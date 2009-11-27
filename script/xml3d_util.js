@@ -345,6 +345,7 @@ function RGBColor(color_string)
     this.r = (this.r < 0 || isNaN(this.r)) ? 0 : ((this.r > 255) ? 255 : this.r);
     this.g = (this.g < 0 || isNaN(this.g)) ? 0 : ((this.g > 255) ? 255 : this.g);
     this.b = (this.b < 0 || isNaN(this.b)) ? 0 : ((this.b > 255) ? 255 : this.b);
+    this.alpha = color_string == 'transparent' ? 0 : 1;
 
     // some getters
     this.toRGB = function () {
@@ -365,6 +366,10 @@ function RGBColor(color_string)
         return [ this.r / 255, this.g / 255, this.b / 255];
     };
 
+    this.toGLAlpha = function () {
+        return [ this.r / 255, this.g / 255, this.b / 255, this.alpha];
+    };
+    
     // help
     this.getHelpXML = function () {
 

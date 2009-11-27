@@ -409,7 +409,6 @@ org.xml3d.dataTypes.Quaternion.prototype.mult = function(that) {
 			* that.w - this.x * that.x - this.y * that.y - this.z * that.z);
 };
 org.xml3d.dataTypes.Quaternion.parseAxisAngle = function(str) {
-	org.xml3d.debug.logInfo("Parsing: " + str);
 	var m = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
 	return org.xml3d.dataTypes.Quaternion.axisAngle(
 			new org.xml3d.dataTypes.Vec3f(+m[1], +m[2], +m[3]), +m[4]);

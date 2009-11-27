@@ -124,7 +124,6 @@ org.xml3d.XML3DNodeFactory.prototype.create = function(node, ctx) {
 		if (nodeType === undefined) {
 			org.xml3d.debug.logInfo("Unrecognised element " + node.localName);
 		} else {
-			org.xml3d.debug.logInfo("Created class for " + node.localName);
 			ctx.domElement = node;
 			n = new nodeType(ctx);
 			node._xml3dNode = n;
@@ -194,6 +193,97 @@ org.xml3d.XML3DDocument.prototype.resolve = function(uriStr) {
 		return org.xml3d.URIResolver.resolve(this, uriStr);
 };
 
+//-----------------------------------------------------------------------------
+//Class Camera
+//-----------------------------------------------------------------------------
+org.xml3d.Camera = function() {
+	this.position = new org.xml3d.dataTypes.Vec3f(0.0, 0.0, 10.0);
+	this.orientation = new org.xml3d.dataTypes.Quaternion(0.0, 0.0, 0.0, 1.0);
+	this.fieldOfView = 0.78539816339744828;
+	this.zFar = 100000;
+	this.zNear = 0.1;
+
+};
+
+org.xml3d.Camera.prototype.getViewMatrix = function() {
+	return this.orientation.toMatrix().transpose().mult(
+			org.xml3d.dataTypes.SFMatrix4.translation(this.position.negate()));
+};
+
+org.xml3d.Camera.prototype.getProjectionMatrix = function(aspect) {
+	if (this.projMatrix == null) {
+		var fovy = this.fieldOfView;
+		var zfar = this.zFar;
+		var znear = this.zNear;
+		var f = 1 / Math.tan(fovy / 2);
+		this.projMatrix = new org.xml3d.dataTypes.SFMatrix4(f / aspect, 0, 0,
+				0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), 2 * znear
+						* zfar / (znear - zfar), 0, 0, -1, 0);
+	}
+	return this.projMatrix;
+};
+
+
+//-----------------------------------------------------------------------------
+// Init helper
+//-----------------------------------------------------------------------------
+org.xml3d.initFloat = function(value, defaultValue) {
+	return value ? +value : defaultValue;
+};
+
+org.xml3d.initString = function(value, defaultValue) {
+	return value ? value : defaultValue;
+};
+
+org.xml3d.initInt = function(value, defaultValue) {
+	return value ? parseInt(value) : defaultValue;
+};
+
+org.xml3d.initBoolean = function(value, defaultValue) {
+	return value ? value == "true" : defaultValue;
+};
+
+org.xml3d.initVec3f = function(value, x, y, z) {
+	return value ? org.xml3d.dataTypes.Vec3f.parse(value)
+			: new org.xml3d.dataTypes.Vec3f(x, y, z);
+};
+
+org.xml3d.initAxisAnglef = function(value, x, y, z, angle) {
+	return value ? org.xml3d.dataTypes.Quaternion.parseAxisAngle(value)
+			: org.xml3d.dataTypes.Quaternion.axisAngle(
+					new org.xml3d.dataTypes.Vec3f(x, y, z), angle);
+};
+
+org.xml3d.initEnum = function(value, defaultValue, choice) {
+	return (value && choice[value] !== undefined) ? choice[value]
+			: defaultValue;
+};
+
+org.xml3d.initIntArray = function(value, defaultValue) {
+	var exp = /([+\-0-9]+)/g;
+	return value ? value.match(exp) : defaultValue;
+};
+
+org.xml3d.initFloatArray = function(value, defaultValue) {
+	var exp = /([+\-0-9eE\.]+)/g;
+	return value ? value.match(exp) : defaultValue;
+};
+
+org.xml3d.initFloat3Array = function(value, defaultValue) {
+	return org.xml3d.initFloatArray(value, defaultValue);
+};
+
+org.xml3d.initFloat2Array = function(value, defaultValue) {
+	return org.xml3d.initFloatArray(value, defaultValue);
+};
+
+org.xml3d.initBoolArray = function(value, defaultValue) {
+	return new Array();
+};
+
+org.xml3d.initAnyURI = function(node, defaultValue) {
+	return org.xml3d.initString(node, defaultValue);
+};
 // MeshTypes
 org.xml3d.MeshTypes = {};
 org.xml3d.MeshTypes["triangles"] = 0;

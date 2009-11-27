@@ -126,7 +126,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 					&& document.defaultView.getComputedStyle) {
 				var colorStr = document.defaultView.getComputedStyle(
 						shape.node.domElement, "").getPropertyValue("color");
-				org.xml3d.debug.logInfo("Color: " + colorStr);
 				var color = new RGBColor(colorStr);
 				sp.diffuseColor = color.toGL();
 			}
@@ -151,6 +150,19 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	}
 
 	this.drawableObjects = null;
+};
+
+org.xml3d.webgl.Renderer.prototype.dispose = function() {
+	var drawableObjects = new Array();
+	this.collectDrawableObjects(org.xml3d.dataTypes.SFMatrix4.identity(),
+			drawableObjects, null);
+	for ( var i = 0, n = drawableObjects.length; i < n; i++) {
+		var shape = drawableObjects[i][1];
+		var shader = drawableObjects[i][2];
+		shape.dispose();
+		if (shader)
+		  shader.dispose();
+	}
 };
 
 org.xml3d.webgl.XML3DRenderAdapterFactory = function(gl) {
@@ -279,6 +291,7 @@ org.xml3d.webgl.XML3DImgRenderAdapter.prototype.bindTexture = function(
 	var gl = this.factory.gl;
 	var image = new Image();
 	image.src = this.node.src;
+	org.xml3d.debug.logInfo("Bind texture: " + image.src);
 	image.onload = function() {
 		org.xml3d.debug.logInfo("Texture loaded: " + image);
 
@@ -303,13 +316,12 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.constructor = org.xml3d.webg
 
 org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.init = function() {
 	var gl = this.factory.gl;
-	var self = this;
-
+	
 	if (this.node.childNodes.length) {
 		var imageData = this.factory.getAdapter(this.node.childNodes[0]);
 		if (imageData) {
-			var textureId = gl.createTexture();
-			org.xml3d.debug.logInfo("Creating GL texture: " + textureId);
+			this.textureId = gl.createTexture();
+			org.xml3d.debug.logInfo("Creating GL texture: " + this.textureId);
 			imageData.bindTexture(this);
 		}
 	}
@@ -347,6 +359,12 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.disable = function() {
 	gl.bindTexture(gl.TEXTURE_2D, null);
 	gl.disable(gl.TEXTURE_2D);
 };
+
+org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.dispose = function() {
+	var gl = this.factory.gl;
+	gl.deleteTexture(this.textureId);
+};
+
 
 // Adapter for <shader>
 org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
@@ -435,6 +453,13 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.cleanUp = function() {
 		t.disable();
 	});
 };
+
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
+	Array.forEach(this.textures, function(t) {
+		t.dispose();
+	});
+};
+
 
 // Adapter for <group>
 org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
@@ -546,8 +571,8 @@ org.xml3d.webgl.XML3DBindRenderAdapter.prototype.getBuffer = function() {
 			var child = this.node.childNodes[0];
 			var fArray = null;
 
-			org.xml3d.debug.logInfo("Child: " + child.typeName);
-			org.xml3d.debug.logInfo("Values size: " + child.value.length);
+			//org.xml3d.debug.logInfo("Child: " + child.typeName);
+			//org.xml3d.debug.logInfo("Values size: " + child.value.length);
 
 			if (org.xml3d.isa(child, org.xml3d.nodeTypes.int)) {
 				this.dataType = gl.UNSIGNED_SHORT;
@@ -610,6 +635,20 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = functi
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getBBox = function(min, max,
 		invalidate) {
 
+};
+
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
+	var gl = this.factory.gl;
+	var bindables = this.getBindables();
+	for ( var i = 0; i < bindables.length; i++) {
+		var bindable = bindables[i];
+		if (bindable.kind != org.xml3d.webgl.XML3DBindRenderAdapter.BUFFER_TYPE)
+			continue;
+
+		var buffer = bindable.getBuffer();
+		if(buffer)
+			gl.deleteBuffer(buffer);
+	}
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader) {

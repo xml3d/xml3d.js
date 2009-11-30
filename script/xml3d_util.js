@@ -430,7 +430,7 @@ function(inode, tnode, tfield)
 	this.inodeId = inode;
 	this.tnodeId = tnode;
 	this.tnode = null;
-	if (tfield == "rotation" || tfield == "scaleOrientation")
+	if (tfield != "rotation" && tfield != "scaleOrientation")
 		throw "InvalidFieldException";
 	this.tfield = tfield;
 	this.isInit = false;
@@ -461,8 +461,8 @@ org.xml3d.util.X3DOrientationInterpolation.prototype.initialize = function()
 		org.xml3d.debug.logError("Can't find Xml3d node: " + this.tnodeId);
 		return;
 	}
-	this.keyValues = x3dom.fields.MFRotation.parse(inode.getAttribute('keyValue'));
-	this.key = Array.map(ctx.xmlNode.getAttribute('key').split(/\s+/), function(n) {
+	this.keyValue = org.xml3d.dataTypes.MFRotation.parse(inode.getAttribute('keyValue'));
+	this.key = Array.map(inode.getAttribute('key').split(/\s+/), function(n) {
 					return +n;
 				});
 	this.valid = true;
@@ -482,19 +482,20 @@ org.xml3d.util.X3DOrientationInterpolation.prototype.set_fraction = function(t)
 };
 
 org.xml3d.util.X3DOrientationInterpolation.prototype.interpolate = function(t, interp) {
-	if (t <= this._key[0])
-		return this._keyValue[0];
-	if (t >= this._key[this._key.length - 1])
-		return this._keyValue[this._key.length - 1];
-	for ( var i = 0; i < this._key.length - 1; ++i)
-		if (this._key[i] < t && t <= this._key[i + 1])
-			return interp(this._keyValue[i], this._keyValue[i + 1],
-					(t - this._key[i])
-							/ (this._key[i + 1] - this._key[i]));
+	if (t <= this.key[0])
+		return this.keyValue[0];
+	if (t >= this.key[this.key.length - 1])
+		return this.keyValue[this.key.length - 1];
+	for ( var i = 0; i < this.key.length - 1; ++i)
+		if (this.key[i] < t && t <= this.key[i + 1]){
+			return interp(this.keyValue[i], this.keyValue[i + 1],
+					(t - this.key[i])
+							/ (this.key[i + 1] - this.key[i]));
+		}
 };
 
 org.xml3d.util.X3DOrientationInterpolation.getElementById = function(id, namespace) {
-	return this.parentDocument.evaluate('//*[@id="' + id + '"]', this.parentDocument, function() {
+	return document.evaluate('//*[@id="' + id + '"]', document, function() {
 		return namespace;
 	}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 };

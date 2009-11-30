@@ -495,7 +495,7 @@ org.xml3d.dataTypes.Quaternion.prototype.toMatrix = function() {
 
 org.xml3d.dataTypes.Quaternion.prototype.toAxisAngle = function() {
 	var angle = 2 * Math.acos(this.w);
-	var s = Math.sqrt(1 - q.w * q.w);
+	var s = Math.sqrt(1 - this.w * this.w);
 	if (s < 0.001) {
 		return [ this.x, this.y, this.z, angle ];
 	}

@@ -12,7 +12,7 @@ else if (typeof org.xml3d != "object")
 org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 	var self = this;
 	// this.id = Xml3dElementId;
-	this.xml3d = xml3d;// document.getElementById(Xml3dElementId);
+	this.xml3d = xml3d !== undefined ? xml3d : canvas;
 	this.canvas = canvas;
 	this.camera = xml3d.camera;
 

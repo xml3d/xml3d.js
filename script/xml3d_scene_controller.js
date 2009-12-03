@@ -29,10 +29,10 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 	if (!this.xml3d || !this.xml3d.camera)
 		return;
 
-	// this.setUpdateFrequence(50.0);
+	
 	this.rotateSpeed = 0.005;
 
-	this.canvas.addEventListener("mousedown", function(event) {
+	this.xml3d.addEventListener("mousedown", function(event) {
 		self.startDrag(event);
 	}, false);
 	document.addEventListener("mouseup", function(event) {
@@ -44,9 +44,14 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 	document.addEventListener("contextmenu", function(event) {
 		self.stopEvent(event);
 	}, false);
-	document.addEventListener("keypress", function(event) {
+	document.addEventListener("keydown", function(event) {
 		self.keyHandling(event);
 	}, false);
+	
+	if(canvas == null)
+	{
+		this.setUpdateFrequence(30);
+	}
 
 	// Create Input Panel
 	if (InputPanelId) {
@@ -113,6 +118,7 @@ org.xml3d.Xml3dSceneController.prototype.setUpdateFrequence = function(
 	var self = this;
 	if (this.intervalHandle)
 		clearTimeout(this.intervalHandle);
+	alert("Set Update Frequence");
 	this.intervalHandle = setInterval(function() {
 		self.update();
 	}, frequence);
@@ -195,7 +201,7 @@ org.xml3d.Xml3dSceneController.prototype.rotate = function(ev) {
 	var dy = (ev.pageY - this.old_y) * this.rotateSpeed;
 
 	if (this.camera.direction !== undefined) {
-		var up = camera.up;
+		var up = this.camera.up;
 		up.x = up.z = 0;
 		up.y = 1;
 
@@ -216,7 +222,7 @@ org.xml3d.Xml3dSceneController.prototype.rotate = function(ev) {
 			var rotVec = direction.cross(up);
 			var m = org.xml3d.dataTypes.SFMatrix4.parseRotation(rotVec.x + " "
 					+ rotVec.y + " " + rotVec.z + " " + dy);
-			var newdirection = m.transformNorm(direction);
+			var newdirection = m.multMatrixVec(direction);
 			direction.x = newdirection.x;
 			direction.y = newdirection.y;
 			direction.z = newdirection.z;
@@ -339,7 +345,6 @@ org.xml3d.Xml3dSceneController.prototype.updateInput = function() {
 };
 
 org.xml3d.Xml3dSceneController.prototype.takeInput = function(e) {
-	alert("Take Input!");
 	if (this.inputPanel) {
 		this.camera.position.x = this.inputPosX.value;
 		this.camera.position.y = this.inputPosY.value;

@@ -16,82 +16,80 @@ org.xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
 org.xml3d.webglNS = 'http://www.w3.org/2009/xml3d/webgl';
 org.xml3d.document = new org.xml3d.XML3DDocument(document);
 
-org.xml3d.XML3DCanvas = function(x3dElem) {
-	this.initContext = function(canvas) {
-		org.xml3d.debug.logInfo("Initializing XML3DCanvas for [" + canvas.id
-				+ "]");
-		var gl = org.xml3d.gfx_webgl(canvas);
-		if (!gl) {
-			org.xml3d.debug.logError("No 3D context found...");
-			this.canvasDiv.removeChild(canvas);
-			return null;
-		}
-		return gl;
-	};
-	this.createHTMLCanvas = function(x3dElem, sibling) {
-		org.xml3d.debug.logInfo("Creating canvas for X3D element...");
-		var canvas = document.createElementNS(org.xml3d.xhtmlNS, 'canvas');
-		canvas.setAttribute("class", "x3dom-canvas");
-		this.canvasDiv.appendChild(canvas);
-		sibling.parentNode.insertBefore(this.canvasDiv, sibling);
-		var x, y, w, h, showStat;
-		if ((x = x3dElem.getAttribute("x")) !== null) {
-			canvas.style.left = x.toString();
-		}
-		if ((y = x3dElem.getAttribute("y")) !== null) {
-			canvas.style.top = y.toString();
-		}
-		if ((w = x3dElem.getAttribute("width")) !== null) {
-			canvas.style.width = this.canvasDiv.style.width = w.toString();
-			canvas.setAttribute("width", canvas.style.width);
-		}
-		if ((h = x3dElem.getAttribute("height")) !== null) {
-			canvas.style.height = this.canvasDiv.style.height = h.toString();
-			canvas.setAttribute("height", canvas.style.height);
-		}
-		var id;
-		if ((id = x3dElem.getAttribute("id")) !== null) {
-			this.canvasDiv.setAttribute("class", "x3dom-canvasdiv");
-			this.canvasDiv.id = "x3dom-" + id + "-canvasdiv";
-			canvas.id = "x3dom-" + id + "-canvas";
-		} else {
-			var index = (document
-					.getElementsByTagNameNS(org.xml3d.x3dNS, 'X3D').length + 1);
-			this.canvasDiv.id = "x3dom-" + index + "-canvasdiv";
-			canvas.id = "x3dom-" + index + "-canvas";
-		}
-
-		return canvas;
-	};
-	this.createStatDiv = function() {
-		var statDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
-		statDiv.setAttribute("class", "x3dom-statdiv");
-		statDiv.innerHTML = "0 fps";
-		this.canvasDiv.appendChild(statDiv);
-		statDiv.oncontextmenu = statDiv.onmousedown = function(evt) {
-			evt.preventDefault();
-			evt.stopPropagation();
-			evt.returnValue = false;
-			return false;
-		};
-		return statDiv;
-	};
-	this.x3dElem = x3dElem;
-	
-	var hideDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
-	x3dElem.parentNode.insertBefore(hideDiv, x3dElem);
-	hideDiv.appendChild(x3dElem);
-	hideDiv.style.display ="none";
-	
+org.xml3d.XML3DCanvas = function(xml3dElement) {
+	this.x3dElem = xml3dElement;
 	this.root = null;
+	
+	// Place xml3dElement inside an invisble div
+	var hideDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+	xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
+	hideDiv.appendChild(xml3dElement);
+	hideDiv.style.display = "none";
+
+	// Create a div to place the canvas in
 	this.canvasDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
-	this.canvas = this.createHTMLCanvas(x3dElem, hideDiv);
-	this.canvas.parent = this;
+	hideDiv.parentNode.insertBefore(this.canvasDiv, hideDiv);
+	
+	// Create canvas and append it to the div created before
+	this.canvas = org.xml3d.XML3DCanvas.createHTMLCanvas(xml3dElement);
+	this.canvasDiv.appendChild(this.canvas);
+	this.canvasDiv.style.height = this.canvas.style.height;
+	this.canvasDiv.style.width = this.canvas.style.width;
+	
+	 
+	//this.canvas.parent = this;
 	this.fps_t0 = new Date().getTime();
 	this.gl = this.initContext(this.canvas);
-	this.showStat = x3dElem.getAttribute("showStat");
-	this.statDiv = (this.showStat !== null && this.showStat == "true") ? this
-			.createStatDiv() : null;
+};
+
+org.xml3d.XML3DCanvas.prototype.initContext = function(canvas) {
+	org.xml3d.debug.logInfo("Initializing XML3DCanvas for [" + canvas.id + "]");
+	var gl = org.xml3d.gfx_webgl(canvas);
+	if (!gl) {
+		org.xml3d.debug.logError("No 3D context found...");
+		this.canvasDiv.removeChild(canvas);
+		return null;
+	}
+	return gl;
+};
+
+org.xml3d.XML3DCanvas.createHTMLCanvas = function(x3dElem) {
+	org.xml3d.debug.logInfo("Creating canvas for X3D element...");
+	var canvas = document.createElementNS(org.xml3d.xhtmlNS, 'canvas');
+	canvas.setAttribute("class", "xml3d-canvas");
+	
+	var x, y, w, h, showStat;
+
+	if ((w = x3dElem.getAttribute("style")) !== null) {
+		org.xml3d.debug.logInfo("Setting style");
+		canvas.setAttribute("style", x3dElem.getAttribute("style"));
+	}
+
+	if ((w = x3dElem.getAttribute("width")) !== null) {
+		canvas.style.width = w.toString();
+		canvas.setAttribute("width", canvas.style.width);
+		org.xml3d.debug.logInfo("Init w:" + canvas.style.width);
+	}
+	if ((h = x3dElem.getAttribute("height")) !== null) {
+
+		canvas.style.height = h.toString();
+		canvas.setAttribute("height", canvas.style.height);
+	}
+	return canvas;
+};
+
+org.xml3d.XML3DCanvas.prototype.createStatDiv = function() {
+	var statDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+	statDiv.setAttribute("class", "xml3d-statdiv");
+	statDiv.innerHTML = "0 fps";
+	this.canvasDiv.appendChild(statDiv);
+	statDiv.oncontextmenu = statDiv.onmousedown = function(evt) {
+		evt.preventDefault();
+		evt.stopPropagation();
+		evt.returnValue = false;
+		return false;
+	};
+	return statDiv;
 };
 
 org.xml3d.XML3DCanvas.prototype.onload = function() {
@@ -100,7 +98,7 @@ org.xml3d.XML3DCanvas.prototype.onload = function() {
 	org.xml3d.debug.logInfo("Canvas loaded. Starting update");
 	if (org.xml3d.Xml3dSceneController !== undefined)
 		new org.xml3d.Xml3dSceneController(this.canvas, this.root);
-	
+
 	var root = this.root;
 	this.root.getBackgroundColor = function() {
 		if (RGBColor && document.defaultView
@@ -141,12 +139,11 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 (function() {
 	var onload = function() {
 		var x3ds = document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d');
-		if (x3ds.length)
-		{
-			if (x3ds.item(0).style !== undefined)
-			{
-			  org.xml3d.debug.logInfo("Using native implementation...");
-			  return;
+		if (x3ds.length) {
+			if (x3ds.item(0).style !== undefined) {
+				org.xml3d.debug.logInfo("Using native implementation...");
+				new org.xml3d.Xml3dSceneController(x3ds.item(0));
+				return;
 			}
 		}
 		x3ds = Array.map(x3ds, function(n) {
@@ -169,15 +166,13 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 			var x3dcanvas = org.xml3d.document.createCanvas(x3ds[i]);
 			if (x3dcanvas.gl === null) {
 				var altDiv = document.createElement("div");
-				altDiv.setAttribute("class", "x3dom-nox3d");
+				altDiv.setAttribute("class", "xml3d-nox3d");
 				var altP = document.createElement("p");
 				altP
 						.appendChild(document
 								.createTextNode("WebGL is not yet supported in your browser. "));
 				var aLnk = document.createElement("a");
-				aLnk
-						.setAttribute("href",
-								"http://www.org.xml3d.org/?page_id=9");
+				aLnk.setAttribute("href", "http://www.xml3d.org/");
 				aLnk
 						.appendChild(document
 								.createTextNode("Follow link for a list of supported browsers... "));
@@ -216,7 +211,7 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 	window.addEventListener('load', onload, false);
 	window.addEventListener('unload', onunload, false);
 	window.addEventListener('reload', onunload, false);
-	
+
 })();
 
 org.xml3d.gfx_webgl = (function() {
@@ -229,7 +224,7 @@ org.xml3d.gfx_webgl = (function() {
 		return this.name;
 	};
 	function setupContext(canvas) {
-		//org.xml3d.debug.logInfo("setupContext: canvas=" + canvas);
+		// org.xml3d.debug.logInfo("setupContext: canvas=" + canvas);
 		var ctx = null;
 		try {
 			ctx = canvas.getContext('moz-webgl');
@@ -276,7 +271,7 @@ org.xml3d.gfx_webgl = (function() {
 		}
 		return wrapShaderProgram(gl, prog);
 	}
-	
+
 	Context.prototype.renderScene = function(scene) {
 		var gl = this.ctx3d;
 		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -305,12 +300,10 @@ org.xml3d.gfx_webgl = (function() {
 	};
 	Context.prototype.shutdown = function(scene) {
 		var gl = this.ctx3d;
-		
+
 		if (this.renderer) {
 			this.renderer.dispose();
 		}
 	};
 	return setupContext;
 })();
-
-

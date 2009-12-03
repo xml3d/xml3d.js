@@ -136,7 +136,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		sp.lightOn = lightOn;
 
 		sp.modelViewMatrix = mat_view.mult(transform).toGL();
-		var projMatrix = this.scene.camera.getProjectionMatrix(1);
+		//org.xml3d.debug.logInfo("Proj Width: " + this.canvas.width);
+		//org.xml3d.debug.logInfo("Proj Height: " + this.canvas.height);
+		var projMatrix = this.scene.camera.getProjectionMatrix(this.canvas.width / this.canvas.height);
 		var viewMatrix = this.scene.camera.getViewMatrix();
 		sp.modelViewProjectionMatrix = projMatrix.mult(viewMatrix).mult(
 				transform).toGL();

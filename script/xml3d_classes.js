@@ -157,11 +157,42 @@ org.xml3d.XML3DDocument.prototype.createCanvas = function(xml3dElement) {
 	
 	var canvas = new org.xml3d.XML3DCanvas(xml3dElement);
 	if (canvas.gl) {
-		canvas.root = this.getNode(xml3dElement);
+		this.initXml3d(xml3dElement);
+		canvas.root = xml3dElement._xml3dNode;
 		this.canvases.push(canvas);
 		canvas.onload();
 	}
 	return canvas;
+};
+
+org.xml3d.XML3DDocument.prototype.initXml3d = function(xml3dElement) {
+	
+	if (xml3dElement._xml3dNode !== undefined)
+		return;
+	
+	var tmp = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+	tmp.setAttribute('style', xml3dElement.getAttribute('style'));
+	//org.xml3d.debug.logInfo("Init width:" + document.defaultView.getComputedStyle(xml3dElement, "").getPropertyValue("width"));
+	//org.xml3d.debug.logInfo("Init height:" + tmp.style.height);
+	
+	
+	xml3dNode = this.getNode(xml3dElement);
+	xml3dElement.addEventListener('DOMNodeRemoved', this.onRemove, true);
+	xml3dElement.addEventListener('DOMNodeInserted', this.onAdd, true);
+	xml3dElement.addEventListener('DOMAttrModified', this.onSet, true);
+	
+};
+
+org.xml3d.XML3DDocument.prototype.onAdd = function(e) {
+	org.xml3d.debug.logInfo("Add: "+e);
+};
+
+org.xml3d.XML3DDocument.prototype.onSet = function(e) {
+	org.xml3d.debug.logInfo("Set: "+e);
+};
+
+org.xml3d.XML3DDocument.prototype.onRemove = function(e) {
+	org.xml3d.debug.logInfo("Remove: "+e);
 };
 
 org.xml3d.XML3DDocument.prototype.onunload = function(xml3dElement) {

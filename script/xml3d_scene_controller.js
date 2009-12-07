@@ -118,7 +118,6 @@ org.xml3d.Xml3dSceneController.prototype.setUpdateFrequence = function(
 	var self = this;
 	if (this.intervalHandle)
 		clearTimeout(this.intervalHandle);
-	alert("Set Update Frequence");
 	this.intervalHandle = setInterval(function() {
 		self.update();
 	}, frequence);

@@ -11,7 +11,8 @@ else if (typeof org.xml3d != "object")
 
 org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 	var self = this;
-	this.buildIn = (xml3d === undefined) || (!xml3d);
+	
+	this.buildIn = xml3d.style !== undefined;
 
 	this.xml3d = this.buildIn ? canvas : xml3d;
 	this.canvas = canvas;

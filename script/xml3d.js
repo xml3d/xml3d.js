@@ -171,7 +171,7 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 		if (x3ds.length) {
 			if (x3ds.item(0).style !== undefined) {
 				org.xml3d.debug.logInfo("Using native implementation...");
-				new org.xml3d.Xml3dSceneController(null, x3ds.item(0));
+				new org.xml3d.Xml3dSceneController(x3ds.item(0), x3ds.item(0));
 				return;
 			}
 		}

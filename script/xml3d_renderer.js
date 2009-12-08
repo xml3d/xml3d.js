@@ -136,8 +136,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		sp.lightOn = lightOn;
 
 		sp.modelViewMatrix = mat_view.mult(transform).toGL();
-		//org.xml3d.debug.logInfo("Proj Width: " + this.canvas.width);
-		//org.xml3d.debug.logInfo("Proj Height: " + this.canvas.height);
 		var projMatrix = this.scene.camera.getProjectionMatrix(this.canvas.width / this.canvas.height);
 		var viewMatrix = this.scene.camera.getViewMatrix();
 		sp.modelViewProjectionMatrix = projMatrix.mult(viewMatrix).mult(
@@ -580,22 +578,22 @@ org.xml3d.webgl.XML3DBindRenderAdapter.prototype.getBuffer = function() {
 				this.dataType = gl.UNSIGNED_SHORT;
 				this.tupleSize = 1;
 				// org.xml3d.debug.logInfo("Values: " + child.value);
-				fArray = new CanvasUnsignedShortArray(child.value);
+				fArray = new WebGLUnsignedShortArray (child.value);
 				this.count = child.value.length;
 			} else if (org.xml3d.isa(child, org.xml3d.nodeTypes.bool))
 				this.dataType = gl.BOOL;
 			else if (org.xml3d.isa(child, org.xml3d.nodeTypes.float)) {
 				this.dataType = gl.FLOAT;
 				this.tupleSize = 1;
-				fArray = new CanvasFloatArray(child.value);
+				fArray = new WebGLFloatArray(child.value);
 			} else if (org.xml3d.isa(child, org.xml3d.nodeTypes.float2)) {
 				this.dataType = gl.FLOAT;
 				this.tupleSize = 2;
-				fArray = new CanvasFloatArray(child.value);
+				fArray = new WebGLFloatArray(child.value);
 			} else if (org.xml3d.isa(child, org.xml3d.nodeTypes.float3)) {
 				this.dataType = gl.FLOAT;
 				this.tupleSize = 3;
-				fArray = new CanvasFloatArray(child.value);
+				fArray = new WebGLFloatArray(child.value);
 			}
 			if (fArray) {
 				var bufferType = this.isElementArray ? gl.ELEMENT_ARRAY_BUFFER
@@ -784,21 +782,21 @@ org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
 		case gl.FLOAT_MAT2:
 			shader.__defineSetter__(obj.name, (function(loc) {
 				return function(val) {
-					gl.uniformMatrix2fv(loc, false, new CanvasFloatArray(val));
+					gl.uniformMatrix2fv(loc, false, new WebGLFloatArray(val));
 				};
 			})(loc));
 			break;
 		case gl.FLOAT_MAT3:
 			shader.__defineSetter__(obj.name, (function(loc) {
 				return function(val) {
-					gl.uniformMatrix3fv(loc, false, new CanvasFloatArray(val));
+					gl.uniformMatrix3fv(loc, false, new WebGLFloatArray(val));
 				};
 			})(loc));
 			break;
 		case gl.FLOAT_MAT4:
 			shader.__defineSetter__(obj.name, (function(loc) {
 				return function(val) {
-					gl.uniformMatrix4fv(loc, false, new CanvasFloatArray(val));
+					gl.uniformMatrix4fv(loc, false, new WebGLFloatArray(val));
 				};
 			})(loc));
 			break;

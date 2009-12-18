@@ -132,7 +132,7 @@ org.xml3d.XML3DCanvas.prototype.onload = function() {
 	this.root.getBackgroundColor = function() {
 		if (RGBColor && document.defaultView
 				&& document.defaultView.getComputedStyle) {
-			var colorStr = org.xml3d.util.getStyle(root.domElement,
+			var colorStr = org.xml3d.util.getStyle(root,
 					"background-color");
 			var color = new RGBColor(colorStr);
 			return color.toGLAlpha();

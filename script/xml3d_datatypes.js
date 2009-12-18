@@ -15,6 +15,56 @@ if (!org.xml3d.dataTypes)
 else if (typeof org.xml3d.dataTypes != "object")
 	throw new Error("org.xml3d.dataTypes already exists and is not an object");
 
+
+if(typeof XML3DMatrix == 'undefined')
+{
+	function XML3DMatrix() {
+		this._js = true;
+		this.m11 = 1;
+		this.m12 = 0;
+		this.m13 = 0;
+		this.m14 = 0;
+		this.m21 = 0;
+		this.m22 = 1;
+		this.m23 = 0;
+		this.m24 = 0;
+		this.m31 = 0;
+		this.m32 = 0;
+		this.m33 = 1;
+		this.m34 = 0;
+		this.m41 = 0;
+		this.m42 = 0;
+		this.m43 = 0;
+		this.m44 = 1;
+	}
+	
+}
+
+if (!XML3DMatrix.prototype.setMatrixValue) {
+	XML3DMatrix.prototype.setMatrixValue = function(str) {
+		var m = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
+		if (m.length != 16)
+			throw new DOMException();
+		this.m11 = m[0];
+		this.m12 = m[1];
+		this.m13 = m[2];
+		this.m14 = m[3];
+		this.m21 = m[4];
+		this.m22 = m[5];
+		this.m23 = m[6];
+		this.m24 = m[7];
+		this.m31 = m[8];
+		this.m32 = m[9];
+		this.m33 = m[10];
+		this.m34 = m[11];
+		this.m41 = m[12];
+		this.m42 = m[13];
+		this.m43 = m[14];
+		this.m44 = m[15];
+	};
+}
+
+
 org.xml3d.dataTypes = {};
 org.xml3d.dataTypes.SFMatrix4 = function(_00, _01, _02, _03, _10, _11, _12,
 		_13, _20, _21, _22, _23, _30, _31, _32, _33) {
@@ -54,21 +104,27 @@ org.xml3d.dataTypes.SFMatrix4 = function(_00, _01, _02, _03, _10, _11, _12,
 		this._33 = _33;
 	}
 };
+
+// Skipped
 org.xml3d.dataTypes.SFMatrix4.prototype.e0 = function() {
 	var baseVec = new org.xml3d.dataTypes.Vec3f(this._00, this._10, this._20);
 	return baseVec.normalised();
 };
+//Skipped
 org.xml3d.dataTypes.SFMatrix4.prototype.e1 = function() {
 	var baseVec = new org.xml3d.dataTypes.Vec3f(this._01, this._11, this._21);
 	return baseVec.normalised();
 };
+//Skipped
 org.xml3d.dataTypes.SFMatrix4.prototype.e2 = function() {
 	var baseVec = new org.xml3d.dataTypes.Vec3f(this._02, this._12, this._22);
 	return baseVec.normalised();
 };
+//Skipped
 org.xml3d.dataTypes.SFMatrix4.prototype.e3 = function() {
 	return new org.xml3d.dataTypes.Vec3f(this._03, this._13, this._23);
 };
+//Skipped
 org.xml3d.dataTypes.SFMatrix4.identity = function() {
 	return new org.xml3d.dataTypes.SFMatrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
 			0, 0, 0, 0, 1);

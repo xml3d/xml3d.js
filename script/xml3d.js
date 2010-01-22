@@ -305,9 +305,9 @@ org.xml3d.gfx_webgl = (function() {
 		var gl = this.ctx3d;
 		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 		var bgCol = scene.getBackgroundColor();
-		if (bgCol)
+		/*if (bgCol)
 			gl.clearColor(bgCol[0], bgCol[1], bgCol[2], bgCol[3]);
-		else
+		else*/
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		gl.clearDepth(1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT

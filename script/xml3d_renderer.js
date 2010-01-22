@@ -23,6 +23,18 @@ org.xml3d.webgl.Renderer = function(scene, canvas, gl) {
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(gl);
 	this.defaultShader = null;
 	this.lights = null;
+	this.camera = this.initCamera();
+};
+
+org.xml3d.webgl.Renderer.prototype.initCamera = function() {
+	var av = this.scene.getActiveView();
+	if (av == null)
+	{
+		org.xml3d.debug.logWarning("No View defined for xml3d element.");
+		return new org.xml3d.Camera();
+	}
+	org.xml3d.debug.logWarning("Creating view.");
+	return new org.xml3d.Camera(av);
 };
 
 org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
@@ -80,7 +92,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 				this.drawableObjects, null);
 	}
 
-	var mat_view = this.scene.camera.getViewMatrix();
+	var mat_view = this.camera.getViewMatrix();
 	var light, lightOn;
 
 	var zPos = [];
@@ -155,9 +167,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		 */
 
 		sp.modelViewMatrix = mat_view.mult(transform).toGL();
-		var projMatrix = this.scene.camera
+		var projMatrix = this.camera
 				.getProjectionMatrix(this.canvas.width / this.canvas.height);
-		var viewMatrix = this.scene.camera.getViewMatrix();
+		var viewMatrix = this.camera.getViewMatrix();
 		sp.modelViewProjectionMatrix = projMatrix.mult(viewMatrix).mult(
 				transform).toGL();
 
@@ -190,7 +202,7 @@ org.xml3d.webgl.XML3DRenderAdapterFactory = function(gl) {
 };
 
 org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.getAdapter = function(node) {
-	if (node === null || node._configured === undefined)
+	if (node === undefined || node == null || node._configured === undefined)
 		return null;
 
 	// org.xml3d.debug.logInfo("Node: " + node);
@@ -216,8 +228,6 @@ org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.createAdapter = function(
 		node) {
 	if (node.localName == "xml3d")
 		return new org.xml3d.webgl.XML3DCanvasRenderAdapter(this, node);
-	if (node.localName == "entity")
-		return new org.xml3d.webgl.XML3DEntityRenderAdapter(this, node);
 	if (node.localName == "group")
 		return new org.xml3d.webgl.XML3DGroupRenderAdapter(this, node);
 	if (node.localName == "mesh")
@@ -513,15 +523,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 
 	return transform.mult(adapter.getMatrix());
 };
-
-// Adapter for <entity>
-org.xml3d.webgl.XML3DEntityRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.XML3DGroupRenderAdapter.call(this, factory, node);
-};
-org.xml3d.webgl.XML3DEntityRenderAdapter.prototype = new org.xml3d.webgl.XML3DGroupRenderAdapter();
-org.xml3d.webgl.XML3DEntityRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DEntityRenderAdapter;
-
-org.xml3d.webgl.XML3DEntityRenderAdapter.prototype.getShader = function() {
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function() {
 	return this.factory.getAdapter(this.node.getShader());
 };
 
@@ -726,12 +728,14 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader) {
 		}
 	}
 	if (elements) {
-		if (gl.getError() !== 0) {
-			org.xml3d.debug.logInfo("Error before");
+		var error = gl.getError();
+		if (error !== gl.NO_ERROR) {
+			org.xml3d.debug.logInfo("Error before:" + error);
 		}
 		gl.drawElements(gl.TRIANGLES, elements.count, elements.dataType, 0);
-		if (gl.getError() !== 0) {
-			org.xml3d.debug.logInfo("Error after");
+		var error = gl.getError();
+		if (error !== gl.NO_ERROR) {
+			org.xml3d.debug.logInfo("Error after: " + error);
 		}
 	} else
 		org.xml3d.debug.logInfo("No element array found!");

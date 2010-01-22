@@ -28,13 +28,12 @@ org.xml3d.tests.XML3DVec3.functs = [
 "add",
 "subtract",
 "multiply",
-"multiply",
+"scale",
 "cross",
 "dot",
 "negate",
 "length",
 "normalize",
-"normalized",
 ];
 org.xml3d.tests.XML3DRotation = {};
 org.xml3d.tests.XML3DRotation.functs = [
@@ -42,6 +41,7 @@ org.xml3d.tests.XML3DRotation.functs = [
 "setAxisAngle",
 "setAxisAngleValue",
 "toMatrix",
+"rotateVec3",
 ];
 org.xml3d.tests.XML3DMatrix = {};
 org.xml3d.tests.XML3DMatrix.functs = [

@@ -93,10 +93,18 @@ org.xml3d.URIResolver.resolve = function(document, uriStr) {
 	if (!document || !uriStr)
 		return null;
 	var uri = new org.xml3d.URI(uriStr);
+	
+	if (uri.scheme == 'urn')
+	{
+		org.xml3d.debug.logInfo("++ Found URN." + uriStr);
+		return null;
+	}
+	
 	if (!uri.path)
 		return org.xml3d.URIResolver.resolveLocal(document, uri.fragment);
 
-	org.xml3d.debug.logInfo("++ Can't resolve global hrefs yet: " + uriStr);
+	
+	org.xml3d.debug.logWarning("++ Can't resolve global hrefs yet: " + uriStr);
 	// TODO Resolve intra-document references
 	return null;
 };
@@ -1901,8 +1909,6 @@ org.xml3d.classInfo.float3.configure = function(node, context) {
 	// TODO: Setter for mixed value
 
 	node.value = org.xml3d.initFloat3Array(node.getTextContent(), null);
-
-
 
     // Node::setField
 	node.setField = function(event)	{

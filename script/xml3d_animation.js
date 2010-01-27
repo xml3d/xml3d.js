@@ -174,7 +174,7 @@ org.xml3d.animation.X3DOrientationInterpolation.prototype.getValue = function(t)
 	var value = this.interpolate(t, function(a, b, t) {
 		return a.slerp(b, t);
 	});
-	org.xml3d.debug.logWarning(value.toAxisAngle() instanceof Array);
+	//org.xml3d.debug.logWarning(value.toAxisAngle() instanceof Array);
 	return value.toAxisAngle();
 };
 

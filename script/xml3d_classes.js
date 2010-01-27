@@ -17,6 +17,7 @@ else if (typeof org.xml3d.event != "object")
 	throw new Error("org.xml3d.event already exists and is not an object");
 
 org.xml3d.classInfo = {};
+org.xml3d.methods = {};
 
 org.xml3d.defineClass = function(ctor, parent, methods) {
 	if (parent) {
@@ -150,8 +151,8 @@ org.xml3d.XML3DNodeFactory.prototype.create = function(node, context) {
 	}
 };
 
-org.xml3d.XML3DNodeFactory.createAxisAnglefFromString = function(value) {
-	return new org.xml3d.dataTypes.Quaternion.parseAxisAngle(value);
+org.xml3d.XML3DNodeFactory.createXML3DRotationFromString = function(value) {
+	return new XML3DRotation.parseAxisAngle(value);
 };
 
 // -----------------------------------------------------------------------------
@@ -261,8 +262,8 @@ org.xml3d.Notification = function(notifier, eventType, attribute, oldValue, newV
 //-----------------------------------------------------------------------------
 org.xml3d.Camera = function(view) {
 	if (arguments.length == 0) {
-	  this.position = new org.xml3d.dataTypes.Vec3f(0.0, 0.0, 10.0);
-	  this.orientation = new org.xml3d.dataTypes.Quaternion(0.0, 0.0, 0.0, 1.0);
+	  this.position = new XML3DVec3(0.0, 0.0, 10.0);
+	  this.orientation = new XML3DRotation(0.0, 0.0, 0.0, 1.0);
 	  this.fieldOfView = 0.78539816339744828;
 	}
 	else
@@ -315,14 +316,18 @@ org.xml3d.initBoolean = function(value, defaultValue) {
 };
 
 org.xml3d.initXML3DVec3 = function(value, x, y, z) {
-	return value ? org.xml3d.dataTypes.Vec3f.parse(value)
-			: new org.xml3d.dataTypes.Vec3f(x, y, z);
+	if (value) {
+		result = new XML3DVec3();
+		result.setVec3Value(value);
+		return result;
+	}
+	else return new XML3DVec3(x, y, z);
 };
 
 org.xml3d.initXML3DRotation = function(value, x, y, z, angle) {
-	return value ? org.xml3d.dataTypes.Quaternion.parseAxisAngle(value)
-			: org.xml3d.dataTypes.Quaternion.axisAngle(
-					new org.xml3d.dataTypes.Vec3f(x, y, z), angle);
+	return value ? XML3DRotation.parseAxisAngle(value)
+			: XML3DRotation.axisAngle(
+					new XML3DVec3(x, y, z), angle);
 };
 
 org.xml3d.initEnum = function(value, defaultValue, choice) {
@@ -375,8 +380,23 @@ org.xml3d.WrapTypes["clamp"] = 0;
 org.xml3d.WrapTypes["repeat"] = 1;
 org.xml3d.WrapTypes["border"] = 2;
 
+// Initialize methods
+org.xml3d.methods["xml3dCreateXML3DVec3"] = function() { throw new Error("xml3d::createXML3DVec3: Method not implemented yet."); };
+org.xml3d.methods["xml3dCreateXML3DRotation"] = function() { throw new Error("xml3d::createXML3DRotation: Method not implemented yet."); };
+org.xml3d.methods["xml3dCreateXML3DMatrix"] = function() { throw new Error("xml3d::createXML3DMatrix: Method not implemented yet."); };
+org.xml3d.methods["groupGetLocalMatrix"] = function() { throw new Error("group::getLocalMatrix: Method not implemented yet."); };
+org.xml3d.methods["viewSetDirection"] = function() { throw new Error("view::setDirection: Method not implemented yet."); };
+org.xml3d.methods["viewSetUpVector"] = function() { throw new Error("view::setUpVector: Method not implemented yet."); };
+org.xml3d.methods["viewLookAt"] = function() { throw new Error("view::lookAt: Method not implemented yet."); };
+org.xml3d.methods["viewGetDirection"] = function() { throw new Error("view::getDirection: Method not implemented yet."); };
+org.xml3d.methods["viewGetUpVector"] = function() { throw new Error("view::getUpVector: Method not implemented yet."); };
+org.xml3d.methods["viewGetViewMatrix"] = function() { throw new Error("view::getViewMatrix: Method not implemented yet."); };
+org.xml3d.methods["XML3DGraphTypeGetWorldMatrix"] = function() { throw new Error("XML3DGraphType::getWorldMatrix: Method not implemented yet."); };
 org.xml3d.event.UNHANDLED = 1;
 org.xml3d.event.HANDLED = 2;
+
+
+
 
 /**
  * Register class for element <Xml3dNode>
@@ -452,7 +472,8 @@ org.xml3d.classInfo.XML3DElement.configure = function(node, context) {
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DElement, org.xml3d.classInfo.Xml3dNode);
 
@@ -472,7 +493,7 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DElement.configure(node, context);
 	  node.__defineSetter__("height", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._height;
 	        if (typeof value == 'string')
 	        	this._height = org.xml3d.XML3DNodeFactory.createIntFromString(value);
@@ -491,7 +512,7 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("width", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._width;
 	        if (typeof value == 'string')
 	        	this._width = org.xml3d.XML3DNodeFactory.createIntFromString(value);
@@ -588,7 +609,11 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 	  	  this.width = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	node.createXML3DVec3 = org.xml3d.methods.xml3dCreateXML3DVec3;
+	node.createXML3DRotation = org.xml3d.methods.xml3dCreateXML3DRotation;
+	node.createXML3DMatrix = org.xml3d.methods.xml3dCreateXML3DMatrix;
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.xml3d, org.xml3d.classInfo.XML3DElement);
 
@@ -626,7 +651,8 @@ org.xml3d.classInfo.defs.configure = function(node, context) {
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.defs, org.xml3d.classInfo.XML3DElement);
 
@@ -651,7 +677,8 @@ org.xml3d.classInfo.XML3DReferenceableType.configure = function(node, context) {
     // Node::setField
 	node.setField = function(event)	{
 	  var attrName = event.attrName;
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DReferenceableType, org.xml3d.classInfo.Xml3dNode);
 
@@ -671,7 +698,7 @@ org.xml3d.classInfo.XML3DGraphType.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DElement.configure(node, context);
 	  node.__defineSetter__("visible", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._visible;
 	        if (typeof value == 'string')
 	        	this._visible = org.xml3d.XML3DNodeFactory.createBooleanFromString(value);
@@ -752,7 +779,9 @@ org.xml3d.classInfo.XML3DGraphType.configure = function(node, context) {
 	  	  this.visible = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DGraphType, org.xml3d.classInfo.XML3DElement);
 
@@ -851,7 +880,10 @@ org.xml3d.classInfo.group.configure = function(node, context) {
 	  	  this.visible = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
+	node.getLocalMatrix = org.xml3d.methods.groupGetLocalMatrix;
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.group, org.xml3d.classInfo.XML3DGraphType);
 
@@ -932,7 +964,9 @@ org.xml3d.classInfo.XML3DGeometryType.configure = function(node, context) {
 	  	  this.visible = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DGeometryType, org.xml3d.classInfo.XML3DGraphType);
 
@@ -952,7 +986,7 @@ org.xml3d.classInfo.mesh.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DGeometryType.configure(node, context);
 	  node.__defineSetter__("type", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._type;
 	        if (typeof value == 'string')
 	        	this._type = org.xml3d.XML3DNodeFactory.createEnumFromString(value);
@@ -1038,7 +1072,9 @@ org.xml3d.classInfo.mesh.configure = function(node, context) {
 	  	  this.type = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.mesh, org.xml3d.classInfo.XML3DGeometryType);
 
@@ -1075,7 +1111,8 @@ org.xml3d.classInfo.XML3DTransformProviderType.configure = function(node, contex
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DTransformProviderType, org.xml3d.classInfo.XML3DElement);
 
@@ -1095,7 +1132,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DTransformProviderType.configure(node, context);
 	  node.__defineSetter__("translation", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._translation;
 	        if (typeof value == 'string')
 	        	this._translation = org.xml3d.XML3DNodeFactory.createXML3DVec3FromString(value);
@@ -1114,7 +1151,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("scale", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._scale;
 	        if (typeof value == 'string')
 	        	this._scale = org.xml3d.XML3DNodeFactory.createXML3DVec3FromString(value);
@@ -1133,7 +1170,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("rotation", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._rotation;
 	        if (typeof value == 'string')
 	        	this._rotation = org.xml3d.XML3DNodeFactory.createXML3DRotationFromString(value);
@@ -1152,7 +1189,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("center", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._center;
 	        if (typeof value == 'string')
 	        	this._center = org.xml3d.XML3DNodeFactory.createXML3DVec3FromString(value);
@@ -1171,7 +1208,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("scaleOrientation", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._scaleOrientation;
 	        if (typeof value == 'string')
 	        	this._scaleOrientation = org.xml3d.XML3DNodeFactory.createXML3DRotationFromString(value);
@@ -1232,7 +1269,8 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	  	  this.scaleOrientation = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.transform, org.xml3d.classInfo.XML3DTransformProviderType);
 
@@ -1252,7 +1290,7 @@ org.xml3d.classInfo.bind.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DElement.configure(node, context);
 	  node.__defineSetter__("semantic", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._semantic;
 	        if (typeof value == 'string')
 	        	this._semantic = org.xml3d.XML3DNodeFactory.createStringFromString(value);
@@ -1294,7 +1332,8 @@ org.xml3d.classInfo.bind.configure = function(node, context) {
 	  	  this.semantic = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.bind, org.xml3d.classInfo.XML3DElement);
 
@@ -1340,7 +1379,8 @@ org.xml3d.classInfo.XML3DShaderProviderType.configure = function(node, context) 
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DShaderProviderType, org.xml3d.classInfo.XML3DElement);
 
@@ -1377,7 +1417,8 @@ org.xml3d.classInfo.XML3DSurfaceShaderProviderType.configure = function(node, co
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DSurfaceShaderProviderType, org.xml3d.classInfo.XML3DShaderProviderType);
 
@@ -1414,7 +1455,8 @@ org.xml3d.classInfo.shader.configure = function(node, context) {
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.shader, org.xml3d.classInfo.XML3DSurfaceShaderProviderType);
 
@@ -1434,7 +1476,7 @@ org.xml3d.classInfo.light.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DGraphType.configure(node, context);
 	  node.__defineSetter__("global", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._global;
 	        if (typeof value == 'string')
 	        	this._global = org.xml3d.XML3DNodeFactory.createBooleanFromString(value);
@@ -1453,7 +1495,7 @@ org.xml3d.classInfo.light.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("intensity", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._intensity;
 	        if (typeof value == 'string')
 	        	this._intensity = org.xml3d.XML3DNodeFactory.createFloatFromString(value);
@@ -1551,7 +1593,9 @@ org.xml3d.classInfo.light.configure = function(node, context) {
 	  	  this.intensity = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.light, org.xml3d.classInfo.XML3DGraphType);
 
@@ -1588,7 +1632,8 @@ org.xml3d.classInfo.XML3DLightShaderProviderType.configure = function(node, cont
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DLightShaderProviderType, org.xml3d.classInfo.XML3DShaderProviderType);
 
@@ -1625,7 +1670,8 @@ org.xml3d.classInfo.lightshader.configure = function(node, context) {
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.lightshader, org.xml3d.classInfo.XML3DLightShaderProviderType);
 
@@ -1646,7 +1692,7 @@ org.xml3d.classInfo.script.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	  node.__defineSetter__("src", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._src;
 	        if (typeof value == 'string')
 	        	this._src = org.xml3d.XML3DNodeFactory.createAnyURIFromString(value);
@@ -1665,7 +1711,7 @@ org.xml3d.classInfo.script.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("type", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._type;
 	        if (typeof value == 'string')
 	        	this._type = org.xml3d.XML3DNodeFactory.createStringFromString(value);
@@ -1713,7 +1759,8 @@ org.xml3d.classInfo.script.configure = function(node, context) {
 	  	  this.type = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.script, org.xml3d.classInfo.XML3DElement);
 
@@ -1750,7 +1797,8 @@ org.xml3d.classInfo.XML3DBindableType.configure = function(node, context) {
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DBindableType, org.xml3d.classInfo.XML3DElement);
 
@@ -1790,7 +1838,8 @@ org.xml3d.classInfo.float.configure = function(node, context) {
 		  return org.xml3d.event.HANDLED;
 	  }
 	// TODO: Mixed value change
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.float, org.xml3d.classInfo.XML3DBindableType);
 
@@ -1830,7 +1879,8 @@ org.xml3d.classInfo.float2.configure = function(node, context) {
 		  return org.xml3d.event.HANDLED;
 	  }
 	// TODO: Mixed value change
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.float2, org.xml3d.classInfo.XML3DBindableType);
 
@@ -1870,7 +1920,8 @@ org.xml3d.classInfo.float3.configure = function(node, context) {
 		  return org.xml3d.event.HANDLED;
 	  }
 	// TODO: Mixed value change
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.float3, org.xml3d.classInfo.XML3DBindableType);
 
@@ -1910,7 +1961,8 @@ org.xml3d.classInfo.float4.configure = function(node, context) {
 		  return org.xml3d.event.HANDLED;
 	  }
 	// TODO: Mixed value change
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.float4, org.xml3d.classInfo.XML3DBindableType);
 
@@ -1950,7 +2002,8 @@ org.xml3d.classInfo.int.configure = function(node, context) {
 		  return org.xml3d.event.HANDLED;
 	  }
 	// TODO: Mixed value change
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.int, org.xml3d.classInfo.XML3DBindableType);
 
@@ -1990,7 +2043,8 @@ org.xml3d.classInfo.bool.configure = function(node, context) {
 		  return org.xml3d.event.HANDLED;
 	  }
 	// TODO: Mixed value change
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.bool, org.xml3d.classInfo.XML3DBindableType);
 
@@ -2010,7 +2064,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	  node.__defineSetter__("type", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._type;
 	        if (typeof value == 'string')
 	        	this._type = org.xml3d.XML3DNodeFactory.createEnumFromString(value);
@@ -2029,7 +2083,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("filterMin", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._filterMin;
 	        if (typeof value == 'string')
 	        	this._filterMin = org.xml3d.XML3DNodeFactory.createEnumFromString(value);
@@ -2048,7 +2102,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("filterMag", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._filterMag;
 	        if (typeof value == 'string')
 	        	this._filterMag = org.xml3d.XML3DNodeFactory.createEnumFromString(value);
@@ -2067,7 +2121,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("filterMip", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._filterMip;
 	        if (typeof value == 'string')
 	        	this._filterMip = org.xml3d.XML3DNodeFactory.createEnumFromString(value);
@@ -2086,7 +2140,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("wrapS", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._wrapS;
 	        if (typeof value == 'string')
 	        	this._wrapS = org.xml3d.XML3DNodeFactory.createEnumFromString(value);
@@ -2105,7 +2159,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("wrapT", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._wrapT;
 	        if (typeof value == 'string')
 	        	this._wrapT = org.xml3d.XML3DNodeFactory.createEnumFromString(value);
@@ -2124,7 +2178,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("wrapU", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._wrapU;
 	        if (typeof value == 'string')
 	        	this._wrapU = org.xml3d.XML3DNodeFactory.createEnumFromString(value);
@@ -2143,7 +2197,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("borderColor", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._borderColor;
 	        if (typeof value == 'string')
 	        	this._borderColor = org.xml3d.XML3DNodeFactory.createStringFromString(value);
@@ -2220,7 +2274,8 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  	  this.borderColor = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.texture, org.xml3d.classInfo.XML3DBindableType);
 
@@ -2257,7 +2312,8 @@ org.xml3d.classInfo.XML3DImageDataProviderType.configure = function(node, contex
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DImageDataProviderType, org.xml3d.classInfo.XML3DElement);
 
@@ -2277,7 +2333,7 @@ org.xml3d.classInfo.img.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DImageDataProviderType.configure(node, context);
 	  node.__defineSetter__("src", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._src;
 	        if (typeof value == 'string')
 	        	this._src = org.xml3d.XML3DNodeFactory.createAnyURIFromString(value);
@@ -2318,7 +2374,8 @@ org.xml3d.classInfo.img.configure = function(node, context) {
 	  	  this.src = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.img, org.xml3d.classInfo.XML3DImageDataProviderType);
 
@@ -2407,7 +2464,9 @@ org.xml3d.classInfo.use.configure = function(node, context) {
 	  	  this.visible = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.use, org.xml3d.classInfo.XML3DGraphType);
 
@@ -2427,7 +2486,7 @@ org.xml3d.classInfo.view.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DElement.configure(node, context);
 	  node.__defineSetter__("position", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._position;
 	        if (typeof value == 'string')
 	        	this._position = org.xml3d.XML3DNodeFactory.createXML3DVec3FromString(value);
@@ -2446,7 +2505,7 @@ org.xml3d.classInfo.view.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("orientation", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._orientation;
 	        if (typeof value == 'string')
 	        	this._orientation = org.xml3d.XML3DNodeFactory.createXML3DRotationFromString(value);
@@ -2465,7 +2524,7 @@ org.xml3d.classInfo.view.configure = function(node, context) {
 	  );
 	  node.__defineSetter__("fieldOfView", 
 	      function (value) {
-	        org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._fieldOfView;
 	        if (typeof value == 'string')
 	        	this._fieldOfView = org.xml3d.XML3DNodeFactory.createFloatFromString(value);
@@ -2516,7 +2575,26 @@ org.xml3d.classInfo.view.configure = function(node, context) {
 	  	  this.fieldOfView = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
-	};
+	}; // End setField
+	node.setDirection = org.xml3d.methods.viewSetDirection;
+	node.setUpVector = org.xml3d.methods.viewSetUpVector;
+	node.lookAt = org.xml3d.methods.viewLookAt;
+	node.getDirection = org.xml3d.methods.viewGetDirection;
+	node.getUpVector = org.xml3d.methods.viewGetUpVector;
+	node.getViewMatrix = org.xml3d.methods.viewGetViewMatrix;
+	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.view, org.xml3d.classInfo.XML3DElement);
 
+
+org.xml3d.methods.xml3dCreateXML3DVec3 = function() {
+	return new XML3DVec3();
+};
+
+org.xml3d.methods.viewGetDirection = function() {
+	return this.orientation.rotateVec3(new XML3DVec3(0, 0, -1));
+};
+
+org.xml3d.methods.viewSetUpVector = function(vec) {
+	this.orientation.setRotation(new XML3DVec3(0, 1, 0), vec);
+};

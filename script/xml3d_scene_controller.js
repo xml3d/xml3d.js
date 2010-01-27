@@ -15,7 +15,17 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 
 	this.xml3d = this.buildIn ? canvas : xml3d;
 	this.canvas = canvas;
-	this.camera = document.getElementById("controller_view");
+	
+	this.camera = this.getView(xml3d);
+	if (!this.camera)
+	{
+		org.xml3d.debug.logWarning("No view found. Adding one.");
+		var view = document.createElementNS(org.xml3d.xml3dNS, 'view');
+		camera.setAttribute("position", "0 0 -10");
+		xml3d.insertBefore(view, xml3d.firstChild);
+		this.camera = view;
+		xml3d.update(); // TODO: Test
+	}
 	var InputPanelId = null;
 
 	this.old_x = -1;
@@ -29,20 +39,14 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 		return res;
 	};
 
-	if(this.buildIn)
-	{
-		this.UPVECTOR = this.createVec3(0, 1, 0);
-		this.ZVECTOR = this.createVec3(0, 0, -1);	}
-	else
-	{
-		this.UPVECTOR = new org.xml3d.dataTypes.Vec3f(0.0, 1.0, 0.0);
-		this.ZVECTOR = new org.xml3d.dataTypes.Vec3f(0.0, 0.0, -1.0);	
-	}
-
+	this.UPVECTOR = this.createVec3(0, 1, 0);
+	this.ZVECTOR = this.createVec3(0, 0, -1);
+	
 	this.moveSpeedElement = document.getElementById("moveSpeed");
 
 	if (!this.xml3d || !this.camera)
 	{
+		org.xml3d.debug.logError("Could not initialize Camera Controller.");
 		return;
 	}
 		
@@ -93,6 +97,26 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 		this.updateInput();
 	}
 
+};
+
+org.xml3d.Xml3dSceneController.prototype.getView = function(xml3dElem) {
+	var activeView = null;
+	var activeViewStr = xml3dElem.activeView;
+	if (activeViewStr)
+	{
+		if (activeViewStr.indexOf('#') == 0)
+			activeViewStr = activeViewStr.replace('#', '');
+		activeView = org.xml3d.document.getElementById(activeViewStr);
+	}
+	// if activeView is not defined or the reference is not valid
+	// use the first view element
+	if (!activeView)
+	{
+		activeView =  document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
+			return org.xml3d.xml3dNS;
+		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	}
+	return activeView;
 };
 
 org.xml3d.Xml3dSceneController.prototype.getMoveScale = function() {

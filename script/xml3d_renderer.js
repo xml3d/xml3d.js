@@ -268,6 +268,10 @@ org.xml3d.webgl.RenderAdapter.prototype.getShader = function() {
 org.xml3d.webgl.RenderAdapter.prototype.init = function() {
 };
 
+org.xml3d.webgl.RenderAdapter.prototype.notifyChanged = function(e) {
+	org.xml3d.debug.logWarning("Unhandled change: " + e);
+};
+
 org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 		transform, out, parentShader) {
 	for ( var i = 0; i < this.node.childNodes.length; i++) {
@@ -544,8 +548,13 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 				.mult(n.scaleOrientation.toMatrix()).mult(m.scale(n.scale))
 				.mult(n.scaleOrientation.toMatrix().inverse()).mult(
 						m.translation(n.center.negate()));
+		//org.xml3d.debug.logInfo(this.matrix);
 	}
 	return this.matrix;
+};
+
+org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
+	this.matrix = null;
 };
 
 // Adapter for <bind>
@@ -673,8 +682,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAda
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getCenter = function() {
-	var min = new org.xml3d.dataTypes.Vec3f(-1, -1, -1);
-	var max = new org.xml3d.dataTypes.Vec3f(1, 1, 1);
+	var min = new XML3DVec3(-1, -1, -1);
+	var max = new XML3DVec3(1, 1, 1);
 	this.getBBox(min, max, true);
 	var center = min.add(max).scale(0.5);
 	return center;
@@ -771,12 +780,12 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getPosition = function(
 	for ( var i = 0; i < bindables.length; i++) {
 		if (bindables[i].semantic == "position") {
 			var pos = bindables[i].getGLValue();
-			return transform.multMatrixPnt(new org.xml3d.dataTypes.Vec3f(
+			return transform.multMatrixPnt(new XML3DVec3(
 					pos[0], pos[1], pos[2]));
 		}
 	}
 	return transform
-			.multMatrixPnt(new org.xml3d.dataTypes.Vec3f(0.0, 0.0, 0.0));
+			.multMatrixPnt(new XML3DVec3(0.0, 0.0, 0.0));
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getAttenuation = function(
@@ -786,10 +795,10 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getAttenuation = function(
 	for ( var i = 0; i < bindables.length; i++) {
 		if (bindables[i].semantic == "attenuation") {
 			var attn = bindables[i].getGLValue();
-			return new org.xml3d.dataTypes.Vec3f(attn[0], attn[1], attn[2]);
+			return new XML3DVec3(attn[0], attn[1], attn[2]);
 		}
 	}
-	return new org.xml3d.dataTypes.Vec3f(0.0, 0.0, 1.0);
+	return new XML3DVec3(0.0, 0.0, 1.0);
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getLightShader = function() {

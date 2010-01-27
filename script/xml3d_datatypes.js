@@ -107,22 +107,22 @@ org.xml3d.dataTypes.SFMatrix4 = function(_00, _01, _02, _03, _10, _11, _12,
 
 // Skipped
 org.xml3d.dataTypes.SFMatrix4.prototype.e0 = function() {
-	var baseVec = new org.xml3d.dataTypes.Vec3f(this._00, this._10, this._20);
+	var baseVec = new XML3DVec3(this._00, this._10, this._20);
 	return baseVec.normalised();
 };
 //Skipped
 org.xml3d.dataTypes.SFMatrix4.prototype.e1 = function() {
-	var baseVec = new org.xml3d.dataTypes.Vec3f(this._01, this._11, this._21);
+	var baseVec = new XML3DVec3(this._01, this._11, this._21);
 	return baseVec.normalised();
 };
 //Skipped
 org.xml3d.dataTypes.SFMatrix4.prototype.e2 = function() {
-	var baseVec = new org.xml3d.dataTypes.Vec3f(this._02, this._12, this._22);
+	var baseVec = new XML3DVec3(this._02, this._12, this._22);
 	return baseVec.normalised();
 };
 //Skipped
 org.xml3d.dataTypes.SFMatrix4.prototype.e3 = function() {
-	return new org.xml3d.dataTypes.Vec3f(this._03, this._13, this._23);
+	return new XML3DVec3(this._03, this._13, this._23);
 };
 //Skipped
 org.xml3d.dataTypes.SFMatrix4.identity = function() {
@@ -210,13 +210,13 @@ org.xml3d.dataTypes.SFMatrix4.prototype.mult = function(that) {
 			* that._13 + this._32 * that._23 + this._33 * that._33);
 };
 org.xml3d.dataTypes.SFMatrix4.prototype.multMatrixPnt = function(vec) {
-	return new org.xml3d.dataTypes.Vec3f(this._00 * vec.x + this._01 * vec.y
+	return new XML3DVec3(this._00 * vec.x + this._01 * vec.y
 			+ this._02 * vec.z + this._03, this._10 * vec.x + this._11 * vec.y
 			+ this._12 * vec.z + this._13, this._20 * vec.x + this._21 * vec.y
 			+ this._22 * vec.z + this._23);
 };
 org.xml3d.dataTypes.SFMatrix4.prototype.multMatrixVec = function(vec) {
-	return new org.xml3d.dataTypes.Vec3f(this._00 * vec.x + this._01 * vec.y
+	return new XML3DVec3(this._00 * vec.x + this._01 * vec.y
 			+ this._02 * vec.z, this._10 * vec.x + this._11 * vec.y + this._12
 			* vec.z, this._20 * vec.x + this._21 * vec.y + this._22 * vec.z);
 };
@@ -224,7 +224,7 @@ org.xml3d.dataTypes.SFMatrix4.prototype.multFullMatrixPnt = function(vec) {
 	var w = this._30 * vec.x + this._31 * vec.y + this._32 * vec.z + this._33;
 	if (w)
 		w = 1.0 / w;
-	return new org.xml3d.dataTypes.Vec3f((this._00 * vec.x + this._01 * vec.y
+	return new XML3DVec3((this._00 * vec.x + this._01 * vec.y
 			+ this._02 * vec.z + this._03)
 			* w,
 			(this._10 * vec.x + this._11 * vec.y + this._12 * vec.z + this._13)
@@ -396,7 +396,10 @@ org.xml3d.dataTypes.Vec2f.prototype.setValueByStr = function(s) {
 	this.y = +m[2];
 	return this;
 };
-org.xml3d.dataTypes.Vec3f = function(x, y, z) {
+
+
+
+XML3DVec3 = function(x, y, z) {
 	if (arguments.length == 0) {
 		this.x = this.y = this.z = 0;
 	} else {
@@ -405,73 +408,84 @@ org.xml3d.dataTypes.Vec3f = function(x, y, z) {
 		this.z = z;
 	}
 };
-org.xml3d.dataTypes.Vec3f.parse = function(str) {
+
+XML3DVec3.prototype.setVec3Value = function(str) {
 	var m = /^(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
-	return new org.xml3d.dataTypes.Vec3f(+m[1], +m[2], +m[3]);
+	this.x = +m[1];
+	this.y = +m[2];
+	this.z = +m[3];
 };
-org.xml3d.dataTypes.Vec3f.prototype.add = function(that) {
-	return new org.xml3d.dataTypes.Vec3f(this.x + that.x, this.y + that.y,
+
+XML3DVec3.prototype.add = function(that) {
+	return new XML3DVec3(this.x + that.x, this.y + that.y,
 			this.z + that.z);
 };
-org.xml3d.dataTypes.Vec3f.prototype.subtract = function(that) {
-	return new org.xml3d.dataTypes.Vec3f(this.x - that.x, this.y - that.y,
+XML3DVec3.prototype.subtract = function(that) {
+	return new XML3DVec3(this.x - that.x, this.y - that.y,
 			this.z - that.z);
 };
-org.xml3d.dataTypes.Vec3f.prototype.negate = function() {
-	return new org.xml3d.dataTypes.Vec3f(-this.x, -this.y, -this.z);
+XML3DVec3.prototype.negate = function() {
+	return new XML3DVec3(-this.x, -this.y, -this.z);
 };
-org.xml3d.dataTypes.Vec3f.prototype.dot = function(that) {
+XML3DVec3.prototype.dot = function(that) {
 	return (this.x * that.x + this.y * that.y + this.z * that.z);
 };
-org.xml3d.dataTypes.Vec3f.prototype.cross = function(that) {
-	return new org.xml3d.dataTypes.Vec3f(this.y * that.z - this.z * that.y,
+XML3DVec3.prototype.cross = function(that) {
+	return new XML3DVec3(this.y * that.z - this.z * that.y,
 			this.z * that.x - this.x * that.z, this.x * that.y - this.y
 					* that.x);
 };
-org.xml3d.dataTypes.Vec3f.prototype.reflect = function(n) {
+/*org.xml3d.dataTypes.Vec3f.prototype.reflect = function(n) {
 	var d2 = this.dot(n) * 2;
-	return new org.xml3d.dataTypes.Vec3f(this.x - d2 * n.x, this.y - d2 * n.y,
+	return new XML3DVec3(this.x - d2 * n.x, this.y - d2 * n.y,
 			this.z - d2 * n.z);
-};
-org.xml3d.dataTypes.Vec3f.prototype.length = function() {
+};*/
+XML3DVec3.prototype.length = function() {
 	return Math.sqrt((this.x * this.x) + (this.y * this.y) + (this.z * this.z));
 };
-org.xml3d.dataTypes.Vec3f.prototype.normalised = function(that) {
+
+XML3DVec3.prototype.normalize = function(that) {
 	var n = this.length();
 	if (n)
 		n = 1.0 / n;
-	return new org.xml3d.dataTypes.Vec3f(this.x * n, this.y * n, this.z * n);
+	else throw new DOMException();
+	
+	return new XML3DVec3(this.x * n, this.y * n, this.z * n);
 };
-org.xml3d.dataTypes.Vec3f.prototype.scale = function(n) {
-	return new org.xml3d.dataTypes.Vec3f(this.x * n, this.y * n, this.z * n);
+
+XML3DVec3.prototype.scale = function(n) {
+	return new XML3DVec3(this.x * n, this.y * n, this.z * n);
 };
-org.xml3d.dataTypes.Vec3f.prototype.toGL = function() {
+
+XML3DVec3.prototype.toGL = function() {
 	return [ this.x, this.y, this.z ];
 };
-org.xml3d.dataTypes.Vec3f.prototype.toString = function() {
+
+XML3DVec3.prototype.toString = function() {
 	return "{ x " + this.x + " y " + this.y + " z " + this.z + " }";
 };
-org.xml3d.dataTypes.Quaternion = function(x, y, z, w) {
+
+XML3DRotation = function(x, y, z, w) {
 	this.x = x;
 	this.y = y;
 	this.z = z;
 	this.w = w;
 };
-org.xml3d.dataTypes.Quaternion.prototype.mult = function(that) {
-	return new org.xml3d.dataTypes.Quaternion(this.w * that.x + this.x * that.w
+XML3DRotation.prototype.mult = function(that) {
+	return new XML3DRotation(this.w * that.x + this.x * that.w
 			+ this.y * that.z - this.z * that.y, this.w * that.y + this.y
 			* that.w + this.z * that.x - this.x * that.z, this.w * that.z
 			+ this.z * that.w + this.x * that.y - this.y * that.x, this.w
 			* that.w - this.x * that.x - this.y * that.y - this.z * that.z);
 };
-org.xml3d.dataTypes.Quaternion.parseAxisAngle = function(str) {
+XML3DRotation.parseAxisAngle = function(str) {
 	var m = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
-	return org.xml3d.dataTypes.Quaternion.axisAngle(
-			new org.xml3d.dataTypes.Vec3f(+m[1], +m[2], +m[3]), +m[4]);
+	return XML3DRotation.axisAngle(
+			new XML3DVec3(+m[1], +m[2], +m[3]), +m[4]);
 };
 
-org.xml3d.dataTypes.Quaternion.fromMatrix = function(mat) {
-	var q = new org.xml3d.dataTypes.Quaternion();
+XML3DRotation.fromMatrix = function(mat) {
+	var q = new XML3DRotation();
 	var trace = mat._00 + mat._11 + mat._22;
 	if (trace > 0) {
 		var s = 0.5 / Math.sqrt(trace + 1.0);
@@ -503,7 +517,7 @@ org.xml3d.dataTypes.Quaternion.fromMatrix = function(mat) {
 	return q;
 };
 
-org.xml3d.dataTypes.Quaternion.fromBasis = function(x, y, z) {
+XML3DRotation.fromBasis = function(x, y, z) {
 	var normX = x.length();
 	var normY = y.length();
 	var normZ = z.length();
@@ -519,22 +533,22 @@ org.xml3d.dataTypes.Quaternion.fromBasis = function(x, y, z) {
 	m._21 = y.z / normY;
 	m._22 = z.z / normZ;
 
-	return org.xml3d.dataTypes.Quaternion.fromMatrix(m);
+	return XML3DRotation.fromMatrix(m);
 };
 
-org.xml3d.dataTypes.Quaternion.axisAngle = function(axis, a) {
+XML3DRotation.axisAngle = function(axis, a) {
 	var t = axis.length();
 	if (t > 0.000001) {
 		var s = Math.sin(a / 2) / t;
 		var c = Math.cos(a / 2);
-		return new org.xml3d.dataTypes.Quaternion(axis.x * s, axis.y * s,
+		return new XML3DRotation(axis.x * s, axis.y * s,
 				axis.z * s, c);
 	} else {
-		return new org.xml3d.dataTypes.Quaternion(0, 0, 0, 1);
+		return new XML3DRotation(0, 0, 0, 1);
 	}
 };
 
-org.xml3d.dataTypes.Quaternion.prototype.toMatrix = function() {
+XML3DRotation.prototype.toMatrix = function() {
 	var xx = this.x * this.x * 2;
 	var xy = this.x * this.y * 2;
 	var xz = this.x * this.z * 2;
@@ -549,7 +563,7 @@ org.xml3d.dataTypes.Quaternion.prototype.toMatrix = function() {
 			1 - (xx + yy), 0, 0, 0, 0, 1);
 };
 
-org.xml3d.dataTypes.Quaternion.prototype.toAxisAngle = function() {
+XML3DRotation.prototype.toAxisAngle = function() {
 	var angle = 2 * Math.acos(this.w);
 	var s = Math.sqrt(1 - this.w * this.w);
 	if (s < 0.001) {
@@ -558,7 +572,7 @@ org.xml3d.dataTypes.Quaternion.prototype.toAxisAngle = function() {
 	return [ this.x / s, this.y / s, this.z / s, angle ];
 };
 
-org.xml3d.dataTypes.Quaternion.prototype.rotateVec = function(v) {
+XML3DRotation.prototype.rotateVec3 = function(v) {
 	var q00 = 2.0 * this.x * this.x;
 	var q11 = 2.0 * this.y * this.y;
 	var q22 = 2.0 * this.z * this.z;
@@ -572,47 +586,47 @@ org.xml3d.dataTypes.Quaternion.prototype.rotateVec = function(v) {
 
 	var q23 = 2.0 * this.z * this.w;
 
-	return new org.xml3d.dataTypes.Vec3f((1.0 - q11 - q22) * v.x + (q01 - q23)
+	return new XML3DVec3((1.0 - q11 - q22) * v.x + (q01 - q23)
 			* v.y + (q02 + q13) * v.z, (q01 + q23) * v.x + (1.0 - q22 - q00)
 			* v.y + (q12 - q03) * v.z, (q02 - q13) * v.x + (q12 + q03) * v.y
 			+ (1.0 - q11 - q00) * v.z);
 };
 
-org.xml3d.dataTypes.Quaternion.prototype.dot = function(that) {
+XML3DRotation.prototype.dot = function(that) {
 	return this.x * that.x + this.y * that.y + this.z * that.z + this.w
 			* that.w;
 };
-org.xml3d.dataTypes.Quaternion.prototype.add = function(that) {
-	return new org.xml3d.dataTypes.Quaternion(this.x + that.x, this.y + that.y,
+XML3DRotation.prototype.add = function(that) {
+	return new XML3DRotation(this.x + that.x, this.y + that.y,
 			this.z + that.z, this.w + that.w);
 };
-org.xml3d.dataTypes.Quaternion.prototype.subtract = function(that) {
-	return new org.xml3d.dataTypes.Quaternion(this.x - that.x, this.y - that.y,
+XML3DRotation.prototype.subtract = function(that) {
+	return new XML3DRotation(this.x - that.x, this.y - that.y,
 			this.z - that.z, this.w - that.w);
 };
-org.xml3d.dataTypes.Quaternion.prototype.multScalar = function(s) {
-	return new org.xml3d.dataTypes.Quaternion(this.x * s, this.y * s, this.z
+XML3DRotation.prototype.multScalar = function(s) {
+	return new XML3DRotation(this.x * s, this.y * s, this.z
 			* s, this.w * s);
 };
-org.xml3d.dataTypes.Quaternion.prototype.normalised = function(that) {
+XML3DRotation.prototype.normalised = function(that) {
 	var d2 = this.dot(that);
 	var id = 1.0;
 	if (d2)
 		id = 1.0 / Math.sqrt(d2);
-	return new org.xml3d.dataTypes.Quaternion(this.x * id, this.y * id, this.z
+	return new XML3DRotation(this.x * id, this.y * id, this.z
 			* id, this.w * id);
 };
-org.xml3d.dataTypes.Quaternion.prototype.negate = function() {
-	return new org.xml3d.dataTypes.Quaternion(this.x, this.y, this.z, this.w);
+XML3DRotation.prototype.negate = function() {
+	return new XML3DRotation(this.x, this.y, this.z, this.w);
 };
-org.xml3d.dataTypes.Quaternion.prototype.slerp = function(that, t) {
+XML3DRotation.prototype.slerp = function(that, t) {
 	var cosom = this.dot(that);
 	var rot1;
 	if (cosom < 0.0) {
 		cosom = -cosom;
 		rot1 = that.negate();
 	} else {
-		rot1 = new org.xml3d.dataTypes.Quaternion(that.x, that.y, that.z,
+		rot1 = new XML3DRotation(that.x, that.y, that.z,
 				that.w);
 	}
 	var scalerot0, scalerot1;
@@ -627,7 +641,7 @@ org.xml3d.dataTypes.Quaternion.prototype.slerp = function(that, t) {
 	}
 	return this.multScalar(scalerot0).add(rot1.multScalar(scalerot1));
 };
-org.xml3d.dataTypes.Quaternion.prototype.toString = function() {
+XML3DRotation.prototype.toString = function() {
 	return '((' + this.x + ', ' + this.y + ', ' + this.z + '), ' + this.w + ')';
 };
 org.xml3d.dataTypes.MFRotation = function(rotArray) {
@@ -646,8 +660,8 @@ org.xml3d.dataTypes.MFRotation.parse = function(str) {
 		var c = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*),?\s*([+-]?\d*\.*\d*),?\s*$/
 				.exec(mc[i]);
 		if (c[0])
-			vecs.push(org.xml3d.dataTypes.Quaternion.axisAngle(
-					new org.xml3d.dataTypes.Vec3f(+c[1], +c[2], +c[3]), +c[4]));
+			vecs.push(XML3DRotation.axisAngle(
+					new XML3DVec3(+c[1], +c[2], +c[3]), +c[4]));
 	}
 	return new org.xml3d.dataTypes.MFRotation(vecs);
 };
@@ -720,7 +734,7 @@ org.xml3d.dataTypes.MFVec3.parse = function(str) {
 		var c = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*),?\s*$/
 				.exec(mc[i]);
 		if (c[0])
-			vecs.push(new org.xml3d.dataTypes.Vec3f(+c[1], +c[2], +c[3]));
+			vecs.push(new XML3DVec3(+c[1], +c[2], +c[3]));
 	}
 	return new org.xml3d.dataTypes.MFVec3(vecs);
 };
@@ -763,16 +777,16 @@ org.xml3d.dataTypes.MFVec2.prototype.toGL = function() {
 };
 org.xml3d.dataTypes.Line = function(pos, dir) {
 	if (arguments.length == 0) {
-		this.pos = new org.xml3d.dataTypes.Vec3f(0, 0, 0);
-		this.dir = new org.xml3d.dataTypes.Vec3f(0, 0, 1);
+		this.pos = new XML3DVec3(0, 0, 0);
+		this.dir = new XML3DVec3(0, 0, 1);
 		this.t = 1;
 	} else {
-		this.pos = new org.xml3d.dataTypes.Vec3f(pos.x, pos.y, pos.z);
+		this.pos = new XML3DVec3(pos.x, pos.y, pos.z);
 		var n = dir.length();
 		this.t = n;
 		if (n)
 			n = 1.0 / n;
-		this.dir = new org.xml3d.dataTypes.Vec3f(dir.x * n, dir.y * n, dir.z
+		this.dir = new XML3DVec3(dir.x * n, dir.y * n, dir.z
 				* n);
 	}
 };

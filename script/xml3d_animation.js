@@ -29,9 +29,14 @@ else if (typeof org.xml3d.animation != "object")
 	
 })();
 
-org.xml3d.startAnimation = function(aniID, transID, transAttr)
+org.xml3d.startAnimation = function(aniID, transID, transAttr, loop)
 {
-	org.xml3d.document.animationManager.startAnimation(aniID, transID, transAttr);
+	return org.xml3d.document.animationManager.startAnimation(aniID, transID, transAttr, loop);
+};
+
+org.xml3d.stopAnimation = function(handle)
+{
+	org.xml3d.document.animationManager.stopAnimation(handle);
 };
 
 /*org.xml3d.startAnimation = function(aniID)
@@ -43,6 +48,7 @@ org.xml3d.startAnimation = function(aniID, transID, transAttr)
 org.xml3d.animation.XML3DAnimationManager = function(document) {
 	this.document = document;
 	this.animations = {};
+
 };
 
 org.xml3d.animation.XML3DAnimationManager.prototype.init = function() {
@@ -84,11 +90,38 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 		trans.setAttributeNode(field);
 	}
 	
+	if(animation.running[field] !== undefined) {
+		if (animation.running[field].timer)
+		{
+			org.xml3d.debug.logWarning("Animation already running");
+		}
+		else
+		{
+			animation.running[field].timer = window.setInterval(function() { animation.progress(field); }, 50);
+		}
+		return animation.running[field];
+	}
+	
 	animation.running[field] = {};
 	animation.running[field].step = 0;
 	animation.running[field].timer = window.setInterval(function() { animation.progress(field); }, 50);
 	
-	
+	return animation.running[field];
+};
+
+org.xml3d.animation.XML3DAnimationManager.prototype.stopAnimation = function(handle) 
+{
+	if (handle === undefined || handle == null 
+			|| handle.timer === undefined)
+	{
+		org.xml3d.debug.logError("XML3DAnimationManager::stopAnimation: Not a vaild animation handle");
+		return;
+	}
+	if (handle.timer)
+	{
+		window.clearInterval(handle.timer);
+		handle.timer = null;
+	}
 };
 
 /*org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID) {

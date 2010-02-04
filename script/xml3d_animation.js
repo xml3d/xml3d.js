@@ -29,9 +29,9 @@ else if (typeof org.xml3d.animation != "object")
 	
 })();
 
-org.xml3d.startAnimation = function(aniID, transID, transAttr, loop)
+org.xml3d.startAnimation = function(aniID, transID, transAttr, duration, loop)
 {
-	return org.xml3d.document.animationManager.startAnimation(aniID, transID, transAttr, loop);
+	return org.xml3d.document.animationManager.startAnimation(aniID, transID, transAttr, duration, loop);
 };
 
 org.xml3d.stopAnimation = function(handle)
@@ -62,7 +62,7 @@ org.xml3d.animation.XML3DAnimationManager.prototype.init = function() {
 	}
 };
 
-org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID, transID, transAttr) {
+org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID, transID, transAttr, duration, loop) {
 	org.xml3d.debug.logWarning(this);
 	if(this.animations[aniID] === undefined)
 	{
@@ -97,13 +97,19 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 		}
 		else
 		{
+			// We start from the beginning when animation is restarted
+			animation.running[field].duration = duration;
+			animation.running[field].loop = loop;
+			animation.running[field].startTime = (new Date()).getTime();
 			animation.running[field].timer = window.setInterval(function() { animation.progress(field); }, 50);
 		}
 		return animation.running[field];
 	}
 	
 	animation.running[field] = {};
-	animation.running[field].step = 0;
+	animation.running[field].duration = duration;
+	animation.running[field].loop = loop;
+	animation.running[field].startTime = (new Date()).getTime();
 	animation.running[field].timer = window.setInterval(function() { animation.progress(field); }, 50);
 	
 	return animation.running[field];
@@ -190,7 +196,7 @@ org.xml3d.animation.X3DOrientationInterpolation.prototype.initialize = function(
 	});
 	if (this.keyValue.length != this.key.length)
 	{
-		org.xml3d.debug.logWarning("Key size and Value size differ.");
+		org.xml3d.debug.logWarning("Key size and Value size differ. Keys: " + this.key.length + " Values: " + this.keyValue.length);
 		return;
 	}
 	this.valid = true;
@@ -198,9 +204,17 @@ org.xml3d.animation.X3DOrientationInterpolation.prototype.initialize = function(
 
 org.xml3d.animation.X3DOrientationInterpolation.prototype.progress = function(field) {
 	var anim = this.running[field];
-	field.nodeValue = this.getValue(anim.step / 100.0).join(' ');
-	anim.step = (anim.step + 1) % 101;
+	var time = (new Date()).getTime();
 	
+	var key = ((time - anim.startTime) % anim.duration ) / (anim.duration * 1.0);
+	if(!anim.loop && (time - anim.startTime > anim.duration) )
+	{
+		key = 1.0
+		window.clearInterval(anim.timer);
+		anim.timer = null;
+	}
+	
+	field.nodeValue = this.getValue( key ).join(' ');
 };
 
 org.xml3d.animation.X3DOrientationInterpolation.prototype.getValue = function(t) {

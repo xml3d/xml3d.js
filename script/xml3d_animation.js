@@ -63,7 +63,13 @@ org.xml3d.animation.XML3DAnimationManager.prototype.init = function() {
 };
 
 org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID, transID, transAttr, duration, loop) {
-	org.xml3d.debug.logWarning(this);
+	
+	if (duration === undefined)
+		duration = 3000;
+	
+	if (loop === undefined)
+		loop = false;
+	
 	if(this.animations[aniID] === undefined)
 	{
 		org.xml3d.debug.logWarning("Unknown Animation: " + aniID);
@@ -209,7 +215,7 @@ org.xml3d.animation.X3DOrientationInterpolation.prototype.progress = function(fi
 	var key = ((time - anim.startTime) % anim.duration ) / (anim.duration * 1.0);
 	if(!anim.loop && (time - anim.startTime > anim.duration) )
 	{
-		key = 1.0
+		key = 1.0;
 		window.clearInterval(anim.timer);
 		anim.timer = null;
 	}

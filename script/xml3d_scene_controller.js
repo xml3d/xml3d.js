@@ -21,7 +21,7 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 	{
 		org.xml3d.debug.logWarning("No view found. Adding one.");
 		var view = document.createElementNS(org.xml3d.xml3dNS, 'view');
-		camera.setAttribute("position", "0 0 -10");
+		view.setAttribute("position", "0 0 -10");
 		xml3d.insertBefore(view, xml3d.firstChild);
 		this.camera = view;
 		xml3d.update(); // TODO: Test

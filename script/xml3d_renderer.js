@@ -87,7 +87,8 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 		gl.attachShader(prog, fs);
 		gl.linkProgram(prog);
 		var msg = gl.getProgramInfoLog(prog);
-		if (msg) {
+
+		if (msg.length > 54) {
 			org.xml3d.debug.logError("Could not create standard shader: " + name + " ("+ msg +")");
 			return null;
 		}
@@ -374,7 +375,7 @@ org.xml3d.webgl.XML3DImgRenderAdapter.prototype = new org.xml3d.webgl.RenderAdap
 org.xml3d.webgl.XML3DImgRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DImgRenderAdapter;
 
 org.xml3d.webgl.XML3DImgRenderAdapter.prototype.bindTexture = function(
-		textureAdapter) {
+		texture) {
 	var gl = this.factory.gl;
 	var image = new Image();
 	image.src = this.node.src;
@@ -382,17 +383,18 @@ org.xml3d.webgl.XML3DImgRenderAdapter.prototype.bindTexture = function(
 	image.onload = function() {
 		org.xml3d.debug.logInfo("Texture loaded: " + image);
 
-		gl.bindTexture(gl.TEXTURE_2D, textureAdapter.textureId);
+		gl.bindTexture(gl.TEXTURE_2D, texture.textureId);
 		gl.texImage2D(gl.TEXTURE_2D, 0, image);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-		textureAdapter.isValid = true;
+		org.xml3d.webgl.checkError(gl, "After binding texture");
 	};
 };
 
 // Adapter for <texture>
+/*
 org.xml3d.webgl.XML3DTextureRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.textureId = null;
@@ -412,7 +414,7 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.init = function() {
 	}
 	if (imageData) {
 		this.textureId = gl.createTexture();
-		org.xml3d.debug.logInfo("Creating GL texture: " + this.textureId);
+		//org.xml3d.debug.logInfo("Creating GL texture: " + this.textureId);
 		imageData.bindTexture(this);
 	}
 	this.wrapS = this.initWrapMode("wrapS");
@@ -453,7 +455,7 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.disable = function() {
 org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.dispose = function() {
 	var gl = this.factory.gl;
 	gl.deleteTexture(this.textureId);
-};
+};*/
 
 // Adapter for <shader>
 org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
@@ -493,6 +495,57 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 			}
 			return this.sp;
 		}));
+org.xml3d.webgl.XML3DShaderRenderAdapter.texture = function () {
+	this.textureId = null;
+	this.wrapS = null;
+	this.wrapT = null;
+};
+
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textureNode) {
+	var gl = this.factory.gl;
+
+	var imageData = null;
+	var child = textureNode.firstChild;
+	var texture = new org.xml3d.webgl.XML3DShaderRenderAdapter.texture();
+	while (child && !imageData) {
+		imageData = this.factory.getAdapter(child);
+		child = child.nextSibling;
+	}
+	if (imageData) {
+		texture.textureId = gl.createTexture();
+		imageData.bindTexture(texture);
+	}
+	texture.wrapS = this.initWrapMode(textureNode, "wrapS");
+	texture.wrapT = this.initWrapMode(textureNode, "wrapT");
+	this.enable(texture);
+	this.textures.push(texture);
+	org.xml3d.debug.logInfo("Created GL texture: " + texture.textureId);
+};
+
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initWrapMode = function(
+		texNode, which) {
+	var gl = this.factory.gl;
+	switch (texNode.childNodes[which]) {
+	case org.xml3d.WrapTypes.clamp:
+		return gl.CLAMP_TO_EDGE;
+	case org.xml3d.WrapTypes.border:
+		return gl.BORDER;
+	case org.xml3d.WrapTypes.repeat:
+	default:
+		return gl.REPEAT;
+	}
+};
+
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.enable = function(texture) {
+	var gl = this.factory.gl;
+	gl.enable(gl.TEXTURE_2D);
+	gl.bindTexture(gl.TEXTURE_2D, texture.textureId);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, texture.wrapS);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, texture.wrapT);
+	org.xml3d.webgl.checkError(gl, "After trying to enable texture.");
+};
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = function(
 		shaderArray) {
@@ -510,7 +563,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = functio
 
 	gl.linkProgram(prog);
 	var msg = gl.getProgramInfoLog(prog);
-	if (msg) {
+
+	if (msg.length > 54) {
 		org.xml3d.debug.logError(msg);
 		return null;
 	}
@@ -522,19 +576,15 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function() {
 		return;
 	var gl = this.factory.gl;
 	var bindables = this.getBindables();
-	this.textures = new Array();
+	var texNum = 0;
 	for ( var i = 0; i < bindables.length; i++) {
 
 		var bindable = bindables[i];
-		if (bindable.kind === org.xml3d.webgl.XML3DBindRenderAdapter.TEXTURE_TYPE) {
-			var texture = bindable.texture;
-			if (texture && texture.isValid) {
-				texture.enable();
-				this.textures.push(texture);
-			}
 
+		if (org.xml3d.isa(bindable.node.firstElementChild, org.xml3d.classInfo.texture)) {
+			this.enable(this.textures[texNum]);
+			texNum++;
 		} else if (bindable.kind === org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE) {
-
 			org.xml3d.webgl.checkError(gl, "Error before setting parameter:" + bindable.semantic);
 			var value = bindable.getGLValue();
 			if (value)
@@ -542,17 +592,23 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function() {
 			org.xml3d.webgl.checkError(gl, "Error after setting parameter:" + bindable.semantic + ", value: " + value);
 		}
 	}
+
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.cleanUp = function() {
+	var gl = this.factory.gl;
 	Array.forEach(this.textures, function(t) {
-		t.disable();
+		org.xml3d.webgl.checkError(gl, "Before shader cleanup.");
+		gl.bindTexture(gl.TEXTURE_2D, null);
+		gl.disable(gl.TEXTURE_2D);
+		org.xml3d.webgl.checkError(gl, "After shader cleanup.");
 	});
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
+	var gl = this.factory.gl;
 	Array.forEach(this.textures, function(t) {
-		t.dispose();
+		gl.deleteTexture(t.textureId);
 	});
 };
 
@@ -630,9 +686,8 @@ org.xml3d.webgl.XML3DBindRenderAdapter.prototype.init = function() {
 			} else if (org.xml3d.isa(this.node.parentNode,
 					org.xml3d.classInfo.shader)) {
 				if (org.xml3d.isa(child, org.xml3d.classInfo.texture)) {
-
-					this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.TEXTURE_TYPE;
-					this.texture = this.factory.getAdapter(child);
+					this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE;
+					this.node.parentNode.adapters[0].initTexture(child);
 				} else {
 					this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE;
 				}
@@ -645,6 +700,8 @@ org.xml3d.webgl.XML3DBindRenderAdapter.prototype.init = function() {
 	}
 
 };
+
+
 
 org.xml3d.webgl.XML3DBindRenderAdapter.prototype.getGLValue = function() {
 	var gl = this.factory.gl;
@@ -715,6 +772,10 @@ org.xml3d.webgl.XML3DBindRenderAdapter.prototype.getBuffer = function() {
 	}
 
 	return this.buffer;
+};
+
+org.xml3d.webgl.XML3DBindRenderAdapter.prototype.notifyChanged = function(e) {
+	this.glValue = null;
 };
 
 // Adapter for <mesh>

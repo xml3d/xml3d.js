@@ -158,7 +158,11 @@ org.xml3d.XML3DNodeFactory.prototype.create = function(node, context) {
 		}
 	}
 };
-
+org.xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(str){
+	var vec = new XML3DVec3();
+	vec.setVec3Value(str);
+	return vec;
+};
 org.xml3d.XML3DNodeFactory.createXML3DRotationFromString = function(value) {
 	return new XML3DRotation.parseAxisAngle(value);
 };
@@ -199,7 +203,26 @@ org.xml3d.XML3DDocument.prototype.initXml3d = function(xml3dElement) {
 	xml3dElement.addEventListener('DOMNodeRemoved', this.onRemove, true);
 	xml3dElement.addEventListener('DOMNodeInserted', this.onAdd, true);
 	xml3dElement.addEventListener('DOMAttrModified', this.onSet, true);
-	
+	xml3dElement.addEventListener('DOMCharacterDataModified', this.onTextSet, true);
+
+};
+
+org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
+	if (e.target === undefined)
+	{
+		org.xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
+		return;
+	}
+	try {
+		var bindNode = e.target.parentNode.parentNode;
+		var oldValue = e.target.parentNode.value;
+		e.target.parentNode.setValue(e);
+		if (bindNode.notificationRequired())
+			bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
+	} catch (e) {
+		org.xml3d.debug.logError("Exception in textSet:");
+		org.xml3d.debug.logException(e);
+	}
 };
 
 org.xml3d.XML3DDocument.prototype.onAdd = function(e) {
@@ -552,7 +575,12 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 		return this.activeView;
 	};
 
+	node.update = function() {
+		org.xml3d.debug.logInfo("Hit Update");
+		// TODO  I need to be able to update...
 
+
+	};
 
     // Node::setField
 	node.setField = function(event)	{
@@ -621,7 +649,8 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 	node.createXML3DVec3 = org.xml3d.methods.xml3dCreateXML3DVec3;
 	node.createXML3DRotation = org.xml3d.methods.xml3dCreateXML3DRotation;
 	node.createXML3DMatrix = org.xml3d.methods.xml3dCreateXML3DMatrix;
-	
+
+
 };
 org.xml3d.defineClass(org.xml3d.classInfo.xml3d, org.xml3d.classInfo.XML3DElement);
 
@@ -1826,6 +1855,11 @@ org.xml3d.classInfo.float.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
 
+	node.setValue = function(event){
+		this.value = org.xml3d.initFloatArray(event.newValue, null);
+		this.Value = event.newValue;
+		return org.xml3d.event.HANDLED;
+	};
 	node.value = org.xml3d.initFloatArray(node.getTextContent(), null);
 
 
@@ -1867,6 +1901,12 @@ org.xml3d.classInfo.float2.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
 
+	node.setValue = function(event){
+		this.value = org.xml3d.initFloat2Array(event.newValue, null);
+		this.Value = event.newValue;
+		return org.xml3d.event.HANDLED;
+	};
+
 	node.value = org.xml3d.initFloat2Array(node.getTextContent(), null);
 
 
@@ -1907,7 +1947,11 @@ org.xml3d.classInfo.float3 = function() {
 org.xml3d.classInfo.float3.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
-
+	node.setValue = function(event){
+		this.value = org.xml3d.initFloat3Array(event.newValue, null);
+		this.Value = event.newValue;
+		return org.xml3d.event.HANDLED;
+	};
 	node.value = org.xml3d.initFloat3Array(node.getTextContent(), null);
 
     // Node::setField
@@ -1947,6 +1991,11 @@ org.xml3d.classInfo.float4.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
 
+	node.setValue = function(event){
+		this.value = org.xml3d.initFloat4Array(event.newValue, null);
+		this.Value = event.newValue;
+		return org.xml3d.event.HANDLED;
+	};
 	node.value = org.xml3d.initFloat4Array(node.getTextContent(), null);
 
 
@@ -1988,6 +2037,11 @@ org.xml3d.classInfo.int.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
 
+	node.setValue = function(event){
+		this.value = org.xml3d.initIntArray(event.newValue, null);
+		this.Value = event.newValue;
+		return org.xml3d.event.HANDLED;
+	};
 	node.value = org.xml3d.initIntArray(node.getTextContent(), null);
 
 
@@ -2028,6 +2082,12 @@ org.xml3d.classInfo.bool = function() {
 org.xml3d.classInfo.bool.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
+
+	node.setValue = function(event){
+		this.value = org.xml3d.initBoolArray(event.newValue, null);
+		this.Value = event.newValue;
+		return org.xml3d.event.HANDLED;
+	};
 
 	node.value = org.xml3d.initBoolArray(node.getTextContent(), null);
 

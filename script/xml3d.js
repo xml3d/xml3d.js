@@ -16,6 +16,44 @@ org.xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
 org.xml3d.webglNS = 'http://www.w3.org/2009/xml3d/webgl';
 org.xml3d.document = new org.xml3d.XML3DDocument(document);
 
+if (!Array.forEach) {
+	Array.forEach = function(array, fun, thisp) {
+		var len = array.length;
+		for ( var i = 0; i < len; i++) {
+			if (i in array) {
+				fun.call(thisp, array[i], i, array);
+			}
+		}
+	};
+}
+if (!Array.map) {
+	Array.map = function(array, fun, thisp) {
+		var len = array.length;
+		var res = [];
+		for ( var i = 0; i < len; i++) {
+			if (i in array) {
+				res[i] = fun.call(thisp, array[i], i, array);
+			}
+		}
+		return res;
+	};
+}
+if (!Array.filter) {
+	Array.filter = function(array, fun, thisp) {
+		var len = array.length;
+		var res = [];
+		for ( var i = 0; i < len; i++) {
+			if (i in array) {
+				var val = array[i];
+				if (fun.call(thisp, val, i, array)) {
+					res.push(val);
+				}
+			}
+		}
+		return res;
+	};
+}
+
 org.xml3d.XML3DCanvas = function(xml3dElement) {
 	this.xml3dElem = xml3dElement;
 	this.root = null;

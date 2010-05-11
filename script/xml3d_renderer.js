@@ -41,11 +41,14 @@ org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 	var av = this.scene.getActiveView();
 	if (av == null)
 	{
-		org.xml3d.debug.logWarning("No View defined for xml3d element.");
-		return new org.xml3d.Camera();
+		av =  document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
+			return org.xml3d.xml3dNS;
+		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		if (av == null)
+			org.xml3d.debug.logError("No view defined.");
+		return this.factory.getAdapter(av);
 	}
-	org.xml3d.debug.logWarning("Creating view.");
-	return new org.xml3d.Camera(av);
+	return this.factory.getAdapter(av);
 };
 
 org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
@@ -61,7 +64,7 @@ org.xml3d.webgl.Renderer.prototype.getLights = function() {
 		this.lights = new Array();
 		var adapter = this.factory.getAdapter(this.scene);
 		if (adapter)
-			adapter.collectLights(org.xml3d.dataTypes.SFMatrix4.identity(),
+			adapter.collectLights(new XML3DMatrix(),
 					this.lights);
 	}
 	return this.lights;
@@ -87,7 +90,6 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 		gl.attachShader(prog, fs);
 		gl.linkProgram(prog);
 		var msg = gl.getProgramInfoLog(prog);
-
 		if (msg.length > 54) {
 			org.xml3d.debug.logError("Could not create standard shader: " + name + " ("+ msg +")");
 			return null;
@@ -111,10 +113,10 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	org.xml3d.webgl.checkError(gl, "Start render");
 	if (this.drawableObjects === undefined || !this.drawableObjects) {
 		this.drawableObjects = [];
-		this.collectDrawableObjects(org.xml3d.dataTypes.SFMatrix4.identity(),
+		this.collectDrawableObjects(new XML3DMatrix(),
 				this.drawableObjects, null);
 	}
-
+	
 	var mat_view = this.camera.getViewMatrix();
 	var light, lightOn;
 
@@ -123,8 +125,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		var trafo = this.drawableObjects[i][0];
 		var obj3d = this.drawableObjects[i][1];
 		var center = this.getCenter(obj3d);
-		center = trafo.multMatrixPnt(center);
-		center = mat_view.multMatrixPnt(center);
+		center = trafo.multiply(center);
+		center = mat_view.multiply(center);
 		zPos[i] = [ i, center.z ];
 	}
 	zPos.sort(function(a, b) {
@@ -202,11 +204,11 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		 * sp.lightOn = lightOn;
 		 */
 
-		sp.modelViewMatrix = mat_view.mult(transform).toGL();
+		sp.modelViewMatrix = mat_view.multiply(transform).toGL();
 		var projMatrix = this.camera
 				.getProjectionMatrix(this.canvas.width / this.canvas.height);
 		var viewMatrix = this.camera.getViewMatrix();
-		sp.modelViewProjectionMatrix = projMatrix.mult(viewMatrix).mult(
+		sp.modelViewProjectionMatrix = projMatrix.multiply(viewMatrix).multiply(
 				transform).toGL();
 
 		gl.disable(gl.CULL_FACE);
@@ -222,7 +224,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 org.xml3d.webgl.Renderer.prototype.dispose = function() {
 	var drawableObjects = new Array();
-	this.collectDrawableObjects(org.xml3d.dataTypes.SFMatrix4.identity(),
+	this.collectDrawableObjects(new XML3DMatrix(),
 			drawableObjects, null);
 	for ( var i = 0, n = drawableObjects.length; i < n; i++) {
 		var shape = drawableObjects[i][1];
@@ -265,12 +267,12 @@ org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.createAdapter = function(
 		node) {
 	if (node.localName == "xml3d")
 		return new org.xml3d.webgl.XML3DCanvasRenderAdapter(this, node);
+	if (node.localName == "view")
+		return new org.xml3d.webgl.XML3DViewRenderAdapter(this, node);
 	if (node.localName == "group")
 		return new org.xml3d.webgl.XML3DGroupRenderAdapter(this, node);
 	if (node.localName == "mesh")
 		return new org.xml3d.webgl.XML3DMeshRenderAdapter(this, node);
-	if (node.localName == "texture")
-		return new org.xml3d.webgl.XML3DTextureRenderAdapter(this, node);
 	if (node.localName == "img")
 		return new org.xml3d.webgl.XML3DImgRenderAdapter(this, node);
 	if (node.localName == "bind")
@@ -367,6 +369,49 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter = function(factory, node) {
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DCanvasRenderAdapter;
 
+// Adapter for <view>
+org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
+	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+	this.zFar = 100000;
+	this.zNear = 0.1;
+	this.viewMatrix = null;
+	this.projMatrix = null;
+};
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DViewRenderAdapter;
+
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
+	if (this.viewMatrix == null) {
+		this.viewMatrix =  this.node.orientation.toMatrix().transpose().multiply(
+				new XML3DMatrix().translate(this.node.position.negate()));
+	}
+	return this.viewMatrix;
+};
+
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(aspect) {
+	if (this.projMatrix == null) {
+		var fovy = this.node.fieldOfView;
+		var zfar = this.zFar;
+		var znear = this.zNear;
+		var f = 1 / Math.tan(fovy / 2);
+		this.projMatrix = new XML3DMatrix(f / aspect, 0, 0,
+				0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), 2 * znear
+						* zfar / (znear - zfar), 0, 0, -1, 0);
+	}
+	return this.projMatrix;
+};
+
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
+	if (e.attribute == "orientation" || e.attribute == "position")
+		this.viewMatrix = null;
+	else if (e.attribute == "fieldOfView")
+		this.projMatrix = null;
+	else {
+		this.viewMatrix = null;
+		this.projMatrix = null;
+	}
+};
+
 // Adapter for <img>
 org.xml3d.webgl.XML3DImgRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
@@ -393,70 +438,6 @@ org.xml3d.webgl.XML3DImgRenderAdapter.prototype.bindTexture = function(
 	};
 };
 
-// Adapter for <texture>
-/*
-org.xml3d.webgl.XML3DTextureRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
-	this.textureId = null;
-	this.isValid = false;
-};
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DTextureRenderAdapter;
-
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.init = function() {
-	var gl = this.factory.gl;
-
-	var imageData = null;
-	var child = this.node.firstChild;
-	while (child && !imageData) {
-		imageData = this.factory.getAdapter(child);
-		child = child.nextSibling;
-	}
-	if (imageData) {
-		this.textureId = gl.createTexture();
-		//org.xml3d.debug.logInfo("Creating GL texture: " + this.textureId);
-		imageData.bindTexture(this);
-	}
-	this.wrapS = this.initWrapMode("wrapS");
-	this.wrapT = this.initWrapMode("wrapT");
-
-};
-
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initWrapMode = function(
-		which) {
-	var gl = this.factory.gl;
-	switch (this.node[which]) {
-	case org.xml3d.WrapTypes.clamp:
-		return gl.CLAMP_TO_EDGE;
-	case org.xml3d.WrapTypes.border:
-		return gl.BORDER;
-	case org.xml3d.WrapTypes.repeat:
-	default:
-		return gl.REPEAT;
-	}
-};
-
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.enable = function() {
-	var gl = this.factory.gl;
-	gl.enable(gl.TEXTURE_2D);
-	gl.bindTexture(gl.TEXTURE_2D, this.textureId);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrapS);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrapT);
-};
-
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.disable = function() {
-	var gl = this.factory.gl;
-	gl.bindTexture(gl.TEXTURE_2D, null);
-	gl.disable(gl.TEXTURE_2D);
-};
-
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.dispose = function() {
-	var gl = this.factory.gl;
-	gl.deleteTexture(this.textureId);
-};*/
-
 // Adapter for <shader>
 org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
@@ -469,10 +450,19 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.constructor = org.xml3d.webgl
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 		"shaderProgram", (function() {
 			var gl = this.factory.gl;
+			var bindables = this.getBindables();
 			if (!this.sp && this.node.hasAttribute("script")) {
 				var scriptURL = this.node.getAttribute("script");
 				if (new org.xml3d.URI(scriptURL).scheme == "urn")
 				{
+					for ( var i = 0; i < bindables.length; i++) {
+						var bindable = bindables[i];
+						if (bindable.semantic == "useVertexColor") {
+							var value = bindable.getGLValue();
+							if (value)
+								scriptURL = scriptURL + "vcolor";
+						}
+					}					
 					this.sp = this.factory.renderer.getStandardShaderProgram(gl, scriptURL);
 					return this.sp;
 				}
@@ -624,7 +614,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 	if (adapter === null)
 		return transform;
 
-	return transform.mult(adapter.getMatrix());
+	return transform.multiply(adapter.getMatrix());
 };
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function() {
 	return this.factory.getAdapter(this.node.getShader());
@@ -641,12 +631,12 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = org.xml3d.we
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 	if (!this.matrix) {
 		var n = this.node;
-		var m = org.xml3d.dataTypes.SFMatrix4;
-		this.matrix = m.translation(n.translation)
-				.mult(m.translation(n.center)).mult(n.rotation.toMatrix())
-				.mult(n.scaleOrientation.toMatrix()).mult(m.scale(n.scale))
-				.mult(n.scaleOrientation.toMatrix().inverse()).mult(
-						m.translation(n.center.negate()));
+		var m = new XML3DMatrix();
+		this.matrix = m.translate(n.translation)
+		  .multiply(m.translate(n.center)).multiply(n.rotation.toMatrix())
+		  .multiply(n.scaleOrientation.toMatrix()).multiply(m.scale(n.scale))
+		  .multiply(n.scaleOrientation.toMatrix().inverse()).multiply(
+				  m.translate(n.center.negate()));
 		//org.xml3d.debug.logInfo(this.matrix);
 	}
 	return this.matrix;
@@ -706,14 +696,22 @@ org.xml3d.webgl.XML3DBindRenderAdapter.prototype.init = function() {
 org.xml3d.webgl.XML3DBindRenderAdapter.prototype.getGLValue = function() {
 	var gl = this.factory.gl;
 
-	if (!this.glValue) {
+	if (this.glValue == undefined) {
 		org.xml3d.debug.logInfo("Creating GL value for: " + this.semantic);
 		var child = this.node.firstChild;
 		while(child && !this.glValue)
 		{
 			if (child.nodeType == Node.ELEMENT_NODE)
 			{
-				this.glValue = child.value;
+				if (child.nodeName == "bool")
+				{
+					if (child.textContent == "true")
+						this.glValue = true;
+					else
+						this.glValue = false;
+				} else {
+					this.glValue = child.value;
+				}
 			}
 			child = child.nextSibling;
 		}
@@ -878,12 +876,12 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getPosition = function(
 	for ( var i = 0; i < bindables.length; i++) {
 		if (bindables[i].semantic == "position") {
 			var pos = bindables[i].getGLValue();
-			return transform.multMatrixPnt(new XML3DVec3(
+			return transform.multiply(new XML3DVec3(
 					pos[0], pos[1], pos[2]));
 		}
 	}
 	return transform
-			.multMatrixPnt(new XML3DVec3(0.0, 0.0, 0.0));
+			.multiply(new XML3DVec3(0.0, 0.0, 0.0));
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getAttenuation = function(
@@ -916,16 +914,35 @@ org.xml3d.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = org.xml3d.
 var g_shaders = {};
 
 g_shaders["urn:xml3d:shader:flat"] = {
-	vertex : "attribute vec3 position;"
-			+ "uniform mat4 modelViewProjectionMatrix;"
+	vertex : 
+			 "attribute vec3 position;"
+			+ "uniform mat4 modelViewProjectionMatrix;"		
 			+ "void main(void) {"
 			+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);"
 			+ "}",
-	fragment : "uniform vec3 diffuseColor;"
+	fragment :
+		     "uniform vec3 diffuseColor;"
 			+ "void main(void) {"
 			+ "    gl_FragColor = vec4(diffuseColor.x, diffuseColor.y, diffuseColor.z, 1.0);"
 			+ "}"
 };
+g_shaders["urn:xml3d:shader:flatvcolor"] = {
+		vertex : 
+				 "attribute vec3 position;"
+				+ "attribute vec3 color;"
+				+ "varying vec3 fragVertexColor;"
+				+ "uniform mat4 modelViewProjectionMatrix;"	
+				+ "void main(void) {"
+				+ "    fragVertexColor = color;"
+				+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);"
+				+ "}",
+		fragment :
+			     "uniform vec3 diffuseColor;"
+				+ "varying vec3 fragVertexColor;"
+				+ "void main(void) {"
+				+ "    gl_FragColor = vec4(fragVertexColor, 1.0);"
+				+ "}"
+	};
 
 g_shaders["urn:xml3d:shader:phong"] = {
 		vertex : 	

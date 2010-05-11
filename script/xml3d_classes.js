@@ -285,13 +285,13 @@ org.xml3d.Notification = function(notifier, eventType, attribute, oldValue, newV
 	this.attribute = attribute;
 	this.oldValue = oldValue;
 	this.newValue = newValue;
-}
+};
 
 
 //-----------------------------------------------------------------------------
 //Class Camera
 //-----------------------------------------------------------------------------
-org.xml3d.Camera = function(view) {
+/*org.xml3d.Camera = function(view) {
 	if (arguments.length == 0) {
 	  this.position = new XML3DVec3(0.0, 0.0, 10.0);
 	  this.orientation = new XML3DRotation(0.0, 0.0, 0.0, 1.0);
@@ -309,8 +309,7 @@ org.xml3d.Camera = function(view) {
 };
 
 org.xml3d.Camera.prototype.getViewMatrix = function() {
-	return this.orientation.toMatrix().transpose().mult(
-			org.xml3d.dataTypes.SFMatrix4.translation(this.position.negate()));
+	return this.orientation.toMatrix().transpose().multiply(new XML3DMatrix().translate(this.position.negate()));
 };
 
 org.xml3d.Camera.prototype.getProjectionMatrix = function(aspect) {
@@ -319,12 +318,12 @@ org.xml3d.Camera.prototype.getProjectionMatrix = function(aspect) {
 		var zfar = this.zFar;
 		var znear = this.zNear;
 		var f = 1 / Math.tan(fovy / 2);
-		this.projMatrix = new org.xml3d.dataTypes.SFMatrix4(f / aspect, 0, 0,
+		this.projMatrix = new XML3DMatrix(f / aspect, 0, 0,
 				0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), 2 * znear
 						* zfar / (znear - zfar), 0, 0, -1, 0);
 	}
 	return this.projMatrix;
-};
+};*/
 
 
 //-----------------------------------------------------------------------------
@@ -411,18 +410,6 @@ org.xml3d.WrapTypes["clamp"] = 0;
 org.xml3d.WrapTypes["repeat"] = 1;
 org.xml3d.WrapTypes["border"] = 2;
 
-// Initialize methods
-org.xml3d.methods["xml3dCreateXML3DVec3"] = function() { throw new Error("xml3d::createXML3DVec3: Method not implemented yet."); };
-org.xml3d.methods["xml3dCreateXML3DRotation"] = function() { throw new Error("xml3d::createXML3DRotation: Method not implemented yet."); };
-org.xml3d.methods["xml3dCreateXML3DMatrix"] = function() { throw new Error("xml3d::createXML3DMatrix: Method not implemented yet."); };
-org.xml3d.methods["groupGetLocalMatrix"] = function() { throw new Error("group::getLocalMatrix: Method not implemented yet."); };
-org.xml3d.methods["viewSetDirection"] = function() { throw new Error("view::setDirection: Method not implemented yet."); };
-org.xml3d.methods["viewSetUpVector"] = function() { throw new Error("view::setUpVector: Method not implemented yet."); };
-org.xml3d.methods["viewLookAt"] = function() { throw new Error("view::lookAt: Method not implemented yet."); };
-org.xml3d.methods["viewGetDirection"] = function() { throw new Error("view::getDirection: Method not implemented yet."); };
-org.xml3d.methods["viewGetUpVector"] = function() { throw new Error("view::getUpVector: Method not implemented yet."); };
-org.xml3d.methods["viewGetViewMatrix"] = function() { throw new Error("view::getViewMatrix: Method not implemented yet."); };
-org.xml3d.methods["XML3DGraphTypeGetWorldMatrix"] = function() { throw new Error("XML3DGraphType::getWorldMatrix: Method not implemented yet."); };
 org.xml3d.event.UNHANDLED = 1;
 org.xml3d.event.HANDLED = 2;
 
@@ -455,14 +442,14 @@ org.xml3d.classInfo.Xml3dNode.configure = function(node, c) {
 	
 	node.notificationRequired = function () {
 		return this.adapters.length != 0;
-	}
+	};
 
 	node.notify = function (notification) {
 		for(var i= 0; i < this.adapters.length; i++)
 		{
 		  this.adapters[i].notifyChanged(notification);
 		}
-	}
+	};
 	
 	node.setField = function(event) {
 		return org.xml3d.event.UNHANDLED;
@@ -2652,15 +2639,35 @@ org.xml3d.classInfo.view.configure = function(node, context) {
 };
 org.xml3d.defineClass(org.xml3d.classInfo.view, org.xml3d.classInfo.XML3DElement);
 
-
 org.xml3d.methods.xml3dCreateXML3DVec3 = function() {
 	return new XML3DVec3();
 };
 
-org.xml3d.methods.viewGetDirection = function() {
-	return this.orientation.rotateVec3(new XML3DVec3(0, 0, -1));
+org.xml3d.methods.xml3dCreateXML3DMatrix = function () {
+	return new XML3DMatrix();
 };
 
-org.xml3d.methods.viewSetUpVector = function(vec) {
-	this.orientation.setRotation(new XML3DVec3(0, 1, 0), vec);
+org.xml3d.methods.xml3dCreateXML3DRotation = function() {
+	return new XML3DRotation();
 };
+
+org.xml3d.methods.viewGetDirection = function() {
+	return this.orientation.rotateVec3(new XML3DVec3(0,0,-1));
+};
+
+org.xml3d.methods.viewSetPosition = function(pos) {
+	this.position = pos;
+};
+
+org.xml3d.methods.viewSetDirection = function(quat) {
+	this.orientation = quat;
+};
+
+org.xml3d.methods.viewGetUpVector = function() {
+	return this.orientation.rotateVec3(new XML3DVec3(0, 1, 0));
+};
+
+org.xml3d.methods.viewLookAt = function(vec) {
+	// TODO: write lookat function
+};
+

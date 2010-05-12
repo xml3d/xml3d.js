@@ -160,7 +160,7 @@ org.xml3d.animation.XML3DAnimationManager.prototype.stopAnimation = function(han
 	alert(node);
 };*/
 org.xml3d.x3dNS = 'http://www.web3d.org/specifications/x3d-namespace';
-org.xml3d.xml3dNS = 'http://www.w3.org/2009/xml3d';
+org.xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 
 /**
  * Class to use X3D OrientationInterpolator nodes in Xml3d

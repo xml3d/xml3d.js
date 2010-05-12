@@ -11,9 +11,9 @@ if (!org.xml3d)
 else if (typeof org.xml3d != "object")
 	throw new Error("org.xml3d already exists and is not an object");
 
-org.xml3d.xml3dNS = 'http://www.w3.org/2009/xml3d';
+org.xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 org.xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
-org.xml3d.webglNS = 'http://www.w3.org/2009/xml3d/webgl';
+org.xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
 org.xml3d.document = new org.xml3d.XML3DDocument(document);
 
 if (!Array.forEach) {

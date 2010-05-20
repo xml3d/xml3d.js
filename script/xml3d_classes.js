@@ -158,13 +158,17 @@ org.xml3d.XML3DNodeFactory.prototype.create = function(node, context) {
 		}
 	}
 };
-org.xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(str){
-	var vec = new XML3DVec3();
-	vec.setVec3Value(str);
-	return vec;
+
+org.xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(value) {
+	var result = new XML3DVec3();
+	result.setVec3Value(value);
+	return result;
 };
+
 org.xml3d.XML3DNodeFactory.createXML3DRotationFromString = function(value) {
-	return new XML3DRotation.parseAxisAngle(value);
+	var result = new XML3DRotation();
+	result.setAxisAngle(value);
+	return result;
 };
 
 // -----------------------------------------------------------------------------
@@ -226,7 +230,12 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 };
 
 org.xml3d.XML3DDocument.prototype.onAdd = function(e) {
-	org.xml3d.debug.logInfo("Add: "+e);
+	try {
+		org.xml3d.document.getNode(e.target);
+	} catch (e) {
+		org.xml3d.debug.logError("Exception in configuring node:");
+		org.xml3d.debug.logException(e);
+	}
 };
 
 org.xml3d.XML3DDocument.prototype.onSet = function(e) {
@@ -285,13 +294,14 @@ org.xml3d.Notification = function(notifier, eventType, attribute, oldValue, newV
 	this.attribute = attribute;
 	this.oldValue = oldValue;
 	this.newValue = newValue;
-};
+}
 
 
 //-----------------------------------------------------------------------------
 //Class Camera
 //-----------------------------------------------------------------------------
-/*org.xml3d.Camera = function(view) {
+/*
+org.xml3d.Camera = function(view) {
 	if (arguments.length == 0) {
 	  this.position = new XML3DVec3(0.0, 0.0, 10.0);
 	  this.orientation = new XML3DRotation(0.0, 0.0, 0.0, 1.0);
@@ -309,7 +319,8 @@ org.xml3d.Notification = function(notifier, eventType, attribute, oldValue, newV
 };
 
 org.xml3d.Camera.prototype.getViewMatrix = function() {
-	return this.orientation.toMatrix().transpose().multiply(new XML3DMatrix().translate(this.position.negate()));
+	return this.orientation.toMatrix().transpose().multiply(
+			new XML3DMatrix().translate(this.position.negate()));
 };
 
 org.xml3d.Camera.prototype.getProjectionMatrix = function(aspect) {
@@ -323,7 +334,8 @@ org.xml3d.Camera.prototype.getProjectionMatrix = function(aspect) {
 						* zfar / (znear - zfar), 0, 0, -1, 0);
 	}
 	return this.projMatrix;
-};*/
+};
+*/
 
 
 //-----------------------------------------------------------------------------
@@ -347,7 +359,7 @@ org.xml3d.initBoolean = function(value, defaultValue) {
 
 org.xml3d.initXML3DVec3 = function(value, x, y, z) {
 	if (value) {
-		result = new XML3DVec3();
+		var result = new XML3DVec3();
 		result.setVec3Value(value);
 		return result;
 	}
@@ -355,9 +367,13 @@ org.xml3d.initXML3DVec3 = function(value, x, y, z) {
 };
 
 org.xml3d.initXML3DRotation = function(value, x, y, z, angle) {
-	return value ? XML3DRotation.parseAxisAngle(value)
-			: XML3DRotation.axisAngle(
-					new XML3DVec3(x, y, z), angle);
+	var result = new XML3DRotation();
+	if (value) {
+		result.setAxisAngle(value);
+	} else {
+		result.setAxisAngle(new XML3DVec3(x, y, z), angle);
+	}
+	return result;
 };
 
 org.xml3d.initEnum = function(value, defaultValue, choice) {
@@ -410,6 +426,7 @@ org.xml3d.WrapTypes["clamp"] = 0;
 org.xml3d.WrapTypes["repeat"] = 1;
 org.xml3d.WrapTypes["border"] = 2;
 
+// Initialize methods
 org.xml3d.event.UNHANDLED = 1;
 org.xml3d.event.HANDLED = 2;
 
@@ -442,15 +459,20 @@ org.xml3d.classInfo.Xml3dNode.configure = function(node, c) {
 	
 	node.notificationRequired = function () {
 		return this.adapters.length != 0;
-	};
+	}
 
 	node.notify = function (notification) {
 		for(var i= 0; i < this.adapters.length; i++)
 		{
 		  this.adapters[i].notifyChanged(notification);
 		}
-	};
+	}
 	
+	node.update = function() {
+		org.xml3d.debug.logInfo("Hit Update");
+		// TODO  I need to be able to update...
+ 	};
+ 	
 	node.setField = function(event) {
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -458,18 +480,18 @@ org.xml3d.classInfo.Xml3dNode.configure = function(node, c) {
 
 
 /**
- * Object org.xml3d.classInfo.XML3DElement()
+ * Object org.xml3d.classInfo.XML3DBaseType()
  * 
  * @augments org.xml3d.classInfo.Xml3dNode
  * @constructor
  * @see org.xml3d.classInfo.Xml3dNode
  */
  
-org.xml3d.classInfo.XML3DElement = function() {
+org.xml3d.classInfo.XML3DBaseType = function() {
 	org.xml3d.classInfo.Xml3dNode.call(this);
 };
 
-org.xml3d.classInfo.XML3DElement.configure = function(node, context) {
+org.xml3d.classInfo.XML3DBaseType.configure = function(node, context) {
 	org.xml3d.classInfo.Xml3dNode.configure(node, context);
 
 
@@ -493,22 +515,22 @@ org.xml3d.classInfo.XML3DElement.configure = function(node, context) {
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.XML3DElement, org.xml3d.classInfo.Xml3dNode);
+org.xml3d.defineClass(org.xml3d.classInfo.XML3DBaseType, org.xml3d.classInfo.Xml3dNode);
 
 /**
  * Object org.xml3d.classInfo.xml3d()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DBaseType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DBaseType
  */
  
 org.xml3d.classInfo.xml3d = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DBaseType.call(this);
 };
 
 org.xml3d.classInfo.xml3d.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DBaseType.configure(node, context);
 	  node.__defineSetter__("height", 
 	      function (value) {
 	        //org.xml3d.debug.logInfo("Setter: " + value);
@@ -562,12 +584,7 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 		return this.activeView;
 	};
 
-	node.update = function() {
-		org.xml3d.debug.logInfo("Hit Update");
-		// TODO  I need to be able to update...
 
-
-	};
 
     // Node::setField
 	node.setField = function(event)	{
@@ -636,25 +653,24 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 	node.createXML3DVec3 = org.xml3d.methods.xml3dCreateXML3DVec3;
 	node.createXML3DRotation = org.xml3d.methods.xml3dCreateXML3DRotation;
 	node.createXML3DMatrix = org.xml3d.methods.xml3dCreateXML3DMatrix;
-
-
+	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.xml3d, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.xml3d, org.xml3d.classInfo.XML3DBaseType);
 
 /**
  * Object org.xml3d.classInfo.defs()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DBaseType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DBaseType
  */
  
 org.xml3d.classInfo.defs = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DBaseType.call(this);
 };
 
 org.xml3d.classInfo.defs.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DBaseType.configure(node, context);
 
 	//node.children = [];
 
@@ -678,22 +694,22 @@ org.xml3d.classInfo.defs.configure = function(node, context) {
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.defs, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.defs, org.xml3d.classInfo.XML3DBaseType);
 
 /**
  * Object org.xml3d.classInfo.XML3DReferenceableType()
  * 
- * @augments org.xml3d.classInfo.Xml3dNode
+ * @augments org.xml3d.classInfo.XML3DBaseType
  * @constructor
- * @see org.xml3d.classInfo.Xml3dNode
+ * @see org.xml3d.classInfo.XML3DBaseType
  */
  
 org.xml3d.classInfo.XML3DReferenceableType = function() {
-	org.xml3d.classInfo.Xml3dNode.call(this);
+	org.xml3d.classInfo.XML3DBaseType.call(this);
 };
 
 org.xml3d.classInfo.XML3DReferenceableType.configure = function(node, context) {
-	org.xml3d.classInfo.Xml3dNode.configure(node, context);
+	org.xml3d.classInfo.XML3DBaseType.configure(node, context);
 
 
 
@@ -701,25 +717,37 @@ org.xml3d.classInfo.XML3DReferenceableType.configure = function(node, context) {
     // Node::setField
 	node.setField = function(event)	{
 	  var attrName = event.attrName;
+	  if (attrName == "id") {
+	  	  this.id = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
+	  if (attrName == "class") {
+	  	  this.class = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
+	  if (attrName == "style") {
+	  	  this.style = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.XML3DReferenceableType, org.xml3d.classInfo.Xml3dNode);
+org.xml3d.defineClass(org.xml3d.classInfo.XML3DReferenceableType, org.xml3d.classInfo.XML3DBaseType);
 
 /**
  * Object org.xml3d.classInfo.XML3DGraphType()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DReferenceableType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DReferenceableType
  */
  
 org.xml3d.classInfo.XML3DGraphType = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DReferenceableType.call(this);
 };
 
 org.xml3d.classInfo.XML3DGraphType.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DReferenceableType.configure(node, context);
 	  node.__defineSetter__("visible", 
 	      function (value) {
 	        //org.xml3d.debug.logInfo("Setter: " + value);
@@ -807,7 +835,7 @@ org.xml3d.classInfo.XML3DGraphType.configure = function(node, context) {
 	node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.XML3DGraphType, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.XML3DGraphType, org.xml3d.classInfo.XML3DReferenceableType);
 
 /**
  * Object org.xml3d.classInfo.group()
@@ -1105,17 +1133,17 @@ org.xml3d.defineClass(org.xml3d.classInfo.mesh, org.xml3d.classInfo.XML3DGeometr
 /**
  * Object org.xml3d.classInfo.XML3DTransformProviderType()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DReferenceableType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DReferenceableType
  */
  
 org.xml3d.classInfo.XML3DTransformProviderType = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DReferenceableType.call(this);
 };
 
 org.xml3d.classInfo.XML3DTransformProviderType.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DReferenceableType.configure(node, context);
 
 
 
@@ -1138,7 +1166,7 @@ org.xml3d.classInfo.XML3DTransformProviderType.configure = function(node, contex
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.XML3DTransformProviderType, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.XML3DTransformProviderType, org.xml3d.classInfo.XML3DReferenceableType);
 
 /**
  * Object org.xml3d.classInfo.transform()
@@ -1301,17 +1329,36 @@ org.xml3d.defineClass(org.xml3d.classInfo.transform, org.xml3d.classInfo.XML3DTr
 /**
  * Object org.xml3d.classInfo.bind()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DBaseType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DBaseType
  */
  
 org.xml3d.classInfo.bind = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DBaseType.call(this);
 };
 
 org.xml3d.classInfo.bind.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DBaseType.configure(node, context);
+	  node.__defineSetter__("name", 
+	      function (value) {
+	        //org.xml3d.debug.logInfo("Setter: " + value);
+	        var oldValue = this._name;
+	        if (typeof value == 'string')
+	        	this._name = org.xml3d.XML3DNodeFactory.createStringFromString(value);
+	        else
+	        	this._name = value;
+	        
+	        if (this.notificationRequired())
+            	this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "name", oldValue, this._name));
+	      
+	      }
+	  );
+	  node.__defineGetter__("name", 
+	      function (value) {
+	        return this._name;
+	      }
+	  );
 	  node.__defineSetter__("semantic", 
 	      function (value) {
 	        //org.xml3d.debug.logInfo("Setter: " + value);
@@ -1332,6 +1379,7 @@ org.xml3d.classInfo.bind.configure = function(node, context) {
 	      }
 	  );
 
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
 	node._semantic = org.xml3d.initString(node.getAttribute("semantic"), "");
 	node.bound = null;
 
@@ -1352,6 +1400,10 @@ org.xml3d.classInfo.bind.configure = function(node, context) {
 	  	  this.style = event.newValue;
 		  return org.xml3d.event.HANDLED;
 	  }
+	  if (attrName == "name") {
+	  	  this.name = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
 	  if (attrName == "semantic") {
 	  	  this.semantic = event.newValue;
 		  return org.xml3d.event.HANDLED;
@@ -1359,22 +1411,22 @@ org.xml3d.classInfo.bind.configure = function(node, context) {
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.bind, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.bind, org.xml3d.classInfo.XML3DBaseType);
 
 /**
  * Object org.xml3d.classInfo.XML3DShaderProviderType()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DReferenceableType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DReferenceableType
  */
  
 org.xml3d.classInfo.XML3DShaderProviderType = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DReferenceableType.call(this);
 };
 
 org.xml3d.classInfo.XML3DShaderProviderType.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DReferenceableType.configure(node, context);
 
 	//node.binds = [];
 	node.script = null;
@@ -1406,7 +1458,7 @@ org.xml3d.classInfo.XML3DShaderProviderType.configure = function(node, context) 
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.XML3DShaderProviderType, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.XML3DShaderProviderType, org.xml3d.classInfo.XML3DReferenceableType);
 
 /**
  * Object org.xml3d.classInfo.XML3DSurfaceShaderProviderType()
@@ -1702,17 +1754,17 @@ org.xml3d.defineClass(org.xml3d.classInfo.lightshader, org.xml3d.classInfo.XML3D
 /**
  * Object org.xml3d.classInfo.script()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DReferenceableType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DReferenceableType
  */
  
 org.xml3d.classInfo.script = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DReferenceableType.call(this);
 };
 
 org.xml3d.classInfo.script.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DReferenceableType.configure(node, context);
 	// TODO: Setter for mixed value
 	  node.__defineSetter__("src", 
 	      function (value) {
@@ -1754,8 +1806,8 @@ org.xml3d.classInfo.script.configure = function(node, context) {
 	  );
 
 	node.value = org.xml3d.initString(node.getTextContent(), null);
-	node._src = org.xml3d.initAnyURI(node.getAttribute("src"), null);
-	node._type = org.xml3d.initString(node.getAttribute("type"), null);
+	node._src = org.xml3d.initAnyURI(node.getAttribute("src"), "");
+	node._type = org.xml3d.initString(node.getAttribute("type"), "");
 
 
 
@@ -1786,22 +1838,22 @@ org.xml3d.classInfo.script.configure = function(node, context) {
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.script, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.script, org.xml3d.classInfo.XML3DReferenceableType);
 
 /**
  * Object org.xml3d.classInfo.XML3DBindableType()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DBaseType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DBaseType
  */
  
 org.xml3d.classInfo.XML3DBindableType = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DBaseType.call(this);
 };
 
 org.xml3d.classInfo.XML3DBindableType.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DBaseType.configure(node, context);
 
 
 
@@ -1824,7 +1876,7 @@ org.xml3d.classInfo.XML3DBindableType.configure = function(node, context) {
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.XML3DBindableType, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.XML3DBindableType, org.xml3d.classInfo.XML3DBaseType);
 
 /**
  * Object org.xml3d.classInfo.float()
@@ -1842,11 +1894,6 @@ org.xml3d.classInfo.float.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
 
-	node.setValue = function(event){
-		this.value = org.xml3d.initFloatArray(event.newValue, null);
-		this.Value = event.newValue;
-		return org.xml3d.event.HANDLED;
-	};
 	node.value = org.xml3d.initFloatArray(node.getTextContent(), null);
 
 
@@ -1888,12 +1935,6 @@ org.xml3d.classInfo.float2.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
 
-	node.setValue = function(event){
-		this.value = org.xml3d.initFloat2Array(event.newValue, null);
-		this.Value = event.newValue;
-		return org.xml3d.event.HANDLED;
-	};
-
 	node.value = org.xml3d.initFloat2Array(node.getTextContent(), null);
 
 
@@ -1934,12 +1975,10 @@ org.xml3d.classInfo.float3 = function() {
 org.xml3d.classInfo.float3.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
-	node.setValue = function(event){
-		this.value = org.xml3d.initFloat3Array(event.newValue, null);
-		this.Value = event.newValue;
-		return org.xml3d.event.HANDLED;
-	};
+
 	node.value = org.xml3d.initFloat3Array(node.getTextContent(), null);
+
+
 
     // Node::setField
 	node.setField = function(event)	{
@@ -1978,11 +2017,6 @@ org.xml3d.classInfo.float4.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
 
-	node.setValue = function(event){
-		this.value = org.xml3d.initFloat4Array(event.newValue, null);
-		this.Value = event.newValue;
-		return org.xml3d.event.HANDLED;
-	};
 	node.value = org.xml3d.initFloat4Array(node.getTextContent(), null);
 
 
@@ -2024,11 +2058,6 @@ org.xml3d.classInfo.int.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
 
-	node.setValue = function(event){
-		this.value = org.xml3d.initIntArray(event.newValue, null);
-		this.Value = event.newValue;
-		return org.xml3d.event.HANDLED;
-	};
 	node.value = org.xml3d.initIntArray(node.getTextContent(), null);
 
 
@@ -2069,12 +2098,6 @@ org.xml3d.classInfo.bool = function() {
 org.xml3d.classInfo.bool.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBindableType.configure(node, context);
 	// TODO: Setter for mixed value
-
-	node.setValue = function(event){
-		this.value = org.xml3d.initBoolArray(event.newValue, null);
-		this.Value = event.newValue;
-		return org.xml3d.event.HANDLED;
-	};
 
 	node.value = org.xml3d.initBoolArray(node.getTextContent(), null);
 
@@ -2269,13 +2292,13 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	  );
 
 	node._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.TextureTypes);
-	node._filterMin = org.xml3d.initEnum(node.getAttribute("filterMin"), null, org.xml3d.FilterTypes);
-	node._filterMag = org.xml3d.initEnum(node.getAttribute("filterMag"), null, org.xml3d.FilterTypes);
-	node._filterMip = org.xml3d.initEnum(node.getAttribute("filterMip"), null, org.xml3d.FilterTypes);
-	node._wrapS = org.xml3d.initEnum(node.getAttribute("wrapS"), null, org.xml3d.WrapTypes);
-	node._wrapT = org.xml3d.initEnum(node.getAttribute("wrapT"), null, org.xml3d.WrapTypes);
-	node._wrapU = org.xml3d.initEnum(node.getAttribute("wrapU"), null, org.xml3d.WrapTypes);
-	node._borderColor = org.xml3d.initString(node.getAttribute("borderColor"), null);
+	node._filterMin = org.xml3d.initEnum(node.getAttribute("filterMin"), 2, org.xml3d.FilterTypes);
+	node._filterMag = org.xml3d.initEnum(node.getAttribute("filterMag"), 2, org.xml3d.FilterTypes);
+	node._filterMip = org.xml3d.initEnum(node.getAttribute("filterMip"), 1, org.xml3d.FilterTypes);
+	node._wrapS = org.xml3d.initEnum(node.getAttribute("wrapS"), 1, org.xml3d.WrapTypes);
+	node._wrapT = org.xml3d.initEnum(node.getAttribute("wrapT"), 1, org.xml3d.WrapTypes);
+	node._wrapU = org.xml3d.initEnum(node.getAttribute("wrapU"), 1, org.xml3d.WrapTypes);
+	node._borderColor = org.xml3d.initString(node.getAttribute("borderColor"), "");
 	node.imageData = null;
 
 
@@ -2335,17 +2358,17 @@ org.xml3d.defineClass(org.xml3d.classInfo.texture, org.xml3d.classInfo.XML3DBind
 /**
  * Object org.xml3d.classInfo.XML3DImageDataProviderType()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DReferenceableType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DReferenceableType
  */
  
 org.xml3d.classInfo.XML3DImageDataProviderType = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DReferenceableType.call(this);
 };
 
 org.xml3d.classInfo.XML3DImageDataProviderType.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DReferenceableType.configure(node, context);
 
 
 
@@ -2368,7 +2391,7 @@ org.xml3d.classInfo.XML3DImageDataProviderType.configure = function(node, contex
 	}; // End setField
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.XML3DImageDataProviderType, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.XML3DImageDataProviderType, org.xml3d.classInfo.XML3DReferenceableType);
 
 /**
  * Object org.xml3d.classInfo.img()
@@ -2526,17 +2549,17 @@ org.xml3d.defineClass(org.xml3d.classInfo.use, org.xml3d.classInfo.XML3DGraphTyp
 /**
  * Object org.xml3d.classInfo.view()
  * 
- * @augments org.xml3d.classInfo.XML3DElement
+ * @augments org.xml3d.classInfo.XML3DReferenceableType
  * @constructor
- * @see org.xml3d.classInfo.XML3DElement
+ * @see org.xml3d.classInfo.XML3DReferenceableType
  */
  
 org.xml3d.classInfo.view = function() {
-	org.xml3d.classInfo.XML3DElement.call(this);
+	org.xml3d.classInfo.XML3DReferenceableType.call(this);
 };
 
 org.xml3d.classInfo.view.configure = function(node, context) {
-	org.xml3d.classInfo.XML3DElement.configure(node, context);
+	org.xml3d.classInfo.XML3DReferenceableType.configure(node, context);
 	  node.__defineSetter__("position", 
 	      function (value) {
 	        //org.xml3d.debug.logInfo("Setter: " + value);
@@ -2637,7 +2660,8 @@ org.xml3d.classInfo.view.configure = function(node, context) {
 	node.getViewMatrix = org.xml3d.methods.viewGetViewMatrix;
 	
 };
-org.xml3d.defineClass(org.xml3d.classInfo.view, org.xml3d.classInfo.XML3DElement);
+org.xml3d.defineClass(org.xml3d.classInfo.view, org.xml3d.classInfo.XML3DReferenceableType);
+
 
 org.xml3d.methods.xml3dCreateXML3DVec3 = function() {
 	return new XML3DVec3();

@@ -16,6 +16,101 @@ if (!org.xml3d.webgl)
 else if (typeof org.xml3d.webgl != "object")
 	throw new Error("org.xml3d.webgl already exists and is not an object");
 
+org.xml3d.gfx_webgl = (function() {
+	function Context(ctx3d, canvas, name) {
+		this.ctx3d = ctx3d;
+		this.canvas = canvas;
+		this.name = name;
+	}
+	Context.prototype.getName = function() {
+		return this.name;
+	};
+	function setupContext(canvas) {
+		// org.xml3d.debug.logInfo("setupContext: canvas=" + canvas);
+		var ctx = null;
+		try {
+			ctx = canvas.getContext('moz-webgl');
+			if (ctx) {
+				return new Context(ctx, canvas, 'moz-webgl');
+			}
+		} catch (ef) {
+		}
+		try {
+			ctx = canvas.getContext('webkit-3d');
+			if (ctx) {
+				return new Context(ctx, canvas, 'webkit-3d');
+			}
+		} catch (es) {
+		}
+	}
+
+	function getShaderProgram(gl, ids) {
+		var shader = [];
+		for ( var id = 0; id < 2; id++) {
+			if (!g_shaders[ids[id]]) {
+				org.xml3d.debug.logError('Cannot find shader ' + ids[id]);
+				return;
+			}
+			if (g_shaders[ids[id]].type == 'vertex') {
+				shader[id] = gl.createShader(gl.VERTEX_SHADER);
+			} else if (g_shaders[ids[id]].type == 'fragment') {
+				shader[id] = gl.createShader(gl.FRAGMENT_SHADER);
+			} else {
+				org.xml3d.debug
+						.logError('Invalid shader type ' + g_shaders[id].type);
+				return;
+			}
+			gl.shaderSource(shader[id], g_shaders[ids[id]].data);
+			gl.compileShader(shader[id]);
+		}
+		var prog = gl.createProgram();
+		gl.attachShader(prog, shader[0]);
+		gl.attachShader(prog, shader[1]);
+		gl.linkProgram(prog);
+		var msg = gl.getProgramInfoLog(prog);
+		if (msg) {
+			org.xml3d.debug.logError(msg);
+		}
+		return wrapShaderProgram(gl, prog);
+	}
+
+	Context.prototype.renderScene = function(scene) {
+		var gl = this.ctx3d;
+		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+		var bgCol = scene.getBackgroundColor();
+		if (bgCol)
+			gl.clearColor(bgCol[0], bgCol[1], bgCol[2], bgCol[3]);
+		else
+			gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		gl.clearDepth(1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
+				| gl.STENCIL_BUFFER_BIT);
+		gl.enable(gl.DEPTH_TEST);
+		gl.depthFunc(gl.LEQUAL);
+		gl.enable(gl.CULL_FACE);
+		gl.enable(gl.BLEND);
+		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+		if (this.renderer === undefined || !this.renderer) {
+			this.renderer = new org.xml3d.webgl.Renderer(scene, this.canvas, gl);
+		}
+		this.renderer.render();
+
+		gl.disable(gl.BLEND);
+		gl.disable(gl.DEPTH_TEST);
+
+	};
+	Context.prototype.shutdown = function(scene) {
+		var gl = this.ctx3d;
+
+		if (this.renderer) {
+			this.renderer.dispose();
+		}
+	};
+	return setupContext;
+})();
+
+
 org.xml3d.webgl.checkError = function(gl, text)
 {
 	var error = gl.getError();
@@ -35,6 +130,9 @@ org.xml3d.webgl.Renderer = function(scene, canvas, gl) {
 	this.lights = null;
 	this.camera = this.initCamera();
 	this.shaderMap = {};
+};
+org.xml3d.webgl.Renderer.prototype.update = function() {
+	this.canvas.needUpdate = true;
 };
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
@@ -82,8 +180,24 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 		var prog = gl.createProgram();
 		var vs = gl.createShader(gl.VERTEX_SHADER);
 		var fs = gl.createShader(gl.FRAGMENT_SHADER);
-		gl.shaderSource(vs, g_shaders[name].vertex);
-		gl.shaderSource(fs, g_shaders[name].fragment);
+		
+		if (name == "urn:xml3d:shader:lights")
+		{
+			// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line 
+			var lights = this.getLights();
+			var sfrag = g_shaders[name].fragment;
+			var cut1 = sfrag.substring(0,14);
+			var cut2 = sfrag.substring(38, sfrag.length);
+			var maxLights = "const int MAXLIGHTS = "+ lights.length.toString() + ";";
+			
+			gl.shaderSource(vs, g_shaders[name].vertex);
+			var frag = cut1+maxLights+cut2;
+			gl.shaderSource(fs, frag);
+			// ------------------------------------------------------------------------
+		} else {
+			gl.shaderSource(vs, g_shaders[name].vertex);
+			gl.shaderSource(fs, g_shaders[name].fragment);
+		}
 		gl.compileShader(vs);
 		gl.compileShader(fs);
 		gl.attachShader(prog, vs);
@@ -109,6 +223,8 @@ org.xml3d.webgl.Renderer.prototype.getCenter = function(adapter) {
 org.xml3d.webgl.Renderer.prototype.render = function() {
 	var gl = this.gl;
 	var sp = null;
+	if (!this.camera)
+		return;
 
 	org.xml3d.webgl.checkError(gl, "Start render");
 	if (this.drawableObjects === undefined || !this.drawableObjects) {
@@ -117,7 +233,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 				this.drawableObjects, null);
 	}
 	
-	var mat_view = this.camera.getViewMatrix();
+	var worldViewMatrix = this.camera.getViewMatrix();
+	
+	
 	var light, lightOn;
 
 	var zPos = [];
@@ -126,7 +244,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		var obj3d = this.drawableObjects[i][1];
 		var center = this.getCenter(obj3d);
 		center = trafo.multiply(center);
-		center = mat_view.multiply(center);
+		center = worldViewMatrix.multiply(center);
 		zPos[i] = [ i, center.z ];
 	}
 	zPos.sort(function(a, b) {
@@ -178,8 +296,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 		for ( var j = 0; j < slights.length; j++) {
 			var light = slights[j][1];
-			lightParams.positions = lightParams.positions.concat(light
-					.getPosition(slights[j][0]).toGL());
+			lightParams.positions = lightParams.positions.concat(
+					worldViewMatrix.multiply(light
+					.getPosition(slights[j][0])).toGL());
 			lightParams.attenuations = lightParams.attenuations.concat(light
 					.getAttenuation().toGL());
 
@@ -203,14 +322,17 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		 * sp.eyePosition = [ 0, 0, 0 ]; sp.lightDirection = light.toGL();
 		 * sp.lightOn = lightOn;
 		 */
-
-		sp.modelViewMatrix = mat_view.multiply(transform).toGL();
+		
+		sp.modelViewMatrix = worldViewMatrix.multiply(transform).toGL();
 		var projMatrix = this.camera
 				.getProjectionMatrix(this.canvas.width / this.canvas.height);
 		var viewMatrix = this.camera.getViewMatrix();
 		sp.modelViewProjectionMatrix = projMatrix.multiply(viewMatrix).multiply(
 				transform).toGL();
-
+		
+		sp.worldViewMatrix = worldViewMatrix.toGL();
+		sp.eyePosition = this.camera.node.position.toGL();
+		
 		gl.disable(gl.CULL_FACE);
 		if (shader)
 			shader.setParameters();
@@ -219,6 +341,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			shader.cleanUp();
 	}
 
+	this.canvas.needUpdate = false;
 	this.drawableObjects = null;
 };
 
@@ -382,7 +505,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	if (this.viewMatrix == null) {
-		this.viewMatrix =  this.node.orientation.toMatrix().transpose().multiply(
+		this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
 				new XML3DMatrix().translate(this.node.position.negate()));
 	}
 	return this.viewMatrix;
@@ -410,6 +533,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 		this.viewMatrix = null;
 		this.projMatrix = null;
 	}
+	this.factory.renderer.update();
 };
 
 // Adapter for <img>
@@ -644,6 +768,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
+	this.factory.renderer.canvas.needUpdate = true;
 };
 
 // Adapter for <bind>
@@ -774,6 +899,7 @@ org.xml3d.webgl.XML3DBindRenderAdapter.prototype.getBuffer = function() {
 
 org.xml3d.webgl.XML3DBindRenderAdapter.prototype.notifyChanged = function(e) {
 	this.glValue = null;
+	this.factory.renderer.canvas.needUpdate = true;
 };
 
 // Adapter for <mesh>
@@ -945,6 +1071,53 @@ g_shaders["urn:xml3d:shader:flatvcolor"] = {
 	};
 
 g_shaders["urn:xml3d:shader:phong"] = {
+		vertex :
+			
+		"attribute vec3 position;\n"
+		+"attribute vec3 normals;\n"
+		+"varying vec3 fragNormal;\n"
+		+"varying vec3 fragLightVector;\n"
+		+"varying vec3 fragEyeVector;\n"
+		+"uniform mat4 modelViewProjectionMatrix;\n"
+		+"uniform mat4 modelViewMatrix;\n"
+		+"uniform vec3 lightDirection;\n"
+		+"uniform vec3 eyePosition;\n"
+		
+		+"void main(void) {\n"
+		+"    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
+		+"    fragNormal = (modelViewMatrix * vec4(normals, 0.0)).xyz;\n"
+		+"    fragLightVector = -lightDirection;\n"
+		+"    fragEyeVector = eyePosition - (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
+		+"}\n",
+		
+		fragment:
+			"uniform float ambientIntensity;\n"
+			+"uniform vec3 diffuseColor;"
+			+"uniform vec3 emissiveColor;"
+			+"uniform float shininess;"
+			+"uniform vec3 specularColor;"
+			+"uniform float transparency;"
+			+"uniform float lightOn;"
+			
+			+"varying vec3 fragNormal;"
+			+"varying vec3 fragLightVector;"
+			+"varying vec3 fragEyeVector;"
+			
+			+"void main(void) {"
+			+"    vec3 normal = normalize(fragNormal);"
+			+"    vec3 light = normalize(fragLightVector);"
+			+"    vec3 eye = normalize(fragEyeVector);"
+			+"    float diffuse = max(0.0, dot(normal, light)) * lightOn;"
+			+"    diffuse += max(0.0, dot(normal, eye));"
+			+"    float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0) * lightOn;"
+			+"    specular += pow(max(0.0, dot(normal, normalize(eye))), shininess*128.0);"
+			+"    vec3 rgb = emissiveColor + diffuse*diffuseColor + specular*specularColor;"
+			+"    rgb = clamp(rgb, 0.0, 1.0);"
+			+"    gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); "
+			+"}"
+};
+
+/*g_shaders["urn:xml3d:shader:phong"] = {
 		vertex : 	
 		  "attribute vec3 position;\n"
 		+ "attribute vec3 normal;\n"
@@ -965,6 +1138,62 @@ g_shaders["urn:xml3d:shader:phong"] = {
 		+ "    fragEyeVector = eyePosition - (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
 		+ "    fragTexCoord = texcoord;\n"
 		+ "}\n",
+
+		fragment : 
+			  "uniform float ambientIntensity;\n"
+			+ "uniform vec3 diffuseColor;\n"
+			+ "uniform vec3 emissiveColor;\n"
+			+ "uniform float shininess;\n"
+			+ "uniform vec3 specularColor;\n"
+			+ "uniform float alpha;\n"
+			+ "uniform float lightOn;\n"
+			+ "uniform sampler2D tex;\n"
+			+ "varying vec3 fragNormal;\n"
+			+ "varying vec3 fragLightVector;\n"
+			+ "varying vec3 fragEyeVector;\n"
+			+ "varying vec2 fragTexCoord;\n"
+			+ "void main(void) {\n"
+			+ "	vec3 normal = normalize(fragNormal);\n"
+			+ "	vec3 light = normalize(fragLightVector);\n"
+			+ "	vec3 eye = normalize(fragEyeVector);\n"
+			+ "	vec2 texCoord = vec2(fragTexCoord.x,1.0-fragTexCoord.y);\n"
+			+ "	float diffuse = max(0.0, dot(normal, light)) * lightOn;\n"
+			+ "	diffuse += max(0.0, dot(normal, eye));\n"
+			+ "	float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0) * lightOn;\n"
+			+ "	specular += pow(max(0.0, dot(normal, normalize(eye))), shininess*128.0);\n"
+			+ "	vec3 rgb = emissiveColor + diffuse*texture2D(tex, texCoord).rgb + specular*specularColor;\n"
+			+ "	rgb = clamp(rgb, 0.0, 1.0);\n"
+			+ "	gl_FragColor = vec4(rgb, texture2D(tex, texCoord).a);\n"
+			+ "}\n"
+
+	};*/
+
+g_shaders["urn:xml3d:shader:phongvcolor"] = {
+		vertex : 	
+		  "attribute vec3 position;\n"
+		+ "attribute vec3 normal;\n"
+		+ "attribute vec2 texcoord;\n"
+		+ "attribute vec3 color;\n"
+		+ "varying vec3 fragNormal;\n"
+		+ "varying vec3 fragLightVector;\n"
+		+ "varying vec3 fragEyeVector;\n"
+		+ "varying vec2 fragTexCoord;\n"
+		+ "varying vec3 fragVertexColor;\n"
+		+ "uniform mat4 modelViewProjectionMatrix;\n"
+		+ "uniform mat4 modelViewMatrix;\n"
+		+ "uniform mat4 worldViewMatrix;\n"
+		+ "uniform mat4 normalViewMatrix;\n"
+		+ "uniform vec3 lightDirection;\n"
+		+ "uniform vec3 eyePosition;\n"
+		+ "\n"
+		+ "void main(void) {\n"
+		+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
+		+ "    fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
+		+ "    fragLightVector = -lightDirection;\n"
+		+ "    fragEyeVector = eyePosition - (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
+		+ "    fragTexCoord = texcoord;\n"
+		+ "    fragVertexColor = color;\n"
+		+ "}\n",
 		
 		fragment : 
 		  "uniform float ambientIntensity;\n"
@@ -979,6 +1208,7 @@ g_shaders["urn:xml3d:shader:phong"] = {
 		+ "varying vec3 fragLightVector;\n"
 		+ "varying vec3 fragEyeVector;\n"
 		+ "varying vec2 fragTexCoord;\n"
+		+ "varying vec3 fragVertexColor;\n"
 		+ "void main(void) {\n"
 		+ "	vec3 normal = normalize(fragNormal);\n"
 		+ "	vec3 light = normalize(fragLightVector);\n"
@@ -988,12 +1218,91 @@ g_shaders["urn:xml3d:shader:phong"] = {
 		+ "	diffuse += max(0.0, dot(normal, eye));\n"
 		+ "	float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0) * lightOn;\n"
 		+ "	specular += pow(max(0.0, dot(normal, normalize(eye))), shininess*128.0);\n"
-		+ "	vec3 rgb = emissiveColor + diffuse*texture2D(tex, texCoord).rgb + specular*specularColor;\n"
+		+ "	vec3 rgb = emissiveColor + diffuse*fragVertexColor + specular*specularColor;\n"
 		+ "	rgb = clamp(rgb, 0.0, 1.0);\n"
-		+ "	gl_FragColor = vec4(rgb, texture2D(tex, texCoord).a);\n"
+		+ "	gl_FragColor = vec4(rgb, 1.0);\n"
 		+ "}\n"
 	};
 
+g_shaders["urn:xml3d:shader:lights"] = {
+		
+		vertex :
+			"#version 120\n\n"
+
+			+"attribute vec3 position;\n"
+			+"attribute vec3 normal;\n"
+			
+			+"varying vec3 N;\n"
+			+"varying vec3 v;\n"
+			+"varying vec3 fragEyeVector;\n"
+			
+			+"uniform mat4 modelViewProjectionMatrix;\n"
+			+"uniform mat4 modelViewMatrix;\n"
+			+"uniform mat4 normalViewMatrix;\n"
+			+"uniform vec3 eyePosition;\n"
+			
+			
+			+"void main(void) {"
+			+"gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
+			+"N = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
+			+"N = normalize(N);\n"
+			+"v = (modelViewMatrix * vec4(position, 0.0)).xyz;\n"
+			+"fragEyeVector = eyePosition - v;\n"
+			+"}\n",
+	
+		fragment :
+		
+	// NOTE: Any changes to this area must be carried over to the substring calculations in
+	// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
+		"#version 120\n\n"
+		+"const int MAXLIGHTS = 2; \n"
+	// ------------------------------------------------------------------------------------
+		+"uniform float ambientIntensity;\n"
+		+"uniform vec3 diffuseColor;\n"
+		+"uniform vec3 emissiveColor;\n"
+		+"uniform float shininess;\n"
+		+"uniform vec3 specularColor;\n"
+		+"uniform float transparency;\n"
+		+"uniform float lightOn = 1;\n"
+		
+		+"varying vec3 N;\n"
+		+"varying vec3 v;\n"
+		+"varying vec3 fragEyeVector;\n"
+		
+		
+		
+		+"uniform vec3 lightAttenuations[MAXLIGHTS];\n"
+		+"uniform vec3 lightPositions[MAXLIGHTS];\n"
+		+"uniform vec3 lightDiffuseColors[MAXLIGHTS];\n"
+		+"uniform vec3 lightAmbientColors[MAXLIGHTS];\n"
+
+		+"vec3 light(in int i)\n"
+	 	+"{\n"
+	 	+"		vec3 L = normalize(lightPositions[i].xyz - v);\n"
+		+"		vec3 E = normalize(fragEyeVector);\n"
+		+"		vec3 R = normalize(-reflect(L,N));\n"					
+ 		
+		+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"		 
+		+"		float dist = length(L);\n"
+		+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
+
+		+"		vec3 Iamb = ambientColor * lightAmbientColors[i];\n"
+		+"		vec3 Idiff = lightDiffuseColors[i] * abs(dot(N,L)) * diffuseColor;\n"
+		+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), 0.3*shininess);\n"		 
+		+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
+		+"		return color;"
+			
+		+"}\n"
+			
+		+"void main(void) {\n"
+		+"	vec3 color = vec3(0.0, 0.0, 0.0);\n"
+		+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
+		+"			color = color + light(i);\n"
+		+"		}\n"
+		+"	gl_FragColor = vec4(color, 1.0);\n"
+		+"}\n"
+		
+};
 org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
 	var shader = {};
 	shader.bind = function() {

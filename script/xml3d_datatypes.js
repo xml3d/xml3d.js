@@ -125,9 +125,9 @@ XML3DMatrix.prototype.multiply = function (that) {
 				+ this.m43 * that.z + this.m44 * that.w);
 	}
 	return new XML3DVec3(this.m11 * that.x + this.m12 * that.y
-			+ this.m13 * that.z + this.m14, this.m21 * that.x + this.m22 * that.y
-			+ this.m23 * that.z + this.m24, this.m31 * that.x + this.m32 * that.y
-			+ this.m33 * that.z + this.m34);
+			+ this.m13 * that.z, this.m21 * that.x + this.m22 * that.y
+			+ this.m23 * that.z, this.m31 * that.x + this.m32 * that.y
+			+ this.m33 * that.z);
 };
 
 XML3DMatrix.prototype.det3 = function(a1, a2, a3, b1, b2, b3,
@@ -314,285 +314,6 @@ XML3DMatrix.prototype.toGL = function() {
 			this.m14, this.m24, this.m34, this.m44 ];
 };
 
-
-org.xml3d.dataTypes.SFMatrix4 = function(_00, _01, _02, _03, _10, _11, _12,
-		_13, _20, _21, _22, _23, _30, _31, _32, _33) {
-	if (arguments.length == 0) {
-		this._00 = 1;
-		this._01 = 0;
-		this._02 = 0;
-		this._03 = 0;
-		this._10 = 0;
-		this._11 = 1;
-		this._12 = 0;
-		this._13 = 0;
-		this._20 = 0;
-		this._21 = 0;
-		this._22 = 1;
-		this._23 = 0;
-		this._30 = 0;
-		this._31 = 0;
-		this._32 = 0;
-		this._33 = 1;
-	} else {
-		this._00 = _00;
-		this._01 = _01;
-		this._02 = _02;
-		this._03 = _03;
-		this._10 = _10;
-		this._11 = _11;
-		this._12 = _12;
-		this._13 = _13;
-		this._20 = _20;
-		this._21 = _21;
-		this._22 = _22;
-		this._23 = _23;
-		this._30 = _30;
-		this._31 = _31;
-		this._32 = _32;
-		this._33 = _33;
-	}
-};
-
-// Skipped
-org.xml3d.dataTypes.SFMatrix4.prototype.e0 = function() {
-	var baseVec = new XML3DVec3(this._00, this._10, this._20);
-	return baseVec.normalised();
-};
-//Skipped
-org.xml3d.dataTypes.SFMatrix4.prototype.e1 = function() {
-	var baseVec = new XML3DVec3(this._01, this._11, this._21);
-	return baseVec.normalised();
-};
-//Skipped
-org.xml3d.dataTypes.SFMatrix4.prototype.e2 = function() {
-	var baseVec = new XML3DVec3(this._02, this._12, this._22);
-	return baseVec.normalised();
-};
-//Skipped
-org.xml3d.dataTypes.SFMatrix4.prototype.e3 = function() {
-	return new XML3DVec3(this._03, this._13, this._23);
-};
-//Skipped
-org.xml3d.dataTypes.SFMatrix4.identity = function() {
-	return new org.xml3d.dataTypes.SFMatrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
-			0, 0, 0, 0, 1);
-};
-org.xml3d.dataTypes.SFMatrix4.translation = function(vec) {
-	return new org.xml3d.dataTypes.SFMatrix4(1, 0, 0, vec.x, 0, 1, 0, vec.y, 0,
-			0, 1, vec.z, 0, 0, 0, 1);
-};
-org.xml3d.dataTypes.SFMatrix4.rotationX = function(a) {
-	var c = Math.cos(a);
-	var s = Math.sin(a);
-	return new org.xml3d.dataTypes.SFMatrix4(1, 0, 0, 0, 0, c, -s, 0, 0, s, c,
-			0, 0, 0, 0, 1);
-};
-org.xml3d.dataTypes.SFMatrix4.rotationY = function(a) {
-	var c = Math.cos(a);
-	var s = Math.sin(a);
-	return new org.xml3d.dataTypes.SFMatrix4(c, 0, s, 0, 0, 1, 0, 0, -s, 0, c,
-			0, 0, 0, 0, 1);
-};
-org.xml3d.dataTypes.SFMatrix4.rotationZ = function(a) {
-	var c = Math.cos(a);
-	var s = Math.sin(a);
-	return new org.xml3d.dataTypes.SFMatrix4(c, -s, 0, 0, s, c, 0, 0, 0, 0, 1,
-			0, 0, 0, 0, 1);
-};
-org.xml3d.dataTypes.SFMatrix4.scale = function(vec) {
-	return new org.xml3d.dataTypes.SFMatrix4(vec.x, 0, 0, 0, 0, vec.y, 0, 0, 0,
-			0, vec.z, 0, 0, 0, 0, 1);
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.setTranslate = function(vec) {
-	this._03 = vec.x;
-	this._13 = vec.y;
-	this._23 = vec.z;
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.setScale = function(vec) {
-	this._00 = vec.x;
-	this._11 = vec.y;
-	this._22 = vec.z;
-};
-org.xml3d.dataTypes.SFMatrix4.parseRotation = function(str) {
-	var m = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
-	var x = +m[1], y = +m[2], z = +m[3], a = +m[4];
-	var d = Math.sqrt(x * x + y * y + z * z);
-	if (d == 0) {
-		x = 1;
-		y = z = 0;
-	} else {
-		x /= d;
-		y /= d;
-		z /= d;
-	}
-	var c = Math.cos(a);
-	var s = Math.sin(a);
-	var t = 1 - c;
-	return new org.xml3d.dataTypes.SFMatrix4(t * x * x + c, t * x * y + s * z,
-			t * x * z - s * y, 0, t * x * y - s * z, t * y * y + c, t * y * z
-					+ s * x, 0, t * x * z + s * y, t * y * z - s * x, t * z * z
-					+ c, 0, 0, 0, 0, 1).transpose();
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.mult = function(that) {
-	return new org.xml3d.dataTypes.SFMatrix4(this._00 * that._00 + this._01
-			* that._10 + this._02 * that._20 + this._03 * that._30, this._00
-			* that._01 + this._01 * that._11 + this._02 * that._21 + this._03
-			* that._31, this._00 * that._02 + this._01 * that._12 + this._02
-			* that._22 + this._03 * that._32, this._00 * that._03 + this._01
-			* that._13 + this._02 * that._23 + this._03 * that._33, this._10
-			* that._00 + this._11 * that._10 + this._12 * that._20 + this._13
-			* that._30, this._10 * that._01 + this._11 * that._11 + this._12
-			* that._21 + this._13 * that._31, this._10 * that._02 + this._11
-			* that._12 + this._12 * that._22 + this._13 * that._32, this._10
-			* that._03 + this._11 * that._13 + this._12 * that._23 + this._13
-			* that._33, this._20 * that._00 + this._21 * that._10 + this._22
-			* that._20 + this._23 * that._30, this._20 * that._01 + this._21
-			* that._11 + this._22 * that._21 + this._23 * that._31, this._20
-			* that._02 + this._21 * that._12 + this._22 * that._22 + this._23
-			* that._32, this._20 * that._03 + this._21 * that._13 + this._22
-			* that._23 + this._23 * that._33, this._30 * that._00 + this._31
-			* that._10 + this._32 * that._20 + this._33 * that._30, this._30
-			* that._01 + this._31 * that._11 + this._32 * that._21 + this._33
-			* that._31, this._30 * that._02 + this._31 * that._12 + this._32
-			* that._22 + this._33 * that._32, this._30 * that._03 + this._31
-			* that._13 + this._32 * that._23 + this._33 * that._33);
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.multMatrixPnt = function(vec) {
-	return new XML3DVec3(this._00 * vec.x + this._01 * vec.y
-			+ this._02 * vec.z + this._03, this._10 * vec.x + this._11 * vec.y
-			+ this._12 * vec.z + this._13, this._20 * vec.x + this._21 * vec.y
-			+ this._22 * vec.z + this._23);
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.multMatrixVec = function(vec) {
-	return new XML3DVec3(this._00 * vec.x + this._01 * vec.y
-			+ this._02 * vec.z, this._10 * vec.x + this._11 * vec.y + this._12
-			* vec.z, this._20 * vec.x + this._21 * vec.y + this._22 * vec.z);
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.multFullMatrixPnt = function(vec) {
-	var w = this._30 * vec.x + this._31 * vec.y + this._32 * vec.z + this._33;
-	if (w)
-		w = 1.0 / w;
-	return new XML3DVec3((this._00 * vec.x + this._01 * vec.y
-			+ this._02 * vec.z + this._03)
-			* w,
-			(this._10 * vec.x + this._11 * vec.y + this._12 * vec.z + this._13)
-					* w, (this._20 * vec.x + this._21 * vec.y + this._22
-					* vec.z + this._23)
-					* w);
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.transpose = function() {
-	return new org.xml3d.dataTypes.SFMatrix4(this._00, this._10, this._20,
-			this._30, this._01, this._11, this._21, this._31, this._02,
-			this._12, this._22, this._32, this._03, this._13, this._23,
-			this._33);
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.toGL = function() {
-	return [ this._00, this._10, this._20, this._30, this._01, this._11,
-			this._21, this._31, this._02, this._12, this._22, this._32,
-			this._03, this._13, this._23, this._33 ];
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.decompose = function() {
-	var T = new SFVec3(this._03, this._13, this._23);
-	var S = new SFVec3(1, 1, 1);
-	var angle_x, angle_y, angle_y, tr_x, tr_y, C;
-	angle_y = Math.asin(this._02);
-	C = Math.cos(angle_y);
-	if (Math.abs(C) > 0.005) {
-		tr_x = this._22 / C;
-		tr_y = -this._12 / C;
-		angle_x = Math.atan2(tr_y, tr_x);
-		tr_x = this._00 / C;
-		tr_y = -this._01 / C;
-		angle_z = Math.atan2(tr_y, tr_x);
-	} else {
-		angle_x = 0;
-		tr_x = this._11;
-		tr_y = this._10;
-		angle_z = Math.atan2(tr_y, tr_x);
-	}
-	return [ T, S, angle_x, angle_y, angle_z ];
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.det3 = function(a1, a2, a3, b1, b2, b3,
-		c1, c2, c3) {
-	var d = (a1 * b2 * c3) + (a2 * b3 * c1) + (a3 * b1 * c2) - (a1 * b3 * c2)
-			- (a2 * b1 * c3) - (a3 * b2 * c1);
-	return d;
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.det = function() {
-	var a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
-	a1 = this._00;
-	b1 = this._10;
-	c1 = this._20;
-	d1 = this._30;
-	a2 = this._01;
-	b2 = this._11;
-	c2 = this._21;
-	d2 = this._31;
-	a3 = this._02;
-	b3 = this._12;
-	c3 = this._22;
-	d3 = this._32;
-	a4 = this._03;
-	b4 = this._13;
-	c4 = this._23;
-	d4 = this._33;
-	var d = +a1 * this.det3(b2, b3, b4, c2, c3, c4, d2, d3, d4) - b1
-			* this.det3(a2, a3, a4, c2, c3, c4, d2, d3, d4) + c1
-			* this.det3(a2, a3, a4, b2, b3, b4, d2, d3, d4) - d1
-			* this.det3(a2, a3, a4, b2, b3, b4, c2, c3, c4);
-	return d;
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.inverse = function() {
-	var a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
-	a1 = this._00;
-	b1 = this._10;
-	c1 = this._20;
-	d1 = this._30;
-	a2 = this._01;
-	b2 = this._11;
-	c2 = this._21;
-	d2 = this._31;
-	a3 = this._02;
-	b3 = this._12;
-	c3 = this._22;
-	d3 = this._32;
-	a4 = this._03;
-	b4 = this._13;
-	c4 = this._23;
-	d4 = this._33;
-	var rDet = this.det();
-	if (Math.abs(rDet) < 0.000001) {
-		org.xml3d.debug.logInfo("Invert matrix: singular matrix, no inverse!");
-		return org.xml3d.dataTypes.SFMatrix4.identity();
-	}
-	rDet = 1.0 / rDet;
-	return new org.xml3d.dataTypes.SFMatrix4(+this.det3(b2, b3, b4, c2, c3, c4,
-			d2, d3, d4)
-			* rDet, -this.det3(a2, a3, a4, c2, c3, c4, d2, d3, d4) * rDet,
-			+this.det3(a2, a3, a4, b2, b3, b4, d2, d3, d4) * rDet, -this.det3(
-					a2, a3, a4, b2, b3, b4, c2, c3, c4)
-					* rDet, -this.det3(b1, b3, b4, c1, c3, c4, d1, d3, d4)
-					* rDet, +this.det3(a1, a3, a4, c1, c3, c4, d1, d3, d4)
-					* rDet, -this.det3(a1, a3, a4, b1, b3, b4, d1, d3, d4)
-					* rDet, +this.det3(a1, a3, a4, b1, b3, b4, c1, c3, c4)
-					* rDet, +this.det3(b1, b2, b4, c1, c2, c4, d1, d2, d4)
-					* rDet, -this.det3(a1, a2, a4, c1, c2, c4, d1, d2, d4)
-					* rDet, +this.det3(a1, a2, a4, b1, b2, b4, d1, d2, d4)
-					* rDet, -this.det3(a1, a2, a4, b1, b2, b4, c1, c2, c4)
-					* rDet, -this.det3(b1, b2, b3, c1, c2, c3, d1, d2, d3)
-					* rDet, +this.det3(a1, a2, a3, c1, c2, c3, d1, d2, d3)
-					* rDet, -this.det3(a1, a2, a3, b1, b2, b3, d1, d2, d3)
-					* rDet, +this.det3(a1, a2, a3, b1, b2, b3, c1, c2, c3)
-					* rDet);
-};
-org.xml3d.dataTypes.SFMatrix4.prototype.toString = function() {
-	return '[SFMatrix4 ' + this._00 + ', ' + this._01 + ', ' + this._02 + ', '
-			+ this._03 + '; ' + this._10 + ', ' + this._11 + ', ' + this._12
-			+ ', ' + this._13 + '; ' + this._20 + ', ' + this._21 + ', '
-			+ this._22 + ', ' + this._23 + '; ' + this._30 + ', ' + this._31
-			+ ', ' + this._32 + ', ' + this._33 + ']';
-};
 org.xml3d.dataTypes.Vec2f = function(x, y) {
 	if (arguments.length == 0) {
 		this.x = this.y = 0;
@@ -744,11 +465,6 @@ XML3DRotation.prototype.mult = function(that) {
 			+ this.z * that.w + this.x * that.y - this.y * that.x, this.w
 			* that.w - this.x * that.x - this.y * that.y - this.z * that.z);
 };
-XML3DRotation.parseAxisAngle = function(str) {
-	var m = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
-	return XML3DRotation.axisAngle(
-			new XML3DVec3(+m[1], +m[2], +m[3]), +m[4]);
-};
 
 XML3DRotation.fromMatrix = function(mat) {
 	var q = new XML3DRotation();
@@ -788,7 +504,6 @@ XML3DRotation.fromBasis = function(x, y, z) {
 	var normY = y.length();
 	var normZ = z.length();
 
-	//var m = new org.xml3d.dataTypes.SFMatrix4();
 	var m = new XML3DMatrix();
 	m.m11 = x.x / normX;
 	m.m12 = y.x / normY;
@@ -813,6 +528,28 @@ XML3DRotation.axisAngle = function(axis, a) {
 	} else {
 		return new XML3DRotation(0, 0, 0, 1);
 	}
+};
+
+XML3DRotation.prototype.setAxisAngle = function(axis, a) {
+		
+		var t = axis.length();
+		if (t > 0.000001) {
+			var s = Math.sin(a / 2) / t;
+			var c = Math.cos(a / 2);
+			this.x = axis.x * s;
+			this.y = axis.y * s;
+			this.z = axis.z * s;
+			this.w = c;
+		} else {
+			this.x = this.y = this.z = 0;
+			this.w = 1;
+		}
+	
+};
+
+XML3DRotation.prototype.setAxisAngleValue = function(str) {
+	var m = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
+	this.setAxisAngle(new XML3DVec3(+m[1], +m[2], +m[3]), +m[4]);
 };
 
 XML3DRotation.prototype.toMatrix = function() {
@@ -884,7 +621,7 @@ XML3DRotation.prototype.normalised = function(that) {
 			* id, this.w * id);
 };
 XML3DRotation.prototype.negate = function() {
-	return new XML3DRotation(this.x, this.y, this.z, this.w);
+	return new XML3DRotation(this.x, this.y, this.z, -this.w);
 };
 XML3DRotation.prototype.slerp = function(that, t) {
 	var cosom = this.dot(that);

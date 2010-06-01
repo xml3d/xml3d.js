@@ -141,6 +141,7 @@ org.xml3d.XML3DCanvas.createHTMLCanvas = function(x3dElem) {
 	}
 	canvas.setAttribute("height", canvas.style.height);
 	canvas.setAttribute("width", canvas.style.width);
+	canvas.needUpdate = true;
 
 	return canvas;
 };
@@ -190,12 +191,15 @@ org.xml3d.XML3DCanvas.prototype.tick = function() {
 		this.statDiv.textContent = fps.toFixed(2) + ' fps';
 	}
 	this.fps_t0 = d;
-	try {
-		// this.doc.advanceTime(d / 1000);
-		this.gl.renderScene(this.root);
-	} catch (e) {
-		org.xml3d.debug.logException(e);
-		throw e;
+	if (this.canvas.needUpdate)
+	{
+		try {
+			// this.doc.advanceTime(d / 1000);
+			this.gl.renderScene(this.root);
+		} catch (e) {
+			org.xml3d.debug.logException(e);
+			throw e;
+		}
 	}
 };
 
@@ -283,96 +287,4 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 
 })();
 
-org.xml3d.gfx_webgl = (function() {
-	function Context(ctx3d, canvas, name) {
-		this.ctx3d = ctx3d;
-		this.canvas = canvas;
-		this.name = name;
-	}
-	Context.prototype.getName = function() {
-		return this.name;
-	};
-	function setupContext(canvas) {
-		// org.xml3d.debug.logInfo("setupContext: canvas=" + canvas);
-		var ctx = null;
-		try {
-			ctx = canvas.getContext('moz-webgl');
-			if (ctx) {
-				return new Context(ctx, canvas, 'moz-webgl');
-			}
-		} catch (ef) {
-		}
-		try {
-			ctx = canvas.getContext('webkit-3d');
-			if (ctx) {
-				return new Context(ctx, canvas, 'webkit-3d');
-			}
-		} catch (es) {
-		}
-	}
 
-	function getShaderProgram(gl, ids) {
-		var shader = [];
-		for ( var id = 0; id < 2; id++) {
-			if (!g_shaders[ids[id]]) {
-				org.xml3d.debug.logError('Cannot find shader ' + ids[id]);
-				return;
-			}
-			if (g_shaders[ids[id]].type == 'vertex') {
-				shader[id] = gl.createShader(gl.VERTEX_SHADER);
-			} else if (g_shaders[ids[id]].type == 'fragment') {
-				shader[id] = gl.createShader(gl.FRAGMENT_SHADER);
-			} else {
-				org.xml3d.debug
-						.logError('Invalid shader type ' + g_shaders[id].type);
-				return;
-			}
-			gl.shaderSource(shader[id], g_shaders[ids[id]].data);
-			gl.compileShader(shader[id]);
-		}
-		var prog = gl.createProgram();
-		gl.attachShader(prog, shader[0]);
-		gl.attachShader(prog, shader[1]);
-		gl.linkProgram(prog);
-		var msg = gl.getProgramInfoLog(prog);
-		if (msg) {
-			org.xml3d.debug.logError(msg);
-		}
-		return wrapShaderProgram(gl, prog);
-	}
-
-	Context.prototype.renderScene = function(scene) {
-		var gl = this.ctx3d;
-		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-		var bgCol = scene.getBackgroundColor();
-		if (bgCol)
-			gl.clearColor(bgCol[0], bgCol[1], bgCol[2], bgCol[3]);
-		else
-			gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		gl.clearDepth(1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
-				| gl.STENCIL_BUFFER_BIT);
-		gl.enable(gl.DEPTH_TEST);
-		gl.depthFunc(gl.LEQUAL);
-		gl.enable(gl.CULL_FACE);
-		gl.enable(gl.BLEND);
-		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-		if (this.renderer === undefined || !this.renderer) {
-			this.renderer = new org.xml3d.webgl.Renderer(scene, this.canvas, gl);
-		}
-		this.renderer.render();
-
-		gl.disable(gl.BLEND);
-		gl.disable(gl.DEPTH_TEST);
-
-	};
-	Context.prototype.shutdown = function(scene) {
-		var gl = this.ctx3d;
-
-		if (this.renderer) {
-			this.renderer.dispose();
-		}
-	};
-	return setupContext;
-})();

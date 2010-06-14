@@ -100,6 +100,7 @@ org.xml3d.gfx_webgl = (function() {
 		gl.disable(gl.DEPTH_TEST);
 
 	};
+	
 	Context.prototype.shutdown = function(scene) {
 		var gl = this.ctx3d;
 
@@ -181,17 +182,16 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 		var vs = gl.createShader(gl.VERTEX_SHADER);
 		var fs = gl.createShader(gl.FRAGMENT_SHADER);
 		
-		if (name == "urn:xml3d:shader:lights")
+		if (name == "urn:xml3d:shader:phong")
 		{
 			// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line 
 			var lights = this.getLights();
 			var sfrag = g_shaders[name].fragment;
-			var cut1 = sfrag.substring(0,14);
-			var cut2 = sfrag.substring(38, sfrag.length);
-			var maxLights = "const int MAXLIGHTS = "+ lights.length.toString() + ";";
+			var tail = sfrag.substring(38, sfrag.length);
+			var maxLights = "#version 120\n\n const int MAXLIGHTS = "+ lights.length.toString() + ";\n";
 			
 			gl.shaderSource(vs, g_shaders[name].vertex);
-			var frag = cut1+maxLights+cut2;
+			var frag = maxLights + tail; 
 			gl.shaderSource(fs, frag);
 			// ------------------------------------------------------------------------
 		} else {
@@ -336,6 +336,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		gl.disable(gl.CULL_FACE);
 		if (shader)
 			shader.setParameters();
+		
 		shape.render(sp);
 		if (shader)
 			shader.cleanUp();
@@ -546,9 +547,8 @@ org.xml3d.webgl.XML3DImgRenderAdapter.prototype.constructor = org.xml3d.webgl.XM
 org.xml3d.webgl.XML3DImgRenderAdapter.prototype.bindTexture = function(
 		texture) {
 	var gl = this.factory.gl;
+	var fact = this.factory;
 	var image = new Image();
-	image.src = this.node.src;
-	org.xml3d.debug.logInfo("Bind texture: " + image.src);
 	image.onload = function() {
 		org.xml3d.debug.logInfo("Texture loaded: " + image);
 
@@ -559,7 +559,11 @@ org.xml3d.webgl.XML3DImgRenderAdapter.prototype.bindTexture = function(
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 		org.xml3d.webgl.checkError(gl, "After binding texture");
+		fact.renderer.update();
 	};
+	
+	image.src = this.node.src;
+	org.xml3d.debug.logInfo("Bind texture: " + image.src);
 };
 
 // Adapter for <shader>
@@ -1002,12 +1006,14 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getPosition = function(
 	for ( var i = 0; i < bindables.length; i++) {
 		if (bindables[i].semantic == "position") {
 			var pos = bindables[i].getGLValue();
-			return transform.multiply(new XML3DVec3(
-					pos[0], pos[1], pos[2]));
+			var t =  transform.multiply(new XML3DRotation(
+					pos[0], pos[1], pos[2], 1.0));
+			return new XML3DVec3(t.x/t.w, t.y/t.w, t.z/t.w);
 		}
 	}
-	return transform
-			.multiply(new XML3DVec3(0.0, 0.0, 0.0));
+	var t = transform
+			.multiply(new XML3DRotation(0.0, 0.0, 0.0, 1.0));
+	return new XML3DVec3(t.x/t.w, t.y/t.w, t.z/t.w);
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getAttenuation = function(
@@ -1073,100 +1079,96 @@ g_shaders["urn:xml3d:shader:flatvcolor"] = {
 g_shaders["urn:xml3d:shader:phong"] = {
 		vertex :
 			
-		"attribute vec3 position;\n"
-		+"attribute vec3 normals;\n"
+		"#version 120\n\n"	
+		+"attribute vec3 position;\n"
+		+"attribute vec3 normal;\n"
+		//+"attribute vec2 texcoord;\n"
+		
 		+"varying vec3 fragNormal;\n"
-		+"varying vec3 fragLightVector;\n"
+		+"varying vec3 fragVertexPosition;\n"
 		+"varying vec3 fragEyeVector;\n"
+		+"varying vec2 fragTexCoord;\n"
+		
+		
 		+"uniform mat4 modelViewProjectionMatrix;\n"
 		+"uniform mat4 modelViewMatrix;\n"
-		+"uniform vec3 lightDirection;\n"
 		+"uniform vec3 eyePosition;\n"
 		
 		+"void main(void) {\n"
-		+"    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
-		+"    fragNormal = (modelViewMatrix * vec4(normals, 0.0)).xyz;\n"
-		+"    fragLightVector = -lightDirection;\n"
-		+"    fragEyeVector = eyePosition - (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
+		+"	  gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
+		+"	  fragNormal = normalize((modelViewMatrix * vec4(normal, 0.0)).xyz);\n"
+		+"	  fragVertexPosition = (modelViewMatrix * vec4(position, 0.0)).xyz;\n"
+		+"	  fragEyeVector = normalize(eyePosition - fragVertexPosition);\n"
+		//+"    fragTexCoord = texcoord;\n"
 		+"}\n",
 		
 		fragment:
-			"uniform float ambientIntensity;\n"
-			+"uniform vec3 diffuseColor;"
-			+"uniform vec3 emissiveColor;"
-			+"uniform float shininess;"
-			+"uniform vec3 specularColor;"
-			+"uniform float transparency;"
-			+"uniform float lightOn;"
+	// NOTE: Any changes to this area must be carried over to the substring calculations in
+	// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
+			"#version 120\n\n"
 			
-			+"varying vec3 fragNormal;"
-			+"varying vec3 fragLightVector;"
-			+"varying vec3 fragEyeVector;"
+			+"const int MAXLIGHTS = 0; \n"
+	// ------------------------------------------------------------------------------------
+			+"uniform float ambientIntensity;\n"
+			+"uniform vec3 diffuseColor;\n"
+			+"uniform vec3 emissiveColor;\n"
+			+"uniform float shininess;\n"
+			+"uniform vec3 specularColor;\n"
+			+"uniform float transparency;\n"
+			+"uniform float lightOn;\n"
+			//+"uniform sampler2D tex;\n"
 			
-			+"void main(void) {"
-			+"    vec3 normal = normalize(fragNormal);"
-			+"    vec3 light = normalize(fragLightVector);"
-			+"    vec3 eye = normalize(fragEyeVector);"
-			+"    float diffuse = max(0.0, dot(normal, light)) * lightOn;"
-			+"    diffuse += max(0.0, dot(normal, eye));"
-			+"    float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0) * lightOn;"
-			+"    specular += pow(max(0.0, dot(normal, normalize(eye))), shininess*128.0);"
-			+"    vec3 rgb = emissiveColor + diffuse*diffuseColor + specular*specularColor;"
-			+"    rgb = clamp(rgb, 0.0, 1.0);"
-			+"    gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); "
+			+"varying vec3 fragNormal;\n"
+			+"varying vec3 fragVertexPosition;\n"
+			+"varying vec3 fragEyeVector;\n"
+			//+"varying vec2 fragTexCoord;\n"
+			
+			+"uniform vec3 lightAttenuations[MAXLIGHTS+1];\n"
+			+"uniform vec3 lightPositions[MAXLIGHTS+1];\n"
+			+"uniform vec3 lightDiffuseColors[MAXLIGHTS+1];\n"
+			+"uniform vec3 lightAmbientColors[MAXLIGHTS+1];\n"
+			
+			
+			+"vec3 light(in int i)\n"
+		 	+"{\n"
+		 	+"		vec3 L = lightPositions[i].xyz - fragVertexPosition;\n"
+		 	+"		float dist = length(L);\n"
+		 	+"      L = normalize(L);\n"
+			+"		vec3 E = fragEyeVector;\n"
+			+"		vec3 R = -reflect(L,fragNormal);\n"					
+			
+			+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"		 			
+			+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
+
+			+"		vec3 Iamb = ambientColor * lightAmbientColors[i];\n"
+			+"		vec3 Idiff = lightDiffuseColors[i] * abs(dot(fragNormal,L)) * diffuseColor ;\n"//* texture2D(tex, texCoord).rgb
+			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), 0.3*shininess);\n"		 
+			+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
+			+"		return color;\n"
+			+"}\n"
+			
+			+"void main(void) {\n"
+			//+"  vec2 texCoord = vec2(fragTexCoord.x,1.0-fragTexCoord.y);\n"
+			+"	if (MAXLIGHTS == 0) {\n"
+			+"      vec3 light;\n"
+			+"      vec3 normal = fragNormal;\n"
+			+"      vec3 eye = fragEyeVector;\n"
+			+"      float diffuse = max(0.0, dot(normal, light)) * lightOn;\n"
+			+"      diffuse += max(0.0, dot(normal, eye));\n"
+			+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0) * lightOn;\n" 
+			+"      specular += pow(max(0.0, dot(normal, normalize(eye))), shininess*128.0);\n"
+			+"      vec3 rgb = emissiveColor + diffuse*diffuseColor + specular*specularColor;\n"//*texture2D(tex, texCoord).rgb
+			+"      rgb = clamp(rgb, 0.0, 1.0);\n"
+			+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
+			+"	} else {\n"
+			+"      vec3 color;\n"
+			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
+			+"			color = color + light(i);\n"
+			+"		}\n"
+			+"		gl_FragColor = vec4(color, max(0.0, 1.0 - transparency));\n"
+			+"  }\n"
 			+"}"
 };
-
-/*g_shaders["urn:xml3d:shader:phong"] = {
-		vertex : 	
-		  "attribute vec3 position;\n"
-		+ "attribute vec3 normal;\n"
-		+ "attribute vec2 texcoord;\n"
-		+ "varying vec3 fragNormal;\n"
-		+ "varying vec3 fragLightVector;\n"
-		+ "varying vec3 fragEyeVector;\n"
-		+ "varying vec2 fragTexCoord;\n"
-		+ "uniform mat4 modelViewProjectionMatrix;\n"
-		+ "uniform mat4 modelViewMatrix;\n"
-		+ "uniform vec3 lightDirection;\n"
-		+ "uniform vec3 eyePosition;\n"
-		+ "\n"
-		+ "void main(void) {\n"
-		+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
-		+ "    fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
-		+ "    fragLightVector = -lightDirection;\n"
-		+ "    fragEyeVector = eyePosition - (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
-		+ "    fragTexCoord = texcoord;\n"
-		+ "}\n",
-
-		fragment : 
-			  "uniform float ambientIntensity;\n"
-			+ "uniform vec3 diffuseColor;\n"
-			+ "uniform vec3 emissiveColor;\n"
-			+ "uniform float shininess;\n"
-			+ "uniform vec3 specularColor;\n"
-			+ "uniform float alpha;\n"
-			+ "uniform float lightOn;\n"
-			+ "uniform sampler2D tex;\n"
-			+ "varying vec3 fragNormal;\n"
-			+ "varying vec3 fragLightVector;\n"
-			+ "varying vec3 fragEyeVector;\n"
-			+ "varying vec2 fragTexCoord;\n"
-			+ "void main(void) {\n"
-			+ "	vec3 normal = normalize(fragNormal);\n"
-			+ "	vec3 light = normalize(fragLightVector);\n"
-			+ "	vec3 eye = normalize(fragEyeVector);\n"
-			+ "	vec2 texCoord = vec2(fragTexCoord.x,1.0-fragTexCoord.y);\n"
-			+ "	float diffuse = max(0.0, dot(normal, light)) * lightOn;\n"
-			+ "	diffuse += max(0.0, dot(normal, eye));\n"
-			+ "	float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0) * lightOn;\n"
-			+ "	specular += pow(max(0.0, dot(normal, normalize(eye))), shininess*128.0);\n"
-			+ "	vec3 rgb = emissiveColor + diffuse*texture2D(tex, texCoord).rgb + specular*specularColor;\n"
-			+ "	rgb = clamp(rgb, 0.0, 1.0);\n"
-			+ "	gl_FragColor = vec4(rgb, texture2D(tex, texCoord).a);\n"
-			+ "}\n"
-
-	};*/
 
 g_shaders["urn:xml3d:shader:phongvcolor"] = {
 		vertex : 	
@@ -1224,85 +1226,6 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 		+ "}\n"
 	};
 
-g_shaders["urn:xml3d:shader:lights"] = {
-		
-		vertex :
-			"#version 120\n\n"
-
-			+"attribute vec3 position;\n"
-			+"attribute vec3 normal;\n"
-			
-			+"varying vec3 N;\n"
-			+"varying vec3 v;\n"
-			+"varying vec3 fragEyeVector;\n"
-			
-			+"uniform mat4 modelViewProjectionMatrix;\n"
-			+"uniform mat4 modelViewMatrix;\n"
-			+"uniform mat4 normalViewMatrix;\n"
-			+"uniform vec3 eyePosition;\n"
-			
-			
-			+"void main(void) {"
-			+"gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
-			+"N = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
-			+"N = normalize(N);\n"
-			+"v = (modelViewMatrix * vec4(position, 0.0)).xyz;\n"
-			+"fragEyeVector = eyePosition - v;\n"
-			+"}\n",
-	
-		fragment :
-		
-	// NOTE: Any changes to this area must be carried over to the substring calculations in
-	// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
-		"#version 120\n\n"
-		+"const int MAXLIGHTS = 2; \n"
-	// ------------------------------------------------------------------------------------
-		+"uniform float ambientIntensity;\n"
-		+"uniform vec3 diffuseColor;\n"
-		+"uniform vec3 emissiveColor;\n"
-		+"uniform float shininess;\n"
-		+"uniform vec3 specularColor;\n"
-		+"uniform float transparency;\n"
-		+"uniform float lightOn = 1;\n"
-		
-		+"varying vec3 N;\n"
-		+"varying vec3 v;\n"
-		+"varying vec3 fragEyeVector;\n"
-		
-		
-		
-		+"uniform vec3 lightAttenuations[MAXLIGHTS];\n"
-		+"uniform vec3 lightPositions[MAXLIGHTS];\n"
-		+"uniform vec3 lightDiffuseColors[MAXLIGHTS];\n"
-		+"uniform vec3 lightAmbientColors[MAXLIGHTS];\n"
-
-		+"vec3 light(in int i)\n"
-	 	+"{\n"
-	 	+"		vec3 L = normalize(lightPositions[i].xyz - v);\n"
-		+"		vec3 E = normalize(fragEyeVector);\n"
-		+"		vec3 R = normalize(-reflect(L,N));\n"					
- 		
-		+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"		 
-		+"		float dist = length(L);\n"
-		+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
-
-		+"		vec3 Iamb = ambientColor * lightAmbientColors[i];\n"
-		+"		vec3 Idiff = lightDiffuseColors[i] * abs(dot(N,L)) * diffuseColor;\n"
-		+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), 0.3*shininess);\n"		 
-		+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
-		+"		return color;"
-			
-		+"}\n"
-			
-		+"void main(void) {\n"
-		+"	vec3 color = vec3(0.0, 0.0, 0.0);\n"
-		+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
-		+"			color = color + light(i);\n"
-		+"		}\n"
-		+"	gl_FragColor = vec4(color, 1.0);\n"
-		+"}\n"
-		
-};
 org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
 	var shader = {};
 	shader.bind = function() {

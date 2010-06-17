@@ -256,14 +256,14 @@ org.xml3d.Xml3dSceneController.prototype.rotate = function(ev) {
 		}
 		var newdir = this.ZVECTOR;
 		var rot1 = this.ZVECTOR.cross(this.UPVECTOR);
-		var m = org.xml3d.dataTypes.SFMatrix4.parseRotation(rot1.x + " "
-				+ rot1.y + " " + rot1.z + " " + this.pitch);
-		var newdir = m.multMatrixVec(newdir);
+		
+		var m = this.xml3d.createXML3DRotation();
+		m.setAxisAngle(rot1, this.pitch);
+		var newdir = m.rotateVec3(newdir);
 		
 		var rot2 = this.UPVECTOR;
-		var m = org.xml3d.dataTypes.SFMatrix4.parseRotation(rot2.x + " "
-				+ rot2.y + " " + rot2.z + " " + this.yaw);
-		var newdir = m.multMatrixVec(newdir);
+		m.setAxisAngle(rot2, this.yaw);
+		var newdir = m.rotateVec3(newdir);
 		dir.x = newdir.x;
 		dir.y = newdir.y;
 		dir.z = newdir.z;

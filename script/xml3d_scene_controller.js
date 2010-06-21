@@ -43,6 +43,7 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 	this.ZVECTOR = this.createVec3(0, 0, -1);
 	
 	this.moveSpeedElement = document.getElementById("moveSpeed");
+	this.useKeys = document.getElementById("useKeys");
 
 	if (!this.xml3d || !this.camera)
 	{
@@ -66,9 +67,11 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 	document.addEventListener("contextmenu", function(event) {
 		self.stopEvent(event);
 	}, false);
-	document.addEventListener("keydown", function(event) {
-		self.keyHandling(event);
-	}, false);
+	if (this.useKeys) {
+		document.addEventListener("keydown", function(event) {
+			self.keyHandling(event);
+		}, false);
+	}
 	
 	if(this.buildIn)
 	{
@@ -269,6 +272,7 @@ org.xml3d.Xml3dSceneController.prototype.rotate = function(ev) {
 		dir.z = newdir.z;
 		this.camera.setUpVector(this.UPVECTOR);
 		this.camera.setDirection(dir);
+		//org.xml3d.debug.logInfo("Position: " + this.camera.position.x + " " + this.camera.position.y + " " + this.camera.position.z);
 	} else {
 		var direction = this.camera.orientation.rotateVec(this.ZVECTOR)
 				.normalised();

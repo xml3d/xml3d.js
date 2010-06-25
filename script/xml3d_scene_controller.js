@@ -19,11 +19,12 @@ org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
 	this.camera = this.getView(xml3d);
 	if (!this.camera)
 	{
-		org.xml3d.debug.logWarning("No view found. Adding one.");
-		var view = document.createElementNS(org.xml3d.xml3dNS, 'view');
+		org.xml3d.debug.logWarning("No view found, rendering disabled!");
+		/*var view = document.createElementNS(org.xml3d.xml3dNS, 'view');	
 		view.setAttribute("position", "0 0 -10");
 		xml3d.insertBefore(view, xml3d.firstChild);
 		this.camera = view;
+		*/
 		xml3d.update(); // TODO: Test
 	}
 	var InputPanelId = null;
@@ -242,12 +243,12 @@ org.xml3d.Xml3dSceneController.prototype.rotate = function(ev) {
 		
 		if (dx) {
 			this.yaw -= dx;
-			/*
-			if(this.yaw < 0)
-				this.yaw += 360;
-			if(this.yaw > 360)
-				this.yaw -= 360;
-			*/
+			
+			/*if(this.yaw < -1.5)
+				this.yaw += 1.5;
+			if(this.yaw > 2)
+				this.yaw -= 2;*/
+			
 		}
 		if (dy) {
 			this.pitch -= dy;
@@ -257,22 +258,33 @@ org.xml3d.Xml3dSceneController.prototype.rotate = function(ev) {
 			if(this.pitch > 1.5)
 				this.pitch = 1.5;
 		}
-		var newdir = this.ZVECTOR;
-		var rot1 = this.ZVECTOR.cross(this.UPVECTOR);
-		
-		var m = this.xml3d.createXML3DRotation();
-		m.setAxisAngle(rot1, this.pitch);
-		var newdir = m.rotateVec3(newdir);
-		
-		var rot2 = this.UPVECTOR;
-		m.setAxisAngle(rot2, this.yaw);
-		var newdir = m.rotateVec3(newdir);
-		dir.x = newdir.x;
-		dir.y = newdir.y;
-		dir.z = newdir.z;
-		this.camera.setUpVector(this.UPVECTOR);
-		this.camera.setDirection(dir);
-		//org.xml3d.debug.logInfo("Position: " + this.camera.position.x + " " + this.camera.position.y + " " + this.camera.position.z);
+		if (this.buildIn)
+		{
+			var newdir = this.ZVECTOR;
+			var rot1 = this.ZVECTOR.cross(this.UPVECTOR);
+			var m = new XML3DMatrix().rotateAxisAngle(new XML3DRotation(rot1,this.pitch));
+			var newdir = m.multiply(newdir);
+			
+			var rot2 = this.UPVECTOR;
+			var m = new XML3DMatrix().rotateAxisAngle(new XML3DRotation(rot2,this.yaw));
+			var newdir = m.multiply(newdir);
+			dir.x = newdir.x;
+			dir.y = newdir.y;
+			dir.z = newdir.z;
+			this.camera.setUpVector(this.UPVECTOR);
+			this.camera.setDirection(dir);
+		} else {			
+			var rz = new XML3DRotation();
+			rz.setAxisAngle(this.ZVECTOR, 0);
+			var rx = new XML3DRotation();
+			rx.setAxisAngle(this.ZVECTOR.cross(this.UPVECTOR), this.pitch);
+			var ry = new XML3DRotation();
+			ry.setAxisAngle(this.UPVECTOR, this.yaw);
+
+			var rot = rz.mult(ry.mult(rx));
+			this.camera.orientation = rot;
+			
+		}
 	} else {
 		var direction = this.camera.orientation.rotateVec(this.ZVECTOR)
 				.normalised();
@@ -340,15 +352,17 @@ org.xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 			break;
 		case 39: // right
 		case 68: // d
-			camera.position.x -= dir.z * this.getMoveScale();
-			camera.position.z += dir.x * this.getMoveScale();
-
+			var np = camera.position;
+			np.x -= dir.z * this.getMoveScale();
+			np.z += dir.x * this.getMoveScale();
+			camera.position = np;
 			break;
 		case 37: // left
 		case 65: // a
-			camera.position.x += dir.z * this.getMoveScale();
-			camera.position.z -= dir.x * this.getMoveScale();
-
+			var np = camera.position;
+			np.x += dir.z * this.getMoveScale();
+			np.z -= dir.x * this.getMoveScale();
+			camera.position = np;
 			break;
 		case 40: // down
 		case 83: // s

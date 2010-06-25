@@ -70,6 +70,15 @@ org.xml3d.XML3DCanvas = function(xml3dElement) {
 
 	this.fps_t0 = new Date().getTime();
 	this.gl = this.initContext(this.canvas);
+	var gl = this.gl;
+	var xml3del = this.xml3dElem;
+	var canvas = this.canvas;
+	
+	this.canvas.addEventListener('mouseup', function(evt) {
+		
+		var derp = 0;
+		gl.renderPick(xml3del, evt.layerX - canvas.offsetLeft, evt.layerY - canvas.offsetTop);
+	}, false);
 };
 
 org.xml3d.XML3DCanvas.prototype.initContext = function(canvas) {

@@ -74,6 +74,7 @@ org.xml3d.gfx_webgl = (function() {
 		return wrapShaderProgram(gl, prog);
 	}
 
+
 	Context.prototype.renderScene = function(scene) {
 		var gl = this.ctx3d;
 		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -99,6 +100,45 @@ org.xml3d.gfx_webgl = (function() {
 		gl.disable(gl.BLEND);
 		gl.disable(gl.DEPTH_TEST);
 
+	};
+
+	Context.prototype.initTex = function(gl, w, h) {
+		var tex = gl.createTexture();
+		org.xml3d.webgl.checkError(gl, "After initTex");
+		gl.bindTexture(gl.TEXTURE_2D, tex);
+		//this.emptyTexImage2D(gl, gl.RGBA, w, h, gl.RGBA, gl.UNSIGNED_BYTE);
+
+		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		
+		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.bindTexture(gl.TEXTURE_2D, null);
+		
+		tex.width = w;
+		tex.height = h;
+		return tex;
+	};
+	Context.prototype.initFbo = function(gl, w, h) {
+		var fbo = gl.createFramebuffer();
+		var rb = gl.createRenderbuffer();
+		var tex = this.initTex(gl, w, h, nearest);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+		gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, w, h);
+		gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+				gl.TEXTURE_2D, tex, 0);
+		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+				gl.RENDERBUFFER, rb);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		var r = {};
+		r.fbo = fbo;
+		r.rbo = rb;
+		r.tex = tex;
+		r.width = w;
+		r.height = h;
+		return r;
 	};
 	
 	Context.prototype.shutdown = function(scene) {
@@ -301,9 +341,12 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 					.getPosition(slights[j][0])).toGL());
 			lightParams.attenuations = lightParams.attenuations.concat(light
 					.getAttenuation().toGL());
+			lightParams.diffuseColors = lightParams.diffuseColors.concat(
+					light.getDiffuseColor().toGL());
 
 		}
-		lightParams.diffuseColors = [ 10, 4, 4, 4, 4, 10 ];
+		//lightParams.diffuseColors = [ 10, 4, 4, 4, 4, 10 ];
+		//lightParams.diffuseColors = [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ];
 		lightParams.ambientColors = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ];
 
 		sp.lightPositions = lightParams.positions;
@@ -326,8 +369,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		sp.modelViewMatrix = worldViewMatrix.multiply(transform).toGL();
 		var projMatrix = this.camera
 				.getProjectionMatrix(this.canvas.width / this.canvas.height);
-		var viewMatrix = this.camera.getViewMatrix();
-		sp.modelViewProjectionMatrix = projMatrix.multiply(viewMatrix).multiply(
+		sp.modelViewProjectionMatrix = projMatrix.multiply(worldViewMatrix).multiply(
 				transform).toGL();
 		
 		sp.worldViewMatrix = worldViewMatrix.toGL();
@@ -344,6 +386,90 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 	this.canvas.needUpdate = false;
 	this.drawableObjects = null;
+};
+
+org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
+	try {
+		gl = this.gl;
+		
+		
+		if (this.drawableObjects === undefined || !this.drawableObjects) {
+			this.drawableObjects = [];
+			this.collectDrawableObjects(new XML3DMatrix(),
+					this.drawableObjects, null);
+		}
+		
+		var worldViewMatrix = this.camera.getViewMatrix();
+		
+		var zPos = [];
+		for (i = 0, n = this.drawableObjects.length; i < n; i++) {
+			var trafo = this.drawableObjects[i][0];
+			var obj3d = this.drawableObjects[i][1];
+			var center = this.getCenter(obj3d);
+			center = trafo.multiply(center);
+			center = worldViewMatrix.multiply(center);
+			zPos[i] = [ i, center.z ];
+		}
+		zPos.sort(function(a, b) {
+			return a[1] - b[1];
+		});
+		
+		for (i = 0, n = zPos.length; i < n; i++) {
+			var obj = this.drawableObjects[zPos[i][0]];
+			var transform = obj[0];
+			var shape = obj[1];
+			var shader = obj[2];
+			
+			var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
+			sp.bind();
+			
+			sp.id = 1.0 - (i+1) / 255.0;
+			sp.wcMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE,
+					Number.MAX_VALUE).toGL();
+			sp.wcMax = new XML3DVec3(Number.MIN_VALUE, Number.MIN_VALUE,
+					Number.MIN_VALUE).toGL();
+			
+			sp.modelViewMatrix = worldViewMatrix.multiply(transform).toGL();
+			var projMatrix = this.camera
+					.getProjectionMatrix(this.canvas.width / this.canvas.height);
+			var viewMatrix = this.camera.getViewMatrix();
+			sp.modelViewProjectionMatrix = projMatrix.multiply(viewMatrix).multiply(
+					transform).toGL();
+			
+			sp.worldViewMatrix = worldViewMatrix.toGL();
+			
+			shape.render(sp);
+			if (shader)
+				shader.cleanUp();
+		}
+		org.xml3d.webgl.checkError(gl, "Before readpixels");
+		gl.flush();
+		var data = gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE);
+		org.xml3d.webgl.checkError(gl, "After readpixels");
+		var pickPos = new XML3DVec3(0, 0, 0);
+		pickPos.x = data[0] / 255;
+		pickPos.y = data[1] / 255;
+		pickPos.z = data[2] / 255;
+		//pickPos = pickPos.mult(max.subtract(min)).add(min);
+		var objId = 255 - data[3] - 1;
+		if (objId >= 0) {
+			scene.currentPickPos = pickPos;
+			var pickedObj = this.drawableObjects[zPos[objId][0]];
+			scene.currentPickObj = pickedObj[1].node;
+			org.xml3d.debug.logInfo("Picked object "+objId);
+		}
+		this.canvas.needUpdate = true;
+		
+		
+	} catch (e) {
+		//org.xml3d.debug.logError(e);
+		this.canvas.needUpdate = true;
+		var derp = e;
+		var herp = 0;
+	}
+	
+	
+	
 };
 
 org.xml3d.webgl.Renderer.prototype.dispose = function() {
@@ -506,8 +632,10 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	if (this.viewMatrix == null) {
-		this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
-				new XML3DMatrix().translate(this.node.position.negate()));
+		//this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
+		//		new XML3DMatrix().translate(this.node.position.negate()));
+		this.viewMatrix =  new XML3DMatrix().translate(this.node.position.negate()).multiply(
+				this.node.orientation.negate().toMatrix());
 	}
 	return this.viewMatrix;
 };
@@ -963,8 +1091,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader) {
 			if (shader[bindable.semantic] !== undefined && buffer) {
 				gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 				gl.vertexAttribPointer(shader[bindable.semantic],
-						bindable.tupleSize, bindable.dataType, false, 0, 0);
-				gl.enableVertexAttribArray(shader[bindable.semantic]);
+					bindable.tupleSize, bindable.dataType, false, 0, 0);
+				gl.enableVertexAttribArray(shader[bindable.semantic]);			
 			}
 		}
 	}
@@ -1027,6 +1155,21 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getAttenuation = function(
 		}
 	}
 	return new XML3DVec3(0.0, 0.0, 1.0);
+};
+
+org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getDiffuseColor = function()
+{
+	var ls = this.getLightShader();
+	var bindables = ls.getBindables();
+	
+	for ( var i = 0; i < bindables.length; i++) {
+		if (bindables[i].semantic == "diffuseColor") {
+			var diff = bindables[i].getGLValue();
+			return new XML3DVec3(diff[0], diff[1], diff[2]);
+		}
+	}
+	return new XML3DVec3(1.0, 1.0, 1.0);
+		
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getLightShader = function() {
@@ -1133,24 +1276,26 @@ g_shaders["urn:xml3d:shader:phong"] = {
 		 	+"{\n"
 		 	+"		vec3 L = lightPositions[i].xyz - fragVertexPosition;\n"
 		 	+"		float dist = length(L);\n"
-		 	+"      L = normalize(L);\n"
+		 	+"      L = normalize(-L);\n"
+		 	+"      vec3 N = normalize(fragNormal);\n"
+
 			+"		vec3 E = fragEyeVector;\n"
-			+"		vec3 R = -reflect(L,fragNormal);\n"					
-			
+			+"		vec3 R = -reflect(L,N);\n"					
 			+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"		 			
 			+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
 
 			+"		vec3 Iamb = ambientColor * lightAmbientColors[i];\n"
-			+"		vec3 Idiff = lightDiffuseColors[i] * abs(dot(fragNormal,L)) * diffuseColor ;\n"//* texture2D(tex, texCoord).rgb
+			+"		vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * diffuseColor ;\n"//* texture2D(tex, texCoord).rgb
 			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), 0.3*shininess);\n"		 
 			+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
-			+"		return color;\n"
+			//+"		return vec3(max(dot(fragNormal,L),0.0), max(dot(-fragNormal,L),0.0), max(dot(fragNormal,-L),0.0));\n" 
+			+"		return color;\n" 
 			+"}\n"
 			
 			+"void main(void) {\n"
 			//+"  vec2 texCoord = vec2(fragTexCoord.x,1.0-fragTexCoord.y);\n"
 			+"	if (MAXLIGHTS == 0) {\n"
-			+"      vec3 light;\n"
+			+"      vec3 light = vec3(0,0,0);\n"
 			+"      vec3 normal = fragNormal;\n"
 			+"      vec3 eye = fragEyeVector;\n"
 			+"      float diffuse = max(0.0, dot(normal, light)) * lightOn;\n"
@@ -1161,12 +1306,13 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"      rgb = clamp(rgb, 0.0, 1.0);\n"
 			+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
 			+"	} else {\n"
-			+"      vec3 color;\n"
+			+"      vec3 color = vec3(0,0,0);\n"
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			color = color + light(i);\n"
 			+"		}\n"
 			+"		gl_FragColor = vec4(color, max(0.0, 1.0 - transparency));\n"
-			+"  }\n"
+			//+"		gl_FragColor = vec4(fragNormal.x, fragNormal.y, fragNormal.z, max(0.0, 1.0 - transparency));\n"
+				+"  }\n"
 			+"}"
 };
 
@@ -1226,6 +1372,38 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 		+ "}\n"
 	};
 
+g_shaders["urn:xml3d:shader:picking"] = {
+		vertex:
+		"#version 120\n\n"	
+		+"attribute vec3 position;\n"
+		+ "uniform mat4 modelViewMatrix;\n"
+		+ "uniform mat4 modelViewProjectionMatrix;\n"
+		+ "uniform vec3 wcMin;\n"
+		+ "uniform vec3 wcMax;\n"
+		
+		+ "varying vec3 worldCoord;\n"
+		+ "void main(void) {\n"
+		+ "    worldCoord = (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
+		//+ "    vec3 dia = wcMax - wcMin;\n"
+		//+ "    worldCoord = worldCoord - wcMin;\n"
+		//+ "    worldCoord.x /= dia.x;\n"
+		//+ "    worldCoord.y /= dia.y;\n"
+		//+ "    worldCoord.z /= dia.z;\n"
+		+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
+		+ "}" ,
+		
+		fragment:
+		
+		"#version 120\n\n"		
+		+"uniform float id;" 
+		+ "varying vec3 worldCoord;\n"
+		
+		+ "void main(void) {\n"
+		+ "    gl_FragColor = vec4(worldCoord, id);\n" 
+		+ "}\n"
+	};
+	
+	
 org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
 	var shader = {};
 	shader.bind = function() {

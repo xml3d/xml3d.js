@@ -54,6 +54,7 @@ if (!Array.filter) {
 	};
 }
 
+
 org.xml3d.XML3DCanvas = function(xml3dElement) {
 	this.xml3dElem = xml3dElement;
 	this.root = null;
@@ -237,6 +238,7 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 		org.xml3d.debug.logInfo("Found " + x3ds.length + " xml3d nodes...");
 		
 		if (x3ds.length) {
+			org.xml3d._xml3d = x3ds[0];
 			if (x3ds[0].style !== undefined) {
 				org.xml3d.debug.logInfo("Using native implementation...");
 				new org.xml3d.Xml3dSceneController(x3ds[0], x3ds[0]);

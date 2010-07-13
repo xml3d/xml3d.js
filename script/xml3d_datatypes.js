@@ -883,3 +883,10 @@ function MFString_parse(str) {
 		return [ str ];
 	}
 }
+
+createXML3DVec3 = function() {
+	if (org.xml3d._xml3d === undefined) {
+		return new XML3DVec3(); 
+	}
+	return org.xml3d._xml3d.createXML3DVec3();
+};

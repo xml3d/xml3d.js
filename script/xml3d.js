@@ -54,6 +54,17 @@ if (!Array.filter) {
 	};
 }
 
+document.nativeGetElementById = document.getElementById;
+document.getElementById = function(id) {
+	var elem = document.nativeGetElementById(id);
+	if(elem)
+	{
+		return elem;
+	} else {
+		return org.xml3d.document.getElementById(id);
+	}
+};
+
 
 org.xml3d.XML3DCanvas = function(xml3dElement) {
 	this.xml3dElem = xml3dElement;

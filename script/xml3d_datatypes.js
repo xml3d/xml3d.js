@@ -10,13 +10,9 @@ if (!org.xml3d)
 else if (typeof org.xml3d != "object")
 	throw new Error("org.xml3d already exists and is not an object");
 
-if (!org.xml3d.dataTypes)
-	org.xml3d.dataTypes = {};
-else if (typeof org.xml3d.dataTypes != "object")
-	throw new Error("org.xml3d.dataTypes already exists and is not an object");
-
-org.xml3d.dataTypes = {};
-
+// Create the XML3D data types for JS
+if (!org.xml3d._native)
+{
 /*
  * Returns a new 4x4 XML3DMatrix from given arguments.
  * If no arguments are given it returns an identity matrix.
@@ -314,61 +310,6 @@ XML3DMatrix.prototype.toGL = function() {
 			this.m14, this.m24, this.m34, this.m44 ];
 };
 
-org.xml3d.dataTypes.Vec2f = function(x, y) {
-	if (arguments.length == 0) {
-		this.x = this.y = 0;
-	} else {
-		this.x = x;
-		this.y = y;
-	}
-};
-org.xml3d.dataTypes.Vec2f.parse = function(str) {
-	var m = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)$/.exec(str);
-	return new org.xml3d.dataTypes.Vec2f(+m[1], +m[2]);
-};
-org.xml3d.dataTypes.Vec2f.prototype.add = function(that) {
-	return new org.xml3d.dataTypes.Vec2f(this.x + that.x, this.y + that.y);
-};
-org.xml3d.dataTypes.Vec2f.prototype.subtract = function(that) {
-	return new org.xml3d.dataTypes.Vec2f(this.x - that.x, this.y - that.y);
-};
-org.xml3d.dataTypes.Vec2f.prototype.negate = function() {
-	return new org.xml3d.dataTypes.Vec2f(-this.x, -this.y);
-};
-org.xml3d.dataTypes.Vec2f.prototype.dot = function(that) {
-	return this.x * that.x + this.y * that.y;
-};
-org.xml3d.dataTypes.Vec2f.prototype.reflect = function(n) {
-	var d2 = this.dot(n) * 2;
-	return new org.xml3d.dataTypes.Vec2f(this.x - d2 * n.x, this.y - d2 * n.y);
-};
-org.xml3d.dataTypes.Vec2f.prototype.normalised = function(that) {
-	var n = this.length();
-	if (n)
-		n = 1.0 / n;
-	return new org.xml3d.dataTypes.Vec2f(this.x * n, this.y * n);
-};
-org.xml3d.dataTypes.Vec2f.prototype.multiply = function(n) {
-	return new org.xml3d.dataTypes.Vec2f(this.x * n, this.y * n);
-};
-org.xml3d.dataTypes.Vec2f.prototype.length = function() {
-	return Math.sqrt((this.x * this.x) + (this.y * this.y));
-};
-org.xml3d.dataTypes.Vec2f.prototype.toGL = function() {
-	return [ this.x, this.y ];
-};
-org.xml3d.dataTypes.Vec2f.prototype.toString = function() {
-	return "{ x " + this.x + " y " + this.y + " }";
-};
-org.xml3d.dataTypes.Vec2f.prototype.setValueByStr = function(s) {
-	var m = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)$/.exec(s);
-	this.x = +m[1];
-	this.y = +m[2];
-	return this;
-};
-
-
-
 XML3DVec3 = function(x, y, z) {
 	if (arguments.length == 0) {
 		this.x = this.y = this.z = 0;
@@ -432,8 +373,10 @@ XML3DVec3.prototype.toGL = function() {
 };
 
 XML3DVec3.prototype.toString = function() {
-	return "{ x " + this.x + " y " + this.y + " z " + this.z + " }";
+	return "XML3DVec3(" + this.x + " " + this.y + " " + this.z + ")";
 };
+
+
 
 XML3DRotation = function(x, y, z, w) {
 	if (arguments.length == 0)
@@ -442,23 +385,17 @@ XML3DRotation = function(x, y, z, w) {
 		this.y = 0;
 		this.z = 0;
 		this.w = 1;
-	} else {
-		if (x.y !== undefined)
-		{
-			this.x = x.x;
-			this.y = x.y;
-			this.z = x.z;
-			this.w = y;
+	} else if (arguments.length == 2) {
+		this.setAxisAngle(x, y);
 		} else {
-		
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.w = w;
 		}
-	}
-	};
-XML3DRotation.prototype.mult = function(that) {
+};
+
+XML3DRotation.prototype.multiply = function(that) {
 	return new XML3DRotation(this.w * that.x + this.x * that.w
 			+ this.y * that.z - this.z * that.y, this.w * that.y + this.y
 			* that.w + this.z * that.x - this.x * that.z, this.w * that.z
@@ -567,6 +504,23 @@ XML3DRotation.prototype.toMatrix = function() {
 			1 - (xx + yy), 0, 0, 0, 0, 1);
 };
 
+XML3DRotation.prototype.__defineGetter__("axis", function() {
+	var s = Math.sqrt(1 - this.w * this.w);
+	if (s < 0.001) {
+		return new XML3DVec3(0, 0, 1);
+	}
+	return new XML3DVec3(this.x / s, this.y / s, this.z / s);
+});
+
+XML3DRotation.prototype.__defineGetter__("angle", function() {
+	var angle = 2 * Math.acos(this.w);
+	var s = Math.sqrt(1 - this.w * this.w);
+	if (s < 0.001) {
+		return 0.0;
+	}
+	return angle;
+});
+
 XML3DRotation.prototype.toAxisAngle = function() {
 	var angle = 2 * Math.acos(this.w);
 	var s = Math.sqrt(1 - this.w * this.w);
@@ -612,6 +566,7 @@ XML3DRotation.prototype.multScalar = function(s) {
 	return new XML3DRotation(this.x * s, this.y * s, this.z
 			* s, this.w * s);
 };
+
 XML3DRotation.prototype.normalised = function(that) {
 	var d2 = this.dot(that);
 	var id = 1.0;
@@ -620,13 +575,29 @@ XML3DRotation.prototype.normalised = function(that) {
 	return new XML3DRotation(this.x * id, this.y * id, this.z
 			* id, this.w * id);
 };
+
+XML3DRotation.prototype.length = function() {
+	return Math.sqrt(this.dot(this));
+};
+
+XML3DRotation.prototype.normalize = function(that) {
+	var l = this.length();
+	if (l) {
+		var id = 1.0 / l;
+		return new XML3DRotation(this.x * id, this.y * id, this.z * id, this.w * id);
+	}
+	return new XML3DRotation();
+};
+
+
 XML3DRotation.prototype.negate = function() {
 	return new XML3DRotation(this.x, this.y, this.z, -this.w);
 };
-XML3DRotation.prototype.slerp = function(that, t) {
+XML3DRotation.prototype.interpolate = function(that, t) {
 	var cosom = this.dot(that);
 	var rot1;
 	if (cosom < 0.0) {
+		
 		cosom = -cosom;
 		rot1 = that.negate();
 	} else {
@@ -646,247 +617,40 @@ XML3DRotation.prototype.slerp = function(that, t) {
 	return this.multScalar(scalerot0).add(rot1.multScalar(scalerot1));
 };
 XML3DRotation.prototype.toString = function() {
-	return '((' + this.x + ', ' + this.y + ', ' + this.z + '), ' + this.w + ')';
-};
-org.xml3d.dataTypes.MFRotation = function(rotArray) {
-	if (arguments.length == 0) {
-	} else {
-		rotArray.map(function(v) {
-			this.push(v);
-		}, this);
-	}
-};
-org.xml3d.dataTypes.MFRotation.prototype = new Array;
-org.xml3d.dataTypes.MFRotation.parse = function(str) {
-	var mc = str.match(/([+-]?\d*\.?\d*\s*){4},?\s*/g);
-	var vecs = [];
-	for ( var i = 0; i < mc.length; ++i) {
-		var c = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*),?\s*([+-]?\d*\.*\d*),?\s*$/
-				.exec(mc[i]);
-		if (c[0])
-			vecs.push(XML3DRotation.axisAngle(
-					new XML3DVec3(+c[1], +c[2], +c[3]), +c[4]));
-	}
-	return new org.xml3d.dataTypes.MFRotation(vecs);
-};
-org.xml3d.dataTypes.MFRotation.prototype.toGL = function() {
-	var a = [];
-	return a;
-};
-org.xml3d.dataTypes.SFColor = function(r, g, b) {
-	if (arguments.length == 0) {
-		this.r = this.g = this.b = 0;
-	} else {
-		this.r = r;
-		this.g = g;
-		this.b = b;
-	}
-};
-org.xml3d.dataTypes.SFColor.parse = function(str) {
-	var m = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)$/
-			.exec(str);
-	return new org.xml3d.dataTypes.SFColor(+m[1], +m[2], +m[3]);
-};
-org.xml3d.dataTypes.SFColor.prototype.toGL = function() {
-	return [ this.r, this.g, this.b ];
-};
-org.xml3d.dataTypes.SFColor.prototype.toString = function() {
-	return "{ r " + this.r + " g " + this.g + " b " + this.b + " }";
-};
-org.xml3d.dataTypes.MFColor = function(colorArray) {
-	if (arguments.length == 0) {
-	} else {
-		colorArray.map(function(c) {
-			this.push(c);
-		}, this);
-	}
-};
-org.xml3d.dataTypes.MFColor.prototype = new Array;
-org.xml3d.dataTypes.MFColor.parse = function(str) {
-	var mc = str.match(/([+-]?\d*\.?\d*\s*){3},?\s*/g);
-	var colors = [];
-	for ( var i = 0; i < mc.length; ++i) {
-		var c = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*),?\s*$/
-				.exec(mc[i]);
-		if (c[0])
-			colors.push(new org.xml3d.dataTypes.SFColor(+c[1], +c[2], +c[3]));
-	}
-	return new org.xml3d.dataTypes.MFColor(colors);
-};
-org.xml3d.dataTypes.MFColor.prototype.toGL = function() {
-	var a = [];
-	Array.map(this, function(c) {
-		a.push(c.r);
-		a.push(c.g);
-		a.push(c.b);
-	});
-	return a;
-};
-org.xml3d.dataTypes.MFVec3 = function(vec3Array) {
-	if (arguments.length == 0) {
-	} else {
-		vec3Array.map(function(v) {
-			this.push(v);
-		}, this);
-	}
-};
-org.xml3d.dataTypes.MFVec3.prototype = new Array;
-org.xml3d.dataTypes.MFVec3.parse = function(str) {
-	var mc = str.match(/([+-]?\d*\.?\d*\s*){3},?\s*/g);
-	var vecs = [];
-	for ( var i = 0; i < mc.length; ++i) {
-		var c = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*),?\s*$/
-				.exec(mc[i]);
-		if (c[0])
-			vecs.push(new XML3DVec3(+c[1], +c[2], +c[3]));
-	}
-	return new org.xml3d.dataTypes.MFVec3(vecs);
-};
-org.xml3d.dataTypes.MFVec3.prototype.toGL = function() {
-	var a = [];
-	Array.map(this, function(c) {
-		a.push(c.x);
-		a.push(c.y);
-		a.push(c.z);
-	});
-	return a;
-};
-org.xml3d.dataTypes.MFVec2 = function(vec2Array) {
-	if (arguments.length == 0) {
-	} else {
-		vec2Array.map(function(v) {
-			this.push(v);
-		}, this);
-	}
-};
-org.xml3d.dataTypes.MFVec2.prototype = new Array;
-org.xml3d.dataTypes.MFVec2.parse = function(str) {
-	var mc = str.match(/([+-]?\d*\.?\d*\s*){2},?\s*/g);
-	var vecs = [];
-	for ( var i = 0; i < mc.length; ++i) {
-		var c = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)\s*,?\s*$/
-				.exec(mc[i]);
-		if (c[0])
-			vecs.push(new org.xml3d.dataTypes.Vec2f(+c[1], +c[2]));
-	}
-	return new org.xml3d.dataTypes.MFVec2(vecs);
-};
-org.xml3d.dataTypes.MFVec2.prototype.toGL = function() {
-	var a = [];
-	Array.map(this, function(v) {
-		a.push(v.x);
-		a.push(v.y);
-	});
-	return a;
-};
-org.xml3d.dataTypes.Line = function(pos, dir) {
-	if (arguments.length == 0) {
-		this.pos = new XML3DVec3(0, 0, 0);
-		this.dir = new XML3DVec3(0, 0, 1);
-		this.t = 1;
-	} else {
-		this.pos = new XML3DVec3(pos.x, pos.y, pos.z);
-		var n = dir.length();
-		this.t = n;
-		if (n)
-			n = 1.0 / n;
-		this.dir = new XML3DVec3(dir.x * n, dir.y * n, dir.z
-				* n);
-	}
-};
-org.xml3d.dataTypes.Line.prototype.toString = function() {
-	var str = 'Line: [' + this.pos.toString() + '; ' + this.dir.toString()
-			+ ']';
-	return str;
-};
-org.xml3d.dataTypes.Line.prototype.intersect = function(low, high) {
-	var Eps = 0.000001;
-	var isect = 0.0;
-	var out = Number.MAX_VALUE;
-	var r, te, tl;
-	if (this.dir.x > Eps) {
-		r = 1.0 / this.dir.x;
-		te = (low.x - this.pos.x) * r;
-		tl = (high.x - this.pos.x) * r;
-		if (tl < out)
-			out = tl;
-		if (te > isect)
-			isect = te;
-	} else if (this.dir.x < -Eps) {
-		r = 1.0 / this.dir.x;
-		te = (high.x - this.pos.x) * r;
-		tl = (low.x - this.pos.x) * r;
-		if (tl < out)
-			out = tl;
-		if (te > isect)
-			isect = te;
-	} else if (this.pos.x < low.x || this.pos.x > high.x) {
-		return false;
-	}
-	if (this.dir.y > Eps) {
-		r = 1.0 / this.dir.y;
-		te = (low.y - this.pos.y) * r;
-		tl = (high.y - this.pos.y) * r;
-		if (tl < out)
-			out = tl;
-		if (te > isect)
-			isect = te;
-		if (isect - out >= Eps)
-			return false;
-	} else if (this.dir.y < -Eps) {
-		r = 1.0 / this.dir.y;
-		te = (high.y - this.pos.y) * r;
-		tl = (low.y - this.pos.y) * r;
-		if (tl < out)
-			out = tl;
-		if (te > isect)
-			isect = te;
-		if (isect - out >= Eps)
-			return false;
-	} else if (this.pos.y < low.y || this.pos.y > high.y) {
-		return false;
-	}
-	if (this.dir.z > Eps) {
-		r = 1.0 / this.dir.z;
-		te = (low.z - this.pos.z) * r;
-		tl = (high.z - this.pos.z) * r;
-		if (tl < out)
-			out = tl;
-		if (te > isect)
-			isect = te;
-	} else if (this.dir.z < -Eps) {
-		r = 1.0 / this.dir.z;
-		te = (high.z - this.pos.z) * r;
-		tl = (low.z - this.pos.z) * r;
-		if (tl < out)
-			out = tl;
-		if (te > isect)
-			isect = te;
-	} else if (this.pos.z < low.z || this.pos.z > high.z) {
-		return false;
-	}
-	this.enter = isect;
-	this.exit = out;
-	return (isect - out < Eps);
+	return "XML3DRotation(" + this.axis + ", " + this.angle + ")";
 };
 
-function MFString_parse(str) {
-	if (str[0] == '"') {
-		var re = /"((?:[^\\"]|\\\\|\\")*)"/g;
-		var m;
-		var ret = [];
-		while (m = re.exec(str)) {
-			ret.push(m[1].replace(/\\([\\"])/, "$1"));
-		}
-		return ret;
-	} else {
-		return [ str ];
+} // End createXML3DDatatypes
+else {
+	// Create global constructors if not available
+	if(Object.prototype.constructor === XML3DVec3.prototype.constructor) {
+		XML3DVec3 = function(x, y, z) {
+			var v =org.xml3d._xml3d.createXML3DVec3();
+			if (arguments.length == 3) {
+				v.x = x;
+				v.y = y;
+				v.z = z;
+			} 
+			return v;
+		};
+	};
+	
+	if(Object.prototype.constructor === XML3DRotation.prototype.constructor) {
+		XML3DRotation = function(axis, angle) {
+			var v =org.xml3d._xml3d.createXML3DRotation();
+			if (arguments.length == 2) {
+				v.setAxisAngle(axis, angle);
+			} 
+			return v;
+		};
+	};
+
+	// Create nice toString Functions (does not work for FF :\)
+	if (XML3DVec3.prototype.toString == Object.prototype.toString) {
+		XML3DVec3.prototype.toString = function() { return "XML3DVec3(" + this.x + " " + this.y + " " + this.z + ")";};
+	}
+	if (XML3DRotation.prototype.toString == Object.prototype.toString) {
+		XML3DRotation.prototype.toString = function() { return "XML3DRotation(" + this.axis + ", " + this.angle + ")";};
 	}
 }
 
-createXML3DVec3 = function() {
-	if (org.xml3d._xml3d === undefined) {
-		return new XML3DVec3(); 
-	}
-	return org.xml3d._xml3d.createXML3DVec3();
-};

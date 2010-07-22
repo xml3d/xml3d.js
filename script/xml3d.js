@@ -14,7 +14,8 @@ else if (typeof org.xml3d != "object")
 org.xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 org.xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
 org.xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
-org.xml3d.document = new org.xml3d.XML3DDocument(document);
+org.xml3d._xml3d = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
+org.xml3d._native = org.xml3d._xml3d.style !== undefined; 
 
 if (!Array.forEach) {
 	Array.forEach = function(array, fun, thisp) {
@@ -61,171 +62,10 @@ document.getElementById = function(id) {
 	{
 		return elem;
 	} else {
-		return org.xml3d.document.getElementById(id);
+		return this.evaluate('//*[@id="' + id + '"]', this, function() {
+			return org.xml3d.xml3dNS;
+		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	}
-};
-
-
-org.xml3d.XML3DCanvas = function(xml3dElement) {
-	this.xml3dElem = xml3dElement;
-	this.root = null;
-
-	// Place xml3dElement inside an invisble div
-	this.hideDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
-	xml3dElement.parentNode.insertBefore(this.hideDiv, xml3dElement);
-	this.hideDiv.appendChild(xml3dElement);
-	this.hideDiv.style.display = "none";
-
-	// Create canvas and append it to the document created before
-	this.canvas = org.xml3d.XML3DCanvas.createHTMLCanvas(xml3dElement);
-	this.hideDiv.parentNode.insertBefore(this.canvas, this.hideDiv);
-
-	this.fps_t0 = new Date().getTime();
-	this.gl = this.initContext(this.canvas);
-	var gl = this.gl;
-	var xml3del = this.xml3dElem;
-	var canvas = this.canvas;
-	
-	this.canvas.addEventListener('mouseup', function(evt) {
-		
-		var derp = 0;
-		gl.renderPick(xml3del, evt.layerX - canvas.offsetLeft, evt.layerY - canvas.offsetTop);
-	}, false);
-};
-
-org.xml3d.XML3DCanvas.prototype.initContext = function(canvas) {
-	org.xml3d.debug.logInfo("Initializing XML3DCanvas for [" + canvas.id + "]");
-	var gl = org.xml3d.gfx_webgl(canvas);
-	if (!gl) {
-		org.xml3d.debug.logError("No 3D context found...");
-		this.hideDiv.parentNode.removeChild(canvas);
-		return null;
-	}
-	return gl;
-};
-
-org.xml3d.XML3DCanvas.createHTMLCanvas = function(x3dElem) {
-	org.xml3d.debug.logInfo("Creating canvas for X3D element...");
-	var canvas = document.createElementNS(org.xml3d.xhtmlNS, 'canvas');
-	canvas.setAttribute("class", "xml3d-canvas");
-
-	var x, y, w, h, showStat;
-
-	if ((w = x3dElem.getAttribute("style")) !== null) {
-		org.xml3d.debug.logInfo("Setting style");
-		canvas.setAttribute("style", x3dElem.getAttribute("style"));
-	}
-
-	org.xml3d.debug.logInfo("Canvas getAttribute style: "
-			+ canvas.getAttribute("style"));
-	org.xml3d.debug.logInfo("Canvas style: " + canvas.style);
-	org.xml3d.debug.logInfo("Canvas style width: " + canvas.style.width);
-	org.xml3d.debug.logInfo("Canvas style height: " + canvas.style.height);
-
-	var sides = [ "top", "right", "bottom", "left" ];
-	var colorStr = styleStr = widthStr = paddingStr = "";
-	for (i in sides) {
-		colorStr += org.xml3d.util.getStyle(x3dElem, "border-" + sides[i]
-				+ "-color")
-				+ " ";
-		styleStr += org.xml3d.util.getStyle(x3dElem, "border-" + sides[i]
-				+ "-style")
-				+ " ";
-		widthStr += org.xml3d.util.getStyle(x3dElem, "border-" + sides[i]
-				+ "-width")
-				+ " ";
-		paddingStr += org.xml3d.util.getStyle(x3dElem, "padding-" + sides[i])
-				+ " ";
-		// org.xml3d.debug.logInfo("Computed border color: " + sides[i] + ": " +
-		// colorStr);
-		// org.xml3d.debug.logInfo("Computed border style: " + sides[i] + ": " +
-		// styleStr);
-		// org.xml3d.debug.logInfo("Computed border width: " + sides[i] + ": " +
-		// widthStr);
-		// org.xml3d.debug.logInfo("Computed padding: " + sides[i] + ": " +
-		// paddingStr);
-	}
-	canvas.style.borderColor = colorStr;
-	canvas.style.borderStyle = styleStr;
-	canvas.style.borderWidth = widthStr;
-	canvas.style.padding = paddingStr;
-	canvas.style.backgroundColor = org.xml3d.util.getStyle(x3dElem,
-			"background-Color");
-
-	if ((w = x3dElem.getAttribute("width")) !== null) {
-		canvas.style.width = w.toString();
-		org.xml3d.debug.logInfo("Init w:" + canvas.style.width);
-	}
-	if ((h = x3dElem.getAttribute("height")) !== null) {
-
-		canvas.style.height = h.toString();
-	}
-	canvas.setAttribute("height", canvas.style.height);
-	canvas.setAttribute("width", canvas.style.width);
-	canvas.needUpdate = true;
-
-	return canvas;
-};
-
-org.xml3d.XML3DCanvas.prototype.createStatDiv = function() {
-	var statDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
-	statDiv.setAttribute("class", "xml3d-statdiv");
-	statDiv.innerHTML = "0 fps";
-	this.canvasDiv.appendChild(statDiv);
-	statDiv.oncontextmenu = statDiv.onmousedown = function(evt) {
-		evt.preventDefault();
-		evt.stopPropagation();
-		evt.returnValue = false;
-		return false;
-	};
-	return statDiv;
-};
-
-org.xml3d.XML3DCanvas.prototype.onload = function() {
-	if (!this.root)
-		return;
-	org.xml3d.debug.logInfo("Canvas loaded. Starting update");
-	if (org.xml3d.Xml3dSceneController !== undefined)
-		new org.xml3d.Xml3dSceneController(this.canvas, this.root);
-
-	var root = this.root;
-	this.root.getBackgroundColor = function() {
-		if (RGBColor && document.defaultView
-				&& document.defaultView.getComputedStyle) {
-			var colorStr = org.xml3d.util.getStyle(root,
-					"background-color");
-			var color = new RGBColor(colorStr);
-			return color.toGLAlpha();
-		}
-	};
-
-	var x3dCanvas = this;
-	setInterval(function() {
-		x3dCanvas.tick();
-	}, 16);
-};
-
-org.xml3d.XML3DCanvas.prototype.tick = function() {
-	var d = new Date().getTime();
-	var fps = 1000.0 / (d - this.fps_t0);
-	if (this.statDiv) {
-		this.statDiv.textContent = fps.toFixed(2) + ' fps';
-	}
-	this.fps_t0 = d;
-	if (this.canvas.needUpdate)
-	{
-		try {
-			// this.doc.advanceTime(d / 1000);
-			this.gl.renderScene(this.root);
-		} catch (e) {
-			org.xml3d.debug.logException(e);
-			throw e;
-		}
-	}
-};
-
-org.xml3d.XML3DCanvas.prototype.shutdown = function() {
-	this.gl.shutdown();
 };
 
 (function() {
@@ -250,9 +90,8 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 		
 		if (x3ds.length) {
 			org.xml3d._xml3d = x3ds[0];
-			if (x3ds[0].style !== undefined) {
+			if (org.xml3d._native) {
 				org.xml3d.debug.logInfo("Using native implementation...");
-				new org.xml3d.Xml3dSceneController(x3ds[0], x3ds[0]);
 				return;
 			}
 		}
@@ -301,7 +140,8 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 		})('load');
 	};
 	var onunload = function() {
-		org.xml3d.document.onunload();
+		if (org.xml3d.document !== undefined)
+			org.xml3d.document.onunload();
 	};
 	window.addEventListener('load', onload, false);
 	window.addEventListener('unload', onunload, false);
@@ -309,4 +149,19 @@ org.xml3d.XML3DCanvas.prototype.shutdown = function() {
 
 })();
 
+//Some helper function. We don't have global constructors for 
+//all implementations
+createXML3DVec3 = function() {
+	if (org.xml3d._xml3d === undefined) {
+		return new XML3DVec3(); 
+	}
+	return org.xml3d._xml3d.createXML3DVec3();
+};
+
+createXML3DRotation = function() {
+	if (org.xml3d._xml3d === undefined) {
+		return new XML3DRotation(); 
+	}
+	return org.xml3d._xml3d.createXML3DRotation();
+};
 

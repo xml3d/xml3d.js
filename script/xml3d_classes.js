@@ -161,13 +161,15 @@ org.xml3d.XML3DNodeFactory.prototype.create = function(node, context) {
 
 org.xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(value) {
 	var result = new XML3DVec3();
-	result.setVec3Value(value);
+	if (value && value.length)
+		result.setVec3Value(value);
 	return result;
 };
 
 org.xml3d.XML3DNodeFactory.createXML3DRotationFromString = function(value) {
 	var result = new XML3DRotation();
-	result.setAxisAngleValue(value);
+	if (value && value.length)
+		result.setAxisAngleValue(value);
 	return result;
 };
 
@@ -191,7 +193,6 @@ org.xml3d.XML3DDocument.prototype.createCanvas = function(xml3dElement) {
 	var canvas = new org.xml3d.XML3DCanvas(xml3dElement);
 	if (canvas.gl) {
 		this.initXml3d(xml3dElement);
-		canvas.root = xml3dElement;
 		this.canvases.push(canvas);
 		canvas.onload();
 	}
@@ -284,6 +285,9 @@ org.xml3d.XML3DDocument.prototype.getElementById = function(id) {
 org.xml3d.XML3DDocument.prototype.resolve = function(uriStr) {
 		return org.xml3d.URIResolver.resolve(this, uriStr);
 };
+
+org.xml3d.document = new org.xml3d.XML3DDocument(document);
+
 
 //-----------------------------------------------------------------------------
 //Class Notification
@@ -1134,7 +1138,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DTransformProviderType.configure(node, context);
 	  node.__defineSetter__("translation", 
 	      function (value) {
-	        //org.xml3d.debug.logInfo("Setter: " + value);
+	        //org.xml3d.debug.logInfo("Setter: " + typeof value);
 	        var oldValue = this._translation;
 	        if (typeof value == 'string')
 	        	this._translation = org.xml3d.XML3DNodeFactory.createXML3DVec3FromString(value);
@@ -1143,7 +1147,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	        
 	        if (this.notificationRequired())
             	this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "translation", oldValue, this._translation));
-	      
+	        
 	      }
 	  );
 	  node.__defineGetter__("translation", 

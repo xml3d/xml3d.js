@@ -16,6 +16,166 @@ if (!org.xml3d.webgl)
 else if (typeof org.xml3d.webgl != "object")
 	throw new Error("org.xml3d.webgl already exists and is not an object");
 
+org.xml3d.XML3DCanvas = function(xml3d) {
+	this.xml3dElement = xml3d;
+
+	// Place xml3dElement inside an invisble div
+	this.hideDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+	this.xml3dElement.parentNode.insertBefore(this.hideDiv, this.xml3dElement);
+	this.hideDiv.appendChild(this.xml3dElement);
+	this.hideDiv.style.display = "none";
+
+	// Create canvas and append it to the document created before
+	this.canvas = org.xml3d.XML3DCanvas.createHTMLCanvas(this.xml3dElement);
+	this.xml3dElement.canvas = this.canvas;
+	this.hideDiv.parentNode.insertBefore(this.canvas, this.hideDiv);
+
+	this.fps_t0 = new Date().getTime();
+	this.gl = this.initContext(this.canvas);
+	var gl = this.gl;
+	var xml3del = this.xml3dElement;
+	var canvas = this.canvas;
+	
+	this.canvas.addEventListener('mouseup', function(evt) {
+		
+		var derp = 0;
+		gl.renderPick(xml3del, evt.layerX - canvas.offsetLeft, evt.layerY - canvas.offsetTop);
+	}, false);
+};
+
+org.xml3d.XML3DCanvas.prototype.initContext = function(canvas) {
+	org.xml3d.debug.logInfo("Initializing XML3DCanvas for [" + canvas.id + "]");
+	var gl = org.xml3d.gfx_webgl(canvas);
+	if (!gl) {
+		org.xml3d.debug.logError("No 3D context found...");
+		this.hideDiv.parentNode.removeChild(canvas);
+		return null;
+	}
+	return gl;
+};
+
+org.xml3d.XML3DCanvas.createHTMLCanvas = function(x3dElem) {
+	org.xml3d.debug.logInfo("Creating canvas for X3D element...");
+	var canvas = document.createElementNS(org.xml3d.xhtmlNS, 'canvas');
+	canvas.setAttribute("class", "xml3d-canvas");
+
+	var x, y, w, h, showStat;
+
+	if ((w = x3dElem.getAttribute("style")) !== null) {
+		org.xml3d.debug.logInfo("Setting style");
+		canvas.setAttribute("style", x3dElem.getAttribute("style"));
+	}
+
+	org.xml3d.debug.logInfo("Canvas getAttribute style: "
+			+ canvas.getAttribute("style"));
+	org.xml3d.debug.logInfo("Canvas style: " + canvas.style);
+	org.xml3d.debug.logInfo("Canvas style width: " + canvas.style.width);
+	org.xml3d.debug.logInfo("Canvas style height: " + canvas.style.height);
+
+	var sides = [ "top", "right", "bottom", "left" ];
+	var colorStr = styleStr = widthStr = paddingStr = "";
+	for (i in sides) {
+		colorStr += org.xml3d.util.getStyle(x3dElem, "border-" + sides[i]
+				+ "-color")
+				+ " ";
+		styleStr += org.xml3d.util.getStyle(x3dElem, "border-" + sides[i]
+				+ "-style")
+				+ " ";
+		widthStr += org.xml3d.util.getStyle(x3dElem, "border-" + sides[i]
+				+ "-width")
+				+ " ";
+		paddingStr += org.xml3d.util.getStyle(x3dElem, "padding-" + sides[i])
+				+ " ";
+		// org.xml3d.debug.logInfo("Computed border color: " + sides[i] + ": " +
+		// colorStr);
+		// org.xml3d.debug.logInfo("Computed border style: " + sides[i] + ": " +
+		// styleStr);
+		// org.xml3d.debug.logInfo("Computed border width: " + sides[i] + ": " +
+		// widthStr);
+		// org.xml3d.debug.logInfo("Computed padding: " + sides[i] + ": " +
+		// paddingStr);
+	}
+	canvas.style.borderColor = colorStr;
+	canvas.style.borderStyle = styleStr;
+	canvas.style.borderWidth = widthStr;
+	canvas.style.padding = paddingStr;
+	canvas.style.backgroundColor = org.xml3d.util.getStyle(x3dElem,
+			"background-Color");
+
+	if ((w = x3dElem.getAttribute("width")) !== null) {
+		canvas.style.width = w.toString();
+		org.xml3d.debug.logInfo("Init w:" + canvas.style.width);
+	}
+	if ((h = x3dElem.getAttribute("height")) !== null) {
+
+		canvas.style.height = h.toString();
+	}
+	canvas.setAttribute("height", canvas.style.height);
+	canvas.setAttribute("width", canvas.style.width);
+	canvas.needUpdate = true;
+	canvas.xml3dElement = x3dElem;
+	return canvas;
+};
+
+org.xml3d.XML3DCanvas.prototype.createStatDiv = function() {
+	var statDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+	statDiv.setAttribute("class", "xml3d-statdiv");
+	statDiv.innerHTML = "0 fps";
+	this.canvasDiv.appendChild(statDiv);
+	statDiv.oncontextmenu = statDiv.onmousedown = function(evt) {
+		evt.preventDefault();
+		evt.stopPropagation();
+		evt.returnValue = false;
+		return false;
+	};
+	return statDiv;
+};
+
+org.xml3d.XML3DCanvas.prototype.onload = function() {
+	if (!this.xml3dElement)
+		return;
+	org.xml3d.debug.logInfo("Canvas loaded. Starting update");
+
+	var xml3dElement = this.xml3dElement;
+	this.xml3dElement.getBackgroundColor = function() {
+		if (RGBColor && document.defaultView
+				&& document.defaultView.getComputedStyle) {
+			var colorStr = org.xml3d.util.getStyle(xml3dElement,
+					"background-color");
+			var color = new RGBColor(colorStr);
+			return color.toGLAlpha();
+		}
+	};
+
+	var x3dCanvas = this;
+	setInterval(function() {
+		x3dCanvas.tick();
+	}, 16);
+};
+
+org.xml3d.XML3DCanvas.prototype.tick = function() {
+	var d = new Date().getTime();
+	var fps = 1000.0 / (d - this.fps_t0);
+	if (this.statDiv) {
+		this.statDiv.textContent = fps.toFixed(2) + ' fps';
+	}
+	this.fps_t0 = d;
+	if (this.canvas.needUpdate)
+	{
+		try {
+			// this.doc.advanceTime(d / 1000);
+			this.gl.renderScene(this.xml3dElement);
+		} catch (e) {
+			org.xml3d.debug.logException("tick::" + e);
+			throw e;
+		}
+	}
+};
+
+org.xml3d.XML3DCanvas.prototype.shutdown = function() {
+	this.gl.shutdown();
+};
+
 org.xml3d.gfx_webgl = (function() {
 	function Context(ctx3d, canvas, name) {
 		this.ctx3d = ctx3d;
@@ -929,6 +1089,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 	if (!this.matrix) {
 		var n = this.node;
 		var m = new XML3DMatrix();
+		//org.xml3d.debug.logInfo("Matrix: " + m);
 		this.matrix = m.translate(n.translation)
 		  .multiply(m.translate(n.center)).multiply(n.rotation.toMatrix())
 		  .multiply(n.scaleOrientation.toMatrix()).multiply(m.scale(n.scale))
@@ -941,6 +1102,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
+	//org.xml3d.debug.logInfo("Invalidate matrix");
 	this.factory.renderer.canvas.needUpdate = true;
 };
 

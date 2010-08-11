@@ -18,12 +18,9 @@ else if (typeof org.xml3d.animation != "object")
 
 (function() {
 	var load = function() {
-		if (org.xml3d.document !== undefined);
-		{
 			org.xml3d.debug.logInfo("Initializing Animation Manager.");
-			org.xml3d.document.animationManager = new org.xml3d.animation.XML3DAnimationManager(org.xml3d.document);
-			org.xml3d.document.animationManager.init();
-		}
+			org.xml3d.animation.animationManager = new org.xml3d.animation.XML3DAnimationManager();
+			org.xml3d.animation.animationManager.init();
 	};
 	window.addEventListener('load', load, false);
 	
@@ -31,29 +28,21 @@ else if (typeof org.xml3d.animation != "object")
 
 org.xml3d.startAnimation = function(aniID, transID, transAttr, duration, loop)
 {
-	return org.xml3d.document.animationManager.startAnimation(aniID, transID, transAttr, duration, loop);
+	return org.xml3d.animation.animationManager.startAnimation(aniID, transID, transAttr, duration, loop);
 };
 
 org.xml3d.stopAnimation = function(handle)
 {
-	org.xml3d.document.animationManager.stopAnimation(handle);
+	org.xml3d.animation.animationManager.stopAnimation(handle);
 };
 
 org.xml3d.stopAllAnimations = function() 
 {
-	org.xml3d.document.animationManager.stopAllAnimations();
-}
+	org.xml3d.animation.animationManager.stopAllAnimations();
+};
 
-/*org.xml3d.startAnimation = function(aniID)
-{
-	org.xml3d.document.animationManager.startAnimation(aniID);
-};*/
-
-
-org.xml3d.animation.XML3DAnimationManager = function(document) {
-	this.document = document;
+org.xml3d.animation.XML3DAnimationManager = function() {
 	this.interpolators = {};
-
 };
 
 org.xml3d.animation.XML3DAnimationManager.prototype.init = function() {
@@ -96,7 +85,7 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 		org.xml3d.debug.logWarning("Could not initialize Interpolator: " + aniID);
 		return;
 	}
-	var trans = this.document.getElementById(transID);
+	var trans = document.getElementById(transID);
 	if (!trans)
 	{
 		org.xml3d.debug.logWarning("Could not find animation target: " + transID);
@@ -106,8 +95,8 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 	var field = trans.getAttributeNode(transAttr);
 	if (!field)
 	{
-		field = this.document.parentDocument.createAttribute(transAttr);
-		field.nodeValue = interpolator.getValue(0).join(' ');
+		field = document.createAttribute(transAttr);
+		field.nodeValue = "1 0 0 0";
 		trans.setAttributeNode(field);
 	}
 	
@@ -129,10 +118,18 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 	
 	interpolator.animations[field] = {};
 	interpolator.animations[field].field = field;
+	interpolator.animations[field].node = trans;
+	interpolator.animations[field].attribute = transAttr;
 	interpolator.animations[field].duration = duration;
 	interpolator.animations[field].loop = loop;
 	interpolator.animations[field].startTime = (new Date()).getTime();
 	interpolator.animations[field].running = true;
+	var xml3d = document.evaluate('//xml3d:xml3d', document, function() {
+		return org.xml3d.xml3dNS;
+	}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	
+	if (xml3d && xml3d.update)
+		interpolator.animations[field].updateElement = xml3d;
 	
 	return interpolator.animations[field];
 };
@@ -195,6 +192,8 @@ org.xml3d.animation.X3DInterpolation.prototype.isValid = function() {
 };
 
 org.xml3d.animation.X3DInterpolation.prototype.progressAll = function(time) {
+	
+	
 	for(var i in this.animations)
 	{
 		if (this.animations[i].running)
@@ -204,15 +203,16 @@ org.xml3d.animation.X3DInterpolation.prototype.progressAll = function(time) {
 
 
 org.xml3d.animation.X3DInterpolation.prototype.progress = function(anim, time) {
-	
 	var key = ((time - anim.startTime) % anim.duration ) / (anim.duration * 1.0);
 	if(!anim.loop && (time - anim.startTime > anim.duration) )
 	{
 		key = 1.0;
 		anim.running = false;
 	}
-	
-	anim.field.nodeValue = this.getValue( key ).join(' ');
+	anim.node[anim.attribute] = this.getValue( key );
+	if (anim.updateElement) {
+		anim.updateElement.update();
+	}
 };
 
 org.xml3d.animation.X3DInterpolation.prototype.initialize = function() {};
@@ -242,17 +242,16 @@ org.xml3d.animation.X3DOrientationInterpolation.prototype.constructor = org.xml3
 
 org.xml3d.animation.X3DOrientationInterpolation.prototype.getValue = function(t) {
 	var value = this.interpolate(t, function(a, b, t) {
-		return a.slerp(b, t);
+		return a.interpolate(b, t);
 	});
-	//org.xml3d.debug.logWarning(value.toAxisAngle() instanceof Array);
-	return value.toAxisAngle();
+	return value;
 };
 
 org.xml3d.animation.X3DOrientationInterpolation.prototype.initialize = function() {
 	this.isInit = true;
 	this.valid = false;
 
-	this.keyValue = org.xml3d.dataTypes.MFRotation.parse(this.inode.getAttribute('keyValue'));
+	this.keyValue = org.xml3d.animation.RotationArray.parse(this.inode.getAttribute('keyValue'));
 	var keyStr =  this.inode.getAttribute('key').replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 	this.key = Array.map(keyStr.split(/[\s+,]/), function(n) {
 		return +n;
@@ -278,8 +277,7 @@ org.xml3d.animation.X3DPositionInterpolation.prototype.getValue = function(t) {
 	var value = this.interpolate(t, function(a, b, t) {
 		return a.scale(1.0 - t).add(b.scale(t));
 	});
-	//org.xml3d.debug.logWarning(value.toAxisAngle() instanceof Array);
-	return [ value.x, value.y, value.z];
+	return value;
 };
 
 org.xml3d.animation.X3DPositionInterpolation.prototype.initialize = function() {
@@ -325,4 +323,100 @@ org.xml3d.animation.Vec3Array.parse = function(str) {
 	}
 	return new org.xml3d.animation.Vec3Array(vecs);
 };
+
+org.xml3d.animation.RotationArray = function(rotArray) {
+	if (arguments.length == 0) {
+	} else {
+		rotArray.map(function(v) {
+			this.push(v);
+		}, this);
+	}
+};
+org.xml3d.animation.RotationArray.prototype = new Array;
+org.xml3d.animation.RotationArray.parse = function(str) {
+	var mc = str.match(/([+-]?\d*\.?\d*\s*){4},?\s*/g);
+	var vecs = [];
+	for ( var i = 0; i < mc.length; ++i) {
+		for ( var i = 0; i < mc.length; ++i) {
+			var c = /^([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*)\s*,?\s*([+-]?\d*\.*\d*),?\s*([+-]?\d*\.*\d*),?\s*$/
+					.exec(mc[i]);
+			if (c && c[0])
+			{
+				var axis = new XML3DVec3(+c[1], +c[2], +c[3]);
+				//org.xml3d.debug.logWarning("Axis: " + axis);
+				//org.xml3d.debug.logWarning("Angle: " + +c[4]);
+				var rot = new XML3DRotation(axis, +c[4]);
+				//org.xml3d.debug.logWarning("Axis: " + rot.axis);
+				//org.xml3d.debug.logWarning("Angle: " + rot.angle);
+				vecs.push(rot);
+			}
+		}
+//		if (mc[i]) {
+//			var r = new XML3DRotation();
+//			org.xml3d.debug.logWarning(mc[i]);
+//			r.setAxisAngleValue(mc[i]);
+//			vecs.push(r);
+//		}
+	}
+	
+	return new org.xml3d.animation.RotationArray(vecs);
+};
+
+
+if (!XML3DRotation.prototype.slerp) {
+
+	org.xml3d.Quaternion = function(axis, angle) {
+		this.x = axis.x * s;
+		this.y = axis.y * s;
+		this.z = axis.z * s;
+		this.w = c;
+	};
+	
+	org.xml3d.Quaternion.prototype.__defineGetter__("axis", function() {
+		var s = Math.sqrt(1 - this.w * this.w);
+		if (s < 0.001) {
+			return new XML3DVec3(0, 0, 1);
+		}
+		return new XML3DVec3(this.x / s, this.y / s, this.z / s);
+	});
+
+	org.xml3d.Quaternion.prototype.__defineGetter__("angle", function() {
+		var angle = 2 * Math.acos(this.w);
+		var s = Math.sqrt(1 - this.w * this.w);
+		if (s < 0.001) {
+			return 0.0;
+		}
+		return angle;
+	});
+	
+	org.xml3d.Quaternion.prototype.slerp = function(that, t) {
+		var cosom = this.x * that.x + this.y * that.y + this.z * that.z + this.w * that.w;
+		var rot1;
+		if (cosom < 0.0) {
+			cosom = -cosom;
+			rot1 = that.negate();
+		} else {
+			rot1 = new XML3DRotation(that.x, that.y, that.z,
+					that.w);
+		}
+		var scalerot0, scalerot1;
+		if ((1.0 - cosom) > 0.00001) {
+			var omega = Math.acos(cosom);
+			var sinom = Math.sin(omega);
+			scalerot0 = Math.sin((1.0 - t) * omega) / sinom;
+			scalerot1 = Math.sin(t * omega) / sinom;
+		} else {
+			scalerot0 = 1.0 - t;
+			scalerot1 = t;
+		}
+		return this.multScalar(scalerot0).add(rot1.multScalar(scalerot1));	
+	};
+	
+	XML3DRotation.prototype.slerp = function(that, t) {
+		var q1 = new org.xml3d.Quaternion(this.axis, this.angle);
+		var q2 = new org.xml3d.Quaternion(that.axis, that.angle);
+		var q3 = q1.slerp(q2, t);
+		return new XML3DRotation(q3.axis, q3.angle);
+	};
+}
 

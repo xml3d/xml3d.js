@@ -1,15 +1,8 @@
 
-// Create global symbol org
+//Check, if basics have already been defined
 var org;
-if (!org)
-	org = {};
-else if (typeof org != "object")
-	throw new Error("org already exists and is not an object");
-
-if (!org.xml3d)
-	org.xml3d = {};
-else if (typeof org.xml3d != "object")
-	throw new Error("org.xml3d already exists and is not an object");
+if (!org || !org.xml3d)
+  throw new Error("xml3d.js has to be included first");
 
 if (!org.xml3d.event)
 	org.xml3d.event = {};
@@ -412,14 +405,14 @@ org.xml3d.classInfo.Xml3dNode.configure = function(node, c) {
 	
 	node.notificationRequired = function () {
 		return this.adapters.length != 0;
-	}
+	};
 
 	node.notify = function (notification) {
 		for(var i= 0; i < this.adapters.length; i++)
 		{
 		  this.adapters[i].notifyChanged(notification);
 		}
-	}
+	};
 	
 	node.update = function() {
 		org.xml3d.debug.logInfo("Hit Update");

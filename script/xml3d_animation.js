@@ -1,14 +1,7 @@
+//Check, if basics have already been defined
 var org;
-if (!org)
-	org = {};
-else if (typeof org != "object")
-	throw new Error("org already exists and is not an object");
-
-// Create global symbol org.xml3d
-if (!org.xml3d)
-	org.xml3d = {};
-else if (typeof org.xml3d != "object")
-	throw new Error("org.xml3d already exists and is not an object");
+if (!org || !org.xml3d)
+  throw new Error("xml3d.js has to be included first");
 
 //Create global symbol org.xml3d.animation
 if (!org.xml3d.animation)
@@ -43,6 +36,13 @@ org.xml3d.stopAllAnimations = function()
 
 org.xml3d.animation.XML3DAnimationManager = function() {
 	this.interpolators = {};
+	var xml3d = document.evaluate('//xml3d:xml3d', document, function() {
+		return org.xml3d.xml3dNS;
+	}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	
+	if (xml3d && xml3d.update)
+		this.updateElement = xml3d;
+
 };
 
 org.xml3d.animation.XML3DAnimationManager.prototype.init = function() {
@@ -63,7 +63,7 @@ org.xml3d.animation.XML3DAnimationManager.prototype.init = function() {
 		}
 	}
 	var a = this;
-	window.setInterval(function() { a.progress(); }, 20);
+	window.setInterval(function() { a.progress(); }, 30);
 };
 
 org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID, transID, transAttr, duration, loop) {
@@ -96,7 +96,7 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 	if (!field)
 	{
 		field = document.createAttribute(transAttr);
-		field.nodeValue = "1 0 0 0";
+		field.nodeValue = "";
 		trans.setAttributeNode(field);
 	}
 	
@@ -124,12 +124,6 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 	interpolator.animations[field].loop = loop;
 	interpolator.animations[field].startTime = (new Date()).getTime();
 	interpolator.animations[field].running = true;
-	var xml3d = document.evaluate('//xml3d:xml3d', document, function() {
-		return org.xml3d.xml3dNS;
-	}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-	
-	if (xml3d && xml3d.update)
-		interpolator.animations[field].updateElement = xml3d;
 	
 	return interpolator.animations[field];
 };
@@ -161,6 +155,8 @@ org.xml3d.animation.XML3DAnimationManager.prototype.progress = function()
 	{
 		this.interpolators[i].progressAll(time);
 	}
+	if(this.updateElement)
+		this.updateElement.update();
 };
 
 
@@ -210,9 +206,6 @@ org.xml3d.animation.X3DInterpolation.prototype.progress = function(anim, time) {
 		anim.running = false;
 	}
 	anim.node[anim.attribute] = this.getValue( key );
-	if (anim.updateElement) {
-		anim.updateElement.update();
-	}
 };
 
 org.xml3d.animation.X3DInterpolation.prototype.initialize = function() {};

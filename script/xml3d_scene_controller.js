@@ -1,121 +1,151 @@
+//Check, if basics have already been defined
 var org;
-if (!org)
-	org = {};
-else if (typeof org != "object")
-	throw new Error("org already exists and is not an object");
+if (!org || !org.xml3d)
+  throw new Error("xml3d.js has to be included first");
 
-if (!org.xml3d)
-	org.xml3d = {};
-else if (typeof org.xml3d != "object")
-	throw new Error("org.xml3d already exists and is not an object");
+if (!org.xml3d.util)
+	org.xml3d.util = {};
+else if (typeof org.xml3d.util != "object")
+	throw new Error("org.xml3d.util already exists and is not an object");
 
-org.xml3d.Xml3dSceneController = function(canvas, xml3d) {
-	var self = this;
-	this.buildIn = xml3d.style !== undefined;
+org.xml3d.util.Timer = function() {
+	this.start();
+};
 
-	this.xml3d = this.buildIn ? canvas : xml3d;
-	this.canvas = canvas;
+org.xml3d.util.Timer.prototype.restart = function() {
+	var prevTime = this.time;
+	this.start();
+	return this.time - prevTime;
+};
+
+org.xml3d.util.Timer.prototype.start = function() {
+	this.time = new Date().getTime();
+};
+
+
+org.xml3d.Camera = function(view) {
+	this.view = view;
+};
+
+org.xml3d.Camera.prototype.__defineGetter__("orientation", function() { return this.view.orientation; });
+org.xml3d.Camera.prototype.__defineGetter__("position", function() { return this.view.position; });
+org.xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { /*org.xml3d.debug.logError("Orientation: " + orientation);*/ this.view.orientation = orientation; });
+org.xml3d.Camera.prototype.__defineSetter__("position", function(position) { this.view.position = position; });
+org.xml3d.Camera.prototype.__defineGetter__("direction", function() { return this.view.getDirection(); });
+org.xml3d.Camera.prototype.__defineGetter__("fieldOfView", function() { return this.view.fieldOfView; });
+
+org.xml3d.Camera.prototype.rotateAroundPoint = function(q0, p0) {
+	//org.xml3d.debug.logError("Orientation: " + this.orientation.multiply(q0).normalize());
+	var tmp = this.orientation.multiply(q0);
+	tmp.normalize();
+	this.orientation = tmp;
+	var trans = new XML3DRotation(this.inverseTransformOf(q0.axis), q0.angle).rotateVec3(this.position.subtract(p0));
+	this.position = p0.add(trans);
+};
+
+org.xml3d.Camera.prototype.rotate = function(q0) {
+	this.orientation = this.orientation.multiply(q0).normalize();
+};
+
+org.xml3d.Camera.prototype.translate = function(t0) {
+	this.position = this.position.add(t0);
+};
+
+org.xml3d.Camera.prototype.inverseTransformOf = function(vec) {
+	return this.orientation.rotateVec3(vec);
+};
+
+org.xml3d.Xml3dSceneController = function(xml3d) {
+	this.webgl = xml3d.style === undefined;
+
+	this.xml3d = xml3d;
+	this.canvas = this.webgl ?  xml3d.canvas : xml3d;
 	
-	this.camera = this.getView(xml3d);
-	if (!this.camera)
+	var view = this.getView();
+	if (!view)
 	{
 		org.xml3d.debug.logWarning("No view found, rendering disabled!");
-		/*var view = document.createElementNS(org.xml3d.xml3dNS, 'view');	
-		view.setAttribute("position", "0 0 -10");
-		xml3d.insertBefore(view, xml3d.firstChild);
-		this.camera = view;
-		*/
-		xml3d.update(); // TODO: Test
+		if (xml3d.update)
+			xml3d.update(); // TODO: Test
 	}
-	var InputPanelId = null;
-
-	this.old_x = -1;
-	this.old_y = -1;
-	this.yaw = 0;
-	this.pitch = 0;
-	
-	this.createVec3 = function(x, y, z){
-		var res = this.xml3d.createXML3DVec3();
-		res.x = x; res.y = y; res.z = z;
-		return res;
-	};
-
-	this.UPVECTOR = this.createVec3(0, 1, 0);
-	this.ZVECTOR = this.createVec3(0, 0, -1);
-	
-	this.moveSpeedElement = document.getElementById("moveSpeed");
-	this.useKeys = document.getElementById("useKeys");
-
-	if (!this.xml3d || !this.camera)
+	if (!this.xml3d || !view)
 	{
 		org.xml3d.debug.logError("Could not initialize Camera Controller.");
 		return;
 	}
-		
-
+	org.xml3d.debug.logWarning("View: " + view);
+	this.camera = new org.xml3d.Camera(view);
+	this.timer = new org.xml3d.util.Timer();
+	this.prevPos = function() {
+		this.x = -1;
+		this.y = -1;
+	};
 	
-	this.rotateSpeed = 0.005;
-
-	this.canvas.addEventListener("mousedown", function(event) {
-		self.startDrag(event);
-	}, false);
-	document.addEventListener("mouseup", function(event) {
-		self.stopDrag(event);
-	}, false);
-	document.addEventListener("mousemove", function(event) {
-		self.manageDrag(event);
-	}, false);
-	document.addEventListener("contextmenu", function(event) {
-		self.stopEvent(event);
-	}, false);
-	if (this.useKeys) {
-		document.addEventListener("keydown", function(event) {
-			self.keyHandling(event);
-		}, false);
-	}
+	this.revolveAroundPoint = new XML3DVec3(0, 0, 0);
+	this.rotateSpeed = 1;
+	this.zoomSpeed = 20;
+	this.spinningSensitivity = 0.3;
+	this.isSpinning = false;
 	
-	if(this.buildIn)
+	this.UPVECTOR = new XML3DVec3(0, 1, 0);
+	this.ZVECTOR = new XML3DVec3(0, 0, -1);
+	
+	this.moveSpeedElement = document.getElementById("moveSpeed");
+	this.useKeys = document.getElementById("useKeys");
+
+	this.attach();
+	
+	if(!this.webgl)
 	{
 		this.setUpdateFrequence(30);
 	}
-
-	// Create Input Panel
-	if (InputPanelId) {
-		this.inputPanel = document.getElementById(InputPanelId);
-		this.inputForm = document.createElement("form");
-		this.inputPanel.appendChild(this.inputForm);
-		this.inputPosX = this.createInput("PositionX", this.inputForm);
-		this.inputPosY = this.createInput("PositionY", this.inputForm);
-		this.inputPosZ = this.createInput("PositionZ", this.inputForm);
-		this.inputDirX = this.createInput("DirectionX", this.inputForm);
-		this.inputDirY = this.createInput("DirectionY", this.inputForm);
-		this.inputDirZ = this.createInput("DirectionZ", this.inputForm);
-		this.submit = document.createElement("input");
-		this.submit.type = "submit";
-		this.submit.name = "update";
-		this.submit.value = "Update";
-		this.inputForm.appendChild(this.submit);
-		this.inputForm.addEventListener("submit", function(event) {
-			self.takeInput(event);
-		}, false);
-		this.updateInput();
-	}
-
 };
 
-org.xml3d.Xml3dSceneController.prototype.getView = function(xml3dElem) {
+org.xml3d.Xml3dSceneController.prototype.attach = function() {
+	var self = this;
+	this._evt_mousedown = function(e) {self.mousePressEvent(e);};
+	this._evt_mouseup = function(e) {self.mouseReleaseEvent(e);};
+	this._evt_mousemove = function(e) {self.mouseMoveEvent(e);};
+	this._evt_contextmenu = function(e) {self.stopEvent(e);};
+	this._evt_keydown = function(e) {self.keyHandling(e);};
+	
+	this.canvas.addEventListener("mousedown", this._evt_mousedown, false);
+	document.addEventListener("mouseup", this._evt_mouseup, false);
+	document.addEventListener("mousemove",this._evt_mousemove, false);
+	this.canvas.addEventListener("contextmenu", this._evt_contextmenu, false);
+	if (this.useKeys)
+		document.addEventListener("keydown", this._evt_keydown, false);
+};
+
+org.xml3d.Xml3dSceneController.prototype.detach = function() {
+	this.canvas.removeEventListener("mousedown", this._evt_mousedown, false);
+	document.removeEventListener("mouseup", this._evt_mouseup, false);
+	document.removeEventListener("mousemove",this._evt_mousemove, false);
+	this.canvas.removeEventListener("contextmenu", this._evt_contextmenu, false);
+	if (this.useKeys)
+		document.removeEventListener("keydown", this._evt_keydown, false);
+};
+
+org.xml3d.Xml3dSceneController.prototype.__defineGetter__("width", function() { return this.canvas.width;});
+org.xml3d.Xml3dSceneController.prototype.__defineGetter__("height", function() { return this.canvas.height;});
+
+org.xml3d.Xml3dSceneController.prototype.getView = function() {
 	var activeView = null;
-	var activeViewStr = xml3dElem.activeView;
+	var activeViewStr = this.xml3d.activeView ? this.xml3d.activeView : this.xml3d.getAttribute("activeView");
+	org.xml3d.debug.logWarning("Active View: " + activeViewStr);
+	
 	if (activeViewStr)
 	{
 		if (activeViewStr.indexOf('#') == 0)
 			activeViewStr = activeViewStr.replace('#', '');
-		activeView = org.xml3d.document.getElementById(activeViewStr);
+		org.xml3d.debug.logWarning("Trying to resolve view '" + activeViewStr +"'");
+		activeView = document.getElementById(activeViewStr);
 	}
 	// if activeView is not defined or the reference is not valid
 	// use the first view element
 	if (!activeView)
 	{
+		org.xml3d.debug.logWarning("No view referenced. Trying to use first view.");
 		activeView =  document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
 			return org.xml3d.xml3dNS;
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -155,7 +185,6 @@ org.xml3d.Xml3dSceneController.prototype.update = function() {
 		this.needUpdate = false;
 		if (this.xml3d.update)
 			this.xml3d.update();
-		this.updateInput();
 	}
 };
 
@@ -169,153 +198,104 @@ org.xml3d.Xml3dSceneController.prototype.setUpdateFrequence = function(
 	}, frequence);
 };
 
-org.xml3d.Xml3dSceneController.prototype.startDrag = function(event) {
-	// if (event.preventDefault) {
-	// event.preventDefault();
-	// }
+org.xml3d.Xml3dSceneController.prototype.NO_MOUSE_ACTION = 0;
+org.xml3d.Xml3dSceneController.prototype.TRANSLATE = 1;
+org.xml3d.Xml3dSceneController.prototype.ZOOM = 2;
+org.xml3d.Xml3dSceneController.prototype.ROTATE = 3;
+
+org.xml3d.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 
 	this.stopEvent(event);
-
 	ev = event || window.event;
 
-	this.dragButton = (ev.which || ev.button);
-	this.dragActive = true;
-	this.old_x = ev.pageX;
-	this.old_y = ev.pageY;
+	var button = (ev.which || ev.button);
+	switch (button) {
+		case 1:
+			this.action = this.ROTATE;
+			break;
+		case 2:
+			this.action = this.TRANSLATE;
+			break;
+		case 3:
+			this.action = this.ZOOM;
+			break;
+		default:
+			this.action = this.NO_MOUSE_ACTION;
+	}
+	
+	this.prevPos.x = ev.pageX;
+	this.prevPos.y = ev.pageY;
 
 	return false;
 };
 
-org.xml3d.Xml3dSceneController.prototype.stopDrag = function(event) {
+org.xml3d.Xml3dSceneController.prototype.mouseReleaseEvent = function(event) {
 	this.stopEvent(event);
-	this.dragActive = false;
+	
+	//if (this.action == this.ROTATE && this.mouseSpeed > this.spinningSensitivity)
+	//	this.startSpinning();
+	
+	this.action = this.NO_MOUSE_ACTION;
 	return false;
 };
 
-org.xml3d.Xml3dSceneController.prototype.manageDrag = function(event) {
+org.xml3d.Xml3dSceneController.prototype.startSpinning = new function() {
+	this.isSpinning = true;
+	// TODO
+};
+
+org.xml3d.Xml3dSceneController.prototype.computeMouseSpeed = function(event) {
+	var dx = (event.pageX - this.prevPos.x);
+	var dy = (event.pageY - this.prevPos.y);
+	var dist = Math.sqrt(+dx*dx + dy*+dy);
+	this.delay = this.timer.restart();
+	if (this.delay == 0)
+	    this.mouseSpeed = dist;
+	  else
+	    this.mouseSpeed = dist/this.delay;
+	org.xml3d.debug.logWarning("Mouse speed: " + this.mouseSpeed);
+};
+
+org.xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
 	this.stopEvent(event);
 
 	ev = event || window.event;
 
-	/*
-	 * var direction = this.camera.direction; var up = this.camera.up; up.x =
-	 * up.z = 0; up.y = 1;
-	 */
+	switch(this.action) {
+		case(this.TRANSLATE):
+			var f = 2.0* Math.tan(this.camera.fieldOfView/2.0) / this.height;
+			var dx = f*(ev.pageX - this.prevPos.x);
+			var dy = f*(ev.pageY - this.prevPos.y);
+			var trans = new XML3DVec3(dx, dy, 0.0);
+			this.camera.translate(this.camera.inverseTransformOf(trans));
+			break;
+		case(this.ZOOM):
+			var dy = this.zoomSpeed * (ev.pageY - this.prevPos.y) / this.height;
+			this.camera.translate(this.camera.inverseTransformOf(new XML3DVec3(0, 0, dy)));
+			break;
+		case(this.ROTATE):
+			
+			var dx = -this.rotateSpeed * (ev.pageX - this.prevPos.x) * 2.0 * Math.PI / this.width;
+			var dy = -this.rotateSpeed * (ev.pageY - this.prevPos.y) * 2.0 * Math.PI / this.height;
 
-	if (this.dragActive) {
-		if (this.dragButton == 1) {
-			this.rotate(ev);
-		}
-		if (this.dragButton == 3) {
-			this.dolly(ev);
-		}
+			var mx = new XML3DRotation(new XML3DVec3(0,1,0), dx);
+			var my = new XML3DRotation(new XML3DVec3(1,0,0), dy);
+			//this.computeMouseSpeed(ev);
+			this.camera.rotateAroundPoint(mx.multiply(my), this.revolveAroundPoint);
+			break;
+	}
+	
+	if (this.action != this.NO_MOUSE_ACTION)
+	{
 		this.needUpdate = true;
+		this.prevPos.x = ev.pageX;
+		this.prevPos.y = ev.pageY;
+		event.returnValue = false;
 	}
 	return false;
 };
 
-org.xml3d.Xml3dSceneController.prototype.dolly = function(ev) {
 
-	var dy = (ev.pageY - this.old_y);
-	if(this.camera.getDirection !== undefined){
-		var dir = this.camera.getDirection();
-		this.camera.position = this.camera.position.add(dir.scale(-dy * 0.5));
-	} else {
-		var direction = this.camera.orientation.rotateVec(this.ZVECTOR)
-				.normalised();
-		this.camera.position = this.camera.position.add(direction
-				.scale(-dy * 0.5));
-	}
-
-	this.old_x = ev.pageX;
-	this.old_y = ev.pageY;
-
-};
-
-org.xml3d.Xml3dSceneController.prototype.rotate = function(ev) {
-
-	var dx = (ev.pageX - this.old_x) * this.rotateSpeed;
-	var dy = (ev.pageY - this.old_y) * this.rotateSpeed;
-
-	if (this.camera.getDirection !== undefined) {
-
-		var dir = this.camera.getDirection();
-		
-		if (dx) {
-			this.yaw -= dx;
-			
-			/*if(this.yaw < -1.5)
-				this.yaw += 1.5;
-			if(this.yaw > 2)
-				this.yaw -= 2;*/
-			
-		}
-		if (dy) {
-			this.pitch -= dy;
-			
-			if(this.pitch < -1.5)
-				this.pitch = -1.5;
-			if(this.pitch > 1.5)
-				this.pitch = 1.5;
-		}
-		if (this.buildIn)
-		{
-			var newdir = this.ZVECTOR;
-			var rot1 = this.ZVECTOR.cross(this.UPVECTOR);
-			var m = new XML3DMatrix().rotateAxisAngle(new XML3DRotation(rot1,this.pitch));
-			var newdir = m.multiply(newdir);
-			
-			var rot2 = this.UPVECTOR;
-			var m = new XML3DMatrix().rotateAxisAngle(new XML3DRotation(rot2,this.yaw));
-			var newdir = m.multiply(newdir);
-			dir.x = newdir.x;
-			dir.y = newdir.y;
-			dir.z = newdir.z;
-			this.camera.setUpVector(this.UPVECTOR);
-			this.camera.setDirection(dir);
-		} else {			
-			var rz = new XML3DRotation();
-			rz.setAxisAngle(this.ZVECTOR, 0);
-			var rx = new XML3DRotation();
-			rx.setAxisAngle(this.ZVECTOR.cross(this.UPVECTOR), this.pitch);
-			var ry = new XML3DRotation();
-			ry.setAxisAngle(this.UPVECTOR, this.yaw);
-
-			var rot = rz.mult(ry.mult(rx));
-			this.camera.orientation = rot;
-			
-		}
-	} else {
-		var direction = this.camera.orientation.rotateVec(this.ZVECTOR)
-				.normalised();
-		var up = this.camera.orientation.rotateVec(this.UPVECTOR).normalised();
-
-		if (dx) {
-			var s = Math.sin(dx);
-			var c = Math.cos(dx);
-			var length1 = Math.sqrt(direction.x * direction.x + direction.z
-					* direction.z);
-			direction.x = c * direction.x - s * direction.z;
-			direction.z = s * direction.x + c * direction.z;
-			length1 /= Math.sqrt(direction.x * direction.x + direction.z
-					* direction.z);
-			direction.x = direction.x * length1;
-			direction.z = direction.z * length1;
-		}
-		if (dy) {
-			var rotVec = direction.cross(up);
-			var rot = org.xml3d.dataTypes.Quaternion.axisAngle(rotVec, -dy);
-			direction = rot.rotateVec(direction).normalised();
-		}
-		var xAxis = direction.cross(up);
-		this.camera.orientation = org.xml3d.dataTypes.Quaternion.fromBasis(
-				xAxis, xAxis.cross(direction), direction.negate());
-	}
-
-	this.old_x = ev.pageX;
-	this.old_y = ev.pageY;
-
-};
 
 // -----------------------------------------------------
 // key movement
@@ -377,49 +357,74 @@ org.xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 	this.preventDefault(e);
 };
 
-org.xml3d.Xml3dSceneController.prototype.createInput = function(inputName,
-		panel) {
-	panel.appendChild(document.createTextNode(inputName + ": "));
-	var input = document.createElement("input");
-	input.type = "text";
-	input.style.width = "10em";
-	input.name = inputName;
-	panel.appendChild(input);
-	panel.appendChild(document.createElement("br"));
-	return input;
-};
+(function() {
 
-org.xml3d.Xml3dSceneController.prototype.updateInput = function() {
-	if (this.inputPanel) {
-		this.inputPosX.value = this.camera.position.x;
-		this.inputPosY.value = this.camera.position.y;
-		this.inputPosZ.value = this.camera.position.z;
-		this.inputDirX.value = this.camera.direction.x;
-		this.inputDirY.value = this.camera.direction.y;
-		this.inputDirZ.value = this.camera.direction.z;
-	}
-};
+	var onload = function() {
+		var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d') );
 
-org.xml3d.Xml3dSceneController.prototype.takeInput = function(e) {
-	if (this.inputPanel) {
-		this.camera.position.x = this.inputPosX.value;
-		this.camera.position.y = this.inputPosY.value;
-		this.camera.position.z = this.inputPosZ.value;
-		this.camera.direction.x = this.inputDirX.value;
-		this.camera.direction.y = this.inputDirY.value;
-		this.camera.direction.z = this.inputDirZ.value;
-		this.needUpdate = true;
-		this.update();
-	}
-	this.preventDefault(e);
-};
+		org.xml3d.Xml3dSceneController.controllers = new Array();
+		for(var node in xml3dList) {
+			org.xml3d.debug.logInfo("Attaching Controller to &lt;xml3d&gt; element.");
+			org.xml3d.Xml3dSceneController.controllers[node] = new org.xml3d.Xml3dSceneController(xml3dList[node]);
+		};
+	};
+	var onunload = function() {
+		for(var i in org.xml3d.Xml3dSceneController.controllers)
+		{
+			org.xml3d.Xml3dSceneController.controllers[i].detach();
+		}
+	};
+	
+	window.addEventListener('load', onload, false);
+	window.addEventListener('unload', onunload, false);
+	window.addEventListener('reload', onunload, false);
 
-org.xml3d.Xml3dSceneController.prototype.setAnimation = function(active) {
-	this.animation = active;
-	this.xml3d.setAnimation(active);
-};
+})();
 
-org.xml3d.Xml3dSceneController.prototype.reset = function() {
-	this.xml3d.reset();
-	this.needUpdate = true;
-};
+
+//org.xml3d.Xml3dSceneController.prototype.createInput = function(inputName,
+//		panel) {
+//	panel.appendChild(document.createTextNode(inputName + ": "));
+//	var input = document.createElement("input");
+//	input.type = "text";
+//	input.style.width = "10em";
+//	input.name = inputName;
+//	panel.appendChild(input);
+//	panel.appendChild(document.createElement("br"));
+//	return input;
+//};
+//
+//org.xml3d.Xml3dSceneController.prototype.updateInput = function() {
+//	if (this.inputPanel) {
+//		this.inputPosX.value = this.camera.position.x;
+//		this.inputPosY.value = this.camera.position.y;
+//		this.inputPosZ.value = this.camera.position.z;
+//		this.inputDirX.value = this.camera.direction.x;
+//		this.inputDirY.value = this.camera.direction.y;
+//		this.inputDirZ.value = this.camera.direction.z;
+//	}
+//};
+//
+//org.xml3d.Xml3dSceneController.prototype.takeInput = function(e) {
+//	if (this.inputPanel) {
+//		this.camera.position.x = this.inputPosX.value;
+//		this.camera.position.y = this.inputPosY.value;
+//		this.camera.position.z = this.inputPosZ.value;
+//		this.camera.direction.x = this.inputDirX.value;
+//		this.camera.direction.y = this.inputDirY.value;
+//		this.camera.direction.z = this.inputDirZ.value;
+//		this.needUpdate = true;
+//		this.update();
+//	}
+//	this.preventDefault(e);
+//};
+//
+//org.xml3d.Xml3dSceneController.prototype.setAnimation = function(active) {
+//	this.animation = active;
+//	this.xml3d.setAnimation(active);
+//};
+//
+//org.xml3d.Xml3dSceneController.prototype.reset = function() {
+//	this.xml3d.reset();
+//	this.needUpdate = true;
+//};

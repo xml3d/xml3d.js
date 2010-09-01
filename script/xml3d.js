@@ -86,12 +86,14 @@ document.getElementById = function(id) {
 		if (activateLog) {
 			org.xml3d.debug.activate();
 		}
-		org.xml3d.debug.logInfo("Found " + x3ds.length + " xml3d nodes...");
+		if(org.xml3d.debug)
+			org.xml3d.debug.logInfo("Found " + x3ds.length + " xml3d nodes...");
 		
 		if (x3ds.length) {
 			org.xml3d._xml3d = x3ds[0];
 			if (org.xml3d._native) {
-				org.xml3d.debug.logInfo("Using native implementation...");
+				if(org.xml3d.debug)
+					org.xml3d.debug.logInfo("Using native implementation...");
 				return;
 			}
 		}

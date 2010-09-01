@@ -1,16 +1,9 @@
-// Create global symbol org
+//Check, if basics have already been defined
 var org;
-if (!org)
-	org = {};
-else if (typeof org != "object")
-	throw new Error("org already exists and is not an object");
+if (!org || !org.xml3d)
+  throw new Error("xml3d.js has to be included first");
 
-if (!org.xml3d)
-	org.xml3d = {};
-else if (typeof org.xml3d != "object")
-	throw new Error("org.xml3d already exists and is not an object");
-
-// Create global symbol org.xml3d
+// Create global symbol org.xml3d.webgl
 if (!org.xml3d.webgl)
 	org.xml3d.webgl = {};
 else if (typeof org.xml3d.webgl != "object")

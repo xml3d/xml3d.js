@@ -42,6 +42,9 @@ org.xml3d.tests.XML3DRotation.functs = [
 "setAxisAngleValue",
 "toMatrix",
 "rotateVec3",
+"interpolate",
+"multiply",
+"normalize",
 ];
 org.xml3d.tests.XML3DMatrix = {};
 org.xml3d.tests.XML3DMatrix.functs = [

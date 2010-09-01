@@ -161,15 +161,13 @@ org.xml3d.XML3DNodeFactory.prototype.create = function(node, context) {
 
 org.xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(value) {
 	var result = new XML3DVec3();
-	if (value && value.length)
-		result.setVec3Value(value);
+	result.setVec3Value(value);
 	return result;
 };
 
 org.xml3d.XML3DNodeFactory.createXML3DRotationFromString = function(value) {
 	var result = new XML3DRotation();
-	if (value && value.length)
-		result.setAxisAngleValue(value);
+	result.setAxisAngleValue(value);
 	return result;
 };
 
@@ -193,6 +191,7 @@ org.xml3d.XML3DDocument.prototype.createCanvas = function(xml3dElement) {
 	var canvas = new org.xml3d.XML3DCanvas(xml3dElement);
 	if (canvas.gl) {
 		this.initXml3d(xml3dElement);
+		canvas.root = xml3dElement;
 		this.canvases.push(canvas);
 		canvas.onload();
 	}
@@ -232,7 +231,7 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 
 org.xml3d.XML3DDocument.prototype.onAdd = function(e) {
 	try {
-		org.xml3d.document.getNode(e.target);
+		this.getNode(e.target);
 	} catch (e) {
 		org.xml3d.debug.logError("Exception in configuring node:");
 		org.xml3d.debug.logException(e);
@@ -276,18 +275,9 @@ org.xml3d.XML3DDocument.prototype.getNode = function(element) {
 	return this.factory.create(element, ctx);
 };
 
-org.xml3d.XML3DDocument.prototype.getElementById = function(id) {
-	return this.parentDocument.evaluate('//*[@id="' + id + '"]', this.parentDocument, function() {
-		return org.xml3d.xml3dNS;
-	}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-};
-
 org.xml3d.XML3DDocument.prototype.resolve = function(uriStr) {
 		return org.xml3d.URIResolver.resolve(this, uriStr);
 };
-
-org.xml3d.document = new org.xml3d.XML3DDocument(document);
-
 
 //-----------------------------------------------------------------------------
 //Class Notification
@@ -614,6 +604,7 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 	node.createXML3DVec3 = org.xml3d.methods.xml3dCreateXML3DVec3;
 	node.createXML3DRotation = org.xml3d.methods.xml3dCreateXML3DRotation;
 	node.createXML3DMatrix = org.xml3d.methods.xml3dCreateXML3DMatrix;
+	node.getElementByPoint = org.xml3d.methods.xml3dGetElementByPoint;
 	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.xml3d, org.xml3d.classInfo.XML3DBaseType);
@@ -1138,7 +1129,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DTransformProviderType.configure(node, context);
 	  node.__defineSetter__("translation", 
 	      function (value) {
-	        //org.xml3d.debug.logInfo("Setter: " + typeof value);
+	        //org.xml3d.debug.logInfo("Setter: " + value);
 	        var oldValue = this._translation;
 	        if (typeof value == 'string')
 	        	this._translation = org.xml3d.XML3DNodeFactory.createXML3DVec3FromString(value);
@@ -1147,7 +1138,7 @@ org.xml3d.classInfo.transform.configure = function(node, context) {
 	        
 	        if (this.notificationRequired())
             	this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "translation", oldValue, this._translation));
-	        
+	      
 	      }
 	  );
 	  node.__defineGetter__("translation", 
@@ -2603,7 +2594,7 @@ org.xml3d.classInfo.view.configure = function(node, context) {
 
 	node._position = org.xml3d.initXML3DVec3(node.getAttribute("position"), 0, 0, 0);
 	node._orientation = org.xml3d.initXML3DRotation(node.getAttribute("orientation"), 0, 0, 1, 0);
-	node._fieldOfView = org.xml3d.initFloat(node.getAttribute("fieldOfView"), 0.78539816339744828);
+	node._fieldOfView = org.xml3d.initFloat(node.getAttribute("fieldOfView"), 0.785398);
 
 
     // Node::setField

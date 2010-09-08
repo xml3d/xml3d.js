@@ -422,3 +422,27 @@ org.xml3d.util.getStyle = function(oElm, strCssRule) {
 	}
 	return strValue;
 };
+
+org.xml3d.util.setField = function(elementId, fieldName, value) {
+	var e = document.getElementById(elementId);
+	if (e) {
+		var binds = e.childNodes;
+		for (var i = 0; i < binds.length; i++) {
+			  var bind = binds[i];
+			  if (bind.nodeType === Node.ELEMENT_NODE && (bind.name == fieldName || bind.semantic == fieldName)) {
+				  var firstNode = null;
+				  for(firstNode = bind.firstChild; firstNode; firstNode = firstNode.nextSibling) {
+					  if (firstNode.nodeType === Node.ELEMENT_NODE) {
+						  if (typeof value === 'string')
+						  {
+							  while ( firstNode.hasChildNodes() ) firstNode.removeChild( firstNode.lastChild );
+							  firstNode.appendChild(document.createTextNode(value));
+							  return true;
+						  }
+					  }
+				  }
+			  }
+			}
+	}
+	return false;
+};

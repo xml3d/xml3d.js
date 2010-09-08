@@ -364,7 +364,7 @@ org.xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 
 		org.xml3d.Xml3dSceneController.controllers = new Array();
 		for(var node in xml3dList) {
-			org.xml3d.debug.logInfo("Attaching Controller to &lt;xml3d&gt; element.");
+			org.xml3d.debug.logInfo("Attaching Controller to xml3d element.");
 			org.xml3d.Xml3dSceneController.controllers[node] = new org.xml3d.Xml3dSceneController(xml3dList[node]);
 		};
 	};

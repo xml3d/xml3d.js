@@ -94,11 +94,6 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 	this.useKeys = document.getElementById("useKeys");
 
 	this.attach();
-	
-	if(!this.webgl)
-	{
-		this.setUpdateFrequence(30);
-	}
 };
 
 org.xml3d.Xml3dSceneController.prototype.attach = function() {
@@ -186,16 +181,6 @@ org.xml3d.Xml3dSceneController.prototype.update = function() {
 		if (this.xml3d.update)
 			this.xml3d.update();
 	}
-};
-
-org.xml3d.Xml3dSceneController.prototype.setUpdateFrequence = function(
-		frequence) {
-	var self = this;
-	if (this.intervalHandle)
-		clearTimeout(this.intervalHandle);
-	this.intervalHandle = setInterval(function() {
-		self.update();
-	}, frequence);
 };
 
 org.xml3d.Xml3dSceneController.prototype.NO_MOUSE_ACTION = 0;
@@ -291,6 +276,8 @@ org.xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera
 		this.prevPos.x = ev.pageX;
 		this.prevPos.y = ev.pageY;
 		event.returnValue = false;
+        
+		this.update();
 	}
 	return false;
 };

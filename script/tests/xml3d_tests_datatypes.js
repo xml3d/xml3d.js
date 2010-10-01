@@ -20,6 +20,7 @@ org.xml3d.tests.datatypes = [
 "XML3DRotation",
 "XML3DMatrix",
 "XML3DBox",
+"XML3DRay",
 ];
 
 org.xml3d.tests.XML3DVec3 = {};
@@ -62,5 +63,8 @@ org.xml3d.tests.XML3DBox.functs = [
 "center",
 "makeEmpty",
 "isEmpty",
+];
+org.xml3d.tests.XML3DRay = {};
+org.xml3d.tests.XML3DRay.functs = [
 ];
  

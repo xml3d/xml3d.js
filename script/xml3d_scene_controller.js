@@ -347,6 +347,9 @@ org.xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 (function() {
 
 	var onload = function() {
+		if (!org.xml3d._rendererFound)
+			return;
+			
 		var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d') );
 
 		org.xml3d.Xml3dSceneController.controllers = new Array();

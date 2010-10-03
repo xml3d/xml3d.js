@@ -24,17 +24,20 @@ org.xml3d.webgl.supported = function() {
 
 org.xml3d.webgl.configure = function(xml3ds) {
 
-	var sglscript=document.createElement('script');
+	/*var sglscript=document.createElement('script');
 	sglscript.setAttribute("type","text/javascript");
 	sglscript.setAttribute("src", "../../org.xml3d.renderer.webgl/script/spidergl.js");
 	document.getElementsByTagName("head")[0].appendChild(sglscript);
-	
+	*/
 	for(var i in xml3ds) {
 		// Creates a HTML <canvas> using the style of the <xml3d> Element
 		var canvas = org.xml3d.webgl.createCanvas(xml3ds[i]);
 		// Creates the gl context for the <canvas>  Element
 		var context = org.xml3d.webgl.createContext(canvas, xml3ds[i]);
+		xml3ds[i].canvas = canvas;
+		
 		context.start();
+		org.xml3d._rendererFound = true;
 	}
 };
 
@@ -69,6 +72,7 @@ org.xml3d.webgl.createCanvas = function(xml3dElement) {
 	if ((h = xml3dElement.getAttribute("height")) !== null) {
 		canvas.style.height = h;
 	}
+	canvas.id = "canvas1";
 	hideDiv.parentNode.insertBefore(canvas, hideDiv);
 	return canvas;
 };
@@ -117,6 +121,17 @@ org.xml3d.webgl.createContext = (function() {
 		}, 16);*/
 	};
 	
+	Context.prototype.getCanvasId = function() {
+		return this.canvas.id;
+	};
+	
+	Context.prototype.getCanvasWidth = function() {
+		return this.canvas.width;
+	};
+	
+	Context.prototype.getCanvasHeight = function() {
+		return this.canvas.height;
+	};
 	
 	function setupContext(canvas, xml3dElement) {
 		org.xml3d.debug.logInfo("setupContext: canvas=" + canvas);
@@ -163,12 +178,12 @@ org.xml3d.webgl.createContext = (function() {
 
 	Context.prototype.renderPick = function(scene, screenX, screenY) {
 		var gl = this.gl;
-		if (!scene.pickBuffer)
+		if (!this.pickBuffer)
 		{
 			org.xml3d.debug.logError('Picking buffer could not be created!');
 			return;
 		}
-		scene.pickBuffer.bind();
+		this.pickBuffer.bind();
 		
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		gl.clearDepth(1.0);
@@ -181,7 +196,7 @@ org.xml3d.webgl.createContext = (function() {
 		this.renderer.renderPickingPass(scene, screenX, screenY);
 		
 		gl.disable(gl.DEPTH_TEST);
-		scene.pickBuffer.unbind();
+		this.pickBuffer.unbind();
 	};
 	
 	Context.prototype.renderScene = function() {
@@ -238,13 +253,25 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(ctx, this);
 	this.lights = null;
 	this.camera = this.initCamera();
-	this.shaderMap = {};	
-	/*this.scene.pickBuffer = new SglFramebuffer(gl, canvas.width, canvas.height, 
-			[gl.RGBA], gl.DEPTH_COMPONENT16, null, {depthAsRenderbuffer : true});*/
+	this.shaderMap = {};
+	sglRegisterCanvas(ctx.getCanvasId(), this, 1.0);
+	this.ctx.pickBuffer = new SglFramebuffer(gl, ctx.getCanvasWidth(), ctx.getCanvasHeight(), 
+			[gl.RGBA], gl.DEPTH_COMPONENT16, null, {depthAsRenderbuffer : true});
 	org.xml3d.webgl.checkError(gl, "After creating picking buffer");
 };
 org.xml3d.webgl.Renderer.prototype.update = function() {
-	this.canvas.needUpdate = true;
+	//this.canvas.needUpdate = true;
+};
+
+org.xml3d.webgl.Renderer.prototype.draw = function(gl) {
+	try {
+		/*Un-comment to enable continuous rendering again*/
+		//this.ctx.renderScene(this.scene);
+	} catch (e) {
+		org.xml3d.debug.logException(e);
+		throw e;
+	}
+	
 };
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
@@ -263,7 +290,7 @@ org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 
 org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
 		objects, lights, shader) {
-	var adapter = this.factory.getAdapter(this.scene);
+	var adapter = this.factory.getAdapter(this.scene.xml3d);
 	if (adapter)
 		return adapter.collectDrawableObjects(transform, objects, lights, shader);
 	return [];
@@ -317,10 +344,10 @@ org.xml3d.webgl.Renderer.prototype.getCenter = function(adapter) {
 };
 
 org.xml3d.webgl.Renderer.prototype.render = function() {
-	var gl = this.gl;
+	var gl = this.ctx.gl;
 	var sp = null;
-	this.canvas.busyDrawing = true;
-	
+
+
 	if (!this.camera)
 		return;
 	if (this.drawableObjects === undefined || !this.drawableObjects || 
@@ -334,7 +361,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	var xform = new SglTransformStack();
 	xform.view.load(this.camera.getViewMatrix());	
 	var projMatrix = this.camera
-	.getProjectionMatrix(this.canvas.width / this.canvas.height);
+	.getProjectionMatrix(this.ctx.getCanvasWidth() / this.ctx.getCanvasHeight());
 	var viewMatrix = this.camera.getViewMatrix();
 	xform.projection.load(projMatrix);
 	
@@ -434,14 +461,12 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		}
 		
 	}
-	this.canvas.needUpdate = false;
-	this.canvas.busyDrawing = false;
+	
 	this.drawableObjects = null;
 };
 
 org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
 	try {
-		this.canvas.busyDrawing = true;
 		gl = this.gl;
 		
 		
@@ -455,7 +480,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
 		var xform = new SglTransformStack();
 		xform.view.load(this.camera.getViewMatrix());
 		var projMatrix = this.camera
-		.getProjectionMatrix(this.canvas.width / this.canvas.height);
+		.getProjectionMatrix(this.ctx.getCanvasWidth() / this.ctx.getCanvasHeight());
 		xform.projection.load(projMatrix);
 		
 		
@@ -525,10 +550,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
 			scene.currentPickPos = null;
 			scene.currentPickObj = null;
 		}	
-		this.canvas.busyDrawing = false;
 	} catch (e) {
 		org.xml3d.debug.logError(e);		
-		this.canvas.busyDrawing = false;
 	}
 	
 };
@@ -732,7 +755,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.constructor = org.xml3d.webgl
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 		"shaderProgram", (function() {
-			var gl = this.factory.gl;
+			var gl = this.factory.ctx.gl;
 			var bindables = this.getBindables();
 			if (!this.sp && this.node.hasAttribute("script")) {
 				var scriptURL = this.node.getAttribute("script");
@@ -922,7 +945,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
-	this.factory.renderer.canvas.needUpdate = true;
+	//this.factory.renderer.canvas.needUpdate = true;
 };
 
 // Adapter for <bind>
@@ -1091,7 +1114,7 @@ org.xml3d.webgl.XML3DBindRenderAdapter.prototype.getBuffer = function() {
 
 org.xml3d.webgl.XML3DBindRenderAdapter.prototype.notifyChanged = function(e) {
 	this.glValue = null;
-	this.factory.renderer.canvas.needUpdate = true;
+	//this.factory.renderer.canvas.needUpdate = true;
 };
 
 // Adapter for <mesh>
@@ -1141,7 +1164,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, parameters) {
-	var gl = this.factory.gl;
+	var gl = this.factory.ctx.gl;
 	var bindables = this.getBindables();
 	var elements = null;
 	

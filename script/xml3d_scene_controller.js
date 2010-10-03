@@ -125,17 +125,17 @@ org.xml3d.Xml3dSceneController.prototype.__defineGetter__("width", function() { 
 org.xml3d.Xml3dSceneController.prototype.__defineGetter__("height", function() { return this.canvas.height;});
 
 org.xml3d.Xml3dSceneController.prototype.getView = function() {
-	var activeView = null;
-	var activeViewStr = this.xml3d.activeView ? this.xml3d.activeView : this.xml3d.getAttribute("activeView");
-	org.xml3d.debug.logWarning("Active View: " + activeViewStr);
+	//var activeView = null;
+	var activeView = this.xml3d.activeView; //? this.xml3d.activeView : this.xml3d.getAttribute("activeView");
+	org.xml3d.debug.logWarning("Active View: " + activeView);
 	
-	if (activeViewStr)
+	/*if (activeViewStr)
 	{
 		if (activeViewStr.indexOf('#') == 0)
 			activeViewStr = activeViewStr.replace('#', '');
 		org.xml3d.debug.logWarning("Trying to resolve view '" + activeViewStr +"'");
 		activeView = document.getElementById(activeViewStr);
-	}
+	}*/
 	// if activeView is not defined or the reference is not valid
 	// use the first view element
 	if (!activeView)

@@ -7345,7 +7345,7 @@ function sglGetCanvasContext(canvasID) {
 	var canvas = document.getElementById(canvasID);
 	if (!canvas) return null;
 
-	var gl = canvas.getContext("moz-webgl");
+	var gl = canvas.getContext("experimental-webgl");
 	if (!gl) return null;
 
 	if (gl.FALSE == undefined) gl.FALSE = 0;
@@ -7857,7 +7857,8 @@ function _sglUnmanageCanvas(canvasID) {
 }
 
 function _sglManageCanvasOnLoad(canvasID, handler, updateRate) {
-	window.addEventListener("load", function() { _sglManageCanvas(canvasID, handler, updateRate); }, false);
+	//window.addEventListener("load", function() { _sglManageCanvas(canvasID, handler, updateRate); }, false);
+	_sglManageCanvas(canvasID, handler, updateRate)
 }
 
 function _sglUnmanageCanvasOnLoad(canvasID) {

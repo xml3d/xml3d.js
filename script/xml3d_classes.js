@@ -274,6 +274,12 @@ org.xml3d.XML3DDocument.prototype.resolve = function(uriStr) {
 		return org.xml3d.URIResolver.resolve(this, uriStr);
 };
 
+org.xml3d.XML3DDocument.prototype.nativeGetElementById = document.getElementById;
+
+org.xml3d.XML3DDocument.prototype.getElementById = function(id) {
+	return document.getElementById(id);
+};
+
 //-----------------------------------------------------------------------------
 //Class Notification
 //-----------------------------------------------------------------------------
@@ -295,20 +301,21 @@ org.xml3d.data.Adapter = function(factory, node) {
 	this.init = function() {
 	  // Init is called by the factory after adding the adapter to the node
 	};
-	this.notifyChanged = function(e) {
-	  // Notification from the data structure. e is of type org.xml3d.Notification.
-	};
-	this.isAdapterFor = function(aType) {
-	  return false; // Needs to be overwritten
-	};
+
+};
+org.xml3d.data.Adapter.prototype.notifyChanged = function(e) {
+	 // Notification from the data structure. e is of type org.xml3d.Notification.
+};
+org.xml3d.data.Adapter.prototype.isAdapterFor = function(aType) {
+	 return false; // Needs to be overwritten
 };
 
-
 org.xml3d.data.AdapterFactory = function() {
+	//this.parentFactory = parent;
  	// This function has to be overwritten
-	this.createAdapter = function(node) {
-		return null;
-	};
+	//this.createAdapter = function(node) {
+	//	return null;
+	//};
 	this.getAdapter = function(node, atype) {
 		if (!node || node._configured === undefined)
 			return null;
@@ -463,7 +470,7 @@ org.xml3d.classInfo.Xml3dNode.configure = function(node, c) {
 	};
 	
 	node.update = function() {
-		org.xml3d.debug.logInfo("Hit Update");
+		//org.xml3d.debug.logInfo("Hit Update");
 		// TODO  I need to be able to update...
  	};
  	

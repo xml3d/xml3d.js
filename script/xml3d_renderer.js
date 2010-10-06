@@ -1191,28 +1191,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		//Texture is not ready for rendering yet, skip this object
 		return;
 	}
-
-	
-	
-
-//---------------------------------------------
-   //TODO: test
-	var factory       = new org.xml3d.webgl.XML3DDataAdapterFactory(this);
-	var dataCollector = factory.getAdapter(this.node, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
-
-	var tmp = dataCollector.createDataTable();
-	
-	var txt = "";
-	for(key in tmp)
-	{
-		txt += key + ":" + tmp[key] + "\n\n";
-	}
-	
-	alert("createDataTable:\n" + txt);
-//---------------------------------
-	
-	
-	
 	
 	
 	org.xml3d.webgl.checkError(gl, "Error before starting render.");
@@ -1923,7 +1901,7 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 	}
 		
 	if (node.localName == "data")
-		return null;// TODO
+		return new org.xml3d.webgl.DataDataAdapter(this, node);
 	
 	org.xml3d.debug.logError("org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter: " + 
 			                 node.localName + " is not supported");
@@ -1956,6 +1934,25 @@ org.xml3d.webgl.DataAdapter = function(factory, node)
 {
 	org.xml3d.data.Adapter.call(this, factory, node);
 	this.observers = new Array();	
+	
+	this.init = function()
+	{
+		for ( var i = 0; i < this.node.childNodes.length; i++) 
+		{
+			var childNode = this.node.childNodes[i];
+		
+			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
+			{				
+				dataCollector = this.factory.getAdapter(childNode);			
+				
+				if(dataCollector)
+				{
+					dataCollector.registerObserver(this);
+				}
+			}
+		}		
+	};	
+	
 };
 org.xml3d.webgl.DataAdapter.prototype             = new org.xml3d.data.Adapter();
 org.xml3d.webgl.DataAdapter.prototype.constructor = org.xml3d.webgl.DataAdapter;
@@ -2037,10 +2034,48 @@ org.xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function()
 	// Maybe caching mechanism
 };
 
+org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
+{
+	var dataTable = new Array();
+	
+	for ( var i = 0; i < this.node.childNodes.length; i++) 
+	{
+		var childNode = this.node.childNodes[i];
+
+		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
+		{
+			var dataCollector = this.factory.getAdapter(childNode);
+			var tmpDataTable  = dataCollector.createDataTable();
+		
+			if(tmpDataTable)
+			{
+				for (key in tmpDataTable) 
+				{ 
+					dataTable[key] = tmpDataTable[key]; 
+				}				
+			}
+		}
+	}
+	
+	return dataTable;
+};
 
 org.xml3d.webgl.DataAdapter.prototype.createDataTable = function()
 {
-	// abstract
+
+//	1. If the "src" attribute is use, reuse the datatable of the referred <data> element (or file) and ignore the element's content
+	
+	var srcElement = this.node.getSrc();
+	
+	if(srcElement != null)
+	{
+		srcElement = this.factory.getAdapter(srcElement);
+		return srcElement.createDataTable();
+	}
+	else
+	{
+		return this.getDataFromChildren();
+	}
 };
 
 org.xml3d.webgl.DataAdapter.prototype.toString = function()
@@ -2119,44 +2154,26 @@ org.xml3d.webgl.MeshDataAdapter = function(factory, node)
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
 	
 	//TODO: why is init() declared as privileged method?
-	this.init = function()
-	{
-		for ( var i = 0; i < this.node.childNodes.length; i++) 
-		{
-			var childNode = this.node.childNodes[i];
-		
-			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
-			{				
-				dataCollector = this.factory.getAdapter(childNode);			
-				
-				if(dataCollector)
-				{
-					dataCollector.registerObserver(this);
-				}
-			}
-		}		
-	};
-
+//	this.init = function()
+//	{
+//		for ( var i = 0; i < this.node.childNodes.length; i++) 
+//		{
+//			var childNode = this.node.childNodes[i];
+//		
+//			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
+//			{				
+//				dataCollector = this.factory.getAdapter(childNode);			
+//				
+//				if(dataCollector)
+//				{
+//					dataCollector.registerObserver(this);
+//				}
+//			}
+//		}		
+//	};
 };
 org.xml3d.webgl.MeshDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
-org.xml3d.webgl.MeshDataAdapter.prototype.constructor = org.xml3d.webgl.DataAdapter;
-
-
-
-//org.xml3d.webgl.MeshDataAdapter.init = function()
-//{
-//	alert("---> MeshDataAdapter.prototype.init ");
-//	for ( var i = 0; i < this.node.childNodes.length; i++) 
-//	{
-//		var childNode = this.node.childNodes[i];
-//		
-//		if(childNode)
-//		{
-//			dataCollector = this.factory.getAdapter(childNode);
-//			dataCollector.registerObserver(this);
-//		}
-//	}
-//};
+org.xml3d.webgl.MeshDataAdapter.prototype.constructor = org.xml3d.webgl.MeshDataAdapter;
 
 
 org.xml3d.webgl.MeshDataAdapter.prototype.notifyDataChanged = function()
@@ -2164,34 +2181,120 @@ org.xml3d.webgl.MeshDataAdapter.prototype.notifyDataChanged = function()
 	// Maybe caching mechanism
 };
 
-org.xml3d.webgl.MeshDataAdapter.prototype.createDataTable = function()
-{
-	var dataTable = new Array();
-
-	for ( var i = 0; i < this.node.childNodes.length; i++) 
-	{
-		var childNode = this.node.childNodes[i];
-
-		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
-		{
-			var dataCollector = this.factory.getAdapter(childNode);
-			var tmpDataTable  = dataCollector.createDataTable();
-		
-			if(tmpDataTable)
-			{
-				for (key in tmpDataTable) 
-				{ 
-					dataTable[key] = tmpDataTable[key]; 
-				}				
-			}
-		}
-	}
-	
-	return dataTable;
-};
+//org.xml3d.webgl.MeshDataAdapter.prototype.createDataTable = function()
+//{
+//	var dataTable = new Array();
+//
+//	for ( var i = 0; i < this.node.childNodes.length; i++) 
+//	{
+//		var childNode = this.node.childNodes[i];
+//
+//		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
+//		{
+//			var dataCollector = this.factory.getAdapter(childNode);
+//			var tmpDataTable  = dataCollector.createDataTable();
+//		
+//			if(tmpDataTable)
+//			{
+//				for (key in tmpDataTable) 
+//				{ 
+//					dataTable[key] = tmpDataTable[key]; 
+//				}				
+//			}
+//		}
+//	}
+//	
+//	return dataTable;
+//};
 
 
 org.xml3d.webgl.MeshDataAdapter.prototype.toString = function()
+{
+	return "org.xml3d.webgl.DataDataAdapter";
+};
+
+
+//-----------------------------------------------------------------------
+
+/**
+ * Class org.xml3d.webgl.DataDataAdapter
+ * 
+ * extends: org.xml3d.data.DataAdapter
+ * 
+ * @author Benjamin Friedrich
+ * 
+ * @version  10/2010  1.0
+ */
+
+/**
+ * Constructor of org.xml3d.webgl.DataDataAdapter
+ * 
+ * @augments org.xml3d.data.DataAdapter
+ * @constructor
+ * 
+ * @param factory
+ * @param node
+ */
+org.xml3d.webgl.DataDataAdapter = function(factory, node) 
+{
+	org.xml3d.webgl.DataAdapter.call(this, factory, node);
+	
+	//TODO: why is init() declared as privileged method?
+//	this.init = function()
+//	{
+//		for ( var i = 0; i < this.node.childNodes.length; i++) 
+//		{
+//			var childNode = this.node.childNodes[i];
+//		
+//			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
+//			{				
+//				dataCollector = this.factory.getAdapter(childNode);			
+//				
+//				if(dataCollector)
+//				{
+//					dataCollector.registerObserver(this);
+//				}
+//			}
+//		}		
+//	};
+};
+org.xml3d.webgl.DataDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
+org.xml3d.webgl.DataDataAdapter.prototype.constructor = org.xml3d.webgl.DataDataAdapter;
+
+
+org.xml3d.webgl.DataDataAdapter.prototype.notifyDataChanged = function()
+{
+	// Maybe caching mechanism
+};
+
+//org.xml3d.webgl.DataDataAdapter.prototype.createDataTable = function()
+//{
+//	var dataTable = new Array();
+//
+//	for ( var i = 0; i < this.node.childNodes.length; i++) 
+//	{
+//		var childNode = this.node.childNodes[i];
+//
+//		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
+//		{
+//			var dataCollector = this.factory.getAdapter(childNode);
+//			var tmpDataTable  = dataCollector.createDataTable();
+//		
+//			if(tmpDataTable)
+//			{
+//				for (key in tmpDataTable) 
+//				{ 
+//					dataTable[key] = tmpDataTable[key]; 
+//				}				
+//			}
+//		}
+//	}
+//	
+//	return dataTable;
+//};
+
+
+org.xml3d.webgl.DataDataAdapter.prototype.toString = function()
 {
 	return "org.xml3d.webgl.MeshDataAdapter";
 };

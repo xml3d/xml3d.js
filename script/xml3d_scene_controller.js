@@ -129,13 +129,13 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 	var activeView = this.xml3d.activeView; //? this.xml3d.activeView : this.xml3d.getAttribute("activeView");
 	org.xml3d.debug.logWarning("Active View: " + activeView);
 	
-	/*if (activeViewStr)
+	if (typeof activeView=="string")
 	{
-		if (activeViewStr.indexOf('#') == 0)
-			activeViewStr = activeViewStr.replace('#', '');
-		org.xml3d.debug.logWarning("Trying to resolve view '" + activeViewStr +"'");
-		activeView = document.getElementById(activeViewStr);
-	}*/
+		if (activeView.indexOf('#') == 0)
+			activeView = activeView.replace('#', '');
+		org.xml3d.debug.logWarning("Trying to resolve view '" + activeView +"'");
+		activeView = document.getElementById(activeView);
+	}
 	// if activeView is not defined or the reference is not valid
 	// use the first view element
 	if (!activeView)

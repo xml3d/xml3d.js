@@ -163,7 +163,7 @@ document.getElementById = function(id) {
 		})('load');
 	};
 	var onunload = function() {
-		if (org.xml3d.document !== undefined)
+		if (org.xml3d.document)
 			org.xml3d.document.onunload();
 	};
 	window.addEventListener('load', onload, false);

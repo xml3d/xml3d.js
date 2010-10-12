@@ -135,7 +135,7 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 			activeView = activeView.replace('#', '');
 		org.xml3d.debug.logWarning("Trying to resolve view '" + activeView +"'");
 		activeView = document.getElementById(activeView);
-	}*/
+	}
 	// if activeView is not defined or the reference is not valid
 	// use the first view element
 	if (!activeView)

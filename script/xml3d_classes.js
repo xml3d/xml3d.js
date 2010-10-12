@@ -380,6 +380,11 @@ org.xml3d.initIntArray = function(value, defaultValue) {
 	return value ? new Int32Array(value.match(exp)) : new Int32Array(defaultValue);
 };
 
+org.xml3d.initUInt16Array = function(value, defaultValue) {
+	var exp = /([+\-0-9]+)/g;
+	return value ? new Uint16Array(value.match(exp)) : new Uint16Array(defaultValue);
+};
+
 org.xml3d.initFloatArray = function(value, defaultValue) {
 	var exp = /([+\-0-9eE\.]+)/g;
 	return value ? new Float32Array(value.match(exp)) :  new Float32Array(defaultValue);

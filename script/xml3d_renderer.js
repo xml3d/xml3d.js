@@ -419,12 +419,13 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		}
 		
 		var slights = this.lights;
+		var elements = slights.length * 3;
 		var lightParams = {
-			positions : new Array(),
-			diffuseColors : new Array(),
-			ambientColors : new Array(),
-			attenuations : new Array(),
-			visible : new Array()
+			positions : new Float32Array(elements),
+			diffuseColors : new Float32Array(elements),
+			ambientColors : new Float32Array(elements),
+			attenuations : new Float32Array(elements),
+			visible : new Float32Array(elements)
 		};
 		for ( var j = 0; j < slights.length; j++) {
 			/*var light = slights[j][1];
@@ -438,10 +439,10 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 					light.getVisibility());		*/
 			var light = slights[j][1];
 			var params = light.getParameters(sglMulM4(viewMatrix, slights[j][0]));
-			lightParams.positions = lightParams.positions.concat(params.position.data);
-			lightParams.attenuations = lightParams.attenuations.concat(params.attenuation.data);
-			lightParams.diffuseColors = lightParams.diffuseColors.concat(params.intensity.data);
-			lightParams.visible = lightParams.visible.concat(params.visibility.data);
+			lightParams.positions.set(params.position.data, j*3);
+			lightParams.attenuations.set(params.attenuation.data, j*3);
+			lightParams.diffuseColors.set(params.intensity.data, j*3);
+			lightParams.visible.set(params.visibility.data, j*3);
 		}
 
 		lightParams.ambientColors = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ];
@@ -822,7 +823,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 			
 			if (!this.sp)
 			{
-				//var sParams = this.dataAdapter.createDataTable();
+				var sParams = this.dataAdapter.createDataTable();
 				if (this.node.hasAttribute("script"))
 				{
 					var scriptURL = this.node.getAttribute("script");
@@ -831,8 +832,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 						if (this.textures[0] && sParams.scriptURL == "urn:xml3d:shader:phong")
 							scriptURL = "urn:xml3d:shader:texturedphong";
 					
-						//if (sParams.useVertexColor && sParams.useVertexColor == true)
-						//	scriptURL = scriptURL + "vcolor";
+						if (sParams.useVertexColor && sParams.useVertexColor.data == true)
+							scriptURL = scriptURL + "vcolor";
 						
 						this.sp = this.factory.renderer.getStandardShaderProgram(gl, scriptURL);
 						return this.sp;		
@@ -937,30 +938,14 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	if (!this.sp)
 		return;
 	var gl = this.factory.gl;
-	/*var bindables = this.getBindables();
-	
-	for ( var i = 0; i < bindables.length; i++) {
-		var bindable = bindables[i];
+	//set up default values for built in phong shader, 
+	//chrome won't render correctly if a required value is missing
+	parameters.diffuseColor = [1,1,1];
+	parameters.emissiveColor = [0,0,0];
+	parameters.shininess = [64];
+	parameters.specularColor = [0,0,0];
+	parameters.transparency = [0];
 
-		if (org.xml3d.isa(bindable.node.firstElementChild, org.xml3d.classInfo.texture)) {
-			//Do nothing
-		} else if (bindable.kind === org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE) {
-			var value = bindable.getGLValue();
-			if (value)
-			{
-				parameters[bindable.semantic] = value;
-			}
-		}
-	}*/
-	//This if block should be removed when the Shader data adapter is working
-	/*if (!this.dataAdapter)
-	{
-		var sParams = {};
-		sParams.diffuseColor = {};
-		sParams.diffuseColor.data = [1.0, 1.0, 0.0];
-		return sParams;
-		
-	}*/
 	var sParams = this.dataAdapter.createDataTable();
 	for (var p in sParams)
 	{
@@ -1316,24 +1301,16 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.notifyChanged = function(e) {
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(transform) {
-	//This if block should be removed when the Shader data adapter is working
+	var shader = this.getLightShader();
+	
+	//Due to the way lights are handled we need to create a data adapter here on the first
+	//run through of this method
 	if (!this.dataAdapter)
 	{
-		var params = {};
-		var t = sglMulM4V4(transform, [0.0, 0.0, 0.0, 1.0]);
-		params.position = {};
-		params.position.data = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
-		
-		params.attenuation = {};
-		params.attenuation.data = [1.0, 0.0, 0.0];
-		
-		params.intensity = {};
-		params.intensity.data = [1.0, 1.0, 1.0];
-		
-		params.visibility = {};
-		params.visibility.data = [1.0, 1.0, 1.0];
-		
-		return params;
+		var renderer = shader.factory.renderer;
+		this.dataAdapter = renderer.dataFactory.getAdapter(shader.node);
+		if(this.dataAdapter)
+			this.dataAdapter.registerObserver(renderer);
 	}
 	var params = this.dataAdapter.createDataTable();
 	
@@ -2296,7 +2273,10 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function()
 	var content = new Array();
 	
 	content['tupleSize'] = this.getTupleSize();
-	content['data'] = value;
+	if (value.length == 1)
+		content['data'] = value[0];
+	else
+		content['data'] = value;
 	result[name] = content;
 	
 	return result;

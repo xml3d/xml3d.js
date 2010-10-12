@@ -407,7 +407,8 @@ org.xml3d.initFloat4x4Array = function(value, defaultValue) {
 };
 
 org.xml3d.initBoolArray = function(value, defaultValue) {
-	return new Array();
+	var converted = value.replace(/(true)/i, "1").replace(/(false)/i, "0");
+	return new Uint8Array(converted.match(/\d/i));
 };
 
 org.xml3d.initAnyURI = function(node, defaultValue) {

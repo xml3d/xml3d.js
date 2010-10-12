@@ -1883,17 +1883,19 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.getAdapter  = function(node)
  */
 org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node) 
 {
-	if (node.localName == "mesh")
+	if (node.localName == "mesh"   ||
+		node.localName == "shader" ||
+		node.localName == "lightshader" )
 	{
-		return new org.xml3d.webgl.MeshDataAdapter(this, node);
+		return new org.xml3d.webgl.RootDataAdapter(this, node);
 	}
 	
-	if (node.localName == "float" || 
+	if (node.localName == "float"  || 
 		node.localName == "float2" || 
 		node.localName == "float3" || 
 		node.localName == "float4" || 
-		node.localName == "int" ||
-		node.localName == "bool" ||
+		node.localName == "int"    ||
+		node.localName == "bool"   ||
 		node.localName == "texture")
 	{
 		return new org.xml3d.webgl.ValueDataAdapter(this, node);
@@ -1901,7 +1903,7 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 		
 	if (node.localName == "data")
 	{
-		return new org.xml3d.webgl.DataDataAdapter(this, node);
+		return new org.xml3d.webgl.DataAdapter(this, node);
 	}
 		
 	org.xml3d.debug.logError("org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter: " + 
@@ -2046,6 +2048,14 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
 		{
 			var dataCollector = this.factory.getAdapter(childNode);
+			
+			if(dataCollector.isRootAdapter())
+			{
+				org.xml3d.debug.logWarning(childNode.localName + 
+						                   " can not be a children of another DataCollector element ==> ignored");
+				continue;
+			}
+			
 			var tmpDataTable  = dataCollector.createDataTable();
 		
 			if(tmpDataTable)
@@ -2079,6 +2089,11 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function()
 	}
 };
 
+org.xml3d.webgl.DataAdapter.prototype.isRootAdapter = function()
+{
+	return false;
+};
+
 org.xml3d.webgl.DataAdapter.prototype.toString = function()
 {
 	return "org.xml3d.webgl.DataAdapter";
@@ -2108,9 +2123,6 @@ org.xml3d.webgl.DataAdapter.prototype.toString = function()
 org.xml3d.webgl.ValueDataAdapter = function(factory, node) 
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
-	
-	
-	
 };
 org.xml3d.webgl.ValueDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.ValueDataAdapter.prototype.constructor = org.xml3d.webgl.ValueDataAdapter;
@@ -2141,7 +2153,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 		return 4;
 	}
 	
-	org.xml3d.debug.logWarning("Can not determine tuple size of elemen " + this.node.localName);
+	org.xml3d.debug.logWarning("Can not determine tuple size of element " + this.node.localName);
 	return -1;
 };
 
@@ -2157,9 +2169,9 @@ org.xml3d.webgl.ValueDataAdapter.prototype.convertDataToArray = function(data)
 
 org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function()
 {
-	var name   = this.node.name;
-	var value  = this.node.getTextContent();
-	var result = new Array(1);
+	var name    = this.node.name;
+	var value   = this.node.getTextContent();
+	var result  = new Array(1);
 	var content = new Array();
 	
 	content['tupleSize'] = this.getTupleSize();
@@ -2179,7 +2191,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
 //-----------------------------------------------------------------------
 
 /**
- * Class org.xml3d.webgl.MeshDataAdapter
+ * Class org.xml3d.webgl.RootDataAdapter
  * 
  * extends: org.xml3d.data.DataAdapter
  * 
@@ -2189,7 +2201,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
  */
 
 /**
- * Constructor of org.xml3d.webgl.MeshDataAdapter
+ * Constructor of org.xml3d.webgl.RootDataAdapter
  * 
  * @augments org.xml3d.data.DataAdapter
  * @constructor
@@ -2197,63 +2209,66 @@ org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
  * @param factory
  * @param node
  */
-org.xml3d.webgl.MeshDataAdapter = function(factory, node) 
+org.xml3d.webgl.RootDataAdapter = function(factory, node) 
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
 };
-org.xml3d.webgl.MeshDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
-org.xml3d.webgl.MeshDataAdapter.prototype.constructor = org.xml3d.webgl.MeshDataAdapter;
+org.xml3d.webgl.RootDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
+org.xml3d.webgl.RootDataAdapter.prototype.constructor = org.xml3d.webgl.RootDataAdapter;
 
 
-org.xml3d.webgl.MeshDataAdapter.prototype.notifyDataChanged = function()
+org.xml3d.webgl.RootDataAdapter.prototype.notifyDataChanged = function()
 {
 	// Maybe caching mechanism
 };
 
-
-
-org.xml3d.webgl.MeshDataAdapter.prototype.toString = function()
+org.xml3d.webgl.RootDataAdapter.prototype.isRootAdapter = function()
 {
-	return "org.xml3d.webgl.DataDataAdapter";
+	return true;
+};
+
+org.xml3d.webgl.RootDataAdapter.prototype.toString = function()
+{
+	return "org.xml3d.webgl.RootDataAdapter";
 };
 
 
 //-----------------------------------------------------------------------
+//
+///**
+// * Class org.xml3d.webgl.DataDataAdapter
+// * 
+// * extends: org.xml3d.data.DataAdapter
+// * 
+// * @author Benjamin Friedrich
+// * 
+// * @version  10/2010  1.0
+// */
 
-/**
- * Class org.xml3d.webgl.DataDataAdapter
- * 
- * extends: org.xml3d.data.DataAdapter
- * 
- * @author Benjamin Friedrich
- * 
- * @version  10/2010  1.0
- */
-
-/**
- * Constructor of org.xml3d.webgl.DataDataAdapter
- * 
- * @augments org.xml3d.data.DataAdapter
- * @constructor
- * 
- * @param factory
- * @param node
- */
-org.xml3d.webgl.DataDataAdapter = function(factory, node) 
-{
-	org.xml3d.webgl.DataAdapter.call(this, factory, node);
-};
-org.xml3d.webgl.DataDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
-org.xml3d.webgl.DataDataAdapter.prototype.constructor = org.xml3d.webgl.DataDataAdapter;
-
-
-org.xml3d.webgl.DataDataAdapter.prototype.notifyDataChanged = function()
-{
-	// Maybe caching mechanism
-};
-
-
-org.xml3d.webgl.DataDataAdapter.prototype.toString = function()
-{
-	return "org.xml3d.webgl.MeshDataAdapter";
-};
+///**
+// * Constructor of org.xml3d.webgl.DataDataAdapter
+// * 
+// * @augments org.xml3d.data.DataAdapter
+// * @constructor
+// * 
+// * @param factory
+// * @param node
+// */
+//org.xml3d.webgl.DataDataAdapter = function(factory, node) 
+//{
+//	org.xml3d.webgl.DataAdapter.call(this, factory, node);
+//};
+//org.xml3d.webgl.DataDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
+//org.xml3d.webgl.DataDataAdapter.prototype.constructor = org.xml3d.webgl.DataDataAdapter;
+//
+//
+//org.xml3d.webgl.DataDataAdapter.prototype.notifyDataChanged = function()
+//{
+//	// Maybe caching mechanism
+//};
+//
+//
+//org.xml3d.webgl.DataDataAdapter.prototype.toString = function()
+//{
+//	return "org.xml3d.webgl.DataDataAdapter";
+//};

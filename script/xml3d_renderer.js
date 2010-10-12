@@ -1885,7 +1885,7 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 {
 	if (node.localName == "mesh")
 	{
-		return new org.xml3d.webgl.MeshDataAdapter(this, node);// TODO
+		return new org.xml3d.webgl.MeshDataAdapter(this, node);
 	}
 	
 	if (node.localName == "float" || 
@@ -1896,13 +1896,14 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 		node.localName == "bool" ||
 		node.localName == "texture")
 	{
-		
-		return new org.xml3d.webgl.ValueDataAdapter(this, node);// TODO
+		return new org.xml3d.webgl.ValueDataAdapter(this, node);
 	}
 		
 	if (node.localName == "data")
+	{
 		return new org.xml3d.webgl.DataDataAdapter(this, node);
-	
+	}
+		
 	org.xml3d.debug.logError("org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter: " + 
 			                 node.localName + " is not supported");
 	return null;
@@ -2107,19 +2108,66 @@ org.xml3d.webgl.DataAdapter.prototype.toString = function()
 org.xml3d.webgl.ValueDataAdapter = function(factory, node) 
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
+	
+	
+	
 };
 org.xml3d.webgl.ValueDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.ValueDataAdapter.prototype.constructor = org.xml3d.webgl.ValueDataAdapter;
 
+
+org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function() 
+{
+	if (this.node.localName == "float" ||
+		this.node.localName == "int"   ||
+		this.node.localName == "bool"  ||
+		this.node.localName == "texture")
+	{
+		return 1;
+	}
+			
+	if (this.node.localName == "float2")
+	{
+		return 2;
+	}
+	
+	if (this.node.localName == "float3")
+	{
+		return 3;
+	}
+	
+	if (this.node.localName == "float4")
+	{
+		return 4;
+	}
+	
+	org.xml3d.debug.logWarning("Can not determine tuple size of elemen " + this.node.localName);
+	return -1;
+};
+
+
+org.xml3d.webgl.ValueDataAdapter.prototype.convertDataToArray = function(data)
+{
+	var tmpStr = data.replace(/^\s+/, '').replace(/\s+$/, '');
+	tmpStr     = tmpStr.replace(/\s+/g, ' ');
+
+	return tmpStr.split(' ');
+};
+
+
 org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function()
 {
-	var name  = this.node.name;
-	var value = this.node.getTextContent();
-	var data  = new Array(1);
+	var name   = this.node.name;
+	var value  = this.node.getTextContent();
+	var result = new Array(1);
+	var content = new Array();
 	
-	data[name] = value;
+	content['tupleSize'] = this.getTupleSize();
+	content['data']      = this.convertDataToArray(value);
 	
-	return data;
+	result[name] = content;
+	
+	return result;
 };
 
 org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
@@ -2152,25 +2200,6 @@ org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
 org.xml3d.webgl.MeshDataAdapter = function(factory, node) 
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
-	
-	//TODO: why is init() declared as privileged method?
-//	this.init = function()
-//	{
-//		for ( var i = 0; i < this.node.childNodes.length; i++) 
-//		{
-//			var childNode = this.node.childNodes[i];
-//		
-//			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
-//			{				
-//				dataCollector = this.factory.getAdapter(childNode);			
-//				
-//				if(dataCollector)
-//				{
-//					dataCollector.registerObserver(this);
-//				}
-//			}
-//		}		
-//	};
 };
 org.xml3d.webgl.MeshDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.MeshDataAdapter.prototype.constructor = org.xml3d.webgl.MeshDataAdapter;
@@ -2181,31 +2210,6 @@ org.xml3d.webgl.MeshDataAdapter.prototype.notifyDataChanged = function()
 	// Maybe caching mechanism
 };
 
-//org.xml3d.webgl.MeshDataAdapter.prototype.createDataTable = function()
-//{
-//	var dataTable = new Array();
-//
-//	for ( var i = 0; i < this.node.childNodes.length; i++) 
-//	{
-//		var childNode = this.node.childNodes[i];
-//
-//		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
-//		{
-//			var dataCollector = this.factory.getAdapter(childNode);
-//			var tmpDataTable  = dataCollector.createDataTable();
-//		
-//			if(tmpDataTable)
-//			{
-//				for (key in tmpDataTable) 
-//				{ 
-//					dataTable[key] = tmpDataTable[key]; 
-//				}				
-//			}
-//		}
-//	}
-//	
-//	return dataTable;
-//};
 
 
 org.xml3d.webgl.MeshDataAdapter.prototype.toString = function()
@@ -2238,25 +2242,6 @@ org.xml3d.webgl.MeshDataAdapter.prototype.toString = function()
 org.xml3d.webgl.DataDataAdapter = function(factory, node) 
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
-	
-	//TODO: why is init() declared as privileged method?
-//	this.init = function()
-//	{
-//		for ( var i = 0; i < this.node.childNodes.length; i++) 
-//		{
-//			var childNode = this.node.childNodes[i];
-//		
-//			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
-//			{				
-//				dataCollector = this.factory.getAdapter(childNode);			
-//				
-//				if(dataCollector)
-//				{
-//					dataCollector.registerObserver(this);
-//				}
-//			}
-//		}		
-//	};
 };
 org.xml3d.webgl.DataDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.DataDataAdapter.prototype.constructor = org.xml3d.webgl.DataDataAdapter;
@@ -2266,32 +2251,6 @@ org.xml3d.webgl.DataDataAdapter.prototype.notifyDataChanged = function()
 {
 	// Maybe caching mechanism
 };
-
-//org.xml3d.webgl.DataDataAdapter.prototype.createDataTable = function()
-//{
-//	var dataTable = new Array();
-//
-//	for ( var i = 0; i < this.node.childNodes.length; i++) 
-//	{
-//		var childNode = this.node.childNodes[i];
-//
-//		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
-//		{
-//			var dataCollector = this.factory.getAdapter(childNode);
-//			var tmpDataTable  = dataCollector.createDataTable();
-//		
-//			if(tmpDataTable)
-//			{
-//				for (key in tmpDataTable) 
-//				{ 
-//					dataTable[key] = tmpDataTable[key]; 
-//				}				
-//			}
-//		}
-//	}
-//	
-//	return dataTable;
-//};
 
 
 org.xml3d.webgl.DataDataAdapter.prototype.toString = function()

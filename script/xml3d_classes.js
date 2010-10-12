@@ -394,6 +394,10 @@ org.xml3d.initFloat2Array = function(value, defaultValue) {
 	return org.xml3d.initFloatArray(value, defaultValue);
 };
 
+org.xml3d.initFloat4Array = function(value, defaultValue) {
+	return org.xml3d.initFloatArray(value, defaultValue);
+};
+
 org.xml3d.initFloat4x4Array = function(value, defaultValue) {
 	return org.xml3d.initFloatArray(value, defaultValue);
 };

@@ -1998,6 +1998,13 @@ org.xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e)
 	this.notifyObservers();
 };
 
+//TODO: pass last node and its corresponding data table to its observers
+org.xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function()
+{
+	this.notifyObservers();
+	// Maybe caching mechanism
+};
+
 
 org.xml3d.webgl.DataAdapter.prototype.registerObserver = function(observer)
 {
@@ -2030,12 +2037,7 @@ org.xml3d.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
 };
 
 
-//TODO: pass last node and its corresponding data table to its observers
-org.xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function()
-{
-	this.notifyObservers();
-	// Maybe caching mechanism
-};
+
 
 org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 {
@@ -2217,10 +2219,10 @@ org.xml3d.webgl.RootDataAdapter.prototype             = new org.xml3d.webgl.Data
 org.xml3d.webgl.RootDataAdapter.prototype.constructor = org.xml3d.webgl.RootDataAdapter;
 
 
-org.xml3d.webgl.RootDataAdapter.prototype.notifyDataChanged = function()
-{
-	// Maybe caching mechanism
-};
+//org.xml3d.webgl.RootDataAdapter.prototype.notifyDataChanged = function()
+//{
+//	this.notifyObservers();
+//};
 
 org.xml3d.webgl.RootDataAdapter.prototype.isRootAdapter = function()
 {

@@ -477,8 +477,8 @@ org.xml3d.classInfo.Xml3dNode.configure = function(node, c) {
 	};
 	
 	node.update = function() {
-		//org.xml3d.debug.logInfo("Hit Update");
-		// TODO  I need to be able to update...
+		if (this.adapters[0])
+			this.adapters[0].factory.renderer.redraw();
  	};
  	
 	node.setField = function(event) {
@@ -2408,7 +2408,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
             	this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "type", oldValue, this._type));
 	      
 	      }
-	  );
+	  );  
 	  node.__defineGetter__("type", 
 	      function (value) {
 	        return this._type;

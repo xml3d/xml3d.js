@@ -32,7 +32,7 @@ org.xml3d.webgl.configure = function(xml3ds) {
 	*/
 	for(var i in xml3ds) {
 		// Creates a HTML <canvas> using the style of the <xml3d> Element
-		var canvas = org.xml3d.webgl.createCanvas(xml3ds[i]);
+		var canvas = org.xml3d.webgl.createCanvas(xml3ds[i], i);
 		// Creates the gl context for the <canvas>  Element
 		var context = org.xml3d.webgl.createContext(canvas, xml3ds[i]);
 		xml3ds[i].canvas = canvas;
@@ -43,7 +43,7 @@ org.xml3d.webgl.configure = function(xml3ds) {
 	}
 };
 
-org.xml3d.webgl.createCanvas = function(xml3dElement) {
+org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	// Place xml3dElement inside an invisble div
 	var hideDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
 	xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
@@ -74,7 +74,7 @@ org.xml3d.webgl.createCanvas = function(xml3dElement) {
 	if ((h = xml3dElement.getAttribute("height")) !== null) {
 		canvas.style.height = h;
 	}
-	canvas.id = "canvas1";
+	canvas.id = "canvas"+index;
 	hideDiv.parentNode.insertBefore(canvas, hideDiv);
 	return canvas;
 };
@@ -123,6 +123,11 @@ org.xml3d.webgl.createContext = (function() {
 				}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 				if (av == null)
 					org.xml3d.debug.logError("No view defined.");
+			}
+			if (typeof av == typeof "") {
+				av = this.xml3d.xml3ddocument.resolve(av);
+				if (av == null)
+					org.xml3d.debug.logError("Could not find view");
 			}
 			return av;
 		};
@@ -272,10 +277,12 @@ org.xml3d.webgl.checkError = function(gl, text)
 
 org.xml3d.webgl.Renderer = function(ctx) {
 	this.ctx = ctx;
+	this.currentView = null;
 	this.scene = ctx.scene;
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(ctx, this);
 	this.dataFactory = new org.xml3d.webgl.XML3DDataAdapterFactory(ctx);
 	this.lights = null;
+	this.needDraw = true;
 	this.camera = this.initCamera();
 	this.shaderMap = {};
 	sglRegisterCanvas(ctx.getCanvasId(), this, 30.0); //Last parameter is frames-per-second value
@@ -284,13 +291,17 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	org.xml3d.webgl.checkError(gl, "After creating picking buffer");
 };
 org.xml3d.webgl.Renderer.prototype.update = function() {
-	//this.canvas.needUpdate = true;
+	return this.needDraw;
+};
+
+org.xml3d.webgl.Renderer.prototype.redraw = function() {
+	this.needDraw = true;
 };
 
 org.xml3d.webgl.Renderer.prototype.draw = function(gl) {
 	try {
-		/*Un-comment to enable continuous rendering again*/
 		this.ctx.renderScene();
+		this.needDraw = false;
 	} catch (e) {
 		org.xml3d.debug.logException(e);
 		throw e;
@@ -300,6 +311,7 @@ org.xml3d.webgl.Renderer.prototype.draw = function(gl) {
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 	var av = this.scene.getActiveView();
+	
 	if (av == null)
 	{
 		av =  document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
@@ -307,8 +319,10 @@ org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		if (av == null)
 			org.xml3d.debug.logError("No view defined.");
+		this.currentView = av;
 		return this.factory.getAdapter(av, org.xml3d.webgl.Renderer.prototype);
 	}
+	this.currentView = av;
 	return this.factory.getAdapter(av, org.xml3d.webgl.Renderer.prototype);
 };
 
@@ -374,6 +388,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 	if (!this.camera)
 		return;
+	if (this.currentView != this.scene.getActiveView())
+		this.camera = this.initCamera();
+	
 	if (this.drawableObjects === undefined || !this.drawableObjects || 
 			this.lights === undefined || !this.lights) {
 		this.drawableObjects = [];

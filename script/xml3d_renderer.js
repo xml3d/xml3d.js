@@ -1712,16 +1712,67 @@ org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
 
 
 
+/********************************** Start of the DataCollector Implementation *************************************************/
 
+/*-----------------------------------------------------------------------
+ * XML3D Data Composition Rules:
+ * -----------------------------
+ *
+ * The elements <mesh>, <data>, <shader>, <lightshader> and any other elements that uses generic 
+ * data fields implements the behavior of a "DataCollector".
+ *
+ * The result of a DataCollector is a "datatable" - a map with "name" as key and a TypedArray
+ * (https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html)
+ * as value.
+ *
+ * The <data> element is the only DataCollector that forwards the data to parent nodes or referring nodes.
+ *
+ * For each DataCollector, data is collected with following algorithm:
+ * 
+ * 1. If the "src" attribute is used, reuse the datatable of the referred <data> element and ignore the element's content
+ * 2. If no "src" attribute is defined:
+ *    2.1 Go through each <data> element contained by the DataCollector from top to down and apply it's datatable to the result.
+ *        2.1.1 If the datatables of consecutive <data> elements define a value for the same name, the later overwrites the former.
+ *    2.2 Go through each value element (int, float1, float2 etc.) and assign it's name-value pair to the datatable, overwriting 
+ *        existing entries.
+ * 
+ *   
+ * Description of the actual Implementation:  
+ * -----------------------------------------        
+ * The DataCollector is implementation according to the Adapter concept. For each element that uses
+ * generic data (<mesh>, <data>, <float>,...) a DataAdapter is instantiated. Such a DataAdapter should
+ * be constructed via the "XML3DDataAdapterFactory" factory. The XML3DDataAdapterFactory manages all 
+ * DataAdapter instances so that for each node there is always just one DataAdapter. It is also responsible
+ * for creating the corresponding DataAdapter for an element node. In addition, when a DataAdapter is constructed 
+ * via the factory, its init method is called which ensures that all child elements have a corresponding DataAdapter.
+ * In doing so, the parent DataAdapter registers itself as observer in its child DataAdapters. When a DataCollector 
+ * element changes, all its observers are notified (those are generally its parent DataAdapter or other components 
+ * such as a renderer relying on the data of the observed element). 
+ */
 
-//-----------------------------------------------------------------------
-
-/* Data collector */
+//---------------------------------------------------------------------------------------------------------------------------
 
 /**
  * Class org.xml3d.webgl.XML3DDataAdapterFactory
- * 
  * extends: org.xml3d.data.AdapterFactory
+ * 
+ * XML3DDataAdapterFactory creates DataAdapter instances for elements using generic data (<mesh>, <data>, <float>,...).
+ * Additionally, it manages all DataAdapter instances so that for each node there is always just one DataAdapter. When
+ * it creates a DataAdapter, it calls its init method. Currently, the following elements are supported:
+ * 
+ * <ul>
+ * 		<li>mesh</li>
+ * 		<li>shader</li>
+ * 		<li>lightshader</li>
+ * 		<li>float</li>
+ * 		<li>float2</li>
+ * 		<li>float3</li>
+ * 		<li>float4</li>
+ * 		<li>int</li>
+ * 		<li>bool</li>
+ * 		<li>texture</li>
+ * 		<li>data</li>
+ * </ul>
  * 
  * @author Kristian Sons
  * @author Benjamin Friedrich
@@ -1746,21 +1797,22 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype             = new org.xml3d.da
 org.xml3d.webgl.XML3DDataAdapterFactory.prototype.constructor = org.xml3d.webgl.XML3DDataAdapterFactory;
 
 /**
- * Returns adapter 
+ * Returns a DataAdapter instance associated with the given node. If there is already a DataAdapter created for this node,
+ * this instance is returned, otherwise a new one is created. 
  * 
- * @param node
- * @returns
+ * @param   node  element node which uses generic data. The supported elements are listed in the class description above. 
+ * @returns DataAdapter instance
  */
-org.xml3d.webgl.XML3DDataAdapterFactory.prototype.getAdapter  = function(node) 
+org.xml3d.webgl.XML3DDataAdapterFactory.prototype.getAdapter = function(node) 
 {
 	return org.xml3d.data.AdapterFactory.prototype.getAdapter.call(this, node, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
 };
 
 /**
- * Creates adapter
+ * Creates a DataAdapter associated with the given node.
  * 
- * @param node
- * @returns
+ * @param   node  element node which uses generic data. The supported elements are listed in the class description above. 
+ * @returns DataAdapter instance
  */
 org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node) 
 {
@@ -1792,12 +1844,15 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 	return null;
 };
 
-//-----------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------
 
 /**
- * Class org.xml3d.webgl.DataAdapter
- * 
+ * Class org.xml3d.webgl.DataAdapter 
  * extends: org.xml3d.data.Adapter
+ * 
+ * The DataAdapter implements the DataCollector concept and serves as basis of all DataAdapter classes.
+ * In general, a DataAdapter is associated with an element node which uses generic data and should be
+ * instantiated via org.xml3d.webgl.XML3DDataAdapterFactory to ensure proper functionality.
  * 
  * @author Kristian Sons
  * @author Benjamin Friedrich
@@ -1817,8 +1872,15 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 org.xml3d.webgl.DataAdapter = function(factory, node) 
 {
 	org.xml3d.data.Adapter.call(this, factory, node);
+
 	this.observers = new Array();	
 	
+	/* Creates DataAdapter instances for the node's children and registers 
+	 * itself as observer in those children instances. This approach is needed
+	 * for being notified about changes in the child elements. If the data of
+	 * a children is changed, the whole parent element must be considered as
+	 * changed.  
+	 */
 	this.init = function()
 	{
 		for ( var i = 0; i < this.node.childNodes.length; i++) 
@@ -1834,21 +1896,14 @@ org.xml3d.webgl.DataAdapter = function(factory, node)
 					dataCollector.registerObserver(this);
 				}
 			}
-		}		
+		}
+		
+		this.createDataTable(true);
 	};	
 	
 };
 org.xml3d.webgl.DataAdapter.prototype             = new org.xml3d.data.Adapter();
 org.xml3d.webgl.DataAdapter.prototype.constructor = org.xml3d.webgl.DataAdapter;
-
-
-///**
-// * Init is called by the factory after adding the adapter to the node
-// */
-//org.xml3d.webgl.DataAdapter.prototype.init = function() 
-//{
-//	
-//};
 
 /**
  * 
@@ -1860,7 +1915,9 @@ org.xml3d.webgl.DataAdapter.prototype.isAdapterFor = function(aType)
 	return aType == org.xml3d.webgl.XML3DDataAdapterFactory.prototype;
 };
 
-
+/**
+ * Notifies all observers about data changes by calling their notifyDataChanged() method.
+ */
 org.xml3d.webgl.DataAdapter.prototype.notifyObservers = function() 
 {	
 	for(var i = 0; i < this.observers.length; i++)
@@ -1870,23 +1927,44 @@ org.xml3d.webgl.DataAdapter.prototype.notifyObservers = function()
 };
 
 /**
- * Notification from the data structure.
+ * The notifyChanged() method is called by the XML3D data structure to notify the DataAdapter about 
+ * data changes in its associating node. When this method is called, all DataAdapter observers are 
+ * notified about data changes.
  * 
  * @param e  notification of type org.xml3d.Notification
  */
 org.xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e) 
 {	
-	this.notifyObservers();
+	// this is the DataAdapter where an actual change occurs, therefore
+	// the dataTable must be recreated
+	this.notifyDataChanged();
 };
 
-//TODO: pass last node and its corresponding data table to its observers
+/**
+ * Is called when the observed DataAdapter has changed. This basic implementation
+ * does only notify all its observers about changes since an element observed by
+ * a DataAdapter should always be a child DataAdapter. This means when a child element
+ * changes, also its parent changes.
+ */
 org.xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function()
 {
+	// Notification can only come from a child DataAdapter. That's why dataTable 
+	// can be merged with this instance's datatable
+	this.createDataTable(true);
 	this.notifyObservers();
-	// Maybe caching mechanism
 };
 
-
+/**
+ * Registers an observer which is notified when the element node associated with the 
+ * data adapter changes. If the given object is already registered as observer, it
+ * is ignored.
+ * 
+ * <b>Note that there must be a notifyDataChanged() method without parameters.</b>
+ * 
+ * @param observer  
+ * 			object which shall be notified when the node associated with the
+ * 			DataAdapter changes		  
+ */
 org.xml3d.webgl.DataAdapter.prototype.registerObserver = function(observer)
 {
 	for(var i = 0; i < this.observers.length; i++)
@@ -1901,7 +1979,12 @@ org.xml3d.webgl.DataAdapter.prototype.registerObserver = function(observer)
 	this.observers.push(observer);
 };
 
-
+/**
+ * Unregisters the given observer. If the given object is not registered as observer, it is irgnored.
+ * 
+ * @param observer
+ * 			which shall be unregistered
+ */
 org.xml3d.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
 {
 	for(var i = 0; i < this.observers.length; i++)
@@ -1917,9 +2000,11 @@ org.xml3d.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
 			                   " can not be unregistered because it is not registered");
 };
 
-
-
-
+/**
+ * Returns datatable retrieved from the DataAdapter's children.
+ * 
+ * @returns datatable retrieved from the DataAdapter's children 
+ */
 org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 {
 	var dataTable = new Array();
@@ -1932,15 +2017,18 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 		{
 			var dataCollector = this.factory.getAdapter(childNode);
 			
+			/* A RootAdapter must not be a chilrden of another DataAdapter.
+			 * Therefore, its data is ignored, if it is specified as child.	 
+			 * Example: <mesh>, <shader> and <lightshader> */
 			if(dataCollector.isRootAdapter())
 			{
 				org.xml3d.debug.logWarning(childNode.localName + 
 						                   " can not be a children of another DataCollector element ==> ignored");
 				continue;
 			}
+
+			var tmpDataTable = dataCollector.createDataTable();
 			
-			var tmpDataTable  = dataCollector.createDataTable();
-		
 			if(tmpDataTable)
 			{
 				for (key in tmpDataTable) 
@@ -1954,22 +2042,31 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 	return dataTable;
 };
 
-org.xml3d.webgl.DataAdapter.prototype.createDataTable = function()
+org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
 {
-
-//	1. If the "src" attribute is use, reuse the datatable of the referred <data> element (or file) and ignore the element's content
+	if(forceNewInstance == undefined ? true : ! forceNewInstance)
+	{
+	   return this.dataTable;
+	}
 	
 	var srcElement = this.node.getSrc();
+	var dataTable;
 	
-	if(srcElement != null)
+	if(srcElement == null)
 	{
-		srcElement = this.factory.getAdapter(srcElement);
-		return srcElement.createDataTable();
+		dataTable = this.getDataFromChildren();
 	}
 	else
 	{
-		return this.getDataFromChildren();
+		// If the "src" attribute is use, reuse the datatable of the referred <data> element (or file) 
+		// and ignore the element's content
+		srcElement = this.factory.getAdapter(srcElement);
+		dataTable  = srcElement.createDataTable();
 	}
+	
+	this.dataTable = dataTable;
+	
+	return dataTable;
 };
 
 org.xml3d.webgl.DataAdapter.prototype.isRootAdapter = function()
@@ -1982,7 +2079,7 @@ org.xml3d.webgl.DataAdapter.prototype.toString = function()
 	return "org.xml3d.webgl.DataAdapter";
 };
 
-//-----------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------
 
 /**
  * Class org.xml3d.webgl.ValueDataAdapter
@@ -2006,6 +2103,10 @@ org.xml3d.webgl.DataAdapter.prototype.toString = function()
 org.xml3d.webgl.ValueDataAdapter = function(factory, node) 
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
+	this.init = function()
+	{
+		this.createDataTable(true);
+	};	
 };
 org.xml3d.webgl.ValueDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.ValueDataAdapter.prototype.constructor = org.xml3d.webgl.ValueDataAdapter;
@@ -2040,29 +2141,45 @@ org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 	return -1;
 };
 
-
-org.xml3d.webgl.ValueDataAdapter.prototype.convertDataToArray = function(data)
-{
-	var tmpStr = data.replace(/^\s+/, '').replace(/\s+$/, '');
-	tmpStr     = tmpStr.replace(/\s+/g, ' ');
-
-	return tmpStr.split(' ');
-};
-
-
-org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function()
-{
+org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewInstance)
+{	
+	if(forceNewInstance == undefined ? true : ! forceNewInstance)
+	{
+	   return this.dataTable;
+	}
+	
 	var name  = this.node.name;
-	var value = this.node.value;
+	var value;
+	
+	if (name == "index")
+	{
+		value = this.node.getTextContent();
+		value = org.xml3d.initUInt16Array(value, null);
+	} 
+	else 
+	{
+		value = this.node.value;
+	}
+	
 	var result  = new Array(1);
 	var content = new Array();
 	
 	content['tupleSize'] = this.getTupleSize();
-	if (value.length == 1)
-		content['data'] = value[0];
-	else
-		content['data'] = value;
+	
+//	if (value.length == 1)
+//	{
+//		content['data'] = value[0];
+//	}
+//	else
+//	{
+//		content['data'] = value;
+//	}
+		
 	result[name] = content;
+	
+	content['data']      = value;
+	result[name]         = content;
+	this.dataTable       = result;
 	
 	return result;
 };
@@ -2072,8 +2189,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
 	return "org.xml3d.webgl.ValueDataAdapter";
 };
 
-
-//-----------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------
 
 /**
  * Class org.xml3d.webgl.RootDataAdapter
@@ -2118,42 +2234,4 @@ org.xml3d.webgl.RootDataAdapter.prototype.toString = function()
 };
 
 
-//-----------------------------------------------------------------------
-//
-///**
-// * Class org.xml3d.webgl.DataDataAdapter
-// * 
-// * extends: org.xml3d.data.DataAdapter
-// * 
-// * @author Benjamin Friedrich
-// * 
-// * @version  10/2010  1.0
-// */
-
-///**
-// * Constructor of org.xml3d.webgl.DataDataAdapter
-// * 
-// * @augments org.xml3d.data.DataAdapter
-// * @constructor
-// * 
-// * @param factory
-// * @param node
-// */
-//org.xml3d.webgl.DataDataAdapter = function(factory, node) 
-//{
-//	org.xml3d.webgl.DataAdapter.call(this, factory, node);
-//};
-//org.xml3d.webgl.DataDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
-//org.xml3d.webgl.DataDataAdapter.prototype.constructor = org.xml3d.webgl.DataDataAdapter;
-//
-//
-//org.xml3d.webgl.DataDataAdapter.prototype.notifyDataChanged = function()
-//{
-//	// Maybe caching mechanism
-//};
-//
-//
-//org.xml3d.webgl.DataDataAdapter.prototype.toString = function()
-//{
-//	return "org.xml3d.webgl.DataDataAdapter";
-//};
+/********************************** End of the DataCollector Implementation *************************************************/

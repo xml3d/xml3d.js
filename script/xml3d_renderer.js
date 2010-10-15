@@ -466,11 +466,11 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		};
 		for ( var j = 0; j < slights.length; j++) {
 			var light = slights[j][1];
-			var params = light.getParameters(sglMulM4(viewMatrix, slights[j][0]));
-			lightParams.positions.set(params.position.data, j*3);
-			lightParams.attenuations.set(params.attenuation.data, j*3);
-			lightParams.diffuseColors.set(params.intensity.data, j*3);
-			lightParams.visible.set(params.visibility.data, j*3);
+			var params = light.getParameters(sglMulM4(viewMatrix, slights[j][0]));//
+			lightParams.positions.set(params.position, j*3);
+			lightParams.attenuations.set(params.attenuation, j*3);
+			lightParams.diffuseColors.set(params.intensity, j*3);
+			lightParams.visible.set(params.visibility, j*3);
 		}
 
 		lightParams.ambientColors = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ];
@@ -723,7 +723,6 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 				new XML3DMatrix().translate(this.node.position.negate()));
 	}
 	return new sglM4(this.viewMatrix.toGL());
-	//return this.viewMatrix;
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(aspect) {
@@ -737,7 +736,6 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(
 						* zfar / (znear - zfar), 0, 0, -1, 0);
 	}
 	return new sglM4(this.projMatrix.toGL());
-	//return this.projMatrix;
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
@@ -794,7 +792,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 						if (this.textures[0] && scriptURL == "urn:xml3d:shader:phong")
 							scriptURL = "urn:xml3d:shader:texturedphong";
 					
-						if (sParams.useVertexColor && sParams.useVertexColor.data == true)
+						if (sParams.useVertexColor && sParams.useVertexColor.data[0] == true)
 							scriptURL = scriptURL + "vcolor";
 						
 						this.sp = this.factory.renderer.getStandardShaderProgram(gl, scriptURL);
@@ -926,12 +924,15 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	var sParams = this.dataAdapter.createDataTable();
 	for (var p in sParams)
 	{
-		if (typeof sParams[p].data == typeof "") {	
+		var data = sParams[p].data;
+		if (typeof data == typeof "") {	
 			//Probably a texture, try to create one
 			this.initTexture(sParams[p].data, p);
 			continue;
 		}
-		parameters[p] = sParams[p].data;
+		if (data.length == 1)
+			data = data[0];
+		parameters[p] = data;
 	}
 
 };
@@ -1171,7 +1172,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.notifyChanged = function(e) {
 	this[e.attribute] = null;
 };
 
-org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(transform) {
+org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(modelViewMatrix) {
 	var shader = this.getLightShader();
 	
 	if (!this.dataAdapter)
@@ -1183,30 +1184,26 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(trans
 	}
 	var params = this.dataAdapter.createDataTable();
 	
-	//Step through the returned data table, check to make sure all required values are set
-	//if not, enter a default value. Also apply transformations if applicable. 
-	if (params.position) {
-		var t = sglMulM4V4(transform, [params.position.data[0], params.position.data[1], params.position.data[2], 1.0]);
-		params.position.data = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
-	} else {
-		var t = sglMulM4V4(transform, [0.0, 0.0, 0.0, 1.0]);
-		params.position = {};
-		params.position.data = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
+	//Set up default values
+	var pos = sglMulM4V4(modelViewMatrix, [0.0, 0.0, 0.0, 1.0]);
+	var aParams = {
+		position 	: [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]],
+		attenuation : [0.0, 0.0, 1.0],
+		intensity 	: [1.0, 1.0, 1.0],
+		visibility 	: [1.0, 1.0, 1.0]
+	};
+	
+	for (var p in params) {
+		if (p == "position") {
+			//Position must be multiplied with the model view matrix
+			var t = sglMulM4V4(modelViewMatrix, [params[p].data[0], params[p].data[1], params[p].data[2], 1.0]);
+			aParams[p] = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
+			continue;
+		}
+		aParams[p] = params[p].data;	
 	}
 	
-	if (!params.attenuation) {
-		params.attenuation = {};
-		params.attenuation.data = [0.0, 0.0, 1.0];
-	}
-	if (!params.intensity) {
-		params.intensity = {};
-		params.intensity.data = [1.0, 1.0, 1.0];
-	}
-	if (!params.visibilty) {
-		params.visibility = {};
-		params.visibility.data = [1.0, 1.0, 1.0];
-	}
-	return params;
+	return aParams;
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getLightShader = function() {
@@ -1302,7 +1299,6 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"uniform float shininess;\n"
 			+"uniform vec3 specularColor;\n"
 			+"uniform float transparency;\n"
-			+"uniform float lightOn;\n"
 			//+"uniform sampler2D diffuseTexture;\n"
 			
 			+"varying vec3 fragNormal;\n"
@@ -2155,15 +2151,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
 		return null;
 	}
 	
-	
-	if(node.children.length != 1)
-	{
-		org.xml3d.debug.logWarning("texture element has illegal number of children: " + 
-								   node.children.length);
-		return null;
-	}
-	
-	var textureChild = node.children[0];
+	var textureChild = node.firstElementChild;
 	if(textureChild.localName != "img")
 	{
 		org.xml3d.debug.logWarning("child of texture element is not an img element");
@@ -2191,31 +2179,9 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewIn
 		value = this.node.value;
 	}
 
-	var name  = this.node.name;	
-//	if (name == "index")
-//	{
-//		value = this.node.getTextContent();
-//		value = org.xml3d.initUInt16Array(value, null);
-//	} 
-//	else 
-//	{
-//		value = this.node.value;
-//	}
-	
 	var result  = new Array(1);
 	var content = new Array();
-	
 	content['tupleSize'] = this.getTupleSize();
-	
-//	if (value.length == 1)
-//	{
-//		content['data'] = value[0];
-//	}
-//	else
-//	{
-//		content['data'] = value;
-//	}
-	
 		
 	result[name]    = content;
 	content['data'] = value;

@@ -209,19 +209,29 @@ org.xml3d.XML3DDocument.prototype.initXml3d = function(xml3dElement) {
 
 };
 
-org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
+org.xml3d.XML3DDocument.prototype.onTextSet = function(e)
+{
 	if (e.target === undefined)
 	{
 		org.xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
 		return;
 	}
-	try {
-		var bindNode = e.target.parentNode.parentNode;
+	
+	try 
+	{
+		
+		var bindNode = e.target.parentNode;
 		var oldValue = e.target.parentNode.value;
+	
 		e.target.parentNode.setValue(e);
+		
 		if (bindNode.notificationRequired())
 			bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
-	} catch (e) {
+
+
+	} 
+	catch (e) 
+	{
 		org.xml3d.debug.logError("Exception in textSet:");
 		org.xml3d.debug.logException(e);
 	}
@@ -2041,7 +2051,7 @@ org.xml3d.classInfo.float.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = e.newValue;
+		this.value   = org.xml3d.initFloatArray(e.newValue, null);
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2092,7 +2102,7 @@ org.xml3d.classInfo.float2.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = e.newValue;
+		this.value = org.xml3d.initFloat2Array(e.newValue, null);
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2143,7 +2153,7 @@ org.xml3d.classInfo.float3.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = e.newValue;
+		this.value = org.xml3d.initFloat3Array(e.newValue, null);
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2194,7 +2204,7 @@ org.xml3d.classInfo.float4.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = e.newValue;
+		this.value = org.xml3d.initFloat4Array(e.newValue, null);
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2245,7 +2255,7 @@ org.xml3d.classInfo.float4x4.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = e.newValue;
+		this.value = org.xml3d.initFloat4x4Array(e.newValue, []);
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2296,7 +2306,7 @@ org.xml3d.classInfo.int.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = e.newValue;
+		this.value = org.xml3d.initIntArray(e.newValue, null);
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2347,7 +2357,7 @@ org.xml3d.classInfo.bool.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = e.newValue;
+		this.value = org.xml3d.initBoolArray(e.newValue, null);
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));

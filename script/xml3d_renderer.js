@@ -2179,6 +2179,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewIn
 		value = this.node.value;
 	}
 
+	var name  = this.node.name;		
 	var result  = new Array(1);
 	var content = new Array();
 	content['tupleSize'] = this.getTupleSize();

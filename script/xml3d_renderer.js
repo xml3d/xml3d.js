@@ -1823,12 +1823,13 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 		return new org.xml3d.webgl.RootDataAdapter(this, node);
 	}
 	
-	if (node.localName == "float"  || 
-		node.localName == "float2" || 
-		node.localName == "float3" || 
-		node.localName == "float4" || 
-		node.localName == "int"    ||
-		node.localName == "bool"   ||
+	if (node.localName == "float"    || 
+		node.localName == "float2"   || 
+		node.localName == "float3"   || 
+		node.localName == "float4"   || 
+		node.localName == "float4x4" ||
+		node.localName == "int"      ||
+		node.localName == "bool"     ||
 		node.localName == "texture")
 	{
 		return new org.xml3d.webgl.ValueDataAdapter(this, node);
@@ -2136,9 +2137,40 @@ org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 	{
 		return 4;
 	}
+
+	if (this.node.localName == "float4x4")
+	{
+		return 16;
+	}
 	
 	org.xml3d.debug.logWarning("Can not determine tuple size of element " + this.node.localName);
 	return -1;
+};
+
+
+org.xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node) 
+{
+	if(node.localName != "texture")
+	{
+		return null;
+	}
+	
+	
+	if(node.children.length != 1)
+	{
+		org.xml3d.debug.logWarning("texture element has illegal number of children: " + 
+								   node.children.length);
+		return null;
+	}
+	
+	var textureChild = node.children[0];
+	if(textureChild.localName != "img")
+	{
+		org.xml3d.debug.logWarning("child of texture element is not an img element");
+		return null;
+	}
+	
+	return textureChild.src;
 };
 
 org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewInstance)
@@ -2148,18 +2180,27 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewIn
 	   return this.dataTable;
 	}
 	
-	var name  = this.node.name;
 	var value;
-	
-	if (name == "index")
+
+	if(this.node.localName == "texture")
 	{
-		value = this.node.getTextContent();
-		value = org.xml3d.initUInt16Array(value, null);
-	} 
-	else 
+		value = this.extractTextureData(this.node);
+	}
+	else
 	{
 		value = this.node.value;
 	}
+
+	var name  = this.node.name;	
+//	if (name == "index")
+//	{
+//		value = this.node.getTextContent();
+//		value = org.xml3d.initUInt16Array(value, null);
+//	} 
+//	else 
+//	{
+//		value = this.node.value;
+//	}
 	
 	var result  = new Array(1);
 	var content = new Array();
@@ -2174,13 +2215,13 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewIn
 //	{
 //		content['data'] = value;
 //	}
+	
 		
-	result[name] = content;
-	
-	content['data']      = value;
-	result[name]         = content;
-	this.dataTable       = result;
-	
+	result[name]    = content;
+	content['data'] = value;
+	result[name]    = content;
+	this.dataTable  = result;
+
 	return result;
 };
 

@@ -70,12 +70,15 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 
 	if ((w = xml3dElement.getAttribute("width")) !== null) {
 		canvas.style.width = w;
-	}
+	} 
 	if ((h = xml3dElement.getAttribute("height")) !== null) {
 		canvas.style.height = h;
-	}
+	} 
+
 	canvas.id = "canvas"+index;
 	hideDiv.parentNode.insertBefore(canvas, hideDiv);
+	canvas.width = canvas.clientWidth;
+	canvas.height = canvas.clientHeight;
 	return canvas;
 };
 
@@ -719,8 +722,6 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	if (this.viewMatrix == null) {
-		//this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
-		//		new XML3DMatrix().translate(this.node.position.negate()));
 		this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
 				new XML3DMatrix().translate(this.node.position.negate()));
 	}

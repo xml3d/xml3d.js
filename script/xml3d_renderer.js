@@ -70,12 +70,15 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 
 	if ((w = xml3dElement.getAttribute("width")) !== null) {
 		canvas.style.width = w;
-	}
+	} 
 	if ((h = xml3dElement.getAttribute("height")) !== null) {
 		canvas.style.height = h;
-	}
+	} 
+
 	canvas.id = "canvas"+index;
 	hideDiv.parentNode.insertBefore(canvas, hideDiv);
+	canvas.width = canvas.clientWidth;
+	canvas.height = canvas.clientHeight;
 	return canvas;
 };
 
@@ -436,12 +439,17 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		
 		if (shader) {
 			sp = shader.shaderProgram;
-		}
+		} 
 		
 		if (!sp)
 		{
 			org.xml3d.webgl.checkError(gl, "Before default shader");
-			sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
+			if (shader) {
+				shader.sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
+				sp = shader.sp;
+			}
+			else
+				sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
 			if (sp) {
 				if (RGBColor && document.defaultView
 					&& document.defaultView.getComputedStyle) {
@@ -466,7 +474,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		};
 		for ( var j = 0; j < slights.length; j++) {
 			var light = slights[j][1];
-			var params = light.getParameters(sglMulM4(viewMatrix, slights[j][0]));//
+			var params = light.getParameters(sglMulM4(viewMatrix, slights[j][0]));
 			lightParams.positions.set(params.position, j*3);
 			lightParams.attenuations.set(params.attenuation, j*3);
 			lightParams.diffuseColors.set(params.intensity, j*3);
@@ -717,8 +725,6 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	if (this.viewMatrix == null) {
-		//this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
-		//		new XML3DMatrix().translate(this.node.position.negate()));
 		this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
 				new XML3DMatrix().translate(this.node.position.negate()));
 	}
@@ -804,11 +810,11 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 							+ "-fs");
 					if (vsScript && fsScript) {
 						var vShader = {
-							script : vsScript.value,
+							script : vsScript.textContent,
 							type : gl.VERTEX_SHADER
 						};
 						var fShader = {
-							script : fsScript.value,
+							script : fsScript.textContent,
 							type : gl.FRAGMENT_SHADER
 						};
 						this.sp = this.createShaderProgram( [ vShader, fShader ]);
@@ -875,26 +881,20 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = function(
 		shaderArray) {
-	var gl = this.factory.gl;
-	var shader = [];
+	var gl = this.factory.ctx.gl;
 
-	var prog = gl.createProgram();
+	var prog = prog = new SglProgram(gl,[shaderArray[0].script], [shaderArray[1].script]);
 
-	for ( var i = 0; i < 2; i++) {
-		shader[i] = gl.createShader(shaderArray[i].type);
-		gl.shaderSource(shader[i], shaderArray[i].script);
-		gl.compileShader(shader[i]);
-		gl.attachShader(prog, shader[i]);
-	}
-
-	gl.linkProgram(prog);
-	var msg = gl.getProgramInfoLog(prog);
-
-	if (msg.length > 54) {
-		org.xml3d.debug.logError(msg);
+	var msg = prog.log;
+	var checkFail = msg.match(/(FAIL)/i);
+	if (checkFail) {
+		org.xml3d.debug.logError("Shader creation failed: ("+ msg +")");
+		org.xml3d.debug.logInfo("A custom shader failed during compilation, using default flat shader instead.");
+		gl.getError(); //We know an error was generated when the shader failed, pop it
 		return null;
 	}
-	return org.xml3d.webgl.Renderer.wrapShaderProgram(gl, prog);
+
+	return prog;
 };
 
 /*
@@ -925,10 +925,16 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	for (var p in sParams)
 	{
 		var data = sParams[p].data;
-		if (typeof data == typeof "") {	
-			//Probably a texture, try to create one
-			this.initTexture(sParams[p].data, p);
-			continue;
+		if (typeof data == typeof "") {
+			var check = data.match(/(jpg|png|gif|jpeg|bmp)/g);
+			if (check) {
+				//Probably a texture, try to create one
+				this.initTexture(sParams[p].data, p);
+				continue;
+			} else {
+				org.xml3d.debug.logError("Shader did not expect a String as data for "+p);
+				continue;
+			}
 		}
 		if (data.length == 1)
 			data = data[0];
@@ -1093,7 +1099,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, parameters) {
 
-	if (!this.dataAdapter)
+	if (!this.dataAdapter && !this.loadedMesh)
 	{
 		var renderer = this.factory.renderer;
 		this.dataAdapter = renderer.dataFactory.getAdapter(this.node);
@@ -1886,7 +1892,7 @@ org.xml3d.webgl.DataAdapter = function(factory, node)
 		
 			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
 			{				
-				dataCollector = this.factory.getAdapter(childNode);			
+				dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);			
 				
 				if(dataCollector)
 				{
@@ -2012,7 +2018,7 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 
 		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
 		{
-			var dataCollector = this.factory.getAdapter(childNode);
+			var dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
 			
 			/* A RootAdapter must not be a chilrden of another DataAdapter.
 			 * Therefore, its data is ignored, if it is specified as child.	 

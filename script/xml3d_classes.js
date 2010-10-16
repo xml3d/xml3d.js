@@ -251,16 +251,13 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e)
 	
 	try 
 	{
-		
 		var bindNode = e.target.parentNode;
 		var oldValue = e.target.parentNode.value;
-	
+
 		e.target.parentNode.setValue(e);
 		
 		if (bindNode.notificationRequired())
 			bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
-
-
 	} 
 	catch (e) 
 	{

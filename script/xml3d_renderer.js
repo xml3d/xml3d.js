@@ -439,15 +439,18 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		
 		if (shader) {
 			sp = shader.shaderProgram;
-		} else {
-			shader = {};
-		}
+		} 
 		
-		if (!shader.sp)
+		if (!sp)
 		{
 			org.xml3d.webgl.checkError(gl, "Before default shader");
-			shader.sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
-			if (shader.sp) {
+			if (shader) {
+				shader.sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
+				sp = shader.sp;
+			}
+			else
+				sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
+			if (sp) {
 				if (RGBColor && document.defaultView
 					&& document.defaultView.getComputedStyle) {
 					var colorStr = document.defaultView.getComputedStyle(
@@ -922,10 +925,16 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	for (var p in sParams)
 	{
 		var data = sParams[p].data;
-		if (typeof data == typeof "") {	
-			//Probably a texture, try to create one
-			this.initTexture(sParams[p].data, p);
-			continue;
+		if (typeof data == typeof "") {
+			var check = data.match(/(jpg|png|gif|jpeg|bmp)/g);
+			if (check) {
+				//Probably a texture, try to create one
+				this.initTexture(sParams[p].data, p);
+				continue;
+			} else {
+				org.xml3d.debug.logError("Shader did not expect a String as data for "+p);
+				continue;
+			}
 		}
 		if (data.length == 1)
 			data = data[0];
@@ -1090,7 +1099,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, parameters) {
 
-	if (!this.dataAdapter)
+	if (!this.dataAdapter && !this.loadedMesh)
 	{
 		var renderer = this.factory.renderer;
 		this.dataAdapter = renderer.dataFactory.getAdapter(this.node);
@@ -1883,7 +1892,7 @@ org.xml3d.webgl.DataAdapter = function(factory, node)
 		
 			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
 			{				
-				dataCollector = this.factory.getAdapter(childNode);			
+				dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);			
 				
 				if(dataCollector)
 				{
@@ -2009,7 +2018,7 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 
 		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
 		{
-			var dataCollector = this.factory.getAdapter(childNode);
+			var dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
 			
 			/* A RootAdapter must not be a chilrden of another DataAdapter.
 			 * Therefore, its data is ignored, if it is specified as child.	 

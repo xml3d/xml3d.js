@@ -303,8 +303,8 @@ org.xml3d.webgl.Renderer.prototype.redraw = function() {
 
 org.xml3d.webgl.Renderer.prototype.draw = function(gl) {
 	try {
-		this.ctx.renderScene();
 		this.needDraw = false;
+		this.ctx.renderScene();		
 	} catch (e) {
 		org.xml3d.debug.logException(e);
 		throw e;
@@ -1127,6 +1127,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	}
 	if (invalidTextures)
 	{
+		this.factory.renderer.needDraw = true;
 		//Texture is not ready for rendering yet, skip this object
 		return;
 	}

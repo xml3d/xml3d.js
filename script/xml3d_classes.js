@@ -182,6 +182,38 @@ org.xml3d.XML3DNodeFactory.createXML3DRotationFromString = function(value) {
 	return result;
 };
 
+org.xml3d.XML3DNodeFactory.createBooleanFromString = function(value) 
+{
+	return new Boolean(value);
+};
+
+org.xml3d.XML3DNodeFactory.createStringFromString = function(value) 
+{
+	return new String(value);
+};
+
+org.xml3d.XML3DNodeFactory.createIntFromString = function(value) 
+{
+	return parseInt(value);
+};
+
+org.xml3d.XML3DNodeFactory.createFloatFromString = function(value) 
+{
+	return parseFloat(value);
+};
+
+org.xml3d.XML3DNodeFactory.createAnyURIFromString = function(value) 
+{
+	//TODO: not implemented
+	return value;
+};
+
+org.xml3d.XML3DNodeFactory.createEnumFromString = function(value) 
+{
+	//TODO: not implemented
+	return value;
+};
+
 // -----------------------------------------------------------------------------
 // Class XML3Document
 // -----------------------------------------------------------------------------
@@ -959,6 +991,7 @@ org.xml3d.classInfo.XML3DGraphType.configure = function(node, context) {
 	  node.__defineSetter__("visible", 
 	      function (value) {
 	        //org.xml3d.debug.logInfo("Setter: " + value);
+		  
 	        var oldValue = this._visible;
 	        if (typeof value == 'string')
 	        	this._visible = org.xml3d.XML3DNodeFactory.createBooleanFromString(value);
@@ -967,8 +1000,7 @@ org.xml3d.classInfo.XML3DGraphType.configure = function(node, context) {
 	        
 	        if (this.notificationRequired())
             	this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "visible", oldValue, this._visible));
-	      
-	      }
+	  	}
 	  );
 	  node.__defineGetter__("visible", 
 	      function (value) {

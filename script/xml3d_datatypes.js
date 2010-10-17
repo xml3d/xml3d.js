@@ -314,7 +314,7 @@ XML3DVec3 = function(x, y, z) {
 };
 
 XML3DVec3.prototype.setVec3Value = function(str) {
-	var m = /^(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
+	var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(str);
 	this.x = +m[1];
 	this.y = +m[2];
 	this.z = +m[3];
@@ -478,7 +478,7 @@ XML3DRotation.prototype.setAxisAngle = function(axis, a) {
 };
 
 XML3DRotation.prototype.setAxisAngleValue = function(str) {
-	var m = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
+	var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(str);
 	this.setAxisAngle(new XML3DVec3(+m[1], +m[2], +m[3]), +m[4]);
 };
 

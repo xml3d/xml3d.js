@@ -17,6 +17,39 @@ else if (typeof org.xml3d.data != "object")
 	throw new Error("org.xml3d.data already exists and is not an object");
 
 
+/* 
+ * Workaround for DOMAttrModified issues in WebKit based browsers:
+ * https://bugs.webkit.org/show_bug.cgi?id=8191
+ */
+if(navigator.userAgent.indexOf("WebKit") != -1)
+{
+	Element.prototype.__setAttribute = Element.prototype.setAttribute;
+	Element.prototype.setAttribute   = function(attrName, newVal)
+	{
+	  var prevVal = this.getAttribute(attrName);
+	  this.__setAttribute(attrName, newVal);
+	  newVal = this.getAttribute(attrName);
+
+	  if (newVal != prevVal)
+	  {
+	    var evt = document.createEvent("MutationEvent");
+	    evt.initMutationEvent(
+		      "DOMAttrModified",
+		      true,
+		      false,
+		      this,
+		      prevVal || "",
+		      newVal || "",
+		      attrName,
+		      (prevVal == null) ? evt.ADDITION : evt.MODIFICATION
+	    );
+	    this.dispatchEvent(evt);
+	  }
+	};	
+}
+
+
+
 org.xml3d.classInfo = {};
 org.xml3d.methods = {};
 org.xml3d.document = null;

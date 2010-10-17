@@ -329,11 +329,11 @@ org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 	return this.factory.getAdapter(av, org.xml3d.webgl.Renderer.prototype);
 };
 
-org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(renderer, transform,
+org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
 		objects, lights, shader) {
 	var adapter = this.factory.getAdapter(this.scene.xml3d, org.xml3d.webgl.Renderer.prototype);
 	if (adapter)
-		return adapter.collectDrawableObjects(renderer, transform, objects, lights, shader);
+		return adapter.collectDrawableObjects(transform, objects, lights, shader);
 	return [];
 };
 
@@ -683,7 +683,7 @@ org.xml3d.webgl.RenderAdapter.prototype.getShader = function() {
 //};
 
 org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
-		renderer, transform, outMeshes, outLights, parentShader) {
+		transform, outMeshes, outLights, parentShader) {
 	for ( var i = 0; i < this.node.childNodes.length; i++) {
 		if (this.node.childNodes[i]) {
 			var adapter = this.factory.getAdapter(this.node.childNodes[i], org.xml3d.webgl.Renderer.prototype);
@@ -693,7 +693,7 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 				if (!shader) 
 					shader = parentShader;
 	
-				adapter.collectDrawableObjects(renderer, childTransform, outMeshes, outLights, shader);
+				adapter.collectDrawableObjects(childTransform, outMeshes, outLights, shader);
 			}
 		}
 	}
@@ -882,7 +882,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = function(
 		shaderArray) {
 	var gl = this.factory.ctx.gl;
-
 	var prog = prog = new SglProgram(gl,[shaderArray[0].script], [shaderArray[1].script]);
 
 	var msg = prog.log;
@@ -1058,7 +1057,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	
 	//Support for mesh loading from .obj files 
 	//DISABLED FOR NOW
-	/*if (src)
+	/*if (src && typeof src == typeof "" && src.charAt(0)!='#')
 	{
 		var meshJS = new SglMeshJS();
 		if (!meshJS.importOBJ(src))
@@ -1084,7 +1083,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getCenter = function() {
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
-		renderer, transform, outMeshes, outLights, shader) {
+		transform, outMeshes, outLights, shader) {
 	outMeshes.push( [ transform, this, shader ]);
 };
 
@@ -1171,7 +1170,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype = new org.xml3d.webgl.RenderAd
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DLightRenderAdapter;
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.collectDrawableObjects = function(
-		renderer, transform, outMeshes, outLights, shader) {
+		transform, outMeshes, outLights, shader) {
 	outLights.push( [ transform, this ]);
 };
 
@@ -1191,13 +1190,20 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 	}
 	var params = this.dataAdapter.createDataTable();
 	
+	var visible = this.node.getAttribute("visible");
+	if (visible === null || visible == "true")
+		var visibility = [1.0, 1.0, 1.0];
+	else
+		var visibility = [0.0, 0.0, 0.0];
+
+	
 	//Set up default values
 	var pos = sglMulM4V4(modelViewMatrix, [0.0, 0.0, 0.0, 1.0]);
 	var aParams = {
 		position 	: [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]],
 		attenuation : [0.0, 0.0, 1.0],
 		intensity 	: [1.0, 1.0, 1.0],
-		visibility 	: [1.0, 1.0, 1.0]
+		visibility 	: visibility
 	};
 	
 	for (var p in params) {

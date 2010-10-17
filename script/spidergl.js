@@ -3220,11 +3220,11 @@ SglBox3.prototype = {
 
 	transformed : function(matrix) {
 		var b = new SglBox3();
-		var p = sglMulM4V3(matrix, this.corner(0), 1.0);
+		var p = sglMulM4V3(matrix, new SglVec3(this.corner(0)), 1.0);
 		b.min = p;
 		b.max = p;
 		for (var i=1; i<8; ++i) {
-			p = sglMulM4V3(matrix, this.corner(1), 1.0);
+			p = sglMulM4V3(matrix, new SglVec3(this.corner(i)), 1.0);
 			b.min = sglMinV3(b.min, p);
 			b.max = sglMaxV3(b.max, p);
 		}

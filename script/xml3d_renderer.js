@@ -248,6 +248,10 @@ org.xml3d.webgl.createContext = (function() {
 
 		gl.enable(gl.DEPTH_TEST);
 		gl.disable(gl.CULL_FACE);
+		gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE,
+				gl.ONE);
+		gl.enable(gl.BLEND);
+		
 		
 		this.renderer.render();
 
@@ -380,9 +384,6 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 	return shader;
 };
 
-org.xml3d.webgl.Renderer.prototype.getCenter = function(adapter) {
-	return adapter.getCenter();
-};
 
 org.xml3d.webgl.Renderer.prototype.render = function() {
 	var gl = this.ctx.gl;
@@ -416,11 +417,10 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	var zPos = [];
 	for (i = 0, n = this.drawableObjects.length; i < n; i++) {
 		var trafo = this.drawableObjects[i][0];
-		var obj3d = this.drawableObjects[i][1];
-		var center = this.getCenter(obj3d);
+		var meshAdapter = this.drawableObjects[i][1];
+		var center = new SglVec3(meshAdapter.bbox.center);
 		center.v = sglMulM4V3(trafo, center, 1.0);
 		center.v = sglMulM4V3(xform.view._s[0], center, 1.0);
-		
 		zPos[i] = [ i, center.z ];
 	}
 	zPos.sort(function(a, b) {
@@ -533,8 +533,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
 		var zPos = [];
 		for (i = 0, n = this.drawableObjects.length; i < n; i++) {
 			var trafo = this.drawableObjects[i][0];
-			var obj3d = this.drawableObjects[i][1];
-			var center = this.getCenter(obj3d);
+			var meshAdapter = this.drawableObjects[i][1];
+			var center = new SglVec3(meshAdapter.bbox.center);
 			center.v = sglMulM4V3(trafo, center, 1.0);
 			center.v = sglMulM4V3(xform.view._s[0], center, 1.0);
 			
@@ -1054,6 +1054,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	
 	var src = node.getSrc();
 	this.loadedMesh = false;
+	this._bbox = null;
 	
 	//Support for mesh loading from .obj files 
 	//DISABLED FOR NOW
@@ -1069,28 +1070,24 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	} else {	*/
 		this.mesh = new SglMeshGL(factory.ctx.gl);
 	//}
+	this.__defineGetter__("bbox", function() {
+		if (!this._bbox) {
+			var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
+			this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
+		}
+		return this._bbox;
+	}); 
+		
 };
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
-
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getCenter = function() {
-	var min = new XML3DVec3(-1, -1, -1);
-	var max = new XML3DVec3(1, 1, 1);
-	this.getBBox(min, max, true);
-	var center = min.add(max).scale(0.5);
-	return new SglVec3(center.x, center.y, center.z);
-	//return center;
-};
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
 		transform, outMeshes, outLights, shader) {
 	outMeshes.push( [ transform, this, shader ]);
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getBBox = function(min, max,
-		invalidate) {
 
-};
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 	this.mesh.destroy();
@@ -1234,6 +1231,29 @@ org.xml3d.webgl.XML3DLightShaderRenderAdapter = function(factory, node) {
 };
 org.xml3d.webgl.XML3DLightShaderRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DLightShaderRenderAdapter;
+
+// Utility functions
+org.xml3d.webgl.calculateBoundingBox = function(tArray) {
+	var bbox = new SglBox3();
+	if (!tArray || tArray.length < 3)
+		return bbox;
+	
+	// Initialize with first position
+	for (var j=0; j<3; ++j) {
+		bbox.min[j] = tArray[j];
+		bbox.max[j] = tArray[j];
+	}
+
+	var val = 0.0;
+	for (var i=3; i<tArray.length; i+=3) {
+		for (var j=0; j<3; ++j) {
+			val = tArray[i+j];
+			if (bbox.min[j] > val) bbox.min[j] = val;
+			if (bbox.max[j] < val) bbox.max[j] = val;
+		}
+	}
+	return bbox;
+};
 
 var g_shaders = {};
 

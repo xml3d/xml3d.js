@@ -399,7 +399,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			this.lights === undefined || !this.lights) {
 		this.drawableObjects = [];
 		this.lights = new Array();
-		this.collectDrawableObjects(this, new sglM4(),
+		this.collectDrawableObjects(new sglM4(),
 				this.drawableObjects, this.lights, null);
 	}
 	

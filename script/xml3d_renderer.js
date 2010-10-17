@@ -475,6 +475,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		for ( var j = 0; j < slights.length; j++) {
 			var light = slights[j][1];
 			var params = light.getParameters(sglMulM4(viewMatrix, slights[j][0]));
+			if (!params)
+				continue; // TODO: Shrink array
 			lightParams.positions.set(params.position, j*3);
 			lightParams.attenuations.set(params.attenuation, j*3);
 			lightParams.diffuseColors.set(params.intensity, j*3);
@@ -1177,6 +1179,9 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.notifyChanged = function(e) {
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(modelViewMatrix) {
 	var shader = this.getLightShader();
+	
+	if(!shader)
+		return null;
 	
 	if (!this.dataAdapter)
 	{
@@ -2046,6 +2051,9 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
 		{
 			var dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
+			
+			if(!dataCollector) // This can happen, i.e. a child node in a seperate namespace
+				continue;
 			
 			/* A RootAdapter must not be a chilrden of another DataAdapter.
 			 * Therefore, its data is ignored, if it is specified as child.	 

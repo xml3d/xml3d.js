@@ -23,29 +23,58 @@ else if (typeof org.xml3d.data != "object")
  */
 if(navigator.userAgent.indexOf("WebKit") != -1)
 {
-	Element.prototype.__setAttribute = Element.prototype.setAttribute;
-	Element.prototype.setAttribute   = function(attrName, newVal)
+	var attrModifiedWorks = false;
+	var listener = function(){ attrModifiedWorks = true; };
+	document.documentElement.addEventListener("DOMAttrModified", listener, false);
+	document.documentElement.setAttribute("___TEST___", true);
+	document.documentElement.removeAttribute("___TEST___", true);
+	document.documentElement.removeEventListener("DOMAttrModified", listener, false);
+	
+	if (!attrModifiedWorks)
 	{
-	  var prevVal = this.getAttribute(attrName);
-	  this.__setAttribute(attrName, newVal);
-	  newVal = this.getAttribute(attrName);
+		Element.prototype.__setAttribute = HTMLElement.prototype.setAttribute;
 
-	  if (newVal != prevVal)
-	  {
-	    var evt = document.createEvent("MutationEvent");
-	    evt.initMutationEvent(
-		      "DOMAttrModified",
-		      true,
-		      false,
-		      this,
-		      prevVal || "",
-		      newVal || "",
-		      attrName,
-		      (prevVal == null) ? evt.ADDITION : evt.MODIFICATION
-	    );
-	    this.dispatchEvent(evt);
-	  }
-	};	
+		Element.prototype.setAttribute = function(attrName, newVal)
+		{
+			var prevVal = this.getAttribute(attrName);
+			this.__setAttribute(attrName, newVal);
+			newVal = this.getAttribute(attrName);
+			if (newVal != prevVal)
+			{
+				var evt = document.createEvent("MutationEvent");
+				evt.initMutationEvent(
+						"DOMAttrModified",
+						true,
+						false,
+						this,
+						prevVal || "",
+						newVal || "",
+						attrName,
+						(prevVal == null) ? evt.ADDITION : evt.MODIFICATION
+				);
+				this.dispatchEvent(evt);
+			}
+		};
+		
+		Element.prototype.__removeAttribute = HTMLElement.prototype.removeAttribute;
+		Element.prototype.removeAttribute = function(attrName)
+		{
+			var prevVal = this.getAttribute(attrName);
+			this.__removeAttribute(attrName);
+			var evt = document.createEvent("MutationEvent");
+			evt.initMutationEvent(
+					"DOMAttrModified",
+					true,
+					false,
+					this,
+					prevVal,
+					"",
+					attrName,
+					evt.REMOVAL
+			);
+			this.dispatchEvent(evt);
+		};
+	}
 }
 
 

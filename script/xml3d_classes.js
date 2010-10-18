@@ -148,7 +148,7 @@ org.xml3d.URIResolver.resolve = function(document, uriStr) {
 		return org.xml3d.URIResolver.resolveLocal(document, uri.fragment);
 
 	
-	org.xml3d.debug.logWarning("++ Can't resolve global hrefs yet: " + uriStr);
+	//org.xml3d.debug.logWarning("++ Can't resolve global hrefs yet: " + uriStr);
 	// TODO Resolve intra-document references
 	return null;
 };
@@ -316,6 +316,8 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
 	}
 	try {
 		e.target.setField(e);
+		if (e.target.notificationRequired())
+			e.target.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, e.attrName, e.prevValue, e.newValue));
 	} catch (e) {
 		org.xml3d.debug.logError("Exception in setField:");
 		org.xml3d.debug.logException(e);
@@ -323,7 +325,7 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
 };
 
 org.xml3d.XML3DDocument.prototype.onRemove = function(e) {
-	org.xml3d.debug.logInfo("Remove: "+e);
+	//org.xml3d.debug.logInfo("Remove: "+e);
 };
 
 org.xml3d.XML3DDocument.prototype.onunload = function(xml3dElement) {
@@ -2113,7 +2115,7 @@ org.xml3d.classInfo.float.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value   = org.xml3d.initFloatArray(e.newValue, null);
+		this.value = org.xml3d.initFloatArray(e.newValue, null);
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));

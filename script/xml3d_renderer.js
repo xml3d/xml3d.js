@@ -207,7 +207,7 @@ org.xml3d.webgl.createContext = (function() {
 		return wrapShaderProgram(gl, prog);
 	}
 
-	Context.prototype.renderPick = function(scene, screenX, screenY) {
+	Context.prototype.renderPick = function(screenX, screenY) {
 		var gl = this.gl;
 		if (!this.pickBuffer)
 		{
@@ -215,19 +215,20 @@ org.xml3d.webgl.createContext = (function() {
 			return;
 		}
 		this.pickBuffer.bind();
-		
+
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		gl.clearDepth(1.0);
+		//gl.clearDepth(1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
-		gl.depthFunc(gl.LEQUAL);
+		//gl.depthFunc(gl.LEQUAL);
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
 		
-		this.renderer.renderPickingPass(scene, screenX, screenY);
+		this.renderer.renderPickingPass(screenX, screenY);
 		
 		gl.disable(gl.DEPTH_TEST);
 		this.pickBuffer.unbind();
+
 	};
 	
 	Context.prototype.renderScene = function() {
@@ -275,7 +276,16 @@ org.xml3d.webgl.checkError = function(gl, text)
 {
 	var error = gl.getError();
 	if (error !== gl.NO_ERROR) {
-		var msg = "GL error " + error + " occured.";
+		var textErr = ""+error;
+		switch (error) {
+		case 1280: textErr = "1280 ( GL_INVALID_ENUM )"; break;
+		case 1281: textErr = "1281 ( GL_INVALID_VALUE )"; break;
+		case 1282: textErr = "1282 ( GL_INVALID_OPERATION )"; break;
+		case 1283: textErr = "1283 ( GL_STACK_OVERFLOW )"; break;
+		case 1284: textErr = "1284 ( GL_STACK_UNDERFLOW )"; break;
+		case 1285: textErr = "1285 ( GL_OUT_OF_MEMORY )"; break;
+		}
+		var msg = "GL error " + textErr + " occured.";
 		if (text !== undefined)
 			msg += " " + text;
 		org.xml3d.debug.logError(msg);
@@ -293,8 +303,16 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.camera = this.initCamera();
 	this.shaderMap = {};
 	sglRegisterCanvas(ctx.getCanvasId(), this, 30.0); //Last parameter is frames-per-second value
-	this.ctx.pickBuffer = new SglFramebuffer(gl, ctx.getCanvasWidth(), ctx.getCanvasHeight(), 
-			[gl.RGBA], gl.DEPTH_COMPONENT16, null, {depthAsRenderbuffer : true});
+	
+	/*this.ctx.fbo = new SglFramebuffer(gl, ctx.getCanvasWidth(), ctx.getCanvasHeight(), 
+			[gl.RGBA], gl.DEPTH_COMPONENT16, null, 
+			{ depthAsRenderbuffer : true, 
+			  colorsAsRenderBuffer : true,
+			  stencilAsRenderBuffer : true
+			}
+	);*/
+	this.ctx.pickBuffer = new SglRenderbuffer(gl, gl.DEPTH_COMPONENT16, ctx.getCanvasWidth(), ctx.getCanvasHeight());
+	
 	org.xml3d.webgl.checkError(gl, "After creating picking buffer");
 };
 org.xml3d.webgl.Renderer.prototype.update = function() {
@@ -303,6 +321,30 @@ org.xml3d.webgl.Renderer.prototype.update = function() {
 
 org.xml3d.webgl.Renderer.prototype.redraw = function() {
 	this.needDraw = true;
+};
+
+org.xml3d.webgl.Renderer.prototype.mouseUp = function(gl, button, x, y) {
+	if (button == 0) {
+		this.ctx.renderPick(x, y);
+		if (this.scene.currentPickObj)
+		{
+			var currentObj = this.scene.currentPickObj;
+			var evtMethod = currentObj.getAttribute('onclick');
+			if (evtMethod)
+				eval(evtMethod);
+			
+			while(currentObj.parentNode.nodeName == "group")
+			{
+				currentObj = currentObj.parentNode;
+				evtMethod = currentObj.getAttribute('onclick');
+				if (evtMethod)
+					eval(evtMethod);
+			}
+			return true;
+		}
+		
+	}
+	return false;
 };
 
 org.xml3d.webgl.Renderer.prototype.draw = function(gl) {
@@ -513,7 +555,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	this.drawableObjects = null;
 };
 
-org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
+org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 	try {
 		gl = this.ctx.gl;
 		
@@ -521,7 +563,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
 		if (this.drawableObjects === undefined || !this.drawableObjects) {
 			this.drawableObjects = [];
 			this.slights = new Array();
-			this.collectDrawableObjects(this, new sglM4(),
+			this.collectDrawableObjects(new sglM4(),
 					this.drawableObjects, this.slights, null);
 		}
 		
@@ -590,13 +632,13 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
 		//pickPos = pickPos.mult(max.subtract(min)).add(min);
 		var objId = 255 - data[3] - 1;
 		if (objId >= 0) {
-			scene.currentPickPos = pickPos;
+			this.scene.currentPickPos = pickPos;
 			var pickedObj = this.drawableObjects[(zPos[objId][0])];
-			scene.currentPickObj = pickedObj[1].node;
+			this.scene.currentPickObj = pickedObj[1].node;
 			//org.xml3d.debug.logInfo("Picked object "+objId);
 		} else {
-			scene.currentPickPos = null;
-			scene.currentPickObj = null;
+			this.scene.currentPickPos = null;
+			this.scene.currentPickObj = null;
 		}	
 	} catch (e) {
 		org.xml3d.debug.logError(e);		

@@ -207,8 +207,8 @@ org.xml3d.webgl.createContext = (function() {
 		return wrapShaderProgram(gl, prog);
 	}
 
-	Context.prototype.renderPick = function(screenX, screenY) {
-		var gl = this.gl;
+	Context.prototype.renderPick = function(gl, screenX, screenY) {
+		//var gl = this.gl;
 		if (!this.pickBuffer)
 		{
 			org.xml3d.debug.logError('Picking buffer could not be created!');
@@ -304,17 +304,17 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.shaderMap = {};
 	sglRegisterCanvas(ctx.getCanvasId(), this, 30.0); //Last parameter is frames-per-second value
 	
-	/*this.ctx.fbo = new SglFramebuffer(gl, ctx.getCanvasWidth(), ctx.getCanvasHeight(), 
+	this.ctx.pickBuffer = new SglFramebuffer(gl, ctx.getCanvasWidth(), ctx.getCanvasHeight(), 
 			[gl.RGBA], gl.DEPTH_COMPONENT16, null, 
 			{ depthAsRenderbuffer : true, 
-			  colorsAsRenderBuffer : true,
-			  stencilAsRenderBuffer : true
+			  colorsAsRenderBuffer : true
 			}
-	);*/
-	this.ctx.pickBuffer = new SglRenderbuffer(gl, gl.DEPTH_COMPONENT16, ctx.getCanvasWidth(), ctx.getCanvasHeight());
+	);
+	//this.ctx.pickBuffer = new SglRenderbuffer(gl, gl.DEPTH_COMPONENT16, ctx.getCanvasWidth(), ctx.getCanvasHeight());
 	
 	org.xml3d.webgl.checkError(gl, "After creating picking buffer");
 };
+
 org.xml3d.webgl.Renderer.prototype.update = function() {
 	return this.needDraw;
 };
@@ -325,7 +325,7 @@ org.xml3d.webgl.Renderer.prototype.redraw = function() {
 
 org.xml3d.webgl.Renderer.prototype.mouseUp = function(gl, button, x, y) {
 	if (button == 0) {
-		this.ctx.renderPick(x, y);
+		this.ctx.renderPick(gl, x, y);
 		if (this.scene.currentPickObj)
 		{
 			var currentObj = this.scene.currentPickObj;
@@ -542,7 +542,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			shader.setParameters(parameters);		
 			
 			shape.render(shader, parameters);
-			shader.cleanUp();
 			org.xml3d.webgl.checkError(gl, "Error after cleanup.");
 		} else {
 			shader = {};
@@ -686,10 +685,6 @@ org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.createAdapter = function(
 		return new org.xml3d.webgl.XML3DGroupRenderAdapter(this, node);
 	if (node.localName == "mesh")
 		return new org.xml3d.webgl.XML3DMeshRenderAdapter(this, node);
-	if (node.localName == "img")
-		return new org.xml3d.webgl.XML3DImgRenderAdapter(this, node);
-	if (node.localName == "bind")
-		return new org.xml3d.webgl.XML3DBindRenderAdapter(this, node);
 	if (node.localName == "transform")
 		return new org.xml3d.webgl.XML3DTransformRenderAdapter(this, node);
 	if (node.localName == "shader")
@@ -799,15 +794,6 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 	}
 	this.factory.renderer.update();
 };
-
-// Adapter for <img>
-org.xml3d.webgl.XML3DImgRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
-};
-org.xml3d.webgl.XML3DImgRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DImgRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DImgRenderAdapter;
-
-
 
 // Adapter for <shader>
 org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
@@ -986,8 +972,11 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.cleanUp = function() {
-	//TEXTURE CLEANUP NO LONGER NECESSARY
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(e) {
+	if (e.attribute == "script") {
+		this.sp.destroy();
+		this.sp = null;
+	}
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
@@ -1040,56 +1029,6 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
 	//this.factory.renderer.canvas.needUpdate = true;
-};
-
-// Adapter for <bind>
-org.xml3d.webgl.XML3DBindRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
-	this.buffer = null;
-	this.glValue = null;
-	this.tupleSize = 1;
-	this.dataType = factory.gl.FLOAT;
-	this.semantic = node.semantic;
-	this.isIndex = this.semantic == "index";
-	this.kind = -1;
-	this.texture = null;
-};
-
-org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE = 0;
-org.xml3d.webgl.XML3DBindRenderAdapter.BUFFER_TYPE = 1;
-org.xml3d.webgl.XML3DBindRenderAdapter.TEXTURE_TYPE = 2;
-org.xml3d.webgl.XML3DBindRenderAdapter.LIGHTSHADER_PARAMETER_TYPE = 3;
-
-org.xml3d.webgl.XML3DBindRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DBindRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DBindRenderAdapter;
-
-org.xml3d.webgl.XML3DBindRenderAdapter.prototype.init = function() {
-	var child = this.node.firstChild;
-	while (child) {
-		if (child.nodeType == Node.ELEMENT_NODE) {
-			if (org.xml3d.isa(this.node.parentNode, org.xml3d.classInfo.mesh)) {
-				this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.BUFFER_TYPE;
-			} else if (org.xml3d.isa(this.node.parentNode,
-					org.xml3d.classInfo.shader)) {
-				if (org.xml3d.isa(child, org.xml3d.classInfo.texture)) {
-					this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE;
-					this.node.parentNode.adapters[0].initTexture(child);
-				} else {
-					this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE;
-				}
-			} else if (org.xml3d.isa(this.node.parentNode,
-					org.xml3d.classInfo.lightshader)) {
-				this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.LIGHTSHADER_PARAMETER_TYPE;
-			}
-		}
-		child = child.nextSibling;
-	}
-
-};
-
-
-org.xml3d.webgl.XML3DBindRenderAdapter.prototype.notifyChanged = function(e) {
-	this.glValue = null;
 };
 
 // Adapter for <mesh>

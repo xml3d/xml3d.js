@@ -78,7 +78,6 @@ if(navigator.userAgent.indexOf("WebKit") != -1)
 }
 
 
-
 org.xml3d.classInfo = {};
 org.xml3d.methods = {};
 org.xml3d.document = null;
@@ -86,7 +85,7 @@ org.xml3d.document = null;
 org.xml3d.data.configure = function(xml3ds) {
  	if (!org.xml3d.document)
  		org.xml3d.document = new org.xml3d.XML3DDocument();
- 	
+
  	for(var x in xml3ds) {
  		org.xml3d.document.initXml3d(xml3ds[x]);
  	}
@@ -166,17 +165,17 @@ org.xml3d.URIResolver.resolve = function(document, uriStr) {
 	if (!document || !uriStr)
 		return null;
 	var uri = new org.xml3d.URI(uriStr);
-	
+
 	if (uri.scheme == 'urn')
 	{
 		org.xml3d.debug.logInfo("++ Found URN." + uriStr);
 		return null;
 	}
-	
+
 	if (!uri.path)
 		return org.xml3d.URIResolver.resolveLocal(document, uri.fragment);
 
-	
+
 	org.xml3d.debug.logWarning("++ Can't resolve global hrefs yet: " + uriStr);
 	// TODO Resolve intra-document references
 	return null;
@@ -197,7 +196,7 @@ org.xml3d.URIResolver.resolveLocal = function(document, id) {
 };
 
 var getElementByIdWrapper = function(xmldoc, myID, namespace) {
-	
+
 };
 
 // -----------------------------------------------------------------------------
@@ -225,7 +224,7 @@ org.xml3d.XML3DNodeFactory.prototype.create = function(node, context) {
 			Array.forEach(Array.map(node.childNodes, function(n) {
 				return this.create(n, context);
 			}, this), function(c) {
-				
+
 			});
 			return n;
 		}
@@ -275,7 +274,6 @@ org.xml3d.XML3DNodeFactory.createEnumFromString = function(value)
 	//TODO: not implemented
 	return value;
 };
-
 // -----------------------------------------------------------------------------
 // Class XML3Document
 // -----------------------------------------------------------------------------
@@ -291,10 +289,10 @@ org.xml3d.XML3DDocument = function(parentDocument) {
 };
 
 org.xml3d.XML3DDocument.prototype.initXml3d = function(xml3dElement) {
-	
+
 	if (xml3dElement._xml3dNode !== undefined)
 		return;
-	
+
 	xml3dNode = this.getNode(xml3dElement);
 	xml3dElement.addEventListener('DOMNodeRemoved', this.onRemove, true);
 	xml3dElement.addEventListener('DOMNodeInserted', this.onAdd, true);
@@ -303,29 +301,27 @@ org.xml3d.XML3DDocument.prototype.initXml3d = function(xml3dElement) {
 
 };
 
-org.xml3d.XML3DDocument.prototype.onTextSet = function(e)
-{
+org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 	if (e.target === undefined)
 	{
 		org.xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
 		return;
 	}
-	
-	try 
-	{
-		var bindNode = e.target.parentNode;
-		var oldValue = e.target.parentNode.value;
+	try
+    {
+        var bindNode = e.target.parentNode;
+        var oldValue = e.target.parentNode.value;
 
-		e.target.parentNode.setValue(e);
-		
-		if (bindNode.notificationRequired())
-			bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
-	} 
-	catch (e) 
-	{
-		org.xml3d.debug.logError("Exception in textSet:");
-		org.xml3d.debug.logException(e);
-	}
+        e.target.parentNode.setValue(e);
+
+        if (bindNode.notificationRequired())
+            bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
+    }
+    catch (e)
+    {
+        org.xml3d.debug.logError("Exception in textSet:");
+        org.xml3d.debug.logException(e);
+    } 
 };
 
 org.xml3d.XML3DDocument.prototype.onAdd = function(e) {
@@ -361,7 +357,7 @@ org.xml3d.XML3DDocument.prototype.onunload = function(xml3dElement) {
 org.xml3d.XML3DDocument.prototype.getNode = function(element) {
 	if (element._configured !== undefined)
 		return element;
-	
+
 	var ctx = {
 			assert : org.xml3d.debug.assert,
 			log : org.xml3d.debug.logInfo,
@@ -402,7 +398,7 @@ org.xml3d.data.Adapter = function(factory, node) {
 	this.init = function() {
 	  // Init is called by the factory after adding the adapter to the node
 	};
-	
+
 };
 org.xml3d.data.Adapter.prototype.notifyChanged = function(e) {
 	 // Notification from the data structure. e is of type org.xml3d.Notification.
@@ -410,6 +406,7 @@ org.xml3d.data.Adapter.prototype.notifyChanged = function(e) {
 org.xml3d.data.Adapter.prototype.isAdapterFor = function(aType) {
 	 return false; // Needs to be overwritten
 };
+
 
 org.xml3d.data.AdapterFactory = function() {
 	this.getAdapter = function(node, atype) {
@@ -515,6 +512,7 @@ org.xml3d.initBoolArray = function(value, defaultValue) {
 org.xml3d.initAnyURI = function(node, defaultValue) {
 	return org.xml3d.initString(node, defaultValue);
 };
+
 // MeshTypes
 org.xml3d.MeshTypes = {};
 org.xml3d.MeshTypes["triangles"] = 0;
@@ -1050,7 +1048,6 @@ org.xml3d.classInfo.XML3DGraphType.configure = function(node, context) {
 	  node.__defineSetter__("visible", 
 	      function (value) {
 	        //org.xml3d.debug.logInfo("Setter: " + value);
-		  
 	        var oldValue = this._visible;
 	        if (typeof value == 'string')
 	        	this._visible = org.xml3d.XML3DNodeFactory.createBooleanFromString(value);
@@ -1059,7 +1056,8 @@ org.xml3d.classInfo.XML3DGraphType.configure = function(node, context) {
 	        
 	        if (this.notificationRequired())
             	this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "visible", oldValue, this._visible));
-	  	}
+	      
+	      }
 	  );
 	  node.__defineGetter__("visible", 
 	      function (value) {
@@ -1986,7 +1984,7 @@ org.xml3d.classInfo.script.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = e.newValue;
+		this.value = org.xml3d.initString(e.newValue, null); 
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2142,7 +2140,7 @@ org.xml3d.classInfo.float.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value   = org.xml3d.initFloatArray(e.newValue, null);
+		this.value = org.xml3d.initFloatArray(e.newValue, null); 
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2193,7 +2191,7 @@ org.xml3d.classInfo.float2.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = org.xml3d.initFloat2Array(e.newValue, null);
+		this.value = org.xml3d.initFloat2Array(e.newValue, null); 
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2244,7 +2242,7 @@ org.xml3d.classInfo.float3.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = org.xml3d.initFloat3Array(e.newValue, null);
+		this.value = org.xml3d.initFloat3Array(e.newValue, null); 
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2295,7 +2293,7 @@ org.xml3d.classInfo.float4.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = org.xml3d.initFloat4Array(e.newValue, null);
+		this.value = org.xml3d.initFloat4Array(e.newValue, null); 
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2346,7 +2344,7 @@ org.xml3d.classInfo.float4x4.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = org.xml3d.initFloat4x4Array(e.newValue, []);
+		this.value = org.xml3d.initFloat4x4Array(e.newValue, []); 
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2397,7 +2395,7 @@ org.xml3d.classInfo.int.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = org.xml3d.initIntArray(e.newValue, null);
+		this.value = org.xml3d.initIntArray(e.newValue, null); 
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2448,7 +2446,7 @@ org.xml3d.classInfo.bool.configure = function(node, context) {
 	// TODO: Setter for mixed value
 	node.setValue = function(e) {
 		var oldValue = this.value;
-		this.value = org.xml3d.initBoolArray(e.newValue, null);
+		this.value = org.xml3d.initBoolArray(e.newValue, null); 
 		
 		if (this.parentNode.notificationRequired())
         	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
@@ -2509,7 +2507,7 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
             	this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "type", oldValue, this._type));
 	      
 	      }
-	  );  
+	  );
 	  node.__defineGetter__("type", 
 	      function (value) {
 	        return this._type;
@@ -2813,6 +2811,67 @@ org.xml3d.classInfo.img.configure = function(node, context) {
 	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.img, org.xml3d.classInfo.XML3DImageDataProviderType);
+
+/**
+ * Object org.xml3d.classInfo.video()
+ * 
+ * @augments org.xml3d.classInfo.XML3DImageDataProviderType
+ * @constructor
+ * @see org.xml3d.classInfo.XML3DImageDataProviderType
+ */
+ 
+org.xml3d.classInfo.video = function() {
+	org.xml3d.classInfo.XML3DImageDataProviderType.call(this);
+};
+
+org.xml3d.classInfo.video.configure = function(node, context) {
+	org.xml3d.classInfo.XML3DImageDataProviderType.configure(node, context);
+	  node.__defineSetter__("src", 
+	      function (value) {
+	        //org.xml3d.debug.logInfo("Setter: " + value);
+	        var oldValue = this._src;
+	        if (typeof value == 'string')
+	        	this._src = org.xml3d.XML3DNodeFactory.createAnyURIFromString(value);
+	        else
+	        	this._src = value;
+	        
+	        if (this.notificationRequired())
+            	this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this._src));
+	      
+	      }
+	  );
+	  node.__defineGetter__("src", 
+	      function (value) {
+	        return this._src;
+	      }
+	  );
+
+	node._src = org.xml3d.initAnyURI(node.getAttribute("src"), "");
+
+
+    // Node::setField
+	node.setField = function(event)	{
+	  var attrName = event.attrName;
+	  if (attrName == "id") {
+	  	  this.id = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
+	  if (attrName == "class") {
+	  	  this.class = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
+	  if (attrName == "style") {
+	  	  this.style = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
+	  if (attrName == "src") {
+	  	  this.src = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
+	}; // End setField
+	
+};
+org.xml3d.defineClass(org.xml3d.classInfo.video, org.xml3d.classInfo.XML3DImageDataProviderType);
 
 /**
  * Object org.xml3d.classInfo.view()

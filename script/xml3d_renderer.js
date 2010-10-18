@@ -969,9 +969,25 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 
 	return sglMulM4(transform, adapter.getMatrix());
 };
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function() {
-	return this.factory.getAdapter(this.node.getShader(), org.xml3d.webgl.Renderer.prototype);
+
+
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function() 
+{
+	var shader = this.node.getShader();
+
+	// if no shader attribute is specified, try to get a shader from the style attribute
+	if(shader == null)
+	{
+		var styleValue = this.node.getAttribute('style');
+		var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
+		pattern.exec(styleValue);
+		shader = this.node.xml3ddocument.resolve(RegExp.$1);
+	}
+
+	return this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
 };
+
+
 
 // Adapter for <transform>
 org.xml3d.webgl.XML3DTransformRenderAdapter = function(factory, node) {

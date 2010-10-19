@@ -985,7 +985,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	//chrome won't render correctly if a required value is missing
 	parameters.diffuseColor = [1,1,1];
 	parameters.emissiveColor = [0,0,0];
-	parameters.shininess = [64];
+	parameters.shininess = [0.2];
 	parameters.specularColor = [0,0,0];
 	parameters.transparency = [0];
 
@@ -1425,7 +1425,7 @@ g_shaders["urn:xml3d:shader:phong"] = {
 
 			+"		vec3 Iamb = ambientColor * lightAmbientColors[i];\n"
 			+"		vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * diffuseColor ;\n"
-			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess);\n"
+			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
 			+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
 			+"		return color * lightVisibility[i];\n" 
 			+"}\n"
@@ -1437,8 +1437,8 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"      vec3 eye = normalize(fragVertexPosition);\n"
 			+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
 			+"      diffuse += max(0.0, dot(normal, eye));\n"
-			+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess);\n" 
-			+"      specular += pow(max(0.0, dot(normal, eye)), shininess);\n"
+			+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n" 
+			+"      specular += pow(max(0.0, dot(normal, eye)), shininess*128.0);\n"
 			+"      vec3 rgb = emissiveColor + diffuse*diffuseColor + specular*specularColor;\n"
 			+"      rgb = clamp(rgb, 0.0, 1.0);\n"
 			+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
@@ -1521,7 +1521,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			
 			+"		vec3 Iamb = ambientColor * lightAmbientColors[i] * lightVisibility[i];\n"
 			+"		vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * texDiffuse.xyz;\n"
-			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess);\n"
+			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
 			+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
 			+"		return vec4(color * lightVisibility[i], texDiffuse.w);\n" 
 			+"}\n"
@@ -1533,8 +1533,8 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"      vec3 eye = normalize(fragVertexPosition);\n"
 			+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
 			+"      diffuse += max(0.0, dot(normal, eye));\n"
-			+"      float specular = pow(max(0.0, dot(normal, normalize(light-eye))), shininess);\n"
-			+"      specular += pow(max(0.0, dot(normal, eye)), shininess);\n"
+			+"      float specular = pow(max(0.0, dot(normal, normalize(light-eye))), shininess*128.0);\n"
+			+"      specular += pow(max(0.0, dot(normal, eye)), shininess*128.0);\n"
 			+"      vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
 			+"      vec3 rgb = emissiveColor + diffuse*texDiffuse.xyz+ specular*specularColor;\n"
 			+"      gl_FragColor = vec4(rgb, texDiffuse.w*max(0.0, 1.0 - transparency)); \n"
@@ -1615,7 +1615,7 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 
 				+"		vec3 Iamb = ambientColor * lightAmbientColors[i]* lightVisibility[i];\n"
 				+"		vec3 Idiff = lightDiffuseColors[i]* lightVisibility[i] * max(dot(N,L),0.0) * fragVertexColor ;\n"
-				+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess);\n"
+				+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
 				+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
 				+"		return color;\n" 
 				+"}\n"
@@ -1627,8 +1627,8 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"      vec3 eye = normalize(fragVertexPosition);\n"
 				+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
 				+"      diffuse += max(0.0, dot(normal, eye));\n"
-				+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess);\n" 
-				+"      specular += pow(max(0.0, dot(normal, eye)), shininess);\n"
+				+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n" 
+				+"      specular += pow(max(0.0, dot(normal, eye)), shininess*128.0);\n"
 				+"      vec3 rgb = emissiveColor + diffuse*fragVertexColor + specular*specularColor;\n"
 				+"      rgb = clamp(rgb, 0.0, 1.0);\n"
 				+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"

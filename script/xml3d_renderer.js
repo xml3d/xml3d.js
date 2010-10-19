@@ -207,27 +207,28 @@ org.xml3d.webgl.createContext = (function() {
 		return wrapShaderProgram(gl, prog);
 	}
 
-	Context.prototype.renderPick = function(scene, screenX, screenY) {
-		var gl = this.gl;
+	Context.prototype.renderPick = function(gl, screenX, screenY) {
+		//var gl = this.gl;
 		if (!this.pickBuffer)
 		{
 			org.xml3d.debug.logError('Picking buffer could not be created!');
 			return;
 		}
 		this.pickBuffer.bind();
-		
+
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		gl.clearDepth(1.0);
+		//gl.clearDepth(1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
-		gl.depthFunc(gl.LEQUAL);
+		//gl.depthFunc(gl.LEQUAL);
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
 		
-		this.renderer.renderPickingPass(scene, screenX, screenY);
+		this.renderer.renderPickingPass(screenX, screenY);
 		
 		gl.disable(gl.DEPTH_TEST);
 		this.pickBuffer.unbind();
+
 	};
 	
 	Context.prototype.renderScene = function() {
@@ -275,7 +276,16 @@ org.xml3d.webgl.checkError = function(gl, text)
 {
 	var error = gl.getError();
 	if (error !== gl.NO_ERROR) {
-		var msg = "GL error " + error + " occured.";
+		var textErr = ""+error;
+		switch (error) {
+		case 1280: textErr = "1280 ( GL_INVALID_ENUM )"; break;
+		case 1281: textErr = "1281 ( GL_INVALID_VALUE )"; break;
+		case 1282: textErr = "1282 ( GL_INVALID_OPERATION )"; break;
+		case 1283: textErr = "1283 ( GL_STACK_OVERFLOW )"; break;
+		case 1284: textErr = "1284 ( GL_STACK_UNDERFLOW )"; break;
+		case 1285: textErr = "1285 ( GL_OUT_OF_MEMORY )"; break;
+		}
+		var msg = "GL error " + textErr + " occured.";
 		if (text !== undefined)
 			msg += " " + text;
 		org.xml3d.debug.logError(msg);
@@ -293,16 +303,48 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.camera = this.initCamera();
 	this.shaderMap = {};
 	sglRegisterCanvas(ctx.getCanvasId(), this, 30.0); //Last parameter is frames-per-second value
+	
 	this.ctx.pickBuffer = new SglFramebuffer(gl, ctx.getCanvasWidth(), ctx.getCanvasHeight(), 
-			[gl.RGBA], gl.DEPTH_COMPONENT16, null, {depthAsRenderbuffer : true});
+			[gl.RGBA], gl.DEPTH_COMPONENT16, null, 
+			{ depthAsRenderbuffer : true, 
+			  colorsAsRenderBuffer : true
+			}
+	);
+	//this.ctx.pickBuffer = new SglRenderbuffer(gl, gl.DEPTH_COMPONENT16, ctx.getCanvasWidth(), ctx.getCanvasHeight());
+	
 	org.xml3d.webgl.checkError(gl, "After creating picking buffer");
 };
+
 org.xml3d.webgl.Renderer.prototype.update = function() {
 	return this.needDraw;
 };
 
 org.xml3d.webgl.Renderer.prototype.redraw = function() {
 	this.needDraw = true;
+};
+
+org.xml3d.webgl.Renderer.prototype.mouseUp = function(gl, button, x, y) {
+	if (button == 0) {
+		this.ctx.renderPick(gl, x, y);
+		if (this.scene.currentPickObj)
+		{
+			var currentObj = this.scene.currentPickObj;
+			var evtMethod = currentObj.getAttribute('onclick');
+			if (evtMethod)
+				eval(evtMethod);
+			
+			while(currentObj.parentNode.nodeName == "group")
+			{
+				currentObj = currentObj.parentNode;
+				evtMethod = currentObj.getAttribute('onclick');
+				if (evtMethod)
+					eval(evtMethod);
+			}
+			return true;
+		}
+		
+	}
+	return false;
 };
 
 org.xml3d.webgl.Renderer.prototype.draw = function(gl) {
@@ -500,7 +542,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			shader.setParameters(parameters);		
 			
 			shape.render(shader, parameters);
-			shader.cleanUp();
 			org.xml3d.webgl.checkError(gl, "Error after cleanup.");
 		} else {
 			shader = {};
@@ -513,7 +554,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	this.drawableObjects = null;
 };
 
-org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
+org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 	try {
 		gl = this.ctx.gl;
 		
@@ -521,7 +562,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
 		if (this.drawableObjects === undefined || !this.drawableObjects) {
 			this.drawableObjects = [];
 			this.slights = new Array();
-			this.collectDrawableObjects(this, new sglM4(),
+			this.collectDrawableObjects(new sglM4(),
 					this.drawableObjects, this.slights, null);
 		}
 		
@@ -590,13 +631,13 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(scene, x, y) {
 		//pickPos = pickPos.mult(max.subtract(min)).add(min);
 		var objId = 255 - data[3] - 1;
 		if (objId >= 0) {
-			scene.currentPickPos = pickPos;
+			this.scene.currentPickPos = pickPos;
 			var pickedObj = this.drawableObjects[(zPos[objId][0])];
-			scene.currentPickObj = pickedObj[1].node;
+			this.scene.currentPickObj = pickedObj[1].node;
 			//org.xml3d.debug.logInfo("Picked object "+objId);
 		} else {
-			scene.currentPickPos = null;
-			scene.currentPickObj = null;
+			this.scene.currentPickPos = null;
+			this.scene.currentPickObj = null;
 		}	
 	} catch (e) {
 		org.xml3d.debug.logError(e);		
@@ -644,10 +685,6 @@ org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.createAdapter = function(
 		return new org.xml3d.webgl.XML3DGroupRenderAdapter(this, node);
 	if (node.localName == "mesh")
 		return new org.xml3d.webgl.XML3DMeshRenderAdapter(this, node);
-	if (node.localName == "img")
-		return new org.xml3d.webgl.XML3DImgRenderAdapter(this, node);
-	if (node.localName == "bind")
-		return new org.xml3d.webgl.XML3DBindRenderAdapter(this, node);
 	if (node.localName == "transform")
 		return new org.xml3d.webgl.XML3DTransformRenderAdapter(this, node);
 	if (node.localName == "shader")
@@ -757,15 +794,6 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 	}
 	this.factory.renderer.update();
 };
-
-// Adapter for <img>
-org.xml3d.webgl.XML3DImgRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
-};
-org.xml3d.webgl.XML3DImgRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DImgRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DImgRenderAdapter;
-
-
 
 // Adapter for <shader>
 org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
@@ -944,8 +972,11 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.cleanUp = function() {
-	//TEXTURE CLEANUP NO LONGER NECESSARY
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(e) {
+	if (e.attribute == "script") {
+		this.sp.destroy();
+		this.sp = null;
+	}
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
@@ -969,9 +1000,25 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 
 	return sglMulM4(transform, adapter.getMatrix());
 };
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function() {
-	return this.factory.getAdapter(this.node.getShader(), org.xml3d.webgl.Renderer.prototype);
+
+
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function() 
+{
+	var shader = this.node.getShader();
+
+	// if no shader attribute is specified, try to get a shader from the style attribute
+	if(shader == null)
+	{
+		var styleValue = this.node.getAttribute('style');
+		var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
+		pattern.exec(styleValue);
+		shader = this.node.xml3ddocument.resolve(RegExp.$1);
+	}
+
+	return this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
 };
+
+
 
 // Adapter for <transform>
 org.xml3d.webgl.XML3DTransformRenderAdapter = function(factory, node) {
@@ -998,56 +1045,6 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
 	//this.factory.renderer.canvas.needUpdate = true;
-};
-
-// Adapter for <bind>
-org.xml3d.webgl.XML3DBindRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
-	this.buffer = null;
-	this.glValue = null;
-	this.tupleSize = 1;
-	this.dataType = factory.gl.FLOAT;
-	this.semantic = node.semantic;
-	this.isIndex = this.semantic == "index";
-	this.kind = -1;
-	this.texture = null;
-};
-
-org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE = 0;
-org.xml3d.webgl.XML3DBindRenderAdapter.BUFFER_TYPE = 1;
-org.xml3d.webgl.XML3DBindRenderAdapter.TEXTURE_TYPE = 2;
-org.xml3d.webgl.XML3DBindRenderAdapter.LIGHTSHADER_PARAMETER_TYPE = 3;
-
-org.xml3d.webgl.XML3DBindRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DBindRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DBindRenderAdapter;
-
-org.xml3d.webgl.XML3DBindRenderAdapter.prototype.init = function() {
-	var child = this.node.firstChild;
-	while (child) {
-		if (child.nodeType == Node.ELEMENT_NODE) {
-			if (org.xml3d.isa(this.node.parentNode, org.xml3d.classInfo.mesh)) {
-				this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.BUFFER_TYPE;
-			} else if (org.xml3d.isa(this.node.parentNode,
-					org.xml3d.classInfo.shader)) {
-				if (org.xml3d.isa(child, org.xml3d.classInfo.texture)) {
-					this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE;
-					this.node.parentNode.adapters[0].initTexture(child);
-				} else {
-					this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.SHADER_PARAMETER_TYPE;
-				}
-			} else if (org.xml3d.isa(this.node.parentNode,
-					org.xml3d.classInfo.lightshader)) {
-				this.kind = org.xml3d.webgl.XML3DBindRenderAdapter.LIGHTSHADER_PARAMETER_TYPE;
-			}
-		}
-		child = child.nextSibling;
-	}
-
-};
-
-
-org.xml3d.webgl.XML3DBindRenderAdapter.prototype.notifyChanged = function(e) {
-	this.glValue = null;
 };
 
 // Adapter for <mesh>

@@ -341,6 +341,8 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
 	}
 	try {
 		e.target.setField(e);
+		if (e.target.notificationRequired())
+			e.target.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, e.attrName, e.prevValue, e.newValue));
 	} catch (e) {
 		org.xml3d.debug.logError("Exception in setField:");
 		org.xml3d.debug.logException(e);

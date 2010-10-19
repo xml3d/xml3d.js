@@ -108,10 +108,59 @@ document.getElementById = function(id) {
 			return;
 		}
 		
-		if (!org.xml3d.webgl.supported()) {
+		if (!org.xml3d.webgl.supported()) 
+		{
 			if(org.xml3d.debug)
+			{
 				org.xml3d.debug.logWarning("Could not initialise WebGL, sorry :-(");
-			// TODO: create some placeholder for xml3d tag that gives more info
+			}
+			
+			for(var i = 0; i < xml3ds.length; i++) 
+			{
+				// Place xml3dElement inside an invisble div
+				var hideDiv      = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+				var xml3dElement = xml3ds[i];
+				
+				xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
+				hideDiv.appendChild(xml3dElement);
+				hideDiv.style.display = "none";
+	
+				var infoDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+				infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
+				infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
+				infoDiv.style.border = "2px solid red";
+				infoDiv.style.color  = "red";
+				infoDiv.style.padding = "10px";
+				
+				
+				var width = xml3dElement.getAttribute("width");
+				if( width !== null) 
+				{
+					infoDiv.style.width = width;
+				} 
+				
+				var height = xml3dElement.getAttribute("height");
+				if( height !== null) 
+				{
+					infoDiv.style.height = height;
+				} 
+	
+				var hElement = document.createElement("h3");
+				var hTxt     = document.createTextNode("Your browser doesn't support XML3D.");
+				hElement.appendChild (hTxt);
+				
+				var pElement = document.createElement("p");
+				var pTxt     = document.createTextNode(
+						"Please visit http://xml3d.org/ to get a native XML3D implementation or " +
+						"http://get.webgl.org/ to get information about WebGL supporting browsers.");
+				pElement.appendChild (pTxt);
+				
+				infoDiv.appendChild (hElement);
+				infoDiv.appendChild (pElement);
+				
+				hideDiv.parentNode.insertBefore(infoDiv, hideDiv);
+			}
+			
 			return;
 		}
 		

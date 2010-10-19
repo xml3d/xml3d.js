@@ -1,7 +1,7 @@
 /*************************************************************************/
 /*                                                                       */
 /*  xml3d.js                                                             */
-/*  Declarative 3D in HTML							                     */
+/*  Declarative 3D in HTML                                               */
 /*                                                                       */
 /*  Copyright (C) 2010                                                   */
 /*  DFKI - German Research Center for Artificial Intelligence            */

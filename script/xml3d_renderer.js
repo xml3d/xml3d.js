@@ -7,7 +7,7 @@
 /*  DFKI - German Research Center for Artificial Intelligence            */
 /* 	partly based on code originally provided by Philip Taylor, 			 */
 /*  Peter Eschler, Johannes Behr and Yvonne Jung 						 */
-/*  (philip.html5.org, www.x3dom.org)  		 								 */
+/*  (philip.html5.org, www.x3dom.org)                                    */
 /*                                                                       */
 /*  This file is part of xml3d.js                                        */
 /*                                                                       */

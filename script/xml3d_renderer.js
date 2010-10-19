@@ -135,10 +135,11 @@ org.xml3d.webgl.createContext = (function() {
 		this.gl = gl;
 		this.canvas = canvas;
 		this.scene = scene;
-		this.needsUpdate = true;
+		this.needDraw = true;
 	}
 	
 	Context.prototype.start = function() {
+		sglRegisterCanvas(this.canvas.id, this, 30.0); //Last parameter is frames-per-second value
 		var ctx = this;
 		ctx.renderScene();
 	};
@@ -202,14 +203,18 @@ org.xml3d.webgl.createContext = (function() {
 		//var gl = this.gl;
 		if (!this.pickBuffer)
 		{
-			org.xml3d.debug.logError('Picking buffer could not be created!');
-			return;
+			this.pickBuffer = new SglFramebuffer(gl, this.getCanvasWidth(), this.getCanvasHeight(), 
+					[gl.RGBA], gl.DEPTH_COMPONENT16, null, 
+					{ depthAsRenderbuffer : true }
+			);
+			if (!this.pickBuffer.isValid)
+				return;
 		}
 		this.pickBuffer.bind();
 
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		//gl.clearDepth(1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
 		//gl.depthFunc(gl.LEQUAL);
 		gl.disable(gl.CULL_FACE);
@@ -253,6 +258,92 @@ org.xml3d.webgl.createContext = (function() {
 			this.renderer.dispose();
 		}
 	};
+	
+	Context.prototype.update = function() {
+		return this.needDraw;
+	};
+
+	Context.prototype.redraw = function() {
+		this.needDraw = true;
+	};
+
+	Context.prototype.mouseUp = function(gl, button, x, y) {
+		if (button == 0) {
+			this.renderPick(gl, x, y);
+			if (this.scene.currentPickObj)
+			{
+				var currentObj = this.scene.currentPickObj;
+				var evtMethod = currentObj.getAttribute('onclick');
+				if (evtMethod && currentObj.evalMethod) {
+					currentObj.evalMethod(evtMethod);
+				}
+				
+				while(currentObj.parentNode.nodeName == "group")
+				{
+					currentObj = currentObj.parentNode;
+					evtMethod = currentObj.getAttribute('onclick');
+					if (evtMethod && currentObj.evalMethod) {
+						currentObj.evalMethod(evtMethod);
+					}
+				}
+				return true;
+			}
+			
+		}
+		return false;
+	};
+	
+	Context.prototype.mouseMove = function(gl, x, y) {
+		var lastObj = this.scene.currentPickObj;
+		
+		this.renderPick(gl, x, y);
+		if (this.scene.currentPickObj)
+		{
+			var currentObj = this.scene.currentPickObj;
+			var evtMethod = currentObj.getAttribute('onmouseover');
+			if (evtMethod && currentObj.evalMethod) {
+				currentObj.evalMethod(evtMethod);
+			}
+			
+			while(currentObj.parentNode.nodeName == "group")
+			{
+				currentObj = currentObj.parentNode;
+				evtMethod = currentObj.getAttribute('onmouseover');
+				if (evtMethod && currentObj.evalMethod) {
+					currentObj.evalMethod(evtMethod);
+				}
+			}
+			return true;
+		} else if (lastObj) {
+			var currentObj = lastObj;
+			var evtMethod = currentObj.getAttribute('onmouseout');
+			if (evtMethod && currentObj.evalMethod) {
+				currentObj.evalMethod(evtMethod);
+			}
+			
+			while(currentObj.parentNode.nodeName == "group")
+			{
+				currentObj = currentObj.parentNode;
+				evtMethod = currentObj.getAttribute('onmouseout');
+				if (evtMethod && currentObj.evalMethod) {
+					currentObj.evalMethod(evtMethod);
+				}
+			}
+			return true;
+		}
+		return false;
+	};
+
+	Context.prototype.draw = function(gl) {
+		try {
+			this.needDraw = false;
+			this.renderScene();		
+		} catch (e) {
+			org.xml3d.debug.logException(e);
+			throw e;
+		}
+		
+	};
 	return setupContext;
 })();
 
@@ -284,64 +375,17 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(ctx, this);
 	this.dataFactory = new org.xml3d.webgl.XML3DDataAdapterFactory(ctx);
 	this.lights = null;
-	this.needDraw = true;
 	this.camera = this.initCamera();
 	this.shaderMap = {};
-	sglRegisterCanvas(ctx.getCanvasId(), this, 30.0); //Last parameter is frames-per-second value
-	
-	this.ctx.pickBuffer = new SglFramebuffer(gl, ctx.getCanvasWidth(), ctx.getCanvasHeight(), 
-			[gl.RGBA], gl.DEPTH_COMPONENT16, null, 
-			{ depthAsRenderbuffer : true, 
-			  colorsAsRenderBuffer : true
-			}
-	);
+	this.width = this.ctx.getCanvasWidth();
+	this.height = this.ctx.getCanvasHeight();
+
 	//this.ctx.pickBuffer = new SglRenderbuffer(gl, gl.DEPTH_COMPONENT16, ctx.getCanvasWidth(), ctx.getCanvasHeight());
 	
 	org.xml3d.webgl.checkError(gl, "After creating picking buffer");
 };
 
-org.xml3d.webgl.Renderer.prototype.update = function() {
-	return this.needDraw;
-};
 
-org.xml3d.webgl.Renderer.prototype.redraw = function() {
-	this.needDraw = true;
-};
-
-org.xml3d.webgl.Renderer.prototype.mouseUp = function(gl, button, x, y) {
-	if (button == 0) {
-		//this.ctx.renderPick(gl, x, y);
-		if (this.scene.currentPickObj)
-		{
-			var currentObj = this.scene.currentPickObj;
-			var evtMethod = currentObj.getAttribute('onclick');
-			if (evtMethod)
-				eval(evtMethod);
-			
-			while(currentObj.parentNode.nodeName == "group")
-			{
-				currentObj = currentObj.parentNode;
-				evtMethod = currentObj.getAttribute('onclick');
-				if (evtMethod)
-					eval(evtMethod);
-			}
-			return true;
-		}
-		
-	}
-	return false;
-};
-
-org.xml3d.webgl.Renderer.prototype.draw = function(gl) {
-	try {
-		this.needDraw = false;
-		this.ctx.renderScene();		
-	} catch (e) {
-		org.xml3d.debug.logException(e);
-		throw e;
-	}
-	
-};
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 	var av = this.scene.getActiveView();
@@ -434,7 +478,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	var xform = new SglTransformStack();
 	xform.view.load(this.camera.getViewMatrix());	
 	var projMatrix = this.camera
-	.getProjectionMatrix(this.ctx.getCanvasWidth() / this.ctx.getCanvasHeight());
+	.getProjectionMatrix(this.width / this.height);
 	var viewMatrix = this.camera.getViewMatrix();
 	xform.projection.load(projMatrix);
 	
@@ -533,14 +577,19 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			shader.sp = sp;
 			shape.render(shader, parameters);
 		}
+		xform.model.pop();
 		
 	}
+	xform.view.pop();
+	xform.projection.pop();
 	
 	this.drawableObjects = null;
 };
 
 org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 	try {
+		if (x<0 || y<0 || x>=this.width || y>=this.height)
+			return;
 		gl = this.ctx.gl;
 		
 		
@@ -554,7 +603,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 		var xform = new SglTransformStack();
 		xform.view.load(this.camera.getViewMatrix());
 		var projMatrix = this.camera
-		.getProjectionMatrix(this.ctx.getCanvasWidth() / this.ctx.getCanvasHeight());
+		.getProjectionMatrix(this.width / this.height);
 		xform.projection.load(projMatrix);
 		
 		
@@ -599,6 +648,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 			shader = {};
 			shader.sp = sp;
 			shape.render(shader, parameters);
+			xform.model.pop();
 			
 		}
 		org.xml3d.webgl.checkError(gl, "Before readpixels");
@@ -619,7 +669,6 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 			this.scene.currentPickPos = pickPos;
 			var pickedObj = this.drawableObjects[(zPos[objId][0])];
 			this.scene.currentPickObj = pickedObj[1].node;
-			//org.xml3d.debug.logInfo("Picked object "+objId);
 		} else {
 			this.scene.currentPickPos = null;
 			this.scene.currentPickObj = null;
@@ -627,6 +676,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 	} catch (e) {
 		org.xml3d.debug.logError(e);		
 	}
+	xform.view.pop();
+	xform.projection.pop();
 	
 };
 
@@ -777,7 +828,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 		this.viewMatrix = null;
 		this.projMatrix = null;
 	}
-	this.factory.renderer.update();
+	this.factory.ctx.update();
 };
 
 // Adapter for <shader>
@@ -986,6 +1037,17 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 	return sglMulM4(transform, adapter.getMatrix());
 };
 
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMethod) {
+	
+	if (evtMethod)
+		eval(evtMethod);
+};
+
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(e) {
+	if (e.attribute == "shader") {	
+		this.shader = this.getShader();
+	}
+};
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function() 
 {
@@ -1075,6 +1137,13 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = functi
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 	this.mesh.destroy();
+};
+
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMethod) {
+	if (evtMethod) {
+		eval(evtMethod);
+	}
+	
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, parameters) {

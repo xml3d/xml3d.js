@@ -605,7 +605,7 @@ org.xml3d.classInfo.Xml3dNode.configure = function(node, c) {
 	
 	node.update = function() {
 		if (this.adapters[0])
-			this.adapters[0].factory.renderer.redraw();
+			this.adapters[0].factory.ctx.redraw();
  	};
  	
 	node.setField = function(event) {
@@ -1194,7 +1194,10 @@ org.xml3d.classInfo.group.configure = function(node, context) {
 		}
 		return this.shader;
 	};
-
+	node.evalMethod = function(evtMethod) {
+		if (evtMethod)
+			eval(evtMethod);
+	};
 
     // Node::setField
 	node.setField = function(event)	{
@@ -1253,6 +1256,10 @@ org.xml3d.classInfo.group.configure = function(node, context) {
 	  }
 	  if (attrName == "visible") {
 	  	  this.visible = event.newValue;
+		  return org.xml3d.event.HANDLED;
+	  }
+	  if (attrName == "shader") {
+	  	  this.shader = null;
 		  return org.xml3d.event.HANDLED;
 	  }
 	}; // End setField
@@ -1389,7 +1396,10 @@ org.xml3d.classInfo.mesh.configure = function(node, context) {
 		}
 		return this.src;
 	};
-
+	node.evalMethod = function (evtMethod) {
+		if (evtMethod)
+			eval(evtMethod);
+	};
 
     // Node::setField
 	node.setField = function(event)	{

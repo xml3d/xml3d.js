@@ -139,7 +139,12 @@ org.xml3d.webgl.createContext = (function() {
 	}
 	
 	Context.prototype.start = function() {
-		sglRegisterCanvas(this.canvas.id, this, 30.0); //Last parameter is frames-per-second value
+		//sglRegisterCanvas(this.canvas.id, this, 30.0); //Last parameter is frames-per-second value
+
+		_sglManageCanvas(this.canvas.id, this, 30.0);
+		_sglUnmanageCanvasOnLoad(this.canvas.id);
+		SGL_DefaultStreamMappingPrefix = "";
+		
 		var ctx = this;
 		ctx.renderScene();
 	};
@@ -235,11 +240,9 @@ org.xml3d.webgl.createContext = (function() {
 		}
 		
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-
+		gl.viewport(0, 0, this.canvas.width, this.canvas.height);		
 		gl.enable(gl.DEPTH_TEST);
-		gl.disable(gl.CULL_FACE);
-		
+		gl.disable(gl.CULL_FACE);		
 		gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE,
 				gl.ONE);
 		gl.enable(gl.BLEND);
@@ -382,7 +385,7 @@ org.xml3d.webgl.Renderer = function(ctx) {
 
 	//this.ctx.pickBuffer = new SglRenderbuffer(gl, gl.DEPTH_COMPONENT16, ctx.getCanvasWidth(), ctx.getCanvasHeight());
 	
-	org.xml3d.webgl.checkError(gl, "After creating picking buffer");
+	
 };
 
 

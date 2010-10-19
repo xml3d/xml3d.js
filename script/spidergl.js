@@ -2027,8 +2027,7 @@ function sglMulSM4(s, m) {
 	return sglMulM4S(m, s);
 }
 
-function sglMulM4V3(m, v, w) {	 
-	v = v.v;
+function sglMulM4V3(m, v, w) {
 	return [
 		m[ 0] * v[0] + m[ 4] * v[1] + m[ 8] * v[2] + m[12] * w,
 		m[ 1] * v[0] + m[ 5] * v[1] + m[ 9] * v[2] + m[13] * w,
@@ -3220,11 +3219,11 @@ SglBox3.prototype = {
 
 	transformed : function(matrix) {
 		var b = new SglBox3();
-		var p = sglMulM4V3(matrix, new SglVec3(this.corner(0)), 1.0);
+		var p = sglMulM4V3(matrix, this.corner(0), 1.0);
 		b.min = p;
 		b.max = p;
 		for (var i=1; i<8; ++i) {
-			p = sglMulM4V3(matrix, new SglVec3(this.corner(i)), 1.0);
+			p = sglMulM4V3(matrix, this.corner(i), 1.0);
 			b.min = sglMinV3(b.min, p);
 			b.max = sglMaxV3(b.max, p);
 		}
@@ -4218,7 +4217,17 @@ function sglTexture2DFromData(gl, internalFormat, width, height, sourceFormat, s
 
 	var tex = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_2D, tex);
+
+	var flipYEnabled  = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
+	var flipYRequired = (opt.flipY === true);
+	if (flipYEnabled != flipYRequired) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ((flipYRequired) ? (1) : (0)));
+	}
 	gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels);
+	if (flipYEnabled != flipYRequired) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ((flipYEnabled) ? (1) : (0)));
+	}
+
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     opt.wrapS    );
@@ -4257,8 +4266,17 @@ function sglTexture2DFromImage(gl, image, options) {
 
 	var tex = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_2D, tex);
-	//gl.texImage2D(gl.TEXTURE_2D, 0, image, opt.flipY, opt.premultiplyAlpha);
+
+	var flipYEnabled  = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
+	var flipYRequired = (opt.flipY === true);
+	if (flipYEnabled != flipYRequired) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ((flipYRequired) ? (1) : (0)));
+	}
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	if (flipYEnabled != flipYRequired) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ((flipYEnabled) ? (1) : (0)));
+	}
+
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S,     opt.wrapS    );
@@ -4329,9 +4347,19 @@ function sglTextureCubeFromData(gl, internalFormat, width, height, sourceFormat,
 
 	var tex = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
+
+	var flipYEnabled  = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
+	var flipYRequired = (opt.flipY === true);
+	if (flipYEnabled != flipYRequired) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ((flipYRequired) ? (1) : (0)));
+	}
 	for (var i=0; i<6; ++i) {
 		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, width, height, 0, sourceFormat, sourceType, facesTexels[i]);
 	}
+	if (flipYEnabled != flipYRequired) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ((flipYEnabled) ? (1) : (0)));
+	}
+
 	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, opt.minFilter);
 	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S,     opt.wrapS    );
@@ -4370,9 +4398,17 @@ function sglTextureCubeFromImages(gl, images, options) {
 
 	var tex = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
+
+	var flipYEnabled  = gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL);
+	var flipYRequired = (opt.flipY === true);
+	if (flipYEnabled != flipYRequired) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ((flipYRequired) ? (1) : (0)));
+	}
 	for (var i=0; i<6; ++i) {
-		//gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, images[i], opt.flipY);
 		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[i]);
+	}
+	if (flipYEnabled != flipYRequired) {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, ((flipYEnabled) ? (1) : (0)));
 	}
 	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, opt.minFilter);
 	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, opt.magFilter);
@@ -5023,7 +5059,6 @@ SglProgram.prototype =
 			unif = this._uniforms[u];
 			if (unif) {
 				unif.value = mapping[u];
-				//org.xml3d.webgl.checkError(this.gl, "Error after setting uniforms in render");
 			}
 		}
 	},
@@ -6583,12 +6618,12 @@ SglMeshGLRenderer.prototype = {
 		var mapping = new Object();
 		var src = null;
 		for (var attr in this._prog.attributes) {
-			//if (attr.substr(0, n) == prefix) {
-				src = attr;
+			if (attr.substr(0, n) == prefix) {
+				src = attr.substr(n);
 				if (src.length > 0) {
 					mapping[attr] = src;
 				}
-			//}
+			}
 		}
 		return mapping;
 	},
@@ -6687,7 +6722,7 @@ SglMeshGLRenderer.prototype = {
 		this._updateEnabledVB = true;
 		this._mesh = mesh;
 		this._bindVertexBuffers(0);
-		this._phase = 2;	
+		this._phase = 2;
 	},
 
 	endMesh : function() {
@@ -6730,7 +6765,7 @@ SglMeshGLRenderer.prototype = {
 				}
 			}
 		}
-		
+
 		if (this._primStream.isPacked) {
 			if (this._primStream.blocksCount > 0) {
 				var blocks = this._primStream.blockRanges(first, count);
@@ -6887,7 +6922,7 @@ SglMeshJS.prototype.toMeshGL = function(gl) {
 };
 
 function sglPackMeshJStoGL(gl, mesh, primitives, maxVertexIndex) {
-	var primName = primitives     || triangles;
+	var primName = primitives     || "triangles";
 	var maxInd   = maxVertexIndex || 65000;
 
 	var prim = mesh.connectivity.primitives[primName];
@@ -6898,11 +6933,25 @@ function sglPackMeshJStoGL(gl, mesh, primitives, maxVertexIndex) {
 	var pmode = sglGLPrimitiveType(gl, prim.mode);
 	if (pmode == undefined) return null;
 
+	var ariety   = 0;
+	if (pmode === gl.TRIANGLES) {
+		ariety = 3;
+	}
+	else if (pmode === gl.LINES) {
+		ariety = 2;
+	}
+	else if (pmode === gl.POINTS) {
+		ariety = 1;
+	}
+	else {
+		return null;
+	}
+
 	var res   = [ ];
 
 	var srcIndices = prim.buffer;
 	var n          = srcIndices.length;
-	n -= (n % 3);
+	n -= (n % ariety);
 
 	var start = 0;
 
@@ -6929,10 +6978,10 @@ function sglPackMeshJStoGL(gl, mesh, primitives, maxVertexIndex) {
 
 		var indicesMap = { };
 		var vtxCount   = 0;
-		for (var i=start; i<n; i+=3) {
+		for (var i=start; i<n; i+=ariety) {
 			var triIndices       = { };
 			var newVerticesCount = 0;
-			for (var j=0; j<3; ++j) {
+			for (var j=0; j<ariety; ++j) {
 				var srcIdx = srcIndices[i+j];
 				if (triIndices[srcIdx] == undefined) {
 					triIndices[srcIdx] = true;
@@ -6943,7 +6992,7 @@ function sglPackMeshJStoGL(gl, mesh, primitives, maxVertexIndex) {
 			}
 
 			if ((vtxCount + newVerticesCount) <= maxInd) {
-				for (var j=0; j<3; ++j) {
+				for (var j=0; j<ariety; ++j) {
 					var srcIdx = srcIndices[i+j];
 					var dstIdx = indicesMap[srcIdx];
 					if (dstIdx == undefined) {
@@ -6953,7 +7002,7 @@ function sglPackMeshJStoGL(gl, mesh, primitives, maxVertexIndex) {
 					}
 					dstIndices.push(dstIdx);
 				}
-				start += 3;
+				start += ariety;
 			}
 			else {
 				break;
@@ -7464,10 +7513,11 @@ function _SglCanvasManager(canvasID, handler, updateRate) {
 	var gl = sglGetCanvasContext(canvasID);
 	if (!gl) throw new Error("SpiderGL : Cannot get WebGL context");
 
-	gl.pixelStorei(gl.PACK_ALIGNMENT,                 1);
-	gl.pixelStorei(gl.UNPACK_ALIGNMENT,               1);
-	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,            1);
-	gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+	gl.pixelStorei(gl.PACK_ALIGNMENT,                     1);
+	gl.pixelStorei(gl.UNPACK_ALIGNMENT,                   1);
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,                true);
+	gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,     false);
+	gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
 
 	// for some strange reason, this is a workaround
 	// to have Chrome work properly...
@@ -7857,8 +7907,7 @@ function _sglUnmanageCanvas(canvasID) {
 }
 
 function _sglManageCanvasOnLoad(canvasID, handler, updateRate) {
-	//window.addEventListener("load", function() { _sglManageCanvas(canvasID, handler, updateRate); }, false);
-	_sglManageCanvas(canvasID, handler, updateRate)
+	window.addEventListener("load", function() { _sglManageCanvas(canvasID, handler, updateRate); }, false);
 }
 
 function _sglUnmanageCanvasOnLoad(canvasID) {

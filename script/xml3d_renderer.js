@@ -217,7 +217,7 @@ org.xml3d.webgl.createContext = (function() {
 		}
 		this.pickBuffer.bind();
 
-		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		//gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		//gl.clearDepth(1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
@@ -296,7 +296,7 @@ org.xml3d.webgl.createContext = (function() {
 		return false;
 	};
 	
-	Context.prototype.mouseMove = function(gl, x, y) {
+	/*Context.prototype.mouseMove = function(gl, x, y) {
 		var lastObj = this.scene.currentPickObj;
 		
 		this.renderPick(gl, x, y);
@@ -336,6 +336,7 @@ org.xml3d.webgl.createContext = (function() {
 		}
 		return false;
 	};
+	*/
 
 	Context.prototype.draw = function(gl) {
 		try {
@@ -668,7 +669,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 		pickPos.z = data[2] / 255;
 		//pickPos = pickPos.mult(max.subtract(min)).add(min);
 		var objId = 255 - data[3] - 1;
-		if (objId >= 0) {
+		if (objId >= 0 && data[3] > 0) {
 			this.scene.currentPickPos = pickPos;
 			var pickedObj = this.drawableObjects[(zPos[objId][0])];
 			this.scene.currentPickObj = pickedObj[1].node;

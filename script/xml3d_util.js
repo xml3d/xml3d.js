@@ -1,4 +1,28 @@
-//Check, if basics have already been defined
+/*************************************************************************/
+/*                                                                       */
+/*  xml3d_util.js                                                        */
+/*  Utilities for XML3D								                     */
+/*                                                                       */
+/*  Copyright (C) 2010                                                   */
+/*  DFKI - German Research Center for Artificial Intelligence            */
+/* 	partly based on code originally provided by Philip Taylor, 			 */
+/*  Peter Eschler, Johannes Behr and Yvonne Jung 						 */
+/*  (philip.html5.org, www.x3dom.org)	 								 */
+/*                                                                       */
+/*  This file is part of xml3d.js                                        */
+/*                                                                       */
+/*  xml3d.js is free software; you can redistribute it and/or modify     */
+/*  under the terms of the GNU General Public License as                 */
+/*  published by the Free Software Foundation; either version 2 of       */
+/*  the License, or (at your option) any later version.                  */
+/*                                                                       */
+/*  xml3d.js is distributed in the hope that it will be useful, but      */
+/*  WITHOUT ANY WARRANTY; without even the implied warranty of           */
+/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 */
+/*  See the GNU General Public License                                   */
+/*  (http://www.fsf.org/licensing/licenses/gpl.html) for more details.   */
+/*                                                                       */
+/*************************************************************************/
 var org;
 if (!org || !org.xml3d)
   throw new Error("xml3d.js has to be included first");
@@ -13,6 +37,44 @@ if (!org.xml3d.debug)
     org.xml3d.debug = {};
 else if (typeof org.xml3d.debug != "object")
     throw new Error("org.xml3d.debug already exists and is not an object");
+
+if (!Array.forEach) {
+	Array.forEach = function(array, fun, thisp) {
+		var len = array.length;
+		for ( var i = 0; i < len; i++) {
+			if (i in array) {
+				fun.call(thisp, array[i], i, array);
+			}
+		}
+	};
+}
+if (!Array.map) {
+	Array.map = function(array, fun, thisp) {
+		var len = array.length;
+		var res = [];
+		for ( var i = 0; i < len; i++) {
+			if (i in array) {
+				res[i] = fun.call(thisp, array[i], i, array);
+			}
+		}
+		return res;
+	};
+}
+if (!Array.filter) {
+	Array.filter = function(array, fun, thisp) {
+		var len = array.length;
+		var res = [];
+		for ( var i = 0; i < len; i++) {
+			if (i in array) {
+				var val = array[i];
+				if (fun.call(thisp, val, i, array)) {
+					res.push(val);
+				}
+			}
+		}
+		return res;
+	};
+}
 
 org.xml3d.debug = {
 	INFO : "INFO",
@@ -441,3 +503,5 @@ org.xml3d.setParameter = function(elementId, fieldName, value) {
 	}
 	return false;
 };
+
+/***********************************************************************/

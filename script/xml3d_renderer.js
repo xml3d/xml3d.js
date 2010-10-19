@@ -1,3 +1,28 @@
+/*************************************************************************/
+/*                                                                       */
+/*  xml3d_renderer.js                                                    */
+/*  WebGL renderer for XML3D						                     */
+/*                                                                       */
+/*  Copyright (C) 2010                                                   */
+/*  DFKI - German Research Center for Artificial Intelligence            */
+/* 	partly based on code originally provided by Philip Taylor, 			 */
+/*  Peter Eschler, Johannes Behr and Yvonne Jung 						 */
+/*  (philip.html5.org, www.x3dom.org)  		 								 */
+/*                                                                       */
+/*  This file is part of xml3d.js                                        */
+/*                                                                       */
+/*  xml3d.js is free software; you can redistribute it and/or modify     */
+/*  under the terms of the GNU General Public License as                 */
+/*  published by the Free Software Foundation; either version 2 of       */
+/*  the License, or (at your option) any later version.                  */
+/*                                                                       */
+/*  xml3d.js is distributed in the hope that it will be useful, but      */
+/*  WITHOUT ANY WARRANTY; without even the implied warranty of           */
+/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 */
+/*  See the GNU General Public License                                   */
+/*  (http://www.fsf.org/licensing/licenses/gpl.html) for more details.   */
+/*                                                                       */
+/*************************************************************************/
 
 //Check, if basics have already been defined
 var org;
@@ -25,11 +50,6 @@ org.xml3d.webgl.supported = function() {
 
 org.xml3d.webgl.configure = function(xml3ds) {
 
-	/*var sglscript=document.createElement('script');
-	sglscript.setAttribute("type","text/javascript");
-	sglscript.setAttribute("src", "../../org.xml3d.renderer.webgl/script/spidergl.js");
-	document.getElementsByTagName("head")[0].appendChild(sglscript);
-	*/
 	for(var i in xml3ds) {
 		// Creates a HTML <canvas> using the style of the <xml3d> Element
 		var canvas = org.xml3d.webgl.createCanvas(xml3ds[i], i);
@@ -44,16 +64,22 @@ org.xml3d.webgl.configure = function(xml3ds) {
 };
 
 org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
+	
+	var parent = xml3dElement.parentNode;
 	// Place xml3dElement inside an invisble div
-	var hideDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
-	xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
-	hideDiv.appendChild(xml3dElement);
+	var hideDiv = parent.ownerDocument.createElement('div');
 	hideDiv.style.display = "none";
-
+	parent.insertBefore(hideDiv, xml3dElement);
+	hideDiv.appendChild(xml3dElement);
+	
 	// Create canvas and append it where the xml3d element was before
-	var canvas = document.createElementNS(org.xml3d.xhtmlNS, 'canvas');
-	canvas.setAttribute("style", xml3dElement.getAttribute("style"));
-	canvas.setAttribute("class", xml3dElement.getAttribute("class"));
+	var canvas = parent.ownerDocument.createElement('canvas');
+	parent.insertBefore(canvas, hideDiv);
+	if (xml3dElement.hasAttribute("style"))
+		canvas.setAttribute("style", xml3dElement.getAttribute("style"));
+	if (xml3dElement.hasAttribute("class"))
+		canvas.setAttribute("class", xml3dElement.getAttribute("class"));
+	
 	var sides = [ "top", "right", "bottom", "left" ];
 	var colorStr = styleStr = widthStr = paddingStr = "";
 	for (i in sides) {
@@ -66,7 +92,7 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	canvas.style.borderStyle = styleStr;
 	canvas.style.borderWidth = widthStr;
 	canvas.style.padding = paddingStr;
-	canvas.style.backgroundColor = org.xml3d.util.getStyle(xml3dElement, "background-Color");
+	
 
 	if ((w = xml3dElement.getAttribute("width")) !== null) {
 		canvas.style.width = w;
@@ -76,9 +102,9 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	} 
 
 	canvas.id = "canvas"+index;
-	hideDiv.parentNode.insertBefore(canvas, hideDiv);
 	canvas.width = canvas.clientWidth;
 	canvas.height = canvas.clientHeight;
+	canvas.style.display = "block";
 	return canvas;
 };
 
@@ -86,7 +112,7 @@ org.xml3d.webgl.initListeners = function(ctx, xml3del) {
 	var gl = ctx.gl;
 	
 	ctx.canvas.addEventListener('mouseup', function(evt) {		
-			ctx.renderPick(xml3del, evt.layerX, evt.layerY);
+			//ctx.renderPick(xml3del, evt.layerX, evt.layerY);
 			if(xml3del.currentPickObj)
 			{
 				var currentObj = xml3del.currentPickObj;
@@ -108,15 +134,7 @@ org.xml3d.webgl.createContext = (function() {
 	
 	function Scene(xml3dElement) {
 		this.xml3d = xml3dElement;
-		this.getBackgroundColor = function() {
-			if (RGBColor && document.defaultView
-					&& document.defaultView.getComputedStyle) {
-				var colorStr = org.xml3d.util.getStyle(this.xml3d,
-						"background-color");
-				var color = new RGBColor(colorStr);
-				return color.toGLAlpha();
-			}
-		};
+		
 		this.getActiveView = function() {
 			var av = this.xml3d.getActiveView();
 			if (av == null)
@@ -146,10 +164,6 @@ org.xml3d.webgl.createContext = (function() {
 	Context.prototype.start = function() {
 		var ctx = this;
 		ctx.renderScene();
-		/*setInterval(function() {
-			if (ctx.needsUpdate)
-				ctx.renderScene();
-		}, 16);*/
 	};
 	
 	Context.prototype.getCanvasId = function() {
@@ -238,12 +252,6 @@ org.xml3d.webgl.createContext = (function() {
 			this.renderer = new org.xml3d.webgl.Renderer(this);
 		}
 		
-		var bgCol = this.scene.getBackgroundColor();
-		if (bgCol)
-			gl.clearColor(bgCol[0], bgCol[1], bgCol[2], bgCol[3]);
-		else
-			gl.clearColor(0.3, 0.3, 0.6, 1.0);
-		
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 
@@ -325,7 +333,7 @@ org.xml3d.webgl.Renderer.prototype.redraw = function() {
 
 org.xml3d.webgl.Renderer.prototype.mouseUp = function(gl, button, x, y) {
 	if (button == 0) {
-		this.ctx.renderPick(gl, x, y);
+		//this.ctx.renderPick(gl, x, y);
 		if (this.scene.currentPickObj)
 		{
 			var currentObj = this.scene.currentPickObj;
@@ -1010,6 +1018,8 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 	if(shader == null)
 	{
 		var styleValue = this.node.getAttribute('style');
+		if(!styleValue)
+			return null;
 		var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
 		pattern.exec(styleValue);
 		shader = this.node.xml3ddocument.resolve(RegExp.$1);
@@ -2280,4 +2290,4 @@ org.xml3d.webgl.RootDataAdapter.prototype.toString = function()
 };
 
 
-/********************************** End of the DataCollector Implementation *************************************************/
+/***********************************************************************/

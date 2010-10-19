@@ -1,3 +1,26 @@
+/*************************************************************************/
+/*                                                                       */
+/*  xml3d.js                                                             */
+/*  Declarative 3D in HTML							                     */
+/*                                                                       */
+/*  Copyright (C) 2010                                                   */
+/*  DFKI - German Research Center for Artificial Intelligence            */
+/*                                                                       */
+/*  This file is part of xml3d.js                                        */
+/*                                                                       */
+/*  xml3d.js is free software; you can redistribute it and/or modify     */
+/*  under the terms of the GNU General Public License as                 */
+/*  published by the Free Software Foundation; either version 2 of       */
+/*  the License, or (at your option) any later version.                  */
+/*                                                                       */
+/*  xml3d.js is distributed in the hope that it will be useful, but      */
+/*  WITHOUT ANY WARRANTY; without even the implied warranty of           */
+/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 */
+/*  See the GNU General Public License                                   */
+/*  (http://www.fsf.org/licensing/licenses/gpl.html) for more details.   */
+/*                                                                       */
+/*************************************************************************/
+
 // Create global symbol org
 var org;
 if (!org)
@@ -17,44 +40,6 @@ org.xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
 org.xml3d._xml3d = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
 org.xml3d._native = !!org.xml3d._xml3d.style; 
 org.xml3d._rendererFound = false;
-
-if (!Array.forEach) {
-	Array.forEach = function(array, fun, thisp) {
-		var len = array.length;
-		for ( var i = 0; i < len; i++) {
-			if (i in array) {
-				fun.call(thisp, array[i], i, array);
-			}
-		}
-	};
-}
-if (!Array.map) {
-	Array.map = function(array, fun, thisp) {
-		var len = array.length;
-		var res = [];
-		for ( var i = 0; i < len; i++) {
-			if (i in array) {
-				res[i] = fun.call(thisp, array[i], i, array);
-			}
-		}
-		return res;
-	};
-}
-if (!Array.filter) {
-	Array.filter = function(array, fun, thisp) {
-		var len = array.length;
-		var res = [];
-		for ( var i = 0; i < len; i++) {
-			if (i in array) {
-				var val = array[i];
-				if (fun.call(thisp, val, i, array)) {
-					res.push(val);
-				}
-			}
-		}
-		return res;
-	};
-}
 
 document.nativeGetElementById = document.getElementById;
 document.getElementById = function(id) {
@@ -167,38 +152,7 @@ document.getElementById = function(id) {
 		
 		org.xml3d.data.configure(xml3ds);
 		org.xml3d.webgl.configure(xml3ds);
-		/*for (i = 0; i < xml3ds.length; i++) {
 		
-			var x3dcanvas = org.xml3d.document.createCanvas(xml3ds[i]);
-			if (x3dcanvas.gl === null) {
-				var altDiv = document.createElement("div");
-				altDiv.setAttribute("class", "xml3d-nox3d");
-				var altP = document.createElement("p");
-				altP
-						.appendChild(document
-								.createTextNode("WebGL is not yet supported in your browser. "));
-				var aLnk = document.createElement("a");
-				aLnk.setAttribute("href", "http://www.xml3d.org/");
-				aLnk
-						.appendChild(document
-								.createTextNode("Follow link for a list of supported browsers... "));
-				altDiv.appendChild(altP);
-				altDiv.appendChild(aLnk);
-				x3dcanvas.canvasDiv.appendChild(altDiv);
-				if (x3dcanvas.statDiv) {
-					x3dcanvas.canvasDiv.removeChild(x3dcanvas.statDiv);
-				}
-				var altImg = x3ds[i].getAttribute("altImg") || null;
-				if (altImg) {
-					var altImgObj = new Image();
-					altImgObj.src = altImg;
-					x3dcanvas.canvasDiv.style.backgroundImage = "url(" + altImg
-							+ ")";
-				} else {
-				}
-				continue;
-			}
-		}*/
 		var ready = (function(eventType) {
 			var evt = null;
 			if (document.createEvent) {

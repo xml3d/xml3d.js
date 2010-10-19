@@ -189,6 +189,7 @@ org.xml3d.URIResolver = function() {
 org.xml3d.URIResolver.resolve = function(document, uriStr) {
 	if (!document || !uriStr)
 		return null;
+	
 	var uri = new org.xml3d.URI(uriStr);
 
 	if (uri.scheme == 'urn')

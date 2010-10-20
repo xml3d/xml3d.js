@@ -116,6 +116,7 @@ document.getElementById = function(id) {
 				infoDiv.style.border = "2px solid red";
 				infoDiv.style.color  = "red";
 				infoDiv.style.padding = "10px";
+				infoDiv.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
 				
 				
 				var width = xml3dElement.getAttribute("width");
@@ -131,15 +132,16 @@ document.getElementById = function(id) {
 				} 
 	
 				var hElement = document.createElement("h3");
-				var hTxt     = document.createTextNode("Your browser doesn't support XML3D.");
+				var hTxt     = document.createTextNode("Your browser doesn't appear to support XML3D.");
 				hElement.appendChild (hTxt);
 				
 				var pElement = document.createElement("p");
-				var pTxt     = document.createTextNode(
-						"Please visit http://xml3d.org/ to get a native XML3D implementation or " +
-						"http://get.webgl.org/ to get information about WebGL supporting browsers.");
-				pElement.appendChild (pTxt);
-				
+				pElement.appendChild(document.createTextNode("Please visit "));
+				var link = document.createElement("a");
+				link.setAttribute("href", "http://www.xml3d.org");
+				link.appendChild(document.createTextNode("http://www.xml3d.org"));
+				pElement.appendChild(link);
+				pElement.appendChild(document.createTextNode(" to get information about browsers supporting XML3D."));
 				infoDiv.appendChild (hElement);
 				infoDiv.appendChild (pElement);
 				

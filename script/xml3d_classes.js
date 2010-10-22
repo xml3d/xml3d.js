@@ -189,7 +189,6 @@ org.xml3d.URIResolver = function() {
 org.xml3d.URIResolver.resolve = function(document, uriStr) {
 	if (!document || !uriStr)
 		return null;
-	
 	var uri = new org.xml3d.URI(uriStr);
 
 	if (uri.scheme == 'urn')
@@ -610,6 +609,10 @@ org.xml3d.classInfo.Xml3dNode.configure = function(node, c) {
  	
 	node.setField = function(event) {
 		return org.xml3d.event.UNHANDLED;
+	};
+	node.evalMethod = function(evtMethod) {
+		if (evtMethod)
+			eval(evtMethod);
 	};
 };
 
@@ -1194,10 +1197,7 @@ org.xml3d.classInfo.group.configure = function(node, context) {
 		}
 		return this.shader;
 	};
-	node.evalMethod = function(evtMethod) {
-		if (evtMethod)
-			eval(evtMethod);
-	};
+
 
     // Node::setField
 	node.setField = function(event)	{
@@ -1256,10 +1256,6 @@ org.xml3d.classInfo.group.configure = function(node, context) {
 	  }
 	  if (attrName == "visible") {
 	  	  this.visible = event.newValue;
-		  return org.xml3d.event.HANDLED;
-	  }
-	  if (attrName == "shader") {
-	  	  this.shader = null;
 		  return org.xml3d.event.HANDLED;
 	  }
 	}; // End setField
@@ -1396,10 +1392,7 @@ org.xml3d.classInfo.mesh.configure = function(node, context) {
 		}
 		return this.src;
 	};
-	node.evalMethod = function (evtMethod) {
-		if (evtMethod)
-			eval(evtMethod);
-	};
+
 
     // Node::setField
 	node.setField = function(event)	{
@@ -2689,9 +2682,9 @@ org.xml3d.classInfo.texture.configure = function(node, context) {
 	node._filterMin = org.xml3d.initEnum(node.getAttribute("filterMin"), 2, org.xml3d.FilterTypes);
 	node._filterMag = org.xml3d.initEnum(node.getAttribute("filterMag"), 2, org.xml3d.FilterTypes);
 	node._filterMip = org.xml3d.initEnum(node.getAttribute("filterMip"), 1, org.xml3d.FilterTypes);
-	node._wrapS = org.xml3d.initEnum(node.getAttribute("wrapS"), 1, org.xml3d.WrapTypes);
-	node._wrapT = org.xml3d.initEnum(node.getAttribute("wrapT"), 1, org.xml3d.WrapTypes);
-	node._wrapU = org.xml3d.initEnum(node.getAttribute("wrapU"), 1, org.xml3d.WrapTypes);
+	node._wrapS = org.xml3d.initEnum(node.getAttribute("wrapS"), 0, org.xml3d.WrapTypes);
+	node._wrapT = org.xml3d.initEnum(node.getAttribute("wrapT"), 0, org.xml3d.WrapTypes);
+	node._wrapU = org.xml3d.initEnum(node.getAttribute("wrapU"), 0, org.xml3d.WrapTypes);
 	node._borderColor = org.xml3d.initString(node.getAttribute("borderColor"), "");
 	node.imageData = null;
 

@@ -1096,6 +1096,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
+	this.factory.ctx.redraw();
 };
 
 // Adapter for <mesh>
@@ -1180,7 +1181,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	}
 	if (invalidTextures)
 	{
-		this.factory.renderer.needDraw = true;
+		this.factory.ctx.redraw();
 		//Texture is not ready for rendering yet, skip this object
 		return;
 	}

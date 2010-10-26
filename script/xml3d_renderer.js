@@ -2024,8 +2024,8 @@ org.xml3d.webgl.DataAdapter.prototype.notifyObservers = function()
 
 /**
  * The notifyChanged() method is called by the XML3D data structure to notify the DataAdapter about 
- * data changes in its associating node. When this method is called, all DataAdapter observers are 
- * notified about data changes.
+ * data changes (DOM mustation events) in its associating node. When this method is called, all observers 
+ * of the DataAdapter are notified about data changes via their notifyDataChanged() method.
  * 
  * @param e  notification of type org.xml3d.Notification
  */
@@ -2038,9 +2038,9 @@ org.xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e)
 
 /**
  * Is called when the observed DataAdapter has changed. This basic implementation
- * does only notify all its observers about changes since an element observed by
- * a DataAdapter should always be a child DataAdapter. This means when a child element
- * changes, also its parent changes.
+ * recreates its data table and notifies all its observers about changes. The recreation
+ * of the data table is necessary as the notification usually comes from a child DataAdapter.
+ * This means when a child element changes, its parent changes simultaneously.
  */
 org.xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function()
 {
@@ -2098,6 +2098,9 @@ org.xml3d.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
 
 /**
  * Returns datatable retrieved from the DataAdapter's children.
+ * In doing so, only the cached datatables are fetched since 
+ * the value of the changed child should already be adapted
+ * and the values of the remaining children do not vary.
  * 
  * @returns datatable retrieved from the DataAdapter's children 
  */
@@ -2113,7 +2116,7 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 		{
 			var dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
 			
-			if(!dataCollector) // This can happen, i.e. a child node in a seperate namespace
+			if(! dataCollector) // This can happen, i.e. a child node in a seperate namespace
 				continue;
 			
 			/* A RootAdapter must not be a chilrden of another DataAdapter.
@@ -2141,6 +2144,22 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 	return dataTable;
 };
 
+/**
+ * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true', 
+ * createDataTable() creates a new datatable, caches and returns it. If no
+ * parameter is specified or 'forceNewInstance' is specified with 'false', the
+ * cashed datatable is returned.<br/>
+ * Each datatable has the following format:<br/>
+ * <br/>
+ * datatable['name']['tupleSize'] : tuple size of the data element with name 'name' <br/>
+ * datatable['name']['data']      : typed array (https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html)
+ * 								  associated with the data element with name 'name'
+ * 
+ * @param   forceNewInstance 
+ * 				indicates whether a new instance shall be created or the cached
+ * 				datatable shall be returned			
+ * @returns datatable
+ */
 org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
 {
 	if(forceNewInstance == undefined ? true : ! forceNewInstance)
@@ -2157,7 +2176,7 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 	}
 	else
 	{
-		// If the "src" attribute is use, reuse the datatable of the referred <data> element (or file) 
+		// If the "src" attribute is used, reuse the datatable of the referred <data> element (or file) 
 		// and ignore the element's content
 		srcElement = this.factory.getAdapter(srcElement);
 		dataTable  = srcElement.createDataTable();
@@ -2168,11 +2187,19 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 	return dataTable;
 };
 
+/**
+ * Indicates whether this DataAdapter is a RootAdapter (has no parent DataAdapter).
+ * 
+ * @returns true if this DataAdapter is a RootAdapter, otherwise false.
+ */
 org.xml3d.webgl.DataAdapter.prototype.isRootAdapter = function()
 {
 	return false;
 };
 
+/**
+ * Returns String representation of this DataAdapter
+ */
 org.xml3d.webgl.DataAdapter.prototype.toString = function()
 {
 	return "org.xml3d.webgl.DataAdapter";
@@ -2182,18 +2209,20 @@ org.xml3d.webgl.DataAdapter.prototype.toString = function()
 
 /**
  * Class org.xml3d.webgl.ValueDataAdapter
+ * extends: org.xml3d.webgl.DataAdapter
  * 
- * extends: org.xml3d.data.DataAdapter
+ * ValueDataAdapter represents a leaf in the DataAdapter hierarchy. A
+ * ValueDataAdapter is associated with the XML3D data elements having
+ * no children besides a text node such as <bool>, <float>, <float2>,... .
  * 
- * @author Benjamin Friedrich
- * 
- * @version  10/2010  1.0
+ * @author  Benjamin Friedrich
+ * @version 10/2010  1.0
  */
 
 /**
  * Constructor of org.xml3d.webgl.ValueDataAdapter
  * 
- * @augments org.xml3d.data.DataAdapter
+ * @augments org.xml3d.webgl.DataAdapter
  * @constructor
  * 
  * @param factory
@@ -2210,7 +2239,12 @@ org.xml3d.webgl.ValueDataAdapter = function(factory, node)
 org.xml3d.webgl.ValueDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.ValueDataAdapter.prototype.constructor = org.xml3d.webgl.ValueDataAdapter;
 
-
+/**
+ * Returns the tuple size of the associated XML3D data element. 
+ * 
+ * @returns the tuples size of the associated node or -1 if the tuple size 
+ * 			of the associated node can not be determined
+ */
 org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function() 
 {
 	if (this.node.localName == "float" ||
@@ -2245,7 +2279,20 @@ org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 	return -1;
 };
 
-
+/**
+ * Extracts the texture data of a node. For example: 
+ * 
+ * <code>
+ *	<texture name="...">
+ * 		<img src="textureData.jpg"/>
+ * 	</texture
+ * </code>
+ * 
+ * In this case, "textureData.jpg" is returned as texture data.
+ * 
+ * @param   node  XML3D texture node
+ * @returns texture data or null, if the given node is not a XML3D texture element
+ */
 org.xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node) 
 {
 	if(node.localName != "texture")
@@ -2263,6 +2310,22 @@ org.xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
 	return textureChild.src;
 };
 
+/**
+ * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true', 
+ * createDataTable() creates a new datatable, caches and returns it. If no
+ * parameter is specified or 'forceNewInstance' is specified with 'false', the
+ * cashed datatable is returned.<br/>
+ * Each datatable has the following format:<br/>
+ * <br/>
+ * datatable['name']['tupleSize'] : tuple size of the data element with name 'name' <br/>
+ * datatable['name']['data']      : typed array (https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html)
+ * 								    associated with the data element with name 'name'
+ * 
+ * @param   forceNewInstance 
+ * 				indicates whether a new instance shall be created or the cached
+ * 				datatable shall be returned			
+ * @returns datatable
+ */
 org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewInstance)
 {	
 	if(forceNewInstance == undefined ? true : ! forceNewInstance)
@@ -2281,19 +2344,22 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewIn
 		value = this.node.value;
 	}
 
-	var name  = this.node.name;		
-	var result  = new Array(1);
-	var content = new Array();
+	var name    		 = this.node.name;		
+	var result 			 = new Array(1);
+	var content          = new Array();
 	content['tupleSize'] = this.getTupleSize();
 		
 	result[name]    = content;
 	content['data'] = value;
-	result[name]    = content;
+	result[name]    = content; 
 	this.dataTable  = result;
 
 	return result;
 };
 
+/**
+ * Returns String representation of this DataAdapter
+ */
 org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
 {
 	return "org.xml3d.webgl.ValueDataAdapter";
@@ -2302,19 +2368,19 @@ org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
 //---------------------------------------------------------------------------------------------------------------------------
 
 /**
- * Class org.xml3d.webgl.RootDataAdapter
+ * Class    org.xml3d.webgl.RootDataAdapter
+ * extends: org.xml3d.webgl.DataAdapter
  * 
- * extends: org.xml3d.data.DataAdapter
+ * RootDataAdapter represents the root in the DataAdapter hierarchy (no parents).
  * 
- * @author Benjamin Friedrich
- * 
- * @version  10/2010  1.0
+ * @author  Benjamin Friedrich
+ * @version 10/2010  1.0
  */
 
 /**
  * Constructor of org.xml3d.webgl.RootDataAdapter
  * 
- * @augments org.xml3d.data.DataAdapter
+ * @augments org.xml3d.webgl.DataAdapter
  * @constructor
  * 
  * @param factory
@@ -2327,21 +2393,22 @@ org.xml3d.webgl.RootDataAdapter = function(factory, node)
 org.xml3d.webgl.RootDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.RootDataAdapter.prototype.constructor = org.xml3d.webgl.RootDataAdapter;
 
-
-//org.xml3d.webgl.RootDataAdapter.prototype.notifyDataChanged = function()
-//{
-//	this.notifyObservers();
-//};
-
+/**
+ * Indicates whether this DataAdapter is a RootAdapter (has no parent DataAdapter).
+ * 
+ * @returns true if this DataAdapter is a RootAdapter, otherwise false.
+ */
 org.xml3d.webgl.RootDataAdapter.prototype.isRootAdapter = function()
 {
 	return true;
 };
 
+/**
+ * Returns String representation of this DataAdapter
+ */
 org.xml3d.webgl.RootDataAdapter.prototype.toString = function()
 {
 	return "org.xml3d.webgl.RootDataAdapter";
 };
-
 
 /***********************************************************************/

@@ -55,6 +55,7 @@ org.xml3d.Camera.prototype.__defineGetter__("position", function() { return this
 org.xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { /*org.xml3d.debug.logError("Orientation: " + orientation);*/ this.view.orientation = orientation; });
 org.xml3d.Camera.prototype.__defineSetter__("position", function(position) { this.view.position = position; });
 org.xml3d.Camera.prototype.__defineGetter__("direction", function() { return this.view.getDirection(); });
+org.xml3d.Camera.prototype.__defineGetter__("upVector", function() { return this.view.getUpVector(); });
 org.xml3d.Camera.prototype.__defineGetter__("fieldOfView", function() { return this.view.fieldOfView; });
 
 org.xml3d.Camera.prototype.rotateAroundPoint = function(q0, p0) {
@@ -64,6 +65,20 @@ org.xml3d.Camera.prototype.rotateAroundPoint = function(q0, p0) {
 	this.orientation = tmp;
 	var trans = new XML3DRotation(this.inverseTransformOf(q0.axis), q0.angle).rotateVec3(this.position.subtract(p0));
 	this.position = p0.add(trans);
+};
+
+org.xml3d.Camera.prototype.lookAround = function(rotSide, rotUp, upVector) {
+	//org.xml3d.debug.logError("Orientation: " + this.orientation.multiply(q0).normalize());
+	var check = rotUp.multiply(this.orientation);
+	var tmp;
+	if( Math.abs(upVector.dot(check.rotateVec3(new XML3DVec3(0,0,-1)))) > 0.95 )
+		tmp = rotSide;
+    else
+	    tmp = rotSide.multiply(rotUp);
+	tmp.normalize();
+	tmp = tmp.multiply(this.orientation);
+	tmp.normalize();
+	this.orientation = tmp;
 };
 
 org.xml3d.Camera.prototype.rotate = function(q0) {
@@ -96,6 +111,7 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 		org.xml3d.debug.logError("Could not initialize Camera Controller.");
 		return;
 	}
+	
 	org.xml3d.debug.logWarning("View: " + view);
 	this.camera = new org.xml3d.Camera(view);
 	this.timer = new org.xml3d.util.Timer();
@@ -104,17 +120,35 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 		this.y = -1;
 	};
 	
+	this.mode = "examine";
 	this.revolveAroundPoint = new XML3DVec3(0, 0, 0);
 	this.rotateSpeed = 1;
 	this.zoomSpeed = 20;
 	this.spinningSensitivity = 0.3;
 	this.isSpinning = false;
 	
-	this.UPVECTOR = new XML3DVec3(0, 1, 0);
-	this.ZVECTOR = new XML3DVec3(0, 0, -1);
+	this.upVector = this.camera.upVector;
 	
 	this.moveSpeedElement = document.getElementById("moveSpeed");
 	this.useKeys = document.getElementById("useKeys");
+	
+	var navigations = xml3d.getElementsByTagName("navigation");
+	
+	if(navigations.length > 0)
+	{
+		var config = navigations[0];
+		this.mode = config.getAttribute("mode");
+		if(this.mode != "walk" && this.mode != "examine" )
+			this.mode = "examine";
+		
+		if(config.getAttribute("resolveAround")){
+			this.revolveAroundPoint.setVec3Value(config.getAttribute("resolveAround"));
+		}
+		if(config.getAttribute("speed"))
+		{
+			this.zoomSpeed *= config.getAttribute("speed");
+		}
+	}
 
 	this.attach();
 };
@@ -171,12 +205,6 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 	return activeView;
 };
 
-org.xml3d.Xml3dSceneController.prototype.getMoveScale = function() {
-	if (this.moveSpeedElement)
-		return this.moveSpeedElement.value;
-	return 1.0;
-};
-
 org.xml3d.Xml3dSceneController.prototype.stopEvent = function(ev) {
 	this.stopPropagation(ev);
 	this.preventDefault(ev);
@@ -208,8 +236,9 @@ org.xml3d.Xml3dSceneController.prototype.update = function() {
 
 org.xml3d.Xml3dSceneController.prototype.NO_MOUSE_ACTION = 0;
 org.xml3d.Xml3dSceneController.prototype.TRANSLATE = 1;
-org.xml3d.Xml3dSceneController.prototype.ZOOM = 2;
+org.xml3d.Xml3dSceneController.prototype.DOLLY = 2;
 org.xml3d.Xml3dSceneController.prototype.ROTATE = 3;
+org.xml3d.Xml3dSceneController.prototype.LOOKAROUND = 4;
 
 org.xml3d.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 
@@ -219,13 +248,16 @@ org.xml3d.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 	var button = (ev.which || ev.button);
 	switch (button) {
 		case 1:
-			this.action = this.ROTATE;
+			if(this.mode == "examine")
+				this.action = this.ROTATE;
+			else
+				this.action = this.LOOKAROUND;
 			break;
 		case 2:
 			this.action = this.TRANSLATE;
 			break;
 		case 3:
-			this.action = this.ZOOM;
+			this.action = this.DOLLY;
 			break;
 		default:
 			this.action = this.NO_MOUSE_ACTION;
@@ -277,7 +309,7 @@ org.xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera
 			var trans = new XML3DVec3(dx, dy, 0.0);
 			this.camera.translate(this.camera.inverseTransformOf(trans));
 			break;
-		case(this.ZOOM):
+		case(this.DOLLY):
 			var dy = this.zoomSpeed * (ev.pageY - this.prevPos.y) / this.height;
 			this.camera.translate(this.camera.inverseTransformOf(new XML3DVec3(0, 0, dy)));
 			break;
@@ -290,6 +322,16 @@ org.xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera
 			var my = new XML3DRotation(new XML3DVec3(1,0,0), dy);
 			//this.computeMouseSpeed(ev);
 			this.camera.rotateAroundPoint(mx.multiply(my), this.revolveAroundPoint);
+			break;
+		case(this.LOOKAROUND):
+			var dx = -this.rotateSpeed * (ev.pageX - this.prevPos.x) * 2.0 * Math.PI / this.width;
+			var dy = this.rotateSpeed * (ev.pageY - this.prevPos.y) * 2.0 * Math.PI / this.height;
+			var cross = this.upVector.cross(this.camera.direction);
+
+			var mx = new XML3DRotation( this.upVector , dx);
+			var my = new XML3DRotation( cross , dy);
+			
+			this.camera.lookAround(mx, my, this.upVector);
 			break;
 	}
 	
@@ -338,25 +380,25 @@ org.xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 		switch (KeyID) {
 		case 38: // up
 		case 87: // w
-			camera.position = camera.position.add(dir.scale(this.getMoveScale()));
+			camera.position = camera.position.add(dir.scale(this.zoomSpeed));
 			break;
 		case 39: // right
 		case 68: // d
 			var np = camera.position;
-			np.x -= dir.z * this.getMoveScale();
-			np.z += dir.x * this.getMoveScale();
+			np.x -= dir.z * this.zoomSpeed;
+			np.z += dir.x * this.zoomSpeed;
 			camera.position = np;
 			break;
 		case 37: // left
 		case 65: // a
 			var np = camera.position;
-			np.x += dir.z * this.getMoveScale();
-			np.z -= dir.x * this.getMoveScale();
+			np.x += dir.z * this.zoomSpeed;
+			np.z -= dir.x * this.zoomSpeed;
 			camera.position = np;
 			break;
 		case 40: // down
 		case 83: // s
-			camera.position = camera.position.subtract(dir.scale(this.getMoveScale()));
+			camera.position = camera.position.subtract(dir.scale(this.zoomSpeed));
 			break;
 
 		default:

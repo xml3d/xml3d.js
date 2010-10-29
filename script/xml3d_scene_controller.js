@@ -206,24 +206,11 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 };
 
 org.xml3d.Xml3dSceneController.prototype.stopEvent = function(ev) {
-	this.stopPropagation(ev);
-	this.preventDefault(ev);
-};
-
-org.xml3d.Xml3dSceneController.prototype.stopPropagation = function(ev) {
-	if (ev.stopPropagation) {
-		ev.stopPropagation();
-	} else {
-		ev.cancelBubble = true;
-	}
-};
-
-org.xml3d.Xml3dSceneController.prototype.preventDefault = function(ev) {
-	if (ev.preventDefault) {
+	if (ev.preventDefault)
 		ev.preventDefault();
-	} else {
-		ev.returnValue = false;
-	}
+	if (ev.stopPropagation) 
+		ev.stopPropagation();
+	ev.returnValue = false;
 };
 
 org.xml3d.Xml3dSceneController.prototype.update = function() {
@@ -242,7 +229,6 @@ org.xml3d.Xml3dSceneController.prototype.LOOKAROUND = 4;
 
 org.xml3d.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 
-	this.stopEvent(event);
 	ev = event || window.event;
 
 	var button = (ev.which || ev.button);
@@ -266,6 +252,7 @@ org.xml3d.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 	this.prevPos.x = ev.pageX;
 	this.prevPos.y = ev.pageY;
 
+	this.stopEvent(event);
 	return false;
 };
 
@@ -297,7 +284,6 @@ org.xml3d.Xml3dSceneController.prototype.computeMouseSpeed = function(event) {
 };
 
 org.xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
-	this.stopEvent(event);
 
 	ev = event || window.event;
 
@@ -344,6 +330,7 @@ org.xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera
         
 		this.update();
 	}
+	this.stopEvent(event);
 	return false;
 };
 
@@ -406,7 +393,7 @@ org.xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 		}
 		this.needUpdate = true;
 	}
-	this.preventDefault(e);
+	this.stopEvent(e);
 };
 
 (function() {

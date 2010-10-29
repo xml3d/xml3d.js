@@ -91,7 +91,7 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	canvas.style.borderStyle = styleStr;
 	canvas.style.borderWidth = widthStr;
 	canvas.style.padding = paddingStr;
-	
+	canvas.style.cursor = "default";
 
 	if ((w = xml3dElement.getAttribute("width")) !== null) {
 		canvas.style.width = w;

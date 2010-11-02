@@ -32,74 +32,369 @@ if (!org || !org.xml3d)
 // Create the XML3D data types for JS
 if (!org.xml3d._native)
 {
+	//------------------------------------------------------------
+	XML3DDataType = function()
+	{
+		this.ownerNode = null;
+		this.attrName  = null;
+	};
+
+	XML3DDataType.prototype.setOwnerNode = function(attrName, ownerNode)
+	{
+		if( attrName  === undefined || attrName  == null || 
+			ownerNode === undefined || ownerNode == null)
+		{
+			throw new Error("Passed invalid parameter values ( " +
+							"attrName="  + attrName  + "; " +
+							"ownerNode=" + ownerNode + 
+					 	    " ) for method XML3DDataType.setOwnerNode()");
+		}
+		
+		this.attrName  = attrName;
+		this.ownerNode = ownerNode;
+	};
+
+	XML3DDataType.prototype.removeOwnerNode = function()
+	{
+		this.ownerNode = null;
+		this.attrName  = null;
+	};
+
+	XML3DDataType.prototype.notifyOwnerNode = function(prevValue, newValue)
+	{
+		if(this.ownerNode != null && this.ownerNode.notificationRequired())
+		{
+			this.ownerNode.notify(new org.xml3d.Notification(this.ownerNode, 
+															 MutationEvent.MODIFICATION, 
+															 this.attrName, 
+															 prevValue, 
+															 newValue));
+		}
+	};
+
+	//------------------------------------------------------------
+	
 /*
  * Returns a new 4x4 XML3DMatrix from given arguments.
  * If no arguments are given it returns an identity matrix.
  */
-XML3DMatrix = function(_11, _12, _13, _14, _21, _22, _23,
-		_24, _31, _32, _33, _34, _41, _42, _43, _44) {
-	if (arguments.length == 0){
-		this._js = true;
-		this.m11 = 1;
-		this.m12 = 0;
-		this.m13 = 0;
-		this.m14 = 0;
-		this.m21 = 0;
-		this.m22 = 1;
-		this.m23 = 0;
-		this.m24 = 0;
-		this.m31 = 0;
-		this.m32 = 0;
-		this.m33 = 1;
-		this.m34 = 0;
-		this.m41 = 0;
-		this.m42 = 0;
-		this.m43 = 0;
-		this.m44 = 1;
-	} else {
-		this._js = true;
-		this.m11 = _11;
-		this.m12 = _12;
-		this.m13 = _13;
-		this.m14 = _14;
-		this.m21 = _21;
-		this.m22 = _22;
-		this.m23 = _23;
-		this.m24 = _24;
-		this.m31 = _31;
-		this.m32 = _32;
-		this.m33 = _33;
-		this.m34 = _34;
-		this.m41 = _41;
-		this.m42 = _42;
-		this.m43 = _43;
-		this.m44 = _44;
+XML3DMatrix = function(_11, _12, _13, _14, 
+					   _21, _22, _23, _24, 
+					   _31, _32, _33, _34, 
+					   _41, _42, _43, _44) 
+{
+	XML3DDataType.call(this);
+	
+	this._js = true;
+	
+	if (arguments.length == 0)
+	{
+		this._setMatrixInternal(1, 0, 0, 0, 
+							    0, 1, 0, 0, 
+							    0, 0, 1, 0, 
+							    0, 0, 0, 1);
+	} 
+	else 
+	{
+		this._setMatrixInternal(_11, _12, _13, _14, 
+							    _21, _22, _23, _24, 
+							    _31, _32, _33, _34, 
+							    _41, _42, _43, _44);
 	}
 };
+XML3DMatrix.prototype             = new XML3DDataType();
+XML3DMatrix.prototype.constructor = XML3DMatrix;
+
+//Getter definition
+XML3DMatrix.prototype.__defineGetter__("m11",  function () 
+{
+	return this._m11;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m12",  function () 
+{
+	return this._m12;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m13",  function () 
+{
+	return this._m13;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m14",  function () 
+{
+	return this._m14;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m21",  function () 
+{
+	return this._m21;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m22",  function () 
+{
+	return this._m22;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m23",  function () 
+{
+	return this._m23;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m24",  function () 
+{
+	return this._m24;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m31",  function () 
+{
+	return this._m31;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m32",  function () 
+{
+	return this._m32;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m33",  function () 
+{
+	return this._m33;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m34",  function () 
+{
+	return this._m34;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m41",  function () 
+{
+	return this._m41;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m42",  function () 
+{
+	return this._m42;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m43",  function () 
+{
+	return this._m43;
+});
+
+XML3DMatrix.prototype.__defineGetter__("m44",  function () 
+{
+	return this._m44;
+});
+
+
+
+
+//Setter definition
+
+XML3DMatrix.prototype._setMatrixField = function(field, value)
+{
+	var values = new Array(16);
+	
+	values["m11"] = this._m11;
+	values["m12"] = this._m12;
+	values["m13"] = this._m13;
+	values["m14"] = this._m14;
+	
+	values["m21"] = this._m21;
+	values["m22"] = this._m22;
+	values["m23"] = this._m23;
+	values["m24"] = this._m24;
+	
+	values["m31"] = this._m31;
+	values["m32"] = this._m32;
+	values["m33"] = this._m33;
+	values["m34"] = this._m34;
+	
+	values["m41"] = this._m41;
+	values["m42"] = this._m42;
+	values["m43"] = this._m43;
+	values["m44"] = this._m44;
+	
+	// set the matrix field
+	values[field] = value;
+	
+	this._setMatrixInternal(
+			   values['m11'], values['m12'], values['m13'], values['m14'], 
+	           values['m21'], values['m22'], values['m23'], values['m24'],
+	           values['m31'], values['m32'], values['m33'], values['m34'], 
+	           values['m41'], values['m42'], values['m43'], values['m44'] );
+};
+
+XML3DMatrix.prototype.__defineSetter__('m11',  function (value) 
+{
+	this._setMatrixField('m11', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m12',  function (value) 
+{
+	this._setMatrixField('m12', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m13',  function (value) 
+{
+	this._setMatrixField('m13', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m14',  function (value) 
+{
+	this._setMatrixField('m14', value);
+});
+
+
+XML3DMatrix.prototype.__defineSetter__('m21',  function (value) 
+{
+	this._setMatrixField('m21', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m22',  function (value) 
+{
+	this._setMatrixField('m22', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m23',  function (value) 
+{
+	this._setMatrixField('m23', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m24',  function (value) 
+{
+	this._setMatrixField('m24', value);
+});
+
+
+XML3DMatrix.prototype.__defineSetter__('m31',  function (value) 
+{
+	this._setMatrixField('m31', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m32',  function (value) 
+{
+	this._setMatrixField('m32', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m33',  function (value) 
+{
+	this._setMatrixField('m33', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m34',  function (value) 
+{
+	this._setMatrixField('m34', value);
+});
+
+
+XML3DMatrix.prototype.__defineSetter__('m41',  function (value) 
+{
+	this._setMatrixField('m41', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m42',  function (value) 
+{
+	this._setMatrixField('m42', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m43',  function (value) 
+{
+	this._setMatrixField('m43', value);
+});
+
+XML3DMatrix.prototype.__defineSetter__('m44',  function (value) 
+{
+	this._setMatrixField('m44', value);
+});
+
 
 /*
  * Populates this matrix with values from a given string.
  */
-XML3DMatrix.setMatrixValue = function(str) {
+XML3DMatrix.prototype.setMatrixValue = function(str) 
+{
 	var m = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(str);
-	if (m.length != 16)
-		throw new DOMException();
-	this.m11 = m[0];
-	this.m12 = m[1];
-	this.m13 = m[2];
-	this.m14 = m[3];
-	this.m21 = m[4];
-	this.m22 = m[5];
-	this.m23 = m[6];
-	this.m24 = m[7];
-	this.m31 = m[8];
-	this.m32 = m[9];
-	this.m33 = m[10];
-	this.m34 = m[11];
-	this.m41 = m[12];
-	this.m42 = m[13];
-	this.m43 = m[14];
-	this.m44 = m[15];
+
+	if (m.length != 17) // m[0] is the whole string, the rest is the actual result
+		throw new Error("Illegal number of elements: " + (m.length - 1) + "expected: 16");
+	
+	this._setMatrixInternal(m[1],  m[2],  m[3],  m[4], 
+							m[5],  m[6],  m[7],  m[8], 
+							m[9],  m[10], m[11], m[12], 
+							m[13], m[14], m[15], m[16]);
+};
+
+
+XML3DMatrix.prototype._setMatrixInternal = function(m11, m12, m13, m14,
+													m21, m22, m23, m24,
+													m31, m32, m33, m34,
+													m41, m42, m43, m44)
+{
+	if(isNaN(m11) || isNaN(m12) || isNaN(m13) || isNaN(m14) || 
+	   isNaN(m21) || isNaN(m22) || isNaN(m23) || isNaN(m24) ||
+	   isNaN(m31) || isNaN(m32) || isNaN(m33) || isNaN(m34) ||
+	   isNaN(m41) || isNaN(m42) || isNaN(m43) || isNaN(m44) )
+	{
+		var matrixString = "( " + m11 + " " + m12 + " " + m13 + " " + m14 + "\n" +
+						   		  m21 + " " + m22 + " " + m23 + " " + m24 + "\n" +
+						   		  m31 + " " + m32 + " " + m33 + " " + m34 + "\n" +
+						   		  m41 + " " + m42 + " " + m43 + " " + m44 + " )";
+			
+		throw new Error("Invalid matrix value :\n" + matrixString);
+	}
+	
+	if((m11 != this._m11) || (m12 != this._m12) || (m13 != this._m13) || (m14 != this._m14) || 
+	   (m21 != this._m21) || (m22 != this._m22) || (m23 != this._m23) || (m24 != this._m24) ||
+	   (m31 != this._m31) || (m32 != this._m32) || (m33 != this._m33) || (m34 != this._m34) ||
+	   (m41 != this._m41) || (m42 != this._m42) || (m43 != this._m43) || (m44 != this._m44) )
+	{
+		var oldM11 = this._m11;
+		var oldM12 = this._m12;
+		var oldM13 = this._m13;
+		var oldM14 = this._m14;
+		var oldM21 = this._m21;
+		var oldM22 = this._m22;
+		var oldM23 = this._m23;
+		var oldM24 = this._m24;
+		var oldM31 = this._m31;
+		var oldM32 = this._m32;
+		var oldM33 = this._m33;
+		var oldM34 = this._m34;
+		var oldM41 = this._m41;
+		var oldM42 = this._m42;
+		var oldM43 = this._m43;
+		var oldM44 = this._m44;
+	
+		this._m11 = m11;
+		this._m12 = m12;
+		this._m13 = m13;
+		this._m14 = m14;
+		this._m21 = m21;
+		this._m22 = m22;
+		this._m23 = m23;
+		this._m24 = m24;
+		this._m31 = m31;
+		this._m32 = m32;
+		this._m33 = m33;
+		this._m34 = m34;
+		this._m41 = m41;
+		this._m42 = m42;
+		this._m43 = m43;
+		this._m44 = m44;
+		
+		var newValue = [m11, m12, m13, m14,
+		                m21, m22, m23, m24,
+		                m31, m32, m33, m34,
+		                m41, m42, m43, m44];
+		
+		var oldValue = [oldM11, oldM12, oldM13, oldM14,
+		                oldM21, oldM22, oldM23, oldM24,
+		                oldM31, oldM32, oldM33, oldM34,
+		                oldM41, oldM42, oldM43, oldM44];
+
+		this.notifyOwnerNode(oldValue, newValue);
+	}
 };
 
 /*
@@ -107,42 +402,48 @@ XML3DMatrix.setMatrixValue = function(str) {
  * argument which can be any of: XML3DMatrix, XML3DVec3, XML3DRotation.
  * This matrix is not modified.
  */
-XML3DMatrix.prototype.multiply = function (that) {
-	if (that.m44) {
-		return new XML3DMatrix(this.m11 * that.m11 + this.m12
-				* that.m21 + this.m13 * that.m31 + this.m14 * that.m41, this.m11
-				* that.m12 + this.m12 * that.m22 + this.m13 * that.m32 + this.m14
-				* that.m42, this.m11 * that.m13 + this.m12 * that.m23 + this.m13
-				* that.m33 + this.m14 * that.m43, this.m11 * that.m14 + this.m12
-				* that.m24 + this.m13 * that.m34 + this.m14 * that.m44, this.m21
-				* that.m11 + this.m22 * that.m21 + this.m23 * that.m31 + this.m24
-				* that.m41, this.m21 * that.m12 + this.m22 * that.m22 + this.m23
-				* that.m32 + this.m24 * that.m42, this.m21 * that.m13 + this.m22
-				* that.m23 + this.m23 * that.m33 + this.m24 * that.m43, this.m21
-				* that.m14 + this.m22 * that.m24 + this.m23 * that.m34 + this.m24
-				* that.m44, this.m31 * that.m11 + this.m32 * that.m21 + this.m33
-				* that.m31 + this.m34 * that.m41, this.m31 * that.m12 + this.m32
-				* that.m22 + this.m33 * that.m32 + this.m34 * that.m42, this.m31
-				* that.m13 + this.m32 * that.m23 + this.m33 * that.m33 + this.m34
-				* that.m43, this.m31 * that.m14 + this.m32 * that.m24 + this.m33
-				* that.m34 + this.m34 * that.m44, this.m41 * that.m11 + this.m42
-				* that.m21 + this.m43 * that.m31 + this.m44 * that.m41, this.m41
-				* that.m12 + this.m42 * that.m22 + this.m43 * that.m32 + this.m44
-				* that.m42, this.m41 * that.m13 + this.m42 * that.m23 + this.m43
-				* that.m33 + this.m44 * that.m43, this.m41 * that.m14 + this.m42
-				* that.m24 + this.m43 * that.m34 + this.m44 * that.m44);
-		}
-	if (that.w) {
-		return new XML3DRotation(this.m11 * that.x + this.m12 * that.y
-				+ this.m13 * that.z + this.m14 * that.w, this.m21 * that.x + this.m22 * that.y
-				+ this.m23 * that.z + this.m24 * that.w, this.m31 * that.x + this.m32 * that.y
-				+ this.m33 * that.z + this.m34 * that.w, this.m41 * that.x + this.m42 * that.y
-				+ this.m43 * that.z + this.m44 * that.w);
+XML3DMatrix.prototype.multiply = function (that) 
+{
+	if (that.m44) 
+	{
+		return new XML3DMatrix(this._m11 * that.m11 + this._m12
+				* that.m21 + this._m13 * that.m31 + this._m14 * that.m41, this._m11
+				* that.m12 + this._m12 * that.m22 + this._m13 * that.m32 + this._m14
+				* that.m42, this._m11 * that.m13 + this._m12 * that.m23 + this._m13
+				* that.m33 + this._m14 * that.m43, this._m11 * that.m14 + this._m12
+				* that.m24 + this._m13 * that.m34 + this._m14 * that.m44, this._m21
+				* that.m11 + this._m22 * that.m21 + this._m23 * that.m31 + this._m24
+				* that.m41, this._m21 * that.m12 + this._m22 * that.m22 + this._m23
+				* that.m32 + this._m24 * that.m42, this._m21 * that.m13 + this._m22
+				* that.m23 + this._m23 * that.m33 + this._m24 * that.m43, this._m21
+				* that.m14 + this._m22 * that.m24 + this._m23 * that.m34 + this._m24
+				* that.m44, this._m31 * that.m11 + this._m32 * that.m21 + this._m33
+				* that.m31 + this._m34 * that.m41, this._m31 * that.m12 + this._m32
+				* that.m22 + this._m33 * that.m32 + this._m34 * that.m42, this._m31
+				* that.m13 + this._m32 * that.m23 + this._m33 * that.m33 + this._m34
+				* that.m43, this._m31 * that.m14 + this._m32 * that.m24 + this._m33
+				* that.m34 + this._m34 * that.m44, this._m41 * that.m11 + this._m42
+				* that.m21 + this._m43 * that.m31 + this._m44 * that.m41, this._m41
+				* that.m12 + this._m42 * that.m22 + this._m43 * that.m32 + this._m44
+				* that.m42, this._m41 * that.m13 + this._m42 * that.m23 + this._m43
+				* that.m33 + this._m44 * that.m43, this._m41 * that.m14 + this._m42
+				* that.m24 + this._m43 * that.m34 + this._m44 * that.m44);
 	}
-	return new XML3DVec3(this.m11 * that.x + this.m12 * that.y
-			+ this.m13 * that.z, this.m21 * that.x + this.m22 * that.y
-			+ this.m23 * that.z, this.m31 * that.x + this.m32 * that.y
-			+ this.m33 * that.z);
+
+
+	if (that.w) 
+	{
+		return new XML3DRotation(this._m11 * that.x + this._m12 * that.y
+				+ this._m13 * that.z + this._m14 * that.w, this._m21 * that.x + this._m22 * that.y
+				+ this._m23 * that.z + this._m24 * that.w, this._m31 * that.x + this._m32 * that.y
+				+ this._m33 * that.z + this._m34 * that.w, this._m41 * that.x + this._m42 * that.y
+				+ this._m43 * that.z + this._m44 * that.w);
+	}
+	
+	return new XML3DVec3(this._m11 * that.x + this._m12 * that.y
+						+ this._m13 * that.z, this._m21 * that.x + this._m22 * that.y
+						+ this._m23 * that.z, this._m31 * that.x + this._m32 * that.y
+						+ this._m33 * that.z);
 };
 
 XML3DMatrix.prototype.det3 = function(a1, a2, a3, b1, b2, b3,
@@ -153,22 +454,22 @@ XML3DMatrix.prototype.det3 = function(a1, a2, a3, b1, b2, b3,
 };
 XML3DMatrix.prototype.det = function() {
 	var a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
-	a1 = this.m11;
-	b1 = this.m21;
-	c1 = this.m31;
-	d1 = this.m41;
-	a2 = this.m12;
-	b2 = this.m22;
-	c2 = this.m32;
-	d2 = this.m42;
-	a3 = this.m13;
-	b3 = this.m23;
-	c3 = this.m33;
-	d3 = this.m43;
-	a4 = this.m14;
-	b4 = this.m24;
-	c4 = this.m34;
-	d4 = this.m44;
+	a1 = this._m11;
+	b1 = this._m21;
+	c1 = this._m31;
+	d1 = this._m41;
+	a2 = this._m12;
+	b2 = this._m22;
+	c2 = this._m32;
+	d2 = this._m42;
+	a3 = this._m13;
+	b3 = this._m23;
+	c3 = this._m33;
+	d3 = this._m43;
+	a4 = this._m14;
+	b4 = this._m24;
+	c4 = this._m34;
+	d4 = this._m44;
 	var d = +a1 * this.det3(b2, b3, b4, c2, c3, c4, d2, d3, d4) - b1
 			* this.det3(a2, a3, a4, c2, c3, c4, d2, d3, d4) + c1
 			* this.det3(a2, a3, a4, b2, b3, b4, d2, d3, d4) - d1
@@ -183,26 +484,28 @@ XML3DMatrix.prototype.det = function() {
  */
 XML3DMatrix.prototype.inverse = function() {
 	var a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
-	a1 = this.m11;
-	b1 = this.m21;
-	c1 = this.m31;
-	d1 = this.m41;
-	a2 = this.m12;
-	b2 = this.m22;
-	c2 = this.m32;
-	d2 = this.m42;
-	a3 = this.m13;
-	b3 = this.m23;
-	c3 = this.m33;
-	d3 = this.m43;
-	a4 = this.m14;
-	b4 = this.m24;
-	c4 = this.m34;
-	d4 = this.m44;
+	a1 = this._m11;
+	b1 = this._m21;
+	c1 = this._m31;
+	d1 = this._m41;
+	a2 = this._m12;
+	b2 = this._m22;
+	c2 = this._m32;
+	d2 = this._m42;
+	a3 = this._m13;
+	b3 = this._m23;
+	c3 = this._m33;
+	d3 = this._m43;
+	a4 = this._m14;
+	b4 = this._m24;
+	c4 = this._m34;
+	d4 = this._m44;
 	var rDet = this.det();
-	if (Math.abs(rDet) < 0.000001) {
+	
+	if (Math.abs(rDet) < 0.000001) 
+	{
 		org.xml3d.debug.logInfo("Invert matrix: singular matrix, no inverse!");
-		throw new DOMException();
+		throw new Error("Invert matrix: singular matrix, no inverse!");
 		return new XML3DMatrix();
 	}
 	rDet = 1.0 / rDet;
@@ -230,10 +533,10 @@ XML3DMatrix.prototype.inverse = function() {
  * This matrix is not modified.
  */
 XML3DMatrix.prototype.transpose = function() {
-	return new XML3DMatrix(this.m11, this.m21, this.m31,
-			this.m41, this.m12, this.m22, this.m32, this.m42, this.m13,
-			this.m23, this.m33, this.m43, this.m14, this.m24, this.m34,
-			this.m44);
+	return new XML3DMatrix(this._m11, this._m21, this._m31,
+			this._m41, this._m12, this._m22, this._m32, this._m42, this._m13,
+			this._m23, this._m33, this._m43, this._m14, this._m24, this._m34,
+			this._m44);
 };
 
 /*
@@ -316,103 +619,184 @@ XML3DMatrix.prototype.rotateAxisAngle = function(rot) {
 };
 
 XML3DMatrix.prototype.toString = function() {
-	return '[XML3DMatrix ' + this.m11 + ', ' + this.m12 + ', ' + this.m13 + ', '
-			+ this.m14 + '; ' + this.m21 + ', ' + this.m22 + ', ' + this.m23
-			+ ', ' + this.m24 + '; ' + this.m31 + ', ' + this.m32 + ', '
-			+ this.m33 + ', ' + this.m34 + '; ' + this.m41 + ', ' + this.m42
-			+ ', ' + this.m43 + ', ' + this.m44 + ']';
+	return '[XML3DMatrix ' + this._m11 + ', ' + this._m12 + ', ' + this._m13 + ', '
+			+ this._m14 + '; ' + this._m21 + ', ' + this._m22 + ', ' + this._m23
+			+ ', ' + this._m24 + '; ' + this._m31 + ', ' + this._m32 + ', '
+			+ this._m33 + ', ' + this._m34 + '; ' + this._m41 + ', ' + this._m42
+			+ ', ' + this._m43 + ', ' + this._m44 + ']';
 };
 
 XML3DMatrix.prototype.toGL = function() {
-	return [ this.m11, this.m21, this.m31, this.m41, this.m12, this.m22,
-			this.m32, this.m42, this.m13, this.m23, this.m33, this.m43,
-			this.m14, this.m24, this.m34, this.m44 ];
+	return [ this._m11, this._m21, this._m31, this._m41, this._m12, this._m22,
+			this._m32, this._m42, this._m13, this._m23, this._m33, this._m43,
+			this._m14, this._m24, this._m34, this._m44 ];
 };
 
-XML3DVec3 = function(x, y, z) {
-	if (arguments.length == 0) {
-		this.x = this.y = this.z = 0;
-	} else {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+
+//------------------------------------------------------------
+
+XML3DVec3 = function(x, y, z) 
+{	
+	XML3DDataType.call(this);
+	
+	// Note that there is no owner node registered yet. Therefore, the setXYZ() method
+	// can be used at this point since no notification can be triggered.
+	if (arguments.length == 0) 
+	{
+		this._setXYZ(0, 0, 0);
+	} 
+	else 
+	{
+		this._setXYZ(x, y, z);
 	}
 };
+XML3DVec3.prototype             = new XML3DDataType();
+XML3DVec3.prototype.constructor = XML3DVec3;
 
-XML3DVec3.prototype.setVec3Value = function(str) {
+XML3DVec3.prototype._setXYZ = function(x, y, z)
+{
+	if( isNaN(x) || isNaN(y) || isNaN(z))
+	{
+		throw new Error("XML3DVec3._setXYZ(): ( " + 
+							   x + ", " + y + ", " + z + 
+							   " ) are not valid vector components" );
+	}
+	
+	var oldX = this._x;
+	var oldY = this._y;
+	var oldZ = this._z;
+	
+	if(oldX != x || oldY != y || oldZ != z)
+	{
+		this._x = x;
+		this._y = y;
+		this._z = z;
+		
+		this.notifyOwnerNode([oldX, oldY, oldZ], 
+							 [x,    y,    z]);
+	}	
+};
+
+
+XML3DVec3.prototype.__defineSetter__("x", function (value) 
+{
+	this._setXYZ(value, this._y, this._z);
+});
+
+XML3DVec3.prototype.__defineGetter__("x", function () 
+{
+	return this._x;
+});
+
+
+XML3DVec3.prototype.__defineSetter__("y", function (value) 
+{
+	this._setXYZ(this._x, value, this._z);
+});
+
+XML3DVec3.prototype.__defineGetter__("y", function () 
+{
+	return this._y;
+});
+
+XML3DVec3.prototype.__defineSetter__("z", function (value) 
+{
+	this._setXYZ(this._x, this._y, value);
+});
+
+XML3DVec3.prototype.__defineGetter__("z", function () 
+{
+	return this._z;
+});
+
+
+XML3DVec3.prototype.setVec3Value = function(str) 
+{
 	var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(str);
-	this.x = +m[1];
-	this.y = +m[2];
-	this.z = +m[3];
+	this._setXYZ(+m[1], +m[2], +m[3]);
 };
 
 XML3DVec3.prototype.add = function(that) {
-	return new XML3DVec3(this.x + that.x, this.y + that.y,
-			this.z + that.z);
+	return new XML3DVec3(this._x + that.x, this._y + that.y,
+			this._z + that.z);
 };
 XML3DVec3.prototype.subtract = function(that) {
-	return new XML3DVec3(this.x - that.x, this.y - that.y,
-			this.z - that.z);
+	return new XML3DVec3(this._x - that.x, this._y - that.y,
+			this._z - that.z);
 };
 XML3DVec3.prototype.negate = function() {
-	return new XML3DVec3(-this.x, -this.y, -this.z);
+	return new XML3DVec3(-this._x, -this._y, -this._z);
 };
 XML3DVec3.prototype.dot = function(that) {
-	return (this.x * that.x + this.y * that.y + this.z * that.z);
+	return (this._x * that.x + this._y * that.y + this._z * that.z);
 };
 XML3DVec3.prototype.cross = function(that) {
-	return new XML3DVec3(this.y * that.z - this.z * that.y,
-			this.z * that.x - this.x * that.z, this.x * that.y - this.y
+	return new XML3DVec3(this._y * that.z - this._z * that.y,
+			this._z * that.x - this._x * that.z, this._x * that.y - this._y
 					* that.x);
 };
 /*org.xml3d.dataTypes.Vec3f.prototype.reflect = function(n) {
 	var d2 = this.dot(n) * 2;
-	return new XML3DVec3(this.x - d2 * n.x, this.y - d2 * n.y,
+	return new XML3DVec3(this.x - d2 * n.x, this._y - d2 * n.y,
 			this.z - d2 * n.z);
 };*/
 XML3DVec3.prototype.length = function() {
-	return Math.sqrt((this.x * this.x) + (this.y * this.y) + (this.z * this.z));
+	return Math.sqrt((this._x * this._x) + (this._y * this._y) + (this._z * this._z));
 };
 
 XML3DVec3.prototype.normalize = function(that) {
 	var n = this.length();
 	if (n)
 		n = 1.0 / n;
-	else throw new DOMException();
+	else throw new Error();
 	
-	return new XML3DVec3(this.x * n, this.y * n, this.z * n);
+	return new XML3DVec3(this._x * n, this._y * n, this._z * n);
 };
 
 XML3DVec3.prototype.scale = function(n) {
-	return new XML3DVec3(this.x * n, this.y * n, this.z * n);
+	return new XML3DVec3(this._x * n, this._y * n, this._z * n);
 };
 
 XML3DVec3.prototype.toGL = function() {
-	return [ this.x, this.y, this.z ];
+	return [ this._x, this._y, this._z ];
 };
 
 XML3DVec3.prototype.toString = function() {
-	return "XML3DVec3(" + this.x + " " + this.y + " " + this.z + ")";
+	return "XML3DVec3(" + this._x + " " + this._y + " " + this._z + ")";
 };
 
 
 
-XML3DRotation = function(x, y, z, w) {
+//-----------------------------------------------------------------
+
+
+XML3DRotation = function(x, y, z, w) 
+{
+	XML3DDataType.call(this);
+	
 	if (arguments.length == 0)
 	{
 		this.x = 0;
 		this.y = 0;
 		this.z = 0;
 		this.w = 1;
-	} else if (arguments.length == 2) {
+	} 
+	else if (arguments.length == 2) 
+	{
 		this.setAxisAngle(x, y);
-		} else {
+	} 
+	else 
+	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.w = w;
-		}
+	}
 };
+XML3DRotation.prototype             = new XML3DDataType();
+XML3DRotation.prototype.constructor = XML3DRotation;
+
+
 
 XML3DRotation.prototype.multiply = function(that) {
 	return new XML3DRotation(this.w * that.x + this.x * that.w
@@ -486,24 +870,45 @@ XML3DRotation.axisAngle = function(axis, a) {
 	}
 };
 
-XML3DRotation.prototype.setAxisAngle = function(axis, a) {
+XML3DRotation.prototype.setAxisAngle = function(axis, a) 
+{
+		if(typeof axis != 'object' || isNaN(a))
+		{
+			throw new Error("Illegal axis and/or angle values: " +
+						    "( axis=" + axis + " angle=" + a + " )");
+		}
+			
+		var t    = axis.length();
+		var oldX = this.x;
+		var oldY = this.y;
+		var oldZ = this.z;
+		var oldW = this.w;
 		
-		var t = axis.length();
-		if (t > 0.000001) {
+		if (t > 0.000001) 
+		{
 			var s = Math.sin(a / 2) / t;
 			var c = Math.cos(a / 2);
 			this.x = axis.x * s;
 			this.y = axis.y * s;
 			this.z = axis.z * s;
 			this.w = c;
-		} else {
+		} 
+		else 
+		{
 			this.x = this.y = this.z = 0;
 			this.w = 1;
 		}
 	
+		
+		if(oldX != this.x || oldY != this.y || oldZ != this.z || oldW != this.w)
+		{
+			this.notifyOwnerNode([oldX,   oldY,   oldZ,   oldW],
+								 [this.x, this.y, this.z, this.w]);
+		}
 };
 
-XML3DRotation.prototype.setAxisAngleValue = function(str) {
+XML3DRotation.prototype.setAxisAngleValue = function(str) 
+{
 	var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(str);
 	this.setAxisAngle(new XML3DVec3(+m[1], +m[2], +m[3]), +m[4]);
 };

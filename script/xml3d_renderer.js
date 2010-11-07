@@ -803,9 +803,11 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype = new org.xml3d.webgl.RenderAda
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DViewRenderAdapter;
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
-	if (this.viewMatrix == null) {
-		this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
-				new XML3DMatrix().translate(this.node.position.negate()));
+	if (this.viewMatrix == null) 
+	{
+		var negPos      = this.node.position.negate();
+		this.viewMatrix = this.node.orientation.negate().toMatrix().multiply(
+				new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
 	}
 	return new sglM4(this.viewMatrix.toGL());
 };
@@ -1083,13 +1085,15 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = org.xml3d.we
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 	if (!this.matrix) {
-		var n = this.node;
-		var m = new XML3DMatrix();
-		this.matrix = m.translate(n.translation)
-		  .multiply(m.translate(n.center)).multiply(n.rotation.toMatrix())
-		  .multiply(n.scaleOrientation.toMatrix()).multiply(m.scale(n.scale))
+		var n         = this.node;
+		var m         = new XML3DMatrix();
+		var negCenter = n.center.negate();
+		
+		this.matrix = m.translate(n.translation.x, n.translation.y, n.translation.z)
+		  .multiply(m.translate(n.center.x,n.center.y, n.center.z)).multiply(n.rotation.toMatrix())
+		  .multiply(n.scaleOrientation.toMatrix()).multiply(m.scale(n.scale.x, n.scale.y, n.scale.z))
 		  .multiply(n.scaleOrientation.toMatrix().inverse()).multiply(
-				  m.translate(n.center.negate()));
+				  m.translate(negCenter.x, negCenter.y, negCenter.z));
 	}
 	return new sglM4(this.matrix.toGL());
 };

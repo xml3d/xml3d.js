@@ -406,28 +406,26 @@ XML3DMatrix.prototype.multiply = function (that)
 {
 	if (that.m44) 
 	{
-		return new XML3DMatrix(this._m11 * that.m11 + this._m12
-				* that.m21 + this._m13 * that.m31 + this._m14 * that.m41, this._m11
-				* that.m12 + this._m12 * that.m22 + this._m13 * that.m32 + this._m14
-				* that.m42, this._m11 * that.m13 + this._m12 * that.m23 + this._m13
-				* that.m33 + this._m14 * that.m43, this._m11 * that.m14 + this._m12
-				* that.m24 + this._m13 * that.m34 + this._m14 * that.m44, this._m21
-				* that.m11 + this._m22 * that.m21 + this._m23 * that.m31 + this._m24
-				* that.m41, this._m21 * that.m12 + this._m22 * that.m22 + this._m23
-				* that.m32 + this._m24 * that.m42, this._m21 * that.m13 + this._m22
-				* that.m23 + this._m23 * that.m33 + this._m24 * that.m43, this._m21
-				* that.m14 + this._m22 * that.m24 + this._m23 * that.m34 + this._m24
-				* that.m44, this._m31 * that.m11 + this._m32 * that.m21 + this._m33
-				* that.m31 + this._m34 * that.m41, this._m31 * that.m12 + this._m32
-				* that.m22 + this._m33 * that.m32 + this._m34 * that.m42, this._m31
-				* that.m13 + this._m32 * that.m23 + this._m33 * that.m33 + this._m34
-				* that.m43, this._m31 * that.m14 + this._m32 * that.m24 + this._m33
-				* that.m34 + this._m34 * that.m44, this._m41 * that.m11 + this._m42
-				* that.m21 + this._m43 * that.m31 + this._m44 * that.m41, this._m41
-				* that.m12 + this._m42 * that.m22 + this._m43 * that.m32 + this._m44
-				* that.m42, this._m41 * that.m13 + this._m42 * that.m23 + this._m43
-				* that.m33 + this._m44 * that.m43, this._m41 * that.m14 + this._m42
-				* that.m24 + this._m43 * that.m34 + this._m44 * that.m44);
+		return new XML3DMatrix(
+				this._m11 * that.m11 + this._m12 * that.m21 + this._m13 * that.m31 + this._m14 * that.m41, 
+				this._m11 * that.m12 + this._m12 * that.m22 + this._m13 * that.m32 + this._m14 * that.m42, 
+				this._m11 * that.m13 + this._m12 * that.m23 + this._m13 * that.m33 + this._m14 * that.m43,
+				this._m11 * that.m14 + this._m12 * that.m24 + this._m13 * that.m34 + this._m14 * that.m44, 
+				
+				this._m21 * that.m11 + this._m22 * that.m21 + this._m23 * that.m31 + this._m24 * that.m41, 
+				this._m21 * that.m12 + this._m22 * that.m22 + this._m23 * that.m32 + this._m24 * that.m42, 
+				this._m21 * that.m13 + this._m22 * that.m23 + this._m23 * that.m33 + this._m24 * that.m43, 
+				this._m21 * that.m14 + this._m22 * that.m24 + this._m23 * that.m34 + this._m24 * that.m44, 
+				
+				this._m31 * that.m11 + this._m32 * that.m21 + this._m33 * that.m31 + this._m34 * that.m41, 
+				this._m31 * that.m12 + this._m32 * that.m22 + this._m33 * that.m32 + this._m34 * that.m42, 
+				this._m31 * that.m13 + this._m32 * that.m23 + this._m33 * that.m33 + this._m34 * that.m43, 
+				this._m31 * that.m14 + this._m32 * that.m24 + this._m33 * that.m34 + this._m34 * that.m44, 
+				
+				this._m41 * that.m11 + this._m42 * that.m21 + this._m43 * that.m31 + this._m44 * that.m41, 
+				this._m41 * that.m12 + this._m42 * that.m22 + this._m43 * that.m32 + this._m44 * that.m42, 
+				this._m41 * that.m13 + this._m42 * that.m23 + this._m43 * that.m33 + this._m44 * that.m43, 
+				this._m41 * that.m14 + this._m42 * that.m24 + this._m43 * that.m34 + this._m44 * that.m44);
 	}
 
 
@@ -544,9 +542,12 @@ XML3DMatrix.prototype.transpose = function() {
  * matrix containing the passed values. 
  * This matrix is not modified.
  */
-XML3DMatrix.prototype.translate = function(vec) {
-	var tm = new XML3DMatrix(1, 0, 0, vec.x, 0, 1, 0, vec.y, 0,
-			0, 1, vec.z, 0, 0, 0, 1);
+XML3DMatrix.prototype.translate = function(x , y, z) 
+{
+	var tm = new XML3DMatrix(1, 0, 0, x, 
+							 0, 1, 0, y, 
+							 0, 0, 1, z, 
+							 0, 0, 0, 1);
 	return this.multiply(tm);
 	
 };
@@ -557,11 +558,14 @@ XML3DMatrix.prototype.translate = function(vec) {
  * component is undefined the x component value is used in its place.
  * This matrix is not modified.
  */
-XML3DMatrix.prototype.scale = function(vec) {
-	if (!vec.z) vec.z = 1;
-	if (!vec.y) vec.y = vec.x;
-	var sm = new XML3DMatrix(vec.x, 0, 0, 0, 0, vec.y, 0, 0, 0,
-			0, vec.z, 0, 0, 0, 0, 1);
+XML3DMatrix.prototype.scale = function(scaleX, scaleY, scaleZ) 
+{
+	if (!scaleZ) scaleZ = 1;
+	if (!scaleY) scaleY = scaleX;
+	var sm = new XML3DMatrix(scaleX,      0,  0,      0,      
+			                 0,      scaleY,  0,      0, 
+			                 0,           0,  scaleZ, 0, 
+			                 0,           0,       0, 1);
 	return this.multiply(sm);
 };
 
@@ -601,14 +605,13 @@ XML3DMatrix.prototype.rotate = function(rotX, rotY, rotZ) {
  * with the given XML3DRotation. Rotation values are in RADIANS.
  * This matrix is not modified.
  */
-XML3DMatrix.prototype.rotateAxisAngle = function(rot) {
-	var x, y, z, ca, sa, ta, theta;
-	x = rot.x;
-	y = rot.y;
-	z = rot.z;
-	theta = rot.w;// * Math.PI / 180;
-	ca = Math.cos(theta);
-	sa = Math.sin(theta);
+XML3DMatrix.prototype.rotateAxisAngle = function(x, y, z, angle)
+{
+	var ca, sa, ta;
+	
+	ca = Math.cos(angle);
+	sa = Math.sin(angle);
+	
 	ta = 1 - ca;
 	var rm = new XML3DMatrix(ta*x*x + ca, ta*x*y + sa*z, ta*x*z - sa*y, 0, 
 							 ta*x*y - sa*z, ta*y*y + ca, ta*y*z + sa*x, 0,

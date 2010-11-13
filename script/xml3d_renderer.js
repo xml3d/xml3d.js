@@ -609,7 +609,11 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 		var projMatrix = this.camera
 		.getProjectionMatrix(this.width / this.height);
 		xform.projection.load(projMatrix);
-		
+
+			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
+					-Number.MAX_VALUE);
+			var volumeMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE,
+					Number.MAX_VALUE);
 		
 		var zPos = [];
 		for (i = 0, n = this.drawableObjects.length; i < n; i++) {
@@ -620,6 +624,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 			center.v = sglMulM4V3(xform.view._s[0], center, 1.0);
 			
 			zPos[i] = [ i, center.z ];
+				this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo, xform.view._s[0]);
 		}
 		zPos.sort(function(a, b) {
 			return a[1] - b[1];
@@ -636,16 +641,12 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 			xform.model.load(transform);
 			
 			var id = 1.0 - (1+j) / 255.0;
-			var wcMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE,
-					Number.MAX_VALUE).toGL();
-			var wcMax = new XML3DVec3(Number.MIN_VALUE, Number.MIN_VALUE,
-					Number.MIN_VALUE).toGL();
-			
+
 			var parameters = {
 				id : id,
-				wcMin : wcMin,
-				wcMax : wcMax,
-				modelViewMatrix : xform.modelViewMatrix,
+					min : volumeMin.toGL(),
+					max : volumeMax.toGL(),
+					modelMatrix : transform,
 				modelViewProjectionMatrix : xform.modelViewProjectionMatrix
 			};
 			
@@ -657,17 +658,16 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 		}
 		org.xml3d.webgl.checkError(gl, "Before readpixels");
 
-		var data = new Uint8Array(8);
-		
+		var data = new Uint8Array(8);		
 		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+		
 		org.xml3d.webgl.checkError(gl, "After readpixels");
 		
-		//Getting the picked position in scene coordinates doesn't work yet
 		var pickPos = new XML3DVec3(0, 0, 0);
 		pickPos.x = data[0] / 255;
 		pickPos.y = data[1] / 255;
 		pickPos.z = data[2] / 255;
-		//pickPos = pickPos.mult(max.subtract(min)).add(min);
+		pickPos = pickPos.multiply(volumeMax.subtract(volumeMin)).add(volumeMin);
 		var objId = 255 - data[3] - 1;
 		if (objId >= 0 && data[3] > 0) {
 			this.scene.currentPickPos = pickPos;
@@ -683,6 +683,25 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 	xform.view.pop();
 	xform.projection.pop();
 	
+};
+
+org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo, view) {
+	var bbmin = sglMulM4V3(trafo, new SglVec3(bbox.min), 1.0);
+	var bbmax = sglMulM4V3(trafo, new SglVec3(bbox.max), 1.0);
+	bbmin = sglMulM4V3(view, bbmin, 1.0);
+	bbmax = sglMulM4V3(view, bbmax, 1.0);
+	if (bbmin[0] < min.x)
+		min.x = bbmin[0];
+	if (bbmin[1] < min.y)
+		min.y = bbmin[1];
+	if (bbmin[2] < min.z)
+		min.z = bbmin[2];
+	if (bbmax[0] > max.x)
+		max.x = bbmax[0];
+	if (bbmax[1] > max.y)
+		max.y = bbmax[1];
+	if (bbmax[2] > max.z)
+		max.z = bbmax[2];
 };
 
 org.xml3d.webgl.Renderer.prototype.dispose = function() {
@@ -804,11 +823,26 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	if (this.viewMatrix == null) {
-		this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
-				new XML3DMatrix().translate(this.node.position.negate()));
+		//if (this.node.orientation) {
+			this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
+					new XML3DMatrix().translate(this.node.position.negate()));
+			
+		//} 
+
+		/*if (this.node.upVector && this.node.direction)
+		{
+			var pos = this.node.position;
+			var dir = this.node.direction;
+			var up = this.node.upVector;
+			var cross = up.cross(dir);
+
+			var mx = new XML3DRotation( up , 0);
+			var my = new XML3DRotation( cross , 0);
+		}*/
 	}
 	return new sglM4(this.viewMatrix.toGL());
 };
+
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(aspect) {
 	if (this.projMatrix == null) {
@@ -986,9 +1020,9 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	//chrome won't render correctly if a required value is missing
 	parameters.diffuseColor = [1,1,1];
 	parameters.emissiveColor = [0,0,0];
-	parameters.shininess = [0.2];
+	parameters.shininess = 0.2;
 	parameters.specularColor = [0,0,0];
-	parameters.transparency = [0];
+	parameters.transparency = 0;
 
 	var sParams = this.dataAdapter.createDataTable();
 	for (var p in sParams)
@@ -1648,19 +1682,17 @@ g_shaders["urn:xml3d:shader:picking"] = {
 		vertex:
 		
 		"attribute vec3 position;\n"
-		+ "uniform mat4 modelViewMatrix;\n"
+		+ "uniform mat4 modelMatrix;\n"
 		+ "uniform mat4 modelViewProjectionMatrix;\n"
-		+ "uniform vec3 wcMin;\n"
-		+ "uniform vec3 wcMax;\n"
+		+ "uniform vec3 min;\n"
+		+ "uniform vec3 max;\n"
 		
 		+ "varying vec3 worldCoord;\n"
 		+ "void main(void) {\n"
-		+ "    worldCoord = (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
-		//+ "    vec3 dia = wcMax - wcMin;\n"
-		//+ "    worldCoord = worldCoord - wcMin;\n"
-		//+ "    worldCoord.x /= dia.x;\n"
-		//+ "    worldCoord.y /= dia.y;\n"
-		//+ "    worldCoord.z /= dia.z;\n"
+		+ "    worldCoord = (modelMatrix * vec4(position, 1.0)).xyz;\n"
+		+ "    vec3 diff = max - min;\n"
+		+ "    worldCoord = worldCoord - min;\n"
+		+ "    worldCoord = worldCoord / diff;"
 		+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
 		+ "}" ,
 		
@@ -1677,7 +1709,7 @@ g_shaders["urn:xml3d:shader:picking"] = {
 		+ "    gl_FragColor = vec4(worldCoord, id);\n" 
 		+ "}\n"
 	};
-	
+
 	
 org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
 	var shader = {};

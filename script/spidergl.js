@@ -2028,6 +2028,7 @@ function sglMulSM4(s, m) {
 }
 
 function sglMulM4V3(m, v, w) {
+	if (v.v) v = v.v;
 	return [
 		m[ 0] * v[0] + m[ 4] * v[1] + m[ 8] * v[2] + m[12] * w,
 		m[ 1] * v[0] + m[ 5] * v[1] + m[ 9] * v[2] + m[13] * w,

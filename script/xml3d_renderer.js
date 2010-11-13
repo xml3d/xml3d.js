@@ -273,20 +273,23 @@ org.xml3d.webgl.createContext = (function() {
 	Context.prototype.mouseUp = function(gl, button, x, y) {
 		if (button == 0) {
 			this.renderPick(gl, x, y);
-			if (this.scene.currentPickObj)
+			if (this.scene.xml3d.currentPickObj)
 			{
-				var currentObj = this.scene.currentPickObj;
+				var currentObj = this.scene.xml3d.currentPickObj;
 				var evtMethod = currentObj.getAttribute('onclick');
 				if (evtMethod && currentObj.evalMethod) {
 					currentObj.evalMethod(evtMethod);
 				}
-				
-				while(currentObj.parentNode.nodeName == "group")
+				//Make sure the event method didn't remove picked object from the tree
+				if (currentObj && currentObj.parentNode)
 				{
-					currentObj = currentObj.parentNode;
-					evtMethod = currentObj.getAttribute('onclick');
-					if (evtMethod && currentObj.evalMethod) {
-						currentObj.evalMethod(evtMethod);
+					while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
+					{
+						currentObj = currentObj.parentNode;
+						evtMethod = currentObj.getAttribute('onclick');
+						if (evtMethod && currentObj.evalMethod) {
+							currentObj.evalMethod(evtMethod);
+						}
 					}
 				}
 				return true;
@@ -297,12 +300,12 @@ org.xml3d.webgl.createContext = (function() {
 	};
 	
 	/*Context.prototype.mouseMove = function(gl, x, y) {
-		var lastObj = this.scene.currentPickObj;
+		var lastObj = this.scene.xml3d.currentPickObj;
 		
 		this.renderPick(gl, x, y);
-		if (this.scene.currentPickObj)
+		if (this.scene.xml3d.currentPickObj)
 		{
-			var currentObj = this.scene.currentPickObj;
+			var currentObj = this.scene.xml3d.currentPickObj;
 			var evtMethod = currentObj.getAttribute('onmouseover');
 			if (evtMethod && currentObj.evalMethod) {
 				currentObj.evalMethod(evtMethod);
@@ -383,9 +386,6 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.shaderMap = {};
 	this.width = this.ctx.getCanvasWidth();
 	this.height = this.ctx.getCanvasHeight();
-
-	//this.ctx.pickBuffer = new SglRenderbuffer(gl, gl.DEPTH_COMPONENT16, ctx.getCanvasWidth(), ctx.getCanvasHeight());
-	
 	
 };
 
@@ -494,8 +494,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		var trafo = this.drawableObjects[i][0];
 		var meshAdapter = this.drawableObjects[i][1];
 		var center = new SglVec3(meshAdapter.bbox.center);
-		center.v = sglMulM4V3(trafo, center, 1.0);
-		center.v = sglMulM4V3(xform.view._s[0], center, 1.0);
+		center.v = sglMulM4V3(trafo, center.v, 1.0);
+		center.v = sglMulM4V3(xform.view._s[0], center.v, 1.0);
 		zPos[i] = [ i, center.z ];
 	}
 	zPos.sort(function(a, b) {
@@ -558,8 +558,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			lightParams.visible.set(params.visibility, j*3);
 		}
 
-		lightParams.ambientColors = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ];
-
 		//Begin setting up uniforms for rendering
 		parameters["lightPositions[0]"] = lightParams.positions;
 		parameters["lightVisibility[0]"] = lightParams.visible;
@@ -575,7 +573,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			shader.setParameters(parameters);		
 			
 			shape.render(shader, parameters);
-			org.xml3d.webgl.checkError(gl, "Error after cleanup.");
 		} else {
 			shader = {};
 			shader.sp = sp;
@@ -586,8 +583,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	}
 	xform.view.pop();
 	xform.projection.pop();
-	
-	this.drawableObjects = null;
+
 };
 
 org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
@@ -610,21 +606,21 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 		.getProjectionMatrix(this.width / this.height);
 		xform.projection.load(projMatrix);
 
-			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
+			var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
 					-Number.MAX_VALUE);
-			var volumeMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE,
+			var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE,
 					Number.MAX_VALUE);
 		
 		var zPos = [];
 		for (i = 0, n = this.drawableObjects.length; i < n; i++) {
 			var trafo = this.drawableObjects[i][0];
 			var meshAdapter = this.drawableObjects[i][1];
-			var center = new SglVec3(meshAdapter.bbox.center);
-			center.v = sglMulM4V3(trafo, center, 1.0);
-			center.v = sglMulM4V3(xform.view._s[0], center, 1.0);
+			var center = sglV3(meshAdapter.bbox.center);
+			center = sglMulM4V3(trafo, center, 1.0);
+			center = sglMulM4V3(xform.view._s[0], center, 1.0);
 			
-			zPos[i] = [ i, center.z ];
-				this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo, xform.view._s[0]);
+			zPos[i] = [ i, center[2] ];
+				this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
 		}
 		zPos.sort(function(a, b) {
 			return a[1] - b[1];
@@ -644,8 +640,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 
 			var parameters = {
 				id : id,
-					min : volumeMin.toGL(),
-					max : volumeMax.toGL(),
+					min : volumeMin.v,
+					max : volumeMax.v,
 					modelMatrix : transform,
 				modelViewProjectionMatrix : xform.modelViewProjectionMatrix
 			};
@@ -663,19 +659,19 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 		
 		org.xml3d.webgl.checkError(gl, "After readpixels");
 		
-		var pickPos = new XML3DVec3(0, 0, 0);
-		pickPos.x = data[0] / 255;
-		pickPos.y = data[1] / 255;
-		pickPos.z = data[2] / 255;
-		pickPos = pickPos.multiply(volumeMax.subtract(volumeMin)).add(volumeMin);
+		var pickPos = new SglVec3(0, 0, 0);
+		pickPos.v[0] = data[0] / 255;
+		pickPos.v[1] = data[1] / 255;
+		pickPos.v[2] = data[2] / 255;
+		pickPos = pickPos.mul(volumeMax.sub(volumeMin)).add(volumeMin);
 		var objId = 255 - data[3] - 1;
 		if (objId >= 0 && data[3] > 0) {
-			this.scene.currentPickPos = pickPos;
+			this.scene.xml3d.currentPickPos = pickPos;
 			var pickedObj = this.drawableObjects[(zPos[objId][0])];
-			this.scene.currentPickObj = pickedObj[1].node;
+			this.scene.xml3d.currentPickObj = pickedObj[1].node;
 		} else {
-			this.scene.currentPickPos = null;
-			this.scene.currentPickObj = null;
+			this.scene.xml3d.currentPickPos = null;
+			this.scene.xml3d.currentPickObj = null;
 		}	
 	} catch (e) {
 		org.xml3d.debug.logError(e);		
@@ -685,11 +681,12 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 	
 };
 
-org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo, view) {
-	var bbmin = sglMulM4V3(trafo, new SglVec3(bbox.min), 1.0);
-	var bbmax = sglMulM4V3(trafo, new SglVec3(bbox.max), 1.0);
-	bbmin = sglMulM4V3(view, bbmin, 1.0);
-	bbmax = sglMulM4V3(view, bbmax, 1.0);
+org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
+	var bmin = sglV3(bbox.min);
+	var bmax = sglV3(bbox.max);
+	var bbmin = sglMulM4V3(trafo, bmin, 1.0);
+	var bbmax = sglMulM4V3(trafo, bmax, 1.0);
+
 	if (bbmin[0] < min.x)
 		min.x = bbmin[0];
 	if (bbmin[1] < min.y)
@@ -809,6 +806,11 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter = function(factory, node) {
 };
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DCanvasRenderAdapter;
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt) {
+	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
+		this.factory.renderer.drawableObjects = null;
+};
 
 // Adapter for <view>
 org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
@@ -1081,8 +1083,11 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMeth
 		eval(evtMethod);
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(e) {
-	if (e.attribute == "shader") {	
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
+	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
+		this.factory.renderer.drawableObjects = null;
+	
+	if (evt.attribute == "shader") {	
 		this.shader = this.getShader();
 	}
 };
@@ -1424,7 +1429,7 @@ g_shaders["urn:xml3d:shader:phong"] = {
 	fragment:
 	// NOTE: Any changes to this area must be carried over to the substring calculations in
 	// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
-			+"#ifdef GL_ES\n"
+			"#ifdef GL_ES\n"
 			+"precision highp float;\n"
 			+"#endif\n\n"
 			+"const int MAXLIGHTS = 0; \n"
@@ -1443,7 +1448,6 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"uniform vec3 lightAttenuations[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightPositions[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightDiffuseColors[MAXLIGHTS+1];\n"
-			+"uniform vec3 lightAmbientColors[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightVisibility[MAXLIGHTS+1];\n"
 			
 			
@@ -1456,13 +1460,11 @@ g_shaders["urn:xml3d:shader:phong"] = {
 		 	+"      L = normalize(L);\n"
 			+"		vec3 R = normalize(reflect(L,N));\n"
 			
-			+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"
 			+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
 
-			+"		vec3 Iamb = ambientColor * lightAmbientColors[i];\n"
 			+"		vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * diffuseColor ;\n"
 			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
-			+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
+			+"		vec3 color = (atten*(Idiff + Ispec));\n"
 			+"		return color * lightVisibility[i];\n" 
 			+"}\n"
 			
@@ -1479,7 +1481,7 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"      rgb = clamp(rgb, 0.0, 1.0);\n"
 			+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
 			+"	} else {\n"
-			+"      vec3 color = vec3(0,0,0);\n"
+			+"      vec3 color = emissiveColor + (ambientIntensity * diffuseColor);\n"
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			color = color + light(i);\n"
 			+"		}\n"
@@ -1516,7 +1518,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 	fragment:
 		// NOTE: Any changes to this area must be carried over to the substring calculations in
 		// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
-			+"#ifdef GL_ES\n"
+			"#ifdef GL_ES\n"
 			+"precision highp float;\n"
 			+"#endif\n\n"
 			+"const int MAXLIGHTS = 0; \n"
@@ -1538,7 +1540,6 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"uniform vec3 lightAttenuations[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightPositions[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightDiffuseColors[MAXLIGHTS+1];\n"
-			+"uniform vec3 lightAmbientColors[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightVisibility[MAXLIGHTS+1];\n"
 			
 			
@@ -1550,15 +1551,13 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"		float dist = length(L);\n"
 		 	+"      L = normalize(L);\n"
 			+"		vec3 R = normalize(reflect(L,N));\n"
-			
-			+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"		 			
+				 			
 			+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
 			+"      vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
 			
-			+"		vec3 Iamb = ambientColor * lightAmbientColors[i] * lightVisibility[i];\n"
 			+"		vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * texDiffuse.xyz;\n"
 			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
-			+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
+			+"		vec3 color = (atten*(Idiff + Ispec));\n"
 			+"		return vec4(color * lightVisibility[i], texDiffuse.w);\n" 
 			+"}\n"
 			
@@ -1575,7 +1574,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"      vec3 rgb = emissiveColor + diffuse*texDiffuse.xyz+ specular*specularColor;\n"
 			+"      gl_FragColor = vec4(rgb, texDiffuse.w*max(0.0, 1.0 - transparency)); \n"
 			+"	} else {\n"
-			+"      vec4 color = vec4(0,0,0,0);\n"
+			+"      vec4 color = vec4(emissiveColor + (ambientIntensity * diffuseColor), 0.0);\n"
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			color = color + light(i);\n"
 			+"		}\n"
@@ -1633,7 +1632,6 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"uniform vec3 lightAttenuations[MAXLIGHTS+1];\n"
 				+"uniform vec3 lightPositions[MAXLIGHTS+1];\n"
 				+"uniform vec3 lightDiffuseColors[MAXLIGHTS+1];\n"
-				+"uniform vec3 lightAmbientColors[MAXLIGHTS+1];\n"
 				+"uniform vec3 lightVisibility[MAXLIGHTS+1];\n"
 				
 				
@@ -1646,13 +1644,10 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 			 	+"      L = normalize(L);\n"
 				+"		vec3 R = normalize(reflect(L,N));\n"
 				
-				+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"		 			
 				+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
-
-				+"		vec3 Iamb = ambientColor * lightAmbientColors[i]* lightVisibility[i];\n"
 				+"		vec3 Idiff = lightDiffuseColors[i]* lightVisibility[i] * max(dot(N,L),0.0) * fragVertexColor ;\n"
 				+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
-				+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
+				+"		vec3 color = (atten*(Idiff + Ispec));\n"
 				+"		return color;\n" 
 				+"}\n"
 				
@@ -1669,7 +1664,7 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"      rgb = clamp(rgb, 0.0, 1.0);\n"
 				+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
 				+"	} else {\n"
-				+"      vec3 color = vec3(0,0,0);\n"
+				+"      vec3 color = emissiveColor + (ambientIntensity * diffuseColor);\n"
 				+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 				+"			color = color + light(i);\n"
 				+"		}\n"

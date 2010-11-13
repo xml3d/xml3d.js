@@ -352,6 +352,11 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 org.xml3d.XML3DDocument.prototype.onAdd = function(e) {
 	try {
 		org.xml3d.document.getNode(e.target);
+		
+		var parent = e.target.parentNode;
+		if (parent && parent.notify) {
+			parent.notify(new org.xml3d.Notification(this, MutationEvent.ADDITION, null, null, e.target));
+		}
 	} catch (e) {
 		org.xml3d.debug.logError("Exception in configuring node:");
 		org.xml3d.debug.logException(e);
@@ -375,7 +380,15 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
 };
 
 org.xml3d.XML3DDocument.prototype.onRemove = function(e) {
-	org.xml3d.debug.logInfo("Remove: "+e);
+	try {
+		var parent = e.target.parentNode;
+		if (parent && parent.notify) {
+			parent.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, null, null, e.target));
+		}
+	} catch (e) {
+		org.xml3d.debug.logError("Exception in removing a node:");
+		org.xml3d.debug.logException(e);
+	}
 };
 
 org.xml3d.XML3DDocument.prototype.onunload = function(xml3dElement) {

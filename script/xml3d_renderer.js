@@ -141,9 +141,9 @@ org.xml3d.webgl.createContext = (function() {
 	}
 	
 	Context.prototype.start = function() {
-		//sglRegisterCanvas(this.canvas.id, this, 30.0); //Last parameter is frames-per-second value
-
-		_sglManageCanvas(this.canvas.id, this, 30.0);
+		//last parameter is rate at which the Context.prototype.update() method is called in
+		//times-per-second. 
+		_sglManageCanvas(this.canvas.id, this, 30.0); 
 		_sglUnmanageCanvasOnLoad(this.canvas.id);
 		SGL_DefaultStreamMappingPrefix = "";
 		
@@ -207,7 +207,6 @@ org.xml3d.webgl.createContext = (function() {
 	}
 
 	Context.prototype.renderPick = function(gl, screenX, screenY) {
-		//var gl = this.gl;
 		if (!this.pickBuffer)
 		{
 			this.pickBuffer = new SglFramebuffer(gl, this.getCanvasWidth(), this.getCanvasHeight(), 
@@ -219,9 +218,6 @@ org.xml3d.webgl.createContext = (function() {
 		}
 		this.pickBuffer.bind();
 
-		//gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		//gl.clearDepth(1.0);
-		//gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
 		//gl.depthFunc(gl.LEQUAL);
 		gl.disable(gl.CULL_FACE);
@@ -454,6 +450,9 @@ org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
 	return [];
 };
 
+org.xml3d.webgl.Renderer.prototype.rebuildSceneTree = function() {
+	this.drawableObjects = null;
+};
 
 org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name) {
 	var shader = this.shaderMap[name];
@@ -755,7 +754,7 @@ org.xml3d.webgl.Renderer.prototype.dispose = function() {
 };
 
 org.xml3d.webgl.Renderer.prototype.notifyDataChanged = function() {
-	this.ctx.renderScene();
+	this.ctx.redraw();
 };
 
 
@@ -849,7 +848,7 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.constructor = org.xml3d.webgl
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt) {
 	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
-		this.factory.renderer.drawableObjects = null;
+		this.factory.renderer.rebuildSceneTree();
 };
 
 // Adapter for <view>
@@ -908,7 +907,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 		this.viewMatrix = null;
 		this.projMatrix = null;
 	}
-	this.factory.ctx.update();
+	this.factory.ctx.redraw();
 };
 
 // Adapter for <shader>
@@ -1125,12 +1124,15 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMeth
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
 	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
-		this.factory.renderer.drawableObjects = null;
-	
-	if (evt.attribute == "shader") {	
+		this.factory.renderer.drawableObjects = null;	
+	else if (evt.attribute == "shader") {	
 		this.node.shader = null;
 		this.shader = this.getShader();
-		this.factory.renderer.drawableObjects = null;
+		this.factory.renderer.rebuildSceneTree();
+	}
+	else if (evt.attribute == "transform") {
+		this.node.transform = null;
+		this.factory.renderer.rebuildSceneTree();
 	}
 };
 
@@ -1219,7 +1221,12 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = functi
 	outMeshes.push( [ transform, this, shader ]);
 };
 
-
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {	
+	if (e.attribute == "src")	
+		this.node.src = null;
+	
+	this.factory.renderer.rebuildSceneTree();
+};
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 	this.mesh.destroy();

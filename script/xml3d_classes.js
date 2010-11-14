@@ -365,7 +365,7 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
 		org.xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
 		return;
 	}
-
+	
 	try 
 	{
 		var result;
@@ -555,9 +555,21 @@ org.xml3d.initXML3DRotation = function(value, x, y, z, angle) {
 	return result;
 };
 
-org.xml3d.initEnum = function(value, defaultValue, choice) {
-	return (value && choice[value] !== undefined) ? choice[value]
-			: defaultValue;
+//org.xml3d.initEnum = function(value, defaultValue, choice) 
+//{
+//	return (value && choice[value] !== undefined) ? choice[value]
+//			: defaultValue;
+//};
+
+org.xml3d.initEnum = function(value, defaultValue, choice) 
+{	
+	if(value && typeof(value) == "string" && choice[value.toLowerCase()] !== undefined)
+	{
+		var index = choice[value.toLowerCase()];
+		return choice[index];
+	}
+
+	return choice[defaultValue];
 };
 
 org.xml3d.initIntArray = function(value, defaultValue) {
@@ -600,25 +612,121 @@ org.xml3d.initAnyURI = function(node, defaultValue) {
 	return org.xml3d.initString(node, defaultValue);
 };
 
+
+//-----------------------------------------------------------------------------
+// Checker helper
+//-----------------------------------------------------------------------------
+org.xml3d.isFloat = function(value) 
+{
+	return typeof value == "number";
+};
+
+org.xml3d.isString = function(value) 
+{
+	return typeof value == "string";
+};
+
+org.xml3d.isInt = function(value) 
+{
+	return typeof value == "number";
+};
+
+org.xml3d.isBoolean = function(value)
+{
+	return typeof value == "boolean";
+};
+
+org.xml3d.isXML3DVec3 = function(value) 
+{
+	return typeof value == "object" && new XML3DVec3().constructor == value.constructor;
+};
+
+org.xml3d.isXML3DRotation = function(value, x, y, z, angle) 
+{
+	return typeof value == "object" && new XML3DRotation().constructor == value.constructor;
+};
+
+org.xml3d.isEnum = function(value, choice) 
+{
+	return (typeof value == "string" && choice[value.toLowerCase()] != undefined);
+};
+
+org.xml3d.isIntArray = function(value) 
+{
+	return typeof value == "object" && new Int32Array().constructor == value.constructor;
+};
+
+org.xml3d.isUInt16Array = function(value) 
+{
+	return typeof value == "object" && new UInt16Array().constructor == value.constructor;
+};
+
+org.xml3d.isFloatArray = function(value) 
+{
+	return typeof value == "object" && new Float32Array().constructor == value.constructor;
+};
+
+org.xml3d.isFloat3Array = function(value) 
+{
+	return org.xml3d.isFloatArray(value);
+};
+
+org.xml3d.isFloat2Array = function(value) 
+{
+	return org.xml3d.isFloatArray(value);
+};
+
+org.xml3d.isFloat4Array = function(value) 
+{
+	return org.xml3d.isFloatArray(value);
+};
+
+org.xml3d.isFloat4x4Array = function(value) 
+{
+	return org.xml3d.isFloatArray(value);
+};
+
+org.xml3d.isBoolArray = function(value) 
+{
+	return typeof value == "object" && new Uint8Array().constructor == value.constructor;
+};
+
+org.xml3d.isAnyURI = function(node) 
+{
+	return org.xml3d.isString(node);
+};
+
+
 // MeshTypes
 org.xml3d.MeshTypes = {};
 org.xml3d.MeshTypes["triangles"] = 0;
-org.xml3d.MeshTypes["triangleStrips"] = 1;
+org.xml3d.MeshTypes[0] = "triangles";
+org.xml3d.MeshTypes["trianglestrips"] = 1;
+org.xml3d.MeshTypes[1] = "triangleStrips";
 // TextureTypes
 org.xml3d.TextureTypes = {};
-org.xml3d.TextureTypes["2D"] = 0;
-org.xml3d.TextureTypes["1D"] = 1;
-org.xml3d.TextureTypes["3D"] = 2;
+org.xml3d.TextureTypes["2d"] = 0;
+org.xml3d.TextureTypes[0] = "2D";
+org.xml3d.TextureTypes["1d"] = 1;
+org.xml3d.TextureTypes[1] = "1D";
+org.xml3d.TextureTypes["3d"] = 2;
+org.xml3d.TextureTypes[2] = "3D";
 // FilterTypes
 org.xml3d.FilterTypes = {};
 org.xml3d.FilterTypes["none"] = 0;
+org.xml3d.FilterTypes[0] = "none";
 org.xml3d.FilterTypes["nearest"] = 1;
+org.xml3d.FilterTypes[1] = "nearest";
 org.xml3d.FilterTypes["linear"] = 2;
+org.xml3d.FilterTypes[2] = "linear";
 // WrapTypes
 org.xml3d.WrapTypes = {};
 org.xml3d.WrapTypes["clamp"] = 0;
+org.xml3d.WrapTypes[0] = "clamp";
 org.xml3d.WrapTypes["repeat"] = 1;
+org.xml3d.WrapTypes[1] = "repeat";
 org.xml3d.WrapTypes["border"] = 2;
+org.xml3d.WrapTypes[2] = "border";
 
 // Initialize methods
 org.xml3d.event.UNHANDLED = 1;
@@ -698,7 +806,7 @@ org.xml3d.classInfo.XML3DBaseType = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -713,20 +821,40 @@ org.xml3d.classInfo.XML3DBaseType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -746,23 +874,25 @@ org.xml3d.classInfo.xml3d = function(node, context)
 {
 	org.xml3d.classInfo.XML3DBaseType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("height", function (value) 
 	{
 		var oldValue = this._height;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isInt(value))
 		{
-		   this._height = org.xml3d.initInt(node.getAttribute("height"), 600);
-		   
-		   if(this._height.setOwnerNode)
-		   {
-		   	  this._height.setOwnerNode("height", this);
-		   }
+			this._height = value;
 		}
 		else
 		{
-		   this._height = value;
-    	}
+			this.resetAttribute("height");
+			org.xml3d.debug.logWarn(value + " has not expected type Int ==> default value " + this._height  +" is set");
+		}
+	   
+	    if(this._height.setOwnerNode)
+		{
+			this._height.setOwnerNode("height", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._height)
 		{
@@ -777,19 +907,21 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	node.__defineSetter__("width", function (value) 
 	{
 		var oldValue = this._width;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isInt(value))
 		{
-		   this._width = org.xml3d.initInt(node.getAttribute("width"), 800);
-		   
-		   if(this._width.setOwnerNode)
-		   {
-		   	  this._width.setOwnerNode("width", this);
-		   }
+			this._width = value;
 		}
 		else
 		{
-		   this._width = value;
-    	}
+			this.resetAttribute("width");
+			org.xml3d.debug.logWarn(value + " has not expected type Int ==> default value " + this._width  +" is set");
+		}
+	   
+	    if(this._width.setOwnerNode)
+		{
+			this._width.setOwnerNode("width", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._width)
 		{
@@ -808,14 +940,16 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.height = 600;
+			//this.height = 600;
+			this.height = org.xml3d.initInt("", 600);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "width")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.width = 800;
+			//this.width = 800;
+			this.width = org.xml3d.initInt("", 800);
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -824,12 +958,12 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	node._height = org.xml3d.initInt(node.getAttribute("height"), 600);
 	if(node._height.setOwnerNode)
 	{
-		node._height.setOwnerNode("height", this);
+		node._height.setOwnerNode("height", node);
 	}
 	node._width = org.xml3d.initInt(node.getAttribute("width"), 800);
 	if(node._width.setOwnerNode)
 	{
-		node._width.setOwnerNode("width", this);
+		node._width.setOwnerNode("width", node);
 	}
 
 	//node.definitionArea = [];
@@ -850,80 +984,184 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onclick") 
+		if (event.attrName == "onclick") 
 		{
-			this.onclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "ondblclick") 
+		if (event.attrName == "ondblclick") 
 		{
-			this.ondblclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.ondblclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.ondblclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousedown") 
+		if (event.attrName == "onmousedown") 
 		{
-			this.onmousedown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousedown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousedown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseup") 
+		if (event.attrName == "onmouseup") 
 		{
-			this.onmouseup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseover") 
+		if (event.attrName == "onmouseover") 
 		{
-			this.onmouseover = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseover = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseover = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousemove") 
+		if (event.attrName == "onmousemove") 
 		{
-			this.onmousemove = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousemove = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousemove = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseout") 
+		if (event.attrName == "onmouseout") 
 		{
-			this.onmouseout = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseout = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseout = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeypress") 
+		if (event.attrName == "onkeypress") 
 		{
-			this.onkeypress = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeypress = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeypress = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeydown") 
+		if (event.attrName == "onkeydown") 
 		{
-			this.onkeydown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeydown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeydown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeyup") 
+		if (event.attrName == "onkeyup") 
 		{
-			this.onkeyup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeyup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeyup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "height") 
+		if (event.attrName == "height") 
 		{
-			this.height = event.newValue;
+			if(org.xml3d.initInt)
+			{
+				this.height = org.xml3d.initInt(event.newValue, 600);
+			}
+			else
+			{
+				this.height = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "width") 
+		if (event.attrName == "width") 
 		{
-			this.width = event.newValue;
+			if(org.xml3d.initInt)
+			{
+				this.width = org.xml3d.initInt(event.newValue, 800);
+			}
+			else
+			{
+				this.width = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -948,7 +1186,7 @@ org.xml3d.classInfo.XML3DReferenceableType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DBaseType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -963,20 +1201,40 @@ org.xml3d.classInfo.XML3DReferenceableType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -996,23 +1254,25 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DReferenceableType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("map", function (value) 
 	{
 		var oldValue = this._map;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isString(value))
 		{
-		   this._map = org.xml3d.initString(node.getAttribute("map"), "");
-		   
-		   if(this._map.setOwnerNode)
-		   {
-		   	  this._map.setOwnerNode("map", this);
-		   }
+			this._map = value;
 		}
 		else
 		{
-		   this._map = value;
-    	}
+			this.resetAttribute("map");
+			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._map  +" is set");
+		}
+	   
+	    if(this._map.setOwnerNode)
+		{
+			this._map.setOwnerNode("map", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._map)
 		{
@@ -1027,19 +1287,21 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 	node.__defineSetter__("expose", function (value) 
 	{
 		var oldValue = this._expose;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isString(value))
 		{
-		   this._expose = org.xml3d.initString(node.getAttribute("expose"), "");
-		   
-		   if(this._expose.setOwnerNode)
-		   {
-		   	  this._expose.setOwnerNode("expose", this);
-		   }
+			this._expose = value;
 		}
 		else
 		{
-		   this._expose = value;
-    	}
+			this.resetAttribute("expose");
+			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._expose  +" is set");
+		}
+	   
+	    if(this._expose.setOwnerNode)
+		{
+			this._expose.setOwnerNode("expose", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._expose)
 		{
@@ -1058,14 +1320,16 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.map = "";
+			//this.map = "";
+			this.map = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "expose")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.expose = "";
+			//this.expose = "";
+			this.expose = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -1074,12 +1338,12 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 	node._map = org.xml3d.initString(node.getAttribute("map"), "");
 	if(node._map.setOwnerNode)
 	{
-		node._map.setOwnerNode("map", this);
+		node._map.setOwnerNode("map", node);
 	}
 	node._expose = org.xml3d.initString(node.getAttribute("expose"), "");
 	if(node._expose.setOwnerNode)
 	{
-		node._expose.setOwnerNode("expose", this);
+		node._expose.setOwnerNode("expose", node);
 	}
 
 	//node.sources = [];
@@ -1090,30 +1354,64 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "map") 
+		if (event.attrName == "map") 
 		{
-			this.map = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.map = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.map = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "expose") 
+		if (event.attrName == "expose") 
 		{
-			this.expose = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.expose = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.expose = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1133,7 +1431,7 @@ org.xml3d.classInfo.XML3DNestedDataContainerType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataContainerType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -1158,30 +1456,64 @@ org.xml3d.classInfo.XML3DNestedDataContainerType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "map") 
+		if (event.attrName == "map") 
 		{
-			this.map = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.map = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.map = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "expose") 
+		if (event.attrName == "expose") 
 		{
-			this.expose = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.expose = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.expose = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1201,7 +1533,7 @@ org.xml3d.classInfo.data = function(node, context)
 {
 	org.xml3d.classInfo.XML3DNestedDataContainerType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -1225,30 +1557,64 @@ org.xml3d.classInfo.data = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "map") 
+		if (event.attrName == "map") 
 		{
-			this.map = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.map = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.map = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "expose") 
+		if (event.attrName == "expose") 
 		{
-			this.expose = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.expose = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.expose = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1268,7 +1634,7 @@ org.xml3d.classInfo.defs = function(node, context)
 {
 	org.xml3d.classInfo.XML3DBaseType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -1284,20 +1650,40 @@ org.xml3d.classInfo.defs = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1317,23 +1703,25 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DReferenceableType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("visible", function (value) 
 	{
 		var oldValue = this._visible;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isBoolean(value))
 		{
-		   this._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
-		   
-		   if(this._visible.setOwnerNode)
-		   {
-		   	  this._visible.setOwnerNode("visible", this);
-		   }
+			this._visible = value;
 		}
 		else
 		{
-		   this._visible = value;
-    	}
+			this.resetAttribute("visible");
+			org.xml3d.debug.logWarn(value + " has not expected type Boolean ==> default value " + this._visible  +" is set");
+		}
+	   
+	    if(this._visible.setOwnerNode)
+		{
+			this._visible.setOwnerNode("visible", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._visible)
 		{
@@ -1352,7 +1740,8 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.visible = true;
+			//this.visible = true;
+			this.visible = org.xml3d.initBoolean("", true);
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -1361,7 +1750,7 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
 	if(node._visible.setOwnerNode)
 	{
-		node._visible.setOwnerNode("visible", this);
+		node._visible.setOwnerNode("visible", node);
 	}
 
 
@@ -1371,75 +1760,172 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onclick") 
+		if (event.attrName == "onclick") 
 		{
-			this.onclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "ondblclick") 
+		if (event.attrName == "ondblclick") 
 		{
-			this.ondblclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.ondblclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.ondblclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousedown") 
+		if (event.attrName == "onmousedown") 
 		{
-			this.onmousedown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousedown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousedown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseup") 
+		if (event.attrName == "onmouseup") 
 		{
-			this.onmouseup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseover") 
+		if (event.attrName == "onmouseover") 
 		{
-			this.onmouseover = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseover = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseover = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousemove") 
+		if (event.attrName == "onmousemove") 
 		{
-			this.onmousemove = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousemove = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousemove = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseout") 
+		if (event.attrName == "onmouseout") 
 		{
-			this.onmouseout = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseout = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseout = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeypress") 
+		if (event.attrName == "onkeypress") 
 		{
-			this.onkeypress = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeypress = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeypress = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeydown") 
+		if (event.attrName == "onkeydown") 
 		{
-			this.onkeydown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeydown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeydown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeyup") 
+		if (event.attrName == "onkeyup") 
 		{
-			this.onkeyup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeyup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeyup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "visible") 
+		if (event.attrName == "visible") 
 		{
-			this.visible = event.newValue;
+			if(org.xml3d.initBoolean)
+			{
+				this.visible = org.xml3d.initBoolean(event.newValue, true);
+			}
+			else
+			{
+				this.visible = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1460,7 +1946,7 @@ org.xml3d.classInfo.group = function(node, context)
 {
 	org.xml3d.classInfo.XML3DGraphType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -1495,75 +1981,172 @@ org.xml3d.classInfo.group = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onclick") 
+		if (event.attrName == "onclick") 
 		{
-			this.onclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "ondblclick") 
+		if (event.attrName == "ondblclick") 
 		{
-			this.ondblclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.ondblclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.ondblclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousedown") 
+		if (event.attrName == "onmousedown") 
 		{
-			this.onmousedown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousedown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousedown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseup") 
+		if (event.attrName == "onmouseup") 
 		{
-			this.onmouseup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseover") 
+		if (event.attrName == "onmouseover") 
 		{
-			this.onmouseover = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseover = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseover = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousemove") 
+		if (event.attrName == "onmousemove") 
 		{
-			this.onmousemove = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousemove = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousemove = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseout") 
+		if (event.attrName == "onmouseout") 
 		{
-			this.onmouseout = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseout = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseout = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeypress") 
+		if (event.attrName == "onkeypress") 
 		{
-			this.onkeypress = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeypress = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeypress = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeydown") 
+		if (event.attrName == "onkeydown") 
 		{
-			this.onkeydown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeydown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeydown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeyup") 
+		if (event.attrName == "onkeyup") 
 		{
-			this.onkeyup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeyup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeyup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "visible") 
+		if (event.attrName == "visible") 
 		{
-			this.visible = event.newValue;
+			if(org.xml3d.initBoolean)
+			{
+				this.visible = org.xml3d.initBoolean(event.newValue, true);
+			}
+			else
+			{
+				this.visible = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1585,7 +2168,7 @@ org.xml3d.classInfo.XML3DGeometryType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DGraphType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -1600,75 +2183,172 @@ org.xml3d.classInfo.XML3DGeometryType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onclick") 
+		if (event.attrName == "onclick") 
 		{
-			this.onclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "ondblclick") 
+		if (event.attrName == "ondblclick") 
 		{
-			this.ondblclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.ondblclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.ondblclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousedown") 
+		if (event.attrName == "onmousedown") 
 		{
-			this.onmousedown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousedown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousedown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseup") 
+		if (event.attrName == "onmouseup") 
 		{
-			this.onmouseup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseover") 
+		if (event.attrName == "onmouseover") 
 		{
-			this.onmouseover = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseover = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseover = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousemove") 
+		if (event.attrName == "onmousemove") 
 		{
-			this.onmousemove = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousemove = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousemove = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseout") 
+		if (event.attrName == "onmouseout") 
 		{
-			this.onmouseout = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseout = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseout = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeypress") 
+		if (event.attrName == "onkeypress") 
 		{
-			this.onkeypress = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeypress = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeypress = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeydown") 
+		if (event.attrName == "onkeydown") 
 		{
-			this.onkeydown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeydown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeydown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeyup") 
+		if (event.attrName == "onkeyup") 
 		{
-			this.onkeyup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeyup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeyup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "visible") 
+		if (event.attrName == "visible") 
 		{
-			this.visible = event.newValue;
+			if(org.xml3d.initBoolean)
+			{
+				this.visible = org.xml3d.initBoolean(event.newValue, true);
+			}
+			else
+			{
+				this.visible = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1689,23 +2369,25 @@ org.xml3d.classInfo.mesh = function(node, context)
 {
 	org.xml3d.classInfo.XML3DGeometryType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("type", function (value) 
 	{
 		var oldValue = this._type;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isEnum(value, org.xml3d.MeshTypes))
 		{
-		   this._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.MeshTypes);
-		   
-		   if(this._type.setOwnerNode)
-		   {
-		   	  this._type.setOwnerNode("type", this);
-		   }
+			this._type = value;
 		}
 		else
 		{
-		   this._type = value;
-    	}
+			this.resetAttribute("type");
+			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._type  +" is set");
+		}
+	   
+	    if(this._type.setOwnerNode)
+		{
+			this._type.setOwnerNode("type", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._type)
 		{
@@ -1724,7 +2406,8 @@ org.xml3d.classInfo.mesh = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.type = 0;
+			//this.type = 0;
+			this.type = org.xml3d.initEnum("", 0, org.xml3d.MeshTypes);
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -1733,7 +2416,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 	node._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.MeshTypes);
 	if(node._type.setOwnerNode)
 	{
-		node._type.setOwnerNode("type", this);
+		node._type.setOwnerNode("type", node);
 	}
 
 	//node.sources = [];
@@ -1754,80 +2437,184 @@ org.xml3d.classInfo.mesh = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onclick") 
+		if (event.attrName == "onclick") 
 		{
-			this.onclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "ondblclick") 
+		if (event.attrName == "ondblclick") 
 		{
-			this.ondblclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.ondblclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.ondblclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousedown") 
+		if (event.attrName == "onmousedown") 
 		{
-			this.onmousedown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousedown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousedown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseup") 
+		if (event.attrName == "onmouseup") 
 		{
-			this.onmouseup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseover") 
+		if (event.attrName == "onmouseover") 
 		{
-			this.onmouseover = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseover = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseover = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousemove") 
+		if (event.attrName == "onmousemove") 
 		{
-			this.onmousemove = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousemove = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousemove = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseout") 
+		if (event.attrName == "onmouseout") 
 		{
-			this.onmouseout = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseout = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseout = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeypress") 
+		if (event.attrName == "onkeypress") 
 		{
-			this.onkeypress = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeypress = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeypress = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeydown") 
+		if (event.attrName == "onkeydown") 
 		{
-			this.onkeydown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeydown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeydown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeyup") 
+		if (event.attrName == "onkeyup") 
 		{
-			this.onkeyup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeyup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeyup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "visible") 
+		if (event.attrName == "visible") 
 		{
-			this.visible = event.newValue;
+			if(org.xml3d.initBoolean)
+			{
+				this.visible = org.xml3d.initBoolean(event.newValue, true);
+			}
+			else
+			{
+				this.visible = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "type") 
+		if (event.attrName == "type") 
 		{
-			this.type = event.newValue;
+			if(org.xml3d.initEnum)
+			{
+				this.type = org.xml3d.initEnum(event.newValue, 0, org.xml3d.MeshTypes);
+			}
+			else
+			{
+				this.type = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1848,7 +2635,7 @@ org.xml3d.classInfo.XML3DTransformProviderType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DReferenceableType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -1863,20 +2650,40 @@ org.xml3d.classInfo.XML3DTransformProviderType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -1896,23 +2703,25 @@ org.xml3d.classInfo.transform = function(node, context)
 {
 	org.xml3d.classInfo.XML3DTransformProviderType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("translation", function (value) 
 	{
 		var oldValue = this._translation;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isXML3DVec3(value))
 		{
-		   this._translation = org.xml3d.initXML3DVec3(node.getAttribute("translation"), 0, 0, 0);
-		   
-		   if(this._translation.setOwnerNode)
-		   {
-		   	  this._translation.setOwnerNode("translation", this);
-		   }
+			this._translation = value;
 		}
 		else
 		{
-		   this._translation = value;
-    	}
+			this.resetAttribute("translation");
+			org.xml3d.debug.logWarn(value + " has not expected type XML3DVec3 ==> default value " + this._translation  +" is set");
+		}
+	   
+	    if(this._translation.setOwnerNode)
+		{
+			this._translation.setOwnerNode("translation", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._translation)
 		{
@@ -1927,19 +2736,21 @@ org.xml3d.classInfo.transform = function(node, context)
 	node.__defineSetter__("scale", function (value) 
 	{
 		var oldValue = this._scale;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isXML3DVec3(value))
 		{
-		   this._scale = org.xml3d.initXML3DVec3(node.getAttribute("scale"), 1, 1, 1);
-		   
-		   if(this._scale.setOwnerNode)
-		   {
-		   	  this._scale.setOwnerNode("scale", this);
-		   }
+			this._scale = value;
 		}
 		else
 		{
-		   this._scale = value;
-    	}
+			this.resetAttribute("scale");
+			org.xml3d.debug.logWarn(value + " has not expected type XML3DVec3 ==> default value " + this._scale  +" is set");
+		}
+	   
+	    if(this._scale.setOwnerNode)
+		{
+			this._scale.setOwnerNode("scale", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._scale)
 		{
@@ -1954,19 +2765,21 @@ org.xml3d.classInfo.transform = function(node, context)
 	node.__defineSetter__("rotation", function (value) 
 	{
 		var oldValue = this._rotation;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isXML3DRotation(value))
 		{
-		   this._rotation = org.xml3d.initXML3DRotation(node.getAttribute("rotation"), 0, 0, 1, 0);
-		   
-		   if(this._rotation.setOwnerNode)
-		   {
-		   	  this._rotation.setOwnerNode("rotation", this);
-		   }
+			this._rotation = value;
 		}
 		else
 		{
-		   this._rotation = value;
-    	}
+			this.resetAttribute("rotation");
+			org.xml3d.debug.logWarn(value + " has not expected type XML3DRotation ==> default value " + this._rotation  +" is set");
+		}
+	   
+	    if(this._rotation.setOwnerNode)
+		{
+			this._rotation.setOwnerNode("rotation", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._rotation)
 		{
@@ -1981,19 +2794,21 @@ org.xml3d.classInfo.transform = function(node, context)
 	node.__defineSetter__("center", function (value) 
 	{
 		var oldValue = this._center;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isXML3DVec3(value))
 		{
-		   this._center = org.xml3d.initXML3DVec3(node.getAttribute("center"), 0, 0, 0);
-		   
-		   if(this._center.setOwnerNode)
-		   {
-		   	  this._center.setOwnerNode("center", this);
-		   }
+			this._center = value;
 		}
 		else
 		{
-		   this._center = value;
-    	}
+			this.resetAttribute("center");
+			org.xml3d.debug.logWarn(value + " has not expected type XML3DVec3 ==> default value " + this._center  +" is set");
+		}
+	   
+	    if(this._center.setOwnerNode)
+		{
+			this._center.setOwnerNode("center", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._center)
 		{
@@ -2008,19 +2823,21 @@ org.xml3d.classInfo.transform = function(node, context)
 	node.__defineSetter__("scaleOrientation", function (value) 
 	{
 		var oldValue = this._scaleOrientation;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isXML3DRotation(value))
 		{
-		   this._scaleOrientation = org.xml3d.initXML3DRotation(node.getAttribute("scaleOrientation"), 0, 0, 1, 0);
-		   
-		   if(this._scaleOrientation.setOwnerNode)
-		   {
-		   	  this._scaleOrientation.setOwnerNode("scaleOrientation", this);
-		   }
+			this._scaleOrientation = value;
 		}
 		else
 		{
-		   this._scaleOrientation = value;
-    	}
+			this.resetAttribute("scaleOrientation");
+			org.xml3d.debug.logWarn(value + " has not expected type XML3DRotation ==> default value " + this._scaleOrientation  +" is set");
+		}
+	   
+	    if(this._scaleOrientation.setOwnerNode)
+		{
+			this._scaleOrientation.setOwnerNode("scaleOrientation", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._scaleOrientation)
 		{
@@ -2039,35 +2856,40 @@ org.xml3d.classInfo.transform = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.translation = 0, 0, 0;
+			//this.translation = 0, 0, 0;
+			this.translation = org.xml3d.initXML3DVec3("", 0, 0, 0);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "scale")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.scale = 1, 1, 1;
+			//this.scale = 1, 1, 1;
+			this.scale = org.xml3d.initXML3DVec3("", 1, 1, 1);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "rotation")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.rotation = 0, 0, 1, 0;
+			//this.rotation = 0, 0, 1, 0;
+			this.rotation = org.xml3d.initXML3DRotation("", 0, 0, 1, 0);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "center")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.center = 0, 0, 0;
+			//this.center = 0, 0, 0;
+			this.center = org.xml3d.initXML3DVec3("", 0, 0, 0);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "scaleOrientation")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.scaleOrientation = 0, 0, 1, 0;
+			//this.scaleOrientation = 0, 0, 1, 0;
+			this.scaleOrientation = org.xml3d.initXML3DRotation("", 0, 0, 1, 0);
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -2076,27 +2898,27 @@ org.xml3d.classInfo.transform = function(node, context)
 	node._translation = org.xml3d.initXML3DVec3(node.getAttribute("translation"), 0, 0, 0);
 	if(node._translation.setOwnerNode)
 	{
-		node._translation.setOwnerNode("translation", this);
+		node._translation.setOwnerNode("translation", node);
 	}
 	node._scale = org.xml3d.initXML3DVec3(node.getAttribute("scale"), 1, 1, 1);
 	if(node._scale.setOwnerNode)
 	{
-		node._scale.setOwnerNode("scale", this);
+		node._scale.setOwnerNode("scale", node);
 	}
 	node._rotation = org.xml3d.initXML3DRotation(node.getAttribute("rotation"), 0, 0, 1, 0);
 	if(node._rotation.setOwnerNode)
 	{
-		node._rotation.setOwnerNode("rotation", this);
+		node._rotation.setOwnerNode("rotation", node);
 	}
 	node._center = org.xml3d.initXML3DVec3(node.getAttribute("center"), 0, 0, 0);
 	if(node._center.setOwnerNode)
 	{
-		node._center.setOwnerNode("center", this);
+		node._center.setOwnerNode("center", node);
 	}
 	node._scaleOrientation = org.xml3d.initXML3DRotation(node.getAttribute("scaleOrientation"), 0, 0, 1, 0);
 	if(node._scaleOrientation.setOwnerNode)
 	{
-		node._scaleOrientation.setOwnerNode("scaleOrientation", this);
+		node._scaleOrientation.setOwnerNode("scaleOrientation", node);
 	}
 
 
@@ -2106,45 +2928,100 @@ org.xml3d.classInfo.transform = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "translation") 
+		if (event.attrName == "translation") 
 		{
-			this.translation = event.newValue;
+			if(org.xml3d.initXML3DVec3)
+			{
+				this.translation = org.xml3d.initXML3DVec3(event.newValue, 0, 0, 0);
+			}
+			else
+			{
+				this.translation = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "scale") 
+		if (event.attrName == "scale") 
 		{
-			this.scale = event.newValue;
+			if(org.xml3d.initXML3DVec3)
+			{
+				this.scale = org.xml3d.initXML3DVec3(event.newValue, 1, 1, 1);
+			}
+			else
+			{
+				this.scale = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "rotation") 
+		if (event.attrName == "rotation") 
 		{
-			this.rotation = event.newValue;
+			if(org.xml3d.initXML3DRotation)
+			{
+				this.rotation = org.xml3d.initXML3DRotation(event.newValue, 0, 0, 1, 0);
+			}
+			else
+			{
+				this.rotation = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "center") 
+		if (event.attrName == "center") 
 		{
-			this.center = event.newValue;
+			if(org.xml3d.initXML3DVec3)
+			{
+				this.center = org.xml3d.initXML3DVec3(event.newValue, 0, 0, 0);
+			}
+			else
+			{
+				this.center = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "scaleOrientation") 
+		if (event.attrName == "scaleOrientation") 
 		{
-			this.scaleOrientation = event.newValue;
+			if(org.xml3d.initXML3DRotation)
+			{
+				this.scaleOrientation = org.xml3d.initXML3DRotation(event.newValue, 0, 0, 1, 0);
+			}
+			else
+			{
+				this.scaleOrientation = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2164,7 +3041,7 @@ org.xml3d.classInfo.XML3DShaderProviderType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DReferenceableType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -2199,20 +3076,40 @@ org.xml3d.classInfo.XML3DShaderProviderType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2232,7 +3129,7 @@ org.xml3d.classInfo.XML3DSurfaceShaderProviderType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DShaderProviderType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -2247,20 +3144,40 @@ org.xml3d.classInfo.XML3DSurfaceShaderProviderType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2280,7 +3197,7 @@ org.xml3d.classInfo.shader = function(node, context)
 {
 	org.xml3d.classInfo.XML3DSurfaceShaderProviderType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -2295,20 +3212,40 @@ org.xml3d.classInfo.shader = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2328,23 +3265,25 @@ org.xml3d.classInfo.light = function(node, context)
 {
 	org.xml3d.classInfo.XML3DGraphType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("global", function (value) 
 	{
 		var oldValue = this._global;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isBoolean(value))
 		{
-		   this._global = org.xml3d.initBoolean(node.getAttribute("global"), false);
-		   
-		   if(this._global.setOwnerNode)
-		   {
-		   	  this._global.setOwnerNode("global", this);
-		   }
+			this._global = value;
 		}
 		else
 		{
-		   this._global = value;
-    	}
+			this.resetAttribute("global");
+			org.xml3d.debug.logWarn(value + " has not expected type Boolean ==> default value " + this._global  +" is set");
+		}
+	   
+	    if(this._global.setOwnerNode)
+		{
+			this._global.setOwnerNode("global", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._global)
 		{
@@ -2359,19 +3298,21 @@ org.xml3d.classInfo.light = function(node, context)
 	node.__defineSetter__("intensity", function (value) 
 	{
 		var oldValue = this._intensity;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isFloat(value))
 		{
-		   this._intensity = org.xml3d.initFloat(node.getAttribute("intensity"), 1);
-		   
-		   if(this._intensity.setOwnerNode)
-		   {
-		   	  this._intensity.setOwnerNode("intensity", this);
-		   }
+			this._intensity = value;
 		}
 		else
 		{
-		   this._intensity = value;
-    	}
+			this.resetAttribute("intensity");
+			org.xml3d.debug.logWarn(value + " has not expected type Float ==> default value " + this._intensity  +" is set");
+		}
+	   
+	    if(this._intensity.setOwnerNode)
+		{
+			this._intensity.setOwnerNode("intensity", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._intensity)
 		{
@@ -2390,14 +3331,16 @@ org.xml3d.classInfo.light = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.global = false;
+			//this.global = false;
+			this.global = org.xml3d.initBoolean("", false);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "intensity")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.intensity = 1;
+			//this.intensity = 1;
+			this.intensity = org.xml3d.initFloat("", 1);
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -2406,12 +3349,12 @@ org.xml3d.classInfo.light = function(node, context)
 	node._global = org.xml3d.initBoolean(node.getAttribute("global"), false);
 	if(node._global.setOwnerNode)
 	{
-		node._global.setOwnerNode("global", this);
+		node._global.setOwnerNode("global", node);
 	}
 	node._intensity = org.xml3d.initFloat(node.getAttribute("intensity"), 1);
 	if(node._intensity.setOwnerNode)
 	{
-		node._intensity.setOwnerNode("intensity", this);
+		node._intensity.setOwnerNode("intensity", node);
 	}
 
 	node.shader = null;
@@ -2430,85 +3373,196 @@ org.xml3d.classInfo.light = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onclick") 
+		if (event.attrName == "onclick") 
 		{
-			this.onclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "ondblclick") 
+		if (event.attrName == "ondblclick") 
 		{
-			this.ondblclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.ondblclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.ondblclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousedown") 
+		if (event.attrName == "onmousedown") 
 		{
-			this.onmousedown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousedown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousedown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseup") 
+		if (event.attrName == "onmouseup") 
 		{
-			this.onmouseup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseover") 
+		if (event.attrName == "onmouseover") 
 		{
-			this.onmouseover = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseover = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseover = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousemove") 
+		if (event.attrName == "onmousemove") 
 		{
-			this.onmousemove = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousemove = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousemove = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseout") 
+		if (event.attrName == "onmouseout") 
 		{
-			this.onmouseout = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseout = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseout = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeypress") 
+		if (event.attrName == "onkeypress") 
 		{
-			this.onkeypress = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeypress = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeypress = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeydown") 
+		if (event.attrName == "onkeydown") 
 		{
-			this.onkeydown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeydown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeydown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeyup") 
+		if (event.attrName == "onkeyup") 
 		{
-			this.onkeyup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeyup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeyup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "visible") 
+		if (event.attrName == "visible") 
 		{
-			this.visible = event.newValue;
+			if(org.xml3d.initBoolean)
+			{
+				this.visible = org.xml3d.initBoolean(event.newValue, true);
+			}
+			else
+			{
+				this.visible = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "global") 
+		if (event.attrName == "global") 
 		{
-			this.global = event.newValue;
+			if(org.xml3d.initBoolean)
+			{
+				this.global = org.xml3d.initBoolean(event.newValue, false);
+			}
+			else
+			{
+				this.global = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "intensity") 
+		if (event.attrName == "intensity") 
 		{
-			this.intensity = event.newValue;
+			if(org.xml3d.initFloat)
+			{
+				this.intensity = org.xml3d.initFloat(event.newValue, 1);
+			}
+			else
+			{
+				this.intensity = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2529,7 +3583,7 @@ org.xml3d.classInfo.XML3DLightShaderProviderType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DShaderProviderType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -2544,20 +3598,40 @@ org.xml3d.classInfo.XML3DLightShaderProviderType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2577,7 +3651,7 @@ org.xml3d.classInfo.lightshader = function(node, context)
 {
 	org.xml3d.classInfo.XML3DLightShaderProviderType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -2592,20 +3666,40 @@ org.xml3d.classInfo.lightshader = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2625,7 +3719,7 @@ org.xml3d.classInfo.script = function(node, context)
 {
 	org.xml3d.classInfo.XML3DReferenceableType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	// TODO: Setter for mixed value
 	node.setValue = function(e) 
 	{
@@ -2640,19 +3734,21 @@ org.xml3d.classInfo.script = function(node, context)
 	node.__defineSetter__("src", function (value) 
 	{
 		var oldValue = this._src;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isAnyURI(value))
 		{
-		   this._src = org.xml3d.initAnyURI(node.getAttribute("src"), "");
-		   
-		   if(this._src.setOwnerNode)
-		   {
-		   	  this._src.setOwnerNode("src", this);
-		   }
+			this._src = value;
 		}
 		else
 		{
-		   this._src = value;
-    	}
+			this.resetAttribute("src");
+			org.xml3d.debug.logWarn(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
+		}
+	   
+	    if(this._src.setOwnerNode)
+		{
+			this._src.setOwnerNode("src", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._src)
 		{
@@ -2667,19 +3763,21 @@ org.xml3d.classInfo.script = function(node, context)
 	node.__defineSetter__("type", function (value) 
 	{
 		var oldValue = this._type;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isString(value))
 		{
-		   this._type = org.xml3d.initString(node.getAttribute("type"), "");
-		   
-		   if(this._type.setOwnerNode)
-		   {
-		   	  this._type.setOwnerNode("type", this);
-		   }
+			this._type = value;
 		}
 		else
 		{
-		   this._type = value;
-    	}
+			this.resetAttribute("type");
+			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._type  +" is set");
+		}
+	   
+	    if(this._type.setOwnerNode)
+		{
+			this._type.setOwnerNode("type", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._type)
 		{
@@ -2698,14 +3796,16 @@ org.xml3d.classInfo.script = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.src = "";
+			//this.src = "";
+			this.src = org.xml3d.initAnyURI("", "");
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "type")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.type = "";
+			//this.type = "";
+			this.type = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -2715,17 +3815,17 @@ org.xml3d.classInfo.script = function(node, context)
 
 	if(node.value.setOwnerNode)
 	{
-		node.value.setOwnerNode("value", this);
+		node.value.setOwnerNode("value", node);
 	}
 	node._src = org.xml3d.initAnyURI(node.getAttribute("src"), "");
 	if(node._src.setOwnerNode)
 	{
-		node._src.setOwnerNode("src", this);
+		node._src.setOwnerNode("src", node);
 	}
 	node._type = org.xml3d.initString(node.getAttribute("type"), "");
 	if(node._type.setOwnerNode)
 	{
-		node._type.setOwnerNode("type", this);
+		node._type.setOwnerNode("type", node);
 	}
 
 
@@ -2735,31 +3835,64 @@ org.xml3d.classInfo.script = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-			// TODO: Mixed value change
-		if (attrName == "src") 
+		if (event.attrName == "src") 
 		{
-			this.src = event.newValue;
+			if(org.xml3d.initAnyURI)
+			{
+				this.src = org.xml3d.initAnyURI(event.newValue, "");
+			}
+			else
+			{
+				this.src = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "type") 
+		if (event.attrName == "type") 
 		{
-			this.type = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.type = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.type = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2779,23 +3912,25 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DBaseType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("name", function (value) 
 	{
 		var oldValue = this._name;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isString(value))
 		{
-		   this._name = org.xml3d.initString(node.getAttribute("name"), "");
-		   
-		   if(this._name.setOwnerNode)
-		   {
-		   	  this._name.setOwnerNode("name", this);
-		   }
+			this._name = value;
 		}
 		else
 		{
-		   this._name = value;
-    	}
+			this.resetAttribute("name");
+			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._name  +" is set");
+		}
+	   
+	    if(this._name.setOwnerNode)
+		{
+			this._name.setOwnerNode("name", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._name)
 		{
@@ -2814,7 +3949,8 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.name = "";
+			//this.name = "";
+			this.name = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -2823,7 +3959,7 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 	node._name = org.xml3d.initString(node.getAttribute("name"), "");
 	if(node._name.setOwnerNode)
 	{
-		node._name.setOwnerNode("name", this);
+		node._name.setOwnerNode("name", node);
 	}
 
 
@@ -2833,25 +3969,52 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -2871,7 +4034,7 @@ org.xml3d.classInfo.float = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	// TODO: Setter for mixed value
 	node.setValue = function(e) 
 	{
@@ -2893,7 +4056,7 @@ org.xml3d.classInfo.float = function(node, context)
 
 	if(node.value.setOwnerNode)
 	{
-		node.value.setOwnerNode("value", this);
+		node.value.setOwnerNode("value", node);
 	}
 
 
@@ -2903,28 +4066,54 @@ org.xml3d.classInfo.float = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-			// TODO: Mixed value change
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2942,7 +4131,7 @@ org.xml3d.classInfo.float2 = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	// TODO: Setter for mixed value
 	node.setValue = function(e) 
 	{
@@ -2964,7 +4153,7 @@ org.xml3d.classInfo.float2 = function(node, context)
 
 	if(node.value.setOwnerNode)
 	{
-		node.value.setOwnerNode("value", this);
+		node.value.setOwnerNode("value", node);
 	}
 
 
@@ -2974,28 +4163,54 @@ org.xml3d.classInfo.float2 = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-			// TODO: Mixed value change
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3013,7 +4228,7 @@ org.xml3d.classInfo.float3 = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	// TODO: Setter for mixed value
 	node.setValue = function(e) 
 	{
@@ -3035,7 +4250,7 @@ org.xml3d.classInfo.float3 = function(node, context)
 
 	if(node.value.setOwnerNode)
 	{
-		node.value.setOwnerNode("value", this);
+		node.value.setOwnerNode("value", node);
 	}
 
 
@@ -3045,28 +4260,54 @@ org.xml3d.classInfo.float3 = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-			// TODO: Mixed value change
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3084,7 +4325,7 @@ org.xml3d.classInfo.float4 = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	// TODO: Setter for mixed value
 	node.setValue = function(e) 
 	{
@@ -3106,7 +4347,7 @@ org.xml3d.classInfo.float4 = function(node, context)
 
 	if(node.value.setOwnerNode)
 	{
-		node.value.setOwnerNode("value", this);
+		node.value.setOwnerNode("value", node);
 	}
 
 
@@ -3116,28 +4357,54 @@ org.xml3d.classInfo.float4 = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-			// TODO: Mixed value change
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3155,7 +4422,7 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	// TODO: Setter for mixed value
 	node.setValue = function(e) 
 	{
@@ -3177,7 +4444,7 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 
 	if(node.value.setOwnerNode)
 	{
-		node.value.setOwnerNode("value", this);
+		node.value.setOwnerNode("value", node);
 	}
 
 
@@ -3187,28 +4454,54 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-			// TODO: Mixed value change
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3226,7 +4519,7 @@ org.xml3d.classInfo.int = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	// TODO: Setter for mixed value
 	node.setValue = function(e) 
 	{
@@ -3248,7 +4541,7 @@ org.xml3d.classInfo.int = function(node, context)
 
 	if(node.value.setOwnerNode)
 	{
-		node.value.setOwnerNode("value", this);
+		node.value.setOwnerNode("value", node);
 	}
 
 
@@ -3258,28 +4551,54 @@ org.xml3d.classInfo.int = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-			// TODO: Mixed value change
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3297,7 +4616,7 @@ org.xml3d.classInfo.bool = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	// TODO: Setter for mixed value
 	node.setValue = function(e) 
 	{
@@ -3319,7 +4638,7 @@ org.xml3d.classInfo.bool = function(node, context)
 
 	if(node.value.setOwnerNode)
 	{
-		node.value.setOwnerNode("value", this);
+		node.value.setOwnerNode("value", node);
 	}
 
 
@@ -3329,28 +4648,54 @@ org.xml3d.classInfo.bool = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-			// TODO: Mixed value change
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3368,23 +4713,25 @@ org.xml3d.classInfo.texture = function(node, context)
 {
 	org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("type", function (value) 
 	{
 		var oldValue = this._type;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isEnum(value, org.xml3d.TextureTypes))
 		{
-		   this._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.TextureTypes);
-		   
-		   if(this._type.setOwnerNode)
-		   {
-		   	  this._type.setOwnerNode("type", this);
-		   }
+			this._type = value;
 		}
 		else
 		{
-		   this._type = value;
-    	}
+			this.resetAttribute("type");
+			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._type  +" is set");
+		}
+	   
+	    if(this._type.setOwnerNode)
+		{
+			this._type.setOwnerNode("type", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._type)
 		{
@@ -3399,19 +4746,21 @@ org.xml3d.classInfo.texture = function(node, context)
 	node.__defineSetter__("filterMin", function (value) 
 	{
 		var oldValue = this._filterMin;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isEnum(value, org.xml3d.FilterTypes))
 		{
-		   this._filterMin = org.xml3d.initEnum(node.getAttribute("filterMin"), 2, org.xml3d.FilterTypes);
-		   
-		   if(this._filterMin.setOwnerNode)
-		   {
-		   	  this._filterMin.setOwnerNode("filterMin", this);
-		   }
+			this._filterMin = value;
 		}
 		else
 		{
-		   this._filterMin = value;
-    	}
+			this.resetAttribute("filterMin");
+			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._filterMin  +" is set");
+		}
+	   
+	    if(this._filterMin.setOwnerNode)
+		{
+			this._filterMin.setOwnerNode("filterMin", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._filterMin)
 		{
@@ -3426,19 +4775,21 @@ org.xml3d.classInfo.texture = function(node, context)
 	node.__defineSetter__("filterMag", function (value) 
 	{
 		var oldValue = this._filterMag;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isEnum(value, org.xml3d.FilterTypes))
 		{
-		   this._filterMag = org.xml3d.initEnum(node.getAttribute("filterMag"), 2, org.xml3d.FilterTypes);
-		   
-		   if(this._filterMag.setOwnerNode)
-		   {
-		   	  this._filterMag.setOwnerNode("filterMag", this);
-		   }
+			this._filterMag = value;
 		}
 		else
 		{
-		   this._filterMag = value;
-    	}
+			this.resetAttribute("filterMag");
+			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._filterMag  +" is set");
+		}
+	   
+	    if(this._filterMag.setOwnerNode)
+		{
+			this._filterMag.setOwnerNode("filterMag", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._filterMag)
 		{
@@ -3453,19 +4804,21 @@ org.xml3d.classInfo.texture = function(node, context)
 	node.__defineSetter__("filterMip", function (value) 
 	{
 		var oldValue = this._filterMip;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isEnum(value, org.xml3d.FilterTypes))
 		{
-		   this._filterMip = org.xml3d.initEnum(node.getAttribute("filterMip"), 1, org.xml3d.FilterTypes);
-		   
-		   if(this._filterMip.setOwnerNode)
-		   {
-		   	  this._filterMip.setOwnerNode("filterMip", this);
-		   }
+			this._filterMip = value;
 		}
 		else
 		{
-		   this._filterMip = value;
-    	}
+			this.resetAttribute("filterMip");
+			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._filterMip  +" is set");
+		}
+	   
+	    if(this._filterMip.setOwnerNode)
+		{
+			this._filterMip.setOwnerNode("filterMip", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._filterMip)
 		{
@@ -3480,19 +4833,21 @@ org.xml3d.classInfo.texture = function(node, context)
 	node.__defineSetter__("wrapS", function (value) 
 	{
 		var oldValue = this._wrapS;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isEnum(value, org.xml3d.WrapTypes))
 		{
-		   this._wrapS = org.xml3d.initEnum(node.getAttribute("wrapS"), 0, org.xml3d.WrapTypes);
-		   
-		   if(this._wrapS.setOwnerNode)
-		   {
-		   	  this._wrapS.setOwnerNode("wrapS", this);
-		   }
+			this._wrapS = value;
 		}
 		else
 		{
-		   this._wrapS = value;
-    	}
+			this.resetAttribute("wrapS");
+			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._wrapS  +" is set");
+		}
+	   
+	    if(this._wrapS.setOwnerNode)
+		{
+			this._wrapS.setOwnerNode("wrapS", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._wrapS)
 		{
@@ -3507,19 +4862,21 @@ org.xml3d.classInfo.texture = function(node, context)
 	node.__defineSetter__("wrapT", function (value) 
 	{
 		var oldValue = this._wrapT;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isEnum(value, org.xml3d.WrapTypes))
 		{
-		   this._wrapT = org.xml3d.initEnum(node.getAttribute("wrapT"), 0, org.xml3d.WrapTypes);
-		   
-		   if(this._wrapT.setOwnerNode)
-		   {
-		   	  this._wrapT.setOwnerNode("wrapT", this);
-		   }
+			this._wrapT = value;
 		}
 		else
 		{
-		   this._wrapT = value;
-    	}
+			this.resetAttribute("wrapT");
+			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._wrapT  +" is set");
+		}
+	   
+	    if(this._wrapT.setOwnerNode)
+		{
+			this._wrapT.setOwnerNode("wrapT", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._wrapT)
 		{
@@ -3534,19 +4891,21 @@ org.xml3d.classInfo.texture = function(node, context)
 	node.__defineSetter__("wrapU", function (value) 
 	{
 		var oldValue = this._wrapU;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isEnum(value, org.xml3d.WrapTypes))
 		{
-		   this._wrapU = org.xml3d.initEnum(node.getAttribute("wrapU"), 0, org.xml3d.WrapTypes);
-		   
-		   if(this._wrapU.setOwnerNode)
-		   {
-		   	  this._wrapU.setOwnerNode("wrapU", this);
-		   }
+			this._wrapU = value;
 		}
 		else
 		{
-		   this._wrapU = value;
-    	}
+			this.resetAttribute("wrapU");
+			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._wrapU  +" is set");
+		}
+	   
+	    if(this._wrapU.setOwnerNode)
+		{
+			this._wrapU.setOwnerNode("wrapU", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._wrapU)
 		{
@@ -3561,19 +4920,21 @@ org.xml3d.classInfo.texture = function(node, context)
 	node.__defineSetter__("borderColor", function (value) 
 	{
 		var oldValue = this._borderColor;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isString(value))
 		{
-		   this._borderColor = org.xml3d.initString(node.getAttribute("borderColor"), "");
-		   
-		   if(this._borderColor.setOwnerNode)
-		   {
-		   	  this._borderColor.setOwnerNode("borderColor", this);
-		   }
+			this._borderColor = value;
 		}
 		else
 		{
-		   this._borderColor = value;
-    	}
+			this.resetAttribute("borderColor");
+			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._borderColor  +" is set");
+		}
+	   
+	    if(this._borderColor.setOwnerNode)
+		{
+			this._borderColor.setOwnerNode("borderColor", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._borderColor)
 		{
@@ -3592,56 +4953,64 @@ org.xml3d.classInfo.texture = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.type = 0;
+			//this.type = 0;
+			this.type = org.xml3d.initEnum("", 0, org.xml3d.TextureTypes);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "filterMin")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.filterMin = 2;
+			//this.filterMin = 2;
+			this.filterMin = org.xml3d.initEnum("", 2, org.xml3d.FilterTypes);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "filterMag")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.filterMag = 2;
+			//this.filterMag = 2;
+			this.filterMag = org.xml3d.initEnum("", 2, org.xml3d.FilterTypes);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "filterMip")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.filterMip = 1;
+			//this.filterMip = 1;
+			this.filterMip = org.xml3d.initEnum("", 1, org.xml3d.FilterTypes);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "wrapS")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.wrapS = 0;
+			//this.wrapS = 0;
+			this.wrapS = org.xml3d.initEnum("", 0, org.xml3d.WrapTypes);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "wrapT")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.wrapT = 0;
+			//this.wrapT = 0;
+			this.wrapT = org.xml3d.initEnum("", 0, org.xml3d.WrapTypes);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "wrapU")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.wrapU = 0;
+			//this.wrapU = 0;
+			this.wrapU = org.xml3d.initEnum("", 0, org.xml3d.WrapTypes);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "borderColor")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.borderColor = "";
+			//this.borderColor = "";
+			this.borderColor = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -3650,42 +5019,42 @@ org.xml3d.classInfo.texture = function(node, context)
 	node._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.TextureTypes);
 	if(node._type.setOwnerNode)
 	{
-		node._type.setOwnerNode("type", this);
+		node._type.setOwnerNode("type", node);
 	}
 	node._filterMin = org.xml3d.initEnum(node.getAttribute("filterMin"), 2, org.xml3d.FilterTypes);
 	if(node._filterMin.setOwnerNode)
 	{
-		node._filterMin.setOwnerNode("filterMin", this);
+		node._filterMin.setOwnerNode("filterMin", node);
 	}
 	node._filterMag = org.xml3d.initEnum(node.getAttribute("filterMag"), 2, org.xml3d.FilterTypes);
 	if(node._filterMag.setOwnerNode)
 	{
-		node._filterMag.setOwnerNode("filterMag", this);
+		node._filterMag.setOwnerNode("filterMag", node);
 	}
 	node._filterMip = org.xml3d.initEnum(node.getAttribute("filterMip"), 1, org.xml3d.FilterTypes);
 	if(node._filterMip.setOwnerNode)
 	{
-		node._filterMip.setOwnerNode("filterMip", this);
+		node._filterMip.setOwnerNode("filterMip", node);
 	}
 	node._wrapS = org.xml3d.initEnum(node.getAttribute("wrapS"), 0, org.xml3d.WrapTypes);
 	if(node._wrapS.setOwnerNode)
 	{
-		node._wrapS.setOwnerNode("wrapS", this);
+		node._wrapS.setOwnerNode("wrapS", node);
 	}
 	node._wrapT = org.xml3d.initEnum(node.getAttribute("wrapT"), 0, org.xml3d.WrapTypes);
 	if(node._wrapT.setOwnerNode)
 	{
-		node._wrapT.setOwnerNode("wrapT", this);
+		node._wrapT.setOwnerNode("wrapT", node);
 	}
 	node._wrapU = org.xml3d.initEnum(node.getAttribute("wrapU"), 0, org.xml3d.WrapTypes);
 	if(node._wrapU.setOwnerNode)
 	{
-		node._wrapU.setOwnerNode("wrapU", this);
+		node._wrapU.setOwnerNode("wrapU", node);
 	}
 	node._borderColor = org.xml3d.initString(node.getAttribute("borderColor"), "");
 	if(node._borderColor.setOwnerNode)
 	{
-		node._borderColor.setOwnerNode("borderColor", this);
+		node._borderColor.setOwnerNode("borderColor", node);
 	}
 
 	node.imageData = null;
@@ -3696,65 +5065,148 @@ org.xml3d.classInfo.texture = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "name") 
+		if (event.attrName == "name") 
 		{
-			this.name = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.name = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.name = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "type") 
+		if (event.attrName == "type") 
 		{
-			this.type = event.newValue;
+			if(org.xml3d.initEnum)
+			{
+				this.type = org.xml3d.initEnum(event.newValue, 0, org.xml3d.TextureTypes);
+			}
+			else
+			{
+				this.type = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "filterMin") 
+		if (event.attrName == "filterMin") 
 		{
-			this.filterMin = event.newValue;
+			if(org.xml3d.initEnum)
+			{
+				this.filterMin = org.xml3d.initEnum(event.newValue, 2, org.xml3d.FilterTypes);
+			}
+			else
+			{
+				this.filterMin = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "filterMag") 
+		if (event.attrName == "filterMag") 
 		{
-			this.filterMag = event.newValue;
+			if(org.xml3d.initEnum)
+			{
+				this.filterMag = org.xml3d.initEnum(event.newValue, 2, org.xml3d.FilterTypes);
+			}
+			else
+			{
+				this.filterMag = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "filterMip") 
+		if (event.attrName == "filterMip") 
 		{
-			this.filterMip = event.newValue;
+			if(org.xml3d.initEnum)
+			{
+				this.filterMip = org.xml3d.initEnum(event.newValue, 1, org.xml3d.FilterTypes);
+			}
+			else
+			{
+				this.filterMip = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "wrapS") 
+		if (event.attrName == "wrapS") 
 		{
-			this.wrapS = event.newValue;
+			if(org.xml3d.initEnum)
+			{
+				this.wrapS = org.xml3d.initEnum(event.newValue, 0, org.xml3d.WrapTypes);
+			}
+			else
+			{
+				this.wrapS = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "wrapT") 
+		if (event.attrName == "wrapT") 
 		{
-			this.wrapT = event.newValue;
+			if(org.xml3d.initEnum)
+			{
+				this.wrapT = org.xml3d.initEnum(event.newValue, 0, org.xml3d.WrapTypes);
+			}
+			else
+			{
+				this.wrapT = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "wrapU") 
+		if (event.attrName == "wrapU") 
 		{
-			this.wrapU = event.newValue;
+			if(org.xml3d.initEnum)
+			{
+				this.wrapU = org.xml3d.initEnum(event.newValue, 0, org.xml3d.WrapTypes);
+			}
+			else
+			{
+				this.wrapU = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "borderColor") 
+		if (event.attrName == "borderColor") 
 		{
-			this.borderColor = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.borderColor = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.borderColor = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -3774,7 +5226,7 @@ org.xml3d.classInfo.XML3DImageDataProviderType = function(node, context)
 {
 	org.xml3d.classInfo.XML3DReferenceableType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 
 	node.resetAttribute = function(attrName)
 	{
@@ -3789,20 +5241,40 @@ org.xml3d.classInfo.XML3DImageDataProviderType = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -3822,23 +5294,25 @@ org.xml3d.classInfo.img = function(node, context)
 {
 	org.xml3d.classInfo.XML3DImageDataProviderType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("src", function (value) 
 	{
 		var oldValue = this._src;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isAnyURI(value))
 		{
-		   this._src = org.xml3d.initAnyURI(node.getAttribute("src"), "");
-		   
-		   if(this._src.setOwnerNode)
-		   {
-		   	  this._src.setOwnerNode("src", this);
-		   }
+			this._src = value;
 		}
 		else
 		{
-		   this._src = value;
-    	}
+			this.resetAttribute("src");
+			org.xml3d.debug.logWarn(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
+		}
+	   
+	    if(this._src.setOwnerNode)
+		{
+			this._src.setOwnerNode("src", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._src)
 		{
@@ -3857,7 +5331,8 @@ org.xml3d.classInfo.img = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.src = "";
+			//this.src = "";
+			this.src = org.xml3d.initAnyURI("", "");
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -3866,7 +5341,7 @@ org.xml3d.classInfo.img = function(node, context)
 	node._src = org.xml3d.initAnyURI(node.getAttribute("src"), "");
 	if(node._src.setOwnerNode)
 	{
-		node._src.setOwnerNode("src", this);
+		node._src.setOwnerNode("src", node);
 	}
 
 
@@ -3876,25 +5351,52 @@ org.xml3d.classInfo.img = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "src") 
+		if (event.attrName == "src") 
 		{
-			this.src = event.newValue;
+			if(org.xml3d.initAnyURI)
+			{
+				this.src = org.xml3d.initAnyURI(event.newValue, "");
+			}
+			else
+			{
+				this.src = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -3914,23 +5416,25 @@ org.xml3d.classInfo.video = function(node, context)
 {
 	org.xml3d.classInfo.XML3DImageDataProviderType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("src", function (value) 
 	{
 		var oldValue = this._src;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isAnyURI(value))
 		{
-		   this._src = org.xml3d.initAnyURI(node.getAttribute("src"), "");
-		   
-		   if(this._src.setOwnerNode)
-		   {
-		   	  this._src.setOwnerNode("src", this);
-		   }
+			this._src = value;
 		}
 		else
 		{
-		   this._src = value;
-    	}
+			this.resetAttribute("src");
+			org.xml3d.debug.logWarn(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
+		}
+	   
+	    if(this._src.setOwnerNode)
+		{
+			this._src.setOwnerNode("src", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._src)
 		{
@@ -3949,7 +5453,8 @@ org.xml3d.classInfo.video = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.src = "";
+			//this.src = "";
+			this.src = org.xml3d.initAnyURI("", "");
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -3958,7 +5463,7 @@ org.xml3d.classInfo.video = function(node, context)
 	node._src = org.xml3d.initAnyURI(node.getAttribute("src"), "");
 	if(node._src.setOwnerNode)
 	{
-		node._src.setOwnerNode("src", this);
+		node._src.setOwnerNode("src", node);
 	}
 
 
@@ -3968,25 +5473,52 @@ org.xml3d.classInfo.video = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "src") 
+		if (event.attrName == "src") 
 		{
-			this.src = event.newValue;
+			if(org.xml3d.initAnyURI)
+			{
+				this.src = org.xml3d.initAnyURI(event.newValue, "");
+			}
+			else
+			{
+				this.src = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		
@@ -4006,23 +5538,25 @@ org.xml3d.classInfo.view = function(node, context)
 {
 	org.xml3d.classInfo.XML3DGraphType(node, context);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
-// eAllAttributes
+
 	node.__defineSetter__("position", function (value) 
 	{
 		var oldValue = this._position;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isXML3DVec3(value))
 		{
-		   this._position = org.xml3d.initXML3DVec3(node.getAttribute("position"), 0, 0, 0);
-		   
-		   if(this._position.setOwnerNode)
-		   {
-		   	  this._position.setOwnerNode("position", this);
-		   }
+			this._position = value;
 		}
 		else
 		{
-		   this._position = value;
-    	}
+			this.resetAttribute("position");
+			org.xml3d.debug.logWarn(value + " has not expected type XML3DVec3 ==> default value " + this._position  +" is set");
+		}
+	   
+	    if(this._position.setOwnerNode)
+		{
+			this._position.setOwnerNode("position", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._position)
 		{
@@ -4037,19 +5571,21 @@ org.xml3d.classInfo.view = function(node, context)
 	node.__defineSetter__("orientation", function (value) 
 	{
 		var oldValue = this._orientation;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isXML3DRotation(value))
 		{
-		   this._orientation = org.xml3d.initXML3DRotation(node.getAttribute("orientation"), 0, 0, 1, 0);
-		   
-		   if(this._orientation.setOwnerNode)
-		   {
-		   	  this._orientation.setOwnerNode("orientation", this);
-		   }
+			this._orientation = value;
 		}
 		else
 		{
-		   this._orientation = value;
-    	}
+			this.resetAttribute("orientation");
+			org.xml3d.debug.logWarn(value + " has not expected type XML3DRotation ==> default value " + this._orientation  +" is set");
+		}
+	   
+	    if(this._orientation.setOwnerNode)
+		{
+			this._orientation.setOwnerNode("orientation", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._orientation)
 		{
@@ -4064,19 +5600,21 @@ org.xml3d.classInfo.view = function(node, context)
 	node.__defineSetter__("fieldOfView", function (value) 
 	{
 		var oldValue = this._fieldOfView;
-		if (typeof value == 'string')
+		
+		if(org.xml3d.isFloat(value))
 		{
-		   this._fieldOfView = org.xml3d.initFloat(node.getAttribute("fieldOfView"), 0.785398);
-		   
-		   if(this._fieldOfView.setOwnerNode)
-		   {
-		   	  this._fieldOfView.setOwnerNode("fieldOfView", this);
-		   }
+			this._fieldOfView = value;
 		}
 		else
 		{
-		   this._fieldOfView = value;
-    	}
+			this.resetAttribute("fieldOfView");
+			org.xml3d.debug.logWarn(value + " has not expected type Float ==> default value " + this._fieldOfView  +" is set");
+		}
+	   
+	    if(this._fieldOfView.setOwnerNode)
+		{
+			this._fieldOfView.setOwnerNode("fieldOfView", this);
+		}
     	
 		if (this.notificationRequired() && oldValue != this._fieldOfView)
 		{
@@ -4095,21 +5633,24 @@ org.xml3d.classInfo.view = function(node, context)
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.position = 0, 0, 0;
+			//this.position = 0, 0, 0;
+			this.position = org.xml3d.initXML3DVec3("", 0, 0, 0);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "orientation")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.orientation = 0, 0, 1, 0;
+			//this.orientation = 0, 0, 1, 0;
+			this.orientation = org.xml3d.initXML3DRotation("", 0, 0, 1, 0);
 			return org.xml3d.event.HANDLED;
 		}
 		if(attrName == "fieldOfView")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
 			// no further notification is required.
-			this.fieldOfView = 0.785398;
+			//this.fieldOfView = 0.785398;
+			this.fieldOfView = org.xml3d.initFloat("", 0.785398);
 			return org.xml3d.event.HANDLED;
 		}
 		return org.xml3d.event.UNHANDLED;
@@ -4118,17 +5659,17 @@ org.xml3d.classInfo.view = function(node, context)
 	node._position = org.xml3d.initXML3DVec3(node.getAttribute("position"), 0, 0, 0);
 	if(node._position.setOwnerNode)
 	{
-		node._position.setOwnerNode("position", this);
+		node._position.setOwnerNode("position", node);
 	}
 	node._orientation = org.xml3d.initXML3DRotation(node.getAttribute("orientation"), 0, 0, 1, 0);
 	if(node._orientation.setOwnerNode)
 	{
-		node._orientation.setOwnerNode("orientation", this);
+		node._orientation.setOwnerNode("orientation", node);
 	}
 	node._fieldOfView = org.xml3d.initFloat(node.getAttribute("fieldOfView"), 0.785398);
 	if(node._fieldOfView.setOwnerNode)
 	{
-		node._fieldOfView.setOwnerNode("fieldOfView", this);
+		node._fieldOfView.setOwnerNode("fieldOfView", node);
 	}
 
 
@@ -4138,90 +5679,208 @@ org.xml3d.classInfo.view = function(node, context)
 	// Node::setField
 	node.setField = function(event)	
 	{
-		var attrName = event.attrName;
-		if (attrName == "id") 
+		if (event.attrName == "id") 
 		{
-			this.id = event.newValue;
+			if(org.xml3d.initID)
+			{
+				this.id = org.xml3d.initID(event.newValue, null);
+			}
+			else
+			{
+				this.id = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "class") 
+		if (event.attrName == "class") 
 		{
-			this.class = event.newValue;
+			if(org.xml3d.initNMTOKENS)
+			{
+				this.class = org.xml3d.initNMTOKENS(event.newValue, null);
+			}
+			else
+			{
+				this.class = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "style") 
+		if (event.attrName == "style") 
 		{
-			this.style = event.newValue;
+			if(org.xml3d.initString)
+			{
+				this.style = org.xml3d.initString(event.newValue, "");
+			}
+			else
+			{
+				this.style = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onclick") 
+		if (event.attrName == "onclick") 
 		{
-			this.onclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "ondblclick") 
+		if (event.attrName == "ondblclick") 
 		{
-			this.ondblclick = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.ondblclick = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.ondblclick = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousedown") 
+		if (event.attrName == "onmousedown") 
 		{
-			this.onmousedown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousedown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousedown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseup") 
+		if (event.attrName == "onmouseup") 
 		{
-			this.onmouseup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseover") 
+		if (event.attrName == "onmouseover") 
 		{
-			this.onmouseover = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseover = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseover = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmousemove") 
+		if (event.attrName == "onmousemove") 
 		{
-			this.onmousemove = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmousemove = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmousemove = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onmouseout") 
+		if (event.attrName == "onmouseout") 
 		{
-			this.onmouseout = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onmouseout = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onmouseout = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeypress") 
+		if (event.attrName == "onkeypress") 
 		{
-			this.onkeypress = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeypress = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeypress = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeydown") 
+		if (event.attrName == "onkeydown") 
 		{
-			this.onkeydown = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeydown = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeydown = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "onkeyup") 
+		if (event.attrName == "onkeyup") 
 		{
-			this.onkeyup = event.newValue;
+			if(org.xml3d.initScript)
+			{
+				this.onkeyup = org.xml3d.initScript(event.newValue, "");
+			}
+			else
+			{
+				this.onkeyup = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "visible") 
+		if (event.attrName == "visible") 
 		{
-			this.visible = event.newValue;
+			if(org.xml3d.initBoolean)
+			{
+				this.visible = org.xml3d.initBoolean(event.newValue, true);
+			}
+			else
+			{
+				this.visible = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "position") 
+		if (event.attrName == "position") 
 		{
-			this.position = event.newValue;
+			if(org.xml3d.initXML3DVec3)
+			{
+				this.position = org.xml3d.initXML3DVec3(event.newValue, 0, 0, 0);
+			}
+			else
+			{
+				this.position = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "orientation") 
+		if (event.attrName == "orientation") 
 		{
-			this.orientation = event.newValue;
+			if(org.xml3d.initXML3DRotation)
+			{
+				this.orientation = org.xml3d.initXML3DRotation(event.newValue, 0, 0, 1, 0);
+			}
+			else
+			{
+				this.orientation = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
-		if (attrName == "fieldOfView") 
+		if (event.attrName == "fieldOfView") 
 		{
-			this.fieldOfView = event.newValue;
+			if(org.xml3d.initFloat)
+			{
+				this.fieldOfView = org.xml3d.initFloat(event.newValue, 0.785398);
+			}
+			else
+			{
+				this.fieldOfView = event.newValue;
+			}
 			return org.xml3d.event.HANDLED;
 		}
 		

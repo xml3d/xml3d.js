@@ -286,7 +286,8 @@ org.xml3d.Xml3dSceneController.prototype.computeMouseSpeed = function(event) {
 org.xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
 
 	ev = event || window.event;
-
+	if (!this.action)
+		return;
 	switch(this.action) {
 		case(this.TRANSLATE):
 			var f = 2.0* Math.tan(this.camera.fieldOfView/2.0) / this.height;

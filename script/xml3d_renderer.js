@@ -136,6 +136,8 @@ org.xml3d.webgl.createContext = (function() {
 		this.canvas = canvas;
 		this.scene = scene;
 		this.needDraw = true;
+		this.needPickingDraw = true;
+		this.isDragging = false;
 	}
 	
 	Context.prototype.start = function() {
@@ -219,13 +221,14 @@ org.xml3d.webgl.createContext = (function() {
 
 		//gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		//gl.clearDepth(1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+		//gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
 		//gl.depthFunc(gl.LEQUAL);
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
 		
-		this.renderer.renderPickingPass(screenX, screenY);
+		this.renderer.renderPickingPass(screenX, screenY, this.needPickingDraw);
+		this.needPickingDraw = false;
 		
 		gl.disable(gl.DEPTH_TEST);
 		this.pickBuffer.unbind();
@@ -271,6 +274,8 @@ org.xml3d.webgl.createContext = (function() {
 	};
 
 	Context.prototype.mouseUp = function(gl, button, x, y) {
+		this.isDragging = false;
+		this.needPickingDraw = true;
 		if (button == 0) {
 			this.renderPick(gl, x, y);
 			if (this.scene.xml3d.currentPickObj)
@@ -299,28 +304,60 @@ org.xml3d.webgl.createContext = (function() {
 		return false;
 	};
 	
-	/*Context.prototype.mouseMove = function(gl, x, y) {
+	Context.prototype.mouseDown = function(gl, button, x, y) {
+			this.isDragging = true;
+	};
+	
+	Context.prototype.mouseMove = function(gl, x, y) {
+		if (this.isDragging)	
+			return;
+		
 		var lastObj = this.scene.xml3d.currentPickObj;
 		
 		this.renderPick(gl, x, y);
+		
 		if (this.scene.xml3d.currentPickObj)
 		{
 			var currentObj = this.scene.xml3d.currentPickObj;
-			var evtMethod = currentObj.getAttribute('onmouseover');
-			if (evtMethod && currentObj.evalMethod) {
-				currentObj.evalMethod(evtMethod);
-			}
-			
-			while(currentObj.parentNode.nodeName == "group")
+			if (currentObj != lastObj)
 			{
-				currentObj = currentObj.parentNode;
-				evtMethod = currentObj.getAttribute('onmouseover');
+				//The mouse is now over a different object, so call the new object's
+				//mouseover method and the old object's mouseout method.
+				var evtMethod = currentObj.getAttribute('onmouseover');
 				if (evtMethod && currentObj.evalMethod) {
 					currentObj.evalMethod(evtMethod);
 				}
+				
+				while(currentObj.parentNode.nodeName == "group")
+				{
+					currentObj = currentObj.parentNode;
+					evtMethod = currentObj.getAttribute('onmouseover');
+					if (evtMethod && currentObj.evalMethod) {
+						currentObj.evalMethod(evtMethod);
+					}
+				}
+				if (lastObj) {
+					currentObj = lastObj;
+					evtMethod = currentObj.getAttribute('onmouseout');
+					if (evtMethod && currentObj.evalMethod) {
+						currentObj.evalMethod(evtMethod);
+					}
+					
+					while(currentObj.parentNode.nodeName == "group")
+					{
+						currentObj = currentObj.parentNode;
+						evtMethod = currentObj.getAttribute('onmouseout');
+						if (evtMethod && currentObj.evalMethod) {
+							currentObj.evalMethod(evtMethod);
+						}
+					}
+				}
 			}
 			return true;
+			
 		} else if (lastObj) {
+			//The mouse has left the last object and is now over nothing, call
+			//mouseout on the last object.
 			var currentObj = lastObj;
 			var evtMethod = currentObj.getAttribute('onmouseout');
 			if (evtMethod && currentObj.evalMethod) {
@@ -339,7 +376,7 @@ org.xml3d.webgl.createContext = (function() {
 		}
 		return false;
 	};
-	*/
+	
 
 	Context.prototype.draw = function(gl) {
 		try {
@@ -386,6 +423,7 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.shaderMap = {};
 	this.width = this.ctx.getCanvasWidth();
 	this.height = this.ctx.getCanvasHeight();
+	this.pzPos = [];
 	
 };
 
@@ -472,6 +510,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	
 	if (this.drawableObjects === undefined || !this.drawableObjects || 
 			this.lights === undefined || !this.lights) {
+		this.ctx.needPickingRedraw = true;
 		this.drawableObjects = [];
 		this.lights = new Array();
 		this.collectDrawableObjects(new sglM4(),
@@ -586,71 +625,75 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 };
 
-org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
+org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDraw) {
 	try {
 		if (x<0 || y<0 || x>=this.width || y>=this.height)
 			return;
 		gl = this.ctx.gl;
 		
+		var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
+				-Number.MAX_VALUE);
+		var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE,
+				Number.MAX_VALUE);
 		
-		if (this.drawableObjects === undefined || !this.drawableObjects) {
-			this.drawableObjects = [];
-			this.slights = new Array();
-			this.collectDrawableObjects(new sglM4(),
-					this.drawableObjects, this.slights, null);
-		}
-		
-		var xform = new SglTransformStack();
-		xform.view.load(this.camera.getViewMatrix());
-		var projMatrix = this.camera
-		.getProjectionMatrix(this.width / this.height);
-		xform.projection.load(projMatrix);
-
-			var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
-					-Number.MAX_VALUE);
-			var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE,
-					Number.MAX_VALUE);
-		
-		var zPos = [];
-		for (i = 0, n = this.drawableObjects.length; i < n; i++) {
-			var trafo = this.drawableObjects[i][0];
-			var meshAdapter = this.drawableObjects[i][1];
-			var center = sglV3(meshAdapter.bbox.center);
-			center = sglMulM4V3(trafo, center, 1.0);
-			center = sglMulM4V3(xform.view._s[0], center, 1.0);
+		if (needPickingDraw) {
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+			if (this.drawableObjects === undefined || !this.drawableObjects) {
+				this.drawableObjects = [];
+				this.slights = new Array();
+				this.collectDrawableObjects(new sglM4(),
+						this.drawableObjects, this.slights, null);
+			}
 			
-			zPos[i] = [ i, center[2] ];
-				this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
-		}
-		zPos.sort(function(a, b) {
-			return a[1] - b[1];
-		});
-		
-		for (j = 0, n = zPos.length; j < n; j++) {
-			var obj = this.drawableObjects[zPos[j][0]];
-			var transform = obj[0];
-			var shape = obj[1];
-			var shader = obj[2];
+			var xform = new SglTransformStack();
+			xform.view.load(this.camera.getViewMatrix());
+			var projMatrix = this.camera
+			.getProjectionMatrix(this.width / this.height);
+			xform.projection.load(projMatrix);
 			
-			var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
-						
-			xform.model.load(transform);
+			this.pzPos = [];
+			for (i = 0, n = this.drawableObjects.length; i < n; i++) {
+				var trafo = this.drawableObjects[i][0];
+				var meshAdapter = this.drawableObjects[i][1];
+				var center = sglV3(meshAdapter.bbox.center);
+				center = sglMulM4V3(trafo, center, 1.0);
+				center = sglMulM4V3(xform.view._s[0], center, 1.0);
+				
+				this.pzPos[i] = [ i, center[2] ];
+					this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
+			}
+			this.pzPos.sort(function(a, b) {
+				return a[1] - b[1];
+			});
 			
-			var id = 1.0 - (1+j) / 255.0;
-
-			var parameters = {
-				id : id,
-					min : volumeMin.v,
-					max : volumeMax.v,
-					modelMatrix : transform,
-				modelViewProjectionMatrix : xform.modelViewProjectionMatrix
-			};
-			
-			shader = {};
-			shader.sp = sp;
-			shape.render(shader, parameters);
-			xform.model.pop();
-			
+			for (j = 0, n = this.pzPos.length; j < n; j++) {
+				var obj = this.drawableObjects[this.pzPos[j][0]];
+				var transform = obj[0];
+				var shape = obj[1];
+				var shader = obj[2];
+				
+				var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
+							
+				xform.model.load(transform);
+				
+				var id = 1.0 - (1+j) / 255.0;
+	
+				var parameters = {
+					id : id,
+						min : volumeMin.v,
+						max : volumeMax.v,
+						modelMatrix : transform,
+					modelViewProjectionMatrix : xform.modelViewProjectionMatrix
+				};
+				
+				shader = {};
+				shader.sp = sp;
+				shape.render(shader, parameters);
+				xform.model.pop();
+				
+			}
+			xform.view.pop();
+			xform.projection.pop();
 		}
 		org.xml3d.webgl.checkError(gl, "Before readpixels");
 
@@ -667,7 +710,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 		var objId = 255 - data[3] - 1;
 		if (objId >= 0 && data[3] > 0) {
 			this.scene.xml3d.currentPickPos = pickPos;
-			var pickedObj = this.drawableObjects[(zPos[objId][0])];
+			var pickedObj = this.drawableObjects[(this.pzPos[objId][0])];
 			this.scene.xml3d.currentPickObj = pickedObj[1].node;
 		} else {
 			this.scene.xml3d.currentPickPos = null;
@@ -676,9 +719,6 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
 	} catch (e) {
 		org.xml3d.debug.logError(e);		
 	}
-	xform.view.pop();
-	xform.projection.pop();
-	
 };
 
 org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
@@ -1088,7 +1128,9 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		this.factory.renderer.drawableObjects = null;
 	
 	if (evt.attribute == "shader") {	
+		this.node.shader = null;
 		this.shader = this.getShader();
+		this.factory.renderer.drawableObjects = null;
 	}
 };
 

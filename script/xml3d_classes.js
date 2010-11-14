@@ -374,16 +374,15 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
 		{
 			result = e.target.resetAttribute(e.attrName);
 		}
-		else if(e.attrChange == MutationEvent.MODIFICATION)
+		else if(e.attrChange == MutationEvent.MODIFICATION ||
+				e.attrChange == MutationEvent.ADDITION)
 		{
 			result = e.target.setField(e);
 		}
 		else
 		{
-			org.xml3d.debug.logWarn("Unexpected MutationEvent.ADDITION event for attribute " + 
-			                        e.attrName + 
-			                        " in node " + 
-			                        e.target.localName + " ==> not handled");
+			org.xml3d.debug.logError("An unknown event for attribue " + e.attrName + 
+					                 " of node " + e.target.localName + " has occured");
 			return;
 		}
 	
@@ -886,7 +885,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		else
 		{
 			this.resetAttribute("height");
-			org.xml3d.debug.logWarn(value + " has not expected type Int ==> default value " + this._height  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Int ==> default value " + this._height  +" is set");
 		}
 	   
 	    if(this._height.setOwnerNode)
@@ -915,7 +914,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		else
 		{
 			this.resetAttribute("width");
-			org.xml3d.debug.logWarn(value + " has not expected type Int ==> default value " + this._width  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Int ==> default value " + this._width  +" is set");
 		}
 	   
 	    if(this._width.setOwnerNode)
@@ -1266,7 +1265,7 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 		else
 		{
 			this.resetAttribute("map");
-			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._map  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type String ==> default value " + this._map  +" is set");
 		}
 	   
 	    if(this._map.setOwnerNode)
@@ -1295,7 +1294,7 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 		else
 		{
 			this.resetAttribute("expose");
-			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._expose  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type String ==> default value " + this._expose  +" is set");
 		}
 	   
 	    if(this._expose.setOwnerNode)
@@ -1715,7 +1714,7 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 		else
 		{
 			this.resetAttribute("visible");
-			org.xml3d.debug.logWarn(value + " has not expected type Boolean ==> default value " + this._visible  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Boolean ==> default value " + this._visible  +" is set");
 		}
 	   
 	    if(this._visible.setOwnerNode)
@@ -2381,7 +2380,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		else
 		{
 			this.resetAttribute("type");
-			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._type  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Enum ==> default value " + this._type  +" is set");
 		}
 	   
 	    if(this._type.setOwnerNode)
@@ -2715,7 +2714,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		else
 		{
 			this.resetAttribute("translation");
-			org.xml3d.debug.logWarn(value + " has not expected type XML3DVec3 ==> default value " + this._translation  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type XML3DVec3 ==> default value " + this._translation  +" is set");
 		}
 	   
 	    if(this._translation.setOwnerNode)
@@ -2744,7 +2743,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		else
 		{
 			this.resetAttribute("scale");
-			org.xml3d.debug.logWarn(value + " has not expected type XML3DVec3 ==> default value " + this._scale  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type XML3DVec3 ==> default value " + this._scale  +" is set");
 		}
 	   
 	    if(this._scale.setOwnerNode)
@@ -2773,7 +2772,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		else
 		{
 			this.resetAttribute("rotation");
-			org.xml3d.debug.logWarn(value + " has not expected type XML3DRotation ==> default value " + this._rotation  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type XML3DRotation ==> default value " + this._rotation  +" is set");
 		}
 	   
 	    if(this._rotation.setOwnerNode)
@@ -2802,7 +2801,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		else
 		{
 			this.resetAttribute("center");
-			org.xml3d.debug.logWarn(value + " has not expected type XML3DVec3 ==> default value " + this._center  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type XML3DVec3 ==> default value " + this._center  +" is set");
 		}
 	   
 	    if(this._center.setOwnerNode)
@@ -2831,7 +2830,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		else
 		{
 			this.resetAttribute("scaleOrientation");
-			org.xml3d.debug.logWarn(value + " has not expected type XML3DRotation ==> default value " + this._scaleOrientation  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type XML3DRotation ==> default value " + this._scaleOrientation  +" is set");
 		}
 	   
 	    if(this._scaleOrientation.setOwnerNode)
@@ -3277,7 +3276,7 @@ org.xml3d.classInfo.light = function(node, context)
 		else
 		{
 			this.resetAttribute("global");
-			org.xml3d.debug.logWarn(value + " has not expected type Boolean ==> default value " + this._global  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Boolean ==> default value " + this._global  +" is set");
 		}
 	   
 	    if(this._global.setOwnerNode)
@@ -3306,7 +3305,7 @@ org.xml3d.classInfo.light = function(node, context)
 		else
 		{
 			this.resetAttribute("intensity");
-			org.xml3d.debug.logWarn(value + " has not expected type Float ==> default value " + this._intensity  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Float ==> default value " + this._intensity  +" is set");
 		}
 	   
 	    if(this._intensity.setOwnerNode)
@@ -3742,7 +3741,7 @@ org.xml3d.classInfo.script = function(node, context)
 		else
 		{
 			this.resetAttribute("src");
-			org.xml3d.debug.logWarn(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
 		}
 	   
 	    if(this._src.setOwnerNode)
@@ -3771,7 +3770,7 @@ org.xml3d.classInfo.script = function(node, context)
 		else
 		{
 			this.resetAttribute("type");
-			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._type  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type String ==> default value " + this._type  +" is set");
 		}
 	   
 	    if(this._type.setOwnerNode)
@@ -3924,7 +3923,7 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 		else
 		{
 			this.resetAttribute("name");
-			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._name  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type String ==> default value " + this._name  +" is set");
 		}
 	   
 	    if(this._name.setOwnerNode)
@@ -4725,7 +4724,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		else
 		{
 			this.resetAttribute("type");
-			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._type  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Enum ==> default value " + this._type  +" is set");
 		}
 	   
 	    if(this._type.setOwnerNode)
@@ -4754,7 +4753,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		else
 		{
 			this.resetAttribute("filterMin");
-			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._filterMin  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Enum ==> default value " + this._filterMin  +" is set");
 		}
 	   
 	    if(this._filterMin.setOwnerNode)
@@ -4783,7 +4782,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		else
 		{
 			this.resetAttribute("filterMag");
-			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._filterMag  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Enum ==> default value " + this._filterMag  +" is set");
 		}
 	   
 	    if(this._filterMag.setOwnerNode)
@@ -4812,7 +4811,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		else
 		{
 			this.resetAttribute("filterMip");
-			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._filterMip  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Enum ==> default value " + this._filterMip  +" is set");
 		}
 	   
 	    if(this._filterMip.setOwnerNode)
@@ -4841,7 +4840,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		else
 		{
 			this.resetAttribute("wrapS");
-			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._wrapS  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Enum ==> default value " + this._wrapS  +" is set");
 		}
 	   
 	    if(this._wrapS.setOwnerNode)
@@ -4870,7 +4869,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		else
 		{
 			this.resetAttribute("wrapT");
-			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._wrapT  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Enum ==> default value " + this._wrapT  +" is set");
 		}
 	   
 	    if(this._wrapT.setOwnerNode)
@@ -4899,7 +4898,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		else
 		{
 			this.resetAttribute("wrapU");
-			org.xml3d.debug.logWarn(value + " has not expected type Enum ==> default value " + this._wrapU  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Enum ==> default value " + this._wrapU  +" is set");
 		}
 	   
 	    if(this._wrapU.setOwnerNode)
@@ -4928,7 +4927,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		else
 		{
 			this.resetAttribute("borderColor");
-			org.xml3d.debug.logWarn(value + " has not expected type String ==> default value " + this._borderColor  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type String ==> default value " + this._borderColor  +" is set");
 		}
 	   
 	    if(this._borderColor.setOwnerNode)
@@ -5306,7 +5305,7 @@ org.xml3d.classInfo.img = function(node, context)
 		else
 		{
 			this.resetAttribute("src");
-			org.xml3d.debug.logWarn(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
 		}
 	   
 	    if(this._src.setOwnerNode)
@@ -5428,7 +5427,7 @@ org.xml3d.classInfo.video = function(node, context)
 		else
 		{
 			this.resetAttribute("src");
-			org.xml3d.debug.logWarn(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type AnyURI ==> default value " + this._src  +" is set");
 		}
 	   
 	    if(this._src.setOwnerNode)
@@ -5550,7 +5549,7 @@ org.xml3d.classInfo.view = function(node, context)
 		else
 		{
 			this.resetAttribute("position");
-			org.xml3d.debug.logWarn(value + " has not expected type XML3DVec3 ==> default value " + this._position  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type XML3DVec3 ==> default value " + this._position  +" is set");
 		}
 	   
 	    if(this._position.setOwnerNode)
@@ -5579,7 +5578,7 @@ org.xml3d.classInfo.view = function(node, context)
 		else
 		{
 			this.resetAttribute("orientation");
-			org.xml3d.debug.logWarn(value + " has not expected type XML3DRotation ==> default value " + this._orientation  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type XML3DRotation ==> default value " + this._orientation  +" is set");
 		}
 	   
 	    if(this._orientation.setOwnerNode)
@@ -5608,7 +5607,7 @@ org.xml3d.classInfo.view = function(node, context)
 		else
 		{
 			this.resetAttribute("fieldOfView");
-			org.xml3d.debug.logWarn(value + " has not expected type Float ==> default value " + this._fieldOfView  +" is set");
+			org.xml3d.debug.logWarning(value + " has not expected type Float ==> default value " + this._fieldOfView  +" is set");
 		}
 	   
 	    if(this._fieldOfView.setOwnerNode)

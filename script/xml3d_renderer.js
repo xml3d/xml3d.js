@@ -76,8 +76,11 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	parent.insertBefore(canvas, hideDiv);
 	if (xml3dElement.hasAttribute("style"))
 		canvas.setAttribute("style", xml3dElement.getAttribute("style"));
+	
+	var classString = "xml3d-canvas-style";
 	if (xml3dElement.hasAttribute("class"))
-		canvas.setAttribute("class", xml3dElement.getAttribute("class"));
+		classString = xml3dElement.getAttribute("class") + " " + classString;
+	canvas.setAttribute("class", classString);
 	
 	var sides = [ "top", "right", "bottom", "left" ];
 	var colorStr = styleStr = widthStr = paddingStr = "";

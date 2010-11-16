@@ -454,6 +454,8 @@ org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
 };
 
 org.xml3d.webgl.Renderer.prototype.rebuildSceneTree = function() {
+	//TODO: Remove naive tree rebuilding in favor of only updating those nodes which
+	//were actually changed.
 	this.drawableObjects = null;
 };
 
@@ -1127,7 +1129,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMeth
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
 	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
-		this.factory.renderer.drawableObjects = null;	
+		this.factory.renderer.rebuildSceneTree();	
 	else if (evt.attribute == "shader") {	
 		this.node.shader = null;
 		this.shader = this.getShader();
@@ -1182,6 +1184,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
+	this.factory.renderer.rebuildSceneTree();
 	this.factory.ctx.redraw();
 };
 

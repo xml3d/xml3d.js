@@ -667,6 +667,36 @@ org.xml3d.classInfo.XML3DBaseType.configure = function(node, context) {
 };
 org.xml3d.defineClass(org.xml3d.classInfo.XML3DBaseType, org.xml3d.classInfo.Xml3dNode);
 
+org.xml3d.canvasEvents = {"mousedown":1, "mouseup":1};
+org.xml3d.configureXML3DEvents = function(node) {
+	node.__proto__.__addEventListener = node.__proto__.addEventListener;
+	node.__proto__.__removeEventListener = node.__proto__.removeEventListener;
+	
+	node.addEventListener = function(type, listener, useCapture) {
+		if(type in org.xml3d.canvasEvents) {
+			for (i = 0; i < this.adapters.length; i++) {
+				if (this.adapters[i].addEventListener) {
+					this.adapters[i].addEventListener(type, listener, useCapture);
+				}
+			}
+		}
+		else
+			this.__addEventListener(type, listener, useCapture);
+	};
+	node.removeEventListener = function(type, listener, useCapture) {
+		if(type in org.xml3d.canvasEvents) {
+			for (i = 0; i < this.adapters.length; i++) {
+				if (this.adapters[i].removeEventListener) {
+					this.adapters[i].removeEventListener(type, listener, useCapture);
+				}
+			}
+		}
+		else
+			this.__removeEventListener(type, listener, useCapture);
+	};
+
+};
+
 /**
  * Object org.xml3d.classInfo.xml3d()
  * 
@@ -681,6 +711,10 @@ org.xml3d.classInfo.xml3d = function() {
 
 org.xml3d.classInfo.xml3d.configure = function(node, context) {
 	org.xml3d.classInfo.XML3DBaseType.configure(node, context);
+	
+	org.xml3d.configureXML3DEvents(node);
+	
+	
 	  node.__defineSetter__("height", 
 	      function (value) {
 	        //org.xml3d.debug.logInfo("Setter: " + value);
@@ -803,6 +837,7 @@ org.xml3d.classInfo.xml3d.configure = function(node, context) {
 	node.createXML3DMatrix = org.xml3d.methods.xml3dCreateXML3DMatrix;
 	node.createXML3DRay = org.xml3d.methods.xml3dCreateXML3DRay;
 	node.getElementByPoint = org.xml3d.methods.xml3dGetElementByPoint;
+	
 	
 };
 org.xml3d.defineClass(org.xml3d.classInfo.xml3d, org.xml3d.classInfo.XML3DBaseType);
@@ -3110,3 +3145,14 @@ org.xml3d.methods.viewLookAt = function(vec) {
 	// TODO: write lookat function
 };
 
+org.xml3d.methods.viewSetUpVector = function() {
+	throw Error("view::setSetUpVector not implemeted yet.");
+};
+
+org.xml3d.methods.xml3dGetElementByPoint = function(x, y) {
+	for (i = 0; i < this.adapters.length; i++) {
+		if (this.adapters[i].getElementByPoint) {
+			return this.adapters[i].getElementByPoint(x, y);
+		}
+	}
+};

@@ -209,7 +209,8 @@ org.xml3d.webgl.createContext = (function() {
 		return wrapShaderProgram(gl, prog);
 	}
 
-	Context.prototype.renderPick = function(gl, screenX, screenY) {
+	Context.prototype.renderPick = function(screenX, screenY) {
+		var gl = this.gl;
 		if (!this.pickBuffer)
 		{
 			this.pickBuffer = new SglFramebuffer(gl, this.getCanvasWidth(), this.getCanvasHeight(), 
@@ -273,10 +274,11 @@ org.xml3d.webgl.createContext = (function() {
 	};
 
 	Context.prototype.mouseUp = function(gl, button, x, y) {
+		//alert("mouseUP");
 		this.isDragging = false;
 		this.needPickingDraw = true;
 		if (button == 0) {
-			this.renderPick(gl, x, y);
+			this.renderPick(x, y);
 			if (this.scene.xml3d.currentPickObj)
 			{
 				var currentObj = this.scene.xml3d.currentPickObj;
@@ -313,7 +315,7 @@ org.xml3d.webgl.createContext = (function() {
 		
 		var lastObj = this.scene.xml3d.currentPickObj;
 		
-		this.renderPick(gl, x, y);
+		this.renderPick(x, y);
 		
 		if (this.scene.xml3d.currentPickObj)
 		{
@@ -847,6 +849,7 @@ org.xml3d.webgl.RenderAdapter.prototype.applyTransformMatrix = function(
 // Adapter for <xml3d>
 org.xml3d.webgl.XML3DCanvasRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+	this.canvas = factory.ctx.canvas;
 };
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DCanvasRenderAdapter;
@@ -854,6 +857,20 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.constructor = org.xml3d.webgl
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt) {
 	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
 		this.factory.renderer.rebuildSceneTree();
+};
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.addEventListener = function(type, listener, useCapture) {
+	this.canvas.addEventListener(type, listener, useCapture);
+};
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.removeEventListener = function(type, listener, useCapture) {
+	this.canvas.removeEventListener(type, listener, useCapture);
+};
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y) {
+	this.factory.ctx.renderPick(x, y);
+	//alert(this.node.currentPickObj.localName);
+	return this.node.currentPickObj;
 };
 
 // Adapter for <view>

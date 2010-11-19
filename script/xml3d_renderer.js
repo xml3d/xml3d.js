@@ -141,6 +141,7 @@ org.xml3d.webgl.createContext = (function() {
 		this.needDraw = true;
 		this.needPickingDraw = true;
 		this.isDragging = false;
+		this.events = { "mousedown":[], "mouseup":[] };
 	}
 	
 	Context.prototype.start = function() {
@@ -307,6 +308,14 @@ org.xml3d.webgl.createContext = (function() {
 	
 	Context.prototype.mouseDown = function(gl, button, x, y) {
 			this.isDragging = true;
+			for (var i in this.events.mousedown) {
+				//var evt=document.createEvent("MouseEvents");
+			    //if(evt)evt.initMouseEvent("mousedown",true,true,document.defaultView,1,0,0,0,0,false,false,false,false,0,null);
+				this.ui.mouseDownEvent.__defineGetter__("normal", function() {alert(this);});
+			    this.ui.mouseDownEvent.__defineGetter__("position", function() {alert(this);});
+			    this.events.mousedown[i].listener.call(this.events.mousedown[i].node, this.ui.mouseDownEvent);
+			    //this.events.mousedown[i].node.dispatchEvent(this.ui.mouseDownEvent);
+			}
 	};
 	
 	Context.prototype.mouseMove = function(gl, x, y) {
@@ -389,6 +398,20 @@ org.xml3d.webgl.createContext = (function() {
 		}
 		
 	};
+	
+	Context.prototype.addEventListener = function(node, type, listener, useCapture) {
+		if (type in this.events) {
+			var e = new Object();
+			e.node = node;
+			e.listener = listener;
+			e.useCapture = useCapture;
+			this.events[type].push(e);
+		}
+	};
+
+	Context.removeEventListener = function(node, type, listener, useCapture) {
+		// TODO: implement
+	};
 	return setupContext;
 })();
 
@@ -425,6 +448,7 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.width = this.ctx.getCanvasWidth();
 	this.height = this.ctx.getCanvasHeight();
 	this.pzPos = [];
+	
 	
 };
 
@@ -860,11 +884,11 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt)
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.addEventListener = function(type, listener, useCapture) {
-	this.canvas.addEventListener(type, listener, useCapture);
+	this.factory.ctx.addEventListener(this.node, type, listener, useCapture);
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.removeEventListener = function(type, listener, useCapture) {
-	this.canvas.removeEventListener(type, listener, useCapture);
+	this.factory.ctx.removeEventListener(this.node, type, listener, useCapture);
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y) {

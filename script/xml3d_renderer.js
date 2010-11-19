@@ -977,7 +977,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 					if(this.dataAdapter)
 						this.dataAdapter.registerObserver(renderer);
 					else
-						org.xml3d.logError("Data adapter for a mesh element could not be created!");
+						org.xml3d.debug.logError("Data adapter for a mesh element could not be created!");
 				}
 				var sParams = this.dataAdapter.createDataTable();
 				this.setParameters({}); //Indirectly checks for textures
@@ -1100,7 +1100,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 		if(this.dataAdapter)
 			this.dataAdapter.registerObserver(renderer);
 		else
-			org.xml3d.logError("Data adapter for a shader element could not be created!");
+			org.xml3d.debug.logError("Data adapter for a shader element could not be created!");
 	}
 	var gl = this.factory.gl;
 	//set up default values for built in phong shader, 
@@ -1254,7 +1254,10 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	this.__defineGetter__("bbox", function() {
 		if (!this._bbox) {
 			var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
-			this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
+			if (!dt.position || !dt.position.data)
+				throw new Error("A mesh is referencing non-existent data: Cannot find positions data for " + this.node.getAttribute("src"));
+			else
+				this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
 		}
 		return this._bbox;
 	}); 
@@ -1295,7 +1298,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		if(this.dataAdapter)
 			this.dataAdapter.registerObserver(renderer);
 		else
-			org.xml3d.logError("Data adapter for a mesh element could not be created!");
+			org.xml3d.debug.logError("Data adapter for a mesh element could not be created!");
 	}
 	var gl = this.factory.ctx.gl;
 	var elements = null;

@@ -727,6 +727,10 @@ XML3DVec3.prototype.subtract = function(that) {
 	return new XML3DVec3(this._x - that.x, this._y - that.y,
 			this._z - that.z);
 };
+XML3DVec3.prototype.multiply = function(that) {
+	return new XML3DVec3(this.x * that.x, this.y * that.y,
+			this.z * that.z);
+};
 XML3DVec3.prototype.negate = function() {
 	return new XML3DVec3(-this._x, -this._y, -this._z);
 };

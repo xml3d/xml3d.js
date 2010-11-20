@@ -7719,7 +7719,7 @@ _SglCanvasManager.prototype = {
 				this.requestDraw();
 			}
 		}
-		this.canvas.focus();
+		//this.canvas.focus();
 		if (e.preventDefault) {
 			e.preventDefault();
 		}

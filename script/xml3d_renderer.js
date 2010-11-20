@@ -56,29 +56,32 @@ org.xml3d.webgl.configure = function(xml3ds) {
 		// Creates the gl context for the <canvas>  Element
 		var context = org.xml3d.webgl.createContext(canvas, xml3ds[i]);
 		xml3ds[i].canvas = canvas;
-		
+
 		context.start();
 		org.xml3d._rendererFound = true;
 	}
 };
 
 org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
-	
+
 	var parent = xml3dElement.parentNode;
 	// Place xml3dElement inside an invisble div
 	var hideDiv = parent.ownerDocument.createElement('div');
 	hideDiv.style.display = "none";
 	parent.insertBefore(hideDiv, xml3dElement);
 	hideDiv.appendChild(xml3dElement);
-	
+
 	// Create canvas and append it where the xml3d element was before
 	var canvas = parent.ownerDocument.createElement('canvas');
 	parent.insertBefore(canvas, hideDiv);
 	if (xml3dElement.hasAttribute("style"))
 		canvas.setAttribute("style", xml3dElement.getAttribute("style"));
+
+	var classString = "xml3d-canvas-style";
 	if (xml3dElement.hasAttribute("class"))
-		canvas.setAttribute("class", xml3dElement.getAttribute("class"));
-	
+		classString = xml3dElement.getAttribute("class") + " " + classString;
+	canvas.setAttribute("class", classString);
+
 	var sides = [ "top", "right", "bottom", "left" ];
 	var colorStr = styleStr = widthStr = paddingStr = "";
 	for (i in sides) {
@@ -95,10 +98,10 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 
 	if ((w = xml3dElement.getAttribute("width")) !== null) {
 		canvas.style.width = w;
-	} 
+	}
 	if ((h = xml3dElement.getAttribute("height")) !== null) {
 		canvas.style.height = h;
-	} 
+	}
 
 	canvas.id = "canvas"+index;
 	canvas.width = canvas.clientWidth;
@@ -108,10 +111,10 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 };
 
 org.xml3d.webgl.createContext = (function() {
-	
+
 	function Scene(xml3dElement) {
 		this.xml3d = xml3dElement;
-		
+
 		this.getActiveView = function() {
 			var av = this.xml3d.getActiveView();
 			if (av == null)
@@ -130,37 +133,40 @@ org.xml3d.webgl.createContext = (function() {
 			return av;
 		};
 	}
-	
+
 	function Context(gl, canvas, scene) {
 		this.gl = gl;
 		this.canvas = canvas;
 		this.scene = scene;
 		this.needDraw = true;
+		this.needPickingDraw = true;
+		this.isDragging = false;
+		this.events = { "mousedown":[], "mouseup":[] };
 	}
-	
-	Context.prototype.start = function() {
-		//sglRegisterCanvas(this.canvas.id, this, 30.0); //Last parameter is frames-per-second value
 
+	Context.prototype.start = function() {
+		//last parameter is rate at which the Context.prototype.update() method is called in
+		//times-per-second.
 		_sglManageCanvas(this.canvas.id, this, 30.0);
 		_sglUnmanageCanvasOnLoad(this.canvas.id);
 		SGL_DefaultStreamMappingPrefix = "";
-		
+
 		var ctx = this;
 		ctx.renderScene();
 	};
-	
+
 	Context.prototype.getCanvasId = function() {
 		return this.canvas.id;
 	};
-	
+
 	Context.prototype.getCanvasWidth = function() {
 		return this.canvas.clientWidth;
 	};
-	
+
 	Context.prototype.getCanvasHeight = function() {
 		return this.canvas.clientHeight;
 	};
-	
+
 	function setupContext(canvas, xml3dElement) {
 		org.xml3d.debug.logInfo("setupContext: canvas=" + canvas);
 		var ctx = null;
@@ -204,12 +210,12 @@ org.xml3d.webgl.createContext = (function() {
 		return wrapShaderProgram(gl, prog);
 	}
 
-	Context.prototype.renderPick = function(gl, screenX, screenY) {
-		//var gl = this.gl;
+	Context.prototype.renderPick = function(screenX, screenY) {
+		var gl = this.gl;
 		if (!this.pickBuffer)
 		{
-			this.pickBuffer = new SglFramebuffer(gl, this.getCanvasWidth(), this.getCanvasHeight(), 
-					[gl.RGBA], gl.DEPTH_COMPONENT16, null, 
+			this.pickBuffer = new SglFramebuffer(gl, this.getCanvasWidth(), this.getCanvasHeight(),
+					[gl.RGBA], gl.DEPTH_COMPONENT16, null,
 					{ depthAsRenderbuffer : true }
 			);
 			if (!this.pickBuffer.isValid)
@@ -217,43 +223,41 @@ org.xml3d.webgl.createContext = (function() {
 		}
 		this.pickBuffer.bind();
 
-		//gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		//gl.clearDepth(1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
 		//gl.depthFunc(gl.LEQUAL);
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
-		
-		this.renderer.renderPickingPass(screenX, screenY);
-		
+
+		this.renderer.renderPickingPass(screenX, screenY, this.needPickingDraw);
+		this.needPickingDraw = false;
+
 		gl.disable(gl.DEPTH_TEST);
 		this.pickBuffer.unbind();
 
 	};
-	
+
 	Context.prototype.renderScene = function() {
 		var gl = this.gl;
 
 		if (this.renderer === undefined || !this.renderer) {
 			this.renderer = new org.xml3d.webgl.Renderer(this);
 		}
-		
+
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-		gl.viewport(0, 0, this.canvas.width, this.canvas.height);		
+		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 		gl.enable(gl.DEPTH_TEST);
-		gl.disable(gl.CULL_FACE);		
+		gl.disable(gl.CULL_FACE);
 		gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE,
 				gl.ONE);
 		gl.enable(gl.BLEND);
-		
+
 		this.renderer.render();
 
 		gl.disable(gl.DEPTH_TEST);
 		gl.disable(gl.CULL_FACE);
 
 	};
-	
+
 	Context.prototype.shutdown = function(scene) {
 		var gl = this.gl;
 
@@ -261,7 +265,7 @@ org.xml3d.webgl.createContext = (function() {
 			this.renderer.dispose();
 		}
 	};
-	
+
 	Context.prototype.update = function() {
 		return this.needDraw;
 	};
@@ -271,59 +275,105 @@ org.xml3d.webgl.createContext = (function() {
 	};
 
 	Context.prototype.mouseUp = function(gl, button, x, y) {
+		//alert("mouseUP");
+		this.isDragging = false;
+		this.needPickingDraw = true;
 		if (button == 0) {
-			this.renderPick(gl, x, y);
-			if (this.scene.currentPickObj)
+			this.renderPick(x, y);
+			if (this.scene.xml3d.currentPickObj)
 			{
-				var currentObj = this.scene.currentPickObj;
+				var currentObj = this.scene.xml3d.currentPickObj;
 				var evtMethod = currentObj.getAttribute('onclick');
 				if (evtMethod && currentObj.evalMethod) {
 					currentObj.evalMethod(evtMethod);
 				}
-				
-				while(currentObj.parentNode.nodeName == "group")
+				//Make sure the event method didn't remove picked object from the tree
+				if (currentObj && currentObj.parentNode)
 				{
-					currentObj = currentObj.parentNode;
-					evtMethod = currentObj.getAttribute('onclick');
-					if (evtMethod && currentObj.evalMethod) {
-						currentObj.evalMethod(evtMethod);
+					while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
+					{
+						currentObj = currentObj.parentNode;
+						evtMethod = currentObj.getAttribute('onclick');
+						if (evtMethod && currentObj.evalMethod) {
+							currentObj.evalMethod(evtMethod);
+						}
 					}
 				}
 				return true;
 			}
-			
+
 		}
 		return false;
 	};
-	
-	/*Context.prototype.mouseMove = function(gl, x, y) {
-		var lastObj = this.scene.currentPickObj;
-		
-		this.renderPick(gl, x, y);
-		if (this.scene.currentPickObj)
-		{
-			var currentObj = this.scene.currentPickObj;
-			var evtMethod = currentObj.getAttribute('onmouseover');
-			if (evtMethod && currentObj.evalMethod) {
-				currentObj.evalMethod(evtMethod);
+
+	Context.prototype.mouseDown = function(gl, button, x, y) {
+			this.isDragging = true;
+			for (var i in this.events.mousedown) {
+				//var evt=document.createEvent("MouseEvents");
+			    //if(evt)evt.initMouseEvent("mousedown",true,true,document.defaultView,1,0,0,0,0,false,false,false,false,0,null);
+				this.ui.mouseDownEvent.__defineGetter__("normal", function() {alert(this);});
+			    this.ui.mouseDownEvent.__defineGetter__("position", function() {alert(this);});
+			    this.events.mousedown[i].listener.call(this.events.mousedown[i].node, this.ui.mouseDownEvent);
+			    //this.events.mousedown[i].node.dispatchEvent(this.ui.mouseDownEvent);
 			}
-			
-			while(currentObj.parentNode.nodeName == "group")
+	};
+
+	Context.prototype.mouseMove = function(gl, x, y) {
+		if (this.isDragging)
+			return;
+
+		var lastObj = this.scene.xml3d.currentPickObj;
+
+		this.renderPick(x, y);
+
+		if (this.scene.xml3d.currentPickObj)
+		{
+			var currentObj = this.scene.xml3d.currentPickObj;
+			if (currentObj != lastObj)
 			{
-				currentObj = currentObj.parentNode;
-				evtMethod = currentObj.getAttribute('onmouseover');
+				//The mouse is now over a different object, so call the new object's
+				//mouseover method and the old object's mouseout method.
+				var evtMethod = currentObj.getAttribute('onmouseover');
 				if (evtMethod && currentObj.evalMethod) {
 					currentObj.evalMethod(evtMethod);
 				}
+
+				while(currentObj.parentNode.nodeName == "group")
+				{
+					currentObj = currentObj.parentNode;
+					evtMethod = currentObj.getAttribute('onmouseover');
+					if (evtMethod && currentObj.evalMethod) {
+						currentObj.evalMethod(evtMethod);
+					}
+				}
+				if (lastObj) {
+					currentObj = lastObj;
+					evtMethod = currentObj.getAttribute('onmouseout');
+					if (evtMethod && currentObj.evalMethod) {
+						currentObj.evalMethod(evtMethod);
+					}
+
+					while(currentObj.parentNode.nodeName == "group")
+					{
+						currentObj = currentObj.parentNode;
+						evtMethod = currentObj.getAttribute('onmouseout');
+						if (evtMethod && currentObj.evalMethod) {
+							currentObj.evalMethod(evtMethod);
+						}
+					}
+				}
 			}
 			return true;
+
 		} else if (lastObj) {
+			//The mouse has left the last object and is now over nothing, call
+			//mouseout on the last object.
 			var currentObj = lastObj;
 			var evtMethod = currentObj.getAttribute('onmouseout');
 			if (evtMethod && currentObj.evalMethod) {
 				currentObj.evalMethod(evtMethod);
 			}
-			
+
 			while(currentObj.parentNode.nodeName == "group")
 			{
 				currentObj = currentObj.parentNode;
@@ -336,17 +386,31 @@ org.xml3d.webgl.createContext = (function() {
 		}
 		return false;
 	};
-	*/
+
 
 	Context.prototype.draw = function(gl) {
 		try {
 			this.needDraw = false;
-			this.renderScene();		
+			this.renderScene();
 		} catch (e) {
 			org.xml3d.debug.logException(e);
 			throw e;
 		}
-		
+
+	};
+
+	Context.prototype.addEventListener = function(node, type, listener, useCapture) {
+		if (type in this.events) {
+			var e = new Object();
+			e.node = node;
+			e.listener = listener;
+			e.useCapture = useCapture;
+			this.events[type].push(e);
+		}
+	};
+
+	Context.removeEventListener = function(node, type, listener, useCapture) {
+		// TODO: implement
 	};
 	return setupContext;
 })();
@@ -383,17 +447,16 @@ org.xml3d.webgl.Renderer = function(ctx) {
 	this.shaderMap = {};
 	this.width = this.ctx.getCanvasWidth();
 	this.height = this.ctx.getCanvasHeight();
+	this.pzPos = [];
 
-	//this.ctx.pickBuffer = new SglRenderbuffer(gl, gl.DEPTH_COMPONENT16, ctx.getCanvasWidth(), ctx.getCanvasHeight());
-	
-	
+
 };
 
 
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 	var av = this.scene.getActiveView();
-	
+
 	if (av == null)
 	{
 		av =  document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
@@ -416,6 +479,11 @@ org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
 	return [];
 };
 
+org.xml3d.webgl.Renderer.prototype.rebuildSceneTree = function() {
+	//TODO: Remove naive tree rebuilding in favor of only updating those nodes which
+	//were actually changed.
+	this.drawableObjects = null;
+};
 
 org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name) {
 	var shader = this.shaderMap[name];
@@ -427,10 +495,10 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 		}
 		org.xml3d.webgl.checkError(gl, "Before creating shader");
 		var prog = null;
-		
+
 		if (name == "urn:xml3d:shader:phong" || name == "urn:xml3d:shader:phongvcolor" || name == "urn:xml3d:shader:texturedphong")
 		{
-			// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line 
+			// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
 			var sfrag = g_shaders[name].fragment;
 			var tail = sfrag.substring(68, sfrag.length);
 			if (!this.lights)
@@ -439,8 +507,8 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 			else
 				var maxLights = "#ifdef GL_ES\nprecision highp float;\n" +
 						"#endif\n\n const int MAXLIGHTS = "+ this.lights.length.toString() + ";\n";
-			
-			var frag = maxLights + tail; 
+
+			var frag = maxLights + tail;
 			prog = new SglProgram(gl, [g_shaders[name].vertex], [frag]);
 			org.xml3d.webgl.checkError(gl, "After creating shader");
 		} else {
@@ -450,7 +518,7 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 		if (!prog)
 		{
 			org.xml3d.debug.logError("Could not create shader program: " + name);
-			return null;	
+			return null;
 		}
 
 		this.shaderMap[name] = prog;
@@ -469,24 +537,25 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		return;
 	if (this.currentView != this.scene.getActiveView())
 		this.camera = this.initCamera();
-	
-	if (this.drawableObjects === undefined || !this.drawableObjects || 
+
+	if (this.drawableObjects === undefined || !this.drawableObjects ||
 			this.lights === undefined || !this.lights) {
+		this.ctx.needPickingRedraw = true;
 		this.drawableObjects = [];
 		this.lights = new Array();
 		this.collectDrawableObjects(new sglM4(),
 				this.drawableObjects, this.lights, null);
 	}
-	
-	
+
+
 	var xform = new SglTransformStack();
-	xform.view.load(this.camera.getViewMatrix());	
+	xform.view.load(this.camera.getViewMatrix());
 	var projMatrix = this.camera
 	.getProjectionMatrix(this.width / this.height);
 	var viewMatrix = this.camera.getViewMatrix();
 	xform.projection.load(projMatrix);
-	
-	
+
+
 	var light, lightOn;
 
 	var zPos = [];
@@ -494,8 +563,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		var trafo = this.drawableObjects[i][0];
 		var meshAdapter = this.drawableObjects[i][1];
 		var center = new SglVec3(meshAdapter.bbox.center);
-		center.v = sglMulM4V3(trafo, center, 1.0);
-		center.v = sglMulM4V3(xform.view._s[0], center, 1.0);
+		center.v = sglMulM4V3(trafo, center.v, 1.0);
+		center.v = sglMulM4V3(xform.view._s[0], center.v, 1.0);
 		zPos[i] = [ i, center.z ];
 	}
 	zPos.sort(function(a, b) {
@@ -507,15 +576,15 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		var transform = obj[0];
 		var shape = obj[1];
 		var shader = obj[2];
-	
+
 		sp = null;
 		xform.model.load(transform);
 		var parameters = {};
-		
+
 		if (shader) {
 			sp = shader.shaderProgram;
-		} 
-		
+		}
+
 		if (!sp)
 		{
 			org.xml3d.webgl.checkError(gl, "Before default shader");
@@ -537,7 +606,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 					}
 			}
 		}
-		
+
 		var slights = this.lights;
 		var elements = slights.length * 3;
 		var lightParams = {
@@ -558,8 +627,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			lightParams.visible.set(params.visibility, j*3);
 		}
 
-		lightParams.ambientColors = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ];
-
 		//Begin setting up uniforms for rendering
 		parameters["lightPositions[0]"] = lightParams.positions;
 		parameters["lightVisibility[0]"] = lightParams.visible;
@@ -568,121 +635,140 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		parameters["lightAttenuations[0]"] = lightParams.attenuations;
 		parameters["modelViewMatrix"] = xform.modelViewMatrix;
 		parameters["modelViewProjectionMatrix"] = xform.modelViewProjectionMatrix;
-		
+
 		if (shader)
 		{
 			//Add uniforms from the shader to the parameters package
-			shader.setParameters(parameters);		
-			
+			shader.setParameters(parameters);
+
 			shape.render(shader, parameters);
-			org.xml3d.webgl.checkError(gl, "Error after cleanup.");
 		} else {
 			shader = {};
 			shader.sp = sp;
 			shape.render(shader, parameters);
 		}
 		xform.model.pop();
-		
+
 	}
 	xform.view.pop();
 	xform.projection.pop();
-	
-	this.drawableObjects = null;
+
 };
 
-org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y) {
+org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDraw) {
 	try {
 		if (x<0 || y<0 || x>=this.width || y>=this.height)
 			return;
 		gl = this.ctx.gl;
-		
-		
-		if (this.drawableObjects === undefined || !this.drawableObjects) {
-			this.drawableObjects = [];
-			this.slights = new Array();
-			this.collectDrawableObjects(new sglM4(),
-					this.drawableObjects, this.slights, null);
-		}
-		
-		var xform = new SglTransformStack();
-		xform.view.load(this.camera.getViewMatrix());
-		var projMatrix = this.camera
-		.getProjectionMatrix(this.width / this.height);
-		xform.projection.load(projMatrix);
-		
-		
-		var zPos = [];
-		for (i = 0, n = this.drawableObjects.length; i < n; i++) {
-			var trafo = this.drawableObjects[i][0];
-			var meshAdapter = this.drawableObjects[i][1];
-			var center = new SglVec3(meshAdapter.bbox.center);
-			center.v = sglMulM4V3(trafo, center, 1.0);
-			center.v = sglMulM4V3(xform.view._s[0], center, 1.0);
-			
-			zPos[i] = [ i, center.z ];
-		}
-		zPos.sort(function(a, b) {
-			return a[1] - b[1];
-		});
-		
-		for (j = 0, n = zPos.length; j < n; j++) {
-			var obj = this.drawableObjects[zPos[j][0]];
-			var transform = obj[0];
-			var shape = obj[1];
-			var shader = obj[2];
-			
-			var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
-						
-			xform.model.load(transform);
-			
-			var id = 1.0 - (1+j) / 255.0;
-			var wcMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE,
-					Number.MAX_VALUE).toGL();
-			var wcMax = new XML3DVec3(Number.MIN_VALUE, Number.MIN_VALUE,
-					Number.MIN_VALUE).toGL();
-			
-			var parameters = {
-				id : id,
-				wcMin : wcMin,
-				wcMax : wcMax,
-				modelViewMatrix : xform.modelViewMatrix,
-				modelViewProjectionMatrix : xform.modelViewProjectionMatrix
-			};
-			
-			shader = {};
-			shader.sp = sp;
-			shape.render(shader, parameters);
-			xform.model.pop();
-			
+
+		var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
+				-Number.MAX_VALUE);
+		var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE,
+				Number.MAX_VALUE);
+
+		if (needPickingDraw) {
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+			if (this.drawableObjects === undefined || !this.drawableObjects) {
+				this.drawableObjects = [];
+				this.slights = new Array();
+				this.collectDrawableObjects(new sglM4(),
+						this.drawableObjects, this.slights, null);
+			}
+
+			var xform = new SglTransformStack();
+			xform.view.load(this.camera.getViewMatrix());
+			var projMatrix = this.camera
+			.getProjectionMatrix(this.width / this.height);
+			xform.projection.load(projMatrix);
+
+			this.pzPos = [];
+			for (i = 0, n = this.drawableObjects.length; i < n; i++) {
+				var trafo = this.drawableObjects[i][0];
+				var meshAdapter = this.drawableObjects[i][1];
+				var center = sglV3(meshAdapter.bbox.center);
+				center = sglMulM4V3(trafo, center, 1.0);
+				center = sglMulM4V3(xform.view._s[0], center, 1.0);
+
+				this.pzPos[i] = [ i, center[2] ];
+					this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
+			}
+			this.pzPos.sort(function(a, b) {
+				return a[1] - b[1];
+			});
+
+			for (j = 0, n = this.pzPos.length; j < n; j++) {
+				var obj = this.drawableObjects[this.pzPos[j][0]];
+				var transform = obj[0];
+				var shape = obj[1];
+				var shader = obj[2];
+
+				var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
+
+				xform.model.load(transform);
+
+				var id = 1.0 - (1+j) / 255.0;
+
+				var parameters = {
+					id : id,
+						min : volumeMin.v,
+						max : volumeMax.v,
+						modelMatrix : transform,
+					modelViewProjectionMatrix : xform.modelViewProjectionMatrix
+				};
+
+				shader = {};
+				shader.sp = sp;
+				shape.render(shader, parameters);
+				xform.model.pop();
+
+			}
+			xform.view.pop();
+			xform.projection.pop();
 		}
 		org.xml3d.webgl.checkError(gl, "Before readpixels");
 
 		var data = new Uint8Array(8);
-		
 		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+
 		org.xml3d.webgl.checkError(gl, "After readpixels");
-		
-		//Getting the picked position in scene coordinates doesn't work yet
-		var pickPos = new XML3DVec3(0, 0, 0);
-		pickPos.x = data[0] / 255;
-		pickPos.y = data[1] / 255;
-		pickPos.z = data[2] / 255;
-		//pickPos = pickPos.mult(max.subtract(min)).add(min);
+
+		var pickPos = new SglVec3(0, 0, 0);
+		pickPos.v[0] = data[0] / 255;
+		pickPos.v[1] = data[1] / 255;
+		pickPos.v[2] = data[2] / 255;
+		pickPos = pickPos.mul(volumeMax.sub(volumeMin)).add(volumeMin);
 		var objId = 255 - data[3] - 1;
 		if (objId >= 0 && data[3] > 0) {
-			this.scene.currentPickPos = pickPos;
-			var pickedObj = this.drawableObjects[(zPos[objId][0])];
-			this.scene.currentPickObj = pickedObj[1].node;
+			this.scene.xml3d.currentPickPos = pickPos;
+			var pickedObj = this.drawableObjects[(this.pzPos[objId][0])];
+			this.scene.xml3d.currentPickObj = pickedObj[1].node;
 		} else {
-			this.scene.currentPickPos = null;
-			this.scene.currentPickObj = null;
-		}	
+			this.scene.xml3d.currentPickPos = null;
+			this.scene.xml3d.currentPickObj = null;
+		}
 	} catch (e) {
-		org.xml3d.debug.logError(e);		
+		org.xml3d.debug.logError(e);
 	}
-	xform.view.pop();
-	xform.projection.pop();
-	
+};
+
+org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
+	var bmin = sglV3(bbox.min);
+	var bmax = sglV3(bbox.max);
+	var bbmin = sglMulM4V3(trafo, bmin, 1.0);
+	var bbmax = sglMulM4V3(trafo, bmax, 1.0);
+
+	if (bbmin[0] < min.x)
+		min.x = bbmin[0];
+	if (bbmin[1] < min.y)
+		min.y = bbmin[1];
+	if (bbmin[2] < min.z)
+		min.z = bbmin[2];
+	if (bbmax[0] > max.x)
+		max.x = bbmax[0];
+	if (bbmax[1] > max.y)
+		max.y = bbmax[1];
+	if (bbmax[2] > max.z)
+		max.z = bbmax[2];
 };
 
 org.xml3d.webgl.Renderer.prototype.dispose = function() {
@@ -699,7 +785,7 @@ org.xml3d.webgl.Renderer.prototype.dispose = function() {
 };
 
 org.xml3d.webgl.Renderer.prototype.notifyDataChanged = function() {
-	this.ctx.renderScene();
+	this.ctx.redraw();
 };
 
 
@@ -766,12 +852,12 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 	for ( var i = 0; i < this.node.childNodes.length; i++) {
 		if (this.node.childNodes[i]) {
 			var adapter = this.factory.getAdapter(this.node.childNodes[i], org.xml3d.webgl.Renderer.prototype);
-			if (adapter) {		
+			if (adapter) {
 				var childTransform = adapter.applyTransformMatrix(transform);
 				var shader = adapter.getShader();
-				if (!shader) 
+				if (!shader)
 					shader = parentShader;
-	
+
 				adapter.collectDrawableObjects(childTransform, outMeshes, outLights, shader);
 			}
 		}
@@ -787,9 +873,29 @@ org.xml3d.webgl.RenderAdapter.prototype.applyTransformMatrix = function(
 // Adapter for <xml3d>
 org.xml3d.webgl.XML3DCanvasRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+	this.canvas = factory.ctx.canvas;
 };
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DCanvasRenderAdapter;
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt) {
+	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
+		this.factory.renderer.rebuildSceneTree();
+};
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.addEventListener = function(type, listener, useCapture) {
+	this.factory.ctx.addEventListener(this.node, type, listener, useCapture);
+};
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.removeEventListener = function(type, listener, useCapture) {
+	this.factory.ctx.removeEventListener(this.node, type, listener, useCapture);
+};
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y) {
+	this.factory.ctx.renderPick(x, y);
+	//alert(this.node.currentPickObj.localName);
+	return this.node.currentPickObj;
+};
 
 // Adapter for <view>
 org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
@@ -803,7 +909,24 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype = new org.xml3d.webgl.RenderAda
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DViewRenderAdapter;
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
-	if (this.viewMatrix == null) 
+	//if (this.viewMatrix == null) {
+		//if (this.node.orientation) {
+	//		this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
+	//				new XML3DMatrix().translate(this.node.position.negate()));
+
+		//}
+
+		/*if (this.node.upVector && this.node.direction)
+		{
+			var pos = this.node.position;
+			var dir = this.node.direction;
+			var up = this.node.upVector;
+			var cross = up.cross(dir);
+
+			var mx = new XML3DRotation( up , 0);
+			var my = new XML3DRotation( cross , 0);
+		}*/
+	if (this.viewMatrix == null)
 	{
 		var negPos      = this.node.position.negate();
 		this.viewMatrix = this.node.orientation.negate().toMatrix().multiply(
@@ -811,6 +934,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	}
 	return new sglM4(this.viewMatrix.toGL());
 };
+
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(aspect) {
 	if (this.projMatrix == null) {
@@ -834,7 +958,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 		this.viewMatrix = null;
 		this.projMatrix = null;
 	}
-	this.factory.ctx.update();
+	this.factory.ctx.redraw();
 };
 
 // Adapter for <shader>
@@ -858,7 +982,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 					if(this.dataAdapter)
 						this.dataAdapter.registerObserver(renderer);
 					else
-						org.xml3d.logError("Data adapter for a mesh element could not be created!");
+						org.xml3d.debug.logError("Data adapter for a mesh element could not be created!");
 				}
 				var sParams = this.dataAdapter.createDataTable();
 				this.setParameters({}); //Indirectly checks for textures
@@ -869,12 +993,12 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 					{
 						if (this.textures[0] && scriptURL == "urn:xml3d:shader:phong")
 							scriptURL = "urn:xml3d:shader:texturedphong";
-					
+
 						if (sParams.useVertexColor && sParams.useVertexColor.data[0] == true)
 							scriptURL = scriptURL + "vcolor";
-						
+
 						this.sp = this.factory.renderer.getStandardShaderProgram(gl, scriptURL);
-						return this.sp;		
+						return this.sp;
 					}
 					var vsScript = this.node.xml3ddocument.resolve(scriptURL
 							+ "-vs");
@@ -898,22 +1022,22 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 		}));
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textureSrc, semantic) {
-	
+
 	var gl = this.factory.ctx.gl;
 	org.xml3d.webgl.checkError(gl, "Error before creating texture:");
 	var imageData = null;
 	var texture = null;
-	
+
 	//See if this texture already exists
 	for (var t in this.textures) {
 		var tex = this.textures[t];
 		if (tex.semantic == semantic && tex.src == textureSrc)
 			return;
 	}
-	
+
 	var options = ({
 		/*Custom texture options would go here, SGL's default options are:
-		
+
 		minFilter        : gl.LINEAR,
 		magFilter        : gl.LINEAR,
 		wrapS            : gl.CLAMP_TO_EDGE,
@@ -932,7 +1056,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	//null would be replaced with options, --CANNOT PASS EMPTY OPTIONS OBJECT--
 	texture = new SglTexture2D(gl, textureSrc, null);
 	org.xml3d.webgl.checkError(gl, "Error after creating texture:" + textureSrc);
-	
+
 	if (!texture) {
 		org.xml3d.debug.logError("Could not create texture for " + textureSrc);
 		return;
@@ -943,9 +1067,9 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 		src 		: textureSrc,
 		tex 		: texture
 	});
-	
+
 	this.textures.push(texContainer);
-	
+
 	//org.xml3d.debug.logInfo("Created GL texture: " + texContainer.semantic);
 	//return;
 };
@@ -981,16 +1105,16 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 		if(this.dataAdapter)
 			this.dataAdapter.registerObserver(renderer);
 		else
-			org.xml3d.logError("Data adapter for a shader element could not be created!");
+			org.xml3d.debug.logError("Data adapter for a shader element could not be created!");
 	}
 	var gl = this.factory.gl;
-	//set up default values for built in phong shader, 
+	//set up default values for built in phong shader,
 	//chrome won't render correctly if a required value is missing
 	parameters.diffuseColor = [1,1,1];
 	parameters.emissiveColor = [0,0,0];
-	parameters.shininess = [0.2];
+	parameters.shininess = 0.2;
 	parameters.specularColor = [0,0,0];
-	parameters.transparency = [0];
+	parameters.transparency = 0;
 
 	var sParams = this.dataAdapter.createDataTable();
 	for (var p in sParams)
@@ -1044,18 +1168,26 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMethod) {
-	
+
 	if (evtMethod)
 		eval(evtMethod);
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(e) {
-	if (e.attribute == "shader") {	
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
+	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
+		this.factory.renderer.rebuildSceneTree();
+	else if (evt.attribute == "shader") {
+		this.node.shader = null;
 		this.shader = this.getShader();
+		this.factory.renderer.rebuildSceneTree();
+	}
+	else if (evt.attribute == "transform") {
+		this.node.transform = null;
+		this.factory.renderer.rebuildSceneTree();
 	}
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function() 
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 {
 	var shader = this.node.getShader();
 
@@ -1088,7 +1220,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 		var n         = this.node;
 		var m         = new XML3DMatrix();
 		var negCenter = n.center.negate();
-		
+
 		this.matrix = m.translate(n.translation.x, n.translation.y, n.translation.z)
 		  .multiply(m.translate(n.center.x,n.center.y, n.center.z)).multiply(n.rotation.toMatrix())
 		  .multiply(n.scaleOrientation.toMatrix()).multiply(m.scale(n.scale.x, n.scale.y, n.scale.z))
@@ -1100,18 +1232,19 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
+	this.factory.renderer.rebuildSceneTree();
 	this.factory.ctx.redraw();
 };
 
 // Adapter for <mesh>
 org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
-	
+
 	var src = node.getSrc();
 	this.loadedMesh = false;
 	this._bbox = null;
-	
-	//Support for mesh loading from .obj files 
+
+	//Support for mesh loading from .obj files
 	//DISABLED FOR NOW
 	/*if (src && typeof src == typeof "" && src.charAt(0)!='#')
 	{
@@ -1128,11 +1261,14 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	this.__defineGetter__("bbox", function() {
 		if (!this._bbox) {
 			var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
-			this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
+			if (!dt.position || !dt.position.data)
+				throw new Error("A mesh is referencing non-existent data: Cannot find positions data for " + this.node.getAttribute("src"));
+			else
+				this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
 		}
 		return this._bbox;
-	}); 
-		
+	});
+
 };
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
@@ -1142,7 +1278,12 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = functi
 	outMeshes.push( [ transform, this, shader ]);
 };
 
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
+	if (e.attribute == "src")
+		this.node.src = null;
 
+	this.factory.renderer.rebuildSceneTree();
+};
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 	this.mesh.destroy();
@@ -1152,7 +1293,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMetho
 	if (evtMethod) {
 		eval(evtMethod);
 	}
-	
+
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, parameters) {
@@ -1164,20 +1305,20 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		if(this.dataAdapter)
 			this.dataAdapter.registerObserver(renderer);
 		else
-			org.xml3d.logError("Data adapter for a mesh element could not be created!");
+			org.xml3d.debug.logError("Data adapter for a mesh element could not be created!");
 	}
 	var gl = this.factory.ctx.gl;
 	var elements = null;
-	
+
 	var samplers = {};
 	var invalidTextures = false;
 	if (shader.textures !== undefined && shader.textures.length > 0)
 	{
-		
+
 		for (var t in shader.textures)
 		{
 			var temp = shader.textures[t];
-			if (temp.tex.isValid) 
+			if (temp.tex.isValid)
 				samplers[temp.semantic] = temp.tex;
 			else
 				invalidTextures = true;
@@ -1189,10 +1330,10 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		//Texture is not ready for rendering yet, skip this object
 		return;
 	}
-	
-	
+
+
 	org.xml3d.webgl.checkError(gl, "Error before starting render.");
-	
+
 	if (!this.loadedMesh) {
 		var meshParams = this.dataAdapter.createDataTable();
 		var mIndicies = new Uint16Array(meshParams.index.data);
@@ -1204,12 +1345,12 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 			this.mesh.addVertexAttribute(p, parameter.tupleSize, parameter.data);
 		}
 	}
-	
+
 	if (this.loadedMesh || meshParams) {
 		org.xml3d.webgl.checkError(gl, "Error before drawing Elements.");
 		sglRenderMeshGLPrimitives(this.mesh, "triangles", shader.sp, null, parameters, samplers);
 		org.xml3d.webgl.checkError(gl, "Error after drawing Elements.");
-		
+
 	} else
 		org.xml3d.debug.logError("No element array found!");
 };
@@ -1238,10 +1379,10 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.notifyChanged = function(e) {
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(modelViewMatrix) {
 	var shader = this.getLightShader();
-	
+
 	if(!shader)
 		return null;
-	
+
 	if (!this.dataAdapter)
 	{
 		var renderer = shader.factory.renderer;
@@ -1250,14 +1391,14 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 			this.dataAdapter.registerObserver(renderer);
 	}
 	var params = this.dataAdapter.createDataTable();
-	
+
 	var visible = this.node.getAttribute("visible");
 	if (visible === null || visible == "true")
 		var visibility = [1.0, 1.0, 1.0];
 	else
 		var visibility = [0.0, 0.0, 0.0];
 
-	
+
 	//Set up default values
 	var pos = sglMulM4V4(modelViewMatrix, [0.0, 0.0, 0.0, 1.0]);
 	var aParams = {
@@ -1266,7 +1407,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 		intensity 	: [1.0, 1.0, 1.0],
 		visibility 	: visibility
 	};
-	
+
 	for (var p in params) {
 		if (p == "position") {
 			//Position must be multiplied with the model view matrix
@@ -1274,9 +1415,9 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 			aParams[p] = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
 			continue;
 		}
-		aParams[p] = params[p].data;	
+		aParams[p] = params[p].data;
 	}
-	
+
 	return aParams;
 };
 
@@ -1312,7 +1453,7 @@ org.xml3d.webgl.calculateBoundingBox = function(tArray) {
 	var bbox = new SglBox3();
 	if (!tArray || tArray.length < 3)
 		return bbox;
-	
+
 	// Initialize with first position
 	for (var j=0; j<3; ++j) {
 		bbox.min[j] = tArray[j];
@@ -1333,9 +1474,9 @@ org.xml3d.webgl.calculateBoundingBox = function(tArray) {
 var g_shaders = {};
 
 g_shaders["urn:xml3d:shader:flat"] = {
-	vertex : 
+	vertex :
 			 "attribute vec3 position;"
-			+ "uniform mat4 modelViewProjectionMatrix;"		
+			+ "uniform mat4 modelViewProjectionMatrix;"
 			+ "void main(void) {"
 			+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);"
 			+ "}",
@@ -1349,11 +1490,11 @@ g_shaders["urn:xml3d:shader:flat"] = {
 			+ "}"
 };
 g_shaders["urn:xml3d:shader:flatvcolor"] = {
-		vertex : 
+		vertex :
 				 "attribute vec3 position;"
 				+ "attribute vec3 color;"
 				+ "varying vec3 fragVertexColor;"
-				+ "uniform mat4 modelViewProjectionMatrix;"	
+				+ "uniform mat4 modelViewProjectionMatrix;"
 				+ "void main(void) {"
 				+ "    fragVertexColor = color;"
 				+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);"
@@ -1371,30 +1512,30 @@ g_shaders["urn:xml3d:shader:flatvcolor"] = {
 
 g_shaders["urn:xml3d:shader:phong"] = {
 		vertex :
-					
+
 		"attribute vec3 position;\n"
 		+"attribute vec3 normal;\n"
-		
+
 		+"varying vec3 fragNormal;\n"
 		+"varying vec3 fragVertexPosition;\n"
 		+"varying vec3 fragEyeVector;\n"
 		+"varying vec2 fragTexCoord;\n"
-		
+
 		+"uniform mat4 modelViewProjectionMatrix;\n"
 		+"uniform mat4 modelViewMatrix;\n"
 		+"uniform vec3 eyePosition;\n"
-		
+
 		+"void main(void) {\n"
 		+"	  gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
 		+"	  fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
 		+"	  fragVertexPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
 		+"	  fragEyeVector = fragVertexPosition;\n"
 		+"}\n",
-		
+
 	fragment:
 	// NOTE: Any changes to this area must be carried over to the substring calculations in
 	// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
-			+"#ifdef GL_ES\n"
+			"#ifdef GL_ES\n"
 			+"precision highp float;\n"
 			+"#endif\n\n"
 			+"const int MAXLIGHTS = 0; \n"
@@ -1405,18 +1546,17 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"uniform float shininess;\n"
 			+"uniform vec3 specularColor;\n"
 			+"uniform float transparency;\n"
-			
+
 			+"varying vec3 fragNormal;\n"
 			+"varying vec3 fragVertexPosition;\n"
 			+"varying vec3 fragEyeVector;\n"
-			
+
 			+"uniform vec3 lightAttenuations[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightPositions[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightDiffuseColors[MAXLIGHTS+1];\n"
-			+"uniform vec3 lightAmbientColors[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightVisibility[MAXLIGHTS+1];\n"
-			
-			
+
+
 			+"vec3 light(in int i)\n"
 		 	+"{\n"
 		 	+"		vec3 L = lightPositions[i] - fragVertexPosition;\n"
@@ -1425,17 +1565,15 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"		float dist = length(L);\n"
 		 	+"      L = normalize(L);\n"
 			+"		vec3 R = normalize(reflect(L,N));\n"
-			
-			+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"
-			+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
 
-			+"		vec3 Iamb = ambientColor * lightAmbientColors[i];\n"
+			+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"
+
 			+"		vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * diffuseColor ;\n"
 			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
-			+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
-			+"		return color * lightVisibility[i];\n" 
+			+"		vec3 color = (atten*(Idiff + Ispec));\n"
+			+"		return color * lightVisibility[i];\n"
 			+"}\n"
-			
+
 			+"void main(void) {\n"
 			+"	if (MAXLIGHTS < 1) {\n"
 			+"      vec3 light = normalize(-fragVertexPosition);\n"
@@ -1443,13 +1581,13 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"      vec3 eye = normalize(fragVertexPosition);\n"
 			+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
 			+"      diffuse += max(0.0, dot(normal, eye));\n"
-			+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n" 
+			+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n"
 			+"      specular += pow(max(0.0, dot(normal, eye)), shininess*128.0);\n"
 			+"      vec3 rgb = emissiveColor + diffuse*diffuseColor + specular*specularColor;\n"
 			+"      rgb = clamp(rgb, 0.0, 1.0);\n"
 			+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
 			+"	} else {\n"
-			+"      vec3 color = vec3(0,0,0);\n"
+			+"      vec3 color = emissiveColor + (ambientIntensity * diffuseColor);\n"
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			color = color + light(i);\n"
 			+"		}\n"
@@ -1464,17 +1602,17 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 		"attribute vec3 position;\n"
 		+"attribute vec3 normal;\n"
 		+"attribute vec2 texcoord;\n"
-		
+
 		+"varying vec3 fragNormal;\n"
 		+"varying vec3 fragVertexPosition;\n"
 		+"varying vec3 fragEyeVector;\n"
 		+"varying vec2 fragTexCoord;\n"
-		
+
 		+"uniform mat4 modelViewProjectionMatrix;\n"
 		+"uniform mat4 modelViewMatrix;\n"
 		+"uniform vec3 eyePosition;\n"
-		
-		
+
+
 		+"void main(void) {\n"
 		+"	  gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
 		+"	  fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
@@ -1482,11 +1620,11 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 		+"	  fragEyeVector = fragVertexPosition;\n"
 		+"    fragTexCoord = texcoord;\n"
 		+"}\n",
-		
+
 	fragment:
 		// NOTE: Any changes to this area must be carried over to the substring calculations in
 		// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
-			+"#ifdef GL_ES\n"
+			"#ifdef GL_ES\n"
 			+"precision highp float;\n"
 			+"#endif\n\n"
 			+"const int MAXLIGHTS = 0; \n"
@@ -1499,19 +1637,18 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"uniform float transparency;\n"
 			+"uniform float lightOn;\n"
 			+"uniform sampler2D diffuseTexture;\n"
-			
+
 			+"varying vec3 fragNormal;\n"
 			+"varying vec3 fragVertexPosition;\n"
 			+"varying vec3 fragEyeVector;\n"
 			+"varying vec2 fragTexCoord;\n"
-			
+
 			+"uniform vec3 lightAttenuations[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightPositions[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightDiffuseColors[MAXLIGHTS+1];\n"
-			+"uniform vec3 lightAmbientColors[MAXLIGHTS+1];\n"
 			+"uniform vec3 lightVisibility[MAXLIGHTS+1];\n"
-			
-			
+
+
 			+"vec4 light(in int i)\n"
 		 	+"{\n"
 		 	+"		vec3 L = lightPositions[i] - fragVertexPosition;\n"
@@ -1520,18 +1657,16 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"		float dist = length(L);\n"
 		 	+"      L = normalize(L);\n"
 			+"		vec3 R = normalize(reflect(L,N));\n"
-			
-			+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"		 			
-			+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
+
+			+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"
 			+"      vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
-			
-			+"		vec3 Iamb = ambientColor * lightAmbientColors[i] * lightVisibility[i];\n"
+
 			+"		vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * texDiffuse.xyz;\n"
 			+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
-			+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
-			+"		return vec4(color * lightVisibility[i], texDiffuse.w);\n" 
+			+"		vec3 color = (atten*(Idiff + Ispec));\n"
+			+"		return vec4(color * lightVisibility[i], texDiffuse.w);\n"
 			+"}\n"
-			
+
 			+"void main(void) {\n"
 			+"	if (MAXLIGHTS < 1) {\n"
 			+"      vec3 light = normalize(-fragVertexPosition);\n"
@@ -1545,7 +1680,8 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"      vec3 rgb = emissiveColor + diffuse*texDiffuse.xyz+ specular*specularColor;\n"
 			+"      gl_FragColor = vec4(rgb, texDiffuse.w*max(0.0, 1.0 - transparency)); \n"
 			+"	} else {\n"
-			+"      vec4 color = vec4(0,0,0,0);\n"
+			+"      vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
+			+"      vec4 color = vec4(emissiveColor + (ambientIntensity * diffuseColor * texDiffuse.xyz), 0.0);\n"
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			color = color + light(i);\n"
 			+"		}\n"
@@ -1560,17 +1696,17 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 			"attribute vec3 position;\n"
 			+"attribute vec3 normal;\n"
 			+"attribute vec3 color;\n"
-			
+
 			+"varying vec3 fragNormal;\n"
 			+"varying vec3 fragVertexPosition;\n"
 			+"varying vec3 fragEyeVector;\n"
 			+"varying vec2 fragTexCoord;\n"
 			+"varying vec3 fragVertexColor;\n"
-			
+
 			+"uniform mat4 modelViewProjectionMatrix;\n"
 			+"uniform mat4 modelViewMatrix;\n"
 			+"uniform vec3 eyePosition;\n"
-			
+
 			+"void main(void) {\n"
 			+"	  gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
 			+"	  fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
@@ -1578,7 +1714,7 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 			+"	  fragEyeVector = fragVertexPosition;\n"
 			+ "   fragVertexColor = color;\n"
 			+"}\n",
-			
+
 		fragment:
 		// NOTE: Any changes to this area must be carried over to the substring calculations in
 		// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
@@ -1594,19 +1730,18 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"uniform vec3 specularColor;\n"
 				+"uniform float transparency;\n"
 				+"uniform float lightOn;\n"
-				
+
 				+"varying vec3 fragNormal;\n"
 				+"varying vec3 fragVertexPosition;\n"
 				+"varying vec3 fragEyeVector;\n"
 				+"varying vec3 fragVertexColor;\n"
-				
+
 				+"uniform vec3 lightAttenuations[MAXLIGHTS+1];\n"
 				+"uniform vec3 lightPositions[MAXLIGHTS+1];\n"
 				+"uniform vec3 lightDiffuseColors[MAXLIGHTS+1];\n"
-				+"uniform vec3 lightAmbientColors[MAXLIGHTS+1];\n"
 				+"uniform vec3 lightVisibility[MAXLIGHTS+1];\n"
-				
-				
+
+
 				+"vec3 light(in int i)\n"
 			 	+"{\n"
 			 	+"		vec3 L = lightPositions[i] - fragVertexPosition;\n"
@@ -1615,17 +1750,14 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"		float dist = length(L);\n"
 			 	+"      L = normalize(L);\n"
 				+"		vec3 R = normalize(reflect(L,N));\n"
-				
-				+"		vec3 ambientColor = ambientIntensity * diffuseColor;\n"		 			
-				+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"	 
 
-				+"		vec3 Iamb = ambientColor * lightAmbientColors[i]* lightVisibility[i];\n"
+				+"		float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"
 				+"		vec3 Idiff = lightDiffuseColors[i]* lightVisibility[i] * max(dot(N,L),0.0) * fragVertexColor ;\n"
 				+"		vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
-				+"		vec3 color = (emissiveColor+Iamb+atten*(Idiff + Ispec));\n"
-				+"		return color;\n" 
+				+"		vec3 color = (atten*(Idiff + Ispec));\n"
+				+"		return color;\n"
 				+"}\n"
-				
+
 				+"void main(void) {\n"
 				+"	if (MAXLIGHTS < 1) {\n"
 				+"      vec3 light = normalize(-fragVertexPosition);\n"
@@ -1633,56 +1765,54 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"      vec3 eye = normalize(fragVertexPosition);\n"
 				+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
 				+"      diffuse += max(0.0, dot(normal, eye));\n"
-				+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n" 
+				+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n"
 				+"      specular += pow(max(0.0, dot(normal, eye)), shininess*128.0);\n"
 				+"      vec3 rgb = emissiveColor + diffuse*fragVertexColor + specular*specularColor;\n"
 				+"      rgb = clamp(rgb, 0.0, 1.0);\n"
 				+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
 				+"	} else {\n"
-				+"      vec3 color = vec3(0,0,0);\n"
+				+"      vec3 color = emissiveColor + (ambientIntensity * diffuseColor);\n"
 				+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 				+"			color = color + light(i);\n"
 				+"		}\n"
 				+"		gl_FragColor = vec4(color, max(0.0, 1.0 - transparency));\n"
 				+"  }\n"
 				+"}"
-	};	
+	};
 
 g_shaders["urn:xml3d:shader:picking"] = {
 		vertex:
-		
+
 		"attribute vec3 position;\n"
-		+ "uniform mat4 modelViewMatrix;\n"
+		+ "uniform mat4 modelMatrix;\n"
 		+ "uniform mat4 modelViewProjectionMatrix;\n"
-		+ "uniform vec3 wcMin;\n"
-		+ "uniform vec3 wcMax;\n"
-		
+		+ "uniform vec3 min;\n"
+		+ "uniform vec3 max;\n"
+
 		+ "varying vec3 worldCoord;\n"
 		+ "void main(void) {\n"
-		+ "    worldCoord = (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
-		//+ "    vec3 dia = wcMax - wcMin;\n"
-		//+ "    worldCoord = worldCoord - wcMin;\n"
-		//+ "    worldCoord.x /= dia.x;\n"
-		//+ "    worldCoord.y /= dia.y;\n"
-		//+ "    worldCoord.z /= dia.z;\n"
+		+ "    worldCoord = (modelMatrix * vec4(position, 1.0)).xyz;\n"
+		+ "    vec3 diff = max - min;\n"
+		+ "    worldCoord = worldCoord - min;\n"
+		+ "    worldCoord = worldCoord / diff;"
 		+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
 		+ "}" ,
-		
+
 		fragment:
-		
-		
+
+
 		"#ifdef GL_ES\n"
 		+"precision highp float;\n"
 		+"#endif\n\n"
-		+"uniform float id;" 
+		+"uniform float id;"
 		+ "varying vec3 worldCoord;\n"
-		
+
 		+ "void main(void) {\n"
-		+ "    gl_FragColor = vec4(worldCoord, id);\n" 
+		+ "    gl_FragColor = vec4(worldCoord, id);\n"
 		+ "}\n"
 	};
-	
-	
+
+
 org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
 	var shader = {};
 	shader.bind = function() {
@@ -1817,7 +1947,7 @@ org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
  * XML3D Data Composition Rules:
  * -----------------------------
  *
- * The elements <mesh>, <data>, <shader>, <lightshader> and any other elements that uses generic 
+ * The elements <mesh>, <data>, <shader>, <lightshader> and any other elements that uses generic
  * data fields implements the behavior of a "DataCollector".
  *
  * The result of a DataCollector is a "datatable" - a map with "name" as key and a TypedArray
@@ -1827,26 +1957,26 @@ org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
  * The <data> element is the only DataCollector that forwards the data to parent nodes or referring nodes.
  *
  * For each DataCollector, data is collected with following algorithm:
- * 
+ *
  * 1. If the "src" attribute is used, reuse the datatable of the referred <data> element and ignore the element's content
  * 2. If no "src" attribute is defined:
  *    2.1 Go through each <data> element contained by the DataCollector from top to down and apply it's datatable to the result.
  *        2.1.1 If the datatables of consecutive <data> elements define a value for the same name, the later overwrites the former.
- *    2.2 Go through each value element (int, float1, float2 etc.) and assign it's name-value pair to the datatable, overwriting 
+ *    2.2 Go through each value element (int, float1, float2 etc.) and assign it's name-value pair to the datatable, overwriting
  *        existing entries.
- * 
- *   
- * Description of the actual Implementation:  
- * -----------------------------------------        
+ *
+ *
+ * Description of the actual Implementation:
+ * -----------------------------------------
  * The DataCollector is implementation according to the Adapter concept. For each element that uses
  * generic data (<mesh>, <data>, <float>,...) a DataAdapter is instantiated. Such a DataAdapter should
- * be constructed via the "XML3DDataAdapterFactory" factory. The XML3DDataAdapterFactory manages all 
+ * be constructed via the "XML3DDataAdapterFactory" factory. The XML3DDataAdapterFactory manages all
  * DataAdapter instances so that for each node there is always just one DataAdapter. It is also responsible
- * for creating the corresponding DataAdapter for an element node. In addition, when a DataAdapter is constructed 
+ * for creating the corresponding DataAdapter for an element node. In addition, when a DataAdapter is constructed
  * via the factory, its init method is called which ensures that all child elements have a corresponding DataAdapter.
- * In doing so, the parent DataAdapter registers itself as observer in its child DataAdapters. When a DataCollector 
- * element changes, all its observers are notified (those are generally its parent DataAdapter or other components 
- * such as a renderer relying on the data of the observed element). 
+ * In doing so, the parent DataAdapter registers itself as observer in its child DataAdapters. When a DataCollector
+ * element changes, all its observers are notified (those are generally its parent DataAdapter or other components
+ * such as a renderer relying on the data of the observed element).
  */
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -1854,11 +1984,11 @@ org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
 /**
  * Class org.xml3d.webgl.XML3DDataAdapterFactory
  * extends: org.xml3d.data.AdapterFactory
- * 
+ *
  * XML3DDataAdapterFactory creates DataAdapter instances for elements using generic data (<mesh>, <data>, <float>,...).
  * Additionally, it manages all DataAdapter instances so that for each node there is always just one DataAdapter. When
  * it creates a DataAdapter, it calls its init method. Currently, the following elements are supported:
- * 
+ *
  * <ul>
  * 		<li>mesh</li>
  * 		<li>shader</li>
@@ -1872,22 +2002,22 @@ org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
  * 		<li>texture</li>
  * 		<li>data</li>
  * </ul>
- * 
+ *
  * @author Kristian Sons
  * @author Benjamin Friedrich
- * 
+ *
  * @version  10/2010  1.0
  */
 
 /**
- * Constructor of org.xml3d.webgl.XML3DDataAdapterFactory 
- * 
+ * Constructor of org.xml3d.webgl.XML3DDataAdapterFactory
+ *
  * @augments org.xml3d.data.AdapterFactory
  * @constructor
- * 
+ *
  * @param ctx
  */
-org.xml3d.webgl.XML3DDataAdapterFactory = function(ctx) 
+org.xml3d.webgl.XML3DDataAdapterFactory = function(ctx)
 {
 	org.xml3d.data.AdapterFactory.call(this);
 	this.ctx = ctx;
@@ -1897,23 +2027,23 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.constructor = org.xml3d.webgl.
 
 /**
  * Returns a DataAdapter instance associated with the given node. If there is already a DataAdapter created for this node,
- * this instance is returned, otherwise a new one is created. 
- * 
- * @param   node  element node which uses generic data. The supported elements are listed in the class description above. 
+ * this instance is returned, otherwise a new one is created.
+ *
+ * @param   node  element node which uses generic data. The supported elements are listed in the class description above.
  * @returns DataAdapter instance
  */
-org.xml3d.webgl.XML3DDataAdapterFactory.prototype.getAdapter = function(node) 
+org.xml3d.webgl.XML3DDataAdapterFactory.prototype.getAdapter = function(node)
 {
 	return org.xml3d.data.AdapterFactory.prototype.getAdapter.call(this, node, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
 };
 
 /**
  * Creates a DataAdapter associated with the given node.
- * 
- * @param   node  element node which uses generic data. The supported elements are listed in the class description above. 
+ *
+ * @param   node  element node which uses generic data. The supported elements are listed in the class description above.
  * @returns DataAdapter instance
  */
-org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node) 
+org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 {
 	if (node.localName == "mesh"   ||
 		node.localName == "shader" ||
@@ -1921,11 +2051,11 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 	{
 		return new org.xml3d.webgl.RootDataAdapter(this, node);
 	}
-	
-	if (node.localName == "float"    || 
-		node.localName == "float2"   || 
-		node.localName == "float3"   || 
-		node.localName == "float4"   || 
+
+	if (node.localName == "float"    ||
+		node.localName == "float2"   ||
+		node.localName == "float3"   ||
+		node.localName == "float4"   ||
 		node.localName == "float4x4" ||
 		node.localName == "int"      ||
 		node.localName == "bool"     ||
@@ -1933,13 +2063,13 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 	{
 		return new org.xml3d.webgl.ValueDataAdapter(this, node);
 	}
-		
+
 	if (node.localName == "data")
 	{
 		return new org.xml3d.webgl.DataAdapter(this, node);
 	}
-		
-	//org.xml3d.debug.logError("org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter: " + 
+
+	//org.xml3d.debug.logError("org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter: " +
 	//		                 node.localName + " is not supported");
 	return null;
 };
@@ -1947,70 +2077,70 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 //---------------------------------------------------------------------------------------------------------------------------
 
 /**
- * Class org.xml3d.webgl.DataAdapter 
+ * Class org.xml3d.webgl.DataAdapter
  * extends: org.xml3d.data.Adapter
- * 
+ *
  * The DataAdapter implements the DataCollector concept and serves as basis of all DataAdapter classes.
  * In general, a DataAdapter is associated with an element node which uses generic data and should be
  * instantiated via org.xml3d.webgl.XML3DDataAdapterFactory to ensure proper functionality.
- * 
+ *
  * @author Kristian Sons
  * @author Benjamin Friedrich
- * 
+ *
  * @version  10/2010  1.0
  */
 
 /**
  * Constructor of org.xml3d.webgl.DataAdapter
- * 
+ *
  * @augments org.xml3d.data.Adapter
  * @constructor
- * 
+ *
  * @param factory
  * @param node
  */
-org.xml3d.webgl.DataAdapter = function(factory, node) 
+org.xml3d.webgl.DataAdapter = function(factory, node)
 {
 	org.xml3d.data.Adapter.call(this, factory, node);
 
-	this.observers = new Array();	
-	
-	/* Creates DataAdapter instances for the node's children and registers 
+	this.observers = new Array();
+
+	/* Creates DataAdapter instances for the node's children and registers
 	 * itself as observer in those children instances. This approach is needed
 	 * for being notified about changes in the child elements. If the data of
 	 * a children is changed, the whole parent element must be considered as
-	 * changed.  
+	 * changed.
 	 */
 	this.init = function()
 	{
-		for ( var i = 0; i < this.node.childNodes.length; i++) 
+		for ( var i = 0; i < this.node.childNodes.length; i++)
 		{
 			var childNode = this.node.childNodes[i];
-		
+
 			if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
-			{				
-				dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);			
-				
+			{
+				dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
+
 				if(dataCollector)
 				{
 					dataCollector.registerObserver(this);
 				}
 			}
 		}
-		
+
 		this.createDataTable(true);
-	};	
-	
+	};
+
 };
 org.xml3d.webgl.DataAdapter.prototype             = new org.xml3d.data.Adapter();
 org.xml3d.webgl.DataAdapter.prototype.constructor = org.xml3d.webgl.DataAdapter;
 
 /**
- * 
+ *
  * @param aType
  * @returns
  */
-org.xml3d.webgl.DataAdapter.prototype.isAdapterFor = function(aType) 
+org.xml3d.webgl.DataAdapter.prototype.isAdapterFor = function(aType)
 {
 	return aType == org.xml3d.webgl.XML3DDataAdapterFactory.prototype;
 };
@@ -2018,8 +2148,8 @@ org.xml3d.webgl.DataAdapter.prototype.isAdapterFor = function(aType)
 /**
  * Notifies all observers about data changes by calling their notifyDataChanged() method.
  */
-org.xml3d.webgl.DataAdapter.prototype.notifyObservers = function() 
-{	
+org.xml3d.webgl.DataAdapter.prototype.notifyObservers = function()
+{
 	for(var i = 0; i < this.observers.length; i++)
 	{
 		this.observers[i].notifyDataChanged();
@@ -2027,14 +2157,14 @@ org.xml3d.webgl.DataAdapter.prototype.notifyObservers = function()
 };
 
 /**
- * The notifyChanged() method is called by the XML3D data structure to notify the DataAdapter about 
- * data changes (DOM mustation events) in its associating node. When this method is called, all observers 
+ * The notifyChanged() method is called by the XML3D data structure to notify the DataAdapter about
+ * data changes (DOM mustation events) in its associating node. When this method is called, all observers
  * of the DataAdapter are notified about data changes via their notifyDataChanged() method.
- * 
+ *
  * @param e  notification of type org.xml3d.Notification
  */
-org.xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e) 
-{	
+org.xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e)
+{
 	// this is the DataAdapter where an actual change occurs, therefore
 	// the dataTable must be recreated
 	this.notifyDataChanged();
@@ -2048,22 +2178,22 @@ org.xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e)
  */
 org.xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function()
 {
-	// Notification can only come from a child DataAdapter. That's why dataTable 
+	// Notification can only come from a child DataAdapter. That's why dataTable
 	// can be merged with this instance's datatable
 	this.createDataTable(true);
 	this.notifyObservers();
 };
 
 /**
- * Registers an observer which is notified when the element node associated with the 
+ * Registers an observer which is notified when the element node associated with the
  * data adapter changes. If the given object is already registered as observer, it
  * is ignored.
- * 
+ *
  * <b>Note that there must be a notifyDataChanged() method without parameters.</b>
- * 
- * @param observer  
+ *
+ * @param observer
  * 			object which shall be notified when the node associated with the
- * 			DataAdapter changes		  
+ * 			DataAdapter changes
  */
 org.xml3d.webgl.DataAdapter.prototype.registerObserver = function(observer)
 {
@@ -2074,14 +2204,14 @@ org.xml3d.webgl.DataAdapter.prototype.registerObserver = function(observer)
 			org.xml3d.debug.logWarning("Observer " + observer + " is already registered");
 			return;
 		}
-	}	
-	
+	}
+
 	this.observers.push(observer);
 };
 
 /**
  * Unregisters the given observer. If the given object is not registered as observer, it is irgnored.
- * 
+ *
  * @param observer
  * 			which shall be unregistered
  */
@@ -2094,62 +2224,62 @@ org.xml3d.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
 			this.observers = this.observers.splice(i, 1);
 			return;
 		}
-	}	
-	
-	org.xml3d.debug.logWarning("Observer " + observer + 
+	}
+
+	org.xml3d.debug.logWarning("Observer " + observer +
 			                   " can not be unregistered because it is not registered");
 };
 
 /**
  * Returns datatable retrieved from the DataAdapter's children.
- * In doing so, only the cached datatables are fetched since 
+ * In doing so, only the cached datatables are fetched since
  * the value of the changed child should already be adapted
  * and the values of the remaining children do not vary.
- * 
- * @returns datatable retrieved from the DataAdapter's children 
+ *
+ * @returns datatable retrieved from the DataAdapter's children
  */
 org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 {
 	var dataTable = new Array();
-	
-	for ( var i = 0; i < this.node.childNodes.length; i++) 
+
+	for ( var i = 0; i < this.node.childNodes.length; i++)
 	{
 		var childNode = this.node.childNodes[i];
 
 		if(childNode  && childNode.nodeType === Node.ELEMENT_NODE)
 		{
 			var dataCollector = this.factory.getAdapter(childNode, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
-			
+
 			if(! dataCollector) // This can happen, i.e. a child node in a seperate namespace
 				continue;
-			
+
 			/* A RootAdapter must not be a chilrden of another DataAdapter.
-			 * Therefore, its data is ignored, if it is specified as child.	 
+			 * Therefore, its data is ignored, if it is specified as child.
 			 * Example: <mesh>, <shader> and <lightshader> */
 			if(dataCollector.isRootAdapter())
 			{
-				org.xml3d.debug.logWarning(childNode.localName + 
+				org.xml3d.debug.logWarning(childNode.localName +
 						                   " can not be a children of another DataCollector element ==> ignored");
 				continue;
 			}
 
 			var tmpDataTable = dataCollector.createDataTable();
-			
+
 			if(tmpDataTable)
 			{
-				for (key in tmpDataTable) 
-				{ 
-					dataTable[key] = tmpDataTable[key]; 
-				}				
+				for (key in tmpDataTable)
+				{
+					dataTable[key] = tmpDataTable[key];
+				}
 			}
 		}
 	}
-	
+
 	return dataTable;
 };
 
 /**
- * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true', 
+ * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true',
  * createDataTable() creates a new datatable, caches and returns it. If no
  * parameter is specified or 'forceNewInstance' is specified with 'false', the
  * cashed datatable is returned.<br/>
@@ -2158,10 +2288,10 @@ org.xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
  * datatable['name']['tupleSize'] : tuple size of the data element with name 'name' <br/>
  * datatable['name']['data']      : typed array (https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html)
  * 								  associated with the data element with name 'name'
- * 
- * @param   forceNewInstance 
+ *
+ * @param   forceNewInstance
  * 				indicates whether a new instance shall be created or the cached
- * 				datatable shall be returned			
+ * 				datatable shall be returned
  * @returns datatable
  */
 org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
@@ -2170,30 +2300,30 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 	{
 	   return this.dataTable;
 	}
-	
+
 	var srcElement = this.node.getSrc();
 	var dataTable;
-	
+
 	if(srcElement == null)
 	{
 		dataTable = this.getDataFromChildren();
 	}
 	else
 	{
-		// If the "src" attribute is used, reuse the datatable of the referred <data> element (or file) 
+		// If the "src" attribute is used, reuse the datatable of the referred <data> element (or file)
 		// and ignore the element's content
 		srcElement = this.factory.getAdapter(srcElement);
 		dataTable  = srcElement.createDataTable();
 	}
-	
+
 	this.dataTable = dataTable;
-	
+
 	return dataTable;
 };
 
 /**
  * Indicates whether this DataAdapter is a RootAdapter (has no parent DataAdapter).
- * 
+ *
  * @returns true if this DataAdapter is a RootAdapter, otherwise false.
  */
 org.xml3d.webgl.DataAdapter.prototype.isRootAdapter = function()
@@ -2214,42 +2344,42 @@ org.xml3d.webgl.DataAdapter.prototype.toString = function()
 /**
  * Class org.xml3d.webgl.ValueDataAdapter
  * extends: org.xml3d.webgl.DataAdapter
- * 
+ *
  * ValueDataAdapter represents a leaf in the DataAdapter hierarchy. A
  * ValueDataAdapter is associated with the XML3D data elements having
  * no children besides a text node such as <bool>, <float>, <float2>,... .
- * 
+ *
  * @author  Benjamin Friedrich
  * @version 10/2010  1.0
  */
 
 /**
  * Constructor of org.xml3d.webgl.ValueDataAdapter
- * 
+ *
  * @augments org.xml3d.webgl.DataAdapter
  * @constructor
- * 
+ *
  * @param factory
  * @param node
  */
-org.xml3d.webgl.ValueDataAdapter = function(factory, node) 
+org.xml3d.webgl.ValueDataAdapter = function(factory, node)
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
 	this.init = function()
 	{
 		this.createDataTable(true);
-	};	
+	};
 };
 org.xml3d.webgl.ValueDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.ValueDataAdapter.prototype.constructor = org.xml3d.webgl.ValueDataAdapter;
 
 /**
- * Returns the tuple size of the associated XML3D data element. 
- * 
- * @returns the tuples size of the associated node or -1 if the tuple size 
+ * Returns the tuple size of the associated XML3D data element.
+ *
+ * @returns the tuples size of the associated node or -1 if the tuple size
  * 			of the associated node can not be determined
  */
-org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function() 
+org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 {
 	if (this.node.localName == "float" ||
 		this.node.localName == "int"   ||
@@ -2258,17 +2388,17 @@ org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 	{
 		return 1;
 	}
-			
+
 	if (this.node.localName == "float2")
 	{
 		return 2;
 	}
-	
+
 	if (this.node.localName == "float3")
 	{
 		return 3;
 	}
-	
+
 	if (this.node.localName == "float4")
 	{
 		return 4;
@@ -2278,44 +2408,44 @@ org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 	{
 		return 16;
 	}
-	
+
 	org.xml3d.debug.logWarning("Can not determine tuple size of element " + this.node.localName);
 	return -1;
 };
 
 /**
- * Extracts the texture data of a node. For example: 
- * 
+ * Extracts the texture data of a node. For example:
+ *
  * <code>
  *	<texture name="...">
  * 		<img src="textureData.jpg"/>
  * 	</texture
  * </code>
- * 
+ *
  * In this case, "textureData.jpg" is returned as texture data.
- * 
+ *
  * @param   node  XML3D texture node
  * @returns texture data or null, if the given node is not a XML3D texture element
  */
-org.xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node) 
+org.xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
 {
 	if(node.localName != "texture")
 	{
 		return null;
 	}
-	
+
 	var textureChild = node.firstElementChild;
 	if(textureChild.localName != "img")
 	{
 		org.xml3d.debug.logWarning("child of texture element is not an img element");
 		return null;
 	}
-	
+
 	return textureChild.src;
 };
 
 /**
- * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true', 
+ * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true',
  * createDataTable() creates a new datatable, caches and returns it. If no
  * parameter is specified or 'forceNewInstance' is specified with 'false', the
  * cashed datatable is returned.<br/>
@@ -2324,19 +2454,19 @@ org.xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
  * datatable['name']['tupleSize'] : tuple size of the data element with name 'name' <br/>
  * datatable['name']['data']      : typed array (https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html)
  * 								    associated with the data element with name 'name'
- * 
- * @param   forceNewInstance 
+ *
+ * @param   forceNewInstance
  * 				indicates whether a new instance shall be created or the cached
- * 				datatable shall be returned			
+ * 				datatable shall be returned
  * @returns datatable
  */
 org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewInstance)
-{	
+{
 	if(forceNewInstance == undefined ? true : ! forceNewInstance)
 	{
 	   return this.dataTable;
 	}
-	
+
 	var value;
 
 	if(this.node.localName == "texture")
@@ -2348,14 +2478,14 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewIn
 		value = this.node.value;
 	}
 
-	var name    		 = this.node.name;		
+	var name    		 = this.node.name;
 	var result 			 = new Array(1);
 	var content          = new Array();
 	content['tupleSize'] = this.getTupleSize();
-		
+
 	result[name]    = content;
 	content['data'] = value;
-	result[name]    = content; 
+	result[name]    = content;
 	this.dataTable  = result;
 
 	return result;
@@ -2374,23 +2504,24 @@ org.xml3d.webgl.ValueDataAdapter.prototype.toString = function()
 /**
  * Class    org.xml3d.webgl.RootDataAdapter
  * extends: org.xml3d.webgl.DataAdapter
- * 
+ *
  * RootDataAdapter represents the root in the DataAdapter hierarchy (no parents).
- * 
+ *
  * @author  Benjamin Friedrich
  * @version 10/2010  1.0
  */
 
 /**
  * Constructor of org.xml3d.webgl.RootDataAdapter
- * 
+ *
  * @augments org.xml3d.webgl.DataAdapter
  * @constructor
- * 
+ *
  * @param factory
  * @param node
+ *
  */
-org.xml3d.webgl.RootDataAdapter = function(factory, node) 
+org.xml3d.webgl.RootDataAdapter = function(factory, node)
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
 };
@@ -2399,7 +2530,7 @@ org.xml3d.webgl.RootDataAdapter.prototype.constructor = org.xml3d.webgl.RootData
 
 /**
  * Indicates whether this DataAdapter is a RootAdapter (has no parent DataAdapter).
- * 
+ *
  * @returns true if this DataAdapter is a RootAdapter, otherwise false.
  */
 org.xml3d.webgl.RootDataAdapter.prototype.isRootAdapter = function()
@@ -2416,3 +2547,4 @@ org.xml3d.webgl.RootDataAdapter.prototype.toString = function()
 };
 
 /***********************************************************************/
+

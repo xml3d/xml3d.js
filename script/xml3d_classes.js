@@ -841,6 +841,9 @@ org.xml3d.classInfo.XML3DBaseType = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1039,6 +1042,14 @@ org.xml3d.classInfo.xml3d = function(node, context)
 			this.width = org.xml3d.initInt(event.newValue, 800);
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+		if (event.attrName == "activeView") 
+		{
+			this.activeView = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1091,6 +1102,9 @@ org.xml3d.classInfo.XML3DReferenceableType = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1229,6 +1243,9 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 			this.expose = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1296,6 +1313,14 @@ org.xml3d.classInfo.XML3DNestedDataContainerType = function(node, context)
 			this.expose = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+		if (event.attrName == "src") 
+		{
+			this.src = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1362,6 +1387,14 @@ org.xml3d.classInfo.data = function(node, context)
 			this.expose = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+		if (event.attrName == "script") 
+		{
+			this.script = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1410,6 +1443,9 @@ org.xml3d.classInfo.defs = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1552,6 +1588,9 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 			this.visible = org.xml3d.initBoolean(event.newValue, true);
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1675,6 +1714,19 @@ org.xml3d.classInfo.group = function(node, context)
 			this.visible = org.xml3d.initBoolean(event.newValue, true);
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+		if (event.attrName == "transform") 
+		{
+			this.transform = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+		if (event.attrName == "shader") 
+		{
+			this.shader = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1779,6 +1831,9 @@ org.xml3d.classInfo.XML3DGeometryType = function(node, context)
 			this.visible = org.xml3d.initBoolean(event.newValue, true);
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1938,6 +1993,14 @@ org.xml3d.classInfo.mesh = function(node, context)
 			this.type = org.xml3d.initEnum(event.newValue, 0, org.xml3d.MeshTypes);
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+		if (event.attrName == "src") 
+		{
+			this.src = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -1986,6 +2049,9 @@ org.xml3d.classInfo.XML3DTransformProviderType = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2258,6 +2324,9 @@ org.xml3d.classInfo.transform = function(node, context)
 			this.scaleOrientation = org.xml3d.initXML3DRotation(event.newValue, 0, 0, 1, 0);
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2325,6 +2394,19 @@ org.xml3d.classInfo.XML3DShaderProviderType = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+		if (event.attrName == "script") 
+		{
+			this.script = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+		if (event.attrName == "src") 
+		{
+			this.src = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2372,6 +2454,9 @@ org.xml3d.classInfo.XML3DSurfaceShaderProviderType = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2419,6 +2504,9 @@ org.xml3d.classInfo.shader = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2620,6 +2708,14 @@ org.xml3d.classInfo.light = function(node, context)
 			this.intensity = org.xml3d.initFloat(event.newValue, 1);
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+		if (event.attrName == "shader") 
+		{
+			this.shader = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2668,6 +2764,9 @@ org.xml3d.classInfo.XML3DLightShaderProviderType = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2715,6 +2814,9 @@ org.xml3d.classInfo.lightshader = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2869,6 +2971,9 @@ org.xml3d.classInfo.script = function(node, context)
 			this.type = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -2961,6 +3066,9 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3030,6 +3138,9 @@ org.xml3d.classInfo.float = function(node, context)
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3099,6 +3210,9 @@ org.xml3d.classInfo.float2 = function(node, context)
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3168,6 +3282,9 @@ org.xml3d.classInfo.float3 = function(node, context)
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3237,6 +3354,9 @@ org.xml3d.classInfo.float4 = function(node, context)
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3306,6 +3426,9 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3375,6 +3498,9 @@ org.xml3d.classInfo.int = function(node, context)
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3444,6 +3570,9 @@ org.xml3d.classInfo.bool = function(node, context)
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3857,6 +3986,9 @@ org.xml3d.classInfo.texture = function(node, context)
 			this.borderColor = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3904,6 +4036,9 @@ org.xml3d.classInfo.XML3DImageDataProviderType = function(node, context)
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -3996,6 +4131,9 @@ org.xml3d.classInfo.img = function(node, context)
 			this.src = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -4088,6 +4226,9 @@ org.xml3d.classInfo.video = function(node, context)
 			this.src = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};
@@ -4325,6 +4466,9 @@ org.xml3d.classInfo.view = function(node, context)
 			this.fieldOfView = org.xml3d.initFloat(event.newValue, 0.785398);
 			return org.xml3d.event.HANDLED;
 		}
+	
+
+	
 		
 		return org.xml3d.event.UNHANDLED;
 	};

@@ -815,6 +815,29 @@ org.xml3d.classInfo.XML3DBaseType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -828,12 +851,12 @@ org.xml3d.classInfo.XML3DBaseType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -921,6 +944,97 @@ org.xml3d.classInfo.xml3d = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "ondblclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.ondblclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousedown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousedown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseover")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseover = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousemove")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousemove = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseout")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseout = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeypress")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeypress = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeydown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeydown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeyup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeyup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "height")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -935,6 +1049,15 @@ org.xml3d.classInfo.xml3d = function(node, context)
 			this.width = org.xml3d.initInt("", 800);
 			return org.xml3d.event.HANDLED;
 		}
+	
+		if(attrName == "activeView")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.activeView = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -969,12 +1092,12 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1076,6 +1199,29 @@ org.xml3d.classInfo.XML3DReferenceableType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1089,12 +1235,12 @@ org.xml3d.classInfo.XML3DReferenceableType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1182,6 +1328,27 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "map")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -1196,6 +1363,8 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 			this.expose = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1220,12 +1389,12 @@ org.xml3d.classInfo.XML3DDataContainerType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1267,6 +1436,50 @@ org.xml3d.classInfo.XML3DNestedDataContainerType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "map")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.map = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "expose")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.expose = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+		if(attrName == "src")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.src = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1290,12 +1503,12 @@ org.xml3d.classInfo.XML3DNestedDataContainerType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1342,6 +1555,57 @@ org.xml3d.classInfo.data = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "map")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.map = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "expose")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.expose = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+		if(attrName == "src")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.src = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "script")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.script = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1364,12 +1628,12 @@ org.xml3d.classInfo.data = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1389,6 +1653,11 @@ org.xml3d.classInfo.data = function(node, context)
 		}
 	
 
+		if (event.attrName == "src") 
+		{
+			this.src = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
 		if (event.attrName == "script") 
 		{
 			this.script = org.xml3d.initString(event.newValue, "");
@@ -1416,6 +1685,29 @@ org.xml3d.classInfo.defs = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1430,12 +1722,12 @@ org.xml3d.classInfo.defs = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1495,6 +1787,97 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "ondblclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.ondblclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousedown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousedown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseover")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseover = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousemove")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousemove = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseout")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseout = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeypress")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeypress = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeydown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeydown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeyup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeyup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "visible")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -1502,6 +1885,8 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 			this.visible = org.xml3d.initBoolean("", true);
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1520,12 +1905,12 @@ org.xml3d.classInfo.XML3DGraphType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1613,6 +1998,120 @@ org.xml3d.classInfo.group = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "ondblclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.ondblclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousedown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousedown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseover")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseover = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousemove")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousemove = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseout")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseout = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeypress")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeypress = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeydown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeydown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeyup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeyup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "visible")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.visible = org.xml3d.initBoolean("", true);
+			return org.xml3d.event.HANDLED;
+		}
+	
+		if(attrName == "transform")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.transform = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "shader")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.shader = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1646,12 +2145,12 @@ org.xml3d.classInfo.group = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1750,6 +2249,106 @@ org.xml3d.classInfo.XML3DGeometryType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "ondblclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.ondblclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousedown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousedown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseover")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseover = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousemove")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousemove = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseout")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseout = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeypress")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeypress = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeydown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeydown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeyup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeyup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "visible")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.visible = org.xml3d.initBoolean("", true);
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1763,12 +2362,12 @@ org.xml3d.classInfo.XML3DGeometryType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -1884,6 +2483,104 @@ org.xml3d.classInfo.mesh = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "ondblclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.ondblclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousedown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousedown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseover")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseover = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousemove")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousemove = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseout")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseout = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeypress")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeypress = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeydown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeydown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeyup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeyup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "visible")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.visible = org.xml3d.initBoolean("", true);
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "type")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -1891,6 +2588,15 @@ org.xml3d.classInfo.mesh = function(node, context)
 			this.type = org.xml3d.initEnum("", 0, org.xml3d.MeshTypes);
 			return org.xml3d.event.HANDLED;
 		}
+	
+		if(attrName == "src")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.src = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1920,12 +2626,12 @@ org.xml3d.classInfo.mesh = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2023,6 +2729,29 @@ org.xml3d.classInfo.XML3DTransformProviderType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2036,12 +2765,12 @@ org.xml3d.classInfo.XML3DTransformProviderType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2213,6 +2942,27 @@ org.xml3d.classInfo.transform = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "translation")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -2248,6 +2998,8 @@ org.xml3d.classInfo.transform = function(node, context)
 			this.scaleOrientation = org.xml3d.initXML3DRotation("", 0, 0, 1, 0);
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2286,12 +3038,12 @@ org.xml3d.classInfo.transform = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2348,6 +3100,43 @@ org.xml3d.classInfo.XML3DShaderProviderType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+		if(attrName == "script")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.script = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "src")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.src = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2381,12 +3170,12 @@ org.xml3d.classInfo.XML3DShaderProviderType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2428,6 +3217,43 @@ org.xml3d.classInfo.XML3DSurfaceShaderProviderType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+		if(attrName == "script")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.script = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "src")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.src = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2441,12 +3267,12 @@ org.xml3d.classInfo.XML3DSurfaceShaderProviderType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2456,6 +3282,16 @@ org.xml3d.classInfo.XML3DSurfaceShaderProviderType = function(node, context)
 		}
 	
 
+		if (event.attrName == "script") 
+		{
+			this.script = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+		if (event.attrName == "src") 
+		{
+			this.src = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
 	
 		
 		return org.xml3d.event.UNHANDLED;
@@ -2478,6 +3314,43 @@ org.xml3d.classInfo.shader = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+		if(attrName == "script")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.script = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "src")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.src = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2491,12 +3364,12 @@ org.xml3d.classInfo.shader = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2506,6 +3379,16 @@ org.xml3d.classInfo.shader = function(node, context)
 		}
 	
 
+		if (event.attrName == "script") 
+		{
+			this.script = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+		if (event.attrName == "src") 
+		{
+			this.src = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
 	
 		
 		return org.xml3d.event.UNHANDLED;
@@ -2584,6 +3467,104 @@ org.xml3d.classInfo.light = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "ondblclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.ondblclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousedown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousedown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseover")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseover = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousemove")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousemove = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseout")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseout = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeypress")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeypress = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeydown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeydown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeyup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeyup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "visible")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.visible = org.xml3d.initBoolean("", true);
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "global")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -2598,6 +3579,15 @@ org.xml3d.classInfo.light = function(node, context)
 			this.intensity = org.xml3d.initFloat("", 1);
 			return org.xml3d.event.HANDLED;
 		}
+	
+		if(attrName == "shader")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.shader = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2630,12 +3620,12 @@ org.xml3d.classInfo.light = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2738,6 +3728,43 @@ org.xml3d.classInfo.XML3DLightShaderProviderType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+		if(attrName == "script")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.script = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "src")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.src = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2751,12 +3778,12 @@ org.xml3d.classInfo.XML3DLightShaderProviderType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2766,6 +3793,16 @@ org.xml3d.classInfo.XML3DLightShaderProviderType = function(node, context)
 		}
 	
 
+		if (event.attrName == "script") 
+		{
+			this.script = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+		if (event.attrName == "src") 
+		{
+			this.src = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
 	
 		
 		return org.xml3d.event.UNHANDLED;
@@ -2788,6 +3825,43 @@ org.xml3d.classInfo.lightshader = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+		if(attrName == "script")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.script = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "src")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.src = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2801,12 +3875,12 @@ org.xml3d.classInfo.lightshader = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -2816,6 +3890,16 @@ org.xml3d.classInfo.lightshader = function(node, context)
 		}
 	
 
+		if (event.attrName == "script") 
+		{
+			this.script = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
+		if (event.attrName == "src") 
+		{
+			this.src = org.xml3d.initString(event.newValue, "");
+			return org.xml3d.event.HANDLED;
+		}
 	
 		
 		return org.xml3d.event.UNHANDLED;
@@ -2839,7 +3923,7 @@ org.xml3d.classInfo.script = function(node, context)
 	node.setValue = function(e) 
 	{
 		var oldValue = this.value;
-		this.value = org.xml3d.initString(e.newValue, null); 
+		this.value = org.xml3d.initString(e.newValue, ""); 
 		
 		if (this.parentNode.notificationRequired() && oldValue != this.value)
 		{
@@ -2905,6 +3989,27 @@ org.xml3d.classInfo.script = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "src")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -2919,10 +4024,12 @@ org.xml3d.classInfo.script = function(node, context)
 			this.type = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node.value = org.xml3d.initString(node.getTextContent(), null);
+	node.value = org.xml3d.initString(node.getTextContent(), "");
 
 	if(node.value.setOwnerNode)
 	{
@@ -2948,12 +4055,12 @@ org.xml3d.classInfo.script = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3023,6 +4130,27 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "name")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -3030,6 +4158,8 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 			this.name = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -3048,12 +4178,12 @@ org.xml3d.classInfo.XML3DDataSourceType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3091,7 +4221,7 @@ org.xml3d.classInfo.float = function(node, context)
 	node.setValue = function(e) 
 	{
 		var oldValue = this.value;
-		this.value = org.xml3d.initFloatArray(e.newValue, null); 
+		this.value = org.xml3d.initFloatArray(e.newValue, ""); 
 		
 		if (this.parentNode.notificationRequired() && oldValue != this.value)
 		{
@@ -3101,10 +4231,40 @@ org.xml3d.classInfo.float = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "name")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.name = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node.value = org.xml3d.initFloatArray(node.getTextContent(), null);
+	node.value = org.xml3d.initFloatArray(node.getTextContent(), "");
 
 	if(node.value.setOwnerNode)
 	{
@@ -3120,12 +4280,12 @@ org.xml3d.classInfo.float = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3163,7 +4323,7 @@ org.xml3d.classInfo.float2 = function(node, context)
 	node.setValue = function(e) 
 	{
 		var oldValue = this.value;
-		this.value = org.xml3d.initFloat2Array(e.newValue, null); 
+		this.value = org.xml3d.initFloat2Array(e.newValue, ""); 
 		
 		if (this.parentNode.notificationRequired() && oldValue != this.value)
 		{
@@ -3173,10 +4333,40 @@ org.xml3d.classInfo.float2 = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "name")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.name = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node.value = org.xml3d.initFloat2Array(node.getTextContent(), null);
+	node.value = org.xml3d.initFloat2Array(node.getTextContent(), "");
 
 	if(node.value.setOwnerNode)
 	{
@@ -3192,12 +4382,12 @@ org.xml3d.classInfo.float2 = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3235,7 +4425,7 @@ org.xml3d.classInfo.float3 = function(node, context)
 	node.setValue = function(e) 
 	{
 		var oldValue = this.value;
-		this.value = org.xml3d.initFloat3Array(e.newValue, null); 
+		this.value = org.xml3d.initFloat3Array(e.newValue, ""); 
 		
 		if (this.parentNode.notificationRequired() && oldValue != this.value)
 		{
@@ -3245,10 +4435,40 @@ org.xml3d.classInfo.float3 = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "name")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.name = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node.value = org.xml3d.initFloat3Array(node.getTextContent(), null);
+	node.value = org.xml3d.initFloat3Array(node.getTextContent(), "");
 
 	if(node.value.setOwnerNode)
 	{
@@ -3264,12 +4484,12 @@ org.xml3d.classInfo.float3 = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3307,7 +4527,7 @@ org.xml3d.classInfo.float4 = function(node, context)
 	node.setValue = function(e) 
 	{
 		var oldValue = this.value;
-		this.value = org.xml3d.initFloat4Array(e.newValue, null); 
+		this.value = org.xml3d.initFloat4Array(e.newValue, ""); 
 		
 		if (this.parentNode.notificationRequired() && oldValue != this.value)
 		{
@@ -3317,10 +4537,40 @@ org.xml3d.classInfo.float4 = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "name")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.name = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node.value = org.xml3d.initFloat4Array(node.getTextContent(), null);
+	node.value = org.xml3d.initFloat4Array(node.getTextContent(), "");
 
 	if(node.value.setOwnerNode)
 	{
@@ -3336,12 +4586,12 @@ org.xml3d.classInfo.float4 = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3389,6 +4639,36 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "name")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.name = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -3408,12 +4688,12 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3451,7 +4731,7 @@ org.xml3d.classInfo.int = function(node, context)
 	node.setValue = function(e) 
 	{
 		var oldValue = this.value;
-		this.value = org.xml3d.initIntArray(e.newValue, null); 
+		this.value = org.xml3d.initIntArray(e.newValue, ""); 
 		
 		if (this.parentNode.notificationRequired() && oldValue != this.value)
 		{
@@ -3461,10 +4741,40 @@ org.xml3d.classInfo.int = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "name")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.name = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node.value = org.xml3d.initIntArray(node.getTextContent(), null);
+	node.value = org.xml3d.initIntArray(node.getTextContent(), "");
 
 	if(node.value.setOwnerNode)
 	{
@@ -3480,12 +4790,12 @@ org.xml3d.classInfo.int = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3523,7 +4833,7 @@ org.xml3d.classInfo.bool = function(node, context)
 	node.setValue = function(e) 
 	{
 		var oldValue = this.value;
-		this.value = org.xml3d.initBoolArray(e.newValue, null); 
+		this.value = org.xml3d.initBoolArray(e.newValue, ""); 
 		
 		if (this.parentNode.notificationRequired() && oldValue != this.value)
 		{
@@ -3533,10 +4843,40 @@ org.xml3d.classInfo.bool = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "name")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.name = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node.value = org.xml3d.initBoolArray(node.getTextContent(), null);
+	node.value = org.xml3d.initBoolArray(node.getTextContent(), "");
 
 	if(node.value.setOwnerNode)
 	{
@@ -3552,12 +4892,12 @@ org.xml3d.classInfo.bool = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -3818,6 +5158,34 @@ org.xml3d.classInfo.texture = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "name")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.name = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "type")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -3874,6 +5242,8 @@ org.xml3d.classInfo.texture = function(node, context)
 			this.borderColor = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -3928,12 +5298,12 @@ org.xml3d.classInfo.texture = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -4010,6 +5380,29 @@ org.xml3d.classInfo.XML3DImageDataProviderType = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -4023,12 +5416,12 @@ org.xml3d.classInfo.XML3DImageDataProviderType = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -4088,6 +5481,27 @@ org.xml3d.classInfo.img = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "src")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -4095,6 +5509,8 @@ org.xml3d.classInfo.img = function(node, context)
 			this.src = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -4113,12 +5529,12 @@ org.xml3d.classInfo.img = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -4183,6 +5599,27 @@ org.xml3d.classInfo.video = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "src")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -4190,6 +5627,8 @@ org.xml3d.classInfo.video = function(node, context)
 			this.src = org.xml3d.initString("", "");
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -4208,12 +5647,12 @@ org.xml3d.classInfo.video = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 
@@ -4334,6 +5773,104 @@ org.xml3d.classInfo.view = function(node, context)
 
 	node.resetAttribute = function(attrName)
 	{
+		if(attrName == "id")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.id = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "class")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.class = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "style")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.style = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "ondblclick")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.ondblclick = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousedown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousedown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseover")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseover = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmousemove")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmousemove = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onmouseout")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onmouseout = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeypress")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeypress = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeydown")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeydown = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "onkeyup")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.onkeyup = org.xml3d.initString("", "");
+			return org.xml3d.event.HANDLED;
+		}
+		if(attrName == "visible")
+		{
+			// An event is triggered through the corresponding setter. Therefore,
+			// no further notification is required.
+			this.visible = org.xml3d.initBoolean("", true);
+			return org.xml3d.event.HANDLED;
+		}
 		if(attrName == "position")
 		{
 			// An event is triggered through the corresponding setter. Therefore,
@@ -4355,6 +5892,8 @@ org.xml3d.classInfo.view = function(node, context)
 			this.fieldOfView = org.xml3d.initFloat("", 0.785398);
 			return org.xml3d.event.HANDLED;
 		}
+	
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -4383,12 +5922,12 @@ org.xml3d.classInfo.view = function(node, context)
 	{
 		if (event.attrName == "id") 
 		{
-			this.id = org.xml3d.initString(event.newValue, null);
+			this.id = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "class") 
 		{
-			this.class = org.xml3d.initString(event.newValue, null);
+			this.class = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 		if (event.attrName == "style") 

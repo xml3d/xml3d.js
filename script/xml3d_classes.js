@@ -701,6 +701,35 @@ org.xml3d.isAnyURI = function(node)
 	return org.xml3d.isString(node);
 };
 
+org.xml3d.canvasEvents = {"mousedown":1, "mouseup":1};
+org.xml3d.configureXML3DEvents = function(node) {
+	node.__proto__.__addEventListener = node.__proto__.addEventListener;
+	node.__proto__.__removeEventListener = node.__proto__.removeEventListener;
+	
+	node.addEventListener = function(type, listener, useCapture) {
+		if(type in org.xml3d.canvasEvents) {
+			for (i = 0; i < this.adapters.length; i++) {
+				if (this.adapters[i].addEventListener) {
+					this.adapters[i].addEventListener(type, listener, useCapture);
+				}
+			}
+		}
+		else
+			this.__addEventListener(type, listener, useCapture);
+	};
+	node.removeEventListener = function(type, listener, useCapture) {
+		if(type in org.xml3d.canvasEvents) {
+			for (i = 0; i < this.adapters.length; i++) {
+				if (this.adapters[i].removeEventListener) {
+					this.adapters[i].removeEventListener(type, listener, useCapture);
+				}
+			}
+		}
+		else
+			this.__removeEventListener(type, listener, useCapture);
+	};
+};
+
 
 // MeshTypes
 org.xml3d.MeshTypes = {};
@@ -883,6 +912,7 @@ org.xml3d.classInfo.XML3DBaseType = function(node, context)
 org.xml3d.classInfo.xml3d = function(node, context) 
 {
 	org.xml3d.classInfo.XML3DBaseType(node, context);
+	org.xml3d.configureXML3DEvents(node);
 	//org.xml3d.classInfo.Xml3dNode(node, context);
 
 	node.__defineSetter__("height", function (value) 
@@ -6045,10 +6075,22 @@ org.xml3d.methods.viewSetDirection = function(quat) {
 	this.orientation = quat;
 };
 
+org.xml3d.methods.viewSetUpVector = function() {
+	throw Error("view::setSetUpVector not implemeted yet.");
+};
+
 org.xml3d.methods.viewGetUpVector = function() {
 	return this.orientation.rotateVec3(new XML3DVec3(0, 1, 0));
 };
 
 org.xml3d.methods.viewLookAt = function(vec) {
 	// TODO: write lookat function
+};
+
+org.xml3d.methods.xml3dGetElementByPoint = function(x, y) {
+	for (i = 0; i < this.adapters.length; i++) {
+		if (this.adapters[i].getElementByPoint) {
+			return this.adapters[i].getElementByPoint(x, y);
+		}
+	}
 };

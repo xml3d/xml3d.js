@@ -308,13 +308,14 @@ org.xml3d.webgl.createContext = (function() {
 
 	Context.prototype.mouseDown = function(gl, button, x, y) {
 			this.isDragging = true;
+			var scene = this.scene;
 			for (var i in this.events.mousedown) {
-				//var evt=document.createEvent("MouseEvents");
-			    //if(evt)evt.initMouseEvent("mousedown",true,true,document.defaultView,1,0,0,0,0,false,false,false,false,0,null);
-				this.ui.mouseDownEvent.__defineGetter__("normal", function() {alert(this);});
-			    this.ui.mouseDownEvent.__defineGetter__("position", function() {alert(this);});
+				var v = scene.xml3d.currentPickPos.v;
+				var pos = new XML3DVec3(v[0], v[1], v[2]);
+				
+				this.ui.mouseDownEvent.__defineGetter__("normal", function() {return new XML3DVec3(0, 0, 1);});
+			    this.ui.mouseDownEvent.__defineGetter__("position", function() {return pos});
 			    this.events.mousedown[i].listener.call(this.events.mousedown[i].node, this.ui.mouseDownEvent);
-			    //this.events.mousedown[i].node.dispatchEvent(this.ui.mouseDownEvent);
 			}
 	};
 
@@ -661,12 +662,9 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			return;
 		gl = this.ctx.gl;
 
-		var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
-				-Number.MAX_VALUE);
-		var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE,
-				Number.MAX_VALUE);
-
 		if (needPickingDraw) {
+			var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
+			var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 			if (this.drawableObjects === undefined || !this.drawableObjects) {
 				this.drawableObjects = [];
@@ -692,6 +690,9 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 				this.pzPos[i] = [ i, center[2] ];
 					this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
 			}
+			this.bbMin = volumeMin;
+			this.bbMax = volumeMax;
+			
 			this.pzPos.sort(function(a, b) {
 				return a[1] - b[1];
 			});
@@ -736,7 +737,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		pickPos.v[0] = data[0] / 255;
 		pickPos.v[1] = data[1] / 255;
 		pickPos.v[2] = data[2] / 255;
-		pickPos = pickPos.mul(volumeMax.sub(volumeMin)).add(volumeMin);
+		pickPos = pickPos.mul(this.bbMax.sub(this.bbMin)).add(this.bbMin);
 		var objId = 255 - data[3] - 1;
 		if (objId >= 0 && data[3] > 0) {
 			this.scene.xml3d.currentPickPos = pickPos;
@@ -1021,40 +1022,23 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 			return this.sp;
 		}));
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textureSrc, semantic) {
-
-	var gl = this.factory.ctx.gl;
-	org.xml3d.webgl.checkError(gl, "Error before creating texture:");
-	var imageData = null;
-	var texture = null;
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textureInfo, name) {
 
 	//See if this texture already exists
 	for (var t in this.textures) {
 		var tex = this.textures[t];
-		if (tex.semantic == semantic && tex.src == textureSrc)
+		if (tex.name == name && tex.src == textureInfo.src)
 			return;
 	}
-
-	var options = ({
-		/*Custom texture options would go here, SGL's default options are:
-
-		minFilter        : gl.LINEAR,
-		magFilter        : gl.LINEAR,
-		wrapS            : gl.CLAMP_TO_EDGE,
-		wrapT            : gl.CLAMP_TO_EDGE,
-		isDepth          : false,
-		depthMode        : gl.LUMINANCE,
-		depthCompareMode : gl.COMPARE_R_TO_TEXTURE,
-		depthCompareFunc : gl.LEQUAL,
-		generateMipmap   : false,
-		flipY            : true,
-		premultiplyAlpha : false,
-		onload           : null
-		 */
-	});
+	var gl = this.factory.ctx.gl;
+	org.xml3d.webgl.checkError(gl, "Error before creating texture:");
+	
+	var texture = null;
+	var options = textureInfo.options;
+	var textureSrc = textureInfo.src;
 
 	//null would be replaced with options, --CANNOT PASS EMPTY OPTIONS OBJECT--
-	texture = new SglTexture2D(gl, textureSrc, null);
+	texture = new SglTexture2D(gl, textureInfo.src, options);
 	org.xml3d.webgl.checkError(gl, "Error after creating texture:" + textureSrc);
 
 	if (!texture) {
@@ -1063,7 +1047,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	}
 	//Create a container for the texture
 	var texContainer = ({
-		semantic 	: semantic,
+		name 	: name,
 		src 		: textureSrc,
 		tex 		: texture
 	});
@@ -1120,17 +1104,19 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	for (var p in sParams)
 	{
 		var data = sParams[p].data;
-		if (typeof data == typeof "") {
-			var check = data.match(/(jpg|png|gif|jpeg|bmp)/g);
-			if (check) {
+		if (sParams[p].isTexture) {
+			
+			//var check = data.match(/(jpg|png|gif|jpeg|bmp)/g);
+			//if (check) {
 				//Probably a texture, try to create one
-				this.initTexture(sParams[p].data, p);
+				this.initTexture(sParams[p], p);
 				continue;
-			} else {
+		}
+		/*else {
 				org.xml3d.debug.logError("Shader did not expect a String as data for "+p);
 				continue;
 			}
-		}
+		}*/
 		if (data.length == 1)
 			data = data[0];
 		parameters[p] = data;
@@ -1319,7 +1305,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		{
 			var temp = shader.textures[t];
 			if (temp.tex.isValid)
-				samplers[temp.semantic] = temp.tex;
+				samplers[temp.name] = temp.tex;
 			else
 				invalidTextures = true;
 		}
@@ -2058,12 +2044,16 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 		node.localName == "float4"   ||
 		node.localName == "float4x4" ||
 		node.localName == "int"      ||
-		node.localName == "bool"     ||
-		node.localName == "texture")
+		node.localName == "bool"     )
 	{
 		return new org.xml3d.webgl.ValueDataAdapter(this, node);
 	}
 
+	if (node.localName == "texture")
+	{
+		return new org.xml3d.webgl.TextureDataAdapter(this, node);
+	}
+			
 	if (node.localName == "data")
 	{
 		return new org.xml3d.webgl.DataAdapter(this, node);
@@ -2383,8 +2373,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 {
 	if (this.node.localName == "float" ||
 		this.node.localName == "int"   ||
-		this.node.localName == "bool"  ||
-		this.node.localName == "texture")
+		this.node.localName == "bool"  )
 	{
 		return 1;
 	}
@@ -2467,17 +2456,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewIn
 	   return this.dataTable;
 	}
 
-	var value;
-
-	if(this.node.localName == "texture")
-	{
-		value = this.extractTextureData(this.node);
-	}
-	else
-	{
-		value = this.node.value;
-	}
-
+	var value = this.node.value;
 	var name    		 = this.node.name;
 	var result 			 = new Array(1);
 	var content          = new Array();
@@ -2546,5 +2525,83 @@ org.xml3d.webgl.RootDataAdapter.prototype.toString = function()
 	return "org.xml3d.webgl.RootDataAdapter";
 };
 
+org.xml3d.webgl.TextureDataAdapter = function(factory, node)
+{
+	org.xml3d.webgl.DataAdapter.call(this, factory, node);
+	this.init = function()
+	{
+		this.createDataTable(true);
+	};
+};
+org.xml3d.webgl.TextureDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
+org.xml3d.webgl.TextureDataAdapter.prototype.constructor = org.xml3d.webgl.TextureDataAdapter;
+
+org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNewInstance)
+{
+	if(forceNewInstance == undefined ? true : ! forceNewInstance)
+	{
+	   return this.dataTable;
+	}
+
+	var clampToGL = function(gl, modeStr) {
+		if (modeStr == "clamp")
+			return gl.CLAMP_TO_EDGE;
+		if (modeStr == "repeat")
+			return gl.REPEAT;
+		return gl.CLAMP_TO_EDGE;
+	};
+	
+	var node = this.node;
+	var textureChild = node.firstElementChild;
+	if(textureChild.localName != "img")
+	{
+		org.xml3d.debug.logWarning("child of texture element is not an img element");
+		return null;
+	}
+
+	var options = ({
+		/*Custom texture options would go here, SGL's default options are:
+
+		minFilter        : gl.LINEAR,
+		magFilter        : gl.LINEAR,
+		wrapS            : gl.CLAMP_TO_EDGE,
+		wrapT            : gl.CLAMP_TO_EDGE,
+		isDepth          : false,
+		depthMode        : gl.LUMINANCE,
+		depthCompareMode : gl.COMPARE_R_TO_TEXTURE,
+		depthCompareFunc : gl.LEQUAL,
+		generateMipmap   : false,
+		flipY            : true,
+		premultiplyAlpha : false,
+		onload           : null
+		 */
+		wrapS            : clampToGL(gl, node.wrapS),
+		wrapT            : clampToGL(gl, node.wrapT),
+		generateMipmap   : false
+		
+	});	
+	var result 			 = new Array(1);
+	//var value = new SglTexture2D(gl, textureSrc, options);
+	var name    		 = this.node.name;
+	var content          = new Array();
+	content['tupleSize'] = 1;
+	console.log(options.wrapS);
+	
+	content['options'] = options;
+	content['src'] = textureChild.src;
+	content['isTexture'] = true;
+	
+	result[name]    = content;
+	this.dataTable  = result;
+	return result;
+};
+
+/**
+ * Returns String representation of this TextureDataAdapter
+ */
+org.xml3d.webgl.TextureDataAdapter.prototype.toString = function()
+{
+	return "org.xml3d.webgl.TextureDataAdapter";
+};
 /***********************************************************************/
 

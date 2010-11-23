@@ -235,6 +235,31 @@ org.xml3d.webgl.createContext = (function() {
 		this.pickBuffer.unbind();
 
 	};
+	
+	Context.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
+		if (!pickedObj)
+			return;
+		var gl = this.gl;
+		if (!this.normalPickBuffer)
+		{
+			this.normalPickBuffer = new SglFramebuffer(gl, this.getCanvasWidth(), this.getCanvasHeight(),
+					[gl.RGBA], gl.DEPTH_COMPONENT16, null,
+					{ depthAsRenderbuffer : true }
+			);
+			if (!this.normalPickBuffer.isValid)
+				return;
+		}
+		this.normalPickBuffer.bind();
+		
+		gl.enable(gl.DEPTH_TEST);
+		gl.disable(gl.CULL_FACE);
+		gl.disable(gl.BLEND);
+
+		this.renderer.renderPickedNormals(pickedObj, screenX, screenY);
+
+		gl.disable(gl.DEPTH_TEST);
+		this.normalPickBuffer.unbind();
+	};
 
 	Context.prototype.renderScene = function() {
 		var gl = this.gl;
@@ -282,7 +307,7 @@ org.xml3d.webgl.createContext = (function() {
 			this.renderPick(x, y);
 			if (this.scene.xml3d.currentPickObj)
 			{
-				var currentObj = this.scene.xml3d.currentPickObj;
+				var currentObj = this.scene.xml3d.currentPickObj[1].node;
 				var evtMethod = currentObj.getAttribute('onclick');
 				if (evtMethod && currentObj.evalMethod) {
 					currentObj.evalMethod(evtMethod);
@@ -309,11 +334,18 @@ org.xml3d.webgl.createContext = (function() {
 	Context.prototype.mouseDown = function(gl, button, x, y) {
 			this.isDragging = true;
 			var scene = this.scene;
-			for (var i in this.events.mousedown) {
+			if (!scene.xml3d.currentPickPos)
+				return;
+			
+			for (var i in this.events.mousedown) {				
 				var v = scene.xml3d.currentPickPos.v;
-				var pos = new XML3DVec3(v[0], v[1], v[2]);
-				
-				this.ui.mouseDownEvent.__defineGetter__("normal", function() {return new XML3DVec3(0, 0, 1);});
+				var pos = new XML3DVec3(v[0], v[1], v[2]);				
+				var ctx = this;
+				this.ui.mouseDownEvent.__defineGetter__("normal", function() {
+					ctx.renderPickedNormals(scene.xml3d.currentPickObj, x, y); 
+					var v = scene.xml3d.currentPickNormal.v;
+					return new XML3DVec3(v[0], v[1], v[2]);
+					});
 			    this.ui.mouseDownEvent.__defineGetter__("position", function() {return pos});
 			    this.events.mousedown[i].listener.call(this.events.mousedown[i].node, this.ui.mouseDownEvent);
 			}
@@ -329,7 +361,7 @@ org.xml3d.webgl.createContext = (function() {
 
 		if (this.scene.xml3d.currentPickObj)
 		{
-			var currentObj = this.scene.xml3d.currentPickObj;
+			var currentObj = this.scene.xml3d.currentPickObj[1].node;
 			if (currentObj != lastObj)
 			{
 				//The mouse is now over a different object, so call the new object's
@@ -348,7 +380,7 @@ org.xml3d.webgl.createContext = (function() {
 					}
 				}
 				if (lastObj) {
-					currentObj = lastObj;
+					currentObj = lastObj[1].node;
 					evtMethod = currentObj.getAttribute('onmouseout');
 					if (evtMethod && currentObj.evalMethod) {
 						currentObj.evalMethod(evtMethod);
@@ -369,7 +401,7 @@ org.xml3d.webgl.createContext = (function() {
 		} else if (lastObj) {
 			//The mouse has left the last object and is now over nothing, call
 			//mouseout on the last object.
-			var currentObj = lastObj;
+			var currentObj = lastObj[1].node;
 			var evtMethod = currentObj.getAttribute('onmouseout');
 			if (evtMethod && currentObj.evalMethod) {
 				currentObj.evalMethod(evtMethod);
@@ -701,7 +733,6 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 				var obj = this.drawableObjects[this.pzPos[j][0]];
 				var transform = obj[0];
 				var shape = obj[1];
-				var shader = obj[2];
 
 				var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
 
@@ -742,7 +773,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		if (objId >= 0 && data[3] > 0) {
 			this.scene.xml3d.currentPickPos = pickPos;
 			var pickedObj = this.drawableObjects[(this.pzPos[objId][0])];
-			this.scene.xml3d.currentPickObj = pickedObj[1].node;
+			this.scene.xml3d.currentPickObj = pickedObj;
 		} else {
 			this.scene.xml3d.currentPickPos = null;
 			this.scene.xml3d.currentPickObj = null;
@@ -750,6 +781,45 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 	} catch (e) {
 		org.xml3d.debug.logError(e);
 	}
+};
+
+org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
+	gl = this.ctx.gl;
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+	
+	var transform = pickedObj[0];
+	var shape = pickedObj[1];
+	var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:pickedNormals");
+	
+	var xform = new SglTransformStack();
+	xform.view.load(this.camera.getViewMatrix());
+	var projMatrix = this.camera
+	.getProjectionMatrix(this.width / this.height);
+	xform.projection.load(projMatrix);
+	xform.model.load(transform);
+	
+	var parameters = {
+		modelViewMatrix : xform.modelViewMatrix,
+		modelViewProjectionMatrix : xform.modelViewProjectionMatrix
+	};
+
+	shader = {};
+	shader.sp = sp;
+	shape.render(shader, parameters);
+	
+	org.xml3d.webgl.checkError(gl, "Before readpixels");
+	var data = new Uint8Array(8);
+	gl.readPixels(screenX, screenY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+	org.xml3d.webgl.checkError(gl, "After readpixels");
+
+	var pickNorm = new SglVec3(0, 0, 0);
+	pickNorm.v[0] = data[0] / 255;
+	pickNorm.v[1] = data[1] / 255;
+	pickNorm.v[2] = data[2] / 255;
+
+	this.scene.xml3d.currentPickNormal = pickNorm;
+	xform.model.pop();
+	xform.projection.pop();
 };
 
 org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
@@ -893,9 +963,9 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.removeEventListener = functio
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y) {
-	this.factory.ctx.renderPick(x, y);
+	this.factory.ctx.renderPick(x, this.canvas.height - y);
 	//alert(this.node.currentPickObj.localName);
-	return this.node.currentPickObj;
+	return this.node.currentPickObj[1].node;
 };
 
 // Adapter for <view>
@@ -1795,6 +1865,35 @@ g_shaders["urn:xml3d:shader:picking"] = {
 
 		+ "void main(void) {\n"
 		+ "    gl_FragColor = vec4(worldCoord, id);\n"
+		+ "}\n"
+	};
+
+g_shaders["urn:xml3d:shader:pickedNormals"] = {
+		vertex:
+
+		"attribute vec3 position;\n"
+		+ "attribute vec3 normal;\n"
+		+ "uniform mat4 modelViewMatrix;\n"
+		+ "uniform mat4 modelViewProjectionMatrix;\n"
+
+		+ "varying vec3 fragNormal;\n"
+		
+		+ "void main(void) {\n"
+		+ "	   fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
+		+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
+		+ "}" ,
+
+		fragment:
+
+
+		"#ifdef GL_ES\n"
+		+"precision highp float;\n"
+		+"#endif\n\n"
+		
+		+ "varying vec3 fragNormal;\n"
+
+		+ "void main(void) {\n"
+		+ "    gl_FragColor = vec4(normalize(fragNormal), 1.0);\n"
 		+ "}\n"
 	};
 

@@ -799,7 +799,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	xform.model.load(transform);
 	
 	var parameters = {
-		modelViewMatrix : xform.modelViewMatrix,
+		modelViewMatrix : transform,
 		modelViewProjectionMatrix : xform.modelViewProjectionMatrix
 	};
 

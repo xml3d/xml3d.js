@@ -482,6 +482,7 @@ org.xml3d.util.getStyle = function(oElm, strCssRule) {
 		});
 		strValue = oElm.currentStyle[strCssRule];
 	}
+
 	return strValue;
 };
 

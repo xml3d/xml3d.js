@@ -94,8 +94,8 @@ org.xml3d.Camera.prototype.inverseTransformOf = function(vec) {
 };
 
 org.xml3d.Xml3dSceneController = function(xml3d) {
-	this.webgl = !xml3d.style;
-
+	this.webgl = typeof(xml3d.style) !== 'object';
+	
 	this.xml3d = xml3d;
 	this.canvas = this.webgl ?  xml3d.canvas : xml3d;
 	

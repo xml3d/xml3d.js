@@ -816,7 +816,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	pickNorm.v[0] = data[0] / 255;
 	pickNorm.v[1] = data[1] / 255;
 	pickNorm.v[2] = data[2] / 255;
-
+	pickNorm.v = sglSubV3S(sglMulV3S(pickNorm.v, 2.0), 1.0);
 	this.scene.xml3d.currentPickNormal = pickNorm;
 	xform.model.pop();
 	xform.projection.pop();
@@ -1893,7 +1893,7 @@ g_shaders["urn:xml3d:shader:pickedNormals"] = {
 		+ "varying vec3 fragNormal;\n"
 
 		+ "void main(void) {\n"
-		+ "    gl_FragColor = vec4(normalize(fragNormal), 1.0);\n"
+		+ "    gl_FragColor = vec4((normalize(fragNormal)+1.0)/2.0, 1.0);\n"
 		+ "}\n"
 	};
 

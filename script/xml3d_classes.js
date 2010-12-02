@@ -812,8 +812,8 @@ org.xml3d.classInfo.Xml3dNode = function(node, c)
 	
 	node.update = function() 
 	{
-		if (this.adapters[0])
-			this.adapters[0].factory.ctx.redraw();
+		//if (this.adapters[0])
+		//	this.adapters[0].factory.ctx.redraw("xml3d::update");
  	};
  	
 	node.setField = function(event) 

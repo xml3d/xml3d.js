@@ -107,6 +107,7 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	canvas.width = canvas.clientWidth;
 	canvas.height = canvas.clientHeight;
 	canvas.style.display = "block";
+	// TODO: Check background color (see conformace tests)
 	return canvas;
 };
 
@@ -134,20 +135,22 @@ org.xml3d.webgl.createContext = (function() {
 		};
 	}
 
+	// TODO: Comments, rename to XML3DHandler, move render... methods to renderer
 	function Context(gl, canvas, scene) {
 		this.gl = gl;
-		this.canvas = canvas;
+		this.canvas = canvas; // TODO: Remove
 		this.scene = scene;
 		this.needDraw = true;
 		this.needPickingDraw = true;
 		this.isDragging = false;
+		this.timeNow   = Date.now() / 1000.0;
 		this.events = { "mousedown":[], "mouseup":[] };
 	}
 
 	Context.prototype.start = function() {
 		//last parameter is rate at which the Context.prototype.update() method is called in
 		//times-per-second.
-		_sglManageCanvas(this.canvas.id, this, 30.0);
+		_sglManageCanvas(this.canvas.id, this, 25.0);
 		_sglUnmanageCanvasOnLoad(this.canvas.id);
 		SGL_DefaultStreamMappingPrefix = "";
 
@@ -180,6 +183,7 @@ org.xml3d.webgl.createContext = (function() {
 		}
 	}
 
+	// TODO: Remove?
 	function getShaderProgram(gl, ids) {
 		var shader = [];
 		for ( var id = 0; id < 2; id++) {
@@ -210,6 +214,7 @@ org.xml3d.webgl.createContext = (function() {
 		return wrapShaderProgram(gl, prog);
 	}
 
+	// Decouple pick render pass and reading the pixels
 	Context.prototype.renderPick = function(screenX, screenY) {
 		var gl = this.gl;
 		if (!this.pickBuffer)
@@ -267,7 +272,7 @@ org.xml3d.webgl.createContext = (function() {
 		if (this.renderer === undefined || !this.renderer) {
 			this.renderer = new org.xml3d.webgl.Renderer(this);
 		}
-
+		gl.clearDepth(1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 		gl.viewport(0, 0, this.canvas.width, this.canvas.height);
 		gl.enable(gl.DEPTH_TEST);
@@ -291,16 +296,19 @@ org.xml3d.webgl.createContext = (function() {
 		}
 	};
 
+	// Handler function. Returns true, if an update is needed
 	Context.prototype.update = function() {
 		return this.needDraw;
 	};
 
-	Context.prototype.redraw = function() {
+	Context.prototype.redraw = function(reason) {
+		//if (reason)
+		//	console.log(reason);
 		this.needDraw = true;
 	};
 
 	Context.prototype.mouseUp = function(gl, button, x, y) {
-		//alert("mouseUP");
+
 		this.isDragging = false;
 		this.needPickingDraw = true;
 		if (button == 0) {
@@ -324,7 +332,6 @@ org.xml3d.webgl.createContext = (function() {
 						}
 					}
 				}
-				return true;
 			}
 
 		}
@@ -335,7 +342,7 @@ org.xml3d.webgl.createContext = (function() {
 			this.isDragging = true;
 			var scene = this.scene;
 			if (!scene.xml3d.currentPickPos)
-				return;
+				return false;
 			
 			for (var i in this.events.mousedown) {				
 				var v = scene.xml3d.currentPickPos.v;
@@ -346,14 +353,15 @@ org.xml3d.webgl.createContext = (function() {
 					var v = scene.xml3d.currentPickNormal.v;
 					return new XML3DVec3(v[0], v[1], v[2]);
 					});
-			    this.ui.mouseDownEvent.__defineGetter__("position", function() {return pos});
+			    this.ui.mouseDownEvent.__defineGetter__("position", function() {return pos;});
 			    this.events.mousedown[i].listener.call(this.events.mousedown[i].node, this.ui.mouseDownEvent);
 			}
+			return false;
 	};
 
 	Context.prototype.mouseMove = function(gl, x, y) {
 		if (this.isDragging)
-			return;
+			return false;
 
 		var lastObj = this.scene.xml3d.currentPickObj;
 
@@ -396,9 +404,8 @@ org.xml3d.webgl.createContext = (function() {
 					}
 				}
 			}
-			return true;
-
-		} else if (lastObj) {
+		} 
+		if (lastObj) {
 			//The mouse has left the last object and is now over nothing, call
 			//mouseout on the last object.
 			var currentObj = lastObj[1].node;
@@ -415,7 +422,6 @@ org.xml3d.webgl.createContext = (function() {
 					currentObj.evalMethod(evtMethod);
 				}
 			}
-			return true;
 		}
 		return false;
 	};
@@ -469,6 +475,7 @@ org.xml3d.webgl.checkError = function(gl, text)
 	}
 };
 
+// TODO: Add resize method
 org.xml3d.webgl.Renderer = function(ctx) {
 	this.ctx = ctx;
 	this.currentView = null;
@@ -571,6 +578,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	if (this.currentView != this.scene.getActiveView())
 		this.camera = this.initCamera();
 
+	var start = Date.now() / 1000.0;
+	
+	
 	if (this.drawableObjects === undefined || !this.drawableObjects ||
 			this.lights === undefined || !this.lights) {
 		this.ctx.needPickingRedraw = true;
@@ -580,6 +590,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 				this.drawableObjects, this.lights, null);
 	}
 
+	var end = Date.now() / 1000.0;
+	//console.log("Traversal Time:" + (end-start));
+	start = end;
 
 	var xform = new SglTransformStack();
 	xform.view.load(this.camera.getViewMatrix());
@@ -603,6 +616,10 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	zPos.sort(function(a, b) {
 		return a[1] - b[1];
 	});
+
+	end = Date.now() / 1000.0;
+	//console.log("Sort Time:" + (end-start));
+	start = end;
 
 	for (var i = 0, n = zPos.length; i < n; i++) {
 		var obj = this.drawableObjects[zPos[i][0]];
@@ -683,6 +700,10 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		xform.model.pop();
 
 	}
+	end = Date.now() / 1000.0;
+	//console.log("Render Time:" + (end-start));
+	start = end;
+
 	xform.view.pop();
 	xform.projection.pop();
 
@@ -693,7 +714,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		if (x<0 || y<0 || x>=this.width || y>=this.height)
 			return;
 		gl = this.ctx.gl;
-
+		
 		if (needPickingDraw) {
 			var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
 			var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
@@ -856,7 +877,7 @@ org.xml3d.webgl.Renderer.prototype.dispose = function() {
 };
 
 org.xml3d.webgl.Renderer.prototype.notifyDataChanged = function() {
-	this.ctx.redraw();
+	this.ctx.redraw("Unspecified data change.");
 };
 
 
@@ -1029,7 +1050,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 		this.viewMatrix = null;
 		this.projMatrix = null;
 	}
-	this.factory.ctx.redraw();
+	this.factory.ctx.redraw("View changed");
 };
 
 // Adapter for <shader>
@@ -1289,7 +1310,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
 	this.factory.renderer.rebuildSceneTree();
-	this.factory.ctx.redraw();
+	this.factory.ctx.redraw("Transformation changed.");
 };
 
 // Adapter for <mesh>
@@ -1382,7 +1403,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	}
 	if (invalidTextures)
 	{
-		this.factory.ctx.redraw();
+		this.factory.ctx.redraw("Invalid texture.");
 		//Texture is not ready for rendering yet, skip this object
 		return;
 	}
@@ -1391,6 +1412,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	org.xml3d.webgl.checkError(gl, "Error before starting render.");
 
 	if (!this.loadedMesh) {
+		//console.log("Creating Mesh: " + this.node.id);
 		var meshParams = this.dataAdapter.createDataTable();
 		var mIndicies = new Uint16Array(meshParams.index.data);
 		this.mesh.addIndexedPrimitives("triangles", gl.TRIANGLES, mIndicies);
@@ -1400,6 +1422,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 			var parameter = meshParams[p];
 			this.mesh.addVertexAttribute(p, parameter.tupleSize, parameter.data);
 		}
+		this.loadedMesh = true;
 	}
 
 	if (this.loadedMesh || meshParams) {
@@ -2658,6 +2681,7 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 		return null;
 	}
 
+	// TODO: Sampler options
 	var options = ({
 		/*Custom texture options would go here, SGL's default options are:
 
@@ -2684,7 +2708,6 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 	var name    		 = this.node.name;
 	var content          = new Array();
 	content['tupleSize'] = 1;
-	console.log(options.wrapS);
 	
 	content['options'] = options;
 	content['src'] = textureChild.src;

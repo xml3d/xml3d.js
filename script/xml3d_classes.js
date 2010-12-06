@@ -328,50 +328,63 @@ org.xml3d.XML3DDocument.prototype.initXml3d = function(xml3dElement) {
 };
 
 
-function compare(arr1, arr2)
+function isEqual(val1, val2)
 {
-	if(arr1 === arr2)
+	if(val1 === val2)
 	{
 		return true;
 	}
 	
-	if(! (arr1 && arr2))
+	if(! (val1 && val2))
 	{
 		return false;
 	}
 	
-	
-	if(org.xml3d.isUInt16Array   || 
-	   org.xml3d.isFloatArray    || 
-	   org.xml3d.isFloat2Array   ||
-	   org.xml3d.isFloat3Array   ||
-	   org.xml3d.isFloat4Array   ||
-	   org.xml3d.isFloat4x4Array ||
-	   org.xml3d.isBoolArray)
+	if(org.xml3d.isUInt16Array(val1)   || 
+	   org.xml3d.isFloatArray(val1)    || 
+	   org.xml3d.isFloat2Array(val1)   ||
+	   org.xml3d.isFloat3Array(val1)   ||
+	   org.xml3d.isFloat4Array(val1)   ||
+	   org.xml3d.isFloat4x4Array(val1) ||
+	   org.xml3d.isBoolArray(val1))
 	{
-		if(arr1.length != arr2.length)
+		
+		if(val1.length != val2.length)
 		{
 			return false;
 		}
 		
-		if(arr1.toString() != arr2.toString())
+		if(val1.toString() != val2.toString())
 		{
 			return false;
 		}
 		
-		for(var i=0; i < arr1.length; i++)
+		for(var i=0; i < val1.length; i++)
 		{	
-			if(arr1[i] != arr2[i])
+			if(val1[i] != val2[i])
 			{
 				return false;
 			}
 		}
 	}
+	else if(org.xml3d.isXML3DVec3(val1))
+	{
+		return val1.x == val2.x &&
+			   val1.y == val2.y &&
+			   val1.z == val2.z;
+	}
+	else if(org.xml3d.isXML3DRotation(val1))
+	{
+		return val1.x == val2.x &&
+			   val1.y == val2.y &&
+			   val1.z == val2.z &&
+			   val1.w == val2.w;
+	}
 	else
 	{
-		for(var i in arr1)
+		for(var i in val1)
 		{
-			if(arr1[i] != arr2[i])
+			if(val1[i] != val2[i])
 			{
 				return false;
 			}
@@ -395,7 +408,7 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 
         e.target.parentNode.setValue(e);
 
-        if (bindNode.notificationRequired() && ! compare(oldValue, e.target.parentNode.value))
+        if (bindNode.notificationRequired() && ! isEqual(oldValue, e.target.parentNode.value))
         {
             bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
         }
@@ -421,8 +434,10 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 
         e.target.parentNode.setValue(e);
 
-        if (bindNode.notificationRequired() && oldValue != e.target.parentNode.value)
+        if (bindNode.notificationRequired() && ! isEqual(oldValue, e.target.parentNode.value))
+        {
             bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
+        }
     }
     catch (e)
     {
@@ -479,7 +494,7 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
 		
 		if (result == org.xml3d.event.HANDLED &&
 			e.target.notificationRequired()   && 
-			e.prevValue != e.newValue)
+			! isEqual(e.prevValue, e.newValue))
 		{
 			// The removal of an attribute is also handled as MutationEvent.MODIFICATION since
 			// this event is handled by resetting the internal attribute value.
@@ -625,9 +640,15 @@ org.xml3d.initInt = function(value, defaultValue) {
 	return value ? parseInt(value) : defaultValue;
 };
 
+/*
 org.xml3d.initBoolean = function(value, defaultValue) {
 	return value ? value == "true" : defaultValue;
 };
+*/
+
+org.xml3d.initBoolean = function(value, defaultValue) {
+        return !!value;
+}; 
 
 org.xml3d.initXML3DVec3 = function(value, x, y, z) {
 	if (value) {
@@ -748,7 +769,7 @@ org.xml3d.isIntArray = function(value)
 
 org.xml3d.isUInt16Array = function(value) 
 {
-	return typeof value == "object" && new UInt16Array().constructor == value.constructor;
+	return typeof value == "object" && new Uint16Array().constructor == value.constructor;
 };
 
 org.xml3d.isFloatArray = function(value) 
@@ -786,7 +807,34 @@ org.xml3d.isAnyURI = function(node)
 	return org.xml3d.isString(node);
 };
 
-
+org.xml3d.canvasEvents = {"mousedown":1, "mouseup":1};
+org.xml3d.configureXML3DEvents = function(node) {
+	node.__proto__.__addEventListener = node.__proto__.addEventListener;
+	node.__proto__.__removeEventListener = node.__proto__.removeEventListener;
+	
+	node.addEventListener = function(type, listener, useCapture) {
+		if(type in org.xml3d.canvasEvents) {
+			for (i = 0; i < this.adapters.length; i++) {
+				if (this.adapters[i].addEventListener) {
+					this.adapters[i].addEventListener(type, listener, useCapture);
+				}
+			}
+		}
+		else
+			this.__addEventListener(type, listener, useCapture);
+	};
+	node.removeEventListener = function(type, listener, useCapture) {
+		if(type in org.xml3d.canvasEvents) {
+			for (i = 0; i < this.adapters.length; i++) {
+				if (this.adapters[i].removeEventListener) {
+					this.adapters[i].removeEventListener(type, listener, useCapture);
+				}
+			}
+		}
+		else
+			this.__removeEventListener(type, listener, useCapture);
+	};
+};
 // MeshTypes
 org.xml3d.MeshTypes = {};
 org.xml3d.MeshTypes["triangles"] = 0;
@@ -893,8 +941,8 @@ org.xml3d.classInfo.Xml3dNode = function(node, c)
  */
 org.xml3d.classInfo.xml3d = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DBaseType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
+	org.xml3d.configureXML3DEvents(node);
 
 
 	node.__defineSetter__("id", function (value) 
@@ -1702,7 +1750,6 @@ org.xml3d.classInfo.xml3d = function(node, context)
  */
 org.xml3d.classInfo.data = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DNestedDataContainerType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -2090,7 +2137,6 @@ org.xml3d.classInfo.data = function(node, context)
  */
 org.xml3d.classInfo.defs = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DBaseType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -2275,7 +2321,6 @@ org.xml3d.classInfo.defs = function(node, context)
  */
 org.xml3d.classInfo.group = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DGraphType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -3088,7 +3133,6 @@ org.xml3d.classInfo.group = function(node, context)
  */
 org.xml3d.classInfo.mesh = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DGeometryType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -3893,7 +3937,6 @@ org.xml3d.classInfo.mesh = function(node, context)
  */
 org.xml3d.classInfo.transform = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DTransformProviderType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -4312,7 +4355,6 @@ org.xml3d.classInfo.transform = function(node, context)
  */
 org.xml3d.classInfo.shader = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DSurfaceShaderProviderType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -4606,7 +4648,6 @@ org.xml3d.classInfo.shader = function(node, context)
  */
 org.xml3d.classInfo.light = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DGraphType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -5456,7 +5497,6 @@ org.xml3d.classInfo.light = function(node, context)
  */
 org.xml3d.classInfo.lightshader = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DLightShaderProviderType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -5750,7 +5790,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
  */
 org.xml3d.classInfo.script = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DReferenceableType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -6046,7 +6085,6 @@ org.xml3d.classInfo.script = function(node, context)
  */
 org.xml3d.classInfo.float = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -6295,7 +6333,6 @@ org.xml3d.classInfo.float = function(node, context)
  */
 org.xml3d.classInfo.float2 = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -6544,7 +6581,6 @@ org.xml3d.classInfo.float2 = function(node, context)
  */
 org.xml3d.classInfo.float3 = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -6793,7 +6829,6 @@ org.xml3d.classInfo.float3 = function(node, context)
  */
 org.xml3d.classInfo.float4 = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -7042,7 +7077,6 @@ org.xml3d.classInfo.float4 = function(node, context)
  */
 org.xml3d.classInfo.float4x4 = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -7291,7 +7325,6 @@ org.xml3d.classInfo.float4x4 = function(node, context)
  */
 org.xml3d.classInfo.int = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -7540,7 +7573,6 @@ org.xml3d.classInfo.int = function(node, context)
  */
 org.xml3d.classInfo.bool = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -7789,7 +7821,6 @@ org.xml3d.classInfo.bool = function(node, context)
  */
 org.xml3d.classInfo.texture = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DDataSourceType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -8397,7 +8428,6 @@ org.xml3d.classInfo.texture = function(node, context)
  */
 org.xml3d.classInfo.img = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DImageDataProviderType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -8628,7 +8658,6 @@ org.xml3d.classInfo.img = function(node, context)
  */
 org.xml3d.classInfo.video = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DImageDataProviderType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -8859,7 +8888,6 @@ org.xml3d.classInfo.video = function(node, context)
  */
 org.xml3d.classInfo.view = function(node, context) 
 {
-	//org.xml3d.classInfo.XML3DGraphType(node, context);
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
@@ -9723,10 +9751,22 @@ org.xml3d.methods.viewSetDirection = function(quat) {
 	this.orientation = quat;
 };
 
+org.xml3d.methods.viewSetUpVector = function() {
+	throw Error("view::setSetUpVector not implemeted yet.");
+};
+
 org.xml3d.methods.viewGetUpVector = function() {
 	return this.orientation.rotateVec3(new XML3DVec3(0, 1, 0));
 };
 
 org.xml3d.methods.viewLookAt = function(vec) {
 	// TODO: write lookat function
+};
+
+org.xml3d.methods.xml3dGetElementByPoint = function(x, y) {
+	for (i = 0; i < this.adapters.length; i++) {
+		if (this.adapters[i].getElementByPoint) {
+			return this.adapters[i].getElementByPoint(x, y);
+		}
+	}
 };

@@ -116,7 +116,7 @@ org.xml3d.webgl.createContext = (function() {
 		this.xml3d = xml3dElement;
 
 		this.getActiveView = function() {
-			var av = this.xml3d.getActiveView();
+			var av = this.xml3d.getActiveViewNode();
 			if (av == null)
 			{
 				av = document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
@@ -1160,7 +1160,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype = new org.xml3d.webgl.RenderAd
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DGroupRenderAdapter;
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
-	var adapter = this.factory.getAdapter(this.node.getTransform(), org.xml3d.webgl.Renderer.prototype);
+	var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 	if (adapter === null)
 		return transform;
 
@@ -1189,7 +1189,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 {
-	var shader = this.node.getShader();
+	var shader = this.node.getShaderNode();
 
 	// if no shader attribute is specified, try to get a shader from the style attribute
 	if(shader == null)
@@ -1240,7 +1240,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e
 org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 
-	var src = node.getSrc();
+	var src = node.getSrcNode();
 	this.loadedMesh = false;
 	this._bbox = null;
 
@@ -1423,7 +1423,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getLightShader = function() {
 	if (!this.lightShader) {
-		var shader = this.node.getShader();
+		var shader = this.node.getShaderNode();
 		// if no shader attribute is specified, try to get a shader from the style attribute
 		if(shader == null)
 		{
@@ -2301,7 +2301,7 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 	   return this.dataTable;
 	}
 
-	var srcElement = this.node.getSrc();
+	var srcElement = this.node.getSrcNode();
 	var dataTable;
 
 	if(srcElement == null)

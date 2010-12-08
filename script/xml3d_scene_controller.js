@@ -198,7 +198,7 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 	if (!activeView)
 	{
 		org.xml3d.debug.logWarning("No view referenced. Trying to use first view.");
-		activeView =  document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
+		activeView =  document.evaluate('//xml3d:xml3d//xml3d:view[1]', document, function() {
 			return org.xml3d.xml3dNS;
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	}

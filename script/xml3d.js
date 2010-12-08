@@ -44,14 +44,18 @@ org.xml3d._rendererFound = false;
 document.nativeGetElementById = document.getElementById;
 document.getElementById = function(id) {
 	var elem = document.nativeGetElementById(id);
-	if(elem)
-	{
+	if(elem) {
 		return elem;
 	} else {
-		return this.evaluate('//*[@id="' + id + '"]', this, function() {
-			return org.xml3d.xml3dNS;
-		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		var elems = this.getElementsByTagName("*");
+		for ( var i = 0; i < elems.length; i++) {
+			var node = elems[i];
+			if (node.getAttribute("id") === id) {
+				return node;
+			}
+		}
 	}
+	return null;
 };
 
 (function() {
@@ -150,7 +154,6 @@ document.getElementById = function(id) {
 			
 			return;
 		}
-		
 		
 		org.xml3d.data.configure(xml3ds);
 		org.xml3d.webgl.configure(xml3ds);

@@ -200,7 +200,7 @@ org.xml3d.URIResolver.resolve = function(document, uriStr) {
 	if (!uri.path)
 		return org.xml3d.URIResolver.resolveLocal(document, uri.fragment);
 
-
+	console.trace();
 	org.xml3d.debug.logWarning("++ Can't resolve global hrefs yet: " + uriStr);
 	// TODO Resolve intra-document references
 	return null;
@@ -916,8 +916,8 @@ org.xml3d.classInfo.Xml3dNode = function(node, c)
 
 	node.update = function()
 	{
-		//if (this.adapters[0])
-		//	this.adapters[0].factory.ctx.redraw("xml3d::update");
+		if (this.adapters[0])
+			this.adapters[0].factory.ctx.redraw("xml3d::update");
  	};
 
 	node.setField = function(event)

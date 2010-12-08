@@ -1275,8 +1275,9 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 		if(!styleValue)
 			return null;
 		var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
-		pattern.exec(styleValue);
-		shader = this.node.xml3ddocument.resolve(RegExp.$1);
+		var result = pattern.exec(styleValue);
+		if (result)
+			shader = this.node.xml3ddocument.resolve(result[1]);
 	}
 
 	return this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
@@ -1295,16 +1296,17 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = org.xml3d.we
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 	if (!this.matrix) {
 		var n         = this.node;
-		var m         = new XML3DMatrix();
-		var negCenter = n.center.negate();
 
-		this.matrix = m.translate(n.translation.x, n.translation.y, n.translation.z)
-		  .multiply(m.translate(n.center.x,n.center.y, n.center.z)).multiply(n.rotation.toMatrix())
-		  .multiply(n.scaleOrientation.toMatrix()).multiply(m.scale(n.scale.x, n.scale.y, n.scale.z))
-		  .multiply(n.scaleOrientation.toMatrix().inverse()).multiply(
-				  m.translate(negCenter.x, negCenter.y, negCenter.z));
+		var t = sglTranslationM4C(n.translation.x, n.translation.y, n.translation.z);
+		var c = sglTranslationM4C(n.center.x, n.center.y, n.center.z);
+		var nc = sglTranslationM4C(-n.center.x, -n.center.y, -n.center.z);
+		var s = sglScalingM4C(n.scale.x, n.scale.y, n.scale.z);
+		var r = sglRotationAngleAxisM4V(n.rotation.angle, n.rotation.axis.toGL());
+		var so = sglRotationAngleAxisM4V(n.scaleOrientation.angle, n.scaleOrientation.axis.toGL() );
+		
+		this.matrix = sglMulM4(sglMulM4(sglMulM4(sglMulM4(sglMulM4(t, c), r), so),s), sglInverseM4(so), nc);
 	}
-	return new sglM4(this.matrix.toGL());
+	return this.matrix;
 };
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
@@ -1510,8 +1512,9 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getLightShader = function() {
 			if(!styleValue)
 				return null;
 			var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
-			pattern.exec(styleValue);
-			shader = this.node.xml3ddocument.resolve(RegExp.$1);
+			var result = pattern.exec(styleValue);
+			if (result)
+				shader = this.node.xml3ddocument.resolve(result[1]);
 		}
 		this.lightShader = this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
 	}

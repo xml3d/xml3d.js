@@ -7,7 +7,7 @@ if(xml3dPhysics)
 	throw new Error("xml3d_physics.js already included");
 	
 xml3dPhysics = document.createElement('object');
-xml3dPhysics.setAttribute('type', 'application/xml3dPhysics');
+xml3dPhysics.setAttribute('type', 'application/xml3d-physics');
 xml3dPhysics.setAttribute('width', '0');
 xml3dPhysics.setAttribute('height', '0');
 document.body.appendChild(xml3dPhysics);
@@ -69,10 +69,12 @@ function __physicsUpdateTransform(id, translation, rotation) {
 
 // Wait for initialization until plugin has finished initalizing.
 function __physicsInitializeWait() {
-	if(typeof xml3dPhysics.initialize == 'undefined')
+	if(typeof xml3dPhysics.initialize == 'undefined' ||
+		!xml3dPhysics.initialize){
 		window.setTimeout(__physicsInitializeWait, 50);
-	else
+	} else {
 		xml3dPhysics.initialize();
+	}
 }
 __physicsInitializeWait();
 

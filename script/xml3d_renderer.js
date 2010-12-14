@@ -756,11 +756,11 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
 		
-		if (needPickingDraw) {
+		if (needPickingDraw || !this.drawableObjects) {
 			var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
 			var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-			if (this.drawableObjects === undefined || !this.drawableObjects) {
+			if (!this.drawableObjects) {
 				this.drawableObjects = [];
 				this.slights = new Array();
 				this.collectDrawableObjects(new sglM4(),
@@ -859,6 +859,9 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
 	gl = this.handler.gl;
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+	gl.enable(gl.DEPTH_TEST);
+	gl.disable(gl.CULL_FACE);
+	gl.disable(gl.BLEND);
 	
 	var transform = pickedObj[0];
 	var shape = pickedObj[1];
@@ -893,6 +896,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	this.scene.xml3d.currentPickNormal = pickNorm;
 	xform.model.pop();
 	xform.projection.pop();
+	gl.disable(gl.DEPTH_TEST);
 };
 
 //Helper to expand an axis aligned bounding box around another object's bounding box
@@ -1046,8 +1050,7 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.removeEventListener = functio
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y) {
-	this.factory.handler.renderPick(x, this.canvas.height - y);
-	//alert(this.node.currentPickObj.localName);
+	this.factory.handler.renderPick(x, this.factory.handler.getCanvasHeight() - y - 1);
 	return this.node.currentPickObj[1].node;
 };
 

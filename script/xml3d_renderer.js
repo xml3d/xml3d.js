@@ -346,7 +346,9 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		if (this.isDragging)
 			return false;
 
-		var lastObj = this.scene.xml3d.currentPickObj;
+		var lastObj = null;
+		if(this.scene.xml3d.currentPickObj)
+			lastObj = this.scene.xml3d.currentPickObj[1].node;
 
 		this.renderPick(x, y);
 
@@ -371,27 +373,27 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 					}
 				}
 				if (lastObj) {
-					currentObj = lastObj[1].node;
-					evtMethod = currentObj.getAttribute('onmouseout');
-					if (evtMethod && currentObj.evalMethod) {
-						currentObj.evalMethod(evtMethod);
+					evtMethod = lastObj.getAttribute('onmouseout');
+					if (evtMethod && lastObj.evalMethod) {
+						lastObj.evalMethod(evtMethod);
 					}
 
-					while(currentObj.parentNode.nodeName == "group")
+					while(lastObj.parentNode.nodeName == "group")
 					{
-						currentObj = currentObj.parentNode;
-						evtMethod = currentObj.getAttribute('onmouseout');
-						if (evtMethod && currentObj.evalMethod) {
-							currentObj.evalMethod(evtMethod);
+						lastObj = lastObj.parentNode;
+						evtMethod = lastObj.getAttribute('onmouseout');
+						if (evtMethod && lastObj.evalMethod) {
+							lastObj.evalMethod(evtMethod);
 						}
 					}
+					lastObj = null;
 				}
 			}
 		} 
 		if (lastObj) {
 			//The mouse has left the last object and is now over nothing, call
 			//mouseout on the last object.
-			var currentObj = lastObj[1].node;
+			var currentObj = lastObj;
 			var evtMethod = currentObj.getAttribute('onmouseout');
 			if (evtMethod && currentObj.evalMethod) {
 				currentObj.evalMethod(evtMethod);

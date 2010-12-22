@@ -835,6 +835,7 @@ org.xml3d.configureXML3DEvents = function(node) {
 			this.__removeEventListener(type, listener, useCapture);
 	};
 };
+
 // MeshTypes
 org.xml3d.MeshTypes = {};
 org.xml3d.MeshTypes["triangles"] = 0;
@@ -942,6 +943,7 @@ org.xml3d.classInfo.Xml3dNode = function(node, c)
 org.xml3d.classInfo.xml3d = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
+
 	org.xml3d.configureXML3DEvents(node);
 
 
@@ -1615,7 +1617,6 @@ org.xml3d.classInfo.xml3d = function(node, context)
 
 	//node.definitionArea = [];
 	//node.graph = [];
-	node.activeView = null;
 
 
 
@@ -2056,8 +2057,6 @@ org.xml3d.classInfo.data = function(node, context)
 
 	//node.sources = [];
 	//node.childContainers = [];
-	node.src = null;
-	node.script = null;
 
 
 
@@ -3002,8 +3001,6 @@ org.xml3d.classInfo.group = function(node, context)
 		node._visible.setOwnerNode("visible", node);
 	}
 
-	node.transform = null;
-	node.shader = null;
 	//node.children = [];
 	//node.defs = [];
 
@@ -3825,7 +3822,6 @@ org.xml3d.classInfo.mesh = function(node, context)
 
 	//node.sources = [];
 	//node.childContainers = [];
-	node.src = null;
 
 
 
@@ -4597,10 +4593,8 @@ org.xml3d.classInfo.shader = function(node, context)
 		node._style.setOwnerNode("style", node);
 	}
 
-	node.script = null;
 	//node.sources = [];
 	//node.childContainers = [];
-	node.src = null;
 
 
 
@@ -5391,7 +5385,6 @@ org.xml3d.classInfo.light = function(node, context)
 		node._intensity.setOwnerNode("intensity", node);
 	}
 
-	node.shader = null;
 
 
 
@@ -5750,10 +5743,8 @@ org.xml3d.classInfo.lightshader = function(node, context)
 		node._style.setOwnerNode("style", node);
 	}
 
-	node.script = null;
 	//node.sources = [];
 	//node.childContainers = [];
-	node.src = null;
 
 
 
@@ -8380,7 +8371,6 @@ org.xml3d.classInfo.texture = function(node, context)
 		node._borderColor.setOwnerNode("borderColor", node);
 	}
 
-	node.imageData = null;
 
 
 

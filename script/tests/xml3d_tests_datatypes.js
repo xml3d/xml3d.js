@@ -40,6 +40,7 @@ org.xml3d.tests.XML3DRotation = {};
 org.xml3d.tests.XML3DRotation.functs = [
 "setRotation",
 "setAxisAngle",
+"setQuaternion",
 "setAxisAngleValue",
 "toMatrix",
 "rotateVec3",

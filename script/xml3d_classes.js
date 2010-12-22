@@ -1415,7 +1415,8 @@ org.xml3d.classInfo.xml3d = function(node, context)
 
 	node.__defineGetter__("activeView", function (value)
 	{
-		return this._activeView;
+		//return this._activeView;
+		return this.getAttribute("activeView");
 	});
 
 
@@ -1936,7 +1937,8 @@ org.xml3d.classInfo.data = function(node, context)
 
 	node.__defineGetter__("src", function (value)
 	{
-		return this._src;
+		//return this._src;
+		return this.getAttribute("src");
 	});
 
 	node.__defineSetter__("script", function (value)
@@ -1968,7 +1970,8 @@ org.xml3d.classInfo.data = function(node, context)
 
 	node.__defineGetter__("script", function (value)
 	{
-		return this._script;
+		//return this._script;
+		return this.getAttribute("script");
 	});
 
 
@@ -2774,7 +2777,8 @@ org.xml3d.classInfo.group = function(node, context)
 
 	node.__defineGetter__("transform", function (value)
 	{
-		return this._transform;
+		//return this._transform;
+		return this.getAttribute("transform");
 	});
 
 	node.__defineSetter__("shader", function (value)
@@ -2806,7 +2810,8 @@ org.xml3d.classInfo.group = function(node, context)
 
 	node.__defineGetter__("shader", function (value)
 	{
-		return this._shader;
+		//return this._shader;
+		return this.getAttribute("shader");
 	});
 
 
@@ -3620,7 +3625,8 @@ org.xml3d.classInfo.mesh = function(node, context)
 
 	node.__defineGetter__("src", function (value)
 	{
-		return this._src;
+		//return this._src;
+		return this.getAttribute("src");
 	});
 
 
@@ -4498,7 +4504,8 @@ org.xml3d.classInfo.shader = function(node, context)
 
 	node.__defineGetter__("script", function (value)
 	{
-		return this._script;
+		//return this._script;
+		return this.getAttribute("script");
 	});
 
 	node.__defineSetter__("src", function (value)
@@ -4530,7 +4537,8 @@ org.xml3d.classInfo.shader = function(node, context)
 
 	node.__defineGetter__("src", function (value)
 	{
-		return this._src;
+		//return this._src;
+		return this.getAttribute("src");
 	});
 
 
@@ -5173,7 +5181,8 @@ org.xml3d.classInfo.light = function(node, context)
 
 	node.__defineGetter__("shader", function (value)
 	{
-		return this._shader;
+		//return this._shader;
+		return this.getAttribute("shader");
 	});
 
 
@@ -5648,7 +5657,8 @@ org.xml3d.classInfo.lightshader = function(node, context)
 
 	node.__defineGetter__("script", function (value)
 	{
-		return this._script;
+		//return this._script;
+		return this.getAttribute("script");
 	});
 
 	node.__defineSetter__("src", function (value)
@@ -5680,7 +5690,8 @@ org.xml3d.classInfo.lightshader = function(node, context)
 
 	node.__defineGetter__("src", function (value)
 	{
-		return this._src;
+		//return this._src;
+		return this.getAttribute("src");
 	});
 
 

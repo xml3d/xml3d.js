@@ -946,7 +946,102 @@ org.xml3d.classInfo.xml3d = function(node, context)
 
 	org.xml3d.configureXML3DEvents(node);
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
+	if(node._onclick != null && node._onclick.setOwnerNode)
+	{
+		node._onclick.setOwnerNode("onclick", node);
+	}
+	
+	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
+	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
+	{
+		node._ondblclick.setOwnerNode("ondblclick", node);
+	}
+	
+	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
+	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
+	{
+		node._onmousedown.setOwnerNode("onmousedown", node);
+	}
+	
+	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
+	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
+	{
+		node._onmouseup.setOwnerNode("onmouseup", node);
+	}
+	
+	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
+	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
+	{
+		node._onmouseover.setOwnerNode("onmouseover", node);
+	}
+	
+	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
+	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
+	{
+		node._onmousemove.setOwnerNode("onmousemove", node);
+	}
+	
+	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
+	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
+	{
+		node._onmouseout.setOwnerNode("onmouseout", node);
+	}
+	
+	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
+	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
+	{
+		node._onkeypress.setOwnerNode("onkeypress", node);
+	}
+	
+	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
+	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
+	{
+		node._onkeydown.setOwnerNode("onkeydown", node);
+	}
+	
+	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
+	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
+	{
+		node._onkeyup.setOwnerNode("onkeyup", node);
+	}
+	
+	node._height = org.xml3d.initInt(node.getAttribute("height"), 600);
+	if(node._height != null && node._height.setOwnerNode)
+	{
+		node._height.setOwnerNode("height", node);
+	}
+	
+	node._width = org.xml3d.initInt(node.getAttribute("width"), 800);
+	if(node._width != null && node._width.setOwnerNode)
+	{
+		node._width.setOwnerNode("width", node);
+	}
+	
 
+	//node.definitionArea = [];
+	//node.graph = [];
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -1383,9 +1478,6 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	});
 
 
-
-
-
 	node.__defineSetter__("activeView", function (value)
 	{
 		var oldValue = this.activeView;
@@ -1411,8 +1503,6 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	{
 		return this.getAttribute("activeView");
 	});
-
-
 
 	node.resetAttribute = function(attrName)
 	{
@@ -1533,87 +1623,6 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
-	if(node._onclick != null && node._onclick.setOwnerNode)
-	{
-		node._onclick.setOwnerNode("onclick", node);
-	}
-	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
-	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
-	{
-		node._ondblclick.setOwnerNode("ondblclick", node);
-	}
-	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
-	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
-	{
-		node._onmousedown.setOwnerNode("onmousedown", node);
-	}
-	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
-	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
-	{
-		node._onmouseup.setOwnerNode("onmouseup", node);
-	}
-	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
-	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
-	{
-		node._onmouseover.setOwnerNode("onmouseover", node);
-	}
-	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
-	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
-	{
-		node._onmousemove.setOwnerNode("onmousemove", node);
-	}
-	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
-	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
-	{
-		node._onmouseout.setOwnerNode("onmouseout", node);
-	}
-	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
-	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
-	{
-		node._onkeypress.setOwnerNode("onkeypress", node);
-	}
-	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
-	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
-	{
-		node._onkeydown.setOwnerNode("onkeydown", node);
-	}
-	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
-	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
-	{
-		node._onkeyup.setOwnerNode("onkeyup", node);
-	}
-	node._height = org.xml3d.initInt(node.getAttribute("height"), 600);
-	if(node._height != null && node._height.setOwnerNode)
-	{
-		node._height.setOwnerNode("height", node);
-	}
-	node._width = org.xml3d.initInt(node.getAttribute("width"), 800);
-	if(node._width != null && node._width.setOwnerNode)
-	{
-		node._width.setOwnerNode("width", node);
-	}
-
-	//node.definitionArea = [];
-	//node.graph = [];
-
-
-
 	node.getActiveViewNode = function()
 	{
 		if (!this._activeViewNode && this.hasAttribute("activeView"))
@@ -1624,9 +1633,6 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	};
 
 
-
-
-
 	// Node::setField
 	node.setField = function(event)
 	{
@@ -1635,100 +1641,83 @@ org.xml3d.classInfo.xml3d = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onclick")
 		{
 			this.onclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "ondblclick")
 		{
 			this.ondblclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousedown")
 		{
 			this.onmousedown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseup")
 		{
 			this.onmouseup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseover")
 		{
 			this.onmouseover = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousemove")
 		{
 			this.onmousemove = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseout")
 		{
 			this.onmouseout = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeypress")
 		{
 			this.onkeypress = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeydown")
 		{
 			this.onkeydown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeyup")
 		{
 			this.onkeyup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "height")
 		{
 			this.height = org.xml3d.initInt(event.newValue, 600);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "width")
 		{
 			this.width = org.xml3d.initInt(event.newValue, 800);
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
 		if (event.attrName == "activeView")
 		{
 			this.activeView = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -1751,7 +1740,42 @@ org.xml3d.classInfo.data = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._map = org.xml3d.initString(node.getAttribute("map"), "");
+	if(node._map != null && node._map.setOwnerNode)
+	{
+		node._map.setOwnerNode("map", node);
+	}
+	
+	node._expose = org.xml3d.initString(node.getAttribute("expose"), "");
+	if(node._expose != null && node._expose.setOwnerNode)
+	{
+		node._expose.setOwnerNode("expose", node);
+	}
+	
 
+	//node.sources = [];
+	//node.childContainers = [];
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -1898,9 +1922,6 @@ org.xml3d.classInfo.data = function(node, context)
 	});
 
 
-
-
-
 	node.__defineSetter__("src", function (value)
 	{
 		var oldValue = this.src;
@@ -1952,8 +1973,6 @@ org.xml3d.classInfo.data = function(node, context)
 	{
 		return this.getAttribute("script");
 	});
-
-
 
 	node.resetAttribute = function(attrName)
 	{
@@ -2011,37 +2030,6 @@ org.xml3d.classInfo.data = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._map = org.xml3d.initString(node.getAttribute("map"), "");
-	if(node._map != null && node._map.setOwnerNode)
-	{
-		node._map.setOwnerNode("map", node);
-	}
-	node._expose = org.xml3d.initString(node.getAttribute("expose"), "");
-	if(node._expose != null && node._expose.setOwnerNode)
-	{
-		node._expose.setOwnerNode("expose", node);
-	}
-
-	//node.sources = [];
-	//node.childContainers = [];
-
-
-
 	node.getSrcNode = function()
 	{
 		if (!this._srcNode && this.hasAttribute("src"))
@@ -2050,9 +2038,6 @@ org.xml3d.classInfo.data = function(node, context)
 		}
 		return this._srcNode;
 	};
-
-
-
 
 	node.getScriptNode = function()
 	{
@@ -2064,9 +2049,6 @@ org.xml3d.classInfo.data = function(node, context)
 	};
 
 
-
-
-
 	// Node::setField
 	node.setField = function(event)
 	{
@@ -2075,32 +2057,26 @@ org.xml3d.classInfo.data = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "map")
 		{
 			this.map = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "expose")
 		{
 			this.expose = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
 
 		if (event.attrName == "src")
 		{
@@ -2112,8 +2088,7 @@ org.xml3d.classInfo.data = function(node, context)
 			this.script = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2131,7 +2106,29 @@ org.xml3d.classInfo.defs = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
 
+	//node.children = [];
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -2220,11 +2217,6 @@ org.xml3d.classInfo.defs = function(node, context)
 	});
 
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -2253,26 +2245,6 @@ org.xml3d.classInfo.defs = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-
-	//node.children = [];
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -2282,23 +2254,18 @@ org.xml3d.classInfo.defs = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -2316,7 +2283,96 @@ org.xml3d.classInfo.group = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
+	if(node._onclick != null && node._onclick.setOwnerNode)
+	{
+		node._onclick.setOwnerNode("onclick", node);
+	}
+	
+	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
+	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
+	{
+		node._ondblclick.setOwnerNode("ondblclick", node);
+	}
+	
+	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
+	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
+	{
+		node._onmousedown.setOwnerNode("onmousedown", node);
+	}
+	
+	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
+	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
+	{
+		node._onmouseup.setOwnerNode("onmouseup", node);
+	}
+	
+	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
+	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
+	{
+		node._onmouseover.setOwnerNode("onmouseover", node);
+	}
+	
+	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
+	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
+	{
+		node._onmousemove.setOwnerNode("onmousemove", node);
+	}
+	
+	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
+	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
+	{
+		node._onmouseout.setOwnerNode("onmouseout", node);
+	}
+	
+	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
+	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
+	{
+		node._onkeypress.setOwnerNode("onkeypress", node);
+	}
+	
+	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
+	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
+	{
+		node._onkeydown.setOwnerNode("onkeydown", node);
+	}
+	
+	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
+	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
+	{
+		node._onkeyup.setOwnerNode("onkeyup", node);
+	}
+	
+	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
+	if(node._visible != null && node._visible.setOwnerNode)
+	{
+		node._visible.setOwnerNode("visible", node);
+	}
+	
 
+	//node.children = [];
+	//node.defs = [];
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -2724,9 +2780,6 @@ org.xml3d.classInfo.group = function(node, context)
 	});
 
 
-
-
-
 	node.__defineSetter__("transform", function (value)
 	{
 		var oldValue = this.transform;
@@ -2778,8 +2831,6 @@ org.xml3d.classInfo.group = function(node, context)
 	{
 		return this.getAttribute("shader");
 	});
-
-
 
 	node.resetAttribute = function(attrName)
 	{
@@ -2900,82 +2951,6 @@ org.xml3d.classInfo.group = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
-	if(node._onclick != null && node._onclick.setOwnerNode)
-	{
-		node._onclick.setOwnerNode("onclick", node);
-	}
-	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
-	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
-	{
-		node._ondblclick.setOwnerNode("ondblclick", node);
-	}
-	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
-	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
-	{
-		node._onmousedown.setOwnerNode("onmousedown", node);
-	}
-	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
-	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
-	{
-		node._onmouseup.setOwnerNode("onmouseup", node);
-	}
-	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
-	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
-	{
-		node._onmouseover.setOwnerNode("onmouseover", node);
-	}
-	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
-	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
-	{
-		node._onmousemove.setOwnerNode("onmousemove", node);
-	}
-	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
-	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
-	{
-		node._onmouseout.setOwnerNode("onmouseout", node);
-	}
-	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
-	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
-	{
-		node._onkeypress.setOwnerNode("onkeypress", node);
-	}
-	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
-	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
-	{
-		node._onkeydown.setOwnerNode("onkeydown", node);
-	}
-	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
-	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
-	{
-		node._onkeyup.setOwnerNode("onkeyup", node);
-	}
-	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
-	if(node._visible != null && node._visible.setOwnerNode)
-	{
-		node._visible.setOwnerNode("visible", node);
-	}
-
-	//node.children = [];
-	//node.defs = [];
-
-
-
 	node.getTransformNode = function()
 	{
 		if (!this._transformNode && this.hasAttribute("transform"))
@@ -2984,9 +2959,6 @@ org.xml3d.classInfo.group = function(node, context)
 		}
 		return this._transformNode;
 	};
-
-
-
 
 	node.getShaderNode = function()
 	{
@@ -2998,9 +2970,6 @@ org.xml3d.classInfo.group = function(node, context)
 	};
 
 
-
-
-
 	// Node::setField
 	node.setField = function(event)
 	{
@@ -3009,86 +2978,71 @@ org.xml3d.classInfo.group = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onclick")
 		{
 			this.onclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "ondblclick")
 		{
 			this.ondblclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousedown")
 		{
 			this.onmousedown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseup")
 		{
 			this.onmouseup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseover")
 		{
 			this.onmouseover = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousemove")
 		{
 			this.onmousemove = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseout")
 		{
 			this.onmouseout = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeypress")
 		{
 			this.onkeypress = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeydown")
 		{
 			this.onkeydown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeyup")
 		{
 			this.onkeyup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "visible")
 		{
 			this.visible = org.xml3d.initBoolean(event.newValue, true);
 			return org.xml3d.event.HANDLED;
 		}
-
-
 
 		if (event.attrName == "transform")
 		{
@@ -3100,8 +3054,7 @@ org.xml3d.classInfo.group = function(node, context)
 			this.shader = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -3121,7 +3074,102 @@ org.xml3d.classInfo.mesh = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
+	if(node._onclick != null && node._onclick.setOwnerNode)
+	{
+		node._onclick.setOwnerNode("onclick", node);
+	}
+	
+	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
+	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
+	{
+		node._ondblclick.setOwnerNode("ondblclick", node);
+	}
+	
+	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
+	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
+	{
+		node._onmousedown.setOwnerNode("onmousedown", node);
+	}
+	
+	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
+	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
+	{
+		node._onmouseup.setOwnerNode("onmouseup", node);
+	}
+	
+	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
+	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
+	{
+		node._onmouseover.setOwnerNode("onmouseover", node);
+	}
+	
+	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
+	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
+	{
+		node._onmousemove.setOwnerNode("onmousemove", node);
+	}
+	
+	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
+	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
+	{
+		node._onmouseout.setOwnerNode("onmouseout", node);
+	}
+	
+	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
+	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
+	{
+		node._onkeypress.setOwnerNode("onkeypress", node);
+	}
+	
+	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
+	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
+	{
+		node._onkeydown.setOwnerNode("onkeydown", node);
+	}
+	
+	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
+	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
+	{
+		node._onkeyup.setOwnerNode("onkeyup", node);
+	}
+	
+	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
+	if(node._visible != null && node._visible.setOwnerNode)
+	{
+		node._visible.setOwnerNode("visible", node);
+	}
+	
+	node._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.MeshTypes);
+	if(node._type != null && node._type.setOwnerNode)
+	{
+		node._type.setOwnerNode("type", node);
+	}
+	
 
+	//node.sources = [];
+	//node.childContainers = [];
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -3558,9 +3606,6 @@ org.xml3d.classInfo.mesh = function(node, context)
 	});
 
 
-
-
-
 	node.__defineSetter__("src", function (value)
 	{
 		var oldValue = this.src;
@@ -3586,8 +3631,6 @@ org.xml3d.classInfo.mesh = function(node, context)
 	{
 		return this.getAttribute("src");
 	});
-
-
 
 	node.resetAttribute = function(attrName)
 	{
@@ -3708,87 +3751,6 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
-	if(node._onclick != null && node._onclick.setOwnerNode)
-	{
-		node._onclick.setOwnerNode("onclick", node);
-	}
-	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
-	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
-	{
-		node._ondblclick.setOwnerNode("ondblclick", node);
-	}
-	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
-	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
-	{
-		node._onmousedown.setOwnerNode("onmousedown", node);
-	}
-	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
-	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
-	{
-		node._onmouseup.setOwnerNode("onmouseup", node);
-	}
-	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
-	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
-	{
-		node._onmouseover.setOwnerNode("onmouseover", node);
-	}
-	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
-	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
-	{
-		node._onmousemove.setOwnerNode("onmousemove", node);
-	}
-	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
-	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
-	{
-		node._onmouseout.setOwnerNode("onmouseout", node);
-	}
-	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
-	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
-	{
-		node._onkeypress.setOwnerNode("onkeypress", node);
-	}
-	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
-	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
-	{
-		node._onkeydown.setOwnerNode("onkeydown", node);
-	}
-	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
-	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
-	{
-		node._onkeyup.setOwnerNode("onkeyup", node);
-	}
-	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
-	if(node._visible != null && node._visible.setOwnerNode)
-	{
-		node._visible.setOwnerNode("visible", node);
-	}
-	node._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.MeshTypes);
-	if(node._type != null && node._type.setOwnerNode)
-	{
-		node._type.setOwnerNode("type", node);
-	}
-
-	//node.sources = [];
-	//node.childContainers = [];
-
-
-
 	node.getSrcNode = function()
 	{
 		if (!this._srcNode && this.hasAttribute("src"))
@@ -3799,9 +3761,6 @@ org.xml3d.classInfo.mesh = function(node, context)
 	};
 
 
-
-
-
 	// Node::setField
 	node.setField = function(event)
 	{
@@ -3810,100 +3769,83 @@ org.xml3d.classInfo.mesh = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onclick")
 		{
 			this.onclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "ondblclick")
 		{
 			this.ondblclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousedown")
 		{
 			this.onmousedown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseup")
 		{
 			this.onmouseup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseover")
 		{
 			this.onmouseover = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousemove")
 		{
 			this.onmousemove = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseout")
 		{
 			this.onmouseout = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeypress")
 		{
 			this.onkeypress = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeydown")
 		{
 			this.onkeydown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeyup")
 		{
 			this.onkeyup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "visible")
 		{
 			this.visible = org.xml3d.initBoolean(event.newValue, true);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "type")
 		{
 			this.type = org.xml3d.initEnum(event.newValue, 0, org.xml3d.MeshTypes);
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
 		if (event.attrName == "src")
 		{
 			this.src = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -3922,7 +3864,58 @@ org.xml3d.classInfo.transform = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._translation = org.xml3d.initXML3DVec3(node.getAttribute("translation"), 0, 0, 0);
+	if(node._translation != null && node._translation.setOwnerNode)
+	{
+		node._translation.setOwnerNode("translation", node);
+	}
+	
+	node._scale = org.xml3d.initXML3DVec3(node.getAttribute("scale"), 1, 1, 1);
+	if(node._scale != null && node._scale.setOwnerNode)
+	{
+		node._scale.setOwnerNode("scale", node);
+	}
+	
+	node._rotation = org.xml3d.initXML3DRotation(node.getAttribute("rotation"), 0, 0, 1, 0);
+	if(node._rotation != null && node._rotation.setOwnerNode)
+	{
+		node._rotation.setOwnerNode("rotation", node);
+	}
+	
+	node._center = org.xml3d.initXML3DVec3(node.getAttribute("center"), 0, 0, 0);
+	if(node._center != null && node._center.setOwnerNode)
+	{
+		node._center.setOwnerNode("center", node);
+	}
+	
+	node._scaleOrientation = org.xml3d.initXML3DRotation(node.getAttribute("scaleOrientation"), 0, 0, 1, 0);
+	if(node._scaleOrientation != null && node._scaleOrientation.setOwnerNode)
+	{
+		node._scaleOrientation.setOwnerNode("scaleOrientation", node);
+	}
+	
 
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -4156,11 +4149,6 @@ org.xml3d.classInfo.transform = function(node, context)
 	});
 
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -4224,50 +4212,6 @@ org.xml3d.classInfo.transform = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._translation = org.xml3d.initXML3DVec3(node.getAttribute("translation"), 0, 0, 0);
-	if(node._translation != null && node._translation.setOwnerNode)
-	{
-		node._translation.setOwnerNode("translation", node);
-	}
-	node._scale = org.xml3d.initXML3DVec3(node.getAttribute("scale"), 1, 1, 1);
-	if(node._scale != null && node._scale.setOwnerNode)
-	{
-		node._scale.setOwnerNode("scale", node);
-	}
-	node._rotation = org.xml3d.initXML3DRotation(node.getAttribute("rotation"), 0, 0, 1, 0);
-	if(node._rotation != null && node._rotation.setOwnerNode)
-	{
-		node._rotation.setOwnerNode("rotation", node);
-	}
-	node._center = org.xml3d.initXML3DVec3(node.getAttribute("center"), 0, 0, 0);
-	if(node._center != null && node._center.setOwnerNode)
-	{
-		node._center.setOwnerNode("center", node);
-	}
-	node._scaleOrientation = org.xml3d.initXML3DRotation(node.getAttribute("scaleOrientation"), 0, 0, 1, 0);
-	if(node._scaleOrientation != null && node._scaleOrientation.setOwnerNode)
-	{
-		node._scaleOrientation.setOwnerNode("scaleOrientation", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -4277,53 +4221,43 @@ org.xml3d.classInfo.transform = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "translation")
 		{
 			this.translation = org.xml3d.initXML3DVec3(event.newValue, 0, 0, 0);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "scale")
 		{
 			this.scale = org.xml3d.initXML3DVec3(event.newValue, 1, 1, 1);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "rotation")
 		{
 			this.rotation = org.xml3d.initXML3DRotation(event.newValue, 0, 0, 1, 0);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "center")
 		{
 			this.center = org.xml3d.initXML3DVec3(event.newValue, 0, 0, 0);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "scaleOrientation")
 		{
 			this.scaleOrientation = org.xml3d.initXML3DRotation(event.newValue, 0, 0, 1, 0);
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -4341,7 +4275,30 @@ org.xml3d.classInfo.shader = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
 
+	//node.sources = [];
+	//node.childContainers = [];
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -4430,9 +4387,6 @@ org.xml3d.classInfo.shader = function(node, context)
 	});
 
 
-
-
-
 	node.__defineSetter__("script", function (value)
 	{
 		var oldValue = this.script;
@@ -4485,8 +4439,6 @@ org.xml3d.classInfo.shader = function(node, context)
 		return this.getAttribute("src");
 	});
 
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -4529,27 +4481,6 @@ org.xml3d.classInfo.shader = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-
-	//node.sources = [];
-	//node.childContainers = [];
-
-
-
 	node.getScriptNode = function()
 	{
 		if (!this._scriptNode && this.hasAttribute("script"))
@@ -4558,9 +4489,6 @@ org.xml3d.classInfo.shader = function(node, context)
 		}
 		return this._scriptNode;
 	};
-
-
-
 
 	node.getSrcNode = function()
 	{
@@ -4572,9 +4500,6 @@ org.xml3d.classInfo.shader = function(node, context)
 	};
 
 
-
-
-
 	// Node::setField
 	node.setField = function(event)
 	{
@@ -4583,20 +4508,16 @@ org.xml3d.classInfo.shader = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
 
 		if (event.attrName == "script")
 		{
@@ -4608,8 +4529,7 @@ org.xml3d.classInfo.shader = function(node, context)
 			this.src = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -4627,7 +4547,106 @@ org.xml3d.classInfo.light = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
+	if(node._onclick != null && node._onclick.setOwnerNode)
+	{
+		node._onclick.setOwnerNode("onclick", node);
+	}
+	
+	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
+	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
+	{
+		node._ondblclick.setOwnerNode("ondblclick", node);
+	}
+	
+	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
+	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
+	{
+		node._onmousedown.setOwnerNode("onmousedown", node);
+	}
+	
+	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
+	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
+	{
+		node._onmouseup.setOwnerNode("onmouseup", node);
+	}
+	
+	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
+	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
+	{
+		node._onmouseover.setOwnerNode("onmouseover", node);
+	}
+	
+	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
+	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
+	{
+		node._onmousemove.setOwnerNode("onmousemove", node);
+	}
+	
+	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
+	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
+	{
+		node._onmouseout.setOwnerNode("onmouseout", node);
+	}
+	
+	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
+	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
+	{
+		node._onkeypress.setOwnerNode("onkeypress", node);
+	}
+	
+	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
+	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
+	{
+		node._onkeydown.setOwnerNode("onkeydown", node);
+	}
+	
+	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
+	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
+	{
+		node._onkeyup.setOwnerNode("onkeyup", node);
+	}
+	
+	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
+	if(node._visible != null && node._visible.setOwnerNode)
+	{
+		node._visible.setOwnerNode("visible", node);
+	}
+	
+	node._global = org.xml3d.initBoolean(node.getAttribute("global"), false);
+	if(node._global != null && node._global.setOwnerNode)
+	{
+		node._global.setOwnerNode("global", node);
+	}
+	
+	node._intensity = org.xml3d.initFloat(node.getAttribute("intensity"), 1);
+	if(node._intensity != null && node._intensity.setOwnerNode)
+	{
+		node._intensity.setOwnerNode("intensity", node);
+	}
+	
 
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -5093,9 +5112,6 @@ org.xml3d.classInfo.light = function(node, context)
 	});
 
 
-
-
-
 	node.__defineSetter__("shader", function (value)
 	{
 		var oldValue = this.shader;
@@ -5121,8 +5137,6 @@ org.xml3d.classInfo.light = function(node, context)
 	{
 		return this.getAttribute("shader");
 	});
-
-
 
 	node.resetAttribute = function(attrName)
 	{
@@ -5250,90 +5264,6 @@ org.xml3d.classInfo.light = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
-	if(node._onclick != null && node._onclick.setOwnerNode)
-	{
-		node._onclick.setOwnerNode("onclick", node);
-	}
-	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
-	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
-	{
-		node._ondblclick.setOwnerNode("ondblclick", node);
-	}
-	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
-	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
-	{
-		node._onmousedown.setOwnerNode("onmousedown", node);
-	}
-	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
-	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
-	{
-		node._onmouseup.setOwnerNode("onmouseup", node);
-	}
-	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
-	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
-	{
-		node._onmouseover.setOwnerNode("onmouseover", node);
-	}
-	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
-	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
-	{
-		node._onmousemove.setOwnerNode("onmousemove", node);
-	}
-	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
-	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
-	{
-		node._onmouseout.setOwnerNode("onmouseout", node);
-	}
-	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
-	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
-	{
-		node._onkeypress.setOwnerNode("onkeypress", node);
-	}
-	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
-	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
-	{
-		node._onkeydown.setOwnerNode("onkeydown", node);
-	}
-	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
-	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
-	{
-		node._onkeyup.setOwnerNode("onkeyup", node);
-	}
-	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
-	if(node._visible != null && node._visible.setOwnerNode)
-	{
-		node._visible.setOwnerNode("visible", node);
-	}
-	node._global = org.xml3d.initBoolean(node.getAttribute("global"), false);
-	if(node._global != null && node._global.setOwnerNode)
-	{
-		node._global.setOwnerNode("global", node);
-	}
-	node._intensity = org.xml3d.initFloat(node.getAttribute("intensity"), 1);
-	if(node._intensity != null && node._intensity.setOwnerNode)
-	{
-		node._intensity.setOwnerNode("intensity", node);
-	}
-
-
-
-
 	node.getShaderNode = function()
 	{
 		if (!this._shaderNode && this.hasAttribute("shader"))
@@ -5344,9 +5274,6 @@ org.xml3d.classInfo.light = function(node, context)
 	};
 
 
-
-
-
 	// Node::setField
 	node.setField = function(event)
 	{
@@ -5355,106 +5282,88 @@ org.xml3d.classInfo.light = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onclick")
 		{
 			this.onclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "ondblclick")
 		{
 			this.ondblclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousedown")
 		{
 			this.onmousedown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseup")
 		{
 			this.onmouseup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseover")
 		{
 			this.onmouseover = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousemove")
 		{
 			this.onmousemove = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseout")
 		{
 			this.onmouseout = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeypress")
 		{
 			this.onkeypress = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeydown")
 		{
 			this.onkeydown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeyup")
 		{
 			this.onkeyup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "visible")
 		{
 			this.visible = org.xml3d.initBoolean(event.newValue, true);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "global")
 		{
 			this.global = org.xml3d.initBoolean(event.newValue, false);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "intensity")
 		{
 			this.intensity = org.xml3d.initFloat(event.newValue, 1);
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
 		if (event.attrName == "shader")
 		{
 			this.shader = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -5473,7 +5382,30 @@ org.xml3d.classInfo.lightshader = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
 
+	//node.sources = [];
+	//node.childContainers = [];
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -5562,9 +5494,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
 	});
 
 
-
-
-
 	node.__defineSetter__("script", function (value)
 	{
 		var oldValue = this.script;
@@ -5617,8 +5546,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
 		return this.getAttribute("src");
 	});
 
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -5661,27 +5588,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-
-	//node.sources = [];
-	//node.childContainers = [];
-
-
-
 	node.getScriptNode = function()
 	{
 		if (!this._scriptNode && this.hasAttribute("script"))
@@ -5690,9 +5596,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
 		}
 		return this._scriptNode;
 	};
-
-
-
 
 	node.getSrcNode = function()
 	{
@@ -5704,9 +5607,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
 	};
 
 
-
-
-
 	// Node::setField
 	node.setField = function(event)
 	{
@@ -5715,20 +5615,16 @@ org.xml3d.classInfo.lightshader = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
 
 		if (event.attrName == "script")
 		{
@@ -5740,8 +5636,7 @@ org.xml3d.classInfo.lightshader = function(node, context)
 			this.src = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -5759,7 +5654,47 @@ org.xml3d.classInfo.script = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node.value = org.xml3d.initString(node.getTextContent(), null);
 
+	if(node.value != null && node.value.setOwnerNode)
+	{
+		node.value.setOwnerNode("value", node);
+	}
+	
+	node._src = org.xml3d.initString(node.getAttribute("src"), "");
+	if(node._src != null && node._src.setOwnerNode)
+	{
+		node._src.setOwnerNode("src", node);
+	}
+	
+	node._type = org.xml3d.initString(node.getAttribute("type"), "");
+	if(node._type != null && node._type.setOwnerNode)
+	{
+		node._type.setOwnerNode("type", node);
+	}
+	
+
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -5917,11 +5852,6 @@ org.xml3d.classInfo.script = function(node, context)
 	});
 
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -5964,41 +5894,6 @@ org.xml3d.classInfo.script = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node.value = org.xml3d.initString(node.getTextContent(), null);
-
-	if(node.value != null && node.value.setOwnerNode)
-	{
-		node.value.setOwnerNode("value", node);
-	}
-	node._src = org.xml3d.initString(node.getAttribute("src"), "");
-	if(node._src != null && node._src.setOwnerNode)
-	{
-		node._src.setOwnerNode("src", node);
-	}
-	node._type = org.xml3d.initString(node.getAttribute("type"), "");
-	if(node._type != null && node._type.setOwnerNode)
-	{
-		node._type.setOwnerNode("type", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -6008,36 +5903,28 @@ org.xml3d.classInfo.script = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
-
 		if (event.attrName == "src")
 		{
 			this.src = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "type")
 		{
 			this.type = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -6055,7 +5942,41 @@ org.xml3d.classInfo.float = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
+	if(node._name != null && node._name.setOwnerNode)
+	{
+		node._name.setOwnerNode("name", node);
+	}
+	
+	node.value = org.xml3d.initFloatArray(node.getTextContent(), null);
 
+	if(node.value != null && node.value.setOwnerNode)
+	{
+		node.value.setOwnerNode("value", node);
+	}
+	
+
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -6184,11 +6105,6 @@ org.xml3d.classInfo.float = function(node, context)
 		}
 	};
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -6224,36 +6140,6 @@ org.xml3d.classInfo.float = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._name = org.xml3d.initString(node.getAttribute("name"), "");
-	if(node._name != null && node._name.setOwnerNode)
-	{
-		node._name.setOwnerNode("name", node);
-	}
-	node.value = org.xml3d.initFloatArray(node.getTextContent(), null);
-
-	if(node.value != null && node.value.setOwnerNode)
-	{
-		node.value.setOwnerNode("value", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -6263,30 +6149,23 @@ org.xml3d.classInfo.float = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "name")
 		{
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -6304,7 +6183,41 @@ org.xml3d.classInfo.float2 = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
+	if(node._name != null && node._name.setOwnerNode)
+	{
+		node._name.setOwnerNode("name", node);
+	}
+	
+	node.value = org.xml3d.initFloat2Array(node.getTextContent(), null);
 
+	if(node.value != null && node.value.setOwnerNode)
+	{
+		node.value.setOwnerNode("value", node);
+	}
+	
+
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -6433,11 +6346,6 @@ org.xml3d.classInfo.float2 = function(node, context)
 		}
 	};
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -6473,36 +6381,6 @@ org.xml3d.classInfo.float2 = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._name = org.xml3d.initString(node.getAttribute("name"), "");
-	if(node._name != null && node._name.setOwnerNode)
-	{
-		node._name.setOwnerNode("name", node);
-	}
-	node.value = org.xml3d.initFloat2Array(node.getTextContent(), null);
-
-	if(node.value != null && node.value.setOwnerNode)
-	{
-		node.value.setOwnerNode("value", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -6512,30 +6390,23 @@ org.xml3d.classInfo.float2 = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "name")
 		{
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -6553,7 +6424,41 @@ org.xml3d.classInfo.float3 = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
+	if(node._name != null && node._name.setOwnerNode)
+	{
+		node._name.setOwnerNode("name", node);
+	}
+	
+	node.value = org.xml3d.initFloat3Array(node.getTextContent(), null);
 
+	if(node.value != null && node.value.setOwnerNode)
+	{
+		node.value.setOwnerNode("value", node);
+	}
+	
+
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -6682,11 +6587,6 @@ org.xml3d.classInfo.float3 = function(node, context)
 		}
 	};
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -6722,36 +6622,6 @@ org.xml3d.classInfo.float3 = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._name = org.xml3d.initString(node.getAttribute("name"), "");
-	if(node._name != null && node._name.setOwnerNode)
-	{
-		node._name.setOwnerNode("name", node);
-	}
-	node.value = org.xml3d.initFloat3Array(node.getTextContent(), null);
-
-	if(node.value != null && node.value.setOwnerNode)
-	{
-		node.value.setOwnerNode("value", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -6761,30 +6631,23 @@ org.xml3d.classInfo.float3 = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "name")
 		{
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -6802,7 +6665,41 @@ org.xml3d.classInfo.float4 = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
+	if(node._name != null && node._name.setOwnerNode)
+	{
+		node._name.setOwnerNode("name", node);
+	}
+	
+	node.value = org.xml3d.initFloat4Array(node.getTextContent(), null);
 
+	if(node.value != null && node.value.setOwnerNode)
+	{
+		node.value.setOwnerNode("value", node);
+	}
+	
+
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -6931,11 +6828,6 @@ org.xml3d.classInfo.float4 = function(node, context)
 		}
 	};
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -6971,36 +6863,6 @@ org.xml3d.classInfo.float4 = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._name = org.xml3d.initString(node.getAttribute("name"), "");
-	if(node._name != null && node._name.setOwnerNode)
-	{
-		node._name.setOwnerNode("name", node);
-	}
-	node.value = org.xml3d.initFloat4Array(node.getTextContent(), null);
-
-	if(node.value != null && node.value.setOwnerNode)
-	{
-		node.value.setOwnerNode("value", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -7010,30 +6872,23 @@ org.xml3d.classInfo.float4 = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "name")
 		{
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -7051,7 +6906,41 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
+	if(node._name != null && node._name.setOwnerNode)
+	{
+		node._name.setOwnerNode("name", node);
+	}
+	
+	node.value = org.xml3d.initFloat4x4Array(node.getTextContent(), []);
 
+	if(node.value != null && node.value.setOwnerNode)
+	{
+		node.value.setOwnerNode("value", node);
+	}
+	
+
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -7180,11 +7069,6 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 		}
 	};
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -7220,36 +7104,6 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._name = org.xml3d.initString(node.getAttribute("name"), "");
-	if(node._name != null && node._name.setOwnerNode)
-	{
-		node._name.setOwnerNode("name", node);
-	}
-	node.value = org.xml3d.initFloat4x4Array(node.getTextContent(), []);
-
-	if(node.value != null && node.value.setOwnerNode)
-	{
-		node.value.setOwnerNode("value", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -7259,30 +7113,23 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "name")
 		{
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -7300,7 +7147,41 @@ org.xml3d.classInfo.int = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
+	if(node._name != null && node._name.setOwnerNode)
+	{
+		node._name.setOwnerNode("name", node);
+	}
+	
+	node.value = org.xml3d.initIntArray(node.getTextContent(), null);
 
+	if(node.value != null && node.value.setOwnerNode)
+	{
+		node.value.setOwnerNode("value", node);
+	}
+	
+
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -7429,11 +7310,6 @@ org.xml3d.classInfo.int = function(node, context)
 		}
 	};
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -7469,36 +7345,6 @@ org.xml3d.classInfo.int = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._name = org.xml3d.initString(node.getAttribute("name"), "");
-	if(node._name != null && node._name.setOwnerNode)
-	{
-		node._name.setOwnerNode("name", node);
-	}
-	node.value = org.xml3d.initIntArray(node.getTextContent(), null);
-
-	if(node.value != null && node.value.setOwnerNode)
-	{
-		node.value.setOwnerNode("value", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -7508,30 +7354,23 @@ org.xml3d.classInfo.int = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "name")
 		{
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -7549,7 +7388,41 @@ org.xml3d.classInfo.bool = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
+	if(node._name != null && node._name.setOwnerNode)
+	{
+		node._name.setOwnerNode("name", node);
+	}
+	
+	node.value = org.xml3d.initBoolArray(node.getTextContent(), null);
 
+	if(node.value != null && node.value.setOwnerNode)
+	{
+		node.value.setOwnerNode("value", node);
+	}
+	
+
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -7678,11 +7551,6 @@ org.xml3d.classInfo.bool = function(node, context)
 		}
 	};
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -7718,36 +7586,6 @@ org.xml3d.classInfo.bool = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._name = org.xml3d.initString(node.getAttribute("name"), "");
-	if(node._name != null && node._name.setOwnerNode)
-	{
-		node._name.setOwnerNode("name", node);
-	}
-	node.value = org.xml3d.initBoolArray(node.getTextContent(), null);
-
-	if(node.value != null && node.value.setOwnerNode)
-	{
-		node.value.setOwnerNode("value", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -7757,30 +7595,23 @@ org.xml3d.classInfo.bool = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "name")
 		{
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -7798,7 +7629,82 @@ org.xml3d.classInfo.texture = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._name = org.xml3d.initString(node.getAttribute("name"), "");
+	if(node._name != null && node._name.setOwnerNode)
+	{
+		node._name.setOwnerNode("name", node);
+	}
+	
+	node._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.TextureTypes);
+	if(node._type != null && node._type.setOwnerNode)
+	{
+		node._type.setOwnerNode("type", node);
+	}
+	
+	node._filterMin = org.xml3d.initEnum(node.getAttribute("filterMin"), 2, org.xml3d.FilterTypes);
+	if(node._filterMin != null && node._filterMin.setOwnerNode)
+	{
+		node._filterMin.setOwnerNode("filterMin", node);
+	}
+	
+	node._filterMag = org.xml3d.initEnum(node.getAttribute("filterMag"), 2, org.xml3d.FilterTypes);
+	if(node._filterMag != null && node._filterMag.setOwnerNode)
+	{
+		node._filterMag.setOwnerNode("filterMag", node);
+	}
+	
+	node._filterMip = org.xml3d.initEnum(node.getAttribute("filterMip"), 1, org.xml3d.FilterTypes);
+	if(node._filterMip != null && node._filterMip.setOwnerNode)
+	{
+		node._filterMip.setOwnerNode("filterMip", node);
+	}
+	
+	node._wrapS = org.xml3d.initEnum(node.getAttribute("wrapS"), 0, org.xml3d.WrapTypes);
+	if(node._wrapS != null && node._wrapS.setOwnerNode)
+	{
+		node._wrapS.setOwnerNode("wrapS", node);
+	}
+	
+	node._wrapT = org.xml3d.initEnum(node.getAttribute("wrapT"), 0, org.xml3d.WrapTypes);
+	if(node._wrapT != null && node._wrapT.setOwnerNode)
+	{
+		node._wrapT.setOwnerNode("wrapT", node);
+	}
+	
+	node._wrapU = org.xml3d.initEnum(node.getAttribute("wrapU"), 0, org.xml3d.WrapTypes);
+	if(node._wrapU != null && node._wrapU.setOwnerNode)
+	{
+		node._wrapU.setOwnerNode("wrapU", node);
+	}
+	
+	node._borderColor = org.xml3d.initString(node.getAttribute("borderColor"), "");
+	if(node._borderColor != null && node._borderColor.setOwnerNode)
+	{
+		node._borderColor.setOwnerNode("borderColor", node);
+	}
+	
 
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -8148,11 +8054,6 @@ org.xml3d.classInfo.texture = function(node, context)
 	});
 
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -8244,70 +8145,6 @@ org.xml3d.classInfo.texture = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._name = org.xml3d.initString(node.getAttribute("name"), "");
-	if(node._name != null && node._name.setOwnerNode)
-	{
-		node._name.setOwnerNode("name", node);
-	}
-	node._type = org.xml3d.initEnum(node.getAttribute("type"), 0, org.xml3d.TextureTypes);
-	if(node._type != null && node._type.setOwnerNode)
-	{
-		node._type.setOwnerNode("type", node);
-	}
-	node._filterMin = org.xml3d.initEnum(node.getAttribute("filterMin"), 2, org.xml3d.FilterTypes);
-	if(node._filterMin != null && node._filterMin.setOwnerNode)
-	{
-		node._filterMin.setOwnerNode("filterMin", node);
-	}
-	node._filterMag = org.xml3d.initEnum(node.getAttribute("filterMag"), 2, org.xml3d.FilterTypes);
-	if(node._filterMag != null && node._filterMag.setOwnerNode)
-	{
-		node._filterMag.setOwnerNode("filterMag", node);
-	}
-	node._filterMip = org.xml3d.initEnum(node.getAttribute("filterMip"), 1, org.xml3d.FilterTypes);
-	if(node._filterMip != null && node._filterMip.setOwnerNode)
-	{
-		node._filterMip.setOwnerNode("filterMip", node);
-	}
-	node._wrapS = org.xml3d.initEnum(node.getAttribute("wrapS"), 0, org.xml3d.WrapTypes);
-	if(node._wrapS != null && node._wrapS.setOwnerNode)
-	{
-		node._wrapS.setOwnerNode("wrapS", node);
-	}
-	node._wrapT = org.xml3d.initEnum(node.getAttribute("wrapT"), 0, org.xml3d.WrapTypes);
-	if(node._wrapT != null && node._wrapT.setOwnerNode)
-	{
-		node._wrapT.setOwnerNode("wrapT", node);
-	}
-	node._wrapU = org.xml3d.initEnum(node.getAttribute("wrapU"), 0, org.xml3d.WrapTypes);
-	if(node._wrapU != null && node._wrapU.setOwnerNode)
-	{
-		node._wrapU.setOwnerNode("wrapU", node);
-	}
-	node._borderColor = org.xml3d.initString(node.getAttribute("borderColor"), "");
-	if(node._borderColor != null && node._borderColor.setOwnerNode)
-	{
-		node._borderColor.setOwnerNode("borderColor", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -8317,77 +8154,63 @@ org.xml3d.classInfo.texture = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "name")
 		{
 			this.name = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "type")
 		{
 			this.type = org.xml3d.initEnum(event.newValue, 0, org.xml3d.TextureTypes);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "filterMin")
 		{
 			this.filterMin = org.xml3d.initEnum(event.newValue, 2, org.xml3d.FilterTypes);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "filterMag")
 		{
 			this.filterMag = org.xml3d.initEnum(event.newValue, 2, org.xml3d.FilterTypes);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "filterMip")
 		{
 			this.filterMip = org.xml3d.initEnum(event.newValue, 1, org.xml3d.FilterTypes);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "wrapS")
 		{
 			this.wrapS = org.xml3d.initEnum(event.newValue, 0, org.xml3d.WrapTypes);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "wrapT")
 		{
 			this.wrapT = org.xml3d.initEnum(event.newValue, 0, org.xml3d.WrapTypes);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "wrapU")
 		{
 			this.wrapU = org.xml3d.initEnum(event.newValue, 0, org.xml3d.WrapTypes);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "borderColor")
 		{
 			this.borderColor = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -8405,7 +8228,34 @@ org.xml3d.classInfo.img = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._src = org.xml3d.initString(node.getAttribute("src"), "");
+	if(node._src != null && node._src.setOwnerNode)
+	{
+		node._src.setOwnerNode("src", node);
+	}
+	
 
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -8523,11 +8373,6 @@ org.xml3d.classInfo.img = function(node, context)
 	});
 
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -8563,30 +8408,6 @@ org.xml3d.classInfo.img = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._src = org.xml3d.initString(node.getAttribute("src"), "");
-	if(node._src != null && node._src.setOwnerNode)
-	{
-		node._src.setOwnerNode("src", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -8596,29 +8417,23 @@ org.xml3d.classInfo.img = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "src")
 		{
 			this.src = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -8636,7 +8451,34 @@ org.xml3d.classInfo.video = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._src = org.xml3d.initString(node.getAttribute("src"), "");
+	if(node._src != null && node._src.setOwnerNode)
+	{
+		node._src.setOwnerNode("src", node);
+	}
+	
 
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -8754,11 +8596,6 @@ org.xml3d.classInfo.video = function(node, context)
 	});
 
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -8794,30 +8631,6 @@ org.xml3d.classInfo.video = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._src = org.xml3d.initString(node.getAttribute("src"), "");
-	if(node._src != null && node._src.setOwnerNode)
-	{
-		node._src.setOwnerNode("src", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -8827,29 +8640,23 @@ org.xml3d.classInfo.video = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "src")
 		{
 			this.src = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 
@@ -8867,7 +8674,112 @@ org.xml3d.classInfo.view = function(node, context)
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
 
+	node._id = org.xml3d.initString(node.getAttribute("id"), null);
+	if(node._id != null && node._id.setOwnerNode)
+	{
+		node._id.setOwnerNode("id", node);
+	}
+	
+	node._class = org.xml3d.initString(node.getAttribute("class"), null);
+	if(node._class != null && node._class.setOwnerNode)
+	{
+		node._class.setOwnerNode("class", node);
+	}
+	
+	node._style = org.xml3d.initString(node.getAttribute("style"), "");
+	if(node._style != null && node._style.setOwnerNode)
+	{
+		node._style.setOwnerNode("style", node);
+	}
+	
+	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
+	if(node._onclick != null && node._onclick.setOwnerNode)
+	{
+		node._onclick.setOwnerNode("onclick", node);
+	}
+	
+	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
+	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
+	{
+		node._ondblclick.setOwnerNode("ondblclick", node);
+	}
+	
+	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
+	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
+	{
+		node._onmousedown.setOwnerNode("onmousedown", node);
+	}
+	
+	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
+	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
+	{
+		node._onmouseup.setOwnerNode("onmouseup", node);
+	}
+	
+	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
+	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
+	{
+		node._onmouseover.setOwnerNode("onmouseover", node);
+	}
+	
+	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
+	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
+	{
+		node._onmousemove.setOwnerNode("onmousemove", node);
+	}
+	
+	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
+	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
+	{
+		node._onmouseout.setOwnerNode("onmouseout", node);
+	}
+	
+	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
+	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
+	{
+		node._onkeypress.setOwnerNode("onkeypress", node);
+	}
+	
+	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
+	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
+	{
+		node._onkeydown.setOwnerNode("onkeydown", node);
+	}
+	
+	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
+	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
+	{
+		node._onkeyup.setOwnerNode("onkeyup", node);
+	}
+	
+	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
+	if(node._visible != null && node._visible.setOwnerNode)
+	{
+		node._visible.setOwnerNode("visible", node);
+	}
+	
+	node._position = org.xml3d.initXML3DVec3(node.getAttribute("position"), 0, 0, 0);
+	if(node._position != null && node._position.setOwnerNode)
+	{
+		node._position.setOwnerNode("position", node);
+	}
+	
+	node._orientation = org.xml3d.initXML3DRotation(node.getAttribute("orientation"), 0, 0, 1, 0);
+	if(node._orientation != null && node._orientation.setOwnerNode)
+	{
+		node._orientation.setOwnerNode("orientation", node);
+	}
+	
+	node._fieldOfView = org.xml3d.initFloat(node.getAttribute("fieldOfView"), 0.785398);
+	if(node._fieldOfView != null && node._fieldOfView.setOwnerNode)
+	{
+		node._fieldOfView.setOwnerNode("fieldOfView", node);
+	}
+	
 
+	
+	
+	
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -9362,11 +9274,6 @@ org.xml3d.classInfo.view = function(node, context)
 	});
 
 
-
-
-
-
-
 	node.resetAttribute = function(attrName)
 	{
 		if(attrName == "id")
@@ -9493,95 +9400,6 @@ org.xml3d.classInfo.view = function(node, context)
 		return org.xml3d.event.UNHANDLED;
 	};
 
-	node._id = org.xml3d.initString(node.getAttribute("id"), null);
-	if(node._id != null && node._id.setOwnerNode)
-	{
-		node._id.setOwnerNode("id", node);
-	}
-	node._class = org.xml3d.initString(node.getAttribute("class"), null);
-	if(node._class != null && node._class.setOwnerNode)
-	{
-		node._class.setOwnerNode("class", node);
-	}
-	node._style = org.xml3d.initString(node.getAttribute("style"), "");
-	if(node._style != null && node._style.setOwnerNode)
-	{
-		node._style.setOwnerNode("style", node);
-	}
-	node._onclick = org.xml3d.initString(node.getAttribute("onclick"), "");
-	if(node._onclick != null && node._onclick.setOwnerNode)
-	{
-		node._onclick.setOwnerNode("onclick", node);
-	}
-	node._ondblclick = org.xml3d.initString(node.getAttribute("ondblclick"), "");
-	if(node._ondblclick != null && node._ondblclick.setOwnerNode)
-	{
-		node._ondblclick.setOwnerNode("ondblclick", node);
-	}
-	node._onmousedown = org.xml3d.initString(node.getAttribute("onmousedown"), "");
-	if(node._onmousedown != null && node._onmousedown.setOwnerNode)
-	{
-		node._onmousedown.setOwnerNode("onmousedown", node);
-	}
-	node._onmouseup = org.xml3d.initString(node.getAttribute("onmouseup"), "");
-	if(node._onmouseup != null && node._onmouseup.setOwnerNode)
-	{
-		node._onmouseup.setOwnerNode("onmouseup", node);
-	}
-	node._onmouseover = org.xml3d.initString(node.getAttribute("onmouseover"), "");
-	if(node._onmouseover != null && node._onmouseover.setOwnerNode)
-	{
-		node._onmouseover.setOwnerNode("onmouseover", node);
-	}
-	node._onmousemove = org.xml3d.initString(node.getAttribute("onmousemove"), "");
-	if(node._onmousemove != null && node._onmousemove.setOwnerNode)
-	{
-		node._onmousemove.setOwnerNode("onmousemove", node);
-	}
-	node._onmouseout = org.xml3d.initString(node.getAttribute("onmouseout"), "");
-	if(node._onmouseout != null && node._onmouseout.setOwnerNode)
-	{
-		node._onmouseout.setOwnerNode("onmouseout", node);
-	}
-	node._onkeypress = org.xml3d.initString(node.getAttribute("onkeypress"), "");
-	if(node._onkeypress != null && node._onkeypress.setOwnerNode)
-	{
-		node._onkeypress.setOwnerNode("onkeypress", node);
-	}
-	node._onkeydown = org.xml3d.initString(node.getAttribute("onkeydown"), "");
-	if(node._onkeydown != null && node._onkeydown.setOwnerNode)
-	{
-		node._onkeydown.setOwnerNode("onkeydown", node);
-	}
-	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
-	if(node._onkeyup != null && node._onkeyup.setOwnerNode)
-	{
-		node._onkeyup.setOwnerNode("onkeyup", node);
-	}
-	node._visible = org.xml3d.initBoolean(node.getAttribute("visible"), true);
-	if(node._visible != null && node._visible.setOwnerNode)
-	{
-		node._visible.setOwnerNode("visible", node);
-	}
-	node._position = org.xml3d.initXML3DVec3(node.getAttribute("position"), 0, 0, 0);
-	if(node._position != null && node._position.setOwnerNode)
-	{
-		node._position.setOwnerNode("position", node);
-	}
-	node._orientation = org.xml3d.initXML3DRotation(node.getAttribute("orientation"), 0, 0, 1, 0);
-	if(node._orientation != null && node._orientation.setOwnerNode)
-	{
-		node._orientation.setOwnerNode("orientation", node);
-	}
-	node._fieldOfView = org.xml3d.initFloat(node.getAttribute("fieldOfView"), 0.785398);
-	if(node._fieldOfView != null && node._fieldOfView.setOwnerNode)
-	{
-		node._fieldOfView.setOwnerNode("fieldOfView", node);
-	}
-
-
-
-
 
 	// Node::setField
 	node.setField = function(event)
@@ -9591,107 +9409,88 @@ org.xml3d.classInfo.view = function(node, context)
 			this.id = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "class")
 		{
 			this.class = org.xml3d.initString(event.newValue, null);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "style")
 		{
 			this.style = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onclick")
 		{
 			this.onclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "ondblclick")
 		{
 			this.ondblclick = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousedown")
 		{
 			this.onmousedown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseup")
 		{
 			this.onmouseup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseover")
 		{
 			this.onmouseover = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmousemove")
 		{
 			this.onmousemove = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onmouseout")
 		{
 			this.onmouseout = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeypress")
 		{
 			this.onkeypress = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeydown")
 		{
 			this.onkeydown = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "onkeyup")
 		{
 			this.onkeyup = org.xml3d.initString(event.newValue, "");
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "visible")
 		{
 			this.visible = org.xml3d.initBoolean(event.newValue, true);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "position")
 		{
 			this.position = org.xml3d.initXML3DVec3(event.newValue, 0, 0, 0);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "orientation")
 		{
 			this.orientation = org.xml3d.initXML3DRotation(event.newValue, 0, 0, 1, 0);
 			return org.xml3d.event.HANDLED;
 		}
-
 		if (event.attrName == "fieldOfView")
 		{
 			this.fieldOfView = org.xml3d.initFloat(event.newValue, 0.785398);
 			return org.xml3d.event.HANDLED;
 		}
 
-
-
-
-
+	
 		return org.xml3d.event.UNHANDLED;
 	};
 

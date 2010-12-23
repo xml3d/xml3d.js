@@ -9,15 +9,33 @@ if (!org.xml3d.animation)
 else if (typeof org.xml3d.animation != "object")
 	throw new Error("org.xml3d.animation already exists and is not an object");
 
-(function() {
-	var load = function() {
-			org.xml3d.debug.logInfo("Initializing Animation Manager.");
-			org.xml3d.animation.animationManager = new org.xml3d.animation.XML3DAnimationManager();
-			org.xml3d.animation.animationManager.init();
+// This is quirk required  to run animation manager initalization only after full
+// document is loaded and all X3D interpolation elements are accesible.
+
+// Browsers  based  on  Gecko 1.9.2 (e.g. Firefox 3.5) will only execute function
+// that is set to timeout in 0 milliseconds exactly after document will be loaded
+// or  as  soon  as  possible  if  document is already loaded, thus we can safely
+// initalize animation manager. Such browsers can  be checked by testing value of
+// document.readyState, which must be undefined.
+
+// Other browsers may execute function  even  before loading  of  the webpage  is 
+// finished, but they define document.readyState,  which allows us to detech such
+// state  and  register event handler, which  will  run  the  initalization after 
+// document is fully loaded.
+
+setTimeout(function() {
+	function initAnimationManager() {
+		org.xml3d.debug.logInfo("Initializing Animation Manager.");
+		org.xml3d.animation.animationManager = new org.xml3d.animation.XML3DAnimationManager();
+		org.xml3d.animation.animationManager.init();
 	};
-	window.addEventListener('load', load, false);
 	
-})();
+	if (document.readyState == "complete" || // All major browsers except Gecko 1.9.2 or earlier.
+		document.readyState == undefined) // Gecko 1.9.2 or earlier version. Document is guaranteed to be loaded when running this code.
+		initAnimationManager();
+	else
+		window.addEventListener('load', initAnimationManager, false);
+}, 0);
 
 org.xml3d.startAnimation = function(aniID, transID, transAttr, duration, loop)
 {
@@ -64,6 +82,27 @@ org.xml3d.animation.XML3DAnimationManager.prototype.init = function() {
 	}
 	var a = this;
 	window.setInterval(function() { a.progress(); }, 30);
+};
+
+org.xml3d.animation.XML3DAnimationManager.prototype.updateInterpolators = function() {
+	var ois = document.getElementsByTagNameNS(org.xml3d.x3dNS, 'OrientationInterpolator');
+	for(var i = 0; i < ois.length; i++)
+	{
+		if (ois[i].hasAttribute('id'))
+		{
+			if (this.interpolators[ois[i].getAttribute('id')] == undefined)
+				this.interpolators[ois[i].getAttribute('id')] = new org.xml3d.animation.X3DOrientationInterpolation(ois[i]);
+		}
+	}
+	var ois = document.getElementsByTagNameNS(org.xml3d.x3dNS, 'PositionInterpolator');
+	for(var i = 0; i < ois.length; i++)
+	{
+		if (ois[i].hasAttribute('id'))
+		{
+			if (this.interpolators[ois[i].getAttribute('id')] == undefined)
+			this.interpolators[ois[i].getAttribute('id')] = new org.xml3d.animation.X3DPositionInterpolation(ois[i]);
+		}
+	}
 };
 
 org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID, transID, transAttr, duration, loop) {

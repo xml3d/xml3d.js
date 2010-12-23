@@ -1388,34 +1388,33 @@ org.xml3d.classInfo.xml3d = function(node, context)
 
 	node.__defineSetter__("activeView", function (value)
 	{
-		var oldValue = this._activeView;
-
+		var oldValue = this.activeView;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._activeView = value;
+			this.setAttribute("activeView", value);
 		}
 		else
 		{
-			this._activeView = org.xml3d.initString(value, "");
+			this.setAttribute("activeView", org.xml3d.initString(value, ""));
 		}
 
 	    this._activeViewNode = null;
 
+	    // TODO: to be removed
 	    if(this._activeView != null && this._activeView.setOwnerNode)
 		{
 			this._activeView.setOwnerNode("activeView", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._activeView))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.activeView))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "activeView", oldValue, this._activeView));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "activeView", oldValue, this.activeView));
 		}
 	});
 
 	node.__defineGetter__("activeView", function (value)
 	{
-		//return this._activeView;
 		return this.getAttribute("activeView");
 	});
 
@@ -1910,67 +1909,65 @@ org.xml3d.classInfo.data = function(node, context)
 
 	node.__defineSetter__("src", function (value)
 	{
-		var oldValue = this._src;
-
+		var oldValue = this.src;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._src = value;
+			this.setAttribute("src", value);
 		}
 		else
 		{
-			this._src = org.xml3d.initString(value, "");
+			this.setAttribute("src", org.xml3d.initString(value, ""));
 		}
 
 	    this._srcNode = null;
 
+	    // TODO: to be removed
 	    if(this._src != null && this._src.setOwnerNode)
 		{
 			this._src.setOwnerNode("src", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._src))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.src))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this._src));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this.src));
 		}
 	});
 
 	node.__defineGetter__("src", function (value)
 	{
-		//return this._src;
 		return this.getAttribute("src");
 	});
 
 	node.__defineSetter__("script", function (value)
 	{
-		var oldValue = this._script;
-
+		var oldValue = this.script;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._script = value;
+			this.setAttribute("script", value);
 		}
 		else
 		{
-			this._script = org.xml3d.initString(value, "");
+			this.setAttribute("script", org.xml3d.initString(value, ""));
 		}
 
 	    this._scriptNode = null;
 
+	    // TODO: to be removed
 	    if(this._script != null && this._script.setOwnerNode)
 		{
 			this._script.setOwnerNode("script", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._script))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.script))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "script", oldValue, this._script));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "script", oldValue, this.script));
 		}
 	});
 
 	node.__defineGetter__("script", function (value)
 	{
-		//return this._script;
 		return this.getAttribute("script");
 	});
 
@@ -2750,67 +2747,65 @@ org.xml3d.classInfo.group = function(node, context)
 
 	node.__defineSetter__("transform", function (value)
 	{
-		var oldValue = this._transform;
-
+		var oldValue = this.transform;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._transform = value;
+			this.setAttribute("transform", value);
 		}
 		else
 		{
-			this._transform = org.xml3d.initString(value, "");
+			this.setAttribute("transform", org.xml3d.initString(value, ""));
 		}
 
 	    this._transformNode = null;
 
+	    // TODO: to be removed
 	    if(this._transform != null && this._transform.setOwnerNode)
 		{
 			this._transform.setOwnerNode("transform", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._transform))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.transform))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "transform", oldValue, this._transform));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "transform", oldValue, this.transform));
 		}
 	});
 
 	node.__defineGetter__("transform", function (value)
 	{
-		//return this._transform;
 		return this.getAttribute("transform");
 	});
 
 	node.__defineSetter__("shader", function (value)
 	{
-		var oldValue = this._shader;
-
+		var oldValue = this.shader;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._shader = value;
+			this.setAttribute("shader", value);
 		}
 		else
 		{
-			this._shader = org.xml3d.initString(value, "");
+			this.setAttribute("shader", org.xml3d.initString(value, ""));
 		}
 
 	    this._shaderNode = null;
 
+	    // TODO: to be removed
 	    if(this._shader != null && this._shader.setOwnerNode)
 		{
 			this._shader.setOwnerNode("shader", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._shader))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.shader))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "shader", oldValue, this._shader));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "shader", oldValue, this.shader));
 		}
 	});
 
 	node.__defineGetter__("shader", function (value)
 	{
-		//return this._shader;
 		return this.getAttribute("shader");
 	});
 
@@ -3598,34 +3593,33 @@ org.xml3d.classInfo.mesh = function(node, context)
 
 	node.__defineSetter__("src", function (value)
 	{
-		var oldValue = this._src;
-
+		var oldValue = this.src;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._src = value;
+			this.setAttribute("src", value);
 		}
 		else
 		{
-			this._src = org.xml3d.initString(value, "");
+			this.setAttribute("src", org.xml3d.initString(value, ""));
 		}
 
 	    this._srcNode = null;
 
+	    // TODO: to be removed
 	    if(this._src != null && this._src.setOwnerNode)
 		{
 			this._src.setOwnerNode("src", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._src))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.src))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this._src));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this.src));
 		}
 	});
 
 	node.__defineGetter__("src", function (value)
 	{
-		//return this._src;
 		return this.getAttribute("src");
 	});
 
@@ -4477,67 +4471,65 @@ org.xml3d.classInfo.shader = function(node, context)
 
 	node.__defineSetter__("script", function (value)
 	{
-		var oldValue = this._script;
-
+		var oldValue = this.script;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._script = value;
+			this.setAttribute("script", value);
 		}
 		else
 		{
-			this._script = org.xml3d.initString(value, "");
+			this.setAttribute("script", org.xml3d.initString(value, ""));
 		}
 
 	    this._scriptNode = null;
 
+	    // TODO: to be removed
 	    if(this._script != null && this._script.setOwnerNode)
 		{
 			this._script.setOwnerNode("script", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._script))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.script))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "script", oldValue, this._script));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "script", oldValue, this.script));
 		}
 	});
 
 	node.__defineGetter__("script", function (value)
 	{
-		//return this._script;
 		return this.getAttribute("script");
 	});
 
 	node.__defineSetter__("src", function (value)
 	{
-		var oldValue = this._src;
-
+		var oldValue = this.src;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._src = value;
+			this.setAttribute("src", value);
 		}
 		else
 		{
-			this._src = org.xml3d.initString(value, "");
+			this.setAttribute("src", org.xml3d.initString(value, ""));
 		}
 
 	    this._srcNode = null;
 
+	    // TODO: to be removed
 	    if(this._src != null && this._src.setOwnerNode)
 		{
 			this._src.setOwnerNode("src", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._src))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.src))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this._src));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this.src));
 		}
 	});
 
 	node.__defineGetter__("src", function (value)
 	{
-		//return this._src;
 		return this.getAttribute("src");
 	});
 
@@ -5154,34 +5146,33 @@ org.xml3d.classInfo.light = function(node, context)
 
 	node.__defineSetter__("shader", function (value)
 	{
-		var oldValue = this._shader;
-
+		var oldValue = this.shader;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._shader = value;
+			this.setAttribute("shader", value);
 		}
 		else
 		{
-			this._shader = org.xml3d.initString(value, "");
+			this.setAttribute("shader", org.xml3d.initString(value, ""));
 		}
 
 	    this._shaderNode = null;
 
+	    // TODO: to be removed
 	    if(this._shader != null && this._shader.setOwnerNode)
 		{
 			this._shader.setOwnerNode("shader", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._shader))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.shader))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "shader", oldValue, this._shader));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "shader", oldValue, this.shader));
 		}
 	});
 
 	node.__defineGetter__("shader", function (value)
 	{
-		//return this._shader;
 		return this.getAttribute("shader");
 	});
 
@@ -5630,67 +5621,65 @@ org.xml3d.classInfo.lightshader = function(node, context)
 
 	node.__defineSetter__("script", function (value)
 	{
-		var oldValue = this._script;
-
+		var oldValue = this.script;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._script = value;
+			this.setAttribute("script", value);
 		}
 		else
 		{
-			this._script = org.xml3d.initString(value, "");
+			this.setAttribute("script", org.xml3d.initString(value, ""));
 		}
 
 	    this._scriptNode = null;
 
+	    // TODO: to be removed
 	    if(this._script != null && this._script.setOwnerNode)
 		{
 			this._script.setOwnerNode("script", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._script))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.script))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "script", oldValue, this._script));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "script", oldValue, this.script));
 		}
 	});
 
 	node.__defineGetter__("script", function (value)
 	{
-		//return this._script;
 		return this.getAttribute("script");
 	});
 
 	node.__defineSetter__("src", function (value)
 	{
-		var oldValue = this._src;
-
+		var oldValue = this.src;
+		
 		if(org.xml3d.isString(value))
 		{
-			this._src = value;
+			this.setAttribute("src", value);
 		}
 		else
 		{
-			this._src = org.xml3d.initString(value, "");
+			this.setAttribute("src", org.xml3d.initString(value, ""));
 		}
 
 	    this._srcNode = null;
 
+	    // TODO: to be removed
 	    if(this._src != null && this._src.setOwnerNode)
 		{
 			this._src.setOwnerNode("src", this);
 		}
 
-
-		if (this.notificationRequired() && ! isEqual(oldValue, this._src))
+		if (this.notificationRequired() && ! isEqual(oldValue, this.src))
 		{
-			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this._src));
+			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this.src));
 		}
 	});
 
 	node.__defineGetter__("src", function (value)
 	{
-		//return this._src;
 		return this.getAttribute("src");
 	});
 

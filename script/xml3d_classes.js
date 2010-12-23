@@ -1401,12 +1401,6 @@ org.xml3d.classInfo.xml3d = function(node, context)
 
 	    this._activeViewNode = null;
 
-	    // TODO: to be removed
-	    if(this._activeView != null && this._activeView.setOwnerNode)
-		{
-			this._activeView.setOwnerNode("activeView", this);
-		}
-
 		if (this.notificationRequired() && ! isEqual(oldValue, this.activeView))
 		{
 			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "activeView", oldValue, this.activeView));
@@ -1922,12 +1916,6 @@ org.xml3d.classInfo.data = function(node, context)
 
 	    this._srcNode = null;
 
-	    // TODO: to be removed
-	    if(this._src != null && this._src.setOwnerNode)
-		{
-			this._src.setOwnerNode("src", this);
-		}
-
 		if (this.notificationRequired() && ! isEqual(oldValue, this.src))
 		{
 			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "src", oldValue, this.src));
@@ -1953,12 +1941,6 @@ org.xml3d.classInfo.data = function(node, context)
 		}
 
 	    this._scriptNode = null;
-
-	    // TODO: to be removed
-	    if(this._script != null && this._script.setOwnerNode)
-		{
-			this._script.setOwnerNode("script", this);
-		}
 
 		if (this.notificationRequired() && ! isEqual(oldValue, this.script))
 		{
@@ -2760,12 +2742,6 @@ org.xml3d.classInfo.group = function(node, context)
 
 	    this._transformNode = null;
 
-	    // TODO: to be removed
-	    if(this._transform != null && this._transform.setOwnerNode)
-		{
-			this._transform.setOwnerNode("transform", this);
-		}
-
 		if (this.notificationRequired() && ! isEqual(oldValue, this.transform))
 		{
 			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "transform", oldValue, this.transform));
@@ -2791,12 +2767,6 @@ org.xml3d.classInfo.group = function(node, context)
 		}
 
 	    this._shaderNode = null;
-
-	    // TODO: to be removed
-	    if(this._shader != null && this._shader.setOwnerNode)
-		{
-			this._shader.setOwnerNode("shader", this);
-		}
 
 		if (this.notificationRequired() && ! isEqual(oldValue, this.shader))
 		{
@@ -3605,12 +3575,6 @@ org.xml3d.classInfo.mesh = function(node, context)
 		}
 
 	    this._srcNode = null;
-
-	    // TODO: to be removed
-	    if(this._src != null && this._src.setOwnerNode)
-		{
-			this._src.setOwnerNode("src", this);
-		}
 
 		if (this.notificationRequired() && ! isEqual(oldValue, this.src))
 		{
@@ -4484,12 +4448,6 @@ org.xml3d.classInfo.shader = function(node, context)
 
 	    this._scriptNode = null;
 
-	    // TODO: to be removed
-	    if(this._script != null && this._script.setOwnerNode)
-		{
-			this._script.setOwnerNode("script", this);
-		}
-
 		if (this.notificationRequired() && ! isEqual(oldValue, this.script))
 		{
 			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "script", oldValue, this.script));
@@ -4515,12 +4473,6 @@ org.xml3d.classInfo.shader = function(node, context)
 		}
 
 	    this._srcNode = null;
-
-	    // TODO: to be removed
-	    if(this._src != null && this._src.setOwnerNode)
-		{
-			this._src.setOwnerNode("src", this);
-		}
 
 		if (this.notificationRequired() && ! isEqual(oldValue, this.src))
 		{
@@ -5159,12 +5111,6 @@ org.xml3d.classInfo.light = function(node, context)
 
 	    this._shaderNode = null;
 
-	    // TODO: to be removed
-	    if(this._shader != null && this._shader.setOwnerNode)
-		{
-			this._shader.setOwnerNode("shader", this);
-		}
-
 		if (this.notificationRequired() && ! isEqual(oldValue, this.shader))
 		{
 			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "shader", oldValue, this.shader));
@@ -5634,12 +5580,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
 
 	    this._scriptNode = null;
 
-	    // TODO: to be removed
-	    if(this._script != null && this._script.setOwnerNode)
-		{
-			this._script.setOwnerNode("script", this);
-		}
-
 		if (this.notificationRequired() && ! isEqual(oldValue, this.script))
 		{
 			this.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "script", oldValue, this.script));
@@ -5665,12 +5605,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
 		}
 
 	    this._srcNode = null;
-
-	    // TODO: to be removed
-	    if(this._src != null && this._src.setOwnerNode)
-		{
-			this._src.setOwnerNode("src", this);
-		}
 
 		if (this.notificationRequired() && ! isEqual(oldValue, this.src))
 		{

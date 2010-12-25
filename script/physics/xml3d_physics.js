@@ -49,7 +49,16 @@ var __physicsXPathEvaluator = new XPathEvaluator();
 function __physicsEvaluateXPath(expr) {  
 	var result = __physicsXPathEvaluator.evaluate(expr, document, 
 		__physicsNSResolver, XPathResult.ANY_TYPE, null);  
-	var found = [];  
+	var found = new Array();  
+	var res;  
+	while (res = result.iterateNext())  
+		found.push(res);  
+	return found;  
+}
+function __physicsEvaluateXPathOnObject(object, expr) {  
+	var xPathExpression = __physicsXPathEvaluator.createExpression(expr, __physicsNSResolver);
+	var result = xPathExpression.evaluate(object, XPathResult.ANY_TYPE, null);
+	var found = new Array();  
 	var res;  
 	while (res = result.iterateNext())  
 		found.push(res);  

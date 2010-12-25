@@ -140,6 +140,7 @@ xml3dPhysics.Interactor = function(xml3d) {
 	};
 
 	this.onMouseDown = function(event) {
+		alert("charge start");
 		var button = (event.which || event.button);
 		if (!this.impulseChargingEnabled || button != 1)
 			return;
@@ -153,11 +154,13 @@ xml3dPhysics.Interactor = function(xml3d) {
 		// console.log(this.lastNormal);
 		var date = new Date();
 		this.lastTime = date.getTime();
+		alert("charge start");
 	};
 
 	// use 2 versions of mouse up
 	// When charging up the event handler has to be global
-	// to make sure that the charging process ends.
+	// to make sure the charging process ends even if the
+	// mouse is outside the XML3D-canvas.
 	this.onMouseUpCharge = function(event) {
 		if (!self.impulseChargingEnabled)
 			return;
@@ -192,16 +195,16 @@ xml3dPhysics.Interactor = function(xml3d) {
 				event.position);
 	};
 
-	var xml3da = this.xml3d;
-	var selfa = this;
+	//var xml3da = this.xml3d;
+	//var selfa = this;
 	this.onload = function() {
-		xml3da.addEventListener("mousedown", function(event) {
-			selfa.onMouseDown(event);
+		xml3d.addEventListener("mousedown", function(event) {
+			self.onMouseDown(event);
 		}, false);
-		xml3da.addEventListener("mouseup", function(event) {
-			selfa.onMouseUpNoCharge(event);
+		xml3d.addEventListener("mouseup", function(event) {
+			self.onMouseUpNoCharge(event);
 		}, false);
-		document.onmouseup = selfa.onMouseUpCharge;
+		document.onmouseup = self.onMouseUpCharge;
 	};
 	window.addEventListener('load', this.onload, false);
 };

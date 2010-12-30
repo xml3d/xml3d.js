@@ -140,7 +140,6 @@ xml3dPhysics.Interactor = function(xml3d) {
 	};
 
 	this.onMouseDown = function(event) {
-		alert("charge start");
 		var button = (event.which || event.button);
 		if (!this.impulseChargingEnabled || button != 1)
 			return;
@@ -154,7 +153,6 @@ xml3dPhysics.Interactor = function(xml3d) {
 		// console.log(this.lastNormal);
 		var date = new Date();
 		this.lastTime = date.getTime();
-		alert("charge start");
 	};
 
 	// use 2 versions of mouse up

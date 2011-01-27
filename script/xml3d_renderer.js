@@ -107,7 +107,10 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	canvas.width = canvas.clientWidth;
 	canvas.height = canvas.clientHeight;
 	canvas.style.display = "block";
-	// TODO: Check background color (see conformace tests)
+	var bgcolor = org.xml3d.util.getStyle(xml3dElement, "background-color");
+	if (bgcolor)
+		canvas.style.backgroundColor = bgcolor;
+	
 	return canvas;
 };
 
@@ -1406,9 +1409,11 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	this.__defineGetter__("bbox", function() {
 		if (!this._bbox) {
 			var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
-			if (!dt.position || !dt.position.data)
-				throw new Error("A mesh is referencing non-existent data: Cannot find positions data for " + this.node.getAttribute("src"));
-			else
+			if (!dt.position || !dt.position.data) {
+				org.xml3d.debug.logError("A mesh is referencing non-existent data: Cannot find positions data for " + 
+						this.node.getAttribute("src"));
+			this.isValid = false;
+			} else
 				this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
 		}
 		return this._bbox;
@@ -1445,6 +1450,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMetho
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, parameters) {
+	if (!this.isValid)
+		return;
 
 	if (!this.dataAdapter && !this.loadedMesh)
 	{

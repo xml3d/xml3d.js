@@ -162,7 +162,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.needPickingDraw = true;
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
-		this.events = { "mousedown":[], "mouseup":[] };
+		this.events = { "mousedown":[], "mouseup":[], "framedrawn":[] };
 		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
 		
 		//Set up internal frame buffers used for picking
@@ -414,6 +414,19 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		return false;
 	};
 
+	XML3DHandler.prototype.dispatchFrameDrawnEvent = function(start, end, numObjDrawn) {
+		var event = {};
+		event.timeStart = start;
+		event.timeEnd = end;
+		event.renderTimeInMilliseconds = end - start;
+		event.numberOfObjectsDrawn = numObjDrawn;
+		
+		for (var i in this.events.framedrawn) {
+			this.events.framedrawn[i].listener.call(this.events.framedrawn[i].node, event);
+		}
+		
+	};
+	
 	/**
 	 * Called by SpiderGL to redraw the scene
 	 * @param gl
@@ -422,7 +435,11 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	XML3DHandler.prototype.draw = function(gl) {
 		try {
 			this.needDraw = false;
-			this.renderer.render();
+			var start = Date.now();
+			var numObjDrawn = this.renderer.render();
+			var end = Date.now();
+			
+			this.dispatchFrameDrawnEvent(start, end, numObjDrawn);
 		} catch (e) {
 			org.xml3d.debug.logException(e);
 			throw e;
@@ -451,10 +468,15 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 
 	XML3DHandler.removeEventListener = function(node, type, listener, useCapture) {
 		// TODO: Test
-		for (var l in this.events[type]) {
-			var stored = this.events[type][l];
+		if (!this.events[type]) {
+			org.xml3d.debug.logError("Could not remove listener for event type "+type);
+			return;
+		}
+		
+		for (i=0; i<this.events[type].length; i++) {
+			var stored = this.events[type][i];
 			if (stored.node == node && stored.listener == listener)
-				this.events[type].pop(l);
+				this.events[type].splice(i,1);
 		}
 	};
 	
@@ -604,7 +626,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	gl.enable(gl.BLEND);
 
 	if (!this.camera)
-		return;
+		return 0;
 	if (this.currentView != this.scene.getActiveView())
 		this.camera = this.initCamera();
 
@@ -741,6 +763,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 	gl.disable(gl.DEPTH_TEST);
 	gl.disable(gl.CULL_FACE);
+	
+	return zPos.length;
 };
 
 /**
@@ -1198,7 +1222,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	var options = textureInfo.options;
 	var textureSrc = textureInfo.src;
 
-	//null would be replaced with options, --CANNOT PASS EMPTY OPTIONS OBJECT--
 	texture = new SglTexture2D(gl, textureInfo.src, options);
 	org.xml3d.webgl.checkError(gl, "Error after creating texture:" + textureSrc);
 
@@ -1266,18 +1289,10 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	{
 		var data = sParams[p].data;
 		if (sParams[p].isTexture) {
-			
-			//var check = data.match(/(jpg|png|gif|jpeg|bmp)/g);
-			//if (check) {
-				//Probably a texture, try to create one
-				this.initTexture(sParams[p], p);
-				continue;
+			this.initTexture(sParams[p], p);
+			continue;
 		}
-		/*else {
-				org.xml3d.debug.logError("Shader did not expect a String as data for "+p);
-				continue;
-			}
-		}*/
+
 		if (data.length == 1)
 			data = data[0];
 		parameters[p] = data;
@@ -1380,7 +1395,15 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
-	this.factory.renderer.rebuildSceneTree("Transformation changed.");
+	this.matrix = this.getMatrix();
+	for (var l in this.listeners) {
+		this.listeners[l].internalNotifyChanged("transform", this.matrix);
+	}
+	this.factory.renderer.requestRedraw("Transformation changed.");
+};
+
+org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.resetListeners = function() {
+	this.listeners = new Array();
 };
 
 // Adapter for <mesh>
@@ -1390,6 +1413,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	var src = node.getSrcNode();
 	this.loadedMesh = false;
 	this._bbox = null;
+	this.isValid = true;
 
 	//Support for mesh loading from .obj files
 	//DISABLED FOR NOW

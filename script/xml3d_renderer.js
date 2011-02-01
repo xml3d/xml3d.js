@@ -220,6 +220,14 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		return this.ui.height;
 	};
 
+	XML3DHandler.prototype.resize = function(gl, width, height) {
+		if (width < 1 || height < 1)
+			return false;
+		
+		this.renderer.resize(width, height);
+		
+		return true;
+	};
 	
 	// TODO: Decouple pick render pass and reading the pixels	
 	//Binds the picking buffer and passes the request for a picking pass to the renderer
@@ -284,7 +292,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			this.renderPick(x, y);
 			if (this.scene.xml3d.currentPickObj)
 			{
-				var currentObj = this.scene.xml3d.currentPickObj[1].node;
+				var currentObj = this.scene.xml3d.currentPickObj.node;
 				var evtMethod = currentObj.getAttribute('onclick');
 				if (evtMethod && currentObj.evalMethod) {
 					currentObj.evalMethod(evtMethod);
@@ -351,13 +359,13 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 
 		var lastObj = null;
 		if(this.scene.xml3d.currentPickObj)
-			lastObj = this.scene.xml3d.currentPickObj[1].node;
+			lastObj = this.scene.xml3d.currentPickObj.node;
 
 		this.renderPick(x, y);
 
 		if (this.scene.xml3d.currentPickObj)
 		{
-			var currentObj = this.scene.xml3d.currentPickObj[1].node;
+			var currentObj = this.scene.xml3d.currentPickObj.node;
 			if (currentObj != lastObj)
 			{
 				//The mouse is now over a different object, so call the new object's
@@ -551,11 +559,64 @@ org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
 	return [];
 };
 
-org.xml3d.webgl.Renderer.prototype.rebuildSceneTree = function(reason) {
+org.xml3d.webgl.Renderer.prototype.resizeCanvas = function (width, height) {
+	this.width = width;
+	this.height = height;
+};
+
+org.xml3d.webgl.Renderer.prototype.requestRedraw = function(reason) {
 	//TODO: Remove naive tree rebuilding in favor of only updating those nodes which
 	//were actually changed.
-	this.drawableObjects = null;
+	//this.drawableObjects = null;
 	this.handler.redraw(reason);
+};
+
+org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
+	var adapter = this.factory.getAdapter(evt.newValue, org.xml3d.webgl.Renderer.prototype);
+	
+	//Traverse parent nodes to build any inherited shader and transform elements
+	var transform = adapter.applyTransformMatrix(new sglM4());
+	var shader = null;
+	var currentNode = evt.newValue;
+	var didListener = false;
+	while (currentNode.parentNode) {
+		currentNode = currentNode.parentNode;
+		if (currentNode.nodeName == "group") {
+			var parentAdapter = this.factory.getAdapter(currentNode, org.xml3d.webgl.Renderer.prototype);	
+			
+			if (!didListener) { parentAdapter.listeners.push(adapter); didListener = true; }
+			transform = parentAdapter.applyTransformMatrix(transform);
+			if (!shader)
+				shader = parentAdapter.getShader();
+		}
+	}
+	//Now traverse child nodes and pass them the transform and shader info 
+	//(this would happen if we add a group node containing a mesh for example)
+	currentNode = evt.newValue;
+	for (var child in currentNode.childNodes) {
+		var childAdapter = this.factory.getAdapter(currentNode.childNodes[child],org.xml3d.webgl.Renderer.prototype);
+		if (childAdapter) {
+			childAdapter.collectDrawableObjects(transform, this.drawableObjects, this.lights, shader);
+		}
+	}
+	
+	adapter.collectDrawableObjects(transform, this.drawableObjects, this.lights, shader);
+	this.requestRedraw("A node was added.");
+	
+};
+
+org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
+	//TODO: Improve removal of nodes
+	//For the time being, removing a node causes the tree to be rebuilt.
+	//Problem: Removing a group node with a mesh node as a child only throws an event for the group node
+	for (var node in this.scene.xml3d.childNodes) {
+		var adapter = this.factory.getAdapter(this.scene.xml3d.childNodes[node], org.xml3d.webgl.Renderer.prototype);
+		if (adapter && adapter.resetListeners)
+			adapter.resetListeners();
+	}
+	this.drawableObjects = null;
+	this.requestRedraw("A node was removed.");
+	
 };
 
 /**
@@ -660,8 +721,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 	var zPos = [];
 	for (i = 0, n = this.drawableObjects.length; i < n; i++) {
-		var trafo = this.drawableObjects[i][0];
-		var meshAdapter = this.drawableObjects[i][1];
+		var meshAdapter = this.drawableObjects[i];
+		var trafo = meshAdapter._transform;
 		var center = new SglVec3(meshAdapter.bbox.center);
 		center.v = sglMulM4V3(trafo, center.v, 1.0);
 		center.v = sglMulM4V3(xform.view._s[0], center.v, 1.0);
@@ -677,9 +738,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 	for (var i = 0, n = zPos.length; i < n; i++) {
 		var obj = this.drawableObjects[zPos[i][0]];
-		var transform = obj[0];
-		var shape = obj[1];
-		var shader = obj[2];
+		var transform = obj._transform;
+		var shape = obj;
+		var shader = obj._shader;
 
 		sp = null;
 		xform.model.load(transform);
@@ -804,8 +865,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 
 			this.pzPos = [];
 			for (i = 0, n = this.drawableObjects.length; i < n; i++) {
-				var trafo = this.drawableObjects[i][0];
-				var meshAdapter = this.drawableObjects[i][1];
+				var meshAdapter = this.drawableObjects[i];
+				var trafo = meshAdapter._transform;
 				var center = sglV3(meshAdapter.bbox.center);
 				center = sglMulM4V3(trafo, center, 1.0);
 				center = sglMulM4V3(xform.view._s[0], center, 1.0);
@@ -822,8 +883,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 
 			for (j = 0, n = this.pzPos.length; j < n; j++) {
 				var obj = this.drawableObjects[this.pzPos[j][0]];
-				var transform = obj[0];
-				var shape = obj[1];
+				var transform = obj._transform;
+				var shape = obj;
 
 				var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
 
@@ -892,8 +953,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	gl.disable(gl.CULL_FACE);
 	gl.disable(gl.BLEND);
 	
-	var transform = pickedObj[0];
-	var shape = pickedObj[1];
+	var transform = pickedObj._transform;
+	var shape = pickedObj;
 	var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:pickedNormals");
 	
 	var xform = new SglTransformStack();
@@ -1035,16 +1096,23 @@ org.xml3d.webgl.RenderAdapter.prototype.getShader = function() {
 
 org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 		transform, outMeshes, outLights, parentShader) {
+	var adapter = this.factory.getAdapter(this.node, org.xml3d.webgl.Renderer.prototype);
+	if (adapter._parentShader !== undefined)
+		adapter._parentShader = parentShader;
+	
 	for ( var i = 0; i < this.node.childNodes.length; i++) {
 		if (this.node.childNodes[i]) {
-			var adapter = this.factory.getAdapter(this.node.childNodes[i], org.xml3d.webgl.Renderer.prototype);
-			if (adapter) {
-				var childTransform = adapter.applyTransformMatrix(transform);
-				var shader = adapter.getShader();
+			var currNode = this.node.childNodes[i];
+			var childAdapter = this.factory.getAdapter(this.node.childNodes[i], org.xml3d.webgl.Renderer.prototype);
+			if (childAdapter) {
+				var childTransform = childAdapter.applyTransformMatrix(transform);
+				var shader = childAdapter.getShader();
 				if (!shader)
 					shader = parentShader;
-
-				adapter.collectDrawableObjects(childTransform, outMeshes, outLights, shader);
+				if (adapter.listeners)
+					adapter.listeners.push(childAdapter);
+				
+				childAdapter.collectDrawableObjects(childTransform, outMeshes, outLights, shader);
 			}
 		}
 	}
@@ -1065,8 +1133,10 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype = new org.xml3d.webgl.RenderA
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DCanvasRenderAdapter;
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt) {
-	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL) {
-		this.factory.renderer.rebuildSceneTree("");
+	if (evt.eventType == MutationEvent.ADDITION) {
+		this.factory.renderer.sceneTreeAddition(evt);
+	} else if (evt.eventType == MutationEvent.REMOVAL) {
+		this.factory.renderer.sceneTreeRemoval(evt);
 	}
 };
 
@@ -1317,34 +1387,100 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
 // Adapter for <group>
 org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+	this.listeners = new Array();
+	this._parentTransform = null;
+	this._parentShader = null;
 };
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DGroupRenderAdapter;
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
+	this._parentTransform = transform;
 	var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-	if (adapter === null)
+	if (adapter === null) {
 		return transform;
-
+	}
+	
+	adapter.listeners.push(this);
 	return sglMulM4(transform, adapter.getMatrix());
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMethod) {
-
 	if (evtMethod)
 		eval(evtMethod);
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
-	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
-		this.factory.renderer.rebuildSceneTree("Group attribute changed");
+	var downstreamValue = null;
+	if (evt.eventType == MutationEvent.ADDITION)
+		this.factory.renderer.sceneTreeAddition(evt);
+	else if (evt.eventType == MutationEvent.REMOVAL)
+		this.factory.renderer.sceneTreeRemoval(evt);
 	else if (evt.attribute == "shader") {
+		//Update this group node's shader then propagate the change down to its children
 		this.shader = this.getShader();
-		this.factory.renderer.rebuildSceneTree("Group shader changed");
+		if (this.shader == null)
+			downstreamValue = this._parentShader;
+		else
+			downstreamValue = this.shader;
+		
+		for (var l in this.listeners) {
+			this.listeners[l].internalNotifyChanged(evt.attribute, downstreamValue);
+		}
+		
+		this.factory.renderer.requestRedraw("Group shader changed.");
 	}
 	else if (evt.attribute == "transform") {
-		this.node.transform = null;
-		this.factory.renderer.rebuildSceneTree("Group transform changed");
+		//This group is now linked to a different transform node. We need to notify all 
+		//of its children with the new transformation matrix
+		
+		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
+		downstreamValue = sglMulM4(this._parentTransform, adapter.getMatrix());
+		for (var l in this.listeners) {
+			this.listeners[l].internalNotifyChanged("parenttransform", downstreamValue);
+		}
+		this.factory.renderer.requestRedraw("Group transform changed.");
+	}
+};
+
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.resetListeners = function() {
+	for (var l in this.listeners) {
+		if (this.listeners[l].resetListeners)
+			this.listeners[l].resetListeners();
+	}
+	this.listeners = new Array();
+};
+
+/**
+ * Notify this node that changes were made to its parent, then propagate these changes further down
+ * to its children. The changes will eventually end at the 'leaf' nodes, which are normally meshes.
+ * 
+ * @param what
+ * @param newValue
+ * @return
+ */
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = function(what, newValue) {
+	var downstreamValue = null;
+	
+	if (what == "parenttransform") {
+		//This change came from a parent group node, we need to update the parentTransform and pass
+		//the updated transformation matrix down to the children
+		this._parentTransform = newValue;
+		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
+		downstreamValue = sglMulM4(this._parentTransform, adapter.getMatrix());
+		
+	} else if (what == "transform") {
+		//This was a change to the <transform> node tied to this adapter
+		downstreamValue = sglMulM4(this._parentTransform, newValue);	
+		
+	} else if (what == "shader") {
+		this._parentShader = newValue;
+		if (this.shader)
+			return; //this group node's shader overrides the parent shader for all its children, so we're done
+	}
+	
+	for (var l in this.listeners) {
+		this.listeners[l].internalNotifyChanged(what, downstreamValue);
 	}
 };
 
@@ -1373,6 +1509,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 org.xml3d.webgl.XML3DTransformRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.matrix = null;
+	this.listeners = new Array();
 };
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DTransformRenderAdapter;
@@ -1448,16 +1585,28 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
 		transform, outMeshes, outLights, shader) {
-	outMeshes.push( [ transform, this, shader ]);
+	this._transform = transform;
+	this._shader = shader;
+	outMeshes.push( this );
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
+	if (e.eventType == MutationEvent.REMOVAL)
+		this.factory.renderer.sceneTreeRemoval(e);
 	if (e.attribute == "src") {
 		this.loadedMesh = false;
+		
 	}
 
-	this.factory.renderer.rebuildSceneTree("Mesh src changed");
+	this.factory.renderer.requestRedraw("Mesh src changed.");
 	
+};
+
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.internalNotifyChanged = function(what, newValue) {
+	if (what == "transform" || what == "parenttransform")
+		this._transform = newValue;
+	else if (what == "shader")
+		this._shader = newValue;
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {

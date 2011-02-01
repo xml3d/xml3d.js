@@ -1324,7 +1324,6 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 	if (evt.eventType == MutationEvent.ADDITION || evt.eventType == MutationEvent.REMOVAL)
 		this.factory.renderer.rebuildSceneTree("Group attribute changed");
 	else if (evt.attribute == "shader") {
-		this.node.shader = null;
 		this.shader = this.getShader();
 		this.factory.renderer.rebuildSceneTree("Group shader changed");
 	}
@@ -1430,7 +1429,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = functi
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.attribute == "src") {
-		this.node.src = e.newValue;
 		this.loadedMesh = false;
 	}
 

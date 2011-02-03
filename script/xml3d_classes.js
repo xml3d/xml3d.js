@@ -390,6 +390,9 @@ function isEqual(val1, val2)
 			}
 		}
 	}
+	
+	if (typeof val1 == typeof val2)
+		return val1 == val2;
 
 	return true;
 };
@@ -807,7 +810,7 @@ org.xml3d.isAnyURI = function(node)
 	return org.xml3d.isString(node);
 };
 
-org.xml3d.canvasEvents = {"mousedown":1, "mouseup":1};
+org.xml3d.canvasEvents = {"mousedown":1, "mouseup":1, "framedrawn":1};
 org.xml3d.configureXML3DEvents = function(node) {
 	node.__proto__.__addEventListener = node.__proto__.addEventListener;
 	node.__proto__.__removeEventListener = node.__proto__.removeEventListener;
@@ -1346,7 +1349,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 
 	node.__defineSetter__("activeView", function (value)
 	{
-		var oldValue = this.activeView;
+		var oldValue = this._activeView;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -1745,7 +1748,7 @@ org.xml3d.classInfo.data = function(node, context)
 
 	node.__defineSetter__("src", function (value)
 	{
-		var oldValue = this.src;
+		var oldValue = this._src;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -1771,7 +1774,7 @@ org.xml3d.classInfo.data = function(node, context)
 
 	node.__defineSetter__("script", function (value)
 	{
-		var oldValue = this.script;
+		var oldValue = this._script;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -2450,7 +2453,7 @@ org.xml3d.classInfo.group = function(node, context)
 
 	node.__defineSetter__("transform", function (value)
 	{
-		var oldValue = this.transform;
+		var oldValue = this._transform;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -2476,7 +2479,7 @@ org.xml3d.classInfo.group = function(node, context)
 
 	node.__defineSetter__("shader", function (value)
 	{
-		var oldValue = this.shader;
+		var oldValue = this._shader;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -3141,7 +3144,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 
 	node.__defineSetter__("src", function (value)
 	{
-		var oldValue = this.src;
+		var oldValue = this._src;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -3863,7 +3866,7 @@ org.xml3d.classInfo.shader = function(node, context)
 
 	node.__defineSetter__("script", function (value)
 	{
-		var oldValue = this.script;
+		var oldValue = this._script;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -3889,7 +3892,7 @@ org.xml3d.classInfo.shader = function(node, context)
 
 	node.__defineSetter__("src", function (value)
 	{
-		var oldValue = this.src;
+		var oldValue = this._src;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -4444,7 +4447,7 @@ org.xml3d.classInfo.light = function(node, context)
 
 	node.__defineSetter__("shader", function (value)
 	{
-		var oldValue = this.shader;
+		var oldValue = this._shader;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -4799,7 +4802,7 @@ org.xml3d.classInfo.lightshader = function(node, context)
 
 	node.__defineSetter__("script", function (value)
 	{
-		var oldValue = this.script;
+		var oldValue = this._script;
 		
 		if(org.xml3d.isString(value))
 		{
@@ -4825,7 +4828,7 @@ org.xml3d.classInfo.lightshader = function(node, context)
 
 	node.__defineSetter__("src", function (value)
 	{
-		var oldValue = this.src;
+		var oldValue = this._src;
 		
 		if(org.xml3d.isString(value))
 		{

@@ -108,7 +108,8 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	canvas.height = canvas.clientHeight;
 	canvas.style.display = "block";
 	var bgcolor = org.xml3d.util.getStyle(xml3dElement, "background-color");
-	if (bgcolor)
+	
+	if (bgcolor && bgcolor != "transparent")
 		canvas.style.backgroundColor = bgcolor;
 	
 	return canvas;

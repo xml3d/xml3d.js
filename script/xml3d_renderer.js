@@ -402,7 +402,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				}
 			}
 		} 
-		if (lastObj) {
+		else if (lastObj) {
 			//The mouse has left the last object and is now over nothing, call
 			//mouseout on the last object.
 			var currentObj = lastObj;
@@ -838,7 +838,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
  * @return
  */
 org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDraw) {
-	try {
 		if (x<0 || y<0 || x>=this.width || y>=this.height)
 			return;
 		gl = this.handler.gl;
@@ -910,32 +909,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			xform.view.pop();
 			xform.projection.pop();
 		}
-		org.xml3d.webgl.checkError(gl, "Before readpixels");
-
-		var data = new Uint8Array(8);
-		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
-
-		org.xml3d.webgl.checkError(gl, "After readpixels");
-
-		var pickPos = new SglVec3(0, 0, 0);
-		pickPos.v[0] = data[0] / 255;
-		pickPos.v[1] = data[1] / 255;
-		pickPos.v[2] = data[2] / 255;
-		pickPos = pickPos.mul(this.bbMax.sub(this.bbMin)).add(this.bbMin);
-		var objId = 255 - data[3] - 1;
-		if (objId >= 0 && data[3] > 0) {
-			this.scene.xml3d.currentPickPos = pickPos;
-			var pickedObj = this.drawableObjects[(this.pzPos[objId][0])];
-			this.scene.xml3d.currentPickObj = pickedObj;
-		} else {
-			this.scene.xml3d.currentPickPos = null;
-			this.scene.xml3d.currentPickObj = null;
-		}
+		this.readPixels(false, x, y);
 		gl.disable(gl.DEPTH_TEST);
-	} catch (e) {
-		gl.disable(gl.DEPTH_TEST);
-		org.xml3d.debug.logError(e);
-	}
 };
 
 /**
@@ -974,20 +949,49 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	shader.sp = sp;
 	shape.render(shader, parameters);
 	
-	org.xml3d.webgl.checkError(gl, "Before readpixels");
-	var data = new Uint8Array(8);
-	gl.readPixels(screenX, screenY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
-	org.xml3d.webgl.checkError(gl, "After readpixels");
-
-	var pickNorm = new SglVec3(0, 0, 0);
-	pickNorm.v[0] = data[0] / 255;
-	pickNorm.v[1] = data[1] / 255;
-	pickNorm.v[2] = data[2] / 255;
-	pickNorm.v = sglSubV3S(sglMulV3S(pickNorm.v, 2.0), 1.0);
-	this.scene.xml3d.currentPickNormal = pickNorm;
+	this.readPixels(true, screenX, screenY);
+	
 	xform.model.pop();
 	xform.projection.pop();
 	gl.disable(gl.DEPTH_TEST);
+};
+
+/**
+ * Reads pixels from the screenbuffer to determine picked object or normals.
+ * 
+ * @param normals
+ * 			How the read pixel data will be interpreted.
+ * @return
+ */
+org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) {
+	org.xml3d.webgl.checkError(gl, "Before readpixels");
+	var data = new Uint8Array(8);
+	
+	try {
+		gl.readPixels(screenX, screenY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+		
+		var vec = new SglVec3(0, 0, 0);
+		vec.v[0] = data[0] / 255;
+		vec.v[1] = data[1] / 255;
+		vec.v[2] = data[2] / 255;
+		
+		if(normals) {
+			vec.v = sglSubV3S(sglMulV3S(vec.v, 2.0), 1.0);
+			this.scene.xml3d.currentPickNormal = vec;
+		} else {		
+			var objId = 255 - data[3] - 1;
+			if (objId >= 0 && data[3] > 0) {
+				vec = vec.mul(this.bbMax.sub(this.bbMin)).add(this.bbMin);
+				this.scene.xml3d.currentPickPos = vec;
+				var pickedObj = this.drawableObjects[(this.pzPos[objId][0])];
+				this.scene.xml3d.currentPickObj = pickedObj;
+			} else {
+				this.scene.xml3d.currentPickPos = null;
+				this.scene.xml3d.currentPickObj = null;	
+			}
+	}
+	} catch(e) {org.xml3d.debug.logError(e);}
+	
 };
 
 //Helper to expand an axis aligned bounding box around another object's bounding box

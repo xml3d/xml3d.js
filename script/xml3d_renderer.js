@@ -1059,6 +1059,8 @@ org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.createAdapter = function(
 		return new org.xml3d.webgl.XML3DCanvasRenderAdapter(this, node);
 	if (node.localName == "view")
 		return new org.xml3d.webgl.XML3DViewRenderAdapter(this, node);
+	if (node.localName == "defs")
+		return new org.xml3d.webgl.XML3DDefsRenderAdapter(this, node);
 	if (node.localName == "group")
 		return new org.xml3d.webgl.XML3DGroupRenderAdapter(this, node);
 	if (node.localName == "mesh")
@@ -1067,6 +1069,10 @@ org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.createAdapter = function(
 		return new org.xml3d.webgl.XML3DTransformRenderAdapter(this, node);
 	if (node.localName == "shader")
 		return new org.xml3d.webgl.XML3DShaderRenderAdapter(this, node);
+	if (node.localName == "texture")
+		return new org.xml3d.webgl.XML3DTextureRenderAdapter(this, node);
+	if (node.localName == "img")
+		return new org.xml3d.webgl.XML3DImgRenderAdapter(this, node);
 	if (node.localName == "light")
 		return new org.xml3d.webgl.XML3DLightRenderAdapter(this, node);
 	if (node.localName == "lightshader")
@@ -1222,11 +1228,25 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 	this.factory.handler.redraw("View changed");
 };
 
+//Adapter for <defs>
+org.xml3d.webgl.XML3DDefsRenderAdapter = function(factory, node) {
+	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+};
+org.xml3d.webgl.XML3DDefsRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
+org.xml3d.webgl.XML3DDefsRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DDefsRenderAdapter;
+org.xml3d.webgl.XML3DDefsRenderAdapter.prototype.notifyChanged = function(evt) {
+	
+};
+
 // Adapter for <shader>
 org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.sp = null;
 	this.textures = new Array();
+	var gl = factory.handler.gl;
+	var errorTexData = new Uint8Array(4);
+	errorTexData.set([0,0,0,255]);
+	this.errorTexture = new SglTexture2D(gl, gl.RGBA, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, errorTexData, null);
 };
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DShaderRenderAdapter;
@@ -1313,8 +1333,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 
 	this.textures.push(texContainer);
 
-	//org.xml3d.debug.logInfo("Created GL texture: " + texContainer.semantic);
-	//return;
 };
 
 
@@ -1379,6 +1397,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.attribute == "script") {
 		this.sp.destroy();
 		this.sp = null;
+	} else {
+		org.xml3d.debug.logError("Unhandled change in shader adapter: "+ e.attribute);
 	}
 };
 
@@ -1387,6 +1407,28 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
 	Array.forEach(this.textures, function(t) {
 		t.tex.destroy();
 	});
+};
+
+//Adapter for <texture>
+org.xml3d.webgl.XML3DTextureRenderAdapter = function(factory, node) {
+	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+	this.shaderAdapter = factory.getAdapter(node.parentNode, org.xml3d.webgl.Renderer.prototype);
+};
+org.xml3d.webgl.XML3DTextureRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
+org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DTextureRenderAdapter;
+org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.notifyChanged = function(evt) {
+	this.shaderAdapter.notifyChanged(evt);
+};
+
+//Adapter for <img>
+org.xml3d.webgl.XML3DImgRenderAdapter = function(factory, node) {
+	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+	this.textureAdapter = factory.getAdapter(node.parentNode, org.xml3d.webgl.Renderer.prototype);
+};
+org.xml3d.webgl.XML3DImgRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
+org.xml3d.webgl.XML3DImgRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DImgRenderAdapter;
+org.xml3d.webgl.XML3DImgRenderAdapter.prototype.notifyChanged = function(evt) {
+	this.textureAdapter.notifyChanged(evt);
 };
 
 // Adapter for <group>
@@ -1472,11 +1514,17 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = functi
 		//the updated transformation matrix down to the children
 		this._parentTransform = newValue;
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-		downstreamValue = sglMulM4(this._parentTransform, adapter.getMatrix());
+		if (adapter)
+			downstreamValue = sglMulM4(this._parentTransform, adapter.getMatrix());
+		else
+			downstreamValue = this._parentTransform;
 		
 	} else if (what == "transform") {
 		//This was a change to the <transform> node tied to this adapter
-		downstreamValue = sglMulM4(this._parentTransform, newValue);	
+		if (this._parentTransform)
+			downstreamValue = sglMulM4(this._parentTransform, newValue);	
+		else
+			downstreamValue = newValue;
 		
 	} else if (what == "shader") {
 		this._parentShader = newValue;
@@ -1651,15 +1699,16 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 			var temp = shader.textures[t];
 			if (temp.tex.isValid)
 				samplers[temp.name] = temp.tex;
-			else
+			else {
+				samplers[temp.name] = shader.errorTexture;
 				invalidTextures = true;
+			}
 		}
 	}
 	if (invalidTextures)
 	{
+		//We should redraw in case the texture is still loading
 		this.factory.handler.redraw("Invalid texture.");
-		//Texture is not ready for rendering yet, skip this object
-		return;
 	}
 
 
@@ -2403,6 +2452,9 @@ org.xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 	{
 		return new org.xml3d.webgl.ValueDataAdapter(this, node);
 	}
+	
+	if (node.localName == "img")
+		return new org.xml3d.webgl.ImgDataAdapter(this, node);
 
 	if (node.localName == "texture")
 	{
@@ -2880,13 +2932,20 @@ org.xml3d.webgl.RootDataAdapter.prototype.toString = function()
 	return "org.xml3d.webgl.RootDataAdapter";
 };
 
+
+org.xml3d.webgl.ImgDataAdapter = function(factory, node)
+{
+	org.xml3d.webgl.DataAdapter.call(this, factory, node);
+};
+org.xml3d.webgl.ImgDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
+org.xml3d.webgl.ImgDataAdapter.prototype.constructor = org.xml3d.webgl.ImgDataAdapter;
+
+org.xml3d.webgl.ImgDataAdapter.prototype.createDataTable = function(forceNewInstance)
+{};
+
 org.xml3d.webgl.TextureDataAdapter = function(factory, node)
 {
 	org.xml3d.webgl.DataAdapter.call(this, factory, node);
-	this.init = function()
-	{
-		this.createDataTable(true);
-	};
 };
 org.xml3d.webgl.TextureDataAdapter.prototype             = new org.xml3d.webgl.DataAdapter();
 org.xml3d.webgl.TextureDataAdapter.prototype.constructor = org.xml3d.webgl.TextureDataAdapter;

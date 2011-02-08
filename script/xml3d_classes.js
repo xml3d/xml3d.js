@@ -495,14 +495,14 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
 		}
 
 
-		if (result == org.xml3d.event.HANDLED &&
+		/*if (result == org.xml3d.event.HANDLED &&
 			e.target.notificationRequired()   &&
 			! isEqual(e.prevValue, e.newValue))
 		{
 			// The removal of an attribute is also handled as MutationEvent.MODIFICATION since
 			// this event is handled by resetting the internal attribute value.
 			e.target.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, e.attrName, e.prevValue, e.newValue));
-		}
+		}*/
 	 }
 	 catch (e)
 	 {
@@ -530,7 +530,7 @@ org.xml3d.XML3DDocument.prototype.onRemove = function(e)
 
         if (bindNode.notificationRequired())
         {
-            bindNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.prevValue, e.newValue));
+            bindNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
         }
 
         for(var i = 0; i < bindNode.adapters.length; i++)

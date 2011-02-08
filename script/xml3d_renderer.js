@@ -230,7 +230,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		return true;
 	};
 	
-	// TODO: Decouple pick render pass and reading the pixels	
 	//Binds the picking buffer and passes the request for a picking pass to the renderer
 	XML3DHandler.prototype.renderPick = function(screenX, screenY) {		
 		this.pickBuffer.bind();
@@ -274,6 +273,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		//if (reason)
 		//	console.log(reason);
 		this.needDraw = true;
+		this.needPickingDraw = true;
 	};
 
 	/**
@@ -513,7 +513,6 @@ org.xml3d.webgl.checkError = function(gl, text)
 	}
 };
 
-// TODO: Add resize method
 /**
  * Constructor for the Renderer.
  * 
@@ -531,7 +530,8 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.shaderMap = {};
 	this.width = width;
 	this.height = height;
-	this.pzPos = [];
+	this.drawableObjects = null;
+	this.zPos = [];
 
 };
 
@@ -566,9 +566,6 @@ org.xml3d.webgl.Renderer.prototype.resizeCanvas = function (width, height) {
 };
 
 org.xml3d.webgl.Renderer.prototype.requestRedraw = function(reason) {
-	//TODO: Remove naive tree rebuilding in favor of only updating those nodes which
-	//were actually changed.
-	//this.drawableObjects = null;
 	this.handler.redraw(reason);
 };
 
@@ -585,39 +582,26 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 		if (currentNode.nodeName == "group") {
 			var parentAdapter = this.factory.getAdapter(currentNode, org.xml3d.webgl.Renderer.prototype);	
 			
-			if (!didListener) { parentAdapter.listeners.push(adapter); didListener = true; }
+			if (!didListener) { 
+				parentAdapter.listeners.push(adapter); 
+				didListener = true; 
+			}
 			transform = parentAdapter.applyTransformMatrix(transform);
 			if (!shader)
 				shader = parentAdapter.getShader();
 		}
 	}
-	//Now traverse child nodes and pass them the transform and shader info 
-	//(this would happen if we add a group node containing a mesh for example)
-	currentNode = evt.newValue;
-	for (var child in currentNode.childNodes) {
-		var childAdapter = this.factory.getAdapter(currentNode.childNodes[child],org.xml3d.webgl.Renderer.prototype);
-		if (childAdapter) {
-			childAdapter.collectDrawableObjects(transform, this.drawableObjects, this.lights, shader);
-		}
-	}
-	
+
 	adapter.collectDrawableObjects(transform, this.drawableObjects, this.lights, shader);
 	this.requestRedraw("A node was added.");
 	
 };
 
 org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
-	//TODO: Improve removal of nodes
-	//For the time being, removing a node causes the tree to be rebuilt.
-	//Problem: Removing a group node with a mesh node as a child only throws an event for the group node
-	for (var node in this.scene.xml3d.childNodes) {
-		var adapter = this.factory.getAdapter(this.scene.xml3d.childNodes[node], org.xml3d.webgl.Renderer.prototype);
-		if (adapter && adapter.resetListeners)
-			adapter.resetListeners();
-	}
-	this.drawableObjects = null;
+	//References to the adapters of the removed node are automatically cleaned up
+	//as they're encountered during the render phase or notifyChanged methods
 	this.requestRedraw("A node was removed.");
-	
+
 };
 
 /**
@@ -720,16 +704,24 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 	var light, lightOn;
 
-	var zPos = [];
+	this.zPos = [];
 	for (i = 0, n = this.drawableObjects.length; i < n; i++) {
 		var meshAdapter = this.drawableObjects[i];
+		
+		if (!meshAdapter.isValid) {
+			this.drawableObjects.splice(i, 1);
+			i--;
+			n--;
+			continue;
+		}
+		
 		var trafo = meshAdapter._transform;
 		var center = new SglVec3(meshAdapter.bbox.center);
 		center.v = sglMulM4V3(trafo, center.v, 1.0);
 		center.v = sglMulM4V3(xform.view._s[0], center.v, 1.0);
-		zPos[i] = [ i, center.z ];
+		this.zPos[i] = [ i, center.z ];
 	}
-	zPos.sort(function(a, b) {
+	this.zPos.sort(function(a, b) {
 		return a[1] - b[1];
 	});
 
@@ -737,8 +729,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	//console.log("Sort Time:" + (end-start));
 	start = end;
 
-	for (var i = 0, n = zPos.length; i < n; i++) {
-		var obj = this.drawableObjects[zPos[i][0]];
+	for (var i = 0, n = this.zPos.length; i < n; i++) {
+		var obj = this.drawableObjects[this.zPos[i][0]];
 		var transform = obj._transform;
 		var shape = obj;
 		var shader = obj._shader;
@@ -826,7 +818,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	gl.disable(gl.DEPTH_TEST);
 	gl.disable(gl.CULL_FACE);
 	
-	return zPos.length;
+	return this.zPos.length;
 };
 
 /**
@@ -846,16 +838,10 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
 		
-		if (needPickingDraw || !this.drawableObjects) {
+		if (needPickingDraw ) {
 			var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
 			var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-			if (!this.drawableObjects) {
-				this.drawableObjects = [];
-				this.slights = new Array();
-				this.collectDrawableObjects(new sglM4(),
-						this.drawableObjects, this.slights, null);
-			}
 
 			var xform = new SglTransformStack();
 			xform.view.load(this.camera.getViewMatrix());
@@ -863,26 +849,16 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			.getProjectionMatrix(this.width / this.height);
 			xform.projection.load(projMatrix);
 
-			this.pzPos = [];
-			for (i = 0, n = this.drawableObjects.length; i < n; i++) {
-				var meshAdapter = this.drawableObjects[i];
+			for (var i = 0; i < this.zPos.length; i++) {
+				var meshAdapter = this.drawableObjects[this.zPos[i][0]];
 				var trafo = meshAdapter._transform;
-				var center = sglV3(meshAdapter.bbox.center);
-				center = sglMulM4V3(trafo, center, 1.0);
-				center = sglMulM4V3(xform.view._s[0], center, 1.0);
-
-				this.pzPos[i] = [ i, center[2] ];
-					this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
+				this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
 			}
 			this.bbMin = volumeMin;
 			this.bbMax = volumeMax;
 			
-			this.pzPos.sort(function(a, b) {
-				return a[1] - b[1];
-			});
-
-			for (j = 0, n = this.pzPos.length; j < n; j++) {
-				var obj = this.drawableObjects[this.pzPos[j][0]];
+			for (j = 0, n = this.zPos.length; j < n; j++) {
+				var obj = this.drawableObjects[this.zPos[j][0]];
 				var transform = obj._transform;
 				var shape = obj;
 
@@ -983,7 +959,7 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 			if (objId >= 0 && data[3] > 0) {
 				vec = vec.mul(this.bbMax.sub(this.bbMin)).add(this.bbMin);
 				this.scene.xml3d.currentPickPos = vec;
-				var pickedObj = this.drawableObjects[(this.pzPos[objId][0])];
+				var pickedObj = this.drawableObjects[this.zPos[objId][0]];
 				this.scene.xml3d.currentPickObj = pickedObj;
 			} else {
 				this.scene.xml3d.currentPickPos = null;
@@ -1020,12 +996,9 @@ org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo
  * @return
  */
 org.xml3d.webgl.Renderer.prototype.dispose = function() {
-	var drawableObjects = new Array();
-	this.collectDrawableObjects(this, new sglM4(),
-			drawableObjects, new Array(), null);
-	for ( var i = 0, n = drawableObjects.length; i < n; i++) {
-		var shape = drawableObjects[i][1];
-		var shader = drawableObjects[i][2];
+	for ( var i = 0, n = this.drawableObjects.length; i < n; i++) {
+		var shape = this.drawableObjects[i][1];
+		var shader = this.drawableObjects[i][2];
 		shape.dispose();
 		if (shader)
 			shader.dispose();
@@ -1088,7 +1061,6 @@ org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.createAdapter = function(
 
 org.xml3d.webgl.RenderAdapter = function(factory, node) {
 	org.xml3d.data.Adapter.call(this, factory, node);
-	this.drawableObjects = null;
 };
 org.xml3d.webgl.RenderAdapter.prototype = new org.xml3d.data.Adapter();
 org.xml3d.webgl.RenderAdapter.prototype.constructor = org.xml3d.webgl.RenderAdapter;
@@ -1120,8 +1092,9 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 				var shader = childAdapter.getShader();
 				if (!shader)
 					shader = parentShader;
-				if (adapter.listeners)
+				if (adapter.listeners) {
 					adapter.listeners.push(childAdapter);
+				}
 				
 				childAdapter.collectDrawableObjects(childTransform, outMeshes, outLights, shader);
 			}
@@ -1161,7 +1134,7 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.removeEventListener = functio
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y) {
 	this.factory.handler.renderPick(x, this.factory.handler.getCanvasHeight() - y - 1);
-	return this.node.currentPickObj[1].node;
+	return this.node.currentPickObj.node;
 };
 
 // Adapter for <view>
@@ -1247,6 +1220,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	var errorTexData = new Uint8Array(4);
 	errorTexData.set([0,0,0,255]);
 	this.errorTexture = new SglTexture2D(gl, gl.RGBA, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, errorTexData, null);
+	this.isValid = true;
 };
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DShaderRenderAdapter;
@@ -1407,6 +1381,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
 	Array.forEach(this.textures, function(t) {
 		t.tex.destroy();
 	});
+	this.sp.destroy();
+	this.isValid = false;
 };
 
 //Adapter for <texture>
@@ -1437,6 +1413,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
 	this.listeners = new Array();
 	this._parentTransform = null;
 	this._parentShader = null;
+	this.isValid = true;
 };
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DGroupRenderAdapter;
@@ -1472,7 +1449,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 			downstreamValue = this.shader;
 		
 		for (var l in this.listeners) {
-			this.listeners[l].internalNotifyChanged(evt.attribute, downstreamValue);
+			if (this.listeners[l].isValid)
+				this.listeners[l].internalNotifyChanged(evt.attribute, downstreamValue);
+			else
+				this.listeners.splice(l, 1);
 		}
 		
 		this.factory.renderer.requestRedraw("Group shader changed.");
@@ -1484,18 +1464,13 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 		downstreamValue = sglMulM4(this._parentTransform, adapter.getMatrix());
 		for (var l in this.listeners) {
-			this.listeners[l].internalNotifyChanged("parenttransform", downstreamValue);
+			if (this.listeners[l].isValid)
+				this.listeners[l].internalNotifyChanged("parenttransform", downstreamValue);
+			else
+				this.listeners.splice(l, 1);
 		}
 		this.factory.renderer.requestRedraw("Group transform changed.");
 	}
-};
-
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.resetListeners = function() {
-	for (var l in this.listeners) {
-		if (this.listeners[l].resetListeners)
-			this.listeners[l].resetListeners();
-	}
-	this.listeners = new Array();
 };
 
 /**
@@ -1533,7 +1508,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = functi
 	}
 	
 	for (var l in this.listeners) {
-		this.listeners[l].internalNotifyChanged(what, downstreamValue);
+		if (this.listeners[l].isValid)
+			this.listeners[l].internalNotifyChanged(what, downstreamValue);
+		else
+			this.listeners.splice(l, 1);
 	}
 };
 
@@ -1556,6 +1534,15 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 	return this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
 };
 
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispose = function() {
+	for (var child in this.node.childNodes) {
+		var adapter = this.factory.getAdapter(this.node.childNodes[child]);
+		if (adapter)
+			adapter.dispose();
+	}
+	this.isValid = false;
+};
+
 
 
 // Adapter for <transform>
@@ -1563,6 +1550,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.matrix = null;
 	this.listeners = new Array();
+	this.isValid = true;
 };
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DTransformRenderAdapter;
@@ -1587,23 +1575,26 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e
 	this.matrix = null;
 	this.matrix = this.getMatrix();
 	for (var l in this.listeners) {
-		this.listeners[l].internalNotifyChanged("transform", this.matrix);
+		if (this.listeners[l].isValid)
+			this.listeners[l].internalNotifyChanged("transform", this.matrix);
+		else
+			this.listeners.splice(l,1);
 	}
 	this.factory.renderer.requestRedraw("Transformation changed.");
 };
-
-org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.resetListeners = function() {
-	this.listeners = new Array();
+org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.dispose = function() {
+	this.isValid = false;
 };
 
 // Adapter for <mesh>
 org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 
+	this.isValid = true;
 	var src = node.getSrcNode();
 	this.loadedMesh = false;
 	this._bbox = null;
-	this.isValid = true;
+	this.meshIsValid = true;
 
 	//Support for mesh loading from .obj files
 	//DISABLED FOR NOW
@@ -1625,7 +1616,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 			if (!dt.position || !dt.position.data) {
 				org.xml3d.debug.logError("A mesh is referencing non-existent data: Cannot find positions data for " + 
 						this.node.getAttribute("src"));
-			this.isValid = false;
+			this.meshIsValid = false;
 			} else
 				this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
 		}
@@ -1664,17 +1655,17 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.internalNotifyChanged = functio
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 	this.mesh.destroy();
+	this.isValid = false;
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMethod) {
 	if (evtMethod) {
 		eval(evtMethod);
 	}
-
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, parameters) {
-	if (!this.isValid)
+	if (!this.meshIsValid)
 		return;
 
 	if (!this.dataAdapter && !this.loadedMesh)
@@ -1746,6 +1737,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter = function(factory, node) {
 	this.attenuation = null;
 	this.intensity = null;
 	this.visible = null;
+	this.isValid = true;
 };
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DLightRenderAdapter;
@@ -1820,6 +1812,9 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getLightShader = function() {
 		this.lightShader = this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
 	}
 	return this.lightShader;
+};
+org.xml3d.webgl.XML3DLightRenderAdapter.prototype.dispose = function() {
+	this.isValid = false;
 };
 
 
@@ -2049,11 +2044,11 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"			float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"
 			+"      	vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
 
-			+"			vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * texDiffuse.xyz;\n"
+			+"			vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * texDiffuse.xyz * diffuseColor;\n"
 			+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
 			+"			color = color + vec4((atten*(Idiff + Ispec))*lightVisibility[i], texDiffuse.w);\n"
-			+"		}\n"
-			+"		gl_FragColor = vec4(color.xyz, color.w*max(0.0, 1.0 - transparency));\n"
+			+"		}\n"			
+			+"			gl_FragColor = vec4(color.xyz, color.w*max(0.0, 1.0 - transparency));\n" 
 			+"  }\n"
 			+"}"
 };

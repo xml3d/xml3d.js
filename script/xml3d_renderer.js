@@ -28,6 +28,9 @@
 var org;
 if (!org || !org.xml3d)
   throw new Error("xml3d.js has to be included first");
+if (!window.SGL_VERSION_STRING)
+	throw new Error("spidergl.js has to be included first");
+
 
 // Create global symbol org.xml3d.webgl
 if (!org.xml3d.webgl)
@@ -82,6 +85,7 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 		classString = xml3dElement.getAttribute("class") + " " + classString;
 	canvas.setAttribute("class", classString);
 
+	
 	var sides = [ "top", "right", "bottom", "left" ];
 	var colorStr = styleStr = widthStr = paddingStr = "";
 	for (i in sides) {
@@ -98,11 +102,14 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 
 	if ((w = xml3dElement.getAttribute("width")) !== null) {
 		canvas.style.width = w;
+	} else {
+		canvas.style.width = org.xml3d.util.getStyle(xml3dElement, "width");
 	}
 	if ((h = xml3dElement.getAttribute("height")) !== null) {
 		canvas.style.height = h;
+	} else {
+		canvas.style.height = org.xml3d.util.getStyle(xml3dElement, "height");
 	}
-
 	canvas.id = "canvas"+index;
 	canvas.width = canvas.clientWidth;
 	canvas.height = canvas.clientHeight;
@@ -1614,9 +1621,10 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 		if (!this._bbox) {
 			var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
 			if (!dt.position || !dt.position.data) {
-				org.xml3d.debug.logError("A mesh is referencing non-existent data: Cannot find positions data for " + 
-						this.node.getAttribute("src"));
-			this.meshIsValid = false;
+				org.xml3d.debug.logWarning("Cannot find positions data for " + 
+						this.node.getAttribute("src")+". Can't calculate Bounding Box.");
+				//this.isValid = false;
+				this._bbox = new SglBox3();
 			} else
 				this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
 		}

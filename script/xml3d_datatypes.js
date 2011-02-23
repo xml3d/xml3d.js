@@ -815,17 +815,17 @@ XML3DRotation.prototype.multiply = function(that) {
 
 XML3DRotation.fromMatrix = function(mat) {
 	var q = new XML3DRotation();
-	var trace = mat.m11 + mat.m21 + mat.m31;
-	if (trace > 0) {
-		var s = 0.5 / Math.sqrt(trace + 1.0);
-		q.w = 0.25 / s;
-		q.x = (mat.m32 - mat.m23) * s;
-		q.y = (mat.m13 - mat.m31) * s;
-		q.z = (mat.m21 - mat.m12) * s;
+	var trace = mat.m11 + mat.m22 + mat.m33;
+	if (trace > 0) {		
+		var s = 2.0 * Math.sqrt(trace + 1.0);
+		q.w = 0.25 * s;
+		q.x = (mat.m32 - mat.m23) / s;
+		q.y = (mat.m13 - mat.m31) / s;
+		q.z = (mat.m21 - mat.m12) / s;
 	} else {
 		if (mat.m11 > mat.m22 && mat.m11 > mat.m33) {
-			var s = 2.0 * sqrtf(1.0 + mat.m11 - mat.m22 - mat.m33);
-			q.w = (mat._21 - mat._12) / s;
+			var s = 2.0 * Math.sqrt(1.0 + mat.m11 - mat.m22 - mat.m33);
+			q.w = (mat.m32 - mat.m23) / s;
 			q.x = 0.25 * s;
 			q.y = (mat.m12 + mat.m21) / s;
 			q.z = (mat.m13 + mat.m31) / s;

@@ -8167,24 +8167,30 @@ org.xml3d.methods.viewSetPosition = function(pos) {
 	this.position = pos;
 };
 
-org.xml3d.methods.viewSetDirection = function(quat) {
-	this.orientation = quat;
+org.xml3d.methods.viewSetDirection = function(vec) {
+	var dir = vec.negate().normalize();
+	if (this._upVector)
+		var up = this._upVector;
+	else
+		var up = new XML3DVec3(0,1,0);
+	var right = up.cross(dir).normalize();
+	up = dir.cross(right).normalize();
+	this.orientation = XML3DRotation.fromBasis(right, up, dir);
+
 };
 
-org.xml3d.methods.viewSetUpVector = function() {
-	throw Error("view::setSetUpVector not implemeted yet.");
+org.xml3d.methods.viewSetUpVector = function(up) {
+	this._upVector = up.normalize();
 };
 
 org.xml3d.methods.viewGetUpVector = function() {
 	return this.orientation.rotateVec3(new XML3DVec3(0, 1, 0));
 };
 
-org.xml3d.methods.viewSetUpVector = function() {
-	throw Error("view::setSetUpVector not implemeted yet.");
-};
-
-org.xml3d.methods.viewLookAt = function(vec) {
-	// TODO: write lookat function
+org.xml3d.methods.viewLookAt = function(point) {
+	var vector = this.position.subtract(point);
+	vector = vector.normalize();
+	this.setDirection(vector);
 };
 
 org.xml3d.methods.xml3dGetElementByPoint = function(x, y) {

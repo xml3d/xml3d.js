@@ -59,6 +59,12 @@ org.xml3d.webgl.configure = function(xml3ds) {
 		// Creates the gl XML3DHandler for the <canvas>  Element
 		var XML3DHandler = org.xml3d.webgl.createXML3DHandler(canvas, xml3ds[i]);
 		xml3ds[i].canvas = canvas;
+		
+		//Check for event listener attributes for the xml3d node
+		if (xml3ds[i].hasAttribute("onmousemove"))
+			XML3DHandler.addEventListener(xml3ds[i], "mousemove", xml3ds[i].getAttribute("onmousemove"), false);
+		if (xml3ds[i].hasAttribute("onmouseout"))
+			XML3DHandler.addEventListener(xml3ds[i], "mouseout", xml3ds[i].getAttribute("onmouseout"), false);
 
 		XML3DHandler.start();
 		org.xml3d._rendererFound = true;
@@ -170,7 +176,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.needPickingDraw = true;
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
-		this.events = { "mousedown":[], "mouseup":[], "framedrawn":[] };
+		this.events = { "mousedown":[], "mouseup":[], "framedrawn":[], "mousemove":[], "mouseout":[] };
 		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
 		
 		//Set up internal frame buffers used for picking
@@ -426,10 +432,37 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 					currentObj.evalMethod(evtMethod);
 				}
 			}
+		}		
+		//Call any global mousemove methods, they will receive the mouseMoveEvent as the single argument
+		for (var i in this.events.mousemove) {
+			var mm = this.ui.mouseMoveEvent;
+			this.events.mousemove[i].listener(mm);
+		}
+		return false;
+	};
+	
+	/**
+	 * This method is called by SpiderGL each time the mouse leaves the canvas
+	 * 
+	 * @param gl
+	 * @return
+	 */
+	XML3DHandler.prototype.mouseOut = function(gl) {
+		for (var i in this.events.mouseout) {
+			var mm = this.ui.mouseMoveEvent;
+			this.events.mouseout[i].listener(mm);
 		}
 		return false;
 	};
 
+	/**
+	 * Dispatches a FrameDrawnEvent to listeners
+	 * 
+	 * @param start
+	 * @param end
+	 * @param numObjDrawn
+	 * @return
+	 */
 	XML3DHandler.prototype.dispatchFrameDrawnEvent = function(start, end, numObjDrawn) {
 		var event = {};
 		event.timeStart = start;
@@ -476,13 +509,36 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		if (type in this.events) {
 			var e = new Object();
 			e.node = node;
-			e.listener = listener;
+			
+			//For now we will accept a single target method with a single argument
+			//later this can be expanded to include more complex listeners
+			if (typeof listener == typeof "") {
+				var parsed = this.parseListenerString(listener);
+				if (parsed == "" || !window[parsed]) {
+					org.xml3d.debug.logError("Could not parse or find listener { "+listener+" } for event { "+type+" }");
+					return;
+				} else {
+					e.listener = window[parsed];
+				}			
+			} else {
+				e.listener = listener;
+			}
 			e.useCapture = useCapture;
 			this.events[type].push(e);
 		}
 	};
 
-	XML3DHandler.removeEventListener = function(node, type, listener, useCapture) {
+
+	XML3DHandler.prototype.parseListenerString = function(listener) {
+		var matchedListener = "";
+		//Make sure the listener string has the form "functionName(arguments)"
+		var matches = listener.match(/.*\(.*\)/);
+		if (matches)
+			matchedListener = listener.substring(0, listener.indexOf('('));
+		
+		return matchedListener;
+	};
+	XML3DHandler.prototype.removeEventListener = function(node, type, listener, useCapture) {
 		// TODO: Test
 		if (!this.events[type]) {
 			org.xml3d.debug.logError("Could not remove listener for event type "+type);
@@ -581,7 +637,10 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 	
 	//Traverse parent nodes to build any inherited shader and transform elements
 	var transform = adapter.applyTransformMatrix(new sglM4());
-	var shader = null;
+	var shader = null;	
+	if (adapter.getShader)
+		shader = adapter.getShader();
+	
 	var currentNode = evt.newValue;
 	var didListener = false;
 	while (currentNode.parentNode) {
@@ -783,7 +842,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		};
 		for ( var j = 0; j < slights.length; j++) {
 			var light = slights[j][1];
-			var params = light.getParameters(sglMulM4(viewMatrix, slights[j][0]));
+			var params = light.getParameters(viewMatrix);
 			if (!params)
 				continue; // TODO: Shrink array
 			lightParams.positions.set(params.position, j*3);
@@ -1469,7 +1528,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		//of its children with the new transformation matrix
 		
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-		downstreamValue = sglMulM4(this._parentTransform, adapter.getMatrix());
+		downstreamValue = sglMulM4(adapter.getMatrix(), this._parentTransform);
 		for (var l in this.listeners) {
 			if (this.listeners[l].isValid)
 				this.listeners[l].internalNotifyChanged("parenttransform", downstreamValue);
@@ -1507,6 +1566,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = functi
 			downstreamValue = sglMulM4(this._parentTransform, newValue);	
 		else
 			downstreamValue = newValue;
+		what = "parenttransform";
 		
 	} else if (what == "shader") {
 		this._parentShader = newValue;
@@ -1617,19 +1677,20 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	} else {	*/
 		this.mesh = new SglMeshGL(factory.handler.gl);
 	//}
-	this.__defineGetter__("bbox", function() {
-		if (!this._bbox) {
-			var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
-			if (!dt.position || !dt.position.data) {
-				org.xml3d.debug.logWarning("Cannot find positions data for " + 
-						this.node.getAttribute("src")+". Can't calculate Bounding Box.");
-				//this.isValid = false;
-				this._bbox = new SglBox3();
-			} else
-				this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
-		}
-		return this._bbox;
-	});
+		
+
+		var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
+		if (!dt.position || !dt.position.data) {
+			org.xml3d.debug.logError("A mesh is referencing non-existent data: Cannot find positions data for " + 
+					this.node.getAttribute("src"));
+			this.meshIsValid = false;
+		} else
+			this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
+		
+		this.__defineGetter__("bbox", function() {
+			return this._bbox;
+		});
+
 
 };
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
@@ -1637,9 +1698,11 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
 		transform, outMeshes, outLights, shader) {
-	this._transform = transform;
-	this._shader = shader;
-	outMeshes.push( this );
+	if (this.meshIsValid) {
+		this._transform = transform;
+		this._shader = shader;
+		outMeshes.push( this );
+	}
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
@@ -1753,10 +1816,16 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.constructor = org.xml3d.webgl.
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.collectDrawableObjects = function(
 		transform, outMeshes, outLights, shader) {
 	outLights.push( [ transform, this ]);
+	this._transform = transform;
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.notifyChanged = function(e) {
 	this[e.attribute] = null;
+};
+
+org.xml3d.webgl.XML3DLightRenderAdapter.prototype.internalNotifyChanged = function(what, newValue) {
+	if (what == "transform" || what == "parenttransform")
+		this._transform = newValue;
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(modelViewMatrix) {
@@ -1764,7 +1833,9 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 
 	if(!shader)
 		return null;
-
+	
+	if (this._transform)
+		modelViewMatrix = sglMulM4(modelViewMatrix, this._transform);
 	if (!this.dataAdapter)
 	{
 		var renderer = shader.factory.renderer;
@@ -1793,7 +1864,8 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 	for (var p in params) {
 		if (p == "position") {
 			//Position must be multiplied with the model view matrix
-			var t = sglMulM4V4(modelViewMatrix, [params[p].data[0], params[p].data[1], params[p].data[2], 1.0]);
+			var t = [params[p].data[0], params[p].data[1],params[p].data[2], 1.0];
+			t = sglMulM4V4(modelViewMatrix, t);
 			aParams[p] = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
 			continue;
 		}

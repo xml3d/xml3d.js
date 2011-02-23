@@ -7625,7 +7625,11 @@ _SglCanvasManager.prototype = {
 				}
 			}
 		}
-
+	//---- Added 23.02.11
+		if (this.handler.mouseOut)
+			if (this.handler.mouseOut(this.gl) != false)
+				doDraw = true;
+	//----
 		if (doDraw) {
 			this.requestDraw();
 		}

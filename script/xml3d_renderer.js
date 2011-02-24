@@ -767,10 +767,29 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	var viewMatrix = this.camera.getViewMatrix();
 	xform.projection.load(projMatrix);
 
-
+	//Setup lights
 	var light, lightOn;
+	var slights = this.lights;
+	var elements = slights.length * 3;
+	var lightParams = {
+		positions : new Float32Array(elements),
+		diffuseColors : new Float32Array(elements),
+		ambientColors : new Float32Array(elements),
+		attenuations : new Float32Array(elements),
+		visible : new Float32Array(elements)
+	};
+	for ( var j = 0; j < slights.length; j++) {
+		var light = slights[j][1];
+		var params = light.getParameters(viewMatrix);
+		if (!params)
+			continue; // TODO: Shrink array
+		lightParams.positions.set(params.position, j*3);
+		lightParams.attenuations.set(params.attenuation, j*3);
+		lightParams.diffuseColors.set(params.intensity, j*3);
+		lightParams.visible.set(params.visibility, j*3);
+	}
 
-	this.zPos = [];
+	this.zPos = new Array();
 	for (i = 0, n = this.drawableObjects.length; i < n; i++) {
 		var meshAdapter = this.drawableObjects[i];
 		
@@ -785,7 +804,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		var center = new SglVec3(meshAdapter.bbox.center);
 		center.v = sglMulM4V3(trafo, center.v, 1.0);
 		center.v = sglMulM4V3(xform.view._s[0], center.v, 1.0);
-		this.zPos[i] = [ i, center.z ];
+		this.zPos[i] = [ i, center.z ]; 
 	}
 	this.zPos.sort(function(a, b) {
 		return a[1] - b[1];
@@ -794,8 +813,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	end = Date.now() / 1000.0;
 	//console.log("Sort Time:" + (end-start));
 	start = end;
-
-	for (var i = 0, n = this.zPos.length; i < n; i++) {
+	
+	var origLength = this.zPos.length;
+	for (var i = 0, n = origLength; i < n; i++) {
 		var obj = this.drawableObjects[this.zPos[i][0]];
 		var transform = obj._transform;
 		var shape = obj;
@@ -831,26 +851,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			}
 		}
 
-		var slights = this.lights;
-		var elements = slights.length * 3;
-		var lightParams = {
-			positions : new Float32Array(elements),
-			diffuseColors : new Float32Array(elements),
-			ambientColors : new Float32Array(elements),
-			attenuations : new Float32Array(elements),
-			visible : new Float32Array(elements)
-		};
-		for ( var j = 0; j < slights.length; j++) {
-			var light = slights[j][1];
-			var params = light.getParameters(viewMatrix);
-			if (!params)
-				continue; // TODO: Shrink array
-			lightParams.positions.set(params.position, j*3);
-			lightParams.attenuations.set(params.attenuation, j*3);
-			lightParams.diffuseColors.set(params.intensity, j*3);
-			lightParams.visible.set(params.visibility, j*3);
-		}
-
 		//Begin setting up uniforms for rendering
 		parameters["lightPositions[0]"] = lightParams.positions;
 		parameters["lightVisibility[0]"] = lightParams.visible;
@@ -865,6 +865,14 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 			//Add uniforms from the shader to the parameters package
 			shader.setParameters(parameters);
 
+			//If this object has transparency we'll defer rendering it until all solid objects
+			//are done. Note this doesn't cover transparent textures...
+			if (parameters.transparency > 0 && i < origLength) {
+				this.zPos.push(this.zPos[i]);
+				n++;
+				continue;
+			}
+			
 			shape.render(shader, parameters);
 		} else {
 			shader = {};
@@ -1678,12 +1686,14 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 		this.mesh = new SglMeshGL(factory.handler.gl);
 	//}
 		
-
+		
 		var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
 		if (!dt.position || !dt.position.data) {
-			org.xml3d.debug.logError("A mesh is referencing non-existent data: Cannot find positions data for " + 
-					this.node.getAttribute("src"));
+			org.xml3d.debug.logWarning("Cannot find positions data for " + 
+					this.node.getAttribute("src")+". Can't calculate Bounding Box.");
+			//Flag should be set to prevent this mesh being added to list of drawable objects
 			this.meshIsValid = false;
+			this._bbox = new SglBox3();
 		} else
 			this._bbox  = org.xml3d.webgl.calculateBoundingBox(dt.position.data);
 		

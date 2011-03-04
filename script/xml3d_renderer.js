@@ -666,6 +666,8 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 	//References to the adapters of the removed node are automatically cleaned up
 	//as they're encountered during the render phase or notifyChanged methods
+	if (evt.oldValue.dispose)
+		evt.oldValue.dispose();
 	this.requestRedraw("A node was removed.");
 
 };
@@ -1488,19 +1490,21 @@ org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
 	this._parentTransform = null;
 	this._parentShader = null;
 	this.isValid = true;
+	this._transformAdapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
+	if (this._transformAdapter)
+		this._transformAdapter.listeners.push(this);
 };
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DGroupRenderAdapter;
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
-	this._parentTransform = transform;
-	var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-	if (adapter === null) {
-		return transform;
-	}
+	if (this._parentTransform !== null)
+		transform = sglMulM4(transform, this._parentTransform);
 	
-	adapter.listeners.push(this);
-	return sglMulM4(transform, adapter.getMatrix());
+	if (this._transformAdapter)
+		return sglMulM4(transform, this._transformAdapter.getMatrix());
+	
+	return transform;
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMethod) {
@@ -1511,9 +1515,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMeth
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
 	var downstreamValue = null;
 	if (evt.eventType == MutationEvent.ADDITION)
-		this.factory.renderer.sceneTreeAddition(evt);
-	else if (evt.eventType == MutationEvent.REMOVAL)
+		this.factory.renderer.sceneTreeAddition(evt); 
+	else if (evt.eventType == MutationEvent.REMOVAL) {
 		this.factory.renderer.sceneTreeRemoval(evt);
+	}
 	else if (evt.attribute == "shader") {
 		//Update this group node's shader then propagate the change down to its children
 		this.shader = this.getShader();
@@ -1522,11 +1527,13 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		else
 			downstreamValue = this.shader;
 		
-		for (var l in this.listeners) {
-			if (this.listeners[l].isValid)
-				this.listeners[l].internalNotifyChanged(evt.attribute, downstreamValue);
-			else
-				this.listeners.splice(l, 1);
+		for (var i=0; i<this.listeners.length; i++) {
+			if (this.listeners[i].isValid)
+				this.listeners[i].internalNotifyChanged(evt.attribute, downstreamValue);
+			else {
+				this.listeners.splice(i, 1);
+				i--;
+			}
 		}
 		
 		this.factory.renderer.requestRedraw("Group shader changed.");
@@ -1537,11 +1544,13 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 		downstreamValue = sglMulM4(adapter.getMatrix(), this._parentTransform);
-		for (var l in this.listeners) {
-			if (this.listeners[l].isValid)
-				this.listeners[l].internalNotifyChanged("parenttransform", downstreamValue);
-			else
-				this.listeners.splice(l, 1);
+		for (var i=0; i<this.listeners.length; i++) {
+			if (this.listeners[i].isValid)
+				this.listeners[i].internalNotifyChanged("parenttransform", downstreamValue);
+			else {
+				this.listeners.splice(i, 1);
+				i--;
+			}
 		}
 		this.factory.renderer.requestRedraw("Group transform changed.");
 	}
@@ -1582,11 +1591,13 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = functi
 			return; //this group node's shader overrides the parent shader for all its children, so we're done
 	}
 	
-	for (var l in this.listeners) {
-		if (this.listeners[l].isValid)
-			this.listeners[l].internalNotifyChanged(what, downstreamValue);
-		else
-			this.listeners.splice(l, 1);
+	for (var i=0; i<this.listeners.length; i++) {
+		if (this.listeners[i].isValid)
+			this.listeners[i].internalNotifyChanged(what, downstreamValue);
+		else {
+			this.listeners.splice(i, 1);
+			i--;
+		}
 	}
 };
 
@@ -1649,11 +1660,13 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
 	this.matrix = this.getMatrix();
-	for (var l in this.listeners) {
-		if (this.listeners[l].isValid)
-			this.listeners[l].internalNotifyChanged("transform", this.matrix);
-		else
-			this.listeners.splice(l,1);
+	for (var i=0; i<this.listeners.length; i++) {
+		if (this.listeners[i].isValid)
+			this.listeners[i].internalNotifyChanged("transform", this.matrix);
+		else {
+			this.listeners.splice(i,1);
+			i--;
+		}
 	}
 	this.factory.renderer.requestRedraw("Transformation changed.");
 };

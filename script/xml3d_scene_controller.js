@@ -141,7 +141,7 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 		if(this.mode != "walk" && this.mode != "examine" )
 			this.mode = "examine";
 		
-		if(this.mode = "none")
+		if(this.mode == "none")
 			return;
 		
 		if(config.getAttribute("resolveAround")){

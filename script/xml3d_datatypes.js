@@ -644,13 +644,21 @@ XML3DVec3 = function(x, y, z)
 	
 	// Note that there is no owner node registered yet. Therefore, the setXYZ() method
 	// can be used at this point since no notification can be triggered.
-	if (arguments.length == 0) 
-	{
-		this._setXYZ(0, 0, 0);
-	} 
-	else 
-	{
-		this._setXYZ(x, y, z);
+	var n = arguments.length;
+	switch(n) {
+		case 1:
+			if (arguments[0] instanceof Array || arguments[0] instanceof Float32Array) {
+				this._setXYZ(x[0], x[1], x[2]);
+			} else {
+				this._setXYZ(x, x, x);
+			}
+			break;
+		case 3:
+			this._setXYZ(x, y, z);
+			break;
+		default:
+			this._setXYZ(0, 0, 0);
+			break;
 	}
 };
 XML3DVec3.prototype             = new XML3DDataType();
@@ -780,25 +788,31 @@ XML3DVec3.prototype.toString = function() {
 XML3DRotation = function(x, y, z, w) 
 {
 	XML3DDataType.call(this);
-	
-	if (arguments.length == 0)
-	{
-		this.x = 0;
-		this.y = 0;
-		this.z = 0;
-		this.w = 1;
-	} 
-	else if (arguments.length == 2) 
-	{
-		this.setAxisAngle(x, y);
-	} 
-	else 
-	{
+	var n = arguments.length;
+	switch(n) {
+	case 1:
+		this.x = x[0];
+		this.y = x[1];
+		this.z = x[2];
+		this.w = x[3];
+		break;
+	case 2:
+		this.setAxisAngle(x,y);
+		break;
+	case 4:
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.w = w;
+		break;
+	default:
+		this.x = 0;
+		this.y = 0;
+		this.z = 0;
+		this.w = 1;
+		break;
 	}
+
 };
 XML3DRotation.prototype             = new XML3DDataType();
 XML3DRotation.prototype.constructor = XML3DRotation;

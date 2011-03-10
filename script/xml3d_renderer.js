@@ -65,6 +65,13 @@ org.xml3d.webgl.configure = function(xml3ds) {
 			XML3DHandler.addEventListener(xml3ds[i], "mousemove", xml3ds[i].getAttribute("onmousemove"), false);
 		if (xml3ds[i].hasAttribute("onmouseout"))
 			XML3DHandler.addEventListener(xml3ds[i], "mouseout", xml3ds[i].getAttribute("onmouseout"), false);
+		if (xml3ds[i].hasAttribute("onmouseup"))
+			XML3DHandler.addEventListener(xml3ds[i], "mouseup", xml3ds[i].getAttribute("onmouseup"), false);
+		if (xml3ds[i].hasAttribute("onmousedown"))
+			XML3DHandler.addEventListener(xml3ds[i], "mousedown", xml3ds[i].getAttribute("onmousedown"), false);
+		if (xml3ds[i].hasAttribute("onmousewheel"))
+			XML3DHandler.addEventListener(xml3ds[i], "mousewheel", xml3ds[i].getAttribute("onmousewheel"), false);
+		
 
 		XML3DHandler.start();
 		org.xml3d._rendererFound = true;
@@ -176,7 +183,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.needPickingDraw = true;
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
-		this.events = { "mousedown":[], "mouseup":[], "framedrawn":[], "mousemove":[], "mouseout":[] };
+		this.events = { "mousedown":[], "mouseup":[], "framedrawn":[], "mousemove":[], "mouseout":[], "update":[], "mousewheel":[] };
 		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
 		
 		//Set up internal frame buffers used for picking
@@ -324,7 +331,11 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 					}
 				}
 			}
-
+			
+		}
+		for (var i in this.events.mouseup) {
+			var mue = this.ui.mouseUpEvent;
+			this.events.mouseup[i].listener(mue);
 		}
 		return false;
 	};

@@ -406,14 +406,23 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 	}
 	try
     {
-        var bindNode = e.target.parentNode;
-        var oldValue = e.target.parentNode.value;
-
-        e.target.parentNode.setValue(e);
-
-        if (bindNode.notificationRequired() && ! isEqual(oldValue, e.target.parentNode.value))
+        var removedNode = e.target;
+        
+        if (!removedNode.notifcationRequired)
+        	return;
+        
+        if (removedNode.notificationRequired())
         {
-            bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
+            removedNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
+        }
+
+        for(var i = 0; i < removedNode.adapters.length; i++)
+        {
+        	var adapter = removedNode.adapters[i];
+        	if(adapter.dispose)
+        	{
+        		adapter.dispose();
+        	}
         }
     }
     catch (e)

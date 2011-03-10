@@ -368,6 +368,13 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @return
 	 */
 	XML3DHandler.prototype.mouseMove = function(gl, x, y) {
+		
+		//Call any global mousemove methods, they will receive the mouseMoveEvent as the single argument
+		for (var i in this.events.mousemove) {
+			var mm = this.ui.mouseMoveEvent;
+			this.events.mousemove[i].listener(mm);
+		}
+		
 		if (this.isDragging)
 			return false;
 
@@ -389,7 +396,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 					currentObj.evalMethod(evtMethod);
 				}
 
-				while(currentObj.parentNode.nodeName == "group")
+				while(correntObj.parentNode && currentObj.parentNode.nodeName == "group")
 				{
 					currentObj = currentObj.parentNode;
 					evtMethod = currentObj.getAttribute('onmouseover');
@@ -403,7 +410,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 						lastObj.evalMethod(evtMethod);
 					}
 
-					while(lastObj.parentNode.nodeName == "group")
+					while(lastObj.parentNode && lastObj.parentNode.nodeName == "group")
 					{
 						lastObj = lastObj.parentNode;
 						evtMethod = lastObj.getAttribute('onmouseout');
@@ -433,11 +440,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				}
 			}
 		}		
-		//Call any global mousemove methods, they will receive the mouseMoveEvent as the single argument
-		for (var i in this.events.mousemove) {
-			var mm = this.ui.mouseMoveEvent;
-			this.events.mousemove[i].listener(mm);
-		}
+		
 		return false;
 	};
 	
@@ -454,6 +457,14 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		}
 		return false;
 	};
+	
+	XML3DHandler.prototype.mouseWheel = function(gl) {
+		for (var i in this.events.mousewheel) {
+			var mw = this.ui.mouseWheelEvent;
+			this.events.mousewheel[i].listener(mw);
+		}
+		return false;
+	};
 
 	/**
 	 * Dispatches a FrameDrawnEvent to listeners
@@ -463,12 +474,13 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @param numObjDrawn
 	 * @return
 	 */
-	XML3DHandler.prototype.dispatchFrameDrawnEvent = function(start, end, numObjDrawn) {
+	XML3DHandler.prototype.dispatchFrameDrawnEvent = function(start, end, stats) {
 		var event = {};
 		event.timeStart = start;
 		event.timeEnd = end;
 		event.renderTimeInMilliseconds = end - start;
-		event.numberOfObjectsDrawn = numObjDrawn;
+		event.numberOfObjectsDrawn = stats[0];
+		event.numberOfTrianglesDrawn = stats[1];
 		
 		for (var i in this.events.framedrawn) {
 			this.events.framedrawn[i].listener.call(this.events.framedrawn[i].node, event);
@@ -485,10 +497,10 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		try {
 			this.needDraw = false;
 			var start = Date.now();
-			var numObjDrawn = this.renderer.render();
+			var stats = this.renderer.render();
 			var end = Date.now();
 			
-			this.dispatchFrameDrawnEvent(start, end, numObjDrawn);
+			this.dispatchFrameDrawnEvent(start, end, stats);
 		} catch (e) {
 			org.xml3d.debug.logException(e);
 			throw e;
@@ -688,7 +700,7 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 			org.xml3d.debug.logError("Could not find standard shader: " + name);
 			return null;
 		}
-		org.xml3d.webgl.checkError(gl, "Before creating shader");
+		//org.xml3d.webgl.checkError(gl, "Before creating shader");
 		var prog = null;
 
 		if (name == "urn:xml3d:shader:phong" || name == "urn:xml3d:shader:phongvcolor" || name == "urn:xml3d:shader:texturedphong")
@@ -705,10 +717,10 @@ org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name)
 
 			var frag = maxLights + tail;
 			prog = new SglProgram(gl, [g_shaders[name].vertex], [frag]);
-			org.xml3d.webgl.checkError(gl, "After creating shader");
+			//org.xml3d.webgl.checkError(gl, "After creating shader");
 		} else {
 			prog = new SglProgram(gl, [g_shaders[name].vertex], [g_shaders[name].fragment]);
-			org.xml3d.webgl.checkError(gl, "After creating shader");
+			//org.xml3d.webgl.checkError(gl, "After creating shader");
 		}
 		if (!prog)
 		{
@@ -816,6 +828,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	//console.log("Sort Time:" + (end-start));
 	start = end;
 	
+	var numTrianglesDrawn = 0;
 	var origLength = this.zPos.length;
 	for (var i = 0, n = origLength; i < n; i++) {
 		var obj = this.drawableObjects[this.zPos[i][0]];
@@ -833,7 +846,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 		if (!sp)
 		{
-			org.xml3d.webgl.checkError(gl, "Before default shader");
+			//org.xml3d.webgl.checkError(gl, "Before default shader");
 			if (shader) {
 				shader.sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
 				sp = shader.sp;
@@ -846,9 +859,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 					var colorStr = document.defaultView.getComputedStyle(
 						shape.node, "").getPropertyValue("color");
 					var color = new RGBColor(colorStr);
-					org.xml3d.webgl.checkError(gl, "Before default diffuse");
+					//org.xml3d.webgl.checkError(gl, "Before default diffuse");
 					parameters["diffuseColor"] = [0.0,0.0,0.80];
-					org.xml3d.webgl.checkError(gl, "After default diffuse");
+					//org.xml3d.webgl.checkError(gl, "After default diffuse");
 					}
 			}
 		}
@@ -874,6 +887,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 				n++;
 				continue;
 			}
+			var prims = shape.mesh.connectivity.primitives;
+			if (prims && prims.triangles)
+				numTrianglesDrawn += prims.triangles.length / 3;
 			
 			shape.render(shader, parameters);
 		} else {
@@ -894,7 +910,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	gl.disable(gl.DEPTH_TEST);
 	gl.disable(gl.CULL_FACE);
 	
-	return this.zPos.length;
+	return [origLength, numTrianglesDrawn];
 };
 
 /**
@@ -1016,7 +1032,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
  * @return
  */
 org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) {
-	org.xml3d.webgl.checkError(gl, "Before readpixels");
+	//org.xml3d.webgl.checkError(gl, "Before readpixels");
 	var data = new Uint8Array(8);
 	
 	try {
@@ -1361,14 +1377,14 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 			return;
 	}
 	var gl = this.factory.handler.gl;
-	org.xml3d.webgl.checkError(gl, "Error before creating texture:");
+	//org.xml3d.webgl.checkError(gl, "Error before creating texture:");
 	
 	var texture = null;
 	var options = textureInfo.options;
 	var textureSrc = textureInfo.src;
 
 	texture = new SglTexture2D(gl, textureInfo.src, options);
-	org.xml3d.webgl.checkError(gl, "Error after creating texture:" + textureSrc);
+	//org.xml3d.webgl.checkError(gl, "Error after creating texture:" + textureSrc);
 
 	if (!texture) {
 		org.xml3d.debug.logError("Could not create texture for " + textureSrc);
@@ -1445,7 +1461,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.attribute == "script") {
-		this.sp.destroy();
+		if (this.sp)
+			this.sp.destroy();
 		this.sp = null;
 	} else {
 		org.xml3d.debug.logError("Unhandled change in shader adapter: "+ e.attribute);
@@ -1797,7 +1814,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	}
 
 
-	org.xml3d.webgl.checkError(gl, "Error before starting render.");
+	//org.xml3d.webgl.checkError(gl, "Error before starting render.");
 
 	if (!this.loadedMesh) {
 		//console.log("Creating Mesh: " + this.node.id);
@@ -1814,9 +1831,9 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	}
 
 	if (this.loadedMesh || meshParams) {
-		org.xml3d.webgl.checkError(gl, "Error before drawing Elements.");
+		//org.xml3d.webgl.checkError(gl, "Error before drawing Elements.");
 		sglRenderMeshGLPrimitives(this.mesh, "triangles", shader.sp, null, parameters, samplers);
-		org.xml3d.webgl.checkError(gl, "Error after drawing Elements.");
+		//org.xml3d.webgl.checkError(gl, "Error after drawing Elements.");
 
 	} else
 		org.xml3d.debug.logError("No element array found!");
@@ -2135,7 +2152,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"      gl_FragColor = vec4(rgb, texDiffuse.w*max(0.0, 1.0 - transparency)); \n"
 			+"	} else {\n"
 			+"      vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
-			+"      vec4 color = vec4(emissiveColor + (ambientIntensity * diffuseColor * texDiffuse.xyz), 0.0);\n"
+			+"      vec4 color = vec4(emissiveColor, 0.0);\n" //vec4(emissiveColor + (ambientIntensity * diffuseColor * texDiffuse), 0.0);
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			vec3 L = lightPositions[i] - fragVertexPosition;\n"
 		 	+"      	vec3 N = normalize(fragNormal);\n"

@@ -407,7 +407,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 					currentObj.evalMethod(evtMethod);
 				}
 
-				while(correntObj.parentNode && currentObj.parentNode.nodeName == "group")
+				while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
 				{
 					currentObj = currentObj.parentNode;
 					evtMethod = currentObj.getAttribute('onmouseover');

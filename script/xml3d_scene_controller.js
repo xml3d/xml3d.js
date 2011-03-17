@@ -112,7 +112,6 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 		return;
 	}
 	
-	org.xml3d.debug.logWarning("View: " + view);
 	this.camera = new org.xml3d.Camera(view);
 	this.timer = new org.xml3d.util.Timer();
 	this.prevPos = function() {
@@ -145,7 +144,11 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 			return;
 		
 		if(config.getAttribute("resolveAround")){
+			org.xml3d.debug.logWarning("resolveAround is obsolete. Use 'revolveAround' instead!");
 			this.revolveAroundPoint.setVec3Value(config.getAttribute("resolveAround"));
+		}
+		if(config.getAttribute("revolveAround")){
+			this.revolveAroundPoint.setVec3Value(config.getAttribute("revolveAround"));
 		}
 		if(config.getAttribute("speed"))
 		{

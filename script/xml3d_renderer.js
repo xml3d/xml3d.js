@@ -72,10 +72,22 @@ org.xml3d.webgl.configure = function(xml3ds) {
 		if (xml3ds[i].hasAttribute("onmousewheel"))
 			XML3DHandler.addEventListener(xml3ds[i], "mousewheel", xml3ds[i].getAttribute("onmousewheel"), false);
 		
+		if (xml3ds[i].hasAttribute("onupdate"))
+			XML3DHandler.addEventListener(xml3ds[i], "update", xml3ds[i].getAttribute("onupdate"), false);
+		if (xml3ds[i].hasAttribute("contextmenu") && xml3ds[i].getAttribute("contextmenu") == "false")
+			xml3ds[i].canvas.addEventListener("contextmenu", function(e) {org.xml3d.webgl.stopEvent(e);}, false);
 
 		XML3DHandler.start();
 		org.xml3d._rendererFound = true;
 	}
+};
+
+org.xml3d.webgl.stopEvent = function(ev) {
+	if (ev.preventDefault)
+		ev.preventDefault();
+	if (ev.stopPropagation) 
+		ev.stopPropagation();
+	ev.returnValue = false;
 };
 
 org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
@@ -279,6 +291,10 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	//This function is called by SpiderGL at regular intervals to determine if a redraw of the 
 	//scene is required
 	XML3DHandler.prototype.update = function() {
+		for (var i in this.events.update) {
+			if (this.events.update[i].listener() == true)
+				this.needDraw = true;
+		}
 		return this.needDraw;
 	};
 
@@ -611,14 +627,15 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.scene = handler.scene;
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(handler, this);
 	this.dataFactory = new org.xml3d.webgl.XML3DDataAdapterFactory(handler);
-	this.lights = null;
+	this.lights = [];
 	this.camera = this.initCamera();
 	this.shaderMap = {};
 	this.width = width;
 	this.height = height;
-	this.drawableObjects = null;
+	this.drawableObjects = [];
 	this.zPos = [];
-
+	
+	this.collectDrawableObjects(new sglM4(), this.drawableObjects, this.lights, null);
 };
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
@@ -772,14 +789,14 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	//Gather all objects in the scene and the information needed to render them
 	//This will only be redone if the scene structure has changed since the 
 	//last rendering pass
-	if (this.drawableObjects === undefined || !this.drawableObjects ||
+	/*if (this.drawableObjects === undefined || !this.drawableObjects ||
 			this.lights === undefined || !this.lights) {
 		this.handler.needPickingRedraw = true;
 		this.drawableObjects = [];
 		this.lights = new Array();
 		this.collectDrawableObjects(new sglM4(),
 				this.drawableObjects, this.lights, null);
-	}
+	}*/
 
 	var end = Date.now() / 1000.0;
 	//console.log("Traversal Time:" + (end-start));
@@ -818,6 +835,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	for (i = 0, n = this.drawableObjects.length; i < n; i++) {
 		var meshAdapter = this.drawableObjects[i];
 		
+		//Check if this mesh was removed from the scene since last rendering pass
 		if (!meshAdapter.isValid) {
 			this.drawableObjects.splice(i, 1);
 			i--;
@@ -885,6 +903,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		parameters["lightAttenuations[0]"] = lightParams.attenuations;
 		parameters["modelViewMatrix"] = xform.modelViewMatrix;
 		parameters["modelViewProjectionMatrix"] = xform.modelViewProjectionMatrix;
+		parameters["normalMatrix"] = xform.viewSpaceNormalMatrix;
 
 		if (shader)
 		{
@@ -2032,13 +2051,14 @@ g_shaders["urn:xml3d:shader:phong"] = {
 
 		+"uniform mat4 modelViewProjectionMatrix;\n"
 		+"uniform mat4 modelViewMatrix;\n"
+		+"uniform mat3 normalMatrix;\n"
 		+"uniform vec3 eyePosition;\n"
 
 		+"void main(void) {\n"
 		+"	  gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
-		+"	  fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
+		+"	  fragNormal = normalize(normalMatrix * normal);\n"
 		+"	  fragVertexPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
-		+"	  fragEyeVector = fragVertexPosition;\n"
+		+"	  fragEyeVector = normalize(fragVertexPosition);\n"
 		+"}\n",
 
 	fragment:
@@ -2067,9 +2087,9 @@ g_shaders["urn:xml3d:shader:phong"] = {
 
 			+"void main(void) {\n"
 			+"	if (MAXLIGHTS < 1) {\n"
-			+"      vec3 light = normalize(-fragVertexPosition);\n"
-			+"      vec3 normal = normalize(fragNormal);\n"
-			+"      vec3 eye = normalize(fragVertexPosition);\n"
+			+"      vec3 light = -fragEyeVector;\n"
+			+"      vec3 normal = fragNormal;\n"
+			+"      vec3 eye = fragEyeVector;\n"
 			+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
 			+"      diffuse += max(0.0, dot(normal, eye));\n"
 			+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n"
@@ -2081,8 +2101,8 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"      vec3 color = emissiveColor + (ambientIntensity * diffuseColor);\n"
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			vec3 L = lightPositions[i] - fragVertexPosition;\n"
-		 	+"      	vec3 N = normalize(fragNormal);\n"
-		 	+"			vec3 E = normalize(fragEyeVector);\n"
+		 	+"      	vec3 N = fragNormal;\n"
+		 	+"			vec3 E = fragEyeVector;\n"
 			+"			float dist = length(L);\n"
 		 	+"      	L = normalize(L);\n"
 			+"			vec3 R = normalize(reflect(L,N));\n"
@@ -2110,14 +2130,15 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 
 		+"uniform mat4 modelViewProjectionMatrix;\n"
 		+"uniform mat4 modelViewMatrix;\n"
+		+"uniform mat3 normalMatrix;\n"
 		+"uniform vec3 eyePosition;\n"
 
 
 		+"void main(void) {\n"
 		+"	  gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
-		+"	  fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
+		+"	  fragNormal = normalize(normalMatrix * normal);\n"
 		+"	  fragVertexPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
-		+"	  fragEyeVector = fragVertexPosition;\n"
+		+"	  fragEyeVector = normalize(fragVertexPosition);\n"
 		+"    fragTexCoord = texcoord;\n"
 		+"}\n",
 
@@ -2152,8 +2173,8 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"void main(void) {\n"
 			+"	if (MAXLIGHTS < 1) {\n"
 			+"      vec3 light = normalize(-fragVertexPosition);\n"
-			+"      vec3 normal = normalize(fragNormal);\n"
-			+"      vec3 eye = normalize(fragVertexPosition);\n"
+			+"      vec3 normal = fragNormal;\n"
+			+"      vec3 eye = fragEyeVector;\n"
 			+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
 			+"      diffuse += max(0.0, dot(normal, eye));\n"
 			+"      float specular = pow(max(0.0, dot(normal, normalize(light-eye))), shininess*128.0);\n"
@@ -2166,8 +2187,8 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"      vec4 color = vec4(emissiveColor, 0.0);\n" //vec4(emissiveColor + (ambientIntensity * diffuseColor * texDiffuse), 0.0);
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			vec3 L = lightPositions[i] - fragVertexPosition;\n"
-		 	+"      	vec3 N = normalize(fragNormal);\n"
-		 	+"			vec3 E = normalize(fragEyeVector);\n"
+		 	+"      	vec3 N = fragNormal;\n"
+		 	+"			vec3 E = fragEyeVector;\n"
 			+"			float dist = length(L);\n"
 		 	+"     	 	L = normalize(L);\n"
 			+"			vec3 R = normalize(reflect(L,N));\n"
@@ -2199,13 +2220,14 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 
 			+"uniform mat4 modelViewProjectionMatrix;\n"
 			+"uniform mat4 modelViewMatrix;\n"
+			+"uniform mat3 normalMatrix;\n"
 			+"uniform vec3 eyePosition;\n"
 
 			+"void main(void) {\n"
 			+"	  gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
-			+"	  fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
+			+"	  fragNormal = normalize(normalMatrix * normal);\n"
 			+"	  fragVertexPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;\n"
-			+"	  fragEyeVector = fragVertexPosition;\n"
+			+"	  fragEyeVector = normalize(fragVertexPosition);\n"
 			+ "   fragVertexColor = color;\n"
 			+"}\n",
 
@@ -2237,9 +2259,9 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 
 				+"void main(void) {\n"
 				+"	if (MAXLIGHTS < 1) {\n"
-				+"      vec3 light = normalize(-fragVertexPosition);\n"
-				+"      vec3 normal = normalize(fragNormal);\n"
-				+"      vec3 eye = normalize(fragVertexPosition);\n"
+				+"      vec3 light = -fragEyeVector;\n"
+				+"      vec3 normal = fragNormal;\n"
+				+"      vec3 eye = fragEyeVector;\n"
 				+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
 				+"      diffuse += max(0.0, dot(normal, eye));\n"
 				+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n"
@@ -2251,8 +2273,8 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"      vec3 color = emissiveColor + (ambientIntensity * diffuseColor);\n"
 				+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 				+"			vec3 L = lightPositions[i] - fragVertexPosition;\n"
-			 	+"      	vec3 N = normalize(fragNormal);\n"
-			 	+"			vec3 E = normalize(fragEyeVector);\n"
+			 	+"      	vec3 N = fragNormal;\n"
+			 	+"			vec3 E = fragEyeVector;\n"
 				+"			float dist = length(L);\n"
 			 	+"      	L = normalize(L);\n"
 				+"			vec3 R = normalize(reflect(L,N));\n"
@@ -2306,11 +2328,12 @@ g_shaders["urn:xml3d:shader:pickedNormals"] = {
 		+ "attribute vec3 normal;\n"
 		+ "uniform mat4 modelViewMatrix;\n"
 		+ "uniform mat4 modelViewProjectionMatrix;\n"
+		+ "uniform mat3 normalMatrix;\n"
 
 		+ "varying vec3 fragNormal;\n"
 		
 		+ "void main(void) {\n"
-		+ "	   fragNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;\n"
+		+ "	   fragNormal = normalize(normalMatrix * normal);\n"
 		+ "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);\n"
 		+ "}" ,
 
@@ -2324,7 +2347,7 @@ g_shaders["urn:xml3d:shader:pickedNormals"] = {
 		+ "varying vec3 fragNormal;\n"
 
 		+ "void main(void) {\n"
-		+ "    gl_FragColor = vec4((normalize(fragNormal)+1.0)/2.0, 1.0);\n"
+		+ "    gl_FragColor = vec4((fragNormal+1.0)/2.0, 1.0);\n"
 		+ "}\n"
 	};
 

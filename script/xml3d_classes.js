@@ -406,23 +406,15 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 	}
 	try
     {
-        var removedNode = e.target;
+        var removedNodeParent = e.target.parentNode;
+        removedNodeParent.setValue(e);
         
-        if (!removedNode.notifcationRequired)
+        if (!removedNodeParent.notificationRequired)
         	return;
         
-        if (removedNode.notificationRequired())
+        if (removedNodeParent.notificationRequired())
         {
-            removedNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
-        }
-
-        for(var i = 0; i < removedNode.adapters.length; i++)
-        {
-        	var adapter = removedNode.adapters[i];
-        	if(adapter.dispose)
-        	{
-        		adapter.dispose();
-        	}
+        	removedNodeParent.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
         }
     }
     catch (e)
@@ -535,16 +527,16 @@ org.xml3d.XML3DDocument.prototype.onRemove = function(e)
 		//if (parent && parent.notify) {
 		//	parent.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, null, null, e.target));
 
-        var bindNode = e.target;
+        var removedNode = e.target;
 
-        if (bindNode.notificationRequired())
+        if (removedNode.notificationRequired())
         {
-            bindNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
+            removedNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
         }
 
-        for(var i = 0; i < bindNode.adapters.length; i++)
+        for(var i = 0; i < removedNode.adapters.length; i++)
         {
-        	var adapter = bindNode.adapters[i];
+        	var adapter = removedNode.adapters[i];
         	if(adapter.dispose)
         	{
         		adapter.dispose();

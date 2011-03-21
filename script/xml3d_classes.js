@@ -534,14 +534,14 @@ org.xml3d.XML3DDocument.prototype.onRemove = function(e)
             removedNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
         }
 
-        for(var i = 0; i < removedNode.adapters.length; i++)
+       /*for(var i = 0; i < removedNode.adapters.length; i++)
         {
         	var adapter = removedNode.adapters[i];
         	if(adapter.dispose)
         	{
         		adapter.dispose();
         	}
-        }
+        }*/
     }
     catch (e)
     {

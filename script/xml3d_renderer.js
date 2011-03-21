@@ -706,8 +706,9 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 	//References to the adapters of the removed node are automatically cleaned up
 	//as they're encountered during the render phase or notifyChanged methods
-	if (evt.oldValue.dispose)
-		evt.oldValue.dispose();
+	var adapter = this.factory.getAdapter(evt.oldValue, org.xml3d.webgl.Renderer.prototype);
+	if (adapter && adapter.dispose)
+		adapter.dispose();
 	this.requestRedraw("A node was removed.");
 
 };
@@ -1669,7 +1670,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispose = function() {
 	for (var child in this.node.childNodes) {
-		var adapter = this.factory.getAdapter(this.node.childNodes[child]);
+		var adapter = this.factory.getAdapter(this.node.childNodes[child], org.xml3d.webgl.Renderer.prototype);
 		if (adapter)
 			adapter.dispose();
 	}

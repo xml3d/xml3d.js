@@ -30,22 +30,11 @@ if (!xml3dPhysics)
 	throw new Error("xml3d_physics.js has to be included first");
 
 function createVec3(x, y, z) {
-	var xml3d = __physicsXml3dElements[0];
-	var res = xml3d.createXML3DVec3();
-	res.x = x;
-	res.y = y;
-	res.z = z;
-	return res;
+	return new XML3DVec3(x, y, z);;
 }
 
 function createRotation(x, y, z, w) {
-	var xml3d = document.getElementById("MyXml3d");
-	var res = xml3d.createXML3DRotation();
-	res.x = x;
-	res.y = y;
-	res.z = z;
-	res.w = w;
-	return res;
+	return new XML3DRotation(new XML3DVec3(x, y, z), w);
 }
 
 function multVec3(vec, scalar) {

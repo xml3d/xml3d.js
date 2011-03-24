@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     15.07.2010 14:51:00                                                        
+
+     project    XML3D Blender Exporter
+     description
+     Deploy script that prepares a single Blender Script to export XML3D files. 
+                   
+     Author: Kristian Sons                                                                
+     ====================================================================== -->
+<project name="script-merge" default="all">
+    <description>
+           Merge all the single scripts to one global xml3d.js
+    </description>
+
+	<property  file="build.properties" />
+	
+	<target name="all" depends="base, physics">
+	
+	</target>
+	
+    <!-- ================================= 
+          target: base              
+         ================================= -->
+    <target name="base" depends="clean" description="description">
+    	<concat destfile="${buildDir}/${scriptName}">
+    		<fileset file="${basedir}/preamble.txt"/>
+			<fileset file="${srcDir}/xml3d.js"/>
+    		<fileset file="${srcDir}/xml3d_util.js"/>
+    		<fileset file="${srcDir}/xml3d_datatypes.js"/>
+			<fileset file="${srcDir}/xml3d_classes.js"/>
+			<fileset file="${srcDir}/spidergl.js"/>
+			<fileset file="${srcDir}/xml3d_renderer.js"/>
+			<fileset file="${srcDir}/xml3d_scene_controller.js"/>
+		</concat>
+    	<replaceregexp file="${buildDir}/${scriptName}"
+    	    	               match="org.xml3d.webgl.checkError\("
+    	    	               replace="//org.xml3d.webgl.checkError\(" byline="true"/>
+    	<replaceregexp file="${buildDir}/${scriptName}"
+    	    	    	               match="%VERSION%"
+    	    	    	               replace="${version}" byline="true"/>
+    	
+    </target>
+	
+	<target name="physics" depends="clean" description="description">
+	    	<concat destfile="${buildDir}/${physicsScriptName}">
+	    		<fileset file="${basedir}/preamble.txt"/>
+				<fileset file="${physicsDir}/xml3d_physics.js"/>
+	    		<fileset file="${physicsDir}/xml3d_physics_interaction.js"/>
+			</concat>
+    	<replaceregexp file="${buildDir}/${physicsScriptName}"
+    	    	    	               match="%VERSION%"
+    	    	    	               replace="${version}" byline="true"/>
+
+    </target>
+	
+	<target name="clean">
+		<delete dir="${buildDir}"></delete>
+	</target>
+
+
+</project>

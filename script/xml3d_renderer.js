@@ -76,6 +76,11 @@ org.xml3d.webgl.configure = function(xml3ds) {
 			XML3DHandler.addEventListener(xml3ds[i], "update", xml3ds[i].getAttribute("onupdate"), false);
 		if (xml3ds[i].hasAttribute("contextmenu") && xml3ds[i].getAttribute("contextmenu") == "false")
 			xml3ds[i].canvas.addEventListener("contextmenu", function(e) {org.xml3d.webgl.stopEvent(e);}, false);
+		if (xml3ds[i].hasAttribute("framedrawn"))
+			XML3DHandler.addEventListener(xml3ds[i], "framedrawn", xml3ds[i].getAttribute("framedrawn"), false);
+		
+		if (xml3ds[i].hasAttribute("disablepicking"))
+			XML3DHandler._pickingDisabled = xml3ds[i].getAttribute("disablepicking") == "true" ? true : false;
 
 		XML3DHandler.start();
 		org.xml3d._rendererFound = true;
@@ -193,6 +198,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.canvasId = canvas.id;
 		this.needDraw = true;
 		this.needPickingDraw = true;
+		this._pickingDisabled = false;
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
 		this.events = { "mousedown":[], "mouseup":[], "framedrawn":[], "mousemove":[], "mouseout":[], "update":[], "mousewheel":[] };
@@ -211,6 +217,17 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		
 		if (!this.pickBuffer.isValid || !this.normalPickBuffer.isValid)
 			org.xml3d.debug.logError("Creation of picking framebuffers failed");
+		
+		var handler = this;		
+		this.redraw = function(reason) {
+			if (this.needDraw !== undefined) {
+				this.needDraw = true;
+				this.needPickingDraw = true;
+			} else {
+				//This is a callback from a texture, don't need to redraw the picking buffers
+				handler.needDraw = true;
+			}
+		};
 	}
 	
 	//Requests a WebGL context for the canvas and returns an XML3DHander for it
@@ -263,7 +280,9 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	};
 	
 	//Binds the picking buffer and passes the request for a picking pass to the renderer
-	XML3DHandler.prototype.renderPick = function(screenX, screenY) {		
+	XML3DHandler.prototype.renderPick = function(screenX, screenY) {
+		if (this._pickingDisabled)
+			return;
 		this.pickBuffer.bind();
 		this.renderer.renderPickingPass(screenX, screenY, this.needPickingDraw);
 		this.needPickingDraw = false;
@@ -272,20 +291,11 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	
 	//Binds the normal picking buffer and passes the request for picked object normals to the renderer
 	XML3DHandler.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
-		if (!pickedObj)
+		if (!pickedObj || this._pickingDisabled)
 			return;
 		this.normalPickBuffer.bind();		
 		this.renderer.renderPickedNormals(pickedObj, screenX, screenY);
 		this.normalPickBuffer.unbind();
-	};
-
-	//Destroys the renderer associated with this Handler
-	XML3DHandler.prototype.shutdown = function(scene) {
-		var gl = this.gl;
-
-		if (this.renderer) {
-			this.renderer.dispose();
-		}
 	};
 
 	//This function is called by SpiderGL at regular intervals to determine if a redraw of the 
@@ -296,20 +306,26 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				this.needDraw = true;
 		}
 		return this.needDraw;
-	};
-
+	};	
+	
 	/**
-	 * Instructs the handler to request a redraw of the scene. SpiderGL will start the
-	 * redraw process the next time it calls XML3DHandler.prototype.update()
-	 * 
-	 * @param reason
+	 * Called by SpiderGL to redraw the scene
+	 * @param gl
 	 * @return
 	 */
-	XML3DHandler.prototype.redraw = function(reason) {
-		//if (reason)
-		//	console.log(reason);
-		this.needDraw = true;
-		this.needPickingDraw = true;
+	XML3DHandler.prototype.draw = function(gl) {
+		try {
+			this.needDraw = false;
+			var start = Date.now();
+			var stats = this.renderer.render();
+			var end = Date.now();
+			
+			this.dispatchFrameDrawnEvent(start, end, stats);
+		} catch (e) {
+			org.xml3d.debug.logException(e);
+			throw e;
+		}
+
 	};
 
 	/**
@@ -514,26 +530,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		}
 		
 	};
-	
-	/**
-	 * Called by SpiderGL to redraw the scene
-	 * @param gl
-	 * @return
-	 */
-	XML3DHandler.prototype.draw = function(gl) {
-		try {
-			this.needDraw = false;
-			var start = Date.now();
-			var stats = this.renderer.render();
-			var end = Date.now();
-			
-			this.dispatchFrameDrawnEvent(start, end, stats);
-		} catch (e) {
-			org.xml3d.debug.logException(e);
-			throw e;
-		}
-
-	};
 
 	/**
 	 * Add a new event listener to a node inside the XML3D scene structure.
@@ -591,6 +587,15 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		}
 	};
 	
+	//Destroys the renderer associated with this Handler
+	XML3DHandler.prototype.shutdown = function(scene) {
+		var gl = this.gl;
+
+		if (this.renderer) {
+			this.renderer.dispose();
+		}
+	};
+	
 	return setupXML3DHandler;
 })();
 
@@ -635,7 +640,7 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.drawableObjects = [];
 	this.zPos = [];
 	
-	this.collectDrawableObjects(new sglM4(), this.drawableObjects, this.lights, null);
+	this.collectDrawableObjects(new sglM4(), this.drawableObjects, this.lights, null, true);
 };
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
@@ -656,10 +661,10 @@ org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 };
 
 org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
-		objects, lights, shader) {
+		objects, lights, shader, visible) {
 	var adapter = this.factory.getAdapter(this.scene.xml3d, org.xml3d.webgl.Renderer.prototype);
 	if (adapter)
-		return adapter.collectDrawableObjects(transform, objects, lights, shader);
+		return adapter.collectDrawableObjects(transform, objects, lights, shader, visible);
 	return [];
 };
 
@@ -677,6 +682,7 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 	
 	//Traverse parent nodes to build any inherited shader and transform elements
 	var transform = adapter.applyTransformMatrix(new sglM4());
+	var visible = true;
 	var shader = null;	
 	if (adapter.getShader)
 		shader = adapter.getShader();
@@ -695,10 +701,12 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 			transform = parentAdapter.applyTransformMatrix(transform);
 			if (!shader)
 				shader = parentAdapter.getShader();
+			if (currentNode.getAttribute("visible") == "false")
+				visible = false;
 		}
 	}
 
-	adapter.collectDrawableObjects(transform, this.drawableObjects, this.lights, shader);
+	adapter.collectDrawableObjects(transform, this.drawableObjects, this.lights, shader, visible);
 	this.requestRedraw("A node was added.");
 	
 };
@@ -787,22 +795,6 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 	var start = Date.now() / 1000.0;
 	
-	//Gather all objects in the scene and the information needed to render them
-	//This will only be redone if the scene structure has changed since the 
-	//last rendering pass
-	/*if (this.drawableObjects === undefined || !this.drawableObjects ||
-			this.lights === undefined || !this.lights) {
-		this.handler.needPickingRedraw = true;
-		this.drawableObjects = [];
-		this.lights = new Array();
-		this.collectDrawableObjects(new sglM4(),
-				this.drawableObjects, this.lights, null);
-	}*/
-
-	var end = Date.now() / 1000.0;
-	//console.log("Traversal Time:" + (end-start));
-	start = end;
-
 	var xform = new SglTransformStack();
 	xform.view.load(this.camera.getViewMatrix());
 	var projMatrix = this.camera
@@ -854,7 +846,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		return a[1] - b[1];
 	});
 
-	end = Date.now() / 1000.0;
+	var end = Date.now() / 1000.0;
 	//console.log("Sort Time:" + (end-start));
 	start = end;
 	
@@ -865,6 +857,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		var transform = obj._transform;
 		var shape = obj;
 		var shader = obj._shader;
+		
+		if (shape._visible == false)
+			continue;
 
 		sp = null;
 		xform.model.load(transform);
@@ -905,6 +900,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		parameters["modelViewMatrix"] = xform.modelViewMatrix;
 		parameters["modelViewProjectionMatrix"] = xform.modelViewProjectionMatrix;
 		parameters["normalMatrix"] = xform.viewSpaceNormalMatrix;
+		parameters["cameraPosition"] = xform.modelSpaceViewerPosition;
 
 		if (shader)
 		{
@@ -1201,7 +1197,7 @@ org.xml3d.webgl.RenderAdapter.prototype.getShader = function() {
 //};
 
 org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
-		transform, outMeshes, outLights, parentShader) {
+		transform, outMeshes, outLights, parentShader, visible) {
 	var adapter = this.factory.getAdapter(this.node, org.xml3d.webgl.Renderer.prototype);
 	if (adapter._parentShader !== undefined)
 		adapter._parentShader = parentShader;
@@ -1209,6 +1205,7 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 	for ( var i = 0; i < this.node.childNodes.length; i++) {
 		if (this.node.childNodes[i]) {
 			var currNode = this.node.childNodes[i];
+			var isVisible = visible;
 			var childAdapter = this.factory.getAdapter(this.node.childNodes[i], org.xml3d.webgl.Renderer.prototype);
 			if (childAdapter) {
 				var childTransform = childAdapter.applyTransformMatrix(transform);
@@ -1218,8 +1215,10 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 				if (adapter.listeners) {
 					adapter.listeners.push(childAdapter);
 				}
+				if (currNode.getAttribute("visible") == "false")
+					isVisible = false;
 				
-				childAdapter.collectDrawableObjects(childTransform, outMeshes, outLights, shader);
+				childAdapter.collectDrawableObjects(childTransform, outMeshes, outLights, shader, isVisible);
 			}
 		}
 	}
@@ -1402,10 +1401,17 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textureInfo, name) {
 
 	//See if this texture already exists
-	for (var t in this.textures) {
-		var tex = this.textures[t];
-		if (tex.name == name && tex.src == textureInfo.src)
-			return;
+	for (var i=0; i<this.textures.length; i++) {
+		var tex = this.textures[i];
+		if (tex.name == name) {
+			if (tex.src = textureInfo.src[0])
+				return;
+			else {
+				tex.tex.destroy();
+				this.textures.splice(i,1);
+				break;
+			}
+		}	
 	}
 	var gl = this.factory.handler.gl;
 	//org.xml3d.webgl.checkError(gl, "Error before creating texture:");
@@ -1413,8 +1419,10 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	var texture = null;
 	var options = textureInfo.options;
 	var textureSrc = textureInfo.src;
+	
+	options["onload"] = this.factory.handler.redraw;
 
-	texture = new SglTexture2D(gl, textureInfo.src, options);
+	texture = new SglTexture2D(gl, textureInfo.src[0], options);
 	//org.xml3d.webgl.checkError(gl, "Error after creating texture:" + textureSrc);
 
 	if (!texture) {
@@ -1424,12 +1432,59 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	//Create a container for the texture
 	var texContainer = ({
 		name 	: name,
-		src 		: textureSrc,
-		tex 		: texture
+		src 	: textureSrc,
+		tex 	: texture
 	});
 
 	this.textures.push(texContainer);
 
+};
+
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTextureCube = function(textureInfo, name) {
+	//See if this texture already exists
+	var tex = null;
+	for (var i=0; i<this.textures.length; i++) {
+		var temp = this.textures[i];
+		if (temp.name == name) {
+			tex = temp;
+			break;
+		}
+	}
+	//Check if texture sources have changed
+	//TODO: Handle src changes better so this step isn't necessary
+	if (tex != null) {
+		for (var j=0; j<tex.src.length; j++) {
+			if (tex.src[j] != textureInfo.src[j]) {
+				tex.tex.destroy();
+				this.textures.splice(i,1);
+				break;
+			}
+		}
+		return;
+	}
+	
+	var gl = this.factory.handler.gl;
+	var texture = null;
+	var options = textureInfo.options;
+	var textureSrcs = textureInfo.src;
+	
+	options["onload"] = this.factory.handler.redraw;
+	
+	texture = new SglTextureCube(gl, textureSrcs, options);
+	
+	if (!texture) {
+		org.xml3d.debug.logError("Could not create cube map for " + name);
+		return;
+	}
+	
+	//Create a container for the texture
+	var texContainer = ({
+		name 	: name,
+		src 	: textureSrcs,
+		tex 	: texture
+	});
+
+	this.textures.push(texContainer);
 };
 
 
@@ -1479,7 +1534,10 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 	{
 		var data = sParams[p].data;
 		if (sParams[p].isTexture) {
-			this.initTexture(sParams[p], p);
+			if (sParams[p]["src"].length > 1)
+				this.initTextureCube(sParams[p], p);
+			else
+				this.initTexture(sParams[p], p);
 			continue;
 		}
 
@@ -1574,15 +1632,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 			downstreamValue = this._parentShader;
 		else
 			downstreamValue = this.shader;
-		
-		for (var i=0; i<this.listeners.length; i++) {
-			if (this.listeners[i].isValid)
-				this.listeners[i].internalNotifyChanged(evt.attribute, downstreamValue);
-			else {
-				this.listeners.splice(i, 1);
-				i--;
-			}
-		}
+		this.notifyListeners(evt.attribute, downstreamValue);
 		
 		this.factory.renderer.requestRedraw("Group shader changed.");
 	}
@@ -1592,15 +1642,12 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 		downstreamValue = sglMulM4(adapter.getMatrix(), this._parentTransform);
-		for (var i=0; i<this.listeners.length; i++) {
-			if (this.listeners[i].isValid)
-				this.listeners[i].internalNotifyChanged("parenttransform", downstreamValue);
-			else {
-				this.listeners.splice(i, 1);
-				i--;
-			}
-		}
+		this.notifyListeners("parenttransform", downstreamValue);
 		this.factory.renderer.requestRedraw("Group transform changed.");
+	}
+	else if (evt.attribute == "visible") {		
+		this.notifyListeners("visible", evt.newValue);
+		this.factory.renderer.requestRedraw("Group visibility changed.");
 	}
 };
 
@@ -1637,17 +1684,24 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = functi
 		this._parentShader = newValue;
 		if (this.shader)
 			return; //this group node's shader overrides the parent shader for all its children, so we're done
+	} else if (what == "visible") {
+		downstreamValue = newValue;
 	}
 	
-	for (var i=0; i<this.listeners.length; i++) {
-		if (this.listeners[i].isValid)
-			this.listeners[i].internalNotifyChanged(what, downstreamValue);
-		else {
-			this.listeners.splice(i, 1);
-			i--;
-		}
-	}
+	this.notifyListeners(what, downstreamValue);
 };
+
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyListeners = function(what, newValue) {
+	for (var i=0; i<this.listeners.length; i++) {
+			if (this.listeners[i].isValid)
+				this.listeners[i].internalNotifyChanged(what, newValue);
+			else {
+				this.listeners.splice(i, 1);
+				i--;
+			}
+		}
+};
+
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 {
@@ -1768,23 +1822,25 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAda
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
-		transform, outMeshes, outLights, shader) {
+		transform, outMeshes, outLights, shader, visible) {
 	if (this.meshIsValid) {
 		this._transform = transform;
 		this._shader = shader;
 		outMeshes.push( this );
+		this._visible = visible;
 	}
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.eventType == MutationEvent.REMOVAL)
 		this.factory.renderer.sceneTreeRemoval(e);
-	if (e.attribute == "src") {
+	else if (e.attribute == "src") {
 		this.loadedMesh = false;
-		
 	}
+	else if (e.attribute == "visible")
+		this._visible = e.newValue;
 
-	this.factory.renderer.requestRedraw("Mesh src changed.");
+	this.factory.renderer.requestRedraw("Mesh attribute was changed.");
 	
 };
 
@@ -1793,6 +1849,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.internalNotifyChanged = functio
 		this._transform = newValue;
 	else if (what == "shader")
 		this._shader = newValue;
+	else if (what == "visible")
+		this._visible = newValue;
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
@@ -1823,7 +1881,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	var elements = null;
 
 	var samplers = {};
-	var invalidTextures = false;
 	if (shader.textures !== undefined && shader.textures.length > 0)
 	{
 
@@ -1834,16 +1891,9 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 				samplers[temp.name] = temp.tex;
 			else {
 				samplers[temp.name] = shader.errorTexture;
-				invalidTextures = true;
 			}
 		}
 	}
-	if (invalidTextures)
-	{
-		//We should redraw in case the texture is still loading
-		this.factory.handler.redraw("Invalid texture.");
-	}
-
 
 	//org.xml3d.webgl.checkError(gl, "Error before starting render.");
 
@@ -1852,9 +1902,24 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		var meshParams = this.dataAdapter.createDataTable();
 		var mIndicies = new Uint16Array(meshParams.index.data);
 		this.mesh.addIndexedPrimitives("triangles", gl.TRIANGLES, mIndicies);
+		
+		/*if (meshParams.xflow) {
+			if (shader.applyXFlowShader(meshParams.xflow)) {
+				
+			}
+		}*/
+		
 		for (var p in meshParams) {
 			if (p == "index")
 				continue;
+			
+			if (p == "xflow") {
+				if (shader.applyXFlowShader(meshParams[p])) 
+					continue;
+				
+				continue;
+			}
+			
 			var parameter = meshParams[p];
 			this.mesh.addVertexAttribute(p, parameter.tupleSize, parameter.data);
 		}
@@ -1878,25 +1943,33 @@ org.xml3d.webgl.XML3DLightRenderAdapter = function(factory, node) {
 	this.position = null;
 	this.attenuation = null;
 	this.intensity = null;
-	this.visible = null;
+	this._visible = null;
 	this.isValid = true;
 };
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DLightRenderAdapter;
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.collectDrawableObjects = function(
-		transform, outMeshes, outLights, shader) {
+		transform, outMeshes, outLights, shader, visible) {
 	outLights.push( [ transform, this ]);
 	this._transform = transform;
+	this._visible = visible;
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.notifyChanged = function(e) {
-	this[e.attribute] = null;
+	if (e.attribute == "visible")
+		this._visible = e.newValue;
+	else
+		this[e.attribute] = null;
+	
+	this.factory.handler.redraw("Light attribute changed.");	
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.internalNotifyChanged = function(what, newValue) {
 	if (what == "transform" || what == "parenttransform")
 		this._transform = newValue;
+	else if (what == "visible")
+		this._visible = newValue;
 };
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(modelViewMatrix) {
@@ -1916,8 +1989,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 	}
 	var params = this.dataAdapter.createDataTable();
 
-	var visible = this.node.getAttribute("visible");
-	if (visible === null || visible == "true")
+	if (this._visible)
 		var visibility = [1.0, 1.0, 1.0];
 	else
 		var visibility = [0.0, 0.0, 0.0];
@@ -2088,7 +2160,7 @@ g_shaders["urn:xml3d:shader:phong"] = {
 
 			+"void main(void) {\n"
 			+"	if (MAXLIGHTS < 1) {\n"
-			+"      vec3 light = -fragEyeVector;\n"
+			+"      vec3 light = -normalize(fragVertexPosition);\n"
 			+"      vec3 normal = fragNormal;\n"
 			+"      vec3 eye = fragEyeVector;\n"
 			+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
@@ -2173,7 +2245,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 
 			+"void main(void) {\n"
 			+"	if (MAXLIGHTS < 1) {\n"
-			+"      vec3 light = normalize(-fragVertexPosition);\n"
+			+"      vec3 light = -normalize(fragVertexPosition);\n"
 			+"      vec3 normal = fragNormal;\n"
 			+"      vec3 eye = fragEyeVector;\n"
 			+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
@@ -2260,7 +2332,7 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 
 				+"void main(void) {\n"
 				+"	if (MAXLIGHTS < 1) {\n"
-				+"      vec3 light = -fragEyeVector;\n"
+				+"      vec3 light = -normalize(fragVertexPosition);\n"
 				+"      vec3 normal = fragNormal;\n"
 				+"      vec3 eye = fragEyeVector;\n"
 				+"      float diffuse = max(0.0, dot(normal, light)) ;\n"
@@ -2862,6 +2934,13 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 		srcElement = this.factory.getAdapter(srcElement);
 		dataTable  = srcElement.createDataTable();
 	}
+	
+	if (this.node.localName == "data") {
+		var script = this.node.getScriptNode();
+		if(script) {
+			dataTable["xflow"] = script;
+		}
+	}
 
 	this.dataTable = dataTable;
 
@@ -3116,13 +3195,8 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 	};
 	
 	var node = this.node;
-	var textureChild = node.firstElementChild;
-	if(textureChild.localName != "img")
-	{
-		org.xml3d.debug.logWarning("child of texture element is not an img element");
-		return null;
-	}
-
+	var imgSrc = new Array();
+	
 	// TODO: Sampler options
 	var options = ({
 		/*Custom texture options would go here, SGL's default options are:
@@ -3145,6 +3219,32 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 		generateMipmap   : false
 		
 	});	
+	
+	if (node.hasAttribute("textype") && node.getAttribute("textype") == "cube") {
+		for (var i=0; i<node.childNodes.length; i++) {
+			var child = node.childNodes[i];
+			if (child.localName != "img")
+				continue;
+			imgSrc.push(child.src);
+		}
+		
+		if (imgSrc.length != 6) {
+			org.xml3d.debug.logError("A cube map requires 6 textures, but only "+imgSrc.length+" were found!");
+			return null;
+		}
+		options["flipY"] = false;
+		
+	} else {
+		var textureChild = node.firstElementChild;
+		if(textureChild.localName != "img")
+		{
+			org.xml3d.debug.logWarning("child of texture element is not an img element");
+			return null;
+		}
+		imgSrc.push(textureChild.src);
+	}
+
+	
 	var result 			 = new Array(1);
 	//var value = new SglTexture2D(gl, textureSrc, options);
 	var name    		 = this.node.name;
@@ -3152,7 +3252,7 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 	content['tupleSize'] = 1;
 	
 	content['options'] = options;
-	content['src'] = textureChild.src;
+	content['src'] = imgSrc;
 	content['isTexture'] = true;
 	
 	result[name]    = content;

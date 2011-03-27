@@ -651,7 +651,13 @@ org.xml3d.initBoolean = function(value, defaultValue) {
 */
 
 org.xml3d.initBoolean = function(value, defaultValue) {
-        return !!value;
+    if (value === undefined || value == "")
+		return defaultValue;
+	
+	if (typeof value == typeof "") {
+		return value == "true" ? true : false;
+	}
+    return !!value;
 };
 
 org.xml3d.initXML3DVec3 = function(value, x, y, z) {

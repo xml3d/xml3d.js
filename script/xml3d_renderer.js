@@ -1209,6 +1209,9 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 			var childAdapter = this.factory.getAdapter(this.node.childNodes[i], org.xml3d.webgl.Renderer.prototype);
 			if (childAdapter) {
 				var childTransform = childAdapter.applyTransformMatrix(transform);
+				if (childAdapter._parentTransform !== undefined) {
+					childAdapter._parentTransform = transform;
+				}
 				var shader = childAdapter.getShader();
 				if (!shader)
 					shader = parentShader;
@@ -1605,7 +1608,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
 	if (this._parentTransform !== null)
-		transform = sglMulM4(transform, this._parentTransform);
+		return sglMulM4(transform, this._parentTransform);
 	
 	if (this._transformAdapter)
 		return sglMulM4(transform, this._transformAdapter.getMatrix());

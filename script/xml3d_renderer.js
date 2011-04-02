@@ -1939,13 +1939,20 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 };
 
 
-
 // Adapter for <light>
 org.xml3d.webgl.XML3DLightRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.position = null;
-	this.attenuation = null;
 	this.intensity = null;
+	
+	var intensityAttribute = node.getAttribute("intensity");
+	if (intensityAttribute) {
+		try {
+			var int = parseInt(intensityAttribute);
+			this.intensity = int;
+		} catch (e) {org.xml3d.debug.logWarning("Could not parse light intensity attribute ' "+intensityAttribute+" '"); }
+	}
+	
 	this._visible = null;
 	this.isValid = true;
 };
@@ -1962,8 +1969,12 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.collectDrawableObjects = funct
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.attribute == "visible")
 		this._visible = e.newValue;
-	else
-		this[e.attribute] = null;
+	else if (e.attribute == "intensity") {
+		if (!isNaN(e.newValue))
+			this.intensity = e.newValue;
+		else
+			org.xml3d.debug.logError("Invalid parameter for light intensity attribute: NaN");
+	}
 	
 	this.factory.handler.redraw("Light attribute changed.");	
 };
@@ -2017,7 +2028,12 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 		}
 		aParams[p] = params[p].data;
 	}
-
+	
+	if (this.intensity !== null) {
+		var i = aParams.intensity;
+		aParams.intensity = [i[0]*this.intensity, i[1]*this.intensity, i[2]*this.intensity];
+	}
+	
 	return aParams;
 };
 

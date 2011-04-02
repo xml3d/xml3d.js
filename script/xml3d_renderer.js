@@ -38,6 +38,12 @@ if (!org.xml3d.webgl)
 else if (typeof org.xml3d.webgl != "object")
 	throw new Error("org.xml3d.webgl already exists and is not an object");
 
+//Create global symbol org.xml3d.xflow
+if (!org.xml3d.xflow)
+	org.xml3d.xflow = {};
+else if (typeof org.xml3d.xflow != "object")
+	throw new Error("org.xml3d.xflow already exists and is not an object");
+
 
 org.xml3d.webgl.supported = function() {
 	var canvas = document.createElement("canvas");
@@ -2941,7 +2947,7 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 
 	var srcElement = this.node.getSrcNode();
 	var dataTable;
-
+	
 	if(srcElement == null)
 	{
 		dataTable = this.getDataFromChildren();
@@ -2952,15 +2958,22 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 		// and ignore the element's content
 		srcElement = this.factory.getAdapter(srcElement);
 		dataTable  = srcElement.createDataTable();
-	}
+	}	
 	
+	//Check for xflow scripts
 	if (this.node.localName == "data") {
 		var script = this.node.getScriptNode();
-		if(script) {
-			dataTable["xflow"] = script;
+		if(script) {	
+			var type = script.value.toLowerCase();
+			if (org.xml3d.xflow[type]) {
+				org.xml3d.xflow[type](dataTable);
+			}
+			else
+				org.xml3d.debug.logError("Unknown XFlow script '"+script.value+"'.");
+
 		}
 	}
-
+	
 	this.dataTable = dataTable;
 
 	return dataTable;
@@ -3117,7 +3130,6 @@ org.xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewIn
 	var content          = new Array();
 	content['tupleSize'] = this.getTupleSize();
 
-	result[name]    = content;
 	content['data'] = value;
 	result[name]    = content;
 	this.dataTable  = result;
@@ -3287,4 +3299,280 @@ org.xml3d.webgl.TextureDataAdapter.prototype.toString = function()
 	return "org.xml3d.webgl.TextureDataAdapter";
 };
 /***********************************************************************/
+
+org.xml3d.xflow.plane = function(dataTable) {
+	var segments = dataTable.segments;
+	segments = segments !== undefined && segments.data ? segments.data[0] : 1;	
+	if (segments <= 0)
+		return;
+	
+	var numVertices = (segments+1)*(segments+1);
+	var numIndices = (segments*segments) * 6;
+	var index = new Int32Array(numIndices); 
+	var position = new Float32Array(numVertices*3); 
+	var normal = new Float32Array(numVertices*3); 
+	var texcoord = new Float32Array(numVertices*2);
+	
+	var quadLength = 2 / segments;
+	
+	for (var i=0; i<segments+1; i++)
+	for (var j=0; j<segments+1; j++) {
+		var x = -1.0 + i*quadLength;
+		var y = -1.0 + j*quadLength;
+		var u = i / segments;
+		var v = j / segments;
+		var ind = j * (segments+1) + i;
+		
+		position.set([x, 0, y], ind*3);
+		normal.set([0,1,0], ind*3);
+		texcoord.set([u,v], ind*2);		
+	}
+	
+	var quadIndex = 0;
+	
+	for (var i=0; i<segments; i++)
+	for (var j=0; j<segments; j++) {
+		var i0 = j * (segments+1) + i;
+		var i1 = i0 + 1;
+		var i2 = (j+1) * (segments+1) + i;
+		var i3 = i2 + 1;
+		
+		index.set([i0, i1, i2, i2, i1, i3], quadIndex);
+		quadIndex += 6;
+	}
+
+	dataTable.index = { data : index, tupleSize : 1 };
+	dataTable.position = { data : position, tupleSize : 3};
+	dataTable.normal = { data : normal, tupleSize : 3 };
+	dataTable.texcoord = { data : texcoord, tupleSize : 2 };		
+};
+
+org.xml3d.xflow.box = function(dataTable) {
+	var segments = dataTable.segments;
+	var size = dataTable.size;
+	segments = segments !== undefined && segments.data ? segments.data[0] : 1;
+	size = size !== undefined && size.data ? size.data[0] : 2.0;
+	
+	if (segments <= 0 || size <= 0)
+		return;
+	
+	var halfSize = size / 2.0;
+	var numTrianglesPerFace = segments * segments * 2;
+	var numIndicesPerFace = numTrianglesPerFace * 3;
+	var numIndices = numIndicesPerFace * 6;
+	var numVerticesPerFace = (segments+1)*(segments+1);
+	var numVertices = numVerticesPerFace * 6;
+	
+	var quadLength = size / segments;
+	var index = new Int32Array(numIndices); 
+	var position = new Float32Array(numVertices*3); 
+	var normal = new Float32Array(numVertices*3); 
+	var texcoord = new Float32Array(numVertices*2);
+	
+	var faceNormals = [ [0,-1,0],
+	                    [0,1,0],
+	                    [-1,0,0],
+	                    [1,0,0],
+	                    [0,0,-1],
+	                    [0,0,1]
+	                  ];
+	
+	for (var k=0; k<6; k++) {
+		for (var i=0; i<segments+1; i++)
+		for (var j=0; j<segments+1; j++) {
+			var x = -halfSize + i*quadLength;
+			var y = -halfSize + j*quadLength;
+			
+			var ind = j * (segments+1) + i + k*numVerticesPerFace;
+			
+			var u = i/segments;
+			var v = j/segments;
+			
+			switch (k) {
+			case 0:
+				position.set([x, -halfSize, y], ind*3); break;
+			case 1:
+				position.set([x, halfSize, y], ind*3); break;
+			case 2:
+				position.set([-halfSize, x, y], ind*3); break;
+			case 3:
+				position.set([halfSize, x, y], ind*3); break;
+			case 4:
+				position.set([x, y, -halfSize], ind*3); break;
+			case 5:
+				position.set([x, y, halfSize], ind*3); break;
+			}
+			
+			normal.set(faceNormals[k], ind*3);
+			texcoord.set([u, v], ind*2);			
+		}	
+	}
+	
+	var quadIndex = 0;
+	
+	for (var k=0; k<6; k++) {
+		for (var i=0; i<segments; i++)
+		for (var j=0; j<segments; j++) {
+			var i0 = j * (segments+1) + i + k*numVerticesPerFace;
+			var i1 = i0 + 1;
+			var i2 = (j+1) * (segments+1) + i + k*numVerticesPerFace;
+			var i3 = i2 + 1;
+			
+			index.set([i0, i1, i2, i2, i1, i3], quadIndex);
+			quadIndex += 6;
+		}
+	}
+	
+	dataTable.index = { data : index, tupleSize : 1 };
+	dataTable.position = { data : position, tupleSize : 3};
+	dataTable.normal = { data : normal, tupleSize : 3 };
+	dataTable.texcoord = { data : texcoord, tupleSize : 2 };                   
+};
+
+org.xml3d.xflow.sphere = function(dataTable) {
+	var segments = dataTable.segments;
+	segments = segments !== undefined && segments.data ? segments.data[0] : 1;
+	
+	if (segments <= 0)
+		return;
+	
+	var numTriangles = segments * segments * 2;
+	var numIndices = numTriangles * 3;
+	var numVertices = (segments+1)*(segments+1);
+
+	var index = new Int32Array(numIndices); 
+	var position = new Float32Array(numVertices*3); 
+	var normal = new Float32Array(numVertices*3); 
+	var texcoord = new Float32Array(numVertices*2);
+	
+	for (var i=0; i<segments+1; i++)
+	for (var j=0; j<segments+1; j++) {
+		var u = i/segments;
+		var v = j/segments;
+		
+		var theta = u*Math.PI;
+		var phi = v*Math.PI*2;
+		
+		var x = Math.sin(theta) * Math.cos(phi);
+		var y = Math.cos(theta);
+		var z = -Math.sin(theta) * Math.sin(phi);
+		
+		var ind = j * (segments+1) + i;
+		var n = new XML3DVec3(x,y,z).normalize();
+		
+		position.set([x,y,z], ind*3);
+		normal.set([n.x, n.y, n.z], ind*3);
+		texcoord.set([v, 1-u], ind*2);
+	}
+	
+	var quadIndex = 0;
+	
+	for (var i=0; i<segments; i++)
+	for (var j=0; j<segments; j++) {
+		var i0 = j * (segments+1) + i;
+		var i1 = i0 + 1;
+		var i2 = (j+1) * (segments+1) + i;
+		var i3 = i2 + 1;
+		
+		index.set([i0, i1, i2, i2, i1, i3], quadIndex);
+		quadIndex += 6;
+	}
+
+	dataTable.index = { data : index, tupleSize : 1 };
+	dataTable.position = { data : position, tupleSize : 3};
+	dataTable.normal = { data : normal, tupleSize : 3 };
+	dataTable.texcoord = { data : texcoord, tupleSize : 2 };
+};
+
+org.xml3d.xflow.cylinder = function(dataTable) {
+	var segments = dataTable.segments;
+	segments = segments !== undefined && segments.data ? segments.data[0] : 1;
+	
+	if (segments <= 0)
+		return;
+	
+	var numTrianglesCap = segments - 2;
+	var numTrianglesSide = segments*segments * 2;
+	var numTriangles = numTrianglesSide + 2*numTrianglesCap;
+	var numIndices = numTriangles * 3;
+	
+	var numVerticesCap = segments;
+	var numVerticesSide = (segments+1)*(segments+1);
+	var numVertices = numVerticesSide + numVerticesCap*2;
+	
+	var index = new Int32Array(numIndices); 
+	var position = new Float32Array(numVertices*3); 
+	var normal = new Float32Array(numVertices*3); 
+	var texcoord = new Float32Array(numVertices*2);
+	
+	//Create vertices for body
+	for (var i=0; i<segments+1; i++)
+	for (var j=0; j<segments+1; j++) {
+		var u = i/segments;
+		var v = j/segments;
+		
+		var x = Math.sin(u * 2 * Math.PI);
+		var y = Math.cos(u * 2 * Math.PI);
+		var z = (v - 0.5)*2;
+		
+		var ind = j * (segments+1) + i;
+		var n = new XML3DVec3(x,0,y).normalize();
+		
+		position.set([x,z,y], ind*3);
+		normal.set([n.x, n.y, n.z], ind*3);
+		texcoord.set([u,v], ind*2);
+	}
+	
+	//Create vertices for caps
+	for( var k=0; k<2; k++)
+    for( var i=0; i<segments; i++) {
+    	var u = i/segments;
+		
+    	var x = Math.sin(u * 2 * Math.PI);
+		var y = Math.cos(u * 2 * Math.PI);
+		var z = (k - 0.5)*2;
+		
+		var ind = i + k*numVerticesCap + numVerticesSide;
+		
+		position.set([x,z,y], ind*3);
+		if (k==1)
+			normal.set([0,-1,0], ind*3);
+		else
+			normal.set([0,1,0], ind*3);
+		texcoord.set([x,y], ind*2);
+    }
+	
+	var quadIndex = 0;
+	
+	//Create triangles for body
+	for (var i=0; i<segments; i++)
+	for (var j=0; j<segments; j++) {
+		var i0 = j * (segments+1) + i;
+		var i1 = i0 + 1;
+		var i2 = (j+1) * (segments+1) + i;
+		var i3 = i2 + 1;
+		
+		index.set([i0, i1, i2, i2, i1, i3], quadIndex);
+		quadIndex += 6;
+	}
+	
+	//Create triangles for caps
+	for( var k=0; k<2; k++)
+    for( var i=0; i<(segments-2); i++) {
+    	var i0 = numVerticesSide + k*numVerticesCap;
+    	var i1 = i0 + i + 1;
+    	var i2 = i1 + 1;
+    	
+    	index.set([i0,i1,i2], quadIndex);
+    	quadIndex += 3;
+    }
+	
+	dataTable.index = { data : index, tupleSize : 1 };
+	dataTable.position = { data : position, tupleSize : 3};
+	dataTable.normal = { data : normal, tupleSize : 3 };
+	dataTable.texcoord = { data : texcoord, tupleSize : 2 };
+};
+
+
+
 

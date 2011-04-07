@@ -113,15 +113,12 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	// Create canvas and append it where the xml3d element was before
 	var canvas = parent.ownerDocument.createElement('canvas');
 	parent.insertBefore(canvas, hideDiv);
-	if (xml3dElement.hasAttribute("style"))
-		canvas.setAttribute("style", xml3dElement.getAttribute("style"));
-
-	var classString = "xml3d-canvas-style";
-	if (xml3dElement.hasAttribute("class"))
-		classString = xml3dElement.getAttribute("class") + " " + classString;
-	canvas.setAttribute("class", classString);
 
 	
+	// Try to transfer all CSS attributes from the xml3d element to the canvas element
+	
+	// First set the computed for some important attributes, they might be overwritten 
+	// by class and style attribute later
 	var sides = [ "top", "right", "bottom", "left" ];
 	var colorStr = styleStr = widthStr = paddingStr = "";
 	for (i in sides) {
@@ -134,26 +131,37 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	canvas.style.borderStyle = styleStr;
 	canvas.style.borderWidth = widthStr;
 	canvas.style.padding = paddingStr;
-	canvas.style.cursor = "default";
+	
+	canvas.style.width = org.xml3d.util.getStyle(xml3dElement, "width");
+	canvas.style.height = org.xml3d.util.getStyle(xml3dElement, "height");
+	
+	var bgcolor = org.xml3d.util.getStyle(xml3dElement, "background-color");
+	if (bgcolor && bgcolor != "transparent")
+		canvas.style.backgroundColor = bgcolor;
 
+	// transfer style attribute as it's not in the computed style and has
+	// higher priority
+	if (xml3dElement.hasAttribute("style"))
+		canvas.setAttribute("style", xml3dElement.getAttribute("style"));
+
+	// transfer class attributes and add xml3d-canvas-style for special canvas styling
+	var classString = "xml3d-canvas-style";
+	if (xml3dElement.hasAttribute("class"))
+		classString = xml3dElement.getAttribute("class") + " " + classString;
+	canvas.setAttribute("class", classString);
+
+
+	// Width and height are can also be specified as attributes, then they have
+	// the highest priority
 	if ((w = xml3dElement.getAttribute("width")) !== null) {
 		canvas.style.width = w;
-	} else {
-		canvas.style.width = org.xml3d.util.getStyle(xml3dElement, "width");
-	}
+	} 
 	if ((h = xml3dElement.getAttribute("height")) !== null) {
 		canvas.style.height = h;
-	} else {
-		canvas.style.height = org.xml3d.util.getStyle(xml3dElement, "height");
-	}
+	} 
 	canvas.id = "canvas"+index;
 	canvas.width = canvas.clientWidth;
 	canvas.height = canvas.clientHeight;
-	canvas.style.display = "block";
-	var bgcolor = org.xml3d.util.getStyle(xml3dElement, "background-color");
-	
-	if (bgcolor && bgcolor != "transparent")
-		canvas.style.backgroundColor = bgcolor;
 	
 	return canvas;
 };

@@ -1612,8 +1612,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setParameters = function(para
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.attribute == "script") {
-		if (this.sp)
-			this.sp.destroy();
+		if (this.sp) 
+			this.sp.program.destroy();
 		this.sp = null;
 	} else {
 		org.xml3d.debug.logError("Unhandled change in shader adapter: "+ e.attribute);

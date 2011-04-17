@@ -7562,9 +7562,12 @@ function _SglCanvasManager(canvasID, handler, updateRate) {
 
 	this.load();
 
-	if (updateRate) {
+//-- Added 17.04.11
+	/*if (updateRate) {
 		this.ui.updateRate = updateRate;
-	}
+	}*/
+	_tick();
+//--
 }
 
 _SglCanvasManager.prototype = {
@@ -7579,7 +7582,10 @@ _SglCanvasManager.prototype = {
 	requestDraw : function() {
 		if (!this._drawPending) {
 			this._drawPending = true;
-			setTimeout(this._drawFunc, 0);
+		//-- Added 17.04.11
+			//setTimeout(this._drawFunc, 0);
+			this._drawFunc();
+		//--
 		}
 	},
 
@@ -7893,6 +7899,25 @@ _SglCanvasManager.prototype = {
 };
 /***********************************************************************/
 
+//-- Added 17.04.11
+function _tick() {
+	for (var mgr in _SGL_RegisteredCanvas) {
+		_SGL_RegisteredCanvas[mgr].update();
+	}
+	requestAnimFrame(_tick);
+}
+
+window.requestAnimFrame = (function(){
+    return  window.requestAnimationFrame       || 
+    		window.webkitRequestAnimationFrame || 
+            window.mozRequestAnimationFrame    || 
+            window.oRequestAnimationFrame      || 
+            window.msRequestAnimationFrame     || 
+            function(){
+              window.setTimeout(_tick, 1000 / 30);
+            };
+  })();
+//--
 
 // canvas registration
 /***********************************************************************/

@@ -534,7 +534,7 @@ org.xml3d.XML3DDocument.prototype.onRemove = function(e)
             removedNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
         }
 
-       /*for(var i = 0; i < removedNode.adapters.length; i++)
+        /*for(var i = 0; i < removedNode.adapters.length; i++)
         {
         	var adapter = removedNode.adapters[i];
         	if(adapter.dispose)
@@ -852,6 +852,10 @@ org.xml3d.MeshTypes["triangles"] = 0;
 org.xml3d.MeshTypes[0] = "triangles";
 org.xml3d.MeshTypes["trianglestrips"] = 1;
 org.xml3d.MeshTypes[1] = "triangleStrips";
+org.xml3d.MeshTypes["lines"] = 2;
+org.xml3d.MeshTypes[2] = "lines";
+org.xml3d.MeshTypes["linestrips"] = 3;
+org.xml3d.MeshTypes[3] = "lineStrips";
 // TextureTypes
 org.xml3d.TextureTypes = {};
 org.xml3d.TextureTypes["2d"] = 0;
@@ -1602,6 +1606,9 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		node.createXML3DMatrix = org.xml3d.methods.xml3dCreateXML3DMatrix;
 		node.createXML3DRay = org.xml3d.methods.xml3dCreateXML3DRay;
 		node.getElementByPoint = org.xml3d.methods.xml3dGetElementByPoint;
+		node.generateRay = org.xml3d.methods.xml3dGenerateRay;
+		node.getElementByRay = org.xml3d.methods.xml3dGetElementByRay;
+		node.getBoundingBox = org.xml3d.methods.xml3dGetBoundingBox;
 
 };
 /**
@@ -2738,6 +2745,7 @@ org.xml3d.classInfo.group = function(node, context)
 
 		node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
 		node.getLocalMatrix = org.xml3d.methods.groupGetLocalMatrix;
+		node.getBoundingBox = org.xml3d.methods.groupGetBoundingBox;
 
 };
 /**
@@ -3393,6 +3401,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 	};
 
 		node.getWorldMatrix = org.xml3d.methods.XML3DGraphTypeGetWorldMatrix;
+		node.getBoundingBox = org.xml3d.methods.meshGetBoundingBox;
 
 };
 /**

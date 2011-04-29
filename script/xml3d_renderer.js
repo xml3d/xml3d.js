@@ -215,8 +215,9 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this._pickingDisabled = false;
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
-		this.events = { "mousedown":[], "mouseup":[], "framedrawn":[], "mousemove":[], "mouseout":[], "update":[], "mousewheel":[] };
-		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
+		this.events = { "mousedown":[], "mouseup":[], "click":[], "framedrawn":[], "mousemove":[], 
+				"mouseout":[], "update":[], "mousewheel":[] };
+		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight, index);
 		
 		//Set up internal frame buffers used for picking
 		//SpiderGL requires these buffers to be stored inside the Handler
@@ -331,16 +332,16 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		try {			
 			var start = Date.now();
 			var stats = this.renderer.render();
-			var end = Date.now();			
+			var end = Date.now();	
 			this.dispatchFrameDrawnEvent(start, end, stats);
-			this.needDraw = false;
+			this.needDraw = false;				
 		} catch (e) {
 			org.xml3d.debug.logException(e);
 			throw e;
 		}
 
 	};
-
+	
 	/**
 	 * This method is called by SpiderGL each time a mouseUp event is triggered on the canvas
 	 * 
@@ -350,16 +351,16 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @param y
 	 * @return
 	 */
-	XML3DHandler.prototype.mouseUp = function(gl, button, x, y) {
-
-		this.isDragging = false;
-		this.needPickingDraw = true;
+	XML3DHandler.prototype.mouseUp = function(gl, button, x, y) {	
+		if (this.isDragging)
+			this.needPickingDraw = true;
+		
 		if (button == 0) {
 			this.renderPick(x, y);
 			if (this.scene.xml3d.currentPickObj)
 			{
 				var currentObj = this.scene.xml3d.currentPickObj.node;
-				var evtMethod = currentObj.getAttribute('onclick');
+				var evtMethod = currentObj.getAttribute('onmouseup');
 				if (evtMethod && currentObj.evalMethod) {
 					evtMethod = new Function(evtMethod);
 					evtMethod.call(currentObj);
@@ -370,13 +371,48 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 					while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
 					{
 						currentObj = currentObj.parentNode;
-						evtMethod = currentObj.getAttribute('onclick');
+						evtMethod = currentObj.getAttribute('onmouseup');
 						if (evtMethod && currentObj.evalMethod) {
 							evtMethod = new Function(evtMethod);
 							evtMethod.call(currentObj);
 						}
 					}
 				}
+			}
+			
+			if (!this.isDragging) {
+				//Generate onclick events to meshes
+				if (this.scene.xml3d.currentPickObj)
+				{
+					var currentObj = this.scene.xml3d.currentPickObj.node;
+					var evtMethod = currentObj.getAttribute('onclick');
+					if (evtMethod && currentObj.evalMethod) {
+						evtMethod = new Function(evtMethod);
+						evtMethod.call(currentObj);
+					}
+					//Make sure the event method didn't remove picked object from the tree
+					if (currentObj && currentObj.parentNode)
+					{
+						while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
+						{
+							currentObj = currentObj.parentNode;
+							evtMethod = currentObj.getAttribute('onclick');
+							if (evtMethod && currentObj.evalMethod) {
+								evtMethod = new Function(evtMethod);
+								evtMethod.call(currentObj);
+							}
+						}
+					}
+				}
+				
+				for (var i=0; i<this.events.click.length; i++) {
+					var mue = this.ui.mouseUpEvent;
+					this.events.click[i].listener(mue);
+				}
+			} else {
+				//Mouse has moved between this mouseup event and the corresponding mousedown
+				//so we don't generate onclick events
+				this.isDragging = false;	
 			}
 			
 		}
@@ -397,7 +433,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @return
 	 */
 	XML3DHandler.prototype.mouseDown = function(gl, button, x, y) {
-			this.isDragging = true;
 			var scene = this.scene;
 			if (!scene.xml3d.currentPickPos)
 				return false;
@@ -425,16 +460,18 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @param y
 	 * @return
 	 */
-	XML3DHandler.prototype.mouseMove = function(gl, x, y) {
-		
+	XML3DHandler.prototype.mouseMove = function(gl, x, y) {		
+		if (this.ui.mouseButtonsDown[0]) {
+			this.isDragging = true;
+		}
 		//Call any global mousemove methods, they will receive the mouseMoveEvent as the single argument
 		for (var i in this.events.mousemove) {
 			var mm = this.ui.mouseMoveEvent;
 			this.events.mousemove[i].listener(mm);
 		}
 		
-		if (this.isDragging)
-			return false;
+		//if (this.isDragging)
+		//	return false;
 
 		var lastObj = null;
 		if(this.scene.xml3d.currentPickObj)

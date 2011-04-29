@@ -117,8 +117,13 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	
 	// Try to transfer all CSS attributes from the xml3d element to the canvas element
 	
+	// transfer style attribute as it's not in the computed style and has
+	// higher priority
+	if (xml3dElement.hasAttribute("style"))
+		canvas.setAttribute("style", xml3dElement.getAttribute("style"));
+
 	// First set the computed for some important attributes, they might be overwritten 
-	// by class and style attribute later
+	// by class attribute later
 	var sides = [ "top", "right", "bottom", "left" ];
 	var colorStr = styleStr = widthStr = paddingStr = "";
 	for (i in sides) {
@@ -132,17 +137,16 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	canvas.style.borderWidth = widthStr;
 	canvas.style.padding = paddingStr;
 	
-	canvas.style.width = org.xml3d.util.getStyle(xml3dElement, "width");
-	canvas.style.height = org.xml3d.util.getStyle(xml3dElement, "height");
+	if(!canvas.style.width)
+		canvas.style.width = org.xml3d.util.getStyle(xml3dElement, "width");
+	if(!canvas.style.height)
+		canvas.style.height = org.xml3d.util.getStyle(xml3dElement, "height");
 	
+	if (!canvas.style.backgroundColor) {
 	var bgcolor = org.xml3d.util.getStyle(xml3dElement, "background-color");
 	if (bgcolor && bgcolor != "transparent")
 		canvas.style.backgroundColor = bgcolor;
-
-	// transfer style attribute as it's not in the computed style and has
-	// higher priority
-	if (xml3dElement.hasAttribute("style"))
-		canvas.setAttribute("style", xml3dElement.getAttribute("style"));
+	}
 
 	// transfer class attributes and add xml3d-canvas-style for special canvas styling
 	var classString = "xml3d-canvas-style";

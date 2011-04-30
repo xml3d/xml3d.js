@@ -1057,6 +1057,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 				var transform = obj._transform;
 				var shape = obj;
 				
+				if (obj.isValid == false)
+					continue;
 				xform.model.load(transform);
 
 				var id = 1.0 - (1+j) / 255.0;
@@ -1923,8 +1925,12 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 		this.__defineGetter__("bbox", function() {
 			return this._bbox;
 		});
-
-
+		
+	this.dataType = node.getAttribute("type");
+	if (!this.dataType)
+		this.dataType = "triangles";
+	this.dataType = this.dataType.toLowerCase();
+	this.gltype = this.getGLType(this.dataType);
 };
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
@@ -1972,6 +1978,17 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMetho
 	}
 };
 
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getGLType = function(typeName) {
+	switch (typeName) {
+		case "triangles"	: return gl.TRIANGLES;
+		case "tristrips" 	: return gl.TRIANGLE_STRIP;
+		case "points"		: return gl.POINTS;
+		case "lines"		: return gl.LINES;
+		case "linestrips"	: return gl.LINE_STRIP;
+		default				: return gl.TRIANGLES;
+	}
+};
+
 //Requests a compiled shader object from the given shader node
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.applyXFlowShader = function(shader) {
 	var declarations = this.xflowShader.source.declarations;
@@ -1986,6 +2003,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	if (!this.meshIsValid)
 		return;
 
+	//Create the dataAdapter for this mesh
 	if (!this.dataAdapter && !this.loadedMesh)
 	{
 		var renderer = this.factory.renderer;
@@ -1995,13 +2013,17 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		else
 			org.xml3d.debug.logError("Data adapter for a mesh element could not be created!");
 	}
+	
+	
 	var gl = this.factory.handler.gl;
 	var elements = null;
-
 	var samplers = {};
+	var shaderProgram = shader.sp.program;
+	var meshParams = this.dataAdapter.createDataTable();
+
+	//Populate the samplers container if the shader uses textures
 	if (shader.textures !== undefined && shader.textures.length > 0)
 	{
-
 		for (var t in shader.textures)
 		{
 			var temp = shader.textures[t];
@@ -2017,14 +2039,20 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		this.xflowShader.sp = this.applyXFlowShader(shader).program;
 	}
 
-	//org.xml3d.webgl.checkError(gl, "Error before starting render.");
-	
+	//Create and fill vertex buffer objects for this mesh 
 	if (!this.loadedMesh) {
-		//console.log("Creating Mesh: " + this.node.id);
-		var meshParams = this.dataAdapter.createDataTable();
-		var mIndicies = new Uint16Array(meshParams.index.data);
-		this.mesh.addIndexedPrimitives("triangles", gl.TRIANGLES, mIndicies);
+		if (meshParams.index)
+		{
+			//Indexed primitives
+			var mIndicies = new Uint16Array(meshParams.index.data);
+			this.mesh.addIndexedPrimitives(this.dataType, this.gltype, mIndicies);
+		} else {
+			//Non-indexed primitives
+			this.mesh.addArrayPrimitives(this.dataType, this.gltype, 0, meshParams.position.data.length / 3);
+			this.mesh.primitives = this.dataType;
+		} 
 		
+		//Step through mesh attributes and create their VBOs
 		for (var p in meshParams) {
 			if (p == "index")
 				continue;
@@ -2036,27 +2064,49 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 			var parameter = meshParams[p];
 			this.mesh.addVertexAttribute(p, parameter.tupleSize, parameter.data);
 		}
+		
 		this.loadedMesh = true;
 	}
 
+	//Populate uniforms for the attached XFlow shader, if any
+	if (this.xflowShader) {
+		var meshParams = this.dataAdapter.createDataTable();
+		for (var p in meshParams.xflowShader.uniforms) {
+			var data = meshParams.xflowShader.uniforms[p].data;
+			if (data.length < 2)
+				data = data[0];
+			parameters[p] = data;
+		}
+		shaderProgram = this.xflowShader.sp;
+	}
+	
+	//Draw the object
 	if (this.loadedMesh || meshParams) {
 		//org.xml3d.webgl.checkError(gl, "Error before drawing Elements.");
 	try {
-		if (this.xflowShader) {
-			//Populate the local XFlow shader's uniform parameters
-			var meshParams = this.dataAdapter.createDataTable();
-			for (var p in meshParams.xflowShader.uniforms) {
-				var data = meshParams.xflowShader.uniforms[p].data;
-				if (data.length < 2)
-					data = data[0];
-				parameters[p] = data;
-			}
+		
+		if (this.gltype == gl.POINTS)
+			gl.enable(gl.VERTEX_PROGRAM_POINT_SIZE);
+		
+		if (meshParams.size) {
+			//We're dealing with multiple distinct objects in the same array buffer (eg. groups of LINE_STRIPS)
+			var sizes = meshParams.size.data;
+			var first=0, count=0;
 			
-			sglRenderMeshGLPrimitives(this.mesh, "triangles", this.xflowShader.sp, null, parameters, samplers);
+			for (var i=0; i<sizes.length; i++) {
+				count = sizes[i];
+				sglRenderMeshGLPrimitives(this.mesh, this.dataType, shaderProgram, null, parameters, samplers, first, count);
+				first = first + count;
+			}			
+		} else {
+			sglRenderMeshGLPrimitives(this.mesh, this.dataType, shaderProgram, null, parameters, samplers);
 		}
-		else
-			sglRenderMeshGLPrimitives(this.mesh, "triangles", shader.sp.program, null, parameters, samplers);
+			
 		//org.xml3d.webgl.checkError(gl, "Error after drawing Elements.");
+		
+		if (this.gltype == gl.POINTS)
+			gl.disable(gl.VERTEX_PROGRAM_POINT_SIZE);
+		
 	} catch (e) {
 		org.xml3d.debug.logError("While drawing mesh: "+e);
 	}
@@ -2220,7 +2270,7 @@ org.xml3d.webgl.calculateBoundingBox = function(tArray) {
 
 var g_shaders = {};
 
-g_shaders["urn:xml3d:shader:flat"] = {
+g_shaders["urn:xml3d:shader:matte"] = g_shaders["urn:xml3d:shader:flat"] = {
 	vertex :
 			 "attribute vec3 position;"
 			+ "uniform mat4 modelViewProjectionMatrix;"
@@ -2238,7 +2288,7 @@ g_shaders["urn:xml3d:shader:flat"] = {
 			+ "    gl_FragColor = vec4(diffuseColor.x, diffuseColor.y, diffuseColor.z, 1.0);"
 			+ "}"
 };
-g_shaders["urn:xml3d:shader:flatvcolor"] = {
+g_shaders["urn:xml3d:shader:mattevcolor"] = g_shaders["urn:xml3d:shader:flatvcolor"] = {
 		vertex :
 				 "attribute vec3 position;"
 				+ "attribute vec3 color;"
@@ -3877,6 +3927,36 @@ org.xml3d.xflow.noise = function(dataTable) {
 	delete dataTable.strength;	
 	
 };
+
+org.xml3d.xflow.smoothing = function(dataTable) {
+	//Can't do smoothing in a vertex shader as it's not parallel
 	
-
-
+	var numVertices = dataTable.position.data.length;
+	var numTriangles = dataTable.index.data.length / 3;
+	
+	var newNorm = new Float32Array(numVertices*3); 
+	
+	for (var i = 0; i<numTriangles; i++) {
+		var index0 = dataTable.index.data[i*3];
+		var index1 = dataTable.index.data[i*3+1];
+		var index2 = dataTable.index.data[i*3+2];
+		
+		var pos1 = new XML3DVec3(dataTable.position.data[index0], dataTable.position.data[index0+1],
+				dataTable.position.data[index0+2]);
+		var pos2 = new XML3DVec3(dataTable.position.data[index1], dataTable.position.data[index1+1],
+				dataTable.position.data[index1+2]);
+		var pos3 = new XML3DVec3(dataTable.position.data[index2], dataTable.position.data[index2+1],
+				dataTable.position.data[index2+2]);
+		
+		var norm = (pos2.subtract(pos1)).cross(pos3.subtract(pos1));
+		
+		var n = [norm.x, norm.y, norm.z];
+		
+		newNorm.set(n, index0);
+		newNorm.set(n, index1);
+		newNorm.set(n, index2);
+	}
+	
+	dataTable.normal = { data : newNorm, tupleSize : 3 };
+	
+};

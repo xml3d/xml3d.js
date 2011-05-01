@@ -221,7 +221,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.timeNow   = Date.now() / 1000.0;
 		this.events = { "mousedown":[], "mouseup":[], "click":[], "framedrawn":[], "mousemove":[], 
 				"mouseout":[], "update":[], "mousewheel":[] };
-		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight, index);
+		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
 		
 		//Set up internal frame buffers used for picking
 		//SpiderGL requires these buffers to be stored inside the Handler

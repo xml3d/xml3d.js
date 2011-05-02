@@ -2411,6 +2411,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 
 
 		+"void main(void) {\n"
+		+"    vec2 tex = texcoord;\n"
 		+"    vec3 pos = position;\n"
 		+"    vec3 norm = normal;\n\n //~"
 		
@@ -2418,7 +2419,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 		+"	  fragNormal = normalize(normalMatrix * norm);\n"
 		+"	  fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;\n"
 		+"	  fragEyeVector = normalize(fragVertexPosition);\n"
-		+"    fragTexCoord = texcoord;\n"
+		+"    fragTexCoord = tex;\n"
 		+"}\n",
 
 	fragment:
@@ -3960,3 +3961,32 @@ org.xml3d.xflow.smoothing = function(dataTable) {
 	dataTable.normal = { data : newNorm, tupleSize : 3 };
 	
 };
+
+org.xml3d.xflow.uv = function(dataTable) {
+	
+	if (!dataTable.scale || !dataTable.translate) {
+		org.xml3d.debug.logError("Missing parameters for XFlow UV script!");
+		return;
+	}
+	
+	var sd = "uniform vec2 scale;\n";
+	sd += "uniform vec2 translate;\n";
+	
+	var sb = "tex = tex * scale + translate;\n";
+	
+	if (dataTable.xflowShader) {
+		dataTable.xflowShader.declarations += sd;
+		dataTable.xflowShader.body += sb;
+	} else {
+		dataTable.xflowShader = {};
+		dataTable.xflowShader.body = sb;
+		dataTable.xflowShader.declarations = sd;
+		dataTable.xflowShader.body = sb;
+		dataTable.xflowShader.uniforms = {};		
+	}
+	dataTable.xflowShader.uniforms["scale"] = dataTable.scale;
+	delete dataTable.scale;
+	dataTable.xflowShader.uniforms["translate"] = dataTable.translate;
+	delete dataTable.translate;
+};
+

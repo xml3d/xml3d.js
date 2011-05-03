@@ -412,6 +412,33 @@ org.xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 	this.stopEvent(e);
 };
 
+//-----------------------------------------------------
+//attach/detach of all controllers
+//-----------------------------------------------------
+org.xml3d.Xml3dSceneController.attachAllControllers = function() { 
+	
+	org.xml3d.debug.logInfo("Attaching all active controllers to xml3d elements."); 
+	
+	var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d') );
+	for(var node in xml3dList) {
+		org.xml3d.Xml3dSceneController.controllers[node].attach(); 
+	}
+};
+
+org.xml3d.Xml3dSceneController.detachAllControllers = function() { 
+	
+	org.xml3d.debug.logInfo("Detaching all active controllers from xml3d elements."); 
+	
+	var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d') );
+	for(var node in xml3dList) {
+		org.xml3d.Xml3dSceneController.controllers[node].detach(); 
+	}
+};
+
+//-----------------------------------------------------
+//loading/unloading
+//-----------------------------------------------------
+
 (function() {
 
 	var onload = function() {

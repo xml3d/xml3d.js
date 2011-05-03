@@ -77,6 +77,8 @@ org.xml3d.webgl.configure = function(xml3ds) {
 			XML3DHandler.addEventListener(xml3ds[i], "mousedown", xml3ds[i].getAttribute("onmousedown"), false);
 		if (xml3ds[i].hasAttribute("onmousewheel"))
 			XML3DHandler.addEventListener(xml3ds[i], "mousewheel", xml3ds[i].getAttribute("onmousewheel"), false);
+		if (xml3ds[i].hasAttribute("onclick"))
+			XML3DHandler.addEventListener(xml3ds[i], "click", xml3ds[i].getAttribute("onclick"), false);
 		
 		if (xml3ds[i].hasAttribute("onupdate"))
 			XML3DHandler.addEventListener(xml3ds[i], "update", xml3ds[i].getAttribute("onupdate"), false);
@@ -358,6 +360,17 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	XML3DHandler.prototype.mouseUp = function(gl, button, x, y) {	
 		if (this.isDragging)
 			this.needPickingDraw = true;
+		
+		if (this.ui.mouseUpEvent) {
+			var handler = this;
+			var scene = this.scene;
+			this.ui.mouseUpEvent.__defineGetter__("normal", function() {
+				handler.renderPickedNormals(scene.xml3d.currentPickObj, x, y); 
+				var v = scene.xml3d.currentPickNormal.v;
+				return new XML3DVec3(v[0], v[1], v[2]);
+			});
+			this.ui.mouseUpEvent.__defineGetter__("position", function() {return scene.xml3d.currentPickPos;});
+		}
 		
 		if (button == 0) {
 			this.renderPick(x, y);
@@ -1068,7 +1081,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 						min : volumeMin.v,
 						max : volumeMax.v,
 						modelMatrix : transform,
-					modelViewProjectionMatrix : xform.modelViewProjectionMatrix
+					modelViewProjectionMatrix : xform.modelViewProjectionMatrix,
+					normalMatrix : xform.viewSpaceNormalMatrix
 				};
 				
 				shape.render(shader, parameters);
@@ -1111,7 +1125,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	
 	var parameters = {
 		modelViewMatrix : transform,
-		modelViewProjectionMatrix : xform.modelViewProjectionMatrix
+		modelViewProjectionMatrix : xform.modelViewProjectionMatrix,
+		normalMatrix : xform.viewSpaceNormalMatrix
 	};
 
 	shader = {};
@@ -1332,9 +1347,25 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.removeEventListener = functio
 	this.factory.handler.removeEventListener(this.node, type, listener, useCapture);
 };
 
-org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y) {
-	this.factory.handler.renderPick(x, this.factory.handler.getCanvasHeight() - y - 1);
-	return this.node.currentPickObj.node;
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) {
+	var pickY = this.factory.handler.getCanvasHeight() - y - 1; 
+		this.factory.handler.renderPick(x, pickY);
+		if(hitPoint && this.node.currentPickPos)
+		{
+			hitPoint.x = this.node.currentPickPos.v[0]; 
+			hitPoint.y = this.node.currentPickPos.v[1]; 
+			hitPoint.z = this.node.currentPickPos.v[2]; 
+		}
+		
+		if(hitNormal && this.node.currentPickObj)
+		{
+			this.factory.handler.renderPickedNormals(this.node.currentPickObj, x, pickY);
+			hitNormal.x = this.node.currentPickNormal.v[0];
+			hitNormal.y = this.node.currentPickNormal.v[1]; 
+			hitNormal.z = this.node.currentPickNormal.v[2]; 
+		}
+		
+	 	return this.node.currentPickObj.node;
 };
 
 // Adapter for <view>

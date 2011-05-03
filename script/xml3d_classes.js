@@ -8209,10 +8209,10 @@ org.xml3d.methods.viewLookAt = function(point) {
 	this.setDirection(vector);
 };
 
-org.xml3d.methods.xml3dGetElementByPoint = function(x, y) {
+org.xml3d.methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
 	for (i = 0; i < this.adapters.length; i++) {
 		if (this.adapters[i].getElementByPoint) {
-			return this.adapters[i].getElementByPoint(x, y);
+			return this.adapters[i].getElementByPoint(x, y, hitPoint, hitNormal);
 		}
 	}
 };

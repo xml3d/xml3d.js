@@ -58,7 +58,7 @@ org.xml3d.webgl.supported = function() {
 };
 
 org.xml3d.webgl.configure = function(xml3ds) {
-
+	var handlers = {};
 	for(var i in xml3ds) {
 		// Creates a HTML <canvas> using the style of the <xml3d> Element
 		var canvas = org.xml3d.webgl.createCanvas(xml3ds[i], i);
@@ -80,8 +80,6 @@ org.xml3d.webgl.configure = function(xml3ds) {
 		if (xml3ds[i].hasAttribute("onclick"))
 			XML3DHandler.addEventListener(xml3ds[i], "click", xml3ds[i].getAttribute("onclick"), false);
 		
-		if (xml3ds[i].hasAttribute("onupdate"))
-			XML3DHandler.addEventListener(xml3ds[i], "update", xml3ds[i].getAttribute("onupdate"), false);
 		if (xml3ds[i].hasAttribute("contextmenu") && xml3ds[i].getAttribute("contextmenu") == "false")
 			xml3ds[i].canvas.addEventListener("contextmenu", function(e) {org.xml3d.webgl.stopEvent(e);}, false);
 		if (xml3ds[i].hasAttribute("framedrawn"))
@@ -91,7 +89,16 @@ org.xml3d.webgl.configure = function(xml3ds) {
 			XML3DHandler._pickingDisabled = xml3ds[i].getAttribute("disablepicking") == "true" ? true : false;
 
 		XML3DHandler.start();
+		handlers[i] = XML3DHandler;
 		org.xml3d._rendererFound = true;
+	}
+	
+	//Update listening should be deferred until all canvases are created and configured or it may interfere with the 
+	//configuration process
+	for (var i in xml3ds) {
+		if (xml3ds[i].hasAttribute("onupdate"))
+			handlers[i].addEventListener(xml3ds[i], "update", xml3ds[i].getAttribute("onupdate"), false);
+		
 	}
 };
 
@@ -322,10 +329,11 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	//This function is called by SpiderGL at regular intervals to determine if a redraw of the 
 	//scene is required
 	XML3DHandler.prototype.update = function() {
-		for (var i=0; i<this.events.update.length; i++) {
-			if (this.events.update[i].listener() == true)
+		for (var i=0; i<this.events.update.length; i++) {		
+			if (this.events.update[i].listener.call(this.events.update[i].node) == true)
 				this.needDraw = true;
 		}	
+		
 		return this.needDraw;
 	};	
 	
@@ -424,7 +432,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				
 				for (var i=0; i<this.events.click.length; i++) {
 					var mue = this.ui.mouseUpEvent;
-					this.events.click[i].listener(mue);
+					this.events.click[i].listener.call(this.events.click[i].node, mue);
 				}
 			} else {
 				//Mouse has moved between this mouseup event and the corresponding mousedown
@@ -435,7 +443,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		}
 		for (var i=0; i<this.events.mouseup.length; i++) {
 			var mue = this.ui.mouseUpEvent;
-			this.events.mouseup[i].listener(mue);
+			this.events.mouseup[i].listener.call(this.events.mouseup[i].node, mue);
 		}
 		return false;
 	};
@@ -484,7 +492,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		//Call any global mousemove methods, they will receive the mouseMoveEvent as the single argument
 		for (var i in this.events.mousemove) {
 			var mm = this.ui.mouseMoveEvent;
-			this.events.mousemove[i].listener(mm);
+			this.events.mousemove[i].listener.call(this.events.mousemove[i].node, mm);
 		}
 		
 		//if (this.isDragging)
@@ -578,7 +586,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	XML3DHandler.prototype.mouseOut = function(gl) {
 		for (var i in this.events.mouseout) {
 			var mm = this.ui.mouseMoveEvent;
-			this.events.mouseout[i].listener(mm);
+			this.events.mouseout[i].listener.call(this.events.mouseout[i].node, mm);
 		}
 		return false;
 	};
@@ -586,7 +594,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	XML3DHandler.prototype.mouseWheel = function(gl) {
 		for (var i in this.events.mousewheel) {
 			var mw = this.ui.mouseWheelEvent;
-			this.events.mousewheel[i].listener(mw);
+			this.events.mousewheel[i].listener.call(this.events.mousewheel[i].node, mw);
 		}
 		return false;
 	};
@@ -626,26 +634,13 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		if (type in this.events) {
 			var e = new Object();
 			e.node = node;
-			
-			//For now we will accept a single target method with a single argument
-			//later this can be expanded to include more complex listeners
-			if (typeof listener == typeof "") {
-				var parsed = this.parseListenerString(listener);
-				if (parsed == "" || !window[parsed]) {
-					org.xml3d.debug.logError("Could not parse or find listener { "+listener+" } for event { "+type+" }");
-					return;
-				} else {
-					e.listener = window[parsed];
-				}			
-			} else {
-				e.listener = listener;
-			}
+			e.listener = new Function(listener);
 			e.useCapture = useCapture;
 			this.events[type].push(e);
-		}
+		} 
 	};
 
-
+	//TODO: Remove? May no longer be needed.
 	XML3DHandler.prototype.parseListenerString = function(listener) {
 		var matchedListener = "";
 		//Make sure the listener string has the form "functionName(arguments)"
@@ -2156,8 +2151,8 @@ org.xml3d.webgl.XML3DLightRenderAdapter = function(factory, node) {
 	var intensityAttribute = node.getAttribute("intensity");
 	if (intensityAttribute) {
 		try {
-			var int = parseInt(intensityAttribute);
-			this.intensity = int;
+			var flt = parseFloat(intensityAttribute);
+			this.intensity = flt;
 		} catch (e) {org.xml3d.debug.logWarning("Could not parse light intensity attribute ' "+intensityAttribute+" '"); }
 	}
 	

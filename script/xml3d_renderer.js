@@ -1293,8 +1293,8 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 			var childAdapter = this.factory.getAdapter(child, org.xml3d.webgl.Renderer.prototype);
 			if (childAdapter) {
 				var childTransform = childAdapter.applyTransformMatrix(transform);
-				if (childAdapter._parentTransform !== undefined) {
-					childAdapter._parentTransform = transform;
+				if (childAdapter.parentTransform !== undefined || childAdapter._parentTransform !== undefined) {
+					childAdapter.parentTransform = transform;
 				}
 				var shader = childAdapter.getShader();
 				
@@ -1370,33 +1370,31 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this.zNear = 0.1;
 	this.viewMatrix = null;
 	this.projMatrix = null;
+	this.parentTransform = null;
+	this._adjustedParentTransform = null;
 };
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DViewRenderAdapter;
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
-	//if (this.viewMatrix == null) {
-		//if (this.node.orientation) {
-	//		this.viewMatrix =  this.node.orientation.negate().toMatrix().multiply(
-	//				new XML3DMatrix().translate(this.node.position.negate()));
 
-		//}
-
-		/*if (this.node.upVector && this.node.direction)
-		{
-			var pos = this.node.position;
-			var dir = this.node.direction;
-			var up = this.node.upVector;
-			var cross = up.cross(dir);
-
-			var mx = new XML3DRotation( up , 0);
-			var my = new XML3DRotation( cross , 0);
-		}*/
 	if (this.viewMatrix == null)
 	{
-		var negPos      = this.node.position.negate();
-		this.viewMatrix = this.node.orientation.negate().toMatrix().multiply(
-				new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
+		if (this._adjustedParentTransform) {
+			var m = this._adjustedParentTransform;
+			var norient = XML3DRotation.fromMatrix(this._adjustedParentTransform);
+			var npos = new XML3DVec3(m._m14, m._m24, m._m34);
+			
+			norient = norient.multiply(this.node.orientation).negate();
+			npos = npos.add(this.node.position).negate();
+			
+			this.viewMatrix = norient.toMatrix().multiply(
+				new XML3DMatrix().translate(npos.x, npos.y, npos.z));
+		} else {
+			var negPos      = this.node.position.negate();
+			this.viewMatrix = this.node.orientation.negate().toMatrix().multiply(
+					new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
+		}
 	}
 	return new sglM4(this.viewMatrix.toGL());
 };
@@ -1426,6 +1424,31 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 	}
 	this.factory.handler.redraw("View changed");
 };
+
+
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.internalNotifyChanged = function(what, newValue) {
+	if (what == "parenttransform") {
+		this.parentTransform = newValue;	
+	}
+};
+
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.__defineSetter__("parentTransform", (function(value) {
+	this._parentTransform = value;
+	
+	if (!value)
+		return;
+	
+	var p = this._parentTransform;
+	var mat = new XML3DMatrix(
+	p[0], p[4], p[8], p[12], 
+	p[1], p[5], p[9], p[13], 
+	p[2], p[6], p[10], p[14],
+	p[3], p[7], p[11], p[15]);
+
+	this._adjustedParentTransform = mat;
+
+}));
+
 
 //Adapter for <defs>
 org.xml3d.webgl.XML3DDefsRenderAdapter = function(factory, node) {
@@ -1724,7 +1747,7 @@ org.xml3d.webgl.XML3DImgRenderAdapter.prototype.notifyChanged = function(evt) {
 org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.listeners = new Array();
-	this._parentTransform = null;
+	this.parentTransform = null;
 	this._parentShader = null;
 	this.isValid = true;
 	this._transformAdapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
@@ -1735,8 +1758,8 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype = new org.xml3d.webgl.RenderAd
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DGroupRenderAdapter;
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
-	if (this._parentTransform !== null)
-		return sglMulM4(transform, this._parentTransform);
+	if (this.parentTransform !== null)
+		return sglMulM4(transform, this.parentTransform);
 	
 	if (this._transformAdapter)
 		return sglMulM4(transform, this._transformAdapter.getMatrix());
@@ -1772,7 +1795,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		//of its children with the new transformation matrix
 		
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-		downstreamValue = sglMulM4(adapter.getMatrix(), this._parentTransform);
+		downstreamValue = sglMulM4(adapter.getMatrix(), this.parentTransform);
 		this.notifyListeners("parenttransform", downstreamValue);
 		this.factory.renderer.requestRedraw("Group transform changed.");
 	}
@@ -1796,17 +1819,17 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = functi
 	if (what == "parenttransform") {
 		//This change came from a parent group node, we need to update the parentTransform and pass
 		//the updated transformation matrix down to the children
-		this._parentTransform = newValue;
+		this.parentTransform = newValue;
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 		if (adapter)
-			downstreamValue = sglMulM4(this._parentTransform, adapter.getMatrix());
+			downstreamValue = sglMulM4(this.parentTransform, adapter.getMatrix());
 		else
-			downstreamValue = this._parentTransform;
+			downstreamValue = this.parentTransform;
 		
 	} else if (what == "transform") {
 		//This was a change to the <transform> node tied to this adapter
-		if (this._parentTransform)
-			downstreamValue = sglMulM4(this._parentTransform, newValue);	
+		if (this.parentTransform)
+			downstreamValue = sglMulM4(this.parentTransform, newValue);	
 		else
 			downstreamValue = newValue;
 		what = "parenttransform";
@@ -3442,6 +3465,18 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 		return gl.CLAMP_TO_EDGE;
 	};
 	
+	var filterToGL = function(gl, modeStr) {
+		if (modeStr == "nearest")
+			return gl.NEAREST;
+		if (modeStr == "linear")
+			return gl.LINEAR;
+		if (modeStr == "linear_mipmap")
+			return gl.LINEAR_MIPMAP_NEAREST;
+		if (modeStr == "nearest_mipmap")
+			return gl.NEAREST_MIPMAP_NEAREST;
+		return gl.LINEAR;
+	};
+	
 	var node = this.node;
 	var imgSrc = new Array();
 	
@@ -3467,6 +3502,12 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 		generateMipmap   : false
 		
 	});	
+
+	// TODO: automatically set generateMipmap to true when mipmap dependent filters are used
+	options.minFilter = filterToGL(gl, node.getAttribute("minFilter"));
+	options.magFilter = filterToGL(gl, node.getAttribute("magFilter"));
+	if (node.getAttribute("mipmap") == "true")
+		options.generateMipmap = true;
 	
 	if (node.hasAttribute("textype") && node.getAttribute("textype") == "cube") {
 		for (var i=0; i<node.childNodes.length; i++) {

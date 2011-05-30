@@ -748,8 +748,12 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		if (type in this.events) {
 			var e = new Object();
 			e.node = node;
-			var parsed = this.parseListenerString(listener);
-			e.listener = new Function("evt", parsed);
+			if (typeof listener == typeof "") {
+				var parsed = this.parseListenerString(listener);
+				e.listener = new Function("evt", parsed);
+			} else {
+				e.listener = listener;
+			}
 			e.useCapture = useCapture;
 			this.events[type].push(e);
 		} 

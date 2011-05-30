@@ -228,11 +228,12 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this._pickingDisabled = false;
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
+		this.postProcessShaders = [];
 		this.events = { "mousedown":[], "mouseup":[], "click":[], "framedrawn":[], "mousemove":[], 
 				"mouseout":[], "update":[], "mousewheel":[] };
 		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
 		
-		//Set up internal frame buffers used for picking
+		//Set up internal frame buffers used for picking and post-processing
 		//SpiderGL requires these buffers to be stored inside the Handler
 		this.pickBuffer = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
 				[gl.RGBA], gl.DEPTH_COMPONENT16, null,
@@ -242,10 +243,48 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				[gl.RGBA], gl.DEPTH_COMPONENT16, null,
 				{ depthAsRenderbuffer : true }
 		);
+		this.backBufferZero = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
+				[gl.RGBA], gl.DEPTH_COMPONENT16, null,
+				{ depthAsRenderbuffer : true }
+		);
+		this.backBufferOne = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
+				[gl.RGBA], gl.DEPTH_COMPONENT16, null,
+				{ depthAsRenderbuffer : true }
+		);
+		this.backBufferOrig = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
+				[gl.RGBA], gl.DEPTH_COMPONENT16, null,
+				{ depthAsRenderbuffer : true }
+		);
 		
-		if (!this.pickBuffer.isValid || !this.normalPickBuffer.isValid)
-			org.xml3d.debug.logError("Creation of picking framebuffers failed");
+		if (!this.pickBuffer.isValid || !this.normalPickBuffer.isValid || !this.backBufferZero || !this.backBufferOne)
+			org.xml3d.debug.logError("Creation of a framebuffer failed");
 		
+		//This is the simple fullscreen quad used with the post-processing shaders
+		//For reasons unknown to man it has to be defined here, SpiderGL won't render it 
+		//properly otherwise
+		var quadPositions = new Float32Array
+		([
+			-1.0, -1.0,
+			 1.0, -1.0,
+			-1.0,  1.0,
+			 1.0,  1.0
+		]);
+		var texcoord = new Float32Array
+		([
+			0.0, 0.0,
+			 1.0, 0.0,
+			0.0,  1.0,
+			 1.0,  1.0
+		]);
+		
+		this.quadMesh = new SglMeshGL(gl);
+		this.quadMesh.addVertexAttribute("position", 2, quadPositions);
+		this.quadMesh.addVertexAttribute("texcoord", 2, texcoord);
+		this.quadMesh.addArrayPrimitives("tristrip", gl.TRIANGLE_STRIP, 0, 4);
+		//-------------------
+		
+		//Framebuffers used for render-to-texture
+		this.rttBuffers = {};
 		var handler = this;		
 		this.redraw = function(reason, forcePickingRedraw) {
 			if (this.needDraw !== undefined) {
@@ -256,6 +295,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				handler.needDraw = true;
 			}
 		};
+		
+		this.gatherPostProcessShaders();
 	}
 	
 	//Requests a WebGL context for the canvas and returns an XML3DHander for it
@@ -268,6 +309,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				return new XML3DHandler(handler, canvas, new Scene(xml3dElement));
 			}
 		} catch (ef) {
+			org.xml3d.debug.logError(ef);
 			return null;
 		}
 	}
@@ -280,9 +322,28 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		_sglUnmanageCanvasOnLoad(this.canvasId);
 		SGL_DefaultStreamMappingPrefix = "";
 
-		this.renderer.render();
+		this.draw(this.gl);
 	};
-
+	
+	XML3DHandler.prototype.gatherPostProcessShaders = function() {
+		//TODO: add some kind of <postprocessing> node to the namespace?
+		
+		//var ppnode = document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'postprocessing');
+		var ppnode = document.getElementById("postprocessing_"+this.canvasId);
+		//if (ppnode.length < 1)
+		//	return;
+		if (!ppnode)
+			return;
+		//ppnode = ppnode[0];
+		var shader = ppnode.firstElementChild;
+		
+		while(shader !== null) {
+			//if (shader.sp.valid)
+				this.postProcessShaders.push(shader);
+			
+			shader = shader.nextElementSibling;
+		}
+	};
 	//Returns the HTML ID of the canvas associated with this Handler
 	XML3DHandler.prototype.getCanvasId = function() {
 		return this.ui.canvas.id;
@@ -343,10 +404,26 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @return
 	 */
 	XML3DHandler.prototype.draw = function(gl) {
-		try {			
-			var start = Date.now();
-			var stats = this.renderer.render();
-			var end = Date.now();	
+		try {
+			for (var t in this.rttBuffers) {
+				this.rttBuffers[t].needDraw = true;
+			}
+			
+			if (this.postProcessShaders.length > 0 && document.getElementById("postprocessing_"+this.canvasId).getAttribute("visible") != "false") {
+				this.backBufferOrig.bind();
+				
+				var start = Date.now();		
+				var stats = this.renderer.render(gl);
+				
+				this.backBufferOrig.unbind();
+			
+				this.renderShaders(this.postProcessShaders, null);
+				var end = Date.now();				
+			} else {
+				var start = Date.now();		
+				var stats = this.renderer.render(gl);
+				var end = Date.now();				
+			}
 			this.dispatchFrameDrawnEvent(start, end, stats);
 			this.needDraw = false;				
 		} catch (e) {
@@ -354,6 +431,43 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			throw e;
 		}
 
+	};
+	
+	/**
+	 * Iterates through the list of shaders, ping-ponging between framebuffers and rendering them to a fullscreen quad
+	 * 
+	 * @param gl
+	 * @param shaderArray
+	 * 			The list of shaders to render
+	 * @param targetFrameBuffer
+	 *			The framebuffer that final result should be rendered to. If null it will be rendered to the screen.
+	 * @return
+	 */
+	XML3DHandler.prototype.renderShaders = function(shaderArray, targetFrameBuffer) {			
+		var lastBufferNum = 1;
+		var currBuffer, lastBuffer;		
+		
+		for (var i=0; i<shaderArray.length; i++) {
+			currBuffer = lastBufferNum == 0? this.backBufferOne : this.backBufferZero;
+			lastBuffer = lastBufferNum == 0? this.backBufferZero : this.backBufferOne;
+			lastBufferNum = (lastBufferNum + 1) % 2;		
+			
+			if (i == shaderArray.length-1) {
+				if (!targetFrameBuffer)
+					this.renderer.renderShader(this.gl, this.quadMesh, shaderArray[i], lastBuffer, this.backBufferOrig);
+				else {
+					targetFrameBuffer.bind();
+
+					this.renderer.renderShader(this.gl, this.quadMesh, shaderArray[i], lastBuffer, this.backBufferOrig);
+					targetFrameBuffer.unbind();
+				}
+			} else {
+				currBuffer.bind();
+				this.renderer.renderShader(this.gl, this.quadMesh, shaderArray[i], lastBuffer, this.backBufferOrig);
+				currBuffer.unbind();
+			}
+		}
+			
 	};
 	
 	/**
@@ -634,19 +748,22 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		if (type in this.events) {
 			var e = new Object();
 			e.node = node;
-			e.listener = new Function(listener);
+			var parsed = this.parseListenerString(listener);
+			e.listener = new Function("evt", parsed);
 			e.useCapture = useCapture;
 			this.events[type].push(e);
 		} 
 	};
 
-	//TODO: Remove? May no longer be needed.
+
 	XML3DHandler.prototype.parseListenerString = function(listener) {
-		var matchedListener = "";
+		var matchedListener =  "alert(Could not parse listener string "+listener+"! Only listeners of the type 'myFunction(aVariableToHoldTheEvent)' are supported!)";
 		//Make sure the listener string has the form "functionName(arguments)"
 		var matches = listener.match(/.*\(.*\)/);
-		if (matches)
+		if (matches) {
 			matchedListener = listener.substring(0, listener.indexOf('('));
+			matchedListener += "(evt)";
+		}
 		
 		return matchedListener;
 	};
@@ -662,6 +779,47 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			if (stored.node == node && stored.listener == listener)
 				this.events[type].splice(i,1);
 		}
+	};
+	
+XML3DHandler.prototype.getRenderedTexture = function (textureSrc) {
+		if (!this.rttBuffers[textureSrc]) {
+			var srcDataNode = document.getElementById(textureSrc.substring(1,textureSrc.length));
+			if (!srcDataNode) {
+				org.xml3d.debug.logError("Could not resolve texture source { "+textureSrc+" }");
+				return null;
+			}
+			var width = srcDataNode.getAttribute("width");
+			var height = srcDataNode.getAttribute("height");
+			width = width ? width : 512;
+			height = height ?  height : 512;
+			
+			var FBO = new SglFramebuffer(this.gl, width, height,
+				[gl.RGBA], gl.DEPTH_COMPONENT16, null,
+				{ depthAsRenderbuffer : true }
+			);
+			
+			var shader = srcDataNode.firstElementChild;
+			var sArray = [];
+			while(shader !== null) {				
+				sArray.push(shader);				
+				shader = shader.nextElementSibling;
+			}
+			var container = {};
+			container.fbo = FBO;
+			container.shaders = sArray;
+			container.needDraw = true;
+			this.rttBuffers[textureSrc] = container;
+		}
+		var cont = this.rttBuffers[textureSrc];
+		
+		var fbo = cont.fbo;
+		var shaders = cont.shaders;
+		
+		if (cont.needDraw == true)
+			this.renderShaders(shaders, fbo);
+		
+		cont.needDraw = false;
+		return fbo.colorTargets[0];
 	};
 	
 	//Destroys the renderer associated with this Handler
@@ -1173,6 +1331,52 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 	
 };
 
+/**
+ * Renders a single shader to a fullscreen quad
+
+ * 
+ * @param gl
+ * @param quadMesh
+ *     The fullscreen quad
+ * @param shader
+ *     The shader to be used for this pass. 
+ * @param buffer
+ *     The SGLTexture that the previous drawing or post-processing pass rendered to
+ * @return
+ */
+org.xml3d.webgl.Renderer.prototype.renderShader = function(gl, quadMesh, shader, buffer, original) {
+	if (!shader || !buffer || !original)
+		return;
+	
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+	gl.viewport(0, 0, this.width, this.height);	
+	gl.disable(gl.CULL_FACE);
+	
+	var parameters = {};
+	var samplers = {};
+	var sp;
+	
+	if (shader === null) {
+		sp = this.ppShader.program;
+	} else {		
+		if (!shader.setParameters) {
+			shader = this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
+		}
+		shader.setParameters(parameters);
+		if (shader.textures.length > 0) {
+			var st = shader.textures;
+			for (var i=0; i<st.length; i++) {
+				samplers[st[i].name] = st[i].tex;
+			}
+		}
+		sp = shader.shaderProgram;
+	}
+
+	samplers.backBuffer = buffer.colorTargets[0];
+	samplers.backBufferOrig = original.colorTargets[0];
+	sglRenderMeshGLPrimitives(quadMesh, "tristrip", sp, null, parameters, samplers);
+};
+
 //Helper to expand an axis aligned bounding box around another object's bounding box
 org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
 	var bmin = sglV3(bbox.min);
@@ -1555,8 +1759,14 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	for (var i=0; i<this.textures.length; i++) {
 		var tex = this.textures[i];
 		if (tex.name == name) {
-			if (tex.src = textureInfo.src[0])
+			if (tex.src = textureInfo.src[0]) {
+				if (tex.dynamic == false)
+					return;
+					
+				//Dynamic texture (render-to-texture) must be refreshed
+				tex.texture = this.factory.handler.getRenderedTexture(tex.src);		
 				return;
+			}
 			else {
 				tex.tex.destroy();
 				this.textures.splice(i,1);
@@ -1566,14 +1776,21 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	}
 	var gl = this.factory.handler.gl;
 	//org.xml3d.webgl.checkError(gl, "Error before creating texture:");
-	
+	var dynamicTexture = false;
 	var texture = null;
 	var options = textureInfo.options;
 	var textureSrc = textureInfo.src;
 	
 	options["onload"] = this.factory.handler.redraw;
+	
+	if (textureSrc[0].charAt(0) == '#') {
+		var texBuffer = this.factory.handler.getRenderedTexture(textureSrc[0]);
+		texture = texBuffer;
+		dynamicTexture = true;
+	} else {
 
-	texture = new SglTexture2D(gl, textureInfo.src[0], options);
+		texture = new SglTexture2D(gl, textureInfo.src[0], options);
+	}
 	//org.xml3d.webgl.checkError(gl, "Error after creating texture:" + textureSrc);
 
 	if (!texture) {
@@ -1584,7 +1801,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	var texContainer = ({
 		name 	: name,
 		src 	: textureSrc,
-		tex 	: texture
+		tex 	: texture,
+		dynamic : dynamicTexture
 	});
 
 	this.textures.push(texContainer);
@@ -2369,7 +2587,6 @@ g_shaders["urn:xml3d:shader:phong"] = {
 		+"varying vec3 fragNormal;\n"
 		+"varying vec3 fragVertexPosition;\n"
 		+"varying vec3 fragEyeVector;\n"
-		+"varying vec2 fragTexCoord;\n"
 
 		+"uniform mat4 modelViewProjectionMatrix;\n"
 		+"uniform mat4 modelViewMatrix;\n"
@@ -3470,9 +3687,9 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 			return gl.NEAREST;
 		if (modeStr == "linear")
 			return gl.LINEAR;
-		if (modeStr == "linear_mipmap")
+		if (modeStr == "mipmap_linear")
 			return gl.LINEAR_MIPMAP_NEAREST;
-		if (modeStr == "nearest_mipmap")
+		if (modeStr == "mipmap_nearest")
 			return gl.NEAREST_MIPMAP_NEAREST;
 		return gl.LINEAR;
 	};

@@ -137,12 +137,13 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 	{
 		var config = navigations[0];
 		this.mode = config.getAttribute("mode");
-		if(this.mode != "walk" && this.mode != "examine" )
-			this.mode = "examine";
-		
+
 		if(this.mode == "none")
 			return;
 		
+		if(this.mode != "walk" && this.mode != "examine" )
+			this.mode = "examine";
+
 		if(config.getAttribute("resolveAround")){
 			org.xml3d.debug.logWarning("resolveAround is obsolete. Use 'revolveAround' instead!");
 			this.revolveAroundPoint.setVec3Value(config.getAttribute("resolveAround"));

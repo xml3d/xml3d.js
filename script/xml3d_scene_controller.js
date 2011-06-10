@@ -369,7 +369,7 @@ org.xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 	var xml3d = this.xml3d;
 	// alert(xml3d);
 	var camera = this.camera;
-	var dir = camera.getDirection();
+	var dir = camera.direction;
 	if (xml3d) {
 		switch (KeyID) {
 		case 38: // up

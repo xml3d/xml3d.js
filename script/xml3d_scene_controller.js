@@ -159,6 +159,15 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 	this.attach();
 };
 
+org.xml3d.Xml3dSceneController.prototype.setCamera = function(newCamera) {
+	this.camera = new org.xml3d.Camera(newCamera);
+	this.upVector = this.camera.upVector;
+};
+
+org.xml3d.Xml3dSceneController.prototype.setRevolvePoint = function(vec) {
+	this.revolveAroundPoint = vec;
+};
+
 org.xml3d.Xml3dSceneController.prototype.attach = function() {
 	var self = this;
 	this._evt_mousedown = function(e) {self.mousePressEvent(e);};

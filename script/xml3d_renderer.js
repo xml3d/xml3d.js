@@ -50,9 +50,9 @@ org.xml3d.webgl.supported = function() {
 	canvas.width = 1;
 	canvas.height = 1;
 	try {
-		gl = canvas.getContext("experimental-webgl");
+		var gl = canvas.getContext("experimental-webgl");
 	} catch(e) {
-		gl = null;
+		var gl = null;
 	}
 	return !!gl;
 };
@@ -166,12 +166,18 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 
 	// Width and height are can also be specified as attributes, then they have
 	// the highest priority
+	var h, w;
+	
 	if ((w = xml3dElement.getAttribute("width")) !== null) {
 		canvas.style.width = w;
-	} 
+	} else if ((w = org.xml3d.util.getStyle(xml3dElement, "width")) != "auto"){
+		canvas.style.width = w;
+	}
 	if ((h = xml3dElement.getAttribute("height")) !== null) {
 		canvas.style.height = h;
-	} 
+	} else if ((h = org.xml3d.util.getStyle(xml3dElement, "height")) != "auto"){
+		canvas.style.height = h;
+	}
 	canvas.id = "canvas"+index;
 	canvas.width = canvas.clientWidth;
 	canvas.height = canvas.clientHeight;
@@ -1540,6 +1546,9 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt)
 	} else if (evt.eventType == MutationEvent.REMOVAL) {
 		this.factory.renderer.sceneTreeRemoval(evt);
 	}
+	if (evt.attribute == "activeView") {
+		this.factory.renderer.camera = this.factory.renderer.initCamera();
+	}
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.addEventListener = function(type, listener, useCapture) {
@@ -1580,6 +1589,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this.projMatrix = null;
 	this.parentTransform = null;
 	this._adjustedParentTransform = null;
+	this.isValid = true;
 };
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DViewRenderAdapter;
@@ -1633,10 +1643,11 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 	this.factory.handler.redraw("View changed");
 };
 
-
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.internalNotifyChanged = function(what, newValue) {
 	if (what == "parenttransform") {
-		this.parentTransform = newValue;	
+		this.parentTransform = newValue;
+		
+		this.viewMatrix = null;
 	}
 };
 
@@ -1740,6 +1751,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getXFlowShader = function(dec
 		org.xml3d.debug.logWarning("XFlow scripts cannot be used in conjunction with custom shaders yet, sorry!");
 		return null;
 	}
+	var gl = this.factory.handler.gl;
 	var vertex = this.sp.vSource;
 	var fragment = this.sp.fSource;
 	
@@ -1763,7 +1775,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.initTexture = function(textur
 	for (var i=0; i<this.textures.length; i++) {
 		var tex = this.textures[i];
 		if (tex.name == name) {
-			if (tex.src = textureInfo.src[0]) {
+			if (tex.src == textureInfo.src[0]) {
 				if (tex.dynamic == false)
 					return;
 					
@@ -2178,8 +2190,9 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 		this.mesh = new SglMeshGL(factory.handler.gl);
 	//}
 		
-		
-		var dt = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
+	this.dataAdapter = this.factory.renderer.dataFactory.getAdapter(this.node);
+	this.dataAdapter.registerObserver(this);
+	var dt = this.dataAdapter.createDataTable();
 		if (!dt.position || !dt.position.data) {
 			org.xml3d.debug.logWarning("Cannot find positions data for " + 
 					this.node.getAttribute("src")+". Can't calculate Bounding Box.");
@@ -2201,7 +2214,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	if (!this.dataType)
 		this.dataType = "triangles";
 	this.dataType = this.dataType.toLowerCase();
-	this.gltype = this.getGLType(this.dataType);
+	this.gltype = this.getGLType(this.factory.handler.gl, this.dataType);
 };
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
@@ -2217,8 +2230,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = functi
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
-	if (e.eventType == MutationEvent.REMOVAL)
-		this.factory.renderer.sceneTreeRemoval(e);
+	if (e.eventType == MutationEvent.REMOVAL) 
+		this.factory.renderer.sceneTreeRemoval(e);	
 	else if (e.attribute == "src") {
 		this.loadedMesh = false;
 	}
@@ -2227,6 +2240,17 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
 
 	this.factory.renderer.requestRedraw("Mesh attribute was changed.");
 	
+};
+
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyDataChanged = function(e) {
+	/*if (this.loadedMesh) {
+		var dt = this.dataAdapter.createDataTable();
+		var newData = dt[e.notifier.name];
+		if (newData)
+			this.mesh.addVertexAttribute(e.notifier.name, newData.tupleSize, newData.data);
+	}*/
+	this.loadedMesh = false;
+	this.factory.renderer.requestRedraw("Mesh data has changed");
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.internalNotifyChanged = function(what, newValue) {
@@ -2249,7 +2273,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMetho
 	}
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getGLType = function(typeName) {
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getGLType = function(gl, typeName) {
 	switch (typeName) {
 		case "triangles"	: return gl.TRIANGLES;
 		case "tristrips" 	: return gl.TRIANGLE_STRIP;
@@ -2355,10 +2379,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 	if (this.loadedMesh || meshParams) {
 		//org.xml3d.webgl.checkError(gl, "Error before drawing Elements.");
 	try {
-		
-		if (this.gltype == gl.POINTS)
-			gl.enable(gl.VERTEX_PROGRAM_POINT_SIZE);
-		
+	
 		if (meshParams.size) {
 			//We're dealing with multiple distinct objects in the same array buffer (eg. groups of LINE_STRIPS)
 			var sizes = meshParams.size.data;
@@ -2374,9 +2395,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		}
 			
 		//org.xml3d.webgl.checkError(gl, "Error after drawing Elements.");
-		
-		if (this.gltype == gl.POINTS)
-			gl.disable(gl.VERTEX_PROGRAM_POINT_SIZE);
 		
 	} catch (e) {
 		org.xml3d.debug.logError("While drawing mesh: "+e);
@@ -3215,7 +3233,7 @@ org.xml3d.webgl.DataAdapter = function(factory, node)
 		var child = this.node.firstElementChild;
 		while (child !== null)
 		{			
-			dataCollector = this.factory.getAdapter(child, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
+			var dataCollector = this.factory.getAdapter(child, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
 
 			if(dataCollector)
 			{
@@ -3255,11 +3273,11 @@ org.xml3d.webgl.DataAdapter.prototype.isAdapterFor = function(aType)
 /**
  * Notifies all observers about data changes by calling their notifyDataChanged() method.
  */
-org.xml3d.webgl.DataAdapter.prototype.notifyObservers = function()
+org.xml3d.webgl.DataAdapter.prototype.notifyObservers = function(e)
 {
 	for(var i = 0; i < this.observers.length; i++)
 	{
-		this.observers[i].notifyDataChanged();
+		this.observers[i].notifyDataChanged(e);
 	}
 };
 
@@ -3274,7 +3292,7 @@ org.xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e)
 {
 	// this is the DataAdapter where an actual change occurs, therefore
 	// the dataTable must be recreated
-	this.notifyDataChanged();
+	this.notifyDataChanged(e);
 };
 
 /**
@@ -3283,12 +3301,12 @@ org.xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e)
  * of the data table is necessary as the notification usually comes from a child DataAdapter.
  * This means when a child element changes, its parent changes simultaneously.
  */
-org.xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function()
+org.xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function(e)
 {
 	// Notification can only come from a child DataAdapter. That's why dataTable
 	// can be merged with this instance's datatable
 	this.createDataTable(true);
-	this.notifyObservers();
+	this.notifyObservers(e);
 };
 
 /**
@@ -4220,7 +4238,7 @@ org.xml3d.xflow.noise = function(dataTable) {
 org.xml3d.xflow.smoothing = function(dataTable) {
 	//Can't do smoothing in a vertex shader as it's not parallel
 	
-	var numVertices = dataTable.position.data.length;
+	var numVertices = dataTable.position.data.length / 3;
 	var numTriangles = dataTable.index.data.length / 3;
 	
 	var newNorm = new Float32Array(numVertices*3); 

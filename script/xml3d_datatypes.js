@@ -78,10 +78,7 @@ if (!org.xml3d._native)
  * Returns a new 4x4 XML3DMatrix from given arguments.
  * If no arguments are given it returns an identity matrix.
  */
-XML3DMatrix = function(_11, _12, _13, _14, 
-					   _21, _22, _23, _24, 
-					   _31, _32, _33, _34, 
-					   _41, _42, _43, _44) 
+XML3DMatrix = function() 
 {
 	XML3DDataType.call(this);
 	
@@ -94,14 +91,29 @@ XML3DMatrix = function(_11, _12, _13, _14,
 							    0, 0, 1, 0, 
 							    0, 0, 0, 1);
 	} 
+	else if (arguments.length == 1)
+	{
+
+		var m = arguments[0];
+		if (m.length < 16) {
+			org.xml3d.debug.logError("Tried to initialize a XML3DMatrix from a Float32Array with less than 16 members");
+			return null;
+		}
+		this._setMatrixInternal(m[0], m[1], m[2], m[3], 
+								m[4], m[5], m[6], m[7], 
+								m[8], m[9], m[10], m[11], 
+								m[12], m[13], m[14], m[15]);
+	}
 	else 
 	{
-		this._setMatrixInternal(_11, _12, _13, _14, 
-							    _21, _22, _23, _24, 
-							    _31, _32, _33, _34, 
-							    _41, _42, _43, _44);
+		this._setMatrixInternal(arguments[0], arguments[1], arguments[2], arguments[3], 
+				arguments[4], arguments[5], arguments[6], arguments[7], 
+				arguments[8], arguments[9], arguments[10], arguments[11], 
+				arguments[12], arguments[13], arguments[14], arguments[15]);
+		
 	}
 };
+
 XML3DMatrix.prototype             = new XML3DDataType();
 XML3DMatrix.prototype.constructor = XML3DMatrix;
 
@@ -443,6 +455,15 @@ XML3DMatrix.prototype.multiply = function (that)
 						+ this._m23 * that.z, this._m31 * that.x + this._m32 * that.y
 						+ this._m33 * that.z);
 };
+
+XML3DMatrix.prototype.mulVec3 = function(that, w) {
+	return new XML3DVec3(
+			this._m11 * that.x + this._m21 * that.y + this._m31 * that.z + this._m41 * w, 
+			this._m12 * that.x + this._m22 * that.y + this._m32 * that.z + this._m42 * w, 
+			this._m13 * that.x + this._m23 * that.y + this._m33 * that.z + this._m43 * w
+			);
+};
+
 
 XML3DMatrix.prototype.det3 = function(a1, a2, a3, b1, b2, b3,
 		c1, c2, c3) {

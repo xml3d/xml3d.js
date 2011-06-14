@@ -1598,20 +1598,12 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 
 	if (this.viewMatrix == null)
 	{
+		var negPos      = this.node.position.negate();
+		this.viewMatrix = this.node.orientation.negate().toMatrix().multiply(
+				new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
+				
 		if (this._adjustedParentTransform) {
-			var m = this._adjustedParentTransform;
-			var norient = XML3DRotation.fromMatrix(this._adjustedParentTransform);
-			var npos = new XML3DVec3(m._m14, m._m24, m._m34);
-			
-			norient = norient.multiply(this.node.orientation).negate();
-			npos = npos.add(this.node.position).negate();
-			
-			this.viewMatrix = norient.toMatrix().multiply(
-				new XML3DMatrix().translate(npos.x, npos.y, npos.z));
-		} else {
-			var negPos      = this.node.position.negate();
-			this.viewMatrix = this.node.orientation.negate().toMatrix().multiply(
-					new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
+			this.viewMatrix = this.viewMatrix.multiply(this._adjustedParentTransform);
 		}
 	}
 	return new sglM4(this.viewMatrix.toGL());

@@ -817,7 +817,8 @@ org.xml3d.isAnyURI = function(node)
 	return org.xml3d.isString(node);
 };
 
-org.xml3d.canvasEvents = {"mousedown":1, "mouseup":1, "framedrawn":1};
+org.xml3d.canvasEvents = {"mousedown":1, "mouseup":1, "mousemove":1, "mousewheel":1, 
+						 "framedrawn":1, "onclick":1, "click":1, "mouseout":1, "framedrawn":1};
 org.xml3d.configureXML3DEvents = function(node) {
 	node.__proto__.__addEventListener = node.__proto__.addEventListener;
 	node.__proto__.__removeEventListener = node.__proto__.removeEventListener;

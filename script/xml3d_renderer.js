@@ -820,15 +820,19 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		return matchedListener;
 	};
 	XML3DHandler.prototype.removeEventListener = function(node, type, listener, useCapture) {
-		// TODO: Test
 		if (!this.events[type]) {
 			org.xml3d.debug.logError("Could not remove listener for event type "+type);
 			return;
 		}
 		
+		/* Note: below we compare the listener functions by 
+		 * converting them to strings. This works on chrome 12.0.742.100 and firefox 4.0.1. 
+		 * However it might not work on other browsers like IE.  
+		 */  
 		for (i=0; i<this.events[type].length; i++) {
 			var stored = this.events[type][i];
-			if (stored.node == node && stored.listener == listener)
+			if (stored.node == node 
+			 && String(stored.listener) == String(listener))
 				this.events[type].splice(i,1);
 		}
 	};

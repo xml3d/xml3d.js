@@ -2445,6 +2445,14 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.render = function(shader, param
 		org.xml3d.debug.logError("No element array found!");
 };
 
+// Returns the XML3DBox bounding box of this mesh
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getBoundingBox = function() {
+
+	var min = new XML3DVec3(this._bbox.min[0], this._bbox.min[1], this._bbox.min[2]);
+	var max = new XML3DVec3(this._bbox.max[0], this._bbox.max[1], this._bbox.max[2]);
+	
+	return new XML3DBox(min, max); 
+};
 
 // Adapter for <light>
 org.xml3d.webgl.XML3DLightRenderAdapter = function(factory, node) {

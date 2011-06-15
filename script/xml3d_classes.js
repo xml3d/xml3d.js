@@ -8226,6 +8226,8 @@ org.xml3d.methods.xml3dGenerateRay = function(x, y) {
 	}
 };
 
+org.xml3d.methods.xml3dGetBoundingBox = org.xml3d.methods.groupGetBoundingBox;
+
 org.xml3d.methods.groupGetLocalMatrix = function() { 
 	
 	var xfmNode = this.getTransformNode();  
@@ -8244,6 +8246,43 @@ org.xml3d.methods.groupGetLocalMatrix = function() {
 	
 	return new XML3DMatrix(); 
 }; 
+
+
+/** return the bounding box that is the bounding box of all children. 
+ */
+org.xml3d.methods.groupGetBoundingBox = function() { 
+
+    var bbox = new XML3DBox(); 
+    var child = this.firstElementChild; 
+    while(child !== null)
+    {
+        if(child.getBoundingBox)
+            bbox.extend(child.getBoundingBox()); 
+        
+        child = child.nextElementSibling;
+    }
+    
+    return bbox; 
+}; 
+
+/** returns the bounding box of this mesh in world space.
+ */
+org.xml3d.methods.meshGetBoundingBox = function() {
+
+    for (i = 0; i < this.adapters.length; i++) {
+        if (this.adapters[i].getBoundingBox) {
+            var bbox = this.adapters[i].getBoundingBox();
+
+            var worldMat = this.getWorldMatrix(); 
+            bbox.min = worldMat.mulVec3(bbox.min, 1); 
+            bbox.max = worldMat.mulVec3(bbox.max, 1);
+            
+            return bbox; 
+        }
+    }
+    
+    return new XML3DBox(); 
+};
 
 org.xml3d.methods.XML3DGraphTypeGetWorldMatrix = function() {
 	

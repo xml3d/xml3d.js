@@ -67,19 +67,6 @@ org.xml3d.webgl.configure = function(xml3ds) {
 		xml3ds[i].canvas = canvas;
 		
 		//Check for event listener attributes for the xml3d node
-		if (xml3ds[i].hasAttribute("onmousemove"))
-			XML3DHandler.addEventListener(xml3ds[i], "mousemove", xml3ds[i].getAttribute("onmousemove"), false);
-		if (xml3ds[i].hasAttribute("onmouseout"))
-			XML3DHandler.addEventListener(xml3ds[i], "mouseout", xml3ds[i].getAttribute("onmouseout"), false);
-		if (xml3ds[i].hasAttribute("onmouseup"))
-			XML3DHandler.addEventListener(xml3ds[i], "mouseup", xml3ds[i].getAttribute("onmouseup"), false);
-		if (xml3ds[i].hasAttribute("onmousedown"))
-			XML3DHandler.addEventListener(xml3ds[i], "mousedown", xml3ds[i].getAttribute("onmousedown"), false);
-		if (xml3ds[i].hasAttribute("onmousewheel"))
-			XML3DHandler.addEventListener(xml3ds[i], "mousewheel", xml3ds[i].getAttribute("onmousewheel"), false);
-		if (xml3ds[i].hasAttribute("onclick"))
-			XML3DHandler.addEventListener(xml3ds[i], "click", xml3ds[i].getAttribute("onclick"), false);
-		
 		if (xml3ds[i].hasAttribute("contextmenu") && xml3ds[i].getAttribute("contextmenu") == "false")
 			xml3ds[i].canvas.addEventListener("contextmenu", function(e) {org.xml3d.webgl.stopEvent(e);}, false);
 		if (xml3ds[i].hasAttribute("framedrawn"))
@@ -518,6 +505,106 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			
 	};
 	
+	/** 
+	 * Initalizes an DOM MouseEvent, picks the scene and sends the event to 
+	 * the hit object, if one was hit. 
+	 * 
+	 *  It dispatches it on two ways: calling dispatchEvent() on the target element 
+	 *  and going through the tree up to the root xml3d element invoking all 
+	 *  on[type] attribute code. 
+	 * 
+	 * @param type the type string according to the W3 DOM MouseEvent
+	 * @param button which mouse button is pressed, if any
+	 * @param x the screen x-coordinate
+	 * @param y the screen y-coordinate 
+	 * @param (optional) event the W3 DOM MouseEvent, if present (currently not when SpiderGL's blur event occurs)
+	 * @param (optional) target the element to which the event is to be dispatched. If this is 
+	 * 			not given, the currentPickObj will be taken or the xml3d element, if no hit occured. 
+	 * 
+	 */
+	XML3DHandler.prototype.dispatchMouseEvent = function(type, button, x, y, event, target) {
+
+		// init event
+		var evt = null; 
+		if(event === null || event === undefined) 
+		{
+			evt = document.createEvent("MouseEvents");
+			evt.initMouseEvent(	type,
+							// canBubble, cancelable, view, detail
+						   	true, true, window, 0, 
+						   	// screenX, screenY, clientX, clientY 
+						   	0, 0, x, y,  
+						   	// ctrl, alt, shift, meta, button 
+						   	false, false, false, false, button, 
+						   	// relatedTarget
+						   	null);
+		}
+		else
+			evt = event;
+
+		// adapt type to not clash with events spidergl listens to 
+		//evt.type = "xml3d" + type; 
+		
+		// find event target
+		var tar = null;		
+		if(target !== undefined && target !== null)
+			tar = target; 
+		else if(this.scene.xml3d.currentPickObj)
+			tar = this.scene.xml3d.currentPickObj.node;
+		else
+			tar = this.scene.xml3d;
+				
+		// dispatch
+		tar.dispatchEvent(evt);
+		
+		// trigger on[event] attributes 
+		var ontype = "on" + type; 
+		if (this.scene.xml3d.currentPickObj)
+		{
+			var currentObj = this.scene.xml3d.currentPickObj.node;
+			var evtMethod = currentObj.getAttribute(ontype);
+			if (evtMethod && currentObj.evalMethod) {
+				evtMethod = new Function(evtMethod);
+				evtMethod.call(currentObj);
+			}
+			
+			//Make sure the event method didn't remove picked object from the tree
+			if (currentObj && currentObj.parentNode)
+			{
+				while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
+				{
+					currentObj = currentObj.parentNode;
+					evtMethod = currentObj.getAttribute(ontype);
+					if (evtMethod && currentObj.evalMethod) {
+						evtMethod = new Function(evtMethod);
+						evtMethod.call(currentObj);
+					}
+				}
+			}
+		}
+	}; 
+	
+	/** 
+	 * Adds position and normal attributes to the given event. 
+	 * 
+	 * @param event
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	XML3DHandler.prototype.initExtendedMouseEvent = function(event, x, y) { 
+				
+		var handler = this;
+		var scene = this.scene;
+		
+		event.__defineGetter__("normal", function() {
+			handler.renderPickedNormals(scene.xml3d.currentPickObj, x, y); 
+			var v = scene.xml3d.currentPickNormal.v;
+			return new XML3DVec3(v[0], v[1], v[2]);
+		});
+		event.__defineGetter__("position", function() {return scene.xml3d.currentPickPos;});
+	}; 
+	
 	/**
 	 * This method is called by SpiderGL each time a mouseUp event is triggered on the canvas
 	 * 
@@ -528,86 +615,24 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @return
 	 */
 	XML3DHandler.prototype.mouseUp = function(gl, button, x, y) {	
+		
 		if (this.isDragging)
+		{
 			this.needPickingDraw = true;
-		
-		if (this.ui.mouseUpEvent) {
-			var handler = this;
-			var scene = this.scene;
-			this.ui.mouseUpEvent.__defineGetter__("normal", function() {
-				handler.renderPickedNormals(scene.xml3d.currentPickObj, x, y); 
-				var v = scene.xml3d.currentPickNormal.v;
-				return new XML3DVec3(v[0], v[1], v[2]);
-			});
-			this.ui.mouseUpEvent.__defineGetter__("position", function() {return scene.xml3d.currentPickPos;});
+			this.isDragging = false;
 		}
 		
-		if (button == 0) {
-			this.renderPick(x, y);
-			if (this.scene.xml3d.currentPickObj)
-			{
-				var currentObj = this.scene.xml3d.currentPickObj.node;
-				var evtMethod = currentObj.getAttribute('onmouseup');
-				if (evtMethod && currentObj.evalMethod) {
-					evtMethod = new Function(evtMethod);
-					evtMethod.call(currentObj);
-				}
-				//Make sure the event method didn't remove picked object from the tree
-				if (currentObj && currentObj.parentNode)
-				{
-					while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
-					{
-						currentObj = currentObj.parentNode;
-						evtMethod = currentObj.getAttribute('onmouseup');
-						if (evtMethod && currentObj.evalMethod) {
-							evtMethod = new Function(evtMethod);
-							evtMethod.call(currentObj);
-						}
-					}
-				}
-			}
-			
-			if (!this.isDragging) {
-				//Generate onclick events to meshes
-				if (this.scene.xml3d.currentPickObj)
-				{
-					var currentObj = this.scene.xml3d.currentPickObj.node;
-					var evtMethod = currentObj.getAttribute('onclick');
-					if (evtMethod && currentObj.evalMethod) {
-						evtMethod = new Function(evtMethod);
-						evtMethod.call(currentObj);
-					}
-					//Make sure the event method didn't remove picked object from the tree
-					if (currentObj && currentObj.parentNode)
-					{
-						while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
-						{
-							currentObj = currentObj.parentNode;
-							evtMethod = currentObj.getAttribute('onclick');
-							if (evtMethod && currentObj.evalMethod) {
-								evtMethod = new Function(evtMethod);
-								evtMethod.call(currentObj);
-							}
-						}
-					}
-				}
+		this.renderPick(x, y); 
 				
-				for (var i=0; i<this.events.click.length; i++) {
-					var mue = this.ui.mouseUpEvent;
-					this.events.click[i].listener.call(this.events.click[i].node, mue);
-				}
-			} else {
-				//Mouse has moved between this mouseup event and the corresponding mousedown
-				//so we don't generate onclick events
-				this.isDragging = false;	
-			}
-			
+		var evt = null; 
+		if (this.ui.mouseUpEvent) {
+			evt = this.ui.mouseUpEvent; 
+			this.initExtendedMouseEvent(evt, x, y); 
 		}
-		for (var i=0; i<this.events.mouseup.length; i++) {
-			var mue = this.ui.mouseUpEvent;
-			this.events.mouseup[i].listener.call(this.events.mouseup[i].node, mue);
-		}
-		return false;
+		
+		this.dispatchMouseEvent("mouseup", button, x, y, evt); 
+		
+		return false; // don't redraw
 	};
 
 	/**
@@ -620,24 +645,41 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @return
 	 */
 	XML3DHandler.prototype.mouseDown = function(gl, button, x, y) {
-			var scene = this.scene;
-			if (!scene.xml3d.currentPickPos)
-				return false;
-			//this.renderPickedNormals(scene.xml3d.currentPickObj, x, y); 
-			for (var i=0; i<this.events.mousedown.length; i++) {				
-				var v = scene.xml3d.currentPickPos.v;
-				var pos = new XML3DVec3(v[0], v[1], v[2]);				
-				var handler = this;
-				this.ui.mouseDownEvent.__defineGetter__("normal", function() {
-					handler.renderPickedNormals(scene.xml3d.currentPickObj, x, y); 
-					var v = scene.xml3d.currentPickNormal.v;
-					return new XML3DVec3(v[0], v[1], v[2]);
-					});
-			    this.ui.mouseDownEvent.__defineGetter__("position", function() {return pos;});
-			    this.events.mousedown[i].listener.call(this.events.mousedown[i].node, this.ui.mouseDownEvent);
-			}
-			return false;
+
+		var scene = this.scene;
+		
+		var evt = this.ui.mouseDownEvent; 
+		this.initExtendedMouseEvent(evt, x, y); 
+		
+		this.dispatchMouseEvent("mousedown", button, x, y, evt); 
+		
+		return false; // don't redraw
 	};
+	
+	/** 
+	 * This method is called by SpiderGL each time a click event is triggered on the canvas
+	 * 
+	 * @param gl
+	 * @param button
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	XML3DHandler.prototype.click = function(gl, button, x, y) {
+
+		if (this.isDragging)
+			this.needPickingDraw = true;
+				
+		var evt = null; 
+		if (this.ui.clickEvent) {
+			evt = this.ui.clickEvent; 
+			this.initExtendedMouseEvent(evt, x, y); 
+		}
+		
+		this.dispatchMouseEvent("click", button, x, y, evt); 
+		
+		return false; // don't redraw
+	}; 
 
 	/**
 	 * This method is called by SpiderGL each time a mouseMove event is triggered on the canvas
@@ -647,24 +689,20 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @param y
 	 * @return
 	 */
-	XML3DHandler.prototype.mouseMove = function(gl, x, y) {		
+	XML3DHandler.prototype.mouseMove = function(gl, x, y) {
+		
 		if (this.ui.mouseButtonsDown[0]) {
 			this.isDragging = true;
 		}
-		//Call any global mousemove methods, they will receive the mouseMoveEvent as the single argument
-		for (var i in this.events.mousemove) {
-			var mm = this.ui.mouseMoveEvent;
-			this.events.mousemove[i].listener.call(this.events.mousemove[i].node, mm);
-		}
 		
-		//if (this.isDragging)
-		//	return false;
-
+		//Call any global mousemove methods		
+		var evt = this.ui.mouseMoveEvent; 
+		this.dispatchMouseEvent("mousemove", 0, x, y, evt, this.scene.xml3d); 
+		
 		var lastObj = null;
 		if(this.scene.xml3d.currentPickObj)
 			lastObj = this.scene.xml3d.currentPickObj.node;
 
-	try {
 		this.renderPick(x, y);
 		
 		if (this.scene.xml3d.currentPickObj)
@@ -673,70 +711,17 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			if (currentObj != lastObj)
 			{
 				//The mouse is now over a different object, so call the new object's
-				//mouseover method and the old object's mouseout method.
-				var evtMethod = currentObj.getAttribute('onmouseover');
-				if (evtMethod && currentObj.evalMethod) {
-					evtMethod = new Function(evtMethod);
-					evtMethod.call(currentObj);
-				}
-				
-				while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
-				{
-					currentObj = currentObj.parentNode;
-					evtMethod = currentObj.getAttribute('onmouseover');
-					if (evtMethod && currentObj.evalMethod) {
-						evtMethod = new Function(evtMethod);
-						evtMethod.call(currentObj);
-					}
-				}
-
-				if (lastObj) {
-					evtMethod = lastObj.getAttribute('onmouseout');
-					if (evtMethod && lastObj.evalMethod) {
-						evtMethod = new Function(evtMethod);
-						evtMethod.call(lastObj);
-					}
-
-					while(lastObj.parentNode && lastObj.parentNode.nodeName == "group")
-					{
-						lastObj = lastObj.parentNode;
-						evtMethod = lastObj.getAttribute('onmouseout');
-						if (evtMethod && lastObj.evalMethod) {
-							evtMethod = new Function(evtMethod);
-							evtMethod.call(lastObj);
-						}
-					}
-					
-					lastObj = null;
-				}
-				
+				//mouseover method
+				this.dispatchMouseEvent("mouseover", 0, x, y); 
 			}
 		} 
-		else if (lastObj) {
-			//The mouse has left the last object and is now over nothing, call
-			//mouseout on the last object.
-			var currentObj = lastObj;
-			var evtMethod = currentObj.getAttribute('onmouseout');
-			if (evtMethod && currentObj.evalMethod) {
-				evtMethod = new Function(evtMethod);
-				evtMethod.call(currentObj);
-			}
-
-			while(currentObj.parentNode.nodeName == "group")
-			{
-				currentObj = currentObj.parentNode;
-				evtMethod = currentObj.getAttribute('onmouseout');
-				if (evtMethod && currentObj.evalMethod) {
-					evtMethod = new Function(evtMethod);
-					evtMethod.call(currentObj);
-				}
-			}
+		
+		if (lastObj) {
+			//The mouse has left the last object
+			this.dispatchMouseEvent("mouseout", 0, x, y, null, lastObj); 	
 		}		
 		
-		return false;
-	} catch (e) {
-		org.xml3d.debug.logError("Error in mousemove: "+e);
-	}
+		return false; // don't redraw
 	};
 	
 	/**
@@ -746,19 +731,22 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @return
 	 */
 	XML3DHandler.prototype.mouseOut = function(gl) {
-		for (var i in this.events.mouseout) {
-			var mm = this.ui.mouseMoveEvent;
-			this.events.mouseout[i].listener.call(this.events.mouseout[i].node, mm);
-		}
-		return false;
+		
+		this.dispatchMouseEvent("mouseout", 0, 
+				this.ui.mousePos.x, this.ui.mousePos.y, 
+				this.ui.mouseMoveEvent, this.scene.xml3d);
+		
+		return false; // don't redraw
 	};
 	
 	XML3DHandler.prototype.mouseWheel = function(gl) {
-		for (var i in this.events.mousewheel) {
-			var mw = this.ui.mouseWheelEvent;
-			this.events.mousewheel[i].listener.call(this.events.mousewheel[i].node, mw);
-		}
-		return false;
+		
+		// note: mousewheel type not defined in DOM! 
+		this.dispatchMouseEvent("mousewheel", 0, 
+				this.ui.mousePos.x, this.ui.mousePos.y, 
+				this.ui.mouseWheelEvent, this.scene.xml3d);
+		
+		return false; // don't redraw
 	};
 
 	/**

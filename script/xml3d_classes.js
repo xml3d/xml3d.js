@@ -817,34 +817,39 @@ org.xml3d.isAnyURI = function(node)
 	return org.xml3d.isString(node);
 };
 
-org.xml3d.canvasEvents = {"mousedown":1, "mouseup":1, "mousemove":1, "mousewheel":1, 
-						 "framedrawn":1, "onclick":1, "click":1, "mouseout":1, "framedrawn":1};
-org.xml3d.configureXML3DEvents = function(node) {
-	node.__proto__.__addEventListener = node.__proto__.addEventListener;
-	node.__proto__.__removeEventListener = node.__proto__.removeEventListener;
+org.xml3d.elementEvents = {
+        "xml3d": { "framedrawn":1 }
+};
+org.xml3d.configureEvents = function(node) {
+    node.__proto__.__addEventListener = node.__proto__.addEventListener;
+    node.__proto__.__removeEventListener = node.__proto__.removeEventListener;
 
-	node.addEventListener = function(type, listener, useCapture) {
-		if(type in org.xml3d.canvasEvents) {
-			for (i = 0; i < this.adapters.length; i++) {
-				if (this.adapters[i].addEventListener) {
-					this.adapters[i].addEventListener(type, listener, useCapture);
-				}
-			}
-		}
-		else
-			this.__addEventListener(type, listener, useCapture);
-	};
-	node.removeEventListener = function(type, listener, useCapture) {
-		if(type in org.xml3d.canvasEvents) {
-			for (i = 0; i < this.adapters.length; i++) {
-				if (this.adapters[i].removeEventListener) {
-					this.adapters[i].removeEventListener(type, listener, useCapture);
-				}
-			}
-		}
-		else
-			this.__removeEventListener(type, listener, useCapture);
-	};
+    node.addEventListener = function(type, listener, useCapture) {
+                
+        if(org.xml3d.elementEvents[node.nodeName] 
+        && type in org.xml3d.elementEvents[node.nodeName]) {
+            for (i = 0; i < this.adapters.length; i++) {
+                if (this.adapters[i].addEventListener) {
+                    this.adapters[i].addEventListener(type, listener, useCapture);
+                }
+            }
+        }
+        else
+            this.__addEventListener(type, listener, useCapture);
+    };
+    node.removeEventListener = function(type, listener, useCapture) {
+        
+        if(org.xml3d.elementEvents[node.nodeName] 
+        && type in org.xml3d.elementEvents[node.nodeName]) {
+            for (i = 0; i < this.adapters.length; i++) {
+                if (this.adapters[i].removeEventListener) {
+                    this.adapters[i].removeEventListener(type, listener, useCapture);
+                }
+            }
+        }
+        else
+            this.__removeEventListener(type, listener, useCapture);
+    };
 };
 
 // MeshTypes
@@ -892,6 +897,8 @@ org.xml3d.event.HANDLED = 2;
  */
 org.xml3d.classInfo.Xml3dNode = function(node, c)
 {
+    org.xml3d.configureEvents(node);
+    
 	node.xml3ddocument = c.doc;
 	node.adapters      = [];
 
@@ -959,8 +966,6 @@ org.xml3d.classInfo.Xml3dNode = function(node, c)
 org.xml3d.classInfo.xml3d = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
-
-	org.xml3d.configureXML3DEvents(node);
 
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
@@ -1623,7 +1628,6 @@ org.xml3d.classInfo.data = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -1944,7 +1948,6 @@ org.xml3d.classInfo.defs = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -2093,7 +2096,6 @@ org.xml3d.classInfo.defs = function(node, context)
 org.xml3d.classInfo.group = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
-
 
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
@@ -2760,7 +2762,6 @@ org.xml3d.classInfo.mesh = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -3416,7 +3417,6 @@ org.xml3d.classInfo.transform = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -3795,7 +3795,6 @@ org.xml3d.classInfo.shader = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -4039,7 +4038,6 @@ org.xml3d.classInfo.shader = function(node, context)
 org.xml3d.classInfo.light = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
-
 
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
@@ -4731,7 +4729,6 @@ org.xml3d.classInfo.lightshader = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -4976,7 +4973,6 @@ org.xml3d.classInfo.script = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -5213,7 +5209,6 @@ org.xml3d.classInfo.float = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -5411,7 +5406,6 @@ org.xml3d.classInfo.float = function(node, context)
 org.xml3d.classInfo.float2 = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
-
 
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
@@ -5611,7 +5605,6 @@ org.xml3d.classInfo.float3 = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -5809,7 +5802,6 @@ org.xml3d.classInfo.float3 = function(node, context)
 org.xml3d.classInfo.float4 = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
-
 
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
@@ -6009,7 +6001,6 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -6207,7 +6198,6 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 org.xml3d.classInfo.int = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
-
 
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
@@ -6407,7 +6397,6 @@ org.xml3d.classInfo.bool = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -6605,7 +6594,6 @@ org.xml3d.classInfo.bool = function(node, context)
 org.xml3d.classInfo.texture = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
-
 
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
@@ -7097,7 +7085,6 @@ org.xml3d.classInfo.img = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -7284,7 +7271,6 @@ org.xml3d.classInfo.video = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
 
-
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
 	node._style = org.xml3d.initString(node.getAttribute("style"), "");
@@ -7470,7 +7456,6 @@ org.xml3d.classInfo.video = function(node, context)
 org.xml3d.classInfo.view = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
-
 
 	node._id = org.xml3d.initString(node.getAttribute("id"), null);
 	node._class = org.xml3d.initString(node.getAttribute("class"), null);
@@ -8219,34 +8204,32 @@ org.xml3d.methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
 };
 
 org.xml3d.methods.xml3dGenerateRay = function(x, y) {
-	for (i = 0; i < this.adapters.length; i++) {
-		if (this.adapters[i].generateRay) {
-			return this.adapters[i].generateRay(x, y);
-		}
-	}
+    for (i = 0; i < this.adapters.length; i++) {
+        if (this.adapters[i].generateRay) {
+            return this.adapters[i].generateRay(x, y);
+        }
+    }
 };
 
 org.xml3d.methods.xml3dGetBoundingBox = org.xml3d.methods.groupGetBoundingBox;
 
 org.xml3d.methods.groupGetLocalMatrix = function() { 
-	
-	var xfmNode = this.getTransformNode();  
-	if(xfmNode)
-	{
-		for (i = 0; i < xfmNode.adapters.length; i++) {
-			if (xfmNode.adapters[i].getMatrix) {
-				var sglMat = xfmNode.adapters[i].getMatrix();
-				var xml3dMat = new XML3DMatrix(sglMat); 
-				
-				// transpose because we want row-major order
-				return xml3dMat.transpose(); 
-			}
-		}
-	}
-	
-	return new XML3DMatrix(); 
+    
+    var xfmNode = this.getTransformNode();  
+    if(xfmNode)
+    {
+        for (i = 0; i < xfmNode.adapters.length; i++) {
+            if (xfmNode.adapters[i].getMatrix) {
+                var sglMat = xfmNode.adapters[i].getMatrix();                
+                var xml3dMat = new XML3DMatrix(sglMat); 
+                
+                return xml3dMat.transpose(); 
+            }
+        }
+    }
+    
+    return new XML3DMatrix(); 
 }; 
-
 
 /** return the bounding box that is the bounding box of all children. 
  */
@@ -8285,19 +8268,19 @@ org.xml3d.methods.meshGetBoundingBox = function() {
 };
 
 org.xml3d.methods.XML3DGraphTypeGetWorldMatrix = function() {
-	
-	var node = this; 
-	
-	var mat = new XML3DMatrix(); 
-	
-	// accumulate matrix until xml3d tag is reached 
-	while(node.nodeName !== "xml3d")
-	{
-		if(node.nodeName === "group")
-			mat = node.getLocalMatrix().multiply(mat); 
-		
-		node = node.parentNode; 
-	}
-	
-	return mat; 
+    
+    var node = this; 
+    
+    var mat = new XML3DMatrix(); 
+    
+    // accumulate matrix until xml3d tag is reached 
+    while(node.nodeName !== "xml3d")
+    {
+        if(node.nodeName === "group")
+            mat = node.getLocalMatrix().multiply(mat); 
+        
+        node = node.parentNode; 
+    }
+    
+    return mat; 
 };

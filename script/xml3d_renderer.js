@@ -413,7 +413,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		}
 		
 		// calculate ray 
-		ray.origin = new XML3DVec3(-viewMat[12], -viewMat[13], -viewMat[14]); 
+		
+		ray.origin = this.renderer.currentView.position;  
 		ray.direction = new XML3DVec3(farHit[0] - nearHit[0], 
 									  farHit[1] - nearHit[1],
 									  farHit[2] - nearHit[2]);

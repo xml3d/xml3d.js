@@ -1624,7 +1624,10 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(
 			hitNormal.z = this.node.currentPickNormal.v[2]; 
 		}
 		
-	 	return this.node.currentPickObj.node;
+		if(this.node.currentPickObj !== null)
+			return this.node.currentPickObj.node;
+		else
+			return null; 
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.generateRay = function(x, y) {

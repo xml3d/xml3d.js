@@ -8225,3 +8225,40 @@ org.xml3d.methods.xml3dGenerateRay = function(x, y) {
 		}
 	}
 };
+
+org.xml3d.methods.groupGetLocalMatrix = function() { 
+	
+	var xfmNode = this.getTransformNode();  
+	if(xfmNode)
+	{
+		for (i = 0; i < xfmNode.adapters.length; i++) {
+			if (xfmNode.adapters[i].getMatrix) {
+				var sglMat = xfmNode.adapters[i].getMatrix();
+				var xml3dMat = new XML3DMatrix(sglMat); 
+				
+				// transpose because we want row-major order
+				return xml3dMat.transpose(); 
+			}
+		}
+	}
+	
+	return new XML3DMatrix(); 
+}; 
+
+org.xml3d.methods.XML3DGraphTypeGetWorldMatrix = function() {
+	
+	var node = this; 
+	
+	var mat = new XML3DMatrix(); 
+	
+	// accumulate matrix until xml3d tag is reached 
+	while(node.nodeName !== "xml3d")
+	{
+		if(node.nodeName === "group")
+			mat = node.getLocalMatrix().multiply(mat); 
+		
+		node = node.parentNode; 
+	}
+	
+	return mat; 
+};

@@ -8217,3 +8217,11 @@ org.xml3d.methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
 		}
 	}
 };
+
+org.xml3d.methods.xml3dGenerateRay = function(x, y) {
+	for (i = 0; i < this.adapters.length; i++) {
+		if (this.adapters[i].generateRay) {
+			return this.adapters[i].generateRay(x, y);
+		}
+	}
+};

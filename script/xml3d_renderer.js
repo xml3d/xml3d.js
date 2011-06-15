@@ -392,7 +392,49 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.renderer.renderPickedNormals(pickedObj, screenX, screenY);
 		this.normalPickBuffer.unbind();
 	};
+	
+	//Uses gluUnProject() to transform the 2D screen point to a 3D ray 
+	// returns an XML3DRay
+	XML3DHandler.prototype.generateRay = function(screenX, screenY) { 
+		
+		// setup input to unproject
+		var viewport = new Array(); 
+		viewport[0] = 0; 
+		viewport[1] = 0; 
+		viewport[2] = this.renderer.width; 
+		viewport[3] = this.renderer.height;
+		
+		var viewMat = this.renderer.viewMatrix;
+		var projMat = this.renderer.projMatrix; 
+		
+		var ray = new XML3DRay(); 
+		
+		var nearHit = new Array();
+		var farHit = new Array(); 
+		
+		// do unprojections
+		if(false === GLU.unProject(screenX, screenY, 0, 
+											 viewMat, projMat, viewport, nearHit))
+		{
+			return ray; 
+		}
 
+		if(false === GLU.unProject(screenX, screenY, 1,
+				 							 viewMat, projMat, viewport, farHit))
+		{
+			return ray; 
+		}
+		
+		// calculate ray 
+		ray.origin = new XML3DVec3(-viewMat[12], -viewMat[13], -viewMat[14]); 
+		ray.direction = new XML3DVec3(farHit[0] - nearHit[0], 
+									  farHit[1] - nearHit[1],
+									  farHit[2] - nearHit[2]);
+		ray.direction = ray.direction.normalize(); 
+		
+		return ray;
+	}; 
+	
 	//This function is called by SpiderGL at regular intervals to determine if a redraw of the 
 	//scene is required
 	XML3DHandler.prototype.update = function() {
@@ -884,6 +926,8 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.height = height;
 	this.drawableObjects = [];
 	this.zPos = [];
+	this.viewMatrix = new sglM4(); // view matrix of last call to render()
+	this.projMatrix = new sglM4(); // projection matrix of last call to render()
 	
 	this.collectDrawableObjects(new sglM4(), this.drawableObjects, this.lights, null, true);
 };
@@ -1048,10 +1092,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	
 	var xform = new SglTransformStack();
 	xform.view.load(this.camera.getViewMatrix());
-	var projMatrix = this.camera
-	.getProjectionMatrix(this.width / this.height);
-	var viewMatrix = this.camera.getViewMatrix();
-	xform.projection.load(projMatrix);
+	this.projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
+	this.viewMatrix = this.camera.getViewMatrix();
+	xform.projection.load(this.projMatrix);
 
 	//Setup lights
 	var light, lightOn;
@@ -1066,7 +1109,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	};
 	for ( var j = 0; j < slights.length; j++) {
 		var light = slights[j][1];
-		var params = light.getParameters(viewMatrix);
+		var params = light.getParameters(this.viewMatrix);
 		if (!params)
 			continue; // TODO: Shrink array
 		lightParams.positions.set(params.position, j*3);
@@ -1579,6 +1622,12 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(
 		
 	 	return this.node.currentPickObj.node;
 };
+
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.generateRay = function(x, y) {
+	
+	var glY = this.factory.handler.getCanvasHeight() - y - 1; 
+	return this.factory.handler.generateRay(x, glY); 		
+}; 
 
 // Adapter for <view>
 org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {

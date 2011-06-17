@@ -458,9 +458,12 @@ XML3DMatrix.prototype.multiply = function (that)
 
 XML3DMatrix.prototype.mulVec3 = function(that, w) {
 	return new XML3DVec3(
-			this._m11 * that.x + this._m21 * that.y + this._m31 * that.z + this._m41 * w, 
-			this._m12 * that.x + this._m22 * that.y + this._m32 * that.z + this._m42 * w, 
-			this._m13 * that.x + this._m23 * that.y + this._m33 * that.z + this._m43 * w
+//		this._m11 * that.x + this._m21 * that.y + this._m31 * that.z + this._m41 * w, 
+//		this._m12 * that.x + this._m22 * that.y + this._m32 * that.z + this._m42 * w, 
+//		this._m13 * that.x + this._m23 * that.y + this._m33 * that.z + this._m43 * w
+		this._m11 * that.x + this._m12 * that.y + this._m13 * that.z + this._m14 * w, 
+		this._m21 * that.x + this._m22 * that.y + this._m23 * that.z + this._m24 * w, 
+		this._m31 * that.x + this._m32 * that.y + this._m33 * that.z + this._m34 * w
 			);
 };
 
@@ -1142,4 +1145,138 @@ else {
 	}
 }
 
-/***********************************************************************/
+//-----------------------------------------------------------------
+
+/** returns an XML3DBox, which is an axis-aligned box, described 
+ *  by two vectors min and max.
+ *   
+ *  @param min (optional) instance of XML3DVec3 for the smallest point of the box
+ *  @param max (optional) instance of XML3DVec3 for the biggest point of the box   
+ */
+XML3DBox = function(min, max) 
+{
+	XML3DDataType.call(this);
+	if(arguments.length === 2) 
+	{
+		this.min = min; 
+		this.max = max; 
+	}
+	else
+	{
+		this.makeEmpty(); 
+	}
+	
+	return this; 
+};
+
+XML3DBox.prototype             = new XML3DDataType();
+XML3DBox.prototype.constructor = XML3DBox;
+
+/** @returns XML3DVec3 describing the size of the box */ 
+XML3DBox.prototype.size = function() 
+{
+	var v = this.max.subtract(this.min);
+	if(v.x < 0)
+		v.x = 0; 
+	if(v.y < 0)
+		v.y = 0; 
+	if(v.z < 0)
+		v.z = 0; 
+	
+	return v; 
+}; 
+
+/** @returns XML3DVec3 that is the center of the box */ 
+XML3DBox.prototype.center = function() 
+{
+	return this.min.add(this.max).scale(0.5); 
+}; 
+
+/** sets min's components to Number.MAX_VALUE and max' components to -Number.MAX_VALUE.
+ */
+XML3DBox.prototype.makeEmpty = function() 
+{
+	this.min = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE); 
+	this.max = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
+}; 
+
+/** @returns whether at least one of min's components is bigger than the corresponding 
+ *  component in max.
+ */
+XML3DBox.prototype.isEmpty = function() 
+{
+	return (this.min.x > this.max.x 
+		 || this.min.y > this.max.y
+		 || this.min.z > this.max.z); 
+};
+
+/** updates the min or max accoring to the given point or bounding box. 
+ * 
+ * @param that the object used for extension, which can be a XML3DVec3 or XML3DBox
+ */
+XML3DBox.prototype.extend = function(that)
+{
+	var min, max; 
+	if(that.constructor === XML3DBox)
+	{	
+		min = that.min; 
+		max = that.max; 
+	}
+	else if(that.constructor === XML3DVec3)
+	{
+		min = that; 
+		max = that; 
+	}
+	else
+		return; 
+
+	if(min.x < this.min.x)
+		this.min.x = min.x;
+	if(min.y < this.min.y)
+		this.min.y = min.y; 
+	if(min.z < this.min.z)
+		this.min.z = min.z;
+	
+	if(max.x > this.max.x)
+		this.max.x = max.x;
+	if(max.y > this.max.y)
+		this.max.y = max.y; 
+	if(max.z > this.max.z)
+		this.max.z = max.z;
+}; 
+
+//-----------------------------------------------------------------
+
+/** returns an XML3DRay that has an origin and a direction.
+ * 
+ * If the arguments are not given, the ray's origin is (0,0,0) and 
+ * points down the negative z-axis.  
+ *   
+ *  @param origin (optional) instance of XML3DVec3 for the origin of the ray
+ *  @param direction (optional) instance of XML3DVec3 for the direction of the ray   
+ */
+XML3DRay = function(origin, direction) 
+{
+	XML3DDataType.call(this);
+	
+	switch(arguments.length) {		
+	case 1: 
+		this.origin = origin; 
+		this.direction = new XML3DVec3(0, 0, -1); 
+		break; 
+		
+	case 2: 
+		this.origin = origin; 
+		this.direction = direction; 
+		
+	default: 
+		this.origin = new XML3DVec3(0, 0, 0);
+		this.direction = new XML3DVec3(0, 0, -1);
+		break; 
+	}
+	
+	return this; 
+};
+
+XML3DRay.prototype             = new XML3DDataType();
+XML3DRay.prototype.constructor = XML3DRay;

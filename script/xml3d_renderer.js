@@ -50,9 +50,9 @@ org.xml3d.webgl.supported = function() {
 	canvas.width = 1;
 	canvas.height = 1;
 	try {
-		var gl = canvas.getContext("experimental-webgl");
+		gl = canvas.getContext("experimental-webgl");
 	} catch(e) {
-		var gl = null;
+		gl = null;
 	}
 	return !!gl;
 };
@@ -134,7 +134,7 @@ org.xml3d.webgl.createCanvas = function(xml3dElement, index) {
 	// First set the computed for some important attributes, they might be overwritten 
 	// by class attribute later
 	var sides = [ "top", "right", "bottom", "left" ];
-	var colorStr = styleStr = widthStr = paddingStr = "";
+	var colorStr = ""; var styleStr = ""; var widthStr = ""; var paddingStr = "";
 	for (i in sides) {
 		colorStr += org.xml3d.util.getStyle(xml3dElement, "border-" + sides[i] + "-color") + " ";
 		styleStr += org.xml3d.util.getStyle(xml3dElement, "border-" + sides[i] + "-style") + " ";

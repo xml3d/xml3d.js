@@ -560,30 +560,51 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		
 		// trigger on[event] attributes 
 		var ontype = "on" + type; 
-		if (this.scene.xml3d.currentPickObj)
+		
+		var currentObj = tar;
+		var evtMethod = currentObj.getAttribute(ontype);
+		if (evtMethod && currentObj.evalMethod) {
+			evtMethod = new Function(evtMethod);
+			evtMethod.call(currentObj);
+		}
+		
+		//Make sure the event method didn't remove picked object from the tree
+		if (currentObj && currentObj.parentNode)
 		{
-			var currentObj = this.scene.xml3d.currentPickObj.node;
-			var evtMethod = currentObj.getAttribute(ontype);
-			if (evtMethod && currentObj.evalMethod) {
-				evtMethod = new Function(evtMethod);
-				evtMethod.call(currentObj);
-			}
-			
-			//Make sure the event method didn't remove picked object from the tree
-			if (currentObj && currentObj.parentNode)
+			while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
 			{
-				while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
-				{
-					currentObj = currentObj.parentNode;
-					evtMethod = currentObj.getAttribute(ontype);
-					if (evtMethod && currentObj.evalMethod) {
-						evtMethod = new Function(evtMethod);
-						evtMethod.call(currentObj);
-					}
+				currentObj = currentObj.parentNode;
+				evtMethod = currentObj.getAttribute(ontype);
+				if (evtMethod && currentObj.evalMethod) {
+					evtMethod = new Function(evtMethod);
+					evtMethod.call(currentObj);
 				}
 			}
 		}
 	}; 
+	
+	/** 
+	 * Creates an DOM mouse event based on the given event and returns it
+	 * 
+	 * @param event the event to copy
+	 * @return the new event 
+	 */
+	XML3DHandler.prototype.copyMouseEvent = function(event)
+	{
+		evt = document.createEvent("MouseEvents");
+		evt.initMouseEvent(	event.type,
+						// canBubble, cancelable, view, detail
+					   	event.bubbles, event.cancelable, event.view, event.detail, 
+					   	// screenX, screenY, clientX, clientY 
+					   	event.screenX, event.screenY, event.clientX, event.clientY,   
+					   	// ctrl, alt, shift, meta, button 
+					   	event.ctrlKey, event.shiftKey, event.metaKey, event.button,  
+					   	// relatedTarget
+					   	event.relatedTarget);
+		
+		return evt; 
+	}; 
+	
 	
 	/** 
 	 * Adds position and normal attributes to the given event. 
@@ -627,7 +648,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				
 		var evt = null; 
 		if (this.ui.mouseUpEvent) {
-			evt = this.ui.mouseUpEvent; 
+			evt = this.copyMouseEvent(this.ui.mouseUpEvent);
 			this.initExtendedMouseEvent(evt, x, y); 
 		}
 		
@@ -649,7 +670,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 
 		var scene = this.scene;
 		
-		var evt = this.ui.mouseDownEvent; 
+		var evt = this.copyMouseEvent(this.ui.mouseDownEvent); 
 		this.initExtendedMouseEvent(evt, x, y); 
 		
 		this.dispatchMouseEvent("mousedown", button, x, y, evt); 
@@ -673,7 +694,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				
 		var evt = null; 
 		if (this.ui.clickEvent) {
-			evt = this.ui.clickEvent; 
+			evt = this.copyMouseEvent(this.ui.clickEvent); 
 			this.initExtendedMouseEvent(evt, x, y); 
 		}
 		
@@ -683,7 +704,9 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	}; 
 
 	/**
-	 * This method is called by SpiderGL each time a mouseMove event is triggered on the canvas
+	 * This method is called by SpiderGL each time a mouseMove event is triggered on the canvas. 
+	 * 
+	 * This method also triggers mouseover and mouseout events of objects in the scene. 
 	 * 
 	 * @param gl
 	 * @param x
@@ -697,30 +720,38 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		}
 		
 		//Call any global mousemove methods		
-		var evt = this.ui.mouseMoveEvent; 
+		var evt = this.copyMouseEvent(this.ui.mouseMoveEvent); 
 		this.dispatchMouseEvent("mousemove", 0, x, y, evt, this.scene.xml3d); 
 		
 		var lastObj = null;
 		if(this.scene.xml3d.currentPickObj)
 			lastObj = this.scene.xml3d.currentPickObj.node;
 
-		this.renderPick(x, y);
-		
-		if (this.scene.xml3d.currentPickObj)
+		if(x === 144)
 		{
-			var currentObj = this.scene.xml3d.currentPickObj.node;
-			if (currentObj != lastObj)
+			var blub = 5; 
+		}
+		this.renderPick(x, y);
+		var curObj = null; 
+		if(this.scene.xml3d.currentPickObj)
+			curObj = this.scene.xml3d.currentPickObj.node;
+		
+		// trigger mouseover and mouseout
+		if(curObj !== lastObj)
+		{
+			if (curObj)
 			{
 				//The mouse is now over a different object, so call the new object's
 				//mouseover method
-				this.dispatchMouseEvent("mouseover", 0, x, y); 
+				this.dispatchMouseEvent("mouseover", 0, x, y);
 			}
-		} 
-		
-		if (lastObj) {
-			//The mouse has left the last object
-			this.dispatchMouseEvent("mouseout", 0, x, y, null, lastObj); 	
-		}		
+			
+			if (lastObj) 
+			{
+				//The mouse has left the last object
+				this.dispatchMouseEvent("mouseout", 0, x, y, null, lastObj); 	
+			}
+		}
 		
 		return false; // don't redraw
 	};

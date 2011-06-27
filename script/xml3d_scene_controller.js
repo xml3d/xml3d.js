@@ -208,6 +208,7 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 		org.xml3d.debug.logWarning("Trying to resolve view '" + activeView +"'");
 		activeView = document.getElementById(activeView);
 	}
+	
 	// if activeView is not defined or the reference is not valid
 	// use the first view element
 	if (!activeView)
@@ -217,6 +218,34 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 			return org.xml3d.xml3dNS;
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	}
+	
+	if(!activeView)
+	{
+		// no view present at all
+		// create new one and append it to defs element
+		org.xml3d.debug.logWarning("No view defined. Trying to create view.");
+		
+		// create it
+		activeView = document.createElementNS(org.xml3d.xml3dNS, "view");
+		
+		var id = "created_org.xml3d.Xml3dSceneController.view_"; 
+		id += "" + Math.random(); 
+		activeView.setAttribute("id", id); 
+		
+		// append it to defs 
+		var defsEl =  document.evaluate('//xml3d:xml3d//xml3d:defs[1]', document, function() {
+			return org.xml3d.xml3dNS;
+		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		
+		if(!defsEl)
+		{
+			defsEl = document.createElementNS(org.xml3d.xml3dNS, "defs");
+			this.xml3d.appendChild(defsEl); 
+		}
+		
+		defsEl.appendChild(activeView);
+	}
+	
 	return activeView;
 };
 

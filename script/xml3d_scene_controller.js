@@ -114,10 +114,7 @@ org.xml3d.Xml3dSceneController = function(xml3d) {
 	
 	this.camera = new org.xml3d.Camera(view);
 	this.timer = new org.xml3d.util.Timer();
-	this.prevPos = function() {
-		this.x = -1;
-		this.y = -1;
-	};
+	this.prevPos = {x: -1, y: -1};
 	
 	this.mode = "examine";
 	this.revolveAroundPoint = new XML3DVec3(0, 0, 0);

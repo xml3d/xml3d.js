@@ -844,11 +844,11 @@ XML3DRotation.prototype.constructor = XML3DRotation;
 
 
 XML3DRotation.prototype.multiply = function(that) {
-	return new XML3DRotation(this.w * that.x + this.x * that.w
-			+ this.y * that.z - this.z * that.y, this.w * that.y + this.y
-			* that.w + this.z * that.x - this.x * that.z, this.w * that.z
-			+ this.z * that.w + this.x * that.y - this.y * that.x, this.w
-			* that.w - this.x * that.x - this.y * that.y - this.z * that.z);
+	return new XML3DRotation(
+			this.w * that.x + this.x * that.w + this.y * that.z - this.z * that.y, 
+			this.w * that.y + this.y * that.w + this.z * that.x - this.x * that.z, 
+			this.w * that.z	+ this.z * that.w + this.x * that.y - this.y * that.x, 
+			this.w * that.w - this.x * that.x - this.y * that.y - this.z * that.z);
 };
 
 XML3DRotation.fromMatrix = function(mat) {
@@ -1088,6 +1088,17 @@ XML3DRotation.prototype.interpolate = function(that, t) {
 XML3DRotation.prototype.toString = function() {
 	return "XML3DRotation(" + this.axis + ", " + this.angle + ")";
 };
+
+/** Replaces the existing rotation with one computed from the two 
+ * vectors passed as arguments.
+ */
+XML3DRotation.prototype.setRotation = function(from, to) {
+	
+	var axis = from.cross(to); 
+	var angle = Math.acos(from.dot(to)); 
+	
+	this.setAxisAngle(axis, angle); 
+}; 
 
 
 //-----------------------------------------------------------------

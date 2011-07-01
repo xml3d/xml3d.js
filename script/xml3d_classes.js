@@ -8190,7 +8190,7 @@ org.xml3d.methods.viewGetUpVector = function() {
 };
 
 org.xml3d.methods.viewLookAt = function(point) {
-	var vector = this.position.subtract(point);
+	var vector = point.subtract(this.position);
 	vector = vector.normalize();
 	this.setDirection(vector);
 };

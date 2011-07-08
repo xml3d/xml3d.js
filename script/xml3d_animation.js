@@ -60,48 +60,79 @@ org.xml3d.animation.XML3DAnimationManager = function() {
 	
 	if (xml3d && xml3d.update)
 		this.updateElement = xml3d;
-
 };
 
 org.xml3d.animation.XML3DAnimationManager.prototype.init = function() {
-	var ois = document.getElementsByTagNameNS(org.xml3d.x3dNS, 'OrientationInterpolator');
-	for(var i = 0; i < ois.length; i++)
-	{
-		if (ois[i].hasAttribute('id'))
-		{
-			this.interpolators[ois[i].getAttribute('id')] = new org.xml3d.animation.X3DOrientationInterpolation(ois[i]);
-		}
-	}
-	var ois = document.getElementsByTagNameNS(org.xml3d.x3dNS, 'PositionInterpolator');
-	for(var i = 0; i < ois.length; i++)
-	{
-		if (ois[i].hasAttribute('id'))
-		{
-			this.interpolators[ois[i].getAttribute('id')] = new org.xml3d.animation.X3DPositionInterpolation(ois[i]);
-		}
-	}
+	
+	this.updateInterpolators();
+
 	var a = this;
+	
+	window.addEventListener("DOMNodeInserted", 
+		function(evt) { a.onNodeInserted(evt); });	
+	window.addEventListener("DOMNodeRemoved", 
+		function(evt) { a.onNodeRemoved(evt); });
+		
 	window.setInterval(function() { a.progress(); }, 30);
 };
+
+org.xml3d.animation.XML3DAnimationManager.prototype.addInterpolator = function(pol) {
+
+	var cons = null; 
+	if(pol.localName === 'OrientationInterpolator')
+		cons = org.xml3d.animation.X3DOrientationInterpolation; 
+	else if(pol.localName === 'PositionInterpolator')
+		cons = org.xml3d.animation.X3DPositionInterpolation;
+	else
+		return; // don't support others
+	
+	if (pol.hasAttribute('id'))
+	{
+		if (this.interpolators[pol.getAttribute('id')] == undefined)
+		{
+			this.interpolators[pol.getAttribute('id')] = new cons(pol);
+		}
+	}
+}; 
+
+org.xml3d.animation.XML3DAnimationManager.prototype.onNodeInserted = function(evt) { 
+	
+	if(evt.target.namespaceURI !== org.xml3d.x3dNS)
+		return; 
+	
+	this.addInterpolator(evt.target); 
+};
+
+org.xml3d.animation.XML3DAnimationManager.prototype.onNodeRemoved = function(evt) { 
+	
+	var t = evt.target;
+	if(t.namespaceURI !== org.xml3d.x3dNS)
+		return; 
+	
+	if(t.localName !== 'OrientationInterpolator' 
+	&& t.localName !== 'PositionInterpolator')	 
+		return; 
+	
+	if(t.hasAttribute('id'))
+	{
+		if(this.interpolators[t.getAttribute('id')])
+			this.interpolators[t.getAttribute('id')] = undefined; 
+	}
+}; 
+
+
 
 org.xml3d.animation.XML3DAnimationManager.prototype.updateInterpolators = function() {
 	var ois = document.getElementsByTagNameNS(org.xml3d.x3dNS, 'OrientationInterpolator');
 	for(var i = 0; i < ois.length; i++)
 	{
-		if (ois[i].hasAttribute('id'))
-		{
-			if (this.interpolators[ois[i].getAttribute('id')] == undefined)
-				this.interpolators[ois[i].getAttribute('id')] = new org.xml3d.animation.X3DOrientationInterpolation(ois[i]);
-		}
+		this.addInterpolator(ois[i]); 
 	}
+	
 	var ois = document.getElementsByTagNameNS(org.xml3d.x3dNS, 'PositionInterpolator');
 	for(var i = 0; i < ois.length; i++)
 	{
-		if (ois[i].hasAttribute('id'))
-		{
-			if (this.interpolators[ois[i].getAttribute('id')] == undefined)
-			this.interpolators[ois[i].getAttribute('id')] = new org.xml3d.animation.X3DPositionInterpolation(ois[i]);
-		}
+		this.addInterpolator(ois[i]); 
 	}
 };
 
@@ -138,6 +169,9 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 		field.nodeValue = "";
 		trans.setAttributeNode(field);
 	}
+	
+	// force interpolator to re-read it's attributes in case they changed 
+	interpolator.isInit = false; 
 	
 	if(interpolator.animations[field] !== undefined) {
 		if (interpolator.animations[field].running)

@@ -91,6 +91,9 @@ org.xml3d.animation.XML3DAnimationManager.prototype.addInterpolator = function(p
 		if (this.interpolators[pol.getAttribute('id')] == undefined)
 		{
 			this.interpolators[pol.getAttribute('id')] = new cons(pol);
+			var a = this;
+			pol.addEventListener("DOMAttrModified",
+					function(evt) { a.onAttrModified(evt); });
 		}
 	}
 }; 
@@ -116,10 +119,20 @@ org.xml3d.animation.XML3DAnimationManager.prototype.onNodeRemoved = function(evt
 	if(t.hasAttribute('id'))
 	{
 		if(this.interpolators[t.getAttribute('id')])
-			this.interpolators[t.getAttribute('id')] = undefined; 
+		{
+			this.interpolators[t.getAttribute('id')] = undefined;
+		}
 	}
 }; 
 
+org.xml3d.animation.XML3DAnimationManager.prototype.onAttrModified = function(evt) {
+
+	var t = evt.target;
+
+	// note: no checks, we will always have a valid interpolator
+
+	this.interpolators[t.getAttribute('id')].isInit = false;
+};
 
 
 org.xml3d.animation.XML3DAnimationManager.prototype.updateInterpolators = function() {
@@ -169,10 +182,7 @@ org.xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(an
 		field.nodeValue = "";
 		trans.setAttributeNode(field);
 	}
-	
-	// force interpolator to re-read it's attributes in case they changed 
-	interpolator.isInit = false; 
-	
+
 	if(interpolator.animations[field] !== undefined) {
 		if (interpolator.animations[field].running)
 		{

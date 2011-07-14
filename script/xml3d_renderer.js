@@ -1644,7 +1644,7 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(
 			hitNormal.z = this.node.currentPickNormal.v[2]; 
 		}
 		
-		if(this.node.currentPickObj !== null)
+		if(this.node.currentPickObj)
 			return this.node.currentPickObj.node;
 		else
 			return null; 

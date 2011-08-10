@@ -82,7 +82,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 		
 		meshInfo.vbos.index = indexBuffer;
 		meshInfo.isIndexed = true;
-		delete dataTable.index;
+		//delete dataTable.index;
 		
 	} else {
 		//?
@@ -92,7 +92,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 	for (var attr in dataTable) {
 		var a = dataTable[attr];
 		
-		if(a.isXflow || attr == "xflowShader")
+		if(a.isXflow || attr == "xflowShader" || attr == "index")
 			continue;
 		
 		var attrBuffer = gl.createBuffer();
@@ -158,11 +158,11 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 		
 		var vbo = this.mesh.vbos[name];
 
-		gl.enableVertexAttribArray(shaderAttribute);		
+		gl.enableVertexAttribArray(shaderAttribute.location);		
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
 	}
-	
+	org.xml3d.webgl.checkError(this.gl);
 //Draw the object
 	if (this.mesh.isIndexed) {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.vbos.index);
@@ -177,7 +177,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 		var shaderAttribute = sAttributes[name];
 		if (!shaderAttribute)
 			continue;
-		gl.disableVertexAttribArray(shaderAttribute);
+		gl.disableVertexAttribArray(shaderAttribute.location);
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 };

@@ -72,6 +72,16 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			requestAnimFrame(handler._tick);
 		};
 		
+		this.redraw = function(reason, forcePickingRedraw) {
+			if (this.needDraw !== undefined) {
+				this.needDraw = true;
+				this.needPickingDraw = forcePickingRedraw !== undefined ? forcePickingRedraw : true;
+			} else {
+				//This is a callback from a texture, don't need to redraw the picking buffers
+				handler.needDraw = true;
+			}
+		};
+		
 		//Create renderer
 		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
 		
@@ -130,15 +140,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		//Framebuffers used for render-to-texture
 		this.rttBuffers = {};
 		var handler = this;		
-		this.redraw = function(reason, forcePickingRedraw) {
-			if (this.needDraw !== undefined) {
-				this.needDraw = true;
-				this.needPickingDraw = forcePickingRedraw !== undefined ? forcePickingRedraw : true;
-			} else {
-				//This is a callback from a texture, don't need to redraw the picking buffers
-				handler.needDraw = true;
-			}
-		};
 		
 		this.gatherPostProcessShaders();
 	}
@@ -175,19 +176,11 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		
 		gl.pixelStorei(gl.PACK_ALIGNMENT,                     1);
 		gl.pixelStorei(gl.UNPACK_ALIGNMENT,                   1);
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,                true);
-		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,     false);
-		gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,                false);
+		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,     true);
+		gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
 		
 		this._tick();
-		
-
-		
-		//_sglManageCanvas(this.canvasId, this, 25.0);
-		//_sglUnmanageCanvasOnLoad(this.canvasId);
-		//SGL_DefaultStreamMappingPrefix = "";
-
-		//this.draw(this.gl);
 	};
 	
 	XML3DHandler.prototype.gatherPostProcessShaders = function() {
@@ -541,7 +534,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		                                 
 		var scene = this.scene;
 		
-		//var evt = this.copyMouseEvent(this.ui.mouseDownEvent); 
+		var evt = this.copyMouseEvent(evt); 
 		this.initExtendedMouseEvent(evt, pos.x, pos.y); 
 		
 		this.dispatchMouseEvent("mousedown", evt.button, pos.x, pos.y, evt); 
@@ -590,7 +583,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		}
 		
 		//Call any global mousemove methods		
-		//var evt = this.copyMouseEvent(this.ui.mouseMoveEvent); 
+		var evt = this.copyMouseEvent(evt); 
 		this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt, this.scene.xml3d); 
 		
 		var lastObj = null;

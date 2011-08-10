@@ -6,9 +6,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	this.program = null;
 	this.gl = this.factory.handler.gl;
 	
-	//Stores texture node adapters
-	this.textures = [];
-	
 	var renderer = this.factory.renderer;
 	this.dataAdapter = renderer.dataFactory.getAdapter(this.node);
 	if(this.dataAdapter)
@@ -16,10 +13,16 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	else
 		org.xml3d.debug.logError("Data adapter for a shader element could not be created!");
 	
+	//Collect textures (if any)
+	this.textures = {};
 	var dataTable = this.dataAdapter.createDataTable();
 	for (var param in dataTable) {
-		if (param.isTexture)
-			this.textures.push(factory.getAdapter(param.node, org.xml3d.webgl.Renderer.prototype));
+		if (dataTable[param].isTexture) {
+			this.textures[param] = {
+				adapter : factory.getAdapter(dataTable[param].node, org.xml3d.webgl.Renderer.prototype),
+				info	: { texUnit : 0 }
+			};		
+		}
 	}
 };
 
@@ -65,13 +68,9 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getStandardShaderSource = function(scriptURL, sources) {
 	//Need to check for textures to decide which internal shader to use
-	var hasTextures = false; var vertexColors = false;
+	var vertexColors = false;
 	var dataTable = this.dataAdapter.createDataTable();
-	
-	for (var item in dataTable) {
-		if (dataTable[item].isTexture) 
-			hasTextures = true;
-	}	
+	var hasTextures = this.textures.length > 0;		
 
 	if (scriptURL == "urn:xml3d:shader:phong" && hasTextures)
 		scriptURL = "urn:xml3d:shader:texturedphong";
@@ -141,9 +140,9 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = functio
 		programObject.attributes[att.name] = attInfo;
 	}
 	
-	org.xml3d.webgl.checkError(this.gl);
-	
+	//TODO: shader not picking up light uniforms?
 	//Tally shader uniforms and samplers
+	var texCount = 0;
 	var numUniforms = gl.getProgramParameter(prg, gl.ACTIVE_UNIFORMS);
 	for (var i=0; i<numUniforms; i++) {
 		var uni = gl.getActiveUniform(prg, i);
@@ -154,13 +153,16 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = functio
 		uniInfo.glType = uni.type;
 		uniInfo.location = gl.getUniformLocation(prg, uni.name);
 		
-		if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE)
+		if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
+			uniInfo.texUnit = texCount;
+			this.textures[uni.name].info = uniInfo;
+
 			programObject.samplers[uni.name] = uniInfo;
+			texCount++;
+		}
 		else
 			programObject.uniforms[uni.name] = uniInfo;
 	}
-	
-	org.xml3d.webgl.checkError(this.gl);
 	
 	return programObject;
 };
@@ -259,9 +261,10 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 	//Set shader-specific uniforms
 	for (var uniform in dataTable) {
 		var u = dataTable[uniform];	
-		if (u.isTexture) continue;
-		
-		if (sp.uniforms[uniform]) {
+		if (u.isTexture) {		
+			this.setUniform(gl, sp.samplers[uniform], this.textures[uniform].info.texUnit);
+		} 
+		else if (sp.uniforms[uniform]) {
 			this.setUniform(gl, sp.uniforms[uniform], u.data);
 		}
 	}
@@ -280,7 +283,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniform = function(gl, u, value) {
 	switch (u.glType) {
 		case gl.BOOL:
-		case gl.INT:		gl.uniform1i(u.location, value); break;	
+		case gl.INT:		
+		case gl.SAMPLER_2D:	gl.uniform1i(u.location, value); break;	
 		
 		case gl.BOOL_VEC2: 	
 		case gl.INT_VEC2:	gl.uniform2iv(u.location, value); break;
@@ -306,15 +310,17 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniform = function(gl, u, 
 	}
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindSamplers = function() {
-	for (var i=0; i<this.textures.length; i++) {
-		this.textures[i].bind(i);
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindSamplers = function() {	
+	for (var name in this.textures) {
+		var tex = this.textures[name];
+		tex.adapter.bind(tex.info.texUnit);		
 	}
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.unbindSamplers = function() {
-	for (var i=0; i<this.textures.length; i++) {
-		this.textures[i].unbind(i);
+	for (var name in this.textures) {
+		var tex = this.textures[name];
+		tex.adapter.unbind(tex.info.texUnit);
 	}
 };
 

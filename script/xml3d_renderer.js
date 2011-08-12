@@ -24,26 +24,6 @@
 /*                                                                       */
 /*************************************************************************/
 
-//Check, if basics have already been defined
-var org;
-if (!org || !org.xml3d)
-  throw new Error("xml3d.js has to be included first");
-if (!window.SGL_VERSION_STRING)
-	throw new Error("spidergl.js has to be included first");
-
-
-// Create global symbol org.xml3d.webgl
-if (!org.xml3d.webgl)
-	org.xml3d.webgl = {};
-else if (typeof org.xml3d.webgl != "object")
-	throw new Error("org.xml3d.webgl already exists and is not an object");
-
-//Create global symbol org.xml3d.xflow
-if (!org.xml3d.xflow)
-	org.xml3d.xflow = {};
-else if (typeof org.xml3d.xflow != "object")
-	throw new Error("org.xml3d.xflow already exists and is not an object");
-
 
 org.xml3d.webgl.supported = function() {
 	var canvas = document.createElement("canvas");
@@ -475,9 +455,8 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 				
 		if (!shader)
 		{			
-			//var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
-			//TODO: this function
-			this.bindStandardShaderProgram(gl, "urn:xml3d:shader:flat");
+			//TODO: Find a way to bind a default shader program if none is given
+			this.bindDefaultShaderProgram(this.handler.gl, "urn:xml3d:shader:flat");
 			
 			/*if (sp) {
 				if (RGBColor && document.defaultView
@@ -496,6 +475,8 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 		parameters["normalMatrix"] = xform.viewSpaceNormalMatrix;
 		parameters["cameraPosition"] = xform.modelSpaceViewerPosition;
 		
+		if (!shader)
+			continue; //TODO: remove once default shader program is in place
 		shader.enable(parameters);		
 		shape.draw(shader);
 		shader.disable();

@@ -66,13 +66,19 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 
 }));
 
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.isEmpty = function(obj) {
+	for (var p in obj) {
+		return false;
+	}
+	return true;
+};
+
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getStandardShaderSource = function(scriptURL, sources) {
 	//Need to check for textures to decide which internal shader to use
 	var vertexColors = false;
-	var dataTable = this.dataAdapter.createDataTable();
-	var hasTextures = this.textures.length > 0;		
+	var dataTable = this.dataAdapter.createDataTable();	
 
-	if (scriptURL == "urn:xml3d:shader:phong" && hasTextures)
+	if (scriptURL == "urn:xml3d:shader:phong" && !this.isEmpty(this.textures))
 		scriptURL = "urn:xml3d:shader:texturedphong";
 	
 	if (dataTable.useVertexColor && dataTable.useVertexColor.data[0] == true)

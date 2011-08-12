@@ -644,7 +644,7 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 	{
 	   return this.dataTable;
 	}
-
+	var gl = this.factory.handler.gl;
 	var clampToGL = function(gl, modeStr) {
 		if (modeStr == "clamp")
 			return gl.CLAMP_TO_EDGE;

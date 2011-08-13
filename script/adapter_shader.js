@@ -6,10 +6,11 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	this.program = null;
 	this.gl = this.factory.handler.gl;
 	
-	var renderer = this.factory.renderer;
-	this.dataAdapter = renderer.dataFactory.getAdapter(this.node);
+	this.renderer = this.factory.renderer;
+	
+	this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
 	if(this.dataAdapter)
-		this.dataAdapter.registerObserver(renderer);
+		this.dataAdapter.registerObserver(this.renderer);
 	else
 		org.xml3d.debug.logError("Data adapter for a shader element could not be created!");
 	
@@ -66,6 +67,12 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 
 }));
 
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
+	if (evt.attribute == "script") {
+		this.destroy();
+	}
+};
+
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.isEmpty = function(obj) {
 	for (var p in obj) {
 		return false;
@@ -84,7 +91,20 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getStandardShaderSource = fun
 	if (dataTable.useVertexColor && dataTable.useVertexColor.data[0] == true)
 		scriptURL += "vcolor";
 	
-	if (g_shaders[scriptURL]) {
+	if (scriptURL == "urn:xml3d:shader:phong" || scriptURL == "urn:xml3d:shader:phongvcolor" || scriptURL == "urn:xml3d:shader:texturedphong")
+	{
+		// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
+		var sfrag = g_shaders[scriptURL].fragment;
+		var tail = sfrag.substring(68, sfrag.length);
+		var maxLights = "#ifdef GL_ES\nprecision highp float;\n" +
+				"#endif\n\n const int MAXLIGHTS = "+ this.renderer.lights.length.toString() + ";\n";
+
+		var frag = maxLights + tail;
+		
+		sources.vs = g_shaders[scriptURL].vertex;
+		sources.fs = frag;
+	} 
+	else if (g_shaders[scriptURL]) {
 		sources.vs = g_shaders[scriptURL].vertex;
 		sources.fs = g_shaders[scriptURL].fragment;
 	}
@@ -202,7 +222,11 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindProgram = function() {
 	this.gl.useProgram(this.shaderProgram.handle);
 };
 
-//Can set these right after linking? Or do they have to be set before each draw?
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.destroy = function() {
+	if (this.shaderProgram)
+		this.gl.deleteProgram(this.shaderProgram.handle);
+};
+
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setStandardUniforms = function() {
 	var sp = this.shaderProgram;
 	var gl = this.gl;
@@ -243,13 +267,12 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setStandardUniforms = functio
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.enable = function(globalUniforms) {
-	org.xml3d.webgl.checkError(this.gl);
-	this.bindProgram();
-	org.xml3d.webgl.checkError(this.gl);
+	//org.xml3d.webgl.checkError(this.gl);
+	this.bindProgram();	
 	this.setUniformVariables(globalUniforms);
-	org.xml3d.webgl.checkError(this.gl);
+	//org.xml3d.webgl.checkError(this.gl);
 	this.bindSamplers();
-	org.xml3d.webgl.checkError(this.gl);
+	//org.xml3d.webgl.checkError(this.gl);
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.disable = function() {
@@ -267,13 +290,21 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 	//Set shader-specific uniforms
 	for (var uniform in dataTable) {
 		var u = dataTable[uniform];	
+		if (u.clean === true)
+			continue;
+		
 		if (u.isTexture) {		
 			this.setUniform(gl, sp.samplers[uniform], this.textures[uniform].info.texUnit);
 		} 
 		else if (sp.uniforms[uniform]) {
-			this.setUniform(gl, sp.uniforms[uniform], u.data);
+			var data = u.data.length == 1 ? u.data[0] : u.data;
+			this.setUniform(gl, sp.uniforms[uniform], data);
 		}
+		
+		this.dataAdapter.dataTable[uniform].clean = true;
 	}
+	
+	var herp = gl.getUniformLocation(sp.handle, "lightPositions");
 	
 	//Set global uniforms (lights, space conversion matrices)
 	for (var uniform in globalUniforms) {

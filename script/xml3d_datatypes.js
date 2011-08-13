@@ -416,8 +416,10 @@ XML3DMatrix.prototype._setMatrixInternal = function(m11, m12, m13, m14,
  */
 XML3DMatrix.prototype.multiply = function (that) 
 {
-	if (that.m44) 
+	if (that.m44 !== undefined) 
 	{
+		//TODO: check multiplication, looks like it should be column-major instead of row-major because we have to
+		//adjust transform matrix multiplications with .transpose() in several places to get the right transformation
 		return new XML3DMatrix(
 				this._m11 * that.m11 + this._m12 * that.m21 + this._m13 * that.m31 + this._m14 * that.m41, 
 				this._m11 * that.m12 + this._m12 * that.m22 + this._m13 * that.m32 + this._m14 * that.m42, 
@@ -441,7 +443,7 @@ XML3DMatrix.prototype.multiply = function (that)
 	}
 
 
-	if (that.w) 
+	if (that.w !== undefined) 
 	{
 		return new XML3DRotation(this._m11 * that.x + this._m12 * that.y
 				+ this._m13 * that.z + this._m14 * that.w, this._m21 * that.x + this._m22 * that.y
@@ -659,6 +661,20 @@ XML3DMatrix.prototype.toGL = function() {
 			this._m14, this._m24, this._m34, this._m44 ];
 };
 
+XML3DMatrix.prototype.to3x3GL = function() {
+	return [this._m11, this._m21, this._m31, this._m12, this._m22,
+			this._m32, this._m13, this._m23, this._m33,];
+};
+
+XML3DMatrix.prototype.getColumnV3 = function(colnum) {
+	switch (colnum) {
+	case 1: return new XML3DVec3(this._m11, this._m21, this._m31);
+	case 2: return new XML3DVec3(this._m12, this._m22, this._m32);
+	case 3: return new XML3DVec3(this._m13, this._m23, this._m33);
+	case 4: return new XML3DVec3(this._m14, this._m24, this._m34);
+	default: return null;
+	}
+};
 
 //------------------------------------------------------------
 
@@ -1099,6 +1115,10 @@ XML3DRotation.prototype.setRotation = function(from, to) {
 	
 	this.setAxisAngle(axis, angle); 
 }; 
+
+XML3DRotation.prototype.toGL = function() {
+	return [this.x, this.y, this.z, this.w];
+};
 
 
 //-----------------------------------------------------------------

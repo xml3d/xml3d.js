@@ -193,10 +193,11 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.opaqueObjects = [];
 	this.transparentObjects = [];
 	this.zPos = [];
-	this.viewMatrix = new sglM4(); // view matrix of last call to render()
-	this.projMatrix = new sglM4(); // projection matrix of last call to render()
+	this.viewMatrix = new XML3DMatrix(); // view matrix of last call to render()
+	this.projMatrix = new XML3DMatrix(); // projection matrix of last call to render()
 	
-	this.collectDrawableObjects(new sglM4(), this.opaqueObjects, this.transparentObjects, this.lights, null, true);
+	
+	this.collectDrawableObjects(new XML3DMatrix(), this.opaqueObjects, this.transparentObjects, this.lights, null, true);
 };
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
@@ -237,7 +238,7 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 	var adapter = this.factory.getAdapter(evt.newValue, org.xml3d.webgl.Renderer.prototype);
 	
 	//Traverse parent nodes to build any inherited shader and transform elements
-	var transform = adapter.applyTransformMatrix(new sglM4());
+	var transform = adapter.applyTransformMatrix(new XML3DMatrix());
 	var visible = true;
 	var shader = null;	
 	if (adapter.getShader)
@@ -348,11 +349,15 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		this.camera = this.initCamera();
 	
 	//TODO: port matrix calculations away from SpiderGL
-	var xform = new SglTransformStack();
+	/*var xform = new SglTransformStack();
 	xform.view.load(this.camera.getViewMatrix());
 	this.projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
 	this.viewMatrix = this.camera.getViewMatrix();
-	xform.projection.load(this.projMatrix);
+	xform.projection.load(this.projMatrix);*/
+	
+	var xform = {};
+	xform.view = this.camera.getViewMatrix();
+	xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
 	
 	//Setup lights
 	var light, lightOn;
@@ -367,7 +372,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	};
 	for ( var j = 0; j < slights.length; j++) {
 		var light = slights[j][1];
-		var params = light.getParameters(this.viewMatrix);
+		var params = light.getParameters(xform.view);
 		if (!params)
 			continue; // TODO: Shrink array
 		lightParams.positions.set(params.position, j*3);
@@ -415,9 +420,9 @@ org.xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, sor
 		}
 		
 		var trafo = meshAdapter._transform;
-		var center = new SglVec3(meshAdapter.bbox.center);
-		center.v = sglMulM4V3(trafo, center.v, 1.0);
-		center.v = sglMulM4V3(xform.view._s[0], center.v, 1.0);
+		var center = new XML3DVec3(meshAdapter.bbox.center);
+		center = trafo.multiply(new XML3DRotation(center.x, center.y, center.z, 1.0));
+		center = xform.view.multiply(new XML3DRotation(center.x, center.y, center.z, 1.0));
 		sortedObjectArray[i] = [ i, center.z ]; 
 	}
 	
@@ -451,8 +456,10 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 		if (shape._visible == false)
 			continue;
 		
-		xform.model.load(transform);
-				
+		//xform.model.load(transform);
+		xform.model = transform;
+		xform.modelView = this.camera.getModelViewMatrix(xform.model);
+		
 		if (!shader)
 		{			
 			//TODO: Find a way to bind a default shader program if none is given
@@ -470,10 +477,10 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 			
 		}
 
-		parameters["modelViewMatrix"] = xform.modelViewMatrix;
-		parameters["modelViewProjectionMatrix"] = xform.modelViewProjectionMatrix;
-		parameters["normalMatrix"] = xform.viewSpaceNormalMatrix;
-		parameters["cameraPosition"] = xform.modelSpaceViewerPosition;
+		parameters["modelViewMatrix"] = xform.modelView.toGL();
+		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView).toGL();
+		parameters["normalMatrix"] = this.camera.getNormalMatrixGL(xform.modelView);
+		parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3);
 		
 		if (!shader)
 			continue; //TODO: remove once default shader program is in place
@@ -1041,7 +1048,8 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 		var r = sglRotationAngleAxisM4V(n.rotation.angle, n.rotation.axis.toGL());
 		var so = sglRotationAngleAxisM4V(n.scaleOrientation.angle, n.scaleOrientation.axis.toGL() );
 		
-		this.matrix = sglMulM4(sglMulM4(sglMulM4(sglMulM4(sglMulM4(t, c), r), so),s), sglInverseM4(so), nc);
+		var m = sglMulM4(sglMulM4(sglMulM4(sglMulM4(sglMulM4(t, c), r), so),s), sglInverseM4(so), nc);
+		this.matrix = new XML3DMatrix(m);
 	}
 	return this.matrix;
 };

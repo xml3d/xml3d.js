@@ -1,10 +1,11 @@
 
-
 //Adapter for <texture>
 org.xml3d.webgl.XML3DTextureRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.gl = factory.renderer.handler.gl;
-	this.info = this.initTexture(factory, node);
+	this.factory = factory;
+	this.node = node;
+	this.info = this.initTexture();
 	this.bind = function(texUnit) { return; };
 	this.unbind = function(texUnit) { return; };
 };
@@ -12,7 +13,10 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype = new org.xml3d.webgl.Render
 org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DTextureRenderAdapter;
 
 org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.notifyChanged = function(evt) {
-	//this.shaderAdapter.notifyChanged(evt);
+	if (evt.attribute == "src") {
+		this.destroy();
+		this.info = this.initTexture();
+	}
 };
 
 org.xml3d.webgl.XML3DTextureRenderAdapter.prototype._bind = function(texUnit) {
@@ -25,12 +29,13 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype._unbind = function(texUnit) 
 	this.gl.bindTexture(this.info.glType, null);
 };
 
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function(factory, node) {
-	var dataTable = factory.renderer.dataFactory.getAdapter(node).createDataTable();
+org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
+	var dataTable = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
 	var gl = this.gl;
+	var name = this.node.name;
 	
-	if (!dataTable[node.name]) {
-		org.xml3d.debug.logError("No data table entry found for "+node.name);
+	if (!dataTable[name]) {
+		org.xml3d.debug.logError("No data table entry found for "+name);
 		return;
 	}
 	
@@ -43,11 +48,11 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function(facto
 			premultiplyAlpha : true	
 	};
 	
-	opt.minFilter = dataTable[node.name].options.minFilter;
-	opt.magFilter = dataTable[node.name].options.magFilter;
-	opt.wrapS = dataTable[node.name].options.wrapS;
-	opt.wrapT = dataTable[node.name].options.wrapT;
-	opt.generateMipmap = dataTable[node.name].options.generateMipmap;
+	opt.minFilter = dataTable[name].options.minFilter;
+	opt.magFilter = dataTable[name].options.magFilter;
+	opt.wrapS = dataTable[name].options.wrapS;
+	opt.wrapT = dataTable[name].options.wrapT;
+	opt.generateMipmap = dataTable[name].options.generateMipmap;
 	
 	//Create texture handle
 	var texture = gl.createTexture();
@@ -86,7 +91,7 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function(facto
 		
 		loaded();
 	};
-	image.src = dataTable[node.name].src[0];
+	image.src = dataTable[name].src[0];
 	
 	return info;
 };
@@ -97,4 +102,6 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.destroy = function() {
 	
 	this.gl.deleteTexture(this.info.handle);
 	this.info = null;
+	this.bind = function(texUnit) { return; };
+	this.unbind = function(texUnit) { return; };
 };

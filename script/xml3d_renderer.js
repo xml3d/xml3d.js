@@ -420,7 +420,7 @@ org.xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, sor
 		}
 		
 		var trafo = meshAdapter._transform;
-		var center = new XML3DVec3(meshAdapter.bbox.center);
+		var center = meshAdapter.bbox.center();
 		center = trafo.multiply(new XML3DRotation(center.x, center.y, center.z, 1.0));
 		center = xform.view.multiply(new XML3DRotation(center.x, center.y, center.z, 1.0));
 		sortedObjectArray[i] = [ i, center.z ]; 
@@ -679,15 +679,13 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		gl.disable(gl.BLEND);
 		
 		if (needPickingDraw ) {
-			var volumeMax = new SglVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
-			var volumeMin = new SglVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
+			var volumeMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
-			var xform = new SglTransformStack();
-			xform.view.load(this.camera.getViewMatrix());
-			var projMatrix = this.camera
-			.getProjectionMatrix(this.width / this.height);
-			xform.projection.load(projMatrix);
+			var xform = {};
+			xform.view = this.camera.getViewMatrix();
+			xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
 
 			for (var i = 0; i < this.zPos.length; i++) {
 				var meshAdapter = this.drawableObjects[this.zPos[i][0]];
@@ -707,25 +705,22 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 				
 				if (obj.isValid == false)
 					continue;
-				xform.model.load(transform);
+				xform.model = transform;
+				xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
 				var id = 1.0 - (1+j) / 255.0;
 
 				var parameters = {
-					id : id,
-						min : volumeMin.v,
-						max : volumeMax.v,
+						id : id,
+						min : volumeMin.toGL(),
+						max : volumeMax.toGL(),
 						modelMatrix : transform,
-					modelViewProjectionMatrix : xform.modelViewProjectionMatrix,
-					normalMatrix : xform.viewSpaceNormalMatrix
+						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView).toGL(),
+						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 				};
 				
 				shape.render(shader, parameters);
-				xform.model.pop();
-
-			}
-			xform.view.pop();
-			xform.projection.pop();
+			}			
 		}
 		this.readPixels(false, x, y);
 		gl.disable(gl.DEPTH_TEST);
@@ -751,17 +746,16 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	var shape = pickedObj;
 	var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:pickedNormals");
 	
-	var xform = new SglTransformStack();
-	xform.view.load(this.camera.getViewMatrix());
-	var projMatrix = this.camera
-	.getProjectionMatrix(this.width / this.height);
-	xform.projection.load(projMatrix);
-	xform.model.load(transform);
+	var xform = {};
+	xform.view = this.camera.getViewMatrix();
+	xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
+	xform.model = transform;
+	xform.modelView = this.camera.getModelViewMatrix(xform.model);
 	
 	var parameters = {
 		modelViewMatrix : transform,
-		modelViewProjectionMatrix : xform.modelViewProjectionMatrix,
-		normalMatrix : xform.viewSpaceNormalMatrix
+		modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView).toGL(),
+		normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 	};
 
 	shader = {};
@@ -769,9 +763,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	shape.render(shader, parameters);
 	
 	this.readPixels(true, screenX, screenY);
-	
-	xform.model.pop();
-	xform.projection.pop();
+
 	gl.disable(gl.DEPTH_TEST);
 };
 
@@ -789,18 +781,18 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 	try {
 		gl.readPixels(screenX, screenY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
 		
-		var vec = new SglVec3(0, 0, 0);
-		vec.v[0] = data[0] / 255;
-		vec.v[1] = data[1] / 255;
-		vec.v[2] = data[2] / 255;
+		var vec = new XML3DVec3(0, 0, 0);
+		vec.x = data[0] / 255;
+		vec.y = data[1] / 255;
+		vec.z = data[2] / 255;
 		
 		if(normals) {
-			vec.v = sglSubV3S(sglMulV3S(vec.v, 2.0), 1.0);
+			vec = vec.scale(2.0).subtract(new XML3DVec3(1.0));
 			this.scene.xml3d.currentPickNormal = vec;
 		} else {		
 			var objId = 255 - data[3] - 1;
 			if (objId >= 0 && data[3] > 0) {
-				vec = vec.mul(this.bbMax.sub(this.bbMin)).add(this.bbMin);
+				vec = vec.multiply(this.bbMax.subtract(this.bbMin)).add(this.bbMin);
 				this.scene.xml3d.currentPickPos = vec;
 				var pickedObj = this.drawableObjects[this.zPos[objId][0]];
 				this.scene.xml3d.currentPickObj = pickedObj;
@@ -861,23 +853,28 @@ org.xml3d.webgl.Renderer.prototype.renderShader = function(gl, quadMesh, shader,
 
 //Helper to expand an axis aligned bounding box around another object's bounding box
 org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
-	var bmin = sglV3(bbox.min);
-	var bmax = sglV3(bbox.max);
-	var bbmin = sglMulM4V3(trafo, bmin, 1.0);
-	var bbmax = sglMulM4V3(trafo, bmax, 1.0);
+	var bmin = new XML3DVec3(bbox.min);
+	var bmax = new XML3DVec3(bbox.max);
+	var bbmin = trafo.mulVec3(bmin, 1.0);
+	var bbmax = trafo.mulVec3(bmax, 1.0);
 
-	if (bbmin[0] < min.x)
-		min.x = bbmin[0];
-	if (bbmin[1] < min.y)
-		min.y = bbmin[1];
-	if (bbmin[2] < min.z)
-		min.z = bbmin[2];
-	if (bbmax[0] > max.x)
-		max.x = bbmax[0];
-	if (bbmax[1] > max.y)
-		max.y = bbmax[1];
-	if (bbmax[2] > max.z)
-		max.z = bbmax[2];
+	if (bbmin.x < min.x)
+		min.x = bbmin.x;
+	if (bbmin.y < min.y)
+		min.y = bbmin.y;
+	if (bbmin.z < min.z)
+		min.z = bbmin.z;
+	if (bbmax.x > max.x)
+		max.x = bbmax.x;
+	if (bbmax.y > max.y)
+		max.y = bbmax.y;
+	if (bbmax.z > max.z)
+		max.z = bbmax.z;
+};
+
+org.xml3d.webgl.Renderer.prototype.bindDefaultShaderProgram = function(gl, name) {
+	
+
 };
 
 /**
@@ -1082,146 +1079,20 @@ org.xml3d.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = org.xml3d.
 
 // Utility functions
 org.xml3d.webgl.calculateBoundingBox = function(tArray) {
-	var bbox = new SglBox3();
+	var bbox = new XML3DBox();
+	
 	if (!tArray || tArray.length < 3)
 		return bbox;
 
 	// Initialize with first position
-	for (var j=0; j<3; ++j) {
-		bbox.min[j] = tArray[j];
-		bbox.max[j] = tArray[j];
-	}
+	bbox.extend(tArray[0], tArray[1], tArray[2]);
 
 	var val = 0.0;
 	for (var i=3; i<tArray.length; i+=3) {
-		for (var j=0; j<3; ++j) {
-			val = tArray[i+j];
-			if (bbox.min[j] > val) bbox.min[j] = val;
-			if (bbox.max[j] < val) bbox.max[j] = val;
-		}
+		bbox.extend(new XML3DVec3(tArray[i], tArray[i+1], tArray[i+2]));
 	}
 	return bbox;
 };
-
-
-org.xml3d.webgl.Renderer.wrapShaderProgram = function(gl, sp) {
-	var shader = {};
-	shader.bind = function() {
-		gl.useProgram(sp);
-	};
-	var i = 0, ok = true;
-	var loc = null, obj = null;
-	for (i = 0; ok; ++i) {
-		try {
-			obj = gl.getActiveUniform(sp, i);
-		} catch (eu) {
-		}
-		if (gl.getError() !== 0) {
-			break;
-		}
-		loc = gl.getUniformLocation(sp, obj.name);
-
-		switch (obj.type) {
-		case gl.SAMPLER_2D:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniform1i(loc, val);
-				};
-			})(loc));
-			break;
-		case gl.SAMPLER_CUBE:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniform1i(loc, val);
-				};
-			})(loc));
-			break;
-		case gl.BOOL:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniform1i(loc, val);
-				};
-			})(loc));
-			break;
-		case gl.FLOAT:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniform1f(loc, val);
-				};
-			})(loc));
-			break;
-		case gl.FLOAT_VEC2:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniform2f(loc, val[0], val[1]);
-				};
-			})(loc));
-			break;
-		case gl.FLOAT_VEC3:
-			if (obj.size == 1) {
-				shader.__defineSetter__(obj.name, (function(loc) {
-					return function(val) {
-						gl.uniform3f(loc, val[0], val[1], val[2]);
-					};
-				})(loc));
-			} else {
-				shader.__defineSetter__(obj.name, (function(loc) {
-					return function(val) {
-						gl.uniform3fv(loc, val);
-					};
-				})(loc));
-			}
-			break;
-		case gl.FLOAT_VEC4:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniform4f(loc, val[0], val[1], val[2], val[3]);
-				};
-			})(loc));
-			break;
-		case gl.FLOAT_MAT2:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniformMatrix2fv(loc, false, new WebGLFloatArray(val));
-				};
-			})(loc));
-			break;
-		case gl.FLOAT_MAT3:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniformMatrix3fv(loc, false, new WebGLFloatArray(val));
-				};
-			})(loc));
-			break;
-		case gl.FLOAT_MAT4:
-			shader.__defineSetter__(obj.name, (function(loc) {
-				return function(val) {
-					gl.uniformMatrix4fv(loc, false, new WebGLFloatArray(val));
-				};
-			})(loc));
-			break;
-		default:
-			org.xml3d.debug.logInfo('GLSL program variable ' + obj.name
-					+ ' has unknown type ' + obj.type);
-		}
-
-	}
-	for (i = 0; ok; ++i) {
-		try {
-			obj = gl.getActiveAttrib(sp, i);
-		} catch (ea) {
-		}
-		if (gl.getError() !== 0) {
-			break;
-		}
-		loc = gl.getAttribLocation(sp, obj.name);
-		shader[obj.name] = loc;
-	}
-	return shader;
-};
-
-
-
 
 
 

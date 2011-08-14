@@ -227,6 +227,13 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.destroy = function() {
 		this.gl.deleteProgram(this.shaderProgram.handle);
 };
 
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
+	Array.forEach(this.textures, function(t) {
+		t.adapter.destroy();
+	});
+	this.destroy();
+};
+
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setStandardUniforms = function() {
 	var sp = this.shaderProgram;
 	var gl = this.gl;

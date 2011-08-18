@@ -81,14 +81,12 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 		indexBuffer.glType = this.getGLTypeFromArray(gl, mIndices);
 		
 		meshInfo.vbos.index = indexBuffer;
-		meshInfo.isIndexed = true;
-		//delete dataTable.index;
-		
+		meshInfo.isIndexed = true;		
 	} else {
 		//?
 		meshInfo.isIndexed = false;
 	}
-	org.xml3d.webgl.checkError(this.gl);
+
 	for (var attr in dataTable) {
 		var a = dataTable[attr];
 		
@@ -105,7 +103,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 		
 		meshInfo.vbos[attr] = attrBuffer;
 	}
-	org.xml3d.webgl.checkError(this.gl);
+
 	this._bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 	
 	this.isValid = true;
@@ -148,7 +146,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMetho
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	var sAttributes = shader.program.attributes;
 	var gl = this.gl;
-	org.xml3d.webgl.checkError(this.gl);
 	
 //Bind vertex buffers
 	for (var name in this.mesh.vbos) {
@@ -162,7 +159,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
 	}
-	org.xml3d.webgl.checkError(this.gl);
+	
 //Draw the object
 	if (this.mesh.isIndexed) {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.vbos.index);
@@ -170,7 +167,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	} else {
 		gl.drawArrays(this.mesh.glType, 0, this.mesh.vbos.position.length);
 	}
-	org.xml3d.webgl.checkError(this.gl);
 	
 //Unbind vertex buffers
 	for (var name in this.mesh.vbos) {
@@ -180,6 +176,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 		gl.disableVertexAttribArray(shaderAttribute.location);
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+	
+	return this.mesh.vbos.position.length / 9;
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.destroy = function() {

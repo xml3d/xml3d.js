@@ -2,8 +2,6 @@
 var org;
 if (!org || !org.xml3d)
   throw new Error("xml3d.js has to be included first");
-if (!window.SGL_VERSION_STRING)
-	throw new Error("spidergl.js has to be included first");
 
 
 // Create global symbol org.xml3d.webgl
@@ -618,17 +616,16 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		// trigger mouseover and mouseout
 		if(curObj !== lastObj)
 		{
+			if (lastObj) 
+			{
+				//The mouse has left the last object
+				this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, lastObj); 	
+			}
 			if (curObj)
 			{
 				//The mouse is now over a different object, so call the new object's
 				//mouseover method
 				this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y);
-			}
-			
-			if (lastObj) 
-			{
-				//The mouse has left the last object
-				this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, lastObj); 	
 			}
 		}
 		

@@ -151,7 +151,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = functio
 							handle		: prg };
 	
 	gl.useProgram(prg);
-	org.xml3d.webgl.checkError(this.gl);
 	
 	//Tally shader attributes
 	var numAttributes = gl.getProgramParameter(prg, gl.ACTIVE_ATTRIBUTES);
@@ -270,16 +269,13 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setStandardUniforms = functio
 		this.setUniform(gl, uniform, 0.0);
 	}
 	
-	org.xml3d.webgl.checkError(this.gl);
+	//org.xml3d.webgl.checkError(this.gl);
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.enable = function(globalUniforms) {
-	//org.xml3d.webgl.checkError(this.gl);
 	this.bindProgram();	
 	this.setUniformVariables(globalUniforms);
-	//org.xml3d.webgl.checkError(this.gl);
 	this.bindSamplers();
-	//org.xml3d.webgl.checkError(this.gl);
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.disable = function() {
@@ -310,8 +306,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 		
 		this.dataAdapter.dataTable[uniform].clean = true;
 	}
-	
-	var herp = gl.getUniformLocation(sp.handle, "lightPositions");
 	
 	//Set global uniforms (lights, space conversion matrices)
 	for (var uniform in globalUniforms) {

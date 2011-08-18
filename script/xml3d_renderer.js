@@ -381,6 +381,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		lightParams.visible.set(params.visibility, j*3);
 	}
 	
+	var stats = { objCount : 0, triCount : 0 };
+	
 	//TODO: Remove sorting for opaque objects?
 	//Sort opaque objects, back to front
 	var zPosOpaque = [];
@@ -391,7 +393,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	this.sortObjects(this.transparentObjects, zPosTransparent, xform, false);
 	
 	//Render opaque objects
-	this.drawObjects(this.opaqueObjects, zPosOpaque, xform, lightParams);
+	this.drawObjects(this.opaqueObjects, zPosOpaque, xform, lightParams, stats);
 	
 	//Render transparent objects
 	if (this.transparentObjects.length > 0) {
@@ -399,13 +401,13 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		gl.enable(gl.BLEND);
 		gl.depthMask(gl.FALSE);
 	
-		this.drawObjects(this.transparentObjects, zPosTransparent, xform, lightParams);
+		this.drawObjects(this.transparentObjects, zPosTransparent, xform, lightParams, stats);
 		
 		gl.disable(gl.BLEND);
 		gl.depthMask(gl.TRUE);
 	}
 	
-	return [this.opaqueObjects.length + this.transparentObjects.length, 1]; //TODO: Num triangles
+	return [stats.objCount, stats.triCount]; //TODO: Num triangles
 };
 
 org.xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, sortedObjectArray, xform, backToFront) {
@@ -485,12 +487,13 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 		if (!shader)
 			continue; //TODO: remove once default shader program is in place
 		shader.enable(parameters);		
-		shape.draw(shader);
+		triCount += shape.draw(shader);
 		shader.disable();
-		
+		objCount++;
 	}
 	
-	
+	stats.objCount = objCount;
+	stats.triCount = triCount;
 	
 };
 

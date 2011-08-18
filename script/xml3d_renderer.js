@@ -263,9 +263,8 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 		}
 	}
 
-	adapter.collectDrawableObjects(transform, this.drawableObjects, this.lights, shader, visible);
-	this.requestRedraw("A node was added.");
-	
+	adapter.collectDrawableObjects(transform, this.opaqueObjects, this.transparentObjects, this.lights, shader, visible);
+	this.requestRedraw("A node was added.");	
 };
 
 org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
@@ -276,62 +275,6 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 		adapter.dispose();
 	this.requestRedraw("A node was removed.");
 
-};
-
-/**
- * Creates and returns the requested shader. Custom user defined shaders are handled in 
- * org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram
- * 
- * @param gl
- * @param name
- * @return
- */
-org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name) {
-	var shader = this.shaderMap[name];
-	if (!shader) {
-		var sp = {program:null, vSource:"", fSource:""};
-		
-		if (g_shaders[name] === undefined)
-		{
-			org.xml3d.debug.logError("Could not find standard shader: " + name);
-			return sp;
-		}
-		//org.xml3d.webgl.checkError(gl, "Before creating shader");
-		var prog = null;
-
-		if (name == "urn:xml3d:shader:phong" || name == "urn:xml3d:shader:phongvcolor" || name == "urn:xml3d:shader:texturedphong")
-		{
-			// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
-			var sfrag = g_shaders[name].fragment;
-			var tail = sfrag.substring(68, sfrag.length);
-			if (!this.lights)
-				var maxLights = "#ifdef GL_ES\nprecision highp float;\n" +
-						"#endif\n\nconst int MAXLIGHTS = ;\n";
-			else
-				var maxLights = "#ifdef GL_ES\nprecision highp float;\n" +
-						"#endif\n\n const int MAXLIGHTS = "+ this.lights.length.toString() + ";\n";
-
-			var frag = maxLights + tail;
-			prog = new SglProgram(gl, [g_shaders[name].vertex], [frag]);
-			sp.vSource = g_shaders[name].vertex;
-			sp.fSource = frag;
-			//org.xml3d.webgl.checkError(gl, "After creating shader");
-		} else {
-			prog = new SglProgram(gl, [g_shaders[name].vertex], [g_shaders[name].fragment]);
-			sp.vSource = g_shaders[name].vertex;
-			sp.fSource = g_shaders[name].fragment;
-			//org.xml3d.webgl.checkError(gl, "After creating shader");
-		}
-		if (!prog)
-		{
-			org.xml3d.debug.logError("Could not create shader program: " + name);
-			return sp;
-		}
-		sp.program = prog;
-		this.shaderMap[name] = sp;
-		shader = sp;
-	}
-	return shader;
 };
 
 org.xml3d.webgl.Renderer.prototype.render = function() {
@@ -347,14 +290,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	
 	if (this.currentView != this.scene.getActiveView())
 		this.camera = this.initCamera();
-	
-	//TODO: port matrix calculations away from SpiderGL
-	/*var xform = new SglTransformStack();
-	xform.view.load(this.camera.getViewMatrix());
-	this.projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
-	this.viewMatrix = this.camera.getViewMatrix();
-	xform.projection.load(this.projMatrix);*/
-	
+
 	var xform = {};
 	xform.view = this.camera.getViewMatrix();
 	xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
@@ -407,7 +343,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		gl.depthMask(gl.TRUE);
 	}
 	
-	return [stats.objCount, stats.triCount]; //TODO: Num triangles
+	return [stats.objCount, stats.triCount]; 
 };
 
 org.xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, sortedObjectArray, xform, backToFront) {
@@ -498,173 +434,6 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 	
 };
 
-
-/**
- * The main rendering method that will redraw the scene
- * @return
- */
-/*
-org.xml3d.webgl.Renderer.prototype.render = function() {
-	var gl = this.handler.gl;
-	var sp = null;
-
-	gl.clearDepth(1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-	gl.viewport(0, 0, this.width, this.height);
-	gl.disable(gl.DEPTH_TEST);
-	gl.disable(gl.CULL_FACE);
-	gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE,
-			gl.ONE_MINUS_SRC_ALPHA);
-	gl.enable(gl.BLEND);
-
-	if (!this.camera)
-		return 0;
-	if (this.currentView != this.scene.getActiveView())
-		this.camera = this.initCamera();
-
-	var start = Date.now() / 1000.0;
-	
-	var xform = new SglTransformStack();
-	xform.view.load(this.camera.getViewMatrix());
-	this.projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
-	this.viewMatrix = this.camera.getViewMatrix();
-	xform.projection.load(this.projMatrix);
-
-	//Setup lights
-	var light, lightOn;
-	var slights = this.lights;
-	var elements = slights.length * 3;
-	var lightParams = {
-		positions : new Float32Array(elements),
-		diffuseColors : new Float32Array(elements),
-		ambientColors : new Float32Array(elements),
-		attenuations : new Float32Array(elements),
-		visible : new Float32Array(elements)
-	};
-	for ( var j = 0; j < slights.length; j++) {
-		var light = slights[j][1];
-		var params = light.getParameters(this.viewMatrix);
-		if (!params)
-			continue; // TODO: Shrink array
-		lightParams.positions.set(params.position, j*3);
-		lightParams.attenuations.set(params.attenuation, j*3);
-		lightParams.diffuseColors.set(params.intensity, j*3);
-		lightParams.visible.set(params.visibility, j*3);
-	}
-
-	this.zPos = new Array();
-	for (i = 0, n = this.opaqueObjects.length; i < n; i++) {
-		var meshAdapter = this.opaqueObjects[i];
-		
-		//Check if this mesh was removed from the scene since last rendering pass
-		if (!meshAdapter.isValid) {
-			this.opaqueObjects.splice(i, 1);
-			i--;
-			n--;
-			continue;
-		}
-		
-		var trafo = meshAdapter._transform;
-		var center = new SglVec3(meshAdapter.bbox.center);
-		center.v = sglMulM4V3(trafo, center.v, 1.0);
-		center.v = sglMulM4V3(xform.view._s[0], center.v, 1.0);
-		this.zPos[i] = [ i, center.z ]; 
-	}
-	this.zPos.sort(function(a, b) {
-		return a[1] - b[1];
-	});
-
-	var end = Date.now() / 1000.0;
-	//console.log("Sort Time:" + (end-start));
-	start = end;
-	
-	var numTrianglesDrawn = 0;
-	
-	//Draw opaque objects
-	for (var i = 0, n = this.zPos.length; i < n; i++) {
-		var obj = this.opaqueObjects[this.zPos[i][0]];
-		var transform = obj._transform;
-		var shape = obj;
-		var shader = obj._shader;
-		
-		if (shape._visible == false)
-			continue;
-
-		sp = null;
-		xform.model.load(transform);
-		var parameters = {};
-
-		if (shader) {
-			sp = shader.shaderProgram;
-		}
-
-		if (!sp)
-		{
-			//org.xml3d.webgl.checkError(gl, "Before default shader");
-			if (shader) {
-				shader.sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
-				sp = shader.sp;
-			}
-			else
-				sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
-			if (sp) {
-				if (RGBColor && document.defaultView
-					&& document.defaultView.getComputedStyle) {
-					var colorStr = document.defaultView.getComputedStyle(
-						shape.node, "").getPropertyValue("color");
-					var color = new RGBColor(colorStr);
-					parameters["diffuseColor"] = [0.0,0.0,0.80];
-					}
-			}
-		}
-
-		//Begin setting up uniforms for rendering
-		parameters["lightPositions[0]"] = lightParams.positions;
-		parameters["lightVisibility[0]"] = lightParams.visible;
-		parameters["lightDiffuseColors[0]"] = lightParams.diffuseColors;
-		parameters["lightAmbientColors[0]"] = lightParams.ambientColors;
-		parameters["lightAttenuations[0]"] = lightParams.attenuations;
-		parameters["modelViewMatrix"] = xform.modelViewMatrix;
-		parameters["modelViewProjectionMatrix"] = xform.modelViewProjectionMatrix;
-		parameters["normalMatrix"] = xform.viewSpaceNormalMatrix;
-		parameters["cameraPosition"] = xform.modelSpaceViewerPosition;
-
-		if (shader)
-		{
-			//Add uniforms from the shader to the parameters package
-			shader.setParameters(parameters);
-			var prims = shape.mesh.connectivity.primitives;
-			if (prims && prims.triangles)
-				numTrianglesDrawn += prims.triangles.length / 3;
-			
-			shape.render(shader, parameters);
-		} else {
-			shader = {};
-			shader.sp = sp;
-			shape.render(shader, parameters);
-		}
-		xform.model.pop();
-
-	}
-	
-	//Draw transparent objects
-	for (var i = 0, n = origLength; i < n; i++) {
-		
-	}
-	
-	
-	end = Date.now() / 1000.0;
-	//console.log("Render Time:" + (end-start));
-	start = end;
-
-	xform.view.pop();
-	xform.projection.pop();
-
-	gl.disable(gl.CULL_FACE);
-	
-	return [origLength, numTrianglesDrawn];
-};
-*/
 /**
  * Render the scene using the picking shader and determine which object, if any, was picked
  * 

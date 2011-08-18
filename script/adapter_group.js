@@ -15,10 +15,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
 	if (this.parentTransform !== null)
-		return transform.multiply(this.parentTransform);
+		return this.parentTransform.multiply(transform);
 	
 	if (this._transformAdapter)
-		return transform.multiply(this._transformAdapter.getMatrix());
+		return this._transformAdapter.getMatrix().multiply(transform);
 	
 	return transform;
 };
@@ -51,7 +51,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		//of its children with the new transformation matrix
 		
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-		downstreamValue = this.parentTransform.multiply(adapter.getMatrix());
+		downstreamValue = adapter.getMatrix().multiply(this.parentTransform);
 		this.notifyListeners("parenttransform", downstreamValue);
 		this.factory.renderer.requestRedraw("Group transform changed.");
 	}
@@ -78,14 +78,14 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = functi
 		this.parentTransform = newValue;
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 		if (adapter)
-			downstreamValue = this.parentTransform.multiply(adapter.getMatrix());
+			downstreamValue = adapter.getMatrix().multiply(this.parentTransform);
 		else
 			downstreamValue = this.parentTransform;
 		
 	} else if (what == "transform") {
 		//This was a change to the <transform> node tied to this adapter
 		if (this.parentTransform)
-			downstreamValue = this.parentTransform.multiply(newValue);	
+			downstreamValue = newValue.multiply(this.parentTransform);	
 		else
 			downstreamValue = newValue;
 		what = "parenttransform";

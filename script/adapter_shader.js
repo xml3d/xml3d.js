@@ -62,14 +62,22 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 				}
 			}
 			
-			this.program = this.createShaderProgram(vertexSource, fragmentSource);
+			this.program = this.createShaderProgram( {vs:vertexSource, fs:fragmentSource} );
 			return this.program;
 
 }));
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
-	if (evt.attribute == "script") {
+	if (evt.attribute == "script" && this.program) {
 		this.destroy();
+		
+		//All uniforms need to be dirtied to make sure they're set in the new shader program
+		var dataTable = this.dataAdapter.createDataTable();		
+		for (var uniform in dataTable) {
+			var u = dataTable[uniform];
+			if (u.clean)
+				u.clean = false;
+		}	
 	}
 };
 
@@ -114,8 +122,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = functio
 	var gl = this.gl;
 	
 	if (!sources.vs || !sources.fs) {
-		return this.createShaderProgram( gl, g_shaders["urn:xml3d:shader:flat"].vertex, 
-				 							 g_shaders["urn:xml3d:shader:flat"].fragment );	
+		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );	
 	}
 	
 	var prg = gl.createProgram();
@@ -125,8 +133,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = functio
 	
 	if (vShader === null || fShader === null) {
 		//Use a default flat shader instead
-		return this.createShaderProgram( gl, g_shaders["urn:xml3d:shader:flat"].vertex, 
-											 g_shaders["urn:xml3d:shader:flat"].fragment );
+		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
 	}
 	
 	//Link shader program	
@@ -141,8 +149,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = functio
 		org.xml3d.debug.logError(errorString);
 		gl.getError();
 		
-		return this.createShaderProgram( gl, g_shaders["urn:xml3d:shader:flat"].vertex, 
-				 							 g_shaders["urn:xml3d:shader:flat"].fragment );
+		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
 	}
 	
 	var programObject = { 	attributes 	: {}, 
@@ -224,6 +232,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindProgram = function() {
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.destroy = function() {
 	if (this.shaderProgram)
 		this.gl.deleteProgram(this.shaderProgram.handle);
+	
+	this.program = null;
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
@@ -296,8 +306,11 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 		if (u.clean === true)
 			continue;
 		
-		if (u.isTexture) {		
-			this.setUniform(gl, sp.samplers[uniform], this.textures[uniform].info.texUnit);
+		if (u.isTexture) {
+			//Have to check for existence of uniforms in the shader, since the user is allowed to give 
+			//unused parameters
+			if (sp.samplers[uniform])
+				this.setUniform(gl, sp.samplers[uniform], this.textures[uniform].info.texUnit);
 		} 
 		else if (sp.uniforms[uniform]) {
 			var data = u.data.length == 1 ? u.data[0] : u.data;

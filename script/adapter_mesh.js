@@ -114,7 +114,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.eventType == MutationEvent.REMOVAL) 
 		this.factory.renderer.sceneTreeRemoval(e);	
 	else if (e.attribute == "src") {
-		this.destroy();
+		this.dispose();
 		this.mesh = this.initMeshGL();
 	}
 	else if (e.attribute == "visible")
@@ -146,6 +146,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMetho
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	var sAttributes = shader.program.attributes;
 	var gl = this.gl;
+	var triCount = 0;
 	
 //Bind vertex buffers
 	for (var name in this.mesh.vbos) {
@@ -164,8 +165,10 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	if (this.mesh.isIndexed) {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.vbos.index);
 		gl.drawElements(this.mesh.glType, this.mesh.vbos.index.length, gl.UNSIGNED_SHORT, 0);
+		triCount = this.mesh.vbos.index.length / 3;
 	} else {
 		gl.drawArrays(this.mesh.glType, 0, this.mesh.vbos.position.length);
+		triCount = this.mesh.vbos.position.length / 3;
 	}
 	
 //Unbind vertex buffers
@@ -177,10 +180,10 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 	
-	return this.mesh.vbos.position.length / 9;
+	return triCount;
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.destroy = function() {
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 	for (var vbo in this.mesh.vbos) {
 		var buffer = this.mesh.vbos[vbo];
 		this.gl.deleteBuffer(buffer);

@@ -439,8 +439,9 @@ org.xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, sor
 	}
 };
 
-org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray, xform, lightParams) {
-
+org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray, xform, lightParams, stats) {
+	var objCount = 0;
+	var triCount = 0;
 	var parameters = {};
 	
 	parameters["lightPositions[0]"] = lightParams.positions;

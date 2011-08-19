@@ -185,6 +185,7 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.scene = handler.scene;
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(handler, this);
 	this.dataFactory = new org.xml3d.webgl.XML3DDataAdapterFactory(handler);
+	this.bufferHandler = new org.xml3d.webgl.XML3DBufferHandler(handler.gl, this);
 	this.lights = [];
 	this.camera = this.initCamera();
 	this.shaderMap = {};
@@ -196,6 +197,7 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.viewMatrix = new XML3DMatrix(); // view matrix of last call to render()
 	this.projMatrix = new XML3DMatrix(); // projection matrix of last call to render()
 	
+	this.fbos = this._initFrameBuffers(handler.gl);
 	
 	this.collectDrawableObjects(new XML3DMatrix(), this.opaqueObjects, this.transparentObjects, this.lights, null, true);
 };
@@ -224,6 +226,18 @@ org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
 		return adapter.collectDrawableObjects(transform, opaqueObjects, transparentObjects, lights, shader, visible);
 	return [];
 };
+
+org.xml3d.webgl.Renderer.prototype._initFrameBuffers = function(gl) {
+	var fbos = {};
+	
+	fbos.picking = this.bufferHandler.createPickingBuffer(this.width, this.height);
+	if (!fbos.picking.valid)
+		this.handler._pickingDisabled = true;
+	
+	return fbos;
+};
+
+
 
 org.xml3d.webgl.Renderer.prototype.resizeCanvas = function (width, height) {
 	this.width = width;
@@ -447,6 +461,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			return;
 		gl = this.handler.gl;
 		
+		gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
+		
 		gl.enable(gl.DEPTH_TEST);
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
@@ -497,6 +513,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		}
 		this.readPixels(false, x, y);
 		gl.disable(gl.DEPTH_TEST);
+		
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 };
 
 /**

@@ -248,19 +248,15 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	XML3DHandler.prototype.renderPick = function(screenX, screenY) {
 		if (this._pickingDisabled)
 			return;
-		this.pickBuffer.bind();
 		this.renderer.renderPickingPass(screenX, screenY, this.needPickingDraw);
 		this.needPickingDraw = false;
-		this.pickBuffer.unbind();
 	};
 	
 	//Binds the normal picking buffer and passes the request for picked object normals to the renderer
 	XML3DHandler.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
 		if (!pickedObj || this._pickingDisabled)
-			return;
-		this.normalPickBuffer.bind();		
+			return;	
 		this.renderer.renderPickedNormals(pickedObj, screenX, screenY);
-		this.normalPickBuffer.unbind();
 	};
 	
 	//Uses gluUnProject() to transform the 2D screen point to a 3D ray 
@@ -424,7 +420,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 						   	null);
 		}
 		else
-			evt = event;
+			evt = this.copyMouseEvent(event);
 
 		// adapt type to not clash with events spidergl listens to 
 		//evt.type = "xml3d" + type; 
@@ -448,7 +444,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		var evtMethod = currentObj.getAttribute(ontype);
 		if (evtMethod && currentObj.evalMethod) {
 			evtMethod = new Function(evtMethod);
-			evtMethod.call(currentObj);
+			evtMethod.call(currentObj, evt);
 		}
 		
 		//Make sure the event method didn't remove picked object from the tree
@@ -460,7 +456,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				evtMethod = currentObj.getAttribute(ontype);
 				if (evtMethod && currentObj.evalMethod) {
 					evtMethod = new Function(evtMethod);
-					evtMethod.call(currentObj);
+					evtMethod.call(currentObj, evt);
 				}
 			}
 		}
@@ -667,7 +663,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		event.timeEnd = end;
 		event.renderTimeInMilliseconds = end - start;
 		event.numberOfObjectsDrawn = stats[0];
-		event.numberOfTrianglesDrawn = stats[1];
+		event.numberOfTrianglesDrawn = Math.floor(stats[1]);
 		
 		for (var i in this.events.framedrawn) {
 			this.events.framedrawn[i].listener.call(this.events.framedrawn[i].node, event);

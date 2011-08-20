@@ -52,8 +52,8 @@ org.xml3d.Camera = function(view) {
 
 org.xml3d.Camera.prototype.__defineGetter__("orientation", function() { return this.view.orientation; });
 org.xml3d.Camera.prototype.__defineGetter__("position", function() { return this.view.position; });
-org.xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { /*org.xml3d.debug.logError("Orientation: " + orientation);*/ this.view.orientation = orientation; });
-org.xml3d.Camera.prototype.__defineSetter__("position", function(position) { this.view.position = position; });
+org.xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { /*org.xml3d.debug.logError("Orientation: " + orientation);*/ org.xml3d.copyRotation(this.view.orientation, orientation); });
+org.xml3d.Camera.prototype.__defineSetter__("position", function(position) { org.xml3d.copyVector(this.view.position, position); });
 org.xml3d.Camera.prototype.__defineGetter__("direction", function() { return this.view.getDirection(); });
 org.xml3d.Camera.prototype.__defineGetter__("upVector", function() { return this.view.getUpVector(); });
 org.xml3d.Camera.prototype.__defineGetter__("fieldOfView", function() { return this.view.fieldOfView; });

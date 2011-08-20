@@ -196,3 +196,12 @@ createXML3DRotation = function() {
 	return org.xml3d._xml3d.createXML3DRotation();
 };
 
+org.xml3d.copyRotation = function(to, from) {
+    to.setAxisAngle(from.axis, from.angle);
+}
+
+org.xml3d.copyVector = function(to, from) {
+    to.x = from.x;
+    to.y = from.y;
+    to.z = from.z;
+}

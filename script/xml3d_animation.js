@@ -288,7 +288,12 @@ org.xml3d.animation.X3DInterpolation.prototype.progress = function(anim, time) {
 		key = 1.0;
 		anim.running = false;
 	}
-	anim.node[anim.attribute] = this.getValue( key );
+    if (anim.node[anim.attribute] instanceof XML3DRotation)
+        org.xml3d.copyRotation(anim.node[anim.attribute], this.getValue( key ));
+    else if (anim.node[anim.attribute] instanceof XML3DVec3)
+        org.xml3d.copyVector(anim.node[anim.attribute], this.getValue( key ));
+    else
+        anim.node[anim.attribute] = this.getValue( key );
 };
 
 org.xml3d.animation.X3DInterpolation.prototype.initialize = function() {};

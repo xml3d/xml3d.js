@@ -186,16 +186,15 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(handler, this);
 	this.dataFactory = new org.xml3d.webgl.XML3DDataAdapterFactory(handler);
 	this.bufferHandler = new org.xml3d.webgl.XML3DBufferHandler(handler.gl, this);
+	this.shaderHandler = new org.xml3d.webgl.XML3DShaderHandler(handler.gl, this);
 	this.lights = [];
 	this.camera = this.initCamera();
-	this.shaderMap = {};
+	this.shaderMap = this._initInternalShaders();
 	this.width = width;
 	this.height = height;
 	this.opaqueObjects = [];
 	this.transparentObjects = [];
-	this.zPos = [];
-	this.viewMatrix = new XML3DMatrix(); // view matrix of last call to render()
-	this.projMatrix = new XML3DMatrix(); // projection matrix of last call to render()
+	this.allObjects = [];
 	
 	this.fbos = this._initFrameBuffers(handler.gl);
 	
@@ -237,7 +236,13 @@ org.xml3d.webgl.Renderer.prototype._initFrameBuffers = function(gl) {
 	return fbos;
 };
 
-
+org.xml3d.webgl.Renderer.prototype._initInternalShaders = function() {
+	var shaderMap = {};
+	shaderMap.picking = this.shaderHandler.getStandardShaderProgram("urn:xml3d:shader:picking");
+	//TODO: Shadow map, reflection, etc
+	
+	return shaderMap;
+};
 
 org.xml3d.webgl.Renderer.prototype.resizeCanvas = function (width, height) {
 	this.width = width;
@@ -412,34 +417,23 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 		//xform.model.load(transform);
 		xform.model = transform;
 		xform.modelView = this.camera.getModelViewMatrix(xform.model);
-		
-		if (!shader)
-		{			
-			//TODO: Find a way to bind a default shader program if none is given
-			this.bindDefaultShaderProgram(this.handler.gl, "urn:xml3d:shader:flat");
-			
-			/*if (sp) {
-				if (RGBColor && document.defaultView
-					&& document.defaultView.getComputedStyle) {
-					var colorStr = document.defaultView.getComputedStyle(
-						shape.node, "").getPropertyValue("color");
-					var color = new RGBColor(colorStr);
-					//parameters["diffuseColor"] = [0.0,0.0,0.80];
-					}
-			}*/
-			
-		}
-
 		parameters["modelViewMatrix"] = xform.modelView.toGL();
 		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView).toGL();
 		parameters["normalMatrix"] = this.camera.getNormalMatrixGL(xform.modelView);
 		parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3);
 		
 		if (!shader)
-			continue; //TODO: remove once default shader program is in place
-		shader.enable(parameters);		
-		triCount += shape.draw(shader);
-		shader.disable();
+		{			
+			shader = {};
+			shader.program = this.shaderHandler.bindDefaultShader();
+			this.shaderHandler.setUniformVariables(shader.program, parameters);
+			triCount += shape.draw(shader);
+			this.shaderHandler.unbindDefaultShader();
+		} else {
+			shader.enable(parameters);		
+			triCount += shape.draw(shader);
+			shader.disable();
+		}
 		objCount++;
 	}
 	
@@ -467,6 +461,9 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
 		
+		this.allObjects = this.opaqueObjects.concat(this.transparentObjects);
+		var shader = {};
+		
 		if (needPickingDraw ) {
 			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
 			var volumeMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
@@ -476,19 +473,20 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			xform.view = this.camera.getViewMatrix();
 			xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
 
-			for (var i = 0; i < this.zPos.length; i++) {
-				var meshAdapter = this.drawableObjects[this.zPos[i][0]];
+			for (var i = 0; i < this.opaqueObjects.length; i++) {
+				var meshAdapter = this.opaqueObjects[i];
 				var trafo = meshAdapter._transform;
 				this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
 			}
+			
 			this.bbMin = volumeMin;
 			this.bbMax = volumeMax;
-			var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
-			shader = {};
-			shader.sp = sp;
 			
-			for (j = 0, n = this.zPos.length; j < n; j++) {
-				var obj = this.drawableObjects[this.zPos[j][0]];
+			shader.program = this.shaderMap.picking;
+			this.shaderHandler.bindShader(shader.program);
+			
+			for (j = 0, n = this.allObjects.length; j < n; j++) {
+				var obj = this.allObjects[j];
 				var transform = obj._transform;
 				var shape = obj;
 				
@@ -503,15 +501,19 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 						id : id,
 						min : volumeMin.toGL(),
 						max : volumeMax.toGL(),
-						modelMatrix : transform,
+						modelMatrix : transform.toGL(),
 						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView).toGL(),
 						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 				};
 				
-				shape.render(shader, parameters);
-			}			
+				this.shaderHandler.setUniformVariables(shader.program, parameters);
+				shape.draw(shader);
+			}
 		}
+		
 		this.readPixels(false, x, y);
+		this.shaderHandler.unbindShader(shader.program);
+		
 		gl.disable(gl.DEPTH_TEST);
 		
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -585,7 +587,7 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 			if (objId >= 0 && data[3] > 0) {
 				vec = vec.multiply(this.bbMax.subtract(this.bbMin)).add(this.bbMin);
 				this.scene.xml3d.currentPickPos = vec;
-				var pickedObj = this.drawableObjects[this.zPos[objId][0]];
+				var pickedObj = this.allObjects[objId];
 				this.scene.xml3d.currentPickObj = pickedObj;
 			} else {
 				this.scene.xml3d.currentPickPos = null;
@@ -644,8 +646,8 @@ org.xml3d.webgl.Renderer.prototype.renderShader = function(gl, quadMesh, shader,
 
 //Helper to expand an axis aligned bounding box around another object's bounding box
 org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
-	var bmin = new XML3DVec3(bbox.min);
-	var bmax = new XML3DVec3(bbox.max);
+	var bmin = bbox.min;
+	var bmax = bbox.max;
 	var bbmin = trafo.mulVec3(bmin, 1.0);
 	var bbmax = trafo.mulVec3(bmax, 1.0);
 

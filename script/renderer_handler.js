@@ -65,7 +65,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.canvas = canvas;
 		this.needDraw = true;
 		this.needPickingDraw = true;
-		this._pickingDisabled = true; //TODO: SET BACK TO FALSE
+		this._pickingDisabled = false; //TODO: SET BACK TO FALSE
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
 		this.postProcessShaders = [];
@@ -222,17 +222,17 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	};
 	//Returns the HTML ID of the canvas associated with this Handler
 	XML3DHandler.prototype.getCanvasId = function() {
-		return this.ui.canvas.id;
+		return this.canvas.id;
 	};
 
 	//Returns the width of the canvas associated with this Handler
 	XML3DHandler.prototype.getCanvasWidth = function() {
-		return this.ui.width;
+		return this.canvas.width;
 	};
 
 	//Returns the height of the canvas associated with this Handler
 	XML3DHandler.prototype.getCanvasHeight = function() {
-		return this.ui.height;
+		return this.canvas.height;
 	};
 
 	XML3DHandler.prototype.resize = function(gl, width, height) {
@@ -248,7 +248,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	XML3DHandler.prototype.renderPick = function(screenX, screenY) {
 		if (this._pickingDisabled)
 			return;
-		this.renderer.renderPickingPass(screenX, screenY, this.needPickingDraw);
+		this.renderer.renderPickingPass(screenX, this.canvas.height - screenY, this.needPickingDraw);
 		this.needPickingDraw = false;
 	};
 	

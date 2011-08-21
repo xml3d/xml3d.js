@@ -792,6 +792,7 @@ XML3DMatrix = function()
 	XML3DDataType.call(this);
 	
 	this._js = true;
+	this._data = new Array(16);
 	
 	if (arguments.length == 0)
 	{
@@ -829,82 +830,82 @@ XML3DMatrix.prototype.constructor = XML3DMatrix;
 //Getter definition
 XML3DMatrix.prototype.__defineGetter__("m11",  function () 
 {
-	return this._m11;
+	return this._data[0];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m12",  function () 
 {
-	return this._m12;
+	return this._data[1];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m13",  function () 
 {
-	return this._m13;
+	return this._data[2];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m14",  function () 
 {
-	return this._m14;
+	return this._data[3];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m21",  function () 
 {
-	return this._m21;
+	return this._data[4];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m22",  function () 
 {
-	return this._m22;
+	return this._data[5];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m23",  function () 
 {
-	return this._m23;
+	return this._data[6];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m24",  function () 
 {
-	return this._m24;
+	return this._data[7];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m31",  function () 
 {
-	return this._m31;
+	return this._data[8];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m32",  function () 
 {
-	return this._m32;
+	return this._data[9];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m33",  function () 
 {
-	return this._m33;
+	return this._data[10];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m34",  function () 
 {
-	return this._m34;
+	return this._data[11];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m41",  function () 
 {
-	return this._m41;
+	return this._data[12];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m42",  function () 
 {
-	return this._m42;
+	return this._data[13];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m43",  function () 
 {
-	return this._m43;
+	return this._data[14];
 });
 
 XML3DMatrix.prototype.__defineGetter__("m44",  function () 
 {
-	return this._m44;
+	return this._data[15];
 });
 
 
@@ -912,121 +913,102 @@ XML3DMatrix.prototype.__defineGetter__("m44",  function ()
 
 //Setter definition
 
-XML3DMatrix.prototype._setMatrixField = function(field, value)
+XML3DMatrix.prototype._setMatrixField = function(offset, value)
 {
-	var values = new Array(16);
+	if (isNaN(value)) {
+		throw new Error("Attempted to set a bad matrix value: "+value);
+	}
 	
-	values["m11"] = this._m11;
-	values["m12"] = this._m12;
-	values["m13"] = this._m13;
-	values["m14"] = this._m14;
-	
-	values["m21"] = this._m21;
-	values["m22"] = this._m22;
-	values["m23"] = this._m23;
-	values["m24"] = this._m24;
-	
-	values["m31"] = this._m31;
-	values["m32"] = this._m32;
-	values["m33"] = this._m33;
-	values["m34"] = this._m34;
-	
-	values["m41"] = this._m41;
-	values["m42"] = this._m42;
-	values["m43"] = this._m43;
-	values["m44"] = this._m44;
-	
-	// set the matrix field
-	values[field] = value;
-	
-	this._setMatrixInternal(
-			   values['m11'], values['m12'], values['m13'], values['m14'], 
-	           values['m21'], values['m22'], values['m23'], values['m24'],
-	           values['m31'], values['m32'], values['m33'], values['m34'], 
-	           values['m41'], values['m42'], values['m43'], values['m44'] );
+	if (this._data[offset] != value) {
+		var oldValues = this._data;
+		
+		this._data[offset] = value;
+		
+		this.notifyOwnerNode(oldValues, this._data);
+	}
 };
 
 XML3DMatrix.prototype.__defineSetter__('m11',  function (value) 
 {
-	this._setMatrixField('m11', value);
+	this._setMatrixField(0, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m12',  function (value) 
 {
-	this._setMatrixField('m12', value);
+	this._setMatrixField(1, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m13',  function (value) 
 {
-	this._setMatrixField('m13', value);
+	this._setMatrixField(2, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m14',  function (value) 
 {
-	this._setMatrixField('m14', value);
+	this._setMatrixField(3, value);
 });
 
 
 XML3DMatrix.prototype.__defineSetter__('m21',  function (value) 
 {
-	this._setMatrixField('m21', value);
+	this._setMatrixField(4, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m22',  function (value) 
 {
-	this._setMatrixField('m22', value);
+	this._setMatrixField(5, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m23',  function (value) 
 {
-	this._setMatrixField('m23', value);
+	this._setMatrixField(6, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m24',  function (value) 
 {
-	this._setMatrixField('m24', value);
+	this._setMatrixField(7, value);
 });
 
 
 XML3DMatrix.prototype.__defineSetter__('m31',  function (value) 
 {
-	this._setMatrixField('m31', value);
+	this._setMatrixField(8, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m32',  function (value) 
 {
-	this._setMatrixField('m32', value);
+	this._setMatrixField(9, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m33',  function (value) 
 {
-	this._setMatrixField('m33', value);
+	this._setMatrixField(10, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m34',  function (value) 
 {
-	this._setMatrixField('m34', value);
+	this._setMatrixField(11, value);
 });
 
 
 XML3DMatrix.prototype.__defineSetter__('m41',  function (value) 
 {
-	this._setMatrixField('m41', value);
+	this._setMatrixField(12, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m42',  function (value) 
 {
-	this._setMatrixField('m42', value);
+	this._setMatrixField(13, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m43',  function (value) 
 {
-	this._setMatrixField('m43', value);
+	this._setMatrixField(14, value);
 });
 
 XML3DMatrix.prototype.__defineSetter__('m44',  function (value) 
 {
-	this._setMatrixField('m44', value);
+	this._setMatrixField(15, value);
 });
 
 
@@ -1065,56 +1047,20 @@ XML3DMatrix.prototype._setMatrixInternal = function(m11, m12, m13, m14,
 		throw new Error("Invalid matrix value :\n" + matrixString);
 	}
 	
-	if((m11 != this._m11) || (m12 != this._m12) || (m13 != this._m13) || (m14 != this._m14) || 
-	   (m21 != this._m21) || (m22 != this._m22) || (m23 != this._m23) || (m24 != this._m24) ||
-	   (m31 != this._m31) || (m32 != this._m32) || (m33 != this._m33) || (m34 != this._m34) ||
-	   (m41 != this._m41) || (m42 != this._m42) || (m43 != this._m43) || (m44 != this._m44) )
+	if((m11 != this._data[0]) || (m12 != this._data[1]) || (m13 != this._dataa[2]) || (m14 != this._data[3]) || 
+	   (m21 != this._data[4]) || (m22 != this._data[5]) || (m23 != this._data[6]) || (m24 != this._data[7]) ||
+	   (m31 != this._data[8]) || (m32 != this._data[9]) || (m33 != this._data[10]) || (m34 != this._data[11]) ||
+	   (m41 != this._data[12]) || (m42 != this._data[13]) || (m43 != this._data[14]) || (m44 != this._data[15]) )
 	{
-		var oldM11 = this._m11;
-		var oldM12 = this._m12;
-		var oldM13 = this._m13;
-		var oldM14 = this._m14;
-		var oldM21 = this._m21;
-		var oldM22 = this._m22;
-		var oldM23 = this._m23;
-		var oldM24 = this._m24;
-		var oldM31 = this._m31;
-		var oldM32 = this._m32;
-		var oldM33 = this._m33;
-		var oldM34 = this._m34;
-		var oldM41 = this._m41;
-		var oldM42 = this._m42;
-		var oldM43 = this._m43;
-		var oldM44 = this._m44;
-	
-		this._m11 = m11;
-		this._m12 = m12;
-		this._m13 = m13;
-		this._m14 = m14;
-		this._m21 = m21;
-		this._m22 = m22;
-		this._m23 = m23;
-		this._m24 = m24;
-		this._m31 = m31;
-		this._m32 = m32;
-		this._m33 = m33;
-		this._m34 = m34;
-		this._m41 = m41;
-		this._m42 = m42;
-		this._m43 = m43;
-		this._m44 = m44;
-		
-		var newValue = [m11, m12, m13, m14,
+
+		var oldValue = this._data;
+
+		this._data = [m11, m12, m13, m14,
 		                m21, m22, m23, m24,
 		                m31, m32, m33, m34,
 		                m41, m42, m43, m44];
-		
-		var oldValue = [oldM11, oldM12, oldM13, oldM14,
-		                oldM21, oldM22, oldM23, oldM24,
-		                oldM31, oldM32, oldM33, oldM34,
-		                oldM41, oldM42, oldM43, oldM44];
 
-		this.notifyOwnerNode(oldValue, newValue);
+		this.notifyOwnerNode(oldValue, this._data);
 	}
 };
 
@@ -1125,46 +1071,47 @@ XML3DMatrix.prototype._setMatrixInternal = function(m11, m12, m13, m14,
  */
 XML3DMatrix.prototype.multiply = function (that) 
 {
+	var a = this._data;
+	
 	if (that.m44 !== undefined) 
 	{
-		//TODO: check multiplication, looks like it should be column-major instead of row-major because we have to
-		//adjust transform matrix multiplications with .transpose() in several places to get the right transformation
+		var b = that._data;
+		
 		return new XML3DMatrix(
-				this._m11 * that.m11 + this._m12 * that.m21 + this._m13 * that.m31 + this._m14 * that.m41, 
-				this._m11 * that.m12 + this._m12 * that.m22 + this._m13 * that.m32 + this._m14 * that.m42, 
-				this._m11 * that.m13 + this._m12 * that.m23 + this._m13 * that.m33 + this._m14 * that.m43,
-				this._m11 * that.m14 + this._m12 * that.m24 + this._m13 * that.m34 + this._m14 * that.m44, 
+				a[0] * b[0] + a[1] * b[4] + a[2] * b[8] + a[3] * b[12], 
+				a[0] * b[1] + a[1] * b[5] + a[2] * b[9] + a[3] * b[13], 
+				a[0] * b[2] + a[1] * b[6] + a[2] * b[10] + a[3] * b[14],
+				a[0] * b[3] + a[1] * b[7] + a[2] * b[11] + a[3] * b[15], 
 				
-				this._m21 * that.m11 + this._m22 * that.m21 + this._m23 * that.m31 + this._m24 * that.m41, 
-				this._m21 * that.m12 + this._m22 * that.m22 + this._m23 * that.m32 + this._m24 * that.m42, 
-				this._m21 * that.m13 + this._m22 * that.m23 + this._m23 * that.m33 + this._m24 * that.m43, 
-				this._m21 * that.m14 + this._m22 * that.m24 + this._m23 * that.m34 + this._m24 * that.m44, 
+				a[4] * b[0] + a[5] * b[4] + a[6] * b[8] + a[7] * b[12], 
+				a[4] * b[1] + a[5] * b[5] + a[6] * b[9] + a[7] * b[13], 
+				a[4] * b[2] + a[5] * b[6] + a[6] * b[10] + a[7] * b[14], 
+				a[4] * b[3] + a[5] * b[7] + a[6] * b[11] + a[7] * b[15], 
 				
-				this._m31 * that.m11 + this._m32 * that.m21 + this._m33 * that.m31 + this._m34 * that.m41, 
-				this._m31 * that.m12 + this._m32 * that.m22 + this._m33 * that.m32 + this._m34 * that.m42, 
-				this._m31 * that.m13 + this._m32 * that.m23 + this._m33 * that.m33 + this._m34 * that.m43, 
-				this._m31 * that.m14 + this._m32 * that.m24 + this._m33 * that.m34 + this._m34 * that.m44, 
+				a[8] * b[0] + a[9] * b[4] + a[10] * b[8] + a[11] * b[12], 
+				a[8] * b[1] + a[9] * b[5] + a[10] * b[9] + a[11] * b[13], 
+				a[8] * b[2] + a[9] * b[6] + a[10] * b[10] + a[11] * b[14], 
+				a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11] * b[15], 
 				
-				this._m41 * that.m11 + this._m42 * that.m21 + this._m43 * that.m31 + this._m44 * that.m41, 
-				this._m41 * that.m12 + this._m42 * that.m22 + this._m43 * that.m32 + this._m44 * that.m42, 
-				this._m41 * that.m13 + this._m42 * that.m23 + this._m43 * that.m33 + this._m44 * that.m43, 
-				this._m41 * that.m14 + this._m42 * that.m24 + this._m43 * that.m34 + this._m44 * that.m44);
+				a[12] * b[0] + a[13] * b[4] + a[14] * b[8] + a[15] * b[12], 
+				a[12] * b[1] + a[13] * b[5] + a[14] * b[9] + a[15] * b[13], 
+				a[12] * b[2] + a[13] * b[6] + a[14] * b[10] + a[15] * b[14], 
+				a[12] * b[3] + a[13] * b[7] + a[14] * b[11] + a[15] * b[15]);
 	}
-
 
 	if (that.w !== undefined) 
 	{
-		return new XML3DRotation(this._m11 * that.x + this._m12 * that.y
-				+ this._m13 * that.z + this._m14 * that.w, this._m21 * that.x + this._m22 * that.y
-				+ this._m23 * that.z + this._m24 * that.w, this._m31 * that.x + this._m32 * that.y
-				+ this._m33 * that.z + this._m34 * that.w, this._m41 * that.x + this._m42 * that.y
-				+ this._m43 * that.z + this._m44 * that.w);
+		return new XML3DRotation(a[0] * that.x + a[1] * that.y
+				+ a[2] * that.z + a[3] * that.w, a[4] * that.x + a[5] * that.y
+				+ a[6] * that.z + a[7] * that.w, a[8] * that.x + a[9] * that.y
+				+ a[10] * that.z + a[11] * that.w, a[12] * that.x + a[13] * that.y
+				+ a[14] * that.z + a[15] * that.w);
 	}
 	
-	return new XML3DVec3(this._m11 * that.x + this._m12 * that.y
-						+ this._m13 * that.z, this._m21 * that.x + this._m22 * that.y
-						+ this._m23 * that.z, this._m31 * that.x + this._m32 * that.y
-						+ this._m33 * that.z);
+	return new XML3DVec3(a[0] * that.x + a[1] * that.y
+						+ a[2] * that.z, a[4] * that.x + a[5] * that.y
+						+ a[6] * that.z, a[8] * that.x + a[9] * that.y
+						+ a[10] * that.z);
 };
 
 XML3DMatrix.prototype.mulVec3 = function(that, w) {
@@ -1172,10 +1119,10 @@ XML3DMatrix.prototype.mulVec3 = function(that, w) {
 //		this._m11 * that.x + this._m21 * that.y + this._m31 * that.z + this._m41 * w, 
 //		this._m12 * that.x + this._m22 * that.y + this._m32 * that.z + this._m42 * w, 
 //		this._m13 * that.x + this._m23 * that.y + this._m33 * that.z + this._m43 * w
-		this._m11 * that.x + this._m12 * that.y + this._m13 * that.z + this._m14 * w, 
-		this._m21 * that.x + this._m22 * that.y + this._m23 * that.z + this._m24 * w, 
-		this._m31 * that.x + this._m32 * that.y + this._m33 * that.z + this._m34 * w
-			);
+		this._data[0] * that.x + this._data[1] * that.y + this._data[2] * that.z + this._data[3] * w, 
+		this._data[4] * that.x + this._data[5] * that.y + this._data[6] * that.z + this._data[7] * w, 
+		this._data[8] * that.x + this._data[9] * that.y + this._data[10] * that.z + this._data[11] * w
+		);
 };
 
 
@@ -1186,23 +1133,28 @@ XML3DMatrix.prototype.det3 = function(a1, a2, a3, b1, b2, b3,
 	return d;
 };
 XML3DMatrix.prototype.det = function() {
+	var a = this._data;
+	
 	var a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
-	a1 = this._m11;
-	b1 = this._m21;
-	c1 = this._m31;
-	d1 = this._m41;
-	a2 = this._m12;
-	b2 = this._m22;
-	c2 = this._m32;
-	d2 = this._m42;
-	a3 = this._m13;
-	b3 = this._m23;
-	c3 = this._m33;
-	d3 = this._m43;
-	a4 = this._m14;
-	b4 = this._m24;
-	c4 = this._m34;
-	d4 = this._m44;
+	a1 = a[0];
+	b1 = a[4];
+	c1 = a[8];
+	d1 = a[12];
+	
+	a2 = a[1];
+	b2 = a[5];
+	c2 = a[9];
+	d2 = a[13];
+	
+	a3 = a[2];
+	b3 = a[6];
+	c3 = a[10];
+	d3 = a[14];
+	
+	a4 = a[3];
+	b4 = a[7];
+	c4 = a[11];
+	d4 = a[15];
 	var d = +a1 * this.det3(b2, b3, b4, c2, c3, c4, d2, d3, d4) - b1
 			* this.det3(a2, a3, a4, c2, c3, c4, d2, d3, d4) + c1
 			* this.det3(a2, a3, a4, b2, b3, b4, d2, d3, d4) - d1
@@ -1216,23 +1168,29 @@ XML3DMatrix.prototype.det = function() {
  * Throws: DOMException when the matrix cannot be inverted.
  */
 XML3DMatrix.prototype.inverse = function() {
+	var a = this._data;
+	
 	var a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
-	a1 = this._m11;
-	b1 = this._m21;
-	c1 = this._m31;
-	d1 = this._m41;
-	a2 = this._m12;
-	b2 = this._m22;
-	c2 = this._m32;
-	d2 = this._m42;
-	a3 = this._m13;
-	b3 = this._m23;
-	c3 = this._m33;
-	d3 = this._m43;
-	a4 = this._m14;
-	b4 = this._m24;
-	c4 = this._m34;
-	d4 = this._m44;
+	a1 = a[0];
+	b1 = a[4];
+	c1 = a[8];
+	d1 = a[12];
+	
+	a2 = a[1];
+	b2 = a[5];
+	c2 = a[9];
+	d2 = a[13];
+	
+	a3 = a[2];
+	b3 = a[6];
+	c3 = a[10];
+	d3 = a[14];
+	
+	a4 = a[3];
+	b4 = a[7];
+	c4 = a[11];
+	d4 = a[15];
+	
 	var rDet = this.det();
 	
 	if (Math.abs(rDet) < 0.000001) 
@@ -1266,10 +1224,11 @@ XML3DMatrix.prototype.inverse = function() {
  * This matrix is not modified.
  */
 XML3DMatrix.prototype.transpose = function() {
-	return new XML3DMatrix(this._m11, this._m21, this._m31,
-			this._m41, this._m12, this._m22, this._m32, this._m42, this._m13,
-			this._m23, this._m33, this._m43, this._m14, this._m24, this._m34,
-			this._m44);
+
+	return new XML3DMatrix(this._data[0], this._data[4], this._data[8],
+			this._data[12], this._data[1], this._data[5], this._data[9], this._data[13], this._data[2],
+			this._data[6], this._data[10], this._data[14], this._data[3], this._data[7], this._data[11],
+			this._data[15]);
 };
 
 /*
@@ -1357,30 +1316,32 @@ XML3DMatrix.prototype.rotateAxisAngle = function(x, y, z, angle)
 };
 
 XML3DMatrix.prototype.toString = function() {
-	return '[XML3DMatrix ' + this._m11 + ', ' + this._m12 + ', ' + this._m13 + ', '
-			+ this._m14 + '; ' + this._m21 + ', ' + this._m22 + ', ' + this._m23
-			+ ', ' + this._m24 + '; ' + this._m31 + ', ' + this._m32 + ', '
-			+ this._m33 + ', ' + this._m34 + '; ' + this._m41 + ', ' + this._m42
-			+ ', ' + this._m43 + ', ' + this._m44 + ']';
+	return '[XML3DMatrix ' + this.m11 + ', ' + this.m12 + ', ' + this.m13 + ', '
+			+ this.m14 + '; ' + this.m21 + ', ' + this.m22 + ', ' + this.m23
+			+ ', ' + this.m24 + '; ' + this.m31 + ', ' + this.m32 + ', '
+			+ this.m33 + ', ' + this.m34 + '; ' + this.m41 + ', ' + this.m42
+			+ ', ' + this.m43 + ', ' + this.m44 + ']';
 };
 
 XML3DMatrix.prototype.toGL = function() {
-	return [ this._m11, this._m21, this._m31, this._m41, this._m12, this._m22,
-			this._m32, this._m42, this._m13, this._m23, this._m33, this._m43,
-			this._m14, this._m24, this._m34, this._m44 ];
+
+	return [ this._data[0], this._data[4], this._data[8],
+				this._data[12], this._data[1], this._data[5], this._data[9], this._data[13], this._data[2],
+				this._data[6], this._data[10], this._data[14], this._data[3], this._data[7], this._data[11],
+				this._data[15] ];
 };
 
 XML3DMatrix.prototype.to3x3GL = function() {
-	return [this._m11, this._m21, this._m31, this._m12, this._m22,
-			this._m32, this._m13, this._m23, this._m33,];
+	return [this._data[0], this._data[4], this._data[8], this._data[1], this._data[5], this._data[9],
+	        this._data[2], this._data[6], this._data[10]];
 };
 
 XML3DMatrix.prototype.getColumnV3 = function(colnum) {
 	switch (colnum) {
-	case 1: return new XML3DVec3(this._m11, this._m21, this._m31);
-	case 2: return new XML3DVec3(this._m12, this._m22, this._m32);
-	case 3: return new XML3DVec3(this._m13, this._m23, this._m33);
-	case 4: return new XML3DVec3(this._m14, this._m24, this._m34);
+	case 1: return new XML3DVec3(this._data[0], this._data[4], this._data[8]);
+	case 2: return new XML3DVec3(this._data[1], this._data[5], this._data[9]);
+	case 3: return new XML3DVec3(this._data[2], this._data[6], this._data[10]);
+	case 4: return new XML3DVec3(this._data[3], this._data[7], this._data[11]);
 	default: return null;
 	}
 };
@@ -3004,6 +2965,9 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
 	node._height = org.xml3d.initInt(node.getAttribute("height"), 600);
 	node._width = org.xml3d.initInt(node.getAttribute("width"), 800);
+	node.setOptionValue = function (name, value) {
+		return false;
+	};
 
 	//node.definitionArea = [];
 	//node.graph = [];
@@ -14919,7 +14883,7 @@ function sglFramebufferFromTargets(gl, colorTargets, depthTarget, stencilTarget,
 		height = trg.height;
 	}
 
-	var obj = new SglFramebufferInfo()
+	var obj = new SglFramebufferInfo();
 	obj.handle        = fb;
 	obj.valid         = (fbStatus == gl.FRAMEBUFFER_COMPLETE);
 	obj.width         = width;
@@ -18263,6 +18227,467 @@ function sglRegisterLoadedCanvas(canvasID, handler, updateRate) {
 /***********************************************************************/
 
 
+/**********************************************
+ * Class org.xml3d.webgl.XML3DShaderHandler
+ * 
+ * The XML3DShaderHandler is an abstraction between the renderer and WebGL. It handles the creation of shaders and 
+ * management of internal shaders that have no DOM node associated with them (eg. the picking shader). No shaders are
+ * stored in this class.
+ * 
+ **********************************************/
+
+org.xml3d.webgl.XML3DShaderHandler = function(gl, renderer) {
+	this.gl = gl;
+	this.renderer = renderer;
+	this.currentProgram = null;
+	this.shaders = {};
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.getStandardShaderProgram = function(name) {
+	var sources = {};
+	
+	if (!g_shaders[name]) {
+		org.xml3d.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
+	} else {
+		sources.vs = g_shaders[name].vertex;
+		sources.fs = g_shaders[name].fragment;
+	}
+	
+	var shaderProgram = this.createShaderFromSources(sources);	
+	this.setStandardUniforms(shaderProgram);
+	
+	return shaderProgram;
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.createShaderFromSources = function(sources) {
+	var gl = this.gl;
+	
+	if (!sources.vs || !sources.fs) {
+		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );	
+	}
+	
+	var prg = gl.createProgram();
+	
+	var vShader = this.compileShader(gl.VERTEX_SHADER, sources.vs);
+	var fShader = this.compileShader(gl.FRAGMENT_SHADER, sources.fs);
+	
+	if (vShader === null || fShader === null) {
+		//Use a default flat shader instead
+		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
+	}
+	
+	//Link shader program	
+	gl.attachShader(prg, vShader);
+	gl.attachShader(prg, fShader);
+	gl.linkProgram(prg);
+	
+	if (gl.getProgramParameter(prg, gl.LINK_STATUS) == 0) {
+		var errorString = "Shader linking failed: \n";
+		errorString += gl.getProgramInfoLog(prg);
+		errorString += "\n--------\n";
+		org.xml3d.debug.logError(errorString);
+		gl.getError();
+		
+		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
+	}
+	
+	var programObject = { 	attributes 	: {}, 
+							uniforms 	: {}, 
+							samplers	: {},
+							handle		: prg };
+	
+	gl.useProgram(prg);
+	
+	//Tally shader attributes
+	var numAttributes = gl.getProgramParameter(prg, gl.ACTIVE_ATTRIBUTES);
+	for (var i=0; i<numAttributes; i++) {
+		var att = gl.getActiveAttrib(prg, i);
+		if (!att) continue;
+		var attInfo = {};
+		attInfo.name = att.name;
+		attInfo.size = att.size;
+		attInfo.glType = att.type;
+		attInfo.location = gl.getAttribLocation(prg, att.name);
+		programObject.attributes[att.name] = attInfo;
+	}
+
+	//TODO: shader not picking up light uniforms?
+	//Tally shader uniforms and samplers
+	var texCount = 0;
+	var numUniforms = gl.getProgramParameter(prg, gl.ACTIVE_UNIFORMS);
+	for (var i=0; i<numUniforms; i++) {
+		var uni = gl.getActiveUniform(prg, i);
+		if (!uni) continue;
+		var uniInfo = {};	
+		uniInfo.name = uni.name;
+		uniInfo.size = uni.size;
+		uniInfo.glType = uni.type;
+		uniInfo.location = gl.getUniformLocation(prg, uni.name);
+		
+		if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
+			uniInfo.texUnit = texCount;
+			this.textures[uni.name].info = uniInfo;
+
+			programObject.samplers[uni.name] = uniInfo;
+			texCount++;
+		}
+		else
+			programObject.uniforms[uni.name] = uniInfo;
+	}
+	
+	return programObject;
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.compileShader = function(type, shaderSource) {
+	var gl = this.gl;
+	
+	var shd = gl.createShader(type);
+	gl.shaderSource(shd, shaderSource);
+	gl.compileShader(shd);
+	
+	if (gl.getShaderParameter(shd, gl.COMPILE_STATUS) == 0) {
+		var errorString = "";
+		if (type == gl.VERTEX_SHADER)
+			errorString = "Vertex shader failed to compile: \n";
+		else
+			errorString = "Fragment shader failed to compile: \n";
+		
+		errorString += gl.getShaderInfoLog(shd) + "\n--------\n";
+		org.xml3d.debug.logError(errorString);
+		gl.getError();
+		
+		return null;
+	}
+	
+	return shd;
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.setStandardUniforms = function(sp) {
+	
+	var gl = this.gl;
+	
+	var uniform = null;
+	
+	//Diffuse color
+	uniform = sp.uniforms.diffuseColor;
+	if (uniform) { 
+		this.setUniform(gl, uniform, [0.0, 0.0, 1.0]);
+	}
+	
+	//Emissive color
+	uniform = sp.uniforms.emissiveColor;
+	if (uniform) { 
+		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
+	}
+	
+	//Specular color
+	uniform = sp.uniforms.specularColor;
+	if (uniform) { 
+		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
+	}
+		
+	//Shininess
+	uniform = sp.uniforms.shininess;
+	if (uniform) { 
+		this.setUniform(gl, uniform, 0.2);
+	}
+	
+	//Transparency
+	uniform = sp.uniforms.transparency;
+	if (uniform) { 
+		this.setUniform(gl, uniform, 0.0);
+	}
+	
+	////org.xml3d.webgl.checkError(this.gl);
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.setUniformVariables = function(sp, uniforms) {
+	if (this.currentProgram != sp) {
+		this.gl.useProgram(sp.handle);
+	}
+	
+	for (var name in uniforms) {
+		var u = uniforms[name];
+		if (u.clean)
+			continue;
+		
+		if (sp.uniforms[name]) {
+			this.setUniform(this.gl, sp.uniforms[name], u);
+		}
+	}
+	
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.bindShader = function(sp) {
+	this.currentProgram = sp;
+	this.gl.useProgram(sp.handle);
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.unbindShader = function(sp) {
+	this.currentProgram = null;
+	this.gl.useProgram(null);
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.setUniform = function(gl, u, value) {
+	switch (u.glType) {
+		case gl.BOOL:
+		case gl.INT:		
+		case gl.SAMPLER_2D:	gl.uniform1i(u.location, value); break;	
+		
+		case gl.BOOL_VEC2: 	
+		case gl.INT_VEC2:	gl.uniform2iv(u.location, value); break;
+		
+		case gl.BOOL_VEC3:	
+		case gl.INT_VEC3:	gl.uniform3iv(u.location, value); break;
+		
+		case gl.BOOL_VEC4:	
+		case gl.INT_VEC4:	gl.uniform4iv(u.location, value); break;
+		
+		case gl.FLOAT:		gl.uniform1f(u.location, value); break;
+		case gl.FLOAT_VEC2:	gl.uniform2fv(u.location, value); break;
+		case gl.FLOAT_VEC3:	gl.uniform3fv(u.location, value); break;
+		case gl.FLOAT_VEC4:	gl.uniform4fv(u.location, value); break;
+		
+		case gl.FLOAT_MAT2: gl.uniformMatrix2fv(u.location, gl.FALSE, value); break;
+		case gl.FLOAT_MAT3: gl.uniformMatrix3fv(u.location, gl.FALSE, value); break;
+		case gl.FLOAT_MAT4: gl.uniformMatrix4fv(u.location, gl.FALSE, value); break;
+		
+		default:
+			org.xml3d.debug.logError("Unknown uniform type "+u.glType);
+			break;
+	}
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.bindDefaultShader = function() {
+	if (!this.shaders.defaultShader) {
+		this.shaders.defaultShader = this.getStandardShaderProgram("urn:xml3d:shader:flat");
+	}
+	this.currentProgram = this.shaders.defaultShader;
+	this.gl.useProgram(this.shaders.defaultShader.handle);
+	
+	return this.shaders.defaultShader;
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.unbindDefaultShader = function() {
+	this.currentProgram = null;
+	this.gl.useProgram(null);
+};
+/*******************************************
+ * Class org.xml3d.webgl.XML3DBufferHandler 
+ * 
+ * The XML3DBufferHandler is an abstraction layer between the renderer and WebGL. It handles all operations
+ * on Framebuffer Objects but doesn't store any of these internally. FBOs are returned and expected as a
+ * 'struct' containing the following information:
+ * 
+ * 		handle			: The WebGL handle returned when gl.createFramebuffer() is called
+ * 		valid			: A flag indicating whether this FBO is complete
+ * 		width			: Width of this FBO
+ * 		height			: Height of this FBO
+ * 		colorTarget		
+ * 		depthTarget 	
+ * 		stencilTarget	: The targets that will be rendered to, can be either a RenderBuffer or Texture2D contained
+ * 						  in another 'struct' with fields "handle" and "isTexture"
+ * 
+ * @author Christian Schlinkmann
+ *******************************************/
+
+org.xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
+	this.renderer = renderer;
+	this.gl = gl;
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(width, height) {
+	var gl = this.gl;
+	
+	if (width > 380 || height > 240) {
+		var scale = 380 / width;
+		width = Math.floor(width * scale);
+		height = Math.floor(height * scale);
+	}
+	
+	return this.createFrameBuffer(width, height, gl.RGBA, gl.DEPTH_COMPONENT16, null, { depthAsRenderbuffer : true } );
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.createShadowBuffer = function() {
+	//TODO: this
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options) {
+	
+	var gl = this.gl;	
+	options = this.fillOptions(options);
+	
+	var handle = gl.createFramebuffer();
+	gl.bindFramebuffer(gl.FRAMEBUFFER, handle);
+	
+	//Create targets
+	var colorTarget = { handle : null, isTexture : false };
+	if (colorFormat) {
+		colorTargets = [];
+		if (options.colorAsRenderbuffer) {
+			var ct = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, ct);
+			gl.renderbufferStorage(gl.RENDERBUFFER, colorFormat, width, height);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+			
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, ct);
+			
+			colorTarget.handle = ct;
+			colorTarget.isTexture = false;		
+		} else {
+			//opt.generateMipmap = opt.generateColorsMipmap;
+			var ctex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, colorFormat, width, height, gl.RGBA, 
+					gl.UNSIGNED_BYTE, null, options);
+			
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
+			
+			colorTarget.handle = handle;
+			colorTarget.isTexture = true;
+		}	
+	}
+	
+	var depthTarget = { handle : null, isTexture : false };
+	if (depthFormat) {
+		options.isDepth = true;
+		if (options.depthAsRenderbuffer) {
+			var dt = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, dt);
+			gl.renderbufferStorage(gl.RENDERBUFFER, depthFormat, width, height);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+			
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, dt);
+			
+			depthTarget.handle = dt;
+			depthTarget.isTexture = false;
+		} else {
+			//opt.generateMipmap = opt.generateDepthMipmap;			
+			var dtex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, depthFormat, width, height, 
+									gl.DEPTH_COMPONENT, gl.FLOAT, null, options);
+			
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, dtex.handle, 0);
+			
+			depthTarget.handle = dtex.handle;
+			depthTarget.isTexture = true;
+		}
+	}
+	
+	var stencilTarget = { handle : null, isTexture : false };
+	if (stencilFormat) {
+		options.isDepth = false;
+		if (options.stencilAsRenderbuffer) {
+			var st = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, st);
+			gl.renderbufferStorage(gl.RENDERBUFFER, stencilFormat, width, height);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+			
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, st);			
+			
+			stencilTarget.handle = st;
+			stencilTarget.isTexture = false;
+		}
+		else {
+			//opt.generateMipmap = opt.generateStencilMipmap;			
+			var stex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, stencilFormat, width, height, 
+									gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, null, options);
+			
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);
+			
+			stencilTarget.handle = stex.handle;
+			stencilTarget.isTexture = true;
+		}
+	}
+	
+	//Finalize framebuffer creation
+	var fbStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+	
+	switch (fbStatus) {
+	    case gl.FRAMEBUFFER_COMPLETE:
+	        break;
+	    case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+	        org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+	        break;
+	    case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+	        break;
+	    case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
+	        break;
+	    case gl.FRAMEBUFFER_UNSUPPORTED:
+	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_UNSUPPORTED");
+	        break;
+	    default:
+	    	org.xml3d.debug.logError("Incomplete framebuffer: " + status);
+	}
+	
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	
+	var fbo = {};
+	fbo.handle = handle;
+	fbo.valid = (fbStatus == gl.FRAMEBUFFER_COMPLETE);
+	fbo.width = width;
+	fbo.height = height;
+	fbo.colorTarget = colorTarget;
+	fbo.depthTarget = depthTarget;
+	fbo.stencilTarget = stencilTarget;
+
+	return fbo;
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.destroyFrameBuffer = function(fbo) {
+	if (!fbo.handle)
+		return;
+	
+	var gl = this.gl;
+	gl.deleteFramebuffer(fbo.handle);
+	
+	if(fbo.colorTarget !== null) {
+		if (fbo.colorTarget.isTexture) 
+			gl.deleteTexture(fbo.colorTarget.handle);
+		else
+			gl.deleteRenderBuffer(fbo.colorTarget.handle);
+	}
+	if(fbo.depthTarget !== null) {
+		if (fbo.depthTarget.isTexture) 
+			gl.deleteTexture(fbo.depthTarget.handle);
+		else
+			gl.deleteRenderBuffer(fbo.depthTarget.handle);
+	}
+	if(fbo.stencilTarget !== null) {
+		if (fbo.stencilTarget.isTexture) 
+			gl.deleteTexture(fbo.stencilTarget.handle);
+		else
+			gl.deleteRenderBuffer(fbo.stencilTarget.handle);
+	}
+	
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.fillOptions = function(options) {
+	var gl = this.gl;
+	var opt =  {
+		wrapS             	  : gl.CLAMP_TO_EDGE,
+		wrapT                 : gl.CLAMP_TO_EDGE,
+		minFilter             : gl.NEAREST,
+		magFilter             : gl.NEAREST,
+		depthMode             : gl.LUMINANCE,
+		depthCompareMode      : gl.COMPARE_R_TO_TEXTURE,
+		depthCompareFunc      : gl.LEQUAL,
+		colorsAsRenderbuffer  : false,
+		depthAsRenderbuffer   : false,
+		stencilAsRenderbuffer : false,
+		isDepth               : false
+	};
+	
+	for (var item in options) {
+		opt[item] = options[item];
+	}
+	return opt;
+};
+
+
+
 //Check, if basics have already been defined
 var org;
 if (!org || !org.xml3d)
@@ -18330,7 +18755,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.canvas = canvas;
 		this.needDraw = true;
 		this.needPickingDraw = true;
-		this._pickingDisabled = true; //TODO: SET BACK TO FALSE
+		this._pickingDisabled = false; //TODO: SET BACK TO FALSE
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
 		this.postProcessShaders = [];
@@ -18487,17 +18912,17 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	};
 	//Returns the HTML ID of the canvas associated with this Handler
 	XML3DHandler.prototype.getCanvasId = function() {
-		return this.ui.canvas.id;
+		return this.canvas.id;
 	};
 
 	//Returns the width of the canvas associated with this Handler
 	XML3DHandler.prototype.getCanvasWidth = function() {
-		return this.ui.width;
+		return this.canvas.width;
 	};
 
 	//Returns the height of the canvas associated with this Handler
 	XML3DHandler.prototype.getCanvasHeight = function() {
-		return this.ui.height;
+		return this.canvas.height;
 	};
 
 	XML3DHandler.prototype.resize = function(gl, width, height) {
@@ -18513,19 +18938,15 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	XML3DHandler.prototype.renderPick = function(screenX, screenY) {
 		if (this._pickingDisabled)
 			return;
-		this.pickBuffer.bind();
-		this.renderer.renderPickingPass(screenX, screenY, this.needPickingDraw);
+		this.renderer.renderPickingPass(screenX, this.canvas.height - screenY, this.needPickingDraw);
 		this.needPickingDraw = false;
-		this.pickBuffer.unbind();
 	};
 	
 	//Binds the normal picking buffer and passes the request for picked object normals to the renderer
 	XML3DHandler.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
 		if (!pickedObj || this._pickingDisabled)
-			return;
-		this.normalPickBuffer.bind();		
+			return;	
 		this.renderer.renderPickedNormals(pickedObj, screenX, screenY);
-		this.normalPickBuffer.unbind();
 	};
 	
 	//Uses gluUnProject() to transform the 2D screen point to a 3D ray 
@@ -18689,7 +19110,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 						   	null);
 		}
 		else
-			evt = event;
+			evt = this.copyMouseEvent(event);
 
 		// adapt type to not clash with events spidergl listens to 
 		//evt.type = "xml3d" + type; 
@@ -18704,7 +19125,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			tar = this.scene.xml3d;
 				
 		// dispatch
-		//tar.dispatchEvent(evt);
+		tar.dispatchEvent(evt);
 		
 		// trigger on[event] attributes 
 		var ontype = "on" + type; 
@@ -18713,7 +19134,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		var evtMethod = currentObj.getAttribute(ontype);
 		if (evtMethod && currentObj.evalMethod) {
 			evtMethod = new Function(evtMethod);
-			evtMethod.call(currentObj);
+			evtMethod.call(currentObj, evt);
 		}
 		
 		//Make sure the event method didn't remove picked object from the tree
@@ -18725,7 +19146,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				evtMethod = currentObj.getAttribute(ontype);
 				if (evtMethod && currentObj.evalMethod) {
 					evtMethod = new Function(evtMethod);
-					evtMethod.call(currentObj);
+					evtMethod.call(currentObj, evt);
 				}
 			}
 		}
@@ -18881,17 +19302,16 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		// trigger mouseover and mouseout
 		if(curObj !== lastObj)
 		{
+			if (lastObj) 
+			{
+				//The mouse has left the last object
+				this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, lastObj); 	
+			}
 			if (curObj)
 			{
 				//The mouse is now over a different object, so call the new object's
 				//mouseover method
 				this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y);
-			}
-			
-			if (lastObj) 
-			{
-				//The mouse has left the last object
-				this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, lastObj); 	
 			}
 		}
 		
@@ -18933,7 +19353,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		event.timeEnd = end;
 		event.renderTimeInMilliseconds = end - start;
 		event.numberOfObjectsDrawn = stats[0];
-		event.numberOfTrianglesDrawn = stats[1];
+		event.numberOfTrianglesDrawn = Math.floor(stats[1]);
 		
 		for (var i in this.events.framedrawn) {
 			this.events.framedrawn[i].listener.call(this.events.framedrawn[i].node, event);
@@ -19253,18 +19673,18 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.scene = handler.scene;
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(handler, this);
 	this.dataFactory = new org.xml3d.webgl.XML3DDataAdapterFactory(handler);
+	this.bufferHandler = new org.xml3d.webgl.XML3DBufferHandler(handler.gl, this);
+	this.shaderHandler = new org.xml3d.webgl.XML3DShaderHandler(handler.gl, this);
 	this.lights = [];
 	this.camera = this.initCamera();
-	this.shaderMap = {};
+	this.shaderMap = this._initInternalShaders();
 	this.width = width;
 	this.height = height;
 	this.opaqueObjects = [];
 	this.transparentObjects = [];
-	this.zPos = [];
-	this.viewMatrix = new XML3DMatrix(); // view matrix of last call to render()
-	this.projMatrix = new XML3DMatrix(); // projection matrix of last call to render()
+	this.allObjects = [];
 	
-	//this.createDefaultObjects();
+	this.fbos = this._initFrameBuffers(handler.gl);
 	
 	this.collectDrawableObjects(new XML3DMatrix(), this.opaqueObjects, this.transparentObjects, this.lights, null, true);
 };
@@ -19292,6 +19712,24 @@ org.xml3d.webgl.Renderer.prototype.collectDrawableObjects = function(transform,
 	if (adapter)
 		return adapter.collectDrawableObjects(transform, opaqueObjects, transparentObjects, lights, shader, visible);
 	return [];
+};
+
+org.xml3d.webgl.Renderer.prototype._initFrameBuffers = function(gl) {
+	var fbos = {};
+	
+	fbos.picking = this.bufferHandler.createPickingBuffer(this.width, this.height);
+	if (!fbos.picking.valid)
+		this.handler._pickingDisabled = true;
+	
+	return fbos;
+};
+
+org.xml3d.webgl.Renderer.prototype._initInternalShaders = function() {
+	var shaderMap = {};
+	shaderMap.picking = this.shaderHandler.getStandardShaderProgram("urn:xml3d:shader:picking");
+	//TODO: Shadow map, reflection, etc
+	
+	return shaderMap;
 };
 
 org.xml3d.webgl.Renderer.prototype.resizeCanvas = function (width, height) {
@@ -19332,9 +19770,8 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 		}
 	}
 
-	adapter.collectDrawableObjects(transform, this.drawableObjects, this.lights, shader, visible);
-	this.requestRedraw("A node was added.");
-	
+	adapter.collectDrawableObjects(transform, this.opaqueObjects, this.transparentObjects, this.lights, shader, visible);
+	this.requestRedraw("A node was added.");	
 };
 
 org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
@@ -19347,62 +19784,6 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 
 };
 
-/**
- * Creates and returns the requested shader. Custom user defined shaders are handled in 
- * org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram
- * 
- * @param gl
- * @param name
- * @return
- */
-/*org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram = function(gl, name) {
-	var shader = this.shaderMap[name];
-	if (!shader) {
-		var sp = {program:null, vSource:"", fSource:""};
-		
-		if (g_shaders[name] === undefined)
-		{
-			org.xml3d.debug.logError("Could not find standard shader: " + name);
-			return sp;
-		}
-		////org.xml3d.webgl.checkError(gl, "Before creating shader");
-		var prog = null;
-
-		if (name == "urn:xml3d:shader:phong" || name == "urn:xml3d:shader:phongvcolor" || name == "urn:xml3d:shader:texturedphong")
-		{
-			// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
-			var sfrag = g_shaders[name].fragment;
-			var tail = sfrag.substring(68, sfrag.length);
-			if (!this.lights)
-				var maxLights = "#ifdef GL_ES\nprecision highp float;\n" +
-						"#endif\n\nconst int MAXLIGHTS = ;\n";
-			else
-				var maxLights = "#ifdef GL_ES\nprecision highp float;\n" +
-						"#endif\n\n const int MAXLIGHTS = "+ this.lights.length.toString() + ";\n";
-
-			var frag = maxLights + tail;
-			prog = new SglProgram(gl, [g_shaders[name].vertex], [frag]);
-			sp.vSource = g_shaders[name].vertex;
-			sp.fSource = frag;
-			////org.xml3d.webgl.checkError(gl, "After creating shader");
-		} else {
-			prog = new SglProgram(gl, [g_shaders[name].vertex], [g_shaders[name].fragment]);
-			sp.vSource = g_shaders[name].vertex;
-			sp.fSource = g_shaders[name].fragment;
-			////org.xml3d.webgl.checkError(gl, "After creating shader");
-		}
-		if (!prog)
-		{
-			org.xml3d.debug.logError("Could not create shader program: " + name);
-			return sp;
-		}
-		sp.program = prog;
-		this.shaderMap[name] = sp;
-		shader = sp;
-	}
-	return shader;
-};
-*/
 org.xml3d.webgl.Renderer.prototype.render = function() {
 	var gl = this.handler.gl;
 	var sp = null;
@@ -19416,14 +19797,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	
 	if (this.currentView != this.scene.getActiveView())
 		this.camera = this.initCamera();
-	
-	//TODO: port matrix calculations away from SpiderGL
-	/*var xform = new SglTransformStack();
-	xform.view.load(this.camera.getViewMatrix());
-	this.projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
-	this.viewMatrix = this.camera.getViewMatrix();
-	xform.projection.load(this.projMatrix);*/
-	
+
 	var xform = {};
 	xform.view = this.camera.getViewMatrix();
 	xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
@@ -19450,6 +19824,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		lightParams.visible.set(params.visibility, j*3);
 	}
 	
+	var stats = { objCount : 0, triCount : 0 };
+	
 	//TODO: Remove sorting for opaque objects?
 	//Sort opaque objects, back to front
 	var zPosOpaque = [];
@@ -19460,7 +19836,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	this.sortObjects(this.transparentObjects, zPosTransparent, xform, false);
 	
 	//Render opaque objects
-	this.drawObjects(this.opaqueObjects, zPosOpaque, xform, lightParams);
+	this.drawObjects(this.opaqueObjects, zPosOpaque, xform, lightParams, stats);
 	
 	//Render transparent objects
 	if (this.transparentObjects.length > 0) {
@@ -19468,13 +19844,13 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		gl.enable(gl.BLEND);
 		gl.depthMask(gl.FALSE);
 	
-		this.drawObjects(this.transparentObjects, zPosTransparent, xform, lightParams);
+		this.drawObjects(this.transparentObjects, zPosTransparent, xform, lightParams, stats);
 		
 		gl.disable(gl.BLEND);
 		gl.depthMask(gl.TRUE);
 	}
 	
-	return [this.opaqueObjects.length + this.transparentObjects.length, 1]; //TODO: Num triangles
+	return [stats.objCount, stats.triCount]; 
 };
 
 org.xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, sortedObjectArray, xform, backToFront) {
@@ -19506,8 +19882,9 @@ org.xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, sor
 	}
 };
 
-org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray, xform, lightParams) {
-
+org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray, xform, lightParams, stats) {
+	var objCount = 0;
+	var triCount = 0;
 	var parameters = {};
 	
 	parameters["lightPositions[0]"] = lightParams.positions;
@@ -19528,208 +19905,31 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 		//xform.model.load(transform);
 		xform.model = transform;
 		xform.modelView = this.camera.getModelViewMatrix(xform.model);
-		
-		if (!shader)
-		{			
-			//TODO: Find a way to bind a default shader program if none is given
-			this.bindDefaultShaderProgram(this.handler.gl, "urn:xml3d:shader:flat");
-			
-			/*if (sp) {
-				if (RGBColor && document.defaultView
-					&& document.defaultView.getComputedStyle) {
-					var colorStr = document.defaultView.getComputedStyle(
-						shape.node, "").getPropertyValue("color");
-					var color = new RGBColor(colorStr);
-					//parameters["diffuseColor"] = [0.0,0.0,0.80];
-					}
-			}*/
-			
-		}
-
 		parameters["modelViewMatrix"] = xform.modelView.toGL();
 		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView).toGL();
 		parameters["normalMatrix"] = this.camera.getNormalMatrixGL(xform.modelView);
 		parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3);
 		
 		if (!shader)
-			continue; //TODO: remove once default shader program is in place
-		shader.enable(parameters);		
-		shape.draw(shader);
-		shader.disable();
-		
-	}
-	
-	
-	
-};
-
-
-/**
- * The main rendering method that will redraw the scene
- * @return
- */
-/*
-org.xml3d.webgl.Renderer.prototype.render = function() {
-	var gl = this.handler.gl;
-	var sp = null;
-
-	gl.clearDepth(1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-	gl.viewport(0, 0, this.width, this.height);
-	gl.disable(gl.DEPTH_TEST);
-	gl.disable(gl.CULL_FACE);
-	gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE,
-			gl.ONE_MINUS_SRC_ALPHA);
-	gl.enable(gl.BLEND);
-
-	if (!this.camera)
-		return 0;
-	if (this.currentView != this.scene.getActiveView())
-		this.camera = this.initCamera();
-
-	var start = Date.now() / 1000.0;
-	
-	var xform = new SglTransformStack();
-	xform.view.load(this.camera.getViewMatrix());
-	this.projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
-	this.viewMatrix = this.camera.getViewMatrix();
-	xform.projection.load(this.projMatrix);
-
-	//Setup lights
-	var light, lightOn;
-	var slights = this.lights;
-	var elements = slights.length * 3;
-	var lightParams = {
-		positions : new Float32Array(elements),
-		diffuseColors : new Float32Array(elements),
-		ambientColors : new Float32Array(elements),
-		attenuations : new Float32Array(elements),
-		visible : new Float32Array(elements)
-	};
-	for ( var j = 0; j < slights.length; j++) {
-		var light = slights[j][1];
-		var params = light.getParameters(this.viewMatrix);
-		if (!params)
-			continue; // TODO: Shrink array
-		lightParams.positions.set(params.position, j*3);
-		lightParams.attenuations.set(params.attenuation, j*3);
-		lightParams.diffuseColors.set(params.intensity, j*3);
-		lightParams.visible.set(params.visibility, j*3);
-	}
-
-	this.zPos = new Array();
-	for (i = 0, n = this.opaqueObjects.length; i < n; i++) {
-		var meshAdapter = this.opaqueObjects[i];
-		
-		//Check if this mesh was removed from the scene since last rendering pass
-		if (!meshAdapter.isValid) {
-			this.opaqueObjects.splice(i, 1);
-			i--;
-			n--;
-			continue;
-		}
-		
-		var trafo = meshAdapter._transform;
-		var center = new SglVec3(meshAdapter.bbox.center);
-		center.v = sglMulM4V3(trafo, center.v, 1.0);
-		center.v = sglMulM4V3(xform.view._s[0], center.v, 1.0);
-		this.zPos[i] = [ i, center.z ]; 
-	}
-	this.zPos.sort(function(a, b) {
-		return a[1] - b[1];
-	});
-
-	var end = Date.now() / 1000.0;
-	//console.log("Sort Time:" + (end-start));
-	start = end;
-	
-	var numTrianglesDrawn = 0;
-	
-	//Draw opaque objects
-	for (var i = 0, n = this.zPos.length; i < n; i++) {
-		var obj = this.opaqueObjects[this.zPos[i][0]];
-		var transform = obj._transform;
-		var shape = obj;
-		var shader = obj._shader;
-		
-		if (shape._visible == false)
-			continue;
-
-		sp = null;
-		xform.model.load(transform);
-		var parameters = {};
-
-		if (shader) {
-			sp = shader.shaderProgram;
-		}
-
-		if (!sp)
-		{
-			////org.xml3d.webgl.checkError(gl, "Before default shader");
-			if (shader) {
-				shader.sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
-				sp = shader.sp;
-			}
-			else
-				sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:flat");
-			if (sp) {
-				if (RGBColor && document.defaultView
-					&& document.defaultView.getComputedStyle) {
-					var colorStr = document.defaultView.getComputedStyle(
-						shape.node, "").getPropertyValue("color");
-					var color = new RGBColor(colorStr);
-					parameters["diffuseColor"] = [0.0,0.0,0.80];
-					}
-			}
-		}
-
-		//Begin setting up uniforms for rendering
-		parameters["lightPositions[0]"] = lightParams.positions;
-		parameters["lightVisibility[0]"] = lightParams.visible;
-		parameters["lightDiffuseColors[0]"] = lightParams.diffuseColors;
-		parameters["lightAmbientColors[0]"] = lightParams.ambientColors;
-		parameters["lightAttenuations[0]"] = lightParams.attenuations;
-		parameters["modelViewMatrix"] = xform.modelViewMatrix;
-		parameters["modelViewProjectionMatrix"] = xform.modelViewProjectionMatrix;
-		parameters["normalMatrix"] = xform.viewSpaceNormalMatrix;
-		parameters["cameraPosition"] = xform.modelSpaceViewerPosition;
-
-		if (shader)
-		{
-			//Add uniforms from the shader to the parameters package
-			shader.setParameters(parameters);
-			var prims = shape.mesh.connectivity.primitives;
-			if (prims && prims.triangles)
-				numTrianglesDrawn += prims.triangles.length / 3;
-			
-			shape.render(shader, parameters);
-		} else {
+		{			
 			shader = {};
-			shader.sp = sp;
-			shape.render(shader, parameters);
+			shader.program = this.shaderHandler.bindDefaultShader();
+			this.shaderHandler.setUniformVariables(shader.program, parameters);
+			triCount += shape.draw(shader);
+			this.shaderHandler.unbindDefaultShader();
+		} else {
+			shader.enable(parameters);		
+			triCount += shape.draw(shader);
+			shader.disable();
 		}
-		xform.model.pop();
-
+		objCount++;
 	}
 	
-	//Draw transparent objects
-	for (var i = 0, n = origLength; i < n; i++) {
-		
-	}
+	stats.objCount = objCount;
+	stats.triCount = triCount;
 	
-	
-	end = Date.now() / 1000.0;
-	//console.log("Render Time:" + (end-start));
-	start = end;
-
-	xform.view.pop();
-	xform.projection.pop();
-
-	gl.disable(gl.CULL_FACE);
-	
-	return [origLength, numTrianglesDrawn];
 };
-*/
+
 /**
  * Render the scene using the picking shader and determine which object, if any, was picked
  * 
@@ -19743,9 +19943,14 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			return;
 		gl = this.handler.gl;
 		
+		gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
+		
 		gl.enable(gl.DEPTH_TEST);
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
+		
+		this.allObjects = this.opaqueObjects.concat(this.transparentObjects);
+		var shader = {};
 		
 		if (needPickingDraw ) {
 			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
@@ -19756,19 +19961,20 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			xform.view = this.camera.getViewMatrix();
 			xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
 
-			for (var i = 0; i < this.zPos.length; i++) {
-				var meshAdapter = this.drawableObjects[this.zPos[i][0]];
+			for (var i = 0; i < this.opaqueObjects.length; i++) {
+				var meshAdapter = this.opaqueObjects[i];
 				var trafo = meshAdapter._transform;
 				this.adjustMinMax(meshAdapter.bbox, volumeMin, volumeMax, trafo);
 			}
+			
 			this.bbMin = volumeMin;
 			this.bbMax = volumeMax;
-			var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:picking");
-			shader = {};
-			shader.sp = sp;
 			
-			for (j = 0, n = this.zPos.length; j < n; j++) {
-				var obj = this.drawableObjects[this.zPos[j][0]];
+			shader.program = this.shaderMap.picking;
+			this.shaderHandler.bindShader(shader.program);
+			
+			for (j = 0, n = this.allObjects.length; j < n; j++) {
+				var obj = this.allObjects[j];
 				var transform = obj._transform;
 				var shape = obj;
 				
@@ -19783,16 +19989,22 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 						id : id,
 						min : volumeMin.toGL(),
 						max : volumeMax.toGL(),
-						modelMatrix : transform,
+						modelMatrix : transform.toGL(),
 						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView).toGL(),
 						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 				};
 				
-				shape.render(shader, parameters);
-			}			
+				this.shaderHandler.setUniformVariables(shader.program, parameters);
+				shape.draw(shader);
+			}
 		}
+		
 		this.readPixels(false, x, y);
+		this.shaderHandler.unbindShader(shader.program);
+		
 		gl.disable(gl.DEPTH_TEST);
+		
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 };
 
 /**
@@ -19863,7 +20075,7 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 			if (objId >= 0 && data[3] > 0) {
 				vec = vec.multiply(this.bbMax.subtract(this.bbMin)).add(this.bbMin);
 				this.scene.xml3d.currentPickPos = vec;
-				var pickedObj = this.drawableObjects[this.zPos[objId][0]];
+				var pickedObj = this.allObjects[objId];
 				this.scene.xml3d.currentPickObj = pickedObj;
 			} else {
 				this.scene.xml3d.currentPickPos = null;
@@ -19922,8 +20134,8 @@ org.xml3d.webgl.Renderer.prototype.renderShader = function(gl, quadMesh, shader,
 
 //Helper to expand an axis aligned bounding box around another object's bounding box
 org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
-	var bmin = new XML3DVec3(bbox.min);
-	var bmax = new XML3DVec3(bbox.max);
+	var bmin = bbox.min;
+	var bmax = bbox.max;
 	var bbmin = trafo.mulVec3(bmin, 1.0);
 	var bbmax = trafo.mulVec3(bmax, 1.0);
 
@@ -20310,6 +20522,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	this.gl = this.factory.handler.gl;
 	
 	this.renderer = this.factory.renderer;
+	this.shaderHandler = this.renderer.shaderHandler;
 	
 	this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
 	if(this.dataAdapter)
@@ -20350,7 +20563,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 					this.getStandardShaderSource(scriptURL, sources);
 					this.program = this.createShaderProgram(sources);
 					this.gl.useProgram(this.program.handle);
-					this.setStandardUniforms();
+					this.shaderHandler.setStandardUniforms(this.program);
 					return this.program;
 				} else {
 					//User-provided shader
@@ -20365,14 +20578,22 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 				}
 			}
 			
-			this.program = this.createShaderProgram(vertexSource, fragmentSource);
+			this.program = this.createShaderProgram( {vs:vertexSource, fs:fragmentSource} );
 			return this.program;
 
 }));
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
-	if (evt.attribute == "script") {
+	if (evt.attribute == "script" && this.program) {
 		this.destroy();
+		
+		//All uniforms need to be dirtied to make sure they're set in the new shader program
+		var dataTable = this.dataAdapter.createDataTable();		
+		for (var uniform in dataTable) {
+			var u = dataTable[uniform];
+			if (u.clean)
+				u.clean = false;
+		}	
 	}
 };
 
@@ -20414,110 +20635,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getStandardShaderSource = fun
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = function(sources) {
-	var gl = this.gl;
-	
-	if (!sources.vs || !sources.fs) {
-		return this.createShaderProgram( gl, g_shaders["urn:xml3d:shader:flat"].vertex, 
-				 							 g_shaders["urn:xml3d:shader:flat"].fragment );	
-	}
-	
-	var prg = gl.createProgram();
-	
-	var vShader = this.compileShader(gl.VERTEX_SHADER, sources.vs);
-	var fShader = this.compileShader(gl.FRAGMENT_SHADER, sources.fs);
-	
-	if (vShader === null || fShader === null) {
-		//Use a default flat shader instead
-		return this.createShaderProgram( gl, g_shaders["urn:xml3d:shader:flat"].vertex, 
-											 g_shaders["urn:xml3d:shader:flat"].fragment );
-	}
-	
-	//Link shader program	
-	gl.attachShader(prg, vShader);
-	gl.attachShader(prg, fShader);
-	gl.linkProgram(prg);
-	
-	if (gl.getProgramParameter(prg, gl.LINK_STATUS) == 0) {
-		var errorString = "Shader linking failed: \n";
-		errorString += gl.getProgramInfoLog(prg);
-		errorString += "\n--------\n";
-		org.xml3d.debug.logError(errorString);
-		gl.getError();
-		
-		return this.createShaderProgram( gl, g_shaders["urn:xml3d:shader:flat"].vertex, 
-				 							 g_shaders["urn:xml3d:shader:flat"].fragment );
-	}
-	
-	var programObject = { 	attributes 	: {}, 
-							uniforms 	: {}, 
-							samplers	: {},
-							handle		: prg };
-	
-	gl.useProgram(prg);
-	
-	//Tally shader attributes
-	var numAttributes = gl.getProgramParameter(prg, gl.ACTIVE_ATTRIBUTES);
-	for (var i=0; i<numAttributes; i++) {
-		var att = gl.getActiveAttrib(prg, i);
-		if (!att) continue;
-		var attInfo = {};
-		attInfo.name = att.name;
-		attInfo.size = att.size;
-		attInfo.glType = att.type;
-		attInfo.location = gl.getAttribLocation(prg, att.name);
-		programObject.attributes[att.name] = attInfo;
-	}
-
-	//TODO: shader not picking up light uniforms?
-	//Tally shader uniforms and samplers
-	var texCount = 0;
-	var numUniforms = gl.getProgramParameter(prg, gl.ACTIVE_UNIFORMS);
-	for (var i=0; i<numUniforms; i++) {
-		var uni = gl.getActiveUniform(prg, i);
-		if (!uni) continue;
-		var uniInfo = {};	
-		uniInfo.name = uni.name;
-		uniInfo.size = uni.size;
-		uniInfo.glType = uni.type;
-		uniInfo.location = gl.getUniformLocation(prg, uni.name);
-		
-		if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
-			uniInfo.texUnit = texCount;
-			this.textures[uni.name].info = uniInfo;
-
-			programObject.samplers[uni.name] = uniInfo;
-			texCount++;
-		}
-		else
-			programObject.uniforms[uni.name] = uniInfo;
-	}
-	
-	return programObject;
-};
-
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.compileShader = function(type, shaderSource) {
-	var gl = this.gl;
-	
-	var shd = gl.createShader(type);
-	gl.shaderSource(shd, shaderSource);
-	gl.compileShader(shd);
-	
-	if (gl.getShaderParameter(shd, gl.COMPILE_STATUS) == 0) {
-		var errorString = "";
-		if (type == gl.VERTEX_SHADER)
-			errorString = "Vertex shader failed to compile: \n";
-		else
-			errorString = "Fragment shader failed to compile: \n";
-		
-		errorString += gl.getShaderInfoLog(shd) + "\n--------\n";
-		org.xml3d.debug.logError(errorString);
-		gl.getError();
-		
-		return null;
-	}
-	
-	return shd;
-	
+	return this.shaderHandler.createShaderFromSources(sources);
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindProgram = function() {	
@@ -20527,6 +20645,8 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindProgram = function() {
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.destroy = function() {
 	if (this.shaderProgram)
 		this.gl.deleteProgram(this.shaderProgram.handle);
+	
+	this.program = null;
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
@@ -20536,52 +20656,10 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
 	this.destroy();
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setStandardUniforms = function() {
-	var sp = this.shaderProgram;
-	var gl = this.gl;
-	
-	var uniform = null;
-	
-	//Diffuse color
-	uniform = sp.uniforms.diffuseColor;
-	if (uniform) { 
-		this.setUniform(gl, uniform, [1.0, 1.0, 1.0]);
-	}
-	
-	//Emissive color
-	uniform = sp.uniforms.emissiveColor;
-	if (uniform) { 
-		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
-	}
-	
-	//Specular color
-	uniform = sp.uniforms.specularColor;
-	if (uniform) { 
-		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
-	}
-		
-	//Shininess
-	uniform = sp.uniforms.shininess;
-	if (uniform) { 
-		this.setUniform(gl, uniform, 0.2);
-	}
-	
-	//Transparency
-	uniform = sp.uniforms.transparency;
-	if (uniform) { 
-		this.setUniform(gl, uniform, 0.0);
-	}
-	
-	//org.xml3d.webgl.checkError(this.gl);
-};
-
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.enable = function(globalUniforms) {
-	////org.xml3d.webgl.checkError(this.gl);
 	this.bindProgram();	
 	this.setUniformVariables(globalUniforms);
-	////org.xml3d.webgl.checkError(this.gl);
 	this.bindSamplers();
-	////org.xml3d.webgl.checkError(this.gl);
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.disable = function() {
@@ -20593,68 +20671,37 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 	var sp = this.shaderProgram;
 	var gl = this.gl;
 	
-	//TODO: implement a system (maybe in the dataAdapter) so only uniforms that have changed
-	//since the last frame need to be set
-	
 	//Set shader-specific uniforms
 	for (var uniform in dataTable) {
 		var u = dataTable[uniform];	
 		if (u.clean === true)
 			continue;
 		
-		if (u.isTexture) {		
-			this.setUniform(gl, sp.samplers[uniform], this.textures[uniform].info.texUnit);
+		if (u.isTexture) {
+			//Have to check for existence of uniforms in the shader, since the user is allowed to give 
+			//unused parameters
+			if (sp.samplers[uniform])
+				this.shaderHandler.setUniform(gl, sp.samplers[uniform], this.textures[uniform].info.texUnit);
 		} 
 		else if (sp.uniforms[uniform]) {
 			var data = u.data.length == 1 ? u.data[0] : u.data;
-			this.setUniform(gl, sp.uniforms[uniform], data);
+			this.shaderHandler.setUniform(gl, sp.uniforms[uniform], data);
 		}
 		
 		this.dataAdapter.dataTable[uniform].clean = true;
 	}
-	
-	var herp = gl.getUniformLocation(sp.handle, "lightPositions");
 	
 	//Set global uniforms (lights, space conversion matrices)
 	for (var uniform in globalUniforms) {
 		var uValue = globalUniforms[uniform];
 		
 		if (sp.uniforms[uniform]) {
-			this.setUniform(gl, sp.uniforms[uniform], uValue);
+			this.shaderHandler.setUniform(gl, sp.uniforms[uniform], uValue);
 		}
 	}
 	
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniform = function(gl, u, value) {
-	switch (u.glType) {
-		case gl.BOOL:
-		case gl.INT:		
-		case gl.SAMPLER_2D:	gl.uniform1i(u.location, value); break;	
-		
-		case gl.BOOL_VEC2: 	
-		case gl.INT_VEC2:	gl.uniform2iv(u.location, value); break;
-		
-		case gl.BOOL_VEC3:	
-		case gl.INT_VEC3:	gl.uniform3iv(u.location, value); break;
-		
-		case gl.BOOL_VEC4:	
-		case gl.INT_VEC4:	gl.uniform4iv(u.location, value); break;
-		
-		case gl.FLOAT:		gl.uniform1f(u.location, value); break;
-		case gl.FLOAT_VEC2:	gl.uniform2fv(u.location, value); break;
-		case gl.FLOAT_VEC3:	gl.uniform3fv(u.location, value); break;
-		case gl.FLOAT_VEC4:	gl.uniform4fv(u.location, value); break;
-		
-		case gl.FLOAT_MAT2: gl.uniformMatrix2fv(u.location, gl.FALSE, value); break;
-		case gl.FLOAT_MAT3: gl.uniformMatrix3fv(u.location, gl.FALSE, value); break;
-		case gl.FLOAT_MAT4: gl.uniformMatrix4fv(u.location, gl.FALSE, value); break;
-		
-		default:
-			org.xml3d.debug.logError("Unknown uniform type "+u.glType);
-			break;
-	}
-};
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindSamplers = function() {	
 	for (var name in this.textures) {
@@ -20670,6 +20717,76 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.unbindSamplers = function() {
 	}
 };
 
+
+org.xml3d.webgl.XML3DCreateTex2DFromData = function(gl, internalFormat, width, height, 
+		sourceFormat, sourceType, texels, opt) {
+	
+	var info = {};
+	if (!texels) {
+		if (sourceType == gl.FLOAT) {
+			texels = new Float32Array(width * height * 4);
+		}
+		else {
+			texels = new Uint8Array(width * height * 4);
+		}
+	}
+	
+	var handle = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, handle);
+	
+	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
+	
+	gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels);
+	
+	if (opt.isDepth) {
+		gl.texParameteri(gl.TEXTURE_2D, gl.DEPTH_TEXTURE_MODE,   opt.depthMode);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, opt.depthCompareMode);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, opt.depthCompareFunc);
+	}
+	if (opt.generateMipmap) {
+		gl.generateMipmap(gl.TEXTURE_2D);
+	}
+	
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	
+	info.handle = handle;
+	info.options = opt;
+	info.valid = true;
+	info.glType = gl.TEXTURE_2D;
+	info.format = internalFormat;	
+	
+	return info;
+};
+
+org.xml3d.webgl.XML3DCreateTex2DFromImage = function(gl, handle, image, opt) {
+	gl.bindTexture(gl.TEXTURE_2D, handle);
+	
+	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
+	
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	
+	if (opt.generateMipmap) {
+		gl.generateMipmap(gl.TEXTURE_2D);
+	}
+	
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	
+	info.handle = texture;
+	info.options = opt;
+	info.valid = true;
+	info.glType = gl.TEXTURE_2D;
+	info.format = gl.RGBA;	
+	
+	return info;	
+};
 
 //Adapter for <texture>
 org.xml3d.webgl.XML3DTextureRenderAdapter = function(factory, node) {
@@ -20713,18 +20830,14 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	
 	var opt = {
 			isDepth          : false,
-			depthMode        : gl.LUMINANCE,
-			depthCompareMode : gl.COMPARE_R_TO_TEXTURE,
-			depthCompareFunc : gl.LEQUAL,
+			minFilter 		 : dataTable[name].options.minFilter,
+			magFilter		 : dataTable[name].options.magFilter,
+			wrapS			 : dataTable[name].options.wrapS,
+			wrapT			 : dataTable[name].options.wrapT,
+			generateMipmap	 : dataTable[name].options.generateMipmap,
 			flipY            : true,
 			premultiplyAlpha : true	
 	};
-	
-	opt.minFilter = dataTable[name].options.minFilter;
-	opt.magFilter = dataTable[name].options.magFilter;
-	opt.wrapS = dataTable[name].options.wrapS;
-	opt.wrapT = dataTable[name].options.wrapT;
-	opt.generateMipmap = dataTable[name].options.generateMipmap;
 	
 	//Create texture handle
 	var texture = gl.createTexture();
@@ -20732,31 +20845,11 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	var loaded = this.factory.handler.redraw;
 	
 	//Load texture img(s)
-	//var image = node.firstElementChild;
 	var image = new Image();
 	var texAdapter = this;
 	image.onload = function() {
-		gl.bindTexture(gl.TEXTURE_2D, texture);
 		
-		//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
-		
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-		
-		if (opt.generateMipmap) {
-			gl.generateMipmap(gl.TEXTURE_2D);
-		}
-		
-		gl.bindTexture(gl.TEXTURE_2D, null);
-		
-		info.handle = texture;
-		info.options = opt;
-		info.valid = true;
-		info.glType = gl.TEXTURE_2D;
-		info.format = gl.RGBA;	
+		info = org.xml3d.webgl.XML3DCreateTex2DFromImage(gl, texture, image, opt);
 		
 		texAdapter.bind = texAdapter._bind;
 		texAdapter.unbind = texAdapter._unbind;
@@ -20860,14 +20953,12 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 		indexBuffer.glType = this.getGLTypeFromArray(gl, mIndices);
 		
 		meshInfo.vbos.index = indexBuffer;
-		meshInfo.isIndexed = true;
-		//delete dataTable.index;
-		
+		meshInfo.isIndexed = true;		
 	} else {
 		//?
 		meshInfo.isIndexed = false;
 	}
-	//org.xml3d.webgl.checkError(this.gl);
+
 	for (var attr in dataTable) {
 		var a = dataTable[attr];
 		
@@ -20884,7 +20975,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 		
 		meshInfo.vbos[attr] = attrBuffer;
 	}
-	//org.xml3d.webgl.checkError(this.gl);
+
 	this._bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 	
 	this.isValid = true;
@@ -20895,7 +20986,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.eventType == MutationEvent.REMOVAL) 
 		this.factory.renderer.sceneTreeRemoval(e);	
 	else if (e.attribute == "src") {
-		this.destroy();
+		this.dispose();
 		this.mesh = this.initMeshGL();
 	}
 	else if (e.attribute == "visible")
@@ -20927,7 +21018,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.evalOnclick = function(evtMetho
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	var sAttributes = shader.program.attributes;
 	var gl = this.gl;
-	//org.xml3d.webgl.checkError(this.gl);
+	var triCount = 0;
 	
 //Bind vertex buffers
 	for (var name in this.mesh.vbos) {
@@ -20941,16 +21032,16 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
 	}
-	//org.xml3d.webgl.checkError(this.gl);
 	
 //Draw the object
 	if (this.mesh.isIndexed) {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.vbos.index);
 		gl.drawElements(this.mesh.glType, this.mesh.vbos.index.length, gl.UNSIGNED_SHORT, 0);
+		triCount = this.mesh.vbos.index.length / 3;
 	} else {
 		gl.drawArrays(this.mesh.glType, 0, this.mesh.vbos.position.length);
+		triCount = this.mesh.vbos.position.length / 3;
 	}
-	//org.xml3d.webgl.checkError(this.gl);
 	
 //Unbind vertex buffers
 	for (var name in this.mesh.vbos) {
@@ -20960,9 +21051,11 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 		gl.disableVertexAttribArray(shaderAttribute.location);
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+	
+	return triCount;
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.destroy = function() {
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 	for (var vbo in this.mesh.vbos) {
 		var buffer = this.mesh.vbos[vbo];
 		this.gl.deleteBuffer(buffer);
@@ -20994,10 +21087,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
 	if (this.parentTransform !== null)
-		return transform.multiply(this.parentTransform);
+		return this.parentTransform.multiply(transform);
 	
 	if (this._transformAdapter)
-		return transform.multiply(this._transformAdapter.getMatrix());
+		return this._transformAdapter.getMatrix().multiply(transform);
 	
 	return transform;
 };
@@ -21030,7 +21123,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		//of its children with the new transformation matrix
 		
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-		downstreamValue = this.parentTransform.multiply(adapter.getMatrix());
+		downstreamValue = adapter.getMatrix().multiply(this.parentTransform);
 		this.notifyListeners("parenttransform", downstreamValue);
 		this.factory.renderer.requestRedraw("Group transform changed.");
 	}
@@ -21057,14 +21150,14 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.internalNotifyChanged = functi
 		this.parentTransform = newValue;
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 		if (adapter)
-			downstreamValue = this.parentTransform.multiply(adapter.getMatrix());
+			downstreamValue = adapter.getMatrix().multiply(this.parentTransform);
 		else
 			downstreamValue = this.parentTransform;
 		
 	} else if (what == "transform") {
 		//This was a change to the <transform> node tied to this adapter
 		if (this.parentTransform)
-			downstreamValue = this.parentTransform.multiply(newValue);	
+			downstreamValue = newValue.multiply(this.parentTransform);	
 		else
 			downstreamValue = newValue;
 		what = "parenttransform";

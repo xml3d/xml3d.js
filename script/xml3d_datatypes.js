@@ -410,9 +410,9 @@ XML3DMatrix.prototype.mulVec3 = function(that, w) {
 //		this._m11 * that.x + this._m21 * that.y + this._m31 * that.z + this._m41 * w, 
 //		this._m12 * that.x + this._m22 * that.y + this._m32 * that.z + this._m42 * w, 
 //		this._m13 * that.x + this._m23 * that.y + this._m33 * that.z + this._m43 * w
-		this._data[0] * that.x + this._data[1] * that.y + this._data[2] * that.z + this._data[3] * that.w, 
-		this._data[4] * that.x + this._data[5] * that.y + this._data[6] * that.z + this._data[7] * that.w, 
-		this._data[8] * that.x + this._data[9] * that.y + this._data[10] * that.z + this._data[11] * that.w
+		this._data[0] * that.x + this._data[1] * that.y + this._data[2] * that.z + this._data[3] * w, 
+		this._data[4] * that.x + this._data[5] * that.y + this._data[6] * that.z + this._data[7] * w, 
+		this._data[8] * that.x + this._data[9] * that.y + this._data[10] * that.z + this._data[11] * w
 		);
 };
 

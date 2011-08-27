@@ -18227,467 +18227,6 @@ function sglRegisterLoadedCanvas(canvasID, handler, updateRate) {
 /***********************************************************************/
 
 
-/**********************************************
- * Class org.xml3d.webgl.XML3DShaderHandler
- * 
- * The XML3DShaderHandler is an abstraction between the renderer and WebGL. It handles the creation of shaders and 
- * management of internal shaders that have no DOM node associated with them (eg. the picking shader). No shaders are
- * stored in this class.
- * 
- **********************************************/
-
-org.xml3d.webgl.XML3DShaderHandler = function(gl, renderer) {
-	this.gl = gl;
-	this.renderer = renderer;
-	this.currentProgram = null;
-	this.shaders = {};
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.getStandardShaderProgram = function(name) {
-	var sources = {};
-	
-	if (!g_shaders[name]) {
-		org.xml3d.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
-	} else {
-		sources.vs = g_shaders[name].vertex;
-		sources.fs = g_shaders[name].fragment;
-	}
-	
-	var shaderProgram = this.createShaderFromSources(sources);	
-	this.setStandardUniforms(shaderProgram);
-	
-	return shaderProgram;
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.createShaderFromSources = function(sources) {
-	var gl = this.gl;
-	
-	if (!sources.vs || !sources.fs) {
-		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
-										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );	
-	}
-	
-	var prg = gl.createProgram();
-	
-	var vShader = this.compileShader(gl.VERTEX_SHADER, sources.vs);
-	var fShader = this.compileShader(gl.FRAGMENT_SHADER, sources.fs);
-	
-	if (vShader === null || fShader === null) {
-		//Use a default flat shader instead
-		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
-										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
-	}
-	
-	//Link shader program	
-	gl.attachShader(prg, vShader);
-	gl.attachShader(prg, fShader);
-	gl.linkProgram(prg);
-	
-	if (gl.getProgramParameter(prg, gl.LINK_STATUS) == 0) {
-		var errorString = "Shader linking failed: \n";
-		errorString += gl.getProgramInfoLog(prg);
-		errorString += "\n--------\n";
-		org.xml3d.debug.logError(errorString);
-		gl.getError();
-		
-		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
-										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
-	}
-	
-	var programObject = { 	attributes 	: {}, 
-							uniforms 	: {}, 
-							samplers	: {},
-							handle		: prg };
-	
-	gl.useProgram(prg);
-	
-	//Tally shader attributes
-	var numAttributes = gl.getProgramParameter(prg, gl.ACTIVE_ATTRIBUTES);
-	for (var i=0; i<numAttributes; i++) {
-		var att = gl.getActiveAttrib(prg, i);
-		if (!att) continue;
-		var attInfo = {};
-		attInfo.name = att.name;
-		attInfo.size = att.size;
-		attInfo.glType = att.type;
-		attInfo.location = gl.getAttribLocation(prg, att.name);
-		programObject.attributes[att.name] = attInfo;
-	}
-
-	//TODO: shader not picking up light uniforms?
-	//Tally shader uniforms and samplers
-	var texCount = 0;
-	var numUniforms = gl.getProgramParameter(prg, gl.ACTIVE_UNIFORMS);
-	for (var i=0; i<numUniforms; i++) {
-		var uni = gl.getActiveUniform(prg, i);
-		if (!uni) continue;
-		var uniInfo = {};	
-		uniInfo.name = uni.name;
-		uniInfo.size = uni.size;
-		uniInfo.glType = uni.type;
-		uniInfo.location = gl.getUniformLocation(prg, uni.name);
-		
-		if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
-			uniInfo.texUnit = texCount;
-			this.textures[uni.name].info = uniInfo;
-
-			programObject.samplers[uni.name] = uniInfo;
-			texCount++;
-		}
-		else
-			programObject.uniforms[uni.name] = uniInfo;
-	}
-	
-	return programObject;
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.compileShader = function(type, shaderSource) {
-	var gl = this.gl;
-	
-	var shd = gl.createShader(type);
-	gl.shaderSource(shd, shaderSource);
-	gl.compileShader(shd);
-	
-	if (gl.getShaderParameter(shd, gl.COMPILE_STATUS) == 0) {
-		var errorString = "";
-		if (type == gl.VERTEX_SHADER)
-			errorString = "Vertex shader failed to compile: \n";
-		else
-			errorString = "Fragment shader failed to compile: \n";
-		
-		errorString += gl.getShaderInfoLog(shd) + "\n--------\n";
-		org.xml3d.debug.logError(errorString);
-		gl.getError();
-		
-		return null;
-	}
-	
-	return shd;
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.setStandardUniforms = function(sp) {
-	
-	var gl = this.gl;
-	
-	var uniform = null;
-	
-	//Diffuse color
-	uniform = sp.uniforms.diffuseColor;
-	if (uniform) { 
-		this.setUniform(gl, uniform, [0.0, 0.0, 1.0]);
-	}
-	
-	//Emissive color
-	uniform = sp.uniforms.emissiveColor;
-	if (uniform) { 
-		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
-	}
-	
-	//Specular color
-	uniform = sp.uniforms.specularColor;
-	if (uniform) { 
-		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
-	}
-		
-	//Shininess
-	uniform = sp.uniforms.shininess;
-	if (uniform) { 
-		this.setUniform(gl, uniform, 0.2);
-	}
-	
-	//Transparency
-	uniform = sp.uniforms.transparency;
-	if (uniform) { 
-		this.setUniform(gl, uniform, 0.0);
-	}
-	
-	////org.xml3d.webgl.checkError(this.gl);
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.setUniformVariables = function(sp, uniforms) {
-	if (this.currentProgram != sp) {
-		this.gl.useProgram(sp.handle);
-	}
-	
-	for (var name in uniforms) {
-		var u = uniforms[name];
-		if (u.clean)
-			continue;
-		
-		if (sp.uniforms[name]) {
-			this.setUniform(this.gl, sp.uniforms[name], u);
-		}
-	}
-	
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.bindShader = function(sp) {
-	this.currentProgram = sp;
-	this.gl.useProgram(sp.handle);
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.unbindShader = function(sp) {
-	this.currentProgram = null;
-	this.gl.useProgram(null);
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.setUniform = function(gl, u, value) {
-	switch (u.glType) {
-		case gl.BOOL:
-		case gl.INT:		
-		case gl.SAMPLER_2D:	gl.uniform1i(u.location, value); break;	
-		
-		case gl.BOOL_VEC2: 	
-		case gl.INT_VEC2:	gl.uniform2iv(u.location, value); break;
-		
-		case gl.BOOL_VEC3:	
-		case gl.INT_VEC3:	gl.uniform3iv(u.location, value); break;
-		
-		case gl.BOOL_VEC4:	
-		case gl.INT_VEC4:	gl.uniform4iv(u.location, value); break;
-		
-		case gl.FLOAT:		gl.uniform1f(u.location, value); break;
-		case gl.FLOAT_VEC2:	gl.uniform2fv(u.location, value); break;
-		case gl.FLOAT_VEC3:	gl.uniform3fv(u.location, value); break;
-		case gl.FLOAT_VEC4:	gl.uniform4fv(u.location, value); break;
-		
-		case gl.FLOAT_MAT2: gl.uniformMatrix2fv(u.location, gl.FALSE, value); break;
-		case gl.FLOAT_MAT3: gl.uniformMatrix3fv(u.location, gl.FALSE, value); break;
-		case gl.FLOAT_MAT4: gl.uniformMatrix4fv(u.location, gl.FALSE, value); break;
-		
-		default:
-			org.xml3d.debug.logError("Unknown uniform type "+u.glType);
-			break;
-	}
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.bindDefaultShader = function() {
-	if (!this.shaders.defaultShader) {
-		this.shaders.defaultShader = this.getStandardShaderProgram("urn:xml3d:shader:flat");
-	}
-	this.currentProgram = this.shaders.defaultShader;
-	this.gl.useProgram(this.shaders.defaultShader.handle);
-	
-	return this.shaders.defaultShader;
-};
-
-org.xml3d.webgl.XML3DShaderHandler.prototype.unbindDefaultShader = function() {
-	this.currentProgram = null;
-	this.gl.useProgram(null);
-};
-/*******************************************
- * Class org.xml3d.webgl.XML3DBufferHandler 
- * 
- * The XML3DBufferHandler is an abstraction layer between the renderer and WebGL. It handles all operations
- * on Framebuffer Objects but doesn't store any of these internally. FBOs are returned and expected as a
- * 'struct' containing the following information:
- * 
- * 		handle			: The WebGL handle returned when gl.createFramebuffer() is called
- * 		valid			: A flag indicating whether this FBO is complete
- * 		width			: Width of this FBO
- * 		height			: Height of this FBO
- * 		colorTarget		
- * 		depthTarget 	
- * 		stencilTarget	: The targets that will be rendered to, can be either a RenderBuffer or Texture2D contained
- * 						  in another 'struct' with fields "handle" and "isTexture"
- * 
- * @author Christian Schlinkmann
- *******************************************/
-
-org.xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
-	this.renderer = renderer;
-	this.gl = gl;
-};
-
-org.xml3d.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(width, height) {
-	var gl = this.gl;
-	
-	if (width > 380 || height > 240) {
-		var scale = 380 / width;
-		width = Math.floor(width * scale);
-		height = Math.floor(height * scale);
-	}
-	
-	return this.createFrameBuffer(width, height, gl.RGBA, gl.DEPTH_COMPONENT16, null, { depthAsRenderbuffer : true } );
-};
-
-org.xml3d.webgl.XML3DBufferHandler.prototype.createShadowBuffer = function() {
-	//TODO: this
-};
-
-org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options) {
-	
-	var gl = this.gl;	
-	options = this.fillOptions(options);
-	
-	var handle = gl.createFramebuffer();
-	gl.bindFramebuffer(gl.FRAMEBUFFER, handle);
-	
-	//Create targets
-	var colorTarget = { handle : null, isTexture : false };
-	if (colorFormat) {
-		colorTargets = [];
-		if (options.colorAsRenderbuffer) {
-			var ct = gl.createRenderbuffer();
-			gl.bindRenderbuffer(gl.RENDERBUFFER, ct);
-			gl.renderbufferStorage(gl.RENDERBUFFER, colorFormat, width, height);
-			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-			
-			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, ct);
-			
-			colorTarget.handle = ct;
-			colorTarget.isTexture = false;		
-		} else {
-			//opt.generateMipmap = opt.generateColorsMipmap;
-			var ctex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, colorFormat, width, height, gl.RGBA, 
-					gl.UNSIGNED_BYTE, null, options);
-			
-			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
-			
-			colorTarget.handle = handle;
-			colorTarget.isTexture = true;
-		}	
-	}
-	
-	var depthTarget = { handle : null, isTexture : false };
-	if (depthFormat) {
-		options.isDepth = true;
-		if (options.depthAsRenderbuffer) {
-			var dt = gl.createRenderbuffer();
-			gl.bindRenderbuffer(gl.RENDERBUFFER, dt);
-			gl.renderbufferStorage(gl.RENDERBUFFER, depthFormat, width, height);
-			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-			
-			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, dt);
-			
-			depthTarget.handle = dt;
-			depthTarget.isTexture = false;
-		} else {
-			//opt.generateMipmap = opt.generateDepthMipmap;			
-			var dtex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, depthFormat, width, height, 
-									gl.DEPTH_COMPONENT, gl.FLOAT, null, options);
-			
-			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, dtex.handle, 0);
-			
-			depthTarget.handle = dtex.handle;
-			depthTarget.isTexture = true;
-		}
-	}
-	
-	var stencilTarget = { handle : null, isTexture : false };
-	if (stencilFormat) {
-		options.isDepth = false;
-		if (options.stencilAsRenderbuffer) {
-			var st = gl.createRenderbuffer();
-			gl.bindRenderbuffer(gl.RENDERBUFFER, st);
-			gl.renderbufferStorage(gl.RENDERBUFFER, stencilFormat, width, height);
-			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-			
-			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, st);			
-			
-			stencilTarget.handle = st;
-			stencilTarget.isTexture = false;
-		}
-		else {
-			//opt.generateMipmap = opt.generateStencilMipmap;			
-			var stex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, stencilFormat, width, height, 
-									gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, null, options);
-			
-			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);
-			
-			stencilTarget.handle = stex.handle;
-			stencilTarget.isTexture = true;
-		}
-	}
-	
-	//Finalize framebuffer creation
-	var fbStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-	
-	switch (fbStatus) {
-	    case gl.FRAMEBUFFER_COMPLETE:
-	        break;
-	    case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-	        org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-	        break;
-	    case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-	        break;
-	    case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
-	        break;
-	    case gl.FRAMEBUFFER_UNSUPPORTED:
-	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_UNSUPPORTED");
-	        break;
-	    default:
-	    	org.xml3d.debug.logError("Incomplete framebuffer: " + status);
-	}
-	
-	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-	
-	var fbo = {};
-	fbo.handle = handle;
-	fbo.valid = (fbStatus == gl.FRAMEBUFFER_COMPLETE);
-	fbo.width = width;
-	fbo.height = height;
-	fbo.colorTarget = colorTarget;
-	fbo.depthTarget = depthTarget;
-	fbo.stencilTarget = stencilTarget;
-
-	return fbo;
-};
-
-org.xml3d.webgl.XML3DBufferHandler.prototype.destroyFrameBuffer = function(fbo) {
-	if (!fbo.handle)
-		return;
-	
-	var gl = this.gl;
-	gl.deleteFramebuffer(fbo.handle);
-	
-	if(fbo.colorTarget !== null) {
-		if (fbo.colorTarget.isTexture) 
-			gl.deleteTexture(fbo.colorTarget.handle);
-		else
-			gl.deleteRenderBuffer(fbo.colorTarget.handle);
-	}
-	if(fbo.depthTarget !== null) {
-		if (fbo.depthTarget.isTexture) 
-			gl.deleteTexture(fbo.depthTarget.handle);
-		else
-			gl.deleteRenderBuffer(fbo.depthTarget.handle);
-	}
-	if(fbo.stencilTarget !== null) {
-		if (fbo.stencilTarget.isTexture) 
-			gl.deleteTexture(fbo.stencilTarget.handle);
-		else
-			gl.deleteRenderBuffer(fbo.stencilTarget.handle);
-	}
-	
-};
-
-org.xml3d.webgl.XML3DBufferHandler.prototype.fillOptions = function(options) {
-	var gl = this.gl;
-	var opt =  {
-		wrapS             	  : gl.CLAMP_TO_EDGE,
-		wrapT                 : gl.CLAMP_TO_EDGE,
-		minFilter             : gl.NEAREST,
-		magFilter             : gl.NEAREST,
-		depthMode             : gl.LUMINANCE,
-		depthCompareMode      : gl.COMPARE_R_TO_TEXTURE,
-		depthCompareFunc      : gl.LEQUAL,
-		colorsAsRenderbuffer  : false,
-		depthAsRenderbuffer   : false,
-		stencilAsRenderbuffer : false,
-		isDepth               : false
-	};
-	
-	for (var item in options) {
-		opt[item] = options[item];
-	}
-	return opt;
-};
-
-
-
 //Check, if basics have already been defined
 var org;
 if (!org || !org.xml3d)
@@ -18773,6 +18312,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		
 		//This function is called at regular intervals by requestAnimFrame to determine if a redraw
 		//is needed
+		var handler = this;
 		this._tick = function() {
 			if (handler.update())
 				handler.draw();
@@ -18843,11 +18383,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.quadMesh.addVertexAttribute("position", 2, quadPositions);
 		this.quadMesh.addVertexAttribute("texcoord", 2, texcoord);
 		this.quadMesh.addArrayPrimitives("tristrip", gl.TRIANGLE_STRIP, 0, 4);
-		//-------------------
-		
-		//Framebuffers used for render-to-texture
-		this.rttBuffers = {};
-		var handler = this;		
+		//-------------------	
 		
 		this.gatherPostProcessShaders();
 	}
@@ -19486,6 +19022,468 @@ XML3DHandler.prototype.getRenderedTexture = function (textureSrc) {
 	
 	return setupXML3DHandler;
 })();
+/**********************************************
+ * Class org.xml3d.webgl.XML3DShaderHandler
+ * 
+ * The XML3DShaderHandler is an abstraction between the renderer and WebGL. It handles the creation of shaders and 
+ * management of internal shaders that have no DOM node associated with them (eg. the picking shader). No shaders are
+ * stored in this class.
+ * 
+ **********************************************/
+
+org.xml3d.webgl.XML3DShaderHandler = function(gl, renderer) {
+	this.gl = gl;
+	this.renderer = renderer;
+	this.currentProgram = null;
+	this.shaders = {};
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.getStandardShaderProgram = function(name) {
+	var sources = {};
+	
+	if (!g_shaders[name]) {
+		org.xml3d.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
+	} else {
+		sources.vs = g_shaders[name].vertex;
+		sources.fs = g_shaders[name].fragment;
+	}
+	
+	var shaderProgram = this.createShaderFromSources(sources);	
+	this.setStandardUniforms(shaderProgram);
+	
+	return shaderProgram;
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.createShaderFromSources = function(sources) {
+	var gl = this.gl;
+	
+	if (!sources.vs || !sources.fs) {
+		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );	
+	}
+	
+	var prg = gl.createProgram();
+	
+	var vShader = this.compileShader(gl.VERTEX_SHADER, sources.vs);
+	var fShader = this.compileShader(gl.FRAGMENT_SHADER, sources.fs);
+	
+	if (vShader === null || fShader === null) {
+		//Use a default flat shader instead
+		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
+	}
+	
+	//Link shader program	
+	gl.attachShader(prg, vShader);
+	gl.attachShader(prg, fShader);
+	gl.linkProgram(prg);
+	
+	if (gl.getProgramParameter(prg, gl.LINK_STATUS) == 0) {
+		var errorString = "Shader linking failed: \n";
+		errorString += gl.getProgramInfoLog(prg);
+		errorString += "\n--------\n";
+		org.xml3d.debug.logError(errorString);
+		gl.getError();
+		
+		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
+	}
+	
+	var programObject = { 	attributes 	: {}, 
+							uniforms 	: {}, 
+							samplers	: {},
+							handle		: prg };
+	
+	gl.useProgram(prg);
+	
+	//Tally shader attributes
+	var numAttributes = gl.getProgramParameter(prg, gl.ACTIVE_ATTRIBUTES);
+	for (var i=0; i<numAttributes; i++) {
+		var att = gl.getActiveAttrib(prg, i);
+		if (!att) continue;
+		var attInfo = {};
+		attInfo.name = att.name;
+		attInfo.size = att.size;
+		attInfo.glType = att.type;
+		attInfo.location = gl.getAttribLocation(prg, att.name);
+		programObject.attributes[att.name] = attInfo;
+	}
+
+	//TODO: shader not picking up light uniforms?
+	//Tally shader uniforms and samplers
+	var texCount = 0;
+	var numUniforms = gl.getProgramParameter(prg, gl.ACTIVE_UNIFORMS);
+	for (var i=0; i<numUniforms; i++) {
+		var uni = gl.getActiveUniform(prg, i);
+		if (!uni) continue;
+		var uniInfo = {};	
+		uniInfo.name = uni.name;
+		uniInfo.size = uni.size;
+		uniInfo.glType = uni.type;
+		uniInfo.location = gl.getUniformLocation(prg, uni.name);
+		
+		if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
+			uniInfo.texUnit = texCount;
+			//this.textures[uni.name].info = uniInfo;
+
+			programObject.samplers[uni.name] = uniInfo;
+			texCount++;
+		}
+		else
+			programObject.uniforms[uni.name] = uniInfo;
+	}
+	
+	return programObject;
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.compileShader = function(type, shaderSource) {
+	var gl = this.gl;
+	
+	var shd = gl.createShader(type);
+	gl.shaderSource(shd, shaderSource);
+	gl.compileShader(shd);
+	
+	if (gl.getShaderParameter(shd, gl.COMPILE_STATUS) == 0) {
+		var errorString = "";
+		if (type == gl.VERTEX_SHADER)
+			errorString = "Vertex shader failed to compile: \n";
+		else
+			errorString = "Fragment shader failed to compile: \n";
+		
+		errorString += gl.getShaderInfoLog(shd) + "\n--------\n";
+		org.xml3d.debug.logError(errorString);
+		gl.getError();
+		
+		return null;
+	}
+	
+	return shd;
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.setStandardUniforms = function(sp) {
+	
+	var gl = this.gl;
+	
+	var uniform = null;
+	
+	//Diffuse color
+	uniform = sp.uniforms.diffuseColor;
+	if (uniform) { 
+		this.setUniform(gl, uniform, [1.0, 1.0, 1.0]);
+	}
+	
+	//Emissive color
+	uniform = sp.uniforms.emissiveColor;
+	if (uniform) { 
+		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
+	}
+	
+	//Specular color
+	uniform = sp.uniforms.specularColor;
+	if (uniform) { 
+		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
+	}
+		
+	//Shininess
+	uniform = sp.uniforms.shininess;
+	if (uniform) { 
+		this.setUniform(gl, uniform, 0.2);
+	}
+	
+	//Transparency
+	uniform = sp.uniforms.transparency;
+	if (uniform) { 
+		this.setUniform(gl, uniform, 0.0);
+	}
+
+	
+	////org.xml3d.webgl.checkError(this.gl);
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.setUniformVariables = function(sp, uniforms) {
+	if (this.currentProgram != sp) {
+		this.gl.useProgram(sp.handle);
+	}
+	
+	for (var name in uniforms) {
+		var u = uniforms[name];
+		if (u.clean)
+			continue;
+		
+		if (sp.uniforms[name]) {
+			this.setUniform(this.gl, sp.uniforms[name], u);
+		}
+	}
+	
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.bindShader = function(sp) {
+	this.currentProgram = sp;
+	this.gl.useProgram(sp.handle);
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.unbindShader = function(sp) {
+	this.currentProgram = null;
+	this.gl.useProgram(null);
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.setUniform = function(gl, u, value) {
+	switch (u.glType) {
+		case gl.BOOL:
+		case gl.INT:		
+		case gl.SAMPLER_2D:	gl.uniform1i(u.location, value); break;	
+		
+		case gl.BOOL_VEC2: 	
+		case gl.INT_VEC2:	gl.uniform2iv(u.location, value); break;
+		
+		case gl.BOOL_VEC3:	
+		case gl.INT_VEC3:	gl.uniform3iv(u.location, value); break;
+		
+		case gl.BOOL_VEC4:	
+		case gl.INT_VEC4:	gl.uniform4iv(u.location, value); break;
+		
+		case gl.FLOAT:		gl.uniform1f(u.location, value); break;
+		case gl.FLOAT_VEC2:	gl.uniform2fv(u.location, value); break;
+		case gl.FLOAT_VEC3:	gl.uniform3fv(u.location, value); break;
+		case gl.FLOAT_VEC4:	gl.uniform4fv(u.location, value); break;
+		
+		case gl.FLOAT_MAT2: gl.uniformMatrix2fv(u.location, gl.FALSE, value); break;
+		case gl.FLOAT_MAT3: gl.uniformMatrix3fv(u.location, gl.FALSE, value); break;
+		case gl.FLOAT_MAT4: gl.uniformMatrix4fv(u.location, gl.FALSE, value); break;
+		
+		default:
+			org.xml3d.debug.logError("Unknown uniform type "+u.glType);
+			break;
+	}
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.bindDefaultShader = function() {
+	if (!this.shaders.defaultShader) {
+		this.shaders.defaultShader = this.getStandardShaderProgram("urn:xml3d:shader:flat");
+	}
+	this.currentProgram = this.shaders.defaultShader;
+	this.gl.useProgram(this.shaders.defaultShader.handle);
+	
+	return this.shaders.defaultShader;
+};
+
+org.xml3d.webgl.XML3DShaderHandler.prototype.unbindDefaultShader = function() {
+	this.currentProgram = null;
+	this.gl.useProgram(null);
+};
+/*******************************************
+ * Class org.xml3d.webgl.XML3DBufferHandler 
+ * 
+ * The XML3DBufferHandler is an abstraction layer between the renderer and WebGL. It handles all operations
+ * on Framebuffer Objects but doesn't store any of these internally. FBOs are returned and expected as a
+ * 'struct' containing the following information:
+ * 
+ * 		handle			: The WebGL handle returned when gl.createFramebuffer() is called
+ * 		valid			: A flag indicating whether this FBO is complete
+ * 		width			: Width of this FBO
+ * 		height			: Height of this FBO
+ * 		colorTarget		
+ * 		depthTarget 	
+ * 		stencilTarget	: The targets that will be rendered to, can be either a RenderBuffer or Texture2D contained
+ * 						  in another 'struct' with fields "handle" and "isTexture"
+ * 
+ * @author Christian Schlinkmann
+ *******************************************/
+
+org.xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
+	this.renderer = renderer;
+	this.gl = gl;
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(width, height) {
+	var gl = this.gl;
+	
+	if (width > 380 || height > 240) {
+		var scale = 380 / width;
+		width = Math.floor(width * scale);
+		height = Math.floor(height * scale);
+	}
+	
+	return this.createFrameBuffer(width, height, gl.RGBA, gl.DEPTH_COMPONENT16, null, { depthAsRenderbuffer : true } );
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.createShadowBuffer = function() {
+	//TODO: this
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options) {
+	
+	var gl = this.gl;	
+	options = this.fillOptions(options);
+	
+	var handle = gl.createFramebuffer();
+	gl.bindFramebuffer(gl.FRAMEBUFFER, handle);
+	
+	//Create targets
+	var colorTarget = { handle : null, isTexture : false };
+	if (colorFormat) {
+		colorTargets = [];
+		if (options.colorAsRenderbuffer) {
+			var ct = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, ct);
+			gl.renderbufferStorage(gl.RENDERBUFFER, colorFormat, width, height);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+			
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, ct);
+			
+			colorTarget.handle = ct;
+			colorTarget.isTexture = false;		
+		} else {
+			//opt.generateMipmap = opt.generateColorsMipmap;
+			var ctex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, colorFormat, width, height, gl.RGBA, 
+					gl.UNSIGNED_BYTE, null, options);
+			
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
+			
+			colorTarget.handle = handle;
+			colorTarget.isTexture = true;
+		}	
+	}
+	
+	var depthTarget = { handle : null, isTexture : false };
+	if (depthFormat) {
+		options.isDepth = true;
+		if (options.depthAsRenderbuffer) {
+			var dt = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, dt);
+			gl.renderbufferStorage(gl.RENDERBUFFER, depthFormat, width, height);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+			
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, dt);
+			
+			depthTarget.handle = dt;
+			depthTarget.isTexture = false;
+		} else {
+			//opt.generateMipmap = opt.generateDepthMipmap;			
+			var dtex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, depthFormat, width, height, 
+									gl.DEPTH_COMPONENT, gl.FLOAT, null, options);
+			
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, dtex.handle, 0);
+			
+			depthTarget.handle = dtex.handle;
+			depthTarget.isTexture = true;
+		}
+	}
+	
+	var stencilTarget = { handle : null, isTexture : false };
+	if (stencilFormat) {
+		options.isDepth = false;
+		if (options.stencilAsRenderbuffer) {
+			var st = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, st);
+			gl.renderbufferStorage(gl.RENDERBUFFER, stencilFormat, width, height);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+			
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, st);			
+			
+			stencilTarget.handle = st;
+			stencilTarget.isTexture = false;
+		}
+		else {
+			//opt.generateMipmap = opt.generateStencilMipmap;			
+			var stex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, stencilFormat, width, height, 
+									gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, null, options);
+			
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);
+			
+			stencilTarget.handle = stex.handle;
+			stencilTarget.isTexture = true;
+		}
+	}
+	
+	//Finalize framebuffer creation
+	var fbStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+	
+	switch (fbStatus) {
+	    case gl.FRAMEBUFFER_COMPLETE:
+	        break;
+	    case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+	        org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+	        break;
+	    case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+	        break;
+	    case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
+	        break;
+	    case gl.FRAMEBUFFER_UNSUPPORTED:
+	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_UNSUPPORTED");
+	        break;
+	    default:
+	    	org.xml3d.debug.logError("Incomplete framebuffer: " + status);
+	}
+	
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	
+	var fbo = {};
+	fbo.handle = handle;
+	fbo.valid = (fbStatus == gl.FRAMEBUFFER_COMPLETE);
+	fbo.width = width;
+	fbo.height = height;
+	fbo.colorTarget = colorTarget;
+	fbo.depthTarget = depthTarget;
+	fbo.stencilTarget = stencilTarget;
+
+	return fbo;
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.destroyFrameBuffer = function(fbo) {
+	if (!fbo.handle)
+		return;
+	
+	var gl = this.gl;
+	gl.deleteFramebuffer(fbo.handle);
+	
+	if(fbo.colorTarget !== null) {
+		if (fbo.colorTarget.isTexture) 
+			gl.deleteTexture(fbo.colorTarget.handle);
+		else
+			gl.deleteRenderBuffer(fbo.colorTarget.handle);
+	}
+	if(fbo.depthTarget !== null) {
+		if (fbo.depthTarget.isTexture) 
+			gl.deleteTexture(fbo.depthTarget.handle);
+		else
+			gl.deleteRenderBuffer(fbo.depthTarget.handle);
+	}
+	if(fbo.stencilTarget !== null) {
+		if (fbo.stencilTarget.isTexture) 
+			gl.deleteTexture(fbo.stencilTarget.handle);
+		else
+			gl.deleteRenderBuffer(fbo.stencilTarget.handle);
+	}
+	
+};
+
+org.xml3d.webgl.XML3DBufferHandler.prototype.fillOptions = function(options) {
+	var gl = this.gl;
+	var opt =  {
+		wrapS             	  : gl.CLAMP_TO_EDGE,
+		wrapT                 : gl.CLAMP_TO_EDGE,
+		minFilter             : gl.NEAREST,
+		magFilter             : gl.NEAREST,
+		depthMode             : gl.LUMINANCE,
+		depthCompareMode      : gl.COMPARE_R_TO_TEXTURE,
+		depthCompareFunc      : gl.LEQUAL,
+		colorsAsRenderbuffer  : false,
+		depthAsRenderbuffer   : false,
+		stencilAsRenderbuffer : false,
+		isDepth               : false
+	};
+	
+	for (var item in options) {
+		opt[item] = options[item];
+	}
+	return opt;
+};
+
+
+
 /*************************************************************************/
 /*                                                                       */
 /*  xml3d_renderer.js                                                    */
@@ -19753,6 +19751,8 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 	
 	var currentNode = evt.newValue;
 	var didListener = false;
+	adapter.isValid = true;
+	
 	while (currentNode.parentNode) {
 		currentNode = currentNode.parentNode;
 		if (currentNode.nodeName == "group") {
@@ -20564,7 +20564,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 					this.program = this.createShaderProgram(sources);
 					this.gl.useProgram(this.program.handle);
 					this.shaderHandler.setStandardUniforms(this.program);
-					return this.program;
 				} else {
 					//User-provided shader
 					var vsScript = this.node.xml3ddocument.resolve(scriptURL
@@ -20572,13 +20571,23 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 					var fsScript = this.node.xml3ddocument.resolve(scriptURL
 							+ "-fs");
 					if (vsScript && fsScript) {
-						vertexSource = vsScript.textContent;
-						fragmentSource = fsScript.textContent;
+						sources.vs = vsScript.textContent;
+						sources.fs = fsScript.textContent;
 					}
+					
+					this.program = this.createShaderProgram(sources);
+				}
+			} else {	
+				this.program = this.createShaderProgram(sources);
+			}
+			
+			for (var name in this.program.samplers) {
+				var texInfo = this.program.samplers[name];
+				if (texInfo && this.textures[name]) {
+					this.textures[name].info = texInfo;
 				}
 			}
 			
-			this.program = this.createShaderProgram( {vs:vertexSource, fs:fragmentSource} );
 			return this.program;
 
 }));
@@ -20763,6 +20772,7 @@ org.xml3d.webgl.XML3DCreateTex2DFromData = function(gl, internalFormat, width, h
 };
 
 org.xml3d.webgl.XML3DCreateTex2DFromImage = function(gl, handle, image, opt) {
+	var info = {};
 	gl.bindTexture(gl.TEXTURE_2D, handle);
 	
 	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -20779,7 +20789,7 @@ org.xml3d.webgl.XML3DCreateTex2DFromImage = function(gl, handle, image, opt) {
 	
 	gl.bindTexture(gl.TEXTURE_2D, null);
 	
-	info.handle = texture;
+	info.handle = handle;
 	info.options = opt;
 	info.valid = true;
 	info.glType = gl.TEXTURE_2D;
@@ -20849,7 +20859,7 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	var texAdapter = this;
 	image.onload = function() {
 		
-		info = org.xml3d.webgl.XML3DCreateTex2DFromImage(gl, texture, image, opt);
+		texAdapter.info = org.xml3d.webgl.XML3DCreateTex2DFromImage(gl, texture, image, opt);
 		
 		texAdapter.bind = texAdapter._bind;
 		texAdapter.unbind = texAdapter._unbind;
@@ -20876,6 +20886,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.gl = this.factory.handler.gl;
 	this.isValid = false;
+	this.meshIsValid = false;
 	this._bbox = null;
 	
 	this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
@@ -20897,7 +20908,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
 		transform, opaqueObjects, transparenObjects, outLights, shader, visible) {
-	if (this.isValid) {
+	if (this.isValid && this.meshIsValid) {
 		this._transform = transform;
 		this._shader = shader;
 		
@@ -20978,6 +20989,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 
 	this._bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 	
+	this.meshIsValid = true;
 	this.isValid = true;
 	return meshInfo;
 };
@@ -22175,6 +22187,8 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"uniform vec3 lightVisibility[MAXLIGHTS+1];\n"
 
 			+"void main(void) {\n"
+			+"  if (transparency > 0.95) discard;\n"
+			+"  vec3 color = emissiveColor;\n"
 			+"	if (MAXLIGHTS < 1) {\n"
 			+"      vec3 light = -normalize(fragVertexPosition);\n"
 			+"      vec3 normal = fragNormal;\n"
@@ -22183,11 +22197,8 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"      diffuse += max(0.0, dot(normal, eye));\n"
 			+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n"
 			+"      specular += pow(max(0.0, dot(normal, eye)), shininess*128.0);\n"
-			+"      vec3 rgb = emissiveColor + diffuse*diffuseColor + specular*specularColor;\n"
-			+"      rgb = clamp(rgb, 0.0, 1.0);\n"
-			+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
+			+"      color = color + diffuse*diffuseColor + specular*specularColor;\n"
 			+"	} else {\n"
-			+"      vec3 color = emissiveColor + (ambientIntensity * diffuseColor);\n"
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			vec3 L = lightPositions[i] - fragVertexPosition;\n"
 		 	+"      	vec3 N = fragNormal;\n"
@@ -22200,8 +22211,8 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"	
 			+"			color = color + (atten*(Idiff + Ispec)) * lightVisibility[i];\n"
 			+"		}\n"
-			+"		gl_FragColor = vec4(color, max(0.0, 1.0 - transparency));\n"
 			+"  }\n"
+			+"	gl_FragColor = vec4(color, max(0.0, 1.0 - transparency));\n"
 			+"}"
 };
 
@@ -22264,6 +22275,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 
 
 			+"void main(void) {\n"
+			+"  vec4 color = vec4(emissiveColor, 0.0);\n"
 			+"	if (MAXLIGHTS < 1) {\n"
 			+"      vec3 light = -normalize(fragVertexPosition);\n"
 			+"      vec3 normal = fragNormal;\n"
@@ -22273,11 +22285,9 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"      float specular = pow(max(0.0, dot(normal, normalize(light-eye))), shininess*128.0);\n"
 			+"      specular += pow(max(0.0, dot(normal, eye)), shininess*128.0);\n"
 			+"      vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
-			+"      vec3 rgb = emissiveColor + diffuse*texDiffuse.xyz+ specular*specularColor;\n"
-			+"      gl_FragColor = vec4(rgb, texDiffuse.w*max(0.0, 1.0 - transparency)); \n"
+			+"      color += vec4(diffuse*texDiffuse.xyz+ specular*specularColor, texDiffuse.w);\n"
 			+"	} else {\n"
 			+"      vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
-			+"      vec4 color = vec4(emissiveColor, 0.0);\n" //vec4(emissiveColor + (ambientIntensity * diffuseColor * texDiffuse), 0.0);
 			+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 			+"			vec3 L = lightPositions[i] - fragVertexPosition;\n"
 		 	+"      	vec3 N = fragNormal;\n"
@@ -22291,10 +22301,12 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 
 			+"			vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * texDiffuse.xyz * diffuseColor;\n"
 			+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
-			+"			color = color + vec4((atten*(Idiff + Ispec))*lightVisibility[i], texDiffuse.w);\n"
-			+"		}\n"			
-			+"			gl_FragColor = vec4(color.xyz, color.w*max(0.0, 1.0 - transparency));\n" 
+			+"			color += vec4((atten*(Idiff + Ispec))*lightVisibility[i], texDiffuse.w);\n"
+			+"		}\n"		
 			+"  }\n"
+			+"  float alpha = color.w * max(0.0, 1.0 - transparency);\n"
+			+"  if (alpha < 0.1) discard;\n"
+			+"	gl_FragColor = vec4(color.xyz, alpha);\n" 
 			+"}"
 };
 
@@ -22354,6 +22366,8 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"uniform vec3 lightVisibility[MAXLIGHTS+1];\n"
 
 				+"void main(void) {\n"
+				+"  if (transparency > 0.95) discard;\n"
+				+"  vec3 color = emissiveColor;\n"
 				+"	if (MAXLIGHTS < 1) {\n"
 				+"      vec3 light = -normalize(fragVertexPosition);\n"
 				+"      vec3 normal = fragNormal;\n"
@@ -22362,11 +22376,8 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"      diffuse += max(0.0, dot(normal, eye));\n"
 				+"      float specular = pow(max(0.0, dot(normal, normalize(light+eye))), shininess*128.0);\n"
 				+"      specular += pow(max(0.0, dot(normal, eye)), shininess*128.0);\n"
-				+"      vec3 rgb = emissiveColor + diffuse*fragVertexColor + specular*specularColor;\n"
-				+"      rgb = clamp(rgb, 0.0, 1.0);\n"
-				+"      gl_FragColor = vec4(rgb, max(0.0, 1.0 - transparency)); \n"
+				+"      color += diffuse*fragVertexColor + specular*specularColor;\n"
 				+"	} else {\n"
-				+"      vec3 color = emissiveColor + (ambientIntensity * diffuseColor);\n"
 				+"		for (int i=0; i<MAXLIGHTS; i++) {\n"
 				+"			vec3 L = lightPositions[i] - fragVertexPosition;\n"
 			 	+"      	vec3 N = fragNormal;\n"
@@ -22378,10 +22389,10 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 				+"			float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"
 				+"			vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * fragVertexColor ;\n"
 				+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
-				+"			color = color + (atten*(Idiff + Ispec))*lightVisibility[i];\n"
+				+"			color += (atten*(Idiff + Ispec))*lightVisibility[i];\n"
 				+"		}\n"
-				+"		gl_FragColor = vec4(color, max(0.0, 1.0 - transparency));\n"
 				+"  }\n"
+				+"	gl_FragColor = vec4(color, max(0.0, 1.0 - transparency));\n"
 				+"}"
 	};
 

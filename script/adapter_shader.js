@@ -49,7 +49,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 					this.program = this.createShaderProgram(sources);
 					this.gl.useProgram(this.program.handle);
 					this.shaderHandler.setStandardUniforms(this.program);
-					return this.program;
 				} else {
 					//User-provided shader
 					var vsScript = this.node.xml3ddocument.resolve(scriptURL
@@ -57,13 +56,23 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 					var fsScript = this.node.xml3ddocument.resolve(scriptURL
 							+ "-fs");
 					if (vsScript && fsScript) {
-						vertexSource = vsScript.textContent;
-						fragmentSource = fsScript.textContent;
+						sources.vs = vsScript.textContent;
+						sources.fs = fsScript.textContent;
 					}
+					
+					this.program = this.createShaderProgram(sources);
+				}
+			} else {	
+				this.program = this.createShaderProgram(sources);
+			}
+			
+			for (var name in this.program.samplers) {
+				var texInfo = this.program.samplers[name];
+				if (texInfo && this.textures[name]) {
+					this.textures[name].info = texInfo;
 				}
 			}
 			
-			this.program = this.createShaderProgram( {vs:vertexSource, fs:fragmentSource} );
 			return this.program;
 
 }));

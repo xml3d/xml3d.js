@@ -4,6 +4,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.gl = this.factory.handler.gl;
 	this.isValid = false;
+	this.meshIsValid = false;
 	this._bbox = null;
 	
 	this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
@@ -25,7 +26,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.X
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
 		transform, opaqueObjects, transparenObjects, outLights, shader, visible) {
-	if (this.isValid) {
+	if (this.isValid && this.meshIsValid) {
 		this._transform = transform;
 		this._shader = shader;
 		
@@ -106,6 +107,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 
 	this._bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 	
+	this.meshIsValid = true;
 	this.isValid = true;
 	return meshInfo;
 };

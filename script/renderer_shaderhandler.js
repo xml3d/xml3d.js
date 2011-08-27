@@ -34,7 +34,7 @@ org.xml3d.webgl.XML3DShaderHandler.prototype.createShaderFromSources = function(
 	var gl = this.gl;
 	
 	if (!sources.vs || !sources.fs) {
-		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
 										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );	
 	}
 	
@@ -45,7 +45,7 @@ org.xml3d.webgl.XML3DShaderHandler.prototype.createShaderFromSources = function(
 	
 	if (vShader === null || fShader === null) {
 		//Use a default flat shader instead
-		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
 										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
 	}
 	
@@ -61,7 +61,7 @@ org.xml3d.webgl.XML3DShaderHandler.prototype.createShaderFromSources = function(
 		org.xml3d.debug.logError(errorString);
 		gl.getError();
 		
-		return this.createShaderProgram( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
+		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
 										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
 	}
 	
@@ -100,8 +100,6 @@ org.xml3d.webgl.XML3DShaderHandler.prototype.createShaderFromSources = function(
 		
 		if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
 			uniInfo.texUnit = texCount;
-			this.textures[uni.name].info = uniInfo;
-
 			programObject.samplers[uni.name] = uniInfo;
 			texCount++;
 		}
@@ -145,7 +143,7 @@ org.xml3d.webgl.XML3DShaderHandler.prototype.setStandardUniforms = function(sp) 
 	//Diffuse color
 	uniform = sp.uniforms.diffuseColor;
 	if (uniform) { 
-		this.setUniform(gl, uniform, [0.0, 0.0, 1.0]);
+		this.setUniform(gl, uniform, [1.0, 1.0, 1.0]);
 	}
 	
 	//Emissive color
@@ -171,6 +169,7 @@ org.xml3d.webgl.XML3DShaderHandler.prototype.setStandardUniforms = function(sp) 
 	if (uniform) { 
 		this.setUniform(gl, uniform, 0.0);
 	}
+
 	
 	//org.xml3d.webgl.checkError(this.gl);
 };

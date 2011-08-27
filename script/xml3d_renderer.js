@@ -265,6 +265,8 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 	
 	var currentNode = evt.newValue;
 	var didListener = false;
+	adapter.isValid = true;
+	
 	while (currentNode.parentNode) {
 		currentNode = currentNode.parentNode;
 		if (currentNode.nodeName == "group") {

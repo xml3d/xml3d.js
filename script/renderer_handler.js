@@ -83,6 +83,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		
 		//This function is called at regular intervals by requestAnimFrame to determine if a redraw
 		//is needed
+		var handler = this;
 		this._tick = function() {
 			if (handler.update())
 				handler.draw();
@@ -153,11 +154,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.quadMesh.addVertexAttribute("position", 2, quadPositions);
 		this.quadMesh.addVertexAttribute("texcoord", 2, texcoord);
 		this.quadMesh.addArrayPrimitives("tristrip", gl.TRIANGLE_STRIP, 0, 4);
-		//-------------------
-		
-		//Framebuffers used for render-to-texture
-		this.rttBuffers = {};
-		var handler = this;		
+		//-------------------	
 		
 		this.gatherPostProcessShaders();
 	}

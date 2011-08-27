@@ -44,6 +44,7 @@ org.xml3d.webgl.XML3DCreateTex2DFromData = function(gl, internalFormat, width, h
 };
 
 org.xml3d.webgl.XML3DCreateTex2DFromImage = function(gl, handle, image, opt) {
+	var info = {};
 	gl.bindTexture(gl.TEXTURE_2D, handle);
 	
 	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -60,7 +61,7 @@ org.xml3d.webgl.XML3DCreateTex2DFromImage = function(gl, handle, image, opt) {
 	
 	gl.bindTexture(gl.TEXTURE_2D, null);
 	
-	info.handle = texture;
+	info.handle = handle;
 	info.options = opt;
 	info.valid = true;
 	info.glType = gl.TEXTURE_2D;
@@ -130,7 +131,7 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	var texAdapter = this;
 	image.onload = function() {
 		
-		info = org.xml3d.webgl.XML3DCreateTex2DFromImage(gl, texture, image, opt);
+		texAdapter.info = org.xml3d.webgl.XML3DCreateTex2DFromImage(gl, texture, image, opt);
 		
 		texAdapter.bind = texAdapter._bind;
 		texAdapter.unbind = texAdapter._unbind;

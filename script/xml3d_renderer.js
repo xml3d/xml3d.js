@@ -832,16 +832,20 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = org.xml3d.we
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 	if (!this.matrix) {
 		var n         = this.node;
-		//TODO: Port calculation away from SpiderGL
-		var t = sglTranslationM4C(n.translation.x, n.translation.y, n.translation.z);
-		var c = sglTranslationM4C(n.center.x, n.center.y, n.center.z);
-		var nc = sglTranslationM4C(-n.center.x, -n.center.y, -n.center.z);
-		var s = sglScalingM4C(n.scale.x, n.scale.y, n.scale.z);
-		var r = sglRotationAngleAxisM4V(n.rotation.angle, n.rotation.axis.toGL());
-		var so = sglRotationAngleAxisM4V(n.scaleOrientation.angle, n.scaleOrientation.axis.toGL() );
+		var m = new XML3DMatrix();
+
+		var t = n.translation;
+		var c = n.center;
+		var s = n.scale;
+		var so = n.scaleOrientation.toMatrix();
 		
-		var m = sglMulM4(sglMulM4(sglMulM4(sglMulM4(sglMulM4(t, c), r), so),s), sglInverseM4(so), nc);
-		this.matrix = new XML3DMatrix(m);
+		this.matrix = m.translate(t.x, t.y, t.z)
+		  .multiply(m.translate(c.x, c.y, c.z)).multiply(n.rotation.toMatrix())
+		  .multiply(so).multiply(m.scale(s.x, s.y, s.z))
+		  .multiply(so.inverse()).multiply(m.translate(-c.x, -c.y, -c.z));
+		
+		this.matrix = this.matrix.transpose();
+		
 	}
 	return this.matrix;
 };

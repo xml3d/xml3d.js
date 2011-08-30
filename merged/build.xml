@@ -29,7 +29,6 @@
     		<fileset file="${srcDir}/xml3d_util.js"/>
     		<fileset file="${srcDir}/xml3d_datatypes.js"/>
 			<fileset file="${srcDir}/xml3d_classes.js"/>
-			<fileset file="${srcDir}/spidergl.js"/>
     		<fileset file="${srcDir}/renderer_handler.js"/>
     		<fileset file="${srcDir}/renderer_shaderhandler.js"/>
     		<fileset file="${srcDir}/renderer_bufferhandler.js"/>

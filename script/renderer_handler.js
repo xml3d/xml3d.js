@@ -131,7 +131,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		
 		if (!this.pickBuffer.isValid || !this.normalPickBuffer.isValid || !this.backBufferZero || !this.backBufferOne)
 			org.xml3d.debug.logError("Creation of a framebuffer failed");
-		*/
+			
 		//This is the simple fullscreen quad used with the post-processing shaders
 		//For reasons unknown to man it has to be defined here, SpiderGL won't render it 
 		//properly otherwise
@@ -153,7 +153,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.quadMesh = new SglMeshGL(gl);
 		this.quadMesh.addVertexAttribute("position", 2, quadPositions);
 		this.quadMesh.addVertexAttribute("texcoord", 2, texcoord);
-		this.quadMesh.addArrayPrimitives("tristrip", gl.TRIANGLE_STRIP, 0, 4);
+		this.quadMesh.addArrayPrimitives("tristrip", gl.TRIANGLE_STRIP, 0, 4);*/
 		//-------------------	
 		
 		this.gatherPostProcessShaders();

@@ -14,13 +14,15 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype = new org.xml3d.webgl.RenderAd
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DGroupRenderAdapter;
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
+	var ret = transform;
+	
 	if (this.parentTransform !== null)
-		return this.parentTransform.multiply(transform);
+		ret = this.parentTransform.multiply(ret);
 	
 	if (this._transformAdapter)
-		return this._transformAdapter.getMatrix().multiply(transform);
+		ret = this._transformAdapter.getMatrix().multiply(ret);
 	
-	return transform;
+	return ret;
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMethod) {

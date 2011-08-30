@@ -267,9 +267,15 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 	var didListener = false;
 	adapter.isValid = true;
 	
-	while (currentNode.parentNode) {
+	if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+		this.factory.handler.setMouseMovePicking(true);
+	
+	while (currentNode.parentNode) {	
 		currentNode = currentNode.parentNode;
 		if (currentNode.nodeName == "group") {
+			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+				this.factory.handler.setMouseMovePicking(true);
+			
 			var parentAdapter = this.factory.getAdapter(currentNode, org.xml3d.webgl.Renderer.prototype);	
 			
 			if (!didListener) { 
@@ -783,11 +789,13 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 				}
 				if (child.getAttribute("visible") == "false")
 					isVisible = false;
+				if (child.hasAttribute("onmousemove") || child.hasAttribute("onmouseout"))
+					this.factory.handler.setMouseMovePicking(true);
+				
 				childAdapter.collectDrawableObjects(childTransform, opaqueObjects, transparentObjects, outLights, shader, isVisible);
 			}
 			child = child.nextElementSibling;
 		}
-	
 };
 
 

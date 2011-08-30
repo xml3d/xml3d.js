@@ -65,7 +65,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.canvas = canvas;
 		this.needDraw = true;
 		this.needPickingDraw = true;
-		this._pickingDisabled = false; //TODO: SET BACK TO FALSE
+		this._pickingEnabled = true; 
+		this._mouseMovePickingEnabled = false;
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
 		this.postProcessShaders = [];
@@ -597,6 +598,9 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		var evt = this.copyMouseEvent(evt); 
 		this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt, this.scene.xml3d); 
 		
+		if (!this._mouseMovePickingEnabled)
+			return;
+		
 		var lastObj = null;
 		if(this.scene.xml3d.currentPickObj)
 			lastObj = this.scene.xml3d.currentPickObj.node;
@@ -689,6 +693,10 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			}
 			e.useCapture = useCapture;
 			this.events[type].push(e);
+			
+			if (type == "mousemove" || type == "mouseout")
+				if (node.name !== "xml3d")
+					this._mouseMovePickingDisabled = false;
 		} 
 	};
 
@@ -778,6 +786,10 @@ XML3DHandler.prototype.getRenderedTexture = function (textureSrc) {
 			x : (evt.clientX - rct.left),
 			y : (evt.clientY - rct.top )
 		};
+	};
+	
+	XML3DHandler.prototype.setMouseMovePicking = function(isEnabled) {
+		this._mouseMovePickingEnabled = isEnabled;
 	};
 
 	window.requestAnimFrame = (function(){

@@ -29,9 +29,21 @@
     		<fileset file="${srcDir}/xml3d_util.js"/>
     		<fileset file="${srcDir}/xml3d_datatypes.js"/>
 			<fileset file="${srcDir}/xml3d_classes.js"/>
-			<fileset file="${srcDir}/spidergl.js"/>
+    		<fileset file="${srcDir}/renderer_handler.js"/>
+    		<fileset file="${srcDir}/renderer_shaderhandler.js"/>
+    		<fileset file="${srcDir}/renderer_bufferhandler.js"/>
 			<fileset file="${srcDir}/xml3d_renderer.js"/>
-			<fileset file="${srcDir}/xml3d_scene_controller.js"/>
+			<fileset file="${srcDir}/adapter_xml3d.js"/>
+			<fileset file="${srcDir}/adapter_view.js"/>
+			<fileset file="${srcDir}/adapter_shader.js"/>
+    		<fileset file="${srcDir}/adapter_texture.js"/>
+			<fileset file="${srcDir}/adapter_mesh.js"/>
+			<fileset file="${srcDir}/adapter_group.js"/>
+			<fileset file="${srcDir}/adapter_light.js"/>
+			<fileset file="${srcDir}/adapter_data.js"/>
+			<fileset file="${srcDir}/xml3d_shaders.js"/>
+			<fileset file="${srcDir}/xml3d_xflow.js"/>	
+    		<fileset file="${srcDir}/xml3d_scene_controller.js"/>
 		</concat>
     	<replaceregexp file="${buildDir}/${scriptName}"
     	    	               match="org.xml3d.webgl.checkError\("

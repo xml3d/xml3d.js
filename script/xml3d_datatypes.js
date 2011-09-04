@@ -459,7 +459,49 @@ XML3DMatrix.prototype.det = function() {
  * Throws: DOMException when the matrix cannot be inverted.
  */
 XML3DMatrix.prototype.inverse = function() {
-	var a = this._data;
+	var m = this._data;
+	
+	var m0  = m[ 0], m1  = m[ 1], m2  = m[ 2], m3  = m[ 3],
+	    m4  = m[ 4], m5  = m[ 5], m6  = m[ 6], m7  = m[ 7],
+	    m8  = m[ 8], m9  = m[ 9], m10 = m[10], m11 = m[11],
+	    m12 = m[12], m13 = m[13], m14 = m[14], m15 = m[15]
+
+	var t = new XML3DMatrix();
+
+	t.m11 = (m9*m14*m7-m13*m10*m7+m13*m6*m11-m5*m14*m11-m9*m6*m15+m5*m10*m15);
+	t.m12 = (m13*m10*m3-m9*m14*m3-m13*m2*m11+m1*m14*m11+m9*m2*m15-m1*m10*m15);
+	t.m13 = (m5*m14*m3-m13*m6*m3+m13*m2*m7-m1*m14*m7-m5*m2*m15+m1*m6*m15);
+	t.m14 = (m9*m6*m3-m5*m10*m3-m9*m2*m7+m1*m10*m7+m5*m2*m11-m1*m6*m11);
+
+	t.m21 = (m12*m10*m7-m8*m14*m7-m12*m6*m11+m4*m14*m11+m8*m6*m15-m4*m10*m15);
+	t.m22 = (m8*m14*m3-m12*m10*m3+m12*m2*m11-m0*m14*m11-m8*m2*m15+m0*m10*m15);
+	t.m23 = (m12*m6*m3-m4*m14*m3-m12*m2*m7+m0*m14*m7+m4*m2*m15-m0*m6*m15);
+	t.m24 = (m4*m10*m3-m8*m6*m3+m8*m2*m7-m0*m10*m7-m4*m2*m11+m0*m6*m11);
+
+	t.m31 = (m8*m13*m7-m12*m9*m7+m12*m5*m11-m4*m13*m11-m8*m5*m15+m4*m9*m15);
+	t.m32 = (m12*m9*m3-m8*m13*m3-m12*m1*m11+m0*m13*m11+m8*m1*m15-m0*m9*m15);
+	t.m33 = (m4*m13*m3-m12*m5*m3+m12*m1*m7-m0*m13*m7-m4*m1*m15+m0*m5*m15);
+	t.m34 = (m8*m5*m3-m4*m9*m3-m8*m1*m7+m0*m9*m7+m4*m1*m11-m0*m5*m11);
+
+	t.m41 = (m12*m9*m6-m8*m13*m6-m12*m5*m10+m4*m13*m10+m8*m5*m14-m4*m9*m14);
+	t.m42 = (m8*m13*m2-m12*m9*m2+m12*m1*m10-m0*m13*m10-m8*m1*m14+m0*m9*m14);
+	t.m43 = (m12*m5*m2-m4*m13*m2-m12*m1*m6+m0*m13*m6+m4*m1*m14-m0*m5*m14);
+	t.m44 = (m4*m9*m2-m8*m5*m2+m8*m1*m6-m0*m9*m6-m4*m1*m10+m0*m5*m10);
+
+	var s = 1.0 / (
+		m12 * m9 * m6 * m3 - m8 * m13 * m6 * m3 - m12 * m5 * m10 * m3 + m4 * m13 * m10 * m3 +
+		m8 * m5 * m14 * m3 - m4 * m9 * m14 * m3 - m12 * m9 * m2 * m7 + m8 * m13 * m2 * m7 +
+		m12 * m1 * m10 * m7 - m0 * m13 * m10 * m7 - m8 * m1 * m14 * m7 + m0 * m9 * m14 * m7 +
+		m12 * m5 * m2 * m11 - m4 * m13 * m2 * m11 - m12 * m1 * m6 * m11 + m0 * m13 * m6 * m11 +
+		m4 * m1 * m14 * m11 - m0 * m5 * m14 * m11 - m8 * m5 * m2 * m15 + m4 * m9 * m2 * m15 +
+		m8 * m1 * m6 * m15 - m0 * m9 * m6 * m15 - m4 * m1 * m10 * m15 + m0 * m5 * m10 * m15
+	);
+
+	for (var i=0; i<16; ++i) t._data[i] *= s;
+
+	return t;
+	
+	/*var a = this._data;
 	
 	var a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
 	a1 = a[0];
@@ -509,6 +551,7 @@ XML3DMatrix.prototype.inverse = function() {
 					* rDet, -this.det3(a1, a2, a3, b1, b2, b3, d1, d2, d3)
 					* rDet, +this.det3(a1, a2, a3, b1, b2, b3, c1, c2, c3)
 					* rDet);
+	*/
 };
 /*
  * Transpose returns a new matrix which is the transposed form of this matrix.

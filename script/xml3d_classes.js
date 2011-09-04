@@ -982,7 +982,10 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
 	node._height = org.xml3d.initInt(node.getAttribute("height"), 600);
 	node._width = org.xml3d.initInt(node.getAttribute("width"), 800);
-
+	node.setOptionValue = function(option) {
+		org.xml3d.debug.logInfo("setOptionValue is not yet supported in XML3D WebGL.");
+		return;
+	};
 	//node.definitionArea = [];
 	//node.graph = [];
 	

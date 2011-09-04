@@ -578,9 +578,12 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) {
 	//org.xml3d.webgl.checkError(gl, "Before readpixels");
 	var data = new Uint8Array(8);
+	var scale = this.fbos.picking.scale;
+	var x = screenX * scale;
+	var y = screenY * scale;
 	
 	try {
-		gl.readPixels(screenX, screenY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
 		
 		var vec = new XML3DVec3(0, 0, 0);
 		vec.x = data[0] / 255;

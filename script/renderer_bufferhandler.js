@@ -17,6 +17,9 @@
  * @author Christian Schlinkmann
  *******************************************/
 
+org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH = 512;
+org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT = 512;
+
 org.xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
 	this.renderer = renderer;
 	this.gl = gl;
@@ -24,21 +27,30 @@ org.xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
 
 org.xml3d.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(width, height) {
 	var gl = this.gl;
+	var scale = 1.0;
 	
-	if (width > 380 || height > 240) {
-		var scale = 380 / width;
-		width = Math.floor(width * scale);
-		height = Math.floor(height * scale);
+	var hDiff = height - org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT;
+	var wDiff = width - org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH;
+	
+	if (hDiff > 0 || wDiff > 0) {
+		if (hDiff > wDiff) {
+			scale = org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT / height;
+		} else {
+			scale = org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH / width;
+		}	
 	}
 	
-	return this.createFrameBuffer(width, height, gl.RGBA, gl.DEPTH_COMPONENT16, null, { depthAsRenderbuffer : true } );
+	width = Math.floor(width * scale);
+	height = Math.floor(height * scale);
+	
+	return this.createFrameBuffer(width, height, gl.RGBA, gl.DEPTH_COMPONENT16, null, { depthAsRenderbuffer : true }, scale );
 };
 
 org.xml3d.webgl.XML3DBufferHandler.prototype.createShadowBuffer = function() {
 	//TODO: this
 };
 
-org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options) {
+org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options, scale) {
 	
 	var gl = this.gl;	
 	options = this.fillOptions(options);
@@ -155,6 +167,7 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width,
 	fbo.colorTarget = colorTarget;
 	fbo.depthTarget = depthTarget;
 	fbo.stencilTarget = stencilTarget;
+	fbo.scale = scale;
 
 	return fbo;
 };

@@ -212,7 +212,7 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 	if (!activeView)
 	{
 		org.xml3d.debug.logWarning("No view referenced. Trying to use first view.");
-		activeView =  document.evaluate('//xml3d:xml3d//xml3d:view[1]', document, function() {
+		activeView = document.evaluate('xml3d:view[1]', this.xml3d, function() {
 			return org.xml3d.xml3dNS;
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	}
@@ -231,7 +231,7 @@ org.xml3d.Xml3dSceneController.prototype.getView = function() {
 		activeView.setAttribute("id", id); 
 		
 		// append it to defs 
-		var defsEl =  document.evaluate('//xml3d:xml3d//xml3d:defs[1]', document, function() {
+		var defsEl =  document.evaluate('xml3d:defs[1]', this.xml3d, function() {
 			return org.xml3d.xml3dNS;
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		

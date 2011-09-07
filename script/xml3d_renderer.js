@@ -317,10 +317,10 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	
 	if (this.currentView != this.scene.getActiveView())
 		this.camera = this.initCamera();
-
+	
 	var xform = {};
-	xform.view = this.camera.getViewMatrix();
-	xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
+	xform.view = this.getViewMatrix(true);  
+	xform.proj = this.getProjectionMatrix(true); 
 	
 	//Setup lights
 	var light, lightOn;
@@ -703,6 +703,47 @@ org.xml3d.webgl.Renderer.prototype.notifyDataChanged = function() {
 	this.handler.redraw("Unspecified data change.");
 };
 
+/**
+ * Retrieve the camera's view matrix. 
+ * 
+ * Currently recomputation is forced always in render(). 
+ * 
+ * @param forceRecompute if true recomputes the matrix, else returns cached version
+ * @return camera's current view matrix  
+ */
+org.xml3d.webgl.Renderer.prototype.getViewMatrix = function(forceRecompute) { 
+
+	if(forceRecompute || !this._viewMatrix)
+	{	
+		if (this.currentView != this.scene.getActiveView())
+			this.camera = this.initCamera();
+	
+		this._viewMatrix = this.camera.getViewMatrix();
+	}
+	
+	return this._viewMatrix; 
+}; 
+
+/**
+ * Retrieve the camera's projection matrix. 
+ * 
+ * Currently recomputation is forced always in render().
+ * 
+ * @param forceRecompute if true recomputes the matrix, else returns cached version
+ * @return camera's projection matrix based on current width and height
+ */
+org.xml3d.webgl.Renderer.prototype.getProjectionMatrix = function(forceRecompute) { 
+
+	if(forceRecompute || !this._projMatrix)
+	{
+		if (this.currentView != this.scene.getActiveView())
+			this.camera = this.initCamera();
+		
+		this._projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
+	}
+	
+	return this._projMatrix;
+}; 
 
 org.xml3d.webgl.XML3DRenderAdapterFactory = function(handler, renderer) {
 	org.xml3d.data.AdapterFactory.call(this);

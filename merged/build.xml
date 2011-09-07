@@ -25,6 +25,7 @@
     <target name="base" depends="clean" description="description">
     	<concat destfile="${buildDir}/${scriptName}">
     		<fileset file="${basedir}/preamble.txt"/>
+    		<fileset file="${srcDir}/GLU.js"/>
 			<fileset file="${srcDir}/xml3d.js"/>
     		<fileset file="${srcDir}/xml3d_util.js"/>
     		<fileset file="${srcDir}/xml3d_datatypes.js"/>

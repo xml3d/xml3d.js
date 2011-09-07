@@ -31,9 +31,7 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(
 		this.factory.handler.renderPick(x, pickY);
 		if(hitPoint && this.node.currentPickPos)
 		{
-			hitPoint.x = this.node.currentPickPos.v[0]; 
-			hitPoint.y = this.node.currentPickPos.v[1]; 
-			hitPoint.z = this.node.currentPickPos.v[2]; 
+			hitPoint = new XML3DVec3(this.node.currentPickPos);
 		}
 		
 		if(hitNormal && this.node.currentPickObj)

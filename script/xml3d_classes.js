@@ -8223,10 +8223,7 @@ org.xml3d.methods.groupGetLocalMatrix = function() {
     {
         for (i = 0; i < xfmNode.adapters.length; i++) {
             if (xfmNode.adapters[i].getMatrix) {
-                var sglMat = xfmNode.adapters[i].getMatrix();                
-                var xml3dMat = new XML3DMatrix(sglMat); 
-                
-                return xml3dMat.transpose(); 
+                return xfmNode.adapters[i].getMatrix();
             }
         }
     }
@@ -8238,12 +8235,21 @@ org.xml3d.methods.groupGetLocalMatrix = function() {
  */
 org.xml3d.methods.groupGetBoundingBox = function() { 
 
-    var bbox = new XML3DBox(); 
+    var bbox = new XML3DBox();
+    var locMat = this.getLocalMatrix();
+    
     var child = this.firstElementChild; 
     while(child !== null)
     {
         if(child.getBoundingBox)
-            bbox.extend(child.getBoundingBox()); 
+        {
+            var chBBox = child.getBoundingBox(); 
+            
+            chBBox.min = locMat.mulVec3(chBBox.min); 
+            chBBox.max = locMat.mulVec3(chBBox.max);
+            
+            bbox.extend(chBBox); 
+        }
         
         child = child.nextElementSibling;
     }
@@ -8256,15 +8262,8 @@ org.xml3d.methods.groupGetBoundingBox = function() {
 org.xml3d.methods.meshGetBoundingBox = function() {
 
     for (i = 0; i < this.adapters.length; i++) {
-        if (this.adapters[i].getBoundingBox) {
-            var bbox = this.adapters[i].getBoundingBox();
-
-            var worldMat = this.getWorldMatrix(); 
-            bbox.min = worldMat.mulVec3(bbox.min, 1); 
-            bbox.max = worldMat.mulVec3(bbox.max, 1);
-            
-            return bbox; 
-        }
+        if (this.adapters[i].getBoundingBox)
+            return this.adapters[i].getBoundingBox();
     }
     
     return new XML3DBox(); 

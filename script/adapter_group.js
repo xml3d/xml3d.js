@@ -53,7 +53,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		//of its children with the new transformation matrix
 		
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-		downstreamValue = adapter.getMatrix().multiply(this.parentTransform);
+		downstreamValue = adapter.getMatrix().multiply(this.parentTransform); 
 		this.notifyListeners("parenttransform", downstreamValue);
 		this.factory.renderer.requestRedraw("Group transform changed.");
 	}

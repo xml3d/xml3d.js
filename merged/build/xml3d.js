@@ -200,6 +200,15 @@ createXML3DRotation = function() {
 	return org.xml3d._xml3d.createXML3DRotation();
 };
 
+org.xml3d.copyRotation = function(to, from) {
+    to.setAxisAngle(from.axis, from.angle);
+}
+
+org.xml3d.copyVector = function(to, from) {
+    to.x = from.x;
+    to.y = from.y;
+    to.z = from.z;
+}
 /*************************************************************************/
 /*                                                                       */
 /*  xml3d_util.js                                                        */
@@ -803,8 +812,14 @@ XML3DMatrix = function()
 	} 
 	else if (arguments.length == 1)
 	{
-
-		var m = arguments[0];
+		var m = arguments[0]; 
+		
+		if(arguments[0].constructor === XML3DMatrix)
+		{
+			// copy constructor
+			m = arguments[0]._data;  
+		}
+		
 		if (m.length < 16) {
 			org.xml3d.debug.logError("Tried to initialize a XML3DMatrix from a Float32Array with less than 16 members");
 			return null;
@@ -1115,16 +1130,32 @@ XML3DMatrix.prototype.multiply = function (that)
 };
 
 XML3DMatrix.prototype.mulVec3 = function(that, w) {
-	return new XML3DVec3(
-//		this._m11 * that.x + this._m21 * that.y + this._m31 * that.z + this._m41 * w, 
-//		this._m12 * that.x + this._m22 * that.y + this._m32 * that.z + this._m42 * w, 
-//		this._m13 * that.x + this._m23 * that.y + this._m33 * that.z + this._m43 * w
-		this._data[0] * that.x + this._data[1] * that.y + this._data[2] * that.z + this._data[3] * w, 
-		this._data[4] * that.x + this._data[5] * that.y + this._data[6] * that.z + this._data[7] * w, 
-		this._data[8] * that.x + this._data[9] * that.y + this._data[10] * that.z + this._data[11] * w
-		);
+	
+	if(!w)
+		w = 1; 
+	
+	// column-major
+	var _x = this.m11 * that.x + this.m21 * that.y + this.m31 * that.z + this.m41 * w; 
+	var _y = this.m12 * that.x + this.m22 * that.y + this.m32 * that.z + this.m42 * w;  
+	var _z = this.m13 * that.x + this.m23 * that.y + this.m33 * that.z + this.m43 * w; 
+	var _w = this.m14 * that.x + this.m24 * that.y + this.m34 * that.z + this.m44 * w;
+	
+	// row-major	
+	/*var _x = this.m11 * vec.x + this.m12 * vec.y + this.m13 * vec.z + this.m14 * w; 
+	var _y = this.m21 * vec.x + this.m22 * vec.y + this.m23 * vec.z + this.m24 * w;  
+	var _z = this.m31 * vec.x + this.m32 * vec.y + this.m33 * vec.z + this.m34 * w; 
+	var _w = this.m41 * vec.x + this.m42 * vec.y + this.m43 * vec.z + this.m44 * w;
+	*/
+	
+	if(_w != 0 && w != 1)
+	{
+		_x = _x/_w;
+		_y = _y/_w; 
+		_z = _z/_w; 
+	}
+	
+	return new XML3DVec3(_x, _y, _z); 
 };
-
 
 XML3DMatrix.prototype.det3 = function(a1, a2, a3, b1, b2, b3,
 		c1, c2, c3) {
@@ -1195,9 +1226,49 @@ XML3DMatrix.prototype.inverse = function() {
 	
 	if (Math.abs(rDet) < 0.000001) 
 	{
-		org.xml3d.debug.logInfo("Invert matrix: singular matrix, no inverse!");
-		throw new Error("Invert matrix: singular matrix, no inverse!");
-		return new XML3DMatrix();
+		//Do safe inverse calculation. Computationally expensive, but no danger of 
+		//uninvertible matrix exceptions.
+		var m = this._data;
+		
+		var m0  = m[ 0], m1  = m[ 1], m2  = m[ 2], m3  = m[ 3],
+		    m4  = m[ 4], m5  = m[ 5], m6  = m[ 6], m7  = m[ 7],
+		    m8  = m[ 8], m9  = m[ 9], m10 = m[10], m11 = m[11],
+		    m12 = m[12], m13 = m[13], m14 = m[14], m15 = m[15]
+
+		var t = new XML3DMatrix();
+
+		t.m11 = (m9*m14*m7-m13*m10*m7+m13*m6*m11-m5*m14*m11-m9*m6*m15+m5*m10*m15);
+		t.m12 = (m13*m10*m3-m9*m14*m3-m13*m2*m11+m1*m14*m11+m9*m2*m15-m1*m10*m15);
+		t.m13 = (m5*m14*m3-m13*m6*m3+m13*m2*m7-m1*m14*m7-m5*m2*m15+m1*m6*m15);
+		t.m14 = (m9*m6*m3-m5*m10*m3-m9*m2*m7+m1*m10*m7+m5*m2*m11-m1*m6*m11);
+
+		t.m21 = (m12*m10*m7-m8*m14*m7-m12*m6*m11+m4*m14*m11+m8*m6*m15-m4*m10*m15);
+		t.m22 = (m8*m14*m3-m12*m10*m3+m12*m2*m11-m0*m14*m11-m8*m2*m15+m0*m10*m15);
+		t.m23 = (m12*m6*m3-m4*m14*m3-m12*m2*m7+m0*m14*m7+m4*m2*m15-m0*m6*m15);
+		t.m24 = (m4*m10*m3-m8*m6*m3+m8*m2*m7-m0*m10*m7-m4*m2*m11+m0*m6*m11);
+
+		t.m31 = (m8*m13*m7-m12*m9*m7+m12*m5*m11-m4*m13*m11-m8*m5*m15+m4*m9*m15);
+		t.m32 = (m12*m9*m3-m8*m13*m3-m12*m1*m11+m0*m13*m11+m8*m1*m15-m0*m9*m15);
+		t.m33 = (m4*m13*m3-m12*m5*m3+m12*m1*m7-m0*m13*m7-m4*m1*m15+m0*m5*m15);
+		t.m34 = (m8*m5*m3-m4*m9*m3-m8*m1*m7+m0*m9*m7+m4*m1*m11-m0*m5*m11);
+
+		t.m41 = (m12*m9*m6-m8*m13*m6-m12*m5*m10+m4*m13*m10+m8*m5*m14-m4*m9*m14);
+		t.m42 = (m8*m13*m2-m12*m9*m2+m12*m1*m10-m0*m13*m10-m8*m1*m14+m0*m9*m14);
+		t.m43 = (m12*m5*m2-m4*m13*m2-m12*m1*m6+m0*m13*m6+m4*m1*m14-m0*m5*m14);
+		t.m44 = (m4*m9*m2-m8*m5*m2+m8*m1*m6-m0*m9*m6-m4*m1*m10+m0*m5*m10);
+
+		var s = 1.0 / (
+			m12 * m9 * m6 * m3 - m8 * m13 * m6 * m3 - m12 * m5 * m10 * m3 + m4 * m13 * m10 * m3 +
+			m8 * m5 * m14 * m3 - m4 * m9 * m14 * m3 - m12 * m9 * m2 * m7 + m8 * m13 * m2 * m7 +
+			m12 * m1 * m10 * m7 - m0 * m13 * m10 * m7 - m8 * m1 * m14 * m7 + m0 * m9 * m14 * m7 +
+			m12 * m5 * m2 * m11 - m4 * m13 * m2 * m11 - m12 * m1 * m6 * m11 + m0 * m13 * m6 * m11 +
+			m4 * m1 * m14 * m11 - m0 * m5 * m14 * m11 - m8 * m5 * m2 * m15 + m4 * m9 * m2 * m15 +
+			m8 * m1 * m6 * m15 - m0 * m9 * m6 * m15 - m4 * m1 * m10 * m15 + m0 * m5 * m10 * m15
+		);
+
+		for (var i=0; i<16; ++i) t._data[i] *= s;
+
+		return t;
 	}
 	rDet = 1.0 / rDet;
 	return new XML3DMatrix(+this.det3(b2, b3, b4, c2, c3, c4,
@@ -1218,6 +1289,7 @@ XML3DMatrix.prototype.inverse = function() {
 					* rDet, -this.det3(a1, a2, a3, b1, b2, b3, d1, d2, d3)
 					* rDet, +this.det3(a1, a2, a3, b1, b2, b3, c1, c2, c3)
 					* rDet);
+	
 };
 /*
  * Transpose returns a new matrix which is the transposed form of this matrix.
@@ -1357,7 +1429,11 @@ XML3DVec3 = function(x, y, z)
 	var n = arguments.length;
 	switch(n) {
 		case 1:
-			if (arguments[0] instanceof Array || arguments[0] instanceof Float32Array) {
+			// copy constructor
+			if(arguments[0].constructor === XML3DVec3)
+				this._setXYZ(arguments[0].x, arguments[0].y, arguments[0].z); 
+			else if (arguments[0] instanceof Array 
+				  || arguments[0] instanceof Float32Array) {
 				this._setXYZ(x[0], x[1], x[2]);
 			} else {
 				this._setXYZ(x, x, x);
@@ -1501,10 +1577,21 @@ XML3DRotation = function(x, y, z, w)
 	var n = arguments.length;
 	switch(n) {
 	case 1:
-		this.x = x[0];
-		this.y = x[1];
-		this.z = x[2];
-		this.w = x[3];
+		if(arguments[0].constructor === XML3DRotation)
+		{
+			// copy constructor
+			this.x = arguments[0].x;
+			this.y = arguments[0].y; 
+			this.z = arguments[0].z; 
+			this.w = arguments[0].w; 
+		}
+		else
+		{
+			this.x = x[0];
+			this.y = x[1];
+			this.z = x[2];
+			this.w = x[3];
+		}
 		break;
 	case 2:
 		this.setAxisAngle(x,y);
@@ -1796,16 +1883,23 @@ XML3DRotation.prototype.toGL = function() {
 /** returns an XML3DBox, which is an axis-aligned box, described 
 *  by two vectors min and max.
 *   
-*  @param min (optional) instance of XML3DVec3 for the smallest point of the box
-*  @param max (optional) instance of XML3DVec3 for the biggest point of the box   
+*  @param min either XML3DBox acting as copy constructor or instance of XML3DVec3 for the smallest point of the box
+*  @param max (optional) instance of XML3DVec3 for the biggest point of the box. In the 
+*  			case of min being a XML3DBox this parameter is ignored.   
 */
 XML3DBox = function(min, max) 
 {
 	XML3DDataType.call(this);
-	if(arguments.length === 2) 
+	if(arguments.length == 1 && arguments[0].constructor === XML3DBox)
 	{
-		this.min = min; 
-		this.max = max; 
+		// copy constructor
+		this.min = new XML3DVec3(arguments[0].min); 
+		this.max = new XML3DVec3(arguments[0].max); 
+	}
+	else if(arguments.length === 2) 
+	{
+		this.min = new XML3DVec3(min); 
+		this.max = new XML3DVec3(max); 
 	}
 	else
 	{
@@ -1907,8 +2001,17 @@ XML3DRay = function(origin, direction)
 	
 	switch(arguments.length) {		
 	case 1: 
-		this.origin = origin; 
-		this.direction = new XML3DVec3(0, 0, -1); 
+		if(arguments[0].constructor === XML3DRay)
+		{
+			// copy constructor
+			this.origin = new XML3DVec3(arguments[0].origin);
+			this.direction = new XML3DVec3(arguments[0].direction); 
+		}
+		else
+		{
+			this.origin = origin; 
+			this.direction = new XML3DVec3(0, 0, -1);
+		}
 		break; 
 		
 	case 2: 
@@ -2965,10 +3068,10 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
 	node._height = org.xml3d.initInt(node.getAttribute("height"), 600);
 	node._width = org.xml3d.initInt(node.getAttribute("width"), 800);
-	node.setOptionValue = function (name, value) {
-		return false;
+	node.setOptionValue = function(option) {
+		org.xml3d.debug.logInfo("setOptionValue is not yet supported in XML3D WebGL.");
+		return;
 	};
-
 	//node.definitionArea = [];
 	//node.graph = [];
 	
@@ -10206,10 +10309,7 @@ org.xml3d.methods.groupGetLocalMatrix = function() {
     {
         for (i = 0; i < xfmNode.adapters.length; i++) {
             if (xfmNode.adapters[i].getMatrix) {
-                var sglMat = xfmNode.adapters[i].getMatrix();                
-                var xml3dMat = new XML3DMatrix(sglMat); 
-                
-                return xml3dMat.transpose(); 
+                return xfmNode.adapters[i].getMatrix();
             }
         }
     }
@@ -10221,12 +10321,21 @@ org.xml3d.methods.groupGetLocalMatrix = function() {
  */
 org.xml3d.methods.groupGetBoundingBox = function() { 
 
-    var bbox = new XML3DBox(); 
+    var bbox = new XML3DBox();
+    var locMat = this.getLocalMatrix();
+    
     var child = this.firstElementChild; 
     while(child !== null)
     {
         if(child.getBoundingBox)
-            bbox.extend(child.getBoundingBox()); 
+        {
+            var chBBox = child.getBoundingBox(); 
+            
+            chBBox.min = locMat.mulVec3(chBBox.min); 
+            chBBox.max = locMat.mulVec3(chBBox.max);
+            
+            bbox.extend(chBBox); 
+        }
         
         child = child.nextElementSibling;
     }
@@ -10239,15 +10348,8 @@ org.xml3d.methods.groupGetBoundingBox = function() {
 org.xml3d.methods.meshGetBoundingBox = function() {
 
     for (i = 0; i < this.adapters.length; i++) {
-        if (this.adapters[i].getBoundingBox) {
-            var bbox = this.adapters[i].getBoundingBox();
-
-            var worldMat = this.getWorldMatrix(); 
-            bbox.min = worldMat.mulVec3(bbox.min, 1); 
-            bbox.max = worldMat.mulVec3(bbox.max, 1);
-            
-            return bbox; 
-        }
+        if (this.adapters[i].getBoundingBox)
+            return this.adapters[i].getBoundingBox();
     }
     
     return new XML3DBox(); 
@@ -10589,7 +10691,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 * @return
 	 */
 	XML3DHandler.prototype.draw = function() {
-		//try {
+		try {
 			for (var t in this.rttBuffers) {
 				this.rttBuffers[t].needDraw = true;
 			}
@@ -10611,10 +10713,10 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			}
 			this.dispatchFrameDrawnEvent(start, end, stats);
 			this.needDraw = false;	
-		//} catch (e) {
-		//	org.xml3d.debug.logException(e);
-		//	throw e;
-		//}
+		} catch (e) {
+			org.xml3d.debug.logException(e);
+			throw e;
+		}
 
 	};
 	
@@ -11343,6 +11445,9 @@ org.xml3d.webgl.XML3DShaderHandler.prototype.unbindDefaultShader = function() {
  * @author Christian Schlinkmann
  *******************************************/
 
+org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH = 512;
+org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT = 512;
+
 org.xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
 	this.renderer = renderer;
 	this.gl = gl;
@@ -11350,21 +11455,30 @@ org.xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
 
 org.xml3d.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(width, height) {
 	var gl = this.gl;
+	var scale = 1.0;
 	
-	if (width > 380 || height > 240) {
-		var scale = 380 / width;
-		width = Math.floor(width * scale);
-		height = Math.floor(height * scale);
+	var hDiff = height - org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT;
+	var wDiff = width - org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH;
+	
+	if (hDiff > 0 || wDiff > 0) {
+		if (hDiff > wDiff) {
+			scale = org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT / height;
+		} else {
+			scale = org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH / width;
+		}	
 	}
 	
-	return this.createFrameBuffer(width, height, gl.RGBA, gl.DEPTH_COMPONENT16, null, { depthAsRenderbuffer : true } );
+	width = Math.floor(width * scale);
+	height = Math.floor(height * scale);
+	
+	return this.createFrameBuffer(width, height, gl.RGBA, gl.DEPTH_COMPONENT16, null, { depthAsRenderbuffer : true }, scale );
 };
 
 org.xml3d.webgl.XML3DBufferHandler.prototype.createShadowBuffer = function() {
 	//TODO: this
 };
 
-org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options) {
+org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options, scale) {
 	
 	var gl = this.gl;	
 	options = this.fillOptions(options);
@@ -11481,6 +11595,7 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width,
 	fbo.colorTarget = colorTarget;
 	fbo.depthTarget = depthTarget;
 	fbo.stencilTarget = stencilTarget;
+	fbo.scale = scale;
 
 	return fbo;
 };
@@ -12117,9 +12232,12 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) {
 	////org.xml3d.webgl.checkError(gl, "Before readpixels");
 	var data = new Uint8Array(8);
+	var scale = this.fbos.picking.scale;
+	var x = screenX * scale;
+	var y = screenY * scale;
 	
 	try {
-		gl.readPixels(screenX, screenY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
 		
 		var vec = new XML3DVec3(0, 0, 0);
 		vec.x = data[0] / 255;
@@ -12310,7 +12428,7 @@ org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
 		adapter._parentShader = parentShader;
 	
 	var child = this.node.firstElementChild;
-
+	
 	while (child !== null) {
 			var isVisible = visible;
 			var childAdapter = this.factory.getAdapter(child, org.xml3d.webgl.Renderer.prototype);
@@ -13143,10 +13261,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getBoundingBox = function() {
-	var min = new XML3DVec3(this._bbox.min[0], this._bbox.min[1], this._bbox.min[2]);
-	var max = new XML3DVec3(this._bbox.max[0], this._bbox.max[1], this._bbox.max[2]);
-	
-	return new XML3DBox(min, max); 
+		
+	return new XML3DBox(this._bbox);  
 };
 
 // Adapter for <group>
@@ -13203,7 +13319,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		//of its children with the new transformation matrix
 		
 		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-		downstreamValue = adapter.getMatrix().multiply(this.parentTransform);
+		downstreamValue = adapter.getMatrix().multiply(this.parentTransform); 
 		this.notifyListeners("parenttransform", downstreamValue);
 		this.factory.renderer.requestRedraw("Group transform changed.");
 	}
@@ -15380,8 +15496,8 @@ org.xml3d.Camera = function(view) {
 
 org.xml3d.Camera.prototype.__defineGetter__("orientation", function() { return this.view.orientation; });
 org.xml3d.Camera.prototype.__defineGetter__("position", function() { return this.view.position; });
-org.xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { /*org.xml3d.debug.logError("Orientation: " + orientation);*/ this.view.orientation = orientation; });
-org.xml3d.Camera.prototype.__defineSetter__("position", function(position) { this.view.position = position; });
+org.xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { /*org.xml3d.debug.logError("Orientation: " + orientation);*/ org.xml3d.copyRotation(this.view.orientation, orientation); });
+org.xml3d.Camera.prototype.__defineSetter__("position", function(position) { org.xml3d.copyVector(this.view.position, position); });
 org.xml3d.Camera.prototype.__defineGetter__("direction", function() { return this.view.getDirection(); });
 org.xml3d.Camera.prototype.__defineGetter__("upVector", function() { return this.view.getUpVector(); });
 org.xml3d.Camera.prototype.__defineGetter__("fieldOfView", function() { return this.view.fieldOfView; });

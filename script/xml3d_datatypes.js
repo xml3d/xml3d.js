@@ -94,8 +94,14 @@ XML3DMatrix = function()
 	} 
 	else if (arguments.length == 1)
 	{
-
-		var m = arguments[0];
+		var m = arguments[0]; 
+		
+		if(arguments[0].constructor === XML3DMatrix)
+		{
+			// copy constructor
+			m = arguments[0]._data;  
+		}
+		
 		if (m.length < 16) {
 			org.xml3d.debug.logError("Tried to initialize a XML3DMatrix from a Float32Array with less than 16 members");
 			return null;
@@ -406,16 +412,32 @@ XML3DMatrix.prototype.multiply = function (that)
 };
 
 XML3DMatrix.prototype.mulVec3 = function(that, w) {
-	return new XML3DVec3(
-//		this._m11 * that.x + this._m21 * that.y + this._m31 * that.z + this._m41 * w, 
-//		this._m12 * that.x + this._m22 * that.y + this._m32 * that.z + this._m42 * w, 
-//		this._m13 * that.x + this._m23 * that.y + this._m33 * that.z + this._m43 * w
-		this._data[0] * that.x + this._data[1] * that.y + this._data[2] * that.z + this._data[3] * w, 
-		this._data[4] * that.x + this._data[5] * that.y + this._data[6] * that.z + this._data[7] * w, 
-		this._data[8] * that.x + this._data[9] * that.y + this._data[10] * that.z + this._data[11] * w
-		);
+	
+	if(!w)
+		w = 1; 
+	
+	// column-major
+	var _x = this.m11 * that.x + this.m21 * that.y + this.m31 * that.z + this.m41 * w; 
+	var _y = this.m12 * that.x + this.m22 * that.y + this.m32 * that.z + this.m42 * w;  
+	var _z = this.m13 * that.x + this.m23 * that.y + this.m33 * that.z + this.m43 * w; 
+	var _w = this.m14 * that.x + this.m24 * that.y + this.m34 * that.z + this.m44 * w;
+	
+	// row-major	
+	/*var _x = this.m11 * vec.x + this.m12 * vec.y + this.m13 * vec.z + this.m14 * w; 
+	var _y = this.m21 * vec.x + this.m22 * vec.y + this.m23 * vec.z + this.m24 * w;  
+	var _z = this.m31 * vec.x + this.m32 * vec.y + this.m33 * vec.z + this.m34 * w; 
+	var _w = this.m41 * vec.x + this.m42 * vec.y + this.m43 * vec.z + this.m44 * w;
+	*/
+	
+	if(_w != 0 && w != 1)
+	{
+		_x = _x/_w;
+		_y = _y/_w; 
+		_z = _z/_w; 
+	}
+	
+	return new XML3DVec3(_x, _y, _z); 
 };
-
 
 XML3DMatrix.prototype.det3 = function(a1, a2, a3, b1, b2, b3,
 		c1, c2, c3) {
@@ -689,7 +711,11 @@ XML3DVec3 = function(x, y, z)
 	var n = arguments.length;
 	switch(n) {
 		case 1:
-			if (arguments[0] instanceof Array || arguments[0] instanceof Float32Array) {
+			// copy constructor
+			if(arguments[0].constructor === XML3DVec3)
+				this._setXYZ(arguments[0].x, arguments[0].y, arguments[0].z); 
+			else if (arguments[0] instanceof Array 
+				  || arguments[0] instanceof Float32Array) {
 				this._setXYZ(x[0], x[1], x[2]);
 			} else {
 				this._setXYZ(x, x, x);
@@ -833,10 +859,21 @@ XML3DRotation = function(x, y, z, w)
 	var n = arguments.length;
 	switch(n) {
 	case 1:
-		this.x = x[0];
-		this.y = x[1];
-		this.z = x[2];
-		this.w = x[3];
+		if(arguments[0].constructor === XML3DRotation)
+		{
+			// copy constructor
+			this.x = arguments[0].x;
+			this.y = arguments[0].y; 
+			this.z = arguments[0].z; 
+			this.w = arguments[0].w; 
+		}
+		else
+		{
+			this.x = x[0];
+			this.y = x[1];
+			this.z = x[2];
+			this.w = x[3];
+		}
 		break;
 	case 2:
 		this.setAxisAngle(x,y);
@@ -1128,16 +1165,23 @@ XML3DRotation.prototype.toGL = function() {
 /** returns an XML3DBox, which is an axis-aligned box, described 
 *  by two vectors min and max.
 *   
-*  @param min (optional) instance of XML3DVec3 for the smallest point of the box
-*  @param max (optional) instance of XML3DVec3 for the biggest point of the box   
+*  @param min either XML3DBox acting as copy constructor or instance of XML3DVec3 for the smallest point of the box
+*  @param max (optional) instance of XML3DVec3 for the biggest point of the box. In the 
+*  			case of min being a XML3DBox this parameter is ignored.   
 */
 XML3DBox = function(min, max) 
 {
 	XML3DDataType.call(this);
-	if(arguments.length === 2) 
+	if(arguments.length == 1 && arguments[0].constructor === XML3DBox)
 	{
-		this.min = min; 
-		this.max = max; 
+		// copy constructor
+		this.min = new XML3DVec3(arguments[0].min); 
+		this.max = new XML3DVec3(arguments[0].max); 
+	}
+	else if(arguments.length === 2) 
+	{
+		this.min = new XML3DVec3(min); 
+		this.max = new XML3DVec3(max); 
 	}
 	else
 	{
@@ -1239,8 +1283,17 @@ XML3DRay = function(origin, direction)
 	
 	switch(arguments.length) {		
 	case 1: 
-		this.origin = origin; 
-		this.direction = new XML3DVec3(0, 0, -1); 
+		if(arguments[0].constructor === XML3DRay)
+		{
+			// copy constructor
+			this.origin = new XML3DVec3(arguments[0].origin);
+			this.direction = new XML3DVec3(arguments[0].direction); 
+		}
+		else
+		{
+			this.origin = origin; 
+			this.direction = new XML3DVec3(0, 0, -1);
+		}
 		break; 
 		
 	case 2: 

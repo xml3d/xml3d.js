@@ -10635,7 +10635,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.canvas = canvas;
 		this.needDraw = true;
 		this.needPickingDraw = true;
-		this._pickingEnabled = true; 
+		this._pickingDisabled = false; 
+		this._lastPickedObj = null; 
 		this._mouseMovePickingEnabled = false;
 		this.isDragging = false;
 		this.timeNow   = Date.now() / 1000.0;
@@ -11170,11 +11171,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt, this.scene.xml3d); 
 		
 		if (!this._mouseMovePickingEnabled)
-			return;
-		
-		var lastObj = null;
-		if(this.scene.xml3d.currentPickObj)
-			lastObj = this.scene.xml3d.currentPickObj.node;
+			return;			
 
 		this.renderPick(pos.x, pos.y);
 		var curObj = null; 
@@ -11182,12 +11179,12 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			curObj = this.scene.xml3d.currentPickObj.node;
 		
 		// trigger mouseover and mouseout
-		if(curObj !== lastObj)
+		if(curObj !== this._lastPickedObj)
 		{
-			if (lastObj) 
+			if (this._lastPickedObj)
 			{
 				//The mouse has left the last object
-				this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, lastObj); 	
+				this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this._lastPickedObj); 	
 			}
 			if (curObj)
 			{
@@ -11195,6 +11192,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				//mouseover method
 				this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y);
 			}
+			
+			this._lastPickedObj = curObj;  
 		}
 		
 		return false; // don't redraw

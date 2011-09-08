@@ -43,7 +43,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewMatrix = function(model) {
 	//TODO: Check matrix multiplication in datatypes... transpose shouldn't be necessary here
-	return this.viewMatrix.multiply(model.transpose());
+	return this.getViewMatrix().multiply(model.transpose());
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrixGL = function(modelViewMatrix) {

@@ -26,28 +26,27 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.removeEventListener = functio
 	this.factory.handler.removeEventListener(this.node, type, listener, useCapture);
 };
 
-org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) {
-
-	this.factory.handler.renderPick(x, y);
-	if(hitPoint && this.node.currentPickPos)
-	{
-		hitPoint.x = this.node.currentPickPos.x;
-		hitPoint.y = this.node.currentPickPos.y;
-		hitPoint.z = this.node.currentPickPos.z;
-	}
-	
-	if(hitNormal && this.node.currentPickObj)
-	{
-		this.factory.handler.renderPickedNormals(this.node.currentPickObj, x, pickY);
-		hitNormal.x = this.node.currentPickNormal.x;
-		hitNormal.y = this.node.currentPickNormal.y; 
-		hitNormal.z = this.node.currentPickNormal.z; 
-	}
-	
-	if(this.node.currentPickObj !== null)
-		return this.node.currentPickObj.node;
-	else
-		return null; 
+org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) { 
+		this.factory.handler.renderPick(x, y);
+		if(hitPoint && this.node.currentPickPos)
+		{
+			hitPoint.x = this.node.currentPickPos.x; 
+			hitPoint.y = this.node.currentPickPos.y; 
+			hitPoint.z = this.node.currentPickPos.z; 
+		}
+		
+		if(hitNormal && this.node.currentPickObj)
+		{
+			this.factory.handler.renderPickedNormals(this.node.currentPickObj, x, y);
+			hitNormal.x = this.node.currentPickNormal.x;
+			hitNormal.y = this.node.currentPickNormal.y; 
+			hitNormal.z = this.node.currentPickNormal.z; 
+		}
+		
+		if(this.node.currentPickObj !== null)
+			return this.node.currentPickObj.node;
+		else
+			return null; 
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.generateRay = function(x, y) {

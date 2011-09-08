@@ -239,6 +239,7 @@ org.xml3d.webgl.Renderer.prototype._initFrameBuffers = function(gl) {
 org.xml3d.webgl.Renderer.prototype._initInternalShaders = function() {
 	var shaderMap = {};
 	shaderMap.picking = this.shaderHandler.getStandardShaderProgram("urn:xml3d:shader:picking");
+	shaderMap.normalsPicking = this.shaderHandler.getStandardShaderProgram("urn:xml3d:shader:pickedNormals");
 	//TODO: Shadow map, reflection, etc
 	
 	return shaderMap;
@@ -311,6 +312,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 	gl.viewport(0, 0, this.width, this.height);
+	//gl.enable(gl.BLEND);
 	//gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE,
 	//		gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.DEPTH_TEST);
@@ -319,8 +321,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		this.camera = this.initCamera();
 	
 	var xform = {};
-	xform.view = this.getViewMatrix(true);  
-	xform.proj = this.getProjectionMatrix(true); 
+	xform.view = this.getViewMatrix();  
+	xform.proj = this.getProjectionMatrix(); 
 	
 	//Setup lights
 	var light, lightOn;
@@ -538,6 +540,9 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
  */
 org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
 	gl = this.handler.gl;
+	
+	gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
+	
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 	gl.enable(gl.DEPTH_TEST);
 	gl.disable(gl.CULL_FACE);
@@ -545,7 +550,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	
 	var transform = pickedObj._transform;
 	var shape = pickedObj;
-	var sp = this.getStandardShaderProgram(gl, "urn:xml3d:shader:pickedNormals");
+	var sp = this.shaderMap.normalsPicking;
+	this.shaderHandler.bindShader(sp);
 	
 	var xform = {};
 	xform.view = this.camera.getViewMatrix();
@@ -560,12 +566,16 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	};
 
 	shader = {};
-	shader.sp = sp;
-	shape.render(shader, parameters);
+	shader.program = sp;
+	this.shaderHandler.setUniformVariables(shader.program, parameters);
+	shape.draw(shader);
 	
+	this.shaderHandler.unbindShader(shader.program);
 	this.readPixels(true, screenX, screenY);
+	
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	this.handler.needPickingDraw = true;
 
-	gl.disable(gl.DEPTH_TEST);
 };
 
 /**
@@ -676,10 +686,6 @@ org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo
 		max.z = bbmax.z;
 };
 
-org.xml3d.webgl.Renderer.prototype.bindDefaultShaderProgram = function(gl, name) {
-	
-
-};
 
 /**
  * Walks through the drawable objects and destroys each shape and shader
@@ -711,9 +717,9 @@ org.xml3d.webgl.Renderer.prototype.notifyDataChanged = function() {
  * @param forceRecompute if true recomputes the matrix, else returns cached version
  * @return camera's current view matrix  
  */
-org.xml3d.webgl.Renderer.prototype.getViewMatrix = function(forceRecompute) { 
+org.xml3d.webgl.Renderer.prototype.getViewMatrix = function() { 
 
-	if(forceRecompute || !this._viewMatrix)
+	if(!this._viewMatrix)
 	{	
 		if (this.currentView != this.scene.getActiveView())
 			this.camera = this.initCamera();
@@ -732,9 +738,9 @@ org.xml3d.webgl.Renderer.prototype.getViewMatrix = function(forceRecompute) {
  * @param forceRecompute if true recomputes the matrix, else returns cached version
  * @return camera's projection matrix based on current width and height
  */
-org.xml3d.webgl.Renderer.prototype.getProjectionMatrix = function(forceRecompute) { 
+org.xml3d.webgl.Renderer.prototype.getProjectionMatrix = function() { 
 
-	if(forceRecompute || !this._projMatrix)
+	if(!this._projMatrix)
 	{
 		if (this.currentView != this.scene.getActiveView())
 			this.camera = this.initCamera();

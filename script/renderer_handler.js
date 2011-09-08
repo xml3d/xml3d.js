@@ -255,7 +255,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	XML3DHandler.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
 		if (!pickedObj || this._pickingDisabled)
 			return;	
-		this.renderer.renderPickedNormals(pickedObj, screenX, screenY);
+		this.renderer.renderPickedNormals(pickedObj, screenX, this.canvas.height - screenY);
 	};
 	
 	//Uses gluUnProject() to transform the 2D screen point to a 3D ray 

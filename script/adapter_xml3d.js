@@ -30,20 +30,16 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(
 		this.factory.handler.renderPick(x, y);
 		if(hitPoint && this.node.currentPickPos)
 		{
-			hitPoint.x = this.node.currentPickPos.x; 
-			hitPoint.y = this.node.currentPickPos.y; 
-			hitPoint.z = this.node.currentPickPos.z; 
+			org.xml3d.copyVector(hitPoint, this.node.currentPickPos);
 		}
 		
 		if(hitNormal && this.node.currentPickObj)
 		{
 			this.factory.handler.renderPickedNormals(this.node.currentPickObj, x, y);
-			hitNormal.x = this.node.currentPickNormal.x;
-			hitNormal.y = this.node.currentPickNormal.y; 
-			hitNormal.z = this.node.currentPickNormal.z; 
+			org.xml3d.copyVector(hitNormal, this.node.currentPickNormal);
 		}
 		
-		if(this.node.currentPickObj !== null)
+		if(this.node.currentPickObj)
 			return this.node.currentPickObj.node;
 		else
 			return null; 

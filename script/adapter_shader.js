@@ -78,17 +78,21 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
 }));
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
-	if (evt.attribute == "script" && this.program) {
-		this.destroy();
+	if (evt.attribute == "script") {
+		if (this.program) {
+			this.destroy();
 		
-		//All uniforms need to be dirtied to make sure they're set in the new shader program
-		var dataTable = this.dataAdapter.createDataTable();		
-		for (var uniform in dataTable) {
-			var u = dataTable[uniform];
-			if (u.clean)
-				u.clean = false;
-		}	
+			//All uniforms need to be dirtied to make sure they're set in the new shader program
+			var dataTable = this.dataAdapter.createDataTable();		
+			for (var uniform in dataTable) {
+				var u = dataTable[uniform];
+				if (u.clean)
+					u.clean = false;
+			}	
+		}
+		this.renderer.requestRedraw();
 	}
+	
 };
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.isEmpty = function(obj) {

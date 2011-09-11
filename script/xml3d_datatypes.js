@@ -417,17 +417,17 @@ XML3DMatrix.prototype.mulVec3 = function(that, w) {
 		w = 1; 
 	
 	// column-major
-	/*var _x = this.m11 * that.x + this.m21 * that.y + this.m31 * that.z + this.m41 * w; 
-	var _y = this.m12 * that.x + this.m22 * that.y + this.m32 * that.z + this.m42 * w;  
-	var _z = this.m13 * that.x + this.m23 * that.y + this.m33 * that.z + this.m43 * w; 
-	var _w = this.m14 * that.x + this.m24 * that.y + this.m34 * that.z + this.m44 * w;
-	*/
+	var _x = this._data[0] * that.x + this._data[4] * that.y + this._data[8] * that.z + this._data[12] * w; 
+	var _y = this._data[1] * that.x + this._data[5] * that.y + this._data[9] * that.z + this._data[13] * w;  
+	var _z = this._data[2] * that.x + this._data[6] * that.y + this._data[10] * that.z + this._data[14] * w; 
+	var _w = this._data[3] * that.x + this._data[7] * that.y + this._data[11] * that.z + this._data[15] * w;
+
 	// row-major
-	var _x = this._data[0] * that.x + this._data[1] * that.y + this._data[2] * that.z + this._data[3] * w ;
+	/*var _x = this._data[0] * that.x + this._data[1] * that.y + this._data[2] * that.z + this._data[3] * w ;
 	var _y = this._data[4] * that.x + this._data[5] * that.y + this._data[6] * that.z + this._data[7] * w ;
 	var _z = this._data[8] * that.x + this._data[9] * that.y + this._data[10] * that.z + this._data[11] * w;
 	var _w = this._data[12] * that.x + this._data[13] * that.y + this._data[14] * that.z + this._data[15] * w;
-	
+	*/
 	if(_w != 0 && w != 1)
 	{
 		_x = _x/_w;

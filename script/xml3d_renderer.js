@@ -511,7 +511,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 						id : id,
 						min : volumeMin.toGL(),
 						max : volumeMax.toGL(),
-						modelMatrix : transform.toGL(),
+						modelMatrix : transform.transpose().toGL(),
 						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView).toGL(),
 						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 				};
@@ -607,8 +607,8 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 			var objId = 255 - data[3] - 1;
 			if (objId >= 0 && data[3] > 0) {
 				vec = vec.multiply(this.bbMax.subtract(this.bbMin)).add(this.bbMin);
-				this.scene.xml3d.currentPickPos = vec;
 				var pickedObj = this.allObjects[objId];
+				this.scene.xml3d.currentPickPos = vec;
 				this.scene.xml3d.currentPickObj = pickedObj;
 			} else {
 				this.scene.xml3d.currentPickPos = null;

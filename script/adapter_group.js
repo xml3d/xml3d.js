@@ -6,9 +6,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
 	this.parentTransform = null;
 	this._parentShader = null;
 	this.isValid = true;
-	this._transformAdapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-	if (this._transformAdapter)
-		this._transformAdapter.listeners.push(this);
+	//this._transformAdapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
+	//if (this._transformAdapter)
+	//	this._transformAdapter.listeners.push(this);
+	this._updateTransformAdapter(); 
 };
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DGroupRenderAdapter;
@@ -51,9 +52,13 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 	else if (evt.attribute == "transform") {
 		//This group is now linked to a different transform node. We need to notify all 
 		//of its children with the new transformation matrix
+		//var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
+		//downstreamValue = adapter.getMatrix();
+		this._updateTransformAdapter();
+		downstreamValue = this._transformAdapter.getMatrix(); 
+		if(this.parentTransform)
+			downstreamValue = downstreamValue.multiply(this.parentTransform);
 		
-		var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
-		downstreamValue = adapter.getMatrix().multiply(this.parentTransform); 
 		this.notifyListeners("parenttransform", downstreamValue);
 		this.factory.renderer.requestRedraw("Group transform changed.");
 	}
@@ -143,3 +148,19 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispose = function() {
 	this.isValid = false;
 };
 
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype._updateTransformAdapter = function() { 
+
+	// deregister in old adapter
+	if(this._transformAdapter)
+	{
+		var l = this._transformAdapter.listeners; 
+		var i = l.indexOf(this); 
+		if(i > -1)
+			l.splice(i,1);
+	}
+	
+	// setup new and register listener
+	this._transformAdapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
+	if (this._transformAdapter)
+		this._transformAdapter.listeners.push(this);
+};

@@ -1029,7 +1029,7 @@ XML3DRotation.prototype.toMatrix = function() {
 
 XML3DRotation.prototype.__defineGetter__("axis", function() {
 	var s = Math.sqrt(1 - this.w * this.w);
-	if (s < 0.001) {
+	if (s < 0.001 || isNaN(s)) {
 		return new XML3DVec3(0, 0, 1);
 	}
 	return new XML3DVec3(this.x / s, this.y / s, this.z / s);
@@ -1038,7 +1038,7 @@ XML3DRotation.prototype.__defineGetter__("axis", function() {
 XML3DRotation.prototype.__defineGetter__("angle", function() {
 	var angle = 2 * Math.acos(this.w);
 	var s = Math.sqrt(1 - this.w * this.w);
-	if (s < 0.001) {
+	if (s < 0.001 || isNaN(s)) {
 		return 0.0;
 	}
 	return angle;
@@ -1047,7 +1047,7 @@ XML3DRotation.prototype.__defineGetter__("angle", function() {
 XML3DRotation.prototype.toAxisAngle = function() {
 	var angle = 2 * Math.acos(this.w);
 	var s = Math.sqrt(1 - this.w * this.w);
-	if (s < 0.001) {
+	if (s < 0.001 || isNaN(s)) {
 		return [ this.x, this.y, this.z, angle ];
 	}
 	return [ this.x / s, this.y / s, this.z / s, angle ];

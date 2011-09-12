@@ -710,22 +710,17 @@ org.xml3d.webgl.Renderer.prototype.notifyDataChanged = function() {
 };
 
 /**
- * Retrieve the camera's view matrix. 
+ * Retrieve the camera's view matrix.
  * 
- * Currently recomputation is forced always in render(). 
- * 
- * @param forceRecompute if true recomputes the matrix, else returns cached version
  * @return camera's current view matrix  
  */
 org.xml3d.webgl.Renderer.prototype.getViewMatrix = function() { 
 
-	if(!this._viewMatrix)
-	{	
-		if (this.currentView != this.scene.getActiveView())
-			this.camera = this.initCamera();
-	
-		this._viewMatrix = this.camera.getViewMatrix();
-	}
+	// recompute if view changed
+	if (this.currentView != this.scene.getActiveView())
+		this.camera = this.initCamera();
+
+	this._viewMatrix = this.camera.getViewMatrix();
 	
 	return this._viewMatrix; 
 }; 
@@ -733,9 +728,6 @@ org.xml3d.webgl.Renderer.prototype.getViewMatrix = function() {
 /**
  * Retrieve the camera's projection matrix. 
  * 
- * Currently recomputation is forced always in render().
- * 
- * @param forceRecompute if true recomputes the matrix, else returns cached version
  * @return camera's projection matrix based on current width and height
  */
 org.xml3d.webgl.Renderer.prototype.getProjectionMatrix = function() { 

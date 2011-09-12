@@ -270,8 +270,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		viewport[3] = this.renderer.height;
 		
 		// get view and projection matrix arrays 
-		var viewMat = this.renderer.getViewMatrix()._data;
-		var projMat = this.renderer.getProjectionMatrix()._data; 
+		var viewMat = this.renderer.getViewMatrix().toGL();
+		var projMat = this.renderer.getProjectionMatrix().toGL(); 
 		
 		var ray = new XML3DRay(); 
 		

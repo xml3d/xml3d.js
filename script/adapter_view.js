@@ -21,7 +21,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 				new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
 				
 		if (this.parentTransform) {
-			this.viewMatrix = this.viewMatrix.multiply(this.parentTransform);		
+			this.viewMatrix = this.viewMatrix.multiply(this.parentTransform.transpose());		
 		}
 	}
 	return this.viewMatrix;

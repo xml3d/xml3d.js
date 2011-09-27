@@ -8198,12 +8198,25 @@ org.xml3d.methods.viewLookAt = function(point) {
 	this.setDirection(vector);
 };
 
+org.xml3d.methods.viewGetViewMatrix = function() { 
+
+	for (i = 0; i < this.adapters.length; i++) {
+		if (this.adapters[i].getViewMatrix) {
+			return this.adapters[i].getViewMatrix();
+		}
+	}
+	
+	return new XML3DMatrix(); 
+}; 
+
 org.xml3d.methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
 	for (i = 0; i < this.adapters.length; i++) {
 		if (this.adapters[i].getElementByPoint) {
 			return this.adapters[i].getElementByPoint(x, y, hitPoint, hitNormal);
 		}
 	}
+	
+	return null; 
 };
 
 org.xml3d.methods.xml3dGenerateRay = function(x, y) {
@@ -8212,6 +8225,8 @@ org.xml3d.methods.xml3dGenerateRay = function(x, y) {
             return this.adapters[i].generateRay(x, y);
         }
     }
+    
+    return new XML3DRay(); 
 };
 
 org.xml3d.methods.xml3dGetBoundingBox = org.xml3d.methods.groupGetBoundingBox;

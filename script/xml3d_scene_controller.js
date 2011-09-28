@@ -50,13 +50,33 @@ org.xml3d.Camera = function(view) {
 	this.view = view;
 };
 
-org.xml3d.Camera.prototype.__defineGetter__("orientation", function() { return this.view.orientation; });
-org.xml3d.Camera.prototype.__defineGetter__("position", function() { return this.view.position; });
-org.xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { /*org.xml3d.debug.logError("Orientation: " + orientation);*/ org.xml3d.copyRotation(this.view.orientation, orientation); });
-org.xml3d.Camera.prototype.__defineSetter__("position", function(position) { org.xml3d.copyVector(this.view.position, position); });
-org.xml3d.Camera.prototype.__defineGetter__("direction", function() { return this.view.getDirection(); });
-org.xml3d.Camera.prototype.__defineGetter__("upVector", function() { return this.view.getUpVector(); });
-org.xml3d.Camera.prototype.__defineGetter__("fieldOfView", function() { return this.view.fieldOfView; });
+org.xml3d.Camera.prototype.__defineGetter__("orientation", function() { 
+	return this.view.orientation; 
+});
+org.xml3d.Camera.prototype.__defineGetter__("position", function() { 
+	return this.view.position; 
+});
+org.xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { 
+	/*org.xml3d.debug.logError("Orientation: " + orientation);*/ 
+	//org.xml3d.copyRotation(this.view.orientation, orientation);
+	var ax = orientation.axis; 
+	var str = ax.x + " " + ax.y + " " + ax.z + " " + orientation.angle; 
+	this.view.setAttribute("orientation", str);
+});
+org.xml3d.Camera.prototype.__defineSetter__("position", function(position) { 
+	//org.xml3d.copyVector(this.view.position, position);
+	var str = position.x + " " + position.y + " " + position.z; 
+	this.view.setAttribute("position", str);
+});
+org.xml3d.Camera.prototype.__defineGetter__("direction", function() { 
+	return this.view.getDirection(); 
+});
+org.xml3d.Camera.prototype.__defineGetter__("upVector", function() { 
+	return this.view.getUpVector(); 
+});
+org.xml3d.Camera.prototype.__defineGetter__("fieldOfView", function() { 
+	return this.view.fieldOfView; 
+});
 
 org.xml3d.Camera.prototype.rotateAroundPoint = function(q0, p0) {
 	//org.xml3d.debug.logError("Orientation: " + this.orientation.multiply(q0).normalize());

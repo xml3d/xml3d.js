@@ -65,10 +65,14 @@ org.xml3d.webgl.XML3DShaderHandler.prototype.createShaderFromSources = function(
 										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
 	}
 	
-	var programObject = { 	attributes 	: {}, 
-							uniforms 	: {}, 
-							samplers	: {},
-							handle		: prg };
+	var programObject = { 	
+			attributes 	: {}, 
+			uniforms 	: {}, 
+			samplers	: {},
+			handle		: prg, 
+			vSource		: sources.vs,
+			fSource		: sources.fs
+	};
 	
 	gl.useProgram(prg);
 	

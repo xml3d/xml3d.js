@@ -778,8 +778,8 @@ org.xml3d.xflow.instance = function(dataTable) {
 			var curPos = new XML3DVec3(position[i*3], position[i*3+1], position[i*3+2]);
 			var curNorm = new XML3DVec3(normal[i*3], normal[i*3+1], normal[i*3+2]);
 			
-			var transformedPos = matrix.mulVec3b(curPos, 1).scale(size);
-			var transformedNorm = matrix.mulVec3b(curNorm, 1);
+			var transformedPos = matrix.mulVec3(curPos, 1).scale(size);
+			var transformedNorm = matrix.mulVec3(curNorm, 1);
 			
 			var instanceIndex = j * numVertices*3 + i*3;
 			var texindex = j * numVertices*2 + i*2;

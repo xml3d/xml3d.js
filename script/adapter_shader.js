@@ -5,6 +5,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.program = null;
 	this.gl = this.factory.handler.gl;
+	this.xflowBuilt = false;
 	
 	this.renderer = this.factory.renderer;
 	this.shaderHandler = this.renderer.shaderHandler;
@@ -156,7 +157,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.enable = function(globalUniforms) {
 	this.bindProgram();	
-	this.setUniformVariables(globalUniforms);
+	//this.setUniformVariables(globalUniforms);
 	this.bindSamplers();
 };
 
@@ -214,4 +215,36 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.unbindSamplers = function() {
 		tex.adapter.unbind(tex.info.texUnit);
 	}
 };
+
+//Build an instance of the local shader with the given XFlow declarations and body
+org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getXFlowShader = function(declarations, body) {
+	/*if (new org.xml3d.URI(this.program.scriptURL).scheme != "urn") {
+		org.xml3d.debug.logWarning("XFlow scripts cannot be used in conjunction with custom shaders yet, sorry!");
+		return null;
+	}*/
+	
+	if (this.xflowBuilt) {
+		return this.program;
+	}
+	
+	var vertex = this.program.vSource;
+	var fragment = this.program.fSource;
+	
+	vertex = declarations + vertex;
+	var cutPoint = vertex.indexOf('~');
+	
+	var bodyCut1 = vertex.substring(0, cutPoint+1);
+	var bodyCut2 = vertex.substring(cutPoint+3);
+	
+	vertex = bodyCut1 +"\n"+ body + bodyCut2;
+	
+	var sources = {};
+	sources.vs = vertex;
+	sources.fs = fragment;
+	this.xflowBuilt = true;
+	
+	return this.createShaderProgram(sources);
+	
+};
+
 

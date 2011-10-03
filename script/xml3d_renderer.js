@@ -357,9 +357,13 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	var zPosTransparent = [];
 	this.sortObjects(this.transparentObjects, zPosTransparent, xform, false);
 	
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.enable(gl.BLEND);
+	
 	//Render opaque objects
 	this.drawObjects(this.opaqueObjects, zPosOpaque, xform, lightParams, stats);
 	
+	gl.disable(gl.BLEND);
 	//Render transparent objects
 	if (this.transparentObjects.length > 0) {
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -440,7 +444,9 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, zPosArray
 			triCount += shape.draw(shader);
 			this.shaderHandler.unbindDefaultShader();
 		} else {
-			shader.enable(parameters);		
+			shader.enable(parameters);	
+			shape.applyXFlow(shader, parameters);			
+			shader.setUniformVariables(parameters);
 			triCount += shape.draw(shader);
 			shader.disable();
 		}

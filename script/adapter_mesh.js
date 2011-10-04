@@ -211,15 +211,16 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	var sAttributes = shader.program.attributes;
 	var gl = this.gl;
 	var triCount = 0;
-	
-//Bind vertex buffers
-	for (var name in this.mesh.vbos) {
-		var shaderAttribute = sAttributes[name];
-		if (!shaderAttribute)
-			continue;
-		
-		var vbo = this.mesh.vbos[name];
 
+
+//Bind vertex buffers
+	for (var name in sAttributes) {
+		var shaderAttribute = sAttributes[name];
+		var vbo = this.mesh.vbos[name];
+		if (!vbo) {
+			org.xml3d.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
+		}
+		
 		gl.enableVertexAttribArray(shaderAttribute.location);		
 		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
@@ -236,10 +237,9 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	}
 	
 //Unbind vertex buffers
-	for (var name in this.mesh.vbos) {
+	for (var name in sAttributes) {
 		var shaderAttribute = sAttributes[name];
-		if (!shaderAttribute)
-			continue;
+		
 		gl.disableVertexAttribArray(shaderAttribute.location);
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);

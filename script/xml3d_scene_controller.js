@@ -482,6 +482,19 @@ org.xml3d.Xml3dSceneController.detachAllControllers = function() {
 	}
 };
 
+org.xml3d.Xml3dSceneController.getController = function(xml3d) { 
+
+	var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d') );
+	for(var node in xml3dList) {
+		
+		var ctrl = org.xml3d.Xml3dSceneController.controllers[node]; 
+		if(xml3d == ctrl.xml3d)
+			return ctrl; 
+	}
+	
+	return null; 
+}; 
+
 //-----------------------------------------------------
 //loading/unloading
 //-----------------------------------------------------
@@ -495,9 +508,9 @@ org.xml3d.Xml3dSceneController.detachAllControllers = function() {
 		var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d') );
 
 		org.xml3d.Xml3dSceneController.controllers = new Array();
-		for(var node in xml3dList) {
+		for(var i in xml3dList) {
 			org.xml3d.debug.logInfo("Attaching Controller to xml3d element.");
-			org.xml3d.Xml3dSceneController.controllers[node] = new org.xml3d.Xml3dSceneController(xml3dList[node]);
+			org.xml3d.Xml3dSceneController.controllers[i] = new org.xml3d.Xml3dSceneController(xml3dList[i]);
 		};
 	};
 	var onunload = function() {

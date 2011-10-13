@@ -556,6 +556,130 @@ org.xml3d.xflow.tangent = function(dataTable) {
 
 };
 
+org.xml3d.xflow.skinning_js = function(dataTable, dataAdapter) {
+	if (!dataTable.bindPose || !dataTable.boneIndices || !dataTable.boneWeights || !dataTable.pose || !dataTable.normal) {
+		org.xml3d.debug.logError("Missing parameters for XFlow Skinning_js script!");
+		return;
+	}
+	dataTable.bindPose.isXFlow = true;
+	dataTable.boneIndices.isXFlow = true;
+	dataTable.boneWeights.isXFlow = true;
+	dataTable.pose.isXFlow = true;
+	
+	var bindPose = new Array();
+	var pose = new Array();
+	var numMatrices = dataTable.bindPose.data.length / 16;
+	var numVertices = dataTable.position.data.length / 3;
+	
+	if (dataTable.pose.data.length != dataTable.bindPose.data.length)
+		return;
+	
+	
+	var newPos = new Float32Array(numVertices*3);
+	var newNorm = new Float32Array(numVertices*3);
+
+    // loop invariant allocations
+    var curBoneIndices = [0,0,0,0];
+	var curBoneWeights = [0,0,0,0];
+
+    // shortcut names
+    var bD = dataTable.bindPose.data;
+    var pD = dataTable.pose.data;
+	
+	for (var i=0; i < numVertices; i++) {
+		var vindex = i*3;
+
+        var curPos_x = dataTable.position.data[vindex];
+        var curPos_y = dataTable.position.data[vindex+1];
+        var curPos_z = dataTable.position.data[vindex+2];
+
+        var curNorm_x = dataTable.normal.data[vindex];
+        var curNorm_y = dataTable.normal.data[vindex+1];
+        var curNorm_z = dataTable.normal.data[vindex+2];
+		
+        // LIR upwards
+		curBoneIndices[0] = dataTable.boneIndices.data[i*4];
+		curBoneIndices[1] = dataTable.boneIndices.data[i*4+1];
+		curBoneIndices[2] = dataTable.boneIndices.data[i*4+2];
+		curBoneIndices[3] = dataTable.boneIndices.data[i*4+3];
+		
+        // LIR upwards
+		curBoneWeights[0] = dataTable.boneWeights.data[i*4];
+		curBoneWeights[1] = dataTable.boneWeights.data[i*4+1];
+		curBoneWeights[2] = dataTable.boneWeights.data[i*4+2];
+		curBoneWeights[3] = dataTable.boneWeights.data[i*4+3];
+		
+        var pos_x = 0; var pos_y = 0; var pos_z = 0;
+        var norm_x = 0; var norm_y = 0; var norm_z = 0;
+		var accumulatedWeight = 0;
+		
+		for (var j=0; j < 4; j++) {
+			var boneIndex = curBoneIndices[j];
+			if (boneIndex < 0 || boneIndex >= numMatrices) continue;
+			
+			var weight = curBoneWeights[j];
+			accumulatedWeight += weight;
+			
+            var bI = boneIndex * 16;
+			
+            var bindPos_x = bD[bI] * curPos_x + bD[bI+4] * curPos_y + bD[bI+8] * curPos_z + bD[bI+12];
+            var bindPos_y = bD[bI+1] * curPos_x + bD[bI+5] * curPos_y + bD[bI+9] * curPos_z + bD[bI+13];
+            var bindPos_z = bD[bI+2] * curPos_x + bD[bI+6] * curPos_y + bD[bI+10] * curPos_z + bD[bI+14];
+            var bindPos_w = bD[bI+3] * curPos_x + bD[bI+7] * curPos_y + bD[bI+11] * curPos_z + bD[bI+15];
+            if (bindPos_w != 0) {
+                bindPos_x = bindPos_x / bindPos_w;
+                bindPos_y = bindPos_y / bindPos_w;
+                bindPos_z = bindPos_z / bindPos_w;
+            }
+			
+            var bindNorm_x = bD[bI] * curNorm_x + bD[bI+1] * curNorm_y + bD[bI+2] * curNorm_z;
+            var bindNorm_y = bD[bI+4] * curNorm_x + bD[bI+5] * curNorm_y + bD[bI+6] * curNorm_z;
+            var bindNorm_z = bD[bI+8] * curNorm_x + bD[bI+9] * curNorm_y + bD[bI+10] * curNorm_z;
+           
+            var posePos_x = pD[bI] * bindPos_x + pD[bI+4] * bindPos_y + pD[bI+8] * bindPos_z + pD[bI+12];
+            var posePos_y = pD[bI+1] * bindPos_x + pD[bI+5] * bindPos_y + pD[bI+9] * bindPos_z + pD[bI+13];
+            var posePos_z = pD[bI+2] * bindPos_x + pD[bI+6] * bindPos_y + pD[bI+10] * bindPos_z + pD[bI+14];
+            var posePos_w = pD[bI+3] * bindPos_x + pD[bI+7] * bindPos_y + pD[bI+11] * bindPos_z + pD[bI+15];
+            if (posePos_w != 0) {
+                posePos_x = posePos_x / posePos_w;
+                posePos_y = posePos_y / posePos_w;
+                posePos_z = posePos_z / posePos_w;
+            }
+			
+            var poseNorm_x = pD[bI] * bindNorm_x + pD[bI+1] * bindNorm_y + pD[bI+2] * bindNorm_z;
+            var poseNorm_y = pD[bI+4] * bindNorm_x + pD[bI+5] * bindNorm_y + pD[bI+6] * bindNorm_z;
+            var poseNorm_z = pD[bI+8] * bindNorm_x + pD[bI+9] * bindNorm_y + pD[bI+10] * bindNorm_z;
+            
+            pos_x = pos_x + posePos_x * weight;
+            pos_y = pos_y + posePos_y * weight;
+            pos_z = pos_z + posePos_z * weight;
+
+            norm_x = norm_x + poseNorm_x * weight;
+            norm_y = norm_y + poseNorm_y * weight;
+            norm_z = norm_z + poseNorm_z * weight;
+			
+		}
+		
+		var restWeight = 1 - accumulatedWeight;
+
+        pos_x = pos_x + curPos_x * restWeight;
+        pos_y = pos_y + curPos_y * restWeight;
+        pos_z = pos_z + curPos_z * restWeight;
+
+        norm_x = norm_x + curNorm_x * restWeight;
+        norm_y = norm_y + curNorm_y * restWeight;
+        norm_z = norm_z + curNorm_z * restWeight;
+		
+
+		newPos.set([pos_x, pos_y, pos_z], vindex);
+		newNorm.set([norm_x, norm_y, norm_z], vindex);
+		
+	}
+
+	dataTable.position = {data : newPos, tupleSize : 3, forcedUpdate : true};
+	dataTable.normal = {data : newNorm, tupleSize : 3, forcedUpdate : true};
+};
+
 org.xml3d.xflow.skinning = function(dataTable, dataAdapter) {
 	if (!dataTable.bindPose || !dataTable.boneIndices || !dataTable.boneWeights || !dataTable.pose || !dataTable.normal) {
 		org.xml3d.debug.logError("Missing parameters for XFlow Skinning script!");

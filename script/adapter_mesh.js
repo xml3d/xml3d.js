@@ -71,11 +71,29 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 	meshInfo.glType = this.getGLTypeFromString(gl, this.dataType);
 	
 	var dataTable = this.dataAdapter.createDataTable();
+	this._bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
+
 	if (dataTable.position.data.length > org.xml3d.webgl.MAX_MESH_INDEX_COUNT) {
-		splitMesh(dataTable, org.xml3d.webgl.MAX_MESH_INDEX_COUNT);
-	} else {
-		if (dataTable.index) {
-			//indexed primitives
+		this.splitMesh(dataTable, org.xml3d.webgl.MAX_MESH_INDEX_COUNT);
+	} 
+	if (dataTable.index) {
+		if (dataTable.index.length > 0) {
+			var numIndexBins = dataTable.index.length;
+			meshInfo.vbos.index = [];
+			for (var i = 0; i < numIndexBins; i++) {
+				var mIndices = new Uint16Array(dataTable.index[i].data);
+				var indexBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mIndices, gl.STATIC_DRAW);
+				
+				indexBuffer.length = mIndices.length;
+				indexBuffer.tupleSize = dataTable.index[i].tupleSize;
+				indexBuffer.glType = this.getGLTypeFromArray(gl, mIndices);
+					
+				meshInfo.vbos.index[i] = indexBuffer;
+				meshInfo.isIndexed = true;	
+			}
+		} else {
 			var mIndices = new Uint16Array(dataTable.index.data);
 			var indexBuffer = gl.createBuffer();
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -84,20 +102,37 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 			indexBuffer.length = mIndices.length;
 			indexBuffer.tupleSize = dataTable.index.tupleSize;
 			indexBuffer.glType = this.getGLTypeFromArray(gl, mIndices);
-			
-			meshInfo.vbos.index = indexBuffer;
-			meshInfo.isIndexed = true;		
-		} else {
-			//?
-			meshInfo.isIndexed = false;
+			meshInfo.vbos.index = [];
+			meshInfo.vbos.index[0] = indexBuffer;
+			meshInfo.isIndexed = true;	
 		}
+	} else {
+		//?
+		meshInfo.isIndexed = false;
+	}
 	
-		for (var attr in dataTable) {
-			var a = dataTable[attr];
+	for (var attr in dataTable) {
+		var a = dataTable[attr];
+		
+		if(a.isXflow || attr == "xflowShader" || attr == "index" || attr == "segments")
+			continue;
+		
+		if (a.length > 0) {
+			var numBins = a.length;
+			meshInfo.vbos[attr] = [];
 			
-			if(a.isXflow || attr == "xflowShader" || attr == "index")
-				continue;
-			
+			for (var i = 0; i < numBins; i++) {
+				var attrBuffer = gl.createBuffer();
+				gl.bindBuffer(gl.ARRAY_BUFFER, attrBuffer);
+				gl.bufferData(gl.ARRAY_BUFFER, a[i].data, gl.STATIC_DRAW);
+				
+				attrBuffer.length = a[i].data.length;
+				attrBuffer.tupleSize = a[i].tupleSize;
+				attrBuffer.glType = this.getGLTypeFromArray(gl, a[i].data);
+
+				meshInfo.vbos[attr][i] = attrBuffer;
+			}
+		} else {
 			var attrBuffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, attrBuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, a.data, gl.STATIC_DRAW);
@@ -106,49 +141,63 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 			attrBuffer.tupleSize = a.tupleSize;
 			attrBuffer.glType = this.getGLTypeFromArray(gl, a.data);
 			
-			meshInfo.vbos[attr] = attrBuffer;
+			meshInfo.vbos[attr] = [];
+			meshInfo.vbos[attr][0] = attrBuffer;
 		}
 	}
 
 	if (dataTable["xflowShader"]) {
 		this.xflowShader = dataTable["xflowShader"];
 	}
-	
-	this._bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
-	
+
 	this.meshIsValid = true;
 	this.isValid = true;
 	return meshInfo;
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable, maxIndexCount) {
-	var maxDataSize = dataTable.position.data.length;
-	var vertices = dataTable.position.data;
-	var indices = dataTable.index.data;
+	var verticesPerPolygon = 3;
+	maxIndexCount = Math.floor(maxIndexCount / 3) * 3;
 	
-	if (dataTable.index) {
+	var positionSource = dataTable.position.data;
+	var indexSource = dataTable.index ? dataTable.index.data : undefined;
+	var normalSource = dataTable.normal ? dataTable.normal.data : undefined;
+	var texcoordSource = dataTable.texcoord ? dataTable.texcoord.data : undefined;
+	
+	var vertexStride = dataTable.position.tupleSize;
+	var texcoordStride = dataTable.texcoord ? dataTable.texcoord.tupleSize : undefined;
+	var currentIndexSize = indexSource.length;
+	
+	if (indexSource) {
 		var boundaryList = [];
-		maxDataSize = Math.max(indices.length, maxDataSize);	
-	
-		var lastBinSize = maxDataSize % maxIndexCount;
-		var numBins = Math.ceil(maxDataSize / maxIndexCount);
-		var bins = new Array(numBins);
+		
+		var lastBinSize = currentIndexSize % maxIndexCount;
+		var numBins = Math.ceil(currentIndexSize / maxIndexCount);
+		var bins = new Array();
+		
 		for (var i = 0; i < numBins; i++) {
-			var binSize = i == numBins - 1 ? lastBinSize : maxIndexCount;
+			//var binSize = i == numBins - 1 ? lastBinSize : maxIndexCount;
+			bins[i] = {};
+			bins[i].index = new Uint16Array(maxIndexCount);
+			bins[i].index.nextFreeSlot = 0;
+			bins[i].position = new Float32Array(maxIndexCount*vertexStride);
 			
-			bins[i].index = new UInt16Array(binSize);
-			bins[i].position = new Float32Array(binSize);
-			if (dataTable.normal)
-				bins[i].normal = new Float32Array(binSize);
-			if (dataTable.texcoord)
-				bins[i].texcoord = new Float32Array(binSize);
+			if (normalSource)
+				bins[i].normal = new Float32Array(maxIndexCount*vertexStride);
+			if (texcoordSource)
+				bins[i].texcoord = new Float32Array(maxIndexCount*texcoordStride);
 		}
-			
-		for (var i = 0; i < indices.length; i += dataTable.position.tupleSize) {
+		
+		for (var i = 0; i < indexSource.length; i += verticesPerPolygon) {
 			var consistentBin = true;
-			var targetBin = indices[i] / maxIndexCount;
-			for (j = 1; j < dataTable.position.tupleSize; j++) {
-				if (indices[i + j] / maxIndexCount != targetBin) {
+			var targetBin = Math.floor(indexSource[i] / maxIndexCount);
+			
+			if (bins[targetBin].index.nextFreeSlot + verticesPerPolygon > maxIndexCount) 
+				consistentBin = false;
+
+			//See if this polygon spans more than one bin
+			for (j = 1; j < verticesPerPolygon; j++) {
+				if (Math.floor(indexSource[i + j] / maxIndexCount) != targetBin) {
 					consistentBin = false;
 					break;
 				}
@@ -161,16 +210,119 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 			
 			var indexTransform = maxIndexCount * targetBin;
 			
-			for (var j = 0; j < dataTable.position.tupleSize; j++) {
-				var newIndex = indices[i + j] - indexTransform;
+			//Distribute the indices and vertex data into the appropriate bin
+			for (var j = 0; j < verticesPerPolygon; j++) {
+				var oldIndex = indexSource[i+j];
+				var newIndex = oldIndex - indexTransform;
 				
-				bins[targetBin];
+				var bin = bins[targetBin];
+				//bin.index.set([newIndex], bin.index.nextFreeSlot);
+				bin.index[bin.index.nextFreeSlot] = newIndex;
+				bin.index.nextFreeSlot++;
+				
+				var vertIndex = oldIndex * vertexStride;
+				var position = [];
+				for (var k = 0; k < vertexStride; k++) {
+					position[k] = positionSource[vertIndex+k];
+				}			
+				bin.position.set(position, newIndex*vertexStride);
+				//bin.position[newIndex * vertexStride] = position;
+				
+				if(normalSource) {
+					var normal = [];
+					for (var k = 0; k < vertexStride; k++) {
+						normal[k] = normalSource[vertIndex+k];
+					}			
+					bin.normal.set(normal, newIndex*vertexStride);
+					//bin.normal[newIndex*vertexStride] = normal;
+				}
+				
+				var texIndex = oldIndex * texcoordStride;
+				if (texcoordSource) {
+					var texcoord = [];
+					for (var k = 0; k < texcoordStride; k++) {
+						texcoord[k] = texcoordSource[texIndex+k];
+					}			
+					bin.texcoord.set(texcoord, newIndex*texcoordStride);
+					//bin.texcoord[newIndex*texcoordStride] = texcoord;
+				}
 				
 			}
+		}
+		
+		//Insert boundary items into meshes
+		var targetBin = 0;
+		for (var i = 0; i < boundaryList.length; i++) {
+			while(bins[targetBin].index.nextFreeSlot + verticesPerPolygon > maxIndexCount) {
+				targetBin++;
+				if (targetBin >= bins.length) {
+					bins[targetBin] = {};
+					//We need to create a new bin
+					bins[targetBin].index = new Uint16Array(maxIndexCount);
+					bins[targetBin].index.nextFreeSlot = 0;
+					bins[targetBin].position = new Float32Array(maxIndexCount*vertexStride);
+					
+					if (normalSource)
+						bins[targetBin].normal = new Float32Array(maxIndexCount*vertexStride);
+					if (texcoordSource)
+						bins[targetBin].texcoord = new Float32Array(maxIndexCount*texcoordStride);
+					break;
+				}
+			}
 			
+			for (var j = 0; j < verticesPerPolygon; j++) {
+				var bin = bins[targetBin];
+				
+				var oldIndex = indexSource[boundaryList[i] + j];
+				var newIndex = bin.index.nextFreeSlot;
+				
+				//bin.index.set(newIndex, newIndex);
+				bin.index[newIndex] = newIndex;
+				bin.index.nextFreeSlot++;
+				
+				var position = [];
+				for (var k = 0; k < vertexStride; k++) {
+					position[k] = positionSource[oldIndex*vertexStride+k];
+				}			
+				bin.position.set(position, newIndex*vertexStride);
+				
+				if(normalSource) {
+					var normal = [];
+					for (var k = 0; k < vertexStride; k++) {
+						normal[k] = normalSource[oldIndex*vertexStride+k];
+					}			
+					bin.normal.set(normal, newIndex*vertexStride);
+				}
+				
+				if (texcoordSource) {
+					var texcoord = [];
+					for (var k = 0; k < texcoordStride; k++) {
+						texcoord[k] = texcoordSource[oldIndex*texcoordStride+k];
+					}			
+					bin.texcoord.set(texcoord, newIndex*vertexStride);
+				}
+				
+			}
 		}
 	
+		dataTable.index = [];
+		dataTable.position = [];
+		if (normalSource)
+			dataTable.normal = [];
+		if (texcoordSource)
+			dataTable.texcoord = [];
+		
+		for (var i = 0; i < bins.length; i++) {
+			dataTable.index[i] = { data : bins[i].index, tupleSize : vertexStride };
+			dataTable.position[i] = { data : bins[i].position, tupleSize : vertexStride };
+			if (normalSource)
+				dataTable.normal[i] = { data : bins[i].normal, tupleSize : vertexStride };
+			if (texcoordSource)
+				dataTable.position[i] = { data : bins[i].texcoord, tupleSize : texcoordStride };
+		}
+		
 	}
+	
 	
 };
 
@@ -212,37 +364,54 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	var gl = this.gl;
 	var triCount = 0;
 
-
-//Bind vertex buffers
-	for (var name in sAttributes) {
-		var shaderAttribute = sAttributes[name];
-		var vbo = this.mesh.vbos[name];
-		if (!vbo) {
-			org.xml3d.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
+	var dataTable = this.dataAdapter.createDataTable();
+	var numBins = this.mesh.isIndexed ? this.mesh.vbos.index.length : this.mesh.vbos.position.length;
+	
+	for (var i = 0; i < numBins; i++) {
+	//Bind vertex buffers
+		for (var name in sAttributes) {
+			var shaderAttribute = sAttributes[name];
+			var vbo;
+			
+			if (this.mesh.vbos[name].length > 1)
+				vbo = this.mesh.vbos[name][i];
+			else
+				vbo = this.mesh.vbos[name][0];
+			
+			if (!vbo) {
+				org.xml3d.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
+			}
+	
+			gl.enableVertexAttribArray(shaderAttribute.location);		
+			gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+			
+			if (dataTable[name] && dataTable[name].forcedUpdate) {
+				gl.bufferData(gl.ARRAY_BUFFER, dataTable[name].data, gl.STATIC_DRAW);
+				dataTable[name].forcedUpdate = false;
+			}
+			
+			gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
 		}
 		
-		gl.enableVertexAttribArray(shaderAttribute.location);		
-		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-		gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
-	}
-	
-//Draw the object
-	if (this.mesh.isIndexed) {
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.vbos.index);
-		gl.drawElements(this.mesh.glType, this.mesh.vbos.index.length, gl.UNSIGNED_SHORT, 0);
-		triCount = this.mesh.vbos.index.length / 3;
-	} else {
-		gl.drawArrays(this.mesh.glType, 0, this.mesh.vbos.position.length);
-		triCount = this.mesh.vbos.position.length / 3;
-	}
-	
-//Unbind vertex buffers
-	for (var name in sAttributes) {
-		var shaderAttribute = sAttributes[name];
+	//Draw the object
+		if (this.mesh.isIndexed) {
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.vbos.index[i]);
+			gl.drawElements(this.mesh.glType, this.mesh.vbos.index[i].length, gl.UNSIGNED_SHORT, 0);
+			triCount = this.mesh.vbos.index[i].length / 3;
+		} else {
+			gl.drawArrays(this.mesh.glType, 0, this.mesh.vbos.position[i].length);
+			triCount = this.mesh.vbos.position[i].length / 3;
+		}
 		
-		gl.disableVertexAttribArray(shaderAttribute.location);
+	//Unbind vertex buffers
+		for (var name in sAttributes) {
+			var shaderAttribute = sAttributes[name];
+			
+			gl.disableVertexAttribArray(shaderAttribute.location);
+		}
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 	
 	return triCount;
 };
@@ -250,7 +419,9 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispose = function() {
 	for (var vbo in this.mesh.vbos) {
 		var buffer = this.mesh.vbos[vbo];
-		this.gl.deleteBuffer(buffer);
+		for (var i = 0; i < buffer.length; i++) {
+			this.gl.deleteBuffer(buffer[i]);
+		}
 	}	
 	this.isValid = false;
 	this.mesh.vbos = {};

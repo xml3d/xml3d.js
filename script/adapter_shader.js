@@ -92,15 +92,14 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt)
 			}	
 		}
 		this.renderer.requestRedraw();
-	} else if (evt.newValue && evt.newValue.nodeName) {
-		if (evt.newValue.nodeName == "texture") {
-			var adapter = this.factory.getAdapter(evt.newValue, org.xml3d.webgl.Renderer.prototype);
-			var name = evt.newValue.name;
+	} else if (evt.newValue && evt.newValue.nodeName == "texture") {		
+		var adapter = this.factory.getAdapter(evt.newValue, org.xml3d.webgl.Renderer.prototype);
+		var name = evt.newValue.name;
 			
-			this.textures[name] = { adapter : adapter, info : { texUnit : 0 } };
-			this.destroy();
-		}
+		this.textures[name] = { adapter : adapter, info : { texUnit : 0 } };
+		this.destroy();		
 	}
+	
 	
 };
 

@@ -72,11 +72,12 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 	
 	var dataTable = this.dataAdapter.createDataTable();
 	this._bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
-
-	if (dataTable.position.data.length > org.xml3d.webgl.MAX_MESH_INDEX_COUNT) {
-		this.splitMesh(dataTable, org.xml3d.webgl.MAX_MESH_INDEX_COUNT);
-	} 
-	if (dataTable.index) {
+	
+	if (dataTable.index) {			
+		if (dataTable.position.data.length / 3 > org.xml3d.webgl.MAX_MESH_INDEX_COUNT) {
+			this.splitMesh(dataTable, org.xml3d.webgl.MAX_MESH_INDEX_COUNT);
+		} 
+		
 		if (dataTable.index.length > 0) {
 			var numIndexBins = dataTable.index.length;
 			meshInfo.vbos.index = [];

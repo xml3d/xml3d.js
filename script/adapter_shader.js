@@ -196,7 +196,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 		
 		this.dataAdapter.dataTable[uniform].clean = true;
 	}
-	
+
 	//Set global uniforms (lights, space conversion matrices)
 	for (var uniform in globalUniforms) {
 		var uValue = globalUniforms[uniform];
@@ -205,14 +205,29 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 			this.shaderHandler.setUniform(gl, sp.uniforms[uniform], uValue);
 		}
 	}
-	
+
 };
 
 
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindSamplers = function() {	
+	var mustRebuildShader = false;
+	
 	for (var name in this.textures) {
 		var tex = this.textures[name];
-		tex.adapter.bind(tex.info.texUnit);		
+		if (tex.adapter.node != null)
+			tex.adapter.bind(tex.info.texUnit);
+		else {
+			mustRebuildShader = true;
+			break;
+		}
+	}
+	
+	//A texture must have been removed since the last render pass, so to be safe we should rebuild the shader
+	//to try to avoid missing sampler errors in GL
+	if (mustRebuildShader) {
+		delete this.textures[name];
+		this.destroy();
+		this.enable();
 	}
 };
 

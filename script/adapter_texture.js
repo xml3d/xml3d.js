@@ -87,10 +87,12 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.notifyChanged = function(evt
 	if (evt.attribute == "src") {
 		this.destroy();
 		this.info = this.initTexture();
+		this.factory.renderer.requestRedraw();
 	} else if (evt.attribute == "node") {
 		if (evt.newValue == "") {
 			this.node = null;
 			this.destroy();
+			this.factory.renderer.requestRedraw();
 		}
 	}
 };

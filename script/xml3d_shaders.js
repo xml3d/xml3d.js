@@ -113,7 +113,7 @@ g_shaders["urn:xml3d:shader:phong"] = {
 			+"			vec3 R = normalize(reflect(L,N));\n"
 			+"			float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"
 			+"			vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * diffuseColor ;\n"
-			+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"	
+			+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0) * lightDiffuseColors[i];\n"
 			+"			color = color + (atten*(Idiff + Ispec)) * lightVisibility[i];\n"
 			+"		}\n"
 			+"  }\n"
@@ -205,7 +205,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 			+"      	vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);\n"
 
 			+"			vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * texDiffuse.xyz * diffuseColor;\n"
-			+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
+			+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0) * lightDiffuseColors[i];\n"
 			+"			color += vec4((atten*(Idiff + Ispec))*lightVisibility[i], texDiffuse.w);\n"
 			+"		}\n"		
 			+"  }\n"
@@ -293,7 +293,7 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 
 				+"			float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);\n"
 				+"			vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * fragVertexColor ;\n"
-				+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0);\n"
+				+"			vec3 Ispec = specularColor * pow(max(dot(R,E),0.0), shininess*128.0) * lightDiffuseColors[i];\n"
 				+"			color += (atten*(Idiff + Ispec))*lightVisibility[i];\n"
 				+"		}\n"
 				+"  }\n"

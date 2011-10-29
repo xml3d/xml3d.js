@@ -957,14 +957,6 @@ XML3DRotation.fromBasis = function(x, y, z) {
 	return XML3DRotation.fromMatrix(m);
 };
 
-XML3DRotation.prototype.setRotation = function(from, to) {
-	var a = from.normalize();
-	var b = to.normalize();
-	var vec = from.cross(to).normalize();
-	
-	this.setAxisAngle(vec, Math.acos(a.dot(b)));
-};
-
 XML3DRotation.axisAngle = function(axis, a) {
 	var t = axis.length();
 	if (t > 0.000001) {
@@ -1154,10 +1146,12 @@ XML3DRotation.prototype.toString = function() {
 /** Replaces the existing rotation with one computed from the two 
  * vectors passed as arguments.
  */
-XML3DRotation.prototype.setRotation = function(from, to) {
+XML3DRotation.prototype.setRotation = function(from, to) {	
+	var a = from.normalize();
+	var b = to.normalize();
 	
 	var axis = from.cross(to); 
-	var angle = Math.acos(from.dot(to)); 
+	var angle = Math.acos(a.dot(b)); 
 	
 	this.setAxisAngle(axis, angle); 
 }; 

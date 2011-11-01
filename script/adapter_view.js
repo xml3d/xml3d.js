@@ -8,9 +8,11 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this.projMatrix = null;
 	this._parentTrans = new XML3DVec3(0,0,0);
 	this._parentRot = new XML3DRotation(0,0,1,0);
+	this._parentTransform = null;
 	this.__defineSetter__("parentTransform", function(incoming){
-		this._parentRot = XML3DRotation.fromMatrix(incoming).negate();;
-		this._parentTrans =  new XML3DVec3(incoming.m41, incoming.m42, incoming.m43).negate();
+		var i = incoming.transpose();
+		this._parentRot = XML3DRotation.fromMatrix(i).negate();
+		this._parentTrans =  new XML3DVec3(i.m14, i.m24, i.m34).negate();
     });
 	this.isValid = true;
 };

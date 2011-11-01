@@ -55,7 +55,13 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		//var adapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 		//downstreamValue = adapter.getMatrix();
 		this._updateTransformAdapter();
-		downstreamValue = this._transformAdapter.getMatrix(); 
+		if (this._transformAdapter) 
+			downstreamValue = this._transformAdapter.getMatrix(); 
+		else if (this.parentTransform)
+			downstreamValue = new XML3DMatrix();
+		else
+			downstreamValue = null;
+		
 		if(this.parentTransform)
 			downstreamValue = downstreamValue.multiply(this.parentTransform);
 		

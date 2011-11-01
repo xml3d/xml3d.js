@@ -6,9 +6,11 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this.zNear = 0.1;
 	this.viewMatrix = null;
 	this.projMatrix = null;
-	this._parentTransform = null;
+	this._parentTrans = new XML3DVec3(0,0,0);
+	this._parentRot = new XML3DRotation(0,0,1,0);
 	this.__defineSetter__("parentTransform", function(incoming){
-        this._parentTransform = incoming.inverse().transpose();
+		this._parentRot = XML3DRotation.fromMatrix(incoming).negate();;
+		this._parentTrans =  new XML3DVec3(incoming.m41, incoming.m42, incoming.m43).negate();
     });
 	this.isValid = true;
 };
@@ -19,13 +21,10 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 
 	if (this.viewMatrix == null)
 	{
-		var negPos      = this.node.position.negate();
-		this.viewMatrix = this.node.orientation.negate().toMatrix().multiply(
+		var negPos      = this.node.position.negate().add(this._parentTrans);
+		var negOr = this.node.orientation.negate().multiply(this._parentRot);
+		this.viewMatrix = negOr.toMatrix().multiply(
 				new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
-				
-		if (this._parentTransform) {
-			this.viewMatrix = this.viewMatrix.multiply(this._parentTransform);		
-		}
 	}
 	return this.viewMatrix;
 };

@@ -10,12 +10,6 @@ if (!org.xml3d.webgl)
 else if (typeof org.xml3d.webgl != "object")
 	throw new Error("org.xml3d.webgl already exists and is not an object");
 
-//Create global symbol org.xml3d.xflow
-if (!org.xml3d.xflow)
-	org.xml3d.xflow = {};
-else if (typeof org.xml3d.xflow != "object")
-	throw new Error("org.xml3d.xflow already exists and is not an object");
-
 org.xml3d.webgl.MAXFPS = 30;
 
 /**
@@ -445,6 +439,11 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		if (evtMethod && currentObj.evalMethod) {
 			evtMethod = new Function(evtMethod);
 			evtMethod.call(currentObj, evt);
+		}
+		
+		for (ev in this.events[type]) {
+			var evl = this.events[type][ev];
+			evl.listener.call(ev.node, evt);
 		}
 		
 		//Make sure the event method didn't remove picked object from the tree

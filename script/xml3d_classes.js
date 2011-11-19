@@ -818,7 +818,8 @@ org.xml3d.isAnyURI = function(node)
 };
 
 org.xml3d.elementEvents = {
-        "xml3d": { "framedrawn":1 }
+        "xml3d": { "framedrawn":1, "mousedown":1, "mouseup":1, "click":1, "mousemove":1, 
+	"mouseout":1, "update":1, "mousewheel":1 }
 };
 org.xml3d.configureEvents = function(node) {
     node.__proto__.__addEventListener = node.__proto__.addEventListener;

@@ -818,8 +818,8 @@ org.xml3d.isAnyURI = function(node)
 };
 
 org.xml3d.elementEvents = {
-        "xml3d": { "framedrawn":1, "mousedown":1, "mouseup":1, "click":1, "mousemove":1, 
-	"mouseout":1, "update":1, "mousewheel":1 }
+        "framedrawn":1, "mousedown":1, "mouseup":1, "click":1, "mousemove":1, 
+		"mouseout":1, "update":1, "mousewheel":1
 };
 org.xml3d.configureEvents = function(node) {
     node.__proto__.__addEventListener = node.__proto__.addEventListener;
@@ -827,8 +827,7 @@ org.xml3d.configureEvents = function(node) {
 
     node.addEventListener = function(type, listener, useCapture) {
                 
-        if(org.xml3d.elementEvents[node.nodeName] 
-        && type in org.xml3d.elementEvents[node.nodeName]) {
+        if(org.xml3d.elementEvents[type]) {
             for (i = 0; i < this.adapters.length; i++) {
                 if (this.adapters[i].addEventListener) {
                     this.adapters[i].addEventListener(type, listener, useCapture);
@@ -840,8 +839,7 @@ org.xml3d.configureEvents = function(node) {
     };
     node.removeEventListener = function(type, listener, useCapture) {
         
-        if(org.xml3d.elementEvents[node.nodeName] 
-        && type in org.xml3d.elementEvents[node.nodeName]) {
+        if(org.xml3d.elementEvents[type]) {
             for (i = 0; i < this.adapters.length; i++) {
                 if (this.adapters[i].removeEventListener) {
                     this.adapters[i].removeEventListener(type, listener, useCapture);

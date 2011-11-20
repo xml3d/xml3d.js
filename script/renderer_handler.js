@@ -429,7 +429,12 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			tar = this.scene.xml3d;
 				
 		// dispatch
-		tar.dispatchEvent(evt);
+		for (var i = 0; i < tar.adapters.length; i++) {
+			if (tar.adapters[i].dispatchEvent) {
+				tar.adapters[i].dispatchEvent(evt);
+			}
+		}
+		
 		
 		// trigger on[event] attributes 
 		var ontype = "on" + type; 

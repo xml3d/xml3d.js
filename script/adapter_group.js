@@ -5,6 +5,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
 	this.listeners = new Array();
 	this.parentTransform = null;
 	this._parentShader = null;
+	this._eventListeners = [];
 	this.isValid = true;
 	//this._transformAdapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 	//if (this._transformAdapter)
@@ -29,6 +30,34 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.evalOnclick = function(evtMethod) {
 	if (evtMethod)
 		eval(evtMethod);
+};
+
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.addEventListener = function(itype, ilistener, icapture) {
+	var evl = {
+		type : itype,
+		listener : ilistener,
+		capture : icapture
+	};	
+	this._eventListeners.push(evl);
+};
+
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.removeEventListener = function(itype, ilistener, icapture) {
+	for (var i=0; i < this._eventListeners.length; i++) {
+		var evl = this._eventListeners[i];
+		if (evl.type == itype && evl.listener == ilistener) {
+			this._eventListeners.splice(i, 1);
+			i--;
+		}
+	}
+};
+
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispatchEvent = function(evt) {
+	for (var i=0; i<this._eventListeners.length; i++) {
+		var evl = this._eventListeners[i];
+		if (evl.type == evt.type) {
+			evl.listener.call(this.node, evt);
+		}
+	}
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {

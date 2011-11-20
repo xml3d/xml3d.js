@@ -186,14 +186,25 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.initMeshGL = function() {
 	return meshInfo;
 };
 
+/**
+ * Splits mesh data into smaller chunks. WebGL only supports 65,535 indices, meshes of greater size are
+ * automatically split by this function. Supports splitting indices, positions, texcoords and colors. 
+ * NOTE: The dataTable parameter is modified to hold the newly split mesh data.
+ * 
+ * @param dataTable the source data table to be split
+ * @param maxIndexCount the desired chunk size
+ * @return
+ */
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable, maxIndexCount) {
 	var verticesPerPolygon = 3;
 	maxIndexCount = Math.floor(maxIndexCount / 3) * 3;
 	
+	//See which data is in the supplied dataTable
 	var positionSource = dataTable.position.data;
 	var indexSource = dataTable.index ? dataTable.index.data : undefined;
 	var normalSource = dataTable.normal ? dataTable.normal.data : undefined;
 	var texcoordSource = dataTable.texcoord ? dataTable.texcoord.data : undefined;
+	var colorSource = dataTable.color ? dataTable.color.data : undefined;
 	
 	var vertexStride = dataTable.position.tupleSize;
 	var texcoordStride = dataTable.texcoord ? dataTable.texcoord.tupleSize : undefined;
@@ -206,8 +217,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 		var numBins = Math.ceil(currentIndexSize / maxIndexCount);
 		var bins = new Array();
 		
+		//Create the bins
 		for (var i = 0; i < numBins; i++) {
-			//var binSize = i == numBins - 1 ? lastBinSize : maxIndexCount;
 			bins[i] = {};
 			bins[i].index = new Uint16Array(maxIndexCount);
 			bins[i].index.nextFreeSlot = 0;
@@ -217,8 +228,11 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 				bins[i].normal = new Float32Array(maxIndexCount*vertexStride);
 			if (texcoordSource)
 				bins[i].texcoord = new Float32Array(maxIndexCount*texcoordStride);
+			if (colorSource)
+				bins[i].color = new Float32Array(maxIndexCount*vertexStride);
 		}
 		
+		//Iterate over the index buffer and sort the polygons into bins
 		for (var i = 0; i < indexSource.length; i += verticesPerPolygon) {
 			var consistentBin = true;
 			var targetBin = Math.floor(indexSource[i] / maxIndexCount);
@@ -234,6 +248,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 				}
 			}
 			
+			//We need to place this polygon in a separate pass
 			if (!consistentBin) {
 				boundaryList.push(i);
 				continue;
@@ -247,7 +262,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 				var newIndex = oldIndex - indexTransform;
 				
 				var bin = bins[targetBin];
-				//bin.index.set([newIndex], bin.index.nextFreeSlot);
 				bin.index[bin.index.nextFreeSlot] = newIndex;
 				bin.index.nextFreeSlot++;
 				
@@ -257,7 +271,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 					position[k] = positionSource[vertIndex+k];
 				}			
 				bin.position.set(position, newIndex*vertexStride);
-				//bin.position[newIndex * vertexStride] = position;
 				
 				if(normalSource) {
 					var normal = [];
@@ -265,7 +278,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 						normal[k] = normalSource[vertIndex+k];
 					}			
 					bin.normal.set(normal, newIndex*vertexStride);
-					//bin.normal[newIndex*vertexStride] = normal;
 				}
 				
 				var texIndex = oldIndex * texcoordStride;
@@ -275,20 +287,27 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 						texcoord[k] = texcoordSource[texIndex+k];
 					}			
 					bin.texcoord.set(texcoord, newIndex*texcoordStride);
-					//bin.texcoord[newIndex*texcoordStride] = texcoord;
+				}
+				
+				if(colorSource) {
+					var color = [];
+					for (var k = 0; k < vertexStride; k++) {
+						color[k] = colorSource[vertIndex+k];
+					}			
+					bin.color.set(color, newIndex*vertexStride);
 				}
 				
 			}
 		}
 		
-		//Insert boundary items into meshes
+		//Insert boundary items into bins
 		var targetBin = 0;
 		for (var i = 0; i < boundaryList.length; i++) {
 			while(bins[targetBin].index.nextFreeSlot + verticesPerPolygon > maxIndexCount) {
 				targetBin++;
 				if (targetBin >= bins.length) {
-					bins[targetBin] = {};
 					//We need to create a new bin
+					bins[targetBin] = {};
 					bins[targetBin].index = new Uint16Array(maxIndexCount);
 					bins[targetBin].index.nextFreeSlot = 0;
 					bins[targetBin].position = new Float32Array(maxIndexCount*vertexStride);
@@ -297,17 +316,19 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 						bins[targetBin].normal = new Float32Array(maxIndexCount*vertexStride);
 					if (texcoordSource)
 						bins[targetBin].texcoord = new Float32Array(maxIndexCount*texcoordStride);
+					if (colorSource)
+						bins[targetBin].color = new Float32Array(maxIndexCount*vertexStride);
 					break;
 				}
 			}
 			
+			//Distribute polygon into the appropriate bin
 			for (var j = 0; j < verticesPerPolygon; j++) {
 				var bin = bins[targetBin];
 				
 				var oldIndex = indexSource[boundaryList[i] + j];
 				var newIndex = bin.index.nextFreeSlot;
 				
-				//bin.index.set(newIndex, newIndex);
 				bin.index[newIndex] = newIndex;
 				bin.index.nextFreeSlot++;
 				
@@ -333,16 +354,28 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 					bin.texcoord.set(texcoord, newIndex*vertexStride);
 				}
 				
+				if(colorSource) {
+					var color = [];
+					for (var k = 0; k < vertexStride; k++) {
+						color[k] = colorSource[oldIndex*vertexStride+k];
+					}			
+					bin.color.set(color, newIndex*vertexStride);
+				}
+				
 			}
 		}
 	
+		//Prepare dataTable for the split mesh data
 		dataTable.index = [];
 		dataTable.position = [];
 		if (normalSource)
 			dataTable.normal = [];
 		if (texcoordSource)
 			dataTable.texcoord = [];
+		if (colorSource)
+			dataTable.color = [];
 		
+		//Populate the dataTable with the bins
 		for (var i = 0; i < bins.length; i++) {
 			dataTable.index[i] = { data : bins[i].index, tupleSize : vertexStride };
 			dataTable.position[i] = { data : bins[i].position, tupleSize : vertexStride };
@@ -350,6 +383,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.splitMesh = function(dataTable,
 				dataTable.normal[i] = { data : bins[i].normal, tupleSize : vertexStride };
 			if (texcoordSource)
 				dataTable.position[i] = { data : bins[i].texcoord, tupleSize : texcoordStride };
+			if (colorSource)
+				dataTable.color[i] = { data : bins[i].color, tupleSize : vertexStride };
 		}
 		
 	}
@@ -427,10 +462,30 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.draw = function(shader) {
 	//Draw the object
 		if (this.mesh.isIndexed) {
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.mesh.vbos.index[i]);
-			gl.drawElements(this.mesh.glType, this.mesh.vbos.index[i].length, gl.UNSIGNED_SHORT, 0);
+			
+			if (dataTable.size) {
+				var offset = 0;
+				var sd = dataTable.size.data;
+				for (var j = 0; j < sd.length; j++) {
+					gl.drawElements(this.mesh.glType, sd[j], gl.UNSIGNED_SHORT, offset);
+					offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
+				}
+			} else {
+				gl.drawElements(this.mesh.glType, this.mesh.vbos.index[i].length, gl.UNSIGNED_SHORT, offset);
+			}
+			
 			triCount = this.mesh.vbos.index[i].length / 3;
 		} else {
-			gl.drawArrays(this.mesh.glType, 0, this.mesh.vbos.position[i].length);
+			if (dataTable.size) {
+				var offset = 0;
+				var sd = dataTable.size.data;
+				for (var j = 0; j < sd.length; j++) {
+					gl.drawArrays(this.mesh.glType, offset, sd[j]);
+					offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
+				}
+			} else {
+				gl.drawArrays(this.mesh.glType, 0, this.mesh.vbos.position[i].length);
+			}
 			triCount = this.mesh.vbos.position[i].length / 3;
 		}
 		

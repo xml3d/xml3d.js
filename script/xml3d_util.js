@@ -82,7 +82,7 @@ org.xml3d.debug = {
 	ERROR : "ERROR",
 	EXCEPTION : "EXCEPTION",
 	isActive : false,
-	isFirebugAvailable : false,
+	isConsoleAvailable : false,
 	isSetup : false,
 	numLinesLogged : 0,
 	maxLinesToLog : 400,
@@ -92,31 +92,16 @@ org.xml3d.debug = {
 			return;
 		}
 		try {
-			if (console) {
-				org.xml3d.debug.isFirebugAvailable = true;
+			if (window.console) {
+				org.xml3d.debug.isConsoleAvailable = true;
 			}
 		} catch (err) {
-			org.xml3d.debug.isFirebugAvailable = false;
+			org.xml3d.debug.isConsoleAvailable = false;
 		}
-		org.xml3d.debug.setupLogContainer();
 		org.xml3d.debug.isSetup = true;
 	},
 	activate : function() {
 		org.xml3d.debug.isActive = true;
-		document.body.appendChild(org.xml3d.debug.logContainer);
-	},
-	setupLogContainer : function() {
-		org.xml3d.debug.logContainer = document.createElement("div");
-		org.xml3d.debug.logContainer.id = "x3dom_logdiv";
-		org.xml3d.debug.logContainer.style.border = "2px solid olivedrab";
-		org.xml3d.debug.logContainer.style.height = "180px";
-		org.xml3d.debug.logContainer.style.padding = "2px";
-		org.xml3d.debug.logContainer.style.overflow = "auto";
-		org.xml3d.debug.logContainer.style.whiteSpace = "pre-wrap";
-		org.xml3d.debug.logContainer.style.fontFamily = "sans-serif";
-		org.xml3d.debug.logContainer.style.fontSize = "x-small";
-		org.xml3d.debug.logContainer.style.color = "#00ff00";
-		org.xml3d.debug.logContainer.style.backgroundColor = "black";
 	},
 	doLog : function(msg, logType) {
 		if (!org.xml3d.debug.isActive) {
@@ -130,24 +115,20 @@ org.xml3d.debug = {
 		if (org.xml3d.debug.numLinesLogged > org.xml3d.debug.maxLinesToLog) {
 			return;
 		}
-		var node = document.createElement("p");
-		node.style.margin = 0;
-		node.innerHTML = logType + ": " + msg;
-		org.xml3d.debug.logContainer.insertBefore(node,
-				org.xml3d.debug.logContainer.firstChild);
-		if (org.xml3d.debug.isFirebugAvailable) {
+		
+		if (org.xml3d.debug.isConsoleAvailable) {
 			switch (logType) {
 			case org.xml3d.debug.INFO:
-				console.info(msg);
+				window.console.info(msg);
 				break;
 			case org.xml3d.debug.WARNING:
-				console.warn(msg);
+				window.console.warn(msg);
 				break;
 			case org.xml3d.debug.ERROR:
-				console.error(msg);
+				window.console.error(msg);
 				break;
 			case org.xml3d.debug.EXCEPTION:
-				console.debug(msg);
+				window.console.debug(msg);
 				break;
 			default:
 				break;

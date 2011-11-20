@@ -67,17 +67,8 @@ document.getElementById = function(id) {
 		var xml3ds = document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d');
 		xml3ds = Array.map(xml3ds, function(n) { return n; });
 		
-		var activateLog = false;
-		for (var i = 0; i < xml3ds.length; i++) {
-			var showLog = xml3ds[i].getAttributeNS(org.xml3d.webglNS, "showLog");
-			if (showLog !== null && showLog == "true") {
-				activateLog = true;
-				break;
-			}
-		}
-		if (activateLog) {
-			org.xml3d.debug.activate();
-		}
+		org.xml3d.debug.activate();
+		
 		if(org.xml3d.debug)
 			org.xml3d.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
 		

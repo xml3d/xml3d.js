@@ -8,67 +8,110 @@
                    
      Author: Kristian Sons                                                                
      ====================================================================== -->
-<project name="script-merge" default="all">
-    <description>
+<project name="script-merge" default="nightly">
+	<description>
            Merge all the single scripts to one global xml3d.js
     </description>
 
-	<property  file="build.properties" />
-	
-	<target name="all" depends="base, physics">
-	
+	<property file="build.properties" />
+
+	<macrodef name="git">
+		<attribute name="command" />
+		<attribute name="git" default="${git.cmd}" />
+		<attribute name="dir" default="" />
+		<element name="args" optional="true" />
+		<sequential>
+			<echo message="@{git} @{command}" />
+			<exec executable="@{git}" dir="@{dir}" outputproperty="git.output">
+				<arg value="@{command}" />
+				<args />
+			</exec>
+		</sequential>
+	</macrodef>
+
+	<target name="checkOS">
+		<condition property="isWindows">
+			<os family="windows" />
+		</condition>
+		<condition property="isLinux">
+			<os family="unix" />
+		</condition>
 	</target>
-	
-    <!-- ================================= 
+
+	<target name="windowsGit" depends="checkOS" if="isWindows">
+		<property name="git.cmd" value="git.cmd" />
+	</target>
+	<target name="linuxGit" depends="checkOS" if="isLinux">
+		<property name="git.cmd" value="git" />
+	</target>
+
+	<target name="stable">
+		<property name="versionStr" value="v${version}" />
+		<property name="script.ext" value="${version}"/>
+		<antcall target="base" />
+	</target>
+
+	<target name="nightly" depends="windowsGit, linuxGit">
+		<tstamp />
+		<git command="rev-parse">
+			<args>
+				<arg value="--short=10" />
+				<arg value="HEAD" />
+			</args>
+		</git>
+		<echo message="${git.output}" />
+		<property name="versionStr" value="rev. ${git.output} (${TODAY})" />
+		<property name="script.ext" value="nightly"/>
+		<antcall target="base"  />
+	</target>
+
+
+	<!-- =================================
           target: base              
          ================================= -->
-    <target name="base" depends="clean" description="description">
-    	<concat destfile="${buildDir}/${scriptName}">
-    		<fileset file="${basedir}/preamble.txt"/>
-    		<fileset file="${srcDir}/GLU.js"/>
-			<fileset file="${srcDir}/xml3d.js"/>
-    		<fileset file="${srcDir}/xml3d_util.js"/>
-    		<fileset file="${srcDir}/xml3d_datatypes.js"/>
-			<fileset file="${srcDir}/xml3d_classes.js"/>
-    		<fileset file="${srcDir}/renderer_handler.js"/>
-    		<fileset file="${srcDir}/renderer_shaderhandler.js"/>
-    		<fileset file="${srcDir}/renderer_bufferhandler.js"/>
-			<fileset file="${srcDir}/xml3d_renderer.js"/>
-			<fileset file="${srcDir}/adapter_xml3d.js"/>
-			<fileset file="${srcDir}/adapter_view.js"/>
-			<fileset file="${srcDir}/adapter_shader.js"/>
-    		<fileset file="${srcDir}/adapter_texture.js"/>
-			<fileset file="${srcDir}/adapter_mesh.js"/>
-			<fileset file="${srcDir}/adapter_group.js"/>
-			<fileset file="${srcDir}/adapter_light.js"/>
-			<fileset file="${srcDir}/adapter_data.js"/>
-			<fileset file="${srcDir}/xml3d_shaders.js"/>
-			<fileset file="${srcDir}/xml3d_xflow.js"/>	
-    		<fileset file="${srcDir}/xml3d_scene_controller.js"/>
+	<target name="base" depends="clean" description="description">
+		<property name="finalScript" value="${buildDir}/${script.start}-${script.ext}.js"/>
+		<concat destfile="${finalScript}">
+			<fileset file="${basedir}/preamble.txt" />
+			<fileset file="${srcDir}/GLU.js" />
+			<fileset file="${srcDir}/xml3d.js" />
+			<fileset file="${srcDir}/xml3d_util.js" />
+			<fileset file="${srcDir}/xml3d_datatypes.js" />
+			<fileset file="${srcDir}/xml3d_classes.js" />
+			<fileset file="${srcDir}/renderer_handler.js" />
+			<fileset file="${srcDir}/renderer_shaderhandler.js" />
+			<fileset file="${srcDir}/renderer_bufferhandler.js" />
+			<fileset file="${srcDir}/xml3d_renderer.js" />
+			<fileset file="${srcDir}/adapter_xml3d.js" />
+			<fileset file="${srcDir}/adapter_view.js" />
+			<fileset file="${srcDir}/adapter_shader.js" />
+			<fileset file="${srcDir}/adapter_texture.js" />
+			<fileset file="${srcDir}/adapter_mesh.js" />
+			<fileset file="${srcDir}/adapter_group.js" />
+			<fileset file="${srcDir}/adapter_light.js" />
+			<fileset file="${srcDir}/adapter_data.js" />
+			<fileset file="${srcDir}/xml3d_shaders.js" />
+			<fileset file="${srcDir}/xml3d_xflow.js" />
+			<fileset file="${srcDir}/xml3d_scene_controller.js" />
 		</concat>
-    	<replaceregexp file="${buildDir}/${scriptName}"
-    	    	               match="org.xml3d.webgl.checkError\("
-    	    	               replace="//org.xml3d.webgl.checkError\(" byline="true"/>
-    	<replaceregexp file="${buildDir}/${scriptName}"
-    	    	    	               match="%VERSION%"
-    	    	    	               replace="${version}" byline="true"/>
-    	
-    </target>
-	
-	<target name="physics" depends="clean" description="description">
-	    	<concat destfile="${buildDir}/${physicsScriptName}">
-	    		<fileset file="${basedir}/preamble.txt"/>
-				<fileset file="${physicsDir}/xml3d_physics.js"/>
-	    		<fileset file="${physicsDir}/xml3d_physics_interaction.js"/>
-			</concat>
-    	<replaceregexp file="${buildDir}/${physicsScriptName}"
-    	    	    	               match="%VERSION%"
-    	    	    	               replace="${version}" byline="true"/>
+		<replaceregexp file="${finalScript}" match="org.xml3d.webgl.checkError\(" replace="//org.xml3d.webgl.checkError\(" byline="true" />
+		<replaceregexp file="${finalScript}" match="%VERSION%" replace="${versionStr}" byline="true" />
 
-    </target>
-	
+	</target>
+
+	<target name="physics" depends="clean" description="description">
+		<concat destfile="${buildDir}/${physicsScriptName}">
+			<fileset file="${basedir}/preamble.txt" />
+			<fileset file="${physicsDir}/xml3d_physics.js" />
+			<fileset file="${physicsDir}/xml3d_physics_interaction.js" />
+		</concat>
+		<replaceregexp file="${buildDir}/${physicsScriptName}" match="%VERSION%" replace="${version}" byline="true" />
+
+	</target>
+
 	<target name="clean">
-		<delete dir="${buildDir}"></delete>
+		<delete dir="${buildDir}">
+		</delete>
 	</target>
 
 

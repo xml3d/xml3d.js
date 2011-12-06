@@ -107,6 +107,31 @@ org.xml3d.classInfo = {};
 org.xml3d.methods = {};
 org.xml3d.document = null;
 
+function getAllElementNodes(elem) {
+	if (!elem)
+		return [];
+	var r = [];
+	var n = elem.firstElementChild;
+	while(n) {
+		r.push(n);
+		r = r.concat(getAllElementNodes(n));
+		n = n.nextElementSibling;
+	}
+	return r;
+};
+
+function getElementNodes(elem) {
+if (!elem)
+	return [];
+var r = [];
+var n = elem.firstElementChild;
+while(n) {
+	r.push(n);
+	n = n.nextElementSibling;
+}
+return r;
+};
+
 org.xml3d.data.configure = function(xml3ds) {
  	if (!org.xml3d.document)
  		org.xml3d.document = new org.xml3d.XML3DDocument();
@@ -247,11 +272,9 @@ org.xml3d.XML3DNodeFactory.prototype.create = function(node, context) {
 			node._classInfo = classInfo;
 			//n = new elementType(ctx);
 			//node._xml3dNode = n;
-			Array.forEach(Array.map(node.childNodes, function(n) {
+			Array.forEach(getElementNodes(node), function(n) {
 				return this.create(n, context);
-			}, this), function(c) {
-
-			});
+			}, this);
 			return n;
 		}
 	}
@@ -818,8 +841,8 @@ org.xml3d.isAnyURI = function(node)
 };
 
 org.xml3d.elementEvents = {
-        "framedrawn":1, "mousedown":1, "mouseup":1, "click":1, "mousemove":1, 
-		"mouseout":1, "update":1, "mousewheel":1
+    "framedrawn":1, "mousedown":1, "mouseup":1, "click":1, "mousemove":1,
+	"mouseout":1, "update":1, "mousewheel":1
 };
 org.xml3d.configureEvents = function(node) {
     node.__proto__.__addEventListener = node.__proto__.addEventListener;
@@ -827,7 +850,7 @@ org.xml3d.configureEvents = function(node) {
 
     node.addEventListener = function(type, listener, useCapture) {
                 
-        if(org.xml3d.elementEvents[type]) {
+        if(org.xml3d.elementEvents[node.nodeName]) {
             for (i = 0; i < this.adapters.length; i++) {
                 if (this.adapters[i].addEventListener) {
                     this.adapters[i].addEventListener(type, listener, useCapture);
@@ -839,7 +862,7 @@ org.xml3d.configureEvents = function(node) {
     };
     node.removeEventListener = function(type, listener, useCapture) {
         
-        if(org.xml3d.elementEvents[type]) {
+        if(org.xml3d.elementEvents[node.nodeName]) {
             for (i = 0; i < this.adapters.length; i++) {
                 if (this.adapters[i].removeEventListener) {
                     this.adapters[i].removeEventListener(type, listener, useCapture);
@@ -956,12 +979,8 @@ org.xml3d.classInfo.Xml3dNode = function(node, c)
 
 
 /**
- * Object org.xml3d.classInfo.xml3d()
- *
- * @augments org.xml3d.classInfo.XML3DBaseType
- * @constructor
- * @see org.xml3d.classInfo.XML3DBaseType
- */
+ * Parameters and Methods for <xml3d>
+ **/
 org.xml3d.classInfo.xml3d = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -981,15 +1000,13 @@ org.xml3d.classInfo.xml3d = function(node, context)
 	node._onkeyup = org.xml3d.initString(node.getAttribute("onkeyup"), "");
 	node._height = org.xml3d.initInt(node.getAttribute("height"), 600);
 	node._width = org.xml3d.initInt(node.getAttribute("width"), 800);
-	node.setOptionValue = function(option) {
-		org.xml3d.debug.logInfo("setOptionValue is not yet supported in XML3D WebGL.");
-		return;
-	};
+
 	//node.definitionArea = [];
 	//node.graph = [];
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -1015,6 +1032,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -1040,6 +1058,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -1065,6 +1084,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onclick", function (value)
 	{
 		var oldValue = this._onclick;
@@ -1090,6 +1110,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("ondblclick", function (value)
 	{
 		var oldValue = this._ondblclick;
@@ -1115,6 +1136,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._ondblclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousedown", function (value)
 	{
 		var oldValue = this._onmousedown;
@@ -1140,6 +1162,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onmousedown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseup", function (value)
 	{
 		var oldValue = this._onmouseup;
@@ -1165,6 +1188,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onmouseup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseover", function (value)
 	{
 		var oldValue = this._onmouseover;
@@ -1190,6 +1214,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onmouseover;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousemove", function (value)
 	{
 		var oldValue = this._onmousemove;
@@ -1215,6 +1240,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onmousemove;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseout", function (value)
 	{
 		var oldValue = this._onmouseout;
@@ -1240,6 +1266,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onmouseout;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeypress", function (value)
 	{
 		var oldValue = this._onkeypress;
@@ -1265,6 +1292,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onkeypress;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeydown", function (value)
 	{
 		var oldValue = this._onkeydown;
@@ -1290,6 +1318,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onkeydown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeyup", function (value)
 	{
 		var oldValue = this._onkeyup;
@@ -1315,6 +1344,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._onkeyup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("height", function (value)
 	{
 		var oldValue = this._height;
@@ -1340,6 +1370,7 @@ org.xml3d.classInfo.xml3d = function(node, context)
 		return this._height;
 	});
 
+	// Bla:false
 	node.__defineSetter__("width", function (value)
 	{
 		var oldValue = this._width;
@@ -1620,12 +1651,8 @@ org.xml3d.classInfo.xml3d = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.data()
- *
- * @augments org.xml3d.classInfo.XML3DNestedDataContainerType
- * @constructor
- * @see org.xml3d.classInfo.XML3DNestedDataContainerType
- */
+ * Parameters and Methods for <data>
+ **/
 org.xml3d.classInfo.data = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -1641,6 +1668,7 @@ org.xml3d.classInfo.data = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -1666,6 +1694,7 @@ org.xml3d.classInfo.data = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -1691,6 +1720,7 @@ org.xml3d.classInfo.data = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -1716,6 +1746,7 @@ org.xml3d.classInfo.data = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("map", function (value)
 	{
 		var oldValue = this._map;
@@ -1741,6 +1772,7 @@ org.xml3d.classInfo.data = function(node, context)
 		return this._map;
 	});
 
+	// Bla:false
 	node.__defineSetter__("expose", function (value)
 	{
 		var oldValue = this._expose;
@@ -1940,12 +1972,8 @@ org.xml3d.classInfo.data = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.defs()
- *
- * @augments org.xml3d.classInfo.XML3DBaseType
- * @constructor
- * @see org.xml3d.classInfo.XML3DBaseType
- */
+ * Parameters and Methods for <defs>
+ **/
 org.xml3d.classInfo.defs = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -1958,6 +1986,7 @@ org.xml3d.classInfo.defs = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -1983,6 +2012,7 @@ org.xml3d.classInfo.defs = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -2008,6 +2038,7 @@ org.xml3d.classInfo.defs = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -2089,12 +2120,8 @@ org.xml3d.classInfo.defs = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.group()
- *
- * @augments org.xml3d.classInfo.XML3DGraphType
- * @constructor
- * @see org.xml3d.classInfo.XML3DGraphType
- */
+ * Parameters and Methods for <group>
+ **/
 org.xml3d.classInfo.group = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -2119,6 +2146,7 @@ org.xml3d.classInfo.group = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -2144,6 +2172,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -2169,6 +2198,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -2194,6 +2224,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onclick", function (value)
 	{
 		var oldValue = this._onclick;
@@ -2219,6 +2250,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("ondblclick", function (value)
 	{
 		var oldValue = this._ondblclick;
@@ -2244,6 +2276,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._ondblclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousedown", function (value)
 	{
 		var oldValue = this._onmousedown;
@@ -2269,6 +2302,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onmousedown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseup", function (value)
 	{
 		var oldValue = this._onmouseup;
@@ -2294,6 +2328,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onmouseup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseover", function (value)
 	{
 		var oldValue = this._onmouseover;
@@ -2319,6 +2354,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onmouseover;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousemove", function (value)
 	{
 		var oldValue = this._onmousemove;
@@ -2344,6 +2380,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onmousemove;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseout", function (value)
 	{
 		var oldValue = this._onmouseout;
@@ -2369,6 +2406,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onmouseout;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeypress", function (value)
 	{
 		var oldValue = this._onkeypress;
@@ -2394,6 +2432,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onkeypress;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeydown", function (value)
 	{
 		var oldValue = this._onkeydown;
@@ -2419,6 +2458,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onkeydown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeyup", function (value)
 	{
 		var oldValue = this._onkeyup;
@@ -2444,6 +2484,7 @@ org.xml3d.classInfo.group = function(node, context)
 		return this._onkeyup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("visible", function (value)
 	{
 		var oldValue = this._visible;
@@ -2754,12 +2795,8 @@ org.xml3d.classInfo.group = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.mesh()
- *
- * @augments org.xml3d.classInfo.XML3DGeometryType
- * @constructor
- * @see org.xml3d.classInfo.XML3DGeometryType
- */
+ * Parameters and Methods for <mesh>
+ **/
 org.xml3d.classInfo.mesh = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -2785,6 +2822,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -2810,6 +2848,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -2835,6 +2874,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -2860,6 +2900,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onclick", function (value)
 	{
 		var oldValue = this._onclick;
@@ -2885,6 +2926,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("ondblclick", function (value)
 	{
 		var oldValue = this._ondblclick;
@@ -2910,6 +2952,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._ondblclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousedown", function (value)
 	{
 		var oldValue = this._onmousedown;
@@ -2935,6 +2978,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onmousedown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseup", function (value)
 	{
 		var oldValue = this._onmouseup;
@@ -2960,6 +3004,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onmouseup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseover", function (value)
 	{
 		var oldValue = this._onmouseover;
@@ -2985,6 +3030,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onmouseover;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousemove", function (value)
 	{
 		var oldValue = this._onmousemove;
@@ -3010,6 +3056,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onmousemove;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseout", function (value)
 	{
 		var oldValue = this._onmouseout;
@@ -3035,6 +3082,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onmouseout;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeypress", function (value)
 	{
 		var oldValue = this._onkeypress;
@@ -3060,6 +3108,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onkeypress;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeydown", function (value)
 	{
 		var oldValue = this._onkeydown;
@@ -3085,6 +3134,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onkeydown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeyup", function (value)
 	{
 		var oldValue = this._onkeyup;
@@ -3110,6 +3160,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._onkeyup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("visible", function (value)
 	{
 		var oldValue = this._visible;
@@ -3135,6 +3186,7 @@ org.xml3d.classInfo.mesh = function(node, context)
 		return this._visible;
 	});
 
+	// Bla:false
 	node.__defineSetter__("type", function (value)
 	{
 		var oldValue = this._type;
@@ -3409,12 +3461,8 @@ org.xml3d.classInfo.mesh = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.transform()
- *
- * @augments org.xml3d.classInfo.XML3DTransformProviderType
- * @constructor
- * @see org.xml3d.classInfo.XML3DTransformProviderType
- */
+ * Parameters and Methods for <transform>
+ **/
 org.xml3d.classInfo.transform = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -3451,6 +3499,7 @@ org.xml3d.classInfo.transform = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -3476,6 +3525,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -3501,6 +3551,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -3526,6 +3577,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("translation", function (value)
 	{
 		var oldValue = this._translation;
@@ -3555,6 +3607,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		return this._translation;
 	});
 
+	// Bla:false
 	node.__defineSetter__("scale", function (value)
 	{
 		var oldValue = this._scale;
@@ -3584,6 +3637,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		return this._scale;
 	});
 
+	// Bla:false
 	node.__defineSetter__("rotation", function (value)
 	{
 		var oldValue = this._rotation;
@@ -3613,6 +3667,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		return this._rotation;
 	});
 
+	// Bla:false
 	node.__defineSetter__("center", function (value)
 	{
 		var oldValue = this._center;
@@ -3642,6 +3697,7 @@ org.xml3d.classInfo.transform = function(node, context)
 		return this._center;
 	});
 
+	// Bla:false
 	node.__defineSetter__("scaleOrientation", function (value)
 	{
 		var oldValue = this._scaleOrientation;
@@ -3787,12 +3843,8 @@ org.xml3d.classInfo.transform = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.shader()
- *
- * @augments org.xml3d.classInfo.XML3DSurfaceShaderProviderType
- * @constructor
- * @see org.xml3d.classInfo.XML3DSurfaceShaderProviderType
- */
+ * Parameters and Methods for <shader>
+ **/
 org.xml3d.classInfo.shader = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -3806,6 +3858,7 @@ org.xml3d.classInfo.shader = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -3831,6 +3884,7 @@ org.xml3d.classInfo.shader = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -3856,6 +3910,7 @@ org.xml3d.classInfo.shader = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -4031,12 +4086,8 @@ org.xml3d.classInfo.shader = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.light()
- *
- * @augments org.xml3d.classInfo.XML3DGraphType
- * @constructor
- * @see org.xml3d.classInfo.XML3DGraphType
- */
+ * Parameters and Methods for <light>
+ **/
 org.xml3d.classInfo.light = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -4061,6 +4112,7 @@ org.xml3d.classInfo.light = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -4086,6 +4138,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -4111,6 +4164,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -4136,6 +4190,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onclick", function (value)
 	{
 		var oldValue = this._onclick;
@@ -4161,6 +4216,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("ondblclick", function (value)
 	{
 		var oldValue = this._ondblclick;
@@ -4186,6 +4242,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._ondblclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousedown", function (value)
 	{
 		var oldValue = this._onmousedown;
@@ -4211,6 +4268,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onmousedown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseup", function (value)
 	{
 		var oldValue = this._onmouseup;
@@ -4236,6 +4294,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onmouseup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseover", function (value)
 	{
 		var oldValue = this._onmouseover;
@@ -4261,6 +4320,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onmouseover;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousemove", function (value)
 	{
 		var oldValue = this._onmousemove;
@@ -4286,6 +4346,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onmousemove;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseout", function (value)
 	{
 		var oldValue = this._onmouseout;
@@ -4311,6 +4372,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onmouseout;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeypress", function (value)
 	{
 		var oldValue = this._onkeypress;
@@ -4336,6 +4398,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onkeypress;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeydown", function (value)
 	{
 		var oldValue = this._onkeydown;
@@ -4361,6 +4424,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onkeydown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeyup", function (value)
 	{
 		var oldValue = this._onkeyup;
@@ -4386,6 +4450,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._onkeyup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("visible", function (value)
 	{
 		var oldValue = this._visible;
@@ -4411,6 +4476,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._visible;
 	});
 
+	// Bla:false
 	node.__defineSetter__("global", function (value)
 	{
 		var oldValue = this._global;
@@ -4436,6 +4502,7 @@ org.xml3d.classInfo.light = function(node, context)
 		return this._global;
 	});
 
+	// Bla:false
 	node.__defineSetter__("intensity", function (value)
 	{
 		var oldValue = this._intensity;
@@ -4721,12 +4788,8 @@ org.xml3d.classInfo.light = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.lightshader()
- *
- * @augments org.xml3d.classInfo.XML3DLightShaderProviderType
- * @constructor
- * @see org.xml3d.classInfo.XML3DLightShaderProviderType
- */
+ * Parameters and Methods for <lightshader>
+ **/
 org.xml3d.classInfo.lightshader = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -4740,6 +4803,7 @@ org.xml3d.classInfo.lightshader = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -4765,6 +4829,7 @@ org.xml3d.classInfo.lightshader = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -4790,6 +4855,7 @@ org.xml3d.classInfo.lightshader = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -4965,12 +5031,8 @@ org.xml3d.classInfo.lightshader = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.script()
- *
- * @augments org.xml3d.classInfo.XML3DReferenceableType
- * @constructor
- * @see org.xml3d.classInfo.XML3DReferenceableType
- */
+ * Parameters and Methods for <script>
+ **/
 org.xml3d.classInfo.script = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -4985,6 +5047,7 @@ org.xml3d.classInfo.script = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -5010,6 +5073,7 @@ org.xml3d.classInfo.script = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -5035,6 +5099,7 @@ org.xml3d.classInfo.script = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -5071,6 +5136,7 @@ org.xml3d.classInfo.script = function(node, context)
 	    	this.parentNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "value", oldValue, this.value));
 		}
 	};
+	// Bla:false
 	node.__defineSetter__("src", function (value)
 	{
 		var oldValue = this._src;
@@ -5096,6 +5162,7 @@ org.xml3d.classInfo.script = function(node, context)
 		return this._src;
 	});
 
+	// Bla:false
 	node.__defineSetter__("type", function (value)
 	{
 		var oldValue = this._type;
@@ -5201,12 +5268,8 @@ org.xml3d.classInfo.script = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.float()
- *
- * @augments org.xml3d.classInfo.XML3DDataSourceType
- * @constructor
- * @see org.xml3d.classInfo.XML3DDataSourceType
- */
+ * Parameters and Methods for <float>
+ **/
 org.xml3d.classInfo.float = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -5220,6 +5283,7 @@ org.xml3d.classInfo.float = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -5245,6 +5309,7 @@ org.xml3d.classInfo.float = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -5270,6 +5335,7 @@ org.xml3d.classInfo.float = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -5295,6 +5361,7 @@ org.xml3d.classInfo.float = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("name", function (value)
 	{
 		var oldValue = this._name;
@@ -5399,12 +5466,8 @@ org.xml3d.classInfo.float = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.float2()
- *
- * @augments org.xml3d.classInfo.XML3DDataSourceType
- * @constructor
- * @see org.xml3d.classInfo.XML3DDataSourceType
- */
+ * Parameters and Methods for <float2>
+ **/
 org.xml3d.classInfo.float2 = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -5418,6 +5481,7 @@ org.xml3d.classInfo.float2 = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -5443,6 +5507,7 @@ org.xml3d.classInfo.float2 = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -5468,6 +5533,7 @@ org.xml3d.classInfo.float2 = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -5493,6 +5559,7 @@ org.xml3d.classInfo.float2 = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("name", function (value)
 	{
 		var oldValue = this._name;
@@ -5597,12 +5664,8 @@ org.xml3d.classInfo.float2 = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.float3()
- *
- * @augments org.xml3d.classInfo.XML3DDataSourceType
- * @constructor
- * @see org.xml3d.classInfo.XML3DDataSourceType
- */
+ * Parameters and Methods for <float3>
+ **/
 org.xml3d.classInfo.float3 = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -5616,6 +5679,7 @@ org.xml3d.classInfo.float3 = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -5641,6 +5705,7 @@ org.xml3d.classInfo.float3 = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -5666,6 +5731,7 @@ org.xml3d.classInfo.float3 = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -5691,6 +5757,7 @@ org.xml3d.classInfo.float3 = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("name", function (value)
 	{
 		var oldValue = this._name;
@@ -5795,12 +5862,8 @@ org.xml3d.classInfo.float3 = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.float4()
- *
- * @augments org.xml3d.classInfo.XML3DDataSourceType
- * @constructor
- * @see org.xml3d.classInfo.XML3DDataSourceType
- */
+ * Parameters and Methods for <float4>
+ **/
 org.xml3d.classInfo.float4 = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -5814,6 +5877,7 @@ org.xml3d.classInfo.float4 = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -5839,6 +5903,7 @@ org.xml3d.classInfo.float4 = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -5864,6 +5929,7 @@ org.xml3d.classInfo.float4 = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -5889,6 +5955,7 @@ org.xml3d.classInfo.float4 = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("name", function (value)
 	{
 		var oldValue = this._name;
@@ -5993,12 +6060,8 @@ org.xml3d.classInfo.float4 = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.float4x4()
- *
- * @augments org.xml3d.classInfo.XML3DDataSourceType
- * @constructor
- * @see org.xml3d.classInfo.XML3DDataSourceType
- */
+ * Parameters and Methods for <float4x4>
+ **/
 org.xml3d.classInfo.float4x4 = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -6012,6 +6075,7 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -6037,6 +6101,7 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -6062,6 +6127,7 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -6087,6 +6153,7 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("name", function (value)
 	{
 		var oldValue = this._name;
@@ -6191,12 +6258,8 @@ org.xml3d.classInfo.float4x4 = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.int()
- *
- * @augments org.xml3d.classInfo.XML3DDataSourceType
- * @constructor
- * @see org.xml3d.classInfo.XML3DDataSourceType
- */
+ * Parameters and Methods for <int>
+ **/
 org.xml3d.classInfo.int = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -6210,6 +6273,7 @@ org.xml3d.classInfo.int = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -6235,6 +6299,7 @@ org.xml3d.classInfo.int = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -6260,6 +6325,7 @@ org.xml3d.classInfo.int = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -6285,6 +6351,7 @@ org.xml3d.classInfo.int = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("name", function (value)
 	{
 		var oldValue = this._name;
@@ -6389,12 +6456,8 @@ org.xml3d.classInfo.int = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.bool()
- *
- * @augments org.xml3d.classInfo.XML3DDataSourceType
- * @constructor
- * @see org.xml3d.classInfo.XML3DDataSourceType
- */
+ * Parameters and Methods for <bool>
+ **/
 org.xml3d.classInfo.bool = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -6408,6 +6471,7 @@ org.xml3d.classInfo.bool = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -6433,6 +6497,7 @@ org.xml3d.classInfo.bool = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -6458,6 +6523,7 @@ org.xml3d.classInfo.bool = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -6483,6 +6549,7 @@ org.xml3d.classInfo.bool = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("name", function (value)
 	{
 		var oldValue = this._name;
@@ -6587,12 +6654,8 @@ org.xml3d.classInfo.bool = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.texture()
- *
- * @augments org.xml3d.classInfo.XML3DDataSourceType
- * @constructor
- * @see org.xml3d.classInfo.XML3DDataSourceType
- */
+ * Parameters and Methods for <texture>
+ **/
 org.xml3d.classInfo.texture = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -6613,6 +6676,7 @@ org.xml3d.classInfo.texture = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -6638,6 +6702,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -6663,6 +6728,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -6688,6 +6754,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("name", function (value)
 	{
 		var oldValue = this._name;
@@ -6713,6 +6780,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._name;
 	});
 
+	// Bla:false
 	node.__defineSetter__("type", function (value)
 	{
 		var oldValue = this._type;
@@ -6738,6 +6806,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._type;
 	});
 
+	// Bla:false
 	node.__defineSetter__("filterMin", function (value)
 	{
 		var oldValue = this._filterMin;
@@ -6763,6 +6832,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._filterMin;
 	});
 
+	// Bla:false
 	node.__defineSetter__("filterMag", function (value)
 	{
 		var oldValue = this._filterMag;
@@ -6788,6 +6858,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._filterMag;
 	});
 
+	// Bla:false
 	node.__defineSetter__("filterMip", function (value)
 	{
 		var oldValue = this._filterMip;
@@ -6813,6 +6884,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._filterMip;
 	});
 
+	// Bla:false
 	node.__defineSetter__("wrapS", function (value)
 	{
 		var oldValue = this._wrapS;
@@ -6838,6 +6910,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._wrapS;
 	});
 
+	// Bla:false
 	node.__defineSetter__("wrapT", function (value)
 	{
 		var oldValue = this._wrapT;
@@ -6863,6 +6936,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._wrapT;
 	});
 
+	// Bla:false
 	node.__defineSetter__("wrapU", function (value)
 	{
 		var oldValue = this._wrapU;
@@ -6888,6 +6962,7 @@ org.xml3d.classInfo.texture = function(node, context)
 		return this._wrapU;
 	});
 
+	// Bla:false
 	node.__defineSetter__("borderColor", function (value)
 	{
 		var oldValue = this._borderColor;
@@ -7077,12 +7152,8 @@ org.xml3d.classInfo.texture = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.img()
- *
- * @augments org.xml3d.classInfo.XML3DImageDataProviderType
- * @constructor
- * @see org.xml3d.classInfo.XML3DImageDataProviderType
- */
+ * Parameters and Methods for <img>
+ **/
 org.xml3d.classInfo.img = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -7095,6 +7166,7 @@ org.xml3d.classInfo.img = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -7120,6 +7192,7 @@ org.xml3d.classInfo.img = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -7145,6 +7218,7 @@ org.xml3d.classInfo.img = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -7170,6 +7244,7 @@ org.xml3d.classInfo.img = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("src", function (value)
 	{
 		var oldValue = this._src;
@@ -7263,12 +7338,8 @@ org.xml3d.classInfo.img = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.video()
- *
- * @augments org.xml3d.classInfo.XML3DImageDataProviderType
- * @constructor
- * @see org.xml3d.classInfo.XML3DImageDataProviderType
- */
+ * Parameters and Methods for <video>
+ **/
 org.xml3d.classInfo.video = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -7281,6 +7352,7 @@ org.xml3d.classInfo.video = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -7306,6 +7378,7 @@ org.xml3d.classInfo.video = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -7331,6 +7404,7 @@ org.xml3d.classInfo.video = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -7356,6 +7430,7 @@ org.xml3d.classInfo.video = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("src", function (value)
 	{
 		var oldValue = this._src;
@@ -7449,12 +7524,8 @@ org.xml3d.classInfo.video = function(node, context)
 
 };
 /**
- * Object org.xml3d.classInfo.view()
- *
- * @augments org.xml3d.classInfo.XML3DGraphType
- * @constructor
- * @see org.xml3d.classInfo.XML3DGraphType
- */
+ * Parameters and Methods for <view>
+ **/
 org.xml3d.classInfo.view = function(node, context)
 {
 	org.xml3d.classInfo.Xml3dNode(node, context);
@@ -7488,6 +7559,7 @@ org.xml3d.classInfo.view = function(node, context)
 	
 	
 	
+	// Bla:false
 	node.__defineSetter__("id", function (value)
 	{
 		var oldValue = this._id;
@@ -7513,6 +7585,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._id;
 	});
 
+	// Bla:false
 	node.__defineSetter__("class", function (value)
 	{
 		var oldValue = this._class;
@@ -7538,6 +7611,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._class;
 	});
 
+	// Bla:false
 	node.__defineSetter__("style", function (value)
 	{
 		var oldValue = this._style;
@@ -7563,6 +7637,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._style;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onclick", function (value)
 	{
 		var oldValue = this._onclick;
@@ -7588,6 +7663,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("ondblclick", function (value)
 	{
 		var oldValue = this._ondblclick;
@@ -7613,6 +7689,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._ondblclick;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousedown", function (value)
 	{
 		var oldValue = this._onmousedown;
@@ -7638,6 +7715,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onmousedown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseup", function (value)
 	{
 		var oldValue = this._onmouseup;
@@ -7663,6 +7741,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onmouseup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseover", function (value)
 	{
 		var oldValue = this._onmouseover;
@@ -7688,6 +7767,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onmouseover;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmousemove", function (value)
 	{
 		var oldValue = this._onmousemove;
@@ -7713,6 +7793,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onmousemove;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onmouseout", function (value)
 	{
 		var oldValue = this._onmouseout;
@@ -7738,6 +7819,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onmouseout;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeypress", function (value)
 	{
 		var oldValue = this._onkeypress;
@@ -7763,6 +7845,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onkeypress;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeydown", function (value)
 	{
 		var oldValue = this._onkeydown;
@@ -7788,6 +7871,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onkeydown;
 	});
 
+	// Bla:false
 	node.__defineSetter__("onkeyup", function (value)
 	{
 		var oldValue = this._onkeyup;
@@ -7813,6 +7897,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._onkeyup;
 	});
 
+	// Bla:false
 	node.__defineSetter__("visible", function (value)
 	{
 		var oldValue = this._visible;
@@ -7838,6 +7923,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._visible;
 	});
 
+	// Bla:false
 	node.__defineSetter__("position", function (value)
 	{
 		var oldValue = this._position;
@@ -7867,6 +7953,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._position;
 	});
 
+	// Bla:false
 	node.__defineSetter__("orientation", function (value)
 	{
 		var oldValue = this._orientation;
@@ -7896,6 +7983,7 @@ org.xml3d.classInfo.view = function(node, context)
 		return this._orientation;
 	});
 
+	// Bla:false
 	node.__defineSetter__("fieldOfView", function (value)
 	{
 		var oldValue = this._fieldOfView;
@@ -8197,16 +8285,16 @@ org.xml3d.methods.viewLookAt = function(point) {
 	this.setDirection(vector);
 };
 
-org.xml3d.methods.viewGetViewMatrix = function() { 
+org.xml3d.methods.viewGetViewMatrix = function() {
 
 	for (i = 0; i < this.adapters.length; i++) {
 		if (this.adapters[i].getViewMatrix) {
 			return this.adapters[i].getViewMatrix();
 		}
 	}
-	
-	return new XML3DMatrix(); 
-}; 
+
+	return new XML3DMatrix();
+};
 
 org.xml3d.methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
 	for (i = 0; i < this.adapters.length; i++) {
@@ -8214,8 +8302,8 @@ org.xml3d.methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
 			return this.adapters[i].getElementByPoint(x, y, hitPoint, hitNormal);
 		}
 	}
-	
-	return null; 
+
+	return null;
 };
 
 org.xml3d.methods.xml3dGenerateRay = function(x, y) {
@@ -8224,8 +8312,8 @@ org.xml3d.methods.xml3dGenerateRay = function(x, y) {
             return this.adapters[i].generateRay(x, y);
         }
     }
-    
-    return new XML3DRay(); 
+
+    return new XML3DRay();
 };
 
 org.xml3d.methods.xml3dGetBoundingBox = org.xml3d.methods.groupGetBoundingBox;
@@ -8251,18 +8339,18 @@ org.xml3d.methods.groupGetBoundingBox = function() {
 
     var bbox = new XML3DBox();
     var locMat = this.getLocalMatrix();
-    
+
     var child = this.firstElementChild; 
     while(child !== null)
     {
         if(child.getBoundingBox)
         {
-            var chBBox = child.getBoundingBox(); 
-            
-            chBBox.min = locMat.mulVec3(chBBox.min); 
+            var chBBox = child.getBoundingBox();
+
+            chBBox.min = locMat.mulVec3(chBBox.min);
             chBBox.max = locMat.mulVec3(chBBox.max);
-            
-            bbox.extend(chBBox); 
+
+            bbox.extend(chBBox);
         }
         
         child = child.nextElementSibling;

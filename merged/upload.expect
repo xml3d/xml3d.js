@@ -1,0 +1,13 @@
+#!/usr/local/bin/expect
+spawn /usr/bin/cadaver [lindex $argv 0]
+expect "Do you wish to accept the certificate"
+send "y\n"
+expect "dav:"
+send "cd projects/xml3d/script\n"
+expect "dav:"
+send "rm xml3d-nightly.js\n"
+expect "dav:"
+send "put xml3d-nightly.js\n"
+expect "dav:"
+send "quit\n"
+exit 0

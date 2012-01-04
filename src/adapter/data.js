@@ -520,7 +520,7 @@ org.xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
 	}
 
 	var textureChild = node.firstElementChild;
-	if(textureChild.localName != "img")
+	if(!textureChild || textureChild.localName != "img")
 	{
 		org.xml3d.debug.logWarning("child of texture element is not an img element");
 		return null;
@@ -713,15 +713,15 @@ org.xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNew
 		
 	} else {
 		var textureChild = node.firstElementChild;
-		if(textureChild.localName != "img")
+		if(!textureChild || textureChild.localName != "img")
 		{
 			org.xml3d.debug.logWarning("child of texture element is not an img element");
-			return null;
+			return null; // TODO: Should always return a result
 		}
 		imgSrc.push(textureChild.src);
 	}
 
-	
+	// TODO: Is this correct, do we use it as Array?
 	var result 			 = new Array(1);
 	//var value = new SglTexture2D(gl, textureSrc, options);
 	var name    		 = this.node.name;

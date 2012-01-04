@@ -112,6 +112,10 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	var gl = this.gl;
 	var name = this.node.name;
 	
+	if (!dataTable) {
+		return;
+	}
+
 	if (!dataTable[name]) {
 		org.xml3d.debug.logError("No data table entry found for "+name);
 		return;

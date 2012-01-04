@@ -47,7 +47,7 @@
 
 	<target name="stable">
 		<property name="versionStr" value="v${version}" />
-		<property name="script.ext" value="${version}"/>
+		<property name="script.ext" value="${version}" />
 		<antcall target="base" />
 	</target>
 
@@ -61,42 +61,45 @@
 		</git>
 		<echo message="${git.output}" />
 		<property name="versionStr" value="rev. ${git.output} (${TODAY})" />
-		<property name="script.ext" value="nightly"/>
-		<antcall target="base"  />
+		<property name="script.ext" value="nightly" />
+		<antcall target="base" />
 	</target>
 
+	<filelist dir="${srcDir}" id="sourceFiles">
+		<file name="GLU.js" />
+		<file name="xml3d.js" />
+		<file name="xml3d_util.js" />
+		<file name="xml3d_datatypes.js" />
+		<file name="xml3d_classes.js" />
+		<file name="renderer_handler.js" />
+		<file name="renderer_shaderhandler.js" />
+		<file name="renderer_bufferhandler.js" />
+		<file name="xml3d_renderer.js" />
+		<file name="adapter_xml3d.js" />
+		<file name="adapter_view.js" />
+		<file name="adapter_shader.js" />
+		<file name="adapter_texture.js" />
+		<file name="adapter_mesh.js" />
+		<file name="adapter_group.js" />
+		<file name="adapter_light.js" />
+		<file name="adapter_data.js" />
+		<file name="xml3d_shaders.js" />
+		<file name="xml3d_xflow.js" />
+		<file name="xml3d_scene_controller.js" />
+	</filelist>
 
 	<!-- =================================
           target: base              
          ================================= -->
 	<target name="base" depends="clean" description="description">
-		<property name="finalScript" value="${buildDir}/${script.start}-${script.ext}.js"/>
+		<property name="finalScript" value="${buildDir}/${script.start}-${script.ext}.js" />
 		<concat destfile="${finalScript}">
 			<fileset file="${basedir}/preamble.txt" />
-			<fileset file="${srcDir}/GLU.js" />
-			<fileset file="${srcDir}/xml3d.js" />
-			<fileset file="${srcDir}/xml3d_util.js" />
-			<fileset file="${srcDir}/xml3d_datatypes.js" />
-			<fileset file="${srcDir}/xml3d_classes.js" />
-			<fileset file="${srcDir}/renderer_handler.js" />
-			<fileset file="${srcDir}/renderer_shaderhandler.js" />
-			<fileset file="${srcDir}/renderer_bufferhandler.js" />
-			<fileset file="${srcDir}/xml3d_renderer.js" />
-			<fileset file="${srcDir}/adapter_xml3d.js" />
-			<fileset file="${srcDir}/adapter_view.js" />
-			<fileset file="${srcDir}/adapter_shader.js" />
-			<fileset file="${srcDir}/adapter_texture.js" />
-			<fileset file="${srcDir}/adapter_mesh.js" />
-			<fileset file="${srcDir}/adapter_group.js" />
-			<fileset file="${srcDir}/adapter_light.js" />
-			<fileset file="${srcDir}/adapter_data.js" />
-			<fileset file="${srcDir}/xml3d_shaders.js" />
-			<fileset file="${srcDir}/xml3d_xflow.js" />
-			<fileset file="${srcDir}/xml3d_scene_controller.js" />
+			<filelist refid="sourceFiles"/>
 		</concat>
 		<replaceregexp file="${finalScript}" match="org.xml3d.webgl.checkError\(" replace="//org.xml3d.webgl.checkError\(" byline="true" />
 		<replaceregexp file="${finalScript}" match="%VERSION%" replace="${versionStr}" byline="true" />
-
+		<copy file="${finalScript}" tofile="${buildDir}/xml3d.js" />
 	</target>
 
 	<target name="physics" depends="clean" description="description">

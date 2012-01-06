@@ -1,10 +1,11 @@
 // XML3DVec3
 
-/** @constructor * */
 new (function() {
-
-    /*
-     * Configure array properties @private @param {number} index Array index
+    /**
+     * Configure array properties
+     *  @private
+     *  @this {XML3DVec3}
+     *  @param {number} index Array index
      */
     function prop(index) {
         return {
@@ -18,9 +19,8 @@ new (function() {
         configurable : false,
         enumerable : false
         };
-    }
-    ;
-
+    };
+    
     /**
      * Creates an instance of XML3DVec3. XML3DVec3 represents a
      * three-dimensional vector as a 3-tuple floating point values.
@@ -37,14 +37,14 @@ new (function() {
         this._data[1] = y || 0;
         this._data[2] = z || 0;
 
-    };
+    }, p = XML3DVec3.prototype;
 
     /** @type {number} */
-    Object.defineProperty(XML3DVec3.prototype, "x", prop(0));
+    Object.defineProperty(p, "x", prop(0));
     /** @type {number} */
-    Object.defineProperty(XML3DVec3.prototype, "y", prop(1));
+    Object.defineProperty(p, "y", prop(1));
     /** @type {number} */
-    Object.defineProperty(XML3DVec3.prototype, "z", prop(2));
+    Object.defineProperty(p, "z", prop(2));
 
     /**
      * String representation of the XML3DVec3.
@@ -52,7 +52,7 @@ new (function() {
      * @this {XML3DVec3}
      * @return {string} Human-readable representation of this XML3DVec3.
      */
-    XML3DVec3.prototype.toString = function() {
+    p.toString = function() {
         return "XML3DVec3(" + this._data[0] + " " + this._data[1] + " "
                 + this._data[2] + ")";
     };
@@ -64,7 +64,7 @@ new (function() {
      * @param {XML3DVec3} that The vector to add
      * @return {XML3DVec3} The new vector with the result of the addition
      */
-    XML3DVec3.prototype.add = function(that) {
+    p.add = function(that) {
         if (that._data)
             return new XML3DVec3(this._data[0] + that._data[0], this._data[1]
                     + that._data[1], this._data[2] + that._data[2]);
@@ -79,7 +79,7 @@ new (function() {
      * @param {XML3DVec3} that The vector to subtract
      * @return {XML3DVec3} The new vector with the result of the subtraction
      */
-    XML3DVec3.prototype.subtract = function(that) {
+    p.subtract = function(that) {
         if (that._data)
             return new XML3DVec3(this._data[0] - that._data[0], this._data[1]
                     - that._data[1], this._data[2] - that._data[2]);
@@ -91,7 +91,7 @@ new (function() {
      * Returns the length of this vector.
      * @return {number} The length of this vector
      */
-    XML3DVec3.prototype.length = function() {
+    p.length = function() {
         return Math.sqrt((this._data[0] * this._data[0])
                 + (this._data[1] * this._data[1])
                 + (this._data[2] * this._data[2]));
@@ -103,7 +103,7 @@ new (function() {
      * @param {XML3DVec3} str The string to parse
      * @throws {Error} If passed string can not be parsed
      */
-    XML3DVec3.prototype.setVec3Value = function(str) {
+    p.setVec3Value = function(str) {
         var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(str);
         if (!m) // TODO Throw DOMException
             throw Error("Wrong format for XML3DVec3::setVec3Value");
@@ -120,7 +120,7 @@ new (function() {
      * @param {XML3DVec3} that The vector to multiply
      * @return {XML3DVec3} The new vector with the result of the multiplication
      */
-    XML3DVec3.prototype.multiply = function(that) {
+    p.multiply = function(that) {
         if (that._data)
             return new XML3DVec3(this._data[0] * that._data[0], this._data[1]
                     * that._data[1], this._data[2] * that._data[2]);
@@ -135,9 +135,9 @@ new (function() {
      * @param {number} fac The factor for the multiplication
      * @return {XML3DVec3} The new and scaled vector
      */
-    XML3DVec3.prototype.scale = function(fac) {
-        return new XML3DVec3(this._data[0] * n, this._data[1] * n,
-                this._data[2] * n);
+    p.scale = function(fac) {
+        return new XML3DVec3(this._data[0] * fac, this._data[1] * fac,
+                this._data[2] * fac);
     };
 
     /**
@@ -146,7 +146,7 @@ new (function() {
      * @param {XML3DVec3} that The second vector
      * @return {XML3DVec3} The new vector with the result of the cross product
      */
-    XML3DVec3.prototype.cross = function(that) {
+    p.cross = function(that) {
         if (that._data)
             return new XML3DVec3(this._data[1] * that._data[2] - this._data[2]
                     * that._data[1], this._data[2] * that._data[0]
@@ -163,7 +163,7 @@ new (function() {
      * a newly created vector. This is not modified.
      * @return {XML3DVec3} The new and negated vector
      */
-    XML3DVec3.prototype.negate = function() {
+    p.negate = function() {
         return new XML3DVec3(-this._data[0], -this._data[1], -this._data[2]);
     };
 
@@ -173,7 +173,7 @@ new (function() {
      * @param {XML3DVec3} that The second vector
      * @return {number} The result of the dot product
      */
-    XML3DVec3.prototype.dot = function(that) {
+    p.dot = function(that) {
         return (this._data[0] * that.x + this._data[1] * that.y + this._data[2]
                 * that.z);
     };
@@ -184,7 +184,7 @@ new (function() {
      * @return {XML3DVec3} The new and normalized vector
      * @throws {Error} If length of this vector is zero
      */
-    XML3DVec3.prototype.normalize = function() {
+    p.normalize = function() {
         var n = this.length();
         if (n)
             n = 1.0 / n;
@@ -196,10 +196,12 @@ new (function() {
     };
 
     /*
-     * XML3DVec3.prototype.toGL = function() { return [ this._data[0],
+     * p.toGL = function() { return [ this._data[0],
      * this._data[1], this._data[2] ]; };
      */
 
+    org.xml3d.XML3DVec3 = XML3DVec3;
     if (!window.XML3DVec3)
         window.XML3DVec3 = XML3DVec3;
-});
+
+})();

@@ -1006,6 +1006,31 @@ XML3DRotation.prototype.setAxisAngle = function(axis, a)
 		}
 };
 
+XML3DRotation.prototype.setQuaternion = function(im, re)
+{
+    if (!org.xml3d.isXML3DVec3(im))
+        throw new Error("First argument for XML3DRotation.prototype.setQuaternion must be XML3DVec3");
+
+    if (!org.xml3d.isFloat(re))
+        throw new Error("First argument for XML3DRotation.prototype.setQuaternion must be float");
+
+    var oldX = this.x;
+    var oldY = this.y;
+    var oldZ = this.z;
+    var oldW = this.w;
+
+    this.x = im.x;
+    this.y = im.y;
+    this.z = im.z;
+    this.w = re;
+
+    if (oldX != this.x || oldY != this.y || oldZ != this.z || oldW != this.w)
+    {
+        this.notifyOwnerNode([oldX,   oldY,   oldZ,   oldW],
+                             [this.x, this.y, this.z, this.w]);
+    }
+}
+
 XML3DRotation.prototype.setAxisAngleValue = function(str) 
 {
 	var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(str);

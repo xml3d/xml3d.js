@@ -317,8 +317,13 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 	//		gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.DEPTH_TEST);
 	
-	if (this.currentView != this.scene.getActiveView())
+    // If the view has changed or we don't have a camera, then compute it.
+	if (this.currentView != this.scene.getActiveView() || !this.camera)
 		this.camera = this.initCamera();
+
+    // Check if we still don't have a camera.
+    if (!this.camera)
+        return [0, 0];
 	
 	var xform = {};
 	xform.view = this.getViewMatrix();  

@@ -21,6 +21,8 @@ org.xml3d.tests.datatypes = [
 "XML3DMatrix",
 "XML3DBox",
 "XML3DRay",
+"XML3DDataResult",
+"XML3DDataEntry",
 ];
 
 org.xml3d.tests.XML3DVec3 = {};
@@ -67,5 +69,13 @@ org.xml3d.tests.XML3DBox.functs = [
 ];
 org.xml3d.tests.XML3DRay = {};
 org.xml3d.tests.XML3DRay.functs = [
+];
+org.xml3d.tests.XML3DDataResult = {};
+org.xml3d.tests.XML3DDataResult.functs = [
+"key",
+"get",
+];
+org.xml3d.tests.XML3DDataEntry = {};
+org.xml3d.tests.XML3DDataEntry.functs = [
 ];
  

@@ -69,6 +69,11 @@
 		<file name="GLU.js" />
 		<file name="xml3d.js" />
 		<file name="xml3d_util.js" />
+		<file name="glMatrix.js" />
+		<file name="types/vec3.js" />
+		<file name="types/rotation.js" />
+		<file name="types/box.js" />
+		<file name="types/matrix.js" />
 		<file name="xml3d_datatypes.js" />
 		<file name="xml3d_classes.js" />
 		<file name="renderer_handler.js" />
@@ -88,6 +93,11 @@
 		<file name="xml3d_scene_controller.js" />
 	</filelist>
 
+	<filelist dir="${srcDir}" id="refactored">
+			<file name="types/vec3.js" />
+			<file name="types/box.js" />
+			
+		</filelist>
 	<!-- =================================
           target: base              
          ================================= -->

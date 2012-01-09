@@ -14,7 +14,9 @@ new (function() {
             },
             set : function(val) {
                 this._data[index] = val;
-                // TODO: notify owner
+                // Value changed
+                if (this._callback)
+                    this._callback(this);
         },
         configurable : false,
         enumerable : false
@@ -29,13 +31,17 @@ new (function() {
      * @param {number=} x The x value (optional). Default: 0.
      * @param {number=} y The y value (optional). Default: 0.
      * @param {number=} z The z value (optional). Default: 0.
+     * @param {function(XML3DVec3=)=} cb Called, if value has changed.
+     *                                Has this as first parameter.
      */
-    var XML3DVec3 = function(x, y, z) {
+    var XML3DVec3 = function(x, y, z, cb) {
         /** @private */
         this._data = new Float32Array(3);
         this._data[0] = x || 0;
         this._data[1] = y || 0;
         this._data[2] = z || 0;
+
+        this._callback = typeof cb == 'function' ? cb : 0;
 
     }, p = XML3DVec3.prototype;
 
@@ -110,7 +116,8 @@ new (function() {
         this._data[0] = +m[1];
         this._data[1] = +m[2];
         this._data[2] = +m[3];
-        // TODO: notify owner
+        if (this._callback)
+            this._callback(this);
     };
 
     /**

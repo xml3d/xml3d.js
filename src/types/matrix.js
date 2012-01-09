@@ -57,15 +57,16 @@ new (function() {
      *            row.
      */
     var XML3DMatrix = function(m11, m12, m13, m14, m21, m22, m23, m24, m31,
-            m32, m33, m34, m41, m42, m43, m44) {
+            m32, m33, m34, m41, m42, m43, m44, cb) {
         /** @private */
-        if (typeof m11 == 'number' && arguments.length == 16) {
+        if (typeof m11 == 'number' && arguments.length >= 16) {
             this._data = new Float32Array(arguments);
+            this._callback = typeof cb == 'function' ? cb : 0;
         } else {
             this._data = new Float32Array( [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
                     0, 0, 0, 0, 1 ]);
+            this._callback = typeof m11 == 'function' ? m11 : 0;
         }
-
     }, p = XML3DMatrix.prototype;
 
     /** @type {number} */
@@ -133,6 +134,8 @@ new (function() {
             };
 
         this._data = new Float32Array(m.slice(1));
+        if (this._callback)
+            this._callback(this);
     };
 
     /**

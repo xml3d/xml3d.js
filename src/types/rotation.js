@@ -8,11 +8,18 @@ new (function() {
      * @param {number=} x The x value (optional). Default: 0.
      * @param {number=} y The y value (optional). Default: 0.
      * @param {number=} z The z value (optional). Default: 0.
+     * @param {function(XML3DVec3=)=} cb Called, if value has changed.
+     *                                   Has this as first parameter.
      */
-    var XML3DRotation = function(axis, angle) {
+    var XML3DRotation = function(axis, angle, cb) {
+        var that = this;
+        /** @private **/
+        this._callback = typeof cb == 'function' ? cb : 0;
+
         /** @private */
-        this._axis = axis ? new XML3DVec3(axis.x, axis.y, axis.z)
-                : new XML3DVec3(0, 0, 1);
+        var vec_cb = function() { if(that._callback) that._callback(that); };
+        this._axis = axis ? new XML3DVec3(axis.x, axis.y, axis.z, vec_cb)
+                : new XML3DVec3(0, 0, 1, vec_cb);
         /** @private */
         this._angle = angle || 0;
 
@@ -39,7 +46,8 @@ new (function() {
         },
         set : function(angle) {
             this._angle = angle;
-            // TODO: changed
+            if (this._callback)
+                this._callback(this);
     },
     configurable : false,
     enumerable : false
@@ -59,17 +67,19 @@ new (function() {
      * Replaces the existing rotation with the axis-angle representation passed
      * as argument
      */
-    p.setAxisAngle = function(axis, a) {
-        if (typeof axis != 'object' || isNaN(a)) {
+    p.setAxisAngle = function(axis, angle) {
+        if (typeof axis != 'object' || isNaN(angle)) {
             throw new Error("Illegal axis and/or angle values: " + "( axis="
-                    + axis + " angle=" + a + " )");
+                    + axis + " angle=" + angle + " )");
         }
 
-        this._axis.x = axis._data[0];
-        this._axis.y = axis._data[1];
-        this._axis.z = axis._data[2];
+        // TODO: slice?
+        this._axis._data[0] = axis._data[0];
+        this._axis._data[1] = axis._data[1];
+        this._axis._data[2] = axis._data[2];
         this._angle = angle;
-        // TODO Notify owner
+        if (this._callback)
+            this._callback(this);
     };
 
     /**
@@ -81,9 +91,8 @@ new (function() {
         var a = from.normalize();
         var b = to.normalize();
 
-        this._axis = from.cross(to);
-        this._angle = Math.acos(a.dot(b));
-        // TODO Notify owner
+        // This function will also callback
+        this.setAxisAngle(from.cross(to), Math.acos(a.dot(b)));
     };
 
     /**
@@ -95,9 +104,9 @@ new (function() {
         var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(str);
         if (!m)
             throw new Error("Could not parse AxisAngle string: " + str);
-        this._axis = new XML3DVec3(+m[1], +m[2], +m[3]);
-        this._angle = +m[4];
-        // TODO Notify owner
+
+        // This function will also callback
+        this.setAxisAngle(new XML3DVec3(+m[1], +m[2], +m[3]), +m[4]);
     };
 
     /**
@@ -170,18 +179,19 @@ new (function() {
     p._setQuaternion = function(quat) {
         var s = Math.sqrt(1 - quat[3] * quat[3]);
         if (s < 0.001 || isNaN(s)) {
-            this._axis.x = 0;
-            this._axis.y = 0;
-            this._axis.z = 1;
+            this._axis._data[0] = 0;
+            this._axis._data[1] = 0;
+            this._axis._data[2] = 1;
             this._angle = 0;
         } else {
             s = 1 / s;
-            this._axis.x = quat[0] * s;
-            this._axis.y = quat[1] * s;
-            this._axis.z = quat[2] * s;
+            this._axis._data[0] = quat[0] * s;
+            this._axis._data[1] = quat[1] * s;
+            this._axis._data[2] = quat[2] * s;
             this._angle = 2 * Math.acos(quat[3]);
         }
-        // TODO notify
+        if (this._callback)
+            this._callback(this);
     };
 
     /**

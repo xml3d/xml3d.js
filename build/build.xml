@@ -74,6 +74,10 @@
 		<file name="types/rotation.js" />
 		<file name="types/box.js" />
 		<file name="types/matrix.js" />
+		<file name="utils/uri.js" />
+		<file name="elements/adapter.js" />
+		<file name="elements/document.js" />
+		<file name="elements/factory.js" />
 		<file name="xml3d_datatypes.js" />
 		<file name="xml3d_classes.js" />
 		<file name="renderer_handler.js" />

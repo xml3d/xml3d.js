@@ -31,6 +31,15 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	return this.viewMatrix;
 };
 
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.collectDrawableObjects =
+    function(transform, opaqueObjects, transparenObjects, outLights, shader,
+             visible) {
+    if (this.isValid) {
+        // This is required if <view> element is added dynamically after the
+        // scene is loaded.
+        this.parentTransform = transform;
+    }
+};
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(aspect) {
 	if (this.projMatrix == null) {

@@ -629,6 +629,8 @@ org.xml3d.data.Adapter.prototype.isAdapterFor = function(aType) {
 	 return false; // Needs to be overwritten
 };
 
+org.xml3d.data.Adapter.prototype.internalNotifyChanged = function(what, newValue) {
+}
 
 org.xml3d.data.AdapterFactory = function() {
 	this.getAdapter = function(node, atype) {

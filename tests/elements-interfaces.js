@@ -210,3 +210,20 @@ test("Enumeration interface tests", function() {
     equals(e.getAttribute("type"), "asdf", "getAttribute = 'asdf'.");
     equals(e.type, "2d", "Invalid value set via setAttribute. Back to default: '2d'.");
 });
+
+test("Typed Array interface tests", function() {
+    var e = document.createElementNS(org.xml3d.xml3dNS, "float");
+    notEqual(e.value, null, "Value must not be null");
+    equal(e.value.toString(), "[object Float32Array]", "<float> has Float32Array");
+    equal(e.value.length, 0, "Initial length is zero.");
+
+    e = document.createElementNS(org.xml3d.xml3dNS, "int");
+    notEqual(e.value, null, "Value must not be null");
+    equal(e.value.toString(), "[object Int32Array]", "<int> has Int32Array");
+    equal(e.value.length, 0, "Initial length is zero.");
+
+    e = document.createElementNS(org.xml3d.xml3dNS, "bool");
+    notEqual(e.value, null, "Value must not be null");
+    equal(e.value.toString(), "[object Uint8Array]", "<bool> has Uint8Array");
+    equal(e.value.length, 0, "Initial length is zero.");
+});

@@ -275,8 +275,8 @@ org.xml3d.isAnyURI = function(node)
 };
 
 org.xml3d.elementEvents = {
-    "framedrawn":1, "mousedown":1, "mouseup":1, "click":1, "mousemove":1,
-	"mouseout":1, "update":1, "mousewheel":1
+    "framedrawn":1, "mousedown":1, "mouseup":1, "click":1, "mousemove":1, 
+	"mouseout":1, "update":1, "mousewheel":1 
 };
 org.xml3d.configureEvents = function(node) {
     node.__proto__.__addEventListener = node.__proto__.addEventListener;
@@ -8087,7 +8087,7 @@ org.xml3d.methods.groupGetLocalMatrix = function() {
  */
 org.xml3d.methods.groupGetBoundingBox = function() { 
 
-    var bbox = new XML3DBox();
+    var bbox = new XML3DBox(); 
     var locMat = this.getLocalMatrix();
 
     var child = this.firstElementChild; 

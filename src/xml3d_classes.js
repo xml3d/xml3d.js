@@ -852,7 +852,7 @@ org.xml3d.configureEvents = function(node) {
 
     node.addEventListener = function(type, listener, useCapture) {
 
-        if(org.xml3d.elementEvents[node.nodeName]) {
+        if(org.xml3d.elementEvents[type]) {
             for (i = 0; i < this.adapters.length; i++) {
                 if (this.adapters[i].addEventListener) {
                     this.adapters[i].addEventListener(type, listener, useCapture);
@@ -864,7 +864,7 @@ org.xml3d.configureEvents = function(node) {
     };
     node.removeEventListener = function(type, listener, useCapture) {
 
-        if(org.xml3d.elementEvents[node.nodeName]) {
+        if(org.xml3d.elementEvents[type]) {
             for (i = 0; i < this.adapters.length; i++) {
                 if (this.adapters[i].removeEventListener) {
                     this.adapters[i].removeEventListener(type, listener, useCapture);

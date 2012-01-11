@@ -100,57 +100,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         //Create renderer
         this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
 
-        //TODO: Buffer setup, move fullscreen quad out of handler
-
-        //Set up internal frame buffers used for picking and post-processing
-        //SpiderGL requires these buffers to be stored inside the Handler
-        /*this.pickBuffer = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
-                [gl.RGBA], gl.DEPTH_COMPONENT16, null,
-                { depthAsRenderbuffer : true }
-        );
-        this.normalPickBuffer = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
-                [gl.RGBA], gl.DEPTH_COMPONENT16, null,
-                { depthAsRenderbuffer : true }
-        );
-        this.backBufferZero = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
-                [gl.RGBA], gl.DEPTH_COMPONENT16, null,
-                { depthAsRenderbuffer : true }
-        );
-        this.backBufferOne = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
-                [gl.RGBA], gl.DEPTH_COMPONENT16, null,
-                { depthAsRenderbuffer : true }
-        );
-        this.backBufferOrig = new SglFramebuffer(gl, canvas.clientWidth, canvas.clientHeight,
-                [gl.RGBA], gl.DEPTH_COMPONENT16, null,
-                { depthAsRenderbuffer : true }
-        );
-
-        if (!this.pickBuffer.isValid || !this.normalPickBuffer.isValid || !this.backBufferZero || !this.backBufferOne)
-            org.xml3d.debug.logError("Creation of a framebuffer failed");
-
-        //This is the simple fullscreen quad used with the post-processing shaders
-        //For reasons unknown to man it has to be defined here, SpiderGL won't render it
-        //properly otherwise
-        var quadPositions = new Float32Array
-        ([
-            -1.0, -1.0,
-             1.0, -1.0,
-            -1.0,  1.0,
-             1.0,  1.0
-        ]);
-        var texcoord = new Float32Array
-        ([
-            0.0, 0.0,
-             1.0, 0.0,
-            0.0,  1.0,
-             1.0,  1.0
-        ]);
-
-        this.quadMesh = new SglMeshGL(gl);
-        this.quadMesh.addVertexAttribute("position", 2, quadPositions);
-        this.quadMesh.addVertexAttribute("texcoord", 2, texcoord);
-        this.quadMesh.addArrayPrimitives("tristrip", gl.TRIANGLE_STRIP, 0, 4);*/
-        //-------------------
+        //TODO: Buffer setup, move fullscreen quad out of handle
 
         this.gatherPostProcessShaders();
     }
@@ -413,12 +363,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
                                // relatedTarget
                                null);
         }
-        else
-            evt = this.copyMouseEvent(event);
-
-        // adapt type to not clash with events spidergl listens to
-        //evt.type = "xml3d" + type;
-
+  
         // find event target
         var tar = null;
         if(target !== undefined && target !== null)
@@ -427,6 +372,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
             tar = this.scene.xml3d.currentPickObj.node;
         else
             tar = this.scene.xml3d;
+			
+		evt.target = tar;
 
         // dispatch
         for (var i = 0; i < tar.adapters.length; i++) {

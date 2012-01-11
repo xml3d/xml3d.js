@@ -313,19 +313,19 @@ org.xml3d.MeshTypes = {};
 org.xml3d.MeshTypes["triangles"] = 0;
 org.xml3d.MeshTypes[0] = "triangles";
 org.xml3d.MeshTypes["trianglestrips"] = 1;
-org.xml3d.MeshTypes[1] = "triangleStrips";
+org.xml3d.MeshTypes[1] = "trianglestrips";
 org.xml3d.MeshTypes["lines"] = 2;
 org.xml3d.MeshTypes[2] = "lines";
 org.xml3d.MeshTypes["linestrips"] = 3;
-org.xml3d.MeshTypes[3] = "lineStrips";
+org.xml3d.MeshTypes[3] = "linestrips";
 // TextureTypes
 org.xml3d.TextureTypes = {};
 org.xml3d.TextureTypes["2d"] = 0;
-org.xml3d.TextureTypes[0] = "2D";
+org.xml3d.TextureTypes[0] = "2d";
 org.xml3d.TextureTypes["1d"] = 1;
-org.xml3d.TextureTypes[1] = "1D";
+org.xml3d.TextureTypes[1] = "1d";
 org.xml3d.TextureTypes["3d"] = 2;
-org.xml3d.TextureTypes[2] = "3D";
+org.xml3d.TextureTypes[2] = "3d";
 // FilterTypes
 org.xml3d.FilterTypes = {};
 org.xml3d.FilterTypes["none"] = 0;
@@ -345,23 +345,23 @@ org.xml3d.WrapTypes[2] = "border";
 // DataFieldType
 org.xml3d.DataFieldType = {};
 org.xml3d.DataFieldType["float "] = 0;
-org.xml3d.DataFieldType[0] = "FLOAT ";
+org.xml3d.DataFieldType[0] = "float ";
 org.xml3d.DataFieldType["float2 "] = 1;
-org.xml3d.DataFieldType[1] = "FLOAT2 ";
+org.xml3d.DataFieldType[1] = "float2 ";
 org.xml3d.DataFieldType["float3"] = 2;
-org.xml3d.DataFieldType[2] = "FLOAT3";
+org.xml3d.DataFieldType[2] = "float3";
 org.xml3d.DataFieldType["float4"] = 3;
-org.xml3d.DataFieldType[3] = "FLOAT4";
+org.xml3d.DataFieldType[3] = "float4";
 org.xml3d.DataFieldType["float4x4"] = 4;
-org.xml3d.DataFieldType[4] = "FLOAT4X4";
+org.xml3d.DataFieldType[4] = "float4x4";
 org.xml3d.DataFieldType["int"] = 5;
-org.xml3d.DataFieldType[5] = "INT";
+org.xml3d.DataFieldType[5] = "int";
 org.xml3d.DataFieldType["bool"] = 6;
-org.xml3d.DataFieldType[6] = "BOOL";
+org.xml3d.DataFieldType[6] = "bool";
 org.xml3d.DataFieldType["texture"] = 7;
-org.xml3d.DataFieldType[7] = "TEXTURE";
+org.xml3d.DataFieldType[7] = "texture";
 org.xml3d.DataFieldType["video"] = 8;
-org.xml3d.DataFieldType[8] = "VIDEO";
+org.xml3d.DataFieldType[8] = "video";
 
 org.xml3d.event = org.xml3d.event || {};
 // Initialize methods
@@ -7761,7 +7761,7 @@ org.xml3d.classInfo.group.props = {
 	onkeypress : {c: org.xml3d.delegateEventAttribute},
 	onkeydown : {c: org.xml3d.delegateEventAttribute},
 	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	visible : {c: org.xml3d.delegateBoolAttribute},
+	visible : {c: org.xml3d.delegateBoolAttribute, params: true},
 	_term: undefined
 };
 /**
@@ -7781,8 +7781,8 @@ org.xml3d.classInfo.mesh.props = {
 	onkeypress : {c: org.xml3d.delegateEventAttribute},
 	onkeydown : {c: org.xml3d.delegateEventAttribute},
 	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	visible : {c: org.xml3d.delegateBoolAttribute},
-	type : {c: org.xml3d.delegateEnum},
+	visible : {c: org.xml3d.delegateBoolAttribute, params: true},
+	type : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.MeshTypes, d: 0}},
 	_term: undefined
 };
 /**
@@ -7792,11 +7792,11 @@ org.xml3d.classInfo.transform.props = {
 	id : {c: org.xml3d.delegateStringAttribute},
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
-	translation : {c: org.xml3d.syncVec3},
-	scale : {c: org.xml3d.syncVec3},
-	rotation : {c: org.xml3d.syncRotation},
-	center : {c: org.xml3d.syncVec3},
-	scaleOrientation : {c: org.xml3d.syncRotation},
+	translation : {c: org.xml3d.syncVec3, params: [0, 0, 0]},
+	scale : {c: org.xml3d.syncVec3, params: [1, 1, 1]},
+	rotation : {c: org.xml3d.syncRotation, params: [0, 0, 1, 0]},
+	center : {c: org.xml3d.syncVec3, params: [0, 0, 0]},
+	scaleOrientation : {c: org.xml3d.syncRotation, params: [0, 0, 1, 0]},
 	_term: undefined
 };
 /**
@@ -7825,8 +7825,8 @@ org.xml3d.classInfo.light.props = {
 	onkeypress : {c: org.xml3d.delegateEventAttribute},
 	onkeydown : {c: org.xml3d.delegateEventAttribute},
 	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	visible : {c: org.xml3d.delegateBoolAttribute},
-	global : {c: org.xml3d.delegateBoolAttribute},
+	visible : {c: org.xml3d.delegateBoolAttribute, params: true},
+	global : {c: org.xml3d.delegateBoolAttribute, params: false},
 	intensity : {c: org.xml3d.delegateFloatAttribute, params: 1},
 	_term: undefined
 };
@@ -7859,7 +7859,7 @@ org.xml3d.classInfo.float.props = {
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
 	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncValue},
+	value : {c: org.xml3d.syncFloatArray},
 	_term: undefined
 };
 /**
@@ -7870,7 +7870,7 @@ org.xml3d.classInfo.float2.props = {
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
 	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncValue},
+	value : {c: org.xml3d.syncFloat2Array},
 	_term: undefined
 };
 /**
@@ -7881,7 +7881,7 @@ org.xml3d.classInfo.float3.props = {
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
 	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncValue},
+	value : {c: org.xml3d.syncFloat3Array},
 	_term: undefined
 };
 /**
@@ -7892,7 +7892,7 @@ org.xml3d.classInfo.float4.props = {
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
 	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncValue},
+	value : {c: org.xml3d.syncFloat4Array},
 	_term: undefined
 };
 /**
@@ -7903,7 +7903,7 @@ org.xml3d.classInfo.float4x4.props = {
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
 	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncValue},
+	value : {c: org.xml3d.syncFloat4x4Array},
 	_term: undefined
 };
 /**
@@ -7914,7 +7914,7 @@ org.xml3d.classInfo.int.props = {
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
 	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncValue},
+	value : {c: org.xml3d.syncIntArray},
 	_term: undefined
 };
 /**
@@ -7925,7 +7925,7 @@ org.xml3d.classInfo.bool.props = {
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
 	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncValue},
+	value : {c: org.xml3d.syncBoolArray},
 	_term: undefined
 };
 /**
@@ -7936,13 +7936,13 @@ org.xml3d.classInfo.texture.props = {
 	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
 	// TODO: Handle style
 	name : {c: org.xml3d.delegateStringAttribute},
-	type : {c: org.xml3d.delegateEnum},
-	filterMin : {c: org.xml3d.delegateEnum},
-	filterMag : {c: org.xml3d.delegateEnum},
-	filterMip : {c: org.xml3d.delegateEnum},
-	wrapS : {c: org.xml3d.delegateEnum},
-	wrapT : {c: org.xml3d.delegateEnum},
-	wrapU : {c: org.xml3d.delegateEnum},
+	type : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.TextureTypes, d: 0}},
+	filterMin : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.FilterTypes, d: 2}},
+	filterMag : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.FilterTypes, d: 2}},
+	filterMip : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.FilterTypes, d: 1}},
+	wrapS : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.WrapTypes, d: 0}},
+	wrapT : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.WrapTypes, d: 0}},
+	wrapU : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.WrapTypes, d: 0}},
 	borderColor : {c: org.xml3d.delegateStringAttribute},
 	_term: undefined
 };
@@ -7983,9 +7983,9 @@ org.xml3d.classInfo.view.props = {
 	onkeypress : {c: org.xml3d.delegateEventAttribute},
 	onkeydown : {c: org.xml3d.delegateEventAttribute},
 	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	visible : {c: org.xml3d.delegateBoolAttribute},
-	position : {c: org.xml3d.syncVec3},
-	orientation : {c: org.xml3d.syncRotation},
+	visible : {c: org.xml3d.delegateBoolAttribute, params: true},
+	position : {c: org.xml3d.syncVec3, params: [0, 0, 0]},
+	orientation : {c: org.xml3d.syncRotation, params: [0, 0, 1, 0]},
 	fieldOfView : {c: org.xml3d.delegateFloatAttribute, params: 0.785398},
 	_term: undefined
 };

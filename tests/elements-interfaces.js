@@ -1,6 +1,8 @@
 module("Element interface tests", {
 });
 
+var EPSILON = 0.00001;
+
 test("Event attribute tests", function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
     var getterText =  "alert('get function')";
@@ -93,4 +95,82 @@ test("Boolean interface tests", function() {
 
     e.setAttribute("visible", "asdf");
     equals(e.visible, 0.785398, "Invalid value set via setAttribute. Back to default: 0.785398.");
+});
+
+test("XML3DVec interface tests", function() {
+    var e = document.createElementNS(org.xml3d.xml3dNS, "transform");
+
+    // Set via interface
+    QUnit.closeVector(e.scale, new XML3DVec3(1, 1, 1), EPSILON, "transform.scale is '1 1 1' initially.");
+    raises(function() {e.scale = new XML3DVec3();}, "XML3DVec properties are readonly");
+    QUnit.closeVector(e.scale, new XML3DVec3(1, 1, 1), EPSILON, "transform.scale not changed after set");
+
+    e.scale.x += 2;
+    QUnit.closeVector(e.scale, new XML3DVec3(3, 1, 1), EPSILON, "transform.scale.x set to 3");
+
+    // Attribute is synced
+    equals(e.getAttribute("scale"), "3 1 1", "getAttribute = '3 1 1'.");
+
+    // Set via attribute
+    e.setAttribute("scale", "1 2 3");
+    QUnit.closeVector(e.scale, new XML3DVec3(1, 2, 3), EPSILON, "Value set via setAttribute to '1 2 3'.");
+
+    // TODO: What should happen here?
+    e.setAttribute("scale", "asdf");
+    QUnit.closeVector(e.scale, new XML3DVec3(1, 2, 3), EPSILON, "Invalid value set via setAttribute. Back to default: 0.785398.");
+});
+
+test("XML3DRotation interface tests", function() {
+    var e = document.createElementNS(org.xml3d.xml3dNS, "transform");
+
+    // Set via interface
+    QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1),0), EPSILON, "texture.type is '0 0 1 0' initially.");
+    raises(function() {e.rotation = new XML3DRotation();}, "XML3DRotation properties are readonly");
+    QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1),0), EPSILON, "texture.type not changed after set");
+
+    e.rotation.angle = 2;
+    QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1),2), EPSILON, "texture.type.angle set to 2");
+
+    // Attribute is synced
+    equals(e.getAttribute("rotation"), "0 0 1 2", "getAttribute = '0 0 1 2'.");
+
+    // Set via attribute
+    e.setAttribute("rotation", "1 0 0 3.14");
+    QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(1, 0, 0),3.14), EPSILON, "Value set via setAttribute to '1 0 0 3.14'.");
+
+    // TODO: What should happen here?
+    e.setAttribute("rotation", "asdf");
+    QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1),2), EPSILON, "Invalid value set via setAttribute. Back to default?.");
+});
+
+test("Enumeration interface tests", function() {
+    // Behavior copied from HTMLInputElement::type
+
+    var e = document.createElementNS(org.xml3d.xml3dNS, "texture");
+
+    // Set via interface
+    equals(e.type, "2d", "texture.type is '2d' initially.");
+    e.type = "3d";
+    equals(e.type, "3d", "texture.type = '3d';");
+    e.type = "1D";
+    equals(e.type, "1d", "texture.type = '1D'; // case insensitive");
+    // Set invalid, TODO: Right behavior?
+    e.type = "asdf";
+    equals(e.type, "2d", "texture.type set to invalid. Back to default: '2d'.");
+
+
+    // Attribute is sync'ed
+    e.type = "3d";
+    equals(e.getAttribute("type"), "3d", "getAttribute = '3d'.");
+    e.type = "asdf"; // Invalid values are set anyway
+    equals(e.getAttribute("type"), "asdf", "getAttribute = 'asdf'.");
+
+    // Set via attribute
+    e.setAttribute("type", "1d");
+    equals(e.type, "1d", "Value set via setAttribute to '1d'.");
+    e.setAttribute("type", "3D"); // case insensitive
+    equals(e.type, "3d", "Value set via setAttribute to '3D'.");
+    e.setAttribute("type", "asdf"); // invalid
+    equals(e.getAttribute("type"), "asdf", "getAttribute = 'asdf'.");
+    equals(e.type, "2d", "Invalid value set via setAttribute. Back to default: '2d'.");
 });

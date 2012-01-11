@@ -8,6 +8,19 @@ org.xml3d.XML3DNodeFactory.isXML3DNode = function(node) {
     return (node.nodeType === Node.ELEMENT_NODE && (node.namespaceURI == org.xml3d.xml3dNS));
 };
 
+org.xml3d.XML3DNodeFactory.extendProps = function (a, b) {
+    for ( var prop in b ) {
+        if ( b[prop] === undefined ) {
+            delete a[prop];
+        } else if ( prop !== "constructor" || a !== window ) {
+            if (b[prop].c == undefined)
+                throw ("Can't configure " + a.nodeName + "::" + prop);
+            var v = new b[prop].c(a, b[prop].id || prop, b[prop].params);
+            Object.defineProperty(a, prop, v.desc);
+        }
+    }
+    return a;
+};
 // TODO: Merge into org.xml3d.configure
 org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
     var n, t;
@@ -16,7 +29,7 @@ org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
         if (classInfo === undefined) {
             org.xml3d.debug.logInfo("Unrecognised element " + element.localName);
         } else {
-            org.xml3d.extendProps(element, classInfo.props);
+            org.xml3d.XML3DNodeFactory.extendProps(element, classInfo.props);
             element._configured = true;
             var n = element.firstElementChild;
             while(n) {

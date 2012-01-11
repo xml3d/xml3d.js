@@ -57,6 +57,118 @@ document.getElementById = function(id) {
 	}
 	return null;
 };
+document.nativecreateElementNS = document.createElementNS;
+document.createElementNS = function(ns, name) {
+    var r = document.nativecreateElementNS(ns,name);
+    if(ns == org.xml3d.xml3dNS) {
+        org.xml3d.configure(r);
+    }
+    return r;
+};
+
+org.xml3d.extend = function (a, b) {
+    for ( var prop in b ) {
+        if ( b[prop] === undefined ) {
+            delete a[prop];
+        } else if ( prop !== "constructor" || a !== window ) {
+            a[prop] = b[prop];
+        }
+    }
+    return a;
+};
+
+org.xml3d.extendProps = function (a, b) {
+    for ( var prop in b ) {
+        if ( b[prop] === undefined ) {
+            delete a[prop];
+        } else if ( prop !== "constructor" || a !== window ) {
+            var v = new b[prop].c(a, b[prop].id || prop, b[prop].params);
+            Object.defineProperty(a, prop, v.desc);
+        }
+    }
+    return a;
+};
+
+org.xml3d.delegateStringAttribute = function (elem, id) {
+    this.desc = {
+        get: function() {
+            return this.getAttribute(id) || "";
+        },
+        set: function(value) {
+            this.setAttribute(id, value);  
+        }
+    };
+};
+
+org.xml3d.delegateEventAttribute = function (elem, id) {
+    var f = null;
+    var e = elem;
+    this.desc = {
+        get: function() {
+            if (f) { return f; };
+            if(!this.hasAttribute(id))
+                return null;
+            return eval("c = function onclick(event){\n  "+
+                    this.getAttribute(id) +
+                    "\n}");
+        },
+        set: function(value) {
+            if (typeof value == 'function') {
+                f = value;
+            }
+        }
+    };
+};
+
+org.xml3d.delegateIntAttribute = function (elem, id, defaultValue) {
+    var current = defaultValue;
+    
+    this.desc = {
+        get: function() {
+            return current;
+        },
+        set: function(value) {
+            var v = +value;
+            current = typeof v == 'number' ? Math.floor(v) : defaultValue;
+            this.setAttribute(id, current+'');
+        }
+    };
+};
+
+org.xml3d.delegateFloatAttribute = function (elem, id, defaultValue) {
+    var current = defaultValue;
+    
+    this.desc = {
+        get: function() {
+            return current;
+        },
+        set: function(value) {
+            var v = +value;
+            current = typeof v == 'number' ? v : defaultValue;
+            this.setAttribute(id, current+'');
+        }
+    };
+};
+
+org.xml3d.delegateBoolAttribute = function (elem, id, defaultValue) {
+    var current = defaultValue;
+    
+    this.desc = {
+        get: function() {
+            return current;
+        },
+        set: function(value) {
+            current = Boolean(value);
+            this.setAttribute(id, current+'');
+        }
+    };
+};
+
+org.xml3d.delegateEnum = org.xml3d.delegateStringAttribute;
+org.xml3d.syncVec3 = org.xml3d.delegateStringAttribute;
+org.xml3d.syncRotation = org.xml3d.delegateStringAttribute;
+org.xml3d.syncValue = org.xml3d.delegateStringAttribute;
+
 
 (function() {
 	var onload = function() {

@@ -349,11 +349,10 @@ org.xml3d.webgl.createXML3DHandler = (function() {
     XML3DHandler.prototype.dispatchMouseEvent = function(type, button, x, y, event, target) {
 
         // init event
-        var evt = null;
         if(event === null || event === undefined)
         {
-            evt = document.createEvent("MouseEvents");
-            evt.initMouseEvent(    type,
+            event = document.createEvent("MouseEvents");
+            event.initMouseEvent(    type,
                             // canBubble, cancelable, view, detail
                                true, true, window, 0,
                                // screenX, screenY, clientX, clientY
@@ -363,7 +362,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
                                // relatedTarget
                                null);
         }
-  
+
         // find event target
         var tar = null;
         if(target !== undefined && target !== null)
@@ -372,13 +371,12 @@ org.xml3d.webgl.createXML3DHandler = (function() {
             tar = this.scene.xml3d.currentPickObj.node;
         else
             tar = this.scene.xml3d;
-			
-		evt.target = tar;
+        event.target = tar;
 
         // dispatch
         for (var i = 0; i < tar.adapters.length; i++) {
             if (tar.adapters[i].dispatchEvent) {
-                tar.adapters[i].dispatchEvent(evt);
+                tar.adapters[i].dispatchEvent(event);
             }
         }
 
@@ -390,12 +388,12 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         var evtMethod = currentObj.getAttribute(ontype);
         if (evtMethod && currentObj.evalMethod) {
             evtMethod = new Function(evtMethod);
-            evtMethod.call(currentObj, evt);
+            evtMethod.call(currentObj, event);
         }
 
         for (ev in this.events[type]) {
             var evl = this.events[type][ev];
-            evl.listener.call(ev.node, evt);
+            evl.listener.call(ev.node, event);
         }
 
         //Make sure the event method didn't remove picked object from the tree
@@ -407,7 +405,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
                 evtMethod = currentObj.getAttribute(ontype);
                 if (evtMethod && currentObj.evalMethod) {
                     evtMethod = new Function(evtMethod);
-                    evtMethod.call(currentObj, evt);
+                    evtMethod.call(currentObj, event);
                 }
             }
         }
@@ -451,8 +449,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 
         event.__defineGetter__("normal", function() {
             handler.renderPickedNormals(scene.xml3d.currentPickObj, x, y);
-            var v = scene.xml3d.currentPickNormal.v;
-            return new XML3DVec3(v[0], v[1], v[2]);
+            var v = scene.xml3d.currentPickNormal;
+            return new XML3DVec3(v.x, v.y, v.z);
         });
         event.__defineGetter__("position", function() {return scene.xml3d.currentPickPos;});
     };
@@ -496,8 +494,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
     XML3DHandler.prototype.mouseDown = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = true;
         var pos = this.getMousePosition(evt);
-
-        var scene = this.scene;
+        this.renderPick(pos.x, pos.y);
 
         var evt = this.copyMouseEvent(evt);
         this.initExtendedMouseEvent(evt, pos.x, pos.y);

@@ -22,7 +22,7 @@ new (function() {
         enumerable : false
         };
     };
-    
+
     /**
      * Creates an instance of XML3DVec3. XML3DVec3 represents a
      * three-dimensional vector as a 3-tuple floating point values.

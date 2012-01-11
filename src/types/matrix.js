@@ -170,7 +170,7 @@ new (function() {
      * of 3 rotations about the major axes. If the y and z components are
      * undefined, the x value is used to rotate the object about the z axis.
      * Rotation values are in RADIANS. This matrix is not modified.
-     * 
+     *
      * @returns {XML3DMatrix} new rotated matrix
      */
     p.rotate = function(rotX, rotY, rotZ) {
@@ -206,7 +206,7 @@ new (function() {
      * RotateAxisAngle returns a new matrix which is this matrix multiplied by a
      * rotation matrix with the given XML3DRotation. This matrix is not
      * modified.
-     * 
+     *
      * @param {number} x x-component of the rotation axis
      * @param {number} y y-component of the rotation axis
      * @param {number} z z-component of the rotation axis
@@ -224,7 +224,7 @@ new (function() {
      * matrix containing the passed values. If the z component is undefined a 1
      * is used in its place. If the y component is undefined the x component
      * value is used in its place. This matrix is not modified.
-     * 
+     *
      * @param {number} scaleX scale factor in x direction
      * @param {number=} scaleY scale factor in y direction. Optional. If
      *            undefined the scaleX value is used in its place

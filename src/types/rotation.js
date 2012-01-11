@@ -146,7 +146,7 @@ new (function() {
     };
 
     /**
-     * Returns a XML3DMatrix that describes this 3D rotation in a 
+     * Returns a XML3DMatrix that describes this 3D rotation in a
      * 4x4 matrix representation.
      * @return {XML3DMatrix} Rotation matrix
      */
@@ -155,13 +155,13 @@ new (function() {
       quat4.toMat4(p.toQuaternion(this),m._data);
       return m;
     };
-    
+
     /**
-     * Rotates the vector passed as parameter with this rotation 
+     * Rotates the vector passed as parameter with this rotation
      * representation. The result is returned as new vector instance.
      * Neither this nor the inputVector are changed.
      * 4x4 matrix representation.
-     * @param {XML3DVec3} inputVector 
+     * @param {XML3DVec3} inputVector
      * @return {XML3DVec3} The rotated vector
      */
     p.rotateVec3 = function(inputVector) {
@@ -169,7 +169,7 @@ new (function() {
         quat4.multiplyVec3(p.toQuaternion(this), inputVector._data, result._data);
         return result;
     };
-    
+
     /**
      * Replaces the existing rotation with the quaternion representation passed
      * as argument
@@ -197,7 +197,7 @@ new (function() {
     /**
      * Multiplies this rotation with the passed rotation. This rotation is not
      * changed.
-     * 
+     *
      * @param {XML3DRotation} rot1
      * @return {XML3DVec3} The result
      */

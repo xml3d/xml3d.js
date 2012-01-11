@@ -21,7 +21,7 @@
          *  @private
          **/
         this._max = null;
-        
+
         if (arguments.length == 1 && arguments[0] instanceof XML3DBox) {
             // copy constructor
             this._min = new XML3DVec3(arguments[0]._min.x, arguments[0]._min.y, arguments[0]._min.z);
@@ -94,38 +94,38 @@
     XML3DBox.prototype.isEmpty = function() {
         return (this._min.x > this._max.x || this._min.y > this._max.y || this._min.z > this._max.z);
     };
-    
-    /** updates the min or max accoring to the given point or bounding box. 
-    * 
+
+    /** updates the min or max accoring to the given point or bounding box.
+    *
     * @param that the object used for extension, which can be a XML3DVec3 or XML3DBox
-    
+
     XML3DBox.prototype.extend = function(that)
     {
-        var min, max; 
+        var min, max;
         if(that.constructor === XML3DBox)
-        {   
-            min = that.min; 
-            max = that.max; 
+        {
+            min = that.min;
+            max = that.max;
         }
         else if(that.constructor === XML3DVec3)
         {
-            min = that; 
-            max = that; 
+            min = that;
+            max = that;
         }
         else
-            return; 
+            return;
 
         if(min.x < this._min.x)
             this._min.x = min.x;
         if(min.y < this._min.y)
-            this._min.y = min.y; 
+            this._min.y = min.y;
         if(min.z < this._min.z)
             this._min.z = min.z;
-        
+
         if(max.x > this._max.x)
             this._max.x = max.x;
         if(max.y > this._max.y)
-            this._max.y = max.y; 
+            this._max.y = max.y;
         if(max.z > this._max.z)
             this._max.z = max.z;
     }; */

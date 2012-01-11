@@ -6,43 +6,27 @@ var EPSILON = 0.00001;
 test("Event attribute tests", function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
     var getterText =  "alert('get function')";
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
     // Set via attribute and get via interface
     equals(e.onclick, null, "xml3d::onclick is null initially.");
     e.setAttribute("onclick", getterText);
     equals(e.getAttribute("onclick"), getterText, "Value set.");
     equals(typeof e.onclick, "function", "onclick is of type function");
     equals(e.onclick.toString(), "function onclick(event){\n  alert('get function')\n}", "text");
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
     // Set via interface
     var v = function() { console.log("set function"); };
     e.onclick = v;
     equals(e.getAttribute("onclick"), getterText, "Value of attribute remains unchanged after setting event function per interface.");
     equals(e.onclick, v, "Function is set.");
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
     e.setAttribute("onclick", getterText);
     notEqual(e.onclick, v, "Setting of attribute changed function.");
 });
 
 test("Int interface tests", function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
     // Set via interface
     equals(e.width, 800, "xml3d.width is 800 initially.");
     e.width = 300;
@@ -52,11 +36,6 @@ test("Int interface tests", function() {
     equals(e.width, 1, "xml3d.width = 1.");
     e.width = 500.9;
     equals(e.width, 500, "xml3d.width = 500.9.");
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
 
     // Set via attribute
     e.setAttribute("width", "123");
@@ -71,11 +50,7 @@ test("Int interface tests", function() {
 
 test("Float interface tests", function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "view");
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
     // Set via interface
     equals(e.fieldOfView, 0.785398, "view.fieldOfView is 0.785398 initially.");
     e.fieldOfView = 0.87;
@@ -83,11 +58,6 @@ test("Float interface tests", function() {
     equals(e.getAttribute("fieldOfView"), "0.87", "getAttribute = '0.87'.");
     e.fieldOfView = true;
     equals(e.fieldOfView, 1, "view.fieldOfView = 1.");
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
 
     // Set via attribute
     e.setAttribute("fieldOfView", "0.5");
@@ -99,11 +69,7 @@ test("Float interface tests", function() {
 
 test("Boolean interface tests", function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "view");
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
     // Set via interface
     equals(e.visible, true, "view.fieldOfView is 'true' initially.");
     e.visible = false;
@@ -131,11 +97,7 @@ test("Boolean interface tests", function() {
 
 test("XML3DVec interface tests", function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "transform");
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> b5f5c79d55ce8d72ad944d5d1e67cc64bff1472a
     // Set via interface
     QUnit.closeVector(e.scale, new XML3DVec3(1, 1, 1), EPSILON, "transform.scale is '1 1 1' initially.");
     raises(function() {e.scale = new XML3DVec3();}, "XML3DVec properties are readonly");

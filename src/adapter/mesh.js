@@ -6,7 +6,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
     this.isValid = false;
     this.meshIsValid = false;
     this._bbox = null;
-    this._eventListeners = [];
+    this.processListeners();
     this.shaderHandler = factory.renderer.shaderHandler;
 
     this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
@@ -27,6 +27,21 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
 
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.processListeners  = function() {
+	var attributes = this.node.attributes;
+	for (var index in attributes) {
+		var att = attributes[index];
+		if (!att.name)
+			continue;
+			
+		var type = att.name;
+		if (type.match(/onmouse/) || type == "onclick") {
+			var eventType = type.substring(2);
+			this.node.addEventListener(eventType,  new Function("evt", att.value), false);
+		}
+	}
+};
+
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
         transform, opaqueObjects, transparenObjects, outLights, shader, visible) {
     if (this.isValid && this.meshIsValid) {
@@ -43,33 +58,8 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = functi
     }
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.addEventListener = function(itype, ilistener, icapture) {
-    var evl = {
-        type : itype,
-        listener : ilistener,
-        capture : icapture
-    };
-    this._eventListeners.push(evl);
-};
-
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.removeEventListener = function(itype, ilistener, icapture) {
-    for (var i=0; i < this._eventListeners.length; i++) {
-        var evl = this._eventListeners[i];
-        if (evl.type == itype && evl.listener == ilistener) {
-            this._eventListeners.splice(i, 1);
-            i--;
-        }
-    }
-};
-
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispatchEvent = function(evt) {
-    for (var i=0; i<this._eventListeners.length; i++) {
-        var evl = this._eventListeners[i];
-        if (evl.type == evt.type) {
-            evl.listener.call(this.node, evt);
-        }
-    }
-
+	var res = this.node.dispatchEvent(evt);
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getGLTypeFromString = function(gl, typeName) {

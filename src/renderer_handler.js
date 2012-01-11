@@ -57,6 +57,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         this.gl = gl;
         this.scene = scene;
         this.canvas = canvas;
+		this.lastMousePos = {x:0, y:0};
         this.needDraw = true;
         this.needPickingDraw = true;
         this._pickingDisabled = false;
@@ -347,9 +348,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      *
      */
     XML3DHandler.prototype.dispatchMouseEvent = function(type, button, x, y, event, target) {
-
         // init event
-        var evt = null;
+        var evt = event;
         if(event === null || event === undefined)
         {
             evt = document.createEvent("MouseEvents");
@@ -372,8 +372,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
             tar = this.scene.xml3d.currentPickObj.node;
         else
             tar = this.scene.xml3d;
-			
-		evt.target = tar;
 
         // dispatch
         for (var i = 0; i < tar.adapters.length; i++) {
@@ -381,34 +379,12 @@ org.xml3d.webgl.createXML3DHandler = (function() {
                 tar.adapters[i].dispatchEvent(evt);
             }
         }
-
-
-        // trigger on[event] attributes
-        var ontype = "on" + type;
-
-        var currentObj = tar;
-        var evtMethod = currentObj.getAttribute(ontype);
-        if (evtMethod && currentObj.evalMethod) {
-            evtMethod = new Function(evtMethod);
-            evtMethod.call(currentObj, evt);
-        }
-
-        for (ev in this.events[type]) {
-            var evl = this.events[type][ev];
-            evl.listener.call(ev.node, evt);
-        }
-
-        //Make sure the event method didn't remove picked object from the tree
-        if (currentObj && currentObj.parentNode)
-        {
-            while(currentObj.parentNode && currentObj.parentNode.nodeName == "group")
-            {
-                currentObj = currentObj.parentNode;
-                evtMethod = currentObj.getAttribute(ontype);
-                if (evtMethod && currentObj.evalMethod) {
-                    evtMethod = new Function(evtMethod);
-                    evtMethod.call(currentObj, evt);
-                }
+		
+		// dispatch an extra copy to the canvas element
+		tar = this.scene.xml3d;
+		for (var i = 0; i < tar.adapters.length; i++) {
+            if (tar.adapters[i].dispatchEvent) {
+                tar.adapters[i].dispatchEvent(evt);
             }
         }
     };
@@ -469,17 +445,25 @@ org.xml3d.webgl.createXML3DHandler = (function() {
     XML3DHandler.prototype.mouseUp = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = false;
         var pos = this.getMousePosition(evt);
-
-        if (this.isDragging)
-        {
-            this.needPickingDraw = true;
-            this.isDragging = false;
-        }
+		var lpos = this.lastMousePosition;
+		
+		this.lastMousePosition = pos;
+		
+        if (this.isDragging) {	
+			this.needPickingDraw = true;
+			this.isDragging = false;
+		}
+		
+		// If true this event is a 'click' and will be handled by the click listener. DOM does not allow
+		// the same event to be sent twice, so we can either send a mouseup or a click, but not both.
+		if (Math.abs(pos.x - lpos.x) <= 1 || Math.abs(pos.y - lpos.y) <= 1)
+			return;
 
         this.renderPick(pos.x, pos.y);
-
-        this.initExtendedMouseEvent(evt, pos.x, pos.y);
-        this.dispatchMouseEvent("mouseup", evt.button, pos.x, pos.y, evt);
+		
+		var event = this.copyMouseEvent(evt);
+        this.initExtendedMouseEvent(event, pos.x, pos.y);
+        this.dispatchMouseEvent("mouseup", event.button, pos.x, pos.y, event);
 
         return false; // don't redraw
     };
@@ -496,13 +480,14 @@ org.xml3d.webgl.createXML3DHandler = (function() {
     XML3DHandler.prototype.mouseDown = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = true;
         var pos = this.getMousePosition(evt);
-
+		this.lastMousePosition = pos;
+		
         var scene = this.scene;
 
-        var evt = this.copyMouseEvent(evt);
-        this.initExtendedMouseEvent(evt, pos.x, pos.y);
+        var event = this.copyMouseEvent(evt);
+        this.initExtendedMouseEvent(event, pos.x, pos.y);
 
-        this.dispatchMouseEvent("mousedown", evt.button, pos.x, pos.y, evt);
+        this.dispatchMouseEvent("mousedown", event.button, pos.x, pos.y, event);
 
         return false; // don't redraw
     };
@@ -518,14 +503,15 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      */
     XML3DHandler.prototype.click = function(evt) {
         var pos = this.getMousePosition(evt);
+		this.lastMousePosition = pos;
         if (this.isDragging) {
             this.needPickingDraw = true;
             return;
         }
 
-
-        this.initExtendedMouseEvent(evt, pos.x, pos.y);
-        this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
+		var event = this.copyMouseEvent(evt);
+        this.initExtendedMouseEvent(event, pos.x, pos.y);
+        this.dispatchMouseEvent("click", event.button, pos.x, pos.y, event);
 
         return false; // don't redraw
     };
@@ -633,7 +619,19 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      * @return
      */
     XML3DHandler.prototype.addEventListener = function(node, type, listener, useCapture) {
-        if (type in this.events) {
+		if (typeof listener == typeof "") {
+            var parsed = this.parseListenerString(listener);
+            e.listener = new Function("evt", parsed);
+        } else {
+            e.listener = listener;
+        }
+		for (var i = 0; i < node.adapters.length; i++) {
+            if (node.adapters[i].addEventListener) {
+                node.adapters[i].addEventListener(evt);
+            }
+        }
+		
+        /*if (type in this.events) {
             var e = new Object();
             e.node = node;
             if (typeof listener == typeof "") {
@@ -648,7 +646,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
             if (type == "mousemove" || type == "mouseout")
                 if (node.name !== "xml3d")
                     this._mouseMovePickingDisabled = false;
-        }
+        }*/
     };
 
 
@@ -664,21 +662,27 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         return matchedListener;
     };
     XML3DHandler.prototype.removeEventListener = function(node, type, listener, useCapture) {
-        if (!this.events[type]) {
+		for (var i = 0; i < node.adapters.length; i++) {
+            if (node.adapters[i].removeEventListener) {
+                node.adapters[i].removeEventListener(evt);
+            }
+        }
+        /*if (!this.events[type]) {
             org.xml3d.debug.logError("Could not remove listener for event type "+type);
             return;
-        }
+        }*/
 
         /* Note: below we compare the listener functions by
          * converting them to strings. This works on chrome 12.0.742.100 and firefox 4.0.1.
          * However it might not work on other browsers like IE.
          */
-        for (i=0; i<this.events[type].length; i++) {
+       /* for (i=0; i<this.events[type].length; i++) {
             var stored = this.events[type][i];
             if (stored.node == node
              && String(stored.listener) == String(listener))
                 this.events[type].splice(i,1);
         }
+		*/
     };
 
 XML3DHandler.prototype.getRenderedTexture = function (textureSrc) {

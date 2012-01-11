@@ -57,7 +57,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         this.gl = gl;
         this.scene = scene;
         this.canvas = canvas;
-		this.lastMousePos = {x:0, y:0};
         this.needDraw = true;
         this.needPickingDraw = true;
         this._pickingDisabled = false;
@@ -445,19 +444,11 @@ org.xml3d.webgl.createXML3DHandler = (function() {
     XML3DHandler.prototype.mouseUp = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = false;
         var pos = this.getMousePosition(evt);
-		var lpos = this.lastMousePosition;
-		
-		this.lastMousePosition = pos;
 		
         if (this.isDragging) {	
 			this.needPickingDraw = true;
 			this.isDragging = false;
 		}
-		
-		// If true this event is a 'click' and will be handled by the click listener. DOM does not allow
-		// the same event to be sent twice, so we can either send a mouseup or a click, but not both.
-		if (Math.abs(pos.x - lpos.x) <= 1 || Math.abs(pos.y - lpos.y) <= 1)
-			return;
 
         this.renderPick(pos.x, pos.y);
 		
@@ -479,9 +470,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      */
     XML3DHandler.prototype.mouseDown = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = true;
-        var pos = this.getMousePosition(evt);
-		this.lastMousePosition = pos;
-		
         this.renderPick(pos.x, pos.y);
 
         var event = this.copyMouseEvent(evt);
@@ -503,7 +491,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      */
     XML3DHandler.prototype.click = function(evt) {
         var pos = this.getMousePosition(evt);
-		this.lastMousePosition = pos;
         if (this.isDragging) {
             this.needPickingDraw = true;
             return;

@@ -352,8 +352,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         var evt = event;
         if(event === null || event === undefined)
         {
-            evt = document.createEvent("MouseEvents");
-            evt.initMouseEvent(    type,
+            event = document.createEvent("MouseEvents");
+            event.initMouseEvent(    type,
                             // canBubble, cancelable, view, detail
                                true, true, window, 0,
                                // screenX, screenY, clientX, clientY
@@ -363,7 +363,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
                                // relatedTarget
                                null);
         }
-  
+
         // find event target
         var tar = null;
         if(target !== undefined && target !== null)
@@ -376,7 +376,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         // dispatch
         for (var i = 0; i < tar.adapters.length; i++) {
             if (tar.adapters[i].dispatchEvent) {
-                tar.adapters[i].dispatchEvent(evt);
+                tar.adapters[i].dispatchEvent(event);
             }
         }
 		
@@ -427,8 +427,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 
         event.__defineGetter__("normal", function() {
             handler.renderPickedNormals(scene.xml3d.currentPickObj, x, y);
-            var v = scene.xml3d.currentPickNormal.v;
-            return new XML3DVec3(v[0], v[1], v[2]);
+            var v = scene.xml3d.currentPickNormal;
+            return new XML3DVec3(v.x, v.y, v.z);
         });
         event.__defineGetter__("position", function() {return scene.xml3d.currentPickPos;});
     };
@@ -482,7 +482,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         var pos = this.getMousePosition(evt);
 		this.lastMousePosition = pos;
 		
-        var scene = this.scene;
+        this.renderPick(pos.x, pos.y);
 
         var event = this.copyMouseEvent(evt);
         this.initExtendedMouseEvent(event, pos.x, pos.y);

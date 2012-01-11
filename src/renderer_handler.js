@@ -361,9 +361,9 @@ org.xml3d.webgl.createXML3DHandler = (function() {
                                // relatedTarget
                                null);
         }
-		
-		// Copy event to avoid DOM dispatch errors (cannot dispatch event more than once)
-		var evt = this.copyMouseEvent(event);
+
+        // Copy event to avoid DOM dispatch errors (cannot dispatch event more than once)
+        var evt = this.copyMouseEvent(event);
         this.initExtendedMouseEvent(evt, x, y);
 
         // find event target
@@ -378,13 +378,13 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         // dispatch
         for (var i = 0; i < tar.adapters.length; i++) {
             if (tar.adapters[i].dispatchEvent) {
-                tar.adapters[i].dispatchEvent(event);
+                tar.adapters[i].dispatchEvent(evt);
             }
         }
-		
-		// dispatch an extra copy to the canvas element
-		tar = this.scene.xml3d;
-		for (var i = 0; i < tar.adapters.length; i++) {
+
+        // dispatch an extra copy to the canvas element
+        tar = this.scene.xml3d;
+        for (var i = 0; i < tar.adapters.length; i++) {
             if (tar.adapters[i].dispatchEvent) {
                 tar.adapters[i].dispatchEvent(evt);
             }
@@ -447,11 +447,11 @@ org.xml3d.webgl.createXML3DHandler = (function() {
     XML3DHandler.prototype.mouseUp = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = false;
         var pos = this.getMousePosition(evt);
-		
-        if (this.isDragging) {	
-			this.needPickingDraw = true;
-			this.isDragging = false;
-		}
+
+        if (this.isDragging) {
+            this.needPickingDraw = true;
+            this.isDragging = false;
+        }
 
         this.renderPick(pos.x, pos.y);
         this.dispatchMouseEvent("mouseup", event.button, pos.x, pos.y, event);
@@ -470,7 +470,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      */
     XML3DHandler.prototype.mouseDown = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = true;
-		var pos = this.getMousePosition(evt);
+        var pos = this.getMousePosition(evt);
         this.renderPick(pos.x, pos.y);
 
         this.dispatchMouseEvent("mousedown", event.button, pos.x, pos.y, event);
@@ -493,7 +493,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
             this.needPickingDraw = true;
             return;
         }
-		
+
         this.dispatchMouseEvent("click", event.button, pos.x, pos.y, event);
 
         return false; // don't redraw
@@ -601,18 +601,18 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      * @return
      */
     XML3DHandler.prototype.addEventListener = function(node, type, listener, useCapture) {
-		if (typeof listener == typeof "") {
+        if (typeof listener == typeof "") {
             var parsed = this.parseListenerString(listener);
             e.listener = new Function("evt", parsed);
         } else {
             e.listener = listener;
         }
-		for (var i = 0; i < node.adapters.length; i++) {
+        for (var i = 0; i < node.adapters.length; i++) {
             if (node.adapters[i].addEventListener) {
                 node.adapters[i].addEventListener(evt);
             }
         }
-		
+
         /*if (type in this.events) {
             var e = new Object();
             e.node = node;
@@ -644,7 +644,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         return matchedListener;
     };
     XML3DHandler.prototype.removeEventListener = function(node, type, listener, useCapture) {
-		for (var i = 0; i < node.adapters.length; i++) {
+        for (var i = 0; i < node.adapters.length; i++) {
             if (node.adapters[i].removeEventListener) {
                 node.adapters[i].removeEventListener(evt);
             }
@@ -664,7 +664,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
              && String(stored.listener) == String(listener))
                 this.events[type].splice(i,1);
         }
-		*/
+        */
     };
 
 XML3DHandler.prototype.getRenderedTexture = function (textureSrc) {

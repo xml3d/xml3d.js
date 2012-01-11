@@ -348,8 +348,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      */
     XML3DHandler.prototype.dispatchMouseEvent = function(type, button, x, y, event, target) {
         // init event
-        var evt = event;
-        if(event === null || event === undefined)
+        if(event === null || evt === undefined)
         {
             event = document.createEvent("MouseEvents");
             event.initMouseEvent(    type,
@@ -362,6 +361,10 @@ org.xml3d.webgl.createXML3DHandler = (function() {
                                // relatedTarget
                                null);
         }
+		
+		// Copy event to avoid DOM dispatch errors (cannot dispatch event more than once)
+		var evt = this.copyMouseEvent(event);
+        this.initExtendedMouseEvent(evt, x, y);
 
         // find event target
         var tar = null;
@@ -451,9 +454,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		}
 
         this.renderPick(pos.x, pos.y);
-		
-		var event = this.copyMouseEvent(evt);
-        this.initExtendedMouseEvent(event, pos.x, pos.y);
         this.dispatchMouseEvent("mouseup", event.button, pos.x, pos.y, event);
 
         return false; // don't redraw
@@ -470,10 +470,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      */
     XML3DHandler.prototype.mouseDown = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = true;
+		var pos = this.getMousePosition(evt);
         this.renderPick(pos.x, pos.y);
-
-        var event = this.copyMouseEvent(evt);
-        this.initExtendedMouseEvent(event, pos.x, pos.y);
 
         this.dispatchMouseEvent("mousedown", event.button, pos.x, pos.y, event);
 
@@ -495,9 +493,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
             this.needPickingDraw = true;
             return;
         }
-
-		var event = this.copyMouseEvent(evt);
-        this.initExtendedMouseEvent(event, pos.x, pos.y);
+		
         this.dispatchMouseEvent("click", event.button, pos.x, pos.y, event);
 
         return false; // don't redraw
@@ -521,7 +517,6 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         }
 
         //Call any global mousemove methods
-        var evt = this.copyMouseEvent(evt);
         this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt, this.scene.xml3d);
 
         if (!this._mouseMovePickingEnabled)

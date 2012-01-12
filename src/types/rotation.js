@@ -13,6 +13,7 @@ new (function() {
      */
     var XML3DRotation = function(axis, angle, cb) {
         var that = this;
+
         /** @private **/
         this._callback = typeof cb == 'function' ? cb : 0;
 
@@ -27,7 +28,7 @@ new (function() {
 
     /** @type {number} */
     Object.defineProperty(p, "axis", {
-        /** @this {XML3DBox} * */
+        /** @this {XML3DRotation} * */
         get : function() {
             return this._axis;
         },
@@ -40,7 +41,7 @@ new (function() {
 
     /** @type {number} */
     Object.defineProperty(p, "angle", {
-        /** @this {XML3DBox} * */
+        /** @this {XML3DRotation} * */
         get : function() {
             return this._angle;
         },

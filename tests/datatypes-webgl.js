@@ -97,3 +97,5 @@ test("XML3DMatrix::setMatrixValue callback", function()  {
     this.mat.setMatrixValue("1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16");
     ok(true);
 });
+
+//TODO: Callback tests for XML3DBox and XML3DRay

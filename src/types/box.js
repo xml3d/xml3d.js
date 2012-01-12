@@ -3,35 +3,27 @@
      * Creates an instance of XML3DBox. XML3DBox represents an axis-aligned box,
      * described by two vectors min and max.
      * @constructor
-     * @param {(XML3DVec3|XML3DBox)=} min either XML3DBox acting as copy
-     *            constructor or instance of XML3DVec3 for the smallest point of
-     *            the box
-     * @param {XML3DVec3=} max XML3DVec3 for the biggest point of the
-     *            box. In the case of min being a XML3DBox this parameter is
-     *            ignored.
+     * @param {XML3DVec3=} min The smaller point of the box. Default: (0,0,0)
+     * @param {XML3DVec3=} max The biggest point of the box. Default: (0,0,0) 
      */
-    XML3DBox = function(min, max) {
-        /**
-         *  @type {XML3DVec3}
-         *  @private
-         **/
-        this._min = null;
-        /**
-         *  @type {XML3DVec3}
-         *  @private
-         **/
-        this._max = null;
+    XML3DBox = function(min, max,cb) {
+        var that = this;
+
+        /** @private **/
+        this._callback = typeof cb == 'function' ? cb : 0;
+
+        /** anonymous callback to inform this instance **/
+        var vec_cb = function() { if(that._callback) that._callback(that); };
         
-        if (arguments.length == 1 && arguments[0] instanceof XML3DBox) {
-            // copy constructor
-            this._min = new XML3DVec3(arguments[0]._min.x, arguments[0]._min.y, arguments[0]._min.z);
-            this._max = new XML3DVec3(arguments[0]._max.x, arguments[0]._max.y, arguments[0]._max.z);
-        } else if (arguments.length === 2) {
-            this._min = new XML3DVec3(min.x, min.y, min.z);
-            this._max = new XML3DVec3(max.x, max.y, max.z);
-        } else {
-            this.makeEmpty();
-        }
+        /** @private
+         *  @type {XML3DVec3} */
+        this._min = min ? new XML3DVec3(min.x, min.y, min.z, vec_cb)
+                : new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE, vec_cb);
+
+        /** @private
+         *  @type {XML3DVec3} */
+        this._max = max ? new XML3DVec3(max.x, max.y, max.z, vec_cb)
+                : new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE, vec_cb);
     };
 
     /** @type {XML3DVec3} */
@@ -85,6 +77,8 @@
                 Number.MAX_VALUE);
         this._max = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
                 -Number.MAX_VALUE);
+        if (this._callback)
+            this._callback(this);
     };
 
     /**
@@ -129,5 +123,8 @@
         if(max.z > this._max.z)
             this._max.z = max.z;
     }; */
+    
+    // Export
+    org.xml3d.XML3DBox = XML3DBox;
     if (!window.XML3DBox)
         window.XML3DBox = XML3DBox;

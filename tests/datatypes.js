@@ -472,8 +472,8 @@ test("Default Constructor", function() {
 	ok(typeof XML3DRay == 'function', "Global constructor is a function.");
 	ok(typeof new XML3DRay() == 'object', "XML3DRay instance is object.");
 
-	QUnit.closeVector(this.ident.origin, new XML3DVec3(0, 0, 0), EPSILON, "origin identity");
-	QUnit.closeVector(this.ident.direction, new XML3DVec3(0, 0, 1), EPSILON, "direction identity");
+	QUnit.closeVector(this.ident.origin, new XML3DVec3(0, 0, 0), EPSILON, "default origin");
+	QUnit.closeVector(this.ident.direction, new XML3DVec3(0, 0, -1), EPSILON, "default direction");
 });
 
 test("Assigning Constructor", function() {
@@ -482,12 +482,13 @@ test("Assigning Constructor", function() {
 	QUnit.closeVector(this.ray1.direction, new XML3DVec3(4,5,6), EPSILON, "direction");
 });
 
-test("Copy Constructor", function() {
+// Copy constructor not defined in spec
+/*test("Copy Constructor", function() {
 
 	var r = new XML3DRay(this.ray1);
 
 	QUnit.closeRay(r, this.ray1, EPSILON);
-});
+});*/
 
 // ============================================================================
 // --- XML3DBox ---
@@ -535,23 +536,34 @@ test("Default Constructor", function() {
 });
 
 test("Assigning Constructor", function() {
-
 	QUnit.closeVector(this.incValueBox.min, new XML3DVec3(-1, -2, -3), EPSILON);
 	QUnit.closeVector(this.incValueBox.max, new XML3DVec3(4, 5, 6), EPSILON);
 });
 
-test("Copy Constructor", function() {
+// Not defined in spec
+/*test("Copy Constructor", function() {
 
 	var b = new XML3DBox(this.box1);
 
 	QUnit.closeBox(b, this.box1, EPSILON);
+});*/
+
+test("XML3DBox setter", function() {
+
+    var s = new XML3DBox();
+    s.min.x = -1; s.min.y = -2; s.min.z = -3;
+    s.max.x =  4; s.max.y =  5; s.max.z =  6;
+    
+    QUnit.closeBox(s, this.incValueBox, EPSILON);
 });
+
 
 test("XML3DBox::size: zero size", function() {
 
 	var s = this.ident.size();
-
 	QUnit.closeVector(s, new XML3DVec3(0, 0, 0), EPSILON);
+	s = this.incValueBox.size();
+    QUnit.closeVector(s, new XML3DVec3(5, 7, 9), EPSILON);
 });
 
 test("XML3DBox::size: non-zero size", function() {
@@ -565,15 +577,17 @@ test("XML3DBox::center", function() {
     QUnit.closeVector(b.center(), b.min.add(b.max).scale(0.5), EPSILON);
 });
 
+test("XML3DBox::isEmpty", function() {
+    ok(this.ident.isEmpty());
+    ok(!this.box3.isEmpty());
+});
+
 test("XML3DBox::makeEmpty", function() {
-	var b = new XML3DBox(this.box3);
+	var b = new XML3DBox(this.box3.min, this.box3.max);
     b.makeEmpty();
 
+    ok(b.isEmpty());
     QUnit.closeVector(b.size(), new XML3DVec3(0,0,0), EPSILON);
 });
 
-test("XML3DBox::isEmpty", function() {
 
-	ok(this.ident.isEmpty());
-	ok(!this.box3.isEmpty());
-});

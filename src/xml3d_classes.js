@@ -844,35 +844,6 @@ org.xml3d.elementEvents = {
     "framedrawn":1, "mousedown":1, "mouseup":1, "click":1, "mousemove":1,
 	"mouseout":1, "update":1, "mousewheel":1
 };
-org.xml3d.configureEvents = function(node) {
-    node.__proto__.__addEventListener = node.__proto__.addEventListener;
-    node.__proto__.__removeEventListener = node.__proto__.removeEventListener;
-
-    node.addEventListener = function(type, listener, useCapture) {
-                
-        if(org.xml3d.elementEvents[node.nodeName]) {
-            for (i = 0; i < this.adapters.length; i++) {
-                if (this.adapters[i].addEventListener) {
-                    this.adapters[i].addEventListener(type, listener, useCapture);
-                }
-            }
-        }
-        else
-            this.__addEventListener(type, listener, useCapture);
-    };
-    node.removeEventListener = function(type, listener, useCapture) {
-        
-        if(org.xml3d.elementEvents[node.nodeName]) {
-            for (i = 0; i < this.adapters.length; i++) {
-                if (this.adapters[i].removeEventListener) {
-                    this.adapters[i].removeEventListener(type, listener, useCapture);
-                }
-            }
-        }
-        else
-            this.__removeEventListener(type, listener, useCapture);
-    };
-};
 
 // MeshTypes
 org.xml3d.MeshTypes = {};
@@ -919,7 +890,6 @@ org.xml3d.event.HANDLED = 2;
  */
 org.xml3d.classInfo.Xml3dNode = function(node, c)
 {
-    org.xml3d.configureEvents(node);
     
 	node.xml3ddocument = c.doc;
 	node.adapters      = [];

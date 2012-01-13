@@ -8,19 +8,7 @@ org.xml3d.XML3DNodeFactory.isXML3DNode = function(node) {
     return (node.nodeType === Node.ELEMENT_NODE && (node.namespaceURI == org.xml3d.xml3dNS));
 };
 
-org.xml3d.XML3DNodeFactory.extendProps = function (a, b) {
-    for ( var prop in b ) {
-        if ( b[prop] === undefined ) {
-            delete a[prop];
-        } else if ( prop !== "constructor" || a !== window ) {
-            if (b[prop].c == undefined)
-                throw ("Can't configure " + a.nodeName + "::" + prop);
-            var v = new b[prop].c(a, b[prop].id || prop, b[prop].params);
-            Object.defineProperty(a, prop, v.desc);
-        }
-    }
-    return a;
-};
+
 // TODO: Merge into org.xml3d.configure
 org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
     var n, t;
@@ -29,8 +17,8 @@ org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
         if (classInfo === undefined) {
             org.xml3d.debug.logInfo("Unrecognised element " + element.localName);
         } else {
-            org.xml3d.XML3DNodeFactory.extendProps(element, classInfo.props);
-            element._configured = true;
+            element._configured = new org.xml3d.ElementHandler(element);
+            element._configured.registerAttributes(classInfo.props);
             var n = element.firstElementChild;
             while(n) {
                 this.configure(n);
@@ -40,6 +28,13 @@ org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
         }
     }
 };
+
+org.xml3d.factory = new org.xml3d.XML3DNodeFactory();
+org.xml3d.configure = function(element) {
+    if (element._configured !== undefined)
+        return element;
+    org.xml3d.factory.configure(element);
+}
 
 org.xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(value) {
     var result = new XML3DVec3();

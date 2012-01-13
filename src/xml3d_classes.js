@@ -7707,40 +7707,40 @@ org.xml3d.classInfo.view = function(node, context)
  * Properties and methods for <xml3d>
  **/
 org.xml3d.classInfo.xml3d.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	onclick : {c: org.xml3d.delegateEventAttribute},
-	ondblclick : {c: org.xml3d.delegateEventAttribute},
-	onmousedown : {c: org.xml3d.delegateEventAttribute},
-	onmouseup : {c: org.xml3d.delegateEventAttribute},
-	onmouseover : {c: org.xml3d.delegateEventAttribute},
-	onmousemove : {c: org.xml3d.delegateEventAttribute},
-	onmouseout : {c: org.xml3d.delegateEventAttribute},
-	onkeypress : {c: org.xml3d.delegateEventAttribute},
-	onkeydown : {c: org.xml3d.delegateEventAttribute},
-	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	height : {c: org.xml3d.delegateIntAttribute, params: 600},
-	width : {c: org.xml3d.delegateIntAttribute, params: 800},
+	onclick : {c: org.xml3d.EventAttributeHandler},
+	ondblclick : {c: org.xml3d.EventAttributeHandler},
+	onmousedown : {c: org.xml3d.EventAttributeHandler},
+	onmouseup : {c: org.xml3d.EventAttributeHandler},
+	onmouseover : {c: org.xml3d.EventAttributeHandler},
+	onmousemove : {c: org.xml3d.EventAttributeHandler},
+	onmouseout : {c: org.xml3d.EventAttributeHandler},
+	onkeypress : {c: org.xml3d.EventAttributeHandler},
+	onkeydown : {c: org.xml3d.EventAttributeHandler},
+	onkeyup : {c: org.xml3d.EventAttributeHandler},
+	height : {c: org.xml3d.IntAttributeHandler, params: 600},
+	width : {c: org.xml3d.IntAttributeHandler, params: 800},
 	_term: undefined
 };
 /**
  * Properties and methods for <data>
  **/
 org.xml3d.classInfo.data.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	map : {c: org.xml3d.delegateStringAttribute},
-	expose : {c: org.xml3d.delegateStringAttribute},
+	map : {c: org.xml3d.StringAttributeHandler},
+	expose : {c: org.xml3d.StringAttributeHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <defs>
  **/
 org.xml3d.classInfo.defs.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
 	_term: undefined
 };
@@ -7748,63 +7748,63 @@ org.xml3d.classInfo.defs.props = {
  * Properties and methods for <group>
  **/
 org.xml3d.classInfo.group.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	onclick : {c: org.xml3d.delegateEventAttribute},
-	ondblclick : {c: org.xml3d.delegateEventAttribute},
-	onmousedown : {c: org.xml3d.delegateEventAttribute},
-	onmouseup : {c: org.xml3d.delegateEventAttribute},
-	onmouseover : {c: org.xml3d.delegateEventAttribute},
-	onmousemove : {c: org.xml3d.delegateEventAttribute},
-	onmouseout : {c: org.xml3d.delegateEventAttribute},
-	onkeypress : {c: org.xml3d.delegateEventAttribute},
-	onkeydown : {c: org.xml3d.delegateEventAttribute},
-	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	visible : {c: org.xml3d.delegateBoolAttribute, params: true},
+	onclick : {c: org.xml3d.EventAttributeHandler},
+	ondblclick : {c: org.xml3d.EventAttributeHandler},
+	onmousedown : {c: org.xml3d.EventAttributeHandler},
+	onmouseup : {c: org.xml3d.EventAttributeHandler},
+	onmouseover : {c: org.xml3d.EventAttributeHandler},
+	onmousemove : {c: org.xml3d.EventAttributeHandler},
+	onmouseout : {c: org.xml3d.EventAttributeHandler},
+	onkeypress : {c: org.xml3d.EventAttributeHandler},
+	onkeydown : {c: org.xml3d.EventAttributeHandler},
+	onkeyup : {c: org.xml3d.EventAttributeHandler},
+	visible : {c: org.xml3d.BoolAttributeHandler, params: true},
 	_term: undefined
 };
 /**
  * Properties and methods for <mesh>
  **/
 org.xml3d.classInfo.mesh.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	onclick : {c: org.xml3d.delegateEventAttribute},
-	ondblclick : {c: org.xml3d.delegateEventAttribute},
-	onmousedown : {c: org.xml3d.delegateEventAttribute},
-	onmouseup : {c: org.xml3d.delegateEventAttribute},
-	onmouseover : {c: org.xml3d.delegateEventAttribute},
-	onmousemove : {c: org.xml3d.delegateEventAttribute},
-	onmouseout : {c: org.xml3d.delegateEventAttribute},
-	onkeypress : {c: org.xml3d.delegateEventAttribute},
-	onkeydown : {c: org.xml3d.delegateEventAttribute},
-	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	visible : {c: org.xml3d.delegateBoolAttribute, params: true},
-	type : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.MeshTypes, d: 0}},
+	onclick : {c: org.xml3d.EventAttributeHandler},
+	ondblclick : {c: org.xml3d.EventAttributeHandler},
+	onmousedown : {c: org.xml3d.EventAttributeHandler},
+	onmouseup : {c: org.xml3d.EventAttributeHandler},
+	onmouseover : {c: org.xml3d.EventAttributeHandler},
+	onmousemove : {c: org.xml3d.EventAttributeHandler},
+	onmouseout : {c: org.xml3d.EventAttributeHandler},
+	onkeypress : {c: org.xml3d.EventAttributeHandler},
+	onkeydown : {c: org.xml3d.EventAttributeHandler},
+	onkeyup : {c: org.xml3d.EventAttributeHandler},
+	visible : {c: org.xml3d.BoolAttributeHandler, params: true},
+	type : {c: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.MeshTypes, d: 0}},
 	_term: undefined
 };
 /**
  * Properties and methods for <transform>
  **/
 org.xml3d.classInfo.transform.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	translation : {c: org.xml3d.syncVec3, params: [0, 0, 0]},
-	scale : {c: org.xml3d.syncVec3, params: [1, 1, 1]},
-	rotation : {c: org.xml3d.syncRotation, params: [0, 0, 1, 0]},
-	center : {c: org.xml3d.syncVec3, params: [0, 0, 0]},
-	scaleOrientation : {c: org.xml3d.syncRotation, params: [0, 0, 1, 0]},
+	translation : {c: org.xml3d.XML3DVec3AttributeHandler, params: [0, 0, 0]},
+	scale : {c: org.xml3d.XML3DVec3AttributeHandler, params: [1, 1, 1]},
+	rotation : {c: org.xml3d.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
+	center : {c: org.xml3d.XML3DVec3AttributeHandler, params: [0, 0, 0]},
+	scaleOrientation : {c: org.xml3d.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
 	_term: undefined
 };
 /**
  * Properties and methods for <shader>
  **/
 org.xml3d.classInfo.shader.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
 	_term: undefined
 };
@@ -7812,30 +7812,30 @@ org.xml3d.classInfo.shader.props = {
  * Properties and methods for <light>
  **/
 org.xml3d.classInfo.light.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	onclick : {c: org.xml3d.delegateEventAttribute},
-	ondblclick : {c: org.xml3d.delegateEventAttribute},
-	onmousedown : {c: org.xml3d.delegateEventAttribute},
-	onmouseup : {c: org.xml3d.delegateEventAttribute},
-	onmouseover : {c: org.xml3d.delegateEventAttribute},
-	onmousemove : {c: org.xml3d.delegateEventAttribute},
-	onmouseout : {c: org.xml3d.delegateEventAttribute},
-	onkeypress : {c: org.xml3d.delegateEventAttribute},
-	onkeydown : {c: org.xml3d.delegateEventAttribute},
-	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	visible : {c: org.xml3d.delegateBoolAttribute, params: true},
-	global : {c: org.xml3d.delegateBoolAttribute, params: false},
-	intensity : {c: org.xml3d.delegateFloatAttribute, params: 1},
+	onclick : {c: org.xml3d.EventAttributeHandler},
+	ondblclick : {c: org.xml3d.EventAttributeHandler},
+	onmousedown : {c: org.xml3d.EventAttributeHandler},
+	onmouseup : {c: org.xml3d.EventAttributeHandler},
+	onmouseover : {c: org.xml3d.EventAttributeHandler},
+	onmousemove : {c: org.xml3d.EventAttributeHandler},
+	onmouseout : {c: org.xml3d.EventAttributeHandler},
+	onkeypress : {c: org.xml3d.EventAttributeHandler},
+	onkeydown : {c: org.xml3d.EventAttributeHandler},
+	onkeyup : {c: org.xml3d.EventAttributeHandler},
+	visible : {c: org.xml3d.BoolAttributeHandler, params: true},
+	global : {c: org.xml3d.BoolAttributeHandler, params: false},
+	intensity : {c: org.xml3d.FloatAttributeHandler, params: 1},
 	_term: undefined
 };
 /**
  * Properties and methods for <lightshader>
  **/
 org.xml3d.classInfo.lightshader.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
 	_term: undefined
 };
@@ -7843,150 +7843,150 @@ org.xml3d.classInfo.lightshader.props = {
  * Properties and methods for <script>
  **/
 org.xml3d.classInfo.script.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	value : {c: org.xml3d.delegateStringAttribute},
-	src : {c: org.xml3d.delegateStringAttribute},
-	type : {c: org.xml3d.delegateStringAttribute},
+	value : {c: org.xml3d.StringAttributeHandler},
+	src : {c: org.xml3d.StringAttributeHandler},
+	type : {c: org.xml3d.StringAttributeHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <float>
  **/
 org.xml3d.classInfo.float.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncFloatArray},
+	name : {c: org.xml3d.StringAttributeHandler},
+	value : {c: org.xml3d.FloatArrayValueHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <float2>
  **/
 org.xml3d.classInfo.float2.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncFloat2Array},
+	name : {c: org.xml3d.StringAttributeHandler},
+	value : {c: org.xml3d.Float2ArrayValueHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <float3>
  **/
 org.xml3d.classInfo.float3.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncFloat3Array},
+	name : {c: org.xml3d.StringAttributeHandler},
+	value : {c: org.xml3d.Float3ArrayValueHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <float4>
  **/
 org.xml3d.classInfo.float4.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncFloat4Array},
+	name : {c: org.xml3d.StringAttributeHandler},
+	value : {c: org.xml3d.Float4ArrayValueHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <float4x4>
  **/
 org.xml3d.classInfo.float4x4.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncFloat4x4Array},
+	name : {c: org.xml3d.StringAttributeHandler},
+	value : {c: org.xml3d.Float4x4ArrayValueHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <int>
  **/
 org.xml3d.classInfo.int.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncIntArray},
+	name : {c: org.xml3d.StringAttributeHandler},
+	value : {c: org.xml3d.IntArrayValueHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <bool>
  **/
 org.xml3d.classInfo.bool.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	name : {c: org.xml3d.delegateStringAttribute},
-	value : {c: org.xml3d.syncBoolArray},
+	name : {c: org.xml3d.StringAttributeHandler},
+	value : {c: org.xml3d.BoolArrayValueHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <texture>
  **/
 org.xml3d.classInfo.texture.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	name : {c: org.xml3d.delegateStringAttribute},
-	type : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.TextureTypes, d: 0}},
-	filterMin : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.FilterTypes, d: 2}},
-	filterMag : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.FilterTypes, d: 2}},
-	filterMip : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.FilterTypes, d: 1}},
-	wrapS : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.WrapTypes, d: 0}},
-	wrapT : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.WrapTypes, d: 0}},
-	wrapU : {c: org.xml3d.delegateEnum, params: {e: org.xml3d.WrapTypes, d: 0}},
-	borderColor : {c: org.xml3d.delegateStringAttribute},
+	name : {c: org.xml3d.StringAttributeHandler},
+	type : {c: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.TextureTypes, d: 0}},
+	filterMin : {c: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.FilterTypes, d: 2}},
+	filterMag : {c: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.FilterTypes, d: 2}},
+	filterMip : {c: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.FilterTypes, d: 1}},
+	wrapS : {c: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.WrapTypes, d: 0}},
+	wrapT : {c: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.WrapTypes, d: 0}},
+	wrapU : {c: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.WrapTypes, d: 0}},
+	borderColor : {c: org.xml3d.StringAttributeHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <img>
  **/
 org.xml3d.classInfo.img.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	src : {c: org.xml3d.delegateStringAttribute},
+	src : {c: org.xml3d.StringAttributeHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <video>
  **/
 org.xml3d.classInfo.video.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	src : {c: org.xml3d.delegateStringAttribute},
+	src : {c: org.xml3d.StringAttributeHandler},
 	_term: undefined
 };
 /**
  * Properties and methods for <view>
  **/
 org.xml3d.classInfo.view.props = {
-	id : {c: org.xml3d.delegateStringAttribute},
-	className : {c: org.xml3d.delegateStringAttribute, id: 'class'},
+	id : {c: org.xml3d.StringAttributeHandler},
+	className : {c: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
-	onclick : {c: org.xml3d.delegateEventAttribute},
-	ondblclick : {c: org.xml3d.delegateEventAttribute},
-	onmousedown : {c: org.xml3d.delegateEventAttribute},
-	onmouseup : {c: org.xml3d.delegateEventAttribute},
-	onmouseover : {c: org.xml3d.delegateEventAttribute},
-	onmousemove : {c: org.xml3d.delegateEventAttribute},
-	onmouseout : {c: org.xml3d.delegateEventAttribute},
-	onkeypress : {c: org.xml3d.delegateEventAttribute},
-	onkeydown : {c: org.xml3d.delegateEventAttribute},
-	onkeyup : {c: org.xml3d.delegateEventAttribute},
-	visible : {c: org.xml3d.delegateBoolAttribute, params: true},
-	position : {c: org.xml3d.syncVec3, params: [0, 0, 0]},
-	orientation : {c: org.xml3d.syncRotation, params: [0, 0, 1, 0]},
-	fieldOfView : {c: org.xml3d.delegateFloatAttribute, params: 0.785398},
+	onclick : {c: org.xml3d.EventAttributeHandler},
+	ondblclick : {c: org.xml3d.EventAttributeHandler},
+	onmousedown : {c: org.xml3d.EventAttributeHandler},
+	onmouseup : {c: org.xml3d.EventAttributeHandler},
+	onmouseover : {c: org.xml3d.EventAttributeHandler},
+	onmousemove : {c: org.xml3d.EventAttributeHandler},
+	onmouseout : {c: org.xml3d.EventAttributeHandler},
+	onkeypress : {c: org.xml3d.EventAttributeHandler},
+	onkeydown : {c: org.xml3d.EventAttributeHandler},
+	onkeyup : {c: org.xml3d.EventAttributeHandler},
+	visible : {c: org.xml3d.BoolAttributeHandler, params: true},
+	position : {c: org.xml3d.XML3DVec3AttributeHandler, params: [0, 0, 0]},
+	orientation : {c: org.xml3d.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
+	fieldOfView : {c: org.xml3d.FloatAttributeHandler, params: 0.785398},
 	_term: undefined
 };
 org.xml3d.methods.xml3dCreateXML3DVec3 = function() {

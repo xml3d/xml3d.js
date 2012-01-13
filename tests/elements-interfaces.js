@@ -1,9 +1,11 @@
-module("Element interface tests", {
+module("Element attributes tests", {
 });
 
 var EPSILON = 0.00001;
 
 test("Event attribute tests", function() {
+    // Behavior copied from HTMLCanvas::width
+
     var e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
     var getterText =  "alert('get function')";
 
@@ -21,7 +23,9 @@ test("Event attribute tests", function() {
     equals(e.onclick, v, "Function is set.");
 
     e.setAttribute("onclick", getterText);
-    notEqual(e.onclick, v, "Setting of attribute changed function.");
+    console.log(e.onclick);
+    notEqual(e.onclick, v, "Valid setAttribute changed function.");
+    equals(typeof e.onclick, "function", "onclick is of type function after setAttribute");
 });
 
 test("Int interface tests", function() {

@@ -28,18 +28,18 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAda
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.processListeners  = function() {
-	var attributes = this.node.attributes;
-	for (var index in attributes) {
-		var att = attributes[index];
-		if (!att.name)
-			continue;
-			
-		var type = att.name;
-		if (type.match(/onmouse/) || type == "onclick") {
-			var eventType = type.substring(2);
-			this.node.addEventListener(eventType,  new Function("evt", att.value), false);
-		}
-	}
+    var attributes = this.node.attributes;
+    for (var index in attributes) {
+        var att = attributes[index];
+        if (!att.name)
+            continue;
+
+        var type = att.name;
+        if (type.match(/onmouse/) || type == "onclick") {
+            var eventType = type.substring(2);
+            this.node.addEventListener(eventType,  new Function("evt", att.value), false);
+        }
+    }
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = function(
@@ -59,7 +59,7 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.collectDrawableObjects = functi
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispatchEvent = function(evt) {
-	var res = this.node.dispatchEvent(evt);
+    var res = this.node.dispatchEvent(evt);
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.getGLTypeFromString = function(gl, typeName) {

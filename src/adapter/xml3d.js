@@ -3,7 +3,7 @@
 org.xml3d.webgl.XML3DCanvasRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.canvas = factory.handler.canvas;
-	this.processListeners();
+    this.processListeners();
 };
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DCanvasRenderAdapter;
@@ -20,22 +20,22 @@ org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt)
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.processListeners  = function() {
-	var attributes = this.node.attributes;
-	for (var index in attributes) {
-		var att = attributes[index];
-		if (!att.name)
-			continue;
-			
-		var type = att.name;
-		if (type.match(/onmouse/) || type == "onclick") {
-			var eventType = type.substring(2);
-			this.node.addEventListener(eventType, new Function(att.value), false);
-		}
-	}
+    var attributes = this.node.attributes;
+    for (var index in attributes) {
+        var att = attributes[index];
+        if (!att.name)
+            continue;
+
+        var type = att.name;
+        if (type.match(/onmouse/) || type == "onclick") {
+            var eventType = type.substring(2);
+            this.node.addEventListener(eventType, new Function(att.value), false);
+        }
+    }
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.dispatchEvent = function(evt) {
-	var res = this.node.dispatchEvent(evt);
+    var res = this.node.dispatchEvent(evt);
 };
 
 org.xml3d.webgl.XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) { 

@@ -18,7 +18,7 @@ org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
             org.xml3d.debug.logInfo("Unrecognised element " + element.localName);
         } else {
             element._configured = new org.xml3d.ElementHandler(element);
-            element._configured.registerAttributes(classInfo.props);
+            element._configured.registerAttributes(classInfo);
             var n = element.firstElementChild;
             while(n) {
                 this.configure(n);

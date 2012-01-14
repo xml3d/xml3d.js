@@ -29,12 +29,15 @@ new (function() {
             if (b[prop] === undefined) {
                 delete a[prop];
             } else {
-                if (b[prop].c == undefined)
-                    throw ("Can't configure " + a.nodeName + "::" + prop);
-                var attrName = b[prop].id || prop;
-                var v = new b[prop].c(a, attrName, b[prop].params);
-                this.handlers[attrName] = v;
-                Object.defineProperty(a, prop, v.desc);
+                if (b[prop].a !== undefined) {
+                    var attrName = b[prop].id || prop;
+                    var v = new b[prop].a(a, attrName, b[prop].params);
+                    this.handlers[attrName] = v;
+                    Object.defineProperty(a, prop, v.desc);
+                } else if (b[prop].m !== undefined) {
+                    a[prop] = b[prop].m;
+                } else
+                    console.error("Can't configure " + a.nodeName + "::" + prop);
             }
         }
         return a;

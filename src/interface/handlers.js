@@ -1,5 +1,18 @@
 new (function() {
 
+    var string2bool = function(string) {
+        switch (string.toLowerCase()) {
+        case "true":
+        case "1":
+            return true;
+        case "false":
+        case "0":
+            return false;
+        default:
+            return Boolean(string);
+        }
+    };
+
     handler = {};
 
     handler.ElementHandler = function(elem) {
@@ -10,10 +23,10 @@ new (function() {
         }
     };
 
-    handler.ElementHandler.prototype.registerAttributes = function (b) {
+    handler.ElementHandler.prototype.registerAttributes = function(b) {
         var a = this.element;
-        for ( var prop in b ) {
-            if ( b[prop] === undefined ) {
+        for ( var prop in b) {
+            if (b[prop] === undefined) {
                 delete a[prop];
             } else {
                 if (b[prop].c == undefined)
@@ -29,8 +42,8 @@ new (function() {
 
     handler.ElementHandler.prototype.handleEvent = function(e) {
         var handler = this.handlers[e.attrName];
-        if(handler && handler.setter)
-            handler.setter(e.newValue, true);
+        if (handler && handler.setFromAttribute)
+            handler.setFromAttribute(e.newValue);
         console.log(e);
     };
 
@@ -55,23 +68,24 @@ new (function() {
         AttributeHandler.call(this, elem);
         var current = p.d;
 
-        this.setter = function(v, fromAttribute) {
-            if(!fromAttribute) {
-                // Attribute is always set to value
-                 this.setAttribute(id, v);
-             }
-             var value = typeof v == 'string' ? v.toLowerCase() : undefined;
-             if (value && p.e[value] !== undefined)
-                 current = p.e[value];
-             else
-                 current = p.d;
-         };
+        this.setFromAttribute = function(v) {
+            var value = v.toLowerCase();
+            current = (value && p.e[value] !== undefined) ? p.e[value] : p.d;
+        };
 
-         this.desc = {
+        this.desc = {
             get : function() {
                 return p.e[current];
             },
-            set : this.set
+            set : function(v) {
+                // Attribute is set to whatever comes in
+            this.setAttribute(id, v);
+            var value = typeof v == 'string' ? v.toLowerCase() : undefined;
+            if (value && p.e[value] !== undefined)
+                current = p.e[value];
+            else
+                current = p.d;
+        }
         };
     };
     handler.EnumAttributeHandler.prototype = new AttributeHandler();
@@ -81,24 +95,20 @@ new (function() {
         AttributeHandler.call(this, elem);
         var f = null;
         var e = elem;
-        this.setter = function(value, fromAttribute) {
-            if (typeof value == 'function') {
-                f = value;
-            }
-            if (fromAttribute)
-                f = null;
+        this.setFromAttribute = function(value) {
+            f = null;
         };
         this.desc = {
             get : function() {
-                if (f) {
+                if (f)
                     return f;
-                }
-                ;
-                if (!this.hasAttribute(id))
+                if (!this.hasAttribute(id) || f === undefined)
                     return null;
                 return eval("c = function onclick(event){\n  " + this.getAttribute(id) + "\n}");
             },
-            set : this.setter
+            set : function(value) {
+                f = (typeof value == 'function') ? value : undefined;
+            }
         };
     };
     handler.EventAttributeHandler.prototype = new AttributeHandler();
@@ -106,24 +116,51 @@ new (function() {
 
     handler.IntAttributeHandler = function(elem, id, defaultValue) {
         var current = defaultValue;
-        this.setter = function(value, fromAttribute) {
+        this.setFromAttribute = function(value) {
             var v = +value;
-            current = typeof v == 'number' ? Math.floor(v) : defaultValue;
-            if(!fromAttribute)
-                this.setAttribute(id, current + '');
+            current = isNaN(v) ? defaultValue : Math.floor(v);
         };
+
         this.desc = {
             get : function() {
                 return current;
             },
-            set : this.setter
+            set : function(value) {
+                var v = +value;
+                current = isNaN(v) ? defaultValue : Math.floor(v);
+                this.setAttribute(id, current + '');
+            }
         };
     };
     handler.IntAttributeHandler.prototype = new AttributeHandler();
     handler.IntAttributeHandler.prototype.constructor = handler.IntAttributeHandler;
 
+    handler.FloatAttributeHandler = function(elem, id, defaultValue) {
+        var current = defaultValue;
+
+        this.setFromAttribute = function(value) {
+            var v = +value;
+            current = isNaN(v) ? defaultValue : v;
+        };
+
+        this.desc = {
+            get : function() {
+                return current;
+            },
+            set : function(value) {
+                var v = +value;
+                current = isNaN(v) ? defaultValue : v;
+                this.setAttribute(id, current + '');
+            }
+        };
+    };
+
     handler.BoolAttributeHandler = function(elem, id, defaultValue) {
         var current = defaultValue;
+
+        this.setFromAttribute = function(value) {
+            current = string2bool(value + '');
+        };
 
         this.desc = {
             get : function() {
@@ -131,7 +168,8 @@ new (function() {
             },
             set : function(value) {
                 current = Boolean(value);
-                this.setAttribute(id, current + '');
+                if (this.hasAttribute(id))
+                    this.setAttribute(id, current + '');
             }
         };
     };
@@ -141,6 +179,21 @@ new (function() {
         var changed = function(value) {
             elem.setAttribute(id, value.x + " " + value.y + " " + value.z);
         };
+
+        this.setFromAttribute = function(value) {
+            if (!v) {
+                v = new XML3DVec3(0, 0, 0, changed);
+            }
+            var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
+            if (!m) {
+                v._data.set(d);
+            } else {
+                v._data[0] = m[1];
+                v._data[1] = m[2];
+                v._data[2] = m[3];
+            }
+        };
+
         this.desc = {
             get : function() {
                 if (!v) {
@@ -159,6 +212,25 @@ new (function() {
         var changed = function(v) {
             elem.setAttribute(id, v.axis.x + " " + v.axis.y + " " + v.axis.z + " " + v.angle);
         };
+
+        this.setFromAttribute = function(value) {
+            if (!v) {
+                v = new XML3DRotation(null, null, changed);
+            }
+            var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
+            if (!m) {
+                v._axis._data[0] = d[0];
+                v._axis._data[1] = d[1];
+                v._axis._data[2] = d[2];
+                v._angle = d[3];
+            } else {
+                v._axis._data[0] = +m[1];
+                v._axis._data[1] = +m[2];
+                v._axis._data[2] = +m[3];
+                v._angle = +m[4];
+            }
+        };
+
         this.desc = {
             get : function() {
                 if (!v) {
@@ -168,21 +240,6 @@ new (function() {
             },
             set : function(value) {
                 throw Error("Can't set " + elem.nodeName + "::" + id + ": it's readonly");
-            }
-        };
-    };
-
-    handler.FloatAttributeHandler = function(elem, id, defaultValue) {
-        var current = defaultValue;
-
-        this.desc = {
-            get : function() {
-                return current;
-            },
-            set : function(value) {
-                var v = +value;
-                current = typeof v == 'number' ? v : defaultValue;
-                this.setAttribute(id, current + '');
             }
         };
     };
@@ -253,18 +310,7 @@ new (function() {
         var m = str.match(exp);
         if (!m)
             return new Uint8Array();
-        m = Array.map(m, function(string) {
-            switch (string.toLowerCase()) {
-            case "true":
-            case "1":
-                return true;
-            case "false":
-            case "0":
-                return false;
-            default:
-                return Boolean(string);
-            }
-        });
+        m = Array.map(m, string2bool);
         return m ? new Uint8Array(m) : new Uint8Array();
     };
 

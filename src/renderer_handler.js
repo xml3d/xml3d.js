@@ -24,7 +24,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		this.xml3d = xml3dElement;
 
 		this.getActiveView = function() {
-			var av = this.xml3d.getActiveViewNode();
+		var av = this.xml3d.getActiveViewNode();
 			if (av == null)
 			{
 				av = document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
@@ -311,6 +311,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         }
 
         // dispatch an extra copy to the canvas element
+        // TODO: is this needed? do we 'eat' the initial event or is it passed on already?
         tar = this.scene.xml3d;
         for (var i = 0; i < tar.adapters.length; i++) {
             if (tar.adapters[i].dispatchEvent) {

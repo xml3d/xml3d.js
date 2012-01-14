@@ -64,18 +64,14 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
 		this.viewMatrix = null;
 	else if (e.attribute == "fieldOfView")
 		this.projMatrix = null;
-	else {
+	else if (e.attribute == "parenttransform") {
+        this.parentTransform = newValue;
+		this.viewMatrix = null;
+    } else {
 		this.viewMatrix = null;
 		this.projMatrix = null;
 	}
 	this.factory.handler.redraw("View changed");
-};
-
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.internalNotifyChanged = function(what, newValue) {
-	if (what == "parenttransform") {	
-		this.parentTransform = newValue;
-		this.viewMatrix = null;
-	}
 };
 
 

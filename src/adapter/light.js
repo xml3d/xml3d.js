@@ -19,13 +19,6 @@ org.xml3d.webgl.XML3DLightRenderAdapter = function(factory, node) {
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DLightRenderAdapter;
 
-org.xml3d.webgl.XML3DLightRenderAdapter.prototype.collectDrawableObjects = function(
-		transform, opaqueObjects, transparentObjects, outLights, shader, visible) {
-	outLights.push( [ transform, this ]);
-	this._transform = transform;
-	this._visible = visible;
-};
-
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.notifyChanged = function(e) {
 	if (e.attribute == "visible")
 		this._visible = e.newValue;

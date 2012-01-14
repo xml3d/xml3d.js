@@ -32,52 +32,6 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DShaderRenderAdapter;
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.__defineGetter__(
-		"shaderProgram", (function() {
-		
-			if (this.program) 
-				return this.program;
-			
-			//Create the shader program for this node
-			var sources = {vs:null, fs:null};
-			
-			if (this.node.hasAttribute("script"))
-			{
-				var scriptURL = this.node.getAttribute("script");
-				if (new org.xml3d.URI(scriptURL).scheme == "urn") {
-					//Internal shader
-					this.getStandardShaderSource(scriptURL, sources);
-					this.program = this.createShaderProgram(sources);
-					this.gl.useProgram(this.program.handle);
-					this.shaderHandler.setStandardUniforms(this.program);
-				} else {
-					//User-provided shader
-					var vsScript = this.node.xml3ddocument.resolve(scriptURL
-							+ "-vs");
-					var fsScript = this.node.xml3ddocument.resolve(scriptURL
-							+ "-fs");
-					if (vsScript && fsScript) {
-						sources.vs = vsScript.textContent;
-						sources.fs = fsScript.textContent;
-					}
-					
-					this.program = this.createShaderProgram(sources);
-				}
-			} else {	
-				this.program = this.createShaderProgram(sources);
-			}
-			
-			for (var name in this.program.samplers) {
-				var texInfo = this.program.samplers[name];
-				if (texInfo && this.textures[name]) {
-					this.textures[name].info = texInfo;
-				}
-			}
-			
-			return this.program;
-
-}));
-
 org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
 	if (evt.attribute == "script") {
 		if (this.program) {

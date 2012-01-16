@@ -78,11 +78,12 @@
 		<file name="types/box.js" />
 		<file name="types/matrix.js" />
 		<file name="types/ray.js" />
-		<file name="types/box.js" />
 		<file name="utils/uri.js" />
 		<file name="elements/adapter.js" />
 		<file name="elements/document.js" />
 		<file name="elements/factory.js" />
+		<file name="interface/handlers.js" />
+		<file name="interface/methods.js" />
 		<file name="xml3d_classes.js" />
 		<file name="renderer_handler.js" />
 		<file name="renderer_shaderhandler.js" />

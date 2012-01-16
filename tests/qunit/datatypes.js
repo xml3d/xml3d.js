@@ -56,6 +56,15 @@ QUnit.extend( QUnit, {
 			QUnit.__passesVector(actual.min, expected.min, maxDifference) &&
 			QUnit.__passesVector(actual.max, expected.max, maxDifference);
 		QUnit.push(passes, actual, expected, message);
-	},
+	}
 			
 });
+new (function() {
+
+    var original = QUnit.jsDump.parsers.object;
+    QUnit.jsDump.setParser("object", function(a,b) {
+        if(a instanceof XML3DVec3 || a instanceof XML3DRotation )
+            return a.toString();
+        return original(a,b);
+    });
+})();

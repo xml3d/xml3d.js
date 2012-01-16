@@ -231,7 +231,7 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 			case "group": 
 				if (currentNode.getAttribute("visible") == "false")
 					visible = false;
-				if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout")
+				if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
 					this.handler.setMouseMovePicking(true);	
 					
 				var shader = adapter.getShader();
@@ -242,7 +242,7 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 			case "mesh":
 				if (currentNode.getAttribute("visible") == "false")
 					visible = false;
-				if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout")
+				if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
 					this.handler.setMouseMovePicking(true);	
 					
 				// Add a new drawable object to the scene

@@ -1,4 +1,4 @@
-module("Element interface tests", {
+module("Generated Element interface tests", {
 });
 
 test("&lt;xml3d&gt; interface test", function() {

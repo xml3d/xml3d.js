@@ -29,15 +29,6 @@ while(n) {
 return r;
 };
 
-org.xml3d.data.configure = function(xml3ds) {
- 	if (!org.xml3d.document)
- 		org.xml3d.document = new org.xml3d.XML3DDocument();
-
- 	for(var x in xml3ds) {
- 		org.xml3d.document.initXml3d(xml3ds[x]);
- 	}
-};
-
 org.xml3d.defineClass = function(ctor, parent, methods) {
 	if (parent) {
 		function inheritance() {

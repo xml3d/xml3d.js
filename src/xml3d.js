@@ -167,8 +167,12 @@ org.xml3d.extend = function (a, b) {
 			return;
 		}
 		
-		org.xml3d.data.configure(xml3ds);
-		org.xml3d.webgl.configure(xml3ds);
+        org.xml3d.configure(xml3ds);
+        try {
+            org.xml3d.webgl.configure(xml3ds);
+        } catch (e) {
+            org.xml3d.debug.logError(e);
+        }
 		
 		var ready = (function(eventType) {
 			var evt = null;

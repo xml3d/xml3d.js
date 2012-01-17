@@ -80,7 +80,6 @@
 		<file name="types/ray.js" />
 		<file name="utils/uri.js" />
 		<file name="elements/adapter.js" />
-		<file name="elements/document.js" />
 		<file name="elements/factory.js" />
 		<file name="interface/elements.js" />
 		<file name="interface/attributes.js" />

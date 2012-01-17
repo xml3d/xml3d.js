@@ -31,10 +31,14 @@ org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
 
 org.xml3d.factory = new org.xml3d.XML3DNodeFactory();
 org.xml3d.configure = function(element) {
+    if (Array.isArray(element))
+    {
+        Array.forEach(element, org.xml3d.configure);
+    }
     if (element._configured !== undefined)
         return element;
     org.xml3d.factory.configure(element);
-}
+};
 
 org.xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(value) {
     var result = new XML3DVec3();

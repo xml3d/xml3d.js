@@ -3,7 +3,7 @@ module("XML3DVec3 callback tests", {
     setup: function () {
         this.callbackVec3 = function(p) {
             ok(p instanceof XML3DVec3);
-            console.log(p.toString());
+            //console.log(p.toString());
         };
         this.vec = new XML3DVec3(0, 1, 0, this.callbackVec3);
     }
@@ -30,7 +30,7 @@ module("XML3DRotation callback tests", {
     setup: function () {
         this.callback = function(p) {
             ok(p instanceof XML3DRotation);
-            console.log(this.toString());
+            //console.log(this.toString());
         };
         this.rot = new XML3DRotation(new XML3DVec3(0,0,1), 3.14, this.callback);
     }
@@ -82,7 +82,7 @@ module("XML3DMatrix callback tests", {
     setup: function () {
         this.callback = function(p) {
             ok(p instanceof XML3DMatrix);
-            console.log(this.toString());
+            //console.log(this.toString());
         };
         this.mat = new XML3DMatrix(this.callback);
     }

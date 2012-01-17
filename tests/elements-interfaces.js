@@ -4,15 +4,15 @@ var EPSILON = 0.00001;
 
 test("Event attribute tests", function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
-    var getterText = "alert('get function')";
+    var getterText = "alert('get function');";
 
     // Set via attribute and get via interface
         equals(e.onclick, null, "xml3d::onclick is null initially.");
         e.setAttribute("onclick", getterText);
         equals(e.getAttribute("onclick"), getterText, "Value set.");
         equals(typeof e.onclick, "function", "onclick is of type function");
-        equals(e.onclick.toString(), "function onclick(event){\n  alert('get function')\n}", "text");
-
+        notEqual(e.onclick.toString().match(new RegExp("function onclick.*\n.*alert(.*get function.*).*\n.*")), null , "text");
+        //console.log(e.onclick.toString().match());
         // Set via interface
         var v = function() {
             console.log("set function");

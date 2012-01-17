@@ -5,7 +5,7 @@ test("&lt;xml3d&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
 	ok(e, "xml3d exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.onclick, "object", "onclick is of type 'object'");
 	equals(typeof e.ondblclick, "object", "ondblclick is of type 'object'");
@@ -24,7 +24,7 @@ test("&lt;data&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "data");
 	ok(e, "data exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.map, "string", "map is of type 'string'");
 	equals(typeof e.expose, "string", "expose is of type 'string'");
@@ -33,14 +33,14 @@ test("&lt;defs&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "defs");
 	ok(e, "defs exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 });
 test("&lt;group&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "group");
 	ok(e, "group exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.onclick, "object", "onclick is of type 'object'");
 	equals(typeof e.ondblclick, "object", "ondblclick is of type 'object'");
@@ -58,7 +58,7 @@ test("&lt;mesh&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "mesh");
 	ok(e, "mesh exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.onclick, "object", "onclick is of type 'object'");
 	equals(typeof e.ondblclick, "object", "ondblclick is of type 'object'");
@@ -77,7 +77,7 @@ test("&lt;transform&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "transform");
 	ok(e, "transform exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.translation, "object", "translation is of type 'object'");
 	equals(typeof e.scale, "object", "scale is of type 'object'");
@@ -89,14 +89,14 @@ test("&lt;shader&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "shader");
 	ok(e, "shader exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 });
 test("&lt;light&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "light");
 	ok(e, "light exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.onclick, "object", "onclick is of type 'object'");
 	equals(typeof e.ondblclick, "object", "ondblclick is of type 'object'");
@@ -116,14 +116,14 @@ test("&lt;lightshader&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "lightshader");
 	ok(e, "lightshader exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 });
 test("&lt;script&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "script");
 	ok(e, "script exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.value, "string", "value is of type 'string'");
 	equals(typeof e.src, "string", "src is of type 'string'");
@@ -133,7 +133,7 @@ test("&lt;float&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "float");
 	ok(e, "float exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.name, "string", "name is of type 'string'");
 	equals(typeof e.value, "object", "value is of type 'object'");
@@ -142,7 +142,7 @@ test("&lt;float2&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "float2");
 	ok(e, "float2 exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.name, "string", "name is of type 'string'");
 	equals(typeof e.value, "object", "value is of type 'object'");
@@ -151,7 +151,7 @@ test("&lt;float3&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "float3");
 	ok(e, "float3 exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.name, "string", "name is of type 'string'");
 	equals(typeof e.value, "object", "value is of type 'object'");
@@ -160,7 +160,7 @@ test("&lt;float4&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "float4");
 	ok(e, "float4 exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.name, "string", "name is of type 'string'");
 	equals(typeof e.value, "object", "value is of type 'object'");
@@ -169,7 +169,7 @@ test("&lt;float4x4&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "float4x4");
 	ok(e, "float4x4 exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.name, "string", "name is of type 'string'");
 	equals(typeof e.value, "object", "value is of type 'object'");
@@ -178,7 +178,7 @@ test("&lt;int&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "int");
 	ok(e, "int exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.name, "string", "name is of type 'string'");
 	equals(typeof e.value, "object", "value is of type 'object'");
@@ -187,7 +187,7 @@ test("&lt;bool&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "bool");
 	ok(e, "bool exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.name, "string", "name is of type 'string'");
 	equals(typeof e.value, "object", "value is of type 'object'");
@@ -196,7 +196,7 @@ test("&lt;texture&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "texture");
 	ok(e, "texture exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.name, "string", "name is of type 'string'");
 	equals(typeof e.type, "string", "type is of type 'string'");
@@ -212,7 +212,7 @@ test("&lt;img&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "img");
 	ok(e, "img exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.src, "string", "src is of type 'string'");
 });
@@ -220,7 +220,7 @@ test("&lt;video&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "video");
 	ok(e, "video exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.src, "string", "src is of type 'string'");
 });
@@ -228,7 +228,7 @@ test("&lt;view&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "view");
 	ok(e, "view exits");
 	equals(typeof e.className, "string", "className is of type 'string'");
-	equals(typeof e.style, "object", "className is of type 'object'");
+	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.onclick, "object", "onclick is of type 'object'");
 	equals(typeof e.ondblclick, "object", "ondblclick is of type 'object'");

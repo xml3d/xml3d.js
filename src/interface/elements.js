@@ -7,6 +7,7 @@
             this.element = elem;
             this.element.addEventListener('DOMAttrModified', this, false);
             this.handlers = {};
+            this.adapters = {};
         }
     };
 

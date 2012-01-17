@@ -866,51 +866,6 @@ org.xml3d.webgl.Renderer.prototype.getProjectionMatrix = function() {
 	return this._projMatrix;
 }; 
 
-org.xml3d.webgl.XML3DRenderAdapterFactory = function(handler, renderer) {
-	org.xml3d.data.AdapterFactory.call(this);
-	this.handler = handler;
-	this.renderer = renderer;
-};
-org.xml3d.webgl.XML3DRenderAdapterFactory.prototype = new org.xml3d.data.AdapterFactory();
-org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.constructor = org.xml3d.webgl.XML3DRenderAdapterFactory;
-
-org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.getAdapter = function(node) {
-	return org.xml3d.data.AdapterFactory.prototype.getAdapter.call(this, node, org.xml3d.webgl.Renderer.prototype);
-};
-
-org.xml3d.webgl.XML3DRenderAdapterFactory.prototype.createAdapter = function(
-		node) {
-	if (node.localName == "xml3d")
-		return new org.xml3d.webgl.XML3DCanvasRenderAdapter(this, node);
-	if (node.localName == "view")
-		return new org.xml3d.webgl.XML3DViewRenderAdapter(this, node);
-	if (node.localName == "defs")
-		return new org.xml3d.webgl.XML3DDefsRenderAdapter(this, node);
-	if (node.localName == "group")
-		return new org.xml3d.webgl.XML3DGroupRenderAdapter(this, node);
-	if (node.localName == "mesh")
-		return new org.xml3d.webgl.XML3DMeshRenderAdapter(this, node);
-	if (node.localName == "transform")
-		return new org.xml3d.webgl.XML3DTransformRenderAdapter(this, node);
-	if (node.localName == "shader")
-		return new org.xml3d.webgl.XML3DShaderRenderAdapter(this, node);
-	if (node.localName == "texture")
-		return new org.xml3d.webgl.XML3DTextureRenderAdapter(this, node);
-	if (node.localName == "img")
-		return new org.xml3d.webgl.XML3DImgRenderAdapter(this, node);
-	if (node.localName == "light")
-		return new org.xml3d.webgl.XML3DLightRenderAdapter(this, node);
-	if (node.localName == "lightshader")
-		return new org.xml3d.webgl.XML3DLightShaderRenderAdapter(this, node);
-
-	if (node.localName == "use") {
-		var reference = node.getHref();
-		return this.getAdapter(reference);
-	}
-
-	return null;
-};
-
 org.xml3d.webgl.RenderAdapter = function(factory, node) {
 	org.xml3d.data.Adapter.call(this, factory, node);
 };

@@ -21,23 +21,26 @@ org.xml3d.data.Adapter.prototype.isAdapterFor = function(aType) {
 };
 
 org.xml3d.data.AdapterFactory = function() {
-    this.getAdapter = function(node, atype) {
-        if (!node || node._configured === undefined)
-            return null;
-        for (i = 0; i < node.adapters.length; i++) {
-            if (node.adapters[i].isAdapterFor(atype)) {
-                return node.adapters[i];
-            }
-        }
-        // No adapter found, try to create one
-        var adapter = this.createAdapter(node);
-        if (adapter) {
-            node.addAdapter(adapter);
-            adapter.init();
-        }
-        return adapter;
-    };
 };
+
+org.xml3d.data.AdapterFactory.prototype.getAdapter = function(node, atype) {
+    if (!node || node._configured === undefined)
+        return null;
+    var elemHandler = node._configured;
+    var realType = atype || this.name;
+    var adapter = elemHandler.adapters[realType];
+    if(adapter !== undefined)
+        return adapter;
+    
+    // No adapter found, try to create one
+    adapter = this.createAdapter(node);
+    if (adapter) {
+        elemHandler.adapters[realType] = adapter;
+        adapter.init();
+    }
+    return adapter;
+};
+
 org.xml3d.data.AdapterFactory.prototype.createAdapter = function(node) {
     return null;
 };

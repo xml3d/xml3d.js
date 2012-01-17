@@ -55,7 +55,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(ob
    return shader;	
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights) {
+org.xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights) {
 	//Need to check for textures to decide which internal shader to use
 	var vertexColors = false;
 	var dataTable = shaderAdapter.createDataTable();	

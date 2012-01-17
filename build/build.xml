@@ -87,7 +87,8 @@
 		<file name="interface/methods.js" />
 		<file name="xml3d_classes.js" />
 		<file name="renderer_handler.js" />
-		<file name="renderer_shaderhandler.js" />
+		<file name="renderer_shadermanager.js" />
+		<file name="renderer_meshmanager.js" />
 		<file name="renderer_bufferhandler.js" />
 		<file name="xml3d_renderer.js" />
 		<file name="adapter/xml3d.js" />
@@ -98,6 +99,7 @@
 		<file name="adapter/group.js" />
 		<file name="adapter/light.js" />
 		<file name="adapter/data.js" />
+		<file name="adapter/factory.js" />
 		<file name="xml3d_shaders.js" />
 		<file name="xml3d_xflow.js" />
 		<file name="xml3d_scene_controller.js" />

@@ -21,18 +21,14 @@
 /*                                                                       */
 /*************************************************************************/
 
-// Create global symbol org
-var org;
-if (!org)
-	org = {};
-else if (typeof org != "object")
-	throw new Error("org already exists and is not an object");
+/** @namespace **/
+var org = org || {};
 
-// Create global symbol org.xml3d
-if (!org.xml3d)
-	org.xml3d = {};
-else if (typeof org.xml3d != "object")
-	throw new Error("org.xml3d already exists and is not an object");
+if (org.xml3d !== undefined)
+    throw new Error("xml3d.js has already been included.");
+
+/**  @namespace **/
+org.xml3d = {};
 
 org.xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 org.xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
@@ -40,31 +36,6 @@ org.xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
 org.xml3d._xml3d = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
 org.xml3d._native = !!org.xml3d._xml3d.style; 
 org.xml3d._rendererFound = false;
-
-document.nativeGetElementById = document.getElementById;
-document.getElementById = function(id) {
-	var elem = document.nativeGetElementById(id);
-	if(elem) {
-		return elem;
-	} else {
-		var elems = this.getElementsByTagName("*");
-		for ( var i = 0; i < elems.length; i++) {
-			var node = elems[i];
-			if (node.getAttribute("id") === id) {
-				return node;
-			}
-		}
-	}
-	return null;
-};
-document.nativecreateElementNS = document.createElementNS;
-document.createElementNS = function(ns, name) {
-    var r = document.nativecreateElementNS(ns,name);
-    if(ns == org.xml3d.xml3dNS) {
-        org.xml3d.configure(r);
-    }
-    return r;
-};
 
 org.xml3d.extend = function (a, b) {
     for ( var prop in b ) {
@@ -76,8 +47,6 @@ org.xml3d.extend = function (a, b) {
     }
     return a;
 };
-
-
 
 (function() {
 	var onload = function() {
@@ -222,62 +191,3 @@ org.xml3d.copyVector = function(to, from) {
     to.z = from.z;
 }
 
-/*
- * Workaround for DOMAttrModified issues in WebKit based browsers:
- * https://bugs.webkit.org/show_bug.cgi?id=8191
- */
-if(navigator.userAgent.indexOf("WebKit") != -1)
-{
-    var attrModifiedWorks = false;
-    var listener = function(){ attrModifiedWorks = true; };
-    document.documentElement.addEventListener("DOMAttrModified", listener, false);
-    document.documentElement.setAttribute("___TEST___", true);
-    document.documentElement.removeAttribute("___TEST___", true);
-    document.documentElement.removeEventListener("DOMAttrModified", listener, false);
-
-    if (!attrModifiedWorks)
-    {
-        Element.prototype.__setAttribute = HTMLElement.prototype.setAttribute;
-
-        Element.prototype.setAttribute = function(attrName, newVal)
-        {
-            var prevVal = this.getAttribute(attrName);
-            this.__setAttribute(attrName, newVal);
-            newVal = this.getAttribute(attrName);
-            //if (newVal != prevVal)
-            {
-                var evt = document.createEvent("MutationEvent");
-                evt.initMutationEvent(
-                        "DOMAttrModified",
-                        true,
-                        false,
-                        this,
-                        prevVal || "",
-                        newVal || "",
-                        attrName,
-                        (prevVal == null) ? evt.ADDITION : evt.MODIFICATION
-                );
-                this.dispatchEvent(evt);
-            }
-        };
-
-        Element.prototype.__removeAttribute = HTMLElement.prototype.removeAttribute;
-        Element.prototype.removeAttribute = function(attrName)
-        {
-            var prevVal = this.getAttribute(attrName);
-            this.__removeAttribute(attrName);
-            var evt = document.createEvent("MutationEvent");
-            evt.initMutationEvent(
-                    "DOMAttrModified",
-                    true,
-                    false,
-                    this,
-                    prevVal,
-                    "",
-                    attrName,
-                    evt.REMOVAL
-            );
-            this.dispatchEvent(evt);
-        };
-    }
-}

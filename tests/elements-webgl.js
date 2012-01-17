@@ -1,23 +1,39 @@
-module("Element methods tests", {
-    setup: function() {
-        var v = document.getElementById("xml3dframe");
-        ok(v);
-        v.style.float = "right";
-        v.style.width = "500px";
-        v.style.height = "300px";
-        v.addEventListener("load", function() {ok(true); start();}, true);
-        v.src = "scenes/basic.xhtml";
-        this.doc = v.contentDocument;
-    }
+
+
+var loadDocument = function(url,f) {
+    console.log("Setup scene.");
+    var v = document.getElementById("xml3dframe");
+    ok(v, "Found frame.");
+    v.style.float = "right";
+    v.style.width = "500px";
+    v.style.height = "300px";
+    v.addEventListener("load", f, true);
+    v.src = url;
+};
+
+
+module("Element configuration tests", {
+     setup: function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/basic.xhtml", this.cb);
+     },
+     teardown: function() {
+         var v = document.getElementById("xml3dframe");
+         v.removeEventListener("load", this.cb, true);  
+     }
 });
 
-test("IFrame loaded", function() {
-   expect(3);
-   stop();
-   ok(this.doc);
+test("IFrame loaded", 3, function() {
+   ok(this.doc, "Document set");
 });
 
-test("Auto-configuration", function() {
+test("Auto-configuration", 8, function() {
    var x = this.doc.getElementById("myXml3d");
    ok(x, "Object is adressable");
    equals(typeof x._configured, 'object', "Object is configured");
@@ -26,6 +42,66 @@ test("Auto-configuration", function() {
    ok(x, "Object is adressable");
    equals(typeof x._configured, 'object', "Object is configured");
    equals(x.nodeName, "group", "Is group element");
-   
-   
 });
+
+test("Configuration of new elements", 4, function() {
+    var doc = this.doc;
+    var x = doc.getElementById("myXml3d");
+    var n = doc.createElementNS(org.xml3d.xml3dNS,"view");
+    equals(typeof n._configured, 'object', "Object is configured");
+    x.appendChild(n);
+    equals(typeof n._configured, 'object', "Object is still configured");
+});
+
+function TestAdapterFactory() {
+    this.name = "test";
+    this.createAdapter = function() {
+        return {
+            init : function() {
+                ok(true, "Init Adapter");
+            }
+        };
+    };
+};
+
+org.xml3d.createClass(TestAdapterFactory, org.xml3d.data.AdapterFactory);
+
+module("Adapter tests", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/basic.xhtml", this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    },
+    factory : new TestAdapterFactory(),
+    webglFactory : new org.xml3d.webgl.XML3DRenderAdapterFactory()
+});
+
+test("Adapter registration and initialization test", 6, function() {
+    var x = this.doc.getElementById("myXml3d");
+    equal(x._configured.adapters["test"], undefined, "No Adapter registered yet.");
+    var a = this.factory.getAdapter(x);
+    notEqual(x._configured.adapters["test"], undefined, "Adapter registered.");
+    ok(a, "Adapter created");
+});
+
+test("WebGLFactory test", 6, function() {
+    var g = this.doc.getElementById("myGroup");
+    ok(g, "Node exits");
+    equal(g._configured.adapters["XML3DRenderAdapterFactory"], undefined, "No Adapter registered yet.");
+    var a = this.webglFactory.getAdapter(g);
+    ok(a, "There is a WebGL Group adapter");
+    notEqual(g._configured.adapters["XML3DRenderAdapterFactory"], undefined, "No Adapter registered yet.");
+});
+
+
+
+

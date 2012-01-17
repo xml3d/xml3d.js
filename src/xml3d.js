@@ -49,18 +49,16 @@ org.xml3d.extend = function (a, b) {
 };
 
 org.xml3d.createClass = function(ctor, parent, methods) {
+    methods = methods || {};
     if (parent) {
-        function inheritance() {
-        }
-        inheritance.prototype = parent.prototype;
-        ctor.prototype = new inheritance();
+        var F = function() {};
+        F.prototype = parent.prototype;
+        ctor.prototype = new F();
         ctor.prototype.constructor = ctor;
-        ctor.superClass = parent;
+        //ctor.superClass = parent;
     }
-    if (methods) {
-        for ( var m in methods) {
-            ctor.prototype[m] = methods[m];
-        }
+    for (var m in methods) {
+        ctor.prototype[m] = methods[m];
     }
     return ctor;
 };

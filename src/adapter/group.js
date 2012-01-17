@@ -138,7 +138,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype._updateTransformAdapter = func
 	}
 	
 	// setup new and register listener
-	this._transformAdapter = this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
+	this._transformAdapter = null; // FIXME: this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
 	if (this._transformAdapter)
 		this._transformAdapter.listeners.push(this);
 };

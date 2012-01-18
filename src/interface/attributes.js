@@ -31,7 +31,24 @@
         };
     };
 
+    function createEvent(elem, id, v) {
+        var evt = { attrName: id, relatedNode: elem, value: null, type: "XML3D_DANGLING_REFERENCE" };
+        var uri = new org.xml3d.URI(v);
+        if (uri.valid) {
+            var e = org.xml3d.URIResolver.resolve(uri);
+            evt.value = e;
+            console.log("Resolved node: " + e);
+            if(e)
+                evt.type = "XML3D_REFERENCE_VALID";
+        }
+        return evt;
+    }
+
     handler.ReferenceHandler = function(elem, id) {
+        this.setFromAttribute = function(v){
+            elem._configured.notify(createEvent(elem, id, v));
+            return true; // Already notified
+        };
         this.desc = {
                 get : function() {
                     return this.getAttribute(id) || "";
@@ -49,6 +66,7 @@
         this.setFromAttribute = function(v) {
             var value = v.toLowerCase();
             current = (value && p.e[value] !== undefined) ? p.e[value] : p.d;
+            return false;
         };
 
         this.desc = {
@@ -75,6 +93,7 @@
         var e = elem;
         this.setFromAttribute = function(value) {
             f = null;
+            return false;
         };
         this.desc = {
             get : function() {
@@ -86,7 +105,7 @@
             },
             set : function(value) {
                 f = (typeof value == 'function') ? value : undefined;
-                this._configured.notify(id);
+                this._configured.notify({ attrName: id, relatedNode: elem });
             }
         };
     };
@@ -98,6 +117,7 @@
         this.setFromAttribute = function(value) {
             var v = +value;
             current = isNaN(v) ? defaultValue : Math.floor(v);
+            return false;
         };
 
         this.desc = {
@@ -120,6 +140,7 @@
         this.setFromAttribute = function(value) {
             var v = +value;
             current = isNaN(v) ? defaultValue : v;
+            return false;
         };
 
         this.desc = {
@@ -139,6 +160,7 @@
 
         this.setFromAttribute = function(value) {
             current = string2bool(value + '');
+            return false;
         };
 
         this.desc = {
@@ -171,6 +193,7 @@
                 v._data[1] = m[2];
                 v._data[2] = m[3];
             }
+            return false;
         };
 
         this.desc = {
@@ -208,6 +231,7 @@
                 v._axis._data[2] = +m[3];
                 v._angle = +m[4];
             }
+            return false;
         };
 
         this.desc = {

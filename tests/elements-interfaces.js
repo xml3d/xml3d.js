@@ -78,6 +78,42 @@ test("Int interface tests", function() {
         equals(e.width, 800, "Invalid value set via setAttribute. Back to default: 800.");
     });
 
+test("String interface tests", function() {
+        e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
+        equals(e.getAttribute("id"), null, "no Attribute set");
+        // Set via interface
+        equals(e.id, "", "No Attribute set.");
+
+        e.id = "myxml3d";
+        equals(e.id, "myxml3d", "xml3d.id = 'myxml3d'.");
+        equals(e.getAttribute("id"), "myxml3d", "getAttribute = 'myxml3d'.");
+        e.id = true;
+        equals(e.id, "true", "xml3d.id == 'true'.");
+        equals(e.getAttribute("id"), "true", "getAttribute = 'true'.");
+
+        // Set via attribute
+        e.setAttribute("id", "123");
+        equals(e.id, "123", "Value set via setAttribute to 123.");
+    });
+
+test("Reference interface tests", function() {
+    e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
+    equals(e.getAttribute("activeView"), null, "no Attribute set");
+    // Set via interface
+    equals(e.activeView, "", "No Attribute set.");
+
+    e.activeView = "myxml3d";
+    equals(e.activeView, "myxml3d", "xml3d.activeView = 'myxml3d'.");
+    equals(e.getAttribute("activeView"), "myxml3d", "getAttribute = 'myxml3d'.");
+    e.activeView = true;
+    equals(e.activeView, "true", "xml3d.activeView == 'true'.");
+    equals(e.getAttribute("activeView"), "true", "getAttribute = 'true'.");
+
+    // Set via attribute
+    e.setAttribute("activeView", "#myView");
+    equals(e.activeView, "#myView", "Value set via setAttribute to 123.");
+});
+
 test("Float interface tests", function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "view");
 

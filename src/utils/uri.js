@@ -2,11 +2,11 @@
 // Class URI
 // -----------------------------------------------------------------------------
 org.xml3d.URI = function(str) {
-    if (!str)
-        str = "";
+    str = str || "";
     // Based on the regex in RFC2396 Appendix B.
     var parser = /^(?:([^:\/?\#]+):)?(?:\/\/([^\/?\#]*))?([^?\#]*)(?:\?([^\#]*))?(?:\#(.*))?/;
     var result = str.match(parser);
+    this.valid = result != null;
     this.scheme = result[1] || null;
     this.authority = result[2] || null;
     this.path = result[3] || null;
@@ -41,10 +41,10 @@ org.xml3d.URI.prototype.toString = function() {
 org.xml3d.URIResolver = function() {
 };
 
-org.xml3d.URIResolver.resolve = function(document, uriStr) {
-    if (!document || !uriStr)
-        return null;
-    var uri = new org.xml3d.URI(uriStr);
+org.xml3d.URIResolver.resolve = function(uri, document) {
+    if (typeof uri == 'string')
+        uri = new org.xml3d.URI(uri);
+    document = document || window.document;
 
     if (uri.scheme == 'urn')
     {
@@ -52,25 +52,11 @@ org.xml3d.URIResolver.resolve = function(document, uriStr) {
         return null;
     }
 
-    if (!uri.path)
-        return org.xml3d.URIResolver.resolveLocal(document, uri.fragment);
-
-
-    org.xml3d.debug.logWarning("++ Can't resolve global hrefs yet: " + uriStr);
-    // TODO Resolve intra-document references
-    return null;
-};
-
-org.xml3d.URIResolver.resolveLocal = function(document, id) {
-    if (document !== undefined && document) {
-        var elem = document.getElementById(id);
-        //org.xml3d.debug.logInfo("++ Found: " + elem);
-        if (elem)
-        {
-            var node = document.getNode(elem);
-            //org.xml3d.debug.logInfo("++ Found: " + node);
-            return node;
-        }
+    if (!uri.path) { // local uri
+        return document.getElementById(uri.fragment);
     }
+
+    org.xml3d.debug.logWarning("++ Can't resolve URI: " + uri.toString());
+    // TODO Resolve intra-document references
     return null;
 };

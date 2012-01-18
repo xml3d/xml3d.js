@@ -26,7 +26,7 @@ test("Factory test", 2, function() {
     this.factory.createAdapter().notifyChanged();
 });
 
-test("Event attribute tests", 7, function() {
+test("Event attribute notification tests", 7, function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created");
@@ -39,28 +39,28 @@ test("Event attribute tests", 7, function() {
     equal(a.event.attrName, "onclick", "MutationEvent::attrName");
 });
 
-test("Int interface tests", 2, function() {
+test("Int attribute notifcation tests", 2, function() {
     e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     e.setAttribute("width", "123");
     e.width = 300;
 });
 
-test("Float interface tests", 2, function() {
+test("Float attribute notification tests", 2, function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "view");
     var a = this.factory.getAdapter(e);
     e.setAttribute("fieldOfView", "0.5");
     e.fieldOfView = 0.87;
 });
 
-test("Boolean interface tests", 2, function() {
+test("Boolean attribute notification tests", 2, function() {
     e = document.createElementNS(org.xml3d.xml3dNS, "view");
     var a = this.factory.getAdapter(e);
     e.setAttribute("visible", "false");
     e.visible = true;
 });
 
-test("XML3DVec interface tests", 3, function() {
+test("XML3DVec attribute notification tests", 3, function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "transform");
     var a = this.factory.getAdapter(e);
     e.setAttribute("scale", "1 2 3");
@@ -68,7 +68,7 @@ test("XML3DVec interface tests", 3, function() {
     e.scale.setVec3Value("4 5 6");
 });
 
-test("XML3DRotation interface tests", 5, function() {
+test("XML3DRotation attribute notification tests", 5, function() {
     var e = document.createElementNS(org.xml3d.xml3dNS, "transform");
     var a = this.factory.getAdapter(e);
     e.setAttribute("rotation", "1 0 0 3.14");
@@ -78,7 +78,7 @@ test("XML3DRotation interface tests", 5, function() {
     e.rotation.setAxisAngleValue("1 4 5 6");
 });
 
-test("Enumeration interface tests", 5, function() {
+test("Enumeration attribute notification tests", 5, function() {
     // Behavior copied from HTMLInputElement::type
     var e = document.createElementNS(org.xml3d.xml3dNS, "texture");
     var a = this.factory.getAdapter(e);
@@ -90,3 +90,11 @@ test("Enumeration interface tests", 5, function() {
     e.setAttribute("type", "asdf"); // invalid
 });
 
+test("Reference attribute notification tests", 4, function() {
+    var e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
+    var a = this.factory.getAdapter(e);
+    e.setAttribute("activeView", "#myView");
+    equal(a.event.type, "XML3D_DANGLING_REFERENCE", "Can't resolve before insertion into DOM.");
+    equal(a.event.value, null, "Can't resolve before insertion into DOM.");
+    e.activeView = "#hallo";
+});

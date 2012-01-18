@@ -36,15 +36,16 @@
 
     handler.ElementHandler.prototype.handleEvent = function(e) {
         var handler = this.handlers[e.attrName];
-        if (handler && handler.setFromAttribute)
-            handler.setFromAttribute(e.newValue);
-        var adapters = this.adapters;
-        for(var a in adapters)
-            adapters[a].notifyChanged(e);
+        var notified = false;
+        if (handler && handler.setFromAttribute) {
+            notified = handler.setFromAttribute(e.newValue);
+        }
+        if(!notified) {
+            this.notify(e);
+        }
     };
 
-    handler.ElementHandler.prototype.notify = function(attr) {
-        var evt = { attrName: attr, relatedNode: this.element };
+    handler.ElementHandler.prototype.notify = function(evt) {
         var adapters = this.adapters;
         for(var a in adapters)
             adapters[a].notifyChanged(evt);

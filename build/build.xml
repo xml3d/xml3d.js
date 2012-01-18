@@ -8,7 +8,7 @@
                    
      Author: Kristian Sons                                                                
      ====================================================================== -->
-<project name="script-merge" default="nightly">
+<project name="script-merge" default="develop">
 	<description>
            Merge all the single scripts to one global xml3d.js
     </description>
@@ -47,7 +47,7 @@
 
 	<target name="stable">
 		<property name="versionStr" value="v${version}" />
-		<property name="script.ext" value="${version}" />
+		<property name="script.ext" value="-${version}" />
 		<antcall target="base" />
 	</target>
 
@@ -61,7 +61,14 @@
 		</git>
 		<echo message="${git.output}" />
 		<property name="versionStr" value="rev. ${git.output} (${TODAY})" />
-		<property name="script.ext" value="nightly" />
+		<property name="script.ext" value="-nightly" />
+		<antcall target="base" />
+	</target>
+
+	<target name="develop">
+		<tstamp />
+		<property name="versionStr" value="DEVELOPMENT SNAPSHOT (${TODAY})" />
+		<property name="script.ext" value="" />
 		<antcall target="base" />
 	</target>
 
@@ -114,14 +121,13 @@
           target: base              
          ================================= -->
 	<target name="base" depends="clean" description="description">
-		<property name="finalScript" value="${buildDir}/${script.start}-${script.ext}.js" />
+		<property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
 		<concat destfile="${finalScript}">
 			<fileset file="${basedir}/preamble.txt" />
 			<filelist refid="sourceFiles"/>
 		</concat>
 		<replaceregexp file="${finalScript}" match="org.xml3d.webgl.checkError\(" replace="//org.xml3d.webgl.checkError\(" byline="true" />
 		<replaceregexp file="${finalScript}" match="%VERSION%" replace="${versionStr}" byline="true" />
-		<copy file="${finalScript}" tofile="${buildDir}/xml3d.js" />
 	</target>
 
 	<target name="physics" depends="clean" description="description">

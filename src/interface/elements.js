@@ -5,7 +5,10 @@
     handler.ElementHandler = function(elem) {
         if (elem) {
             this.element = elem;
-            this.element.addEventListener('DOMAttrModified', this, false);
+            elem.addEventListener('DOMAttrModified', this, false);
+//            elem.addEventListener('DOMNodeRemoved', this, true);
+//            elem.addEventListener('DOMCharacterDataModified', this, false);
+//            elem.addEventListener('DOMNodeInserted', this, true);
             this.handlers = {};
             this.adapters = {};
         }
@@ -35,7 +38,16 @@
         var handler = this.handlers[e.attrName];
         if (handler && handler.setFromAttribute)
             handler.setFromAttribute(e.newValue);
-        console.log(e);
+        var adapters = this.adapters;
+        for(var a in adapters)
+            adapters[a].notifyChanged(e);
+    };
+
+    handler.ElementHandler.prototype.notify = function(attr) {
+        var evt = { attrName: attr, relatedNode: this.element };
+        var adapters = this.adapters;
+        for(var a in adapters)
+            adapters[a].notifyChanged(evt);
     };
 
     // Export to org.xml3d namespace

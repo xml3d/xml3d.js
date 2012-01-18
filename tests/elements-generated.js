@@ -19,6 +19,15 @@ test("&lt;xml3d&gt; interface test", function() {
 	equals(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
 	equals(typeof e.height, "number", "height is of type 'number'");
 	equals(typeof e.width, "number", "width is of type 'number'");
+	equals(typeof e.createXML3DVec3, "function", "createXML3DVec3 is of type 'function'");
+	equals(typeof e.createXML3DRotation, "function", "createXML3DRotation is of type 'function'");
+	equals(typeof e.createXML3DMatrix, "function", "createXML3DMatrix is of type 'function'");
+	equals(typeof e.createXML3DRay, "function", "createXML3DRay is of type 'function'");
+	equals(typeof e.getElementByPoint, "function", "getElementByPoint is of type 'function'");
+	equals(typeof e.generateRay, "function", "generateRay is of type 'function'");
+	equals(typeof e.getElementByRay, "function", "getElementByRay is of type 'function'");
+	equals(typeof e.getBoundingBox, "function", "getBoundingBox is of type 'function'");
+	equals(typeof e.activeView, "string", "activeView is of type 'string'");
 });
 test("&lt;data&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "data");
@@ -28,6 +37,10 @@ test("&lt;data&gt; interface test", function() {
 	equals(typeof e.id, "string", "id is of type 'string'");
 	equals(typeof e.map, "string", "map is of type 'string'");
 	equals(typeof e.expose, "string", "expose is of type 'string'");
+	equals(typeof e.getResult, "function", "getResult is of type 'function'");
+	equals(typeof e.getOutputFieldNames, "function", "getOutputFieldNames is of type 'function'");
+	equals(typeof e.src, "string", "src is of type 'string'");
+	equals(typeof e.script, "string", "script is of type 'string'");
 });
 test("&lt;defs&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "defs");
@@ -53,6 +66,11 @@ test("&lt;group&gt; interface test", function() {
 	equals(typeof e.onkeydown, "object", "onkeydown is of type 'object'");
 	equals(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
 	equals(typeof e.visible, "boolean", "visible is of type 'boolean'");
+	equals(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
+	equals(typeof e.getLocalMatrix, "function", "getLocalMatrix is of type 'function'");
+	equals(typeof e.getBoundingBox, "function", "getBoundingBox is of type 'function'");
+	equals(typeof e.transform, "string", "transform is of type 'string'");
+	equals(typeof e.shader, "string", "shader is of type 'string'");
 });
 test("&lt;mesh&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "mesh");
@@ -72,6 +90,9 @@ test("&lt;mesh&gt; interface test", function() {
 	equals(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
 	equals(typeof e.visible, "boolean", "visible is of type 'boolean'");
 	equals(typeof e.type, "string", "type is of type 'string'");
+	equals(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
+	equals(typeof e.getBoundingBox, "function", "getBoundingBox is of type 'function'");
+	equals(typeof e.src, "string", "src is of type 'string'");
 });
 test("&lt;transform&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "transform");
@@ -91,6 +112,8 @@ test("&lt;shader&gt; interface test", function() {
 	equals(typeof e.className, "string", "className is of type 'string'");
 	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
+	equals(typeof e.script, "string", "script is of type 'string'");
+	equals(typeof e.src, "string", "src is of type 'string'");
 });
 test("&lt;light&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "light");
@@ -111,6 +134,8 @@ test("&lt;light&gt; interface test", function() {
 	equals(typeof e.visible, "boolean", "visible is of type 'boolean'");
 	equals(typeof e.global, "boolean", "global is of type 'boolean'");
 	equals(typeof e.intensity, "number", "intensity is of type 'number'");
+	equals(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
+	equals(typeof e.shader, "string", "shader is of type 'string'");
 });
 test("&lt;lightshader&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "lightshader");
@@ -118,6 +143,8 @@ test("&lt;lightshader&gt; interface test", function() {
 	equals(typeof e.className, "string", "className is of type 'string'");
 	equals(typeof e.style, "object", "style is of type 'object'");
 	equals(typeof e.id, "string", "id is of type 'string'");
+	equals(typeof e.script, "string", "script is of type 'string'");
+	equals(typeof e.src, "string", "src is of type 'string'");
 });
 test("&lt;script&gt; interface test", function() {
 	var e = document.createElementNS(org.xml3d.xml3dNS, "script");
@@ -244,4 +271,11 @@ test("&lt;view&gt; interface test", function() {
 	equals(typeof e.position, "object", "position is of type 'object'");
 	equals(typeof e.orientation, "object", "orientation is of type 'object'");
 	equals(typeof e.fieldOfView, "number", "fieldOfView is of type 'number'");
+	equals(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
+	equals(typeof e.setDirection, "function", "setDirection is of type 'function'");
+	equals(typeof e.setUpVector, "function", "setUpVector is of type 'function'");
+	equals(typeof e.lookAt, "function", "lookAt is of type 'function'");
+	equals(typeof e.getDirection, "function", "getDirection is of type 'function'");
+	equals(typeof e.getUpVector, "function", "getUpVector is of type 'function'");
+	equals(typeof e.getViewMatrix, "function", "getViewMatrix is of type 'function'");
 });

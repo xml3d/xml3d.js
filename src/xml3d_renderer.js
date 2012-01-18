@@ -197,10 +197,10 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	//Light information is needed to create shaders, so process them first
 	this.lights = [];
 	this.drawableObjects = this.processScene(this.xml3dNode);
-}
+};
 
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
-	var av = this.xml3dNode.getActiveView();
+	var av = null;//FIXME: this.xml3dNode.getActiveView();
 
 	if (av == null)
 	{

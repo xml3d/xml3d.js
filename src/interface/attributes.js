@@ -31,6 +31,17 @@
         };
     };
 
+    handler.ReferenceHandler = function(elem, id) {
+        this.desc = {
+                get : function() {
+                    return this.getAttribute(id) || "";
+                },
+                set : function(value) {
+                    this.setAttribute(id, value);
+                }
+            };
+    };
+
     handler.EnumAttributeHandler = function(elem, id, p) {
         AttributeHandler.call(this, elem);
         var current = p.d;
@@ -75,6 +86,7 @@
             },
             set : function(value) {
                 f = (typeof value == 'function') ? value : undefined;
+                this._configured.notify(id);
             }
         };
     };

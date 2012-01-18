@@ -354,6 +354,7 @@ org.xml3d.classInfo.xml3d = {
 	generateRay : {m: org.xml3d.methods.xml3dGenerateRay},
 	getElementByRay : {m: org.xml3d.methods.xml3dGetElementByRay},
 	getBoundingBox : {m: org.xml3d.methods.xml3dGetBoundingBox},
+	activeView : {a: org.xml3d.ReferenceHandler},
 	_term: undefined
 };
 /**
@@ -367,6 +368,8 @@ org.xml3d.classInfo.data = {
 	expose : {a: org.xml3d.StringAttributeHandler},
 	getResult : {m: org.xml3d.methods.dataGetResult},
 	getOutputFieldNames : {m: org.xml3d.methods.dataGetOutputFieldNames},
+	src : {a: org.xml3d.ReferenceHandler},
+	script : {a: org.xml3d.ReferenceHandler},
 	_term: undefined
 };
 /**
@@ -399,6 +402,8 @@ org.xml3d.classInfo.group = {
 	getWorldMatrix : {m: org.xml3d.methods.XML3DGraphTypeGetWorldMatrix},
 	getLocalMatrix : {m: org.xml3d.methods.groupGetLocalMatrix},
 	getBoundingBox : {m: org.xml3d.methods.groupGetBoundingBox},
+	transform : {a: org.xml3d.ReferenceHandler},
+	shader : {a: org.xml3d.ReferenceHandler},
 	_term: undefined
 };
 /**
@@ -422,6 +427,7 @@ org.xml3d.classInfo.mesh = {
 	type : {a: org.xml3d.EnumAttributeHandler, params: {e: org.xml3d.MeshTypes, d: 0}},
 	getWorldMatrix : {m: org.xml3d.methods.XML3DGraphTypeGetWorldMatrix},
 	getBoundingBox : {m: org.xml3d.methods.meshGetBoundingBox},
+	src : {a: org.xml3d.ReferenceHandler},
 	_term: undefined
 };
 /**
@@ -445,6 +451,8 @@ org.xml3d.classInfo.shader = {
 	id : {a: org.xml3d.StringAttributeHandler},
 	className : {a: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
+	script : {a: org.xml3d.ReferenceHandler},
+	src : {a: org.xml3d.ReferenceHandler},
 	_term: undefined
 };
 /**
@@ -468,6 +476,7 @@ org.xml3d.classInfo.light = {
 	global : {a: org.xml3d.BoolAttributeHandler, params: false},
 	intensity : {a: org.xml3d.FloatAttributeHandler, params: 1},
 	getWorldMatrix : {m: org.xml3d.methods.XML3DGraphTypeGetWorldMatrix},
+	shader : {a: org.xml3d.ReferenceHandler},
 	_term: undefined
 };
 /**
@@ -477,6 +486,8 @@ org.xml3d.classInfo.lightshader = {
 	id : {a: org.xml3d.StringAttributeHandler},
 	className : {a: org.xml3d.StringAttributeHandler, id: 'class'},
 	// TODO: Handle style
+	script : {a: org.xml3d.ReferenceHandler},
+	src : {a: org.xml3d.ReferenceHandler},
 	_term: undefined
 };
 /**

@@ -2,15 +2,25 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>XML3D Empty Scene</title>
+<title>XML3D Basic Scene</title>
 <link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
 <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
   <xml3d id="myXml3d" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
 	  <defs>
+        <transform id="t_identity"/>
+        <transform id="t_translation" translation="1 2 3"/>
+        <transform id="t_rotation" rotation="1 0 0 1.3"/>
+        <transform id="t_scale" scale="1 2 3"/>
+        <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.3"  translation="1 2 3"/>
 	  </defs>
-    <group id="myGroup"></group>
+	<view id="myView"/>
+	<light id="myLight"/>
+    <group id="myGroup">
+        <mesh id="myMesh01"/>
+    </group>
+    <mesh id="myMesh02"/>
   </xml3d>
 </body>
 </html>

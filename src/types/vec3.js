@@ -1,6 +1,9 @@
 // XML3DVec3
 
-new (function() {
+(function($) {
+    // Is native?
+    if($) return;
+
     /**
      * Configure array properties
      *  @private
@@ -59,8 +62,7 @@ new (function() {
      * @return {string} Human-readable representation of this XML3DVec3.
      */
     p.toString = function() {
-        return "XML3DVec3(" + this._data[0] + " " + this._data[1] + " "
-                + this._data[2] + ")";
+        return "[object XML3DVec3]";
     };
 
     /**
@@ -211,4 +213,4 @@ new (function() {
     if (!window.XML3DVec3)
         window.XML3DVec3 = XML3DVec3;
 
-})();
+}(org.xml3d._native));

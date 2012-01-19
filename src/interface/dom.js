@@ -1,7 +1,7 @@
 // dom.js
 
-(function(native) {
-    if(!native) {
+(function($) {
+    if($) return;
         var doc = {};
         var nativeGetElementById = document.getElementById;
         doc.getElementById = function(id) {
@@ -28,7 +28,6 @@
             return r;
         };
         org.xml3d.extend(window.document,doc);
-    }
     
 }(org.xml3d._native));
 

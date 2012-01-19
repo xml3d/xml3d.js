@@ -1,4 +1,8 @@
-// XML3DBox
+// box.js
+(function($) {
+    // Is native?
+    if($) return;
+
     /**
      * Creates an instance of XML3DBox. XML3DBox represents an axis-aligned box,
      * described by two vectors min and max.
@@ -89,6 +93,15 @@
         return (this._min.x > this._max.x || this._min.y > this._max.y || this._min.z > this._max.z);
     };
     
+    /**
+     * String representation of the XML3DBox.
+     * @override
+     * @return {string} Human-readable representation of this XML3DBox.
+     */
+    XML3DBox.prototype.toString = function() {
+        return "[object XML3DBox]";
+    };
+
     /** updates the min or max accoring to the given point or bounding box. 
     * 
     * @param that the object used for extension, which can be a XML3DVec3 or XML3DBox
@@ -128,3 +141,5 @@
     org.xml3d.XML3DBox = XML3DBox;
     if (!window.XML3DBox)
         window.XML3DBox = XML3DBox;
+
+}(org.xml3d._native));

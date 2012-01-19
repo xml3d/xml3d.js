@@ -1,6 +1,8 @@
-// XML3DRay
+// ray.js
+(function($) {
+    // Is native?
+    if($) return;
 
-new (function() {
     /** returns an XML3DRay that has an origin and a direction.
     * 
     * If the arguments are not given, the ray's origin is (0,0,0) and 
@@ -43,9 +45,18 @@ new (function() {
         enumerable : false
     });
 
+    /**
+     * String representation of the XML3DRay.
+     * @override
+     * @return {string} Human-readable representation of this XML3DRay.
+     */
+    p.toString = function() {
+        return "[object XML3DRay]";
+    };
+
     // Export
     org.xml3d.XML3DRay = XML3DRay;
     if (!window.XML3DRay)
         window.XML3DRay = XML3DRay;
 
-})();
+}(org.xml3d._native));

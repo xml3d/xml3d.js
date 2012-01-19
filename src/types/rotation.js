@@ -1,4 +1,7 @@
-new (function() {
+// rotation.js
+(function($) {
+    // Is native?
+    if($) return;
 
     /**
      * Creates an instance of XML3DRotation. XML3DRotation represents a
@@ -61,7 +64,7 @@ new (function() {
      * @return {string} Human-readable representation of this XML3DRotation.
      */
     p.toString = function() {
-        return "XML3DRotation(" + this._axis + ", " + this._angle + ")";
+        return "[object XML3DRotation]";
     };
 
     /**
@@ -222,5 +225,4 @@ new (function() {
     if (!window.XML3DRotation)
         window.XML3DRotation = XML3DRotation;
 
-})();
-
+}(org.xml3d._native));

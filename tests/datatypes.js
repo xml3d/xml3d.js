@@ -28,7 +28,7 @@ test("Assigning Constructor", function()  {
 });
 
 test("XML3DVec3::toString", function()  {
-	equal(this.ident.toString(), "XML3DVec3(0 0 0)", "Serialization");
+	equal(this.ident.toString(), "[object XML3DVec3]", "Serialization");
 });
 
 test("XML3DVec3::add", function()  {
@@ -154,7 +154,7 @@ test("Setter", function()  {
 });
 
 test("XML3DRotation::toString", function()  {
-	equal(this.ident.toString(), "XML3DRotation(XML3DVec3(0 0 1), 0)", "Serialization");
+	equal(this.ident.toString(), "[object XML3DRotation]", "Serialization");
 });
 
 test("XML3DRotation::setAxisAngle", function()  {
@@ -369,7 +369,7 @@ test("Assigning Constructor", function() {
 });*/
 
 test("XML3DMatrix::toString", function()  {
-    equal(this.mat1.toString(), "XML3DMatrix(2, 2, 12, 0; 1, 6, 17, 0; 0, 0, 1, 0; 1, 2, 3, 1)", "Serialization");
+    equal(this.mat1.toString(), "[object XML3DMatrix]", "Serialization");
 });
 
 test("XML3DMatrix::inverse: invertable matrix", function() {
@@ -482,6 +482,10 @@ test("Assigning Constructor", function() {
 	QUnit.closeVector(this.ray1.direction, new XML3DVec3(4,5,6), EPSILON, "direction");
 });
 
+test("XML3DRay::toString", function()  {
+    equal(this.ident.toString(), "[object XML3DRay]", "Serialization");
+});
+
 // Copy constructor not defined in spec
 /*test("Copy Constructor", function() {
 
@@ -547,6 +551,11 @@ test("Assigning Constructor", function() {
 
 	QUnit.closeBox(b, this.box1, EPSILON);
 });*/
+
+test("XML3DBox::toString", function()  {
+    equal(this.ident.toString(), "[object XML3DBox]", "Serialization");
+});
+
 
 test("XML3DBox setter", function() {
 

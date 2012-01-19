@@ -1,6 +1,6 @@
 // adapter/factory.js
 
-(function(native) {
+(function() {
     var XML3DRenderAdapterFactory = function(handler, renderer) {
         org.xml3d.data.AdapterFactory.call(this);
         this.handler = handler;

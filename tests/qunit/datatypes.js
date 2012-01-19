@@ -24,6 +24,11 @@ QUnit.extend( QUnit, {
 	},
 	
 	closeMatrix  : function(actual, expected, maxDifference, message) {
+	    if(!actual || !expected) {
+	        QUnit.push(actual === expected, actual, expected, message);
+	        return;
+	    }
+
 		var passes = 
 			Math.abs(actual.m11 - expected.m11) <= maxDifference &&
 			Math.abs(actual.m12 - expected.m12) <= maxDifference &&
@@ -61,10 +66,23 @@ QUnit.extend( QUnit, {
 });
 new (function() {
 
+    function isVec3(arg) { return arg.toString() == '[object XML3DVec3]';};
+    function isRotation(arg) { return arg.toString() == '[object XML3DRotation]';};
+    function isMatrix(arg) { return arg.toString() == '[object XML3DMatrix]';};
+
     var original = QUnit.jsDump.parsers.object;
     QUnit.jsDump.setParser("object", function(a,b) {
-        if(a instanceof XML3DVec3 || a instanceof XML3DRotation )
-            return a.toString();
+        if(!a) return original(a,b);
+        if(isVec3(a))
+            return "XML3DVec("+a.x+", "+a.y+", "+a.z+")";
+        if(isRotation(a))
+            return "XML3DRotation("+a.axis.x+", "+a.axis.y+", "+a.axis.z+", "+ a.angle+")";
+        if(isMatrix(a))
+            return 'XML3DMatrix(\n' +
+            a.m11 + ", " +  a.m12 + ", " +  a.m13 + ", " +  a.m14 + "\n" +
+            a.m21 + ", " +  a.m22 + ", " +  a.m23 + ", " +  a.m24 + "\n" +
+            a.m31 + ", " +  a.m32 + ", " +  a.m33 + ", " +  a.m34 + "\n" +
+            a.m41 + ", " +  a.m42 + ", " +  a.m43 + ", " +  a.m44 + ")";
         return original(a,b);
     });
 })();

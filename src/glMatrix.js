@@ -1831,5 +1831,5 @@ quat4.slerp = function(quat, quat2, slerp, dest) {
  */
 quat4.str = function(quat) {
 	return '[' + quat[0] + ', ' + quat[1] + ', ' + quat[2] + ', ' + quat[3] + ']'; 
-}
+};
 

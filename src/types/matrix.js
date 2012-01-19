@@ -1,4 +1,8 @@
-new (function() {
+// matrix.js
+(function($) {
+    // Is native?
+    if($) return;
+
     /**
      * Configure array properties
      * @private
@@ -103,16 +107,12 @@ new (function() {
     Object.defineProperty(p, "m44", prop(15));
 
     /**
-     * String representation of the XML3DMatrix.
+     * String representation of the XML3DBox.
      * @override
-     * @return {string} Human-readable representation of this XML3DMatrix.
+     * @return {string} Human-readable representation of this XML3DBox.
      */
     p.toString = function() {
-        var a = this._data;
-        return 'XML3DMatrix(' + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3]
-                + "; " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[8] + "; "
-                + a[8] + ", " + a[9] + ", " + a[10] + ", " + a[11] + "; "
-                + a[12] + ", " + a[13] + ", " + a[14] + ", " + a[15] + ")";
+        return "[object XML3DMatrix]";
     };
 
     p.setMatrixValue = function(str) {
@@ -261,4 +261,4 @@ new (function() {
     if (!window.XML3DMatrix)
         window.XML3DMatrix = XML3DMatrix;
 
-})();
+}(org.xml3d._native));

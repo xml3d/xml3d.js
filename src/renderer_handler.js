@@ -303,21 +303,21 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         else
             tar = this.scene.xml3d;
 
-        // dispatch
-        for (var i = 0; i < tar.adapters.length; i++) {
+        // FIXME dispatch
+        /*for (var i = 0; i < tar.adapters.length; i++) {
             if (tar.adapters[i].dispatchEvent) {
                 tar.adapters[i].dispatchEvent(evt);
             }
-        }
+        }*/
 
-        // dispatch an extra copy to the canvas element
+        // FIXME dispatch an extra copy to the canvas element
         // TODO: is this needed? do we 'eat' the initial event or is it passed on already?
         tar = this.scene.xml3d;
-        for (var i = 0; i < tar.adapters.length; i++) {
+        /*for (var i = 0; i < tar.adapters.length; i++) {
             if (tar.adapters[i].dispatchEvent) {
                 tar.adapters[i].dispatchEvent(evt);
             }
-        }
+        }*/
     };
 	
 	/** 

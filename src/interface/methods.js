@@ -14,7 +14,8 @@ new (function() {
     };
 
     methods.xml3dGetElementByRay = function() {
-        throw (this.nodeName + "::getElementByRay is not implemeted yet.");
+        console.error(this.nodeName + "::getElementByRay is not implemeted yet.");
+        return null;
     };
 
     methods.xml3dCreateXML3DMatrix = function() {
@@ -34,19 +35,21 @@ new (function() {
     };
 
     methods.viewSetDirection = function(vec) {
-        var dir = vec.negate().normalize();
+        vec = vec || new XML3DVec3(0,0,-1);
+        /*var dir = vec.negate().normalize();
+
         if (this._upVector)
             var up = this._upVector;
         else
             var up = new XML3DVec3(0, 1, 0);
         var right = up.cross(dir).normalize();
         up = dir.cross(right).normalize();
-        this.orientation = XML3DRotation.fromBasis(right, up, dir);
-
+        this.orientation = XML3DRotation.fromBasis(right, up, dir);*/
+        console.error("view::setDirection not implemented yet");
     };
 
     methods.viewSetUpVector = function(up) {
-        this._upVector = up.normalize();
+        console.error("view::setUpVector not implemented yet");
     };
 
     methods.viewGetUpVector = function() {
@@ -60,47 +63,43 @@ new (function() {
     };
 
     methods.viewGetViewMatrix = function() {
-
-        for (i = 0; i < this.adapters.length; i++) {
-            if (this.adapters[i].getViewMatrix) {
-                return this.adapters[i].getViewMatrix();
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].viewGetViewMatrix) {
+                return adapters[adapter].viewGetViewMatrix(x, y, hitPoint, hitNormal);
             }
         }
-
-        return new XML3DMatrix();
+        var p = this.position;
+        return new XML3DMatrix().translate(p.x,p.y,p.z).inverse();
     };
 
     methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
-        for (i = 0; i < this.adapters.length; i++) {
-            if (this.adapters[i].getElementByPoint) {
-                return this.adapters[i].getElementByPoint(x, y, hitPoint, hitNormal);
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].getElementByPoint) {
+                return adapters[adapter].getElementByPoint(x, y, hitPoint, hitNormal);
             }
         }
-
         return null;
     };
 
     methods.xml3dGenerateRay = function(x, y) {
-        for (i = 0; i < this.adapters.length; i++) {
-            if (this.adapters[i].generateRay) {
-                return this.adapters[i].generateRay(x, y);
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].xml3dGenerateRay) {
+                return adapters[adapter].xml3dGenerateRay(x, y);
             }
         }
-
         return new XML3DRay();
     };
 
     methods.groupGetLocalMatrix = function() {
-
-        var xfmNode = this.getTransformNode();
-        if (xfmNode) {
-            for (i = 0; i < xfmNode.adapters.length; i++) {
-                if (xfmNode.adapters[i].getMatrix) {
-                    return xfmNode.adapters[i].getMatrix();
-                }
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].groupGetLocalMatrix) {
+                return adapters[adapter].groupGetLocalMatrix();
             }
         }
-
         return new XML3DMatrix();
     };
 
@@ -108,9 +107,14 @@ new (function() {
      * return the bounding box that is the bounding box of all children.
      */
     methods.groupGetBoundingBox = function() {
-
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].getBoundingBox) {
+                return adapters[adapter].getBoundingBox();
+            }
+        }
         var bbox = new XML3DBox();
-        var locMat = this.getLocalMatrix();
+        /*var locMat = this.getLocalMatrix();
 
         var child = this.firstElementChild;
         while (child !== null) {
@@ -124,7 +128,7 @@ new (function() {
             }
 
             child = child.nextElementSibling;
-        }
+        }*/
 
         return bbox;
     };
@@ -134,30 +138,23 @@ new (function() {
      * returns the bounding box of this mesh in world space.
      */
     methods.meshGetBoundingBox = function() {
-
-        for (i = 0; i < this.adapters.length; i++) {
-            if (this.adapters[i].getBoundingBox)
-                return this.adapters[i].getBoundingBox();
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].getBoundingBox) {
+                return adapters[adapter].getBoundingBox();
+            }
         }
-
         return new XML3DBox();
     };
 
     methods.XML3DGraphTypeGetWorldMatrix = function() {
-
-        var node = this;
-
-        var mat = new XML3DMatrix();
-
-        // accumulate matrix until xml3d tag is reached
-        while (node.nodeName !== "xml3d") {
-            if (node.nodeName === "group")
-                mat = node.getLocalMatrix().multiply(mat);
-
-            node = node.parentNode;
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].XML3DGraphTypeGetWorldMatrix) {
+                return adapters[adapter].XML3DGraphTypeGetWorldMatrix();
+            }
         }
-
-        return mat;
+        return new XML3DMatrix();
     };
     // Export to org.xml3d namespace
     org.xml3d.extend(org.xml3d.methods, methods);

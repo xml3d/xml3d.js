@@ -70,10 +70,7 @@ test("Group Transformation local", function() {
     QUnit.closeMatrix(group.getLocalMatrix(), a, 0.000001, "Group references #t_translation: local Matrix");
     QUnit.closeMatrix(group.getWorldMatrix(), new XML3DMatrix(), 0.000001, "Global transformation is identity");
 
-    var rotation = new XML3DRotation(new XML3DVec3(1, 0, 0), Math.PI / 2);
-    a = new XML3DMatrix().multiply(rotation.toMatrix());
-    // Don't rely on XML3DMatrix::rotateAxisAngle for now
-    // a = new XML3DMatrix().rotateAxisAngle(1,0,0,Math.PI/2);
+    a = new XML3DMatrix(1, 0, 0, 0, 0, -0, 1, 0, 0, -1, -0, 0, 0, 0, 0, 1);
     group.setAttribute("transform", "#t_rotation");
     QUnit.closeMatrix(group.getLocalMatrix(), a, 0.000001, "Group references #t_rotation: local Matrix");
 

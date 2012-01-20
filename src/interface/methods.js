@@ -112,9 +112,13 @@ new (function() {
             var so = n.scaleOrientation.toMatrix();
 
             var m = new XML3DMatrix();
-            return m.translate(t.x, t.y, t.z).multiply(m.translate(c.x, c.y, c.z)).multiply(n.rotation.toMatrix())
-                    .multiply(so).multiply(m.scale(s.x, s.y, s.z)).multiply(so.inverse()).multiply(
-                            m.translate(-c.x, -c.y, -c.z));
+            return m.translate(t.x, t.y, t.z)
+                   .multiply(m.translate(c.x, c.y, c.z))
+                   .multiply(n.rotation.toMatrix())
+                   .multiply(so)
+                   .multiply(m.scale(s.x, s.y, s.z))
+                   .multiply(so.inverse())
+                   .multiply(m.translate(-c.x, -c.y, -c.z));
         }
         return new XML3DMatrix();
     };

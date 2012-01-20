@@ -68,7 +68,13 @@ new (function() {
 
     function isVec3(arg) { return arg.toString() == '[object XML3DVec3]';};
     function isRotation(arg) { return arg.toString() == '[object XML3DRotation]';};
-    function isMatrix(arg) { return arg.toString() == '[object XML3DMatrix]';};
+    function isMatrix(arg) {
+        if (arg.toString() == '[object XML3DMatrix]')
+            return true;
+        if (window.WebKitCSSMatrix)
+            return arg instanceof window.WebKitCSSMatrix;
+        return false;
+    };
 
     var original = QUnit.jsDump.parsers.object;
     QUnit.jsDump.setParser("object", function(a,b) {

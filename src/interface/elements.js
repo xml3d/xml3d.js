@@ -51,6 +51,14 @@
             adapters[a].notifyChanged(evt);
     };
 
+    handler.ElementHandler.prototype.resolve = function(attrName) {
+        var uri = new org.xml3d.URI(this.element[attrName]);
+        if (uri.valid && uri.fragment) {
+            return org.xml3d.URIResolver.resolve(uri);
+        }
+        return null;
+    };
+
     // Export to org.xml3d namespace
     org.xml3d.extend(org.xml3d, handler);
 

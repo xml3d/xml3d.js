@@ -156,7 +156,28 @@
      */
     p.toMatrix = function() {
       var m = new XML3DMatrix();
-      quat4.toMat4(p.toQuaternion(this),m._data);
+      var c = Math.cos(-this._angle);
+      var s = Math.sin(-this._angle);
+      var t = 1.0 - c;
+
+      var a1 = this._axis;
+      m._data[0] = c + a1.x*a1.x*t;
+      m._data[5] = c + a1.y*a1.y*t;
+      m._data[10] = c + a1.z*a1.z*t;
+
+      var tmp1 = a1.x*a1.y*t;
+      var tmp2 = a1.z*s;
+      m._data[4] = tmp1 + tmp2;
+      m._data[1] = tmp1 - tmp2;
+      tmp1 = a1.x*a1.z*t;
+      tmp2 = a1.y*s;
+      m._data[8] = tmp1 - tmp2;
+      m._data[2] = tmp1 + tmp2;
+      tmp1 = a1.y*a1.z*t;
+      tmp2 = a1.x*s;
+      m._data[9] = tmp1 + tmp2;
+      m._data[6] = tmp1 - tmp2;
+      //quat4.toMat4(p.toQuaternion(this),m._data);
       return m;
     };
     

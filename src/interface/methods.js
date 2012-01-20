@@ -64,13 +64,16 @@ new (function() {
 
     methods.viewGetViewMatrix = function() {
         var adapters = this._configured.adapters || {};
-        for (var adapter in adapters) {
+        for ( var adapter in adapters) {
             if (adapters[adapter].viewGetViewMatrix) {
                 return adapters[adapter].viewGetViewMatrix(x, y, hitPoint, hitNormal);
             }
         }
+        // Fallback implementation
         var p = this.position;
-        return new XML3DMatrix().translate(p.x,p.y,p.z).inverse();
+        var r = this.orientation;
+        var a = r.axis;
+        return new XML3DMatrix().translate(p.x, p.y, p.z).rotateAxisAngle(a.x, a.y, a.z, r.angle).inverse();
     };
 
     methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
@@ -95,10 +98,23 @@ new (function() {
 
     methods.groupGetLocalMatrix = function() {
         var adapters = this._configured.adapters || {};
-        for (var adapter in adapters) {
+        for ( var adapter in adapters) {
             if (adapters[adapter].groupGetLocalMatrix) {
                 return adapters[adapter].groupGetLocalMatrix();
             }
+        }
+        // Fallback
+        var n = this._configured.resolve("transform");
+        if (n) {
+            var t = n.translation;
+            var c = n.center;
+            var s = n.scale;
+            var so = n.scaleOrientation.toMatrix();
+
+            var m = new XML3DMatrix();
+            return m.translate(t.x, t.y, t.z).multiply(m.translate(c.x, c.y, c.z)).multiply(n.rotation.toMatrix())
+                    .multiply(so).multiply(m.scale(s.x, s.y, s.z)).multiply(so.inverse()).multiply(
+                            m.translate(-c.x, -c.y, -c.z));
         }
         return new XML3DMatrix();
     };

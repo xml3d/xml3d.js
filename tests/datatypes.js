@@ -451,6 +451,32 @@ test("XML3DMatrix::setMatrixValue: invalid value", function() {
     raises(function() {m.setMatrixValue("wrong-matrix-format");}, "set an invalid value");
 });
 
+test("XML3DMatrix::CSSMatrix conformance", function() {
+
+    // TODO: Document that XML3DMatrix::rotate and XML3DMatrix::rotateAxisAngle
+        // are in radians while the same methods of CSSMatrix use degrees
+        if (window.WebKitCSSMatrix) {
+            var xml3d = new XML3DMatrix();
+            var css = new WebKitCSSMatrix();
+            QUnit.closeMatrix(xml3d, css, EPSILON, "Same identity");
+            QUnit.closeMatrix(xml3d.translate(1, 2, 3), css.translate(1, 2, 3), EPSILON, "CSSMatrix::translate");
+            QUnit.closeMatrix(xml3d.scale(1, 2, 3), css.scale(1, 2, 3), EPSILON, "CSSMatrix::scale");
+            QUnit.closeMatrix(xml3d.rotate(0, 0, Math.PI / 2), css.rotate(0, 0, 90), EPSILON, "CSSMatrix::rotate");
+            QUnit.closeMatrix(xml3d.rotateAxisAngle(1, 0, 0, Math.PI / 4), css.rotateAxisAngle(1, 0, 0, 45), EPSILON,
+                    "CSSMatrix::rotateAxisAngle");
+            QUnit.closeMatrix(xml3d.translate(1, 2, 3).inverse(), css.translate(1, 2, 3).inverse(), EPSILON,
+                    "CSSMatrix::inverse (test depends on correct ::translate)");
+            QUnit.closeMatrix(xml3d.translate(1, 2, 3).multiply(xml3d.scale(2, 2, 2)), css.translate(1, 2, 3).multiply(
+                    css.scale(2, 2, 2)), EPSILON,
+                    "CSSMatrix::multiply (test depends on correct ::translate and ::scale)");
+            // QUnit.closeMatrix(css.rotate(45,0,0),
+            // css.rotateAxisAngle(1,0,0,45), EPSILON);
+            QUnit.closeMatrix(xml3d.rotateAxisAngle(1, 0, 0, Math.PI / 2), new XML3DRotation(new XML3DVec3(1, 0, 0),
+                    Math.PI / 2).toMatrix(), EPSILON);
+
+        }
+    });
+
 //============================================================================
 //--- XML3DRay ---
 //============================================================================

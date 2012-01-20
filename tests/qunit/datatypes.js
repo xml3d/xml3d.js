@@ -86,3 +86,13 @@ new (function() {
         return original(a,b);
     });
 })();
+
+var loadDocument = function(url, f) {
+    var v = document.getElementById("xml3dframe");
+    ok(v, "Found frame.");
+    v.style.float = "right";
+    v.style.width = "500px";
+    v.style.height = "300px";
+    v.addEventListener("load", f, true);
+    v.src = url;
+};

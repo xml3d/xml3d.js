@@ -1,19 +1,6 @@
 
-
-var loadDocument = function(url,f) {
-    console.log("Setup scene.");
-    var v = document.getElementById("xml3dframe");
-    ok(v, "Found frame.");
-    v.style.float = "right";
-    v.style.width = "500px";
-    v.style.height = "300px";
-    v.addEventListener("load", f, true);
-    v.src = url;
-};
-
-
 module("Element configuration tests", {
-     setup: function() {
+    setup : function() {
         stop();
         var that = this;
         this.cb = function(e) {
@@ -22,11 +9,11 @@ module("Element configuration tests", {
             start();
         };
         loadDocument("scenes/basic.xhtml", this.cb);
-     },
-     teardown: function() {
-         var v = document.getElementById("xml3dframe");
-         v.removeEventListener("load", this.cb, true);  
-     }
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
 });
 
 test("IFrame loaded", 3, function() {

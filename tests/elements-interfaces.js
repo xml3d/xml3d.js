@@ -43,6 +43,8 @@ test("Int interface tests", function() {
         e.setAttribute("width", 509.5);
         equals(e.width, 509, "canvas.width = 509.5 // 509;");
         equals(e.getAttribute("width"), "509.5", "getAttribute = '509.5'");
+        e.setAttribute("width", "asdf");
+        equals(e.width, 300, "canvas.width set back to default, if invalid value.");
 
         // Now xml3d
         e = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
@@ -154,19 +156,19 @@ test("Boolean interface tests", function() {
 
         equals(e.getAttribute("visible"), null, "Attribute has not been set yet.");
 
-        // now XML3DViewElement::visible
-        e = document.createElementNS(org.xml3d.xml3dNS, "view");
+        // now XML3DGroupElement::visible
+        e = document.createElementNS(org.xml3d.xml3dNS, "group");
 
         // Set via interface
-        equals(e.visible, true, "view.fieldOfView is 'true' initially.");
+        equals(e.visible, true, "group.visible is 'true' initially.");
         e.visible = false;
-        equals(e.visible, false, "view.visible set to false;");
+        equals(e.visible, false, "group.visible set to false;");
         e.visible = true;
-        equals(e.visible, true, "view.visible set to true;");
+        equals(e.visible, true, "group.visible set to true;");
         e.visible = 0;
-        equals(e.visible, false, "view.visible set to 0;");
+        equals(e.visible, false, "group.visible set to 0;");
         e.visible = "false"; // Non-empty string evaulates to 'true'
-        equals(e.visible, true, "view.visible set to non-empty string.");
+        equals(e.visible, true, "group.visible set to non-empty string.");
 
         equals(e.getAttribute("visible"), null, "Attribute has not been set yet.");
 
@@ -287,4 +289,41 @@ test("Typed Array interface tests", function() {
     notEqual(e.value, null, "Value must not be null");
     equal(e.value.toString(), "[object Uint8Array]", "<bool> has Uint8Array");
     equal(e.value.length, 0, "Initial length is zero.");
+});
+
+
+module("Element initialization tests", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/basic.xhtml", this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+test("Interface initialization", function() {
+    var t = this.doc.getElementById("t_mixed");
+    var v = this.doc.getElementById("myView");
+    var x = this.doc.getElementById("myXml3d");
+    var m = this.doc.getElementById("myMesh01");
+    var g = this.doc.getElementById("myGroup");
+
+    QUnit
+            .closeVector(t.translation, new XML3DVec3(1, 2, 3), EPSILON,
+                    "XML3DVec3 (transform::translation) initialized.");
+    QUnit.closeRotation(t.rotation, new XML3DRotation(new XML3DVec3(1, 0, 0), 1.3), EPSILON,
+            "XML3DRotation (transform::rotation) initialized.");
+    QUnit.close(v.fieldOfView, 0.5, EPSILON, "Float (view::rotation) initialized.");
+    QUnit.close(x.width, 500, EPSILON, "Int (xml3d::width) initialized.");
+    equal(g.visible, false, "Boolean (group::visible) initialized.");
+    equal(m.type, "lines", "Enumeration (mesh::type) initialized.");
+    equal(g.onclick, null, "Event attribute (group::onclick) non-initialized.");
+    equal(typeof m.onclick, "function", "Event attribute (mesh::onclick) initialized.");
 });

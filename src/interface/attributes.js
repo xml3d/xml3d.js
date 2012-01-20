@@ -11,8 +11,7 @@
         default:
             return Boolean(string);
         }
-    },
-    handler = {};
+    }, handler = {};
 
     AttributeHandler = function(elem) {
         this.setter = function(e) {
@@ -32,31 +31,36 @@
     };
 
     function createEvent(elem, id, v) {
-        var evt = { attrName: id, relatedNode: elem, value: null, type: "XML3D_DANGLING_REFERENCE" };
+        var evt = {
+            attrName : id,
+            relatedNode : elem,
+            value : null,
+            type : "XML3D_DANGLING_REFERENCE"
+        };
         var uri = new org.xml3d.URI(v);
         if (uri.valid) {
             var e = org.xml3d.URIResolver.resolve(uri);
             evt.value = e;
             console.log("Resolved node: " + e);
-            if(e)
+            if (e)
                 evt.type = "XML3D_REFERENCE_VALID";
         }
         return evt;
     }
 
     handler.ReferenceHandler = function(elem, id) {
-        this.setFromAttribute = function(v){
+        this.setFromAttribute = function(v) {
             elem._configured.notify(createEvent(elem, id, v));
             return true; // Already notified
         };
         this.desc = {
-                get : function() {
-                    return this.getAttribute(id) || "";
-                },
-                set : function(value) {
-                    this.setAttribute(id, value);
-                }
-            };
+            get : function() {
+                return this.getAttribute(id) || "";
+            },
+            set : function(value) {
+                this.setAttribute(id, value);
+            }
+        };
     };
 
     handler.EnumAttributeHandler = function(elem, id, p) {
@@ -68,6 +72,8 @@
             current = (value && p.e[value] !== undefined) ? p.e[value] : p.d;
             return false;
         };
+        if (elem.hasAttribute(id))
+            this.setFromAttribute(elem.getAttribute(id));
 
         this.desc = {
             get : function() {
@@ -105,7 +111,10 @@
             },
             set : function(value) {
                 f = (typeof value == 'function') ? value : undefined;
-                this._configured.notify({ attrName: id, relatedNode: elem });
+                this._configured.notify( {
+                    attrName : id,
+                    relatedNode : elem
+                });
             }
         };
     };
@@ -114,11 +123,14 @@
 
     handler.IntAttributeHandler = function(elem, id, defaultValue) {
         var current = defaultValue;
+
         this.setFromAttribute = function(value) {
-            var v = +value;
-            current = isNaN(v) ? defaultValue : Math.floor(v);
+            var v = value.match(/^\d+/);
+            current = v ? +v[0] : defaultValue;
             return false;
         };
+        if (elem.hasAttribute(id))
+            this.setFromAttribute(elem.getAttribute(id));
 
         this.desc = {
             get : function() {
@@ -142,6 +154,8 @@
             current = isNaN(v) ? defaultValue : v;
             return false;
         };
+        if (elem.hasAttribute(id))
+            this.setFromAttribute(elem.getAttribute(id));
 
         this.desc = {
             get : function() {
@@ -162,6 +176,8 @@
             current = string2bool(value + '');
             return false;
         };
+        if (elem.hasAttribute(id))
+            this.setFromAttribute(elem.getAttribute(id));
 
         this.desc = {
             get : function() {
@@ -177,6 +193,7 @@
 
     handler.XML3DVec3AttributeHandler = function(elem, id, d) {
         var v = null;
+        var that = this;
         var changed = function(value) {
             elem.setAttribute(id, value.x + " " + value.y + " " + value.z);
         };
@@ -199,7 +216,10 @@
         this.desc = {
             get : function() {
                 if (!v) {
-                    v = new XML3DVec3(d[0], d[1], d[2], changed);
+                    if (this.hasAttribute(id))
+                        that.setFromAttribute(this.getAttribute(id));
+                    else
+                        v = new XML3DVec3(d[0], d[1], d[2], changed);
                 }
                 return v;
             },
@@ -211,6 +231,7 @@
 
     handler.XML3DRotationAttributeHandler = function(elem, id, d) {
         var v = null;
+        var that = this;
         var changed = function(v) {
             elem.setAttribute(id, v.axis.x + " " + v.axis.y + " " + v.axis.z + " " + v.angle);
         };
@@ -237,7 +258,10 @@
         this.desc = {
             get : function() {
                 if (!v) {
-                    v = new XML3DRotation(new XML3DVec3(d[0], d[1], d[2]), d[3], changed);
+                    if (this.hasAttribute(id))
+                        that.setFromAttribute(this.getAttribute(id));
+                    else
+                        v = new XML3DRotation(new XML3DVec3(d[0], d[1], d[2]), d[3], changed);
                 }
                 return v;
             },

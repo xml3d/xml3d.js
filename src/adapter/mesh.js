@@ -7,11 +7,11 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
     this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
     this.dataAdapter.registerObserver(this);
 
-    this.mesh = this.initMeshGL();
+    //this.mesh = this.initMeshGL();
  
     this.passChangeToObject = function(evt) { 
         org.xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
-    }
+    };
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
@@ -30,6 +30,11 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.processListeners  = function() 
             this.node.addEventListener(eventType,  new Function("evt", att.value), false);
         }
     }
+};
+
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.registerCallback = function(callback) {
+	if (callback instanceof Function)
+		this.passChangeToObject = callback;
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispatchEvent = function(evt) {

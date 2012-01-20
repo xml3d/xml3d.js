@@ -174,6 +174,19 @@ org.xml3d.webgl.checkError = function(gl, text)
 };
 
 /**
+ * Represents a drawable object in the scene.
+ * 
+ * This object holds references to a mesh and shader stored in their respective managers, or in the 
+ * case of XFlow a local instance of these objects, since XFlow may be applied differently to different 
+ * instances of the same <data> element. It also holds the current transformation matrix for the object,
+ * a flag to indicate visibility (not visible = will not be rendered), and a callback function to be used by
+ * any adapters associated with this object (eg. the mesh's parent Group) to propogate changes (eg. when the 
+ * parent group's shader is changed).
+ */
+ 
+
+
+/**
  * Constructor for the Renderer.
  * 
  * The renderer is responsible for drawing the scene and determining which object was
@@ -182,12 +195,12 @@ org.xml3d.webgl.checkError = function(gl, text)
 org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.handler = handler;
 	this.currentView = null;
-	this.xml3dNode = handler.scene;
+	this.xml3dNode = handler.scene.xml3d;
 	this.factory = new org.xml3d.webgl.XML3DRenderAdapterFactory(handler, this);
 	this.dataFactory = new org.xml3d.webgl.XML3DDataAdapterFactory(handler);
 	this.bufferHandler = new org.xml3d.webgl.XML3DBufferHandler(handler.gl, this);
-	this.shaderManager = new org.xml3d.webgl.XML3DShaderManager(this, this.dataFactory, this.factory);
-	this.meshManager = new org.xml3d.webgl.XML3DMeshManager(this, this.dataFactory, this.factory);
+	this.shaderManager = new org.xml3d.webgl.XML3DShaderManager(handler.gl, this, this.dataFactory, this.factory);
+	this.meshManager = new org.xml3d.webgl.XML3DMeshManager(handler.gl, this, this.dataFactory, this.factory);
 	this.camera = this.initCamera();
 	this.shaderMap = this._initInternalShaders();
 	this.width = width;
@@ -199,8 +212,23 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.drawableObjects = this.processScene(this.xml3dNode);
 };
 
+org.xml3d.webgl.Renderer.drawableObject = function() {
+	this.mesh = null;
+	this.shader = null;
+	this.transform = null;
+	this.visible = true;
+	this.meshNode = null;
+	this.callback = function(evt) {
+		//do stuff
+
+	};
+};
+
 org.xml3d.webgl.Renderer.prototype.initCamera = function() {
-	var av = null;//FIXME: this.xml3dNode.getActiveView();
+	var avLink = this.xml3dNode.activeView;
+	var av = null;
+	if (avLink != "")
+		av = org.xml3d.URIResolver.resolve(avLink);
 
 	if (av == null)
 	{
@@ -210,10 +238,10 @@ org.xml3d.webgl.Renderer.prototype.initCamera = function() {
 		if (av == null)
 			org.xml3d.debug.logError("No view defined.");
 		this.currentView = av;
-		return this.factory.getAdapter(av, org.xml3d.webgl.Renderer.prototype);
+		return this.factory.getAdapter(av);
 	}
 	this.currentView = av;
-	return this.factory.getAdapter(av, org.xml3d.webgl.Renderer.prototype);
+	return this.factory.getAdapter(av);
 };
 
 org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
@@ -222,7 +250,7 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
     
 	//Build scene
 	var recursiveBuild = function(currentNode, visible, transform, parentShader) {
-		var adapter = this.factory.getAdapter(currentNode, org.xml3d.webgl.Renderer.prototype);
+		var adapter = renderer.factory.getAdapter(currentNode);
 		var downstreamShader = parentShader;
 		var downstreamTransform = transform;
 
@@ -247,7 +275,7 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 					
 				// Add a new drawable object to the scene
 				var newObject = new org.xml3d.webgl.Renderer.drawableObject(renderer);
-				newObject.mesh = this.meshManager.createMesh(currentNode);
+				newObject.mesh = renderer.meshManager.createMesh(currentNode);
 				newObject.meshNode = currentNode;
 				newObject.visible = visible;
 				
@@ -261,26 +289,27 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 				break;
 				
 			case "light":
-				this.lights.push( { adapter : adapter , transform : transform} );
+				renderer.lights.push( { adapter : adapter , transform : transform} );
 				break;
 
 			default:
 				break;
 		}
 
-		if (currentNode.childNodes.length) {
-			var children = currentNode.childNodes;
-			for (var child in children) {
-				recursiveBuild(children[child], visible, downstreamTransform, downstreamShader);
-			}
-		}	
+		
+		var child = currentNode.firstElementChild;
+		while (child) {
+			recursiveBuild(child, visible, downstreamTransform, downstreamShader);
+			child = child.nextSibling;
+		}
+		
 	};
 	
 	recursiveBuild(xml3dNode, true, new XML3DMatrix(), null);
 	
 	for (var i=0; i < scene.length; i++) {
 		var obj = scene[i];
-		this.shaderManager.createShaderForObject(obj, this.lights);
+		obj.shader = this.shaderManager.createShaderForObject(obj, this.lights);
 	}
 	
 	return scene;
@@ -331,7 +360,7 @@ org.xml3d.webgl.Renderer.prototype.requestRedraw = function(reason) {
 };
 
 org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
-	var adapter = this.factory.getAdapter(evt.newValue, org.xml3d.webgl.Renderer.prototype);
+	var adapter = this.factory.getAdapter(evt.newValue);
 	
 	//Traverse parent nodes to build any inherited shader and transform elements
 	var transform = adapter.applyTransformMatrix(new XML3DMatrix());
@@ -353,7 +382,7 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
 				this.factory.handler.setMouseMovePicking(true);
 			
-			var parentAdapter = this.factory.getAdapter(currentNode, org.xml3d.webgl.Renderer.prototype);	
+			var parentAdapter = this.factory.getAdapter(currentNode);	
 			
 			if (!didListener) { 
 				parentAdapter.listeners.push(adapter); 
@@ -374,7 +403,7 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 	//References to the adapters of the removed node are automatically cleaned up
 	//as they're encountered during the render phase or notifyChanged methods
-	var adapter = this.factory.getAdapter(evt.oldValue, org.xml3d.webgl.Renderer.prototype);
+	var adapter = this.factory.getAdapter(evt.oldValue);
 	if (adapter && adapter.dispose)
 		adapter.dispose();
 	this.requestRedraw("A node was removed.");
@@ -394,7 +423,9 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
     gl.enable(gl.DEPTH_TEST);
 	
     // If the view has changed or we don't have a camera, then compute it.
-	if (this.currentView != this.xml3dNode.getActiveView() || !this.camera)
+    //TODO: Implement better notification system for view changes
+    var av = this.xml3dNode.activeView;
+	if (this.currentView != org.xml3d.URIResolver.resolve(av) || !this.camera)
 		this.camera = this.initCamera();
 
     // Check if we still don't have a camera.
@@ -417,7 +448,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		visible : new Float32Array(elements)
 	};
 	for ( var j = 0; j < slights.length; j++) {
-		var light = slights[j][1];
+		light = slights[j].adapter;
 		var params = light.getParameters(xform.view);
 		if (!params)
 			continue; // TODO: Shrink array
@@ -515,11 +546,11 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 		//xform.model.load(transform);
 		xform.model = transform;
 		xform.modelView = this.camera.getModelViewMatrix(xform.model);
-        parameters["modelMatrix"] = transform.toGL();
-		parameters["modelViewMatrix"] = xform.modelView.toGL();
-		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView).toGL();
+        parameters["modelMatrix"] = transform._data;
+		parameters["modelViewMatrix"] = xform.modelView._data;
+		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView)._data;
 		parameters["normalMatrix"] = this.camera.getNormalMatrixGL(xform.modelView);
-		parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3);
+		//parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3); //TODO: Fix me
 		
 		if (!shader)
 		{			
@@ -528,7 +559,7 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 			triCount += this.drawObject(shader, mesh);
 			this.shaderManager.unbindDefaultShader();
 		} else {
-			this.shaderManager.enable(shader, parameters);
+			this.shaderManager.bindShader(shader, parameters);
 			//shape.applyXFlow(shader, parameters);			
 			this.shaderManager.setUniformVariables(parameters);
 			triCount += this.drawObject(shader, mesh);
@@ -544,7 +575,7 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 
 org.xml3d.webgl.Renderer.prototype.drawObject = function(shaderProgram, meshInfo) { 
 	var sAttributes = shaderProgram.attributes;
-	var gl = this.gl;
+	var gl = this.handler.gl;
 	var triCount = 0;
     var vbos = meshInfo.vbos;
 
@@ -678,10 +709,10 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 
 				var parameters = {
 						id : id,
-						min : volumeMin.toGL(),
-						max : volumeMax.toGL(),
-						modelMatrix : transform.transpose().toGL(),
-						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView).toGL(),
+						min : volumeMin._data,
+						max : volumeMax._data,
+						modelMatrix : transform._data,
+						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)._data,
 						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 				};
 				
@@ -729,8 +760,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	xform.modelView = this.camera.getModelViewMatrix(xform.model);
 	
 	var parameters = {
-		modelViewMatrix : transform.toGL(),
-		modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView).toGL(),
+		modelViewMatrix : transform._data,
+		modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)._data,
 		normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 	};
 
@@ -840,7 +871,9 @@ org.xml3d.webgl.Renderer.prototype.notifyDataChanged = function() {
 org.xml3d.webgl.Renderer.prototype.getViewMatrix = function() { 
 
 	// recompute if view changed
-	if (this.currentView != this.scene.getActiveView())
+	//TODO: better view change notification system
+	var av = this.xml3dNode.activeView;
+	if (this.currentView != org.xml3d.URIResolver.resolve(av))
 		this.camera = this.initCamera();
 
 	this._viewMatrix = this.camera.getViewMatrix();
@@ -857,7 +890,9 @@ org.xml3d.webgl.Renderer.prototype.getProjectionMatrix = function() {
 
 	if(!this._projMatrix)
 	{
-		if (this.currentView != this.scene.getActiveView())
+		//TODO: better view change notification system
+		var av = this.xml3dNode.activeView;
+		if (this.currentView != org.xml3d.URIResolver.resolve(av))
 			this.camera = this.initCamera();
 		
 		this._projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
@@ -880,45 +915,6 @@ org.xml3d.webgl.RenderAdapter.prototype.getShader = function() {
 	return null;
 };
 
-//org.xml3d.webgl.RenderAdapter.prototype.notifyChanged = function(e) {
-//	org.xml3d.debug.logWarning("Unhandled change: " + e);
-//};
-
-org.xml3d.webgl.RenderAdapter.prototype.collectDrawableObjects = function(
-		transform, opaqueObjects, transparentObjects, outLights, parentShader, visible) {
-	var adapter = this.factory.getAdapter(this.node, org.xml3d.webgl.Renderer.prototype);
-	if (adapter._parentShader !== undefined)
-		adapter._parentShader = parentShader;
-	
-	var child = this.node.firstElementChild;
-	
-	while (child !== null) {
-			var isVisible = visible;
-			var childAdapter = this.factory.getAdapter(child, org.xml3d.webgl.Renderer.prototype);
-			if (childAdapter) {
-				var childTransform = childAdapter.applyTransformMatrix(transform);
-				if (childAdapter.parentTransform !== undefined || childAdapter._parentTransform !== undefined) {
-					childAdapter.parentTransform = transform;
-				}
-				var shader = childAdapter.getShader();
-				
-				if (!shader)
-					shader = parentShader;
-				if (adapter.listeners) {
-					adapter.listeners.push(childAdapter);
-				}
-				if (child.getAttribute("visible") == "false")
-					isVisible = false;
-				if (child.hasAttribute("onmousemove") || child.hasAttribute("onmouseout"))
-					this.factory.handler.setMouseMovePicking(true);
-				
-				childAdapter.collectDrawableObjects(childTransform, opaqueObjects, transparentObjects, outLights, shader, isVisible);
-			}
-			child = child.nextElementSibling;
-		}
-};
-
-
 org.xml3d.webgl.RenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
 	return transform;
@@ -938,7 +934,7 @@ org.xml3d.webgl.XML3DDefsRenderAdapter.prototype.notifyChanged = function(evt) {
 //Adapter for <img>
 org.xml3d.webgl.XML3DImgRenderAdapter = function(factory, node) {
 	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
-	this.textureAdapter = factory.getAdapter(node.parentNode, org.xml3d.webgl.Renderer.prototype);
+	this.textureAdapter = factory.getAdapter(node.parentNode);
 };
 org.xml3d.webgl.XML3DImgRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
 org.xml3d.webgl.XML3DImgRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DImgRenderAdapter;
@@ -956,6 +952,9 @@ org.xml3d.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = org.xml3d.
 // Utility functions
 org.xml3d.webgl.calculateBoundingBox = function(tArray) {
 	var bbox = new XML3DBox();
+	
+	//TODO: Fix bounding box
+	return bbox;
 	
 	if (!tArray || tArray.length < 3)
 		return bbox;

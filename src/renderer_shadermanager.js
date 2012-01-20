@@ -16,7 +16,7 @@ org.xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory
 };
 
 org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, lights) {
-	var groupAdapter = this.factory.getAdapter(obj.meshNode.parentNode, org.xml3d.webgl.Renderer.prototype);
+	var groupAdapter = this.factory.getAdapter(obj.meshNode.parentNode);
 	var shaderAdapter = groupAdapter.getShader();
 	var shaderNode = shaderAdapter.node;
     
@@ -27,9 +27,9 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(ob
         
     var sources = {vs:null, fs:null};
 			
-	if (this.node.hasAttribute("script"))
+	if (shaderNode.hasAttribute("script"))
 	{
-		var scriptURL = this.node.getAttribute("script");
+		var scriptURL = shaderNode.getAttribute("script");
 		if (new org.xml3d.URI(scriptURL).scheme == "urn") {
 			//Internal shader
 			this.getStandardShaderSource(scriptURL, sources, shaderAdapter, lights);
@@ -58,7 +58,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(ob
 org.xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights) {
 	//Need to check for textures to decide which internal shader to use
 	var vertexColors = false;
-	var dataTable = shaderAdapter.createDataTable();	
+	var dataTable = shaderAdapter.dataAdapter.createDataTable();	
 
 	//if (scriptURL == "urn:xml3d:shader:phong" && !this.isEmpty(this.textures))
 	//	scriptURL = "urn:xml3d:shader:texturedphong";

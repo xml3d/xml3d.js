@@ -192,8 +192,8 @@ org.xml3d.webgl.DataAdapter = function(factory, node)
 			child = child.nextElementSibling;
 		}
 		
-		if (this.node.getSrcNode) {
-			var srcElement = this.node.getSrcNode();
+		if (this.node.src != "") {
+			var srcElement = org.xml3d.URIResolver.resolve(this.node.src);
 			if (srcElement) {
 				dataCollector = this.factory.getAdapter(srcElement, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
 				if (dataCollector)
@@ -373,10 +373,10 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 	   return this.dataTable;
 	}
 
-	var srcElement = this.node.getSrcNode();
+	var src = this.node.src;
 	var dataTable;
 	
-	if(srcElement == null)
+	if(src == "")
 	{
 		dataTable = this.getDataFromChildren();
 	}
@@ -384,14 +384,15 @@ org.xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstanc
 	{
 		// If the "src" attribute is used, reuse the datatable of the referred <data> element (or file)
 		// and ignore the element's content
-		srcElement = this.factory.getAdapter(srcElement, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
-		dataTable  = srcElement.createDataTable();
+		src = org.xml3d.URIResolver.resolve(src);
+		src = this.factory.getAdapter(src, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);
+		dataTable  = src.createDataTable();
 	}	
 	
 	//Check for xflow scripts
 	if (this.node.localName == "data") {
-		var script = this.node.getScriptNode();
-		if(script) {	
+		var script = this.node.script;
+		if(script != "") {	
 			var type = script.value.toLowerCase();
 			if (org.xml3d.xflow[type]) {
 				org.xml3d.xflow[type](dataTable);			

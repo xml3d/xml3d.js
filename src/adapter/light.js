@@ -63,7 +63,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 
 
 	//Set up default values
-	var pos = modelViewMatrix.multiply(new XML3DRotation(0.0, 0.0, 0.0, 1.0)).toGL();
+	var pos = modelViewMatrix.multiply(new XML3DRotation(0.0, 0.0, 0.0, 1.0).toMatrix())._data;
 	var aParams = {
 		position 	: [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]],
 		attenuation : [0.0, 0.0, 1.0],
@@ -75,7 +75,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 		if (p == "position") {
 			//Position must be multiplied with the model view matrix
 			var t = [params[p].data[0], params[p].data[1],params[p].data[2], 1.0];
-			t = modelViewMatrix.multiply(new XML3DRotation(t)).toGL();
+			t = modelViewMatrix.multiply(new XML3DRotation(t).toMatrix())._data;
 			aParams[p] = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
 			continue;
 		}
@@ -92,7 +92,10 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 
 org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getLightShader = function() {
 	if (!this.lightShader) {
-		var shader = this.node.getShaderNode();
+		var shaderLink = this.node.shader;
+		var shader = null;
+		if (shaderLink != "")
+			shader = org.xml3d.URIResolver.resolve(shaderLink);
 		// if no shader attribute is specified, try to get a shader from the style attribute
 		if(shader == null)
 		{
@@ -104,7 +107,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getLightShader = function() {
 			if (result)
 				shader = this.node.xml3ddocument.resolve(result[1]);
 		}
-		this.lightShader = this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
+		this.lightShader = this.factory.getAdapter(shader);
 	}
 	return this.lightShader;
 };

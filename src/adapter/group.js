@@ -100,10 +100,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyListeners = function(evt
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 {
-	var shader = this.node.getShaderNode();
+	var shader = this.node.shader;
 
 	// if no shader attribute is specified, try to get a shader from the style attribute
-	if(shader == null)
+	if(shader == "")
 	{
 		var styleValue = this.node.getAttribute('style');
 		if(!styleValue)
@@ -112,14 +112,16 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 		var result = pattern.exec(styleValue);
 		if (result)
 			shader = this.node.xml3ddocument.resolve(result[1]);
+	} else {
+		shader = org.xml3d.URIResolver.resolve(shader);
 	}
 
-	return this.factory.getAdapter(shader, org.xml3d.webgl.Renderer.prototype);
+	return this.factory.getAdapter(shader);
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispose = function() {
 	for (var child in this.node.childNodes) {
-		var adapter = this.factory.getAdapter(this.node.childNodes[child], org.xml3d.webgl.Renderer.prototype);
+		var adapter = this.factory.getAdapter(this.node.childNodes[child]);
 		if (adapter)
 			adapter.dispose();
 	}

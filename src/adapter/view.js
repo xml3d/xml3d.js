@@ -47,12 +47,14 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewMatrix = function(model) {
 	//TODO: Check matrix multiplication in datatypes... transpose shouldn't be necessary here
-	return this.getViewMatrix().multiply(model.transpose());
+	return this.getViewMatrix().multiply(model);
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrixGL = function(modelViewMatrix) {
-	var invt = modelViewMatrix.inverse().transpose();
-	return invt.to3x3GL();
+	var invt = modelViewMatrix.inverse();
+	return [invt.m11, invt.m12, invt.m13, 
+	        invt.m21, invt.m22, invt.m23, 
+	        invt.m31, invt.m32, invt.m33];
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewProjectionMatrix = function(modelViewMatrix) {

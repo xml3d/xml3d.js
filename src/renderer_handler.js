@@ -105,15 +105,15 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	function setupXML3DHandler(canvas, xml3dElement) {
 		org.xml3d.debug.logInfo("setupXML3DHandler: canvas=" + canvas);
 		var context = null;
-		try {
+		//try {
 			context = canvas.getContext("experimental-webgl");
 			if (context) {
 				return new XML3DHandler(context, canvas, new Scene(xml3dElement));
 			}
-		} catch (ef) {
-			org.xml3d.debug.logError(ef);
-			return null;
-		}
+		//} catch (ef) {
+		//	org.xml3d.debug.logError(ef);
+		//	return null;
+		//}
 	}
 	
 	XML3DHandler.prototype.registerCanvasListeners = function(canvas) {

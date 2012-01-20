@@ -13,9 +13,9 @@ org.xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
 	// For now each mesh gets its own set of vertex buffers and such, even if there are 
 	// many meshes in the scene that use the exact same set of data (instances)
 	
-	var dataAdapter = this.dataFactory.getAdapter(meshNode);
+	var adapter = this.factory.getAdapter(meshNode);
+	var dataAdapter = adapter.dataAdapter;
 	var dataTable = dataAdapter.createDataTable();
-	var adapter = this.factory.getAdapter(meshNode, org.xml3d.webgl.Renderer.prototype);
 	var gl = this.gl;
 	
 	var meshInfo = {};

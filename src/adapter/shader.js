@@ -22,7 +22,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	for (var param in dataTable) {
 		if (dataTable[param].isTexture) {
 			this.textures[param] = {
-				adapter : factory.getAdapter(dataTable[param].node, org.xml3d.webgl.Renderer.prototype),
+				adapter : factory.getAdapter(dataTable[param].node),
 				info	: { texUnit : 0 }
 			};		
 		} 
@@ -47,7 +47,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt)
 		}
 		this.renderer.requestRedraw();
 	} else if (evt.newValue && evt.newValue.nodeName == "texture") {		
-		var adapter = this.factory.getAdapter(evt.newValue, org.xml3d.webgl.Renderer.prototype);
+		var adapter = this.factory.getAdapter(evt.newValue);
 		var name = evt.newValue.name;
 			
 		this.textures[name] = { adapter : adapter, info : { texUnit : 0 } };

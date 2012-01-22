@@ -24,7 +24,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 		  .multiply(so).multiply(m.scale(s.x, s.y, s.z))
 		  .multiply(so.inverse()).multiply(m.translate(-c.x, -c.y, -c.z));
 		
-		this.matrix = this.matrix.transpose();
+		this.matrix = mat4.transpose(this.matrix._data);
 		
 	}
 	return this.matrix;

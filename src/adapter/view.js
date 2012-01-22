@@ -10,7 +10,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this._parentRot = new XML3DRotation(0,0,1,0);
 	this._parentTransform = null;
 	this.__defineSetter__("parentTransform", function(incoming){
-		var i = incoming.transpose();
+		var i = mat4.transpose(incoming._data);
 		this._parentRot = XML3DRotation.fromMatrix(i).negate();
 		this._parentTrans =  new XML3DVec3(i.m14, i.m24, i.m34).negate();
     });
@@ -47,18 +47,17 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewMatrix = function(model) {
 	//TODO: Check matrix multiplication in datatypes... transpose shouldn't be necessary here
-	return this.getViewMatrix().multiply(model);
+	//TODO: cleanup dataypes in this adapter
+	return  mat4.multiply(this.getViewMatrix()._data, mat4.transpose(model));
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrixGL = function(modelViewMatrix) {
-	var invt = modelViewMatrix.inverse();
-	return [invt.m11, invt.m12, invt.m13, 
-	        invt.m21, invt.m22, invt.m23, 
-	        invt.m31, invt.m32, invt.m33];
+	var invt = mat4.inverse(modelViewMatrix);
+	return mat4.toMat3(mat4.transpose(invt));
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewProjectionMatrix = function(modelViewMatrix) {
-	return this.projMatrix.multiply(modelViewMatrix);
+	return mat4.multiply(this.projMatrix._data, modelViewMatrix);
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {

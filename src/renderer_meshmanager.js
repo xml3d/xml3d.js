@@ -101,10 +101,7 @@ org.xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
 	//if (dataTable["xflowShader"]) {
 	//	this.xflowShader = dataTable["xflowShader"];
 	//}
-
-	this.meshIsValid = true;
-	this.isValid = true;
-	
+	meshInfo.valid = true;
 	meshInfo.bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 
 	return meshInfo;

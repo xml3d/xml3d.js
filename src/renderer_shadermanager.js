@@ -16,18 +16,22 @@ org.xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory
 };
 
 org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, lights) {
+	//This method is 'suboptimal', but will be replaced with the new modular shader system
+	var shaderNode = null;
+	var shader = null;
+	
 	var groupAdapter = this.factory.getAdapter(obj.meshNode.parentNode);
 	var shaderAdapter = groupAdapter.getShader();
-	var shaderNode = shaderAdapter.node;
-    
-    var shader = this.shaders[shaderNode.id];
+	shaderNode = shaderAdapter ? shaderAdapter.node : null;	
+
+    shader = shaderNode ? this.shaders[shaderNode.id] : null;
     
     if (shader)
         return shader;
         
     var sources = {vs:null, fs:null};
 			
-	if (shaderNode.hasAttribute("script"))
+	if (shaderNode && shaderNode.hasAttribute("script"))
 	{
 		var scriptURL = shaderNode.getAttribute("script");
 		if (new org.xml3d.URI(scriptURL).scheme == "urn") {
@@ -47,11 +51,11 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(ob
 			
             shader = this.createShaderFromSources(sources);
 		}
+		this.shaders[shaderNode.id] = shader;
 	} else {	
 		shader = this.createShaderFromSources(sources);
 	}
    
-   this.shaders[shaderNode.id] = shader;
    return shader;	
 };
 

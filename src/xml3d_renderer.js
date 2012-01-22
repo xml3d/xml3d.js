@@ -545,7 +545,7 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 		
 		//xform.model.load(transform);
 		xform.model = transform;
-		xform.modelView = this.camera.getModelViewMatrix(xform.model);
+		xform.modelView = this.camera.getModelViewMatrix(xform.model._data);
         parameters["modelMatrix"] = transform._data;
 		parameters["modelViewMatrix"] = xform.modelView._data;
 		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView)._data;
@@ -603,8 +603,7 @@ org.xml3d.webgl.Renderer.prototype.drawObject = function(shaderProgram, meshInfo
 			/*if (dataTable[name] && dataTable[name].forcedUpdate) {
 				gl.bufferData(gl.ARRAY_BUFFER, dataTable[name].data, gl.STATIC_DRAW);
 				dataTable[name].forcedUpdate = false;
-			}
-            */
+			}*/    
 			
 			gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
 		}
@@ -621,7 +620,7 @@ org.xml3d.webgl.Renderer.prototype.drawObject = function(shaderProgram, meshInfo
 					offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
 				}
 			} else {
-				gl.drawElements(meshInfo.glType, vbos.index[i].length, gl.UNSIGNED_SHORT, offset);
+				gl.drawElements(meshInfo.glType, vbos.index[i].length, gl.UNSIGNED_SHORT, 0);
 			}
 			
 			triCount = vbos.index[i].length / 3;
@@ -711,7 +710,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 						id : id,
 						min : volumeMin._data,
 						max : volumeMax._data,
-						modelMatrix : transform._data,
+						modelMatrix : mat4.tranpose(transform._data),
 						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)._data,
 						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 				};

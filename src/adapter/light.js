@@ -46,7 +46,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 		return null;
 	
 	if (this._transform)
-		modelViewMatrix = modelViewMatrix.multiply(this._transform.transpose());
+		modelViewMatrix = mat4.multiply(modelViewMatrix, mat4.transpose(this._transform._data));
 	if (!this.dataAdapter)
 	{
 		var renderer = shader.factory.renderer;
@@ -63,7 +63,7 @@ org.xml3d.webgl.XML3DLightRenderAdapter.prototype.getParameters = function(model
 
 
 	//Set up default values
-	var pos = modelViewMatrix.multiply(new XML3DRotation(0.0, 0.0, 0.0, 1.0).toMatrix())._data;
+	var pos = mat4.multiplyVec4(modelViewMatrix, [0,0,0,1]);
 	var aParams = {
 		position 	: [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]],
 		attenuation : [0.0, 0.0, 1.0],

@@ -305,7 +305,7 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 		
 	};
 	
-	recursiveBuild(xml3dNode, true, new XML3DMatrix(), null);
+	recursiveBuild(xml3dNode, true, mat4.identity(mat4.create()), null);
 	
 	for (var i=0; i < scene.length; i++) {
 		var obj = scene[i];
@@ -433,8 +433,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
         return [0, 0];
 	
 	var xform = {};
-	xform.view = this.getViewMatrix();  
-	xform.proj = this.getProjectionMatrix(); 
+	xform.view = this.getViewMatrix()._data;  
+	xform.proj = this.getProjectionMatrix()._data; 
 	
 	//Setup lights
 	var light, lightOn;
@@ -544,10 +544,10 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 			continue;
 		
 		//xform.model.load(transform);
-		xform.model = transform._data;
+		xform.model = transform;
 		xform.modelView = this.camera.getModelViewMatrix(xform.model);
         parameters["modelMatrix"] = transform;
-		parameters["modelViewMatrix"] = xform.modelView;
+		parameters["modelViewMatrix"] = mat4.transpose(xform.modelView);
 		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView);
 		parameters["normalMatrix"] = this.camera.getNormalMatrixGL(xform.modelView);
 		//parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3); //TODO: Fix me
@@ -674,8 +674,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 		var shader = {};
 		
 		if (needPickingDraw ) {
-			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
-			var volumeMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
+			var volumeMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
 			var xform = {};
@@ -685,7 +685,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			for (var i = 0; i < this.drawableObjects.length; i++) {
 				var obj = this.drawableObjects[i];
 				var trafo = obj.transform;
-				this.adjustMinMax(obj.mesh.bbox, volumeMin._data, volumeMax._data, trafo._data);
+				this.adjustMinMax(obj.mesh.bbox, volumeMin, volumeMax, trafo);
 			}
 			
 			this.bbMin = volumeMin;
@@ -701,15 +701,15 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 				
 				if (mesh.isValid == false)
 					continue;
-				xform.model = transform._data;
+				xform.model = transform;
 				xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
 				var id = 1.0 - (1+j) / 255.0;
 
 				var parameters = {
 						id : id,
-						min : volumeMin._data,
-						max : volumeMax._data,
+						min : volumeMin,
+						max : volumeMax,
 						modelMatrix : mat4.transpose(xform.model),
 						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
 						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
@@ -759,7 +759,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	xform.modelView = this.camera.getModelViewMatrix(xform.model);
 	
 	var parameters = {
-		modelViewMatrix : transform._data,
+		modelViewMatrix : transform,
 		modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)._data,
 		normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 	};
@@ -794,18 +794,18 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 	try {
 		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
 		
-		var vec = new XML3DVec3(0, 0, 0);
+		var vec = vec3.create();
 		vec.x = data[0] / 255;
 		vec.y = data[1] / 255;
 		vec.z = data[2] / 255;
 		
 		if(normals) {
-			vec = vec.scale(2.0).subtract(new XML3DVec3(1.0));
+			vec = vec3.subtract(vec3.scale(vec,2.0), vec3.create([1,1,1]));
 			this.xml3dNode.currentPickNormal = vec;
 		} else {		
 			var objId = 255 - data[3] - 1;
 			if (objId >= 0 && data[3] > 0) {
-				vec = vec.multiply(this.bbMax.subtract(this.bbMin)).add(this.bbMin);
+				vec = vec3.multiply(vec, vec3.add(vec3.subtract(this.bbMax, this.bbMin)),this.bbMin);
 				var pickedObj = this.drawableObjects[objId];
 				this.xml3dNode.currentPickPos = vec;
 				this.xml3dNode.currentPickObj = pickedObj.meshNode;

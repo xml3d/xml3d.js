@@ -25,8 +25,10 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	{
 		var negPos      = this.node.position.negate().add(this._parentTrans);
 		var negOr = this.node.orientation.negate().multiply(this._parentRot);
+		
 		this.viewMatrix = negOr.toMatrix().multiply(
 				new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
+		this.viewMatrix._data = mat4.transpose(this.viewMatrix._data);
 	}
 	return this.viewMatrix;
 };
@@ -48,7 +50,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewMatrix = function(model) {
 	//TODO: Check matrix multiplication in datatypes... transpose shouldn't be necessary here
 	//TODO: cleanup dataypes in this adapter
-	return  mat4.multiply(this.getViewMatrix()._data, mat4.transpose(model));
+	return mat4.multiply(this.getViewMatrix()._data, mat4.transpose(model));
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrixGL = function(modelViewMatrix) {

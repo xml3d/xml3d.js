@@ -17,10 +17,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 	var ret = transform;
 	
 	if (this.parentTransform !== null)
-		ret = this.parentTransform.multiply(ret);
+		ret = mat4.multiply(this.parentTransform, ret);
 	
 	if (this._transformAdapter)
-		ret = this._transformAdapter.getMatrix().multiply(ret);
+		ret = mat4.multiply(this._transformAdapter.getMatrix(), ret);
 	
 	return ret;
 };
@@ -140,7 +140,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype._updateTransformAdapter = func
 	}
 	
 	// setup new and register listener
-	this._transformAdapter = null; // FIXME: this.factory.getAdapter(this.node.getTransformNode(), org.xml3d.webgl.Renderer.prototype);
+	var tname = this.node.transform;
+	var tnode = org.xml3d.URIResolver.resolve(tname);
+	this._transformAdapter = this.factory.getAdapter(tnode);
+	
 	if (this._transformAdapter)
 		this._transformAdapter.listeners.push(this);
 };

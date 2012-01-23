@@ -544,11 +544,11 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 			continue;
 		
 		//xform.model.load(transform);
-		xform.model = transform;
-		xform.modelView = this.camera.getModelViewMatrix(xform.model._data);
-        parameters["modelMatrix"] = transform._data;
-		parameters["modelViewMatrix"] = xform.modelView._data;
-		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView)._data;
+		xform.model = transform._data;
+		xform.modelView = this.camera.getModelViewMatrix(xform.model);
+        parameters["modelMatrix"] = transform;
+		parameters["modelViewMatrix"] = xform.modelView;
+		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView);
 		parameters["normalMatrix"] = this.camera.getNormalMatrixGL(xform.modelView);
 		//parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3); //TODO: Fix me
 		
@@ -561,7 +561,7 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 		} else {
 			this.shaderManager.bindShader(shader, parameters);
 			//shape.applyXFlow(shader, parameters);			
-			this.shaderManager.setUniformVariables(parameters);
+			this.shaderManager.setUniformVariables(shader, parameters);
 			triCount += this.drawObject(shader, mesh);
 		}
 		objCount++;
@@ -685,7 +685,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 			for (var i = 0; i < this.drawableObjects.length; i++) {
 				var obj = this.drawableObjects[i];
 				var trafo = obj.transform;
-				this.adjustMinMax(obj.mesh.bbox, volumeMin, volumeMax, trafo);
+				this.adjustMinMax(obj.mesh.bbox, volumeMin._data, volumeMax._data, trafo._data);
 			}
 			
 			this.bbMin = volumeMin;
@@ -701,7 +701,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 				
 				if (mesh.isValid == false)
 					continue;
-				xform.model = transform;
+				xform.model = transform._data;
 				xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
 				var id = 1.0 - (1+j) / 255.0;
@@ -710,8 +710,8 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 						id : id,
 						min : volumeMin._data,
 						max : volumeMax._data,
-						modelMatrix : mat4.tranpose(transform._data),
-						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)._data,
+						modelMatrix : mat4.transpose(xform.model),
+						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
 						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
 				};
 				
@@ -820,23 +820,24 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 
 //Helper to expand an axis aligned bounding box around another object's bounding box
 org.xml3d.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
-	var bmin = bbox.min;
-	var bmax = bbox.max;
-	var bbmin = trafo.mulVec3(bmin, 1.0);
-	var bbmax = trafo.mulVec3(bmax, 1.0);
+	var bmin = bbox.min._data;
+	var bmax = bbox.max._data;
+	var t = trafo;
+	var bbmin = mat4.multiplyVec3(trafo, bmin);
+	var bbmax = mat4.multiplyVec3(trafo, bmax);
 
-	if (bbmin.x < min.x)
-		min.x = bbmin.x;
-	if (bbmin.y < min.y)
-		min.y = bbmin.y;
-	if (bbmin.z < min.z)
-		min.z = bbmin.z;
-	if (bbmax.x > max.x)
-		max.x = bbmax.x;
-	if (bbmax.y > max.y)
-		max.y = bbmax.y;
-	if (bbmax.z > max.z)
-		max.z = bbmax.z;
+	if (bbmin[0] < min[0])
+		min[0] = bbmin[0];
+	if (bbmin[1] < min[1])
+		min[1] = bbmin[1];
+	if (bbmin[2] < min[2])
+		min[2] = bbmin[2];
+	if (bbmax[0] > max[0])
+		max[0] = bbmax[0];
+	if (bbmax[1] > max[1])
+		max[1] = bbmax[1];
+	if (bbmax[2] > max[2])
+		max[2] = bbmax[2];
 };
 
 

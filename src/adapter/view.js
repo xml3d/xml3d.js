@@ -6,13 +6,13 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this.zNear = 0.1;
 	this.viewMatrix = null;
 	this.projMatrix = null;
-	this._parentTrans = new XML3DVec3(0,0,0);
-	this._parentRot = new XML3DRotation(0,0,1,0);
+	this._parentTrans = vec3.create([0,0,0]);
+	this._parentRot = quat4.create([0,0,1,0]);
 	this._parentTransform = null;
 	this.__defineSetter__("parentTransform", function(incoming){
-		var i = mat4.transpose(incoming._data);
-		this._parentRot = XML3DRotation.fromMatrix(i).negate();
-		this._parentTrans =  new XML3DVec3(i.m14, i.m24, i.m34).negate();
+		var i = incoming._data;
+		this._parentRot = XML3DRotation.fromMatrix(i).negate()._data;
+		this._parentTrans =  new XML3DVec3(i.m14, i.m24, i.m34).negate()._data;
     });
 	this.isValid = true;
 };
@@ -23,12 +23,15 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 
 	if (this.viewMatrix == null)
 	{
-		var negPos      = this.node.position.negate().add(this._parentTrans);
-		var negOr = this.node.orientation.negate().multiply(this._parentRot);
+		var pos = this.node.position._data;
+		var orient = this.node.orientation._data;
+		var negPos = vec3.add(vec3.negate(pos, vec3.create()), this._parentTrans);
+		var negOr = quat4.multiply(quat4.inverse(orient, quat4.create()), this._parentRot);
 		
-		this.viewMatrix = negOr.toMatrix().multiply(
-				new XML3DMatrix().translate(negPos.x, negPos.y, negPos.z));
-		this.viewMatrix._data = mat4.transpose(this.viewMatrix._data);
+		this.viewMatrix = mat4.multiply(
+							quat4.toMat4(negOr), 
+							mat4.translate(mat4.identity(mat4.create()), negPos)
+						  );
 	}
 	return this.viewMatrix;
 };
@@ -40,26 +43,24 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(
 		var zfar = this.zFar;
 		var znear = this.zNear;
 		var f = 1 / Math.tan(fovy / 2);
-		this.projMatrix = new XML3DMatrix(f / aspect, 0, 0,
+		this.projMatrix = mat4.create([f / aspect, 0, 0,
 				0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), 2 * znear
-						* zfar / (znear - zfar), 0, 0, -1, 0);
+						* zfar / (znear - zfar), 0, 0, -1, 0]);
 	}
 	return this.projMatrix;
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewMatrix = function(model) {
-	//TODO: Check matrix multiplication in datatypes... transpose shouldn't be necessary here
-	//TODO: cleanup dataypes in this adapter
-	return mat4.multiply(this.getViewMatrix()._data, mat4.transpose(model));
+	return mat4.multiply(this.getViewMatrix(), model, mat4.create());
 };
 
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrixGL = function(modelViewMatrix) {
-	var invt = mat4.inverse(modelViewMatrix);
-	return mat4.toMat3(mat4.transpose(invt));
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrix = function(modelViewMatrix) {
+	var invt = mat4.inverse(modelViewMatrix, mat4.create());
+	return mat4.toMat3(invt);
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewProjectionMatrix = function(modelViewMatrix) {
-	return mat4.multiply(this.projMatrix._data, modelViewMatrix);
+	return mat4.multiply(mat4.transpose(this.projMatrix, mat4.create()), modelViewMatrix, mat4.create());
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {

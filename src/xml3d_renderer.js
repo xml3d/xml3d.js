@@ -433,8 +433,8 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
         return [0, 0];
 	
 	var xform = {};
-	xform.view = this.getViewMatrix()._data;  
-	xform.proj = this.getProjectionMatrix()._data; 
+	xform.view = this.getViewMatrix();  
+	xform.proj = this.getProjectionMatrix(); 
 	
 	//Setup lights
 	var light, lightOn;
@@ -546,10 +546,10 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 		//xform.model.load(transform);
 		xform.model = transform;
 		xform.modelView = this.camera.getModelViewMatrix(xform.model);
-        parameters["modelMatrix"] = transform;
-		parameters["modelViewMatrix"] = mat4.transpose(xform.modelView);
+        parameters["modelMatrix"] = xform.model;
+		parameters["modelViewMatrix"] = xform.modelView;
 		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView);
-		parameters["normalMatrix"] = this.camera.getNormalMatrixGL(xform.modelView);
+		parameters["normalMatrix"] = this.camera.getNormalMatrix(xform.modelView);
 		//parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3); //TODO: Fix me
 		
 		if (!shader)
@@ -710,9 +710,9 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 						id : id,
 						min : volumeMin,
 						max : volumeMax,
-						modelMatrix : mat4.transpose(xform.model),
+						modelMatrix : mat4.transpose(transform),
 						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
-						normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
+						normalMatrix : this.camera.getNormalMatrix(xform.modelView)
 				};
 				
 				this.shaderManager.setUniformVariables(shader.program, parameters);
@@ -753,15 +753,13 @@ org.xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, scr
 	this.shaderManager.bindShader(sp);
 	
 	var xform = {};
-	xform.view = this.camera.getViewMatrix();
-	xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
 	xform.model = transform;
 	xform.modelView = this.camera.getModelViewMatrix(xform.model);
 	
 	var parameters = {
 		modelViewMatrix : transform,
-		modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)._data,
-		normalMatrix : this.camera.getNormalMatrixGL(xform.modelView)
+		modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
+		normalMatrix : this.camera.getNormalMatrix(xform.modelView)
 	};
 
 	shader = {};
@@ -805,7 +803,8 @@ org.xml3d.webgl.Renderer.prototype.readPixels = function(normals, screenX, scree
 		} else {		
 			var objId = 255 - data[3] - 1;
 			if (objId >= 0 && data[3] > 0) {
-				vec = vec3.multiply(vec, vec3.add(vec3.subtract(this.bbMax, this.bbMin)),this.bbMin);
+				var tmp = vec3.add(vec3.subtract(this.bbMax, this.bbMin),this.bbMin);
+				vec = vec3.create([ vec[0]*tmp[0], vec[1]*tmp[1], vec[2]*tmp[2] ]);
 				var pickedObj = this.drawableObjects[objId];
 				this.xml3dNode.currentPickPos = vec;
 				this.xml3dNode.currentPickObj = pickedObj.meshNode;
@@ -954,13 +953,13 @@ org.xml3d.webgl.calculateBoundingBox = function(tArray) {
 	var bbox = new XML3DBox();
 	
 	//TODO: Fix bounding box
-	return bbox;
+	//return bbox;
 	
 	if (!tArray || tArray.length < 3)
 		return bbox;
 
 	// Initialize with first position
-	bbox.extend(tArray[0], tArray[1], tArray[2]);
+	bbox.extend(new XML3DVec3(tArray[0], tArray[1], tArray[2]));
 
 	var val = 0.0;
 	for (var i=3; i<tArray.length; i+=3) {

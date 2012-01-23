@@ -105,7 +105,7 @@
     /** updates the min or max accoring to the given point or bounding box. 
     * 
     * @param that the object used for extension, which can be a XML3DVec3 or XML3DBox
-    
+    */
     XML3DBox.prototype.extend = function(that)
     {
         var min, max; 
@@ -135,7 +135,7 @@
             this._max.y = max.y; 
         if(max.z > this._max.z)
             this._max.z = max.z;
-    }; */
+    }; 
     
     // Export
     org.xml3d.XML3DBox = XML3DBox;

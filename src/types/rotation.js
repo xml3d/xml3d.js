@@ -224,6 +224,12 @@
         var na = this._axis.normalize();
         return new XML3DRotation(na, this._angle);
     };
+    
+    p.__defineGetter__("_data", function() {
+    	var a = this._axis._data;
+    	return new Float32Array([a[0], a[1], a[2], this._angle]);
+    });
+    
 
     org.xml3d.XML3DRotation = XML3DRotation;
     if (!window.XML3DRotation)

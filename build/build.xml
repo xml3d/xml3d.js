@@ -99,6 +99,7 @@
 		<file name="renderer_bufferhandler.js" />
 		<file name="xml3d_renderer.js" />
 		<file name="adapter/xml3d.js" />
+		<file name="adapter/transform.js" />
 		<file name="adapter/view.js" />
 		<file name="adapter/shader.js" />
 		<file name="adapter/texture.js" />

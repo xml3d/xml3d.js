@@ -12,19 +12,23 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = org.xml3d.we
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 	if (!this.matrix) {
 		var n         = this.node;
-		var m = new XML3DMatrix();
+		var m = mat4.identity(mat4.create());
 
-		var t = n.translation;
-		var c = n.center;
-		var s = n.scale;
-		var so = n.scaleOrientation.toMatrix();
-		
-		this.matrix = m.translate(t.x, t.y, t.z)
-		  .multiply(m.translate(c.x, c.y, c.z)).multiply(n.rotation.toMatrix())
-		  .multiply(so).multiply(m.scale(s.x, s.y, s.z))
-		  .multiply(so.inverse()).multiply(m.translate(-c.x, -c.y, -c.z));
-		
-		this.matrix = mat4.transpose(this.matrix._data);
+		var t = n.translation._data;
+		var c = n.center._data;
+		var s = n.scale._data;
+		var so = n.scaleOrientation.toMatrix()._data;
+	
+		var tmp = mat4.multiply(mat4.multiply(mat4.multiply(mat4.multiply(mat4.multiply(mat4.multiply(		
+				mat4.inverse(so),
+				mat4.translate(m, vec3.negate(c))),
+				mat4.scale(m, s)),
+				so),
+				n.rotation.toMatrix()._data),
+				mat4.translate(m, c)),
+				mat4.translate(m,t));
+				
+		this.matrix = mat4.transpose(tmp);
 		
 	}
 	return this.matrix;

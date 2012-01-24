@@ -16,16 +16,23 @@
      */
     var XML3DRotation = function(axis, angle, cb) {
         var that = this;
+        this._data = new Float32Array(4);
 
-        /** @private **/
+        /** @private */
         this._callback = typeof cb == 'function' ? cb : 0;
 
         /** @private */
-        var vec_cb = function() { if(that._callback) that._callback(that); };
-        this._axis = axis ? new XML3DVec3(axis.x, axis.y, axis.z, vec_cb)
-                : new XML3DVec3(0, 0, 1, vec_cb);
+        var vec_cb = function() {
+            that._updateQuaternion();
+            if (that._callback)
+                that._callback(that);
+        };
+
+        this._axis = axis ? new XML3DVec3(axis.x, axis.y, axis.z, vec_cb) : new XML3DVec3(0, 0, 1, vec_cb);
         /** @private */
         this._angle = angle || 0;
+
+        this._updateQuaternion();
 
     }, p = XML3DRotation.prototype;
 
@@ -50,6 +57,7 @@
         },
         set : function(angle) {
             this._angle = angle;
+            this._updateQuaternion();
             if (this._callback)
                 this._callback(this);
     },
@@ -82,6 +90,7 @@
         this._axis._data[1] = axis._data[1];
         this._axis._data[2] = axis._data[2];
         this._angle = angle;
+        this._updateQuaternion();
         if (this._callback)
             this._callback(this);
     };
@@ -97,6 +106,19 @@
 
         // This function will also callback
         this.setAxisAngle(from.cross(to), Math.acos(a.dot(b)));
+    };
+
+    p._updateQuaternion = function() {
+        var l = this._axis.length();
+        if (l > 0.00001) {
+            var s = Math.sin(this._angle / 2) / l;
+            this._data[0] = this._axis.x * s;
+            this._data[1] = this._axis.y * s;
+            this._data[2] = this._axis.z * s;
+            this._data[3] = Math.cos(this._angle / 2);
+        } else {
+            return quat4.set([ 0, 0, 0, 1 ], this._data);
+        }
     };
 
     /**
@@ -122,21 +144,9 @@
      */
     p.interpolate = function(rot1, t) {
         var dest = quat4.create(), result = new XML3DRotation();
-        quat4.slerp(p.toQuaternion(this), p.toQuaternion(rot1), t, dest);
+        quat4.slerp(this._data, rot1._data, t, dest);
         result._setQuaternion(dest);
         return result;
-    };
-
-    p.toQuaternion = function(aa) {
-        var l = aa._axis.length();
-        if (l > 0.00001) {
-            var s = Math.sin(aa._angle / 2) / l;
-            var w = Math.cos(aa._angle / 2);
-            var a = aa._axis.scale(s);
-            return quat4.create( [ a.x, a.y, a.z, w ]);
-        } else {
-            return quat4.create( [ 0, 0, 0, 1 ]);
-        }
     };
 
     /**
@@ -155,8 +165,8 @@
      * @return {XML3DMatrix} Rotation matrix
      */
     p.toMatrix = function() {
-      var q = p.toQuaternion(this);
-      // We have to inverse the rotation to get the same
+      var q = quat4.create(this._data);
+      // FIXME: We have to inverse the rotation to get the same
       // result as CSSMatrix::rotateAxisAngle
       q[3] = -q[3];
       var m = new XML3DMatrix();
@@ -174,7 +184,7 @@
      */
     p.rotateVec3 = function(inputVector) {
         var dest = vec3.create(), result = new XML3DVec3();
-        quat4.multiplyVec3(p.toQuaternion(this), inputVector._data, result._data);
+        quat4.multiplyVec3(this._data, inputVector._data, result._data);
         return result;
     };
     
@@ -198,6 +208,7 @@
             this._axis._data[2] = quat[2] * s;
             this._angle = 2 * Math.acos(quat[3]);
         }
+        this._data = quat4.create(quat);
         if (this._callback)
             this._callback(this);
     };
@@ -211,7 +222,7 @@
      */
     p.multiply = function(rot1) {
         var result = new XML3DRotation(), q = quat4.create();
-        quat4.multiply(p.toQuaternion(this), p.toQuaternion(rot1), q);
+        quat4.multiply(this._data,rot1._data, q);
         result._setQuaternion(q);
         return result;
     };
@@ -224,12 +235,6 @@
         var na = this._axis.normalize();
         return new XML3DRotation(na, this._angle);
     };
-    
-    p.__defineGetter__("_data", function() {
-    	var a = this._axis._data;
-    	return new Float32Array([a[0], a[1], a[2], this._angle]);
-    });
-    
 
     org.xml3d.XML3DRotation = XML3DRotation;
     if (!window.XML3DRotation)

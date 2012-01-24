@@ -80,13 +80,12 @@ test("Adapter registration and initialization test", 6, function() {
     ok(a, "Adapter created");
 });
 
-test("WebGLFactory test", 6, function() {
+test("WebGLFactory test", 5, function() {
     var g = this.doc.getElementById("myGroup");
     ok(g, "Node exits");
-    equal(g._configured.adapters["XML3DRenderAdapterFactory"], undefined, "No Adapter registered yet.");
+    notEqual(g._configured.adapters["XML3DRenderAdapterFactory"], undefined, "Adapter registered automatically.");
     var a = this.webglFactory.getAdapter(g);
     ok(a, "There is a WebGL Group adapter");
-    notEqual(g._configured.adapters["XML3DRenderAdapterFactory"], undefined, "No Adapter registered yet.");
 });
 
 

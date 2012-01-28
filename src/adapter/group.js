@@ -17,10 +17,10 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 	var ret = transform;
 	
 	if (this.parentTransform !== null)
-		ret = mat4.multiply(this.parentTransform, ret);
+		ret = mat4.multiply(ret, this.parentTransform, mat4.create());
 	
 	if (this._transformAdapter)
-		ret = mat4.multiply(this._transformAdapter.getMatrix(), ret);
+		ret = mat4.multiply(ret, this._transformAdapter.getMatrix(), mat4.create());
 	
 	return ret;
 };

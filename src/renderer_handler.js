@@ -276,7 +276,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
      */
     XML3DHandler.prototype.dispatchMouseEvent = function(type, button, x, y, event, target) {
         // init event
-        if(event === null || evt === undefined)
+        if(event === null || event === undefined)
         {
             evt = document.createEvent("MouseEvents");
             evt.initMouseEvent(    type,
@@ -383,7 +383,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         }
 
         this.renderPick(pos.x, pos.y);
-        this.dispatchMouseEvent("mouseup", event.button, pos.x, pos.y, event);
+        this.dispatchMouseEvent("mouseup", evt.button, pos.x, pos.y, evt);
 
         return false; // don't redraw
     };
@@ -402,7 +402,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         var pos = this.getMousePosition(evt);
         this.renderPick(pos.x, pos.y);
 
-        this.dispatchMouseEvent("mousedown", event.button, pos.x, pos.y, event);
+        this.dispatchMouseEvent("mousedown", evt.button, pos.x, pos.y, evt);
 
         return false; // don't redraw
     };
@@ -423,7 +423,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
             return;
         }
 
-        this.dispatchMouseEvent("click", event.button, pos.x, pos.y, event);
+        this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
 
         return false; // don't redraw
     };

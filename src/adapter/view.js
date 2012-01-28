@@ -7,7 +7,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this.viewMatrix = null;
 	this.projMatrix = null;
 	this._parentTrans = vec3.create([0,0,0]);
-	this._parentRot = quat4.create([0,0,1,0]);
+	this._parentRot = quat4.create([0,0,0,1]);
 	this._parentTransform = null;
 	this.__defineSetter__("parentTransform", function(incoming){
 		var i = incoming._data;
@@ -26,7 +26,8 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 		var pos = this.node.position._data;
 		var orient = this.node.orientation._data;
 		var negPos = vec3.add(vec3.negate(pos, vec3.create()), this._parentTrans);
-		var negOr = quat4.multiply(quat4.inverse(orient, quat4.create()), this._parentRot);
+		var negOr = quat4.multiply(orient, this._parentRot, quat4.create());
+		quat4.inverse(negOr);
 		
 		this.viewMatrix = mat4.multiply(
 							quat4.toMat4(negOr), 

@@ -246,11 +246,13 @@
                 v._axis._data[1] = d[1];
                 v._axis._data[2] = d[2];
                 v._angle = d[3];
+                v._updateQuaternion();
             } else {
                 v._axis._data[0] = +m[1];
                 v._axis._data[1] = +m[2];
                 v._axis._data[2] = +m[3];
                 v._angle = +m[4];
+                v._updateQuaternion();
             }
             return false;
         };

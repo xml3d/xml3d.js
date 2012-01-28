@@ -168,7 +168,9 @@
       var q = quat4.create(this._data);
       // FIXME: We have to inverse the rotation to get the same
       // result as CSSMatrix::rotateAxisAngle
+      // Not sure why this is, could you have a look at it? - Chris
       q[3] = -q[3];
+      
       var m = new XML3DMatrix();
       quat4.toMat4(q, m._data);
       return m;

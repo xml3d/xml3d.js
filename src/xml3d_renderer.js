@@ -290,6 +290,7 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 				
 			case "light":
 				renderer.lights.push( { adapter : adapter , transform : transform} );
+				adapter._transform = transform;
 				break;
 
 			default:

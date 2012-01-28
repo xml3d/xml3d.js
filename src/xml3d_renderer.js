@@ -253,50 +253,48 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 		var adapter = renderer.factory.getAdapter(currentNode);
 		var downstreamShader = parentShader;
 		var downstreamTransform = transform;
-
-		// change to map system
-		switch (currentNode.nodeName) {
-			case "group": 
-				if (currentNode.getAttribute("visible") == "false")
-					visible = false;
-				if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
-					this.handler.setMouseMovePicking(true);	
-					
-				var shader = adapter.getShader();
-				downstreamShader = shader ? shader : parentShader;				
-				downstreamTransform = adapter.applyTransformMatrix(transform);
-				break;
+		
+		var nodeTypes = {};
+		nodeTypes["group"] = function() {
+			if (currentNode.getAttribute("visible") == "false")
+				visible = false;
+			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+				this.handler.setMouseMovePicking(true);	
+				
+			var shader = adapter.getShader();
+			downstreamShader = shader ? shader : parentShader;				
+			downstreamTransform = adapter.applyTransformMatrix(transform);
 			
-			case "mesh":
-				if (currentNode.getAttribute("visible") == "false")
-					visible = false;
-				if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
-					this.handler.setMouseMovePicking(true);	
-					
-				// Add a new drawable object to the scene
-				var newObject = new org.xml3d.webgl.Renderer.drawableObject(renderer);
-				newObject.mesh = renderer.meshManager.createMesh(currentNode);
-				newObject.meshNode = currentNode;
-				newObject.visible = visible;
+		};
+		
+		nodeTypes["mesh"] = function() {
+			if (currentNode.getAttribute("visible") == "false")
+				visible = false;
+			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+				this.handler.setMouseMovePicking(true);	
 				
-				// Defer creation of the shaders until after the entire scene is processed, this is
-				// to ensure all lights and other shader information is available
-				newObject.shader = null;
-				newObject.transform = transform; 
-				adapter.registerCallback(newObject.callback); 
-				
-				scene.push(newObject);
-				break;
-				
-			case "light":
-				renderer.lights.push( { adapter : adapter , transform : transform} );
-				adapter._transform = transform;
-				break;
-
-			default:
-				break;
-		}
-
+			// Add a new drawable object to the scene
+			var newObject = new org.xml3d.webgl.Renderer.drawableObject(renderer);
+			newObject.mesh = renderer.meshManager.createMesh(currentNode);
+			newObject.meshNode = currentNode;
+			newObject.visible = visible;
+			
+			// Defer creation of the shaders until after the entire scene is processed, this is
+			// to ensure all lights and other shader information is available
+			newObject.shader = null;
+			newObject.transform = transform; 
+			adapter.registerCallback(newObject.callback); 
+			
+			scene.push(newObject);
+		};
+			
+		nodeTypes["light"] = function() {
+			renderer.lights.push( { adapter : adapter , transform : transform} );
+			adapter._transform = transform;
+		};
+		
+		if (nodeTypes[currentNode.nodeName])
+			nodeTypes[currentNode.nodeName]();
 		
 		var child = currentNode.firstElementChild;
 		while (child) {
@@ -448,7 +446,7 @@ org.xml3d.webgl.Renderer.prototype.render = function() {
 		attenuations : new Float32Array(elements),
 		visible : new Float32Array(elements)
 	};
-	for ( var j = 0; j < slights.length; j++) {
+	for ( var j = 0, length = slights.length; j < length; j++) {
 		light = slights[j].adapter;
 		var params = light.getParameters(xform.view);
 		if (!params)
@@ -535,7 +533,7 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 	parameters["lightAmbientColors[0]"] = lightParams.ambientColors;
 	parameters["lightAttenuations[0]"] = lightParams.attenuations;
 	
-	for (var i = 0; i < objectArray.length; i++) {
+	for (var i = 0, n = objectArray.length; i < n; i++) {
 		var obj = objectArray[i];
 		var transform = obj.transform;
 		var mesh = obj.mesh;

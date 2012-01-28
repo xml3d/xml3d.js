@@ -55,6 +55,11 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(ob
 	} else {	
 		shader = this.createShaderFromSources(sources);
 	}
+	
+	if (shaderAdapter) {
+		var dataTable = shaderAdapter.getDataTable();
+		this.setUniformVariables(shader, dataTable);
+	}
    
    return shader;	
 };
@@ -100,7 +105,6 @@ org.xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function
 	}
 	
 	var shaderProgram = this.createShaderFromSources(sources);	
-	this.setStandardUniforms(shaderProgram);
 	
 	return shaderProgram;
 };
@@ -149,7 +153,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(
 			fSource		: sources.fs
 	};
 	
-	gl.useProgram(prg);
+	this.bindShader(prg);
 	
 	//Tally shader attributes
 	var numAttributes = gl.getProgramParameter(prg, gl.ACTIVE_ATTRIBUTES);
@@ -185,6 +189,8 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(
 		else
 			programObject.uniforms[uni.name] = uniInfo;
 	}
+	
+	this.setStandardUniforms(programObject);
 	
 	return programObject;
 };
@@ -254,14 +260,17 @@ org.xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) 
 };
 
 org.xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(sp, uniforms) {
-	if (this.currentProgram != sp) {
-		this.gl.useProgram(sp.handle);
-	}
+	this.bindShader(sp);
 	
 	for (var name in uniforms) {
 		var u = uniforms[name];
+		
+		if (u.data)
+			u = u.data;		
 		if (u.clean)
 			continue;
+		if (u.length == 1)
+			u = u[0]; // Either a single float, int or bool
 		
 		if (sp.uniforms[name]) {
 			this.setUniform(this.gl, sp.uniforms[name], u);
@@ -272,9 +281,11 @@ org.xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(sp, 
 
 org.xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(sp) {
     // TODO: bind samplers (if any)
+	if (sp.handle)
+		sp = sp.handle;
     if (this.currentProgram != sp) {
         this.currentProgram = sp;
-        this.gl.useProgram(sp.handle);
+        this.gl.useProgram(sp);
     }
 };
 

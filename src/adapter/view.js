@@ -10,9 +10,10 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this._parentRot = quat4.create([0,0,0,1]);
 	this._parentTransform = null;
 	this.__defineSetter__("parentTransform", function(incoming){
-		var i = incoming._data;
-		this._parentRot = XML3DRotation.fromMatrix(i).negate()._data;
-		this._parentTrans =  new XML3DVec3(i.m14, i.m24, i.m34).negate()._data;
+		//TODO: rotation.fromMatrix is missing now, what to do?
+		return;
+		this._parentRot = new XML3DRotation.fromMatrix(incoming).negate()._data;
+		this._parentTrans = vec3.negate(vec3.create(incoming.m14, incoming.m24, incoming.m34));
     });
 	this.isValid = true;
 };
@@ -44,9 +45,10 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(
 		var zfar = this.zFar;
 		var znear = this.zNear;
 		var f = 1 / Math.tan(fovy / 2);
-		this.projMatrix = mat4.create([f / aspect, 0, 0,
-				0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), 2 * znear
-						* zfar / (znear - zfar), 0, 0, -1, 0]);
+		this.projMatrix = mat4.create([f / aspect, 0, 0, 0, 
+			                           0, f, 0, 0, 
+			                           0, 0, (znear + zfar) / (znear - zfar), -1, 
+			                           0, 0, 2 * znear* zfar / (znear - zfar), 0]);
 	}
 	return this.projMatrix;
 };
@@ -61,21 +63,38 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrix = function(mode
 };
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewProjectionMatrix = function(modelViewMatrix) {
-	return mat4.multiply(mat4.transpose(this.projMatrix, mat4.create()), modelViewMatrix, mat4.create());
+	return mat4.multiply(this.projMatrix, modelViewMatrix, mat4.create());
 };
 
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(e) {
-	if (e.attribute == "orientation" || e.attribute == "position")
-		this.viewMatrix = null;
-	else if (e.attribute == "fieldOfView")
-		this.projMatrix = null;
-	else if (e.attribute == "parenttransform") {
-        this.parentTransform = newValue;
-		this.viewMatrix = null;
-    } else {
-		this.viewMatrix = null;
-		this.projMatrix = null;
+org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(evt) {	
+	var me = this;
+	var event = evt;
+	var targets = {};
+	
+	targets["internal:transform"] = function() {
+		me.parentTransform = event.newValue;
+		me.viewMatrix = null;
+	};
+	targets["orientation"] = targets["position"] = function() {
+		me.viewMatrix = null;
+	};
+	targets["fieldOfView"] = function() {
+		me.projMatrix = null;
+	};
+	
+	var target = null;
+	if (evt instanceof XML3D_InternalMutationEvent)
+		target = "internal:"+evt.type;
+	else
+		target = evt.attrName;
+	
+	if (targets[target]) {
+		targets[target]();
 	}
+	else {
+		org.xml3d.debug.logWarning("Unhandled event in group adapter: "+evt.eventType + " for parameter "+target);
+	}
+	
 	this.factory.handler.redraw("View changed");
 };
 

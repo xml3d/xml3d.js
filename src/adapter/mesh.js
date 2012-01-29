@@ -7,8 +7,6 @@ org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
     this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
     this.dataAdapter.registerObserver(this);
 
-    //this.mesh = this.initMeshGL();
- 
     this.passChangeToObject = function(evt) { 
         org.xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
     };
@@ -37,30 +35,16 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.registerCallback = function(cal
 		this.passChangeToObject = callback;
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.dispatchEvent = function(evt) {
-    var res = this.node.dispatchEvent(evt);
-};
-
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(evt) {
-	/*if (e.eventType == MutationEvent.REMOVAL) 
-		this.factory.renderer.sceneTreeRemoval(e);	
-	else if (e.attribute == "src") {
-		this.dispose();
-		this.mesh = this.initMeshGL();
-	}
-	else if (e.attribute == "visible")
-		this._visible = e.newValue;
-
-	this.factory.renderer.requestRedraw("Mesh attribute was changed.");
-    */
+	if (evt.eventType == MutationEvent.REMOVAL) 
+		return this.factory.renderer.sceneTreeRemoval(evt);	
 
     this.passChangeToObject(evt);
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyDataChanged = function(e) {
-	//this.factory.renderer.requestRedraw("Mesh data has changed");
+org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyDataChanged = function(evt) {
      //TODO: fix object form
-    this.passChangeToObject(e);
+    this.passChangeToObject(evt);
 };
 
 org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.applyXFlow = function(shader, parameters) {

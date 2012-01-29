@@ -4,6 +4,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
     org.xml3d.webgl.RenderAdapter.call(this, factory, node);
     this.listeners = new Array();
     this.processListeners();
+    this.factory = factory;
     this.parentTransform = null;
     this._parentShader = null;
     this.isValid = true;
@@ -45,57 +46,113 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispatchEvent = function(evt) 
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
-	var downstreamValue = null;
-	if (evt.eventType == MutationEvent.ADDITION)
+	
+	if (evt.eventType == MutationEvent.ADDITION) {
 		this.factory.renderer.sceneTreeAddition(evt); 
+		return;
+	}
 	else if (evt.eventType == MutationEvent.REMOVAL) {
 		this.factory.renderer.sceneTreeRemoval(evt);
+		return;
 	}
-	else if (evt.attribute == "shader") {
+	
+	var downstreamValue = null;
+	var me = this;
+	var event = evt;
+	var ievent = new XML3D_InternalMutationEvent();
+	
+	var targets = {};
+	targets["shader"] = function() {
 		//Update this group node's shader then propagate the change down to its children
-		this.shader = this.getShader();      
-        downstreamValue = this.shader == null ? this._parentShader : this.shader;		
-        evt.newValue = downstreamValue;
-		this.notifyListeners(evt);
+		me.shader = me.getShader();      
+        downstreamValue = me.shader == null ? me._parentShader : me.shader;	
+        
+        ievent.source = "group";
+        ievent.type = "shader";
+        ievent.parameter = "shader";
+        ievent.newValue = downstreamValue;
+        me.notifyChildren(ievent);
 		
-		this.factory.renderer.requestRedraw("Group shader changed.", false);
-	}
-	else if (evt.attribute == "transform") {
+        me.factory.renderer.requestRedraw("Group shader changed.", false);
+	};
+	
+	targets["transform"] = function() {
 		//This group is now linked to a different transform node. We need to notify all 
 		//of its children with the new transformation matrix
 
-		this._updateTransformAdapter();
-		if (this._transformAdapter) 
-			downstreamValue = this._transformAdapter.getMatrix(); 
-		else if (this.parentTransform)
+		me._updateTransformAdapter();
+		if (me._transformAdapter) 
+			downstreamValue = me._transformAdapter.getMatrix(); 
+		else if (me.parentTransform)
 			downstreamValue = new XML3DMatrix();
 		else
 			downstreamValue = null;
 		
-		if(this.parentTransform)
-			downstreamValue = downstreamValue.multiply(this.parentTransform);
+		if(me.parentTransform)
+			downstreamValue = downstreamValue.multiply(me.parentTransform);
         
-        //Set secondary flag to let subsequent adapters know this change was not directed at them
-        evt.secondary = true;        
-        evt.newValue = downstreamValue;
-		this.notifyListeners(evt);
-		this.factory.renderer.requestRedraw("Group transform changed.");
+		ievent.source = "group";
+        ievent.type = "transform";
+        ievent.newValue = downstreamValue;
+        me.notifyChildren(ievent);
+		me.factory.renderer.requestRedraw("Group transform changed.");
+	};
+	
+	targets["visible"] = function() {
+		ievent.source = "group";
+        ievent.type = "visible";
+        ievent.newValue = downstreamValue;
+        
+        me.notifyChildren(ievent);
+		me.factory.renderer.requestRedraw("Group visibility changed.");
+	};
+	
+	targets["internal:shader"] = function() {
+		if (!me.shader) { // This node's shader would override parent shaders
+			event.source = "group";
+			me._parentShader = event.newValue;
+			me.notifyChildren(event);
+		}
+	};
+	
+	targets["internal:transform"] = function() {
+		downstreamValue = event.newValue;
+		if (me.parentTransform)
+			downstreamValue = mat4.multiply(downstreamValue, me.parentTransform);
+		
+		event.source = "group";
+		event.newValue = downstreamValue;
+		me.notifyChildren(event);
+		me.factory.renderer.requestRedraw("Transform node was changed.");
+	};
+	
+	targets["internal:visible"] = function() {
+        me.notifyChildren(event);
+		me.factory.renderer.requestRedraw("Group visibility changed.");
+	};
+	
+	var target;
+	if (evt instanceof XML3D_InternalMutationEvent)
+		target = "internal:"+evt.type;
+	else
+		target = evt.attrName;
+	
+	if (targets[target]) {
+		targets[target]();
 	}
-	else if (evt.attribute == "visible") {
-		this.notifyListeners(evt);
-		this.factory.renderer.requestRedraw("Group visibility changed.");
+	else {
+		org.xml3d.debug.warning("Unhandled event in group adapter: "+evt.eventType + " for attribute "+evt.attribute);
 	}
+
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyListeners = function(evt) {
-	for (var i=0; i<this.listeners.length; i++) {
-			if (this.listeners[i].isValid)
-				this.listeners[i].notifyChanged(evt);
-			else {
-				this.listeners.splice(i, 1);
-				i--;
-			}
-		}
+org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChildren = function(evt) {	
+	var child = this.node.firstElementChild;
+	while (child) {
+		var adapter = this.factory.getAdapter(child);
+		adapter.notifyChanged(evt);
+		child = child.nextElementSibling;
+	}
 };
 
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()

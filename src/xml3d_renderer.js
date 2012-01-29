@@ -212,15 +212,16 @@ org.xml3d.webgl.Renderer = function(handler, width, height) {
 	this.drawableObjects = this.processScene(this.xml3dNode);
 };
 
-org.xml3d.webgl.Renderer.drawableObject = function() {
+org.xml3d.webgl.Renderer.drawableObject = function(renderer) {
 	this.mesh = null;
 	this.shader = null;
 	this.transform = null;
 	this.visible = true;
 	this.meshNode = null;
+	var me = this;
+	var renderer = renderer;
 	this.callback = function(evt) {
-		//do stuff
-
+		renderer.applyChangeToObject(evt, me);
 	};
 };
 
@@ -259,7 +260,7 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 			if (currentNode.getAttribute("visible") == "false")
 				visible = false;
 			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
-				this.handler.setMouseMovePicking(true);	
+				renderer.handler.setMouseMovePicking(true);	
 				
 			var shader = adapter.getShader();
 			downstreamShader = shader ? shader : parentShader;				
@@ -271,7 +272,7 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 			if (currentNode.getAttribute("visible") == "false")
 				visible = false;
 			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
-				this.handler.setMouseMovePicking(true);	
+				renderer.handler.setMouseMovePicking(true);	
 				
 			// Add a new drawable object to the scene
 			var newObject = new org.xml3d.webgl.Renderer.drawableObject(renderer);
@@ -338,7 +339,26 @@ org.xml3d.webgl.Renderer.prototype.getGLContext = function() {
 };
 
 org.xml3d.webgl.Renderer.prototype.applyChangeToObject = function(evt, drawableObject) {
-	// TODO: this
+	var eventTypes = {};
+	var event = evt;
+	var obj = drawableObject;
+	
+	eventTypes["shader"] = function() {
+		//TODO: react to shader changes, eg. uniform variable has a new value
+	};
+	eventTypes["transform"] = function() {
+		obj.transform = event.newValue;
+	};
+	eventTypes["mesh"] = function() {
+		//TODO: react to mesh changes 
+		//src change will require disposing old GL components then creating new
+		//Needs: 'src', 'visible', 'gltype'
+	};
+	
+	if (eventTypes[evt.type]) {
+		eventTypes[evt.type]();
+	}
+
 };
 
 /**
@@ -359,6 +379,7 @@ org.xml3d.webgl.Renderer.prototype.requestRedraw = function(reason) {
 };
 
 org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
+	//TODO: this method needs to create GL components for mesh/shader now
 	var adapter = this.factory.getAdapter(evt.newValue);
 	
 	//Traverse parent nodes to build any inherited shader and transform elements
@@ -402,6 +423,7 @@ org.xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 org.xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 	//References to the adapters of the removed node are automatically cleaned up
 	//as they're encountered during the render phase or notifyChanged methods
+	// TODO: This method needs to make sure GL components are disposed for removed mesh/shader nodes
 	var adapter = this.factory.getAdapter(evt.oldValue);
 	if (adapter && adapter.dispose)
 		adapter.dispose();
@@ -549,6 +571,7 @@ org.xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, li
 		parameters["modelViewMatrix"] = xform.modelView;
 		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView);
 		parameters["normalMatrix"] = this.camera.getNormalMatrix(xform.modelView);
+		
 		//parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3); //TODO: Fix me
 		
 		if (!shader)
@@ -709,7 +732,7 @@ org.xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickin
 						id : id,
 						min : volumeMin,
 						max : volumeMax,
-						modelMatrix : mat4.transpose(transform),
+						modelMatrix : transform,
 						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
 						normalMatrix : this.camera.getNormalMatrix(xform.modelView)
 				};

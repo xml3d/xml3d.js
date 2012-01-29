@@ -12,6 +12,16 @@ else if (typeof org.xml3d.webgl != "object")
 
 org.xml3d.webgl.MAXFPS = 30;
 
+// Since this object is used quite often XML3D_InternalMutationEvent is supposed to be a shortcut to 
+// increase performance by avoiding all the nested objects
+org.xml3d.webgl.Events = {};
+XML3D_InternalMutationEvent = org.xml3d.webgl.Events.InternalMutationEvent = function() {
+	this.source = ""; // The 'current' source node type (shader | group | transform | mesh)
+	this.type = ""; // The type of this event as -> shader|transform|mesh
+	this.parameter = ""; // The parameter that was changed (eg. uniform variable, translation, meshtype etc)
+	this.newValue = null; // The new value of the changed parameter/target
+};
+
 /**
  * Creates the XML3DHandler.
  * 
@@ -299,25 +309,15 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         if(target !== undefined && target !== null)
             tar = target;
         else if(this.scene.xml3d.currentPickObj)
-            tar = this.scene.xml3d.currentPickObj.node;
+            tar = this.scene.xml3d.currentPickObj;
         else
             tar = this.scene.xml3d;
 
-        // FIXME dispatch
-        /*for (var i = 0; i < tar.adapters.length; i++) {
-            if (tar.adapters[i].dispatchEvent) {
-                tar.adapters[i].dispatchEvent(evt);
-            }
-        }*/
-
-        // FIXME dispatch an extra copy to the canvas element
-        // TODO: is this needed? do we 'eat' the initial event or is it passed on already?
+        tar.dispatchEvent(evt);
+        
+        //Dispatch a copy to the XML3D node (canvas)
         tar = this.scene.xml3d;
-        /*for (var i = 0; i < tar.adapters.length; i++) {
-            if (tar.adapters[i].dispatchEvent) {
-                tar.adapters[i].dispatchEvent(evt);
-            }
-        }*/
+        tar.dispatchEvent(evt);
     };
 	
 	/** 

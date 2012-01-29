@@ -39,9 +39,15 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
 	this.matrix = this.getMatrix();
-	for (var i=0; i<this.listeners.length; i++) {
+
+	var ievent = new XML3D_InternalMutationEvent();
+	ievent.source = "transform";
+	ievent.type = "transform";
+	ievent.newValue = this.matrix;
+	
+	for (var i=0, length = this.listeners.length; i < length; i++) {
 		if (this.listeners[i].isValid)
-			this.listeners[i].internalNotifyChanged("transform", this.matrix);
+			this.listeners[i].notifyChanged(ievent);
 		else {
 			this.listeners.splice(i,1);
 			i--;

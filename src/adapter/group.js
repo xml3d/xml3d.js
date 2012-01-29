@@ -2,7 +2,6 @@
 // Adapter for <group>
 org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
     org.xml3d.webgl.RenderAdapter.call(this, factory, node);
-    this.listeners = new Array();
     this.processListeners();
     this.factory = factory;
     this.parentTransform = null;
@@ -41,10 +40,6 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.processListeners  = function()
     }
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispatchEvent = function(evt) {
-    var res = this.node.dispatchEvent(evt);
-};
-
 org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
 	
 	if (evt.eventType == MutationEvent.ADDITION) {
@@ -58,7 +53,6 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 	
 	var downstreamValue = null;
 	var me = this;
-	var event = evt;
 	var ievent = new XML3D_InternalMutationEvent();
 	
 	var targets = {};
@@ -84,12 +78,12 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 		if (me._transformAdapter) 
 			downstreamValue = me._transformAdapter.getMatrix(); 
 		else if (me.parentTransform)
-			downstreamValue = new XML3DMatrix();
+			downstreamValue = mat4.identity(mat4.create());
 		else
 			downstreamValue = null;
 		
 		if(me.parentTransform)
-			downstreamValue = downstreamValue.multiply(me.parentTransform);
+			downstreamValue = mat4.multiply(downstreamValue, me.parentTransform);
         
 		ievent.source = "group";
         ievent.type = "transform";
@@ -109,25 +103,25 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 	
 	targets["internal:shader"] = function() {
 		if (!me.shader) { // This node's shader would override parent shaders
-			event.source = "group";
-			me._parentShader = event.newValue;
-			me.notifyChildren(event);
+			evt.source = "group";
+			me._parentShader = evt.newValue;
+			me.notifyChildren(evt);
 		}
 	};
 	
 	targets["internal:transform"] = function() {
-		downstreamValue = event.newValue;
+		downstreamValue = evt.newValue;
 		if (me.parentTransform)
 			downstreamValue = mat4.multiply(downstreamValue, me.parentTransform);
 		
-		event.source = "group";
-		event.newValue = downstreamValue;
-		me.notifyChildren(event);
+		evt.source = "group";
+		evt.newValue = downstreamValue;
+		me.notifyChildren(evt);
 		me.factory.renderer.requestRedraw("Transform node was changed.");
 	};
 	
 	targets["internal:visible"] = function() {
-        me.notifyChildren(event);
+        me.notifyChildren(evt);
 		me.factory.renderer.requestRedraw("Group visibility changed.");
 	};
 	
@@ -139,8 +133,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 	
 	if (targets[target]) {
 		targets[target]();
-	}
-	else {
+	} else {
 		org.xml3d.debug.warning("Unhandled event in group adapter: "+evt.eventType + " for attribute "+evt.attribute);
 	}
 

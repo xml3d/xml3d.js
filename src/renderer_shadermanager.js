@@ -228,7 +228,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) 
 	//Diffuse color
 	uniform = sp.uniforms.diffuseColor;
 	if (uniform) { 
-		this.setUniform(gl, uniform, [1.0, 1.0, 1.0]);
+		this.setUniform(gl, uniform, [0.0, 0.0, 1.0]);
 	}
 	
 	//Emissive color

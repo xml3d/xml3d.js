@@ -12,8 +12,8 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this.__defineSetter__("parentTransform", function(incoming){
 		//TODO: rotation.fromMatrix is missing now, what to do?
 		return;
-		this._parentRot = new XML3DRotation.fromMatrix(incoming).negate()._data;
-		this._parentTrans = vec3.negate(vec3.create(incoming.m14, incoming.m24, incoming.m34));
+		this._parentRot = new XML3DRotation().fromMatrix(incoming)._data;
+		this._parentTrans = vec3.create([incoming[12], incoming[13], incoming[14]]);
     });
 	this.isValid = true;
 };
@@ -26,7 +26,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	{
 		var pos = this.node.position._data;
 		var orient = this.node.orientation._data;
-		var negPos = vec3.add(vec3.negate(pos, vec3.create()), this._parentTrans);
+		var negPos = vec3.negate(vec3.add(pos, this._parentTrans, vec3.create()));
 		var negOr = quat4.multiply(orient, this._parentRot, quat4.create());
 		quat4.inverse(negOr);
 		
@@ -68,11 +68,10 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewProjectionMatrix = 
 
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(evt) {	
 	var me = this;
-	var event = evt;
 	var targets = {};
 	
 	targets["internal:transform"] = function() {
-		me.parentTransform = event.newValue;
+		me.parentTransform = evt.newValue;
 		me.viewMatrix = null;
 	};
 	targets["orientation"] = targets["position"] = function() {

@@ -261,10 +261,11 @@ org.xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 				visible = false;
 			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
 				renderer.handler.setMouseMovePicking(true);	
-				
+			
 			var shader = adapter.getShader();
-			downstreamShader = shader ? shader : parentShader;				
-			downstreamTransform = adapter.applyTransformMatrix(transform);
+			downstreamShader = shader ? shader : parentShader;	
+			adapter.parentTransform = transform;
+			downstreamTransform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
 			
 		};
 		
@@ -340,14 +341,17 @@ org.xml3d.webgl.Renderer.prototype.getGLContext = function() {
 
 org.xml3d.webgl.Renderer.prototype.applyChangeToObject = function(evt, drawableObject) {
 	var eventTypes = {};
-	var event = evt;
-	var obj = drawableObject;
 	
 	eventTypes["shader"] = function() {
 		//TODO: react to shader changes, eg. uniform variable has a new value
+		if (evt.parameter == "shader") {
+			//change shader reference
+			return;
+		}
+		
 	};
 	eventTypes["transform"] = function() {
-		obj.transform = event.newValue;
+		drawableObject.transform = evt.newValue;
 	};
 	eventTypes["mesh"] = function() {
 		//TODO: react to mesh changes 

@@ -288,8 +288,8 @@ org.xml3d.webgl.createXML3DHandler = (function() {
         // init event
         if(event === null || event === undefined)
         {
-            evt = document.createEvent("MouseEvents");
-            evt.initMouseEvent(    type,
+            event = document.createEvent("MouseEvents");
+            event.initMouseEvent(    type,
                             // canBubble, cancelable, view, detail
                                true, true, window, 0,
                                // screenX, screenY, clientX, clientY
@@ -328,7 +328,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	 */
 	XML3DHandler.prototype.copyMouseEvent = function(event)
 	{
-		evt = document.createEvent("MouseEvents");
+		var evt = document.createEvent("MouseEvents");
 		evt.initMouseEvent(	event.type,
 						// canBubble, cancelable, view, detail
 					   	event.bubbles, event.cancelable, event.view, event.detail, 

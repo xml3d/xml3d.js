@@ -46,6 +46,9 @@ function TestAdapterFactory() {
         return {
             init : function() {
                 ok(true, "Init Adapter");
+            },
+            notifyChanged : function(e) {
+                ok(true, "Adapter has been notified: " + e);
             }
         };
     };
@@ -88,6 +91,50 @@ test("WebGLFactory test", 5, function() {
     ok(a, "There is a WebGL Group adapter");
 });
 
+module("Mutation tests", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/basic.xhtml", this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    },
+    factory : new TestAdapterFactory(),
+});
 
+test("DOMNodeInserted on xml3d", 4, function() {
+	var x = this.doc.getElementById("myXml3d");
+	var g = this.doc.createElementNS(org.xml3d.xml3dNS, "group");
+	this.factory.getAdapter(x);
+	x.appendChild(g);
+});
 
+test("DOMNodeRemoved on xml3d", 6, function() {
+    var x = this.doc.getElementById("myXml3d");
+    var g = this.doc.getElementById("myGroup");
+    this.factory.getAdapter(x);
+    this.factory.getAdapter(g);
+    x.removeChild(g);
+});
 
+test("DOMNodeInserted on arbritary", 4, function() {
+    var x = this.doc.getElementById("myGroup");
+    var g = this.doc.createElementNS(org.xml3d.xml3dNS, "group");
+    this.factory.getAdapter(x);
+    x.appendChild(g);
+});
+
+test("DOMNodeRemoved on arbritary", 6, function() {
+    var x = this.doc.getElementById("myGroup");
+    var g = this.doc.getElementById("myMesh01");
+    this.factory.getAdapter(x);
+    this.factory.getAdapter(g);
+    x.removeChild(g);
+});

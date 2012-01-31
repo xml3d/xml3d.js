@@ -134,7 +134,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 	if (targets[target]) {
 		targets[target]();
 	} else {
-		org.xml3d.debug.warning("Unhandled event in group adapter: "+evt.eventType + " for attribute "+evt.attribute);
+		org.xml3d.debug.logWarning("Unhandled event in group adapter: "+evt.eventType + " for attribute "+evt.attribute);
 	}
 
 };

@@ -6,9 +6,9 @@
         if (elem) {
             this.element = elem;
             elem.addEventListener('DOMAttrModified', this, false);
-//            elem.addEventListener('DOMNodeRemoved', this, true);
+            elem.addEventListener('DOMNodeRemoved', this, true);
 //            elem.addEventListener('DOMCharacterDataModified', this, false);
-//            elem.addEventListener('DOMNodeInserted', this, true);
+            elem.addEventListener('DOMNodeInserted', this, true);
             this.handlers = {};
             this.adapters = {};
         }
@@ -35,20 +35,43 @@
     };
 
     handler.ElementHandler.prototype.handleEvent = function(e) {
-        var handler = this.handlers[e.attrName];
-        var notified = false;
-        if (handler && handler.setFromAttribute) {
-            notified = handler.setFromAttribute(e.newValue);
-        }
-        if(!notified) {
+        switch (e.type) {
+        case "DOMAttrModified":
+            var handler = this.handlers[e.attrName];
+            var notified = false;
+            if (handler && handler.setFromAttribute) {
+                notified = handler.setFromAttribute(e.newValue);
+                if (!notified) {
+                    this.notify(e);
+                }
+            }
+            break;
+        case "DOMNodeInserted":
+            e.eventType = MutationEvent.ADDITION;
             this.notify(e);
-        }
+            break;
+        case "DOMNodeRemoved":
+            e.eventType = MutationEvent.REMOVAL;
+            this.notify(e);
+            if(e.target._configured)
+                e.target._configured.remove(e);
+            break;
+        };
     };
 
     handler.ElementHandler.prototype.notify = function(evt) {
         var adapters = this.adapters;
-        for(var a in adapters)
-            adapters[a].notifyChanged(evt);
+        for(var a in adapters) {
+            try {
+                adapters[a].notifyChanged(evt);
+            } catch (e) {
+                org.xml3d.debug.logError(e);
+            }
+        }
+    };
+
+    handler.ElementHandler.prototype.remove = function(evt) {
+        // TODO
     };
 
     handler.ElementHandler.prototype.resolve = function(attrName) {

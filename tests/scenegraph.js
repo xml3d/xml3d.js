@@ -95,21 +95,30 @@ module("Bounding Boxes", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/basic.xhtml", this.cb);
+        loadDocument("scenes/boundingBox.xhtml", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
         v.removeEventListener("load", this.cb, true);
-    }
+    },
 });
 
-test("Defaults", function() {
-    var xml3d = this.doc.getElementById("myXml3d");
-    ok(xml3d.getBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
 
-    var group = this.doc.getElementById("myGroup");
-    ok(group.getBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
 
-    var mesh = this.doc.getElementById("myMesh01");
-    ok(mesh.getBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
+test("Defaults", 8, function() {
+    var emptyBox = this.doc.getElementById("empty_group").getBoundingBox();
+    var rootBox = this.doc.getElementById("g_Root").getBoundingBox();
+    var topCubeBox = this.doc.getElementById("g_TopCube").getBoundingBox();
+    var botCubeBox = this.doc.getElementById("g_BotCube").getBoundingBox();
+    var frontTopMeshBox = this.doc.getElementById("m_TopFront").getBoundingBox();
+    var frontBotMeshBox = this.doc.getElementById("m_BotFront").getBoundingBox();
+
+    ok(emptyBox.isEmpty(), "Empty group delivers empty BoundingBox");
+
+    QUnit.closeBox(frontTopMeshBox, new XML3DBox(new XML3DVec3(-1,-1,0),new XML3DVec3(1,1,0)), EPSILON, "Front rectangle of top cube: (-1 -1 0) to (1 1 0)");
+    QUnit.closeBox(frontBotMeshBox, new XML3DBox(new XML3DVec3(-1,-1,0),new XML3DVec3(1,1,0)), EPSILON, "Front rectangle of bottom cube: (-1 -1 0) to (1 1 0)");
+    QUnit.closeBox(topCubeBox, new XML3DBox(new XML3DVec3(-1,1.5,-1),new XML3DVec3(1,3.5,1)), EPSILON, "Top cube: (-1 1.5 -1) to (1 3.5 1)");
+    QUnit.closeBox(botCubeBox, new XML3DBox(new XML3DVec3(-1,-3.5,-1),new XML3DVec3(1,-1.5,1)), EPSILON, "Bottom cube: (-1 -3.5 -1) to (1 -1.5 1)");
+    QUnit.closeBox(rootBox, new XML3DBox(new XML3DVec3(-1,-3.5,-1),new XML3DVec3(1,3.5,1)), EPSILON, "Root group: (-1 -3.5 -1) to (1 3.5 1)");
+
 });

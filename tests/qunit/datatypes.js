@@ -57,7 +57,7 @@ QUnit.extend( QUnit, {
 	},
 
 	closeBox : function(actual, expected, maxDifference, message) {
-		var passes =
+		var passes = actual.isEmpty() ? expected.isEmpty() :
 			QUnit.__passesVector(actual.min, expected.min, maxDifference) &&
 			QUnit.__passesVector(actual.max, expected.max, maxDifference);
 		QUnit.push(passes, actual, expected, message);
@@ -68,6 +68,7 @@ new (function() {
 
     function isVec3(arg) { return arg.toString() == '[object XML3DVec3]';};
     function isRotation(arg) { return arg.toString() == '[object XML3DRotation]';};
+    function isBox(arg) { return arg.toString() == '[object XML3DBox]';};
     function isMatrix(arg) {
         if (arg.toString() == '[object XML3DMatrix]')
             return true;
@@ -89,6 +90,8 @@ new (function() {
             a.m21 + ", " +  a.m22 + ", " +  a.m23 + ", " +  a.m24 + "\n" +
             a.m31 + ", " +  a.m32 + ", " +  a.m33 + ", " +  a.m34 + "\n" +
             a.m41 + ", " +  a.m42 + ", " +  a.m43 + ", " +  a.m44 + ")";
+        if(isBox(a))
+            return a.isEmpty() ? "XML3DBox(empty)" : "XML3DBox(("+a.min.x+", "+a.min.y+", "+a.min.z+"),("+a.max.x+", "+a.max.y+", "+a.max.z+"))";
         return original(a,b);
     });
 })();

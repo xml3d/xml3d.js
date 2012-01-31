@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>XML3D Bounding Box Test Scene</title>
+    <link rel="stylesheet" type="text/css" media="all" href="frame.css" />
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+  </head>
+  <body style="background-color: #fff;width:500px">
+    <xml3d id="myXml3d" style="width: 300px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d" activeView="#controller_view">
+      <defs>
+        <data id="mySimpleMesh">
+          <int name="index">0 1 2 1 2 3</int>
+          <float3 name="position">-1.0 -1.0 -0.0 1.0 -1.0 -0.0 -1.0 1.0 -0.0 1.0 1.0 -0.0</float3>
+          <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+          <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        </data>
+        <transform id="t_TopCube" translation="0 2.5 0" />
+        <transform id="t_BotCube" translation="0 -2.5 0" />
+        <transform id="t_Front" translation="0.0 0.0 1.0" />
+        <transform id="t_Back" translation="0.0 0.0 -1.0" />
+        <transform id="t_Left" translation="-1.0 0.0 0.0" rotation="0 1 0 1.57" />
+        <transform id="t_Right" translation="-1.0 0.0 0.0" rotation="0 1 0 1.57" />
+        <transform id="t_Top" translation="0.0 1.0 0.0" rotation="1 0 0 1.57" />
+        <transform id="t_Bottom" translation="0.0 -1.0 0.0" rotation="1 0 0 1.57" />
+      </defs>
+      <view id="controller_view" position="0 0 10" />
+      <group id="g_Root">
+        <group id="g_TopCube" transform="#t_TopCube">
+          <group id="g_TopFront" transform="#t_Front">
+            <mesh id="m_TopFront" type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group id="g_TopBack" transform="#t_Back">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group id="g_TopLeft" transform="#t_Left">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group id="g_TopRight" transform="#t_Right">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group id="g_TopTop" transform="#t_Top">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group id="g_TopBottom" transform="#t_Bottom">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+        </group>
+        <group id="g_BotCube" transform="#t_BotCube">
+          <group transform="#t_Front">
+            <mesh id="m_BotFront" type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group transform="#t_Back">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group transform="#t_Left">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group transform="#t_Right">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group transform="#t_Top">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group transform="#t_Bottom">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+        </group>
+        <group id="empty_group" transform="#t_BotCube"/>
+      </group>
+    </xml3d>
+  </body>
+</html>

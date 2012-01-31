@@ -176,6 +176,17 @@ new (function() {
         }
         return new XML3DMatrix();
     };
+
+    methods.dataGetOutputFieldNames = function() {
+        console.error(this.nodeName + "::getOutputFieldNames is not implemeted yet.");
+        return null;
+    };
+
+    methods.dataGetResult = function() {
+        console.error(this.nodeName + "::getResult is not implemeted yet.");
+        return null;
+    };
+
     // Export to org.xml3d namespace
     org.xml3d.extend(org.xml3d.methods, methods);
 });

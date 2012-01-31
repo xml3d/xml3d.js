@@ -11,7 +11,6 @@ org.xml3d.XML3DNodeFactory.isXML3DNode = function(node) {
 
 // TODO: Merge into org.xml3d.configure
 org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
-    var n, t;
     if (org.xml3d.XML3DNodeFactory.isXML3DNode(element)) {
         var classInfo = org.xml3d.classInfo[element.localName];
         if (classInfo === undefined) {
@@ -19,6 +18,9 @@ org.xml3d.XML3DNodeFactory.prototype.configure = function(element) {
         } else {
             element._configured = new org.xml3d.ElementHandler(element);
             element._configured.registerAttributes(classInfo);
+            // Fix difference in Firefox (undefined) and Chrome (null)
+            if (element.style == undefined)
+                element.style = null;
             var n = element.firstElementChild;
             while(n) {
                 this.configure(n);

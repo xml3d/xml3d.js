@@ -10,7 +10,7 @@ function NotifyingAdapterFactory() {
             init : function() {},
             notifyChanged : function(e) {
                 this.event = e;
-                ok(true, "Adapter notified");
+                ok(true, "Adapter notified: " + e.newValue);
             }
         };
     };
@@ -23,7 +23,7 @@ module("Element notification tests", {
 
 test("Factory test", 2, function() {
     ok(this.factory, "This factory exists.");
-    this.factory.createAdapter().notifyChanged();
+    this.factory.createAdapter().notifyChanged({});
 });
 
 test("Event attribute notification tests", 7, function() {
@@ -73,7 +73,7 @@ test("XML3DRotation attribute notification tests", 5, function() {
     var a = this.factory.getAdapter(e);
     e.setAttribute("rotation", "1 0 0 3.14");
     e.rotation.angle = 4.0;
-    e.rotation.axis.x = 1.0;
+    e.rotation.axis.y = 1.0;
     e.rotation.axis.setVec3Value("1 0 0");
     e.rotation.setAxisAngleValue("1 4 5 6");
 });

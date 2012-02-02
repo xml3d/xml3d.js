@@ -9,12 +9,6 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this._parentTrans = vec3.create([0,0,0]);
 	this._parentRot = quat4.create([0,0,0,1]);
 	this._parentTransform = null;
-	this.__defineSetter__("parentTransform", function(incoming){
-		//TODO: rotation.fromMatrix is missing now, what to do?
-		return;
-		this._parentRot = new XML3DRotation().fromMatrix(incoming)._data;
-		this._parentTrans = vec3.create([incoming[12], incoming[13], incoming[14]]);
-    });
 	this.isValid = true;
 };
 org.xml3d.webgl.XML3DViewRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
@@ -25,15 +19,16 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 	if (this.viewMatrix == null)
 	{
 		var pos = this.node.position._data;
-		var orient = this.node.orientation._data;
-		var negPos = vec3.negate(vec3.add(pos, this._parentTrans, vec3.create()));
-		var negOr = quat4.multiply(orient, this._parentRot, quat4.create());
-		quat4.inverse(negOr);
-		
-		this.viewMatrix = mat4.multiply(
-							quat4.toMat4(negOr), 
-							mat4.translate(mat4.identity(mat4.create()), negPos)
-						  );
+		var orient = this.node.orientation;
+		var v = mat4.rotate(mat4.translate(mat4.identity(mat4.create()),pos), orient.angle, orient.axis._data);
+
+		var p = this.factory.getAdapter(this.node.parentNode);
+		this.parentTransform = p.applyTransformMatrix(mat4.identity(mat4.create()));
+		//console.log(mat4.str(this.parentTransform));
+		if(this.parentTransform) {
+		    v = mat4.multiply(this.parentTransform, v);
+		}
+		this.viewMatrix = mat4.inverse(v);
 	}
 	return this.viewMatrix;
 };

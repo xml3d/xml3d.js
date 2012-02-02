@@ -43,7 +43,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e
 	var ievent = new XML3D_InternalMutationEvent();
 	ievent.source = "transform";
 	ievent.type = "transform";
-	ievent.newValue = this.matrix;
+	ievent.newValue = mat4.create(this.matrix);
 	
 	for (var i=0, length = this.listeners.length; i < length; i++) {
 		if (this.listeners[i].isValid)

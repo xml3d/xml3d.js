@@ -192,7 +192,7 @@ org.xml3d.webgl.DataAdapter = function(factory, node)
 			child = child.nextElementSibling;
 		}
 		
-		if (this.node.src != "") {
+		if (this.node.src) {
 			var srcElement = org.xml3d.URIResolver.resolve(this.node.src);
 			if (srcElement) {
 				dataCollector = this.factory.getAdapter(srcElement, org.xml3d.webgl.XML3DDataAdapterFactory.prototype);

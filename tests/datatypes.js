@@ -216,6 +216,13 @@ test("XML3DRotation::toMatrix", function()  {
     // TODO: Test
 });
 
+test("XML3DRotation::setQuaternion", function()  {
+    equal(typeof this.ident.__proto__.setQuaternion, 'function', "XML3DRotation::setQuaternion exists");
+    var v = new XML3DRotation();
+    v.setQuaternion(new XML3DVec3(0,Math.sqrt(0.5),0),-Math.sqrt(0.5));
+    QUnit.closeRotation(v, new XML3DRotation(new XML3DVec3(0,1,0), Math.PI/2.0), EPSILON);
+});
+
 test("XML3DRotation::rotateVec3", function()  {
 	equal(typeof this.ident.__proto__.rotateVec3, 'function', "XML3DRotation::rotateVec3 exists");
 	
@@ -411,6 +418,7 @@ test("XML3DMatrix::rotateAxisAngle", function() {
     var rot = this.mat1.rotateAxisAngle(this.axis.x, this.axis.y, this.axis.z, 2*Math.PI);
 
     QUnit.closeMatrix(rot, this.mat1, EPSILON);
+    QUnit.closeMatrix(this.ident.rotateAxisAngle(0,0,1,0), new XML3DMatrix(), EPSILON);
 });
 
 test("XML3DMatrix::scale", function() {
@@ -431,6 +439,7 @@ test("XML3DMatrix::translate", function() {
     var calc_trans = this.mat4.translate(tf.x, tf.y, tf.z);
 
     QUnit.closeMatrix(calc_trans, this.mat4_trans, EPSILON);
+    QUnit.close(this.ident.translate(this.mat4_transfac.x,this.mat4_transfac.y, this.mat4_transfac.z).m43, -4, EPSILON);
 });
 
 test("XML3DMatrix::setMatrixValue: valid value", function() {

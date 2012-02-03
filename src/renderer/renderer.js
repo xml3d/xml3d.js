@@ -705,7 +705,7 @@ xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
 			var xform = {};
-			xform.view = this.camera.getViewMatrix();
+			xform.view = this.camera.viewMatrix;
 			xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
 
 			for (var i = 0; i < this.drawableObjects.length; i++) {
@@ -901,7 +901,7 @@ xml3d.webgl.Renderer.prototype.getViewMatrix = function() {
 	if (this.currentView != xml3d.URIResolver.resolve(av))
 		this.camera = this.initCamera();
 
-	this._viewMatrix = this.camera.getViewMatrix();
+	this._viewMatrix = this.camera.viewMatrix;
 	
 	return this._viewMatrix; 
 }; 

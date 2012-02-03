@@ -327,3 +327,12 @@ test("Interface initialization", function() {
     equal(g.onclick, null, "Event attribute (group::onclick) non-initialized.");
     equal(typeof m.onclick, "function", "Event attribute (mesh::onclick) initialized.");
 });
+
+test("Typed array initialization", 5, function() {
+    var value = this.doc.getElementById("indices").value;
+    equal(value.length, 6 , "6 values in array");
+    value = this.doc.getElementById("positions").value;
+    equal(value.length, 12 , "12 indices in array");
+    value = this.doc.getElementById("texcoords").value;
+    equal(value.length, 8 , "8 indices in array");
+});

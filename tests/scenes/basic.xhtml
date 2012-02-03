@@ -20,7 +20,13 @@
     <group id="myGroup" visible="false">
         <mesh id="myMesh01" type="lines" onclick="alert('Hallo');"/>
     </group>
-    <mesh id="myMesh02"/>
+    <mesh id="myMesh02">
+          <int id="indices" name="index">0 1 2 1 2 3</int>
+          <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+          <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+          <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0
+           0.0 0.0<!-- This is a comment -->1.0 0.0</float2>
+    </mesh>
   </xml3d>
 </body>
 </html>

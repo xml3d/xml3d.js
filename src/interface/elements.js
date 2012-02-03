@@ -1,3 +1,8 @@
+xml3d.events = {
+        VALUE_MODIFIED:  99
+};
+
+
 (function() {
 
     var handler = {};
@@ -7,7 +12,6 @@
             this.element = elem;
             elem.addEventListener('DOMAttrModified', this, false);
             elem.addEventListener('DOMNodeRemoved', this, true);
-//            elem.addEventListener('DOMCharacterDataModified', this, false);
             elem.addEventListener('DOMNodeInserted', this, true);
             this.handlers = {};
             this.adapters = {};
@@ -34,7 +38,15 @@
         return a;
     };
 
+    handler.ElementHandler.prototype.registerMixed = function() {
+        this.element.addEventListener('DOMCharacterDataModified', this, false);
+    };
+
     handler.ElementHandler.prototype.handleEvent = function(e) {
+        //if(this.element != e.relatedNode)
+        //    return;
+        console.log(e.type + " at " + e.currentTarget.localName);
+
         switch (e.type) {
         case "DOMAttrModified":
             var handler = this.handlers[e.attrName];
@@ -47,7 +59,12 @@
             }
             break;
         case "DOMNodeInserted":
-            e.eventType = MutationEvent.ADDITION;
+            if (e.target.nodeType == Node.TEXT_NODE && this.handlers.value) {
+                e.eventType = xml3d.events.VALUE_MODIFIED;
+                this.handlers.value.resetValue();
+            } else {
+                e.eventType = MutationEvent.ADDITION;
+            }
             this.notify(e);
             break;
         case "DOMNodeRemoved":
@@ -55,6 +72,11 @@
             this.notify(e);
             if(e.target._configured)
                 e.target._configured.remove(e);
+            break;
+        case "DOMCharacterDataModified":
+            e.eventType = xml3d.events.VALUE_MODIFIED;
+            this.handlers.value.resetValue();
+            this.notify(e);
             break;
         };
     };

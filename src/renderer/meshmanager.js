@@ -103,7 +103,7 @@ xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
 	//}
 	meshInfo.valid = true;
 	// TODO: Is dataTable.position defined?
-	meshInfo.bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data);
+	//meshInfo.bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 
 	return meshInfo;
 	

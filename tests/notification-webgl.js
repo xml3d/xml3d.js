@@ -3,13 +3,14 @@
 var EPSILON = 0.00001;
 
 function NotifyingAdapterFactory() {
+    var that = this;
     this.name = "test";
     this.event = null;
     this.createAdapter = function() {
         return {
             init : function() {},
             notifyChanged : function(e) {
-                this.event = e;
+                that.event = e;
                 ok(true, "Adapter notified: " + e.newValue);
             }
         };
@@ -97,4 +98,51 @@ test("Reference attribute notification tests", 4, function() {
     equal(a.event.type, "XML3D_DANGLING_REFERENCE", "Can't resolve before insertion into DOM.");
     equal(a.event.value, null, "Can't resolve before insertion into DOM.");
     e.activeView = "#hallo";
+});
+
+
+module("Typed array notification tests", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/basic.xhtml", this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    },
+    factory : new NotifyingAdapterFactory()
+});
+
+test("DOMCharacterDataModified notification", 6, function() {
+    /*var index = this.doc.getElementById("indices");
+    this.factory.getAdapter(index);
+    index.firstChild.replaceWholeText("1 2 3");
+    equal(index.value.length, 3);*/
+
+    var pos = this.doc.getElementById("positions");
+    this.factory.getAdapter(pos);
+    equal(pos.value.length, 12);
+    pos.firstChild.deleteData (0,5);
+    equal(pos.value.length, 11);
+    equal(this.factory.event.eventType, xml3d.events.VALUE_MODIFIED);
+
+});
+
+test("Text DOMNodeInserted notification", 8, function() {
+    var index = this.doc.getElementById("indices");
+    this.factory.getAdapter(index);
+    index.appendChild(this.doc.createTextNode(" 0 1 2"));
+    equal(index.value.length, 9);
+    equal(this.factory.event.eventType, xml3d.events.VALUE_MODIFIED);
+
+    var pos = this.doc.getElementById("positions");
+    this.factory.getAdapter(pos);
+    pos.textContent = "1 0 2";
+    equal(pos.value.length, 3);
 });

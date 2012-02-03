@@ -273,14 +273,14 @@
         };
     };
 
-    var typedDesc = function(elem, ta, handler) {
+    var mixedContent = function(elem, ta, handler) {
+        elem._configured.registerMixed();
         return {
             get : function() {
-                if (!ta) {
-                    ta = handler.parse(elem);
+                if (!ta.value) {
+                    ta.value = handler.parse(elem);
                 }
-                ;
-                return ta;
+                return ta.value;
             },
             set : function(value) {
                 // Throw error?
@@ -293,17 +293,16 @@
         var str = "";
         var k = elem.firstChild;
         while (k) {
-            if (k.nodeType == 3) {
-                str += k.textContent;
-            }
+            str += k.nodeType == 3 ? k.textContent : " ";
             k = k.nextSibling;
         }
         return str;
     };
 
     handler.FloatArrayValueHandler = function(elem, id) {
-        var ta = null;
-        this.desc = typedDesc(elem, ta, this);
+        var ta = {};
+        this.desc = mixedContent(elem, ta, this);
+        this.resetValue = function() { ta.value = null; };
     };
 
     handler.FloatArrayValueHandler.prototype.parse = function(elem) {
@@ -319,8 +318,9 @@
     handler.Float4x4ArrayValueHandler = handler.FloatArrayValueHandler;
 
     handler.IntArrayValueHandler = function(elem, id) {
-        var ta = null;
-        this.desc = typedDesc(elem, ta, this);
+        var ta = {};
+        this.desc = mixedContent(elem, ta, this);
+        this.resetValue = function() { ta.value = null; };
     };
     handler.IntArrayValueHandler.prototype.parse = function(elem) {
         var exp = /([+\-0-9]+)/g;
@@ -330,8 +330,9 @@
     };
 
     handler.BoolArrayValueHandler = function(elem, id) {
-        var ta = null;
-        this.desc = typedDesc(elem, ta, this);
+        var ta = {};
+        this.desc = mixedContent(elem, ta, this);
+        this.resetValue = function() { ta.value = null; };
     };
     handler.BoolArrayValueHandler.prototype.parse = function(elem) {
         var exp = /(true|false|0|1)/ig;

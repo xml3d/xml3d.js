@@ -102,6 +102,11 @@ test("XML3DVec3::normalize", function()  {
 	// TODO: Implement tests
 });
 
+test("XML3DVec3::set", function()  {
+    equal(typeof this.vec1.__proto__.set, 'function', "XML3DVec3::set does not exist");
+    // TODO: Implement tests
+});
+
 //============================================================================
 //--- XML3DRotation ---
 //============================================================================
@@ -239,6 +244,12 @@ test("XML3DRotation::rotateVec3", function()  {
 	result = r2.rotateVec3(v1);
 	QUnit.closeVector(result, new XML3DVec3(0, 0, -1), EPSILON);
 });
+
+test("XML3DRotation::set", function()  {
+    equal(typeof this.ident.__proto__.set, 'function', "XML3DRotation::set does not exist");
+    // TODO: Implement tests
+});
+
 
 //============================================================================
 //--- XML3DMatrix ---
@@ -521,6 +532,12 @@ test("XML3DRay::toString", function()  {
     equal(this.ident.toString(), "[object XML3DRay]", "Serialization");
 });
 
+test("XML3DRay::set", function()  {
+    equal(typeof this.ident.__proto__.set, 'function', "XML3DRay::set does not exist");
+    // TODO: Implement tests
+});
+
+
 // Copy constructor not defined in spec
 /*test("Copy Constructor", function() {
 
@@ -632,6 +649,11 @@ test("XML3DBox::makeEmpty", function() {
 
     ok(b.isEmpty());
     QUnit.closeVector(b.size(), new XML3DVec3(0,0,0), EPSILON);
+});
+
+test("XML3DBox::set", function()  {
+    equal(typeof this.ident.__proto__.set, 'function', "XML3DBox::set does not exist");
+    // TODO: Implement tests
 });
 
 

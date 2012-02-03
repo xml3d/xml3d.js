@@ -106,18 +106,18 @@ xml3d.Camera.prototype.inverseTransformOf = function(vec) {
 	return this.orientation.rotateVec3(vec);
 };
 
-xml3d.Xml3dSceneController = function(xml3d) {
-	this.webgl = typeof(xml3d.style) !== 'object';
+xml3d.Xml3dSceneController = function(xml3dElement) {
+	this.webgl = typeof(xml3dElement.style) !== 'object';
 	
-	this.xml3d = xml3d;
-	this.canvas = this.webgl ?  xml3d.canvas : xml3d;
+	this.xml3d = xml3dElement;
+	this.canvas = this.webgl ?  xml3dElement.canvas : xml3dElement;
 	
 	var view = this.getView();
 	if (!view)
 	{
 		xml3d.debug.logWarning("No view found, rendering disabled!");
-		if (xml3d.update)
-			xml3d.update(); // TODO: Test
+		if (xml3dElement.update)
+		    xml3dElement.update(); // TODO: Test
 	}
 	if (!this.xml3d || !view)
 	{
@@ -141,7 +141,7 @@ xml3d.Xml3dSceneController = function(xml3d) {
 	this.moveSpeedElement = document.getElementById("moveSpeed");
 	this.useKeys = document.getElementById("useKeys");
 	
-	var navigations = xml3d.getElementsByTagName("navigation");
+	var navigations = xml3dElement.getElementsByTagName("navigation");
 	
 	if(navigations.length > 0)
 	{

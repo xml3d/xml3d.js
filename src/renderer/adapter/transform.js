@@ -1,15 +1,15 @@
 ﻿
 // Adapter for <transform>
-org.xml3d.webgl.XML3DTransformRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+xml3d.webgl.XML3DTransformRenderAdapter = function(factory, node) {
+	xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.matrix = null;
 	this.listeners = new Array();
 	this.isValid = true;
 };
-org.xml3d.webgl.XML3DTransformRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DTransformRenderAdapter;
+xml3d.webgl.XML3DTransformRenderAdapter.prototype = new xml3d.webgl.RenderAdapter();
+xml3d.webgl.XML3DTransformRenderAdapter.prototype.constructor = xml3d.webgl.XML3DTransformRenderAdapter;
 
-org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
+xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 	if (!this.matrix) {
 		var n         = this.node;
 		var m = mat4.identity(mat4.create());
@@ -36,7 +36,7 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.getMatrix = function() {
 	return this.matrix;
 };
 
-org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
+xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
 	this.matrix = null;
 	this.matrix = this.getMatrix();
 
@@ -55,6 +55,6 @@ org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.notifyChanged = function(e
 	}
 	this.factory.renderer.requestRedraw("Transformation changed.");
 };
-org.xml3d.webgl.XML3DTransformRenderAdapter.prototype.dispose = function() {
+xml3d.webgl.XML3DTransformRenderAdapter.prototype.dispose = function() {
 	this.isValid = false;
 };

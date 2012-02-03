@@ -1,5 +1,5 @@
 // methods.js
-org.xml3d.methods = org.xml3d.methods || {};
+xml3d.methods = xml3d.methods || {};
 
 new (function() {
 
@@ -187,6 +187,6 @@ new (function() {
         return null;
     };
 
-    // Export to org.xml3d namespace
-    org.xml3d.extend(org.xml3d.methods, methods);
+    // Export to xml3d namespace
+    xml3d.extend(xml3d.methods, methods);
 });

@@ -127,7 +127,7 @@
 			<fileset file="${basedir}/preamble.txt" />
 			<filelist refid="sourceFiles"/>
 		</concat>
-		<replaceregexp file="${finalScript}" match="org.xml3d.webgl.checkError\(" replace="//org.xml3d.webgl.checkError\(" byline="true" />
+		<replaceregexp file="${finalScript}" match="xml3d.webgl.checkError\(" replace="//xml3d.webgl.checkError\(" byline="true" />
 		<replaceregexp file="${finalScript}" match="%VERSION%" replace="${versionStr}" byline="true" />
 	</target>
 

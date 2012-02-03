@@ -22,7 +22,7 @@
 /** ********************************************************************** */
 
 var org;
-if (!org || !org.xml3d)
+if (!xml3d)
 	throw new Error("xml3d.js has to be included first");
 
 var xml3dPhysics;

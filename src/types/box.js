@@ -138,8 +138,8 @@
     }; 
     
     // Export
-    org.xml3d.XML3DBox = XML3DBox;
+    xml3d.XML3DBox = XML3DBox;
     if (!window.XML3DBox)
         window.XML3DBox = XML3DBox;
 
-}(org.xml3d._native));
+}(xml3d._native));

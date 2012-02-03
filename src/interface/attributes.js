@@ -37,9 +37,9 @@
             value : null,
             type : "XML3D_DANGLING_REFERENCE"
         };
-        var uri = new org.xml3d.URI(v);
+        var uri = new xml3d.URI(v);
         if (uri.valid) {
-            var e = org.xml3d.URIResolver.resolve(uri);
+            var e = xml3d.URIResolver.resolve(uri);
             evt.value = e;
             console.log("Resolved node: " + e);
             if (e)
@@ -343,7 +343,7 @@
         return m ? new Uint8Array(m) : new Uint8Array();
     };
 
-    // Export to org.xml3d namespace
-    org.xml3d.extend(org.xml3d, handler);
+    // Export to xml3d namespace
+    xml3d.extend(xml3d, handler);
 
 }());

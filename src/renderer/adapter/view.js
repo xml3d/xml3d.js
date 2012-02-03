@@ -1,7 +1,7 @@
 
 // Adapter for <view>
-org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
+	xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.zFar = 100000;
 	this.zNear = 0.1;
 	this.viewMatrix = null;
@@ -11,10 +11,10 @@ org.xml3d.webgl.XML3DViewRenderAdapter = function(factory, node) {
 	this._parentTransform = null;
 	this.isValid = true;
 };
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DViewRenderAdapter;
+xml3d.webgl.XML3DViewRenderAdapter.prototype = new xml3d.webgl.RenderAdapter();
+xml3d.webgl.XML3DViewRenderAdapter.prototype.constructor = xml3d.webgl.XML3DViewRenderAdapter;
 
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
+xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 
 	if (this.viewMatrix == null)
 	{
@@ -34,7 +34,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getViewMatrix = function() {
 };
 
 
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(aspect) {
+xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(aspect) {
 	if (this.projMatrix == null) {
 		var fovy = this.node.fieldOfView;
 		var zfar = this.zFar;
@@ -48,20 +48,20 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getProjectionMatrix = function(
 	return this.projMatrix;
 };
 
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewMatrix = function(model) {
+xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewMatrix = function(model) {
 	return mat4.multiply(this.getViewMatrix(), model, mat4.create());
 };
 
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrix = function(modelViewMatrix) {
+xml3d.webgl.XML3DViewRenderAdapter.prototype.getNormalMatrix = function(modelViewMatrix) {
 	var invt = mat4.inverse(modelViewMatrix, mat4.create());
 	return mat4.toMat3(invt);
 };
 
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewProjectionMatrix = function(modelViewMatrix) {
+xml3d.webgl.XML3DViewRenderAdapter.prototype.getModelViewProjectionMatrix = function(modelViewMatrix) {
 	return mat4.multiply(this.projMatrix, modelViewMatrix, mat4.create());
 };
 
-org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(evt) {	
+xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(evt) {	
 	var me = this;
 	var targets = {};
 	
@@ -86,7 +86,7 @@ org.xml3d.webgl.XML3DViewRenderAdapter.prototype.notifyChanged = function(evt) {
 		targets[target]();
 	}
 	else {
-		org.xml3d.debug.logWarning("Unhandled event in group adapter: "+evt.eventType + " for parameter "+target);
+		xml3d.debug.logWarning("Unhandled event in group adapter: "+evt.eventType + " for parameter "+target);
 	}
 	
 	this.factory.handler.redraw("View changed");

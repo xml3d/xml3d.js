@@ -238,8 +238,8 @@
         return new XML3DRotation(na, this._angle);
     };
 
-    org.xml3d.XML3DRotation = XML3DRotation;
+    xml3d.XML3DRotation = XML3DRotation;
     if (!window.XML3DRotation)
         window.XML3DRotation = XML3DRotation;
 
-}(org.xml3d._native));
+}(xml3d._native));

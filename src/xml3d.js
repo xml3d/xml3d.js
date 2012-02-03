@@ -22,22 +22,18 @@
 /*************************************************************************/
 
 /** @namespace **/
-var org = org || {};
-
-if (org.xml3d !== undefined)
-    throw new Error("xml3d.js has already been included.");
 
 /**  @namespace **/
-org.xml3d = {};
+var xml3d = xml3d || {};
 
-org.xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
-org.xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
-org.xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
-org.xml3d._xml3d = document.createElementNS(org.xml3d.xml3dNS, "xml3d");
-org.xml3d._native = !!org.xml3d._xml3d.style; 
-org.xml3d._rendererFound = false;
+xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
+xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
+xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
+xml3d._xml3d = document.createElementNS(xml3d.xml3dNS, "xml3d");
+xml3d._native = !!xml3d._xml3d.style; 
+xml3d._rendererFound = false;
 
-org.xml3d.extend = function (a, b) {
+xml3d.extend = function (a, b) {
     for ( var prop in b ) {
         if ( b[prop] === undefined ) {
             delete a[prop];
@@ -48,7 +44,7 @@ org.xml3d.extend = function (a, b) {
     return a;
 };
 
-org.xml3d.createClass = function(ctor, parent, methods) {
+xml3d.createClass = function(ctor, parent, methods) {
     methods = methods || {};
     if (parent) {
         var F = function() {};
@@ -68,48 +64,48 @@ org.xml3d.createClass = function(ctor, parent, methods) {
 		
 		
 		// Find all the XML3D tags in the document
-		var xml3ds = document.getElementsByTagNameNS(org.xml3d.xml3dNS, 'xml3d');
+		var xml3ds = document.getElementsByTagNameNS(xml3d.xml3dNS, 'xml3d');
 		xml3ds = Array.map(xml3ds, function(n) { return n; });
 		
-		org.xml3d.debug.activate();
+		xml3d.debug.activate();
 		
-		if(org.xml3d.debug)
-			org.xml3d.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
+		if(xml3d.debug)
+			xml3d.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
 		
 		if (xml3ds.length) {
-			org.xml3d._xml3d = xml3ds[0];
-			if (org.xml3d._native) {
-				if(org.xml3d.debug)
-					org.xml3d.debug.logInfo("Using native implementation.");
-				org.xml3d._rendererFound = true;
+			xml3d._xml3d = xml3ds[0];
+			if (xml3d._native) {
+				if(xml3d.debug)
+					xml3d.debug.logInfo("Using native implementation.");
+				xml3d._rendererFound = true;
 				return;
 			}
 		}
 		
-		if (!org.xml3d.webgl) {
-			if(org.xml3d.debug)
-				org.xml3d.debug.logInfo("No WebGL renderer included.");
+		if (!xml3d.webgl) {
+			if(xml3d.debug)
+				xml3d.debug.logInfo("No WebGL renderer included.");
 			return;
 		}
 		
-		if (!org.xml3d.webgl.supported()) 
+		if (!xml3d.webgl.supported()) 
 		{
-			if(org.xml3d.debug)
+			if(xml3d.debug)
 			{
-				org.xml3d.debug.logWarning("Could not initialise WebGL, sorry :-(");
+				xml3d.debug.logWarning("Could not initialise WebGL, sorry :-(");
 			}
 			
 			for(var i = 0; i < xml3ds.length; i++) 
 			{
 				// Place xml3dElement inside an invisble div
-				var hideDiv      = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+				var hideDiv      = document.createElementNS(xml3d.xhtmlNS, 'div');
 				var xml3dElement = xml3ds[i];
 				
 				xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
 				hideDiv.appendChild(xml3dElement);
 				hideDiv.style.display = "none";
 	
-				var infoDiv = document.createElementNS(org.xml3d.xhtmlNS, 'div');
+				var infoDiv = document.createElementNS(xml3d.xhtmlNS, 'div');
 				infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
 				infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
 				infoDiv.style.border = "2px solid red";
@@ -150,11 +146,11 @@ org.xml3d.createClass = function(ctor, parent, methods) {
 			return;
 		}
 		
-        org.xml3d.configure(xml3ds);
+        xml3d.configure(xml3ds);
         try {
-            org.xml3d.webgl.configure(xml3ds);
+            xml3d.webgl.configure(xml3ds);
         } catch (e) {
-            org.xml3d.debug.logError(e);
+            xml3d.debug.logError(e);
         }
 		
 		var ready = (function(eventType) {
@@ -170,8 +166,8 @@ org.xml3d.createClass = function(ctor, parent, methods) {
 		})('load');
 	};
 	var onunload = function() {
-		if (org.xml3d.document)
-			org.xml3d.document.onunload();
+		if (xml3d.document)
+			xml3d.document.onunload();
 	};
 	window.addEventListener('load', onload, false);
 	window.addEventListener('unload', onunload, false);
@@ -182,24 +178,24 @@ org.xml3d.createClass = function(ctor, parent, methods) {
 //Some helper function. We don't have global constructors for 
 //all implementations
 createXML3DVec3 = function() {
-	if (org.xml3d._xml3d === undefined) {
+	if (xml3d._xml3d === undefined) {
 		return new XML3DVec3(); 
 	}
-	return org.xml3d._xml3d.createXML3DVec3();
+	return xml3d._xml3d.createXML3DVec3();
 };
 
 createXML3DRotation = function() {
-	if (org.xml3d._xml3d === undefined) {
+	if (xml3d._xml3d === undefined) {
 		return new XML3DRotation(); 
 	}
-	return org.xml3d._xml3d.createXML3DRotation();
+	return xml3d._xml3d.createXML3DRotation();
 };
 
-org.xml3d.copyRotation = function(to, from) {
+xml3d.copyRotation = function(to, from) {
     to.setAxisAngle(from.axis, from.angle);
 }
 
-org.xml3d.copyVector = function(to, from) {
+xml3d.copyVector = function(to, from) {
     to.x = from.x;
     to.y = from.y;
     to.z = from.z;

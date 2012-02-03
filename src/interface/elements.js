@@ -65,7 +65,7 @@
             try {
                 adapters[a].notifyChanged(evt);
             } catch (e) {
-                org.xml3d.debug.logError(e);
+                xml3d.debug.logError(e);
             }
         }
     };
@@ -75,14 +75,14 @@
     };
 
     handler.ElementHandler.prototype.resolve = function(attrName) {
-        var uri = new org.xml3d.URI(this.element[attrName]);
+        var uri = new xml3d.URI(this.element[attrName]);
         if (uri.valid && uri.fragment) {
-            return org.xml3d.URIResolver.resolve(uri);
+            return xml3d.URIResolver.resolve(uri);
         }
         return null;
     };
 
-    // Export to org.xml3d namespace
-    org.xml3d.extend(org.xml3d, handler);
+    // Export to xml3d namespace
+    xml3d.extend(xml3d, handler);
 
 }());

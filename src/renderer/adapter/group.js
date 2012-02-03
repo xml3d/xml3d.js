@@ -1,7 +1,7 @@
 
 // Adapter for <group>
-org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
-    org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
+    xml3d.webgl.RenderAdapter.call(this, factory, node);
     this.processListeners();
     this.factory = factory;
     this.parentTransform = null;
@@ -10,9 +10,9 @@ org.xml3d.webgl.XML3DGroupRenderAdapter = function(factory, node) {
     
     this._updateTransformAdapter();
 };
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DGroupRenderAdapter;
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
+xml3d.webgl.XML3DGroupRenderAdapter.prototype = new xml3d.webgl.RenderAdapter();
+xml3d.webgl.XML3DGroupRenderAdapter.prototype.constructor = xml3d.webgl.XML3DGroupRenderAdapter;
+xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = function(
 		transform) {
 	var ret = transform;
 	
@@ -25,7 +25,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.applyTransformMatrix = functio
 	return ret;
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.processListeners  = function() {
+xml3d.webgl.XML3DGroupRenderAdapter.prototype.processListeners  = function() {
     var attributes = this.node.attributes;
     for (var index in attributes) {
         var att = attributes[index];
@@ -40,7 +40,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.processListeners  = function()
     }
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
+xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) {
 	
 	if (evt.eventType == MutationEvent.ADDITION) {
 		this.factory.renderer.sceneTreeAddition(evt); 
@@ -134,12 +134,12 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChanged = function(evt) 
 	if (targets[target]) {
 		targets[target]();
 	} else {
-		org.xml3d.debug.logWarning("Unhandled event in group adapter: "+evt.eventType + " for attribute "+evt.attribute);
+		xml3d.debug.logWarning("Unhandled event in group adapter: "+evt.eventType + " for attribute "+evt.attribute);
 	}
 
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChildren = function(evt) {	
+xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChildren = function(evt) {	
 	var child = this.node.firstElementChild;
 	while (child) {
 		var adapter = this.factory.getAdapter(child);
@@ -148,7 +148,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.notifyChildren = function(evt)
 	}
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
+xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 {
 	var shader = this.node.shader;
 
@@ -163,13 +163,13 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.getShader = function()
 		if (result)
 			shader = this.node.xml3ddocument.resolve(result[1]);
 	} else {
-		shader = org.xml3d.URIResolver.resolve(shader);
+		shader = xml3d.URIResolver.resolve(shader);
 	}
 
 	return this.factory.getAdapter(shader);
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispose = function() {
+xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispose = function() {
 	for (var child in this.node.childNodes) {
 		var adapter = this.factory.getAdapter(this.node.childNodes[child]);
 		if (adapter)
@@ -178,7 +178,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype.dispose = function() {
 	this.isValid = false;
 };
 
-org.xml3d.webgl.XML3DGroupRenderAdapter.prototype._updateTransformAdapter = function() { 
+xml3d.webgl.XML3DGroupRenderAdapter.prototype._updateTransformAdapter = function() { 
 
 	// deregister in old adapter
 	if(this._transformAdapter)
@@ -191,7 +191,7 @@ org.xml3d.webgl.XML3DGroupRenderAdapter.prototype._updateTransformAdapter = func
 	
 	// setup new and register listener
 	var tname = this.node.transform;
-	var tnode = org.xml3d.URIResolver.resolve(tname);
+	var tnode = xml3d.URIResolver.resolve(tname);
 	this._transformAdapter = this.factory.getAdapter(tnode);
 	
 	if (this._transformAdapter)

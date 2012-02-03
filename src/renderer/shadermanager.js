@@ -1,12 +1,12 @@
 ﻿/**********************************************
- * Class org.xml3d.webgl.XML3DShaderManager
+ * Class xml3d.webgl.XML3DShaderManager
  * 
  * The XML3DShaderManager is an abstraction between the renderer and WebGL. It handles the creation and management 
  * of all shaders used in the scene, including internal shaders (eg. picking shader). 
  * 
  **********************************************/
 
-org.xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
+xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	this.gl = gl;
 	this.renderer = renderer;
 	this.dataFactory = dataFactory;
@@ -15,7 +15,7 @@ org.xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory
 	this.shaders = {};
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, lights) {
+xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, lights) {
 	//This method is 'suboptimal', but will be replaced with the new modular shader system
 	var shaderNode = null;
 	var shader = null;
@@ -34,7 +34,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(ob
 	if (shaderNode && shaderNode.hasAttribute("script"))
 	{
 		var scriptURL = shaderNode.getAttribute("script");
-		if (new org.xml3d.URI(scriptURL).scheme == "urn") {
+		if (new xml3d.URI(scriptURL).scheme == "urn") {
 			//Internal shader
 			this.getStandardShaderSource(scriptURL, sources, shaderAdapter, lights);
             shader = this.createShaderFromSources(sources);
@@ -64,7 +64,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(ob
    return shader;	
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights) {
+xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights) {
 	//Need to check for textures to decide which internal shader to use
 	var vertexColors = false;
 	var dataTable = shaderAdapter.dataAdapter.createDataTable();	
@@ -94,11 +94,11 @@ org.xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(
 	}
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function(name) {
+xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function(name) {
 	var sources = {};
 	
 	if (!g_shaders[name]) {
-		org.xml3d.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
+		xml3d.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
 	} else {
 		sources.vs = g_shaders[name].vertex;
 		sources.fs = g_shaders[name].fragment;
@@ -109,7 +109,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function
 	return shaderProgram;
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sources) {
+xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sources) {
 	var gl = this.gl;
 	
 	if (!sources.vs || !sources.fs) {
@@ -137,7 +137,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(
 		var errorString = "Shader linking failed: \n";
 		errorString += gl.getProgramInfoLog(prg);
 		errorString += "\n--------\n";
-		org.xml3d.debug.logError(errorString);
+		xml3d.debug.logError(errorString);
 		gl.getError();
 		
 		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
@@ -195,7 +195,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(
 	return programObject;
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shaderSource) {
+xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shaderSource) {
 	var gl = this.gl;
 	
 	var shd = gl.createShader(type);
@@ -210,7 +210,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shad
 			errorString = "Fragment shader failed to compile: \n";
 		
 		errorString += gl.getShaderInfoLog(shd) + "\n--------\n";
-		org.xml3d.debug.logError(errorString);
+		xml3d.debug.logError(errorString);
 		gl.getError();
 		
 		return null;
@@ -219,7 +219,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shad
 	return shd;
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) {
+xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) {
 	
 	var gl = this.gl;
 	
@@ -256,10 +256,10 @@ org.xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) 
 	}
 
 	
-	//org.xml3d.webgl.checkError(this.gl);
+	//xml3d.webgl.checkError(this.gl);
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(sp, uniforms) {
+xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(sp, uniforms) {
 	this.bindShader(sp);
 	
 	for (var name in uniforms) {
@@ -279,7 +279,7 @@ org.xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(sp, 
 	
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(sp) {
+xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(sp) {
     // TODO: bind samplers (if any)
 	if (sp.handle)
 		sp = sp.handle;
@@ -289,13 +289,13 @@ org.xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(sp) {
     }
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.unbindShader = function(sp) {
+xml3d.webgl.XML3DShaderManager.prototype.unbindShader = function(sp) {
     // TODO: unbind samplers (if any)
 	this.currentProgram = null;
 	this.gl.useProgram(null);
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
+xml3d.webgl.XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
 	switch (u.glType) {
 		case gl.BOOL:
 		case gl.INT:		
@@ -320,12 +320,12 @@ org.xml3d.webgl.XML3DShaderManager.prototype.setUniform = function(gl, u, value)
 		case gl.FLOAT_MAT4: gl.uniformMatrix4fv(u.location, gl.FALSE, value); break;
 		
 		default:
-			org.xml3d.debug.logError("Unknown uniform type "+u.glType);
+			xml3d.debug.logError("Unknown uniform type "+u.glType);
 			break;
 	}
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.bindDefaultShader = function() {
+xml3d.webgl.XML3DShaderManager.prototype.bindDefaultShader = function() {
 	if (!this.shaders.defaultShader) {
 		this.shaders.defaultShader = this.getStandardShaderProgram("urn:xml3d:shader:flat");
 	}
@@ -335,11 +335,11 @@ org.xml3d.webgl.XML3DShaderManager.prototype.bindDefaultShader = function() {
 	return this.shaders.defaultShader;
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.unbindDefaultShader = function() {
+xml3d.webgl.XML3DShaderManager.prototype.unbindDefaultShader = function() {
 	this.currentProgram = null;
 	this.gl.useProgram(null);
 };
 
-org.xml3d.webgl.XML3DShaderManager.prototype.setGLContext = function(gl) {
+xml3d.webgl.XML3DShaderManager.prototype.setGLContext = function(gl) {
 	this.gl = gl;
 };

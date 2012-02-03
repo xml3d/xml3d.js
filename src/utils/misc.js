@@ -23,24 +23,9 @@
 /*  (http://www.fsf.org/licensing/licenses/gpl.html) for more details.   */
 /*                                                                       */
 /*************************************************************************/
-var org;
-if (!org || !org.xml3d)
-  throw new Error("xml3d.js has to be included first");
+xml3d.util = xml3d.util || {};
 
-
-if (!org.xml3d.util)
-	org.xml3d.util = {};
-else if (typeof org.xml3d.util != "object")
-    throw new Error("org.xml3d.util already exists and is not an object");
-
-if (!org.xml3d.debug)
-    org.xml3d.debug = {};
-else if (typeof org.xml3d.debug != "object")
-    throw new Error("org.xml3d.debug already exists and is not an object");
-
-
-
-org.xml3d.util.getStyle = function(oElm, strCssRule) {
+xml3d.util.getStyle = function(oElm, strCssRule) {
     var strValue = "";
     if (document.defaultView && document.defaultView.getComputedStyle) {
         strValue = document.defaultView.getComputedStyle(oElm, "")
@@ -55,7 +40,7 @@ org.xml3d.util.getStyle = function(oElm, strCssRule) {
     return strValue;
 };
 
-org.xml3d.setParameter = function(elementId, fieldName, value) {
+xml3d.setParameter = function(elementId, fieldName, value) {
     var e = document.getElementById(elementId);
     if (e) {
         var fields = e.childNodes;

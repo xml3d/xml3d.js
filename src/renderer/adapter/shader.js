@@ -1,8 +1,8 @@
 
 
 // Adapter for <shader>
-org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
+	xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.program = null;
 	this.gl = this.factory.handler.gl;
 	this.xflowBuilt = false;
@@ -14,7 +14,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	if(this.dataAdapter)
 		this.dataAdapter.registerObserver(this.renderer);
 	else
-		org.xml3d.debug.logError("Data adapter for a shader element could not be created!");
+		xml3d.debug.logError("Data adapter for a shader element could not be created!");
 	
 	//Collect textures (if any)
 	this.textures = {};
@@ -29,10 +29,10 @@ org.xml3d.webgl.XML3DShaderRenderAdapter = function(factory, node) {
 	}
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DShaderRenderAdapter;
+xml3d.webgl.XML3DShaderRenderAdapter.prototype = new xml3d.webgl.RenderAdapter();
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.constructor = xml3d.webgl.XML3DShaderRenderAdapter;
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
 	if (evt.attribute == "script") {
 		if (this.program) {
 			this.destroy();
@@ -57,18 +57,18 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt)
 	
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.isEmpty = function(obj) {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.isEmpty = function(obj) {
 	for (var p in obj) {
 		return false;
 	}
 	return true;
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getDataTable = function() {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.getDataTable = function() {
 	return this.dataAdapter.createDataTable();
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getStandardShaderSource = function(scriptURL, sources) {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.getStandardShaderSource = function(scriptURL, sources) {
 	//Need to check for textures to decide which internal shader to use
 	var vertexColors = false;
 	var dataTable = this.dataAdapter.createDataTable();	
@@ -98,39 +98,39 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getStandardShaderSource = fun
 	}
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = function(sources) {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.createShaderProgram = function(sources) {
 	return this.shaderHandler.createShaderFromSources(sources);
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindProgram = function() {	
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindProgram = function() {	
 	this.gl.useProgram(this.shaderProgram.handle);
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.destroy = function() {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.destroy = function() {
 	if (this.shaderProgram)
 		this.gl.deleteProgram(this.shaderProgram.handle);
 	
 	this.program = null;
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.dispose = function() {
 	Array.forEach(this.textures, function(t) {
 		t.adapter.destroy();
 	});
 	this.destroy();
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.enable = function(globalUniforms) {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.enable = function(globalUniforms) {
 	this.bindProgram();	
 	//this.setUniformVariables(globalUniforms);
 	this.bindSamplers();
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.disable = function() {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.disable = function() {
 	this.unbindSamplers();
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = function(globalUniforms) {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = function(globalUniforms) {
 	var dataTable = this.dataAdapter.createDataTable();
 	var sp = this.shaderProgram;
 	var gl = this.gl;
@@ -167,7 +167,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.setUniformVariables = functio
 };
 
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindSamplers = function() {	
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindSamplers = function() {	
 	var mustRebuildShader = false;
 	
 	for (var name in this.textures) {
@@ -189,7 +189,7 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.bindSamplers = function() {
 	}
 };
 
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.unbindSamplers = function() {
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.unbindSamplers = function() {
 	for (var name in this.textures) {
 		var tex = this.textures[name];
 		tex.adapter.unbind(tex.info.texUnit);
@@ -197,9 +197,9 @@ org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.unbindSamplers = function() {
 };
 
 //Build an instance of the local shader with the given XFlow declarations and body
-org.xml3d.webgl.XML3DShaderRenderAdapter.prototype.getXFlowShader = function(declarations, body) {
-	/*if (new org.xml3d.URI(this.program.scriptURL).scheme != "urn") {
-		org.xml3d.debug.logWarning("XFlow scripts cannot be used in conjunction with custom shaders yet, sorry!");
+xml3d.webgl.XML3DShaderRenderAdapter.prototype.getXFlowShader = function(declarations, body) {
+	/*if (new xml3d.URI(this.program.scriptURL).scheme != "urn") {
+		xml3d.debug.logWarning("XFlow scripts cannot be used in conjunction with custom shaders yet, sorry!");
 		return null;
 	}*/
 	

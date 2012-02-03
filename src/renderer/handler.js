@@ -1,21 +1,11 @@
-//Check, if basics have already been defined
-var org;
-if (!org || !org.xml3d)
-  throw new Error("xml3d.js has to be included first");
-
-
-// Create global symbol org.xml3d.webgl
-if (!org.xml3d.webgl)
-	org.xml3d.webgl = {};
-else if (typeof org.xml3d.webgl != "object")
-	throw new Error("org.xml3d.webgl already exists and is not an object");
-
-org.xml3d.webgl.MAXFPS = 30;
+// Create global symbol xml3d.webgl
+xml3d.webgl = xml3d.webgl || {};
+xml3d.webgl.MAXFPS = 30;
 
 // Since this object is used quite often XML3D_InternalMutationEvent is supposed to be a shortcut to 
 // increase performance by avoiding all the nested objects
-org.xml3d.webgl.Events = {};
-XML3D_InternalMutationEvent = org.xml3d.webgl.Events.InternalMutationEvent = function() {
+xml3d.webgl.Events = {};
+XML3D_InternalMutationEvent = xml3d.webgl.Events.InternalMutationEvent = function() {
 	this.source = ""; // The 'current' source node type (shader | group | transform | mesh)
 	this.type = ""; // The type of this event as -> shader|transform|mesh
 	this.parameter = ""; // The parameter that was changed (eg. uniform variable, translation, meshtype etc)
@@ -28,7 +18,7 @@ XML3D_InternalMutationEvent = org.xml3d.webgl.Events.InternalMutationEvent = fun
  * The Handler is the interface between the renderer, canvas and SpiderGL elements. It responds to
  * user interaction with the scene and manages redrawing of the canvas.
  */
-org.xml3d.webgl.createXML3DHandler = (function() {
+xml3d.webgl.createXML3DHandler = (function() {
 
 	function Scene(xml3dElement) {
 		this.xml3d = xml3dElement;
@@ -38,15 +28,15 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			if (av == null)
 			{
 				av = document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
-					return org.xml3d.xml3dNS;
+					return xml3d.xml3dNS;
 				}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 				if (av == null)
-					org.xml3d.debug.logError("No view defined.");
+					xml3d.debug.logError("No view defined.");
 			}
 			if (typeof av == typeof "") {
 				av = this.xml3d.xml3ddocument.resolve(av);
 				if (av == null)
-					org.xml3d.debug.logError("Could not find view");
+					xml3d.debug.logError("Could not find view");
 			}
 			return av;
 		};
@@ -108,12 +98,12 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 		};
 		
 		//Create renderer
-		this.renderer = new org.xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
+		this.renderer = new xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
 	}
 	
 	//Requests a WebGL context for the canvas and returns an XML3DHander for it
 	function setupXML3DHandler(canvas, xml3dElement) {
-		org.xml3d.debug.logInfo("setupXML3DHandler: canvas=" + canvas);
+		xml3d.debug.logInfo("setupXML3DHandler: canvas=" + canvas);
 		var context = null;
 		//try {
 			context = canvas.getContext("experimental-webgl");
@@ -121,7 +111,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 				return new XML3DHandler(context, canvas, new Scene(xml3dElement));
 			}
 		//} catch (ef) {
-		//	org.xml3d.debug.logError(ef);
+		//	xml3d.debug.logError(ef);
 		//	return null;
 		//}
 	}
@@ -260,7 +250,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 			this.needDraw = false;	
             
 		} catch (e) {
-			org.xml3d.debug.logException(e);
+			xml3d.debug.logException(e);
 			throw e;
 		}
 
@@ -548,7 +538,7 @@ org.xml3d.webgl.createXML3DHandler = (function() {
 	            window.oRequestAnimationFrame      || 
 	            window.msRequestAnimationFrame     || 
 	            function(){
-	              window.setTimeout(_tick, 1000 / org.xml3d.webgl.MAXFPS);
+	              window.setTimeout(_tick, 1000 / xml3d.webgl.MAXFPS);
 	            };
 	  })();
 	

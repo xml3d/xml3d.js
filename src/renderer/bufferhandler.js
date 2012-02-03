@@ -1,5 +1,5 @@
 /*******************************************
- * Class org.xml3d.webgl.XML3DBufferHandler 
+ * Class xml3d.webgl.XML3DBufferHandler 
  * 
  * The XML3DBufferHandler is an abstraction layer between the renderer and WebGL. It handles all operations
  * on Framebuffer Objects but doesn't store any of these internally. FBOs are returned and expected as a
@@ -17,26 +17,26 @@
  * @author Christian Schlinkmann
  *******************************************/
 
-org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH = 512;
-org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT = 512;
+xml3d.webgl.MAX_PICK_BUFFER_WIDTH = 512;
+xml3d.webgl.MAX_PICK_BUFFER_HEIGHT = 512;
 
-org.xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
+xml3d.webgl.XML3DBufferHandler = function(gl, renderer) {
 	this.renderer = renderer;
 	this.gl = gl;
 };
 
-org.xml3d.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(width, height) {
+xml3d.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(width, height) {
 	var gl = this.gl;
 	var scale = 1.0;
 	
-	var hDiff = height - org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT;
-	var wDiff = width - org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH;
+	var hDiff = height - xml3d.webgl.MAX_PICK_BUFFER_HEIGHT;
+	var wDiff = width - xml3d.webgl.MAX_PICK_BUFFER_WIDTH;
 	
 	if (hDiff > 0 || wDiff > 0) {
 		if (hDiff > wDiff) {
-			scale = org.xml3d.webgl.MAX_PICK_BUFFER_HEIGHT / height;
+			scale = xml3d.webgl.MAX_PICK_BUFFER_HEIGHT / height;
 		} else {
-			scale = org.xml3d.webgl.MAX_PICK_BUFFER_WIDTH / width;
+			scale = xml3d.webgl.MAX_PICK_BUFFER_WIDTH / width;
 		}	
 	}
 	
@@ -46,11 +46,11 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(widt
 	return this.createFrameBuffer(width, height, gl.RGBA, gl.DEPTH_COMPONENT16, null, { depthAsRenderbuffer : true }, scale );
 };
 
-org.xml3d.webgl.XML3DBufferHandler.prototype.createShadowBuffer = function() {
+xml3d.webgl.XML3DBufferHandler.prototype.createShadowBuffer = function() {
 	//TODO: this
 };
 
-org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options, scale) {
+xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, height, colorFormat, depthFormat, stencilFormat, options, scale) {
 	
 	var gl = this.gl;	
 	options = this.fillOptions(options);
@@ -74,7 +74,7 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width,
 			colorTarget.isTexture = false;		
 		} else {
 			//opt.generateMipmap = opt.generateColorsMipmap;
-			var ctex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, colorFormat, width, height, gl.RGBA, 
+			var ctex = xml3d.webgl.XML3DCreateTex2DFromData(gl, colorFormat, width, height, gl.RGBA, 
 					gl.UNSIGNED_BYTE, null, options);
 			
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
@@ -99,7 +99,7 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width,
 			depthTarget.isTexture = false;
 		} else {
 			//opt.generateMipmap = opt.generateDepthMipmap;			
-			var dtex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, depthFormat, width, height, 
+			var dtex = xml3d.webgl.XML3DCreateTex2DFromData(gl, depthFormat, width, height, 
 									gl.DEPTH_COMPONENT, gl.FLOAT, null, options);
 			
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, dtex.handle, 0);
@@ -125,7 +125,7 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width,
 		}
 		else {
 			//opt.generateMipmap = opt.generateStencilMipmap;			
-			var stex = org.xml3d.webgl.XML3DCreateTex2DFromData(gl, stencilFormat, width, height, 
+			var stex = xml3d.webgl.XML3DCreateTex2DFromData(gl, stencilFormat, width, height, 
 									gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, null, options);
 			
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);
@@ -142,19 +142,19 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width,
 	    case gl.FRAMEBUFFER_COMPLETE:
 	        break;
 	    case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-	        org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+	        xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
 	        break;
 	    case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+	    	xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
 	        break;
 	    case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
+	    	xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
 	        break;
 	    case gl.FRAMEBUFFER_UNSUPPORTED:
-	    	org.xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_UNSUPPORTED");
+	    	xml3d.debug.logError("Incomplete framebuffer: FRAMEBUFFER_UNSUPPORTED");
 	        break;
 	    default:
-	    	org.xml3d.debug.logError("Incomplete framebuffer: " + status);
+	    	xml3d.debug.logError("Incomplete framebuffer: " + status);
 	}
 	
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -172,7 +172,7 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width,
 	return fbo;
 };
 
-org.xml3d.webgl.XML3DBufferHandler.prototype.destroyFrameBuffer = function(fbo) {
+xml3d.webgl.XML3DBufferHandler.prototype.destroyFrameBuffer = function(fbo) {
 	if (!fbo.handle)
 		return;
 	
@@ -200,7 +200,7 @@ org.xml3d.webgl.XML3DBufferHandler.prototype.destroyFrameBuffer = function(fbo) 
 	
 };
 
-org.xml3d.webgl.XML3DBufferHandler.prototype.fillOptions = function(options) {
+xml3d.webgl.XML3DBufferHandler.prototype.fillOptions = function(options) {
 	var gl = this.gl;
 	var opt =  {
 		wrapS             	  : gl.CLAMP_TO_EDGE,

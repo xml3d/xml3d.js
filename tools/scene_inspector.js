@@ -1,15 +1,6 @@
-var org;
-if (!org)
-	org = {};
-else if (typeof org != "object")
-	throw new Error("org already exists and is not an object");
+var xml3d = xml3d || {};
 
-if (!org.xml3d)
-	org.xml3d = {};
-else if (typeof org.xml3d != "object")
-	throw new Error("org.xml3d already exists and is not an object");
-
-org.xml3d.SceneInspector = function(xml3d) {
+xml3d.SceneInspector = function(xml3d) {
 	var self = this;
 	this.xml3d = xml3d;
 	if(!this.xml3d)

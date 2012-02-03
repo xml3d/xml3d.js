@@ -1,5 +1,5 @@
 
-org.xml3d.webgl.XML3DCreateTex2DFromData = function(gl, internalFormat, width, height, 
+xml3d.webgl.XML3DCreateTex2DFromData = function(gl, internalFormat, width, height, 
 		sourceFormat, sourceType, texels, opt) {
 	
 	var info = {};
@@ -43,7 +43,7 @@ org.xml3d.webgl.XML3DCreateTex2DFromData = function(gl, internalFormat, width, h
 	return info;
 };
 
-org.xml3d.webgl.XML3DCreateTex2DFromImage = function(gl, handle, image, opt) {
+xml3d.webgl.XML3DCreateTex2DFromImage = function(gl, handle, image, opt) {
 	var info = {};
 	gl.bindTexture(gl.TEXTURE_2D, handle);
 	
@@ -71,8 +71,8 @@ org.xml3d.webgl.XML3DCreateTex2DFromImage = function(gl, handle, image, opt) {
 };
 
 //Adapter for <texture>
-org.xml3d.webgl.XML3DTextureRenderAdapter = function(factory, node) {
-	org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+xml3d.webgl.XML3DTextureRenderAdapter = function(factory, node) {
+	xml3d.webgl.RenderAdapter.call(this, factory, node);
 	this.gl = factory.renderer.handler.gl;
 	this.factory = factory;
 	this.node = node;
@@ -80,10 +80,10 @@ org.xml3d.webgl.XML3DTextureRenderAdapter = function(factory, node) {
 	this.bind = function(texUnit) { return; };
 	this.unbind = function(texUnit) { return; };
 };
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DTextureRenderAdapter;
+xml3d.webgl.XML3DTextureRenderAdapter.prototype = new xml3d.webgl.RenderAdapter();
+xml3d.webgl.XML3DTextureRenderAdapter.prototype.constructor = xml3d.webgl.XML3DTextureRenderAdapter;
 
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.notifyChanged = function(evt) {
+xml3d.webgl.XML3DTextureRenderAdapter.prototype.notifyChanged = function(evt) {
 	if (evt.attribute == "src") {
 		this.destroy();
 		this.info = this.initTexture();
@@ -97,17 +97,17 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.notifyChanged = function(evt
 	}
 };
 
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype._bind = function(texUnit) {
+xml3d.webgl.XML3DTextureRenderAdapter.prototype._bind = function(texUnit) {
 	this.gl.activeTexture(this.gl.TEXTURE0 + texUnit);
 	this.gl.bindTexture(this.info.glType, this.info.handle);
 };
 
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype._unbind = function(texUnit) {
+xml3d.webgl.XML3DTextureRenderAdapter.prototype._unbind = function(texUnit) {
 	this.gl.activeTexture(this.gl.TEXTURE0 + texUnit);
 	this.gl.bindTexture(this.info.glType, null);
 };
 
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
+xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	var dataTable = this.factory.renderer.dataFactory.getAdapter(this.node).createDataTable();
 	var gl = this.gl;
 	var name = this.node.name;
@@ -117,7 +117,7 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	}
 
 	if (!dataTable[name]) {
-		org.xml3d.debug.logError("No data table entry found for "+name);
+		xml3d.debug.logError("No data table entry found for "+name);
 		return;
 	}
 	
@@ -142,7 +142,7 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	var texAdapter = this;
 	image.onload = function() {
 		
-		texAdapter.info = org.xml3d.webgl.XML3DCreateTex2DFromImage(gl, texture, image, opt);
+		texAdapter.info = xml3d.webgl.XML3DCreateTex2DFromImage(gl, texture, image, opt);
 		
 		texAdapter.bind = texAdapter._bind;
 		texAdapter.unbind = texAdapter._unbind;
@@ -154,7 +154,7 @@ org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.initTexture = function() {
 	return info;
 };
 
-org.xml3d.webgl.XML3DTextureRenderAdapter.prototype.destroy = function() {
+xml3d.webgl.XML3DTextureRenderAdapter.prototype.destroy = function() {
 	if (!this.info || this.info.handle === null)
 		return;
 	

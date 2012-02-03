@@ -34,7 +34,7 @@ test("Auto-configuration", 8, function() {
 test("Configuration of new elements", 4, function() {
     var doc = this.doc;
     var x = doc.getElementById("myXml3d");
-    var n = doc.createElementNS(org.xml3d.xml3dNS,"view");
+    var n = doc.createElementNS(xml3d.xml3dNS,"view");
     equals(typeof n._configured, 'object', "Object is configured");
     x.appendChild(n);
     equals(typeof n._configured, 'object', "Object is still configured");
@@ -54,7 +54,7 @@ function TestAdapterFactory() {
     };
 };
 
-org.xml3d.createClass(TestAdapterFactory, org.xml3d.data.AdapterFactory);
+xml3d.createClass(TestAdapterFactory, xml3d.data.AdapterFactory);
 
 module("Adapter tests", {
     setup : function() {
@@ -72,7 +72,7 @@ module("Adapter tests", {
         v.removeEventListener("load", this.cb, true);
     },
     factory : new TestAdapterFactory(),
-    webglFactory : new org.xml3d.webgl.XML3DRenderAdapterFactory()
+    webglFactory : new xml3d.webgl.XML3DRenderAdapterFactory()
 });
 
 test("Adapter registration and initialization test", 6, function() {
@@ -111,7 +111,7 @@ module("Mutation tests", {
 
 test("DOMNodeInserted on xml3d", 4, function() {
 	var x = this.doc.getElementById("myXml3d");
-	var g = this.doc.createElementNS(org.xml3d.xml3dNS, "group");
+	var g = this.doc.createElementNS(xml3d.xml3dNS, "group");
 	this.factory.getAdapter(x);
 	x.appendChild(g);
 });
@@ -126,7 +126,7 @@ test("DOMNodeRemoved on xml3d", 6, function() {
 
 test("DOMNodeInserted on arbritary", 4, function() {
     var x = this.doc.getElementById("myGroup");
-    var g = this.doc.createElementNS(org.xml3d.xml3dNS, "group");
+    var g = this.doc.createElementNS(xml3d.xml3dNS, "group");
     this.factory.getAdapter(x);
     x.appendChild(g);
 });

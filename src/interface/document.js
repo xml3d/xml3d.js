@@ -2,9 +2,9 @@
 // -----------------------------------------------------------------------------
 // Class XML3Document
 // -----------------------------------------------------------------------------
-org.xml3d.XML3DDocument = function(parentDocument) {
+xml3d.XML3DDocument = function(parentDocument) {
     this.parentDocument = parentDocument;
-    this.factory = new org.xml3d.XML3DNodeFactory();
+    this.factory = new xml3d.XML3DNodeFactory();
     this.onload = function() {
         alert("on load");
     };
@@ -13,7 +13,7 @@ org.xml3d.XML3DDocument = function(parentDocument) {
     };
 };
 
-org.xml3d.XML3DDocument.prototype.initXml3d = function(xml3dElement) {
+xml3d.XML3DDocument.prototype.initXml3d = function(xml3dElement) {
 
     if (xml3dElement._xml3dNode !== undefined)
         return;
@@ -39,13 +39,13 @@ function isEqual(val1, val2)
         return false;
     }
 
-    if(org.xml3d.isUInt16Array(val1)   ||
-       org.xml3d.isFloatArray(val1)    ||
-       org.xml3d.isFloat2Array(val1)   ||
-       org.xml3d.isFloat3Array(val1)   ||
-       org.xml3d.isFloat4Array(val1)   ||
-       org.xml3d.isFloat4x4Array(val1) ||
-       org.xml3d.isBoolArray(val1))
+    if(xml3d.isUInt16Array(val1)   ||
+       xml3d.isFloatArray(val1)    ||
+       xml3d.isFloat2Array(val1)   ||
+       xml3d.isFloat3Array(val1)   ||
+       xml3d.isFloat4Array(val1)   ||
+       xml3d.isFloat4x4Array(val1) ||
+       xml3d.isBoolArray(val1))
     {
 
         if(val1.length != val2.length)
@@ -66,13 +66,13 @@ function isEqual(val1, val2)
             }
         }
     }
-    else if(org.xml3d.isXML3DVec3(val1))
+    else if(xml3d.isXML3DVec3(val1))
     {
         return val1.x == val2.x &&
                val1.y == val2.y &&
                val1.z == val2.z;
     }
-    else if(org.xml3d.isXML3DRotation(val1))
+    else if(xml3d.isXML3DRotation(val1))
     {
         return val1.x == val2.x &&
                val1.y == val2.y &&
@@ -97,10 +97,10 @@ function isEqual(val1, val2)
 };
 
 
-org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
+xml3d.XML3DDocument.prototype.onTextSet = function(e){
     if (e.target === undefined)
     {
-        org.xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
+        xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
         return;
     }
     try
@@ -113,21 +113,21 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 
         if (removedNodeParent.notificationRequired())
         {
-            removedNodeParent.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
+            removedNodeParent.notify(new xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
         }
     }
     catch (e)
     {
-        org.xml3d.debug.logError("Exception in textSet:");
-        org.xml3d.debug.logException(e);
+        xml3d.debug.logError("Exception in textSet:");
+        xml3d.debug.logException(e);
     }
 };
 
 /*
-org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
+xml3d.XML3DDocument.prototype.onTextSet = function(e){
     if (e.target === undefined)
     {
-        org.xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
+        xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
         return;
     }
     try
@@ -139,13 +139,13 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 
         if (bindNode.notificationRequired() && ! isEqual(oldValue, e.target.parentNode.value))
         {
-            bindNode.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
+            bindNode.notify(new xml3d.Notification(this, MutationEvent.MODIFICATION, "text", oldValue, e.target.parentNode.value));
         }
     }
     catch (e)
     {
-        org.xml3d.debug.logError("Exception in textSet:");
-        org.xml3d.debug.logException(e);
+        xml3d.debug.logError("Exception in textSet:");
+        xml3d.debug.logException(e);
     }
 };
 */
@@ -153,24 +153,24 @@ org.xml3d.XML3DDocument.prototype.onTextSet = function(e){
 
 
 
-org.xml3d.XML3DDocument.prototype.onAdd = function(e) {
+xml3d.XML3DDocument.prototype.onAdd = function(e) {
     try {
-        org.xml3d.document.getNode(e.target);
+        xml3d.document.getNode(e.target);
 
         var parent = e.target.parentNode;
         if (parent && parent.notify) {
-            parent.notify(new org.xml3d.Notification(this, MutationEvent.ADDITION, null, null, e.target));
+            parent.notify(new xml3d.Notification(this, MutationEvent.ADDITION, null, null, e.target));
         }
     } catch (e) {
-        org.xml3d.debug.logError("Exception in configuring node:");
-        org.xml3d.debug.logException(e);
+        xml3d.debug.logError("Exception in configuring node:");
+        xml3d.debug.logException(e);
     }
 };
 
-org.xml3d.XML3DDocument.prototype.onSet = function(e) {
+xml3d.XML3DDocument.prototype.onSet = function(e) {
     if (e.target === undefined)
     {
-        org.xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
+        xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
         return;
     }
 
@@ -189,48 +189,48 @@ org.xml3d.XML3DDocument.prototype.onSet = function(e) {
         }
         else
         {
-            org.xml3d.debug.logError("An unknown event for attribue " + e.attrName +
+            xml3d.debug.logError("An unknown event for attribue " + e.attrName +
                                      " of node " + e.target.localName + " has occured");
             return;
         }
 
 
-        /*if (result == org.xml3d.event.HANDLED &&
+        /*if (result == xml3d.event.HANDLED &&
             e.target.notificationRequired()   &&
             ! isEqual(e.prevValue, e.newValue))
         {
             // The removal of an attribute is also handled as MutationEvent.MODIFICATION since
             // this event is handled by resetting the internal attribute value.
-            e.target.notify(new org.xml3d.Notification(this, MutationEvent.MODIFICATION, e.attrName, e.prevValue, e.newValue));
+            e.target.notify(new xml3d.Notification(this, MutationEvent.MODIFICATION, e.attrName, e.prevValue, e.newValue));
         }*/
      }
      catch (e)
      {
-        org.xml3d.debug.logError("Exception in setField:");
-        org.xml3d.debug.logException(e);
+        xml3d.debug.logError("Exception in setField:");
+        xml3d.debug.logException(e);
     }
 };
 
-org.xml3d.XML3DDocument.prototype.onRemove = function(e)
+xml3d.XML3DDocument.prototype.onRemove = function(e)
 {
-    org.xml3d.debug.logInfo("Remove: "+e);
+    xml3d.debug.logInfo("Remove: "+e);
 
     if (e.target === undefined)
     {
-        org.xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
+        xml3d.debug.logInfo("Unhandled event on: " + e.target.localName);
         return;
     }
     try
     {
         //var parent = e.target.parentNode;
         //if (parent && parent.notify) {
-        //  parent.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, null, null, e.target));
+        //  parent.notify(new xml3d.Notification(this, MutationEvent.REMOVAL, null, null, e.target));
 
         var removedNode = e.target;
 
         if (removedNode.notificationRequired())
         {
-            removedNode.notify(new org.xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
+            removedNode.notify(new xml3d.Notification(this, MutationEvent.REMOVAL, "node", e.target, ""));
         }
 
         /*for(var i = 0; i < removedNode.adapters.length; i++)
@@ -244,33 +244,33 @@ org.xml3d.XML3DDocument.prototype.onRemove = function(e)
     }
     catch (e)
     {
-        org.xml3d.debug.logError("Exception in onRemove:");
-        org.xml3d.debug.logException(e);
+        xml3d.debug.logError("Exception in onRemove:");
+        xml3d.debug.logException(e);
     }
 };
 
-org.xml3d.XML3DDocument.prototype.onunload = function(xml3dElement) {
+xml3d.XML3DDocument.prototype.onunload = function(xml3dElement) {
 };
 
-org.xml3d.XML3DDocument.prototype.getNode = function(element) {
+xml3d.XML3DDocument.prototype.getNode = function(element) {
     if (element._configured !== undefined)
         return element;
 
     var ctx = {
-            assert : org.xml3d.debug.assert,
-            log : org.xml3d.debug.logInfo,
+            assert : xml3d.debug.assert,
+            log : xml3d.debug.logInfo,
             factory : this.factory,
             doc : this
         };
     return this.factory.create(element, ctx);
 };
 
-org.xml3d.XML3DDocument.prototype.resolve = function(uriStr) {
-        return org.xml3d.URIResolver.resolve(this, uriStr);
+xml3d.XML3DDocument.prototype.resolve = function(uriStr) {
+        return xml3d.URIResolver.resolve(this, uriStr);
 };
 
-org.xml3d.XML3DDocument.prototype.nativeGetElementById = document.getElementById;
+xml3d.XML3DDocument.prototype.nativeGetElementById = document.getElementById;
 
-org.xml3d.XML3DDocument.prototype.getElementById = function(id) {
+xml3d.XML3DDocument.prototype.getElementById = function(id) {
     return document.getElementById(id);
 };

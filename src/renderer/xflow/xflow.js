@@ -1,15 +1,15 @@
 
-//Create global symbol org.xml3d.xflow
-if (!org.xml3d.xflow)
-	org.xml3d.xflow = {};
-else if (typeof org.xml3d.xflow != "object")
-	throw new Error("org.xml3d.xflow already exists and is not an object");
+//Create global symbol xml3d.xflow
+if (!xml3d.xflow)
+	xml3d.xflow = {};
+else if (typeof xml3d.xflow != "object")
+	throw new Error("xml3d.xflow already exists and is not an object");
 
-//Create global symbol org.xml3d.xflow
-if (!org.xml3d.xflow.parallel)
-	org.xml3d.xflow.parallel = {};
-else if (typeof org.xml3d.xflow.parallel != "object")
-	throw new Error("org.xml3d.xflow.parallel already exists and is not an object");
+//Create global symbol xml3d.xflow
+if (!xml3d.xflow.parallel)
+	xml3d.xflow.parallel = {};
+else if (typeof xml3d.xflow.parallel != "object")
+	throw new Error("xml3d.xflow.parallel already exists and is not an object");
 
 
 /**
@@ -18,7 +18,7 @@ else if (typeof org.xml3d.xflow.parallel != "object")
  * XFlow scripts can create vertex data or alter it through CPU scripts and/or shaders.
  * 
  */
-org.xml3d.xflow.plane = function(dataTable) {
+xml3d.xflow.plane = function(dataTable) {
 	var segments = dataTable.segments;
 	segments = segments !== undefined && segments.data ? segments.data[0] : 1;	
 	if (segments <= 0)
@@ -65,7 +65,7 @@ org.xml3d.xflow.plane = function(dataTable) {
 	dataTable.texcoord = { data : texcoord, tupleSize : 2 };		
 };
 
-org.xml3d.xflow.box = function(dataTable) {
+xml3d.xflow.box = function(dataTable) {
 	var segments = dataTable.segments;
 	var size = dataTable.size;
 	segments = segments !== undefined && segments.data ? segments.data[0] : 1;
@@ -147,7 +147,7 @@ org.xml3d.xflow.box = function(dataTable) {
 	dataTable.texcoord = { data : texcoord, tupleSize : 2 };                   
 };
 
-org.xml3d.xflow.sphere = function(dataTable) {
+xml3d.xflow.sphere = function(dataTable) {
 	var segments = dataTable.segments;
 	segments = segments !== undefined && segments.data ? segments.data[0] : 1;
 	
@@ -202,7 +202,7 @@ org.xml3d.xflow.sphere = function(dataTable) {
 	dataTable.texcoord = { data : texcoord, tupleSize : 2 };
 };
 
-org.xml3d.xflow.cylinder = function(dataTable) {
+xml3d.xflow.cylinder = function(dataTable) {
 	var segments = dataTable.segments;
 	segments = segments !== undefined && segments.data ? segments.data[0] : 1;
 	
@@ -291,9 +291,9 @@ org.xml3d.xflow.cylinder = function(dataTable) {
 	dataTable.texcoord = { data : texcoord, tupleSize : 2 };
 };
 
-org.xml3d.xflow.ripple = function(dataTable) {
+xml3d.xflow.ripple = function(dataTable) {
 	if (!dataTable.position || !dataTable.strength || !dataTable.wavelength || ! dataTable.phase) {
-		org.xml3d.debug.logError("Missing data for XFlow Ripple script!");
+		xml3d.debug.logError("Missing data for XFlow Ripple script!");
 		return;
 	}
 	
@@ -329,9 +329,9 @@ org.xml3d.xflow.ripple = function(dataTable) {
 
 };
 
-org.xml3d.xflow.morphing = function(dataTable) {
+xml3d.xflow.morphing = function(dataTable) {
 	if (!dataTable.position1 || !dataTable.position2 || !dataTable.weight1 || ! dataTable.weight2) {
-		org.xml3d.debug.logError("Missing data for XFlow Morphing script!");
+		xml3d.debug.logError("Missing data for XFlow Morphing script!");
 		return;
 	}
 	
@@ -365,9 +365,9 @@ org.xml3d.xflow.morphing = function(dataTable) {
 	
 };
 
-org.xml3d.xflow.noise = function(dataTable) {
+xml3d.xflow.noise = function(dataTable) {
 	if (!dataTable.strength || !dataTable.position) {
-		org.xml3d.debug.logError("Missing parameters for XFlow Noise script!");
+		xml3d.debug.logError("Missing parameters for XFlow Noise script!");
 		return;
 	}
 	var sd = 
@@ -407,7 +407,7 @@ org.xml3d.xflow.noise = function(dataTable) {
 	
 };
 
-org.xml3d.xflow.displace = function(dataTable) {
+xml3d.xflow.displace = function(dataTable) {
 
 	//TODO: Texture lookup in vertex shader is not yet supported in WebGL
 	delete dataTable.diffuseTexture;
@@ -415,7 +415,7 @@ org.xml3d.xflow.displace = function(dataTable) {
 	return;
 	
 	if (!dataTable.strength || !dataTable.diffuseTexture) {
-		org.xml3d.debug.logError("Missing parameters for XFlow Displace script!");
+		xml3d.debug.logError("Missing parameters for XFlow Displace script!");
 		return;
 	}
 	
@@ -444,7 +444,7 @@ org.xml3d.xflow.displace = function(dataTable) {
 	
 };
 
-org.xml3d.xflow.smoothing = function(dataTable) {
+xml3d.xflow.smoothing = function(dataTable) {
 	//Can't do smoothing in a vertex shader as it's not parallel
 	
 	var numVertices = dataTable.position.data.length / 3;
@@ -477,10 +477,10 @@ org.xml3d.xflow.smoothing = function(dataTable) {
 	
 };
 
-org.xml3d.xflow.uv = function(dataTable) {
+xml3d.xflow.uv = function(dataTable) {
 	
 	if (!dataTable.scale || !dataTable.translate) {
-		org.xml3d.debug.logError("Missing parameters for XFlow UV script!");
+		xml3d.debug.logError("Missing parameters for XFlow UV script!");
 		return;
 	}
 	
@@ -505,7 +505,7 @@ org.xml3d.xflow.uv = function(dataTable) {
 	delete dataTable.translate;
 };
 
-org.xml3d.xflow.tangent = function(dataTable) {
+xml3d.xflow.tangent = function(dataTable) {
 	
 	var numVertices = dataTable.position.data.length / 3;
 	var numTriangles = dataTable.index.data.length / 3;
@@ -569,9 +569,9 @@ org.xml3d.xflow.tangent = function(dataTable) {
 
 };
 
-org.xml3d.xflow.skinning_js = function(dataTable, dataAdapter) {
+xml3d.xflow.skinning_js = function(dataTable, dataAdapter) {
 	if (!dataTable.bindPose || !dataTable.boneIndices || !dataTable.boneWeights || !dataTable.pose || !dataTable.normal) {
-		org.xml3d.debug.logError("Missing parameters for XFlow Skinning_js script!");
+		xml3d.debug.logError("Missing parameters for XFlow Skinning_js script!");
 		return;
 	}
 	dataTable.bindPose.isXFlow = true;
@@ -693,9 +693,9 @@ org.xml3d.xflow.skinning_js = function(dataTable, dataAdapter) {
 	dataTable.normal = {data : newNorm, tupleSize : 3, forcedUpdate : true};
 };
 
-org.xml3d.xflow.skinning = function(dataTable, dataAdapter) {
+xml3d.xflow.skinning = function(dataTable, dataAdapter) {
 	if (!dataTable.bindPose || !dataTable.boneIndices || !dataTable.boneWeights || !dataTable.pose || !dataTable.normal) {
-		org.xml3d.debug.logError("Missing parameters for XFlow Skinning script!");
+		xml3d.debug.logError("Missing parameters for XFlow Skinning script!");
 		return;
 	}
 	dataTable.bindPose.isXFlow = true;
@@ -763,9 +763,9 @@ org.xml3d.xflow.skinning = function(dataTable, dataAdapter) {
 	dataTable.boneWeight = { data : dataTable.boneWeights.data, tupleSize : 4 };
 };
 
-org.xml3d.xflow.forwardkinematics = function(dataTable) {
+xml3d.xflow.forwardkinematics = function(dataTable) {
 	if (!dataTable.parent || !dataTable.transform) {
-		org.xml3d.debug.logError("Missing parameters for XFlow Forward Kinematics script!");
+		xml3d.debug.logError("Missing parameters for XFlow Forward Kinematics script!");
 		return;
 	}
 	dataTable.parent.isXFlow = true;
@@ -807,9 +807,9 @@ org.xml3d.xflow.forwardkinematics = function(dataTable) {
 	
 };
 
-org.xml3d.xflow.matrixinterpolator = function(dataTable) {
+xml3d.xflow.matrixinterpolator = function(dataTable) {
 	if (!dataTable.weight) {
-		org.xml3d.debug.logError("Missing parameters for XFlow Matrix Interpolator script!");
+		xml3d.debug.logError("Missing parameters for XFlow Matrix Interpolator script!");
 		return;
 	}
 	dataTable.weight.isXFlow = true;
@@ -869,10 +869,10 @@ org.xml3d.xflow.matrixinterpolator = function(dataTable) {
 	
 };
 
-org.xml3d.xflow.instance = function(dataTable) {
+xml3d.xflow.instance = function(dataTable) {
 	
 	if ((!dataTable.pose && !dataTable.transform) || !dataTable.texcoord || !dataTable.index) {
-		org.xml3d.debug.logError("Missing parameters for XFlow Instance script!");
+		xml3d.debug.logError("Missing parameters for XFlow Instance script!");
 		return;
 	}
 	

@@ -257,8 +257,8 @@
         return result;
     };
 
-    org.xml3d.XML3DMatrix = XML3DMatrix;
+    xml3d.XML3DMatrix = XML3DMatrix;
     if (!window.XML3DMatrix)
         window.XML3DMatrix = XML3DMatrix;
 
-}(org.xml3d._native));
+}(xml3d._native));

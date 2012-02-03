@@ -209,8 +209,8 @@
      * this._data[1], this._data[2] ]; };
      */
 
-    org.xml3d.XML3DVec3 = XML3DVec3;
+    xml3d.XML3DVec3 = XML3DVec3;
     if (!window.XML3DVec3)
         window.XML3DVec3 = XML3DVec3;
 
-}(org.xml3d._native));
+}(xml3d._native));

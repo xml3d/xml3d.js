@@ -69,7 +69,7 @@ g_shaders["urn:xml3d:shader:phong"] = {
 
 	fragment:
 	// NOTE: Any changes to this area must be carried over to the substring calculations in
-	// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
+	// xml3d.webgl.Renderer.prototype.getStandardShaderProgram
 			"#ifdef GL_ES\n"
 			+"precision highp float;\n"
 			+"#endif\n\n"
@@ -153,7 +153,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
 
 	fragment:
 		// NOTE: Any changes to this area must be carried over to the substring calculations in
-		// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
+		// xml3d.webgl.Renderer.prototype.getStandardShaderProgram
 			"#ifdef GL_ES\n"
 			+"precision highp float;\n"
 			+"#endif\n\n"
@@ -246,7 +246,7 @@ g_shaders["urn:xml3d:shader:phongvcolor"] = {
 
 		fragment:
 		// NOTE: Any changes to this area must be carried over to the substring calculations in
-		// org.xml3d.webgl.Renderer.prototype.getStandardShaderProgram
+		// xml3d.webgl.Renderer.prototype.getStandardShaderProgram
 				"#ifdef GL_ES\n"
 				+"precision highp float;\n"
 				+"#endif\n\n"

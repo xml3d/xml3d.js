@@ -1,6 +1,6 @@
 ﻿
 
-org.xml3d.webgl.XML3DMeshManager = function(gl, renderer, dataFactory, factory) {
+xml3d.webgl.XML3DMeshManager = function(gl, renderer, dataFactory, factory) {
 	this.gl = gl;
 	this.renderer = renderer;
 	this.dataFactory = dataFactory;
@@ -8,7 +8,7 @@ org.xml3d.webgl.XML3DMeshManager = function(gl, renderer, dataFactory, factory) 
 	this.meshes = {}; 
 };
 
-org.xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
+xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
 	//TODO: cache mesh data to support 'instances' --> better performance/storage
 	// For now each mesh gets its own set of vertex buffers and such, even if there are 
 	// many meshes in the scene that use the exact same set of data (instances)
@@ -25,8 +25,8 @@ org.xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
 	meshInfo.glType = this.getGLTypeFromString(gl, type);
 
 	if (dataTable.index) {			
-		if (dataTable.position.data.length / 3 > org.xml3d.webgl.MAX_MESH_INDEX_COUNT) {
-			this.splitMesh(dataTable, org.xml3d.webgl.MAX_MESH_INDEX_COUNT);
+		if (dataTable.position.data.length / 3 > xml3d.webgl.MAX_MESH_INDEX_COUNT) {
+			this.splitMesh(dataTable, xml3d.webgl.MAX_MESH_INDEX_COUNT);
 		} 
 		
 		if (dataTable.index.length > 0) {
@@ -103,7 +103,7 @@ org.xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
 	//}
 	meshInfo.valid = true;
 	// TODO: Is dataTable.position defined?
-	meshInfo.bbox = org.xml3d.webgl.calculateBoundingBox(dataTable.position.data);
+	meshInfo.bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 
 	return meshInfo;
 	
@@ -120,7 +120,7 @@ org.xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
  * @param maxIndexCount the desired chunk size
  * @return
  */
-org.xml3d.webgl.XML3DMeshManager.prototype.splitMesh = function(dataTable, maxIndexCount) {
+xml3d.webgl.XML3DMeshManager.prototype.splitMesh = function(dataTable, maxIndexCount) {
 	var verticesPerPolygon = 3;
     var colorStride = 3;
 	maxIndexCount = Math.floor(maxIndexCount / 3) * 3;
@@ -318,7 +318,7 @@ org.xml3d.webgl.XML3DMeshManager.prototype.splitMesh = function(dataTable, maxIn
 	
 };
 
-org.xml3d.webgl.XML3DMeshManager.prototype.getGLTypeFromString = function(gl, typeName) {
+xml3d.webgl.XML3DMeshManager.prototype.getGLTypeFromString = function(gl, typeName) {
 	switch (typeName) {
 		case "triangles"	: return gl.TRIANGLES;
 		case "tristrips" 	: return gl.TRIANGLE_STRIP;
@@ -329,7 +329,7 @@ org.xml3d.webgl.XML3DMeshManager.prototype.getGLTypeFromString = function(gl, ty
 	}
 };
 
-org.xml3d.webgl.XML3DMeshManager.prototype.getGLTypeFromArray = function(gl, array) {
+xml3d.webgl.XML3DMeshManager.prototype.getGLTypeFromArray = function(gl, array) {
 	if (array instanceof Int8Array   ) return gl.BYTE;
 	if (array instanceof Uint8Array  ) return gl.UNSIGNED_BYTE;
 	if (array instanceof Int16Array  ) return gl.SHORT;
@@ -340,6 +340,6 @@ org.xml3d.webgl.XML3DMeshManager.prototype.getGLTypeFromArray = function(gl, arr
 	return gl.FLOAT;
 };
 
-org.xml3d.webgl.XML3DMeshManager.prototype.setGLContext = function(gl) {
+xml3d.webgl.XML3DMeshManager.prototype.setGLContext = function(gl) {
 	this.gl = gl;
 };

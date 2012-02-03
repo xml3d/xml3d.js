@@ -1,21 +1,21 @@
-org.xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
+xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
-org.xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
-    org.xml3d.webgl.RenderAdapter.call(this, factory, node);
+xml3d.webgl.XML3DMeshRenderAdapter = function(factory, node) {
+    xml3d.webgl.RenderAdapter.call(this, factory, node);
     
     this.processListeners();
     this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
     this.dataAdapter.registerObserver(this);
 
     this.passChangeToObject = function(evt) { 
-        org.xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
+        xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
     };
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype = new org.xml3d.webgl.RenderAdapter();
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = org.xml3d.webgl.XML3DMeshRenderAdapter;
+xml3d.webgl.XML3DMeshRenderAdapter.prototype = new xml3d.webgl.RenderAdapter();
+xml3d.webgl.XML3DMeshRenderAdapter.prototype.constructor = xml3d.webgl.XML3DMeshRenderAdapter;
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.processListeners  = function() {
+xml3d.webgl.XML3DMeshRenderAdapter.prototype.processListeners  = function() {
     var attributes = this.node.attributes;
     for (var index in attributes) {
         var att = attributes[index];
@@ -30,24 +30,24 @@ org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.processListeners  = function() 
     }
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.registerCallback = function(callback) {
+xml3d.webgl.XML3DMeshRenderAdapter.prototype.registerCallback = function(callback) {
 	if (callback instanceof Function)
 		this.passChangeToObject = callback;
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(evt) {
+xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyChanged = function(evt) {
 	if (evt.eventType == MutationEvent.REMOVAL) 
 		return this.factory.renderer.sceneTreeRemoval(evt);	
 
     this.passChangeToObject(evt);
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyDataChanged = function(evt) {
+xml3d.webgl.XML3DMeshRenderAdapter.prototype.notifyDataChanged = function(evt) {
      //TODO: fix object form
     this.passChangeToObject(evt);
 };
 
-org.xml3d.webgl.XML3DMeshRenderAdapter.prototype.applyXFlow = function(shader, parameters) {
+xml3d.webgl.XML3DMeshRenderAdapter.prototype.applyXFlow = function(shader, parameters) {
 	var dataTable = this.dataAdapter.createDataTable();
 	
 	if (dataTable["xflowShader"]) {

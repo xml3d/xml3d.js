@@ -73,44 +73,44 @@
 	</target>
 
 	<filelist dir="${srcDir}" id="sourceFiles">
-		<file name="GLU.js" />
 		<file name="xml3d.js" />
-		<file name="xml3d_util.js" />
+		<file name="utils/misc.js" />
 		<file name="utils/array.js" />
 		<file name="utils/debug.js" />
 		<file name="utils/color.js" />
-		<file name="glMatrix.js" />
+        <file name="utils/uri.js" />
+        <file name="contrib/glu.js" />
+		<file name="contrib/glMatrix.js" />
 		<file name="types/vec3.js" />
 		<file name="types/rotation.js" />
 		<file name="types/box.js" />
 		<file name="types/matrix.js" />
 		<file name="types/ray.js" />
-		<file name="utils/uri.js" />
-		<file name="elements/adapter.js" />
-		<file name="elements/factory.js" />
+		<file name="base/adapter.js" />
+		<file name="interface/factory.js" />
 		<file name="interface/dom.js" />
 		<file name="interface/elements.js" />
 		<file name="interface/attributes.js" />
 		<file name="interface/methods.js" />
-		<file name="xml3d_classes.js" />
-		<file name="renderer_handler.js" />
-		<file name="renderer_shadermanager.js" />
-		<file name="renderer_meshmanager.js" />
-		<file name="renderer_bufferhandler.js" />
-		<file name="xml3d_renderer.js" />
-		<file name="adapter/xml3d.js" />
-		<file name="adapter/transform.js" />
-		<file name="adapter/view.js" />
-		<file name="adapter/shader.js" />
-		<file name="adapter/texture.js" />
-		<file name="adapter/mesh.js" />
-		<file name="adapter/group.js" />
-		<file name="adapter/light.js" />
-		<file name="adapter/data.js" />
-		<file name="adapter/factory.js" />
-		<file name="xml3d_shaders.js" />
-		<file name="xml3d_xflow.js" />
-		<file name="xml3d_scene_controller.js" />
+		<file name="interface/configuration.js" />
+		<file name="renderer/handler.js" />
+		<file name="renderer/shadermanager.js" />
+		<file name="renderer/meshmanager.js" />
+		<file name="renderer/bufferhandler.js" />
+		<file name="renderer/renderer.js" />
+		<file name="renderer/adapter/xml3d.js" />
+		<file name="renderer/adapter/transform.js" />
+		<file name="renderer/adapter/view.js" />
+		<file name="renderer/adapter/shader.js" />
+		<file name="renderer/adapter/texture.js" />
+		<file name="renderer/adapter/mesh.js" />
+		<file name="renderer/adapter/group.js" />
+		<file name="renderer/adapter/light.js" />
+		<file name="renderer/adapter/data.js" />
+		<file name="renderer/adapter/factory.js" />
+		<file name="renderer/shaders.js" />
+		<file name="renderer/xflow/xflow.js" />
+		<file name="../tools/xml3d_scene_controller.js" />
 	</filelist>
 
 	<filelist dir="${srcDir}" id="refactored">

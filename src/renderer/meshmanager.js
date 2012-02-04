@@ -1,4 +1,5 @@
 ﻿
+xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 xml3d.webgl.XML3DMeshManager = function(gl, renderer, dataFactory, factory) {
 	this.gl = gl;
@@ -17,6 +18,11 @@ xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
 	var dataAdapter = adapter.dataAdapter;
 	var dataTable = dataAdapter.createDataTable();
 	var gl = this.gl;
+	
+	if (!dataTable.position || !dataTable.position.data) {
+		xml3d.debug.logError("Mesh "+dataAdapter.id+" has no data for required attribute 'position'.");
+		return { vbos : {}, glType : 0, valid : false};
+	}
 	
 	var meshInfo = {};
 	meshInfo.vbos = {};
@@ -103,7 +109,7 @@ xml3d.webgl.XML3DMeshManager.prototype.createMesh = function(meshNode) {
 	//}
 	meshInfo.valid = true;
 	// TODO: Is dataTable.position defined?
-	//meshInfo.bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data);
+	meshInfo.bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 
 	return meshInfo;
 	

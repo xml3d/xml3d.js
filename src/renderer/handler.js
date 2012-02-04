@@ -4,8 +4,7 @@ xml3d.webgl.MAXFPS = 30;
 
 // Since this object is used quite often XML3D_InternalMutationEvent is supposed to be a shortcut to 
 // increase performance by avoiding all the nested objects
-xml3d.webgl.Events = {};
-XML3D_InternalMutationEvent = xml3d.webgl.Events.InternalMutationEvent = function() {
+xml3d.webgl.InternalMutationEvent = function() {
 	this.source = ""; // The 'current' source node type (shader | group | transform | mesh)
 	this.type = ""; // The type of this event as -> shader|transform|mesh
 	this.parameter = ""; // The parameter that was changed (eg. uniform variable, translation, meshtype etc)

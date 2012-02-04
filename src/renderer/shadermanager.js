@@ -343,3 +343,74 @@ xml3d.webgl.XML3DShaderManager.prototype.unbindDefaultShader = function() {
 xml3d.webgl.XML3DShaderManager.prototype.setGLContext = function(gl) {
 	this.gl = gl;
 };
+
+xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(gl, internalFormat, width, height, 
+		sourceFormat, sourceType, texels, opt) {
+	
+	var info = {};
+	if (!texels) {
+		if (sourceType == gl.FLOAT) {
+			texels = new Float32Array(width * height * 4);
+		}
+		else {
+			texels = new Uint8Array(width * height * 4);
+		}
+	}
+	
+	var handle = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, handle);
+	
+	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
+	
+	gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels);
+	
+	if (opt.isDepth) {
+		gl.texParameteri(gl.TEXTURE_2D, gl.DEPTH_TEXTURE_MODE,   opt.depthMode);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, opt.depthCompareMode);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, opt.depthCompareFunc);
+	}
+	if (opt.generateMipmap) {
+		gl.generateMipmap(gl.TEXTURE_2D);
+	}
+	
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	
+	info.handle = handle;
+	info.options = opt;
+	info.valid = true;
+	info.glType = gl.TEXTURE_2D;
+	info.format = internalFormat;	
+	
+	return info;
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(gl, handle, image, opt) {
+	var info = {};
+	gl.bindTexture(gl.TEXTURE_2D, handle);
+	
+	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
+	
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	
+	if (opt.generateMipmap) {
+		gl.generateMipmap(gl.TEXTURE_2D);
+	}
+	
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	
+	info.handle = handle;
+	info.options = opt;
+	info.valid = true;
+	info.glType = gl.TEXTURE_2D;
+	info.format = gl.RGBA;	
+	
+	return info;	
+};

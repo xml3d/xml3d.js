@@ -196,7 +196,9 @@ xml3d.webgl.Renderer = function(handler, width, height) {
 	
 	//Light information is needed to create shaders, so process them first
 	this.lights = [];
-	this.drawableObjects = this.processScene(this.xml3dNode);
+	this.drawableObjects = new Array();
+	this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, true, mat4.identity(mat4.create()), null);
+	this.processShaders(this.drawableObjects);
 };
 
 /**
@@ -243,76 +245,68 @@ xml3d.webgl.Renderer.prototype.initCamera = function() {
 	return this.factory.getAdapter(av);
 };
 
-xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
-	var scene = new Array();
-    var renderer = this;
-    
-	//Build scene
-	var recursiveBuild = function(currentNode, visible, transform, parentShader) {
-		var adapter = renderer.factory.getAdapter(currentNode);
-		var downstreamShader = parentShader;
-		var downstreamTransform = transform;
-		
-		var nodeTypes = {};
-		nodeTypes["group"] = function() {
-			if (currentNode.getAttribute("visible") == "false")
-				visible = false;
-			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
-				renderer.handler.setMouseMovePicking(true);	
-			
-			var shader = adapter.getShader();
-			downstreamShader = shader ? shader : parentShader;	
-			adapter.parentTransform = transform;
-			downstreamTransform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
-			
-		};
-		
-		nodeTypes["mesh"] = function() {
-			if (currentNode.getAttribute("visible") == "false")
-				visible = false;
-			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
-				renderer.handler.setMouseMovePicking(true);	
-				
-			// Add a new drawable object to the scene
-			var newObject = new xml3d.webgl.Renderer.drawableObject(renderer);
-			newObject.mesh = renderer.meshManager.createMesh(currentNode);
-			newObject.meshNode = currentNode;
-			newObject.visible = visible;
-			
-			// Defer creation of the shaders until after the entire scene is processed, this is
-			// to ensure all lights and other shader information is available
-			newObject.shader = null;
-			newObject.transform = transform; 
-			adapter.registerCallback(newObject.callback); 
-			
-			scene.push(newObject);
-		};
-			
-		nodeTypes["light"] = function() {
-			renderer.lights.push( { adapter : adapter , transform : transform} );
-			adapter._transform = transform;
-			adapter._visible = visible;
-		};
-		
-		if (nodeTypes[currentNode.nodeName])
-			nodeTypes[currentNode.nodeName]();
-		
-		var child = currentNode.firstElementChild;
-		while (child) {
-			recursiveBuild(child, visible, downstreamTransform, downstreamShader);
-			child = child.nextSibling;
-		}
-		
-	};
-	
-	recursiveBuild(xml3dNode, true, mat4.identity(mat4.create()), null);
-	
-	for (var i=0; i < scene.length; i++) {
+xml3d.webgl.Renderer.prototype.processShaders = function(scene) {
+    for (var i=0; i < scene.length; i++) {
 		var obj = scene[i];
 		obj.shader = this.shaderManager.createShaderForObject(obj, this.lights);
 	}
+};
+
+xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, transform, parentShader) {
+	var adapter = this.factory.getAdapter(currentNode);
+	var downstreamShader = parentShader;
+	var downstreamTransform = transform;
 	
-	return scene;
+	var nodeTypes = {};
+	var renderer = this;
+	nodeTypes["group"] = function() {
+		if (currentNode.getAttribute("visible") == "false")
+			visible = false;
+		if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+			renderer.handler.setMouseMovePicking(true);	
+		
+		var shader = adapter.getShader();
+		downstreamShader = shader ? shader : parentShader;	
+		adapter.parentTransform = transform;
+		downstreamTransform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
+		
+	};
+	
+	nodeTypes["mesh"] = function() {
+		if (currentNode.getAttribute("visible") == "false")
+			visible = false;
+		if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+			renderer.handler.setMouseMovePicking(true);	
+			
+		// Add a new drawable object to the scene
+		var newObject = new xml3d.webgl.Renderer.drawableObject(renderer);
+		newObject.mesh = renderer.meshManager.createMesh(currentNode);
+		newObject.meshNode = currentNode;
+		newObject.visible = visible;
+		
+		// Defer creation of the shaders until after the entire scene is processed, this is
+		// to ensure all lights and other shader information is available
+		newObject.shader = null;
+		newObject.transform = transform; 
+		adapter.registerCallback(newObject.callback); 
+		
+		scene.push(newObject);
+	};
+		
+	nodeTypes["light"] = function() {
+		renderer.lights.push( { adapter : adapter , transform : transform} );
+		adapter._transform = transform;
+		adapter._visible = visible;
+	};
+	
+	if (nodeTypes[currentNode.nodeName])
+		nodeTypes[currentNode.nodeName]();
+	
+	var child = currentNode.firstElementChild;
+	while (child) {
+		this.recursiveBuildScene(scene, child, visible, downstreamTransform, downstreamShader);
+		child = child.nextSibling;
+	}
 };
 
 xml3d.webgl.Renderer.prototype._initFrameBuffers = function(gl) {
@@ -340,6 +334,7 @@ xml3d.webgl.Renderer.prototype.getGLContext = function() {
 
 xml3d.webgl.Renderer.prototype.applyChangeToObject = function(evt, drawableObject) {
 	var eventTypes = {};
+	var renderer = this;
 	
 	eventTypes["shader"] = function() {
 		//TODO: react to shader changes, eg. uniform variable has a new value
@@ -358,8 +353,18 @@ xml3d.webgl.Renderer.prototype.applyChangeToObject = function(evt, drawableObjec
 		//Needs: 'src', 'visible', 'gltype'
 	};
 	
-	if (eventTypes[evt.type]) {
-		eventTypes[evt.type]();
+	eventTypes[MutationEvent.REMOVAL] = function() {
+		//TODO: Handle removal of shader nodes
+		renderer.meshManager.destroyMesh(drawableObject.mesh);
+		var index = renderer.drawableObjects.indexOf(drawableObject);
+		if (index != -1)
+			renderer.drawableObjects.splice(index, 1);
+	};
+	
+	var eventType = evt.type || evt.eventType;
+	
+	if (eventTypes[eventType]) {
+		eventTypes[eventType]();
 	}
 
 };
@@ -382,11 +387,8 @@ xml3d.webgl.Renderer.prototype.requestRedraw = function(reason) {
 };
 
 xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
-	//TODO: this method needs to create GL components for mesh/shader now
-	var adapter = this.factory.getAdapter(evt.newValue);
-	
-	//Traverse parent nodes to build any inherited shader and transform elements
-	var transform = adapter.applyTransformMatrix(new XML3DMatrix());
+	var adapter = this.factory.getAdapter(evt.target);
+	var transform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
 	var visible = true;
 	var shader = null;	
 	if (adapter.getShader)
@@ -398,10 +400,12 @@ xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 	
 	if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
 		this.factory.handler.setMouseMovePicking(true);
-	
-	while (currentNode.parentNode) {	
-		currentNode = currentNode.parentNode;
+
+	//Traverse parent group nodes to build any inherited shader and transform elements
+	while (currentNode.parentElement) {	
+		currentNode = currentNode.parentElement;
 		if (currentNode.nodeName == "group") {
+			//Can we get rid of these checks?
 			if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
 				this.factory.handler.setMouseMovePicking(true);
 			
@@ -416,10 +420,16 @@ xml3d.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 				shader = parentAdapter.getShader();
 			if (currentNode.getAttribute("visible") == "false")
 				visible = false;
+		} else {
+			break; //End of nested groups
 		}
 	}
-
-	adapter.collectDrawableObjects(transform, this.opaqueObjects, this.transparentObjects, this.lights, shader, visible);
+	//Build any new objects and add them to the scene
+	var newObjects = new Array();
+	this.recursiveBuildScene(newObjects, evt.target, visible, transform, shader);
+	this.processShaders(newObjects);	
+	this.drawableObjects.concat(newObjects);
+	
 	this.requestRedraw("A node was added.");	
 };
 
@@ -427,9 +437,12 @@ xml3d.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 	//References to the adapters of the removed node are automatically cleaned up
 	//as they're encountered during the render phase or notifyChanged methods
 	// TODO: This method needs to make sure GL components are disposed for removed mesh/shader nodes
-	var adapter = this.factory.getAdapter(evt.oldValue);
+	
+	var currentNode = evt.target;
+	var adapter = this.factory.getAdapter(currentNode);
 	if (adapter && adapter.dispose)
-		adapter.dispose();
+		adapter.dispose(evt);
+
 	this.requestRedraw("A node was removed.");
 
 };

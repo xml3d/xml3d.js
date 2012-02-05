@@ -67,6 +67,11 @@
 		}
 		
 	};
+	
+	XML3DMeshRenderAdapter.prototype.dispose = function(evt) {	
+		this.passChangeToObject(evt);
+	};
+	
 	// Export to xml3d.webgl namespace
 	xml3d.webgl.XML3DMeshRenderAdapter = XML3DMeshRenderAdapter;
 

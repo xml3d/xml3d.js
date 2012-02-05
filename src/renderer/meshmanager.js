@@ -349,3 +349,12 @@ xml3d.webgl.XML3DMeshManager.prototype.getGLTypeFromArray = function(gl, array) 
 xml3d.webgl.XML3DMeshManager.prototype.setGLContext = function(gl) {
 	this.gl = gl;
 };
+
+xml3d.webgl.XML3DMeshManager.prototype.destroyMesh = function(mesh) {
+	for (var vbo in mesh.vbos) {
+		var buffer = mesh.vbos[vbo];
+		for (var i = 0; i < buffer.length; i++) {
+			this.gl.deleteBuffer(buffer[i]);
+		}
+	}
+};

@@ -169,11 +169,20 @@
 		return this.factory.getAdapter(shader);
 	};
 	
-	XML3DGroupRenderAdapter.prototype.dispose = function() {
-		for (var child in this.node.childNodes) {
-			var adapter = this.factory.getAdapter(this.node.childNodes[child]);
-			if (adapter)
-				adapter.dispose();
+	XML3DGroupRenderAdapter.prototype.dispose = function(evt) {
+		var child = this.node.firstElementChild;
+		while (child) {
+			var adapter = this.factory.getAdapter(child);
+			if (adapter && adapter.dispose)
+				adapter.dispose(evt);
+			child = child.nextElementSibling;
+		}
+		if(this._transformAdapter)
+		{
+			var l = this._transformAdapter.listeners; 
+			var i = l.indexOf(this); 
+			if(i > -1)
+				l.splice(i,1);
 		}
 		this.isValid = false;
 	};

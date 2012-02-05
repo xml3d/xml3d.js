@@ -30,13 +30,20 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, l
         return shader;
         
     var sources = {vs:null, fs:null};
-			
+    var dataTable = null;
+    var hasTextures = false;
+    
+    if (shaderAdapter) {
+	    dataTable = shaderAdapter.getDataTable();
+	    hasTextures = this.hasTextures(dataTable);	
+    }
+    
 	if (shaderNode && shaderNode.hasAttribute("script"))
 	{
 		var scriptURL = shaderNode.getAttribute("script");
 		if (new xml3d.URI(scriptURL).scheme == "urn") {
 			//Internal shader
-			this.getStandardShaderSource(scriptURL, sources, shaderAdapter, lights);
+			this.getStandardShaderSource(scriptURL, sources, shaderAdapter, lights, hasTextures);
             shader = this.createShaderFromSources(sources);
 		} else {
 			//User-provided shader
@@ -56,21 +63,21 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, l
 		shader = this.createShaderFromSources(sources);
 	}
 	
-	if (shaderAdapter) {
-		var dataTable = shaderAdapter.getDataTable();
+	if (shaderAdapter) {		
+		this.createTextures(shader, dataTable);
 		this.setUniformVariables(shader, dataTable);
 	}
    
    return shader;	
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights) {
+xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights, hasTextures) {
 	//Need to check for textures to decide which internal shader to use
 	var vertexColors = false;
-	var dataTable = shaderAdapter.dataAdapter.createDataTable();	
-
-	//if (scriptURL == "urn:xml3d:shader:phong" && !this.isEmpty(this.textures))
-	//	scriptURL = "urn:xml3d:shader:texturedphong";
+	var dataTable = shaderAdapter.getDataTable();	
+	
+	if (scriptURL == "urn:xml3d:shader:phong" && hasTextures)
+		scriptURL = "urn:xml3d:shader:texturedphong";
 	
 	if (dataTable.useVertexColor && dataTable.useVertexColor.data[0] == true)
 		scriptURL += "vcolor";
@@ -168,7 +175,6 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 		programObject.attributes[att.name] = attInfo;
 	}
 
-	//TODO: shader not picking up light uniforms?
 	//Tally shader uniforms and samplers
 	var texCount = 0;
 	var numUniforms = gl.getProgramParameter(prg, gl.ACTIVE_UNIFORMS);
@@ -281,6 +287,12 @@ xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(sp, unif
 
 xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(sp) {
     // TODO: bind samplers (if any)
+	
+	var samplers = sp.samplers;
+	for (var tex in samplers) {
+		this.bindTexture(samplers[tex]);
+	}
+	
 	if (sp.handle)
 		sp = sp.handle;
     if (this.currentProgram != sp) {
@@ -290,7 +302,12 @@ xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(sp) {
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.unbindShader = function(sp) {
-    // TODO: unbind samplers (if any)
+    // TODO: unbind samplers (if any)	
+	var samplers = sp.samplers;
+	for (var tex in samplers) {
+		this.unbindTexture(samplers[tex]);
+	}
+	
 	this.currentProgram = null;
 	this.gl.useProgram(null);
 };
@@ -344,9 +361,57 @@ xml3d.webgl.XML3DShaderManager.prototype.setGLContext = function(gl) {
 	this.gl = gl;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(gl, internalFormat, width, height, 
-		sourceFormat, sourceType, texels, opt) {
+xml3d.webgl.XML3DShaderManager.prototype.hasTextures = function(dataTable) {
+	for (var param in dataTable) {
+		if (dataTable[param].isTexture) {
+			return true;	
+		} 
+	}
+	return false;
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataTable) {
+	var texUnit = 0;
 	
+	for (var name in shader.samplers) {
+		var texture = dataTable[name];
+		var sampler = shader.samplers[name];
+		
+		var opt = {
+				isDepth          : false,
+				minFilter 		 : dataTable[name].options.minFilter,
+				magFilter		 : dataTable[name].options.magFilter,
+				wrapS			 : dataTable[name].options.wrapS,
+				wrapT			 : dataTable[name].options.wrapT,
+				generateMipmap	 : dataTable[name].options.generateMipmap,
+				flipY            : true,
+				premultiplyAlpha : true	
+		};
+		
+		var tex = this.gl.createTexture();
+		var info = { 
+				status : 0, //image has not been loaded yet
+				handle : tex,
+				texUnit : texUnit
+		};
+		var image = new Image();
+		var renderer = this.renderer;
+		image.onload = function() {
+			info.status = 1; //image loaded, next phase is texture creation
+			renderer.requestRedraw.call(renderer, "Texture loaded");
+		};
+		image.src = texture.src[0];
+		
+		info.image = image;
+		sampler.info = info;
+		sampler.options = opt;
+		texUnit++;
+	}
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(internalFormat, width, height, 
+		sourceFormat, sourceType, texels, opt) {
+	var gl = this.gl;
 	var info = {};
 	if (!texels) {
 		if (sourceType == gl.FLOAT) {
@@ -388,9 +453,10 @@ xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(gl, inte
 	return info;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(gl, handle, image, opt) {
-	var info = {};
-	gl.bindTexture(gl.TEXTURE_2D, handle);
+xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(info, opt) {
+	var gl = this.gl;
+	var texInfo = {};
+	gl.bindTexture(gl.TEXTURE_2D, info.handle);
 	
 	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
@@ -398,7 +464,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(gl, han
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 	
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, info.image);
 	
 	if (opt.generateMipmap) {
 		gl.generateMipmap(gl.TEXTURE_2D);
@@ -406,11 +472,29 @@ xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(gl, han
 	
 	gl.bindTexture(gl.TEXTURE_2D, null);
 	
-	info.handle = handle;
-	info.options = opt;
-	info.valid = true;
-	info.glType = gl.TEXTURE_2D;
-	info.format = gl.RGBA;	
+	texInfo.handle = info.handle;
+	texInfo.texUnit = info.texUnit;
+	texInfo.options = opt;
+	texInfo.valid = true;
+	texInfo.glType = gl.TEXTURE_2D;
+	texInfo.format = gl.RGBA;	
 	
-	return info;	
+	return texInfo;	
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.bindTexture = function(tex) {
+	var info = tex.info;
+	
+	if (info.valid) {
+		this.gl.activeTexture(this.gl.TEXTURE0 + info.texUnit);
+		this.gl.bindTexture(info.glType, info.handle);
+	} else {
+		if (info.status)
+			tex.info = this.createTex2DFromImage(info, tex.options);
+	}
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.unbindTexture = function(tex) {
+	this.gl.activeTexture(this.gl.TEXTURE0 + tex.info.texUnit);
+	this.gl.bindTexture(tex.info.glType, null);
 };

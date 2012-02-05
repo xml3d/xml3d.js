@@ -75,7 +75,7 @@ xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
 			colorTarget.isTexture = false;		
 		} else {
 			//opt.generateMipmap = opt.generateColorsMipmap;
-			var ctex = this.shaderManager.createTex2DFromData(gl, colorFormat, width, height, gl.RGBA, 
+			var ctex = this.shaderManager.createTex2DFromData(colorFormat, width, height, gl.RGBA, 
 					gl.UNSIGNED_BYTE, null, options);
 			
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
@@ -100,7 +100,7 @@ xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
 			depthTarget.isTexture = false;
 		} else {
 			//opt.generateMipmap = opt.generateDepthMipmap;			
-			var dtex = this.shaderManager.createTex2DFromData(gl, depthFormat, width, height, 
+			var dtex = this.shaderManager.createTex2DFromData(depthFormat, width, height, 
 									gl.DEPTH_COMPONENT, gl.FLOAT, null, options);
 			
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, dtex.handle, 0);
@@ -126,7 +126,7 @@ xml3d.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
 		}
 		else {
 			//opt.generateMipmap = opt.generateStencilMipmap;			
-			var stex = this.shaderManager.createTex2DFromData(gl, stencilFormat, width, height, 
+			var stex = this.shaderManager.createTex2DFromData(stencilFormat, width, height, 
 									gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, null, options);
 			
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);

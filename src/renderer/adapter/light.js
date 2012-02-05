@@ -41,15 +41,17 @@
 		this.factory.handler.redraw("Light attribute changed.");	
 	};
 	
-	XML3DLightRenderAdapter.prototype.getParameters = function(modelViewMatrix) {
+	XML3DLightRenderAdapter.prototype.getParameters = function(viewMatrix) {
 		var shader = this.getLightShader();
 	
 		if(!shader)
 			return null;
-		var mvm = modelViewMatrix;
+		var mvm = mat4.create(viewMatrix);
 		
+		//TODO: Check calculation of light position, it's not right
 		if (this._transform)
-			mvm = mat4.multiply(this._transform, modelViewMatrix, mat4.create());
+			mvm = mat4.multiply(mvm, this._transform, mat4.create());
+		
 		if (!this.dataAdapter)
 		{
 			var renderer = shader.factory.renderer;
@@ -66,7 +68,7 @@
 	
 	
 		//Set up default values
-		var pos = mat4.multiplyVec4(mvm, [0,0,0,1]);
+		var pos = mat4.multiplyVec4(mvm, quat4.create([0,0,0,1]));
 		var aParams = {
 			position 	: [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]],
 			attenuation : [0.0, 0.0, 1.0],
@@ -77,8 +79,8 @@
 		for (var p in params) {
 			if (p == "position") {
 				//Position must be multiplied with the model view matrix
-				var t = [params[p].data[0], params[p].data[1],params[p].data[2], 1.0];
-				t = mat4.multiplyVec4(mvm, t);
+				var t = quat4.create([params[p].data[0], params[p].data[1],params[p].data[2], 1.0]);
+				mat4.multiplyVec4(mvm, t);
 				aParams[p] = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
 				continue;
 			}

@@ -174,19 +174,6 @@ xml3d.webgl.checkError = function(gl, text)
 };
 
 /**
- * Represents a drawable object in the scene.
- * 
- * This object holds references to a mesh and shader stored in their respective managers, or in the 
- * case of XFlow a local instance of these objects, since XFlow may be applied differently to different 
- * instances of the same <data> element. It also holds the current transformation matrix for the object,
- * a flag to indicate visibility (not visible = will not be rendered), and a callback function to be used by
- * any adapters associated with this object (eg. the mesh's parent Group) to propogate changes (eg. when the 
- * parent group's shader is changed).
- */
- 
-
-
-/**
  * Constructor for the Renderer.
  * 
  * The renderer is responsible for drawing the scene and determining which object was
@@ -212,6 +199,17 @@ xml3d.webgl.Renderer = function(handler, width, height) {
 	this.drawableObjects = this.processScene(this.xml3dNode);
 };
 
+/**
+ * Represents a drawable object in the scene.
+ * 
+ * This object holds references to a mesh and shader stored in their respective managers, or in the 
+ * case of XFlow a local instance of these objects, since XFlow may be applied differently to different 
+ * instances of the same <data> element. It also holds the current transformation matrix for the object,
+ * a flag to indicate visibility (not visible = will not be rendered), and a callback function to be used by
+ * any adapters associated with this object (eg. the mesh's parent Group) to propogate changes (eg. when the 
+ * parent group's shader is changed).
+ */
+ 
 xml3d.webgl.Renderer.drawableObject = function(renderer) {
 	this.mesh = null;
 	this.shader = null;
@@ -293,6 +291,7 @@ xml3d.webgl.Renderer.prototype.processScene = function(xml3dNode) {
 		nodeTypes["light"] = function() {
 			renderer.lights.push( { adapter : adapter , transform : transform} );
 			adapter._transform = transform;
+			adapter._visible = visible;
 		};
 		
 		if (nodeTypes[currentNode.nodeName])
@@ -744,11 +743,10 @@ xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 				this.shaderManager.setUniformVariables(shader.program, parameters);
 				this.drawObject(shader.program, mesh);
 			}
+			this.shaderManager.unbindShader(shader.program);
 		}
 		
-		this.readPixels(false, x, y);
-		this.shaderManager.unbindShader(shader.program);
-		
+		this.readPixels(false, x, y);			
 		gl.disable(gl.DEPTH_TEST);
 		
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);

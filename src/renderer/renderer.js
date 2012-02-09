@@ -1,63 +1,35 @@
-/*************************************************************************/
-/*                                                                       */
-/*  xml3d_renderer.js                                                    */
-/*  WebGL renderer for XML3D						                     */
-/*                                                                       */
-/*  Copyright (C) 2010                                                   */
-/*  DFKI - German Research Center for Artificial Intelligence            */
-/* 	partly based on code originally provided by Philip Taylor, 			 */
-/*  Peter Eschler, Johannes Behr and Yvonne Jung 						 */
-/*  (philip.html5.org, www.x3dom.org)                                    */
-/*                                                                       */
-/*  This file is part of xml3d.js                                        */
-/*                                                                       */
-/*  xml3d.js is free software; you can redistribute it and/or modify     */
-/*  under the terms of the GNU General Public License as                 */
-/*  published by the Free Software Foundation; either version 2 of       */
-/*  the License, or (at your option) any later version.                  */
-/*                                                                       */
-/*  xml3d.js is distributed in the hope that it will be useful, but      */
-/*  WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 */
-/*  See the GNU General Public License                                   */
-/*  (http://www.fsf.org/licensing/licenses/gpl.html) for more details.   */
-/*                                                                       */
-/*************************************************************************/
+// renderer/renderer.js
 
-
-xml3d.webgl.supported = function() {
-	var canvas = document.createElement("canvas");
-	canvas.width = 1;
-	canvas.height = 1;
-	try {
-		var gl = canvas.getContext("experimental-webgl");
-	} catch(e) {
-		var gl = null;
-	}
-	return !!gl;
-};
+(function() {
+    var canvas = document.createElement("canvas");
+    xml3d.webgl.supported = function() {
+        try {
+            return !!(window.WebGLRenderingContext && (canvas.getContext('experimental-webgl')));
+        } catch (e) {
+            return false;
+        }
+    };
+})();
 
 xml3d.webgl.configure = function(xml3ds) {
 	var handlers = {};
 	for(var i in xml3ds) {
 		// Creates a HTML <canvas> using the style of the <xml3d> Element
 		var canvas = xml3d.webgl.createCanvas(xml3ds[i], i);
-		// Creates the gl XML3DHandler for the <canvas>  Element
-		var XML3DHandler = xml3d.webgl.createXML3DHandler(canvas, xml3ds[i]);
-		xml3ds[i].canvas = canvas;
+		// Creates the CanvasHandler for the <canvas>  Element
+		var canvasHandler = new xml3d.webgl.CanvasHandler(canvas, xml3ds[i]);
 		
 		//Check for event listener attributes for the xml3d node
 		if (xml3ds[i].hasAttribute("contextmenu") && xml3ds[i].getAttribute("contextmenu") == "false")
 			xml3ds[i].canvas.addEventListener("contextmenu", function(e) {xml3d.webgl.stopEvent(e);}, false);
 		if (xml3ds[i].hasAttribute("framedrawn"))
-			XML3DHandler.addEventListener(xml3ds[i], "framedrawn", xml3ds[i].getAttribute("framedrawn"), false);
+			canvasHandler.addEventListener(xml3ds[i], "framedrawn", xml3ds[i].getAttribute("framedrawn"), false);
 		
 		if (xml3ds[i].hasAttribute("disablepicking"))
-			XML3DHandler._pickingDisabled = xml3ds[i].getAttribute("disablepicking") == "true" ? true : false;
+			canvasHandler._pickingDisabled = xml3ds[i].getAttribute("disablepicking") == "true" ? true : false;
 
-		XML3DHandler.start();
-		handlers[i] = XML3DHandler;
-		xml3d._rendererFound = true;
+		canvasHandler.start();
+		handlers[i] = canvasHandler;
 	}
 	
 	//Update listening should be deferred until all canvases are created and configured or it may interfere with the 
@@ -75,81 +47,6 @@ xml3d.webgl.stopEvent = function(ev) {
 	if (ev.stopPropagation) 
 		ev.stopPropagation();
 	ev.returnValue = false;
-};
-
-xml3d.webgl.createCanvas = function(xml3dElement, index) {
-
-	var parent = xml3dElement.parentNode;
-	// Place xml3dElement inside an invisble div
-	var hideDiv = parent.ownerDocument.createElement('div');
-	hideDiv.style.display = "none";
-	parent.insertBefore(hideDiv, xml3dElement);
-	hideDiv.appendChild(xml3dElement);
-
-	// Create canvas and append it where the xml3d element was before
-	var canvas = parent.ownerDocument.createElement('canvas');
-	parent.insertBefore(canvas, hideDiv);
-
-	
-	// Try to transfer all CSS attributes from the xml3d element to the canvas element
-	
-	// transfer style attribute as it's not in the computed style and has
-	// higher priority
-	if (xml3dElement.hasAttribute("style"))
-		canvas.setAttribute("style", xml3dElement.getAttribute("style"));
-
-	// First set the computed for some important attributes, they might be overwritten 
-	// by class attribute later
-	var sides = [ "top", "right", "bottom", "left" ];
-	var colorStr = ""; var styleStr = ""; var widthStr = ""; var paddingStr = "";
-	for (i in sides) {
-		colorStr += xml3d.util.getStyle(xml3dElement, "border-" + sides[i] + "-color") + " ";
-		styleStr += xml3d.util.getStyle(xml3dElement, "border-" + sides[i] + "-style") + " ";
-		widthStr += xml3d.util.getStyle(xml3dElement, "border-" + sides[i] + "-width") + " ";
-		paddingStr += xml3d.util.getStyle(xml3dElement, "padding-" + sides[i]) + " ";
-	}
-	canvas.style.borderColor = colorStr;
-	canvas.style.borderStyle = styleStr;
-	canvas.style.borderWidth = widthStr;
-	canvas.style.padding = paddingStr;
-	
-	if(!canvas.style.width)
-		canvas.style.width = xml3d.util.getStyle(xml3dElement, "width");
-	if(!canvas.style.height)
-		canvas.style.height = xml3d.util.getStyle(xml3dElement, "height");
-	
-	if (!canvas.style.backgroundColor) {
-	var bgcolor = xml3d.util.getStyle(xml3dElement, "background-color");
-	if (bgcolor && bgcolor != "transparent")
-		canvas.style.backgroundColor = bgcolor;
-	}
-
-	// transfer class attributes and add xml3d-canvas-style for special canvas styling
-	var classString = "xml3d-canvas-style";
-	if (xml3dElement.hasAttribute("class"))
-		classString = xml3dElement.getAttribute("class") + " " + classString;
-	canvas.setAttribute("class", classString);
-
-
-	// Width and height are can also be specified as attributes, then they have
-	// the highest priority
-	var h, w;
-	
-	if ((w = xml3dElement.getAttribute("width")) !== null) {
-		canvas.style.width = w;
-	} else if ((w = xml3d.util.getStyle(xml3dElement, "width")) != "auto"){
-		canvas.style.width = w;
-	}
-	if ((h = xml3dElement.getAttribute("height")) !== null) {
-		canvas.style.height = h;
-	} else if ((h = xml3d.util.getStyle(xml3dElement, "height")) != "auto"){
-		canvas.style.height = h;
-	}
-	canvas.id = "canvas"+index;
-	canvas.width = canvas.clientWidth;
-	canvas.height = canvas.clientHeight;
-	
-	return canvas;
 };
 
 
@@ -182,7 +79,7 @@ xml3d.webgl.checkError = function(gl, text)
 xml3d.webgl.Renderer = function(handler, width, height) {
 	this.handler = handler;
 	this.currentView = null;
-	this.xml3dNode = handler.scene.xml3d;
+	this.xml3dNode = handler.xml3dElem;
 	this.factory = new xml3d.webgl.XML3DRenderAdapterFactory(handler, this);
 	this.dataFactory = new xml3d.webgl.XML3DDataAdapterFactory(handler);
 	this.shaderManager = new xml3d.webgl.XML3DShaderManager(handler.gl, this, this.dataFactory, this.factory);

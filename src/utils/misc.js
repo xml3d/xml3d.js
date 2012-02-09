@@ -1,28 +1,4 @@
-/*************************************************************************/
-/*                                                                       */
-/*  xml3d_util.js                                                        */
-/*  Utilities for XML3D								                     */
-/*                                                                       */
-/*  Copyright (C) 2010                                                   */
-/*  DFKI - German Research Center for Artificial Intelligence            */
-/* 	partly based on code originally provided by Philip Taylor, 			 */
-/*  Peter Eschler, Johannes Behr and Yvonne Jung 						 */
-/*  (philip.html5.org, www.x3dom.org)	 								 */
-/*                                                                       */
-/*  This file is part of xml3d.js                                        */
-/*                                                                       */
-/*  xml3d.js is free software; you can redistribute it and/or modify     */
-/*  under the terms of the GNU General Public License as                 */
-/*  published by the Free Software Foundation; either version 2 of       */
-/*  the License, or (at your option) any later version.                  */
-/*                                                                       */
-/*  xml3d.js is distributed in the hope that it will be useful, but      */
-/*  WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 */
-/*  See the GNU General Public License                                   */
-/*  (http://www.fsf.org/licensing/licenses/gpl.html) for more details.   */
-/*                                                                       */
-/*************************************************************************/
+// utils/misc.js
 xml3d.util = xml3d.util || {};
 
 xml3d.util.getStyle = function(oElm, strCssRule) {
@@ -58,3 +34,14 @@ xml3d.setParameter = function(elementId, fieldName, value) {
     }
     return false;
 };
+
+window.requestAnimFrame = (function(f,fps){
+    return  window.requestAnimationFrame       ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame    ||
+            window.oRequestAnimationFrame      ||
+            window.msRequestAnimationFrame     ||
+            function(){
+              window.setTimeout(f, 1000 / fps);
+            };
+  })();

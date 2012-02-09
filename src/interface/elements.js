@@ -104,6 +104,33 @@ xml3d.events = {
         return null;
     };
 
+    handler.XML3DHandler = function(elem) {
+        handler.ElementHandler.call(this, elem);
+        var c = document.createElement("canvas");
+        c.width = 800;
+        c.height = 600;
+        this.canvas = c;
+        Object.defineProperty(elem, "clientWidth", {
+            get : function() {
+                console.log("clientWidth");
+                return c.clientWidth;
+            }
+        });
+        Object.defineProperty(elem, "clientHeight", {
+            get : function() {
+                return c.clientHeight;
+            }
+        });
+    };
+    xml3d.createClass(handler.XML3DHandler, handler.ElementHandler);
+
+    /*
+     * handler.XML3DHandler.prototype.registerAttributes = function(config) {
+     * console.dir(handler.XML3DHandler);
+     * handler.XML3DHandler.superclass.registerAttributes.call(this, config);
+     * Object.defineProperty(this.element, "style", this.styler); };
+     */
+
     // Export to xml3d namespace
     xml3d.extend(xml3d, handler);
 

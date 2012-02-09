@@ -16,7 +16,9 @@ xml3d.XML3DNodeFactory.prototype.configure = function(element) {
         if (classInfo === undefined) {
             xml3d.debug.logInfo("Unrecognised element " + element.localName);
         } else {
-            element._configured = new xml3d.ElementHandler(element);
+            element._configured = element.localName == "xml3d" ?
+                      new xml3d.XML3DHandler(element)
+                    : new xml3d.ElementHandler(element);
             element._configured.registerAttributes(classInfo);
             // Fix difference in Firefox (undefined) and Chrome (null)
             if (element.style == undefined)

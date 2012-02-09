@@ -96,7 +96,6 @@
     handler.EventAttributeHandler = function(elem, id) {
         AttributeHandler.call(this, elem);
         var f = null;
-        var e = elem;
         this.setFromAttribute = function(value) {
             f = null;
             return false;
@@ -127,6 +126,8 @@
         this.setFromAttribute = function(value) {
             var v = value.match(/^\d+/);
             current = v ? +v[0] : defaultValue;
+            if(elem._configured.canvas)
+                elem._configured.canvas[id] = current;
             return false;
         };
         if (elem.hasAttribute(id))
@@ -342,6 +343,30 @@
             return new Uint8Array();
         m = Array.map(m, string2bool);
         return m ? new Uint8Array(m) : new Uint8Array();
+    };
+
+    handler.CanvasStyleHandler = function(e, id, d) {
+        var canvas = e._configured.canvas;
+        this.desc = {};
+        this.desc.get = function() { return canvas.style; };
+        this.desc.set = function(value) {};
+        this.setFromAttribute = function(value) {
+            canvas.setAttribute(id, value);
+        };
+        if (e.hasAttribute(id))
+            this.setFromAttribute(e.getAttribute(id));
+    };
+
+    handler.CanvasClassHandler = function(e, id) {
+        var canvas = e._configured.canvas;
+        this.desc = {};
+        this.desc.get = function() { return canvas.className; };
+        this.desc.set = function(value) { canvas.className = value; };
+        this.setFromAttribute = function(value) {
+            canvas.setAttribute(id, value);
+        };
+        if (e.hasAttribute(id))
+            this.setFromAttribute(e.getAttribute(id));
     };
 
     // Export to xml3d namespace

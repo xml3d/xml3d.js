@@ -1,68 +1,7 @@
 
 
-
 xml3d.classInfo = {};
 xml3d.document = null;
-
-function getAllElementNodes(elem) {
-	if (!elem)
-		return [];
-	var r = [];
-	var n = elem.firstElementChild;
-	while(n) {
-		r.push(n);
-		r = r.concat(getAllElementNodes(n));
-		n = n.nextElementSibling;
-	}
-	return r;
-};
-
-function getElementNodes(elem) {
-if (!elem)
-	return [];
-var r = [];
-var n = elem.firstElementChild;
-while(n) {
-	r.push(n);
-	n = n.nextElementSibling;
-}
-return r;
-};
-
-xml3d.defineClass = function(ctor, parent, methods) {
-	if (parent) {
-		function inheritance() {
-		}
-		inheritance.prototype = parent.prototype;
-		ctor.prototype = new inheritance();
-		ctor.prototype.constructor = ctor;
-		ctor.superClass = parent;
-	}
-	if (methods) {
-		for ( var m in methods) {
-			ctor.prototype[m] = methods[m];
-		}
-	}
-	return ctor;
-};
-
-xml3d.isa = function(object, classInfo) {
-	var oClass = object._classInfo;
-	while (oClass !== undefined)  {
-		if (oClass == classInfo)
-			return true;
-		oClass = oClass.constructor.superClass;
-	}
-	return false;
-};
-
-
-var getElementByIdWrapper = function(xmldoc, myID, namespace) {
-
-};
-
-
-
 
 //-----------------------------------------------------------------------------
 //Class Notification
@@ -332,8 +271,8 @@ xml3d.event = xml3d.event || {};
  **/
 xml3d.classInfo.xml3d = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.CanvasClassHandler, id: 'class'},
+    style : {a: xml3d.CanvasStyleHandler},
 	onclick : {a: xml3d.EventAttributeHandler},
 	ondblclick : {a: xml3d.EventAttributeHandler},
 	onmousedown : {a: xml3d.EventAttributeHandler},
@@ -362,8 +301,8 @@ xml3d.classInfo.xml3d = {
  **/
 xml3d.classInfo.data = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for data
 	map : {a: xml3d.StringAttributeHandler},
 	expose : {a: xml3d.StringAttributeHandler},
 	getResult : {m: xml3d.methods.dataGetResult},
@@ -377,8 +316,8 @@ xml3d.classInfo.data = {
  **/
 xml3d.classInfo.defs = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for defs
 	_term: undefined
 };
 /**
@@ -386,8 +325,8 @@ xml3d.classInfo.defs = {
  **/
 xml3d.classInfo.group = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for group
 	onclick : {a: xml3d.EventAttributeHandler},
 	ondblclick : {a: xml3d.EventAttributeHandler},
 	onmousedown : {a: xml3d.EventAttributeHandler},
@@ -411,8 +350,8 @@ xml3d.classInfo.group = {
  **/
 xml3d.classInfo.mesh = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for mesh
 	onclick : {a: xml3d.EventAttributeHandler},
 	ondblclick : {a: xml3d.EventAttributeHandler},
 	onmousedown : {a: xml3d.EventAttributeHandler},
@@ -435,8 +374,8 @@ xml3d.classInfo.mesh = {
  **/
 xml3d.classInfo.transform = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for transform
 	translation : {a: xml3d.XML3DVec3AttributeHandler, params: [0, 0, 0]},
 	scale : {a: xml3d.XML3DVec3AttributeHandler, params: [1, 1, 1]},
 	rotation : {a: xml3d.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
@@ -449,8 +388,8 @@ xml3d.classInfo.transform = {
  **/
 xml3d.classInfo.shader = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for shader
 	script : {a: xml3d.ReferenceHandler},
 	src : {a: xml3d.ReferenceHandler},
 	_term: undefined
@@ -460,8 +399,8 @@ xml3d.classInfo.shader = {
  **/
 xml3d.classInfo.light = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for light
 	onclick : {a: xml3d.EventAttributeHandler},
 	ondblclick : {a: xml3d.EventAttributeHandler},
 	onmousedown : {a: xml3d.EventAttributeHandler},
@@ -484,8 +423,8 @@ xml3d.classInfo.light = {
  **/
 xml3d.classInfo.lightshader = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for lightshader
 	script : {a: xml3d.ReferenceHandler},
 	src : {a: xml3d.ReferenceHandler},
 	_term: undefined
@@ -495,8 +434,8 @@ xml3d.classInfo.lightshader = {
  **/
 xml3d.classInfo.script = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for script
 	value : {a: xml3d.StringAttributeHandler},
 	src : {a: xml3d.StringAttributeHandler},
 	type : {a: xml3d.StringAttributeHandler},
@@ -507,8 +446,8 @@ xml3d.classInfo.script = {
  **/
 xml3d.classInfo.float = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for float
 	name : {a: xml3d.StringAttributeHandler},
 	value : {a: xml3d.FloatArrayValueHandler},
 	_term: undefined
@@ -518,8 +457,8 @@ xml3d.classInfo.float = {
  **/
 xml3d.classInfo.float2 = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for float2
 	name : {a: xml3d.StringAttributeHandler},
 	value : {a: xml3d.Float2ArrayValueHandler},
 	_term: undefined
@@ -529,8 +468,8 @@ xml3d.classInfo.float2 = {
  **/
 xml3d.classInfo.float3 = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for float3
 	name : {a: xml3d.StringAttributeHandler},
 	value : {a: xml3d.Float3ArrayValueHandler},
 	_term: undefined
@@ -540,8 +479,8 @@ xml3d.classInfo.float3 = {
  **/
 xml3d.classInfo.float4 = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for float4
 	name : {a: xml3d.StringAttributeHandler},
 	value : {a: xml3d.Float4ArrayValueHandler},
 	_term: undefined
@@ -551,8 +490,8 @@ xml3d.classInfo.float4 = {
  **/
 xml3d.classInfo.float4x4 = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for float4x4
 	name : {a: xml3d.StringAttributeHandler},
 	value : {a: xml3d.Float4x4ArrayValueHandler},
 	_term: undefined
@@ -562,8 +501,8 @@ xml3d.classInfo.float4x4 = {
  **/
 xml3d.classInfo.int = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for int
 	name : {a: xml3d.StringAttributeHandler},
 	value : {a: xml3d.IntArrayValueHandler},
 	_term: undefined
@@ -573,8 +512,8 @@ xml3d.classInfo.int = {
  **/
 xml3d.classInfo.bool = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for bool
 	name : {a: xml3d.StringAttributeHandler},
 	value : {a: xml3d.BoolArrayValueHandler},
 	_term: undefined
@@ -584,8 +523,8 @@ xml3d.classInfo.bool = {
  **/
 xml3d.classInfo.texture = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for texture
 	name : {a: xml3d.StringAttributeHandler},
 	type : {a: xml3d.EnumAttributeHandler, params: {e: xml3d.TextureTypes, d: 0}},
 	filterMin : {a: xml3d.EnumAttributeHandler, params: {e: xml3d.FilterTypes, d: 2}},
@@ -602,8 +541,8 @@ xml3d.classInfo.texture = {
  **/
 xml3d.classInfo.img = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for img
 	src : {a: xml3d.StringAttributeHandler},
 	_term: undefined
 };
@@ -612,8 +551,8 @@ xml3d.classInfo.img = {
  **/
 xml3d.classInfo.video = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for video
 	src : {a: xml3d.StringAttributeHandler},
 	_term: undefined
 };
@@ -622,8 +561,8 @@ xml3d.classInfo.video = {
  **/
 xml3d.classInfo.view = {
 	id : {a: xml3d.StringAttributeHandler},
-	className : {a: xml3d.StringAttributeHandler, id: 'class'},
-	// TODO: Handle style
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for view
 	onclick : {a: xml3d.EventAttributeHandler},
 	ondblclick : {a: xml3d.EventAttributeHandler},
 	onmousedown : {a: xml3d.EventAttributeHandler},

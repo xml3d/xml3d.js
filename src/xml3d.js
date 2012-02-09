@@ -31,7 +31,6 @@ xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
 xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
 xml3d._xml3d = document.createElementNS(xml3d.xml3dNS, "xml3d");
 xml3d._native = !!xml3d._xml3d.style; 
-xml3d._rendererFound = false;
 
 xml3d.extend = function (a, b) {
     for ( var prop in b ) {
@@ -51,7 +50,7 @@ xml3d.createClass = function(ctor, parent, methods) {
         F.prototype = parent.prototype;
         ctor.prototype = new F();
         ctor.prototype.constructor = ctor;
-        //ctor.superClass = parent;
+        ctor.superclass = parent.prototype;
     }
     for (var m in methods) {
         ctor.prototype[m] = methods[m];
@@ -77,7 +76,6 @@ xml3d.createClass = function(ctor, parent, methods) {
 			if (xml3d._native) {
 				if(xml3d.debug)
 					xml3d.debug.logInfo("Using native implementation.");
-				xml3d._rendererFound = true;
 				return;
 			}
 		}

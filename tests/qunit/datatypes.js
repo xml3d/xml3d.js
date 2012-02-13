@@ -19,7 +19,7 @@ QUnit.extend( QUnit, {
 	closeRotation : function(actual, expected, maxDifference, message) {
 		var passes = (actual === expected) || 
 			QUnit.__passesVector(actual.axis, expected.axis, maxDifference) &&
-			(Math.abs(actual.angle - expected.angle) <= maxDifference);
+			(Math.abs((actual.angle % Math.PI) - (expected.angle % Math.PI)) <= maxDifference);
 		QUnit.push(passes, actual, expected, message);
 	},
 	

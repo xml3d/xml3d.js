@@ -28,11 +28,16 @@
                 that._callback(that);
         };
 
-        this._axis = axis ? new XML3DVec3(axis.x, axis.y, axis.z, vec_cb) : new XML3DVec3(0, 0, 1, vec_cb);
-        /** @private */
-        this._angle = angle || 0;
-
-        this._updateQuaternion();
+        if (axis instanceof XML3DRotation) {
+            this._axis = new XML3DVec3(0, 0, 1, vec_cb);
+            this._angle = 0;
+            this.setAxisAngle(axis.axis, axis.angle);
+        } else {
+            this._axis = axis ? new XML3DVec3(axis.x, axis.y, axis.z, vec_cb) : new XML3DVec3(0, 0, 1, vec_cb);
+            /** @private */
+            this._angle = angle || 0;
+            this._updateQuaternion();
+        }
 
     }, p = XML3DRotation.prototype;
 
@@ -157,6 +162,14 @@
      */
     p.setQuaternion = function(vector, scalar) {
         this._setQuaternion( [ vector.x, vector.y, vector.z, scalar ]);
+    };
+
+    /**
+     * The set method copies the values from other.
+     * @param {XML3DRotation} other The other rotation
+     */
+    p.set = function(other) {
+        this.setAxisAngle(other.axis, other.angle);
     };
 
     /**

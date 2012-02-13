@@ -40,9 +40,16 @@
     var XML3DVec3 = function(x, y, z, cb) {
         /** @private */
         this._data = new Float32Array(3);
-        this._data[0] = x || 0;
-        this._data[1] = y || 0;
-        this._data[2] = z || 0;
+
+        if (typeof x == 'object' && x._data) {
+            this._data[0] = x._data[0];
+            this._data[1] = x._data[1];
+            this._data[2] = x._data[2];
+        } else {
+            this._data[0] = x || 0;
+            this._data[1] = y || 0;
+            this._data[2] = z || 0;
+        }
 
         this._callback = typeof cb == 'function' ? cb : 0;
 
@@ -106,9 +113,9 @@
     };
 
     /**
-     * The setVec3Value method replaces the existing matrix with one computed
+     * The setVec3Value method replaces the existing vector with one computed
      * from parsing the passed string.
-     * @param {XML3DVec3} str The string to parse
+     * @param {string} str The string to parse
      * @throws {Error} If passed string can not be parsed
      */
     p.setVec3Value = function(str) {
@@ -118,6 +125,18 @@
         this._data[0] = +m[1];
         this._data[1] = +m[2];
         this._data[2] = +m[3];
+        if (this._callback)
+            this._callback(this);
+    };
+
+    /**
+     * The set method copies the values from other.
+     * @param {XML3DVec3} other The other vector
+     */
+    p.set = function(other) {
+        this._data[0] = other._data[0];
+        this._data[1] = other._data[1];
+        this._data[2] = other._data[2];
         if (this._callback)
             this._callback(this);
     };
@@ -203,11 +222,6 @@
         return new XML3DVec3(this._data[0] * n, this._data[1] * n,
                 this._data[2] * n);
     };
-
-    /*
-     * p.toGL = function() { return [ this._data[0],
-     * this._data[1], this._data[2] ]; };
-     */
 
     xml3d.XML3DVec3 = XML3DVec3;
     if (!window.XML3DVec3)

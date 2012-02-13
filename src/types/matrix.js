@@ -66,7 +66,9 @@
         if (typeof m11 == 'number' && arguments.length >= 16) {
             this._data = new Float32Array(arguments);
             this._callback = typeof cb == 'function' ? cb : 0;
-        } else {
+        } else if (typeof m11 == 'object' && arguments.length == 1) {
+            this._data = new Float32Array(m11._data);
+        } else{
             this._data = new Float32Array( [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
                     0, 0, 0, 0, 1 ]);
             this._callback = typeof m11 == 'function' ? m11 : 0;

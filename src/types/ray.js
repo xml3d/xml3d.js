@@ -11,20 +11,31 @@
     *  @param {XML3DVec3=} origin (optional) the origin of the ray
     *  @param {XML3DVec3=} direction (optional) the direction of the ray   
     */
-    var XML3DRay = function(origin, direction,cb) 
-    {
+    var XML3DRay = function(origin, direction, cb) {
         var that = this;
 
-        /** @private **/
+        var vec_cb = function() {
+            if (that._callback)
+                that._callback(that);
+        };
+
+        /** @private */
+        this._origin = new XML3DVec3(0, 0, 0, vec_cb);
+        this._direction = new XML3DVec3(0, 0, -1, vec_cb);
+
+        if (origin && origin.origin) {
+            this.set(origin, direction);
+        } else {
+            if (origin) {
+                this._origin.set(origin);
+            }
+            if (direction) {
+                this._direction.set(direction);
+            }
+        }
+        /** @private * */
         this._callback = typeof cb == 'function' ? cb : 0;
 
-        var vec_cb = function() { if(that._callback) that._callback(that); };
-        /** @private */
-        this._origin = origin ? new XML3DVec3(origin.x, origin.y, origin.z, vec_cb)
-                : new XML3DVec3(0, 0, 0, vec_cb);
-        /** @private */
-        this._direction = direction ? new XML3DVec3(direction.x, direction.y, direction.z, vec_cb)
-                : new XML3DVec3(0, 0, -1, vec_cb);
     }, p = XML3DRay.prototype;
     
     /** @type {XML3DVec3} */
@@ -44,6 +55,17 @@
         configurable : false,
         enumerable : false
     });
+    
+    /**
+     * The set method copies the values from other.
+     * @param {XML3DRay} other The other ray
+     */
+    p.set = function(other) {
+        this._origin.set(other.origin);
+        this._direction.set(other.direction);
+        if (this._callback)
+            this._callback(this);
+    };
 
     /**
      * String representation of the XML3DRay.

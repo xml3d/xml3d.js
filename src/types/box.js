@@ -10,24 +10,40 @@
      * @param {XML3DVec3=} min The smaller point of the box. Default: (0,0,0)
      * @param {XML3DVec3=} max The biggest point of the box. Default: (0,0,0) 
      */
-    XML3DBox = function(min, max,cb) {
+    XML3DBox = function(min, max, cb) {
         var that = this;
 
-        /** @private **/
+        /** anonymous callback to inform this instance * */
+        var vec_cb = function() {
+            if (that._callback)
+                that._callback(that);
+        };
+
+        /**
+         * @private
+         * @type {XML3DVec3}
+         */
+        this._min = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE, vec_cb);
+        /**
+         * @private
+         * @type {XML3DVec3}
+         */
+        this._max = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE, vec_cb);
+
+        // Copy constructor
+        if (min && min.min) {
+            this._min.set(min.min);
+            this._max.set(min.max);
+        } else {
+            if (min)
+                this._min.set(min);
+            if (max)
+                this._max.set(max);
+        }
+
+        /** @private * */
         this._callback = typeof cb == 'function' ? cb : 0;
 
-        /** anonymous callback to inform this instance **/
-        var vec_cb = function() { if(that._callback) that._callback(that); };
-        
-        /** @private
-         *  @type {XML3DVec3} */
-        this._min = min ? new XML3DVec3(min.x, min.y, min.z, vec_cb)
-                : new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE, vec_cb);
-
-        /** @private
-         *  @type {XML3DVec3} */
-        this._max = max ? new XML3DVec3(max.x, max.y, max.z, vec_cb)
-                : new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE, vec_cb);
     };
 
     /** @type {XML3DVec3} */
@@ -102,6 +118,17 @@
         return "[object XML3DBox]";
     };
 
+    /**
+     * The set method copies the values from other.
+     * @param {XML3DBox} other The other box
+     */
+    XML3DBox.prototype.set = function(other) {
+        this._min.set(other.min);
+        this._max.set(other.max);
+        if (this._callback)
+            this._callback(this);
+    };
+    
     /** updates the min or max accoring to the given point or bounding box. 
     * 
     * @param that the object used for extension, which can be a XML3DVec3 or XML3DBox

@@ -3,7 +3,7 @@ var EPSILON = 0.00001;
 // ============================================================================
 // --- XML3DVec3 ---
 // ============================================================================
-     
+
 module("XML3DVec3 tests", {
 	ident : new XML3DVec3(),
 	vec1 : new XML3DVec3(3.0, 2.5, -1.0),
@@ -17,14 +17,22 @@ test("Default Constructor", function()  {
 	equal(this.ident.x, 0.0, "x default is 0.0");
 	equal(this.ident.y, 0.0, "y default is 0.0");
 	equal(this.ident.z, 0.0, "z default is 0.0");
-	
+
 	deepEqual(new XML3DVec3(), new XML3DVec3());
 });
 
 test("Assigning Constructor", function()  {
 	equal(this.vec1.x, 3.0, "x is 3.0");
 	equal(this.vec1.y, 2.5, "y is 2.5");
-	equal(this.vec1.z, -1.0, "z is -1.0");	
+	equal(this.vec1.z, -1.0, "z is -1.0");
+});
+
+test("Copy Constructor", function()  {
+    var c = new XML3DVec3(this.vec1);
+    notStrictEqual(c, this.vec1);
+    equal(c.x, 3.0, "x is 3.0");
+    equal(c.y, 2.5, "y is 2.5");
+    equal(c.z, -1.0, "z is -1.0");
 });
 
 test("XML3DVec3::toString", function()  {
@@ -36,13 +44,13 @@ test("XML3DVec3::add", function()  {
 	var v = this.vec1.add(this.vec2);
 	equal(v.x, 4.5, "Result x is 4.5");
 	equal(v.y, 0.5, "Result y is 0.5");
-	equal(v.z, 2.5, "Result z is 2.5");	
+	equal(v.z, 2.5, "Result z is 2.5");
 	equal(this.vec1.x, 3.0, "Object unmodified");
 	equal(this.vec1.y, 2.5, "Object unmodified");
-	equal(this.vec1.z, -1.0, "Object unmodified");	
+	equal(this.vec1.z, -1.0, "Object unmodified");
 	equal(this.vec2.x, 1.5, "Parameter unmodified");
 	equal(this.vec2.y, -2.0, "Parameter unmodified");
-	equal(this.vec2.z, 3.5, "Parameter unmodified");	
+	equal(this.vec2.z, 3.5, "Parameter unmodified");
 });
 
 test("XML3DVec3::subtract", function()  {
@@ -50,13 +58,13 @@ test("XML3DVec3::subtract", function()  {
 	var v = this.vec1.subtract(this.vec2);
 	equal(v.x, 1.5, "Result x is 1.5");
 	equal(v.y, 4.5, "Result y is 4.5");
-	equal(v.z, -4.5, "Result z is -4.5");	
+	equal(v.z, -4.5, "Result z is -4.5");
 	equal(this.vec1.x, 3.0, "Object unmodified");
 	equal(this.vec1.y, 2.5, "Object unmodified");
-	equal(this.vec1.z, -1.0, "Object unmodified");	
+	equal(this.vec1.z, -1.0, "Object unmodified");
 	equal(this.vec2.x, 1.5, "Parameter unmodified");
 	equal(this.vec2.y, -2.0, "Parameter unmodified");
-	equal(this.vec2.z, 3.5, "Parameter unmodified");	
+	equal(this.vec2.z, 3.5, "Parameter unmodified");
 });
 
 test("XML3DVec3::length", function()  {
@@ -104,7 +112,10 @@ test("XML3DVec3::normalize", function()  {
 
 test("XML3DVec3::set", function()  {
     equal(typeof this.vec1.__proto__.set, 'function', "XML3DVec3::set does not exist");
-    // TODO: Implement tests
+    var v = new XML3DVec3();
+    v.set(this.vec2);
+    notStrictEqual(v, this.vec2);
+    QUnit.closeVector(v, this.vec2, EPSILON);
 });
 
 //============================================================================
@@ -123,18 +134,24 @@ test("Default Constructor", function()  {
 	equal(typeof this.ident, 'object', "XML3DVec3 instance is an object.");
 	equal(typeof this.ident.axis, 'object', "XML3DVec3::axis is an object.");
 	equal(typeof this.ident.angle, 'number', "XML3DVec3::angle is a number.");
-	
+
 	equal(this.ident.axis.x, 0.0, "axis.x default is 0.0");
 	equal(this.ident.axis.y, 0.0, "axis.y default is 0.0");
 	equal(this.ident.axis.z, 1.0, "axis.z default is 1.0");
 	equal(this.ident.angle, 0.0, "angle default is 0.0");
-	
+
 	deepEqual(new XML3DRotation(), new XML3DRotation());
 });
 
 test("Assigning Constructor", function()  {
 	QUnit.closeVector(this.rot1.axis, new XML3DVec3(1.0, 0.0, 0.0), EPSILON, "XML3DVec3(1 0 0)");
 	QUnit.close(this.rot1.angle, Math.PI / 2, EPSILON, "angle is ~PI/2.0");
+});
+
+test("Copy Constructor", function()  {
+    var c = new XML3DRotation(this.rot1);
+    notStrictEqual(c, this.rot1);
+    QUnit.closeRotation(c, this.rot1, EPSILON);
 });
 
 test("Setter", function()  {
@@ -174,38 +191,38 @@ test("XML3DRotation::setRotation", function()  {
 
 test("XML3DRotation::interpolate", function()  {
 	equal(typeof this.ident.__proto__.interpolate, 'function', "XML3DRotation::interpolate exists");
-	
+
 	var r1 = new XML3DRotation();
 	var r2 = new XML3DRotation(new XML3DVec3(1.0, 0.0, 0.0), 0.8);
-	
+
 	var result = r1.interpolate(r2, 0.0);
 	deepEqual(r1, new XML3DRotation(), "This rotation may not change");
 	QUnit.closeRotation(result, r1, EPSILON, "t= 0.0, result == r1");
-	
+
 	result = r1.interpolate(r2, 1.0);
 	QUnit.closeRotation(result, r2, EPSILON, "t= 0.0, result == r2");
-	
+
 	result = r1.interpolate(r2, 0.5);
 	QUnit.closeRotation(result, new XML3DRotation(new XML3DVec3(1, 0, 0), 0.4), EPSILON, "Rotation result");
 });
 
 test("XML3DRotation::multiply", function()  {
 	equal(typeof this.ident.__proto__.multiply, 'function', "XML3DRotation::multiply exists");
-	
+
 	var r1 = new XML3DRotation(new XML3DVec3(0.0, 0.0, 1.0), 0.0);
 	var r2 = new XML3DRotation(new XML3DVec3(1.0, 0.0, 0.0), 0.8);
-	
+
 	var result = r1.multiply(r2);
 	deepEqual(r1, new XML3DRotation(), "This rotation must not change.");
 	QUnit.closeRotation(result, r2, EPSILON, "Multiply with identity rotation, result = r2.");
-	
+
 	result = r2.multiply(r2);
 	QUnit.closeRotation(result, new XML3DRotation(new XML3DVec3(1, 0, 0), 1.6), EPSILON, "Multiplication result: XML3DRotation(XML3DVec3(1, 0, 0), 1.6)");
-	
+
 	var r5 = new XML3DRotation(new XML3DVec3(0, 1, 0), Math.PI/2);
 	var r6 = new XML3DRotation(new XML3DVec3(0, 0, 1), Math.PI/2);
 	result = r5.multiply(r6);
-	
+
 	QUnit.close(result.axis.z,Math.sqrt(1.0/3.0), EPSILON);
 	QUnit.close(result.angle, Math.PI*2.0/3.0, EPSILON);
 
@@ -230,16 +247,16 @@ test("XML3DRotation::setQuaternion", function()  {
 
 test("XML3DRotation::rotateVec3", function()  {
 	equal(typeof this.ident.__proto__.rotateVec3, 'function', "XML3DRotation::rotateVec3 exists");
-	
+
 	var r1 = new XML3DRotation(new XML3DVec3(0.0, 0.0, 1.0), Math.PI);
 	var v1 = new XML3DVec3(1, 0, 0);
 
 	var result = r1.rotateVec3(v1);
 	deepEqual(r1, new XML3DRotation(new XML3DVec3(0.0, 0.0, 1.0), Math.PI), "This rotation must not change.");
 	deepEqual(v1, new XML3DVec3(1, 0, 0), "Vector parameter must not change.");
-	
+
 	QUnit.closeVector(result, new XML3DVec3(-1, 0, 0), EPSILON);
-	
+
 	var r2 = new XML3DRotation(new XML3DVec3(0.0, 1.0, 0.0), Math.PI/2.0);
 	result = r2.rotateVec3(v1);
 	QUnit.closeVector(result, new XML3DVec3(0, 0, -1), EPSILON);
@@ -247,7 +264,11 @@ test("XML3DRotation::rotateVec3", function()  {
 
 test("XML3DRotation::set", function()  {
     equal(typeof this.ident.__proto__.set, 'function', "XML3DRotation::set does not exist");
-    // TODO: Implement tests
+    var v = new XML3DRotation();
+    v.set(this.rot1);
+    notStrictEqual(v, this.rot1);
+    QUnit.closeRotation(v, this.rot1, EPSILON);
+
 });
 
 
@@ -378,13 +399,10 @@ test("Assigning Constructor", function() {
 
 });
 
-// No Copy Contructor defined in Spec
-/*test("Copy Constructor", function() {
-
+test("Copy Constructor", function() {
 	var m = new XML3DMatrix(this.mat1);
-
 	QUnit.closeMatrix(m, this.mat1, EPSILON);
-});*/
+});
 
 test("XML3DMatrix::toString", function()  {
     equal(this.mat1.toString(), "[object XML3DMatrix]", "Serialization");
@@ -392,7 +410,7 @@ test("XML3DMatrix::toString", function()  {
 
 test("XML3DMatrix::inverse: invertable matrix", function() {
     equal(typeof this.ident.__proto__.inverse, 'function', "XML3DMatrix::inverse does not exist");
-		
+
     var calc_inv = this.mat1.inverse();
 
     QUnit.closeMatrix(calc_inv, this.mat1_inv, EPSILON);
@@ -528,23 +546,23 @@ test("Assigning Constructor", function() {
 	QUnit.closeVector(this.ray1.direction, new XML3DVec3(4,5,6), EPSILON, "direction");
 });
 
+test("Copy Constructor", function()  {
+    var c = new XML3DRay(this.ray1);
+    notStrictEqual(c, this.ray1);
+    QUnit.closeRay(c, this.ray1, EPSILON);
+});
+
 test("XML3DRay::toString", function()  {
     equal(this.ident.toString(), "[object XML3DRay]", "Serialization");
 });
 
 test("XML3DRay::set", function()  {
     equal(typeof this.ident.__proto__.set, 'function', "XML3DRay::set does not exist");
-    // TODO: Implement tests
+    var c = new XML3DRay();
+    c.set(this.ray1);
+    notStrictEqual(c, this.ray1);
+    QUnit.closeRay(c, this.ray1, EPSILON);
 });
-
-
-// Copy constructor not defined in spec
-/*test("Copy Constructor", function() {
-
-	var r = new XML3DRay(this.ray1);
-
-	QUnit.closeRay(r, this.ray1, EPSILON);
-});*/
 
 // ============================================================================
 // --- XML3DBox ---
@@ -596,13 +614,11 @@ test("Assigning Constructor", function() {
 	QUnit.closeVector(this.incValueBox.max, new XML3DVec3(4, 5, 6), EPSILON);
 });
 
-// Not defined in spec
-/*test("Copy Constructor", function() {
-
+test("Copy Constructor", function() {
 	var b = new XML3DBox(this.box1);
-
+	notStrictEqual(b, this.box1);
 	QUnit.closeBox(b, this.box1, EPSILON);
-});*/
+});
 
 test("XML3DBox::toString", function()  {
     equal(this.ident.toString(), "[object XML3DBox]", "Serialization");
@@ -614,7 +630,7 @@ test("XML3DBox setter", function() {
     var s = new XML3DBox();
     s.min.x = -1; s.min.y = -2; s.min.z = -3;
     s.max.x =  4; s.max.y =  5; s.max.z =  6;
-    
+
     QUnit.closeBox(s, this.incValueBox, EPSILON);
 });
 
@@ -653,7 +669,10 @@ test("XML3DBox::makeEmpty", function() {
 
 test("XML3DBox::set", function()  {
     equal(typeof this.ident.__proto__.set, 'function', "XML3DBox::set does not exist");
-    // TODO: Implement tests
+    var b = new XML3DBox();
+    b.set(this.box1);
+    notStrictEqual(b, this.box1);
+    QUnit.closeBox(b, this.box1, EPSILON);
 });
 
 

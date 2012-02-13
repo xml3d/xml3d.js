@@ -93,7 +93,7 @@
 		<file name="interface/attributes.js" />
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
-		<file name="renderer/handler.js" />
+		<file name="renderer/canvashandler.js" />
 		<file name="renderer/shadermanager.js" />
 		<file name="renderer/meshmanager.js" />
 		<file name="renderer/bufferhandler.js" />

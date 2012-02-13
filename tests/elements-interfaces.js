@@ -26,7 +26,7 @@ test("Event attribute tests", function() {
         equals(e.onclick, null, "Assign invalid type via interface: null.");
 
         e.onclick = v;
-        e.setAttribute("onclick", getterText);
+        e.setAttribute("onclick", "alert('override');");
         notEqual(e.onclick, v, "Valid setAttribute changed function.");
         equals(typeof e.onclick, "function", "onclick is of type function after setAttribute");
     });

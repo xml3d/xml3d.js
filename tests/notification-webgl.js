@@ -27,17 +27,17 @@ test("Factory test", 2, function() {
     this.factory.createAdapter().notifyChanged({});
 });
 
-test("Event attribute notification tests", 7, function() {
+test("Event attribute notification tests", 8, function() {
     var e = document.createElementNS(xml3d.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created");
     e.setAttribute("onclick", "alert('Hallo');");
-    ok(a.event instanceof MutationEvent, "MutationEvent");
-    equal(a.event.attrName, "onclick", "MutationEvent::attrName set");
-    equal(a.event.relatedNode, e, "MutationEvent::relatedNode set");
+    ok(this.factory.event, "Event has been thrown");
+    ok(this.factory.event instanceof MutationEvent, "Type is MutationEvent");
+    equal(this.factory.event.attrName, "onclick", "MutationEvent::attrName set");
+    notEqual(this.factory.event.relatedNode, null, "MutationEvent::relatedNode set");
     e.onclick = function() {};
-    console.log(a.event);
-    equal(a.event.attrName, "onclick", "MutationEvent::attrName");
+    equal(this.factory.event.attrName, "onclick", "MutationEvent::attrName");
 });
 
 test("Int attribute notifcation tests", 2, function() {
@@ -91,12 +91,13 @@ test("Enumeration attribute notification tests", 5, function() {
     e.setAttribute("type", "asdf"); // invalid
 });
 
-test("Reference attribute notification tests", 4, function() {
+test("Reference attribute notification tests", 5, function() {
     var e = document.createElementNS(xml3d.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     e.setAttribute("activeView", "#myView");
-    equal(a.event.type, "XML3D_DANGLING_REFERENCE", "Can't resolve before insertion into DOM.");
-    equal(a.event.value, null, "Can't resolve before insertion into DOM.");
+    ok(this.factory.event, "Event has been thrown");
+    equal(this.factory.event.type, "XML3D_DANGLING_REFERENCE", "Can't resolve before insertion into DOM.");
+    equal(this.factory.event.value, null, "Can't resolve before insertion into DOM.");
     e.activeView = "#hallo";
 });
 
@@ -120,6 +121,7 @@ module("Typed array notification tests", {
 });
 
 test("DOMCharacterDataModified notification", 6, function() {
+    // replaceWholeText not implemented in FF
     /*var index = this.doc.getElementById("indices");
     this.factory.getAdapter(index);
     index.firstChild.replaceWholeText("1 2 3");

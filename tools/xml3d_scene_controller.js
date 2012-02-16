@@ -230,7 +230,7 @@ xml3d.Xml3dSceneController.prototype.getView = function() {
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	}
 	
-	if(!activeView)
+	if(false)
 	{
 		// no view present at all
 		// create new one and append it to defs element
@@ -495,8 +495,6 @@ xml3d.Xml3dSceneController.getController = function(xml3d) {
 (function() {
 
 	var onload = function() {
-		if (!xml3d._rendererFound)
-			return;
 			
 		var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(xml3d.xml3dNS, 'xml3d') );
 

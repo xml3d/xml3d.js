@@ -556,5 +556,35 @@ xml3d.webgl.createCanvas = function(xml3dElement, index) {
     // Create canvas and append it where the xml3d element was before
     var canvas = xml3dElement._configured.canvas;
     parent.insertBefore(canvas, hideDiv);
+
+    var style = canvas.ownerDocument.defaultView.getComputedStyle(xml3dElement);
+    if (!canvas.style.backgroundColor) {
+        var bgcolor = style.getPropertyValue("background-color");
+        if (bgcolor && bgcolor != "transparent")
+            canvas.style.backgroundColor = bgcolor;
+    }
+    // First set the computed for some important attributes, they might be
+    // overwritten
+    // by class attribute later
+    var sides = [ "top", "right", "bottom", "left" ];
+    var colorStr = "";
+    var styleStr = "";
+    var widthStr = "";
+    var paddingStr = "";
+    var marginStr = "";
+    for (var i in sides) {
+        colorStr += style.getPropertyValue("border-" + sides[i] + "-color") + " ";
+        styleStr += style.getPropertyValue("border-" + sides[i] + "-style") + " ";
+        widthStr += style.getPropertyValue("border-" + sides[i] + "-width") + " ";
+        paddingStr += style.getPropertyValue("padding-" + sides[i]) + " ";
+        marginStr += style.getPropertyValue("margin-" + sides[i]) + " ";
+    }
+    canvas.style.borderColor = colorStr;
+    canvas.style.borderStyle = styleStr;
+    canvas.style.borderWidth = widthStr;
+    canvas.style.padding = paddingStr;
+    canvas.style.margin = marginStr;
+    canvas.style.float = style.getPropertyValue("float");
+
     return canvas;
 };

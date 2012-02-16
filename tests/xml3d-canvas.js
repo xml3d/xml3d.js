@@ -78,3 +78,20 @@ test("Canvas size with css element selector (dynamic)", function() {
     equal(c.style.height, "");
 });
 
+test("Element CSS", function() {
+    var c = this.doc.getElementById("default");
+    ok(this.doc.defaultView.getComputedStyle);
+    var canvasStyle = this.doc.defaultView.getComputedStyle(c);
+    ok(canvasStyle);
+    equal(canvasStyle.getPropertyValue("background-color"), "rgb(255, 0, 0)", "Background color is red.");
+    equal(canvasStyle.getPropertyValue("border-top-width"), "1px", "Border size.");
+});
+
+test("Element CSS (WebGL)", function() {
+    var c = this.doc.getElementById("default");
+    if(!c._configured)
+        return;
+    var canvasStyle = this.doc.defaultView.getComputedStyle(c._configured.canvas);
+    equal(canvasStyle.getPropertyValue("background-color"), "rgb(255, 0, 0)", "Background color is red.");
+    equal(canvasStyle.getPropertyValue("border-top-width"), "1px", "Border size.");
+});

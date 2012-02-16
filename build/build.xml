@@ -94,6 +94,7 @@
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
 		<file name="renderer/canvashandler.js" />
+        <file name="renderer/utils.js" />
 		<file name="renderer/shadermanager.js" />
 		<file name="renderer/meshmanager.js" />
 		<file name="renderer/bufferhandler.js" />

@@ -1,7 +1,4 @@
 
-
-var EPSILON = 0.00001;
-
 function NotifyingAdapterFactory() {
     var that = this;
     this.name = "test";

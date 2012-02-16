@@ -133,10 +133,16 @@
      * The set method copies the values from other.
      * @param {XML3DVec3} other The other vector
      */
-    p.set = function(other) {
-        this._data[0] = other._data[0];
-        this._data[1] = other._data[1];
-        this._data[2] = other._data[2];
+    p.set = function(other,y,z) {
+        if(arguments.length == 1) {
+            this._data[0] = other._data[0];
+            this._data[1] = other._data[1];
+            this._data[2] = other._data[2];
+        } else if(arguments.length == 3) {
+            this._data[0] = other;
+            this._data[1] = y;
+            this._data[2] = z;
+        }
         if (this._callback)
             this._callback(this);
     };

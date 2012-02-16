@@ -1,7 +1,5 @@
 module("Element attributes tests", {});
 
-var EPSILON = 0.00001;
-
 test("Event attribute tests", function() {
     var e = document.createElementNS(xml3d.xml3dNS, "xml3d");
     var getterText = "alert('get function');";

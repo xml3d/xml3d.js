@@ -9,7 +9,7 @@
             return false;
         }
     };
-})();
+
 
 xml3d.webgl.configure = function(xml3ds) {
 	var handlers = {};
@@ -882,27 +882,7 @@ xml3d.webgl.XML3DLightShaderRenderAdapter = function(factory, node) {
 xml3d.webgl.XML3DLightShaderRenderAdapter.prototype = new xml3d.webgl.RenderAdapter();
 xml3d.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = xml3d.webgl.XML3DLightShaderRenderAdapter;
 
-// Utility functions
-xml3d.webgl.calculateBoundingBox = function(tArray) {
-	var bbox = new XML3DBox();
-	
-	//TODO: Fix bounding box
-	//return bbox;
-	
-	if (!tArray || tArray.length < 3)
-		return bbox;
-
-	// Initialize with first position
-	bbox.extend(new XML3DVec3(tArray[0], tArray[1], tArray[2]));
-
-	var val = 0.0;
-	for (var i=3; i<tArray.length; i+=3) {
-		bbox.extend(new XML3DVec3(tArray[i], tArray[i+1], tArray[i+2]));
-	}
-	return bbox;
-};
-
-
+})();
 
 
 

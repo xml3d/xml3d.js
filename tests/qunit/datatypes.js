@@ -105,3 +105,5 @@ var loadDocument = function(url, f) {
     v.addEventListener("load", f, true);
     v.src = url;
 };
+
+var EPSILON = 0.0001;

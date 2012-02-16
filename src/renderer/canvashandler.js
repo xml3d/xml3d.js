@@ -68,8 +68,6 @@ xml3d.webgl.InternalMutationEvent = function() {
             "mousewheel" : []
         };
         this.canvasInfo = {
-            width : canvas.width,
-            height : canvas.height,
             id : canvas.id,
             mouseButtonsDown : [ false, false ]
         };
@@ -147,15 +145,6 @@ xml3d.webgl.InternalMutationEvent = function() {
         return this.canvas.id;
     };
 
-    // Returns the width of the canvas associated with this Handler
-    CanvasHandler.prototype.getCanvasWidth = function() {
-        return this.canvas.width;
-    };
-
-    // Returns the height of the canvas associated with this Handler
-    CanvasHandler.prototype.getCanvasHeight = function() {
-        return this.canvas.height;
-    };
 
     CanvasHandler.prototype.resize = function(gl, width, height) {
         if (width < 1 || height < 1)
@@ -586,5 +575,8 @@ xml3d.webgl.createCanvas = function(xml3dElement, index) {
     canvas.style.margin = marginStr;
     canvas.style.float = style.getPropertyValue("float");
 
+    // Need to be set for correct canvas size
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
     return canvas;
 };

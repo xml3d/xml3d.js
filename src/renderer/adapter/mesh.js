@@ -80,7 +80,7 @@
         var bbox = new XML3DBox();
         var dataTable = this.dataAdapter.createDataTable();
         if(dataTable && dataTable.position)
-            bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data);
+            bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data,dataTable.index.data);
         return bbox;
     };
 

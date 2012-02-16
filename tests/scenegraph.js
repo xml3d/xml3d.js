@@ -107,13 +107,17 @@ module("Bounding Boxes", {
 
 
 
-test("Groups and Meshes", 8, function() {
+test("Groups and Meshes", 12, function() {
     var frontTopMeshBox = this.doc.getElementById("m_TopFront").getBoundingBox();
     var frontBotMeshBox = this.doc.getElementById("m_BotFront").getBoundingBox();
     var emptyBox = this.doc.getElementById("empty_group").getBoundingBox();
     var rootBox = this.doc.getElementById("g_Root").getBoundingBox();
     var topCubeBox = this.doc.getElementById("g_TopCube").getBoundingBox();
     var botCubeBox = this.doc.getElementById("g_BotCube").getBoundingBox();
+    var cubeMeshBox = this.doc.getElementById("cube_mesh").getBoundingBox();
+    var cubeGroupBox = this.doc.getElementById("cube_group").getBoundingBox();
+    var splitCubeBox1 = this.doc.getElementById("split_cube_mesh1").getBoundingBox();
+    var splitCubeBox2 = this.doc.getElementById("split_cube_mesh2").getBoundingBox();
 
     ok(emptyBox.isEmpty(), "Empty group delivers empty BoundingBox");
 
@@ -121,6 +125,10 @@ test("Groups and Meshes", 8, function() {
     QUnit.closeBox(frontBotMeshBox, new XML3DBox(new XML3DVec3(-1,-1,0),new XML3DVec3(1,1,0)), EPSILON, "Front rectangle of bottom cube: (-1 -1 0) to (1 1 0)");
     QUnit.closeBox(topCubeBox, new XML3DBox(new XML3DVec3(-1,1.5,-1),new XML3DVec3(1,3.5,1)), EPSILON, "Top cube: (-1 1.5 -1) to (1 3.5 1)");
     QUnit.closeBox(botCubeBox, new XML3DBox(new XML3DVec3(-1,-3.5,-1),new XML3DVec3(1,-1.5,1)), EPSILON, "Bottom cube: (-1 -3.5 -1) to (1 -1.5 1)");
-    QUnit.closeBox(rootBox, new XML3DBox(new XML3DVec3(-1,-3.5,-1),new XML3DVec3(1,3.5,1)), EPSILON, "Root group: (-1 -3.5 -1) to (1 3.5 1)");
+    QUnit.closeBox(cubeMeshBox, new XML3DBox(new XML3DVec3(-1,-1,-1),new XML3DVec3(1,1,1)), EPSILON, "Root group: (-1 -3.5 -1) to (1 3.5 1)");
+    QUnit.closeBox(cubeGroupBox, new XML3DBox(new XML3DVec3(-2.4142136573791504, -1.4142144918441772, -2.4142136573791504),new XML3DVec3(2.4142136573791504, 1.4142144918441772, 2.4142136573791504)), EPSILON);
+    QUnit.closeBox(rootBox, new XML3DBox(new XML3DVec3(-2.41421,-3.5,-2.41421),new XML3DVec3(2.41421,3.5,2.41421)), EPSILON);
+    QUnit.closeBox(splitCubeBox1, new XML3DBox(new XML3DVec3(0, -1, -1),new XML3DVec3(1, 1, 1)), EPSILON, "Root group: (-1 -3.5 -1) to (1 3.5 1)");
+    QUnit.closeBox(splitCubeBox2, new XML3DBox(new XML3DVec3(-1, -1, -1),new XML3DVec3(0, 1, 1)), EPSILON, "Root group: (-1 -3.5 -1) to (1 3.5 1)");
 
 });

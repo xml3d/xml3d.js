@@ -11,7 +11,7 @@
         default:
             return Boolean(string);
         }
-    }, handler = {};
+    }, handler = {}, events = xml3d.events;
 
     AttributeHandler = function(elem) {
         this.setter = function(e) {
@@ -30,27 +30,12 @@
         };
     };
 
-    function createEvent(elem, id, v) {
-        var evt = {
-            attrName : id,
-            relatedNode : elem,
-            value : null,
-            type : "XML3D_DANGLING_REFERENCE"
-        };
-        var uri = new xml3d.URI(v);
-        if (uri.valid) {
-            var e = xml3d.URIResolver.resolve(uri);
-            evt.value = e;
-            console.log("Resolved node: " + e);
-            if (e)
-                evt.type = "XML3D_REFERENCE_VALID";
-        }
-        return evt;
-    }
 
     handler.ReferenceHandler = function(elem, id) {
-        this.setFromAttribute = function(v) {
-            elem._configured.notify(createEvent(elem, id, v));
+        this.setFromAttribute = function(value) {
+            var evt = new events.ReferenceNotification(elem, id, value);
+            elem._configured.notify(evt);
+            elem._configured.notifyOpposite(evt);
             return true; // Already notified
         };
         this.desc = {
@@ -61,6 +46,7 @@
                 this.setAttribute(id, value);
             }
         };
+        elem._configured.notifyOpposite(new events.ReferenceNotification(elem, id, elem.getAttribute(id)));
     };
 
     handler.EnumAttributeHandler = function(elem, id, p) {

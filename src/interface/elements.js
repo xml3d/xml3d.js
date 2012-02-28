@@ -1,11 +1,7 @@
-xml3d.events = {
-        VALUE_MODIFIED:  99
-};
-
 
 (function() {
 
-    var handler = {};
+    var handler = {}, events = xml3d.events;
 
     handler.ElementHandler = function(elem) {
         if (elem) {
@@ -45,7 +41,8 @@ xml3d.events = {
     handler.ElementHandler.prototype.handleEvent = function(e) {
         //if(this.element != e.relatedNode)
         //    return;
-        console.log(e.type + " at " + e.currentTarget.localName);
+        console.log(e.type + " at " + e.currentTarget.localName + "/" + e.target);
+        var n = new events.NotificationWrapper(e);
 
         switch (e.type) {
         case "DOMAttrModified":
@@ -54,34 +51,40 @@ xml3d.events = {
             if (handler && handler.setFromAttribute) {
                 notified = handler.setFromAttribute(e.newValue);
                 if (!notified) {
-                    this.notify(e);
+                    n.type = events.VALUE_MODIFIED;
+                    this.notify(n);
                 }
             }
             break;
         case "DOMNodeInserted":
             if (e.target.nodeType == Node.TEXT_NODE && this.handlers.value) {
-                e.eventType = xml3d.events.VALUE_MODIFIED;
+                n.type = events.VALUE_MODIFIED;
                 this.handlers.value.resetValue();
             } else {
-                e.eventType = MutationEvent.ADDITION;
+                n.type = events.NODE_INSERTED;
             }
-            this.notify(e);
+            this.notify(n);
             break;
         case "DOMNodeRemoved":
-            e.eventType = MutationEvent.REMOVAL;
-            this.notify(e);
-            if(e.target._configured)
-                e.target._configured.remove(e);
+            if(this.element === e.target) {
+                n.type = events.NODE_REMOVED;
+                this.notify(n);
+                if(e.target._configured)
+                    e.target._configured.remove(n);
+            }
             break;
         case "DOMCharacterDataModified":
-            e.eventType = xml3d.events.VALUE_MODIFIED;
+            n.type = events.VALUE_MODIFIED;
             this.handlers.value.resetValue();
-            this.notify(e);
+            this.notify(n);
             break;
         };
     };
 
-    handler.ElementHandler.prototype.notify = function(evt) {
+    /**
+     * @param evt
+     */
+    handler.ElementHandler.prototype.notify =  function(evt) {
         var adapters = this.adapters;
         for(var a in adapters) {
             try {
@@ -92,8 +95,27 @@ xml3d.events = {
         }
     };
 
+    handler.ElementHandler.prototype.addOpposite =  function(evt) {
+        (this.opposites || (this.opposites = [])).push(evt);
+    };
+
+    handler.ElementHandler.prototype.notifyOpposite = function(evt) {
+        if(evt.value && evt.value._configured) {
+            evt.value._configured.addOpposite(evt);
+        }
+    };
+
     handler.ElementHandler.prototype.remove = function(evt) {
-        // TODO
+        //console.log("Remove " + this);
+        if (this.opposites) {
+            for(var o in this.opposites) {
+                var oi = this.opposites[o];
+                if(oi.relatedNode._configured) {
+                    var r = new events.ReferenceNotification(oi.relatedNode, oi.attrName);
+                    oi.relatedNode._configured.notify(r);
+                }
+            }
+        }
     };
 
     handler.ElementHandler.prototype.resolve = function(attrName) {
@@ -102,6 +124,10 @@ xml3d.events = {
             return xml3d.URIResolver.resolve(uri);
         }
         return null;
+    };
+
+    handler.ElementHandler.prototype.toString = function() {
+        return "ElementHandler ("+this.element.nodeName + ", id: "+this.element.id+")";
     };
 
     handler.XML3DHandler = function(elem) {

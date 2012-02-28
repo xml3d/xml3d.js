@@ -87,6 +87,7 @@
 		<file name="types/matrix.js" />
 		<file name="types/ray.js" />
 		<file name="base/adapter.js" />
+		<file name="interface/notification.js" />
 		<file name="interface/factory.js" />
 		<file name="interface/dom.js" />
 		<file name="interface/elements.js" />

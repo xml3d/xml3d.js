@@ -8,7 +8,7 @@ function NotifyingAdapterFactory() {
             init : function() {},
             notifyChanged : function(e) {
                 that.event = e;
-                ok(true, "Adapter notified: " + e.newValue);
+                ok(true, "Adapter notified: " + e);
             }
         };
     };
@@ -24,17 +24,20 @@ test("Factory test", 2, function() {
     this.factory.createAdapter().notifyChanged({});
 });
 
-test("Event attribute notification tests", 8, function() {
+test("Event attribute notification tests", 9, function() {
     var e = document.createElementNS(xml3d.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created");
     e.setAttribute("onclick", "alert('Hallo');");
-    ok(this.factory.event, "Event has been thrown");
-    ok(this.factory.event instanceof MutationEvent, "Type is MutationEvent");
-    equal(this.factory.event.attrName, "onclick", "MutationEvent::attrName set");
-    notEqual(this.factory.event.relatedNode, null, "MutationEvent::relatedNode set");
+    var evt = this.factory.event;
+    console.dir(evt);
+    ok(evt, "Event has been thrown");
+    ok(evt instanceof xml3d.events.NotificationWrapper, "Type is NotificationWrapper");
+    ok(evt.wrapped, "DOM notification is wrapped");
+    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName set");
+    notEqual(evt.wrapped.relatedNode, null, "MutationEvent::relatedNode set");
     e.onclick = function() {};
-    equal(this.factory.event.attrName, "onclick", "MutationEvent::attrName");
+    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName");
 });
 
 test("Int attribute notifcation tests", 2, function() {
@@ -93,7 +96,7 @@ test("Reference attribute notification tests", 5, function() {
     var a = this.factory.getAdapter(e);
     e.setAttribute("activeView", "#myView");
     ok(this.factory.event, "Event has been thrown");
-    equal(this.factory.event.type, "XML3D_DANGLING_REFERENCE", "Can't resolve before insertion into DOM.");
+    equal(this.factory.event.type, xml3d.events.DANGLING_REFERENCE, "Can't resolve before insertion into DOM.");
     equal(this.factory.event.value, null, "Can't resolve before insertion into DOM.");
     e.activeView = "#hallo";
 });
@@ -129,19 +132,21 @@ test("DOMCharacterDataModified notification", 6, function() {
     equal(pos.value.length, 12);
     pos.firstChild.deleteData (0,5);
     equal(pos.value.length, 11);
-    equal(this.factory.event.eventType, xml3d.events.VALUE_MODIFIED);
+    equal(this.factory.event.type, xml3d.events.VALUE_MODIFIED);
 
 });
 
-test("Text DOMNodeInserted notification", 8, function() {
+test("Text DOMNodeInserted notification", 7, function() {
+    // 1: Found frame
+    // 2: Scene loaded
     var index = this.doc.getElementById("indices");
     this.factory.getAdapter(index);
-    index.appendChild(this.doc.createTextNode(" 0 1 2"));
-    equal(index.value.length, 9);
-    equal(this.factory.event.eventType, xml3d.events.VALUE_MODIFIED);
+    index.appendChild(this.doc.createTextNode(" 0 1 2")); // 3: Adapter notified: Notification (type:1)
+    equal(index.value.length, 9, "Length of typed array after text node has been inserted"); // 4
+    equal(this.factory.event.type, xml3d.events.VALUE_MODIFIED, "Notfication of type VALUE_MODIFIED"); // 5
 
     var pos = this.doc.getElementById("positions");
     this.factory.getAdapter(pos);
-    pos.textContent = "1 0 2";
-    equal(pos.value.length, 3);
+    pos.textContent = "1 0 2"; // 6: Adapter notified: Notification (type:1)
+    equal(pos.value.length, 3, "Length of typed array after textContent has been set"); // 7
 });

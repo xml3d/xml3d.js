@@ -48,7 +48,7 @@ xml3d.URIResolver.resolve = function(uri, document) {
 
     if (uri.scheme == 'urn')
     {
-        xml3d.debug.logInfo("++ Found URN." + uriStr);
+        xml3d.debug.logInfo("++ Found URN." + uri);
         return null;
     }
 

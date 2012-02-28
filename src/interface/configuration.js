@@ -4,18 +4,6 @@ xml3d.classInfo = {};
 xml3d.document = null;
 
 //-----------------------------------------------------------------------------
-//Class Notification
-//-----------------------------------------------------------------------------
-xml3d.Notification = function(notifier, eventType, attribute, oldValue, newValue) {
-	this.notifier = notifier;
-	this.eventType = eventType;
-	this.attribute = attribute;
-	this.oldValue = oldValue;
-	this.newValue = newValue;
-};
-
-
-//-----------------------------------------------------------------------------
 // Init helper
 //-----------------------------------------------------------------------------
 xml3d.initFloat = function(value, defaultValue) {

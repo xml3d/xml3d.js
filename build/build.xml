@@ -97,7 +97,6 @@
 		<file name="renderer/canvashandler.js" />
         <file name="renderer/utils.js" />
 		<file name="renderer/shadermanager.js" />
-		<file name="renderer/meshmanager.js" />
 		<file name="renderer/bufferhandler.js" />
 		<file name="renderer/renderer.js" />
 		<file name="renderer/adapter/xml3d.js" />

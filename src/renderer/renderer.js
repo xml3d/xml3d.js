@@ -41,15 +41,6 @@ xml3d.webgl.configure = function(xml3ds) {
 	}
 };
 
-xml3d.webgl.stopEvent = function(ev) {
-	if (ev.preventDefault)
-		ev.preventDefault();
-	if (ev.stopPropagation) 
-		ev.stopPropagation();
-	ev.returnValue = false;
-};
-
-
 xml3d.webgl.checkError = function(gl, text)
 {
 	var error = gl.getError();
@@ -84,12 +75,11 @@ xml3d.webgl.Renderer = function(handler, width, height) {
 	this.dataFactory = new xml3d.webgl.XML3DDataAdapterFactory(handler);
 	this.shaderManager = new xml3d.webgl.XML3DShaderManager(handler.gl, this, this.dataFactory, this.factory);
 	this.bufferHandler = new xml3d.webgl.XML3DBufferHandler(handler.gl, this, this.shaderManager);
-	this.meshManager = new xml3d.webgl.XML3DMeshManager(handler.gl, this, this.dataFactory, this.factory);
 	this.camera = this.initCamera();
 	this.shaderMap = this._initInternalShaders();
 	this.width = width;
 	this.height = height;
-	this.fbos = this._initFrameBuffers(handler.gl);
+	this.fbos = this.initFrameBuffers(handler.gl);
 	
 	//Light information is needed to create shaders, so process them first
 	this.lights = [];
@@ -154,30 +144,32 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 	var downstreamShader = parentShader;
 	var downstreamTransform = transform;
 	
-	var nodeTypes = {};
-	var renderer = this;
-	nodeTypes["group"] = function() {
+	switch(currentNode.nodeName) {
+	case "group":
 		if (currentNode.getAttribute("visible") == "false")
 			visible = false;
 		if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
-			renderer.handler.setMouseMovePicking(true);	
+			this.handler.setMouseMovePicking(true);	
 		
 		var shader = adapter.getShader();
 		downstreamShader = shader ? shader : parentShader;	
 		adapter.parentTransform = transform;
 		downstreamTransform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
-		
-	};
-	
-	nodeTypes["mesh"] = function() {
+		break;	
+
+	case "mesh":
 		if (currentNode.getAttribute("visible") == "false")
 			visible = false;
 		if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
-			renderer.handler.setMouseMovePicking(true);	
-			
+			this.handler.setMouseMovePicking(true);	
+		
+		var meshAdapter = this.factory.getAdapter(currentNode);
+		if (!meshAdapter)
+			break; //TODO: error handling
+		
 		// Add a new drawable object to the scene
-		var newObject = new xml3d.webgl.Renderer.drawableObject(renderer);
-		newObject.mesh = renderer.meshManager.createMesh(currentNode);
+		var newObject = new xml3d.webgl.Renderer.drawableObject(this);
+		newObject.mesh = meshAdapter.createMesh(this.handler.gl);
 		newObject.meshNode = currentNode;
 		newObject.visible = visible;
 		
@@ -188,17 +180,18 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 		adapter.registerCallback(newObject.callback); 
 		
 		scene.push(newObject);
-	};
+		break;
 		
-	nodeTypes["light"] = function() {
-		renderer.lights.push( { adapter : adapter , transform : transform} );
-		adapter._transform = transform;
-		adapter._visible = visible;
-	};
+	case "light":
+		this.lights.push( { adapter : adapter , transform : transform} );
+		adapter.transform = transform;
+		adapter.visible = visible;
+		break;
 	
-	if (nodeTypes[currentNode.nodeName])
-		nodeTypes[currentNode.nodeName]();
-	
+	default:
+		break;
+	}
+
 	var child = currentNode.firstElementChild;
 	while (child) {
 		this.recursiveBuildScene(scene, child, visible, downstreamTransform, downstreamShader);
@@ -206,7 +199,7 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 	}
 };
 
-xml3d.webgl.Renderer.prototype._initFrameBuffers = function(gl) {
+xml3d.webgl.Renderer.prototype.initFrameBuffers = function(gl) {
 	var fbos = {};
 	
 	fbos.picking = this.bufferHandler.createPickingBuffer(this.width, this.height);
@@ -547,9 +540,10 @@ xml3d.webgl.Renderer.prototype.drawObject = function(shaderProgram, meshInfo) {
 		if (meshInfo.isIndexed) {
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vbos.index[i]);
 			
-			if (meshInfo.size) {
+			if (meshInfo.segments) {
+				//This is a segmented mesh (eg. a collection of disjunct line strips)
 				var offset = 0;
-				var sd = meshInfo.size.data;
+				var sd = meshInfo.segments.data;
 				for (var j = 0; j < sd.length; j++) {
 					gl.drawElements(meshInfo.glType, sd[j], gl.UNSIGNED_SHORT, offset);
 					offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes

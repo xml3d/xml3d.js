@@ -580,3 +580,12 @@ xml3d.webgl.createCanvas = function(xml3dElement, index) {
     canvas.height = canvas.clientHeight;
     return canvas;
 };
+
+
+xml3d.webgl.stopEvent = function(ev) {
+	if (ev.preventDefault)
+		ev.preventDefault();
+	if (ev.stopPropagation) 
+		ev.stopPropagation();
+	ev.returnValue = false;
+};

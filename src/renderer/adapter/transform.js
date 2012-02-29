@@ -8,8 +8,10 @@
 		this.isValid = true;
 	};
 	
-	xml3d.createClass(XML3DTransformRenderAdapter, xml3d.webgl.RenderAdapter);
-	XML3DTransformRenderAdapter.prototype.getMatrix = function() {
+	xml3d.createClass(XML3DTransformRenderAdapter, xml3d.webgl.RenderAdapter);	
+	var p = XML3DTransformRenderAdapter.prototype;
+	
+	p.getMatrix = function() {
 		if (!this.matrix) {
 			var n         = this.node;
 			var m = mat4.identity(mat4.create());
@@ -36,26 +38,33 @@
 		return this.matrix;
 	};
 	
-	XML3DTransformRenderAdapter.prototype.notifyChanged = function(e) {
-		this.matrix = null;
-		this.matrix = this.getMatrix();
+	p.notifyChanged = function(e) {
+		if (e.type == 1) {
+			this.matrix = null;
+			this.matrix = this.getMatrix();
+			this.factory.renderer.requestRedraw("Transformation changed.");
+		} else if (e.type == 2) {
+			this.dispose();
+		}
 	
-		var ievent = new xml3d.webgl.InternalMutationEvent();
-		ievent.source = "transform";
-		ievent.type = "transform";
-		ievent.newValue = mat4.create(this.matrix);
+		//var ievent = new xml3d.webgl.InternalMutationEvent();
+		//ievent.source = "transform";
+		//ievent.type = "transform";
+		//ievent.newValue = mat4.create(this.matrix);
+		//TODO: Better method for passing events to listener nodes
+		e.internalType = "transform";
 		
 		for (var i=0, length = this.listeners.length; i < length; i++) {
 			if (this.listeners[i].isValid)
-				this.listeners[i].notifyChanged(ievent);
+				this.listeners[i].notifyChanged(e);
 			else {
 				this.listeners.splice(i,1);
 				i--;
 			}
 		}
-		this.factory.renderer.requestRedraw("Transformation changed.");
+		
 	};
-	XML3DTransformRenderAdapter.prototype.dispose = function() {
+	p.dispose = function() {
 		this.isValid = false;
 	};
 	// Export to xml3d.webgl namespace

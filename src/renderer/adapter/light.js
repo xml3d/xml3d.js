@@ -1,10 +1,8 @@
 // Adapter for <light>
 (function() {
-	
+
 	var XML3DLightRenderAdapter = function(factory, node) {
 		xml3d.webgl.RenderAdapter.call(this, factory, node);
-		this.position = null;
-		this.intensity = null;
 		
 		var intensityAttribute = node.getAttribute("intensity");
 		if (intensityAttribute) {
@@ -14,18 +12,23 @@
 			} catch (e) {xml3d.debug.logWarning("Could not parse light intensity attribute ' "+intensityAttribute+" '"); }
 		}
 		
-		this._visible = null;
+		this.visible = true;
+		this.position = null;
+		this.intensity = null;
+		this.transform = null;
+		this.lightShader = null;
+
 		this.isValid = true;
 	};
 	xml3d.createClass(XML3DLightRenderAdapter, xml3d.webgl.RenderAdapter);
 	
 	XML3DLightRenderAdapter.prototype.notifyChanged = function(evt) {
-		var target = evt.attrName || "internal:"+evt.type;
+		var target = evt.internalType || evt.wrapped.attrName;
 		
 		switch(target) {
 		case "visible":
 		case "internal:visible":
-			this._visible = evt.newValue;
+			this.visible = evt.newValue;
 			break;
 		case "intensity":
 			if (!isNaN(evt.newValue))
@@ -34,7 +37,7 @@
 				xml3d.debug.logError("Invalid parameter for light intensity attribute: NaN");
 			break;
 		case "internal:transform":
-			this._transform = evt.newValue;
+			this.transform = evt.newValue;
 			break;
 		}
 		
@@ -48,9 +51,8 @@
 			return null;
 		var mvm = mat4.create(viewMatrix);
 		
-		//TODO: Check calculation of light position, it's not right
-		if (this._transform)
-			mvm = mat4.multiply(mvm, this._transform, mat4.create());
+		if (this.transform)
+			mvm = mat4.multiply(mvm, this.transform, mat4.create());
 		
 		if (!this.dataAdapter)
 		{
@@ -61,7 +63,7 @@
 		}
 		var params = this.dataAdapter.createDataTable();
 	
-		if (this._visible)
+		if (this.visible)
 			var visibility = [1.0, 1.0, 1.0];
 		else
 			var visibility = [0.0, 0.0, 0.0];

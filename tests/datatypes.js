@@ -126,10 +126,10 @@ module("XML3DRotation tests", {
 	rot1 : new XML3DRotation(new XML3DVec3(1.0, 0.0, 0.0), Math.PI / 2),
 	vec2 : new XML3DVec3(1.5, -2.0, 3.5),
 	mat_90x : new XML3DMatrix(
-            1, 0, 0, 0,
-            0, 0, -1, 0,
-            0, 1, 0, 0,
-            0, 0, 0, 1),
+            1,  0, 0, 0,
+            0,  0, 1, 0,
+            0, -1, 0, 0,
+            0,  0, 0, 1),
 });
 
 test("Default Constructor", function()  {

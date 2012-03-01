@@ -39,7 +39,7 @@ xml3d.webgl.InternalMutationEvent = function() {
         this.xml3dElem = xml3dElem;
 
         // TODO: Safe creation and what happens if this fails?
-        this.gl = canvas.getContext("experimental-webgl");
+        this.gl = canvas.getContext("experimental-webgl", {preserveDrawingBuffer: true});
 
         this.needDraw = true;
         this.needPickingDraw = true;

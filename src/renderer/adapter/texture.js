@@ -23,6 +23,9 @@
 				this.factory.renderer.requestRedraw();
 			}
 		}*/
+		var shaderAdapter = this.factory.getAdapter(this.node.parentElement);
+		if (shaderAdapter)
+			shaderAdapter.notifyChanged(evt);
 	};
 	
 	XML3DTextureRenderAdapter.prototype.getDataTable = function() {
@@ -37,6 +40,10 @@
 		this.info = null;
 		this.bind = function(texUnit) { return; };
 		this.unbind = function(texUnit) { return; };
+	};
+	
+	XML3DTextureRenderAdapter.prototype.dispose = function(evt) {
+		//TODO: tell renderer to dispose
 	};
 	
 	xml3d.webgl.XML3DTextureRenderAdapter = XML3DTextureRenderAdapter;

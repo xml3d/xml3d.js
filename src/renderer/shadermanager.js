@@ -551,3 +551,7 @@ xml3d.webgl.XML3DShaderManager.prototype.unbindTexture = function(tex) {
 	this.gl.activeTexture(this.gl.TEXTURE0 + tex.info.texUnit);
 	this.gl.bindTexture(tex.info.glType, null);
 };
+
+xml3d.webgl.XML3DShaderManager.prototype.destroyTexture = function(tex) {
+	this.gl.deleteTexture(tex.info.handle);
+};

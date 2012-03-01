@@ -61,6 +61,7 @@
                 n.type = events.VALUE_MODIFIED;
                 this.handlers.value.resetValue();
             } else {
+                xml3d.configure(e.target);
                 n.type = events.NODE_INSERTED;
             }
             this.notify(n);

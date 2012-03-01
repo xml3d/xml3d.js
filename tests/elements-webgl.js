@@ -31,6 +31,28 @@ test("Auto-configuration", 8, function() {
    equals(x.nodeName, "group", "Is group element");
 });
 
+test("Auto-configuration on insertion", 6, function() {
+
+    var xmlString = '<group id="g1" xmlns="http://www.xml3d.org/2009/xml3d"> \
+                       <group id="g2"><mesh id="m1"/></group> \
+                     </group>';
+
+    var x = this.doc.getElementById("myXml3d");
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(xmlString, "application/xml");
+    console.dir(doc);
+    x.appendChild(doc.documentElement);
+
+    var g1 = this.doc.getElementById("g1");
+    var m1 = this.doc.getElementById("m1");
+    ok(g1, "Inserted element g1 adressable via getElementById");
+    ok(m1, "Inserted element m1 adressable via getElementById");
+    equals(typeof g1._configured, 'object', "Element g1 is configured");
+    equals(typeof m1._configured, 'object', "Element m1 is configured (recursively)");
+
+
+});
+
 test("Configuration of new elements", 4, function() {
     var doc = this.doc;
     var x = doc.getElementById("myXml3d");
@@ -119,7 +141,7 @@ test("DOMNodeInserted on xml3d", 5, function() {
 	var g = this.doc.createElementNS(xml3d.xml3dNS, "group");
 	this.factory.getAdapter(x); // 3: Init adapter
 	x.appendChild(g); // 4: Adapter for myXml3d has been notified: Notification (type:0)
-    equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5    
+    equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5
 });
 
 test("DOMNodeRemoved on xml3d", 6, function() {
@@ -143,7 +165,7 @@ test("DOMNodeInserted on arbritary", 7, function() {
     // 5: Adapter for myGroup has been notified: Notification (type:0)
     // 6: Adapter for <group> has been notified: Notification (type:0)
     x.appendChild(g);
-    equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 7    
+    equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 7
 });
 
 test("DOMNodeRemoved on arbritary", 6, function() {

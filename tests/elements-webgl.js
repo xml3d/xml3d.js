@@ -23,12 +23,12 @@ test("IFrame loaded", 3, function() {
 test("Auto-configuration", 8, function() {
    var x = this.doc.getElementById("myXml3d");
    ok(x, "Object is adressable");
-   equals(typeof x._configured, 'object', "Object is configured");
-   equals(x.nodeName, "xml3d", "Is XML3D element");
+   equal(typeof x._configured, 'object', "Object is configured");
+   equal(x.nodeName, "xml3d", "Is XML3D element");
    x = this.doc.getElementById("myGroup");
    ok(x, "Object is adressable");
-   equals(typeof x._configured, 'object', "Object is configured");
-   equals(x.nodeName, "group", "Is group element");
+   equal(typeof x._configured, 'object', "Object is configured");
+   equal(x.nodeName, "group", "Is group element");
 });
 
 test("Auto-configuration on insertion", 6, function() {
@@ -47,8 +47,8 @@ test("Auto-configuration on insertion", 6, function() {
     var m1 = this.doc.getElementById("m1");
     ok(g1, "Inserted element g1 adressable via getElementById");
     ok(m1, "Inserted element m1 adressable via getElementById");
-    equals(typeof g1._configured, 'object', "Element g1 is configured");
-    equals(typeof m1._configured, 'object', "Element m1 is configured (recursively)");
+    equal(typeof g1._configured, 'object', "Element g1 is configured");
+    equal(typeof m1._configured, 'object', "Element m1 is configured (recursively)");
 
 
 });
@@ -57,9 +57,9 @@ test("Configuration of new elements", 4, function() {
     var doc = this.doc;
     var x = doc.getElementById("myXml3d");
     var n = doc.createElementNS(xml3d.xml3dNS,"view");
-    equals(typeof n._configured, 'object', "Object is configured");
+    equal(typeof n._configured, 'object', "Object is configured");
     x.appendChild(n);
-    equals(typeof n._configured, 'object', "Object is still configured");
+    equal(typeof n._configured, 'object', "Object is still configured");
 });
 
 function TestAdapterFactory() {

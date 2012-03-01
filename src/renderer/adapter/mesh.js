@@ -10,7 +10,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 	    this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
 	    this.dataAdapter.registerObserver(this);
 
-	    this.getMyDrawableObject = function(evt) {
+	    this.getMyDrawableObject = function() {
 	        xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
 	    };
 	};
@@ -40,10 +40,32 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 	};
 
 	p.notifyChanged = function(evt) {
-		if (evt.eventType == MutationEvent.REMOVAL)
+		if (evt.type == 0)
 			return this.factory.renderer.sceneTreeRemoval(evt);
-		//TODO: this
-	    //this.passChangeToObject(evt);
+		else if (evt.type == 2)
+			return this.factory.renderer.sceneTreeAddition(evt);
+		
+		var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+		
+		switch (target) {
+			case "parentTransform":
+				var drawableObject = this.getMyDrawableObject();
+				drawableObject.transform = evt.newValue;
+			break;
+			
+			case "src":
+				//TODO
+			break;
+			
+			case "type":
+				//TODO
+			break;
+			
+			default:
+				xml3d.debug.logWarning("Unhandled mutation event in mesh adapter for parameter '"+target+"'");
+			break;
+		}
+		
 	};
 
 	p.notifyDataChanged = function(evt) {

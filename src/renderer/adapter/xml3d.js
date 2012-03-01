@@ -12,12 +12,15 @@
 	xml3d.createClass(XML3DCanvasRenderAdapter, xml3d.webgl.RenderAdapter);
 	
 	XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt) {
-		if (evt.eventType == MutationEvent.ADDITION) {
+		if (evt.type == 0) {
 			this.factory.renderer.sceneTreeAddition(evt);
-		} else if (evt.eventType == MutationEvent.REMOVAL) {
+		} else if (evt.type == 2) {
 			this.factory.renderer.sceneTreeRemoval(evt);
 		}
-		if (evt.attribute == "activeView") {
+		
+		var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+		
+		if (target == "activeView") {
 			this.factory.renderer.camera = this.factory.renderer.initCamera();
 		}
 	};

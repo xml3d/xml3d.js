@@ -45,7 +45,7 @@ xml3d.webgl.InternalMutationEvent = function() {
         this.needPickingDraw = true;
         this._pickingDisabled = false;
         this._lastPickedObj = null;
-        this._mouseMovePickingEnabled = false;
+        this.mouseMovePickingEnabled = false;
         this.isDragging = false;
         this.timeNow = Date.now() / 1000.0;
         this.postProcessShaders = [];
@@ -431,13 +431,13 @@ xml3d.webgl.InternalMutationEvent = function() {
         // Call any global mousemove methods
         this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt, this.xml3dElem);
 
-        if (!this._mouseMovePickingEnabled)
+        if (!this.mouseMovePickingEnabled)
             return;
 
         this.renderPick(pos.x, pos.y);
         var curObj = null;
         if (this.xml3dElem.currentPickObj)
-            curObj = this.xml3dElem.currentPickObj.node;
+            curObj = this.xml3dElem.currentPickObj;
 
         // trigger mouseover and mouseout
         if (curObj !== this._lastPickedObj) {
@@ -519,7 +519,7 @@ xml3d.webgl.InternalMutationEvent = function() {
     };
 
     CanvasHandler.prototype.setMouseMovePicking = function(isEnabled) {
-        this._mouseMovePickingEnabled = isEnabled;
+        this.mouseMovePickingEnabled = isEnabled;
     };
 
     xml3d.webgl.CanvasHandler = CanvasHandler;

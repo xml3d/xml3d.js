@@ -21,7 +21,7 @@
             this.parentTransform = p.applyTransformMatrix(mat4.identity(mat4.create()));
 
             if (this.parentTransform) {
-                v = mat4.multiply(this.parentTransform, v);
+                v = mat4.multiply(this.parentTransform, v, mat4.create());
             }
             this.viewMatrix = mat4.inverse(v);
     };
@@ -52,10 +52,10 @@
     };
 
     p.notifyChanged = function(evt) {
-    	var target = evt.internalType || evt.wrapped.attrName;
+    	var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 
         switch (target) {
-        case "internal:transform":
+        case "parentTransform":
         	this.parentTransform = evt.newValue;
             this.updateViewMatrix();
         break;
@@ -70,7 +70,7 @@
         break;
         
         default:
-        	 xml3d.debug.logWarning("Unhandled event in view adapter: " + evt.eventType + " for parameter " + target);
+        	 xml3d.debug.logWarning("Unhandled event in view adapter for parameter " + target);
         break;
         }
  

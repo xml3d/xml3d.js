@@ -4,7 +4,6 @@
 	var XML3DTransformRenderAdapter = function(factory, node) {
 		xml3d.webgl.RenderAdapter.call(this, factory, node);
 		this.matrix = null;
-		this.listeners = new Array();
 		this.isValid = true;
 	};
 	
@@ -46,20 +45,13 @@
 		} else if (e.type == 2) {
 			this.dispose();
 		}
-	
-		//var ievent = new xml3d.webgl.InternalMutationEvent();
-		//ievent.source = "transform";
-		//ievent.type = "transform";
-		//ievent.newValue = mat4.create(this.matrix);
-		//TODO: Better method for passing events to listener nodes
-		e.internalType = "transform";
-		
-		for (var i=0, length = this.listeners.length; i < length; i++) {
-			if (this.listeners[i].isValid)
-				this.listeners[i].notifyChanged(e);
-			else {
-				this.listeners.splice(i,1);
-				i--;
+
+		var opposites = this.node._configured.opposites;
+		if (opposites) {
+			for (var i=0, length = opposites.length; i<length; i++) {
+				var adapter = this.factory.getAdapter(opposites[i].relatedNode);
+				if (adapter && adapter.notifyChanged)
+					adapter.notifyChanged(e);
 			}
 		}
 		

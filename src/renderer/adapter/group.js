@@ -28,8 +28,7 @@
 	    this.parentTransform = null;
 	    this.parentShader = null;
 	    this.isValid = true;
-
-	    updateTransformAdapter(this);
+	    this.updateTransformAdapter();
 	};
 
 	xml3d.createClass(XML3DGroupRenderAdapter, xml3d.webgl.RenderAdapter);
@@ -47,6 +46,13 @@
 			ret = mat4.multiply(ret, this.transformAdapter.getMatrix(), mat4.create());
 
 		return ret;
+	};
+	
+	p.updateTransformAdapter = function() {
+		var tNode = this.node.transform;
+	    tNode = xml3d.URIResolver.resolve(tNode);
+	    if (tNode)
+	    	this.transformAdapter = this.factory.getAdapter(tNode);
 	};
 
 	p.processListeners  = function() {
@@ -93,33 +99,40 @@
 			return;
 		}
 		
-		var target = evt.internalType || evt.wrapped.attrName;
+		var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 		
 		switch (target) {
 		case "shader":
 			//Update this group node's shader then propagate the change down to its children
 			this.shader = this.getShader();
-	        var downstreamValue = this.shader == null ? this._parentShader : this.shader;
+	        var downstreamValue = this.shader == null ? this.parentShader : this.shader;
 
-	        var ievent = new xml3d.webgl.InternalMutationEvent();
-	        ievent.source = "group";
-	        ievent.type = "shader";
-	        ievent.parameter = "shader";
-	        ievent.newValue = downstreamValue;
-	        this.notifyChildren(ievent);
+	        evt.internalType = "internal:shader";
+	        this.notifyChildren(evt);
 
 	        this.factory.renderer.requestRedraw("Group shader changed.", false);
 	    break;
-	       
+		case "translation":
+		case "rotation":
+		case "orientation":
+			//This group adapter's transform node was changed
+			var downstreamValue = this.transformAdapter.getMatrix();
+			if (this.parentTransform)
+				downstreamValue = mat4.multiply(downstreamValue, this.parentTransform);
+			
+			evt.internalType = "parentTransform";
+			evt.newValue = downstreamValue;
+			this.notifyChildren(evt);			 
+		break;
 		case "transform":
 			//This group is now linked to a different transform node. We need to notify all
 			//of its children with the new transformation matrix
 
-			updateTransformAdapter(this);
+			this.updateTransformAdapter(this);
 
 			var downstreamValue;
 			if (this._transformAdapter)
-				downstreamValue = this._transformAdapter.getMatrix();
+				downstreamValue = this.transformAdapter.getMatrix();
 			else if (this.parentTransform)
 				downstreamValue = mat4.identity(mat4.create());
 			else
@@ -128,7 +141,7 @@
 			if(this.parentTransform)
 				downstreamValue = mat4.multiply(downstreamValue, this.parentTransform);
 
-	        evt.internalType = "internal:transform";
+	        evt.internalType = "parentTransform";
 	        evt.newValue = downstreamValue;
 	        
 	        this.notifyChildren(evt);
@@ -136,12 +149,11 @@
 		break;
 		
 		//TODO: this will change once the wrapped events are sent to all listeners of a node
-		case "internal:transform":  
+		case "parentTransform":  
 			var downstreamValue = evt.newValue;
 			if (this.parentTransform)
 				downstreamValue = mat4.multiply(downstreamValue, this.parentTransform);
 
-			//evt.source = "group";
 			evt.newValue = downstreamValue;
 			this.notifyChildren(evt);
 		break;
@@ -157,7 +169,7 @@
 		break;
 			
 		default:
-			xml3d.debug.logWarning("Unhandled event in group adapter: "+evt.wrapper.eventType + " for attribute "+evt.wrapper.attribute);
+			xml3d.debug.logWarning("Unhandled mutation event in group adapter for parameter '"+target+"'");
 		break;
 		};
 

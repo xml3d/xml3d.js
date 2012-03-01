@@ -109,8 +109,8 @@ xml3d.webgl.Renderer.drawableObject = function(renderer) {
 	this.meshNode = null;
 	var me = this;
 	var renderer = renderer;
-	this.callback = function(evt) {
-		renderer.applyChangeToObject(evt, me);
+	this.getObject = function() {
+		return me;
 	};
 };
 
@@ -137,7 +137,9 @@ xml3d.webgl.Renderer.prototype.initCamera = function() {
 xml3d.webgl.Renderer.prototype.processShaders = function(scene) {
     for (var i=0; i < scene.length; i++) {
 		var obj = scene[i];
-		obj.shader = this.shaderManager.createShaderForObject(obj, this.lights);
+		var groupAdapter = this.factory.getAdapter(obj.meshNode.parentNode);
+		var shader = groupAdapter ? groupAdapter.getShader() : null;
+		obj.shader = this.shaderManager.createShader(shader, this.lights);
 	}
 };
 
@@ -179,7 +181,7 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 		// to ensure all lights and other shader information is available
 		newObject.shader = null;
 		newObject.transform = transform; 
-		adapter.registerCallback(newObject.callback); 
+		adapter.registerCallback(newObject.getObject); 
 		
 		scene.push(newObject);
 		break;
@@ -213,6 +215,16 @@ xml3d.webgl.Renderer.prototype.initFrameBuffers = function(gl) {
 
 xml3d.webgl.Renderer.prototype.getGLContext = function() {
 	return handler.gl;
+};
+
+xml3d.webgl.Renderer.prototype.recompileShader = function(shaderAdapter) {
+	this.shaderManager.recompileShader(shaderAdapter, this.lights);
+	this.handler.redraw("A shader was recompiled");
+};
+
+xml3d.webgl.Renderer.prototype.shaderDataChanged = function(shaderAdapter, evt) {
+	this.shaderManager.shaderDataChanged(shaderAdapter, evt);
+	this.handler.redraw("A shader parameter was changed");
 };
 
 //TODO: Move all change handling back into the adapters

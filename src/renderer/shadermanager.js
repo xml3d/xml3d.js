@@ -22,15 +22,16 @@ xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	this.shaders["pickedNormals"] = this.getStandardShaderProgram("urn:xml3d:shader:pickedNormals");
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, lights) {
+xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, lights) {
 	//This method is 'suboptimal', but will be replaced with the new modular shader system
-	var shaderNode = null;
 	var shader = null;
+	var shaderId = "defaultShader";
+	var shaderNode = null;
 	
-	var groupAdapter = this.factory.getAdapter(obj.meshNode.parentNode);
-	var shaderAdapter = groupAdapter.getShader();
-	shaderNode = shaderAdapter ? shaderAdapter.node : null;	
-	var shaderId = shaderNode? shaderNode.id : "defaultShader";
+	if (shaderAdapter) {
+		shaderNode = shaderAdapter.node;
+		shaderId = shaderNode.id;
+	}
 
     shader = this.shaders[shaderId];
     
@@ -207,7 +208,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 	}
 	
 	this.setStandardUniforms(programObject);
-	
+	programObject.changes = [];
 	return programObject;
 };
 
@@ -234,6 +235,33 @@ xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shaderSo
 	
 	return shd;
 };
+
+
+xml3d.webgl.XML3DShaderManager.prototype.recompileShader = function(shaderAdapter, lights) {
+	var shader = this.shaders[shaderAdapter.node.id];
+	if (shader) {
+		this.destroyShader(shader);
+		delete shader;
+		this.createShader(shaderAdapter, lights);
+	}
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderAdapter, evt) {
+	var targetName = evt.wrapped.currentTarget.name;
+	var shader = this.shaders[shaderAdapter.node.id];
+	var dataTable = shaderAdapter.getDataTable();
+	
+	//Store the change, it will be applied the next time the shader is bound
+	if (dataTable[targetName]){
+		shader.changes.push({
+			type : "uniform",
+			name : targetName,
+			newValue : dataTable[targetName].data
+		});
+	}
+	
+};
+
 
 xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) {
 	
@@ -307,17 +335,29 @@ xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(shader, 
 xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
     // TODO: bind samplers (if any)
 	var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
-	var samplers = sp.samplers;
+
+	//Apply any changes encountered since the last time this shader was rendered
+    for (var i=0, l = sp.changes.length; i<l; i++) {
+    	var change = sp.changes[i];
+    	if (change.type == "uniform" && sp.uniforms[change.name]) {
+    		this.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
+    	}
+    	
+    	//TODO: changes to samplers/attributes
+    }
+    sp.changes = [];
+
+    var samplers = sp.samplers;
 	for (var tex in samplers) {
 		this.bindTexture(samplers[tex]);
 	}
-
 	sp = sp.handle;
 	
     if (this.currentProgram != sp) {
         this.currentProgram = sp;
         this.gl.useProgram(sp);
     }
+
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.unbindShader = function(shader) {
@@ -364,6 +404,14 @@ xml3d.webgl.XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
 
 xml3d.webgl.XML3DShaderManager.prototype.setGLContext = function(gl) {
 	this.gl = gl;
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.destroyShader = function(shader) {
+	for (var tex in shader.samplers) {
+		this.destroyTexture(shader.samplers[tex]);
+	}
+	
+	this.gl.deleteProgram(shader.handle);
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.hasTextures = function(dataTable) {

@@ -19,6 +19,7 @@ xml3d.webgl.configure = function(xml3ds) {
 		// Creates the CanvasHandler for the <canvas>  Element
 		var canvasHandler = new xml3d.webgl.CanvasHandler(canvas, xml3ds[i]);
 		
+		// TODO: Move this to XML3DAdapter
 		//Check for event listener attributes for the xml3d node
 		if (xml3ds[i].hasAttribute("contextmenu") && xml3ds[i].getAttribute("contextmenu") == "false")
 			xml3ds[i].canvas.addEventListener("contextmenu", function(e) {xml3d.webgl.stopEvent(e);}, false);
@@ -40,6 +41,7 @@ xml3d.webgl.configure = function(xml3ds) {
 		
 	}
 };
+
 
 xml3d.webgl.checkError = function(gl, text)
 {
@@ -79,7 +81,8 @@ xml3d.webgl.Renderer = function(handler, width, height) {
 	this.shaderMap = this._initInternalShaders();
 	this.width = width;
 	this.height = height;
-	this.fbos = this.initFrameBuffers(handler.gl);
+	// TODO: Remove _ prefix from methods
+	this.fbos = this._initFrameBuffers(handler.gl);
 	
 	//Light information is needed to create shaders, so process them first
 	this.lights = [];
@@ -827,6 +830,8 @@ xml3d.webgl.Renderer.prototype.getProjectionMatrix = function() {
 	
 	return this._projMatrix;
 }; 
+
+// TODO: Move all these stuff to a good place
 
 xml3d.webgl.RenderAdapter = function(factory, node) {
 	xml3d.data.Adapter.call(this, factory, node);

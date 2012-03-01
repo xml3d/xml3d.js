@@ -124,7 +124,12 @@ test("XML3DVec3::set", function()  {
 module("XML3DRotation tests", {
 	ident : new XML3DRotation(),
 	rot1 : new XML3DRotation(new XML3DVec3(1.0, 0.0, 0.0), Math.PI / 2),
-	vec2 : new XML3DVec3(1.5, -2.0, 3.5)
+	vec2 : new XML3DVec3(1.5, -2.0, 3.5),
+	mat_90x : new XML3DMatrix(
+            1, 0, 0, 0,
+            0, 0, -1, 0,
+            0, 1, 0, 0,
+            0, 0, 0, 1),
 });
 
 test("Default Constructor", function()  {
@@ -234,7 +239,10 @@ test("XML3DRotation::normalize", function()  {
 
 test("XML3DRotation::toMatrix", function()  {
     equal(typeof this.ident.__proto__.toMatrix, 'function', "XML3DRotation::toMatrix exists");
-    // TODO: Test
+    var rot = new XML3DRotation(new XML3DVec3(1.0, 0.0, 0.0), Math.PI / 2);
+    QUnit.closeMatrix(new XML3DMatrix().rotateAxisAngle(1, 0, 0, Math.PI / 2), rot.toMatrix(), EPSILON);
+
+    QUnit.closeMatrix(this.mat_90x, rot.toMatrix(), EPSILON);
 });
 
 test("XML3DRotation::setQuaternion", function()  {
@@ -467,6 +475,8 @@ test("XML3DMatrix::translate", function() {
     var calc_trans = this.mat4.translate(tf.x, tf.y, tf.z);
 
     QUnit.closeMatrix(calc_trans, this.mat4_trans, EPSILON);
+    QUnit.close(this.ident.translate(this.mat4_transfac.x,this.mat4_transfac.y, this.mat4_transfac.z).m41, 3, EPSILON);
+    QUnit.close(this.ident.translate(this.mat4_transfac.x,this.mat4_transfac.y, this.mat4_transfac.z).m42, 12, EPSILON);
     QUnit.close(this.ident.translate(this.mat4_transfac.x,this.mat4_transfac.y, this.mat4_transfac.z).m43, -4, EPSILON);
 });
 
@@ -503,13 +513,11 @@ test("XML3DMatrix::CSSMatrix conformance", function() {
                     "CSSMatrix::rotateAxisAngle");
             QUnit.closeMatrix(xml3d.translate(1, 2, 3).inverse(), css.translate(1, 2, 3).inverse(), EPSILON,
                     "CSSMatrix::inverse (test depends on correct ::translate)");
-            QUnit.closeMatrix(xml3d.translate(1, 2, 3).multiply(xml3d.scale(2, 2, 2)), css.translate(1, 2, 3).multiply(
-                    css.scale(2, 2, 2)), EPSILON,
+            QUnit.closeMatrix(xml3d.translate(1, 2, 3).multiply(xml3d.scale(2, 2, 2)), css.scale(2, 2, 2).multiply(
+                    css.translate(1, 2, 3)), EPSILON,
                     "CSSMatrix::multiply (test depends on correct ::translate and ::scale)");
             // QUnit.closeMatrix(css.rotate(45,0,0),
             // css.rotateAxisAngle(1,0,0,45), EPSILON);
-            QUnit.closeMatrix(xml3d.rotateAxisAngle(1, 0, 0, Math.PI / 2), new XML3DRotation(new XML3DVec3(1, 0, 0),
-                    Math.PI / 2).toMatrix(), EPSILON);
 
         }
     });

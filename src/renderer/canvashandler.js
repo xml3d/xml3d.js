@@ -18,37 +18,29 @@ xml3d.webgl.InternalMutationEvent = function() {
  * The Handler is the interface between the renderer, canvas and SpiderGL
  * elements. It responds to user interaction with the scene and manages
  * redrawing of the canvas.
+ * The canvas handler also manages the rendering loop including triggering
+ * of redraws.
  */
 (function() {
 
-    /*
-     * function Scene(xml3dElement) { this.xml3d = xml3dElement;
-     *
-     * this.getActiveView = function() { var av =
-     * this.xml3d.getActiveViewNode(); if (av == null) { av =
-     * document.evaluate('//xml3d:xml3d/xml3d:view[1]', document, function() {
-     * return xml3d.xml3dNS; }, XPathResult.FIRST_ORDERED_NODE_TYPE,
-     * null).singleNodeValue; if (av == null) xml3d.debug.logError("No view
-     * defined."); } if (typeof av == typeof "") { av =
-     * this.xml3d.xml3ddocument.resolve(av); if (av == null)
-     * xml3d.debug.logError("Could not find view"); } return av; }; }
-     */
-
     /**
-     * Constructor for the CanvasHandler
+     * CanvasHandler class.
+     * Own the GL context. Registers and handles the events that happen on the canvas element.
+     * This includes context lost events.
      *
      * @param canvas
      *            the HTML Canvas element that this handler will be responsible
      *            for
-     * @param gl
-     *            the WebGL Context associated with this canvas
-     * @param scene
+     * @param xml3dElem
      *            the root xml3d node, containing the XML3D scene structure
      */
     function CanvasHandler(canvas, xml3dElem) {
-        this.gl = canvas.getContext("experimental-webgl");
-        this.xml3dElem = xml3dElem;
         this.canvas = canvas;
+        this.xml3dElem = xml3dElem;
+
+        // TODO: Safe creation and what happens if this fails?
+        this.gl = canvas.getContext("experimental-webgl");
+
         this.needDraw = true;
         this.needPickingDraw = true;
         this._pickingDisabled = false;
@@ -57,6 +49,8 @@ xml3d.webgl.InternalMutationEvent = function() {
         this.isDragging = false;
         this.timeNow = Date.now() / 1000.0;
         this.postProcessShaders = [];
+
+        // TODO: Do we need this?
         this.events = {
             "mousedown" : [],
             "mouseup" : [],
@@ -67,6 +61,7 @@ xml3d.webgl.InternalMutationEvent = function() {
             "update" : [],
             "mousewheel" : []
         };
+        // TODO: Do we need this?
         this.canvasInfo = {
             id : canvas.id,
             mouseButtonsDown : [ false, false ]
@@ -128,6 +123,7 @@ xml3d.webgl.InternalMutationEvent = function() {
     };
 
     // Initializes the SpiderGL canvas manager and renders the scene
+    // TODO: Should move to renderer, but is triggered from here
     CanvasHandler.prototype.start = function() {
         var gl = this.gl;
 
@@ -140,12 +136,7 @@ xml3d.webgl.InternalMutationEvent = function() {
         this._tick();
     };
 
-    // Returns the HTML ID of the canvas associated with this Handler
-    CanvasHandler.prototype.getCanvasId = function() {
-        return this.canvas.id;
-    };
-
-
+    // TODO: Connect resize listener with this function
     CanvasHandler.prototype.resize = function(gl, width, height) {
         if (width < 1 || height < 1)
             return false;
@@ -174,6 +165,7 @@ xml3d.webgl.InternalMutationEvent = function() {
 
     // Uses gluUnProject() to transform the 2D screen point to a 3D ray
     // returns an XML3DRay
+    // TODO: Move this to Renderer and/or XML3DAdapter
     CanvasHandler.prototype.generateRay = function(screenX, screenY) {
 
         // setup input to unproject
@@ -533,6 +525,7 @@ xml3d.webgl.InternalMutationEvent = function() {
     xml3d.webgl.CanvasHandler = CanvasHandler;
 })();
 
+// TODO: Move to a good place
 xml3d.webgl.createCanvas = function(xml3dElement, index) {
 
     var parent = xml3dElement.parentNode;
@@ -585,7 +578,7 @@ xml3d.webgl.createCanvas = function(xml3dElement, index) {
 xml3d.webgl.stopEvent = function(ev) {
 	if (ev.preventDefault)
 		ev.preventDefault();
-	if (ev.stopPropagation) 
+	if (ev.stopPropagation)
 		ev.stopPropagation();
 	ev.returnValue = false;
 };

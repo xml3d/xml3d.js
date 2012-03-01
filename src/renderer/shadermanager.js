@@ -13,6 +13,13 @@ xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	this.factory = factory;
 	this.currentProgram = null;
 	this.shaders = {};
+	
+	//Always create a default flat shader as a fallback for error handling
+	this.shaders["defaultShader"] = this.getStandardShaderProgram("urn:xml3d:shader:flat");
+	
+	//Create picking shaders
+	this.shaders["picking"] = this.getStandardShaderProgram("urn:xml3d:shader:picking");
+	this.shaders["pickedNormals"] = this.getStandardShaderProgram("urn:xml3d:shader:pickedNormals");
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, lights) {
@@ -23,11 +30,12 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, l
 	var groupAdapter = this.factory.getAdapter(obj.meshNode.parentNode);
 	var shaderAdapter = groupAdapter.getShader();
 	shaderNode = shaderAdapter ? shaderAdapter.node : null;	
+	var shaderId = shaderNode? shaderNode.id : "defaultShader";
 
-    shader = shaderNode ? this.shaders[shaderNode.id] : null;
+    shader = this.shaders[shaderId];
     
     if (shader)
-        return shader;
+        return shaderId;
         
     var sources = {vs:null, fs:null};
     var dataTable = null;
@@ -58,9 +66,11 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, l
 			
             shader = this.createShaderFromSources(sources);
 		}
-		this.shaders[shaderNode.id] = shader;
+		this.shaders[shaderId] = shader;
 	} else {	
-		shader = this.createShaderFromSources(sources);
+		// Create the default flat shader
+		shader = this.shaders["defaultShader"];
+		shaderId = "defaultShader";
 	}
 	
 	if (shaderAdapter) {		
@@ -68,7 +78,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderForObject = function(obj, l
 		this.setUniformVariables(shader, dataTable);
 	}
    
-   return shader;	
+   return shaderId;	
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights, hasTextures) {
@@ -160,7 +170,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 			fSource		: sources.fs
 	};
 	
-	this.bindShader(prg);
+	gl.useProgram(prg);
 	
 	//Tally shader attributes
 	var numAttributes = gl.getProgramParameter(prg, gl.ACTIVE_ATTRIBUTES);
@@ -265,8 +275,17 @@ xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) {
 	//xml3d.webgl.checkError(this.gl);
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(sp, uniforms) {
-	this.bindShader(sp);
+xml3d.webgl.XML3DShaderManager.prototype.getShaderById = function(shaderId) {
+	var sp = this.shaders[shaderId];
+	if (!sp) {
+		xml3d.debug.logError("Could not find the shader [ "+shaderId+" ]");
+		sp = this.shaders["default"];
+	}
+	return sp;
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(shader, uniforms) {
+	this.bindShader(shader);
 	
 	for (var name in uniforms) {
 		var u = uniforms[name];
@@ -278,31 +297,32 @@ xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(sp, unif
 		if (u.length == 1)
 			u = u[0]; // Either a single float, int or bool
 		
-		if (sp.uniforms[name]) {
-			this.setUniform(this.gl, sp.uniforms[name], u);
+		if (shader.uniforms[name]) {
+			this.setUniform(this.gl, shader.uniforms[name], u);
 		}
 	}
 	
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(sp) {
+xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
     // TODO: bind samplers (if any)
-	
+	var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
 	var samplers = sp.samplers;
 	for (var tex in samplers) {
 		this.bindTexture(samplers[tex]);
 	}
+
+	sp = sp.handle;
 	
-	if (sp.handle)
-		sp = sp.handle;
     if (this.currentProgram != sp) {
         this.currentProgram = sp;
         this.gl.useProgram(sp);
     }
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.unbindShader = function(sp) {
+xml3d.webgl.XML3DShaderManager.prototype.unbindShader = function(shader) {
     // TODO: unbind samplers (if any)	
+	var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
 	var samplers = sp.samplers;
 	for (var tex in samplers) {
 		this.unbindTexture(samplers[tex]);
@@ -340,21 +360,6 @@ xml3d.webgl.XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
 			xml3d.debug.logError("Unknown uniform type "+u.glType);
 			break;
 	}
-};
-
-xml3d.webgl.XML3DShaderManager.prototype.bindDefaultShader = function() {
-	if (!this.shaders.defaultShader) {
-		this.shaders.defaultShader = this.getStandardShaderProgram("urn:xml3d:shader:flat");
-	}
-	this.currentProgram = this.shaders.defaultShader;
-	this.gl.useProgram(this.shaders.defaultShader.handle);
-	
-	return this.shaders.defaultShader;
-};
-
-xml3d.webgl.XML3DShaderManager.prototype.unbindDefaultShader = function() {
-	this.currentProgram = null;
-	this.gl.useProgram(null);
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.setGLContext = function(gl) {

@@ -78,11 +78,10 @@ xml3d.webgl.Renderer = function(handler, width, height) {
 	this.shaderManager = new xml3d.webgl.XML3DShaderManager(handler.gl, this, this.dataFactory, this.factory);
 	this.bufferHandler = new xml3d.webgl.XML3DBufferHandler(handler.gl, this, this.shaderManager);
 	this.camera = this.initCamera();
-	this.shaderMap = this._initInternalShaders();
 	this.width = width;
 	this.height = height;
 	// TODO: Remove _ prefix from methods
-	this.fbos = this._initFrameBuffers(handler.gl);
+	this.fbos = this.initFrameBuffers(handler.gl);
 	
 	//Light information is needed to create shaders, so process them first
 	this.lights = [];
@@ -212,19 +211,11 @@ xml3d.webgl.Renderer.prototype.initFrameBuffers = function(gl) {
 	return fbos;
 };
 
-xml3d.webgl.Renderer.prototype._initInternalShaders = function() {
-	var shaderMap = {};
-	shaderMap.picking = this.shaderManager.getStandardShaderProgram("urn:xml3d:shader:picking");
-	shaderMap.normalsPicking = this.shaderManager.getStandardShaderProgram("urn:xml3d:shader:pickedNormals");
-	//TODO: Shadow map, reflection, etc
-	
-	return shaderMap;
-};
-
 xml3d.webgl.Renderer.prototype.getGLContext = function() {
 	return handler.gl;
 };
 
+//TODO: Move all change handling back into the adapters
 xml3d.webgl.Renderer.prototype.applyChangeToObject = function(evt, drawableObject) {
 	var eventTypes = {};
 	var renderer = this;
@@ -468,7 +459,7 @@ xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, lightP
 		var obj = objectArray[i];
 		var transform = obj.transform;
 		var mesh = obj.mesh;
-		var shader = obj.shader;
+		var shaderId = obj.shader || "defaultShader";
 		
 		if (obj.visible == false)
 			continue;
@@ -483,18 +474,26 @@ xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, lightP
 		
 		//parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3); //TODO: Fix me
 		
-		if (!shader)
+		var shader = this.shaderManager.getShaderById(shaderId);
+		
+		this.shaderManager.bindShader(shader, parameters);
+		//shape.applyXFlow(shader, parameters);			
+		this.shaderManager.setUniformVariables(shader, parameters);
+		triCount += this.drawObject(shader, mesh);
+		
+		/*if (!shader)
 		{			
-			shader = this.shaderManager.bindDefaultShader();
-			this.shaderManager.setUniformVariables(shader, parameters);
-			triCount += this.drawObject(shader, mesh);
+			this.shaderManager.bindDefaultShader();
+			shaderId = "defaultShader";
+			this.shaderManager.setUniformVariables(shaderId, parameters);
+			triCount += this.drawObject(shaderId, mesh);
 			this.shaderManager.unbindDefaultShader();
 		} else {
-			this.shaderManager.bindShader(shader, parameters);
+			this.shaderManager.bindShader(shaderId, parameters);
 			//shape.applyXFlow(shader, parameters);			
-			this.shaderManager.setUniformVariables(shader, parameters);
-			triCount += this.drawObject(shader, mesh);
-		}
+			this.shaderManager.setUniformVariables(shaderId, parameters);
+			triCount += this.drawObject(shaderId, mesh);
+		}*/
 		objCount++;
 	}
 	
@@ -504,8 +503,8 @@ xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, lightP
 };
 
 
-xml3d.webgl.Renderer.prototype.drawObject = function(shaderProgram, meshInfo) { 
-	var sAttributes = shaderProgram.attributes;
+xml3d.webgl.Renderer.prototype.drawObject = function(shader, meshInfo) { 
+	var sAttributes = shader.attributes;
 	var gl = this.handler.gl;
 	var triCount = 0;
     var vbos = meshInfo.vbos;
@@ -603,8 +602,6 @@ xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
 		
-		var shader = {};
-		
 		if (needPickingDraw ) {
 			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
 			var volumeMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
@@ -623,8 +620,8 @@ xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 			this.bbMin = volumeMin;
 			this.bbMax = volumeMax;
 			
-			shader.program = this.shaderMap.picking;
-			this.shaderManager.bindShader(shader.program);
+			var shader = this.shaderManager.getShaderById("picking");
+			this.shaderManager.bindShader(shader);
 			
 			for (j = 0, n = this.drawableObjects.length; j < n; j++) {
 				var obj = this.drawableObjects[j];
@@ -647,10 +644,10 @@ xml3d.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 						normalMatrix : this.camera.getNormalMatrix(xform.modelView)
 				};
 				
-				this.shaderManager.setUniformVariables(shader.program, parameters);
-				this.drawObject(shader.program, mesh);
+				this.shaderManager.setUniformVariables(shader, parameters);
+				this.drawObject(shader, mesh);
 			}
-			this.shaderManager.unbindShader(shader.program);
+			this.shaderManager.unbindShader(shader);
 		}
 		
 		this.readPixels(false, x, y);			
@@ -680,8 +677,9 @@ xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, screenX
 	
 	var transform = pickedObj.transform;
 	var mesh = pickedObj.mesh;
-	var sp = this.shaderMap.normalsPicking;
-	this.shaderManager.bindShader(sp);
+	
+	var shader = this.shaderManager.getShaderById("pickedNormals");
+	this.shaderManager.bindShader(shader);
 	
 	var xform = {};
 	xform.model = transform;
@@ -693,12 +691,10 @@ xml3d.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, screenX
 		normalMatrix : this.camera.getNormalMatrix(xform.modelView)
 	};
 
-	shader = {};
-	shader.program = sp;
-	this.shaderManager.setUniformVariables(shader.program, parameters);
+	this.shaderManager.setUniformVariables(shader, parameters);
 	this.drawObject(shader, mesh);
 	
-	this.shaderManager.unbindShader(shader.program);
+	this.shaderManager.unbindShader(shader);
 	this.readPixels(true, screenX, screenY);
 	
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);

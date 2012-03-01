@@ -205,8 +205,9 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
     
 
     p.getGLTypeFromString = function(gl, typeName) {
-    	var name = typeName.toLowerCase();
-    	switch (name) {
+    	if (typeName && typeName.toLowerCase)
+    		typeName = typeName.toLowerCase();
+    	switch (typeName) {
     		case "triangles"	: return gl.TRIANGLES;
     		case "tristrips" 	: return gl.TRIANGLE_STRIP;
     		case "points"		: return gl.POINTS;

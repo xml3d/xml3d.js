@@ -7,7 +7,7 @@ module("WebGL Rendering", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-rendering01.xhtml", this.cb);
+        loadDocument("scenes/webgl-rendering01.xhtml"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

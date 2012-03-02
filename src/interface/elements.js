@@ -28,7 +28,7 @@
                 } else if (b[prop].m !== undefined) {
                     a[prop] = b[prop].m;
                 } else
-                    console.error("Can't configure " + a.nodeName + "::" + prop);
+                    xml3d.debug.logError("Can't configure " + a.nodeName + "::" + prop);
             }
         }
         return a;
@@ -41,7 +41,7 @@
     handler.ElementHandler.prototype.handleEvent = function(e) {
         //if(this.element != e.relatedNode)
         //    return;
-        console.log(e.type + " at " + e.currentTarget.localName + "/" + e.target);
+        xml3d.debug.logDebug(e.type + " at " + e.currentTarget.localName + "/" + e.target);
         var n = new events.NotificationWrapper(e);
 
         switch (e.type) {

@@ -1,44 +1,33 @@
 xml3d.debug = {
-    INFO : "INFO",
-    WARNING : "WARNING",
-    ERROR : "ERROR",
-    EXCEPTION : "EXCEPTION",
-    isActive : false,
-    isConsoleAvailable : false,
+    ALL : 0,
+    DEBUG: 1,
+    INFO : 2,
+    WARNING : 3,
+    ERROR : 4,
+    EXCEPTION : 5,
+    params : {},
     isSetup : false,
-    numLinesLogged : 0,
-    maxLinesToLog : 400,
-    logContainer : null,
+
     setup : function() {
-        if (xml3d.debug.isSetup) {
-            return;
+        if (!xml3d.debug.isSetup) {
+            var p = window.location.search.substr(1).split('&');
+            p.forEach(function(e, i, a) {
+              var keyVal = e.split('=');
+              xml3d.debug.params[keyVal[0]] = decodeURIComponent(keyVal[1]);
+            });
+            if(xml3d.debug.params.xml3d_loglevel === undefined)
+                xml3d.debug.params.xml3d_loglevel = xml3d.debug.WARNING;
+            xml3d.debug.isSetup = true;
         }
-        try {
-            if (window.console) {
-                xml3d.debug.isConsoleAvailable = true;
-            }
-        } catch (err) {
-            xml3d.debug.isConsoleAvailable = false;
-        }
-        xml3d.debug.isSetup = true;
-    },
-    activate : function() {
-        xml3d.debug.isActive = true;
+        return !!xml3d.debug.params.xml3d_debug;
     },
     doLog : function(msg, logType) {
-        if (!xml3d.debug.isActive) {
-            return;
-        }
-        if (xml3d.debug.numLinesLogged === xml3d.debug.maxLinesToLog) {
-            msg = "Maximum number of log lines (="
-                    + xml3d.debug.maxLinesToLog
-                    + ") reached. Deactivating logging...";
-        }
-        if (xml3d.debug.numLinesLogged > xml3d.debug.maxLinesToLog) {
+        var params = xml3d.debug.params;
+        if (!params.xml3d_debug || logType < params.xml3d_loglevel) {
             return;
         }
         
-        if (xml3d.debug.isConsoleAvailable) {
+        if (window.console) {
             switch (logType) {
             case xml3d.debug.INFO:
                 window.console.info(msg);
@@ -56,7 +45,9 @@ xml3d.debug = {
                 break;
             }
         }
-        xml3d.debug.numLinesLogged++;
+    },
+    logDebug : function(msg) {
+        xml3d.debug.doLog(msg, xml3d.debug.DEBUG);
     },
     logInfo : function(msg) {
         xml3d.debug.doLog(msg, xml3d.debug.INFO);
@@ -78,4 +69,3 @@ xml3d.debug = {
         }
     }
 };
-xml3d.debug.setup();

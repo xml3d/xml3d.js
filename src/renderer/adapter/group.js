@@ -159,14 +159,10 @@
 		break;
 			
 		case "visible":
-			var ievent = new xml3d.webgl.InternalMutationEvent();
-			ievent.source = "group";
-	        ievent.type = "visible";
-	        ievent.newValue = evt.newValue;
+	        this.notifyChildren(evt);
+			this.factory.renderer.requestRedraw("Group visibility changed.", true);
+			break;
 
-	        this.notifyChildren(ievent);
-			this.factory.renderer.requestRedraw("Group visibility changed.");
-		break;
 			
 		default:
 			xml3d.debug.logWarning("Unhandled mutation event in group adapter for parameter '"+target+"'");

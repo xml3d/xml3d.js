@@ -48,6 +48,9 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 		
 		switch (target) {
+			case "visible":
+				this.getMyDrawableObject().visible = evt.wrapped.newValue == "true";
+				break;
 			case "parentTransform":
 				var drawableObject = this.getMyDrawableObject();
 				drawableObject.transform = evt.newValue;

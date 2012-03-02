@@ -150,8 +150,7 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 	
 	switch(currentNode.nodeName) {
 	case "group":
-		if (currentNode.getAttribute("visible") == "false")
-			visible = false;
+		visible = visible && currentNode.visible;
 		if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
 			this.handler.setMouseMovePicking(true);	
 		
@@ -162,9 +161,7 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 		break;	
 
 	case "mesh":
-		if (currentNode.getAttribute("visible") == "false")
-			visible = false;
-		if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+	    if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
 			this.handler.setMouseMovePicking(true);	
 		
 		var meshAdapter = this.factory.getAdapter(currentNode);
@@ -175,7 +172,7 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 		var newObject = new xml3d.webgl.Renderer.drawableObject(this);
 		newObject.mesh = meshAdapter.createMesh(this.handler.gl);
 		newObject.meshNode = currentNode;
-		newObject.visible = visible;
+		newObject.visible = visible && currentNode.visible;
 		
 		// Defer creation of the shaders until after the entire scene is processed, this is
 		// to ensure all lights and other shader information is available
@@ -189,7 +186,7 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 	case "light":
 		this.lights.push( { adapter : adapter , transform : transform} );
 		adapter.transform = transform;
-		adapter.visible = visible;
+		adapter.visible = visible && currentNode.visible;
 		break;
 	
 	default:

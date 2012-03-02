@@ -82,7 +82,7 @@ xml3d.createClass = function(ctor, parent, methods) {
 
 			for(var i = 0; i < xml3ds.length; i++)
 			{
-				// Place xml3dElement inside an invisble div
+				// Place xml3dElement inside an invisible div
 				var hideDiv      = document.createElementNS(xml3d.xhtmlNS, 'div');
 				var xml3dElement = xml3ds[i];
 

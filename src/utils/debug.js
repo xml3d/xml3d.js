@@ -41,6 +41,9 @@ xml3d.debug = {
             case xml3d.debug.EXCEPTION:
                 window.console.debug(msg);
                 break;
+            case xml3d.debug.DEBUG:
+                window.console.debug(msg);
+                break;
             default:
                 break;
             }

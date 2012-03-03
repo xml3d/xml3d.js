@@ -57,10 +57,8 @@ xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
             shader = this.createShaderFromSources(sources);
 		} else {
 			//User-provided shader
-			var vsScript = this.node.xml3ddocument.resolve(scriptURL
-					+ "-vs");
-			var fsScript = this.node.xml3ddocument.resolve(scriptURL
-					+ "-fs");
+			var vsScript = xml3d.URIResolver.resolve(scriptURL+ "-vs");
+			var fsScript = xml3d.URIResolver.resolve(scriptURL+ "-fs");
 			if (vsScript && fsScript) {
 				sources.vs = vsScript.textContent;
 				sources.fs = fsScript.textContent;
@@ -76,8 +74,13 @@ xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
 	}
 	
 	if (shaderAdapter) {		
-		this.createTextures(shader, dataTable);
-		this.setUniformVariables(shader, dataTable);
+		var texturesCreated = this.createTextures(shader, dataTable);
+		if (!texturesCreated) {
+			this.destroyShader(shader);
+			shaderId = "defaultShader";
+		}	
+		else
+			this.setUniformVariables(shader, dataTable);
 	}
    
    return shaderId;	
@@ -438,6 +441,10 @@ xml3d.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataT
 	
 	for (var name in shader.samplers) {
 		var texture = dataTable[name];
+		if (!texture) {
+			xml3d.debug.logWarning("Can't find required texture with name='"+name+"'. Using default shader instead.");
+			return false;
+		}
 		var sampler = shader.samplers[name];
 		
 		var opt = {
@@ -470,6 +477,8 @@ xml3d.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataT
 		sampler.options = opt;
 		texUnit++;
 	}
+	
+	return true;
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(internalFormat, width, height, 
@@ -563,6 +572,7 @@ xml3d.webgl.XML3DShaderManager.prototype.unbindTexture = function(tex) {
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.destroyTexture = function(tex) {
-	this.gl.deleteTexture(tex.info.handle);
+	if (tex.info && tex.info.handle)
+		this.gl.deleteTexture(tex.info.handle);
 };
 

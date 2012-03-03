@@ -196,3 +196,64 @@ test("Nested transforms", 8, function() {
     
 });
 
+
+
+module("WebGL Shaders and Textures", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/webgl-rendering02.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Texture shader basics", 5, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+
+    h.draw();   
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [255,255,0,255], "Yellow texture");
+    
+    this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [255,0,255,255], "Change img src to magenta texture");
+    
+    //Removing the texture node should cause the shader to recompile to standard phong shader
+    var texNode = this.doc.getElementById("tex1");
+    this.doc.getElementById("texShader1").removeChild(texNode);
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,255,255], "Remove texture node");
+});
+
+test("Custom shader", 5, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+
+    var cshader = this.doc.getElementById("customShader");
+    var group = this.doc.getElementById("myGroup");
+    group.setAttribute("shader", "#customShader");
+    h.draw();   
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [255,0,0,255], "Red custom shader");
+    
+    //The shader has a green diffuseColor parameter that should override the standard blue
+    cshader.setAttribute("script", "urn:xml3d:shader:phong");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,255,0,255], "Change shader script to standard phong");
+    
+});
+

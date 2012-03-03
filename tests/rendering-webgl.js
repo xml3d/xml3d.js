@@ -151,3 +151,48 @@ test("Add/remove meshes and groups", 6, function() {
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]"); 
 });
 
+test("Nested transforms", 8, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+    var group3 = this.doc.getElementById("group3");
+    var group4 = this.doc.getElementById("group4");
+    
+    group3.visible = true;
+    h.draw();   
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,255,255], "Blue at 90,90 [nested y-axis rotations]");
+    
+    var t3 = this.doc.getElementById("t_group3");
+    var t4 = this.doc.getElementById("t_group4");
+    t3.setAttribute("rotation", "0 1 0 0");
+    h.draw();   
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,0,0], "Transparent at 90,90 [outer rotation 0, inner 90]");
+    
+    // Rotate both inner and outer around y-axis 90 degrees, should flip the shape around
+    t3.setAttribute("rotation", "0 1 0 1.57");
+    h.draw();   
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,255,255], "Blue at 90,90 [set outer rotation 90]");
+    
+    // Rotate inner -90 around local x-axis (actually around z since we've rotated 90 around x first)
+    t4.setAttribute("rotation", "1 0 0 -1.57");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,0,0], "Transparent at 90,90 [inner x-axis rotation -90]");
+    
+    // Rotate outer 90 around x-axis, this should undo the -90 x-axis rotation of inner
+    t3.setAttribute("rotation", "1 0 0 1.57");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,255,255], "Blue at 90,90 [cancel inner rotation with outer]");
+    
+    // Move the shape 3 units to the right so it's off the screen
+    t4.setAttribute("translation", "3 0 0");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,0,0], "Transparent at 90,90 [add inner translation]");
+    
+});
+

@@ -10,6 +10,9 @@
   <body style="background-color: #FFF;width:500px">
    <xml3d activeView="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
     <defs>
+    <transform id="t_group3" rotation="0 1 0 1.57" />
+    <transform id="t_group4" rotation="0 1 0 1.57" />
+    
     <shader id="flatred" script="urn:xml3d:shader:flat">
         <float3 name="diffuseColor">
             1 0 0
@@ -23,12 +26,12 @@
     
     <data id="meshdata" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
-        <float3 name="position">-1.0 -1.0 -3.0 1.0 -1.0 -3.0 -1.0 1.0 -3.0 1.0 1.0 -3.0</float3>
+        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
     </data>
     </defs>
-    <view id="defaultView"/>
+    <view id="defaultView" position="0 0 3"/>
     <group id="myGroup" visible="false">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
 	          
@@ -38,6 +41,14 @@
     <group id="group1" shader="#phonggreen" visible="false">
     <group id="group2" shader="#flatred">
         <mesh id="myNestedMesh" src="#meshdata" type="triangles">
+              
+        </mesh>
+    </group>
+    </group>
+    
+    <group id="group3" transform="#t_group3" visible="false">
+    <group id="group4" transform="#t_group4">
+        <mesh id="myNestedMesh2" src="#meshdata" type="triangles">
               
         </mesh>
     </group>

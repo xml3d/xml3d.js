@@ -30,10 +30,10 @@
 		var ret = transform;
 
 		if (this.parentTransform !== null)
-			ret = mat4.multiply(ret, this.parentTransform, mat4.create());
+			ret = mat4.multiply(this.parentTransform, ret,  mat4.create());
 
 		if (this.transformAdapter)
-			ret = mat4.multiply(ret, this.transformAdapter.getMatrix(), mat4.create());
+			ret = mat4.multiply(ret, this.transformAdapter.getMatrix(),mat4.create());
 
 		return ret;
 	};
@@ -97,7 +97,7 @@
 			//This group adapter's transform node was changed
 			var downstreamValue = this.transformAdapter.getMatrix();
 			if (this.parentTransform)
-				downstreamValue = mat4.multiply(downstreamValue, this.parentTransform);
+				downstreamValue = mat4.multiply(this.parentTransform, downstreamValue, mat4.create());
 			
 			evt.internalType = "parenttransform";
 			evt.newValue = downstreamValue;
@@ -107,11 +107,10 @@
 		case "transform":
 			//This group is now linked to a different transform node. We need to notify all
 			//of its children with the new transformation matrix
-
 			this.updateTransformAdapter(this);
 
 			var downstreamValue;
-			if (this._transformAdapter)
+			if (this.transformAdapter)
 				downstreamValue = this.transformAdapter.getMatrix();
 			else if (this.parentTransform)
 				downstreamValue = mat4.identity(mat4.create());
@@ -119,7 +118,7 @@
 				downstreamValue = null;
 
 			if(this.parentTransform)
-				downstreamValue = mat4.multiply(downstreamValue, this.parentTransform);
+				downstreamValue = mat4.multiply(this.parentTransform, downstreamValue, mat4.create());
 
 	        evt.internalType = "parenttransform";
 	        evt.newValue = downstreamValue;
@@ -131,14 +130,17 @@
 		//TODO: this will change once the wrapped events are sent to all listeners of a node
 		case "parenttransform":  
 			var downstreamValue = evt.newValue;
-			if (this.parentTransform)
-				downstreamValue = mat4.multiply(downstreamValue, this.parentTransform);
-
+			this.parentTransform = evt.newValue;
+			
+			if (this.transformAdapter)
+				downstreamValue = mat4.multiply(downstreamValue, this.transformAdapter.getMatrix(), mat4.create());
+			
 			evt.newValue = downstreamValue;
 			this.notifyChildren(evt);
 			break;
 			
 		case "visible":
+			//TODO: improve visibility handling
 			//If this node is set visible=false then it overrides the parent node 
 			if (this.parentVisible == false)
 				break;

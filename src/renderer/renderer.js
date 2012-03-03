@@ -22,23 +22,15 @@ xml3d.webgl.configure = function(xml3ds) {
 		// TODO: Move this to XML3DAdapter
 		//Check for event listener attributes for the xml3d node
 		if (xml3ds[i].hasAttribute("contextmenu") && xml3ds[i].getAttribute("contextmenu") == "false")
-			xml3ds[i].canvas.addEventListener("contextmenu", function(e) {xml3d.webgl.stopEvent(e);}, false);
-		if (xml3ds[i].hasAttribute("framedrawn"))
-			canvasHandler.addEventListener(xml3ds[i], "framedrawn", xml3ds[i].getAttribute("framedrawn"), false);
+			canvas.addEventListener("contextmenu", function(e) {xml3d.webgl.stopEvent(e);}, false);
+		//if (xml3ds[i].hasAttribute("framedrawn"))
+		//	canvas.addEventListener("framedrawn", new Function(xml3ds[i].getAttribute("framedrawn")), false);
 		
 		if (xml3ds[i].hasAttribute("disablepicking"))
 			canvasHandler._pickingDisabled = xml3ds[i].getAttribute("disablepicking") == "true" ? true : false;
 
 		canvasHandler.start();
 		handlers[i] = canvasHandler;
-	}
-	
-	//Update listening should be deferred until all canvases are created and configured or it may interfere with the 
-	//configuration process
-	for (var i in xml3ds) {
-		if (xml3ds[i].hasAttribute("onupdate"))
-			handlers[i].addEventListener(xml3ds[i], "update", xml3ds[i].getAttribute("onupdate"), false);
-		
 	}
 };
 
@@ -211,7 +203,7 @@ xml3d.webgl.Renderer.prototype.initFrameBuffers = function(gl) {
 };
 
 xml3d.webgl.Renderer.prototype.getGLContext = function() {
-	return handler.gl;
+	return this.handler.gl;
 };
 
 xml3d.webgl.Renderer.prototype.recompileShader = function(shaderAdapter) {

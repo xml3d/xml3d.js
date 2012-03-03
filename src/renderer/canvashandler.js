@@ -51,17 +51,6 @@ xml3d.webgl.InternalMutationEvent = function() {
         this.postProcessShaders = [];
 
         // TODO: Do we need this?
-        this.events = {
-            "mousedown" : [],
-            "mouseup" : [],
-            "click" : [],
-            "framedrawn" : [],
-            "mousemove" : [],
-            "mouseout" : [],
-            "update" : [],
-            "mousewheel" : []
-        };
-        // TODO: Do we need this?
         this.canvasInfo = {
             id : canvas.id,
             mouseButtonsDown : [ false, false ]
@@ -203,13 +192,11 @@ xml3d.webgl.InternalMutationEvent = function() {
     };
 
     // This function is called by _tick() at regular intervals to determine if a
-    // redraw of the
-    // scene is required
+    // redraw of the scene is required
     CanvasHandler.prototype.update = function() {
-        for ( var i = 0; i < this.events.update.length; i++) {
-            if (this.events.update[i].listener.call(this.events.update[i].node) == true)
-                this.needDraw = true;
-        }
+        var event = document.createEvent('Event');
+        event.initEvent('update', true, true, null);
+        this.xml3dElem.dispatchEvent(event);
 
         return this.needDraw;
     };
@@ -488,17 +475,15 @@ xml3d.webgl.InternalMutationEvent = function() {
      * @return
      */
     CanvasHandler.prototype.dispatchFrameDrawnEvent = function(start, end, stats) {
-        var event = {};
+        var event = document.createEvent('Event');
+        event.initEvent('framedrawn', true, true, null);
         event.timeStart = start;
         event.timeEnd = end;
         event.renderTimeInMilliseconds = end - start;
         event.numberOfObjectsDrawn = stats[0];
         event.numberOfTrianglesDrawn = Math.floor(stats[1]);
-
-        for ( var i in this.events.framedrawn) {
-            this.events.framedrawn[i].listener.call(this.events.framedrawn[i].node, event);
-        }
-
+         
+        this.xml3dElem.dispatchEvent(event);
     };
 
     // Destroys the renderer associated with this Handler

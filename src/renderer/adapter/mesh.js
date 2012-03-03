@@ -61,14 +61,11 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 				break;
 			
 			case "parentvisible":	
-				if (this.node.visible == false)
-					break;
-				else
-					this.getMyDrawableObject().visible = evt.wrapped.newValue == "true";
+				this.getMyDrawableObject().visible = evt.newValue && this.node.visible;
 				break;
 				
 			case "visible":
-				this.getMyDrawableObject().visible = evt.wrapped.newValue == "true";
+				this.getMyDrawableObject().visible = (evt.wrapped.newValue == "true") && this.node.parentNode.visible;
 				break;
 			
 			case "src":

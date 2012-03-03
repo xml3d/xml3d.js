@@ -27,8 +27,10 @@
 		
 		switch(target) {
 		case "visible":
-		case "internal:visible":
-			this.visible = evt.newValue;
+			this.visible = (evt.wrapped.newValue == "true") && this.node.parentNode.visible;
+			break;
+		case "parentvisible":
+			this.visible = evt.newValue && this.node.visible;
 			break;
 		case "intensity":
 			if (!isNaN(evt.newValue))
@@ -36,7 +38,7 @@
 			else
 				xml3d.debug.logError("Invalid parameter for light intensity attribute: NaN");
 			break;
-		case "internal:transform":
+		case "parenttransform":
 			this.transform = evt.newValue;
 			break;
 		}

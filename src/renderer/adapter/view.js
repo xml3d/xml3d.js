@@ -55,7 +55,7 @@
     	var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 
         switch (target) {
-        case "parentTransform":
+        case "parenttransform":
         	this.parentTransform = evt.newValue;
             this.updateViewMatrix();
         break;

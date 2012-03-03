@@ -41,7 +41,7 @@
 		if (e.type == 1) {
 			this.matrix = null;
 			this.matrix = this.getMatrix();
-			this.factory.renderer.requestRedraw("Transformation changed.");
+			this.factory.renderer.requestRedraw("Transformation changed.", true);
 		} else if (e.type == 2) {
 			this.dispose();
 		}

@@ -63,11 +63,10 @@
 		return this.dataAdapter.createDataTable();
 	};
 	
-	XML3DShaderRenderAdapter.prototype.dispose = function() {
+	XML3DShaderRenderAdapter.prototype.destroy = function() {
 		Array.forEach(this.textures, function(t) {
 			t.adapter.destroy();
 		});
-		this.destroy();
 	};
 
 	XML3DShaderRenderAdapter.prototype.bindSamplers = function() {	

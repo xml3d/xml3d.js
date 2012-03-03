@@ -2,6 +2,9 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 //Adapter for <mesh>
 (function() {
+	var noDrawableObject = function() {
+		xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
+    };
 
 	var XML3DMeshRenderAdapter = function(factory, node) {
 	    xml3d.webgl.RenderAdapter.call(this, factory, node);
@@ -9,10 +12,9 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 	    this.processListeners();
 	    this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
 	    this.dataAdapter.registerObserver(this);
+	    this.parentVisible = true;
 
-	    this.getMyDrawableObject = function() {
-	        xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
-	    };
+	    this.getMyDrawableObject = noDrawableObject;
 	};
 
 	xml3d.createClass(XML3DMeshRenderAdapter, xml3d.webgl.RenderAdapter);
@@ -41,32 +43,50 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 	p.notifyChanged = function(evt) {
 		if (evt.type == 0)
-			return this.factory.renderer.sceneTreeRemoval(evt);
+			// Node insertion is handled by the CanvasRenderAdapter
+			return;
 		else if (evt.type == 2)
-			return this.factory.renderer.sceneTreeAddition(evt);
+			return this.factory.renderer.sceneTreeRemoval(evt);
 		
 		var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 		
 		switch (target) {
+			case "parenttransform":
+				this.getMyDrawableObject().transform = evt.newValue;
+				break;
+			
+			case "parentshader":
+				var newShaderId = evt.newValue ? evt.newValue.node.id : "defaultShader";
+				this.getMyDrawableObject().shader = newShaderId;
+				break;
+			
+			case "parentvisible":	
+				if (this.node.visible == false)
+					break;
+				else
+					this.getMyDrawableObject().visible = evt.wrapped.newValue == "true";
+				break;
+				
 			case "visible":
 				this.getMyDrawableObject().visible = evt.wrapped.newValue == "true";
 				break;
-			case "parentTransform":
-				var drawableObject = this.getMyDrawableObject();
-				drawableObject.transform = evt.newValue;
-			break;
 			
 			case "src":
-				//TODO
-			break;
+				this.dispose(evt);
+				var gl = this.factory.renderer.getGLContext();
+				var newMesh = this.createMesh(gl);
+				this.getMyDrawableObject().mesh = newMesh;
+				break;
 			
 			case "type":
-				//TODO
-			break;
+				var gl = this.factory.renderer.getGLContext();
+				var newGLType = this.getGLTypeFromString(gl, evt.wrapped.newValue);
+				this.getMyDrawableObject().mesh.glType = newGLType;
+				break;
 			
 			default:
 				xml3d.debug.logWarning("Unhandled mutation event in mesh adapter for parameter '"+target+"'");
-			break;
+				break;
 		}
 		
 	};
@@ -78,10 +98,6 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 
 	p.createMesh = function(gl) {
-		//TODO: cache mesh data to support 'instances' --> better performance/storage
-		// For now each mesh gets its own set of vertex buffers and such, even if there are 
-		// many meshes in the scene that use the exact same set of data (instances)
-		
 		var dataTable = this.dataAdapter.createDataTable();
 		
 		if (!dataTable.position || !dataTable.position.data) {
@@ -173,16 +189,13 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		//	this.xflowShader = dataTable["xflowShader"];
 		//}
 		meshInfo.valid = true;
-		// TODO: Is dataTable.position defined?
 		meshInfo.bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data);
 		
 		if (dataTable.size) {
 			meshInfo.segments = dataTable.size;
 		}
 		return meshInfo;
-		
-		
-		// return either a meshInfo or an index to the stored mesh in this.meshes
+
 	};
 	
 	// TODO: move to xflow manager
@@ -207,17 +220,31 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 	};
 
-	//TODO: mesh dispose
-	p.dispose = function(evt) {
-		this.passChangeToObject(evt);
-		/*
-			for (var vbo in mesh.vbos) {
-				var buffer = mesh.vbos[vbo];
-				for (var i = 0; i < buffer.length; i++) {
-					this.gl.deleteBuffer(buffer[i]);
-				}
+	// Disposes of all GL buffers but does not destroy the mesh
+	p.dispose = function(gl) {
+		if (!gl)
+			gl = this.factory.renderer.getGLContext();
+		var myObject = this.getMyDrawableObject();
+		var vbos = myObject.mesh.vbos;
+		
+		for (var vbo in vbos) {
+			var buffer = vbos[vbo];
+			for (var i = 0; i < buffer.length; i++) {
+				gl.deleteBuffer(buffer[i]);
 			}
-		*/
+		}
+		
+		myObject.mesh.valid = false;
+	};
+	
+	// Disposes of all GL buffers and destroys the mesh (along with its DrawableObject)
+	// This should only be called if the mesh node is removed from the scene tree
+	p.destroy = function(gl) {
+		if (!gl)
+			gl = this.factory.renderer.getGLContext();
+		this.dispose(gl);
+		this.factory.renderer.removeDrawableObject(this.getMyDrawableObject());
+		this.getMyDrawableObject = noDrawableObject;
 	};
 
     p.getBoundingBox = function() {

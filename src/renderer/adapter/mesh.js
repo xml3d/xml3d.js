@@ -4,7 +4,8 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 (function() {
 	var noDrawableObject = function() {
 		xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
-    };
+    },
+    rc = window.WebGLRenderingContext;
 
 	var XML3DMeshRenderAdapter = function(factory, node) {
 	    xml3d.webgl.RenderAdapter.call(this, factory, node);
@@ -76,8 +77,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 				break;
 			
 			case "type":
-				var gl = this.factory.renderer.getGLContext();
-				var newGLType = this.getGLTypeFromString(gl, evt.wrapped.newValue);
+				var newGLType = this.getGLTypeFromString(evt.wrapped.newValue);
 				this.getMyDrawableObject().mesh.glType = newGLType;
 				break;
 			
@@ -106,7 +106,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		meshInfo.vbos = {};
 		
 		var type = this.node.getAttribute("type");
-		meshInfo.glType = this.getGLTypeFromString(gl, type);
+		meshInfo.glType = this.getGLTypeFromString(type);
 
 		if (dataTable.index) {			
 			if (dataTable.position.data.length / 3 > xml3d.webgl.MAX_MESH_INDEX_COUNT) {
@@ -124,7 +124,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 					
 					indexBuffer.length = mIndices.length;
 					indexBuffer.tupleSize = dataTable.index[i].tupleSize;
-					indexBuffer.glType = this.getGLTypeFromArray(gl, mIndices);
+					indexBuffer.glType = this.getGLTypeFromArray(mIndices);
 						
 					meshInfo.vbos.index[i] = indexBuffer;
 					meshInfo.isIndexed = true;	
@@ -137,7 +137,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 				
 				indexBuffer.length = mIndices.length;
 				indexBuffer.tupleSize = dataTable.index.tupleSize;
-				indexBuffer.glType = this.getGLTypeFromArray(gl, mIndices);
+				indexBuffer.glType = this.getGLTypeFromArray(mIndices);
 				meshInfo.vbos.index = [];
 				meshInfo.vbos.index[0] = indexBuffer;
 				meshInfo.isIndexed = true;	
@@ -164,7 +164,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 					
 					attrBuffer.length = a[i].data.length;
 					attrBuffer.tupleSize = a[i].tupleSize;
-					attrBuffer.glType = this.getGLTypeFromArray(gl, a[i].data);
+					attrBuffer.glType = this.getGLTypeFromArray(a[i].data);
 
 					meshInfo.vbos[attr][i] = attrBuffer;
 				}
@@ -175,7 +175,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 				
 				attrBuffer.length = a.data.length;
 				attrBuffer.tupleSize = a.tupleSize;
-				attrBuffer.glType = this.getGLTypeFromArray(gl, a.data);
+				attrBuffer.glType = this.getGLTypeFromArray(a.data);
 				
 				meshInfo.vbos[attr] = [];
 				meshInfo.vbos[attr][0] = attrBuffer;
@@ -251,30 +251,42 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
             bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data,dataTable.index.data);
         return bbox;
     };
-    
 
-    p.getGLTypeFromString = function(gl, typeName) {
-    	if (typeName && typeName.toLowerCase)
-    		typeName = typeName.toLowerCase();
-    	switch (typeName) {
-    		case "triangles"	: return gl.TRIANGLES;
-    		case "tristrips" 	: return gl.TRIANGLE_STRIP;
-    		case "points"		: return gl.POINTS;
-    		case "lines"		: return gl.LINES;
-    		case "linestrips"	: return gl.LINE_STRIP;
-    		default				: return gl.TRIANGLES;
-    	}
+   p.getGLTypeFromString = function(typeName) {
+        if (typeName && typeName.toLowerCase)
+            typeName = typeName.toLowerCase();
+        switch (typeName) {
+        case "triangles":
+            return rc.TRIANGLES;
+        case "tristrips":
+            return rc.TRIANGLE_STRIP;
+        case "points":
+            return rc.POINTS;
+        case "lines":
+            return rc.LINES;
+        case "linestrips":
+            return rc.LINE_STRIP;
+        default:
+            return rc.TRIANGLES;
+        }
     };
 
-    p.getGLTypeFromArray = function(gl, array) {
-    	if (array instanceof Int8Array   ) return gl.BYTE;
-    	if (array instanceof Uint8Array  ) return gl.UNSIGNED_BYTE;
-    	if (array instanceof Int16Array  ) return gl.SHORT;
-    	if (array instanceof Uint16Array ) return gl.UNSIGNED_SHORT;
-    	if (array instanceof Int32Array  ) return gl.INT;
-    	if (array instanceof Uint32Array ) return gl.UNSIGNED_INT;
-    	if (array instanceof Float32Array) return gl.FLOAT;
-    	return gl.FLOAT;
+    p.getGLTypeFromArray = function(array) {
+        if (array instanceof Int8Array)
+            return rc.BYTE;
+        if (array instanceof Uint8Array)
+            return rc.UNSIGNED_BYTE;
+        if (array instanceof Int16Array)
+            return rc.SHORT;
+        if (array instanceof Uint16Array)
+            return rc.UNSIGNED_SHORT;
+        if (array instanceof Int32Array)
+            return rc.INT;
+        if (array instanceof Uint32Array)
+            return rc.UNSIGNED_INT;
+        if (array instanceof Float32Array)
+            return rc.FLOAT;
+        return rc.FLOAT;
     };
 
 

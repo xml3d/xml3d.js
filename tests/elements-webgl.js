@@ -40,7 +40,6 @@ test("Auto-configuration on insertion", 6, function() {
     var x = this.doc.getElementById("myXml3d");
     var parser = new DOMParser();
     var doc = parser.parseFromString(xmlString, "application/xml");
-    console.dir(doc);
     x.appendChild(doc.documentElement);
 
     var g1 = this.doc.getElementById("g1");
@@ -144,18 +143,20 @@ test("DOMNodeInserted on xml3d", 5, function() {
     equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5
 });
 
-test("DOMNodeRemoved on xml3d", 6, function() {
+test("DOMNodeRemoved on xml3d", 7, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("myXml3d");
     var g = this.doc.getElementById("myGroup");
     this.factory.getAdapter(x); // 3: Init adapter
     this.factory.getAdapter(g); // 4: Init adapter
-    x.removeChild(g); // 5: Adapter for myGroup has been notified: Notification (type:2)
-    equal(this.factory.event.type, xml3d.events.NODE_REMOVED, "Notification of type NODE_REMOVED"); // 6
+    // 5: Adapter for myXml3d has been notified: Notification (type:2)
+    // 6: Adapter for myGroup has been notified: Notification (type:2)
+    x.removeChild(g);
+    equal(this.factory.event.type, xml3d.events.NODE_REMOVED, "Notification of type NODE_REMOVED"); // 7
 });
 
-test("DOMNodeInserted on arbritary", 7, function() {
+test("DOMNodeInserted on arbritary", 6, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("myGroup");
@@ -163,30 +164,31 @@ test("DOMNodeInserted on arbritary", 7, function() {
     this.factory.getAdapter(x); // 3: Init adapter
     this.factory.getAdapter(g); // 4: Init adapter
     // 5: Adapter for myGroup has been notified: Notification (type:0)
-    // 6: Adapter for <group> has been notified: Notification (type:0)
     x.appendChild(g);
-    equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 7
+    equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 6
 });
 
-test("DOMNodeRemoved on arbritary", 6, function() {
+test("DOMNodeRemoved on arbritary", 7, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("myGroup");
     var g = this.doc.getElementById("myMesh01");
     this.factory.getAdapter(x); // 3: Init adapter
     this.factory.getAdapter(g); // 4: Init adapter
-    x.removeChild(g); // 5: Adapter for myMesh01 has been notified: Notification (type:2)
-    equal(this.factory.event.type, xml3d.events.NODE_REMOVED, "Notification of type NODE_REMOVED"); // 6
+    // 5: Adapter for myGroup has been notified: Notification (type:2)
+    // 6: Adapter for myMesh01 has been notified: Notification (type:2)
+    x.removeChild(g);
+    equal(this.factory.event.type, xml3d.events.NODE_REMOVED, "Notification of type NODE_REMOVED"); // 7
 });
 
 test("Dangling Reference notification", 6, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("transformedGroup");
-    var g = this.doc.getElementById("t_mixed");
+    var transform = this.doc.getElementById("t_mixed");
     this.factory.getAdapter(x); // 3: Init adapter
-    this.factory.getAdapter(g); // 4: Init adapter
+    this.factory.getAdapter(transform); // 4: Init adapter
     // 5: Adapter for t_mixed has been notified: Notification (type:2)
     // 6: Adapter for transformedGroup has been notified: ReferenceNotification (type:3, value: null)
-    g.parentNode.removeChild(g);
+    transform.parentNode.removeChild(transform);
 });

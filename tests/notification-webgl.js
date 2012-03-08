@@ -30,7 +30,7 @@ test("Event attribute notification tests", 9, function() {
     ok(a, "Adapter created");
     e.setAttribute("onclick", "alert('Hallo');");
     var evt = this.factory.event;
-    console.dir(evt);
+    //console.dir(evt);
     ok(evt, "Event has been thrown");
     ok(evt instanceof xml3d.events.NotificationWrapper, "Type is NotificationWrapper");
     ok(evt.wrapped, "DOM notification is wrapped");
@@ -101,6 +101,42 @@ test("Reference attribute notification tests", 5, function() {
     e.activeView = "#hallo";
 });
 
+module("Composed Element notification tests", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/webgl-rendering02.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    },
+    factory : new NotifyingAdapterFactory()
+});
+
+test("Only one element gets notified", 3, function() {
+
+    function addAdapters(e, factory) {
+        var c = e.firstElementChild;
+        while(c) {
+            factory.getAdapter(c);
+            addAdapters(c, factory);
+            c = c.nextElementSibling;
+        }
+    }
+
+    var x = this.doc.getElementById("xml3DElem");
+    this.factory.getAdapter(x);
+    addAdapters(x, this.factory);
+    var img = this.doc.getElementById("tex1img");
+    img.setAttribute("src", "textures/magenta.png");
+
+});
 
 module("Typed array notification tests", {
     setup : function() {
@@ -119,6 +155,7 @@ module("Typed array notification tests", {
     },
     factory : new NotifyingAdapterFactory()
 });
+
 
 test("DOMCharacterDataModified notification", 6, function() {
     // replaceWholeText not implemented in FF

@@ -10,7 +10,7 @@ xml3d.XML3DNodeFactory.isXML3DNode = function(node) {
 
 
 // TODO: Merge into xml3d.configure
-xml3d.XML3DNodeFactory.prototype.configure = function(element) {
+xml3d.XML3DNodeFactory.prototype.configure = function(element, selfmonitoring) {
     if (xml3d.XML3DNodeFactory.isXML3DNode(element)) {
         var classInfo = xml3d.classInfo[element.localName];
         if (classInfo === undefined) {
@@ -18,7 +18,7 @@ xml3d.XML3DNodeFactory.prototype.configure = function(element) {
         } else {
             element._configured = element.localName == "xml3d" ?
                       new xml3d.XML3DHandler(element)
-                    : new xml3d.ElementHandler(element);
+                    : new xml3d.ElementHandler(element,selfmonitoring);
             element._configured.registerAttributes(classInfo);
             // Fix difference in Firefox (undefined) and Chrome (null)
             if (element.style == undefined)
@@ -34,14 +34,14 @@ xml3d.XML3DNodeFactory.prototype.configure = function(element) {
 };
 
 xml3d.factory = new xml3d.XML3DNodeFactory();
-xml3d.configure = function(element) {
+xml3d.configure = function(element, selfmonitoring) {
     if (Array.isArray(element))
     {
         Array.forEach(element, xml3d.configure);
     }
     if (element._configured !== undefined)
         return element;
-    xml3d.factory.configure(element);
+    xml3d.factory.configure(element, selfmonitoring);
 };
 
 xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(value) {

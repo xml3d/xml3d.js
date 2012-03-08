@@ -133,24 +133,7 @@ new (function() {
                 return adapters[adapter].getBoundingBox();
             }
         }
-        var bbox = new XML3DBox();
-        /*var locMat = this.getLocalMatrix();
-
-        var child = this.firstElementChild;
-        while (child !== null) {
-            if (child.getBoundingBox) {
-                var chBBox = child.getBoundingBox();
-
-                chBBox.min = locMat.mulVec3(chBBox.min);
-                chBBox.max = locMat.mulVec3(chBBox.max);
-
-                bbox.extend(chBBox);
-            }
-
-            child = child.nextElementSibling;
-        }*/
-
-        return bbox;
+        return new XML3DBox();
     };
     methods.xml3dGetBoundingBox = methods.groupGetBoundingBox;
 

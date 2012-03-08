@@ -107,3 +107,4 @@ var loadDocument = function(url, f) {
 };
 
 var EPSILON = 0.0001;
+QUnit.config.testTimeout = 5000;

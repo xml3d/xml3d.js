@@ -23,7 +23,7 @@
         doc.createElementNS = function(ns, name) {
             var r = nativeCreateElementNS.call(this,ns,name);
             if(ns == xml3d.xml3dNS) {
-                xml3d.configure(r);
+                xml3d.configure(r, true);
             }
             return r;
         };

@@ -3,14 +3,78 @@
 
     var handler = {}, events = xml3d.events;
 
-    handler.ElementHandler = function(elem) {
+    function attrModified(e) {
+        var eh = e.relatedNode._configured;
+        var handler = eh && eh.handlers[e.attrName];
+        if(!handler)
+            return;
+
+        var notified = false;
+        if (handler.setFromAttribute) {
+            notified = handler.setFromAttribute(e.newValue);
+        }
+        if (!notified) {
+                var n = new events.NotificationWrapper(e);
+                n.type = events.VALUE_MODIFIED;
+                eh.notify(n);
+        }
+    };
+
+    function nodeRemoved(e) {
+        var parent = e.relatedNode,
+            removedChild = e.target,
+            parentHandler = parent._configured;
+
+        if(!parentHandler)
+            return;
+
+        var n = new events.NotificationWrapper(e);
+
+        if (removedChild.nodeType == Node.TEXT_NODE && parentHandler.handlers.value) {
+            n.type = events.VALUE_MODIFIED;
+            parentHandler.handlers.value.resetValue();
+        } else {
+            n.type = events.NODE_REMOVED;
+            parentHandler.notify(n);
+            if(removedChild._configured) {
+                removedChild._configured.notify(n);
+                removedChild._configured.remove(n);
+            }
+        }
+    }
+
+    function nodeInserted(e) {
+        var parent = e.relatedNode,
+            insertedChild = e.target,
+            parentHandler = parent._configured;
+
+        if(!parentHandler || e.currentTarget === insertedChild)
+            return;
+
+        var n = new events.NotificationWrapper(e)
+
+        if (insertedChild.nodeType == Node.TEXT_NODE && parentHandler.handlers.value) {
+            n.type = events.VALUE_MODIFIED;
+            parentHandler.handlers.value.resetValue();
+        } else {
+            xml3d.configure(insertedChild);
+            n.type = events.NODE_INSERTED;
+        }
+        parentHandler.notify(n);
+    }
+
+    handler.ElementHandler = function(elem, monitor) {
         if (elem) {
             this.element = elem;
-            elem.addEventListener('DOMAttrModified', this, false);
-            elem.addEventListener('DOMNodeRemoved', this, true);
-            elem.addEventListener('DOMNodeInserted', this, true);
             this.handlers = {};
             this.adapters = {};
+
+            if(monitor) {
+                elem.addEventListener('DOMNodeRemoved', nodeRemoved, true);
+                elem.addEventListener('DOMNodeInserted', nodeInserted, true);
+                elem.addEventListener('DOMAttrModified', attrModified, false);
+                this.monitoring = true;
+            }
         }
     };
 
@@ -39,41 +103,11 @@
     };
 
     handler.ElementHandler.prototype.handleEvent = function(e) {
-        //if(this.element != e.relatedNode)
-        //    return;
+
         xml3d.debug.logDebug(e.type + " at " + e.currentTarget.localName + "/" + e.target);
         var n = new events.NotificationWrapper(e);
 
         switch (e.type) {
-        case "DOMAttrModified":
-            var handler = this.handlers[e.attrName];
-            var notified = false;
-            if (handler && handler.setFromAttribute) {
-                notified = handler.setFromAttribute(e.newValue);
-                if (!notified) {
-                    n.type = events.VALUE_MODIFIED;
-                    this.notify(n);
-                }
-            }
-            break;
-        case "DOMNodeInserted":
-            if (e.target.nodeType == Node.TEXT_NODE && this.handlers.value) {
-                n.type = events.VALUE_MODIFIED;
-                this.handlers.value.resetValue();
-            } else {
-                xml3d.configure(e.target);
-                n.type = events.NODE_INSERTED;
-            }
-            this.notify(n);
-            break;
-        case "DOMNodeRemoved":
-            if(this.element === e.target) {
-                n.type = events.NODE_REMOVED;
-                this.notify(n);
-                if(e.target._configured)
-                    e.target._configured.remove(n);
-            }
-            break;
         case "DOMCharacterDataModified":
             n.type = events.VALUE_MODIFIED;
             this.handlers.value.resetValue();
@@ -81,6 +115,7 @@
             break;
         };
     };
+
 
     /**
      * @param evt
@@ -132,14 +167,13 @@
     };
 
     handler.XML3DHandler = function(elem) {
-        handler.ElementHandler.call(this, elem);
+        handler.ElementHandler.call(this, elem, true);
         var c = document.createElement("canvas");
         c.width = 800;
         c.height = 600;
         this.canvas = c;
         Object.defineProperty(elem, "clientWidth", {
             get : function() {
-                console.log("clientWidth");
                 return c.clientWidth;
             }
         });
@@ -149,6 +183,7 @@
             }
         });
     };
+
     xml3d.createClass(handler.XML3DHandler, handler.ElementHandler);
 
     /*

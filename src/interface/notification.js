@@ -38,7 +38,7 @@
       }
       if (uri && uri.valid) {
           this.value = xml3d.URIResolver.resolve(uri);
-          console.log("Resolved node: " + this.value);
+          xml3d.debug.logDebug("Resolved node: " + this.value);
       }
       this.type = this.value ? events.VALID_REFERENCE : events.DANGLING_REFERENCE;
   };

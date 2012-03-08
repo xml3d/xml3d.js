@@ -35,19 +35,19 @@ xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
 	}
 
     shader = this.shaders[shaderId];
-    
+
     if (shader)
         return shaderId;
-        
+
     var sources = {vs:null, fs:null};
     var dataTable = null;
     var hasTextures = false;
-    
+
     if (shaderAdapter) {
 	    dataTable = shaderAdapter.getDataTable();
 	    hasTextures = this.hasTextures(dataTable);	
     }
-    
+
 	if (shaderNode && shaderNode.hasAttribute("script"))
 	{
 		var scriptURL = shaderNode.getAttribute("script");
@@ -82,7 +82,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
 		else
 			this.setUniformVariables(shader, dataTable);
 	}
-   
+
    return shaderId;	
 };
 
@@ -166,7 +166,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
 	}
 	
-	var programObject = { 	
+	var programObject = {
 			attributes 	: {}, 
 			uniforms 	: {}, 
 			samplers	: {},
@@ -251,19 +251,21 @@ xml3d.webgl.XML3DShaderManager.prototype.recompileShader = function(shaderAdapte
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderAdapter, evt) {
-	var targetName = evt.wrapped.currentTarget.name;
-	var shader = this.shaders[shaderAdapter.node.id];
-	var dataTable = shaderAdapter.getDataTable();
-	
-	//Store the change, it will be applied the next time the shader is bound
-	if (dataTable[targetName]){
-		shader.changes.push({
-			type : "uniform",
-			name : targetName,
-			newValue : dataTable[targetName].data
-		});
-	}
-	
+    if (!evt.wrapped)
+        return;
+    var targetName = evt.wrapped.currentTarget.name || evt.wrapped.relatedNode.name;
+    var shader = this.shaders[shaderAdapter.node.id];
+    var dataTable = shaderAdapter.getDataTable();
+
+    // Store the change, it will be applied the next time the shader is bound
+    if (dataTable[targetName]) {
+        shader.changes.push({
+            type : "uniform",
+            name : targetName,
+            newValue : dataTable[targetName].data
+        });
+    }
+
 };
 
 
@@ -355,7 +357,7 @@ xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
     	if (change.type == "uniform" && sp.uniforms[change.name]) {
     		this.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
     	}
-    	
+
     	//TODO: changes to samplers/attributes
     }
     sp.changes = [];

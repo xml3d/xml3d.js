@@ -37,6 +37,7 @@
             n.type = events.NODE_REMOVED;
             parentHandler.notify(n);
             if(removedChild._configured) {
+                n.type = events.THIS_REMOVED;
                 removedChild._configured.notify(n);
                 removedChild._configured.remove(n);
             }

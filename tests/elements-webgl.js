@@ -153,7 +153,7 @@ test("DOMNodeRemoved on xml3d", 7, function() {
     // 5: Adapter for myXml3d has been notified: Notification (type:2)
     // 6: Adapter for myGroup has been notified: Notification (type:2)
     x.removeChild(g);
-    equal(this.factory.event.type, xml3d.events.NODE_REMOVED, "Notification of type NODE_REMOVED"); // 7
+    equal(this.factory.event.type, xml3d.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
 test("DOMNodeInserted on arbritary", 6, function() {
@@ -178,7 +178,7 @@ test("DOMNodeRemoved on arbritary", 7, function() {
     // 5: Adapter for myGroup has been notified: Notification (type:2)
     // 6: Adapter for myMesh01 has been notified: Notification (type:2)
     x.removeChild(g);
-    equal(this.factory.event.type, xml3d.events.NODE_REMOVED, "Notification of type NODE_REMOVED"); // 7
+    equal(this.factory.event.type, xml3d.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
 test("Dangling Reference notification", 6, function() {

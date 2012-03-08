@@ -5,7 +5,8 @@
             VALUE_MODIFIED:  1,
             NODE_REMOVED: 2,
             DANGLING_REFERENCE: 3,
-            VALID_REFERENCE: 4
+            VALID_REFERENCE: 4,
+            THIS_REMOVED: 5
     };
 
   //-----------------------------------------------------------------------------

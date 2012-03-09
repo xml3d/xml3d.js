@@ -129,12 +129,13 @@ xml3d.webgl.Renderer.prototype.initCamera = function() {
 	return this.factory.getAdapter(av);
 };
 
-xml3d.webgl.Renderer.prototype.processShaders = function(scene) {
-    for (var i=0; i < scene.length; i++) {
-		var obj = scene[i];
+xml3d.webgl.Renderer.prototype.processShaders = function(objects) {
+    for (var i=0, l=objects.length; i < l; i++) {
+		var obj = objects[i];
 		var groupAdapter = this.factory.getAdapter(obj.meshNode.parentNode);
 		var shader = groupAdapter ? groupAdapter.getShader() : null;
-		obj.shader = this.shaderManager.createShader(shader, this.lights);
+		var shaderName = this.shaderManager.createShader(shader, this.lights);
+		obj.shader = shaderName;
 	}
 };
 
@@ -218,8 +219,8 @@ xml3d.webgl.Renderer.prototype.recompileShader = function(shaderAdapter) {
 	this.handler.redraw("A shader was recompiled");
 };
 
-xml3d.webgl.Renderer.prototype.shaderDataChanged = function(shaderAdapter, evt) {
-	this.shaderManager.shaderDataChanged(shaderAdapter, evt);
+xml3d.webgl.Renderer.prototype.shaderDataChanged = function(shaderId, attrName, newValue) {
+	this.shaderManager.shaderDataChanged(shaderId, attrName, newValue);
 	this.handler.redraw("A shader parameter was changed");
 };
 
@@ -346,68 +347,81 @@ xml3d.webgl.Renderer.prototype.render = function() {
 	}
 	
 	var stats = { objCount : 0, triCount : 0 };
-	
-	//TODO: Remove sorting for opaque objects?
-	//Sort opaque objects, back to front
-	//var zPosOpaque = [];
-	//this.sortObjects(this.opaqueObjects, zPosOpaque, xform, false);
-	
-	//Sort transparent objects, back to front
-	//var zPosTransparent = [];
-	//this.sortObjects(this.transparentObjects, zPosTransparent, xform, false);
+
+	//Sort objects by shader/transparency
+	var opaqueObjects = {};
+	var transparentObjects = [];
+	this.sortObjects(this.drawableObjects, opaqueObjects, transparentObjects, xform);	
 	
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-	gl.enable(gl.BLEND);
 	
 	//Render opaque objects
-	this.drawObjects(this.drawableObjects, xform, lightParams, stats);
+	for (var shaderName in opaqueObjects) {
+		var objectArray = opaqueObjects[shaderName];		
+		this.drawObjects(objectArray, xform, lightParams, stats);
+	}
 	
-	gl.disable(gl.BLEND);
-    //TODO: transparent objects
-    
 	//Render transparent objects
-	/*if (this.transparentObjects.length > 0) {
-		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		gl.enable(gl.BLEND);
-		gl.depthMask(gl.FALSE);
-	
-		this.drawObjects(this.transparentObjects, zPosTransparent, xform, lightParams, stats);
+	if (transparentObjects.length > 0) {
 		
+		//Render transparent objects
+		//gl.depthMask(gl.FALSE);
+		gl.enable(gl.BLEND);
+		gl.disable(gl.DEPTH_TEST);
+		
+		this.drawObjects(transparentObjects, xform, lightParams, stats);
+		
+		gl.enable(gl.DEPTH_TEST);
 		gl.disable(gl.BLEND);
-		gl.depthMask(gl.TRUE);
-	}*/
-	
+		//gl.depthMask(gl.TRUE);
+	}
+
 	return [stats.objCount, stats.triCount]; 
 };
 
-xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, sortedObjectArray, xform, backToFront) {
-    // TODO: sort objects by shader
-	for (i = 0, n = sourceObjectArray.length; i < n; i++) {
-		var meshAdapter = sourceObjectArray[i];
+xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent, xform, backToFront) {
+	var tempArray = [];
+	for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
+		var obj = sourceObjectArray[i];
+		var shaderName = obj.shader;
+		var shader = this.shaderManager.getShaderById(shaderName);
 		
-		if (!meshAdapter.isValid) {
-			sourceObjectArray.splice(i, 1);
-			i--;
-			n--;
-			continue;
+		if (shader.hasTransparency) {
+			//Transparent objects will be drawn front to back so there's no sense in sorting them
+			//by shader
+			tempArray.push(obj);
+		} else {
+			opaque[shaderName] = opaque[shaderName] || [];
+			opaque[shaderName].push(obj);
 		}
-		
-		var trafo = meshAdapter._transform;
-		var center = meshAdapter.bbox.center();
-		center = trafo.multiply(new XML3DRotation(center.x, center.y, center.z, 1.0));
-		center = xform.view.multiply(new XML3DRotation(center.x, center.y, center.z, 1.0));
-		sortedObjectArray[i] = [ i, center.z ]; 
 	}
 	
-	if (backToFront) {
-		sortedObjectArray.sort(function(a, b) {
-			return a[1] - b[1];
-		});
-	} else {
-		sortedObjectArray.sort(function(a, b) {
-			return b[1] - a[1];
-		});
+	//Sort transparent objects from front to back
+	if (tempArray.length > 1) {
+		for (i = 0, n = tempArray.length; i < n; i++) {
+			var obj = tempArray[i];
+			var trafo = obj.transform;
+			var center = obj.mesh.bbox.center()._data;
+			center = mat4.multiplyVec4(trafo, quat4.create([center[0], center[1], center[2], 1.0]));
+			center = mat4.multiplyVec4(xform.view, quat4.create([center[0], center[1], center[2], 1.0]));
+			tempArray[i] = [ obj, center[3] ];
+		}
+		
+		if (backToFront) {
+			tempArray.sort(function(a, b) {
+				return a[1] - b[1];
+			});
+		} else {
+			tempArray.sort(function(a, b) {
+				return b[1] - a[1];
+			});
+		}
+		//TODO: Can we do this better?
+		for (var i=0, l=tempArray.length; i < l; i++) {
+			transparent[i] = tempArray[i][0];
+		}
 	}
+
 };
 
 xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, lightParams, stats) {
@@ -430,7 +444,6 @@ xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, lightP
 		if (obj.visible == false)
 			continue;
 		
-		//xform.model.load(transform);
 		xform.model = transform;
 		xform.modelView = this.camera.getModelViewMatrix(xform.model);
         parameters["modelMatrix"] = xform.model;
@@ -446,25 +459,11 @@ xml3d.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, lightP
 		//shape.applyXFlow(shader, parameters);			
 		this.shaderManager.setUniformVariables(shader, parameters);
 		triCount += this.drawObject(shader, mesh);
-		
-		/*if (!shader)
-		{			
-			this.shaderManager.bindDefaultShader();
-			shaderId = "defaultShader";
-			this.shaderManager.setUniformVariables(shaderId, parameters);
-			triCount += this.drawObject(shaderId, mesh);
-			this.shaderManager.unbindDefaultShader();
-		} else {
-			this.shaderManager.bindShader(shaderId, parameters);
-			//shape.applyXFlow(shader, parameters);			
-			this.shaderManager.setUniformVariables(shaderId, parameters);
-			triCount += this.drawObject(shaderId, mesh);
-		}*/
 		objCount++;
 	}
 	
-	stats.objCount = objCount;
-	stats.triCount = triCount;
+	stats.objCount += objCount;
+	stats.triCount += triCount;
 	
 };
 

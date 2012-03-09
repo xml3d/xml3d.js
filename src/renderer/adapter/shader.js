@@ -24,11 +24,37 @@
 		
 		var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 		
-		if (target == "script") {
+		switch (target) {
+		case "script":
 			this.renderer.recompileShader(this);
+			break;
+		
+		case "src":
+			this.renderer.shaderDataChanged(this.node.id, target, evt.wrapped.newValue);
+			break;
+			
+		case "texmodified":
+			
+			break;
+		
+		case "texremoved":
+			
+			break;
+			
+		case "texadded":
+			
+			break;
+			
+		default:
+			xml3d.debug.logWarning("Unhandled mutation event in shader adapter for parameter '"+target+"'");
+			break;
+		
 		}
 		
+		
 		//TODO: Handle addition/removal of textures
+		
+		
 		
 		/*
 		if (evt.attribute == "script") {
@@ -56,7 +82,13 @@
 	};
 	
 	XML3DShaderRenderAdapter.prototype.notifyDataChanged = function(evt) {
-		this.renderer.shaderDataChanged(this, evt);
+		var targetName = evt.wrapped.currentTarget.name || evt.wrapped.relatedNode.name;
+		var dataTable = this.getDataTable();
+		var newValue = dataTable[targetName].data;
+		if (newValue.length < 2)
+			newValue = newValue[0];
+		
+		this.renderer.shaderDataChanged(this.node.id, targetName, newValue);
 	};
 
 	XML3DShaderRenderAdapter.prototype.getDataTable = function() {

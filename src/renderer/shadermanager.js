@@ -16,6 +16,7 @@ xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	
 	//Always create a default flat shader as a fallback for error handling
 	this.shaders["defaultShader"] = this.getStandardShaderProgram("urn:xml3d:shader:flat");
+	this.shaders["defaultShader"].hasTransparency = false;
 	
 	//Create picking shaders
 	this.shaders["picking"] = this.getStandardShaderProgram("urn:xml3d:shader:picking");
@@ -42,10 +43,14 @@ xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
     var sources = {vs:null, fs:null};
     var dataTable = null;
     var hasTextures = false;
-
+    var hasTransparency = false;
+    
     if (shaderAdapter) {
 	    dataTable = shaderAdapter.getDataTable();
-	    hasTextures = this.hasTextures(dataTable);	
+	    hasTextures = this.hasTextures(dataTable);
+	    if (dataTable["transparency"]) {
+	    	hasTransparency = dataTable["transparency"].data[0] > 0;
+	    }
     }
 
 	if (shaderNode && shaderNode.hasAttribute("script"))
@@ -66,6 +71,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
 			
             shader = this.createShaderFromSources(sources);
 		}
+		shader.hasTransparency = hasTransparency;
 		this.shaders[shaderId] = shader;
 	} else {	
 		// Create the default flat shader
@@ -135,8 +141,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 	var gl = this.gl;
 	
 	if (!sources.vs || !sources.fs) {
-		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
-										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );	
+		return this.shaders["defaultShader"];
 	}
 	
 	var prg = gl.createProgram();
@@ -146,8 +151,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 	
 	if (vShader === null || fShader === null) {
 		//Use a default flat shader instead
-		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
-										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
+		return this.shaders["defaultShader"];
 	}
 	
 	//Link shader program	
@@ -162,8 +166,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 		xml3d.debug.logError(errorString);
 		gl.getError();
 		
-		return this.createShaderFromSources( {vs : g_shaders["urn:xml3d:shader:flat"].vertex, 
-										  fs : g_shaders["urn:xml3d:shader:flat"].fragment} );
+		return this.shaders["defaultShaders"];
 	}
 	
 	var programObject = {
@@ -242,30 +245,33 @@ xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shaderSo
 
 
 xml3d.webgl.XML3DShaderManager.prototype.recompileShader = function(shaderAdapter, lights) {
-	var shader = this.shaders[shaderAdapter.node.id];
+	var shaderName = shaderAdapter.node.id;
+	var shader = this.shaders[shaderName];
 	if (shader) {
 		this.destroyShader(shader);
-		delete shader;
+		delete this.shaders[shaderName];
 		this.createShader(shaderAdapter, lights);
 	}
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderAdapter, evt) {
-    if (!evt.wrapped)
-        return;
-    var targetName = evt.wrapped.currentTarget.name || evt.wrapped.relatedNode.name;
-    var shader = this.shaders[shaderAdapter.node.id];
-    var dataTable = shaderAdapter.getDataTable();
-
-    // Store the change, it will be applied the next time the shader is bound
-    if (dataTable[targetName]) {
-        shader.changes.push({
-            type : "uniform",
-            name : targetName,
-            newValue : dataTable[targetName].data
-        });
-    }
-
+xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, attrName, newValue) {
+	var shader = this.shaders[shaderId];
+	
+	//Store the change, it will be applied the next time the shader is bound
+	if (attrName == "src") {
+		//A texture source was changed
+		
+	} else {
+		if (attrName == "transparency") 
+			shader.hasTransparency = newValue > 0;
+			
+		shader.changes.push({
+			type : "uniform",
+			name : attrName,
+			newValue : newValue
+		});
+	}
+	
 };
 
 
@@ -348,7 +354,6 @@ xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(shader, 
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
-    // TODO: bind samplers (if any)
 	var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
 
 	//Apply any changes encountered since the last time this shader was rendered

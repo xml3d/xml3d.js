@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- ====================================================================== 
-     15.07.2010 14:51:00                                                        
-
-     project    XML3D Blender Exporter
+<!-- ======================================================================
+     project    xml3d.js
      description
-     Deploy script that prepares a single Blender Script to export XML3D files. 
-                   
-     Author: Kristian Sons                                                                
+     Deploy script that prepares a single xml3d.js script file
+
+     Author: Kristian Sons
      ====================================================================== -->
 <project name="script-merge" default="develop">
 	<description>
@@ -27,6 +25,22 @@
 				<args />
 			</exec>
 		</sequential>
+	</macrodef>
+
+	<macrodef name="post-file" description="Use Curl to post the file to the WEBDAV path">
+	    <attribute name="file"/>
+	    <attribute name="url" />
+	    <sequential>
+	        <echo message="Using CURL to upload @{file} to @{url}" />
+	        <!--Execute curl to post the file to the URL -->
+	        <exec executable="${curl.path}">
+                <arg value="-n" />
+	        	<arg value="-s" />
+	            <arg value="-T" />
+	        	<arg value='"@{file}"' />
+	            <arg value='@{url}'/>
+	        </exec>
+	    </sequential>
 	</macrodef>
 
 	<target name="checkOS">
@@ -51,19 +65,20 @@
 		<antcall target="base" />
 	</target>
 
-	<target name="nightly" depends="windowsGit, linuxGit">
-		<tstamp />
-		<git command="log">
-			<args>
-				<arg value="-1" />
-				<arg value="--format=%h / %ci" />
-			</args>
-		</git>
-		<echo message="${git.output}" />
-		<property name="versionStr" value="nightly / ${git.output}" />
-		<property name="script.ext" value="-nightly" />
-		<antcall target="base" />
-	</target>
+   <target name="continuous" depends="windowsGit, linuxGit">
+        <tstamp />
+        <git command="log">
+            <args>
+                <arg value="-1" />
+                <arg value="--format=%h / %ci" />
+            </args>
+        </git>
+        <echo message="${git.output}" />
+        <property name="versionStr" value="DEVELOPMENT / ${git.output}" />
+        <property name="script.ext" value="-dev" />
+        <antcall target="base" />
+        <antcall target="upload" />
+    </target>
 
 	<target name="develop">
 		<tstamp />
@@ -117,10 +132,10 @@
 	<filelist dir="${srcDir}" id="refactored">
 			<file name="types/vec3.js" />
 			<file name="types/box.js" />
-			
+
 		</filelist>
 	<!-- =================================
-          target: base              
+          target: base
          ================================= -->
 	<target name="base" depends="clean" description="description">
 		<property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
@@ -147,5 +162,11 @@
 		</delete>
 	</target>
 
+    <target name="upload">
+    	 <property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
+    	 <fail unless="upload.url"/>
+    	 <post-file file="${finalScript}"
+    	                   url="${upload.url}" />
+    </target>
 
 </project>

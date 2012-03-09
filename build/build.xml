@@ -37,7 +37,7 @@
                 <arg value="-n" />
 	        	<arg value="-s" />
 	            <arg value="-T" />
-	        	<arg value='"@{file}"' />
+                <arg value='@{file}' />
 	            <arg value='@{url}'/>
 	        </exec>
 	    </sequential>

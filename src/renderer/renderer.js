@@ -397,8 +397,9 @@ xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, opaque,
 	}
 	
 	//Sort transparent objects from front to back
-	if (tempArray.length > 1) {
-		for (i = 0, n = tempArray.length; i < n; i++) {
+	var tlength = tempArray.length;
+	if (tlength > 1) {
+		for (i = 0; i < tlength; i++) {
 			var obj = tempArray[i];
 			var trafo = obj.transform;
 			var center = obj.mesh.bbox.center()._data;
@@ -417,9 +418,11 @@ xml3d.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, opaque,
 			});
 		}
 		//TODO: Can we do this better?
-		for (var i=0, l=tempArray.length; i < l; i++) {
+		for (var i=0; i < tlength; i++) {
 			transparent[i] = tempArray[i][0];
 		}
+	} else if (tlength == 1) {
+		transparent[0] = tempArray[0];
 	}
 
 };

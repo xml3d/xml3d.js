@@ -4,7 +4,7 @@
     var handler = {}, events = xml3d.events;
 
     function attrModified(e) {
-        var eh = e.relatedNode._configured;
+        var eh = e.target._configured;
         var handler = eh && eh.handlers[e.attrName];
         if(!handler)
             return;

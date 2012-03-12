@@ -224,9 +224,11 @@ xml3d.webgl.Renderer.prototype.recompileShader = function(shaderAdapter) {
 	this.handler.redraw("A shader was recompiled");
 };
 
-xml3d.webgl.Renderer.prototype.shaderDataChanged = function(shaderId, attrName, newValue) {
-	this.shaderManager.shaderDataChanged(shaderId, attrName, newValue);
-	this.handler.redraw("A shader parameter was changed");
+xml3d.webgl.Renderer.prototype.shaderDataChanged = function(shaderId, attrName, newValue, texName) {
+	this.shaderManager.shaderDataChanged(shaderId, attrName, newValue, texName);
+	
+	if (attrName != "src")
+		this.handler.redraw("A shader parameter was changed");
 };
 
 xml3d.webgl.Renderer.prototype.removeDrawableObject = function(obj) {

@@ -11,18 +11,6 @@
 	
 	xml3d.createClass(XML3DTextureRenderAdapter, xml3d.webgl.RenderAdapter);
 	XML3DTextureRenderAdapter.prototype.notifyChanged = function(evt) {
-		//TODO: pass changes to renderer
-		/*if (evt.attribute == "src") {
-			this.destroy();
-			this.info = this.initTexture();
-			this.factory.renderer.requestRedraw();
-		} else if (evt.attribute == "node") {
-			if (evt.newValue == "") {
-				this.node = null;
-				this.destroy();
-				this.factory.renderer.requestRedraw();
-			}
-		}*/
 		var shaderAdapter = this.factory.getAdapter(this.node.parentElement);
 		if (shaderAdapter)
 			shaderAdapter.notifyChanged(evt);

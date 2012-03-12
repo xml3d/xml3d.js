@@ -254,13 +254,25 @@ xml3d.webgl.XML3DShaderManager.prototype.recompileShader = function(shaderAdapte
 	}
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, attrName, newValue) {
+xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, attrName, newValue, textureName) {
 	var shader = this.shaders[shaderId];
 	
 	//Store the change, it will be applied the next time the shader is bound
 	if (attrName == "src") {
 		//A texture source was changed
+		if (textureName) {
+			var sampler = shader.samplers[textureName];
+			if (sampler)
+				this.replaceTexture(sampler, newValue);
+		} else 
+			xml3d.debug.logError("Couldn't apply change because of a missing texture name");
 		
+		
+		/*shader.changes.push({
+			type : "sampler",
+			name : attrName,
+			newValue : newValue
+		});*/
 	} else {
 		if (attrName == "transparency") 
 			shader.hasTransparency = newValue > 0;
@@ -466,26 +478,46 @@ xml3d.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataT
 		};
 		
 		var tex = this.gl.createTexture();
-		var info = { 
-				status : 0, //image has not been loaded yet
-				handle : tex,
-				texUnit : texUnit
-		};
-		var image = new Image();
-		var renderer = this.renderer;
-		image.onload = function() {
-			info.status = 1; //image loaded, next phase is texture creation
-			renderer.requestRedraw.call(renderer, "Texture loaded");
-		};
-		image.src = texture.src[0];
 		
-		info.image = image;
+		var info = this.loadImage(texture.src[0]);
+		info.texUnit = texUnit;
+		info.handle = tex;
 		sampler.info = info;
 		sampler.options = opt;
 		texUnit++;
 	}
 	
 	return true;
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.loadImage = function(src) {
+	var info = { 
+			status : 0 //image has not been loaded yet
+	};
+	var image = new Image();
+	var renderer = this.renderer;
+	image.onload = function() {
+		info.status = 1; //image loaded, next phase is texture creation
+		renderer.requestRedraw.call(renderer, "Texture loaded");
+	};
+	image.src = src;	
+	info.image = image;
+	return info;
+};
+
+xml3d.webgl.XML3DShaderManager.prototype.replaceTexture = function(texture, newTextureSrc) {
+	this.destroyTexture(texture);
+	var tex = this.gl.createTexture();
+	var info = this.loadImage(newTextureSrc);
+	info.handle = tex;
+	
+	//Copy old values into the new info object
+	var texInfo = texture.info;
+	info.format = texInfo.format;
+	info.glType = texInfo.glType;
+	info.options = texInfo.options;
+	info.valid = false;
+	texture.info = info;
 };
 
 xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(internalFormat, width, height, 

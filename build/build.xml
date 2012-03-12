@@ -62,7 +62,7 @@
 	<target name="stable">
 		<property name="versionStr" value="v${version}" />
 		<property name="script.ext" value="-${version}" />
-		<antcall target="base" />
+		<antcall target="concat" />
 	</target>
 
    <target name="continuous" depends="windowsGit, linuxGit">
@@ -76,7 +76,7 @@
         <echo message="${git.output}" />
         <property name="versionStr" value="DEVELOPMENT / ${git.output}" />
         <property name="script.ext" value="-dev" />
-        <antcall target="base" />
+        <antcall target="concat" />
         <antcall target="upload" />
     </target>
 
@@ -84,7 +84,7 @@
 		<tstamp />
 		<property name="versionStr" value="DEVELOPMENT SNAPSHOT (${TODAY})" />
 		<property name="script.ext" value="" />
-		<antcall target="base" />
+		<antcall target="concat" />
 	</target>
 
 	<filelist dir="${srcDir}" id="sourceFiles">
@@ -129,15 +129,10 @@
 		<file name="../tools/xml3d_scene_controller.js" />
 	</filelist>
 
-	<filelist dir="${srcDir}" id="refactored">
-			<file name="types/vec3.js" />
-			<file name="types/box.js" />
-
-		</filelist>
 	<!-- =================================
-          target: base
+          target: Concat all file
          ================================= -->
-	<target name="base" depends="clean" description="description">
+	<target name="concat" depends="clean" description="description">
 		<property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
 		<concat destfile="${finalScript}">
 			<fileset file="${basedir}/preamble.txt" />

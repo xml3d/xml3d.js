@@ -19,11 +19,11 @@ xml3d.debug = {
                 xml3d.debug.params.xml3d_loglevel = xml3d.debug.WARNING;
             xml3d.debug.isSetup = true;
         }
-        return !!xml3d.debug.params.xml3d_debug;
+        return !!xml3d.debug.params.xml3d_log;
     },
     doLog : function(msg, logType) {
         var params = xml3d.debug.params;
-        if (!params.xml3d_debug || logType < params.xml3d_loglevel) {
+        if (!params.xml3d_log || logType < params.xml3d_loglevel) {
             return;
         }
         

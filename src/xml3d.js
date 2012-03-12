@@ -26,6 +26,7 @@
 /**  @namespace **/
 var xml3d = xml3d || {};
 
+xml3d.version = '%VERSION%';
 xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
 xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
@@ -61,8 +62,9 @@ xml3d.createClass = function(ctor, parent, methods) {
 	var onload = function() {
 
         var debug = xml3d.debug.setup();
+        debug && xml3d.debug.logInfo("xml3d.js version: " + xml3d.version);
 
-		// Find all the XML3D tags in the document
+        // Find all the XML3D tags in the document
 		var xml3ds = document.getElementsByTagNameNS(xml3d.xml3dNS, 'xml3d');
 		xml3ds = Array.map(xml3ds, function(n) { return n; });
 

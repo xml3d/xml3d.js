@@ -492,15 +492,16 @@ xml3d.webgl.Renderer.prototype.drawObject = function(shader, meshInfo) {
 			var shaderAttribute = sAttributes[name];
 			var vbo;
 			
+			if (!vbos[name]) {
+				xml3d.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
+				continue;
+			}
+			
 			if (vbos[name].length > 1)
 				vbo = vbos[name][i];
 			else
 				vbo = vbos[name][0];
-			
-			if (!vbo) {
-				xml3d.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
-			}
-	
+
 			gl.enableVertexAttribArray(shaderAttribute.location);		
 			gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 			

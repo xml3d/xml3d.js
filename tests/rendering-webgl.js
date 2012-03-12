@@ -204,7 +204,7 @@ test("Nested transforms", 8, function() {
 
 });
 
-test("Camera with group transforms", 5, function() {
+test("Camera with group transforms", 6, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -228,7 +228,12 @@ test("Camera with group transforms", 5, function() {
     camTransform.setAttribute("translation", "0 -6 0");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,0,255], "Camera facing bottom of cube, Black");
+    deepEqual(actual, [255,0,255,255], "Camera facing bottom of cube, Purple");
+    
+    view.setAttribute("orientation", "0 0 0 0");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [255,0,255,255], "Camera with orientation '0 0 0 0', Purple");
 });
 
 

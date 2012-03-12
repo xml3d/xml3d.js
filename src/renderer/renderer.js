@@ -189,6 +189,10 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 		adapter.visible = visible && currentNode.visible;
 		break;
 	
+	case "view":
+		adapter.parentTransform = transform;
+		adapter.updateViewMatrix();
+		break;
 	default:
 		break;
 	}
@@ -240,6 +244,12 @@ xml3d.webgl.Renderer.prototype.setGLContext = function(gl) {
 xml3d.webgl.Renderer.prototype.resizeCanvas = function (width, height) {
 	this.width = width;
 	this.height = height;
+};
+
+xml3d.webgl.Renderer.prototype.activeViewChanged = function () {
+	this._projMatrix = null;
+	this._viewMatrix = null;
+	this.camera = this.initCamera();
 };
 
 xml3d.webgl.Renderer.prototype.requestRedraw = function(reason, forcePickingRedraw) {
@@ -310,19 +320,13 @@ xml3d.webgl.Renderer.prototype.render = function() {
 	//		gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.DEPTH_TEST);
 	
-    // If the view has changed or we don't have a camera, then compute it.
-    //TODO: Implement better notification system for view changes
-    var av = this.xml3dNode.activeView;
-	if (this.currentView != xml3d.URIResolver.resolve(av) || !this.camera)
-		this.camera = this.initCamera();
-
     // Check if we still don't have a camera.
     if (!this.camera)
         return [0, 0];
 	
 	var xform = {};
-	xform.view = this.getViewMatrix();  
-	xform.proj = this.getProjectionMatrix(); 
+	xform.view = this.camera.viewMatrix;  
+	xform.proj = this.camera.getProjectionMatrix(this.width / this.height); 
 	
 	//Setup lights
 	var light, lightOn;
@@ -756,44 +760,6 @@ xml3d.webgl.Renderer.prototype.dispose = function() {
 xml3d.webgl.Renderer.prototype.notifyDataChanged = function() {
 	this.handler.redraw("Unspecified data change.");
 };
-
-/**
- * Retrieve the camera's view matrix.
- * 
- * @return camera's current view matrix  
- */
-xml3d.webgl.Renderer.prototype.getViewMatrix = function() { 
-
-	// recompute if view changed
-	//TODO: better view change notification system
-	var av = this.xml3dNode.activeView;
-	if (this.currentView != xml3d.URIResolver.resolve(av))
-		this.camera = this.initCamera();
-
-	this._viewMatrix = this.camera.viewMatrix;
-	
-	return this._viewMatrix; 
-}; 
-
-/**
- * Retrieve the camera's projection matrix. 
- * 
- * @return camera's projection matrix based on current width and height
- */
-xml3d.webgl.Renderer.prototype.getProjectionMatrix = function() { 
-
-	if(!this._projMatrix)
-	{
-		//TODO: better view change notification system
-		var av = this.xml3dNode.activeView;
-		if (this.currentView != xml3d.URIResolver.resolve(av))
-			this.camera = this.initCamera();
-		
-		this._projMatrix = this.camera.getProjectionMatrix(this.width / this.height);
-	}
-	
-	return this._projMatrix;
-}; 
 
 // TODO: Move all these stuff to a good place
 

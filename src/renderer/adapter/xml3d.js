@@ -21,7 +21,7 @@
 		var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 		
 		if (target == "activeView") {
-			this.factory.renderer.camera = this.factory.renderer.initCamera();
+			this.factory.renderer.activeViewChanged();
 		}
 	};
 	

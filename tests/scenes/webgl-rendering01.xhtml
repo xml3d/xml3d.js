@@ -12,10 +12,38 @@
     <defs>
     <transform id="t_group3" rotation="0 1 0 1.57" />
     <transform id="t_group4" rotation="0 1 0 1.57" />
+    <transform id="t_cubetop" rotation="1 0 0 1.57" translation="0 1 0"/>
+    <transform id="t_cubebottom" rotation="1 0 0 -1.57" translation="0 -1 0"/>
+    <transform id="t_cubeleft" rotation="0 1 0 1.57" translation="1 0 0"/>
+    <transform id="t_cuberight" rotation="0 1 0 -1.57" translation="-1 0 0"/>
+    <transform id="t_cubeback" rotation="0 1 0 -3.141" translation="0 0 -1"/>
+    <transform id="t_cubefront" translation="0 0 1"/>
+    <transform id="t_camera1" />
     
     <shader id="flatred" script="urn:xml3d:shader:flat">
         <float3 name="diffuseColor">
             1 0 0
+        </float3>
+    </shader>
+    <shader id="flatgreen" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">
+            0 1 0
+        </float3>
+    </shader>
+    <shader id="flatpurple" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">
+            1 0 1
+        </float3>
+    </shader>
+    <shader id="flatyellow" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">
+            1 1 0
+        </float3>
+    </shader>
+    
+    <shader id="flatblack" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">
+            0 0 0
         </float3>
     </shader>
     <shader id="phonggreen" script="urn:xml3d:shader:phong">
@@ -31,6 +59,9 @@
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
     </data>
     </defs>
+    <group id="cameraGroup1" transform="#t_camera1">
+         <view id="transformTestView" position="0 0 -3" orientation="0 1 0 3.141"/>
+    </group>
     <view id="defaultView" position="0 0 3"/>
     <group id="myGroup" visible="false">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
@@ -52,6 +83,27 @@
               
         </mesh>
     </group>
+    </group>
+    
+    <group id="group5" visible="false">
+        <group transform="#t_cubetop" shader="#flatred">
+            <mesh src="#meshdata" type="triangles"/>
+        </group>
+        <group transform="#t_cubeleft" shader="#flatgreen">
+            <mesh src="#meshdata" type="triangles"/>
+        </group>
+        <group transform="#t_cuberight" shader="#flatpurple">
+            <mesh src="#meshdata" type="triangles"/>
+        </group>
+        <group transform="#t_cubebottom" shader="#flatblack">
+            <mesh src="#meshdata" type="triangles"/>
+        </group>
+        <group transform="#t_cubeback" shader="#flatyellow">
+            <mesh src="#meshdata" type="triangles"/>
+        </group>
+         <group transform="#t_cubefront" >
+        <mesh src="#meshdata" type="triangles"/>
+        </group>
     </group>
     </xml3d>
     <script type="text/javascript">

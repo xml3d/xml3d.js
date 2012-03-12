@@ -165,8 +165,8 @@ xml3d.webgl.InternalMutationEvent = function() {
         viewport[3] = this.renderer.height;
 
         // get view and projection matrix arrays
-        var viewMat = this.renderer.getViewMatrix().toGL();
-        var projMat = this.renderer.getProjectionMatrix().toGL();
+        var viewMat = this.renderer.camera.viewMatrix;
+        var projMat = this.renderer.camera.getProjectionMatrix(viewport[2] / viewport[3]);
 
         var ray = new XML3DRay();
 

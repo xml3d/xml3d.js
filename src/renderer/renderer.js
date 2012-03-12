@@ -154,6 +154,7 @@ xml3d.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 		var shader = adapter.getShader();
 		downstreamShader = shader ? shader : parentShader;	
 		adapter.parentTransform = transform;
+		adapter.parentShader = parentShader;
 		adapter.isVisible = visible;
 		downstreamTransform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
 		break;	

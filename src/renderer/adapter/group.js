@@ -76,6 +76,10 @@
 		case "shader":
 			//Update this group node's shader then propagate the change down to its children
 			var downstreamValue = this.getShader();
+			if (!downstreamValue) {
+				//This node's shader was removed, pass down the parent shader instead
+				downstreamValue = this.parentShader;
+			}
 	        evt.internalType = "parentshader";
 	        evt.newValue = downstreamValue;
 	        this.notifyChildren(evt);

@@ -90,7 +90,7 @@ test("Change shader via script", 6, function() {
 
 });
 
-test("Change visible/shader for nested groups", 7, function() {
+test("Change visible/shader for nested groups", 8, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -122,6 +122,11 @@ test("Change visible/shader for nested groups", 7, function() {
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [re-add child shader]");
+    
+    outerGroup.setAttribute("shader", "#flatblack");
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [child shader overrides new parent shader]");
 });
 
 test("Add/remove meshes and groups", 6, function() {

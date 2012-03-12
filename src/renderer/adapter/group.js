@@ -224,8 +224,8 @@
 	        if(c.getBoundingBox)
 	            bbox.extend(c.getBoundingBox());
 	    });
-	    if (this._transformAdapter) {
-	        xml3d.webgl.transformAABB(bbox, this._transformAdapter.getMatrix());
+	    if (this.transformAdapter) {
+	        xml3d.webgl.transformAABB(bbox, this.transformAdapter.getMatrix());
 	    }
 	    return bbox;
     };

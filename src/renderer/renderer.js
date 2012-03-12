@@ -23,8 +23,6 @@ xml3d.webgl.configure = function(xml3ds) {
 		//Check for event listener attributes for the xml3d node
 		if (xml3ds[i].hasAttribute("contextmenu") && xml3ds[i].getAttribute("contextmenu") == "false")
 			canvas.addEventListener("contextmenu", function(e) {xml3d.webgl.stopEvent(e);}, false);
-		//if (xml3ds[i].hasAttribute("framedrawn"))
-		//	canvas.addEventListener("framedrawn", new Function(xml3ds[i].getAttribute("framedrawn")), false);
 		
 		if (xml3ds[i].hasAttribute("disablepicking"))
 			canvasHandler._pickingDisabled = xml3ds[i].getAttribute("disablepicking") == "true" ? true : false;

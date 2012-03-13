@@ -496,6 +496,17 @@ xml3d.classInfo.int = {
 	_term: undefined
 };
 /**
+ * Properties and methods for <int4>
+ **/
+xml3d.classInfo.int4 = {
+	id : {a: xml3d.StringAttributeHandler},
+    className : {a: xml3d.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for int4
+	name : {a: xml3d.StringAttributeHandler},
+	value : {a: xml3d.IntArrayValueHandler},
+	_term: undefined
+};
+/**
  * Properties and methods for <bool>
  **/
 xml3d.classInfo.bool = {

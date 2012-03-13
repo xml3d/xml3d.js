@@ -15,8 +15,12 @@ xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	this.shaders = {};
 	
 	//Always create a default flat shader as a fallback for error handling
-	this.shaders["defaultShader"] = this.getStandardShaderProgram("urn:xml3d:shader:flat");
-	this.shaders["defaultShader"].hasTransparency = false;
+	var fallbackShader = this.getStandardShaderProgram("urn:xml3d:shader:flat");
+	fallbackShader.hasTransparency = false;
+	this.bindShader(fallbackShader);
+	this.setUniform(gl, fallbackShader.uniforms["diffuseColor"], [1, 0, 0]);
+	this.unbindShader(fallbackShader);
+	this.shaders["defaultShader"] = fallbackShader;
 	
 	//Create picking shaders
 	this.shaders["picking"] = this.getStandardShaderProgram("urn:xml3d:shader:picking");

@@ -15,7 +15,7 @@
     p.updateViewMatrix = function() {
             var pos = this.node.position._data;
             var orient = this.node.orientation;
-            var v = mat4.multiply(mat4.translate(mat4.identity(mat4.create()), pos), quat4.toMat4(orient._data));
+            var v = mat4.multiply(mat4.translate(mat4.identity(mat4.create()), pos), orient.toMatrix()._data); 
             
             var p = this.factory.getAdapter(this.node.parentNode);
             this.parentTransform = p.applyTransformMatrix(mat4.identity(mat4.create()));

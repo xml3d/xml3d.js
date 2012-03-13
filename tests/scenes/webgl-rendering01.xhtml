@@ -11,6 +11,7 @@
    <xml3d activeView="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
     <defs>
     <transform id="t_group3" rotation="0 1 0 1.57" />
+    <transform id="t_viewtest" rotation="0 1 0 1.57" />
     <transform id="t_group4" rotation="0 1 0 1.57" />
     <transform id="t_cubetop" rotation="1 0 0 1.57" translation="0 1 0"/>
     <transform id="t_cubebottom" rotation="1 0 0 -1.57" translation="0 -1 0"/>
@@ -20,9 +21,9 @@
     <transform id="t_cubefront" translation="0 0 1"/>
     <transform id="t_camera1" />
     
-    <shader id="flatred" script="urn:xml3d:shader:flat">
+    <shader id="flatblue" script="urn:xml3d:shader:flat">
         <float3 name="diffuseColor">
-            1 0 0
+            0 0 1
         </float3>
     </shader>
     <shader id="flatgreen" script="urn:xml3d:shader:flat">
@@ -63,14 +64,19 @@
          <view id="transformTestView" position="0 0 -3" orientation="0 1 0 3.141"/>
     </group>
     <view id="defaultView" position="0 0 3"/>
+    
+    <view id="viewOrientationTest" position="-3 0 0" orientation="0 1 0 -1.57"/>
+    
+    <group id="viewTest" visible="false" transform="#t_viewtest">
+        <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
+    </group>
+    
     <group id="myGroup" visible="false">
-	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
-	          
-	    </mesh>
+	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
     </group>
     
     <group id="group1" shader="#phonggreen" visible="false">
-    <group id="group2" shader="#flatred">
+    <group id="group2" shader="#flatblue">
         <mesh id="myNestedMesh" src="#meshdata" type="triangles">
               
         </mesh>
@@ -86,7 +92,7 @@
     </group>
     
     <group id="group5" visible="false">
-        <group transform="#t_cubetop" shader="#flatred">
+        <group transform="#t_cubetop" shader="#flatblue">
             <mesh src="#meshdata" type="triangles"/>
         </group>
         <group transform="#t_cubeleft" shader="#flatgreen">

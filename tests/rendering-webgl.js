@@ -51,7 +51,7 @@ test("Change visibility via script", 7, function() {
         equal(n.numberOfObjectsDrawn, 1, "1 Object drawn");
         equal(n.numberOfTrianglesDrawn, 2, "2 Triangles drawn");
         actual = win.getPixelValue(gl, 40, 40);
-        deepEqual(actual, [0,0,255,255], "Blue at 40,40");
+        deepEqual(actual, [255,0,0,255], "Red at 40,40");
         actual = win.getPixelValue(gl, 0, 0);
         deepEqual(actual, [0,0,0,0], "Transparent at 0,0");
     };
@@ -70,12 +70,12 @@ test("Change shader via script", 6, function() {
     group.visible = true;
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [visible true]");
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [visible true]");
 
-    group.setAttribute("shader", "#flatred");
+    group.setAttribute("shader", "#flatblue");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [flat shader]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [flat shader]");
 
     group.setAttribute("shader", "#phonggreen");
     h.draw();
@@ -83,10 +83,10 @@ test("Change shader via script", 6, function() {
     deepEqual(actual, [0,241,0,255], "Green at 40,40 [phong shader]");
 
     var shaderColor = this.doc.getElementById("phonggreen_color");
-    shaderColor.textContent = "1 0 0";
+    shaderColor.textContent = "0 0 1";
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [241,0,0,255], "Red at 40,40 [change color]");
+    deepEqual(actual, [0,0,241,255], "Blue at 40,40 [change color]");
 
 });
 
@@ -111,22 +111,22 @@ test("Change visible/shader for nested groups", 8, function() {
     innerGroup.setAttribute("visible", "true");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [both visible, child shader overrides parent]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [both visible, child shader overrides parent]");
 
     innerGroup.setAttribute("shader", "");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,241,0,255], "Green at 40,40 [remove child shader]");
 
-    innerGroup.setAttribute("shader", "#flatred");
+    innerGroup.setAttribute("shader", "#flatblue");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [re-add child shader]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [re-add child shader]");
     
     outerGroup.setAttribute("shader", "#flatblack");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,0,0,255], "Red at 40,40 [child shader overrides new parent shader]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child shader overrides new parent shader]");
 });
 
 test("Add/remove meshes and groups", 6, function() {
@@ -139,7 +139,7 @@ test("Add/remove meshes and groups", 6, function() {
     x.appendChild(mesh);
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [add mesh]");
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add mesh]");
 
     x.removeChild(mesh);
     h.draw();
@@ -151,7 +151,7 @@ test("Add/remove meshes and groups", 6, function() {
     x.appendChild(group);
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [add group with mesh]");
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
     x.removeChild(group);
     h.draw();
@@ -169,7 +169,7 @@ test("Nested transforms", 8, function() {
     group3.visible = true;
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,255,255], "Blue at 90,90 [nested y-axis rotations]");
+    deepEqual(actual, [255,0,0,255], "Red at 90,90 [nested y-axis rotations]");
 
     var t3 = this.doc.getElementById("t_group3");
     var t4 = this.doc.getElementById("t_group4");
@@ -182,7 +182,7 @@ test("Nested transforms", 8, function() {
     t3.setAttribute("rotation", "0 1 0 1.57");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,255,255], "Blue at 90,90 [set outer rotation 90]");
+    deepEqual(actual, [255,0,0,255], "Red at 90,90 [set outer rotation 90]");
 
     // Rotate inner -90 around local x-axis (actually around z since we've rotated 90 around x first)
     t4.setAttribute("rotation", "1 0 0 -1.57");
@@ -194,7 +194,7 @@ test("Nested transforms", 8, function() {
     t3.setAttribute("rotation", "1 0 0 1.57");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,255,255], "Blue at 90,90 [cancel inner rotation with outer]");
+    deepEqual(actual, [255,0,0,255], "Red at 90,90 [cancel inner rotation with outer]");
 
     // Move the shape 3 units to the right so it's off the screen
     t4.setAttribute("translation", "3 0 0");
@@ -204,14 +204,23 @@ test("Nested transforms", 8, function() {
 
 });
 
-test("Camera with group transforms", 6, function() {
+test("Camera with group transforms", 7, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
     var group5 = this.doc.getElementById("group5");
     var camTransform = this.doc.getElementById("t_camera1");
     var view = this.doc.getElementById("transformTestView");
+    var camtest = this.doc.getElementById("viewTest");
     
+    //Simple test of camera orientation to check that view matrix is built correctly
+    camtest.visible = true;
+    x.setAttribute("activeView", "#viewOrientationTest");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [255,0,0,255], "Simple camera orientation check, Red");
+    
+    camtest.visible = false;
     group5.visible = true;
     x.setAttribute("activeView", "#transformTestView");
     h.draw();
@@ -222,7 +231,7 @@ test("Camera with group transforms", 6, function() {
     camTransform.setAttribute("translation", "0 3 0");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [255,0,0,255], "Camera facing top of cube, Red");
+    deepEqual(actual, [0,0,255,255], "Camera facing top of cube, Blue");
     
     view.setAttribute("orientation", "0 1 0 0");
     camTransform.setAttribute("translation", "0 -6 0");
@@ -234,6 +243,7 @@ test("Camera with group transforms", 6, function() {
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,255,255], "Camera with orientation '0 0 0 0', Purple");
+    
 });
 
 
@@ -254,7 +264,7 @@ module("WebGL Shaders and Textures", {
         v.removeEventListener("load", this.cb, true);
     }
 });
-
+/*
 test("Texture shader basics", 5, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
@@ -274,8 +284,9 @@ test("Texture shader basics", 5, function() {
     this.doc.getElementById("texShader1").removeChild(texNode);
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,255,255], "Remove texture node");
+    deepEqual(actual, [255,0,0,255], "Remove texture node");
 });
+*/
 
 test("Custom shader", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
@@ -287,7 +298,7 @@ test("Custom shader", 4, function() {
     group.setAttribute("shader", "#customShader");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [255,0,0,255], "Red custom shader");
+    deepEqual(actual, [255,255,0,255], "Yellow custom shader");
 
     //The shader has a green diffuseColor parameter that should override the standard blue
     cshader.setAttribute("script", "urn:xml3d:shader:phong");

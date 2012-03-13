@@ -508,13 +508,15 @@ test("XML3DMatrix::CSSMatrix conformance", function() {
             QUnit.closeMatrix(xml3d, css, EPSILON, "Same identity");
             QUnit.closeMatrix(xml3d.translate(1, 2, 3), css.translate(1, 2, 3), EPSILON, "CSSMatrix::translate");
             QUnit.closeMatrix(xml3d.scale(1, 2, 3), css.scale(1, 2, 3), EPSILON, "CSSMatrix::scale");
-            QUnit.closeMatrix(xml3d.rotate(0, 0, Math.PI / 2), css.rotate(0, 0, 90), EPSILON, "CSSMatrix::rotate");
+            QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, 0, 0), css.rotate(90, 0, 0), EPSILON, "CSSMatrix::rotate 1");
+            QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, Math.PI / 2, 0), css.rotate(90, 90, 0), EPSILON, "CSSMatrix::rotate 2");
+            QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4, Math.PI / 4, Math.PI / 2), css.rotate(-45, 45, 90), EPSILON, "CSSMatrix::rotate 3");
+            QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4), css.rotate(-45), EPSILON, "CSSMatrix::rotate 4");
             QUnit.closeMatrix(xml3d.rotateAxisAngle(1, 0, 0, Math.PI / 4), css.rotateAxisAngle(1, 0, 0, 45), EPSILON,
                     "CSSMatrix::rotateAxisAngle");
             QUnit.closeMatrix(xml3d.translate(1, 2, 3).inverse(), css.translate(1, 2, 3).inverse(), EPSILON,
                     "CSSMatrix::inverse (test depends on correct ::translate)");
-            QUnit.closeMatrix(xml3d.translate(1, 2, 3).multiply(xml3d.scale(2, 2, 2)), css.scale(2, 2, 2).multiply(
-                    css.translate(1, 2, 3)), EPSILON,
+            QUnit.closeMatrix(xml3d.translate(1, 2, 3).multiply(xml3d.scale(2, 2, 2)), css.translate(1, 2, 3).multiply(css.scale(2, 2, 2)), EPSILON,
                     "CSSMatrix::multiply (test depends on correct ::translate and ::scale)");
             // QUnit.closeMatrix(css.rotate(45,0,0),
             // css.rotateAxisAngle(1,0,0,45), EPSILON);

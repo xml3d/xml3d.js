@@ -176,32 +176,15 @@
      * @returns {XML3DMatrix} new rotated matrix
      */
     p.rotate = function(rotX, rotY, rotZ) {
-
-        var cos_rz = Math.cos(rotZ || 0), cos_ry = Math.cos(rotY || 0), cos_rx = Math
-                .cos(rotX || 0), sin_rz = Math.sin(rotZ || 0), sin_ry = Math
-                .sin(rotY || 0), sin_rx = Math.sin(rotZ || 0);
-
-        var m00 = cos_rz * cos_ry, m01 = sin_rz * cos_ry, m02 = -sin_ry, m10 = -sin_rz
-                * cos_rx + cos_rz * sin_ry * sin_rx, m11 = cos_rz * cos_rx
-                + sin_rz * sin_ry * sin_rx, m12 = cos_ry * sin_rx, m20 = -sin_rz
-                * -sin_rx + cos_rz * sin_ry * cos_rx, m21 = cos_rz * -sin_rx
-                + sin_rz * sin_ry * cos_rx, m22 = cos_ry * cos_rx;
-
-        var b = this._data;
-        var result = new XML3DMatrix(b[0] * m00 + b[4] * m01 + b[8] * m02, b[1]
-                * m00 + b[5] * m01 + b[9] * m02, b[2] * m00 + b[6] * m01
-                + b[10] * m02, b[3] * m00 + b[7] * m01 + b[11] * m02,
-
-        b[0] * m10 + b[4] * m11 + b[8] * m12, b[1] * m10 + b[5] * m11 + b[9]
-                * m12, b[2] * m10 + b[6] * m11 + b[10] * m12, b[3] * m10 + b[7]
-                * m11 + b[11] * m12,
-
-        b[0] * m20 + b[4] * m21 + b[8] * m22, b[1] * m20 + b[5] * m21 + b[9]
-                * m22, b[2] * m20 + b[6] * m21 + b[10] * m22, b[3] * m20 + b[7]
-                * m21 + b[11] * m22,
-
-        b[12], b[13], b[14], b[15]);
-        return result;
+        var r = new XML3DMatrix();
+        if(rotY === undefined && rotZ === undefined) {
+            mat4.rotateZ(this._data, rotX, r._data);
+            return r;    
+        }
+        mat4.rotateZ(this._data, rotZ, r._data);
+        mat4.rotateY(r._data, rotY);
+        mat4.rotateX(r._data, rotX);
+        return r;
     };
 
     /**

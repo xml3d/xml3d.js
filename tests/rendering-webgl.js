@@ -17,11 +17,11 @@ module("WebGL Rendering", {
 });
 
 function getContextForXml3DElement(x) {
-    return x._configured.adapters.XML3DRenderAdapterFactory.handler.gl;
+    return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler.gl;
 };
 
 function getHandler(x) {
-	return x._configured.adapters.XML3DRenderAdapterFactory.handler;
+	return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler;
 };
 
 test("Background and invisible mesh", 4, function() {
@@ -277,7 +277,7 @@ test("Texture shader basics", 5, function() {
     deepEqual(actual, [0,0,255,255], "Remove texture node");
 });
 
-test("Custom shader", 5, function() {
+test("Custom shader", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);

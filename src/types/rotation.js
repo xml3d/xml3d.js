@@ -122,7 +122,7 @@
             this._data[2] = this._axis.z * s;
             this._data[3] = Math.cos(this._angle / 2);
         } else {
-            return quat4.set([ 0, 0, 0, 1 ], this._data);
+            quat4.set([ 0, 0, 0, 1 ], this._data);
         }
     };
 

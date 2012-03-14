@@ -71,9 +71,10 @@ xml3d.webgl.InternalMutationEvent = function() {
         };
 
         this.redraw = function(reason, forcePickingRedraw) {
+            forcePickingRedraw = forcePickingRedraw === undefined ? true : forcePickingRedraw;
             if (this.needDraw !== undefined) {
                 this.needDraw = true;
-                this.needPickingDraw = forcePickingRedraw !== undefined ? forcePickingRedraw : true;
+                this.needPickingDraw = this.needPickingDraw || forcePickingRedraw;
             } else {
                 // This is a callback from a texture, don't need to redraw the
                 // picking buffers
@@ -214,8 +215,8 @@ xml3d.webgl.InternalMutationEvent = function() {
             var stats = this.renderer.render(this.gl);
             var end = Date.now();
 
-            this.dispatchFrameDrawnEvent(start, end, stats);
             this.needDraw = false;
+            this.dispatchFrameDrawnEvent(start, end, stats);
 
         } catch (e) {
             xml3d.debug.logException(e);

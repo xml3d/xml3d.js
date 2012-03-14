@@ -34,15 +34,16 @@ test("Background and invisible mesh", 4, function() {
     deepEqual(actual, [0,0,0,0], "Transparent at 0,0");
 });
 
-test("Change visibility via script", 7, function() {
+test("Change visibility via script", 9, function() {
     var x = this.doc.getElementById("xml3DElem"),
         actual,
         win = this.doc.defaultView,
         gl = getContextForXml3DElement(x),
-        testFunc = null;
+        testFunc = null, h = getHandler(x);
 
     x.addEventListener("framedrawn", function(n) {
             ok("Redraw was triggered");
+            ok(!h.needDraw, "Redraw not required");
             if(testFunc)
                 testFunc(n);
             start();
@@ -57,6 +58,7 @@ test("Change visibility via script", 7, function() {
     };
     stop();
     this.doc.getElementById("myGroup").visible = true;
+    ok(h.needDraw, "Redraw required");
 });
 
 test("Change shader via script", 6, function() {
@@ -244,6 +246,23 @@ test("Camera with group transforms", 7, function() {
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,255,255], "Camera with orientation '0 0 0 0', Purple");
     
+});
+
+test("Pick pass flag", 7, function() {
+    var x = this.doc.getElementById("xml3DElem");
+    var h = getHandler(x);
+    h.renderPick(0,0);
+    ok(!h.needPickingDraw, "No picking needed after pick rendering");
+    this.doc.getElementById("group2").setAttribute("shader","#flatblack");
+    ok(!h.needPickingDraw, "Changing shaders does not require a picking pass");
+    this.doc.getElementById("t_cubebottom").translation.x = 5;
+    ok(h.needPickingDraw, "Changing transformation does require a picking pass");
+    h.renderPick(0,0);
+    ok(!h.needPickingDraw, "No picking needed after pick rendering");
+    this.doc.getElementById("t_cubebottom").translation.x = 3;
+    this.doc.getElementById("group2").setAttribute("shader","#flatblue");
+    // This failed because setting shader set flag to 'false'
+    ok(h.needPickingDraw, "Changing transformation does require a picking pass");
 });
 
 

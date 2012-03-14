@@ -98,7 +98,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		var dataTable = this.dataAdapter.createDataTable();
 		
 		if (!dataTable.position || !dataTable.position.data) {
-			xml3d.debug.logError("Mesh "+dataAdapter.id+" has no data for required attribute 'position'.");
+			xml3d.debug.logError("Mesh "+this.node.id+" has no data for required attribute 'position'.");
 			return { vbos : {}, glType : 0, valid : false};
 		}
 		

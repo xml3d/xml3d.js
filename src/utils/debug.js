@@ -16,14 +16,14 @@ xml3d.debug = {
               xml3d.debug.params[keyVal[0]] = decodeURIComponent(keyVal[1]);
             });
             if(xml3d.debug.params.xml3d_loglevel === undefined)
-                xml3d.debug.params.xml3d_loglevel = xml3d.debug.WARNING;
+                xml3d.debug.params.xml3d_loglevel = xml3d.debug.ERROR;
             xml3d.debug.isSetup = true;
         }
-        return !!xml3d.debug.params.xml3d_log;
+        return !xml3d.debug.params.xml3d_nolog;
     },
     doLog : function(msg, logType) {
         var params = xml3d.debug.params;
-        if (!params.xml3d_log || logType < params.xml3d_loglevel) {
+        if (params.xml3d_nolog || logType < params.xml3d_loglevel) {
             return;
         }
         

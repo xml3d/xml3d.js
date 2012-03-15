@@ -86,6 +86,36 @@ test("Group Transformation local", function() {
 
     });
 
+test("Hierarchy", function() {
+    var parent = this.doc.getElementById("parentGroup");
+    var child1 = this.doc.getElementById("child01");
+    var child2 = this.doc.getElementById("child02");
+    var a = new XML3DMatrix().rotate(Math.PI/2.0,0,0);
+    QUnit.closeMatrix(parent.getLocalMatrix(), a, EPSILON, "Local Matrix");
+    QUnit.closeMatrix(parent.getWorldMatrix(), new XML3DMatrix(), EPSILON, "Global transformation is identity");
+    QUnit.closeMatrix(child1.getLocalMatrix(), new XML3DMatrix(), EPSILON, "Child1 matrix is identity");
+    QUnit.closeMatrix(child1.getLocalMatrix(), new XML3DMatrix(), EPSILON, "Child2 matrix is identity");
+    QUnit.closeMatrix(child1.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "World Matrix of child");
+    QUnit.closeMatrix(child1.getWorldMatrix(), child2.getWorldMatrix(), EPSILON, "World Matrix of child");
+    child1.transform = "#t_rotation2";
+    QUnit.closeMatrix(child1.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "World Matrix of child not changed through local matrix change.");
+    QUnit.closeMatrix(child1.getLocalMatrix(), new XML3DMatrix().rotate(0,Math.PI/2.0,0), EPSILON, "Child2 matrix is now a rotation matrix.");
+    QUnit.closeMatrix(child2.getLocalMatrix(), new XML3DMatrix(), EPSILON, "Child2 matrix is still identity");
+
+    //Change parent transformation
+    parent.transform = "#t_rotation3";
+    QUnit.closeMatrix(parent.getLocalMatrix(), new XML3DMatrix().rotate(0,0,Math.PI/2.0), EPSILON, "New parent local matrix");
+    QUnit.closeMatrix(child1.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "New child1 global matrix");
+    // Failed in 361f96c because of reference copies in transformation propagation
+    QUnit.closeMatrix(child2.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "New child2 global matrix");
+
+    var t = this.doc.getElementById("t_rotation3");
+    t.translation.set(new XML3DVec3(1,2,3));
+    QUnit.closeMatrix(parent.getLocalMatrix(), new XML3DMatrix().translate(1,2,3).rotate(0,0,Math.PI/2.0), EPSILON, "New parent local matrix");
+    QUnit.closeMatrix(child1.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "New child1 global matrix");
+    // Failed in 361f96c because of reference copies in transformation propagation
+    QUnit.closeMatrix(child2.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "New child2 global matrix");
+});
 
 
 module("Bounding Boxes", {

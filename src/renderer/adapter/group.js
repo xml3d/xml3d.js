@@ -133,15 +133,17 @@
 		
 		//TODO: this will change once the wrapped events are sent to all listeners of a node
 		case "parenttransform":  
-			var downstreamValue = evt.newValue;
+			var parentValue = downstreamValue = evt.newValue;
 			this.parentTransform = evt.newValue;
 			
 			if (this.transformAdapter)
-				downstreamValue = mat4.multiply(downstreamValue, this.transformAdapter.getMatrix(), mat4.create());
+				downstreamValue = mat4.multiply(parentValue, this.transformAdapter.getMatrix(), mat4.create());
 			
 			evt.newValue = downstreamValue;
 			this.notifyChildren(evt);
-			break;
+			// Reset event value
+			evt.newValue = parentValue;
+            break;
 			
 		case "visible":
 			//TODO: improve visibility handling
@@ -218,6 +220,7 @@
 		this.isValid = false;
 	};
 
+	/* Interface methods */
 	p.getBoundingBox = function() {
 	    var bbox = new XML3DBox();
 	    Array.prototype.forEach.call(this.node.childNodes, function(c) {
@@ -228,6 +231,20 @@
 	        xml3d.webgl.transformAABB(bbox, this.transformAdapter.getMatrix());
 	    }
 	    return bbox;
+    };
+  
+    p.getLocalMatrix = function() {
+        var m = new XML3DMatrix();
+        if (this.transformAdapter !== null)
+            m._data.set(this.transformAdapter.getMatrix());
+        return m;
+    };
+    
+    p.getWorldMatrix = function() {
+        var m = new XML3DMatrix();
+        if (this.parentTransform !== null)
+            m._data.set(this.parentTransform);
+        return m;
     };
 
 	xml3d.webgl.XML3DGroupRenderAdapter = XML3DGroupRenderAdapter;

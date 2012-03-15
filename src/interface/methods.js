@@ -99,26 +99,9 @@ new (function() {
     methods.groupGetLocalMatrix = function() {
         var adapters = this._configured.adapters || {};
         for ( var adapter in adapters) {
-            if (adapters[adapter].groupGetLocalMatrix) {
-                return adapters[adapter].groupGetLocalMatrix();
+            if (adapters[adapter].getLocalMatrix) {
+                return adapters[adapter].getLocalMatrix();
             }
-        }
-        // Fallback
-        var n = this._configured.resolve("transform");
-        if (n) {
-            var t = n.translation;
-            var c = n.center;
-            var s = n.scale;
-            var so = n.scaleOrientation.toMatrix();
-
-            var m = new XML3DMatrix();
-            return m.translate(t.x, t.y, t.z)
-                   .multiply(m.translate(c.x, c.y, c.z))
-                   .multiply(n.rotation.toMatrix())
-                   .multiply(so)
-                   .multiply(m.scale(s.x, s.y, s.z))
-                   .multiply(so.inverse())
-                   .multiply(m.translate(-c.x, -c.y, -c.z));
         }
         return new XML3DMatrix();
     };
@@ -153,8 +136,8 @@ new (function() {
     methods.XML3DGraphTypeGetWorldMatrix = function() {
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {
-            if (adapters[adapter].XML3DGraphTypeGetWorldMatrix) {
-                return adapters[adapter].XML3DGraphTypeGetWorldMatrix();
+            if (adapters[adapter].getWorldMatrix) {
+                return adapters[adapter].getWorldMatrix();
             }
         }
         return new XML3DMatrix();

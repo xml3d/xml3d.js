@@ -2,16 +2,6 @@
 xml3d.webgl = xml3d.webgl || {};
 xml3d.webgl.MAXFPS = 30;
 
-// Since this object is used quite often XML3D_InternalMutationEvent is supposed
-// to be a shortcut to
-// increase performance by avoiding all the nested objects
-xml3d.webgl.InternalMutationEvent = function() {
-    this.source = ""; // The 'current' source node type (shader | group | transform | mesh)
-    this.type = ""; // The type of this event as -> shader|transform|mesh
-    this.parameter = ""; // The parameter that was changed (eg. uniform variable, translation, meshtype etc)
-    this.newValue = null; // The new value of the changed parameter/target
-};
-
 /**
  * Creates the CanvasHandler.
  *
@@ -435,8 +425,7 @@ xml3d.webgl.InternalMutationEvent = function() {
             }
             if (curObj) {
                 // The mouse is now over a different object, so call the new
-                // object's
-                // mouseover method
+                // object's mouseover method
                 this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y);
             }
 
@@ -476,14 +465,16 @@ xml3d.webgl.InternalMutationEvent = function() {
      * @return
      */
     CanvasHandler.prototype.dispatchFrameDrawnEvent = function(start, end, stats) {
-        var event = document.createEvent('Event');
-        event.initEvent('framedrawn', true, true, null);
-        event.timeStart = start;
-        event.timeEnd = end;
-        event.renderTimeInMilliseconds = end - start;
-        event.numberOfObjectsDrawn = stats[0];
-        event.numberOfTrianglesDrawn = Math.floor(stats[1]);
-         
+        var event = document.createEvent('CustomEvent');
+        var data = {
+        		timeStart : start,
+        		timeEnd : end,
+        		renderTimeInMilliseconds : end - start,
+        		numberOfObjectsDrawn : stats[0],
+        		numberOfTrianglesDrawn : Math.floor(stats[1])
+        };
+        event.initCustomEvent('framedrawn', true, true, data);
+
         this.xml3dElem.dispatchEvent(event);
     };
 

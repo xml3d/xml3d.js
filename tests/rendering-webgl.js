@@ -49,8 +49,8 @@ test("Change visibility via script", 9, function() {
             start();
     });
     testFunc = function(n) {
-        equal(n.numberOfObjectsDrawn, 1, "1 Object drawn");
-        equal(n.numberOfTrianglesDrawn, 2, "2 Triangles drawn");
+        equal(n.detail.numberOfObjectsDrawn, 1, "1 Object drawn");
+        equal(n.detail.numberOfTrianglesDrawn, 2, "2 Triangles drawn");
         actual = win.getPixelValue(gl, 40, 40);
         deepEqual(actual, [255,0,0,255], "Red at 40,40");
         actual = win.getPixelValue(gl, 0, 0);

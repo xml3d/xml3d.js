@@ -210,15 +210,6 @@ test("&lt;int&gt; interface test", function() {
 	equal(typeof e.name, "string", "name is of type 'string'");
 	equal(typeof e.value, "object", "value is of type 'object'");
 });
-test("&lt;int4&gt; interface test", function() {
-	var e = document.createElementNS(xml3d.xml3dNS, "int4");
-	ok(e, "int4 exits");
-	equal(typeof e.className, "string", "className is of type 'string'");
-	equal(typeof e.style, "object", "style is of type 'object'");
-	equal(typeof e.id, "string", "id is of type 'string'");
-	equal(typeof e.name, "string", "name is of type 'string'");
-	equal(typeof e.value, "object", "value is of type 'object'");
-});
 test("&lt;bool&gt; interface test", function() {
 	var e = document.createElementNS(xml3d.xml3dNS, "bool");
 	ok(e, "bool exits");

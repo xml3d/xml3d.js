@@ -58,7 +58,7 @@
             n.type = events.VALUE_MODIFIED;
             parentHandler.handlers.value.resetValue();
         } else {
-            xml3d.configure(insertedChild);
+            xml3d.config.element(insertedChild);
             n.type = events.NODE_INSERTED;
         }
         parentHandler.notify(n);

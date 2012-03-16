@@ -133,7 +133,7 @@ xml3d.createClass = function(ctor, parent, methods) {
 			return;
 		}
 
-        xml3d.configure(xml3ds);
+        xml3d.config.configure(xml3ds);
         try {
             xml3d.webgl.configure(xml3ds);
         } catch (e) {

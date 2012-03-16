@@ -1,17 +1,11 @@
-// -----------------------------------------------------------------------------
-// Class XML3DNodeFactory
-// -----------------------------------------------------------------------------
-xml3d.XML3DNodeFactory = function() {
+xml3d.config = xml3d.config || {};
+
+xml3d.config.isXML3DElement = function(e) {
+    return (e.nodeType === Node.ELEMENT_NODE && (e.namespaceURI == xml3d.xml3dNS));
 };
 
-xml3d.XML3DNodeFactory.isXML3DNode = function(node) {
-    return (node.nodeType === Node.ELEMENT_NODE && (node.namespaceURI == xml3d.xml3dNS));
-};
-
-
-// TODO: Merge into xml3d.configure
-xml3d.XML3DNodeFactory.prototype.configure = function(element, selfmonitoring) {
-    if (xml3d.XML3DNodeFactory.isXML3DNode(element)) {
+xml3d.config.element = function(element, selfmonitoring) {
+    if (element._configured === undefined && xml3d.config.isXML3DElement(element)) {
         var classInfo = xml3d.classInfo[element.localName];
         if (classInfo === undefined) {
             xml3d.debug.logInfo("Unrecognised element " + element.localName);
@@ -25,7 +19,7 @@ xml3d.XML3DNodeFactory.prototype.configure = function(element, selfmonitoring) {
                 element.style = null;
             var n = element.firstElementChild;
             while(n) {
-                this.configure(n);
+                xml3d.config.element(n);
                 n = n.nextElementSibling;
             }
             return n;
@@ -33,51 +27,10 @@ xml3d.XML3DNodeFactory.prototype.configure = function(element, selfmonitoring) {
     }
 };
 
-xml3d.factory = new xml3d.XML3DNodeFactory();
-xml3d.configure = function(element, selfmonitoring) {
+xml3d.config.configure = function(element, selfmonitoring) {
     if (Array.isArray(element))
     {
-        Array.forEach(element, xml3d.configure);
+        Array.forEach(element, xml3d.config.element);
     }
-    if (element._configured !== undefined)
-        return element;
-    xml3d.factory.configure(element, selfmonitoring);
-};
-
-xml3d.XML3DNodeFactory.createXML3DVec3FromString = function(value) {
-    var result = new XML3DVec3();
-    result.setVec3Value(value);
-    return result;
-};
-
-xml3d.XML3DNodeFactory.createXML3DRotationFromString = function(value) {
-    var result = new XML3DRotation();
-    result.setAxisAngleValue(value);
-    return result;
-};
-
-xml3d.XML3DNodeFactory.createBooleanFromString = function(value) {
-    return new Boolean(value);
-};
-
-xml3d.XML3DNodeFactory.createStringFromString = function(value) {
-    return new String(value);
-};
-
-xml3d.XML3DNodeFactory.createIntFromString = function(value) {
-    return parseInt(value);
-};
-
-xml3d.XML3DNodeFactory.createFloatFromString = function(value) {
-    return parseFloat(value);
-};
-
-xml3d.XML3DNodeFactory.createAnyURIFromString = function(value) {
-    // TODO: not implemented
-    return value;
-};
-
-xml3d.XML3DNodeFactory.createEnumFromString = function(value) {
-    // TODO: not implemented
-    return value;
+    xml3d.config.element(element, selfmonitoring);
 };

@@ -103,12 +103,19 @@ xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scri
 	
 	if (scriptURL == "urn:xml3d:shader:phong" && hasTextures)
 		scriptURL = "urn:xml3d:shader:texturedphong";
+	else if (scriptURL == "urn:xml3d:shader:diffuse" && hasTextures)
+		scriptURL = "urn:xml3d:shader:textureddiffuse";
 	
 	if (dataTable.useVertexColor && dataTable.useVertexColor.data[0] == true)
 		scriptURL += "vcolor";
 	
-	if (scriptURL == "urn:xml3d:shader:phong" || scriptURL == "urn:xml3d:shader:phongvcolor" || scriptURL == "urn:xml3d:shader:texturedphong")
-	{
+	switch (scriptURL) {
+	case "urn:xml3d:shader:phong":
+	case "urn:xml3d:shader:texturedphong":
+	case "urn:xml3d:shader:phongvcolor":
+	case "urn:xml3d:shader:diffuse":
+	case "urn:xml3d:shader:textureddiffuse":
+	case "urn:xml3d:shader:diffusevcolor":
 		// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
 		var sfrag = g_shaders[scriptURL].fragment;
 		var tail = sfrag.substring(68);
@@ -119,10 +126,12 @@ xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scri
 		
 		sources.vs = g_shaders[scriptURL].vertex;
 		sources.fs = frag;
-	} 
-	else if (g_shaders[scriptURL]) {
-		sources.vs = g_shaders[scriptURL].vertex;
-		sources.fs = g_shaders[scriptURL].fragment;
+		break;
+	default:
+		if (g_shaders[scriptURL]){
+			sources.vs = g_shaders[scriptURL].vertex;
+			sources.fs = g_shaders[scriptURL].fragment;
+		}			
 	}
 };
 

@@ -244,6 +244,8 @@
         var m = new XML3DMatrix();
         if (this.parentTransform !== null)
             m._data.set(this.parentTransform);
+        if (this.transformAdapter !== null)
+            mat4.multiply(m._data, this.transformAdapter.getMatrix());
         return m;
     };
 

@@ -126,7 +126,6 @@
 		<file name="renderer/adapter/factory.js" />
 		<file name="renderer/shaders.js" />
 		<file name="renderer/xflow/xflow.js" />
-		<file name="../tools/xml3d_scene_controller.js" />
 	</filelist>
 
 	<!-- =================================

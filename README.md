@@ -17,6 +17,15 @@ it in your xhtml.
 <script src="http://www.xml3d.org/xml3d/script/xml3d.js"></script>
 ```
 
+If a standard navigation mode is sufficient for your web application, you can
+include the camera controller that comes with xml3d.js:
+
+```html
+<script src="http://www.xml3d.org/xml3d/script/xml3d.js"></script>
+<script src="http://www.xml3d.org/xml3d/script/tools/camera.js"></script>
+```
+
+
 #### Build ####
 The xml3d.js is separated into several files. To build, run the ant script
 'build.xml' located in the 'build' folder. From Eclipse IDE the build can also

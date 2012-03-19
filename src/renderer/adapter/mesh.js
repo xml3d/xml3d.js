@@ -239,6 +239,9 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 	p.destroy = function(gl) {
 		if (!gl)
 			gl = this.factory.renderer.getGLContext();
+		if (this.getMyDrawableObject == noDrawableObject) {
+			return; //This mesh either has no GL data or was already deleted
+		}
 		this.dispose(gl);
 		this.factory.renderer.removeDrawableObject(this.getMyDrawableObject());
 		this.getMyDrawableObject = noDrawableObject;

@@ -62,11 +62,13 @@
 
 	p.notifyChanged = function(evt) {
 		if (evt.type == 0) {
-			// Node insertion is handled by the CanvasRenderAdapter
+			this.factory.renderer.sceneTreeAddition(evt);
 			return;
 		}
 		else if (evt.type == 2) {
 			this.factory.renderer.sceneTreeRemoval(evt);
+			return;
+		} else if (evt.type == 5) {
 			return;
 		}
 		

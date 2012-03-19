@@ -384,9 +384,14 @@ xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
 	{
 		// If the "src" attribute is used, reuse the datatable of the referred <data> element (or file)
 		// and ignore the element's content
-		src = xml3d.URIResolver.resolve(src);
-		src = this.factory.getAdapter(src, xml3d.webgl.XML3DDataAdapterFactory.prototype);
-		dataTable  = src.createDataTable();
+		var rsrc = xml3d.URIResolver.resolve(src);
+		rsrc = this.factory.getAdapter(rsrc, xml3d.webgl.XML3DDataAdapterFactory.prototype);
+		if (!rsrc) {
+			xml3d.debug.logError("Could not find mesh data with src '"+src+"'");
+			this.dataTable = {};
+			return;
+		}
+		dataTable  = rsrc.createDataTable();
 	}	
 	
 	//Check for xflow scripts

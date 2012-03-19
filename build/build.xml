@@ -135,7 +135,15 @@
 	<target name="concat" depends="clean" description="description">
 		<property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
 		<concat destfile="${finalScript}">
-			<fileset file="${basedir}/preamble.txt" />
+			  <header>/**
+</header>
+			  <fileset file="${basedir}/../LICENSE" />
+			  <footer>*/
+/** @version: ${versionStr} **/
+</footer>
+		</concat>
+
+		<concat destfile="${finalScript}" eol="unix" append="true">
 			<filelist refid="sourceFiles"/>
 		</concat>
 		<replaceregexp file="${finalScript}" match="xml3d.webgl.checkError\(" replace="//xml3d.webgl.checkError\(" byline="true" />

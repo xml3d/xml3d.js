@@ -1,27 +1,4 @@
-/*************************************************************************/
-/*                                                                       */
-/*  xml3d.js                                                             */
-/*  Declarative 3D in HTML                                               */
-/*                                                                       */
-/*  Copyright (C) 2010                                                   */
-/*  DFKI - German Research Center for Artificial Intelligence            */
-/*                                                                       */
-/*  This file is part of xml3d.js                                        */
-/*                                                                       */
-/*  xml3d.js is free software; you can redistribute it and/or modify     */
-/*  under the terms of the GNU General Public License as                 */
-/*  published by the Free Software Foundation; either version 2 of       */
-/*  the License, or (at your option) any later version.                  */
-/*                                                                       */
-/*  xml3d.js is distributed in the hope that it will be useful, but      */
-/*  WITHOUT ANY WARRANTY; without even the implied warranty of           */
-/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                 */
-/*  See the GNU General Public License                                   */
-/*  (http://www.fsf.org/licensing/licenses/gpl.html) for more details.   */
-/*                                                                       */
-/*************************************************************************/
-
-/** @namespace **/
+// xml3d.js
 
 /**  @namespace **/
 var xml3d = xml3d || {};

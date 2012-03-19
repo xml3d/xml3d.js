@@ -40,7 +40,14 @@
 		
 		case "src":
 			//A texture was changed
-			var texNode = evt.wrapped.relatedNode.parentNode;
+			var texNode = evt.wrapped.relatedNode;
+			
+			//Firefox assigns the relatedNode differently in this case, so we have to check for this
+			if (texNode.ownerElement)
+				texNode = texNode.ownerElement;
+			
+			texNode = texNode.parentNode;
+			
 			var texName = texNode.name;
 			this.renderer.shaderDataChanged(this.node.id, target, evt.wrapped.newValue, texName);
 			break;

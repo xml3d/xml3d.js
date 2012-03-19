@@ -181,6 +181,39 @@ test("DOMNodeRemoved on arbritary", 7, function() {
     equal(this.factory.event.type, xml3d.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
+test("DOMNodeRemoved recursively", 9, function() {
+    // 1: Found frame
+    // 2: Scene loaded
+    var p = this.doc.getElementById("parentGroup");
+    var c1 = this.doc.getElementById("child01");
+    var c2 = this.doc.getElementById("child02");
+    this.factory.getAdapter(p); // 3: Init adapter
+    this.factory.getAdapter(c1); // 4: Init adapter
+    this.factory.getAdapter(c2); // 5: Init adapter
+    p.parentNode.removeChild(p);
+    // 6: Adapter for parentGroup has been notified: Notification (type:5)
+    // 7: Adapter for child01 has been notified: Notification (type:5)
+    // 8: Adapter for child01 has been notified: Notification (type:5)
+    equal(this.factory.event.type, xml3d.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 9
+});
+
+test("DOMNodeRemoved with opposite", 10, function() {
+    // 1: Found frame
+    // 2: Scene loaded
+    var x = this.doc.getElementById("parentGroup");
+    var t = this.doc.getElementById("t_rotation");
+    var t2 = this.doc.getElementById("t_identity");
+    this.factory.getAdapter(x); // 3: Init adapter
+    this.factory.getAdapter(t); // 4: Init adapter
+    ok(t._configured.opposites, "Opposits exists"); // 5
+    equal(t._configured.opposites.length, 1, "t_rotation has one opposite"); // 6
+    equal(t2._configured.opposites.length, 2, "t_identity has two opposites"); // 7
+    x.parentNode.removeChild(x);
+    // 8: Adapter for parentGroup has been notified: Notification (type:5)
+    equal(t._configured.opposites.length, 0, "t_rotation has no opposite"); // 9
+    equal(t2._configured.opposites.length, 0, "t_identity has no opposite"); // 10
+});
+
 test("Dangling Reference notification", 6, function() {
     // 1: Found frame
     // 2: Scene loaded

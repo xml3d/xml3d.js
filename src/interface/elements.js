@@ -38,9 +38,20 @@
             parentHandler.notify(n);
             if(removedChild._configured) {
                 n.type = events.THIS_REMOVED;
-                removedChild._configured.notify(n);
-                removedChild._configured.remove(n);
+                removeRecursive(removedChild,n);
             }
+        }
+    }
+
+    function removeRecursive(element, evt) {
+        if(element._configured) {
+            element._configured.notify(evt);
+            element._configured.remove(evt);
+        }
+        var n = element.firstElementChild;
+        while(n) {
+            removeRecursive(n,evt);
+            n = n.nextElementSibling;
         }
     }
 
@@ -52,7 +63,7 @@
         if(!parentHandler || e.currentTarget === insertedChild)
             return;
 
-        var n = new events.NotificationWrapper(e)
+        var n = new events.NotificationWrapper(e);
 
         if (insertedChild.nodeType == Node.TEXT_NODE && parentHandler.handlers.value) {
             n.type = events.VALUE_MODIFIED;
@@ -136,12 +147,25 @@
         (this.opposites || (this.opposites = [])).push(evt);
     };
 
+    handler.ElementHandler.prototype.removeOpposite =  function(evt) {
+        for(var o in this.opposites) {
+            var oi = this.opposites[o];
+            if(oi.relatedNode === evt.relatedNode) {
+                this.opposites.splice(o,1);
+                return;
+            }
+        }
+    };
+
     handler.ElementHandler.prototype.notifyOpposite = function(evt) {
         if(evt.value && evt.value._configured) {
             evt.value._configured.addOpposite(evt);
         }
     };
 
+    /*
+     * Get called, if the related node gets removed from the DOM
+     */
     handler.ElementHandler.prototype.remove = function(evt) {
         //console.log("Remove " + this);
         if (this.opposites) {
@@ -153,6 +177,12 @@
                 }
             }
         }
+        for(var h in this.handlers) {
+            var handler = this.handlers[h];
+            if(handler.remove)
+                handler.remove();
+        }
+
     };
 
     handler.ElementHandler.prototype.resolve = function(attrName) {

@@ -38,6 +38,12 @@
             elem._configured.notifyOpposite(evt);
             return true; // Already notified
         };
+        this.remove = function() {
+            var evt = new events.ReferenceNotification(elem, id, elem.getAttribute(id));
+            if(evt.type == events.VALID_REFERENCE && evt.value._configured) {
+                evt.value._configured.removeOpposite(evt);
+            }
+        };
         this.desc = {
             get : function() {
                 return this.getAttribute(id) || "";

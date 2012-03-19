@@ -323,8 +323,10 @@ xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 
 		var dataCollector = this.factory.getAdapter(child, xml3d.webgl.XML3DDataAdapterFactory.prototype);
 		
-		if(! dataCollector) // This can happen, i.e. a child node in a seperate namespace
-			continue;
+		if(! dataCollector) {// This can happen, i.e. a child node in a separate namespace
+		    child = child.nextElementSibling;
+		    continue;
+		}
 
 		/* A RootAdapter must not be a chilrden of another DataAdapter.
 		 * Therefore, its data is ignored, if it is specified as child.

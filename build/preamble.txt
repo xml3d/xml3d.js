@@ -1,5 +1,0 @@
-// This file is a merged collection of several JavaScript Libraries
-// to run an XML3D system (www.xml3d.org)
-// Please see informations below for individual copyrights and licenses  
-// Version: %VERSION%
-

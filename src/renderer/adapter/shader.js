@@ -54,7 +54,11 @@
 	};
 	
 	XML3DShaderRenderAdapter.prototype.notifyDataChanged = function(evt) {
+		if (!evt.wrapped)
+			return; 
+		
 		var targetName = evt.wrapped.currentTarget.name || evt.wrapped.relatedNode.name;
+		
 		if (!targetName)
 			return; //Likely a change to a texture, this is handled through notifyChanged
 		

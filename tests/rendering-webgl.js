@@ -283,29 +283,98 @@ module("WebGL Shaders and Textures", {
         v.removeEventListener("load", this.cb, true);
     }
 });
-/*
-test("Texture shader basics", 5, function() {
+
+test("Simple texture", 3, function() {
+	var x = this.doc.getElementById("xml3DElem"),
+    actual,
+    win = this.doc.defaultView,
+    gl = getContextForXml3DElement(x),
+    testFunc = null, h = getHandler(x);	
+
+	x.addEventListener("framedrawn", function(n) {
+	        if(testFunc)
+	            testFunc(n);
+	        start();
+	});
+	
+	testFunc = function(n) {
+	    actual = win.getPixelValue(gl, 40, 40);
+	    deepEqual(actual, [241,241,0,255], "Yellow texture");
+	};
+	stop();
+	h.draw();
+
+});
+
+
+test("Changing texture", 3, function() {
+	var x = this.doc.getElementById("xml3DElem"),
+    actual,
+    win = this.doc.defaultView,
+    gl = getContextForXml3DElement(x),
+    testFunc = null, h = getHandler(x);	
+
+	//prevents the frame after loading of the initial yellow texture from sometimes being
+	//caught by the listener
+	h.draw(); 
+	
+	x.addEventListener("framedrawn", function(n) {
+	        if(testFunc)
+	            testFunc(n);
+	        start();
+	});
+	
+	testFunc = function(n) {
+	    actual = win.getPixelValue(gl, 40, 40);
+	    deepEqual(actual, [241,0,241,255], "Magenta texture");
+	};
+	
+	stop();
+	this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
+	
+});
+
+test("Textured diffuse shader", 3, function() {
+	var x = this.doc.getElementById("xml3DElem"),
+    actual,
+    win = this.doc.defaultView,
+    gl = getContextForXml3DElement(x),
+    testFunc = null, h = getHandler(x);
+	var count=0;
+
+	x.addEventListener("framedrawn", function(n) {
+	        if(testFunc)
+	            testFunc(n);
+	        start();
+	});
+	
+	testFunc = function(n) {
+		count++;
+		if (count > 1) {
+			//Bit of a hack but we need to skip the frame that's drawn after the shader
+			//has been changed but before the texture has been loaded
+		    actual = win.getPixelValue(gl, 40, 40);
+		    deepEqual(actual, [241,241,0,255], "Yellow diffuse texture");
+		}
+	};
+	stop(2);
+	this.doc.getElementById("texShader1").setAttribute("script", "urn:xml3d:shader:diffuse");
+});
+
+test("Diffuse shader with vertex colors", 3, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
-
+    var cgroup = this.doc.getElementById("coloredMeshGroup");
+    var ogroup = this.doc.getElementById("myGroup");
+    
+    cgroup.visible = true;
+    ogroup.setAttribute("visible", "false");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [255,255,0,255], "Yellow texture");
+    deepEqual(actual, [112,112,30,255], "Corners have colors red, yellow, green, blue");
 
-    this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [255,0,255,255], "Change img src to magenta texture");
-
-    //Removing the texture node should cause the shader to recompile to standard phong shader
-    var texNode = this.doc.getElementById("tex1");
-    this.doc.getElementById("texShader1").removeChild(texNode);
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [255,0,0,255], "Remove texture node");
 });
-*/
 
 test("Custom shader", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;

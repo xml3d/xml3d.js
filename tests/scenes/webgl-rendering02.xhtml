@@ -44,12 +44,24 @@
     </shader>  
     <shader id="customShader" script="#customShaderScript">
         <float3 name="diffuseColor">0 1 0</float3>
-    </shader>    
+    </shader>   
+    <shader id="diffuseShader" script="urn:xml3d:shader:diffuse">
+        <float3 name="diffuseColor">1 1 1</float3>
+        <bool name="useVertexColor">true</bool>
+    </shader> 
     <data id="meshdata" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
         <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+    
+    <data id="coloredmeshdata" type="triangles">
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        <float3 name="color">0.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.0 1.0 1.0 0.0</float3>
     </data>
     </defs>
     
@@ -58,6 +70,10 @@
     <group id="myGroup" shader="#texShader1">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
 	    </mesh>
+    </group>  
+    <group id="coloredMeshGroup" shader="#diffuseShader" visible="false">
+        <mesh src="#coloredmeshdata" type="triangles">
+        </mesh>
     </group>  
 
     </xml3d>

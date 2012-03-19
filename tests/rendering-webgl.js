@@ -290,19 +290,21 @@ test("Simple texture", 3, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     testFunc = null, h = getHandler(x);	
+	this.doc.getElementById("myGroup").visible = true;
 
 	x.addEventListener("framedrawn", function(n) {
 	        if(testFunc)
-	            testFunc(n);
-	        start();
+	            testFunc(n);        
 	});
 	
 	testFunc = function(n) {
 	    actual = win.getPixelValue(gl, 40, 40);
+	    if (actual[0] == 0)
+	    	return;
 	    deepEqual(actual, [241,241,0,255], "Yellow texture");
+	    start();
 	};
 	stop();
-	h.draw();
 
 });
 
@@ -313,20 +315,19 @@ test("Changing texture", 3, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     testFunc = null, h = getHandler(x);	
-
-	//prevents the frame after loading of the initial yellow texture from sometimes being
-	//caught by the listener
-	h.draw(); 
+	this.doc.getElementById("myGroup").visible = true;
 	
 	x.addEventListener("framedrawn", function(n) {
 	        if(testFunc)
 	            testFunc(n);
-	        start();
 	});
 	
 	testFunc = function(n) {
 	    actual = win.getPixelValue(gl, 40, 40);
+	    if (actual[0] == 0)
+	    	return;
 	    deepEqual(actual, [241,0,241,255], "Magenta texture");
+	    start();
 	};
 	
 	stop();
@@ -340,25 +341,23 @@ test("Textured diffuse shader", 3, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     testFunc = null, h = getHandler(x);
-	var count=0;
+	var group = this.doc.getElementById("diffuseTexGroup");
+	group.visible = true;
 
 	x.addEventListener("framedrawn", function(n) {
 	        if(testFunc)
 	            testFunc(n);
-	        start();
 	});
 	
 	testFunc = function(n) {
-		count++;
-		if (count > 1) {
-			//Bit of a hack but we need to skip the frame that's drawn after the shader
-			//has been changed but before the texture has been loaded
-		    actual = win.getPixelValue(gl, 40, 40);
-		    deepEqual(actual, [241,241,0,255], "Yellow diffuse texture");
-		}
+		actual = win.getPixelValue(gl, 40, 40);
+		if (actual[0] == 0) //texture hasn't finished loading yet
+			return;
+		deepEqual(actual, [241,241,0,255], "Yellow diffuse texture");
+		start();
 	};
-	stop(2);
-	this.doc.getElementById("texShader1").setAttribute("script", "urn:xml3d:shader:diffuse");
+	
+	stop();
 });
 
 test("Diffuse shader with vertex colors", 3, function() {
@@ -366,10 +365,8 @@ test("Diffuse shader with vertex colors", 3, function() {
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
     var cgroup = this.doc.getElementById("coloredMeshGroup");
-    var ogroup = this.doc.getElementById("myGroup");
     
     cgroup.visible = true;
-    ogroup.setAttribute("visible", "false");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [112,112,30,255], "Corners have colors red, yellow, green, blue");
@@ -383,6 +380,7 @@ test("Custom shader", 4, function() {
 
     var cshader = this.doc.getElementById("customShader");
     var group = this.doc.getElementById("myGroup");
+    group.visible = true;
     group.setAttribute("shader", "#customShader");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);

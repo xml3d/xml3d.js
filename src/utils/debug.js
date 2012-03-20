@@ -7,26 +7,38 @@ xml3d.debug = {
     EXCEPTION : 5,
     params : {},
     isSetup : false,
+    loglevel : 4,
+    loglevels : {
+        all : 0,
+        debug : 1,
+        info : 2,
+        warning : 3,
+        error : 4,
+        exception : 5,
+    },
 
     setup : function() {
-        if (!xml3d.debug.isSetup) {
+        var debug = xml3d.debug;
+        if (!debug.isSetup) {
             var p = window.location.search.substr(1).split('&');
             p.forEach(function(e, i, a) {
               var keyVal = e.split('=');
-              xml3d.debug.params[keyVal[0]] = decodeURIComponent(keyVal[1]);
+              debug.params[keyVal[0].toLowerCase()] = decodeURIComponent(keyVal[1]);
             });
-            if(xml3d.debug.params.xml3d_loglevel === undefined)
-                xml3d.debug.params.xml3d_loglevel = xml3d.debug.ERROR;
+            debug.loglevel = debug.loglevels[debug.params.xml3d_loglevel] ||
+                             debug.params.xml3d_loglevel ||
+                             debug.loglevels.error;
+
             xml3d.debug.isSetup = true;
         }
         return !xml3d.debug.params.xml3d_nolog;
     },
     doLog : function(msg, logType) {
         var params = xml3d.debug.params;
-        if (params.xml3d_nolog || logType < params.xml3d_loglevel) {
+        if (params.xml3d_nolog || logType < xml3d.debug.loglevel) {
             return;
         }
-        
+
         if (window.console) {
             switch (logType) {
             case xml3d.debug.INFO:

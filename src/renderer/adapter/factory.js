@@ -2,14 +2,14 @@
 
 (function() {
     var XML3DRenderAdapterFactory = function(handler, renderer) {
-        xml3d.data.AdapterFactory.call(this);
+        XML3D.data.AdapterFactory.call(this);
         this.handler = handler;
         this.renderer = renderer;
         this.name = "XML3DRenderAdapterFactory";
     };
-    xml3d.createClass(XML3DRenderAdapterFactory, xml3d.data.AdapterFactory);
+    XML3D.createClass(XML3DRenderAdapterFactory, XML3D.data.AdapterFactory);
         
-    var gl = xml3d.webgl,
+    var gl = XML3D.webgl,
         reg = {
             xml3d:          gl.XML3DCanvasRenderAdapter,
             view:           gl.XML3DViewRenderAdapter,
@@ -35,5 +35,5 @@
 
     
     // Export
-    xml3d.webgl.XML3DRenderAdapterFactory = XML3DRenderAdapterFactory;
+    XML3D.webgl.XML3DRenderAdapterFactory = XML3DRenderAdapterFactory;
 }());

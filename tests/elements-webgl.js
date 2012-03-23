@@ -55,7 +55,7 @@ test("Auto-configuration on insertion", 6, function() {
 test("Configuration of new elements", 4, function() {
     var doc = this.doc;
     var x = doc.getElementById("myXml3d");
-    var n = doc.createElementNS(xml3d.xml3dNS,"view");
+    var n = doc.createElementNS(XML3D.xml3dNS,"view");
     equal(typeof n._configured, 'object', "Object is configured");
     x.appendChild(n);
     equal(typeof n._configured, 'object', "Object is still configured");
@@ -78,7 +78,7 @@ function TestAdapterFactory() {
     };
 };
 
-xml3d.createClass(TestAdapterFactory, xml3d.data.AdapterFactory);
+XML3D.createClass(TestAdapterFactory, XML3D.data.AdapterFactory);
 
 module("Adapter tests", {
     setup : function() {
@@ -96,7 +96,7 @@ module("Adapter tests", {
         v.removeEventListener("load", this.cb, true);
     },
     factory : new TestAdapterFactory(),
-    webglFactory : new xml3d.webgl.XML3DRenderAdapterFactory()
+    webglFactory : new XML3D.webgl.XML3DRenderAdapterFactory()
 });
 
 test("Adapter registration and initialization test", 6, function() {
@@ -137,10 +137,10 @@ test("DOMNodeInserted on xml3d", 5, function() {
     // 1: Found frame
     // 2: Scene loaded
 	var x = this.doc.getElementById("myXml3d");
-	var g = this.doc.createElementNS(xml3d.xml3dNS, "group");
+	var g = this.doc.createElementNS(XML3D.xml3dNS, "group");
 	this.factory.getAdapter(x); // 3: Init adapter
 	x.appendChild(g); // 4: Adapter for myXml3d has been notified: Notification (type:0)
-    equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5
+    equal(this.factory.event.type, XML3D.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5
 });
 
 test("DOMNodeRemoved on xml3d", 7, function() {
@@ -153,19 +153,19 @@ test("DOMNodeRemoved on xml3d", 7, function() {
     // 5: Adapter for myXml3d has been notified: Notification (type:2)
     // 6: Adapter for myGroup has been notified: Notification (type:2)
     x.removeChild(g);
-    equal(this.factory.event.type, xml3d.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
+    equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
 test("DOMNodeInserted on arbritary", 6, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("myGroup");
-    var g = this.doc.createElementNS(xml3d.xml3dNS, "group");
+    var g = this.doc.createElementNS(XML3D.xml3dNS, "group");
     this.factory.getAdapter(x); // 3: Init adapter
     this.factory.getAdapter(g); // 4: Init adapter
     // 5: Adapter for myGroup has been notified: Notification (type:0)
     x.appendChild(g);
-    equal(this.factory.event.type, xml3d.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 6
+    equal(this.factory.event.type, XML3D.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 6
 });
 
 test("DOMNodeRemoved on arbritary", 7, function() {
@@ -178,7 +178,7 @@ test("DOMNodeRemoved on arbritary", 7, function() {
     // 5: Adapter for myGroup has been notified: Notification (type:2)
     // 6: Adapter for myMesh01 has been notified: Notification (type:2)
     x.removeChild(g);
-    equal(this.factory.event.type, xml3d.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
+    equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
 test("DOMNodeRemoved recursively", 9, function() {
@@ -194,7 +194,7 @@ test("DOMNodeRemoved recursively", 9, function() {
     // 6: Adapter for parentGroup has been notified: Notification (type:5)
     // 7: Adapter for child01 has been notified: Notification (type:5)
     // 8: Adapter for child01 has been notified: Notification (type:5)
-    equal(this.factory.event.type, xml3d.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 9
+    equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 9
 });
 
 test("DOMNodeRemoved with opposite", 10, function() {

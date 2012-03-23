@@ -22,14 +22,14 @@
         var nativeCreateElementNS = document.createElementNS;
         doc.createElementNS = function(ns, name) {
             var r = nativeCreateElementNS.call(this,ns,name);
-            if(ns == xml3d.xml3dNS) {
-                xml3d.config.element(r, true);
+            if(ns == XML3D.xml3dNS) {
+                XML3D.config.element(r, true);
             }
             return r;
         };
-        xml3d.extend(window.document,doc);
+        XML3D.extend(window.document,doc);
     
-}(xml3d._native));
+}(XML3D._native));
 
 /*
  * Workaround for DOMAttrModified issues in WebKit based browsers:

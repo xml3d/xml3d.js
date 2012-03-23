@@ -2,18 +2,18 @@
 (function() {
 	
 	var XML3DShaderRenderAdapter = function(factory, node) {
-		xml3d.webgl.RenderAdapter.call(this, factory, node);
+		XML3D.webgl.RenderAdapter.call(this, factory, node);
 		this.renderer = this.factory.renderer;
 		
 		this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
 		if(this.dataAdapter)
 			this.dataAdapter.registerObserver(this);
 		else
-			xml3d.debug.logError("Data adapter for a shader element could not be created!");
+			XML3D.debug.logError("Data adapter for a shader element could not be created!");
 		
 	};
 	
-	xml3d.createClass(XML3DShaderRenderAdapter, xml3d.webgl.RenderAdapter);
+	XML3D.createClass(XML3DShaderRenderAdapter, XML3D.webgl.RenderAdapter);
 
 	XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
 		if (evt.type == 0) {
@@ -53,7 +53,7 @@
 			break;
 
 		default:
-			xml3d.debug.logWarning("Unhandled mutation event in shader adapter for parameter '"+target+"'");
+			XML3D.debug.logWarning("Unhandled mutation event in shader adapter for parameter '"+target+"'");
 			break;
 		
 		}
@@ -111,8 +111,8 @@
 
 	//Build an instance of the local shader with the given XFlow declarations and body
 	XML3DShaderRenderAdapter.prototype.getXFlowShader = function(declarations, body) {
-		/*if (new xml3d.URI(this.program.scriptURL).scheme != "urn") {
-			xml3d.debug.logWarning("XFlow scripts cannot be used in conjunction with custom shaders yet, sorry!");
+		/*if (new XML3D.URI(this.program.scriptURL).scheme != "urn") {
+			XML3D.debug.logWarning("XFlow scripts cannot be used in conjunction with custom shaders yet, sorry!");
 			return null;
 		}*/
 		
@@ -140,7 +140,7 @@
 		
 	};
 	
-	// Export to xml3d.webgl namespace
-	xml3d.webgl.XML3DShaderRenderAdapter = XML3DShaderRenderAdapter;
+	// Export to XML3D.webgl namespace
+	XML3D.webgl.XML3DShaderRenderAdapter = XML3DShaderRenderAdapter;
 
 }());

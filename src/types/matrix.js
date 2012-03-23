@@ -242,8 +242,8 @@
         return result;
     };
 
-    xml3d.XML3DMatrix = XML3DMatrix;
+    XML3D.XML3DMatrix = XML3DMatrix;
     if (!window.XML3DMatrix)
         window.XML3DMatrix = XML3DMatrix;
 
-}(xml3d._native));
+}(XML3D._native));

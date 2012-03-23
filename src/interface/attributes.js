@@ -11,7 +11,7 @@
         default:
             return Boolean(string);
         }
-    }, handler = {}, events = xml3d.events;
+    }, handler = {}, events = XML3D.events;
 
     AttributeHandler = function(elem) {
         this.setter = function(e) {
@@ -362,6 +362,6 @@
     };
 
     // Export to xml3d namespace
-    xml3d.extend(xml3d, handler);
+    XML3D.extend(XML3D, handler);
 
 }());

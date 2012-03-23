@@ -1,7 +1,7 @@
 module("Element attributes tests", {});
 
 test("Event attribute tests", function() {
-    var e = document.createElementNS(xml3d.xml3dNS, "xml3d");
+    var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     var getterText = "alert('get function');";
 
     // Set via attribute and get via interface
@@ -45,7 +45,7 @@ test("Int interface tests", function() {
         equal(e.width, 300, "canvas.width set back to default, if invalid value.");
 
         // Now xml3d
-        e = document.createElementNS(xml3d.xml3dNS, "xml3d");
+        e = document.createElementNS(XML3D.xml3dNS, "xml3d");
         equal(e.getAttribute("width"), null, "no Attribute set");
 
         // Set via interface
@@ -79,7 +79,7 @@ test("Int interface tests", function() {
     });
 
 test("String interface tests", function() {
-        e = document.createElementNS(xml3d.xml3dNS, "xml3d");
+        e = document.createElementNS(XML3D.xml3dNS, "xml3d");
         equal(e.getAttribute("id"), null, "no Attribute set");
         // Set via interface
         equal(e.id, "", "No Attribute set.");
@@ -97,7 +97,7 @@ test("String interface tests", function() {
     });
 
 test("Reference interface tests", function() {
-    e = document.createElementNS(xml3d.xml3dNS, "xml3d");
+    e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     equal(e.getAttribute("activeView"), null, "no Attribute set");
     // Set via interface
     equal(e.activeView, "", "No Attribute set.");
@@ -115,7 +115,7 @@ test("Reference interface tests", function() {
 });
 
 test("Float interface tests", function() {
-    var e = document.createElementNS(xml3d.xml3dNS, "view");
+    var e = document.createElementNS(XML3D.xml3dNS, "view");
 
     // Set via interface
         equal(e.fieldOfView, 0.785398, "view.fieldOfView is 0.785398 initially.");
@@ -155,7 +155,7 @@ test("Boolean interface tests", function() {
         equal(e.getAttribute("visible"), null, "Attribute has not been set yet.");
 
         // now XML3DGroupElement::visible
-        e = document.createElementNS(xml3d.xml3dNS, "group");
+        e = document.createElementNS(XML3D.xml3dNS, "group");
 
         // Set via interface
         equal(e.visible, true, "group.visible is 'true' initially.");
@@ -185,7 +185,7 @@ test("Boolean interface tests", function() {
     });
 
 test("XML3DVec interface tests", function() {
-    var e = document.createElementNS(xml3d.xml3dNS, "transform");
+    var e = document.createElementNS(XML3D.xml3dNS, "transform");
     equal(e.getAttribute("scale"), null, "Attribute has not been set yet.");
 
     // Set via interface
@@ -211,7 +211,7 @@ test("XML3DVec interface tests", function() {
     });
 
 test("XML3DRotation interface tests", function() {
-    var e = document.createElementNS(xml3d.xml3dNS, "transform");
+    var e = document.createElementNS(XML3D.xml3dNS, "transform");
 
     // Set via interface
         QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1), 0), EPSILON,
@@ -241,7 +241,7 @@ test("XML3DRotation interface tests", function() {
 
 test("Enumeration interface tests", function() {
     // Behavior copied from HTMLInputElement::type
-    var e = document.createElementNS(xml3d.xml3dNS, "texture");
+    var e = document.createElementNS(XML3D.xml3dNS, "texture");
     // Attribute not set
     equal(e.hasAttribute("type"), false, "hasAttribute = false.");
     equal(e.getAttribute("type"), null, "getAttribute = null.");
@@ -273,17 +273,17 @@ test("Enumeration interface tests", function() {
 });
 
 test("Typed Array interface tests", function() {
-    var e = document.createElementNS(xml3d.xml3dNS, "float");
+    var e = document.createElementNS(XML3D.xml3dNS, "float");
     notEqual(e.value, null, "Value must not be null");
     equal(e.value.toString(), "[object Float32Array]", "<float> has Float32Array");
     equal(e.value.length, 0, "Initial length is zero.");
 
-    e = document.createElementNS(xml3d.xml3dNS, "int");
+    e = document.createElementNS(XML3D.xml3dNS, "int");
     notEqual(e.value, null, "Value must not be null");
     equal(e.value.toString(), "[object Int32Array]", "<int> has Int32Array");
     equal(e.value.length, 0, "Initial length is zero.");
 
-    e = document.createElementNS(xml3d.xml3dNS, "bool");
+    e = document.createElementNS(XML3D.xml3dNS, "bool");
     notEqual(e.value, null, "Value must not be null");
     equal(e.value.toString(), "[object Uint8Array]", "<bool> has Uint8Array");
     equal(e.value.length, 0, "Initial length is zero.");

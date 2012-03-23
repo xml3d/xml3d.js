@@ -165,8 +165,8 @@
     }; 
     
     // Export
-    xml3d.XML3DBox = XML3DBox;
+    XML3D.XML3DBox = XML3DBox;
     if (!window.XML3DBox)
         window.XML3DBox = XML3DBox;
 
-}(xml3d._native));
+}(XML3D._native));

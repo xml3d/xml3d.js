@@ -1,16 +1,16 @@
 // xml3d.js
 
 /**  @namespace **/
-var xml3d = xml3d || {};
+var XML3D = XML3D || {};
 
-xml3d.version = '%VERSION%';
-xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
-xml3d.xhtmlNS = 'http://www.w3.org/1999/xhtml';
-xml3d.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
-xml3d._xml3d = document.createElementNS(xml3d.xml3dNS, "xml3d");
-xml3d._native = !!xml3d._xml3d.style;
+XML3D.version = '%VERSION%';
+XML3D.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
+XML3D.xhtmlNS = 'http://www.w3.org/1999/xhtml';
+XML3D.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
+XML3D._xml3d = document.createElementNS(XML3D.xml3dNS, "xml3d");
+XML3D._native = !!XML3D._xml3d.style;
 
-xml3d.extend = function (a, b) {
+XML3D.extend = function (a, b) {
     for ( var prop in b ) {
         if ( b[prop] === undefined ) {
             delete a[prop];
@@ -21,7 +21,7 @@ xml3d.extend = function (a, b) {
     return a;
 };
 
-xml3d.createClass = function(ctor, parent, methods) {
+XML3D.createClass = function(ctor, parent, methods) {
     methods = methods || {};
     if (parent) {
         var F = function() {};
@@ -38,37 +38,37 @@ xml3d.createClass = function(ctor, parent, methods) {
 (function() {
 	var onload = function() {
 
-        var debug = xml3d.debug.setup();
-        debug && xml3d.debug.logInfo("xml3d.js version: " + xml3d.version);
+        var debug = XML3D.debug.setup();
+        debug && XML3D.debug.logInfo("xml3d.js version: " + XML3D.version);
 
         // Find all the XML3D tags in the document
-		var xml3ds = document.getElementsByTagNameNS(xml3d.xml3dNS, 'xml3d');
+		var xml3ds = document.getElementsByTagNameNS(XML3D.xml3dNS, 'xml3d');
 		xml3ds = Array.map(xml3ds, function(n) { return n; });
 
-		debug && xml3d.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
+		debug && XML3D.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
 
 		if (xml3ds.length) {
-			if (xml3d._native) {
-				debug && xml3d.debug.logInfo("Using native implementation.");
+			if (XML3D._native) {
+				debug && XML3D.debug.logInfo("Using native implementation.");
 				return;
 			}
 		}
 
-		if (!(xml3d.webgl && xml3d.webgl.supported()))
+		if (!(XML3D.webgl && XML3D.webgl.supported()))
 		{
-			debug && xml3d.debug.logWarning("Could not initialise WebGL, sorry :-(");
+			debug && XML3D.debug.logWarning("Could not initialise WebGL, sorry :-(");
 
 			for(var i = 0; i < xml3ds.length; i++)
 			{
 				// Place xml3dElement inside an invisible div
-				var hideDiv      = document.createElementNS(xml3d.xhtmlNS, 'div');
+				var hideDiv      = document.createElementNS(XML3D.xhtmlNS, 'div');
 				var xml3dElement = xml3ds[i];
 
 				xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
 				hideDiv.appendChild(xml3dElement);
 				hideDiv.style.display = "none";
 
-				var infoDiv = document.createElementNS(xml3d.xhtmlNS, 'div');
+				var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
 				infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
 				infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
 				infoDiv.style.border = "2px solid red";
@@ -109,11 +109,11 @@ xml3d.createClass = function(ctor, parent, methods) {
 			return;
 		}
 
-        xml3d.config.configure(xml3ds);
+        XML3D.config.configure(xml3ds);
         try {
-            xml3d.webgl.configure(xml3ds);
+            XML3D.webgl.configure(xml3ds);
         } catch (e) {
-            debug && xml3d.debug.logError(e);
+            debug && XML3D.debug.logError(e);
         }
 
 		var ready = (function(eventType) {
@@ -129,8 +129,8 @@ xml3d.createClass = function(ctor, parent, methods) {
 		})('load');
 	};
 	var onunload = function() {
-		if (xml3d.document)
-			xml3d.document.onunload();
+		if (XML3D.document)
+			XML3D.document.onunload();
 	};
 	window.addEventListener('load', onload, false);
 	window.addEventListener('unload', onunload, false);

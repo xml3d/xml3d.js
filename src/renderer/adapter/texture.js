@@ -2,14 +2,14 @@
 (function() {
 
 	var XML3DTextureRenderAdapter = function(factory, node) {
-		xml3d.webgl.RenderAdapter.call(this, factory, node);
+		XML3D.webgl.RenderAdapter.call(this, factory, node);
 		this.gl = factory.renderer.handler.gl;
 		this.factory = factory;
 		this.node = node;
 		this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
 	};
 	
-	xml3d.createClass(XML3DTextureRenderAdapter, xml3d.webgl.RenderAdapter);
+	XML3D.createClass(XML3DTextureRenderAdapter, XML3D.webgl.RenderAdapter);
 	XML3DTextureRenderAdapter.prototype.notifyChanged = function(evt) {
 		var shaderAdapter = this.factory.getAdapter(this.node.parentElement);
 		if (shaderAdapter)
@@ -34,5 +34,5 @@
 		//TODO: tell renderer to dispose
 	};
 	
-	xml3d.webgl.XML3DTextureRenderAdapter = XML3DTextureRenderAdapter;
+	XML3D.webgl.XML3DTextureRenderAdapter = XML3DTextureRenderAdapter;
 }());

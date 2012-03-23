@@ -35,11 +35,11 @@
       this.value = null;
 
       if (typeof uri == 'string') {
-          uri = new xml3d.URI(uri);
+          uri = new XML3D.URI(uri);
       }
       if (uri && uri.valid) {
-          this.value = xml3d.URIResolver.resolve(uri);
-          xml3d.debug.logDebug("Resolved node: " + this.value);
+          this.value = XML3D.URIResolver.resolve(uri);
+          XML3D.debug.logDebug("Resolved node: " + this.value);
       }
       this.type = this.value ? events.VALID_REFERENCE : events.DANGLING_REFERENCE;
   };
@@ -50,9 +50,9 @@
   };
 
 
-  xml3d.createClass(events.NotificationWrapper, events.Notification);
+  XML3D.createClass(events.NotificationWrapper, events.Notification);
 
-  xml3d.events = xml3d.events || {};
-  xml3d.extend(xml3d.events, events);
+  XML3D.events = XML3D.events || {};
+  XML3D.extend(XML3D.events, events);
 
 }());

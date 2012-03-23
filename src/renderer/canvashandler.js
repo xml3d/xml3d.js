@@ -1,6 +1,6 @@
-// Create global symbol xml3d.webgl
-xml3d.webgl = xml3d.webgl || {};
-xml3d.webgl.MAXFPS = 30;
+// Create global symbol XML3D.webgl
+XML3D.webgl = XML3D.webgl || {};
+XML3D.webgl.MAXFPS = 30;
 
 /**
  * Creates the CanvasHandler.
@@ -57,7 +57,7 @@ xml3d.webgl.MAXFPS = 30;
             if (handler.update())
                 handler.draw();
 
-            requestAnimFrame(handler._tick, xml3d.webgl.MAXFPS);
+            requestAnimFrame(handler._tick, XML3D.webgl.MAXFPS);
         };
 
         this.redraw = function(reason, forcePickingRedraw) {
@@ -73,7 +73,7 @@ xml3d.webgl.MAXFPS = 30;
         };
 
         // Create renderer
-        this.renderer = new xml3d.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
+        this.renderer = new XML3D.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
     }
 
     CanvasHandler.prototype.registerCanvasListeners = function() {
@@ -100,11 +100,11 @@ xml3d.webgl.MAXFPS = 30;
         canvas.addEventListener("mouseout", function(e) {
             handler.mouseOut(e);
         }, false);
-        
+
         // Block the right-click context menu on the canvas unless it's explicitly toggled
 	    var cm = this.xml3dElem.getAttribute("contextmenu");
 	    if (!cm || cm == "false") {
-	    	this.canvas.addEventListener("contextmenu", function(e) {xml3d.webgl.stopEvent(e);}, false);	
+	    	this.canvas.addEventListener("contextmenu", function(e) {XML3D.webgl.stopEvent(e);}, false);
 	    }
     };
 
@@ -214,7 +214,7 @@ xml3d.webgl.MAXFPS = 30;
             this.dispatchFrameDrawnEvent(start, end, stats);
 
         } catch (e) {
-            xml3d.debug.logException(e);
+            XML3D.debug.logException(e);
             throw e;
         }
 
@@ -504,11 +504,11 @@ xml3d.webgl.MAXFPS = 30;
         this.mouseMovePickingEnabled = isEnabled;
     };
 
-    xml3d.webgl.CanvasHandler = CanvasHandler;
+    XML3D.webgl.CanvasHandler = CanvasHandler;
 })();
 
 // TODO: Move to a good place
-xml3d.webgl.createCanvas = function(xml3dElement, index) {
+XML3D.webgl.createCanvas = function(xml3dElement, index) {
 
     var parent = xml3dElement.parentNode;
     // Place xml3dElement inside an invisble div
@@ -557,7 +557,7 @@ xml3d.webgl.createCanvas = function(xml3dElement, index) {
 };
 
 
-xml3d.webgl.stopEvent = function(ev) {
+XML3D.webgl.stopEvent = function(ev) {
 	if (ev.preventDefault)
 		ev.preventDefault();
 	if (ev.stopPropagation)

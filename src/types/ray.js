@@ -77,8 +77,8 @@
     };
 
     // Export
-    xml3d.XML3DRay = XML3DRay;
+    XML3D.XML3DRay = XML3DRay;
     if (!window.XML3DRay)
         window.XML3DRay = XML3DRay;
 
-}(xml3d._native));
+}(XML3D._native));

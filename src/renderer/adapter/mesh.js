@@ -1,14 +1,14 @@
-xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
+XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 //Adapter for <mesh>
 (function() {
 	var noDrawableObject = function() {
-		xml3d.debug.logError("Mesh adapter has no callback to its mesh object!");
+		XML3D.debug.logError("Mesh adapter has no callback to its mesh object!");
     },
     rc = window.WebGLRenderingContext;
 
 	var XML3DMeshRenderAdapter = function(factory, node) {
-	    xml3d.webgl.RenderAdapter.call(this, factory, node);
+	    XML3D.webgl.RenderAdapter.call(this, factory, node);
 
 	    this.processListeners();
 	    this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
@@ -18,7 +18,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 	    this.getMyDrawableObject = noDrawableObject;
 	};
 
-	xml3d.createClass(XML3DMeshRenderAdapter, xml3d.webgl.RenderAdapter);
+	XML3D.createClass(XML3DMeshRenderAdapter, XML3D.webgl.RenderAdapter);
 
 	var p = XML3DMeshRenderAdapter.prototype;
 
@@ -82,7 +82,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 				break;
 			
 			default:
-				xml3d.debug.logWarning("Unhandled mutation event in mesh adapter for parameter '"+target+"'");
+				XML3D.debug.logWarning("Unhandled mutation event in mesh adapter for parameter '"+target+"'");
 				break;
 		}
 		
@@ -98,7 +98,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		var dataTable = this.dataAdapter.createDataTable();
 		
 		if (!dataTable.position || !dataTable.position.data) {
-			xml3d.debug.logError("Mesh "+this.node.id+" has no data for required attribute 'position'.");
+			XML3D.debug.logError("Mesh "+this.node.id+" has no data for required attribute 'position'.");
 			return { vbos : {}, glType : 0, valid : false};
 		}
 		
@@ -109,8 +109,8 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		meshInfo.glType = this.getGLTypeFromString(type);
 
 		if (dataTable.index) {			
-			if (dataTable.position.data.length / 3 > xml3d.webgl.MAX_MESH_INDEX_COUNT) {
-				 xml3d.webgl.splitMesh(dataTable, xml3d.webgl.MAX_MESH_INDEX_COUNT);
+			if (dataTable.position.data.length / 3 > XML3D.webgl.MAX_MESH_INDEX_COUNT) {
+				 XML3D.webgl.splitMesh(dataTable, XML3D.webgl.MAX_MESH_INDEX_COUNT);
 			} 
 			
 			if (dataTable.index.length > 0) {
@@ -186,7 +186,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		//	this.xflowShader = dataTable["xflowShader"];
 		//}
 		meshInfo.valid = true;
-		meshInfo.bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data);
+		meshInfo.bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.data);
 		
 		if (dataTable.size) {
 			meshInfo.segments = dataTable.size;
@@ -251,7 +251,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var bbox = new XML3DBox();
         var dataTable = this.dataAdapter.createDataTable();
         if(dataTable && dataTable.position)
-            bbox = xml3d.webgl.calculateBoundingBox(dataTable.position.data,dataTable.index.data);
+            bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.data,dataTable.index.data);
         return bbox;
     };
 
@@ -294,7 +294,7 @@ xml3d.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 
 
-    // Export to xml3d.webgl namespace
-    xml3d.webgl.XML3DMeshRenderAdapter = XML3DMeshRenderAdapter;
+    // Export to XML3D.webgl namespace
+    XML3D.webgl.XML3DMeshRenderAdapter = XML3DMeshRenderAdapter;
 
 }());

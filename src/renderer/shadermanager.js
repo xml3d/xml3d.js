@@ -1,12 +1,12 @@
 ﻿/**********************************************
- * Class xml3d.webgl.XML3DShaderManager
+ * Class XML3D.webgl.XML3DShaderManager
  * 
  * The XML3DShaderManager is an abstraction between the renderer and WebGL. It handles the creation and management 
  * of all shaders used in the scene, including internal shaders (eg. picking shader). 
  * 
  **********************************************/
 
-xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
+XML3D.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	this.gl = gl;
 	this.renderer = renderer;
 	this.dataFactory = dataFactory;
@@ -28,7 +28,7 @@ xml3d.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, lights) {
+XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, lights) {
 	//This method is 'suboptimal', but will be replaced with the new modular shader system
 	var shader = null;
 	var shaderId = "defaultShader";
@@ -60,14 +60,14 @@ xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
 	if (shaderNode && shaderNode.hasAttribute("script"))
 	{
 		var scriptURL = shaderNode.getAttribute("script");
-		if (new xml3d.URI(scriptURL).scheme == "urn") {
+		if (new XML3D.URI(scriptURL).scheme == "urn") {
 			//Internal shader
 			this.getStandardShaderSource(scriptURL, sources, shaderAdapter, lights, hasTextures);
             shader = this.createShaderFromSources(sources);
 		} else {
 			//User-provided shader
-			var vsScript = xml3d.URIResolver.resolve(scriptURL+ "-vs");
-			var fsScript = xml3d.URIResolver.resolve(scriptURL+ "-fs");
+			var vsScript = XML3D.URIResolver.resolve(scriptURL+ "-vs");
+			var fsScript = XML3D.URIResolver.resolve(scriptURL+ "-fs");
 			if (vsScript && fsScript) {
 				sources.vs = vsScript.textContent;
 				sources.fs = fsScript.textContent;
@@ -96,7 +96,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
    return shaderId;	
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights, hasTextures) {
+XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights, hasTextures) {
 	//Need to check for textures to decide which internal shader to use
 	var vertexColors = false;
 	var dataTable = shaderAdapter.getDataTable();	
@@ -135,11 +135,11 @@ xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scri
 	}
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function(name) {
+XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function(name) {
 	var sources = {};
 	
 	if (!g_shaders[name]) {
-		xml3d.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
+		XML3D.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
 	} else {
 		sources.vs = g_shaders[name].vertex;
 		sources.fs = g_shaders[name].fragment;
@@ -150,7 +150,7 @@ xml3d.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function(nam
 	return shaderProgram;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sources) {
+XML3D.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sources) {
 	var gl = this.gl;
 	
 	if (!sources.vs || !sources.fs) {
@@ -176,7 +176,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 		var errorString = "Shader linking failed: \n";
 		errorString += gl.getProgramInfoLog(prg);
 		errorString += "\n--------\n";
-		xml3d.debug.logError(errorString);
+		XML3D.debug.logError(errorString);
 		gl.getError();
 		
 		return this.shaders["defaultShaders"];
@@ -232,7 +232,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sour
 	return programObject;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shaderSource) {
+XML3D.webgl.XML3DShaderManager.prototype.compileShader = function(type, shaderSource) {
 	var gl = this.gl;
 	
 	var shd = gl.createShader(type);
@@ -247,7 +247,7 @@ xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shaderSo
 			errorString = "Fragment shader failed to compile: \n";
 		
 		errorString += gl.getShaderInfoLog(shd) + "\n--------\n";
-		xml3d.debug.logError(errorString);
+		XML3D.debug.logError(errorString);
 		gl.getError();
 		
 		return null;
@@ -257,7 +257,7 @@ xml3d.webgl.XML3DShaderManager.prototype.compileShader = function(type, shaderSo
 };
 
 
-xml3d.webgl.XML3DShaderManager.prototype.recompileShader = function(shaderAdapter, lights) {
+XML3D.webgl.XML3DShaderManager.prototype.recompileShader = function(shaderAdapter, lights) {
 	var shaderName = shaderAdapter.node.id;
 	var shader = this.shaders[shaderName];
 	if (shader) {
@@ -267,7 +267,7 @@ xml3d.webgl.XML3DShaderManager.prototype.recompileShader = function(shaderAdapte
 	}
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, attrName, newValue, textureName) {
+XML3D.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, attrName, newValue, textureName) {
 	var shader = this.shaders[shaderId];
 	
 	//Store the change, it will be applied the next time the shader is bound
@@ -278,7 +278,7 @@ xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, 
 			if (sampler)
 				this.replaceTexture(sampler, newValue);
 		} else 
-			xml3d.debug.logError("Couldn't apply change because of a missing texture name");
+			XML3D.debug.logError("Couldn't apply change because of a missing texture name");
 		
 		
 		/*shader.changes.push({
@@ -300,7 +300,7 @@ xml3d.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, 
 };
 
 
-xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) {
+XML3D.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) {
 	
 	var gl = this.gl;
 	
@@ -337,10 +337,10 @@ xml3d.webgl.XML3DShaderManager.prototype.setStandardUniforms = function(sp) {
 	}
 
 	
-	//xml3d.webgl.checkError(this.gl);
+	//XML3D.webgl.checkError(this.gl);
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.getShaderById = function(shaderId) {
+XML3D.webgl.XML3DShaderManager.prototype.getShaderById = function(shaderId) {
 	var sp = this.shaders[shaderId];
 	if (!sp) {
 		var shaderAdapter = this.factory.getAdapter(document.getElementById(shaderId));
@@ -352,13 +352,13 @@ xml3d.webgl.XML3DShaderManager.prototype.getShaderById = function(shaderId) {
 				return this.shaders[shaderId];
 		} 
 		
-		xml3d.debug.logError("Could not find the shader [ "+shaderId+" ]");
+		XML3D.debug.logError("Could not find the shader [ "+shaderId+" ]");
 		sp = this.shaders["default"];	
 	}
 	return sp;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(shader, uniforms) {
+XML3D.webgl.XML3DShaderManager.prototype.setUniformVariables = function(shader, uniforms) {
 	this.bindShader(shader);
 	
 	for (var name in uniforms) {
@@ -378,7 +378,7 @@ xml3d.webgl.XML3DShaderManager.prototype.setUniformVariables = function(shader, 
 	
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
+XML3D.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
 	var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
 
 	//Apply any changes encountered since the last time this shader was rendered
@@ -405,7 +405,7 @@ xml3d.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
 
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.unbindShader = function(shader) {
+XML3D.webgl.XML3DShaderManager.prototype.unbindShader = function(shader) {
     // TODO: unbind samplers (if any)	
 	var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
 	var samplers = sp.samplers;
@@ -417,7 +417,7 @@ xml3d.webgl.XML3DShaderManager.prototype.unbindShader = function(shader) {
 	this.gl.useProgram(null);
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
+XML3D.webgl.XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
 	switch (u.glType) {
 		case 35670: 														//gl.BOOL
 		case 5124: 															//gl.INT		
@@ -442,16 +442,16 @@ xml3d.webgl.XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
 		case 35676: gl.uniformMatrix4fv(u.location, gl.FALSE, value); break;//gl.FLOAT_MAT4
 		
 		default:
-			xml3d.debug.logError("Unknown uniform type "+u.glType);
+			XML3D.debug.logError("Unknown uniform type "+u.glType);
 			break;
 	}
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.setGLContext = function(gl) {
+XML3D.webgl.XML3DShaderManager.prototype.setGLContext = function(gl) {
 	this.gl = gl;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.destroyShader = function(shader) {
+XML3D.webgl.XML3DShaderManager.prototype.destroyShader = function(shader) {
 	for (var tex in shader.samplers) {
 		this.destroyTexture(shader.samplers[tex]);
 	}
@@ -459,7 +459,7 @@ xml3d.webgl.XML3DShaderManager.prototype.destroyShader = function(shader) {
 	this.gl.deleteProgram(shader.handle);
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.hasTextures = function(dataTable) {
+XML3D.webgl.XML3DShaderManager.prototype.hasTextures = function(dataTable) {
 	for (var param in dataTable) {
 		if (dataTable[param].isTexture) {
 			return true;	
@@ -468,13 +468,13 @@ xml3d.webgl.XML3DShaderManager.prototype.hasTextures = function(dataTable) {
 	return false;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataTable) {
+XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataTable) {
 	var texUnit = 0;
 	
 	for (var name in shader.samplers) {
 		var texture = dataTable[name];
 		if (!texture) {
-			xml3d.debug.logWarning("Can't find required texture with name='"+name+"'. Using default shader instead.");
+			XML3D.debug.logWarning("Can't find required texture with name='"+name+"'. Using default shader instead.");
 			return false;
 		}
 		var sampler = shader.samplers[name];
@@ -503,7 +503,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataT
 	return true;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.loadImage = function(src) {
+XML3D.webgl.XML3DShaderManager.prototype.loadImage = function(src) {
 	var info = { 
 			status : 0 //image has not been loaded yet
 	};
@@ -518,7 +518,7 @@ xml3d.webgl.XML3DShaderManager.prototype.loadImage = function(src) {
 	return info;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.replaceTexture = function(texture, newTextureSrc) {
+XML3D.webgl.XML3DShaderManager.prototype.replaceTexture = function(texture, newTextureSrc) {
 	this.destroyTexture(texture);
 	var tex = this.gl.createTexture();
 	var info = this.loadImage(newTextureSrc);
@@ -533,7 +533,7 @@ xml3d.webgl.XML3DShaderManager.prototype.replaceTexture = function(texture, newT
 	texture.info = info;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(internalFormat, width, height, 
+XML3D.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(internalFormat, width, height, 
 		sourceFormat, sourceType, texels, opt) {
 	var gl = this.gl;
 	var info = {};
@@ -577,7 +577,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(internal
 	return info;
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(info, opt) {
+XML3D.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(info, opt) {
 	var gl = this.gl;
 	var texInfo = {};
 	gl.bindTexture(gl.TEXTURE_2D, info.handle);
@@ -606,7 +606,7 @@ xml3d.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(info, o
 	return texInfo;	
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.bindTexture = function(tex) {
+XML3D.webgl.XML3DShaderManager.prototype.bindTexture = function(tex) {
 	var info = tex.info;
 	
 	if (info.valid) {
@@ -618,12 +618,12 @@ xml3d.webgl.XML3DShaderManager.prototype.bindTexture = function(tex) {
 	}
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.unbindTexture = function(tex) {
+XML3D.webgl.XML3DShaderManager.prototype.unbindTexture = function(tex) {
 	this.gl.activeTexture(this.gl.TEXTURE0 + tex.info.texUnit);
 	this.gl.bindTexture(tex.info.glType, null);
 };
 
-xml3d.webgl.XML3DShaderManager.prototype.destroyTexture = function(tex) {
+XML3D.webgl.XML3DShaderManager.prototype.destroyTexture = function(tex) {
 	if (tex.info && tex.info.handle)
 		this.gl.deleteTexture(tex.info.handle);
 };

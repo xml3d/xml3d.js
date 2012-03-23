@@ -1,11 +1,11 @@
 // Temporary fixes for native XML3D implementations
 
-if(xml3d._native)
+if(XML3D._native)
 {
     // Create global constructors if not available
     if(Object.prototype.constructor === XML3DVec3.prototype.constructor) {
         XML3DVec3 = function(x, y, z) {
-            var v =xml3d._xml3d.createXML3DVec3();
+            var v = XML3D._xml3d.createXML3DVec3();
             if (arguments.length == 3) {
                 v.x = x;
                 v.y = y;
@@ -17,7 +17,7 @@ if(xml3d._native)
     
     if(Object.prototype.constructor === XML3DRotation.prototype.constructor) {
         XML3DRotation = function(axis, angle) {
-            var v =xml3d._xml3d.createXML3DRotation();
+            var v = XML3D._xml3d.createXML3DRotation();
             if (arguments.length == 2) {
                 v.setAxisAngle(axis, angle);
             } 
@@ -27,7 +27,7 @@ if(xml3d._native)
 
     if(Object.prototype.constructor === XML3DMatrix.prototype.constructor) {
         XML3DMatrix = function(m11,m12,m13,m14,m21,m22,m23,m24,m31,m32,m33,m34,m41,m42,m43,m44) {
-            var m = xml3d._xml3d.createXML3DMatrix();
+            var m = XML3D._xml3d.createXML3DMatrix();
             if (arguments.length == 16) {
                 m.m11 = m11; m.m12 = m12; m.m13 = m13; m.m14 = m14;  
                 m.m21 = m21; m.m22 = m22; m.m23 = m23; m.m24 = m24;

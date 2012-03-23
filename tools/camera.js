@@ -41,32 +41,32 @@ xml3d.Camera = function(view) {
 	this.view = view;
 };
 
-xml3d.Camera.prototype.__defineGetter__("orientation", function() { 
-	return this.view.orientation; 
+xml3d.Camera.prototype.__defineGetter__("orientation", function() {
+	return this.view.orientation;
 });
-xml3d.Camera.prototype.__defineGetter__("position", function() { 
-	return this.view.position; 
+xml3d.Camera.prototype.__defineGetter__("position", function() {
+	return this.view.position;
 });
-xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) { 
-	/*xml3d.debug.logError("Orientation: " + orientation);*/ 
+xml3d.Camera.prototype.__defineSetter__("orientation", function(orientation) {
+	/*xml3d.debug.logError("Orientation: " + orientation);*/
 	//xml3d.copyRotation(this.view.orientation, orientation);
-	var ax = orientation.axis; 
-	var str = ax.x + " " + ax.y + " " + ax.z + " " + orientation.angle; 
+	var ax = orientation.axis;
+	var str = ax.x + " " + ax.y + " " + ax.z + " " + orientation.angle;
 	this.view.setAttribute("orientation", str);
 });
-xml3d.Camera.prototype.__defineSetter__("position", function(position) { 
+xml3d.Camera.prototype.__defineSetter__("position", function(position) {
 	//xml3d.copyVector(this.view.position, position);
-	var str = position.x + " " + position.y + " " + position.z; 
+	var str = position.x + " " + position.y + " " + position.z;
 	this.view.setAttribute("position", str);
 });
-xml3d.Camera.prototype.__defineGetter__("direction", function() { 
-	return this.view.getDirection(); 
+xml3d.Camera.prototype.__defineGetter__("direction", function() {
+	return this.view.getDirection();
 });
-xml3d.Camera.prototype.__defineGetter__("upVector", function() { 
-	return this.view.getUpVector(); 
+xml3d.Camera.prototype.__defineGetter__("upVector", function() {
+	return this.view.getUpVector();
 });
-xml3d.Camera.prototype.__defineGetter__("fieldOfView", function() { 
-	return this.view.fieldOfView; 
+xml3d.Camera.prototype.__defineGetter__("fieldOfView", function() {
+	return this.view.fieldOfView;
 });
 
 xml3d.Camera.prototype.rotateAroundPoint = function(q0, p0) {
@@ -106,10 +106,10 @@ xml3d.Camera.prototype.inverseTransformOf = function(vec) {
 
 xml3d.Xml3dSceneController = function(xml3dElement) {
 	this.webgl = typeof(xml3dElement.style) !== 'object';
-	
+
 	this.xml3d = xml3dElement;
 	this.canvas = this.webgl ?  xml3dElement.canvas : xml3dElement;
-	
+
 	var view = this.getView();
 	if (!view)
 	{
@@ -122,25 +122,25 @@ xml3d.Xml3dSceneController = function(xml3dElement) {
 		xml3d.debug.logError("Could not initialize Camera Controller.");
 		return;
 	}
-	
+
 	this.camera = new xml3d.Camera(view);
 	this.timer = new xml3d.util.Timer();
 	this.prevPos = {x: -1, y: -1};
-	
+
 	this.mode = "examine";
 	this.revolveAroundPoint = new XML3DVec3(0, 0, 0);
 	this.rotateSpeed = 1;
 	this.zoomSpeed = 20;
 	this.spinningSensitivity = 0.3;
 	this.isSpinning = false;
-	
+
 	this.upVector = this.camera.upVector;
-	
+
 	this.moveSpeedElement = document.getElementById("moveSpeed");
 	this.useKeys = document.getElementById("useKeys");
-	
+
 	var navigations = xml3dElement.getElementsByTagName("navigation");
-	
+
 	if(navigations.length > 0)
 	{
 		var config = navigations[0];
@@ -148,7 +148,7 @@ xml3d.Xml3dSceneController = function(xml3dElement) {
 
 		if(this.mode == "none")
 			return;
-		
+
 		if(this.mode != "walk" && this.mode != "examine" )
 			this.mode = "examine";
 
@@ -184,7 +184,7 @@ xml3d.Xml3dSceneController.prototype.attach = function() {
 	this._evt_mousemove = function(e) {self.mouseMoveEvent(e);};
 	this._evt_contextmenu = function(e) {self.stopEvent(e);};
 	this._evt_keydown = function(e) {self.keyHandling(e);};
-	
+
 	this.canvas.addEventListener("mousedown", this._evt_mousedown, false);
 	document.addEventListener("mouseup", this._evt_mouseup, false);
 	document.addEventListener("mousemove",this._evt_mousemove, false);
@@ -209,7 +209,7 @@ xml3d.Xml3dSceneController.prototype.getView = function() {
 	//var activeView = null;
 	var activeView = this.xml3d.activeView; //? this.xml3d.activeView : this.xml3d.getAttribute("activeView");
 	xml3d.debug.logWarning("Active View: " + activeView);
-	
+
 	if (typeof activeView=="string")
 	{
 		if (activeView.indexOf('#') == 0)
@@ -217,7 +217,7 @@ xml3d.Xml3dSceneController.prototype.getView = function() {
 		xml3d.debug.logWarning("Trying to resolve view '" + activeView +"'");
 		activeView = document.getElementById(activeView);
 	}
-	
+
 	// if activeView is not defined or the reference is not valid
 	// use the first view element
 	if (!activeView)
@@ -227,41 +227,41 @@ xml3d.Xml3dSceneController.prototype.getView = function() {
 			return xml3d.xml3dNS;
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	}
-	
+
 	if(false)
 	{
 		// no view present at all
 		// create new one and append it to defs element
 		xml3d.debug.logWarning("No view defined. Trying to create view.");
-		
+
 		// create it
 		activeView = document.createElementNS(xml3d.xml3dNS, "view");
-		
-		var id = "created_xml3d.Xml3dSceneController.view_"; 
-		id += "" + Math.random(); 
-		activeView.setAttribute("id", id); 
-		
-		// append it to defs 
+
+		var id = "created_xml3d.Xml3dSceneController.view_";
+		id += "" + Math.random();
+		activeView.setAttribute("id", id);
+
+		// append it to defs
 		var defsEl =  document.evaluate('xml3d:defs[1]', this.xml3d, function() {
 			return xml3d.xml3dNS;
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-		
+
 		if(!defsEl)
 		{
 			defsEl = document.createElementNS(xml3d.xml3dNS, "defs");
-			this.xml3d.appendChild(defsEl); 
+			this.xml3d.appendChild(defsEl);
 		}
-		
+
 		defsEl.appendChild(activeView);
 	}
-	
+
 	return activeView;
 };
 
 xml3d.Xml3dSceneController.prototype.stopEvent = function(ev) {
 	if (ev.preventDefault)
 		ev.preventDefault();
-	if (ev.stopPropagation) 
+	if (ev.stopPropagation)
 		ev.stopPropagation();
 	ev.returnValue = false;
 };
@@ -301,7 +301,7 @@ xml3d.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 		default:
 			this.action = this.NO_MOUSE_ACTION;
 	}
-	
+
 	this.prevPos.x = ev.pageX;
 	this.prevPos.y = ev.pageY;
 
@@ -311,10 +311,10 @@ xml3d.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 
 xml3d.Xml3dSceneController.prototype.mouseReleaseEvent = function(event) {
 	this.stopEvent(event);
-	
+
 	//if (this.action == this.ROTATE && this.mouseSpeed > this.spinningSensitivity)
 	//	this.startSpinning();
-	
+
 	this.action = this.NO_MOUSE_ACTION;
 	return false;
 };
@@ -354,7 +354,7 @@ xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
 			this.camera.translate(this.camera.inverseTransformOf(new XML3DVec3(0, 0, dy)));
 			break;
 		case(this.ROTATE):
-			
+
 			var dx = -this.rotateSpeed * (ev.pageX - this.prevPos.x) * 2.0 * Math.PI / this.width;
 			var dy = -this.rotateSpeed * (ev.pageY - this.prevPos.y) * 2.0 * Math.PI / this.height;
 
@@ -370,18 +370,18 @@ xml3d.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
 
 			var mx = new XML3DRotation( this.upVector , dx);
 			var my = new XML3DRotation( cross , dy);
-			
+
 			this.camera.lookAround(mx, my, this.upVector);
 			break;
 	}
-	
+
 	if (this.action != this.NO_MOUSE_ACTION)
 	{
 		this.needUpdate = true;
 		this.prevPos.x = ev.pageX;
 		this.prevPos.y = ev.pageY;
 		event.returnValue = false;
-        
+
 		this.update();
 	}
 	this.stopEvent(event);
@@ -453,38 +453,38 @@ xml3d.Xml3dSceneController.prototype.keyHandling = function(e) {
 //-----------------------------------------------------
 //attach/detach of all controllers
 //-----------------------------------------------------
-xml3d.Xml3dSceneController.attachAllControllers = function() { 
-	
-	xml3d.debug.logInfo("Attaching all active controllers to xml3d elements."); 
-	
+xml3d.Xml3dSceneController.attachAllControllers = function() {
+
+	xml3d.debug.logInfo("Attaching all active controllers to xml3d elements.");
+
 	var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(xml3d.xml3dNS, 'xml3d') );
 	for(var node in xml3dList) {
-		xml3d.Xml3dSceneController.controllers[node].attach(); 
+		xml3d.Xml3dSceneController.controllers[node].attach();
 	}
 };
 
-xml3d.Xml3dSceneController.detachAllControllers = function() { 
-	
-	xml3d.debug.logInfo("Detaching all active controllers from xml3d elements."); 
-	
+xml3d.Xml3dSceneController.detachAllControllers = function() {
+
+	xml3d.debug.logInfo("Detaching all active controllers from xml3d elements.");
+
 	var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(xml3d.xml3dNS, 'xml3d') );
 	for(var node in xml3dList) {
-		xml3d.Xml3dSceneController.controllers[node].detach(); 
+		xml3d.Xml3dSceneController.controllers[node].detach();
 	}
 };
 
-xml3d.Xml3dSceneController.getController = function(xml3d) { 
+xml3d.Xml3dSceneController.getController = function(xml3d) {
 
 	var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(xml3d.xml3dNS, 'xml3d') );
 	for(var node in xml3dList) {
-		
-		var ctrl = xml3d.Xml3dSceneController.controllers[node]; 
+
+		var ctrl = xml3d.Xml3dSceneController.controllers[node];
 		if(xml3d == ctrl.xml3d)
-			return ctrl; 
+			return ctrl;
 	}
-	
-	return null; 
-}; 
+
+	return null;
+};
 
 //-----------------------------------------------------
 //loading/unloading
@@ -493,7 +493,7 @@ xml3d.Xml3dSceneController.getController = function(xml3d) {
 (function() {
 
 	var onload = function() {
-			
+
 		var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(xml3d.xml3dNS, 'xml3d') );
 
 		xml3d.Xml3dSceneController.controllers = new Array();
@@ -508,7 +508,7 @@ xml3d.Xml3dSceneController.getController = function(xml3d) {
 			xml3d.Xml3dSceneController.controllers[i].detach();
 		}
 	};
-	
+
 	window.addEventListener('load', onload, false);
 	window.addEventListener('unload', onunload, false);
 	window.addEventListener('reload', onunload, false);

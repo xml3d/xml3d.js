@@ -48,7 +48,6 @@ xml3d.createClass = function(ctor, parent, methods) {
 		debug && xml3d.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
 
 		if (xml3ds.length) {
-			xml3d._xml3d = xml3ds[0];
 			if (xml3d._native) {
 				debug && xml3d.debug.logInfo("Using native implementation.");
 				return;
@@ -139,29 +138,6 @@ xml3d.createClass = function(ctor, parent, methods) {
 
 })();
 
-//Some helper function. We don't have global constructors for
-//all implementations
-createXML3DVec3 = function() {
-	if (xml3d._xml3d === undefined) {
-		return new XML3DVec3();
-	}
-	return xml3d._xml3d.createXML3DVec3();
-};
 
-createXML3DRotation = function() {
-	if (xml3d._xml3d === undefined) {
-		return new XML3DRotation();
-	}
-	return xml3d._xml3d.createXML3DRotation();
-};
 
-xml3d.copyRotation = function(to, from) {
-    to.setAxisAngle(from.axis, from.angle);
-}
-
-xml3d.copyVector = function(to, from) {
-    to.x = from.x;
-    to.y = from.y;
-    to.z = from.z;
-}
 

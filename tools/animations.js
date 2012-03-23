@@ -16,9 +16,9 @@ else if (typeof xml3d.animation != "object")
 // initalize animation manager. Such browsers can  be checked by testing value of
 // document.readyState, which must be undefined.
 
-// Other browsers may execute function  even  before loading  of  the webpage  is 
+// Other browsers may execute function  even  before loading  of  the webpage  is
 // finished, but they define document.readyState,  which allows us to detech such
-// state  and  register event handler, which  will  run  the  initalization after 
+// state  and  register event handler, which  will  run  the  initalization after
 // document is fully loaded.
 
 setTimeout(function() {
@@ -27,7 +27,7 @@ setTimeout(function() {
 		xml3d.animation.animationManager = new xml3d.animation.XML3DAnimationManager();
 		xml3d.animation.animationManager.init();
 	};
-	
+
 	if (document.readyState == "complete" || // All major browsers except Gecko 1.9.2 or earlier.
 		document.readyState == undefined) // Gecko 1.9.2 or earlier version. Document is guaranteed to be loaded when running this code.
 		initAnimationManager();
@@ -45,7 +45,7 @@ xml3d.stopAnimation = function(handle)
 	xml3d.animation.animationManager.stopAnimation(handle);
 };
 
-xml3d.stopAllAnimations = function() 
+xml3d.stopAllAnimations = function()
 {
 	xml3d.animation.animationManager.stopAllAnimations();
 };
@@ -55,35 +55,35 @@ xml3d.animation.XML3DAnimationManager = function() {
 	var xml3d = document.evaluate('//xml3d:xml3d', document, function() {
 		return xml3d.xml3dNS;
 	}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-	
+
 	if (xml3d && xml3d.update)
 		this.updateElement = xml3d;
 };
 
 xml3d.animation.XML3DAnimationManager.prototype.init = function() {
-	
+
 	this.updateInterpolators();
 
 	var a = this;
-	
-	window.addEventListener("DOMNodeInserted", 
-		function(evt) { a.onNodeInserted(evt); });	
-	window.addEventListener("DOMNodeRemoved", 
+
+	window.addEventListener("DOMNodeInserted",
+		function(evt) { a.onNodeInserted(evt); });
+	window.addEventListener("DOMNodeRemoved",
 		function(evt) { a.onNodeRemoved(evt); });
-		
+
 	window.setInterval(function() { a.progress(); }, 30);
 };
 
 xml3d.animation.XML3DAnimationManager.prototype.addInterpolator = function(pol) {
 
-	var cons = null; 
+	var cons = null;
 	if(pol.localName === 'OrientationInterpolator')
-		cons = xml3d.animation.X3DOrientationInterpolation; 
+		cons = xml3d.animation.X3DOrientationInterpolation;
 	else if(pol.localName === 'PositionInterpolator')
 		cons = xml3d.animation.X3DPositionInterpolation;
 	else
 		return; // don't support others
-	
+
 	if (pol.hasAttribute('id'))
 	{
 		if (this.interpolators[pol.getAttribute('id')] == undefined)
@@ -94,26 +94,26 @@ xml3d.animation.XML3DAnimationManager.prototype.addInterpolator = function(pol) 
 					function(evt) { a.onAttrModified(evt); });
 		}
 	}
-}; 
-
-xml3d.animation.XML3DAnimationManager.prototype.onNodeInserted = function(evt) { 
-	
-	if(evt.target.namespaceURI !== xml3d.x3dNS)
-		return; 
-	
-	this.addInterpolator(evt.target); 
 };
 
-xml3d.animation.XML3DAnimationManager.prototype.onNodeRemoved = function(evt) { 
-	
+xml3d.animation.XML3DAnimationManager.prototype.onNodeInserted = function(evt) {
+
+	if(evt.target.namespaceURI !== xml3d.x3dNS)
+		return;
+
+	this.addInterpolator(evt.target);
+};
+
+xml3d.animation.XML3DAnimationManager.prototype.onNodeRemoved = function(evt) {
+
 	var t = evt.target;
 	if(t.namespaceURI !== xml3d.x3dNS)
-		return; 
-	
-	if(t.localName !== 'OrientationInterpolator' 
-	&& t.localName !== 'PositionInterpolator')	 
-		return; 
-	
+		return;
+
+	if(t.localName !== 'OrientationInterpolator'
+	&& t.localName !== 'PositionInterpolator')
+		return;
+
 	if(t.hasAttribute('id'))
 	{
 		if(this.interpolators[t.getAttribute('id')])
@@ -121,7 +121,7 @@ xml3d.animation.XML3DAnimationManager.prototype.onNodeRemoved = function(evt) {
 			this.interpolators[t.getAttribute('id')] = undefined;
 		}
 	}
-}; 
+};
 
 xml3d.animation.XML3DAnimationManager.prototype.onAttrModified = function(evt) {
 
@@ -137,24 +137,24 @@ xml3d.animation.XML3DAnimationManager.prototype.updateInterpolators = function()
 	var ois = document.getElementsByTagNameNS(xml3d.x3dNS, 'OrientationInterpolator');
 	for(var i = 0; i < ois.length; i++)
 	{
-		this.addInterpolator(ois[i]); 
+		this.addInterpolator(ois[i]);
 	}
-	
+
 	var ois = document.getElementsByTagNameNS(xml3d.x3dNS, 'PositionInterpolator');
 	for(var i = 0; i < ois.length; i++)
 	{
-		this.addInterpolator(ois[i]); 
+		this.addInterpolator(ois[i]);
 	}
 };
 
 xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID, transID, transAttr, duration, loop) {
-	
+
 	if (duration === undefined)
 		duration = 3000;
-	
+
 	if (loop === undefined)
 		loop = false;
-	
+
 	if(this.interpolators[aniID] === undefined)
 	{
 		xml3d.debug.logWarning("Unknown Interpolator: " + aniID);
@@ -172,7 +172,7 @@ xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID,
 		xml3d.debug.logWarning("Could not find animation target: " + transID);
 		return;
 	}
-	
+
 	var field = trans.getAttributeNode(transAttr);
 	if (!field)
 	{
@@ -196,7 +196,7 @@ xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID,
 		}
 		return interpolator.animations[field];
 	}
-	
+
 	interpolator.animations[field] = {};
 	interpolator.animations[field].field = field;
 	interpolator.animations[field].node = trans;
@@ -205,13 +205,13 @@ xml3d.animation.XML3DAnimationManager.prototype.startAnimation = function(aniID,
 	interpolator.animations[field].loop = loop;
 	interpolator.animations[field].startTime = (new Date()).getTime();
 	interpolator.animations[field].running = true;
-	
+
 	return interpolator.animations[field];
 };
 
-xml3d.animation.XML3DAnimationManager.prototype.stopAnimation = function(handle) 
+xml3d.animation.XML3DAnimationManager.prototype.stopAnimation = function(handle)
 {
-	if (handle === undefined || handle == null 
+	if (handle === undefined || handle == null
 			|| handle.running === undefined)
 	{
 		xml3d.debug.logError("XML3DAnimationManager::stopAnimation: Not a vaild animation handle");
@@ -220,7 +220,7 @@ xml3d.animation.XML3DAnimationManager.prototype.stopAnimation = function(handle)
 	handle.running = false;
 };
 
-xml3d.animation.XML3DAnimationManager.prototype.stopAllAnimations = function() 
+xml3d.animation.XML3DAnimationManager.prototype.stopAllAnimations = function()
 {
 	for (var i in this.interpolators)
 	{
@@ -229,7 +229,7 @@ xml3d.animation.XML3DAnimationManager.prototype.stopAllAnimations = function()
 	}
 };
 
-xml3d.animation.XML3DAnimationManager.prototype.progress = function() 
+xml3d.animation.XML3DAnimationManager.prototype.progress = function()
 {
 	var time = (new Date()).getTime();
 	for (var i in this.interpolators)
@@ -246,7 +246,7 @@ xml3d.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
 
 /**
  * Class to use X3D OrientationInterpolator nodes in Xml3d
- * 
+ *
  * @param inode
  *            node id of OrientationInterpolator element in X3D namespace
  * @param tnode
@@ -269,8 +269,8 @@ xml3d.animation.X3DInterpolation.prototype.isValid = function() {
 };
 
 xml3d.animation.X3DInterpolation.prototype.progressAll = function(time) {
-	
-	
+
+
 	for(var i in this.animations)
 	{
 		if (this.animations[i].running)
@@ -437,7 +437,7 @@ xml3d.animation.RotationArray.parse = function(str) {
 //			vecs.push(r);
 //		}
 	}
-	
+
 	return new xml3d.animation.RotationArray(vecs);
 };
 
@@ -450,7 +450,7 @@ if (!XML3DRotation.prototype.slerp) {
 		this.z = axis.z * s;
 		this.w = c;
 	};
-	
+
 	xml3d.Quaternion.prototype.__defineGetter__("axis", function() {
 		var s = Math.sqrt(1 - this.w * this.w);
 		if (s < 0.001) {
@@ -467,7 +467,7 @@ if (!XML3DRotation.prototype.slerp) {
 		}
 		return angle;
 	});
-	
+
 	xml3d.Quaternion.prototype.slerp = function(that, t) {
 		var cosom = this.x * that.x + this.y * that.y + this.z * that.z + this.w * that.w;
 		var rot1;
@@ -488,9 +488,9 @@ if (!XML3DRotation.prototype.slerp) {
 			scalerot0 = 1.0 - t;
 			scalerot1 = t;
 		}
-		return this.multScalar(scalerot0).add(rot1.multScalar(scalerot1));	
+		return this.multScalar(scalerot0).add(rot1.multScalar(scalerot1));
 	};
-	
+
 	XML3DRotation.prototype.slerp = function(that, t) {
 		var q1 = new xml3d.Quaternion(this.axis, this.angle);
 		var q2 = new xml3d.Quaternion(that.axis, that.angle);

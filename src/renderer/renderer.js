@@ -241,6 +241,7 @@ XML3D.webgl.Renderer.prototype.activeViewChanged = function () {
 	this._projMatrix = null;
 	this._viewMatrix = null;
 	this.camera = this.initCamera();
+	this.requestRedraw("Active view changed", true);
 };
 
 XML3D.webgl.Renderer.prototype.requestRedraw = function(reason, forcePickingRedraw) {

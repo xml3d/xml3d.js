@@ -61,6 +61,24 @@ test("Change visibility via script", 9, function() {
     ok(h.needDraw, "Redraw required");
 });
 
+test("Change active view via script", 7, function() {
+    // 1: Found frame
+    // 2: Scene loaded
+    var x = this.doc.getElementById("xml3DElem");
+    var h = getHandler(x);
+    x.addEventListener("framedrawn", function(n) {
+            ok("Redraw was triggered"); // 6
+            ok(!h.needDraw, "Redraw not required"); // 7
+            start();
+    });
+    stop();
+    equal(x.activeView, "#defaultView", "Initial active view is #default"); // 3
+    x.activeView = "#viewOrientationTest";
+    equal(x.activeView, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 4
+    ok(h.needDraw, "Redraw required"); // 5, fails in < 920181
+});
+
+
 test("Change shader via script", 6, function() {
     // 1: Found frame
     // 2: Scene loaded

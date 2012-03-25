@@ -36,20 +36,35 @@ new (function() {
 
     methods.viewSetDirection = function(vec) {
         vec = vec || new XML3DVec3(0,0,-1);
-        /*var dir = vec.negate().normalize();
+        vec = vec.normalize();
+        
+        var up = this.orientation.rotateVec3(new XML3DVec3(0,1,0));
+        up = up.normalize();
+        var right = up.cross(vec);
 
-        if (this._upVector)
-            var up = this._upVector;
-        else
-            var up = new XML3DVec3(0, 1, 0);
-        var right = up.cross(dir).normalize();
-        up = dir.cross(right).normalize();
-        this.orientation = XML3DRotation.fromBasis(right, up, dir);*/
-        console.error("view::setDirection not implemented yet");
+        var w = Math.sqrt(1 + right.x + up.y + vec.z)/2;
+        //What to do if w is 0?
+        var wscale = w * 4;
+        var axis = new XML3DVec3(vec.y - up.z, right.z - vec.x, up.x - right.y).scale(1/wscale);
+        var orient = new XML3DRotation();
+        orient._setQuaternion([axis.x, axis.y, axis.z, w]);
+        this.orientation.set(orient);
     };
 
     methods.viewSetUpVector = function(up) {
-        console.error("view::setUpVector not implemented yet");
+    	up = up || new XML3DVec3(0,1,0);
+    	up = up.normalize();
+    	
+        var vec = this.orientation.rotateVec3(new XML3DVec3(0,0,-1));
+        vec = vec.normalize();
+        var right = up.cross(vec);
+        
+        var w = Math.sqrt(1 + right.x + up.y + vec.z)/2;
+        var wscale = w * 4;
+        var axis = new XML3DVec3(vec.y - up.z, right.z - vec.x, up.x - right.y).scale(1/wscale);
+        var orient = new XML3DRotation();
+        orient._setQuaternion([axis.x, axis.y, axis.z, w]);
+        this.orientation.set(orient);
     };
 
     methods.viewGetUpVector = function() {

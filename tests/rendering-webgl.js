@@ -266,6 +266,32 @@ test("Camera with group transforms", 7, function() {
     
 });
 
+test("Camera setDirection/upVector", 5, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+    var group5 = this.doc.getElementById("group5");
+    var view = this.doc.getElementById("viewOrientationTest");
+    var camtest = this.doc.getElementById("viewTest");
+    
+    camtest.visible = true;
+    view.setAttribute("orientation", "0 0 1 0");
+    x.setAttribute("activeView", "#viewOrientationTest");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,0,0], "Camera looking down z axis, transparent");
+    
+    view.setDirection(new XML3DVec3(1, 0, 0));
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [255,0,0,255], "Camera looking to the right, red");
+  
+    view.setUpVector(new XML3DVec3(0, -1, 0));
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [255,255,0,255], "Camera looking left, yellow");
+});
+
 test("Pick pass flag", 7, function() {
     var x = this.doc.getElementById("xml3DElem");
     var h = getHandler(x);
@@ -411,4 +437,6 @@ test("Custom shader", 4, function() {
     deepEqual(actual, [0,255,0,255], "Change shader script to standard phong");
 
 });
+
+
 

@@ -118,25 +118,25 @@ test("Float interface tests", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "view");
 
     // Set via interface
-        equal(e.fieldOfView, 0.785398, "view.fieldOfView is 0.785398 initially.");
+        QUnit.close(e.fieldOfView, 0.785398, EPSILON, "view.fieldOfView is 0.785398 initially.");
         e.fieldOfView = 0.87;
-        equal(e.fieldOfView, 0.87, "view.fieldOfView = 0.87.");
+        QUnit.close(e.fieldOfView, 0.87, EPSILON, "view.fieldOfView = 0.87.");
         equal(e.getAttribute("fieldOfView"), "0.87", "getAttribute = '0.87'.");
         e.fieldOfView = true;
-        equal(e.fieldOfView, 1, "view.fieldOfView = 1.");
+        QUnit.close(e.fieldOfView, 1, EPSILON, "view.fieldOfView = 1.");
 
         // Set via attribute
         e.setAttribute("fieldOfView", "0.5");
-        equal(e.fieldOfView, 0.5, "Value set via setAttribute to 0.5.");
+        QUnit.close(e.fieldOfView, 0.5, EPSILON, "Value set via setAttribute to 0.5.");
         equal(e.getAttribute("fieldOfView"), "0.5", "Value set via setAttribute to 0.5.");
 
         e.setAttribute("fieldOfView", 0.6);
-        equal(e.fieldOfView, 0.6, "Value set via setAttribute to 0.6.");
+        QUnit.close(e.fieldOfView, 0.6, EPSILON, "Value set via setAttribute to 0.6.");
         equal(e.getAttribute("fieldOfView"), "0.6", "Value set via setAttribute to 0.6.");
 
         e.setAttribute("fieldOfView", "asdf");
         equal(e.getAttribute("fieldOfView"), "asdf", "attribute value invalid");
-        equal(e.fieldOfView, 0.785398, "Invalid value set via setAttribute. Back to default: 0.785398.");
+        QUnit.close(e.fieldOfView, 0.785398, EPSILON, "Invalid value set via setAttribute. Back to default: 0.785398.");
     });
 
 test("Boolean interface tests", function() {

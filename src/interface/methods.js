@@ -34,37 +34,85 @@ new (function() {
         this.position = pos;
     };
 
-    methods.viewSetDirection = function(vec) {
-        vec = vec || new XML3DVec3(0,0,-1);
-        vec = vec.normalize();
-        
+    var tmpX = vec3.create();
+    var tmpY = vec3.create();
+    var tmpZ = vec3.create();
+
+    quat4.setFromMat3 = function(m, dest) {
+        var tr = m[0] + m[4] + m[8];
+
+        if (tr > 0) {
+            var s = Math.sqrt(tr + 1.0) * 2; // s=4*dest[3]
+            dest[0] = (m[7] - m[5]) / s;
+            dest[1] = (m[2] - m[6]) / s;
+            dest[2] = (m[3] - m[1]) / s;
+            dest[3] = 0.25 * s;
+        } else if ((m[0] > m[4]) & (m[0] > m[8])) {
+            var s = Math.sqrt(1.0 + m[0] - m[4] - m[8]) * 2; // s=4*qx
+            dest[3] = (m[7] - m[5]) / s;
+            dest[0] = 0.25 * s;
+            dest[1] = (m[1] + m[3]) / s;
+            dest[2] = (m[2] + m[6]) / s;
+        } else if (m[4] > m[8]) {
+            var s = Math.sqrt(1.0 + m[4] - m[0] - m[8]) * 2; // s=4*qy
+            dest[3] = (m[2] - m[6]) / s;
+            dest[0] = (m[1] + m[3]) / s;
+            dest[1] = 0.25 * s;
+            dest[2] = (m[5] + m[7]) / s;
+        } else {
+            var s = Math.sqrt(1.0 + m[8] - m[0] - m[4]) * 2; // s=4*qz
+            dest[3] = (m[3] - m[1]) / s;
+            dest[0] = (m[2] + m[6]) / s;
+            dest[1] = (m[5] + m[7]) / s;
+            dest[2] = 0.25 * s;
+        }
+    };
+
+    quat4.setFromBasis = function(X,Y,Z,dest) {
+        var lx = 1.0 / vec3.length(X);
+        var ly = 1.0 / vec3.length(Y);
+        var lz = 1.0 / vec3.length(Z);
+        var m = mat3.create();
+        m[0] = X[0] * lx;
+        m[1] = Y[0] * ly;
+        m[2] = Z[0] * lz;
+        m[3] = X[1] * lx;
+        m[4] = Y[1] * ly;
+        m[5] = Z[1] * lz;
+        m[6] = X[2] * lx;
+        m[7] = Y[2] * ly;
+        m[8] = Z[2] * lz;
+        quat4.setFromMat3(m,dest);
+    };
+
+    methods.viewSetDirection = function(direction) {
+        direction = direction || new XML3DVec3(0,0,-1);
+        direction = direction.normalize();
+
         var up = this.orientation.rotateVec3(new XML3DVec3(0,1,0));
         up = up.normalize();
-        var right = up.cross(vec);
 
-        var w = Math.sqrt(1 + right.x + up.y + vec.z)/2;
-        //What to do if w is 0?
-        var wscale = w * 4;
-        var axis = new XML3DVec3(vec.y - up.z, right.z - vec.x, up.x - right.y).scale(1/wscale);
-        var orient = new XML3DRotation();
-        orient._setQuaternion([axis.x, axis.y, axis.z, w]);
-        this.orientation.set(orient);
+        vec3.cross(direction._data,up._data,tmpX);
+        if(!vec3.length(tmpX)) {
+                tmpX = this.orientation.rotateVec3(new XML3DVec3(1,0,0))._data;
+        }
+        vec3.cross(tmpX,direction._data,tmpY);
+        vec3.negate(direction._data,tmpZ);
+
+        var q = quat4.create();
+        quat4.setFromBasis(tmpX, tmpY, tmpZ, q);
+        this.orientation._setQuaternion(q);
     };
 
     methods.viewSetUpVector = function(up) {
     	up = up || new XML3DVec3(0,1,0);
     	up = up.normalize();
-    	
-        var vec = this.orientation.rotateVec3(new XML3DVec3(0,0,-1));
-        vec = vec.normalize();
-        var right = up.cross(vec);
-        
-        var w = Math.sqrt(1 + right.x + up.y + vec.z)/2;
-        var wscale = w * 4;
-        var axis = new XML3DVec3(vec.y - up.z, right.z - vec.x, up.x - right.y).scale(1/wscale);
-        var orient = new XML3DRotation();
-        orient._setQuaternion([axis.x, axis.y, axis.z, w]);
-        this.orientation.set(orient);
+
+    	var r = new XML3DRotation();
+    	r.setRotation(new XML3DVec3(0,1,0),up);
+    	r = this.orientation.multiply(r);
+    	r = r.normalize();
+    	this.orientation.set(r);
     };
 
     methods.viewGetUpVector = function() {
@@ -72,16 +120,14 @@ new (function() {
     };
 
     methods.viewLookAt = function(point) {
-        var vector = point.subtract(this.position);
-        vector = vector.normalize();
-        this.setDirection(vector);
+        this.setDirection(point.subtract(this.position));
     };
 
     methods.viewGetViewMatrix = function() {
         var adapters = this._configured.adapters || {};
         for ( var adapter in adapters) {
-            if (adapters[adapter].viewGetViewMatrix) {
-                return adapters[adapter].viewGetViewMatrix(x, y, hitPoint, hitNormal);
+            if (adapters[adapter].getViewMatrix) {
+                return adapters[adapter].getViewMatrix();
             }
         }
         // Fallback implementation

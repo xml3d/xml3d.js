@@ -39,6 +39,13 @@
         return this.projMatrix;
     };
 
+    /* Interface method */
+    p.getViewMatrix = function() {
+        var m = new XML3DMatrix();
+        m._data.set(this.viewMatrix);
+        return m;
+    };
+
     p.getModelViewMatrix = function(model) {
         return mat4.multiply(this.viewMatrix, model, mat4.create());
     };

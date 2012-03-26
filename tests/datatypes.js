@@ -250,6 +250,9 @@ test("XML3DRotation::setQuaternion", function()  {
     var v = new XML3DRotation();
     v.setQuaternion(new XML3DVec3(0,Math.sqrt(0.5),0),-Math.sqrt(0.5));
     QUnit.closeRotation(v, new XML3DRotation(new XML3DVec3(0,1,0), Math.PI/2.0), EPSILON);
+
+    v.setQuaternion(new XML3DVec3(-0.5,0.5,-0.5),0.5);
+    QUnit.closeRotation(v, new XML3DRotation(new XML3DVec3(-0.5774,0.5774,-0.5774), 2/3*Math.PI), EPSILON);
 });
 
 test("XML3DRotation::rotateVec3", function()  {

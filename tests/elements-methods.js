@@ -15,9 +15,9 @@ test("xml3d methods test", function() {
     ok(node.createXML3DRay() instanceof XML3DRay, "xml3d::createXML3DRay returns XML3DRay");
     deepEqual(node.createXML3DRay(), new XML3DRay(), "xml3d::createXML3DRay() == new XML3DRay()");
 
-    equal(node.getElementByPoint(0,0), null, "xml3d::getElementByPoint returns null");
-    ok(node.generateRay(0,0) instanceof XML3DRay, "xml3d::generateRay returns XML3DRay");
-    equal(node.getElementByRay(node.generateRay(0,0)), null, "xml3d::getElementByRay returns null");
+    equal(node.getElementByPoint(0,0, new XML3DVec3(), new XML3DVec3()), null, "xml3d::getElementByPoint returns ");
+    ok(node.generateRay(0,0) instanceof XML3DRay, "xml3d::generateRay returns ");
+    equal(node.getElementByRay(new XML3DRay(), new XML3DVec3(), new XML3DVec3()), null, "xml3d::getElementByRay returns ");
 
     ok(node.getBoundingBox() instanceof XML3DBox, "xml3d::getBoundingBox returns ");
     ok(node.getBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");

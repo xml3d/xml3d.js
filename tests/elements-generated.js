@@ -1,3 +1,5 @@
+
+/* All tests in this module / file are generated from the spec. Do not edit them manually. */
 module("Generated Element interface tests", {
 });
 

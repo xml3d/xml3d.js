@@ -1,4 +1,4 @@
-
+/* START GENERATED: All following code is generated from the specification. Do not edit manually */
 // MeshTypes
 XML3D.MeshTypes = {};
 XML3D.MeshTypes["triangles"] = 0;
@@ -376,3 +376,4 @@ XML3D.classInfo.view = {
 	getViewMatrix : {m: XML3D.methods.viewGetViewMatrix},
 	_term: undefined
 };
+/* END GENERATED */

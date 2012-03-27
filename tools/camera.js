@@ -510,7 +510,7 @@ XML3D.Xml3dSceneController.getController = function(xml3d) {
 		}
 	};
 
-	window.addEventListener('load', onload, false);
+	//window.addEventListener('load', onload, false);
 	window.addEventListener('unload', onunload, false);
 	window.addEventListener('reload', onunload, false);
 

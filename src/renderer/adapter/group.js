@@ -199,7 +199,7 @@
 				var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
 				var result = pattern.exec(styleValue);
 				if (result)
-					shader = this.node.xml3ddocument.resolve(result[1]);
+					shader = XML3D.URIResolver.resolve(result[1]);
 			}
 		} else {
 			shader = XML3D.URIResolver.resolve(shader);

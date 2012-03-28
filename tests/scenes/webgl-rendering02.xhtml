@@ -41,7 +41,14 @@
         <texture id="tex1" name="diffuseTexture">
             <img id="tex1img" src="textures/yellow.png"/>
         </texture>
-    </shader>  
+    </shader> 
+     
+    <shader id="diffuseTexShader" script="urn:xml3d:shader:diffuse">
+        <texture id="tex1" name="diffuseTexture">
+            <img id="tex1img" src="textures/yellow.png"/>
+        </texture>
+    </shader>
+    
     <shader id="customShader" script="#customShaderScript">
         <float3 name="diffuseColor">0 1 0</float3>
     </shader>   
@@ -67,12 +74,16 @@
     
     <view id="defaultView" position="0 0 3"/>
     
-    <group id="myGroup" shader="#texShader1">
+    <group id="myGroup" shader="#texShader1" visible="false">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
 	    </mesh>
     </group>  
     <group id="coloredMeshGroup" shader="#diffuseShader" visible="false">
         <mesh src="#coloredmeshdata" type="triangles">
+        </mesh>
+    </group>  
+    <group id="diffuseTexGroup" shader="#diffuseTexShader" visible="false">
+        <mesh src="#meshdata" type="triangles">
         </mesh>
     </group>  
 

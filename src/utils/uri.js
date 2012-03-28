@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 // Class URI
 // -----------------------------------------------------------------------------
-xml3d.URI = function(str) {
+XML3D.URI = function(str) {
     str = str || "";
     // Based on the regex in RFC2396 Appendix B.
     var parser = /^(?:([^:\/?\#]+):)?(?:\/\/([^\/?\#]*))?([^?\#]*)(?:\?([^\#]*))?(?:\#(.*))?/;
@@ -15,7 +15,7 @@ xml3d.URI = function(str) {
 };
 
 // Restore the URI to it's stringy glory.
-xml3d.URI.prototype.toString = function() {
+XML3D.URI.prototype.toString = function() {
     var str = "";
     if (this.scheme) {
         str += this.scheme + ":";
@@ -38,17 +38,17 @@ xml3d.URI.prototype.toString = function() {
 // -----------------------------------------------------------------------------
 // Class URIResolver
 // -----------------------------------------------------------------------------
-xml3d.URIResolver = function() {
+XML3D.URIResolver = function() {
 };
 
-xml3d.URIResolver.resolve = function(uri, document) {
+XML3D.URIResolver.resolve = function(uri, document) {
     if (typeof uri == 'string')
-        uri = new xml3d.URI(uri);
+        uri = new XML3D.URI(uri);
     document = document || window.document;
 
     if (uri.scheme == 'urn')
     {
-        xml3d.debug.logInfo("++ Found URN." + uri);
+        XML3D.debug.logInfo("++ Found URN." + uri);
         return null;
     }
 
@@ -56,7 +56,7 @@ xml3d.URIResolver.resolve = function(uri, document) {
         return document.getElementById(uri.fragment);
     }
 
-    xml3d.debug.logWarning("++ Can't resolve URI: " + uri.toString());
+    XML3D.debug.logWarning("++ Can't resolve URI: " + uri.toString());
     // TODO Resolve intra-document references
     return null;
 };

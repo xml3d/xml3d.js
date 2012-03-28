@@ -1,11 +1,11 @@
 // Adapter for <xml3d>
 (function() {
 	var XML3DCanvasRenderAdapter = function(factory, node) {
-		xml3d.webgl.RenderAdapter.call(this, factory, node);
+		XML3D.webgl.RenderAdapter.call(this, factory, node);
 		this.factory = factory;
 	    this.processListeners();
 	};
-	xml3d.createClass(XML3DCanvasRenderAdapter, xml3d.webgl.RenderAdapter);
+	XML3D.createClass(XML3DCanvasRenderAdapter, XML3D.webgl.RenderAdapter);
 	
 	XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt) {
 		if (evt.type == 0) {
@@ -40,13 +40,13 @@
 			this.factory.handler.renderPick(x, y);
 			if(hitPoint && this.node.currentPickPos)
 			{
-				xml3d.copyVector(hitPoint, this.node.currentPickPos);
+				XML3D.copyVector(hitPoint, this.node.currentPickPos);
 			}
 			
 			if(hitNormal && this.node.currentPickObj)
 			{
 				this.factory.handler.renderPickedNormals(this.node.currentPickObj, x, y);
-				xml3d.copyVector(hitNormal, this.node.currentPickNormal);
+				XML3D.copyVector(hitNormal, this.node.currentPickNormal);
 			}
 			
 			if(this.node.currentPickObj)
@@ -60,6 +60,6 @@
 		var glY = this.factory.handler.getCanvasHeight() - y - 1; 
 		return this.factory.handler.generateRay(x, glY); 		
 	}; 
-	xml3d.webgl.XML3DCanvasRenderAdapter = XML3DCanvasRenderAdapter;
+	XML3D.webgl.XML3DCanvasRenderAdapter = XML3DCanvasRenderAdapter;
 
 }());

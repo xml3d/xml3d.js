@@ -4,14 +4,14 @@
 	var updateTransformAdapter = function(me) {
 		// setup new and register listener
 		var tname = me.node.transform;
-		var tnode = xml3d.URIResolver.resolve(tname);
+		var tnode = XML3D.URIResolver.resolve(tname);
 		me.transformAdapter = me.factory.getAdapter(tnode);
 
 	};
 	
 	
 	var XML3DGroupRenderAdapter = function(factory, node) {
-	    xml3d.webgl.RenderAdapter.call(this, factory, node);
+	    XML3D.webgl.RenderAdapter.call(this, factory, node);
 	    this.processListeners();
 	    this.factory = factory;
 	    this.parentTransform = null;
@@ -21,7 +21,7 @@
 	    this.updateTransformAdapter();
 	};
 
-	xml3d.createClass(XML3DGroupRenderAdapter, xml3d.webgl.RenderAdapter);
+	XML3D.createClass(XML3DGroupRenderAdapter, XML3D.webgl.RenderAdapter);
 
 	var p = XML3DGroupRenderAdapter.prototype;
 
@@ -40,7 +40,7 @@
 	
 	p.updateTransformAdapter = function() {
 		var tNode = this.node.transform;
-	    tNode = xml3d.URIResolver.resolve(tNode);
+	    tNode = XML3D.URIResolver.resolve(tNode);
 	    if (tNode)
 	    	this.transformAdapter = this.factory.getAdapter(tNode);
 	};
@@ -62,11 +62,13 @@
 
 	p.notifyChanged = function(evt) {
 		if (evt.type == 0) {
-			// Node insertion is handled by the CanvasRenderAdapter
+			this.factory.renderer.sceneTreeAddition(evt);
 			return;
 		}
 		else if (evt.type == 2) {
 			this.factory.renderer.sceneTreeRemoval(evt);
+			return;
+		} else if (evt.type == 5) {
 			return;
 		}
 		
@@ -169,7 +171,7 @@
 			break;
 			
 		default:
-			xml3d.debug.logWarning("Unhandled mutation event in group adapter for parameter '"+target+"'");
+			XML3D.debug.logWarning("Unhandled mutation event in group adapter for parameter '"+target+"'");
 			break;
 		};
 
@@ -197,10 +199,10 @@
 				var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
 				var result = pattern.exec(styleValue);
 				if (result)
-					shader = this.node.xml3ddocument.resolve(result[1]);
+					shader = XML3D.URIResolver.resolve(result[1]);
 			}
 		} else {
-			shader = xml3d.URIResolver.resolve(shader);
+			shader = XML3D.URIResolver.resolve(shader);
 		}
 		
 		shader = this.factory.getAdapter(shader);
@@ -228,7 +230,7 @@
 	            bbox.extend(c.getBoundingBox());
 	    });
 	    if (this.transformAdapter) {
-	        xml3d.webgl.transformAABB(bbox, this.transformAdapter.getMatrix());
+	        XML3D.webgl.transformAABB(bbox, this.transformAdapter.getMatrix());
 	    }
 	    return bbox;
     };
@@ -249,5 +251,5 @@
         return m;
     };
 
-	xml3d.webgl.XML3DGroupRenderAdapter = XML3DGroupRenderAdapter;
+	XML3D.webgl.XML3DGroupRenderAdapter = XML3DGroupRenderAdapter;
 }());

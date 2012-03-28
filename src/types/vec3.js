@@ -229,8 +229,8 @@
                 this._data[2] * n);
     };
 
-    xml3d.XML3DVec3 = XML3DVec3;
+    XML3D.XML3DVec3 = XML3DVec3;
     if (!window.XML3DVec3)
         window.XML3DVec3 = XML3DVec3;
 
-}(xml3d._native));
+}(XML3D._native));

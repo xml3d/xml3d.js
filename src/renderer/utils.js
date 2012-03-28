@@ -3,7 +3,7 @@
 
     var minmax = new Float32Array(6);
 
-    xml3d.webgl.calculateBoundingBox = function(positions, index) {
+    XML3D.webgl.calculateBoundingBox = function(positions, index) {
         var bbox = new XML3DBox();
 
         if (!positions || positions.length < 3)
@@ -67,7 +67,7 @@
 
     var absMat = mat4.create();
 
-    xml3d.webgl.transformAABB = function(bbox, gmatrix) {
+    XML3D.webgl.transformAABB = function(bbox, gmatrix) {
         if (bbox.isEmpty())
             return;
 
@@ -98,7 +98,7 @@
      * @param maxIndexCount the desired chunk size
      * @return
      */
-    xml3d.webgl.splitMesh = function(dataTable, maxIndexCount) {
+    XML3D.webgl.splitMesh = function(dataTable, maxIndexCount) {
     	var verticesPerPolygon = 3;
         var colorStride = 3;
     	maxIndexCount = Math.floor(maxIndexCount / 3) * 3;

@@ -12,6 +12,7 @@
     <defs>
     <transform id="t_group3" rotation="0 1 0 1.57" />
     <transform id="t_viewtest" rotation="0 1 0 1.57" />
+    <transform id="t_viewtest2" translation="0 0 -6" />
     <transform id="t_group4" rotation="0 1 0 1.57" />
     <transform id="t_cubetop" rotation="1 0 0 1.57" translation="0 1 0"/>
     <transform id="t_cubebottom" rotation="1 0 0 -1.57" translation="0 -1 0"/>
@@ -69,6 +70,9 @@
     
     <group id="viewTest" visible="false" transform="#t_viewtest">
         <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
+        <group transform="#t_viewtest2" shader="#flatyellow">
+            <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
+        </group>
     </group>
     
     <group id="myGroup" visible="false">

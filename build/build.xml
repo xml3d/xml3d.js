@@ -65,6 +65,21 @@
 		<antcall target="concat" />
 	</target>
 
+   <target name="lastTag" depends="windowsGit, linuxGit">
+        <tstamp />
+        <git command="describe">
+            <args>
+                <arg value="--tags" />
+                <arg value="--abbrev=0" />
+            </args>
+        </git>
+        <echo message="${git.output}" />
+        <property name="versionStr" value="${git.output}" />
+        <property name="script.ext" value="-${git.output}" />
+        <antcall target="build" />
+        <antcall target="upload" />
+    </target>
+
    <target name="continuous" depends="windowsGit, linuxGit">
         <tstamp />
         <git command="log">
@@ -76,7 +91,7 @@
         <echo message="${git.output}" />
         <property name="versionStr" value="DEVELOPMENT / ${git.output}" />
         <property name="script.ext" value="-dev" />
-        <antcall target="concat" />
+        <antcall target="build" />
         <antcall target="upload" />
     </target>
 
@@ -84,7 +99,7 @@
 		<tstamp />
 		<property name="versionStr" value="DEVELOPMENT SNAPSHOT (${TODAY})" />
 		<property name="script.ext" value="" />
-		<antcall target="concat" />
+		<antcall target="build" />
 	</target>
 
 	<filelist dir="${srcDir}" id="sourceFiles">
@@ -126,21 +141,25 @@
 		<file name="renderer/adapter/factory.js" />
 		<file name="renderer/shaders.js" />
 		<file name="renderer/xflow/xflow.js" />
-		<file name="../tools/xml3d_scene_controller.js" />
 	</filelist>
 
-	<!-- =================================
-          target: Concat all file
-         ================================= -->
-	<target name="concat" depends="clean" description="description">
-		<property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
-		<concat destfile="${finalScript}">
-			<fileset file="${basedir}/preamble.txt" />
-			<filelist refid="sourceFiles"/>
-		</concat>
-		<replaceregexp file="${finalScript}" match="xml3d.webgl.checkError\(" replace="//xml3d.webgl.checkError\(" byline="true" />
-		<replaceregexp file="${finalScript}" match="%VERSION%" replace="${versionStr}" byline="true" />
-	</target>
+	<!-- - - - - - - - - - - - - - - - - -
+          target: build
+         - - - - - - - - - - - - - - - - - -->
+    <target name="build" depends="clean">
+    	<fail unless="script.ext"/>
+        <antcall target="build-xml3d.js" />
+        <antcall target="build-tools" />
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - -
+          target: build
+         - - - - - - - - - - - - - - - - - -->
+    <target name="upload">
+        <fail unless="script.ext"/>
+        <antcall target="upload-xml3d.js" />
+        <antcall target="upload-tools" />
+    </target>
 
 	<target name="physics" depends="clean" description="description">
 		<concat destfile="${buildDir}/${physicsScriptName}">
@@ -156,12 +175,45 @@
 		<delete dir="${buildDir}">
 		</delete>
 	</target>
+    <!-- - - - - - - - - - - - - - - - - -
+          Tools
+         - - - - - - - - - - - - - - - - - -->
+    <target name="build-xml3d.js" description="Merges the core xml3d.js parts">
+    	   <property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
+	       <concat destfile="${finalScript}">
+	       <header>/**
+</header>
+           <fileset file="${basedir}/../LICENSE" />
+           <footer>*/
+/** @version: ${versionStr} **/
+</footer>
+	       </concat>
 
-    <target name="upload">
-    	 <property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
-    	 <fail unless="upload.url"/>
-    	 <post-file file="${finalScript}"
-    	                   url="${upload.url}" />
+	       <concat destfile="${finalScript}" eol="unix" append="true">
+	        <filelist refid="sourceFiles"/>
+	       </concat>
+	        <replaceregexp file="${finalScript}" match="xml3d.webgl.checkError\(" replace="//xml3d.webgl.checkError\(" byline="true" />
+	        <replaceregexp file="${finalScript}" match="%VERSION%" replace="${versionStr}" byline="true" />
+	    </target>
+
+
+    <target name="upload-xml3d.js">
+        <fail unless="upload.url"/>
+        <property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
+        <post-file file="${finalScript}" url="${upload.url}" />
     </target>
+
+	<!-- - - - - - - - - - - - - - - - - -
+          Tools
+         - - - - - - - - - - - - - - - - - -->
+    <target name="build-tools">
+        <copy file="${srcDir}/../tools/camera.js" toFile="${buildDir}/tools/camera${script.ext}.js" />
+    </target>
+
+    <target name="upload-tools">
+    	 <fail unless="upload.url"/>
+    	 <post-file file="${buildDir}/tools/camera${script.ext}.js" url="${upload.url}/tools/" />
+    </target>
+
 
 </project>

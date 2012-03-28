@@ -3,6 +3,16 @@
     // Is native?
     if($) return;
 
+    function orthogonal(v) {
+        if ((Math.abs(v._data[1]) >= 0.9*Math.abs(v._data[0])) && (Math.abs(v._data[2]) >= 0.9*Math.abs(v._data[0])))
+            return new XML3DVec3(0.0, -v._data[2], v._data[1]);
+          else
+            if ((Math.abs(v._data[0]) >= 0.9*Math.abs(v._data[1])) && (Math.abs(v._data[2]) >= 0.9*Math.abs(v._data[1])))
+              return new XML3DVec3(-v._data[2], 0.0, v._data[0]);
+            else
+              return new XML3DVec3(-v._data[1], v._data[0], 0.0);
+    }
+
     /**
      * Creates an instance of XML3DRotation. XML3DRotation represents a
      * three-dimensional vector as a 3-tuple floating point values.
@@ -109,8 +119,13 @@
         var a = from.normalize();
         var b = to.normalize();
 
+        var axis = a.cross(b);
+        if (!axis.length()) {
+            // from and to are parallel
+            axis = orthogonal(a);
+        };
         // This function will also callback
-        this.setAxisAngle(from.cross(to), Math.acos(a.dot(b)));
+        this.setAxisAngle(axis, Math.acos(a.dot(b)));
     };
 
     p._updateQuaternion = function() {
@@ -251,8 +266,8 @@
         return new XML3DRotation(na, this._angle);
     };
 
-    xml3d.XML3DRotation = XML3DRotation;
+    XML3D.XML3DRotation = XML3DRotation;
     if (!window.XML3DRotation)
         window.XML3DRotation = XML3DRotation;
 
-}(xml3d._native));
+}(XML3D._native));

@@ -41,8 +41,8 @@
 //---------------------------------------------------------------------------------------------------------------------------
 
 /**
- * Class xml3d.webgl.XML3DDataAdapterFactory
- * extends: xml3d.data.AdapterFactory
+ * Class XML3D.webgl.XML3DDataAdapterFactory
+ * extends: XML3D.data.AdapterFactory
  *
  * XML3DDataAdapterFactory creates DataAdapter instances for elements using generic data (<mesh>, <data>, <float>,...).
  * Additionally, it manages all DataAdapter instances so that for each node there is always just one DataAdapter. When
@@ -69,20 +69,20 @@
  */
 
 /**
- * Constructor of xml3d.webgl.XML3DDataAdapterFactory
+ * Constructor of XML3D.webgl.XML3DDataAdapterFactory
  *
- * @augments xml3d.data.AdapterFactory
+ * @augments XML3D.data.AdapterFactory
  * @constructor
  *
  * @param handler
  */
-xml3d.webgl.XML3DDataAdapterFactory = function(handler)
+XML3D.webgl.XML3DDataAdapterFactory = function(handler)
 {
-	xml3d.data.AdapterFactory.call(this);
+	XML3D.data.AdapterFactory.call(this);
 	this.handler = handler;
 };
-xml3d.webgl.XML3DDataAdapterFactory.prototype             = new xml3d.data.AdapterFactory();
-xml3d.webgl.XML3DDataAdapterFactory.prototype.constructor = xml3d.webgl.XML3DDataAdapterFactory;
+XML3D.webgl.XML3DDataAdapterFactory.prototype             = new XML3D.data.AdapterFactory();
+XML3D.webgl.XML3DDataAdapterFactory.prototype.constructor = XML3D.webgl.XML3DDataAdapterFactory;
 
 /**
  * Returns a DataAdapter instance associated with the given node. If there is already a DataAdapter created for this node,
@@ -91,9 +91,9 @@ xml3d.webgl.XML3DDataAdapterFactory.prototype.constructor = xml3d.webgl.XML3DDat
  * @param   node  element node which uses generic data. The supported elements are listed in the class description above.
  * @returns DataAdapter instance
  */
-xml3d.webgl.XML3DDataAdapterFactory.prototype.getAdapter = function(node)
+XML3D.webgl.XML3DDataAdapterFactory.prototype.getAdapter = function(node)
 {
-	return xml3d.data.AdapterFactory.prototype.getAdapter.call(this, node, xml3d.webgl.XML3DDataAdapterFactory.prototype);
+	return XML3D.data.AdapterFactory.prototype.getAdapter.call(this, node, XML3D.webgl.XML3DDataAdapterFactory.prototype);
 };
 
 /**
@@ -102,13 +102,13 @@ xml3d.webgl.XML3DDataAdapterFactory.prototype.getAdapter = function(node)
  * @param   node  element node which uses generic data. The supported elements are listed in the class description above.
  * @returns DataAdapter instance
  */
-xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
+XML3D.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 {
 	if (node.localName == "mesh"   ||
 		node.localName == "shader" ||
 		node.localName == "lightshader" )
 	{
-		return new xml3d.webgl.RootDataAdapter(this, node);
+		return new XML3D.webgl.RootDataAdapter(this, node);
 	}
 
 	if (node.localName == "float"    ||
@@ -119,23 +119,23 @@ xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 		node.localName == "int"      ||
 		node.localName == "bool"     )
 	{
-		return new xml3d.webgl.ValueDataAdapter(this, node);
+		return new XML3D.webgl.ValueDataAdapter(this, node);
 	}
 	
 	if (node.localName == "img")
-		return new xml3d.webgl.ImgDataAdapter(this, node);
+		return new XML3D.webgl.ImgDataAdapter(this, node);
 
 	if (node.localName == "texture")
 	{
-		return new xml3d.webgl.TextureDataAdapter(this, node);
+		return new XML3D.webgl.TextureDataAdapter(this, node);
 	}
 			
 	if (node.localName == "data")
 	{
-		return new xml3d.webgl.DataAdapter(this, node);
+		return new XML3D.webgl.DataAdapter(this, node);
 	}
 
-	//xml3d.debug.logError("xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter: " +
+	//XML3D.debug.logError("XML3D.webgl.XML3DDataAdapterFactory.prototype.createAdapter: " +
 	//		                 node.localName + " is not supported");
 	return null;
 };
@@ -143,12 +143,12 @@ xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
 //---------------------------------------------------------------------------------------------------------------------------
 
 /**
- * Class xml3d.webgl.DataAdapter
- * extends: xml3d.data.Adapter
+ * Class XML3D.webgl.DataAdapter
+ * extends: XML3D.data.Adapter
  *
  * The DataAdapter implements the DataCollector concept and serves as basis of all DataAdapter classes.
  * In general, a DataAdapter is associated with an element node which uses generic data and should be
- * instantiated via xml3d.webgl.XML3DDataAdapterFactory to ensure proper functionality.
+ * instantiated via XML3D.webgl.XML3DDataAdapterFactory to ensure proper functionality.
  *
  * @author Kristian Sons
  * @author Benjamin Friedrich
@@ -157,17 +157,17 @@ xml3d.webgl.XML3DDataAdapterFactory.prototype.createAdapter = function(node)
  */
 
 /**
- * Constructor of xml3d.webgl.DataAdapter
+ * Constructor of XML3D.webgl.DataAdapter
  *
- * @augments xml3d.data.Adapter
+ * @augments XML3D.data.Adapter
  * @constructor
  *
  * @param factory
  * @param node
  */
-xml3d.webgl.DataAdapter = function(factory, node)
+XML3D.webgl.DataAdapter = function(factory, node)
 {
-	xml3d.data.Adapter.call(this, factory, node);
+	XML3D.data.Adapter.call(this, factory, node);
 
 	this.observers = new Array();
 
@@ -182,7 +182,7 @@ xml3d.webgl.DataAdapter = function(factory, node)
 		var child = this.node.firstElementChild;
 		while (child !== null)
 		{			
-			var dataCollector = this.factory.getAdapter(child, xml3d.webgl.XML3DDataAdapterFactory.prototype);
+			var dataCollector = this.factory.getAdapter(child, XML3D.webgl.XML3DDataAdapterFactory.prototype);
 
 			if(dataCollector)
 			{
@@ -193,9 +193,9 @@ xml3d.webgl.DataAdapter = function(factory, node)
 		}
 		
 		if (this.node.src) {
-			var srcElement = xml3d.URIResolver.resolve(this.node.src);
+			var srcElement = XML3D.URIResolver.resolve(this.node.src);
 			if (srcElement) {
-				dataCollector = this.factory.getAdapter(srcElement, xml3d.webgl.XML3DDataAdapterFactory.prototype);
+				dataCollector = this.factory.getAdapter(srcElement, XML3D.webgl.XML3DDataAdapterFactory.prototype);
 				if (dataCollector)
 					dataCollector.registerObserver(this);
 			}
@@ -206,23 +206,23 @@ xml3d.webgl.DataAdapter = function(factory, node)
 	};
 
 };
-xml3d.webgl.DataAdapter.prototype             = new xml3d.data.Adapter();
-xml3d.webgl.DataAdapter.prototype.constructor = xml3d.webgl.DataAdapter;
+XML3D.webgl.DataAdapter.prototype             = new XML3D.data.Adapter();
+XML3D.webgl.DataAdapter.prototype.constructor = XML3D.webgl.DataAdapter;
 
 /**
  *
  * @param aType
  * @returns
  */
-xml3d.webgl.DataAdapter.prototype.isAdapterFor = function(aType)
+XML3D.webgl.DataAdapter.prototype.isAdapterFor = function(aType)
 {
-	return aType == xml3d.webgl.XML3DDataAdapterFactory.prototype;
+	return aType == XML3D.webgl.XML3DDataAdapterFactory.prototype;
 };
 
 /**
  * Notifies all observers about data changes by calling their notifyDataChanged() method.
  */
-xml3d.webgl.DataAdapter.prototype.notifyObservers = function(e)
+XML3D.webgl.DataAdapter.prototype.notifyObservers = function(e)
 {
 	for(var i = 0; i < this.observers.length; i++)
 	{
@@ -235,9 +235,9 @@ xml3d.webgl.DataAdapter.prototype.notifyObservers = function(e)
  * data changes (DOM mustation events) in its associating node. When this method is called, all observers
  * of the DataAdapter are notified about data changes via their notifyDataChanged() method.
  *
- * @param e  notification of type xml3d.Notification
+ * @param e  notification of type XML3D.Notification
  */
-xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e)
+XML3D.webgl.DataAdapter.prototype.notifyChanged = function(e)
 {
 	// this is the DataAdapter where an actual change occurs, therefore
 	// the dataTable must be recreated
@@ -250,7 +250,7 @@ xml3d.webgl.DataAdapter.prototype.notifyChanged = function(e)
  * of the data table is necessary as the notification usually comes from a child DataAdapter.
  * This means when a child element changes, its parent changes simultaneously.
  */
-xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function(e)
+XML3D.webgl.DataAdapter.prototype.notifyDataChanged = function(e)
 {
 	// Notification can only come from a child DataAdapter. That's why dataTable
 	// can be merged with this instance's datatable
@@ -269,13 +269,13 @@ xml3d.webgl.DataAdapter.prototype.notifyDataChanged = function(e)
  * 			object which shall be notified when the node associated with the
  * 			DataAdapter changes
  */
-xml3d.webgl.DataAdapter.prototype.registerObserver = function(observer)
+XML3D.webgl.DataAdapter.prototype.registerObserver = function(observer)
 {
 	for(var i = 0; i < this.observers.length; i++)
 	{
 		if(this.observers[i] == observer)
 		{
-			xml3d.debug.logWarning("Observer " + observer + " is already registered");
+			XML3D.debug.logWarning("Observer " + observer + " is already registered");
 			return;
 		}
 	}
@@ -289,7 +289,7 @@ xml3d.webgl.DataAdapter.prototype.registerObserver = function(observer)
  * @param observer
  * 			which shall be unregistered
  */
-xml3d.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
+XML3D.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
 {
 	for(var i = 0; i < this.observers.length; i++)
 	{
@@ -300,7 +300,7 @@ xml3d.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
 		}
 	}
 
-	xml3d.debug.logWarning("Observer " + observer +
+	XML3D.debug.logWarning("Observer " + observer +
 			                   " can not be unregistered because it is not registered");
 };
 
@@ -312,7 +312,7 @@ xml3d.webgl.DataAdapter.prototype.unregisterObserver = function(observer)
  *
  * @returns datatable retrieved from the DataAdapter's children
  */
-xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
+XML3D.webgl.DataAdapter.prototype.getDataFromChildren = function()
 {
 	var dataTable = new Array();
 
@@ -321,17 +321,19 @@ xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
 	{
 		//var childNode = this.node.childNodes[i];
 
-		var dataCollector = this.factory.getAdapter(child, xml3d.webgl.XML3DDataAdapterFactory.prototype);
+		var dataCollector = this.factory.getAdapter(child, XML3D.webgl.XML3DDataAdapterFactory.prototype);
 		
-		if(! dataCollector) // This can happen, i.e. a child node in a seperate namespace
-			continue;
+		if(! dataCollector) {// This can happen, i.e. a child node in a separate namespace
+		    child = child.nextElementSibling;
+		    continue;
+		}
 
 		/* A RootAdapter must not be a chilrden of another DataAdapter.
 		 * Therefore, its data is ignored, if it is specified as child.
 		 * Example: <mesh>, <shader> and <lightshader> */
 		if(dataCollector.isRootAdapter())
 		{
-			xml3d.debug.logWarning(child.localName +
+			XML3D.debug.logWarning(child.localName +
 					                   " can not be a children of another DataCollector element ==> ignored");
 			continue;
 		}
@@ -366,7 +368,7 @@ xml3d.webgl.DataAdapter.prototype.getDataFromChildren = function()
  * 				datatable shall be returned
  * @returns datatable
  */
-xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
+XML3D.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
 {
 	if(forceNewInstance == undefined ? true : ! forceNewInstance)
 	{
@@ -384,10 +386,10 @@ xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
 	{
 		// If the "src" attribute is used, reuse the datatable of the referred <data> element (or file)
 		// and ignore the element's content
-		var rsrc = xml3d.URIResolver.resolve(src);
-		rsrc = this.factory.getAdapter(rsrc, xml3d.webgl.XML3DDataAdapterFactory.prototype);
+		var rsrc = XML3D.URIResolver.resolve(src);
+		rsrc = this.factory.getAdapter(rsrc, XML3D.webgl.XML3DDataAdapterFactory.prototype);
 		if (!rsrc) {
-			xml3d.debug.logError("Could not find mesh data with src '"+src+"'");
+			XML3D.debug.logError("Could not find mesh data with src '"+src+"'");
 			this.dataTable = {};
 			return;
 		}
@@ -399,11 +401,11 @@ xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
 		var script = this.node.script;
 		if(script != "") {	
 			var type = script.value.toLowerCase();
-			if (xml3d.xflow[type]) {
-				xml3d.xflow[type](dataTable);			
+			if (XML3D.xflow[type]) {
+				XML3D.xflow[type](dataTable);			
 			}
 			else
-				xml3d.debug.logError("Unknown XFlow script '"+script.value+"'.");
+				XML3D.debug.logError("Unknown XFlow script '"+script.value+"'.");
 
 		}
 	}
@@ -418,7 +420,7 @@ xml3d.webgl.DataAdapter.prototype.createDataTable = function(forceNewInstance)
  *
  * @returns true if this DataAdapter is a RootAdapter, otherwise false.
  */
-xml3d.webgl.DataAdapter.prototype.isRootAdapter = function()
+XML3D.webgl.DataAdapter.prototype.isRootAdapter = function()
 {
 	return false;
 };
@@ -426,16 +428,16 @@ xml3d.webgl.DataAdapter.prototype.isRootAdapter = function()
 /**
  * Returns String representation of this DataAdapter
  */
-xml3d.webgl.DataAdapter.prototype.toString = function()
+XML3D.webgl.DataAdapter.prototype.toString = function()
 {
-	return "xml3d.webgl.DataAdapter";
+	return "XML3D.webgl.DataAdapter";
 };
 
 //---------------------------------------------------------------------------------------------------------------------------
 
 /**
- * Class xml3d.webgl.ValueDataAdapter
- * extends: xml3d.webgl.DataAdapter
+ * Class XML3D.webgl.ValueDataAdapter
+ * extends: XML3D.webgl.DataAdapter
  *
  * ValueDataAdapter represents a leaf in the DataAdapter hierarchy. A
  * ValueDataAdapter is associated with the XML3D data elements having
@@ -446,24 +448,24 @@ xml3d.webgl.DataAdapter.prototype.toString = function()
  */
 
 /**
- * Constructor of xml3d.webgl.ValueDataAdapter
+ * Constructor of XML3D.webgl.ValueDataAdapter
  *
- * @augments xml3d.webgl.DataAdapter
+ * @augments XML3D.webgl.DataAdapter
  * @constructor
  *
  * @param factory
  * @param node
  */
-xml3d.webgl.ValueDataAdapter = function(factory, node)
+XML3D.webgl.ValueDataAdapter = function(factory, node)
 {
-	xml3d.webgl.DataAdapter.call(this, factory, node);
+	XML3D.webgl.DataAdapter.call(this, factory, node);
 	this.init = function()
 	{
 		this.createDataTable(true);
 	};
 };
-xml3d.webgl.ValueDataAdapter.prototype             = new xml3d.webgl.DataAdapter();
-xml3d.webgl.ValueDataAdapter.prototype.constructor = xml3d.webgl.ValueDataAdapter;
+XML3D.webgl.ValueDataAdapter.prototype             = new XML3D.webgl.DataAdapter();
+XML3D.webgl.ValueDataAdapter.prototype.constructor = XML3D.webgl.ValueDataAdapter;
 
 /**
  * Returns the tuple size of the associated XML3D data element.
@@ -471,7 +473,7 @@ xml3d.webgl.ValueDataAdapter.prototype.constructor = xml3d.webgl.ValueDataAdapte
  * @returns the tuples size of the associated node or -1 if the tuple size
  * 			of the associated node can not be determined
  */
-xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
+XML3D.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 {
 	if (this.node.localName == "float" ||
 		this.node.localName == "int"   ||
@@ -500,7 +502,7 @@ xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
 		return 16;
 	}
 
-	xml3d.debug.logWarning("Can not determine tuple size of element " + this.node.localName);
+	XML3D.debug.logWarning("Can not determine tuple size of element " + this.node.localName);
 	return -1;
 };
 
@@ -518,7 +520,7 @@ xml3d.webgl.ValueDataAdapter.prototype.getTupleSize = function()
  * @param   node  XML3D texture node
  * @returns texture data or null, if the given node is not a XML3D texture element
  */
-xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
+XML3D.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
 {
 	if(node.localName != "texture")
 	{
@@ -528,7 +530,7 @@ xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
 	var textureChild = node.firstElementChild;
 	if(!textureChild || textureChild.localName != "img")
 	{
-		xml3d.debug.logWarning("child of texture element is not an img element");
+		XML3D.debug.logWarning("child of texture element is not an img element");
 		return null;
 	}
 
@@ -551,7 +553,7 @@ xml3d.webgl.ValueDataAdapter.prototype.extractTextureData = function(node)
  * 				datatable shall be returned
  * @returns datatable
  */
-xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewInstance)
+XML3D.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewInstance)
 {
 	if(forceNewInstance == undefined ? true : ! forceNewInstance)
 	{
@@ -574,16 +576,16 @@ xml3d.webgl.ValueDataAdapter.prototype.createDataTable = function(forceNewInstan
 /**
  * Returns String representation of this DataAdapter
  */
-xml3d.webgl.ValueDataAdapter.prototype.toString = function()
+XML3D.webgl.ValueDataAdapter.prototype.toString = function()
 {
-	return "xml3d.webgl.ValueDataAdapter";
+	return "XML3D.webgl.ValueDataAdapter";
 };
 
 //---------------------------------------------------------------------------------------------------------------------------
 
 /**
- * Class    xml3d.webgl.RootDataAdapter
- * extends: xml3d.webgl.DataAdapter
+ * Class    XML3D.webgl.RootDataAdapter
+ * extends: XML3D.webgl.DataAdapter
  *
  * RootDataAdapter represents the root in the DataAdapter hierarchy (no parents).
  *
@@ -592,28 +594,28 @@ xml3d.webgl.ValueDataAdapter.prototype.toString = function()
  */
 
 /**
- * Constructor of xml3d.webgl.RootDataAdapter
+ * Constructor of XML3D.webgl.RootDataAdapter
  *
- * @augments xml3d.webgl.DataAdapter
+ * @augments XML3D.webgl.DataAdapter
  * @constructor
  *
  * @param factory
  * @param node
  *
  */
-xml3d.webgl.RootDataAdapter = function(factory, node)
+XML3D.webgl.RootDataAdapter = function(factory, node)
 {
-	xml3d.webgl.DataAdapter.call(this, factory, node);
+	XML3D.webgl.DataAdapter.call(this, factory, node);
 };
-xml3d.webgl.RootDataAdapter.prototype             = new xml3d.webgl.DataAdapter();
-xml3d.webgl.RootDataAdapter.prototype.constructor = xml3d.webgl.RootDataAdapter;
+XML3D.webgl.RootDataAdapter.prototype             = new XML3D.webgl.DataAdapter();
+XML3D.webgl.RootDataAdapter.prototype.constructor = XML3D.webgl.RootDataAdapter;
 
 /**
  * Indicates whether this DataAdapter is a RootAdapter (has no parent DataAdapter).
  *
  * @returns true if this DataAdapter is a RootAdapter, otherwise false.
  */
-xml3d.webgl.RootDataAdapter.prototype.isRootAdapter = function()
+XML3D.webgl.RootDataAdapter.prototype.isRootAdapter = function()
 {
 	return true;
 };
@@ -621,30 +623,30 @@ xml3d.webgl.RootDataAdapter.prototype.isRootAdapter = function()
 /**
  * Returns String representation of this DataAdapter
  */
-xml3d.webgl.RootDataAdapter.prototype.toString = function()
+XML3D.webgl.RootDataAdapter.prototype.toString = function()
 {
-	return "xml3d.webgl.RootDataAdapter";
+	return "XML3D.webgl.RootDataAdapter";
 };
 
 
-xml3d.webgl.ImgDataAdapter = function(factory, node)
+XML3D.webgl.ImgDataAdapter = function(factory, node)
 {
-	xml3d.webgl.DataAdapter.call(this, factory, node);
+	XML3D.webgl.DataAdapter.call(this, factory, node);
 };
-xml3d.webgl.ImgDataAdapter.prototype             = new xml3d.webgl.DataAdapter();
-xml3d.webgl.ImgDataAdapter.prototype.constructor = xml3d.webgl.ImgDataAdapter;
+XML3D.webgl.ImgDataAdapter.prototype             = new XML3D.webgl.DataAdapter();
+XML3D.webgl.ImgDataAdapter.prototype.constructor = XML3D.webgl.ImgDataAdapter;
 
-xml3d.webgl.ImgDataAdapter.prototype.createDataTable = function(forceNewInstance)
+XML3D.webgl.ImgDataAdapter.prototype.createDataTable = function(forceNewInstance)
 {};
 
-xml3d.webgl.TextureDataAdapter = function(factory, node)
+XML3D.webgl.TextureDataAdapter = function(factory, node)
 {
-	xml3d.webgl.DataAdapter.call(this, factory, node);
+	XML3D.webgl.DataAdapter.call(this, factory, node);
 };
-xml3d.webgl.TextureDataAdapter.prototype             = new xml3d.webgl.DataAdapter();
-xml3d.webgl.TextureDataAdapter.prototype.constructor = xml3d.webgl.TextureDataAdapter;
+XML3D.webgl.TextureDataAdapter.prototype             = new XML3D.webgl.DataAdapter();
+XML3D.webgl.TextureDataAdapter.prototype.constructor = XML3D.webgl.TextureDataAdapter;
 
-xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNewInstance)
+XML3D.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNewInstance)
 {
 	if(forceNewInstance == undefined ? true : ! forceNewInstance)
 	{
@@ -712,7 +714,7 @@ xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNewInst
 		}
 		
 		if (imgSrc.length != 6) {
-			xml3d.debug.logError("A cube map requires 6 textures, but only "+imgSrc.length+" were found!");
+			XML3D.debug.logError("A cube map requires 6 textures, but only "+imgSrc.length+" were found!");
 			return null;
 		}
 		options["flipY"] = false;
@@ -721,7 +723,7 @@ xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNewInst
 		var textureChild = node.firstElementChild;
 		if(!textureChild || textureChild.localName != "img")
 		{
-			xml3d.debug.logWarning("child of texture element is not an img element");
+			XML3D.debug.logWarning("child of texture element is not an img element");
 			return null; // TODO: Should always return a result
 		}
 		imgSrc.push(textureChild.src);
@@ -747,8 +749,8 @@ xml3d.webgl.TextureDataAdapter.prototype.createDataTable = function(forceNewInst
 /**
  * Returns String representation of this TextureDataAdapter
  */
-xml3d.webgl.TextureDataAdapter.prototype.toString = function()
+XML3D.webgl.TextureDataAdapter.prototype.toString = function()
 {
-	return "xml3d.webgl.TextureDataAdapter";
+	return "XML3D.webgl.TextureDataAdapter";
 };
 /***********************************************************************/

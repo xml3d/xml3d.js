@@ -1,7 +1,7 @@
 // utils/misc.js
-xml3d.util = xml3d.util || {};
+XML3D.util = XML3D.util || {};
 
-xml3d.util.getStyle = function(oElm, strCssRule) {
+XML3D.util.getStyle = function(oElm, strCssRule) {
     var strValue = "";
     if (document.defaultView && document.defaultView.getComputedStyle) {
         strValue = document.defaultView.getComputedStyle(oElm, "")
@@ -16,7 +16,7 @@ xml3d.util.getStyle = function(oElm, strCssRule) {
     return strValue;
 };
 
-xml3d.setParameter = function(elementId, fieldName, value) {
+XML3D.setParameter = function(elementId, fieldName, value) {
     var e = document.getElementById(elementId);
     if (e) {
         var fields = e.childNodes;

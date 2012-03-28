@@ -2,9 +2,9 @@
 // Adapter and Adapter factory
 //-----------------------------------------------------------------------------
 
-xml3d.data = xml3d.data || {};
+XML3D.data = XML3D.data || {};
 
-xml3d.data.Adapter = function(factory, node) {
+XML3D.data.Adapter = function(factory, node) {
     this.factory = factory; // optional
     this.node = node; // optional
     this.init = function() {
@@ -12,18 +12,18 @@ xml3d.data.Adapter = function(factory, node) {
     };
 };
 
-xml3d.data.Adapter.prototype.notifyChanged = function(e) {
+XML3D.data.Adapter.prototype.notifyChanged = function(e) {
     // Notification from the data structure. e is of type
-    // xml3d.Notification.
+    // XML3D.Notification.
 };
-xml3d.data.Adapter.prototype.isAdapterFor = function(aType) {
+XML3D.data.Adapter.prototype.isAdapterFor = function(aType) {
     return false; // Needs to be overwritten
 };
 
-xml3d.data.AdapterFactory = function() {
+XML3D.data.AdapterFactory = function() {
 };
 
-xml3d.data.AdapterFactory.prototype.getAdapter = function(node, atype) {
+XML3D.data.AdapterFactory.prototype.getAdapter = function(node, atype) {
     if (!node || node._configured === undefined)
         return null;
     var elemHandler = node._configured;
@@ -41,6 +41,6 @@ xml3d.data.AdapterFactory.prototype.getAdapter = function(node, atype) {
     return adapter;
 };
 
-xml3d.data.AdapterFactory.prototype.createAdapter = function(node) {
+XML3D.data.AdapterFactory.prototype.createAdapter = function(node) {
     return null;
 };

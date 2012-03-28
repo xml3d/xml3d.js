@@ -1,7 +1,7 @@
 
 (function() {
 
-    var handler = {}, events = xml3d.events;
+    var handler = {}, events = XML3D.events;
 
     function attrModified(e) {
         var eh = e.target._configured;
@@ -38,9 +38,20 @@
             parentHandler.notify(n);
             if(removedChild._configured) {
                 n.type = events.THIS_REMOVED;
-                removedChild._configured.notify(n);
-                removedChild._configured.remove(n);
+                removeRecursive(removedChild,n);
             }
+        }
+    }
+
+    function removeRecursive(element, evt) {
+        if(element._configured) {
+            element._configured.notify(evt);
+            element._configured.remove(evt);
+        }
+        var n = element.firstElementChild;
+        while(n) {
+            removeRecursive(n,evt);
+            n = n.nextElementSibling;
         }
     }
 
@@ -52,13 +63,13 @@
         if(!parentHandler || e.currentTarget === insertedChild)
             return;
 
-        var n = new events.NotificationWrapper(e)
+        var n = new events.NotificationWrapper(e);
 
         if (insertedChild.nodeType == Node.TEXT_NODE && parentHandler.handlers.value) {
             n.type = events.VALUE_MODIFIED;
             parentHandler.handlers.value.resetValue();
         } else {
-            xml3d.config.element(insertedChild);
+            XML3D.config.element(insertedChild);
             n.type = events.NODE_INSERTED;
         }
         parentHandler.notify(n);
@@ -93,7 +104,7 @@
                 } else if (b[prop].m !== undefined) {
                     a[prop] = b[prop].m;
                 } else
-                    xml3d.debug.logError("Can't configure " + a.nodeName + "::" + prop);
+                    XML3D.debug.logError("Can't configure " + a.nodeName + "::" + prop);
             }
         }
         return a;
@@ -105,7 +116,7 @@
 
     handler.ElementHandler.prototype.handleEvent = function(e) {
 
-        xml3d.debug.logDebug(e.type + " at " + e.currentTarget.localName + "/" + e.target);
+        XML3D.debug.logDebug(e.type + " at " + e.currentTarget.localName + "/" + e.target);
         var n = new events.NotificationWrapper(e);
 
         switch (e.type) {
@@ -127,7 +138,7 @@
             try {
                 adapters[a].notifyChanged(evt);
             } catch (e) {
-                xml3d.debug.logError(e);
+                XML3D.debug.logError(e);
             }
         }
     };
@@ -136,12 +147,25 @@
         (this.opposites || (this.opposites = [])).push(evt);
     };
 
+    handler.ElementHandler.prototype.removeOpposite =  function(evt) {
+        for(var o in this.opposites) {
+            var oi = this.opposites[o];
+            if(oi.relatedNode === evt.relatedNode) {
+                this.opposites.splice(o,1);
+                return;
+            }
+        }
+    };
+
     handler.ElementHandler.prototype.notifyOpposite = function(evt) {
         if(evt.value && evt.value._configured) {
             evt.value._configured.addOpposite(evt);
         }
     };
 
+    /*
+     * Get called, if the related node gets removed from the DOM
+     */
     handler.ElementHandler.prototype.remove = function(evt) {
         //console.log("Remove " + this);
         if (this.opposites) {
@@ -153,12 +177,18 @@
                 }
             }
         }
+        for(var h in this.handlers) {
+            var handler = this.handlers[h];
+            if(handler.remove)
+                handler.remove();
+        }
+
     };
 
     handler.ElementHandler.prototype.resolve = function(attrName) {
-        var uri = new xml3d.URI(this.element[attrName]);
+        var uri = new XML3D.URI(this.element[attrName]);
         if (uri.valid && uri.fragment) {
-            return xml3d.URIResolver.resolve(uri);
+            return XML3D.URIResolver.resolve(uri);
         }
         return null;
     };
@@ -185,7 +215,7 @@
         });
     };
 
-    xml3d.createClass(handler.XML3DHandler, handler.ElementHandler);
+    XML3D.createClass(handler.XML3DHandler, handler.ElementHandler);
 
     /*
      * handler.XML3DHandler.prototype.registerAttributes = function(config) {
@@ -195,6 +225,6 @@
      */
 
     // Export to xml3d namespace
-    xml3d.extend(xml3d, handler);
+    XML3D.extend(XML3D, handler);
 
 }());

@@ -2,14 +2,14 @@
 (function() {
 
 	var XML3DLightRenderAdapter = function(factory, node) {
-		xml3d.webgl.RenderAdapter.call(this, factory, node);
+		XML3D.webgl.RenderAdapter.call(this, factory, node);
 		
 		var intensityAttribute = node.getAttribute("intensity");
 		if (intensityAttribute) {
 			try {
 				var flt = parseFloat(intensityAttribute);
 				this.intensity = flt;
-			} catch (e) {xml3d.debug.logWarning("Could not parse light intensity attribute ' "+intensityAttribute+" '"); }
+			} catch (e) {XML3D.debug.logWarning("Could not parse light intensity attribute ' "+intensityAttribute+" '"); }
 		}
 		
 		this.visible = true;
@@ -20,7 +20,7 @@
 
 		this.isValid = true;
 	};
-	xml3d.createClass(XML3DLightRenderAdapter, xml3d.webgl.RenderAdapter);
+	XML3D.createClass(XML3DLightRenderAdapter, XML3D.webgl.RenderAdapter);
 	
 	XML3DLightRenderAdapter.prototype.notifyChanged = function(evt) {
 		var target = evt.internalType || evt.wrapped.attrName;
@@ -36,7 +36,7 @@
 			if (!isNaN(evt.newValue))
 				this.intensity = evt.newValue;
 			else
-				xml3d.debug.logError("Invalid parameter for light intensity attribute: NaN");
+				XML3D.debug.logError("Invalid parameter for light intensity attribute: NaN");
 			break;
 		case "parenttransform":
 			this.transform = evt.newValue;
@@ -104,7 +104,7 @@
 			var shaderLink = this.node.shader;
 			var shader = null;
 			if (shaderLink != "")
-				shader = xml3d.URIResolver.resolve(shaderLink);
+				shader = XML3D.URIResolver.resolve(shaderLink);
 			// if no shader attribute is specified, try to get a shader from the style attribute
 			if(shader == null)
 			{
@@ -124,7 +124,7 @@
 		this.isValid = false;
 	};
 
-	// Export to xml3d.webgl namespace
-	xml3d.webgl.XML3DLightRenderAdapter = XML3DLightRenderAdapter;
+	// Export to XML3D.webgl namespace
+	XML3D.webgl.XML3DLightRenderAdapter = XML3DLightRenderAdapter;
 
 }());

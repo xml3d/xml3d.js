@@ -11,7 +11,7 @@
         default:
             return Boolean(string);
         }
-    }, handler = {}, events = xml3d.events;
+    }, handler = {}, events = XML3D.events;
 
     AttributeHandler = function(elem) {
         this.setter = function(e) {
@@ -37,6 +37,12 @@
             elem._configured.notify(evt);
             elem._configured.notifyOpposite(evt);
             return true; // Already notified
+        };
+        this.remove = function() {
+            var evt = new events.ReferenceNotification(elem, id, elem.getAttribute(id));
+            if(evt.type == events.VALID_REFERENCE && evt.value._configured) {
+                evt.value._configured.removeOpposite(evt);
+            }
         };
         this.desc = {
             get : function() {
@@ -172,8 +178,7 @@
             },
             set : function(value) {
                 current = Boolean(value);
-                if (this.hasAttribute(id))
-                    this.setAttribute(id, current + '');
+                this.setAttribute(id, current + '');
             }
         };
     };
@@ -356,6 +361,6 @@
     };
 
     // Export to xml3d namespace
-    xml3d.extend(xml3d, handler);
+    XML3D.extend(XML3D, handler);
 
 }());

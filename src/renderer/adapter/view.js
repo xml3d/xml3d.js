@@ -1,7 +1,7 @@
 // Adapter for <view>
 (function() {
     var XML3DViewRenderAdapter = function(factory, node) {
-        xml3d.webgl.RenderAdapter.call(this, factory, node);
+        XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.zFar = 100000;
         this.zNear = 0.1;
         this.parentTransform = null;
@@ -9,7 +9,7 @@
         this.projMatrix = null;
         this.updateViewMatrix();
     };
-    xml3d.createClass(XML3DViewRenderAdapter, xml3d.webgl.RenderAdapter);
+    XML3D.createClass(XML3DViewRenderAdapter, XML3D.webgl.RenderAdapter);
     var p = XML3DViewRenderAdapter.prototype;
 
     p.updateViewMatrix = function() {
@@ -37,6 +37,13 @@
             
         }
         return this.projMatrix;
+    };
+
+    /* Interface method */
+    p.getViewMatrix = function() {
+        var m = new XML3DMatrix();
+        m._data.set(this.viewMatrix);
+        return m;
     };
 
     p.getModelViewMatrix = function(model) {
@@ -70,14 +77,14 @@
         break;
         
         default:
-        	 xml3d.debug.logWarning("Unhandled event in view adapter for parameter " + target);
+            XML3D.debug.logWarning("Unhandled event in view adapter for parameter " + target);
         break;
         }
  
         this.factory.handler.redraw("View changed");
     };
 
-    // Export to xml3d.webgl namespace
-    xml3d.webgl.XML3DViewRenderAdapter = XML3DViewRenderAdapter;
+    // Export to XML3D.webgl namespace
+    XML3D.webgl.XML3DViewRenderAdapter = XML3DViewRenderAdapter;
 
 }());

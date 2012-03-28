@@ -65,6 +65,21 @@
 		<antcall target="concat" />
 	</target>
 
+   <target name="lastTag" depends="windowsGit, linuxGit">
+        <tstamp />
+        <git command="describe">
+            <args>
+                <arg value="--tags" />
+                <arg value="--abbrev=0" />
+            </args>
+        </git>
+        <echo message="${git.output}" />
+        <property name="versionStr" value="${git.output}" />
+        <property name="script.ext" value="-${git.output}" />
+        <antcall target="build" />
+        <antcall target="upload" />
+    </target>
+
    <target name="continuous" depends="windowsGit, linuxGit">
         <tstamp />
         <git command="log">

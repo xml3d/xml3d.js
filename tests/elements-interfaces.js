@@ -155,6 +155,14 @@ test("Boolean interface tests", function() {
         equal(e.getAttribute("visible"), null, "Attribute has not been set yet.");
 
         // now XML3DGroupElement::visible
+        // We do not completely emulate the weird behavior of boolean values in HTML
+        // HTML boolean attributes have a real strange behavior, mainly for backward compatibility.
+        // HTML/SGML allows something like <input disabled> which maps to following in XHTML:
+        // <input disabled="true"/> => disabled as expected
+        // <input disabled="false"/> => also disabled
+        // The semantic is: If the disabled attribute is set, it's disabled otherwise not
+        // This makes only sense for booleans, where the default is false.
+        // Thus we use the "standard" behavior as for example an integer value
         e = document.createElementNS(XML3D.xml3dNS, "group");
 
         // Set via interface

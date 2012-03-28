@@ -178,8 +178,7 @@
             },
             set : function(value) {
                 current = Boolean(value);
-                if (this.hasAttribute(id))
-                    this.setAttribute(id, current + '');
+                this.setAttribute(id, current + '');
             }
         };
     };

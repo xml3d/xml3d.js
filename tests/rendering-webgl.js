@@ -287,6 +287,7 @@ test("Camera setDirection/upVector", 5, function() {
     deepEqual(actual, [255,0,0,255], "Camera looking to the right, red");
   
     view.setUpVector(new XML3DVec3(0, -1, 0));
+    view.setDirection(new XML3DVec3(-1, 0, 0));
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,255,0,255], "Camera looking left, yellow");
@@ -413,7 +414,7 @@ test("Diffuse shader with vertex colors", 3, function() {
     cgroup.visible = true;
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [112,112,30,255], "Corners have colors red, yellow, green, blue");
+    QUnit.closePixel(actual, [112,112,30,255], 1, "Corners have colors red, yellow, green, blue");
 
 });
 

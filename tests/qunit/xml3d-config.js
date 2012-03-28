@@ -61,8 +61,16 @@ QUnit.extend( QUnit, {
 			QUnit.__passesVector(actual.min, expected.min, maxDifference) &&
 			QUnit.__passesVector(actual.max, expected.max, maxDifference);
 		QUnit.push(passes, actual, expected, message);
-	}
-			
+	},
+
+	closePixel : function(actual, expected, maxDifference, message) {
+        var passes = (actual === expected) ||
+        Math.abs(actual[0] - expected[0]) <= maxDifference &&
+        Math.abs(actual[1] - expected[1]) <= maxDifference &&
+        Math.abs(actual[2] - expected[2]) <= maxDifference &&
+        Math.abs(actual[3] - expected[3]) <= maxDifference;
+        QUnit.push(passes, actual, expected, message);
+    }
 });
 new (function() {
 

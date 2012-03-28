@@ -266,7 +266,7 @@ test("Camera with group transforms", 7, function() {
     
 });
 
-test("Camera setDirection and navigation", 7, function() {
+test("Camera setDirection/upVector", 5, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -287,16 +287,9 @@ test("Camera setDirection and navigation", 7, function() {
     deepEqual(actual, [255,0,0,255], "Camera looking to the right, red");
   
     view.setUpVector(new XML3DVec3(0, -1, 0));
-    view.setDirection(new XML3DVec3(-1, 0, 0));
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,255,0,255], "Camera looking left, yellow");
-    
-    var nav = this.doc.createElementNS(XML3D.xml3dNS, "navigation");
-    x.appendChild(nav);
-    ok(h.renderer.cameraController !== undefined, "Camera controller created after adding navigation node.");
-    x.removeChild(nav);
-    ok(!h.renderer.cameraController, "Camera controller removed after removing navigation node.");
 });
 
 test("Pick pass flag", 7, function() {

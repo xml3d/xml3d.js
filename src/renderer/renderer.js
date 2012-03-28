@@ -182,15 +182,6 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 		adapter.parentTransform = transform;
 		adapter.updateViewMatrix();
 		break;
-		
-	case "navigation":
-		if (XML3D.Xml3dSceneController) {
-			this.cameraController = new XML3D.Xml3dSceneController(this.xml3dNode);
-		} else {
-			XML3D.debug.logWarning("Found a navigation element but camera.js hasn't been included.");
-		}
-		break;
-		
 	default:
 		break;
 	}
@@ -259,16 +250,6 @@ XML3D.webgl.Renderer.prototype.requestRedraw = function(reason, forcePickingRedr
 
 XML3D.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 	var target = evt.wrapped.target;
-	
-	if (target.nodeName == "navigation") {
-		if (XML3D.Xml3dSceneController) {
-			this.cameraController = new XML3D.Xml3dSceneController(this.xml3dNode);
-		} else {
-			XML3D.debug.logWarning("Found a navigation element but camera.js hasn't been included.");
-		}
-		return;
-	}
-	
 	var adapter = this.factory.getAdapter(target);
 	
 	//If no adapter is found the added node must be a text node, or something else 
@@ -311,13 +292,6 @@ XML3D.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
 
 XML3D.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 	var currentNode = evt.wrapped.target;
-	
-	if (currentNode.nodeName == "navigation" && this.cameraController) {
-		this.cameraController.detach();
-		delete this.cameraController;
-		return;
-	}
-	
 	var adapter = this.factory.getAdapter(currentNode);
 	if (adapter && adapter.destroy)
 		adapter.destroy();

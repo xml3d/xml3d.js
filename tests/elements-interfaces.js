@@ -168,7 +168,7 @@ test("Boolean interface tests", function() {
         e.visible = "false"; // Non-empty string evaulates to 'true'
         equal(e.visible, true, "group.visible set to non-empty string.");
 
-        equal(e.getAttribute("visible"), null, "Attribute has not been set yet.");
+        equal(e.getAttribute("visible"), "true", "Attribute evaluates to 'true'.");
 
         // Set via attribute
         e.visible = false;

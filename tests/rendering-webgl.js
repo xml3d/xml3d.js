@@ -380,6 +380,33 @@ test("Changing texture", 3, function() {
 	
 });
 
+test("NPOT texture resizing", 4, function() {
+	var x = this.doc.getElementById("xml3DElem"),
+    actual,
+    win = this.doc.defaultView,
+    gl = getContextForXml3DElement(x),
+    testFunc = null, h = getHandler(x);	
+	
+	x.addEventListener("framedrawn", function(n) {
+	        if(testFunc)
+	            testFunc(n);
+	});
+	
+	testFunc = function(n) {
+	    actual = win.getPixelValue(gl, 40, 40);
+	    if ((actual[1] + actual[2]) == 0)
+	    	return;
+	    deepEqual(actual, [0,241,0,255], "Green at 40,40");
+	    actual = win.getPixelValue(gl, 120, 80);
+	    deepEqual(actual, [0,0,253,255], "Blue at 120,80");
+	    start();
+	};
+	
+	this.doc.getElementById("npotTexGroup").visible = true;
+	stop();
+	
+});
+
 test("Textured diffuse shader", 3, function() {
 	var x = this.doc.getElementById("xml3DElem"),
     actual,

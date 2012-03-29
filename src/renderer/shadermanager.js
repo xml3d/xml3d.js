@@ -478,14 +478,14 @@ XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataT
 			return false;
 		}
 		var sampler = shader.samplers[name];
-		
+		var dtopt = dataTable[name].options;
 		var opt = {
 				isDepth          : false,
-				minFilter 		 : dataTable[name].options.minFilter,
-				magFilter		 : dataTable[name].options.magFilter,
-				wrapS			 : dataTable[name].options.wrapS,
-				wrapT			 : dataTable[name].options.wrapT,
-				generateMipmap	 : dataTable[name].options.generateMipmap,
+				minFilter 		 : dtopt.minFilter,
+				magFilter		 : dtopt.magFilter,
+				wrapS            : dtopt.wrapS,
+				wrapT            : dtopt.wrapT,
+				generateMipmap   : dtopt.generateMipmap,
 				flipY            : true,
 				premultiplyAlpha : true	
 		};
@@ -580,6 +580,7 @@ XML3D.webgl.XML3DShaderManager.prototype.createTex2DFromData = function(internal
 XML3D.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(info, opt) {
 	var gl = this.gl;
 	var texInfo = {};
+	var image = info.image;
 	gl.bindTexture(gl.TEXTURE_2D, info.handle);
 	
 	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -588,7 +589,18 @@ XML3D.webgl.XML3DShaderManager.prototype.createTex2DFromImage = function(info, o
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 	
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, info.image);
+	if (!this.isPowerOfTwo(image.width) || !this.isPowerOfTwo(image.height)) {
+	    // Scale up the texture to the next highest power of two dimensions.
+	    var canvas = document.createElement("canvas");
+	    canvas.width = this.nextHighestPowerOfTwo(image.width);
+	    canvas.height = this.nextHighestPowerOfTwo(image.height);
+	    var ctx = canvas.getContext("2d");
+	    ctx.drawImage(image, 0, 0, canvas.width, canvas.height); //stretch to fit
+	    //ctx.drawImage(image, 0, 0, image.width, image.height); //centered with transparent padding around edges
+	    image = canvas;
+	}
+	
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 	
 	if (opt.generateMipmap) {
 		gl.generateMipmap(gl.TEXTURE_2D);
@@ -628,3 +640,14 @@ XML3D.webgl.XML3DShaderManager.prototype.destroyTexture = function(tex) {
 		this.gl.deleteTexture(tex.info.handle);
 };
 
+XML3D.webgl.XML3DShaderManager.prototype.isPowerOfTwo = function(dimension) {
+    return (dimension & (dimension - 1)) == 0;
+};
+
+XML3D.webgl.XML3DShaderManager.prototype.nextHighestPowerOfTwo = function(x) {
+    --x;
+    for (var i = 1; i < 32; i <<= 1) {
+        x = x | x >> i;
+    }
+    return x + 1;
+};

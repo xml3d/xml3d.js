@@ -42,6 +42,13 @@
             <img id="tex1img" src="textures/yellow.png"/>
         </texture>
     </shader> 
+    
+    <shader id="npotTexShader" script="urn:xml3d:shader:phong">
+        <float3 name="specularColor">0 0 0</float3>
+        <texture id="npottex" name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+            <img id="npotteximg" src="textures/bluegreen.png"/>
+        </texture>
+    </shader> 
      
     <shader id="diffuseTexShader" script="urn:xml3d:shader:diffuse">
         <texture id="tex1" name="diffuseTexture">
@@ -63,11 +70,13 @@
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
     </data>
     
+    <data id="wrapMeshData" type="triangles">
+        <data src="#meshdata"/>
+        <float2 name="texcoord">0.0 2.0 2.0 2.0 0.0 0.0 2.0 0.0</float2>
+    </data>
+    
     <data id="coloredmeshdata" type="triangles">
-        <int name="index">0 1 2 1 2 3</int>
-        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
-        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
-        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        <data src="#meshdata"/>
         <float3 name="color">0.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.0 1.0 1.0 0.0</float3>
     </data>
     </defs>
@@ -86,6 +95,11 @@
         <mesh src="#meshdata" type="triangles">
         </mesh>
     </group>  
+    
+    <group id="npotTexGroup" shader="#npotTexShader" visible="false">
+        <mesh src="#wrapMeshData" type="triangles">
+        </mesh>
+    </group> 
 
     </xml3d>
     <script type="text/javascript">

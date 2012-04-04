@@ -97,7 +97,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.createMesh = function(gl) {
         var dataTable = this.dataAdapter.createDataTable();
         
-        if (!dataTable.position || !dataTable.position.data) {
+		if (!dataTable.position || !dataTable.position.value) {
             XML3D.debug.logError("Mesh "+this.node.id+" has no data for required attribute 'position'.");
             return { vbos : {}, glType : 0, valid : false};
         }
@@ -109,7 +109,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         meshInfo.glType = this.getGLTypeFromString(type);
 
         if (dataTable.index) {            
-            if (dataTable.position.data.length / 3 > XML3D.webgl.MAX_MESH_INDEX_COUNT) {
+			if (dataTable.position.value.length / 3 > XML3D.webgl.MAX_MESH_INDEX_COUNT) {
                  XML3D.webgl.splitMesh(dataTable, XML3D.webgl.MAX_MESH_INDEX_COUNT);
             } 
             
@@ -130,7 +130,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     meshInfo.isIndexed = true;    
                 }
             } else {
-                var mIndices = new Uint16Array(dataTable.index.data);
+				var mIndices = new Uint16Array(dataTable.index.value);
                 var indexBuffer = gl.createBuffer();
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
                 gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mIndices, gl.STATIC_DRAW);
@@ -160,22 +160,22 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 for (var i = 0; i < numBins; i++) {
                     var attrBuffer = gl.createBuffer();
                     gl.bindBuffer(gl.ARRAY_BUFFER, attrBuffer);
-                    gl.bufferData(gl.ARRAY_BUFFER, a[i].data, gl.STATIC_DRAW);
+					gl.bufferData(gl.ARRAY_BUFFER, a[i].value, gl.STATIC_DRAW);
                     
-                    attrBuffer.length = a[i].data.length;
+					attrBuffer.length = a[i].value.length;
                     attrBuffer.tupleSize = a[i].tupleSize;
-                    attrBuffer.glType = this.getGLTypeFromArray(a[i].data);
+					attrBuffer.glType = this.getGLTypeFromArray(a[i].value);
 
                     meshInfo.vbos[attr][i] = attrBuffer;
                 }
             } else {
                 var attrBuffer = gl.createBuffer();
                 gl.bindBuffer(gl.ARRAY_BUFFER, attrBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, a.data, gl.STATIC_DRAW);
+				gl.bufferData(gl.ARRAY_BUFFER, a.value, gl.STATIC_DRAW);
                 
-                attrBuffer.length = a.data.length;
+				attrBuffer.length = a.value.length;
                 attrBuffer.tupleSize = a.tupleSize;
-                attrBuffer.glType = this.getGLTypeFromArray(a.data);
+				attrBuffer.glType = this.getGLTypeFromArray(a.value);
                 
                 meshInfo.vbos[attr] = [];
                 meshInfo.vbos[attr][0] = attrBuffer;
@@ -207,7 +207,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             shader.program = shader.getXFlowShader(declarations, body);
 
             for (var p in xflowShader.uniforms) {
-                var data = xflowShader.uniforms[p].data;
+				var data = xflowShader.uniforms[p].value;
                 if (data.length < 2)
                     data = data[0];
 
@@ -251,7 +251,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var bbox = new window.XML3DBox();
         var dataTable = this.dataAdapter.createDataTable();
         if(dataTable && dataTable.position)
-            bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.data,dataTable.index.data);
+            bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.value,dataTable.index.value);
         return bbox;
     };
 

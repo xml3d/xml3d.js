@@ -52,8 +52,8 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
     if (shaderAdapter) {
         dataTable = shaderAdapter.getDataTable();
         hasTextures = this.hasTextures(dataTable);
-        if (dataTable["transparency"]) {
-            hasTransparency = dataTable["transparency"].data[0] > 0;
+	    if (dataTable.transparency) {
+	        hasTransparency = dataTable.transparency.value[0] > 0;
         }
     }
 
@@ -105,7 +105,7 @@ XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scri
     if (hasTextures && (shaderName == "phong" || shaderName == "diffuse"))
         shaderName = "textured"+shaderName;
     
-    if (dataTable.useVertexColor && dataTable.useVertexColor.data[0] == true)
+	if (dataTable.useVertexColor && dataTable.useVertexColor.value[0] == true)
         shaderName += "vcolor";
     
     switch (shaderName) {
@@ -358,8 +358,8 @@ XML3D.webgl.XML3DShaderManager.prototype.setUniformVariables = function(shader, 
     for (var name in uniforms) {
         var u = uniforms[name];
         
-        if (u.data)
-            u = u.data;        
+		if (u.value)
+			u = u.value;
         if (u.clean)
             continue;
         if (u.length == 1)

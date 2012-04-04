@@ -36,6 +36,8 @@
 		<file name="interface/attributes.js" />
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
+        <file name="data/data.js" />
+        <file name="data/factory.js" />
 		<file name="renderer/canvashandler.js" />
 		<file name="renderer/utils.js" />
 		<file name="renderer/shadermanager.js" />
@@ -56,7 +58,6 @@
 		<file name="renderer/shader/diffuse.js" />
 		<file name="renderer/shader/phong.js" />
 		<file name="renderer/shader/utility.js" />
-		<!-- <file name="renderer/xflow/xflow.js" /> -->
 	</filelist>
 
 	<target name="lastTag" depends="init, windowsGit, linuxGit">

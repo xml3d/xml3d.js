@@ -70,7 +70,7 @@
             return; //Likely a change to a texture, this is handled through notifyChanged
         
         var dataTable = this.getDataTable();
-        var newValue = dataTable[targetName].data;
+		var newValue = dataTable[targetName].value;
         if (newValue.length < 2)
             newValue = newValue[0];
         

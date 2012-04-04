@@ -55,7 +55,7 @@ XML3D.webgl.Renderer = function(handler, width, height) {
     this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
     this.factory = new XML3D.webgl.XML3DRenderAdapterFactory(handler, this);
-    this.dataFactory = new XML3D.webgl.XML3DDataAdapterFactory(handler);
+	this.dataFactory = new XML3D.data.XML3DDataAdapterFactory(handler);
     this.shaderManager = new XML3D.webgl.XML3DShaderManager(handler.gl, this, this.dataFactory, this.factory);
     this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(handler.gl, this, this.shaderManager);
     this.camera = this.initCamera();
@@ -447,7 +447,7 @@ XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, shaderId, xfo
         var transform = obj.transform;
         var mesh = obj.mesh;
         
-        if (obj.visible == false)
+		if (!(obj.visible && mesh.valid))
             continue;
         
         xform.model = transform;

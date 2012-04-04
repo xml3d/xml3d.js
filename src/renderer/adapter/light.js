@@ -79,12 +79,12 @@
         for (var p in params) {
             if (p == "position") {
                 //Position must be multiplied with the model view matrix
-                var t = quat4.create([params[p].data[0], params[p].data[1],params[p].data[2], 1.0]);
+				var t = quat4.create([params[p].value[0],params[p].value[1],params[p].value[2], 1.0]);
                 mat4.multiplyVec4(mvm, t);
                 aParams[p] = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
                 continue;
             }
-            aParams[p] = params[p].data;
+			aParams[p] = params[p].value;
         }
         
         if (this.intensity !== null) {

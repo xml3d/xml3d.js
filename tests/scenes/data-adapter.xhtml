@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Data Adapter Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="xml3DElem" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+      <defs>
+           <mesh type="triangles" id="test1" >
+              <int    name="index">    1 2 3       </int>
+              <float3 name="position"> 1.0 2.0 3.0 </float3>
+              <float3 name="normal">   1.1 2.0 3.0 </float3>                  
+           </mesh>
+           
+           <data id="test2" >
+              <int    name="index">    4 5 6       </int>
+              <float3 name="position"> 4.0 5.0 6.0 </float3>
+              <float3 name="normal">   4.4 5.0 6.0 </float3>                  
+           </data>
+           
+           <mesh type="triangles" id="test3" >     
+             <float3 name="normal"> 1.0 2.0 3.0 </float3>
+              
+              <data>
+                 <int    name="index">    1 2 3          </int>
+                 <float3 name="position"> 11.0 22.0 33.0 </float3>
+                 <float3 name="normal">   4.0 5.0 6.0    </float3>                  
+              </data>
+              
+              <int name="index"> 4 5 6 </int>     
+           </mesh>
+           
+           <data id="test4-1" src="#test2"/>
+           <data id="test4-2" src="#test2">
+                <int    name="index">    1 2 3          </int>
+                <float3 name="position"> 11.0 22.0 33.0 </float3>
+                <float3 name="normal">   4.0 5.0 6.0    </float3>        
+           </data>
+
+           <data id="sequence01">
+                <float3 name="position" seqnr="0"> 0.0 0.0  0.0 </float3>
+                <float3 name="position" seqnr="1"> 1.0 1.0  1.0 </float3>
+                <float3 name="position" seqnr="2"> 2.0 2.0  2.0 </float3>
+                <float3 name="position" seqnr="3"> 3.0 3.0  3.0 </float3>
+                <float3 name="position" seqnr="4"> 4.0 4.0  4.0 </float3>
+           </data>
+           
+           
+           <mesh type="triangles" id="tupleSizeTest">
+               <int     name="intTest">0 1 2 1 2 3</int>    
+               <int4    name="int4Test">0 1 2 3</int4>    
+               <bool    name="boolTest">0 1 2 1 2 3</bool>  
+               <texture name="textureTest"> <img src="textures/Winter.jpg"/> </texture>
+               <float   name="floatTest">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float>        
+               <float2  name="float2Test">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>      
+               <float3  name="float3Test">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+               <float4  name="float4Test">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float4>
+               <float4x4 name="float4x4Test">1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16</float4x4>
+           </mesh>
+           
+           <mesh type="triangles" id="invalidMesh1" >
+              <int name="index">1 2 3</int>
+              <mesh type="triangles">
+                    <int name="index">11 22 33</int> 
+              </mesh>
+           </mesh>
+           
+           <lightshader id="lightShaderTest" script="urn:xml3d:lightshader:point">
+               <float3 name="intensity">0.9 0.4 0.4</float3>
+               <float3 name="attenuation">0 0 1</float3>    
+               <bool   name="castShadow">true</bool>
+           </lightshader>
+           
+           <shader id="shaderTest" script="urn:xml3d:shader:phong">
+               <float3 name="diffuseColor">1.0 0.5 0.5</float3>
+               <float name="ambientIntensity">0</float>
+           </shader>
+     
+     
+           <mesh type="triangles" id="listenerRoot" >      
+             <float3 name="normal" id="listenerChild1"> 1.0 2.0 3.0 </float3>
+              
+              <data id="listenerChild2">
+                 <int    name="index" id="listenerGrandChild1">    1 2 3          </int>
+                 <float3 name="position" id="listenerGrandChild2"> 11.0 22.0 33.0 </float3>
+                 <float3 name="normal" id="listenerGrandChild3">   4.0 5.0 6.0    </float3>                  
+              </data>
+              
+              <int name="index" id="listenerChild3"> 4 5 6 </int>     
+           </mesh>
+          
+           <mesh type="triangles" id="textureTest" >       
+             <texture name="textureImg"> 
+                <img src="testimgs/img.jpg"/>
+             </texture>
+          </mesh>
+
+           <mesh type="triangles" id="float4x4Test" >
+              <float4x4 name="float4x4">
+                    1 2 3 4
+                    5 6 7 8
+                    9 10 11 12
+                    13 14 15 16
+              </float4x4>
+           </mesh>
+       </defs>
+    </xml3d>
+</body>
+</html>

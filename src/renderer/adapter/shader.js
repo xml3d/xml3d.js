@@ -7,7 +7,7 @@
         
         this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
         if(this.dataAdapter)
-            this.dataAdapter.registerObserver(this);
+			this.dataAdapter.registerConsumer(this);
         else
             XML3D.debug.logError("Data adapter for a shader element could not be created!");
         

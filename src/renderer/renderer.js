@@ -162,7 +162,6 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
         
         // Add a new drawable object to the scene
         var newObject = new XML3D.webgl.Renderer.drawableObject();
-        newObject.mesh = meshAdapter.createMesh(this.handler.gl);
         newObject.meshNode = currentNode;
         newObject.visible = visible && currentNode.visible;
         
@@ -170,7 +169,8 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
         // to ensure all lights and other shader information is available
         newObject.shader = null;
         newObject.transform = transform; 
-        adapter.registerCallback(newObject.getObject); 
+		adapter.registerCallback(newObject.getObject);
+		meshAdapter.createMesh();
         
         scene.push(newObject);
         break;

@@ -41,6 +41,90 @@ XML3D.data = XML3D.data || {};
 
 //---------------------------------------------------------------------------------------------------------------------------
 
+var ProcessTable = function(handler, names, callback) {
+    this.handler = handler;
+    this.fieldNames = names;
+    this.callback = callback;
+    /**
+     * Contains named ProviderEntries
+     */
+    this.providers = {};
+
+    this.register = function() {
+        for(a in this.providers) {
+            this.providers[a].registerConsumer(this);
+        }
+    };
+
+    this.notifyDataChanged = function(provider) {
+        if (this.callback)
+            this.callback.call(this.handler, this.providers, provider);
+    };
+
+    this.toString = function() {
+        var result = "ProcessTable(";
+        result += this.fieldNames.join(" ");
+        result += ")";
+        return result;
+    };
+};
+
+
+/**
+ * Class ScriptOutput is a single, named output of a script.
+ * It's the entry in the provider map of a
+ * ProcessTable
+ * @implements ProviderEntry
+ *
+ */
+var ScriptOutput = function(script, name) {
+    this.script = script;
+    this.name = name;
+    this.data = {}; // Attached user data
+    this.observers = new Array();
+    this.script.registerConsumer(this);
+
+    this.getValue = function() {
+        return this.script.getValue(this.name);
+    };
+
+    this.getTupleSize = function() {
+        return this.script.getTupleSize(this.name);
+    };
+
+    this.registerConsumer = function(consumer) {
+        var length = this.observers.length;
+        for(var i = 0; i < length; i++)
+        {
+            if(this.observers[i] == consumer)
+            {
+                XML3D.debug.logWarning("Observer " + consumer + " is already registered");
+                return;
+            }
+        }
+        this.observers.push(consumer);
+    };
+
+    this.notifyDataChanged = function(e) {
+        var length = this.observers.length;
+        for(var i = 0; i < length; i++)
+        {
+            this.observers[i].notifyDataChanged(this);
+        }
+    };
+
+    this.__defineGetter__("value", function() {
+        console.error("Using deprecated getter");
+        return this.script.getValue(this.name);
+    });
+
+    this.__defineGetter__("tupleSize", function() {
+        return this.script.getTupleSize(this.name);
+    });
+    this.toString = function() {
+            return this.name + ": " + this.script.toString();
+    };
+};
 
 //---------------------------------------------------------------------------------------------------------------------------
 
@@ -72,6 +156,8 @@ XML3D.data.DataAdapter = function(factory, node)
 	XML3D.data.Adapter.call(this, factory, node);
 
 	this.observers = new Array();
+	this.cachedOutputs = null;
+	this.nameMap = {};
 
 	/* Creates DataAdapter instances for the node's children and registers
 	 * itself as observer in those children instances. This approach is needed
@@ -79,6 +165,20 @@ XML3D.data.DataAdapter = function(factory, node)
 	 * a children is changed, the whole parent element must be considered as
 	 * changed.
 	 */
+
+	this.buildMap = function() {
+	    var map = this.node.map;
+        if(map) {
+            var entries = map.split(/\s+/);
+            for(var i = 0; i< entries.length; i++) {
+                var entry = entries[i].split(/\s*:=\s*/);
+                this.nameMap[entry[1]] = entry[0];
+            }
+        }
+	};
+
+
+
 	this.init = function()
 	{
 	    var node = this.node;
@@ -89,7 +189,7 @@ XML3D.data.DataAdapter = function(factory, node)
 
 			if(dataCollector)
 			{
-				dataCollector.registerObserver(this);
+				dataCollector.registerConsumer(this);
 			}
 
 			child = child.nextElementSibling;
@@ -100,10 +200,15 @@ XML3D.data.DataAdapter = function(factory, node)
 			if (srcElement) {
 				dataCollector = this.factory.getAdapter(srcElement, XML3D.data.XML3DDataAdapterFactory.prototype);
 				if (dataCollector)
-					dataCollector.registerObserver(this);
+					dataCollector.registerConsumer(this);
 			}
 		}
 
+		var xflow = this.resolveScript();
+		if(xflow)
+		    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
+
+		this.buildMap();
 		this.createDataTable(true);
 
 	};
@@ -172,7 +277,7 @@ XML3D.data.DataAdapter.prototype.notifyDataChanged = function(e)
  * 			object which shall be notified when the node associated with the
  * 			DataAdapter changes
  */
-XML3D.data.DataAdapter.prototype.registerObserver = function(observer)
+XML3D.data.DataAdapter.prototype.registerConsumer = function(observer)
 {
 	for(var i = 0; i < this.observers.length; i++)
 	{
@@ -192,7 +297,7 @@ XML3D.data.DataAdapter.prototype.registerObserver = function(observer)
  * @param observer
  * 			which shall be unregistered
  */
-XML3D.data.DataAdapter.prototype.unregisterObserver = function(observer)
+XML3D.data.DataAdapter.prototype.unregisterConsumer = function(observer)
 {
 	for(var i = 0; i < this.observers.length; i++)
 	{
@@ -266,6 +371,144 @@ XML3D.data.DataAdapter.prototype.getDataFromChildren = function()
     return dataTable;
 };
 
+XML3D.data.DataAdapter.prototype.getInputs = function() {
+    if (this.cachedInputs)
+        return this.cachedInputs;
+
+    var result = {};
+    this.forEachChildAdapter(function(adapter) {
+        var other = adapter.getOutputs();
+        for (var output in other) {
+            result[output] = other[output];
+        }
+    });
+    this.cachedInputs = result;
+    return result;
+};
+
+XML3D.data.DataAdapter.prototype.getOutputs = function() {
+    var result = {};
+
+    // All inputs get propagated as outputs, but
+    var inputs = this.getInputs();
+    for(input in inputs) {
+        result[input] = inputs[input];
+    }
+
+    // if they get overridden by a script output
+    var xflow = this.resolveScript();
+    if(xflow && xflow.outputs) {
+        var outputs = xflow.outputs;
+        for ( var i = 0; i < outputs.length; i++) {
+            result[outputs[i].name] = { script: this.scriptInstance, scriptOutputName: outputs[i].name };
+        }
+    }
+
+    // At the end we apply renaming
+    for(output in result) {
+        var newName = this.nameMap[output];
+        if(newName) {
+            result[newName] = result[output];
+            delete result[output];
+        }
+    }
+    return result;
+};
+
+XML3D.data.DataAdapter.prototype.resolveScript = function() {
+    if (this.xflow)
+        return this.xflow;
+
+    var script = this.node.script;
+
+    if(!script)
+        return null;
+
+    var pos = script.indexOf("urn:xml3d:xflow:");
+    var urnfrag = "";
+
+    if (pos === 0) {
+        urnfrag = script.substring(16, script.length);
+        XML3D.debug.logWarning("URN: " + script);
+    } else {
+        var sn = XML3D.URIResolver.resolve(script, this.node.ownerDocument);
+        if(!sn)
+            return null;
+        pos = sn.textContent.indexOf("urn:xml3d:xflow:");
+        if (pos=== 0)
+            urnfrag =  sn.textContent.substring(16, sn.textContent.length);
+    }
+
+    this.xflow = XML3D.xflow.getScript(urnfrag);
+    if(this.xflow === undefined) {
+        XML3D.debug.logWarning("Can't evaluate xflow script: " + urnfrag);
+        return null;
+    }
+    return this.xflow;
+};
+
+XML3D.data.DataAdapter.prototype.requestOutputData = function(handler, nameArray, table, callback) {
+    table = table || new ProcessTable(handler, nameArray, callback);
+    this.populateProcessTable(table);
+    //console.log(table);
+    table.register();
+
+    if (callback)
+        callback.call(handler, table.providers);
+};
+
+XML3D.data.DataAdapter.prototype.forEachChildAdapter = function(f) {
+    var node = this.node;
+    if (node.src) {
+        var srcElement = XML3D.URIResolver.resolve(node.src,node.ownerDocument);
+        if (srcElement) {
+            da = this.factory.getAdapter(srcElement, XML3D.data.XML3DDataAdapterFactory.prototype);
+            if (da)
+                f(da);
+        }
+    } else {
+        for (var child = this.node.firstElementChild; child !== null; child = child.nextElementSibling) {
+            var ca = this.factory.getAdapter(child, XML3D.data.XML3DDataAdapterFactory.prototype);
+            if(ca)
+                f(ca);
+        }
+    }
+};
+
+XML3D.data.DataAdapter.prototype.requestInputData = function(handler, nameArray, table, callback) {
+    table = table || new ProcessTable(handler, nameArray, callback);
+    this.forEachChildAdapter(function(adapter) {
+        adapter.requestOutputData(handler, nameArray, table, null);
+    });
+    if (callback)
+        callback.call(handler, table.providers);
+    return table;
+};
+
+XML3D.data.DataAdapter.prototype.populateProcessTable = function(table) {
+    var src = this.node.src, resolved;
+
+    var outputs = this.getOutputs();
+    var fields = table.fieldNames;
+    for(var i = 0; i < fields.length; i++){
+        var field = fields[i];
+        var provider = outputs[field];
+        if(provider) {
+            if(provider.script) {
+                var scriptProvider = new ScriptOutput(provider.script, provider.scriptOutputName);
+                table.providers[field] = scriptProvider;
+            } else {
+                table.providers[field] = provider;
+            }
+        } else {
+            // No error here: requested field might be optional. Consumer
+            // has to decide.
+            //XML3D.debug.logDebug("Did not find requested input: " + field)
+        }
+    }
+
+};
+
 /**
  * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true',
  * createDataTable() creates a new datatable, caches and returns it. If no
@@ -329,6 +572,7 @@ XML3D.data.DataAdapter.prototype.createDataTable = function(forceNewInstance)
 	return dataTable;
 };
 
+
 /**
  * Indicates whether this DataAdapter is a SinkAdapter (has no parent DataAdapter).
  *
@@ -349,310 +593,6 @@ XML3D.data.DataAdapter.prototype.toString = function()
 
 //---------------------------------------------------------------------------------------------------------------------------
 
-/**
- * Class XML3D.data.ValueDataAdapter
- * extends: XML3D.data.DataAdapter
- *
- * ValueDataAdapter represents a leaf in the DataAdapter hierarchy. A
- * ValueDataAdapter is associated with the XML3D data elements having
- * no children besides a text node such as <bool>, <float>, <float2>,... .
- *
- * @author  Benjamin Friedrich
- * @version 10/2010  1.0
- */
-
-/**
- * Constructor of XML3D.data.ValueDataAdapter
- *
- * @augments XML3D.data.DataAdapter
- * @constructor
- *
- * @param factory
- * @param node
- */
-XML3D.data.ValueDataAdapter = function(factory, node)
-{
-	XML3D.data.DataAdapter.call(this, factory, node);
-	this.init = function()
-	{
-		this.createDataTable(true);
-	};
-};
-XML3D.data.ValueDataAdapter.prototype             = new XML3D.data.DataAdapter();
-XML3D.data.ValueDataAdapter.prototype.constructor = XML3D.data.ValueDataAdapter;
-
-/**
- * Returns the tuple size of the associated XML3D data element.
- *
- * @returns the tuples size of the associated node or -1 if the tuple size
- * 			of the associated node can not be determined
- */
-XML3D.data.ValueDataAdapter.prototype.getTupleSize = function()
-{
-    switch(this.node.localName) {
-        case "float":
-        case "int":
-        case "bool":
-            return 1;
-        case "float2":
-            return 2;
-        case "float3":
-            return 3;
-        case "float4":
-        case "int4":
-            return 4;
-        case "float4x4":
-            return 16;
-    }
-
-	XML3D.debug.logWarning("Can not determine tuple size of element " + this.node.localName);
-	return -1;
-};
-
-/**
- * Extracts the texture data of a node. For example:
- *
- * <code>
- *	<texture name="...">
- * 		<img src="textureData.jpg"/>
- * 	</texture
- * </code>
- *
- * In this case, "textureData.jpg" is returned as texture data.
- *
- * @param   node  XML3D texture node
- * @returns texture data or null, if the given node is not a XML3D texture element
- */
-XML3D.data.ValueDataAdapter.prototype.extractTextureData = function(node)
-{
-	if(node.localName != "texture")
-	{
-		return null;
-	}
-
-	var textureChild = node.firstElementChild;
-	if(!textureChild || textureChild.localName != "img")
-	{
-		XML3D.debug.logWarning("child of texture element is not an img element");
-		return null;
-	}
-
-	return textureChild.src;
-};
-
-/**
- * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true',
- * createDataTable() creates a new datatable, caches and returns it. If no
- * parameter is specified or 'forceNewInstance' is specified with 'false', the
- * cashed datatable is returned.<br/>
- * Each datatable has the following format:<br/>
- * <br/>
- * datatable['name']['tupleSize'] : tuple size of the data element with name 'name' <br/>
- * datatable['name']['data']      : typed array (https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html)
- * 								    associated with the data element with name 'name'
- *
- * @param   forceNewInstance
- * 				indicates whether a new instance shall be created or the cached
- * 				datatable shall be returned
- * @returns datatable
- */
-XML3D.data.ValueDataAdapter.prototype.createDataTable = function(forceNewInstance)
-{
-	if(forceNewInstance == undefined ? true : ! forceNewInstance)
-	{
-	   return this.dataTable;
-	}
-
-	var entry = {};
-	entry.name = this.node.name;
-	entry.value = this.node.value;
-	entry.sequence = [];
-	entry.sequence.push({key: +this.node.seqnr, value: this.node.value});
-	entry.tupleSize = this.getTupleSize();
-
-	this.dataTable  = {};
-	this.dataTable[entry.name] = entry;
-	return this.dataTable;
-};
-
-/**
- * Returns String representation of this DataAdapter
- */
-XML3D.data.ValueDataAdapter.prototype.toString = function()
-{
-	return "XML3D.data.ValueDataAdapter";
-};
-
 //---------------------------------------------------------------------------------------------------------------------------
 
-/**
- * Class    XML3D.data.SinkDataAdapter
- * extends: XML3D.data.DataAdapter
- *
- * SinkDataAdapter represents the sink in the data hierarchy (no parents).
- *
- * @author  Benjamin Friedrich
- * @version 10/2010  1.0
- */
-
-/**
- * Constructor of XML3D.data.SinkDataAdapter
- *
- * @augments XML3D.data.DataAdapter
- * @constructor
- *
- * @param factory
- * @param node
- *
- */
-XML3D.data.SinkDataAdapter = function(factory, node)
-{
-	XML3D.data.DataAdapter.call(this, factory, node);
-};
-XML3D.data.SinkDataAdapter.prototype             = new XML3D.data.DataAdapter();
-XML3D.data.SinkDataAdapter.prototype.constructor = XML3D.data.SinkDataAdapter;
-
-/**
- * Indicates whether this DataAdapter is a SinkAdapter (has no parent DataAdapter).
- *
- * @returns true if this DataAdapter is a SinkAdapter, otherwise false.
- */
-XML3D.data.SinkDataAdapter.prototype.isSinkAdapter = function()
-{
-	return true;
-};
-
-/**
- * Returns String representation of this DataAdapter
- */
-XML3D.data.SinkDataAdapter.prototype.toString = function()
-{
-	return "XML3D.data.SinkDataAdapter";
-};
-
-
-XML3D.data.ImgDataAdapter = function(factory, node)
-{
-	XML3D.data.DataAdapter.call(this, factory, node);
-};
-XML3D.data.ImgDataAdapter.prototype             = new XML3D.data.DataAdapter();
-XML3D.data.ImgDataAdapter.prototype.constructor = XML3D.data.ImgDataAdapter;
-
-XML3D.data.ImgDataAdapter.prototype.createDataTable = function(forceNewInstance)
-{};
-
-XML3D.data.TextureDataAdapter = function(factory, node)
-{
-	XML3D.data.DataAdapter.call(this, factory, node);
-};
-XML3D.data.TextureDataAdapter.prototype             = new XML3D.data.DataAdapter();
-XML3D.data.TextureDataAdapter.prototype.constructor = XML3D.data.TextureDataAdapter;
-
-XML3D.data.TextureDataAdapter.prototype.createDataTable = function(forceNewInstance)
-{
-	if(forceNewInstance == undefined ? true : ! forceNewInstance)
-	{
-	   return this.dataTable;
-	}
-	var gl = this.factory.handler.gl;
-	var clampToGL = function(gl, modeStr) {
-		if (modeStr == "clamp")
-			return gl.CLAMP_TO_EDGE;
-		if (modeStr == "repeat")
-			return gl.REPEAT;
-		return gl.CLAMP_TO_EDGE;
-	};
-
-	var filterToGL = function(gl, modeStr) {
-		if (modeStr == "nearest")
-			return gl.NEAREST;
-		if (modeStr == "linear")
-			return gl.LINEAR;
-		if (modeStr == "mipmap_linear")
-			return gl.LINEAR_MIPMAP_NEAREST;
-		if (modeStr == "mipmap_nearest")
-			return gl.NEAREST_MIPMAP_NEAREST;
-		return gl.LINEAR;
-	};
-
-	var node = this.node;
-	var imgSrc = new Array();
-
-	// TODO: Sampler options
-	var options = ({
-		/*Custom texture options would go here, SGL's default options are:
-
-		minFilter        : gl.LINEAR,
-		magFilter        : gl.LINEAR,
-		wrapS            : gl.CLAMP_TO_EDGE,
-		wrapT            : gl.CLAMP_TO_EDGE,
-		isDepth          : false,
-		depthMode        : gl.LUMINANCE,
-		depthCompareMode : gl.COMPARE_R_TO_TEXTURE,
-		depthCompareFunc : gl.LEQUAL,
-		generateMipmap   : false,
-		flipY            : true,
-		premultiplyAlpha : false,
-		onload           : null
-		 */
-		wrapS            : clampToGL(gl, node.wrapS),
-		wrapT            : clampToGL(gl, node.wrapT),
-		generateMipmap   : false
-
-	});
-
-	// TODO: automatically set generateMipmap to true when mipmap dependent filters are used
-	options.minFilter = filterToGL(gl, node.getAttribute("minFilter"));
-	options.magFilter = filterToGL(gl, node.getAttribute("magFilter"));
-	if (node.getAttribute("mipmap") == "true")
-		options.generateMipmap = true;
-
-	if (node.hasAttribute("textype") && node.getAttribute("textype") == "cube") {
-		for (var i=0; i<node.childNodes.length; i++) {
-			var child = node.childNodes[i];
-			if (child.localName != "img")
-				continue;
-			imgSrc.push(child.src);
-		}
-
-		if (imgSrc.length != 6) {
-			XML3D.debug.logError("A cube map requires 6 textures, but only "+imgSrc.length+" were found!");
-			return null;
-		}
-		options["flipY"] = false;
-
-	} else {
-		var textureChild = node.firstElementChild;
-		if(!textureChild || textureChild.localName != "img")
-		{
-			XML3D.debug.logWarning("child of texture element is not an img element");
-			return null; // TODO: Should always return a result
-		}
-		imgSrc.push(textureChild.src);
-	}
-
-	// TODO: Is this correct, do we use it as Array?
-	var result 			 = new Array(1);
-	//var value = new SglTexture2D(gl, textureSrc, options);
-	var name    		 = this.node.name;
-	var content          = new Array();
-	content['tupleSize'] = 1;
-
-	content['options'] = options;
-	content['src'] = imgSrc;
-	content['isTexture'] = true;
-	content['node'] = this.node;
-
-	result[name]    = content;
-	this.dataTable  = result;
-	return result;
-};
-
-/**
- * Returns String representation of this TextureDataAdapter
- */
-XML3D.data.TextureDataAdapter.prototype.toString = function()
-{
-	return "XML3D.data.TextureDataAdapter";
-};
 /***********************************************************************/

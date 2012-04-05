@@ -61,7 +61,7 @@
             var renderer = shader.factory.renderer;
             this.dataAdapter = renderer.dataFactory.getAdapter(shader.node);
             if(this.dataAdapter)
-                this.dataAdapter.registerObserver(renderer);
+				this.dataAdapter.registerConsumer(renderer);
         }
         var params = this.dataAdapter.createDataTable();
     

@@ -5,12 +5,13 @@
     var ScriptInstance = function(data, script) {
         this.data = data;
         this.script = script;
-        this.result = null;
+        this.result = {};
+        this.needsEvaluation = true;
         this.observers = new Array();
 
 
         this.getValue = function(name) {
-            if(!this.result)
+            if(this.needsEvaluation)
                 this.evaluate();
             return this.result[name];
         };
@@ -23,7 +24,7 @@
         };
 
         this.dataChanged = function(dataTable, entry) {
-            this.result = null;
+            this.needsEvaluation = true;
             var args = [];
             this.script.params.forEach(function(param){
                 var arg = dataTable[param];
@@ -49,6 +50,7 @@
             } catch (e) {
                 XML3D.debug.logError("Failed to evaluate xflow script: " + e);
             }
+            this.needsEvaluation = false;
         };
 
         this.registerConsumer = function(consumer) {

@@ -32,6 +32,7 @@
             this.createDataTable(true);
         };
         this.data = {};
+        this.key = node.seqnr;
     };
     XML3D.createClass(ValueDataAdapter, XML3D.data.DataAdapter);
 

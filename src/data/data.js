@@ -41,6 +41,35 @@ XML3D.data = XML3D.data || {};
 
 //---------------------------------------------------------------------------------------------------------------------------
 
+var ProviderEntry = function() {
+    this.consumers = new Array();
+
+    this.registerConsumer = function(consumer) {
+        var length = this.consumers.length;
+        for(var i = 0; i < length; i++)
+        {
+            if(this.consumers[i] == consumer)
+            {
+                XML3D.debug.logWarning("Consumer " + consumer + " is already registered");
+                return;
+            }
+        }
+        this.consumers.push(consumer);
+    };
+
+    this.notifyDataChanged = function(e) {
+        var length = this.consumers.length;
+        for(var i = 0; i < length; i++)
+        {
+            this.consumers[i].notifyDataChanged(this);
+        }
+    };
+
+    this.getValue = function() {
+        XML3D.debug.logError("ProviderEntry::getValue needs to be overwritten");
+    };
+};
+
 var ProcessTable = function(handler, names, callback) {
     this.handler = handler;
     this.fieldNames = names;
@@ -69,6 +98,47 @@ var ProcessTable = function(handler, names, callback) {
     };
 };
 
+var Sequence = function(entry1, entry2) {
+    ProviderEntry.call(this);
+    this.data = [];
+
+    this.push = function(entry) {
+        var key = entry.key;
+        if(key === undefined)
+            throw "No key in entry for sequence";
+        var length = this.data.length;
+        for(var i = 0; i<length; i++) {
+            if (this.data[i].key == key) {
+                this.data.splice(i, 1, entry);
+                return;
+            }
+        }
+        this.data.push(entry);
+        this.data.sort(function(a, b) {
+            return a.key - b.key;
+        });
+    };
+
+    this.interpolate = function(t, interp) {
+        if (t <= this.data[0].key)
+            return this.data[0].value;
+        if (t >= this.data[this.data.length - 1])
+            return this.data[this.data.length - 1].value;
+        for ( var i = 0; i < this.data.length - 1; ++i)
+            if (this.data[i].key < t && t <= this.data[i + 1].key) {
+                return interp(this.data[i].value, this.data[i + 1].value,
+                        (t - this.data[i].key) / (this.data[i + 1].key - this.data[i].key));
+            }
+    };
+
+    this.getValue = function() {
+        return this;
+    };
+
+    this.push(entry1);
+    this.push(entry2);
+};
+XML3D.createClass(Sequence, ProviderEntry);
 
 /**
  * Class ScriptOutput is a single, named output of a script.
@@ -78,10 +148,10 @@ var ProcessTable = function(handler, names, callback) {
  *
  */
 var ScriptOutput = function(script, name) {
+    ProviderEntry.call(this);
     this.script = script;
     this.name = name;
     this.data = {}; // Attached user data
-    this.observers = new Array();
     this.script.registerConsumer(this);
 
     this.getValue = function() {
@@ -90,27 +160,6 @@ var ScriptOutput = function(script, name) {
 
     this.getTupleSize = function() {
         return this.script.getTupleSize(this.name);
-    };
-
-    this.registerConsumer = function(consumer) {
-        var length = this.observers.length;
-        for(var i = 0; i < length; i++)
-        {
-            if(this.observers[i] == consumer)
-            {
-                XML3D.debug.logWarning("Observer " + consumer + " is already registered");
-                return;
-            }
-        }
-        this.observers.push(consumer);
-    };
-
-    this.notifyDataChanged = function(e) {
-        var length = this.observers.length;
-        for(var i = 0; i < length; i++)
-        {
-            this.observers[i].notifyDataChanged(this);
-        }
     };
 
     this.__defineGetter__("value", function() {
@@ -125,6 +174,9 @@ var ScriptOutput = function(script, name) {
             return this.name + ": " + this.script.toString();
     };
 };
+
+XML3D.createClass(ScriptOutput, ProviderEntry);
+
 
 //---------------------------------------------------------------------------------------------------------------------------
 
@@ -379,8 +431,18 @@ XML3D.data.DataAdapter.prototype.getInputs = function() {
     this.forEachChildAdapter(function(adapter) {
         var other = adapter.getOutputs();
         for (var output in other) {
-            result[output] = other[output];
-        }
+            var inTable = result[output];
+            if(inTable) {
+                if (inTable instanceof Sequence) {
+                    console.log("Found sequence: " + inTable);
+                    inTable.push(other[output]);
+                } else {
+                    console.log("Create sequence: " + output);
+                    result[output] = new Sequence(inTable, other[output]);
+                };
+            } else
+                result[output] = other[output];
+        };
     });
     this.cachedInputs = result;
     return result;
@@ -441,7 +503,7 @@ XML3D.data.DataAdapter.prototype.resolveScript = function() {
 
     this.xflow = XML3D.xflow.getScript(urnfrag);
     if(this.xflow === undefined) {
-        XML3D.debug.logWarning("Can't evaluate xflow script: " + urnfrag);
+        XML3D.debug.logWarning("No xflow script registered with name: " + urnfrag);
         return null;
     }
     return this.xflow;

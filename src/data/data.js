@@ -432,13 +432,22 @@ XML3D.data.DataAdapter.prototype.getInputs = function() {
         var other = adapter.getOutputs();
         for (var output in other) {
             var inTable = result[output];
+            var newEntry = other[output];
+
             if(inTable) {
                 if (inTable instanceof Sequence) {
-                    console.log("Found sequence: " + inTable);
-                    inTable.push(other[output]);
+                    // There is already a sequence, merging will be done
+                    // in Sequence
+                    inTable.push(newEntry);
                 } else {
-                    console.log("Create sequence: " + output);
-                    result[output] = new Sequence(inTable, other[output]);
+                    if (inTable.key != newEntry.key) {
+                        // Two different keys: create a sequence
+                        result[output] = new Sequence(inTable, newEntry);
+                    }
+                    else {
+                        // Two different keys: overwrite
+                        result[output] = newEntry;
+                    }
                 };
             } else
                 result[output] = other[output];

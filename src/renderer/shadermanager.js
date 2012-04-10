@@ -45,16 +45,15 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
         return shaderId;
 
     var sources = {vertex:null, fragment:null};
-    var dataTable = null;
-    var hasTextures = false;
-    var hasTransparency = false;
+    var flags = {hasTextures : false, hasTransparency : false, hasVColors : false};
     
     if (shaderAdapter) {
-        dataTable = shaderAdapter.getDataTable();
-        hasTextures = this.hasTextures(dataTable);
+    	var dataTable = shaderAdapter.requestData(["transparency", "diffuseTexture", "useVertexColor"]);
 	    if (dataTable.transparency) {
-	        hasTransparency = dataTable.transparency.value[0] > 0;
+	        flags.hasTransparency = dataTable.transparency.value[0] > 0;
         }
+	    flags.hasTextures = dataTable.diffuseTexture !== undefined;
+	    flags.hasVColors = dataTable.useVertexColor && dataTable.useVertexColor.value[0] == true;
     }
 
     if (shaderNode && shaderNode.hasAttribute("script"))
@@ -62,7 +61,7 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
         var scriptURL = shaderNode.getAttribute("script");
         if (new XML3D.URI(scriptURL).scheme == "urn") {
             //Internal shader
-            sources = this.getStandardShaderSource(scriptURL, shaderAdapter, lights, hasTextures);
+			this.getStandardShaderSource(scriptURL, sources, shaderAdapter, lights, flags);
             shader = this.createShaderFromSources(sources);
         } else {
             //User-provided shader
@@ -75,7 +74,7 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
             
             shader = this.createShaderFromSources(sources);
         }
-        shader.hasTransparency = hasTransparency;
+		shader.hasTransparency = flags.hasTransparency;
         this.shaders[shaderId] = shader;
     } else {    
         // Create the default flat shader
@@ -84,13 +83,20 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
     }
     
     if (shaderAdapter) {        
-        var texturesCreated = this.createTextures(shader, dataTable);
+		var texturesCreated = this.createTextures(shader, shaderAdapter);
         if (!texturesCreated) {
             this.destroyShader(shader);
             shaderId = "defaultShader";
         }    
-        else
-            this.setUniformVariables(shader, dataTable);
+		else {
+			//Set all uniform variables
+			var nameArray = [];
+			for (var name in shader.uniforms) {
+				nameArray.push(name);
+			}
+			var dataTable = shaderAdapter.requestData(nameArray);
+			this.setUniformVariables(shader, dataTable);		
+		}
     }
 
    return shaderId;    
@@ -99,13 +105,12 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
 XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, shaderAdapter, lights, hasTextures) {
     var sources = {vertex:null, fragment:null};
     var shaderName = scriptURL.substring(scriptURL.lastIndexOf(':')+1);
-    var dataTable = shaderAdapter.getDataTable();    
     
     //Need to check for textures to decide which internal shader to use
     if (hasTextures && (shaderName == "phong" || shaderName == "diffuse"))
         shaderName = "textured"+shaderName;
     
-	if (dataTable.useVertexColor && dataTable.useVertexColor.value[0] == true)
+	if (flags.hasVColors)
         shaderName += "vcolor";
     
     switch (shaderName) {
@@ -273,13 +278,7 @@ XML3D.webgl.XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, 
                 this.replaceTexture(sampler, newValue);
         } else 
             XML3D.debug.logError("Couldn't apply change because of a missing texture name");
-        
-        
-        /*shader.changes.push({
-            type : "sampler",
-            name : attrName,
-            newValue : newValue
-        });*/
+
     } else {
         if (attrName == "transparency") 
             shader.hasTransparency = newValue > 0;
@@ -453,17 +452,14 @@ XML3D.webgl.XML3DShaderManager.prototype.destroyShader = function(shader) {
     this.gl.deleteProgram(shader.handle);
 };
 
-XML3D.webgl.XML3DShaderManager.prototype.hasTextures = function(dataTable) {
-    for (var param in dataTable) {
-        if (dataTable[param].isTexture) {
-            return true;    
-        } 
-    }
-    return false;
-};
-
-XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, dataTable) {
+XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, shaderAdapter) {
     var texUnit = 0;
+	var nameArray = [];
+	
+	for (var name in shader.samplers) {
+		nameArray.push(name);
+	}
+	var dataTable = shaderAdapter.requestData(nameArray);
     
     for (var name in shader.samplers) {
         var texture = dataTable[name];

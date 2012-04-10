@@ -333,7 +333,7 @@ XML3D.webgl.Renderer.prototype.render = function() {
     };
     for ( var j = 0, length = slights.length; j < length; j++) {
         light = slights[j].adapter;
-        var params = light.getParameters(xform.view);
+		var params = light.requestData(["position", "attenuation", "intensity", "visiblility"], xform.view);
         if (!params)
             continue; // TODO: Shrink array
         lightParams.positions.set(params.position, j*3);
@@ -512,7 +512,7 @@ XML3D.webgl.Renderer.prototype.drawObject = function(shader, meshInfo) {
             if (meshInfo.segments) {
                 //This is a segmented mesh (eg. a collection of disjunct line strips)
                 var offset = 0;
-                var sd = meshInfo.segments.data;
+				var sd = meshInfo.segments.value;
                 for (var j = 0; j < sd.length; j++) {
                     gl.drawElements(meshInfo.glType, sd[j], gl.UNSIGNED_SHORT, offset);
                     offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes

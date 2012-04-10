@@ -46,7 +46,7 @@
         this.factory.handler.redraw("Light attribute changed.");    
     };
     
-    XML3DLightRenderAdapter.prototype.getParameters = function(viewMatrix) {
+	XML3DLightRenderAdapter.prototype.requestData = function(parameters, viewMatrix) {
         var shader = this.getLightShader();
     
         if(!shader)
@@ -63,7 +63,7 @@
             if(this.dataAdapter)
 				this.dataAdapter.registerConsumer(renderer);
         }
-        var params = this.dataAdapter.createDataTable();
+		var params = this.dataAdapter.requestOutputData(this, parameters);
     
         var visibility = this.visible ? [1.0, 1.0, 1.0] : [0.0, 0.0, 0.0];
     

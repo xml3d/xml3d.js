@@ -526,6 +526,8 @@ XML3D.data.DataAdapter.prototype.requestOutputData = function(handler, nameArray
 
     if (callback)
         callback.call(handler, table.providers);
+    else
+    	return table.providers;
 };
 
 XML3D.data.DataAdapter.prototype.forEachChildAdapter = function(f) {

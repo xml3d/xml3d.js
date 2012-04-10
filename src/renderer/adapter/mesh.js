@@ -122,7 +122,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
 	p.createMesh = function() {
-		this.dataAdapter.requestOutputData(this, ["index", "position", "normal", "color", "texcoord"], null, this.dataChanged);
+		this.dataAdapter.requestOutputData(this, ["index", "position", "normal", "color", "texcoord", "size"], null, this.dataChanged);
 	};
 
 	var ALL_CHANGED = -1;

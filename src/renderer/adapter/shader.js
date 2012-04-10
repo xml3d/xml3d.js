@@ -14,8 +14,9 @@
     };
     
     XML3D.createClass(XML3DShaderRenderAdapter, XML3D.webgl.RenderAdapter);
-
-    XML3DShaderRenderAdapter.prototype.notifyChanged = function(evt) {
+	var p = XML3DShaderRenderAdapter.prototype;
+	
+	p.notifyChanged = function(evt) {
         if (evt.type == 0) {
             this.factory.renderer.sceneTreeAddition(evt);
             return;
@@ -60,7 +61,11 @@
         
     };
     
-    XML3DShaderRenderAdapter.prototype.notifyDataChanged = function(evt) {
+	p.requestData = function(parameters) {
+		return this.dataAdapter.requestOutputData(this, parameters);
+	};
+	
+	p.notifyDataChanged = function(evt) {
         if (!evt.wrapped)
             return; 
         
@@ -69,25 +74,21 @@
         if (!targetName)
             return; //Likely a change to a texture, this is handled through notifyChanged
         
-        var dataTable = this.getDataTable();
+		var dataTable = this.requestData([targetName]);
 		var newValue = dataTable[targetName].value;
         if (newValue.length < 2)
             newValue = newValue[0];
         
         this.renderer.shaderDataChanged(this.node.id, targetName, newValue);
     };
-
-    XML3DShaderRenderAdapter.prototype.getDataTable = function() {
-        return this.dataAdapter.createDataTable();
-    };
     
-    XML3DShaderRenderAdapter.prototype.destroy = function() {
+	p.destroy = function() {
         Array.forEach(this.textures, function(t) {
             t.adapter.destroy();
         });
     };
 
-    XML3DShaderRenderAdapter.prototype.bindSamplers = function() {    
+	p.bindSamplers = function() {	
         var mustRebuildShader = false;
         
         for (var name in this.textures) {
@@ -110,7 +111,7 @@
     };
 
     //Build an instance of the local shader with the given XFlow declarations and body
-    XML3DShaderRenderAdapter.prototype.getXFlowShader = function(declarations, body) {
+	p.getXFlowShader = function(declarations, body) {
         /*if (new XML3D.URI(this.program.scriptURL).scheme != "urn") {
             XML3D.debug.logWarning("XFlow scripts cannot be used in conjunction with custom shaders yet, sorry!");
             return null;

@@ -98,6 +98,7 @@ XML3D.classInfo['data'] = {
     getResult : {m: XML3D.methods.dataGetResult},
     getOutputFieldNames : {m: XML3D.methods.dataGetOutputFieldNames},
     src : {a: XML3D.ReferenceHandler},
+	proto : {a: XML3D.ReferenceHandler},
     script : {a: XML3D.ReferenceHandler},
     _term: undefined
 };
@@ -239,6 +240,8 @@ XML3D.classInfo['float'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float
     name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.FloatArrayValueHandler},
     _term: undefined
 };
@@ -250,6 +253,8 @@ XML3D.classInfo['float2'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float2
     name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float2ArrayValueHandler},
     _term: undefined
 };
@@ -261,6 +266,8 @@ XML3D.classInfo['float3'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float3
     name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float3ArrayValueHandler},
     _term: undefined
 };
@@ -272,6 +279,8 @@ XML3D.classInfo['float4'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float4
     name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float4ArrayValueHandler},
     _term: undefined
 };
@@ -283,6 +292,8 @@ XML3D.classInfo['float4x4'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float4x4
     name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float4x4ArrayValueHandler},
     _term: undefined
 };
@@ -294,6 +305,21 @@ XML3D.classInfo['int'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for int
     name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+	value : {a: XML3D.IntArrayValueHandler},
+	_term: undefined
+};
+/**
+ * Properties and methods for <int4>
+ **/
+XML3D.classInfo.int4 = {
+	id : {a: XML3D.StringAttributeHandler},
+    className : {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for int4
+	name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.IntArrayValueHandler},
     _term: undefined
 };
@@ -305,6 +331,8 @@ XML3D.classInfo['bool'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for bool
     name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.BoolArrayValueHandler},
     _term: undefined
 };
@@ -316,6 +344,8 @@ XML3D.classInfo['texture'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for texture
     name : {a: XML3D.StringAttributeHandler},
+	replaceby : {a: XML3D.StringAttributeHandler},
+	seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
     type : {a: XML3D.EnumAttributeHandler, params: {e: XML3D.TextureTypes, d: 0}},
     filterMin : {a: XML3D.EnumAttributeHandler, params: {e: XML3D.FilterTypes, d: 2}},
     filterMag : {a: XML3D.EnumAttributeHandler, params: {e: XML3D.FilterTypes, d: 2}},

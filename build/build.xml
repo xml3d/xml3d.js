@@ -67,6 +67,7 @@
         <file name="data/xflow/skinDirection.js" />
         <file name="data/xflow/skinPosition.js" />
         <file name="data/xflow/flattenBoneTransform.js" />
+        <file name="data/xflow/flipNormal.js" />
 	</filelist>
 
 	<target name="lastTag" depends="init, windowsGit, linuxGit">

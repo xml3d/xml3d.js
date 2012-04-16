@@ -255,7 +255,7 @@
     					for (var k = 0; k < texcoordStride; k++) {
     						texcoord[k] = texcoordSource[oldIndex*texcoordStride+k];
     					}			
-    					bin.texcoord.set(texcoord, newIndex*vertexStride);
+    					bin.texcoord.set(texcoord, newIndex*texcoordStride);
     				}
     				
     				if(colorSource) {
@@ -281,14 +281,16 @@
     		
     		//Populate the dataTable with the bins
     		for (var i = 0; i < bins.length; i++) {
-    			dataTable.index[i] = { data : bins[i].index, tupleSize : vertexStride };
-    			dataTable.position[i] = { data : bins[i].position, tupleSize : vertexStride };
-    			if (normalSource)
-    				dataTable.normal[i] = { data : bins[i].normal, tupleSize : vertexStride };
-    			if (texcoordSource)
-    				dataTable.position[i] = { data : bins[i].texcoord, tupleSize : texcoordStride };
-    			if (colorSource)
-    				dataTable.color[i] = { data : bins[i].color, tupleSize : colorStride };
+    			if (bins[i].index.nextFreeSlot > 0) {
+                    dataTable.index[i] = { data : bins[i].index, tupleSize : vertexStride };
+                    dataTable.position[i] = { data : bins[i].position, tupleSize : vertexStride };
+                    if (normalSource)
+                        dataTable.normal[i] = { data : bins[i].normal, tupleSize : vertexStride };
+                    if (texcoordSource)
+                        dataTable.texcoord[i] = { data : bins[i].texcoord, tupleSize : texcoordStride };
+                    if (colorSource)
+                        dataTable.color[i] = { data : bins[i].color, tupleSize : colorStride };
+                }
     		}
     		
     	}

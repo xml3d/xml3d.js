@@ -162,14 +162,6 @@ var ScriptOutput = function(script, name) {
         return this.script.getTupleSize(this.name);
     };
 
-    this.__defineGetter__("value", function() {
-        console.error("Using deprecated getter");
-        return this.script.getValue(this.name);
-    });
-
-    this.__defineGetter__("tupleSize", function() {
-        return this.script.getTupleSize(this.name);
-    });
     this.toString = function() {
             return this.name + ": " + this.script.toString();
     };
@@ -233,36 +225,11 @@ XML3D.data.DataAdapter = function(factory, node)
 
 	this.init = function()
 	{
-	    var node = this.node;
-		var child = node.firstElementChild;
-		while (child !== null)
-		{
-			var dataCollector = this.factory.getAdapter(child, XML3D.data.XML3DDataAdapterFactory.prototype);
-
-			if(dataCollector)
-			{
-				dataCollector.registerConsumer(this);
-			}
-
-			child = child.nextElementSibling;
-		}
-
-		if (node.src) {
-			var srcElement = XML3D.URIResolver.resolve(node.src,node.ownerDocument);
-			if (srcElement) {
-				dataCollector = this.factory.getAdapter(srcElement, XML3D.data.XML3DDataAdapterFactory.prototype);
-				if (dataCollector)
-					dataCollector.registerConsumer(this);
-			}
-		}
-
 		var xflow = this.resolveScript();
 		if(xflow)
 		    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
 
 		this.buildMap();
-		this.createDataTable(true);
-
 	};
 
 };
@@ -279,16 +246,6 @@ XML3D.data.DataAdapter.prototype.isAdapterFor = function(aType)
 	return aType == XML3D.data.XML3DDataAdapterFactory.prototype;
 };
 
-/**
- * Notifies all observers about data changes by calling their notifyDataChanged() method.
- */
-XML3D.data.DataAdapter.prototype.notifyObservers = function(e)
-{
-	for(var i = 0; i < this.observers.length; i++)
-	{
-		this.observers[i].notifyDataChanged(e);
-	}
-};
 
 /**
  * The notifyChanged() method is called by the XML3D data structure to notify the DataAdapter about
@@ -304,124 +261,8 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(e)
 	this.notifyDataChanged(e);
 };
 
-/**
- * Is called when the observed DataAdapter has changed. This basic implementation
- * recreates its data table and notifies all its observers about changes. The recreation
- * of the data table is necessary as the notification usually comes from a child DataAdapter.
- * This means when a child element changes, its parent changes simultaneously.
- */
-XML3D.data.DataAdapter.prototype.notifyDataChanged = function(e)
-{
-	// Notification can only come from a child DataAdapter. That's why dataTable
-	// can be merged with this instance's datatable
-	this.createDataTable(true);
-	this.notifyObservers(e);
-};
 
-/**
- * Registers an observer which is notified when the element node associated with the
- * data adapter changes. If the given object is already registered as observer, it
- * is ignored.
- *
- * <b>Note that there must be a notifyDataChanged() method without parameters.</b>
- *
- * @param observer
- * 			object which shall be notified when the node associated with the
- * 			DataAdapter changes
- */
-XML3D.data.DataAdapter.prototype.registerConsumer = function(observer)
-{
-	for(var i = 0; i < this.observers.length; i++)
-	{
-		if(this.observers[i] == observer)
-		{
-			XML3D.debug.logWarning("Observer " + observer + " is already registered");
-			return;
-		}
-	}
 
-	this.observers.push(observer);
-};
-
-/**
- * Unregisters the given observer. If the given object is not registered as observer, it is irgnored.
- *
- * @param observer
- * 			which shall be unregistered
- */
-XML3D.data.DataAdapter.prototype.unregisterConsumer = function(observer)
-{
-	for(var i = 0; i < this.observers.length; i++)
-	{
-		if(this.observers[i] == observer)
-		{
-			this.observers = this.observers.splice(i, 1);
-			return;
-		}
-	}
-
-	XML3D.debug.logWarning("Observer " + observer +
-			                   " can not be unregistered because it is not registered");
-};
-
-/**
- * Returns datatable retrieved from the DataAdapter's children.
- * In doing so, only the cached datatables are fetched since
- * the value of the changed child should already be adapted
- * and the values of the remaining children do not vary.
- *
- * @returns datatable retrieved from the DataAdapter's children
- */
-XML3D.data.DataAdapter.prototype.getDataFromChildren = function()
-{
-	var dataTable = {};
-
-	var child = this.node.firstElementChild;
-	while (child !== null) {
-        // var childNode = this.node.childNodes[i];
-
-        var dataCollector = this.factory.getAdapter(child, XML3D.data.XML3DDataAdapterFactory.prototype);
-
-        if (dataCollector) {// Can be null for a foreign node
-
-            /*
-             * A SinkAdapter must not be a chilrden of another DataAdapter.
-             * Therefore, its data is ignored, if it is specified as child.
-             * Example: <mesh>, <shader> and <lightshader>
-             */
-            if (dataCollector.isSinkAdapter()) {
-                XML3D.debug.logWarning(child.localName + " can not be a children of another DataCollector element ==> ignored");
-            } else {
-                var tmpDataTable = dataCollector.createDataTable();
-                if (tmpDataTable) {
-                    for (key in tmpDataTable) {
-                        if (dataTable[key]) { // We have to merge
-                            var targetSeq = dataTable[key].sequence;
-                            tmpDataTable[key].sequence.forEach(function(entry, index) {
-                                var found = false;
-                                for ( var i = 0; i < targetSeq.length; i++) {
-                                    if (targetSeq[i].key == entry.key) { // Existing key: replace it
-                                        targetSeq[i].value = entry.value;
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (!found) { // New key: add it
-                                    targetSeq.push(entry);
-                                    // TODO: Need to re-sort by key
-                                }
-                            });
-                        } else
-                            dataTable[key] = tmpDataTable[key];
-                    }
-                }
-            }
-        }
-        child = child.nextElementSibling;
-    }
-
-    return dataTable;
-};
 
 XML3D.data.DataAdapter.prototype.getInputs = function() {
     if (this.cachedInputs)
@@ -518,6 +359,16 @@ XML3D.data.DataAdapter.prototype.resolveScript = function() {
     return this.xflow;
 };
 
+XML3D.data.DataAdapter.prototype.requestInputData = function(handler, nameArray, table, callback) {
+    table = table || new ProcessTable(handler, nameArray, callback);
+    this.forEachChildAdapter(function(adapter) {
+        adapter.requestOutputData(handler, nameArray, table, null);
+    });
+    if (callback)
+        callback.call(handler, table.providers);
+    return table;
+};
+
 XML3D.data.DataAdapter.prototype.requestOutputData = function(handler, nameArray, table, callback) {
     table = table || new ProcessTable(handler, nameArray, callback);
     this.populateProcessTable(table);
@@ -530,33 +381,29 @@ XML3D.data.DataAdapter.prototype.requestOutputData = function(handler, nameArray
     	return table.providers;
 };
 
-XML3D.data.DataAdapter.prototype.forEachChildAdapter = function(f) {
+/**
+ * Calls parameter func for each child element. This includes the child
+ * elements of a referenced data element, if src is defined
+ * @param func The function to call
+ */
+XML3D.data.DataAdapter.prototype.forEachChildAdapter = function(func) {
     var node = this.node;
     if (node.src) {
         var srcElement = XML3D.URIResolver.resolve(node.src,node.ownerDocument);
         if (srcElement) {
             da = this.factory.getAdapter(srcElement, XML3D.data.XML3DDataAdapterFactory.prototype);
             if (da)
-                f(da);
+                func(da);
         }
     } else {
         for (var child = this.node.firstElementChild; child !== null; child = child.nextElementSibling) {
             var ca = this.factory.getAdapter(child, XML3D.data.XML3DDataAdapterFactory.prototype);
             if(ca)
-                f(ca);
+                func(ca);
         }
     }
 };
 
-XML3D.data.DataAdapter.prototype.requestInputData = function(handler, nameArray, table, callback) {
-    table = table || new ProcessTable(handler, nameArray, callback);
-    this.forEachChildAdapter(function(adapter) {
-        adapter.requestOutputData(handler, nameArray, table, null);
-    });
-    if (callback)
-        callback.call(handler, table.providers);
-    return table;
-};
 
 XML3D.data.DataAdapter.prototype.populateProcessTable = function(table) {
     var src = this.node.src, resolved;
@@ -583,80 +430,6 @@ XML3D.data.DataAdapter.prototype.populateProcessTable = function(table) {
 };
 
 /**
- * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true',
- * createDataTable() creates a new datatable, caches and returns it. If no
- * parameter is specified or 'forceNewInstance' is specified with 'false', the
- * cashed datatable is returned.<br/>
- * Each datatable has the following format:<br/>
- * <br/>
- * datatable['name']['tupleSize'] : tuple size of the data element with name 'name' <br/>
- * datatable['name']['data']      : typed array (https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html)
- * 								  associated with the data element with name 'name'
- *
- * @param   forceNewInstance
- * 				indicates whether a new instance shall be created or the cached
- * 				datatable shall be returned
- * @returns datatable
- */
-XML3D.data.DataAdapter.prototype.createDataTable = function(forceNewInstance)
-{
-	if(forceNewInstance == undefined ? true : ! forceNewInstance)
-	{
-	   return this.dataTable;
-	}
-
-	var src = this.node.src;
-	var dataTable;
-
-	if(src == "")
-	{
-		dataTable = this.getDataFromChildren();
-	}
-	else
-	{
-		// If the "src" attribute is used, reuse the datatable of the referred <data> element (or file)
-		// and ignore the element's content
-		var rsrc = XML3D.URIResolver.resolve(src, this.node.ownerDocument);
-		rsrc = this.factory.getAdapter(rsrc, XML3D.data.XML3DDataAdapterFactory.prototype);
-		if (!rsrc) {
-			XML3D.debug.logError("Could not find mesh data with src '"+src+"'");
-			this.dataTable = {};
-			return;
-		}
-		dataTable  = rsrc.createDataTable();
-	}
-
-	//Check for xflow scripts
-	/*if (this.node.localName == "data") {
-		var script = this.node.script;
-		if(script != "") {
-			var type = script.value.toLowerCase();
-			if (XML3D.xflow[type]) {
-				XML3D.xflow[type](dataTable);
-			}
-			else
-				XML3D.debug.logError("Unknown XFlow script '"+script.value+"'.");
-
-		}
-	}*/
-
-	this.dataTable = dataTable;
-
-	return dataTable;
-};
-
-
-/**
- * Indicates whether this DataAdapter is a SinkAdapter (has no parent DataAdapter).
- *
- * @returns true if this DataAdapter is a SinkAdapter, otherwise false.
- */
-XML3D.data.DataAdapter.prototype.isSinkAdapter = function()
-{
-	return false;
-};
-
-/**
  * Returns String representation of this DataAdapter
  */
 XML3D.data.DataAdapter.prototype.toString = function()
@@ -664,8 +437,3 @@ XML3D.data.DataAdapter.prototype.toString = function()
 	return "XML3D.data.DataAdapter";
 };
 
-//---------------------------------------------------------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------------------------------------------------------
-
-/***********************************************************************/

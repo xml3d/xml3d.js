@@ -6,10 +6,10 @@
         this.renderer = this.factory.renderer;
         
         this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
-        if(this.dataAdapter)
-			this.dataAdapter.registerConsumer(this);
-        else
-            XML3D.debug.logError("Data adapter for a shader element could not be created!");
+		//if(this.dataAdapter)
+		//	this.dataAdapter.registerConsumer(this);
+		//else
+		//	XML3D.debug.logError("Data adapter for a shader element could not be created!");
         
     };
     

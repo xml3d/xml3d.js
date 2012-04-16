@@ -2,6 +2,17 @@
 (function() {
     "use strict";
 
+    var tupleTable = {
+            float:      1,
+            int:        1,
+            bool:       1,
+            float2:     2,
+            float3:     3,
+            float4:     4,
+            int4:       4,
+            float4x4:   16
+    };
+
     /**
      * Class XML3D.data.ValueDataAdapter
      * extends: XML3D.data.DataAdapter
@@ -29,23 +40,30 @@
         XML3D.data.DataAdapter.call(this, factory, node);
         this.init = function()
         {
-            this.createDataTable(true);
+            this.value = this.node.value;
+            this.key = this.node.seqnr;
+            this.tupleSize = tupleTable[this.node.localName];
         };
+        this.provider = new ProviderEntry();
         this.data = {};
-        this.key = node.seqnr;
+
+        this.consumers = new Array();
+
+        this.registerConsumer = function(consumer) {
+            var length = this.consumers.length;
+            for(var i = 0; i < length; i++)
+            {
+                if(this.consumers[i] == consumer)
+                {
+                    XML3D.debug.logWarning("Consumer " + consumer + " is already registered");
+                    return;
+                }
+            }
+            this.consumers.push(consumer);
+        };
     };
     XML3D.createClass(ValueDataAdapter, XML3D.data.DataAdapter);
 
-    var tupleTable = {
-            float:      1,
-            int:        1,
-            bool:       1,
-            float2:     2,
-            float3:     3,
-            float4:     4,
-            int4:       4,
-            float4x4:   16
-    };
 
     /**
      * Extracts the texture data of a node. For example:
@@ -78,44 +96,6 @@
         return textureChild.src;
     };
 
-    /**
-     * Creates datatable. If the parameter 'forceNewInstance' is specified with 'true',
-     * createDataTable() creates a new datatable, caches and returns it. If no
-     * parameter is specified or 'forceNewInstance' is specified with 'false', the
-     * cashed datatable is returned.<br/>
-     * Each datatable has the following format:<br/>
-     * <br/>
-     * datatable['name']['tupleSize'] : tuple size of the data element with name 'name' <br/>
-     * datatable['name']['data']      : typed array (https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/doc/spec/TypedArray-spec.html)
-     *                                  associated with the data element with name 'name'
-     *
-     * @param   forceNewInstance
-     *              indicates whether a new instance shall be created or the cached
-     *              datatable shall be returned
-     * @returns datatable
-     */
-    ValueDataAdapter.prototype.createDataTable = function(forceNewInstance)
-    {
-        if(forceNewInstance == undefined ? true : ! forceNewInstance)
-        {
-           return this.dataTable;
-        }
-
-        this.value = this.node.value;
-        this.tupleSize = tupleTable[this.node.localName];
-
-        var entry = {};
-        entry.name = this.node.name;
-        entry.value = this.node.value;
-        entry.sequence = [];
-        entry.sequence.push({key: +this.node.seqnr, value: this.node.value});
-        entry.tupleSize = tupleTable[this.node.localName];
-        this.entry = entry;
-
-        this.dataTable  = {};
-        this.dataTable[entry.name] = entry;
-        return this.dataTable;
-    };
 
     ValueDataAdapter.prototype.getValue = function() {
         return this.node.value;
@@ -138,6 +118,15 @@
                 table.providers[fields[i]] = this;
                 return;
             }
+        }
+    };
+
+    ValueDataAdapter.prototype.notifyChanged = function(e)
+    {
+        var length = this.consumers.length;
+        for(var i = 0; i < length; i++)
+        {
+            this.consumers[i].notifyDataChanged(this);
         }
     };
 

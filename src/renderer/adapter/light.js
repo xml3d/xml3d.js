@@ -60,8 +60,8 @@
         {
             var renderer = shader.factory.renderer;
             this.dataAdapter = renderer.dataFactory.getAdapter(shader.node);
-            if(this.dataAdapter)
-				this.dataAdapter.registerConsumer(renderer);
+			//if(this.dataAdapter)
+			//	this.dataAdapter.registerConsumer(renderer);
         }
 		var params = this.dataAdapter.requestOutputData(this, parameters);
     

@@ -548,7 +548,7 @@ XML3D.webgl.createCanvas = function(xml3dElement, index) {
     canvas.style.borderWidth = widthStr;
     canvas.style.padding = paddingStr;
     canvas.style.margin = marginStr;
-    canvas.style.float = style.getPropertyValue("float");
+    canvas.style['float'] = style.getPropertyValue("float");
 
     // Need to be set for correct canvas size
     canvas.width = canvas.clientWidth;

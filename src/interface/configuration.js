@@ -59,7 +59,7 @@ XML3D.classInfo = {};
 /**
  * Properties and methods for <xml3d>
  **/
-XML3D.classInfo.xml3d = {
+XML3D.classInfo['xml3d'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.CanvasClassHandler, id: 'class'},
     style : {a: XML3D.CanvasStyleHandler},
@@ -89,7 +89,7 @@ XML3D.classInfo.xml3d = {
 /**
  * Properties and methods for <data>
  **/
-XML3D.classInfo.data = {
+XML3D.classInfo['data'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
@@ -104,7 +104,7 @@ XML3D.classInfo.data = {
 /**
  * Properties and methods for <defs>
  **/
-XML3D.classInfo.defs = {
+XML3D.classInfo['defs'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for defs
@@ -113,7 +113,7 @@ XML3D.classInfo.defs = {
 /**
  * Properties and methods for <group>
  **/
-XML3D.classInfo.group = {
+XML3D.classInfo['group'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for group
@@ -138,7 +138,7 @@ XML3D.classInfo.group = {
 /**
  * Properties and methods for <mesh>
  **/
-XML3D.classInfo.mesh = {
+XML3D.classInfo['mesh'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for mesh
@@ -162,7 +162,7 @@ XML3D.classInfo.mesh = {
 /**
  * Properties and methods for <transform>
  **/
-XML3D.classInfo.transform = {
+XML3D.classInfo['transform'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for transform
@@ -176,7 +176,7 @@ XML3D.classInfo.transform = {
 /**
  * Properties and methods for <shader>
  **/
-XML3D.classInfo.shader = {
+XML3D.classInfo['shader'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for shader
@@ -187,7 +187,7 @@ XML3D.classInfo.shader = {
 /**
  * Properties and methods for <light>
  **/
-XML3D.classInfo.light = {
+XML3D.classInfo['light'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for light
@@ -211,7 +211,7 @@ XML3D.classInfo.light = {
 /**
  * Properties and methods for <lightshader>
  **/
-XML3D.classInfo.lightshader = {
+XML3D.classInfo['lightshader'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for lightshader
@@ -222,7 +222,7 @@ XML3D.classInfo.lightshader = {
 /**
  * Properties and methods for <script>
  **/
-XML3D.classInfo.script = {
+XML3D.classInfo['script'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for script
@@ -234,7 +234,7 @@ XML3D.classInfo.script = {
 /**
  * Properties and methods for <float>
  **/
-XML3D.classInfo.float = {
+XML3D.classInfo['float'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float
@@ -245,7 +245,7 @@ XML3D.classInfo.float = {
 /**
  * Properties and methods for <float2>
  **/
-XML3D.classInfo.float2 = {
+XML3D.classInfo['float2'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float2
@@ -256,7 +256,7 @@ XML3D.classInfo.float2 = {
 /**
  * Properties and methods for <float3>
  **/
-XML3D.classInfo.float3 = {
+XML3D.classInfo['float3'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float3
@@ -267,7 +267,7 @@ XML3D.classInfo.float3 = {
 /**
  * Properties and methods for <float4>
  **/
-XML3D.classInfo.float4 = {
+XML3D.classInfo['float4'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float4
@@ -278,7 +278,7 @@ XML3D.classInfo.float4 = {
 /**
  * Properties and methods for <float4x4>
  **/
-XML3D.classInfo.float4x4 = {
+XML3D.classInfo['float4x4'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float4x4
@@ -289,7 +289,7 @@ XML3D.classInfo.float4x4 = {
 /**
  * Properties and methods for <int>
  **/
-XML3D.classInfo.int = {
+XML3D.classInfo['int'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for int
@@ -300,7 +300,7 @@ XML3D.classInfo.int = {
 /**
  * Properties and methods for <bool>
  **/
-XML3D.classInfo.bool = {
+XML3D.classInfo['bool'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for bool
@@ -311,7 +311,7 @@ XML3D.classInfo.bool = {
 /**
  * Properties and methods for <texture>
  **/
-XML3D.classInfo.texture = {
+XML3D.classInfo['texture'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for texture
@@ -329,7 +329,7 @@ XML3D.classInfo.texture = {
 /**
  * Properties and methods for <img>
  **/
-XML3D.classInfo.img = {
+XML3D.classInfo['img'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for img
@@ -339,7 +339,7 @@ XML3D.classInfo.img = {
 /**
  * Properties and methods for <video>
  **/
-XML3D.classInfo.video = {
+XML3D.classInfo['video'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for video
@@ -349,7 +349,7 @@ XML3D.classInfo.video = {
 /**
  * Properties and methods for <view>
  **/
-XML3D.classInfo.view = {
+XML3D.classInfo['view'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for view

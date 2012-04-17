@@ -43,6 +43,9 @@
 	    </sequential>
 	</macrodef>
 
+	<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
+	           classpath="./closure/compiler.jar"/>
+
 	<target name="checkOS">
 		<condition property="isWindows">
 			<os family="windows" />
@@ -101,6 +104,14 @@
 		<property name="script.ext" value="" />
 		<antcall target="build" />
 	</target>
+
+   <target name="minified">
+        <tstamp />
+        <property name="versionStr" value="DEVELOPMENT SNAPSHOT (${TODAY})" />
+        <property name="script.ext" value="" />
+        <antcall target="build" />
+        <antcall target="minify" />
+    </target>
 
 	<filelist dir="${srcDir}" id="sourceFiles">
 		<file name="xml3d.js" />
@@ -170,6 +181,15 @@
 		<replaceregexp file="${buildDir}/${physicsScriptName}" match="%VERSION%" replace="${version}" byline="true" />
 
 	</target>
+
+    <target name="minify">
+    	<property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
+    	 <jscomp compilationLevel="simple" warning="verbose"
+    	            debug="false" output="${buildDir}/${script.start}${script.ext}-min.js" >
+    	 	  <sources refid="sourceFiles">
+    	 	  </sources>
+    	 </jscomp>
+    </target>
 
 	<target name="clean">
 		<delete dir="${buildDir}">

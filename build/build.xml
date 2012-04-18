@@ -118,7 +118,7 @@
 		<file name="utils/misc.js" />
 		<file name="utils/array.js" />
 		<file name="utils/debug.js" />
-		<file name="utils/color.js" />
+		<!--<file name="utils/color.js" />-->
         <file name="utils/uri.js" />
         <file name="contrib/glu.js" />
 		<file name="contrib/glMatrix.js" />
@@ -151,7 +151,7 @@
 		<file name="renderer/adapter/data.js" />
 		<file name="renderer/adapter/factory.js" />
 		<file name="renderer/shaders.js" />
-		<file name="renderer/xflow/xflow.js" />
+		<!-- <file name="renderer/xflow/xflow.js" /> -->
 	</filelist>
 
 	<!-- - - - - - - - - - - - - - - - - -
@@ -184,7 +184,7 @@
 
     <target name="minify">
     	<property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
-    	 <jscomp compilationLevel="simple" warning="verbose"
+    	 <jscomp compilationlevel="simple" warning="verbose"
     	            debug="false" output="${buildDir}/${script.start}${script.ext}-min.js" >
     	 	  <sources refid="sourceFiles">
     	 	  </sources>

@@ -340,7 +340,7 @@ XML3D.webgl.DataAdapter.prototype.getDataFromChildren = function()
 		var tmpDataTable = dataCollector.createDataTable();
 		if(tmpDataTable)
 		{
-			for (key in tmpDataTable)
+			for (var key in tmpDataTable)
 			{
 				dataTable[key] = tmpDataTable[key];
 			}

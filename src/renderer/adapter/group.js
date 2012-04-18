@@ -224,7 +224,7 @@
 
 	/* Interface methods */
 	p.getBoundingBox = function() {
-	    var bbox = new XML3DBox();
+	    var bbox = new window.XML3DBox();
 	    Array.prototype.forEach.call(this.node.childNodes, function(c) {
 	        if(c.getBoundingBox)
 	            bbox.extend(c.getBoundingBox());
@@ -236,14 +236,14 @@
     };
   
     p.getLocalMatrix = function() {
-        var m = new XML3DMatrix();
+        var m = new window.XML3DMatrix();
         if (this.transformAdapter !== null)
             m._data.set(this.transformAdapter.getMatrix());
         return m;
     };
     
     p.getWorldMatrix = function() {
-        var m = new XML3DMatrix();
+        var m = new window.XML3DMatrix();
         if (this.parentTransform !== null)
             m._data.set(this.parentTransform);
         if (this.transformAdapter !== null)

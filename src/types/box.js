@@ -10,7 +10,7 @@
      * @param {XML3DVec3=} min The smaller point of the box. Default: (0,0,0)
      * @param {XML3DVec3=} max The biggest point of the box. Default: (0,0,0) 
      */
-    XML3DBox = function(min, max, cb) {
+    var XML3DBox = function(min, max, cb) {
         var that = this;
 
         /** anonymous callback to inform this instance * */
@@ -23,12 +23,12 @@
          * @private
          * @type {XML3DVec3}
          */
-        this._min = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE, vec_cb);
+        this._min = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE, vec_cb);
         /**
          * @private
          * @type {XML3DVec3}
          */
-        this._max = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE, vec_cb);
+        this._max = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE, vec_cb);
 
         // Copy constructor
         if (min && min.min) {
@@ -93,9 +93,9 @@
      * components to -Number.MAX_VALUE.
      */
     XML3DBox.prototype.makeEmpty = function() {
-        this._min = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE,
+        this._min = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE,
                 Number.MAX_VALUE);
-        this._max = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
+        this._max = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE,
                 -Number.MAX_VALUE);
         if (this._callback)
             this._callback(this);
@@ -136,12 +136,12 @@
     XML3DBox.prototype.extend = function(that)
     {
         var min, max; 
-        if(that.constructor === XML3DBox)
+        if(that.constructor === window.XML3DBox)
         {   
             min = that.min; 
             max = that.max; 
         }
-        else if(that.constructor === XML3DVec3)
+        else if(that.constructor === window.XML3DVec3)
         {
             min = that; 
             max = that; 
@@ -166,7 +166,6 @@
     
     // Export
     XML3D.XML3DBox = XML3DBox;
-    if (!window.XML3DBox)
-        window.XML3DBox = XML3DBox;
+    window.XML3DBox = XML3DBox;
 
 }(XML3D._native));

@@ -248,7 +248,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 	};
 
     p.getBoundingBox = function() {
-        var bbox = new XML3DBox();
+        var bbox = new window.XML3DBox();
         var dataTable = this.dataAdapter.createDataTable();
         if(dataTable && dataTable.position)
             bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.data,dataTable.index.data);

@@ -57,7 +57,7 @@ XML3D.webgl.MAXFPS = 30;
             if (handler.update())
                 handler.draw();
 
-            requestAnimFrame(handler._tick, XML3D.webgl.MAXFPS);
+            window.requestAnimFrame(handler._tick, XML3D.webgl.MAXFPS);
         };
 
         this.redraw = function(reason, forcePickingRedraw) {
@@ -164,7 +164,7 @@ XML3D.webgl.MAXFPS = 30;
         var viewMat = this.renderer.camera.viewMatrix;
         var projMat = this.renderer.camera.getProjectionMatrix(viewport[2] / viewport[3]);
 
-        var ray = new XML3DRay();
+        var ray = new window.XML3DRay();
 
         var nearHit = new Array();
         var farHit = new Array();
@@ -181,7 +181,7 @@ XML3D.webgl.MAXFPS = 30;
         // calculate ray
 
         ray.origin = this.renderer.currentView.position;
-        ray.direction = new XML3DVec3(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
+        ray.direction = new window.XML3DVec3(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
         ray.direction = ray.direction.normalize();
 
         return ray;
@@ -236,11 +236,11 @@ XML3D.webgl.MAXFPS = 30;
      *            the screen x-coordinate
      * @param y
      *            the screen y-coordinate
-     * @param (optional)
-     *            event the W3 DOM MouseEvent, if present (currently not when
+     * @param event
+     *            the W3 DOM MouseEvent, if present (currently not when
      *            SpiderGL's blur event occurs)
-     * @param (optional)
-     *            target the element to which the event is to be dispatched. If
+     * @param target
+     *            the element to which the event is to be dispatched. If
      *            this is not given, the currentPickObj will be taken or the
      *            xml3d element, if no hit occured.
      *
@@ -318,11 +318,11 @@ XML3D.webgl.MAXFPS = 30;
 
         event.__defineGetter__("normal", function() {
             handler.renderPickedNormals(xml3dElem.currentPickObj, x, y);
-            var v = scene.xml3d.currentPickNormal.v;
-            return new XML3DVec3(v[0], v[1], v[2]);
+            var v = xml3dElem.currentPickNormal.v;
+            return new window.XML3DVec3(v[0], v[1], v[2]);
         });
         event.__defineGetter__("position", function() {
-            return scene.xml3d.currentPickPos;
+            return xml3dElem.currentPickPos;
         });
     };
 

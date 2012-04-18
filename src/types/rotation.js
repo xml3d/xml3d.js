@@ -5,12 +5,12 @@
 
     function orthogonal(v) {
         if ((Math.abs(v._data[1]) >= 0.9*Math.abs(v._data[0])) && (Math.abs(v._data[2]) >= 0.9*Math.abs(v._data[0])))
-            return new XML3DVec3(0.0, -v._data[2], v._data[1]);
+            return new window.XML3DVec3(0.0, -v._data[2], v._data[1]);
           else
             if ((Math.abs(v._data[0]) >= 0.9*Math.abs(v._data[1])) && (Math.abs(v._data[2]) >= 0.9*Math.abs(v._data[1])))
-              return new XML3DVec3(-v._data[2], 0.0, v._data[0]);
+              return new window.XML3DVec3(-v._data[2], 0.0, v._data[0]);
             else
-              return new XML3DVec3(-v._data[1], v._data[0], 0.0);
+              return new window.XML3DVec3(-v._data[1], v._data[0], 0.0);
     }
 
     /**
@@ -39,11 +39,11 @@
         };
 
         if (axis instanceof XML3DRotation) {
-            this._axis = new XML3DVec3(0, 0, 1, vec_cb);
+            this._axis = new window.XML3DVec3(0, 0, 1, vec_cb);
             this._angle = 0;
             this.setAxisAngle(axis.axis, axis.angle);
         } else {
-            this._axis = axis ? new XML3DVec3(axis.x, axis.y, axis.z, vec_cb) : new XML3DVec3(0, 0, 1, vec_cb);
+            this._axis = axis ? new window.XML3DVec3(axis.x, axis.y, axis.z, vec_cb) : new window.XML3DVec3(0, 0, 1, vec_cb);
             /** @private */
             this._angle = angle || 0;
             this._updateQuaternion();
@@ -152,7 +152,7 @@
             throw new Error("Could not parse AxisAngle string: " + str);
 
         // This function will also callback
-        this.setAxisAngle(new XML3DVec3(+m[1], +m[2], +m[3]), +m[4]);
+        this.setAxisAngle(new window.XML3DVec3(+m[1], +m[2], +m[3]), +m[4]);
     };
 
     /**
@@ -199,7 +199,7 @@
       // Not sure why this is, could you have a look at it? - Chris
       q[3] = -q[3];
       
-      var m = new XML3DMatrix();
+      var m = new window.XML3DMatrix();
       quat4.toMat4(q, m._data);
       return m;
     };
@@ -213,7 +213,7 @@
      * @return {XML3DVec3} The rotated vector
      */
     p.rotateVec3 = function(inputVector) {
-        var dest = vec3.create(), result = new XML3DVec3();
+        var dest = vec3.create(), result = new window.XML3DVec3();
         quat4.multiplyVec3(this._data, inputVector._data, result._data);
         return result;
     };
@@ -267,7 +267,6 @@
     };
 
     XML3D.XML3DRotation = XML3DRotation;
-    if (!window.XML3DRotation)
-        window.XML3DRotation = XML3DRotation;
+    window.XML3DRotation = XML3DRotation;
 
 }(XML3D._native));

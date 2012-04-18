@@ -20,6 +20,9 @@
 XML3D.webgl.MAX_PICK_BUFFER_WIDTH = 512;
 XML3D.webgl.MAX_PICK_BUFFER_HEIGHT = 512;
 
+/**
+ * @constructor
+ */
 XML3D.webgl.XML3DBufferHandler = function(gl, renderer, shaderManager) {
 	this.renderer = renderer;
 	this.gl = gl;
@@ -62,7 +65,7 @@ XML3D.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
 	//Create targets
 	var colorTarget = { handle : null, isTexture : false };
 	if (colorFormat) {
-		colorTargets = [];
+		var colorTargets = [];
 		if (options.colorAsRenderbuffer) {
 			var ct = gl.createRenderbuffer();
 			gl.bindRenderbuffer(gl.RENDERBUFFER, ct);
@@ -155,7 +158,7 @@ XML3D.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
 	    	XML3D.debug.logError("Incomplete framebuffer: FRAMEBUFFER_UNSUPPORTED");
 	        break;
 	    default:
-	    	XML3D.debug.logError("Incomplete framebuffer: " + status);
+	    	XML3D.debug.logError("Incomplete framebuffer: " + fbStatus);
 	}
 
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);

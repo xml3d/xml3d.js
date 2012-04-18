@@ -559,7 +559,7 @@ XML3D.webgl.Renderer.prototype.drawObject = function(shader, meshInfo) {
 XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDraw) {
 		if (x<0 || y<0 || x>=this.width || y>=this.height)
 			return;
-		gl = this.handler.gl;
+		var gl = this.handler.gl;
 		
 		gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
 		
@@ -568,8 +568,8 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 		gl.disable(gl.BLEND);
 		
 		if (needPickingDraw ) {
-			var volumeMax = new XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
-			var volumeMin = new XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
+			var volumeMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
+			var volumeMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
 			var xform = {};
@@ -588,7 +588,7 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 			var shader = this.shaderManager.getShaderById("picking");
 			this.shaderManager.bindShader(shader);
 			
-			for (j = 0, n = this.drawableObjects.length; j < n; j++) {
+			for (var j = 0, n = this.drawableObjects.length; j < n; j++) {
 				var obj = this.drawableObjects[j];
 				var transform = obj.transform;
 				var mesh = obj.mesh;
@@ -631,7 +631,7 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
  * @return
  */
 XML3D.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
-	gl = this.handler.gl;
+	var gl = this.handler.gl;
 	
 	gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
 	
@@ -680,6 +680,7 @@ XML3D.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) 
 	var scale = this.fbos.picking.scale;
 	var x = screenX * scale;
 	var y = screenY * scale;
+	var gl = this.handler.gl;
 	
 	try {
 		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);

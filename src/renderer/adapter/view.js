@@ -41,7 +41,7 @@
 
     /* Interface method */
     p.getViewMatrix = function() {
-        var m = new XML3DMatrix();
+        var m = new window.XML3DMatrix();
         m._data.set(this.viewMatrix);
         return m;
     };

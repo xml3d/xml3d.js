@@ -4,7 +4,7 @@
     var minmax = new Float32Array(6);
 
     XML3D.webgl.calculateBoundingBox = function(positions, index) {
-        var bbox = new XML3DBox();
+        var bbox = new window.XML3DBox();
 
         if (!positions || positions.length < 3)
             return bbox;

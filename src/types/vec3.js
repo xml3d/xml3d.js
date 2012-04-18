@@ -230,7 +230,6 @@
     };
 
     XML3D.XML3DVec3 = XML3DVec3;
-    if (!window.XML3DVec3)
-        window.XML3DVec3 = XML3DVec3;
+    window.XML3DVec3 = XML3DVec3;
 
 }(XML3D._native));

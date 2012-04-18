@@ -57,27 +57,29 @@
         return XML3D.data.AdapterFactory.prototype.getAdapter.call(this, node, XML3D.data.XML3DDataAdapterFactory.prototype);
     };
 
-    var data = XML3D.data,
-    reg = {
-        mesh:          data.SinkDataAdapter,
-        shader:        data.SinkDataAdapter,
-        lightshader:   data.SinkDataAdapter,
-        float:         data.ValueDataAdapter,
-        float2:        data.ValueDataAdapter,
-        float3:        data.ValueDataAdapter,
-        float4:        data.ValueDataAdapter,
-        float4x4:      data.ValueDataAdapter,
-        int:           data.ValueDataAdapter,
-        int4:          data.ValueDataAdapter,
-        bool:          data.ValueDataAdapter,
-        img:           data.ImgDataAdapter,
-        texture:       data.TextureDataAdapter,
-        data:          data.DataAdapter
-    };
-    /**
+    var data = XML3D.data, reg = {};
+
+    reg['mesh']        = data.SinkDataAdapter;
+    reg['shader']      = data.SinkDataAdapter;
+    reg['lightshader'] = data.SinkDataAdapter;
+    reg['float']       = data.ValueDataAdapter;
+    reg['float2']      = data.ValueDataAdapter;
+    reg['float3']      = data.ValueDataAdapter;
+    reg['float4']      = data.ValueDataAdapter;
+    reg['float4x4']    = data.ValueDataAdapter;
+    reg['int']         = data.ValueDataAdapter;
+    reg['int4']        = data.ValueDataAdapter;
+    reg['bool']        = data.ValueDataAdapter;
+    reg['img']         = data.ImgDataAdapter;
+    reg['texture']     = data.TextureDataAdapter;
+    reg['data']        = data.DataAdapter;
+
+   /**
      * Creates a DataAdapter associated with the given node.
      *
-     * @param   node  element node which uses generic data. The supported elements are listed in the class description above.
+     * @param node
+     *            element node which uses generic data. The supported elements
+     *            are listed in the class description above.
      * @returns DataAdapter instance
      */
     XML3DDataAdapterFactory.prototype.createAdapter = function(node)

@@ -144,12 +144,18 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             return;
         }
 
+        // We have positons, let's calc a bounding box
+        this.bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.value,dataTable.index.value);
+
+
         var meshInfo = {
             vbos : {},
             glType : this.getGLTypeFromString(this.node.type)
         };
 
         if (dataTable.index) {
+
+
             if (positions.length / 3 > XML3D.webgl.MAX_MESH_INDEX_COUNT) {
                 XML3D.webgl.splitMesh(dataTable, XML3D.webgl.MAX_MESH_INDEX_COUNT);
             }
@@ -238,7 +244,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
     
     // TODO: move to xflow manager
-    p.applyXFlow = function(shader, parameters) {
+	/*p.applyXFlow = function(shader, parameters) {
         var dataTable = this.dataAdapter.createDataTable();
 
         if (dataTable["xflowShader"]) {
@@ -257,7 +263,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             }
         }
 
-    };
+	};*/
 
     // Disposes of all GL buffers but does not destroy the mesh
     p.dispose = function(gl) {
@@ -290,11 +296,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     p.getBoundingBox = function() {
-        var bbox = new window.XML3DBox();
-        var dataTable = this.dataAdapter.createDataTable();
-        if(dataTable && dataTable.position)
-            bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.value,dataTable.index.value);
-        return bbox;
+        return this.bbox;
     };
 
    p.getGLTypeFromString = function(typeName) {

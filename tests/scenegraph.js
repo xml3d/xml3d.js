@@ -25,7 +25,7 @@ test("Defaults", function() {
     elems.light = this.doc.getElementById("myLight");
 
     var a = new XML3DMatrix();
-    for (elem in elems)
+    for (var elem in elems)
         QUnit.closeMatrix(elems[elem].getWorldMatrix(), a, EPSILON, "Untransformed " + elems[elem].nodeName
                 + " delivers indentity world matrix");
 

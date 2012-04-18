@@ -76,7 +76,7 @@
 
         // This script instance is a consumer itself
         //console.log("Creating Table for "+ this.script.name + " ScriptInstance of " + this.data.node.id);
-        this.table = new ProcessTable(this, this.script.params, this.dataChanged);
+        this.table = new XML3D.data.ProcessTable(this, this.script.params, this.dataChanged);
         this.data.requestInputData(this, this.script.params, this.table, this.dataChanged);
         //console.log("Table for "+ this.script.name + " ScriptInstance of " + this.data.node.id + ": ");
         //console.dir(this.table);

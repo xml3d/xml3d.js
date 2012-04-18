@@ -313,7 +313,7 @@ XML3D.classInfo['int'] = {
 /**
  * Properties and methods for <int4>
  **/
-XML3D.classInfo.int4 = {
+XML3D.classInfo['int4'] = {
 	id : {a: XML3D.StringAttributeHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for int4

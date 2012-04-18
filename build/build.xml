@@ -36,6 +36,7 @@
 		<file name="interface/attributes.js" />
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
+		<file name="data/processtable.js" />
         <file name="data/data.js" />
         <file name="data/values.js" />
         <file name="data/scriptinstance.js" />

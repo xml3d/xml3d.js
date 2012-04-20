@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="master" default="deploy">
+	<macrodef name="git">
+		<attribute name="command" />
+		<attribute name="git" default="${git.cmd}" />
+		<attribute name="dir" default="" />
+		<element name="args" optional="true" />
+		<sequential>
+			<echo message="@{git} @{command}" />
+			<exec executable="@{git}" dir="@{dir}" outputproperty="git.output">
+				<arg value="@{command}" />
+				<args />
+			</exec>
+		</sequential>
+	</macrodef>
+
+    <macrodef name="upload" description="Upload a file to standard URL">
+        <attribute name="extension"/>
+        <sequential>
+            <fail unless="upload.url"/>
+            <post-file file="${buildDir}/${script.start}@{extension}.js" url="${upload.url}"/>
+        </sequential>
+    </macrodef>
+	
+	<macrodef name="post-file" description="Use Curl to post the file to the WEBDAV path">
+		<attribute name="file" />
+		<attribute name="url" />
+		<sequential>
+			<echo message="Using CURL to upload @{file} to @{url}" />
+			<!--Execute curl to post the file to the URL -->
+			<exec executable="${curl.path}">
+				<arg value="-n" />
+				<arg value="-s" />
+				<arg value="-T" />
+				<arg value='@{file}' />
+				<arg value='@{url}' />
+			</exec>
+		</sequential>
+	</macrodef>
+
+	<!-- = = = = = = = = = = = = = = = = = macrodef: concatScripts = = = = = 
+		= = = = = = = = = = = = -->
+	<macrodef name="concatScripts">
+		<attribute name="extension" default="" />
+		<attribute name="version" />
+		<sequential>
+			<property name="finalScript" value="${buildDir}/${script.start}@{extension}.js" />
+
+			<concat destfile="${finalScript}">
+				<header>/**${line.separator}</header>
+				<fileset file="${basedir}/../LICENSE" />
+				<footer>${line.separator}@version: @{version} ${line.separator}**/
+					${line.separator}</footer>
+			</concat>
+
+			<concat destfile="${finalScript}" eol="unix" append="true">
+				<filelist refid="sourceFiles" />
+			</concat>
+
+			<replaceregexp file="${finalScript}" match="xml3d.webgl.checkError\("
+				replace="//xml3d.webgl.checkError\(" byline="true" />
+			<replaceregexp file="${finalScript}" match="%VERSION%"
+				replace="@{version}" byline="true" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="compileScripts">
+		<attribute name="extension" default="-min" />
+		<attribute name="version" />
+		<sequential>
+			<jscomp compilationlevel="simple" warning="verbose"
+				generateexports="yes" debug="false"
+				output="${buildDir}/${script.start}@{extension}.js">
+				<define name="XML3D.version" value="@{version}"/>
+				<sources refid="sourceFiles">
+				</sources>
+			</jscomp>
+		</sequential>
+	</macrodef>
+    
+    <target name="clean">
+        <delete dir="${buildDir}">
+        </delete>
+    </target>
+	
+	<target name="checkOS">
+		<condition property="isWindows">
+			<os family="windows" />
+		</condition>
+		<condition property="isLinux">
+			<os family="unix" />
+		</condition>
+	</target>
+
+	<target name="windowsGit" depends="checkOS" if="isWindows">
+		<property name="git.cmd" value="git.cmd" />
+	</target>
+	<target name="linuxGit" depends="checkOS" if="isLinux">
+		<property name="git.cmd" value="git" />
+	</target>
+
+	<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
+		classpath="./closure/compiler.jar" />
+
+	<target name="init" depends="init-properties, clean" />
+
+	<target name="init-properties">
+		<property file="build.properties" />
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${source.dir}" destdir="${build.dir}/classes">
+			<classpath refid="build.classpath" />
+		</javac>
+	</target>
+
+    <!-- <target name="physics" depends="init" description="description">
+        <concat destfile="${buildDir}/${physicsScriptName}">
+            <fileset file="${basedir}/preamble.txt" />
+            <fileset file="${physicsDir}/xml3d_physics.js" />
+            <fileset file="${physicsDir}/xml3d_physics_interaction.js" />
+        </concat>
+        <replaceregexp file="${buildDir}/${physicsScriptName}" match="%VERSION%" replace="${version}" byline="true" />
+
+    </target>-->
+	<target name="deploy" />
+</project>

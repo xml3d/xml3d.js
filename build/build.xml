@@ -11,108 +11,8 @@
            Merge all the single scripts to one global xml3d.js
     </description>
 
+	<import file="build-master.xml"/>
 	<property file="build.properties" />
-
-	<macrodef name="git">
-		<attribute name="command" />
-		<attribute name="git" default="${git.cmd}" />
-		<attribute name="dir" default="" />
-		<element name="args" optional="true" />
-		<sequential>
-			<echo message="@{git} @{command}" />
-			<exec executable="@{git}" dir="@{dir}" outputproperty="git.output">
-				<arg value="@{command}" />
-				<args />
-			</exec>
-		</sequential>
-	</macrodef>
-
-	<macrodef name="post-file" description="Use Curl to post the file to the WEBDAV path">
-	    <attribute name="file"/>
-	    <attribute name="url" />
-	    <sequential>
-	        <echo message="Using CURL to upload @{file} to @{url}" />
-	        <!--Execute curl to post the file to the URL -->
-	        <exec executable="${curl.path}">
-                <arg value="-n" />
-	        	<arg value="-s" />
-	            <arg value="-T" />
-                <arg value='@{file}' />
-	            <arg value='@{url}'/>
-	        </exec>
-	    </sequential>
-	</macrodef>
-
-	<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
-	           classpath="./closure/compiler.jar"/>
-
-	<target name="checkOS">
-		<condition property="isWindows">
-			<os family="windows" />
-		</condition>
-		<condition property="isLinux">
-			<os family="unix" />
-		</condition>
-	</target>
-
-	<target name="windowsGit" depends="checkOS" if="isWindows">
-		<property name="git.cmd" value="git.cmd" />
-	</target>
-	<target name="linuxGit" depends="checkOS" if="isLinux">
-		<property name="git.cmd" value="git" />
-	</target>
-
-	<target name="stable">
-		<property name="versionStr" value="v${version}" />
-		<property name="script.ext" value="-${version}" />
-		<antcall target="concat" />
-	</target>
-
-   <target name="lastTag" depends="windowsGit, linuxGit">
-        <tstamp />
-        <git command="describe">
-            <args>
-                <arg value="--tags" />
-                <arg value="--abbrev=0" />
-            </args>
-        </git>
-        <echo message="${git.output}" />
-        <property name="versionStr" value="${git.output}" />
-        <property name="script.ext" value="-${git.output}" />
-        <antcall target="build" />
-        <antcall target="upload" />
-    </target>
-
-   <target name="continuous" depends="windowsGit, linuxGit">
-        <tstamp />
-        <git command="log">
-            <args>
-                <arg value="-1" />
-                <arg value="--format=%h / %ci" />
-            </args>
-        </git>
-        <echo message="${git.output}" />
-        <property name="versionStr" value="DEVELOPMENT / ${git.output}" />
-        <property name="script.ext" value="-dev" />
-        <antcall target="build" />
-        <antcall target="minify" />
-        <antcall target="upload" />
-    </target>
-
-	<target name="develop">
-		<tstamp />
-		<property name="versionStr" value="DEVELOPMENT SNAPSHOT (${TODAY})" />
-		<property name="script.ext" value="" />
-		<antcall target="build" />
-	</target>
-
-   <target name="minified">
-        <tstamp />
-        <property name="versionStr" value="DEVELOPMENT SNAPSHOT (${TODAY})" />
-        <property name="script.ext" value="" />
-        <antcall target="build" />
-        <antcall target="minify" />
-    </target>
 
 	<filelist dir="${srcDir}" id="sourceFiles">
 		<file name="xml3d.js" />
@@ -120,8 +20,8 @@
 		<file name="utils/array.js" />
 		<file name="utils/debug.js" />
 		<!--<file name="utils/color.js" />-->
-        <file name="utils/uri.js" />
-        <file name="contrib/glu.js" />
+		<file name="utils/uri.js" />
+		<file name="contrib/glu.js" />
 		<file name="contrib/glMatrix.js" />
 		<file name="types/vec3.js" />
 		<file name="types/rotation.js" />
@@ -137,7 +37,7 @@
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
 		<file name="renderer/canvashandler.js" />
-        <file name="renderer/utils.js" />
+		<file name="renderer/utils.js" />
 		<file name="renderer/shadermanager.js" />
 		<file name="renderer/bufferhandler.js" />
 		<file name="renderer/renderer.js" />
@@ -155,97 +55,54 @@
 		<!-- <file name="renderer/xflow/xflow.js" /> -->
 	</filelist>
 
-	<!-- - - - - - - - - - - - - - - - - -
-          target: build
-         - - - - - - - - - - - - - - - - - -->
-    <target name="build" depends="clean">
-    	<fail unless="script.ext"/>
-        <antcall target="build-xml3d.js" />
-        <antcall target="build-tools" />
-    </target>
-
-    <!-- - - - - - - - - - - - - - - - - -
-          target: build
-         - - - - - - - - - - - - - - - - - -->
-    <target name="upload">
-        <fail unless="script.ext"/>
-        <antcall target="upload-xml3d.js" />
-    	<antcall target="upload-xml3d-min.js" />
-        <antcall target="upload-tools" />
-    </target>
-
-	<target name="physics" depends="clean" description="description">
-		<concat destfile="${buildDir}/${physicsScriptName}">
-			<fileset file="${basedir}/preamble.txt" />
-			<fileset file="${physicsDir}/xml3d_physics.js" />
-			<fileset file="${physicsDir}/xml3d_physics_interaction.js" />
-		</concat>
-		<replaceregexp file="${buildDir}/${physicsScriptName}" match="%VERSION%" replace="${version}" byline="true" />
-
+	<target name="lastTag" depends="init, windowsGit, linuxGit">
+		<tstamp />
+		<git command="describe">
+			<args>
+				<arg value="--tags" />
+				<arg value="--abbrev=0" />
+			</args>
+		</git>
+		<echo message="${git.output}" />
+        <concatScripts version="${git.output}" extension="-${git.output}"/>
+        <compileScripts version="${git.output}" extension="-${git.output}-min"/>
 	</target>
 
-    <target name="minify">
-    	 <jscomp compilationlevel="simple" warning="verbose" generateexports="yes"
-    	            debug="false" output="${buildDir}/${script.start}${script.ext}-min.js">
-    	 	<define name="XML3D.version" value="${versionStr}"></define>
-    	 	  <sources refid="sourceFiles">
-    	 	  </sources>
-    	 </jscomp>
-    </target>
-
-	<target name="clean">
-		<delete dir="${buildDir}">
-		</delete>
-	</target>
-    <!-- - - - - - - - - - - - - - - - - -
-          Tools
-         - - - - - - - - - - - - - - - - - -->
-    <target name="build-xml3d.js" description="Merges the core xml3d.js parts">
-    	   <property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
-	       <concat destfile="${finalScript}">
-	       <header>/**
-</header>
-           <fileset file="${basedir}/../LICENSE" />
-           <footer>*/
-/** @version: ${versionStr} **/
-</footer>
-	       </concat>
-
-	       <concat destfile="${finalScript}" eol="unix" append="true">
-	        <filelist refid="sourceFiles"/>
-	       </concat>
-	        <replaceregexp file="${finalScript}" match="xml3d.webgl.checkError\(" replace="//xml3d.webgl.checkError\(" byline="true" />
-	        <replaceregexp file="${finalScript}" match="%VERSION%" replace="${versionStr}" byline="true" />
-	    </target>
-
-
-    <target name="upload-xml3d.js">
-        <fail unless="upload.url"/>
-        <property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
-        <post-file file="${finalScript}" url="${upload.url}"/>
-    </target>
-	
-	<target name="check-minified">
-	    <available file="${buildDir}/${script.start}${script.ext}-min.js" property="minified.exists"/>
+	<target name="continuous" depends="init, windowsGit, linuxGit">
+		<tstamp />
+		<git command="log">
+			<args>
+				<arg value="-1" />
+				<arg value="--format=%h / %ci" />
+			</args>
+		</git>
+		<echo message="${git.output}" />
+		<concatScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-dev"/>
+        <compileScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-dev-min"/>
+        <upload extension="-dev"/>
+		<upload extension="-dev-min"/>
 	</target>
 
-	<target name="upload-xml3d-min.js" depends="check-minified" if="minified.exists">
-        <fail unless="upload.url"/>
-        <property name="finalScript" value="${buildDir}/${script.start}${script.ext}-min.js" />
-        <post-file file="${finalScript}" url="${upload.url}"/>
-	</target> 
+	<target name="develop" depends="init">
+		<tstamp />
+		<concatScripts version="DEVELOPMENT SNAPSHOT (${TODAY})"/>
+	</target>
+
+    <target name="develop-min" depends="init">
+        <tstamp />
+        <compileScripts version="DEVELOPMENT SNAPSHOT (${TODAY})" extension=""/>
+    </target>
 
 	<!-- - - - - - - - - - - - - - - - - -
-          Tools
+          Tools: TODO
          - - - - - - - - - - - - - - - - - -->
-    <target name="build-tools">
-        <copy file="${srcDir}/../tools/camera.js" toFile="${buildDir}/tools/camera${script.ext}.js" />
-    </target>
+	<target name="build-tools">
+		<copy file="${srcDir}/../tools/camera.js" toFile="${buildDir}/tools/camera${script.ext}.js" />
+	</target>
 
-    <target name="upload-tools">
-    	 <fail unless="upload.url"/>
-    	 <post-file file="${buildDir}/tools/camera${script.ext}.js" url="${upload.url}/tools/" />
-    </target>
-
+	<target name="upload-tools">
+		<fail unless="upload.url"/>
+		<post-file file="${buildDir}/tools/camera${script.ext}.js" url="${upload.url}/tools/" />
+	</target>
 
 </project>

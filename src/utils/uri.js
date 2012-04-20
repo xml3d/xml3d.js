@@ -1,18 +1,24 @@
 /**
  * Class URI
  * @constructor
- * @param str DOMString
+ * @param {string} str The URI as string
  */
 XML3D.URI = function(str) {
     str = str || "";
     // Based on the regex in RFC2396 Appendix B.
     var parser = /^(?:([^:\/?\#]+):)?(?:\/\/([^\/?\#]*))?([^?\#]*)(?:\?([^\#]*))?(?:\#(.*))?/;
     var result = str.match(parser);
+    /**  @type {boolean} */
     this.valid = result != null;
+    /**  @type {?string} */
     this.scheme = result[1] || null;
+    /**  @type {?string} */
     this.authority = result[2] || null;
+    /**  @type {?string} */
     this.path = result[3] || null;
+    /**  @type {?string} */
     this.query = result[4] || null;
+    /**  @type {?string} */
     this.fragment = result[5] || null;
 };
 
@@ -44,6 +50,12 @@ XML3D.URI.prototype.toString = function() {
 XML3D.URIResolver = function() {
 };
 
+/**
+ * Resolve a local URI to an element
+ * @param {(string|XML3D.URI)} uri Element to resolve
+ * @param {Document=} document Base document to use
+ * @return {Element} The resolved element or null if it could not be resolved
+ */
 XML3D.URIResolver.resolve = function(uri, document) {
     if (typeof uri == 'string')
         uri = new XML3D.URI(uri);
@@ -55,7 +67,7 @@ XML3D.URIResolver.resolve = function(uri, document) {
         return null;
     }
 
-    if (!uri.path) { // local uri
+    if (!uri.path && uri.fragment) { // local uri
         return document.getElementById(uri.fragment);
     }
 

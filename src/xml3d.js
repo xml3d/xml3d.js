@@ -1,6 +1,4 @@
-// xml3d.js
-
-/**  @namespace **/
+/** @namespace **/
 var XML3D = XML3D || {};
 
 /** @define {string} */

@@ -95,6 +95,7 @@
         <property name="versionStr" value="DEVELOPMENT / ${git.output}" />
         <property name="script.ext" value="-dev" />
         <antcall target="build" />
+        <antcall target="minify" />
         <antcall target="upload" />
     </target>
 
@@ -169,6 +170,7 @@
     <target name="upload">
         <fail unless="script.ext"/>
         <antcall target="upload-xml3d.js" />
+    	<antcall target="upload-xml3d-min.js" />
         <antcall target="upload-tools" />
     </target>
 
@@ -183,9 +185,9 @@
 	</target>
 
     <target name="minify">
-    	<property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
-    	 <jscomp compilationlevel="simple" warning="verbose"
-    	            debug="false" output="${buildDir}/${script.start}${script.ext}-min.js" >
+    	 <jscomp compilationlevel="simple" warning="verbose" generateexports="yes"
+    	            debug="false" output="${buildDir}/${script.start}${script.ext}-min.js">
+    	 	<define name="XML3D.version" value="${versionStr}"></define>
     	 	  <sources refid="sourceFiles">
     	 	  </sources>
     	 </jscomp>
@@ -220,8 +222,18 @@
     <target name="upload-xml3d.js">
         <fail unless="upload.url"/>
         <property name="finalScript" value="${buildDir}/${script.start}${script.ext}.js" />
-        <post-file file="${finalScript}" url="${upload.url}" />
+        <post-file file="${finalScript}" url="${upload.url}"/>
     </target>
+	
+	<target name="check-minified">
+	    <available file="${buildDir}/${script.start}${script.ext}-min.js" property="minified.exists"/>
+	</target>
+
+	<target name="upload-xml3d-min.js" depends="check-minified" if="minified.exists">
+        <fail unless="upload.url"/>
+        <property name="finalScript" value="${buildDir}/${script.start}${script.ext}-min.js" />
+        <post-file file="${finalScript}" url="${upload.url}"/>
+	</target> 
 
 	<!-- - - - - - - - - - - - - - - - - -
           Tools

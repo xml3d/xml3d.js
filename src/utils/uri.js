@@ -1,6 +1,8 @@
-// -----------------------------------------------------------------------------
-// Class URI
-// -----------------------------------------------------------------------------
+/**
+ * Class URI
+ * @constructor
+ * @param str DOMString
+ */
 XML3D.URI = function(str) {
     str = str || "";
     // Based on the regex in RFC2396 Appendix B.
@@ -35,9 +37,10 @@ XML3D.URI.prototype.toString = function() {
     return str;
 };
 
-// -----------------------------------------------------------------------------
-// Class URIResolver
-// -----------------------------------------------------------------------------
+/**
+ * Class URIResolver
+ * @constructor
+ */
 XML3D.URIResolver = function() {
 };
 

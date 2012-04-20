@@ -3,9 +3,13 @@
 /**  @namespace **/
 var XML3D = XML3D || {};
 
+/** @define {string} */
 XML3D.version = '%VERSION%';
+/** @const */
 XML3D.xml3dNS = 'http://www.xml3d.org/2009/xml3d';
+/** @const */
 XML3D.xhtmlNS = 'http://www.w3.org/1999/xhtml';
+/** @const */
 XML3D.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
 XML3D._xml3d = document.createElementNS(XML3D.xml3dNS, "xml3d");
 XML3D._native = !!XML3D._xml3d.style;

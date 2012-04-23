@@ -52,10 +52,24 @@
     var ImgDataAdapter = function(factory, node)
     {
         XML3D.data.DataAdapter.call(this, factory, node);
+        this.image = null;
     };
     XML3D.createClass(ImgDataAdapter, XML3D.data.DataAdapter);
 
-    ImgDataAdapter.prototype.createDataTable = function(forceNewInstance) {};
+    var createImage = function(src, cb) {
+        var image = new Image();
+        image.onload = cb;
+        image.src = src;
+        return image;
+    };
+
+    ImgDataAdapter.prototype.getImage = function(cb) {
+        if(!this.image)
+        {
+            this.image = createImage(this.node.src, cb);
+        }
+        return this.image;
+    };
 
     // Export
     XML3D.data.ImgDataAdapter = ImgDataAdapter;

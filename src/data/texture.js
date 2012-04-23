@@ -53,30 +53,8 @@
         if (node.getAttribute("mipmap") == "true")
             options.generateMipmap = true;
 
-        /*if (node.hasAttribute("textype") && node.getAttribute("textype") == "cube") {
-            for (var i=0; i<node.childNodes.length; i++) {
-                var child = node.childNodes[i];
-                if (child.localName != "img")
-                    continue;
-                imgSrc.push(child.src);
-            }
-
-            if (imgSrc.length != 6) {
-                XML3D.debug.logError("A cube map requires 6 textures, but only "+imgSrc.length+" were found!");
-                return null;
-            }
-            options["flipY"] = false;
-
-        } else {*/
-            var textureChild = node.firstElementChild;
-            if(!textureChild || textureChild.localName != "img")
-            {
-                XML3D.debug.logWarning("child of texture element is not an img element");
-                return;
-            }
-            options.src = textureChild.src;
-        //}
-
+        var ca = this.factory.getAdapter(node.firstElementChild, XML3D.data.XML3DDataAdapterFactory.prototype);
+        options.imageAdapter = ca;
         this.value = options;
     };
 

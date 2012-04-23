@@ -39,18 +39,6 @@ XML3D.data.DataAdapter = function(factory, node)
             }
         }
 	};
-
-
-
-	this.init = function()
-	{
-		var xflow = this.resolveScript();
-		if(xflow)
-		    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
-
-		this.buildMap();
-	};
-
 };
 XML3D.data.DataAdapter.prototype             = new XML3D.data.Adapter();
 XML3D.data.DataAdapter.prototype.constructor = XML3D.data.DataAdapter;
@@ -65,6 +53,14 @@ XML3D.data.DataAdapter.prototype.isAdapterFor = function(aType)
 	return aType == XML3D.data.XML3DDataAdapterFactory.prototype;
 };
 
+XML3D.data.DataAdapter.prototype.init = function()
+{
+    var xflow = this.resolveScript();
+    if(xflow)
+        this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
+
+    this.buildMap();
+};
 
 /**
  * The notifyChanged() method is called by the XML3D data structure to notify the DataAdapter about

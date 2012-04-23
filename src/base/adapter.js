@@ -7,9 +7,10 @@ XML3D.data = XML3D.data || {};
 XML3D.data.Adapter = function(factory, node) {
     this.factory = factory; // optional
     this.node = node; // optional
-    this.init = function() {
-        // Init is called by the factory after adding the adapter to the node
-    };
+};
+
+XML3D.data.Adapter.prototype.init = function() {
+    // Init is called by the factory after adding the adapter to the node
 };
 
 XML3D.data.Adapter.prototype.notifyChanged = function(e) {
@@ -31,7 +32,7 @@ XML3D.data.AdapterFactory.prototype.getAdapter = function(node, atype) {
     var adapter = elemHandler.adapters[realType];
     if(adapter !== undefined)
         return adapter;
-    
+
     // No adapter found, try to create one
     adapter = this.createAdapter(node);
     if (adapter) {

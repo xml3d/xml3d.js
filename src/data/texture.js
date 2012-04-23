@@ -2,72 +2,58 @@
 (function() {
     "use strict";
 
+    var clampToGL = function(modeStr) {
+        if (modeStr == "clamp")
+            return WebGLRenderingContext.CLAMP_TO_EDGE;
+        if (modeStr == "repeat")
+            return WebGLRenderingContext.REPEAT;
+        return WebGLRenderingContext.CLAMP_TO_EDGE;
+    };
+
+    var filterToGL = function(modeStr) {
+        if (modeStr == "nearest")
+            return WebGLRenderingContext.NEAREST;
+        if (modeStr == "linear")
+            return WebGLRenderingContext.LINEAR;
+        if (modeStr == "mipmap_linear")
+            return WebGLRenderingContext.LINEAR_MIPMAP_NEAREST;
+        if (modeStr == "mipmap_nearest")
+            return WebGLRenderingContext.NEAREST_MIPMAP_NEAREST;
+        return WebGLRenderingContext.LINEAR;
+    };
+
     var TextureDataAdapter = function(factory, node)
     {
         XML3D.data.DataAdapter.call(this, factory, node);
+        XML3D.data.ProviderEntry.call(this);
     };
     XML3D.createClass(TextureDataAdapter, XML3D.data.DataAdapter);
+    XML3D.extend(TextureDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
 
-    TextureDataAdapter.prototype.createDataTable = function(forceNewInstance)
-    {
-        if(forceNewInstance == undefined ? true : ! forceNewInstance)
-        {
-           return this.dataTable;
-        }
-        var gl = this.factory.handler.gl;
-        var clampToGL = function(gl, modeStr) {
-            if (modeStr == "clamp")
-                return gl.CLAMP_TO_EDGE;
-            if (modeStr == "repeat")
-                return gl.REPEAT;
-            return gl.CLAMP_TO_EDGE;
-        };
 
-        var filterToGL = function(gl, modeStr) {
-            if (modeStr == "nearest")
-                return gl.NEAREST;
-            if (modeStr == "linear")
-                return gl.LINEAR;
-            if (modeStr == "mipmap_linear")
-                return gl.LINEAR_MIPMAP_NEAREST;
-            if (modeStr == "mipmap_nearest")
-                return gl.NEAREST_MIPMAP_NEAREST;
-            return gl.LINEAR;
-        };
-
+    TextureDataAdapter.prototype.init = function() {
         var node = this.node;
-        var imgSrc = new Array();
 
-        // TODO: Sampler options
         var options = ({
-            /*Custom texture options would go here, SGL's default options are:
-
-            minFilter        : gl.LINEAR,
-            magFilter        : gl.LINEAR,
-            wrapS            : gl.CLAMP_TO_EDGE,
-            wrapT            : gl.CLAMP_TO_EDGE,
-            isDepth          : false,
-            depthMode        : gl.LUMINANCE,
-            depthCompareMode : gl.COMPARE_R_TO_TEXTURE,
-            depthCompareFunc : gl.LEQUAL,
-            generateMipmap   : false,
-            flipY            : true,
-            premultiplyAlpha : false,
-            onload           : null
-             */
-            wrapS            : clampToGL(gl, node.wrapS),
-            wrapT            : clampToGL(gl, node.wrapT),
+            //isDepth          : false,
+            //depthMode        : gl.LUMINANCE,
+            //depthCompareMode : gl.COMPARE_R_TO_TEXTURE,
+            //depthCompareFunc : gl.LEQUAL,
+            //flipY            : true,
+            //premultiplyAlpha : false,
+            //onload           : null
+            wrapS            : clampToGL(node.wrapS),
+            wrapT            : clampToGL(node.wrapT),
+            minFilter        : filterToGL(node.filterMin),
+            magFilter        : filterToGL(node.filterMag),
             generateMipmap   : false
-
         });
 
         // TODO: automatically set generateMipmap to true when mipmap dependent filters are used
-        options.minFilter = filterToGL(gl, node.getAttribute("minFilter"));
-        options.magFilter = filterToGL(gl, node.getAttribute("magFilter"));
         if (node.getAttribute("mipmap") == "true")
             options.generateMipmap = true;
 
-        if (node.hasAttribute("textype") && node.getAttribute("textype") == "cube") {
+        /*if (node.hasAttribute("textype") && node.getAttribute("textype") == "cube") {
             for (var i=0; i<node.childNodes.length; i++) {
                 var child = node.childNodes[i];
                 if (child.localName != "img")
@@ -81,31 +67,27 @@
             }
             options["flipY"] = false;
 
-        } else {
+        } else {*/
             var textureChild = node.firstElementChild;
             if(!textureChild || textureChild.localName != "img")
             {
                 XML3D.debug.logWarning("child of texture element is not an img element");
-                return null; // TODO: Should always return a result
+                return;
             }
-            imgSrc.push(textureChild.src);
-        }
+            options.src = textureChild.src;
+        //}
 
-        // TODO: Is this correct, do we use it as Array?
-        var result           = new Array(1);
-        //var value = new SglTexture2D(gl, textureSrc, options);
-        var name             = this.node.name;
-        var content          = new Array();
-        content['tupleSize'] = 1;
+        this.value = options;
+    };
 
-        content['options'] = options;
-        content['src'] = imgSrc;
-        content['isTexture'] = true;
-        content['node'] = this.node;
-
-        result[name]    = content;
-        this.dataTable  = result;
+    TextureDataAdapter.prototype.getOutputs = function() {
+        var result = {};
+        result[this.node.name] = this;
         return result;
+    };
+
+    TextureDataAdapter.prototype.getValue = function() {
+        return this.value;
     };
 
     /**
@@ -115,7 +97,7 @@
     {
         return "XML3D.data.TextureDataAdapter";
     };
-    
+
     // Export
     XML3D.data.TextureDataAdapter = TextureDataAdapter;
 

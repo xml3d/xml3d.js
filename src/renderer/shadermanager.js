@@ -468,7 +468,7 @@ XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, shade
             return false;
         }
         var sampler = shader.samplers[name];
-        var dtopt = dataTable[name].options;
+		var dtopt = dataTable[name].getValue();
         var opt = {
                 isDepth          : false,
                 minFilter          : dtopt.minFilter,
@@ -482,7 +482,7 @@ XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, shade
         
         var tex = this.gl.createTexture();
         
-        var info = this.loadImage(texture.src[0]);
+		var info = this.loadImage(dtopt.src);
         info.texUnit = texUnit;
         info.handle = tex;
         sampler.info = info;

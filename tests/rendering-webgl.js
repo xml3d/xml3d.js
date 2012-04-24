@@ -79,6 +79,27 @@ test("Change active view via script", 7, function() {
 });
 
 
+test("Test mesh.getBoundingBox", 4, function() {
+    // 1: Found frame
+    // 2: Scene loaded
+    var x = this.doc.getElementById("xml3DElem");
+    var h = getHandler(x);
+    var group = this.doc.getElementById("myGroup");
+    var mesh = this.doc.getElementById("mySimpleMesh");
+    x.addEventListener("framedrawn", function(n) {
+        var bb = mesh.getBoundingBox();
+        var max = bb._max._data;
+        var min = bb._min._data;
+        
+        deepEqual([max[0], max[1], max[2]], [1,1,0], "BBox max is (1,1,0)");
+        deepEqual([min[0], min[1], min[2]], [-1,-1,0], "BBox min is (-1,-1,0)");
+    	start();
+    });
+    stop();
+    group.visible = true;
+   
+});
+
 test("Change shader via script", 6, function() {
     // 1: Found frame
     // 2: Scene loaded
@@ -309,8 +330,6 @@ test("Pick pass flag", 7, function() {
     // This failed because setting shader set flag to 'false'
     ok(h.needPickingDraw, "Changing transformation does require a picking pass");
 });
-
-
 
 module("WebGL Shaders and Textures", {
     setup : function() {

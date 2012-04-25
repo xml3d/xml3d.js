@@ -118,12 +118,10 @@ XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scri
 	case "urn:xml3d:shader:diffusevcolor":
 		// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
 		var sfrag = g_shaders[scriptURL].fragment;
-		var tail = sfrag.substring(68);
-		var maxLights = "#ifdef GL_ES\nprecision highp float;\n" +
-				"#endif\n\n const int MAXLIGHTS = "+ lights.length.toString() + ";\n";
+		var maxLights = "#define MAXLIGHTS " + lights.length.toString() + "\n";
 
-		var frag = maxLights + tail;
-		
+		var frag = maxLights + sfrag;
+
 		sources.vs = g_shaders[scriptURL].vertex;
 		sources.fs = frag;
 		break;

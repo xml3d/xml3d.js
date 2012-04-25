@@ -384,20 +384,14 @@ XML3D.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
 };
 
 XML3D.webgl.XML3DShaderManager.prototype.updateShader = function(sp) {
+    this.bindShader(sp);
     //Apply any changes encountered since the last time this shader was rendered
     for (var i=0, l = sp.changes.length; i<l; i++) {
         var change = sp.changes[i];
         if (change.type == "uniform" && sp.uniforms[change.name]) {
             this.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
         }
-	sp = sp.handle;
-
-    if (this.currentProgram != sp) {
-        this.currentProgram = sp;
-        this.gl.useProgram(sp);
-    }
-        //TODO: changes to samplers/attributes
-    }
+	
     sp.changes = [];
 };
 
@@ -485,7 +479,7 @@ XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, shade
 
         var tex = this.gl.createTexture();
 
-		if(dtopt.imageAdapter && dtopt.imageAdapter.getImage)
+		if(dtopt.imageAdapter && dtopt.imageAdapter.getValue)
 		{
 		    var info = {
 		            status: 0,
@@ -493,9 +487,9 @@ XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, shade
 		            handle: tex
 		    };
 		    var renderer = this.renderer;
-		    info.image = dtopt.imageAdapter.getImage(function() {
-		        renderer.requestRedraw.call(renderer, "Texture loaded");
+		    info.image = dtopt.imageAdapter.getValue(function() {
 		        info.status = 1;
+                renderer.requestRedraw.call(renderer, "Texture loaded");
 		    });
 		    sampler.info = info;
 		    sampler.options = opt;

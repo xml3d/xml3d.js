@@ -10,9 +10,11 @@
         this.observers = new Array();
 
 
-        this.getValue = function(name) {
+        this.getValue = function(name,cb) {
             if(this.needsEvaluation)
                 this.evaluate();
+            if(cb)
+                cb();
             return this.result[name];
         };
 

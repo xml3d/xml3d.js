@@ -125,8 +125,8 @@ XML3D.data = XML3D.data || {};
         this.data = {}; // Attached user data
         this.script.registerConsumer(this);
 
-        this.getValue = function() {
-            return this.script.getValue(this.name);
+        this.getValue = function(cb) {
+            return this.script.getValue(this.name, cb);
         };
 
         this.getTupleSize = function() {

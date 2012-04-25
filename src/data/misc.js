@@ -63,7 +63,7 @@
         return image;
     };
 
-    ImgDataAdapter.prototype.getImage = function(cb) {
+    ImgDataAdapter.prototype.getValue = function(cb) {
         if(!this.image)
         {
             this.image = createImage(this.node.src, cb);

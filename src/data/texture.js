@@ -54,7 +54,12 @@
             options.generateMipmap = true;
 
         var ca = this.factory.getAdapter(node.firstElementChild, XML3D.data.XML3DDataAdapterFactory.prototype);
-        options.imageAdapter = ca;
+        if (ca.requestOutputData) {
+            var dt = ca.requestOutputData(this, ["image"]);
+            options.imageAdapter = dt.image;
+        }
+        else
+            options.imageAdapter = ca;
         this.value = options;
     };
 

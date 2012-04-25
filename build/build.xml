@@ -69,6 +69,8 @@
         <file name="data/xflow/skinPosition.js" />
         <file name="data/xflow/flattenBoneTransform.js" />
         <file name="data/xflow/flipNormal.js" />
+        <file name="contrib/perlin-noise-simplex.js" />
+        <file name="data/xflow/noiseImage.js" />
 	</filelist>
 
 	<target name="lastTag" depends="init, windowsGit, linuxGit">

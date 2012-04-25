@@ -244,9 +244,9 @@
     
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
-        if (this.parentTransform !== null)
+        if (this.parentTransform)
             m._data.set(this.parentTransform);
-        if (this.transformAdapter !== null)
+        if (this.transformAdapter)
             mat4.multiply(m._data, this.transformAdapter.getMatrix());
         return m;
     };

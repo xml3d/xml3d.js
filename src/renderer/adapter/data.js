@@ -629,9 +629,11 @@ XML3D.webgl.RootDataAdapter.prototype.toString = function()
 };
 
 
-XML3D.webgl.ImgDataAdapter = function(factory, node)
-{
-	XML3D.webgl.DataAdapter.call(this, factory, node);
+XML3D.webgl.ImgDataAdapter = function(factory, node) {
+    XML3D.webgl.DataAdapter.call(this, factory, node);
+    this.init = function() {
+        // Do nothing
+    };
 };
 XML3D.webgl.ImgDataAdapter.prototype             = new XML3D.webgl.DataAdapter();
 XML3D.webgl.ImgDataAdapter.prototype.constructor = XML3D.webgl.ImgDataAdapter;

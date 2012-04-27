@@ -1,15 +1,6 @@
 // Adapter for <group>
 (function() {
 	
-	var updateTransformAdapter = function(me) {
-		// setup new and register listener
-		var tname = me.node.transform;
-		var tnode = XML3D.URIResolver.resolve(tname);
-		me.transformAdapter = me.factory.getAdapter(tnode);
-
-	};
-	
-	
 	var XML3DGroupRenderAdapter = function(factory, node) {
 	    XML3D.webgl.RenderAdapter.call(this, factory, node);
 	    this.processListeners();
@@ -38,12 +29,15 @@
 		return ret;
 	};
 	
-	p.updateTransformAdapter = function() {
-		var tNode = this.node.transform;
-	    tNode = XML3D.URIResolver.resolve(tNode);
-	    if (tNode)
-	    	this.transformAdapter = this.factory.getAdapter(tNode);
-	};
+    p.updateTransformAdapter = function() {
+        this.transformAdapter = null;
+        var tNode = this.node.transform;
+        if (tNode) {
+            tNode = XML3D.URIResolver.resolve(tNode);
+            if (tNode)
+                this.transformAdapter = this.factory.getAdapter(tNode);
+        }
+    };
 
 	p.processListeners  = function() {
 	    var attributes = this.node.attributes;

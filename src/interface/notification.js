@@ -38,10 +38,16 @@
           uri = new XML3D.URI(uri);
       }
       if (uri && uri.valid) {
-          this.value = XML3D.URIResolver.resolve(uri);
-          XML3D.debug.logDebug("Resolved node: " + this.value);
+          if(uri.scheme == 'urn') {
+              this.type = events.VALID_REFERENCE;
+          } else {
+              this.value = XML3D.URIResolver.resolve(uri);
+              XML3D.debug.logDebug("Resolved node: #" + uri.fragment);
+              this.type = this.value ? events.VALID_REFERENCE : events.DANGLING_REFERENCE;
+          }
+      } else {
+          this.type = events.DANGLING_REFERENCE;
       }
-      this.type = this.value ? events.VALID_REFERENCE : events.DANGLING_REFERENCE;
   };
   var RNp = events.ReferenceNotification.prototype;
 

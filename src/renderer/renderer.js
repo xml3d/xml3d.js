@@ -354,7 +354,7 @@ XML3D.webgl.Renderer.prototype.render = function() {
 	//Render opaque objects
 	for (var shaderName in opaqueObjects) {
 		var objectArray = opaqueObjects[shaderName];		
-		this.drawObjects(objectArray, xform, lightParams, stats);
+		this.drawObjects(objectArray, shaderName, xform, lightParams, stats);
 	}
 	
 	//Render transparent objects
@@ -365,7 +365,7 @@ XML3D.webgl.Renderer.prototype.render = function() {
 		gl.enable(gl.BLEND);
 		gl.disable(gl.DEPTH_TEST);
 		
-		this.drawObjects(transparentObjects, xform, lightParams, stats);
+		this.drawObjects(transparentObjects, null, xform, lightParams, stats);
 		
 		gl.enable(gl.DEPTH_TEST);
 		gl.disable(gl.BLEND);
@@ -423,7 +423,10 @@ XML3D.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, opaque,
 
 };
 
-XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, lightParams, stats) {
+var tmpModelView = mat4.create();
+var tmpModelViewProjection = mat4.create();
+
+XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lightParams, stats) {
 	var objCount = 0;
 	var triCount = 0;
 	var parameters = {};
@@ -434,28 +437,26 @@ XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, xform, lightP
 	parameters["lightAmbientColors[0]"] = lightParams.ambientColors;
 	parameters["lightAttenuations[0]"] = lightParams.attenuations;
 	
+	shaderId = shaderId || objectArray[0].shader || "defaultShader";
+	var shader = this.shaderManager.getShaderById(shaderId);
+    this.shaderManager.bindShader(shader);
+    this.shaderManager.updateShader(shader);
+
 	for (var i = 0, n = objectArray.length; i < n; i++) {
 		var obj = objectArray[i];
 		var transform = obj.transform;
 		var mesh = obj.mesh;
-		var shaderId = obj.shader || "defaultShader";
 		
 		if (obj.visible == false)
 			continue;
 		
 		xform.model = transform;
-		xform.modelView = this.camera.getModelViewMatrix(xform.model);
+		xform.modelView = mat4.multiply(this.camera.viewMatrix, xform.model, tmpModelView);
         parameters["modelMatrix"] = xform.model;
 		parameters["modelViewMatrix"] = xform.modelView;
-		parameters["modelViewProjectionMatrix"] = this.camera.getModelViewProjectionMatrix(xform.modelView);
+		parameters["modelViewProjectionMatrix"] = mat4.multiply(this.camera.projMatrix, xform.modelView, tmpModelViewProjection);
 		parameters["normalMatrix"] = this.camera.getNormalMatrix(xform.modelView);
 		
-		//parameters["cameraPosition"] = xform.modelView.inverse().getColumnV3(3); //TODO: Fix me
-		
-		var shader = this.shaderManager.getShaderById(shaderId);
-		
-		this.shaderManager.bindShader(shader, parameters);
-		//shape.applyXFlow(shader, parameters);			
 		this.shaderManager.setUniformVariables(shader, parameters);
 		triCount += this.drawObject(shader, mesh);
 		objCount++;

@@ -379,28 +379,28 @@ XML3D.webgl.XML3DShaderManager.prototype.setUniformVariables = function(shader, 
 XML3D.webgl.XML3DShaderManager.prototype.bindShader = function(shader) {
 	var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
 
-	//Apply any changes encountered since the last time this shader was rendered
-    for (var i=0, l = sp.changes.length; i<l; i++) {
-    	var change = sp.changes[i];
-    	if (change.type == "uniform" && sp.uniforms[change.name]) {
-    		this.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
-    	}
-
-    	//TODO: changes to samplers/attributes
+    if (this.currentProgram != sp.handle) {
+        this.currentProgram = sp.handle;
+        this.gl.useProgram(sp.handle);
     }
-    sp.changes = [];
 
     var samplers = sp.samplers;
 	for (var tex in samplers) {
 		this.bindTexture(samplers[tex]);
 	}
-	sp = sp.handle;
-	
-    if (this.currentProgram != sp) {
-        this.currentProgram = sp;
-        this.gl.useProgram(sp);
-    }
+};
 
+XML3D.webgl.XML3DShaderManager.prototype.updateShader = function(sp) {
+    //Apply any changes encountered since the last time this shader was rendered
+    for (var i=0, l = sp.changes.length; i<l; i++) {
+        var change = sp.changes[i];
+        if (change.type == "uniform" && sp.uniforms[change.name]) {
+            this.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
+        }
+
+        //TODO: changes to samplers/attributes
+    }
+    sp.changes = [];
 };
 
 XML3D.webgl.XML3DShaderManager.prototype.unbindShader = function(shader) {

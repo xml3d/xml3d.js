@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+     <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+   <title>
+    XML3D
+   </title>
+  </head>
+  <body style="background-color: #FFF;width:500px">
+  <xml3d activeView="#defaultView" id="xml3DElem1" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+    <shader id="flatblue" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">
+            0 0 1
+        </float3>
+    </shader>
+    
+    <data id="meshdata" type="triangles">
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+    </defs>
+    
+    <view id="defaultView" position="0 0 3"/>
+   
+    <group id="myGroup" visible="true" shader="#flatblue">
+        <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
+    </group>
+    </xml3d>
+    
+   <xml3d id="xml3DElem2" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+    <shader id="flatblue" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">
+            0 0 1
+        </float3>
+    </shader>
+    
+    <data id="meshdata" type="triangles">
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+    </defs>
+    
+    <view id="canvas2view" position="0 0 -30"/>
+   
+    <group id="myGroup" visible="true" shader="#flatblue">
+        <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
+    </group>
+    </xml3d>
+    
+    <script type="text/javascript">
+    function getPixelValue(canvas, x,y) {
+        var pixels = new Uint8Array(4), a = new Array(4);
+        canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
+        for(var i=0;i&lt;4;i++)
+            a[i] = pixels[i];
+        return a;
+    }
+    </script>
+  </body>
+ </html>

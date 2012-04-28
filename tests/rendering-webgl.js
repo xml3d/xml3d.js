@@ -486,4 +486,28 @@ test("Custom shader", 4, function() {
 });
 
 
+module("Multiple XML3D nodes", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/multiple-canvas.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Default view with no activeView set", 3, function() {
+    var x = this.doc.getElementById("xml3DElem2"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    
+    actual = win.getPixelValue(gl, 275, 100);
+    deepEqual(actual, [0,0,0,0], "Found correct view node");
+});
 

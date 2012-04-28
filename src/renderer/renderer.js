@@ -105,7 +105,7 @@ XML3D.webgl.Renderer.prototype.initCamera = function() {
 
 	if (av == null)
 	{
-		av =  document.evaluate('//xml3d:view[1]', this.xml3dNode, function() {
+		av =  document.evaluate('.//xml3d:view[1]', this.xml3dNode, function() {
 			return XML3D.xml3dNS;
 		}, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		if (av == null)

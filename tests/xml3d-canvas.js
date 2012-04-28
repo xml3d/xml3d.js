@@ -67,6 +67,16 @@ test("Canvas size attributes vs style", function() {
     equal(c.style.height, "20px");
 }); 
 
+test("Canvas positioning with style", function() {
+    var c = this.doc.getElementById("positioning-css-style")._configured.canvas;
+    equal(c.style.left, "30px"); // Interface values come from attribute
+    equal(c.style.top, "50px");
+
+    //c = this.doc.getElementById("positioning-css-class")._configured.canvas;
+    //equal(c.style.left, "80px"); 
+    //equal(c.style.top, "40px");
+}); 
+
 test("Canvas size with css element selector (dynamic)", function() {
     var c = this.doc.getElementById("default");
     this.doc.styleSheets[1].cssRules[1].style.cssText ="background-color: black; width: 15px; height: 15px";  

@@ -524,7 +524,10 @@ test("XML3DMatrix::CSSMatrix conformance", function() {
                     "CSSMatrix::multiply (test depends on correct ::translate and ::scale)");
             // QUnit.closeMatrix(css.rotate(45,0,0),
             // css.rotateAxisAngle(1,0,0,45), EPSILON);
-
+            var rotmat = new WebKitCSSMatrix();
+            rotmat = rotmat.rotate(45, 0, 0);
+            var xrot = new XML3DRotation(new XML3DVec3(1,0,0), Math.PI / 4).toMatrix();
+            QUnit.closeMatrix(rotmat, xrot, EPSILON, "CSSMatrix:rotate matches XML3DRotation.toMatrix()");
         }
     });
 

@@ -217,13 +217,6 @@
 
     XML3D.createClass(handler.XML3DHandler, handler.ElementHandler);
 
-    /*
-     * handler.XML3DHandler.prototype.registerAttributes = function(config) {
-     * console.dir(handler.XML3DHandler);
-     * handler.XML3DHandler.superclass.registerAttributes.call(this, config);
-     * Object.defineProperty(this.element, "style", this.styler); };
-     */
-
     // Export to xml3d namespace
     XML3D.extend(XML3D, handler);
 

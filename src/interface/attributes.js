@@ -349,11 +349,12 @@
 
     handler.CanvasClassHandler = function(e, id) {
         var canvas = e._configured.canvas;
+        canvas.className = "_xml3d"; // Class name always defined for xml3d canvas
         this.desc = {};
         this.desc.get = function() { return canvas.className; };
         this.desc.set = function(value) { canvas.className = value; };
         this.setFromAttribute = function(value) {
-            canvas.setAttribute(id, value);
+            canvas.setAttribute(id, value + " _xml3d");
         };
         if (e.hasAttribute(id))
             this.setFromAttribute(e.getAttribute(id));

@@ -68,13 +68,15 @@ test("Canvas size attributes vs style", function() {
 }); 
 
 test("Canvas positioning with style", function() {
-    var c = this.doc.getElementById("positioning-css-style")._configured.canvas;
+    var c = this.doc.getElementById("positioning-css-style");
     equal(c.style.left, "30px"); // Interface values come from attribute
     equal(c.style.top, "50px");
 
-    //c = this.doc.getElementById("positioning-css-class")._configured.canvas;
-    //equal(c.style.left, "80px"); 
-    //equal(c.style.top, "40px");
+//    c = this.doc.getElementById("positioning-css-class")._configured.canvas;
+//    var canvasStyle = this.doc.defaultView.getComputedStyle(c);
+
+//    equal(canvasStyle.getPropertyValue("left"), "80px");
+//    equal(canvasStyle.getPropertyValue("top"), "40px");
 }); 
 
 test("Canvas size with css element selector (dynamic)", function() {

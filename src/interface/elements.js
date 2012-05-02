@@ -197,22 +197,30 @@
         return "ElementHandler ("+this.element.nodeName + ", id: "+this.element.id+")";
     };
 
+    var delegateProperties = ["clientHeight", "clientLeft", "clientTop", "clientWidth",
+                              "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth"];
+    function delegateProp(name, elem, canvas) {
+        Object.defineProperty(elem, name, {
+            get : function() {
+                return canvas[name];
+            }
+        });
+    }
+
     handler.XML3DHandler = function(elem) {
         handler.ElementHandler.call(this, elem, true);
         var c = document.createElement("canvas");
         c.width = 800;
         c.height = 600;
         this.canvas = c;
-        Object.defineProperty(elem, "clientWidth", {
-            get : function() {
-                return c.clientWidth;
-            }
-        });
-        Object.defineProperty(elem, "clientHeight", {
-            get : function() {
-                return c.clientHeight;
-            }
-        });
+
+        for(var i in delegateProperties) {
+            delegateProp(delegateProperties[i], elem, c);
+        }
+
+        elem.getBoundingClientRect = function() {
+            return c.getBoundingClientRect();
+        };
     };
 
     XML3D.createClass(handler.XML3DHandler, handler.ElementHandler);

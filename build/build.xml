@@ -23,6 +23,7 @@
 		<file name="utils/uri.js" />
 		<file name="contrib/glu.js" />
 		<file name="contrib/glMatrix.js" />
+        <file name="types/math.js" />
 		<file name="types/vec3.js" />
 		<file name="types/rotation.js" />
 		<file name="types/box.js" />
@@ -102,13 +103,11 @@
 	</target>
 
 	<target name="develop" depends="init">
-		<tstamp />
-		<concatScripts version="DEVELOPMENT SNAPSHOT (${TODAY})"/>
+		<concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})"/>
 	</target>
 
     <target name="develop-min" depends="init">
-        <tstamp />
-        <compileScripts version="DEVELOPMENT SNAPSHOT (${TODAY})" extension=""/>
+        <compileScripts version="DEVELOPMENT SNAPSHOT (${build.time})" extension=""/>
     </target>
 
 	<!-- - - - - - - - - - - - - - - - - -

@@ -102,7 +102,13 @@
 	<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
 		classpath="./closure/compiler.jar" />
 
-	<target name="init" depends="init-properties, clean" />
+	<target name="init" depends="init-properties, clean, time" />
+
+	<target name="time">
+		<tstamp>
+	        <format property="build.time" pattern="dd.MM.yyyy HH:mm:ss z"/>
+	    </tstamp>
+	</target>
 
 	<target name="init-properties">
 		<property file="build.properties" />

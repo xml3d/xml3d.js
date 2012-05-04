@@ -414,6 +414,27 @@ test("Copy Constructor", function() {
 	QUnit.closeMatrix(m, this.mat1, EPSILON);
 });
 
+test("Value attributes writeable", function() {
+    var m = new XML3DMatrix();
+    m.m11 = 1;
+    m.m12 = 2;
+    m.m13 = 3;
+    m.m14 = 4;
+    m.m21 = 5;
+    m.m22 = 6;
+    m.m23 = 7;
+    m.m24 = 8;
+    m.m31 = 9;
+    m.m32 = 10;
+    m.m33 = 11;
+    m.m34 = 12;
+    m.m41 = 13;
+    m.m42 = 14;
+    m.m43 = 15;
+    m.m44 = 16;
+    QUnit.closeMatrix(m,this.incValueMat, EPSILON);
+});
+
 test("XML3DMatrix::toString", function()  {
     equal(this.mat1.toString(), "[object XML3DMatrix]", "Serialization");
 });

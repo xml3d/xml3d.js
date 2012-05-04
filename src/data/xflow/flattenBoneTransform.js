@@ -69,7 +69,6 @@ XML3D.xflow.register("flattenBoneTransform", {
 
         
         this.result = result;
-        window.console.dir(result);
         return true;
     }
 });

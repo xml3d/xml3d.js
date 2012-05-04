@@ -163,7 +163,7 @@ XML3D.data.DataAdapter.prototype.resolveScript = function() {
 
     this.xflow = XML3D.xflow.getScript(urnfrag);
     if(this.xflow === undefined) {
-        XML3D.debug.logWarning("No xflow script registered with name: " + urnfrag);
+        XML3D.debug.logError("No xflow script registered with name: " + urnfrag);
         return null;
     }
     return this.xflow;

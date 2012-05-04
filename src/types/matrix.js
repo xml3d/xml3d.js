@@ -15,7 +15,9 @@
                 return this._data[index];
             },
             set : function(val) {
-                throw Error("XML3DMatrix values are readonly");
+                this._data[index] = val;
+                if (this._callback)
+                    this._callback(this);
             },
             configurable : false,
             enumerable : false

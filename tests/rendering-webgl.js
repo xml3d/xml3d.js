@@ -380,6 +380,7 @@ test("Changing texture", 3, function() {
     gl = getContextForXml3DElement(x),
     testFunc = null, h = getHandler(x);	
 	this.doc.getElementById("myGroup").visible = true;
+	this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
 	
 	x.addEventListener("framedrawn", function(n) {
 	        if(testFunc)
@@ -395,8 +396,7 @@ test("Changing texture", 3, function() {
 	};
 	
 	stop();
-	this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
-	
+
 });
 
 test("NPOT texture resizing", 4, function() {

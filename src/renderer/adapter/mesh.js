@@ -145,7 +145,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         }
 
         // We have positons, let's calc a bounding box
-        this.bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.value,dataTable.index.value);
+        this.bbox = XML3D.webgl.calculateBoundingBox(positions,dataTable.index.getValue());
 
 
         var meshInfo = {
@@ -242,7 +242,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		obj.mesh = meshInfo;
 		this.factory.renderer.requestRedraw("Mesh data changed.", false);
     };
-    
+
     // TODO: move to xflow manager
 	/*p.applyXFlow = function(shader, parameters) {
         var dataTable = this.dataAdapter.createDataTable();

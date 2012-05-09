@@ -494,6 +494,9 @@ XML3D.webgl.XML3DShaderManager.prototype.createTextures = function(shader, shade
 		    sampler.info = info;
 		    sampler.options = opt;
 		    texUnit++;
+		} else {
+		    sampler.info = { status: false };
+		    XML3D.debug.logWarning("No image found for texture: " + name);
 		}
 	}
 

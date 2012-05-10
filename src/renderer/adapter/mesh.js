@@ -186,7 +186,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 		//	this.xflowShader = dataTable["xflowShader"];
 		//}
 		meshInfo.valid = true;
-		meshInfo.bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.data);
+		meshInfo.bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.data,dataTable.index ? dataTable.index.data : null);
 		
 		if (dataTable.size) {
 			meshInfo.segments = dataTable.size;

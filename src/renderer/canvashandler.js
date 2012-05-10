@@ -91,6 +91,9 @@ XML3D.webgl.MAXFPS = 30;
         canvas.addEventListener("click", function(e) {
             handler.click(e);
         }, false);
+        canvas.addEventListener("dblclick", function(e) {
+            handler.click(e, true);
+        }, false);
         canvas.addEventListener("mousewheel", function(e) {
             handler.mouseWheel(e);
         }, false);
@@ -380,14 +383,16 @@ XML3D.webgl.MAXFPS = 30;
      * @param y
      * @return
      */
-    CanvasHandler.prototype.click = function(evt) {
+    CanvasHandler.prototype.click = function(evt, isdbl) {
         var pos = this.getMousePosition(evt);
         if (this.isDragging) {
             this.needPickingDraw = true;
             return;
         }
-
-        this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
+        if (isdbl == true)
+            this.dispatchMouseEvent("dblclick", evt.button, pos.x, pos.y, evt);
+        else
+            this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
 
         return false; // don't redraw
     };

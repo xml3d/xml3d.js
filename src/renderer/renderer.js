@@ -588,6 +588,7 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 			
 			var shader = this.shaderManager.getShaderById("picking");
 			this.shaderManager.bindShader(shader);
+			var parameters = {min : volumeMin, max : volumeMax};
 			
 			for (var j = 0, n = this.drawableObjects.length; j < n; j++) {
 				var obj = this.drawableObjects[j];
@@ -599,16 +600,9 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 				xform.model = transform;
 				xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
-				var id = 1.0 - (1+j) / 255.0;
-
-				var parameters = {
-						id : id,
-						min : volumeMin,
-						max : volumeMax,
-						modelMatrix : transform,
-						modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
-						normalMatrix : this.camera.getNormalMatrix(xform.modelView)
-				};
+				parameters.id = 1.0 - (1+j) / 255.0;
+				parameters.modelMatrix = transform;
+				parameters.modelViewProjectionMatrix = this.camera.getModelViewProjectionMatrix(xform.modelView);
 				
 				this.shaderManager.setUniformVariables(shader, parameters);
 				this.drawObject(shader, mesh);
@@ -687,9 +681,9 @@ XML3D.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) 
 		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
 		
 		var vec = vec3.create();
-		vec.x = data[0] / 255;
-		vec.y = data[1] / 255;
-		vec.z = data[2] / 255;
+		vec[0] = data[0] / 255;
+		vec[1] = data[1] / 255;
+		vec[2] = data[2] / 255;
 		
 		if(normals) {
 			vec = vec3.subtract(vec3.scale(vec,2.0), vec3.create([1,1,1]));
@@ -713,11 +707,10 @@ XML3D.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) 
 
 //Helper to expand an axis aligned bounding box around another object's bounding box
 XML3D.webgl.Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
-	var bmin = bbox.min._data;
-	var bmax = bbox.max._data;
-	var t = trafo;
-	var bbmin = mat4.multiplyVec3(trafo, bmin);
-	var bbmax = mat4.multiplyVec3(trafo, bmax);
+    var bbmin = vec3.create();
+    var bbmax = vec3.create();
+	mat4.multiplyVec3(trafo, bbox.min._data, bbmin);
+	mat4.multiplyVec3(trafo, bbox.max._data, bbmax);
 
 	if (bbmin[0] < min[0])
 		min[0] = bbmin[0];

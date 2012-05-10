@@ -102,6 +102,8 @@
 			evt.internalType = "parenttransform";
 			evt.newValue = downstreamValue;
 			this.notifyChildren(evt);
+			delete evt.internalType;
+			delete evt.newValue;
 			break;
 			
 		case "transform":
@@ -124,6 +126,8 @@
 	        evt.newValue = downstreamValue;
 	        
 	        this.notifyChildren(evt);
+	        delete evt.internalType;
+            delete evt.newValue;
 			this.factory.renderer.requestRedraw("Group transform changed.", true);
 			break;
 		
@@ -150,6 +154,8 @@
 				evt.internalType = "parentvisible";
 				evt.newValue = evt.wrapped.newValue == "true";
 				this.notifyChildren(evt);
+				delete evt.internalType;
+	            delete evt.newValue;
 				this.factory.renderer.requestRedraw("Group visibility changed.", true);	
 			}
 			break;

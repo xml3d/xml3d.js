@@ -687,8 +687,10 @@ XML3D.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) 
 		} else {		
 			var objId = 255 - data[3] - 1;
 			if (objId >= 0 && data[3] > 0) {
-				var tmp = vec3.add(vec3.subtract(this.bbMax, this.bbMin),this.bbMin);
-				vec = vec3.create([ vec[0]*tmp[0], vec[1]*tmp[1], vec[2]*tmp[2] ]);
+			    var tmp = vec3.subtract(this.bbMax, this.bbMin, vec3.create());
+			    vec = vec3.create([ vec[0]*tmp[0], vec[1]*tmp[1], vec[2]*tmp[2] ]);
+			    vec3.add(vec, this.bbMin, vec);
+
 				var pickedObj = this.drawableObjects[objId];
 				this.xml3dNode.currentPickPos = vec;
 				this.xml3dNode.currentPickObj = pickedObj.meshNode;

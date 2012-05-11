@@ -393,10 +393,7 @@ XML3D.animation.Vec3Array.parse = function(str) {
 				.exec(mc[i]);
 		if (c[0])
 		{
-			var vec = createXML3DVec3();
-			vec.x = +c[1];
-			vec.y = +c[2];
-			vec.z = +c[3];
+		    var vec = new XML3DVec3(+c[1],+c[2],+c[3]);
 			vecs.push(vec);
 		}
 	}
@@ -437,6 +434,12 @@ XML3D.animation.RotationArray.parse = function(str) {
 //			vecs.push(r);
 //		}
 	}
+	var os ="";
+	for(var i = 0; i < vecs.length; i++) {
+	    var q = vecs[i]._data;
+	    os += q[3] + " " + q[0] + " " + q[1] + " " + q[2] + " ";
+	}
+	console.log(os);
 
 	return new XML3D.animation.RotationArray(vecs);
 };

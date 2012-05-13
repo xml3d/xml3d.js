@@ -307,9 +307,6 @@ XML3D.webgl.Renderer.prototype.render = function() {
 
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 	gl.viewport(0, 0, this.width, this.height);
-	//gl.enable(gl.BLEND);
-	//gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE,
-	//		gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.DEPTH_TEST);
 	
     // Check if we still don't have a camera.
@@ -363,11 +360,10 @@ XML3D.webgl.Renderer.prototype.render = function() {
 		//Render transparent objects
 		//gl.depthMask(gl.FALSE);
 		gl.enable(gl.BLEND);
-		gl.disable(gl.DEPTH_TEST);
-		
-		this.drawObjects(transparentObjects, null, xform, lightParams, stats);
-		
-		gl.enable(gl.DEPTH_TEST);
+		for (var k=0; k < transparentObjects.length; k++) {
+			var objectArray = [transparentObjects[k]];
+			this.drawObjects(objectArray, objectArray[0].shader, xform, lightParams, stats);
+		}
 		gl.disable(gl.BLEND);
 		//gl.depthMask(gl.TRUE);
 	}

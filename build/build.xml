@@ -44,12 +44,12 @@
         <file name="data/texture.js" />
         <file name="data/misc.js" />
         <file name="data/factory.js" />
-        <file name="renderer/canvashandler.js" />
+		   <file name="renderer/canvashandler.js" />
         <file name="renderer/utils.js" />
         <file name="renderer/shadermanager.js" />
         <file name="renderer/bufferhandler.js" />
         <file name="renderer/renderer.js" />
-        <file name="renderer/adapter/xml3d.js" />
+		<file name="renderer/adapter/xml3d.js" />
         <file name="renderer/adapter/transform.js" />
         <file name="renderer/adapter/view.js" />
         <file name="renderer/adapter/shader.js" />
@@ -60,9 +60,12 @@
         <file name="renderer/adapter/factory.js" />
 		<file name="renderer/shader/base.js" />
 		<file name="renderer/shader/matte.js" />
+		<file name="data/xflow/base.js" />
 		<file name="renderer/shader/diffuse.js" />
 		<file name="renderer/shader/phong.js" />
 		<file name="renderer/shader/utility.js" />
+        <file name="data/xflow/morph3.js" />
+        <file name="data/xflow/sub3.js" />
         <file name="data/xflow/normalize3.js" />
         <file name="data/xflow/lerp3seq.js" />
         <file name="data/xflow/slerpseq.js" />

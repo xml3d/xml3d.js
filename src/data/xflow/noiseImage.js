@@ -52,7 +52,7 @@ XML3D.xflow.register("noiseImage", {
         }
         
         ctx.putImageData(id, 0, 0);
-        console.log(img);
+        //console.log(img);
         this.image = img;
         return true;
     }

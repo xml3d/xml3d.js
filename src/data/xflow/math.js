@@ -103,7 +103,7 @@ quat4.slerpOffset = function(quat, quat2, offset, t, dest, shortest) {
     else
       {
         // Spherical interpolation
-        var angle    = Math.acos(fabs(cosAngle));
+        var angle    = Math.acos(Math.abs(cosAngle));
         var sinAngle = Math.sin(angle);
         c1 = Math.sin(angle * (1.0 - t)) / sinAngle;
         c2 = Math.sin(angle * t) / sinAngle;

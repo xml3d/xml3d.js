@@ -391,7 +391,7 @@ XML3D.webgl.XML3DShaderManager.prototype.updateShader = function(sp) {
         if (change.type == "uniform" && sp.uniforms[change.name]) {
             this.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
         }
-	
+    }
     sp.changes = [];
 };
 

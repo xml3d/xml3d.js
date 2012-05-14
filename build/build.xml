@@ -23,8 +23,7 @@
 		<file name="utils/uri.js" />
 		<file name="contrib/glu.js" />
 		<file name="contrib/glMatrix.js" />
-        <file name="types/math.js" />
-		<file name="types/vec3.js" />
+        <file name="types/vec3.js" />
 		<file name="types/rotation.js" />
 		<file name="types/box.js" />
 		<file name="types/matrix.js" />
@@ -44,7 +43,7 @@
         <file name="data/texture.js" />
         <file name="data/misc.js" />
         <file name="data/factory.js" />
-		   <file name="renderer/canvashandler.js" />
+		<file name="renderer/canvashandler.js" />
         <file name="renderer/utils.js" />
         <file name="renderer/shadermanager.js" />
         <file name="renderer/bufferhandler.js" />
@@ -75,7 +74,8 @@
         <file name="data/xflow/skinPosition.js" />
         <file name="data/xflow/flattenBoneTransform.js" />
         <file name="data/xflow/flipNormal.js" />
-        <file name="contrib/perlin-noise-simplex.js" />
+		<file name="data/xflow/math.js" />
+		<file name="contrib/perlin-noise-simplex.js" />
         <file name="data/xflow/noiseImage.js" />
 	</filelist>
 

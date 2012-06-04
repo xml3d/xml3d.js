@@ -47,7 +47,12 @@
             this.result = {};
             try {
                 XML3D.debug.logDebug("Evaluate " + this.script.name + " on " + this.data.node.id);
-                var ok = this.script.evaluate.apply(this.result,this.args);
+                var ok = false;
+                if (XML3D._parallel) {
+                    ok = this.script.evaluate_parallel.apply(this.result,this.args);
+                } else {
+                    ok = this.script.evaluate.apply(this.result,this.args);
+                }
                 //console.dir(this.result);
             } catch (e) {
                 XML3D.debug.logError("Failed to evaluate xflow script: " + e);

@@ -11,6 +11,7 @@ XML3D.xhtmlNS = 'http://www.w3.org/1999/xhtml';
 XML3D.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
 XML3D._xml3d = document.createElementNS(XML3D.xml3dNS, "xml3d");
 XML3D._native = !!XML3D._xml3d.style;
+XML3D._parallel = true;
 
 XML3D.extend = function (a, b) {
     for ( var prop in b ) {
@@ -39,10 +40,10 @@ XML3D.createClass = function(ctor, parent, methods) {
 };
 (function() {
     var onload = function() {
-
+	    
         var debug = XML3D.debug.setup();
         debug && XML3D.debug.logInfo("xml3d.js version: " + XML3D.version);
-
+        
         // Find all the XML3D tags in the document
         var xml3ds = document.getElementsByTagNameNS(XML3D.xml3dNS, 'xml3d');
         xml3ds = Array.map(xml3ds, function(n) { return n; });

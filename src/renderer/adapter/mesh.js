@@ -12,7 +12,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         this.processListeners();
         this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
-	    //this.dataAdapter.registerConsumer(this);
+        //this.dataAdapter.registerConsumer(this);
         this.parentVisible = true;
 
         this.getMyDrawableObject = noDrawableObject;
@@ -61,7 +61,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 this.getMyDrawableObject().shader = newShaderId;
                 break;
 
-			case "parentvisible":
+            case "parentvisible":
                 this.getMyDrawableObject().visible = evt.newValue && this.node.visible;
                 break;
 
@@ -71,7 +71,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
             case "src":
                 this.dispose(evt);
-				this.createMesh();
+                this.createMesh();
                 break;
 
             case "type":
@@ -121,13 +121,13 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         return buffer;
     };
 
-	p.createMesh = function() {
-		this.dataAdapter.requestOutputData(this, ["index", "position", "normal", "color", "texcoord", "size"], null, this.dataChanged);
-	};
+    p.createMesh = function() {
+        this.dataAdapter.requestOutputData(this, ["index", "position", "normal", "color", "texcoord", "size"], null, this.dataChanged);
+    };
 
-	var ALL_CHANGED = -1;
+    var ALL_CHANGED = -1;
 
-	p.dataChanged = function(dataTable, changedEntry) {
+    p.dataChanged = function(dataTable, changedEntry) {
         changedEntry = changedEntry || ALL_CHANGED;
 
         var gl = this.factory.renderer.getGLContext();
@@ -221,12 +221,16 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 var attrBuffer = a.data.buffer;
                 if (!attrBuffer || changedEntry == ALL_CHANGED) {
                     var v = a.getValue();
-                    attrBuffer = createBuffer(gl, gl.ARRAY_BUFFER, v);
+                    attrBuffer = v.data ? createBuffer(gl, gl.ARRAY_BUFFER, v.data) : createBuffer(gl, gl.ARRAY_BUFFER, v);
                     attrBuffer.tupleSize = a.getTupleSize();
                     a.data.buffer = attrBuffer;
                 } else if (changedEntry == a) {
-                    gl.bindBuffer(gl.ARRAY_BUFFER, attrBuffer);
-                    gl.bufferData(gl.ARRAY_BUFFER, a.getValue(), gl.DYNAMIC_DRAW);
+                    var v = a.getValue();
+                    if (v.data)
+                        v = v.data;
+                    
+                    gl.bindBuffer(gl.ARRAY_BUFFER, a.data.buffer);
+                    gl.bufferData(gl.ARRAY_BUFFER, v, gl.DYNAMIC_DRAW);
                 }
                 meshInfo.vbos[attr] = [];
                 meshInfo.vbos[attr][0] = attrBuffer;
@@ -239,12 +243,12 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         if (dataTable.size) {
             meshInfo.segments = dataTable.size;
         }
-		obj.mesh = meshInfo;
-		this.factory.renderer.requestRedraw("Mesh data changed.", false);
+        obj.mesh = meshInfo;
+        this.factory.renderer.requestRedraw("Mesh data changed.", false);
     };
 
     // TODO: move to xflow manager
-	/*p.applyXFlow = function(shader, parameters) {
+    /*p.applyXFlow = function(shader, parameters) {
         var dataTable = this.dataAdapter.createDataTable();
 
         if (dataTable["xflowShader"]) {
@@ -255,7 +259,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             shader.program = shader.getXFlowShader(declarations, body);
 
             for (var p in xflowShader.uniforms) {
-				var data = xflowShader.uniforms[p].value;
+                var data = xflowShader.uniforms[p].value;
                 if (data.length < 2)
                     data = data[0];
 
@@ -263,7 +267,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             }
         }
 
-	};*/
+    };*/
 
     // Disposes of all GL buffers but does not destroy the mesh
     p.dispose = function(gl) {

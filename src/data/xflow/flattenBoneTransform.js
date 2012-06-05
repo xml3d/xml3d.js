@@ -50,21 +50,21 @@ XML3D.xflow.register("flattenBoneTransform", {
     evaluate_parallel: function(parent, xform) {
         var elementalFunc = function(index, parent,xform) {
             var result = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
-            var off = index*16;
+            var xf = xform.get(index);
             
             for(var j = 0; j < 16; j++) {
-                result[j] = xform[off+j];
+                result[j] = xf.get(j);
             }
             
-            var p = parent[index];
-            //var xf = xform.get(index);
-            while (p >= 0) {                   
-                off = p*16;
+            var p = parent.get(index);
+
+            while (p[0] >= 0) {                   
                 //Multiply the current bone matrix with its parent
-                var a00 = xform[off], a01 = xform[off+1], a02 = xform[off+2], a03 = xform[off+3];
-                var a10 = xform[off+4], a11 = xform[off+5], a12 = xform[off+6], a13 = xform[off+7];
-                var a20 = xform[off+8], a21 = xform[off+9], a22 = xform[off+10], a23 = xform[off+11];
-                var a30 = xform[off+12], a31 = xform[off+13], a32 = xform[off+14], a33 = xform[off+15];
+            	xf = xform.get(p[0]);
+                var a00 = xf.get(0), a01 = xf.get(1), a02 = xf.get(2), a03 = xf.get(3);
+                var a10 = xf.get(4), a11 = xf.get(5), a12 = xf.get(6), a13 = xf.get(7);
+                var a20 = xf.get(8), a21 = xf.get(9), a22 = xf.get(10), a23 = xf.get(11);
+                var a30 = xf.get(12), a31 = xf.get(13), a32 = xf.get(14), a33 = xf.get(15);
                 
                 var b00 = result[0], b01 = result[1], b02 = result[2], b03 = result[3];
                 var b10 = result[4], b11 = result[5], b12 = result[6], b13 = result[7];
@@ -87,20 +87,23 @@ XML3D.xflow.register("flattenBoneTransform", {
                 result[13] = b30*a01 + b31*a11 + b32*a21 + b33*a31;
                 result[14] = b30*a02 + b31*a12 + b32*a22 + b33*a32;
                 result[15] = b30*a03 + b31*a13 + b32*a23 + b33*a33;
-                p = parent[p];                 
+                p = parent.get(p[0]);                 
             }
             
             return result;        
         };
 
-        var numMatrices = parent.length;
-        var result = new ParallelArray(
-                numMatrices,
-                elementalFunc,
+        if (!this.parallel_data) {
+        	this.parallel_data = new ParallelArray(xform.data).partition(16);
+        }
+
+        this.parallel_data = this.parallel_data.combine(
+                1,
+                low_precision(elementalFunc),
                 parent,
                 xform
         );
-        this.result = result.flatten();
+        this.result.result = this.parallel_data;
         return true;
     }
 });

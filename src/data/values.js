@@ -39,10 +39,13 @@
     XML3D.createClass(ValueDataAdapter, XML3D.data.DataAdapter);
     XML3D.extend(ValueDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
 
-    ValueDataAdapter.prototype.getValue = function() {
-        return this.node.value;
+    ValueDataAdapter.prototype.getValue = function(wantParallelArray) {
+    	if (wantParallelArray && !(this.value instanceof ParallelArray)) {
+    		this.value = new ParallelArray(this.value).partition(this.tupleSize);
+    	}
+        return this.value;
     };
-
+    
     ValueDataAdapter.prototype.getTupleSize = function() {
         return this.tupleSize;
     };
@@ -69,6 +72,7 @@
      */
     ValueDataAdapter.prototype.notifyChanged = function(e)
     {
+    	this.value = this.node.value;
         this.notifyDataChanged(this);
     };
 

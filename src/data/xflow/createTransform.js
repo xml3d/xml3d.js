@@ -19,18 +19,16 @@ XML3D.xflow.register("createTransform", {
     evaluate_parallel: function( translation,rotation,scale,center,scaleOrientation) {
         var elementalFunc = function(index, translation,rotation) {
             //Translation
-            var off3 = index*3;
-            var off4 = index*4;
             
-            //var t = translation.get(index);
+            var t = translation.get(index);
             var dest = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
-            dest[12] = translation[off3];
-            dest[13] = translation[off3+1];
-            dest[14] = translation[off3+2];
+            dest[12] = t.get(0);
+            dest[13] = t.get(1);
+            dest[14] = t.get(2);
             
             //Rotation to matrix
-            //var rot = rotation[index];
-            var x = rotation[off4+1], y = rotation[off4+2], z = rotation[off4+3], w = -rotation[off4];
+            var rot = rotation.get(index);
+            var x = rot.get(1), y = rot.get(2), z = rot.get(3), w = -rot.get(0);
     
             var x2 = x + x;
             var y2 = y + y;
@@ -94,15 +92,17 @@ XML3D.xflow.register("createTransform", {
             
             return dest;
         };
-        
-        var numVertices = translation.length / 3;
-        var result = new ParallelArray(
-                numVertices,
-                elementalFunc,
+        var createMatrixArray = function() {return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];};
+        if (!this.parallel_data) {
+        	this.parallel_data = new ParallelArray(translation.length, createMatrixArray);
+        }
+        this.parallel_data = this.parallel_data.combine(
+                1,
+                low_precision(elementalFunc),
                 translation,
                 rotation
         );
-        this.result = result.flatten();
+        this.result.result = this.parallel_data;
         return true;
     }
 });

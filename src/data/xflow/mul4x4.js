@@ -21,19 +21,18 @@ XML3D.xflow.register("mul4x4", {
     evaluate_parallel: function(value1, value2) {
             
         var elementalFunc = function(index, value1, value2) {
-            var off = index * 16;
-            //var value1 = value1.get(index);
-           //var mat2 = value2.get(index);
+            var mat1 = value1.get(index);
+            var mat2 = value2.get(index);
             
-            var a00 = value2[off+0], a01 = value2[off+1], a02 = value2[off+2], a03 = value2[off+3];
-            var a10 = value2[off+4], a11 = value2[off+5], a12 = value2[off+6], a13 = value2[off+7];
-            var a20 = value2[off+8], a21 = value2[off+9], a22 = value2[off+10], a23 = value2[off+11];
-            var a30 = value2[off+12], a31 = value2[off+13], a32 = value2[off+14], a33 = value2[off+15];
+            var a00 = mat2.get(0), a01 = mat2.get(1), a02 = mat2.get(2), a03 = mat2.get(3);
+            var a10 = mat2.get(4), a11 = mat2.get(5), a12 = mat2.get(6), a13 = mat2.get(7);
+            var a20 = mat2.get(8), a21 = mat2.get(9), a22 = mat2.get(10), a23 = mat2.get(11);
+            var a30 = mat2.get(12), a31 = mat2.get(13), a32 = mat2.get(14), a33 = mat2.get(15);
     
-            var b00 = value1[off+0], b01 = value1[off+1], b02 = value1[off+2], b03 = value1[off+3];
-            var b10 = value1[off+4], b11 = value1[off+5], b12 = value1[off+6], b13 = value1[off+7];
-            var b20 = value1[off+8], b21 = value1[off+9], b22 = value1[off+10], b23 = value1[off+11];
-            var b30 = value1[off+12], b31 = value1[off+13], b32 = value1[off+14], b33 = value1[off+15];
+            var b00 = mat1.get(0), b01 = mat1.get(1), b02 = mat1.get(2), b03 = mat1.get(3);
+            var b10 = mat1.get(4), b11 = mat1.get(5), b12 = mat1.get(6), b13 = mat1.get(7);
+            var b20 = mat1.get(8), b21 = mat1.get(9), b22 = mat1.get(10), b23 = mat1.get(11);
+            var b30 = mat1.get(12), b31 = mat1.get(13), b32 = mat1.get(14), b33 = mat1.get(15);
             
             var dest = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0];
             dest[0] = b00*a00 + b01*a10 + b02*a20 + b03*a30;
@@ -54,15 +53,17 @@ XML3D.xflow.register("mul4x4", {
             dest[15] = b30*a03 + b31*a13 + b32*a23 + b33*a33;
             return dest;
         };
-       // value1 = new ParallelArray(value1);
-        var numMatrices = value1.length / 16;
-        var result = new ParallelArray(
-                numMatrices,
-                elementalFunc,
+        if (!this.parallel_data) {
+        	this.parallel_data = new ParallelArray(value1.data).partition(16);
+        }
+
+        this.parallel_data = this.parallel_data.combine(
+                1,
+                low_precision(elementalFunc),
                 value1,
                 value2
         );
-        this.result = result.flatten();
+        this.result.result = this.parallel_data;
         return true;
     }
 });

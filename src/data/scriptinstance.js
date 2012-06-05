@@ -9,11 +9,10 @@
         this.needsEvaluation = true;
         this.observers = new Array();
 
-
         this.getValue = function(name,cb) {
             if(this.needsEvaluation)
                 this.evaluate();
-            if(cb)
+            if(cb instanceof Function)
                 cb();
             return this.result[name];
         };
@@ -36,7 +35,7 @@
                 }
                 else {
                     //console.log("Add argument " + param + ": " + arg);
-                    args.push(arg.getValue());
+                	args.push(arg.getValue(XML3D._parallel));
                 }
             });
             this.args = args;
@@ -49,7 +48,7 @@
                 XML3D.debug.logDebug("Evaluate " + this.script.name + " on " + this.data.node.id);
                 var ok = false;
                 if (XML3D._parallel) {
-                    ok = this.script.evaluate_parallel.apply(this.result,this.args);
+                    ok = this.script.evaluate_parallel.apply(this,this.args);
                 } else {
                     ok = this.script.evaluate.apply(this.result,this.args);
                 }

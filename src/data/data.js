@@ -138,34 +138,32 @@ XML3D.data.DataAdapter.prototype.getOutputs = function() {
 };
 
 XML3D.data.DataAdapter.prototype.resolveScript = function() {
-    if (this.xflow)
-        return this.xflow;
-
-    var script = this.node.script;
-
-    if(!script)
-        return null;
-
-    var pos = script.indexOf("urn:xml3d:xflow:");
-    var urnfrag = "";
-
-    if (pos === 0) {
-        urnfrag = script.substring(16, script.length);
-        XML3D.debug.logWarning("URN: " + script);
-    } else {
-        var sn = XML3D.URIResolver.resolve(script, this.node.ownerDocument);
-        if(!sn)
-            return null;
-        pos = sn.textContent.indexOf("urn:xml3d:xflow:");
-        if (pos=== 0)
-            urnfrag =  sn.textContent.substring(16, sn.textContent.length);
+    if (this.xflow === undefined) {
+        var script = this.node.script;
+        if(script) {
+            var pos = script.indexOf("urn:xml3d:xflow:");
+            var urnfrag = "";
+            if (pos === 0) {
+                urnfrag = script.substring(16, script.length);
+                XML3D.debug.logWarning("URN: " + script);
+            } else {
+                var sn = XML3D.URIResolver.resolve(script, this.node.ownerDocument);
+                if(sn && sn.textContent) {
+                    pos = sn.textContent.indexOf("urn:xml3d:xflow:");
+                    if (pos=== 0) {
+                        urnfrag =  sn.textContent.substring(16, sn.textContent.length);
+                        this.xflow = XML3D.xflow.getScript(urnfrag);
+                        if(typeof this.xflow !== 'object') {
+                            XML3D.debug.logError("No xflow script registered with name: " + urnfrag);
+                            this.xflow = null;
+                        }
+                    }
+                }
+            }
+        }
+        this.xflow = this.xflow || null;
     }
 
-    this.xflow = XML3D.xflow.getScript(urnfrag);
-    if(this.xflow === undefined) {
-        XML3D.debug.logError("No xflow script registered with name: " + urnfrag);
-        return null;
-    }
     return this.xflow;
 };
 

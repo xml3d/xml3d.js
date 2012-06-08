@@ -84,7 +84,7 @@
      */
     XML3DDataAdapterFactory.prototype.createAdapter = function(node)
     {
-        XML3D.debug.logDebug("Creating adapter: " + node.localName);
+        //XML3D.debug.logDebug("Creating adapter: " + node.localName);
         var adapterContructor = reg[node.localName];
         if(adapterContructor !== undefined) {
             return new adapterContructor(this, node);

@@ -59,17 +59,19 @@
     XML3D.extend(ImgDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
 
 
-    var createImage = function(src, cb) {
+    var createImage = function(src, cb, obj) {
         var image = new Image();
-        image.onload = cb;
+        image.onload = function(e) {
+            cb.call(obj,e);
+        };
         image.src = src;
         return image;
     };
 
-    ImgDataAdapter.prototype.getValue = function(cb) {
+    ImgDataAdapter.prototype.getValue = function(cb, obj) {
         if(!this.image)
         {
-            this.image = createImage(this.node.src, cb);
+            this.image = createImage(this.node.src, cb, obj || this);
         }
         return this.image;
     };
@@ -78,6 +80,10 @@
         var result = {};
         result['image'] = this;
         return result;
+    };
+
+    ImgDataAdapter.prototype.resolveScript = function() {
+        return null;
     };
 
     // Export

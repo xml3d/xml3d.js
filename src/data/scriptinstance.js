@@ -31,7 +31,7 @@
             this.script.params.forEach(function(param){
                 var arg = dataTable[param];
                 if (!arg) {
-                    XML3D.debug.logError("Missing input in xflow script: " + param);
+                    XML3D.debug.logInfo("Missing input in xflow script: " + param);
                     args.push(undefined);
                 }
                 else {

@@ -64,7 +64,11 @@ XML3D.webgl.Renderer = function(handler, width, height) {
     this.fbos = this.initFrameBuffers(handler.gl);
     
     //Light information is needed to create shaders, so process them first
-    this.lights = [];
+	this.lights = {
+	        changed: true,
+	        point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
+	        directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] }
+	};
     this.drawableObjects = new Array();
     this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, true, mat4.identity(mat4.create()), null);
     if (this.lights.length < 1) {
@@ -176,9 +180,9 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
         break;
         
     case "light":
-        this.lights.push( { adapter : adapter , transform : transform} );
         adapter.transform = transform;
         adapter.visible = visible && currentNode.visible;
+		adapter.addLight(this.lights);
         break;
     
     case "view":
@@ -320,28 +324,6 @@ XML3D.webgl.Renderer.prototype.render = function() {
     xform.view = this.camera.viewMatrix;  
     xform.proj = this.camera.getProjectionMatrix(this.width / this.height); 
     
-    //Setup lights
-    var light, lightOn;
-    var slights = this.lights;
-    var elements = slights.length * 3;
-    var lightParams = {
-        positions : new Float32Array(elements),
-        diffuseColors : new Float32Array(elements),
-        ambientColors : new Float32Array(elements),
-        attenuations : new Float32Array(elements),
-        visible : new Float32Array(elements)
-    };
-    for ( var j = 0, length = slights.length; j < length; j++) {
-        light = slights[j].adapter;
-		var params = light.requestData(["position", "attenuation", "intensity", "visiblility"], xform.view);
-        if (!params)
-            continue; // TODO: Shrink array
-        lightParams.positions.set(params.position, j*3);
-        lightParams.attenuations.set(params.attenuation, j*3);
-        lightParams.diffuseColors.set(params.intensity, j*3);
-        lightParams.visible.set(params.visibility, j*3);
-    }
-    
     var stats = { objCount : 0, triCount : 0 };
 
     //Sort objects by shader/transparency
@@ -354,7 +336,7 @@ XML3D.webgl.Renderer.prototype.render = function() {
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
         var objectArray = opaqueObjects[shaderName];        
-        this.drawObjects(objectArray, shaderName, xform, lightParams, stats);
+		this.drawObjects(objectArray, shaderName, xform, this.lights, stats);
     }
     
     //Render transparent objects
@@ -365,7 +347,7 @@ XML3D.webgl.Renderer.prototype.render = function() {
         gl.enable(gl.BLEND);
         for (var k=0; k < transparentObjects.length; k++) {
             var objectArray = [transparentObjects[k]];
-            this.drawObjects(objectArray, objectArray[0].shader, xform, lightParams, stats);
+			this.drawObjects(objectArray, objectArray[0].shader, xform, this.lights, stats);
         }
         gl.disable(gl.BLEND);
         //gl.depthMask(gl.TRUE);
@@ -426,21 +408,27 @@ var tmpModelView = mat4.create();
 var tmpModelViewProjection = mat4.create();
 var identMat3 = mat3.identity(mat3.create());
 
-XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lightParams, stats) {
+XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, stats) {
     var objCount = 0;
     var triCount = 0;
     var parameters = {};
     
-    parameters["lightPositions[0]"] = lightParams.positions;
-    parameters["lightVisibility[0]"] = lightParams.visible;
-    parameters["lightDiffuseColors[0]"] = lightParams.diffuseColors;
-    parameters["lightAmbientColors[0]"] = lightParams.ambientColors;
-    parameters["lightAttenuations[0]"] = lightParams.attenuations;
-    
+	if(lights.changed) {
+	    parameters["pointLightPosition[0]"] = lights.point.position;
+        parameters["pointLightAttenuation[0]"] = lights.point.attenuation;
+	    parameters["pointLightVisibility[0]"] = lights.point.visibility;
+	    parameters["pointLightIntensity[0]"] = lights.point.intensity;
+        parameters["directionalLightDirection[0]"] = lights.directional.direction;
+        parameters["directionalLightVisibility[0]"] = lights.directional.visibility;
+        parameters["directionalLightIntensity[0]"] = lights.directional.intensity;
+	}
+
     shaderId = shaderId || objectArray[0].shader || "defaultShader";
     var shader = this.shaderManager.getShaderById(shaderId);
     this.shaderManager.bindShader(shader);
     this.shaderManager.updateShader(shader);
+
+    parameters["viewMatrix"] = this.camera.viewMatrix;
 
     for (var i = 0, n = objectArray.length; i < n; i++) {
         var obj = objectArray[i];
@@ -802,9 +790,38 @@ XML3D.webgl.XML3DImgRenderAdapter.prototype.notifyChanged = function(evt) {
 // Adapter for <lightshader>
 XML3D.webgl.XML3DLightShaderRenderAdapter = function(factory, node) {
     XML3D.webgl.RenderAdapter.call(this, factory, node);
+    this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
 };
 XML3D.webgl.XML3DLightShaderRenderAdapter.prototype = new XML3D.webgl.RenderAdapter();
 XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = XML3D.webgl.XML3DLightShaderRenderAdapter;
+
+var LIGHT_DEFAULT_INTENSITY = vec3.create([1,1,1]);
+var LIGHT_DEFAULT_ATTENUATION = vec3.create([0,0,1]);
+
+XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillPointLight = function(point, pos, i) {
+    var dataTable = this.dataAdapter.requestOutputData(this, ["intensity","attenuation"]);
+    var dpos = pos*3;
+    var intensity = dataTable.intensity ? dataTable.intensity.getValue() : LIGHT_DEFAULT_INTENSITY;
+    var attenuation = dataTable.attenuation ? dataTable.attenuation.getValue() : LIGHT_DEFAULT_ATTENUATION;
+
+    point.intensity[dpos] = intensity[0]*i;
+    point.intensity[dpos+1] = intensity[1]*i;
+    point.intensity[dpos+2] = intensity[2]*i;
+
+    point.attenuation[dpos] = attenuation[0];
+    point.attenuation[dpos+1] = attenuation[1];
+    point.attenuation[dpos+2] = attenuation[2];
+};
+
+XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillDirectionalLight = function(directional, pos, i) {
+    var dataTable = this.dataAdapter.requestOutputData(this, ["intensity"]);
+    var dpos = pos*3;
+    var intensity = dataTable.intensity ? dataTable.intensity.getValue() : LIGHT_DEFAULT_INTENSITY;
+
+    directional.intensity[dpos] = intensity[0]*i;
+    directional.intensity[dpos+1] = intensity[1]*i;
+    directional.intensity[dpos+2] = intensity[2]*i;
+};
 
 })();
 

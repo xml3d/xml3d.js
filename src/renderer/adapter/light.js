@@ -4,17 +4,8 @@
     var XML3DLightRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         
-        var intensityAttribute = node.getAttribute("intensity");
-        if (intensityAttribute) {
-            try {
-                var flt = parseFloat(intensityAttribute);
-                this.intensity = flt;
-            } catch (e) {XML3D.debug.logWarning("Could not parse light intensity attribute ' "+intensityAttribute+" '"); }
-        }
-        
         this.visible = true;
         this.position = null;
-        this.intensity = null;
         this.transform = null;
         this.lightShader = null;
 
@@ -33,10 +24,7 @@
             this.visible = evt.newValue && this.node.visible;
             break;
         case "intensity":
-            if (!isNaN(evt.newValue))
-                this.intensity = evt.newValue;
-            else
-                XML3D.debug.logError("Invalid parameter for light intensity attribute: NaN");
+			// TODO: Inform light struct
             break;
         case "parenttransform":
             this.transform = evt.newValue;
@@ -46,53 +34,66 @@
         this.factory.handler.redraw("Light attribute changed.");    
     };
     
-	XML3DLightRenderAdapter.prototype.requestData = function(parameters, viewMatrix) {
-        var shader = this.getLightShader();
+	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]), tmpDirection = vec3.create();
     
-        if(!shader)
-            return null;
-        var mvm = mat4.create(viewMatrix);
-        
-        if (this.transform)
-            mvm = mat4.multiply(mvm, this.transform, mat4.create());
-        
-        if (!this.dataAdapter)
-        {
-            var renderer = shader.factory.renderer;
-            this.dataAdapter = renderer.dataFactory.getAdapter(shader.node);
-			//if(this.dataAdapter)
-			//	this.dataAdapter.registerConsumer(renderer);
-        }
-		var params = this.dataAdapter.requestOutputData(this, parameters);
-    
-        var visibility = this.visible ? [1.0, 1.0, 1.0] : [0.0, 0.0, 0.0];
-    
-        //Set up default values
-        var pos = mat4.multiplyVec4(mvm, quat4.create([0,0,0,1]));
-        var aParams = {
-            position     : [pos[0] / pos[3], pos[1] / pos[3], pos[2] / pos[3]],
-            attenuation : [0.0, 0.0, 1.0],
-            intensity     : [1.0, 1.0, 1.0],
-            visibility     : visibility
-        };
-    
-        for (var p in params) {
-            if (p == "position") {
-                //Position must be multiplied with the model view matrix
-				var t = quat4.create([params[p].value[0],params[p].value[1],params[p].value[2], 1.0]);
-                mat4.multiplyVec4(mvm, t);
-                aParams[p] = [t[0]/t[3], t[1]/t[3], t[2]/t[3]];
-                continue;
-            }
-			aParams[p] = params[p].value;
-        }
-        
-        if (this.intensity !== null) {
-            var i = aParams.intensity;
-            aParams.intensity = [i[0]*this.intensity, i[1]*this.intensity, i[2]*this.intensity];
-        }
-        
-        return aParams;
+	XML3DLightRenderAdapter.prototype.addLight = function(lights) {
+	    var shader = this.getLightShader();
+	    if(!shader)
+	        return;
+	    var script = shader.node.script;
+	    var pos = script.indexOf("urn:xml3d:lightshader:");
+	    if(pos === 0) {
+	        var urnfrag = script.substring(22, script.length);
+	        switch(urnfrag) {
+	            case "point":
+	                var point = lights.point;
+	                var dlen = point.length*3;
+                    point.adapter[point.length] = this;
+                    // Set shader specific parameters
+                    shader.fillPointLight(point, point.length,this.node.intensity);
+                    // Set instance specific parameters
+                    if (this.transform) {
+                        var t = this.transform;
+                        var pos = mat4.multiplyVec4(t, quat4.create([0,0,0,1]));
+                        point.position[dlen] = pos[0]/pos[3];
+                        point.position[dlen+1] = pos[1]/pos[3];
+                        point.position[dlen+2] =  pos[2]/pos[3];
+                    } else {
+                        point.position[dlen] = 0;
+                        point.position[dlen+1] = 0;
+                        point.position[dlen+2] = 0;
+                    }
+                    point.visibility[dlen] = 1;
+                    point.visibility[dlen+1] = 1;
+                    point.visibility[dlen+2] = 1;
+	                point.length++;
+                    break;
+	            case "directional":
+	                var directional = lights.directional;
+	                var dlen = directional.length*3;
+	                directional.adapter[directional.length] = this;
+	                shader.fillDirectionalLight(directional, directional.length,this.node.intensity);
+                    if (this.transform) {
+                        var t = this.transform;
+                        mat4.multiplyVec3(t, XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION, tmpDirection);
+                        directional.direction[dlen] = tmpDirection[0];
+                        directional.direction[dlen+1] = tmpDirection[1];
+                        directional.direction[dlen+2] =  tmpDirection[2];
+                    } else {
+                        directional.direction[dlen] = XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION[0];
+                        directional.direction[dlen+1] = XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION[1];
+                        directional.direction[dlen+2] = XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION[2];
+                    }
+
+	                directional.visibility[dlen] = 1;
+	                directional.visibility[dlen+1] = 1;
+	                directional.visibility[dlen+2] = 1;
+	                directional.length++;
+	                break;
+                default:
+                    XML3D.debug.logWarning("Unsupported lightshader type: " + script);
+	        }
+	    }
     };
     
     XML3DLightRenderAdapter.prototype.getLightShader = function() {

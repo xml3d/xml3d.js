@@ -19,7 +19,24 @@ XML3D.xflow.register("mul4x4", {
         return true;
     },
     evaluate_parallel: function(value1, value2) {
-            
+
+    	if (!this.tmp) {
+       	  this.tmp = new Float32Array(value1.length);
+        }
+        var result = this.tmp;
+        var count = value1.length;
+        for(var i = 0; i < count; i++)
+        {
+            var offset = i*16;
+            mat4.multiplyOffset(result, offset, value1, offset, value2, offset);
+        }
+        //this.parallel_data = new ParallelArray(result).partition(16);
+        this.result.result = result;
+        
+        /*
+      	if (!this.parallel_data) {
+        	this.parallel_data = new ParallelArray(value1.data).partition(16);
+        }
         var elementalFunc = function(index, value1, value2) {
             var mat1 = value1.get(index);
             var mat2 = value2.get(index);
@@ -53,9 +70,6 @@ XML3D.xflow.register("mul4x4", {
             dest[15] = b30*a03 + b31*a13 + b32*a23 + b33*a33;
             return dest;
         };
-        if (!this.parallel_data) {
-        	this.parallel_data = new ParallelArray(value1.data).partition(16);
-        }
 
         this.parallel_data = this.parallel_data.combine(
                 1,
@@ -63,7 +77,9 @@ XML3D.xflow.register("mul4x4", {
                 value1,
                 value2
         );
-        this.result.result = this.parallel_data;
+         this.result.result = this.parallel_data;
+        */
+
         return true;
     }
 });

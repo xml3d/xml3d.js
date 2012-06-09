@@ -17,6 +17,29 @@ XML3D.xflow.register("createTransform", {
         return true;
     },
     evaluate_parallel: function( translation,rotation,scale,center,scaleOrientation) {
+    	var count = translation ? translation.length / 3 :
+            rotation ? rotation.length / 4 :
+            scale ? scale.length / 3 :
+            center ? center.length / 3 :
+            scaleOrientation ? scaleOrientation / 4: 0;
+    	
+    	if (!this.tmp) {
+       	  this.tmp = new Float32Array(count * 16);
+        }
+        
+        var result = this.tmp;
+        for(var i = 0; i < count; i++) {
+            mat4.makeTransformOffset(translation,rotation,scale,center,scaleOrientation,i,result);
+        }
+        this.result.result = result;
+        
+        //this.parallel_data = new ParallelArray(result).partition(16);
+        
+        /*
+        var createMatrixArray = function() {return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];};
+        if (!this.parallel_data) {
+        	this.parallel_data = new ParallelArray(translation.length, createMatrixArray);
+        }
         var elementalFunc = function(index, translation,rotation) {
             //Translation
             
@@ -92,10 +115,7 @@ XML3D.xflow.register("createTransform", {
             
             return dest;
         };
-        var createMatrixArray = function() {return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];};
-        if (!this.parallel_data) {
-        	this.parallel_data = new ParallelArray(translation.length, createMatrixArray);
-        }
+        
         this.parallel_data = this.parallel_data.combine(
                 1,
                 low_precision(elementalFunc),
@@ -103,6 +123,8 @@ XML3D.xflow.register("createTransform", {
                 rotation
         );
         this.result.result = this.parallel_data;
+        */
+
         return true;
     }
 });

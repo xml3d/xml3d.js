@@ -31,43 +31,39 @@ XML3D.xflow.register("skinPosition", {
     },
     
     evaluate_parallel: function(pos, boneIndex, boneWeight, boneXform) {
-        var elementalFunc = function(index, position, boneIndex, boneWeight, boneXform) {
-            var r = [0,0,0];
-            var bw = boneWeight.get(index);
-            var bi = boneIndex.get(index);
-            var pos = position.get(index);
-
-            var tmp = [0,0,0];
-            var x = pos.get(0), y = pos.get(1), z = pos.get(2);
-            
-            for (var j=0; j < 4; j++) {
-                var weight = bw.get(j);
-                if (weight > 0) {
-                    var mo = bi.get(j);
-                    var xform = boneXform.get(mo);
-                    
-                    //Multiply pos with boneXform
-                    r[0] += (xform.get(0)*x + xform.get(4)*y + xform.get(8)*z + xform.get(12)) * weight;
-                    r[1] += (xform.get(1)*x + xform.get(5)*y + xform.get(9)*z + xform.get(13)) * weight; 
-                    r[2] += (xform.get(2)*x + xform.get(6)*y + xform.get(10)*z + xform.get(14)) * weight;
-                }
-            }
-            return r;
-        };
-        
-        if (!this.parallel_data) {
-        	this.parallel_data = new ParallelArray(pos.data).partition(3);
-        }
-
-        this.parallel_data = this.parallel_data.combine(
-                1,
-                low_precision(elementalFunc),
+    	if (!this.elementalFunc) {
+	        this.elementalFunc = function(index, position, boneIndex, boneWeight, boneXform) {
+	        	var r = [0,0,0];
+	            var off4 = index*4;
+	            var off3 = index*3;
+	
+	            var x = position[off3], y = position[off3+1], z = position[off3+2];
+	            
+	            for (var j=0; j < 4; j++) {
+	                var weight = boneWeight[off4+j];
+	                if (weight > 0) {
+	                    var mo = boneIndex[off4+j] * 16;
+	                    
+	                    //Multiply pos with boneXform
+	                    r[0] += (boneXform[mo+0]*x + boneXform[mo+4]*y + boneXform[mo+8]*z + boneXform[mo+12]) * weight;
+	                    r[1] += (boneXform[mo+1]*x + boneXform[mo+5]*y + boneXform[mo+9]*z + boneXform[mo+13]) * weight; 
+	                    r[2] += (boneXform[mo+2]*x + boneXform[mo+6]*y + boneXform[mo+10]*z + boneXform[mo+14]) * weight;
+	                }
+	            }
+	            return r;
+	        };
+    	}
+        var numVertices = pos.length / 3;   
+        var result = new ParallelArray(
+        		numVertices,
+                this.elementalFunc,
                 pos,
                 boneIndex,
                 boneWeight,
                 boneXform
         );
-        this.result.result = this.parallel_data;
+        
+        this.result.result = result;
         return true;
     }
 });

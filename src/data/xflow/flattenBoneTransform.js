@@ -46,8 +46,60 @@ XML3D.xflow.register("flattenBoneTransform", {
         this.result = result;
         return true;
     },
-    
+ 
     evaluate_parallel: function(parent, xform) {
+    	  
+          if (!this.tmp) {
+        	  this.tmp = new Float32Array(xform.length);
+          }
+          
+          var boneCount = xform.length / 16;
+          var result = this.tmp;
+          var computed = [];
+          var par = parent;
+          var xf = xform;
+
+          //For each bone do:
+          for(var i = 0; i < boneCount;){
+              if(!computed[i]) {
+                  var p = par[i];
+                  if(p >= 0){
+                      //This bone has a parent bone
+                      if(!computed[p]){
+                          //The parent bone's transformation matrix hasn't been computed yet
+                          while(par[p] >= 0 && !computed[par[p]]) {
+                              //The current bone has a parent and its transform hasn't been computed yet
+                              p = par[p];
+
+                              if(par[p] >= 0)    
+                                  mat4.multiplyOffset(result, p*16, xf, p*16, result, par[p]*16);
+                              else
+                                  for(var j = 0; j < 16; j++) {
+                                      result[p*16+j] = xf[p*16+j];
+                                  }
+                              computed[p] = true;
+                          }
+                      }
+                      else {
+                          mat4.multiplyOffset(result, i*16, xf, i*16, result,  p*16);
+                      }
+                  }
+                  else{
+                      for(var j = 0; j < 16; j++) {
+                          result[i*16+j] = xf[i*16+j];
+                      }
+                  }
+                  computed[i] = true;
+              }
+              i++;
+          }
+          //this.parallel_data = new ParallelArray(result).partition(16);
+          this.result.result = result;
+    	
+          /*
+           if (!this.parallel_data) {
+          	this.parallel_data = new ParallelArray(xform.data).partition(16);
+          }  
         var elementalFunc = function(index, parent,xform) {
             var result = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
             var xf = xform.get(index);
@@ -92,11 +144,7 @@ XML3D.xflow.register("flattenBoneTransform", {
             
             return result;        
         };
-
-        if (!this.parallel_data) {
-        	this.parallel_data = new ParallelArray(xform.data).partition(16);
-        }
-
+ 
         this.parallel_data = this.parallel_data.combine(
                 1,
                 low_precision(elementalFunc),
@@ -104,6 +152,8 @@ XML3D.xflow.register("flattenBoneTransform", {
                 xform
         );
         this.result.result = this.parallel_data;
+        */
+
         return true;
     }
 });

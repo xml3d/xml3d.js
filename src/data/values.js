@@ -40,9 +40,9 @@
     XML3D.extend(ValueDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
 
     ValueDataAdapter.prototype.getValue = function(wantParallelArray) {
-    	if (wantParallelArray && !(this.value instanceof ParallelArray)) {
-    		this.value = new ParallelArray(this.value).partition(this.tupleSize);
-    	}
+    	//if (wantParallelArray && !(this.value instanceof ParallelArray)) {
+    	//	this.value = new ParallelArray(this.value).partition(this.tupleSize);
+    	//}
         return this.value;
     };
     

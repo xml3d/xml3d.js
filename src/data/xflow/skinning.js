@@ -1,81 +1,81 @@
 XML3D.xflow.register("skinning", {
-    outputs: [{name: 'result', tupleSize: '3', interleaved: {position:'0', normal:'3'}}],
+    outputs: [{name: 'pos', tupleSize: '3'}, {name: 'dir', tupleSize:'3'}],
     params:  ['pos','dir','boneIdx','boneWeight','boneXform'],
     evaluate: function(pos,dir,boneIdx,boneWeight,boneXform) {
         var count = pos.length / 3;
-        var result = new Float32Array(pos.length);
+        var resd = new Float32Array(pos.length);
+        var resp = new Float32Array(dir.length);
 
         var m = mat4.create();
-        var r = vec3.create();
-        var tmp =  vec3.create();
+        var rd = vec3.create();
+        var rp = vec3.create();
+        
+        var tmpd = vec3.create();
+        var tmpp = vec3.create();
 
         for(var i = 0; i<count;i++) {
             var offset = i*3;
-            r[0] = r[1] = r[2] = +0;
+            rd[0] = rd[1] = rd[2] = +0;
+            rp[0] = rp[1] = rp[2] = +0;
             for(var j = 0; j < 4; j++) {
                 var weight = boneWeight[i*4+j];
                 if (weight) {
                     var mo = boneIdx[i*4+j]*16;
 
-                    mat4.multiplyOffsetVec3(boneXform, mo, pos, offset, tmp);
-                    vec3.scale(tmp, weight);
-                    vec3.add(r, tmp);
+                    mat4.multiplyOffsetVec3(boneXform, mo, pos, offset, tmpp);
+                    vec3.scale(tmpp, weight);
+                    vec3.add(rp, tmpp);
+                    
+                    mat4.multiplyOffsetDirection(boneXform, mo, dir, offset, tmpd);
+                    vec3.scale(tmpd, weight);
+                    vec3.add(rd, tmpd);
                 }
             }
-            result[offset] = r[0];
-            result[offset+1] = r[1];
-            result[offset+2] = r[2];
+            resp[offset] = rp[0];
+            resp[offset+1] = rp[1];
+            resp[offset+2] = rp[2];
+            resd[offset] = rd[0];
+            resd[offset+1] = rd[1];
+            resd[offset+2] = rd[2];
         }
-        this.result = result;
+        this.pos = resp;
+        this.dir = resd;
         return true;
     },
-    
-    //pos, dir - 3
-    //boneindex, boneweight - 4
-    //bonexform - 16
-    
-    evaluate_parallel: function(pos, dir, boneIndex, boneWeight, boneXform) {
-        this.elementalFunc =  function(index, pos, dir, boneIndex, boneWeight, boneXform) {
-            var r = [0,0,0,0,0,0];
-            var off4 = index*4;
-            var off3 = index*3;
-            
-            //var bw = boneWeight.get(off4);
-           // var bi = boneIndex.get(off4);
-            var tmpPos = [0,0,0];
-            var tmpDir = [0,0,0];
-            for (var j=0; j < 4; j++) {
-                var weight = boneWeight.get(off4+j);
-                if (weight > 0) {
-                    var mo = boneIndex.get(off4+j) * 16;
-                   // var bxform = boneXform.get(mo);
-                    
-                    //Multiply pos with boneXform
-                    var x = pos.get(off3), y = pos.get(off3+1), z = pos.get(off3+2); 
-                    tmpPos[0] = boneXform.get(mo+0)*x + boneXform.get(mo+4)*y + boneXform.get(mo+8)*z + boneXform.get(mo+12);
-                    tmpPos[1] = boneXform.get(mo+1)*x + boneXform.get(mo+5)*y + boneXform.get(mo+9)*z + boneXform.get(mo+13); 
-                    tmpPos[2] = boneXform.get(mo+2)*x + boneXform.get(mo+6)*y + boneXform.get(mo+10)*z + boneXform.get(mo+14);
 
-                    x = dir.get(off3), y = dir.get(off3+1), z = dir.get(off3+2);
-                    tmpDir[0] = boneXform.get(mo+0)*x + boneXform.get(mo+4)*y + boneXform.get(mo+8)*z;
-                    tmpDir[1] = boneXform.get(mo+1)*x + boneXform.get(mo+5)*y + boneXform.get(mo+9)*z; //is this offsetting right?
-                    tmpDir[2] = boneXform.get(mo+2)*x + boneXform.get(mo+6)*y + boneXform.get(mo+10)*z;
-                    
-                    r[0] += tmpPos[0]*weight;
-                    r[1] += tmpPos[1]*weight;
-                    r[2] += tmpPos[2]*weight;
-                    r[3] += tmpDir[0]*weight;
-                    r[4] += tmpDir[1]*weight;
-                    r[5] += tmpDir[2]*weight;
-                }
-            }
-            
-            return r;
-        };
+    evaluate_parallel: function(pos, dir, boneIndex, boneWeight, boneXform) {
+    	if (!this.elementalFunc) {
+	        this.elementalFunc = function(index, pos, dir, boneIndex, boneWeight, boneXform) {
+	            var rp = [0,0,0];
+	            var rd = [0,0,0];
+	            var off4 = index*4;
+	            var off3 = index*3;
+
+	            var xp = pos[off3], yp = pos[off3+1], zp = pos[off3+2]; 
+	            var xd = dir[off3], yd = dir[off3+1], zd = dir[off3+2]; 
+	            
+	            for (var j=0; j < 4; j++) {
+	                var weight = boneWeight[off4+j];
+	                if (weight > 0) {
+	                    var mo = boneIndex[off4+j] * 16;
+	                    
+	                    rp[0] += (boneXform[mo+0]*xp + boneXform[mo+4]*yp + boneXform[mo+8]*zp + boneXform[mo+12]) * weight;
+	                    rp[1] += (boneXform[mo+1]*xp + boneXform[mo+5]*yp + boneXform[mo+9]*zp + boneXform[mo+13]) * weight; 
+	                    rp[2] += (boneXform[mo+2]*xp + boneXform[mo+6]*yp + boneXform[mo+10]*zp + boneXform[mo+14]) * weight;
+	
+	                    rd[0] += (boneXform[mo+0]*xd + boneXform[mo+4]*yd + boneXform[mo+8]*zd) * weight;
+	                    rd[1] += (boneXform[mo+1]*xd + boneXform[mo+5]*yd + boneXform[mo+9]*zd) * weight; 
+	                    rd[2] += (boneXform[mo+2]*xd + boneXform[mo+6]*yd + boneXform[mo+10]*zd) * weight;
+	                }
+	            }
+	            
+	            return {position : rp, direction : rd};
+	        };
+    	}
 
         var numVertices = pos.length / 3;
         
-        var result = new ParallelArray(
+        var tmp = new ParallelArray(
                 numVertices,
                 this.elementalFunc,
                 pos,
@@ -84,7 +84,9 @@ XML3D.xflow.register("skinning", {
                 boneWeight,
                 boneXform
         );
-        this.result = result.flatten();
+        var result = tmp.unzip();
+        this.result.pos = result.position;
+        this.result.dir = result.direction;
         return true;
     }
 });

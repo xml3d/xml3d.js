@@ -15,7 +15,7 @@ XML3D.xflow.register("slerpSeq", {
     },
 
     evaluate_parallel: function(sequence, weight) {
-        var result = sequence.interpolate(weight.data[0], function(v1,v2,t) {
+        var result = sequence.interpolate(weight[0], function(v1,v2,t) {
             var count = v1.length;
             var result = new Float32Array(count);
 
@@ -26,7 +26,8 @@ XML3D.xflow.register("slerpSeq", {
             return result;
         });
         var tplsize = sequence.data[0].tupleSize;
-        this.result.result = new ParallelArray(result).partition(tplsize);
+        this.result.result = result;
+        //this.result.result = new ParallelArray(result).partition(tplsize);
         return true;
     }
 });

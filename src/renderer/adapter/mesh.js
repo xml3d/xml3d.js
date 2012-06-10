@@ -145,6 +145,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         }
 
         // We have positons, let's calc a bounding box
+        if (positions.data)
+        	positions = positions.data;
         this.bbox = XML3D.webgl.calculateBoundingBox(positions,dataTable.index.getValue());
 
 

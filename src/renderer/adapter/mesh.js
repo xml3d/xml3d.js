@@ -164,7 +164,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var obj = this.getMyDrawableObject();
 
         console.timeEnd("xflow");
-        console.time("Mesh data changed");
+        //console.time("Mesh data changed");
 
         var foundValidPositions = false;
 
@@ -232,7 +232,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         meshInfo.bbox.set(this.bbox);
         obj.mesh = meshInfo;
 
-        console.timeEnd("Mesh data changed");
+        //console.timeEnd("Mesh data changed");
         this.factory.renderer.requestRedraw("Mesh data changed.", false);
     };
 

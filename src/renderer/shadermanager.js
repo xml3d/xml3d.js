@@ -454,11 +454,13 @@
     	this.gl.useProgram(null);
     };
     
+    var rc = window.WebGLRenderingContext;
     XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
     	switch (u.glType) {
-    		case 35670: 														//gl.BOOL
-    		case 5124: 															//gl.INT
-    		case 35678:	gl.uniform1i(u.location, value); break;					//gl.SAMPLER_2D
+            case rc.BOOL:
+            case rc.INT:
+            case rc.SAMPLER_2D:
+                gl.uniform1i(u.location, value); break;
     
     		case 35671: 														//gl.BOOL_VEC2
     		case 35667:	gl.uniform2iv(u.location, value); break;				//gl.INT_VEC2
@@ -645,9 +647,11 @@
     
     	switch(info.status) {
     	    case TEXTURE_STATE.VALID:
-    	        this.gl.activeTexture(this.gl.TEXTURE0 + info.unit);
-    	        this.gl.bindTexture(info.glType, info.handle);
-    	        break;
+                this.gl.activeTexture(this.gl.TEXTURE0 + info.unit);
+                this.gl.bindTexture(info.glType, info.handle);
+                // Should not be here, since the texunit is static
+                this.setUniform(this.gl, tex, info.unit);
+                break;
     	    case TEXTURE_STATE.LOADED:
     	        console.dir("Creating '"+ tex.name + "' from " + info.image.src);
     	        console.dir(info);

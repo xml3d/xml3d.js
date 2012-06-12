@@ -144,7 +144,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
             +"#if MAX_POINTLIGHTS > 0\n"
             +"uniform vec3 pointLightAttenuation[MAX_POINTLIGHTS+1];\n"
             +"uniform vec3 pointLightPosition[MAX_POINTLIGHTS+1];\n"
-            +"uniform vec3 pointLightColor[MAX_POINTLIGHTS+1];\n"
+            +"uniform vec3 pointLightIntensity[MAX_POINTLIGHTS+1];\n"
             +"uniform vec3 pointLightVisibility[MAX_POINTLIGHTS+1];\n"
             +"#endif\n"
 
@@ -159,7 +159,7 @@ g_shaders["urn:xml3d:shader:texturedphong"] = {
             +"  vec3 objDiffuse = diffuseColor * texDiffuse.xyz;\n"
             +"  vec3 color = objDiffuse * ambientIntensity + emissiveColor;\n"
 
-            +"#if MAX_POINTLIGHTS > 1\n"
+            +"#if MAX_POINTLIGHTS > 0\n"
             +"  for (int i=0; i<MAX_POINTLIGHTS; i++) {\n"
             +"    vec4 lPosition = viewMatrix * vec4( pointLightPosition[ i ], 1.0 );"
             +"    vec3 L = lPosition.xyz - fragVertexPosition;\n"

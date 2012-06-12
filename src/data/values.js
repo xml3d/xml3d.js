@@ -32,9 +32,7 @@
             this.key = this.node.seqnr;
             this.tupleSize = tupleTable[this.node.localName];
         };
-        this.provider = new XML3D.data.ProviderEntry();
         this.data = {};
-
     };
     XML3D.createClass(ValueDataAdapter, XML3D.data.DataAdapter);
     XML3D.extend(ValueDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);

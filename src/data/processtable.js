@@ -6,8 +6,9 @@ XML3D.data = XML3D.data || {};
      * ProviderEntry is an interface for entries in the ProcessTable
      * @constructor
      */
-    var ProviderEntry = function() {
+    var ProviderEntry = function(table) {
         this.consumers = new Array();
+        this.table = table;
     };
     ProviderEntry.prototype.getValue = function() {
     };
@@ -25,6 +26,24 @@ XML3D.data = XML3D.data || {};
             }
         }
         this.consumers.push(consumer);
+    };
+
+    ProviderEntry.prototype.notifyTable = function() {
+        this.table.notifyDataChanged();
+    };
+
+    /**
+     * @param consumer
+     */
+    ProviderEntry.prototype.unregisterConsumer = function(consumer) {
+        var length = this.consumers.length;
+        for ( var i = 0; i < length; i++) {
+            if (this.consumers[i] == consumer) {
+                this.consumers.splice(i,1);
+                return;
+            }
+        }
+        XML3D.debug.logWarning("Consumer " + consumer + " has never been registered");
     };
 
     ProviderEntry.prototype.notifyDataChanged = function(e) {
@@ -85,22 +104,41 @@ XML3D.data = XML3D.data || {};
     var ProcessTable = function(handler, names, callback) {
         this.handler = handler;
         this.fieldNames = names;
-        this.callback = callback;
+        this.cb = callback;
         /**
          * Contains named ProviderEntries
          * @type {Object.<string, ProviderEntry>}
          */
         this.providers = {};
 
+        this.setFieldNames = function(names) {
+            this.fieldNames = names;
+            this.providers = null;
+            this.providers = {};
+            this.open();
+        };
+
+        this.open = function() {
+            for ( var a in this.providers) {
+                this.providers[a].unregisterConsumer(this);
+            }
+        };
+
         this.register = function() {
             for ( var a in this.providers) {
                 this.providers[a].registerConsumer(this);
             }
+
+        };
+
+        this.close = function() {
+            this.register();
+            this.notifyDataChanged();
         };
 
         this.notifyDataChanged = function(provider) {
-            if (this.callback)
-                this.callback.call(this.handler, this.providers, provider);
+            if (this.cb)
+                this.cb.call(this.handler, this.providers, provider);
         };
 
         this.toString = function() {
@@ -118,12 +156,12 @@ XML3D.data = XML3D.data || {};
      * @constructor
      * @extends ProviderEntry
      */
-    var ScriptOutput = function(script, name) {
-        ProviderEntry.call(this);
+    var ScriptOutput = function(table, script, name) {
+        ProviderEntry.call(this, table);
         this.script = script;
         this.name = name;
         this.data = {}; // Attached user data
-        this.script.registerConsumer(this);
+        this.script.registerOutput(this);
 
         this.getValue = function(cb) {
             return this.script.getValue(this.name, cb);

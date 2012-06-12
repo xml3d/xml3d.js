@@ -791,6 +791,7 @@ XML3D.webgl.XML3DImgRenderAdapter.prototype.notifyChanged = function(evt) {
 XML3D.webgl.XML3DLightShaderRenderAdapter = function(factory, node) {
     XML3D.webgl.RenderAdapter.call(this, factory, node);
     this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
+    this.table = new XML3D.data.ProcessTable(this, []);
 };
 XML3D.webgl.XML3DLightShaderRenderAdapter.prototype = new XML3D.webgl.RenderAdapter();
 XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = XML3D.webgl.XML3DLightShaderRenderAdapter;
@@ -799,7 +800,8 @@ var LIGHT_DEFAULT_INTENSITY = vec3.create([1,1,1]);
 var LIGHT_DEFAULT_ATTENUATION = vec3.create([0,0,1]);
 
 XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillPointLight = function(point, pos, i) {
-    var dataTable = this.dataAdapter.requestOutputData(this, ["intensity","attenuation"]);
+    this.table.setFieldNames(["intensity","attenuation"]);
+    var dataTable = this.dataAdapter.requestDataOnce(this.table);
     var dpos = pos*3;
     var intensity = dataTable.intensity ? dataTable.intensity.getValue() : LIGHT_DEFAULT_INTENSITY;
     var attenuation = dataTable.attenuation ? dataTable.attenuation.getValue() : LIGHT_DEFAULT_ATTENUATION;
@@ -814,7 +816,8 @@ XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillPointLight = function(po
 };
 
 XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillDirectionalLight = function(directional, pos, i) {
-    var dataTable = this.dataAdapter.requestOutputData(this, ["intensity"]);
+    this.table.setFieldNames(["intensity"]);
+    var dataTable = this.dataAdapter.requestDataOnce(this.table);
     var dpos = pos*3;
     var intensity = dataTable.intensity ? dataTable.intensity.getValue() : LIGHT_DEFAULT_INTENSITY;
 

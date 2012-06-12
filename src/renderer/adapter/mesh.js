@@ -7,6 +7,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     },
     rc = window.WebGLRenderingContext;
 
+    var staticAttributes = ["index", "position", "normal", "color", "texcoord", "size"];
+
     var XML3DMeshRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
 
@@ -14,8 +16,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
         //this.dataAdapter.registerConsumer(this);
         this.parentVisible = true;
-
+        this.table = new XML3D.data.ProcessTable(this, staticAttributes, this.dataChanged);
         this.getMyDrawableObject = noDrawableObject;
+        this.needsInit = true;
     };
 
     XML3D.createClass(XML3DMeshRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -110,7 +113,24 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         return rc.FLOAT;
     };
 
-
+    function getGLTypeFromString(typeName) {
+        if (typeName && typeName.toLowerCase)
+            typeName = typeName.toLowerCase();
+        switch (typeName) {
+        case "triangles":
+            return rc.TRIANGLES;
+        case "tristrips":
+            return rc.TRIANGLE_STRIP;
+        case "points":
+            return rc.POINTS;
+        case "lines":
+            return rc.LINES;
+        case "linestrips":
+            return rc.LINE_STRIP;
+        default:
+            return rc.TRIANGLES;
+        }
+    };
 
     var createBuffer = function(gl, type, data) {
         var buffer = gl.createBuffer();
@@ -122,154 +142,99 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     p.createMesh = function() {
-        this.dataAdapter.requestOutputData(this, ["index", "position", "normal", "color", "texcoord", "size"], null, this.dataChanged);
+        this.dataAdapter.requestData(this.table);
     };
 
-    var ALL_CHANGED = -1;
+    function check(entry) {
+        return !!(entry && entry.getValue());
+    }
 
-    p.dataChanged = function(dataTable, changedEntry) {
-        changedEntry = changedEntry || ALL_CHANGED;
+    function createMeshInfo(type) {
+        return {
+            vbos : {},
+            indexed: false,
+            glType: getGLTypeFromString(type),
+            bbox : new XML3DBox()
+        };
+    }
 
+    p.dataChanged = function(dataTable) {
+        var init = this.needsInit;
         var gl = this.factory.renderer.getGLContext();
         var obj = this.getMyDrawableObject();
 
-        var positions;
-        if (!dataTable.position || !(positions = dataTable.position.getValue())) {
-            XML3D.debug.logError("Mesh " + this.node.id + " has no data for required attribute 'position'.");
-            obj.mesh = {
-                vbos : {},
-                glType : 0,
-                valid : false
-            };
-            return;
-        }
+        console.timeEnd("xflow");
+        console.time("Mesh data changed");
 
-        // We have positons, let's calc a bounding box
-        if (positions.data)
-        	positions = positions.data;
-        this.bbox = XML3D.webgl.calculateBoundingBox(positions,dataTable.index.getValue());
+        var foundValidPositions = false;
 
-
-        var meshInfo = {
-            vbos : {},
-            glType : this.getGLTypeFromString(this.node.type)
-        };
-
-        if (dataTable.index) {
-
-
-            if (positions.length / 3 > XML3D.webgl.MAX_MESH_INDEX_COUNT) {
-                XML3D.webgl.splitMesh(dataTable, XML3D.webgl.MAX_MESH_INDEX_COUNT);
-            }
-
-            if (dataTable.index.length > 0) {
-                var numIndexBins = dataTable.index.length;
-                meshInfo.vbos.index = [];
-                for ( var i = 0; i < numIndexBins; i++) {
-                    var mIndices = new Uint16Array(dataTable.index[i].data);
-                    var indexBuffer = gl.createBuffer();
-                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-                    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mIndices, gl.STATIC_DRAW);
-
-                    indexBuffer.length = mIndices.length;
-                    indexBuffer.tupleSize = dataTable.index[i].tupleSize;
-                    indexBuffer.glType = getGLTypeFromArray(mIndices);
-
-                    meshInfo.vbos.index[i] = indexBuffer;
-                    meshInfo.isIndexed = true;
-                }
-            } else {
-                var indexBuffer = dataTable.index.data.buffer;
-                if (!indexBuffer || changedEntry == ALL_CHANGED || changedEntry == dataTable.index)
-                {
-                    indexBuffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(dataTable.index.getValue()));
-                    indexBuffer.tupleSize = dataTable.index.getTupleSize();
-                    dataTable.index.data.buffer = indexBuffer;
-                }
-
-                meshInfo.vbos.index = [];
-                meshInfo.vbos.index[0] = indexBuffer;
-                meshInfo.isIndexed = true;
-
-            }
-        } else {
-            // ?
-            meshInfo.isIndexed = false;
-        }
+        var meshInfo = obj.mesh || createMeshInfo(this.node.type);
 
         for ( var attr in dataTable) {
-            var a = dataTable[attr];
+            var entry = dataTable[attr];
 
-
-            if (a.isXflow || attr == "xflowShader" || attr == "index" || attr == "segments")
+            if(!(entry.dirty || init))
                 continue;
 
-            if (a.length > 0) {
-                var numBins = a.length;
-                meshInfo.vbos[attr] = [];
+            //console.log(attr);
 
-                for ( var i = 0; i < numBins; i++) {
-                    var attrBuffer = gl.createBuffer();
-                    gl.bindBuffer(gl.ARRAY_BUFFER, attrBuffer);
-                    gl.bufferData(gl.ARRAY_BUFFER, a[i].value, gl.STATIC_DRAW);
-
-                    attrBuffer.length = a[i].value.length;
-                    attrBuffer.tupleSize = a[i].tupleSize;
-                    attrBuffer.glType = getGLTypeFromArray(a[i].value);
-
-                    meshInfo.vbos[attr][i] = attrBuffer;
+            switch(attr) {
+                case "index":
+                    var indexBuffer = entry.data.buffer;
+                    if (!indexBuffer || entry.dirty) {
+                        indexBuffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
+                        indexBuffer.tupleSize = entry.getTupleSize();
+                        dataTable.index.data.buffer = indexBuffer;
+                        meshInfo.vbos.index = [];
+                        meshInfo.vbos.index[0] = indexBuffer;
+                    } else {
+                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+                        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, v, gl.DYNAMIC_DRAW);
+                    }
+                    meshInfo.isIndexed = true;
+                    break;
+                case "position":
+                    foundValidPositions = check(dataTable.position);
+                    // Fallthrough
+                default:
+                    var attrBuffer = entry.data.buffer;
+                    var v = entry.getValue();
+                    if (!attrBuffer) {
+                        attrBuffer = v.data ? createBuffer(gl, gl.ARRAY_BUFFER, v.data) : createBuffer(gl, gl.ARRAY_BUFFER, v);
+                        attrBuffer.tupleSize = entry.getTupleSize();
+                        entry.data.buffer = attrBuffer;
+                    } else {
+                        if (v.data)
+                            v = v.data;
+                        gl.bindBuffer(gl.ARRAY_BUFFER, attrBuffer);
+                        gl.bufferData(gl.ARRAY_BUFFER, v, gl.DYNAMIC_DRAW);
+                    }
+                    // Set it in everycase, because buffer might be created by other mesh consumer
+                    meshInfo.vbos[attr] = [];
+                    meshInfo.vbos[attr][0] = attrBuffer;
                 }
-            } else {
-                var attrBuffer = a.data.buffer;
-                if (!attrBuffer || changedEntry == ALL_CHANGED) {
-                    var v = a.getValue();
-                    attrBuffer = v.data ? createBuffer(gl, gl.ARRAY_BUFFER, v.data) : createBuffer(gl, gl.ARRAY_BUFFER, v);
-                    attrBuffer.tupleSize = a.getTupleSize();
-                    a.data.buffer = attrBuffer;
-                } else if (changedEntry == a) {
-                    var v = a.getValue();
-                    if (v.data)
-                        v = v.data;
-                    
-                    gl.bindBuffer(gl.ARRAY_BUFFER, a.data.buffer);
-                    gl.bufferData(gl.ARRAY_BUFFER, v, gl.DYNAMIC_DRAW);
-                }
-                meshInfo.vbos[attr] = [];
-                meshInfo.vbos[attr][0] = attrBuffer;
-            }
         }
 
+        if(init && !foundValidPositions) {
+            XML3D.debug.logError("Mesh " + this.node.id + " has no data for required attribute 'position'.");
+            obj.mesh.valid = false;
+            return;
+        } else if(foundValidPositions) {
+            // We have positons, let's calc a bounding box
+            var positions = dataTable.position.getValue();
+            if (positions.data)
+                positions = positions.data;
+            this.bbox = XML3D.webgl.calculateBoundingBox(positions,dataTable.index ? dataTable.index.getValue() : null);
+        }
+
+        this.needsInit = false;
         meshInfo.valid = true;
-        meshInfo.bbox = XML3D.webgl.calculateBoundingBox(dataTable.position.data,dataTable.index ? dataTable.index.data : null);
-        
-        if (dataTable.size) {
-            meshInfo.segments = dataTable.size;
-        }
+        meshInfo.bbox.set(this.bbox);
         obj.mesh = meshInfo;
+
+        console.timeEnd("Mesh data changed");
         this.factory.renderer.requestRedraw("Mesh data changed.", false);
     };
-
-    // TODO: move to xflow manager
-    /*p.applyXFlow = function(shader, parameters) {
-        var dataTable = this.dataAdapter.createDataTable();
-
-        if (dataTable["xflowShader"]) {
-            var xflowShader = dataTable["xflowShader"];
-
-            var declarations = xflowShader.declarations;
-            var body = xflowShader.body;
-            shader.program = shader.getXFlowShader(declarations, body);
-
-            for (var p in xflowShader.uniforms) {
-                var data = xflowShader.uniforms[p].value;
-                if (data.length < 2)
-                    data = data[0];
-
-                parameters[p] = data;
-            }
-        }
-
-    };*/
 
     // Disposes of all GL buffers but does not destroy the mesh
     p.dispose = function(gl) {
@@ -305,24 +270,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         return this.bbox;
     };
 
-   p.getGLTypeFromString = function(typeName) {
-        if (typeName && typeName.toLowerCase)
-            typeName = typeName.toLowerCase();
-        switch (typeName) {
-        case "triangles":
-            return rc.TRIANGLES;
-        case "tristrips":
-            return rc.TRIANGLE_STRIP;
-        case "points":
-            return rc.POINTS;
-        case "lines":
-            return rc.LINES;
-        case "linestrips":
-            return rc.LINE_STRIP;
-        default:
-            return rc.TRIANGLES;
-        }
-    };
 
 
 

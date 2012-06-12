@@ -167,6 +167,18 @@ XML3D.data.DataAdapter.prototype.resolveScript = function() {
     return this.xflow;
 };
 
+XML3D.data.DataAdapter.prototype.requestDataOnce = function(table) {
+    this.requestOutputData(table);
+    return table.providers;
+};
+
+XML3D.data.DataAdapter.prototype.requestData = function(table) {
+    table.open();
+    this.requestOutputData(table);
+    table.close();
+    return table.providers;
+};
+
 /**
  * @param handler
  * @param nameArray
@@ -174,13 +186,10 @@ XML3D.data.DataAdapter.prototype.resolveScript = function() {
  * @param callback
  * @returns
  */
-XML3D.data.DataAdapter.prototype.requestInputData = function(handler, nameArray, table, callback) {
-    table = table || new XML3D.data.ProcessTable(handler, nameArray, callback);
+XML3D.data.DataAdapter.prototype.requestInputData = function(table) {
     this.forEachChildAdapter(function(adapter) {
-        adapter.requestOutputData(handler, nameArray, table, null);
+        adapter.requestOutputData(table);
     });
-    if (callback)
-        callback.call(handler, table.providers);
     return table;
 };
 
@@ -191,16 +200,9 @@ XML3D.data.DataAdapter.prototype.requestInputData = function(handler, nameArray,
  * @param callback
  * @returns
  */
-XML3D.data.DataAdapter.prototype.requestOutputData = function(handler, nameArray, table, callback) {
-    table = table || new XML3D.data.ProcessTable(handler, nameArray, callback);
+XML3D.data.DataAdapter.prototype.requestOutputData = function(table) {
     this.populateProcessTable(table);
-    //console.log(table);
-    table.register();
-
-    if (callback)
-        callback.call(handler, table.providers);
-    else
-    	return table.providers;
+    return table.providers;
 };
 
 /**
@@ -228,7 +230,6 @@ XML3D.data.DataAdapter.prototype.forEachChildAdapter = function(func) {
 
 
 XML3D.data.DataAdapter.prototype.populateProcessTable = function(table) {
-    var src = this.node.src, resolved;
 
     var outputs = this.getOutputs();
     var fields = table.fieldNames;
@@ -237,7 +238,7 @@ XML3D.data.DataAdapter.prototype.populateProcessTable = function(table) {
         var provider = outputs[field];
         if(provider) {
             if(provider.script) {
-                var scriptProvider = new XML3D.data.ScriptOutput(provider.script, provider.scriptOutputName);
+                var scriptProvider = new XML3D.data.ScriptOutput(table, provider.script, provider.scriptOutputName);
                 table.providers[field] = scriptProvider;
             } else {
                 table.providers[field] = provider;

@@ -7,7 +7,8 @@
         this.script = script;
         this.result = {};
         this.needsEvaluation = true;
-        this.observers = new Array();
+        this.outputListener = new Array();
+        this.tables = new Array();
 
         this.getValue = function(name,cb) {
             if(this.needsEvaluation)
@@ -24,7 +25,7 @@
             };
         };
 
-        this.dataChanged = function(dataTable, entry) {
+        this.dataChanged = function(dataTable, entries) {
             this.needsEvaluation = true;
             var args = [];
             this.script.params.forEach(function(param){
@@ -39,17 +40,21 @@
                 }
             });
             this.args = args;
-            this.notifyConsumers();
+            this.markOutputs(true);
+            this.notifyTables();
+            this.markOutputs(false);
         };
 
         this.evaluate = function() {
+            this.result = null;
             this.result = {};
             try {
-                XML3D.debug.logDebug("Evaluate " + this.script.name + " on " + this.data.node.id);
                 var ok = false;
                 if (XML3D._parallel) {
+                    XML3D.debug.logDebug("Evaluate " + this.script.name + " on " + this.data.node.id + " using RiverTrail");
                     ok = this.script.evaluate_parallel.apply(this,this.args);
                 } else {
+                    XML3D.debug.logDebug("Evaluate " + this.script.name + " on " + this.data.node.id);
                     ok = this.script.evaluate.apply(this.result,this.args);
                 }
                 //console.dir(this.result);
@@ -59,34 +64,55 @@
             this.needsEvaluation = false;
         };
 
-        this.registerConsumer = function(consumer) {
-            var length = this.observers.length;
+        this.registerOutput = function(output) {
+            var length = this.outputListener.length;
             for(var i = 0; i < length; i++)
             {
-                if(this.observers[i] == consumer)
+                if(this.outputListener[i] == output)
                 {
-                    XML3D.debug.logWarning("Observer " + consumer + " is already registered");
+                    XML3D.debug.logWarning("Observer " + output + " is already registered");
                     return;
                 }
             }
-            this.observers.push(consumer);
+            this.outputListener.push(output);
+            this.registerTable(output.table);
         };
 
-        this.notifyConsumers = function() {
-            var length = this.observers.length;
+        this.markOutputs = function(flag) {
+            var length = this.outputListener.length;
             for(var i = 0; i < length; i++)
             {
-                this.observers[i].notifyDataChanged(this);
+                this.outputListener[i].dirty = flag;
+            }
+        };
+
+        this.registerTable = function(table) {
+            var length = this.tables.length;
+            for(var i = 0; i < length; i++)
+            {
+                if(this.tables[i] == table)
+                {
+                    return;
+                }
+            }
+            this.tables.push(table);
+        };
+
+        this.notifyTables = function() {
+            var length = this.tables.length;
+            for(var i = 0; i < length; i++)
+            {
+                this.tables[i].notifyDataChanged(this);
             }
         };
 
         // This script instance is a consumer itself
         //console.log("Creating Table for "+ this.script.name + " ScriptInstance of " + this.data.node.id);
         this.table = new XML3D.data.ProcessTable(this, this.script.params, this.dataChanged);
-        this.data.requestInputData(this, this.script.params, this.table, this.dataChanged);
+        this.data.requestInputData(this.table);
         //console.log("Table for "+ this.script.name + " ScriptInstance of " + this.data.node.id + ": ");
         //console.dir(this.table);
-        this.table.register();
+        this.table.close();
 
     };
 

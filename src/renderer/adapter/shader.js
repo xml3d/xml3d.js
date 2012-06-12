@@ -6,11 +6,7 @@
         this.renderer = this.factory.renderer;
         
         this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
-		//if(this.dataAdapter)
-		//	this.dataAdapter.registerConsumer(this);
-		//else
-		//	XML3D.debug.logError("Data adapter for a shader element could not be created!");
-        
+		this.table = new XML3D.data.ProcessTable(this, [], this.dataChanged);
     };
     
     XML3D.createClass(XML3DShaderRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -62,7 +58,9 @@
     };
     
 	p.requestData = function(parameters) {
-		return this.dataAdapter.requestOutputData(this, parameters);
+	    this.table.setFieldNames(parameters);
+	    //console.log("Request from shader: " + parameters);
+	    return this.dataAdapter.requestDataOnce(this.table);
 	};
 	
 	p.notifyDataChanged = function(evt) {

@@ -26,6 +26,7 @@
     {
         XML3D.data.DataAdapter.call(this, factory, node);
         XML3D.data.ProviderEntry.call(this);
+        this.table = new XML3D.data.ProcessTable(this, ["image"]);
     };
     XML3D.createClass(TextureDataAdapter, XML3D.data.DataAdapter);
     XML3D.extend(TextureDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
@@ -55,7 +56,7 @@
 
         var ca = this.factory.getAdapter(node.firstElementChild, XML3D.data.XML3DDataAdapterFactory.prototype);
         if (ca.requestOutputData) {
-            var dt = ca.requestOutputData(this, ["image"]);
+            var dt = ca.requestOutputData(this.table);
             options.imageAdapter = dt.image;
         }
         else

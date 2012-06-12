@@ -145,7 +145,11 @@ XML3D.data.DataAdapter.prototype.resolveScript = function() {
             var urnfrag = "";
             if (pos === 0) {
                 urnfrag = script.substring(16, script.length);
-                XML3D.debug.logWarning("URN: " + script);
+                this.xflow = XML3D.xflow.getScript(urnfrag);
+                if(typeof this.xflow !== 'object') {
+                    XML3D.debug.logError("No xflow script registered with name: " + urnfrag);
+                    this.xflow = null;
+                }
             } else {
                 var sn = XML3D.URIResolver.resolve(script, this.node.ownerDocument);
                 if(sn && sn.textContent) {

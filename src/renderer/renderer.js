@@ -309,8 +309,7 @@ XML3D.webgl.Renderer.prototype.sceneTreeRemoval = function (evt) {
 
 XML3D.webgl.Renderer.prototype.render = function() {
     var gl = this.handler.gl;
-    var sp = null;
-    
+	var sp = null;	
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
     gl.viewport(0, 0, this.width, this.height);
@@ -331,20 +330,17 @@ XML3D.webgl.Renderer.prototype.render = function() {
     var transparentObjects = [];
     this.sortObjects(this.drawableObjects, opaqueObjects, transparentObjects, xform);    
     
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
         var objectArray = opaqueObjects[shaderName];        
 		this.drawObjects(objectArray, shaderName, xform, this.lights, stats);
     }
     
-    //Render transparent objects
-    if (transparentObjects.length > 0) {
-        
+	if (transparentObjects.length > 0) {	
         //Render transparent objects
         //gl.depthMask(gl.FALSE);
         gl.enable(gl.BLEND);
+		gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
         for (var k=0; k < transparentObjects.length; k++) {
             var objectArray = [transparentObjects[k]];
 			this.drawObjects(objectArray, objectArray[0].shader, xform, this.lights, stats);

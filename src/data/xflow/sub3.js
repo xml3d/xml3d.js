@@ -8,9 +8,14 @@ XML3D.xflow.register("sub3", {
         if(value1.length != value1.length)
             throw "Xflow::sub3: Input arrays differ in size";
         
-        this.result = new Float32Array(value1.length);
+        if (!this.tmp || this.tmp.length != value1.length)
+            this.tmp = new Float32Array(value1.length);
+            
+        var result = this.tmp;
         for(var i = 0; i<value1.length; i++)
-            this.result[i] = value1[i] - value2[i];
+            result[i] = value1[i] - value2[i];
+        
+        this.result.result = result;
         return true;
     }
 });

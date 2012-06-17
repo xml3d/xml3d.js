@@ -55,7 +55,7 @@
                     ok = this.script.evaluate_parallel.apply(this,this.args);
                 } else {
                     XML3D.debug.logDebug("Evaluate " + this.script.name + " on " + this.data.node.id);
-                    ok = this.script.evaluate.apply(this.result,this.args);
+                    ok = this.script.evaluate.apply(this,this.args);
                 }
                 //console.dir(this.result);
             } catch (e) {

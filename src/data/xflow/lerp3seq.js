@@ -2,8 +2,11 @@ XML3D.xflow.register("lerp3Seq", {
     outputs: [{name: 'result', tupleSize: '3'}],
     params:  ['sequence','weight'],
     evaluate: function(sequence, weight) {
-        this.result = sequence.interpolate(weight[0], function(v1,v2,t) {
-            var result = new Float32Array(v1.length);
+        var me = this;
+        this.result.result = sequence.interpolate(weight[0], function(v1,v2,t) {
+            if (!me.tmp || me.tmp.length != v1.length)
+                me.tmp = new Float32Array(v1.length);
+            var result = me.tmp;
             var it = 1.0 - t;
             for(var i = 0; i < v1.length; i++) {
                 result[i] = v1[i] * it + v2[i] * t;
@@ -14,8 +17,11 @@ XML3D.xflow.register("lerp3Seq", {
     },
     
     evaluate_parallel: function(sequence, weight) {
-        var result = sequence.interpolate(weight[0], function(v1,v2,t) {
-            var result = new Float32Array(v1.length);
+        var me = this;
+        this.result.result = sequence.interpolate(weight[0], function(v1,v2,t) {
+            if (!me.tmp || me.tmp.length != v1.length)
+                me.tmp = new Float32Array(v1.length);
+            var result = me.tmp;
             var it = 1.0 - t;
 
             for(var i = 0; i < v1.length; i++) {
@@ -23,9 +29,6 @@ XML3D.xflow.register("lerp3Seq", {
             };
             return result;
         });
-        var tplsize = sequence.data[0].tupleSize;
-        this.result.result = result;
-        //this.result.result = new ParallelArray(result).partition(tplsize);
         return true;
     }
 });

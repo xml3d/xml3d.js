@@ -3,8 +3,13 @@ XML3D.xflow.register("skinning", {
     params:  ['pos','dir','boneIdx','boneWeight','boneXform'],
     evaluate: function(pos,dir,boneIdx,boneWeight,boneXform) {
         var count = pos.length / 3;
-        var resd = new Float32Array(pos.length);
-        var resp = new Float32Array(dir.length);
+        if (!this.tmpp || this.tmpp.length != pos.length) {
+            this.tmpp = new Float32Array(pos.length);
+            this.tmpd = new Float32Array(dir.length);
+        }
+            
+        var resd = this.tmpp;
+        var resp = this.tmpd;
 
         var m = mat4.create();
         var rd = vec3.create();
@@ -38,40 +43,40 @@ XML3D.xflow.register("skinning", {
             resd[offset+1] = rd[1];
             resd[offset+2] = rd[2];
         }
-        this.pos = resp;
-        this.dir = resd;
+        this.result.pos = resp;
+        this.result.dir = resd;
         return true;
     },
 
     evaluate_parallel: function(pos, dir, boneIndex, boneWeight, boneXform) {
-    	if (!this.elementalFunc) {
-	        this.elementalFunc = function(index, pos, dir, boneIndex, boneWeight, boneXform) {
-	            var rp = [0,0,0];
-	            var rd = [0,0,0];
-	            var off4 = index*4;
-	            var off3 = index*3;
+        if (!this.elementalFunc) {
+            this.elementalFunc = function(index, pos, dir, boneIndex, boneWeight, boneXform) {
+                var rp = [0,0,0];
+                var rd = [0,0,0];
+                var off4 = index*4;
+                var off3 = index*3;
 
-	            var xp = pos[off3], yp = pos[off3+1], zp = pos[off3+2]; 
-	            var xd = dir[off3], yd = dir[off3+1], zd = dir[off3+2]; 
-	            
-	            for (var j=0; j < 4; j++) {
-	                var weight = boneWeight[off4+j];
-	                if (weight > 0) {
-	                    var mo = boneIndex[off4+j] * 16;
-	                    
-	                    rp[0] += (boneXform[mo+0]*xp + boneXform[mo+4]*yp + boneXform[mo+8]*zp + boneXform[mo+12]) * weight;
-	                    rp[1] += (boneXform[mo+1]*xp + boneXform[mo+5]*yp + boneXform[mo+9]*zp + boneXform[mo+13]) * weight; 
-	                    rp[2] += (boneXform[mo+2]*xp + boneXform[mo+6]*yp + boneXform[mo+10]*zp + boneXform[mo+14]) * weight;
-	
-	                    rd[0] += (boneXform[mo+0]*xd + boneXform[mo+4]*yd + boneXform[mo+8]*zd) * weight;
-	                    rd[1] += (boneXform[mo+1]*xd + boneXform[mo+5]*yd + boneXform[mo+9]*zd) * weight; 
-	                    rd[2] += (boneXform[mo+2]*xd + boneXform[mo+6]*yd + boneXform[mo+10]*zd) * weight;
-	                }
-	            }
-	            
-	            return {position : rp, direction : rd};
-	        };
-    	}
+                var xp = pos[off3], yp = pos[off3+1], zp = pos[off3+2]; 
+                var xd = dir[off3], yd = dir[off3+1], zd = dir[off3+2]; 
+                
+                for (var j=0; j < 4; j++) {
+                    var weight = boneWeight[off4+j];
+                    if (weight > 0) {
+                        var mo = boneIndex[off4+j] * 16;
+                        
+                        rp[0] += (boneXform[mo+0]*xp + boneXform[mo+4]*yp + boneXform[mo+8]*zp + boneXform[mo+12]) * weight;
+                        rp[1] += (boneXform[mo+1]*xp + boneXform[mo+5]*yp + boneXform[mo+9]*zp + boneXform[mo+13]) * weight; 
+                        rp[2] += (boneXform[mo+2]*xp + boneXform[mo+6]*yp + boneXform[mo+10]*zp + boneXform[mo+14]) * weight;
+    
+                        rd[0] += (boneXform[mo+0]*xd + boneXform[mo+4]*yd + boneXform[mo+8]*zd) * weight;
+                        rd[1] += (boneXform[mo+1]*xd + boneXform[mo+5]*yd + boneXform[mo+9]*zd) * weight; 
+                        rd[2] += (boneXform[mo+2]*xd + boneXform[mo+6]*yd + boneXform[mo+10]*zd) * weight;
+                    }
+                }
+                
+                return {position : rp, direction : rd};
+            };
+        }
 
         var numVertices = pos.length / 3;
         

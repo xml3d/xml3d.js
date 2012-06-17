@@ -4,9 +4,11 @@ XML3D.xflow.register("flattenBoneTransform", {
     evaluate: function(parent,xform) {
 
         var boneCount = xform.length / 16;
-        var result = new Float32Array(boneCount*16);
+        if (!this.tmp || this.tmp.length != xform.length)
+            this.tmp = new Float32Array(xform.length);
+            
+        var result = this.tmp;
         var computed = [];
-
 
         //For each bone do:
         for(var i = 0; i < boneCount;){
@@ -43,36 +45,34 @@ XML3D.xflow.register("flattenBoneTransform", {
             i++;
         }
 
-        this.result = result;
+        this.result.result = result;
         return true;
     },
  
-    evaluate_parallel: function(parent, xform) {
-    	  
-          if (!this.tmp) {
-        	  this.tmp = new Float32Array(xform.length);
+    evaluate_parallel: function(parent, xform) {         
+          if (!this.tmp || this.tmp.length != xform.length) {
+              this.tmp = new Float32Array(xform.length);
           }
           
           var boneCount = xform.length / 16;
           var result = this.tmp;
+          var xf = xform.data || xform;
           var computed = [];
-          var par = parent;
-          var xf = xform;
 
           //For each bone do:
           for(var i = 0; i < boneCount;){
               if(!computed[i]) {
-                  var p = par[i];
+                  var p = parent[i];
                   if(p >= 0){
                       //This bone has a parent bone
                       if(!computed[p]){
                           //The parent bone's transformation matrix hasn't been computed yet
-                          while(par[p] >= 0 && !computed[par[p]]) {
+                          while(parent[p] >= 0 && !computed[parent[p]]) {
                               //The current bone has a parent and its transform hasn't been computed yet
-                              p = par[p];
+                              p = parent[p];
 
-                              if(par[p] >= 0)    
-                                  mat4.multiplyOffset(result, p*16, xf, p*16, result, par[p]*16);
+                              if(parent[p] >= 0)    
+                                  mat4.multiplyOffset(result, p*16, xf, p*16, result, parent[p]*16);
                               else
                                   for(var j = 0; j < 16; j++) {
                                       result[p*16+j] = xf[p*16+j];
@@ -93,12 +93,11 @@ XML3D.xflow.register("flattenBoneTransform", {
               }
               i++;
           }
-          //this.parallel_data = new ParallelArray(result).partition(16);
           this.result.result = result;
-    	
+        
           /*
            if (!this.parallel_data) {
-          	this.parallel_data = new ParallelArray(xform.data).partition(16);
+              this.parallel_data = new ParallelArray(xform.data).partition(16);
           }  
         var elementalFunc = function(index, parent,xform) {
             var result = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
@@ -112,7 +111,7 @@ XML3D.xflow.register("flattenBoneTransform", {
 
             while (p[0] >= 0) {                   
                 //Multiply the current bone matrix with its parent
-            	xf = xform.get(p[0]);
+                xf = xform.get(p[0]);
                 var a00 = xf.get(0), a01 = xf.get(1), a02 = xf.get(2), a03 = xf.get(3);
                 var a10 = xf.get(4), a11 = xf.get(5), a12 = xf.get(6), a13 = xf.get(7);
                 var a20 = xf.get(8), a21 = xf.get(9), a22 = xf.get(10), a23 = xf.get(11);

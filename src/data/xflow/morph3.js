@@ -7,10 +7,31 @@ XML3D.xflow.register("morph3", {
         
         if(value.length != valueAdd.length)
             throw "Xflow::morph3: Input arrays differ in size";
-        
-        this.result = new Float32Array(value.length);
+        if (!this.tmp || this.tmp.length != value.length)
+            this.tmp = new Float32Array(value.length);
+            
+        var result = this.tmp;
         for(var i = 0; i<value.length; i++)
-            this.result[i] = value[i] + weight[0] * valueAdd[i];
+            result[i] = value[i] + weight[0] * valueAdd[i];
+        
+        this.result.result = result;
+        return true;
+    },
+    
+    evaluate_parallel: function(value, valueAdd, weight) {
+        if(!(value && valueAdd && weight))
+            throw "Xflow::morph3: Not all parameters are set";
+        
+        if(value.length != valueAdd.length)
+            throw "Xflow::morph3: Input arrays differ in size";
+        if (!this.tmp || this.tmp.length != value.length)
+            this.tmp = new Float32Array(value.length);
+            
+        var result = this.tmp;
+        for(var i = 0; i<value.length; i++)
+            result[i] = value[i] + weight[0] * valueAdd[i];
+        
+        this.result.result = result;
         return true;
     }
 });

@@ -5,9 +5,14 @@ XML3D.xflow.register("flipNormal", {
         if(!value)
             throw "Xflow::flipNormal: Not all parameters are set";
         
-        this.result = new Float32Array(value.length);
+        if (!this.tmp || this.tmp.length != value.length)
+            this.tmp = new Float32Array(value.length);
+        
+        var result = this.tmp;
         for(var i = 0; i<value.length; i++)
-            this.result[i] = -value[i];
+            result[i] = -value[i];
+        
+        this.result.result = result;
         return true;
     }
 });

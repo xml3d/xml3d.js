@@ -152,7 +152,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     function createMeshInfo(type) {
         return {
             vbos : {},
-            indexed: false,
+            isIndexed: false,
             glType: getGLTypeFromString(type),
             bbox : new XML3DBox()
         };
@@ -184,13 +184,13 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     if (!indexBuffer || entry.dirty) {
                         indexBuffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
                         indexBuffer.tupleSize = entry.getTupleSize();
-                        dataTable.index.data.buffer = indexBuffer;
-                        meshInfo.vbos.index = [];
-                        meshInfo.vbos.index[0] = indexBuffer;
+                        entry.data.buffer = indexBuffer;
                     } else {
                         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
                         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, v, gl.DYNAMIC_DRAW);
                     }
+                    meshInfo.vbos.index = [];
+                    meshInfo.vbos.index[0] = indexBuffer;
                     meshInfo.isIndexed = true;
                     break;
                 case "position":

@@ -85,7 +85,7 @@
         var flags = {hasTextures : false, hasTransparency : false, hasVColors : false};
     
         if (shaderAdapter) {
-        	var dataTable = shaderAdapter.requestData(["transparency", "diffuseTexture", "specularTexture", "useVertexColor"]);
+            var dataTable = shaderAdapter.requestData(["transparency", "diffuseTexture", "specularTexture", "normalTexture", "useVertexColor"]);
     	    if (dataTable.transparency) {
     	        flags.hasTransparency = dataTable.transparency.value[0] > 0;
     	    }
@@ -158,14 +158,15 @@
     case "diffuse":
     case "textureddiffuse":
     case "diffusevcolor":
+        case "normal":
     		// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
         sources = XML3D.shaders.getScript(shaderName);
     		var maxLights = "";
     		maxLights += "#define MAX_POINTLIGHTS " + lights.point.length.toString() + "\n";
     		maxLights += "#define MAX_DIRECTIONALLIGHTS " + lights.directional.length.toString() + "\n";
-    
-    		sources.fragment = maxLights + sources.fragment;
-    		break;
+            sources.vertex = maxLights + sources.vertex;
+    	    sources.fragment = maxLights + sources.fragment;
+            break;
     	default:
         sources = XML3D.shaders.getScript(shaderName);            
     	}
@@ -653,8 +654,8 @@
                 this.setUniform(this.gl, tex, info.unit);
                 break;
     	    case TEXTURE_STATE.LOADED:
-    	        console.dir("Creating '"+ tex.name + "' from " + info.image.src);
-    	        console.dir(info);
+                //console.dir("Creating '"+ tex.name + "' from " + info.image.src);
+                //console.dir(info);
     	        this.createTex2DFromImage(info);
     	        this.bindTexture(tex);
     	        break;

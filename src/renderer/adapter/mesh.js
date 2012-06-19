@@ -7,7 +7,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     },
     rc = window.WebGLRenderingContext;
 
-    var staticAttributes = ["index", "position", "normal", "color", "texcoord", "size"];
+    var staticAttributes = ["index", "position", "normal", "color", "texcoord", "size", "tangent"];
 
     var XML3DMeshRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);

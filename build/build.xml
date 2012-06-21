@@ -64,6 +64,7 @@
 		<file name="renderer/shader/phong.js" />
 		<file name="renderer/shader/utility.js" />
         <file name="data/xflow/morph3.js" />
+		<file name="data/xflow/merge3.js" />
         <file name="data/xflow/sub3.js" />
         <file name="data/xflow/normalize3.js" />
         <file name="data/xflow/lerp3seq.js" />

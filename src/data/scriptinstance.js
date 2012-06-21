@@ -27,35 +27,40 @@
 
         this.dataChanged = function(dataTable, entries) {
             this.needsEvaluation = true;
+            this.markOutputs(true);
+            this.notifyTables();
+        };
+
+        this.evaluate = function() {
             var args = [];
+            var that = this;
             this.script.params.forEach(function(param){
-                var arg = dataTable[param];
+                var arg = that.table.providers[param];
                 if (!arg) {
                     XML3D.debug.logInfo("Missing input in xflow script: " + param);
                     args.push(undefined);
                 }
                 else {
                     //console.log("Add argument " + param + ": " + arg);
-                	args.push(arg.getValue(XML3D._parallel));
+                    args.push(arg.getValue(XML3D._parallel));
                 }
             });
             this.args = args;
-            this.markOutputs(true);
-            this.notifyTables();
-            this.markOutputs(false);
-        };
 
-        this.evaluate = function() {
             this.result = null;
             this.result = {};
             try {
                 var ok = false;
-                if (XML3D._parallel) {
+                if (XML3D._parallel && this.script.evaluate_parallel) {
                     XML3D.debug.logDebug("Evaluate " + this.script.name + " on " + this.data.node.id + " using RiverTrail");
+                    //(this.script.name == "skinning") && window.museum && window.museum.stats.begin();
                     ok = this.script.evaluate_parallel.apply(this,this.args);
+                    //(this.script.name == "skinning") && window.museum && window.museum.stats.end();
                 } else {
                     XML3D.debug.logDebug("Evaluate " + this.script.name + " on " + this.data.node.id);
+                    //(this.script.name == "skinning") && window.museum && window.museum.stats.begin();
                     ok = this.script.evaluate.apply(this,this.args);
+                    //(this.script.name == "skinning") && window.museum && window.museum.stats.end();
                 }
                 //console.dir(this.result);
             } catch (e) {

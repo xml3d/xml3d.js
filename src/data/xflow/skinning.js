@@ -1,4 +1,13 @@
-XML3D.xflow.register("skinning", {
+(function() {
+
+    var rd = vec3.create();
+    var rp = vec3.create();
+    var rt = vec3.create();
+
+    var tmpd = vec3.create();
+    var tmpp = vec3.create();
+
+    XML3D.xflow.register("skinning", {
     outputs: [{name: 'pos', tupleSize: '3'}, {name: 'dir', tupleSize:'3'}, {name: 'tangent', tupleSize:'3'}],
     params:  ['pos','dir','boneIdx','boneWeight','boneXform','tangent'],
     evaluate: function(pos,dir,boneIdx,boneWeight,boneXform,tangent) {
@@ -12,13 +21,6 @@ XML3D.xflow.register("skinning", {
         var resd = this.tmpp;
         var resp = this.tmpd;
         var rest = this.tmpt;
-
-        var rd = vec3.create();
-        var rp = vec3.create();
-        var rt = vec3.create();
-
-        var tmpd = vec3.create();
-        var tmpp = vec3.create();
 
         for(var i = 0; i<count;i++) {
             var offset = i*3;
@@ -137,3 +139,4 @@ XML3D.xflow.register("skinning", {
         return true;
     }
 });
+}());

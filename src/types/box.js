@@ -135,35 +135,38 @@
     */
     XML3DBox.prototype.extend = function(that)
     {
-        var min, max; 
+        if (!that)
+            return;
+
+        var min, max;
         if(that.constructor === window.XML3DBox)
-        {   
-            min = that.min; 
-            max = that.max; 
+        {
+            min = that.min;
+            max = that.max;
         }
         else if(that.constructor === window.XML3DVec3)
         {
-            min = that; 
-            max = that; 
+            min = that;
+            max = that;
         }
         else
-            return; 
+            return;
 
         if(min.x < this._min.x)
             this._min.x = min.x;
         if(min.y < this._min.y)
-            this._min.y = min.y; 
+            this._min.y = min.y;
         if(min.z < this._min.z)
             this._min.z = min.z;
-        
+
         if(max.x > this._max.x)
             this._max.x = max.x;
         if(max.y > this._max.y)
-            this._max.y = max.y; 
+            this._max.y = max.y;
         if(max.z > this._max.z)
             this._max.z = max.z;
-    }; 
-    
+    };
+
     // Export
     XML3D.XML3DBox = XML3DBox;
     window.XML3DBox = XML3DBox;

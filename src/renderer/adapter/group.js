@@ -16,17 +16,14 @@
 
 	var p = XML3DGroupRenderAdapter.prototype;
 
-	p.applyTransformMatrix = function(
-			transform) {
-		var ret = transform;
-
+	p.applyTransformMatrix = function(m) {
 		if (this.parentTransform !== null)
-			ret = mat4.multiply(this.parentTransform, ret,  mat4.create());
+			mat4.multiply(this.parentTransform, m,  m);
 
 		if (this.transformAdapter)
-			ret = mat4.multiply(ret, this.transformAdapter.getMatrix(),mat4.create());
+			mat4.multiply(m, this.transformAdapter.getMatrix());
 
-		return ret;
+		return m;
 	};
 	
     p.updateTransformAdapter = function() {

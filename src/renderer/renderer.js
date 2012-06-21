@@ -324,7 +324,13 @@ XML3D.webgl.Renderer.prototype.render = function() {
     xform.proj = this.camera.getProjectionMatrix(this.width / this.height); 
     
     var stats = { objCount : 0, triCount : 0 };
-
+	// Update mesh objects
+	var objects = this.drawableObjects;
+	for (var i = 0, l = objects.length; i < l; i++)
+    {
+	    var o = objects[i];
+	    o && o.mesh && o.mesh.update();
+    }
     //Sort objects by shader/transparency
     var opaqueObjects = {};
     var transparentObjects = [];
@@ -431,7 +437,7 @@ XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, shaderId, xfo
         var transform = obj.transform;
         var mesh = obj.mesh;
         
-		if (!(obj.visible && mesh.valid))
+		if (!mesh || !mesh.valid || !obj.visible)
             continue;
         
         xform.model = transform;

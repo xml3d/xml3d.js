@@ -149,27 +149,40 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         return !!(entry && entry.getValue());
     }
 
+    var emptyFunction = function() {};
+
     function createMeshInfo(type) {
         return {
             vbos : {},
             isIndexed: false,
             glType: getGLTypeFromString(type),
-            bbox : new XML3DBox()
+            bbox : new XML3DBox(),
+            update : emptyFunction
         };
     }
 
     p.dataChanged = function(dataTable) {
+        var obj = this.getMyDrawableObject();
+        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
+        if (obj.mesh.update === emptyFunction) {
+            var that = this;
+            obj.mesh.update = function() {
+                that.updateData.call(that, obj);
+                obj.mesh.update = emptyFunction;
+            };
+            this.factory.renderer.requestRedraw("Mesh data changed.", false);
+        };
+    };
+
+    p.updateData = function(obj) {
         var init = this.needsInit;
         var gl = this.factory.renderer.getGLContext();
-        var obj = this.getMyDrawableObject();
-
-        console.timeEnd("xflow");
-        //console.time("Mesh data changed");
 
         var foundValidPositions = false;
 
         var meshInfo = obj.mesh || createMeshInfo(this.node.type);
 
+        var dataTable =  this.table.providers;
         for ( var attr in dataTable) {
             var entry = dataTable[attr];
 
@@ -226,16 +239,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             var positions = dataTable.position.getValue();
             if (positions.data)
                 positions = positions.data;
-            this.bbox = XML3D.webgl.calculateBoundingBox(positions,dataTable.index ? dataTable.index.getValue() : null);
+            this.bbox = this.bbox || XML3D.webgl.calculateBoundingBox(positions,dataTable.index ? dataTable.index.getValue() : null);
+            meshInfo.bbox.set(this.bbox);
         }
 
         this.needsInit = false;
         meshInfo.valid = true;
-        meshInfo.bbox.set(this.bbox);
         obj.mesh = meshInfo;
 
-        //console.timeEnd("Mesh data changed");
-        this.factory.renderer.requestRedraw("Mesh data changed.", false);
     };
 
     // Disposes of all GL buffers but does not destroy the mesh

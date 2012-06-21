@@ -199,6 +199,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 default:
                     var attrBuffer = entry.data.buffer;
                     var v = entry.getValue();
+                    if(!v)
+                        continue;
                     if (!attrBuffer) {
                         attrBuffer = v.data ? createBuffer(gl, gl.ARRAY_BUFFER, v.data) : createBuffer(gl, gl.ARRAY_BUFFER, v);
                         attrBuffer.tupleSize = entry.getTupleSize();

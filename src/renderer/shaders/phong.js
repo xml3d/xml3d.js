@@ -311,3 +311,152 @@ fragment: [
            "}"
            ].join("\n")
 };
+
+
+g_shaders["urn:xml3d:shader:reflection"] = {
+
+vertex: [
+         "attribute vec3 position;",
+         "attribute vec3 normal;",
+         "attribute vec3 tangent;",
+         "attribute vec2 texcoord;",
+
+         "varying vec3 normalVS;",
+         "varying vec3 positionVS;",
+         "varying vec2 texcoordMS;",
+         "varying vec3 viewVecTS;",
+         "varying vec3 reflVector;",
+
+         "#if MAX_DIRECTIONALLIGHTS > 0",
+         "uniform vec3 directionalLightDirection[MAX_DIRECTIONALLIGHTS+1];",
+         "varying vec3 directionalLightDirectionTS[MAX_DIRECTIONALLIGHTS+1];",
+         "#endif",
+
+         "uniform mat4 modelViewProjectionMatrix;", // model -> world -> view -> screen
+         "uniform mat4 modelViewMatrix;",           // model -> world -> view
+         "uniform mat4 modelMatrix;",				// model -> world
+         "uniform mat3 normalMatrix;",              // model -> world -> view (normals)
+         "uniform mat4 viewMatrix;",                // world -> view
+         "uniform vec3 cameraPosition;",
+
+         "void main(void) {",
+         "    normalVS = normalMatrix * normal;", // normal in view space
+         "    positionVS = (modelViewMatrix * vec4(position, 1.0)).xyz;", // position in view space
+
+         "    texcoordMS = texcoord;", // texture coordinates in model space
+
+         // Calculate reflection vector
+         "    vec3 worldPos = (modelMatrix * vec4(position, 1.0)).xyz;",
+         "    vec3 worldNorm = normalize(mat3(modelMatrix) * normal).xyz;",
+         "	  vec3 E = normalize(worldPos - cameraPosition);",
+         "    reflVector = reflect(E, worldNorm);",
+
+         "    vec3 tangentVS = normalize(normalMatrix * tangent);", // tangent in view space
+         "    vec3 bitangentVS = cross(tangentVS, normalVS);", // bi-tangent in view space
+
+         "    vec3 viewVec = normalize(-positionVS);",
+         "    viewVecTS = vec3(dot(viewVec, tangentVS), dot(viewVec, bitangentVS), dot(viewVec, normalVS));",
+
+         // Tangent to matrix
+         "#if MAX_DIRECTIONALLIGHTS > 0",
+         "    vec3 v;",
+         "    for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
+         "      vec3 lVec = (viewMatrix * vec4(directionalLightDirection[i],0.0)).xyz;",
+         "      v.x = dot(lVec, tangentVS);",
+         "      v.y = dot(lVec, bitangentVS);",
+         "      v.z = dot(lVec, normalVS);",
+         "      directionalLightDirectionTS[i] = v;",
+         "    }",
+         "#endif",
+
+         "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
+
+         "}",,
+     ].join("\n"),
+
+fragment: [
+           "#ifdef GL_ES",
+           "precision highp float;",
+           "#endif\n",
+           "uniform float ambientIntensity;",
+           "uniform vec3 diffuseColor;",
+           "uniform vec3 emissiveColor;",
+           "uniform float shininess;",
+           "uniform vec3 specularColor;",
+           "uniform float transparency;",
+           "uniform float lightOn;",
+           "uniform sampler2D diffuseTexture;",
+
+           "uniform sampler2D specularTexture;",
+           "uniform bool useSpecularTexture;",
+
+           "uniform sampler2D reflectionTexture;",
+           "uniform float reflectivity;",
+
+           "uniform sampler2D normalTexture;",
+           "uniform bool useNormalTexture;",
+
+           "varying vec3 normalVS;",
+           "varying vec3 positionVS;",
+           "varying vec2 texcoordMS;",
+           "varying vec3 viewVecTS;",
+           "varying vec3 reflVector;",
+
+           "#if MAX_POINTLIGHTS > 0",
+           "uniform vec3 pointLightAttenuation[MAX_POINTLIGHTS+1];",
+           "uniform vec3 pointLightPosition[MAX_POINTLIGHTS+1];",
+           "uniform vec3 pointLightIntensity[MAX_POINTLIGHTS+1];",
+           "uniform vec3 pointLightVisibility[MAX_POINTLIGHTS+1];",
+           "#endif",
+
+           "#if MAX_DIRECTIONALLIGHTS > 0",
+           "uniform vec3 directionalLightIntensity[MAX_DIRECTIONALLIGHTS+1];",
+           "uniform vec3 directionalLightVisibility[MAX_DIRECTIONALLIGHTS+1];",
+           "uniform vec3 directionalLightDirection[MAX_DIRECTIONALLIGHTS+1];",
+           "varying vec3 directionalLightDirectionTS[MAX_DIRECTIONALLIGHTS+1];",
+           "#endif",
+
+           "void main(void) {",
+           "  vec4 texDiffuse = texture2D(diffuseTexture, texcoordMS);",
+
+           //Dual paraboloid reflection mapping
+		   //Very specific to the museum scene!
+		   //"  float rSign = rNorm.z / abs(rNorm.z);", //-1 if we're sampling the back face, 1 if front
+           //"  vec2 reflUV = (rNorm.xy / (2.0*(1.0 + abs(rNorm.z)))) + 0.5;",
+
+           "  vec3 rNorm = normalize(reflVector);",
+           "  float rSign = rNorm.x / abs(rNorm.x);", //-1 if we're sampling the back face, 1 if front
+           "  vec2 reflUV = (rNorm.zy / (2.0*(1.0 + abs(rNorm.x)))) + 0.5;",
+		   "  reflUV = reflUV.yx;",
+           "  reflUV.x = reflUV.x*0.5 + (rSign + 1.0) * 0.25;", //offset to either the front or back half of the refl texture
+           "  vec4 texRefl = texture2D(reflectionTexture, reflUV);",
+
+           "  vec3 viewVec = normalize(viewVecTS);",
+           "  vec3 normalTS = normalize(normalVS);",
+           "  if (useNormalTexture) {",
+           "  	normalTS = normalize(texture2D(normalTexture, texcoordMS).xyz * 2.0 - 1.0);",
+           "  }",
+           "  vec3 R = reflect(-viewVec, normalTS);",
+
+           "  vec3 objDiffuse = diffuseColor * texDiffuse.xyz;",
+           "  vec3 objSpecular = specularColor;",
+           "  if(useSpecularTexture)",
+           "    objSpecular = objSpecular * texture2D(specularTexture, texcoordMS).xyz;",
+           "  vec3 color = objDiffuse * ambientIntensity + emissiveColor + texRefl.xyz*reflectivity;",
+
+           "#if MAX_DIRECTIONALLIGHTS > 0",
+           "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
+           "    vec3 L =  normalize(directionalLightDirectionTS[i]);",
+           "    vec3 Idiff = directionalLightIntensity[i] * objDiffuse  * max(dot(L,normalTS),0.0);",
+           "    float specular = pow(clamp(dot(R, L), 0.0, 1.0), shininess*128.0); ",
+           "    vec3 Ispec = directionalLightIntensity[i] * objSpecular * specular;",
+           "    color = color + Ispec;// * directionalLightVisibility[i];",
+           "  }",
+           "#endif",
+
+           "  float alpha = texDiffuse.w * max(0.0, 1.0 - transparency);",
+           "  if (alpha < 0.05) discard;",
+           "  gl_FragColor = vec4(color, alpha);",
+           "}"
+           ].join("\n")
+};

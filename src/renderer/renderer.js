@@ -431,6 +431,7 @@ XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, shaderId, xfo
     this.shaderManager.updateShader(shader);
 
     parameters["viewMatrix"] = this.camera.viewMatrix;
+    parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
 
     for (var i = 0, n = objectArray.length; i < n; i++) {
         var obj = objectArray[i];

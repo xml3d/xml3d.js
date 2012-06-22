@@ -159,6 +159,7 @@
     case "textureddiffuse":
     case "diffusevcolor":
         case "normal":
+        case "urn:xml3d:shader:reflection":
     		// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
         sources = XML3D.shaders.getScript(shaderName);
     		var maxLights = "";

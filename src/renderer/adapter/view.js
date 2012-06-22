@@ -7,6 +7,7 @@
         this.parentTransform = null;
         this.viewMatrix = mat4.create();
         this.projMatrix = null;
+        this.worldPosition = [0,0,0];
         this.updateViewMatrix();
     };
     XML3D.createClass(XML3DViewRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -35,6 +36,7 @@
         if (this.parentTransform) {
             mat4.multiply(this.parentTransform, tmp, tmp);
         }
+        this.worldPosition = [tmp[12], tmp[13], tmp[14]];
         mat4.set(mat4.inverse(tmp), this.viewMatrix);
     };
 
@@ -64,6 +66,10 @@
 
     p.getModelViewProjectionMatrix = function(modelViewMatrix) {
         return mat4.multiply(this.projMatrix, modelViewMatrix, mat4.create());
+    };
+    
+    p.getWorldSpacePosition = function() {
+    	return this.worldPosition;
     };
 
     p.notifyChanged = function(evt) {

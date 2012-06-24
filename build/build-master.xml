@@ -49,7 +49,7 @@
 			<concat destfile="${finalScript}">
 				<header>/**${line.separator}</header>
 				<fileset file="${basedir}/../LICENSE" />
-				<footer>${line.separator}@version: @{version} ${line.separator}**/
+				<footer>${line.separator}@version: @{version}${line.separator}**/
 					${line.separator}</footer>
 			</concat>
 

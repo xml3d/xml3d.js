@@ -660,12 +660,14 @@
     	        this.createTex2DFromImage(info);
     	        this.bindTexture(tex);
     	        break;
+            default:
+                this.unbindTexture(tex);
     	};
     };
     
     XML3DShaderManager.prototype.unbindTexture = function(tex) {
-    	this.gl.activeTexture(this.gl.TEXTURE0 + tex.info.texUnit);
-    	this.gl.bindTexture(tex.info.glType, null);
+        this.gl.activeTexture(this.gl.TEXTURE0 + tex.info.unit);
+        this.gl.bindTexture(tex.info.glType, null);
     };
     
     XML3DShaderManager.prototype.destroyTexture = function(tex) {

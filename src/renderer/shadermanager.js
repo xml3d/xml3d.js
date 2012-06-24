@@ -305,8 +305,8 @@
     	}
     };
     
-    XML3DShaderManager.prototype.shaderDataChanged = function(shaderId, attrName, newValue, textureName) {
-    	var shader = this.shaders[shaderId];
+    XML3DShaderManager.prototype.shaderDataChanged = function(adapter, attrName, newValue, textureName) {
+    	var shader = this.shaders[adapter.node.id];
     
     	//Store the change, it will be applied the next time the shader is bound
     	if (attrName == "src") {
@@ -314,7 +314,7 @@
     		if (textureName) {
     			var sampler = shader.samplers[textureName];
     			if (sampler)
-    				this.replaceTexture(sampler, newValue);
+    				shader.samplers[textureName] = this.replaceTexture(adapter, sampler);
     		} else
     			XML3D.debug.logError("Couldn't apply change because of a missing texture name");
     
@@ -520,45 +520,51 @@
     		}
 
     		var dtopt = dataTable[name].getValue();
-    		if(dtopt.imageAdapter && dtopt.imageAdapter.getValue)
-    		{
-    		    var renderer = this.renderer;
-    		    sampler.info = new TextureInfo({
-    		        onload : function() {
-    		            renderer.requestRedraw.call(renderer, "Texture loaded");
-    		        }
-    		    });
-    		    sampler.info.createEmpty(this.gl, texUnit++, dtopt.imageAdapter.getValue(sampler.info.setLoaded, sampler.info));
-    		    sampler.info.setOptions({
-                    isDepth          : false,
-                    minFilter        : dtopt.minFilter,
-                    magFilter        : dtopt.magFilter,
-                    wrapS            : dtopt.wrapS,
-                    wrapT            : dtopt.wrapT,
-                    generateMipmap   : dtopt.generateMipmap,
-                    flipY            : true,
-                    premultiplyAlpha : true
-    		    });
-    		} else {
-    		    sampler.info = new InvalidTexture();
-    		    XML3D.debug.logWarning("No image found for texture: " + name);
-    		}
+    		this.createTexture(dtopt, sampler, texUnit);
+    		texUnit++;
     	}
     
     	return true;
     };
     
-    XML3DShaderManager.prototype.replaceTexture = function(texture, newTextureSrc) {
-    	this.destroyTexture(texture);
-    	var tex = this.gl.createTexture();
-    	var info = this.loadImage(newTextureSrc);
-    	info.handle = tex;
+    XML3DShaderManager.prototype.createTexture = function(dtopt, sampler, texUnit) {
+    	if(dtopt.imageAdapter && dtopt.imageAdapter.getValue)
+		{
+		    var renderer = this.renderer;
+		    sampler.info = new TextureInfo({
+		        onload : function() {
+		            renderer.requestRedraw.call(renderer, "Texture loaded");
+		        }
+		    });
+		    sampler.info.createEmpty(this.gl, texUnit, dtopt.imageAdapter.getValue(sampler.info.setLoaded, sampler.info));
+		    sampler.info.setOptions({
+                isDepth          : false,
+                minFilter        : dtopt.minFilter,
+                magFilter        : dtopt.magFilter,
+                wrapS            : dtopt.wrapS,
+                wrapT            : dtopt.wrapT,
+                generateMipmap   : dtopt.generateMipmap,
+                flipY            : true,
+                premultiplyAlpha : true
+		    });
+		} else {
+		    sampler.info = new InvalidTexture();
+		    XML3D.debug.logWarning("No image found for texture: " + name);
+		}
+    };
     
-    	//Copy old values into the new info object
-    	var texInfo = texture.info;
-    	info.format = texInfo.format;
-    	info.glType = texInfo.glType;
-    	texture.info = info;
+    XML3DShaderManager.prototype.replaceTexture = function(adapter, texture) {
+    	this.destroyTexture(texture);
+    	var dtable = adapter.requestData([texture.name]);
+    	var dtopt = dtable[texture.name].getValue();
+    	
+    	//FIX ME PLEASE
+    	dtopt.imageAdapter.image = null;   	
+    	
+    	this.createTexture(dtopt, texture, texture.texUnit);
+    	
+    	return texture;
+    	
     };
     
     XML3DShaderManager.prototype.createTex2DFromData = function(internalFormat, width, height,

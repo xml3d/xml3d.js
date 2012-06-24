@@ -70,7 +70,7 @@ XML3D.webgl.Renderer = function(handler, width, height) {
 	        directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] }
 	};
     this.drawableObjects = new Array();
-    this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, true, mat4.identity(mat4.create()), null);
+	this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, true, mat4.identity(mat4.create()), null, false);
     if (this.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
@@ -134,7 +134,7 @@ XML3D.webgl.Renderer.prototype.processShaders = function(objects) {
     }
 };
 
-XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, transform, parentShader) {
+XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, transform, parentShader, pickable) {
     var adapter = this.factory.getAdapter(currentNode);
     var downstreamShader = parentShader;
     var downstreamTransform = transform;
@@ -145,6 +145,8 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
         visible = visible && currentNode.visible;
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);    
+		if (currentNode.hasAttribute("interactive")) 
+			pickable = currentNode.getAttribute("interactive") == "true";	
         
         var shader = adapter.getShader();
         downstreamShader = shader ? shader : parentShader;    
@@ -157,6 +159,8 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
     case "mesh":
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);    
+	    if (currentNode.hasAttribute("interactive"))
+	    	pickable = currentNode.getAttribute("interactive") == "true";
         
         var meshAdapter = this.factory.getAdapter(currentNode);
         if (!meshAdapter)
@@ -173,6 +177,7 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
         // to ensure all lights and other shader information is available
         newObject.shader = null;
         newObject.transform = transform; 
+		newObject.pickable = pickable;
 		adapter.registerCallback(newObject.getObject);
 		meshAdapter.createMesh();
         
@@ -195,7 +200,7 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 
     var child = currentNode.firstElementChild;
     while (child) {
-        this.recursiveBuildScene(scene, child, visible, downstreamTransform, downstreamShader);
+		this.recursiveBuildScene(scene, child, visible, downstreamTransform, downstreamShader, pickable);
         child = child.nextSibling;
     }
 };
@@ -219,8 +224,8 @@ XML3D.webgl.Renderer.prototype.recompileShader = function(shaderAdapter) {
     this.handler.redraw("A shader was recompiled");
 };
 
-XML3D.webgl.Renderer.prototype.shaderDataChanged = function(shaderId, attrName, newValue, texName) {
-    this.shaderManager.shaderDataChanged(shaderId, attrName, newValue, texName);
+XML3D.webgl.Renderer.prototype.shaderDataChanged = function(adapter, attrName, newValue, texName) {
+	this.shaderManager.shaderDataChanged(adapter, attrName, newValue, texName);
     
     if (attrName != "src")
         this.handler.redraw("A shader parameter was changed");
@@ -265,12 +270,13 @@ XML3D.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
         return; 
     
     var transform = mat4.identity(mat4.create());
-    var visible = true;
     var shader = null;    
     if (adapter.getShader)
         shader = adapter.getShader();
     
     var currentNode = evt.wrapped.target;
+	var pickable = null;
+	var visible = null;
     var didListener = false;
     adapter.isValid = true;
 
@@ -278,19 +284,28 @@ XML3D.webgl.Renderer.prototype.sceneTreeAddition = function(evt) {
     while (currentNode.parentElement) {    
         currentNode = currentNode.parentElement;
         if (currentNode.nodeName == "group") {        
-            var parentAdapter = this.factory.getAdapter(currentNode);    
+			var parentAdapter = this.factory.getAdapter(currentNode);
             transform = parentAdapter.applyTransformMatrix(transform);
             if (!shader)
                 shader = parentAdapter.getShader();
-            if (currentNode.getAttribute("visible") == "false")
-                visible = false;
+			if (currentNode.hasAttribute("visible")) {
+				var visibleFlag = currentNode.getAttribute("visible");
+				visible = visible !== null ? visible : visibleFlag == "true";
+			}
+			
+			if (currentNode.hasAttribute("interactive")) {
+				var pickFlag = currentNode.getAttribute("interactive");
+				pickable = pickable !== null ? pickable : pickFlag == "true";
+			}
+			
         } else {
             break; //End of nested groups
         }
     }
+	visible = visible === null ? true : visible;
     //Build any new objects and add them to the scene
     var newObjects = new Array();
-    this.recursiveBuildScene(newObjects, evt.wrapped.target, visible, transform, shader);
+	this.recursiveBuildScene(newObjects, evt.wrapped.target, visible, transform, shader, pickable);
     this.processShaders(newObjects);    
     this.drawableObjects = this.drawableObjects.concat(newObjects);
     
@@ -573,7 +588,7 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 
             for (var i = 0; i < this.drawableObjects.length; i++) {
                 var obj = this.drawableObjects[i];
-                if (!obj.mesh.valid)
+				if(!obj.mesh || !obj.pickable)
                     continue;
                 var trafo = obj.transform;
                 this.adjustMinMax(obj.mesh.bbox, volumeMin, volumeMax, trafo);
@@ -591,7 +606,10 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
                 var transform = obj.transform;
                 var mesh = obj.mesh;
                 
-                if (!mesh.valid)
+				if (!obj.pickable)
+					continue;
+				
+				if (!mesh || !mesh.valid)
                     continue;
                 xform.model = transform;
                 xform.modelView = this.camera.getModelViewMatrix(xform.model);

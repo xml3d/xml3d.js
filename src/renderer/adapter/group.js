@@ -1,6 +1,9 @@
 // Adapter for <group>
 (function() {
     
+	var eventTypes = {onclick:1, ondblclick:1,
+			ondrop:1, ondragenter:1, ondragleave:1};
+	
     var XML3DGroupRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.processListeners();
@@ -44,7 +47,7 @@
                 continue;
 
             var type = att.name;
-            if (type.match(/onmouse/) || type == "onclick" || type == "ondblclick") {
+	        if (type.match(/onmouse/) || eventTypes[type]) {
                 var eventType = type.substring(2);
                 this.node.addEventListener(eventType, new Function("evt", att.value), false);
             }

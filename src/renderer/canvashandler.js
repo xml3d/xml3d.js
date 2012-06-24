@@ -103,6 +103,12 @@ XML3D.webgl.MAXFPS = 30;
         canvas.addEventListener("mouseout", function(e) {
             handler.mouseOut(e);
         }, false);
+        canvas.addEventListener("drop", function(e) {
+            handler.dragAndDrop(e);
+        }, false);
+        canvas.addEventListener("dragover", function(e) {
+            handler.dragOver(e);
+        }, false);
 
         // Block the right-click context menu on the canvas unless it's explicitly toggled
         var cm = this.xml3dElem.getAttribute("contextmenu");
@@ -302,7 +308,8 @@ XML3D.webgl.MAXFPS = 30;
         event.ctrlKey, event.altKey, event.shiftKey, event.metaKey, event.button,
         // relatedTarget
         event.relatedTarget);
-
+        if (event.dataTransfer)
+        	evt.data = {url: event.dataTransfer.getData("URL"), text: event.dataTransfer.getData("Text")};
         return evt;
     };
 
@@ -327,6 +334,24 @@ XML3D.webgl.MAXFPS = 30;
         event.__defineGetter__("position", function() {
             return xml3dElem.currentPickPos;
         });
+    };
+    
+  
+    CanvasHandler.prototype.dragAndDrop = function(evt) {
+        var pos = this.getMousePosition(evt);
+
+        this.renderPick(pos.x, pos.y);
+        this.dispatchMouseEvent("drop", evt.button, pos.x, pos.y, evt);
+
+        return false; // don't redraw
+    };
+    CanvasHandler.prototype.dragOver = function(evt) {
+        //var pos = this.getMousePosition(evt);
+
+        //this.renderPick(pos.x, pos.y);
+        //this.dispatchMouseEvent("drop", evt.button, pos.x, pos.y, evt);
+    	evt.preventDefault();
+        return false; // don't redraw
     };
 
     /**

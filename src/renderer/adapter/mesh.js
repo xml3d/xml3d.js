@@ -2,6 +2,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 //Adapter for <mesh>
 (function() {
+	var eventTypes = {onclick:1, ondblclick:1,
+			ondrop:1, ondragenter:1, ondragleave:1};
+	
     var noDrawableObject = function() {
         XML3D.debug.logError("Mesh adapter has no callback to its mesh object!");
     },
@@ -33,10 +36,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 continue;
 
             var type = att.name;
-            if (type.match(/onmouse/) || type == "onclick" || type == "ondblclick") {
+            if (type.match(/onmouse/) || eventTypes[type]) {
                 var eventType = type.substring(2);
                 this.node.addEventListener(eventType,  new Function("evt", att.value), false);
-            }
+            } 
         }
     };
 

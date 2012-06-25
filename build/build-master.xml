@@ -72,6 +72,9 @@
 				generateexports="yes" debug="false"
 				output="${buildDir}/${script.start}@{extension}.js">
 				<define name="XML3D.version" value="@{version}"/>
+				<externs dir="${basedir}">
+				    <file name="extern.js"/>
+				</externs>
 				<sources refid="sourceFiles">
 				</sources>
 			</jscomp>

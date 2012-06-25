@@ -64,6 +64,8 @@
         image.onload = function(e) {
             cb.call(obj,e);
         };
+        // TODO handle: image.onerror = function(e) {}
+        image.crossOrigin = "anonymous";
         image.src = src;
         return image;
     };

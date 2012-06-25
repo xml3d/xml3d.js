@@ -37,11 +37,7 @@
 		
 		case "src":
 			//A texture was changed
-			var texNode = evt.wrapped.relatedNode;
-			
-			//Firefox assigns the relatedNode differently in this case, so we have to check for this
-			if (texNode.ownerElement)
-				texNode = texNode.ownerElement;
+			var texNode = evt.wrapped.target;
 			
 			texNode = texNode.parentNode;
 			

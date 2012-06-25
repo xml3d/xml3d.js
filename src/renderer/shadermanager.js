@@ -42,7 +42,17 @@
     var InvalidTexture = function() {
         this.status = TEXTURE_STATE.INVALID;
     };
-
+    
+    var EMPTY_TEXTURE = null;
+    var createEmptyTexture = function(gl) {
+        var handle =  gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, handle);
+        var data = new Uint8Array([255,128,128,255]);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,  1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        EMPTY_TEXTURE = handle;
+    };
     
     var XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
     	this.gl = gl;
@@ -52,6 +62,8 @@
     	this.currentProgram = null;
     	this.shaders = {};
     
+    	createEmptyTexture(gl);
+    	
     	//Always create a default flat shader as a fallback for error handling
     var fallbackShader = this.getStandardShaderProgram("matte");
     	fallbackShader.hasTransparency = false;
@@ -549,7 +561,7 @@
 		    });
 		} else {
 		    sampler.info = new InvalidTexture();
-		    XML3D.debug.logWarning("No image found for texture: " + name);
+		    XML3D.debug.logWarning("No image found for texture: " + sampler);
 		}
     };
     
@@ -652,13 +664,14 @@
     
     XML3DShaderManager.prototype.bindTexture = function(tex) {
     	var info = tex.info;
-    
+    	var gl = this.gl;
+    	
     	switch(info.status) {
     	    case TEXTURE_STATE.VALID:
-                this.gl.activeTexture(this.gl.TEXTURE0 + info.unit);
-                this.gl.bindTexture(info.glType, info.handle);
+                gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
+                gl.bindTexture(info.glType, info.handle);
                 // Should not be here, since the texunit is static
-                this.setUniform(this.gl, tex, info.unit);
+                this.setUniform(gl, tex, info.unit+1);
                 break;
     	    case TEXTURE_STATE.LOADED:
                 //console.dir("Creating '"+ tex.name + "' from " + info.image.src);
@@ -666,13 +679,15 @@
     	        this.createTex2DFromImage(info);
     	        this.bindTexture(tex);
     	        break;
-            default:
-                this.unbindTexture(tex);
+    	    case TEXTURE_STATE.UNLOADED:
+    	        gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                this.setUniform(gl, tex, 0);
     	};
     };
     
     XML3DShaderManager.prototype.unbindTexture = function(tex) {
-        this.gl.activeTexture(this.gl.TEXTURE0 + tex.info.unit);
+        this.gl.activeTexture(this.gl.TEXTURE1 + tex.info.unit);
         this.gl.bindTexture(tex.info.glType, null);
     };
     

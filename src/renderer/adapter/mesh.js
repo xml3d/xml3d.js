@@ -159,7 +159,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             vbos : {},
             isIndexed: false,
             glType: getGLTypeFromString(type),
-            bbox : new XML3DBox(),
+            bbox : new window.XML3DBox(),
             update : emptyFunction
         };
     }

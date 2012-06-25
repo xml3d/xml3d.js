@@ -342,14 +342,10 @@ XML3D.webgl.MAXFPS = 30;
 
         this.renderPick(pos.x, pos.y);
         this.dispatchMouseEvent("drop", evt.button, pos.x, pos.y, evt);
-
+        evt.preventDefault();
         return false; // don't redraw
     };
     CanvasHandler.prototype.dragOver = function(evt) {
-        //var pos = this.getMousePosition(evt);
-
-        //this.renderPick(pos.x, pos.y);
-        //this.dispatchMouseEvent("drop", evt.button, pos.x, pos.y, evt);
     	evt.preventDefault();
         return false; // don't redraw
     };

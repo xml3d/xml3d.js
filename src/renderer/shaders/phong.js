@@ -243,7 +243,7 @@ vertex: [
 
          "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
 
-         "}",,
+         "}"
      ].join("\n"),
 
 fragment: [
@@ -371,7 +371,7 @@ vertex: [
 
          "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
 
-         "}",,
+         "}"
      ].join("\n"),
 
 fragment: [
@@ -450,7 +450,7 @@ fragment: [
            "    vec3 Idiff = directionalLightIntensity[i] * objDiffuse  * max(dot(L,normalTS),0.0);",
            "    float specular = pow(clamp(dot(R, L), 0.0, 1.0), shininess*128.0); ",
            "    vec3 Ispec = directionalLightIntensity[i] * objSpecular * specular;",
-           "    color = color + Ispec;// * directionalLightVisibility[i];",
+           "    color = color + Ispec + Idiff;// * directionalLightVisibility[i];",
            "  }",
            "#endif",
 

@@ -588,9 +588,10 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 
             for (var i = 0; i < this.drawableObjects.length; i++) {
                 var obj = this.drawableObjects[i];
-				if(!obj.mesh || !obj.pickable)
-                    continue;
-                var trafo = obj.transform;
+            if(!obj.mesh.valid || !obj.pickable)
+                continue;
+
+            var trafo = obj.transform;
                 this.adjustMinMax(obj.mesh.bbox, volumeMin, volumeMax, trafo);
             }
             
@@ -606,11 +607,9 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
                 var transform = obj.transform;
                 var mesh = obj.mesh;
                 
-				if (!obj.pickable)
-					continue;
-				
-				if (!mesh || !mesh.valid)
+                if (!mesh.valid || !obj.pickable)
                     continue;
+                
                 xform.model = transform;
                 xform.modelView = this.camera.getModelViewMatrix(xform.model);
 

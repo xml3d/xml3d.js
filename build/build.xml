@@ -77,8 +77,8 @@
 			</args>
 		</git>
 		<echo message="${git.output}" />
-		<concatScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-dev"/>
-        <compileScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-dev-min"/>
+		<concatScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-${continuous.extension}"/>
+        <compileScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-${continuous.extension}-min"/>
         <upload extension="-dev"/>
 		<upload extension="-dev-min"/>
 	</target>

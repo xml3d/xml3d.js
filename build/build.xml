@@ -79,8 +79,8 @@
 		<echo message="${git.output}" />
 		<concatScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-${continuous.extension}"/>
         <compileScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-${continuous.extension}-min"/>
-        <upload extension="-dev"/>
-		<upload extension="-dev-min"/>
+        <upload extension="-${continuous.extension}"/>
+		<upload extension="-${continuous.extension}-min"/>
 	</target>
 
 	<target name="develop" depends="init">

@@ -557,9 +557,10 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 		if (x<0 || y<0 || x>=this.width || y>=this.height)
 			return;
 		var gl = this.handler.gl;
-		
-		gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
-		
+		var fbo = this.fbos.picking;
+
+		gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
+
 		gl.enable(gl.DEPTH_TEST);
 		gl.disable(gl.CULL_FACE);
 		gl.disable(gl.BLEND);
@@ -567,6 +568,7 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 		if (needPickingDraw ) {
 			var volumeMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
 			var volumeMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
+			gl.viewport(0, 0, fbo.width, fbo.height);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
 			var xform = {};
@@ -575,6 +577,8 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 
 			for (var i = 0; i < this.drawableObjects.length; i++) {
 				var obj = this.drawableObjects[i];
+                if (!obj.mesh.valid)
+                    continue;
 				var trafo = obj.transform;
 				this.adjustMinMax(obj.mesh.bbox, volumeMin, volumeMax, trafo);
 			}
@@ -591,7 +595,7 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 				var transform = obj.transform;
 				var mesh = obj.mesh;
 				
-				if (mesh.isValid == false)
+				if (!mesh.valid)
 					continue;
 				xform.model = transform;
 				xform.modelView = this.camera.getModelViewMatrix(xform.model);
@@ -700,7 +704,6 @@ XML3D.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) 
 			}
 	}
 	} catch(e) {XML3D.debug.logError(e);}
-	
 };
 
 //Helper to expand an axis aligned bounding box around another object's bounding box

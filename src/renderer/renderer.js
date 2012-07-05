@@ -136,7 +136,7 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 	case "group":
 		adapter.parentVisible = visible;
 		visible = visible && currentNode.visible;
-		if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+		if (currentNode.onmouseover || currentNode.onmouseout)
 			this.handler.setMouseMovePicking(true);	
 		
 		var shader = adapter.getShader();
@@ -148,7 +148,7 @@ XML3D.webgl.Renderer.prototype.recursiveBuildScene = function(scene, currentNode
 		break;	
 
 	case "mesh":
-	    if (currentNode.hasAttribute("onmousemove") || currentNode.hasAttribute("onmouseout"))
+	    if (currentNode.onmouseover || currentNode.onmouseout)
 			this.handler.setMouseMovePicking(true);	
 		
 		var meshAdapter = this.factory.getAdapter(currentNode);
@@ -662,6 +662,9 @@ XML3D.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, screenX
 
 };
 
+var pickVector = vec3.create();
+var data = new Uint8Array(8);
+
 /**
  * Reads pixels from the screenbuffer to determine picked object or normals.
  * 
@@ -670,8 +673,7 @@ XML3D.webgl.Renderer.prototype.renderPickedNormals = function(pickedObj, screenX
  * @return
  */
 XML3D.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) {
-	//XML3D.webgl.checkError(gl, "Before readpixels");
-	var data = new Uint8Array(8);
+	//console.log("readPixels", screenX, screenY);
 	var scale = this.fbos.picking.scale;
 	var x = screenX * scale;
 	var y = screenY * scale;
@@ -680,23 +682,22 @@ XML3D.webgl.Renderer.prototype.readPixels = function(normals, screenX, screenY) 
 	try {
 		gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
 		
-		var vec = vec3.create();
-		vec[0] = data[0] / 255;
-		vec[1] = data[1] / 255;
-		vec[2] = data[2] / 255;
+		pickVector[0] = data[0] / 255;
+		pickVector[1] = data[1] / 255;
+		pickVector[2] = data[2] / 255;
 		
 		if(normals) {
-			vec = vec3.subtract(vec3.scale(vec,2.0), vec3.create([1,1,1]));
-			this.xml3dNode.currentPickNormal = vec;
+			pickVector = vec3.subtract(vec3.scale(pickVector,2.0), vec3.create([1,1,1]));
+			this.xml3dNode.currentPickNormal = pickVector;
 		} else {		
 			var objId = 255 - data[3] - 1;
 			if (objId >= 0 && data[3] > 0) {
 			    var tmp = vec3.subtract(this.bbMax, this.bbMin, vec3.create());
-			    vec = vec3.create([ vec[0]*tmp[0], vec[1]*tmp[1], vec[2]*tmp[2] ]);
-			    vec3.add(vec, this.bbMin, vec);
+			    pickVector = vec3.create([ pickVector[0]*tmp[0], pickVector[1]*tmp[1], pickVector[2]*tmp[2] ]);
+			    vec3.add(pickVector, this.bbMin, pickVector);
 
 				var pickedObj = this.drawableObjects[objId];
-				this.xml3dNode.currentPickPos = vec;
+				this.xml3dNode.currentPickPos = pickVector;
 				this.xml3dNode.currentPickObj = pickedObj.meshNode;
 			} else {
 				this.xml3dNode.currentPickPos = null;

@@ -752,6 +752,11 @@ QUnit.load = function() {
 	if ( userAgent ) {
 		userAgent.innerHTML = navigator.userAgent;
 	}
+	var renderer = id("qunit-renderer");
+    if ( renderer ) {
+        renderer.innerHTML = XML3DUnit.getRendererString();
+    }
+
 	var banner = id("qunit-header");
 	if ( banner ) {
 		banner.innerHTML = '<a href="' + QUnit.url({ filter: undefined }) + '"> ' + banner.innerHTML + '</a> ' + urlConfigHtml;

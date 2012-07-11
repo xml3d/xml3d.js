@@ -5,7 +5,7 @@
         this.zFar = 100000;
         this.zNear = 0.1;
         this.parentTransform = null;
-        this.viewMatrix = null;
+        this.viewMatrix = mat4.create();
         this.projMatrix = null;
         this.updateViewMatrix();
     };
@@ -35,7 +35,7 @@
         if (this.parentTransform) {
             mat4.multiply(this.parentTransform, tmp, tmp);
         }
-        this.viewMatrix = mat4.inverse(tmp);
+        mat4.set(mat4.inverse(tmp), this.viewMatrix);
     };
 
     p.getProjectionMatrix = function(aspect) {

@@ -21,7 +21,7 @@ function getContextForXml3DElement(x) {
 };
 
 function getHandler(x) {
-	return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler;
+	return x._configured ? x._configured.adapters.XML3DRenderAdapterFactory.factory.handler : null;
 };
 
 test("Background and invisible mesh", 4, function() {

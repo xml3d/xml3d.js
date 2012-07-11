@@ -50,10 +50,6 @@
         return mat4.multiply(this.viewMatrix, model, mat4.create());
     };
 
-    p.getNormalMatrix = function(modelViewMatrix) {
-        return mat3.transpose(mat4.toInverseMat3(modelViewMatrix));
-    };
-
     p.getModelViewProjectionMatrix = function(modelViewMatrix) {
         return mat4.multiply(this.projMatrix, modelViewMatrix, mat4.create());
     };

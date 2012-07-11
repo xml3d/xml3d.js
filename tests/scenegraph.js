@@ -117,6 +117,16 @@ test("Hierarchy", function() {
     QUnit.closeMatrix(child2.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "New child2 global matrix");
 });
 
+test("Transformation creates non-regular matrix", 2, function() {
+    // 1: Found frame
+    // 2: Scene loaded
+    var x = this.doc.getElementById("myXml3d");
+    var t = this.doc.getElementById("t_regular");
+    var h = getHandler(x);
+    t.scale.set(new XML3DVec3(0,0,0)); // Used to throw exception due to singular matrix
+    h && h.draw();
+});
+
 test("Picking", function() {
 	var xml3d = this.doc.getElementById("myXml3d");
 	var m = xml3d.getElementByPoint(561,203);

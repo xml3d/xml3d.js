@@ -421,6 +421,7 @@ XML3D.webgl.Renderer.prototype.sortObjects = function(sourceObjectArray, opaque,
 
 var tmpModelView = mat4.create();
 var tmpModelViewProjection = mat4.create();
+var identMat3 = mat3.identity(mat3.create());
 
 XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lightParams, stats) {
 	var objCount = 0;
@@ -451,8 +452,9 @@ XML3D.webgl.Renderer.prototype.drawObjects = function(objectArray, shaderId, xfo
         parameters["modelMatrix"] = xform.model;
 		parameters["modelViewMatrix"] = xform.modelView;
 		parameters["modelViewProjectionMatrix"] = mat4.multiply(this.camera.projMatrix, xform.modelView, tmpModelViewProjection);
-		parameters["normalMatrix"] = this.camera.getNormalMatrix(xform.modelView);
-		
+		var normalMatrix = mat4.toInverseMat3(xform.modelView);
+		parameters["normalMatrix"] = normalMatrix ? mat3.transpose(normalMatrix) : identMat3;
+
 		this.shaderManager.setUniformVariables(shader, parameters);
 		triCount += this.drawObject(shader, mesh);
 		objCount++;

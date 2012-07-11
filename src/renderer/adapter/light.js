@@ -65,16 +65,12 @@
 		}
 		var params = this.dataAdapter.createDataTable();
 	
-		if (this.visible)
-			var visibility = [1.0, 1.0, 1.0];
-		else
-			var visibility = [0.0, 0.0, 0.0];
-	
+		var visibility = this.visible ? [1.0, 1.0, 1.0] : [0.0, 0.0, 0.0];
 	
 		//Set up default values
 		var pos = mat4.multiplyVec4(mvm, quat4.create([0,0,0,1]));
 		var aParams = {
-			position 	: [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]],
+			position 	: [pos[0] / pos[3], pos[1] / pos[3], pos[2] / pos[3]],
 			attenuation : [0.0, 0.0, 1.0],
 			intensity 	: [1.0, 1.0, 1.0],
 			visibility 	: visibility

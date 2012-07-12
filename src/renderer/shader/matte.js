@@ -1,4 +1,4 @@
-XML3D.shader.register("matte", {
+XML3D.shaders.register("matte", {
 
     vertex: [
         "attribute vec3 position;",
@@ -12,6 +12,9 @@ XML3D.shader.register("matte", {
     ].join("\n"),
 
     fragment: [
+        "#ifdef GL_ES",
+          "precision highp float;",
+        "#endif",
         "uniform vec3 diffuseColor;",
         "void main(void) {",
         "    gl_FragColor = vec4(diffuseColor, 1.0);",
@@ -19,7 +22,9 @@ XML3D.shader.register("matte", {
     ].join("\n"),
 });
 
-XML3D.shader.register("mattevcolor", {
+XML3D.shaders.register("flat", XML3D.shaders.getScript("matte"));
+
+XML3D.shaders.register("mattevcolor", {
 
     vertex: [
         "attribute vec3 position;",
@@ -34,6 +39,9 @@ XML3D.shader.register("mattevcolor", {
     ].join("\n"),
 
     fragment: [
+        "#ifdef GL_ES",
+          "precision highp float;",
+        "#endif",
         "uniform vec3 diffuseColor;",
         "varying vec3 fragVertexColor;",
         "void main(void) {",
@@ -41,3 +49,5 @@ XML3D.shader.register("mattevcolor", {
         "}"
     ].join("\n"),
 });
+
+XML3D.shaders.register("flatvcolor", XML3D.shaders.getScript("mattevcolor"));

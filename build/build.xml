@@ -51,7 +51,11 @@
 		<file name="renderer/adapter/light.js" />
 		<file name="renderer/adapter/data.js" />
 		<file name="renderer/adapter/factory.js" />
-		<file name="renderer/shaders.js" />
+		<file name="renderer/shader/base.js" />
+		<file name="renderer/shader/matte.js" />
+		<file name="renderer/shader/diffuse.js" />
+		<file name="renderer/shader/phong.js" />
+		<file name="renderer/shader/utility.js" />
 		<!-- <file name="renderer/xflow/xflow.js" /> -->
 	</filelist>
 

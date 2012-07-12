@@ -67,6 +67,9 @@ XML3D.webgl.Renderer = function(handler, width, height) {
 	this.lights = [];
 	this.drawableObjects = new Array();
 	this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, true, mat4.identity(mat4.create()), null);
+    if (this.lights.length < 1) {
+        XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
+    }
 	this.processShaders(this.drawableObjects);
 };
 

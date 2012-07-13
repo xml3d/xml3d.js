@@ -111,11 +111,15 @@ XML3D.createClass = function(ctor, parent, methods) {
 			return;
 		}
 
-        XML3D.config.configure(xml3ds);
+        try {
+            XML3D.config.configure(xml3ds);
+        } catch (e) {
+            debug && XML3D.debug.logError("Error initalizing interfaces: " + e);
+        }
         try {
             XML3D.webgl.configure(xml3ds);
         } catch (e) {
-            debug && XML3D.debug.logError(e);
+            debug && XML3D.debug.logError("Error initalizing webgl: " + e);
         }
 
 		var ready = (function(eventType) {

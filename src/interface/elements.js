@@ -90,20 +90,6 @@
         }
     };
 
-    var call = Function.prototype.call;
-    var defineSetter = call.bind(Object.prototype.__defineSetter__);
-    var defineGetter = call.bind(Object.prototype.__defineGetter__);
-    var hasProperty = call.bind(Object.prototype.hasOwnProperty);
-
-    var defineProperty = function(obj, name, desc) {
-        if(hasProperty(desc, "get")) {
-            defineGetter(obj, name, desc.get);
-        }
-        if(hasProperty(desc, "set")) {
-            defineSetter(obj, name, desc.set);
-        }
-    };
-
     handler.ElementHandler.prototype.registerAttributes = function(b) {
         var a = this.element;
         for ( var prop in b) {
@@ -117,7 +103,7 @@
                     try {
                         Object.defineProperty(a, prop, v.desc);
                     } catch (e) {
-                        defineProperty(a,prop,v.desc);
+                        XML3D.debug.logWarning("Can't configure " + a.nodeName + "::" + prop);
                     }
                 } else if (b[prop].m !== undefined) {
                     a[prop] = b[prop].m;
@@ -226,7 +212,7 @@
         try {
             Object.defineProperty(elem, name, desc);
         } catch (e){
-            defineProperty(elem,name,desc);
+            XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + name);
         };
     }
 

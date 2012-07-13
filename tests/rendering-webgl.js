@@ -125,13 +125,13 @@ test("Change shader via script", 6, function() {
     group.setAttribute("shader", "#phonggreen");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,231,0,255], "Green at 40,40 [phong shader]");
+    deepEqual(actual, [0,0,0,255], "Black at 40,40 [phong shader, no light, no emission]");
 
-    var shaderColor = this.doc.getElementById("phonggreen_color");
+    var shaderColor = this.doc.getElementById("phonggreen_emissive");
     shaderColor.textContent = "0 0 1";
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,231,255], "Blue at 40,40 [change color]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [set emissive color]");
 
 });
 
@@ -161,7 +161,7 @@ test("Change visible/shader for nested groups", 8, function() {
     innerGroup.setAttribute("shader", "");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,231,0,255], "Green at 40,40 [remove child shader]");
+    deepEqual(actual, [255,255,0,255], "Yellow at 40,40 [remove child shader, #flatYellow active]");
 
     innerGroup.setAttribute("shader", "#flatblue");
     h.draw();

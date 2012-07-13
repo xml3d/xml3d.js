@@ -52,6 +52,9 @@
         <float3 id="phonggreen_color" name="diffuseColor">
             0 1 0
         </float3>
+        <float3 id="phonggreen_emissive" name="emissiveColor">
+            0 0 0
+        </float3>
     </shader>
     
     <data id="meshdata" type="triangles">
@@ -79,7 +82,7 @@
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
     </group>
     
-    <group id="group1" shader="#phonggreen" visible="false">
+    <group id="group1" shader="#flatyellow" visible="false">
     <group id="group2" shader="#flatblue">
         <mesh id="myNestedMesh" src="#meshdata" type="triangles">
               

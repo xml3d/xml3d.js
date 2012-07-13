@@ -335,6 +335,19 @@ test("Pick pass flag", 7, function() {
     ok(h.needPickingDraw, "Changing transformation does require a picking pass");
 });
 
+test("No implicit light", 3, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+    
+    var group = this.doc.getElementById("implicitLight");
+    group.visible = true;
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,0,255], "No light, scene is black");
+});
+
+
 module("WebGL Shaders and Textures", {
     setup : function() {
         stop();
@@ -369,7 +382,7 @@ test("Simple texture", 3, function() {
 	    actual = win.getPixelValue(gl, 40, 40);
 	    if (actual[0] == 0)
 	    	return;
-	    deepEqual(actual, [231,231,0,255], "Yellow texture");
+	    deepEqual(actual, [241,241,0,255], "Yellow texture");
 	    start();
 	};
 	stop();
@@ -395,7 +408,7 @@ test("Changing texture", 3, function() {
 	    actual = win.getPixelValue(gl, 40, 40);
 	    if (actual[0] == 0)
 	    	return;
-	    deepEqual(actual, [231,0,231,255], "Magenta texture");
+	    deepEqual(actual, [241,0,241,255], "Magenta texture");
 	    start();
 	};
 	
@@ -419,9 +432,9 @@ test("NPOT texture resizing", 4, function() {
 	    actual = win.getPixelValue(gl, 40, 40);
 	    if ((actual[1] + actual[2]) == 0)
 	    	return;
-	    deepEqual(actual, [0,231,0,255], "Green at 40,40");
+	    deepEqual(actual, [0,241,0,255], "Green at 40,40");
 	    actual = win.getPixelValue(gl, 120, 80);
-	    deepEqual(actual, [0,0,231,255], "Blue at 120,80");
+	    deepEqual(actual, [0,0,253,255], "Blue at 120,80");
 	    start();
 	};
 	
@@ -448,7 +461,7 @@ test("Textured diffuse shader", 3, function() {
 		actual = win.getPixelValue(gl, 40, 40);
 		if (actual[0] == 0) //texture hasn't finished loading yet
 			return;
-		deepEqual(actual, [231,231,0,255], "Yellow diffuse texture");
+		deepEqual(actual, [241,241,0,255], "Yellow diffuse texture");
 		start();
 	};
 	
@@ -464,7 +477,7 @@ test("Diffuse shader with vertex colors", 3, function() {
     cgroup.visible = true;
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    QUnit.closePixel(actual, [102,102,27,255], 1, "Corners have colors red, yellow, green, blue");
+    QUnit.closePixel(actual, [112,112,30,255], 1, "Corners have colors red, yellow, green, blue");
 
 });
 
@@ -485,10 +498,9 @@ test("Custom shader", 4, function() {
     cshader.setAttribute("script", "urn:xml3d:shader:phong");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,231,0,255], "Change shader script to standard phong");
+    deepEqual(actual, [0,255,0,255], "Change shader script to standard phong");
 
 });
-
 
 module("Multiple XML3D nodes", {
     setup : function() {

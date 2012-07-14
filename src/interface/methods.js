@@ -105,14 +105,14 @@ new (function() {
     };
 
     methods.viewSetUpVector = function(up) {
-    	up = up || new window.XML3DVec3(0,1,0);
-    	up = up.normalize();
+        up = up || new window.XML3DVec3(0,1,0);
+        up = up.normalize();
 
-    	var r = new window.XML3DRotation();
-    	r.setRotation(new window.XML3DVec3(0,1,0),up);
-    	r = this.orientation.multiply(r);
-    	r = r.normalize();
-    	this.orientation.set(r);
+        var r = new window.XML3DRotation();
+        r.setRotation(new window.XML3DVec3(0,1,0),up);
+        r = this.orientation.multiply(r);
+        r = r.normalize();
+        this.orientation.set(r);
     };
 
     methods.viewGetUpVector = function() {

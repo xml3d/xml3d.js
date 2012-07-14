@@ -38,78 +38,78 @@ XML3D.createClass = function(ctor, parent, methods) {
     return ctor;
 };
 (function() {
-	var onload = function() {
+    var onload = function() {
 
         var debug = XML3D.debug.setup();
         debug && XML3D.debug.logInfo("xml3d.js version: " + XML3D.version);
 
         // Find all the XML3D tags in the document
-		var xml3ds = document.getElementsByTagNameNS(XML3D.xml3dNS, 'xml3d');
-		xml3ds = Array.map(xml3ds, function(n) { return n; });
+        var xml3ds = document.getElementsByTagNameNS(XML3D.xml3dNS, 'xml3d');
+        xml3ds = Array.map(xml3ds, function(n) { return n; });
 
-		debug && XML3D.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
+        debug && XML3D.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
 
-		if (xml3ds.length) {
-			if (XML3D._native) {
-				debug && XML3D.debug.logInfo("Using native implementation.");
-				return;
-			}
-		}
+        if (xml3ds.length) {
+            if (XML3D._native) {
+                debug && XML3D.debug.logInfo("Using native implementation.");
+                return;
+            }
+        }
 
-		if (!(XML3D.webgl && XML3D.webgl.supported()))
-		{
-			debug && XML3D.debug.logWarning("Could not initialise WebGL, sorry :-(");
+        if (!(XML3D.webgl && XML3D.webgl.supported()))
+        {
+            debug && XML3D.debug.logWarning("Could not initialise WebGL, sorry :-(");
 
-			for(var i = 0; i < xml3ds.length; i++)
-			{
-				// Place xml3dElement inside an invisible div
-				var hideDiv      = document.createElementNS(XML3D.xhtmlNS, 'div');
-				var xml3dElement = xml3ds[i];
+            for(var i = 0; i < xml3ds.length; i++)
+            {
+                // Place xml3dElement inside an invisible div
+                var hideDiv      = document.createElementNS(XML3D.xhtmlNS, 'div');
+                var xml3dElement = xml3ds[i];
 
-				xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
-				hideDiv.appendChild(xml3dElement);
-				hideDiv.style.display = "none";
+                xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
+                hideDiv.appendChild(xml3dElement);
+                hideDiv.style.display = "none";
 
-				var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
-				infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
-				infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
-				infoDiv.style.border = "2px solid red";
-				infoDiv.style.color  = "red";
-				infoDiv.style.padding = "10px";
-				infoDiv.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+                var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
+                infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
+                infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
+                infoDiv.style.border = "2px solid red";
+                infoDiv.style.color  = "red";
+                infoDiv.style.padding = "10px";
+                infoDiv.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
 
 
-				var width = xml3dElement.getAttribute("width");
-				if( width !== null)
-				{
-					infoDiv.style.width = width;
-				}
+                var width = xml3dElement.getAttribute("width");
+                if( width !== null)
+                {
+                    infoDiv.style.width = width;
+                }
 
-				var height = xml3dElement.getAttribute("height");
-				if( height !== null)
-				{
-					infoDiv.style.height = height;
-				}
+                var height = xml3dElement.getAttribute("height");
+                if( height !== null)
+                {
+                    infoDiv.style.height = height;
+                }
 
-				var hElement = document.createElement("h3");
-				var hTxt     = document.createTextNode("Your browser doesn't appear to support XML3D.");
-				hElement.appendChild (hTxt);
+                var hElement = document.createElement("h3");
+                var hTxt     = document.createTextNode("Your browser doesn't appear to support XML3D.");
+                hElement.appendChild (hTxt);
 
-				var pElement = document.createElement("p");
-				pElement.appendChild(document.createTextNode("Please visit "));
-				var link = document.createElement("a");
-				link.setAttribute("href", "http://www.xml3d.org");
-				link.appendChild(document.createTextNode("http://www.xml3d.org"));
-				pElement.appendChild(link);
-				pElement.appendChild(document.createTextNode(" to get information about browsers supporting XML3D."));
-				infoDiv.appendChild (hElement);
-				infoDiv.appendChild (pElement);
+                var pElement = document.createElement("p");
+                pElement.appendChild(document.createTextNode("Please visit "));
+                var link = document.createElement("a");
+                link.setAttribute("href", "http://www.xml3d.org");
+                link.appendChild(document.createTextNode("http://www.xml3d.org"));
+                pElement.appendChild(link);
+                pElement.appendChild(document.createTextNode(" to get information about browsers supporting XML3D."));
+                infoDiv.appendChild (hElement);
+                infoDiv.appendChild (pElement);
 
-				hideDiv.parentNode.insertBefore(infoDiv, hideDiv);
-			}
+                hideDiv.parentNode.insertBefore(infoDiv, hideDiv);
+            }
 
-			return;
-		}
+            return;
+        }
 
         try {
             XML3D.config.configure(xml3ds);
@@ -122,25 +122,25 @@ XML3D.createClass = function(ctor, parent, methods) {
             debug && XML3D.debug.logError("Error initalizing webgl: " + e);
         }
 
-		var ready = (function(eventType) {
-			var evt = null;
-			if (document.createEvent) {
-				evt = document.createEvent("Events");
-				evt.initEvent(eventType, true, true);
-				document.dispatchEvent(evt);
-			} else if (document.createEventObject) {
-				evt = document.createEventObject();
-				document.fireEvent('on' + eventType, evt);
-			}
-		})('load');
-	};
-	var onunload = function() {
-		if (XML3D.document)
-			XML3D.document.onunload();
-	};
-	window.addEventListener('load', onload, false);
-	window.addEventListener('unload', onunload, false);
-	window.addEventListener('reload', onunload, false);
+        var ready = (function(eventType) {
+            var evt = null;
+            if (document.createEvent) {
+                evt = document.createEvent("Events");
+                evt.initEvent(eventType, true, true);
+                document.dispatchEvent(evt);
+            } else if (document.createEventObject) {
+                evt = document.createEventObject();
+                document.fireEvent('on' + eventType, evt);
+            }
+        })('load');
+    };
+    var onunload = function() {
+        if (XML3D.document)
+            XML3D.document.onunload();
+    };
+    window.addEventListener('load', onload, false);
+    window.addEventListener('unload', onunload, false);
+    window.addEventListener('reload', onunload, false);
 
 })();
 

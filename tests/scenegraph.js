@@ -128,13 +128,13 @@ test("Transformation creates non-regular matrix", 2, function() {
 });
 
 test("Picking", function() {
-	var xml3d = this.doc.getElementById("myXml3d");
-	var m = xml3d.getElementByPoint(561,203);
-	strictEqual(m, null, "Nothing picked here");
-	
-	m = xml3d.getElementByPoint(447,203);
-	ok(m, "Pick is not null");
-	equal(m && m.id, "myMesh02");
+    var xml3d = this.doc.getElementById("myXml3d");
+    var m = xml3d.getElementByPoint(561,203);
+    strictEqual(m, null, "Nothing picked here");
+    
+    m = xml3d.getElementByPoint(447,203);
+    ok(m, "Pick is not null");
+    equal(m && m.id, "myMesh02");
 
 });
 

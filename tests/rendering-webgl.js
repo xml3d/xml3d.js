@@ -21,7 +21,7 @@ function getContextForXml3DElement(x) {
 };
 
 function getHandler(x) {
-	return x._configured ? x._configured.adapters.XML3DRenderAdapterFactory.factory.handler : null;
+    return x._configured ? x._configured.adapters.XML3DRenderAdapterFactory.factory.handler : null;
 };
 
 test("Background and invisible mesh", 4, function() {
@@ -97,7 +97,7 @@ test("Test mesh.getBoundingBox", 4, function() {
         
         deepEqual([max[0], max[1], max[2]], [1,1,0], "BBox max is (1,1,0)");
         deepEqual([min[0], min[1], min[2]], [-1,-1,0], "BBox min is (-1,-1,0)");
-    	start();
+        start();
     });
     stop();
     group.visible = true;
@@ -366,106 +366,106 @@ module("WebGL Shaders and Textures", {
 });
 
 test("Simple texture", 3, function() {
-	var x = this.doc.getElementById("xml3DElem"),
+    var x = this.doc.getElementById("xml3DElem"),
     actual,
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
-    testFunc = null, h = getHandler(x);	
-	this.doc.getElementById("myGroup").visible = true;
+    testFunc = null, h = getHandler(x);    
+    this.doc.getElementById("myGroup").visible = true;
 
-	x.addEventListener("framedrawn", function(n) {
-	        if(testFunc)
-	            testFunc(n);        
-	});
-	
-	testFunc = function(n) {
-	    actual = win.getPixelValue(gl, 40, 40);
-	    if (actual[0] == 0)
-	    	return;
-	    deepEqual(actual, [241,241,0,255], "Yellow texture");
-	    start();
-	};
-	stop();
+    x.addEventListener("framedrawn", function(n) {
+            if(testFunc)
+                testFunc(n);        
+    });
+    
+    testFunc = function(n) {
+        actual = win.getPixelValue(gl, 40, 40);
+        if (actual[0] == 0)
+            return;
+        deepEqual(actual, [241,241,0,255], "Yellow texture");
+        start();
+    };
+    stop();
 
 });
 
 
 test("Changing texture", 3, function() {
-	var x = this.doc.getElementById("xml3DElem"),
+    var x = this.doc.getElementById("xml3DElem"),
     actual,
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
-    testFunc = null, h = getHandler(x);	
-	this.doc.getElementById("myGroup").visible = true;
-	this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
-	
-	x.addEventListener("framedrawn", function(n) {
-	        if(testFunc)
-	            testFunc(n);
-	});
-	
-	testFunc = function(n) {
-	    actual = win.getPixelValue(gl, 40, 40);
-	    if (actual[0] == 0)
-	    	return;
-	    deepEqual(actual, [241,0,241,255], "Magenta texture");
-	    start();
-	};
-	
-	stop();
+    testFunc = null, h = getHandler(x);    
+    this.doc.getElementById("myGroup").visible = true;
+    this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
+    
+    x.addEventListener("framedrawn", function(n) {
+            if(testFunc)
+                testFunc(n);
+    });
+    
+    testFunc = function(n) {
+        actual = win.getPixelValue(gl, 40, 40);
+        if (actual[0] == 0)
+            return;
+        deepEqual(actual, [241,0,241,255], "Magenta texture");
+        start();
+    };
+    
+    stop();
 
 });
 
 test("NPOT texture resizing", 4, function() {
-	var x = this.doc.getElementById("xml3DElem"),
+    var x = this.doc.getElementById("xml3DElem"),
     actual,
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
-    testFunc = null, h = getHandler(x);	
-	
-	x.addEventListener("framedrawn", function(n) {
-	        if(testFunc)
-	            testFunc(n);
-	});
-	
-	testFunc = function(n) {
-	    actual = win.getPixelValue(gl, 40, 40);
-	    if ((actual[1] + actual[2]) == 0)
-	    	return;
-	    deepEqual(actual, [0,241,0,255], "Green at 40,40");
-	    actual = win.getPixelValue(gl, 120, 80);
-	    deepEqual(actual, [0,0,253,255], "Blue at 120,80");
-	    start();
-	};
-	
-	this.doc.getElementById("npotTexGroup").visible = true;
-	stop();
-	
+    testFunc = null, h = getHandler(x);    
+    
+    x.addEventListener("framedrawn", function(n) {
+            if(testFunc)
+                testFunc(n);
+    });
+    
+    testFunc = function(n) {
+        actual = win.getPixelValue(gl, 40, 40);
+        if ((actual[1] + actual[2]) == 0)
+            return;
+        deepEqual(actual, [0,241,0,255], "Green at 40,40");
+        actual = win.getPixelValue(gl, 120, 80);
+        deepEqual(actual, [0,0,253,255], "Blue at 120,80");
+        start();
+    };
+    
+    this.doc.getElementById("npotTexGroup").visible = true;
+    stop();
+    
 });
 
 test("Textured diffuse shader", 3, function() {
-	var x = this.doc.getElementById("xml3DElem"),
+    var x = this.doc.getElementById("xml3DElem"),
     actual,
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     testFunc = null, h = getHandler(x);
-	var group = this.doc.getElementById("diffuseTexGroup");
-	group.visible = true;
+    var group = this.doc.getElementById("diffuseTexGroup");
+    group.visible = true;
 
-	x.addEventListener("framedrawn", function(n) {
-	        if(testFunc)
-	            testFunc(n);
-	});
-	
-	testFunc = function(n) {
-		actual = win.getPixelValue(gl, 40, 40);
-		if (actual[0] == 0) //texture hasn't finished loading yet
-			return;
-		deepEqual(actual, [241,241,0,255], "Yellow diffuse texture");
-		start();
-	};
-	
-	stop();
+    x.addEventListener("framedrawn", function(n) {
+            if(testFunc)
+                testFunc(n);
+    });
+    
+    testFunc = function(n) {
+        actual = win.getPixelValue(gl, 40, 40);
+        if (actual[0] == 0) //texture hasn't finished loading yet
+            return;
+        deepEqual(actual, [241,241,0,255], "Yellow diffuse texture");
+        start();
+    };
+    
+    stop();
 });
 
 test("Diffuse shader with vertex colors", 3, function() {

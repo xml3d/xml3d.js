@@ -67,21 +67,21 @@
     };
 
     p.notifyChanged = function(evt) {
-    	var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+        var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 
         switch (target) {
         case "parenttransform":
-        	this.parentTransform = evt.newValue;
+            this.parentTransform = evt.newValue;
             this.updateViewMatrix();
         break;
         
         case "orientation":
         case "position":
-        	 this.updateViewMatrix();
+             this.updateViewMatrix();
         break;
         
         case "fieldOfView":
-        	 this.projMatrix = null;
+             this.projMatrix = null;
         break;
         
         default:

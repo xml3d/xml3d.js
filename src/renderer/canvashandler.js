@@ -105,10 +105,10 @@ XML3D.webgl.MAXFPS = 30;
         }, false);
 
         // Block the right-click context menu on the canvas unless it's explicitly toggled
-	    var cm = this.xml3dElem.getAttribute("contextmenu");
-	    if (!cm || cm == "false") {
-	    	this.canvas.addEventListener("contextmenu", function(e) {XML3D.webgl.stopEvent(e);}, false);
-	    }
+        var cm = this.xml3dElem.getAttribute("contextmenu");
+        if (!cm || cm == "false") {
+            this.canvas.addEventListener("contextmenu", function(e) {XML3D.webgl.stopEvent(e);}, false);
+        }
     };
 
     // TODO: Should move to renderer, but is triggered from here
@@ -477,11 +477,11 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.dispatchFrameDrawnEvent = function(start, end, stats) {
         var event = document.createEvent('CustomEvent');
         var data = {
-        		timeStart : start,
-        		timeEnd : end,
-        		renderTimeInMilliseconds : end - start,
-        		numberOfObjectsDrawn : stats[0],
-        		numberOfTrianglesDrawn : Math.floor(stats[1])
+                timeStart : start,
+                timeEnd : end,
+                renderTimeInMilliseconds : end - start,
+                numberOfObjectsDrawn : stats[0],
+                numberOfTrianglesDrawn : Math.floor(stats[1])
         };
         event.initCustomEvent('framedrawn', true, true, data);
 
@@ -540,9 +540,9 @@ XML3D.webgl.createCanvas = function(xml3dElement, index) {
 
 
 XML3D.webgl.stopEvent = function(ev) {
-	if (ev.preventDefault)
-		ev.preventDefault();
-	if (ev.stopPropagation)
-		ev.stopPropagation();
-	ev.returnValue = false;
+    if (ev.preventDefault)
+        ev.preventDefault();
+    if (ev.stopPropagation)
+        ev.stopPropagation();
+    ev.returnValue = false;
 };

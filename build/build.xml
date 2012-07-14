@@ -19,7 +19,6 @@
 		<file name="utils/misc.js" />
 		<file name="utils/array.js" />
 		<file name="utils/debug.js" />
-		<!--<file name="utils/color.js" />-->
 		<file name="utils/uri.js" />
 		<file name="contrib/glu.js" />
 		<file name="contrib/glMatrix.js" />
@@ -59,10 +58,10 @@
         <file name="renderer/adapter/factory.js" />
 		<file name="renderer/shader/base.js" />
 		<file name="renderer/shader/matte.js" />
-		<file name="data/xflow/base.js" />
 		<file name="renderer/shader/diffuse.js" />
 		<file name="renderer/shader/phong.js" />
 		<file name="renderer/shader/utility.js" />
+        <file name="data/xflow/base.js" />
         <file name="data/xflow/morph3.js" />
 		<file name="data/xflow/merge3.js" />
         <file name="data/xflow/sub3.js" />

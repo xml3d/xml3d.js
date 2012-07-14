@@ -15,7 +15,7 @@ XML3D.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	this.shaders = {};
 	
 	//Always create a default flat shader as a fallback for error handling
-	var fallbackShader = this.getStandardShaderProgram("urn:xml3d:shader:flat");
+	var fallbackShader = this.getStandardShaderProgram("matte");
 	fallbackShader.hasTransparency = false;
 	this.bindShader(fallbackShader);
 	this.setUniform(gl, fallbackShader.uniforms["diffuseColor"], [1, 0, 0]);
@@ -23,8 +23,8 @@ XML3D.webgl.XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
 	this.shaders["defaultShader"] = fallbackShader;
 	
 	//Create picking shaders
-	this.shaders["picking"] = this.getStandardShaderProgram("urn:xml3d:shader:picking");
-	this.shaders["pickedNormals"] = this.getStandardShaderProgram("urn:xml3d:shader:pickedNormals");
+	this.shaders["picking"] = this.getStandardShaderProgram("picking");
+	this.shaders["pickedNormals"] = this.getStandardShaderProgram("pickedNormals");
 	
 };
 
@@ -44,7 +44,7 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
     if (shader)
         return shaderId;
 
-    var sources = {vs:null, fs:null};
+    var sources = {vertex:null, fragment:null};
     var dataTable = null;
     var hasTextures = false;
     var hasTransparency = false;
@@ -62,15 +62,15 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
 		var scriptURL = shaderNode.getAttribute("script");
 		if (new XML3D.URI(scriptURL).scheme == "urn") {
 			//Internal shader
-			this.getStandardShaderSource(scriptURL, sources, shaderAdapter, lights, hasTextures);
+			sources = this.getStandardShaderSource(scriptURL, shaderAdapter, lights, hasTextures);
             shader = this.createShaderFromSources(sources);
 		} else {
 			//User-provided shader
 			var vsScript = XML3D.URIResolver.resolve(scriptURL+ "-vs");
 			var fsScript = XML3D.URIResolver.resolve(scriptURL+ "-fs");
 			if (vsScript && fsScript) {
-				sources.vs = vsScript.textContent;
-				sources.fs = fsScript.textContent;
+				sources.vertex = vsScript.textContent;
+				sources.fragment = fsScript.textContent;
 			}
 			
             shader = this.createShaderFromSources(sources);
@@ -96,51 +96,47 @@ XML3D.webgl.XML3DShaderManager.prototype.createShader = function(shaderAdapter, 
    return shaderId;	
 };
 
-XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights, hasTextures) {
-	//Need to check for textures to decide which internal shader to use
-	var vertexColors = false;
+XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, shaderAdapter, lights, hasTextures) {
+    var sources = {vertex:null, fragment:null};
+	var shaderName = scriptURL.substring(scriptURL.lastIndexOf(':')+1);
 	var dataTable = shaderAdapter.getDataTable();	
 	
-	if (scriptURL == "urn:xml3d:shader:phong" && hasTextures)
-		scriptURL = "urn:xml3d:shader:texturedphong";
-	else if (scriptURL == "urn:xml3d:shader:diffuse" && hasTextures)
-		scriptURL = "urn:xml3d:shader:textureddiffuse";
+	//Need to check for textures to decide which internal shader to use
+	if (hasTextures && (shaderName == "phong" || shaderName == "diffuse"))
+	    shaderName = "textured"+shaderName;
 	
 	if (dataTable.useVertexColor && dataTable.useVertexColor.data[0] == true)
-		scriptURL += "vcolor";
+	    shaderName += "vcolor";
 	
-	switch (scriptURL) {
-	case "urn:xml3d:shader:phong":
-	case "urn:xml3d:shader:texturedphong":
-	case "urn:xml3d:shader:phongvcolor":
-	case "urn:xml3d:shader:diffuse":
-	case "urn:xml3d:shader:textureddiffuse":
-	case "urn:xml3d:shader:diffusevcolor":
+	switch (shaderName) {
+	case "phong":
+	case "texturedphong":
+	case "phongvcolor":
+	case "diffuse":
+	case "textureddiffuse":
+	case "diffusevcolor":
 		// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
-		var sfrag = g_shaders[scriptURL].fragment;
+	    sources = XML3D.shaders.getScript(shaderName);
+	    
+		var sfrag = sources.fragment;
 		var maxLights = "#define MAXLIGHTS " + lights.length.toString() + "\n";
-
 		var frag = maxLights + sfrag;
 
-		sources.vs = g_shaders[scriptURL].vertex;
-		sources.fs = frag;
+		sources.fragment = frag;
 		break;
 	default:
-		if (g_shaders[scriptURL]){
-			sources.vs = g_shaders[scriptURL].vertex;
-			sources.fs = g_shaders[scriptURL].fragment;
-		}			
+	    sources = XML3D.shaders.getScript(shaderName);			
 	}
+	return sources;
 };
 
 XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function(name) {
 	var sources = {};
 	
-	if (!g_shaders[name]) {
-		XML3D.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
-	} else {
-		sources.vs = g_shaders[name].vertex;
-		sources.fs = g_shaders[name].fragment;
+	sources = XML3D.shaders.getScript(name);
+	if (!sources || !sources.vertex) {
+	    sources = {};
+	    XML3D.debug.logError("Unknown shader: "+name+". Using flat shader instead.");
 	}
 	
 	var shaderProgram = this.createShaderFromSources(sources);	
@@ -151,14 +147,14 @@ XML3D.webgl.XML3DShaderManager.prototype.getStandardShaderProgram = function(nam
 XML3D.webgl.XML3DShaderManager.prototype.createShaderFromSources = function(sources) {
 	var gl = this.gl;
 	
-	if (!sources.vs || !sources.fs) {
+	if (!sources.vertex || !sources.fragment) {
 		return this.shaders["defaultShader"];
 	}
 	
 	var prg = gl.createProgram();
 	
-	var vShader = this.compileShader(gl.VERTEX_SHADER, sources.vs);
-	var fShader = this.compileShader(gl.FRAGMENT_SHADER, sources.fs);
+	var vShader = this.compileShader(gl.VERTEX_SHADER, sources.vertex);
+	var fShader = this.compileShader(gl.FRAGMENT_SHADER, sources.fragment);
 	
 	if (vShader === null || fShader === null) {
 		//Use a default flat shader instead

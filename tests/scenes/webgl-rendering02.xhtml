@@ -61,6 +61,7 @@
     </shader>   
     <shader id="diffuseShader" script="urn:xml3d:shader:diffuse">
         <float3 name="diffuseColor">1 1 1</float3>
+        <float name="ambientIntensity">1</float>
         <bool name="useVertexColor">true</bool>
     </shader> 
     <data id="meshdata" type="triangles">
@@ -79,9 +80,21 @@
         <data src="#meshdata"/>
         <float3 name="color">0.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.0 1.0 1.0 0.0</float3>
     </data>
+    
+    <lightshader id="ls_Spot" script="urn:xml3d:lightshader:point">
+        <float3 name="attenuation">1 0 0</float3>
+       <float3 name="intensity">
+        1 1 1
+       </float3>
+      </lightshader>
+      <transform id="t_Lamp" translation="0 0 3"/>
+      
     </defs>
     
     <view id="defaultView" position="0 0 3"/>
+    <group transform="#t_Lamp" id="mainlight">
+      <light shader="#ls_Spot"/>
+    </group>
     
     <group id="myGroup" shader="#texShader1" visible="false">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">

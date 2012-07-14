@@ -17,19 +17,19 @@ XML3D.shaders.register("phong", {
         "void main(void) {",
         "    vec3 pos = position;",
         "    vec3 norm = normal; //~",
-        
+
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
         "    fragNormal = normalize(normalMatrix * norm);",
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
         "    fragEyeVector = normalize(fragVertexPosition);",
-        "}",
+        "}"
     ].join("\n"),
-        
+
     fragment: [
         "#ifdef GL_ES",
           "precision highp float;",
         "#endif",
-        
+
         "uniform float ambientIntensity;",
         "uniform vec3 diffuseColor;",
         "uniform vec3 emissiveColor;",
@@ -76,22 +76,22 @@ XML3D.shaders.register("texturedphong", {
         "attribute vec3 position;",
         "attribute vec3 normal;",
         "attribute vec2 texcoord;",
-        
+
         "varying vec3 fragNormal;",
         "varying vec3 fragVertexPosition;",
         "varying vec3 fragEyeVector;",
         "varying vec2 fragTexCoord;",
-        
+
         "uniform mat4 modelViewProjectionMatrix;",
         "uniform mat4 modelViewMatrix;",
         "uniform mat3 normalMatrix;",
         "uniform vec3 eyePosition;",
-        
+
         "void main(void) {",
         "    vec2 tex = texcoord;",
         "    vec3 pos = position;",
         "    vec3 norm = normal;",
-        
+
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
         "    fragNormal = normalize(normalMatrix * norm);",
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
@@ -127,7 +127,7 @@ XML3D.shaders.register("texturedphong", {
         "uniform vec3 lightDiffuseColors[MAXLIGHTS];",
         "uniform vec3 lightVisibility[MAXLIGHTS];",
         "#endif",
-        
+
         "void main(void) {",
         "  vec4 color = vec4(emissiveColor, 0.0);",
         "#if MAXLIGHTS > 0",
@@ -171,7 +171,7 @@ XML3D.shaders.register("phongvcolor", {
         "void main(void) {",
         "    vec3 pos = position;",
         "    vec3 norm = normal; //~",
-        
+
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
         "    fragNormal = normalize(normalMatrix * norm);",
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
@@ -179,7 +179,7 @@ XML3D.shaders.register("phongvcolor", {
         "    fragVertexColor = color;",
         "}"
     ].join("\n"),
-        
+
     fragment : [
         "#ifdef GL_ES",
         "precision highp float;",
@@ -203,7 +203,7 @@ XML3D.shaders.register("phongvcolor", {
         "uniform vec3 lightDiffuseColors[MAXLIGHTS];",
         "uniform vec3 lightVisibility[MAXLIGHTS];",
         "#endif",
-        
+
         "void main(void) {",
         "  if (transparency > 0.95) discard;",
         "  vec3 color = emissiveColor;",

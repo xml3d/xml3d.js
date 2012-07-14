@@ -16,7 +16,7 @@ XML3D.shaders.register("picking", {
         "    worldCoord = worldCoord - min;",
         "    worldCoord = worldCoord / diff;",
         "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
-        "}",
+        "}"
     ].join("\n"),
 
     fragment : [
@@ -28,7 +28,7 @@ XML3D.shaders.register("picking", {
 
         "void main(void) {",
         "    gl_FragColor = vec4(worldCoord, id);",
-        "}",
+        "}"
     ].join("\n")
 });
 
@@ -41,7 +41,7 @@ XML3D.shaders.register("pickedNormals", {
         "uniform mat3 normalMatrix;",
 
         "varying vec3 fragNormal;",
-        
+
         "void main(void) {",
         "    fragNormal = normalize(normalMatrix * normal);",
         "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
@@ -52,7 +52,7 @@ XML3D.shaders.register("pickedNormals", {
         "#ifdef GL_ES",
           "precision highp float;",
         "#endif",
-        
+
         "varying vec3 fragNormal;",
 
         "void main(void) {",

@@ -16,12 +16,12 @@ XML3D.shaders.register("diffuse", {
         "void main(void) {",
         "    vec3 pos = position;",
         "    vec3 norm = normal; //~",
-        
+
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
         "    fragNormal = normalize(normalMatrix * norm);",
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
         "    fragEyeVector = normalize(fragVertexPosition);",
-        "}," 
+        "}"
     ].join("/n"),
 
     fragment : [
@@ -83,20 +83,20 @@ XML3D.shaders.register("textureddiffuse", {
         "    vec2 tex = texcoord;",
         "    vec3 pos = position;",
         "    vec3 norm = normal; //~",
-        
+
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
         "    fragNormal = normalize(normalMatrix * norm);",
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
         "    fragEyeVector = normalize(fragVertexPosition);",
         "    fragTexCoord = tex;",
-        "}",
+        "}"
     ].join("\n"),
 
     fragment : [
         "#ifdef GL_ES",
           "precision highp float;",
         "#endif",
-        
+
         "uniform vec3 diffuseColor;",
         "uniform sampler2D diffuseTexture;",
         "uniform vec3 emissiveColor;",
@@ -128,7 +128,7 @@ XML3D.shaders.register("textureddiffuse", {
         "      }",
         "  #endif",
         "  gl_FragColor = vec4(color, 1.0);",
-        "}",
+        "}"
     ].join("\n")
 });
 
@@ -153,13 +153,13 @@ XML3D.shaders.register("diffusevcolor", {
         "void main(void) {",
         "    vec3 pos = position;",
         "    vec3 norm = normal; //~",
-        
+
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
         "    fragNormal = normalize(normalMatrix * norm);",
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
         "    fragEyeVector = normalize(fragVertexPosition);",
         "    fragVertexColor = color;",
-        "}",
+        "}"
     ].join("\n"),
 
     fragment : [

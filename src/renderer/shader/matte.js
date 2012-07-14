@@ -19,7 +19,7 @@ XML3D.shaders.register("matte", {
         "void main(void) {",
         "    gl_FragColor = vec4(diffuseColor, 1.0);",
         "}"
-    ].join("\n"),
+    ].join("\n")
 });
 
 XML3D.shaders.register("flat", XML3D.shaders.getScript("matte"));
@@ -35,7 +35,7 @@ XML3D.shaders.register("mattevcolor", {
         "    vec3 pos = position;",
         "    fragVertexColor = color;",
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
-        "}",
+        "}"
     ].join("\n"),
 
     fragment: [
@@ -47,7 +47,7 @@ XML3D.shaders.register("mattevcolor", {
         "void main(void) {",
         "    gl_FragColor = vec4(fragVertexColor, 1.0);",
         "}"
-    ].join("\n"),
+    ].join("\n")
 });
 
 XML3D.shaders.register("flatvcolor", XML3D.shaders.getScript("mattevcolor"));

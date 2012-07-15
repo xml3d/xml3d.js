@@ -93,7 +93,6 @@
         if (shader)
             return shaderId;
 
-    var sources = {vertex:null, fragment:null};
         var flags = {hasTextures : false, hasTransparency : false, hasVColors : false};
 
         if (shaderAdapter) {
@@ -109,11 +108,12 @@
     	{
     		var scriptURL = shaderNode.getAttribute("script");
     		if (new XML3D.URI(scriptURL).scheme == "urn") {
-    			//Internal shader
-    			this.getStandardShaderSource(scriptURL, sources, shaderAdapter, lights, flags);
-                shader = this.createShaderFromSources(sources);
+            //Internal shader
+            var sources = this.getStandardShaderSource(scriptURL, shaderAdapter, lights, flags);
+            shader = this.createShaderFromSources(sources);
     		} else {
-    			//User-provided shader
+                //User-provided shader
+                var sources = {};
     			var vsScript = XML3D.URIResolver.resolve(scriptURL+ "-vs");
     			var fsScript = XML3D.URIResolver.resolve(scriptURL+ "-fs");
     			if (vsScript && fsScript) {
@@ -151,7 +151,7 @@
        return shaderId;
     };
 
-    XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, sources, shaderAdapter, lights, flags) {
+    XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, shaderAdapter, lights, flags) {
     	//Need to check for textures to decide which internal shader to use
     var sources = {vertex:null, fragment:null};
     var shaderName = scriptURL.substring(scriptURL.lastIndexOf(':')+1);
@@ -164,25 +164,25 @@
         shaderName += "vcolor";
 
     switch (shaderName) {
-    case "phong":
-    case "texturedphong":
-    case "phongvcolor":
-    case "diffuse":
-    case "textureddiffuse":
-    case "diffusevcolor":
+        case "phong":
+        case "texturedphong":
+        case "phongvcolor":
+        case "diffuse":
+        case "textureddiffuse":
+        case "diffusevcolor":
         case "normal":
-        case "urn:xml3d:shader:reflection":
-    		// Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
-        sources = XML3D.shaders.getScript(shaderName);
-    		var maxLights = "";
-    		maxLights += "#define MAX_POINTLIGHTS " + lights.point.length.toString() + "\n";
-    		maxLights += "#define MAX_DIRECTIONALLIGHTS " + lights.directional.length.toString() + "\n";
-            sources.vertex = maxLights + sources.vertex;
-    	    sources.fragment = maxLights + sources.fragment;
+        case "reflection":
+            // Workaround for lack of dynamic loops on ATI cards below the HD 5000 line
+            var template = XML3D.shaders.getScript(shaderName);
+            var maxLights = "";
+            maxLights += "#define MAX_POINTLIGHTS " + lights.point.length.toString() + "\n";
+            maxLights += "#define MAX_DIRECTIONALLIGHTS " + lights.directional.length.toString() + "\n";
+            sources.vertex = maxLights + template.vertex;
+            sources.fragment = maxLights + template.fragment;
             break;
-    	default:
-        sources = XML3D.shaders.getScript(shaderName);
-    	}
+        default:
+            sources = XML3D.shaders.getScript(shaderName);
+    }
     return sources;
     };
 

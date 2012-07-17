@@ -1,7 +1,7 @@
 // data/factory.js
 (function() {
     "use strict";
-    
+
     /**
      * Class XML3D.webgl.XML3DDataAdapterFactory
      * extends: XML3D.data.AdapterFactory
@@ -57,6 +57,39 @@
         return XML3D.data.AdapterFactory.prototype.getAdapter.call(this, node, XML3D.data.XML3DDataAdapterFactory.prototype);
     };
 
+    var externalAdapters = {};
+    /**
+     * Tries to create an adapter from an URI
+     *
+     * @param {uri} node
+     * @returns {Adapter} An resolved adapter
+     */
+    XML3DDataAdapterFactory.prototype.getAdapterURI = function(uri)
+    {
+        // TODO: cache
+        uri = new XML3D.URI(uri);
+        var element = XML3D.URIResolver.resolve(uri);
+        if (element)
+            return XML3D.data.AdapterFactory.prototype.getAdapter.call(this, element, XML3D.data.XML3DDataAdapterFactory.prototype);
+
+        var a = externalAdapters[uri];
+        if (a)
+            return a;
+
+        for(var f in factories) {
+            var fac = factories[f];
+            if (fac.isFactoryFor(uri)) {
+                a = fac.createAdapter(uri);
+                if (a) {
+                    externalAdapters[uri] = a;
+                    //a.init();
+                }
+                return a;
+            }
+        };
+    };
+
+
     var data = XML3D.data, reg = {};
 
     reg['mesh']        = data.SinkDataAdapter;
@@ -93,8 +126,13 @@
         return null;
     };
 
+    var factories = {};
+    XML3D.data.registerFactory = function(name, factory) {
+        factories[name] = factory;
+    };
+
     // Export
     XML3D.data.XML3DDataAdapterFactory = XML3DDataAdapterFactory;
 
-    
+
 }());

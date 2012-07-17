@@ -9,6 +9,7 @@ XML3D.data = XML3D.data || {};
     var ProviderEntry = function(table) {
         this.consumers = new Array();
         this.table = table;
+        this.data = {}; // Attached user data
     };
     ProviderEntry.prototype.getValue = function() {
     };
@@ -160,7 +161,6 @@ XML3D.data = XML3D.data || {};
         ProviderEntry.call(this, table);
         this.script = script;
         this.name = name;
-        this.data = {}; // Attached user data
         this.script.registerOutput(this);
 
         this.getValue = function(cb) {

@@ -439,7 +439,6 @@ XML3D.animation.RotationArray.parse = function(str) {
         var q = vecs[i]._data;
         os += q[3] + " " + q[0] + " " + q[1] + " " + q[2] + " ";
     }
-    console.log(os);
 
     return new XML3D.animation.RotationArray(vecs);
 };

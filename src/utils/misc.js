@@ -35,13 +35,13 @@ XML3D.setParameter = function(elementId, fieldName, value) {
     return false;
 };
 
-window.requestAnimFrame = (function(f,fps){
+window.requestAnimFrame = (function(){
     return  window.requestAnimationFrame       ||
             window.webkitRequestAnimationFrame ||
             window.mozRequestAnimationFrame    ||
             window.oRequestAnimationFrame      ||
             window.msRequestAnimationFrame     ||
-            function(){
+            function(f, fps){
               window.setTimeout(f, 1000 / fps);
             };
   })();

@@ -327,7 +327,7 @@ test("Interface initialization", function() {
     QUnit.closeRotation(t.rotation, new XML3DRotation(new XML3DVec3(1, 0, 0), 1.5708), EPSILON,
             "XML3DRotation (transform::rotation) initialized.");
     QUnit.close(v.fieldOfView, 0.5, EPSILON, "Float (view::rotation) initialized.");
-    QUnit.close(x.width, 500, EPSILON, "Int (xml3d::width) initialized.");
+    equal(x.width, 1000, "Int (xml3d::width) initialized.");
     equal(g.visible, false, "Boolean (group::visible) initialized.");
     equal(m.type, "lines", "Enumeration (mesh::type) initialized.");
     equal(g.onclick, null, "Event attribute (group::onclick) non-initialized.");

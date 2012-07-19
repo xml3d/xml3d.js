@@ -136,10 +136,10 @@ module("Mutation tests", {
 test("DOMNodeInserted on xml3d", 5, function() {
     // 1: Found frame
     // 2: Scene loaded
-	var x = this.doc.getElementById("myXml3d");
-	var g = this.doc.createElementNS(XML3D.xml3dNS, "group");
-	this.factory.getAdapter(x); // 3: Init adapter
-	x.appendChild(g); // 4: Adapter for myXml3d has been notified: Notification (type:0)
+    var x = this.doc.getElementById("myXml3d");
+    var g = this.doc.createElementNS(XML3D.xml3dNS, "group");
+    this.factory.getAdapter(x); // 3: Init adapter
+    x.appendChild(g); // 4: Adapter for myXml3d has been notified: Notification (type:0)
     equal(this.factory.event.type, XML3D.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5
 });
 

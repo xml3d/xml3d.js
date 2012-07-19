@@ -48,9 +48,17 @@
             0 0 0
         </float3>
     </shader>
+    <shader id="flatred" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">
+            1 0 0
+        </float3>
+    </shader>
     <shader id="phonggreen" script="urn:xml3d:shader:phong">
         <float3 id="phonggreen_color" name="diffuseColor">
             0 1 0
+        </float3>
+        <float3 id="phonggreen_emissive" name="emissiveColor">
+            0 0 0
         </float3>
     </shader>
     
@@ -79,7 +87,11 @@
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
     </group>
     
-    <group id="group1" shader="#phonggreen" visible="false">
+    <group id="implicitLight" visible="false" shader="#phonggreen">
+        <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
+    </group>
+    
+    <group id="group1" shader="#flatyellow" visible="false">
     <group id="group2" shader="#flatblue">
         <mesh id="myNestedMesh" src="#meshdata" type="triangles">
               
@@ -111,8 +123,8 @@
         <group transform="#t_cubeback" shader="#flatyellow">
             <mesh src="#meshdata" type="triangles"/>
         </group>
-         <group transform="#t_cubefront" >
-        <mesh src="#meshdata" type="triangles"/>
+         <group transform="#t_cubefront">
+            <mesh src="#meshdata" type="triangles"/>
         </group>
     </group>
     </xml3d>

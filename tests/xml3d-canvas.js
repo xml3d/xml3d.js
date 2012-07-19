@@ -17,9 +17,11 @@ module("Canvas configuration tests", {
 });
 
 test("Default canvas size", function() {
+    // 1: Found frame
+    // 2: Scene loaded
     var c = this.doc.getElementById("default");
-    equal(c.width, 800);
-    equal(c.height, 600);
+    equal(c.width, 800); // 3
+    equal(c.height, 600); // 4
     equal(c.clientWidth, 800);
     equal(c.clientHeight, 600);
     equal(c.style.width, "");
@@ -47,12 +49,25 @@ test("Canvas size with style attribute", function() {
     equal(c.style.height, "20px");
 }); 
 
-test("Canvas size with class attribute", function() {
+test("Canvas size with class attribute", 20, function() {
     var c = this.doc.getElementById("css-class");
     equal(c.width, 800);
     equal(c.height, 600);
     equal(c.clientWidth, 20);
     equal(c.clientHeight, 40);
+    equal(c.clientTop, 1);
+    equal(c.clientLeft, 1);
+    equal(c.offsetWidth, 22, "Test offsetWidth: + 2* 1px border"); // 1px border
+    equal(c.offsetHeight, 42, "Test offsetHeight: + 2* 1px border"); // 1px border
+    equal(c.offsetTop, 40, "Test offsetTop");
+    equal(c.offsetLeft, 80, "Test offsetLeft");
+    var cr = c.getBoundingClientRect();
+    equal(cr.bottom, 82, "getBoundingClientRect().bottom");
+    equal(cr.height, 42, "getBoundingClientRect().height");
+    equal(cr.left, 80, "getBoundingClientRect().left");
+    equal(cr.right, 102, "getBoundingClientRect().right");
+    equal(cr.top, 40, "getBoundingClientRect().top");
+    equal(cr.width, 22, "getBoundingClientRect().width");
     equal(c.style.width, "");
     equal(c.style.height, "");
 }); 
@@ -65,6 +80,19 @@ test("Canvas size attributes vs style", function() {
     equal(c.clientHeight, 20);
     equal(c.style.width, "40px");
     equal(c.style.height, "20px");
+}); 
+
+test("Canvas positioning with style", function() {
+    var c = this.doc.getElementById("positioning-css-style");
+    equal(c.style.left, "30px"); // Interface values come from attribute
+    equal(c.style.top, "50px");
+
+    c = this.doc.getElementById("positioning-css-class");
+    if(c._configured) { // WebGL only
+        var canvasStyle = this.doc.defaultView.getComputedStyle(c._configured.canvas);
+        equal(canvasStyle.getPropertyValue("left"), "80px");
+        equal(canvasStyle.getPropertyValue("top"), "40px");
+    }
 }); 
 
 test("Canvas size with css element selector (dynamic)", function() {
@@ -87,11 +115,12 @@ test("Element CSS", function() {
     equal(canvasStyle.getPropertyValue("border-top-width"), "1px", "Border size.");
 });
 
+// For some reason, Chrome hangs up at this test
 test("Element CSS (WebGL)", function() {
     var c = this.doc.getElementById("default");
-    if(!c._configured)
-        return;
-    var canvasStyle = this.doc.defaultView.getComputedStyle(c._configured.canvas);
-    equal(canvasStyle.getPropertyValue("background-color"), "rgb(255, 0, 0)", "Background color is red.");
-    equal(canvasStyle.getPropertyValue("border-top-width"), "1px", "Border size.");
+    if(c._configured) {
+        var canvasStyle = this.doc.defaultView.getComputedStyle(c._configured.canvas);
+        equal(canvasStyle.getPropertyValue("background-color"), "rgb(255, 0, 0)", "Background color is red.");
+        equal(canvasStyle.getPropertyValue("border-top-width"), "1px", "Border size.");
+    }
 });

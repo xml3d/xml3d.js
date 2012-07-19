@@ -57,7 +57,7 @@ XML3D.webgl.MAXFPS = 30;
             if (handler.update())
                 handler.draw();
 
-            requestAnimFrame(handler._tick, XML3D.webgl.MAXFPS);
+            window.requestAnimFrame(handler._tick, XML3D.webgl.MAXFPS);
         };
 
         this.redraw = function(reason, forcePickingRedraw) {
@@ -91,6 +91,9 @@ XML3D.webgl.MAXFPS = 30;
         canvas.addEventListener("click", function(e) {
             handler.click(e);
         }, false);
+        canvas.addEventListener("dblclick", function(e) {
+            handler.click(e, true);
+        }, false);
         canvas.addEventListener("mousewheel", function(e) {
             handler.mouseWheel(e);
         }, false);
@@ -102,10 +105,10 @@ XML3D.webgl.MAXFPS = 30;
         }, false);
 
         // Block the right-click context menu on the canvas unless it's explicitly toggled
-	    var cm = this.xml3dElem.getAttribute("contextmenu");
-	    if (!cm || cm == "false") {
-	    	this.canvas.addEventListener("contextmenu", function(e) {XML3D.webgl.stopEvent(e);}, false);
-	    }
+        var cm = this.xml3dElem.getAttribute("contextmenu");
+        if (!cm || cm == "false") {
+            this.canvas.addEventListener("contextmenu", function(e) {XML3D.webgl.stopEvent(e);}, false);
+        }
     };
 
     // TODO: Should move to renderer, but is triggered from here
@@ -164,7 +167,7 @@ XML3D.webgl.MAXFPS = 30;
         var viewMat = this.renderer.camera.viewMatrix;
         var projMat = this.renderer.camera.getProjectionMatrix(viewport[2] / viewport[3]);
 
-        var ray = new XML3DRay();
+        var ray = new window.XML3DRay();
 
         var nearHit = new Array();
         var farHit = new Array();
@@ -181,7 +184,7 @@ XML3D.webgl.MAXFPS = 30;
         // calculate ray
 
         ray.origin = this.renderer.currentView.position;
-        ray.direction = new XML3DVec3(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
+        ray.direction = new window.XML3DVec3(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
         ray.direction = ray.direction.normalize();
 
         return ray;
@@ -236,11 +239,11 @@ XML3D.webgl.MAXFPS = 30;
      *            the screen x-coordinate
      * @param y
      *            the screen y-coordinate
-     * @param (optional)
-     *            event the W3 DOM MouseEvent, if present (currently not when
+     * @param event
+     *            the W3 DOM MouseEvent, if present (currently not when
      *            SpiderGL's blur event occurs)
-     * @param (optional)
-     *            target the element to which the event is to be dispatched. If
+     * @param target
+     *            the element to which the event is to be dispatched. If
      *            this is not given, the currentPickObj will be taken or the
      *            xml3d element, if no hit occured.
      *
@@ -318,11 +321,11 @@ XML3D.webgl.MAXFPS = 30;
 
         event.__defineGetter__("normal", function() {
             handler.renderPickedNormals(xml3dElem.currentPickObj, x, y);
-            var v = scene.xml3d.currentPickNormal.v;
-            return new XML3DVec3(v[0], v[1], v[2]);
+            var v = xml3dElem.currentPickNormal.v;
+            return new window.XML3DVec3(v[0], v[1], v[2]);
         });
         event.__defineGetter__("position", function() {
-            return scene.xml3d.currentPickPos;
+            return xml3dElem.currentPickPos;
         });
     };
 
@@ -380,14 +383,16 @@ XML3D.webgl.MAXFPS = 30;
      * @param y
      * @return
      */
-    CanvasHandler.prototype.click = function(evt) {
+    CanvasHandler.prototype.click = function(evt, isdbl) {
         var pos = this.getMousePosition(evt);
         if (this.isDragging) {
             this.needPickingDraw = true;
             return;
         }
-
-        this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
+        if (isdbl == true)
+            this.dispatchMouseEvent("dblclick", evt.button, pos.x, pos.y, evt);
+        else
+            this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
 
         return false; // don't redraw
     };
@@ -472,11 +477,11 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.dispatchFrameDrawnEvent = function(start, end, stats) {
         var event = document.createEvent('CustomEvent');
         var data = {
-        		timeStart : start,
-        		timeEnd : end,
-        		renderTimeInMilliseconds : end - start,
-        		numberOfObjectsDrawn : stats[0],
-        		numberOfTrianglesDrawn : Math.floor(stats[1])
+                timeStart : start,
+                timeEnd : end,
+                renderTimeInMilliseconds : end - start,
+                numberOfObjectsDrawn : stats[0],
+                numberOfTrianglesDrawn : Math.floor(stats[1])
         };
         event.initCustomEvent('framedrawn', true, true, data);
 
@@ -527,29 +532,6 @@ XML3D.webgl.createCanvas = function(xml3dElement, index) {
         if (bgcolor && bgcolor != "transparent")
             canvas.style.backgroundColor = bgcolor;
     }
-    // First set the computed for some important attributes, they might be
-    // overwritten
-    // by class attribute later
-    var sides = [ "top", "right", "bottom", "left" ];
-    var colorStr = "";
-    var styleStr = "";
-    var widthStr = "";
-    var paddingStr = "";
-    var marginStr = "";
-    for (var i in sides) {
-        colorStr += style.getPropertyValue("border-" + sides[i] + "-color") + " ";
-        styleStr += style.getPropertyValue("border-" + sides[i] + "-style") + " ";
-        widthStr += style.getPropertyValue("border-" + sides[i] + "-width") + " ";
-        paddingStr += style.getPropertyValue("padding-" + sides[i]) + " ";
-        marginStr += style.getPropertyValue("margin-" + sides[i]) + " ";
-    }
-    canvas.style.borderColor = colorStr;
-    canvas.style.borderStyle = styleStr;
-    canvas.style.borderWidth = widthStr;
-    canvas.style.padding = paddingStr;
-    canvas.style.margin = marginStr;
-    canvas.style.float = style.getPropertyValue("float");
-
     // Need to be set for correct canvas size
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
@@ -558,9 +540,9 @@ XML3D.webgl.createCanvas = function(xml3dElement, index) {
 
 
 XML3D.webgl.stopEvent = function(ev) {
-	if (ev.preventDefault)
-		ev.preventDefault();
-	if (ev.stopPropagation)
-		ev.stopPropagation();
-	ev.returnValue = false;
+    if (ev.preventDefault)
+        ev.preventDefault();
+    if (ev.stopPropagation)
+        ev.stopPropagation();
+    ev.returnValue = false;
 };

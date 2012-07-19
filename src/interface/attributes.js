@@ -13,9 +13,8 @@
         }
     }, handler = {}, events = XML3D.events;
 
-    AttributeHandler = function(elem) {
+    var AttributeHandler = function(elem) {
         this.setter = function(e) {
-            console.log("AttributeHandler:: " + e);
         };
     };
 
@@ -192,7 +191,7 @@
 
         this.setFromAttribute = function(value) {
             if (!v) {
-                v = new XML3DVec3(0, 0, 0, changed);
+                v = new window.XML3DVec3(0, 0, 0, changed);
             }
             var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
             if (!m) {
@@ -211,7 +210,7 @@
                     if (this.hasAttribute(id))
                         that.setFromAttribute(this.getAttribute(id));
                     else
-                        v = new XML3DVec3(d[0], d[1], d[2], changed);
+                        v = new window.XML3DVec3(d[0], d[1], d[2], changed);
                 }
                 return v;
             },
@@ -230,7 +229,7 @@
 
         this.setFromAttribute = function(value) {
             if (!v) {
-                v = new XML3DRotation(null, null, changed);
+                v = new window.XML3DRotation(null, null, changed);
             }
             var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
             if (!m) {
@@ -255,7 +254,7 @@
                     if (this.hasAttribute(id))
                         that.setFromAttribute(this.getAttribute(id));
                     else
-                        v = new XML3DRotation(new XML3DVec3(d[0], d[1], d[2]), d[3], changed);
+                        v = new window.XML3DRotation(new window.XML3DVec3(d[0], d[1], d[2]), d[3], changed);
                 }
                 return v;
             },
@@ -350,11 +349,12 @@
 
     handler.CanvasClassHandler = function(e, id) {
         var canvas = e._configured.canvas;
+        canvas.className = "_xml3d"; // Class name always defined for xml3d canvas
         this.desc = {};
         this.desc.get = function() { return canvas.className; };
         this.desc.set = function(value) { canvas.className = value; };
         this.setFromAttribute = function(value) {
-            canvas.setAttribute(id, value);
+            canvas.setAttribute(id, value + " _xml3d");
         };
         if (e.hasAttribute(id))
             this.setFromAttribute(e.getAttribute(id));

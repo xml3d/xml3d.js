@@ -6,28 +6,28 @@ new (function() {
     var methods = {};
 
     methods.xml3dCreateXML3DVec3 = function() {
-        return new XML3DVec3();
+        return new window.XML3DVec3();
     };
 
     methods.xml3dCreateXML3DRay = function() {
-        return new XML3DRay();
+        return new window.XML3DRay();
     };
 
     methods.xml3dGetElementByRay = function() {
-        console.error(this.nodeName + "::getElementByRay is not implemeted yet.");
+        XML3D.debug.logError(this.nodeName + "::getElementByRay is not implemeted yet.");
         return null;
     };
 
     methods.xml3dCreateXML3DMatrix = function() {
-        return new XML3DMatrix();
+        return new window.XML3DMatrix();
     };
 
     methods.xml3dCreateXML3DRotation = function() {
-        return new XML3DRotation();
+        return new window.XML3DRotation();
     };
 
     methods.viewGetDirection = function() {
-        return this.orientation.rotateVec3(new XML3DVec3(0, 0, -1));
+        return this.orientation.rotateVec3(new window.XML3DVec3(0, 0, -1));
     };
 
     methods.viewSetPosition = function(pos) {
@@ -86,15 +86,15 @@ new (function() {
     };
 
     methods.viewSetDirection = function(direction) {
-        direction = direction || new XML3DVec3(0,0,-1);
+        direction = direction || new window.XML3DVec3(0,0,-1);
         direction = direction.normalize();
 
-        var up = this.orientation.rotateVec3(new XML3DVec3(0,1,0));
+        var up = this.orientation.rotateVec3(new window.XML3DVec3(0,1,0));
         up = up.normalize();
 
         vec3.cross(direction._data,up._data,tmpX);
         if(!vec3.length(tmpX)) {
-                tmpX = this.orientation.rotateVec3(new XML3DVec3(1,0,0))._data;
+                tmpX = this.orientation.rotateVec3(new window.XML3DVec3(1,0,0))._data;
         }
         vec3.cross(tmpX,direction._data,tmpY);
         vec3.negate(direction._data,tmpZ);
@@ -105,18 +105,18 @@ new (function() {
     };
 
     methods.viewSetUpVector = function(up) {
-    	up = up || new XML3DVec3(0,1,0);
-    	up = up.normalize();
+        up = up || new window.XML3DVec3(0,1,0);
+        up = up.normalize();
 
-    	var r = new XML3DRotation();
-    	r.setRotation(new XML3DVec3(0,1,0),up);
-    	r = this.orientation.multiply(r);
-    	r = r.normalize();
-    	this.orientation.set(r);
+        var r = new window.XML3DRotation();
+        r.setRotation(new window.XML3DVec3(0,1,0),up);
+        r = this.orientation.multiply(r);
+        r = r.normalize();
+        this.orientation.set(r);
     };
 
     methods.viewGetUpVector = function() {
-        return this.orientation.rotateVec3(new XML3DVec3(0, 1, 0));
+        return this.orientation.rotateVec3(new window.XML3DVec3(0, 1, 0));
     };
 
     methods.viewLookAt = function(point) {
@@ -134,7 +134,7 @@ new (function() {
         var p = this.position;
         var r = this.orientation;
         var a = r.axis;
-        return new XML3DMatrix().translate(p.x, p.y, p.z).rotateAxisAngle(a.x, a.y, a.z, r.angle).inverse();
+        return new window.XML3DMatrix().translate(p.x, p.y, p.z).rotateAxisAngle(a.x, a.y, a.z, r.angle).inverse();
     };
 
     methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
@@ -154,7 +154,7 @@ new (function() {
                 return adapters[adapter].xml3dGenerateRay(x, y);
             }
         }
-        return new XML3DRay();
+        return new window.XML3DRay();
     };
 
     methods.groupGetLocalMatrix = function() {
@@ -164,7 +164,7 @@ new (function() {
                 return adapters[adapter].getLocalMatrix();
             }
         }
-        return new XML3DMatrix();
+        return new window.XML3DMatrix();
     };
 
     /**
@@ -177,7 +177,7 @@ new (function() {
                 return adapters[adapter].getBoundingBox();
             }
         }
-        return new XML3DBox();
+        return new window.XML3DBox();
     };
     methods.xml3dGetBoundingBox = methods.groupGetBoundingBox;
 
@@ -191,7 +191,7 @@ new (function() {
                 return adapters[adapter].getBoundingBox();
             }
         }
-        return new XML3DBox();
+        return new window.XML3DBox();
     };
 
     methods.XML3DGraphTypeGetWorldMatrix = function() {
@@ -201,16 +201,16 @@ new (function() {
                 return adapters[adapter].getWorldMatrix();
             }
         }
-        return new XML3DMatrix();
+        return new window.XML3DMatrix();
     };
 
     methods.dataGetOutputFieldNames = function() {
-        console.error(this.nodeName + "::getOutputFieldNames is not implemeted yet.");
+        XML3D.debug.logError(this.nodeName + "::getOutputFieldNames is not implemeted yet.");
         return null;
     };
 
     methods.dataGetResult = function() {
-        console.error(this.nodeName + "::getResult is not implemeted yet.");
+        XML3D.debug.logError(this.nodeName + "::getResult is not implemeted yet.");
         return null;
     };
 

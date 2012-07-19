@@ -27,17 +27,17 @@ test("Factory test", 2, function() {
 test("Event attribute notification tests", 9, function() {
     var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
-    ok(a, "Adapter created");
-    e.setAttribute("onclick", "alert('Hallo');");
+    ok(a, "Adapter created"); // 1
+    e.setAttribute("onclick", "alert('Hallo');"); // 2. Adapter notified
     var evt = this.factory.event;
     //console.dir(evt);
-    ok(evt, "Event has been thrown");
-    ok(evt instanceof XML3D.events.NotificationWrapper, "Type is NotificationWrapper");
-    ok(evt.wrapped, "DOM notification is wrapped");
-    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName set");
-    notEqual(evt.wrapped.relatedNode, null, "MutationEvent::relatedNode set");
-    e.onclick = function() {};
-    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName");
+    ok(evt, "Event has been thrown"); // 3
+    ok(evt instanceof XML3D.events.NotificationWrapper, "Type is NotificationWrapper"); // 4
+    ok(evt.wrapped, "DOM notification is wrapped"); // 5
+    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName set"); // 6
+    notEqual(evt.wrapped.relatedNode, null, "MutationEvent::relatedNode set"); // 7
+    e.onclick = function() {}; // 8 Adapter Notified
+    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName"); // 9
 });
 
 test("Int attribute notifcation tests", 2, function() {

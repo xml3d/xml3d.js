@@ -4,6 +4,11 @@ XML3D.config.isXML3DElement = function(e) {
     return (e.nodeType === Node.ELEMENT_NODE && (e.namespaceURI == XML3D.xml3dNS));
 };
 
+/**
+ * @param {Element} element
+ * @param {boolean=} selfmonitoring
+ * @return {undefined}
+ */
 XML3D.config.element = function(element, selfmonitoring) {
     if (element._configured === undefined && XML3D.config.isXML3DElement(element)) {
         var classInfo = XML3D.classInfo[element.localName];
@@ -22,7 +27,6 @@ XML3D.config.element = function(element, selfmonitoring) {
                 XML3D.config.element(n);
                 n = n.nextElementSibling;
             }
-            return n;
         }
     }
 };

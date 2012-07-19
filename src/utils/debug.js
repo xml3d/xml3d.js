@@ -14,7 +14,7 @@ XML3D.debug = {
         info : 2,
         warning : 3,
         error : 4,
-        exception : 5,
+        exception : 5
     },
 
     setup : function() {

@@ -100,7 +100,11 @@
                     var attrName = b[prop].id || prop;
                     var v = new b[prop].a(a, attrName, b[prop].params);
                     this.handlers[attrName] = v;
-                    Object.defineProperty(a, prop, v.desc);
+                    try {
+                        Object.defineProperty(a, prop, v.desc);
+                    } catch (e) {
+                        XML3D.debug.logWarning("Can't configure " + a.nodeName + "::" + prop);
+                    }
                 } else if (b[prop].m !== undefined) {
                     a[prop] = b[prop].m;
                 } else
@@ -197,32 +201,38 @@
         return "ElementHandler ("+this.element.nodeName + ", id: "+this.element.id+")";
     };
 
+    var delegateProperties = ["clientHeight", "clientLeft", "clientTop", "clientWidth",
+                              "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth"];
+    function delegateProp(name, elem, canvas) {
+        var desc = {
+            get : function() {
+                return canvas[name];
+            }
+        };
+        try {
+            Object.defineProperty(elem, name, desc);
+        } catch (e){
+            XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + name);
+        };
+    }
+
     handler.XML3DHandler = function(elem) {
         handler.ElementHandler.call(this, elem, true);
         var c = document.createElement("canvas");
         c.width = 800;
         c.height = 600;
         this.canvas = c;
-        Object.defineProperty(elem, "clientWidth", {
-            get : function() {
-                return c.clientWidth;
-            }
-        });
-        Object.defineProperty(elem, "clientHeight", {
-            get : function() {
-                return c.clientHeight;
-            }
-        });
+
+        for(var i in delegateProperties) {
+            delegateProp(delegateProperties[i], elem, c);
+        }
+
+        elem.getBoundingClientRect = function() {
+            return c.getBoundingClientRect();
+        };
     };
 
     XML3D.createClass(handler.XML3DHandler, handler.ElementHandler);
-
-    /*
-     * handler.XML3DHandler.prototype.registerAttributes = function(config) {
-     * console.dir(handler.XML3DHandler);
-     * handler.XML3DHandler.superclass.registerAttributes.call(this, config);
-     * Object.defineProperty(this.element, "style", this.styler); };
-     */
 
     // Export to xml3d namespace
     XML3D.extend(XML3D, handler);

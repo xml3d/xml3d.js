@@ -41,7 +41,7 @@ if(navigator.userAgent.indexOf("WebKit") != -1)
     var listener = function(){ attrModifiedWorks = true; };
     document.documentElement.addEventListener("DOMAttrModified", listener, false);
     document.documentElement.setAttribute("___TEST___", true);
-    document.documentElement.removeAttribute("___TEST___", true);
+    document.documentElement.removeAttribute("___TEST___");
     document.documentElement.removeEventListener("DOMAttrModified", listener, false);
 
     if (!attrModifiedWorks)
@@ -64,7 +64,7 @@ if(navigator.userAgent.indexOf("WebKit") != -1)
                         prevVal || "",
                         newVal || "",
                         attrName,
-                        (prevVal == null) ? evt.ADDITION : evt.MODIFICATION
+                        (prevVal == null) ? MutationEvent.ADDITION : MutationEvent.MODIFICATION
                 );
                 this.dispatchEvent(evt);
             }
@@ -84,7 +84,7 @@ if(navigator.userAgent.indexOf("WebKit") != -1)
                     prevVal,
                     "",
                     attrName,
-                    evt.REMOVAL
+                    MutationEvent.REMOVAL
             );
             this.dispatchEvent(evt);
         };

@@ -20,8 +20,8 @@
         };
 
         /** @private */
-        this._origin = new XML3DVec3(0, 0, 0, vec_cb);
-        this._direction = new XML3DVec3(0, 0, -1, vec_cb);
+        this._origin = new window.XML3DVec3(0, 0, 0, vec_cb);
+        this._direction = new window.XML3DVec3(0, 0, -1, vec_cb);
 
         if (origin && origin.origin) {
             this.set(origin, direction);
@@ -78,7 +78,6 @@
 
     // Export
     XML3D.XML3DRay = XML3DRay;
-    if (!window.XML3DRay)
-        window.XML3DRay = XML3DRay;
+    window.XML3DRay = XML3DRay;
 
 }(XML3D._native));

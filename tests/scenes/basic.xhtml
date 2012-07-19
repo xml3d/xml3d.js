@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+	  <defs>
+        <transform id="t_identity"/>
+        <transform id="t_regular"/>
+        <transform id="t_translation" translation="1 2 3"/>
+        <transform id="t_rotation" rotation="1 0 0 1.57079632679489"/>
+        <transform id="t_rotation2" rotation="0 1 0 1.57079632679489"/>
+        <transform id="t_rotation3" rotation="0 0 1 1.57079632679489"/>
+        <transform id="t_scale" scale="1 2 3"/>
+        <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708"  translation="1 2 3"/>
+	  </defs>
+	<view id="myView" fieldOfView="0.5"/>
+	<light id="myLight"/>
+    <group id="myGroup" visible="false">
+        <mesh id="myMesh01" type="lines" onclick="alert('Hallo');"/>
+    </group>
+    <group id="meshGroup" transform="#t_regular">
+    <mesh id="myMesh02">
+          <int id="indices" name="index">0 1 2 1 2 3</int>
+          <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+          <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+          <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0
+           0.0 0.0<!-- This is a comment -->1.0 0.0</float2>
+    </mesh>
+    </group>
+    <group id="transformedGroup" transform="#t_mixed">
+    </group>
+    <group id="parentGroup" transform="#t_rotation">
+        <group id="child01" transform="#t_identity"/>
+        <group id="child02" transform="#t_identity"/>
+    </group>
+  </xml3d>
+</body>
+</html>

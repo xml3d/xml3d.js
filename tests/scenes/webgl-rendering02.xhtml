@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+     <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+   <title>
+    XML3D
+   </title>
+  </head>
+  <body style="background-color: #FFF;width:500px">
+   <xml3d activeView="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>   
+    <script id="customShaderScript"></script>
+    <script id="customShaderScript-vs" type="x-shader/x-vertex">
+        #ifdef GL_ES
+        precision highp float;
+        #endif
+
+        attribute vec3 position;
+        uniform mat4 modelViewProjectionMatrix;
+        uniform mat4 modelViewMatrix;
+        
+        void main(void)
+        {
+            gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
+        }
+    </script>
+    <script id="customShaderScript-fs" type="x-shader/x-fragment">
+        #ifdef GL_ES
+        precision highp float;
+        #endif
+        
+        void main(void)
+        {
+            gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+        }
+    </script>
+    
+    
+    <shader id="texShader1" script="urn:xml3d:shader:phong">
+        <texture id="tex1" name="diffuseTexture">
+            <img id="tex1img" src="textures/yellow.png"/>
+        </texture>
+    </shader> 
+    
+    <shader id="npotTexShader" script="urn:xml3d:shader:phong">
+        <float3 name="specularColor">0 0 0</float3>
+        <texture id="npottex" name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+            <img id="npotteximg" src="textures/bluegreen.png"/>
+        </texture>
+    </shader> 
+     
+    <shader id="diffuseTexShader" script="urn:xml3d:shader:diffuse">
+        <texture id="tex1" name="diffuseTexture">
+            <img id="tex1img" src="textures/yellow.png"/>
+        </texture>
+    </shader>
+    
+    <shader id="customShader" script="#customShaderScript">
+        <float3 name="diffuseColor">0 1 0</float3>
+    </shader>   
+    <shader id="diffuseShader" script="urn:xml3d:shader:diffuse">
+        <float3 name="diffuseColor">1 1 1</float3>
+        <float name="ambientIntensity">1</float>
+        <bool name="useVertexColor">true</bool>
+    </shader> 
+    <data id="meshdata" type="triangles">
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+    
+    <data id="wrapMeshData" type="triangles">
+        <data src="#meshdata"/>
+        <float2 name="texcoord">0.0 2.0 2.0 2.0 0.0 0.0 2.0 0.0</float2>
+    </data>
+    
+    <data id="coloredmeshdata" type="triangles">
+        <data src="#meshdata"/>
+        <float3 name="color">0.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.0 1.0 1.0 0.0</float3>
+    </data>
+    
+    <lightshader id="ls_Spot" script="urn:xml3d:lightshader:point">
+        <float3 name="attenuation">1 0 0</float3>
+       <float3 name="intensity">
+        1 1 1
+       </float3>
+      </lightshader>
+      <transform id="t_Lamp" translation="0 0 3"/>
+      
+    </defs>
+    
+    <view id="defaultView" position="0 0 3"/>
+    <group transform="#t_Lamp" id="mainlight">
+      <light shader="#ls_Spot"/>
+    </group>
+    
+    <group id="myGroup" shader="#texShader1" visible="false">
+	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
+	    </mesh>
+    </group>  
+    <group id="coloredMeshGroup" shader="#diffuseShader" visible="false">
+        <mesh src="#coloredmeshdata" type="triangles">
+        </mesh>
+    </group>  
+    <group id="diffuseTexGroup" shader="#diffuseTexShader" visible="false">
+        <mesh src="#meshdata" type="triangles">
+        </mesh>
+    </group>  
+    
+    <group id="npotTexGroup" shader="#npotTexShader" visible="false">
+        <mesh src="#wrapMeshData" type="triangles">
+        </mesh>
+    </group> 
+
+    </xml3d>
+    <script type="text/javascript">
+    function getPixelValue(canvas, x,y) {
+        var pixels = new Uint8Array(4), a = new Array(4);
+        canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
+        for(var i=0;i&lt;4;i++)
+            a[i] = pixels[i];
+        return a;
+    }
+    </script>
+  </body>
+ </html>

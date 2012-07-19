@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Canvas Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+<style>
+.canvas {
+    width: 20px;
+    height: 40px;
+    left: 80px;
+    top: 40px;
+    position: absolute;
+}
+xml3d, canvas {
+    background-color: red;
+    border: 1px solid blue;
+}
+
+</style>
+</head>
+<body style="background-color: #FFF;width:500px">
+  <xml3d id="default" xmlns="http://www.xml3d.org/2009/xml3d">
+  </xml3d>
+  <xml3d id="attributes" width="50px" height="30px" xmlns="http://www.xml3d.org/2009/xml3d">
+  </xml3d>
+  <xml3d id="css-style" style="width: 40px; height: 20px;" xmlns="http://www.xml3d.org/2009/xml3d">
+  </xml3d>
+  <xml3d id="css-class" class="canvas" xmlns="http://www.xml3d.org/2009/xml3d">
+  </xml3d>
+  <xml3d id="attributes-vs-css" class="canvas" style="width: 40px; height: 20px;" width="50px" height="30px" xmlns="http://www.xml3d.org/2009/xml3d">
+  </xml3d>
+  <xml3d id="positioning-css-style" style="width: 40px; height: 20px; left: 30px; top: 50px;" xmlns="http://www.xml3d.org/2009/xml3d">
+  </xml3d>
+  <xml3d id="positioning-css-class" class="canvas" style="width: 40px; height: 20px;" xmlns="http://www.xml3d.org/2009/xml3d">
+  </xml3d>
+  
+</body>
+</html>

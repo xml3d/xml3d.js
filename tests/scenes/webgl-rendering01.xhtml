@@ -48,6 +48,11 @@
             0 0 0
         </float3>
     </shader>
+    <shader id="flatred" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">
+            1 0 0
+        </float3>
+    </shader>
     <shader id="phonggreen" script="urn:xml3d:shader:phong">
         <float3 id="phonggreen_color" name="diffuseColor">
             0 1 0
@@ -118,8 +123,8 @@
         <group transform="#t_cubeback" shader="#flatyellow">
             <mesh src="#meshdata" type="triangles"/>
         </group>
-         <group transform="#t_cubefront" >
-        <mesh src="#meshdata" type="triangles"/>
+         <group transform="#t_cubefront" shader="#flatred">
+            <mesh src="#meshdata" type="triangles"/>
         </group>
     </group>
     </xml3d>

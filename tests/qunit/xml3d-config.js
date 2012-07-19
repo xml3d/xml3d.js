@@ -15,21 +15,21 @@ QUnit.extend( QUnit, {
             QUnit.__passesVector(actual, expected, maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
-    
+
     closeRotation : function(actual, expected, maxDifference, message) {
-        var passes = (actual === expected) || 
+        var passes = (actual === expected) ||
             QUnit.__passesVector(actual.axis, expected.axis, maxDifference) &&
             (Math.abs((actual.angle % Math.PI) - (expected.angle % Math.PI)) <= maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
-    
+
     closeMatrix  : function(actual, expected, maxDifference, message) {
         if(!actual || !expected) {
             QUnit.push(actual === expected, actual, expected, message);
             return;
         }
 
-        var passes = 
+        var passes =
             Math.abs(actual.m11 - expected.m11) <= maxDifference &&
             Math.abs(actual.m12 - expected.m12) <= maxDifference &&
             Math.abs(actual.m13 - expected.m13) <= maxDifference &&
@@ -127,7 +127,7 @@ XML3DUnit.getRendererString = function() {
     {
         return result + "Native";
     }
-    
+
     try {
       context = canvas.getContext("webgl");
     } catch(e) {
@@ -141,7 +141,6 @@ XML3DUnit.getRendererString = function() {
     if (!context) {
         result += "none found";
     } else {
-        console.dir(context.getSupportedExtensions());
         var ext = context.getExtension("WEBGL_debug_renderer_info");
         result += "WebGL";
         if (ext) {

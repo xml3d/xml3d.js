@@ -1,4 +1,4 @@
-module("WebGL Rendering", {
+module("WebGL Scenegraph", {
     setup : function() {
         stop();
         var that = this;
@@ -73,10 +73,10 @@ test("Change active view via script", 8, function() {
     });
     stop();
     equal(x.activeView, "#defaultView", "Initial active view is #default"); // 3
-    
+
     var v = this.doc.getElementById("defaultView");
     QUnit.closeMatrix(v.getViewMatrix(), new XML3DMatrix().translate(0,0,-3), EPSILON, "Check view matrix"); // 4
-    
+
     x.activeView = "#viewOrientationTest";
     equal(x.activeView, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
     ok(h.needDraw, "Redraw required"); // 6, fails in < 920181
@@ -94,14 +94,14 @@ test("Test mesh.getBoundingBox", 4, function() {
         var bb = mesh.getBoundingBox();
         var max = bb._max._data;
         var min = bb._min._data;
-        
+
         deepEqual([max[0], max[1], max[2]], [1,1,0], "BBox max is (1,1,0)");
         deepEqual([min[0], min[1], min[2]], [-1,-1,0], "BBox min is (-1,-1,0)");
         start();
     });
     stop();
     group.visible = true;
-   
+
 });
 
 test("Change shader via script", 6, function() {
@@ -167,7 +167,7 @@ test("Change visible/shader for nested groups", 8, function() {
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [re-add child shader]");
-    
+
     outerGroup.setAttribute("shader", "#flatblack");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
@@ -257,38 +257,38 @@ test("Camera with group transforms", 7, function() {
     var camTransform = this.doc.getElementById("t_camera1");
     var view = this.doc.getElementById("transformTestView");
     var camtest = this.doc.getElementById("viewTest");
-    
+
     //Simple test of camera orientation to check that view matrix is built correctly
     camtest.visible = true;
     x.setAttribute("activeView", "#viewOrientationTest");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,0,255], "Simple camera orientation check, Red");
-    
+
     camtest.visible = false;
     group5.visible = true;
     x.setAttribute("activeView", "#transformTestView");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,255,0,255], "Camera facing back of cube, Yellow");
-    
+
     camTransform.setAttribute("rotation", "1 0 0 1.57");
     camTransform.setAttribute("translation", "0 3 0");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,255,255], "Camera facing top of cube, Blue");
-    
-    view.setAttribute("orientation", "0 1 0 0");
+
+   /* view.setAttribute("orientation", "0 1 0 0");
     camTransform.setAttribute("translation", "0 -6 0");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,255,255], "Camera facing bottom of cube, Purple");
-    
+
     view.setAttribute("orientation", "0 0 0 0");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [255,0,255,255], "Camera with orientation '0 0 0 0', Purple");
-    
+    deepEqual(actual, [255,0,255,255], "Camera with orientation '0 0 0 0', Purple");*/
+
 });
 
 test("Camera setDirection/upVector", 5, function() {
@@ -298,19 +298,19 @@ test("Camera setDirection/upVector", 5, function() {
     var group5 = this.doc.getElementById("group5");
     var view = this.doc.getElementById("viewOrientationTest");
     var camtest = this.doc.getElementById("viewTest");
-    
+
     camtest.visible = true;
     view.setAttribute("orientation", "0 0 1 0");
     x.setAttribute("activeView", "#viewOrientationTest");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,0,0], "Camera looking down z axis, transparent");
-    
+
     view.setDirection(new XML3DVec3(1, 0, 0));
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,0,255], "Camera looking to the right, red");
-  
+
     view.setUpVector(new XML3DVec3(0, -1, 0));
     view.setDirection(new XML3DVec3(-1, 0, 0));
     h.draw();
@@ -339,191 +339,10 @@ test("No implicit light", 3, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
-    
+
     var group = this.doc.getElementById("implicitLight");
     group.visible = true;
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,0,255], "No light, scene is black");
 });
-
-
-module("WebGL Shaders and Textures", {
-    setup : function() {
-        stop();
-        var that = this;
-        this.cb = function(e) {
-            ok(true, "Scene loaded");
-            that.doc = document.getElementById("xml3dframe").contentDocument;
-            start();
-        };
-        loadDocument("scenes/webgl-rendering02.xhtml"+window.location.search, this.cb);
-    },
-    teardown : function() {
-        var v = document.getElementById("xml3dframe");
-        v.removeEventListener("load", this.cb, true);
-    }
-});
-
-test("Simple texture", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"),
-    actual,
-    win = this.doc.defaultView,
-    gl = getContextForXml3DElement(x),
-    testFunc = null, h = getHandler(x);    
-    this.doc.getElementById("myGroup").visible = true;
-
-    x.addEventListener("framedrawn", function(n) {
-            if(testFunc)
-                testFunc(n);        
-    });
-    
-    testFunc = function(n) {
-        actual = win.getPixelValue(gl, 40, 40);
-        if (actual[0] == 0)
-            return;
-        deepEqual(actual, [241,241,0,255], "Yellow texture");
-        start();
-    };
-    stop();
-
-});
-
-
-test("Changing texture", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"),
-    actual,
-    win = this.doc.defaultView,
-    gl = getContextForXml3DElement(x),
-    testFunc = null, h = getHandler(x);    
-    this.doc.getElementById("myGroup").visible = true;
-    this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
-    
-    x.addEventListener("framedrawn", function(n) {
-            if(testFunc)
-                testFunc(n);
-    });
-    
-    testFunc = function(n) {
-        actual = win.getPixelValue(gl, 40, 40);
-        if (actual[0] == 0)
-            return;
-        deepEqual(actual, [241,0,241,255], "Magenta texture");
-        start();
-    };
-    
-    stop();
-
-});
-
-test("NPOT texture resizing", 4, function() {
-    var x = this.doc.getElementById("xml3DElem"),
-    actual,
-    win = this.doc.defaultView,
-    gl = getContextForXml3DElement(x),
-    testFunc = null, h = getHandler(x);    
-    
-    x.addEventListener("framedrawn", function(n) {
-            if(testFunc)
-                testFunc(n);
-    });
-    
-    testFunc = function(n) {
-        actual = win.getPixelValue(gl, 40, 40);
-        if ((actual[1] + actual[2]) == 0)
-            return;
-        deepEqual(actual, [0,241,0,255], "Green at 40,40");
-        actual = win.getPixelValue(gl, 120, 80);
-        deepEqual(actual, [0,0,253,255], "Blue at 120,80");
-        start();
-    };
-    
-    this.doc.getElementById("npotTexGroup").visible = true;
-    stop();
-    
-});
-
-test("Textured diffuse shader", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"),
-    actual,
-    win = this.doc.defaultView,
-    gl = getContextForXml3DElement(x),
-    testFunc = null, h = getHandler(x);
-    var group = this.doc.getElementById("diffuseTexGroup");
-    group.visible = true;
-
-    x.addEventListener("framedrawn", function(n) {
-            if(testFunc)
-                testFunc(n);
-    });
-    
-    testFunc = function(n) {
-        actual = win.getPixelValue(gl, 40, 40);
-        if (actual[0] == 0) //texture hasn't finished loading yet
-            return;
-        deepEqual(actual, [241,241,0,255], "Yellow diffuse texture");
-        start();
-    };
-    
-    stop();
-});
-
-test("Diffuse shader with vertex colors", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    var h = getHandler(x);
-    var cgroup = this.doc.getElementById("coloredMeshGroup");
-    
-    cgroup.visible = true;
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    QUnit.closePixel(actual, [112,112,30,255], 1, "Corners have colors red, yellow, green, blue");
-
-});
-
-test("Custom shader", 4, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    var h = getHandler(x);
-
-    var cshader = this.doc.getElementById("customShader");
-    var group = this.doc.getElementById("myGroup");
-    group.visible = true;
-    group.setAttribute("shader", "#customShader");
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [255,255,0,255], "Yellow custom shader");
-
-    //The shader has a green diffuseColor parameter that should override the standard blue
-    cshader.setAttribute("script", "urn:xml3d:shader:phong");
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,255,0,255], "Change shader script to standard phong");
-
-});
-
-module("Multiple XML3D nodes", {
-    setup : function() {
-        stop();
-        var that = this;
-        this.cb = function(e) {
-            ok(true, "Scene loaded");
-            that.doc = document.getElementById("xml3dframe").contentDocument;
-            start();
-        };
-        loadDocument("scenes/multiple-canvas.xhtml"+window.location.search, this.cb);
-    },
-    teardown : function() {
-        var v = document.getElementById("xml3dframe");
-        v.removeEventListener("load", this.cb, true);
-    }
-});
-
-test("Default view with no activeView set", 3, function() {
-    var x = this.doc.getElementById("xml3DElem2"), actual, win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    
-    actual = win.getPixelValue(gl, 275, 100);
-    deepEqual(actual, [0,0,0,0], "Found correct view node");
-});
-

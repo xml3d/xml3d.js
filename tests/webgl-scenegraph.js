@@ -278,7 +278,7 @@ test("Camera with group transforms", 7, function() {
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,255,255], "Camera facing top of cube, Blue");
 
-   /* view.setAttribute("orientation", "0 1 0 0");
+    view.setAttribute("orientation", "0 1 0 0");
     camTransform.setAttribute("translation", "0 -6 0");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
@@ -287,7 +287,7 @@ test("Camera with group transforms", 7, function() {
     view.setAttribute("orientation", "0 0 0 0");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [255,0,255,255], "Camera with orientation '0 0 0 0', Purple");*/
+    deepEqual(actual, [255,0,255,255], "Camera with orientation '0 0 0 0', Purple");
 
 });
 

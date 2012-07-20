@@ -22,7 +22,7 @@ XML3D.shaders.register("diffuse", {
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
         "    fragEyeVector = normalize(fragVertexPosition);",
         "}"
-    ].join("/n"),
+    ].join("\n"),
 
     fragment : [
         "#ifdef GL_ES",
@@ -31,6 +31,7 @@ XML3D.shaders.register("diffuse", {
 
         "uniform vec3 diffuseColor;",
         "uniform vec3 emissiveColor;",
+        "uniform float ambientIntensity;",
 
         "varying vec3 fragNormal;",
         "varying vec3 fragVertexPosition;",
@@ -44,7 +45,7 @@ XML3D.shaders.register("diffuse", {
         "#endif",
 
         "void main(void) {",
-        "  vec3 color = emissiveColor;",
+        "  vec3 color = emissiveColor + ambientIntensity * diffuseColor;",
         "  #if MAXLIGHTS > 0",
         "      for (int i=0; i<MAXLIGHTS; i++) {",
         "          vec3 L = lightPositions[i] - fragVertexPosition;",
@@ -100,6 +101,7 @@ XML3D.shaders.register("textureddiffuse", {
         "uniform vec3 diffuseColor;",
         "uniform sampler2D diffuseTexture;",
         "uniform vec3 emissiveColor;",
+        "uniform float ambientIntensity;",
 
         "varying vec3 fragNormal;",
         "varying vec3 fragVertexPosition;",
@@ -114,16 +116,17 @@ XML3D.shaders.register("textureddiffuse", {
         "#endif",
 
         "void main(void) {",
-        "  vec3 color = emissiveColor;",
+        "  vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);",
+        "  vec3 objDiffuse = texDiffuse.xyz * diffuseColor;",
+        "  vec3 color = emissiveColor + ambientIntensity * objDiffuse;",
         "  #if MAXLIGHTS > 0",
-        "      vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);",
         "      for (int i=0; i<MAXLIGHTS; i++) {",
         "          vec3 L = lightPositions[i] - fragVertexPosition;",
         "          vec3 N = fragNormal;",
         "          float dist = length(L);",
         "          L = normalize(L);",
         "          float atten = 1.0 / (lightAttenuations[i].x + lightAttenuations[i].y * dist + lightAttenuations[i].z * dist * dist);",
-        "          vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * texDiffuse.xyz;",
+        "          vec3 Idiff = lightDiffuseColors[i] * max(dot(N,L),0.0) * objDiffuse;",
         "          color = color + (atten*Idiff) * lightVisibility[i];",
         "      }",
         "  #endif",
@@ -169,6 +172,8 @@ XML3D.shaders.register("diffusevcolor", {
 
         "uniform vec3 diffuseColor;",
         "uniform vec3 emissiveColor;",
+        "uniform float ambientIntensity;",
+        "uniform float transparency;",
 
         "varying vec3 fragNormal;",
         "varying vec3 fragVertexPosition;",
@@ -183,7 +188,9 @@ XML3D.shaders.register("diffusevcolor", {
         "#endif",
 
         "void main(void) {",
-        "  vec3 color = emissiveColor;",
+        "  if (transparency > 0.95) discard;",
+        "  vec3 objDiffuse = fragVertexColor * diffuseColor;",
+        "  vec3 color = emissiveColor + ambientIntensity * objDiffuse;",
         "  #if MAXLIGHTS > 0",
         "      for (int i=0; i<MAXLIGHTS; i++) {",
         "          vec3 L = lightPositions[i] - fragVertexPosition;",

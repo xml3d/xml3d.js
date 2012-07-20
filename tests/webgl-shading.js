@@ -127,7 +127,7 @@ test("Diffuse shader with vertex colors", 3, function() {
     cgroup.visible = true;
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    QUnit.closePixel(actual, [112,112,30,255], 1, "Corners have colors red, yellow, green, blue");
+    QUnit.closePixel(actual, [225,225,60,255], 1, "Corners have colors red, yellow, green, blue");
 
 });
 
@@ -176,3 +176,73 @@ test("Default view with no activeView set", 3, function() {
     actual = win.getPixelValue(gl, 275, 100);
     deepEqual(actual, [0,0,0,0], "Found correct view node");
 });
+
+module("WebGL: Ambient term", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/webgl-ambient.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Diffuse shader", 4, function() {
+    var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+
+    var testFunc = function() {
+        var actual = win.getPixelValue(gl, 88, 140);
+        var diffuse = [1,0.2,0.3, 255];
+        diffuse = vec3.scale(diffuse, 0.8*255);
+        QUnit.closePixel(actual, diffuse, 1, "Simple Diffuse");
+
+        actual = win.getPixelValue(gl, 150, 140);
+        diffuse = [0.5*0.5*255,1*0.5*255,0*0.5*255, 255];
+        // Timer issue
+        //QUnit.closePixel(actual, diffuse, 1, "Diffuse with Texture");
+
+        actual = win.getPixelValue(gl, 220, 140);
+        // ambientIntensity * diffuseColor * vertexColor * 255
+        diffuse = [0.9*0.4*1.0*255,0.9*0.8*0.5*255,0.9*0.8*0.25*255, 255];
+        QUnit.closePixel(actual, diffuse, 1, "Diffuse with vertex colors");
+        start();
+    };
+
+    stop();
+    testFunc();
+});
+
+test("Phong shader", 4, function() {
+    var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+
+    var testFunc = function() {
+        var actual = win.getPixelValue(gl, 88, 50);
+        var diffuse = [1,0.2,0.3, 255];
+        diffuse = vec3.scale(diffuse, 0.8*255);
+        QUnit.closePixel(actual, diffuse, 1, "Simple Diffuse");
+
+        actual = win.getPixelValue(gl, 150, 50);
+        diffuse = [0.5*0.5*255,1*0.5*255,0*0.5*255, 255];
+        // Timer issue
+        // QUnit.closePixel(actual, diffuse, 1, "Diffuse with Texture");
+
+        actual = win.getPixelValue(gl, 220, 50);
+        // ambientIntensity * diffuseColor * vertexColor * 255
+        diffuse = [0.9*0.4*1.0*255,0.9*0.8*0.5*255,0.9*0.8*0.25*255, 255];
+        QUnit.closePixel(actual, diffuse, 1, "Diffuse with vertex colors");
+        start();
+    };
+    stop();
+    testFunc();
+});
+
+

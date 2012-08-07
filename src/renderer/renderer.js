@@ -588,7 +588,7 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
 
             for (var i = 0; i < this.drawableObjects.length; i++) {
                 var obj = this.drawableObjects[i];
-            if(!obj.mesh.valid || !obj.pickable)
+            if(!obj.mesh.valid)// || !obj.pickable)
                 continue;
 
             var trafo = obj.transform;
@@ -607,7 +607,7 @@ XML3D.webgl.Renderer.prototype.renderPickingPass = function(x, y, needPickingDra
                 var transform = obj.transform;
                 var mesh = obj.mesh;
                 
-                if (!mesh.valid || !obj.pickable)
+                if (!mesh.valid)// || !obj.pickable)
                     continue;
                 
                 xform.model = transform;

@@ -265,7 +265,15 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 gl.deleteBuffer(buffer[i]);
             }
         }
+        this.needsInit = true;
 
+        //Remove buffers from data table so they'll be re-created if this mesh is
+        //re-added later
+        //TODO: Maybe just destroy the entire adapter object externally?
+        var dataTable =  this.table.providers;
+        for ( var attr in dataTable) {
+            delete dataTable[attr].data.buffer;
+        }
         myObject.mesh.valid = false;
     };
 

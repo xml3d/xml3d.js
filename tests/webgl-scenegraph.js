@@ -334,15 +334,3 @@ test("Pick pass flag", 7, function() {
     // This failed because setting shader set flag to 'false'
     ok(h.needPickingDraw, "Changing transformation does require a picking pass");
 });
-
-test("No implicit light", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    var h = getHandler(x);
-
-    var group = this.doc.getElementById("implicitLight");
-    group.visible = true;
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,0,255], "No light, scene is black");
-});

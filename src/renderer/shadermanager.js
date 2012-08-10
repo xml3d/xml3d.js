@@ -278,7 +278,7 @@
     			programObject.uniforms[uni.name] = uniInfo;
     	}
     	
-    	this.setStandardUniforms(programObject, sources.uniforms);
+    	this.setUniformVariables(programObject, sources.uniforms);
     	programObject.changes = [];
     	return programObject;
     };
@@ -344,17 +344,6 @@
 
     };
 
-
-    XML3DShaderManager.prototype.setStandardUniforms = function(sp, uniformValueMap) {
-    	var gl = this.gl;
-
-    	for (var name in uniformValueMap) {
-    	    var uniInfo = sp.uniforms[name];
-    	    if (uniInfo)
-    	        this.setUniform(gl, uniInfo, uniformValueMap[name]);
-    	}
-    };
-
     XML3DShaderManager.prototype.getShaderById = function(shaderId) {
     	var sp = this.shaders[shaderId];
     	if (!sp) {
@@ -374,8 +363,6 @@
     };
 
     XML3DShaderManager.prototype.setUniformVariables = function(shader, uniforms) {
-    	this.bindShader(shader);
-
     	for (var name in uniforms) {
     		var u = uniforms[name];
 

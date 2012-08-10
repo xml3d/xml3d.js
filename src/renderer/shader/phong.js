@@ -86,7 +86,7 @@ XML3D.shaders.register("phong", {
     ].join("\n"),
     
     uniforms: {
-        diffuseColor    : [0.0, 0.0, 1.0],
+        diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0],
         specularColor   : [1.0, 1.0, 1.0],
         transparency    : 0.0,
@@ -196,12 +196,13 @@ XML3D.shaders.register("texturedphong", {
     ].join("\n"),
     
     uniforms: {
-        diffuseColor    : [0.0, 0.0, 1.0],
+        diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0],
-        specularColor   : [1.0, 1.0, 1.0],
+        specularColor   : [0.0, 0.0, 0.0],
         transparency    : 0.0,
         shininess       : 0.5,
-        ambientIntensity: 0.0
+        ambientIntensity: 0.0,
+        useSpecularTexture : 0
     }
 });
 
@@ -298,7 +299,7 @@ XML3D.shaders.register("phongvcolor", {
     ].join("\n"),
     
     uniforms: {
-        diffuseColor    : [0.0, 0.0, 1.0],
+        diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0],
         specularColor   : [1.0, 1.0, 1.0],
         transparency    : 0.0,

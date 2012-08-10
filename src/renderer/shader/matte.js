@@ -22,7 +22,7 @@ XML3D.shaders.register("matte", {
     ].join("\n"),
     
     uniforms: {
-        diffuseColor : [0.0, 0.0, 1.0]
+        diffuseColor : [1.0, 1.0, 1.0]
     }
 });
 
@@ -54,7 +54,7 @@ XML3D.shaders.register("mattevcolor", {
     ].join("\n"),
     
     uniforms: {
-        diffuseColor : [0.0, 0.0, 1.0]
+        diffuseColor : [1.0, 1.0, 1.0]
     }
 });
 

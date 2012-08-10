@@ -179,6 +179,7 @@
             maxLights += "#define MAX_DIRECTIONALLIGHTS " + lights.directional.length.toString() + "\n";
             sources.vertex = maxLights + template.vertex;
             sources.fragment = maxLights + template.fragment;
+            sources.uniforms = template.uniforms;
             break;
         default:
             sources = XML3D.shaders.getScript(shaderName);
@@ -237,8 +238,8 @@
     			uniforms 	: {},
     			samplers	: {},
     			handle		: prg,
-    			vSource		: sources.vs,
-    			fSource		: sources.fs
+    			vSource		: sources.vertex,
+    			fSource		: sources.fragment
     	};
 
     	gl.useProgram(prg);
@@ -273,11 +274,11 @@
     			programObject.samplers[uni.name] = uniInfo;
     			texCount++;
     		}
-    		else
+    		else 
     			programObject.uniforms[uni.name] = uniInfo;
     	}
-
-    	this.setStandardUniforms(programObject);
+    	
+    	this.setStandardUniforms(programObject, sources.uniforms);
     	programObject.changes = [];
     	return programObject;
     };
@@ -344,49 +345,14 @@
     };
 
 
-    XML3DShaderManager.prototype.setStandardUniforms = function(sp) {
-
+    XML3DShaderManager.prototype.setStandardUniforms = function(sp, uniformValueMap) {
     	var gl = this.gl;
 
-    	var uniform = null;
-
-    	//Diffuse color
-    	uniform = sp.uniforms.diffuseColor;
-    	if (uniform) {
-    		this.setUniform(gl, uniform, [1.0, 1.0, 1.0]);
+    	for (var name in uniformValueMap) {
+    	    var uniInfo = sp.uniforms[name];
+    	    if (uniInfo)
+    	        this.setUniform(gl, uniInfo, uniformValueMap[name]);
     	}
-
-    	//Emissive color
-    	uniform = sp.uniforms.emissiveColor;
-    	if (uniform) {
-    		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
-    	}
-
-    	//Specular color
-    	uniform = sp.uniforms.specularColor;
-    	if (uniform) {
-    		this.setUniform(gl, uniform, [0.0, 0.0, 0.0]);
-    	}
-    	uniform = sp.uniforms.useSpecularTexture;
-    	if(uniform) {
-            this.setUniform(gl, sp.uniforms.useSpecularTexture, 0);
-        }
-
-
-    	//Shininess
-    	uniform = sp.uniforms.shininess;
-    	if (uniform) {
-    		this.setUniform(gl, uniform, 0.2);
-    	}
-
-    	//Transparency
-    	uniform = sp.uniforms.transparency;
-    	if (uniform) {
-    		this.setUniform(gl, uniform, 0.0);
-    	}
-
-
-    	//XML3D.webgl.checkError(this.gl);
     };
 
     XML3DShaderManager.prototype.getShaderById = function(shaderId) {

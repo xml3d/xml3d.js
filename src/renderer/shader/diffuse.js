@@ -79,7 +79,7 @@ XML3D.shaders.register("diffuse", {
     ].join("\n"),
     
     uniforms: {
-        diffuseColor    : [0.0, 0.0, 1.0],
+        diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0]  
     }
 });
@@ -177,7 +177,7 @@ XML3D.shaders.register("textureddiffuse", {
     ].join("\n"),
     
     uniforms: {
-        diffuseColor    : [0.0, 0.0, 1.0],
+        diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0]
     }
 });
@@ -270,7 +270,7 @@ XML3D.shaders.register("diffusevcolor", {
      ].join("\n"),
      
      uniforms: {
-         diffuseColor    : [0.0, 0.0, 1.0],
+         diffuseColor    : [1.0, 1.0, 1.0],
          emissiveColor   : [0.0, 0.0, 0.0]
      }
 });

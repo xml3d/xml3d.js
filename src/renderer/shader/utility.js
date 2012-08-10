@@ -29,7 +29,9 @@ XML3D.shaders.register("picking", {
         "void main(void) {",
         "    gl_FragColor = vec4(worldCoord, id);",
         "}"
-    ].join("\n")
+    ].join("\n"),
+    
+    uniforms : {}
 });
 
 XML3D.shaders.register("pickedNormals", {
@@ -58,5 +60,7 @@ XML3D.shaders.register("pickedNormals", {
         "void main(void) {",
         "    gl_FragColor = vec4((fragNormal+1.0)/2.0, 1.0);",
         "}"
-    ].join("\n")
+    ].join("\n"),
+    
+    uniforms : {}
 });

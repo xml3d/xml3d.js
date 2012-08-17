@@ -40,12 +40,12 @@ XML3D.createClass = function(ctor, parent, methods) {
 };
 (function() {
     var onload = function() {
-	    
+
         var debug = XML3D.debug.setup();
         debug && XML3D.debug.logInfo("xml3d.js version: " + XML3D.version);
-        
+
         // Find all the XML3D tags in the document
-        var xml3ds = document.getElementsByTagNameNS(XML3D.xml3dNS, 'xml3d');
+        var xml3ds = document.querySelectorAll("xml3d");
         xml3ds = Array.map(xml3ds, function(n) { return n; });
 
         debug && XML3D.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");

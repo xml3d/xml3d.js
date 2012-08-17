@@ -9,13 +9,8 @@
             if(elem) {
                 return elem;
             } else {
-                var elems = this.getElementsByTagName("*");
-                for ( var i = 0; i < elems.length; i++) {
-                    var node = elems[i];
-                    if (node.getAttribute("id") === id) {
-                        return node;
-                    }
-                }
+                var elems = this.querySelectorAll("*[id="+id+"]");
+                return elems.length ? elems[0] : null;
             }
             return null;
         };
@@ -28,7 +23,7 @@
             return r;
         };
         XML3D.extend(window.document,doc);
-    
+
 }(XML3D._native));
 
 /*

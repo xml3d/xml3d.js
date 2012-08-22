@@ -13,6 +13,28 @@ XML3D.webgl.MAXFPS = 30;
  */
 (function() {
 
+    var canvas = document.createElement("canvas");
+    XML3D.webgl.supported = function() {
+        try {
+            return !!(window.WebGLRenderingContext && (canvas.getContext('experimental-webgl')));
+        } catch (e) {
+            return false;
+        }
+    };
+
+
+    XML3D.webgl.configure = function(xml3ds) {
+        var handlers = {};
+        for(var i in xml3ds) {
+            // Creates a HTML <canvas> using the style of the <xml3d> Element
+            var canvas = XML3D.webgl.createCanvas(xml3ds[i], i);
+            // Creates the CanvasHandler for the <canvas>  Element
+            var canvasHandler = new XML3D.webgl.CanvasHandler(canvas, xml3ds[i]);
+            canvasHandler.start();
+            handlers[i] = canvasHandler;
+        }
+    };
+
     /**
      * CanvasHandler class.
      * Own the GL context. Registers and handles the events that happen on the canvas element.
@@ -335,8 +357,8 @@ XML3D.webgl.MAXFPS = 30;
             return xml3dElem.currentPickPos;
         });
     };
-    
-  
+
+
     CanvasHandler.prototype.dragAndDrop = function(evt) {
         var pos = this.getMousePosition(evt);
 

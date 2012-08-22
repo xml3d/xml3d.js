@@ -47,7 +47,8 @@
         <file name="renderer/shadermanager.js" />
         <file name="renderer/bufferhandler.js" />
         <file name="renderer/renderer.js" />
-		<file name="renderer/adapter/xml3d.js" />
+        <file name="renderer/adapter/misc.js" />
+        <file name="renderer/adapter/xml3d.js" />
         <file name="renderer/adapter/transform.js" />
         <file name="renderer/adapter/view.js" />
         <file name="renderer/adapter/shader.js" />

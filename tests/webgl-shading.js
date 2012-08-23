@@ -118,6 +118,7 @@ test("Textured diffuse shader", 3, function() {
     stop();
 });
 
+// Scene: webgl-rendering02.xhtml
 test("Diffuse shader with vertex colors", 3, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);

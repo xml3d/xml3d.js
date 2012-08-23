@@ -44,7 +44,7 @@ XML3D.shaders.register("diffuse", {
         "uniform vec3 pointLightIntensity[MAX_POINTLIGHTS];",
         "uniform vec3 pointLightVisibility[MAX_POINTLIGHTS];",
         "#endif",
-        
+
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "uniform vec3 directionalLightDirection[MAX_DIRECTIONALLIGHTS];",
         "uniform vec3 directionalLightIntensity[MAX_DIRECTIONALLIGHTS];",
@@ -53,7 +53,7 @@ XML3D.shaders.register("diffuse", {
 
         "void main(void) {",
         "  vec3 color = emissiveColor + ambientIntensity * diffuseColor;",
-        
+
         "  #if MAX_POINTLIGHTS > 0",
         "      for (int i=0; i<MAX_POINTLIGHTS; i++) {",
         "          vec3 L = pointLightPosition[i] - fragVertexPosition;",
@@ -64,7 +64,7 @@ XML3D.shaders.register("diffuse", {
         "          color = color + (atten*Idiff) * pointLightVisibility[i];",
         "      }",
         "  #endif",
-        
+
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
         "    vec4 lDirection = viewMatrix * vec4(directionalLightDirection[i], 0.0);",
@@ -73,14 +73,14 @@ XML3D.shaders.register("diffuse", {
         "    color = color + Idiff * directionalLightVisibility[i];",
         "  }",
         "#endif",
-        
+
         "  gl_FragColor = vec4(color, 1.0);",
         "}"
     ].join("\n"),
-    
+
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],
-        emissiveColor   : [0.0, 0.0, 0.0]  
+        emissiveColor   : [0.0, 0.0, 0.0]
     }
 });
 
@@ -137,7 +137,7 @@ XML3D.shaders.register("textureddiffuse", {
         "uniform vec3 pointLightIntensity[MAX_POINTLIGHTS];",
         "uniform vec3 pointLightVisibility[MAX_POINTLIGHTS];",
         "#endif",
-        
+
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "uniform vec3 directionalLightDirection[MAX_DIRECTIONALLIGHTS];",
         "uniform vec3 directionalLightIntensity[MAX_DIRECTIONALLIGHTS];",
@@ -148,13 +148,13 @@ XML3D.shaders.register("textureddiffuse", {
         "  vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);",
         "  float alpha = texDiffuse.a;",
         "  if (alpha < 0.05) discard;",
-        
+
         "  vec3 objDiffuse = diffuseColor * texDiffuse.rgb;",
-        
+        "  vec3 color = emissiveColor + ambientIntensity * objDiffuse;",
+
         "  #if MAX_POINTLIGHTS > 0",
         "      for (int i=0; i<MAX_POINTLIGHTS; i++) {",
         "          vec3 L = pointLightPosition[i] - fragVertexPosition;",
-        "  #if MAXLIGHTS > 0",
         "          float dist = length(L);",
         "          L = normalize(L);",
         "          float atten = 1.0 / (pointLightAttenuation[i].x + pointLightAttenuation[i].y * dist + pointLightAttenuation[i].z * dist * dist);",
@@ -162,7 +162,7 @@ XML3D.shaders.register("textureddiffuse", {
         "          color = color + (atten*Idiff) * pointLightVisibility[i];",
         "      }",
         "  #endif",
-        
+
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
         "    vec4 lDirection = viewMatrix * vec4(directionalLightDirection[i], 0.0);",
@@ -171,11 +171,11 @@ XML3D.shaders.register("textureddiffuse", {
         "    color = color + Idiff * directionalLightVisibility[i];",
         "  }",
         "#endif",
-        
+
         "  gl_FragColor = vec4(color, alpha);",
         "}"
     ].join("\n"),
-    
+
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0]
@@ -202,7 +202,7 @@ XML3D.shaders.register("diffusevcolor", {
 
         "void main(void) {",
         "    vec3 pos = position;",
-        "    vec3 norm = normal; //~",
+        "    vec3 norm = normal;",
 
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
         "    fragNormal = normalize(normalMatrix * norm);",
@@ -234,7 +234,7 @@ XML3D.shaders.register("diffusevcolor", {
         "uniform vec3 pointLightIntensity[MAX_POINTLIGHTS];",
         "uniform vec3 pointLightVisibility[MAX_POINTLIGHTS];",
         "#endif",
-        
+
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "uniform vec3 directionalLightDirection[MAX_DIRECTIONALLIGHTS];",
         "uniform vec3 directionalLightIntensity[MAX_DIRECTIONALLIGHTS];",
@@ -243,8 +243,10 @@ XML3D.shaders.register("diffusevcolor", {
 
         "void main(void) {",
         "  if (transparency > 0.95) discard;",
+
         "  vec3 objDiffuse = diffuseColor * fragVertexColor;",
-        
+        "  vec3 color = emissiveColor + ambientIntensity * objDiffuse;",
+
         "  #if MAX_POINTLIGHTS > 0",
         "      for (int i=0; i<MAX_POINTLIGHTS; i++) {",
         "          vec3 L = pointLightPosition[i] - fragVertexPosition;",
@@ -255,7 +257,7 @@ XML3D.shaders.register("diffusevcolor", {
         "          color = color + (atten*Idiff) * pointLightVisibility[i];",
         "      }",
         "  #endif",
-        
+
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
         "    vec4 lDirection = viewMatrix * vec4(directionalLightDirection[i], 0.0);",
@@ -264,11 +266,11 @@ XML3D.shaders.register("diffusevcolor", {
         "    color = color + Idiff * directionalLightVisibility[i];",
         "  }",
         "#endif",
-        
+
         "  gl_FragColor = vec4(color, 1.0);",
         "}"
      ].join("\n"),
-     
+
      uniforms: {
          diffuseColor    : [1.0, 1.0, 1.0],
          emissiveColor   : [0.0, 0.0, 0.0]

@@ -334,3 +334,29 @@ test("Pick pass flag", 7, function() {
     // This failed because setting shader set flag to 'false'
     ok(h.needPickingDraw, "Changing transformation does require a picking pass");
 });
+
+
+test("Add a mesh dynamically", 4, function() {
+    var x = this.doc.getElementById("xml3DElem");
+    var g = this.doc.getElementById("myGroup");
+    var count = 0;
+
+    x.addEventListener("framedrawn", function(n) {
+            if (count == 0) {
+                equal(n.detail.numberOfObjectsDrawn, 1, "Initially one drawable object");
+                var group = document.createElementNS(XML3D.xml3dNS,"group");
+                var mesh = document.createElementNS(XML3D.xml3dNS,"mesh");
+                mesh.setAttribute('id',"new_mesh");
+                mesh.setAttribute('src',"#meshdata");
+                g.appendChild(group);
+                group.appendChild(mesh);
+                stop();
+            } else if (count == 1) {
+                equal(n.detail.numberOfObjectsDrawn, 2, "Now two drawable objects");
+            }
+            count++;
+            start();
+    });
+    stop();
+    g.visible = true;
+});

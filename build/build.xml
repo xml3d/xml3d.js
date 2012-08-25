@@ -36,12 +36,12 @@
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
 		<file name="data/processtable.js" />
-        <file name="data/data.js" />
-        <file name="data/values.js" />
+        <file name="data/adapter/data.js" />
+        <file name="data/adapter/values.js" />
         <file name="data/scriptinstance.js" />
-        <file name="data/texture.js" />
-        <file name="data/misc.js" />
-        <file name="data/factory.js" />
+        <file name="data/adapter/texture.js" />
+        <file name="data/adapter/misc.js" />
+        <file name="data/adapter/factory.js" />
 		<file name="renderer/canvashandler.js" />
         <file name="renderer/utils.js" />
         <file name="renderer/shadermanager.js" />
@@ -62,23 +62,23 @@
 		<file name="renderer/shader/diffuse.js" />
 		<file name="renderer/shader/phong.js" />
 		<file name="renderer/shader/utility.js" />
-        <file name="data/xflow/base.js" />
-        <file name="data/xflow/morph3.js" />
-		<file name="data/xflow/merge3.js" />
-        <file name="data/xflow/sub3.js" />
-        <file name="data/xflow/normalize3.js" />
-        <file name="data/xflow/lerp3seq.js" />
-        <file name="data/xflow/slerpseq.js" />
-        <file name="data/xflow/createTransform.js" />
-        <file name="data/xflow/mul4x4.js" />
-        <file name="data/xflow/skinDirection.js" />
-        <file name="data/xflow/skinPosition.js" />
-		<file name="data/xflow/skinning.js" />
-        <file name="data/xflow/flattenBoneTransform.js" />
-        <file name="data/xflow/flipNormal.js" />
-		<file name="data/xflow/math.js" />
+		<file name="data/scripts/base.js" />
+        <file name="data/scripts/morph3.js" />
+		<file name="data/scripts/merge3.js" />
+        <file name="data/scripts/sub3.js" />
+        <file name="data/scripts/normalize3.js" />
+        <file name="data/scripts/lerp3seq.js" />
+        <file name="data/scripts/slerpseq.js" />
+        <file name="data/scripts/createTransform.js" />
+        <file name="data/scripts/mul4x4.js" />
+        <file name="data/scripts/skinDirection.js" />
+        <file name="data/scripts/skinPosition.js" />
+		<file name="data/scripts/skinning.js" />
+        <file name="data/scripts/flattenBoneTransform.js" />
+        <file name="data/scripts/flipNormal.js" />
+		<file name="data/scripts/math.js" />
 		<file name="contrib/perlin-noise-simplex.js" />
-        <file name="data/xflow/noiseImage.js" />
+        <file name="data/scripts/noiseImage.js" />
 	</filelist>
 
 	<target name="lastTag" depends="init, windowsGit, linuxGit">

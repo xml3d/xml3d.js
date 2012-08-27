@@ -592,9 +592,9 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     gl.disable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
 
-    var volumeMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
-	var volumeMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
-	this.adjustMinMax(pickedObj.mesh.bbox, volumeMin, volumeMax, pickedObj.transform);
+    this.bbMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
+    this.bbMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
+    this.adjustMinMax(pickedObj.mesh.bbox, this.bbMin, this.bbMax, pickedObj.transform);
 
     var shader = this.shaderManager.getShaderById("pickedposition");
     this.shaderManager.bindShader(shader);
@@ -604,8 +604,8 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
     var parameters = {
-    	min : volumeMin,
-    	max : volumeMax,
+    	min : this.bbMin,
+    	max : this.bbMax,
         modelMatrix : xform.model,
         modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)
     };
@@ -723,7 +723,7 @@ Renderer.prototype.readPixelDataFromBuffer = function(glX, glY, buffer){
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         return null;
     }
-}
+};
 
 /**
  * Read normal from picking buffer
@@ -745,25 +745,33 @@ Renderer.prototype.readNormalFromPickingBuffer = function(glX, glY){
     else{
         return null;
     }
-}
+};
 
-Renderer.prototype.readPositionFromPickingBuffer = function(screenX, screenY){
-    var data = this.readPixelDataFromBuffer(screenX, screenY, this.fbos.vectorPicking);
+/**
+ * Read position from picking buffer
+ * @param {number} glX OpenGL Coordinate of color buffer
+ * @param {number} glY OpenGL Coordinate of color buffer
+ * @returns {vec3} The world position at the given coordinates
+ */
+Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
+    var data = this.readPixelDataFromBuffer(glX, glY, this.fbos.vectorPicking);
     if(data){
-        // TODO: Fix for positions
         pickVector[0] = data[0] / 254;
         pickVector[1] = data[1] / 254;
         pickVector[2] = data[2] / 254;
 
-        pickVector = vec3.subtract(vec3.scale(pickVector, 2.0), vec3.create([ 1, 1, 1 ]));
+        var tmp = vec3.subtract(this.bbMax, this.bbMin, vec3.create());
+        vec = vec3.create([ pickVector[0]*tmp[0], pickVector[1]*tmp[1], pickVector[2]*tmp[2] ]);
+        vec3.add(pickVector, this.bbMin, pickVector);
+
+        return pickVector;
     }
     else{
         return null;
     }
-}
+};
 
-
-    /**
+/**
  * Reads pixels from the screenbuffer to determine picked object or normals.
  *
  * @param normals

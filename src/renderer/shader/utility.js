@@ -114,7 +114,7 @@ XML3D.shaders.register("pickedNormals", {
         "varying vec3 fragNormal;",
 
         "void main(void) {",
-        "    gl_FragColor = vec4((fragNormal+1.0)/2.0, 1.0);",
+        "    gl_FragColor = vec4((fragNormal+1.0)/2.0 * (254.0 / 255.0), 1.0);",
         "}"
     ].join("\n"),
 

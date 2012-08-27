@@ -186,7 +186,7 @@ XML3D.webgl.MAXFPS = 30;
         if (!pickedObj || this._pickingDisabled)
             return;
         this.renderer.renderPickedNormals(pickedObj, screenX, this.canvas.height - screenY);
-        return this.renderer.readVectorFromPickingBuffer(screenX, this.canvas.height - screenY);
+        return this.renderer.readNormalFromPickingBuffer(screenX, this.canvas.height - screenY);
     };
 
     /**
@@ -199,7 +199,7 @@ XML3D.webgl.MAXFPS = 30;
     	if (!pickedObj)
     		return null;
         this.renderer.renderPickedPosition(pickedObj);
-        return this.renderer.readVectorFromPickingBuffer(canvasX, this.canvas.height - canvasY);
+        return this.renderer.readPositionFromPickingBuffer(canvasX, this.canvas.height - canvasY);
     };
 
     // Uses gluUnProject() to transform the 2D screen point to a 3D ray

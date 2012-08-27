@@ -698,35 +698,72 @@ Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
 };
 
 /**
- * Reads pixels from the screenbuffer to determine picked object or normals.
+ * Reads pixels from the provided buffer
  *
- * @param {number} screenX Screen Coordinate of color buffer
- * @param {number} screenY Screen Coordinate of color buffer
- * @returns {Vec3} the vector of
+ * @param {number} glX OpenGL Coordinate of color buffer
+ * @param {number} glY OpenGL Coordinate of color buffer
+ * @param {Object} buffer Buffer to read pixels from
+ * @returns {Uint8Array} pixel data
  */
-Renderer.prototype.readVectorFromPickingBuffer = function(screenX, screenY) {
-    var scale = this.fbos.picking.scale;
-    var x = screenX * scale;
-    var y = screenY * scale;
+Renderer.prototype.readPixelDataFromBuffer = function(glX, glY, buffer){
+    var fbo = buffer;
+    var scale = fbo.scale;
+    var x = glX * scale;
+    var y = glY * scale;
     var gl = this.handler.gl;
 
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
     try {
         gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-        pickVector[0] = data[0] / 255;
-        pickVector[1] = data[1] / 255;
-        pickVector[2] = data[2] / 255;
-
-        pickVector = vec3.subtract(vec3.scale(pickVector, 2.0), vec3.create([ 1, 1, 1 ]));
-        return pickVector;
+        return data;
     } catch (e) {
         XML3D.debug.logError(e);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         return null;
     }
-};
-
+}
 
 /**
+ * Read normal from picking buffer
+ * @param {number} glX OpenGL Coordinate of color buffer
+ * @param {number} glY OpenGL Coordinate of color buffer
+ * @returns {Object} Vectore wtih
+ */
+Renderer.prototype.readNormalFromPickingBuffer = function(glX, glY){
+    var data = this.readPixelDataFromBuffer(glX, glY, this.fbos.vectorPicking);
+    if(data){
+        pickVector[0] = data[0] / 254;
+        pickVector[1] = data[1] / 254;
+        pickVector[2] = data[2] / 254;
+
+        pickVector = vec3.subtract(vec3.scale(pickVector, 2.0), vec3.create([ 1, 1, 1 ]));
+
+        return pickVector;
+    }
+    else{
+        return null;
+    }
+}
+
+Renderer.prototype.readPositionFromPickingBuffer = function(screenX, screenY){
+    var data = this.readPixelDataFromBuffer(screenX, screenY, this.fbos.vectorPicking);
+    if(data){
+        // TODO: Fix for positions
+        pickVector[0] = data[0] / 254;
+        pickVector[1] = data[1] / 254;
+        pickVector[2] = data[2] / 254;
+
+        pickVector = vec3.subtract(vec3.scale(pickVector, 2.0), vec3.create([ 1, 1, 1 ]));
+    }
+    else{
+        return null;
+    }
+}
+
+
+    /**
  * Reads pixels from the screenbuffer to determine picked object or normals.
  *
  * @param normals

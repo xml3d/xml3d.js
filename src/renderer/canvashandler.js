@@ -378,7 +378,7 @@ XML3D.webgl.MAXFPS = 30;
             var cachedNormal = undefined;
 
             event.__defineGetter__("normal", function(){
-                if(event._cachedNormal !== undefined) return cachedNormal;
+                if(cachedNormal !== undefined) return cachedNormal;
                 var norm = (handler.getWorldSpaceNormalByPoint(handler.currentPickObj, x, y));
                 cachedNormal = norm ? new XML3DVec3(norm[0], norm[1], norm[2]) : null;
                 return cachedNormal;

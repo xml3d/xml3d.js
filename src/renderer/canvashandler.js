@@ -188,6 +188,19 @@ XML3D.webgl.MAXFPS = 30;
         this.renderer.renderPickedNormals(pickedObj, screenX, this.canvas.height - screenY);
     };
 
+    /**
+     * @param {Element} pickedObj
+     * @param {number} canvasX
+     * @param {number} canvasY
+     * @return {vec3}
+     */
+    CanvasHandler.prototype.getWorldSpacePositionByPoint = function(pickedObj, canvasX, canvasY) {
+    	if (!pickedObj)
+    		return null;
+        this.renderer.renderPickedPosition(pickedObj);
+        return this.renderer.readVectorFromPickingBuffer(canvasX, this.canvas.height - canvasY);
+    };
+
     // Uses gluUnProject() to transform the 2D screen point to a 3D ray
     // returns an XML3DRay
     // TODO: Move this to Renderer and/or XML3DAdapter
@@ -309,8 +322,8 @@ XML3D.webgl.MAXFPS = 30;
         var tar = null;
         if (target !== undefined && target !== null)
             tar = target;
-        else if (this.xml3dElem.currentPickObj)
-            tar = this.xml3dElem.currentPickObj;
+        else if (this.currentPickObj)
+            tar = this.currentPickObj;
         else
             tar = this.xml3dElem;
 
@@ -347,15 +360,16 @@ XML3D.webgl.MAXFPS = 30;
     /**
      * Adds position and normal attributes to the given event.
      *
-     * @param event
-     * @param x
-     * @param y
-     * @return
+     * @param {Event} event
+     * @param {number} x
+     * @param {number} y
+     * @return {XML3DVec3}
      */
     CanvasHandler.prototype.initExtendedMouseEvent = function(event, x, y) {
 
         var handler = this;
         var xml3dElem = this.xml3dElem;
+        var cachedPosition = null;
 
         event.__defineGetter__("normal", function() {
             handler.renderPickedNormals(xml3dElem.currentPickObj, x, y);
@@ -363,7 +377,11 @@ XML3D.webgl.MAXFPS = 30;
             return new window.XML3DVec3(v[0], v[1], v[2]);
         });
         event.__defineGetter__("position", function() {
-            return xml3dElem.currentPickPos;
+        	if (!cachedPosition) {
+	        	var pos = handler.getWorldSpacePositionByPoint(handler.currentPickObj, x, y);
+	        	cachedPosition = (pos && pos.x) ? new XML3DVec(pos.x, pos.y, pos.z) : null;
+        	}
+        	return cachedPosition;
         });
     };
 

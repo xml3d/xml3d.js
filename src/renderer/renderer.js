@@ -570,6 +570,47 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 };
 
 /**
+ * Render the picked object using the normal picking shader
+ *
+ * @param {Object} pickedObj
+ */
+Renderer.prototype.renderPickedPosition = function(pickedObj) {
+    var gl = this.handler.gl;
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.BLEND);
+
+    var volumeMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
+	var volumeMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
+	this.adjustMinMax(pickedObj.mesh.bbox, volumeMin, volumeMax, pickedObj.transform);
+
+    var shader = this.shaderManager.getShaderById("pickedposition");
+    this.shaderManager.bindShader(shader);
+
+    var xform = {};
+    xform.model = pickedObj.transform;
+    xform.modelView = this.camera.getModelViewMatrix(xform.model);
+
+    var parameters = {
+    	min : volumeMin,
+    	max : volumeMax,
+        modelMatrix : xform.model,
+        modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)
+    };
+
+    this.shaderManager.setUniformVariables(shader, parameters);
+    this.drawObject(shader, pickedObj.mesh);
+
+    this.shaderManager.unbindShader(shader);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+};
+
+/**
  * Render the picked object using the normal picking shader and return the
  * normal at the point where the object was clicked.
  *

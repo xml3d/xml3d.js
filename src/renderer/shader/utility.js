@@ -23,6 +23,40 @@ XML3D.shaders.register("pickobjectid", {
     uniforms : {}
 });
 
+XML3D.shaders.register("pickedposition", {
+    vertex : [
+        "attribute vec3 position;",
+        "uniform mat4 modelMatrix;",
+        "uniform mat4 modelViewProjectionMatrix;",
+        "uniform vec3 min;",
+        "uniform vec3 max;",
+
+        "varying vec3 worldCoord;",
+
+        "void main(void) {",
+        "    worldCoord = (modelMatrix * vec4(position, 1.0)).xyz;",
+        "    vec3 diff = max - min;",
+        "    worldCoord = worldCoord - min;",
+        "    worldCoord = worldCoord / diff;",
+        "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
+        "}"
+    ].join("\n"),
+
+    fragment : [
+        "#ifdef GL_ES",
+          "precision highp float;",
+        "#endif",
+
+        "varying vec3 worldCoord;",
+
+        "void main(void) {",
+        "    gl_FragColor = vec4(worldCoord, 1.0);",
+        "}"
+    ].join("\n"),
+
+    uniforms : {}
+});
+
 
 XML3D.shaders.register("picking", {
     vertex : [

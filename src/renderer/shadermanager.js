@@ -75,6 +75,7 @@
     	//Create picking shaders
     this.shaders["picking"] = this.getStandardShaderProgram("picking");
     this.shaders["pickobjectid"] = this.getStandardShaderProgram("pickobjectid");
+    this.shaders["pickedposition"] = this.getStandardShaderProgram("pickedposition");
     this.shaders["pickedNormals"] = this.getStandardShaderProgram("pickedNormals");
     };
 

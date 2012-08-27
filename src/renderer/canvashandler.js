@@ -189,10 +189,10 @@ XML3D.webgl.MAXFPS = 30;
     };
 
     /**
-     * @param {Element} pickedObj
+     * @param {Object} pickedObj
      * @param {number} canvasX
      * @param {number} canvasY
-     * @return {vec3}
+     * @return {vec3} The world space position on the object's surface at the given coordinates
      */
     CanvasHandler.prototype.getWorldSpacePositionByPoint = function(pickedObj, canvasX, canvasY) {
     	if (!pickedObj)

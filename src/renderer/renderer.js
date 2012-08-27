@@ -172,7 +172,8 @@ Renderer.prototype.initFrameBuffers = function(gl) {
     var fbos = {};
 
     fbos.picking = this.bufferHandler.createPickingBuffer(this.width, this.height);
-    if (!fbos.picking.valid)
+    fbos.vectorPicking = this.bufferHandler.createPickingBuffer(this.width, this.height);
+    if (!fbos.picking.valid || !fbos.vectorPicking.valid)
         this.handler._pickingDisabled = true;
 
     return fbos;
@@ -577,7 +578,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 Renderer.prototype.renderPickedPosition = function(pickedObj) {
     var gl = this.handler.gl;
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.vectorPicking.handle);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
@@ -622,7 +623,7 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
 Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
     var gl = this.handler.gl;
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.picking.handle);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.vectorPicking.handle);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);

@@ -38,3 +38,18 @@ test("xml3d Apadater getElementByPoint test", function() {
     element = xml3dElement.getElementByPoint(5,5);
     strictEqual(element, null, "Nothing picked");
 });
+
+test("Position picking test", 4, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
+    var target = this.doc.getElementById("pickingMesh1");
+
+    target.addEventListener("click", function(evt) {
+    	ok(evt.position);
+        start();
+    }, false);
+
+    h.updatePickObjectByPoint(88,60);
+    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+    stop();
+});

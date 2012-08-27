@@ -29,9 +29,12 @@ test("Check current pick object (internal)", function() {
     strictEqual(h.currentPickObj, picked, "Return value matches");
 });
 
-test("xml3d Apadater getElementByPoint test", 4, function() {
+test("xml3d Apadater getElementByPoint test", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var element = xml3dElement.getElementByPoint(88,60);
     ok(element, "Object picked");
     strictEqual(element, this.doc.getElementById("pickingMesh1"));
+
+    element = xml3dElement.getElementByPoint(5,5);
+    strictEqual(element, null, "Nothing picked");
 });

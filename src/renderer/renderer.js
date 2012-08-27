@@ -623,7 +623,7 @@ var data = new Uint8Array(8);
  *
  * @param {number} screenX Screen Coordinate of color buffer
  * @param {number} screenY Screen Coordinate of color buffer
- * @returns {Element} Picked Object
+ * @returns {Element|null} Picked Object
  *
  */
 Renderer.prototype.getElementFromPickingBuffer = function(screenX, screenY) {

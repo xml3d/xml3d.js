@@ -16,10 +16,11 @@ module("WebGL Picking tests", {
 });
 
 
-test("Picking test", 4, function() {
+test("Check current pick object (internal)", 5, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
-    h.renderPick(88,60);
+    var picked = h.updatePickObjectByPoint(88,60);
     ok(h.currentPickObj, "Object picked");
-    strictEqual(h.currentPickObj, this.doc.getElementById("pickingMesh1"));
+    strictEqual(h.currentPickObj, picked, "Return value matches");
+    strictEqual(h.currentPickObj, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
 });

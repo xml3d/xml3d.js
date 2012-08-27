@@ -168,14 +168,16 @@ XML3D.webgl.MAXFPS = 30;
      *
      * @param {number} canvasX
      * @param {number} canvasY
+     * @return {Element|null} newly picked object
      */
-    CanvasHandler.prototype.renderPick = function(canvasX, canvasY) {
+    CanvasHandler.prototype.updatePickObjectByPoint = function(canvasX, canvasY) {
         if (this._pickingDisabled)
             return;
         if(this.needPickingDraw)
             this.renderer.renderSceneToPickingBuffer();
         this.currentPickObj = this.renderer.getElementFromPickingBuffer(canvasX, this.canvas.height - canvasY);
         this.needPickingDraw = false;
+        return this.currentPickObj;
     };
 
     // Binds the normal picking buffer and passes the request for picked object
@@ -369,7 +371,7 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.dragAndDrop = function(evt) {
         var pos = this.getMousePosition(evt);
 
-        this.renderPick(pos.x, pos.y);
+        this.updatePickObjectByPoint(pos.x, pos.y);
         this.dispatchMouseEvent("drop", evt.button, pos.x, pos.y, evt);
         evt.preventDefault();
         return false; // don't redraw
@@ -398,7 +400,7 @@ XML3D.webgl.MAXFPS = 30;
             this.isDragging = false;
         }
 
-        this.renderPick(pos.x, pos.y);
+        this.updatePickObjectByPoint(pos.x, pos.y);
         this.dispatchMouseEvent("mouseup", evt.button, pos.x, pos.y, evt);
 
         return false; // don't redraw
@@ -417,7 +419,7 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.mouseDown = function(evt) {
         this.canvasInfo.mouseButtonsDown[evt.button] = true;
         var pos = this.getMousePosition(evt);
-        this.renderPick(pos.x, pos.y);
+        this.updatePickObjectByPoint(pos.x, pos.y);
 
         this.dispatchMouseEvent("mousedown", evt.button, pos.x, pos.y, evt);
 
@@ -472,7 +474,7 @@ XML3D.webgl.MAXFPS = 30;
         if (!this.mouseMovePickingEnabled)
             return;
 
-        this.renderPick(pos.x, pos.y);
+        this.updatePickObjectByPoint(pos.x, pos.y);
         var curObj = null;
         if (this.xml3dElem.currentPickObj)
             curObj = this.xml3dElem.currentPickObj;

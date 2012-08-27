@@ -620,7 +620,7 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
  * @param screenY
  * @return
  */
-Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
+Renderer.prototype.renderPickedNormals = function(pickedObj) {
     var gl = this.handler.gl;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.vectorPicking.handle);
@@ -640,21 +640,19 @@ Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
     xform.model = transform;
     xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
+    var normalMatrix = mat4.toInverseMat3(xform.modelView);
+
     var parameters = {
         modelViewMatrix : transform,
         modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
-        normalMatrix : this.camera.getNormalMatrix(xform.modelView)
+        normalMatrix : normalMatrix ? mat3.transpose(normalMatrix) : identMat3
     };
 
     this.shaderManager.setUniformVariables(shader, parameters);
     this.drawObject(shader, mesh);
 
     this.shaderManager.unbindShader(shader);
-    this.readNormalFromBuffer(screenX, screenY);
-
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    this.handler.needPickingDraw = true;
-
 };
 
 var pickVector = vec3.create();
@@ -668,7 +666,7 @@ var data = new Uint8Array(8);
  * @returns {Element|null} Picked Object
  *
  */
-Renderer.prototype.getElementFromPickingBuffer = function(screenX, screenY) {
+Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
     var gl = this.handler.gl;
     var fbo = this.fbos.picking;
     var scale = fbo.scale;
@@ -684,7 +682,7 @@ Renderer.prototype.getElementFromPickingBuffer = function(screenX, screenY) {
         var objId = 255 - data[3] - 1;
         if (objId >= 0 && data[3] > 0) {
             var pickedObj = this.drawableObjects[objId];
-            result = pickedObj.meshNode;
+            result = pickedObj;
         }
     } catch (e) {
         XML3D.debug.logError(e);
@@ -697,9 +695,9 @@ Renderer.prototype.getElementFromPickingBuffer = function(screenX, screenY) {
  *
  * @param {number} screenX Screen Coordinate of color buffer
  * @param {number} screenY Screen Coordinate of color buffer
- * @returns
+ * @returns {Vec3} the vector of
  */
-Renderer.prototype.readNormalFromBuffer = function(screenX, screenY) {
+Renderer.prototype.readVectorFromPickingBuffer = function(screenX, screenY) {
     var scale = this.fbos.picking.scale;
     var x = screenX * scale;
     var y = screenY * scale;
@@ -713,10 +711,10 @@ Renderer.prototype.readNormalFromBuffer = function(screenX, screenY) {
         pickVector[2] = data[2] / 255;
 
         pickVector = vec3.subtract(vec3.scale(pickVector, 2.0), vec3.create([ 1, 1, 1 ]));
-        this.xml3dNode.currentPickNormal = pickVector;
+        return pickVector;
     } catch (e) {
-        this.xml3dNode.currentPickNormal = null;
         XML3D.debug.logError(e);
+        return null;
     }
 };
 
@@ -754,7 +752,7 @@ Renderer.prototype.readPixels = function(normals, screenX, screenY) {
 
                 var pickedObj = this.drawableObjects[objId];
                 this.xml3dNode.currentPickPos = pickVector;
-                this.xml3dNode.currentPickObj = pickedObj.meshNode;
+                this.xml3dNode.currentPickObj = pickedObj;
             } else {
                 this.xml3dNode.currentPickPos = null;
                 this.xml3dNode.currentPickObj = null;

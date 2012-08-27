@@ -172,20 +172,21 @@ XML3D.webgl.MAXFPS = 30;
      */
     CanvasHandler.prototype.updatePickObjectByPoint = function(canvasX, canvasY) {
         if (this._pickingDisabled)
-            return;
+            return null;
         if(this.needPickingDraw)
             this.renderer.renderSceneToPickingBuffer();
-        this.currentPickObj = this.renderer.getElementFromPickingBuffer(canvasX, this.canvas.height - canvasY);
+        this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, this.canvas.height - canvasY);
         this.needPickingDraw = false;
-        return this.currentPickObj;
+        return this.currentPickObj ? this.currentPickObj.meshNode : null;
     };
 
     // Binds the normal picking buffer and passes the request for picked object
     // normals to the renderer
-    CanvasHandler.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
+    CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, screenX, screenY) {
         if (!pickedObj || this._pickingDisabled)
             return;
         this.renderer.renderPickedNormals(pickedObj, screenX, this.canvas.height - screenY);
+        return this.renderer.readVectorFromPickingBuffer(screenX, this.canvas.height - screenY);
     };
 
     /**
@@ -323,7 +324,7 @@ XML3D.webgl.MAXFPS = 30;
         if (target !== undefined && target !== null)
             tar = target;
         else if (this.currentPickObj)
-            tar = this.currentPickObj;
+            tar = this.currentPickObj.meshNode;
         else
             tar = this.xml3dElem;
 
@@ -369,20 +370,28 @@ XML3D.webgl.MAXFPS = 30;
 
         var handler = this;
         var xml3dElem = this.xml3dElem;
-        var cachedPosition = null;
 
-        event.__defineGetter__("normal", function() {
-            handler.renderPickedNormals(xml3dElem.currentPickObj, x, y);
-            var v = xml3dElem.currentPickNormal.v;
-            return new window.XML3DVec3(v[0], v[1], v[2]);
-        });
-        event.__defineGetter__("position", function() {
-        	if (!cachedPosition) {
-	        	var pos = handler.getWorldSpacePositionByPoint(handler.currentPickObj, x, y);
-	        	cachedPosition = (pos && pos.x) ? new XML3DVec(pos.x, pos.y, pos.z) : null;
-        	}
-        	return cachedPosition;
-        });
+        (function(){
+            var cachedPosition = undefined;
+            var cachedNormal = undefined;
+
+            event.__defineGetter__("normal", function(){
+                if(event._cachedNormal !== undefined) return cachedNormal;
+                var norm = (handler.getWorldSpaceNormalByPoint(handler.currentPickObj, x, y));
+                cachedNormal = (norm && norm[0]) ? new XML3DVec3(norm[0], norm[1], norm[2]) : null;
+                return cachedNormal;
+            });
+            event.__defineGetter__("position", function() {
+                if (!cachedPosition) {
+                    var pos = handler.getWorldSpacePositionByPoint(handler.currentPickObj, x, y);
+                    cachedPosition = (pos && pos[0]) ? new XML3DVec3(pos[0], pos[1], pos[2]) : null;
+                }
+                return cachedPosition;
+            });
+
+        })();
+
+
     };
 
 
@@ -494,8 +503,8 @@ XML3D.webgl.MAXFPS = 30;
 
         this.updatePickObjectByPoint(pos.x, pos.y);
         var curObj = null;
-        if (this.xml3dElem.currentPickObj)
-            curObj = this.xml3dElem.currentPickObj;
+        if (this.currentPickObj)
+            curObj = this.currentPickObj.meshNode;
 
         // trigger mouseover and mouseout
         if (curObj !== this._lastPickedObj) {

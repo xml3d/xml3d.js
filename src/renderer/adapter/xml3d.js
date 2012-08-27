@@ -38,17 +38,18 @@
 
     XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) {
         var handler = this.factory.handler;
-        handler.updatePickObjectByPoint(x, y);
-        if (hitPoint && this.currentPickPos) {
+        var object = handler.updatePickObjectByPoint(x, y);
+        if (hitPoint && object) {
+            handler.renderPickedWorldSpacePosition(object, x, y);
             hitPoint.set(handler.currentPickPos);
         }
-        if (hitNormal && this.node.currentPickObj) {
-            this.factory.handler.renderPickedNormals(this.node.currentPickObj, x, y);
+        if (hitNormal && object) {
+            handler.renderPickedNormals(object, x, y);
             hitNormal.set(handler.currentPickNormal);
         }
 
         if (handler.currentPickObj)
-            return handler.currentPickObj;
+            return handler.currentPickObj.meshNode;
         else
             return null;
     };

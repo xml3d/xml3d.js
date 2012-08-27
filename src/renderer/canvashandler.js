@@ -378,13 +378,13 @@ XML3D.webgl.MAXFPS = 30;
             event.__defineGetter__("normal", function(){
                 if(event._cachedNormal !== undefined) return cachedNormal;
                 var norm = (handler.getWorldSpaceNormalByPoint(handler.currentPickObj, x, y));
-                cachedNormal = (norm && norm[0]) ? new XML3DVec3(norm[0], norm[1], norm[2]) : null;
+                cachedNormal = norm ? new XML3DVec3(norm[0], norm[1], norm[2]) : null;
                 return cachedNormal;
             });
             event.__defineGetter__("position", function() {
                 if (!cachedPosition) {
                     var pos = handler.getWorldSpacePositionByPoint(handler.currentPickObj, x, y);
-                    cachedPosition = (pos && pos[0]) ? new XML3DVec3(pos[0], pos[1], pos[2]) : null;
+                    cachedPosition = pos ? new XML3DVec3(pos[0], pos[1], pos[2]) : null;
                 }
                 return cachedPosition;
             });

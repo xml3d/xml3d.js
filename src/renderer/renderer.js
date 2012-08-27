@@ -729,7 +729,7 @@ Renderer.prototype.readPixelDataFromBuffer = function(glX, glY, buffer){
  * Read normal from picking buffer
  * @param {number} glX OpenGL Coordinate of color buffer
  * @param {number} glY OpenGL Coordinate of color buffer
- * @returns {Object} Vectore wtih
+ * @returns {Object} Vector with normal data
  */
 Renderer.prototype.readNormalFromPickingBuffer = function(glX, glY){
     var data = this.readPixelDataFromBuffer(glX, glY, this.fbos.vectorPicking);

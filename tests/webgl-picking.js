@@ -73,8 +73,9 @@ test("Position picking test", 3, function() {
     }, false);
 
     h.updatePickObjectByPoint(88,60);
-    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
     stop();
+    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+
 });
 
 test("Normal picking test", 4, function() {
@@ -90,7 +91,8 @@ test("Normal picking test", 4, function() {
     }, false);
 
     h.updatePickObjectByPoint(88,60);
-    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
     stop();
+    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+
 });
 

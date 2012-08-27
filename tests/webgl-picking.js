@@ -63,3 +63,21 @@ test("Position picking test", 3, function() {
     h.dispatchMouseEvent("click", 1, 88, 60, null, target);
     stop();
 });
+
+test("Normal picking test", 4, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
+    var target = this.doc.getElementById("pickingMesh1");
+
+    target.addEventListener("click", function(evt) {
+        var normal = evt.normal;
+        ok(normal);
+        QUnit.closeVector(evt.normal, new XML3DVec3(0,0,1), EPSILON, "Picked correct normal");
+        start();
+    }, false);
+
+    h.updatePickObjectByPoint(88,60);
+    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+    stop();
+});
+

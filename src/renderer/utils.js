@@ -318,4 +318,30 @@
 
     };
 
+    /**
+     * @param {XML3DBox} bbox
+     * @param {XML3DVec3} min
+     * @param {XML3DVec3} max
+     * @param {mat4} trafo
+     */
+    XML3D.webgl.adjustMinMax = function(bbox, min, max, trafo) {
+        var bbmin = vec3.create();
+        var bbmax = vec3.create();
+        mat4.multiplyVec3(trafo, bbox.min._data, bbmin);
+        mat4.multiplyVec3(trafo, bbox.max._data, bbmax);
+
+        if (bbmin[0] < min[0])
+            min[0] = bbmin[0];
+        if (bbmin[1] < min[1])
+            min[1] = bbmin[1];
+        if (bbmin[2] < min[2])
+            min[2] = bbmin[2];
+        if (bbmax[0] > max[0])
+            max[0] = bbmax[0];
+        if (bbmax[1] > max[1])
+            max[1] = bbmax[1];
+        if (bbmax[2] > max[2])
+            max[2] = bbmax[2];
+    };
+
 })();

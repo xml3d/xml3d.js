@@ -56,6 +56,8 @@ XML3D.webgl.MAXFPS = 30;
         this.needDraw = true;
         this.needPickingDraw = true;
         this._pickingDisabled = false;
+        /** @type {Drawable} */
+        this.currentPickObj = null;
         this._lastPickedObj = null;
         this.mouseMovePickingEnabled = false;
         this.isDragging = false;

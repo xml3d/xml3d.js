@@ -594,7 +594,7 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
 
     this.bbMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
     this.bbMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
-    this.adjustMinMax(pickedObj.mesh.bbox, this.bbMin, this.bbMax, pickedObj.transform);
+    XML3D.webgl.adjustMinMax(pickedObj.mesh.bbox, this.bbMin, this.bbMax, pickedObj.transform);
 
     var shader = this.shaderManager.getShaderById("pickedposition");
     this.shaderManager.bindShader(shader);
@@ -674,25 +674,17 @@ var data = new Uint8Array(8);
  *
  */
 Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
-    var gl = this.handler.gl;
-    var fbo = this.fbos.picking;
-    var scale = fbo.scale;
-    var x = screenX * scale;
-    var y = screenY * scale;
+    var data = this.readPixelDataFromBuffer(screenX, screenY, this.fbos.picking);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
+    if (!data)
+        return null;
 
     var result = null;
-    try {
-        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
-        var objId = data[0] * 65536 + data[1] * 256 + data[2];
+    var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
-        if (objId > 0) {
-            var pickedObj = this.drawableObjects[objId - 1];
-            result = pickedObj;
-        }
-    } catch (e) {
-        XML3D.debug.logError(e);
+    if (objId > 0) {
+        var pickedObj = this.drawableObjects[objId - 1];
+        result = pickedObj;
     }
     return result;
 };
@@ -769,69 +761,6 @@ Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
     else{
         return null;
     }
-};
-
-/**
- * Reads pixels from the screenbuffer to determine picked object or normals.
- *
- * @param normals
- *             How the read pixel data will be interpreted.
- * @return
- */
-Renderer.prototype.readPixels = function(normals, screenX, screenY) {
-    //console.log("readPixels", screenX, screenY);
-    var scale = this.fbos.picking.scale;
-    var x = screenX * scale;
-    var y = screenY * scale;
-    var gl = this.handler.gl;
-
-    try {
-        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
-
-        pickVector[0] = data[0] / 255;
-        pickVector[1] = data[1] / 255;
-        pickVector[2] = data[2] / 255;
-
-        if(normals) {
-            pickVector = vec3.subtract(vec3.scale(pickVector,2.0), vec3.create([1,1,1]));
-            this.xml3dNode.currentPickNormal = pickVector;
-        } else {
-            var objId = 255 - data[3] - 1;
-            if (objId >= 0 && data[3] > 0) {
-                var tmp = vec3.subtract(this.bbMax, this.bbMin, vec3.create());
-                pickVector = vec3.create([ pickVector[0]*tmp[0], pickVector[1]*tmp[1], pickVector[2]*tmp[2] ]);
-                vec3.add(pickVector, this.bbMin, pickVector);
-
-                var pickedObj = this.drawableObjects[objId];
-                this.xml3dNode.currentPickPos = pickVector;
-                this.xml3dNode.currentPickObj = pickedObj;
-            } else {
-                this.xml3dNode.currentPickPos = null;
-                this.xml3dNode.currentPickObj = null;
-            }
-    }
-    } catch(e) {XML3D.debug.logError(e);}
-};
-
-//Helper to expand an axis aligned bounding box around another object's bounding box
-Renderer.prototype.adjustMinMax = function(bbox, min, max, trafo) {
-    var bbmin = vec3.create();
-    var bbmax = vec3.create();
-    mat4.multiplyVec3(trafo, bbox.min._data, bbmin);
-    mat4.multiplyVec3(trafo, bbox.max._data, bbmax);
-
-    if (bbmin[0] < min[0])
-        min[0] = bbmin[0];
-    if (bbmin[1] < min[1])
-        min[1] = bbmin[1];
-    if (bbmin[2] < min[2])
-        min[2] = bbmin[2];
-    if (bbmax[0] > max[0])
-        max[0] = bbmax[0];
-    if (bbmax[1] > max[1])
-        max[1] = bbmax[1];
-    if (bbmax[2] > max[2])
-        max[2] = bbmax[2];
 };
 
 

@@ -556,8 +556,15 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
         xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
         var parameters = {};
-        parameters.id = 1.0 - (1 + j) / 255.0;
-        parameters.modelMatrix = transform;
+
+        var objId = j+1;
+        var c1 = objId & 255;
+        objId = objId >> 8;
+        var c2 = objId & 255;
+        objId = objId >> 8;
+        var c3 = objId & 255;
+
+        parameters.id = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
         parameters.modelViewProjectionMatrix = this.camera.getModelViewProjectionMatrix(xform.modelView);
 
         this.shaderManager.setUniformVariables(shader, parameters);
@@ -678,10 +685,10 @@ Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
     var result = null;
     try {
         gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+        var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
-        var objId = 255 - data[3] - 1;
-        if (objId >= 0 && data[3] > 0) {
-            var pickedObj = this.drawableObjects[objId];
+        if (objId > 0) {
+            var pickedObj = this.drawableObjects[objId - 1];
             result = pickedObj;
         }
     } catch (e) {

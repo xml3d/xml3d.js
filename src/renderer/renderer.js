@@ -537,9 +537,9 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
     gl.viewport(0, 0, fbo.width, fbo.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
-    var xform = {};
-    xform.view = this.camera.viewMatrix;
-    xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
+    var viewMatrix = this.camera.viewMatrix;
+    var projMatrix = this.camera.getProjectionMatrix(fbo.width / fbo.height);
+    var mvp = mat4.create();
 
     var shader = this.shaderManager.getShaderById("pickobjectid");
     this.shaderManager.bindShader(shader);
@@ -552,10 +552,10 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
         if (!mesh.valid)// || !obj.pickable)
             continue;
 
-        xform.model = transform;
-        xform.modelView = this.camera.getModelViewMatrix(xform.model);
-
         var parameters = {};
+
+        mat4.multiply(viewMatrix, transform, mvp);
+        mat4.multiply(projMatrix, mvp, mvp);
 
         var objId = j+1;
         var c1 = objId & 255;
@@ -565,7 +565,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
         var c3 = objId & 255;
 
         parameters.id = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
-        parameters.modelViewProjectionMatrix = this.camera.getModelViewProjectionMatrix(xform.modelView);
+        parameters.modelViewProjectionMatrix = mvp;
 
         this.shaderManager.setUniformVariables(shader, parameters);
         this.drawObject(shader, mesh);

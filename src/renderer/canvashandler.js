@@ -168,7 +168,7 @@ XML3D.webgl.MAXFPS = 30;
      *
      * @param {number} canvasX
      * @param {number} canvasY
-     * @return {Element|null} newly picked object
+     * @return {Drawable|null} newly picked object
      */
     CanvasHandler.prototype.updatePickObjectByPoint = function(canvasX, canvasY) {
         if (this._pickingDisabled)
@@ -177,7 +177,7 @@ XML3D.webgl.MAXFPS = 30;
             this.renderer.renderSceneToPickingBuffer();
         this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, this.canvas.height - canvasY);
         this.needPickingDraw = false;
-        return this.currentPickObj ? this.currentPickObj.meshNode : null;
+        return this.currentPickObj;
     };
 
     // Binds the normal picking buffer and passes the request for picked object

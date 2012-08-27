@@ -7,7 +7,7 @@ module("WebGL Picking tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-ambient.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/webgl-picking.xhtml"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -27,6 +27,16 @@ test("Check current pick object (internal)", function() {
     picked = h.updatePickObjectByPoint(5,5);
     strictEqual(h.currentPickObj, null, "Nothing picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
+});
+
+test("Pick with large object ids", function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
+    var picked = h.updatePickObjectByPoint(220,150);
+    ok(h.currentPickObj, "Object picked");
+    strictEqual(h.currentPickObj, picked, "Return value matches");
+    strictEqual(h.currentPickObj, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
+
 });
 
 test("xml3d Apadater getElementByPoint test", function() {

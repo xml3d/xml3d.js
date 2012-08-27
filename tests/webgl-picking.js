@@ -48,7 +48,7 @@ test("Pick with large object ids", function() {
     var picked = h.updatePickObjectByPoint(220, 150);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
+    strictEqual(h.currentPickObj.meshNode, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
 
 });
 

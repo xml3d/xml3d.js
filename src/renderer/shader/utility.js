@@ -1,4 +1,27 @@
+XML3D.shaders.register("pickobjectid", {
+    vertex : [
+        "attribute vec3 position;",
+        "uniform mat4 modelViewProjectionMatrix;",
 
+        "varying vec3 worldCoord;",
+        "void main(void) {",
+        "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
+        "}"
+    ].join("\n"),
+
+    fragment : [
+        "#ifdef GL_ES",
+          "precision highp float;",
+        "#endif",
+        "uniform float id;",
+
+        "void main(void) {",
+        "    gl_FragColor = vec4(0.0, 0.0, 0.0, id);",
+        "}"
+    ].join("\n"),
+
+    uniforms : {}
+});
 
 
 XML3D.shaders.register("picking", {
@@ -30,7 +53,7 @@ XML3D.shaders.register("picking", {
         "    gl_FragColor = vec4(worldCoord, id);",
         "}"
     ].join("\n"),
-    
+
     uniforms : {}
 });
 
@@ -61,6 +84,6 @@ XML3D.shaders.register("pickedNormals", {
         "    gl_FragColor = vec4((fragNormal+1.0)/2.0, 1.0);",
         "}"
     ].join("\n"),
-    
+
     uniforms : {}
 });

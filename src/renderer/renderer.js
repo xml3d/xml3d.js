@@ -520,81 +520,58 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
 
 
 /**
- * Render the scene using the picking shader and determine which object, if any, was picked
- *
- * @param x
- * @param y
- * @param needPickingDraw
- * @return
+ * Render the scene using the picking shader.
+ * Modifies current picking buffer.
  */
-Renderer.prototype.renderPickingPass = function(x, y, needPickingDraw) {
-        if (x<0 || y<0 || x>=this.width || y>=this.height)
-            return;
-        var gl = this.handler.gl;
-        var fbo = this.fbos.picking;
+Renderer.prototype.renderSceneToPickingBuffer = function() {
+    var gl = this.handler.gl;
+    var fbo = this.fbos.picking;
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
 
-        gl.enable(gl.DEPTH_TEST);
-        gl.disable(gl.CULL_FACE);
-        gl.disable(gl.BLEND);
+    gl.enable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.BLEND);
 
-        if (needPickingDraw ) {
-            var volumeMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
-            var volumeMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
-            gl.viewport(0, 0, fbo.width, fbo.height);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+    gl.viewport(0, 0, fbo.width, fbo.height);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
-            var xform = {};
-            xform.view = this.camera.viewMatrix;
-            xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
+    var xform = {};
+    xform.view = this.camera.viewMatrix;
+    xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
 
-            for (var i = 0; i < this.drawableObjects.length; i++) {
-                var obj = this.drawableObjects[i];
-            if(!obj.mesh.valid)// || !obj.pickable)
-                continue;
+    var shader = this.shaderManager.getShaderById("pickobjectid");
+    this.shaderManager.bindShader(shader);
 
-            var trafo = obj.transform;
-                this.adjustMinMax(obj.mesh.bbox, volumeMin, volumeMax, trafo);
-            }
+    for ( var j = 0, n = this.drawableObjects.length; j < n; j++) {
+        var obj = this.drawableObjects[j];
+        var transform = obj.transform;
+        var mesh = obj.mesh;
 
-            this.bbMin = volumeMin;
-            this.bbMax = volumeMax;
+        if (!mesh.valid)// || !obj.pickable)
+            continue;
 
-            var shader = this.shaderManager.getShaderById("picking");
-            this.shaderManager.bindShader(shader);
-            var parameters = {min : volumeMin, max : volumeMax};
+        xform.model = transform;
+        xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
-            for (var j = 0, n = this.drawableObjects.length; j < n; j++) {
-                var obj = this.drawableObjects[j];
-                var transform = obj.transform;
-                var mesh = obj.mesh;
+        var parameters = {};
+        parameters.id = 1.0 - (1 + j) / 255.0;
+        parameters.modelMatrix = transform;
+        parameters.modelViewProjectionMatrix = this.camera.getModelViewProjectionMatrix(xform.modelView);
 
-                if (!mesh.valid)// || !obj.pickable)
-                    continue;
+        this.shaderManager.setUniformVariables(shader, parameters);
+        this.drawObject(shader, mesh);
+    }
+    this.shaderManager.unbindShader(shader);
 
-                xform.model = transform;
-                xform.modelView = this.camera.getModelViewMatrix(xform.model);
+    gl.disable(gl.DEPTH_TEST);
 
-                parameters.id = 1.0 - (1+j) / 255.0;
-                parameters.modelMatrix = transform;
-                parameters.modelViewProjectionMatrix = this.camera.getModelViewProjectionMatrix(xform.modelView);
-
-                this.shaderManager.setUniformVariables(shader, parameters);
-                this.drawObject(shader, mesh);
-            }
-            this.shaderManager.unbindShader(shader);
-        }
-
-        this.readPixels(false, x, y);
-        gl.disable(gl.DEPTH_TEST);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 };
 
 /**
- * Render the picked object using the normal picking shader and return the normal at
- * the point where the object was clicked.
+ * Render the picked object using the normal picking shader and return the
+ * normal at the point where the object was clicked.
  *
  * @param pickedObj
  * @param screenX
@@ -631,7 +608,7 @@ Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
     this.drawObject(shader, mesh);
 
     this.shaderManager.unbindShader(shader);
-    this.readPixels(true, screenX, screenY);
+    this.readNormalFromBuffer(screenX, screenY);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     this.handler.needPickingDraw = true;
@@ -640,6 +617,67 @@ Renderer.prototype.renderPickedNormals = function(pickedObj, screenX, screenY) {
 
 var pickVector = vec3.create();
 var data = new Uint8Array(8);
+
+/**
+ * Reads pixels from the screenbuffer to determine picked object or normals.
+ *
+ * @param {number} screenX Screen Coordinate of color buffer
+ * @param {number} screenY Screen Coordinate of color buffer
+ * @returns {Element} Picked Object
+ *
+ */
+Renderer.prototype.getElementFromPickingBuffer = function(screenX, screenY) {
+    var gl = this.handler.gl;
+    var fbo = this.fbos.picking;
+    var scale = fbo.scale;
+    var x = screenX * scale;
+    var y = screenY * scale;
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
+
+    var result = null;
+    try {
+        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+
+        var objId = 255 - data[3] - 1;
+        if (objId >= 0 && data[3] > 0) {
+            var pickedObj = this.drawableObjects[objId];
+            result = pickedObj.meshNode;
+        }
+    } catch (e) {
+        XML3D.debug.logError(e);
+    }
+    return result;
+};
+
+/**
+ * Reads pixels from the screenbuffer to determine picked object or normals.
+ *
+ * @param {number} screenX Screen Coordinate of color buffer
+ * @param {number} screenY Screen Coordinate of color buffer
+ * @returns
+ */
+Renderer.prototype.readNormalFromBuffer = function(screenX, screenY) {
+    var scale = this.fbos.picking.scale;
+    var x = screenX * scale;
+    var y = screenY * scale;
+    var gl = this.handler.gl;
+
+    try {
+        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
+
+        pickVector[0] = data[0] / 255;
+        pickVector[1] = data[1] / 255;
+        pickVector[2] = data[2] / 255;
+
+        pickVector = vec3.subtract(vec3.scale(pickVector, 2.0), vec3.create([ 1, 1, 1 ]));
+        this.xml3dNode.currentPickNormal = pickVector;
+    } catch (e) {
+        this.xml3dNode.currentPickNormal = null;
+        XML3D.debug.logError(e);
+    }
+};
+
 
 /**
  * Reads pixels from the screenbuffer to determine picked object or normals.

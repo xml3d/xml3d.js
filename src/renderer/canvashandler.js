@@ -162,12 +162,19 @@ XML3D.webgl.MAXFPS = 30;
         return true;
     };
 
-    // Binds the picking buffer and passes the request for a picking pass to the
-    // renderer
-    CanvasHandler.prototype.renderPick = function(screenX, screenY) {
+    /**
+     * Binds the picking buffer and passes the request for a picking pass to the
+     * renderer
+     *
+     * @param {number} canvasX
+     * @param {number} canvasY
+     */
+    CanvasHandler.prototype.renderPick = function(canvasX, canvasY) {
         if (this._pickingDisabled)
             return;
-        this.renderer.renderPickingPass(screenX, this.canvas.height - screenY, this.needPickingDraw);
+        if(this.needPickingDraw)
+            this.renderer.renderSceneToPickingBuffer();
+        this.currentPickObj = this.renderer.getElementFromPickingBuffer(canvasX, this.canvas.height - canvasY);
         this.needPickingDraw = false;
     };
 

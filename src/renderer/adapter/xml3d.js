@@ -39,19 +39,21 @@
     XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) {
         var handler = this.factory.handler;
         var object = handler.updatePickObjectByPoint(x, y);
-        if (hitPoint && object) {
-            handler.renderPickedWorldSpacePosition(object, x, y);
-            hitPoint.set(handler.currentPickPos);
+        if(object){
+            if(hitPoint){
+                var vec = handler.getWorldSpacePositionByPoint(object, x, y);
+                hitPoint.set(vec[0],vec[1],vec[2]);
+            }
+            if(hitNormal){
+                var vec = handler.getWorldSpaceNormalByPoint(object, x, y);
+                hitNormal.set(vec[0],vec[1],vec[2]);
+            }
         }
-        if (hitNormal && object) {
-            handler.renderPickedNormals(object, x, y);
-            hitNormal.set(handler.currentPickNormal);
+        else{
+            if(hitPoint) hitPoint.set(NaN, NaN, NaN);
+            if(hitNormal) hitNormal.set(NaN, NaN, NaN);
         }
-
-        if (handler.currentPickObj)
-            return handler.currentPickObj.meshNode;
-        else
-            return null;
+        return object ? object.meshNode : null;
     };
 
     XML3DCanvasRenderAdapter.prototype.generateRay = function(x, y) {

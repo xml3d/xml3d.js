@@ -54,12 +54,17 @@ test("Pick with large object ids", function() {
 
 test("xml3d Apadater getElementByPoint test", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
-    var element = xml3dElement.getElementByPoint(88,60);
+
+    var position = new XML3DVec3(), normal = new XML3DVec3();
+    var element = xml3dElement.getElementByPoint(88,60, position , normal);
     ok(element, "Object picked");
     strictEqual(element, this.doc.getElementById("pickingMesh1"));
+    QUnit.closeVector(normal, new XML3DVec3(0,0,1), EPSILON, "Picked correct normal");
 
-    element = xml3dElement.getElementByPoint(5,5);
+    element = xml3dElement.getElementByPoint(5,5, position, normal);
     strictEqual(element, null, "Nothing picked");
+    ok(isNaN(position.x) && isNaN(position.y) && isNaN(position.z), "Picked correct position");
+    ok(isNaN(normal.x) && isNaN(normal.y) && isNaN(normal.z), "Picked correct normal");
 });
 
 test("Position picking test", 3, function() {
@@ -95,4 +100,5 @@ test("Normal picking test", 4, function() {
     h.dispatchMouseEvent("click", 1, 88, 60, null, target);
 
 });
+
 

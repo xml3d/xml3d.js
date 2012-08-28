@@ -181,10 +181,14 @@ XML3D.webgl.MAXFPS = 30;
         return this.renderer.readPositionFromPickingBuffer(canvasX, this.canvas.height - canvasY);
     };
 
-    // Uses gluUnProject() to transform the 2D screen point to a 3D ray
-    // returns an XML3DRay
-    // TODO: Move this to Renderer and/or XML3DAdapter
-    CanvasHandler.prototype.generateRay = function(screenX, screenY) {
+    /**
+     * Uses gluUnProject() to transform the 2D screen point to a 3D ray.
+     * Not tested!!
+     *
+     * @param {number} glX
+     * @param {number} glY
+     */
+    CanvasHandler.prototype.generateRay = function(glX, glY) {
 
         // setup input to unproject
         var viewport = new Array();
@@ -203,11 +207,11 @@ XML3D.webgl.MAXFPS = 30;
         var farHit = new Array();
 
         // do unprojections
-        if (false === GLU.unProject(screenX, screenY, 0, viewMat, projMat, viewport, nearHit)) {
+        if (false === GLU.unProject(glX, glY, 0, viewMat, projMat, viewport, nearHit)) {
             return ray;
         }
 
-        if (false === GLU.unProject(screenX, screenY, 1, viewMat, projMat, viewport, farHit)) {
+        if (false === GLU.unProject(glX, glY, 1, viewMat, projMat, viewport, farHit)) {
             return ray;
         }
 

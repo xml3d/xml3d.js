@@ -37,6 +37,7 @@
 		<file name="interface/configuration.js" />
 		<file name="data/processtable.js" />
         <file name="data/adapter/data.js" />
+        <file name="data/adapter/proxy.js" />
         <file name="data/adapter/values.js" />
         <file name="data/scriptinstance.js" />
         <file name="data/adapter/texture.js" />

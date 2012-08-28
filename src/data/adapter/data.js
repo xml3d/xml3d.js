@@ -3,6 +3,13 @@ XML3D.data = XML3D.data || {};
 
 (function() {
 
+    /**
+     * @interface
+     */
+    var IDataAdapter = function() {};
+    IDataAdapter.prototype.getOutputs = function() {};
+    IDataAdapter.prototype.addParentAdapter = function(adapter) {};
+
 /**
  * Constructor of XML3D.data.DataAdapter
  * The DataAdapter implements the DataCollector concept and serves as basis of all DataAdapter classes.
@@ -10,6 +17,7 @@ XML3D.data = XML3D.data || {};
  * instantiated via XML3D.data.XML3DDataAdapterFactory to ensure proper functionality.
  *
  * @extends XML3D.data.Adapter
+ * @implements IDataAdapter
  * @constructor
  *
  * @param factory
@@ -21,6 +29,7 @@ XML3D.data.DataAdapter = function(factory, node)
 
 	this.cachedOutputs = null;
 	this.nameMap = {};
+	this.tables = [];
 
 	/* Creates DataAdapter instances for the node's children and registers
 	 * itself as observer in those children instances. This approach is needed
@@ -60,6 +69,10 @@ XML3D.data.DataAdapter.prototype.init = function()
         this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
 
     this.buildMap();
+    var that = this;
+    this.forEachChildAdapter(function(adapter) {
+        adapter.addParentAdapter && adapter.addParentAdapter(that);
+    });
 };
 
 /**
@@ -71,7 +84,11 @@ XML3D.data.DataAdapter.prototype.init = function()
  */
 XML3D.data.DataAdapter.prototype.notifyChanged = function(e)
 {
-    XML3D.debug.logWarning("not handled change in data adapter: " + e);
+    //XML3D.debug.logWarning("not handled change in data adapter: " + e);
+    this.cachedInputs = null;
+    for(var t in this.tables) {
+        this.rebuildStructure(this.tables[t]);
+    }
 };
 
 XML3D.data.DataAdapter.prototype.getInputs = function() {
@@ -176,10 +193,15 @@ XML3D.data.DataAdapter.prototype.requestDataOnce = function(table) {
     return table.providers;
 };
 
-XML3D.data.DataAdapter.prototype.requestData = function(table) {
+XML3D.data.DataAdapter.prototype.rebuildStructure = function(table) {
     table.open();
     this.requestOutputData(table);
     table.close();
+};
+
+XML3D.data.DataAdapter.prototype.requestData = function(table) {
+    this.tables.push(table);
+    this.rebuildStructure(table);
     return table.providers;
 };
 
@@ -217,11 +239,9 @@ XML3D.data.DataAdapter.prototype.requestOutputData = function(table) {
 XML3D.data.DataAdapter.prototype.forEachChildAdapter = function(func) {
     var node = this.node;
     if (node.src) {
-        var srcElement = XML3D.URIResolver.resolve(node.src,node.ownerDocument);
-        if (srcElement) {
-            var da = this.factory.getAdapter(srcElement, XML3D.data.XML3DDataAdapterFactory.prototype);
-            if (da)
-                func(da);
+        var da = this.factory.getAdapterURI(node.src);
+        if (da) {
+            func(da);
         }
     } else {
         for (var child = this.node.firstElementChild; child !== null; child = child.nextElementSibling) {

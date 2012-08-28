@@ -5,28 +5,27 @@
     var c_factories = {};
     var c_cachedAdapterHandles = {};
 
-    XML3D.registerFactory = function(minetype, factory) {
+    XML3D.webgl.registerFactory = function(minetype, factory) {
         if(!c_factories[minetype])
             c_factories[minetype] = [];
         c_factories[minetype].push(factory);
     };
 
 
-    function ResourceManager(){
+    var ResourceManager = function(){
     }
 
     function loadDocument(uri){
-        console.log("Start request: " + this.uri);
+        console.log("Start request: " + uri);
         var xmlHttp = null;
         try {
             xmlHttp = new XMLHttpRequest();
         } catch(e) {
             xmlHttp  = null;
         }
-        var that = this;
         if (xmlHttp) {
             xmlHttp._uri = uri;
-            xmlHttp.open('GET', this.uri, true);
+            xmlHttp.open('GET', uri, true);
             xmlHttp.onreadystatechange = function () {
                 if (xmlHttp.readyState == 4) {
                     processResponse(xmlHttp);
@@ -66,7 +65,7 @@
         var response = c_cachedDocuments[uri].response;
         var mimetype = c_cachedDocuments[uri].mimetype;
 
-        var fullUri = uri + "#" + fragment;
+        var fullUri = uri + (fragment ? "#" + fragment : "");
         var data = null;
         if(mimetype == "application/json"){
             data = response;
@@ -78,14 +77,14 @@
         if(data){
             for(var adapterType in c_cachedAdapterHandles[fullUri]){
                 var handle = c_cachedAdapterHandles[fullUri][adapterType];
-                if(!handle.getRealAdapter() && c_factories[mimetype])
+                if(!handle.hasAdapter() && c_factories[mimetype])
                 {
                     for(var i = 0; i < c_factories[mimetype].length; ++i){
                         var fac = c_factories[mimetype][i];
                         if (fac.isFactoryFor(adapterType)) {
                             var a = fac.createAdapter(data);
                             if (a) {
-                                handle.setRealAdapter(a);
+                                handle.setAdapter(a);
                             }
                         }
                     }
@@ -103,20 +102,24 @@
         if (a)
             return a;
 
-        var a = new XML3D.data.ProxyAdapter();
+        var a = new XML3D.data.AdapterHandle();
         c_cachedAdapterHandles[uri][type] = a;
 
         var docURI = uri.toStringWithoutFragment();
-        var docData = c_cachedDocuments[docURI] || {};
-        if(docData.response){
+        var docData = c_cachedDocuments[docURI];
+        if(docData && docData.response){
             updateAdapterHandlesForFragment(docURI, uri.fragment);
         }else{
-            if(!docData.fragments) docData.fragments = [];
+            if(!docData){
+                loadDocument(docURI);
+                c_cachedDocuments[docURI] = docData = { fragments: []};
+            }
             docData.fragments.push(uri.fragment);
         }
-        c_cachedDocuments[docURI] = docData;
 
         return a;
     }
+
+    XML3D.webgl.ResourceManager = ResourceManager;
 
 })();

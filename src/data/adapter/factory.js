@@ -47,7 +47,7 @@
     XML3D.createClass(XML3DDataAdapterFactory, XML3D.data.AdapterFactory);
 
     XML3DDataAdapterFactory.prototype.isFactoryFor = function(obj) {
-        return obj === XML3D.data;
+        return typeof obj == "string" ? (obj == XML3D.data.toString()) : (obj == XML3D.data);
     };
 
     /**
@@ -74,24 +74,14 @@
         // TODO: cache
         uri = new XML3D.URI(uri);
         var element = XML3D.URIResolver.resolve(uri);
-        if (element)
-            return XML3D.data.AdapterFactory.prototype.getAdapter.call(this, element, XML3D.data.XML3DDataAdapterFactory.prototype);
+        if (element){
+            var handle = new XML3D.data.AdapterHandle();
+            handle.setAdapter(XML3D.data.AdapterFactory.prototype.getAdapter.call(this, element, XML3D.data.XML3DDataAdapterFactory.prototype));
+            return handle;
+        }
 
-        var a = externalAdapters[uri];
-        if (a)
-            return a;
-
-        for(var f in factories) {
-            var fac = factories[f];
-            if (fac.isFactoryFor(uri)) {
-                a = fac.createAdapter(uri);
-                if (a) {
-                    externalAdapters[uri] = a;
-                    //a.init();
-                }
-                return a;
-            }
-        };
+        var a = this.handler.resourceManager.getExternalAdapter(uri, XML3D.data);
+        return a;
     };
 
 

@@ -61,42 +61,9 @@
     /**
      * @implements IDataAdapter
      */
-    var JSONDataAdapter = function(uri) {
-        this.uri = uri;
-        this.json = null;
+    var JSONDataAdapter = function(data) {
+        this.json = data;
         this.parents = [];
-        this.startRequest();
-    };
-
-    JSONDataAdapter.prototype.startRequest = function() {
-        console.log("Start request: " + this.uri);
-        var xmlHttp = null;
-        try {
-            xmlHttp = new XMLHttpRequest();
-        } catch(e) {
-            xmlHttp  = null;
-        }
-        var that = this;
-        if (xmlHttp) {
-            xmlHttp.open('GET', this.uri, true);
-            xmlHttp.onreadystatechange = function () {
-                if (xmlHttp.readyState == 4) {
-                    that.processResponse(xmlHttp);
-                }
-            };
-            xmlHttp.send(null);
-        }
-    };
-    JSONDataAdapter.prototype.processResponse = function(req) {
-        try {
-            this.json = JSON.parse(req.responseText);
-        } catch(e) {
-            XML3D.debug.logError("Could not parse XML3D json file: " + this.uri);
-            return;
-        }
-        for(var i = 0, j = this.parents.length; i < j; i++) {
-            this.parents[i].notifyChanged();
-        }
     };
 
     JSONDataAdapter.prototype.addParentAdapter = function(adapter) {
@@ -128,12 +95,13 @@
      */
     var JSONFactory = {
         isFactoryFor : function(obj) {
-            obj === XML3D.data;
+            return typeof obj == "string" ? (obj == XML3D.data.toString()) : (obj == XML3D.data);
         },
-        createAdapter : function(uri) {
-            return new JSONDataAdapter(uri);
+        createAdapter : function(data) {
+            return new JSONDataAdapter(data);
         }
     };
 
     XML3D.data.registerFactory("json", JSONFactory);
+    XML3D.webgl.registerFactory("application/json", JSONFactory);
 }());

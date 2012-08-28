@@ -74,3 +74,66 @@ test("Mesh XML reference", 3, function() {
     stop();
 
 });
+
+test("Shader JSON reference", 3, function() {
+    var xRef = this.doc.getElementById("xml3dReference"),
+    actual,
+    win = this.doc.defaultView,
+    glRef = getContextForXml3DElement(xRef), hRef = getHandler(xRef);
+
+    var xTest = this.doc.getElementById("xml3dTest"),
+    glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+
+    this.doc.getElementById("jsonShaderGroup").visible = true;
+    this.doc.getElementById("meshGroup").setAttribute("shader", "#flatgreen");
+    hTest.draw();
+    hRef.draw();
+
+
+    var data = glRef.canvas.toDataURL();
+    var img = new Image();
+    img.onload = function(e) {
+        var expected = new Image();
+        expected.onload = function(e) {
+            QUnit.imageEqual(img, expected, "JSON shader render matches");
+            start();
+        };
+        expected.src = glTest.canvas.toDataURL();
+        stop();
+        start();
+    };
+    img.src = data;
+    stop();
+
+});
+
+test("Shader XML reference", 3, function() {
+    var xRef = this.doc.getElementById("xml3dReference"),
+    actual,
+    win = this.doc.defaultView,
+    glRef = getContextForXml3DElement(xRef), hRef = getHandler(xRef);
+
+    var xTest = this.doc.getElementById("xml3dTest"),
+    glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+
+    this.doc.getElementById("xmlShaderGroup").visible = true;
+    this.doc.getElementById("meshGroup").setAttribute("shader", "#flatgreen");
+    hTest.draw();
+    hRef.draw();
+
+    var data = glRef.canvas.toDataURL();
+    var img = new Image();
+    img.onload = function(e) {
+        var expected = new Image();
+        expected.onload = function(e) {
+            QUnit.imageEqual(img, expected, "XML shader render matches");
+            start();
+        };
+        expected.src = glTest.canvas.toDataURL();
+        stop();
+        start();
+    };
+    img.src = data;
+    stop();
+
+});

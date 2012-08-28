@@ -83,7 +83,7 @@ test("Object picking test", 3, function() {
 
 });
 
-test("Position picking test", 3, function() {
+test("Position picking test", 4, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
     var target = this.doc.getElementById("pickingMesh1");
@@ -91,11 +91,12 @@ test("Position picking test", 3, function() {
     target.addEventListener("click", function(evt) {
     	start();
     	ok(evt.position);
+    	QUnit.closeVector(evt.position, new XML3DVec3(-2.503,2.05,-10), EPSILON, "Picked position is correct");
     }, false);
 
-    h.updatePickObjectByPoint(88,60);
+    h.updatePickObjectByPoint(89,51);
     stop();
-    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+    h.dispatchMouseEvent("click", 1, 89, 51, null, target);
 
 });
 

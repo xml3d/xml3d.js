@@ -765,15 +765,15 @@ Renderer.prototype.readNormalFromPickingBuffer = function(glX, glY){
 Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
     var data = this.readPixelDataFromBuffer(glX, glY, this.fbos.vectorPicking);
     if(data){
-        pickVector[0] = data[0] / 254;
-        pickVector[1] = data[1] / 254;
-        pickVector[2] = data[2] / 254;
+        pickVector[0] = data[0] / 255;
+        pickVector[1] = data[1] / 255;
+        pickVector[2] = data[2] / 255;
 
-        var tmp = vec3.subtract(this.bbMax, this.bbMin, vec3.create());
-        vec = vec3.create([ pickVector[0]*tmp[0], pickVector[1]*tmp[1], pickVector[2]*tmp[2] ]);
-        vec3.add(pickVector, this.bbMin, pickVector);
+        var result = vec3.subtract(this.bbMax, this.bbMin, vec3.create());
+        result = vec3.create([ pickVector[0]*result[0], pickVector[1]*result[1], pickVector[2]*result[2] ]);
+        vec3.add(result, this.bbMin, result);
 
-        return pickVector;
+        return result;
     }
     else{
         return null;

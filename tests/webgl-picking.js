@@ -67,6 +67,22 @@ test("xml3d Apadater getElementByPoint test", function() {
     ok(isNaN(normal.x) && isNaN(normal.y) && isNaN(normal.z), "Picked correct normal");
 });
 
+test("Object picking test", 3, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
+    var target = this.doc.getElementById("pickingMesh1");
+
+    target.addEventListener("click", function(evt) {
+        start();
+        strictEqual(evt.target, target);
+    }, false);
+
+    h.updatePickObjectByPoint(88,60);
+    stop();
+    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+
+});
+
 test("Position picking test", 3, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);

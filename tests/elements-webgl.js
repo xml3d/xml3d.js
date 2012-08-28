@@ -62,7 +62,7 @@ test("Configuration of new elements", 4, function() {
 });
 
 function TestAdapterFactory() {
-    this.name = "test";
+    this.type = "test";
     var that = this;
     this.createAdapter = function(node) {
         var name = node ? (node.id || "<"+node.nodeName+">") : "unknown";
@@ -110,6 +110,7 @@ test("Adapter registration and initialization test", 6, function() {
 test("WebGLFactory test", 5, function() {
     var g = this.doc.getElementById("myGroup");
     ok(g, "Node exits");
+    console.log(g._configured.adapters);
     notEqual(g._configured.adapters["XML3DRenderAdapterFactory"], undefined, "Adapter registered automatically.");
     var a = this.webglFactory.getAdapter(g);
     ok(a, "There is a WebGL Group adapter");

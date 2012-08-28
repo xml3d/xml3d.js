@@ -1,14 +1,19 @@
 // adapter/factory.js
 
 (function() {
+    /**
+     * @constructor
+     * @implements {XML3D.data.IFactory}
+     * @extends XML3D.data.AdapterFactory
+     */
     var XML3DRenderAdapterFactory = function(handler, renderer) {
         XML3D.data.AdapterFactory.call(this);
         this.handler = handler;
         this.renderer = renderer;
-        this.name = "XML3DRenderAdapterFactory";
+        this.type = "XML3DRenderAdapterFactory";
     };
     XML3D.createClass(XML3DRenderAdapterFactory, XML3D.data.AdapterFactory);
-        
+
     var gl = XML3D.webgl,
         reg = {
             xml3d:          gl.XML3DCanvasRenderAdapter,
@@ -22,9 +27,13 @@
             img:            gl.XML3DImgRenderAdapter,
             light:          gl.XML3DLightRenderAdapter,
             lightshader:    gl.XML3DLightShaderRenderAdapter
-            
+
     };
-    
+
+    XML3DRenderAdapterFactory.prototype.isFactoryFor = function(obj) {
+        return obj === XML3D.webgl;
+    };
+
     XML3DRenderAdapterFactory.prototype.createAdapter = function(node) {
         var adapterContructor = reg[node.localName];
         if(adapterContructor !== undefined) {
@@ -33,7 +42,7 @@
         return null;
     };
 
-    
+
     // Export
     XML3D.webgl.XML3DRenderAdapterFactory = XML3DRenderAdapterFactory;
 }());

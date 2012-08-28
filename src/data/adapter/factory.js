@@ -31,12 +31,13 @@
      */
 
     /**
-     * Constructor of XML3D.webgl.XML3DDataAdapterFactory
+     * Constructor of XML3DDataAdapterFactory
      *
-     * @augments XML3D.data.AdapterFactory
      * @constructor
+     * @implements {XML3D.data.IFactory}
+     * @extends XML3D.data.AdapterFactory
      *
-     * @param handler
+     * @param {XML3D.webgl.CanvasHandler} handler
      */
     var XML3DDataAdapterFactory = function(handler)
     {
@@ -44,6 +45,10 @@
         this.handler = handler;
     };
     XML3D.createClass(XML3DDataAdapterFactory, XML3D.data.AdapterFactory);
+
+    XML3DDataAdapterFactory.prototype.isFactoryFor = function(obj) {
+        return obj === XML3D.data;
+    };
 
     /**
      * Returns a DataAdapter instance associated with the given node. If there is already a DataAdapter created for this node,

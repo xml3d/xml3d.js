@@ -123,12 +123,12 @@
     };
 
     /**
-     *
+     * @constructor
+     * @implements {XML3D.data.IFactory}
      */
     var JSONFactory = {
-        isFactoryFor : function(uri) {
-            var path = uri.path || "";
-            return path.substr(path.lastIndexOf(".") + 1) == "json";
+        isFactoryFor : function(obj) {
+            obj === XML3D.data;
         },
         createAdapter : function(uri) {
             return new JSONDataAdapter(uri);

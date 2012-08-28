@@ -307,10 +307,6 @@ XML3D.webgl.MAXFPS = 30;
             tar = this.xml3dElem;
 
         tar.dispatchEvent(evt);
-
-        // Dispatch a copy to the XML3D node (canvas)
-        tar = this.xml3dElem;
-        tar.dispatchEvent(evt);
     };
 
     /**

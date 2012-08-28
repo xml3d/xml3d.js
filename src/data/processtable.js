@@ -1,5 +1,3 @@
-XML3D.data = XML3D.data || {};
-
 (function() {
 
     /**

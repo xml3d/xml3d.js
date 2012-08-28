@@ -35,6 +35,7 @@
 		<file name="interface/attributes.js" />
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
+	    <file name="data/base.js" />
 		<file name="data/processtable.js" />
         <file name="data/adapter/data.js" />
         <file name="data/adapter/proxy.js" />
@@ -44,6 +45,7 @@
         <file name="data/adapter/misc.js" />
         <file name="data/adapter/factory.js" />
         <file name="data/adapter/json/factory.js" />
+	    <file name="renderer/base.js" />
 		<file name="renderer/canvashandler.js" />
         <file name="renderer/utils.js" />
         <file name="renderer/shadermanager.js" />

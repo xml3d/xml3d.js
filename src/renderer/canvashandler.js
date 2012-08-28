@@ -1,5 +1,4 @@
 // Create global symbol XML3D.webgl
-XML3D.webgl = XML3D.webgl || {};
 XML3D.webgl.MAXFPS = 30;
 
 /**

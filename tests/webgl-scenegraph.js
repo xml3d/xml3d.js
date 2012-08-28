@@ -17,7 +17,7 @@ module("WebGL Scenegraph", {
 });
 
 function getContextForXml3DElement(x) {
-    return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler.gl;
+    return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler.renderer.gl;
 };
 
 function getHandler(x) {
@@ -321,13 +321,13 @@ test("Camera setDirection/upVector", 5, function() {
 test("Pick pass flag", 7, function() {
     var x = this.doc.getElementById("xml3DElem");
     var h = getHandler(x);
-    h.renderPick(0,0);
+    h.updatePickObjectByPoint(0,0);
     ok(!h.needPickingDraw, "No picking needed after pick rendering");
     this.doc.getElementById("group2").setAttribute("shader","#flatblack");
     ok(!h.needPickingDraw, "Changing shaders does not require a picking pass");
     this.doc.getElementById("t_cubebottom").translation.x = 5;
     ok(h.needPickingDraw, "Changing transformation does require a picking pass");
-    h.renderPick(0,0);
+    h.updatePickObjectByPoint(0,0);
     ok(!h.needPickingDraw, "No picking needed after pick rendering");
     this.doc.getElementById("t_cubebottom").translation.x = 3;
     this.doc.getElementById("group2").setAttribute("shader","#flatblue");

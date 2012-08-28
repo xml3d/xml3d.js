@@ -73,7 +73,8 @@
     	this.shaders["defaultShader"] = fallbackShader;
 
     	//Create picking shaders
-    this.shaders["picking"] = this.getStandardShaderProgram("picking");
+    this.shaders["pickobjectid"] = this.getStandardShaderProgram("pickobjectid");
+    this.shaders["pickedposition"] = this.getStandardShaderProgram("pickedposition");
     this.shaders["pickedNormals"] = this.getStandardShaderProgram("pickedNormals");
     };
 
@@ -274,10 +275,10 @@
     			programObject.samplers[uni.name] = uniInfo;
     			texCount++;
     		}
-    		else 
+    		else
     			programObject.uniforms[uni.name] = uniInfo;
     	}
-    	
+
     	this.setUniformVariables(programObject, sources.uniforms);
     	programObject.changes = [];
     	return programObject;

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Transform</title>
+    <link rel="stylesheet" type="text/css" media="all" href="frame.css" />
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <script type="text/javascript" src="./scripts/canvas2image.js"></script>
+  </head>
+  <body>
+    <div style="color: mediumblue;">
+      <xml3d id="xml3DElem" style="width: 300px; height: 200px; border: 0px solid black; position: absolute; left: 200px" xmlns="http://www.xml3d.org/2009/xml3d" activeView="#defaultView">
+        <view id="defaultView" position="0 0 10" />
+        <defs>
+          <data id="mySimpleMesh">
+            <int name="index">0 1 2 1 2 3</int>
+            <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+            <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+            <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+          </data>
+          <!-- transformations -->
+          <transform id="left4" translation="-4 0 0" />
+          <transform id="right4" translation="4 0 0" />
+          <transform id="scale2" scale="1.5 2 2" />
+          <transform id="rotate90" rotation="0 0 1 0.785398163" />
+        </defs>
+        <group>
+          <group transform="#scale2">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group transform="#right4">
+            <mesh type="triangles" src="#mySimpleMesh" />
+          </group>
+          <group transform="#left4">
+            <group transform="#rotate90">
+              <mesh type="triangles" src="#mySimpleMesh" />
+            </group>
+          </group>
+        </group>
+      </xml3d>
+    </div>
+    <div>
+    Event.clientX: <span id="clientX"></span><br/>
+    Event.clientY: <span id="clientY"></span><br/>
+    Event.target:  <span id="target"></span>
+    </div>
+    <input type="button" onclick="Canvas2Image.saveAsPNG(getCanvas('xml3DElem'));" value="Save image"></input>
+    <script>
+    window.addEventListener('load', function() { 
+        document.getElementById('xml3DElem').addEventListener('mousemove', move, true);
+    }, false);
+    var move = function(evt) {
+        //console.log(evt);
+        document.getElementById("clientX").innerText = evt.clientX;
+        document.getElementById("clientY").innerText = evt.clientY;
+        document.getElementById("target").innerText = evt.target.nodeName;
+    }
+    </script>
+  </body>
+</html>

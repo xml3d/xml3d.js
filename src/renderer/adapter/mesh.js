@@ -193,15 +193,16 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 continue;
 
             //console.log(attr);
-
+            var v = null;
             switch(attr) {
                 case "index":
                     var indexBuffer = entry.data.buffer;
-                    if (!indexBuffer || entry.dirty) {
-                        indexBuffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
+                    v = entry.getValue();
+                    if (!indexBuffer) {
+                        indexBuffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(v));
                         indexBuffer.tupleSize = entry.getTupleSize();
                         entry.data.buffer = indexBuffer;
-                    } else {
+                    } else if (entry.dirty){
                         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
                         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, v, gl.DYNAMIC_DRAW);
                     }
@@ -214,7 +215,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     // Fallthrough
                 default:
                     var attrBuffer = entry.data.buffer;
-                    var v = entry.getValue();
+                    v = entry.getValue();
                     if(!v)
                         continue;
                     if (!attrBuffer) {

@@ -166,7 +166,7 @@ XML3D.webgl.MAXFPS = 30;
      */
     CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, canvasX, canvasY) {
         if (!pickedObj || this._pickingDisabled)
-            return;
+            return null;
         this.renderer.renderPickedNormals(pickedObj, canvasX, this.canvas.height - canvasY);
         return this.renderer.readNormalFromPickingBuffer(canvasX, this.canvas.height - canvasY);
     };

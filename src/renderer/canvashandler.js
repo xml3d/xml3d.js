@@ -55,17 +55,8 @@ XML3D.webgl.MAXFPS = 30;
         this._pickingDisabled = false;
         /** @type {Drawable} */
         this.currentPickObj = null;
-        this._lastPickedObj = null;
-        this.mouseMovePickingEnabled = false;
-        this.isDragging = false;
+        this.lastPickObj = null;
         this.timeNow = Date.now() / 1000.0;
-        this.postProcessShaders = [];
-
-        // TODO: Do we need this?
-        this.canvasInfo = {
-            id : canvas.id,
-            mouseButtonsDown : [ false, false ]
-        };
 
         // Register listeners on canvas
         this.registerCanvasListeners();
@@ -101,13 +92,13 @@ XML3D.webgl.MAXFPS = 30;
         var handler = this;
         var canvas = this.canvas;
         canvas.addEventListener("mousedown", function(e) {
-            handler.mouseDown(e);
+            handler.mousedown(e);
         }, false);
         canvas.addEventListener("mouseup", function(e) {
-            handler.mouseUp(e);
+            handler.mouseup(e);
         }, false);
         canvas.addEventListener("mousemove", function(e) {
-            handler.mouseMove(e);
+            handler.mousemove(e);
         }, false);
         canvas.addEventListener("click", function(e) {
             handler.click(e);
@@ -116,19 +107,19 @@ XML3D.webgl.MAXFPS = 30;
             handler.click(e, true);
         }, false);
         canvas.addEventListener("mousewheel", function(e) {
-            handler.mouseWheel(e);
+            handler.mousewheel(e);
         }, false);
         canvas.addEventListener("DOMMouseScroll", function(e) {
-            handler.mouseWheel(e);
+            handler.mousewheel(e);
         }, false);
         canvas.addEventListener("mouseout", function(e) {
-            handler.mouseOut(e);
+            handler.mouseout(e);
         }, false);
         canvas.addEventListener("drop", function(e) {
-            handler.dragAndDrop(e);
+            handler.drop(e);
         }, false);
         canvas.addEventListener("dragover", function(e) {
-            handler.dragOver(e);
+            handler.dragover(e);
         }, false);
 
         // Block the right-click context menu on the canvas unless it's explicitly toggled
@@ -382,85 +373,65 @@ XML3D.webgl.MAXFPS = 30;
     };
 
 
-    CanvasHandler.prototype.dragAndDrop = function(evt) {
+    /**
+     *
+     * @param evt
+     */
+    CanvasHandler.prototype.drop = function(evt) {
         var pos = this.getMousePosition(evt);
 
         this.updatePickObjectByPoint(pos.x, pos.y);
         this.dispatchMouseEvent("drop", evt.button, pos.x, pos.y, evt);
         evt.preventDefault();
-        return false; // don't redraw
-    };
-    CanvasHandler.prototype.dragOver = function(evt) {
-    	evt.preventDefault();
-        return false; // don't redraw
     };
 
     /**
-     * This method is called each time a mouseUp event is triggered on the
+     *
+     * @param evt
+     */
+    CanvasHandler.prototype.dragover = function(evt) {
+    	evt.preventDefault();
+    };
+
+    /**
+     * This method is called each time a 'mouseup' event is triggered on the
      * canvas
      *
-     * @param gl
-     * @param button
-     * @param x
-     * @param y
-     * @return
+     * @param {MouseEvent} evt
      */
-    CanvasHandler.prototype.mouseUp = function(evt) {
-        this.canvasInfo.mouseButtonsDown[evt.button] = false;
+    CanvasHandler.prototype.mouseup = function(evt) {
         var pos = this.getMousePosition(evt);
-
-        if (this.isDragging) {
-            this.needPickingDraw = true;
-            this.isDragging = false;
-        }
 
         this.updatePickObjectByPoint(pos.x, pos.y);
         this.dispatchMouseEvent("mouseup", evt.button, pos.x, pos.y, evt);
-
-        return false; // don't redraw
     };
 
     /**
-     * This method is called each time a mouseDown event is triggered on the
+     * This method is called each time a 'mousedown' event is triggered on the
      * canvas
      *
-     * @param gl
-     * @param button
-     * @param x
-     * @param y
-     * @return
+     * @param {MouseEvent} evt
      */
-    CanvasHandler.prototype.mouseDown = function(evt) {
-        this.canvasInfo.mouseButtonsDown[evt.button] = true;
+    CanvasHandler.prototype.mousedown = function(evt) {
         var pos = this.getMousePosition(evt);
         this.updatePickObjectByPoint(pos.x, pos.y);
 
         this.dispatchMouseEvent("mousedown", evt.button, pos.x, pos.y, evt);
-
-        return false; // don't redraw
     };
 
     /**
      * This method is called each time a click event is triggered on the canvas
      *
-     * @param gl
-     * @param button
-     * @param x
-     * @param y
-     * @return
+     * @param {MouseEvent} evt
+     * @param {boolean} isdbl
      */
     CanvasHandler.prototype.click = function(evt, isdbl) {
         var pos = this.getMousePosition(evt);
-        if (this.isDragging) {
-            this.needPickingDraw = true;
-            return;
-        }
+        // Click follows always 'mouseup' => no update of pick object needed
         if (isdbl == true)
             this.dispatchMouseEvent("dblclick", evt.button, pos.x, pos.y, evt);
         else
             this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
-
-        return false; // don't redraw
     };
 
     /**
@@ -470,34 +441,21 @@ XML3D.webgl.MAXFPS = 30;
      * This method also triggers mouseover and mouseout events of objects in the
      * scene.
      *
-     * @param gl
-     * @param x
-     * @param y
-     * @return
+     * @param {MouseEvent} evt
      */
-    CanvasHandler.prototype.mouseMove = function(evt) {
+    CanvasHandler.prototype.mousemove = function(evt) {
         var pos = this.getMousePosition(evt);
 
-        if (this.canvasInfo.mouseButtonsDown[0]) {
-            this.isDragging = true;
-        }
-
-        // Call any global mousemove methods
-        this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt, this.xml3dElem);
-
-        if (!this.mouseMovePickingEnabled)
-            return;
-
         this.updatePickObjectByPoint(pos.x, pos.y);
-        var curObj = null;
-        if (this.currentPickObj)
-            curObj = this.currentPickObj.meshNode;
+        this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt);
+
+        var curObj = this.currentPickObj ? this.currentPickObj.meshNode : null;
 
         // trigger mouseover and mouseout
-        if (curObj !== this._lastPickedObj) {
-            if (this._lastPickedObj) {
+        if (curObj !== this.lastPickObj) {
+            if (this.lastPickObj) {
                 // The mouse has left the last object
-                this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this._lastPickedObj);
+                this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this.lastPickObj);
             }
             if (curObj) {
                 // The mouse is now over a different object, so call the new
@@ -505,31 +463,29 @@ XML3D.webgl.MAXFPS = 30;
                 this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y);
             }
 
-            this._lastPickedObj = curObj;
+            this.lastPickObj = curObj;
         }
-
-        return false; // don't redraw
     };
 
     /**
      * This method is called each time the mouse leaves the canvas
      *
-     * @param gl
-     * @return
+     * @param {MouseEvent} evt
      */
-    CanvasHandler.prototype.mouseOut = function(evt) {
+    CanvasHandler.prototype.mouseout = function(evt) {
         var pos = this.getMousePosition(evt);
-        this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, evt, this.xml3dElem);
-
-        return false; // don't redraw
+        this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this.lastPickObj);
     };
 
-    CanvasHandler.prototype.mouseWheel = function(evt) {
+    /**
+     * This method is called each time the mouse leaves the canvas
+     *
+     * @param {MouseEvent} evt
+     */
+    CanvasHandler.prototype.mousewheel = function(evt) {
         var pos = this.getMousePosition(evt);
-        // note: mousewheel type not defined in DOM!
+        // note: mousewheel type is not W3C standard, used in WebKit!
         this.dispatchMouseEvent("mousewheel", 0, pos.x, pos.y, evt, this.xml3dElem);
-
-        return false; // don't redraw
     };
 
     /**
@@ -570,7 +526,6 @@ XML3D.webgl.MAXFPS = 30;
     };
 
     CanvasHandler.prototype.setMouseMovePicking = function(isEnabled) {
-        this.mouseMovePickingEnabled = isEnabled;
     };
 
     XML3D.webgl.CanvasHandler = CanvasHandler;

@@ -159,13 +159,17 @@ XML3D.webgl.MAXFPS = 30;
         return this.currentPickObj;
     };
 
-    // Binds the normal picking buffer and passes the request for picked object
-    // normals to the renderer
-    CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, screenX, screenY) {
+    /**
+     * @param {Object} pickedObj
+     * @param {number} canvasX
+     * @param {number} canvasY
+     * @return {vec3|null} The world space normal on the object's surface at the given coordinates
+     */
+    CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, canvasX, canvasY) {
         if (!pickedObj || this._pickingDisabled)
             return;
-        this.renderer.renderPickedNormals(pickedObj, screenX, this.canvas.height - screenY);
-        return this.renderer.readNormalFromPickingBuffer(screenX, this.canvas.height - screenY);
+        this.renderer.renderPickedNormals(pickedObj, canvasX, this.canvas.height - canvasY);
+        return this.renderer.readNormalFromPickingBuffer(canvasX, this.canvas.height - canvasY);
     };
 
     /**
@@ -236,8 +240,6 @@ XML3D.webgl.MAXFPS = 30;
 
     /**
      * Called by _tick() to redraw the scene if needed
-     *
-     * @return
      */
     CanvasHandler.prototype.draw = function() {
         try {

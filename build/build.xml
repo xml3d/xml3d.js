@@ -27,7 +27,8 @@
 		<file name="types/box.js" />
 		<file name="types/matrix.js" />
 		<file name="types/ray.js" />
-		<file name="base/adapter.js" />
+	    <file name="data/base.js" />
+	    <file name="base/adapter.js" />
 		<file name="interface/notification.js" />
 		<file name="interface/factory.js" />
 		<file name="interface/dom.js" />
@@ -35,7 +36,6 @@
 		<file name="interface/attributes.js" />
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
-	    <file name="data/base.js" />
 		<file name="data/processtable.js" />
         <file name="data/adapter/data.js" />
         <file name="data/adapter/proxy.js" />

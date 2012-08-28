@@ -4,7 +4,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 (function() {
 	var eventTypes = {onclick:1, ondblclick:1,
 			ondrop:1, ondragenter:1, ondragleave:1};
-	
+
     var noDrawableObject = function() {
         XML3D.debug.logError("Mesh adapter has no callback to its mesh object!");
     },
@@ -39,7 +39,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             if (type.match(/onmouse/) || eventTypes[type]) {
                 var eventType = type.substring(2);
                 this.node.addEventListener(eventType,  new Function("evt", att.value), false);
-            } 
+            }
         }
     };
 
@@ -179,7 +179,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     p.updateData = function(obj) {
         var init = this.needsInit;
-        var gl = this.factory.renderer.getGLContext();
+        var gl = this.factory.renderer.gl;
 
         var foundValidPositions = false;
 
@@ -255,7 +255,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     // Disposes of all GL buffers but does not destroy the mesh
     p.dispose = function(gl) {
         if (!gl)
-            gl = this.factory.renderer.getGLContext();
+            gl = this.factory.renderer.gl;
         var myObject = this.getMyDrawableObject();
         var vbos = myObject.mesh.vbos;
 
@@ -281,7 +281,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     // This should only be called if the mesh node is removed from the scene tree
     p.destroy = function(gl) {
         if (!gl)
-            gl = this.factory.renderer.getGLContext();
+            gl = this.factory.renderer.gl;
         if (this.getMyDrawableObject == noDrawableObject) {
             return; //This mesh either has no GL data or was already deleted
         }

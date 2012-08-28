@@ -30,8 +30,8 @@ XML3D.webgl.MAXFPS = 30;
             var canvas = XML3D.webgl.createCanvas(xml3ds[i], i);
             // Creates the CanvasHandler for the <canvas>  Element
             var canvasHandler = new XML3D.webgl.CanvasHandler(canvas, xml3ds[i]);
-            canvasHandler.start();
             handlers[i] = canvasHandler;
+            canvasHandler._tick();
         }
     };
 
@@ -40,7 +40,7 @@ XML3D.webgl.MAXFPS = 30;
      * Own the GL context. Registers and handles the events that happen on the canvas element.
      * This includes context lost events.
      *
-     * @param canvas
+     * @param {HTMLCanvasElement} canvas
      *            the HTML Canvas element that this handler will be responsible
      *            for
      * @param xml3dElem
@@ -49,9 +49,6 @@ XML3D.webgl.MAXFPS = 30;
     function CanvasHandler(canvas, xml3dElem) {
         this.canvas = canvas;
         this.xml3dElem = xml3dElem;
-
-        // TODO: Safe creation and what happens if this fails?
-        this.gl = canvas.getContext("experimental-webgl", {preserveDrawingBuffer: true});
 
         this.needDraw = true;
         this.needPickingDraw = true;
@@ -141,18 +138,7 @@ XML3D.webgl.MAXFPS = 30;
         }
     };
 
-    // TODO: Should move to renderer, but is triggered from here
-    CanvasHandler.prototype.start = function() {
-        var gl = this.gl;
 
-        gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
-        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-        gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
-
-        this._tick();
-    };
 
     // TODO: Connect resize listener with this function
     CanvasHandler.prototype.resize = function(gl, width, height) {
@@ -256,14 +242,13 @@ XML3D.webgl.MAXFPS = 30;
     /**
      * Called by _tick() to redraw the scene if needed
      *
-     * @param gl
      * @return
      */
     CanvasHandler.prototype.draw = function() {
         try {
 
             var start = Date.now();
-            var stats = this.renderer.render(this.gl);
+            var stats = this.renderer.render();
             var end = Date.now();
 
             this.needDraw = false;
@@ -571,8 +556,6 @@ XML3D.webgl.MAXFPS = 30;
 
     // Destroys the renderer associated with this Handler
     CanvasHandler.prototype.shutdown = function(scene) {
-        var gl = this.gl;
-
         if (this.renderer) {
             this.renderer.dispose();
         }
@@ -593,7 +576,6 @@ XML3D.webgl.MAXFPS = 30;
     XML3D.webgl.CanvasHandler = CanvasHandler;
 })();
 
-// TODO: Move to a good place
 XML3D.webgl.createCanvas = function(xml3dElement, index) {
 
     var parent = xml3dElement.parentNode;

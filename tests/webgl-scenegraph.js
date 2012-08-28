@@ -17,7 +17,7 @@ module("WebGL Scenegraph", {
 });
 
 function getContextForXml3DElement(x) {
-    return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler.gl;
+    return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler.renderer.gl;
 };
 
 function getHandler(x) {

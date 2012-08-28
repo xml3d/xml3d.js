@@ -14,16 +14,20 @@
  */
 var Renderer = function(handler, width, height) {
     this.handler = handler;
+    // TODO: Safe creation and what happens if this fails?
+    this.gl = handler.canvas.getContext("experimental-webgl", {preserveDrawingBuffer: true});
+
+    this.setGlobalStates();
     this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
     this.factory = new XML3D.webgl.XML3DRenderAdapterFactory(handler, this);
 	this.dataFactory = new XML3D.data.XML3DDataAdapterFactory(handler);
-    this.shaderManager = new XML3D.webgl.XML3DShaderManager(handler.gl, this, this.dataFactory, this.factory);
-    this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(handler.gl, this, this.shaderManager);
+    this.shaderManager = new XML3D.webgl.XML3DShaderManager(this.gl, this, this.dataFactory, this.factory);
+    this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
     this.camera = this.initCamera();
     this.width = width;
     this.height = height;
-    this.fbos = this.initFrameBuffers(handler.gl);
+    this.fbos = this.initFrameBuffers(this.gl);
 
     //Light information is needed to create shaders, so process them first
 	this.lights = {
@@ -65,6 +69,19 @@ Renderer.drawableObject = function() {
     this.getObject = function() {
         return me;
     };
+};
+
+/**
+ *
+ */
+Renderer.prototype.setGlobalStates = function() {
+    var gl = this.gl;
+
+    gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
 };
 
 Renderer.prototype.initCamera = function() {
@@ -179,10 +196,6 @@ Renderer.prototype.initFrameBuffers = function(gl) {
     return fbos;
 };
 
-Renderer.prototype.getGLContext = function() {
-    return this.handler.gl;
-};
-
 Renderer.prototype.recompileShader = function(shaderAdapter) {
     this.shaderManager.recompileShader(shaderAdapter, this.lights);
     this.handler.redraw("A shader was recompiled");
@@ -286,8 +299,12 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
 
 };
 
+/**
+ *
+ * @returns {Array}
+ */
 Renderer.prototype.render = function() {
-    var gl = this.handler.gl;
+    var gl = this.gl;
 	var sp = null;
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
@@ -441,7 +458,7 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
 
 Renderer.prototype.drawObject = function(shader, meshInfo) {
     var sAttributes = shader.attributes;
-    var gl = this.handler.gl;
+    var gl = this.gl;
     var triCount = 0;
     var vbos = meshInfo.vbos;
 
@@ -525,7 +542,7 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
  * Modifies current picking buffer.
  */
 Renderer.prototype.renderSceneToPickingBuffer = function() {
-    var gl = this.handler.gl;
+    var gl = this.gl;
     var fbo = this.fbos.picking;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
@@ -583,7 +600,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
  * @param {Object} pickedObj
  */
 Renderer.prototype.renderPickedPosition = function(pickedObj) {
-    var gl = this.handler.gl;
+    var gl = this.gl;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.vectorPicking.handle);
 
@@ -628,7 +645,7 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
  * @return
  */
 Renderer.prototype.renderPickedNormals = function(pickedObj) {
-    var gl = this.handler.gl;
+    var gl = this.gl;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.vectorPicking.handle);
 
@@ -702,7 +719,7 @@ Renderer.prototype.readPixelDataFromBuffer = function(glX, glY, buffer){
     var scale = fbo.scale;
     var x = glX * scale;
     var y = glY * scale;
-    var gl = this.handler.gl;
+    var gl = this.gl;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
     try {

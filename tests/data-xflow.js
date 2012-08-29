@@ -1,14 +1,4 @@
 
-function lameArrayCompare(one, two) {
-    if (one.length != two.length)
-        return false;
-    for (var i=0; i < one.length; i++) {
-        if (Math.abs(one[i] - two[i]) > EPSILON)
-            return false;
-    }
-    return true;
-}
-
 function lameParse(text, constructor) {
     var exp = /([+\-0-9eE\.]+)/g;
     var m = text.match(exp);
@@ -117,7 +107,7 @@ module("Xflow tests", {
             return;
         }
         var actualData = adapterOutputs[property].getValue();
-        ok(lameArrayCompare(actualData, shouldMatch), shouldMatchName+" in "+have.id+" matches reference data");
+        QUnit.closeArray(actualData, shouldMatch, EPSILON, shouldMatchName+" in "+have.id+" matches reference data");
     },
 
     MatchNull : function (have, action) {
@@ -144,7 +134,7 @@ module("Xflow tests", {
         var actualData = adapterOutputs[property].getValue();
         var shouldMatch = this.formatData(action.textContent, action.getAttribute("type"));
 
-        ok(lameArrayCompare(actualData, shouldMatch), property+" in "+have.id+" matches expected data");
+        QUnit.closeArray(actualData, shouldMatch, EPSILON, property+" in "+have.id+" matches expected data");
 
     },
 

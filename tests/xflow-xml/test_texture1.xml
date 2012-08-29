@@ -1,0 +1,21 @@
+<XflowTest>
+    <Input>
+
+      <data id="data1">
+        <texture name="texture" id="texture_1">
+          <img src="../images/teapot.ppm"/>
+        </texture>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="First Check" data="#data1" >
+        <MatchInput name="texture" input="#texture_1" />
+        <MatchData name="texture" type="texture" >
+          <img src="../images/teapot.ppm"/>
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

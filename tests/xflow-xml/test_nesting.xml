@@ -1,0 +1,59 @@
+<!--
+	Purpose of Test:
+	Check basic nesting of <data> and input elements
+-->
+<XflowTest>
+    <Input>
+    
+        <data id="data1">
+            <float name="A" id="a1" >0.0</float>
+            <data id="subdata1" >
+                <int name="A"       id="a2" >1</int>
+                <float3 name="B"    id="b1" >1.0 1.0 1.0</float3>
+                <float2 name="C"    id="c1" >2.0 2.0</float2>
+            </data>
+            <data id="subdata2" >
+                <float3 name="B"    id="b2" >2.0 2.0 2.0</float3>
+            </data>
+            <int name="C" id="c2" >42</int>
+        </data>
+             
+    </Input>
+    <TestProcess>
+
+        <Check title="Check #data1" data="#data1">
+            <MatchInput name="A" input="#a1" />
+            <MatchInput name="B" input="#b2" />
+            <MatchInput name="C" input="#c2" />
+        </Check>
+        
+        <Modification title="Remove c2 ">
+            <RemoveNode node="#c2" />     
+        </Modification>
+        
+        <Check title="Check modified #data1" data="#data1">
+            <MatchInput name="C" input="#c1" />
+        </Check>
+        
+        <Modification title="Add C input in subdata2">
+            <AddNodes parentData="#subdata2" >
+            	<float2 name="C" id="c3" >2.0 2.0</float2>
+            </AddNodes>     
+        </Modification>
+        
+        <Check title="Check modified #data1 (2)" data="#data1">
+            <MatchInput name="C" input="#c3" />
+        </Check>
+        
+        <Modification title="Remove subdata2">
+            <RemoveNode node="#subdata2" />       
+        </Modification>
+        
+        <Check title="Check modified #data1 (3)" data="#data1">
+            <MatchInput name="A" input="#a1" />
+            <MatchInput name="B" input="#b1" />
+            <MatchInput name="C" input="#c1" />
+        </Check>
+        
+    </TestProcess>
+</XflowTest>

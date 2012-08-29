@@ -1,3 +1,71 @@
+module("WebGL shaders internal", {
+    setup : function() {
+        var canvas = document.createElement("canvas");
+        this.gl = canvas.getContext('experimental-webgl');
+        this.compiles = function(type, source, msg) {
+            msg = msg || "";
+            var gl = this.gl;
+            var shd = gl.createShader(type);
+            gl.shaderSource(shd, source);
+            gl.compileShader(shd);
+            if (gl.getShaderParameter(shd, gl.COMPILE_STATUS) == 0) {
+                ok(false, msg + ":" +  gl.getShaderInfoLog(shd));
+            } else {
+                ok(true, msg);
+            }
+        };
+        this.mergeDirectives = function(directives, source) {
+            var fragment = "";
+            Array.forEach(directives, function(v) {
+                fragment += "#define " + v + "\n";
+            });
+            return fragment + "\n" + source;
+        }
+    }
+});
+
+test("Phong fragment shader", function() {
+    var phong = XML3D.shaders.getScript("phong");
+    ok(phong, "Phong shader exists");
+    equal(typeof phong.addDirectives, "function", "Function 'addDirectives' exists");
+    var directives = [];
+    phong.addDirectives.call(phong, directives);
+    equal(directives.length, 3, "3 directives from phong shader");
+    var fragment = this.mergeDirectives(directives, phong.fragment);
+    this.compiles(this.gl.FRAGMENT_SHADER, fragment, "Phong fragment without globals compiles.");
+    notEqual(fragment.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
+    notEqual(fragment.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
+
+    directives = [];
+    phong.addDirectives.call(phong, directives, { point : { length : 2 } });
+    equal(directives.length, 3, "3 directives from phong shader");
+    var fragment = this.mergeDirectives(directives, phong.fragment);
+    this.compiles(this.gl.FRAGMENT_SHADER, fragment, "Phong fragment with 2 point lights compiles.");
+    notEqual(fragment.indexOf("MAX_POINTLIGHTS 2"), -1, "MAX_POINTLIGHTS set");
+    notEqual(fragment.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
+
+    directives = [];
+    phong.addDirectives.call(phong, directives, { directional : { length : 1 } });
+    var fragment = this.mergeDirectives(directives, phong.fragment);
+    this.compiles(this.gl.FRAGMENT_SHADER, fragment, "Phong fragment with 1 directional light compiles.");
+    notEqual(fragment.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
+    notEqual(fragment.indexOf("MAX_DIRECTIONALLIGHTS 1"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
+
+    directives = [];
+    phong.addDirectives.call(phong, directives, { directional : { length : 1 } }, { diffuseTexture : {} });
+    var fragment = this.mergeDirectives(directives, phong.fragment);
+    console.log(fragment);
+    this.compiles(this.gl.FRAGMENT_SHADER, fragment, "Phong fragment with 1 directional light and diffuseTexture compiles.");
+    notEqual(fragment.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
+    notEqual(fragment.indexOf("MAX_DIRECTIONALLIGHTS 1"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment.indexOf("HAS_DIFFUSETEXTURE 1"), -1, "HAS_DIFFUSETEXTURE set");
+
+    console.log(phong);
+});
+
 module("WebGL Shaders and Textures", {
     setup : function() {
         stop();
@@ -14,6 +82,8 @@ module("WebGL Shaders and Textures", {
         v.removeEventListener("load", this.cb, true);
     }
 });
+
+
 
 test("Simple texture", 3, function() {
     var x = this.doc.getElementById("xml3DElem"),

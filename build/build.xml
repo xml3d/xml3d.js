@@ -27,7 +27,10 @@
 		<file name="types/box.js" />
 		<file name="types/matrix.js" />
 		<file name="types/ray.js" />
-		<file name="base/adapter.js" />
+	    <file name="data/base.js" />
+	    <file name="base/adapter.js" />
+	    <file name="base/adapterhandle.js" />
+	    <file name="base/resourcemanager.js" />
 		<file name="interface/notification.js" />
 		<file name="interface/factory.js" />
 		<file name="interface/dom.js" />
@@ -42,6 +45,8 @@
         <file name="data/adapter/texture.js" />
         <file name="data/adapter/misc.js" />
         <file name="data/adapter/factory.js" />
+        <file name="data/adapter/json/factory.js" />
+        <file name="renderer/base.js" />
 		<file name="renderer/canvashandler.js" />
         <file name="renderer/utils.js" />
         <file name="renderer/shadermanager.js" />

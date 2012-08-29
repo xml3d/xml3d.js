@@ -13,7 +13,7 @@ function NotifyingAdapterFactory() {
         };
     };
 };
-XML3D.createClass(NotifyingAdapterFactory, XML3D.data.AdapterFactory);
+XML3D.createClass(NotifyingAdapterFactory, XML3D.base.AdapterFactory);
 
 module("Element notification tests", {
     factory : new NotifyingAdapterFactory()

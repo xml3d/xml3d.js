@@ -1,5 +1,4 @@
 // Create global symbol XML3D.webgl
-XML3D.webgl = XML3D.webgl || {};
 XML3D.webgl.MAXFPS = 30;
 
 /**
@@ -84,6 +83,9 @@ XML3D.webgl.MAXFPS = 30;
             }
         };
 
+        // Create Ressource Manager:
+        this.resourceManager = new XML3D.base.ResourceManager();
+
         // Create renderer
         this.renderer = new XML3D.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
     }
@@ -167,7 +169,7 @@ XML3D.webgl.MAXFPS = 30;
      */
     CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, canvasX, canvasY) {
         if (!pickedObj || this._pickingDisabled)
-            return;
+            return null;
         this.renderer.renderPickedNormals(pickedObj, canvasX, this.canvas.height - canvasY);
         return this.renderer.readNormalFromPickingBuffer(canvasX, this.canvas.height - canvasY);
     };

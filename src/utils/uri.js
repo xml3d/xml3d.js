@@ -43,6 +43,24 @@ XML3D.URI.prototype.toString = function() {
     return str;
 };
 
+// Restore the URI to it's stringy glory.
+XML3D.URI.prototype.toStringWithoutFragment = function() {
+    var str = "";
+    if (this.scheme) {
+        str += this.scheme + ":";
+    }
+    if (this.authority) {
+        str += "//" + this.authority;
+    }
+    if (this.path) {
+        str += this.path;
+    }
+    if (this.query) {
+        str += "?" + this.query;
+    }
+    return str;
+};
+
 /**
  * Class URIResolver
  * @constructor

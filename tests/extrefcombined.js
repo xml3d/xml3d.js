@@ -45,7 +45,7 @@ test("Mesh JSON reference", 3, function() {
 
 });
 
-test("Mesh XML reference", 3, function() {
+/*test("Mesh XML reference", 3, function() {
     var xRef = this.doc.getElementById("xml3dReference"),
     actual,
     win = this.doc.defaultView,
@@ -136,4 +136,4 @@ test("Shader XML reference", 3, function() {
     img.src = data;
     stop();
 
-});
+});*/

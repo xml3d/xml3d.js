@@ -91,7 +91,7 @@
 
     /**
      * @constructor
-     * @implements {XML3D.data.IFactory}
+     * @implements {XML3D.base.IFactory}
      */
     var JSONFactory = {
         isFactoryFor : function(obj) {
@@ -102,6 +102,5 @@
         }
     };
 
-    XML3D.data.registerFactory("json", JSONFactory);
-    XML3D.webgl.registerFactory("application/json", JSONFactory);
+    XML3D.base.registerFactory("application/json", JSONFactory);
 }());

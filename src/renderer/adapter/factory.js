@@ -3,16 +3,16 @@
 (function() {
     /**
      * @constructor
-     * @implements {XML3D.data.IFactory}
-     * @extends XML3D.data.AdapterFactory
+     * @implements {XML3D.base.IFactory}
+     * @extends XML3D.base.AdapterFactory
      */
     var XML3DRenderAdapterFactory = function(handler, renderer) {
-        XML3D.data.AdapterFactory.call(this);
+        XML3D.base.AdapterFactory.call(this);
         this.handler = handler;
         this.renderer = renderer;
         this.type = "XML3DRenderAdapterFactory";
     };
-    XML3D.createClass(XML3DRenderAdapterFactory, XML3D.data.AdapterFactory);
+    XML3D.createClass(XML3DRenderAdapterFactory, XML3D.base.AdapterFactory);
 
     var gl = XML3D.webgl,
         reg = {

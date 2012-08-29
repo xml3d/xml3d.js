@@ -4,7 +4,7 @@
 
     /**
      * Class XML3D.webgl.XML3DDataAdapterFactory
-     * extends: XML3D.data.AdapterFactory
+     * extends: XML3D.base.AdapterFactory
      *
      * XML3DDataAdapterFactory creates DataAdapter instances for elements using generic data (<mesh>, <data>, <float>,...).
      * Additionally, it manages all DataAdapter instances so that for each node there is always just one DataAdapter. When
@@ -34,17 +34,17 @@
      * Constructor of XML3DDataAdapterFactory
      *
      * @constructor
-     * @implements {XML3D.data.IFactory}
-     * @extends XML3D.data.AdapterFactory
+     * @implements {XML3D.base.IFactory}
+     * @extends XML3D.base.AdapterFactory
      *
      * @param {XML3D.webgl.CanvasHandler} handler
      */
     var XML3DDataAdapterFactory = function(handler)
     {
-        XML3D.data.AdapterFactory.call(this);
+        XML3D.base.AdapterFactory.call(this);
         this.handler = handler;
     };
-    XML3D.createClass(XML3DDataAdapterFactory, XML3D.data.AdapterFactory);
+    XML3D.createClass(XML3DDataAdapterFactory, XML3D.base.AdapterFactory);
 
     XML3DDataAdapterFactory.prototype.isFactoryFor = function(obj) {
         return typeof obj == "string" ? (obj == XML3D.data.toString()) : (obj == XML3D.data);
@@ -59,24 +59,22 @@
      */
     XML3DDataAdapterFactory.prototype.getAdapter = function(node)
     {
-        return XML3D.data.AdapterFactory.prototype.getAdapter.call(this, node, XML3D.data.XML3DDataAdapterFactory.prototype);
+        return XML3D.base.AdapterFactory.prototype.getAdapter.call(this, node, XML3D.data.XML3DDataAdapterFactory.prototype);
     };
 
-    var externalAdapters = {};
     /**
      * Tries to create an adapter from an URI
      *
-     * @param {uri} node
+     * @param {string} uri
      * @returns {Adapter} An resolved adapter
      */
     XML3DDataAdapterFactory.prototype.getAdapterURI = function(uri)
     {
-        // TODO: cache
         uri = new XML3D.URI(uri);
         var element = XML3D.URIResolver.resolve(uri);
         if (element){
-            var handle = new XML3D.data.AdapterHandle();
-            handle.setAdapter(XML3D.data.AdapterFactory.prototype.getAdapter.call(this, element, XML3D.data.XML3DDataAdapterFactory.prototype));
+            var handle = new XML3D.base.AdapterHandle();
+            handle.setAdapter(XML3D.base.AdapterFactory.prototype.getAdapter.call(this, element, XML3D.data.XML3DDataAdapterFactory.prototype));
             return handle;
         }
 
@@ -119,11 +117,6 @@
         }
         XML3D.debug.logWarning("Not supported as data element: " + node.localName);
         return null;
-    };
-
-    var factories = {};
-    XML3D.data.registerFactory = function(name, factory) {
-        factories[name] = factory;
     };
 
     // Export

@@ -84,7 +84,7 @@ XML3D.webgl.MAXFPS = 30;
         };
 
         // Create Ressource Manager:
-        this.resourceManager = new XML3D.webgl.ResourceManager();
+        this.resourceManager = new XML3D.base.ResourceManager();
 
         // Create renderer
         this.renderer = new XML3D.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);

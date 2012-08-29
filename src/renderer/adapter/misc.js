@@ -1,9 +1,9 @@
 // Misc adapters
 (function() {
     XML3D.webgl.RenderAdapter = function(factory, node) {
-        XML3D.data.Adapter.call(this, factory, node);
+        XML3D.base.Adapter.call(this, factory, node);
     };
-    XML3D.webgl.RenderAdapter.prototype = new XML3D.data.Adapter();
+    XML3D.webgl.RenderAdapter.prototype = new XML3D.base.Adapter();
     XML3D.webgl.RenderAdapter.prototype.constructor = XML3D.webgl.RenderAdapter;
 
     XML3D.webgl.RenderAdapter.prototype.isAdapterFor = function(protoType) {

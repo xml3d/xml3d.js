@@ -78,7 +78,7 @@ function TestAdapterFactory() {
     };
 };
 
-XML3D.createClass(TestAdapterFactory, XML3D.data.AdapterFactory);
+XML3D.createClass(TestAdapterFactory, XML3D.base.AdapterFactory);
 
 module("Adapter tests", {
     setup : function() {

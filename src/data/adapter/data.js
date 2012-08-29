@@ -19,7 +19,7 @@ IDataAdapter.prototype.addParentAdapter = function(adapter) {
  * generic data and should be instantiated via
  * XML3D.data.XML3DDataAdapterFactory to ensure proper functionality.
  *
- * @extends XML3D.data.Adapter
+ * @extends XML3D.base.Adapter
  * @implements IDataAdapter
  * @constructor
  *
@@ -27,7 +27,7 @@ IDataAdapter.prototype.addParentAdapter = function(adapter) {
  * @param node
  */
 XML3D.data.DataAdapter = function(factory, node) {
-    XML3D.data.Adapter.call(this, factory, node);
+    XML3D.base.Adapter.call(this, factory, node);
 
     this.cachedOutputs = null;
     this.nameMap = {};
@@ -53,7 +53,7 @@ XML3D.data.DataAdapter = function(factory, node) {
         }
     };
 };
-XML3D.data.DataAdapter.prototype = new XML3D.data.Adapter();
+XML3D.data.DataAdapter.prototype = new XML3D.base.Adapter();
 XML3D.data.DataAdapter.prototype.constructor = XML3D.data.DataAdapter;
 
 /**

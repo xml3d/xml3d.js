@@ -344,4 +344,13 @@
             max[2] = bbmax[2];
     };
 
+    XML3D.webgl.createEmptyTexture = function(gl) {
+        var handle = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, handle);
+        var data = new Uint8Array([ 255, 128, 128, 255 ]);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    };
+
 })();

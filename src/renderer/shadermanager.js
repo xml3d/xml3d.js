@@ -44,32 +44,24 @@
         this.status = TEXTURE_STATE.INVALID;
     };
 
-    var EMPTY_TEXTURE = null;
-    var createEmptyTexture = function(gl) {
-        var handle = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, handle);
-        var data = new Uint8Array([ 255, 128, 128, 255 ]);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        EMPTY_TEXTURE = handle;
-    };
-
-    var XML3DShaderManager = function(gl, renderer, dataFactory, factory) {
-        this.gl = gl;
+    var XML3DShaderManager = function(renderer, dataFactory, factory) {
         this.renderer = renderer;
+        this.gl = renderer.gl;
         this.dataFactory = dataFactory;
         this.factory = factory;
+
         this.currentProgram = null;
         this.shaders = {};
 
-        createEmptyTexture(gl);
+        this.createDefaultShaders();
+    };
 
-        // Always create a default flat shader as a fallback for error handling
+    XML3DShaderManager.prototype.createDefaultShaders = function() {
+     // Always create a default flat shader as a fallback for error handling
         var fallbackShader = this.getStandardShaderProgram("matte");
         fallbackShader.hasTransparency = false;
         this.bindShader(fallbackShader);
-        this.setUniform(gl, fallbackShader.uniforms["diffuseColor"], [ 1, 0, 0 ]);
+        this.setUniform(fallbackShader.uniforms["diffuseColor"], [ 1, 0, 0 ]);
         this.unbindShader(fallbackShader);
         this.shaders["defaultShader"] = fallbackShader;
 
@@ -385,7 +377,7 @@
                 u = u[0]; // Either a single float, int or bool
 
             if (shader.uniforms[name]) {
-                this.setUniform(this.gl, shader.uniforms[name], u);
+                this.setUniform(shader.uniforms[name], u);
             }
         }
 
@@ -403,7 +395,7 @@
         for ( var tex in samplers) {
             this.bindTexture(samplers[tex]);
             if (tex == "specularTexture" && sp.uniforms.useSpecularTexture) {
-                this.setUniform(this.gl, sp.uniforms.useSpecularTexture, 1);
+                this.setUniform(sp.uniforms.useSpecularTexture, 1);
             }
         }
     };
@@ -415,7 +407,7 @@
         for ( var i = 0, l = sp.changes.length; i < l; i++) {
             var change = sp.changes[i];
             if (change.type == "uniform" && sp.uniforms[change.name]) {
-                this.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
+                this.setUniform(sp.uniforms[change.name], change.newValue);
             }
         }
         sp.changes = [];
@@ -434,7 +426,9 @@
     };
 
     var rc = window.WebGLRenderingContext;
-    XML3DShaderManager.prototype.setUniform = function(gl, u, value) {
+
+    XML3DShaderManager.prototype.setUniform = function(u, value) {
+        var gl = this.gl;
         switch (u.glType) {
         case rc.BOOL:
         case rc.INT:
@@ -484,10 +478,6 @@
             XML3D.debug.logError("Unknown uniform type " + u.glType);
             break;
         }
-    };
-
-    XML3DShaderManager.prototype.setGLContext = function(gl) {
-        this.gl = gl;
     };
 
     XML3DShaderManager.prototype.destroyShader = function(shader) {
@@ -658,7 +648,7 @@
             gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(info.glType, info.handle);
             // Should not be here, since the texunit is static
-            this.setUniform(gl, tex, info.unit + 1);
+            this.setUniform(tex, info.unit + 1);
             break;
         case TEXTURE_STATE.LOADED:
             // console.dir("Creating '"+ tex.name + "' from " + info.image.src);
@@ -669,7 +659,7 @@
         case TEXTURE_STATE.UNLOADED:
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, null);
-            this.setUniform(gl, tex, 0);
+            this.setUniform(tex, 0);
         }
         ;
     };

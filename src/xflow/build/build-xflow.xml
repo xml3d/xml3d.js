@@ -1,0 +1,21 @@
+<project name="renderer-merge" default="develop-min">
+    <description>
+           Build the data module
+    </description>
+
+    <property file="../../../build/build.properties" />
+    <import file="../../../build/build-master.xml" />
+
+    <filelist dir=".." id="sourceFiles">
+        <file name="base.js"/>
+        <file name="data.js"/>
+        <file name="graph.js" />
+        <file name="mapping.js" />
+        <file name="request.js" />
+        <file name="result.js" />
+    </filelist>
+
+    <target name="develop-min" depends="init">
+        <compileScripts version="DEVELOPMENT SNAPSHOT (${build.time})" extension="" />
+    </target>
+</project>

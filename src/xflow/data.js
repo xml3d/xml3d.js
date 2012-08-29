@@ -2,7 +2,7 @@
 
 
 /**
- * @enum {Number}
+ * @enum {number}
  */
 Xflow.DataNotifications = {
     CHANGED_CONTENT: 0,
@@ -18,7 +18,7 @@ var SamplerConfig = function(){
     this.filterMag = 0;
     this.filterMip = 0;
     this.wrapS = 0;
-    this.wrapT = 0
+    this.wrapT = 0;
     this.wrapU = 0;
     this.textureType = 0;
     this.colorR = 0;
@@ -28,7 +28,7 @@ var SamplerConfig = function(){
 Xflow.SamplerConfig = SamplerConfig;
 
 /**
- * @enum {Number}
+ * @enum {number}
  */
 SamplerConfig.FILTER_TYPE = {
     NONE: 0,
@@ -69,7 +69,7 @@ Xflow.DataEntry = DataEntry;
  * @param {function(Xflow.DataEntry, Xflow.DataEntry.NOTIFICATION)} callback
  */
 DataEntry.prototype.addListener = function(callback){
-    this.listeners.push(callback)
+    this.listeners.push(callback);
 };
 /**
  * @param {function(Xflow.DataEntry, Xflow.DataEntry.NOTIFICATION)} callback
@@ -85,7 +85,7 @@ DataEntry.prototype.removeListener = function(callback){
  */
 function notifyListeners(dataEntry, notification){
     for(var i = 0; i < dataEntry.listeners.length; ++i){
-        dataEntry.listeners[i](dataEntry, notification)
+        dataEntry.listeners[i](dataEntry, notification);
     }
 };
 
@@ -104,14 +104,14 @@ Xflow.BufferEntry = BufferEntry;
 
 Object.defineProperty(BufferEntry.prototype, "type", {
     set: function(v){
-        throw "type is read-only"
+        throw "type is read-only";
     },
     get: function(){ return this._type; }
 });
 Object.defineProperty(BufferEntry.prototype, "value", {
     set: function(v){
         // TODO: Check for correct type
-        var newSize = this._value.length != v.length
+        var newSize = this._value.length != v.length;
         this._value = v;
         notifyListeners(this, newSize ? Xflow.DataNotifications.CHANGE_SIZE : Xflow.DataNotifications.CHANGED_CONTENT);
     },

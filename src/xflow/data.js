@@ -102,19 +102,38 @@ var BufferEntry = function(type, value){
 XML3D.createClass(BufferEntry, Xflow.DataEntry);
 Xflow.BufferEntry = BufferEntry;
 
+/**
+ * Type of Buffer
+ * @enum
+ */
+BufferEntry.TYPE = {
+    FLOAT: 0,
+    FLOAT2 : 1,
+    FLOAT3 : 2,
+    FLOAT4 : 3,
+    FLOAT4X4 : 10,
+    INT : 20,
+    INT4 : 21,
+    BOOL: 30
+}
+
 Object.defineProperty(BufferEntry.prototype, "type", {
+    /** @param {Xflow.BufferEntry.TYPE} v */
     set: function(v){
         throw "type is read-only";
     },
+    /** @return {Xflow.BufferEntry.TYPE} */
     get: function(){ return this._type; }
 });
 Object.defineProperty(BufferEntry.prototype, "value", {
+    /** @param {Object} v */
     set: function(v){
         // TODO: Check for correct type
         var newSize = this._value.length != v.length;
         this._value = v;
         notifyListeners(this, newSize ? Xflow.DataNotifications.CHANGE_SIZE : Xflow.DataNotifications.CHANGED_CONTENT);
     },
+    /** @return {Object} */
     get: function(){ return this._value; }
 });
 

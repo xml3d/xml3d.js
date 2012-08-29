@@ -27,6 +27,11 @@
 		<file name="types/box.js" />
 		<file name="types/matrix.js" />
 		<file name="types/ray.js" />
+	    <file name="xflow/base.js" />
+        <file name="xflow/data.js" />
+        <file name="xflow/mapping.js" />
+        <file name="xflow/request.js" />
+        <file name="xflow/result.js" />
 	    <file name="data/base.js" />
 	    <file name="base/adapter.js" />
 	    <file name="base/adapterhandle.js" />

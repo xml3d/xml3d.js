@@ -10,7 +10,7 @@ XML3D.config.isXML3DElement = function(e) {
  * @return {undefined}
  */
 XML3D.config.element = function(element, selfmonitoring) {
-    if (element._configured === undefined && XML3D.config.isXML3DElement(element)) {
+    if (element._configured === undefined ) {//&& XML3D.config.isXML3DElement(element)
         var classInfo = XML3D.classInfo[element.localName];
         if (classInfo === undefined) {
             XML3D.debug.logInfo("Unrecognised element " + element.localName);

@@ -171,9 +171,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     /**
      * @param {Renderer.drawableObject} obj
      */
-    p.updateData = function(obj) {
+    p.updateData = function(request, changeType) {
         var gl = this.factory.renderer.gl;
-
+        var obj = this.getMyDrawableObject();
         var calculateBBox = false;
         var meshInfo = obj.mesh || createMeshInfo(this.node.type);
 

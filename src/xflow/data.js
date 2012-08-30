@@ -58,36 +58,9 @@ SamplerConfig.WRAP_TYPE = {
  * @constructor
  */
 var DataEntry = function(){
-    /** @private */
-    this.listener = [];
 };
 Xflow.DataEntry = DataEntry;
 
-
-
-/**
- * @param {function(Xflow.DataEntry, Xflow.DataEntry.NOTIFICATION)} callback
- */
-DataEntry.prototype.addListener = function(callback){
-    this.listeners.push(callback);
-};
-/**
- * @param {function(Xflow.DataEntry, Xflow.DataEntry.NOTIFICATION)} callback
- */
-DataEntry.prototype.removeListener = function(callback){
-    Array.erase(this.listeners, callback);
-};
-
-/**
- *
- * @param {XML3D.xflow.DataEntry} dataEntry
- * @param {} notification
- */
-function notifyListeners(dataEntry, notification){
-    for(var i = 0; i < dataEntry.listeners.length; ++i){
-        dataEntry.listeners[i](dataEntry, notification);
-    }
-};
 
 /**
  * @constructor
@@ -137,6 +110,33 @@ Object.defineProperty(BufferEntry.prototype, "value", {
     get: function(){ return this._value; }
 });
 
+var DataChangeNotifier = {
+    _listeners: []
+}
+Xflow.DataChangeNotifier = DataChangeNotifier;
 
+/**
+ * @param {function(Xflow.DataEntry, Xflow.DataEntry.NOTIFICATION)} callback
+ */
+DataChangeNotifier.addListener = function(callback){
+this._listeners.push(callback);
+};
 
+/**
+ * @param {function(Xflow.DataEntry, Xflow.DataEntry.NOTIFICATION)} callback
+ */
+DataChangeNotifier.removeListener = function(callback){
+    Array.erase(this._listeners, callback);
+};
+
+/**
+ *
+ * @param {XML3D.xflow.DataEntry} dataEntry
+ * @param {Xflow.DataNotifications} notification
+ */
+function notifyListeners(dataEntry, notification){
+    for(var i = 0; i < dataEntry.listeners.length; ++i){
+        DataChangeNotifier._listeners[i](dataEntry, notification);
+    }
+};
 })();

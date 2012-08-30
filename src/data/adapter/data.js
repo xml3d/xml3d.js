@@ -225,6 +225,11 @@ XML3D.data.DataAdapter.prototype.rebuildStructure = function(table) {
     table.close();
 };
 
+
+XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter){
+
+}
+
 XML3D.data.DataAdapter.prototype.requestData = function(table) {
     this.tables.push(table);
     this.rebuildStructure(table);

@@ -177,7 +177,7 @@
      * @param scriptURL
      * @param lights
      * @param flags
-     * @returns {{ vertex: string, fragment : string }}
+     * @returns {{ vertex: string, fragment : string }!}
      */
     XML3DShaderManager.getStandardShaderSource = function(scriptURL, lights, flags) {
         // Need to check for textures to decide which internal shader to use
@@ -187,39 +187,18 @@
         };
         var shaderName = scriptURL.substring(scriptURL.lastIndexOf(':') + 1);
 
-        // Need to check for textures to decide which internal shader to use
-        if (flags.hasTextures && shaderName == "diffuse")
-            shaderName = "textured" + shaderName;
-
-        if (flags.hasVColors && shaderName == "diffuse")
-            shaderName += "vcolor";
-
         var shaderDescription = XML3D.shaders.getScript(shaderName);
         var directives = [];
-        switch (shaderName) {
-        case "diffuse":
-        case "textureddiffuse":
-        case "diffusevcolor":
-        case "normal":
-        case "reflection":
-            var maxLights = "";
-            maxLights += "#define MAX_POINTLIGHTS " + lights.point.length.toString() + "\n";
-            maxLights += "#define MAX_DIRECTIONALLIGHTS " + lights.directional.length.toString() + "\n";
-            sources.vertex = maxLights + shaderDescription.vertex;
-            sources.fragment = maxLights + shaderDescription.fragment;
-            sources.uniforms = shaderDescription.uniforms;
-            break;
-        default:
-            if (shaderDescription.addDirectives) {
-                shaderDescription.addDirectives.call(shaderDescription, directives, lights);
-                sources.fragment = XML3DShaderManager.addDirectivesToSource(directives, shaderDescription.fragment);
-                sources.vertex = XML3DShaderManager.addDirectivesToSource(directives, shaderDescription.vertex);
-            } else {
-                sources.fragment = shaderDescription.fragment;
-                sources.vertex = shaderDescription.vertex;
-            }
-            sources.uniforms = shaderDescription.uniforms || [];
+
+        if (shaderDescription.addDirectives) {
+            shaderDescription.addDirectives.call(shaderDescription, directives, lights);
+            sources.fragment = XML3DShaderManager.addDirectivesToSource(directives, shaderDescription.fragment);
+            sources.vertex = XML3DShaderManager.addDirectivesToSource(directives, shaderDescription.vertex);
+        } else {
+            sources.fragment = shaderDescription.fragment;
+            sources.vertex = shaderDescription.vertex;
         }
+        sources.uniforms = shaderDescription.uniforms || [];
         return sources;
     };
 

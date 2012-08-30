@@ -70,6 +70,9 @@
      */
     XML3DDataAdapterFactory.prototype.getAdapterURI = function(uri)
     {
+        if(!uri) {
+            return new XML3D.base.AdapterHandle();
+        }
         uri = new XML3D.URI(uri);
         var element = XML3D.URIResolver.resolve(uri);
         if (element){

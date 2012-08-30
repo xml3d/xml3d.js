@@ -36,7 +36,7 @@
 
         this.xflowInputNode = XML3D.data.xflowGraph.createInputNode();
         this.xflowInputNode.name = this.node.name;
-        this.xflowInputNode.value = buffer;
+        this.xflowInputNode.data = buffer;
         this.xflowInputNode.seqnr = this.node.seqnr;
     }
 

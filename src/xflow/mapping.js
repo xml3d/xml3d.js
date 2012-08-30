@@ -47,6 +47,10 @@ OrderMapping.prototype.removeName = function(index){
     mappingNotifyOwner(this);
 };
 
+OrderMapping.prototype.isEmpty = function(){
+    return this._names.length == 0;
+}
+
 /**
  * @constructor
  * @extends {Xflow.Mapping}
@@ -91,6 +95,10 @@ NameMapping.prototype.removeNamePair = function(destName){
     delete this._mappedNames[destName];
     mappingNotifyOwner(this);
 };
+
+NameMapping.prototype.isEmpty = function(){
+    return this._names.length == 0;
+}
 
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
 var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)\}$/;
@@ -156,15 +164,15 @@ NameMapping.prototype.filterNameset = function(nameset, filterType)
 OrderMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType){
     for(var i in sourceMap){
         var idx = this._names.indexOf(i);
-        if(filterType == Xflow.DataEntry.FILTER_TYPE.RENAME ||
-           ( filterType == Xflow.DataEntry.FILTER_TYPE.KEEP && idx != -1) ||
-            (filterType == Xflow.DataEntry.FILTER_TYPE.REMOVE && idx == -1))
+        if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME ||
+           ( filterType == Xflow.DataNode.FILTER_TYPE.KEEP && idx != -1) ||
+            (filterType == Xflow.DataNode.FILTER_TYPE.REMOVE && idx == -1))
             destMap[i] = sourceMap[i];
     }
 }
 NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType){
     var tmp = {};
-    if(filterType == Xflow.DataEntry.FILTER_TYPE.REMOVE){
+    if(filterType == Xflow.DataNode.FILTER_TYPE.REMOVE){
         for(var i in sourceMap)
             tmp[i] = sourceMap[i];
         for(var i in this._mappedNames){
@@ -175,7 +183,7 @@ NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType
         for(var destName in this._mappedNames){
             tmp[destName] = sourceMap[this._mappedNames[destName]]
         }
-        if(filterType == Xflow.DataEntry.FILTER_TYPE.KEEP){
+        if(filterType == Xflow.DataNode.FILTER_TYPE.KEEP){
             for(var i in sourceMap)
                 tmp[i] = tmp[i] || sourceMap[i];
         }

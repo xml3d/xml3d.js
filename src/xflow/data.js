@@ -59,7 +59,7 @@ SamplerConfig.WRAP_TYPE = {
  */
 var DataEntry = function(type){
     this._type = type;
-    this._listener = [];
+    this._listeners = [];
     this.userData = {};
 };
 Xflow.DataEntry = DataEntry;

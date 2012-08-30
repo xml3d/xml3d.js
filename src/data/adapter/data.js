@@ -65,7 +65,7 @@ function recursiveDataAdapterConstruction(adapter){
     for ( var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
         var subadapter = adapter.factory.getAdapter(child);
         if(subadapter){
-            adapter.xflowDataNode.appendChild(subadapter.xflowDataNode);
+            adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
         }
     }
 }
@@ -74,8 +74,8 @@ XML3D.data.DataAdapter.prototype.getXflowNode = function(){
     return this.xflowDataNode;
 }
 
-XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter){
-    return new Xflow.ComputeRequest(this.xflowDataNode, filter);
+XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
+    return new Xflow.ComputeRequest(this.xflowDataNode, filter, callback);
 }
 
 /**

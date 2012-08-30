@@ -28,6 +28,8 @@
 		<file name="types/matrix.js" />
 		<file name="types/ray.js" />
 	    <file name="xflow/base.js" />
+        <file name="xflow/graph.js" />
+        <file name="xflow/compute.js" />
         <file name="xflow/data.js" />
         <file name="xflow/mapping.js" />
         <file name="xflow/request.js" />

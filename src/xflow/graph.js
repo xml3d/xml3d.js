@@ -299,6 +299,7 @@ var filterParser = /^([A-Za-z]*)\(([^()]+)\)$/;
  * @param {string} filterString
  */
 DataNode.prototype.setFilter = function(filterString){
+    filterString = filterString || "";
     var newType = DataNode.FILTER_TYPE.RENAME;
     var newMapping = null;
     var result = filterString.trim().match(filterParser);
@@ -316,6 +317,7 @@ DataNode.prototype.setFilter = function(filterString){
     }
     removeMappingOwner(this._filterMapping);
     this._filterMapping = newMapping;
+    this._filterType = newType;
     this.notify( XflowModification.STRUCTURE_CHANGED);
 };
 
@@ -327,6 +329,7 @@ var bracketsParser = /^\(([^()]*)\)$/;
  * @param {string} computeString
  */
 DataNode.prototype.setCompute = function(computeString){
+    computeString = computeString || "";
     var newOperator = "";
     var inputMapping = null, outputMapping = null;
     var result = computeString.trim().match(computeParser);

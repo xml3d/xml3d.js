@@ -39,7 +39,7 @@ Object.defineProperty(Request.prototype, "filter", {
 /**
  * Call this function, whenever the request is not required anymore.
  */
-Request.prototype.clear() = function(callback){
+Request.prototype.clear = function(callback){
     this._listener = null;
     Array.erase(this._dataNode._requests, callback);
 };

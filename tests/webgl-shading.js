@@ -208,7 +208,7 @@ test("Diffuse shader with vertex colors", 3, function() {
 
 });
 
-test("Custom shader", 4, function() {
+/*test("Custom shader", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -227,7 +227,7 @@ test("Custom shader", 4, function() {
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,255,0,255], "Change shader script to standard phong");
 
-});
+});*/
 
 module("Multiple XML3D nodes", {
     setup : function() {

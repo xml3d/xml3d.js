@@ -124,6 +124,7 @@ XML3D.shaders.register("phong", {
         transparency    : 0.0,
         shininess       : 0.5,
         ambientIntensity: 0.0,
-        useVertexColor : false
+        useVertexColor : false,
+        diffuseTexture : null
     }
 });

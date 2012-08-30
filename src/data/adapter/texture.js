@@ -25,11 +25,9 @@
     var TextureDataAdapter = function(factory, node)
     {
         XML3D.data.DataAdapter.call(this, factory, node);
-        XML3D.data.ProviderEntry.call(this);
         this.table = new XML3D.data.ProcessTable(this, ["image"]);
     };
-    XML3D.createClass(TextureDataAdapter, XML3D.data.DataAdapter);
-    XML3D.extend(TextureDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
+    XML3D.createClass(TextureDataAdapter, XML3D.base.Adapter);
 
 
     TextureDataAdapter.prototype.init = function() {

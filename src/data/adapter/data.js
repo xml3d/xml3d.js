@@ -36,9 +36,7 @@ XML3D.data.DataAdapter = function(factory, node) {
     this.handles = {};
     this.xflowDataNode = null;
 };
-XML3D.data.DataAdapter.prototype = new XML3D.base.Adapter();
-XML3D.data.DataAdapter.prototype.constructor = XML3D.data.DataAdapter;
-
+XML3D.createClass(XML3D.data.DataAdapter, XML3D.base.Adapter);
 /**
  *
  * @param aType

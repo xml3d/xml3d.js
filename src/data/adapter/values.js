@@ -27,7 +27,7 @@
         XML3D.data.DataAdapter.call(this, factory, node);
         this.xflowInputNode = null;
     };
-    XML3D.createClass(ValueDataAdapter, XML3D.data.DataAdapter);
+    XML3D.createClass(ValueDataAdapter, XML3D.base.Adapter);
 
     ValueDataAdapter.prototype.init = function()
     {

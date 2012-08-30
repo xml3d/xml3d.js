@@ -167,34 +167,6 @@
         return XML3D.shaders.getScript(shaderName);
     };
 
-    /**
-     *
-     * @param {string} urnPath
-     * @param lights
-     * @returns {{ vertex: string, fragment : string }!}
-     */
-    XML3DShaderManager.getStandardShaderSource = function(urnPath, lights) {
-        // Need to check for textures to decide which internal shader to use
-        var sources = {
-            vertex : null,
-            fragment : null
-        };
-
-        var shaderDescription = XML3DShaderManager.getShaderDescriptor(urnPath);
-        var directives = [];
-
-        if (shaderDescription.addDirectives) {
-            shaderDescription.addDirectives.call(shaderDescription, directives, lights);
-            sources.fragment = XML3DShaderManager.addDirectivesToSource(directives, shaderDescription.fragment);
-            sources.vertex = XML3DShaderManager.addDirectivesToSource(directives, shaderDescription.vertex);
-        } else {
-            sources.fragment = shaderDescription.fragment;
-            sources.vertex = shaderDescription.vertex;
-        }
-        sources.uniforms = shaderDescription.uniforms || [];
-        return sources;
-    };
-
     XML3DShaderManager.prototype.getStandardShaderProgram = function(name) {
         var sources = {};
 
@@ -224,11 +196,11 @@
         var sc = this.shaderCache;
         var vertexShader = sc.vertex[sources.vertex];
         if (!vertexShader) {
-            vertexShader = sc.vertex[sources.vertex] = this.compileShader(gl.VERTEX_SHADER, sources.vertex);
+            vertexShader = sc.vertex[sources.vertex] = XML3DShaderManager.createWebGLShaderFromSource(gl, gl.VERTEX_SHADER, sources.vertex);
         }
         var fragmentShader = sc.fragment[sources.fragment];
         if (!fragmentShader) {
-            fragmentShader = sc.fragment[sources.fragment] = this.compileShader(gl.FRAGMENT_SHADER, sources.fragment);
+            fragmentShader = sc.fragment[sources.fragment] = XML3DShaderManager.createWebGLShaderFromSource(gl, gl.FRAGMENT_SHADER, sources.fragment);
         }
 
         if (!vertexShader || !fragmentShader) {
@@ -303,9 +275,12 @@
         return programObject;
     };
 
-    XML3DShaderManager.prototype.compileShader = function(type, shaderSource) {
-        var gl = this.gl;
-
+    /**
+     * @param {number} type
+     * @param {string} shaderSource
+     * @returns {WebGLShader|null}
+     */
+    XML3DShaderManager.createWebGLShaderFromSource = function(gl, type, shaderSource) {
         var shd = gl.createShader(type);
         gl.shaderSource(shd, shaderSource);
         gl.compileShader(shd);
@@ -320,7 +295,6 @@
             errorString += gl.getShaderInfoLog(shd) + "\n--------\n";
             XML3D.debug.logError(errorString);
             gl.getError();
-
             return null;
         }
 

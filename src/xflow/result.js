@@ -30,6 +30,6 @@ var ComputeResult = function(){
     Xflow.Result.call(this);
 };
 XML3D.createClass(ComputeResult, Xflow.Result);
-Xflow.ComputeRequest = ComputeResult;
+Xflow.ComputeResult = ComputeResult;
 
 })();

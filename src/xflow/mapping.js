@@ -15,6 +15,7 @@ Xflow.Mapping = Mapping;
  */
 var OrderMapping = function(owner){
     Xflow.Mapping.call(this, owner);
+    this._orderMapping = true;
     this._names = [];
 };
 XML3D.createClass(OrderMapping, Xflow.Mapping);
@@ -52,6 +53,7 @@ OrderMapping.prototype.removeName = function(index){
  */
 var NameMapping = function(owner){
     Xflow.Mapping.call(this, owner);
+    this._nameMapping = true;
     this._names = [];
     this._mappedNames = {};
 };
@@ -126,10 +128,60 @@ NameMapping.parse = function(string, dataNode)
     return mapping;
 }
 
-
 function mappingNotifyOwner(mapping){
     if(mapping._owner)
         mapping._owner.notify(XflowModification.STRUCTURE_CHANGED);
 };
+
+OrderMapping.prototype.filterNameset = function(nameset, filterType)
+{
+    if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME)
+        return nameset.splice();
+    else {
+        var keep = (filterType == Xflow.DataNode.FILTER_TYPE.KEEP);
+        var result = [];
+        for(var i in nameset){
+            var idx = this._names.indexOf(nameset[i]);
+            if( (keep && idx!= -1) || (!keep && idx == -1) )
+                result.push(nameset[i]);
+        }
+        return result;
+    }
+}
+NameMapping.prototype.filterNameset = function(nameset, filterType)
+{
+
+}
+
+OrderMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType){
+    for(var i in sourceMap){
+        var idx = this._names.indexOf(i);
+        if(filterType == Xflow.DataEntry.FILTER_TYPE.RENAME ||
+           ( filterType == Xflow.DataEntry.FILTER_TYPE.KEEP && idx != -1) ||
+            (filterType == Xflow.DataEntry.FILTER_TYPE.REMOVE && idx == -1))
+            destMap[i] = sourceMap[i];
+    }
+}
+NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType){
+    var tmp = {};
+    if(filterType == Xflow.DataEntry.FILTER_TYPE.REMOVE){
+        for(var i in sourceMap)
+            tmp[i] = sourceMap[i];
+        for(var i in this._mappedNames){
+            delete tmp[this._mappedNames[i]];
+        }
+    }
+    else{
+        for(var destName in this._mappedNames){
+            tmp[destName] = sourceMap[this._mappedNames[destName]]
+        }
+        if(filterType == Xflow.DataEntry.FILTER_TYPE.KEEP){
+            for(var i in sourceMap)
+                tmp[i] = tmp[i] || sourceMap[i];
+        }
+    }
+    for(var i in tmp)
+        destMap[i] = tmp[i];
+}
 
 })();

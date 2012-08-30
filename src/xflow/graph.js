@@ -93,7 +93,9 @@ Object.defineProperty(InputNode.prototype, "param", {
 Object.defineProperty(InputNode.prototype, "data", {
     /** @param {Object} v */
     set: function(v){
+        if(this._data) this._data.removeListener(this);
         this._data = v;
+        if(this._data) this._data.addListener(this);
         notifyParentsOnChanged(this, XflowModification.DATA_CHANGED, this._name);
     },
     /** @return {Object} */
@@ -121,6 +123,9 @@ var DataNode = function(graph){
     this._computeOutputMapping = new Xflow.OrderMapping(this);
 
     this._state = XflowModification.NONE;
+
+    this._initCompute();
+    this._requests = [];
 };
 XML3D.createClass(DataNode, Xflow.DataNode);
 Xflow.DataNode = DataNode;
@@ -354,13 +359,16 @@ DataNode.prototype.notify = function(changeType, name){
     {
         this._state = changeType;
         notifyParentsOnChanged(this, changeType, name);
+        this._updateComputeCache(changeType);
+        for(var i in this._requests)
+            this._requests[i].notify(Xflow.RequestNotification.CHANGED_STRUCTURE);
     }
-    else if(changeType == XflowModification.DATA_CHANGED && this._state <= changeType){
+    else if(changeType == XflowModification.DATA_CHANGED && this._state < changeType){
         this._state = changeType;
-        if(this._state < changeType){
-            notifyParentsOnChanged(this, changeType, name);
-        }
-
+        notifyParentsOnChanged(this, changeType, name);
+        this._updateComputeCache(changeType);
+        for(var i in this._requests)
+            this._requests[i].notify(Xflow.RequestNotification.CHANGED_STRUCTURE);
     }
 };
 

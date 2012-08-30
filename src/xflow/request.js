@@ -13,10 +13,12 @@ Xflow.RequestNotification = {
  * @param {Xflow.DataNode} dataNode
  * @param {Array.<string>} filter
  */
-var Request = function(dataNode, filter){
+var Request = function(dataNode, filter, callback){
     this._dataNode = dataNode;
-    this._filter = filter;
-    this._listeners = [];
+    this._filter = filter.slice().sort();
+    this._listener = callback;
+
+    this._dataNode._requests.push(this);
 };
 Xflow.Request = Request;
 
@@ -35,16 +37,11 @@ Object.defineProperty(Request.prototype, "filter", {
 });
 
 /**
- * @param {function(Xflow.Request, Xflow.RequestNotification)} callback
+ * Call this function, whenever the request is not required anymore.
  */
-Request.prototype.addListener = function(callback){
-    this._listeners.push(callback)
-};
-/**
- * @param {function(Xflow.DataEntry, Xflow.RequestNotification)} callback
- */
-Request.prototype.removeListener = function(callback){
-    Array.erase(this._listeners, callback);
+Request.prototype.clear() = function(callback){
+    this._listener = null;
+    Array.erase(this._dataNode._requests, callback);
 };
 
 /**
@@ -52,10 +49,15 @@ Request.prototype.removeListener = function(callback){
  * @param {Xflow.RequestNotification} notification
  */
 function notifyListeners(request, notification){
-    for(var i = 0; i < request._listeners.length; ++i){
-        request._listeners[i](request, notification)
-    }
+    request._listener(request, notification)
 };
+
+/**
+ * @param {Xflow.RequestNotification} notification
+ */
+Request.prototype.notify = function(notification){
+    notifyListeners(this, notification);
+}
 
 /**
  * @constructor
@@ -63,14 +65,14 @@ function notifyListeners(request, notification){
  * @param {Xflow.DataNode} dataNode
  * @param {Array.<string>} filter
  */
-var ComputeRequest = function(dataNode, filter){
-    Xflow.Request.call(this, dataNode, filter);
+var ComputeRequest = function(dataNode, filter, callback){
+    Xflow.Request.call(this, dataNode, filter, callback);
 };
 XML3D.createClass(ComputeRequest, Xflow.Request);
 Xflow.ComputeRequest = ComputeRequest;
 
 ComputeRequest.prototype.getResult = function(){
-    return this._dataNode._getOutputs(this.filter);
+    return this._dataNode._getComputeResult(this._filter);
 }
 
 })();

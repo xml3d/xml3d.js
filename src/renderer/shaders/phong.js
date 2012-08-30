@@ -42,7 +42,7 @@ XML3D.shaders.register("phong", {
         "uniform vec3 specularColor;",
         "uniform float transparency;",
         "uniform mat4 viewMatrix;",
-        "uniform bool useVertexColors;",
+        "uniform bool useVertexColor;",
 
         "#if HAS_DIFFUSETEXTURE",
         "uniform sampler2D diffuseTexture;",
@@ -70,7 +70,7 @@ XML3D.shaders.register("phong", {
         "void main(void) {",
         "  float alpha =  max(0.0, 1.0 - transparency);",
         "  vec3 objDiffuse = diffuseColor;",
-        "  if(useVertexColors)",
+        "  if(useVertexColor)",
         "    objDiffuse *= fragVertexColor;",
         "  #if HAS_DIFFUSETEXTURE",
         "    vec4 texDiffuse = texture2D(diffuseTexture, fragTexCoord);",
@@ -123,6 +123,7 @@ XML3D.shaders.register("phong", {
         specularColor   : [1.0, 1.0, 1.0],
         transparency    : 0.0,
         shininess       : 0.5,
-        ambientIntensity: 0.0
+        ambientIntensity: 0.0,
+        useVertexColor : false
     }
 });

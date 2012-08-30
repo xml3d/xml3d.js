@@ -61,8 +61,6 @@
         this.createDefaultShaders();
     };
 
-
-
     /**
      * @param {Array!} directives
      * @param {string!} source
@@ -77,15 +75,27 @@
     };
 
     XML3DShaderManager.prototype.createDefaultShaders = function() {
-        // Always create a default flat shader as a fallback for error handling
-        var fallbackShader = this.getStandardShaderProgram("matte");
-        fallbackShader.hasTransparency = false;
+        this.createFallbackShader();
+        this.createPickingShader();
+    };
+
+    /**
+     * Always create a default flat shader as a fallback for error handling
+     */
+    XML3DShaderManager.prototype.createFallbackShader = function() {
+        var desc = XML3D.shaders.getScript("matte");
+        var mat = this.createMaterialFromShaderDescriptor(desc);
+        var fallbackShader = mat.getProgram();
         this.bindShader(fallbackShader);
         this.setUniform(fallbackShader.uniforms["diffuseColor"], [ 1, 0, 0 ]);
         this.unbindShader(fallbackShader);
         this.shaders["defaultShader"] = fallbackShader;
+    };
 
-        // Create picking shaders
+    /**
+     * Create picking shaders
+     */
+    XML3DShaderManager.prototype.createPickingShader = function() {
         this.shaders["pickobjectid"] = this.getStandardShaderProgram("pickobjectid");
         this.shaders["pickedposition"] = this.getStandardShaderProgram("pickedposition");
         this.shaders["pickedNormals"] = this.getStandardShaderProgram("pickedNormals");
@@ -119,7 +129,6 @@
         if (shader)
             return shaderId;
 
-
         var scriptURI = new XML3D.URI(shaderNode.script);
         if (scriptURI.scheme != "urn") {
             return "defaultShader";
@@ -127,7 +136,7 @@
 
         var descriptor = XML3DShaderManager.getShaderDescriptor(scriptURI.path);
         var material = this.createMaterialFromShaderDescriptor(descriptor);
-        dataTable = shaderAdapter.requestData(Object.keys(material.getUniforms()));
+        dataTable = shaderAdapter.requestData(material.getRequestFields());
 
         shader = material.getProgram(lights, dataTable);
         this.shaders[shaderId] = shader;

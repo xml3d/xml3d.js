@@ -100,41 +100,42 @@ module("Xflow tests", {
 
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
-        var adapterOutputs = dataAdapter.getOutputs();
+        var adapterOutputs = dataAdapter.getComputeRequest().getResult();
 
-        if (!adapterOutputs[property]) {
+        var actualData = adapterOutputs.getOutputData(property);
+        if (!actualData) {
             ok(false, "Property "+property+" does not exist");
             return;
         }
-        var actualData = adapterOutputs[property].getValue();
-        QUnit.closeArray(actualData, shouldMatch, EPSILON, shouldMatchName+" in "+have.id+" matches reference data");
+
+        QUnit.closeArray(actualData.getValue(), shouldMatch, EPSILON, shouldMatchName+" in "+have.id+" matches reference data");
     },
 
     MatchNull : function (have, action) {
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
-        var adapterOutputs = dataAdapter.getOutputs();
+        var adapterOutputs = dataAdapter.getComputeRequest().getResult();
 
         var property = action.getAttribute("name");
 
-        ok(!(adapterOutputs[property]), "Parameter "+property+" does not exist");
+        ok(!adapterOutputs.getOutputData(property), "Parameter "+property+" does not exist");
     },
 
     MatchData : function(have, action) {
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
-        var adapterOutputs = dataAdapter.getOutputs();
+        var adapterOutputs = dataAdapter.getComputeRequest().getResult();
 
         var property = action.getAttribute("name");
 
-        if (!adapterOutputs[property]) {
+        var actualData = adapterOutputs.getOutputData(property);
+        if (!actualData) {
             ok(false, "Property "+property+" does not exist");
             return;
         }
-        var actualData = adapterOutputs[property].getValue();
         var shouldMatch = this.formatData(action.textContent, action.getAttribute("type"));
 
-        QUnit.closeArray(actualData, shouldMatch, EPSILON, property+" in "+have.id+" matches expected data");
+        QUnit.closeArray(actualData.getValue(), shouldMatch, EPSILON, property+" in "+have.id+" matches expected data");
 
     },
 

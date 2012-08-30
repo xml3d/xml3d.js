@@ -50,14 +50,32 @@
         this.dataFactory = dataFactory;
         this.factory = factory;
 
+        this.shaderCache = {
+            fragment : {},
+            vertex : {}
+        };
+
         this.currentProgram = null;
         this.shaders = {};
 
         this.createDefaultShaders();
     };
 
+    /**
+     * @param {Array!} directives
+     * @param {string!} source
+     * @returns {string}
+     */
+    XML3DShaderManager.addDirectivesToSource = function(directives, source) {
+        var fragment = "";
+        Array.forEach(directives, function(v) {
+            fragment += "#define " + v + "\n";
+        });
+        return fragment + "\n" + source;
+    };
+
     XML3DShaderManager.prototype.createDefaultShaders = function() {
-     // Always create a default flat shader as a fallback for error handling
+        // Always create a default flat shader as a fallback for error handling
         var fallbackShader = this.getStandardShaderProgram("matte");
         fallbackShader.hasTransparency = false;
         this.bindShader(fallbackShader);
@@ -71,6 +89,12 @@
         this.shaders["pickedNormals"] = this.getStandardShaderProgram("pickedNormals");
     };
 
+    /**
+     *
+     * @param shaderAdapter
+     * @param lights
+     * @returns {String}
+     */
     XML3DShaderManager.prototype.createShader = function(shaderAdapter, lights) {
         // This method is 'suboptimal', but will be replaced with the new
         // modular shader system
@@ -107,7 +131,7 @@
             var scriptURL = shaderNode.getAttribute("script");
             if (new XML3D.URI(scriptURL).scheme == "urn") {
                 // Internal shader
-                var sources = this.getStandardShaderSource(scriptURL, shaderAdapter, lights, flags);
+                var sources = XML3DShaderManager.getStandardShaderSource(scriptURL, lights, flags);
                 shader = this.createShaderFromSources(sources);
             } else {
                 // User-provided shader
@@ -148,7 +172,14 @@
         return shaderId;
     };
 
-    XML3DShaderManager.prototype.getStandardShaderSource = function(scriptURL, shaderAdapter, lights, flags) {
+    /**
+     *
+     * @param scriptURL
+     * @param lights
+     * @param flags
+     * @returns {{ vertex: string, fragment : string }}
+     */
+    XML3DShaderManager.getStandardShaderSource = function(scriptURL, lights, flags) {
         // Need to check for textures to decide which internal shader to use
         var sources = {
             vertex : null,
@@ -157,33 +188,37 @@
         var shaderName = scriptURL.substring(scriptURL.lastIndexOf(':') + 1);
 
         // Need to check for textures to decide which internal shader to use
-        if (flags.hasTextures && (shaderName == "phong" || shaderName == "diffuse"))
+        if (flags.hasTextures && shaderName == "diffuse")
             shaderName = "textured" + shaderName;
 
-        if (flags.hasVColors)
+        if (flags.hasVColors && shaderName == "diffuse")
             shaderName += "vcolor";
 
+        var shaderDescription = XML3D.shaders.getScript(shaderName);
+        var directives = [];
         switch (shaderName) {
-        case "phong":
-        case "texturedphong":
-        case "phongvcolor":
         case "diffuse":
         case "textureddiffuse":
         case "diffusevcolor":
         case "normal":
         case "reflection":
-            // Workaround for lack of dynamic loops on ATI cards below the HD
-            // 5000 line
-            var template = XML3D.shaders.getScript(shaderName);
             var maxLights = "";
             maxLights += "#define MAX_POINTLIGHTS " + lights.point.length.toString() + "\n";
             maxLights += "#define MAX_DIRECTIONALLIGHTS " + lights.directional.length.toString() + "\n";
-            sources.vertex = maxLights + template.vertex;
-            sources.fragment = maxLights + template.fragment;
-            sources.uniforms = template.uniforms;
+            sources.vertex = maxLights + shaderDescription.vertex;
+            sources.fragment = maxLights + shaderDescription.fragment;
+            sources.uniforms = shaderDescription.uniforms;
             break;
         default:
-            sources = XML3D.shaders.getScript(shaderName);
+            if (shaderDescription.addDirectives) {
+                shaderDescription.addDirectives.call(shaderDescription, directives, lights);
+                sources.fragment = XML3DShaderManager.addDirectivesToSource(directives, shaderDescription.fragment);
+                sources.vertex = XML3DShaderManager.addDirectivesToSource(directives, shaderDescription.vertex);
+            } else {
+                sources.fragment = shaderDescription.fragment;
+                sources.vertex = shaderDescription.vertex;
+            }
+            sources.uniforms = shaderDescription.uniforms || [];
         }
         return sources;
     };
@@ -202,6 +237,11 @@
         return shaderProgram;
     };
 
+    /**
+     *
+     * @param {{fragment: string, vertex: string}!} sources
+     * @returns
+     */
     XML3DShaderManager.prototype.createShaderFromSources = function(sources) {
         var gl = this.gl;
 
@@ -209,19 +249,25 @@
             return this.shaders["defaultShader"];
         }
 
-        var prg = gl.createProgram();
+        var sc = this.shaderCache;
+        var vertexShader = sc.vertex[sources.vertex];
+        if(!vertexShader) {
+            vertexShader = sc.vertex[sources.vertex] = this.compileShader(gl.VERTEX_SHADER, sources.vertex);
+        }
+        var fragmentShader = sc.fragment[sources.fragment];
+        if(!fragmentShader) {
+            fragmentShader = sc.fragment[sources.fragment] = this.compileShader(gl.FRAGMENT_SHADER, sources.fragment);
+        }
 
-        var vShader = this.compileShader(gl.VERTEX_SHADER, sources.vertex);
-        var fShader = this.compileShader(gl.FRAGMENT_SHADER, sources.fragment);
-
-        if (vShader === null || fShader === null) {
+        if (!vertexShader || !fragmentShader) {
             // Use a default flat shader instead
             return this.shaders["defaultShader"];
         }
+        var prg = gl.createProgram();
 
         // Link shader program
-        gl.attachShader(prg, vShader);
-        gl.attachShader(prg, fShader);
+        gl.attachShader(prg, vertexShader);
+        gl.attachShader(prg, fragmentShader);
         gl.linkProgram(prg);
 
         if (gl.getProgramParameter(prg, gl.LINK_STATUS) == 0) {
@@ -617,8 +663,8 @@
             canvas.height = this.nextHighestPowerOfTwo(image.height);
             var ctx = canvas.getContext("2d");
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height); // stretch
-                                                                        // to
-                                                                        // fit
+            // to
+            // fit
             // ctx.drawImage(image, 0, 0, image.width, image.height); //centered
             // with transparent padding around edges
             image = canvas;

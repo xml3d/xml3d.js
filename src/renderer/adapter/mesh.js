@@ -2,32 +2,41 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 //Adapter for <mesh>
 (function() {
-	var eventTypes = {onclick:1, ondblclick:1,
-			ondrop:1, ondragenter:1, ondragleave:1};
+    var eventTypes = {onclick:1, ondblclick:1,
+            ondrop:1, ondragenter:1, ondragleave:1};
 
     var noDrawableObject = function() {
         XML3D.debug.logError("Mesh adapter has no callback to its mesh object!");
     },
+    /**
+     * @type WebGLRenderingContext
+     * @private
+     */
     rc = window.WebGLRenderingContext;
 
     var staticAttributes = ["index", "position", "normal", "color", "texcoord", "size", "tangent"];
 
+    /**
+     * @constructor
+     */
     var XML3DMeshRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
 
         this.processListeners();
         this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
-        //this.dataAdapter.registerConsumer(this);
         this.parentVisible = true;
-        this.table = new XML3D.data.ProcessTable(this, staticAttributes, this.dataChanged);
         this.getMyDrawableObject = noDrawableObject;
-        this.needsInit = true;
+
+        this.computeRequest = null;
     };
 
     XML3D.createClass(XML3DMeshRenderAdapter, XML3D.webgl.RenderAdapter);
 
     var p = XML3DMeshRenderAdapter.prototype;
 
+    /**
+     *
+     */
     p.processListeners  = function() {
         var attributes = this.node.attributes;
         for (var index in attributes) {
@@ -43,11 +52,17 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         }
     };
 
+    /**
+     * @param {Function} callback
+     */
     p.registerCallback = function(callback) {
         if (callback instanceof Function)
             this.getMyDrawableObject = callback;
     };
 
+    /**
+     * @param {XML3D.events.Notification} evt
+     */
     p.notifyChanged = function(evt) {
         if (evt.type == 0)
             // Node insertion is handled by the CanvasRenderAdapter
@@ -76,7 +91,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 break;
 
             case "src":
-                this.dispose(evt);
                 this.createMesh();
                 break;
 
@@ -92,11 +106,150 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     };
 
-    p.notifyDataChanged = function(evt) {
-         //TODO: fix object form
-        //this.passChangeToObject(evt);
+    /**
+     * @param {WebGLRenderingContext} gl
+     * @param {number} type
+     * @param {Object} data
+     */
+    var createBuffer = function(gl, type, data) {
+        var buffer = gl.createBuffer();
+        gl.bindBuffer(type, buffer);
+        gl.bufferData(type, data, gl.STATIC_DRAW);
+        buffer.length = data.length;
+        buffer.glType = getGLTypeFromArray(data);
+        return buffer;
     };
 
+    /**
+     *
+     */
+    p.createMesh = function() {
+        var that = this;
+        this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes,
+                new function(request, changeType) {
+                    that.updateData.call(that, request, changeType);
+        });
+        var dataTable = this.computeRequest.getResult();
+        for (var attr in staticAttributes) {
+            var dataEntry = dataTable.getOutputData(attr);
+            dataEntry.webglDataChanged = Xflow.DataNotifications.CHANGE_SIZE;
+        }
+    };
+
+    var emptyFunction = function() {};
+
+    /**
+     * @param {string} type
+     */
+    function createMeshInfo(type) {
+        return {
+            vbos : {},
+            isIndexed: false,
+            glType: getGLTypeFromString(type),
+            bbox : new window.XML3DBox(),
+            update : emptyFunction
+        };
+    }
+
+    /**
+     * @param {Xflow.data.Request} request
+     * @param {Xflow.RequestNotification} changeType
+     */
+    p.dataChanged = function(request, changeType) {
+        var obj = this.getMyDrawableObject();
+        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
+        if (obj.mesh.update === emptyFunction) {
+            var that = this;
+            obj.mesh.update = function() {
+                that.updateData.call(that, obj);
+                obj.mesh.update = emptyFunction;
+            };
+            this.factory.renderer.requestRedraw("Mesh data changed.", false);
+        };
+    };
+
+    /**
+     * @param {Renderer.drawableObject} obj
+     */
+    p.updateData = function(obj) {
+        var gl = this.factory.renderer.gl;
+
+        var calculateBBox = false;
+        var meshInfo = obj.mesh || createMeshInfo(this.node.type);
+
+        var dataResult =  this.computeRequest.getResult();
+
+        if (!(dataResult.getOutputData("position"))) {
+            XML3D.debug.logError("Mesh " + this.node.id + " has no data for required attribute 'position'.");
+            obj.mesh.valid = false;
+            return;
+        }
+        for ( var attr in staticAttributes) {
+            var entry = dataResult.getOutputData(attr);
+            if (!(entry && entry.webglDataChanged))
+                continue;
+
+            switch(entry.webglDataChanged) {
+            case Xflow.DataNotifications.CHANGED_CONTENT:
+                var buffer = entry.data.buffer;
+                var bufferType = attr == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+
+                gl.bindBuffer(bufferType, buffer);
+                gl.bufferSubData(bufferType, 0, entry.value);
+                break;
+            case Xflow.DataNotifications.CHANGE_SIZE:
+                var buffer;
+                if (attr == "index") {
+                    buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.value));
+                    meshInfo.isIndexed = true;
+                } else {
+                    buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.value);
+                }
+                buffer.tupleSize = entry.getTupleSize();
+                meshInfo.vbos[attr] = [];
+                meshInfo.vbos[attr][0] = buffer;
+                break;
+             default:
+                 break;
+            }
+            //TODO: must set isIndexed if indices are removed
+            if (attr == "position")
+                calculateBBox = true;
+
+            delete entry.webglDataChanged;
+        }
+
+        //Calculate a bounding box for the mesh
+        if (calculateBBox) {
+            var positions = dataResult.getOutputData("position").value;
+            if (positions.data)
+                positions = positions.data;
+            this.bbox = XML3D.webgl.calculateBoundingBox(positions, meshInfo.isIndexed ? dataResult.getOutputData("index") : null);
+            meshInfo.bbox.set(this.bbox);
+        }
+
+        meshInfo.valid = true;
+        obj.mesh = meshInfo;
+    };
+
+    /**
+     *
+     */
+    p.destroy = function() {
+        if (this.getMyDrawableObject == noDrawableObject) {
+            return; //This mesh either has no GL data or was already deleted
+        }
+        this.dataChanged();
+        this.factory.renderer.removeDrawableObject(this.getMyDrawableObject());
+        this.getMyDrawableObject = noDrawableObject;
+    };
+
+    /**
+     * @return {XML3DBox}
+     */
+    p.getBoundingBox = function() {
+        return this.bbox;
+    };
 
     var getGLTypeFromArray = function(array) {
         if (array instanceof Int8Array)
@@ -116,6 +269,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         return rc.FLOAT;
     };
 
+    /**
+     * @param {string} typeName
+     */
     function getGLTypeFromString(typeName) {
         if (typeName && typeName.toLowerCase)
             typeName = typeName.toLowerCase();
@@ -134,169 +290,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             return rc.TRIANGLES;
         }
     };
-
-    var createBuffer = function(gl, type, data) {
-        var buffer = gl.createBuffer();
-        gl.bindBuffer(type, buffer);
-        gl.bufferData(type, data, gl.STATIC_DRAW);
-        buffer.length = data.length;
-        buffer.glType = getGLTypeFromArray(data);
-        return buffer;
-    };
-
-    p.createMesh = function() {
-        this.dataAdapter.requestData(this.table);
-    };
-
-    function check(entry) {
-        return !!(entry && entry.getValue());
-    }
-
-    var emptyFunction = function() {};
-
-    function createMeshInfo(type) {
-        return {
-            vbos : {},
-            isIndexed: false,
-            glType: getGLTypeFromString(type),
-            bbox : new window.XML3DBox(),
-            update : emptyFunction
-        };
-    }
-
-    p.dataChanged = function(dataTable) {
-        var obj = this.getMyDrawableObject();
-        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
-        if (obj.mesh.update === emptyFunction) {
-            var that = this;
-            obj.mesh.update = function() {
-                that.updateData.call(that, obj);
-                obj.mesh.update = emptyFunction;
-            };
-            this.factory.renderer.requestRedraw("Mesh data changed.", false);
-        };
-    };
-
-    p.updateData = function(obj) {
-        var init = this.needsInit;
-        var gl = this.factory.renderer.gl;
-
-        var foundValidPositions = false;
-
-        var meshInfo = obj.mesh || createMeshInfo(this.node.type);
-
-        var dataTable =  this.table.providers;
-        for ( var attr in dataTable) {
-            var entry = dataTable[attr];
-
-            if(!(entry.dirty || init))
-                continue;
-
-            //console.log(attr);
-            var v = null;
-            switch(attr) {
-                case "index":
-                    var indexBuffer = entry.data.buffer;
-                    v = entry.getValue();
-                    if (!indexBuffer) {
-                        indexBuffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(v));
-                        indexBuffer.tupleSize = entry.getTupleSize();
-                        entry.data.buffer = indexBuffer;
-                    } else if (entry.dirty){
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-                        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, v, gl.DYNAMIC_DRAW);
-                    }
-                    meshInfo.vbos.index = [];
-                    meshInfo.vbos.index[0] = indexBuffer;
-                    meshInfo.isIndexed = true;
-                    break;
-                case "position":
-                    foundValidPositions = check(dataTable.position);
-                    // Fallthrough
-                default:
-                    var attrBuffer = entry.data.buffer;
-                    v = entry.getValue();
-                    if(!v)
-                        continue;
-                    if (!attrBuffer) {
-                        attrBuffer = v.data ? createBuffer(gl, gl.ARRAY_BUFFER, v.data) : createBuffer(gl, gl.ARRAY_BUFFER, v);
-                        attrBuffer.tupleSize = entry.getTupleSize();
-                        entry.data.buffer = attrBuffer;
-                    } else {
-                        if (v.data)
-                            v = v.data;
-                        gl.bindBuffer(gl.ARRAY_BUFFER, attrBuffer);
-                        gl.bufferData(gl.ARRAY_BUFFER, v, gl.DYNAMIC_DRAW);
-                    }
-                    // Set it in everycase, because buffer might be created by other mesh consumer
-                    meshInfo.vbos[attr] = [];
-                    meshInfo.vbos[attr][0] = attrBuffer;
-                }
-        }
-
-        if(init && !foundValidPositions) {
-            XML3D.debug.logError("Mesh " + this.node.id + " has no data for required attribute 'position'.");
-            obj.mesh.valid = false;
-            return;
-        } else if(foundValidPositions) {
-            // We have positons, let's calc a bounding box
-            var positions = dataTable.position.getValue();
-            if (positions.data)
-                positions = positions.data;
-            this.bbox = this.bbox || XML3D.webgl.calculateBoundingBox(positions,dataTable.index ? dataTable.index.getValue() : null);
-            meshInfo.bbox.set(this.bbox);
-        }
-
-        this.needsInit = false;
-        meshInfo.valid = true;
-        obj.mesh = meshInfo;
-
-    };
-
-    // Disposes of all GL buffers but does not destroy the mesh
-    p.dispose = function(gl) {
-        if (!gl)
-            gl = this.factory.renderer.gl;
-        var myObject = this.getMyDrawableObject();
-        var vbos = myObject.mesh.vbos;
-
-        for (var vbo in vbos) {
-            var buffer = vbos[vbo];
-            for (var i = 0; i < buffer.length; i++) {
-                gl.deleteBuffer(buffer[i]);
-            }
-        }
-        this.needsInit = true;
-
-        //Remove buffers from data table so they'll be re-created if this mesh is
-        //re-added later
-        //TODO: Maybe just destroy the entire adapter object externally?
-        var dataTable =  this.table.providers;
-        for ( var attr in dataTable) {
-            delete dataTable[attr].data.buffer;
-        }
-        myObject.mesh.valid = false;
-    };
-
-    // Disposes of all GL buffers and destroys the mesh (along with its DrawableObject)
-    // This should only be called if the mesh node is removed from the scene tree
-    p.destroy = function(gl) {
-        if (!gl)
-            gl = this.factory.renderer.gl;
-        if (this.getMyDrawableObject == noDrawableObject) {
-            return; //This mesh either has no GL data or was already deleted
-        }
-        this.dispose(gl);
-        this.factory.renderer.removeDrawableObject(this.getMyDrawableObject());
-        this.getMyDrawableObject = noDrawableObject;
-    };
-
-    p.getBoundingBox = function() {
-        return this.bbox;
-    };
-
-
-
 
     // Export to XML3D.webgl namespace
     XML3D.webgl.XML3DMeshRenderAdapter = XML3DMeshRenderAdapter;

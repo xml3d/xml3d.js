@@ -110,6 +110,36 @@ Object.defineProperty(BufferEntry.prototype, "value", {
     get: function(){ return this._value; }
 });
 
+BufferEntry.prototype.getTupleSize = function() {
+   if (!this._tupleSize) {
+       var t = DataEntry.TYPE;
+       switch (this._type) {
+       case t.FLOAT:
+       case t.INT:
+       case t.BOOL:
+           this._tupleSize = 1;
+           break;
+       case t.FLOAT2:
+           this._tupleSize = 2;
+           break;
+       case t.FLOAT3:
+           this._tupleSize = 3;
+           break;
+       case t.FLOAT4:
+       case t.INT4:
+           this._tupleSize = 4;
+           break;
+       case t.FLOAT4x4:
+           this._tupleSize = 16;
+           break;
+       default:
+           XML3D.debug.logError("Encountered invalid type: "+this._type);
+           this._tupleSize = 1;
+       }
+   }
+   return this._tupleSize;
+};
+
 var DataChangeNotifier = {
     _listeners: []
 }

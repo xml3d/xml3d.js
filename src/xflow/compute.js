@@ -16,13 +16,11 @@ function getForwardNode(dataNode){
 DataNode.prototype._initCompute = function(){
     this._results = [];
     this._dataMap = {};
-    this._dirty = true;
 }
 
 DataNode.prototype._updateComputeCache = function(state){
     this._results = [];
     this._dataMap = {};
-    this._dirty = true;
 }
 
 DataNode.prototype._getComputeResult = function(filter){
@@ -30,7 +28,7 @@ DataNode.prototype._getComputeResult = function(filter){
     if(forwardNode)
         return forwardNode._getComputeResult(filter);
 
-    var key = filter.join(";");
+    var key = filter ? filter.join(";") : "[null]";
     if(this._results[key])
         return this._results[key];
     var result =  this._createComputeResult(filter)
@@ -44,7 +42,7 @@ DataNode.prototype._createComputeResult = function(filter){
     this._populateDataMap();
 
     for(var i in this._dataMap){
-        if(filter.indexOf(i) != -1){
+        if(!filter || filter.indexOf(i) != -1){
             result._outputNames.push(i);
             result._dataEntries[i] = this._dataMap[i];
         }
@@ -52,8 +50,8 @@ DataNode.prototype._createComputeResult = function(filter){
     return result;
 }
 DataNode.prototype._populateDataMap = function(){
-    if(!this._dirty) return;
-    this._dirty = false;
+    if(this._state == XflowModification.NONE) return;
+    this._state = XflowModification.NONE;
 
     // Prepare input:
     var inputMap = {};

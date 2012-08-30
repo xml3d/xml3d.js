@@ -15,7 +15,7 @@ Xflow.RequestNotification = {
  */
 var Request = function(dataNode, filter, callback){
     this._dataNode = dataNode;
-    this._filter = filter.slice().sort();
+    this._filter = filter ? filter.slice().sort() : null;
     this._listener = callback;
 
     this._dataNode._requests.push(this);

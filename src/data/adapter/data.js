@@ -138,6 +138,7 @@ XML3D.data.DataAdapter.prototype.referredAdapterChanged = function(adapterHandle
     }
 };
 
+/*
 XML3D.data.DataAdapter.prototype.getInputs = function() {
     if (this.cachedInputs)
         return this.cachedInputs;
@@ -255,6 +256,7 @@ XML3D.data.DataAdapter.prototype.requestData = function(table) {
     this.rebuildStructure(table);
     return table.providers;
 };
+*/
 
 /**
  * @param handler

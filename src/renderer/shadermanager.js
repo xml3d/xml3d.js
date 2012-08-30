@@ -96,18 +96,13 @@
      * @returns {String}
      */
     XML3DShaderManager.prototype.createShader = function(shaderAdapter, lights) {
-        // This method is 'suboptimal', but will be replaced with the new
-        // modular shader system
-        var shader = null;
-        var shaderId = "defaultShader";
-        var shaderNode = null;
-
-        if (shaderAdapter) {
-            shaderNode = shaderAdapter.node;
-            shaderId = shaderNode.id;
+        if (!shaderAdapter || !shaderAdapter.node.script) {
+            return "defaultShader";
         }
 
-        shader = this.shaders[shaderId];
+        var shaderNode = shaderAdapter.node;
+        var shaderId = shaderNode.id;
+        var shader = this.shaders[shaderId];
 
         if (shader)
             return shaderId;
@@ -118,55 +113,44 @@
             hasVColors : false
         };
 
-        if (shaderAdapter) {
-            var dataTable = shaderAdapter.requestData([ "transparency", "diffuseTexture", "specularTexture", "normalTexture", "useVertexColor" ]);
-            if (dataTable.transparency) {
-                flags.hasTransparency = dataTable.transparency.value[0] > 0;
-            }
-            flags.hasTextures = dataTable.diffuseTexture !== undefined;
-            flags.hasVColors = dataTable.useVertexColor && dataTable.useVertexColor.value[0] == true;
+        var dataTable = shaderAdapter.requestData([ "transparency", "diffuseTexture", "specularTexture", "normalTexture", "useVertexColor" ]);
+        if (dataTable.transparency) {
+            flags.hasTransparency = dataTable.transparency.value[0] > 0;
         }
+        flags.hasTextures = dataTable.diffuseTexture !== undefined;
+        flags.hasVColors = dataTable.useVertexColor && dataTable.useVertexColor.value[0] == true;
 
-        if (shaderNode && shaderNode.hasAttribute("script")) {
-            var scriptURL = shaderNode.getAttribute("script");
-            if (new XML3D.URI(scriptURL).scheme == "urn") {
-                // Internal shader
-                var sources = XML3DShaderManager.getStandardShaderSource(scriptURL, lights, flags);
-                shader = this.createShaderFromSources(sources);
-            } else {
-                // User-provided shader
-                var sources = {};
-                var vsScript = XML3D.URIResolver.resolve(scriptURL + "-vs");
-                var fsScript = XML3D.URIResolver.resolve(scriptURL + "-fs");
-                if (vsScript && fsScript) {
-                    sources.vertex = vsScript.textContent;
-                    sources.fragment = fsScript.textContent;
-                }
-
-                shader = this.createShaderFromSources(sources);
-            }
-            shader.hasTransparency = flags.hasTransparency;
-            this.shaders[shaderId] = shader;
+        var scriptURI = new XML3D.URI(shaderNode.script);
+        if (scriptURI.scheme == "urn") {
+            // Internal shader
+            var sources = XML3DShaderManager.getStandardShaderSource(scriptURI.path, lights);
+            shader = this.createShaderFromSources(sources);
         } else {
-            // Create the default flat shader
-            shader = this.shaders["defaultShader"];
-            shaderId = "defaultShader";
-        }
-
-        if (shaderAdapter) {
-            var texturesCreated = this.createTextures(shader, shaderAdapter);
-            if (!texturesCreated) {
-                this.destroyShader(shader);
-                shaderId = "defaultShader";
-            } else {
-                // Set all uniform variables
-                var nameArray = [];
-                for ( var name in shader.uniforms) {
-                    nameArray.push(name);
-                }
-                var dataTable = shaderAdapter.requestData(nameArray);
-                this.setUniformVariables(shader, dataTable);
+            // User-provided shader
+            var sources = {};
+            var vsScript = XML3D.URIResolver.resolve(scriptURI.toString() + "-vs");
+            var fsScript = XML3D.URIResolver.resolve(scriptURI.toString() + "-fs");
+            if (vsScript && fsScript) {
+                sources.vertex = vsScript.textContent;
+                sources.fragment = fsScript.textContent;
             }
+            shader = this.createShaderFromSources(sources);
+        }
+        shader.hasTransparency = flags.hasTransparency;
+        this.shaders[shaderId] = shader;
+
+        var texturesCreated = this.createTextures(shader, shaderAdapter);
+        if (!texturesCreated) {
+            this.destroyShader(shader);
+            shaderId = "defaultShader";
+        } else {
+            // Set all uniform variables
+            var nameArray = [];
+            for ( var name in shader.uniforms) {
+                nameArray.push(name);
+            }
+            var dataTable = shaderAdapter.requestData(nameArray);
+            this.setUniformVariables(shader, dataTable);
         }
 
         return shaderId;
@@ -174,18 +158,17 @@
 
     /**
      *
-     * @param scriptURL
+     * @param {string} urnPath
      * @param lights
-     * @param flags
      * @returns {{ vertex: string, fragment : string }!}
      */
-    XML3DShaderManager.getStandardShaderSource = function(scriptURL, lights, flags) {
+    XML3DShaderManager.getStandardShaderSource = function(urnPath, lights) {
         // Need to check for textures to decide which internal shader to use
         var sources = {
             vertex : null,
             fragment : null
         };
-        var shaderName = scriptURL.substring(scriptURL.lastIndexOf(':') + 1);
+        var shaderName = urnPath.substring(urnPath.lastIndexOf(':') + 1);
 
         var shaderDescription = XML3D.shaders.getScript(shaderName);
         var directives = [];
@@ -230,11 +213,11 @@
 
         var sc = this.shaderCache;
         var vertexShader = sc.vertex[sources.vertex];
-        if(!vertexShader) {
+        if (!vertexShader) {
             vertexShader = sc.vertex[sources.vertex] = this.compileShader(gl.VERTEX_SHADER, sources.vertex);
         }
         var fragmentShader = sc.fragment[sources.fragment];
-        if(!fragmentShader) {
+        if (!fragmentShader) {
             fragmentShader = sc.fragment[sources.fragment] = this.compileShader(gl.FRAGMENT_SHADER, sources.fragment);
         }
 

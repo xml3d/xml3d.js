@@ -84,28 +84,6 @@
 		});
 	};
 
-	p.bindSamplers = function() {
-		var mustRebuildShader = false;
-
-		for (var name in this.textures) {
-			var tex = this.textures[name];
-			if (tex.adapter.node != null)
-				tex.adapter.bind(tex.info.texUnit);
-			else {
-				mustRebuildShader = true;
-				break;
-			}
-		}
-
-		//A texture must have been removed since the last render pass, so to be safe we should rebuild the shader
-		//to try to avoid missing sampler errors in GL
-		if (mustRebuildShader) {
-			delete this.textures[name];
-			this.destroy();
-			this.enable();
-		}
-	};
-
 	// Export to XML3D.webgl namespace
 	XML3D.webgl.XML3DShaderRenderAdapter = XML3DShaderRenderAdapter;
 

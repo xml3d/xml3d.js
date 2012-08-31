@@ -18,5 +18,5 @@ XML3D.webgl.DataChangeListener.prototype.dataEntryChanged = function(entry, noti
     entry.userData.webglDataChanged = notification;
 
     //TODO: Decide if we need a picking buffer redraw too
-    this.requestRedraw("Data changed", false);
+    //this.requestRedraw("Data changed", false);
 };

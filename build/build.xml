@@ -54,7 +54,8 @@
         <file name="data/adapter/factory.js" />
         <file name="data/adapter/json/factory.js" />
         <file name="renderer/base.js" />
-		<file name="renderer/canvashandler.js" />
+        <file name="renderer/datachangelistener.js" />
+        <file name="renderer/canvashandler.js" />
         <file name="renderer/utils.js" />
         <file name="renderer/shadermanager.js" />
         <file name="renderer/bufferhandler.js" />

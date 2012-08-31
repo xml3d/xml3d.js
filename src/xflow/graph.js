@@ -63,6 +63,12 @@ var InputNode = function(graph){
 XML3D.createClass(InputNode, Xflow.GraphNode);
 Xflow.InputNode = InputNode;
 
+InputNode.prototype.notify = function(newValue, notification) {
+    var downstreamNotification = notification == Xflow.DataNotifications.CHANGED_CONTENT ? XflowModification.DATA_CHANGED :
+                                                XflowModification.STRUCTURE_CHANGED;
+    notifyParentsOnChanged(this,downstreamNotification);
+};
+
 Object.defineProperty(InputNode.prototype, "name", {
     /** @param {string} v */
     set: function(v){
@@ -371,7 +377,7 @@ DataNode.prototype.notify = function(changeType, name){
         notifyParentsOnChanged(this, changeType, name);
         this._updateComputeCache(changeType);
         for(var i in this._requests)
-            this._requests[i].notify(Xflow.RequestNotification.CHANGED_STRUCTURE);
+            this._requests[i].notify(Xflow.RequestNotification.CHANGED_CONTENT);
     }
 };
 

@@ -7,6 +7,7 @@
 
 		this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
 		this.table = new XML3D.data.ProcessTable(this, [], this.dataChanged);
+		this.computeRequest;
 	};
 
 	XML3D.createClass(XML3DShaderRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -54,24 +55,27 @@
 	};
 
 	p.requestData = function(parameters) {
-	    return this.dataAdapter.getComputeRequest(parameters).getResult();
+	    if (!this.computeRequest) {
+    	    var that = this;
+            this.computeRequest = this.dataAdapter.getComputeRequest(null,
+                function(request, changeType) {
+                    that.notifyDataChanged.call(that, request, changeType);
+            });
+	    }
+	    return this.computeRequest.getResult();
 	};
 
-	p.notifyDataChanged = function(evt) {
-		if (!evt.wrapped)
-			return;
+	p.notifyDataChanged = function(request, changeType) {
+	   //TODO: adapt the change notification system to the new xflow
 
-		var targetName = evt.wrapped.currentTarget.name || evt.wrapped.relatedNode.name;
-
-		if (!targetName)
-			return; //Likely a change to a texture, this is handled through notifyChanged
-
+	    /*
 		var dataTable = this.requestData([targetName]);
 		var newValue = dataTable[targetName].value;
 		if (newValue.length < 2)
 			newValue = newValue[0];
 
 		this.renderer.shaderDataChanged(this.node.id, targetName, newValue);
+		*/
 	};
 
 	p.destroy = function() {

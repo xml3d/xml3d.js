@@ -215,7 +215,7 @@ DataChangeNotifier.removeListener = function(callback){
  */
 function notifyListeners(dataEntry, notification){
     for(var i = 0; i < dataEntry._listeners.length; ++i){
-        dataEntry._listeners[i](dataEntry, notification);
+        dataEntry._listeners[i].notify(dataEntry, notification);
     }
     for(var i = 0; i < DataChangeNotifier._listeners.length; ++i){
         DataChangeNotifier._listeners[i](dataEntry, notification);

@@ -52,7 +52,7 @@
         if(evt.type == XML3D.events.VALUE_MODIFIED){
             var attr = evt.wrapped.attrName;
             if(!attr){
-                this.xflowInputNode.value.setValue(this.node.value);
+                this.xflowInputNode.data.setValue(this.node.value);
             }
             else if(attr == "name"){
                 this.xflowInputNode.name = this.node.name;

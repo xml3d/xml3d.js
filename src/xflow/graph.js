@@ -298,7 +298,7 @@ DataNode.prototype.detachFromParents = function(){
 /**
  * @const
  */
-var filterParser = /^([A-Za-z]*)\(([^()]+)\)$/;
+var filterParser = /^([A-Za-z\s]*)\(([^()]+)\)$/;
 
 /**
  * Set filter by string
@@ -310,7 +310,7 @@ DataNode.prototype.setFilter = function(filterString){
     var newMapping = null;
     var result = filterString.trim().match(filterParser);
     if(result){
-        var type = ""+result[1];
+        var type = result[1].trim();
         switch(type){
             case "keep": newType = DataNode.FILTER_TYPE.KEEP; break;
             case "remove": newType = DataNode.FILTER_TYPE.REMOVE; break;
@@ -340,9 +340,9 @@ DataNode.prototype.setCompute = function(computeString){
     var inputMapping = null, outputMapping = null;
     var result = computeString.trim().match(computeParser);
     if(result){
-        var output = result[2].trim();
+        var output = result[2] ? result[2].trim() : "";
         newOperator = result[3].trim();
-        var input = result[4].trim();
+        var input = result[4] ? result[4].trim() : "";
         if(result = output.match(bracketsParser)){
             output = result[1];
         }

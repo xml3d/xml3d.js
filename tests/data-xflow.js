@@ -190,22 +190,22 @@ module("Xflow tests", {
 test("Test filter parsing", function() {
     var graph = new Xflow.Graph();
     var dataNode = graph.createDataNode();
-    dataNode.setFilter("keep(position, normal, tangent)");
     var mapping;
 
+    dataNode.setFilter("keep(position, normal, tangent)");
     strictEqual(dataNode.filterType, Xflow.DataNode.FILTER_TYPE.KEEP, "Filter Type is 'keep'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getName(0), "position", "First mapping name is 'position'");
     strictEqual(mapping.getName(1), "normal", "Second mapping name is 'normal'");
-    strictEqual(mapping.getName(2), "tangent", "First mapping name is 'tangent'");
+    strictEqual(mapping.getName(2), "tangent", "Third mapping name is 'tangent'");
 
-    dataNode.setFilter("remove(A, B)");
+    dataNode.setFilter("remove ( A , B )   ");
     strictEqual(dataNode.filterType, Xflow.DataNode.FILTER_TYPE.REMOVE, "Filter Type is 'remove'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getName(0), "A", "First mapping name is 'A'");
     strictEqual(mapping.getName(1), "B", "Second mapping name is 'B'");
 
-    dataNode.setFilter("rename({newA : oldA, newB: oldB, newC: oldB})");
+    dataNode.setFilter("rename ({newA : oldA , newB:oldB, newC: oldB})  ");
     strictEqual(dataNode.filterType, Xflow.DataNode.FILTER_TYPE.RENAME , "Filter Type is 'rename'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getDestName(0), "newA", "First destination name is 'newA'");
@@ -215,15 +215,63 @@ test("Test filter parsing", function() {
     strictEqual(mapping.getSrcName(1), "oldB", "Second source name is 'oldB'");
     strictEqual(mapping.getSrcName(2), "oldB", "Third source name is 'oldB'");
 
-    dataNode.setFilter("keep({DEST : A, DEST: B, DEST: C, C2: A})");
+    dataNode.setFilter("keep( {DEST : A, DEST :B , DEST: C , C2: A } ) ");
     strictEqual(dataNode.filterType, Xflow.DataNode.FILTER_TYPE.KEEP , "Filter Type is 'keep'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getDestName(0), "DEST", "First destination name is 'DEST'");
     strictEqual(mapping.getDestName(1), "C2", "Second destination name is 'C2'");
     strictEqual(mapping.getSrcName(0), "C", "First source name is 'C'");
     strictEqual(mapping.getSrcName(1), "A", "Second source name is 'A'");
-
 });
+
+
+test("Test compute parsing", function() {
+    var graph = new Xflow.Graph();
+    var dataNode = graph.createDataNode();
+    var mapping;
+
+    dataNode.setCompute("position = xflow.morph(position, posAdd, weight)");
+    strictEqual(dataNode.computeOperator, "xflow.morph", "Operator is 'xflow.morph'");
+    mapping = dataNode.computeInputMapping;
+    strictEqual(mapping.getName(0), "position", "First input mapping name is 'position'");
+    strictEqual(mapping.getName(1), "posAdd", "Second input mapping name is 'posAdd'");
+    strictEqual(mapping.getName(2), "weight", "Third input mapping name is 'weight'");
+    mapping = dataNode.computeOutputMapping;
+    strictEqual(mapping.getName(0), "position", "First output mapping name is 'position'");
+
+    dataNode.setCompute(" {index: index, norm: normal, pos: position } = xflow.createSphere (segments)  ");
+    strictEqual(dataNode.computeOperator, "xflow.createSphere", "Operator is 'xflow.createSphere'");
+    mapping = dataNode.computeInputMapping;
+    strictEqual(mapping.getName(0), "segments", "First input mapping name is 'segments'");
+    mapping = dataNode.computeOutputMapping;
+    strictEqual(mapping.getSrcName(0), "index", "First output mapping source name is 'index'");
+    strictEqual(mapping.getDestName(0), "index", "First output mapping destination name is 'index'");
+    strictEqual(mapping.getSrcName(1), "normal", "Second output mapping source name is 'normal'");
+    strictEqual(mapping.getDestName(1), "norm", "Second output mapping destination name is 'norm'");
+    strictEqual(mapping.getSrcName(2), "position", "Third output mapping source name is 'position'");
+    strictEqual(mapping.getDestName(2), "pos", "Third output mapping destination name is 'pos'");
+
+
+    dataNode.setCompute(" (index, norm, pos) = xflow.createPlane (segCount)  ");
+    strictEqual(dataNode.computeOperator, "xflow.createPlane", "Operator is 'xflow.createPlane'");
+    mapping = dataNode.computeInputMapping;
+    strictEqual(mapping.getName(0), "segCount", "First input mapping name is 'segCount'");
+    mapping = dataNode.computeOutputMapping;
+    strictEqual(mapping.getName(0), "index", "First output mapping name is 'index'");
+    strictEqual(mapping.getName(1), "norm", "Second output mapping name is 'norm'");
+    strictEqual(mapping.getName(2), "pos", "Third output mapping name is 'pos'");
+
+    dataNode.setCompute(" (transform) = xflow.createTransform ({rotation: rot, translation: trans})  ");
+    strictEqual(dataNode.computeOperator, "xflow.createTransform", "Operator is 'xflow.createTransform'");
+    mapping = dataNode.computeInputMapping;
+    strictEqual(mapping.getSrcName(0), "rot", "First input mapping source name is 'rot'");
+    strictEqual(mapping.getDestName(0), "rotation", "First input mapping destination name is 'rotation'");
+    strictEqual(mapping.getSrcName(1), "trans", "Second input mapping source name is 'trans'");
+    strictEqual(mapping.getDestName(1), "translation", "Second input mapping destination name is 'translation'");
+    mapping = dataNode.computeOutputMapping;
+    strictEqual(mapping.getName(0), "transform", "First output mapping name is 'transform'");
+});
+
 
 test("Very basic test", 4, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));

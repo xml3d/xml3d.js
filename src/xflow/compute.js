@@ -71,7 +71,8 @@ DataNode.prototype._populateDataMap = function(){
             }
         }
     }
-    // TODO: Apply script here:
+    this._applyOperator(inputMap);
+
     this._filterMapping.applyFilterOnMap(this._dataMap, inputMap, this._filterType);
 }
 

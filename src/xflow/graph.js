@@ -341,7 +341,7 @@ DataNode.prototype.setCompute = function(computeString){
     var result = computeString.trim().match(computeParser);
     if(result){
         var output = result[2].trim();
-        newOperator = result[3];
+        newOperator = result[3].trim();
         var input = result[4].trim();
         if(result = output.match(bracketsParser)){
             output = result[1];

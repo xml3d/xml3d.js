@@ -30,6 +30,7 @@
 	    <file name="xflow/base.js" />
         <file name="xflow/graph.js" />
         <file name="xflow/compute.js" />
+        <file name="xflow/operator.js" />
         <file name="xflow/data.js" />
         <file name="xflow/mapping.js" />
         <file name="xflow/request.js" />
@@ -75,23 +76,22 @@
 		<file name="renderer/shader/diffuse.js" />
 		<file name="renderer/shader/phong.js" />
 		<file name="renderer/shader/utility.js" />
-		<file name="data/scripts/base.js" />
-        <file name="data/scripts/morph3.js" />
-		<file name="data/scripts/merge3.js" />
-        <file name="data/scripts/sub3.js" />
-        <file name="data/scripts/normalize3.js" />
-        <file name="data/scripts/lerp3seq.js" />
-        <file name="data/scripts/slerpseq.js" />
-        <file name="data/scripts/createTransform.js" />
-        <file name="data/scripts/mul4x4.js" />
-        <file name="data/scripts/skinDirection.js" />
-        <file name="data/scripts/skinPosition.js" />
-		<file name="data/scripts/skinning.js" />
-        <file name="data/scripts/flattenBoneTransform.js" />
-        <file name="data/scripts/flipNormal.js" />
-		<file name="data/scripts/math.js" />
+        <file name="xflow/operator/morph3.js" />
+		<file name="xflow/operator/merge3.js" />
+        <file name="xflow/operator/sub3.js" />
+        <file name="xflow/operator/normalize3.js" />
+        <file name="xflow/operator/lerp3seq.js" />
+        <file name="xflow/operator/slerpseq.js" />
+        <file name="xflow/operator/createTransform.js" />
+        <file name="xflow/operator/mul4x4.js" />
+        <file name="xflow/operator/skinDirection.js" />
+        <file name="xflow/operator/skinPosition.js" />
+		<file name="xflow/operator/skinning.js" />
+        <file name="xflow/operator/flattenBoneTransform.js" />
+        <file name="xflow/operator/flipNormal.js" />
+		<file name="xflow/operator/math.js" />
 		<file name="contrib/perlin-noise-simplex.js" />
-        <file name="data/scripts/noiseImage.js" />
+        <file name="xflow/operator/noiseImage.js" />
 	</filelist>
 
 	<target name="lastTag" depends="init, windowsGit, linuxGit">

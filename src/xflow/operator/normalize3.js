@@ -1,13 +1,13 @@
-XML3D.xflow.register("normalize3", {
+Xflow.registerOperator("normalize", {
     outputs: [{name: 'result', tupleSize: '3'}],
     params:  ['value'],
     evaluate: function(value) {
         if(!value)
             throw "Xflow::normalize: Not input";
-        
+
         if (!this.tmp || this.tmp.length != value.length)
             this.tmp = new Float32Array(value.length);
-            
+
         var result = this.tmp;
         for(var i = 0; i<value.length/3; i++) {
             var offset = 3*i;

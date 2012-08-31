@@ -1,11 +1,11 @@
-XML3D.xflow.register("skinDirection", {
+Xflow.registerOperator("skinDirection", {
     outputs: [{name: 'result', tupleSize: '3'}],
     params:  ['dir','boneIdx','boneWeight','boneXform'],
     evaluate: function(dir,boneIdx,boneWeight,boneXform) {
         var count = dir.length / 3;
         if (!this.tmp || this.tmp.length != dir.length)
             this.tmp = new Float32Array(dir.length);
-            
+
         var result = this.tmp;
 
         var m = mat4.create();
@@ -40,24 +40,24 @@ XML3D.xflow.register("skinDirection", {
                 var r = [0,0,0];
                 var off4 = index*4;
                 var off3 = index*3;
-    
+
                 var x = direction[off3], y = direction[off3+1], z = direction[off3+2];
-                
+
                 for (var j=0; j < 4; j++) {
                     var weight = boneWeight[off4+j];
                     if (weight > 0) {
                         var mo = boneIndex[off4+j] * 16;
-                        
+
                         //Multiply dir with boneXform
                         r[0] += (boneXform[mo+0]*x + boneXform[mo+4]*y + boneXform[mo+8]*z) * weight;
-                        r[1] += (boneXform[mo+1]*x + boneXform[mo+5]*y + boneXform[mo+9]*z) * weight; 
+                        r[1] += (boneXform[mo+1]*x + boneXform[mo+5]*y + boneXform[mo+9]*z) * weight;
                         r[2] += (boneXform[mo+2]*x + boneXform[mo+6]*y + boneXform[mo+10]*z) * weight;
                     }
                 }
                 return r;
             };
         }
-        var numVertices = dir.length / 3;   
+        var numVertices = dir.length / 3;
         var result = new ParallelArray(
                 numVertices,
                 this.elementalFunc,
@@ -66,7 +66,7 @@ XML3D.xflow.register("skinDirection", {
                 boneWeight,
                 boneXform
         );
-        
+
         this.result.result = result;
         return true;
     }

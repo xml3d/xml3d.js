@@ -49,7 +49,8 @@ Request.prototype.clear = function(callback){
  * @param {Xflow.RequestNotification} notification
  */
 function notifyListeners(request, notification){
-    request._listener(request, notification)
+    if(request._listener)
+        request._listener(request, notification)
 };
 
 /**

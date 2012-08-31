@@ -216,6 +216,7 @@ test("Renaming nodes 3", 6, function() {
     this.executeTests(response);
  });
 
+/*
 test("Templates 1", 19, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/test_template1.xml", handler);
@@ -239,6 +240,7 @@ test("Templates 4", 5, function() {
     var response = this.loadTestXML("./xflow-xml/test_template4.xml", handler);
     this.executeTests(response);
  });
+*/
 
 test("Add/Remove script", 16, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));

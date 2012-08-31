@@ -15,7 +15,6 @@ Xflow.Mapping = Mapping;
  */
 var OrderMapping = function(owner){
     Xflow.Mapping.call(this, owner);
-    this._orderMapping = true;
     this._names = [];
 };
 XML3D.createClass(OrderMapping, Xflow.Mapping);
@@ -57,9 +56,9 @@ OrderMapping.prototype.isEmpty = function(){
  */
 var NameMapping = function(owner){
     Xflow.Mapping.call(this, owner);
-    this._nameMapping = true;
-    this._names = [];
-    this._mappedNames = {};
+    this._destNames = [];
+    this._srcNames = [];
+
 };
 XML3D.createClass(NameMapping, Xflow.Mapping);
 Xflow.NameMapping = NameMapping;
@@ -67,37 +66,46 @@ Xflow.NameMapping = NameMapping;
 Object.defineProperty(NameMapping.prototype, "length", {
     set: function(v){ throw "length is read-only";
     },
-    get: function(){ return this._name.length; }
+    get: function(){ return this._srcNames.length; }
 });
 
 NameMapping.prototype.getDestName = function(idx){
-    return this._names[idx];
+    return this._destNames[idx];
 };
 
 NameMapping.prototype.getSrcName = function(destName){
-    return this._mappedNames[destName];
+    var idx = this._destNames.indexOf(destName);
+    return idx == -1 ? null : this._srcNames[idx];
 };
 
 NameMapping.prototype.clear = function(){
-    this._names = [];
-    this._mappedNames = {};
+    this._srcNames = [];
+    this._destNames = [];
     mappingNotifyOwner(this);
 };
 
 NameMapping.prototype.setNamePair = function(destName, srcName){
-    this._names.push(destName);
-    this._mappedNames[destName] = srcName;
+    var idx = this._destNames.indexOf(destName);
+    if(idx != -1){
+        this._destNames.splice(idx,1);
+        this._srcNames.splice(idx,1);
+    }
+    this._destNames.push(destName);
+    this._srcNames.push(srcName);
     mappingNotifyOwner(this);
 };
 
 NameMapping.prototype.removeNamePair = function(destName){
-    Array.erase(this._names, destName)
-    delete this._mappedNames[destName];
+    var idx = this._destNames.indexOf(destName);
+    if(idx != -1){
+        this._destNames.splice(idx,1);
+        this._srcNames.splice(idx,1);
+    }
     mappingNotifyOwner(this);
 };
 
 NameMapping.prototype.isEmpty = function(){
-    return this._names.length == 0;
+    return this._destNames.length == 0;
 }
 
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
@@ -130,8 +138,7 @@ NameMapping.parse = function(string, dataNode)
     for(var i = 0; i < token.length; i++){
         var pair = token[i].split(":");
         var dest = pair[0].trim(); var src = pair[1].trim();
-        mapping._names.push(dest);
-        mapping._mappedNames[dest] = src;
+        mapping.setNamePair(dest, src);
     }
     return mapping;
 }
@@ -169,27 +176,55 @@ OrderMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterTyp
             (filterType == Xflow.DataNode.FILTER_TYPE.REMOVE && idx == -1))
             destMap[i] = sourceMap[i];
     }
-}
-NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType){
-    var tmp = {};
+};
+OrderMapping.prototype.getScriptInputName = function(index, destName){
+    if(this._names[index])
+        return this._names[index];
+    else
+        return destName;
+};
+OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
+    var index = 0;
+    for(var i in sourceMap){
+        if(index < this._names.length){
+            destMap[this._names[index]] = sourceMap[i];
+            ++index;
+        }
+        else
+            break;
+    }
+};
+
+NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType)
+{
     if(filterType == Xflow.DataNode.FILTER_TYPE.REMOVE){
         for(var i in sourceMap)
-            tmp[i] = sourceMap[i];
-        for(var i in this._mappedNames){
-            delete tmp[this._mappedNames[i]];
-        }
+            if(this._srcNames.indexOf(i) == -1)
+                destMap[i] = sourceMap[i];
     }
     else{
-        for(var destName in this._mappedNames){
-            tmp[destName] = sourceMap[this._mappedNames[destName]]
-        }
-        if(filterType == Xflow.DataNode.FILTER_TYPE.KEEP){
+        if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME){
             for(var i in sourceMap)
-                tmp[i] = tmp[i] || sourceMap[i];
+                if(this._srcNames.indexOf(i) == -1)
+                    destMap[i] = sourceMap[i];
+        }
+        for(var i in this._destNames){
+            destMap[this._destNames[i]] = sourceMap[this._srcNames[i]]
         }
     }
-    for(var i in tmp)
-        destMap[i] = tmp[i];
+};
+
+NameMapping.prototype.getScriptInputName= function(index, destName){
+    var srcName = this.getSrcName(destName);
+    return srcName ? srcName : destName;
+}
+
+
+NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
+    for(var i in this._destNames){
+        var destName = this._destNames[i], srcName = this._srcNames[i];
+        destMap[destName] = sourceMap[srcName];
+    }
 }
 
 })();

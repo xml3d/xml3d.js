@@ -86,11 +86,12 @@
         <file name="xflow/operator/lerp3seq.js" />
         <file name="xflow/operator/slerpseq.js" />
         <file name="xflow/operator/createTransform.js" />
+        <file name="xflow/operator/createTransformInv.js" />
         <file name="xflow/operator/mul4x4.js" />
         <file name="xflow/operator/skinDirection.js" />
         <file name="xflow/operator/skinPosition.js" />
 		<file name="xflow/operator/skinning.js" />
-        <file name="xflow/operator/flattenBoneTransform.js" />
+        <file name="xflow/operator/forwardKinematics.js" />
         <file name="xflow/operator/flipNormal.js" />
 		<file name="xflow/operator/math.js" />
 		<file name="contrib/perlin-noise-simplex.js" />

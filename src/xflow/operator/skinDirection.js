@@ -26,6 +26,7 @@ Xflow.registerOperator("skinDirection", {
                     vec3.add(r, tmp);
                 }
             }
+            vec3.normalize(r);
             result[offset] = r[0];
             result[offset+1] = r[1];
             result[offset+2] = r[2];

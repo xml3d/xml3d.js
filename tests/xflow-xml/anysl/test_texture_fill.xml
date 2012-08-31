@@ -1,0 +1,51 @@
+<XflowTest>
+    <Input>
+
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+program(TestTextureFill,
+    param(in,  Sampler2D, in_image),
+    param(out,  Sampler2D, out_image, sizeof:in_image parallel))
+{
+    Int width = GetTextureWidth(in_image);
+    Int height = GetTextureHeight(in_image);
+
+    Int tid(arGetCurrentThreadID()); // = y * width + x
+    Int y = tid / width;
+    Int x = tid % width;
+
+    SetTexel2D(out_image, x, y, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+}
+]]>
+      </script>
+
+      <data id="image">
+        <texture name="image" id="texture_1">
+          <img src="../images/teapot.ppm"/>
+        </texture>
+      </data>
+      
+      <data id="processedImage" compute="image = TestTextureFill(image)" >
+      	<data src="#image" />
+      	<float3 name="color" >0 0 1</float3>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="Check just the image" data="#image" >
+        <MatchInput name="image" input="#texture_1" />
+        <MatchData name="image" type="texture" >
+          <img src="../images/teapot.ppm"/>
+        </MatchData>
+      </Check>
+      
+      <Check title="Check processed image" data="#processedImage" >
+        <MatchData name="image" type="texture" >
+          <img src="../images/teapot_modified.ppm"/>
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

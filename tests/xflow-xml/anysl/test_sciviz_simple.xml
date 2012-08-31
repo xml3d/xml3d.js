@@ -1,0 +1,102 @@
+<XflowTest>
+  <Input>
+
+    <script id="myMorphing" type="x-shader/anysl.vertex.text">
+      <![CDATA[
+program(MyMorphing,
+    param(in, float3, in_position),
+    param(in, float3, in_normal),
+    param(in, float3, in_position2),
+    param(in, float3, in_normal2),
+    param(out, float3, out_position),
+    param(out, float3, out_normal),
+    param(uniform, float, weight))
+{
+    out_position = Lerp(in_position, in_position2, weight);
+    out_normal = Lerp(in_normal, in_normal2, weight);
+}
+]]>
+    </script>
+
+    <data id="Grid_morphed">
+      <float3 name="position2">
+        0.984252 0.984251 0.321257
+        1.000000 0.984251 0.306515
+        0.984252 0.999999 0.306515
+      </float3>
+      <float3 name="normal2">
+        0.566668 0.566668 0.598102
+        0.562365 0.559313 0.608997
+        0.559313 0.562365 0.608997
+      </float3>
+    </data>
+
+    <data id="Grid_base" compute="(position, normal) = MyMorphing(position, normal, position2, normal2, weight)" >
+      <data src="#Grid_morphed"/>
+      <float3 name="position">
+        0.984252 0.984251 0.000000
+        1.000000 0.984251 0.000000
+        1.000000 0.999999 0.000000
+      </float3>
+      <float3 name="normal">
+        0.000000 0.000000 1.000000
+        0.000000 0.000000 1.000000
+        0.000000 0.000000 1.000000
+      </float3>
+      <float name="weight" id="weight">2.0</float>
+    </data>
+
+  </Input>
+  <TestProcess>
+
+    <Check title="First Check" data="#Grid_base" >
+      <MatchData name="position" type="float3" >
+        0.984252   0.984251   0.642514
+        1.0        0.984251   0.61303
+        0.968504   0.999999   0.61303
+      </MatchData>
+      <MatchData name="normal" type="float3" >
+        1.13334   1.13334   0.196204
+        1.12473   1.11863   0.217994
+        1.11863   1.12473   0.217994
+      </MatchData>
+    </Check>
+
+    <Modification title="Change weight to 0.5" >
+      <ChangeData input="#weight" >0.5</ChangeData>
+    </Modification>
+
+    <Check title="Second Check" data="#Grid_base" >
+      <MatchData name="position" type="float3" >
+        0.984252   0.984251   0.160628
+        1.0   0.984251   0.153258
+        0.992126   0.999999   0.153258
+      </MatchData>
+      <MatchData name="normal" type="float3" >
+        0.283334   0.283334   0.799051
+        0.281182   0.279656   0.804498
+        0.279656   0.281182   0.804498
+      </MatchData>
+    </Check>
+
+
+    <Modification title="Change weight to 0.2" >
+      <ChangeData input="#weight" >0.2</ChangeData>
+    </Modification>
+
+    <Check title="Third Check" data="#Grid_base" >
+      <MatchData name="position" type="float3" >
+        0.984252   0.984251   0.0642514
+        1.0   0.984251   0.061303
+        0.99685   0.999999   0.061303
+      </MatchData>
+      <MatchData name="normal" type="float3" >
+        0.113334   0.113334   0.91962
+        0.112473   0.111863   0.921799
+        0.111863   0.112473   0.921799
+      </MatchData>
+    </Check>
+
+  </TestProcess>
+</XflowTest>
+

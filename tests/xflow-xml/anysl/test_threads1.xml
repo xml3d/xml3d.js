@@ -1,0 +1,35 @@
+<XflowTest>
+    <Input>
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+#define PROGRAM_PARAMS(X)                       \
+    X(in,  Int, in_result, NONE)                \
+    X(out, Int, out_result, NONE)
+
+FLOW_PROGRAM_WITH_PARAMS(TestThreads1, PROGRAM_PARAMS)
+{
+    ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+
+    out_result = Int(arGetCurrentThreadID() + arGetNumThreads());
+}
+]]>
+      </script>
+
+      <data id="data1" compute="result = TestThreads1(result)">
+        <int name="result" id="result_1">
+          0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+        </int>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="First Check" data="#data1" >
+        <MatchData name="result" type="int" >
+          16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

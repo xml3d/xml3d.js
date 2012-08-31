@@ -1,0 +1,46 @@
+<XflowTest>
+    <Input>
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+
+#define PROGRAM_PARAMS(X)                  \
+    X(in, int, weight, WEIGHT)             \
+    X(in, IntArray, in_array, NONE)        \
+    X(out, IntArray, out_array, NONE)
+
+FLOW_PROGRAM_WITH_PARAMS(TestUniformIntArray, PROGRAM_PARAMS)
+{
+    ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+
+    for (int i = 0; i < 10; i++)
+    {
+        Int x = in_array[i];
+        out_array[i] = x * weight;
+        x = out_array[i];
+    }
+}
+]]>
+      </script>
+
+      <data id="data1" compute="array = TestUniformIntArray(weight, array)" >
+        <int name="weight" id="weight_1">
+          2
+        </int>
+        <int name="array" id="array_1">
+          0 1 2 3 4 5 6 7 8 9
+        </int>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="First Check" data="#data1" >
+        <MatchInput name="weight" input="#weight_1" />
+        <MatchData name="array" type="int">
+          0 2 4 6 8 10 12 14 16 18
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

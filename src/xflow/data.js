@@ -132,6 +132,11 @@ BufferEntry.prototype.getValue = function(){
     return this._value;
 };
 
+/** @return {Object} */
+BufferEntry.prototype.getLength = function(){
+    return this._value ? this._value.length : 0;
+};
+
 
 /**
  * @constructor
@@ -183,7 +188,7 @@ BufferEntry.prototype.getTupleSize = function() {
        case t.INT4:
            this._tupleSize = 4;
            break;
-       case t.FLOAT4x4:
+       case t.FLOAT4X4:
            this._tupleSize = 16;
            break;
        default:

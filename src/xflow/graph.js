@@ -90,10 +90,17 @@ Object.defineProperty(InputNode.prototype, "param", {
 Object.defineProperty(InputNode.prototype, "data", {
     /** @param {Object} v */
     set: function(v){
-        if(this._data) this._data.removeListener(this);
+        var oldLength = 0;
+        if(this._data) {
+            oldLength = this._data.getLength();
+            this._data.removeListener(this);
+        }
         this._data = v;
-        if(this._data) this._data.addListener(this);
-        notifyParentsOnChanged(this, XflowModification.DATA_CHANGED, this._name);
+        if(this._data)
+            this._data.addListener(this);
+        var sizeChanged = (oldLength != (this._data ? this._data.getLength() : 0));
+        notifyParentsOnChanged(this, sizeChanged ? XflowModification.STRUCTURE_CHANGED :
+            XflowModification.DATA_CHANGED, this._name);
     },
     /** @return {Object} */
     get: function(){ return this._data; }
@@ -376,13 +383,13 @@ DataNode.prototype.notify = function(changeType, name){
 /**
  * Notify all parent nodes about a change
  * @param {Xflow.GraphNode} node
- * @param {XflowModification} changeType
+ * @param {number, XflowModification} changeType
  * @param {string, null} name
  * @private
  */
 function notifyParentsOnChanged(node, changeType, name){
     for(var i = 0; i < node._parents.length; ++i){
-        node._parents[i].notify(changeType, name);
+        node._parents[i].notify(changeType, name || null);
     }
 };
 /**

@@ -27,6 +27,8 @@ module("Xflow tests", {
         case "float"  :
         case "float2" :
         case "float3" :
+        case "float4" :
+        case "float4x4" :
             data = lameParse(text, Float32Array);
             break;
         case "int"  :
@@ -181,6 +183,16 @@ module("Xflow tests", {
         var targetNode = this.doc.getElementById(targetNodeName);
         targetNode.setAttribute(attrName, newValue);
         ok(true, "Changed attr '"+attrName+"' to '"+newValue+"'");
+    },
+
+    ChangeData : function(action) {
+        var inputId = action.getAttribute("input").substring(1);
+        var input = this.doc.getElementById(inputId);
+
+        var newText = action.textContent;
+        input.firstChild.nodeValue = newText;
+
+        ok(true, "Changed data of '"+inputId+"' to '"+newText+"'");
     }
 
 
@@ -275,62 +287,110 @@ test("Test compute parsing", function() {
 
 test("Very basic test", 4, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_verybasic.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_verybasic.xml", handler);
     this.executeTests(response);
  });
 
 test("Nested nodes test", 13, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_nesting.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_nesting.xml", handler);
     this.executeTests(response);
  });
 
 test("Renaming nodes 1", 13, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_renaming.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_renaming.xml", handler);
     this.executeTests(response);
  });
 
 test("Renaming nodes 2", 14, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_renaming2.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_renaming2.xml", handler);
     this.executeTests(response);
  });
 
 test("Renaming nodes 3", 6, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_renaming3.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_renaming3.xml", handler);
     this.executeTests(response);
  });
 
 /*
 test("Templates 1", 19, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_template1.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_template1.xml", handler);
     this.executeTests(response);
  });
 
 test("Templates 2", 16, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_template2.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_template2.xml", handler);
     this.executeTests(response);
  });
 
 test("Templates 3", 14, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_template3.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_template3.xml", handler);
     this.executeTests(response);
  });
 
 test("Templates 4", 5, function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_template4.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_template4.xml", handler);
     this.executeTests(response);
  });
 */
 
-test("Add/Remove script", 16, function() {
+test("Add/Remove script", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/test_add_remove_script.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/basic/test_add_remove_script.xml", handler);
     this.executeTests(response);
- });
+});
+
+
+test("Operators - Simple", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_simple.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operators - Nesting", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_nesting.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operators - Transform operators", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_transform.xml", handler);
+    this.executeTests(response);
+});
+test("Operators - Skinning operators", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_skinning.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operators - forwardKinematics operator", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_forward_kinematics.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operators - image processing operators", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_image_processing.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operators - Lerp on Sequences", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_lerp_position_seq.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operators - Slerp on Sequences", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_lerp_rotation_seq.xml", handler);
+    this.executeTests(response);
+});

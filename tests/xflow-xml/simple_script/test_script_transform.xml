@@ -1,0 +1,273 @@
+<XflowTest>
+    <Input>
+
+    	<data id="input" >
+    	    <float3 name="translation" >0 0 0  1 2 3  -8 10 9</float3>
+            <float3 name="scale" >1 1 1  0.5 1 2  -0.5 4 1.25</float3>
+            <float4 name="rotation" >1 0 0 0  0.707107 0 0 0.707107  0.707107 -0 -0 -0.707107</float4>
+    	</data>
+    
+        
+    	<data id="transform" compute="result = xflow.createTransform({translation : translation})">
+			<data src="#input" />
+		</data>
+		<data id="transformInv" compute="result = xflow.createTransformInv({translation : translation})">
+			<data src="#input" />
+		</data>
+		
+		<data id="transformMul" compute="result = xflow.mul(value1, value2)">
+			<data filter="rename( {value1: result} )" src="#transform" />
+			<data filter="rename( {value2: result} )" src="#transformInv" />
+		</data>
+    
+        
+    </Input>
+    <TestProcess>
+        <!--
+        <Check title="Check Transform #1" data="#transform" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        1 2 3 1
+            
+                		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        -8 10 9 1
+            </MatchData>
+        </Check>
+        <Check title="Check Inverse Transform #1" data="#transformInv" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        -1 -2 -3 1
+            
+                		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        8 -10 -9 1
+            </MatchData>
+        </Check>
+        
+        <Check title="Check Multiplied Transform #1" data="#transformMul" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+                		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            </MatchData>
+        </Check>
+        -->
+        <Modification title="Change transform input" >
+            <ChangeAttribute node="#transform" attrName="compute" 
+                newValue="result = xflow.createTransform({scale : scale})" />
+            <ChangeAttribute node="#transformInv" attrName="compute" 
+                newValue="result = xflow.createTransformInv({scale : scale})" />
+        </Modification>
+        
+        <Check title="Check Transform #2" data="#transform" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		0.5 0 0 0
+                        0 1 0 0
+                        0 0 2 0
+                        0 0 0 1
+            
+                		-0.5 0 0 0
+                        0 4 0 0
+                        0 0 1.25 0
+                        0 0 0 1
+            </MatchData>
+        </Check>
+        <Check title="Check Inverse Transform #2" data="#transformInv" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		2 0 0 0
+                        0 1 0 0
+                        0 0 0.5 0
+                        0 0 0 1
+            
+                		-2 0 0 0
+                        0 0.25 0 0
+                        0 0 0.8 0
+                        0 0 0 1
+            </MatchData>
+        </Check>
+        <Check title="Check Multiplied Transform #2" data="#transformMul" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+                		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            </MatchData>
+        </Check>
+        
+        
+        <Modification title="Change transform input" >
+            <ChangeAttribute node="#transform" attrName="compute" 
+                newValue="result = xflow.createTransform({rotation : rotation})" />
+            <ChangeAttribute node="#transformInv" attrName="compute" 
+                newValue="result = xflow.createTransformInv({rotation : rotation})" />
+        </Modification>
+        
+        
+        <Check title="Check Transform #3" data="#transform" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		0 1 0 0
+                        -1 0 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+                		0 -1 0 0
+                        1 0 0 0
+                        0 0 1 0
+                        0 0 0 1
+            </MatchData>
+        </Check>
+        <Check title="Check Inverse Transform #3" data="#transformInv" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		0 -1 0 0
+                        1 0 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+                		0 1 0 0
+                        -1 0 0 0
+                        0 0 1 0
+                        0 0 0 1
+            </MatchData>
+        </Check>
+        <Check title="Check Multiplied Transform #3" data="#transformMul" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+                		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            </MatchData>
+        </Check>
+        
+        <Modification title="Change transform input" >
+            <ChangeAttribute node="#transform" attrName="compute" 
+                newValue="result = xflow.createTransform(translation, rotation, scale)" />
+            <ChangeAttribute node="#transformInv" attrName="compute" 
+                newValue="result = xflow.createTransformInv(translation, rotation, scale)" />
+        </Modification>
+        
+        <Check title="Check Transform #4" data="#transform" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		0 0.5 0 0
+                        -1 0 0 0
+                        0 0 2 0
+                        1 2 3 1
+            
+                		0 0.5 0 0
+                        4 0 0 0
+                        0 0 1.25 0
+                        -8 10 9 1
+            </MatchData>
+        </Check>
+        <Check title="Check Inverse Transform #4" data="#transformInv" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		0 -1 0 0
+                        2 0 0 0
+                        0 0 0.5 0
+                        -4 1 -1.5 1
+            
+                		0 0.25 0 0
+                        2 0 0 0
+                        0 0 0.8 0
+                        -20 2 -7.2 1
+            </MatchData>
+        </Check>
+        <Check title="Check Multiplied Transform #4" data="#transformMul" >
+            <MatchData name="result" type="float4x4" >
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+    		    		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            
+                		1 0 0 0
+                        0 1 0 0
+                        0 0 1 0
+                        0 0 0 1
+            </MatchData>
+        </Check>
+        
+    </TestProcess>
+</XflowTest>
+

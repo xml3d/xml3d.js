@@ -1,4 +1,4 @@
-Xflow.registerOperator("flattenBoneTransform", {
+Xflow.registerOperator("forwardKinematics", {
     outputs: [{name: 'result', tupleSize: '16'}],
     params:  ['parent','xform'],
     evaluate: function(parent,xform) {

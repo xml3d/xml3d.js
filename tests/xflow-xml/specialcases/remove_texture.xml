@@ -1,0 +1,35 @@
+<XflowTest>
+    <Input>
+        <!-- Declare the xflow graph here -->
+        <data id="texDefault" >
+            <float name="transparency">0</float>
+            <float3 name="emissiveColor">0 0 0</float3>
+            <float3 name="specularColor">0.025 0.025 0.025</float3>
+            <float name="shininess">64</float>
+            <float name="ambientIntensity">1.0</float>
+            <float3 name="diffuseColor">1 1 1</float3>
+        </data>
+        <data id="JpegTexture">
+            <data src="#texDefault" />
+            <float3 name="diffuseColor">1 1 0</float3>
+            <texture name="diffuseTexture" id="testTexture">
+                <img id="testImage" src="../images/teapot.ppm" />
+            </texture>
+        </data>
+    </Input>
+    <TestProcess>
+
+        <Check title="Texture is present" data="#JpegTexture" filter="diffuseTexture" >
+            <MatchInput name="diffuseTexture" input="#testTexture" />
+        </Check>
+
+        <Modification title="Remove texture node" >
+            <RemoveNode node="#testTexture" />
+        </Modification>
+
+        <Check title="Texture is not present" data="#JpegTexture" filter="diffuseTexture" >
+            <MatchNull name="diffuseTexture" />
+        </Check>
+
+    </TestProcess>
+</XflowTest>

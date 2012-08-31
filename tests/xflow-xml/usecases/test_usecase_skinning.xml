@@ -1,0 +1,294 @@
+<XflowTest>
+    <Input>
+        
+        <!-- Templates: -->
+
+        <proto id="bindPoseTransform" filter="keep(bindPose)"
+             compute="bindPose = xflow.forwardKinematicsInv(boneParent, xform)" >  
+          
+            <int param="" name="boneParent" ></int>
+           
+            <data compute="xform = xflow.createTransformInv( {translation: bonePosition, rotation: bindPose } )" >
+                <float3 param="" name="bonePosition" ></float3>
+                <float4 param="" name="bindPose" ></float4>
+            </data>
+        </proto>
+            
+        <proto id="poseTransform" filter="keep(pose)"
+              compute="pose = xflow.forwardKinematics(boneParent, xform)"  >
+            <int param="" name="boneParent"  ></int>
+            
+            <data id="poseTransformLocal"
+                  compute="xform = xflow.createTransform({translation: bonePosition, rotation: poseRotation} )">
+                        
+                <float3 param="" name="bonePosition"></float3>
+                
+                <data id="poseRotation" compute="poseRotation = xflow.slerpSeq(pose, time)" >
+                    <float4 param="" name="pose" ></float4>
+                    <float param="" name="time" ></float>
+                </data>
+            </data>                     
+        </proto>
+        
+        <data id="finalTransform" compute="boneXform = xflow.mul(bindPose, pose)" >  
+            <data src="#bindPoseTransform" />
+            <data src="#poseTransform" />            
+        </data>
+      
+        <data id="skinning" compute="position = xflow.skinPosition(position, boneIdx, boneWeight, boneXform)" >
+            <data compute="normal = xflow.skinDirection(normal, boneIdx, boneWeight, boneXform)" >
+                
+                <float3 param="" name="position" ></float3>
+                <float3 param="" name="normal" ></float3>
+                
+                <int4 param="" name="boneIdx" ></int4>
+                <float4 param="" name="boneWeight" ></float4>
+                
+                <data src="#finalTransform" />
+            </data>
+        </data>
+        
+        <!-- Data: -->
+        
+        <data id="baseData">
+            <!-- static data (vertex attributes) -->
+            <float3 name="index" >0 1 2</float3>
+            <float3 name="position" >0 0 7  0 5 7  0 10 7  0 15 7</float3>
+            <float3 name="normal" >1 0 0  1 0 0  1 0 0  1 0 0</float3>
+            <int4 name="boneIdx" >0 0 0 0   1 0 0 0   2 0 0 0   2 0 0 0 </int4>
+            <float4 name="boneWeight" >1 0 0 0   1 0 0 0   1 0 0 0   1 0 0 0  </float4> 
+            <!-- bone hierarchie and bind Pose -->    
+            <int name="boneParent" >-1 0 1</int>
+            <float3 name="bonePosition" >0 0 7   0 5 0   0 5 0</float3>
+            <float4 name="bindPose" >1 0 0 0  1 0 0 0  1 0 0 0</float4>
+        </data>
+        
+        <data id="animationData">
+            <float4 name="pose" seqnr="0.0" >1 0 0 0  1 0 0 0  1 0 0 0</float4>
+            <float4 name="pose" seqnr="1.0" >1 0 0 0  1 0 0 0  0.707107 0 0 0.707107</float4>
+            <float4 name="pose" seqnr="2.0" >1 0 0 0   0.707107 0 0 -0.707107   0.707107 0 0 0.707107</float4>
+            <float4 name="pose" seqnr="3.0" >0.707107 0 0 0.707107   0.707107 0 0 -0.707107   0.707107 0 0 0.707107</float4>
+            <float4 name="pose" seqnr="4.0" >0.707107 0 0 0.707107   0.707107 0 0 -0.707107   1 0 0 0</float4>
+            <float4 name="pose" seqnr="5.0" >0.707107 0 0 0.707107   1 0 0 0   1 0 0 0</float4>
+            <float4 name="pose" seqnr="6.0" >1 0 0 0   1 0 0 0   1 0 0 0</float4>
+        </data>
+                
+        <data id="timeSlot" >
+            <float name="time" id="time" >0.0</float>   
+        </data>
+        
+        
+        <!-- Instances: -->
+        
+        <data id="instanceBindPose" proto="#bindPoseTransform" >
+            <data src="#baseData" />
+            <data src="#animationData" />
+            <data src="#timeSlot" />
+        </data>
+        
+        <data id="instancePoseRotation" proto="#poseRotation" >
+            <data src="#baseData" />
+            <data src="#animationData" />
+            <data src="#timeSlot" />
+        </data>
+        
+        <data id="instancePoseLocal" proto="#poseTransformLocal" >
+            <data src="#baseData" />
+            <data src="#animationData" />
+            <data src="#timeSlot" />
+        </data>
+        
+        <data id="instancePose" proto="#poseTransform" >
+            <data src="#baseData" />
+            <data src="#animationData" />
+            <data src="#timeSlot" />
+        </data>
+        
+        <data id="instanceFinal" proto="#finalTransform" >
+            <data src="#baseData" />
+            <data src="#animationData" />
+            <data src="#timeSlot" />
+        </data>
+        
+        <data id="instance" proto="#skinning" >
+            <data src="#baseData" />
+            <data src="#animationData" />
+            <data src="#timeSlot" />
+        </data>
+        
+    </Input>
+    <TestProcess>
+         
+        
+        <Check title="Check Bind Pose #1" data="#instanceBindPose" >
+            <MatchData name="bindPose" type="float4x4" >
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 0 -7 1 
+            
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 -5 -7 1 
+            
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 -10 -7 1       
+            </MatchData>
+        </Check>
+        
+
+        <Check title="Check Pose #1" data="#instancePose" >
+            <MatchData name="pose" type="float4x4" >
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 0 7 1 
+            
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 5 7 1 
+            
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 10 7 1       
+            </MatchData>
+        </Check>         
+        
+        
+        <Check title="Check Skinned Mesh #1" data="#instance" >
+            <MatchData name="position" type="float3" >
+                0 0 7  0 5 7  0 10 7  0 15 7     
+            </MatchData>     
+            <MatchData name="normal" type="float3" >
+                1 0 0  1 0 0  1 0 0  1 0 0     
+            </MatchData>  
+        </Check>
+        
+        
+       
+        
+        <!-- ====== FIRST MODIFICATION ===========================================================================================-->
+        
+        
+        
+        <Modification>
+            <ChangeData input="#time" >1</ChangeData>    
+        </Modification>
+        
+
+        <Check title="Check Rotation #2" data="#instancePoseRotation" >
+            <MatchData name="time" type="float" >
+                1
+            </MatchData>
+            <MatchData name="poseRotation" type="float4" >
+                1 0 0 0  1 0 0 0  0.707107 0 0 0.707107    
+            </MatchData>
+        </Check>
+        
+        
+        <Check title="Check Local Pose #2" data="#instancePoseLocal" >
+            <MatchData name="xform" type="float4x4" >
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 0 7 1 
+            
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 5 0 1 
+            
+                0 1 0 0
+                -1 0 0 0
+                0 0 1 0
+                0 5 0 1       
+            </MatchData>
+        </Check>
+
+                
+        <Check title="Check Pose #2" data="#instancePose" >
+            <MatchData name="pose" type="float4x4" >
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 0 7 1 
+            
+                1 0 0 0
+                0 1 0 0
+                0 0 1 0
+                0 5 7 1 
+            
+                0 1 0 0
+                -1 0 0 0
+                0 0 1 0
+                0 10 7 1       
+            </MatchData>
+        </Check>
+
+      
+        <Check title="Check Skinned Mesh #2" data="#instance" >
+            <MatchData name="position" type="float3" >
+                0 0 7  0 5 7  0 10 7  -5 10 7     
+            </MatchData>     
+            <MatchData name="normal" type="float3" >
+                1 0 0  1 0 0  0 1 0  0 1 0     
+            </MatchData>  
+        </Check>
+       
+        
+        
+        <!-- ====== SECOND MODIFICATION ===========================================================================================-->
+        
+        
+        <Modification>
+            <ChangeData input="#time" >2</ChangeData>    
+        </Modification>
+        
+        <Check title="Check Skinned Mesh #1" data="#instance" >
+            <MatchData name="position" type="float3" >
+                0 0 7  0 5 7  5 5 7  5 10 7     
+            </MatchData>     
+            <MatchData name="normal" type="float3" >
+                1 0 0  0 -1 0  1 0 0  1 0 0     
+            </MatchData>  
+        </Check>
+        
+       
+        
+        <!-- ====== THIRD MODIFICATION ===========================================================================================-->
+        
+        
+        <Modification>
+            <ChangeData input="#time" >3</ChangeData>    
+        </Modification>
+        
+        <Check title="Check Skinned Mesh #1" data="#instance" >
+            <MatchData name="position" type="float3" >
+                0 0 7  -5 0 7  -5 5 7  -10 5 7     
+            </MatchData>     
+            <MatchData name="normal" type="float3" >
+                0 1 0  1 0 0  0 1 0  0 1 0     
+            </MatchData>  
+        </Check>
+        
+        
+        
+        <!-- ====== GLSL Output ===========================================================================================-->
+        
+        
+        <Show title="Show Vertex Shader" data="#instance" what="VertexShader" >
+            <VSConnection in="position" out="position" type="FLOAT3_WORLD_POINT" />
+            <VSConnection in="normal" out="normal" type="FLOAT3_WORLD_NORMAL" />
+            <VSConnection in="color" out="color" type="FLOAT4" optional="true" />
+        </Show>
+        
+        
+        
+        
+    </TestProcess>
+</XflowTest>

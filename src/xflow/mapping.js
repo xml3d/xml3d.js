@@ -184,7 +184,7 @@ OrderMapping.prototype.getScriptInputName = function(index, destName){
     if(this._names[index])
         return this._names[index];
     else
-        return destName;
+        return null;
 };
 OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
     var index = 0;
@@ -219,7 +219,7 @@ NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType
 
 NameMapping.prototype.getScriptInputName= function(index, destName){
     var srcName = this.getSrcNameFromDestName(destName);
-    return srcName ? srcName : destName;
+    return srcName ? srcName : null;
 }
 
 

@@ -3,7 +3,7 @@
 	Check basic nesting of <data> and input elements
 -->
 <XflowTest>
-    <Input >
+    <Input>
     
         <data id="data1">
             <float name="A" id="a1" >0.0</float>

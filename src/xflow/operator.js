@@ -27,8 +27,14 @@
             for(var i in operator.params){
                 var inputName = operator.params[i];
                 var dataName = this._computeInputMapping.getScriptInputName(i, inputName);
-                args.push(input[dataName].getValue());
+                if(dataName){
+                    var dataEntry = input[dataName];
+                    args.push(dataEntry ? dataEntry.getValue() : null);
+                }
+                else
+                    args.push(null);
             }
+
             operator.evaluate.apply(this._operatorData, args);
 
             var outputs = this._operatorData.outputs;

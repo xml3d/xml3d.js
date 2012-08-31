@@ -1,0 +1,33 @@
+<XflowTest>
+    <Input>
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+
+program(TestThreads2,
+    param(in, Int, sizeOfResult),
+    param(out, IntArray, result, size:sizeOfResult parallel))
+{
+    //printf("NumTh %i CurTh %i\n", arGetNumThreads(), arGetCurrentThreadID());
+    result[arGetNumThreads()-arGetCurrentThreadID()-1] = Int(arGetCurrentThreadID() + arGetNumThreads());
+}
+]]>
+      </script>
+
+      <data id="data1" compute="result = TestThreads2(sizeOfResult)" >
+        <int name="sizeOfResult" id="sizeOfResult_1">
+          16
+        </int>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="First Check" data="#data1" >
+        <MatchData name="result" type="int" >
+          31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

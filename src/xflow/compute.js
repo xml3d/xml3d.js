@@ -21,6 +21,9 @@ DataNode.prototype._initCompute = function(){
 DataNode.prototype._updateComputeCache = function(state){
     this._results = [];
     this._dataMap = {};
+    if(state == XflowModification.STRUCTURE_CHANGED){
+        this._operatorData = null;
+    }
 }
 
 DataNode.prototype._getComputeResult = function(filter){

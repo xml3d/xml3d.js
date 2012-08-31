@@ -1,4 +1,4 @@
-Xflow.registerOperator("createTransform", {
+Xflow.registerOperator("createTransformInv", {
     outputs: [{name: 'result', tupleSize: '16'}],
     params:  ['translation','rotation','scale','center','scaleOrientation'],
     evaluate: function(translation,rotation,scale,center,scaleOrientation) {
@@ -16,7 +16,7 @@ Xflow.registerOperator("createTransform", {
 
         var result = this.tmp;
         for(var i = 0; i < count; i++) {
-            mat4.makeTransformXflow(
+            mat4.makeTransformInvXflow(
                 translation ? translation.subarray(i*3) : null,
                 rotation ? rotation.subarray(i*4) : null,
                 scale ? scale.subarray(i*3) : null,
@@ -41,14 +41,14 @@ Xflow.registerOperator("createTransform", {
 
         var result = this.tmp;
         for(var i = 0; i < count; i++) {
-            mat4.makeTransformXflow(
+            mat4.makeTransformInvXflow(
                 translation ? translation.subarray(i*3) : null,
                 rotation ? rotation.subarray(i*4) : null,
                 scale ? scale.subarray(i*3) : null,
                 center ? center.subarray(i*3) : null,
                 scaleOrientation ? scaleOrientation.subarray(i*4) : null,
                 result.subarray(i*16)
-                )
+            )
         }
         this.result.result = result;
 

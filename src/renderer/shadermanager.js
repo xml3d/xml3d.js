@@ -44,6 +44,20 @@
         this.status = TEXTURE_STATE.INVALID;
     };
 
+    /**
+     * @constructor
+     * @param {WebGLProgram} program
+     * @param {{ fragment: string, vertex: string }} sources
+     */
+    var ProgramObject = function(program, sources) {
+        this.attributes = {};
+        this.uniforms = {};
+        this.samplers = {};
+        this.handle = program;
+        this.vSource = sources.vertex;
+        this.fSource = sources.fragment;
+    };
+
     var XML3DShaderManager = function(renderer, dataFactory, factory) {
         this.renderer = renderer;
         this.gl = renderer.gl;
@@ -56,6 +70,8 @@
         };
 
         this.currentProgram = null;
+
+        /** @type {Object.<String,ProgramObject>} */
         this.shaders = {};
 
         this.createDefaultShaders();
@@ -115,7 +131,7 @@
      *
      * @param shaderAdapter
      * @param lights
-     * @returns {String}
+     * @returns {string}
      */
     XML3DShaderManager.prototype.createShader = function(shaderAdapter, lights) {
         if (!shaderAdapter || !shaderAdapter.node.script) {
@@ -136,7 +152,7 @@
 
         var descriptor = XML3DShaderManager.getShaderDescriptor(scriptURI.path);
         var material = this.createMaterialFromShaderDescriptor(descriptor);
-        dataTable = shaderAdapter.requestData(material.getRequestFields());
+        var dataTable = shaderAdapter.requestData(material.getRequestFields());
 
         shader = material.getProgram(lights, dataTable);
         this.shaders[shaderId] = shader;
@@ -146,12 +162,6 @@
             this.destroyShader(shader);
             shaderId = "defaultShader";
         } else {
-            // Set all uniform variables
-            var nameArray = [];
-            for ( var name in shader.uniforms) {
-                nameArray.push(name);
-            }
-            var dataTable = shaderAdapter.requestData(nameArray);
             this.setUniformVariables(shader, dataTable);
         }
 
@@ -184,7 +194,7 @@
     /**
      *
      * @param {{fragment: string, vertex: string}!} sources
-     * @returns
+     * @returns {ProgramObject}
      */
     XML3DShaderManager.prototype.createProgramFromSources = function(sources) {
         var gl = this.gl;
@@ -207,6 +217,7 @@
             // Use a default flat shader instead
             return this.shaders["defaultShader"];
         }
+
         var prg = gl.createProgram();
 
         // Link shader program
@@ -224,15 +235,7 @@
             return this.shaders["defaultShaders"];
         }
 
-        var programObject = {
-            attributes : {},
-            uniforms : {},
-            samplers : {},
-            handle : prg,
-            vSource : sources.vertex,
-            fSource : sources.fragment
-        };
-
+        var programObject = new ProgramObject(prg, sources);
         gl.useProgram(prg);
 
         // Tally shader attributes

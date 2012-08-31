@@ -1,4 +1,4 @@
-XML3D.xflow.register("mul4x4", {
+Xflow.registerOperator("mul", {
     outputs: [{name: 'result', tupleSize: '16'}],
     params:  ['value1','value2'],
     evaluate: function(value1, value2) {
@@ -10,7 +10,7 @@ XML3D.xflow.register("mul4x4", {
 
         if (!this.tmp || this.tmp.length != value1.length)
             this.tmp = new Float32Array(value1.length);
-            
+
         var result = this.tmp;
         var count = value1.length / 16;
         for(var i = 0; i < count; i++)
@@ -34,22 +34,22 @@ XML3D.xflow.register("mul4x4", {
         }
         //this.parallel_data = new ParallelArray(result).partition(16);
         this.result.result = result;*/
-        
-        
+
+
         if (!this.elementalFunc) {
             this.elementalFunc = function(index, value1, value2) {
                 var mo = index*16;
-                
+
                 var a00 = value2[mo+0], a01 = value2[mo+1], a02 = value2[mo+2], a03 = value2[mo+3];
                 var a10 = value2[mo+4], a11 = value2[mo+5], a12 = value2[mo+6], a13 = value2[mo+7];
                 var a20 = value2[mo+8], a21 = value2[mo+9], a22 = value2[mo+10], a23 = value2[mo+11];
                 var a30 = value2[mo+12], a31 = value2[mo+13], a32 = value2[mo+14], a33 = value2[mo+15];
-        
+
                 var b00 = value1[mo+0], b01 = value1[mo+1], b02 = value1[mo+2], b03 = value1[mo+3];
                 var b10 = value1[mo+4], b11 = value1[mo+5], b12 = value1[mo+6], b13 = value1[mo+7];
                 var b20 = value1[mo+8], b21 = value1[mo+9], b22 = value1[mo+10], b23 = value1[mo+11];
                 var b30 = value1[mo+12], b31 = value1[mo+13], b32 = value1[mo+14], b33 = value1[mo+15];
-                
+
                 var dest = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0];
                 dest[0] = b00*a00 + b01*a10 + b02*a20 + b03*a30;
                 dest[1] = b00*a01 + b01*a11 + b02*a21 + b03*a31;
@@ -70,9 +70,9 @@ XML3D.xflow.register("mul4x4", {
                 return dest;
             };
         }
-        
+
         var numMatrices = value1.length/16;
-        
+
         var tmp = new ParallelArray(
                 numMatrices,
                 this.elementalFunc,
@@ -81,7 +81,7 @@ XML3D.xflow.register("mul4x4", {
         );
 
         this.result.result = tmp.flatten();
-        
+
         return true;
     }
 });

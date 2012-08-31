@@ -2,15 +2,15 @@
 (function() {
     "use strict";
 
-    var tupleTable = {};
-    tupleTable['float']    = 1;
-    tupleTable['int']      = 1;
-    tupleTable['bool']     = 1;
-    tupleTable['float2']   = 2;
-    tupleTable['float3']   = 3;
-    tupleTable['float4']   = 4;
-    tupleTable['int4']     = 4;
-    tupleTable['float4x4'] = 16;
+    var bufferTypeTable = {};
+    bufferTypeTable['float']    = Xflow.DataEntry.TYPE.FLOAT;
+    bufferTypeTable['int']      = Xflow.DataEntry.TYPE.INT;
+    bufferTypeTable['bool']     = Xflow.DataEntry.TYPE.BOOL;
+    bufferTypeTable['float2']   = Xflow.DataEntry.TYPE.FLOAT2;
+    bufferTypeTable['float3']   = Xflow.DataEntry.TYPE.FLOAT3;
+    bufferTypeTable['float4']   = Xflow.DataEntry.TYPE.FLOAT4;
+    bufferTypeTable['int4']     = Xflow.DataEntry.TYPE.INT4;
+    bufferTypeTable['float4x4'] = Xflow.DataEntry.TYPE.FLOAT4X4;
 
     /**
      * Constructor of XML3D.data.ValueDataAdapter
@@ -25,53 +25,42 @@
     var ValueDataAdapter = function(factory, node)
     {
         XML3D.data.DataAdapter.call(this, factory, node);
-        XML3D.data.ProviderEntry.call(this);
-        this.init = function()
-        {
-            this.value = this.node.value;
-            this.key = this.node.seqnr;
-            this.tupleSize = tupleTable[this.node.localName];
-        };
-        this.data = {};
+        this.xflowInputNode = null;
     };
-    XML3D.createClass(ValueDataAdapter, XML3D.data.DataAdapter);
-    XML3D.extend(ValueDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
+    XML3D.createClass(ValueDataAdapter, XML3D.base.Adapter);
 
-    ValueDataAdapter.prototype.getValue = function(wantParallelArray) {
-    	//if (wantParallelArray && !(this.value instanceof ParallelArray)) {
-    	//	this.value = new ParallelArray(this.value).partition(this.tupleSize);
-    	//}
-        return this.value;
-    };
-    
-    ValueDataAdapter.prototype.getTupleSize = function() {
-        return this.tupleSize;
-    };
+    ValueDataAdapter.prototype.init = function()
+    {
+        var type = bufferTypeTable[this.node.localName];
+        var buffer = new Xflow.BufferEntry(type, this.node.value);
 
-    ValueDataAdapter.prototype.getOutputs = function() {
-        var result = {};
-        result[this.node.name] = this;
-        return result;
-    };
+        this.xflowInputNode = XML3D.data.xflowGraph.createInputNode();
+        this.xflowInputNode.name = this.node.name;
+        this.xflowInputNode.data = buffer;
+        this.xflowInputNode.seqnr = this.node.seqnr;
+    }
 
-    ValueDataAdapter.prototype.populateProcessTable = function(table) {
-        var fields = table.fieldNames;
-        for(var i = 0; i < fields.length; i++){
-            if(fields[i] == this.node.name) {
-                table.providers[fields[i]] = this;
-                return;
-            }
-        }
-    };
+    ValueDataAdapter.prototype.getXflowNode = function(){
+        return this.xflowInputNode;
+    }
 
     /**
-     * No data is cached, thus just need to inform all the
-     * consumers.
+     *
      */
-    ValueDataAdapter.prototype.notifyChanged = function(e)
+    ValueDataAdapter.prototype.notifyChanged = function(evt)
     {
-    	this.value = this.node.value;
-        this.notifyDataChanged(this);
+        if(evt.type == XML3D.events.VALUE_MODIFIED){
+            var attr = evt.wrapped.attrName;
+            if(!attr){
+                this.xflowInputNode.data.setValue(this.node.value);
+            }
+            else if(attr == "name"){
+                this.xflowInputNode.name = this.node.name;
+            }
+            else if(attr == "seqnr"){
+                this.xflowInputNode.seqnr = this.node.seqnr;
+            }
+        }
     };
 
     /**

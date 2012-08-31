@@ -1,4 +1,4 @@
-XML3D.xflow.register("noiseImage", {
+Xflow.registerOperator("noiseImage", {
     outputs: [{name: 'image', tupleSize: '1'}],
     params:  ['width','height','scale','minFreq','maxFreq'],
     evaluate: function(width,height,scale,minFreq,maxFreq) {
@@ -7,24 +7,24 @@ XML3D.xflow.register("noiseImage", {
         height = height[0];
         minFreq = minFreq[0];
         maxFreq = maxFreq[0];
-        
+
         img.width =  width;
         img.height = height;
         var ctx = img.getContext("2d");
         if(!ctx)
             throw("Could not create 2D context.");
-        
-        var id = ctx.getImageData(0, 0, width, height); 
+
+        var id = ctx.getImageData(0, 0, width, height);
         var pix = id.data;
         this.noise = this.noise || new SimplexNoise();
         var noise = this.noise;
-        
+
         var useTurbulence = minFreq != 0.0 && maxFreq != 0.0 && minFreq < maxFreq;
 
         var snoise = function(x,y) {
             return 2.0 * noise.noise(x, y) - 1.0;
         };
-        
+
         var turbulence = function(minFreq, maxFreq, s, t) {
             var value = 0;
             for (var f = minFreq; f < maxFreq; f *= 2)
@@ -33,7 +33,7 @@ XML3D.xflow.register("noiseImage", {
             }
             return value;
         };
-        
+
         for (var y = 0; y < height; ++y)
         {
             var t = y / height * scale[1];
@@ -50,7 +50,7 @@ XML3D.xflow.register("noiseImage", {
                 pix[offset+3] = 255;
             }
         }
-        
+
         ctx.putImageData(id, 0, 0);
         //console.log(img);
         this.image = img;

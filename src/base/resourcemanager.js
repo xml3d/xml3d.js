@@ -111,7 +111,7 @@
      *
      * @param {XML3D.URI} uri
      * @param {Object} type
-     * @returns
+     * @returns {XML3D.base.AdapterHandle}
      */
     ResourceManager.prototype.getExternalAdapter = function(uri, type) {
 

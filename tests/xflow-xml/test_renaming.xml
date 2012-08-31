@@ -1,0 +1,33 @@
+<XflowTest>
+    <Input>
+        <data id="data1">
+            <int name="index" id="index_1" >0 1 2 1 2 3</int>
+            <float3 name="position" id="position_1">0 1.0 2.0 3.0 5.0 4.0</float3>
+            <float3 name="normal" id="normal_1" >0 1 0 1 0 0 0 0 1</float3>
+        </data>
+        
+         <data id="data2" src="#data1" filter="rename({index2: index, index: position, normal1: normal, normal2: normal})" />        
+    </Input>
+    <TestProcess>
+    
+        <Check title="Check Original Data" data="#data1">
+            <MatchInput name="index" input="#index_1" />
+            <MatchInput name="position" input="#position_1" />
+            <MatchInput name="normal" input="#normal_1" />
+        </Check>
+        <Check title="Check Renamed Data" data="#data2">
+            <MatchInput name="index2" input="#index_1" />
+            <MatchInput name="index" input="#position_1" />
+            <MatchInput name="normal1" input="#normal_1" />
+            <MatchInput name="normal2" input="#normal_1" />
+        </Check>
+        <Modification title="Change renaming">
+            <ChangeAttribute node="#data2" attrName="filter" newValue="rename({index: index, index: position, index: normal})" />            
+        </Modification>
+        <Check title="Check Renamed Data after Change" data="#data2">
+            <MatchInput name="index" input="#normal_1" />
+            <MatchInput name="position" input="#position_1" />
+            <MatchNull name="normal" />
+        </Check>
+    </TestProcess>
+</XflowTest>

@@ -1,0 +1,49 @@
+<XflowTest>
+    <Input>
+    
+        <data id="data1" compute="pos = xflow.morph(value, valueAdd, weight)">
+            <int name="index" id="index_1" >0 1 2 1 2 3</int>
+            <float3 name="value" id="position_1">0 0 0  1 0 0  1 1 0  0 1 0</float3>
+            <float3 name="valueAdd" id="positionAdd_1">0 0 1  0 0 -1  0 0 1  0 0 -1</float3>
+            <float name="weight" id="weight_1" >0.5</float>
+        </data>
+        
+    </Input>
+    <TestProcess>
+
+        <Check title="Check initial value" data="#data1" filter="index valueAdd weight pos" >
+            <MatchInput name="index" input="#index_1" />
+            <MatchInput name="valueAdd" input="#positionAdd_1" />
+            <MatchInput name="weight" input="#weight_1" />
+            <MatchData name="pos" type="float3" >0 0 0.5  1 0 -0.5  1 1 0.5  0 1 -0.5</MatchData>
+        </Check>
+        
+        <Modification title="Remove Script" >
+            <ChangeAttribute node="#data1" attrName="compute" newValue="" />     
+        </Modification>
+        
+        <Check title="Check output without script" data="#data1" filter="index valueAdd weight pos" >
+            <MatchInput name="index" input="#index_1" />
+            <MatchInput name="valueAdd" input="#positionAdd_1" />
+            <MatchInput name="weight" input="#weight_1" />
+            <MatchNull name="pos" />
+        </Check>
+        
+        <Modification title="Add Script again" >
+            <ChangeAttribute node="#data1" attrName="compute" newValue="result = xflow.morph({value: value, valueAdd: valueAdd, weight: weight})" />     
+        </Modification>
+        
+        <Check title="Check output after added Script" data="#data1" filter="index valueAdd weight result" >
+            <MatchInput name="index" input="#index_1" />
+            <MatchInput name="valueAdd" input="#positionAdd_1" />
+            <MatchInput name="weight" input="#weight_1" />
+            <MatchData name="result" type="float3" >0 0 0.5  1 0 -0.5  1 1 0.5  0 1 -0.5</MatchData>
+        </Check>
+       
+        
+        
+        <!-- TODO: Check what happens if we change to another script that has a differen output signature -->
+           
+    </TestProcess>
+</XflowTest>
+

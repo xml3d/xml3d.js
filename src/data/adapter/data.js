@@ -2,6 +2,9 @@ XML3D.data = XML3D.data || {};
 
 (function() {
 
+
+XML3D.data.xflowGraph = new Xflow.Graph();
+
 /**
  * @interface
  */
@@ -29,33 +32,11 @@ IDataAdapter.prototype.addParentAdapter = function(adapter) {
 XML3D.data.DataAdapter = function(factory, node) {
     XML3D.base.Adapter.call(this, factory, node);
 
-    this.cachedOutputs = null;
-    this.nameMap = {};
-    this.tables = [];
+    // Node handles for src and proto
     this.handles = {};
-
-    /*
-     * Creates DataAdapter instances for the node's children and registers
-     * itself as observer in those children instances. This approach is
-     * needed for being notified about changes in the child elements. If the
-     * data of a children is changed, the whole parent element must be
-     * considered as changed.
-     */
-
-    this.buildMap = function() {
-        var map = this.node.map;
-        if (map) {
-            var entries = map.split(/\s+/);
-            for ( var i = 0; i < entries.length; i++) {
-                var entry = entries[i].split(/\s*:=\s*/);
-                this.nameMap[entry[1]] = entry[0];
-            }
-        }
-    };
+    this.xflowDataNode = null;
 };
-XML3D.data.DataAdapter.prototype = new XML3D.base.Adapter();
-XML3D.data.DataAdapter.prototype.constructor = XML3D.data.DataAdapter;
-
+XML3D.createClass(XML3D.data.DataAdapter, XML3D.base.Adapter);
 /**
  *
  * @param aType
@@ -66,31 +47,35 @@ XML3D.data.DataAdapter.prototype.isAdapterFor = function(aType) {
 };
 
 XML3D.data.DataAdapter.prototype.init = function() {
-    var xflow = this.resolveScript();
-    if (xflow)
-        this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
+    //var xflow = this.resolveScript();
+    //if (xflow)
+    //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
+
+    this.xflowDataNode = XML3D.data.xflowGraph.createDataNode();
 
     this.updateHandle("src");
+    this.updateHandle("proto");
+    this.xflowDataNode.setFilter(this.node.getAttribute("filter"));
+    this.xflowDataNode.setCompute(this.node.getAttribute("compute"));
+    recursiveDataAdapterConstruction(this);
 
-    this.buildMap();
-    var that = this;
-    this.forEachChildAdapter(function(adapter) {
-        adapter.addParentAdapter && adapter.addParentAdapter(that);
-    });
 };
 
-XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {
-    if (this.handles[attributeName])
-        this.handles[attributeName].removeListener(this);
-    this.handles[attributeName] = this.factory.getAdapterURI(this.node.getAttribute(attributeName));
-    this.handles[attributeName].addListener(this);
+function recursiveDataAdapterConstruction(adapter){
+    for ( var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
+        var subadapter = adapter.factory.getAdapter(child);
+        if(subadapter){
+            adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
+        }
+    }
 }
 
-XML3D.data.DataAdapter.prototype.referredAdapterChanged = function(adapterHandle) {
-    this.cachedInputs = null;
-    for ( var t in this.tables) {
-        this.rebuildStructure(this.tables[t]);
-    }
+XML3D.data.DataAdapter.prototype.getXflowNode = function(){
+    return this.xflowDataNode;
+}
+
+XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
+    return new Xflow.ComputeRequest(this.xflowDataNode, filter, callback);
 }
 
 /**
@@ -100,18 +85,59 @@ XML3D.data.DataAdapter.prototype.referredAdapterChanged = function(adapterHandle
  * DataAdapter are notified about data changes via their notifyDataChanged()
  * method.
  *
- * @param e notification of type XML3D.Notification
+ * @param evt notification of type XML3D.Notification
  */
-XML3D.data.DataAdapter.prototype.notifyChanged = function(e) {
-    // TODO: Only update src when changed
-    this.updateHandle("src");
+XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
 
-    // XML3D.debug.logWarning("not handled change in data adapter: " + e);
-    this.cachedInputs = null;
-    for ( var t in this.tables) {
-        this.rebuildStructure(this.tables[t]);
+    if (evt.type == XML3D.events.NODE_INSERTED) {
+        var insertedNode = evt.wrapped.target;
+        var insertedXflowNode = this.factory.getAdapter(insertedNode).getXflowNode();
+        var sibling = insertedNode, followUpAdapter = null;
+        do{
+            sibling = sibling.nextSibling;
+        }while(sibling && !(followUpAdapter = this.factory.getAdapter(sibling)))
+        if(followUpAdapter)
+            this.xflowDataNode.insertBefore(insertedXflowNode, followUpAdapter.getXflowNode());
+        else
+            this.xflowDataNode.appendChild(insertedXflowNode);
+        return;
+    }
+    else if (evt.type == XML3D.events.NODE_REMOVED) {
+        var removedXflowNode = this.factory.getAdapter(evt.wrapped.target).getXflowNode();
+        this.xflowDataNode.removeChild(removedXflowNode);
+        return;
+    } else if (evt.type == XML3D.events.VALUE_MODIFIED) {
+        var attr = evt.wrapped.attrName;
+        if(attr == "src" || attr == "proto" ){
+            this.updateHandle(attr);
+        }
+        else if(attr == "filter"){
+            this.xflowDataNode.setFilter(this.node.getAttribute(attr))
+        }
+        else if(attr == "compute"){
+            this.xflowDataNode.setCompute(this.node.getAttribute(attr))
+        }
+        return;
     }
 };
+XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {
+    if (this.handles[attributeName])
+        this.handles[attributeName].removeListener(this);
+    this.handles[attributeName] = this.factory.getAdapterURI(this.node.getAttribute(attributeName));
+    this.handles[attributeName].addListener(this);
+    this.referredAdapterChanged(this.handles[attributeName]);
+};
+
+XML3D.data.DataAdapter.prototype.referredAdapterChanged = function(adapterHandle) {
+    var adapter = adapterHandle.getAdapter();
+    if(this.handles["src"] == adapterHandle){
+        this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
+    }
+    if(this.handles["proto"] == adapterHandle){
+        this.xflowDataNode.protoNode = adapter ? adapter.getXflowNode() : null;
+    }
+};
+
 
 XML3D.data.DataAdapter.prototype.getInputs = function() {
     if (this.cachedInputs)
@@ -230,6 +256,7 @@ XML3D.data.DataAdapter.prototype.requestData = function(table) {
     this.rebuildStructure(table);
     return table.providers;
 };
+
 
 /**
  * @param handler

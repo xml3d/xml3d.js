@@ -71,14 +71,14 @@
                 return p.e[current];
             },
             set : function(v) {
-                // Attribute is set to whatever comes in
-            this.setAttribute(id, v);
-            var value = typeof v == 'string' ? v.toLowerCase() : undefined;
-            if (value && p.e[value] !== undefined)
-                current = p.e[value];
-            else
-                current = p.d;
-        }
+                    // Attribute is set to whatever comes in
+                this.setAttribute(id, v);
+                var value = typeof v == 'string' ? v.toLowerCase() : undefined;
+                if (value && p.e[value] !== undefined)
+                    current = p.e[value];
+                else
+                    current = p.d;
+            }
         };
     };
     handler.EnumAttributeHandler.prototype = new AttributeHandler();

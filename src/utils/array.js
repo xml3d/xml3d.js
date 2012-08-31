@@ -37,6 +37,18 @@ if (!Array.filter) {
     };
 }
 
+if (!Array.erase) {
+    Array.erase = function(array, object) {
+        var erased = false;
+        var idx = -1;
+        while( (idx = array.indexOf(object) ) != -1){
+            array.splice(idx, 1);
+            erased = true;
+        }
+        return erased;
+    };
+}
+
 if (!Array.isArray) {
     Array.isArray = function(arg) {
         return Object.prototype.toString.call(arg) == '[object Array]';

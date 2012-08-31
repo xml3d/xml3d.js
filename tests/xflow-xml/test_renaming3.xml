@@ -1,0 +1,27 @@
+<!--
+	Purpose of Test:
+	Check field overloading - some weird cases
+-->
+<XflowTest>
+    <Input>
+        <data id="data1" filter="rename( {B: A } )" >
+            <float name="A" id="a1" >0.0</float>
+           	<float name="B" id="b1" >1.0</float>
+        </data>   
+        
+        <data id="data2" filter="rename( {A: B } )" >
+            <float name="A" id="a2" >0.0</float>
+           	<float name="B" id="b2" >1.0</float>
+        </data>   
+    </Input>
+    <TestProcess>
+        <Check title="Check merged-renamed data #1" data="#data1">
+            <MatchInput name="B" input="#a1" />
+            <MatchNull name="A" />
+        </Check>
+        <Check title="Check merged-renamed data #2" data="#data2">
+            <MatchInput name="A" input="#b2" />
+            <MatchNull name="B" />
+        </Check>
+    </TestProcess>
+</XflowTest>

@@ -25,44 +25,39 @@
     var TextureDataAdapter = function(factory, node)
     {
         XML3D.data.DataAdapter.call(this, factory, node);
-        XML3D.data.ProviderEntry.call(this);
         this.table = new XML3D.data.ProcessTable(this, ["image"]);
     };
-    XML3D.createClass(TextureDataAdapter, XML3D.data.DataAdapter);
-    XML3D.extend(TextureDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
+    XML3D.createClass(TextureDataAdapter, XML3D.base.Adapter);
 
 
     TextureDataAdapter.prototype.init = function() {
         var node = this.node;
 
-        var options = ({
-            //isDepth          : false,
-            //depthMode        : gl.LUMINANCE,
-            //depthCompareMode : gl.COMPARE_R_TO_TEXTURE,
-            //depthCompareFunc : gl.LEQUAL,
-            //flipY            : true,
-            //premultiplyAlpha : false,
-            //onload           : null
-            wrapS            : clampToGL(node.wrapS),
-            wrapT            : clampToGL(node.wrapT),
-            minFilter        : filterToGL(node.filterMin),
-            magFilter        : filterToGL(node.filterMag),
-            generateMipmap   : false
-        });
+        var imageAdapter = this.factory.getAdapter(node.firstElementChild, XML3D.data.XML3DDataAdapterFactory.prototype);
+        var buffer = new Xflow.TextureEntry(imageAdapter.node);
+
+        this.xflowInputNode = XML3D.data.xflowGraph.createInputNode();
+        this.xflowInputNode.name = node.name;
+        this.xflowInputNode.data = buffer;
+        var options = buffer.getSamplerConfig();
+
+        options.wrapS = clampToGL(node.wrapS);
+        options.wrapT = clampToGL(node.wrapT);
+        options.minFilter = filterToGL(node.filterMin);
+        options.magFilter = filterToGL(node.filterMin);
 
         // TODO: automatically set generateMipmap to true when mipmap dependent filters are used
         if (node.getAttribute("mipmap") == "true")
-            options.generateMipmap = true;
+            options.filterMip = true;
 
-        var ca = this.factory.getAdapter(node.firstElementChild, XML3D.data.XML3DDataAdapterFactory.prototype);
-        if (ca.requestOutputData) {
-            var dt = ca.requestOutputData(this.table);
-            options.imageAdapter = dt.image;
+        if (imageAdapter.requestOutputData) {
+            var dt = imageAdapter.requestOutputData(this.table);
+            buffer.userData.imageAdapter = dt.image;
         }
         else
-            options.imageAdapter = ca;
-        this.value = options;
-    };
+            buffer.userData.imageAdapter = imageAdapter;
+
+};
 
     TextureDataAdapter.prototype.getOutputs = function() {
         var result = {};
@@ -72,6 +67,13 @@
 
     TextureDataAdapter.prototype.getValue = function() {
         return this.value;
+    };
+
+    /**
+     * @return {Element}
+     */
+    TextureDataAdapter.prototype.getXflowNode = function() {
+        return this.xflowInputNode;
     };
 
     /**

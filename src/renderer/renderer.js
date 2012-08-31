@@ -24,6 +24,7 @@ var Renderer = function(handler, width, height) {
 	this.dataFactory = new XML3D.data.XML3DDataAdapterFactory(handler);
     this.shaderManager = new XML3D.webgl.XML3DShaderManager(this.gl, this, this.dataFactory, this.factory);
     this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
+    this.changeListener = new XML3D.webgl.DataChangeListener(this);
     this.camera = this.initCamera();
     this.width = width;
     this.height = height;
@@ -482,13 +483,6 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
 
             gl.enableVertexAttribArray(shaderAttribute.location);
             gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-
-            //TODO: handle changes to data node through renderer.applyChangeToObject system
-            /*if (dataTable[name] && dataTable[name].forcedUpdate) {
-                gl.bufferData(gl.ARRAY_BUFFER, dataTable[name].data, gl.STATIC_DRAW);
-                dataTable[name].forcedUpdate = false;
-            }*/
-
             gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
         }
 

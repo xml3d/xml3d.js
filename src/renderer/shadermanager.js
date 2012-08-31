@@ -98,11 +98,13 @@
 
         if (shaderAdapter) {
             var dataTable = shaderAdapter.requestData(["transparency", "diffuseTexture", "specularTexture", "normalTexture", "useVertexColor"]);
-    	    if (dataTable.transparency) {
-    	        flags.hasTransparency = dataTable.transparency.value[0] > 0;
+            var tmp = dataTable.getOutputData("transparency");
+    	    if (tmp) {
+    	        flags.hasTransparency = tmp.getValue()[0] > 0;
     	    }
-    	    flags.hasTextures = dataTable.diffuseTexture !== undefined;
-    	    flags.hasVColors = dataTable.useVertexColor && dataTable.useVertexColor.value[0] == true;
+    	    flags.hasTextures = dataTable.getOutputData("diffuseTexture") !== undefined;
+    	    tmp = dataTable.getOutputData("useVertexColor");
+    	    flags.hasVColors = tmp && tmp.getValue()[0] == true;
         }
 
     	if (shaderNode && shaderNode.hasAttribute("script"))
@@ -144,8 +146,14 @@
     			for (var name in shader.uniforms) {
     				nameArray.push(name);
     			}
-    			var dataTable = shaderAdapter.requestData(nameArray);
-    			this.setUniformVariables(shader, dataTable);
+    			var result = shaderAdapter.requestData(nameArray);
+    			var table = {};
+    			var tmp;
+    			for (var i=0; i<nameArray.length; i++) {
+    			    var name = nameArray[i];
+    			    table[name] = (tmp = result.getOutputData(name)) ? tmp.getValue() : undefined;
+    			}
+    			this.setUniformVariables(shader, table);
     		}
     	}
 
@@ -363,22 +371,24 @@
     	return sp;
     };
 
+    //TODO: only set uniform if it has changed
     XML3DShaderManager.prototype.setUniformVariables = function(shader, uniforms) {
-    	for (var name in uniforms) {
-    		var u = uniforms[name];
 
-    		if (u.value)
-    			u = u.value;
-    		if (u.clean)
-    			continue;
-    		if (u.length == 1)
-    			u = u[0]; // Either a single float, int or bool
+        if (!uniforms)
+            return; //TODO: this happens with custom shaders, should be removed when we move to the new shader system
+    	for (var name in shader.uniforms) {
+    	    var u = uniforms[name];
 
-    		if (shader.uniforms[name]) {
-    			this.setUniform(this.gl, shader.uniforms[name], u);
-    		}
+            if (!u)
+                continue;
+
+            if (u.length == 1)
+                u = u[0]; // Either a single float, int or bool
+
+            if (shader.uniforms[name]) {
+                this.setUniform(this.gl, shader.uniforms[name], u);
+            }
     	}
-
     };
 
     XML3DShaderManager.prototype.bindShader = function(shader) {
@@ -477,7 +487,7 @@
 
     	for (var name in shader.samplers) {
     	    var sampler = shader.samplers[name];
-            var texture = dataTable[name];
+            var texture = dataTable.getOutputData(name);
 
             if (!texture) {
     			//XML3D.debug.logWarning("Can't find required texture with name='"+name+"'. Using default shader instead.");
@@ -485,16 +495,17 @@
     			continue;
     		}
 
-    		var dtopt = dataTable[name].getValue();
-    		this.createTexture(dtopt, sampler, texUnit);
+    		this.createTexture(texture, sampler, texUnit);
     		texUnit++;
     	}
 
     	return true;
     };
 
-    XML3DShaderManager.prototype.createTexture = function(dtopt, sampler, texUnit) {
-    	if(dtopt.imageAdapter && dtopt.imageAdapter.getValue)
+    XML3DShaderManager.prototype.createTexture = function(texEntry, sampler, texUnit) {
+        var dtopt = texEntry.getSamplerConfig();
+        var texData = texEntry.userData;
+    	if(texData.imageAdapter && texData.imageAdapter.getValue)
 		{
 		    var renderer = this.renderer;
 		    sampler.info = new TextureInfo({
@@ -502,7 +513,7 @@
 		            renderer.requestRedraw.call(renderer, "Texture loaded");
 		        }
 		    });
-		    sampler.info.createEmpty(this.gl, texUnit, dtopt.imageAdapter.getValue(sampler.info.setLoaded, sampler.info));
+		    sampler.info.createEmpty(this.gl, texUnit, texData.imageAdapter.getValue(sampler.info.setLoaded, sampler.info));
 		    sampler.info.setOptions({
                 isDepth          : false,
                 minFilter        : dtopt.minFilter,
@@ -521,13 +532,11 @@
 
     XML3DShaderManager.prototype.replaceTexture = function(adapter, texture) {
     	this.destroyTexture(texture);
-    	var dtable = adapter.requestData([texture.name]);
-    	var dtopt = dtable[texture.name].getValue();
+    	var dtable = adapter.requestData([texture.name]).getOutputData(texture.name);
 
-    	//FIX ME PLEASE
-    	dtopt.imageAdapter.image = null;
+    	dtable.userData.imageAdapter.image = null;
 
-    	this.createTexture(dtopt, texture, texture.texUnit);
+    	this.createTexture(dtable, texture, texture.texUnit);
 
     	return texture;
 

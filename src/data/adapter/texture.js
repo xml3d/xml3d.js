@@ -52,10 +52,8 @@
 
         if (imageAdapter.requestOutputData) {
             var dt = imageAdapter.requestOutputData(this.table);
-            buffer.userData.imageAdapter = dt.image;
+            buffer.setImage(dt.image);
         }
-        else
-            buffer.userData.imageAdapter = imageAdapter;
 
 };
 

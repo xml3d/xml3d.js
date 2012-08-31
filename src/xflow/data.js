@@ -25,6 +25,7 @@ var SamplerConfig = function(){
     this.colorR = 0;
     this.colorG = 0;
     this.colorB = 0;
+    this.generateMipMap = 0;
 };
 Xflow.SamplerConfig = SamplerConfig;
 

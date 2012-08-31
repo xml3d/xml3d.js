@@ -482,13 +482,6 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
 
             gl.enableVertexAttribArray(shaderAttribute.location);
             gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-
-            //TODO: handle changes to data node through renderer.applyChangeToObject system
-            /*if (dataTable[name] && dataTable[name].forcedUpdate) {
-                gl.bufferData(gl.ARRAY_BUFFER, dataTable[name].data, gl.STATIC_DRAW);
-                dataTable[name].forcedUpdate = false;
-            }*/
-
             gl.vertexAttribPointer(shaderAttribute.location, vbo.tupleSize, vbo.glType, false, 0, 0);
         }
 

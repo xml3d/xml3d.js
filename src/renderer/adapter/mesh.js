@@ -130,10 +130,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 that.updateData.call(that, request, changeType);
         });
         var dataTable = this.computeRequest.getResult();
-        for (var attr in staticAttributes) {
-            var dataEntry = dataTable.getOutputData(staticAttributes[attr]);
+        for (var i=0; i<staticAttributes.length; i++) {
+            var dataEntry = dataTable.getOutputData(staticAttributes[i]);
             if(dataEntry)
-                dataEntry.webglDataChanged = Xflow.DataNotifications.CHANGE_SIZE;
+                dataEntry.userData.webglDataChanged = Xflow.DataNotifications.CHANGE_SIZE;
         }
         this.dataChanged();
     };
@@ -189,45 +189,47 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         for ( var i in staticAttributes) {
             var attr = staticAttributes[i];
             var entry = dataResult.getOutputData(attr);
-            if (!(entry && entry.webglDataChanged))
+            if (!entry)
                 continue;
 
-            switch(entry.webglDataChanged) {
+            var buffer = entry.userData.buffer;
+
+            switch(entry.userData.webglDataChanged) {
             case Xflow.DataNotifications.CHANGED_CONTENT:
-                var buffer = entry.data.buffer;
                 var bufferType = attr == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
                 gl.bindBuffer(bufferType, buffer);
                 gl.bufferSubData(bufferType, 0, entry.getValue());
                 break;
             case Xflow.DataNotifications.CHANGE_SIZE:
-                var buffer;
                 if (attr == "index") {
                     buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
-                    meshInfo.isIndexed = true;
                 } else {
                     buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.getValue());
                 }
                 buffer.tupleSize = entry.getTupleSize();
-                meshInfo.vbos[attr] = [];
-                meshInfo.vbos[attr][0] = buffer;
+                entry.userData.buffer = buffer;
                 break;
              default:
                  break;
             }
+
+            meshInfo.vbos[attr] = [];
+            meshInfo.vbos[attr][0] = buffer;
+
             //TODO: must set isIndexed if indices are removed
             if (attr == "position")
                 calculateBBox = true;
+            if (attr == "index")
+                meshInfo.isIndexed = true;
 
-            delete entry.webglDataChanged;
+            delete entry.userData.webglDataChanged;
         }
 
         //Calculate a bounding box for the mesh
         if (calculateBBox) {
             var positions = dataResult.getOutputData("position").getValue();
-            if (positions.data)
-                positions = positions.data;
-            this.bbox = XML3D.webgl.calculateBoundingBox(positions, meshInfo.isIndexed ? dataResult.getOutputData("index") : null);
+            this.bbox = XML3D.webgl.calculateBoundingBox(positions, meshInfo.isIndexed ? dataResult.getOutputData("index").getValue() : null);
             meshInfo.bbox.set(this.bbox);
         }
 

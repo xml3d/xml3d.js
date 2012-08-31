@@ -137,9 +137,8 @@ BufferEntry.prototype.getValue = function(){
  */
 var TextureEntry = function(image){
     Xflow.DataEntry.call(this, DataEntry.TYPE.TEXTURE);
-    this._type = type;
-    this._image = value;
-    this._sampler = new SamplerConfig();
+    this._image = image;
+    this._samplerConfig = new SamplerConfig();
 };
 XML3D.createClass(TextureEntry, Xflow.DataEntry);
 Xflow.TextureEntry = TextureEntry;
@@ -156,8 +155,8 @@ TextureEntry.prototype.getImage = function(){
 }
 
 /** @return {Object} */
-TextureEntry.prototype.getSampler = function(){
-    return this._sampler;
+TextureEntry.prototype.getSamplerConfig = function(){
+    return this._samplerConfig;
 };
 
 

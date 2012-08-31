@@ -137,9 +137,9 @@
 
         var shaderNode = shaderAdapter.node;
         var shaderId = shaderNode.id;
-        var shader = this.shaders[shaderId];
+        var program = this.shaders[shaderId];
 
-        if (shader)
+        if (program)
             return shaderId;
 
         var scriptURI = new XML3D.URI(shaderNode.script);
@@ -151,17 +151,16 @@
         var material = this.createMaterialFromShaderDescriptor(descriptor);
         var dataTable = shaderAdapter.requestData(material.getRequestFields());
 
-        shader = material.getProgram(lights, dataTable);
-        this.shaders[shaderId] = shader;
+        program = material.getProgram(lights, dataTable);
+        XML3D.webgl.checkError(this.gl, "getProgram");
+        this.shaders[shaderId] = program;
+        this.gl.useProgram(program.handle);
+        XML3D.webgl.checkError(this.gl, "useProgram");
 
-        var texturesCreated = this.createTexturesFromComputeResult(shader, dataTable);
-        if (!texturesCreated) {
-            this.destroyShader(shader);
-            shaderId = "defaultShader";
-        } else {
-            this.setUniformsFromComputeResult(shader, dataTable);
-        }
-
+        this.setUniformsFromComputeResult(program, dataTable);
+        XML3D.webgl.checkError(this.gl, "setUniforms");
+        this.createTexturesFromComputeResult(program, dataTable);
+        XML3D.webgl.checkError(this.gl, "setSamplers");
         return shaderId;
     };
 

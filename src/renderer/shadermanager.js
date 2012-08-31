@@ -21,11 +21,12 @@
         this.onload = opt.onload;
     };
 
-    TextureInfo.prototype.createEmpty = function(gl, unit, image) {
+    TextureInfo.prototype.createEmpty = function(gl, unit, image, config) {
         this.status = TEXTURE_STATE.UNLOADED;
         this.handle = gl.createTexture();
         this.unit = unit;
         this.image = image;
+        this.config = config;
     };
 
     TextureInfo.prototype.setLoaded = function() {
@@ -34,10 +35,6 @@
         this.status = TEXTURE_STATE.LOADED;
         if (this.onload)
             this.onload.call(this);
-    };
-
-    TextureInfo.prototype.setOptions = function(opt) {
-        this.options = opt;
     };
 
     var InvalidTexture = function() {
@@ -526,25 +523,16 @@
      * @param {number} texUnit
      */
     XML3DShaderManager.prototype.createTexture = function(texEntry, sampler, texUnit) {
-
-        if (dtopt.imageAdapter && dtopt.imageAdapter.getValue) {
+        var img = texEntry.getImage();
+        if (img) {
             var renderer = this.renderer;
-            sampler.info = new TextureInfo({
+            var info = new TextureInfo({
                 onload : function() {
                     renderer.requestRedraw.call(renderer, "Texture loaded");
                 }
             });
-            sampler.info.createEmpty(this.gl, texUnit, dtopt.imageAdapter.getValue(sampler.info.setLoaded, sampler.info));
-            sampler.info.setOptions({
-                isDepth : false,
-                minFilter : dtopt.minFilter,
-                magFilter : dtopt.magFilter,
-                wrapS : dtopt.wrapS,
-                wrapT : dtopt.wrapT,
-                generateMipmap : dtopt.generateMipmap,
-                flipY : true,
-                premultiplyAlpha : true
-            });
+            info.createEmpty(this.gl, texUnit, img, texEntry.getSamplerConfig());
+            sampler.info = info;
         } else {
             sampler.info = new InvalidTexture();
             XML3D.debug.logWarning("No image found for texture: " + sampler);

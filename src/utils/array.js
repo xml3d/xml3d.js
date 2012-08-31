@@ -49,6 +49,13 @@ if (!Array.erase) {
     };
 }
 
+if (!Array.set) {
+    Array.set = function(array, offset, value) {
+        for (var i=0; i < value.length; i++)
+            array[offset+i] = value[i];
+    };
+}
+
 if (!Array.isArray) {
     Array.isArray = function(arg) {
         return Object.prototype.toString.call(arg) == '[object Array]';

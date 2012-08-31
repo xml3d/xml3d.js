@@ -32,10 +32,11 @@ var Renderer = function(handler, width, height) {
 
     //Light information is needed to create shaders, so process them first
 	this.lights = {
-	        changed: true,
+	        changed : true,
 	        point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
 	        directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] }
 	};
+
     this.drawableObjects = new Array();
 	this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, true, mat4.identity(mat4.create()), null, false);
     if (this.lights.length < 1) {
@@ -207,6 +208,21 @@ Renderer.prototype.shaderDataChanged = function(adapter, attrName, newValue, tex
 
     if (attrName != "src")
         this.handler.redraw("A shader parameter was changed");
+};
+
+/**
+ *
+ * @param {string} lightType
+ * @param {string} field
+ * @param {number} offset
+ * @param {Array.<number>} newValue
+ * @return
+ */
+Renderer.prototype.changeLightData = function(lightType, field, offset, newValue) {
+        var data = this.lights[lightType][field];
+        if (!data) return;
+        Array.set(data, offset, newValue);
+        this.lights.changed = true;
 };
 
 Renderer.prototype.removeDrawableObject = function(obj) {
@@ -420,6 +436,7 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         parameters["directionalLightDirection[0]"] = lights.directional.direction;
         parameters["directionalLightVisibility[0]"] = lights.directional.visibility;
         parameters["directionalLightIntensity[0]"] = lights.directional.intensity;
+        lights.changed = false;
 	}
 
     shaderId = shaderId || objectArray[0].shader || "defaultShader";

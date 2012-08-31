@@ -72,8 +72,11 @@ Object.defineProperty(NameMapping.prototype, "length", {
 NameMapping.prototype.getDestName = function(idx){
     return this._destNames[idx];
 };
+NameMapping.prototype.getSrcName = function(idx){
+    return this._srcNames[idx];
+};
 
-NameMapping.prototype.getSrcName = function(destName){
+NameMapping.prototype.getSrcNameFromDestName = function(destName){
     var idx = this._destNames.indexOf(destName);
     return idx == -1 ? null : this._srcNames[idx];
 };
@@ -215,7 +218,7 @@ NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType
 };
 
 NameMapping.prototype.getScriptInputName= function(index, destName){
-    var srcName = this.getSrcName(destName);
+    var srcName = this.getSrcNameFromDestName(destName);
     return srcName ? srcName : destName;
 }
 

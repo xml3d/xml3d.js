@@ -7,20 +7,28 @@
  */
 var Result = function(){
     this._outputNames = [];
+    /** @type {Object.<string,DataEntry>} */
     this._dataEntries = {};
 };
 Xflow.Result = Result;
 
 Object.defineProperty(Result.prototype, "outputNames", {
     set: function(v){
-       throw "outputNames is readonly"
+       throw "outputNames is readonly";
     },
     get: function(){ return this._outputNames; }
 });
 
 Result.prototype.getOutputData = function(name){
     return this._dataEntries[name];
-}
+};
+
+/**
+ * @returns {Object.<string,DataEntry>}
+ */
+Result.prototype.getOutputMap = function() {
+    return this._dataEntries;
+};
 
 /**
  * @constructor

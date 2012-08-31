@@ -157,12 +157,12 @@
         shader = material.getProgram(lights, dataTable);
         this.shaders[shaderId] = shader;
 
-        var texturesCreated = this.createTextures(shader, shaderAdapter);
+        var texturesCreated = this.createTexturesFromComputeResult(shader, dataTable);
         if (!texturesCreated) {
             this.destroyShader(shader);
             shaderId = "defaultShader";
         } else {
-            this.setUniformVariables(shader, dataTable);
+            this.setUniformsFromComputeResult(shader, dataTable);
         }
 
         return shaderId;
@@ -360,6 +360,20 @@
         return sp;
     };
 
+/**
+ *
+ */
+    XML3DShaderManager.prototype.setUniformsFromComputeResult = function(programObject, data) {
+        var dataMap = data.getOutputMap();
+        var uniforms = programObject.uniforms;
+        for (var name in uniforms) {
+            var entry = dataMap[name];
+            if(entry) {
+                this.setUniform(uniforms[name], entry.getValue());
+            }
+        }
+    };
+
     XML3DShaderManager.prototype.setUniformVariables = function(shader, uniforms) {
         for ( var name in uniforms) {
             var u = uniforms[name];
@@ -483,35 +497,36 @@
         this.gl.deleteProgram(shader.handle);
     };
 
-    XML3DShaderManager.prototype.createTextures = function(shader, shaderAdapter) {
+    /**
+     *
+     * @param {ProgramObject} programObject
+     * @param {Xflow.ComputeResult} result
+     */
+    XML3DShaderManager.prototype.createTexturesFromComputeResult = function(programObject, result) {
         var texUnit = 0;
-        var nameArray = [];
+        var samplers = programObject.samplers;
+        for ( var name in samplers) {
+            var sampler = samplers[name];
+            var entry = result[name];
 
-        for ( var name in shader.samplers) {
-            nameArray.push(name);
-        }
-        var dataTable = shaderAdapter.requestData(nameArray);
-
-        for ( var name in shader.samplers) {
-            var sampler = shader.samplers[name];
-            var texture = dataTable[name];
-
-            if (!texture) {
-                // XML3D.debug.logWarning("Can't find required texture with
-                // name='"+name+"'. Using default shader instead.");
+            if (!entry) {
                 sampler.info = new InvalidTexture();
                 continue;
             }
 
-            var dtopt = dataTable[name].getValue();
-            this.createTexture(dtopt, sampler, texUnit);
+            this.createTextureFromEntry(entry, sampler, texUnit);
             texUnit++;
         }
-
-        return true;
     };
 
-    XML3DShaderManager.prototype.createTexture = function(dtopt, sampler, texUnit) {
+    /**
+     *
+     * @param {Xflow.TextureEntry} entry
+     * @param sampler
+     * @param {number} texUnit
+     */
+    XML3DShaderManager.prototype.createTexture = function(texEntry, sampler, texUnit) {
+
         if (dtopt.imageAdapter && dtopt.imageAdapter.getValue) {
             var renderer = this.renderer;
             sampler.info = new TextureInfo({

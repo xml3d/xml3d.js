@@ -103,13 +103,12 @@ XML3D.shaders.register("diffuse", {
         "}"
     ].join("\n"),
 
-    addDirectives: function(directives, lights, samplers) {
-        var pointLights = lights && lights.point ? lights.point.length : 0;
-        var directionalLights = lights && lights.directional ? lights.directional.length : 0;
-        samplers = samplers || {};
+    addDirectives: function(directives, lights, params) {
+        var pointLights = lights.point ? lights.point.length : 0;
+        var directionalLights = lights.directional ? lights.directional.length : 0;
         directives.push("MAX_POINTLIGHTS " + pointLights);
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
-        directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in samplers ? "1" : "0"));
+        directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
     },
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],

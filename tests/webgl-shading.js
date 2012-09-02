@@ -29,7 +29,7 @@ test("Phong fragment shader", function() {
     ok(phong, "Phong shader exists");
     equal(typeof phong.addDirectives, "function", "Function 'addDirectives' exists");
     var directives = [];
-    phong.addDirectives.call(phong, directives);
+    phong.addDirectives.call(phong, directives, {}, {});
     equal(directives.length, 3, "3 directives from phong shader");
     var fragment1 = this.mergeDirectives(directives, phong.fragment);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment1, "Phong fragment without globals compiles.");
@@ -38,7 +38,7 @@ test("Phong fragment shader", function() {
     notEqual(fragment1.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
-    phong.addDirectives.call(phong, directives, { point : { length : 2 } });
+    phong.addDirectives.call(phong, directives, { point : { length : 2 } }, {});
     equal(directives.length, 3, "3 directives from phong shader");
     var fragment2 = this.mergeDirectives(directives, phong.fragment);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment2, "Phong fragment with 2 point lights compiles.");
@@ -47,7 +47,7 @@ test("Phong fragment shader", function() {
     notEqual(fragment2.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
-    phong.addDirectives.call(phong, directives, { directional : { length : 1 } });
+    phong.addDirectives.call(phong, directives, { directional : { length : 1 } }, {});
     var fragment3 = this.mergeDirectives(directives, phong.fragment);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment3, "Phong fragment with 1 directional light compiles.");
     notEqual(fragment3.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");

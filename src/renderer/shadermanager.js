@@ -365,7 +365,8 @@
         for (var name in uniforms) {
             var entry = dataMap[name];
             if(entry) {
-                this.setUniform(uniforms[name], entry.getValue());
+                var v = entry.getValue();
+                this.setUniform(uniforms[name], (v.length == 1) ? v[0] : v);
             }
         }
     };

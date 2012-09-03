@@ -78,6 +78,7 @@
             var attr = evt.wrapped.attrName;
             if(attr == "src"){
                 this.createImageFromURL(this.node.src);
+            }
         };
     };
 

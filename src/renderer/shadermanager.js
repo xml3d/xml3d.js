@@ -346,8 +346,7 @@
         for ( var name in uniforms) {
             var entry = dataMap[name];
             if (entry) {
-                var v = entry.getValue();
-                this.setUniform(uniforms[name], (v.length == 1) ? v[0] : v);
+                this.setUniform(uniforms[name], entry.getValue());
             }
         }
     };
@@ -360,8 +359,6 @@
                 u = u.value;
             if (u.clean)
                 continue;
-            if (u.length == 1)
-                u = u[0]; // Either a single float, int or bool
 
             if (shader.uniforms[name]) {
                 this.setUniform(shader.uniforms[name], u);
@@ -423,7 +420,10 @@
         case rc.BOOL:
         case rc.INT:
         case rc.SAMPLER_2D:
-            gl.uniform1i(u.location, value);
+            if (value.length)
+                gl.uniform1i(u.location, value[0]);
+            else
+                gl.uniform1i(u.location, value);
             break;
 
         case 35671: // gl.BOOL_VEC2
@@ -442,7 +442,10 @@
             break; // gl.INT_VEC4
 
         case 5126:
-            gl.uniform1f(u.location, value);
+            if (value.length)
+                gl.uniform1f(u.location, value[0]);
+            else
+                gl.uniform1f(u.location, value);
             break; // gl.FLOAT
         case 35664:
             gl.uniform2fv(u.location, value);

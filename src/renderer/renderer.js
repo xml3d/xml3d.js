@@ -203,12 +203,6 @@ Renderer.prototype.recompileShader = function(shaderAdapter) {
     this.handler.redraw("A shader was recompiled");
 };
 
-Renderer.prototype.shaderDataChanged = function(adapter, attrName, newValue, texName) {
-	this.shaderManager.shaderDataChanged(adapter, attrName, newValue, texName);
-
-    if (attrName != "src")
-        this.handler.redraw("A shader parameter was changed");
-};
 
 /**
  *

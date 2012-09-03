@@ -398,9 +398,6 @@
         var samplers = sp.samplers;
         for ( var tex in samplers) {
             this.bindTexture(samplers[tex]);
-            if (tex == "specularTexture" && sp.uniforms.useSpecularTexture) {
-                this.setUniform(sp.uniforms.useSpecularTexture, 1);
-            }
         }
     };
 

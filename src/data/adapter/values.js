@@ -2,16 +2,16 @@
 (function() {
     "use strict";
 
-    var bufferTypeTable = {};
-    bufferTypeTable['float']    = Xflow.DataEntry.TYPE.FLOAT;
-    bufferTypeTable['int']      = Xflow.DataEntry.TYPE.INT;
-    bufferTypeTable['bool']     = Xflow.DataEntry.TYPE.BOOL;
-    bufferTypeTable['float2']   = Xflow.DataEntry.TYPE.FLOAT2;
-    bufferTypeTable['float3']   = Xflow.DataEntry.TYPE.FLOAT3;
-    bufferTypeTable['float4']   = Xflow.DataEntry.TYPE.FLOAT4;
-    bufferTypeTable['int4']     = Xflow.DataEntry.TYPE.INT4;
-    bufferTypeTable['float4x4'] = Xflow.DataEntry.TYPE.FLOAT4X4;
-
+    var BUFFER_TYPE_TABLE = {};
+    BUFFER_TYPE_TABLE['float']    = Xflow.DataEntry.TYPE.FLOAT;
+    BUFFER_TYPE_TABLE['int']      = Xflow.DataEntry.TYPE.INT;
+    BUFFER_TYPE_TABLE['bool']     = Xflow.DataEntry.TYPE.BOOL;
+    BUFFER_TYPE_TABLE['float2']   = Xflow.DataEntry.TYPE.FLOAT2;
+    BUFFER_TYPE_TABLE['float3']   = Xflow.DataEntry.TYPE.FLOAT3;
+    BUFFER_TYPE_TABLE['float4']   = Xflow.DataEntry.TYPE.FLOAT4;
+    BUFFER_TYPE_TABLE['int4']     = Xflow.DataEntry.TYPE.INT4;
+    BUFFER_TYPE_TABLE['float4x4'] = Xflow.DataEntry.TYPE.FLOAT4X4;
+    XML3D.data.BUFFER_TYPE_TABLE = BUFFER_TYPE_TABLE;
     /**
      * Constructor of XML3D.data.ValueDataAdapter
      *
@@ -31,7 +31,7 @@
 
     ValueDataAdapter.prototype.init = function()
     {
-        var type = bufferTypeTable[this.node.localName];
+        var type = BUFFER_TYPE_TABLE[this.node.localName];
         var buffer = new Xflow.BufferEntry(type, this.node.value);
 
         this.xflowInputNode = XML3D.data.xflowGraph.createInputNode();

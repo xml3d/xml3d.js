@@ -127,14 +127,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var that = this;
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes,
             function(request, changeType) {
-                that.updateData.call(that, request, changeType);
+                that.dataChanged(request, changeType);
         });
-        var dataTable = this.computeRequest.getResult();
-        for (var i=0; i<staticAttributes.length; i++) {
-            var dataEntry = dataTable.getOutputData(staticAttributes[i]);
-            if(dataEntry)
-                dataEntry.userData.webglDataChanged = Xflow.DataNotifications.CHANGE_SIZE;
-        }
         this.dataChanged();
     };
 
@@ -201,6 +195,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 gl.bindBuffer(bufferType, buffer);
                 gl.bufferSubData(bufferType, 0, entry.getValue());
                 break;
+            case Xflow.DataNotifications.CHANGED_NEW:
             case Xflow.DataNotifications.CHANGE_SIZE:
                 if (attr == "index") {
                     buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));

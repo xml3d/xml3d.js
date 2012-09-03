@@ -3,91 +3,68 @@
 
     var empty = function() {};
 
-    var StaticProviderEntry = function(data) {
-        var v = null, ts = null;
+    var TYPED_ARRAY_MAP = {
+        "int" : Int32Array,
+        "int4" : Int32Array,
+        "float" : Float32Array,
+        "float2" : Float32Array,
+        "float3" : Float32Array,
+        "float4" : Float32Array,
+        "float4x4" : Float32Array,
+        "bool" : Uint8Array
+    };
+
+    function createXflowBuffer(data){
+        var v = null;
         var first = data.seq[0];
         var value = first.value;
-        switch(data.type) {
-            case "int":
-                ts = 1;
-                v = new Int32Array(value);
-                break;
-            case "int4":
-                ts = 4;
-                v = new Int32Array(value);
-                break;
-            case "float":
-                ts = 1;
-                v = new Float32Array(value);
-                break;
-            case "float2":
-                ts = 2;
-                v = new Float32Array(value);
-                break;
-            case "float3":
-                ts = 3;
-                v = new Float32Array(value);
-                break;
-            case "float4":
-                ts = 4;
-                v = new Float32Array(value);
-                break;
-            case "float4x4":
-                ts = 16;
-                v = new Float32Array(value);
-                break;
-            case "bool":
-                ts = 1;
-                v = new Uint8Array(value);
-                break;
-            default:
-                throw "StaticProviderEntry: " + data.type + " not supported.";
+        if(TYPED_ARRAY_MAP[data.type]){
+            var v = new (TYPED_ARRAY_MAP[data.type])(value);
+            var type = XML3D.data.BUFFER_TYPE_TABLE[data.type];
+            var buffer = new Xflow.BufferEntry(type, v);
+            return buffer;
         }
-        delete first.value;
+        return null;
+    }
 
-        this.value = v;
-        this.tupleSize = ts;
+    function createXflowNode(jsonData){
+        if (jsonData.format != "xml3d-json")
+            throw "Unknown JSON format: " + jsonData.format;
+        if (jsonData.version != "0.4.0")
+            throw "Unknown JSON version: " + jsonData.version;
 
-        this.registerConsumer = empty;
-        this.data = {};
-        this.getValue = function() {
-            return this.value;
-        };
-        this.getTupleSize = function() {
-            return this.tupleSize;
-        };
-    };
+        var node = XML3D.data.xflowGraph.createDataNode();
+
+        var entries = jsonData.data;
+        for(var e in entries) {
+
+            var buffer = createXflowBuffer(entries[e]);
+            if(buffer){
+                var inputNode = XML3D.data.xflowGraph.createInputNode();
+                inputNode.data = buffer;
+                inputNode.name = e;
+                node.appendChild(inputNode);
+            }
+        }
+        return node;
+    }
 
     /**
      * @implements IDataAdapter
      */
-    var JSONDataAdapter = function(data) {
-        this.json = data;
-        this.parents = [];
-    };
-
-    JSONDataAdapter.prototype.addParentAdapter = function(adapter) {
-        this.parents.push(adapter);
-    };
-
-    JSONDataAdapter.prototype.getOutputs = function() {
-        var result = {};
-        if (!this.json)
-            return;
-        try {
-            if (this.json.format != "xml3d-json")
-                throw "Unknown JSON format: " + this.json.format;
-            if (this.json.version != "0.4.0")
-                throw "Unknown JSON version: " + this.json.version;
-            var entries = this.json.data;
-            for(var e in entries) {
-                result[e] = new StaticProviderEntry(entries[e]);
-            }
+    var JSONDataAdapter = function(jsonData) {
+        this.json = jsonData;
+        try{
+            this.xflowDataNode = createXflowNode(jsonData);
         } catch (e) {
-            XML3D.debug.logError("Failed to process XML3D json file ("+this.uri+"): " + e);
+            XML3D.debug.logError("Failed to process XML3D json file: " + e);
         }
-        return result;
+
     };
+
+    JSONDataAdapter.prototype.getXflowNode = function(){
+        return this.xflowDataNode;
+    }
 
     /**
      * @constructor

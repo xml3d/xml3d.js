@@ -92,6 +92,7 @@
         <file name="xflow/operator/skinPosition.js" />
 		<file name="xflow/operator/skinning.js" />
         <file name="xflow/operator/forwardKinematics.js" />
+		<file name="xflow/operator/forwardKinematicsInv.js" />
         <file name="xflow/operator/flipNormal.js" />
 		<file name="xflow/operator/math.js" />
 		<file name="contrib/perlin-noise-simplex.js" />

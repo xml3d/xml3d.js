@@ -108,16 +108,18 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
         return;
     } else if (evt.type == XML3D.events.VALUE_MODIFIED) {
         var attr = evt.wrapped.attrName;
-        if(attr == "src" || attr == "proto" ){
-            this.updateHandle(attr);
-        }
-        else if(attr == "filter"){
+        if(attr == "filter"){
             this.xflowDataNode.setFilter(this.node.getAttribute(attr))
         }
         else if(attr == "compute"){
             this.xflowDataNode.setCompute(this.node.getAttribute(attr))
         }
         return;
+    } else if(evt.type == XML3D.events.DANGLING_REFERENCE || evt.type == XML3D.events.VALID_REFERENCE){
+        var attr = evt.attrName;
+        if(attr == "src" || attr == "proto"){
+            this.updateHandle(attr);
+        }
     }
 };
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {

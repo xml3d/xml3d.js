@@ -187,7 +187,7 @@ test("Textured diffuse shader", 3, function() {
         actual = win.getPixelValue(gl, 40, 40);
         if (actual[0] == 0) //texture hasn't finished loading yet
             return;
-        deepEqual(actual, [251,251,0,255], "Yellow diffuse texture");
+        deepEqual(actual, [241,241,0,255], "Yellow diffuse texture");
         start();
     };
 

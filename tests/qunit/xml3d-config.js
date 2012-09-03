@@ -184,3 +184,24 @@ XML3DUnit.getRendererString = function() {
     }
     return result;
 };
+
+XML3DUnit.loadSceneTestImages = function(doc, refSceneId, testSceneId, callback){
+    var xRef = doc.getElementById(refSceneId),
+        glRef = getContextForXml3DElement(xRef);
+    var xTest = doc.getElementById(testSceneId),
+        glTest = getContextForXml3DElement(xTest);
+
+    var refImagesLoaded = 0;
+    function onLoad(){
+        refImagesLoaded++;
+        if(refImagesLoaded >= 2)
+            callback(refImage, testImage);
+    }
+
+    var refImage = new Image();
+    refImage.onload = onLoad;
+    refImage.src = glRef.canvas.toDataURL();
+    var testImage = new Image();
+    testImage.onload = onLoad;
+    testImage.src = glTest.canvas.toDataURL();
+}

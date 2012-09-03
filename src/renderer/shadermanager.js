@@ -15,18 +15,14 @@
         VALID : 2
     };
 
-    var TextureInfo = function(opt) {
+    var TextureInfo = function(handle, opt) {
         opt = opt || {};
-        this.status = TEXTURE_STATE.INVALID;
+        this.handle = handle;
+        this.status = opt.status || TEXTURE_STATE.INVALID;
         this.onload = opt.onload;
-    };
-
-    TextureInfo.prototype.createEmpty = function(gl, unit, image, config) {
-        this.status = TEXTURE_STATE.UNLOADED;
-        this.handle = gl.createTexture();
-        this.unit = unit;
-        this.image = image;
-        this.config = config;
+        this.unit = opt.unit || 0;
+        this.image = opt.image || null;
+        this.config = opt.config || null;
     };
 
     TextureInfo.prototype.setLoaded = function() {
@@ -152,13 +148,10 @@
         var dataTable = shaderAdapter.requestData(material.getRequestFields());
 
         program = material.getProgram(lights, dataTable);
-        XML3D.webgl.checkError(this.gl, "getProgram");
         this.shaders[shaderId] = program;
         this.gl.useProgram(program.handle);
-        XML3D.webgl.checkError(this.gl, "useProgram");
 
         this.setUniformsFromComputeResult(program, dataTable);
-        XML3D.webgl.checkError(this.gl, "setUniforms");
         this.createTexturesFromComputeResult(program, dataTable);
         XML3D.webgl.checkError(this.gl, "setSamplers");
         return shaderId;
@@ -310,12 +303,16 @@
         }
     };
 
-    XML3DShaderManager.prototype.shaderDataChanged = function(adapter, attrName, newValue, textureName) {
-        var shader = this.shaders[adapter.node.id];
-
+    XML3DShaderManager.prototype.shaderDataChanged = function(adapter, request, changeType) {
+        var program = this.shaders[adapter.node.id];
+        var result = request.getResult();
+        this.bindShader(program);
+        this.setUniformsFromComputeResult(program, result);
+        this.createTexturesFromComputeResult(program, result);
+        this.renderer.requestRedraw("Shader data changed");
         // Store the change, it will be applied the next time the shader is
         // bound
-        if (attrName == "src") {
+        /*if (attrName == "src") {
             // A texture source was changed
             if (textureName) {
                 var sampler = shader.samplers[textureName];
@@ -333,7 +330,7 @@
                 name : attrName,
                 newValue : newValue
             });
-        }
+        }*/
 
     };
 
@@ -356,15 +353,15 @@
         return sp;
     };
 
-/**
- *
- */
+    /**
+     *
+     */
     XML3DShaderManager.prototype.setUniformsFromComputeResult = function(programObject, data) {
         var dataMap = data.getOutputMap();
         var uniforms = programObject.uniforms;
-        for (var name in uniforms) {
+        for ( var name in uniforms) {
             var entry = dataMap[name];
-            if(entry) {
+            if (entry) {
                 var v = entry.getValue();
                 this.setUniform(uniforms[name], (v.length == 1) ? v[0] : v);
             }
@@ -504,7 +501,7 @@
         var samplers = programObject.samplers;
         for ( var name in samplers) {
             var sampler = samplers[name];
-            var entry = result[name];
+            var entry = result.getOutputData(name);
 
             if (!entry) {
                 sampler.info = new InvalidTexture();
@@ -522,16 +519,19 @@
      * @param sampler
      * @param {number} texUnit
      */
-    XML3DShaderManager.prototype.createTexture = function(texEntry, sampler, texUnit) {
+    XML3DShaderManager.prototype.createTextureFromEntry = function(texEntry, sampler, texUnit) {
         var img = texEntry.getImage();
         if (img) {
             var renderer = this.renderer;
-            var info = new TextureInfo({
+            var info = new TextureInfo(this.gl.createTexture(), {
+                status : img.complete ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
                 onload : function() {
                     renderer.requestRedraw.call(renderer, "Texture loaded");
-                }
+                },
+                texUnit : texUnit,
+                image : img,
+                config : texEntry.getSamplerConfig()
             });
-            info.createEmpty(this.gl, texUnit, img, texEntry.getSamplerConfig());
             sampler.info = info;
         } else {
             sampler.info = new InvalidTexture();
@@ -597,7 +597,7 @@
 
     XML3DShaderManager.prototype.createTex2DFromImage = function(info) {
         var gl = this.gl;
-        var opt = info.options;
+        var opt = info.config || {};
         var image = info.image;
 
         gl.bindTexture(gl.TEXTURE_2D, info.handle);

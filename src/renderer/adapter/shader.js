@@ -66,6 +66,8 @@
 	};
 
 	p.notifyDataChanged = function(request, changeType) {
+	    console.log("Shader data changed: ", request, changeType);
+	    this.renderer.shaderManager.shaderDataChanged(this, request, changeType);
 	   //TODO: adapt the change notification system to the new xflow
 
 	    /*

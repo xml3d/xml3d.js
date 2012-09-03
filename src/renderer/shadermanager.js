@@ -96,7 +96,7 @@
         var mat = this.createMaterialFromShaderDescriptor(desc);
         var fallbackShader = mat.getProgram();
         this.bindShader(fallbackShader);
-        this.setUniform(fallbackShader.uniforms["diffuseColor"], [ 1, 0, 0 ]);
+        XML3DShaderManager.setUniform(this.gl, fallbackShader.uniforms["diffuseColor"], [ 1, 0, 0 ]);
         this.unbindShader(fallbackShader);
         this.shaders["defaultShader"] = fallbackShader;
     };
@@ -346,7 +346,7 @@
         for ( var name in uniforms) {
             var entry = dataMap[name];
             if (entry) {
-                this.setUniform(uniforms[name], entry.getValue());
+                XML3DShaderManager.setUniform(this.gl, uniforms[name], entry.getValue());
             }
         }
     };
@@ -361,7 +361,7 @@
                 continue;
 
             if (shader.uniforms[name]) {
-                this.setUniform(shader.uniforms[name], u);
+                XML3DShaderManager.setUniform(this.gl, shader.uniforms[name], u);
             }
         }
 
@@ -388,7 +388,7 @@
         for ( var i = 0, l = sp.changes.length; i < l; i++) {
             var change = sp.changes[i];
             if (change.type == "uniform" && sp.uniforms[change.name]) {
-                this.setUniform(sp.uniforms[change.name], change.newValue);
+                XML3DShaderManager.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
             }
         }
         sp.changes = [];
@@ -410,12 +410,13 @@
 
     /**
      * Set uniforms for active program
+     * @param gl
      * @param u
      * @param value
      * @param {boolean=} transposed
      */
-    XML3DShaderManager.prototype.setUniform = function(u, value, transposed) {
-        var gl = this.gl;
+    XML3DShaderManager.setUniform = function(gl, u, value, transposed) {
+
         switch (u.glType) {
         case rc.BOOL:
         case rc.INT:
@@ -640,7 +641,7 @@
             gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(info.glType, info.handle);
             // Should not be here, since the texunit is static
-            this.setUniform(tex, info.unit + 1);
+            XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
             break;
         case TEXTURE_STATE.LOADED:
             // console.dir("Creating '"+ tex.name + "' from " + info.image.src);
@@ -651,7 +652,7 @@
         case TEXTURE_STATE.UNLOADED:
             gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(gl.TEXTURE_2D, null);
-            this.setUniform(tex, info.unit + 1);
+            XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
         }
         ;
     };

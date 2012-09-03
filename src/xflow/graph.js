@@ -144,9 +144,9 @@ Xflow.DataNode = DataNode;
  * @enum
  */
 DataNode.FILTER_TYPE = {
-    KEEP: 0,
-    REMOVE: 1,
-    RENAME: 2
+    RENAME: 0,
+    KEEP: 1,
+    REMOVE: 2
 }
 /**
  * @private
@@ -179,6 +179,7 @@ Object.defineProperty(DataNode.prototype, "sourceNode", {
         if(this._sourceNode) removeParent(this, this._sourceNode);
         this._sourceNode = v;
         if(this._sourceNode) addParent(this, this._sourceNode);
+        this.notify(XflowModification.STRUCTURE_CHANGED);
     },
     /** @return {Xflow.DataNode,null} */
     get: function(){ return this._sourceNode; }

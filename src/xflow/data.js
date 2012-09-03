@@ -5,9 +5,10 @@
  * @enum {number}
  */
 Xflow.DataNotifications = {
-    CHANGED_CONTENT: 0,
-    CHANGE_SIZE: 1,
-    CHANGE_REMOVED: 2
+    CHANGED_NEW: 0,
+    CHANGED_CONTENT: 1,
+    CHANGE_SIZE: 2,
+    CHANGE_REMOVED: 3
 };
 
 /**
@@ -112,6 +113,7 @@ DataEntry.TYPE = {
 var BufferEntry = function(type, value){
     Xflow.DataEntry.call(this, type);
     this._value = value;
+    notifyListeners(this, Xflow.DataNotifications.CHANGED_NEW);
 };
 XML3D.createClass(BufferEntry, Xflow.DataEntry);
 Xflow.BufferEntry = BufferEntry;
@@ -139,6 +141,7 @@ var TextureEntry = function(image){
     Xflow.DataEntry.call(this, DataEntry.TYPE.TEXTURE);
     this._image = image;
     this._samplerConfig = new SamplerConfig();
+    notifyListeners(this, Xflow.DataNotifications.CHANGED_NEW);
 };
 XML3D.createClass(TextureEntry, Xflow.DataEntry);
 Xflow.TextureEntry = TextureEntry;
@@ -211,7 +214,7 @@ DataChangeNotifier.removeListener = function(callback){
 
 /**
  * @param {Xflow.DataEntry} dataEntry
- * @param {Xflow.DataNotifications} notification
+ * @param {number, Xflow.DataNotifications} notification
  */
 function notifyListeners(dataEntry, notification){
     for(var i = 0; i < dataEntry._listeners.length; ++i){

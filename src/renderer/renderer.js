@@ -368,6 +368,8 @@ Renderer.prototype.render = function() {
         //gl.depthMask(gl.TRUE);
     }
 
+	this.lights.changed = false;
+
     return [stats.objCount, stats.triCount];
 };
 
@@ -436,7 +438,6 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         parameters["directionalLightDirection[0]"] = lights.directional.direction;
         parameters["directionalLightVisibility[0]"] = lights.directional.visibility;
         parameters["directionalLightIntensity[0]"] = lights.directional.intensity;
-        lights.changed = false;
 	}
 
     shaderId = shaderId || objectArray[0].shader || "defaultShader";
@@ -446,6 +447,10 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
 
     parameters["viewMatrix"] = this.camera.viewMatrix;
     parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
+
+    //Set global data that is shared between all objects using this shader
+    this.shaderManager.setUniformVariables(shader, parameters);
+    parameters = {};
 
     for (var i = 0, n = objectArray.length; i < n; i++) {
         var obj = objectArray[i];

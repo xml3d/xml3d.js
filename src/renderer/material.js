@@ -29,13 +29,12 @@
         if(!this.vertex)
             return null;
 
-        var directives = [],
-            sources = {};
+        var directives = [];
         this.addDirectives(directives, lights || {}, data ? data.getOutputMap() : {});
-        sources.fragment = Material.addDirectivesToSource(directives, this.fragment);
-        sources.vertex = Material.addDirectivesToSource(directives, this.vertex);
+        this.fragment = Material.addDirectivesToSource(directives, this.fragment);
+        this.vertex = Material.addDirectivesToSource(directives, this.vertex);
         //console.log(sources.fragment);
-        return this.shaderManager.createProgramFromSources(sources);
+        return this.shaderManager.createProgramFromMaterial(this);
     };
 
 

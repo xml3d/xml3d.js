@@ -40,15 +40,15 @@
     /**
      * @constructor
      * @param {WebGLProgram} program
-     * @param {{ fragment: string, vertex: string }} sources
+     * @param {Material} material
      */
-    var ProgramObject = function(program, sources) {
+    var ProgramObject = function(program, material) {
         this.attributes = {};
         this.uniforms = {};
         this.samplers = {};
         this.handle = program;
-        this.vSource = sources.vertex;
-        this.fSource = sources.fragment;
+        this.vSource = material.vertex;
+        this.fSource = material.fragment;
     };
 
     var XML3DShaderManager = function(renderer, dataFactory, factory) {
@@ -167,39 +167,40 @@
     };
 
     XML3DShaderManager.prototype.getStandardShaderProgram = function(name) {
-        var sources = {};
+        var descriptor = {};
 
-        sources = XML3D.shaders.getScript(name);
-        if (!sources || !sources.vertex) {
-            sources = {};
+        descriptor = XML3D.shaders.getScript(name);
+        if (!descriptor || !descriptor.vertex) {
+            descriptor = {};
             XML3D.debug.logError("Unknown shader: " + name + ". Using flat shader instead.");
         }
 
-        var shaderProgram = this.createProgramFromSources(sources);
+        var material = this.createMaterialFromShaderDescriptor(descriptor);
+        var shaderProgram = this.createProgramFromMaterial(material);
 
         return shaderProgram;
     };
 
     /**
      *
-     * @param {{fragment: string, vertex: string}!} sources
+     * @param {Material!} material
      * @returns {ProgramObject}
      */
-    XML3DShaderManager.prototype.createProgramFromSources = function(sources) {
+    XML3DShaderManager.prototype.createProgramFromMaterial = function(material) {
         var gl = this.gl;
 
-        if (!sources.vertex || !sources.fragment) {
+        if (!material.vertex || !material.fragment) {
             return this.shaders["defaultShader"];
         }
 
         var sc = this.shaderCache;
-        var vertexShader = sc.vertex[sources.vertex];
+        var vertexShader = sc.vertex[material.vertex];
         if (!vertexShader) {
-            vertexShader = sc.vertex[sources.vertex] = XML3DShaderManager.createWebGLShaderFromSource(gl, gl.VERTEX_SHADER, sources.vertex);
+            vertexShader = sc.vertex[material.vertex] = XML3DShaderManager.createWebGLShaderFromSource(gl, gl.VERTEX_SHADER, material.vertex);
         }
-        var fragmentShader = sc.fragment[sources.fragment];
+        var fragmentShader = sc.fragment[material.fragment];
         if (!fragmentShader) {
-            fragmentShader = sc.fragment[sources.fragment] = XML3DShaderManager.createWebGLShaderFromSource(gl, gl.FRAGMENT_SHADER, sources.fragment);
+            fragmentShader = sc.fragment[material.fragment] = XML3DShaderManager.createWebGLShaderFromSource(gl, gl.FRAGMENT_SHADER, material.fragment);
         }
 
         if (!vertexShader || !fragmentShader) {
@@ -224,7 +225,7 @@
             return this.shaders["defaultShaders"];
         }
 
-        var programObject = new ProgramObject(prg, sources);
+        var programObject = new ProgramObject(prg, material);
         gl.useProgram(prg);
 
         // Tally shader attributes
@@ -262,7 +263,7 @@
                 programObject.uniforms[uni.name] = uniInfo;
         }
 
-        this.setUniformVariables(programObject, sources.uniforms);
+        this.setUniformVariables(programObject, material.uniforms);
         programObject.changes = [];
         return programObject;
     };

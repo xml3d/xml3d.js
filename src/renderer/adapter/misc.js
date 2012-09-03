@@ -72,7 +72,7 @@
     XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillPointLight = function(point, i, offset) {
         this.callback = point.dataChanged;
         this.offsets.push(offset);
-        var dataTable = this.computeRequest.getResult().getOutputDataMap();
+        var dataTable = this.computeRequest.getResult().getOutputMap();
 
         var intensity = dataTable["intensity"] ? dataTable["intensity"].getValue() : LIGHT_DEFAULT_INTENSITY;
         var attenuation = dataTable["attenuation"] ? dataTable["attenuation"].getValue() : LIGHT_DEFAULT_ATTENUATION;

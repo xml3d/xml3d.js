@@ -10,31 +10,7 @@
   <body style="background-color: #FFF;width:500px">
    <xml3d activeView="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
     <defs>   
-    <script id="customShaderScript"></script>
-    <script id="customShaderScript-vs" type="x-shader/x-vertex">
-        #ifdef GL_ES
-        precision highp float;
-        #endif
-
-        attribute vec3 position;
-        uniform mat4 modelViewProjectionMatrix;
-        uniform mat4 modelViewMatrix;
-        
-        void main(void)
-        {
-            gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
-        }
-    </script>
-    <script id="customShaderScript-fs" type="x-shader/x-fragment">
-        #ifdef GL_ES
-        precision highp float;
-        #endif
-        
-        void main(void)
-        {
-            gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
-        }
-    </script>
+   
     
     
     <shader id="texShader1" script="urn:xml3d:shader:phong">

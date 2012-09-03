@@ -1,4 +1,4 @@
-XML3D.shaders.register("phong", {
+XML3D.shaders.register("diffuse", {
 
     vertex : [
         "attribute vec3 position;",
@@ -38,8 +38,6 @@ XML3D.shaders.register("phong", {
         "uniform float ambientIntensity;",
         "uniform vec3 diffuseColor;",
         "uniform vec3 emissiveColor;",
-        "uniform float shininess;",
-        "uniform vec3 specularColor;",
         "uniform float transparency;",
         "uniform mat4 viewMatrix;",
         "uniform bool useVertexColor;",
@@ -86,11 +84,9 @@ XML3D.shaders.register("phong", {
         "      vec3 L = lPosition.xyz - fragVertexPosition;",
         "      float dist = length(L);",
         "      L = normalize(L);",
-        "      vec3 R = normalize(reflect(L,fragNormal));",
         "      float atten = 1.0 / (pointLightAttenuation[i].x + pointLightAttenuation[i].y * dist + pointLightAttenuation[i].z * dist * dist);",
         "      vec3 Idiff = pointLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
-        "      vec3 Ispec = pointLightIntensity[i] * specularColor * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
-        "      color = color + (atten*(Idiff + Ispec)) * pointLightVisibility[i];",
+        "      color = color + (atten*Idiff) * pointLightVisibility[i];",
         "    }",
         "  #endif",
 
@@ -98,10 +94,8 @@ XML3D.shaders.register("phong", {
         "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
         "    vec4 lDirection = viewMatrix * vec4(directionalLightDirection[i], 0.0);",
         "    vec3 L =  normalize(-lDirection.xyz);",
-        "    vec3 R = normalize(reflect(L,fragNormal));",
         "    vec3 Idiff = directionalLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
-        "    vec3 Ispec = directionalLightIntensity[i] * specularColor * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
-        "    color = color + ((Idiff + Ispec)) * directionalLightVisibility[i];",
+        "    color = color + (Idiff * directionalLightVisibility[i]);",
         "  }",
         "#endif",
 
@@ -119,13 +113,10 @@ XML3D.shaders.register("phong", {
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0],
-        specularColor   : [1.0, 1.0, 1.0],
         transparency    : 0.0,
-        shininess       : 0.5,
         ambientIntensity: 0.0,
         useVertexColor : false,
     },
-
     samplers: {
         diffuseTexture : null
     }

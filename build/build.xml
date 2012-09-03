@@ -59,6 +59,7 @@
         <file name="renderer/canvashandler.js" />
         <file name="renderer/utils.js" />
         <file name="renderer/shadermanager.js" />
+	    <file name="renderer/material.js" />
         <file name="renderer/bufferhandler.js" />
         <file name="renderer/renderer.js" />
         <file name="renderer/adapter/misc.js" />
@@ -71,11 +72,11 @@
         <file name="renderer/adapter/group.js" />
         <file name="renderer/adapter/light.js" />
         <file name="renderer/adapter/factory.js" />
-		<file name="renderer/shader/base.js" />
-		<file name="renderer/shader/matte.js" />
-		<file name="renderer/shader/diffuse.js" />
-		<file name="renderer/shader/phong.js" />
-		<file name="renderer/shader/utility.js" />
+		<file name="renderer/shaders/base.js" />
+		<file name="renderer/shaders/matte.js" />
+		<file name="renderer/shaders/diffuse.js" />
+		<file name="renderer/shaders/phong.js" />
+		<file name="renderer/shaders/utility.js" />
         <file name="xflow/operator/morph3.js" />
 		<file name="xflow/operator/merge3.js" />
         <file name="xflow/operator/sub3.js" />

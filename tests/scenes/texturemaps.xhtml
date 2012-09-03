@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>XML3D External References</title>
+    <link rel="stylesheet" type="text/css" media="all" href="frame.css" />
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+  </head>
+  <body style="background-color: #fff;width:500px">
+    <xml3d id="xml3dTest" width="320px" height="240px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
+      <defs>
+        <transform id="t_object1" translation="-3 2.5 0" />
+        <data id="simplePlane1">
+          <int id="indices" name="index">0 1 2 1 2 3</int>
+          <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+          <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+          <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        </data>
+        <shader id="s_phongDiffuseColor" script="urn:xml3d:shader:phong">
+          <float name="ambientIntensity">1</float>
+          <float3 name="diffuseColor">1 1 0</float3>
+        </shader>
+      </defs>
+      <view id="myView" />
+      <group id="diffuseColor" shader="#s_phongDiffuseColor" transform="#t_object1" visible="true">
+        <mesh type="triangles" src="#simplePlane1" />
+      </group>
+    </xml3d>
+    
+    <xml3d id="xml3dReference" width="320px" height="240px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
+      <defs>
+        <transform id="t_object2" translation="-3 2.5 0" />
+        <data id="simplePlane2">
+          <int id="indices" name="index">0 1 2 1 2 3</int>
+          <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+          <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+          <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        </data>
+        <shader id="s_phongDiffuseTexture" script="urn:xml3d:shader:phong">
+          <float name="ambientIntensity">1</float>
+          <float3 name="diffuseColor">1 1 1</float3>
+          <texture name="diffuseTexture">
+            <img src="textures/yellow.png" />
+          </texture>
+        </shader>
+      </defs>
+      <view id="myView2" />
+      <group id="diffuseColor" shader="#s_phongDiffuseTexture" transform="#t_object2" visible="true">
+        <mesh type="triangles" src="#simplePlane2" />
+      </group>
+    </xml3d>
+  </body>
+</html>

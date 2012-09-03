@@ -15,74 +15,48 @@ module("External References", {
     }
 });
 
-test("Mesh JSON reference", 3, function() {
-    var xTest = this.doc.getElementById("xml3dTest"), hTest = getHandler(xTest);
+test("Mesh JSON reference", 4, function() {
+    var xTest = this.doc.getElementById("xml3dTest"),
+        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+    var self = this;
+
+    var testStep = 0;
+    function onFrameDrawn(){
+        if(testStep == 0){
+            if( XML3DUnit.getPixelValue(glTest, 64, 200)[0] == 0)
+                return;
+
+            XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
+                QUnit.imageEqual(refImage, testImage, "JSON render matches");
+
+                var meshElement = self.doc.getElementById("myMesh02");
+                meshElement.setAttribute("src", "json/simpleMesh2.json");
+
+                testStep++;
+            });
+        }
+        if(testStep == 1){
+            if( XML3DUnit.getPixelValue(glTest, 128, 128)[0] == 0)
+                return;
+
+            XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference2", "xml3dTest", function(refImage, testImage){
+                QUnit.imageEqual(refImage, testImage, "JSON render matches after change");
+
+                start();
+            });
+        }
+    }
+
+    xTest.addEventListener("framedrawn", onFrameDrawn);
+
 
     this.doc.getElementById("jsonGroup").visible = true;
     hTest.draw();
 
-    XML3DUnit.loadSceneTestImages(this.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-        QUnit.imageEqual(refImage, testImage, "JSON render matches");
-
-        start();
-    });
     stop();
 });
-/*
-
-    var xRef = this.doc.getElementById("xml3dReference"),
-    glRef = getContextForXml3DElement(xRef), hRef = getHandler(xRef),
-    xRef2 = this.doc.getElementById("xml3dReference2"),
-    glRef2 = getContextForXml3DElement(xRef2), hRef2 = getHandler(xRef2);
 
 
-
-
-
-    var self = this;
-
-    var refImages = [], refImagesLoaded = 0;
-    function onLoad(){
-        refImagesLoaded++;
-        if(refImagesLoaded >= refImages.length)
-            doneLoadingReference();
-    }
-
-    var img = new Image();
-    img.onload = onLoad;
-    img.src = glRef.canvas.toDataURL();;
-    refImages.push(img);
-    img = new Image();
-    img.onload = onLoad;
-    img.src = glRef2.canvas.toDataURL();
-    refImages.push(img);
-    stop();
-
-    function doneLoadingReference(){
-        var actualImage = new Image();
-        actualImage.onload = function(e) {
-            QUnit.imageEqual(refImages[0], actualImage, "JSON render matches");
-
-            xTest.addEventListener("framedrawn", function(n) {
-                var actualImage = new Image();
-                actualImage.onload = function(e) {
-                    actual = win.getPixelValue(gl, 128, 128);
-                    QUnit.imageEqual(refImages[1], actualImage, "JSON render matches");
-                }
-                actualImage.src = glTest.canvas.toDataURL();
-            });
-
-            // Now modify the scene
-            var meshElement = self.doc.getElementById("myMesh02");
-            meshElement.src = "json/simpleMesh2.json";
-
-            start();
-        };
-        actualImage.src = glTest.canvas.toDataURL();
-    }
-
-});
-*/
 
 /*test("Mesh XML reference", 3, function() {
     var xRef = this.doc.getElementById("xml3dReference"),

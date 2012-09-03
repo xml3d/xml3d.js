@@ -26,43 +26,57 @@
     </group>
     
     <group id="xmlGroup" transform="#t_object1" visible="false">
-        <mesh id="myMesh02" src="xml/meshes.xml#simpleMesh"/>
+        <mesh id="myMesh03" src="xml/meshes.xml#simpleMesh"/>
     </group>
     
     <group id="jsonShaderGroup" transform="#t_object1" shader="json/flatgreen_shader.json" visible="false">
-        <mesh id="myMesh02" src="#simplePlane1"/>
+        <mesh id="myMesh04" src="#simplePlane1"/>
     </group>
     
     <group id="xmlShaderGroup" transform="#t_object1" shader="xml/shaders.xml#flatgreen2" visible="false">
-        <mesh id="myMesh02" src="#simplePlane1"/>
+        <mesh id="myMesh05" src="#simplePlane1"/>
     </group>
     
   </xml3d>
 
   <xml3d id="xml3dReference" width="320px" height="240px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
 	  <defs>
-        <transform id="t_object1" translation="-3 2.5 0"/>
-        <data id="simplePlane">
-          <int id="indices" name="index">0 1 2 1 2 3</int>
-          <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+        <transform id="t_object1Ref1" translation="-3 2.5 0"/>
+        <data id="simplePlaneRef1">
+          <int id="indicesRef1" name="index">0 1 2 1 2 3</int>
+          <float3 id="positionsRef1" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
           <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
-          <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+          <float2 id="texcoordsRef1" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
         
-        <shader id="flatgreen" script="urn:xml3d:shader:flat">
-          <float3 name="diffuseColor">
-            0 1 0
-          </float3>
-        </shader>
-        
 	  </defs>
-	<view id="myView" />
-	<light id="myLight"/>
+	<view  />
+	<light />
     
-    <group id="meshGroup" transform="#t_object1">
-        <mesh id="myMesh02" type="triangles" src="#simplePlane"/>
+    <group transform="#t_object1Ref1">
+        <mesh type="triangles" src="#simplePlaneRef1"/>
     </group>
     
   </xml3d>
+
+ <xml3d id="xml3dReference2" width="320px" height="240px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc" >
+    <defs>
+        <transform id="t_object1Ref2" translation="-3 2.5 0" />
+        <data id="simplePlaneRef2">
+            <int id="indicesRef2" name="index">0 1 2 1 2 3</int>
+            <float3 id="positionsRef2" name="position">1 -3 -10.0  3 -3 -10.0  1 -1 -10.0 3 -1 -10.0</float3>
+            <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+            <float2 id="texcoordsRef2" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        </data>
+
+    </defs>
+    <view />
+    <light />
+
+    <group transform="#t_object1Ref2">
+        <mesh type="triangles" src="#simplePlaneRef2"/>
+    </group>
+
+ </xml3d>
 </body>
 </html>

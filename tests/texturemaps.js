@@ -26,11 +26,17 @@ test("Phong diffuse texture", 3, function() {
     hTest.draw();
     hRef.draw();
 
-    XML3DUnit.loadSceneTestImages(this.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-        QUnit.imageEqual(refImage, testImage, "Diffuse texture matches");
+    var docu = this.doc;
+    testFunc = function(n) {
+        XML3DUnit.loadSceneTestImages(docu, "xml3dReference", "xml3dTest", function(refImage, testImage){
+            QUnit.imageEqual(refImage, testImage, "Diffuse texture matches");
 
-        start();
-    });
+            start();
+        });
+    };
+    // TODO: Remove this disgusting hack once the 'loaded' events are in
+    setTimeout(testFunc, 100);
+
     stop();
 
 });
@@ -44,11 +50,16 @@ test("Phong specular texture", 3, function() {
     hTest.draw();
     hRef.draw();
 
-    XML3DUnit.loadSceneTestImages(this.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-        QUnit.imageEqual(refImage, testImage, "Specular texture matches");
+    var docu = this.doc;
+    testFunc = function(n) {
+        XML3DUnit.loadSceneTestImages(docu, "xml3dReference", "xml3dTest", function(refImage, testImage){
+            QUnit.imageEqual(refImage, testImage, "Specular texture matches");
 
-        start();
-    });
+            start();
+        });
+    };
+
+    setTimeout(testFunc, 100);
     stop();
 
 });
@@ -62,11 +73,17 @@ test("Phong emissive texture", 3, function() {
     hTest.draw();
     hRef.draw();
 
-    XML3DUnit.loadSceneTestImages(this.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-        QUnit.imageEqual(refImage, testImage, "Emissive texture matches");
+    var docu = this.doc;
+    testFunc = function(n) {
+        XML3DUnit.loadSceneTestImages(docu, "xml3dReference", "xml3dTest", function(refImage, testImage){
+            QUnit.imageEqual(refImage, testImage, "Emissive texture matches");
 
-        start();
-    });
+            start();
+        });
+    };
+
+    setTimeout(testFunc, 100);
+
     stop();
 
 });
@@ -80,11 +97,16 @@ test("Diffuse emissive texture", 3, function() {
     hTest.draw();
     hRef.draw();
 
-    XML3DUnit.loadSceneTestImages(this.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-        QUnit.imageEqual(refImage, testImage, "Emissive texture matches");
+    var docu = this.doc;
+    testFunc = function(n) {
+        XML3DUnit.loadSceneTestImages(docu, "xml3dReference", "xml3dTest", function(refImage, testImage){
+            QUnit.imageEqual(refImage, testImage, "Emissive texture matches");
 
-        start();
-    });
+            start();
+        });
+    };
+
+    setTimeout(testFunc, 100);
     stop();
 
 });

@@ -44,8 +44,14 @@ XML3D.shaders.register("phong", {
         "uniform mat4 viewMatrix;",
         "uniform bool useVertexColor;",
 
+        "#if HAS_EMISSIVETEXTURE",
+        "uniform sampler2D emissiveTexture;",
+        "#endif",
         "#if HAS_DIFFUSETEXTURE",
         "uniform sampler2D diffuseTexture;",
+        "#endif",
+        "#if HAS_SPECULARTEXTURE",
+        "uniform sampler2D specularTexture;",
         "#endif",
 
         "varying vec3 fragNormal;",
@@ -78,7 +84,11 @@ XML3D.shaders.register("phong", {
         "    objDiffuse *= texDiffuse.rgb;",
         "  #endif",
         "  if (alpha < 0.05) discard;",
-        "  vec3 color = emissiveColor + (ambientIntensity * objDiffuse);",
+        "  #if HAS_EMISSIVETEXTURE",
+        "    vec3 color = emissiveColor * texture2D(emissiveTexture, fragTexCoord).rgb + (ambientIntensity * objDiffuse);",
+        "  #else",
+        "    vec3 color = emissiveColor + (ambientIntensity * objDiffuse);",
+        "  #endif",
 
         "  #if MAX_POINTLIGHTS > 0",
         "    for (int i=0; i<MAX_POINTLIGHTS; i++) {",
@@ -89,7 +99,12 @@ XML3D.shaders.register("phong", {
         "      vec3 R = normalize(reflect(L,fragNormal));",
         "      float atten = 1.0 / (pointLightAttenuation[i].x + pointLightAttenuation[i].y * dist + pointLightAttenuation[i].z * dist * dist);",
         "      vec3 Idiff = pointLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
-        "      vec3 Ispec = pointLightIntensity[i] * specularColor * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
+        "      #if HAS_SPECULARTEXTURE",
+        "        vec3 Ispec = pointLightIntensity[i] * specularColor * texture2D(specularTexture, fragTexCoord).rgb " +
+        "              * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
+        "      #else",
+        "         vec3 Ispec = pointLightIntensity[i] * specularColor * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
+        "      #endif",
         "      color = color + (atten*(Idiff + Ispec)) * pointLightVisibility[i];",
         "    }",
         "  #endif",
@@ -115,6 +130,8 @@ XML3D.shaders.register("phong", {
         directives.push("MAX_POINTLIGHTS " + pointLights);
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
+        directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
+        directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));
     },
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],
@@ -123,7 +140,7 @@ XML3D.shaders.register("phong", {
         transparency    : 0.0,
         shininess       : 0.5,
         ambientIntensity: 0.0,
-        useVertexColor : false,
+        useVertexColor : false
     },
 
     samplers: {

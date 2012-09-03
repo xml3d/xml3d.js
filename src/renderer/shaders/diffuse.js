@@ -42,6 +42,9 @@ XML3D.shaders.register("diffuse", {
         "uniform mat4 viewMatrix;",
         "uniform bool useVertexColor;",
 
+        "#if HAS_EMISSIVETEXTURE",
+        "uniform sampler2D emissiveTexture;",
+        "#endif",
         "#if HAS_DIFFUSETEXTURE",
         "uniform sampler2D diffuseTexture;",
         "#endif",
@@ -76,7 +79,12 @@ XML3D.shaders.register("diffuse", {
         "    objDiffuse *= texDiffuse.rgb;",
         "  #endif",
         "  if (alpha < 0.05) discard;",
-        "  vec3 color = emissiveColor + (ambientIntensity * objDiffuse);",
+
+        "  #if HAS_EMISSIVETEXTURE",
+        "    vec3 color = emissiveColor * texture2D(emissiveTexture, fragTexCoord).rgb + (ambientIntensity * objDiffuse);",
+        "  #else",
+        "    vec3 color = emissiveColor + (ambientIntensity * objDiffuse);",
+        "  #endif",
 
         "  #if MAX_POINTLIGHTS > 0",
         "    for (int i=0; i<MAX_POINTLIGHTS; i++) {",
@@ -109,13 +117,14 @@ XML3D.shaders.register("diffuse", {
         directives.push("MAX_POINTLIGHTS " + pointLights);
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
+        directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));
     },
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0],
         transparency    : 0.0,
         ambientIntensity: 0.0,
-        useVertexColor : false,
+        useVertexColor : false
     },
     samplers: {
         diffuseTexture : null

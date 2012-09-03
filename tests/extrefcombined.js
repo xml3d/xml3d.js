@@ -83,30 +83,6 @@ test("Mesh JSON reference", 3, function() {
 
 });
 */
-test("Textured diffuse shader", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"),
-        actual,
-        win = this.doc.defaultView,
-        gl = getContextForXml3DElement(x),
-        testFunc = null, h = getHandler(x);
-    var group = this.doc.getElementById("diffuseTexGroup");
-    group.visible = true;
-
-    x.addEventListener("framedrawn", function(n) {
-        if(testFunc)
-            testFunc(n);
-    });
-
-    testFunc = function(n) {
-        actual = win.getPixelValue(gl, 128, 128);
-        if (actual[0] == 0) //texture hasn't finished loading yet
-            return;
-        deepEqual(actual, [251,251,0,255], "Yellow diffuse texture");
-        start();
-    };
-
-    stop();
-});
 
 /*test("Mesh XML reference", 3, function() {
     var xRef = this.doc.getElementById("xml3dReference"),

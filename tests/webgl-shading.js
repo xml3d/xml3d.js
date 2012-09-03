@@ -30,7 +30,7 @@ test("Phong fragment shader", function() {
     equal(typeof phong.addDirectives, "function", "Function 'addDirectives' exists");
     var directives = [];
     phong.addDirectives.call(phong, directives, {}, {});
-    equal(directives.length, 3, "3 directives from phong shader");
+    equal(directives.length, 5, "5 directives from phong shader");
     var fragment1 = this.mergeDirectives(directives, phong.fragment);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment1, "Phong fragment without globals compiles.");
     notEqual(fragment1.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
@@ -39,7 +39,7 @@ test("Phong fragment shader", function() {
 
     directives = [];
     phong.addDirectives.call(phong, directives, { point : { length : 2 } }, {});
-    equal(directives.length, 3, "3 directives from phong shader");
+    equal(directives.length, 5, "5 directives from phong shader");
     var fragment2 = this.mergeDirectives(directives, phong.fragment);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment2, "Phong fragment with 2 point lights compiles.");
     notEqual(fragment2.indexOf("MAX_POINTLIGHTS 2"), -1, "MAX_POINTLIGHTS set");
@@ -125,19 +125,13 @@ test("Changing texture", 3, function() {
     this.doc.getElementById("myGroup").visible = true;
     this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
 
-    x.addEventListener("framedrawn", function(n) {
-            if(testFunc)
-                testFunc(n);
-    });
-
     testFunc = function(n) {
         actual = win.getPixelValue(gl, 40, 40);
-        if (actual[0] == 0)
-            return;
         deepEqual(actual, [241,0,241,255], "Magenta texture");
         start();
     };
 
+    setTimeout(testFunc, 150);
     stop();
 
 });

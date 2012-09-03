@@ -8,7 +8,7 @@
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
   </head>
   <body style="background-color: #fff;width:500px">
-    <xml3d id="xml3dReference" width="320px" height="240px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
+    <xml3d id="xml3dReference" width="320px" height="210px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
       <defs>
         <transform id="t_object1" translation="-3 2.5 0" />
         <data id="simplePlane1">
@@ -68,7 +68,7 @@
       </group>
     </xml3d>
     
-    <xml3d id="xml3dTest" width="320px" height="240px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
+    <xml3d id="xml3dTest" width="320px" height="210px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
       <defs>
         <transform id="t_object2" translation="-3 2.5 0" />
         <data id="simplePlane2">
@@ -97,12 +97,14 @@
           <texture name="emissiveTexture">
             <img src="textures/yellow.png" />
           </texture>
+          <float3 name="emissiveColor">1 1 1</float3>
         </shader>
         <shader id="s_diffuseEmissiveTexture" script="urn:xml3d:shader:diffuse">
           <float3 name="diffuseColor">0 0 0</float3>
           <texture name="emissiveTexture">
             <img src="textures/yellow.png" />
           </texture>
+          <float3 name="emissiveColor">1 1 1</float3>
         </shader>
         
         <lightshader id="ls_Point2" script="urn:xml3d:lightshader:point">
@@ -126,15 +128,15 @@
       </group>
       
       <group id="specularTexture" shader="#s_phongSpecularTexture" transform="#t_object2" visible="false">
-        <mesh type="triangles" src="#simplePlane1" />
+        <mesh type="triangles" src="#simplePlane2" />
       </group>
       
       <group id="emissiveTexture" shader="#s_phongEmissiveTexture" transform="#t_object2" visible="false">
-        <mesh type="triangles" src="#simplePlane1" />
+        <mesh type="triangles" src="#simplePlane2" />
       </group>
       
       <group id="diffuseEmissiveTexture" shader="#s_diffuseEmissiveTexture" transform="#t_object2" visible="false">
-        <mesh type="triangles" src="#simplePlane1" />
+        <mesh type="triangles" src="#simplePlane2" />
       </group>
     </xml3d>
   </body>

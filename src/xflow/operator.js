@@ -28,8 +28,8 @@
                 var inputName = operator.params[i];
                 var dataName = this._computeInputMapping.getScriptInputName(i, inputName);
                 if(dataName){
-                    var dataEntry = input[dataName];
-                    args.push(dataEntry ? dataEntry.getValue() : null);
+                    var channel = input[dataName];
+                    args.push(channel ? channel.getDataEntry().getValue() : null);
                 }
                 else
                     args.push(null);
@@ -41,17 +41,22 @@
             for(var i in operator.outputs){
                 var d = operator.outputs[i];
                 var value = this._operatorData.result[d.name];
-                if(!outputs[d.name]){
+                if(!outputs[d.name])
+                    outputs[d.name] = new Xflow.Channel(this);
+
+                var entry = outputs[d.name].getDataEntry();
+                if(!entry){
                     switch(d.tupleSize*1){
-                        case 1: outputs[d.name] = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT, value); break;
-                        case 2: outputs[d.name] = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT2, value); break;
-                        case 3: outputs[d.name] = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT3, value); break;
-                        case 4: outputs[d.name] = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT4, value); break;
-                        case 16: outputs[d.name] = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT4X4, value); break;
+                        case 1: entry = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT, value); break;
+                        case 2: entry = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT2, value); break;
+                        case 3: entry = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT3, value); break;
+                        case 4: entry = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT4, value); break;
+                        case 16: entry = new Xflow.BufferEntry(Xflow.DataEntry.TYPE.FLOAT4X4, value); break;
                     }
+                    outputs[d.name].addDataEntry(entry, 0);
                 }
                 else{
-                    outputs[d.name].setValue(value);
+                    entry.setValue(value);
                 }
             }
             this._computeOutputMapping.applyScriptOutputOnMap(input, outputs);

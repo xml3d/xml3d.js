@@ -1,6 +1,6 @@
 var Xflow = {};
 
-
+Xflow.EPSILON = 0.000001;
 /**
  * Type of Modification, used internally only
  * @private
@@ -11,3 +11,4 @@ var XflowModification = {
     DATA_CHANGED: 1,
     STRUCTURE_CHANGED: 2
 };
+

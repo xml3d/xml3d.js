@@ -1,5 +1,52 @@
 (function(){
 
+
+var Channel = function(owner, dataEntry, key){
+    this.entries = [];
+    this.owner = owner;
+
+    if(dataEntry){
+        this.addDataEntry(dataEntry, key);
+    }
+}
+Xflow.Channel = Channel;
+
+Channel.prototype.addDataEntry = function(dataEntry, key){
+    var insertObj = {
+        key: key,
+        value: dataEntry
+    }
+    for(var i = 0; i < this.entries.length; ++i){
+        var entry = this.entries[i];
+        if(entry.key >= key - Xflow.EPSILON ){
+            if(Math.abs(entry.key - key) <= Xflow.EPSILON){
+                this.entries.splice(i, 1, insertObj);
+            }
+            else{
+                this.entries.splice(i, 0, insertObj);
+            }
+            break;
+        }
+    }
+    this.entries.push(insertObj);
+};
+
+Channel.prototype.getDataEntry = function(key){
+    if(this.entries.length == 0)
+        return null;
+    if(key == undefined)
+        return this.entries[0].value;
+
+    for(var i = 0; i < this.entries.length; ++i){
+        var entry = this.entries[i];
+        if(Math.abs(entry.key - key) <= Xflow.EPSILON){
+            return entry.value;
+        }
+    }
+    return null;
+};
+
+
 var DataNode = Xflow.DataNode;
 
 
@@ -50,7 +97,7 @@ DataNode.prototype._createComputeResult = function(filter){
     for(var i in this._dataMap){
         if(!filter || filter.indexOf(i) != -1){
             result._outputNames.push(i);
-            result._dataEntries[i] = this._dataMap[i];
+            result._dataEntries[i] = this._dataMap[i].getDataEntry();
         }
     }
     return result;
@@ -70,10 +117,16 @@ DataNode.prototype._populateDataMap = function(){
                 transferDataMap(inputMap, this._children[i]);
             }
         }
-        for(var i in this._children){
+        for(var i in this._children)
+        {
             if(this._children[i] instanceof Xflow.InputNode){
                 var inputNode = this._children[i];
-                inputMap[inputNode._name] = inputNode._data;
+                var channel = inputMap[inputNode._name];
+                if(!channel || channel.owner != this){
+                    channel = new Channel(this);
+                }
+                channel.addDataEntry(inputNode._data, inputNode._seqnr);
+                inputMap[inputNode._name] = channel;
             }
         }
     }

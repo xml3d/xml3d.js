@@ -48,8 +48,8 @@
     p.requestData = function(parameters) {
         if (!this.computeRequest) {
             var that = this;
-            this.computeRequest = this.dataAdapter.getComputeRequest(null, function(request, changeType) {
-                that.notifyDataChanged.call(that, request, changeType);
+            this.computeRequest = this.dataAdapter.getComputeRequest(parameters, function(request, changeType) {
+                that.notifyDataChanged(request, changeType);
             });
         }
         return this.computeRequest.getResult();

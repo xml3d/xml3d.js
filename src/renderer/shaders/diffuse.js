@@ -127,6 +127,7 @@ XML3D.shaders.register("diffuse", {
         useVertexColor : false
     },
     samplers: {
-        diffuseTexture : null
+        diffuseTexture : null,
+        emissiveTexture : null
     }
 });

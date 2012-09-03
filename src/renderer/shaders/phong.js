@@ -144,6 +144,8 @@ XML3D.shaders.register("phong", {
     },
 
     samplers: {
-        diffuseTexture : null
+        diffuseTexture : null,
+        emissiveTexture : null,
+        specularTexture : null
     }
 });

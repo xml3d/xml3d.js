@@ -139,9 +139,9 @@ XML3D.shaders.register("phong", {
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0],
-        specularColor   : [1.0, 1.0, 1.0],
+        specularColor   : [0.0, 0.0, 0.0],
         transparency    : 0.0,
-        shininess       : 0.5,
+        shininess       : 0.2,
         ambientIntensity: 0.0,
         useVertexColor : false
     },

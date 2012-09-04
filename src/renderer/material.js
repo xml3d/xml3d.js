@@ -37,6 +37,10 @@
         //console.log(sources.fragment);
         var programObject = this.shaderManager.createProgramFromSources(sources);
         this.shaderManager.setUniformVariables(programObject, this.uniforms);
+        if(data) {
+            this.parametersChanged(data.getOutputMap());
+        }
+        programObject.hasTransparency = this.isTransparent;
         return programObject;
     };
 

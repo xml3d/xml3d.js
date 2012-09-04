@@ -15,7 +15,7 @@ module("WebGL Transparency", {
     }
 });
 
-test("ProgramObject.hastransparency is set correctly", 3, function() {
+test("ProgramObject.hastransparency is set correctly", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
     var shaderManager = h.renderer.shaderManager;

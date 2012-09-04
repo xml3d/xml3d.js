@@ -133,6 +133,9 @@ XML3D.shaders.register("phong", {
         directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));
     },
+    hasTransparency: function(params) {
+        return params.transparency && params.transparency.getValue()[0] > 0.001;
+    },
     uniforms: {
         diffuseColor    : [1.0, 1.0, 1.0],
         emissiveColor   : [0.0, 0.0, 0.0],

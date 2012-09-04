@@ -15,7 +15,7 @@ module("External References", {
     }
 });
 
-test("Mesh JSON reference", 4, function() {
+test("Mesh JSON reference", 6, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
@@ -28,6 +28,10 @@ test("Mesh JSON reference", 4, function() {
 
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
                 QUnit.imageEqual(refImage, testImage, "JSON render matches");
+
+                var box = self.doc.getElementById("myMesh02").getBoundingBox();
+                QUnit.closeBox(box, new XML3DBox(new XML3DVec3(-1,-1,-10),new XML3DVec3(1,1,-10)), EPSILON,
+                    "Bounding box of external mesh is: (-1 -1 -10) to (1 1 -10)");
 
                 var meshElement = self.doc.getElementById("myMesh02");
                 meshElement.setAttribute("src", "json/simpleMesh2.json");
@@ -42,13 +46,16 @@ test("Mesh JSON reference", 4, function() {
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference2", "xml3dTest", function(refImage, testImage){
                 QUnit.imageEqual(refImage, testImage, "JSON render matches after change");
 
+                var box = self.doc.getElementById("myMesh02").getBoundingBox();
+                QUnit.closeBox(box, new XML3DBox(new XML3DVec3(1,-3,-10),new XML3DVec3(3,-1,-10)), EPSILON,
+                    "Bounding box of external mesh is: (1 -3 -10) to (3 -1 -10)");
+
                 start();
             });
         }
     }
 
     xTest.addEventListener("framedrawn", onFrameDrawn);
-
 
     this.doc.getElementById("jsonGroup").visible = true;
     hTest.draw();

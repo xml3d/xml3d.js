@@ -424,18 +424,22 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
     var triCount = 0;
     var parameters = {};
 
-	if(lights.changed) {
-	    parameters["pointLightPosition[0]"] = lights.point.position;
+    shaderId = shaderId || objectArray[0].shader || "defaultShader";
+    var shader = this.shaderManager.getShaderById(shaderId);
+
+    if(shader.needsLights || lights.changed) {
+        parameters["pointLightPosition[0]"] = lights.point.position;
         parameters["pointLightAttenuation[0]"] = lights.point.attenuation;
-	    parameters["pointLightVisibility[0]"] = lights.point.visibility;
-	    parameters["pointLightIntensity[0]"] = lights.point.intensity;
+        parameters["pointLightVisibility[0]"] = lights.point.visibility;
+        parameters["pointLightIntensity[0]"] = lights.point.intensity;
         parameters["directionalLightDirection[0]"] = lights.directional.direction;
         parameters["directionalLightVisibility[0]"] = lights.directional.visibility;
         parameters["directionalLightIntensity[0]"] = lights.directional.intensity;
-	}
+        shader.needsLights = false;
+    }
 
-    shaderId = shaderId || objectArray[0].shader || "defaultShader";
-    var shader = this.shaderManager.getShaderById(shaderId);
+
+
     this.shaderManager.bindShader(shader);
     this.shaderManager.updateShader(shader);
 

@@ -47,6 +47,7 @@
         this.uniforms = {};
         this.samplers = {};
         this.handle = program;
+        this.needsLights = true;
         this.vSource = sources.vertex;
         this.fSource = sources.fragment;
     };

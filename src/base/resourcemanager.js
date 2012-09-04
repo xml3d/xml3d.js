@@ -33,13 +33,16 @@
             xmlHttp.open('GET', url, true);
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4) {
-                    processResponse(xmlHttp);
+                    if(xmlHttp.status == 404){
+                        showError(xmlHttp);
+                    }
+                    else
+                        processResponse(xmlHttp);
                 }
             };
             xmlHttp.send(null);
         }
-    }
-    ;
+    };
 
     /**
      * @param {XMLHttpRequest} req
@@ -47,8 +50,15 @@
     function processResponse(req) {
         var mimetype = req.getResponseHeader("content-type");
         updateAdapterHandles(req, req._url, mimetype);
-    }
-    ;
+    };
+
+    /**
+     * @param {XMLHttpRequest} req
+     */
+    function showError(req) {
+        XML3D.debug.logError("Could not load external document '" + req._url +
+            "': " + req.status + " - " + req.statusText);
+    };
 
     /**
      * @param {XMLHttpRequest} req

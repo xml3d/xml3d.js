@@ -243,7 +243,6 @@
         }
 
         // Tally shader uniforms and samplers
-        var texCount = 0;
         var numUniforms = gl.getProgramParameter(prg, gl.ACTIVE_UNIFORMS);
         for ( var i = 0; i < numUniforms; i++) {
             var uni = gl.getActiveUniform(prg, i);
@@ -256,9 +255,7 @@
             uniInfo.location = gl.getUniformLocation(prg, uni.name);
 
             if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
-                uniInfo.texUnit = texCount;
                 programObject.samplers[uni.name] = uniInfo;
-                texCount++;
             } else
                 programObject.uniforms[uni.name] = uniInfo;
         }
@@ -525,7 +522,7 @@
                 onload : function() {
                     renderer.requestRedraw.call(renderer, "Texture loaded");
                 },
-                texUnit : texUnit,
+                unit : texUnit,
                 image : img,
                 config : texEntry.getSamplerConfig()
             });
@@ -634,6 +631,10 @@
         return info;
     };
 
+    /**
+     *
+     * @param {WebGLSampler} tex
+     */
     XML3DShaderManager.prototype.bindTexture = function(tex) {
         var info = tex.info;
         var gl = this.gl;
@@ -652,9 +653,9 @@
             this.bindTexture(tex);
             break;
         case TEXTURE_STATE.UNLOADED:
-            gl.activeTexture(gl.TEXTURE0);
+            gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(gl.TEXTURE_2D, null);
-            this.setUniform(tex, 0);
+            this.setUniform(tex, info.unit + 1);
         }
         ;
     };

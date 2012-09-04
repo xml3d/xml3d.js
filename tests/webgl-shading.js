@@ -317,3 +317,44 @@ test("Phong shader", 4, function() {
 });
 
 
+module("WebGL Shaders and Textures 2", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/webgl-rendering04.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+
+
+test("Switching to previously unused shader", 3, function() {
+    var x = this.doc.getElementById("xml3DElem"),
+        gl = getContextForXml3DElement(x),
+        testFunc = null, h = getHandler(x);
+
+    this.doc.getElementById("myGroup").shader = "#phong2";
+
+    x.addEventListener("framedrawn", function(n) {
+        if(testFunc)
+            testFunc(n);
+    });
+
+    testFunc = function(n) {
+        var actual = XML3DUnit.getPixelValue(gl, 40, 40);
+        if (actual[4] == 0)
+            return;
+        deepEqual(actual, [76,222,255,255], "Shading is correct");
+        start();
+    };
+    stop();
+
+});

@@ -36,8 +36,11 @@ test("Pick transparency values", 3, function() {
     var h = getHandler(xml3dElement);
     var gl = getContextForXml3DElement(xml3dElement);
     var win = this.doc.defaultView;
-    h.draw();
-    var actual = win.getPixelValue(gl, 150, 100);
-    QUnit.closePixel(actual, [127,153,102,255], 1, "Mixed cyan and yellow");
-    console.log(actual);
+    xml3dElement.addEventListener("framedrawn", function(n) {
+        var actual = win.getPixelValue(gl, 150, 100);
+        QUnit.closePixel(actual, [128,153,102,255], 1, "Mixed cyan and yellow");
+        start();
+    });
+    stop();
+    h.redraw();
 });

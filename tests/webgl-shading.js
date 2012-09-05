@@ -222,24 +222,24 @@ test("Diffuse shader with vertex colors", 3, function() {
     cgroup.visible = true;
 });
 
-/*
- * test("Custom shader", 4, function() { var x =
- * this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView; var
- * gl = getContextForXml3DElement(x); var h = getHandler(x);
- *
- * var cshader = this.doc.getElementById("customShader"); var group =
- * this.doc.getElementById("myGroup"); group.visible = true;
- * group.setAttribute("shader", "#customShader"); h.draw(); actual =
- * win.getPixelValue(gl, 90, 90); deepEqual(actual, [255,255,0,255], "Yellow
- * custom shader");
- *
- * //The shader has a green diffuseColor parameter that should override the
- * standard blue cshader.setAttribute("script", "urn:xml3d:shader:phong");
- * h.draw(); actual = win.getPixelValue(gl, 90, 90); deepEqual(actual,
- * [0,255,0,255], "Change shader script to standard phong");
- *
- * });
- */
+test("Simple custom shader", 4, function() {
+    var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+    var cgroup = this.doc.getElementById("customShaderGroup");
+    cgroup.setAttribute("visible", "true");
+    h.draw();
+
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,255,0,255], "Custom shader with default green color");
+
+    cgroup.setAttribute("shader", "#customShader2");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,255,255], "Custom shader with given blue color");
+
+});
+
 
 module("Multiple XML3D nodes", {
     setup : function() {

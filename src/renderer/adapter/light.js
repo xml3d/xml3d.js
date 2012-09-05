@@ -10,7 +10,6 @@
         XML3D.webgl.RenderAdapter.call(this, factory, node);
 
         this.visible = true;
-        this.position = null;
         this.transform = null;
         this.lightShader = null;
         this.renderer = factory.renderer;
@@ -40,11 +39,14 @@
             else
                 return;
 
-            this.renderer.changeLightData(this.lightType, "visibility", this.offset, [lsIntensity[0]*i, lsIntensity[1]*i, lsIntensity[2]*i]);
+            this.renderer.changeLightData(this.lightType, "intensity", this.offset, [lsIntensity[0]*i, lsIntensity[1]*i, lsIntensity[2]*i]);
 
             break;
         case "parenttransform":
             this.transform = evt.newValue;
+            if (this.lightType != "directional")
+                this.renderer.changeLightData(this.lightType, "position", this.offset, this.getPosition());
+
             break;
         }
 
@@ -53,6 +55,16 @@
 
     /** @const */
 	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]), tmpDirection = vec3.create();
+
+
+	XML3DLightRenderAdapter.prototype.getPosition = function() {
+	    if (this.transform) {
+            var t = this.transform;
+            var pos = mat4.multiplyVec4(t, quat4.create([0,0,0,1]));
+            return [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]];
+	    }
+	    return [0,0,0];
+	};
 
 	/**
 	 *
@@ -76,13 +88,8 @@
                     this.offset = lo.length * 3;
                     this.lightType = "point";
 
-                    if (this.transform) {
-                        var t = this.transform;
-                        var pos = mat4.multiplyVec4(t, quat4.create([0,0,0,1]));
-                        Array.set(lo.position, this.offset, [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]]);
-                    } else {
-                        Array.set(lo.position, this.offset, [0,0,0]);
-                    }
+                    Array.set(lo.position, this.offset, this.getPosition());
+
                     Array.set(lo.visibility, this.offset, this.visible ? [1,1,1] : [0,0,0]);
                     shader.fillPointLight(lo, this.node.intensity, this.offset);
                     lo.length++;

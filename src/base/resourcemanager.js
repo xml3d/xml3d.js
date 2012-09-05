@@ -21,7 +21,6 @@
      * @param {string} url
      */
     function loadDocument(url) {
-        console.log("Start request: " + url);
         var xmlHttp = null;
         try {
             xmlHttp = new XMLHttpRequest();

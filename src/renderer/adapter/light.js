@@ -145,7 +145,7 @@
      * @return
      */
     XML3DLightRenderAdapter.prototype.dataChanged = function(field, newValue) {
-        this.renderer.changeLightData(this.lightType, field, this.offset, value);
+        this.renderer.changeLightData(this.lightType, field, this.offset, newValue);
     };
 
     // Export to XML3D.webgl namespace

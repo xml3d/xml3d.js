@@ -79,13 +79,35 @@ test("Phong fragment shader", function() {
     directives = [];
     phong.addDirectives.call(phong, directives, {
         directional : {
+            length : 0
+        },
+        point : {
+            length : 1350
+        }
+    }, {
+        specularTexture : {}
+    });
+    var fragment5 = this.mergeDirectives(directives, phong.fragment);
+    console.log(fragment5);
+    this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with 1,350 point lights and a specular texture compiles.");
+    notEqual(fragment5.indexOf("MAX_POINTLIGHTS 1350"), -1, "MAX_POINTLIGHTS set");
+    notEqual(fragment5.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment5.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
+    notEqual(fragment5.indexOf("HAS_SPECULARTEXTURE 1"), -1, "HAS_SPECULARTEXTURE set");
+    notEqual(fragment5.indexOf("HAS_EMISSIVETEXTURE 0"), -1, "HAS_EMISSIVETEXTURE set");
+
+    directives = [];
+    phong.addDirectives.call(phong, directives, {
+        directional : {
             length : 3
         },
         point : {
             length : 5
         }
     }, {
-        diffuseTexture : {}
+        diffuseTexture : {},
+        specularTexture : {},
+        emissiveTexture : {}
     });
     var fragment5 = this.mergeDirectives(directives, phong.fragment);
     console.log(fragment5);
@@ -93,6 +115,8 @@ test("Phong fragment shader", function() {
     notEqual(fragment5.indexOf("MAX_POINTLIGHTS 5"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment5.indexOf("MAX_DIRECTIONALLIGHTS 3"), -1, "MAX_DIRECTIONALLIGHTS set");
     notEqual(fragment5.indexOf("HAS_DIFFUSETEXTURE 1"), -1, "HAS_DIFFUSETEXTURE set");
+    notEqual(fragment5.indexOf("HAS_SPECULARTEXTURE 1"), -1, "HAS_SPECULARTEXTURE set");
+    notEqual(fragment5.indexOf("HAS_EMISSIVETEXTURE 1"), -1, "HAS_EMISSIVETEXTURE set");
 });
 
 module("WebGL Shaders and Textures", {

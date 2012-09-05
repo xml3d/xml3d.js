@@ -114,7 +114,7 @@ XML3D.shaders.register("phong", {
         "    vec3 L =  normalize(-lDirection.xyz);",
         "    vec3 R = normalize(reflect(L,fragNormal));",
         "    vec3 Idiff = directionalLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
-        "    vec3 Ispec = directionalLightIntensity[i] * specularColor * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
+        "    vec3 Ispec = directionalLightIntensity[i] * objSpecular * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
         "    color = color + ((Idiff + Ispec)) * directionalLightVisibility[i];",
         "  }",
         "#endif",

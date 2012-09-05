@@ -367,7 +367,7 @@ Renderer.prototype.render = function() {
     return [stats.objCount, stats.triCount];
 };
 
-Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent, xform, backToFront) {
+Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent, xform) {
     var tempArray = [];
     for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
         var obj = sourceObjectArray[i];
@@ -396,16 +396,10 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
             tempArray[i] = [ obj, center[3] ];
         }
 
-        if (backToFront) {
-            tempArray.sort(function(a, b) {
-                return a[1] - b[1];
-            });
-        } else {
-            tempArray.sort(function(a, b) {
-                return b[1] - a[1];
-            });
-        }
-        //TODO: Can we do this better?
+        tempArray.sort(function(a, b) {
+            return a[1] - b[1];
+        });
+
         for (var i=0; i < tlength; i++) {
             transparent[i] = tempArray[i][0];
         }

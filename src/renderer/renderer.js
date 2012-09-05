@@ -391,7 +391,7 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
             var center = obj.mesh.bbox.center()._data;
             center = mat4.multiplyVec4(trafo, quat4.create([center[0], center[1], center[2], 1.0]));
             center = mat4.multiplyVec4(xform.view, quat4.create([center[0], center[1], center[2], 1.0]));
-            tempArray[i] = [ obj, center[3] ];
+            tempArray[i] = [ obj, center[2] ];
         }
 
         tempArray.sort(function(a, b) {

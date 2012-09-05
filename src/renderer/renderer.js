@@ -375,8 +375,6 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
         var shader = this.shaderManager.getShaderById(shaderName);
 
         if (shader.hasTransparency) {
-            //Transparent objects will be drawn front to back so there's no sense in sorting them
-            //by shader
             tempArray.push(obj);
         } else {
             opaque[shaderName] = opaque[shaderName] || [];
@@ -384,7 +382,7 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
         }
     }
 
-    //Sort transparent objects from front to back
+    //Sort transparent objects from back to front
     var tlength = tempArray.length;
     if (tlength > 1) {
         for (i = 0; i < tlength; i++) {

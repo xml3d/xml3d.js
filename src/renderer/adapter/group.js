@@ -55,14 +55,14 @@
     };
 
     p.notifyChanged = function(evt) {
-        if (evt.type == 0) {
+        if (evt.type == XML3D.events.NODE_INSERTED) {
             this.factory.renderer.sceneTreeAddition(evt);
             return;
         }
-        else if (evt.type == 2) {
+        else if (evt.type == XML3D.events.NODE_REMOVED) {
             this.factory.renderer.sceneTreeRemoval(evt);
             return;
-        } else if (evt.type == 5) {
+        } else if (evt.type == XML3D.events.THIS_REMOVED) {
             return;
         }
         

@@ -8,9 +8,9 @@
     XML3D.createClass(XML3DCanvasRenderAdapter, XML3D.webgl.RenderAdapter);
 
     XML3DCanvasRenderAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == 0) {
+        if (evt.type == XML3D.events.NODE_INSERTED) {
             this.factory.renderer.sceneTreeAddition(evt);
-        } else if (evt.type == 2) {
+        } else if (evt.type == XML3D.events.NODE_REMOVED) {
             this.factory.renderer.sceneTreeRemoval(evt);
         }
 

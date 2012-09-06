@@ -64,10 +64,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @param {XML3D.events.Notification} evt
      */
     p.notifyChanged = function(evt) {
-        if (evt.type == 0)
+        if (evt.type == XML3D.events.NODE_INSERTED)
             // Node insertion is handled by the CanvasRenderAdapter
             return;
-        else if (evt.type == 2)
+        else if (evt.type == XML3D.events.NODE_REMOVED)
             return this.factory.renderer.sceneTreeRemoval(evt);
 
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;

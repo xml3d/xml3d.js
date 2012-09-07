@@ -154,7 +154,6 @@
 
         this.setUniformsFromComputeResult(program, dataTable);
         this.createTexturesFromComputeResult(program, dataTable);
-        XML3D.webgl.checkError(this.gl, "setSamplers");
         return shaderId;
     };
 
@@ -306,28 +305,11 @@
         this.bindShader(program);
         this.setUniformsFromComputeResult(program, result);
         this.createTexturesFromComputeResult(program, result);
+        if(program.material) {
+            program.material.parametersChanged(result.getOutputMap());
+            program.hasTransparency = program.material.isTransparent;
+        }
         this.renderer.requestRedraw("Shader data changed");
-        // Store the change, it will be applied the next time the shader is
-        // bound
-        /*if (attrName == "src") {
-            // A texture source was changed
-            if (textureName) {
-                var sampler = shader.samplers[textureName];
-                if (sampler)
-                    shader.samplers[textureName] = this.replaceTexture(adapter, sampler);
-            } else
-                XML3D.debug.logError("Couldn't apply change because of a missing texture name");
-
-        } else {
-            if (attrName == "transparency")
-                shader.hasTransparency = newValue > 0;
-
-            shader.changes.push({
-                type : "uniform",
-                name : attrName,
-                newValue : newValue
-            });
-        }*/
 
     };
 

@@ -41,6 +41,7 @@
             this.parametersChanged(data.getOutputMap());
         }
         programObject.hasTransparency = this.isTransparent;
+        programObject.material = this;
         return programObject;
     };
 

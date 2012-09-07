@@ -572,7 +572,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
         var transform = obj.transform;
         var mesh = obj.mesh;
 
-        if (!mesh.valid)// || !obj.pickable)
+        if (!mesh.valid  || !obj.visible)
             continue;
 
         var parameters = {};

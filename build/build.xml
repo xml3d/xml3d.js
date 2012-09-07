@@ -117,8 +117,8 @@
 			</args>
 		</git>
 		<echo message="${git.output}" />
-		<concatScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-${continuous.extension}"/>
-        <compileScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-${continuous.extension}-min"/>
+        <concatScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}"/>
+        <compileScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}-min"/>
         <upload extension="-${continuous.extension}"/>
 		<upload extension="-${continuous.extension}-min"/>
 	</target>

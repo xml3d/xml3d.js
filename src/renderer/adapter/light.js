@@ -77,7 +77,7 @@
             return;
 
         var lo;
-
+        shader.registerLightListener(this.dataChanged.bind(this));
         var script = shader.node.script;
         var pos = script.indexOf("urn:xml3d:lightshader:");
         if(pos === 0) {

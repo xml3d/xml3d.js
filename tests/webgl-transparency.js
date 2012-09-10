@@ -28,7 +28,13 @@ test("ProgramObject.hastransparency is set correctly", function() {
 
     shader = shaderManager.getShaderById("matte");
     equal(shader.hasTransparency, false, "Matte shader is always opaque");
-    console.log(shader);
+
+    var transparencyAttribute = this.doc.getElementById("change_transparencyAttribute");
+    shader = shaderManager.getShaderById("change");
+    equal(shader.hasTransparency, false, "Initially opaque");
+    transparencyAttribute.textContent = "0.5";
+    equal(shader.hasTransparency, true, "Changed after setting transparency parameter to 0.5");
+
 });
 
 test("Pick transparency values", 3, function() {

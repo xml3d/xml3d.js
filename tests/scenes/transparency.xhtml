@@ -32,6 +32,12 @@
           <float name="transparency">0.5</float>
           <float name="ambientIntensity">1</float>
         </shader>
+        <shader id="change" script="urn:xml3d:shader:phong">
+          <float3 name="diffuseColor">0 0.2 0.8</float3>
+          <float id="change_transparencyAttribute" name="transparency">0</float>
+          <float name="ambientIntensity">1</float>
+        </shader>
+        
       </defs>
       <view id="myView" />
       <group id="meshGroup" shader="#opaque" transform="#t_identity" visible="true">

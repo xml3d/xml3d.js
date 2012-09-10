@@ -203,7 +203,7 @@
     handler.ElementHandler.prototype.resolve = function(attrName) {
         var uri = new XML3D.URI(this.element[attrName]);
         if (uri.valid && uri.fragment) {
-            return XML3D.URIResolver.resolve(uri);
+            return XML3D.URIResolver.resolveLocal(uri);
         }
         return null;
     };

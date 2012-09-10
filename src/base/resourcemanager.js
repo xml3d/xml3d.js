@@ -32,11 +32,12 @@
             xmlHttp.open('GET', url, true);
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4) {
-                    if(xmlHttp.status == 404){
-                        showError(xmlHttp);
+                    if(xmlHttp.status == 200){
+                        XML3D.debug.logDebug("Loaded: " + url);
+                        processResponse(xmlHttp);
                     }
                     else
-                        processResponse(xmlHttp);
+                        showError(xmlHttp);
                 }
             };
             xmlHttp.send(null);

@@ -74,22 +74,26 @@ XML3D.URIResolver = function() {
  * @param {Document=} document Base document to use
  * @return {Element} The resolved element or null if it could not be resolved
  */
-XML3D.URIResolver.resolve = function(uri, document) {
+XML3D.URIResolver.resolveLocal = function(uri, document) {
     if (typeof uri == 'string')
         uri = new XML3D.URI(uri);
     document = document || window.document;
 
     if (uri.scheme == 'urn')
     {
-        XML3D.debug.logInfo("++ Found URN." + uri);
         return null;
     }
 
     if (!uri.path && uri.fragment) { // local uri
         return document.getElementById(uri.fragment);
     }
-
-    XML3D.debug.logWarning("++ Can't resolve URI: " + uri.toString());
-    // TODO Resolve intra-document references
     return null;
+};
+
+/**
+ * @deprecated
+ */
+XML3D.URIResolver.resolve = function(uri, document) {
+    XML3D.debug.logWarning("You are using deprecated XML3D.URIResolver.resolve. Use XML3D.URIResolver.resolveLocal instead.");
+    return XML3D.URIResolver.resolveLocal(uri, document);
 };

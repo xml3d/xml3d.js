@@ -125,7 +125,7 @@
             var shaderLink = this.node.shader;
             var shader = null;
             if (shaderLink != "")
-                shader = XML3D.URIResolver.resolve(shaderLink);
+                shader = XML3D.URIResolver.resolveLocal(shaderLink);
             // if no shader attribute is specified, try to get a shader from the style attribute
             if(shader == null)
             {

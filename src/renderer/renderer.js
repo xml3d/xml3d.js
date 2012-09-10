@@ -90,7 +90,7 @@ Renderer.prototype.initCamera = function() {
     var avLink = this.xml3dNode.activeView;
     var av = null;
     if (avLink != "")
-        av = XML3D.URIResolver.resolve(avLink);
+        av = XML3D.URIResolver.resolveLocal(avLink);
 
     if (av == null)
     {
@@ -484,7 +484,7 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
             var vbo;
 
             if (!vbos[name]) {
-                XML3D.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
+                //XML3D.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
                 continue;
             }
 

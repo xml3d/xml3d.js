@@ -48,6 +48,7 @@
 
     /**
      * Creates a new image object
+     *
      * @param {string} url
      */
     ImgDataAdapter.prototype.createImageFromURL = function(url) {
@@ -68,7 +69,7 @@
      */
     ImgDataAdapter.prototype.setTextureEntry = function(entry) {
         this.textureEntry = entry;
-        if (this.image && this.image.complete) {
+        if (this.image) {
             this.textureEntry.setImage(this.image);
         }
     };

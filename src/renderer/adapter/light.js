@@ -44,8 +44,10 @@
             break;
         case "parenttransform":
             this.transform = evt.newValue;
-            if (this.lightType != "directional")
-                this.renderer.changeLightData(this.lightType, "position", this.offset, this.getPosition());
+            if (this.lightType == "directional")
+                this.renderer.changeLightData(this.lightType, "direction", this.offset, this.applyTransform(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
+            else
+                this.renderer.changeLightData(this.lightType, "position", this.offset, this.applyTransform([0,0,0]));
 
             break;
         }
@@ -57,15 +59,15 @@
 	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]), tmpDirection = vec3.create();
 
 
-	XML3DLightRenderAdapter.prototype.getPosition = function() {
+	XML3DLightRenderAdapter.prototype.applyTransform = function(vec) {
 	    if (this.transform) {
             var t = this.transform;
-            var pos = mat4.multiplyVec4(t, quat4.create([0,0,0,1]));
-            return [pos[0]/pos[3], pos[1]/pos[3], pos[2]/pos[3]];
+            var newVec = mat4.multiplyVec4(t, quat4.create([vec[0], vec[1], vec[2], 1]));
+            return [newVec[0]/newVec[3], newVec[1]/newVec[3], newVec[2]/newVec[3]];
 	    }
-	    return [0,0,0];
+	    return vec;
 	};
-
+	
 	/**
 	 *
 	 * @param {Object} lights
@@ -88,8 +90,7 @@
                     this.offset = lo.length * 3;
                     this.lightType = "point";
 
-                    Array.set(lo.position, this.offset, this.getPosition());
-
+                    Array.set(lo.position, this.offset, this.applyTransform([0,0,0]));
                     Array.set(lo.visibility, this.offset, this.visible ? [1,1,1] : [0,0,0]);
                     shader.fillPointLight(lo, this.node.intensity, this.offset);
                     lo.length++;
@@ -99,14 +100,7 @@
                     this.offset = lo.length * 3;
                     this.lightType = "directional";
 
-                    if (this.transform) {
-                        var t = this.transform;
-                        mat4.multiplyVec3(t, XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION, tmpDirection);
-                        Array.set(lo.direction, this.offset, [tmpDirection[0], tmpDirection[1], tmpDirection[2]]);
-                    } else {
-                        Array.set(lo.direction, this.offset, XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
-                    }
-
+                    Array.set(lo.direction, this.offset, this.applyTransform(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
                     Array.set(lo.visibility, this.offset, this.visible ? [1,1,1] : [0,0,0]);
                     shader.fillDirectionalLight(lo, this.node.intensity, this.offset);
                     lo.length++;

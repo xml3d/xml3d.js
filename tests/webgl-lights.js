@@ -115,16 +115,16 @@ test("Change directional light direction", 5, function() {
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,255,255], "Initial light direction");
 
-    var test = this.doc.getElementById("lsDirection");
-    test.textContent = "0 1 0";
+    var test = this.doc.getElementById("t_dirLight");
+    test.setAttribute("rotation", "0 1 0 1.571");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,0,255], "Light parallel to the plane");
     
-    test.textContent = "0 1 -0.05";
+    test.setAttribute("rotation", "0 1 0 1.5");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,127,255], "Light barely hitting the plane");
+    deepEqual(actual, [0,0,180,255], "Light barely hitting the plane");
 });
 
 test("Change lightshader intensity", 4, function() {

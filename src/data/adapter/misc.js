@@ -96,7 +96,53 @@
         return null;
     };
 
+    var VideoDataAdapter = function(factory, node) {
+        XML3D.data.DataAdapter.call(this, factory, node);
+        this.textureEntry = null;
+        this.video = null;
+        if (node.src)
+            this.createVideoFromURL(node.src);
+    };
+    XML3D.createClass(VideoDataAdapter, XML3D.data.DataAdapter);
+
+    /**
+     * Creates a new video object
+     *
+     * @param {string} url
+     */
+   VideoDataAdapter.prototype.createVideoFromURL = function(url) {
+        var video = document.createElement("video");
+        var that = this;
+        video.addEventListener("canplaythrough", function() {
+            video.play();
+            that.interval = window.setInterval(function() {
+                if (that.textureEntry) {
+                    that.textureEntry.setImage(video);
+                    console.log("Update");
+                }
+            }, 15);
+        }, true);
+        video.addEventListener("ended", function() {
+            window.clearInterval(that.interval);
+        }, true);
+        video.crossorigin = "anonymous";
+        video.autoplay = true;
+        video.src = url;
+        this.video = video;
+    };
+
+    /**
+     * @param {Xflow.TextureEntry} entry
+     */
+    VideoDataAdapter.prototype.setTextureEntry = function(entry) {
+        this.textureEntry = entry;
+        if (this.video) {
+            this.textureEntry.setImage(this.video);
+        }
+    };
+
     // Export
     XML3D.data.ImgDataAdapter = ImgDataAdapter;
+    XML3D.data.VideoDataAdapter = VideoDataAdapter;
 
 }());

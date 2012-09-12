@@ -520,7 +520,7 @@
         if (img) {
             var renderer = this.renderer;
             var info = new TextureInfo(this.gl.createTexture(), {
-                status : img.complete ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
+                status : (img.complete || img.readyState) ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
                 onload : function() {
                     renderer.requestRedraw.call(renderer, "Texture loaded");
                 },

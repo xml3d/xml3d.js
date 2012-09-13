@@ -41,7 +41,7 @@
         0 1 2 3 4 5 6 7 8 9 10 11 23 24 25 23 25 26 27 28 29 30 31 32 33 34 24 33 24 23 34 35 24 35 36 24 37 38 39 40 41 42 43 44 45 46 47 48 84 87 88 84 88 85 90 91 87 90 87 84 92 93 94 92 94 95 93 96 94 96 97 94
        </int>
       </data>
-        <transform id="t_Cube" rotation="0.678598 0.678598 -0.281085 1.096057" scale="2 1 1" translation="0 0 0"/>
+        <transform id="t_Unity"/>
         <transform id="t_TopCube" translation="0 2.5 0" />
         <transform id="t_BotCube" translation="0 -2.5 0" />
         <transform id="t_Front" translation="0.0 0.0 1.0" />
@@ -50,15 +50,21 @@
         <transform id="t_Right" translation="-1.0 0.0 0.0" rotation="0 1 0 1.57" />
         <transform id="t_Top" translation="0.0 1.0 0.0" rotation="1 0 0 1.57" />
         <transform id="t_Bottom" translation="0.0 -1.0 0.0" rotation="1 0 0 1.57" />
+        <transform id="t_Scaled" scale="20 5 20"/>
+        <transform id="t_Translated" translation="1 -1 5"/>
+        <transform id="t_Rotated" rotation="1 0 0 0.707106"/>
              <shader id="red" script="urn:xml3d:shader:matte">
-        <float3 name="diffuseColor">1 0 0"</float3>
+        <float3 name="diffuseColor">1 0 0</float3>
       </shader>
          <shader id="green" script="urn:xml3d:shader:matte">
-        <float3 name="diffuseColor">0 1 0"</float3>
+        <float3 name="diffuseColor">0 1 0</float3>
+      </shader>
+      <shader id="yellow" script="urn:xml3d:shader:matte">
+        <float3 name="diffuseColor">1 1 0</float3>
       </shader>
       </defs>
       <shader id="red" script="urn:xml3d:shader:matte">
-        <float3 name="color">1 0 0"</float3>
+        <float3 name="color">1 0 0</float3>
       </shader>
       <view id="controller_view" position="0 0 10" />
       <group id="g_Root">
@@ -103,10 +109,24 @@
           </group>
         </group>
         <group id="empty_group" transform="#t_BotCube"/>
-        <group id="cube_group" transform="#t_Cube" visible="false">
+        <group id="cube_group" transform="#t_Cube" visible="true">
             <mesh id="cube_mesh" type="triangles" src="#cube_data" />
         </group>
+        <group id="scaled_group" shader="#yellow" transform="#t_Scaled" visible="true">
+            <mesh type="triangles" src="#cube_data" />
+        </group>
+        <group id="translated_group" shader="#yellow" transform="#t_Translated" visible="true">
+            <mesh type="triangles" src="#cube_data" />
+        </group>
+        <group id="rotated_group" shader="#yellow" transform="#t_Rotated" visible="true">
+            <mesh type="triangles" src="#cube_data" />
+        </group>
       </group>
+       <group id="hierarchy" shader="#red" transform="#t_Rotated" visible="true">
+            <group transform="#t_Scaled" visible="true">
+                <mesh type="triangles" src="#cube_data" />
+            </group>
+        </group>
        <group>
        <group shader="#green">
             <mesh id="split_cube_mesh1" type="triangles" src="#split_cube_mat1" />

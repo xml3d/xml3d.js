@@ -8,6 +8,13 @@ as developing web pages. Every web developer who knows how to use the DOM (or jQ
 
 XML3D is also an evaluation platform of the W3C Community Group [Declarative 3D for the Web](http://www.w3.org/community/declarative3d/)
 
+#### Examples ####
+<a href="http://www.xml3d.org/xml3d/demos/19_RubiksCube/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/rubik.jpg"/></a>
+<a href="http://www.xml3d.org/xml3d/demos/25_Chess/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/chess.png"/></a>
+<a href="http://www.xml3d.org/xml3d/demos/12_MarsCity/marscity.xhtml"><img src="http://www.xml3d.org/xml3d/demos/thumbs/marscity.jpg?s"/></a>
+<a href="http://www.xml3d.org/xml3d/demos/32_WorldBank/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/worldbank.jpg"/></a>
+<a href="http://xml3d.github.com/xml3d-museum/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/museum.jpg"/></a>
+
 #### Usage ####
 
 Download the [library](http://www.xml3d.org/xml3d/script/xml3d.js) and include it in your xhtml.
@@ -24,6 +31,8 @@ include the camera controller that comes with xml3d.js:
 <script src="http://www.xml3d.org/xml3d/script/tools/camera.js"></script>
 ```
 
+#### Testing ####
+We have an extensive [test suite](http://xml3d.github.com/xml3d.js/tests/) and some [known issues](https://github.com/xml3d/xml3d.js/wiki/Known-issues).
 
 #### Build ####
 The xml3d.js is separated into several files. To build, run the ant script

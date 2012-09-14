@@ -39,4 +39,16 @@ The xml3d.js is separated into several files. To build, run the ant script
 'build.xml' located in the 'build' folder. From Eclipse IDE the build can also
 be started by running 'Run As->Ant build' from the files context menu.
 
+### Change log ###
 
+4.2 - 14.09.2012
+* Hardware accelerated object picking expanded to 16,7 mio objects
+* Emissive texture map support in diffuse and phong shader – [demo](http://xml3d.github.com/xml3d-examples/examples/candle/candle.xhtml)
+* Specular map support in phong shader – [demo](http://xml3d.github.com/xml3d-museum/)
+* New mechanism for custom shaders – [demo](http://xml3d.github.com/xml3d-examples/examples/eyelight/eyelight.xhtml)
+* Support of directional lights (finally) – [demo](http://xml3d.github.com/xml3d-examples/examples/directionalLight/index.xhtml)
+* Support of external data resources in JSON format – [demo](http://xml3d.github.com/xml3d-examples/examples/suzanne/suzanne.xhtml)
+* New mechanism to register loaders for external formats – [demo](http://xml3d.github.com/xml3d-examples/examples/meshlab/meshlab.xhtml)
+
+4.1 - 19.07.2012
+* Initial release on GitHub

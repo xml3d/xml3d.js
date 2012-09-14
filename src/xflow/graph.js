@@ -9,16 +9,7 @@ var Graph = function(){
 };
 Xflow.Graph = Graph;
 
-/**
- * Type of Modification, used internally only
- * @private
- * @enum
- */
-XflowModification = {
-    NONE: 0,
-    DATA_CHANGED: 1,
-    STRUCTURE_CHANGED: 2
-};
+
 
 /**
  * @return {Xflow.InputNode}

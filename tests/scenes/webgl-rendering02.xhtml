@@ -3,6 +3,7 @@
   <head>
      <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <script type="text/javascript" src="scripts/customShader.js"></script>
    <title>
     XML3D Rendering 2
    </title>
@@ -32,9 +33,11 @@
         </texture>
     </shader>
     
-    <shader id="customShader" script="#customShaderScript">
-        <float3 name="diffuseColor">0 1 0</float3>
-    </shader>   
+    <shader id="customShader" script="urn:xml3d:shader:customtest">
+    </shader>  
+    <shader id="customShader2" script="urn:xml3d:shader:customtest">
+        <float3 name="someColor">0 0 1</float3>
+    </shader>    
     <shader id="diffuseShader" script="urn:xml3d:shader:diffuse">
         <float3 name="diffuseColor">1 1 1</float3>
         <float name="ambientIntensity">1</float>
@@ -87,6 +90,11 @@
     
     <group id="npotTexGroup" shader="#npotTexShader" visible="false">
         <mesh src="#wrapMeshData" type="triangles">
+        </mesh>
+    </group> 
+
+    <group id="customShaderGroup" shader="#customShader" visible="false">
+        <mesh src="#meshdata" type="triangles">
         </mesh>
     </group> 
 

@@ -46,15 +46,13 @@
     </lightshader>
     
     <lightshader id="ls_Dir" script="urn:xml3d:lightshader:directional">
-       <float3 name="intensity">
+       <float3 id="lsIntensity" name="intensity">
         0 0 10
-       </float3>
-       <float3 name="direction">
-       0 0 -1
        </float3>
     </lightshader>
     
     <transform id="t_Point" translation="0 0 3"/>
+    <transform id="t_dirLight" rotation="0 0 1 0"/>
       
     </defs>
     
@@ -63,8 +61,8 @@
     <group transform="#t_Point" id="pointlight">
       <light shader="#ls_Point"/>
     </group>
-    <group id="dirlight">
-      <light shader="#ls_Dir"/>
+    <group id="dirlight" transform="#t_dirLight">
+      <light id="dirlightelement" shader="#ls_Dir"/>
     </group>
     
     <group id="diffuseShadedGroup" shader="#diffuseShader" visible="false">
@@ -74,7 +72,7 @@
     <group id="phongShadedGroup" shader="#phongShader" visible="false">
         <mesh id="mySimpleMesh2" src="#meshdata" type="triangles">
         </mesh>
-    </group>  
+    </group> 
 
     </xml3d>
     <script type="text/javascript">

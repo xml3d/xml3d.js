@@ -21,7 +21,6 @@
      * @param {string} url
      */
     function loadDocument(url) {
-        console.log("Start request: " + url);
         var xmlHttp = null;
         try {
             xmlHttp = new XMLHttpRequest();
@@ -33,13 +32,18 @@
             xmlHttp.open('GET', url, true);
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4) {
-                    processResponse(xmlHttp);
+                    if(xmlHttp.status == 200){
+                        XML3D.debug.logDebug("Loaded: " + url);
+                        XML3D.xmlHttpCallback && XML3D.xmlHttpCallback();
+                        processResponse(xmlHttp);
+                    }
+                    else
+                        showError(xmlHttp);
                 }
             };
             xmlHttp.send(null);
         }
-    }
-    ;
+    };
 
     /**
      * @param {XMLHttpRequest} req
@@ -47,8 +51,15 @@
     function processResponse(req) {
         var mimetype = req.getResponseHeader("content-type");
         updateAdapterHandles(req, req._url, mimetype);
-    }
-    ;
+    };
+
+    /**
+     * @param {XMLHttpRequest} req
+     */
+    function showError(req) {
+        XML3D.debug.logError("Could not load external document '" + req._url +
+            "': " + req.status + " - " + req.statusText);
+    };
 
     /**
      * @param {XMLHttpRequest} req

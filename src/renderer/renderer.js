@@ -90,7 +90,7 @@ Renderer.prototype.initCamera = function() {
     var avLink = this.xml3dNode.activeView;
     var av = null;
     if (avLink != "")
-        av = XML3D.URIResolver.resolve(avLink);
+        av = XML3D.URIResolver.resolveLocal(avLink);
 
     if (av == null)
     {
@@ -367,7 +367,7 @@ Renderer.prototype.render = function() {
     return [stats.objCount, stats.triCount];
 };
 
-Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent, xform, backToFront) {
+Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent, xform) {
     var tempArray = [];
     for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
         var obj = sourceObjectArray[i];
@@ -375,8 +375,6 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
         var shader = this.shaderManager.getShaderById(shaderName);
 
         if (shader.hasTransparency) {
-            //Transparent objects will be drawn front to back so there's no sense in sorting them
-            //by shader
             tempArray.push(obj);
         } else {
             opaque[shaderName] = opaque[shaderName] || [];
@@ -384,7 +382,7 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
         }
     }
 
-    //Sort transparent objects from front to back
+    //Sort transparent objects from back to front
     var tlength = tempArray.length;
     if (tlength > 1) {
         for (i = 0; i < tlength; i++) {
@@ -393,19 +391,13 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
             var center = obj.mesh.bbox.center()._data;
             center = mat4.multiplyVec4(trafo, quat4.create([center[0], center[1], center[2], 1.0]));
             center = mat4.multiplyVec4(xform.view, quat4.create([center[0], center[1], center[2], 1.0]));
-            tempArray[i] = [ obj, center[3] ];
+            tempArray[i] = [ obj, center[2] ];
         }
 
-        if (backToFront) {
-            tempArray.sort(function(a, b) {
-                return a[1] - b[1];
-            });
-        } else {
-            tempArray.sort(function(a, b) {
-                return b[1] - a[1];
-            });
-        }
-        //TODO: Can we do this better?
+        tempArray.sort(function(a, b) {
+            return a[1] - b[1];
+        });
+
         for (var i=0; i < tlength; i++) {
             transparent[i] = tempArray[i][0];
         }
@@ -424,18 +416,22 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
     var triCount = 0;
     var parameters = {};
 
-	if(lights.changed) {
-	    parameters["pointLightPosition[0]"] = lights.point.position;
+    shaderId = shaderId || objectArray[0].shader || "defaultShader";
+    var shader = this.shaderManager.getShaderById(shaderId);
+
+    if(shader.needsLights || lights.changed) {
+        parameters["pointLightPosition[0]"] = lights.point.position;
         parameters["pointLightAttenuation[0]"] = lights.point.attenuation;
-	    parameters["pointLightVisibility[0]"] = lights.point.visibility;
-	    parameters["pointLightIntensity[0]"] = lights.point.intensity;
+        parameters["pointLightVisibility[0]"] = lights.point.visibility;
+        parameters["pointLightIntensity[0]"] = lights.point.intensity;
         parameters["directionalLightDirection[0]"] = lights.directional.direction;
         parameters["directionalLightVisibility[0]"] = lights.directional.visibility;
         parameters["directionalLightIntensity[0]"] = lights.directional.intensity;
-	}
+        shader.needsLights = false;
+    }
 
-    shaderId = shaderId || objectArray[0].shader || "defaultShader";
-    var shader = this.shaderManager.getShaderById(shaderId);
+
+
     this.shaderManager.bindShader(shader);
     this.shaderManager.updateShader(shader);
 
@@ -488,7 +484,7 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
             var vbo;
 
             if (!vbos[name]) {
-                XML3D.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
+                //XML3D.debug.logWarning("Missing required mesh data [ "+name+" ], the object may not render correctly.");
                 continue;
             }
 
@@ -576,7 +572,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
         var transform = obj.transform;
         var mesh = obj.mesh;
 
-        if (!mesh.valid)// || !obj.pickable)
+        if (!mesh.valid  || !obj.visible)
             continue;
 
         var parameters = {};

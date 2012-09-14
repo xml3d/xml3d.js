@@ -74,7 +74,7 @@
             return new XML3D.base.AdapterHandle();
         }
         uri = new XML3D.URI(uri);
-        var element = XML3D.URIResolver.resolve(uri);
+        var element = XML3D.URIResolver.resolveLocal(uri);
         if (element){
             var handle = new XML3D.base.AdapterHandle();
             handle.setAdapter(XML3D.base.AdapterFactory.prototype.getAdapter.call(this, element, XML3D.data.XML3DDataAdapterFactory.prototype));

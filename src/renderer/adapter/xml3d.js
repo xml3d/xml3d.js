@@ -36,6 +36,16 @@
         }
     };
 
+    /* Interface methods */
+    XML3DCanvasRenderAdapter.prototype.getBoundingBox = function() {
+        var bbox = new window.XML3DBox();
+        Array.prototype.forEach.call(this.node.childNodes, function(c) {
+            if(c.getBoundingBox)
+                bbox.extend(c.getBoundingBox());
+        });
+        return bbox;
+    };
+
     XML3DCanvasRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) {
         var handler = this.factory.handler;
         var object = handler.updatePickObjectByPoint(x, y);

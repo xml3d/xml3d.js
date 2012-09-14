@@ -13,12 +13,17 @@
                <transform id="t1" translation="-2.5 2 0"/>
                <transform id="t2" translation="0 2 0"/>
                <transform id="t3" translation="2.5 2 0"/>
+               <transform id="t3_back" translation="2.5 2 -1"/>
                <transform id="t4" translation="-2.5 -2 0"/>
                <transform id="t5" translation="0 -2 0"/>
                <transform id="t6" translation="2.5 -2 0"/>
                
                <shader id="shader_diffuse" script="urn:xml3d:shader:diffuse">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
+                  <float name="ambientIntensity">0.8</float>
+               </shader>
+                 <shader id="shader_diffuse2" script="urn:xml3d:shader:diffuse">
+                  <float3 name="diffuseColor">1 0.2 1</float3>
                   <float name="ambientIntensity">0.8</float>
                </shader>
                <shader id="shader_diffuse_texture" script="urn:xml3d:shader:diffuse">
@@ -82,8 +87,11 @@
                 <group shader="#shader_diffuse_texture" transform="#t2">
                    <mesh id="pickingMesh2" src="#mySimpleMesh"/>
                 </group>
-                <group shader="#shader_diffuse_vertexcolors" transform="#t3">
+                <group shader="#shader_diffuse_vertexcolors" transform="#t3"  visible="false">
                    <mesh id="pickingMesh3" src="#mySimpleMesh"/>
+                </group>
+                <group shader="#shader_diffuse2" transform="#t3_back">
+                    <mesh id="pickingMesh_back" src="#mySimpleMesh"/>
                 </group>
                 <group shader="#shader_phong" transform="#t4">
                     <mesh id="pickingMesh4" src="#mySimpleMesh"/>

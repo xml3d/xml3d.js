@@ -32,9 +32,9 @@ XML3D.config.element = function(element, selfmonitoring) {
 };
 
 XML3D.config.configure = function(element, selfmonitoring) {
-    if (Array.isArray(element))
-    {
+    if (Array.isArray(element)) {
         Array.forEach(element, XML3D.config.element);
+    } else {
+        XML3D.config.element(element, selfmonitoring);
     }
-    XML3D.config.element(element, selfmonitoring);
 };

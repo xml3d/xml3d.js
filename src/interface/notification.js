@@ -41,8 +41,9 @@
           if(uri.scheme == 'urn') {
               this.type = events.VALID_REFERENCE;
           } else {
-              this.value = XML3D.URIResolver.resolve(uri);
-              XML3D.debug.logDebug("Resolved node: #" + uri.fragment);
+              this.value = XML3D.URIResolver.resolveLocal(uri);
+              if (this.value)
+                  XML3D.debug.logDebug("Resolved local node: #" + uri.fragment);
               this.type = this.value ? events.VALID_REFERENCE : events.DANGLING_REFERENCE;
           }
       } else {

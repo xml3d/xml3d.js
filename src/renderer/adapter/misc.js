@@ -52,8 +52,9 @@
     XML3D.webgl.XML3DLightShaderRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
-        this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes, this.dataChanged);
+        this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes, this.dataChanged.bind(this));
         this.offsets = [];
+        this.listeners = [];
     };
     XML3D.webgl.XML3DLightShaderRenderAdapter.prototype = new XML3D.webgl.RenderAdapter();
     XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = XML3D.webgl.XML3DLightShaderRenderAdapter;
@@ -102,14 +103,14 @@
      * @param {Xflow.RequestNotification} notification
      */
     XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.dataChanged = function(request, notification) {
-        var dataTable = this.computeRequest.getResult();
+        var dataTable = request.getResult();
 
         for (var i=0; i<staticAttributes.length; i++) {
             var attr = dataTable.getOutputData(staticAttributes[i]);
             if (attr && attr.userData.webglDataChanged) {
                 var value = attr.getValue();
-                for(var j=0; j<this.listeners; j++)
-                    this.listeners[i](staticAttributes[i], value);
+                for(var j=0; j<this.listeners.length; j++)
+                    this.listeners[j](staticAttributes[i], value);
             }
         }
     };

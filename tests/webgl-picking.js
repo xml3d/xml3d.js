@@ -97,7 +97,6 @@ test("Position picking test", 4, function() {
     h.updatePickObjectByPoint(89,51);
     stop();
     h.dispatchMouseEvent("click", 1, 89, 51, null, target);
-
 });
 
 test("Normal picking test", 4, function() {
@@ -115,7 +114,14 @@ test("Normal picking test", 4, function() {
     h.updatePickObjectByPoint(88,60);
     stop();
     h.dispatchMouseEvent("click", 1, 88, 60, null, target);
-
 });
+
+test("Don't pick invisible objects", 3, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var expected = this.doc.getElementById("pickingMesh_back");
+    var actual = xml3dElement.getElementByPoint(215,60);
+    equal(actual, expected, "Pick object behind 'pickingMesh3'");
+});
+
 
 

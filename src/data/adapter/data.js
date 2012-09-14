@@ -222,7 +222,7 @@ XML3D.data.DataAdapter.prototype.resolveScript = function() {
                     this.xflow = null;
                 }
             } else {
-                var sn = XML3D.URIResolver.resolve(script, this.node.ownerDocument);
+                var sn = XML3D.URIResolver.resolveLocal(script, this.node.ownerDocument);
                 if (sn && sn.textContent) {
                     pos = sn.textContent.indexOf("urn:xml3d:xflow:");
                     if (pos === 0) {

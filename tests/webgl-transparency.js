@@ -15,7 +15,7 @@ module("WebGL Transparency", {
     }
 });
 
-test("ProgramObject.hastransparency is set correctly", 3, function() {
+test("ProgramObject.hastransparency is set correctly", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
     var shaderManager = h.renderer.shaderManager;
@@ -28,7 +28,13 @@ test("ProgramObject.hastransparency is set correctly", 3, function() {
 
     shader = shaderManager.getShaderById("matte");
     equal(shader.hasTransparency, false, "Matte shader is always opaque");
-    console.log(shader);
+
+    var transparencyAttribute = this.doc.getElementById("change_transparencyAttribute");
+    shader = shaderManager.getShaderById("change");
+    equal(shader.hasTransparency, false, "Initially opaque");
+    transparencyAttribute.textContent = "0.5";
+    equal(shader.hasTransparency, true, "Changed after setting transparency parameter to 0.5");
+
 });
 
 test("Pick transparency values", 3, function() {
@@ -36,9 +42,11 @@ test("Pick transparency values", 3, function() {
     var h = getHandler(xml3dElement);
     var gl = getContextForXml3DElement(xml3dElement);
     var win = this.doc.defaultView;
-    h.draw();
-
-    var actual = win.getPixelValue(gl, 150, 100);
-    QUnit.closePixel(actual, [128,179,204,127], 1, "Mixed cyan and yellow");
-    console.log(actual);
+    xml3dElement.addEventListener("framedrawn", function(n) {
+        var actual = win.getPixelValue(gl, 150, 100);
+        QUnit.closePixel(actual, [128,153,102,255], 1, "Mixed cyan and yellow");
+        start();
+    });
+    stop();
+    h.redraw();
 });

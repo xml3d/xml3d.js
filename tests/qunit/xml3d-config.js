@@ -149,7 +149,7 @@ var loadDocument = function(url, f) {
 };
 
 var EPSILON = 0.0001;
-QUnit.config.testTimeout = 2000;
+QUnit.config.testTimeout = 20000;
 XML3DUnit = {};
 
 XML3DUnit.getRendererString = function() {

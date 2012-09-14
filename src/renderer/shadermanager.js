@@ -47,6 +47,7 @@
         this.uniforms = {};
         this.samplers = {};
         this.handle = program;
+        this.needsLights = true;
         this.vSource = sources.vertex;
         this.fSource = sources.fragment;
     };
@@ -242,7 +243,6 @@
         }
 
         // Tally shader uniforms and samplers
-        var texCount = 0;
         var numUniforms = gl.getProgramParameter(prg, gl.ACTIVE_UNIFORMS);
         for ( var i = 0; i < numUniforms; i++) {
             var uni = gl.getActiveUniform(prg, i);
@@ -255,9 +255,7 @@
             uniInfo.location = gl.getUniformLocation(prg, uni.name);
 
             if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
-                uniInfo.texUnit = texCount;
                 programObject.samplers[uni.name] = uniInfo;
-                texCount++;
             } else
                 programObject.uniforms[uni.name] = uniInfo;
         }
@@ -308,28 +306,11 @@
         this.bindShader(program);
         this.setUniformsFromComputeResult(program, result);
         this.createTexturesFromComputeResult(program, result);
+        if(program.material) {
+            program.material.parametersChanged(result.getOutputMap());
+            program.hasTransparency = program.material.isTransparent;
+        }
         this.renderer.requestRedraw("Shader data changed");
-        // Store the change, it will be applied the next time the shader is
-        // bound
-        /*if (attrName == "src") {
-            // A texture source was changed
-            if (textureName) {
-                var sampler = shader.samplers[textureName];
-                if (sampler)
-                    shader.samplers[textureName] = this.replaceTexture(adapter, sampler);
-            } else
-                XML3D.debug.logError("Couldn't apply change because of a missing texture name");
-
-        } else {
-            if (attrName == "transparency")
-                shader.hasTransparency = newValue > 0;
-
-            shader.changes.push({
-                type : "uniform",
-                name : attrName,
-                newValue : newValue
-            });
-        }*/
 
     };
 
@@ -426,7 +407,13 @@
 
     var rc = window.WebGLRenderingContext;
 
-    XML3DShaderManager.prototype.setUniform = function(u, value) {
+    /**
+     * Set uniforms for active program
+     * @param u
+     * @param value
+     * @param {boolean=} transposed
+     */
+    XML3DShaderManager.prototype.setUniform = function(u, value, transposed) {
         var gl = this.gl;
         switch (u.glType) {
         case rc.BOOL:
@@ -464,13 +451,13 @@
             break; // gl.FLOAT_VEC4
 
         case 35674:
-            gl.uniformMatrix2fv(u.location, gl.FALSE, value);
+            gl.uniformMatrix2fv(u.location, transposed || false, value);
             break;// gl.FLOAT_MAT2
         case 35675:
-            gl.uniformMatrix3fv(u.location, gl.FALSE, value);
+            gl.uniformMatrix3fv(u.location, transposed || false, value);
             break;// gl.FLOAT_MAT3
         case 35676:
-            gl.uniformMatrix4fv(u.location, gl.FALSE, value);
+            gl.uniformMatrix4fv(u.location, transposed || false, value);
             break;// gl.FLOAT_MAT4
 
         default:
@@ -524,7 +511,7 @@
                 onload : function() {
                     renderer.requestRedraw.call(renderer, "Texture loaded");
                 },
-                texUnit : texUnit,
+                unit : texUnit,
                 image : img,
                 config : texEntry.getSamplerConfig()
             });
@@ -633,6 +620,10 @@
         return info;
     };
 
+    /**
+     *
+     * @param {WebGLSampler} tex
+     */
     XML3DShaderManager.prototype.bindTexture = function(tex) {
         var info = tex.info;
         var gl = this.gl;
@@ -651,9 +642,9 @@
             this.bindTexture(tex);
             break;
         case TEXTURE_STATE.UNLOADED:
-            gl.activeTexture(gl.TEXTURE0);
+            gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(gl.TEXTURE_2D, null);
-            this.setUniform(tex, 0);
+            this.setUniform(tex, info.unit + 1);
         }
         ;
     };

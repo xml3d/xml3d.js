@@ -100,3 +100,51 @@ test("Red point light, blue dir light", 4, function() {
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,255,255], "Phong object is lit purple");
 });
+
+test("Change directional light direction", 5, function() {
+    var x = this.doc.getElementById("xml3DElem"),
+    actual,
+    win = this.doc.defaultView,
+    gl = getContextForXml3DElement(x),
+    h = getHandler(x);
+    this.doc.getElementById("dirlight").visible = true;
+    this.doc.getElementById("pointlight").visible = false;
+
+    this.doc.getElementById("phongShadedGroup").visible = true;
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,255,255], "Initial light direction");
+
+    var test = this.doc.getElementById("t_dirLight");
+    test.setAttribute("rotation", "0 1 0 1.571");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,0,255], "Light parallel to the plane");
+    
+    test.setAttribute("rotation", "0 1 0 1.5");
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,180,255], "Light barely hitting the plane");
+});
+
+test("Change lightshader intensity", 4, function() {
+    var x = this.doc.getElementById("xml3DElem"),
+    actual,
+    win = this.doc.defaultView,
+    gl = getContextForXml3DElement(x),
+    h = getHandler(x);
+    this.doc.getElementById("dirlight").visible = true;
+    this.doc.getElementById("pointlight").visible = false;
+
+    this.doc.getElementById("phongShadedGroup").visible = true;
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,255,255], "Initial light intensity");
+
+    var test = this.doc.getElementById("lsIntensity");
+    test.textContent = "10 10 0";
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [255,255,0,255], "Light intensity changed to yellow");
+   
+});

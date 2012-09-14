@@ -1,2 +1,4 @@
 
 var ParallelArray = {};
+
+var JSON = {};

@@ -1,0 +1,41 @@
+<!--
+	Purpose of Test:
+	Check field overloading with renaming
+-->
+<XflowTest>
+    <Input>
+        <data id="data1">
+            <float name="A" id="a1" >0.0</float>
+            <data id="subdata" filter="rename( {B: A, A: B, D: C} )" >
+                <int name="A"       id="a2" >1</int>
+                <float3 name="B"    id="b1" >1.0 1.0 1.0</float3>
+                <float2 name="C"    id="c1" >2.0 2.0</float2>
+            </data>
+            <int name="C" id="c2" >42</int>
+        </data>   
+    </Input>
+    <TestProcess>
+        <Check title="Check merged-renamed data #1" data="#data1">
+            <MatchInput name="A" input="#a1" />
+            <MatchInput name="B" input="#a2" />
+            <MatchInput name="C" input="#c2" />
+            <MatchInput name="D" input="#c1" />
+        </Check>
+        <Modification title="Change name of overriding element">
+            <ChangeAttribute node="#c2" attrName="name" newValue="D" />     
+        </Modification>
+        <Check title="Check merged-renamed data #2" data="#data1">
+            <MatchNull  name="C" />
+            <MatchInput name="D" input="#c2" />
+        </Check>
+        <Modification title="Remove renaming of subdata">
+            <ChangeAttribute node="#subdata" attrName="filter" newValue="" />            
+        </Modification>
+        <Check title="Check merged-renamed data #3" data="#data1">
+            <MatchInput name="A" input="#a1" />
+            <MatchInput name="B" input="#b1" />
+            <MatchInput name="C" input="#c1" />
+            <MatchInput name="D" input="#c2" />
+        </Check>
+    </TestProcess>
+</XflowTest>

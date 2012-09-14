@@ -48,11 +48,6 @@
             0 0 0
         </float3>
     </shader>
-    <shader id="flatred" script="urn:xml3d:shader:flat">
-        <float3 name="diffuseColor">
-            1 0 0
-        </float3>
-    </shader>
     <shader id="phonggreen" script="urn:xml3d:shader:phong">
         <float3 id="phonggreen_color" name="diffuseColor">
             0 1 0
@@ -68,7 +63,17 @@
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
     </data>
+    <lightshader id="ls_Spot" script="urn:xml3d:lightshader:point">
+        <float3 name="attenuation">1 0 0</float3>
+       <float3 name="intensity">
+        1 1 1
+       </float3>
+      </lightshader>
+      <transform id="t_Lamp" translation="0 0 3"/>
+      
     </defs>
+    
+    
     <group id="cameraGroup1" transform="#t_camera1">
          <view id="transformTestView" position="0 0 -3" orientation="0 1 0 3.141"/>
     </group>
@@ -85,10 +90,6 @@
     
     <group id="myGroup" visible="false">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
-    </group>
-    
-    <group id="implicitLight" visible="false" shader="#phonggreen">
-        <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
     </group>
     
     <group id="group1" shader="#flatyellow" visible="false">
@@ -123,8 +124,8 @@
         <group transform="#t_cubeback" shader="#flatyellow">
             <mesh src="#meshdata" type="triangles"/>
         </group>
-         <group transform="#t_cubefront">
-            <mesh src="#meshdata" type="triangles"/>
+         <group transform="#t_cubefront" >
+        <mesh src="#meshdata" type="triangles"/>
         </group>
     </group>
     </xml3d>

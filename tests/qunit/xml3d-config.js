@@ -70,6 +70,22 @@ QUnit.extend( QUnit, {
         Math.abs(actual[2] - expected[2]) <= maxDifference &&
         Math.abs(actual[3] - expected[3]) <= maxDifference;
         QUnit.push(passes, actual, expected, message);
+    },
+
+    closeArray : function(actual, expected, maxDifference, message) {
+        if (actual.toString() != expected.toString())
+            QUnit.push(false, actual, expected, message);
+
+        if (actual.length != expected.length)
+            QUnit.push(false, actual, expected, message);
+
+        for (var i=0; i<actual.length; i++) {
+            if (Math.abs(actual[i] - expected[i]) > maxDifference) {
+                QUnit.push(false, actual, expected, message);
+                return;
+            }
+        }
+        QUnit.push(true, actual, expected, message);
     }
 });
 new (function() {
@@ -84,6 +100,12 @@ new (function() {
             return arg instanceof window.WebKitCSSMatrix;
         return false;
     };
+    function isFloatArray(arg) {
+        return arg.toString() == '[object Float32Array]';
+    };
+    function isIntArray(arg) {
+        return arg.toString() == '[object Int32Array]';
+    }
 
     var original = QUnit.jsDump.parsers.object;
     QUnit.jsDump.setParser("object", function(a,b) {
@@ -100,6 +122,18 @@ new (function() {
             a.m41 + ", " +  a.m42 + ", " +  a.m43 + ", " +  a.m44 + ")";
         if(isBox(a))
             return a.isEmpty() ? "XML3DBox(empty)" : "XML3DBox(("+a.min.x+", "+a.min.y+", "+a.min.z+"),("+a.max.x+", "+a.max.y+", "+a.max.z+"))";
+        if(isFloatArray(a)) {
+            var str = "Float32Array[";
+            for (var i=0; i < a.length; i++)
+                str += " "+a[i];
+            return str + " ]";
+        }
+        if(isIntArray(a)) {
+            var str = "Int32Array[";
+            for (var i=0; i < a.length; i++)
+                str += " "+a[i];
+            return str + " ]";
+        }
         return original(a,b);
     });
 })();
@@ -115,7 +149,7 @@ var loadDocument = function(url, f) {
 };
 
 var EPSILON = 0.0001;
-QUnit.config.testTimeout = 5000;
+QUnit.config.testTimeout = 20000;
 XML3DUnit = {};
 
 XML3DUnit.getRendererString = function() {
@@ -149,4 +183,33 @@ XML3DUnit.getRendererString = function() {
         }
     }
     return result;
+};
+
+XML3DUnit.loadSceneTestImages = function(doc, refSceneId, testSceneId, callback){
+    var xRef = doc.getElementById(refSceneId),
+        glRef = getContextForXml3DElement(xRef);
+    var xTest = doc.getElementById(testSceneId),
+        glTest = getContextForXml3DElement(xTest);
+
+    var refImagesLoaded = 0;
+    function onLoad(){
+        refImagesLoaded++;
+        if(refImagesLoaded >= 2)
+            callback(refImage, testImage);
+    }
+
+    var refImage = new Image();
+    refImage.onload = onLoad;
+    refImage.src = glRef.canvas.toDataURL();
+    var testImage = new Image();
+    testImage.onload = onLoad;
+    testImage.src = glTest.canvas.toDataURL();
+};
+
+XML3DUnit.getPixelValue = function(canvas, x,y) {
+    var pixels = new Uint8Array(4), a = new Array(4);
+    canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
+    for(var i=0;i < 4;i++)
+        a[i] = pixels[i];
+    return a;
 };

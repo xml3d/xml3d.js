@@ -19,16 +19,26 @@
 		<file name="utils/misc.js" />
 		<file name="utils/array.js" />
 		<file name="utils/debug.js" />
-		<!--<file name="utils/color.js" />-->
 		<file name="utils/uri.js" />
 		<file name="contrib/glu.js" />
 		<file name="contrib/glMatrix.js" />
-		<file name="types/vec3.js" />
+        <file name="types/vec3.js" />
 		<file name="types/rotation.js" />
 		<file name="types/box.js" />
 		<file name="types/matrix.js" />
 		<file name="types/ray.js" />
-		<file name="base/adapter.js" />
+	    <file name="xflow/base.js" />
+        <file name="xflow/graph.js" />
+        <file name="xflow/compute.js" />
+        <file name="xflow/operator.js" />
+        <file name="xflow/data.js" />
+        <file name="xflow/mapping.js" />
+        <file name="xflow/request.js" />
+        <file name="xflow/result.js" />
+	    <file name="data/base.js" />
+	    <file name="base/adapter.js" />
+	    <file name="base/adapterhandle.js" />
+	    <file name="base/resourcemanager.js" />
 		<file name="interface/notification.js" />
 		<file name="interface/factory.js" />
 		<file name="interface/dom.js" />
@@ -36,27 +46,53 @@
 		<file name="interface/attributes.js" />
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
-		<file name="renderer/canvashandler.js" />
-		<file name="renderer/utils.js" />
-		<file name="renderer/shadermanager.js" />
-		<file name="renderer/bufferhandler.js" />
-		<file name="renderer/renderer.js" />
-		<file name="renderer/adapter/xml3d.js" />
-		<file name="renderer/adapter/transform.js" />
-		<file name="renderer/adapter/view.js" />
-		<file name="renderer/adapter/shader.js" />
-		<file name="renderer/adapter/texture.js" />
-		<file name="renderer/adapter/mesh.js" />
-		<file name="renderer/adapter/group.js" />
-		<file name="renderer/adapter/light.js" />
-		<file name="renderer/adapter/data.js" />
-		<file name="renderer/adapter/factory.js" />
-		<file name="renderer/shader/base.js" />
-		<file name="renderer/shader/matte.js" />
-		<file name="renderer/shader/diffuse.js" />
-		<file name="renderer/shader/phong.js" />
-		<file name="renderer/shader/utility.js" />
-		<!-- <file name="renderer/xflow/xflow.js" /> -->
+		<file name="data/processtable.js" />
+        <file name="data/adapter/data.js" />
+        <file name="data/adapter/values.js" />
+        <file name="data/scriptinstance.js" />
+        <file name="data/adapter/texture.js" />
+        <file name="data/adapter/misc.js" />
+        <file name="data/adapter/factory.js" />
+        <file name="data/adapter/json/factory.js" />
+        <file name="renderer/base.js" />
+        <file name="renderer/datachangelistener.js" />
+        <file name="renderer/canvashandler.js" />
+        <file name="renderer/utils.js" />
+        <file name="renderer/shadermanager.js" />
+	    <file name="renderer/material.js" />
+        <file name="renderer/bufferhandler.js" />
+        <file name="renderer/renderer.js" />
+        <file name="renderer/adapter/misc.js" />
+        <file name="renderer/adapter/xml3d.js" />
+        <file name="renderer/adapter/transform.js" />
+        <file name="renderer/adapter/view.js" />
+        <file name="renderer/adapter/shader.js" />
+        <file name="renderer/adapter/texture.js" />
+        <file name="renderer/adapter/mesh.js" />
+        <file name="renderer/adapter/group.js" />
+        <file name="renderer/adapter/light.js" />
+        <file name="renderer/adapter/factory.js" />
+		<file name="renderer/shaders/base.js" />
+		<file name="renderer/shaders/matte.js" />
+		<file name="renderer/shaders/diffuse.js" />
+		<file name="renderer/shaders/phong.js" />
+		<file name="renderer/shaders/utility.js" />
+        <file name="xflow/operator/morph3.js" />
+		<file name="xflow/operator/merge3.js" />
+        <file name="xflow/operator/sub3.js" />
+        <file name="xflow/operator/normalize3.js" />
+        <file name="xflow/operator/lerp3seq.js" />
+        <file name="xflow/operator/slerpseq.js" />
+        <file name="xflow/operator/createTransform.js" />
+        <file name="xflow/operator/mul4x4.js" />
+        <file name="xflow/operator/skinDirection.js" />
+        <file name="xflow/operator/skinPosition.js" />
+		<file name="xflow/operator/skinning.js" />
+        <file name="xflow/operator/flattenBoneTransform.js" />
+        <file name="xflow/operator/flipNormal.js" />
+		<file name="xflow/operator/math.js" />
+		<file name="contrib/perlin-noise-simplex.js" />
+        <file name="xflow/operator/noiseImage.js" />
 	</filelist>
 
 	<target name="lastTag" depends="init, windowsGit, linuxGit">
@@ -81,20 +117,18 @@
 			</args>
 		</git>
 		<echo message="${git.output}" />
-		<concatScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-${continuous.extension}"/>
-        <compileScripts version="DEVELOPMENT SNAPSHOT / ${git.output}" extension="-${continuous.extension}-min"/>
+        <concatScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}"/>
+        <compileScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}-min"/>
         <upload extension="-${continuous.extension}"/>
 		<upload extension="-${continuous.extension}-min"/>
 	</target>
 
 	<target name="develop" depends="init">
-		<tstamp />
-		<concatScripts version="DEVELOPMENT SNAPSHOT (${TODAY})"/>
+		<concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})"/>
 	</target>
 
     <target name="develop-min" depends="init">
-        <tstamp />
-        <compileScripts version="DEVELOPMENT SNAPSHOT (${TODAY})" extension=""/>
+        <compileScripts version="DEVELOPMENT SNAPSHOT (${build.time})" extension=""/>
     </target>
 
 	<!-- - - - - - - - - - - - - - - - - -

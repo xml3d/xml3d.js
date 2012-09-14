@@ -347,7 +347,7 @@ XML3D.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
             var f = 2.0* Math.tan(this.camera.fieldOfView/2.0) / this.height;
             var dx = f*(ev.pageX - this.prevPos.x);
             var dy = f*(ev.pageY - this.prevPos.y);
-            var trans = new XML3DVec3(dx, dy, 0.0);
+			var trans = new XML3DVec3(-dx, dy, 0.0);
             this.camera.translate(this.camera.inverseTransformOf(trans));
             break;
         case(this.DOLLY):

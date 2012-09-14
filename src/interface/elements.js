@@ -41,6 +41,15 @@
                 removeRecursive(removedChild,n);
             }
         }
+        // TODO: Quick fix, solve issue of self monitoring elements better
+        //Quick fix for ghost element bug
+
+        // Dynamically generated objects are self-monitoring, means listening for their own changes.
+        // Once added to the scene, they should stop, otherwise multiple events are received that lead
+        // i.e. to multiple draw objects per mesh.
+        // Now the first event handler stops propagation of the event, but this can have strange side-FX,
+        // if i.e. nodes are monitored from outside.
+        e.stopPropagation();
     }
 
     function removeRecursive(element, evt) {
@@ -73,6 +82,8 @@
             n.type = events.NODE_INSERTED;
         }
         parentHandler.notify(n);
+        // TODO: Quick fix, solve issue of self monitoring elements better
+        e.stopPropagation();
     }
 
     handler.ElementHandler = function(elem, monitor) {
@@ -192,7 +203,7 @@
     handler.ElementHandler.prototype.resolve = function(attrName) {
         var uri = new XML3D.URI(this.element[attrName]);
         if (uri.valid && uri.fragment) {
-            return XML3D.URIResolver.resolve(uri);
+            return XML3D.URIResolver.resolveLocal(uri);
         }
         return null;
     };

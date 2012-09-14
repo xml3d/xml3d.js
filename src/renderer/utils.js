@@ -1,6 +1,26 @@
 // Utility functions
 (function() {
 
+    XML3D.webgl.checkError = function(gl, text)
+    {
+        var error = gl.getError();
+        if (error !== gl.NO_ERROR) {
+            var textErr = ""+error;
+            switch (error) {
+            case 1280: textErr = "1280 ( GL_INVALID_ENUM )"; break;
+            case 1281: textErr = "1281 ( GL_INVALID_VALUE )"; break;
+            case 1282: textErr = "1282 ( GL_INVALID_OPERATION )"; break;
+            case 1283: textErr = "1283 ( GL_STACK_OVERFLOW )"; break;
+            case 1284: textErr = "1284 ( GL_STACK_UNDERFLOW )"; break;
+            case 1285: textErr = "1285 ( GL_OUT_OF_MEMORY )"; break;
+            }
+            var msg = "GL error " + textErr + " occured.";
+            if (text !== undefined)
+                msg += " " + text;
+            XML3D.debug.logError(msg);
+        }
+    };
+
     var minmax = new Float32Array(6);
 
     XML3D.webgl.calculateBoundingBox = function(positions, index) {
@@ -87,13 +107,13 @@
         vec3.add(center, extend, bbox.max._data);
         vec3.subtract(center, extend, bbox.min._data);
     };
-    
+
 
     /**
      * Splits mesh data into smaller chunks. WebGL only supports 65,535 indices, meshes of greater size are
-     * automatically split by this function. Supports splitting indices, positions, texcoords and colors. 
+     * automatically split by this function. Supports splitting indices, positions, texcoords and colors.
      * NOTE: The dataTable parameter is modified to hold the newly split mesh data.
-     * 
+     *
      * @param dataTable the source data table to be split
      * @param maxIndexCount the desired chunk size
      * @return
@@ -102,32 +122,32 @@
         var verticesPerPolygon = 3;
         var colorStride = 3;
         maxIndexCount = Math.floor(maxIndexCount / 3) * 3;
-        
+
         //See which data is in the supplied dataTable
         var positionSource = dataTable.position.data;
         var indexSource = dataTable.index ? dataTable.index.data : undefined;
         var normalSource = dataTable.normal ? dataTable.normal.data : undefined;
         var texcoordSource = dataTable.texcoord ? dataTable.texcoord.data : undefined;
         var colorSource = dataTable.color ? dataTable.color.data : undefined;
-        
+
         var vertexStride = dataTable.position.tupleSize;
         var texcoordStride = dataTable.texcoord ? dataTable.texcoord.tupleSize : undefined;
         var currentIndexSize = indexSource.length;
-        
+
         if (indexSource) {
             var boundaryList = [];
-            
+
             var lastBinSize = currentIndexSize % maxIndexCount;
             var numBins = Math.ceil(currentIndexSize / maxIndexCount);
             var bins = new Array();
-            
+
             //Create the bins
             for (var i = 0; i < numBins; i++) {
                 bins[i] = {};
                 bins[i].index = new Uint16Array(maxIndexCount);
                 bins[i].index.nextFreeSlot = 0;
                 bins[i].position = new Float32Array(maxIndexCount*vertexStride);
-                
+
                 if (normalSource)
                     bins[i].normal = new Float32Array(maxIndexCount*vertexStride);
                 if (texcoordSource)
@@ -135,13 +155,13 @@
                 if (colorSource)
                     bins[i].color = new Float32Array(maxIndexCount*colorStride);
             }
-            
+
             //Iterate over the index buffer and sort the polygons into bins
             for (var i = 0; i < indexSource.length; i += verticesPerPolygon) {
                 var consistentBin = true;
                 var targetBin = Math.floor(indexSource[i] / maxIndexCount);
-                
-                if (bins[targetBin].index.nextFreeSlot + verticesPerPolygon > maxIndexCount) 
+
+                if (bins[targetBin].index.nextFreeSlot + verticesPerPolygon > maxIndexCount)
                     consistentBin = false;
 
                 //See if this polygon spans more than one bin
@@ -151,59 +171,59 @@
                         break;
                     }
                 }
-                
+
                 //We need to place this polygon in a separate pass
                 if (!consistentBin) {
                     boundaryList.push(i);
                     continue;
                 }
-                
+
                 var indexTransform = maxIndexCount * targetBin;
-                
+
                 //Distribute the indices and vertex data into the appropriate bin
                 for (var j = 0; j < verticesPerPolygon; j++) {
                     var oldIndex = indexSource[i+j];
                     var newIndex = oldIndex - indexTransform;
-                    
+
                     var bin = bins[targetBin];
                     bin.index[bin.index.nextFreeSlot] = newIndex;
                     bin.index.nextFreeSlot++;
-                    
+
                     var vertIndex = oldIndex * vertexStride;
                     var position = [];
                     for (var k = 0; k < vertexStride; k++) {
                         position[k] = positionSource[vertIndex+k];
-                    }            
+                    }
                     bin.position.set(position, newIndex*vertexStride);
-                    
+
                     if(normalSource) {
                         var normal = [];
                         for (var k = 0; k < vertexStride; k++) {
                             normal[k] = normalSource[vertIndex+k];
-                        }            
+                        }
                         bin.normal.set(normal, newIndex*vertexStride);
                     }
-                    
+
                     var texIndex = oldIndex * texcoordStride;
                     if (texcoordSource) {
                         var texcoord = [];
                         for (var k = 0; k < texcoordStride; k++) {
                             texcoord[k] = texcoordSource[texIndex+k];
-                        }            
+                        }
                         bin.texcoord.set(texcoord, newIndex*texcoordStride);
                     }
-                    
+
                     if(colorSource) {
                         var color = [];
                         for (var k = 0; k < colorStride; k++) {
                             color[k] = colorSource[vertIndex+k];
-                        }            
+                        }
                         bin.color.set(color, newIndex*colorStride);
                     }
-                    
+
                 }
             }
-            
+
             //Insert boundary items into bins
             var targetBin = 0;
             for (var i = 0; i < boundaryList.length; i++) {
@@ -215,7 +235,7 @@
                         bins[targetBin].index = new Uint16Array(maxIndexCount);
                         bins[targetBin].index.nextFreeSlot = 0;
                         bins[targetBin].position = new Float32Array(maxIndexCount*vertexStride);
-                        
+
                         if (normalSource)
                             bins[targetBin].normal = new Float32Array(maxIndexCount*vertexStride);
                         if (texcoordSource)
@@ -225,50 +245,50 @@
                         break;
                     }
                 }
-                
+
                 //Distribute polygon into the appropriate bin
                 for (var j = 0; j < verticesPerPolygon; j++) {
                     var bin = bins[targetBin];
-                    
+
                     var oldIndex = indexSource[boundaryList[i] + j];
                     var newIndex = bin.index.nextFreeSlot;
-                    
+
                     bin.index[newIndex] = newIndex;
                     bin.index.nextFreeSlot++;
-                    
+
                     var position = [];
                     for (var k = 0; k < vertexStride; k++) {
                         position[k] = positionSource[oldIndex*vertexStride+k];
-                    }            
+                    }
                     bin.position.set(position, newIndex*vertexStride);
-                    
+
                     if(normalSource) {
                         var normal = [];
                         for (var k = 0; k < vertexStride; k++) {
                             normal[k] = normalSource[oldIndex*vertexStride+k];
-                        }            
+                        }
                         bin.normal.set(normal, newIndex*vertexStride);
                     }
-                    
+
                     if (texcoordSource) {
                         var texcoord = [];
                         for (var k = 0; k < texcoordStride; k++) {
                             texcoord[k] = texcoordSource[oldIndex*texcoordStride+k];
-                        }            
+                        }
                         bin.texcoord.set(texcoord, newIndex*texcoordStride);
                     }
-                    
+
                     if(colorSource) {
                         var color = [];
                         for (var k = 0; k < vertexStride; k++) {
                             color[k] = colorSource[oldIndex*colorStride+k];
-                        }            
+                        }
                         bin.color.set(color, newIndex*colorStride);
                     }
-                    
+
                 }
             }
-        
+
             //Prepare dataTable for the split mesh data
             dataTable.index = [];
             dataTable.position = [];
@@ -278,7 +298,7 @@
                 dataTable.texcoord = [];
             if (colorSource)
                 dataTable.color = [];
-            
+
             //Populate the dataTable with the bins
             for (var i = 0; i < bins.length; i++) {
                 if (bins[i].index.nextFreeSlot > 0) {
@@ -292,10 +312,45 @@
                         dataTable.color[i] = { data : bins[i].color, tupleSize : colorStride };
                 }
             }
-            
+
         }
-        
-        
+
+
+    };
+
+    /**
+     * @param {XML3DBox} bbox
+     * @param {XML3DVec3} min
+     * @param {XML3DVec3} max
+     * @param {mat4} trafo
+     */
+    XML3D.webgl.adjustMinMax = function(bbox, min, max, trafo) {
+        var bbmin = vec3.create();
+        var bbmax = vec3.create();
+        mat4.multiplyVec3(trafo, bbox.min._data, bbmin);
+        mat4.multiplyVec3(trafo, bbox.max._data, bbmax);
+
+        if (bbmin[0] < min[0])
+            min[0] = bbmin[0];
+        if (bbmin[1] < min[1])
+            min[1] = bbmin[1];
+        if (bbmin[2] < min[2])
+            min[2] = bbmin[2];
+        if (bbmax[0] > max[0])
+            max[0] = bbmax[0];
+        if (bbmax[1] > max[1])
+            max[1] = bbmax[1];
+        if (bbmax[2] > max[2])
+            max[2] = bbmax[2];
+    };
+
+    XML3D.webgl.createEmptyTexture = function(gl) {
+        var handle = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, handle);
+        var data = new Uint8Array([ 255, 128, 128, 255 ]);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     };
 
 })();

@@ -14,6 +14,8 @@
 		</sequential>
 	</macrodef>
 
+    <dirname property="master.basedir" file="${ant.file.master}"/>
+
     <macrodef name="upload" description="Upload a file to standard URL">
         <attribute name="extension"/>
         <sequential>
@@ -49,7 +51,7 @@
 			<concat destfile="${finalScript}">
 				<header>/**${line.separator}</header>
 				<fileset file="${basedir}/../LICENSE" />
-				<footer>${line.separator}@version: @{version} ${line.separator}**/
+				<footer>${line.separator}@version: @{version}${line.separator}**/
 					${line.separator}</footer>
 			</concat>
 
@@ -72,6 +74,9 @@
 				generateexports="yes" debug="false"
 				output="${buildDir}/${script.start}@{extension}.js">
 				<define name="XML3D.version" value="@{version}"/>
+				<externs dir="${basedir}">
+				    <file name="extern.js"/>
+				</externs>
 				<sources refid="sourceFiles">
 				</sources>
 			</jscomp>
@@ -100,9 +105,15 @@
 	</target>
 
 	<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
-		classpath="./closure/compiler.jar" />
+		classpath="${master.basedir}/closure/compiler.jar" />
 
-	<target name="init" depends="init-properties, clean" />
+	<target name="init" depends="init-properties, clean, time" />
+
+	<target name="time">
+		<tstamp>
+	        <format property="build.time" pattern="dd.MM.yyyy HH:mm:ss z"/>
+	    </tstamp>
+	</target>
 
 	<target name="init-properties">
 		<property file="build.properties" />

@@ -1,6 +1,9 @@
 // Adapter for <group>
 (function() {
     
+	var eventTypes = {onclick:1, ondblclick:1,
+			ondrop:1, ondragenter:1, ondragleave:1};
+	
     var XML3DGroupRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.processListeners();
@@ -30,7 +33,7 @@
         this.transformAdapter = null;
         var tNode = this.node.transform;
         if (tNode) {
-            tNode = XML3D.URIResolver.resolve(tNode);
+            tNode = XML3D.URIResolver.resolveLocal(tNode);
             if (tNode)
                 this.transformAdapter = this.factory.getAdapter(tNode);
         }
@@ -44,7 +47,7 @@
                 continue;
 
             var type = att.name;
-            if (type.match(/onmouse/) || type == "onclick" || type == "ondblclick") {
+	        if (type.match(/onmouse/) || eventTypes[type]) {
                 var eventType = type.substring(2);
                 this.node.addEventListener(eventType, new Function("evt", att.value), false);
             }
@@ -196,10 +199,10 @@
                 var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
                 var result = pattern.exec(styleValue);
                 if (result)
-                    shader = XML3D.URIResolver.resolve(result[1]);
+                    shader = XML3D.URIResolver.resolveLocal(result[1]);
             }
         } else {
-            shader = XML3D.URIResolver.resolve(shader);
+            shader = XML3D.URIResolver.resolveLocal(shader);
         }
         
         shader = this.factory.getAdapter(shader);

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+     <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+   <title>
+    XML3D Rendering 2
+   </title>
+  </head>
+  <body style="background-color: #FFF;width:500px">
+   <xml3d activeView="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+
+        <shader id="phong1" script="urn:xml3d:shader:phong">
+          <float3 name="diffuseColor">0.0 0.5 0.85</float3>
+          <float3 name="emissiveColor">0.0 0.1 0.17</float3>
+		  <float name="ambientIntensity">0.2</float>
+        </shader>
+
+        <shader id="phong2" script="urn:xml3d:shader:phong">
+          <float3 name="diffuseColor">0.0 0.5 0.85</float3>
+          <float3 name="emissiveColor">0.3 0.3 0.3</float3>
+		  <float name="ambientIntensity">0.2</float>
+        </shader>
+
+    <data id="meshdata" type="triangles">
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+
+
+    <lightshader id="ls_Spot" script="urn:xml3d:lightshader:point">
+        <float3 name="attenuation">1 0 0</float3>
+       <float3 name="intensity">
+        1 1 1
+       </float3>
+      </lightshader>
+    <transform id="t_Lamp" translation="0 0 3"/>
+
+    </defs>
+
+    <view id="defaultView" position="0 0 3"/>
+    <group transform="#t_Lamp" id="mainlight">
+      <light shader="#ls_Spot"/>
+    </group>
+
+    <group id="myGroup" shader="#phong1" >
+	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
+	    </mesh>
+    </group>
+
+    </xml3d>
+  </body>
+ </html>

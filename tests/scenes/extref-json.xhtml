@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D External reference in JSON format</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+	  <defs>
+        <transform id="t_regular"/>
+	  </defs>
+	<view id="myView" fieldOfView="0.5"/>
+    <group id="meshGroup" transform="#t_regular">
+		<mesh id="myMesh02" src="json/simpleMesh.json"/>
+    </group>
+  </xml3d>
+</body>
+</html>

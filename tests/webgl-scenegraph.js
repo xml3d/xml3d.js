@@ -17,7 +17,7 @@ module("WebGL Scenegraph", {
 });
 
 function getContextForXml3DElement(x) {
-    return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler.gl;
+    return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler.renderer.gl;
 };
 
 function getHandler(x) {
@@ -321,13 +321,13 @@ test("Camera setDirection/upVector", 5, function() {
 test("Pick pass flag", 7, function() {
     var x = this.doc.getElementById("xml3DElem");
     var h = getHandler(x);
-    h.renderPick(0,0);
+    h.updatePickObjectByPoint(0,0);
     ok(!h.needPickingDraw, "No picking needed after pick rendering");
     this.doc.getElementById("group2").setAttribute("shader","#flatblack");
     ok(!h.needPickingDraw, "Changing shaders does not require a picking pass");
     this.doc.getElementById("t_cubebottom").translation.x = 5;
     ok(h.needPickingDraw, "Changing transformation does require a picking pass");
-    h.renderPick(0,0);
+    h.updatePickObjectByPoint(0,0);
     ok(!h.needPickingDraw, "No picking needed after pick rendering");
     this.doc.getElementById("t_cubebottom").translation.x = 3;
     this.doc.getElementById("group2").setAttribute("shader","#flatblue");
@@ -335,14 +335,28 @@ test("Pick pass flag", 7, function() {
     ok(h.needPickingDraw, "Changing transformation does require a picking pass");
 });
 
-test("No implicit light", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    var h = getHandler(x);
 
-    var group = this.doc.getElementById("implicitLight");
-    group.visible = true;
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,0,255], "No light, scene is black");
+test("Add a mesh dynamically", 4, function() {
+    var x = this.doc.getElementById("xml3DElem");
+    var g = this.doc.getElementById("myGroup");
+    var count = 0;
+
+    x.addEventListener("framedrawn", function(n) {
+            if (count == 0) {
+                equal(n.detail.numberOfObjectsDrawn, 1, "Initially one drawable object");
+                var group = document.createElementNS(XML3D.xml3dNS,"group");
+                var mesh = document.createElementNS(XML3D.xml3dNS,"mesh");
+                mesh.setAttribute('id',"new_mesh");
+                mesh.setAttribute('src',"#meshdata");
+                g.appendChild(group);
+                group.appendChild(mesh);
+                stop();
+            } else if (count == 1) {
+                equal(n.detail.numberOfObjectsDrawn, 2, "Now two drawable objects");
+            }
+            count++;
+            start();
+    });
+    stop();
+    g.visible = true;
 });

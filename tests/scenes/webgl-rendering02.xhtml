@@ -3,38 +3,15 @@
   <head>
      <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <script type="text/javascript" src="scripts/customShader.js"></script>
    <title>
-    XML3D
+    XML3D Rendering 2
    </title>
   </head>
   <body style="background-color: #FFF;width:500px">
    <xml3d activeView="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
     <defs>   
-    <script id="customShaderScript"></script>
-    <script id="customShaderScript-vs" type="x-shader/x-vertex">
-        #ifdef GL_ES
-        precision highp float;
-        #endif
-
-        attribute vec3 position;
-        uniform mat4 modelViewProjectionMatrix;
-        uniform mat4 modelViewMatrix;
-        
-        void main(void)
-        {
-            gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
-        }
-    </script>
-    <script id="customShaderScript-fs" type="x-shader/x-fragment">
-        #ifdef GL_ES
-        precision highp float;
-        #endif
-        
-        void main(void)
-        {
-            gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
-        }
-    </script>
+   
     
     
     <shader id="texShader1" script="urn:xml3d:shader:phong">
@@ -56,9 +33,11 @@
         </texture>
     </shader>
     
-    <shader id="customShader" script="#customShaderScript">
-        <float3 name="diffuseColor">0 1 0</float3>
-    </shader>   
+    <shader id="customShader" script="urn:xml3d:shader:customtest">
+    </shader>  
+    <shader id="customShader2" script="urn:xml3d:shader:customtest">
+        <float3 name="someColor">0 0 1</float3>
+    </shader>    
     <shader id="diffuseShader" script="urn:xml3d:shader:diffuse">
         <float3 name="diffuseColor">1 1 1</float3>
         <float name="ambientIntensity">1</float>
@@ -111,6 +90,11 @@
     
     <group id="npotTexGroup" shader="#npotTexShader" visible="false">
         <mesh src="#wrapMeshData" type="triangles">
+        </mesh>
+    </group> 
+
+    <group id="customShaderGroup" shader="#customShader" visible="false">
+        <mesh src="#meshdata" type="triangles">
         </mesh>
     </group> 
 

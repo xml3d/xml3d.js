@@ -25,7 +25,7 @@ test("Defaults", function() {
     elems.light = this.doc.getElementById("myLight");
 
     var a = new XML3DMatrix();
-    for (elem in elems)
+    for (var elem in elems)
         QUnit.closeMatrix(elems[elem].getWorldMatrix(), a, EPSILON, "Untransformed " + elems[elem].nodeName
                 + " delivers indentity world matrix");
 
@@ -117,6 +117,16 @@ test("Hierarchy", function() {
     QUnit.closeMatrix(child2.getWorldMatrix(), parent.getLocalMatrix(), EPSILON, "New child2 global matrix");
 });
 
+test("Picking", function() {
+	var xml3d = this.doc.getElementById("myXml3d");
+	var m = xml3d.getElementByPoint(561,203);
+	strictEqual(m, null, "Nothing picked here");
+
+	m = xml3d.getElementByPoint(447,203);
+	ok(m, "Pick is not null");
+	equal(m && m.id, "myMesh02");
+
+});
 test("Transformation creates non-regular matrix", 2, function() {
     // 1: Found frame
     // 2: Scene loaded
@@ -131,7 +141,7 @@ test("Picking", function() {
     var xml3d = this.doc.getElementById("myXml3d");
     var m = xml3d.getElementByPoint(561,203);
     strictEqual(m, null, "Nothing picked here");
-    
+
     m = xml3d.getElementByPoint(447,203);
     ok(m, "Pick is not null");
     equal(m && m.id, "myMesh02");
@@ -157,7 +167,7 @@ module("Bounding Boxes", {
 
 
 
-test("Groups and Meshes", 12, function() {
+test("Groups and Meshes", 16, function() {
     var frontTopMeshBox = this.doc.getElementById("m_TopFront").getBoundingBox();
     var frontBotMeshBox = this.doc.getElementById("m_BotFront").getBoundingBox();
     var emptyBox = this.doc.getElementById("empty_group").getBoundingBox();
@@ -168,17 +178,25 @@ test("Groups and Meshes", 12, function() {
     var cubeGroupBox = this.doc.getElementById("cube_group").getBoundingBox();
     var splitCubeBox1 = this.doc.getElementById("split_cube_mesh1").getBoundingBox();
     var splitCubeBox2 = this.doc.getElementById("split_cube_mesh2").getBoundingBox();
-
+    var scaled_group = this.doc.getElementById("scaled_group").getBoundingBox();
+    var translated_group = this.doc.getElementById("translated_group").getBoundingBox();
+    var rotated_group = this.doc.getElementById("rotated_group").getBoundingBox();
+    var hierarchy = this.doc.getElementById("hierarchy").getBoundingBox();
     ok(emptyBox.isEmpty(), "Empty group delivers empty BoundingBox");
 
     QUnit.closeBox(frontTopMeshBox, new XML3DBox(new XML3DVec3(-1,-1,0),new XML3DVec3(1,1,0)), EPSILON, "Front rectangle of top cube: (-1 -1 0) to (1 1 0)");
     QUnit.closeBox(frontBotMeshBox, new XML3DBox(new XML3DVec3(-1,-1,0),new XML3DVec3(1,1,0)), EPSILON, "Front rectangle of bottom cube: (-1 -1 0) to (1 1 0)");
     QUnit.closeBox(topCubeBox, new XML3DBox(new XML3DVec3(-1,1.5,-1),new XML3DVec3(1,3.5,1)), EPSILON, "Top cube: (-1 1.5 -1) to (1 3.5 1)");
     QUnit.closeBox(botCubeBox, new XML3DBox(new XML3DVec3(-1,-3.5,-1),new XML3DVec3(1,-1.5,1)), EPSILON, "Bottom cube: (-1 -3.5 -1) to (1 -1.5 1)");
-    QUnit.closeBox(cubeMeshBox, new XML3DBox(new XML3DVec3(-1,-1,-1),new XML3DVec3(1,1,1)), EPSILON, "Root group: (-1 -3.5 -1) to (1 3.5 1)");
-    QUnit.closeBox(cubeGroupBox, new XML3DBox(new XML3DVec3(-2.4142136573791504, -1.4142144918441772, -2.4142136573791504),new XML3DVec3(2.4142136573791504, 1.4142144918441772, 2.4142136573791504)), EPSILON);
-    QUnit.closeBox(rootBox, new XML3DBox(new XML3DVec3(-2.41421,-3.5,-2.41421),new XML3DVec3(2.41421,3.5,2.41421)), EPSILON);
-    QUnit.closeBox(splitCubeBox1, new XML3DBox(new XML3DVec3(0, -1, -1),new XML3DVec3(1, 1, 1)), EPSILON, "Root group: (-1 -3.5 -1) to (1 3.5 1)");
-    QUnit.closeBox(splitCubeBox2, new XML3DBox(new XML3DVec3(-1, -1, -1),new XML3DVec3(0, 1, 1)), EPSILON, "Root group: (-1 -3.5 -1) to (1 3.5 1)");
+    QUnit.closeBox(cubeMeshBox, new XML3DBox(new XML3DVec3(-1,-1,-1),new XML3DVec3(1,1,1)), EPSILON, "Unity cube mesh: (-1 -1 -1) to (1 1 1)");
+    QUnit.closeBox(cubeGroupBox, cubeMeshBox, EPSILON, "No transformation: mesh and group equal.");
+    QUnit.closeBox(scaled_group, new XML3DBox(new XML3DVec3(-20, -5, -20),new XML3DVec3(20, 5, 20)), EPSILON, "Scaled group.");
+    QUnit.closeBox(translated_group, new XML3DBox(new XML3DVec3(0, -2, 4),new XML3DVec3(2, 0, 6)), EPSILON, "Translated group.");
+    var sq2 = 1.4098814725875854;
+    QUnit.closeBox(rotated_group, new XML3DBox(new XML3DVec3(-1, -sq2, -sq2),new XML3DVec3(1, sq2, sq2)), EPSILON, "Rotated group.");
+    QUnit.closeBox(hierarchy, new XML3DBox(new XML3DVec3(-20, -16.79395294189453, -18.45308494567871),new XML3DVec3(20, 16.79395294189453, 18.45308494567871)), EPSILON, "Hierarchy.");
+    QUnit.closeBox(rootBox, scaled_group, EPSILON, "Overall");
+    QUnit.closeBox(splitCubeBox1, new XML3DBox(new XML3DVec3(0, -1, -1),new XML3DVec3(1, 1, 1)), EPSILON, "Split part 1");
+    QUnit.closeBox(splitCubeBox2, new XML3DBox(new XML3DVec3(-1, -1, -1),new XML3DVec3(0, 1, 1)), EPSILON, "Split part 2");
 
 });

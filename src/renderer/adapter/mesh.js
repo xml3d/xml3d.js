@@ -23,7 +23,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         XML3D.webgl.RenderAdapter.call(this, factory, node);
 
         this.processListeners();
-        this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
+        this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.parentVisible = true;
         this.getMyDrawableObject = noDrawableObject;
 

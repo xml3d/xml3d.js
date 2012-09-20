@@ -52,10 +52,9 @@
         this.fSource = sources.fragment;
     };
 
-    var XML3DShaderManager = function(renderer, dataFactory, factory) {
+    var XML3DShaderManager = function(renderer, factory) {
         this.renderer = renderer;
         this.gl = renderer.gl;
-        this.dataFactory = dataFactory;
         this.factory = factory;
 
         this.shaderCache = {

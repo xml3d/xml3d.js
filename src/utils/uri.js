@@ -22,6 +22,29 @@ XML3D.URI = function(str) {
     this.fragment = result[5] || null;
 };
 
+/**
+ * @return {boolean} true if URI is relative to current document
+ */
+XML3D.URI.prototype.isLocal = function(){
+    return !this.authority && !this.path;
+}
+
+/**
+ * Get absolute URI relative to the provided document uri
+ * @param {string, XML3D.URI} docUri uri of document from which this uri originates
+ * @returns {XML3D.URI}
+ */
+XML3D.URI.prototype.getAbsoluteURI = function(docUri){
+    if(!this.valid || this.authority){
+        return this;
+    }
+    if(typeof(docUri) == "string")
+        docUri = new XML3D.URI(docUri);
+    // TODO: correctly compute new path:
+    var path = this.path.substr(this.path.indexOf("/"));
+    return this;
+}
+
 // Restore the URI to it's stringy glory.
 XML3D.URI.prototype.toString = function() {
     var str = "";
@@ -43,7 +66,9 @@ XML3D.URI.prototype.toString = function() {
     return str;
 };
 
-// Restore the URI to it's stringy glory.
+
+
+// Restore the URI to it's stringy glory minus the fragment
 XML3D.URI.prototype.toStringWithoutFragment = function() {
     var str = "";
     if (this.scheme) {

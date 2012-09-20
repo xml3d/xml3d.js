@@ -42,7 +42,7 @@ module("Xflow tests", {
     },
 
     loadTestXML : function(url, handler) {
-        this.factory = handler.renderer.dataFactory;
+        this.factory = XML3D.data.factory;
         var defsElem = this.doc.getElementById("defsElem");
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.open("GET",url,false);

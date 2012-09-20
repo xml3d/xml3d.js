@@ -21,8 +21,8 @@ var Renderer = function(handler, width, height) {
     this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
     this.factory = new XML3D.webgl.XML3DRenderAdapterFactory(handler, this);
-	this.dataFactory = new XML3D.data.XML3DDataAdapterFactory(handler);
-    this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.dataFactory, this.factory);
+    XML3D.base.registerFactory("application/xml", this.factory);
+    this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
     this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
     this.changeListener = new XML3D.webgl.DataChangeListener(this);
     this.camera = this.initCamera();

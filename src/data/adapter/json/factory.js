@@ -72,7 +72,7 @@
      */
     var JSONFactory = {
         isFactoryFor : function(obj) {
-            return typeof obj == "string" ? (obj == XML3D.data.toString()) : (obj == XML3D.data);
+            return obj == XML3D.data;
         },
         createAdapter : function(data) {
             return new JSONDataAdapter(data);

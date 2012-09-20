@@ -74,6 +74,11 @@
             docCache.response = JSON.parse(req.responseText);
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
             docCache.response = req.responseXML;
+            // Configure all xml3d elements:
+            var xml3dElements = docCache.response.querySelectorAll("xml3d");
+            for(var i = 0; i < xml3dElements.length; ++i){
+                XML3D.config.element(xml3dElements[i]);
+            }
         }
 
         var fragments = docCache.fragments;
@@ -97,7 +102,7 @@
         if (mimetype == "application/json") {
             data = response;
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
-            data = response;
+            data = response.querySelectorAll("*[id="+fragment+"]")[0];
         }
 
         if (data) {
@@ -107,7 +112,8 @@
                     for ( var i = 0; i < c_factories[mimetype].length; ++i) {
                         var fac = c_factories[mimetype][i];
                         if (fac.isFactoryFor(adapterType)) {
-                            var a = fac.createAdapter(data);
+
+                            var a = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
                             if (a) {
                                 handle.setAdapter(a);
                             }
@@ -119,12 +125,16 @@
     }
 
     /**
-     *
+     * Get any adapter, internal or external
+     * @param {Document} doc - the document from which to look up the reference
      * @param {XML3D.URI} uri
      * @param {Object} type
      * @returns {XML3D.base.AdapterHandle}
      */
-    ResourceManager.prototype.getExternalAdapter = function(uri, type) {
+    ResourceManager.prototype.getAdapter = function(doc, uri, type) {
+        if(document != doc){
+            uri = uri.getAbsoluteURI(doc);
+        }
 
         if (!c_cachedAdapterHandles[uri])
             c_cachedAdapterHandles[uri] = {};
@@ -136,23 +146,37 @@
         var a = new XML3D.base.AdapterHandle();
         c_cachedAdapterHandles[uri][type] = a;
 
-        var docURI = uri.toStringWithoutFragment();
-        var docData = c_cachedDocuments[docURI];
-        if (docData && docData.response) {
-            updateAdapterHandlesForFragment(docURI, uri.fragment);
-        } else {
-            if (!docData) {
-                loadDocument(docURI);
-                c_cachedDocuments[docURI] = docData = {
-                    fragments : []
-                };
-            }
-            docData.fragments.push(uri.fragment);
-        }
+        if(uri.isLocal()){
+            var node = XML3D.URIResolver.resolve(uri);
 
+            for ( var i = 0; i < c_factories["application/xml"].length; ++i) {
+                var fac = c_factories["application/xml"][i];
+                if (fac.isFactoryFor(type)) {
+                    var adapter = fac.getAdapter(node);
+                    if (adapter) {
+                        a.setAdapter(adapter);
+                    }
+                }
+            }
+        }
+        else{
+            var docURI = uri.toStringWithoutFragment();
+            var docData = c_cachedDocuments[docURI];
+            if (docData && docData.response) {
+                updateAdapterHandlesForFragment(docURI, uri.fragment);
+            } else {
+                if (!docData) {
+                    loadDocument(docURI);
+                    c_cachedDocuments[docURI] = docData = {
+                        fragments : []
+                    };
+                }
+                docData.fragments.push(uri.fragment);
+            }
+        }
         return a;
     };
 
-    XML3D.base.ResourceManager = ResourceManager;
+    XML3D.base.resourceManager = new ResourceManager();
 
 })();

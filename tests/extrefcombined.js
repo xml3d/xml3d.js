@@ -64,7 +64,7 @@ test("Mesh JSON reference", 6, function() {
 });
 
 
-test("Mesh XML reference", 4, function() {
+test("Mesh XML reference", 5, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
@@ -90,6 +90,19 @@ test("Mesh XML reference", 4, function() {
 
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference2", "xml3dTest", function(refImage, testImage){
                 QUnit.imageEqual(refImage, testImage, "XML render matches after change");
+
+                var meshElement = self.doc.getElementById("myMesh03");
+                meshElement.setAttribute("src", "xml/meshes.xml#simpleMesh3");
+
+                testStep++;
+            });
+        }
+        if(testStep == 2){
+            if( XML3DUnit.getPixelValue(glTest, 64, 200)[0] == 0)
+                return;
+
+            XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
+                QUnit.imageEqual(refImage, testImage, "XML render matches after change to xml reference across two xml files");
 
                 start();
             });

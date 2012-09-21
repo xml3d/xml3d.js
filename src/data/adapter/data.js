@@ -125,7 +125,7 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {
     if (this.handles[attributeName])
         this.handles[attributeName].removeListener(this);
-    this.handles[attributeName] = this.factory.getAdapterURI(this.node.getAttribute(attributeName));
+    this.handles[attributeName] = this.factory.getAdapterURI(this.node, this.node.getAttribute(attributeName));
     this.handles[attributeName].addListener(this);
     this.referredAdapterChanged(this.handles[attributeName]);
 };

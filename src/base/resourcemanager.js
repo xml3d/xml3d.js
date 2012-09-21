@@ -132,8 +132,8 @@
      * @returns {XML3D.base.AdapterHandle}
      */
     ResourceManager.prototype.getAdapter = function(doc, uri, type) {
-        if(document != doc){
-            uri = uri.getAbsoluteURI(doc);
+        if(document != doc || !uri.isLocal()){
+            uri = uri.getAbsoluteURI(doc.documentURI);
         }
 
         if (!c_cachedAdapterHandles[uri])
@@ -147,7 +147,7 @@
         c_cachedAdapterHandles[uri][type] = a;
 
         if(uri.isLocal()){
-            var node = XML3D.URIResolver.resolve(uri);
+            var node = XML3D.URIResolver.resolveLocal(uri);
 
             for ( var i = 0; i < c_factories["application/xml"].length; ++i) {
                 var fac = c_factories["application/xml"][i];

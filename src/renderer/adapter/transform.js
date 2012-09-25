@@ -1,14 +1,14 @@
 ﻿// Adapter for <transform>
 (function() {
 
-    var XML3DTransformRenderAdapter = function(factory, node) {
+    var TransformRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.isValid = true;
 		this.needsUpdate = true;
     };
 
-    XML3D.createClass(XML3DTransformRenderAdapter, XML3D.webgl.RenderAdapter);
-    var p = XML3DTransformRenderAdapter.prototype;
+    XML3D.createClass(TransformRenderAdapter, XML3D.webgl.RenderAdapter);
+    var p = TransformRenderAdapter.prototype;
 
 	var IDENT_MAT = mat4.identity(mat4.create());
 
@@ -85,6 +85,6 @@
         this.isValid = false;
     };
     // Export to XML3D.webgl namespace
-    XML3D.webgl.XML3DTransformRenderAdapter = XML3DTransformRenderAdapter;
+    XML3D.webgl.TransformRenderAdapter = TransformRenderAdapter;
 
 }());

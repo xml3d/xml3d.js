@@ -20,7 +20,7 @@ var Renderer = function(handler, width, height) {
     this.setGlobalStates();
     this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
-    this.factory = new XML3D.webgl.XML3DRenderAdapterFactory(handler, this);
+    this.factory = new XML3D.webgl.RenderAdapterFactory(handler, this);
     XML3D.base.registerFactory("application/xml", this.factory, handler.id);
     this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
     this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);

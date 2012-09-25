@@ -1,6 +1,6 @@
 // Adapter for <view>
 (function() {
-    var XML3DViewRenderAdapter = function(factory, node) {
+    var ViewRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.zFar = 100000;
         this.zNear = 0.1;
@@ -10,8 +10,8 @@
         this.worldPosition = [0,0,0];
         this.updateViewMatrix();
     };
-    XML3D.createClass(XML3DViewRenderAdapter, XML3D.webgl.RenderAdapter);
-    var p = XML3DViewRenderAdapter.prototype;
+    XML3D.createClass(ViewRenderAdapter, XML3D.webgl.RenderAdapter);
+    var p = ViewRenderAdapter.prototype;
 
     var tmp = mat4.create(),
         tmp2 = mat4.create();
@@ -99,6 +99,6 @@
     };
 
     // Export to XML3D.webgl namespace
-    XML3D.webgl.XML3DViewRenderAdapter = XML3DViewRenderAdapter;
+    XML3D.webgl.ViewRenderAdapter = ViewRenderAdapter;
 
 }());

@@ -6,7 +6,7 @@
      * @param {RenderAdapterFactory} factory
      * @param {Element} node
      */
-    var XML3DLightRenderAdapter = function(factory, node) {
+    var LightRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
 
         this.visible = true;
@@ -17,9 +17,9 @@
         this.offset = 0;
         this.lightType = "point";
     };
-    XML3D.createClass(XML3DLightRenderAdapter, XML3D.webgl.RenderAdapter);
+    XML3D.createClass(LightRenderAdapter, XML3D.webgl.RenderAdapter);
 
-    XML3DLightRenderAdapter.prototype.notifyChanged = function(evt) {
+    LightRenderAdapter.prototype.notifyChanged = function(evt) {
         var target = evt.internalType || evt.wrapped.attrName;
 
         switch(target) {
@@ -59,7 +59,7 @@
 	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]), tmpDirection = vec3.create();
 
 
-	XML3DLightRenderAdapter.prototype.applyTransform = function(vec) {
+	LightRenderAdapter.prototype.applyTransform = function(vec) {
 	    if (this.transform) {
             var t = this.transform;
             var newVec = mat4.multiplyVec4(t, quat4.create([vec[0], vec[1], vec[2], 1]));
@@ -72,7 +72,7 @@
 	 *
 	 * @param {Object} lights
 	 */
-	XML3DLightRenderAdapter.prototype.addLight = function(lights) {
+	LightRenderAdapter.prototype.addLight = function(lights) {
 	    this.callback = lights.dataChanged;
 	    var shader = this.getLightShader();
         if (!shader)
@@ -114,7 +114,7 @@
 	/**
 	 *
 	 */
-    XML3DLightRenderAdapter.prototype.getLightShader = function() {
+    LightRenderAdapter.prototype.getLightShader = function() {
         if (!this.lightShader) {
             var shaderLink = this.node.shader;
             var shader = null;
@@ -135,7 +135,7 @@
         }
         return this.lightShader;
     };
-    XML3DLightRenderAdapter.prototype.dispose = function() {
+    LightRenderAdapter.prototype.dispose = function() {
         this.isValid = false;
     };
 
@@ -145,11 +145,11 @@
      * @param {Array.<number>} newValue
      * @return
      */
-    XML3DLightRenderAdapter.prototype.dataChanged = function(field, newValue) {
+    LightRenderAdapter.prototype.dataChanged = function(field, newValue) {
         this.renderer.changeLightData(this.lightType, field, this.offset, newValue);
     };
 
     // Export to XML3D.webgl namespace
-    XML3D.webgl.XML3DLightRenderAdapter = XML3DLightRenderAdapter;
+    XML3D.webgl.LightRenderAdapter = LightRenderAdapter;
 
 }());

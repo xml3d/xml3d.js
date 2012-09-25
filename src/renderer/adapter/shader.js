@@ -1,7 +1,7 @@
 // Adapter for <shader>
 (function() {
 
-    var XML3DShaderRenderAdapter = function(factory, node) {
+    var ShaderRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.renderer = this.factory.renderer;
 
@@ -9,8 +9,8 @@
         this.computeRequest;
     };
 
-    XML3D.createClass(XML3DShaderRenderAdapter, XML3D.webgl.RenderAdapter);
-    var p = XML3DShaderRenderAdapter.prototype;
+    XML3D.createClass(ShaderRenderAdapter, XML3D.webgl.RenderAdapter);
+    var p = ShaderRenderAdapter.prototype;
 
     p.notifyChanged = function(evt) {
         if (evt.type == XML3D.events.NODE_INSERTED) {
@@ -65,6 +65,6 @@
     };
 
     // Export to XML3D.webgl namespace
-    XML3D.webgl.XML3DShaderRenderAdapter = XML3DShaderRenderAdapter;
+    XML3D.webgl.ShaderRenderAdapter = ShaderRenderAdapter;
 
 }());

@@ -4,7 +4,7 @@
 	var eventTypes = {onclick:1, ondblclick:1,
 			ondrop:1, ondragenter:1, ondragleave:1};
 	
-    var XML3DGroupRenderAdapter = function(factory, node) {
+    var GroupRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.processListeners();
         this.factory = factory;
@@ -15,9 +15,9 @@
         this.updateTransformAdapter();
     };
 
-    XML3D.createClass(XML3DGroupRenderAdapter, XML3D.webgl.RenderAdapter);
+    XML3D.createClass(GroupRenderAdapter, XML3D.webgl.RenderAdapter);
 
-    var p = XML3DGroupRenderAdapter.prototype;
+    var p = GroupRenderAdapter.prototype;
 
     p.applyTransformMatrix = function(m) {
         if (this.parentTransform !== null)
@@ -241,5 +241,5 @@
         return m;
     };
 
-    XML3D.webgl.XML3DGroupRenderAdapter = XML3DGroupRenderAdapter;
+    XML3D.webgl.GroupRenderAdapter = GroupRenderAdapter;
 }());

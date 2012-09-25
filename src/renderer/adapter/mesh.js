@@ -19,7 +19,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     /**
      * @constructor
      */
-    var XML3DMeshRenderAdapter = function(factory, node) {
+    var MeshRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
 
         this.processListeners();
@@ -31,9 +31,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.computeRequest = null;
     };
 
-    XML3D.createClass(XML3DMeshRenderAdapter, XML3D.webgl.RenderAdapter);
+    XML3D.createClass(MeshRenderAdapter, XML3D.webgl.RenderAdapter);
 
-    var p = XML3DMeshRenderAdapter.prototype;
+    var p = MeshRenderAdapter.prototype;
 
     /**
      *
@@ -315,6 +315,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     // Export to XML3D.webgl namespace
-    XML3D.webgl.XML3DMeshRenderAdapter = XML3DMeshRenderAdapter;
+    XML3D.webgl.MeshRenderAdapter = MeshRenderAdapter;
 
 }());

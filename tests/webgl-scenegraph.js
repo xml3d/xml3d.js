@@ -17,11 +17,11 @@ module("WebGL Scenegraph", {
 });
 
 function getContextForXml3DElement(x) {
-    return x._configured.adapters.XML3DRenderAdapterFactory.factory.handler.renderer.gl;
+    return x._configured.adapters.RenderAdapterFactory.factory.handler.renderer.gl;
 };
 
 function getHandler(x) {
-    return x._configured ? x._configured.adapters.XML3DRenderAdapterFactory.factory.handler : null;
+    return x._configured ? x._configured.adapters.RenderAdapterFactory.factory.handler : null;
 };
 
 test("Background and invisible mesh", 4, function() {

@@ -96,7 +96,7 @@ module("Adapter tests", {
         v.removeEventListener("load", this.cb, true);
     },
     factory : new TestAdapterFactory(),
-    webglFactory : new XML3D.webgl.XML3DRenderAdapterFactory()
+    webglFactory : new XML3D.webgl.RenderAdapterFactory()
 });
 
 test("Adapter registration and initialization test", 6, function() {
@@ -111,7 +111,7 @@ test("WebGLFactory test", 5, function() {
     var g = this.doc.getElementById("myGroup");
     ok(g, "Node exits");
     console.log(g._configured.adapters);
-    notEqual(g._configured.adapters["XML3DRenderAdapterFactory"], undefined, "Adapter registered automatically.");
+    notEqual(g._configured.adapters["RenderAdapterFactory"], undefined, "Adapter registered automatically.");
     var a = this.webglFactory.getAdapter(g);
     ok(a, "There is a WebGL Group adapter");
 });

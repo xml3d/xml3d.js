@@ -21,23 +21,19 @@
 
 
     //Adapter for <defs>
-    XML3D.webgl.XML3DDefsRenderAdapter = function(factory, node) {
+    XML3D.webgl.DefsRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
     };
-    XML3D.webgl.XML3DDefsRenderAdapter.prototype = new XML3D.webgl.RenderAdapter();
-    XML3D.webgl.XML3DDefsRenderAdapter.prototype.constructor = XML3D.webgl.XML3DDefsRenderAdapter;
-    XML3D.webgl.XML3DDefsRenderAdapter.prototype.notifyChanged = function(evt) {
-
-    };
+    XML3D.createClass(XML3D.webgl.DefsRenderAdapter, XML3D.webgl.RenderAdapter);
 
     //Adapter for <img>
-    XML3D.webgl.XML3DImgRenderAdapter = function(factory, node) {
+    XML3D.webgl.ImgRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.textureAdapter = factory.getAdapter(node.parentNode);
     };
-    XML3D.webgl.XML3DImgRenderAdapter.prototype = new XML3D.webgl.RenderAdapter();
-    XML3D.webgl.XML3DImgRenderAdapter.prototype.constructor = XML3D.webgl.XML3DImgRenderAdapter;
-    XML3D.webgl.XML3DImgRenderAdapter.prototype.notifyChanged = function(evt) {
+    XML3D.createClass(XML3D.webgl.ImgRenderAdapter, XML3D.webgl.RenderAdapter);
+
+    XML3D.webgl.ImgRenderAdapter.prototype.notifyChanged = function(evt) {
         this.textureAdapter.notifyChanged(evt);
     };
 
@@ -49,15 +45,14 @@
      * @param {RenderAdapterFactory} factory
      * @param {Element} node
      */
-    XML3D.webgl.XML3DLightShaderRenderAdapter = function(factory, node) {
+    XML3D.webgl.LightShaderRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes, this.dataChanged.bind(this));
         this.offsets = [];
         this.listeners = [];
     };
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype = new XML3D.webgl.RenderAdapter();
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.constructor = XML3D.webgl.XML3DLightShaderRenderAdapter;
+    XML3D.createClass(XML3D.webgl.LightShaderRenderAdapter, XML3D.webgl.RenderAdapter);
 
     /** @const */
     var LIGHT_DEFAULT_INTENSITY = vec3.create([1,1,1]);
@@ -70,7 +65,7 @@
      * @param {number} i
      * @param {number} offset
      */
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillPointLight = function(point, i, offset) {
+    XML3D.webgl.LightShaderRenderAdapter.prototype.fillPointLight = function(point, i, offset) {
         this.callback = point.dataChanged;
         this.offsets.push(offset);
         var dataTable = this.computeRequest.getResult().getOutputMap();
@@ -88,7 +83,7 @@
     * @param {number} i
     * @param {number} offset
     */
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillDirectionalLight = function(directional, i, offset) {
+    XML3D.webgl.LightShaderRenderAdapter.prototype.fillDirectionalLight = function(directional, i, offset) {
         this.callback = directional.dataChanged;
         this.offsets.push(offset);
         var dataTable = this.computeRequest.getResult().getOutputMap();
@@ -102,7 +97,7 @@
      * @param {Xflow.data.Request} request
      * @param {Xflow.RequestNotification} notification
      */
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.dataChanged = function(request, notification) {
+    XML3D.webgl.LightShaderRenderAdapter.prototype.dataChanged = function(request, notification) {
         var dataTable = request.getResult();
 
         for (var i=0; i<staticAttributes.length; i++) {
@@ -119,10 +114,10 @@
      *
      * @param {Function} func
      */
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.registerLightListener = function(func) {
+    XML3D.webgl.LightShaderRenderAdapter.prototype.registerLightListener = function(func) {
         this.listeners.push(func);
     };
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.removeLightListener = function(func) {
+    XML3D.webgl.LightShaderRenderAdapter.prototype.removeLightListener = function(func) {
         //this.listeners.splice(func);
         //TODO: remove light node listeners
     };
@@ -131,7 +126,7 @@
      *
      * @param {string} name
      */
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.requestParameter = function(name) {
+    XML3D.webgl.LightShaderRenderAdapter.prototype.requestParameter = function(name) {
         return this.computeRequest.getResult().getOutputData(name);
     };
 

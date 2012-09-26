@@ -5,6 +5,8 @@
      * @constructor
      * @implements {XML3D.base.IFactory}
      * @extends XML3D.base.AdapterFactory
+     * @param {XML3D.webgl.CanvasHandler} handler
+     * @param {XML3D.webgl.Renderer} renderer
      */
     var RenderAdapterFactory = function(handler, renderer) {
         XML3D.base.AdapterFactory.call(this);
@@ -14,30 +16,38 @@
     };
     XML3D.createClass(RenderAdapterFactory, XML3D.base.AdapterFactory);
 
-    var gl = XML3D.webgl,
-        reg = {
-            xml3d:          gl.XML3DRenderAdapter,
-            view:           gl.ViewRenderAdapter,
-            defs:           gl.DefsRenderAdapter,
-            mesh:           gl.MeshRenderAdapter,
-            transform:      gl.TransformRenderAdapter,
-            shader:         gl.ShaderRenderAdapter,
-            texture:        gl.TextureRenderAdapter,
-            group:          gl.GroupRenderAdapter,
-            img:            gl.ImgRenderAdapter,
-            light:          gl.LightRenderAdapter,
-            lightshader:    gl.LightShaderRenderAdapter
+    var ns = XML3D.webgl,
+        registry = {
+            xml3d:          ns.XML3DRenderAdapter,
+            view:           ns.ViewRenderAdapter,
+            defs:           ns.DefsRenderAdapter,
+            mesh:           ns.MeshRenderAdapter,
+            transform:      ns.TransformRenderAdapter,
+            shader:         ns.ShaderRenderAdapter,
+            texture:        ns.TextureRenderAdapter,
+            group:          ns.GroupRenderAdapter,
+            img:            ns.ImgRenderAdapter,
+            light:          ns.LightRenderAdapter,
+            lightshader:    ns.LightShaderRenderAdapter
 
     };
 
+    /**
+     * @param obj
+     * @return {Boolean}
+     */
     RenderAdapterFactory.prototype.isFactoryFor = function(obj) {
         return obj == XML3D.webgl;
     };
 
+    /**
+     * @param node
+     * @return {XML3D.base.Adapter|null}
+     */
     RenderAdapterFactory.prototype.createAdapter = function(node) {
-        var adapterContructor = reg[node.localName];
-        if(adapterContructor !== undefined) {
-            return new adapterContructor(this, node);
+        var adapterConstructor = registry[node.localName];
+        if(adapterConstructor !== undefined) {
+            return new adapterConstructor(this, node);
         }
         return null;
     };

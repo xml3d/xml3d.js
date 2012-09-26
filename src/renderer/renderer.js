@@ -812,7 +812,7 @@ Renderer.prototype.notifyDataChanged = function() {
 };
 
     // Export
-    XML3D.webgl['Renderer'] = Renderer;
+    XML3D.webgl.Renderer = Renderer;
 })();
 
 

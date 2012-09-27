@@ -396,6 +396,16 @@ XML3D.classInfo['video'] = {
     _term: undefined
 };
 /**
+ * Properties and methods for <video>
+ **/
+XML3D.classInfo['video'] = {
+    id : {a: XML3D.IDHandler},
+    className : {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for video
+    src : {a: XML3D.StringAttributeHandler},
+    _term: undefined
+};
+/**
  * Properties and methods for <view>
  **/
 XML3D.classInfo['view'] = {

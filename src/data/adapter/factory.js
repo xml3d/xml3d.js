@@ -78,6 +78,7 @@
     reg['texture']     = data.TextureDataAdapter;
     reg['data']        = data.DataAdapter;
     reg['proto']       = data.DataAdapter;
+    reg['iframe']      = data.IFrameDataAdapter;
     reg['video']       = data.VideoDataAdapter;
 
    /**

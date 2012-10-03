@@ -188,6 +188,16 @@ XML3D.webgl.MAXFPS = 30;
         this.renderer.renderPickedPosition(pickedObj);
         return this.renderer.readPositionFromPickingBuffer(canvasX, this.canvas.height - canvasY);
     };
+    
+    CanvasHandler.prototype.getCanvasHeight = function() { 
+    	
+    	return this.canvas.height; 
+    };
+    
+    CanvasHandler.prototype.getCanvasWidth = function() { 
+    	
+    	return this.canvas.width; 
+    };  
 
     /**
      * Uses gluUnProject() to transform the 2D screen point to a 3D ray.
@@ -225,9 +235,9 @@ XML3D.webgl.MAXFPS = 30;
 
         // calculate ray
 
-        ray.origin = this.renderer.currentView.position;
-        ray.direction = new window.XML3DVec3(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
-        ray.direction = ray.direction.normalize();
+        ray.origin.set(this.renderer.currentView.position);
+        ray.direction.set(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
+        ray.direction.set(ray.direction.normalize());
 
         return ray;
     };

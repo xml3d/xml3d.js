@@ -115,7 +115,8 @@ test("Mesh XML reference", 5, function() {
     this.doc.getElementById("xmlGroup").visible = true;
     hTest.draw();
 
-    stop();});
+    stop();
+});
 
 /*
 test("Shader JSON reference", 3, function() {
@@ -150,34 +151,49 @@ test("Shader JSON reference", 3, function() {
 
 });
  */
-test("Shader XML reference", 3, function() {
-    var xRef = this.doc.getElementById("xml3dReference"),
-    actual,
-    win = this.doc.defaultView,
-    glRef = getContextForXml3DElement(xRef), hRef = getHandler(xRef);
 
+test("Shader XML reference", 4, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
-    glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest),
+        hRef = getHandler(this.doc.getElementById("xml3dReference"));
+    var self = this;
 
-    this.doc.getElementById("xmlShaderGroup").visible = true;
+    var testStep = 0;
+
+    function onFrameDrawn(){
+        if(testStep == 0){
+            if( XML3DUnit.getPixelValue(glTest, 64, 200)[1] == 0)
+                return;
+            testStep++;
+            XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
+                QUnit.imageEqual(refImage, testImage, "XML render matches");
+
+                self.doc.getElementById("groupRef1").setAttribute("shader", "#refWood");
+                hRef.draw();
+                self.doc.getElementById("xmlShaderGroup").setAttribute("shader", "xml/shaders.xml#wood");
+
+                testStep++;
+            });
+        }
+        if(testStep == 2){
+            if( XML3DUnit.getPixelValue(glTest, 64, 200)[0] == 0)
+                return;
+            testStep++;
+            XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
+                QUnit.imageEqual(refImage, testImage, "XML render matches");
+
+                start();
+            });
+        }
+    }
+    xTest.addEventListener("framedrawn", onFrameDrawn);
+
     this.doc.getElementById("groupRef1").setAttribute("shader", "#refFlatGreen");
-    hTest.draw();
     hRef.draw();
 
-    var data = glRef.canvas.toDataURL();
-    var img = new Image();
-    img.onload = function(e) {
-        var expected = new Image();
-        expected.onload = function(e) {
-            QUnit.imageEqual(img, expected, "XML shader render matches");
-            start();
-        };
-        expected.src = glTest.canvas.toDataURL();
-        stop();
-        start();
-    };
-    img.src = data;
-    stop();
+    this.doc.getElementById("xmlShaderGroup").visible = true;
+    hTest.draw();
 
+    stop();
 });
 

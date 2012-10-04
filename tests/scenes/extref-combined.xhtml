@@ -17,6 +17,11 @@
           <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
           <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
+
+        <shader id="wood" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">0 0 0</float3>
+        </shader>
+
       </defs>
     <view id="myView" />
     <light id="myLight"/>
@@ -51,6 +56,10 @@
 
         <shader id="refFlatGreen" script="urn:xml3d:shader:flat">
             <float3 name="diffuseColor">0 1 0</float3>
+        </shader>
+
+        <shader id="refWood" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">1 1 0</float3>
         </shader>
         
 	  </defs>

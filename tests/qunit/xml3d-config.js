@@ -194,7 +194,7 @@ XML3DUnit.loadSceneTestImages = function(doc, refSceneId, testSceneId, callback)
     var refImagesLoaded = 0;
     function onLoad(){
         refImagesLoaded++;
-        if(refImagesLoaded >= 2)
+        if(refImagesLoaded == 2)
             callback(refImage, testImage);
     }
 

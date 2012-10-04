@@ -120,6 +120,7 @@
         return result;
     };
 
+
     /**
      *
      * @param shaderAdapter
@@ -132,7 +133,9 @@
         }
 
         var shaderNode = shaderAdapter.node;
-        var shaderId = shaderNode.id;
+        var uri = new XML3D.URI("#" + shaderNode.id);
+        var shaderId = uri.getAbsoluteURI(shaderNode.ownerDocument.documentURI).toString();
+
         var program = this.shaders[shaderId];
 
         if (program)
@@ -159,7 +162,7 @@
 
     /**
      * @param {string} path
-     * @returns
+     * @returns {string}
      */
     XML3DShaderManager.getShaderDescriptor = function(path) {
         var shaderName = path.substring(path.lastIndexOf(':') + 1);
@@ -300,7 +303,8 @@
     };
 
     XML3DShaderManager.prototype.shaderDataChanged = function(adapter, request, changeType) {
-        var program = this.shaders[adapter.node.id];
+        var shaderId = new XML3D.URI("#" + adapter.node.id).getAbsoluteURI(adapter.node.ownerDocument.documentURI).toString();
+        var program = this.shaders[shaderId];
         var result = request.getResult();
         this.bindShader(program);
         this.setUniformsFromComputeResult(program, result);

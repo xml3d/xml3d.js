@@ -3,16 +3,16 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 //Adapter for <mesh>
 (function() {
     var eventTypes = {onclick:1, ondblclick:1,
-            ondrop:1, ondragenter:1, ondragleave:1};
+        ondrop:1, ondragenter:1, ondragleave:1};
 
     var noDrawableObject = function() {
         XML3D.debug.logError("Mesh adapter has no callback to its mesh object!");
     },
-    /**
-     * @type WebGLRenderingContext
-     * @private
-     */
-    rc = window.WebGLRenderingContext;
+        /**
+         * @type WebGLRenderingContext
+         * @private
+         */
+            rc = window.WebGLRenderingContext;
 
     var staticAttributes = ["index", "position", "normal", "color", "texcoord", "size", "tangent"];
 
@@ -25,6 +25,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.processListeners();
         this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.parentVisible = true;
+        this.shaderHandle = null;
         this.getMyDrawableObject = noDrawableObject;
 
         this.computeRequest = null;
@@ -65,7 +66,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      */
     p.notifyChanged = function(evt) {
         if (evt.type == XML3D.events.NODE_INSERTED)
-            // Node insertion is handled by the CanvasRenderAdapter
+        // Node insertion is handled by the CanvasRenderAdapter
             return;
         else if (evt.type == XML3D.events.NODE_REMOVED)
             return this.factory.renderer.sceneTreeRemoval(evt);
@@ -78,8 +79,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 break;
 
             case "parentshader":
-                var newShaderId = evt.newValue ? evt.newValue.node.id : "defaultShader";
-                this.getMyDrawableObject().shader = newShaderId;
+                this.setShaderHandle(evt.newValue);
+                this.referredAdapterChanged(evt.newValue);
                 break;
 
             case "parentvisible":
@@ -106,6 +107,27 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     };
 
+    p.getShaderHandle = function(){
+        return this.shaderHandle;
+    }
+
+    p.setShaderHandle = function(newHandle){
+        if(this.shaderHandle){
+            this.shaderHandle.removeListener(this);
+        }
+        this.shaderHandle = newHandle;
+        if(this.shaderHandle){
+            this.shaderHandle.addListener(this);
+        }
+    };
+
+    p.referredAdapterChanged = function(adapterHandle){
+        var shaderName = this.factory.renderer.shaderManager.createShader(adapterHandle ? adapterHandle.getAdapter() : null,
+            this.factory.renderer.lights);
+        this.getMyDrawableObject().shader = shaderName;
+    };
+
+
     /**
      * @param {WebGLRenderingContext} gl
      * @param {number} type
@@ -128,7 +150,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes,
             function(request, changeType) {
                 that.dataChanged(request, changeType);
-        });
+            });
         this.dataChanged();
     };
 
@@ -189,24 +211,24 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             var buffer = entry.userData.buffer;
 
             switch(entry.userData.webglDataChanged) {
-            case Xflow.DataNotifications.CHANGED_CONTENT:
-                var bufferType = attr == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+                case Xflow.DataNotifications.CHANGED_CONTENT:
+                    var bufferType = attr == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
-                gl.bindBuffer(bufferType, buffer);
-                gl.bufferSubData(bufferType, 0, entry.getValue());
-                break;
-            case Xflow.DataNotifications.CHANGED_NEW:
-            case Xflow.DataNotifications.CHANGE_SIZE:
-                if (attr == "index") {
-                    buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
-                } else {
-                    buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.getValue());
-                }
-                buffer.tupleSize = entry.getTupleSize();
-                entry.userData.buffer = buffer;
-                break;
-             default:
-                 break;
+                    gl.bindBuffer(bufferType, buffer);
+                    gl.bufferSubData(bufferType, 0, entry.getValue());
+                    break;
+                case Xflow.DataNotifications.CHANGED_NEW:
+                case Xflow.DataNotifications.CHANGE_SIZE:
+                    if (attr == "index") {
+                        buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
+                    } else {
+                        buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.getValue());
+                    }
+                    buffer.tupleSize = entry.getTupleSize();
+                    entry.userData.buffer = buffer;
+                    break;
+                default:
+                    break;
             }
 
             meshInfo.vbos[attr] = [];
@@ -276,18 +298,18 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         if (typeName && typeName.toLowerCase)
             typeName = typeName.toLowerCase();
         switch (typeName) {
-        case "triangles":
-            return rc.TRIANGLES;
-        case "tristrips":
-            return rc.TRIANGLE_STRIP;
-        case "points":
-            return rc.POINTS;
-        case "lines":
-            return rc.LINES;
-        case "linestrips":
-            return rc.LINE_STRIP;
-        default:
-            return rc.TRIANGLES;
+            case "triangles":
+                return rc.TRIANGLES;
+            case "tristrips":
+                return rc.TRIANGLE_STRIP;
+            case "points":
+                return rc.POINTS;
+            case "lines":
+                return rc.LINES;
+            case "linestrips":
+                return rc.LINE_STRIP;
+            default:
+                return rc.TRIANGLES;
         }
     };
 

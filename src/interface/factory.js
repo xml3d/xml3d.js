@@ -23,6 +23,8 @@ XML3D.config.element = function(element, selfmonitoring) {
             if (element.style == undefined)
                 element.style = null;
             var n = element.firstElementChild;
+            XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.getAttribute("id"));
+
             while(n) {
                 XML3D.config.element(n);
                 n = n.nextElementSibling;

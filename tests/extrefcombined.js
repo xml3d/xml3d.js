@@ -149,7 +149,7 @@ test("Shader JSON reference", 3, function() {
     stop();
 
 });
-
+ */
 test("Shader XML reference", 3, function() {
     var xRef = this.doc.getElementById("xml3dReference"),
     actual,
@@ -160,7 +160,7 @@ test("Shader XML reference", 3, function() {
     glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
 
     this.doc.getElementById("xmlShaderGroup").visible = true;
-    this.doc.getElementById("meshGroup").setAttribute("shader", "#flatgreen");
+    this.doc.getElementById("groupRef1").setAttribute("shader", "#refFlatGreen");
     hTest.draw();
     hRef.draw();
 
@@ -180,4 +180,4 @@ test("Shader XML reference", 3, function() {
     stop();
 
 });
-*/
+

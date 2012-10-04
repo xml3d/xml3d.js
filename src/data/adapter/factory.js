@@ -75,7 +75,7 @@
         uri = new XML3D.URI(uri);
 
         // TODO: Get document of current adapter, use it instead of window.document
-        var a = XML3D.base.resourceManager.getAdapter(node.ownerDocument, uri, XML3D.data);
+        var a = XML3D.base.resourceManager.getAdapterHandle(node.ownerDocument, uri, XML3D.data);
         return a;
     };
 

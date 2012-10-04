@@ -21,7 +21,7 @@ var Renderer = function(handler, width, height) {
     this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
     this.factory = new XML3D.webgl.XML3DRenderAdapterFactory(handler, this);
-    XML3D.base.registerFactory("application/xml", this.factory);
+    XML3D.base.registerFactory("application/xml", this.factory, handler.id);
     this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
     this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
     this.changeListener = new XML3D.webgl.DataChangeListener(this);
@@ -109,16 +109,17 @@ Renderer.prototype.initCamera = function() {
 Renderer.prototype.processShaders = function(objects) {
     for (var i=0, l=objects.length; i < l; i++) {
         var obj = objects[i];
-        var groupAdapter = this.factory.getAdapter(obj.meshNode.parentNode);
-        var shader = groupAdapter ? groupAdapter.getShader() : null;
-        var shaderName = this.shaderManager.createShader(shader, this.lights);
-        obj.shader = shaderName;
+        var shaderHandle = this.factory.getAdapter(obj.meshNode).getShaderHandle();
+        var shaderAdapter = null;
+        if(shaderHandle)
+            shaderAdapter = shaderHandle.getAdapter();
+        obj.shader = this.shaderManager.createShader(shaderAdapter, this.lights);
     }
 };
 
-Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, transform, parentShader, pickable) {
+Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, transform, parentShaderHandle, pickable) {
     var adapter = this.factory.getAdapter(currentNode);
-    var downstreamShader = parentShader;
+    var downstreamShaderHandle = parentShaderHandle;
     var downstreamTransform = transform;
 
     switch(currentNode.nodeName) {
@@ -130,10 +131,10 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, t
 		if (currentNode.hasAttribute("interactive"))
 			pickable = currentNode.getAttribute("interactive") == "true";
 
-        var shader = adapter.getShader();
-        downstreamShader = shader ? shader : parentShader;
+        var shaderHandle = adapter.getShaderHandle();
+        downstreamShaderHandle = shaderHandle ? shaderHandle : parentShaderHandle;
         adapter.parentTransform = transform;
-        adapter.parentShader = parentShader;
+        adapter.parentShaderHandle = parentShaderHandle;
         adapter.isVisible = visible;
         downstreamTransform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
         break;
@@ -149,6 +150,7 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, t
             break; //TODO: error handling
 
         adapter.parentVisible = visible;
+        adapter.setShaderHandle(parentShaderHandle);
 
         // Add a new drawable object to the scene
         var newObject = new Renderer.drawableObject();
@@ -182,7 +184,7 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, t
 
     var child = currentNode.firstElementChild;
     while (child) {
-		this.recursiveBuildScene(scene, child, visible, downstreamTransform, downstreamShader, pickable);
+		this.recursiveBuildScene(scene, child, visible, downstreamTransform, downstreamShaderHandle, pickable);
         child = child.nextSibling;
     }
 };
@@ -258,9 +260,9 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
         return;
 
     var transform = mat4.identity(mat4.create());
-    var shader = null;
-    if (adapter.getShader)
-        shader = adapter.getShader();
+    var shaderHandle = null;
+    if (adapter.getShaderHandle)
+        shaderHandle = adapter.getShaderHandle();
 
     var currentNode = evt.wrapped.target;
 	var pickable = null;
@@ -274,8 +276,8 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
         if (currentNode.nodeName == "group") {
 			var parentAdapter = this.factory.getAdapter(currentNode);
             transform = parentAdapter.applyTransformMatrix(transform);
-            if (!shader)
-                shader = parentAdapter.getShader();
+            if (!shaderHandle)
+                shaderHandle = parentAdapter.getShaderHandle();
 			if (currentNode.hasAttribute("visible")) {
 				var visibleFlag = currentNode.getAttribute("visible");
 				visible = visible !== null ? visible : visibleFlag == "true";
@@ -293,7 +295,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
 	visible = visible === null ? true : visible;
     //Build any new objects and add them to the scene
     var newObjects = new Array();
-	this.recursiveBuildScene(newObjects, evt.wrapped.target, visible, transform, shader, pickable);
+	this.recursiveBuildScene(newObjects, evt.wrapped.target, visible, transform, shaderHandle, pickable);
     this.processShaders(newObjects);
     this.drawableObjects = this.drawableObjects.concat(newObjects);
 

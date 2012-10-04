@@ -9,7 +9,7 @@
         this.processListeners();
         this.factory = factory;
         this.parentTransform = null;
-        this.parentShader = null;
+        this.parentShaderHandle = null;
         this.parentVisible = true;
         this.isValid = true;
         this.updateTransformAdapter();
@@ -70,25 +70,18 @@
         
         switch (target) {
         case "shader":
-            //Update this group node's shader then propagate the change down to its children
-            var downstreamValue = this.getShader();
-            if (!downstreamValue) {
-                //This node's shader was removed, pass down the parent shader instead
-                downstreamValue = this.parentShader;
-            }
             evt.internalType = "parentshader";
-            evt.newValue = downstreamValue;
+            evt.newValue = this.getShaderHandle();
             this.notifyChildren(evt);
-
             this.factory.renderer.requestRedraw("Group shader changed.", false);
             break;
             
         case "parentshader":
-            this.parentShader = null;        
-            if (!this.getShader()) { // This node's shader would override parent shaders
+            this.parentShaderHandle = null;
+            if (!this.getShaderHandle()) { // This node's shader would override parent shaders
                 this.notifyChildren(evt);
             }
-            this.parentShader = evt.newValue;
+            this.parentShaderHandle = evt.newValue;
             break;
             
         case "translation":
@@ -177,7 +170,6 @@
 
     };
 
-
     p.notifyChildren = function(evt) {
         var child = this.node.firstElementChild;
         while (child) {
@@ -187,27 +179,25 @@
         }
     };
 
-    p.getShader = function()
+    p.getShaderHandle = function()
     {
-        var shader = this.node.shader;
-
-        // if no shader attribute is specified, try to get a shader from the style attribute
-        if(shader == "")
+        var shaderHref = this.node.shader;
+        if(shaderHref == "")
         {
             var styleValue = this.node.getAttribute('style');
-            if(styleValue) {        
+            if(styleValue) {
                 var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
                 var result = pattern.exec(styleValue);
-                if (result)
-                    shader = XML3D.URIResolver.resolveLocal(result[1]);
+                if(result)
+                    shaderHref = result[1];
             }
-        } else {
-            shader = XML3D.URIResolver.resolveLocal(shader);
         }
-        
-        shader = this.factory.getAdapter(shader);
-        
-        return shader || this.parentShader;    
+        if(shaderHref)
+            return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, shaderHref,
+                XML3D.webgl, this.factory.handler.id);
+        else
+            return this.parentShaderHandle;
+
     };
 
     p.destroy = function() {

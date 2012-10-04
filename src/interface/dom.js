@@ -53,6 +53,11 @@ if (navigator.userAgent.indexOf("WebKit") != -1) {
             var prevVal = this.getAttribute(attrName);
             this.__setAttribute(attrName, newVal);
             newVal = this.getAttribute(attrName);
+
+            if(attrName == "id"){
+                XML3D.base.resourceManager.notifyNodeIdChange(this, prevVal, newVal);
+            }
+
             // if (newVal != prevVal)
             {
                 var evt = document.createEvent("MutationEvent");
@@ -66,6 +71,11 @@ if (navigator.userAgent.indexOf("WebKit") != -1) {
         Element.prototype.removeAttribute = function(attrName) {
             var prevVal = this.getAttribute(attrName);
             this.__removeAttribute(attrName);
+
+            if(attrName == "id"){
+                XML3D.base.resourceManager.notifyNodeIdChange(this, prevVal, null);
+            }
+
             var evt = document.createEvent("MutationEvent");
             evt.initMutationEvent("DOMAttrModified", true, false, this, prevVal, "", attrName, MutationEvent.REMOVAL);
             this.dispatchEvent(evt);

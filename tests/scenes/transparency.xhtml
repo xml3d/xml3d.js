@@ -13,6 +13,7 @@
       <defs>
         <transform id="t_identity" />
         <transform id="t_front" translation="0.5 0 1" />
+        <transform id="t_side" translation="-3 0 0" />
         <data id="meshData">
           <int id="indices" name="index">0 1 2 1 2 3</int>
           <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
@@ -45,6 +46,12 @@
       </group>
       <group id="parentGroup" transform="#t_front" shader="#non-opaque">
         <mesh src="#meshData" />
+      </group>
+      <group id="parentGroup" transform="#t_side" shader="#matte">
+            <mesh src="#meshData" />
+      </group>
+      <group id="parentGroup" transform="#t_side" shader="#change">
+          <mesh src="#meshData" />
       </group>
     </xml3d>
   </body>

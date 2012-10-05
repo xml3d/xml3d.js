@@ -228,6 +228,7 @@
         }
 
         var programObject = new ProgramObject(prg, sources);
+        this.currentProgram = prg;
         gl.useProgram(prg);
 
         // Tally shader attributes

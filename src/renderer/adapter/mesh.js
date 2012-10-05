@@ -125,6 +125,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var shaderName = this.factory.renderer.shaderManager.createShader(adapterHandle ? adapterHandle.getAdapter() : null,
             this.factory.renderer.lights);
         this.getMyDrawableObject().shader = shaderName;
+        this.factory.renderer.requestRedraw("Shader changed.", false);
     };
 
 

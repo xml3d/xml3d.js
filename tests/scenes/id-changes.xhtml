@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D External References</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+
+    <xml3d id="xml3dTest" width="320px" height="240px" xmlns="http://www.xml3d.org/2009/xml3d" style="background-color: #ccc">
+      <defs>
+        <transform id="t_object1" translation="-3 2.5 0"/>
+        <transform id="t_object2" translation="0 2.5 0"/>
+        <transform id="t_object3" translation="-3 0 0" />
+        <transform id="t_object4" translation="0 0 0" />
+        <data id="simplePlane1">
+          <int id="indices" name="index">0 1 2 1 2 3</int>
+          <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+          <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+          <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        </data>
+
+        <shader id="black" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">0 0 0</float3>
+        </shader>
+
+        <shader id="green" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">0 1 0</float3>
+        </shader>
+
+      </defs>
+    <view id="myView" />
+    <light id="myLight"/>
+    
+    <group id="referCorrect" transform="#t_object1" shader="#black" >
+        <mesh type="triangles" src="#simplePlane1" />
+    </group>
+
+    <group id="referWrong" transform="#t_object2" shader="#green42" >
+        <mesh type="triangles" src="#simplePlane1" />
+    </group>
+
+    <group id="referLater" transform="#t_object3" shader="#blue" >
+        <mesh type="triangles" src="#simplePlane1" />
+    </group>
+
+    <group id="referNonExisting" transform="#t_object4" shader="#notThere" >
+        <mesh type="triangles" src="#simplePlane1" />
+    </group>
+
+    <shader id="blue" script="urn:xml3d:shader:flat" >
+        <float3 name="diffuseColor">0 0 1</float3>
+    </shader>
+    
+  </xml3d>
+
+</body>
+</html>

@@ -20,7 +20,7 @@
 
     handler.IDHandler = function(elem, id) {
         this.setFromAttribute = function(value, prevValue) {
-                //XML3D.base.resourceManager.notifyNodeIdChange(elem, prevValue, value);
+            XML3D.base.resourceManager.notifyNodeIdChange(elem, prevValue, value);
         }
         this.desc = {
             get : function() {

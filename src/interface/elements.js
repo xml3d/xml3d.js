@@ -5,10 +5,6 @@
 
     function attrModified(e) {
 
-        if(e.attrName == "id"){
-            XML3D.base.resourceManager.notifyNodeIdChange(e.target, e.prevValue, e.newValue);
-        }
-
         var eh = e.target._configured;
         var handler = eh && eh.handlers[e.attrName];
         if(!handler)
@@ -16,7 +12,7 @@
 
         var notified = false;
         if (handler.setFromAttribute) {
-            notified = handler.setFromAttribute(e.newValue);
+            notified = handler.setFromAttribute(e.newValue, e.prevValue);
         }
         if (!notified) {
                 var n = new events.NotificationWrapper(e);

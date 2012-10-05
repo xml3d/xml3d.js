@@ -18,6 +18,20 @@
         };
     };
 
+    handler.IDHandler = function(elem, id) {
+        this.setFromAttribute = function(value, prevValue) {
+                //XML3D.base.resourceManager.notifyNodeIdChange(elem, prevValue, value);
+        }
+        this.desc = {
+            get : function() {
+                return this.getAttribute(id) || "";
+            },
+            set : function(value) {
+                this.setAttribute(id, value);
+            }
+        };
+    };
+
     handler.StringAttributeHandler = function(elem, id) {
         this.desc = {
             get : function() {

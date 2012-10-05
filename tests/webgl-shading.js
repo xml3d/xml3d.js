@@ -145,10 +145,15 @@ test("Simple texture", 3, function() {
             testFunc(n);
     });
 
+    var tested = 0;
     testFunc = function(n) {
         actual = win.getPixelValue(gl, 40, 40);
         if (actual[0] == 0)
             return;
+        tested++;
+        if(tested == 2){
+            console.log("Tested twice!");
+        }
         deepEqual(actual, [ 241, 241, 0, 255 ], "Yellow texture");
         start();
     };
@@ -212,9 +217,15 @@ test("Diffuse shader with vertex colors", 3, function() {
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
     var cgroup = this.doc.getElementById("coloredMeshGroup");
-    h.draw();
+    //h.draw();
+    var tested = 0;
     x.addEventListener("framedrawn", function(n) {
         var actual = win.getPixelValue(gl, 90, 90);
+        tested++;
+        if(tested == 2){
+            console.log("Tested twice!");
+        }
+
         QUnit.closePixel(actual, [ 225, 225, 60, 255 ], 1, "Corners have colors red, yellow, green, blue");
         start();
     });

@@ -17,6 +17,11 @@
           <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
           <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
+
+        <shader id="wood" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">0 0 0</float3>
+        </shader>
+
       </defs>
     <view id="myView" />
     <light id="myLight"/>
@@ -28,7 +33,7 @@
     <group id="xmlGroup" transform="#t_object1" visible="false">
         <mesh id="myMesh03" src="xml/meshes.xml#simpleMesh"/>
     </group>
-    
+
     <group id="jsonShaderGroup" transform="#t_object1" shader="json/flatgreen_shader.json" visible="false">
         <mesh id="myMesh04" src="#simplePlane1"/>
     </group>
@@ -48,12 +53,20 @@
           <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
           <float2 id="texcoordsRef1" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
+
+        <shader id="refFlatGreen" script="urn:xml3d:shader:flat">
+            <float3 name="diffuseColor">0 1 0</float3>
+        </shader>
+
+        <shader id="refWood" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">1 1 0</float3>
+        </shader>
         
 	  </defs>
 	<view  />
 	<light />
     
-    <group transform="#t_object1Ref1">
+    <group id="groupRef1" transform="#t_object1Ref1">
         <mesh type="triangles" src="#simplePlaneRef1"/>
     </group>
     
@@ -73,7 +86,7 @@
     <view />
     <light />
 
-    <group transform="#t_object1Ref2">
+    <group id="groupRef2" transform="#t_object1Ref2">
         <mesh type="triangles" src="#simplePlaneRef2"/>
     </group>
 

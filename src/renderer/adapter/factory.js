@@ -31,7 +31,7 @@
     };
 
     XML3DRenderAdapterFactory.prototype.isFactoryFor = function(obj) {
-        return obj === XML3D.webgl;
+        return obj == XML3D.webgl;
     };
 
     XML3DRenderAdapterFactory.prototype.createAdapter = function(node) {
@@ -41,7 +41,6 @@
         }
         return null;
     };
-
 
     // Export
     XML3D.webgl.XML3DRenderAdapterFactory = XML3DRenderAdapterFactory;

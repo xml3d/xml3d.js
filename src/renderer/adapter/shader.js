@@ -5,8 +5,7 @@
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.renderer = this.factory.renderer;
 
-        this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
-        this.table = new XML3D.data.ProcessTable(this, [], this.dataChanged);
+        this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.computeRequest;
     };
 
@@ -14,13 +13,13 @@
     var p = XML3DShaderRenderAdapter.prototype;
 
     p.notifyChanged = function(evt) {
-        if (evt.type == 0) {
+        if (evt.type == XML3D.events.NODE_INSERTED) {
             this.factory.renderer.sceneTreeAddition(evt);
             return;
-        } else if (evt.type == 2) {
+        } else if (evt.type == XML3D.events.NODE_REMOVED) {
             this.factory.renderer.sceneTreeRemoval(evt);
             return;
-        } else if (evt.type == 5) {
+        } else if (evt.type == XML3D.events.THIS_REMOVED) {
             var target = evt.wrapped.target;
             if (target && target.nodeName == "texture") {
                 // A texture was removed completely, so this shader has to be

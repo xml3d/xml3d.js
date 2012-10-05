@@ -194,7 +194,7 @@ XML3DUnit.loadSceneTestImages = function(doc, refSceneId, testSceneId, callback)
     var refImagesLoaded = 0;
     function onLoad(){
         refImagesLoaded++;
-        if(refImagesLoaded >= 2)
+        if(refImagesLoaded == 2)
             callback(refImage, testImage);
     }
 
@@ -213,3 +213,10 @@ XML3DUnit.getPixelValue = function(canvas, x,y) {
         a[i] = pixels[i];
     return a;
 };
+
+XML3DUnit.pixelsAreEqual = function(actual, shouldBe){
+    return actual[0] == shouldBe[0] &&
+            actual[1] == shouldBe[1] &&
+            actual[2] == shouldBe[2] &&
+            actual[3] == shouldBe[3];
+}

@@ -51,7 +51,7 @@
      */
     XML3D.webgl.XML3DLightShaderRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.dataAdapter = factory.renderer.dataFactory.getAdapter(this.node);
+        this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes, this.dataChanged.bind(this));
         this.offsets = [];
         this.listeners = [];

@@ -25,8 +25,11 @@ DataNode.prototype._updateComputeCache = function(state){
 
 DataNode.prototype._getComputeResult = function(filter){
     var forwardNode = getForwardNode(this);
-    if(forwardNode)
+    if(forwardNode){
+        this._state = XflowModification.NONE;
         return forwardNode._getComputeResult(filter);
+    }
+
 
     var key = filter ? filter.join(";") : "[null]";
     if(this._results[key])

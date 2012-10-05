@@ -4,6 +4,7 @@
     var handler = {}, events = XML3D.events;
 
     function attrModified(e) {
+
         var eh = e.target._configured;
         var handler = eh && eh.handlers[e.attrName];
         if(!handler)
@@ -11,7 +12,7 @@
 
         var notified = false;
         if (handler.setFromAttribute) {
-            notified = handler.setFromAttribute(e.newValue);
+            notified = handler.setFromAttribute(e.newValue, e.prevValue);
         }
         if (!notified) {
                 var n = new events.NotificationWrapper(e);

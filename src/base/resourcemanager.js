@@ -5,10 +5,13 @@
     var c_factories = {};
     var c_cachedAdapterHandles = {};
 
-    XML3D.base.registerFactory = function(minetype, factory) {
-        if (!c_factories[minetype])
-            c_factories[minetype] = [];
-        c_factories[minetype].push(factory);
+    XML3D.base.registerFactory = function(minetype, factory, canvasId) {
+        canvasId = canvasId || 0;
+        if(!c_factories[canvasId])
+            c_factories[canvasId] = {};
+        if (!c_factories[canvasId][minetype])
+            c_factories[canvasId][minetype] = [];
+        c_factories[canvasId][minetype].push(factory);
     };
 
     /**
@@ -50,7 +53,8 @@
      */
     function processResponse(req) {
         var mimetype = req.getResponseHeader("content-type");
-        updateAdapterHandles(req, req._url, mimetype);
+        setDocumentData(req, req._url, mimetype);
+        updateDocumentHandles(req._url);
     };
 
     /**
@@ -66,7 +70,7 @@
      * @param {string} url
      * @param {string} mimetype
      */
-    function updateAdapterHandles(req, url, mimetype) {
+    function setDocumentData(req, url, mimetype) {
         var docCache = c_cachedDocuments[url];
         docCache.mimetype = mimetype;
 
@@ -74,12 +78,20 @@
             docCache.response = JSON.parse(req.responseText);
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
             docCache.response = req.responseXML;
+            // Configure all xml3d elements:
+            var xml3dElements = docCache.response.querySelectorAll("xml3d");
+            for(var i = 0; i < xml3dElements.length; ++i){
+                XML3D.config.element(xml3dElements[i]);
+            }
         }
+    }
 
+    function updateDocumentHandles(url){
+        var docCache = c_cachedDocuments[url];
         var fragments = docCache.fragments;
         docCache.fragments = [];
         for ( var i = 0; i < fragments.length; ++i) {
-            updateAdapterHandlesForFragment(url, fragments[i]);
+            updateExternalHandles(url, fragments[i]);
         }
     }
 
@@ -87,7 +99,7 @@
      * @param {string} url
      * @param {string} fragment Fragment without pound key
      */
-    function updateAdapterHandlesForFragment(url, fragment) {
+    function updateExternalHandles(url, fragment) {
 
         var response = c_cachedDocuments[url].response;
         var mimetype = c_cachedDocuments[url].mimetype;
@@ -97,62 +109,113 @@
         if (mimetype == "application/json") {
             data = response;
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
-            data = response;
+            data = response.querySelectorAll("*[id="+fragment+"]")[0];
         }
 
         if (data) {
-            for ( var adapterType in c_cachedAdapterHandles[fullUrl]) {
-                var handle = c_cachedAdapterHandles[fullUrl][adapterType];
-                if (!handle.hasAdapter() && c_factories[mimetype]) {
-                    for ( var i = 0; i < c_factories[mimetype].length; ++i) {
-                        var fac = c_factories[mimetype][i];
-                        if (fac.isFactoryFor(adapterType)) {
-                            var a = fac.createAdapter(data);
-                            if (a) {
-                                handle.setAdapter(a);
-                            }
-                        }
-                    }
+            updateMissingHandles(fullUrl, mimetype, data);
+        }
+    }
+    function updateMissingHandles(url, mimetype, data){
+        for ( var adapterType in c_cachedAdapterHandles[url]) {
+            for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
+                var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
+                var factories = c_factories[canvasId];
+                if (!handle.hasAdapter() && factories[mimetype]) {
+                    updateHandle(handle, adapterType, canvasId, mimetype, data);
+                }
+            }
+        }
+    }
+
+    function updateHandle(handle, adapterType, canvasId, mimetype, data){
+        var factories = c_factories[canvasId];
+        for ( var i = 0; i < factories[mimetype].length; ++i) {
+            var fac = factories[mimetype][i];
+            if (fac.isFactoryFor(adapterType)) {
+                var adapter = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
+                if (adapter) {
+                    handle.setAdapter(adapter);
+                }
+            }
+        }
+    }
+
+    function clearHandles(url){
+        for ( var adapterType in c_cachedAdapterHandles[url]) {
+            for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
+                var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
+                if (handle.hasAdapter()) {
+                    handle.setAdapter(null);
                 }
             }
         }
     }
 
     /**
-     *
+     * Get any adapter, internal or external
+     * @param {Document} doc - the document from which to look up the reference
      * @param {XML3D.URI} uri
      * @param {Object} type
      * @returns {XML3D.base.AdapterHandle}
      */
-    ResourceManager.prototype.getExternalAdapter = function(uri, type) {
+    ResourceManager.prototype.getAdapterHandle = function(doc, uri, adapterType, canvasId) {
+        if(typeof uri == "string") uri = new XML3D.URI(uri);
+
+        canvasId = canvasId || 0;
+        if(document != doc || !uri.isLocal()){
+            uri = uri.getAbsoluteURI(doc.documentURI);
+        }
 
         if (!c_cachedAdapterHandles[uri])
             c_cachedAdapterHandles[uri] = {};
 
-        var a = c_cachedAdapterHandles[uri][type];
-        if (a)
-            return a;
-
-        var a = new XML3D.base.AdapterHandle();
-        c_cachedAdapterHandles[uri][type] = a;
-
-        var docURI = uri.toStringWithoutFragment();
-        var docData = c_cachedDocuments[docURI];
-        if (docData && docData.response) {
-            updateAdapterHandlesForFragment(docURI, uri.fragment);
-        } else {
-            if (!docData) {
-                loadDocument(docURI);
-                c_cachedDocuments[docURI] = docData = {
-                    fragments : []
-                };
-            }
-            docData.fragments.push(uri.fragment);
+        if(!c_cachedAdapterHandles[uri][adapterType]){
+            c_cachedAdapterHandles[uri][adapterType] = {};
         }
 
-        return a;
+        var handle = c_cachedAdapterHandles[uri][adapterType][canvasId];
+        if (handle)
+            return handle;
+
+        var handle = new XML3D.base.AdapterHandle();
+        c_cachedAdapterHandles[uri][adapterType][canvasId] = handle;
+
+        var factories = c_factories[canvasId];
+
+        if(uri.isLocal()){
+            var node = XML3D.URIResolver.resolveLocal(uri);
+            updateHandle(handle, adapterType, canvasId, "application/xml", node);
+        }
+        else{
+            var docURI = uri.toStringWithoutFragment();
+            var docData = c_cachedDocuments[docURI];
+            if (docData && docData.response) {
+                updateExternalHandles(docURI, uri.fragment);
+            } else {
+                if (!docData) {
+                    loadDocument(docURI);
+                    c_cachedDocuments[docURI] = docData = {
+                        fragments : []
+                    };
+                }
+                docData.fragments.push(uri.fragment);
+            }
+        }
+        return handle;
     };
 
-    XML3D.base.ResourceManager = ResourceManager;
+    ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId){
+        // clear cached adapters of previous id"
+        if(previousId){
+            clearHandles("#" + previousId);
+        }
+        if(newId){
+            updateMissingHandles("#" + newId, "application/xml", node);
+        }
+
+    }
+
+    XML3D.base.resourceManager = new ResourceManager();
 
 })();

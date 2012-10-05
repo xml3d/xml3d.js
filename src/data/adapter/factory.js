@@ -39,15 +39,14 @@
      *
      * @param {XML3D.webgl.CanvasHandler} handler
      */
-    var XML3DDataAdapterFactory = function(handler)
+    var XML3DDataAdapterFactory = function()
     {
         XML3D.base.AdapterFactory.call(this);
-        this.handler = handler;
     };
     XML3D.createClass(XML3DDataAdapterFactory, XML3D.base.AdapterFactory);
 
     XML3DDataAdapterFactory.prototype.isFactoryFor = function(obj) {
-        return typeof obj == "string" ? (obj == XML3D.data.toString()) : (obj == XML3D.data);
+        return obj == XML3D.data;
     };
 
     /**
@@ -68,20 +67,15 @@
      * @param {string} uri
      * @returns {Adapter} An resolved adapter
      */
-    XML3DDataAdapterFactory.prototype.getAdapterURI = function(uri)
+    XML3DDataAdapterFactory.prototype.getAdapterURI = function(node, uri)
     {
         if(!uri) {
             return new XML3D.base.AdapterHandle();
         }
         uri = new XML3D.URI(uri);
-        var element = XML3D.URIResolver.resolveLocal(uri);
-        if (element){
-            var handle = new XML3D.base.AdapterHandle();
-            handle.setAdapter(XML3D.base.AdapterFactory.prototype.getAdapter.call(this, element, XML3D.data.XML3DDataAdapterFactory.prototype));
-            return handle;
-        }
 
-        var a = this.handler.resourceManager.getExternalAdapter(uri, XML3D.data);
+        // TODO: Get document of current adapter, use it instead of window.document
+        var a = XML3D.base.resourceManager.getAdapterHandle(node.ownerDocument, uri, XML3D.data);
         return a;
     };
 
@@ -124,6 +118,6 @@
 
     // Export
     XML3D.data.XML3DDataAdapterFactory = XML3DDataAdapterFactory;
-
-
+    XML3D.data.factory = new XML3DDataAdapterFactory();
+    XML3D.base.registerFactory("application/xml", XML3D.data.factory);
 }());

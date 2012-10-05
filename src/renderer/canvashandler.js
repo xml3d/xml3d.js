@@ -34,6 +34,8 @@ XML3D.webgl.MAXFPS = 30;
         }
     };
 
+    var globalCanvasId = 0;
+
     /**
      * CanvasHandler class.
      * Own the GL context. Registers and handles the events that happen on the canvas element.
@@ -48,6 +50,7 @@ XML3D.webgl.MAXFPS = 30;
     function CanvasHandler(canvas, xml3dElem) {
         this.canvas = canvas;
         this.xml3dElem = xml3dElem;
+        this.id = ++globalCanvasId; // global canvas id starts at 1
 
         this.needDraw = true;
         this.needPickingDraw = true;
@@ -82,9 +85,6 @@ XML3D.webgl.MAXFPS = 30;
                 handler.needDraw = true;
             }
         };
-
-        // Create Ressource Manager:
-        this.resourceManager = new XML3D.base.ResourceManager();
 
         // Create renderer
         this.renderer = new XML3D.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);

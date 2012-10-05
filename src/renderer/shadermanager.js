@@ -52,10 +52,9 @@
         this.fSource = sources.fragment;
     };
 
-    var XML3DShaderManager = function(renderer, dataFactory, factory) {
+    var XML3DShaderManager = function(renderer, factory) {
         this.renderer = renderer;
         this.gl = renderer.gl;
-        this.dataFactory = dataFactory;
         this.factory = factory;
 
         this.shaderCache = {
@@ -121,6 +120,7 @@
         return result;
     };
 
+
     /**
      *
      * @param shaderAdapter
@@ -133,7 +133,9 @@
         }
 
         var shaderNode = shaderAdapter.node;
-        var shaderId = shaderNode.id;
+        var uri = new XML3D.URI("#" + shaderNode.id);
+        var shaderId = uri.getAbsoluteURI(shaderNode.ownerDocument.documentURI).toString();
+
         var program = this.shaders[shaderId];
 
         if (program)
@@ -160,7 +162,7 @@
 
     /**
      * @param {string} path
-     * @returns
+     * @returns {string}
      */
     XML3DShaderManager.getShaderDescriptor = function(path) {
         var shaderName = path.substring(path.lastIndexOf(':') + 1);
@@ -226,6 +228,7 @@
         }
 
         var programObject = new ProgramObject(prg, sources);
+        this.currentProgram = prg;
         gl.useProgram(prg);
 
         // Tally shader attributes
@@ -301,7 +304,8 @@
     };
 
     XML3DShaderManager.prototype.shaderDataChanged = function(adapter, request, changeType) {
-        var program = this.shaders[adapter.node.id];
+        var shaderId = new XML3D.URI("#" + adapter.node.id).getAbsoluteURI(adapter.node.ownerDocument.documentURI).toString();
+        var program = this.shaders[shaderId];
         var result = request.getResult();
         this.bindShader(program);
         this.setUniformsFromComputeResult(program, result);

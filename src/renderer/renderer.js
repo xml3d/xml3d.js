@@ -98,7 +98,12 @@ Renderer.prototype.initCamera = function() {
             return XML3D.xml3dNS;
         }, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         if (av == null)
-            XML3D.debug.logError("No view defined.");
+        {
+            XML3D.debug.logWarning("No view defined: creating one.");
+
+            av = XML3D.createElement("view");
+            this.xml3dNode.appendChild(av);
+        }
         this.currentView = av;
         return this.factory.getAdapter(av);
     }

@@ -91,6 +91,7 @@
 
         Array.set(directional.intensity, offset, [intensity[0]*i, intensity[1]*i, intensity[2]*i]);
     };
+    // TODO: Implement fillSpotLight
 
     /**
      *

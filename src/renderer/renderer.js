@@ -31,9 +31,10 @@ var Renderer = function(handler, width, height) {
 
     //Light information is needed to create shaders, so process them first
 	this.lights = {
-	        changed : true,
-	        point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
-	        directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] }
+            changed : true,
+            point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
+            directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [],
+            spot: {}}
 	};
 
     this.drawableObjects = new Array();
@@ -421,6 +422,7 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         parameters["directionalLightDirection[0]"] = lights.directional.direction;
         parameters["directionalLightVisibility[0]"] = lights.directional.visibility;
         parameters["directionalLightIntensity[0]"] = lights.directional.intensity;
+        // TODO: Spotlight parameters
         shader.needsLights = false;
     }
 

@@ -73,6 +73,9 @@ XML3D.shaders.register("phong", {
         "uniform vec3 directionalLightVisibility[MAX_DIRECTIONALLIGHTS];",
         "#endif",
 
+        "#if MAX_SPOTLIGHTS > 0",
+        "#endif",
+
         "void main(void) {",
         "  float alpha =  max(0.0, 1.0 - transparency);",
         "  vec3 objDiffuse = diffuseColor;",
@@ -119,11 +122,15 @@ XML3D.shaders.register("phong", {
         "  }",
         "#endif",
 
+        "#if MAX_SPOTLIGHTS > 0",
+        "#endif",
+
         "  gl_FragColor = vec4(color, alpha);",
         "}"
     ].join("\n"),
 
     addDirectives: function(directives, lights, params) {
+        // TODO: Handle spot lights
         var pointLights = lights.point ? lights.point.length : 0;
         var directionalLights = lights.directional ? lights.directional.length : 0;
         directives.push("MAX_POINTLIGHTS " + pointLights);

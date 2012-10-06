@@ -108,6 +108,7 @@
                     shader.fillDirectionalLight(lo, this.node.intensity, this.offset);
                     lo.length++;
                     break;
+                case "spot":
                 default:
                     XML3D.debug.logWarning("Unsupported lightshader type: " + script);
             }

@@ -30,7 +30,7 @@ XML3D.webgl.MAXFPS = 30;
             // Creates the CanvasHandler for the <canvas>  Element
             var canvasHandler = new XML3D.webgl.CanvasHandler(canvas, xml3ds[i]);
             handlers[i] = canvasHandler;
-            canvasHandler._tick();
+            canvasHandler.tick();
         }
     };
 
@@ -67,11 +67,13 @@ XML3D.webgl.MAXFPS = 30;
         // determine if a redraw
         // is needed
         var handler = this;
-        this._tick = function() {
-            if (handler.update())
+        this.tick = function() {
+            if (handler.needDraw) {
+                handler.dispatchUpdateEvent();
                 handler.draw();
+            }
 
-            window.requestAnimFrame(handler._tick, XML3D.webgl.MAXFPS);
+            window.requestAnimFrame(handler.tick, XML3D.webgl.MAXFPS);
         };
 
         this.redraw = function(reason, forcePickingRedraw) {
@@ -230,22 +232,21 @@ XML3D.webgl.MAXFPS = 30;
         return ray;
     };
 
-    // This function is called by _tick() at regular intervals to determine if a
-    // redraw of the scene is required
-    CanvasHandler.prototype.update = function() {
+    /**
+     * The update event can be used by user to sync actions
+     * with rendering
+     */
+    CanvasHandler.prototype.dispatchUpdateEvent = function() {
         var event = document.createEvent('CustomEvent');
         event.initCustomEvent('update', true, true, null);
         this.xml3dElem.dispatchEvent(event);
-
-        return this.needDraw;
     };
 
     /**
-     * Called by _tick() to redraw the scene if needed
+     * Called by tick() to redraw the scene if needed
      */
     CanvasHandler.prototype.draw = function() {
         try {
-
             var start = Date.now();
             var stats = this.renderer.render();
             var end = Date.now();

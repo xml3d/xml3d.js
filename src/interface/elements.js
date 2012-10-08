@@ -87,6 +87,13 @@
         e.stopPropagation();
     }
 
+    function nodeInsertedIntoDoc(e) {
+
+        var insertedElHandler = e.target._configured;
+        if(insertedElHandler)
+            insertedElHandler.updateReferenceAttributes();
+    }
+
     handler.ElementHandler = function(elem, monitor) {
         if (elem) {
             this.element = elem;
@@ -96,6 +103,7 @@
             if(monitor) {
                 elem.addEventListener('DOMNodeRemoved', nodeRemoved, true);
                 elem.addEventListener('DOMNodeInserted', nodeInserted, true);
+                elem.addEventListener('DOMNodeInsertedIntoDocument', nodeInsertedIntoDoc, true);
                 elem.addEventListener('DOMAttrModified', attrModified, false);
                 this.monitoring = true;
             }
@@ -124,6 +132,28 @@
             }
         }
         return a;
+    };
+
+    handler.ElementHandler.prototype.updateReferenceAttributes = function() {
+
+        var classInfo = XML3D.classInfo[this.element.localName];
+
+        if (classInfo === undefined) {
+            XML3D.debug.logInfo("Unrecognised element " + element.localName);
+            return;
+        }
+
+        for (var prop in classInfo)
+        {
+            var propInfo = classInfo[prop];
+            if(!propInfo || propInfo.a !== XML3D.ReferenceHandler)
+                continue;
+
+            var attrName = propInfo.id || prop;
+            var ref = this.element.getAttribute(attrName);
+
+            this.notifyOpposite(new events.ReferenceNotification(this.element, attrName, ref));
+        }
     };
 
     handler.ElementHandler.prototype.registerMixed = function() {
@@ -160,6 +190,25 @@
     };
 
     handler.ElementHandler.prototype.addOpposite =  function(evt) {
+
+        // check if it's contained already
+        // and if so, whether the reference is valid
+        for(var curOpp in this.opposites)
+        {
+            var n = this.opposites[curOpp].relatedNode;
+
+            if(n === evt.relatedNode && n === evt.attrName)
+            {
+               if(n === XML3D.events.VALID_REFERENCE)
+                   return;
+
+               // present, but not yet valid: update opposite
+               this.opposites[curOpp] = evt;
+               return;
+            }
+        }
+
+        // not contained, simply add it
         (this.opposites || (this.opposites = [])).push(evt);
     };
 

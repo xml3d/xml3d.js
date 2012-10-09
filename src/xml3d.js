@@ -144,7 +144,7 @@ XML3D.createClass = function(ctor, parent, methods) {
         if (XML3D.document)
             XML3D.document.onunload();
     };
-    window.addEventListener('load', onload, false);
+    window.addEventListener('DOMContentLoaded', onload, false);
     window.addEventListener('unload', onunload, false);
     window.addEventListener('reload', onunload, false);
 

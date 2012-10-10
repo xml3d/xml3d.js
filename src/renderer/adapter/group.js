@@ -19,6 +19,7 @@
 
     var p = GroupRenderAdapter.prototype;
 
+    /** It is assumed that this method uses the world matrix! */
     p.applyTransformMatrix = function(m) {
         if (this.parentTransform !== null)
             mat4.multiply(this.parentTransform, m,  m);
@@ -234,10 +235,10 @@
     
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
-        if (this.parentTransform)
-            m._data.set(this.parentTransform);
-        if (this.transformAdapter)
-            mat4.multiply(m._data, this.transformAdapter.getMatrix());
+
+        var id = mat4.identity(mat4.create());
+        m._data.set(this.applyTransformMatrix(id));
+
         return m;
     };
 

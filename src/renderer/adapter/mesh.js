@@ -37,6 +37,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     var p = MeshRenderAdapter.prototype;
 
+    p.applyTransformMatrix = function(m) {
+
+        if (this.getMyDrawableObject().transform)
+            mat4.multiply(m, this.getMyDrawableObject().transform);
+
+        return m;
+    };
+
     /**
      *
      */

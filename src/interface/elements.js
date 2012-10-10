@@ -15,16 +15,16 @@
             notified = handler.setFromAttribute(e.newValue, e.prevValue);
         }
         if (!notified) {
-                var n = new events.NotificationWrapper(e);
-                n.type = events.VALUE_MODIFIED;
-                eh.notify(n);
+            var n = new events.NotificationWrapper(e);
+            n.type = events.VALUE_MODIFIED;
+            eh.notify(n);
         }
     };
 
     function nodeRemoved(e) {
         var parent = e.relatedNode,
-            removedChild = e.target,
-            parentHandler = parent._configured;
+        removedChild = e.target,
+        parentHandler = parent._configured;
 
         if(!parentHandler)
             return;
@@ -67,8 +67,8 @@
 
     function nodeInserted(e) {
         var parent = e.relatedNode,
-            insertedChild = e.target,
-            parentHandler = parent._configured;
+        insertedChild = e.target,
+        parentHandler = parent._configured;
 
         if(!parentHandler || e.currentTarget === insertedChild)
             return;
@@ -87,11 +87,14 @@
         e.stopPropagation();
     }
 
-    function nodeInsertedIntoDoc(e) {
+    function nodeInsertedIntoDocument(e){
+        var node = e.target;
+        XML3D.base.resourceManager.notifyNodeIdChange(node, null, node.id);
+    }
 
-        var insertedElHandler = e.target._configured;
-        if(insertedElHandler)
-            insertedElHandler.updateReferenceAttributes();
+    function nodeRemovedFromDocument(e){
+        var node = e.target;
+        XML3D.base.resourceManager.notifyNodeIdChange(node, node.id, null);
     }
 
     handler.ElementHandler = function(elem, monitor) {
@@ -103,7 +106,8 @@
             if(monitor) {
                 elem.addEventListener('DOMNodeRemoved', nodeRemoved, true);
                 elem.addEventListener('DOMNodeInserted', nodeInserted, true);
-                elem.addEventListener('DOMNodeInsertedIntoDocument', nodeInsertedIntoDoc, true);
+                elem.addEventListener('DOMNodeInsertedIntoDocument', nodeInsertedIntoDocument, true);
+                elem.addEventListener('DOMNodeRemovedFromDocument', nodeRemovedFromDocument, true);
                 elem.addEventListener('DOMAttrModified', attrModified, true);
                 this.monitoring = true;
             }
@@ -166,11 +170,11 @@
         var n = new events.NotificationWrapper(e);
 
         switch (e.type) {
-        case "DOMCharacterDataModified":
-            n.type = events.VALUE_MODIFIED;
-            this.handlers.value.resetValue();
-            this.notify(n);
-            break;
+            case "DOMCharacterDataModified":
+                n.type = events.VALUE_MODIFIED;
+                this.handlers.value.resetValue();
+                this.notify(n);
+                break;
         };
     };
 
@@ -200,12 +204,12 @@
             if(curOpp.relatedNode === evt.relatedNode
             && curOpp.attrName === evt.attrName)
             {
-               if(curOpp.type === XML3D.events.VALID_REFERENCE)
-                   return;
+                if(curOpp.type === XML3D.events.VALID_REFERENCE)
+                    return;
 
-               // present, but not yet valid: update opposite
-               this.opposites[curOppIdx] = evt;
-               return;
+                // present, but not yet valid: update opposite
+                this.opposites[curOppIdx] = evt;
+                return;
             }
         }
 
@@ -264,7 +268,7 @@
     };
 
     var delegateProperties = ["clientHeight", "clientLeft", "clientTop", "clientWidth",
-                              "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth"];
+        "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth"];
     function delegateProp(name, elem, canvas) {
         var desc = {
             get : function() {

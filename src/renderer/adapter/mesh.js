@@ -279,7 +279,21 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     /**
-     * @return the calculated bounding box of this mesh.
+     * @return {XML3DMatrix}
+     */
+    p.getWorldMatrix = function() {
+
+        var m = new window.XML3DMatrix();
+
+        var obj = this.getMyDrawableObject();
+        if(obj)
+            m._data.set(obj.transform);
+
+        return m;
+    };
+
+    /**
+     * @return {XML3DBox} the calculated bounding box of this mesh.
      */
     p._calcBoundingBox = function() {
 

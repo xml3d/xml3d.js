@@ -139,6 +139,17 @@
         this.isValid = false;
     };
 
+
+    /**
+     * @return {XML3DMatrix}
+     */
+    LightRenderAdapter.prototype.getWorldMatrix = function() {
+
+        var m = new window.XML3DMatrix();
+        m._data.set(this.transform);
+        return m;
+    };
+
     /**
      *
      * @param {string} field

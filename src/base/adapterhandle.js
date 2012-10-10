@@ -27,17 +27,23 @@
      */
     AdapterHandle.prototype.setAdapter = function(adapter) {
         this.adapter = adapter;
+        this.notifyListeners();
+    };
+
+    AdapterHandle.prototype.notifyListeners = function(){
         var i = this.listeners.length;
         while (i--) {
-            this.listeners[i].referredAdapterChanged(this);
+            this.listeners[i](this);
         }
-    };
+    }
 
     /**
      * @param {Object} listener
      */
     AdapterHandle.prototype.addListener = function(listener) {
-        this.listeners.push(listener);
+        var idx = this.listeners.indexOf(listener);
+        if (idx == -1)
+            this.listeners.push(listener);
     };
 
     /**

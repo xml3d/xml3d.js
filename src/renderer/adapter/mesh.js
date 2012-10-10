@@ -26,7 +26,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.processListeners();
         this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.parentVisible = true;
-        this.shaderHandle = null;
         this.getMyDrawableObject = noDrawableObject;
 
         this.computeRequest = null;
@@ -90,7 +89,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
             case "parentshader":
                 this.setShaderHandle(evt.newValue);
-                this.referredAdapterChanged(evt.newValue);
+                this.updateShader(evt.newValue ? evt.newValue.getAdapter() : null);
                 break;
 
             case "parentvisible":
@@ -118,25 +117,25 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     p.getShaderHandle = function(){
-        return this.shaderHandle;
+        return this.getConnectedAdapterHandle("shader");
     }
 
     p.setShaderHandle = function(newHandle){
-        if(this.shaderHandle){
-            this.shaderHandle.removeListener(this);
-        }
-        this.shaderHandle = newHandle;
-        if(this.shaderHandle){
-            this.shaderHandle.addListener(this);
+        this.connectAdapterHandle("shader", newHandle);
+    };
+
+    p.connectedAdapterChanged = function(key, adapter){
+        if(key == "shader"){
+            this.updateShader(adapter);
         }
     };
 
-    p.referredAdapterChanged = function(adapterHandle){
-        var shaderName = this.factory.renderer.shaderManager.createShader(adapterHandle ? adapterHandle.getAdapter() : null,
+    p.updateShader = function(adapter){
+        var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
             this.factory.renderer.lights);
         this.getMyDrawableObject().shader = shaderName;
         this.factory.renderer.requestRedraw("Shader changed.", false);
-    };
+    }
 
 
     /**

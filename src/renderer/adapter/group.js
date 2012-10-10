@@ -194,8 +194,7 @@
             }
         }
         if(shaderHref)
-            return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, shaderHref,
-                XML3D.webgl, this.factory.handler.id);
+            return this.getAdapterHandle(shaderHref);
         else
             return this.parentShaderHandle;
 

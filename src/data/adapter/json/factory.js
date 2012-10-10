@@ -70,14 +70,16 @@
      * @constructor
      * @implements {XML3D.base.IFactory}
      */
-    var JSONFactory = {
-        isFactoryFor : function(obj) {
-            return obj == XML3D.data;
-        },
-        createAdapter : function(data) {
-            return new JSONDataAdapter(data);
-        }
+    var JSONFactory = function()
+    {
+        XML3D.base.AdapterFactory.call(this, XML3D.data, "application/json");
     };
 
-    XML3D.base.registerFactory("application/json", JSONFactory);
+    XML3D.createClass(JSONFactory, XML3D.base.AdapterFactory);
+
+    JSONFactory.prototype.createAdapter = function(data) {
+        return new JSONDataAdapter(data);
+    }
+
+    var jsonFactoryInstance = new JSONFactory();
 }());

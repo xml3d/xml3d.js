@@ -141,7 +141,7 @@
         var factories = c_factories[canvasId];
         for ( var i = 0; i < factories[mimetype].length; ++i) {
             var fac = factories[mimetype][i];
-            if (fac.isFactoryFor(adapterType)) {
+            if (fac.aspect == adapterType) {
                 var adapter = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
                 if (adapter) {
                     handle.setAdapter(adapter);
@@ -169,6 +169,9 @@
      * @returns {XML3D.base.AdapterHandle}
      */
     ResourceManager.prototype.getAdapterHandle = function(doc, uri, adapterType, canvasId) {
+        if(!uri)
+            return null;
+
         if(typeof uri == "string") uri = new XML3D.URI(uri);
 
         canvasId = canvasId || 0;
@@ -215,6 +218,11 @@
     };
 
     ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId){
+        var parent = node;
+        while(parent.parentNode) parent = parent.parentNode;
+        if(parent != window.document)
+            return;
+
         // clear cached adapters of previous id"
         if(previousId){
             clearHandles("#" + previousId);
@@ -222,8 +230,18 @@
         if(newId){
             updateMissingHandles("#" + newId, "application/xml", node);
         }
-
     }
+
+    ResourceManager.prototype.notifyNodeAdapterChange = function(node, adapterType, canvasId){
+        canvasId = canvasId || 0;
+        var uri = "#" + node.id;
+        if( c_cachedAdapterHandles[uri] && c_cachedAdapterHandles[uri][adapterType] &&
+            c_cachedAdapterHandles[uri][adapterType][canvasId] ){
+            c_cachedAdapterHandles[uri][adapterType][canvasId].notifyListeners();
+        }
+    }
+
+
 
     XML3D.base.resourceManager = new ResourceManager();
 

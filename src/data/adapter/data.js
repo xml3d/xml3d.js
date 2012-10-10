@@ -30,21 +30,13 @@ IDataAdapter.prototype.addParentAdapter = function(adapter) {
  * @param node
  */
 XML3D.data.DataAdapter = function(factory, node) {
-    XML3D.base.Adapter.call(this, factory, node);
+    XML3D.base.NodeAdapter.call(this, factory, node);
 
     // Node handles for src and proto
     this.handles = {};
     this.xflowDataNode = null;
 };
-XML3D.createClass(XML3D.data.DataAdapter, XML3D.base.Adapter);
-/**
- *
- * @param aType
- * @returns {Boolean}
- */
-XML3D.data.DataAdapter.prototype.isAdapterFor = function(aType) {
-    return aType == XML3D.data.XML3DDataAdapterFactory.prototype;
-};
+XML3D.createClass(XML3D.data.DataAdapter, XML3D.base.NodeAdapter);
 
 XML3D.data.DataAdapter.prototype.init = function() {
     //var xflow = this.resolveScript();
@@ -123,19 +115,16 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
     }
 };
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {
-    if (this.handles[attributeName])
-        this.handles[attributeName].removeListener(this);
-    this.handles[attributeName] = this.factory.getAdapterURI(this.node, this.node.getAttribute(attributeName));
-    this.handles[attributeName].addListener(this);
-    this.referredAdapterChanged(this.handles[attributeName]);
+    var adapterHandle = this.getAdapterHandle(this.node.getAttribute(attributeName));
+    this.connectAdapterHandle(attributeName, adapterHandle);
+    this.connectedAdapterChanged(attributeName, adapterHandle ? adapterHandle.getAdapter() : null);
 };
 
-XML3D.data.DataAdapter.prototype.referredAdapterChanged = function(adapterHandle) {
-    var adapter = adapterHandle.getAdapter();
-    if(this.handles["src"] == adapterHandle){
+XML3D.data.DataAdapter.prototype.connectedAdapterChanged = function(key, adapter) {
+    if(key == "src"){
         this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
     }
-    if(this.handles["proto"] == adapterHandle){
+    if(key == "proto"){
         this.xflowDataNode.protoNode = adapter ? adapter.getXflowNode() : null;
     }
 };

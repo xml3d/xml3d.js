@@ -1,5 +1,6 @@
 
 function NotifyingAdapterFactory() {
+    XML3D.base.NodeAdapterFactory.call(this, "test");
     var that = this;
     this.name = "test";
     this.event = null;
@@ -14,7 +15,7 @@ function NotifyingAdapterFactory() {
         };
     };
 };
-XML3D.createClass(NotifyingAdapterFactory, XML3D.base.AdapterFactory);
+XML3D.createClass(NotifyingAdapterFactory, XML3D.base.NodeAdapterFactory);
 
 module("Element notification tests", {
     factory : new NotifyingAdapterFactory()

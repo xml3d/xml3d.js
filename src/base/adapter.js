@@ -11,8 +11,9 @@ XML3D.base = {
 };
 
 /**
+ * A normal adapter that doesn't need to be connected to a DOM node
  * @constructor
- * @param {XML3D.base.AdapterFactory} factory
+ * @param {XML3D.base.AdapterFactory} factory - the factory this adapter was created from
  */
 XML3D.base.Adapter = function(factory) {
     this.factory = factory;
@@ -51,7 +52,6 @@ XML3D.base.Adapter.prototype.getConnectedAdapterHandle = function(key){
     return this.connectedAdapterHandles && this.connectedAdapterHandles[key];
 }
 
-
 /**
  * Get the connected adapter of a certain key.
  * This will only return adapters of AdapterHandles previously added via connectAdapter
@@ -64,7 +64,11 @@ XML3D.base.Adapter.prototype.getConnectedAdapter = function(key){
 }
 
 
-
+/**
+ * Internal function that converts an AdapterHandleNotification to a ConnectedAdapterNotification
+ * @private
+ * @param {XML3D.events.AdapterHandleNotification} evt
+ */
 function adapterHandleCallback(evt){
     for(var key in this.connectedAdapterHandles){
         if(this.connectedAdapterHandles[key] == evt.adapterHandle){
@@ -77,28 +81,34 @@ function adapterHandleCallback(evt){
 
 
 /**
+ * An Adapter connected to a DOMNode (possibly of an external document)
  * @constructor
- * @param {XML3D.base.IFactory=} factory
- * @param {Object=} node
+ * @param {XML3D.base.AdapterFactory} factory the AdapterFactory this adapter was created from
+ * @param {Object} node - DOM node of this Adapter
  */
 XML3D.base.NodeAdapter = function(factory, node) {
     XML3D.base.Adapter.call(this, factory)
-    this.node = node; // optional
+    this.node = node;
 };
 XML3D.createClass(XML3D.base.NodeAdapter, XML3D.base.Adapter);
 
+/**
+ * called by the factory after adding the adapter to the node
+ */
 XML3D.base.NodeAdapter.prototype.init = function() {
-  // Init is called by the factory after adding the adapter to the node
 };
 
+/**
+ * Notifiction due to a change in DOM, related adapters and so on.
+ * @param {XML3D.events.Notification} e
+ */
 XML3D.base.NodeAdapter.prototype.notifyChanged = function(e) {
-    // Notification from the data structure. e is of type
-    // XML3D.Notification.
+
 };
 
 /**
  * @param {string,XML3D.URI} uri Uri to referred adapterHandle
- * @returns an AdapterHandle to the referredAdapter of the same aspect and canvasId
+ * @returns an AdapterHandle to the referred Adapter of the same aspect and canvasId
  */
 XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri){
     return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, uri,
@@ -126,30 +136,50 @@ XML3D.base.IFactory.prototype.canvasId;
 
 
 /**
+ * An adapter factory is responsible for creating adapter from a certain data source.
+ * Note that any AdapterFactory is registered with XML3D.base.resourceManager
  * @constructor
  * @implements {XML3D.base.IFactory}
+ * @param {Object} aspect The aspect this factory serves (e.g. XML3D.data or XML3D.webgl)
+ * @param {string} mimetype The mimetype this factory is compatible to
+ * @param {number} canvasId The id of the corresponding canvas handler. 0, if not dependent on any CanvasHandler
  */
 XML3D.base.AdapterFactory = function(aspect, mimetype, canvasId) {
     this.aspect = aspect;
     this.canvasId = canvasId || 0;
     this.mimetype = mimetype;
 
-    XML3D.base.registerFactory(mimetype, this, canvasId);
+    XML3D.base.registerFactory(this);
 };
 
+/**
+ * Implemented by subclass
+ * Create adapter from an object (node in case of an xml, and object in case of json)
+ * @param {object} obj
+ * @returns {XML3D.base.Adapter=} created adapter or null if no adapter can be created
+ */
 XML3D.base.AdapterFactory.prototype.createAdapter = function(obj) {
     return null;
 };
 
 /**
+ * A NodeAdaperFactory is a AdapterFactory, that works specifically for DOM nodes / elements.
  * @constructor
  * @implements {XML3D.base.AdapterFactory}
+ * @param {Object} aspect The aspect this factory serves (e.g. XML3D.data or XML3D.webgl)
+ * @param {number} canvasId The id of the corresponding canvas handler. 0, if not dependent on any CanvasHandler
  */
 XML3D.base.NodeAdapterFactory = function(aspect, canvasId) {
     XML3D.base.AdapterFactory.call(this, aspect, "application/xml", canvasId);
 };
 XML3D.createClass(XML3D.base.NodeAdapterFactory, XML3D.base.AdapterFactory);
 
+/**
+ * This function first checks, if an adapter has been already created for the corresponding node
+ * If yes, this adapter is returned, otherwise, a new adapter is created and returned.
+ * @param {Object} node
+ * @returns {XML3D.base.Adapter} The adapter of the node
+ */
 XML3D.base.NodeAdapterFactory.prototype.getAdapter = function(node) {
     if (!node || node._configured === undefined)
         return null;

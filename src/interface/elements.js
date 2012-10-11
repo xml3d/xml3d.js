@@ -63,6 +63,9 @@
             removeRecursive(n,evt);
             n = n.nextElementSibling;
         }
+        // We call this here in addition to nodeRemovedFromDocument, since the later is not supported by Firefox
+        // TODO: Remove this function call once DOMNodeRemoveFromDocument is supported by all major browsers
+        XML3D.base.resourceManager.notifyNodeIdChange(element, element.id, null);
     }
 
     function nodeInserted(e) {
@@ -81,10 +84,23 @@
         } else {
             XML3D.config.element(insertedChild);
             n.type = events.NODE_INSERTED;
+            addRecursive(insertedChild);
         }
         parentHandler.notify(n);
         // TODO: Quick fix, solve issue of self monitoring elements better
         e.stopPropagation();
+    }
+
+    // TODO: Remove this function once DOMNodeInsertedIntoDocument is supported by all major browsers
+    function addRecursive(element){
+        var n = element.firstElementChild;
+        while(n) {
+            addRecursive(n);
+            n = n.nextElementSibling;
+        }
+        // We call this here in addition to nodeInsertedIntoDocument, since the later is not supported by Firefox
+
+        XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.id);
     }
 
     function nodeInsertedIntoDocument(e){

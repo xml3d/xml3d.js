@@ -43,7 +43,7 @@
         };
     };
 
-
+    // TODO: remove reference handler in webgl generator and remove this line
     handler.ReferenceHandler = handler.StringAttributeHandler;
 
 

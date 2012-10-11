@@ -3,6 +3,7 @@ function NotifyingAdapterFactory() {
     var that = this;
     this.name = "test";
     this.event = null;
+    this.type = "NotifyingAdapterFactory"; 
     this.createAdapter = function() {
         return {
             init : function() {},
@@ -119,7 +120,7 @@ module("Composed Element notification tests", {
     factory : new NotifyingAdapterFactory()
 });
 
-test("Only one element gets notified", 3, function() {
+test("Only one element gets notified", 7, function() {
 
     function addAdapters(e, factory) {
         var c = e.firstElementChild;

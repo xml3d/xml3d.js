@@ -80,7 +80,10 @@ XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
  * @param evt notification of type XML3D.Notification
  */
 XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
-
+    if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
+        this.connectedAdapterChanged(evt.key, evt.adapter);
+        return;
+    }
     if (evt.type == XML3D.events.NODE_INSERTED) {
         var insertedNode = evt.wrapped.target;
         var insertedXflowNode = this.factory.getAdapter(insertedNode).getXflowNode();

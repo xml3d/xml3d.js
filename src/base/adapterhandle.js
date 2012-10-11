@@ -27,13 +27,14 @@
      */
     AdapterHandle.prototype.setAdapter = function(adapter) {
         this.adapter = adapter;
-        this.notifyListeners();
+        this.notifyListeners(XML3D.events.ADAPTER_HANDLE_CHANGED);
     };
 
-    AdapterHandle.prototype.notifyListeners = function(){
+    AdapterHandle.prototype.notifyListeners = function(type){
+        var event = new XML3D.events.AdapterHandleNotification(this, type);
         var i = this.listeners.length;
         while (i--) {
-            this.listeners[i](this);
+            this.listeners[i](event);
         }
     }
 

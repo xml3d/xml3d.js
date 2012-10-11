@@ -232,12 +232,12 @@
         }
     }
 
-    ResourceManager.prototype.notifyNodeAdapterChange = function(node, adapterType, canvasId){
+    ResourceManager.prototype.notifyNodeAdapterChange = function(node, adapterType, canvasId, type){
         canvasId = canvasId || 0;
         var uri = "#" + node.id;
         if( c_cachedAdapterHandles[uri] && c_cachedAdapterHandles[uri][adapterType] &&
             c_cachedAdapterHandles[uri][adapterType][canvasId] ){
-            c_cachedAdapterHandles[uri][adapterType][canvasId].notifyListeners();
+            c_cachedAdapterHandles[uri][adapterType][canvasId].notifyListeners(type);
         }
     }
 

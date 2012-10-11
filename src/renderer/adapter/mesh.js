@@ -74,6 +74,12 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @param {XML3D.events.Notification} evt
      */
     p.notifyChanged = function(evt) {
+        if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
+            if(evt.key == "shader"){
+                this.updateShader(evt.adapter);
+            }
+            return;
+        }
         if (evt.type == XML3D.events.NODE_INSERTED)
         // Node insertion is handled by the CanvasRenderAdapter
             return;
@@ -123,13 +129,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.setShaderHandle = function(newHandle){
         this.connectAdapterHandle("shader", newHandle);
     };
-
-    p.connectedAdapterChanged = function(key, adapter){
-        if(key == "shader"){
-            this.updateShader(adapter);
-        }
-    };
-
     p.updateShader = function(adapter){
         var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
             this.factory.renderer.lights);

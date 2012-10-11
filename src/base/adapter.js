@@ -20,7 +20,7 @@ XML3D.base.Adapter = function(factory) {
 
 /**
  * Connect an adapterHandle to a certain key.
- * This will enable the connectedAdapterChanged callback for the connected adapter.
+ * This will enable the ConnectedAdapterNotifcations for notifyChanged.
  * @param {string} key - the key that will also be provided in connectAdapterChanged callback
  * @param {XML3D.base.AdapterHandle} adapterHandle handle of adapter to be added
  */
@@ -63,19 +63,13 @@ XML3D.base.Adapter.prototype.getConnectedAdapter = function(key){
     return handle && handle.getAdapter();
 }
 
-/**
- * Callback can be implemented by subcall to react to changes in referred adapters
- * @param key
- * @param adapter
- */
-XML3D.base.Adapter.prototype.connectedAdapterChanged = function(key, adapter){}
 
 
-
-function adapterHandleCallback(adapterHandle){
+function adapterHandleCallback(evt){
     for(var key in this.connectedAdapterHandles){
-        if(this.connectedAdapterHandles[key] == adapterHandle){
-            this.connectedAdapterChanged(key, adapterHandle.getAdapter());
+        if(this.connectedAdapterHandles[key] == evt.adapterHandle){
+            var subEvent = new XML3D.events.ConnectedAdapterNotification(key, evt)
+            this.notifyChanged(subEvent);
         }
     }
 }
@@ -112,10 +106,11 @@ XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri){
 }
 /**
  * notifies all adapter that refer to this adapter through AdapterHandles.
+ * @param {number,string} hint with type of change
  */
-XML3D.base.NodeAdapter.prototype.notifyOppositeAdapters = function(){
+XML3D.base.NodeAdapter.prototype.notifyOppositeAdapters = function(type){
     return XML3D.base.resourceManager.notifyNodeAdapterChange(this.node,
-        this.factory.aspect, this.factory.canvasId);
+        this.factory.aspect, this.factory.canvasId, type);
 }
 
 

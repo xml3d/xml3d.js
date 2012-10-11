@@ -125,11 +125,3 @@ XML3D.URIResolver.resolveLocal = function(uri, document) {
     }
     return null;
 };
-
-/**
- * @deprecated
- */
-XML3D.URIResolver.resolve = function(uri, document) {
-    XML3D.debug.logWarning("You are using deprecated XML3D.URIResolver.resolve. Use XML3D.URIResolver.resolveLocal instead.");
-    return XML3D.URIResolver.resolveLocal(uri, document);
-};

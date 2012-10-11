@@ -138,27 +138,6 @@
         return a;
     };
 
-    handler.ElementHandler.prototype.updateReferenceAttributes = function() {
-
-        var classInfo = XML3D.classInfo[this.element.localName];
-
-        if (classInfo === undefined) {
-            XML3D.debug.logInfo("Unrecognised element " + this.element.localName);
-            return;
-        }
-
-        for (var prop in classInfo)
-        {
-            var propInfo = classInfo[prop];
-            if(!propInfo || propInfo.a !== XML3D.ReferenceHandler)
-                continue;
-
-            var attrName = propInfo.id || prop;
-            var ref = this.element.getAttribute(attrName);
-
-            this.notifyOpposite(new events.ReferenceNotification(this.element, attrName, ref));
-        }
-    };
 
     handler.ElementHandler.prototype.registerMixed = function() {
         this.element.addEventListener('DOMCharacterDataModified', this, false);
@@ -193,74 +172,17 @@
         }
     };
 
-    handler.ElementHandler.prototype.addOpposite =  function(evt) {
-
-        // check if it's contained already
-        // and if so, whether the reference is valid
-        for(var curOppIdx in this.opposites)
-        {
-            var curOpp = this.opposites[curOppIdx];
-
-            if(curOpp.relatedNode === evt.relatedNode
-            && curOpp.attrName === evt.attrName)
-            {
-                if(curOpp.type === XML3D.events.VALID_REFERENCE)
-                    return;
-
-                // present, but not yet valid: update opposite
-                this.opposites[curOppIdx] = evt;
-                return;
-            }
-        }
-
-        // not contained, simply add it
-        (this.opposites || (this.opposites = [])).push(evt);
-    };
-
-    handler.ElementHandler.prototype.removeOpposite =  function(evt) {
-        for(var o in this.opposites) {
-            var oi = this.opposites[o];
-            if(oi.relatedNode === evt.relatedNode) {
-                this.opposites.splice(o,1);
-                return;
-            }
-        }
-    };
-
-    handler.ElementHandler.prototype.notifyOpposite = function(evt) {
-        if(evt.value && evt.value._configured) {
-            evt.value._configured.addOpposite(evt);
-        }
-    };
-
     /*
      * Get called, if the related node gets removed from the DOM
      */
     handler.ElementHandler.prototype.remove = function(evt) {
         //console.log("Remove " + this);
-        if (this.opposites) {
-            for(var o in this.opposites) {
-                var oi = this.opposites[o];
-                if(oi.relatedNode._configured) {
-                    var r = new events.ReferenceNotification(oi.relatedNode, oi.attrName);
-                    oi.relatedNode._configured.notify(r);
-                }
-            }
-        }
         for(var h in this.handlers) {
             var handler = this.handlers[h];
             if(handler.remove)
                 handler.remove();
         }
 
-    };
-
-    handler.ElementHandler.prototype.resolve = function(attrName) {
-        var uri = new XML3D.URI(this.element[attrName]);
-        if (uri.valid && uri.fragment) {
-            return XML3D.URIResolver.resolveLocal(uri);
-        }
-        return null;
     };
 
     handler.ElementHandler.prototype.toString = function() {

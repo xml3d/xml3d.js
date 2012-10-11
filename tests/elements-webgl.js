@@ -200,32 +200,3 @@ test("DOMNodeRemoved recursively", 9, function() {
     // 8: Adapter for child01 has been notified: Notification (type:5)
     equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 9
 });
-
-test("DOMNodeRemoved with opposite", 10, function() {
-    // 1: Found frame
-    // 2: Scene loaded
-    var x = this.doc.getElementById("parentGroup");
-    var t = this.doc.getElementById("t_rotation");
-    var t2 = this.doc.getElementById("t_identity");
-    this.factory.getAdapter(x); // 3: Init adapter
-    this.factory.getAdapter(t); // 4: Init adapter
-    ok(t._configured.opposites, "Opposits exists"); // 5
-    equal(t._configured.opposites.length, 1, "t_rotation has one opposite"); // 6
-    equal(t2._configured.opposites.length, 2, "t_identity has two opposites"); // 7
-    x.parentNode.removeChild(x);
-    // 8: Adapter for parentGroup has been notified: Notification (type:5)
-    equal(t._configured.opposites.length, 0, "t_rotation has no opposite"); // 9
-    equal(t2._configured.opposites.length, 0, "t_identity has no opposite"); // 10
-});
-
-test("Dangling Reference notification", 6, function() {
-    // 1: Found frame
-    // 2: Scene loaded
-    var x = this.doc.getElementById("transformedGroup");
-    var transform = this.doc.getElementById("t_mixed");
-    this.factory.getAdapter(x); // 3: Init adapter
-    this.factory.getAdapter(transform); // 4: Init adapter
-    // 5: Adapter for t_mixed has been notified: Notification (type:2)
-    // 6: Adapter for transformedGroup has been notified: ReferenceNotification (type:3, value: null)
-    transform.parentNode.removeChild(transform);
-});

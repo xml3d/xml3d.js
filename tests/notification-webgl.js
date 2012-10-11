@@ -93,16 +93,6 @@ test("Enumeration attribute notification tests", 5, function() {
     e.setAttribute("type", "asdf"); // invalid
 });
 
-test("Reference attribute notification tests", 5, function() {
-    var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
-    var a = this.factory.getAdapter(e);
-    e.setAttribute("activeView", "#myView");
-    ok(this.factory.event, "Event has been thrown");
-    equal(this.factory.event.type, XML3D.events.DANGLING_REFERENCE, "Can't resolve before insertion into DOM.");
-    equal(this.factory.event.value, null, "Can't resolve before insertion into DOM.");
-    e.activeView = "#hallo";
-});
-
 module("Composed Element notification tests", {
     setup : function() {
         stop();

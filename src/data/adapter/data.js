@@ -109,12 +109,10 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
         else if(attr == "compute"){
             this.xflowDataNode.setCompute(this.node.getAttribute(attr))
         }
-        return;
-    } else if(evt.type == XML3D.events.DANGLING_REFERENCE || evt.type == XML3D.events.VALID_REFERENCE){
-        var attr = evt.attrName;
-        if(attr == "src" || attr == "proto"){
+        else if(attr == "src" || attr == "proto"){
             this.updateHandle(attr);
         }
+        return;
     }
 };
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {

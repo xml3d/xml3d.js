@@ -283,14 +283,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      */
     p._calcBoundingBox = function() {
 
+        var bbox = new window.XML3DBox();
+        
         // try to compute bbox using the boundingbox property of xflow
         var bboxResult = this.bboxComputeRequest.getResult();
         var bboxOutData = bboxResult.getOutputData("boundingbox");
         if (bboxOutData)
         {
             var bboxVal = bboxOutData.getValue();
-
-            var bbox = new window.XML3DBox();
             bbox.extend(bboxVal[0]);
             bbox.extend(bboxVal[1]);
 
@@ -299,7 +299,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         // compute bounding box from positions and indices, if present
         var dataResult = this.computeRequest.getResult();
-        var positions = dataResult.getOutputData("position").getValue();
+        var posData = dataResult.getOutputData("position"); 
+        if(!posData)
+            return bbox; 
+        
+        var positions = posData.getValue();
 
         var idxOutData = dataResult.getOutputData("index");
         var indices = idxOutData ? idxOutData.getValue() : null;

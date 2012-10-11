@@ -74,7 +74,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @param {XML3D.events.Notification} evt
      */
     p.notifyChanged = function(evt) {
-        if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
+        if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED && !evt.internalType){
             if(evt.key == "shader"){
                 this.updateShader(evt.adapter);
             }

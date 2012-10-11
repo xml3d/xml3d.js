@@ -68,7 +68,7 @@ XML3D.base.Adapter.prototype.getConnectedAdapter = function(key){
 function adapterHandleCallback(evt){
     for(var key in this.connectedAdapterHandles){
         if(this.connectedAdapterHandles[key] == evt.adapterHandle){
-            var subEvent = new XML3D.events.ConnectedAdapterNotification(key, evt)
+            var subEvent = new XML3D.events.ConnectedAdapterNotification(evt, key)
             this.notifyChanged(subEvent);
         }
     }
@@ -109,6 +109,7 @@ XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri){
  * @param {number,string} hint with type of change
  */
 XML3D.base.NodeAdapter.prototype.notifyOppositeAdapters = function(type){
+    type = type || XML3D.events.ADAPTER_HANDLE_CHANGED;
     return XML3D.base.resourceManager.notifyNodeAdapterChange(this.node,
         this.factory.aspect, this.factory.canvasId, type);
 }

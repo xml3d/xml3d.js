@@ -104,7 +104,7 @@
                 elem.addEventListener('DOMNodeRemoved', nodeRemoved, true);
                 elem.addEventListener('DOMNodeInserted', nodeInserted, true);
                 elem.addEventListener('DOMNodeInsertedIntoDocument', nodeInsertedIntoDoc, true);
-                elem.addEventListener('DOMAttrModified', attrModified, false);
+                elem.addEventListener('DOMAttrModified', attrModified, true);
                 this.monitoring = true;
             }
         }

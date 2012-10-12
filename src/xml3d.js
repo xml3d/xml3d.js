@@ -122,7 +122,7 @@ XML3D.createClass = function(ctor, parent, methods) {
         }
 
         try {
-            XML3D.config.configure(xml3ds, true);
+            XML3D.config.configure(xml3ds);
         } catch (e) {
             debug && XML3D.debug.logError("Error initalizing interfaces: " + e);
         }

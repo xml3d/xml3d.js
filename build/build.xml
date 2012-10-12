@@ -20,6 +20,8 @@
 		<file name="utils/array.js" />
 		<file name="utils/debug.js" />
 		<file name="utils/uri.js" />
+		<file name="utils/css.js" />
+		<file name="utils/cssMatrix.js" />
 		<file name="contrib/glu.js" />
 		<file name="contrib/glMatrix.js" />
         <file name="types/vec3.js" />

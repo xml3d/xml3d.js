@@ -53,6 +53,8 @@ XML3D.createClass = function(ctor, parent, methods) {
 (function() {
     var onload = function() {
 
+        XML3D.css.init();
+
         var debug = XML3D.debug.setup();
         debug && XML3D.debug.logInfo("xml3d.js version: " + XML3D.version);
 

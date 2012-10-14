@@ -33,8 +33,8 @@ var Renderer = function(handler, width, height) {
 	this.lights = {
             changed : true,
             point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
-            directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [],
-            spot: {}}
+            directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
+            spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], cosBeamWidth: [], cosCutOffAngle: [] }
 	};
 
     this.drawableObjects = new Array();
@@ -422,7 +422,13 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         parameters["directionalLightDirection[0]"] = lights.directional.direction;
         parameters["directionalLightVisibility[0]"] = lights.directional.visibility;
         parameters["directionalLightIntensity[0]"] = lights.directional.intensity;
-        // TODO: Spotlight parameters
+        parameters["spotLightAttenuation[0]"] = lights.spot.attenuation;
+        parameters["spotLightPosition[0]"] = lights.spot.position;
+        parameters["spotLightIntensity[0]"] = lights.spot.intensity;
+        parameters["spotLightVisibility[0]"] = lights.spot.visibility;
+        parameters["spotLightDirection[0]"] = lights.spot.direction;
+        parameters["spotLightCosBeamWidth[0]"] = lights.spot.cosBeamWidth;
+        parameters["spotLightCosCutOffAngle[0]"] = lights.spot.cosCutOffAngle;
         shader.needsLights = false;
     }
 

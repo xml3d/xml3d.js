@@ -37,7 +37,7 @@
         this.textureAdapter.notifyChanged(evt);
     };
 
-    var staticAttributes = ["position", "direction", "intensity", "attenuation"];
+    var staticAttributes = ["position", "direction", "intensity", "attenuation", "beamWidth", "cutOffAngle"];
 
     /**
      * Adapter for <lightshader>
@@ -58,6 +58,10 @@
     var LIGHT_DEFAULT_INTENSITY = vec3.create([1,1,1]);
     /** @const */
     var LIGHT_DEFAULT_ATTENUATION = vec3.create([0,0,1]);
+    /** @const */
+    var SPOTLIGHT_DEFAULT_BEAMWIDTH = 1.570796;
+    /** @const */
+    var SPOTLIGHT_DEFAULT_CUTOFFANGLE = 2.356194;
 
     /**
      *
@@ -91,7 +95,27 @@
 
         Array.set(directional.intensity, offset, [intensity[0]*i, intensity[1]*i, intensity[2]*i]);
     };
-    // TODO: Implement fillSpotLight
+
+    /**
+    *
+    * @param {Object} directional
+    * @param {number} i
+    * @param {number} offset
+    */
+    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillSpotLight = function(spot, i, offset) {
+        this.callback = spot.dataChanged;
+        this.offsets.push(offset);
+        var dataTable = this.computeRequest.getResult().getOutputMap();
+        var intensity = dataTable["intensity"] ? dataTable["intensity"].getValue() : LIGHT_DEFAULT_INTENSITY;
+        var attenuation = dataTable["attenuation"] ? dataTable["attenuation"].getValue() : LIGHT_DEFAULT_ATTENUATION;
+        var beamWidth = dataTable["beamWidth"] ? dataTable["beamWidth"].getValue() : [SPOTLIGHT_DEFAULT_BEAMWIDTH];
+        var cutOffAngle = dataTable["cutOffAngle"] ? dataTable["cutOffAngle"].getValue() : [SPOTLIGHT_DEFAULT_CUTOFFANGLE];
+
+        Array.set(spot.intensity, offset, [intensity[0]*i, intensity[1]*i, intensity[2]*i]);
+        Array.set(spot.attenuation, offset, attenuation);
+        Array.set(spot.cosBeamWidth, offset/3, [Math.cos(beamWidth[0])]);
+        Array.set(spot.cosCutOffAngle, offset/3, [Math.cos(cutOffAngle[0])]);
+    };
 
     /**
      *

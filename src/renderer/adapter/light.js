@@ -60,6 +60,8 @@
 
     /** @const */
 	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]), tmpDirection = vec3.create();
+    /** @const */
+	var XML3D_SPOTLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]);
 
 
 	LightRenderAdapter.prototype.applyTransform = function(vec) {
@@ -109,6 +111,16 @@
                     lo.length++;
                     break;
                 case "spot":
+                    lo = lights.spot;
+                    this.offset = lo.length * 3;
+                    this.lightType = "spot";
+
+                    Array.set(lo.position, this.offset, this.applyTransform([0,0,0]));
+                    Array.set(lo.direction, this.offset, this.applyTransform(XML3D_SPOTLIGHT_DEFAULT_DIRECTION));
+                    Array.set(lo.visibility, this.offset, this.visible ? [1,1,1] : [0,0,0]);
+                    shader.fillSpotLight(lo, this.node.intensity, this.offset);
+                    lo.length++;
+                    break;
                 default:
                     XML3D.debug.logWarning("Unsupported lightshader type: " + script);
             }

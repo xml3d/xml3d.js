@@ -60,7 +60,7 @@
             }
         };
         image.crossOrigin = "anonymous";
-        image.src = url;
+        image.src = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
         this.image = image;
     };
 

@@ -80,11 +80,14 @@ XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
  * @param evt notification of type XML3D.Notification
  */
 XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
-    if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
+    if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED || evt.type == XML3D.events.ADAPTER_HANDLE_NOT_FOUND){
         this.connectedAdapterChanged(evt.key, evt.adapter);
+        if(evt.type == XML3D.events.ADAPTER_HANDLE_NOT_FOUND){
+            XML3D.debug.logError("Could not find <data> element of url '" + evt.url + "' for " + evt.key);
+        }
         return;
     }
-    if (evt.type == XML3D.events.NODE_INSERTED) {
+    else if (evt.type == XML3D.events.NODE_INSERTED) {
         var insertedNode = evt.wrapped.target;
         var insertedXflowNode = this.factory.getAdapter(insertedNode).getXflowNode();
         var sibling = insertedNode, followUpAdapter = null;

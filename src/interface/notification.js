@@ -7,7 +7,8 @@
           DANGLING_REFERENCE: 3,
           VALID_REFERENCE: 4,
           THIS_REMOVED: 5,
-          ADAPTER_HANDLE_CHANGED: 6
+          ADAPTER_HANDLE_CHANGED: 6,
+          ADAPTER_HANDLE_NOT_FOUND: 7
   };
 
   //-----------------------------------------------------------------------------
@@ -46,6 +47,7 @@
   events.ConnectedAdapterNotification = function(adapterHandleNotification, key) {
     this.adapter = adapterHandleNotification.adapterHandle.getAdapter();
     this.key = key;
+    this.url = adapterHandleNotification.adapterHandle.url;
     this.type = adapterHandleNotification.type;
   };
   XML3D.createClass(events.ConnectedAdapterNotification, events.Notification);

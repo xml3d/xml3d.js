@@ -5,9 +5,17 @@
      * AdapterHandles are always fetched from the XML3D.base.resourceManager
      * @constructor
      */
-    var AdapterHandle = function() {
+    var AdapterHandle = function(url) {
+        this.url = url;
         this.adapter = null;
         this.listeners = [];
+        this.status = 0; // STATUS.LOADING
+    };
+
+    AdapterHandle.STATUS = {
+        LOADING: 0,
+        NOT_FOUND: 1,
+        READY: 2,
     };
 
     /**
@@ -27,10 +35,15 @@
     /**
      * Note: this function should only be called by XML3D.base.resourceManager
      * @param {XML3D.base.Adapter} adapter The adapter connected to the AdapterHandler
+     * @param {number,XML3D.base.AdapterHandle.STATUS}
      */
-    AdapterHandle.prototype.setAdapter = function(adapter) {
+    AdapterHandle.prototype.setAdapter = function(adapter, status) {
         this.adapter = adapter;
-        this.notifyListeners(XML3D.events.ADAPTER_HANDLE_CHANGED);
+        this.status = status;
+        if(this.status == XML3D.base.AdapterHandle.STATUS.READY)
+            this.notifyListeners(XML3D.events.ADAPTER_HANDLE_CHANGED);
+        else
+            this.notifyListeners(XML3D.events.ADAPTER_HANDLE_NOT_FOUND);
     };
 
     /**

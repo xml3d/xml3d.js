@@ -34,7 +34,7 @@ var Renderer = function(handler, width, height) {
             changed : true,
             point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
             directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
-            spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], cosBeamWidth: [], cosCutOffAngle: [] }
+            spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], beamWidth: [], cutOffAngle: [] }
 	};
 
     this.drawableObjects = new Array();
@@ -202,10 +202,11 @@ Renderer.prototype.recompileShader = function(shaderAdapter) {
  * @return
  */
 Renderer.prototype.changeLightData = function(lightType, field, offset, newValue) {
-        var data = this.lights[lightType][field];
-        if (!data) return;
-        Array.set(data, offset, newValue);
-        this.lights.changed = true;
+    var data = this.lights[lightType][field];
+    if (!data) return;
+    if(field=="beamWidth" || field=="cutOffAngle") offset/=3; //some parameters are scalar
+    Array.set(data, offset, newValue);
+    this.lights.changed = true;
 };
 
 Renderer.prototype.removeDrawableObject = function(obj) {
@@ -427,8 +428,8 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         parameters["spotLightIntensity[0]"] = lights.spot.intensity;
         parameters["spotLightVisibility[0]"] = lights.spot.visibility;
         parameters["spotLightDirection[0]"] = lights.spot.direction;
-        parameters["spotLightCosBeamWidth[0]"] = lights.spot.cosBeamWidth;
-        parameters["spotLightCosCutOffAngle[0]"] = lights.spot.cosCutOffAngle;
+        parameters["spotLightCosBeamWidth[0]"] = lights.spot.beamWidth.map(Math.cos);
+        parameters["spotLightCosCutOffAngle[0]"] = lights.spot.cutOffAngle.map(Math.cos);
         shader.needsLights = false;
     }
 

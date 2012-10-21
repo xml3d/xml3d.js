@@ -113,8 +113,8 @@
 
         Array.set(spot.intensity, offset, [intensity[0]*i, intensity[1]*i, intensity[2]*i]);
         Array.set(spot.attenuation, offset, attenuation);
-        Array.set(spot.cosBeamWidth, offset/3, [Math.cos(beamWidth[0])]);
-        Array.set(spot.cosCutOffAngle, offset/3, [Math.cos(cutOffAngle[0])]);
+        Array.set(spot.beamWidth, offset/3, [beamWidth[0]]);
+        Array.set(spot.cutOffAngle, offset/3, [cutOffAngle[0]]);
     };
 
     /**

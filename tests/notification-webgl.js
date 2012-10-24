@@ -120,7 +120,7 @@ module("Composed Element notification tests", {
     factory : new NotifyingAdapterFactory()
 });
 
-test("Only one element gets notified", 7, function() {
+test("Only one element gets notified", 3, function() {
 
     function addAdapters(e, factory) {
         var c = e.firstElementChild;

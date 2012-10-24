@@ -33,54 +33,66 @@ XML3D.debug = {
         }
         return !XML3D.debug.params.xml3d_nolog;
     },
-    doLog : function(msg, logType) {
+    doLog : function(logType, args) {
         var params = XML3D.debug.params;
         if (params.xml3d_nolog || logType < XML3D.debug.loglevel) {
             return;
         }
-
+        args = Array.prototype.slice.call(args);
         if (window.console) {
             switch (logType) {
             case XML3D.debug.INFO:
-                window.console.info(msg);
+                window.console.info.apply(window.console, args);
                 break;
             case XML3D.debug.WARNING:
-                window.console.warn(msg);
+                window.console.warning.apply(window.console, args);
                 break;
             case XML3D.debug.ERROR:
-                window.console.error(msg);
+                window.console.error.apply(window.console, args);
                 break;
             case XML3D.debug.EXCEPTION:
-                window.console.debug(msg);
+                window.console.error(XML3D.debug.printStackTrace({e: args[0]}).join('\n'));
                 break;
             case XML3D.debug.DEBUG:
-                window.console.debug(msg);
+                window.console.debug.apply(window.console, args);
                 break;
             default:
                 break;
             }
         }
     },
-    logDebug : function(msg) {
-        XML3D.debug.doLog(msg, XML3D.debug.DEBUG);
+    logDebug : function() {
+        XML3D.debug.doLog(XML3D.debug.DEBUG, arguments);
     },
-    logInfo : function(msg) {
-        XML3D.debug.doLog(msg, XML3D.debug.INFO);
+    logInfo : function() {
+        XML3D.debug.doLog(XML3D.debug.INFO, arguments);
     },
-    logWarning : function(msg) {
-        XML3D.debug.doLog(msg, XML3D.debug.WARNING);
+    logWarning : function() {
+        XML3D.debug.doLog(XML3D.debug.WARNING, arguments);
     },
-    logError : function(msg) {
-        XML3D.debug.doLog(msg, XML3D.debug.ERROR);
+    logError : function() {
+        XML3D.debug.doLog(XML3D.debug.ERROR, arguments);
     },
-    logException : function(msg) {
-        XML3D.debug.doLog(msg, XML3D.debug.EXCEPTION);
+    logException : function() {
+        XML3D.debug.doLog(XML3D.debug.EXCEPTION, arguments);
     },
     assert : function(c, msg) {
         if (!c) {
-            XML3D.debug.doLog("Assertion failed in "
-                    + XML3D.debug.assert.caller.name + ': ' + msg,
-                    XML3D.debug.WARNING);
+            XML3D.debug.doLog(XML3D.debug.WARNING, ["Assertion failed in "
+                    + XML3D.debug.assert.caller.name, msg ]);
+        }
+    },
+    trace  : function(msg, logType) {
+        logType = logType !== undefined ? logType : XML3D.debug.ERROR;
+        if(window.console.trace) {
+            if (msg) {
+                XML3D.debug.doLog(logType, [msg]);
+            }
+            window.console.trace();
+        } else {
+            var stack = XML3D.debug.printStackTrace();
+            msg && stack.splice(0,0,msg);
+            XML3D.debug.doLog(logType, stack);
         }
     }
 };

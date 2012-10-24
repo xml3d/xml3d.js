@@ -737,7 +737,7 @@ Renderer.prototype.readPixelDataFromBuffer = function(glX, glY, buffer){
 
         return data;
     } catch (e) {
-        XML3D.debug.logError(e);
+        XML3D.debug.logException(e);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         return null;
     }

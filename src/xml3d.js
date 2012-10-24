@@ -127,12 +127,12 @@ XML3D.createClass = function(ctor, parent, methods) {
         try {
             XML3D.config.configure(xml3ds);
         } catch (e) {
-            debug && XML3D.debug.logError("Error initalizing interfaces: " + e);
+            debug && XML3D.debug.logException(e);
         }
         try {
             XML3D.webgl.configure(xml3ds);
         } catch (e) {
-            debug && XML3D.debug.logError("Error initalizing webgl: " + e);
+            debug && XML3D.debug.logException(e);
         }
 
         // initialize all attached adapters

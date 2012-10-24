@@ -183,7 +183,7 @@
             try {
                 adapters[a].notifyChanged(evt);
             } catch (e) {
-                XML3D.debug.logError(e);
+                XML3D.debug.logException(e);
             }
         }
     };

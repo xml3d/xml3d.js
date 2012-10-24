@@ -17,7 +17,7 @@
             var msg = "GL error " + textErr + " occured.";
             if (text !== undefined)
                 msg += " " + text;
-            XML3D.debug.logError(msg);
+            XML3D.debug.trace(msg);
         }
     };
 

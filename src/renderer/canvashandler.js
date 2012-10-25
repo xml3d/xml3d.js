@@ -145,6 +145,19 @@ XML3D.webgl.MAXFPS = 30;
         return true;
     };
 
+    /** 
+     * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in 
+     * the GL context. The y-coordinate gets turned upside-down. The lowest possible 
+     * canvas coordinate is 0, so we need to subtract 1 from the height, too. 
+     * 
+     * @param {number} canvasY
+     * @return {number} the converted y-coordinate
+     */
+    CanvasHandler.prototype.canvasToGlY = function(canvasY) { 
+        
+        return this.canvas.height - canvasY - 1; 
+    }; 
+    
     /**
      * Binds the picking buffer and passes the request for a picking pass to the
      * renderer
@@ -158,8 +171,12 @@ XML3D.webgl.MAXFPS = 30;
             return null;
         if(this.needPickingDraw)
             this.renderer.renderSceneToPickingBuffer();
-        this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, this.canvas.height - canvasY);
+        
+        var glY = this.canvasToGlY(canvasY);
+        
+        this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, glY);
         this.needPickingDraw = false;
+        
         return this.currentPickObj;
     };
 
@@ -172,8 +189,11 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, canvasX, canvasY) {
         if (!pickedObj || this._pickingDisabled)
             return null;
-        this.renderer.renderPickedNormals(pickedObj, canvasX, this.canvas.height - canvasY);
-        return this.renderer.readNormalFromPickingBuffer(canvasX, this.canvas.height - canvasY);
+        
+        var glY = this.canvasToGlY(canvasY);
+        
+        this.renderer.renderPickedNormals(pickedObj);
+        return this.renderer.readNormalFromPickingBuffer(canvasX, glY);
     };
 
     /**
@@ -185,8 +205,11 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.getWorldSpacePositionByPoint = function(pickedObj, canvasX, canvasY) {
     	if (!pickedObj)
     		return null;
+
+        var glY = this.canvasToGlY(canvasY); 
+        
         this.renderer.renderPickedPosition(pickedObj);
-        return this.renderer.readPositionFromPickingBuffer(canvasX, this.canvas.height - canvasY);
+        return this.renderer.readPositionFromPickingBuffer(canvasX, glY);
     };
     
     CanvasHandler.prototype.getCanvasHeight = function() { 
@@ -203,10 +226,12 @@ XML3D.webgl.MAXFPS = 30;
      * Uses gluUnProject() to transform the 2D screen point to a 3D ray.
      * Not tested!!
      *
-     * @param {number} glX
-     * @param {number} glY
+     * @param {number} canvasX
+     * @param {number} canvasY
      */
-    CanvasHandler.prototype.generateRay = function(glX, glY) {
+    CanvasHandler.prototype.generateRay = function(canvasX, canvasY) {
+        
+        var glY = this.canvasToGlY(canvasY); 
 
         // setup input to unproject
         var viewport = new Array();
@@ -225,11 +250,11 @@ XML3D.webgl.MAXFPS = 30;
         var farHit = new Array();
 
         // do unprojections
-        if (false === GLU.unProject(glX, glY, 0, viewMat, projMat, viewport, nearHit)) {
+        if (false === GLU.unProject(canvasX, glY, 0, viewMat, projMat, viewport, nearHit)) {
             return ray;
         }
 
-        if (false === GLU.unProject(glX, glY, 1, viewMat, projMat, viewport, farHit)) {
+        if (false === GLU.unProject(canvasX, glY, 1, viewMat, projMat, viewport, farHit)) {
             return ray;
         }
 

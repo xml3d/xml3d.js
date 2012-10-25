@@ -139,7 +139,7 @@
         var classInfo = XML3D.classInfo[this.element.localName];
 
         if (classInfo === undefined) {
-            XML3D.debug.logInfo("Unrecognised element " + element.localName);
+            XML3D.debug.logInfo("Unrecognised element " + this.element.localName);
             return;
         }
 

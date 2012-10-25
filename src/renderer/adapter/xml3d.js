@@ -33,10 +33,39 @@
                 var eventType = type.substring(2);
                 this.node.addEventListener(eventType, new Function("evt", att.value), false);
             }
+            if (type == "onload") {
+                var eventType = type.substring(2);
+                this.node.addEventListener(eventType, new Function("evt", att.value), false);
+            }
         }
     };
 
     /* Interface methods */
+
+    /*
+     * This function is called when scene DOM is loaded and all adapters are attached
+     */
+    XML3DRenderAdapter.prototype.initialize = function() {
+        // emit load event when all resources currently loading are completed
+        var callback = (function (node, nodeCanvasId) {
+            var counter = 2; // we fire load event when callback is called twice
+
+            function handler(canvasId) {
+                counter--;
+                if (counter == 0) {
+                    XML3D.util.dispatchEvent(node, 'load');
+                }
+            }
+
+            return handler;
+        })(this.node, this.factory.handler.id);
+
+        // register callback for canvasId == 0 i.e. global resources
+        XML3D.base.resourceManager.addLoadCompleteListener(0, callback);
+        // register callback for canvasId of this node
+        XML3D.base.resourceManager.addLoadCompleteListener(this.factory.handler.id, callback);
+    }
+
     XML3DRenderAdapter.prototype.getBoundingBox = function() {
         var bbox = new window.XML3DBox();
         Array.prototype.forEach.call(this.node.childNodes, function(c) {

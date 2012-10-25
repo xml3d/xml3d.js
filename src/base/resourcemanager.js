@@ -4,6 +4,7 @@
     var c_cachedDocuments = {};
     var c_factories = {};
     var c_cachedAdapterHandles = {};
+    var c_canvasIdCounters = {};
 
     /**
      * Register a factory with the resource manager
@@ -23,6 +24,52 @@
      * @constructor
      */
     var ResourceManager = function() {};
+
+    function getCounterObject(canvasId) {
+        var counterObject = c_canvasIdCounters[canvasId];
+        if (!counterObject) {
+            counterObject = {counter: 0, listeners : new Array()};
+            c_canvasIdCounters[canvasId] = counterObject;
+        }
+        return counterObject;
+    }
+
+    function notifyLoadCompleteListeners(counterObject) {
+        var listeners = counterObject.listeners;
+        counterObject.listeners = new Array();
+        var i = listeners.length;
+        while (i--) {
+            listeners[i](this);
+        }
+    }
+
+    /*
+     * Register listener that will be fired when all resources for specified canvasId are loaded.
+     * Listener is fired only once.
+     *
+     * @param {number} canvasId
+     * @param {EventListener} listener
+     */
+    ResourceManager.prototype.addLoadCompleteListener = function(canvasId, listener) {
+        var counterObject = getCounterObject(canvasId);
+
+        // when counter is 0 we can fire event immediately
+        if (counterObject.counter == 0) {
+            listener(canvasId);
+            return;
+        }
+
+        var idx = counterObject.listeners.indexOf(listener);
+        if (idx == -1)
+            counterObject.listeners.push(listener);
+    };
+
+    ResourceManager.prototype.removeLoadCompleteListener = function(canvasId, listener) {
+        var counterObject = getCounterObject(canvasId);
+        var idx = counterObject.listeners.indexOf(listener);
+        if (idx != -1)
+            counterObject.listeners.splice(idx, 1);
+    };
 
     /**
      * Load a document via XMLHttpRequest
@@ -205,6 +252,7 @@
      */
     function updateHandle(handle, adapterType, canvasId, mimetype, data){
         var factories = c_factories[canvasId];
+
         for ( var i = 0; i < factories[mimetype].length; ++i) {
             var fac = factories[mimetype][i];
             if (fac.aspect == adapterType) {
@@ -213,6 +261,14 @@
                     handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);
                 }
             }
+        }
+
+        // notify all load complete listeners
+        var counterObject = getCounterObject(canvasId);
+        XML3D.debug.assert(counterObject.counter > 0, "counter must be > 0");
+        counterObject.counter--;
+        if (counterObject.counter == 0) {
+            notifyLoadCompleteListeners(counterObject);
         }
     }
 
@@ -267,6 +323,9 @@
 
         var handle = new XML3D.base.AdapterHandle(uri);
         c_cachedAdapterHandles[uri][adapterType][canvasId] = handle;
+
+        var counterObject = getCounterObject(canvasId);
+        counterObject.counter++;
 
         if(uri.isLocal()){
             var node = XML3D.URIResolver.resolveLocal(uri);

@@ -134,6 +134,16 @@ XML3D.createClass = function(ctor, parent, methods) {
             debug && XML3D.debug.logError("Error initalizing webgl: " + e);
         }
 
+        // initialize all attached adapters
+        for (i in xml3ds) {
+            var adapters = xml3ds[i]._configured.adapters;
+            for (var adapter in adapters) {
+                if (adapters[adapter].initialize) {
+                    adapters[adapter].initialize();
+                }
+            }
+        }
+
         var ready = (function(eventType) {
             var evt = null;
             if (document.createEvent) {

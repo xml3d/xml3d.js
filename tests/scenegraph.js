@@ -127,6 +127,9 @@ test("Transformation creates non-regular matrix", 2, function() {
     h && h.draw();
 });
 
+// ============================================================================
+// === Bounding Boxes === 
+// ============================================================================ 
 module("Bounding Boxes", {
     setup : function() {
         stop();
@@ -179,3 +182,112 @@ test("Groups and Meshes", 16, function() {
     QUnit.closeBox(splitCubeBox2, new XML3DBox(new XML3DVec3(-1, -1, -1),new XML3DVec3(0, 1, 1)), EPSILON, "Split part 2");
 
 });
+
+//============================================================================
+//=== getWorldMatrix === 
+//============================================================================
+
+module("getWorldMatrix() Tests", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            that.setupMatrices(); 
+            start();
+        };
+        
+        loadDocument("scenes/basic.xhtml", this.cb);
+    },
+    
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }, 
+    
+    setupMatrices : function() { 
+
+        // t_rotation
+        this.matRot = new XML3DMatrix(
+                1,  0, 0, 0, 
+                0,  0, 1, 0, 
+                0, -1, 0, 0, 
+                0,  0, 0, 1);   
+        
+        // t_rotation2
+        this.matRot2 = new XML3DMatrix(
+                 0, 0, -1, 0, 
+                 0, 1,  0, 0, 
+                 1, 0,  0, 0, 
+                 0, 0,  0, 1);
+
+        // t_rotation3
+        this.matRot3 = new XML3DMatrix(
+                 0, 1, 0, 0, 
+                -1, 0, 0, 0, 
+                 0, 0, 1, 0, 
+                 0, 0, 0, 1);
+
+        // t_mixed
+        this.matMixed = new XML3DMatrix(
+                1,  0, 0, 0, 
+                0,  0, 2, 0, 
+                0, -3, 0, 0, 
+                1,  2, 3, 1);  
+    }, 
+    
+    /** 
+     * Simple test: existence of method, setting of parent transform and recompute matrix.
+     * 
+     * @param {!Object} node the node under test
+     */
+    simpleMatrixTest : function(node) {
+
+        var parGrp = node.parentNode;  
+        
+        ok(node.getWorldMatrix, "getWorldMatrix exists"); 
+        
+        QUnit.closeMatrix(node.getWorldMatrix(), new XML3DMatrix(), EPSILON, "identity"); 
+        
+        parGrp.setAttribute("transform", "#t_mixed"); 
+        QUnit.closeMatrix(node.getWorldMatrix(), this.matMixed, EPSILON, "parent='#t_mixed'");
+    },    
+});
+
+test("group's getWorldMatrix()", function() {
+    
+    var child01 = this.doc.getElementById("child01");
+    var parGrp = this.doc.getElementById("parentGroup"); 
+    
+    ok(child01.getWorldMatrix, "getWorldMatrix exists");
+
+    // parent's transform: t_rotation
+    var mat = child01.getWorldMatrix();  
+    QUnit.closeMatrix(mat, this.matRot, EPSILON, "parent='#t_rotation'."); 
+    
+    // parent's transform: t_rotation2
+    parGrp.setAttribute("transform", "#t_rotation2");
+    
+    mat = child01.getWorldMatrix(); 
+    QUnit.closeMatrix(mat, this.matRot2, EPSILON, "parent='#t_rotation2'.");    
+        
+    // parent is t_rotation3 and child is t_mixed 
+    parGrp.setAttribute("transform", "#t_rotation3");
+    child01.setAttribute("transform", "#t_mixed");   
+    
+    mat = child01.getWorldMatrix(); 
+    QUnit.closeMatrix(mat, this.matRot3.multiply(this.matMixed), EPSILON, "parent='#t_rotation3' and child='#t_mixed'.");
+}); 
+
+test("mesh's getWorldMatrix()", function() {
+    this.simpleMatrixTest(this.doc.getElementById("myMesh01")); 
+}); 
+
+test("light's getWorldMatrix()", function() { 
+    this.simpleMatrixTest(this.doc.getElementById("myLight")); 
+}); 
+
+test("view's getWorldMatrix()", function() { 
+    this.simpleMatrixTest(this.doc.getElementById("myView"));    
+}); 

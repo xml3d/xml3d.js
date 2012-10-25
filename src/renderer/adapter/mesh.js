@@ -166,7 +166,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         this.dataChanged();
 
-        this.bbox = this._calcBoundingBox();
+        this.bbox = this.calcBoundingBox();
     };
 
     var emptyFunction = function() {};
@@ -260,7 +260,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         //Calculate a bounding box for the mesh
         if (calculateBBox) {
-            this.bbox = this._calcBoundingBox();
+            this.bbox = this.calcBoundingBox();
             meshInfo.bbox.set(this.bbox);
         }
 
@@ -302,9 +302,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     /**
+     * @private
      * @return {XML3DBox} the calculated bounding box of this mesh.
      */
-    p._calcBoundingBox = function() {
+    p.calcBoundingBox = function() {
 
         var bbox = new window.XML3DBox();
         

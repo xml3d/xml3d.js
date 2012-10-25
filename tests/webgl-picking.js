@@ -91,7 +91,7 @@ test("Position picking test", 4, function() {
     target.addEventListener("click", function(evt) {
     	start();
     	ok(evt.position);
-    	QUnit.closeVector(evt.position, new XML3DVec3(-2.503,2.05,-10), EPSILON, "Picked position is correct");
+    	QUnit.closeVector(evt.position, new XML3DVec3(-2.503,2.01,-10), EPSILON, "Picked position is correct");
     }, false);
 
     h.updatePickObjectByPoint(89,51);

@@ -233,11 +233,13 @@
         return m;
     };
     
+    var tmpIdMat = mat4.create();
+    
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
 
-        var id = mat4.identity(mat4.create());
-        m._data.set(this.applyTransformMatrix(id));
+        mat4.identity(tmpIdMat);
+        m._data.set(this.applyTransformMatrix(tmpIdMat));
 
         return m;
     };

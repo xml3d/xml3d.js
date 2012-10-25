@@ -16,6 +16,25 @@ XML3D.util.getStyle = function(oElm, strCssRule) {
     return strValue;
 };
 
+
+/**
+ * Dispatch HTML event
+ *
+ * @param {Object} target    element or document
+ * @param {string} eventType standard event type e.g. load, click
+ */
+XML3D.util.dispatchEvent = function(target, eventType) {
+    var evt = null;
+    if (document.createEvent) {
+        evt = document.createEvent("Events");
+        evt.initEvent(eventType, true, true);
+        target.dispatchEvent(evt);
+    } else if (document.createEventObject) {
+        evt = document.createEventObject();
+        target.fireEvent('on' + eventType, evt);
+    }
+}
+
 XML3D.setParameter = function(elementId, fieldName, value) {
     var e = document.getElementById(elementId);
     if (e) {

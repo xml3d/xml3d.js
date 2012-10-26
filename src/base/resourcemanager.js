@@ -408,7 +408,34 @@
         }
     }
 
+    /**
+     * This function is called to load an Image.
+     *
+     * @param {string} uri Image URI
+     * @param {function} loadListener Function called when image was successfully loaded.
+     *                                It will be called with event as the first and image as the second parameter.
+     * @param {function} errorListener Function called when image could not be loaded.
+     *                                 It will be called with event as the first and image as the second parameter.
+     * @return {Image}
+     */
+    ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) {
+        // we use canvasId 0 to represent images loaded in a document
+        getOrCreateCounterObject(0).counter++;
 
+        var image = new Image();
+        image.onload = function(e) {
+            loadComplete(0, uri);
+            loadListener(e, image);
+        };
+        image.onerror = function(e) {
+            loadComplete(0, uri);
+            errorListener(e, image);
+        };
+        image.crossOrigin = "anonymous";
+
+        image.src = uri; // here loading starts
+        return image;
+    }
 
     XML3D.base.resourceManager = new ResourceManager();
 

@@ -193,17 +193,18 @@
 
         // check if it's contained already
         // and if so, whether the reference is valid
-        for(var curOpp in this.opposites)
+        for(var curOppIdx in this.opposites)
         {
-            var n = this.opposites[curOpp].relatedNode;
+            var curOpp = this.opposites[curOppIdx];
 
-            if(n === evt.relatedNode && n === evt.attrName)
+            if(curOpp.relatedNode === evt.relatedNode
+            && curOpp.attrName === evt.attrName)
             {
-               if(n === XML3D.events.VALID_REFERENCE)
+               if(curOpp.type === XML3D.events.VALID_REFERENCE)
                    return;
 
                // present, but not yet valid: update opposite
-               this.opposites[curOpp] = evt;
+               this.opposites[curOppIdx] = evt;
                return;
             }
         }

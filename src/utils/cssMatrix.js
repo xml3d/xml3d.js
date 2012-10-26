@@ -28,7 +28,7 @@
  *    in the form given by the CSS transform property, i.e. just like the
  *    output from [[FirminCSSMatrix#toString]].
  **/
-FirminCSSMatrix = function(domstr) {
+var FirminCSSMatrix = function(domstr) {
     this.m11 = this.m22 = this.m33 = this.m44 = 1;
 
     this.m12 = this.m13 = this.m14 =
@@ -230,8 +230,6 @@ FirminCSSMatrix.toMatrixString = function (transformValue) {
             }),
             unparsed: str
         };
-
-        return o;
     };
 
     var transformOperations = transformStatements.map(parseTransformStatement);
@@ -784,7 +782,7 @@ FirminCSSMatrix.prototype.setMatrixValue = function(domstr) {
     }
 
     for (i = 0; i < len; i++) {
-        point = is3d ?
+        var point = is3d ?
         ("m" + (Math.floor(i / 4) + 1)) + (i % 4 + 1) :
         String.fromCharCode(i + 97); // ASCII char 97 == 'a'
         this[point] = points[i];

@@ -15,7 +15,7 @@
     AdapterHandle.STATUS = {
         LOADING: 0,
         NOT_FOUND: 1,
-        READY: 2,
+        READY: 2
     };
 
     /**
@@ -40,10 +40,7 @@
     AdapterHandle.prototype.setAdapter = function(adapter, status) {
         this.adapter = adapter;
         this.status = status;
-        if(this.status == XML3D.base.AdapterHandle.STATUS.READY)
-            this.notifyListeners(XML3D.events.ADAPTER_HANDLE_CHANGED);
-        else
-            this.notifyListeners(XML3D.events.ADAPTER_HANDLE_NOT_FOUND);
+        this.notifyListeners(XML3D.events.ADAPTER_HANDLE_CHANGED);
     };
 
     /**

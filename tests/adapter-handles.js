@@ -133,7 +133,8 @@ test("Get Missing Handles", function() {
     var self = this;
     handle.addListener(function(e){
         ok(handle == e.adapterHandle, "Event has correct AdapterHandle");
-        ok(e.type = XML3D.events.ADAPTER_HANDLE_NOT_FOUND, "Event type is 'ADAPTER_HANDLE_NOT_FOUND'");
+        ok(e.type = XML3D.events.ADAPTER_HANDLE_CHANGED, "Event type is 'ADAPTER_HANDLE_CHANGED'");
+        ok(e.handleStatus = XML3D.base.AdapterHandle.STATUS.NOT_FOUND, "Event handleStatus is 'NOT_FOUND'");
         ok(!handle.hasAdapter(), "Handle still doesn't have any adapter");
 
         var handle2 = XML3D.base.resourceManager.getAdapterHandle(self.doc, "xml/meshes.xml#nope", XML3D.data);
@@ -142,7 +143,8 @@ test("Get Missing Handles", function() {
 
         handle2.addListener(function(e){
             ok(handle2 == e.adapterHandle, "Event has correct AdapterHandle");
-            ok(e.type = XML3D.events.ADAPTER_HANDLE_NOT_FOUND, "Event type is 'ADAPTER_HANDLE_NOT_FOUND'");
+            ok(e.type = XML3D.events.ADAPTER_HANDLE_CHANGED, "Event type is 'ADAPTER_HANDLE_CHANGED'");
+            ok(e.handleStatus = XML3D.base.AdapterHandle.STATUS.NOT_FOUND, "Event type is 'NOT_FOUND'");
             ok(!handle2.hasAdapter(), "Handle still doesn't have any adapter");
 
             handle2 = XML3D.base.resourceManager.getAdapterHandle(self.doc, "xml/meshes.xml#nope2", XML3D.data);

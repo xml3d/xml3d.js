@@ -62,7 +62,7 @@
         } else if (evt.type == XML3D.events.THIS_REMOVED) {
             return;
         }
-        else if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED && !evt.internalType){
+        else if( (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) && !evt.internalType){
             // The connected transform node changed;
             this.propagateTransform(evt);
             return;

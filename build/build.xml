@@ -14,16 +14,16 @@
     <import file="build-master.xml" />
     <property file="build.properties" />
 
-    <filelist dir="${srcDir}" id="modules">
-        <file name="xml3d.js" />
-        <file name="../build/output/xml3d-utils-module.js" />
-        <file name="../build/output/xml3d-contrib-module.js" />
-        <file name="../build/output/xml3d-types-module.js" />
-        <file name="../build/output/xml3d-base-module.js" />
-        <file name="../build/output/xml3d-interface-module.js" />
-        <file name="../build/output/xml3d-xflow-module.js" />
-        <file name="../build/output/xml3d-data-module.js" />
-        <file name="../build/output/xml3d-renderer-module.js" />
+    <filelist dir="${buildDir}" id="modules">
+        <file name="${srcDir}/xml3d.js" />
+        <file name="xml3d-utils-module.js" />
+        <file name="xml3d-contrib-module.js" />
+        <file name="xml3d-types-module.js" />
+        <file name="xml3d-base-module.js" />
+        <file name="xml3d-interface-module.js" />
+        <file name="xml3d-xflow-module.js" />
+        <file name="xml3d-data-module.js" />
+        <file name="xml3d-renderer-module.js" />
     </filelist>
 
     <target name="lastTag" depends="init, modules-concat, windowsGit, linuxGit">
@@ -63,17 +63,30 @@
     </target>
 
     <!-- - - - - - - - - - - - - - - - - -
-          Tools: TODO
+          Tools
          - - - - - - - - - - - - - - - - - -->
-    <target name="build-tools">
-        <copy file="${srcDir}/../tools/camera.js" toFile="${buildDir}/tools/camera${script.ext}.js" />
+    <filelist dir="${toolsDir}" id="tools-modules">
+        <file name="${buildDir}/xml3d-tools-module.js" />
+    </filelist>
+
+    <target name="build-tools" depends="init, tools-modules-concat">
+        <concatScripts extension="-tools" source="tools-modules" 
+            version="DEVELOPMENT SNAPSHOT (${build.time})" /> 
+    </target>
+
+    <target name="build-tools-min" depends="init, tools-modules-compile">
+        <compileScripts extension="-tools" source="tools-modules"  
+            version="DEVELOPMENT SNAPSHOT (${build.time})" />
     </target>
 
     <target name="upload-tools">
         <fail unless="upload.url" />
-        <post-file file="${buildDir}/tools/camera${script.ext}.js" url="${upload.url}/tools/" />
+        <post-file file="${buildDir}/xml3d-tools.js" url="${upload.url}/" />
     </target>
 
+    <!-- - - - - - - - - - - - - - - - - -
+          Module building targets
+         - - - - - - - - - - - - - - - - - -->
     <target name="modules-concat">
         <subant target="concat">
             <property name="build.path" value="${buildDir}" />
@@ -85,6 +98,22 @@
         <subant target="compile">
             <property name="build.path" value="${buildDir}" />
             <fileset dir="${srcDir}" includes="*/build.xml" />
+        </subant>
+    </target>
+
+    <!-- There's no easy way to get around these duplicated targets. 
+        target's don't have parameters and macrodefs don't support subant tasks -->
+    <target name="tools-modules-concat">
+        <subant target="concat">
+            <property name="build.path" value="${buildDir}" />
+            <fileset dir="${toolsDir}" includes="**/build.xml" />
+        </subant>
+    </target>
+
+    <target name="tools-modules-compile">
+        <subant target="compile">
+            <property name="build.path" value="${buildDir}" />
+            <fileset dir="${toolsDir}" includes="**/build.xml" />
         </subant>
     </target>
 </project>

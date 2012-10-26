@@ -63,7 +63,7 @@
     };
 
     /** @const */
-	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,1]), tmpDirection = vec3.create();
+	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]), tmpDirection = vec3.create();
     /** @const */
 	var XML3D_SPOTLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,1]);
 

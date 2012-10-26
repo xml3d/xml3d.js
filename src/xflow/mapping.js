@@ -148,15 +148,15 @@ NameMapping.parse = function(string, dataNode)
 
 function mappingNotifyOwner(mapping){
     if(mapping._owner)
-        mapping._owner.notify(XflowModification.STRUCTURE_CHANGED);
+        mapping._owner.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 
 OrderMapping.prototype.filterNameset = function(nameset, filterType)
 {
-    if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME)
+    if(filterType == Xflow.DATA_FILTER_TYPE.RENAME)
         return nameset.splice();
     else {
-        var keep = (filterType == Xflow.DataNode.FILTER_TYPE.KEEP);
+        var keep = (filterType == Xflow.DATA_FILTER_TYPE.KEEP);
         var result = [];
         for(var i in nameset){
             var idx = this._names.indexOf(nameset[i]);
@@ -174,9 +174,9 @@ NameMapping.prototype.filterNameset = function(nameset, filterType)
 OrderMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType){
     for(var i in sourceMap){
         var idx = this._names.indexOf(i);
-        if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME ||
-           ( filterType == Xflow.DataNode.FILTER_TYPE.KEEP && idx != -1) ||
-            (filterType == Xflow.DataNode.FILTER_TYPE.REMOVE && idx == -1))
+        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
+           ( filterType == Xflow.DATA_FILTER_TYPE.KEEP && idx != -1) ||
+            (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
             destMap[i] = sourceMap[i];
     }
 };
@@ -200,13 +200,13 @@ OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
 
 NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType)
 {
-    if(filterType == Xflow.DataNode.FILTER_TYPE.REMOVE){
+    if(filterType == Xflow.DATA_FILTER_TYPE.REMOVE){
         for(var i in sourceMap)
             if(this._srcNames.indexOf(i) == -1)
                 destMap[i] = sourceMap[i];
     }
     else{
-        if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME){
+        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME){
             for(var i in sourceMap)
                 if(this._srcNames.indexOf(i) == -1)
                     destMap[i] = sourceMap[i];

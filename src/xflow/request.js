@@ -1,12 +1,5 @@
 (function(){
 
-/**
- * @enum {Number}
- */
-Xflow.RequestNotification = {
-    CHANGED_CONTENT: 0,
-    CHANGED_STRUCTURE: 1
-};
 
 /**
  * @constructor
@@ -46,7 +39,7 @@ Request.prototype.clear = function(callback){
 
 /**
  * @param {Xflow.Request} request
- * @param {Xflow.RequestNotification} notification
+ * @param {Xflow.RESULT_STATE} notification
  */
 function notifyListeners(request, notification){
     if(request._listener)
@@ -54,7 +47,7 @@ function notifyListeners(request, notification){
 };
 
 /**
- * @param {Xflow.RequestNotification} notification
+ * @param {Xflow.RESULT_STATE} notification
  */
 Request.prototype.notify = function(notification){
     notifyListeners(this, notification);

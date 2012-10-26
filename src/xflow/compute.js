@@ -68,7 +68,7 @@ DataNode.prototype._initCompute = function(){
 DataNode.prototype._updateComputeCache = function(state){
     this._results = [];
     this._dataMap = {};
-    if(state == XflowModification.STRUCTURE_CHANGED){
+    if(state == Xflow.RESULT_STATE.CHANGED_STRUCTURE){
         this._operatorData = null;
     }
 }
@@ -76,7 +76,7 @@ DataNode.prototype._updateComputeCache = function(state){
 DataNode.prototype._getComputeResult = function(filter){
     var forwardNode = getForwardNode(this);
     if(forwardNode){
-        this._state = XflowModification.NONE;
+        this._state = Xflow.RESULT_STATE.NONE;
         return forwardNode._getComputeResult(filter);
     }
 
@@ -103,8 +103,8 @@ DataNode.prototype._createComputeResult = function(filter){
     return result;
 }
 DataNode.prototype._populateDataMap = function(){
-    if(this._state == XflowModification.NONE) return;
-    this._state = XflowModification.NONE;
+    if(this._state == Xflow.RESULT_STATE.NONE) return;
+    this._state = Xflow.RESULT_STATE.NONE;
 
     // Prepare input:
     var inputMap = {};

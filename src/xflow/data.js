@@ -1,15 +1,7 @@
 (function(){
 
 
-/**
- * @enum {number}
- */
-Xflow.DataNotifications = {
-    CHANGED_NEW: 0,
-    CHANGED_CONTENT: 1,
-    CHANGE_SIZE: 2,
-    CHANGE_REMOVED: 3
-};
+
 
 /**
  * @constructor
@@ -29,30 +21,6 @@ var SamplerConfig = function(){
 };
 Xflow.SamplerConfig = SamplerConfig;
 
-/**
- * @enum {number}
- */
-SamplerConfig.FILTER_TYPE = {
-    NONE: 0,
-    REPEAT: 1,
-    LINEAR: 2
-};
-/**
- * @enum {Number}
- */
-SamplerConfig.WRAP_TYPE = {
-    CLAMP: 0,
-    REPEAT: 1,
-    BORDER: 2
-};
-/**
- * @enum {Number}
- */
-SamplerConfig.WRAP_TYPE = {
-    TEXTURE_1D: 0,
-    TEXTURE_2D: 1,
-    TEXTURE_3D: 2
-};
 
 
 
@@ -89,21 +57,7 @@ DataEntry.prototype.removeListener = function(callback){
     Array.erase(this._listeners, callback);
 };
 
-/**
- * Type of DataEntry
- * @enum
- */
-DataEntry.TYPE = {
-    FLOAT: 0,
-    FLOAT2 : 1,
-    FLOAT3 : 2,
-    FLOAT4 : 3,
-    FLOAT4X4 : 10,
-    INT : 20,
-    INT4 : 21,
-    BOOL: 30,
-    TEXTURE: 40
-}
+
 
 /**
  * @constructor
@@ -114,7 +68,7 @@ DataEntry.TYPE = {
 var BufferEntry = function(type, value){
     Xflow.DataEntry.call(this, type);
     this._value = value;
-    notifyListeners(this, Xflow.DataNotifications.CHANGED_NEW);
+    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
 XML3D.createClass(BufferEntry, Xflow.DataEntry);
 Xflow.BufferEntry = BufferEntry;
@@ -124,7 +78,7 @@ Xflow.BufferEntry = BufferEntry;
 BufferEntry.prototype.setValue = function(v){
     var newSize = this._value.length != v.length;
     this._value = v;
-    notifyListeners(this, newSize ? Xflow.DataNotifications.CHANGE_SIZE : Xflow.DataNotifications.CHANGED_CONTENT);
+    notifyListeners(this, newSize ? Xflow.DATA_ENTRY_STATE.CHANGE_SIZE : Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }
 
 /** @return {Object} */
@@ -138,16 +92,51 @@ BufferEntry.prototype.getLength = function(){
 };
 
 
+BufferEntry.prototype.getTupleSize = function() {
+    if (!this._tupleSize) {
+        var t = Xflow.DATA_TYPE;
+        switch (this._type) {
+            case t.FLOAT:
+            case t.INT:
+            case t.BOOL:
+                this._tupleSize = 1;
+                break;
+            case t.FLOAT2:
+                this._tupleSize = 2;
+                break;
+            case t.FLOAT3:
+                this._tupleSize = 3;
+                break;
+            case t.FLOAT4:
+            case t.INT4:
+                this._tupleSize = 4;
+                break;
+            case t.FLOAT4X4:
+                this._tupleSize = 16;
+                break;
+            default:
+                XML3D.debug.logError("Encountered invalid type: "+this._type);
+                this._tupleSize = 1;
+        }
+    }
+    return this._tupleSize;
+};
+
+/** @return {Object} */
+BufferEntry.prototype.getIterateCount = function(){
+    return this.getLength() / this.getTupleSize();
+};
+
 /**
  * @constructor
  * @extends {Xflow.DataEntry}
  * @param {Object} value
  */
 var TextureEntry = function(image){
-    Xflow.DataEntry.call(this, DataEntry.TYPE.TEXTURE);
+    Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._image = image;
     this._samplerConfig = new SamplerConfig();
-    notifyListeners(this, Xflow.DataNotifications.CHANGED_NEW);
+    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
 XML3D.createClass(TextureEntry, Xflow.DataEntry);
 Xflow.TextureEntry = TextureEntry;
@@ -155,7 +144,7 @@ Xflow.TextureEntry = TextureEntry;
 /** @param {Object} v */
 TextureEntry.prototype.setImage = function(v){
     this._image = v;
-    notifyListeners(this, Xflow.DataNotifications.CHANGED_CONTENT);
+    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }
 
 /** @return {Object} */
@@ -169,35 +158,9 @@ TextureEntry.prototype.getSamplerConfig = function(){
 };
 
 
-BufferEntry.prototype.getTupleSize = function() {
-   if (!this._tupleSize) {
-       var t = DataEntry.TYPE;
-       switch (this._type) {
-       case t.FLOAT:
-       case t.INT:
-       case t.BOOL:
-           this._tupleSize = 1;
-           break;
-       case t.FLOAT2:
-           this._tupleSize = 2;
-           break;
-       case t.FLOAT3:
-           this._tupleSize = 3;
-           break;
-       case t.FLOAT4:
-       case t.INT4:
-           this._tupleSize = 4;
-           break;
-       case t.FLOAT4X4:
-           this._tupleSize = 16;
-           break;
-       default:
-           XML3D.debug.logError("Encountered invalid type: "+this._type);
-           this._tupleSize = 1;
-       }
-   }
-   return this._tupleSize;
-};
+
+
+
 
 var DataChangeNotifier = {
     _listeners: []
@@ -220,7 +183,7 @@ DataChangeNotifier.removeListener = function(callback){
 
 /**
  * @param {Xflow.DataEntry} dataEntry
- * @param {number, Xflow.DataNotifications} notification
+ * @param {number, Xflow.DATA_ENTRY_STATE} notification
  */
 function notifyListeners(dataEntry, notification){
     for(var i = 0; i < DataChangeNotifier._listeners.length; ++i){

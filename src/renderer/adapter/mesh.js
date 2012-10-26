@@ -184,7 +184,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     /**
      * @param {Xflow.data.Request} request
-     * @param {Xflow.RequestNotification} changeType
+     * @param {Xflow.RESULT_STATE} changeType
      */
     p.dataChanged = function(request, changeType) {
         var obj = this.getMyDrawableObject();
@@ -224,24 +224,24 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             var buffer = entry.userData.buffer;
 
             switch(entry.userData.webglDataChanged) {
-                case Xflow.DataNotifications.CHANGED_CONTENT:
-                    var bufferType = attr == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+            case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:
+                var bufferType = attr == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
-                    gl.bindBuffer(bufferType, buffer);
-                    gl.bufferSubData(bufferType, 0, entry.getValue());
-                    break;
-                case Xflow.DataNotifications.CHANGED_NEW:
-                case Xflow.DataNotifications.CHANGE_SIZE:
-                    if (attr == "index") {
-                        buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
-                    } else {
-                        buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.getValue());
-                    }
-                    buffer.tupleSize = entry.getTupleSize();
-                    entry.userData.buffer = buffer;
-                    break;
-                default:
-                    break;
+                gl.bindBuffer(bufferType, buffer);
+                gl.bufferSubData(bufferType, 0, entry.getValue());
+                break;
+            case Xflow.DATA_ENTRY_STATE.CHANGED_NEW:
+            case Xflow.DATA_ENTRY_STATE.CHANGE_SIZE:
+                if (attr == "index") {
+                    buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
+                } else {
+                    buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.getValue());
+                }
+                buffer.tupleSize = entry.getTupleSize();
+                entry.userData.buffer = buffer;
+                break;
+             default:
+                 break;
             }
 
             meshInfo.vbos[attr] = [];

@@ -205,20 +205,20 @@ test("Test filter parsing", function() {
     var mapping;
 
     dataNode.setFilter("keep(position, normal, tangent)");
-    strictEqual(dataNode.filterType, Xflow.DataNode.FILTER_TYPE.KEEP, "Filter Type is 'keep'");
+    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.KEEP, "Filter Type is 'keep'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getName(0), "position", "First mapping name is 'position'");
     strictEqual(mapping.getName(1), "normal", "Second mapping name is 'normal'");
     strictEqual(mapping.getName(2), "tangent", "Third mapping name is 'tangent'");
 
     dataNode.setFilter("remove ( A , B )   ");
-    strictEqual(dataNode.filterType, Xflow.DataNode.FILTER_TYPE.REMOVE, "Filter Type is 'remove'");
+    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.REMOVE, "Filter Type is 'remove'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getName(0), "A", "First mapping name is 'A'");
     strictEqual(mapping.getName(1), "B", "Second mapping name is 'B'");
 
     dataNode.setFilter("rename ({newA : oldA , newB:oldB, newC: oldB})  ");
-    strictEqual(dataNode.filterType, Xflow.DataNode.FILTER_TYPE.RENAME , "Filter Type is 'rename'");
+    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.RENAME , "Filter Type is 'rename'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getDestName(0), "newA", "First destination name is 'newA'");
     strictEqual(mapping.getDestName(1), "newB", "Second destination name is 'newB'");
@@ -228,7 +228,7 @@ test("Test filter parsing", function() {
     strictEqual(mapping.getSrcName(2), "oldB", "Third source name is 'oldB'");
 
     dataNode.setFilter("keep( {DEST : A, DEST :B , DEST: C , C2: A } ) ");
-    strictEqual(dataNode.filterType, Xflow.DataNode.FILTER_TYPE.KEEP , "Filter Type is 'keep'");
+    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.KEEP , "Filter Type is 'keep'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getDestName(0), "DEST", "First destination name is 'DEST'");
     strictEqual(mapping.getDestName(1), "C2", "Second destination name is 'C2'");

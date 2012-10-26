@@ -43,8 +43,7 @@
         if (node.src)
             this.createImageFromURL(node.src);
     };
-    XML3D.createClass(ImgDataAdapter, XML3D.data.DataAdapter);
-    XML3D.extend(ImgDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
+    XML3D.createClass(ImgDataAdapter, XML3D.base.NodeAdapter);
 
     /**
      * Creates a new image object

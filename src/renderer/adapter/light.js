@@ -16,11 +16,14 @@
 
         this.offset = 0;
         this.lightType = "point";
+        this.updateLightShader();
+
     };
     XML3D.createClass(LightRenderAdapter, XML3D.webgl.RenderAdapter);
 
     LightRenderAdapter.prototype.notifyChanged = function(evt) {
         var target = evt.internalType || evt.wrapped.attrName;
+        // TODO: Support change of lightshader
 
         switch(target) {
         case "visible":
@@ -111,29 +114,26 @@
         }
 	};
 
+    LightRenderAdapter.prototype.updateLightShader = function(){
+        var shaderHref = this.node.shader;
+        if(!shaderHref)
+        {
+            var styleValue = this.node.getAttribute('style');
+            if(styleValue){
+                var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
+                var result = pattern.exec(styleValue);
+                if (result)
+                    shaderHref = result[1];
+            }
+        }
+        this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
+    }
+
 	/**
 	 *
 	 */
     LightRenderAdapter.prototype.getLightShader = function() {
-        if (!this.lightShader) {
-            var shaderLink = this.node.shader;
-            var shader = null;
-            if (shaderLink != "")
-                shader = XML3D.URIResolver.resolveLocal(shaderLink);
-            // if no shader attribute is specified, try to get a shader from the style attribute
-            if(shader == null)
-            {
-                var styleValue = this.node.getAttribute('style');
-                if(!styleValue)
-                    return null;
-                var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
-                var result = pattern.exec(styleValue);
-                if (result)
-                    shader = this.node.xml3ddocument.resolve(result[1]);
-            }
-            this.lightShader = this.factory.getAdapter(shader);
-        }
-        return this.lightShader;
+        return this.getConnectedAdapter("shader");
     };
     LightRenderAdapter.prototype.dispose = function() {
         this.isValid = false;

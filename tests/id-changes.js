@@ -59,8 +59,8 @@ test("Shader ID changes", function() {
     color.name = "diffuseColor";
     color.textContent = "1 0 1";
     newShader.appendChild(color);
-    newShader.script = "urn:xml3d:shader:flat";
     newShader.id = "notThere";
+    newShader.script = "urn:xml3d:shader:flat";
     this.doc.getElementsByTagName("defs")[0].appendChild(newShader);
     hTest.draw();
     ok(true, "Add a new shader of id #notThere");

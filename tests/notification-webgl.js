@@ -1,5 +1,6 @@
 
 function NotifyingAdapterFactory() {
+    XML3D.base.NodeAdapterFactory.call(this, "test");
     var that = this;
     this.name = "test";
     this.event = null;
@@ -14,7 +15,7 @@ function NotifyingAdapterFactory() {
         };
     };
 };
-XML3D.createClass(NotifyingAdapterFactory, XML3D.base.AdapterFactory);
+XML3D.createClass(NotifyingAdapterFactory, XML3D.base.NodeAdapterFactory);
 
 module("Element notification tests", {
     factory : new NotifyingAdapterFactory()
@@ -90,16 +91,6 @@ test("Enumeration attribute notification tests", 5, function() {
     e.setAttribute("type", "3D"); // case insensitive
     e.setAttribute("type", "1d");
     e.setAttribute("type", "asdf"); // invalid
-});
-
-test("Reference attribute notification tests", 5, function() {
-    var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
-    var a = this.factory.getAdapter(e);
-    e.setAttribute("activeView", "#myView");
-    ok(this.factory.event, "Event has been thrown");
-    equal(this.factory.event.type, XML3D.events.DANGLING_REFERENCE, "Can't resolve before insertion into DOM.");
-    equal(this.factory.event.value, null, "Can't resolve before insertion into DOM.");
-    e.activeView = "#hallo";
 });
 
 module("Composed Element notification tests", {

@@ -24,20 +24,16 @@
         if (this.parentTransform !== null)
             mat4.multiply(this.parentTransform, m,  m);
 
-        if (this.transformAdapter)
-            mat4.multiply(m, this.transformAdapter.getMatrix());
+        var handle = this.getConnectedAdapter("transform");
+        if (handle)
+            mat4.multiply(m, handle.getMatrix());
 
         return m;
     };
     
     p.updateTransformAdapter = function() {
-        this.transformAdapter = null;
-        var tNode = this.node.transform;
-        if (tNode) {
-            tNode = XML3D.URIResolver.resolveLocal(tNode);
-            if (tNode)
-                this.transformAdapter = this.factory.getAdapter(tNode);
-        }
+        var transformHref = this.node.transform;
+        this.connectAdapterHandle("transform", this.getAdapterHandle(transformHref));
     };
 
     p.processListeners  = function() {
@@ -66,6 +62,11 @@
         } else if (evt.type == XML3D.events.THIS_REMOVED) {
             return;
         }
+        else if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED && !evt.internalType){
+            // The connected transform node changed;
+            this.propagateTransform(evt);
+            return;
+        }
         
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
         
@@ -85,53 +86,24 @@
             this.parentShaderHandle = evt.newValue;
             break;
             
-        case "translation":
-        case "rotation":
-        case "scale":
-            //This group adapter's transform node was changed
-            var downstreamValue = this.transformAdapter.getMatrix();
-            if (this.parentTransform)
-                downstreamValue = mat4.multiply(this.parentTransform, downstreamValue, mat4.create());
-            
-            evt.internalType = "parenttransform";
-            evt.newValue = downstreamValue;
-            this.notifyChildren(evt);
-            delete evt.internalType;
-            delete evt.newValue;
-            break;
-            
         case "transform":
             //This group is now linked to a different transform node. We need to notify all
             //of its children with the new transformation matrix
-            this.updateTransformAdapter(this);
+            this.updateTransformAdapter();
 
-            var downstreamValue;
-            if (this.transformAdapter)
-                downstreamValue = this.transformAdapter.getMatrix();
-            else if (this.parentTransform)
-                downstreamValue = mat4.identity(mat4.create());
-            else
-                downstreamValue = null;
+            this.propagateTransform(evt);
 
-            if(this.parentTransform)
-                downstreamValue = mat4.multiply(this.parentTransform, downstreamValue, mat4.create());
-
-            evt.internalType = "parenttransform";
-            evt.newValue = downstreamValue;
-            
-            this.notifyChildren(evt);
-            delete evt.internalType;
-            delete evt.newValue;
-            this.factory.renderer.requestRedraw("Group transform changed.", true);
             break;
         
         //TODO: this will change once the wrapped events are sent to all listeners of a node
         case "parenttransform":  
             var parentValue = downstreamValue = evt.newValue;
             this.parentTransform = evt.newValue;
-            
-            if (this.transformAdapter)
-                downstreamValue = mat4.multiply(parentValue, this.transformAdapter.getMatrix(), mat4.create());
+
+            var downstreamValue;
+            var transformAdapter = this.getConnectedAdapter("transform");
+            if (transformAdapter)
+                downstreamValue = mat4.multiply(parentValue, transformAdapter.getMatrix(), mat4.create());
             
             evt.newValue = downstreamValue;
             this.notifyChildren(evt);
@@ -180,6 +152,28 @@
         }
     };
 
+    p.propagateTransform = function(evt){
+        var downstreamValue;
+        var transformAdapter = this.getConnectedAdapter("transform");
+        if (transformAdapter)
+            downstreamValue = transformAdapter.getMatrix();
+        else if (this.parentTransform)
+            downstreamValue = mat4.identity(mat4.create());
+        else
+            downstreamValue = null;
+
+        if(this.parentTransform)
+            downstreamValue = mat4.multiply(this.parentTransform, downstreamValue, mat4.create());
+
+        evt.internalType = "parenttransform";
+        evt.newValue = downstreamValue;
+
+        this.notifyChildren(evt);
+        delete evt.internalType;
+        delete evt.newValue;
+        this.factory.renderer.requestRedraw("Group transform changed.", true);
+    }
+
     p.getShaderHandle = function()
     {
         var shaderHref = this.node.shader;
@@ -194,8 +188,7 @@
             }
         }
         if(shaderHref)
-            return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, shaderHref,
-                XML3D.webgl, this.factory.handler.id);
+            return this.getAdapterHandle(shaderHref);
         else
             return this.parentShaderHandle;
 
@@ -220,16 +213,18 @@
             if(c.getBoundingBox)
                 bbox.extend(c.getBoundingBox());
         });
-        if (this.transformAdapter) {
-            XML3D.webgl.transformAABB(bbox, this.transformAdapter.getMatrix());
+        var adapter = this.getConnectedAdapter("transform");
+        if (adapter) {
+            XML3D.webgl.transformAABB(bbox, adapter.getMatrix());
         }
         return bbox;
     };
   
     p.getLocalMatrix = function() {
         var m = new window.XML3DMatrix();
-        if (this.transformAdapter !== null)
-            m._data.set(this.transformAdapter.getMatrix());
+        var adapter = this.getConnectedAdapter("transform");
+        if (adapter)
+            m._data.set(adapter.getMatrix());
         return m;
     };
     

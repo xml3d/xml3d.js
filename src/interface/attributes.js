@@ -43,33 +43,9 @@
         };
     };
 
+    // TODO: remove reference handler in webgl generator and remove this line
+    handler.ReferenceHandler = handler.StringAttributeHandler;
 
-    handler.ReferenceHandler = function(elem, id) {
-        this.setFromAttribute = function(value) {
-            var evt = new events.ReferenceNotification(elem, id, value);
-            elem._configured.notify(evt);
-            elem._configured.notifyOpposite(evt);
-            return true; // Already notified
-        };
-        this.remove = function() {
-            var evt = new events.ReferenceNotification(elem, id, elem.getAttribute(id));
-            if(evt.type == events.VALID_REFERENCE
-            && evt.value // a shader is a valid ref but does not have an associated value
-            && evt.value._configured)
-            {
-                evt.value._configured.removeOpposite(evt);
-            }
-        };
-        this.desc = {
-            get : function() {
-                return this.getAttribute(id) || "";
-            },
-            set : function(value) {
-                this.setAttribute(id, value);
-            }
-        };
-        elem._configured.notifyOpposite(new events.ReferenceNotification(elem, id, elem.getAttribute(id)));
-    };
 
     handler.EnumAttributeHandler = function(elem, id, p) {
         AttributeHandler.call(this, elem);

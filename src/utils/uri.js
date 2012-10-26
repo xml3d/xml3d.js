@@ -126,6 +126,8 @@ XML3D.URIResolver.resolveLocal = function(uri, document) {
     return null;
 };
 
+
+
 /**
  * @deprecated
  */

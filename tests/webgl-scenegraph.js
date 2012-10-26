@@ -17,11 +17,24 @@ module("WebGL Scenegraph", {
 });
 
 function getContextForXml3DElement(x) {
-    return x._configured.adapters.RenderAdapterFactory.factory.handler.renderer.gl;
+    if(x._configured){
+        for(var i in x._configured.adapters){
+            if(i.indexOf("webgl") == 0){
+                return x._configured.adapters[i].factory.handler.renderer.gl;
+            }
+        }
+    }
 };
 
 function getHandler(x) {
-    return x._configured ? x._configured.adapters.RenderAdapterFactory.factory.handler : null;
+    if(x._configured){
+        for(var i in x._configured.adapters){
+            if(i.indexOf("webgl") == 0){
+                return x._configured.adapters[i].factory.handler;
+            }
+        }
+    }
+    return null;
 };
 
 test("Background and invisible mesh", 4, function() {

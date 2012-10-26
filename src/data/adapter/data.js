@@ -30,21 +30,13 @@ IDataAdapter.prototype.addParentAdapter = function(adapter) {
  * @param node
  */
 XML3D.data.DataAdapter = function(factory, node) {
-    XML3D.base.Adapter.call(this, factory, node);
+    XML3D.base.NodeAdapter.call(this, factory, node);
 
     // Node handles for src and proto
     this.handles = {};
     this.xflowDataNode = null;
 };
-XML3D.createClass(XML3D.data.DataAdapter, XML3D.base.Adapter);
-/**
- *
- * @param aType
- * @returns {Boolean}
- */
-XML3D.data.DataAdapter.prototype.isAdapterFor = function(aType) {
-    return aType == XML3D.data.XML3DDataAdapterFactory.prototype;
-};
+XML3D.createClass(XML3D.data.DataAdapter, XML3D.base.NodeAdapter);
 
 XML3D.data.DataAdapter.prototype.init = function() {
     //var xflow = this.resolveScript();
@@ -88,7 +80,10 @@ XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
  * @param evt notification of type XML3D.Notification
  */
 XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
-
+    if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
+        this.connectedAdapterChanged(evt.key, evt.adapter);
+        return;
+    }
     if (evt.type == XML3D.events.NODE_INSERTED) {
         var insertedNode = evt.wrapped.target;
         var insertedXflowNode = this.factory.getAdapter(insertedNode).getXflowNode();
@@ -114,28 +109,23 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
         else if(attr == "compute"){
             this.xflowDataNode.setCompute(this.node.getAttribute(attr))
         }
-        return;
-    } else if(evt.type == XML3D.events.DANGLING_REFERENCE || evt.type == XML3D.events.VALID_REFERENCE){
-        var attr = evt.attrName;
-        if(attr == "src" || attr == "proto"){
+        else if(attr == "src" || attr == "proto"){
             this.updateHandle(attr);
         }
+        return;
     }
 };
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {
-    if (this.handles[attributeName])
-        this.handles[attributeName].removeListener(this);
-    this.handles[attributeName] = this.factory.getAdapterURI(this.node, this.node.getAttribute(attributeName));
-    this.handles[attributeName].addListener(this);
-    this.referredAdapterChanged(this.handles[attributeName]);
+    var adapterHandle = this.getAdapterHandle(this.node.getAttribute(attributeName));
+    this.connectAdapterHandle(attributeName, adapterHandle);
+    this.connectedAdapterChanged(attributeName, adapterHandle ? adapterHandle.getAdapter() : null);
 };
 
-XML3D.data.DataAdapter.prototype.referredAdapterChanged = function(adapterHandle) {
-    var adapter = adapterHandle.getAdapter();
-    if(this.handles["src"] == adapterHandle){
+XML3D.data.DataAdapter.prototype.connectedAdapterChanged = function(key, adapter) {
+    if(key == "src"){
         this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
     }
-    if(this.handles["proto"] == adapterHandle){
+    if(key == "proto"){
         this.xflowDataNode.protoNode = adapter ? adapter.getXflowNode() : null;
     }
 };

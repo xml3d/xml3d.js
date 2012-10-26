@@ -9,12 +9,12 @@
      * @param {XML3D.webgl.Renderer} renderer
      */
     var RenderAdapterFactory = function(handler, renderer) {
-        XML3D.base.AdapterFactory.call(this);
+        XML3D.base.NodeAdapterFactory.call(this, XML3D.webgl, handler.id);
         this.handler = handler;
         this.renderer = renderer;
         this.type = "RenderAdapterFactory";
     };
-    XML3D.createClass(RenderAdapterFactory, XML3D.base.AdapterFactory);
+    XML3D.createClass(RenderAdapterFactory, XML3D.base.NodeAdapterFactory);
 
     var ns = XML3D.webgl,
         registry = {
@@ -30,14 +30,6 @@
             light:          ns.LightRenderAdapter,
             lightshader:    ns.LightShaderRenderAdapter
 
-    };
-
-    /**
-     * @param obj
-     * @return {Boolean}
-     */
-    RenderAdapterFactory.prototype.isFactoryFor = function(obj) {
-        return obj == XML3D.webgl;
     };
 
     /**

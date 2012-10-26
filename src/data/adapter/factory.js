@@ -41,25 +41,9 @@
      */
     var XML3DDataAdapterFactory = function()
     {
-        XML3D.base.AdapterFactory.call(this);
+        XML3D.base.NodeAdapterFactory.call(this, XML3D.data);
     };
-    XML3D.createClass(XML3DDataAdapterFactory, XML3D.base.AdapterFactory);
-
-    XML3DDataAdapterFactory.prototype.isFactoryFor = function(obj) {
-        return obj == XML3D.data;
-    };
-
-    /**
-     * Returns a DataAdapter instance associated with the given node. If there is already a DataAdapter created for this node,
-     * this instance is returned, otherwise a new one is created.
-     *
-     * @param   node  element node which uses generic data. The supported elements are listed in the class description above.
-     * @returns DataAdapter instance
-     */
-    XML3DDataAdapterFactory.prototype.getAdapter = function(node)
-    {
-        return XML3D.base.AdapterFactory.prototype.getAdapter.call(this, node, XML3D.data.XML3DDataAdapterFactory.prototype);
-    };
+    XML3D.createClass(XML3DDataAdapterFactory, XML3D.base.NodeAdapterFactory);
 
     /**
      * Tries to create an adapter from an URI
@@ -72,9 +56,6 @@
         if(!uri) {
             return new XML3D.base.AdapterHandle();
         }
-        uri = new XML3D.URI(uri);
-
-        // TODO: Get document of current adapter, use it instead of window.document
         var a = XML3D.base.resourceManager.getAdapterHandle(node.ownerDocument, uri, XML3D.data);
         return a;
     };
@@ -119,5 +100,4 @@
     // Export
     XML3D.data.XML3DDataAdapterFactory = XML3DDataAdapterFactory;
     XML3D.data.factory = new XML3DDataAdapterFactory();
-    XML3D.base.registerFactory("application/xml", XML3D.data.factory);
 }());

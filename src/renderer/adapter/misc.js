@@ -1,17 +1,17 @@
 // Misc adapters
 (function() {
     XML3D.webgl.RenderAdapter = function(factory, node) {
-        XML3D.base.Adapter.call(this, factory, node);
+        XML3D.base.NodeAdapter.call(this, factory, node);
     };
-    XML3D.webgl.RenderAdapter.prototype = new XML3D.base.Adapter();
-    XML3D.webgl.RenderAdapter.prototype.constructor = XML3D.webgl.RenderAdapter;
-
-    XML3D.webgl.RenderAdapter.prototype.isAdapterFor = function(protoType) {
-        return protoType == XML3D.webgl.Renderer.prototype;
-    };
+    XML3D.createClass(XML3D.webgl.RenderAdapter, XML3D.base.NodeAdapter);
 
     XML3D.webgl.RenderAdapter.prototype.getShader = function() {
         return null;
+    };
+
+    XML3D.webgl.RenderAdapter.prototype.getAdapterHandle = function(uri) {
+        return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, uri,
+            XML3D.webgl, this.factory.handler.id);
     };
 
     XML3D.webgl.RenderAdapter.prototype.applyTransformMatrix = function(

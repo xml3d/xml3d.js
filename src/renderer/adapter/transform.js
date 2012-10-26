@@ -70,16 +70,7 @@
         } else if (e.type == 2) {
             this.dispose();
         }
-
-        var opposites = this.node._configured.opposites;
-        if (opposites) {
-            for (var i=0, length = opposites.length; i<length; i++) {
-                var adapter = this.factory.getAdapter(opposites[i].relatedNode);
-                if (adapter && adapter.notifyChanged)
-                    adapter.notifyChanged(e);
-            }
-        }
-
+        this.notifyOppositeAdapters();
     };
     p.dispose = function() {
         this.isValid = false;

@@ -24,12 +24,26 @@
         if (this.parentTransform !== null)
             mat4.multiply(this.parentTransform, m,  m);
 
-        var handle = this.getConnectedAdapter("transform");
-        if (handle)
-            mat4.multiply(m, handle.getMatrix());
+        var matrix = this.getLocalMatrixInternal();
+        if (matrix)
+            mat4.multiply(m, matrix);
 
         return m;
     };
+
+    p.getLocalMatrixInternal = function()
+    {
+        var cssMatrix = XML3D.css.getCSSMatrix(this.node);
+        if(cssMatrix){
+            return XML3D.css.convertCssToMat4(cssMatrix);
+        }
+
+        var handle = this.getConnectedAdapter("transform");
+        if (handle)
+            return handle.getMatrix();
+
+        return null;
+    }
     
     p.updateTransformAdapter = function() {
         var transformHref = this.node.transform;
@@ -101,9 +115,9 @@
             this.parentTransform = evt.newValue;
 
             var downstreamValue;
-            var transformAdapter = this.getConnectedAdapter("transform");
-            if (transformAdapter)
-                downstreamValue = mat4.multiply(parentValue, transformAdapter.getMatrix(), mat4.create());
+            var matrix = this.getLocalMatrixInternal();
+            if (matrix)
+                downstreamValue = mat4.multiply(parentValue, matrix, mat4.create());
             
             evt.newValue = downstreamValue;
             this.notifyChildren(evt);
@@ -154,9 +168,9 @@
 
     p.propagateTransform = function(evt){
         var downstreamValue;
-        var transformAdapter = this.getConnectedAdapter("transform");
-        if (transformAdapter)
-            downstreamValue = transformAdapter.getMatrix();
+        var matrix = this.getLocalMatrixInternal();
+        if (matrix)
+            downstreamValue = matrix;
         else if (this.parentTransform)
             downstreamValue = mat4.identity(mat4.create());
         else
@@ -213,18 +227,18 @@
             if(c.getBoundingBox)
                 bbox.extend(c.getBoundingBox());
         });
-        var adapter = this.getConnectedAdapter("transform");
-        if (adapter) {
-            XML3D.webgl.transformAABB(bbox, adapter.getMatrix());
+        var matrix = this.getLocalMatrixInternal();
+        if (matrix) {
+            XML3D.webgl.transformAABB(bbox, matrix);
         }
         return bbox;
     };
   
     p.getLocalMatrix = function() {
         var m = new window.XML3DMatrix();
-        var adapter = this.getConnectedAdapter("transform");
-        if (adapter)
-            m._data.set(adapter.getMatrix());
+        var matrix = this.getLocalMatrixInternal();
+        if (matrix)
+            m._data.set(matrix);
         return m;
     };
     

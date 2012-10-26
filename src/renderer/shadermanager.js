@@ -151,6 +151,11 @@
         var dataTable = shaderAdapter.requestData(material.getRequestFields());
 
         program = material.getProgram(lights, dataTable);
+
+        if (!program) {
+            return "defaultShader";
+        }
+
         this.shaders[shaderId] = program;
         this.gl.useProgram(program.handle);
 
@@ -306,6 +311,7 @@
     XML3DShaderManager.prototype.shaderDataChanged = function(adapter, request, changeType) {
         var shaderId = new XML3D.URI("#" + adapter.node.id).getAbsoluteURI(adapter.node.ownerDocument.documentURI).toString();
         var program = this.shaders[shaderId];
+        if(!program) return; // No Program - probably invalid shader
         var result = request.getResult();
         this.bindShader(program);
         this.setUniformsFromComputeResult(program, result);
@@ -315,7 +321,6 @@
             program.hasTransparency = program.material.isTransparent;
         }
         this.renderer.requestRedraw("Shader data changed");
-
     };
 
     XML3DShaderManager.prototype.getShaderById = function(shaderId) {

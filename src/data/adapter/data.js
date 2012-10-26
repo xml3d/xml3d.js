@@ -82,9 +82,12 @@ XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
 XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
     if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
         this.connectedAdapterChanged(evt.key, evt.adapter);
+        if(evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
+            XML3D.debug.logError("Could not find <data> element of url '" + evt.url + "' for " + evt.key);
+        }
         return;
     }
-    if (evt.type == XML3D.events.NODE_INSERTED) {
+    else if (evt.type == XML3D.events.NODE_INSERTED) {
         var insertedNode = evt.wrapped.target;
         var insertedXflowNode = this.factory.getAdapter(insertedNode).getXflowNode();
         var sibling = insertedNode, followUpAdapter = null;

@@ -72,6 +72,7 @@
     function showError(req) {
         XML3D.debug.logError("Could not load external document '" + req._url +
             "': " + req.status + " - " + req.statusText);
+        invalidateDocumentHandles(req._url);
     };
 
     /**
@@ -118,6 +119,20 @@
     }
 
     /**
+     * Invalidate all handles of a document, that could not be loaded.
+     * @param {string} url The URL of the document
+     */
+    function invalidateDocumentHandles(url){
+        var docCache = c_cachedDocuments[url];
+        var fragments = docCache.fragments;
+        docCache.fragments = [];
+        for ( var i = 0; i < fragments.length; ++i) {
+            var fullUrl = url + (fragments[i] ? "#" + fragments[i] : "");
+            invalidateHandles(fullUrl);
+        }
+    }
+
+    /**
      * Update all handles of a part from an external document
      * @param {string} url The URL of the document
      * @param {string} fragment Fragment without pound key which defines the part of the document
@@ -141,7 +156,11 @@
         if (data) {
             updateMissingHandles(fullUrl, mimetype, data);
         }
+        else{
+            invalidateHandles(fullUrl);
+        }
     }
+
 
     /**
      * Update all AdapterHandles without adapters of a certain url
@@ -157,6 +176,19 @@
                 if (!handle.hasAdapter() && factories[mimetype]) {
                     updateHandle(handle, adapterType, canvasId, mimetype, data);
                 }
+            }
+        }
+    }
+
+    /**
+     * Invalidate all AdapterHandles without adapters of a certain url
+     * @param {string} url The complete url + fragment
+     */
+    function invalidateHandles(url){
+        for ( var adapterType in c_cachedAdapterHandles[url]) {
+            for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
+                var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
+                handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
             }
         }
     }
@@ -178,7 +210,7 @@
             if (fac.aspect == adapterType) {
                 var adapter = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
                 if (adapter) {
-                    handle.setAdapter(adapter);
+                    handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);
                 }
             }
         }
@@ -194,7 +226,7 @@
             for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (handle.hasAdapter()) {
-                    handle.setAdapter(null);
+                    handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
                 }
             }
         }
@@ -233,14 +265,15 @@
         if (handle)
             return handle;
 
-        var handle = new XML3D.base.AdapterHandle();
+        var handle = new XML3D.base.AdapterHandle(uri);
         c_cachedAdapterHandles[uri][adapterType][canvasId] = handle;
-
-        var factories = c_factories[canvasId];
 
         if(uri.isLocal()){
             var node = XML3D.URIResolver.resolveLocal(uri);
-            updateHandle(handle, adapterType, canvasId, "application/xml", node);
+            if(node)
+                updateHandle(handle, adapterType, canvasId, "application/xml", node);
+            else
+                handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
         }
         else{
             var docURI = uri.toStringWithoutFragment();

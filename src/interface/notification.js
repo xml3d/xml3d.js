@@ -46,7 +46,9 @@
   events.ConnectedAdapterNotification = function(adapterHandleNotification, key) {
     this.adapter = adapterHandleNotification.adapterHandle.getAdapter();
     this.key = key;
+    this.url = adapterHandleNotification.adapterHandle.url;
     this.type = adapterHandleNotification.type;
+    this.handleStatus = adapterHandleNotification.adapterHandle.status;
   };
   XML3D.createClass(events.ConnectedAdapterNotification, events.Notification);
   events.ConnectedAdapterNotification.prototype.toString = function() {

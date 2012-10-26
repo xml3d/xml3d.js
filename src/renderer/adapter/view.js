@@ -59,6 +59,19 @@
         m._data.set(this.viewMatrix);
         return m;
     };
+    
+    /** 
+     * @return {XML3DMatrix} returns the inverse of the view matrix, since now we 
+     * want to go world2view and not view2world
+     */
+    p.getWorldMatrix = function() {        
+        var m = new window.XML3DMatrix();  
+        var tmp = mat4.create(); 
+        mat4.inverse(this.viewMatrix, tmp); 
+        m._data.set(tmp);
+        return m; 
+    }; 
+
 
     p.getModelViewMatrix = function(model) {
         return mat4.multiply(this.viewMatrix, model, mat4.create());

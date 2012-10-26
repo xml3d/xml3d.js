@@ -3,6 +3,7 @@ function NotifyingAdapterFactory() {
     var that = this;
     this.name = "test";
     this.event = null;
+    this.type = "NotifyingAdapterFactory"; 
     this.createAdapter = function() {
         return {
             init : function() {},

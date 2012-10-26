@@ -98,7 +98,12 @@ Renderer.prototype.initCamera = function() {
             return XML3D.xml3dNS;
         }, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         if (av == null)
-            XML3D.debug.logError("No view defined.");
+        {
+            XML3D.debug.logWarning("No view defined: creating one.");
+
+            av = XML3D.createElement("view");
+            this.xml3dNode.appendChild(av);
+        }
         this.currentView = av;
         return this.factory.getAdapter(av);
     }
@@ -259,23 +264,27 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     if (!adapter)
         return;
 
-    var transform = mat4.identity(mat4.create());
     var shaderHandle = null;
     if (adapter.getShaderHandle)
         shaderHandle = adapter.getShaderHandle();
 
-    var currentNode = evt.wrapped.target;
+    var currentNode = evt.wrapped.target.parentElement;
 	var pickable = null;
 	var visible = null;
     var didListener = false;
     adapter.isValid = true;
 
+    var parentTransform = mat4.identity(mat4.create());
+    if(currentNode && currentNode.nodeName == "group")
+    {
+        var parentAdapter = this.factory.getAdapter(currentNode);
+        parentTransform = parentAdapter.applyTransformMatrix(parentTransform);
+    }
+
     //Traverse parent group nodes to build any inherited shader and transform elements
-    while (currentNode.parentElement) {
-        currentNode = currentNode.parentElement;
+    while (currentNode) {
         if (currentNode.nodeName == "group") {
-			var parentAdapter = this.factory.getAdapter(currentNode);
-            transform = parentAdapter.applyTransformMatrix(transform);
+            var parentAdapter = this.factory.getAdapter(currentNode);
             if (!shaderHandle)
                 shaderHandle = parentAdapter.getShaderHandle();
 			if (currentNode.hasAttribute("visible")) {
@@ -291,11 +300,13 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
         } else {
             break; //End of nested groups
         }
+
+        currentNode = currentNode.parentElement;
     }
 	visible = visible === null ? true : visible;
     //Build any new objects and add them to the scene
     var newObjects = new Array();
-	this.recursiveBuildScene(newObjects, evt.wrapped.target, visible, transform, shaderHandle, pickable);
+    this.recursiveBuildScene(newObjects, evt.wrapped.target, visible, parentTransform, shaderHandle, pickable);
     this.processShaders(newObjects);
     this.drawableObjects = this.drawableObjects.concat(newObjects);
 

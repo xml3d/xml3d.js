@@ -15,6 +15,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             rc = window.WebGLRenderingContext;
 
     var staticAttributes = ["index", "position", "normal", "color", "texcoord", "size", "tangent"];
+    var bboxAttributes = ["boundingbox"];
 
     /**
      * @constructor
@@ -29,11 +30,20 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.getMyDrawableObject = noDrawableObject;
 
         this.computeRequest = null;
+        this.bboxComputeRequest = null;
     };
 
     XML3D.createClass(MeshRenderAdapter, XML3D.webgl.RenderAdapter);
 
     var p = MeshRenderAdapter.prototype;
+
+    p.applyTransformMatrix = function(m) {
+
+        if (this.getMyDrawableObject().transform)
+            mat4.multiply(m, this.getMyDrawableObject().transform);
+
+        return m;
+    };
 
     /**
      *
@@ -151,8 +161,12 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes,
             function(request, changeType) {
                 that.dataChanged(request, changeType);
-            });
+        });
+        this.bboxComputeRequest = this.dataAdapter.getComputeRequest(bboxAttributes);
+
         this.dataChanged();
+
+        this.bbox = this.calcBoundingBox();
     };
 
     var emptyFunction = function() {};
@@ -246,8 +260,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         //Calculate a bounding box for the mesh
         if (calculateBBox) {
-            var positions = dataResult.getOutputData("position").getValue();
-            this.bbox = XML3D.webgl.calculateBoundingBox(positions, meshInfo.isIndexed ? dataResult.getOutputData("index").getValue() : null);
+            this.bbox = this.calcBoundingBox();
             meshInfo.bbox.set(this.bbox);
         }
 
@@ -272,6 +285,54 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      */
     p.getBoundingBox = function() {
         return this.bbox;
+    };
+
+    /**
+     * @return {XML3DMatrix}
+     */
+    p.getWorldMatrix = function() {
+
+        var m = new window.XML3DMatrix();
+
+        var obj = this.getMyDrawableObject();
+        if(obj)
+            m._data.set(obj.transform);
+
+        return m;
+    };
+
+    /**
+     * @private
+     * @return {XML3DBox} the calculated bounding box of this mesh.
+     */
+    p.calcBoundingBox = function() {
+
+        var bbox = new window.XML3DBox();
+        
+        // try to compute bbox using the boundingbox property of xflow
+        var bboxResult = this.bboxComputeRequest.getResult();
+        var bboxOutData = bboxResult.getOutputData("boundingbox");
+        if (bboxOutData)
+        {
+            var bboxVal = bboxOutData.getValue();
+            bbox.extend(bboxVal[0]);
+            bbox.extend(bboxVal[1]);
+
+            return bbox;
+        }
+
+        // compute bounding box from positions and indices, if present
+        var dataResult = this.computeRequest.getResult();
+        var posData = dataResult.getOutputData("position"); 
+        if(!posData)
+            return bbox; 
+        
+        var positions = posData.getValue();
+
+        var idxOutData = dataResult.getOutputData("index");
+        var indices = idxOutData ? idxOutData.getValue() : null;
+
+        return XML3D.webgl.calculateBoundingBox(positions, indices);
     };
 
     var getGLTypeFromArray = function(array) {

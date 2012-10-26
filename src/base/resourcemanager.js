@@ -78,6 +78,13 @@
             docCache.response = JSON.parse(req.responseText);
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
             docCache.response = req.responseXML;
+
+            if(!docCache.response){
+                XML3D.debug.logError("Invalid external XML document '" + req._url +
+                "': XML Syntax error");
+                return;
+            }
+
             // Configure all xml3d elements:
             var xml3dElements = docCache.response.querySelectorAll("xml3d");
             for(var i = 0; i < xml3dElements.length; ++i){
@@ -103,6 +110,8 @@
 
         var response = c_cachedDocuments[url].response;
         var mimetype = c_cachedDocuments[url].mimetype;
+
+        if(!response) return;
 
         var fullUrl = url + (fragment ? "#" + fragment : "");
         var data = null;

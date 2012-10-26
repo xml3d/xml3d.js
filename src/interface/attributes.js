@@ -53,7 +53,10 @@
         };
         this.remove = function() {
             var evt = new events.ReferenceNotification(elem, id, elem.getAttribute(id));
-            if(evt.type == events.VALID_REFERENCE && evt.value._configured) {
+            if(evt.type == events.VALID_REFERENCE
+            && evt.value // a shader is a valid ref but does not have an associated value
+            && evt.value._configured)
+            {
                 evt.value._configured.removeOpposite(evt);
             }
         };

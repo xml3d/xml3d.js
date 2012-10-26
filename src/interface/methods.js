@@ -150,8 +150,8 @@ new (function() {
     methods.xml3dGenerateRay = function(x, y) {
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {
-            if (adapters[adapter].xml3dGenerateRay) {
-                return adapters[adapter].xml3dGenerateRay(x, y);
+            if (adapters[adapter].generateRay) {
+                return adapters[adapter].generateRay(x, y);
             }
         }
         return new window.XML3DRay();

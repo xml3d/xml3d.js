@@ -50,6 +50,11 @@ XML3D.stopAllAnimations = function()
     XML3D.animation.animationManager.stopAllAnimations();
 };
 
+XML3D.isAnimationRunning = function(aniId, transId, transAttr)
+{
+    return XML3D.animation.animationManager.isAnimationRunning(aniId, transId, transAttr);
+};
+
 XML3D.animation.XML3DAnimationManager = function() {
     this.interpolators = {};
     var xml3d = document.evaluate('//xml3d:xml3d', document, function() {
@@ -238,6 +243,31 @@ XML3D.animation.XML3DAnimationManager.prototype.progress = function()
     }
     if(this.updateElement)
         this.updateElement.update();
+};
+
+
+
+XML3D.animation.XML3DAnimationManager.prototype.isAnimationRunning = function(aniId, transId, transAttr)
+{
+    var interpolator = this.interpolators[aniId];
+    if(!interpolator)
+        return false;
+
+    var trans = document.getElementById(transId);
+    if(!trans)
+        return false;
+
+    var field = trans.getAttributeNode(transAttr);
+    if(!field)
+        return false;
+
+    if(interpolator.animations[field] === undefined)
+        return false;
+
+    if(!interpolator.animations[field].running)
+        return false;
+
+    return true;
 };
 
 

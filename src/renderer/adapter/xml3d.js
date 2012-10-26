@@ -67,9 +67,8 @@
     };
 
     XML3DRenderAdapter.prototype.generateRay = function(x, y) {
-
-        var glY = this.factory.handler.getCanvasHeight() - y - 1;
-        return this.factory.handler.generateRay(x, glY);
+        
+        return this.factory.handler.generateRay(x, y);
     };
     XML3D.webgl.XML3DRenderAdapter = XML3DRenderAdapter;
 

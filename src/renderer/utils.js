@@ -317,6 +317,24 @@
 
 
     };
+    
+    /** for every component of v1 and v2 applies f, i.e. f(v1[.],v2[.]), 
+     *  and returns it.
+     *  
+     *  @param {vec3} v1 
+     *  @param {vec3} v2
+     *  @param {function(number, number):number} f
+     *  @return {vec3} the mapped vector 
+     */    
+    function mapVec(v1, v2, f)
+    {
+        var vec = vec3.create(); 
+        vec[0] = f(v1[0], v2[0]); 
+        vec[1] = f(v1[1], v2[1]);
+        vec[2] = f(v1[2], v2[2]); 
+        
+        return vec; 
+    };
 
     /**
      * @param {XML3DBox} bbox
@@ -325,10 +343,18 @@
      * @param {mat4} trafo
      */
     XML3D.webgl.adjustMinMax = function(bbox, min, max, trafo) {
-        var bbmin = vec3.create();
-        var bbmax = vec3.create();
-        mat4.multiplyVec3(trafo, bbox.min._data, bbmin);
-        mat4.multiplyVec3(trafo, bbox.max._data, bbmax);
+        var xfmmin = vec3.create();
+        var xfmmax = vec3.create();
+        mat4.multiplyVec3(trafo, bbox.min._data, xfmmin);
+        mat4.multiplyVec3(trafo, bbox.max._data, xfmmax);
+        
+        /* bounding box is axis-aligned, but through transformation
+         * min and max values might be shuffled (image e.g. a rotation (0, 1, 0, 1.57), 
+         * here min's and max' x and z values are swapped). So we 
+         * order them now. 
+         */
+        var bbmin = mapVec(xfmmin, xfmmax, Math.min); 
+        var bbmax = mapVec(xfmmin, xfmmax, Math.max); 
 
         if (bbmin[0] < min[0])
             min[0] = bbmin[0];

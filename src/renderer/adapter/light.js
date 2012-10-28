@@ -77,7 +77,7 @@
 	    return vec;
 	};
 
-	XML3DLightRenderAdapter.prototype.applyTransformDir = function(vec) {
+	LightRenderAdapter.prototype.applyTransformDir = function(vec) {
 	    if (this.transform) {
             var t = this.transform;
             var newVec = mat4.multiplyVec4(t, [vec[0], vec[1], vec[2], 0]);

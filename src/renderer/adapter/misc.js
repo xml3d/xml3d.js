@@ -102,7 +102,7 @@
     * @param {number} i
     * @param {number} offset
     */
-    XML3D.webgl.XML3DLightShaderRenderAdapter.prototype.fillSpotLight = function(spot, i, offset) {
+    XML3D.webgl.LightShaderRenderAdapter.prototype.fillSpotLight = function(spot, i, offset) {
         this.callback = spot.dataChanged;
         this.offsets.push(offset);
         var dataTable = this.computeRequest.getResult().getOutputMap();

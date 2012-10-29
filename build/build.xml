@@ -48,10 +48,8 @@
 		<file name="interface/attributes.js" />
 		<file name="interface/methods.js" />
 		<file name="interface/configuration.js" />
-		<file name="data/processtable.js" />
         <file name="data/adapter/data.js" />
         <file name="data/adapter/values.js" />
-        <file name="data/scriptinstance.js" />
         <file name="data/adapter/texture.js" />
         <file name="data/adapter/misc.js" />
         <file name="data/adapter/factory.js" />

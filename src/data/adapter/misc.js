@@ -37,7 +37,6 @@
 
     var ImgDataAdapter = function(factory, node) {
         XML3D.data.DataAdapter.call(this, factory, node);
-        XML3D.data.ProviderEntry.call(this);
         this.textureEntry = null;
         this.image = null;
         if (node.src)

@@ -18,6 +18,17 @@ Xflow.DATA_TYPE = {
     TEXTURE: 40
 }
 
+Xflow.DATA_TYPE_TUPLE_SIZE = {};
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT] = 1;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT2] = 2;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT3] = 3;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT4] = 4;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT4X4] = 16;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.INT] = 1;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.INT4] = 4;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.BOOL] = 1;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.TEXTURE] = 1;
+
 Xflow.DATA_TYPE_MAP = {
     'float' : Xflow.DATA_TYPE.FLOAT,
     'float2' : Xflow.DATA_TYPE.FLOAT2,
@@ -92,3 +103,26 @@ Xflow.RESULT_STATE = {
     CHANGED_STRUCTURE: 2
 };
 
+
+/**
+ * Type of Sequence access - used by operators
+ * @private
+ * @enum
+ */
+Xflow.SEQUENCE = {
+    NO_ACCESS: 0,
+    PREV_BUFFER: 1,
+    NEXT_BUFFER: 2,
+    LINEAR_WEIGHT: 3
+}
+
+/**
+ * Type of Information Extraction - used by operators
+ * @private
+ * @enum
+ */
+Xflow.EXTRACT = {
+    NO_EXTRAC: 0,
+    TEX_WIDTH: 1,
+    TEX_HEIGHT: 2
+};

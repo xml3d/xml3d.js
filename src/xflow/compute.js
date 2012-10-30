@@ -31,17 +31,27 @@ Channel.prototype.addDataEntry = function(dataEntry, key){
     this.entries.push(insertObj);
 };
 
-Channel.prototype.getDataEntry = function(key){
+Channel.prototype.getDataEntry = function(sequenceAccessType, sequenceKey){
     if(this.entries.length == 0)
         return null;
-    if(key == undefined)
+    if(!sequenceAccessType)
         return this.entries[0].value;
 
-    for(var i = 0; i < this.entries.length; ++i){
-        var entry = this.entries[i];
-        if(Math.abs(entry.key - key) <= Xflow.EPSILON){
-            return entry.value;
-        }
+    var i = 0, max = this.entries.length;
+    while(i < max && this.entries[i].key < sequenceKey) ++i;
+    if(sequenceAccessType == Xflow.SEQUENCE.PREV_BUFFER){
+        return this.entries[i ? i -1 : 0].value;
+    }
+    else if(sequenceAccessType == Xflow.SEQUENCE.NEXT_BUFFER){
+        return this.entries[i < max ? i : max - 1].value;
+    }
+    else if(sequenceAccessType == Xflow.SEQUENCE.LINEAR_WEIGHT){
+        var weight1 = this.entries[i ? i - 1 : 0].key;
+        var weight2 = this.entries[i < max ? i : max - 1].key;
+        var value = new Float32Array(1);
+        value[0] = weight2 == weight1 ? 0 : (sequenceKey - weight1) / (weight2 - weight1);
+        // TODO: Check if repeated BufferEntry and Float32Array allocation is a serious bottleneck
+        return new Xflow.BufferEntry(Xflow.DATA_TYPE.FLOAT, value);
     }
     return null;
 };

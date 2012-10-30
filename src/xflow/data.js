@@ -94,30 +94,7 @@ BufferEntry.prototype.getLength = function(){
 
 BufferEntry.prototype.getTupleSize = function() {
     if (!this._tupleSize) {
-        var t = Xflow.DATA_TYPE;
-        switch (this._type) {
-            case t.FLOAT:
-            case t.INT:
-            case t.BOOL:
-                this._tupleSize = 1;
-                break;
-            case t.FLOAT2:
-                this._tupleSize = 2;
-                break;
-            case t.FLOAT3:
-                this._tupleSize = 3;
-                break;
-            case t.FLOAT4:
-            case t.INT4:
-                this._tupleSize = 4;
-                break;
-            case t.FLOAT4X4:
-                this._tupleSize = 16;
-                break;
-            default:
-                XML3D.debug.logError("Encountered invalid type: "+this._type);
-                this._tupleSize = 1;
-        }
+        this._tupleSize = Xflow.DATA_TYPE_TUPLE_SIZE[this._type];
     }
     return this._tupleSize;
 };
@@ -157,7 +134,10 @@ TextureEntry.prototype.getSamplerConfig = function(){
     return this._samplerConfig;
 };
 
-
+/** @return {Object} */
+TextureEntry.prototype.getLength = function(){
+    return 1;
+};
 
 
 

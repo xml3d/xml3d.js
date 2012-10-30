@@ -23,7 +23,7 @@
         
     </Input>
     <TestProcess>
-        <!--
+
         <Check title="Check Transform #1" data="#transform" >
             <MatchData name="result" type="float4x4" >
     		    		1 0 0 0
@@ -79,7 +79,6 @@
                         0 0 0 1
             </MatchData>
         </Check>
-        -->
         <Modification title="Change transform input" >
             <ChangeAttribute node="#transform" attrName="compute" 
                 newValue="result = xflow.createTransform({scale : scale})" />

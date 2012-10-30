@@ -1,15 +1,16 @@
 Xflow.registerOperator("forwardKinematicsInv", {
-    outputs: [{name: 'result', tupleSize: '16'}],
-    params:  ['parent','xform'],
-    evaluate: function(parent,xform) {
-
+    outputs: [  {type: 'float4x4',  name: 'result', customAlloc: true}],
+    params:  [  {type: 'int',       source: 'parent', array: true },
+                {type: 'float4x4',  source: 'xform', array: true }],
+    alloc: function(sizes, parent, xform)
+    {
+        var length = Math.min(parent.length, xform.length / 16);
+        sizes['result'] = length;
+    },
+    evaluate: function(result, parent,xform) {
         var boneCount = xform.length / 16;
-        if (!this.tmp || this.tmp.length != xform.length)
-            this.tmp = new Float32Array(xform.length);
 
-        var result = this.tmp;
         var computed = [];
-
         //For each bone do:
         for(var i = 0; i < boneCount;){
             if(!computed[i]) {
@@ -44,8 +45,5 @@ Xflow.registerOperator("forwardKinematicsInv", {
             }
             i++;
         }
-
-        this.result.result = result;
-        return true;
     }
 });

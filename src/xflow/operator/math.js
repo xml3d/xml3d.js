@@ -172,12 +172,14 @@ mat4.multiplyOffset = function(dest, destOffset, mat, offset1, mat2, offset2) {
     dest[destOffset+15] = b30*a03 + b31*a13 + b32*a23 + b33*a33;
 };
 
-quat4.slerpOffset = function(quat, quat2, offset, t, dest, shortest) {
+quat4.slerpOffset = function(quat, offset1, quat2, offset2, t, dest, destOffset, shortest) {
     if(!dest) { dest = quat; }
 
-    var ix = offset, iy = offset+1, iz = offset+2, iw = offset+3;
+    var ix1 = offset1, iy1 = offset1+1, iz1 = offset1+2, iw1 = offset1+3;
+    var ix2 = offset2, iy2 = offset2+1, iz2 = offset2+2, iw2 = offset2+3;
+    var ixd = destOffset, iyd = destOffset+1, izd = destOffset+2, iwd = destOffset+3;
 
-    var cosAngle =  quat[ix]*quat2[ix] + quat[iy]*quat2[iy] + quat[iz]*quat2[iz] + quat[iw]*quat2[iw];
+    var cosAngle =  quat[ix1]*quat2[ix2] + quat[iy1]*quat2[iy2] + quat[iz1]*quat2[iz2] + quat[iw1]*quat2[iw2];
 
     var c1, c2;
 
@@ -200,8 +202,8 @@ quat4.slerpOffset = function(quat, quat2, offset, t, dest, shortest) {
     if (shortest && (cosAngle < 0.0))
       c1 = -c1;
 
-    dest[ix] = c1*quat[ix] + c2*quat2[ix];
-    dest[iy] = c1*quat[iy] + c2*quat2[iy];
-    dest[iz] = c1*quat[iz] + c2*quat2[iz];
-    dest[iw] = c1*quat[iw] + c2*quat2[iw];
+    dest[ixd] = c1*quat[ix1] + c2*quat2[ix2];
+    dest[iyd] = c1*quat[iy1] + c2*quat2[iy2];
+    dest[izd] = c1*quat[iz1] + c2*quat2[iz2];
+    dest[iwd] = c1*quat[iw1] + c2*quat2[iw2];
 };

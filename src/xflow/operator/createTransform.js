@@ -1,31 +1,21 @@
 Xflow.registerOperator("createTransform", {
-    outputs: [{name: 'result', tupleSize: '16'}],
-    params:  ['translation','rotation','scale','center','scaleOrientation'],
-    evaluate: function(translation,rotation,scale,center,scaleOrientation) {
-        rotation = rotation && rotation.data ? rotation.data[0].getValue() : rotation;
-        var count = translation ? translation.length / 3 :
-                    rotation ? rotation.length / 4 :
-                    scale ? scale.length / 3 :
-                    center ? center.length / 3 :
-                    scaleOrientation ? scaleOrientation / 4 : 0;
-        if(!count)
-            throw ("createTransform: No input found");
-        if (!this.tmp || this.tmp.length != count*16) {
-         	this.tmp = new Float32Array(count * 16);
-        }
-
-        var result = this.tmp;
-        for(var i = 0; i < count; i++) {
+    outputs: [  {type: 'float4x4', name: 'result'}],
+    params:  [  {type: 'float3', source: 'translation', optional: true},
+                {type: 'float4', source: 'rotation', optional: true},
+                {type: 'float3', source: 'scale', optional: true},
+                {type: 'float3', source: 'center', optional: true},
+                {type: 'float4', source: 'scaleOrientation', optional: true}],
+    evaluate: function(result, translation,rotation,scale,center,scaleOrientation) {
+        for(var i = 0; i < this.iterateCount; i++) {
             mat4.makeTransformXflow(
-                translation ? translation.subarray(i*3) : null,
-                rotation ? rotation.subarray(i*4) : null,
-                scale ? scale.subarray(i*3) : null,
-                center ? center.subarray(i*3) : null,
-                scaleOrientation ? scaleOrientation.subarray(i*4) : null,
+                translation ? translation.subarray(this.iterFlag[0] ? i*3 : 0) : null,
+                rotation ? rotation.subarray(this.iterFlag[1] ? i*4 : 0) : null,
+                scale ? scale.subarray(this.iterFlag[2] ? i*3 : 0) : null,
+                center ? center.subarray(this.iterFlag[3] ? i*3 : 0) : null,
+                scaleOrientation ? scaleOrientation.subarray(this.iterFlag[4] ? i*4 : 0) : null,
                 result.subarray(i*16)
             )
         }
-        this.result.result = result;
         return true;
     },
     evaluate_parallel: function( translation,rotation,scale,center,scaleOrientation) {

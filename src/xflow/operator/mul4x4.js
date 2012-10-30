@@ -1,26 +1,18 @@
 Xflow.registerOperator("mul", {
-    outputs: [{name: 'result', tupleSize: '16'}],
-    params:  ['value1','value2'],
-    evaluate: function(value1, value2) {
-        if(!(value1 && value2))
-            throw "Xflow::mul4x4: Not all parameters are set";
-
-        if(value1.length != value1.length)
-            throw "Xflow::mul4x4: Input arrays differ in size";
-
-        if (!this.tmp || this.tmp.length != value1.length)
-            this.tmp = new Float32Array(value1.length);
-
-        var result = this.tmp;
-        var count = value1.length / 16;
-        for(var i = 0; i < count; i++)
+    outputs: [  {type: 'float4x4', name: 'result'}],
+    params:  [  {type: 'float4x4', source: 'value1'},
+                {type: 'float4x4', source: 'value2'}],
+    evaluate: function(result, value1, value2) {
+        for(var i = 0; i < this.iterateCount; i++)
         {
-            var offset = i*16;
-            mat4.multiplyOffset(result, offset, value1, offset, value2, offset);
+            mat4.multiplyOffset(result, i*16,
+                value1,  this.iterFlag[0] ? i*16 : 0,
+                value2, this.iterFlag[0] ? i*16 : 0);
         }
-        this.result.result = result;
-        return true;
     },
+
+
+
     evaluate_parallel: function(value1, value2) {
         /*if (!this.tmp) {
              this.tmp = new Float32Array(value1.length);

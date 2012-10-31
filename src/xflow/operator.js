@@ -58,10 +58,46 @@
                 }
                 operatorInput.push(channel ? channel.getDataEntry(mapping.sequence, keyValue) : null);
             }
-            else
+            else{
                 operatorInput.push(null);
+            }
+
         }
     }
+
+    function checkInput(operator, inputMapping, inputChannels){
+        for(var i in operator.params){
+            var entry = operator.params[i];
+            var dataName = inputMapping.getScriptInputName(i, entry.source);
+            if(!entry.optional && !dataName){
+                XML3D.debug.logError("Xflow: operator " + operator.name + ": Missing input argument for "
+                    + entry.source);
+                return false;
+            }
+            if(dataName){
+                var channel = inputChannels[dataName];
+                if(!channel){
+                    XML3D.debug.logError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
+                        "' not found. Use for parameter " + entry.source);
+                    return false;
+                }
+                var dataEntry = channel.getDataEntry();
+                if(!entry.optional && (!dataEntry || dataEntry.getLength() == 0)){
+                    XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                        ' contains no data.');
+                    return false;
+                }
+                if(dataEntry && dataEntry.type != entry.type){
+                    XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                        " has wrong type. Expected: " + Xflow.getTypeName(entry.type)
+                            + ", but got: " +  Xflow.getTypeName(dataEntry.type) );
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     function prepareOutputs(operator, outputs){
         for(var i in operator.outputs){
@@ -199,12 +235,15 @@
                     case Xflow.DATA_TYPE.FLOAT2:
                     case Xflow.DATA_TYPE.FLOAT3:
                     case Xflow.DATA_TYPE.FLOAT4:
-                    case Xflow.DATA_TYPE.FLOAT4X4: entry._value = new Float32Array(size); break;
+                    case Xflow.DATA_TYPE.FLOAT4X4: entry.setValue(new Float32Array(size)); break;
                     case Xflow.DATA_TYPE.INT:
                     case Xflow.DATA_TYPE.INT4:
-                    case Xflow.DATA_TYPE.BOOL: entry._value = new Int32Array(size); break;
+                    case Xflow.DATA_TYPE.BOOL: entry.setValue(new Int32Array(size)); break;
                     default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + entry.type);
                 }
+            }
+            else{
+                entry.notifyChanged();
             }
         }
     }
@@ -255,6 +294,9 @@
         if(operator){
 
             var inputData = [];
+            if(!checkInput(operator, this._computeInputMapping, inputChannels)){
+                return false;
+            }
             prepareInputs(operator, this._computeInputMapping, inputChannels, inputData);
             prepareOutputs(operator, this._operatorData.outputs);
             var count = getIterateCount(operator, inputData, this._operatorData);
@@ -269,6 +311,7 @@
 
             this._computeOutputMapping.applyScriptOutputOnMap(inputChannels, this._operatorData.outputs);
         }
+        return true;
     }
 
 })();

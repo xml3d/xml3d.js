@@ -57,6 +57,10 @@ DataEntry.prototype.removeListener = function(callback){
     Array.erase(this._listeners, callback);
 };
 
+DataEntry.prototype.notifyChanged = function(){
+    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+}
+
 
 
 /**
@@ -76,7 +80,7 @@ Xflow.BufferEntry = BufferEntry;
 
 /** @param {Object} v */
 BufferEntry.prototype.setValue = function(v){
-    var newSize = this._value.length != v.length;
+    var newSize = (this._value ? this._value.length : 0) != (v ? v.length : 0);
     this._value = v;
     notifyListeners(this, newSize ? Xflow.DATA_ENTRY_STATE.CHANGE_SIZE : Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }

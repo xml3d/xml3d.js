@@ -41,6 +41,14 @@ Xflow.DATA_TYPE_MAP = {
     'texture' : Xflow.DATA_TYPE.TEXTURE
 }
 
+Xflow.getTypeName = function(type){
+    for(var i in Xflow.DATA_TYPE_MAP){
+        if(Xflow.DATA_TYPE_MAP[i] == type){
+            return i;
+        }
+    }
+}
+
 /**
  * @enum {number}
  */

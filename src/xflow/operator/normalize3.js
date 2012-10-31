@@ -1,15 +1,8 @@
 Xflow.registerOperator("normalize", {
-    outputs: [{name: 'result', tupleSize: '3'}],
-    params:  ['value'],
-    evaluate: function(value) {
-        if(!value)
-            throw "Xflow::normalize: Not input";
-
-        if (!this.tmp || this.tmp.length != value.length)
-            this.tmp = new Float32Array(value.length);
-
-        var result = this.tmp;
-        for(var i = 0; i<value.length/3; i++) {
+    outputs: [  {type: 'float3', name: 'result'}],
+    params:  [  {type: 'float3', source: 'value'}],
+    evaluate: function(result, value, info) {
+        for(var i = 0; i < info.iterateCount; i++) {
             var offset = 3*i;
             var x = value[offset];
             var y = value[offset+1];
@@ -19,7 +12,5 @@ Xflow.registerOperator("normalize", {
             result[offset+1] = y*l;
             result[offset+2] = z*l;
         }
-        this.result.result = result;
-        return true;
     }
 });

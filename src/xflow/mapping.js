@@ -1,24 +1,35 @@
 (function(){
 
-/**
- * @constructor
- * @param {Xflow.DataNode} owner
- */
-var Mapping = function(owner){
-    this._owner = owner;
-};
-Xflow.Mapping = Mapping;
+
+var Mapping = Xflow.Mapping;
+
+Mapping.parse = function(string, dataNode){
+    string = string.trim()
+    var results = string.trim().match(orderMappingParser);
+    if(results)
+        return OrderMapping.parse(string, dataNode);
+    results = string.trim().match(nameMappingParser);
+    if(results)
+        return NameMapping.parse(results[1], dataNode);
+    return null;
+}
+
 
 /**
- * @constructor
- * @extends {Xflow.Mapping}
+ * OrderMapping implementation
  */
-var OrderMapping = function(owner){
-    Xflow.Mapping.call(this, owner);
-    this._names = [];
-};
-XML3D.createClass(OrderMapping, Xflow.Mapping);
-Xflow.OrderMapping = OrderMapping;
+
+var OrderMapping = Xflow.OrderMapping;
+
+
+OrderMapping.parse = function(string, dataNode){
+    var mapping = new Xflow.OrderMapping(dataNode)
+    var token = string.split(",");
+    for(var i = 0; i < token.length; i++){
+        mapping._names.push(token[i].trim());
+    }
+    return mapping;
+}
 
 
 Object.defineProperty(OrderMapping.prototype, "length", {
@@ -50,18 +61,25 @@ OrderMapping.prototype.isEmpty = function(){
     return this._names.length == 0;
 }
 
-/**
- * @constructor
- * @extends {Xflow.Mapping}
- */
-var NameMapping = function(owner){
-    Xflow.Mapping.call(this, owner);
-    this._destNames = [];
-    this._srcNames = [];
 
-};
-XML3D.createClass(NameMapping, Xflow.Mapping);
-Xflow.NameMapping = NameMapping;
+/**
+ * NameMapping implementation
+ */
+
+var NameMapping = Xflow.NameMapping;
+
+
+NameMapping.parse = function(string, dataNode)
+{
+    var mapping = new Xflow.NameMapping(dataNode)
+    var token = string.split(",");
+    for(var i = 0; i < token.length; i++){
+        var pair = token[i].split(":");
+        var dest = pair[0].trim(); var src = pair[1].trim();
+        mapping.setNamePair(dest, src);
+    }
+    return mapping;
+}
 
 Object.defineProperty(NameMapping.prototype, "length", {
     set: function(v){ throw "length is read-only";
@@ -114,37 +132,6 @@ NameMapping.prototype.isEmpty = function(){
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
 var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)\}$/;
 
-Mapping.parse = function(string, dataNode){
-    string = string.trim()
-    var results = string.trim().match(orderMappingParser);
-    if(results)
-        return OrderMapping.parse(string, dataNode);
-    results = string.trim().match(nameMappingParser);
-    if(results)
-        return NameMapping.parse(results[1], dataNode);
-    return null;
-}
-
-OrderMapping.parse = function(string, dataNode){
-    var mapping = new Xflow.OrderMapping(dataNode)
-    var token = string.split(",");
-    for(var i = 0; i < token.length; i++){
-        mapping._names.push(token[i].trim());
-    }
-    return mapping;
-}
-
-NameMapping.parse = function(string, dataNode)
-{
-    var mapping = new Xflow.NameMapping(dataNode)
-    var token = string.split(",");
-    for(var i = 0; i < token.length; i++){
-        var pair = token[i].split(":");
-        var dest = pair[0].trim(); var src = pair[1].trim();
-        mapping.setNamePair(dest, src);
-    }
-    return mapping;
-}
 
 function mappingNotifyOwner(mapping){
     if(mapping._owner)

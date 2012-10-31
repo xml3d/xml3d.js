@@ -5,16 +5,17 @@ Xflow.registerOperator("slerpSeq", {
     mapping: [  {source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
                 {source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
                 {source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
-    evaluate: function(result, value1, value2, weight) {
-        for(var i = 0; i < this.iterateCount; ++i){
-            quat4.slerpOffset(  value1,this.iterFlag[0] ? i*4 : 0,
-                                value2,this.iterFlag[1] ? i*4 : 0,
+    evaluate: function(result, value1, value2, weight, info) {
+        for(var i = 0; i < info.iterateCount; ++i){
+            quat4.slerpOffset(  value1,info.iterFlag[0] ? i*4 : 0,
+                                value2,info.iterFlag[1] ? i*4 : 0,
                                 weight[0],
                                 result, i*4, true);
         }
     },
 
     evaluate_parallel: function(sequence, weight) {
+        /*
         var me = this;
         this.result.result = sequence.interpolate(weight[0], function(v1,v2,t) {
             var count = v1.length;
@@ -27,6 +28,7 @@ Xflow.registerOperator("slerpSeq", {
             };
             return result;
         });
+        */
         return true;
     }
 });

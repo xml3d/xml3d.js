@@ -11,7 +11,8 @@ Xflow.registerOperator("lerpSeq", {
         result[1] = invWeight*value1[1] + weight[0]*value2[1];
         result[2] = invWeight*value1[2] + weight[0]*value2[2];
     },
-    evaluate_parallel: function(sequence, weight) {
+    evaluate_parallel: function(sequence, weight, info) {
+        /*
         var me = this;
         this.result.result = sequence.interpolate(weight[0], function(v1,v2,t) {
             if (!me.tmp || me.tmp.length != v1.length)
@@ -24,6 +25,7 @@ Xflow.registerOperator("lerpSeq", {
             };
             return result;
         });
+        */
         return true;
     }
 });

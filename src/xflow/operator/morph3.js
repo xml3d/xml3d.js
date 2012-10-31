@@ -5,12 +5,12 @@ Xflow.registerOperator("morph", {
         { type: 'float3', source: 'valueAdd'},
         { type: 'float', source: 'weight'}
     ],
-    evaluate: function(result, value, valueAdd, weight) {
-        for(var i = 0; i < this.iterateCount; i++){
-            var w = weight[this.iterFlag[2] ? i : 0];
-            result[3*i] = value[ this.iterFlag[0] ? 3*i : 0] + w * valueAdd[this.iterFlag[1] ? 3*i : 0];
-            result[3*i+1] = value[ this.iterFlag[0] ? 3*i+1 : 1] + w * valueAdd[this.iterFlag[1] ? 3*i+1 : 1];
-            result[3*i+2] = value[ this.iterFlag[0] ? 3*i+2 : 2] + w * valueAdd[this.iterFlag[1] ? 3*i+2 : 2];
+    evaluate: function(result, value, valueAdd, weight, info) {
+        for(var i = 0; i < info.iterateCount; i++){
+            var w = weight[info.iterFlag[2] ? i : 0];
+            result[3*i] = value[ info.iterFlag[0] ? 3*i : 0] + w * valueAdd[info.iterFlag[1] ? 3*i : 0];
+            result[3*i+1] = value[ info.iterFlag[0] ? 3*i+1 : 1] + w * valueAdd[info.iterFlag[1] ? 3*i+1 : 1];
+            result[3*i+2] = value[ info.iterFlag[0] ? 3*i+2 : 2] + w * valueAdd[info.iterFlag[1] ? 3*i+2 : 2];
         }
         return true;
     },

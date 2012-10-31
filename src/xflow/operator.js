@@ -267,6 +267,7 @@
 
     function applyDefaultOperation(operator, inputData, operatorData){
         var args = assembleFunctionArgs(operator, inputData, operatorData);
+        args.push(operatorData);
         operator.evaluate.apply(operatorData, args);
     }
 

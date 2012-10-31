@@ -58,7 +58,7 @@ Xflow.TEX_FILTER_TYPE = {
     LINEAR: 2
 };
 /**
- * @enum {Number}
+ * @enum {number}
  */
 Xflow.TEX_WRAP_TYPE = {
     CLAMP: 0,
@@ -66,7 +66,7 @@ Xflow.TEX_WRAP_TYPE = {
     BORDER: 2
 };
 /**
- * @enum {Number}
+ * @enum {number}
  */
 Xflow.TEX_TYPE = {
     TEXTURE_1D: 0,

@@ -1,6 +1,11 @@
 (function(){
 
-
+/**
+ * @constructor
+ * @param {Xflow.DataNode} owner Owner of the channel - always a DataNode
+ * @param {Xflow.DataEntry=} dataEntry Optional DataEntry added to the channel
+ * @param {number=} key Optional key of the added DataEntry
+ */
 var Channel = function(owner, dataEntry, key){
     this.entries = [];
     this.owner = owner;

@@ -5,46 +5,22 @@ Xflow.registerOperator("createTransform", {
                 {type: 'float3', source: 'scale', optional: true},
                 {type: 'float3', source: 'center', optional: true},
                 {type: 'float4', source: 'scaleOrientation', optional: true}],
-    evaluate: function(result, translation,rotation,scale,center,scaleOrientation) {
-        for(var i = 0; i < this.iterateCount; i++) {
+    evaluate: function(result, translation,rotation,scale,center,scaleOrientation, info) {
+        for(var i = 0; i < info.iterateCount; i++) {
             mat4.makeTransformXflow(
-                translation ? translation.subarray(this.iterFlag[0] ? i*3 : 0) : null,
-                rotation ? rotation.subarray(this.iterFlag[1] ? i*4 : 0) : null,
-                scale ? scale.subarray(this.iterFlag[2] ? i*3 : 0) : null,
-                center ? center.subarray(this.iterFlag[3] ? i*3 : 0) : null,
-                scaleOrientation ? scaleOrientation.subarray(this.iterFlag[4] ? i*4 : 0) : null,
+                translation ? translation.subarray(info.iterFlag[0] ? i*3 : 0) : null,
+                rotation ? rotation.subarray(info.iterFlag[1] ? i*4 : 0) : null,
+                scale ? scale.subarray(info.iterFlag[2] ? i*3 : 0) : null,
+                center ? center.subarray(info.iterFlag[3] ? i*3 : 0) : null,
+                scaleOrientation ? scaleOrientation.subarray(info.iterFlag[4] ? i*4 : 0) : null,
                 result.subarray(i*16)
             )
         }
         return true;
-    },
+    }
+    /*
     evaluate_parallel: function( translation,rotation,scale,center,scaleOrientation) {
-    	var count = translation ? translation.length / 3 :
-            rotation ? rotation.length / 4 :
-            scale ? scale.length / 3 :
-            center ? center.length / 3 :
-            scaleOrientation ? scaleOrientation / 4: 0;
-
-    	if (!this.tmp || this.tmp.length != count*16) {
-    	    this.tmp = new Float32Array(count * 16);
-        }
-
-        var result = this.tmp;
-        for(var i = 0; i < count; i++) {
-            mat4.makeTransformXflow(
-                translation ? translation.subarray(i*3) : null,
-                rotation ? rotation.subarray(i*4) : null,
-                scale ? scale.subarray(i*3) : null,
-                center ? center.subarray(i*3) : null,
-                scaleOrientation ? scaleOrientation.subarray(i*4) : null,
-                result.subarray(i*16)
-                )
-        }
-        this.result.result = result;
-
-        //this.parallel_data = new ParallelArray(result).partition(16);
-        /*
-    	var count = translation ? translation.length / 3 :
+    	 var count = translation ? translation.length / 3 :
             rotation ? rotation.length / 4 :
             scale ? scale.length / 3 :
             center ? center.length / 3 :
@@ -137,7 +113,8 @@ Xflow.registerOperator("createTransform", {
                 rotation
         );
         this.result.result = tmp.flatten();
-	*/
+
         return true;
     }
+     */
 });

@@ -31,10 +31,10 @@
 		<file name="types/ray.js" />
 	    <file name="xflow/base.js" />
         <file name="xflow/graph.js" />
+        <file name="xflow/mapping.js" />
+        <file name="xflow/data.js" />
         <file name="xflow/compute.js" />
         <file name="xflow/operator.js" />
-        <file name="xflow/data.js" />
-        <file name="xflow/mapping.js" />
         <file name="xflow/request.js" />
         <file name="xflow/result.js" />
 	    <file name="data/base.js" />
@@ -78,7 +78,6 @@
 		<file name="renderer/shaders/phong.js" />
 		<file name="renderer/shaders/utility.js" />
         <file name="xflow/operator/morph3.js" />
-		<file name="xflow/operator/merge3.js" />
         <file name="xflow/operator/sub3.js" />
         <file name="xflow/operator/normalize3.js" />
         <file name="xflow/operator/lerp3seq.js" />
@@ -88,13 +87,10 @@
         <file name="xflow/operator/mul4x4.js" />
         <file name="xflow/operator/skinDirection.js" />
         <file name="xflow/operator/skinPosition.js" />
-		<file name="xflow/operator/skinning.js" />
         <file name="xflow/operator/forwardKinematics.js" />
 		<file name="xflow/operator/forwardKinematicsInv.js" />
         <file name="xflow/operator/flipNormal.js" />
 		<file name="xflow/operator/math.js" />
-		<file name="contrib/perlin-noise-simplex.js" />
-        <file name="xflow/operator/noiseImage.js" />
 	</filelist>
 
 	<target name="lastTag" depends="init, windowsGit, linuxGit">

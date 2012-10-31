@@ -7,7 +7,7 @@ Xflow.registerOperator("forwardKinematicsInv", {
         var length = Math.min(parent.length, xform.length / 16);
         sizes['result'] = length;
     },
-    evaluate: function(result, parent,xform) {
+    evaluate: function(result, parent,xform, info) {
         var boneCount = xform.length / 16;
 
         var computed = [];

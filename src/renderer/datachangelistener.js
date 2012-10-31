@@ -11,8 +11,8 @@ XML3D.webgl.DataChangeListener = function(renderer) {
 
 /**
  *
- * @param {XML3D.Xflow.DataEntry} entry
- * @param {XML3D.Xflow.DATA_ENTRY_STATE} notification
+ * @param {Xflow.DataEntry} entry
+ * @param {Xflow.DATA_ENTRY_STATE} notification
  */
 XML3D.webgl.DataChangeListener.prototype.dataEntryChanged = function(entry, notification) {
     entry.userData.webglDataChanged = notification;

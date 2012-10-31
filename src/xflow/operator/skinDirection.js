@@ -4,17 +4,17 @@ Xflow.registerOperator("skinDirection", {
                 {type: 'int4', source: 'boneIdx' },
                 {type: 'float4', source: 'boneWeight' },
                 {type: 'float4x4', source: 'boneXform', array: true } ],
-    evaluate: function(result, dir,boneIdx,boneWeight,boneXform) {
+    evaluate: function(result, dir,boneIdx,boneWeight,boneXform, info) {
         var r = vec3.create();
         var tmp =  vec3.create();
 
-        for(var i = 0; i< this.iterateCount;++i) {
+        for(var i = 0; i< info.iterateCount;++i) {
             var offset = i*3;
             r[0] = r[1] = r[2] = +0;
             for(var j = 0; j < 4; j++) {
-                var weight = boneWeight[this.iterFlag[2] ? i*4+j : j];
+                var weight = boneWeight[info.iterFlag[2] ? i*4+j : j];
                 if (weight) {
-                    var mo = boneIdx[this.iterFlag[1] ? i*4+j : j]*16;
+                    var mo = boneIdx[info.iterFlag[1] ? i*4+j : j]*16;
 
                     mat4.multiplyOffsetDirection(boneXform, mo, dir, offset, tmp);
                     vec3.scale(tmp, weight);
@@ -29,6 +29,7 @@ Xflow.registerOperator("skinDirection", {
     },
 
     evaluate_parallel: function(dir, boneIndex, boneWeight, boneXform) {
+        /*
         if (!this.elementalFunc) {
             this.elementalFunc = function(index, direction, boneIndex, boneWeight, boneXform) {
                 var r = [0,0,0];
@@ -62,6 +63,7 @@ Xflow.registerOperator("skinDirection", {
         );
 
         this.result.result = result;
+        */
         return true;
     }
 });

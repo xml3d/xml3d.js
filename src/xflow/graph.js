@@ -114,6 +114,10 @@ Object.defineProperty(InputNode.prototype, "data", {
  */
 var DataNode = function(graph){
     Xflow.GraphNode.call(this, graph);
+
+    this.loading = false;
+
+    
     this._prototype = false;
     this._children = [];
     this._sourceNode = null;
@@ -125,6 +129,7 @@ var DataNode = function(graph){
     this._computeOperator = "";
     this._computeInputMapping = new Xflow.OrderMapping(this);
     this._computeOutputMapping = new Xflow.OrderMapping(this);
+
 
     this._state = Xflow.RESULT_STATE.NONE;
 

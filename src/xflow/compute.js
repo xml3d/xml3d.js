@@ -102,7 +102,7 @@ DataNode.prototype._getComputeResult = function(filter){
 DataNode.prototype._createComputeResult = function(filter){
     var result = new Xflow.ComputeResult();
 
-    this._populateDataMap();
+    var loading = this._populateDataMap();
 
     for(var i in this._dataMap){
         if(!filter || filter.indexOf(i) != -1){
@@ -110,21 +110,27 @@ DataNode.prototype._createComputeResult = function(filter){
             result._dataEntries[i] = this._dataMap[i].getDataEntry();
         }
     }
+    result.loading = loading;
     return result;
 }
 DataNode.prototype._populateDataMap = function(){
     if(this._state == Xflow.RESULT_STATE.NONE) return;
     this._state = Xflow.RESULT_STATE.NONE;
 
+    if(this.loading)
+        return true;
+
     // Prepare input:
     var inputMap = {};
     if(this._sourceNode){
-        transferDataMap(inputMap, this._sourceNode);
+        if(transferDataMap(inputMap, this._sourceNode))
+            return true;
     }
     else{
         for(var i in this._children){
             if(this._children[i] instanceof Xflow.DataNode){
-                transferDataMap(inputMap, this._children[i]);
+                if(transferDataMap(inputMap, this._children[i]))
+                    return true;
             }
         }
         for(var i in this._children)
@@ -143,13 +149,19 @@ DataNode.prototype._populateDataMap = function(){
     this._applyOperator(inputMap);
 
     this._filterMapping.applyFilterOnMap(this._dataMap, inputMap, this._filterType);
+
+    return false;
 }
 
 function transferDataMap(destMap, node){
-    node._populateDataMap();
+    var loading = node._populateDataMap();
+    if(loading)
+        return true;
+
     for(var i in node._dataMap){
         destMap[i] = node._dataMap[i];
     }
+    return false;
 }
 
 })();

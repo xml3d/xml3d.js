@@ -6,6 +6,7 @@
  * @param {Array.<string>} filter
  */
 var Result = function(){
+    this.loading = false;
     this._outputNames = [];
     /** @type {Object.<string,DataEntry>} */
     this._dataEntries = {};

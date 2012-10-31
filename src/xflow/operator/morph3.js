@@ -3,7 +3,7 @@ Xflow.registerOperator("morph", {
     params:  [
         { type: 'float3', source: 'value' },
         { type: 'float3', source: 'valueAdd'},
-        { type: 'float3', source: 'weight'}
+        { type: 'float', source: 'weight'}
     ],
     evaluate: function(result, value, valueAdd, weight) {
         for(var i = 0; i < this.iterateCount; i++){

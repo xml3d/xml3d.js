@@ -95,7 +95,7 @@
     /**
      *
      * @param {Xflow.data.Request} request
-     * @param {Xflow.RequestNotification} notification
+     * @param {Xflow.RESULT_STATE} notification
      */
     XML3D.webgl.LightShaderRenderAdapter.prototype.dataChanged = function(request, notification) {
         var dataTable = request.getResult();

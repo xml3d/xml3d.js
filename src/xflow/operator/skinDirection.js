@@ -1,40 +1,35 @@
 Xflow.registerOperator("skinDirection", {
-    outputs: [{name: 'result', tupleSize: '3'}],
-    params:  ['dir','boneIdx','boneWeight','boneXform'],
-    evaluate: function(dir,boneIdx,boneWeight,boneXform) {
-        var count = dir.length / 3;
-        if (!this.tmp || this.tmp.length != dir.length)
-            this.tmp = new Float32Array(dir.length);
-
-        var result = this.tmp;
-
-        var m = mat4.create();
+    outputs: [  {type: 'float3', name: 'result' }],
+    params:  [  {type: 'float3', source: 'dir' },
+                {type: 'int4', source: 'boneIdx' },
+                {type: 'float4', source: 'boneWeight' },
+                {type: 'float4x4', source: 'boneXform', array: true } ],
+    evaluate: function(result, dir,boneIdx,boneWeight,boneXform, info) {
         var r = vec3.create();
-        var tmp = vec3.create();
+        var tmp =  vec3.create();
 
-        for(var i = 0; i<count;i++) {
+        for(var i = 0; i< info.iterateCount;++i) {
             var offset = i*3;
             r[0] = r[1] = r[2] = +0;
-
             for(var j = 0; j < 4; j++) {
-                var weight = boneWeight[i*4+j];
+                var weight = boneWeight[info.iterFlag[2] ? i*4+j : j];
                 if (weight) {
-                    var mo = boneIdx[i*4+j]*16;
+                    var mo = boneIdx[info.iterFlag[1] ? i*4+j : j]*16;
 
                     mat4.multiplyOffsetDirection(boneXform, mo, dir, offset, tmp);
                     vec3.scale(tmp, weight);
                     vec3.add(r, tmp);
                 }
             }
+            vec3.normalize(r);
             result[offset] = r[0];
             result[offset+1] = r[1];
             result[offset+2] = r[2];
         }
-        this.result.result = result;
-        return true;
     },
 
     evaluate_parallel: function(dir, boneIndex, boneWeight, boneXform) {
+        /*
         if (!this.elementalFunc) {
             this.elementalFunc = function(index, direction, boneIndex, boneWeight, boneXform) {
                 var r = [0,0,0];
@@ -68,6 +63,7 @@ Xflow.registerOperator("skinDirection", {
         );
 
         this.result.result = result;
+        */
         return true;
     }
 });

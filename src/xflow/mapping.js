@@ -1,24 +1,35 @@
 (function(){
 
-/**
- * @constructor
- * @param {Xflow.DataNode} owner
- */
-var Mapping = function(owner){
-    this._owner = owner;
-};
-Xflow.Mapping = Mapping;
+
+var Mapping = Xflow.Mapping;
+
+Mapping.parse = function(string, dataNode){
+    string = string.trim()
+    var results = string.trim().match(orderMappingParser);
+    if(results)
+        return OrderMapping.parse(string, dataNode);
+    results = string.trim().match(nameMappingParser);
+    if(results)
+        return NameMapping.parse(results[1], dataNode);
+    return null;
+}
+
 
 /**
- * @constructor
- * @extends {Xflow.Mapping}
+ * OrderMapping implementation
  */
-var OrderMapping = function(owner){
-    Xflow.Mapping.call(this, owner);
-    this._names = [];
-};
-XML3D.createClass(OrderMapping, Xflow.Mapping);
-Xflow.OrderMapping = OrderMapping;
+
+var OrderMapping = Xflow.OrderMapping;
+
+
+OrderMapping.parse = function(string, dataNode){
+    var mapping = new Xflow.OrderMapping(dataNode)
+    var token = string.split(",");
+    for(var i = 0; i < token.length; i++){
+        mapping._names.push(token[i].trim());
+    }
+    return mapping;
+}
 
 
 Object.defineProperty(OrderMapping.prototype, "length", {
@@ -50,18 +61,25 @@ OrderMapping.prototype.isEmpty = function(){
     return this._names.length == 0;
 }
 
-/**
- * @constructor
- * @extends {Xflow.Mapping}
- */
-var NameMapping = function(owner){
-    Xflow.Mapping.call(this, owner);
-    this._destNames = [];
-    this._srcNames = [];
 
-};
-XML3D.createClass(NameMapping, Xflow.Mapping);
-Xflow.NameMapping = NameMapping;
+/**
+ * NameMapping implementation
+ */
+
+var NameMapping = Xflow.NameMapping;
+
+
+NameMapping.parse = function(string, dataNode)
+{
+    var mapping = new Xflow.NameMapping(dataNode)
+    var token = string.split(",");
+    for(var i = 0; i < token.length; i++){
+        var pair = token[i].split(":");
+        var dest = pair[0].trim(); var src = pair[1].trim();
+        mapping.setNamePair(dest, src);
+    }
+    return mapping;
+}
 
 Object.defineProperty(NameMapping.prototype, "length", {
     set: function(v){ throw "length is read-only";
@@ -114,49 +132,18 @@ NameMapping.prototype.isEmpty = function(){
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
 var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)\}$/;
 
-Mapping.parse = function(string, dataNode){
-    string = string.trim()
-    var results = string.trim().match(orderMappingParser);
-    if(results)
-        return OrderMapping.parse(string, dataNode);
-    results = string.trim().match(nameMappingParser);
-    if(results)
-        return NameMapping.parse(results[1], dataNode);
-    return null;
-}
-
-OrderMapping.parse = function(string, dataNode){
-    var mapping = new Xflow.OrderMapping(dataNode)
-    var token = string.split(",");
-    for(var i = 0; i < token.length; i++){
-        mapping._names.push(token[i].trim());
-    }
-    return mapping;
-}
-
-NameMapping.parse = function(string, dataNode)
-{
-    var mapping = new Xflow.NameMapping(dataNode)
-    var token = string.split(",");
-    for(var i = 0; i < token.length; i++){
-        var pair = token[i].split(":");
-        var dest = pair[0].trim(); var src = pair[1].trim();
-        mapping.setNamePair(dest, src);
-    }
-    return mapping;
-}
 
 function mappingNotifyOwner(mapping){
     if(mapping._owner)
-        mapping._owner.notify(XflowModification.STRUCTURE_CHANGED);
+        mapping._owner.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 
 OrderMapping.prototype.filterNameset = function(nameset, filterType)
 {
-    if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME)
+    if(filterType == Xflow.DATA_FILTER_TYPE.RENAME)
         return nameset.splice();
     else {
-        var keep = (filterType == Xflow.DataNode.FILTER_TYPE.KEEP);
+        var keep = (filterType == Xflow.DATA_FILTER_TYPE.KEEP);
         var result = [];
         for(var i in nameset){
             var idx = this._names.indexOf(nameset[i]);
@@ -174,9 +161,9 @@ NameMapping.prototype.filterNameset = function(nameset, filterType)
 OrderMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType){
     for(var i in sourceMap){
         var idx = this._names.indexOf(i);
-        if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME ||
-           ( filterType == Xflow.DataNode.FILTER_TYPE.KEEP && idx != -1) ||
-            (filterType == Xflow.DataNode.FILTER_TYPE.REMOVE && idx == -1))
+        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
+           ( filterType == Xflow.DATA_FILTER_TYPE.KEEP && idx != -1) ||
+            (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
             destMap[i] = sourceMap[i];
     }
 };
@@ -184,7 +171,7 @@ OrderMapping.prototype.getScriptInputName = function(index, destName){
     if(this._names[index])
         return this._names[index];
     else
-        return destName;
+        return null;
 };
 OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
     var index = 0;
@@ -200,13 +187,13 @@ OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
 
 NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType)
 {
-    if(filterType == Xflow.DataNode.FILTER_TYPE.REMOVE){
+    if(filterType == Xflow.DATA_FILTER_TYPE.REMOVE){
         for(var i in sourceMap)
             if(this._srcNames.indexOf(i) == -1)
                 destMap[i] = sourceMap[i];
     }
     else{
-        if(filterType == Xflow.DataNode.FILTER_TYPE.RENAME){
+        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME){
             for(var i in sourceMap)
                 if(this._srcNames.indexOf(i) == -1)
                     destMap[i] = sourceMap[i];
@@ -219,7 +206,7 @@ NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType
 
 NameMapping.prototype.getScriptInputName= function(index, destName){
     var srcName = this.getSrcNameFromDestName(destName);
-    return srcName ? srcName : destName;
+    return srcName ? srcName : null;
 }
 
 

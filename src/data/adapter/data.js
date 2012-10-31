@@ -118,10 +118,25 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
         return;
     }
 };
+    
+function updateLoadState(dataAdpater){
+    var loading = false;
+    var handle = dataAdpater.getAdapterHandle(dataAdpater.node.getAttribute("src"));
+    if(handle && handle.status == XML3D.base.AdapterHandle.STATUS.LOADING){
+        loading = true;
+    }
+    var handle = dataAdpater.getAdapterHandle(dataAdpater.node.getAttribute("proto"));
+    if(handle && handle.status == XML3D.base.AdapterHandle.STATUS.LOADING){
+        loading = true;
+    }
+    dataAdpater.xflowDataNode.loading = loading;
+}
+    
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {
     var adapterHandle = this.getAdapterHandle(this.node.getAttribute(attributeName));
     this.connectAdapterHandle(attributeName, adapterHandle);
     this.connectedAdapterChanged(attributeName, adapterHandle ? adapterHandle.getAdapter() : null);
+    updateLoadState(this);
 };
 
 XML3D.data.DataAdapter.prototype.connectedAdapterChanged = function(key, adapter) {
@@ -131,6 +146,7 @@ XML3D.data.DataAdapter.prototype.connectedAdapterChanged = function(key, adapter
     if(key == "proto"){
         this.xflowDataNode.protoNode = adapter ? adapter.getXflowNode() : null;
     }
+    updateLoadState(this);
 };
 /**
  * Returns String representation of this DataAdapter

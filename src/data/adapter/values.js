@@ -3,14 +3,14 @@
     "use strict";
 
     var BUFFER_TYPE_TABLE = {};
-    BUFFER_TYPE_TABLE['float']    = Xflow.DataEntry.TYPE.FLOAT;
-    BUFFER_TYPE_TABLE['int']      = Xflow.DataEntry.TYPE.INT;
-    BUFFER_TYPE_TABLE['bool']     = Xflow.DataEntry.TYPE.BOOL;
-    BUFFER_TYPE_TABLE['float2']   = Xflow.DataEntry.TYPE.FLOAT2;
-    BUFFER_TYPE_TABLE['float3']   = Xflow.DataEntry.TYPE.FLOAT3;
-    BUFFER_TYPE_TABLE['float4']   = Xflow.DataEntry.TYPE.FLOAT4;
-    BUFFER_TYPE_TABLE['int4']     = Xflow.DataEntry.TYPE.INT4;
-    BUFFER_TYPE_TABLE['float4x4'] = Xflow.DataEntry.TYPE.FLOAT4X4;
+    BUFFER_TYPE_TABLE['float']    = Xflow.DATA_TYPE.FLOAT;
+    BUFFER_TYPE_TABLE['int']      = Xflow.DATA_TYPE.INT;
+    BUFFER_TYPE_TABLE['bool']     = Xflow.DATA_TYPE.BOOL;
+    BUFFER_TYPE_TABLE['float2']   = Xflow.DATA_TYPE.FLOAT2;
+    BUFFER_TYPE_TABLE['float3']   = Xflow.DATA_TYPE.FLOAT3;
+    BUFFER_TYPE_TABLE['float4']   = Xflow.DATA_TYPE.FLOAT4;
+    BUFFER_TYPE_TABLE['int4']     = Xflow.DATA_TYPE.INT4;
+    BUFFER_TYPE_TABLE['float4x4'] = Xflow.DATA_TYPE.FLOAT4X4;
     XML3D.data.BUFFER_TYPE_TABLE = BUFFER_TYPE_TABLE;
     /**
      * Constructor of XML3D.data.ValueDataAdapter

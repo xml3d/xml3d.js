@@ -1,37 +1,22 @@
 Xflow.registerOperator("morph", {
-    outputs: [{name: 'result', tupleSize: '3'}],
-    params:  ['value','valueAdd','weight'],
-    evaluate: function(value, valueAdd, weight) {
-        if(!(value && valueAdd && weight))
-            throw "Xflow::morph3: Not all parameters are set";
-
-        if(value.length != valueAdd.length)
-            throw "Xflow::morph3: Input arrays differ in size";
-        if (!this.tmp || this.tmp.length != value.length)
-            this.tmp = new Float32Array(value.length);
-
-        var result = this.tmp;
-        for(var i = 0; i<value.length; i++)
-            result[i] = value[i] + weight[0] * valueAdd[i];
-
-        this.result.result = result;
+    outputs: [{type: 'float3', name: 'result'}],
+    params:  [
+        { type: 'float3', source: 'value' },
+        { type: 'float3', source: 'valueAdd'},
+        { type: 'float', source: 'weight'}
+    ],
+    evaluate: function(result, value, valueAdd, weight, info) {
+        for(var i = 0; i < info.iterateCount; i++){
+            var w = weight[info.iterFlag[2] ? i : 0];
+            result[3*i] = value[ info.iterFlag[0] ? 3*i : 0] + w * valueAdd[info.iterFlag[1] ? 3*i : 0];
+            result[3*i+1] = value[ info.iterFlag[0] ? 3*i+1 : 1] + w * valueAdd[info.iterFlag[1] ? 3*i+1 : 1];
+            result[3*i+2] = value[ info.iterFlag[0] ? 3*i+2 : 2] + w * valueAdd[info.iterFlag[1] ? 3*i+2 : 2];
+        }
         return true;
     },
-
-    evaluate_parallel: function(value, valueAdd, weight) {
-        if(!(value && valueAdd && weight))
-            throw "Xflow::morph3: Not all parameters are set";
-
-        if(value.length != valueAdd.length)
-            throw "Xflow::morph3: Input arrays differ in size";
-        if (!this.tmp || this.tmp.length != value.length)
-            this.tmp = new Float32Array(value.length);
-
-        var result = this.tmp;
-        for(var i = 0; i<value.length; i++)
-            result[i] = value[i] + weight[0] * valueAdd[i];
-
-        this.result.result = result;
-        return true;
+    evaluate_core: function(result, value, valueAdd, weight){
+        result[0] = value[0] + weight[0] * valueAdd[0];
+        result[1] = value[1] + weight[0] * valueAdd[1];
+        result[2] = value[2] + weight[0] * valueAdd[2];
     }
 });

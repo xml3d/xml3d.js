@@ -1,0 +1,32 @@
+<XflowTest>
+    <Input>
+
+      <data id="image">
+        <texture name="image" id="texture_1">
+          <img src="../images/teapot.ppm"/>
+        </texture>
+      </data>
+      
+      <data id="processedImage" compute="image = xflow.test.colorImage(color, image)" >
+      		<data src="#image" />
+      		<float3 name="color" >0 0 1</float3>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="Check just the image" data="#image" >
+        <MatchInput name="image" input="#texture_1" />
+        <MatchData name="image" type="texture" >
+          <img src="../images/teapot.ppm"/>
+        </MatchData>
+      </Check>
+      
+      <Check title="Check processed image" data="#processedImage" >
+        <MatchData name="image" type="texture" >
+          <img src="../images/teapot_modified.ppm"/>
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

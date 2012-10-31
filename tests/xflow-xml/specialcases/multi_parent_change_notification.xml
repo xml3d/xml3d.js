@@ -1,0 +1,73 @@
+<!--
+	Purpose of this test:
+	Checking change notification to multiple parent <data> nodes.
+	If a the value of a node with many parents changes, all parents must be notified.
+	Turns out this aspect was overlooked in the initial implementation, that's why we check it's correctness here.
+-->
+<XflowTest>
+    <Input>
+        <!-- Declare the xflow graph here -->
+        <data id="data">
+            <float3 name="value"  >0 0 0</float3>
+			<float3 name="valueAdd"  >2 2 2</float3>
+        </data>
+		<data id="weight">
+            <float name="weight" id="weight_value"  >0</float>
+			<int name="distraction" id="distraction_value" >0</int>
+        </data>
+		<data id="morph1" compute="result = xflow.morph(value, valueAdd, weight)" >
+            <data src="#data" />
+			<data src="#weight" />
+        </data>
+		<data id="morph2" compute="result = xflow.morph(value, valueAdd, weight)" >
+            <data src="#data" />
+			<data src="#weight" />
+        </data>
+    </Input>
+    <TestProcess>
+		<!-- Check initial value -->
+        <Check title="First Check" data="#morph1">      
+            <MatchData name="result" type="float3" >0 0 0</MatchData>
+        </Check>
+		<Check title="Second Check" data="#morph2">      
+            <MatchData name="result" type="float3" >0 0 0</MatchData>
+        </Check>
+		
+		<!-- Changing the weight value should affect both results -->		
+		<Modification title="Change morphing weight" >
+            <ChangeData input="#weight_value" >0.5</ChangeData>
+        </Modification>
+
+		<Check title="First Check" data="#morph1">      
+            <MatchData name="result" type="float3" >1 1 1</MatchData>
+        </Check>
+		<Check title="Second Check" data="#morph2">      
+            <MatchData name="result" type="float3" >1 1 1</MatchData>
+        </Check>
+
+		<!-- here we change the weight and only check one of the morphing results -->						
+		<Modification title="Change morphing weight again" >
+            <ChangeData input="#weight_value" >1</ChangeData>
+        </Modification>
+		
+		<Check title="First Check" data="#morph1">      
+            <MatchData name="result" type="float3" >2 2 2</MatchData>
+        </Check>
+		
+		<!-- 
+			Now we change some other value in the same data node that has the weight.
+			Now both results should still be updated, even the one that was not queried before.
+			This should check some potential errors with potential caching of "changed names".
+		-->								
+		<Modification title="Change distraction value" >
+            <ChangeData input="#distraction_value" >1</ChangeData>
+        </Modification>
+		
+		<Check title="First Check" data="#morph1">      
+            <MatchData name="result" type="float3" >2 2 2</MatchData>
+        </Check>
+        <Check title="First Check" data="#morph2">      
+            <MatchData name="result" type="float3" >2 2 2</MatchData>
+        </Check>        
+    </TestProcess>
+</XflowTest>

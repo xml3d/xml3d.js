@@ -1,5 +1,15 @@
 // Additional methods in glMatrix style
 
+
+vec3.reciprocal = function(vec, dest) {
+    if(!dest) { dest = vec; }
+
+    dest[0] = 1 / vec[0];
+    dest[1] = 1 / vec[1];
+    dest[2] = 1 / vec[2];
+    return dest;
+};
+
 mat4.multiplyOffsetVec3 = function(mat, matOffset, vec, vecOffset, dest) {
     if(!dest) { dest = vec; }
     if(!vecOffset) { vecOffset = 0; }
@@ -26,6 +36,83 @@ mat4.multiplyOffsetDirection = function(mat, matOffset, vec, vecOffset, dest) {
     dest[2] = mat[matOffset+2]*x + mat[matOffset+6]*y + mat[matOffset+10]*z;
 
     return dest;
+};
+
+var IDENT_MAT = mat4.identity(mat4.create());
+var TMP_MATRIX = mat4.create();
+var TMP_VEC = vec3.create();
+
+mat4.makeTransformXflow = function(translation,rotation,scale,center,scaleOrientation,dest){
+    mat4.identity(dest);
+    if(translation) mat4.translate(dest, translation);
+    if(center) mat4.translate(dest, center);
+    if(rotation){
+        quat4.toMat4([rotation[1],rotation[2],rotation[3],-rotation[0]], TMP_MATRIX);
+        mat4.multiply(dest, TMP_MATRIX);
+    }
+    if(scaleOrientation){
+        quat4.toMat4([scaleOrientation[1],scaleOrientation[2],scaleOrientation[3],-scaleOrientation[0]], TMP_MATRIX);
+        mat4.multiply(dest, TMP_MATRIX);
+    }
+    if(scale) mat4.scale(dest, scale);
+    if(scaleOrientation){
+        quat4.toMat4([scaleOrientation[1],scaleOrientation[2],scaleOrientation[3],scaleOrientation[0]], TMP_MATRIX);
+        mat4.multiply(dest, TMP_MATRIX);
+    }
+    if(center){
+        mat4.translate(dest, vec3.negate(center, TMP_VEC));
+    }
+};
+
+mat4.makeTransformInvXflow = function(translation,rotation,scale,center,scaleOrientation,dest){
+    mat4.identity(dest);
+    if(center){
+        mat4.translate(dest, center);
+    }
+    if(scaleOrientation){
+        quat4.toMat4([scaleOrientation[1],scaleOrientation[2],scaleOrientation[3],-scaleOrientation[0]], TMP_MATRIX);
+        mat4.multiply(dest, TMP_MATRIX);
+    }
+    if(scale) mat4.scale(dest, vec3.reciprocal(scale,TMP_VEC) );
+    if(scaleOrientation){
+        quat4.toMat4([scaleOrientation[1],scaleOrientation[2],scaleOrientation[3],scaleOrientation[0]], TMP_MATRIX);
+        mat4.multiply(dest, TMP_MATRIX);
+    }
+    if(rotation){
+        quat4.toMat4([rotation[1],rotation[2],rotation[3],rotation[0]], TMP_MATRIX);
+        mat4.multiply(dest, TMP_MATRIX);
+    }
+    if(center) mat4.translate(dest, vec3.negate(center, TMP_VEC) );
+    if(translation) mat4.translate(dest, vec3.negate(translation, TMP_VEC) );
+};
+
+/*
+mat4.makeTransformInvOffset = function(translation,rotation,scale,center,scaleOrientation,offset,dest) {
+    var mo = offset*16;
+    var vo = offset*3;
+    var qo = offset*4;
+
+    dest[mo+0] = 1;
+    dest[mo+1] = 0;
+    dest[mo+2] = 0;
+    dest[mo+3] = 0;
+    dest[mo+4] = 0;
+    dest[mo+5] = 1;
+    dest[mo+6] = 0;
+    dest[mo+7] = 0;
+    dest[mo+8] = 0;
+    dest[mo+9] = 0;
+    dest[mo+10] = 1;
+    dest[mo+11] = 0;
+    dest[mo+12] = -translation[vo];
+    dest[mo+13] = -translation[vo+1];
+    dest[mo+14] = -translation[vo+2];
+    dest[mo+15] = 1;
+
+    if (rotation) {
+        var rotM = quat4.toMat4([rotation[qo+1],rotation[qo+2],rotation[qo+3],rotation[qo]]);
+        mat4.multiplyOffset(dest, mo,  rotM, 0,  dest, mo);
+    }
 };
 
 mat4.makeTransformOffset = function(translation,rotation,scale,center,scaleOrientation,offset,dest) {
@@ -55,7 +142,7 @@ mat4.makeTransformOffset = function(translation,rotation,scale,center,scaleOrien
         mat4.multiplyOffset(dest, mo,  rotM, 0,  dest, mo);
     }
 };
-
+*/
 mat4.multiplyOffset = function(dest, destOffset, mat, offset1, mat2, offset2) {
     var a00 = mat2[offset2+0], a01 = mat2[offset2+1], a02 = mat2[offset2+2], a03 = mat2[offset2+3];
     var a10 = mat2[offset2+4], a11 = mat2[offset2+5], a12 = mat2[offset2+6], a13 = mat2[offset2+7];
@@ -85,12 +172,14 @@ mat4.multiplyOffset = function(dest, destOffset, mat, offset1, mat2, offset2) {
     dest[destOffset+15] = b30*a03 + b31*a13 + b32*a23 + b33*a33;
 };
 
-quat4.slerpOffset = function(quat, quat2, offset, t, dest, shortest) {
+quat4.slerpOffset = function(quat, offset1, quat2, offset2, t, dest, destOffset, shortest) {
     if(!dest) { dest = quat; }
 
-    var ix = offset, iy = offset+1, iz = offset+2, iw = offset+3;
+    var ix1 = offset1, iy1 = offset1+1, iz1 = offset1+2, iw1 = offset1+3;
+    var ix2 = offset2, iy2 = offset2+1, iz2 = offset2+2, iw2 = offset2+3;
+    var ixd = destOffset, iyd = destOffset+1, izd = destOffset+2, iwd = destOffset+3;
 
-    var cosAngle =  quat[ix]*quat2[ix] + quat[iy]*quat2[iy] + quat[iz]*quat2[iz] + quat[iw]*quat2[iw];
+    var cosAngle =  quat[ix1]*quat2[ix2] + quat[iy1]*quat2[iy2] + quat[iz1]*quat2[iz2] + quat[iw1]*quat2[iw2];
 
     var c1, c2;
 
@@ -113,8 +202,8 @@ quat4.slerpOffset = function(quat, quat2, offset, t, dest, shortest) {
     if (shortest && (cosAngle < 0.0))
       c1 = -c1;
 
-    dest[ix] = c1*quat[ix] + c2*quat2[ix];
-    dest[iy] = c1*quat[iy] + c2*quat2[iy];
-    dest[iz] = c1*quat[iz] + c2*quat2[iz];
-    dest[iw] = c1*quat[iw] + c2*quat2[iw];
+    dest[ixd] = c1*quat[ix1] + c2*quat2[ix2];
+    dest[iyd] = c1*quat[iy1] + c2*quat2[iy2];
+    dest[izd] = c1*quat[iz1] + c2*quat2[iz2];
+    dest[iwd] = c1*quat[iw1] + c2*quat2[iw2];
 };

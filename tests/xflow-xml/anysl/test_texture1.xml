@@ -1,0 +1,49 @@
+<XflowTest>
+    <Input>
+
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+
+#define PROGRAM_PARAMS(X)                              \
+    X(in,  Float2, texcoord, NONE)                     \
+    X(in,  Sampler2D, diffuseTexture, SAMPLER)         \
+    X(out, Float4, color, NONE)
+
+FLOW_PROGRAM_WITH_PARAMS(TestTexture1, PROGRAM_PARAMS)
+{
+    ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+
+	color = 2 * SampleTexture2D(diffuseTexture, texcoord);
+}
+]]>
+      </script>
+
+      <data id="processing" compute="color = TestTexture1(texcoord, diffuseTexture)" >
+        <texture name="diffuseTexture" id="texture_1">
+          <img src="test_texture1.ppm"/>
+        </texture>
+        <float2 name="texcoord">0 0 0.25 0 0.5 0 0.75 0</float2>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="Check just the image" data="#processing" >
+        <MatchInput name="diffuseTexture" input="#texture_1" />
+        <MatchData name="diffuseTexture" type="texture" >
+          <img src="test_texture1.ppm"/>
+        </MatchData>
+      </Check>
+
+      <Check title="Check processed data" data="#processing" >
+        <MatchData name="color" type="float4" >
+          2 0 0 2
+          2 0 0 2
+          0 2 0 2
+          0 2 0 2
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

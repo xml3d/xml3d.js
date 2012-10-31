@@ -5,12 +5,13 @@
  * @param {Xflow.DataNode} dataNode
  * @param {Array.<string>} filter
  */
-var Result = function(){
+Xflow.Result = function(){
+    this.loading = false;
     this._outputNames = [];
     /** @type {Object.<string,DataEntry>} */
     this._dataEntries = {};
 };
-Xflow.Result = Result;
+var Result = Xflow.Result;
 
 Object.defineProperty(Result.prototype, "outputNames", {
     set: function(v){
@@ -34,10 +35,10 @@ Result.prototype.getOutputMap = function() {
  * @constructor
  * @extends {Xflow.Result}
  */
-var ComputeResult = function(){
+Xflow.ComputeResult = function(){
     Xflow.Result.call(this);
 };
-XML3D.createClass(ComputeResult, Xflow.Result);
-Xflow.ComputeResult = ComputeResult;
+XML3D.createClass(Xflow.ComputeResult, Xflow.Result);
+var ComputeResult = Xflow.ComputeResult;
 
 })();

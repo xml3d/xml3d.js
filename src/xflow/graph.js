@@ -4,10 +4,10 @@
  * The Xflow graph includes the whole dataflow graph
  * @constructor
  */
-var Graph = function(){
+Xflow.Graph = function(){
     this._nodes = [];
 };
-Xflow.Graph = Graph;
+var Graph = Xflow.Graph;
 
 
 
@@ -33,30 +33,30 @@ Graph.prototype.createDataNode = function(){
  * @constructor
  * @param {Xflow.Graph} graph
  */
-var GraphNode = function(graph){
+Xflow.GraphNode = function(graph){
     this._graph = graph;
     this._parents = [];
 };
-Xflow.GraphNode = GraphNode;
+var GraphNode = Xflow.GraphNode;
 
 /**
- * @constructore
+ * @constructor
  * @param {Xflow.Graph} graph
  * @extends {Xflow.GraphNode}
  */
-var InputNode = function(graph){
+Xflow.InputNode = function(graph){
     Xflow.GraphNode.call(this, graph);
     this._name = "";
     this._seqnr = 0;
     this._data = null;
     this._param = false;
 };
-XML3D.createClass(InputNode, Xflow.GraphNode);
-Xflow.InputNode = InputNode;
+XML3D.createClass(Xflow.InputNode, Xflow.GraphNode);
+var InputNode = Xflow.InputNode;
 
 InputNode.prototype.notify = function(newValue, notification) {
-    var downstreamNotification = notification == Xflow.DataNotifications.CHANGED_CONTENT ? XflowModification.DATA_CHANGED :
-                                                XflowModification.STRUCTURE_CHANGED;
+    var downstreamNotification = notification == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA :
+                                                Xflow.RESULT_STATE.CHANGED_STRUCTURE;
     notifyParentsOnChanged(this,downstreamNotification);
 };
 
@@ -64,7 +64,7 @@ Object.defineProperty(InputNode.prototype, "name", {
     /** @param {string} v */
     set: function(v){
         this._name = v;
-        notifyParentsOnChanged(this, XflowModification.STRUCTURE_CHANGED);
+        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {string} */
     get: function(){ return this._name; }
@@ -73,7 +73,7 @@ Object.defineProperty(InputNode.prototype, "seqnr", {
     /** @param {number} v */
     set: function(v){
         this._seqnr = v;
-        notifyParentsOnChanged(this, XflowModification.STRUCTURE_CHANGED);
+        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {number} */
     get: function(){ return this._seqnr; }
@@ -82,7 +82,7 @@ Object.defineProperty(InputNode.prototype, "param", {
     /** @param {boolean} v */
     set: function(v){
         this._param = v;
-        notifyParentsOnChanged(this, XflowModification.STRUCTURE_CHANGED);
+        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {boolean} */
     get: function(){ return this._param; }
@@ -90,10 +90,17 @@ Object.defineProperty(InputNode.prototype, "param", {
 Object.defineProperty(InputNode.prototype, "data", {
     /** @param {Object} v */
     set: function(v){
-        if(this._data) this._data.removeListener(this);
+        var oldLength = 0;
+        if(this._data) {
+            oldLength = this._data.getLength();
+            this._data.removeListener(this);
+        }
         this._data = v;
-        if(this._data) this._data.addListener(this);
-        notifyParentsOnChanged(this, XflowModification.DATA_CHANGED, this._name);
+        if(this._data)
+            this._data.addListener(this);
+        var sizeChanged = (oldLength != (this._data ? this._data.getLength() : 0));
+        notifyParentsOnChanged(this, sizeChanged ? Xflow.RESULT_STATE.CHANGED_STRUCTURE :
+            Xflow.RESULT_STATE.CHANGED_DATA, this._name);
     },
     /** @return {Object} */
     get: function(){ return this._data; }
@@ -102,11 +109,15 @@ Object.defineProperty(InputNode.prototype, "data", {
 
 
 /**
- * @constructore
+ * @constructor
  * @extends {Xflow.GraphNode}
  */
-var DataNode = function(graph){
+Xflow.DataNode = function(graph){
     Xflow.GraphNode.call(this, graph);
+
+    this.loading = false;
+
+    
     this._prototype = false;
     this._children = [];
     this._sourceNode = null;
@@ -119,30 +130,55 @@ var DataNode = function(graph){
     this._computeInputMapping = new Xflow.OrderMapping(this);
     this._computeOutputMapping = new Xflow.OrderMapping(this);
 
-    this._state = XflowModification.NONE;
+
+    this._state = Xflow.RESULT_STATE.NONE;
 
     this._initCompute();
     this._requests = [];
 };
-XML3D.createClass(DataNode, Xflow.DataNode);
-Xflow.DataNode = DataNode;
+XML3D.createClass(Xflow.DataNode, Xflow.GraphNode);
+var DataNode = Xflow.DataNode;
+
 
 /**
- * Filter Type of DataNode
- * KEEP - Keep only the provided names
- * REMOVE - Remove provided names (ignores name mapping)
- * RENAME - Only apply name mapping
- * @enum
+ * @constructor
+ * @param {Xflow.DataNode} owner
  */
-DataNode.FILTER_TYPE = {
-    RENAME: 0,
-    KEEP: 1,
-    REMOVE: 2
-}
+Xflow.Mapping = function(owner){
+    this._owner = owner;
+};
+
+
+/**
+ * @constructor
+ * @extends {Xflow.Mapping}
+ * @param {Xflow.DataNode} owner
+ */
+Xflow.OrderMapping = function(owner){
+    Xflow.Mapping.call(this, owner);
+    this._names = [];
+};
+XML3D.createClass(Xflow.OrderMapping, Xflow.Mapping);
+
+/**
+ * @constructor
+ * @extends {Xflow.Mapping}
+ * @param {Xflow.DataNode} owner
+ */
+Xflow.NameMapping = function(owner){
+    Xflow.Mapping.call(this, owner);
+    this._destNames = [];
+    this._srcNames = [];
+
+};
+XML3D.createClass(Xflow.NameMapping, Xflow.Mapping);
+
+
+
 /**
  * @private
  * @param {Xflow.DataNode} parent
- * @param {Xflow.DataNode|Xflow.InputNode} child
+ * @param {Xflow.GraphNode} child
  */
 function addParent(parent, child){
     child._parents.push(parent);
@@ -151,7 +187,7 @@ function addParent(parent, child){
 /**
  * @private
  * @param {Xflow.DataNode} parent
- * @param {Xflow.DataNode|Xflow.InputNode} child
+ * @param {Xflow.GraphNode} child
  */
 function removeParent(parent, child){
     Array.erase(child._parents, parent);
@@ -165,35 +201,35 @@ Object.defineProperty(DataNode.prototype, "prototype", {
     get: function(){ return this._prototype; }
 });
 Object.defineProperty(DataNode.prototype, "sourceNode", {
-    /** @param {Xflow.DataNode,null} v */
+    /** @param {?Xflow.DataNode} v */
     set: function(v){
         if(this._sourceNode) removeParent(this, this._sourceNode);
         this._sourceNode = v;
         if(this._sourceNode) addParent(this, this._sourceNode);
-        this.notify(XflowModification.STRUCTURE_CHANGED);
+        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
-    /** @return {Xflow.DataNode,null} */
+    /** @return {?Xflow.DataNode} */
     get: function(){ return this._sourceNode; }
 });
 Object.defineProperty(DataNode.prototype, "protoNode", {
-    /** @param {Xflow.DataNode,null} v */
+    /** @param {?Xflow.DataNode} v */
     set: function(v){
         if(this._protoNode) removeParent(this, this._protoNode);
         this._protoNode = v;
         if(this._protoNode) addParent(this, this._protoNode);
-        this.notify(XflowModification.STRUCTURE_CHANGED);
+        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
-    /** @return {Xflow.DataNode,null} */
+    /** @return {?Xflow.DataNode} */
     get: function(){ return this._protoNode; }
 });
 
 Object.defineProperty(DataNode.prototype, "filterType", {
-    /** @param {Xflow.DataNode.FILTER_TYPE} v */
+    /** @param {Xflow.DATA_FILTER_TYPE} v */
     set: function(v){
         this._filterType = v;
-        this.notify( XflowModification.STRUCTURE_CHANGED);
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
-    /** @return {Xflow.DataNode.FILTER_TYPE} */
+    /** @return {Xflow.DATA_FILTER_TYPE} */
     get: function(){ return this._filterType; }
 });
 
@@ -209,7 +245,7 @@ Object.defineProperty(DataNode.prototype, "computeOperator", {
     /** @param {string} v */
     set: function(v){
         this._computeOperator = v;
-        this.notify( XflowModification.STRUCTURE_CHANGED);
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {string} */
     get: function(){ return this._computeOperator; }
@@ -235,7 +271,7 @@ Object.defineProperty(DataNode.prototype, "computeOutputMapping", {
 DataNode.prototype.appendChild = function(child){
     this._children.push(child);
     addParent(this, child)
-    this.notify( XflowModification.STRUCTURE_CHANGED);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 /**
  * @param {Xflow.GraphNode} child
@@ -243,7 +279,7 @@ DataNode.prototype.appendChild = function(child){
 DataNode.prototype.removeChild = function(child){
     Array.erase(this._children, child);
     removeParent(this, child)
-    this.notify( XflowModification.STRUCTURE_CHANGED);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 /**
  * @param {Xflow.GraphNode} child
@@ -256,7 +292,7 @@ DataNode.prototype.insertBefore = function(child, beforeNode){
     else
         this._children.splice(idx, 0, child);
     addParent(this, child)
-    this.notify( XflowModification.STRUCTURE_CHANGED);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 /**
  * remove all children of the DataNode
@@ -266,7 +302,7 @@ DataNode.prototype.clearChildren = function(){
         removeParent(this, this._children[i]);
     }
     this._children = [];
-    this.notify( XflowModification.STRUCTURE_CHANGED);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 
 /**
@@ -298,15 +334,15 @@ var filterParser = /^([A-Za-z\s]*)\(([^()]+)\)$/;
  */
 DataNode.prototype.setFilter = function(filterString){
     filterString = filterString || "";
-    var newType = DataNode.FILTER_TYPE.RENAME;
+    var newType = Xflow.DATA_FILTER_TYPE.RENAME;
     var newMapping = null;
     var result = filterString.trim().match(filterParser);
     if(result){
         var type = result[1].trim();
         switch(type){
-            case "keep": newType = DataNode.FILTER_TYPE.KEEP; break;
-            case "remove": newType = DataNode.FILTER_TYPE.REMOVE; break;
-            case "rename": newType = DataNode.FILTER_TYPE.RENAME; break;
+            case "keep": newType = Xflow.DATA_FILTER_TYPE.KEEP; break;
+            case "remove": newType = Xflow.DATA_FILTER_TYPE.REMOVE; break;
+            case "rename": newType = Xflow.DATA_FILTER_TYPE.RENAME; break;
         }
         newMapping = Xflow.Mapping.parse(result[2], this);
     }
@@ -316,7 +352,7 @@ DataNode.prototype.setFilter = function(filterString){
     removeMappingOwner(this._filterMapping);
     this._filterMapping = newMapping;
     this._filterType = newType;
-    this.notify( XflowModification.STRUCTURE_CHANGED);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 
 var computeParser = /^(([^=]+)\=)?([^(]+)\(([^()]*)\)$/;
@@ -338,8 +374,8 @@ DataNode.prototype.setCompute = function(computeString){
         if(result = output.match(bracketsParser)){
             output = result[1];
         }
-        inputMapping = Xflow.Mapping.parse(input);
-        outputMapping = Xflow.Mapping.parse(output);
+        inputMapping = Xflow.Mapping.parse(input, this);
+        outputMapping = Xflow.Mapping.parse(output, this);
     }
     if(!inputMapping) inputMapping = new Xflow.OrderMapping(this);
     if(!outputMapping) outputMapping = new Xflow.OrderMapping(this);
@@ -348,41 +384,41 @@ DataNode.prototype.setCompute = function(computeString){
     this._computeInputMapping = inputMapping;
     this._computeOutputMapping = outputMapping;
     this._computeOperator = newOperator;
-    this.notify( XflowModification.STRUCTURE_CHANGED);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 }
 /**
  * Notifies DataNode about a change. Notification will be forwarded to parents, if necessary
- * @param {XflowModification} changeType
- * @param {string, null} name
+ * @param {Xflow.RESULT_STATE} changeType
+ * @param {?string} name
  */
 DataNode.prototype.notify = function(changeType, name){
-    if(changeType == XflowModification.STRUCTURE_CHANGED && this._state != changeType)
+    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE && this._state != changeType)
     {
         this._state = changeType;
         notifyParentsOnChanged(this, changeType, name);
         this._updateComputeCache(changeType);
         for(var i in this._requests)
-            this._requests[i].notify(Xflow.RequestNotification.CHANGED_STRUCTURE);
+            this._requests[i].notify(changeType);
     }
-    else if(changeType == XflowModification.DATA_CHANGED && this._state < changeType){
+    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA && this._state < changeType){
         this._state = changeType;
         notifyParentsOnChanged(this, changeType, name);
         this._updateComputeCache(changeType);
         for(var i in this._requests)
-            this._requests[i].notify(Xflow.RequestNotification.CHANGED_CONTENT);
+            this._requests[i].notify(changeType);
     }
 };
 
 /**
  * Notify all parent nodes about a change
  * @param {Xflow.GraphNode} node
- * @param {XflowModification} changeType
- * @param {string, null} name
+ * @param {number|Xflow.RESULT_STATE} changeType
+ * @param {?string=} name
  * @private
  */
 function notifyParentsOnChanged(node, changeType, name){
     for(var i = 0; i < node._parents.length; ++i){
-        node._parents[i].notify(changeType, name);
+        node._parents[i].notify(changeType, name || null);
     }
 };
 /**

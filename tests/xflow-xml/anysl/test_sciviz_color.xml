@@ -1,0 +1,188 @@
+<XflowTest>
+  <Input>
+
+    <script id="myMorphing" type="x-shader/anysl.vertex.text">
+      <![CDATA[
+program(MyMorphing,
+    param(in, float3, in_position1),
+    param(in, float3, in_normal1),
+    param(in, float3, in_position2),
+    param(in, float3, in_normal2),
+    param(out, float3, out_position),
+    param(out, float3, out_normal),
+    param(in, float, weight))
+{
+    out_position = Lerp(in_position1, in_position2, weight);
+    out_normal = Lerp(in_normal1, in_normal2, weight);
+}
+]]>
+    </script>
+
+    <script id="myColoring" type="x-shader/anysl.vertex.text">
+      <![CDATA[
+
+    Float3 getColor(float f) {
+	float r, g, b;
+        if (f < 0.25) {
+        	r = 0.0;
+                g = 0.99 - 4 * f;
+                b = 1.0;
+        } else if (f < 0.5) {
+        	r = 0.0;
+                g = 4 * f - 1.0;
+                b = 1.99 - 4 * f;
+        } else if (f < 0.75) {
+		r = 4 * f - 1.99;
+                g = 1.0;
+                b = 0;
+        } else {
+        	r = 1.0;
+                g = 4.0 - 4 * f;
+                b = 0;
+        }
+	return Float3(r, g, b);
+    }
+
+program(MyColoring,
+    param(in, float3, in_position1),
+    param(in, float3, in_normal1),
+    param(in, float3, in_position),
+    param(in, float3, in_normal),
+    param(out, float3, out_position),
+    param(out, float3, out_normal),
+    param(out, float3, out_color))
+{
+    out_position = in_position;
+    out_normal = in_normal;
+    out_color = getColor(Length(in_position-in_position1));
+}
+]]>
+    </script>
+
+    <data id="Grid_deformed">
+      <float3 name="position2">
+        0.984252 0.984251 0.321257
+        1.000000 0.984251 0.306515
+        0.984252 0.999999 0.306515
+      </float3>
+      <float3 name="normal2">
+        0.566668 0.566668 0.598102
+        0.562365 0.559313 0.608997
+        0.559313 0.562365 0.608997
+      </float3>
+    </data>
+
+    <data id="Grid_orig">
+      <float3 name="position1">
+        0.984252 0.984251 0.000000
+        1.000000 0.984251 0.000000
+        1.000000 0.999999 0.000000
+      </float3>
+      <float3 name="normal1">
+        0.000000 0.000000 1.000000
+        0.000000 0.000000 1.000000
+        0.000000 0.000000 1.000000
+      </float3>
+    </data>
+
+    <data id="Grid_morphed" compute="(position, normal) = MyMorphing(position1, normal1, position2, normal2, weight)" >
+      <data src="#Grid_orig"/>
+      <data src="#Grid_deformed"/>
+      <float name="weight" id="weight">0.0</float>
+    </data>
+
+    <data id="Grid_result" compute="(position, normal, color) = MyColoring(position1, normal1, position, normal)" >
+      <data src="#Grid_morphed"/>
+      <data src="#Grid_orig"/>
+    </data>
+
+  </Input>
+  <TestProcess>
+
+    <Check title="First Check (weight=0.0)" data="#Grid_result" >
+      <MatchData name="position" type="float3">
+        0.984252 0.984251 0.000000
+        1.000000 0.984251 0.000000
+        1.000000 0.999999 0.000000
+      </MatchData>
+      <MatchData name="normal" type="float3">
+        0.000000 0.000000 1.000000
+        0.000000 0.000000 1.000000
+        0.000000 0.000000 1.000000
+      </MatchData>
+      <MatchData name="color" type="float3">
+        0.0   0.99   1.0
+        0.0   0.99   1.0
+        0.0   0.99   1.0
+      </MatchData>
+    </Check>
+
+    <Modification title="Change weight to 2.0" >
+      <ChangeData input="#weight" >2.0</ChangeData>
+    </Modification>
+
+    <Check title="Second Check (weight=2.0)" data="#Grid_result" >
+      <MatchData name="position" type="float3" >
+        0.984252   0.984251   0.642514
+        1.0        0.984251   0.61303
+        0.968504   0.999999   0.61303
+      </MatchData>
+      <MatchData name="normal" type="float3" >
+        1.13334   1.13334   0.196204
+        1.12473   1.11863   0.217994
+        1.11863   1.12473   0.217994
+      </MatchData>
+      <MatchData name="color" type="float3">
+        0.580056   1.0   0.0
+        0.46212    1.0   0.0
+        0.465354   1.0   0.0
+      </MatchData>
+    </Check>
+
+    <Modification title="Change weight to 0.5" >
+      <ChangeData input="#weight" >0.5</ChangeData>
+    </Modification>
+
+    <Check title="Third Check (weight=0.5)" data="#Grid_result" >
+      <MatchData name="position" type="float3" >
+        0.984252   0.984251   0.160628
+        1.0   0.984251   0.153258
+        0.992126   0.999999   0.153258
+      </MatchData>
+      <MatchData name="normal" type="float3" >
+        0.283334   0.283334   0.799051
+        0.281182   0.279656   0.804498
+        0.279656   0.281182   0.804498
+      </MatchData>
+      <MatchData name="color" type="float3">
+        0.0   0.347486   1.0
+        0.0   0.37697   1.0
+        0.0   0.376161   1.0
+      </MatchData>
+    </Check>
+
+    <Modification title="Change weight to 0.2" >
+      <ChangeData input="#weight" >0.2</ChangeData>
+    </Modification>
+
+    <Check title="Fourth Check (weight=0.2)" data="#Grid_result" >
+      <MatchData name="position" type="float3" >
+        0.984252   0.984251   0.0642514
+        1.0   0.984251   0.061303
+        0.99685   0.999999   0.061303
+      </MatchData>
+      <MatchData name="normal" type="float3" >
+        0.113334   0.113334   0.91962
+        0.112473   0.111863   0.921799
+        0.111863   0.112473   0.921799
+      </MatchData>
+      <MatchData name="color" type="float3">
+        0.0   0.732994  1.0
+        0.0   0.744788  1.0
+        0.0   0.744465  1.0
+      </MatchData>
+    </Check>
+
+  </TestProcess>
+</XflowTest>
+

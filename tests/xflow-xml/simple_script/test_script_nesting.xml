@@ -1,0 +1,38 @@
+<XflowTest>
+    <Input>
+        
+		<data id="morphed3" compute="position = xflow.morph(position, posAdd3, weight3)">
+		    <float3 name="posAdd3" id="positionAdd_3">1 1 1  0 0 0</float3>
+		    <float name="weight3" id="weight_3" >0.3</float>  
+		    
+	        <data id="morphed2" compute="position = xflow.morph(position, posAdd2, weight2)">
+	            <float3 name="posAdd2" id="positionAdd_2">1 0 0  0 -1 0</float3>
+	            <float name="weight2" id="weight_2" >0.5</float>  
+	            <data id="morphed1" compute="position = xflow.morph(position, posAdd1, weight1)">
+		            <float3 name="posAdd1" id="positionAdd_1">0 0 1  1 0 0</float3>
+		            <float name="weight1" id="weight_1" >0.7</float>                        
+		            
+		            <int name="index" id="index_1" >0 1 2 1 2 3</int>
+		            <float3 name="position" id="position_1">1 1 1  2 2 2</float3>
+	            </data>	
+	        </data>
+
+		</data>
+        
+    </Input>
+    <TestProcess>
+        
+        <Check title="Check Morphed1" data="#morphed1" >
+            <MatchData name="position" type="float3" >1 1 1.7  2.7 2 2</MatchData>
+        </Check>
+       
+        <Check title="Check Morphed2" data="#morphed2" >
+            <MatchData name="position" type="float3" >1.5 1 1.7  2.7 1.5 2</MatchData>
+        </Check>
+        
+        <Check title="Check Morphed3" data="#morphed3" >
+            <MatchData name="position" type="float3" >1.8 1.3 2.0  2.7 1.5 2</MatchData>
+        </Check>
+        
+    </TestProcess>
+</XflowTest>

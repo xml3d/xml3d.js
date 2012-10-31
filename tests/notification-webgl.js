@@ -165,7 +165,7 @@ test("DOMCharacterDataModified notification", 6, function() {
 
 });
 
-test("Text DOMNodeInserted notification", 7, function() {
+test("Text DOMNodeInserted notification", 8, function() {
     // 1: Found frame
     // 2: Scene loaded
     var index = this.doc.getElementById("indices");
@@ -176,6 +176,7 @@ test("Text DOMNodeInserted notification", 7, function() {
 
     var pos = this.doc.getElementById("positions");
     this.factory.getAdapter(pos);
+    equal(pos.value.length, 12, "Length of typed array is correct before modification");
     pos.textContent = "1 0 2"; // 6: Adapter notified: Notification (type:1)
     equal(pos.value.length, 3, "Length of typed array after textContent has been set"); // 7
 });

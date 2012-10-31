@@ -1,0 +1,42 @@
+<XflowTest>
+    <Input>
+		<data id="morphed1" compute="morph1 = xflow.morph(value, valueAdd, weight)">
+			<float3 name="valueAdd" >0 0 1  1 0 0</float3>
+			<float name="weight"  >0.1</float>                        
+			
+			<int name="index" >0 1 2 1 2 3</int>
+			<float3 name="value" >1 1 1  2 2 2</float3>
+			<float3 name="normal" >1 0 0 1 0 0</float3>
+		</data>	    
+    
+    
+		<data id="morphed3" compute="position = xflow.morph(morph2, morph2Add, weight)">
+		    <float name="weight" >0.3</float>  
+		  
+		  	<data id="morphed2.1" compute="morph2 = xflow.morph(morph1, valueAdd, weight)" >
+	            <float3 name="valueAdd" >1 0 0  0 -1 0</float3>
+	            <float name="weight" >0.21</float>  
+	            
+	            <data src="morphed1" />	
+	        </data>
+		 
+		    
+		    <data id="morphed2.2" compute="morph2Add = xflow.morph(morph1, valueAdd, weight)"  >
+	            <float3 name="valueAdd" >0 0 1  1 0 0</float3>
+	            <float name="weight" >0.22</float>                        
+	            
+	            <data src="morphed1" />	
+	        </data>
+	      	
+		</data>
+        
+    </Input>
+    <TestProcess>
+        <Show title="Show Vertex Shader" data="#morphed3" what="VertexShader" 
+                filter="worldPosition worldNormal fragColor index" >
+        	<VSConnection in="position" out="worldPosition" type="FLOAT3_WORLD_POINT" />
+        	<VSConnection in="normal" out="worldNormal" type="FLOAT3_WORLD_NORMAL" />
+        	<VSConnection in="color" out="fragColor" type="FLOAT4" optional="true" />
+        </Show>
+    </TestProcess>
+</XflowTest>

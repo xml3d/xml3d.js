@@ -377,11 +377,13 @@ test("Operators - forwardKinematics operator", function() {
     this.executeTests(response);
 });
 
+/*
 test("Operators - image processing operators", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/simple_script/test_script_image_processing.xml", handler);
     this.executeTests(response);
 });
+*/
 
 test("Operators - Lerp on Sequences", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));

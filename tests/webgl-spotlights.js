@@ -15,26 +15,6 @@ module("WebGL Spotlights", {
     }
 });
 
-test("All spot lights visibility off", 4, function() {
-    var x = this.doc.getElementById("xml3DElem"),
-    actual,
-    win = this.doc.defaultView,
-    gl = getContextForXml3DElement(x),
-    h = getHandler(x);
-    this.doc.getElementById("mainlight").visible = false;
-
-    this.doc.getElementById("diffuseShadedGroup").visible = true;
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,255,0,255], "Green emissive diffuse object");
-
-    this.doc.getElementById("diffuseShadedGroup").visible = false;
-    this.doc.getElementById("phongShadedGroup").visible = true;
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,0,255], "Black phong object");
-});
-
 //
 function array2floatArray2array(a1) {
   a2 = [];
@@ -57,7 +37,6 @@ function getChildNodeByName(node, name) {
   return null;
 }
 
-
 test("Initialization: entries in lights.spot check", 11, function() {
     var x = this.doc.getElementById("xml3DElem"),
     actual,
@@ -70,15 +49,62 @@ test("Initialization: entries in lights.spot check", 11, function() {
     sl = h.renderer.lights.spot;
     ok(sl.length==1, "Test light count");
 
-    deepEqual(sl.intensity, array2floatArray2array([1, 1, 1]), "Test light intensity entry");
+    deepEqual(sl.intensity, array2floatArray2array([10, 10, 10]), "Test light intensity entry");
     deepEqual(sl.attenuation, array2floatArray2array([0, 0, 1]), "Test light attenuation entry");
     deepEqual(sl.visibility, array2floatArray2array([1, 1, 1]), "Test light visibility entry");
-    deepEqual(sl.beamWidth, array2floatArray2array([0.3]), "Test light beamWidth entry");
-    deepEqual(sl.cutOffAngle, array2floatArray2array([0.5]), "Test light cutOffAngle entry");
-    deepEqual(sl.position, array2floatArray2array([0, 0, 2]), "Test for default position entry");
+    deepEqual(sl.beamWidth, array2floatArray2array([0.5]), "Test light beamWidth entry");
+    deepEqual(sl.cutOffAngle, array2floatArray2array([0.785]), "Test light cutOffAngle entry");
+    deepEqual(sl.position, array2floatArray2array([0, 0, 1]), "Test for default position entry");
     deepEqual(sl.direction, array2floatArray2array([0, 0, 1]), "Test for default direction entry");
 });
 
+test("All spot lights visibility off", 4, function() {
+    var x = this.doc.getElementById("xml3DElem"),
+    actual,
+    win = this.doc.defaultView,
+    gl = getContextForXml3DElement(x),
+    h = getHandler(x);
+    this.doc.getElementById("mainlight").visible = false;
+
+    this.doc.getElementById("diffuseShadedGroup").visible = true;
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,255,0,255], "Green emissive diffuse object");
+
+    this.doc.getElementById("diffuseShadedGroup").visible = false;
+    this.doc.getElementById("phongShadedGroup").visible = true;
+    h.draw();
+    actual = win.getPixelValue(gl, 90, 90);
+    deepEqual(actual, [0,0,0,255], "Black phong object");
+});
+
+test("Light spot geometry test", 6, function() {
+    var x = this.doc.getElementById("xml3DElem"),
+    actual,
+    win = this.doc.defaultView,
+    gl = getContextForXml3DElement(x),
+    h = getHandler(x);
+    this.doc.getElementById("mainlight").visible = true;
+
+    this.doc.getElementById("diffuseShadedGroup").visible = false;
+    this.doc.getElementById("phongShadedGroup").visible = true;
+    h.draw();
+    actual = win.getPixelValue(gl, 100, 100);
+    deepEqual(actual, [255,255,255,255], "White phong light spot (at 100, 100)");
+
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,255], "Black phong background object (at 40, 40)");
+
+    this.doc.getElementById("diffuseShadedGroup").visible = true;
+    this.doc.getElementById("phongShadedGroup").visible = false;
+    h.draw();
+    actual = win.getPixelValue(gl, 100, 100);
+    deepEqual(actual, [255,255,255,255], "White diffuse light spot (at 100, 100)");
+
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,255,0,255], "Green diffuse background object (at 40, 40)");
+
+});
 
 test("Change of light shader parameters check against lights.spot", 6, function() {
     var x = this.doc.getElementById("xml3DElem"),
@@ -120,3 +146,4 @@ test("Change in transformation hierarchy check against lights.spot", 4, function
     ok(equarr(sl.direction, [1, 0, 0], 0.0001), "Test direction entry change");
 
 });
+

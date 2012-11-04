@@ -267,6 +267,15 @@
         var na = this._axis.normalize();
         return new XML3DRotation(na, this._angle);
     };
+    
+    /** 
+     * Returns the quaternion, that underlies this rotation. 
+     * 
+     * @return {Float32Array} 
+     */
+    p.getQuaternion = function() {
+        return quat4.create(this._data); 
+    };
 
     XML3D.XML3DRotation = XML3DRotation;
     window.XML3DRotation = XML3DRotation;

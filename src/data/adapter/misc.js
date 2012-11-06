@@ -50,16 +50,17 @@
      * @param {string} url
      */
     ImgDataAdapter.prototype.createImageFromURL = function(url) {
-        var image = new Image();
         var that = this;
-        image.onload = function(e) {
+        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
+        var onload = function (e, image) {
             if (that.textureEntry) {
                 that.textureEntry.setImage(image);
             }
         };
-        image.crossOrigin = "anonymous";
-        image.src = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
-        this.image = image;
+        var onerror = function (e, image) {
+            XML3D.debug.logError("Could not load image URI="+image.src);
+        };
+        this.image = XML3D.base.resourceManager.getImage(uri, onload, onerror);
     };
 
     /**

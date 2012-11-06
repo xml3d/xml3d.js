@@ -4,6 +4,7 @@
     var c_cachedDocuments = {};
     var c_factories = {};
     var c_cachedAdapterHandles = {};
+    var c_canvasIdCounters = {};
 
     /**
      * Register a factory with the resource manager
@@ -23,6 +24,75 @@
      * @constructor
      */
     var ResourceManager = function() {};
+
+    ResourceManager.prototype.getCanvasIdCounters = function () {
+        return c_canvasIdCounters;
+    };
+
+    function getCounterObject(canvasId) {
+        return c_canvasIdCounters[canvasId];
+    }
+
+    function getOrCreateCounterObject(canvasId) {
+        var counterObject = c_canvasIdCounters[canvasId];
+        if (!counterObject) {
+            counterObject = {counter: 0, listeners : new Array()};
+            c_canvasIdCounters[canvasId] = counterObject;
+        }
+        return counterObject;
+    }
+
+    function notifyLoadCompleteListeners(counterObject) {
+        var listeners = counterObject.listeners;
+        counterObject.listeners = new Array();
+        var i = listeners.length;
+        while (i--) {
+            listeners[i](this);
+        }
+    }
+
+    function loadComplete(canvasId, url) {
+        // notify all load complete listeners
+        var counterObject = getCounterObject(canvasId);
+        if (counterObject) {
+            XML3D.debug.assert(counterObject.counter > 0, "counter must be > 0");
+            counterObject.counter--;
+            if (counterObject.counter == 0) {
+                notifyLoadCompleteListeners(counterObject);
+            }
+        }
+    }
+
+    /*
+     * Register listener that will be fired when all resources for specified canvasId are loaded.
+     * Listener is fired only once.
+     *
+     * @param {number} canvasId
+     * @param {EventListener} listener
+     */
+    ResourceManager.prototype.addLoadCompleteListener = function(canvasId, listener) {
+        var counterObject = getCounterObject(canvasId);
+
+        // when counter is 0 we can fire event immediately
+        if (counterObject === undefined || counterObject.counter == 0) {
+            listener(canvasId);
+            return;
+        }
+
+        var idx = counterObject.listeners.indexOf(listener);
+        if (idx == -1) {
+            counterObject.listeners.push(listener);
+        }
+    };
+
+    ResourceManager.prototype.removeLoadCompleteListener = function(canvasId, listener) {
+        var counterObject = getCounterObject(canvasId);
+        if (counterObject) {
+            var idx = counterObject.listeners.indexOf(listener);
+            if (idx != -1)
+                counterObject.listeners.splice(idx, 1);
+        }
+    };
 
     /**
      * Load a document via XMLHttpRequest
@@ -175,6 +245,7 @@
                 var factories = c_factories[canvasId];
                 if (!handle.hasAdapter() && factories[mimetype]) {
                     updateHandle(handle, adapterType, canvasId, mimetype, data);
+                    loadComplete(canvasId, url);
                 }
             }
         }
@@ -189,6 +260,7 @@
             for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
+                loadComplete(canvasId, url);
             }
         }
     }
@@ -205,6 +277,7 @@
      */
     function updateHandle(handle, adapterType, canvasId, mimetype, data){
         var factories = c_factories[canvasId];
+
         for ( var i = 0; i < factories[mimetype].length; ++i) {
             var fac = factories[mimetype][i];
             if (fac.aspect == adapterType) {
@@ -275,7 +348,10 @@
             else
                 handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
         }
-        else{
+        else {
+            var counterObject = getOrCreateCounterObject(canvasId);
+            counterObject.counter++;
+
             var docURI = uri.toStringWithoutFragment();
             var docData = c_cachedDocuments[docURI];
             if (docData && docData.response) {
@@ -332,7 +408,34 @@
         }
     }
 
+    /**
+     * This function is called to load an Image.
+     *
+     * @param {string} uri Image URI
+     * @param {function} loadListener Function called when image was successfully loaded.
+     *                                It will be called with event as the first and image as the second parameter.
+     * @param {function} errorListener Function called when image could not be loaded.
+     *                                 It will be called with event as the first and image as the second parameter.
+     * @return {Image}
+     */
+    ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) {
+        // we use canvasId 0 to represent images loaded in a document
+        getOrCreateCounterObject(0).counter++;
 
+        var image = new Image();
+        image.onload = function(e) {
+            loadComplete(0, uri);
+            loadListener(e, image);
+        };
+        image.onerror = function(e) {
+            loadComplete(0, uri);
+            errorListener(e, image);
+        };
+        image.crossOrigin = "anonymous";
+
+        image.src = uri; // here loading starts
+        return image;
+    }
 
     XML3D.base.resourceManager = new ResourceManager();
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xml3d-data-module" default="concat" basedir=".">
+    <description>
+            All data handling related functionality
+    </description>
+
+    <filelist dir="." id="sourceFiles">
+        <file name="./base.js" />
+        <file name="./adapter/data.js" />
+        <file name="./adapter/values.js" />
+        <file name="./adapter/texture.js" />
+        <file name="./adapter/misc.js" />
+        <file name="./adapter/factory.js" />
+        <file name="./adapter/json/factory.js" />
+    </filelist>
+
+    <target name="concat">
+        <echo message="Merging ${ant.project.name}" />
+        <concat destfile="${build.path}/${ant.project.name}.js" eol="unix" append="true">
+            <filelist refid="sourceFiles" />
+        </concat>
+    </target>
+
+</project>

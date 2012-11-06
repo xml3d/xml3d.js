@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xml3d-xflow-module" default="concat" basedir=".">
+    <description>
+            Build the Xflow module
+    </description>
+
+    <filelist dir="." id="sourceFiles">
+        <file name="./base.js" />
+        <file name="./graph.js" />
+        <file name="./mapping.js" />
+        <file name="./data.js" />
+        <file name="./compute.js" />
+        <file name="./operator.js" />
+        <file name="./request.js" />
+        <file name="./result.js" />
+        <file name="./operator/morph3.js" />
+        <file name="./operator/sub3.js" />
+        <file name="./operator/normalize3.js" />
+        <file name="./operator/lerp3seq.js" />
+        <file name="./operator/slerpseq.js" />
+        <file name="./operator/createTransform.js" />
+        <file name="./operator/createTransformInv.js" />
+        <file name="./operator/mul4x4.js" />
+        <file name="./operator/skinDirection.js" />
+        <file name="./operator/skinPosition.js" />
+        <file name="./operator/forwardKinematics.js" />
+        <file name="./operator/forwardKinematicsInv.js" />
+        <file name="./operator/flipNormal.js" />
+        <file name="./operator/math.js" />
+    </filelist>
+
+    <target name="concat">
+        <echo message="Merging ${ant.project.name}"/>
+        <concat destfile="${build.path}/${ant.project.name}.js" eol="unix" append="true">
+            <filelist refid="sourceFiles" />
+        </concat>
+    </target>
+
+</project>

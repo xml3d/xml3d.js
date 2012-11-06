@@ -45,6 +45,7 @@
 	<macrodef name="concatScripts">
 		<attribute name="extension" default="" />
 		<attribute name="version" />
+	    <attribute name="source" />
 		<sequential>
 			<property name="finalScript" value="${buildDir}/${script.start}@{extension}.js" />
 
@@ -56,7 +57,7 @@
 			</concat>
 
 			<concat destfile="${finalScript}" eol="unix" append="true">
-				<filelist refid="sourceFiles" />
+				<filelist refid="@{source}" />
 			</concat>
 
 			<replaceregexp file="${finalScript}" match="xml3d.webgl.checkError\("

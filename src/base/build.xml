@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xml3d-base-module" default="concat" basedir=".">
+    <description>
+            All base functionality such as Adapters, Factories and ResourceManager
+    </description>
+
+    <filelist dir="." id="sourceFiles">
+        <file name="./adapter.js" />
+        <file name="./adapterhandle.js" />
+        <file name="./resourcemanager.js" />
+    </filelist>
+
+    <target name="concat">
+        <echo message="Merging ${ant.project.name}"/>
+        <concat destfile="${build.path}/${ant.project.name}.js" eol="unix" append="true">
+            <filelist refid="sourceFiles" />
+        </concat>
+    </target>
+
+</project>

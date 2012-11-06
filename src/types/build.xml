@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xml3d-types-module" default="concat" basedir=".">
+    <description>
+            All XML3D types
+    </description>
+
+    <filelist dir="." id="sourceFiles">
+        <file name="vec3.js" />
+        <file name="rotation.js" />
+        <file name="box.js" />
+        <file name="matrix.js" />
+        <file name="ray.js" />
+    </filelist>
+
+    <target name="concat">
+        <echo message="Merging ${ant.project.name}"/>
+        <concat destfile="${build.path}/${ant.project.name}.js" eol="unix" append="true">
+            <filelist refid="sourceFiles" />
+        </concat>
+    </target>
+
+</project>

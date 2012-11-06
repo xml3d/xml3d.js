@@ -163,4 +163,11 @@
             <fileset dir="${srcDir}" includes="*/build.xml" />
         </subant>
     </target>
+
+    <target name="modules-compile">
+        <subant target="compile">
+            <property name="build.path" value="${buildDir}" />
+            <fileset dir="${srcDir}" includes="*/build.xml" />
+        </subant>
+    </target>
 </project>

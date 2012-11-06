@@ -3,6 +3,7 @@
     <description>
             All utility functionality
     </description>
+    <import file="../../build/build-master.xml" />
 
     <filelist dir="." id="sourceFiles">
         <file name="./misc.js" />
@@ -14,10 +15,7 @@
     </filelist>
 
     <target name="concat">
-        <echo message="Merging ${ant.project.name}"/>
-        <concat destfile="${build.path}/${ant.project.name}.js" eol="unix" append="true">
-            <filelist refid="sourceFiles" />
-        </concat>
+        <concat-module name="${ant.project.name}" path="${build.path}" sources="sourceFiles"/>
     </target>
 
 </project>

@@ -45,7 +45,7 @@
     /*
      * This function is called when scene DOM is loaded and all adapters are attached
      */
-    XML3DRenderAdapter.prototype.initialize = function() {
+    XML3DRenderAdapter.prototype.onConfigured = function() {
         // emit load event when all resources currently loading are completed
         var callback = (function (node, nodeCanvasId) {
             var counter = 2; // we fire load event when callback is called twice

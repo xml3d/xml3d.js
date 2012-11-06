@@ -27,6 +27,8 @@
  *  - domstr (String): a string representation of a 2D or 3D transform matrix
  *    in the form given by the CSS transform property, i.e. just like the
  *    output from [[FirminCSSMatrix#toString]].
+ *
+ *  @constructor
  **/
 var FirminCSSMatrix = function(domstr) {
     this.m11 = this.m22 = this.m33 = this.m44 = 1;

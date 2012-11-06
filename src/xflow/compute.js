@@ -81,8 +81,12 @@ DataNode.prototype._initCompute = function(){
 }
 
 DataNode.prototype._updateComputeCache = function(state){
-    this._results = [];
     this._dataMap = {};
+
+    for(var i in this._results){
+        this._results[i].notifyChanged(state);
+    }
+
     if(state == Xflow.RESULT_STATE.CHANGED_STRUCTURE){
         this._operatorData = null;
     }
@@ -95,18 +99,19 @@ DataNode.prototype._getComputeResult = function(filter){
         return forwardNode._getComputeResult(filter);
     }
 
-
     var key = filter ? filter.join(";") : "[null]";
-    if(this._results[key])
-        return this._results[key];
-    var result =  this._createComputeResult(filter)
-    this._results[key] = result;
-    return result;
+    if(!this._results[key])
+        this._results[key] = new Xflow.ComputeResult();
+
+    if(!this._results[key].valid)
+        this._createComputeResult(filter, this._results[key]);
+
+    return this._results[key];
 }
 
-DataNode.prototype._createComputeResult = function(filter){
-    var result = new Xflow.ComputeResult();
-
+DataNode.prototype._createComputeResult = function(filter, result){
+    result._outputNames = [];
+    result._dataEntries = {};
     var loading = this._populateDataMap();
 
     for(var i in this._dataMap){
@@ -116,7 +121,7 @@ DataNode.prototype._createComputeResult = function(filter){
         }
     }
     result.loading = loading;
-    return result;
+    result.valid = true;
 }
 DataNode.prototype._populateDataMap = function(){
     if(this._state == Xflow.RESULT_STATE.NONE) return;

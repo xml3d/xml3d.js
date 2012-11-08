@@ -38,6 +38,7 @@ XML3D.extend = function(a, b) {
 XML3D.createClass = function(ctor, parent, methods) {
     methods = methods || {};
     if (parent) {
+        /** @constructor */
         var F = function() {
         };
         F.prototype = parent.prototype;

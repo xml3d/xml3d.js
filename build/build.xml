@@ -7,138 +7,84 @@
      Author: Kristian Sons
      ====================================================================== -->
 <project name="script-merge" default="develop">
-	<description>
+    <description>
            Merge all the single scripts to one global xml3d.js
     </description>
 
-	<import file="build-master.xml"/>
-	<property file="build.properties" />
+    <import file="build-master.xml" />
+    <property file="build.properties" />
 
-	<filelist dir="${srcDir}" id="sourceFiles">
-		<file name="xml3d.js" />
-		<file name="utils/misc.js" />
-		<file name="utils/array.js" />
-		<file name="utils/debug.js" />
-		<file name="utils/uri.js" />
-		<file name="utils/css.js" />
-		<file name="utils/cssMatrix.js" />
-		<file name="contrib/glu.js" />
-		<file name="contrib/glMatrix.js" />
-        <file name="types/vec3.js" />
-		<file name="types/rotation.js" />
-		<file name="types/box.js" />
-		<file name="types/matrix.js" />
-		<file name="types/ray.js" />
-	    <file name="xflow/base.js" />
-        <file name="xflow/graph.js" />
-        <file name="xflow/mapping.js" />
-        <file name="xflow/data.js" />
-        <file name="xflow/compute.js" />
-        <file name="xflow/operator.js" />
-        <file name="xflow/request.js" />
-        <file name="xflow/result.js" />
-	    <file name="data/base.js" />
-	    <file name="base/adapter.js" />
-	    <file name="base/adapterhandle.js" />
-	    <file name="base/resourcemanager.js" />
-		<file name="interface/notification.js" />
-		<file name="interface/factory.js" />
-		<file name="interface/dom.js" />
-		<file name="interface/elements.js" />
-		<file name="interface/attributes.js" />
-		<file name="interface/methods.js" />
-		<file name="interface/configuration.js" />
-        <file name="data/adapter/data.js" />
-        <file name="data/adapter/values.js" />
-        <file name="data/adapter/texture.js" />
-        <file name="data/adapter/misc.js" />
-        <file name="data/adapter/factory.js" />
-        <file name="data/adapter/json/factory.js" />
-        <file name="renderer/base.js" />
-        <file name="renderer/datachangelistener.js" />
-        <file name="renderer/canvashandler.js" />
-        <file name="renderer/utils.js" />
-        <file name="renderer/shadermanager.js" />
-	    <file name="renderer/material.js" />
-        <file name="renderer/bufferhandler.js" />
-        <file name="renderer/renderer.js" />
-        <file name="renderer/adapter/misc.js" />
-        <file name="renderer/adapter/xml3d.js" />
-        <file name="renderer/adapter/transform.js" />
-        <file name="renderer/adapter/view.js" />
-        <file name="renderer/adapter/shader.js" />
-        <file name="renderer/adapter/texture.js" />
-        <file name="renderer/adapter/mesh.js" />
-        <file name="renderer/adapter/group.js" />
-        <file name="renderer/adapter/light.js" />
-        <file name="renderer/adapter/factory.js" />
-		<file name="renderer/shaders/base.js" />
-		<file name="renderer/shaders/matte.js" />
-		<file name="renderer/shaders/diffuse.js" />
-		<file name="renderer/shaders/phong.js" />
-		<file name="renderer/shaders/utility.js" />
-        <file name="xflow/operator/morph3.js" />
-        <file name="xflow/operator/sub3.js" />
-        <file name="xflow/operator/normalize3.js" />
-        <file name="xflow/operator/lerp3seq.js" />
-        <file name="xflow/operator/slerpseq.js" />
-        <file name="xflow/operator/createTransform.js" />
-        <file name="xflow/operator/createTransformInv.js" />
-        <file name="xflow/operator/mul4x4.js" />
-        <file name="xflow/operator/skinDirection.js" />
-        <file name="xflow/operator/skinPosition.js" />
-        <file name="xflow/operator/forwardKinematics.js" />
-		<file name="xflow/operator/forwardKinematicsInv.js" />
-        <file name="xflow/operator/flipNormal.js" />
-		<file name="xflow/operator/math.js" />
-	</filelist>
+    <filelist dir="${srcDir}" id="modules">
+        <file name="xml3d.js" />
+        <file name="../build/output/xml3d-utils-module.js" />
+        <file name="../build/output/xml3d-contrib-module.js" />
+        <file name="../build/output/xml3d-types-module.js" />
+        <file name="../build/output/xml3d-base-module.js" />
+        <file name="../build/output/xml3d-interface-module.js" />
+        <file name="../build/output/xml3d-xflow-module.js" />
+        <file name="../build/output/xml3d-data-module.js" />
+        <file name="../build/output/xml3d-renderer-module.js" />
+    </filelist>
 
-	<target name="lastTag" depends="init, windowsGit, linuxGit">
-		<tstamp />
-		<git command="describe">
-			<args>
-				<arg value="--tags" />
-				<arg value="--abbrev=0" />
-			</args>
-		</git>
-		<echo message="${git.output}" />
-        <concatScripts version="${git.output}" extension="-${git.output}"/>
-        <compileScripts version="${git.output}" extension="-${git.output}-min"/>
-	</target>
-
-	<target name="continuous" depends="init, windowsGit, linuxGit">
-		<tstamp />
-		<git command="log">
-			<args>
-				<arg value="-1" />
-				<arg value="--format=%h / %ci" />
-			</args>
-		</git>
-		<echo message="${git.output}" />
-        <concatScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}"/>
-        <compileScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}-min"/>
-        <upload extension="-${continuous.extension}"/>
-		<upload extension="-${continuous.extension}-min"/>
-	</target>
-
-	<target name="develop" depends="init">
-		<concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})"/>
-	</target>
-
-    <target name="develop-min" depends="init">
-        <compileScripts version="DEVELOPMENT SNAPSHOT (${build.time})" extension=""/>
+    <target name="lastTag" depends="init, modules-concat, windowsGit, linuxGit">
+        <tstamp />
+        <git command="describe">
+            <args>
+                <arg value="--tags" />
+                <arg value="--abbrev=0" />
+            </args>
+        </git>
+        <echo message="${git.output}" />
+        <concatScripts version="${git.output}" extension="-${git.output}" source="modules"/>
+        <compileScripts version="${git.output}" extension="-${git.output}-min" source="modules"/>
     </target>
 
-	<!-- - - - - - - - - - - - - - - - - -
+    <target name="continuous" depends="init, modules-concat, windowsGit, linuxGit">
+        <tstamp />
+        <git command="log">
+            <args>
+                <arg value="-1" />
+                <arg value="--format=%h / %ci" />
+            </args>
+        </git>
+        <echo message="${git.output}" />
+        <concatScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}" source="modules"/>
+        <compileScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}-min" source="modules"/>
+        <upload extension="-${continuous.extension}" />
+        <upload extension="-${continuous.extension}-min" />
+    </target>
+
+    <target name="develop" depends="init, modules-concat">
+        <concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})" source="modules" />
+    </target>
+
+    <target name="develop-min" depends="init, modules-concat">
+        <compileScripts version="DEVELOPMENT SNAPSHOT (${build.time})" extension="" source="modules" />
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - -
           Tools: TODO
          - - - - - - - - - - - - - - - - - -->
-	<target name="build-tools">
-		<copy file="${srcDir}/../tools/camera.js" toFile="${buildDir}/tools/camera${script.ext}.js" />
-	</target>
+    <target name="build-tools">
+        <copy file="${srcDir}/../tools/camera.js" toFile="${buildDir}/tools/camera${script.ext}.js" />
+    </target>
 
-	<target name="upload-tools">
-		<fail unless="upload.url"/>
-		<post-file file="${buildDir}/tools/camera${script.ext}.js" url="${upload.url}/tools/" />
-	</target>
+    <target name="upload-tools">
+        <fail unless="upload.url" />
+        <post-file file="${buildDir}/tools/camera${script.ext}.js" url="${upload.url}/tools/" />
+    </target>
 
+    <target name="modules-concat">
+        <subant target="concat">
+            <property name="build.path" value="${buildDir}" />
+            <fileset dir="${srcDir}" includes="*/build.xml" />
+        </subant>
+    </target>
+
+    <target name="modules-compile">
+        <subant target="compile">
+            <property name="build.path" value="${buildDir}" />
+            <fileset dir="${srcDir}" includes="*/build.xml" />
+        </subant>
+    </target>
 </project>

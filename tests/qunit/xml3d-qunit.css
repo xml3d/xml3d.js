@@ -2,12 +2,19 @@ div#overall {
     padding-right: 550px;
 }
 
-iframe#xml3dframe{
+iframe#xml3dframe {
     position: fixed;
     top: 8px;
     right: 8px;
-    border: 4px solid red;
+    border: 4px solid;
     width: 500px;
     height: 500px;
 
+}
+
+#xml3dframe.qunit-pass {
+    border-color: #C6E746;
+}
+#xml3dframe.qunit-fail {
+    border-color: #EE5757;
 }

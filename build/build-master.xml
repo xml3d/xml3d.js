@@ -21,22 +21,29 @@
         <attribute name="path" />
         <attribute name="sources" />
         <sequential>
-            <echo message="Compiling @{name}"/>
+            <echo message="Compiling @{sources}" />
+            <pathconvert property="filelist" refid="@{sources}" pathsep=" " />
+            <java jar="${master.basedir}/closure/compiler.jar" fork="true">
+                <arg line="--js ${filelist}"/>
+                <arg line="--warning_level VERBOSE"/>
+                <arg line="--generate_exports"/>
+                <arg line="--js_output_file @{path}/@{name}-min.js"/>
+            </java>
         </sequential>
     </macrodef>
-    
+
     <macrodef name="concat-module" description="Concat files of a module">
         <attribute name="name" />
         <attribute name="path" />
         <attribute name="sources" />
         <sequential>
-            <echo message="Merging @{name}"/>
+            <echo message="Merging @{name}" />
             <concat destfile="@{path}/@{name}.js" eol="unix" append="true">
-                <filelist refid="@{sources}"/>
+                <filelist refid="@{sources}" />
             </concat>
         </sequential>
     </macrodef>
-    
+
     <macrodef name="upload" description="Upload a file to standard URL">
         <attribute name="extension" />
         <sequential>
@@ -61,8 +68,6 @@
         </sequential>
     </macrodef>
 
-    <!-- = = = = = = = = = = = = = = = = = macrodef: concatScripts = = = = = 
-		= = = = = = = = = = = = -->
     <macrodef name="concatScripts">
         <attribute name="extension" default="" />
         <attribute name="version" />
@@ -88,13 +93,14 @@
     <macrodef name="compileScripts">
         <attribute name="extension" default="-min" />
         <attribute name="version" />
+        <attribute name="source" />
         <sequential>
             <jscomp compilationlevel="simple" warning="verbose" generateexports="yes" debug="false" output="${buildDir}/${script.start}@{extension}.js">
                 <define name="XML3D.version" value="@{version}" />
                 <externs dir="${basedir}">
                     <file name="extern.js" />
                 </externs>
-                <sources refid="sourceFiles">
+                <sources refid="@{source}">
                 </sources>
             </jscomp>
         </sequential>
@@ -136,7 +142,8 @@
     </target>
 
     <target name="compile">
-        <echo message="No target 'compile' for ${ant.project.name}"></echo>
+        <echo message="No target 'compile' for ${ant.project.name}">
+        </echo>
     </target>
     <!--<target name="compile" depends="init">
         <javac srcdir="${source.dir}" destdir="${build.dir}/classes">

@@ -18,4 +18,8 @@
         <concat-module name="${ant.project.name}" path="${build.path}" sources="sourceFiles"/>
     </target>
 
+    <target name="compile">
+        <compile-module name="${ant.project.name}" path="${build.path}" sources="sourceFiles"/>
+    </target>
+
 </project>

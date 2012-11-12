@@ -22,12 +22,17 @@
         <attribute name="sources" />
         <sequential>
             <echo message="Compiling @{sources}" />
+        	
+            <local name="finalScript" />
+            <property name="finalScript" value="@{path}/@{name}-min.js" />
+            <delete file="${finalScript}" />
+        	
             <pathconvert property="filelist" refid="@{sources}" pathsep=" " />
             <java jar="${master.basedir}/closure/compiler.jar" fork="true">
                 <arg line="--js ${filelist}"/>
                 <arg line="--warning_level VERBOSE"/>
                 <arg line="--generate_exports"/>
-                <arg line="--js_output_file @{path}/@{name}-min.js"/>
+                <arg line="--js_output_file ${finalScript}"/>
             </java>
         </sequential>
     </macrodef>
@@ -38,7 +43,12 @@
         <attribute name="sources" />
         <sequential>
             <echo message="Merging @{name}" />
-            <concat destfile="@{path}/@{name}.js" eol="unix" append="true">
+            
+            <local name="finalScript" />
+            <property name="finalScript" value="@{path}/@{name}.js" />
+            <delete file="${finalScript}" />
+        	
+            <concat destfile="${finalScript}" eol="unix" append="true">
                 <filelist refid="@{sources}" />
             </concat>
         </sequential>

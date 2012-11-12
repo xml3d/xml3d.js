@@ -1,4 +1,5 @@
-var XML3D = XML3D || {};
+if(!XML3D) 
+    XML3D = {};
 
 XML3D.SceneInspector = function(xml3d) {
     var self = this;

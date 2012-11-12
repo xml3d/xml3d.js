@@ -1,7 +1,7 @@
 // matrix.js
-(function($) {
-    // Is native?
-    if($) return;
+(function(isNative) {
+    
+    if(isNative) return;
 
     /**
      * Configure array properties
@@ -75,7 +75,8 @@
                     0, 0, 0, 0, 1 ]);
             this._callback = typeof m11 == 'function' ? m11 : 0;
         }
-    }, p = XML3DMatrix.prototype;
+    };
+    var p = XML3DMatrix.prototype;
 
     /** @type {number} */
     Object.defineProperty(p, "m11", prop(0));

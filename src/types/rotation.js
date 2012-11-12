@@ -1,7 +1,7 @@
 // rotation.js
-(function($) {
-    // Is native?
-    if($) return;
+(function(isNative) {
+
+    if(isNative) return;
 
     function orthogonal(v) {
         if ((Math.abs(v._data[1]) >= 0.9*Math.abs(v._data[0])) && (Math.abs(v._data[2]) >= 0.9*Math.abs(v._data[0])))
@@ -49,7 +49,9 @@
             this._updateQuaternion();
         }
 
-    }, p = XML3DRotation.prototype;
+    }; 
+    
+    var p = XML3DRotation.prototype;
 
     /** @type {number} */
     Object.defineProperty(p, "axis", {

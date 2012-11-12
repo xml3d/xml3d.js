@@ -14,7 +14,7 @@
     <import file="build-master.xml" />
     <property file="build.properties" />
 
-    <filelist dir="${buildDir}" id="modules">
+    <filelist dir="${modulesBuildDir}" id="modules">
         <file name="${srcDir}/xml3d.js" />
         <file name="xml3d-utils-module.js" />
         <file name="xml3d-contrib-module.js" />
@@ -65,8 +65,8 @@
     <!-- - - - - - - - - - - - - - - - - -
           Tools
          - - - - - - - - - - - - - - - - - -->
-    <filelist dir="${toolsDir}" id="tools-modules">
-        <file name="${buildDir}/xml3d-tools-module.js" />
+    <filelist dir="${modulesBuildDir}" id="tools-modules">
+        <file name="xml3d-tools-module.js" />
     </filelist>
 
     <target name="build-tools" depends="init, tools-modules-concat">
@@ -89,14 +89,14 @@
          - - - - - - - - - - - - - - - - - -->
     <target name="modules-concat">
         <subant target="concat">
-            <property name="build.path" value="${buildDir}" />
+            <property name="build.path" value="${modulesBuildDir}" />
             <fileset dir="${srcDir}" includes="*/build.xml" />
         </subant>
     </target>
 
     <target name="modules-compile">
         <subant target="compile">
-            <property name="build.path" value="${buildDir}" />
+            <property name="build.path" value="${modulesBuildDir}" />
             <fileset dir="${srcDir}" includes="*/build.xml" />
         </subant>
     </target>
@@ -105,14 +105,14 @@
         target's don't have parameters and macrodefs don't support subant tasks -->
     <target name="tools-modules-concat">
         <subant target="concat">
-            <property name="build.path" value="${buildDir}" />
+            <property name="build.path" value="${modulesBuildDir}" />
             <fileset dir="${toolsDir}" includes="**/build.xml" />
         </subant>
     </target>
 
     <target name="tools-modules-compile">
         <subant target="compile">
-            <property name="build.path" value="${buildDir}" />
+            <property name="build.path" value="${modulesBuildDir}" />
             <fileset dir="${toolsDir}" includes="**/build.xml" />
         </subant>
     </target>

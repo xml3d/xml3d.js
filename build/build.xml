@@ -15,7 +15,7 @@
     <property file="build.properties" />
 
     <filelist dir="${modulesBuildDir}" id="modules">
-        <file name="${srcDir}/xml3d.js" />
+        <file name="../../../src/xml3d.js" />
         <file name="xml3d-utils-module.js" />
         <file name="xml3d-contrib-module.js" />
         <file name="xml3d-types-module.js" />

@@ -1,8 +1,9 @@
 // ray.js
-(function($) {
-    // Is native?
-    if($) return;
+(function(isNative) {
 
+    if(isNative)
+        return;
+    
     /** returns an XML3DRay that has an origin and a direction.
     * 
     * If the arguments are not given, the ray's origin is (0,0,0) and 
@@ -36,7 +37,8 @@
         /** @private * */
         this._callback = typeof cb == 'function' ? cb : 0;
 
-    }, p = XML3DRay.prototype;
+    }; 
+    var p = XML3DRay.prototype;
     
     /** @type {XML3DVec3} */
     Object.defineProperty(p, "origin", {

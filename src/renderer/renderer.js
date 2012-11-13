@@ -86,26 +86,8 @@ Renderer.prototype.setGlobalStates = function() {
 };
 
 Renderer.prototype.initCamera = function() {
-    var avLink = this.xml3dNode.activeView;
-    var av = null;
-    if (avLink != "")
-        av = XML3D.URIResolver.resolveLocal(avLink);
+    var av = XML3D.util.getOrCreateActiveView(this.xml3dNode); 
 
-    if (av == null)
-    {
-        av =  document.evaluate('.//xml3d:view[1]', this.xml3dNode, function() {
-            return XML3D.xml3dNS;
-        }, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        if (av == null)
-        {
-            XML3D.debug.logWarning("No view defined: creating one.");
-
-            av = XML3D.createElement("view");
-            this.xml3dNode.appendChild(av);
-        }
-        this.currentView = av;
-        return this.factory.getAdapter(av);
-    }
     this.currentView = av;
     return this.factory.getAdapter(av);
 };

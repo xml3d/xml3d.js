@@ -1,4 +1,5 @@
-var XML3D = XML3D || {};
+if(!XML3D) 
+    XML3D = {};
 
 XML3D.SceneInspector = function(xml3d) {
     var self = this;
@@ -6,35 +7,17 @@ XML3D.SceneInspector = function(xml3d) {
     if(!this.xml3d)
         return;
 
-    this.wrapper = xml3d.parentNode;
-
-    this.getOffX = function(node)
-    {
-        var res = node.offsetLeft;
-        while(node = node.offsetParent)
-            res += node.offsetLeft;
-        return res;
-    };
-
-    this.getOffY = function(node){
-        var res = node.offsetTop;
-        while(node = node.offsetParent)
-            res += node.offsetTop;
-        return res;
-    };
-
     this.inspect = function(event){
         var button = (event.which || event.button);
         if(button == 2){
-            var x = event.pageX - this.getOffX(this.wrapper);
-            var y = event.pageY - this.getOffY(this.wrapper);
-            var node = this.xml3d.getElementByPoint(x, y);
+            var pt = XML3D.util.convertPageCoords(this.xml3d, event.pageX, event.pageY);
+            var node = this.xml3d.getElementByPoint(pt.x, pt.y);
             var path = "";
             while(node && node != xml3d){
                 path += " >> " + node + " (ID: " + node.id + ")";
                 node = node.parentNode;
             }
-            XML3D.debug.logInfo("Mouse: " + x + " " + y + " => " + path);
+            XML3D.debug.logInfo("Mouse: " + pt.x + " " + pt.y + " => " + path);
         }
     };
 

@@ -22,12 +22,17 @@
         <attribute name="sources" />
         <sequential>
             <echo message="Compiling @{sources}" />
+        	
+            <local name="finalScript" />
+            <property name="finalScript" value="@{path}/@{name}-min.js" />
+            <delete file="${finalScript}" />
+        	
             <pathconvert property="filelist" refid="@{sources}" pathsep=" " />
             <java jar="${master.basedir}/closure/compiler.jar" fork="true">
                 <arg line="--js ${filelist}"/>
                 <arg line="--warning_level VERBOSE"/>
                 <arg line="--generate_exports"/>
-                <arg line="--js_output_file @{path}/@{name}-min.js"/>
+                <arg line="--js_output_file ${finalScript}"/>
             </java>
         </sequential>
     </macrodef>
@@ -38,7 +43,12 @@
         <attribute name="sources" />
         <sequential>
             <echo message="Merging @{name}" />
-            <concat destfile="@{path}/@{name}.js" eol="unix" append="true">
+            
+            <local name="finalScript" />
+            <property name="finalScript" value="@{path}/@{name}.js" />
+            <delete file="${finalScript}" />
+        	
+            <concat destfile="${finalScript}" eol="unix" append="true">
                 <filelist refid="@{sources}" />
             </concat>
         </sequential>
@@ -73,8 +83,10 @@
         <attribute name="version" />
         <attribute name="source" />
         <sequential>
+            <local name="finalScript" />
             <property name="finalScript" value="${buildDir}/${script.start}@{extension}.js" />
 
+            <delete file="${finalScript}" />
             <concat destfile="${finalScript}">
                 <header>/**${line.separator}</header>
                 <fileset file="${basedir}/../LICENSE" />
@@ -95,7 +107,11 @@
         <attribute name="version" />
         <attribute name="source" />
         <sequential>
-            <jscomp compilationlevel="simple" warning="verbose" generateexports="yes" debug="false" output="${buildDir}/${script.start}@{extension}.js">
+            <local name="finalScript" /> 
+            <property name="finalScript" value="${buildDir}/${script.start}@{extension}.js" />
+    
+            <delete file="${finalScript}" />
+            <jscomp compilationlevel="simple" warning="verbose" generateexports="yes" debug="false" output="${finalScript}">
                 <define name="XML3D.version" value="@{version}" />
                 <externs dir="${basedir}">
                     <file name="extern.js" />
@@ -129,7 +145,7 @@
 
     <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask" classpath="${master.basedir}/closure/compiler.jar" />
 
-    <target name="init" depends="init-properties, clean, time" />
+    <target name="init" depends="init-properties, time" />
 
     <target name="time">
         <tstamp>

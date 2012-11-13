@@ -20,8 +20,10 @@
 /*************************************************************************/
 
 //Check, if basics have already been defined
-var XML3D = XML3D || {};
-XML3D.util = XML3D.util || {};
+if(!XML3D)    
+    XML3D = {};
+if(!XML3D.util)
+    XML3D.util = {};
 
 XML3D.util.Timer = function() {
     this.start();
@@ -75,7 +77,7 @@ XML3D.Camera.prototype.rotateAroundPoint = function(q0, p0) {
     var tmp = this.orientation.multiply(q0);
     tmp.normalize();
     this.orientation = tmp;
-    var trans = new XML3DRotation(this.inverseTransformOf(q0.axis), q0.angle).rotateVec3(this.position.subtract(p0));
+    var trans = new window.XML3DRotation(this.inverseTransformOf(q0.axis), q0.angle).rotateVec3(this.position.subtract(p0));
     this.position = p0.add(trans);
 };
 
@@ -83,7 +85,7 @@ XML3D.Camera.prototype.lookAround = function(rotSide, rotUp, upVector) {
     //xml3d.debug.logError("Orientation: " + this.orientation.multiply(q0).normalize());
     var check = rotUp.multiply(this.orientation);
     var tmp;
-    if( Math.abs(upVector.dot(check.rotateVec3(new XML3DVec3(0,0,-1)))) > 0.95 )
+    if( Math.abs(upVector.dot(check.rotateVec3(new window.XML3DVec3(0,0,-1)))) > 0.95 )
         tmp = rotSide;
     else
         tmp = rotSide.multiply(rotUp);
@@ -129,7 +131,7 @@ XML3D.Xml3dSceneController = function(xml3dElement) {
     this.prevPos = {x: -1, y: -1};
 
     this.mode = "examine";
-    this.revolveAroundPoint = new XML3DVec3(0, 0, 0);
+    this.revolveAroundPoint = new window.XML3DVec3(0, 0, 0);
     this.rotateSpeed = 1;
     this.zoomSpeed = 20;
     this.spinningSensitivity = 0.3;
@@ -283,7 +285,7 @@ XML3D.Xml3dSceneController.prototype.LOOKAROUND = 4;
 
 XML3D.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 
-    ev = event || window.event;
+    var ev = event || window.event;
 
     var button = (ev.which || ev.button);
     switch (button) {
@@ -339,7 +341,7 @@ XML3D.Xml3dSceneController.prototype.computeMouseSpeed = function(event) {
 
 XML3D.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
 
-    ev = event || window.event;
+    var ev = event || window.event;
     if (!this.action)
         return;
     switch(this.action) {
@@ -347,20 +349,20 @@ XML3D.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
             var f = 2.0* Math.tan(this.camera.fieldOfView/2.0) / this.height;
             var dx = f*(ev.pageX - this.prevPos.x);
             var dy = f*(ev.pageY - this.prevPos.y);
-			var trans = new XML3DVec3(-dx, dy, 0.0);
+			var trans = new window.XML3DVec3(-dx, dy, 0.0);
             this.camera.translate(this.camera.inverseTransformOf(trans));
             break;
         case(this.DOLLY):
             var dy = this.zoomSpeed * (ev.pageY - this.prevPos.y) / this.height;
-            this.camera.translate(this.camera.inverseTransformOf(new XML3DVec3(0, 0, dy)));
+            this.camera.translate(this.camera.inverseTransformOf(new window.XML3DVec3(0, 0, dy)));
             break;
         case(this.ROTATE):
 
             var dx = -this.rotateSpeed * (ev.pageX - this.prevPos.x) * 2.0 * Math.PI / this.width;
             var dy = -this.rotateSpeed * (ev.pageY - this.prevPos.y) * 2.0 * Math.PI / this.height;
 
-            var mx = new XML3DRotation(new XML3DVec3(0,1,0), dx);
-            var my = new XML3DRotation(new XML3DVec3(1,0,0), dy);
+            var mx = new window.XML3DRotation(new window.XML3DVec3(0,1,0), dx);
+            var my = new window.XML3DRotation(new window.XML3DVec3(1,0,0), dy);
             //this.computeMouseSpeed(ev);
             this.camera.rotateAroundPoint(mx.multiply(my), this.revolveAroundPoint);
             break;
@@ -369,8 +371,8 @@ XML3D.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
             var dy = this.rotateSpeed * (ev.pageY - this.prevPos.y) * 2.0 * Math.PI / this.height;
             var cross = this.upVector.cross(this.camera.direction);
 
-            var mx = new XML3DRotation( this.upVector , dx);
-            var my = new XML3DRotation( cross , dy);
+            var mx = new window.XML3DRotation( this.upVector , dx);
+            var my = new window.XML3DRotation( cross , dy);
 
             this.camera.lookAround(mx, my, this.upVector);
             break;

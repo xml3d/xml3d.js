@@ -448,8 +448,8 @@
             break; // gl.INT_VEC4
 
         case 5126:
-            if (value.length)
-                gl.uniform1f(u.location, value[0]);
+            if (value.length != null)
+                gl.uniform1fv(u.location, value);
             else
                 gl.uniform1f(u.location, value);
             break; // gl.FLOAT

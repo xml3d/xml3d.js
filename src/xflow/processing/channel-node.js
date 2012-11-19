@@ -79,6 +79,10 @@
             if(this.emptySubstitutionNode)
                 this.emptySubstitutionNode.clear();
             this.emptySubstitutionNode = null;
+
+            for(var key in this.requestNodes){
+                this.requestNodes[key].setStructureOutOfSync();
+            }
         }
     }
 

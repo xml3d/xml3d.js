@@ -220,7 +220,7 @@ NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, sub
                     callback(destMap, i, sourceMap, i, substitution);
         }
         for(var i in this._destNames){
-            callback(destMap, i, sourceMap, this._srcNames[i], substitution);
+            callback(destMap, this._destNames[i], sourceMap, this._srcNames[i], substitution);
         }
     }
 };

@@ -181,6 +181,7 @@ RequestNode.prototype.setStructureOutOfSync = function(){
     for(var name in this.channels){
         this.channels[name].removeListener(this.channelListener);
     }
+    this.channels = [];
 }
 
 RequestNode.prototype.onChannelChange = function(channel){
@@ -189,10 +190,17 @@ RequestNode.prototype.onChannelChange = function(channel){
     }
 }
 
-
 function synchronizeRequestChannels(requestNode, channelNode){
-    for(var i = 0; i < requestNode.filter.length; ++i){
-        var name = requestNode.filter[i];
+    var names = requestNode.filter;
+    if(!names){
+        names = [];
+        for(var name in channelNode.finalOutputChannels.map){
+            names.push(name);
+        }
+    }
+
+    for(var i = 0; i < names.length; ++i){
+        var name = names[i];
         var channel = channelNode.finalOutputChannels.getChannel(name);
         if(channel){
             requestNode.channels[name] = channel;

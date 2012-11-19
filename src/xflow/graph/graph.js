@@ -146,9 +146,6 @@ Xflow.DataNode = function(graph){
     this._computeInputMapping = new Xflow.OrderMapping(this);
     this._computeOutputMapping = new Xflow.OrderMapping(this);
 
-
-    this._state = Xflow.RESULT_STATE.NONE;
-
     this._channelNode = new Xflow.ChannelNode(this);
     this._requests = [];
 
@@ -390,9 +387,8 @@ DataNode.prototype.setCompute = function(computeString){
  * @param {GraphNode} senderNode
  */
 DataNode.prototype.notify = function(changeType, senderNode){
-    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE && this._state != changeType)
+    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
     {
-        this._state = changeType;
         this._channelNode.setStructureOutOfSync();
 
         notifyParentsOnChanged(this, changeType);
@@ -400,8 +396,7 @@ DataNode.prototype.notify = function(changeType, senderNode){
         for(var i in this._requests)
             this._requests[i].notify(changeType);
     }
-    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA && this._state < changeType){
-        this._state = changeType;
+    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA){
         this._channelNode.notifyDataChange(senderNode);
     }
 };
@@ -410,7 +405,6 @@ DataNode.prototype.notify = function(changeType, senderNode){
 DataNode.prototype._getComputeResult = function(filter){
     var forwardNode = getForwardNode(this);
     if(forwardNode){
-        this._state = Xflow.RESULT_STATE.NONE;
         return forwardNode._getComputeResult(filter);
     }
 

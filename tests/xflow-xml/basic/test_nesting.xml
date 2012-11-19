@@ -26,21 +26,21 @@
             <MatchInput name="B" input="#b2" />
             <MatchInput name="C" input="#c2" />
         </Check>
-        
+
         <Modification title="Remove c2 ">
             <RemoveNode node="#c2" />     
         </Modification>
-        
+
         <Check title="Check modified #data1" data="#data1">
             <MatchInput name="C" input="#c1" />
         </Check>
-        
+
         <Modification title="Add C input in subdata2">
             <AddNodes parentData="#subdata2" >
             	<float2 name="C" id="c3" >2.0 2.0</float2>
             </AddNodes>     
         </Modification>
-        
+
         <Check title="Check modified #data1 (2)" data="#data1">
             <MatchInput name="C" input="#c3" />
         </Check>

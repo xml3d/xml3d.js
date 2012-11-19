@@ -52,78 +52,19 @@ function initOperator(operator){
 
 var DataNode = Xflow.DataNode;
 
-function prepareInputs(operator, inputMapping, inputChannels, operatorInput){
+function prepareInputs(operator, inputChannels, operatorInput){
     for(var i in operator.mapping){
         var mapping = operator.mapping[i];
         var sourceName = mapping.source;
-        var dataName = inputMapping.getScriptInputName(mapping.paramIdx, sourceName);
-        if(dataName){
-            var channel = inputChannels[dataName];
-            var keyValue = 0;
-            if(mapping.sequence){
-                var keyName = inputMapping.getScriptInputName(mapping.keyParamIdx, mapping.keySource);
-                var keyChannel = inputChannels[keyName];
-                var keyEntry =  keyChannel ? keyChannel.getDataEntry() : null;
-                keyValue = keyEntry && keyEntry._value ? keyEntry._value[0] : 0;
-            }
-            operatorInput.push(channel ? channel.getDataEntry(mapping.sequence, keyValue) : null);
+        var channel = inputChannels[sourceName];
+        var keyValue = 0;
+        if(mapping.sequence){
+            var keyName = mapping.keySource;
+            var keyChannel = inputChannels[keyName];
+            var keyEntry =  keyChannel ? keyChannel.getDataEntry() : null;
+            keyValue = keyEntry && keyEntry._value ? keyEntry._value[0] : 0;
         }
-        else{
-            operatorInput.push(null);
-        }
-    }
-}
-
-function checkInput(operator, inputMapping, inputChannels){
-    for(var i in operator.params){
-        var entry = operator.params[i];
-        var dataName = inputMapping.getScriptInputName(i, entry.source);
-        if(!entry.optional && !dataName){
-            XML3D.debug.logError("Xflow: operator " + operator.name + ": Missing input argument for "
-                + entry.source);
-            return false;
-        }
-        if(dataName){
-            var channel = inputChannels[dataName];
-            if(!channel){
-                XML3D.debug.logError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
-                    "' not found. Use for parameter " + entry.source);
-                return false;
-            }
-            var dataEntry = channel.getDataEntry();
-            if(!entry.optional && (!dataEntry || dataEntry.getLength() == 0)){
-                XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
-                    ' contains no data.');
-                return false;
-            }
-            if(dataEntry && dataEntry.type != entry.type){
-                XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
-                    " has wrong type. Expected: " + Xflow.getTypeName(entry.type)
-                        + ", but got: " +  Xflow.getTypeName(dataEntry.type) );
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-
-function prepareOutputs(operator, outputs){
-    for(var i in operator.outputs){
-        var d = operator.outputs[i];
-        if(!outputs[d.name])
-            outputs[d.name] = new Xflow.Channel(this);
-        var entry = outputs[d.name].getDataEntry();
-        if(!entry){
-            var type = d.type;
-            if(type != Xflow.DATA_TYPE.TEXTURE){
-                entry = new Xflow.BufferEntry(type, null);
-            }
-            else{
-                entry = new Xflow.TextureEntry(null);
-            }
-            outputs[d.name].addDataEntry(entry, 0);
-        }
+        operatorInput.push(channel ? channel.getDataEntry(mapping.sequence, keyValue) : null);
     }
 }
 
@@ -225,7 +166,7 @@ function createOperatorInlineLoop(operator, operatorData){
 
 var c_sizes = {};
 
-function allocateOuput(operator, inputData, operatorData){
+function allocateOutput(operator, inputData, output, operatorData){
     if(operator.alloc){
         var args = [c_sizes];
         addInputToArgs(args, inputData);
@@ -234,7 +175,7 @@ function allocateOuput(operator, inputData, operatorData){
 
     for(var i in operator.outputs){
         var d = operator.outputs[i];
-        var entry = operatorData.outputs[d.name].getDataEntry();
+        var entry = output[d.name].dataEntry;
 
         var size = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount) * entry.getTupleSize();
 
@@ -257,11 +198,11 @@ function allocateOuput(operator, inputData, operatorData){
     }
 }
 
-function assembleFunctionArgs(operator, inputData, operatorData){
+function assembleFunctionArgs(operator, inputData, outputData){
     var args = [];
     for(var i in operator.outputs){
         var d = operator.outputs[i];
-        var entry = operatorData.outputs[d.name].getDataEntry();
+        var entry = outputData[d.name].dataEntry;
         args.push(entry ? entry._value : null);
     }
     addInputToArgs(args, inputData);
@@ -274,14 +215,14 @@ function addInputToArgs(args, inputData){
     }
 }
 
-function applyDefaultOperation(operator, inputData, operatorData){
-    var args = assembleFunctionArgs(operator, inputData, operatorData);
+function applyDefaultOperation(operator, inputData, outputData, operatorData){
+    var args = assembleFunctionArgs(operator, inputData, outputData);
     args.push(operatorData);
     operator.evaluate.apply(operatorData, args);
 }
 
-function applyCoreOperation(operator, inputData, operatorData){
-    var args = assembleFunctionArgs(operator, inputData, operatorData);
+function applyCoreOperation(operator, inputData, outputData, operatorData){
+    var args = assembleFunctionArgs(operator, inputData, outputData);
     args.push(operatorData.iterateCount);
 
     var key = operatorData.iterateKey;
@@ -292,36 +233,24 @@ function applyCoreOperation(operator, inputData, operatorData){
     operator._inlineLoop[key].apply(operatorData, args);
 }
 
-DataNode.prototype._applyOperator = function(inputChannels){
+Xflow.ProcessNode.prototype.applyOperator = function(){
     if(!this._operatorData)
         this._operatorData = {
-            outputs: {},
             iterateKey: null,
             iterFlag: {},
             iterateCount: 0
         }
-    var operator = Xflow.getOperator(this._computeOperator);
-    if(operator){
+    var inputData = [];
+    prepareInputs(this.operator, this.inputChannels, inputData);
+    var count = getIterateCount(this.operator, inputData, this._operatorData);
+    allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
 
-        var inputData = [];
-        if(!checkInput(operator, this._computeInputMapping, inputChannels)){
-            return false;
-        }
-        prepareInputs(operator, this._computeInputMapping, inputChannels, inputData);
-        prepareOutputs(operator, this._operatorData.outputs);
-        var count = getIterateCount(operator, inputData, this._operatorData);
-        allocateOuput(operator, inputData, this._operatorData);
-
-        if(operator.evaluate_core){
-            applyCoreOperation(operator, inputData, this._operatorData);
-        }
-        else{
-            applyDefaultOperation(operator, inputData, this._operatorData);
-        }
-
-        this._computeOutputMapping.applyScriptOutputOnMap(inputChannels, this._operatorData.outputs);
+    if(this.operator.evaluate_core){
+        applyCoreOperation(this.operator, inputData, this.outputDataSlots, this._operatorData);
     }
-    return true;
+    else{
+        applyDefaultOperation(this.operator, inputData, this.outputDataSlots, this._operatorData);
+    }
 }
 
 })();

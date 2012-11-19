@@ -43,7 +43,7 @@ ProcessNode.prototype.process = function(){
         for(var i = 0; i < this.children.length; ++i){
             this.children[i].process();
         }
-        // TODO: Do some actual processing
+        this.applyOperator();
         this.processed = true;
     }
 }
@@ -61,11 +61,12 @@ function constructProcessNode(processNode, channelNode, operator, substitution){
 function synchronizeInputChannels(processNode, channelNode, dataNode, substitution){
     var operator = processNode.operator, inputMapping = dataNode._computeInputMapping;
     for(var i = 0; i < operator.params.length; ++i){
-        var dataName = inputMapping.getScriptInputName(i, operator.params[i].source);
+        var sourceName = operator.params[i].source;
+        var dataName = inputMapping.getScriptInputName(i, sourceName);
         if(dataName){
             var channel = channelNode.inputChannels.getChannel(dataName, substitution);
-            if(channel) channel.addListener(this.channelListener);
-            processNode.inputChannels[dataName] = channel;
+            if(channel) channel.addListener(processNode.channelListener);
+            processNode.inputChannels[sourceName] = channel;
         }
     }
 }
@@ -80,7 +81,7 @@ function checkInput(operator, inputMapping, inputChannels){
             return false;
         }
         if(dataName){
-            var channel = inputChannels[dataName];
+            var channel = inputChannels[entry.source];
             if(!channel){
                 XML3D.debug.logError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
                     "' not found. Used for parameter " + entry.source);

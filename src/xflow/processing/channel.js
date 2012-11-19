@@ -29,8 +29,8 @@
     }
 
     Xflow.DataSlot.prototype.notifyOnChange = function(){
-        for(var i = 0; i < this.channels.length; ++i){
-            this.channels[i].notifyOnChange();
+        for(var i = 0; i < this.parentChannels.length; ++i){
+            this.parentChannels[i].notifyOnChange();
         }
     }
 

@@ -60,6 +60,19 @@
             this.processNodes[key] = new Xflow.ProcessNode(this, this.operator, substitution);
 
         this.processNodes[key].useCount++;
+        return this.processNodes[key];
+    }
+
+    ChannelNode.prototype.clearProcessNode = function(substitution){
+        if(!this.operator)
+            return;
+        var key = substitution ? substitution.getKey(this.operatorProtoNames) : 0;
+        var procNode = this.processNodes[key];
+        if(procNode){
+            procNode.useCount--;
+            if(procNode.useCount == 0)
+                delete this.processNodes[key];
+        }
     }
 
     ChannelNode.prototype.notifyDataChange = function(inputNode){
@@ -151,7 +164,8 @@
         if(operator){
             for(var i in operator.outputs){
                 var name = operator.outputs[i].name;
-                channelNode.protoInputChannels.addProtoNames(name, channelNode.operatorProtoNames);
+                var destName = dataNode._computeOutputMapping.getScriptOutputName(i, name);
+                channelNode.protoInputChannels.addProtoNames(destName, channelNode.operatorProtoNames);
             }
         }
     }
@@ -201,6 +215,9 @@
         }
         if(this.protoSubNode){
             this.protoSubNode.clear();
+        }
+        if(this.processNode){
+            this.owner.clearProcessNode(this.substitution);
         }
     }
 

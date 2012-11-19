@@ -51,7 +51,7 @@ Result.prototype.removeListener = function(callback){
 Result.prototype.notifyChanged = function(state){
     this.valid = false;
     for(var i = 0; i < this._listeners.length; ++i){
-        this._listeners[i].notify(this, state);
+        this._listeners[i](this, state);
     }
 }
 

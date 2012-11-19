@@ -1,5 +1,10 @@
 (function(){
 
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.Graph
+//----------------------------------------------------------------------------------------------------------------------
+
 /**
  * The Xflow graph includes the whole dataflow graph
  * @constructor
@@ -29,6 +34,11 @@ Graph.prototype.createDataNode = function(){
     return node;
 };
 
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.GraphNode
+//----------------------------------------------------------------------------------------------------------------------
+
 /**
  * @constructor
  * @param {Xflow.Graph} graph
@@ -38,6 +48,12 @@ Xflow.GraphNode = function(graph){
     this._parents = [];
 };
 var GraphNode = Xflow.GraphNode;
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.InputNode
+//----------------------------------------------------------------------------------------------------------------------
 
 /**
  * @constructor
@@ -90,22 +106,22 @@ Object.defineProperty(InputNode.prototype, "param", {
 Object.defineProperty(InputNode.prototype, "data", {
     /** @param {Object} v */
     set: function(v){
-        var oldLength = 0;
         if(this._data) {
-            oldLength = this._data.getLength();
             this._data.removeListener(this);
         }
         this._data = v;
         if(this._data)
             this._data.addListener(this);
-        var sizeChanged = (oldLength != (this._data ? this._data.getLength() : 0));
-        notifyParentsOnChanged(this, sizeChanged ? Xflow.RESULT_STATE.CHANGED_STRUCTURE :
-            Xflow.RESULT_STATE.CHANGED_DATA, this._name);
+        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {Object} */
     get: function(){ return this._data; }
 });
 
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.DataNode
+//----------------------------------------------------------------------------------------------------------------------
 
 
 /**
@@ -133,8 +149,9 @@ Xflow.DataNode = function(graph){
 
     this._state = Xflow.RESULT_STATE.NONE;
 
-    this._initCompute();
+    this._channelNode = new Xflow.ChannelNode(this);
     this._requests = [];
+
 };
 XML3D.createClass(Xflow.DataNode, Xflow.GraphNode);
 var DataNode = Xflow.DataNode;
@@ -173,25 +190,6 @@ Xflow.NameMapping = function(owner){
 };
 XML3D.createClass(Xflow.NameMapping, Xflow.Mapping);
 
-
-
-/**
- * @private
- * @param {Xflow.DataNode} parent
- * @param {Xflow.GraphNode} child
- */
-function addParent(parent, child){
-    child._parents.push(parent);
-}
-
-/**
- * @private
- * @param {Xflow.DataNode} parent
- * @param {Xflow.GraphNode} child
- */
-function removeParent(parent, child){
-    Array.erase(child._parents, parent);
-}
 
 Object.defineProperty(DataNode.prototype, "prototype", {
     /** @param {boolean} v */
@@ -389,38 +387,82 @@ DataNode.prototype.setCompute = function(computeString){
 /**
  * Notifies DataNode about a change. Notification will be forwarded to parents, if necessary
  * @param {Xflow.RESULT_STATE} changeType
- * @param {?string} name
+ * @param {GraphNode} senderNode
  */
-DataNode.prototype.notify = function(changeType, name){
+DataNode.prototype.notify = function(changeType, senderNode){
     if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE && this._state != changeType)
     {
         this._state = changeType;
-        notifyParentsOnChanged(this, changeType, name);
-        this._updateComputeCache(changeType);
+        this._channelNode.setStructureOutOfSync();
+
+        notifyParentsOnChanged(this, changeType);
+
         for(var i in this._requests)
             this._requests[i].notify(changeType);
     }
     else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA && this._state < changeType){
         this._state = changeType;
-        notifyParentsOnChanged(this, changeType, name);
-        this._updateComputeCache(changeType);
-        for(var i in this._requests)
-            this._requests[i].notify(changeType);
+        this._channelNode.notifyDataChange(senderNode);
     }
 };
+
+
+DataNode.prototype._getComputeResult = function(filter){
+    var forwardNode = getForwardNode(this);
+    if(forwardNode){
+        this._state = Xflow.RESULT_STATE.NONE;
+        return forwardNode._getComputeResult(filter);
+    }
+
+    return this._channelNode.getComputeResult(filter);
+}
+
+
+function getForwardNode(dataNode){
+    if(!dataNode._filterMapping.isEmpty()  || dataNode._computeOperator)
+        return null;
+    if(dataNode._sourceNode && dataNode._children.length == 0)
+        return dataNode._sourceNode;
+    if(dataNode._children.length == 1 && dataNode._children[0] instanceof DataNode)
+        return dataNode._children[0];
+    return null;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Helpers
+//----------------------------------------------------------------------------------------------------------------------
+
+
+/**
+ * @private
+ * @param {Xflow.DataNode} parent
+ * @param {Xflow.GraphNode} child
+ */
+function addParent(parent, child){
+    child._parents.push(parent);
+}
+
+/**
+ * @private
+ * @param {Xflow.DataNode} parent
+ * @param {Xflow.GraphNode} child
+ */
+function removeParent(parent, child){
+    Array.erase(child._parents, parent);
+}
 
 /**
  * Notify all parent nodes about a change
  * @param {Xflow.GraphNode} node
  * @param {number|Xflow.RESULT_STATE} changeType
- * @param {?string=} name
  * @private
  */
-function notifyParentsOnChanged(node, changeType, name){
+function notifyParentsOnChanged(node, changeType){
     for(var i = 0; i < node._parents.length; ++i){
-        node._parents[i].notify(changeType, name || null);
+        node._parents[i].notify(changeType, node);
     }
 };
+
 /**
  * Remove owner from mapping, small helper function
  * @param {Xflow.Mapping} mapping

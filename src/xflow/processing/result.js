@@ -60,10 +60,11 @@ Result.prototype.notifyChanged = function(state){
  * @constructor
  * @extends {Xflow.Result}
  */
-Xflow.ComputeResult = function(){
-    Xflow.Result.call(this);
+Xflow.ComputeResult = function(channelNode){
+    Xflow.Result.call(this, channelNode);
 };
 XML3D.createClass(Xflow.ComputeResult, Xflow.Result);
 var ComputeResult = Xflow.ComputeResult;
+
 
 })();

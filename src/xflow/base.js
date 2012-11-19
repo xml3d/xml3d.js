@@ -7,10 +7,11 @@ Xflow.EPSILON = 0.000001;
  * @enum
  */
 Xflow.DATA_TYPE = {
-    FLOAT: 0,
-    FLOAT2 : 1,
-    FLOAT3 : 2,
-    FLOAT4 : 3,
+    UNKNOWN: 0,
+    FLOAT: 1,
+    FLOAT2 : 2,
+    FLOAT3 : 3,
+    FLOAT4 : 4,
     FLOAT4X4 : 10,
     INT : 20,
     INT4 : 21,
@@ -98,6 +99,10 @@ Xflow.DATA_ENTRY_STATE = {
     CHANGE_SIZE: 2,
     CHANGE_REMOVED: 3
 };
+
+Xflow.RESULT_TYPE = {
+    COMPUTE: 0
+}
 
 
 /**

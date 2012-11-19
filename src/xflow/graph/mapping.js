@@ -1,5 +1,8 @@
 (function(){
 
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.Mapping
+//----------------------------------------------------------------------------------------------------------------------
 
 var Mapping = Xflow.Mapping;
 
@@ -13,6 +16,11 @@ Mapping.parse = function(string, dataNode){
         return NameMapping.parse(results[1], dataNode);
     return null;
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.OrderMapping
+//----------------------------------------------------------------------------------------------------------------------
 
 
 /**
@@ -61,6 +69,62 @@ OrderMapping.prototype.isEmpty = function(){
     return this._names.length == 0;
 }
 
+var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
+
+OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, substitution, filterType, callback){
+    for(var i in sourceMap.map){
+        var idx = this._names.indexOf(i);
+        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
+            ( filterType == Xflow.DATA_FILTER_TYPE.KEEP && idx != -1) ||
+            (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
+            callback(destMap, i, sourceMap, i, substitution);
+    }
+};
+OrderMapping.prototype.getScriptInputName = function(index, destName){
+    if(this._names[index])
+        return this._names[index];
+    else
+        return null;
+};
+OrderMapping.prototype.getScriptOutputName = function(index, srcName){
+    if(this._names[index])
+        return this._names[index];
+    else
+        return null;
+};
+OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
+    var index = 0;
+    for(var i in sourceMap){
+        if(index < this._names.length){
+            destMap[this._names[index]] = sourceMap[i];
+            ++index;
+        }
+        else
+            break;
+    }
+};
+
+
+OrderMapping.prototype.filterNameset = function(nameset, filterType)
+{
+    if(filterType == Xflow.DATA_FILTER_TYPE.RENAME)
+        return nameset.splice();
+    else {
+        var keep = (filterType == Xflow.DATA_FILTER_TYPE.KEEP);
+        var result = [];
+        for(var i in nameset){
+            var idx = this._names.indexOf(nameset[i]);
+            if( (keep && idx!= -1) || (!keep && idx == -1) )
+                result.push(nameset[i]);
+        }
+        return result;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.NameMapping
+//----------------------------------------------------------------------------------------------------------------------
+
 
 /**
  * NameMapping implementation
@@ -98,6 +162,10 @@ NameMapping.prototype.getSrcNameFromDestName = function(destName){
     var idx = this._destNames.indexOf(destName);
     return idx == -1 ? null : this._srcNames[idx];
 };
+NameMapping.prototype.getDestNameFromSrcName = function(srcName){
+    var idx = this._srcNames.indexOf(srcName);
+    return idx == -1 ? null : this._destNames[idx];
+};
 
 NameMapping.prototype.clear = function(){
     this._srcNames = [];
@@ -129,86 +197,40 @@ NameMapping.prototype.isEmpty = function(){
     return this._destNames.length == 0;
 }
 
-var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
+
 var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)\}$/;
 
 
-function mappingNotifyOwner(mapping){
-    if(mapping._owner)
-        mapping._owner.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-};
-
-OrderMapping.prototype.filterNameset = function(nameset, filterType)
-{
-    if(filterType == Xflow.DATA_FILTER_TYPE.RENAME)
-        return nameset.splice();
-    else {
-        var keep = (filterType == Xflow.DATA_FILTER_TYPE.KEEP);
-        var result = [];
-        for(var i in nameset){
-            var idx = this._names.indexOf(nameset[i]);
-            if( (keep && idx!= -1) || (!keep && idx == -1) )
-                result.push(nameset[i]);
-        }
-        return result;
-    }
-}
 NameMapping.prototype.filterNameset = function(nameset, filterType)
 {
 
 }
 
-OrderMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType){
-    for(var i in sourceMap){
-        var idx = this._names.indexOf(i);
-        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
-           ( filterType == Xflow.DATA_FILTER_TYPE.KEEP && idx != -1) ||
-            (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
-            destMap[i] = sourceMap[i];
-    }
-};
-OrderMapping.prototype.getScriptInputName = function(index, destName){
-    if(this._names[index])
-        return this._names[index];
-    else
-        return null;
-};
-OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
-    var index = 0;
-    for(var i in sourceMap){
-        if(index < this._names.length){
-            destMap[this._names[index]] = sourceMap[i];
-            ++index;
-        }
-        else
-            break;
-    }
-};
-
-NameMapping.prototype.applyFilterOnMap = function(destMap, sourceMap, filterType)
+NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, substitution, filterType, callback)
 {
     if(filterType == Xflow.DATA_FILTER_TYPE.REMOVE){
-        for(var i in sourceMap)
+        for(var i in sourceMap.map)
             if(this._srcNames.indexOf(i) == -1)
-                destMap[i] = sourceMap[i];
+                callback(destMap, i, sourceMap, i, substitution);
     }
     else{
         if(filterType == Xflow.DATA_FILTER_TYPE.RENAME){
-            for(var i in sourceMap)
+            for(var i in sourceMap.map)
                 if(this._srcNames.indexOf(i) == -1)
-                    destMap[i] = sourceMap[i];
+                    callback(destMap, i, sourceMap, i, substitution);
         }
         for(var i in this._destNames){
-            destMap[this._destNames[i]] = sourceMap[this._srcNames[i]]
+            callback(destMap, i, sourceMap, this._srcNames[i], substitution);
         }
     }
 };
 
 NameMapping.prototype.getScriptInputName= function(index, destName){
-    var srcName = this.getSrcNameFromDestName(destName);
-    return srcName ? srcName : null;
+    return this.getSrcNameFromDestName(destName);
 }
-
+NameMapping.prototype.getScriptOutputName = function(index, srcName){
+    return this.getDestNameFromSrcName(srcName);
+}
 
 NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
     for(var i in this._destNames){
@@ -216,5 +238,16 @@ NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
         destMap[destName] = sourceMap[srcName];
     }
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Helpers
+//----------------------------------------------------------------------------------------------------------------------
+
+
+function mappingNotifyOwner(mapping){
+    if(mapping._owner)
+        mapping._owner.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+};
 
 })();

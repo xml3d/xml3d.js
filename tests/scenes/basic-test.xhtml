@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+      <data id="rectangle" >
+        <int id="indices" name="index">0 1 2 1 2 3</int>
+        <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0
+          0.0 0.0<!-- This is a comment -->1.0 0.0</float2>
+      </data>
+    </defs>
+    <group id="meshGroup" >
+      <mesh id="myMesh02" src="#rectangle" />
+    </group>
+  </xml3d>
+</body>
+</html>

@@ -43,17 +43,18 @@ ProcessNode.prototype.process = function(){
         for(var i = 0; i < this.children.length; ++i){
             this.children[i].process();
         }
-        this.applyOperator();
         this.processed = true;
+        if(!checkInput(this.operator, this.owner.owner._computeInputMapping, this.inputChannels)){
+            this.valid = false;
+            return;
+        }
+        this.applyOperator();
     }
 }
 
 function constructProcessNode(processNode, channelNode, operator, substitution){
     var dataNode = channelNode.owner;
     synchronizeInputChannels(processNode, channelNode, dataNode, substitution);
-    if(!checkInput(operator, dataNode._computeInputMapping, processNode.inputChannels)){
-        processNode.valid = false;
-    }
     synchronizeChildren(processNode.children, processNode.descendants, processNode.inputChannels);
     synchronizeOutput(processNode.operator, processNode.outputDataSlots);
 }

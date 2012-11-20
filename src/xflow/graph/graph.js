@@ -28,8 +28,8 @@ Graph.prototype.createInputNode = function(){
 /**
  * @return {Xflow.DataNode}
  */
-Graph.prototype.createDataNode = function(){
-    var node = new Xflow.DataNode(this);
+Graph.prototype.createDataNode = function(protoNode){
+    var node = new Xflow.DataNode(this, protoNode);
     this._nodes.push(node);
     return node;
 };
@@ -128,13 +128,13 @@ Object.defineProperty(InputNode.prototype, "data", {
  * @constructor
  * @extends {Xflow.GraphNode}
  */
-Xflow.DataNode = function(graph){
+Xflow.DataNode = function(graph, protoNode){
     Xflow.GraphNode.call(this, graph);
 
     this.loading = false;
 
     
-    this._prototype = false;
+    this._isProtoNode = protoNode;
     this._children = [];
     this._sourceNode = null;
     this._protoNode = null;
@@ -188,13 +188,8 @@ Xflow.NameMapping = function(owner){
 XML3D.createClass(Xflow.NameMapping, Xflow.Mapping);
 
 
-Object.defineProperty(DataNode.prototype, "prototype", {
-    /** @param {boolean} v */
-    set: function(v){ this._prototype = v;
-    },
-    /** @return {boolean} */
-    get: function(){ return this._prototype; }
-});
+
+
 Object.defineProperty(DataNode.prototype, "sourceNode", {
     /** @param {?Xflow.DataNode} v */
     set: function(v){
@@ -259,6 +254,10 @@ Object.defineProperty(DataNode.prototype, "computeOutputMapping", {
     /** @return {Xflow.Mapping} */
     get: function(){ return this._computeOutputMapping; }
 });
+
+DataNode.prototype.isProtoNode = function(){
+    return this._isProtoNode;
+}
 
 /**
  * @param {Xflow.GraphNode} child

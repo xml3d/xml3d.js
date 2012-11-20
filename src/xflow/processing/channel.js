@@ -54,7 +54,7 @@
 
         var entry = this.map[name];
         var key = getEntryKey(entry, substitution);
-        return entry.channels[key].channel;
+        return entry.channels[key] ? entry.channels[key].channel : null;
     }
 
     ChannelMap.prototype.getProtoNames = function(name){
@@ -93,6 +93,7 @@
         if(param && substitution){
             if(substitution.map[name]){
                 mergeChannelsIntoMapEntry(this, entry, substitution.map[name], substitution);
+                return;
             }else{
                 // TODO: at this point we use default values - we need to show an error, if a default values does not exists.
             }
@@ -194,7 +195,7 @@
         if(channelEntry.done){
             if(channelEntry.channel.map == this)
                 channelEntry.useCount++;
-            return;
+            return channelEntry.channel;
         }
         var finalChannel = mergeDataSlotIntoChannel(map, channelEntry.channel, dataSlot);
         channelEntry.channel = finalChannel;
@@ -346,7 +347,7 @@
 
     var c_channelKeyIdx = 0;
     function generateChannelId(){
-        return c_channelKeyIdx++;
+        return ++c_channelKeyIdx;
     }
 
 
@@ -367,13 +368,15 @@
         var result = [];
         if(nameFilter){
             for(var i = 0; i < nameFilter.length; ++i){
-                result[i] = nameFilter[i] + ">" + (this.map[nameFilter[i]] || "X" );
+                var channel = this.map[nameFilter[i]];
+                result[i] = nameFilter[i] + ">" + (channel && channel.id || "X" );
             }
         }
         else{
             var i = 0;
             for(var name in this.map){
-                result[i++] = name + ">" + (this.map[name] || "X" );
+                var channel = this.map[name];
+                result[i++] = name + ">" + (channel && channel.id || "X" );
             }
         }
         return result.length > 0 ? result.join(";") : 0;

@@ -17,6 +17,7 @@
         this.finalOutputChannels = new Xflow.ChannelMap();
 
         this.operator = null;
+        this.protoNames = [];
         this.operatorProtoNames = [];
         this.emptySubstitutionNode = null;
         this.processNodes = {};
@@ -131,14 +132,18 @@
             for(var i = 0; i < owner._children.length; ++i){
                 if(child = owner._children[i]._channelNode){
                     channelNode.inputChannels.mergeProtoNames(child.finalOutputChannels);
+                    Xflow.nameset.add(channelNode.protoNames, child.protoNames);
                 }
             }
             for(var i = 0; i < owner._children.length; ++i){
                 if((child = owner._children[i]) && !child._channelNode){
-                    if(child._param)
-                        channelNode.inputChannels.addProtoNames(child._name);
+                    if(child._param){
+                        channelNode.inputChannels.addProtoNames(child._name, child._name);
+                        Xflow.nameset.add(channelNode.protoNames, child._name);
+                    }
                     var key = child._name + ";" + child._seqnr;
                     channelNode.inputSlots[key] = new Xflow.DataSlot(child._data, child._seqnr);
+
                 }
             }
         }
@@ -146,7 +151,7 @@
 
     function setOperatorProtoNames(channelNode){
         channelNode.operator = Xflow.getOperator(channelNode.owner._computeOperator);
-        if(this.operator){
+        if(channelNode.operator){
             var operator = channelNode.operator, inputMapping = channelNode.owner._computeInputMapping;
             for(var i = 0; i < operator.params.length; ++i){
                 var dataName = inputMapping.getScriptInputName(i, operator.params[i].source);
@@ -162,7 +167,7 @@
         channelNode.protoInputChannels.mergeProtoNames(channelNode.inputChannels);
         var operator = channelNode.operator;
         if(operator){
-            for(var i in operator.outputs){
+            for(var i = 0; i < operator.outputs.length; ++i){
                 var name = operator.outputs[i].name;
                 var destName = dataNode._computeOutputMapping.getScriptOutputName(i, name);
                 channelNode.protoInputChannels.addProtoNames(destName, channelNode.operatorProtoNames);
@@ -178,12 +183,16 @@
         if(dataNode._protoNode){
             var protoOutput = dataNode._protoNode._channelNode.finalOutputChannels;
             dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, protoOutput,
-                null, dataNode._filterType, setChannelMapProtoName);
+                channelNode.protoNames, dataNode._filterType, setChannelMapProtoProtoName);
         }
     }
 
     function setChannelMapProtoName(destMap, destName, srcMap, srcName){
         var protoNames = srcMap.getProtoNames(srcName);
+        destMap.addProtoNames(destName, protoNames);
+    }
+
+    function setChannelMapProtoProtoName(destMap, destName, srcMap, srcName, protoNames){
         destMap.addProtoNames(destName, protoNames);
     }
 
@@ -227,7 +236,7 @@
         setSubNodeInputChannels(channelNode, substitution);
         setSubNodeProcessNode(subNode, channelNode, substitution);
         setSubNodeProtoInputChannels(subNode, channelNode, substitution);
-        setSubNodeFinalOutputChannels(channelNode, substitution);
+        setSubNodeFinalOutputChannels(subNode, channelNode, substitution);
         markChannelsAsDone(channelNode, substitution);
     }
 
@@ -275,9 +284,7 @@
 
         var dataNode = channelNode.owner;
         if(dataNode._protoNode){
-            var subSubstitution = new Xflow.Substitution(this.protoInputChannels, substitution);
-            dataNode._protoNode._channelNode.synchronize(subSubstitution);
-
+            var subSubstitution = new Xflow.Substitution(channelNode.protoInputChannels, substitution);
             subNode.protoSubNode = dataNode._protoNode._channelNode.getSubstitutionNode(subSubstitution);
         }
     }
@@ -299,15 +306,16 @@
         }
     }
 
-    function setSubNodeFinalOutputChannels(channelNode, substitution){
+    function setSubNodeFinalOutputChannels(subNode, channelNode, substitution){
         var dataNode = channelNode.owner;
         dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, channelNode.protoInputChannels,
             substitution, dataNode._filterType, setChannelMapChannel);
 
-        if(dataNode._protoNode){
-            var protoOutput = dataNode._protoNode._channelNode.finalOutputChannels;
+        if(subNode.protoSubNode){
+            var protoChannelNode = subNode.protoSubNode.owner;
+            var protoOutput = protoChannelNode.finalOutputChannels;
             dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, protoOutput,
-                substitution, dataNode._filterType, setChannelMapChannel);
+                subNode.protoSubNode.substitution, dataNode._filterType, setChannelMapChannel);
         }
     }
 

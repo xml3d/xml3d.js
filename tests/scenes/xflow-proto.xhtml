@@ -21,14 +21,6 @@
         </data>
       </proto>
 
-      <proto id="singleMorph" filter="keep(position)"
-             compute="position = xflow.morph(position, posAdd1, weight1)">
-          <float3 param="true" name="position" />
-          <float3 param="true" name="posAdd1" />
-          <float3 param="true" name="weight1" />
-      </proto>
-
-
       <data id="rectangle" >
         <int name="index">0 1 2 1 2 3</int>
         <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3>

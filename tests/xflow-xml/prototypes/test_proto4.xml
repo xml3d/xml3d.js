@@ -1,6 +1,6 @@
 <!-- 
 	Purpose of Test:
-    Check prototypes with scripts
+    Check prototypes with Operators
 -->
 <XflowTest>
     <Input>
@@ -8,25 +8,25 @@
 		<proto id="template1" 
 			 compute="position = xflow.morph(position, posAdd1, weight1)"  >
 				
-		    <float3 param="" name="posAdd1"  ></float3>
-		    <float param="" name="weight1" ></float>  
+		    <float3 param="true" name="posAdd1"  ></float3>
+		    <float param="true" name="weight1" ></float>
 		    
 	        <data compute="position = xflow.morph(position, posAdd2, weight2)" >
 	        	        
-	            <float3 param="" name="posAdd2"  ></float3>
-	            <float param="" name="weight2" ></float>  
+	            <float3 param="true" name="posAdd2"  ></float3>
+	            <float param="true" name="weight2" ></float>
 	            
 	            
 	            <data compute="position = xflow.morph(position, posAdd3, weight3)"  >
 	            	            
-		            <float3 param="" name="posAdd3" ></float3>
-		            <float param="" name="weight3" ></float>                        		            
-		            <float3 param="" name="position" ></float3>
+		            <float3 param="true" name="posAdd3" ></float3>
+		            <float param="true" name="weight3" ></float>
+		            <float3 param="true" name="position" ></float3>
 	            </data>	
 	        </data>
 		</proto>
 		
-		<data id="instance1" proto="template1" >
+		<data id="instance1" proto="#template1" >
 			<float3 name="position">1 1 1  2 2 2</float3>
 			<float3 name="posAdd1">1 1 1  0 0 0</float3>
 			<float3 name="posAdd2">1 0 0  0 -1 0</float3>
@@ -36,7 +36,7 @@
 			<float name="weight3">0.7</float>
 		</data>
 		
-		<data id="instance2" proto="template1" >
+		<data id="instance2" proto="#template1" >
 			<float3 name="position">3 3 3  2 2 2</float3>
 			<float3 name="posAdd1">0 0 0  1 1 1</float3>
 			<float3 name="posAdd2">0 0 -1  0 2 0</float3>

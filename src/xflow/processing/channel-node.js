@@ -116,7 +116,7 @@
             dataNode._sourceNode._channelNode.synchronize();
         else{
             for(var i = 0; i < dataNode._children.length; ++i){
-                if(dataNode._children[i]._channelNode){
+                if(dataNode._children[i]._channelNode && !dataNode._children[i].isProtoNode()){
                     dataNode._children[i]._channelNode.synchronize();
                 }
             }
@@ -130,7 +130,7 @@
         }
         else{
             for(var i = 0; i < owner._children.length; ++i){
-                if(child = owner._children[i]._channelNode){
+                if((child = owner._children[i]._channelNode)  && !owner._children[i].isProtoNode()){
                     channelNode.inputChannels.mergeProtoNames(child.finalOutputChannels);
                     Xflow.nameset.add(channelNode.protoNames, child.protoNames);
                 }
@@ -246,7 +246,7 @@
         else{
             var child;
             for(var i = 0; i < dataNode._children.length; ++i){
-                if(child = dataNode._children[i]._channelNode){
+                if((child = dataNode._children[i]._channelNode) && !dataNode._children[i].isProtoNode() ){
                     subNode.childSubNodes.push(child.getSubstitutionNode(substitution));
                 }
             }
@@ -260,7 +260,7 @@
         }
         else{
             for(var i = 0; i < owner._children.length; ++i){
-                if(child = owner._children[i]._channelNode){
+                if((child = owner._children[i]._channelNode) && !owner._children[i].isProtoNode()){
                     channelNode.inputChannels.merge(child.finalOutputChannels, substitution);
                 }
             }

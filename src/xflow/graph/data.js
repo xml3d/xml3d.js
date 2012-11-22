@@ -119,6 +119,10 @@ BufferEntry.prototype.getIterateCount = function(){
     return this.getLength() / this.getTupleSize();
 };
 
+BufferEntry.prototype.isEmpty = function(){
+    return !this._value;
+};
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.TextureEntry
@@ -138,6 +142,10 @@ Xflow.TextureEntry = function(image){
 };
 XML3D.createClass(Xflow.TextureEntry, Xflow.DataEntry);
 var TextureEntry = Xflow.TextureEntry;
+
+TextureEntry.prototype.isEmpty = function(){
+    return !this._image;
+};
 
 /** @param {Object} v */
 TextureEntry.prototype.setImage = function(v){

@@ -27,8 +27,8 @@ var ProcessNode = Xflow.ProcessNode;
 
 ProcessNode.prototype.onChannelChange = function(channel){
     this.processed = false;
-    for(var i = 0; i < this.outputDataSlots.length; ++i){
-        this.outputDataSlots[i].notifyOnChange();
+    for(var name in this.outputDataSlots){
+        this.outputDataSlots[name].notifyOnChange();
     }
 }
 
@@ -109,7 +109,7 @@ function synchronizeChildren(children, descendants, inputChannels){
     var channel, idx;
     for(var name in inputChannels){
         channel = inputChannels[name];
-        if(channel.creatorProcessNode){
+        if(channel && channel.creatorProcessNode){
             Xflow.utils.setAdd(children, channel.creatorProcessNode);
             Xflow.utils.setAdd(descendants, channel.creatorProcessNode.descendants);
         }
@@ -167,11 +167,14 @@ RequestNode.prototype.synchronize = function(){
 
 RequestNode.prototype.getResult = function(resultType){
     this.synchronize();
-    doRequestNodeProcessing(this);
+    if(!this.owner.loading)
+        doRequestNodeProcessing(this);
+    var result = null;
     if(resultType == Xflow.RESULT_TYPE.COMPUTE){
-        return getRequestComputeResult(this);
+        result = getRequestComputeResult(this);
     }
-    return null;
+    result.loading = this.owner.loading;
+    return result;
 }
 
 RequestNode.prototype.setStructureOutOfSync = function(){
@@ -184,9 +187,11 @@ RequestNode.prototype.setStructureOutOfSync = function(){
         this.channels[name].removeListener(this.channelListener);
     }
     this.channels = [];
+    this.children = [];
 }
 
 RequestNode.prototype.onChannelChange = function(channel){
+    this.processed = false;
     for(var type in this.results){
         this.results[type].notifyChanged(Xflow.RESULT_STATE.CHANGED_DATA);
     }
@@ -227,7 +232,8 @@ function getRequestComputeResult(requestNode)
     var result = requestNode.results[Xflow.RESULT_TYPE.COMPUTE];
     result._dataEntries = {}; result._outputNames = [];
     for(var name in requestNode.channels){
-        result._dataEntries[name] = requestNode.channels[name].getDataEntry();
+        var entry = requestNode.channels[name].getDataEntry();
+        result._dataEntries[name] = entry && !entry.isEmpty() ? entry : null;
         result._outputNames.push(name);
     }
     return result;

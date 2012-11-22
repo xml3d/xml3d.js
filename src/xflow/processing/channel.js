@@ -119,15 +119,18 @@
         for(var name in this.map){
             var entry = this.map[name];
             var entryKey = getEntryKey(entry, substitution);
-            var channel = entry.channels[entryKey].channel;
-            if(channel.map == this){
-                channel.useCount--;
-                if(channel.useCount == 0)
-                    channel.clear();
+            var channel = entry.channels[entryKey] && entry.channels[entryKey].channel;
+            if(channel){
+                if(channel.map == this){
+                    channel.useCount--;
+                    if(channel.useCount == 0)
+                        channel.clear();
+                }
+                if(channel.useCount == 0){
+                    delete entry.channels[entryKey];
+                }
             }
-            if(channel.useCount == 0){
-                delete entry.channels[entryKey];
-            }
+
         }
     }
 

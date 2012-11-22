@@ -210,7 +210,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         var dataResult =  this.computeRequest.getResult();
 
-        if (!(dataResult.getOutputData("position"))) {
+        if (!(dataResult.getOutputData("position") && dataResult.getOutputData("position").getValue())) {
             XML3D.debug.logInfo("Mesh " + this.node.id + " has no data for required attribute 'position'.");
             obj.mesh.valid = false;
             return;
@@ -218,7 +218,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         for ( var i in staticAttributes) {
             var attr = staticAttributes[i];
             var entry = dataResult.getOutputData(attr);
-            if (!entry)
+            if (!entry || !entry.getValue())
                 continue;
 
             var buffer = entry.userData.buffer;

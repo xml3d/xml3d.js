@@ -324,12 +324,17 @@ test("Renaming nodes 3", 6, function() {
  });
 
 
-test("Add/Remove script", function() {
+test("Operator - Add/Remove", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_add_remove_script.xml", handler);
     this.executeTests(response);
 });
 
+test("Operator - Later Input", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_operator_later_input.xml", handler);
+    this.executeTests(response);
+});
 
 test("Operators - Simple", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));

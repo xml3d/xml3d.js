@@ -11,6 +11,7 @@
      */
     Xflow.ChannelNode = function(dataNode){
         this.owner = dataNode;
+        this.loading = false;
         this.inputSlots = {};
         this.inputChannels = new Xflow.ChannelMap();
         this.protoInputChannels = new Xflow.ChannelMap();
@@ -30,7 +31,7 @@
 
     ChannelNode.prototype.synchronize = function(){
         if(this.outOfSync){
-            synchronizeChildren(this.owner);
+            synchronizeChildren(this, this.owner);
             setInputProtoNames(this);
             setOperatorProtoNames(this);
             setProtoInputProtoNames(this);
@@ -97,6 +98,10 @@
             for(var key in this.requestNodes){
                 this.requestNodes[key].setStructureOutOfSync();
             }
+            for(var key in this.processNodes){
+
+            }
+
         }
     }
 
@@ -111,13 +116,18 @@
         return this.requestNodes[key].getResult(Xflow.RESULT_TYPE.COMPUTE);
     }
 
-    function synchronizeChildren(dataNode){
-        if(dataNode._sourceNode)
+    function synchronizeChildren(channelNode, dataNode){
+        channelNode.loading = dataNode.loading;
+        if(dataNode._sourceNode){
             dataNode._sourceNode._channelNode.synchronize();
+            channelNode.loading = channelNode.loading || dataNode._sourceNode._channelNode.loading;
+        }
         else{
+            var child;
             for(var i = 0; i < dataNode._children.length; ++i){
-                if(dataNode._children[i]._channelNode && !dataNode._children[i].isProtoNode()){
-                    dataNode._children[i]._channelNode.synchronize();
+                if((child = dataNode._children[i]._channelNode) && !dataNode._children[i].isProtoNode()){
+                    child.synchronize();
+                    channelNode.loading = channelNode.loading || child.loading;
                 }
             }
         }

@@ -51,7 +51,7 @@ XML3D.debug = {
                 window.console.error.apply(window.console, args);
                 break;
             case XML3D.debug.EXCEPTION:
-                window.console.error(XML3D.debug.printStackTrace({e: args[0]}).join('\n'));
+                window.console.error(XML3D.debug.printStackTrace({e: args[0], guess: true}).join('\n'));
                 break;
             case XML3D.debug.DEBUG:
                 window.console.debug.apply(window.console, args);

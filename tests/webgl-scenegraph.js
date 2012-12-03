@@ -373,3 +373,22 @@ test("Add a mesh dynamically", 4, function() {
     stop();
     g.visible = true;
 });
+
+test("Remove group with references to transform", 6, function() {
+    var outerGroup = this.doc.getElementById("group3");
+    var innerGroup = this.doc.getElementById("group4");
+
+    outerGroup.visible = true;
+    
+    var outerHandles = outerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
+    var innerHandles = innerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
+    ok(outerHandles.transform !== undefined, "Outer transform reference is intact");
+    ok(innerHandles.transform !== undefined, "Inner transform reference is intact");  
+    
+    outerGroup.parentNode.removeChild(outerGroup);
+    
+    outerHandles = outerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
+    innerHandles = innerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
+    ok(outerHandles.transform === undefined, "Outer transform reference has been removed");
+    ok(innerHandles.transform === undefined, "Inner transform reference has been removed");  
+});

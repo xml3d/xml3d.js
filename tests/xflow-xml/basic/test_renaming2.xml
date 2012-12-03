@@ -15,7 +15,9 @@
         </data>   
     </Input>
     <TestProcess>
+
         <Check title="Check merged-renamed data #1" data="#data1">
+
             <MatchInput name="A" input="#a1" />
             <MatchInput name="B" input="#a2" />
             <MatchInput name="C" input="#c2" />

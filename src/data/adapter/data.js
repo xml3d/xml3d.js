@@ -43,7 +43,8 @@ XML3D.data.DataAdapter.prototype.init = function() {
     //if (xflow)
     //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
 
-    this.xflowDataNode = XML3D.data.xflowGraph.createDataNode();
+    var protoNode = (this.node.localName == "proto");
+    this.xflowDataNode = XML3D.data.xflowGraph.createDataNode(protoNode);
 
     this.updateHandle("src");
     this.updateHandle("proto");

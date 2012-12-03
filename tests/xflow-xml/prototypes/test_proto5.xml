@@ -22,8 +22,8 @@
 	        </data>
 	        
 	        <proto id="template1">
-                <float param="" name="A" >0.1</float>
-                <float param="" name="B" >0.2</float>
+                <float param="true" name="A" >0.1</float>
+                <float param="true" name="B" >0.2</float>
             </proto>
 
         </proto>

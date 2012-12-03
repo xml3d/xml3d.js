@@ -38,6 +38,7 @@
         this.xflowInputNode.name = this.node.name;
         this.xflowInputNode.data = buffer;
         this.xflowInputNode.seqnr = this.node.seqnr;
+        this.xflowInputNode.param = this.node.param;
     }
 
     ValueDataAdapter.prototype.getXflowNode = function(){
@@ -59,6 +60,9 @@
             }
             else if(attr == "seqnr"){
                 this.xflowInputNode.seqnr = this.node.seqnr;
+            }
+            else if(attr == "param"){
+                this.xflowInputNode.param = this.node.param;
             }
         }
     };

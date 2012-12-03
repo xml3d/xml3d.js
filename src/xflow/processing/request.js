@@ -10,7 +10,7 @@ var Request = function(dataNode, filter, callback){
     this._dataNode = dataNode;
     this._filter = filter ? filter.slice().sort() : null;
     this._listener = callback;
-
+    this.result = null;
     this._dataNode._requests.push(this);
 };
 Xflow.Request = Request;
@@ -32,9 +32,10 @@ Object.defineProperty(Request.prototype, "filter", {
 /**
  * Call this function, whenever the request is not required anymore.
  */
-Request.prototype.clear = function(callback){
+Request.prototype.clear = function(){
     this._listener = null;
-    Array.erase(this._dataNode._requests, callback);
+    if(this.result) this.result.removeListener(this.callback);
+    Array.erase(this._dataNode._requests, this);
 };
 
 /**
@@ -61,12 +62,20 @@ Request.prototype.notify = function(notification){
  */
 var ComputeRequest = function(dataNode, filter, callback){
     Xflow.Request.call(this, dataNode, filter, callback);
+    this.callback = this.onResultChanged.bind(this);
 };
 XML3D.createClass(ComputeRequest, Xflow.Request);
 Xflow.ComputeRequest = ComputeRequest;
 
 ComputeRequest.prototype.getResult = function(){
-    return this._dataNode._getComputeResult(this._filter);
+    if(this.result) this.result.removeListener(this.callback);
+    this.result = this._dataNode._getComputeResult(this._filter);
+    if(this.result) this.result.addListener(this.callback);
+    return this.result;
+}
+
+ComputeRequest.prototype.onResultChanged = function(notification){
+    this.notify(notification);
 }
 
 })();

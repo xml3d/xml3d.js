@@ -51,7 +51,7 @@ Result.prototype.removeListener = function(callback){
 Result.prototype.notifyChanged = function(state){
     this.valid = false;
     for(var i = 0; i < this._listeners.length; ++i){
-        this._listeners[i].notify(this, state);
+        this._listeners[i](this, state);
     }
 }
 
@@ -60,10 +60,11 @@ Result.prototype.notifyChanged = function(state){
  * @constructor
  * @extends {Xflow.Result}
  */
-Xflow.ComputeResult = function(){
-    Xflow.Result.call(this);
+Xflow.ComputeResult = function(channelNode){
+    Xflow.Result.call(this, channelNode);
 };
 XML3D.createClass(Xflow.ComputeResult, Xflow.Result);
 var ComputeResult = Xflow.ComputeResult;
+
 
 })();

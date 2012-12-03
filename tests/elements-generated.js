@@ -96,6 +96,7 @@ test("&lt;mesh&gt; interface test", function() {
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
     equal(typeof e.getBoundingBox, "function", "getBoundingBox is of type 'function'");
     equal(typeof e.src, "string", "src is of type 'string'");
+    equal(typeof e.proto, "string", "proto is of type 'string'");
 });
 test("&lt;transform&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "transform");
@@ -118,6 +119,7 @@ test("&lt;shader&gt; interface test", function() {
     equal(typeof e.compute, "string", "compute is of type 'string'");
     equal(typeof e.script, "string", "script is of type 'string'");
     equal(typeof e.src, "string", "src is of type 'string'");
+    equal(typeof e.proto, "string", "proto is of type 'string'");
 });
 test("&lt;light&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "light");
@@ -150,6 +152,7 @@ test("&lt;lightshader&gt; interface test", function() {
     equal(typeof e.compute, "string", "compute is of type 'string'");
     equal(typeof e.script, "string", "script is of type 'string'");
     equal(typeof e.src, "string", "src is of type 'string'");
+    equal(typeof e.proto, "string", "proto is of type 'string'");
 });
 test("&lt;script&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "script");
@@ -160,6 +163,18 @@ test("&lt;script&gt; interface test", function() {
     equal(typeof e.src, "string", "src is of type 'string'");
     equal(typeof e.type, "string", "type is of type 'string'");
 });
+test("&lt;proto&gt; interface test", function() {
+    var e = document.createElementNS(XML3D.xml3dNS, "proto");
+    ok(e, "proto exits");
+    equal(typeof e.className, "string", "className is of type 'string'");
+    equal(typeof e.style, "object", "style is of type 'object'");
+    equal(typeof e.id, "string", "id is of type 'string'");
+    equal(typeof e.compute, "string", "compute is of type 'string'");
+    equal(typeof e.filter, "string", "filter is of type 'string'");
+    equal(typeof e.getOutputFieldNames, "function", "getOutputFieldNames is of type 'function'");
+    equal(typeof e.src, "string", "src is of type 'string'");
+    equal(typeof e.proto, "string", "proto is of type 'string'");
+});
 test("&lt;float&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float");
     ok(e, "float exits");
@@ -167,7 +182,7 @@ test("&lt;float&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
 });
 test("&lt;float2&gt; interface test", function() {
@@ -177,7 +192,7 @@ test("&lt;float2&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
 });
 test("&lt;float3&gt; interface test", function() {
@@ -187,7 +202,7 @@ test("&lt;float3&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
 });
 test("&lt;float4&gt; interface test", function() {
@@ -197,7 +212,7 @@ test("&lt;float4&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
 });
 test("&lt;float4x4&gt; interface test", function() {
@@ -207,7 +222,7 @@ test("&lt;float4x4&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
 });
 test("&lt;int&gt; interface test", function() {
@@ -217,7 +232,7 @@ test("&lt;int&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
 });
 test("&lt;int4&gt; interface test", function() {
@@ -227,7 +242,7 @@ test("&lt;int4&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
 });
 test("&lt;bool&gt; interface test", function() {
@@ -237,7 +252,7 @@ test("&lt;bool&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
 });
 test("&lt;texture&gt; interface test", function() {
@@ -247,7 +262,7 @@ test("&lt;texture&gt; interface test", function() {
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
-    equal(typeof e.replaceby, "string", "replaceby is of type 'string'");
+    equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
     equal(typeof e.type, "string", "type is of type 'string'");
     equal(typeof e.filterMin, "string", "filterMin is of type 'string'");

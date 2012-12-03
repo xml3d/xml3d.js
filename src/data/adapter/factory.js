@@ -77,6 +77,7 @@
     reg['img']         = data.ImgDataAdapter;
     reg['texture']     = data.TextureDataAdapter;
     reg['data']        = data.DataAdapter;
+    reg['proto']       = data.DataAdapter;
 
    /**
      * Creates a DataAdapter associated with the given node.

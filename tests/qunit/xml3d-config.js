@@ -73,11 +73,11 @@ QUnit.extend( QUnit, {
     },
 
     closeArray : function(actual, expected, maxDifference, message) {
-        if (actual.toString() != expected.toString())
-            QUnit.push(false, actual, expected, message);
 
-        if (actual.length != expected.length)
+        if(!actual || actual.toString() != expected.toString() || actual.length != expected.length){
             QUnit.push(false, actual, expected, message);
+            return;
+        }
 
         for (var i=0; i<actual.length; i++) {
             if (Math.abs(actual[i] - expected[i]) > maxDifference) {

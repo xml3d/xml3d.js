@@ -1,6 +1,11 @@
 (function(){
 
 
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.SamplerConfig
+//----------------------------------------------------------------------------------------------------------------------
+
+
 /**
  * @constructor
  */
@@ -20,6 +25,9 @@ Xflow.SamplerConfig = function(){
 var SamplerConfig = Xflow.SamplerConfig;
 
 
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.DataEntry
+//----------------------------------------------------------------------------------------------------------------------
 
 
 /**
@@ -60,7 +68,9 @@ DataEntry.prototype.notifyChanged = function(){
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }
 
-
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.BufferEntry
+//----------------------------------------------------------------------------------------------------------------------
 
 /**
  * @constructor
@@ -109,6 +119,16 @@ BufferEntry.prototype.getIterateCount = function(){
     return this.getLength() / this.getTupleSize();
 };
 
+BufferEntry.prototype.isEmpty = function(){
+    return !this._value;
+};
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.TextureEntry
+//----------------------------------------------------------------------------------------------------------------------
+
+
 /**
  * @constructor
  * @extends {Xflow.DataEntry}
@@ -122,6 +142,10 @@ Xflow.TextureEntry = function(image){
 };
 XML3D.createClass(Xflow.TextureEntry, Xflow.DataEntry);
 var TextureEntry = Xflow.TextureEntry;
+
+TextureEntry.prototype.isEmpty = function(){
+    return !this._image;
+};
 
 /** @param {Object} v */
 TextureEntry.prototype.setImage = function(v){
@@ -143,6 +167,13 @@ TextureEntry.prototype.getSamplerConfig = function(){
 TextureEntry.prototype.getLength = function(){
     return 1;
 };
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.DataChangeNotifier
+//----------------------------------------------------------------------------------------------------------------------
+
 
 
 Xflow.DataChangeNotifier = {

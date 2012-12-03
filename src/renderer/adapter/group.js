@@ -74,6 +74,8 @@
             this.factory.renderer.sceneTreeRemoval(evt);
             return;
         } else if (evt.type == XML3D.events.THIS_REMOVED) {
+            //Clear all references to shader and transform adapters
+            this.clearAdapterHandles();
             return;
         }
         else if( (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) && !evt.internalType){

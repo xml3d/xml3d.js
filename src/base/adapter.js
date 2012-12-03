@@ -30,17 +30,39 @@ XML3D.base.Adapter.prototype.connectAdapterHandle = function(key, adapterHandle)
         this.connectedAdapterHandles = {};
         this._bindedAdapterHandleCallback = adapterHandleCallback.bind(this);
     }
+
+    this.disconnectAdapterHandle(key);
+
+    if(adapterHandle) {
+        this.connectedAdapterHandles[key] = adapterHandle;
+        this.connectedAdapterHandles[key].addListener(this._bindedAdapterHandleCallback);
+    }
+    else
+        delete this.connectedAdapterHandles[key];
+
+};
+
+/**
+ * Disconnects the adapter handle from the given key.
+ * @param {string} key - the key that was provided when this adapter handle was connected
+ */
+XML3D.base.Adapter.prototype.disconnectAdapterHandle = function(key){
+    if (this.connectedAdapterHandles && this.connectedAdapterHandles[key]) {
+        this.connectedAdapterHandles[key].removeListener(this._bindedAdapterHandleCallback);
+        delete this.connectedAdapterHandles[key];
+    }
+};
+
+/**
+ * Disconnects all adapter handles.
+ */
+XML3D.base.Adapter.prototype.clearAdapterHandles = function(){
     for(var i in this.connectedAdapterHandles){
         this.connectedAdapterHandles[i].removeListener(this._bindedAdapterHandleCallback);
     }
-    if(adapterHandle)
-        this.connectedAdapterHandles[key] = adapterHandle;
-    else
-        delete this.connectedAdapterHandles[key];
-    for(var i in this.connectedAdapterHandles){
-        this.connectedAdapterHandles[i].addListener(this._bindedAdapterHandleCallback);
-    }
-}
+
+    this.connectedAdapterHandles = {};
+};
 
 /**
 * Get the connected AdapterHandle of a certain key.
@@ -50,7 +72,7 @@ XML3D.base.Adapter.prototype.connectAdapterHandle = function(key, adapterHandle)
 */
 XML3D.base.Adapter.prototype.getConnectedAdapterHandle = function(key){
     return this.connectedAdapterHandles && this.connectedAdapterHandles[key];
-}
+};
 
 /**
  * Get the connected adapter of a certain key.
@@ -61,7 +83,7 @@ XML3D.base.Adapter.prototype.getConnectedAdapterHandle = function(key){
 XML3D.base.Adapter.prototype.getConnectedAdapter = function(key){
     var handle = this.getConnectedAdapterHandle(key);
     return handle && handle.getAdapter();
-}
+};
 
 
 /**
@@ -76,7 +98,7 @@ function adapterHandleCallback(evt){
             this.notifyChanged(subEvent);
         }
     }
-}
+};
 
 
 
@@ -113,7 +135,7 @@ XML3D.base.NodeAdapter.prototype.notifyChanged = function(e) {
 XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri){
     return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, uri,
         this.factory.aspect, this.factory.canvasId);
-}
+};
 /**
  * notifies all adapter that refer to this adapter through AdapterHandles.
  * @param {number,string} hint with type of change
@@ -122,7 +144,7 @@ XML3D.base.NodeAdapter.prototype.notifyOppositeAdapters = function(type){
     type = type || XML3D.events.ADAPTER_HANDLE_CHANGED;
     return XML3D.base.resourceManager.notifyNodeAdapterChange(this.node,
         this.factory.aspect, this.factory.canvasId, type);
-}
+};
 
 
 /**

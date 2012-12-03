@@ -144,18 +144,6 @@ XML3D.createClass = function(ctor, parent, methods) {
                 }
             }
         }
-
-        var ready = (function(eventType) {
-            var evt = null;
-            if (document.createEvent) {
-                evt = document.createEvent("Events");
-                evt.initEvent(eventType, true, true);
-                document.dispatchEvent(evt);
-            } else if (document.createEventObject) {
-                evt = document.createEventObject();
-                document.fireEvent('on' + eventType, evt);
-            }
-        })('load');
     };
     var onunload = function() {
         if (XML3D.document)

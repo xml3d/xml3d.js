@@ -291,7 +291,6 @@ XML3D.webgl.MAXFPS = 30;
 
         } catch (e) {
             XML3D.debug.logException(e);
-            throw e;
         }
 
     };

@@ -57,7 +57,7 @@
         try{
             this.xflowDataNode = createXflowNode(jsonData);
         } catch (e) {
-            XML3D.debug.logError("Failed to process XML3D json file: " + e);
+            XML3D.debug.logException(e, "Failed to process XML3D json file");
         }
 
     };

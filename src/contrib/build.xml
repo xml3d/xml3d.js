@@ -8,6 +8,7 @@
     <filelist dir="." id="sourceFiles">
         <file name="./glu.js" />
         <file name="./glMatrix.js" />
+        <file name="./stacktrace-0.4.js"/>
     </filelist>
 
     <target name="concat">

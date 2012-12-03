@@ -137,12 +137,7 @@ XML3D.createClass = function(ctor, parent, methods) {
 
         // initialize all attached adapters
         for (i in xml3ds) {
-            var adapters = xml3ds[i]._configured.adapters;
-            for (var adapter in adapters) {
-                if (adapters[adapter].onConfigured) {
-                    adapters[adapter].onConfigured();
-                }
-            }
+            XML3D.base.sendAdapterEvent(xml3ds[i], {onConfigured : []});
         }
     };
     var onunload = function() {

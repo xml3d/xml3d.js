@@ -41,7 +41,7 @@ OrderMapping.parse = function(string, dataNode){
 
 
 Object.defineProperty(OrderMapping.prototype, "length", {
-    set: function(v){ throw "length is read-only";
+    set: function(v){ throw new Error("length is read-only");
     },
     get: function(){ return this._name.length; }
 });
@@ -146,7 +146,7 @@ NameMapping.parse = function(string, dataNode)
 }
 
 Object.defineProperty(NameMapping.prototype, "length", {
-    set: function(v){ throw "length is read-only";
+    set: function(v){ throw new Error("length is read-only");
     },
     get: function(){ return this._srcNames.length; }
 });

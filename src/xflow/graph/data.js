@@ -44,7 +44,7 @@ var DataEntry = Xflow.DataEntry;
 Object.defineProperty(DataEntry.prototype, "type", {
     /** @param {Xflow.DATA_TYPE} v */
     set: function(v){
-        throw "type is read-only";
+        throw new Error("type is read-only");
     },
     /** @return {Xflow.DATA_TYPE} */
     get: function(){ return this._type; }

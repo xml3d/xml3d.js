@@ -225,7 +225,7 @@ Object.defineProperty(DataNode.prototype, "filterType", {
 
 Object.defineProperty(DataNode.prototype, "filterMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw "filterMapping is readonly!";
+    set: function(v){ throw new Error("filterMapping is readonly!");
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._filterMapping; }
@@ -242,14 +242,14 @@ Object.defineProperty(DataNode.prototype, "computeOperator", {
 });
 Object.defineProperty(DataNode.prototype, "computeInputMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw "computeInputMapping is readonly!";
+    set: function(v){ throw new Error("computeInputMapping is readonly!");
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._computeInputMapping; }
 });
 Object.defineProperty(DataNode.prototype, "computeOutputMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw "computeOutputMapping is readonly!";
+    set: function(v){ throw new Error("computeOutputMapping is readonly!");
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._computeOutputMapping; }

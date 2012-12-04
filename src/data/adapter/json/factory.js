@@ -29,9 +29,9 @@
 
     function createXflowNode(jsonData){
         if (jsonData.format != "xml3d-json")
-            throw "Unknown JSON format: " + jsonData.format;
+            throw new Error("Unknown JSON format: " + jsonData.format);
         if (jsonData.version != "0.4.0")
-            throw "Unknown JSON version: " + jsonData.version;
+            throw new Error("Unknown JSON version: " + jsonData.version);
 
         var node = XML3D.data.xflowGraph.createDataNode();
 

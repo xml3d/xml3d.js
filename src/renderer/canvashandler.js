@@ -38,7 +38,7 @@ XML3D.webgl.MAXFPS = 30;
 
     /**
      * CanvasHandler class.
-     * Own the GL context. Registers and handles the events that happen on the canvas element.
+     * Registers and handles the events that happen on the canvas element.
      * This includes context lost events.
      *
      * @param {HTMLCanvasElement} canvas
@@ -60,6 +60,30 @@ XML3D.webgl.MAXFPS = 30;
         this.lastPickObj = null;
         this.timeNow = Date.now() / 1000.0;
 
+        var context = this.getContextForCanvas(canvas);
+        if (context) {
+            this.initialize(context);
+        }
+    }
+
+    /**
+     *
+     * @param {HTMLCanvasElement!} canvas
+     */
+    CanvasHandler.prototype.getContextForCanvas = function(canvas) {
+        try {
+            var args = {preserveDrawingBuffer: true};
+            return canvas.getContext('experimental-webgl', args);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param {WebGLRenderingContext!} context
+     */
+    CanvasHandler.prototype.initialize = function(context) {
         // Register listeners on canvas
         this.registerCanvasListeners();
 
@@ -89,7 +113,7 @@ XML3D.webgl.MAXFPS = 30;
         };
 
         // Create renderer
-        this.renderer = new XML3D.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
+        this.renderer = new XML3D.webgl.Renderer(this, context, { width: this.canvas.clientWidth, height: this.canvas.clientHeight });
     }
 
     CanvasHandler.prototype.registerCanvasListeners = function() {

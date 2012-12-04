@@ -9,42 +9,48 @@
  * picked when the user clicks on elements of the canvas.
  * @constructor
  * @param handler The canvas handler
- * @param {number} width Initial width of renderer areas
- * @param {number} height Initial height of renderer areas
+ * @param {WebGLRenderingContext} context Initial width of renderer areas
+ * @param {dimensions} width and height of renderer areas
  */
-var Renderer = function(handler, width, height) {
+var Renderer = function(handler, context, dimensions) {
     this.handler = handler;
-    // TODO: Safe creation and what happens if this fails?
-    this.gl = handler.canvas.getContext("experimental-webgl", {preserveDrawingBuffer: true});
+    this.gl = context;
 
-    this.setGlobalStates();
+    this.setGlobalGLStates();
+
     this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
-    this.factory = new XML3D.webgl.RenderAdapterFactory(handler, this);
-    this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
-    this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
-    this.changeListener = new XML3D.webgl.DataChangeListener(this);
-    this.camera = this.initCamera();
-    this.width = width;
-    this.height = height;
-    this.fbos = this.initFrameBuffers(this.gl);
+    this.width = dimensions.width;
+    this.height = dimensions.height;
 
-    //Light information is needed to create shaders, so process them first
-	this.lights = {
+    this.initialize();
+};
+
+    Renderer.prototype.initialize = function() {
+        this.factory = new XML3D.webgl.RenderAdapterFactory(this.handler, this);
+        this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
+        this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
+        this.changeListener = new XML3D.webgl.DataChangeListener(this);
+        this.camera = this.initCamera();
+        this.fbos = this.initFrameBuffers(this.gl);
+
+        this.initializeScenegraph();
+    }
+
+    Renderer.prototype.initializeScenegraph = function() {
+        this.drawableObjects = new Array();
+        this.lights = {
             changed : true,
             point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
             directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
             spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
-	};
-
-    this.drawableObjects = new Array();
-	this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, true, mat4.identity(mat4.create()), null, false);
-    if (this.lights.length < 1) {
-        XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
+        };
+        this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, null);
+        if (this.lights.length < 1) {
+            XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
+        }
+        this.processShaders(this.drawableObjects);
     }
-    this.processShaders(this.drawableObjects);
-};
-
 /**
  * Represents a drawable object in the scene.
  *
@@ -76,7 +82,7 @@ Renderer.drawableObject = function() {
 /**
  *
  */
-Renderer.prototype.setGlobalStates = function() {
+Renderer.prototype.setGlobalGLStates = function() {
     var gl = this.gl;
 
     gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
@@ -104,51 +110,61 @@ Renderer.prototype.processShaders = function(objects) {
     }
 };
 
-Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, transform, parentShaderHandle, pickable) {
+var TraversalState = function(parent) {
+    parent = parent || {};
+    this.visible = parent.visible || true;
+    this.pickable = parent.pickable || true;
+    this.transform = parent.transform ? mat4.create(parent.transform) : mat4.identity(mat4.create());
+    this.shader = parent.shader || null;
+}
+
+Renderer.prototype.recursiveBuildScene = function(scene, currentNode, parent) {
     var adapter = this.factory.getAdapter(currentNode);
-    var downstreamShaderHandle = parentShaderHandle;
-    var downstreamTransform = transform;
+
+    parent = parent || new TraversalState();
+    var downstream = new TraversalState(parent);
 
     switch(currentNode.nodeName) {
     case "group":
-        adapter.parentVisible = visible;
-        visible = visible && currentNode.visible;
+        adapter.parentVisible = parent.visible;
+        adapter.parentTransform = mat4.create(parent.transform);
+        adapter.parentShaderHandle = parent.shader;
+
+        parent.visible = parent.visible && currentNode.visible;
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);
-		if (currentNode.hasAttribute("interactive"))
-			pickable = currentNode.getAttribute("interactive") == "true";
 
         var shaderHandle = adapter.getShaderHandle();
-        downstreamShaderHandle = shaderHandle ? shaderHandle : parentShaderHandle;
-        adapter.parentTransform = transform;
-        adapter.parentShaderHandle = parentShaderHandle;
-        adapter.isVisible = visible;
-        downstreamTransform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
+        if (shaderHandle)
+            downstream.shader = shaderHandle;
+
+        //console.log("In:", downstreamTransform);
+        downstream.transform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
+        //console.log("Out:", downstreamTransform);
         break;
 
     case "mesh":
+        adapter.parentVisible = parent.visible;
+
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);
-	    if (currentNode.hasAttribute("interactive"))
-	    	pickable = currentNode.getAttribute("interactive") == "true";
 
         var meshAdapter = this.factory.getAdapter(currentNode);
         if (!meshAdapter)
             break; //TODO: error handling
 
-        adapter.parentVisible = visible;
-        adapter.setShaderHandle(parentShaderHandle);
+        adapter.setShaderHandle(parent.shader);
 
         // Add a new drawable object to the scene
         var newObject = new Renderer.drawableObject();
         newObject.meshNode = currentNode;
-        newObject.visible = visible && currentNode.visible;
+        newObject.visible = parent.visible && currentNode.visible;
 
         // Defer creation of the shaders until after the entire scene is processed, this is
         // to ensure all lights and other shader information is available
         newObject.shader = null;
-        newObject.transform = transform;
-		newObject.pickable = pickable;
+        newObject.transform = parent.transform;
+		newObject.pickable = parent.pickable;
 		adapter.registerCallback(newObject.getObject);
 		meshAdapter.createMesh();
 
@@ -156,13 +172,13 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, t
         break;
 
     case "light":
-        adapter.transform = transform;
-        adapter.visible = visible && currentNode.visible;
+        adapter.transform = mat4.create(parent.transform);
+        adapter.visible = parent.visible && currentNode.visible;
 		adapter.addLight(this.lights);
         break;
 
     case "view":
-        adapter.parentTransform = transform;
+        adapter.parentTransform = mat4.create(parent.transform);
         adapter.updateViewMatrix();
         break;
     default:
@@ -171,7 +187,7 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, t
 
     var child = currentNode.firstElementChild;
     while (child) {
-		this.recursiveBuildScene(scene, child, visible, downstreamTransform, downstreamShaderHandle, pickable);
+		this.recursiveBuildScene(scene, child, downstream);
         child = child.nextSibling;
     }
 };
@@ -265,6 +281,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     }
 
     //Traverse parent group nodes to build any inherited shader and transform elements
+    // Christian: Use cached values from adapter
     while (currentNode) {
         if (currentNode.nodeName == "group") {
             var parentAdapter = this.factory.getAdapter(currentNode);
@@ -274,12 +291,6 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
 				var visibleFlag = currentNode.getAttribute("visible");
 				visible = visible !== null ? visible : visibleFlag == "true";
 			}
-
-			if (currentNode.hasAttribute("interactive")) {
-				var pickFlag = currentNode.getAttribute("interactive");
-				pickable = pickable !== null ? pickable : pickFlag == "true";
-			}
-
         } else {
             break; //End of nested groups
         }
@@ -289,7 +300,8 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
 	visible = visible === null ? true : visible;
     //Build any new objects and add them to the scene
     var newObjects = new Array();
-    this.recursiveBuildScene(newObjects, evt.wrapped.target, visible, parentTransform, shaderHandle, pickable);
+    var state = new TraversalState({ visible: visible, pickable: pickable, transform: parentTransform, shader: shaderHandle });
+    this.recursiveBuildScene(newObjects, evt.wrapped.target, state);
     this.processShaders(newObjects);
     this.drawableObjects = this.drawableObjects.concat(newObjects);
 

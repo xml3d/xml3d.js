@@ -36,7 +36,7 @@
     XML3D.data.SinkDataAdapter = SinkDataAdapter;
 
     var ImgDataAdapter = function(factory, node) {
-        XML3D.data.DataAdapter.call(this, factory, node);
+        XML3D.base.NodeAdapter.call(this, factory, node);
         this.textureEntry = null;
         this.image = null;
         if (node.src)
@@ -142,14 +142,12 @@
     };
 
      var IFrameDataAdapter = function(factory, node) {
-        XML3D.data.DataAdapter.call(this, factory, node);
-        XML3D.data.ProviderEntry.call(this);
+        XML3D.base.NodeAdapter.call(this, factory, node);
         this.textureEntry = null;
         this.image = null;
         this.createImageFromIFrame(node);
     };
-    XML3D.createClass(IFrameDataAdapter, XML3D.data.DataAdapter);
-    XML3D.extend(IFrameDataAdapter.prototype, XML3D.data.ProviderEntry.prototype);
+    XML3D.createClass(IFrameDataAdapter, XML3D.base.NodeAdapter);
 
     /**
      * Creates a new iframe object

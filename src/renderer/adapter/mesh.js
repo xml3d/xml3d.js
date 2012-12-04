@@ -77,6 +77,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         if( (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED ) && !evt.internalType ){
             if(evt.key == "shader"){
                 this.updateShader(evt.adapter);
+                if(evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
+                    XML3D.debug.logError("Could not find <shader> element of url '" + evt.url);
+                }
             }
             return;
         }
@@ -94,8 +97,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 break;
 
             case "parentshader":
-                this.setShaderHandle(evt.newValue);
-                this.updateShader(evt.newValue ? evt.newValue.getAdapter() : null);
+                var adapterHandle = evt.newValue;
+                this.setShaderHandle(adapterHandle);
+                this.updateShader(adapterHandle ? adapterHandle.getAdapter() : null);
                 break;
 
             case "parentvisible":
@@ -128,6 +132,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     p.setShaderHandle = function(newHandle){
         this.connectAdapterHandle("shader", newHandle);
+        if(newHandle && newHandle.status == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
+            XML3D.debug.logError("Could not find <shader> element of url '" + newHandle.url);
+        }
     };
     p.updateShader = function(adapter){
         var shaderName = this.factory.renderer.shaderManager.createShader(adapter,

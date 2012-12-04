@@ -135,6 +135,10 @@ function updateLoadState(dataAdpater){
     
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {
     var adapterHandle = this.getAdapterHandle(this.node.getAttribute(attributeName));
+    if(adapterHandle && adapterHandle.status == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
+        XML3D.debug.logError("Could not find <data> element of url '" + adapterHandle.url + "' for " + attributeName);
+    }
+
     this.connectAdapterHandle(attributeName, adapterHandle);
     this.connectedAdapterChanged(attributeName, adapterHandle ? adapterHandle.getAdapter() : null);
     updateLoadState(this);

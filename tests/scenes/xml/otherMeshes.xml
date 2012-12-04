@@ -5,7 +5,7 @@
         <float3 name="position" >-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
         <float3 name="normal" > 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord"  >0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
-        <float2 name="texcoord" seqnr="0.6" >0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
-        <float2 name="texcoord" seqnr="0.4" >0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        <float2 name="texcoord" key="0.6" >0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+        <float2 name="texcoord" key="0.4" >0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
     </data>
 </xml3d>

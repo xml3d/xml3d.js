@@ -2,10 +2,10 @@
     <Input>
         
     	<data id="sequence" >
-    		<float3 name="sequence" seqnr="0" id="first_seq_entry" >0 0 0  0 0 0</float3>   	
-    		<float3 name="sequence" seqnr="1" >1 1 1  1 2 4</float3>   	
-    		<float3 name="sequence" seqnr="2" >2 2 2  4 2 1</float3>   	
-    		<float3 name="sequence" seqnr="4" >0 0 0  6 6 6</float3>   	
+    		<float3 name="sequence" key="0" id="first_seq_entry" >0 0 0  0 0 0</float3>
+    		<float3 name="sequence" key="1" >1 1 1  1 2 4</float3>
+    		<float3 name="sequence" key="2" >2 2 2  4 2 1</float3>
+    		<float3 name="sequence" key="4" >0 0 0  6 6 6</float3>
     	</data>
     
         <data id="data1" compute="result = xflow.lerpSeq(sequence, key)">
@@ -20,8 +20,8 @@
         
         <data id="sequence2" >
     	    <data src="#sequence" />
-    		<float3 name="sequence" seqnr="8" id="first_seq_entry_2" >4 4 4 4 4 4</float3>   	
-    		<float3 name="sequence" seqnr="10" >10 10 10  0 0 0</float3>   	
+    		<float3 name="sequence" key="8" id="first_seq_entry_2" >4 4 4 4 4 4</float3>
+    		<float3 name="sequence" key="10" >10 10 10  0 0 0</float3>
     	</data>
         
         <data id="data3" compute="result = xflow.lerpSeq(sequence, key)">

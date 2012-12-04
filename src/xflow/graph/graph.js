@@ -63,7 +63,7 @@ var GraphNode = Xflow.GraphNode;
 Xflow.InputNode = function(graph){
     Xflow.GraphNode.call(this, graph);
     this._name = "";
-    this._seqnr = 0;
+    this._key = 0;
     this._data = null;
     this._param = false;
 };
@@ -85,14 +85,14 @@ Object.defineProperty(InputNode.prototype, "name", {
     /** @return {string} */
     get: function(){ return this._name; }
 });
-Object.defineProperty(InputNode.prototype, "seqnr", {
+Object.defineProperty(InputNode.prototype, "key", {
     /** @param {number} v */
     set: function(v){
-        this._seqnr = v;
+        this._key = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {number} */
-    get: function(){ return this._seqnr; }
+    get: function(){ return this._key; }
 });
 Object.defineProperty(InputNode.prototype, "param", {
     /** @param {boolean} v */

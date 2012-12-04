@@ -37,7 +37,7 @@
         this.xflowInputNode = XML3D.data.xflowGraph.createInputNode();
         this.xflowInputNode.name = this.node.name;
         this.xflowInputNode.data = buffer;
-        this.xflowInputNode.seqnr = this.node.seqnr;
+        this.xflowInputNode.key = this.node.key;
         this.xflowInputNode.param = this.node.param;
     }
 
@@ -58,8 +58,8 @@
             else if(attr == "name"){
                 this.xflowInputNode.name = this.node.name;
             }
-            else if(attr == "seqnr"){
-                this.xflowInputNode.seqnr = this.node.seqnr;
+            else if(attr == "key"){
+                this.xflowInputNode.key = this.node.key;
             }
             else if(attr == "param"){
                 this.xflowInputNode.param = this.node.param;

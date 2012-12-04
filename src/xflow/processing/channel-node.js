@@ -78,7 +78,7 @@
     }
 
     ChannelNode.prototype.notifyDataChange = function(inputNode){
-        var key = inputNode._name + ";" + inputNode._seqnr;
+        var key = inputNode._name + ";" + inputNode._key;
         if(this.inputSlots[key])
             this.inputSlots[key].setDataEntry(inputNode._data);
     }
@@ -151,8 +151,8 @@
                         channelNode.inputChannels.addProtoNames(child._name, child._name);
                         Xflow.nameset.add(channelNode.protoNames, child._name);
                     }
-                    var key = child._name + ";" + child._seqnr;
-                    channelNode.inputSlots[key] = new Xflow.DataSlot(child._data, child._seqnr);
+                    var key = child._name + ";" + child._key;
+                    channelNode.inputSlots[key] = new Xflow.DataSlot(child._data, child._key);
 
                 }
             }
@@ -276,7 +276,7 @@
             }
             for(var i = 0; i < owner._children.length; ++i){
                 if((child = owner._children[i]) && !child._channelNode){
-                    var key = child._name + ";" + child._seqnr;
+                    var key = child._name + ";" + child._key;
                     channelNode.inputChannels.addDataEntry(child._name, channelNode.inputSlots[key],
                         child._param, substitution);
                 }

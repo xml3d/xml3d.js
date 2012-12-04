@@ -130,7 +130,7 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, parent) {
         adapter.parentTransform = mat4.create(parent.transform);
         adapter.parentShaderHandle = parent.shader;
 
-        parent.visible = parent.visible && currentNode.visible;
+        downstream.visible = parent.visible && currentNode.visible;
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);
 
@@ -257,50 +257,29 @@ Renderer.prototype.requestRedraw = function(reason, forcePickingRedraw) {
 Renderer.prototype.sceneTreeAddition = function(evt) {
     var target = evt.wrapped.target;
     var adapter = this.factory.getAdapter(target);
-
+    
     //If no adapter is found the added node must be a text node, or something else
     //we're not interested in
     if (!adapter)
         return;
 
-    var shaderHandle = null;
-    if (adapter.getShaderHandle)
-        shaderHandle = adapter.getShaderHandle();
-
-    var currentNode = evt.wrapped.target.parentElement;
-	var pickable = null;
-	var visible = null;
-    var didListener = false;
-    adapter.isValid = true;
-
+    var shaderHandle = adapter.getShaderHandle ? adapter.getShaderHandle() : null;
+    var visible = target.visible;
+    
+    var parentNode = target.parentElement;
     var parentTransform = mat4.identity(mat4.create());
-    if(currentNode && currentNode.nodeName == "group")
+    if(parentNode && parentNode.nodeName == "group")
     {
-        var parentAdapter = this.factory.getAdapter(currentNode);
+        var parentAdapter = this.factory.getAdapter(parentNode);
         parentTransform = parentAdapter.applyTransformMatrix(parentTransform);
+        if (!shaderHandle)
+    		shaderHandle = parentAdapter.getShaderHandle();
+		visible = parentNode.visible && parentAdapter.parentVisible;
     }
-
-    //Traverse parent group nodes to build any inherited shader and transform elements
-    // Christian: Use cached values from adapter
-    while (currentNode) {
-        if (currentNode.nodeName == "group") {
-            var parentAdapter = this.factory.getAdapter(currentNode);
-            if (!shaderHandle)
-                shaderHandle = parentAdapter.getShaderHandle();
-			if (currentNode.hasAttribute("visible")) {
-				var visibleFlag = currentNode.getAttribute("visible");
-				visible = visible !== null ? visible : visibleFlag == "true";
-			}
-        } else {
-            break; //End of nested groups
-        }
-
-        currentNode = currentNode.parentElement;
-    }
-	visible = visible === null ? true : visible;
+	
     //Build any new objects and add them to the scene
     var newObjects = new Array();
-    var state = new TraversalState({ visible: visible, pickable: pickable, transform: parentTransform, shader: shaderHandle });
+    var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
     this.recursiveBuildScene(newObjects, evt.wrapped.target, state);
     this.processShaders(newObjects);
     this.drawableObjects = this.drawableObjects.concat(newObjects);

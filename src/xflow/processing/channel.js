@@ -139,7 +139,7 @@
             var entry = this.map[name];
             for(var key in entry.channels){
                 var channel = entry.channels[key].channel;
-                if(channel.map == this)
+                if(channel && channel.map == this)
                     channel.clear();
             }
         }

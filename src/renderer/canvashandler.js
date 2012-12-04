@@ -259,8 +259,9 @@ XML3D.webgl.MAXFPS = 30;
         }
 
         // calculate ray
-
-        ray.origin.set(this.renderer.currentView.position);
+        var worldToViewMat = this.renderer.currentView.getViewMatrix().inverse();
+        
+        ray.origin.set(worldToViewMat.translation());
         ray.direction.set(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
         ray.direction.set(ray.direction.normalize());
 

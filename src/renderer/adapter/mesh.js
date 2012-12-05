@@ -78,7 +78,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             if(evt.key == "shader"){
                 this.updateShader(evt.adapter);
                 if(evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
-                    XML3D.debug.logError("Could not find <shader> element of url '" + evt.url);
+                    XML3D.debug.logError("Missing shader with id '" + evt.url + "', falling back to default shader.");
                 }
             }
             return;
@@ -283,6 +283,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.dataChanged();
         this.factory.renderer.removeDrawableObject(this.getMyDrawableObject());
         this.getMyDrawableObject = noDrawableObject;
+        this.clearAdapterHandles();
     };
 
     /**

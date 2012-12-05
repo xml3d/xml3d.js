@@ -37,7 +37,7 @@ test("Pick with large object ids", function() {
     var drawables = h.renderer.renderObjects.ready;
     var objId = -1;
     for ( var i = 0; i < drawables.length; i++) {
-        if (drawables[i].meshNode === target) {
+        if (drawables[i].meshAdapter.node === target) {
             objId = i;
             break;
         }
@@ -48,7 +48,7 @@ test("Pick with large object ids", function() {
     var picked = h.updatePickObjectByPoint(220, 150);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.meshNode, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
+    strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
 
 });
 

@@ -15,10 +15,27 @@
             this.ready = new Array();
             this.queue = new Array();
         };
-        this.consolidate = function() {
-            this.ready = this.ready.concat(this.queue);
-            this.queue = new Array();
+        this.moveFromQueueToReady = function(obj) {
+            var index = this.queue.indexOf(obj);
+            if (index != -1) {
+                this.queue.splice(index, 1);
+                this.ready.push(obj);
+            }
+
         };
+        this.consolidate = function() {
+            this.queue.slice().forEach(function(obj) {
+                if (obj.can('objectReady'))
+                    obj.objectReady();
+            })
+        }
+        this.updateLights = function(lights, shaderManager) {
+            if (lights.changed) {
+                this.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
+            } else {
+                this.queue.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
+            }
+        }
         this.forEach = function(func, that) {
             this.queue.forEach(func, that);
             this.ready.forEach(func, that);
@@ -93,6 +110,7 @@ Renderer.prototype.initializeScenegraph = function() {
 
 
 var RenderObject = function(opt) {
+    this.handler = opt.handler,
     this.meshAdapter = opt.meshAdapter;
     this.shader = opt.shader || null;
     this.transform = opt.transform || RenderObject.IDENTITY_MATRIX;
@@ -112,22 +130,23 @@ var RenderObject = function(opt) {
 RenderObject.IDENTITY_MATRIX = mat4.identity(mat4.create());
 
 RenderObject.prototype = {
-    oncreated: function() { console.log("Object created", this, arguments); },
+    //oncreated: function() { console.log("Object created", this, arguments) },
     onlightsChanged: function(name, from, to, lights, shaderManager) {
-        console.log(arguments);
         var shaderHandle = this.meshAdapter.getShaderHandle();
-        var shaderAdapter = shaderHandle.getAdapter();
+        var shaderAdapter = shaderHandle && shaderHandle.getAdapter();
         this.shader = shaderManager.createShader(shaderAdapter, lights);
     },
-    oncompile: function() { console.log("Object compile", this); }
-}
+    onrenderReady : function() {
+        this.handler.moveFromQueueToReady(this);
+    }
+};
 
 window.StateMachine.create({
     target: RenderObject.prototype,
     events: [
         { name: 'created',    from: 'none',   to: 'transformReady'  },
         { name: 'lightsChanged', from: '*',  to: 'materialReady' },
-        { name: 'compile',    from: 'materialReady',   to: 'renderReady'   }
+        { name: 'objectReady',    from: 'materialReady',   to: 'renderReady'   }
     ]});
 
 /**
@@ -197,6 +216,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
 
         // Add a new RenderObject to the scene
         var newObject = new RenderObject({
+            handler: this.renderObjects,
             meshAdapter : adapter,
             visible: parent.visible && currentNode.visible,
             transform: parent.transform,
@@ -310,11 +330,8 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     }
 
     //Build any new objects and add them to the scene
-    var newObjects = new Array();
     var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
-    this.recursiveBuildScene(evt.wrapped.target, newObjects, state);
-    this.processShaders(newObjects);
-    this.renderObjects.queue = this.renderObjects.queue.concat(newObjects);
+    this.recursiveBuildScene(evt.wrapped.target, this.renderObjects.queue, state);
 
     this.requestRedraw("A node was added.");
 };
@@ -330,10 +347,9 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
 };
 
 Renderer.prototype.prepareRendering = function() {
-    this.renderObjects.consolidate();
-    if (this.lights.changed) {
-        this.renderObjects.forEach(function(obj) { obj.lightsChanged(this.lights, this.shaderManager); }, this);
-    }
+    var renderObjects = this.renderObjects;
+    renderObjects.updateLights(this.lights, this.shaderManager);
+    renderObjects.consolidate();
 };
 
 /**

@@ -22,7 +22,7 @@ test("Check current pick object (internal)", function() {
     var picked = h.updatePickObjectByPoint(88,60);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.meshNode, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
+    strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
 
     picked = h.updatePickObjectByPoint(5,5);
     strictEqual(h.currentPickObj, null, "Nothing picked");

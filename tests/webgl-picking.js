@@ -34,7 +34,7 @@ test("Pick with large object ids", function() {
     var h = getHandler(xml3dElement);
     var target = this.doc.getElementById("pickingMesh6");
 
-    var drawables = h.renderer.drawableObjects;
+    var drawables = h.renderer.renderObjects;
     var objId = -1;
     for ( var i = 0; i < drawables.length; i++) {
         if (drawables[i].meshNode === target) {

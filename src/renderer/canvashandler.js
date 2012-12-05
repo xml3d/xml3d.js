@@ -210,7 +210,7 @@ XML3D.webgl.MAXFPS = 30;
         
         var glY = this.canvasToGlY(canvasY);
         
-        this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, glY);
+        this.currentPickObj = this.renderer.getRenderObjectFromPickingBuffer(canvasX, glY);
         
         return this.currentPickObj;
     };

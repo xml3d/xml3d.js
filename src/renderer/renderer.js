@@ -2,7 +2,7 @@
 
 (function() {
 
-    var ObjectHandler = function() {
+    var RenderObjectHandler = function() {
         this.remove = function(obj) {
             var index = this.ready.indexOf(obj);
             if (index == -1) {
@@ -39,7 +39,7 @@ var Renderer = function(handler, context, dimensions) {
     this.width = dimensions.width;
     this.height = dimensions.height;
 
-    this.drawableObjects = new ObjectHandler();
+    this.renderObjects = new RenderObjectHandler();
 
     this.initialize();
 };
@@ -62,15 +62,15 @@ Renderer.prototype.initializeScenegraph = function() {
         directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
             spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
     };
-    this.recursiveBuildScene(this.xml3dNode, this.drawableObjects.queue, null);
+    this.recursiveBuildScene(this.xml3dNode, this.renderObjects.queue, null);
     if (this.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
-    this.processShaders(this.drawableObjects.queue);
+    this.processShaders(this.renderObjects.queue);
 };
 
 /**
- * Represents a drawable object in the scene.
+ * Represents a renderable object in the scene.
  *
  * This object holds references to a mesh and shader stored in their respective managers, or in the
  * case of XFlow a local instance of these objects, since XFlow may be applied differently to different
@@ -81,7 +81,7 @@ Renderer.prototype.initializeScenegraph = function() {
  *
  * @constructor
  */
-Renderer.drawableObject = function() {
+var RenderObject = function() {
     this.mesh = null;
     this.shader = null;
     this.transform = null;
@@ -89,7 +89,7 @@ Renderer.drawableObject = function() {
     this.meshNode = null;
     var me = this;
 
-    // A getter for this particular drawableObject. Rather than storing a reference to the drawableObject
+    // A getter for this particular RenderObject. Rather than storing a reference to the RenderObject
     // mesh adapters will store a reference to this function and call it when they need to apply a change.
     // This is just an arbitrary separation to aid in development.
     this.getObject = function() {
@@ -136,7 +136,7 @@ var TraversalState = function(parent) {
     this.shader = parent.shader || null;
 };
 
-Renderer.prototype.recursiveBuildScene = function(currentNode, drawableObjects, parent) {
+Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray, parent) {
     var adapter = this.factory.getAdapter(currentNode);
 
     parent = parent || new TraversalState();
@@ -173,8 +173,8 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, drawableObjects, 
 
         adapter.setShaderHandle(parent.shader);
 
-        // Add a new drawable object to the scene
-        var newObject = new Renderer.drawableObject();
+        // Add a new RenderObject to the scene
+        var newObject = new RenderObject();
         newObject.meshNode = currentNode;
         newObject.visible = parent.visible && currentNode.visible;
 
@@ -186,7 +186,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, drawableObjects, 
 		adapter.registerCallback(newObject.getObject);
 		meshAdapter.createMesh();
 
-        drawableObjects.push(newObject);
+        renderObjectArray.push(newObject);
         break;
 
     case "light":
@@ -205,7 +205,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, drawableObjects, 
 
     var child = currentNode.firstElementChild;
     while (child) {
-        this.recursiveBuildScene(child, drawableObjects, downstream);
+        this.recursiveBuildScene(child, renderObjectArray, downstream);
         child = child.nextElementSibling;
     }
 };
@@ -295,7 +295,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
     this.recursiveBuildScene(evt.wrapped.target, newObjects, state);
     this.processShaders(newObjects);
-    this.drawableObjects.queue = this.drawableObjects.queue.concat(newObjects);
+    this.renderObjects.queue = this.renderObjects.queue.concat(newObjects);
 
     this.requestRedraw("A node was added.");
 };
@@ -332,7 +332,7 @@ Renderer.prototype.render = function() {
 
     var stats = { objCount : 0, triCount : 0 };
 	// Update mesh objects
-	var objects = this.drawableObjects.ready;
+	var objects = this.renderObjects.ready;
 	for (var i = 0, l = objects.length; i < l; i++)
     {
 	    var o = objects[i];
@@ -573,7 +573,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 
     var shader = this.shaderManager.getShaderById("pickobjectid");
     this.shaderManager.bindShader(shader);
-    var objects = this.drawableObjects.ready;
+    var objects = this.renderObjects.ready;
 
     for ( var j = 0, n = objects.length; j < n; j++) {
         var obj = objects[j];
@@ -704,7 +704,7 @@ var data = new Uint8Array(8);
  * @returns {Element|null} Picked Object
  *
  */
-Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
+Renderer.prototype.getRenderObjectFromPickingBuffer = function(screenX, screenY) {
     var data = this.readPixelDataFromBuffer(screenX, screenY, this.fbos.picking);
 
     if (!data)
@@ -714,7 +714,7 @@ Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
     var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
     if (objId > 0) {
-        var pickedObj = this.drawableObjects.ready[objId - 1];
+        var pickedObj = this.renderObjects.ready[objId - 1];
         result = pickedObj;
     }
     return result;
@@ -796,11 +796,11 @@ Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
 
 
 /**
- * Walks through the drawable objects and destroys each shape and shader
+ * Frees all resources
  * @return
  */
 Renderer.prototype.dispose = function() {
-    this.drawableObjects.clear();
+    this.renderObjects.clear();
 };
 
 /**

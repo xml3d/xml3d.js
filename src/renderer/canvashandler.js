@@ -213,6 +213,7 @@ XML3D.webgl.MAXFPS = 30;
         
         this.currentPickObj = this.renderer.getRenderObjectFromPickingBuffer(canvasX, glY);
         
+        
         return this.currentPickObj;
     };
 
@@ -384,7 +385,7 @@ XML3D.webgl.MAXFPS = 30;
         if (target !== undefined && target !== null)
             tar = target;
         else if (this.currentPickObj)
-            tar = this.currentPickObj.meshNode;
+            tar = this.currentPickObj.meshAdapter.node;
         else
             tar = this.xml3dElem;
 
@@ -527,7 +528,7 @@ XML3D.webgl.MAXFPS = 30;
         this.updatePickObjectByPoint(pos.x, pos.y);
         this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt);
 
-        var curObj = this.currentPickObj ? this.currentPickObj.meshNode : null;
+        var curObj = this.currentPickObj ? this.currentPickObj.meshAdapter.node : null;
 
         // trigger mouseover and mouseout
         if (curObj !== this.lastPickObj) {

@@ -518,22 +518,20 @@
     XML3DShaderManager.prototype.createTextureFromEntry = function(texEntry, sampler, texUnit) {
         var img = texEntry.getImage();
         if (img) {
-            if (img.nodeName == "video" && sampler.info) {
-                //We don't need to re-create the texture, just flag it to be updated
-                sampler.info.status = TEXTURE_STATE.LOADED;
-        	} else {
-                var renderer = this.renderer;
-                var info = new TextureInfo(this.gl.createTexture(), {
-                    status : (img.complete || img.readyState) ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
-                    onload : function() {
-                        renderer.requestRedraw.call(renderer, "Texture loaded");
-                    },
-                    unit : texUnit,
-                    image : img,
-                    config : texEntry.getSamplerConfig()
-                });
-                sampler.info = info;
-        	}
+            var handle = (sampler.info && sampler.info.status != TEXTURE_STATE.INVALID) ?
+                sampler.info.handle : this.gl.createTexture();
+
+            var renderer = this.renderer;
+            var info = new TextureInfo(handle, {
+                status : (img.complete || img.readyState) ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
+                onload : function() {
+                    renderer.requestRedraw.call(renderer, "Texture loaded");
+                },
+                unit : texUnit,
+                image : img,
+                config : texEntry.getSamplerConfig()
+            });
+            sampler.info = info;
         } else {
             sampler.info = new InvalidTexture();
             XML3D.debug.logWarning("No image found for texture: " + sampler);
@@ -597,6 +595,10 @@
     };
 
     XML3DShaderManager.prototype.createTex2DFromImage = function(info) {
+        if (info.status == TEXTURE_STATE.INVALID) {
+            throw new Error("Invalid texture");
+        }
+
         var gl = this.gl;
         var opt = info.config || {};
         var image = info.image;

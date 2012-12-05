@@ -118,7 +118,6 @@
             that.interval = window.setInterval(function() {
                 if (that.textureEntry) {
                     that.textureEntry.setImage(video);
-                    console.log("Update");
                 }
             }, 15);
         }, true);
@@ -140,6 +139,17 @@
             this.textureEntry.setImage(this.video);
         }
     };
+
+    VideoDataAdapter.prototype.notifyChanged = function(evt) {
+        if (evt.type == XML3D.events.VALUE_MODIFIED) {
+            var attr = evt.wrapped.attrName;
+            if(attr == "src"){
+                this.createVideoFromURL(this.node.src);
+            }
+        };
+    };
+
+    /** IFrameDataAdapter **/
 
      var IFrameDataAdapter = function(factory, node) {
         XML3D.base.NodeAdapter.call(this, factory, node);

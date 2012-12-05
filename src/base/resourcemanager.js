@@ -437,6 +437,39 @@
         return image;
     }
 
+
+    /**
+     * This function is called to load a Video.
+     *
+     * @param {string} uri Video URI
+     * @param {boolean} autoplay
+     * @param {function} canplaythroughListener Function called when video can be played
+     *                                          without requiring a stop for further buffering.
+     *                                          It will be called with event as the first and
+     *                                          video object as the second parameter.
+     * @param {function} errorListener  Function called when video could not be loaded.
+     *                                 It will be called with event as the first and image as the second parameter.
+     * @return {Image}
+     */
+    ResourceManager.prototype.getVideo = function(uri, autoplay, canplaythroughListener, errorListener) {
+        // we use canvasId 0 to represent videos loaded in a document
+        getOrCreateCounterObject(0).counter++;
+
+        var video = document.createElement("video");
+        video.addEventListener("canplaythrough", function(event) {
+            loadComplete(0, uri);
+            canplaythroughListener(event, video);
+            }, true);
+        video.addEventListener("error", function(event) {
+            loadComplete(0, uri);
+            errorListener(event, video);
+            }, true);
+        video.crossorigin = "anonymous";
+        video.autoplay = autoplay;
+        video.src = uri; // here loading starts
+        return video;
+    }
+
     XML3D.base.resourceManager = new ResourceManager();
 
 })();

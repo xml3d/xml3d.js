@@ -110,24 +110,24 @@
      *
      * @param {string} url
      */
-   VideoDataAdapter.prototype.createVideoFromURL = function(url) {
-        var video = document.createElement("video");
+    VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
-        video.addEventListener("canplaythrough", function() {
+        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
+        var oncanplaythrough = function(event, video) {
             video.play();
             that.interval = window.setInterval(function() {
                 if (that.textureEntry) {
                     that.textureEntry.setImage(video);
                 }
             }, 15);
-        }, true);
-        video.addEventListener("ended", function() {
+        };
+        var onerror = function (event, video) {
+            XML3D.debug.logError("Could not load video URI="+video.src);
+        };
+        this.video = XML3D.base.resourceManager.getVideo(uri, /* autoplay= */true, oncanplaythrough, onerror);
+        this.video.addEventListener("ended", function() {
             window.clearInterval(that.interval);
         }, true);
-        video.crossorigin = "anonymous";
-        video.autoplay = true;
-        video.src = url;
-        this.video = video;
     };
 
     /**
@@ -147,6 +147,16 @@
                 this.createVideoFromURL(this.node.src);
             }
         };
+    };
+
+    VideoDataAdapter.prototype.getValue = function(cb, obj) {
+        return this.video;
+    };
+
+    VideoDataAdapter.prototype.getOutputs = function() {
+        var result = {};
+        result['video'] = this;
+        return result;
     };
 
     /** IFrameDataAdapter **/

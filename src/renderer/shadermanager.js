@@ -23,6 +23,8 @@
         this.unit = opt.unit || 0;
         this.image = opt.image || null;
         this.config = opt.config || null;
+        this.canvas = opt.canvas || null;
+        this.context = opt.context || null; // canvas context
     };
 
     TextureInfo.prototype.setLoaded = function() {
@@ -518,8 +520,16 @@
     XML3DShaderManager.prototype.createTextureFromEntry = function(texEntry, sampler, texUnit) {
         var img = texEntry.getImage();
         if (img) {
-            var handle = (sampler.info && sampler.info.status != TEXTURE_STATE.INVALID) ?
-                sampler.info.handle : this.gl.createTexture();
+            var handle = null;
+            var canvas = null;
+            var context = null;
+            if (sampler.info && sampler.info.status != TEXTURE_STATE.INVALID) {
+                handle = sampler.info.handle;
+                canvas = sampler.info.canvas;
+                context = sampler.info.context;
+            } else {
+                handle = this.gl.createTexture();
+            }
 
             var renderer = this.renderer;
             var info = new TextureInfo(handle, {
@@ -529,7 +539,9 @@
                 },
                 unit : texUnit,
                 image : img,
-                config : texEntry.getSamplerConfig()
+                config : texEntry.getSamplerConfig(),
+                canvas : canvas,
+                context : context
             });
             sampler.info = info;
         } else {
@@ -615,16 +627,29 @@
         var height = image.videoHeight || image.height;
         if (!this.isPowerOfTwo(width) || !this.isPowerOfTwo(height)) {
             // Scale up the texture to the next highest power of two dimensions.
-            var canvas = document.createElement("canvas");
-            canvas.width = this.nextHighestPowerOfTwo(width);
-            canvas.height = this.nextHighestPowerOfTwo(height);
-            var ctx = canvas.getContext("2d");
-            // stretch to fit 
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height); 
+            // Reuse existing canvas if available.
+            var canvas = info.canvas !== null ? info.canvas : document.createElement("canvas");
+
+            var potWidth = this.nextHighestPowerOfTwo(width);
+            var potHeight = this.nextHighestPowerOfTwo(height);
+            var context = null;
+            // Reuse existing context if possible.
+            if (info.context !== null && potWidth == canvas.width && potHeight == canvas.height) {
+                context = info.context;
+            } else {
+                canvas.width = potWidth;
+                canvas.height = potHeight;
+                context = canvas.getContext("2d");
+            }
+
+            // stretch to fit
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
             
             // centered with transparent padding around edges
             //ctx.drawImage(image, 0, 0, image.width, image.height); 
             image = canvas;
+            info.canvas = canvas;
+            info.context = context;
         }
 
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);

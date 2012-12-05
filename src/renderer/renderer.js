@@ -26,31 +26,32 @@ var Renderer = function(handler, context, dimensions) {
     this.initialize();
 };
 
-    Renderer.prototype.initialize = function() {
-        this.factory = new XML3D.webgl.RenderAdapterFactory(this.handler, this);
-        this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
-        this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
-        this.changeListener = new XML3D.webgl.DataChangeListener(this);
-        this.camera = this.initCamera();
-        this.fbos = this.initFrameBuffers(this.gl);
+Renderer.prototype.initialize = function() {
+    this.factory = new XML3D.webgl.RenderAdapterFactory(this.handler, this);
+    this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
+    this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
+    this.changeListener = new XML3D.webgl.DataChangeListener(this);
+    this.camera = this.initCamera();
+    this.fbos = this.initFrameBuffers(this.gl);
 
-        this.initializeScenegraph();
-    }
+    this.initializeScenegraph();
+};
 
-    Renderer.prototype.initializeScenegraph = function() {
-        this.drawableObjects = new Array();
-        this.lights = {
-            changed : true,
-            point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
-            directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
+Renderer.prototype.initializeScenegraph = function() {
+    this.drawableObjects = new Array();
+    this.lights = {
+        changed : true,
+        point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
+        directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
             spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
-        };
-        this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, null);
-        if (this.lights.length < 1) {
-            XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
-        }
-        this.processShaders(this.drawableObjects);
+    };
+    this.recursiveBuildScene(this.xml3dNode, this.drawableObjects, null);
+    if (this.lights.length < 1) {
+        XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
+    this.processShaders(this.drawableObjects);
+};
+
 /**
  * Represents a drawable object in the scene.
  *
@@ -93,7 +94,7 @@ Renderer.prototype.setGlobalGLStates = function() {
 };
 
 Renderer.prototype.initCamera = function() {
-    var av = XML3D.util.getOrCreateActiveView(this.xml3dNode); 
+    var av = XML3D.util.getOrCreateActiveView(this.xml3dNode);
 
     this.currentView = av;
     return this.factory.getAdapter(av);
@@ -116,9 +117,9 @@ var TraversalState = function(parent) {
     this.pickable = parent.pickable || true;
     this.transform = parent.transform ? mat4.create(parent.transform) : mat4.identity(mat4.create());
     this.shader = parent.shader || null;
-}
+};
 
-Renderer.prototype.recursiveBuildScene = function(scene, currentNode, parent) {
+Renderer.prototype.recursiveBuildScene = function(currentNode, drawableObjects, parent) {
     var adapter = this.factory.getAdapter(currentNode);
 
     parent = parent || new TraversalState();
@@ -168,7 +169,7 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, parent) {
 		adapter.registerCallback(newObject.getObject);
 		meshAdapter.createMesh();
 
-        scene.push(newObject);
+        drawableObjects.push(newObject);
         break;
 
     case "light":
@@ -187,8 +188,8 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, parent) {
 
     var child = currentNode.firstElementChild;
     while (child) {
-		this.recursiveBuildScene(scene, child, downstream);
-        child = child.nextSibling;
+        this.recursiveBuildScene(child, drawableObjects, downstream);
+        child = child.nextElementSibling;
     }
 };
 
@@ -257,7 +258,7 @@ Renderer.prototype.requestRedraw = function(reason, forcePickingRedraw) {
 Renderer.prototype.sceneTreeAddition = function(evt) {
     var target = evt.wrapped.target;
     var adapter = this.factory.getAdapter(target);
-    
+
     //If no adapter is found the added node must be a text node, or something else
     //we're not interested in
     if (!adapter)
@@ -265,7 +266,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
 
     var shaderHandle = adapter.getShaderHandle ? adapter.getShaderHandle() : null;
     var visible = target.visible;
-    
+
     var parentNode = target.parentElement;
     var parentTransform = mat4.identity(mat4.create());
     if(parentNode && parentNode.nodeName == "group")
@@ -276,11 +277,11 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     		shaderHandle = parentAdapter.getShaderHandle();
 		visible = parentNode.visible && parentAdapter.parentVisible;
     }
-	
+
     //Build any new objects and add them to the scene
     var newObjects = new Array();
     var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
-    this.recursiveBuildScene(newObjects, evt.wrapped.target, state);
+    this.recursiveBuildScene(evt.wrapped.target, newObjects, state);
     this.processShaders(newObjects);
     this.drawableObjects = this.drawableObjects.concat(newObjects);
 

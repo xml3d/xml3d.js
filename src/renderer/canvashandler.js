@@ -101,6 +101,7 @@ XML3D.webgl.MAXFPS = 30;
         };
 
         this.redraw = function(reason, forcePickingRedraw) {
+            //XML3D.debug.logDebug(reason);
             forcePickingRedraw = forcePickingRedraw === undefined ? true : forcePickingRedraw;
             if (this.needDraw !== undefined) {
                 this.needDraw = true;
@@ -320,6 +321,7 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.draw = function() {
         try {
             var start = Date.now();
+            this.renderer.prepareRendering();
             var stats = this.renderer.render();
             var end = Date.now();
 

@@ -15,6 +15,10 @@
             this.ready = new Array();
             this.queue = new Array();
         };
+        this.consolidate = function() {
+            this.ready = this.ready.concat(this.queue);
+            this.queue = new Array();
+        };
         this.clear();
     };
 
@@ -308,6 +312,10 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
 
     this.requestRedraw("A node was removed.");
 
+};
+
+Renderer.prototype.prepareRendering = function() {
+    this.renderObjects.consolidate();
 };
 
 /**

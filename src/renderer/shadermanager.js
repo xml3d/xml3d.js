@@ -518,17 +518,22 @@
     XML3DShaderManager.prototype.createTextureFromEntry = function(texEntry, sampler, texUnit) {
         var img = texEntry.getImage();
         if (img) {
-            var renderer = this.renderer;
-            var info = new TextureInfo(this.gl.createTexture(), {
-                status : (img.complete || img.readyState) ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
-                onload : function() {
-                    renderer.requestRedraw.call(renderer, "Texture loaded");
-                },
-                unit : texUnit,
-                image : img,
-                config : texEntry.getSamplerConfig()
-            });
-            sampler.info = info;
+            if (img.nodeName == "video" && sampler.info) {
+                //We don't need to re-create the texture, just flag it to be updated
+                sampler.info.status = TEXTURE_STATE.LOADED;
+        	} else {
+                var renderer = this.renderer;
+                var info = new TextureInfo(this.gl.createTexture(), {
+                    status : (img.complete || img.readyState) ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
+                    onload : function() {
+                        renderer.requestRedraw.call(renderer, "Texture loaded");
+                    },
+                    unit : texUnit,
+                    image : img,
+                    config : texEntry.getSamplerConfig()
+                });
+                sampler.info = info;
+        	}
         } else {
             sampler.info = new InvalidTexture();
             XML3D.debug.logWarning("No image found for texture: " + sampler);
@@ -603,18 +608,20 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
-
-        if (!this.isPowerOfTwo(image.width) || !this.isPowerOfTwo(image.height)) {
+        
+        var width = image.videoWidth || image.width;
+        var height = image.videoHeight || image.height;
+        if (!this.isPowerOfTwo(width) || !this.isPowerOfTwo(height)) {
             // Scale up the texture to the next highest power of two dimensions.
             var canvas = document.createElement("canvas");
-            canvas.width = this.nextHighestPowerOfTwo(image.width);
-            canvas.height = this.nextHighestPowerOfTwo(image.height);
+            canvas.width = this.nextHighestPowerOfTwo(width);
+            canvas.height = this.nextHighestPowerOfTwo(height);
             var ctx = canvas.getContext("2d");
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height); // stretch
-            // to
-            // fit
-            // ctx.drawImage(image, 0, 0, image.width, image.height); //centered
-            // with transparent padding around edges
+            // stretch to fit 
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height); 
+            
+            // centered with transparent padding around edges
+            //ctx.drawImage(image, 0, 0, image.width, image.height); 
             image = canvas;
         }
 

@@ -19,8 +19,14 @@
             this.ready = this.ready.concat(this.queue);
             this.queue = new Array();
         };
+        this.forEach = function(func, that) {
+            this.queue.forEach(func, that);
+            this.ready.forEach(func, that);
+        }
         this.clear();
     };
+
+
 
 /**
  * Constructor for the Renderer.
@@ -70,7 +76,6 @@ Renderer.prototype.initializeScenegraph = function() {
     if (this.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
-    this.processShaders(this.renderObjects.queue);
 };
 
 /**
@@ -85,12 +90,14 @@ Renderer.prototype.initializeScenegraph = function() {
  *
  * @constructor
  */
-var RenderObject = function() {
-    this.mesh = null;
-    this.shader = null;
-    this.transform = null;
-    this.visible = true;
-    this.meshNode = null;
+
+
+var RenderObject = function(opt) {
+    this.meshAdapter = opt.meshAdapter;
+    this.shader = opt.shader || null;
+    this.transform = opt.transform || RenderObject.IDENTITY_MATRIX;
+    this.visible = opt.visible !== undefined ? opt.visible : true;
+    this.meshNode = opt.meshNode || null;
     var me = this;
 
     // A getter for this particular RenderObject. Rather than storing a reference to the RenderObject
@@ -99,7 +106,29 @@ var RenderObject = function() {
     this.getObject = function() {
         return me;
     };
+    this.created();
 };
+
+RenderObject.IDENTITY_MATRIX = mat4.identity(mat4.create());
+
+RenderObject.prototype = {
+    oncreated: function() { console.log("Object created", this, arguments); },
+    onlightsChanged: function(name, from, to, lights, shaderManager) {
+        console.log(arguments);
+        var shaderHandle = this.meshAdapter.getShaderHandle();
+        var shaderAdapter = shaderHandle.getAdapter();
+        this.shader = shaderManager.createShader(shaderAdapter, lights);
+    },
+    oncompile: function() { console.log("Object compile", this); }
+}
+
+window.StateMachine.create({
+    target: RenderObject.prototype,
+    events: [
+        { name: 'created',    from: 'none',   to: 'transformReady'  },
+        { name: 'lightsChanged', from: '*',  to: 'materialReady' },
+        { name: 'compile',    from: 'materialReady',   to: 'renderReady'   }
+    ]});
 
 /**
  *
@@ -119,17 +148,6 @@ Renderer.prototype.initCamera = function() {
 
     this.currentView = av;
     return this.factory.getAdapter(av);
-};
-
-Renderer.prototype.processShaders = function(objects) {
-    for (var i=0, l=objects.length; i < l; i++) {
-        var obj = objects[i];
-        var shaderHandle = this.factory.getAdapter(obj.meshNode).getShaderHandle();
-        var shaderAdapter = null;
-        if(shaderHandle)
-            shaderAdapter = shaderHandle.getAdapter();
-        obj.shader = this.shaderManager.createShader(shaderAdapter, this.lights);
-    }
 };
 
 var TraversalState = function(parent) {
@@ -178,16 +196,13 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         adapter.setShaderHandle(parent.shader);
 
         // Add a new RenderObject to the scene
-        var newObject = new RenderObject();
-        newObject.meshNode = currentNode;
-        newObject.visible = parent.visible && currentNode.visible;
-
-        // Defer creation of the shaders until after the entire scene is processed, this is
-        // to ensure all lights and other shader information is available
-        newObject.shader = null;
-        newObject.transform = parent.transform;
-		newObject.pickable = parent.pickable;
-		adapter.registerCallback(newObject.getObject);
+        var newObject = new RenderObject({
+            meshAdapter : adapter,
+            visible: parent.visible && currentNode.visible,
+            transform: parent.transform,
+            pickable: parent.pickable
+        });
+        adapter.registerCallback(newObject.getObject);
 		meshAdapter.createMesh();
 
         renderObjectArray.push(newObject);
@@ -316,6 +331,9 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
 
 Renderer.prototype.prepareRendering = function() {
     this.renderObjects.consolidate();
+    if (this.lights.changed) {
+        this.renderObjects.forEach(function(obj) { obj.lightsChanged(this.lights, this.shaderManager); }, this);
+    }
 };
 
 /**

@@ -2,6 +2,22 @@
 
 (function() {
 
+    var ObjectHandler = function() {
+        this.remove = function(obj) {
+            var index = this.ready.indexOf(obj);
+            if (index == -1) {
+                index = this.queue.indexOf(obj);
+                this.queue.splice(index, 1);
+            } else
+                this.ready.splice(index, 1);
+        };
+        this.clear = function() {
+            this.ready = new Array();
+            this.queue = new Array();
+        };
+        this.clear();
+    };
+
 /**
  * Constructor for the Renderer.
  *
@@ -23,6 +39,8 @@ var Renderer = function(handler, context, dimensions) {
     this.width = dimensions.width;
     this.height = dimensions.height;
 
+    this.drawableObjects = new ObjectHandler();
+
     this.initialize();
 };
 
@@ -38,18 +56,17 @@ Renderer.prototype.initialize = function() {
 };
 
 Renderer.prototype.initializeScenegraph = function() {
-    this.drawableObjects = new Array();
     this.lights = {
         changed : true,
         point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
         directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
             spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
     };
-    this.recursiveBuildScene(this.xml3dNode, this.drawableObjects, null);
+    this.recursiveBuildScene(this.xml3dNode, this.drawableObjects.queue, null);
     if (this.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
-    this.processShaders(this.drawableObjects);
+    this.processShaders(this.drawableObjects.queue);
 };
 
 /**
@@ -226,11 +243,6 @@ Renderer.prototype.changeLightData = function(lightType, field, offset, newValue
     this.lights.changed = true;
 };
 
-Renderer.prototype.removeDrawableObject = function(obj) {
-    var index = this.drawableObjects.indexOf(obj);
-    this.drawableObjects.splice(index, 1);
-};
-
 /**
  * Propogates a change in the WebGL context to everyone who needs to know
  **/
@@ -283,7 +295,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
     this.recursiveBuildScene(evt.wrapped.target, newObjects, state);
     this.processShaders(newObjects);
-    this.drawableObjects = this.drawableObjects.concat(newObjects);
+    this.drawableObjects.queue = this.drawableObjects.queue.concat(newObjects);
 
     this.requestRedraw("A node was added.");
 };
@@ -320,7 +332,7 @@ Renderer.prototype.render = function() {
 
     var stats = { objCount : 0, triCount : 0 };
 	// Update mesh objects
-	var objects = this.drawableObjects;
+	var objects = this.drawableObjects.ready;
 	for (var i = 0, l = objects.length; i < l; i++)
     {
 	    var o = objects[i];
@@ -329,7 +341,7 @@ Renderer.prototype.render = function() {
     //Sort objects by shader/transparency
     var opaqueObjects = {};
     var transparentObjects = [];
-    this.sortObjects(this.drawableObjects, opaqueObjects, transparentObjects, xform);
+    this.sortObjects(objects, opaqueObjects, transparentObjects, xform);
 
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
@@ -561,9 +573,10 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 
     var shader = this.shaderManager.getShaderById("pickobjectid");
     this.shaderManager.bindShader(shader);
+    var objects = this.drawableObjects.ready;
 
-    for ( var j = 0, n = this.drawableObjects.length; j < n; j++) {
-        var obj = this.drawableObjects[j];
+    for ( var j = 0, n = objects.length; j < n; j++) {
+        var obj = objects[j];
         var transform = obj.transform;
         var mesh = obj.mesh;
 
@@ -701,7 +714,7 @@ Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
     var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
     if (objId > 0) {
-        var pickedObj = this.drawableObjects[objId - 1];
+        var pickedObj = this.drawableObjects.ready[objId - 1];
         result = pickedObj;
     }
     return result;
@@ -787,13 +800,7 @@ Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
  * @return
  */
 Renderer.prototype.dispose = function() {
-    for ( var i = 0, n = this.drawableObjects.length; i < n; i++) {
-        var shape = this.drawableObjects[i][1];
-        var shader = this.drawableObjects[i][2];
-        shape.dispose();
-        if (shader)
-            shader.dispose();
-    }
+    this.drawableObjects.clear();
 };
 
 /**

@@ -283,7 +283,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             return; //This mesh either has no GL data or was already deleted
         }
         this.dataChanged();
-        this.factory.renderer.removeDrawableObject(this.getMyDrawableObject());
+        this.factory.renderer.drawableObjects.remove(this.getMyDrawableObject());
         this.getMyDrawableObject = noDrawableObject;
         if (this.computeRequest)
             this.computeRequest.clear();

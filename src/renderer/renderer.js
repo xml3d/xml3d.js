@@ -29,6 +29,16 @@
                 this.queue.push(obj);
             }
         };
+        this.remove = function(obj) {
+            var index = this.queue.indexOf(obj);
+            if (index != -1) {
+                this.queue.splice(index, 1);
+            }
+            var index = this.ready.indexOf(obj);
+            if (index != -1) {
+                this.ready.splice(index, 1);
+            }
+        };
         this.consolidate = function() {
             this.queue.slice().forEach(function(obj) {
                 if (obj.can('updateMaterial'))
@@ -157,8 +167,8 @@ RenderObject.prototype = {
     onmeshChanged : function() {
         console.log("Mesh changed");
     },
-    ondispose : function() {
-        console.log("Dispose");
+    onenterDispose : function() {
+        this.handler.remove(this);
     }
 };
 

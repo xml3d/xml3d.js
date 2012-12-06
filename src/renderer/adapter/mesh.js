@@ -251,7 +251,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      *
      */
     p.destroy = function() {
-        // TODO
+        this.renderObject.dispose();
         if (this.computeRequest)
             this.computeRequest.clear();
         if (this.bboxComputeRequest)

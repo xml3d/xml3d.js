@@ -126,6 +126,9 @@
                     }
                     tick();
                 },
+                ended : function(event, video) {
+                    XML3D.util.dispatchCustomEvent(that.node, 'ended', true, true, null);
+                },
                 load : function(event, video) {
                     XML3D.util.dispatchEvent(that.node, 'load');
                 },

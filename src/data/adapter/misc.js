@@ -115,19 +115,18 @@
         var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
         var oncanplaythrough = function(event, video) {
             video.play();
-            that.interval = window.setInterval(function() {
+            function tick() {
+                window.requestAnimFrame(tick, XML3D.webgl.MAXFPS);
                 if (that.textureEntry) {
                     that.textureEntry.setImage(video);
                 }
-            }, 15);
+            }
+            tick();
         };
         var onerror = function (event, video) {
             XML3D.debug.logError("Could not load video URI="+video.src);
         };
         this.video = XML3D.base.resourceManager.getVideo(uri, /* autoplay= */true, oncanplaythrough, onerror);
-        this.video.addEventListener("ended", function() {
-            window.clearInterval(that.interval);
-        }, true);
     };
 
     /**

@@ -41,10 +41,8 @@
         };
         this.consolidate = function() {
             this.queue.slice().forEach(function(obj) {
-                if (obj.can('updateMaterial'))
-                    obj.updateMaterial();
-                if(obj.can('updateMesh'))
-                    obj.updateMesh();
+                while (obj.can('progress') && obj.progress() == StateMachine.Result.SUCCEEDED )
+                   true
             })
         }
         this.updateLights = function(lights, shaderManager) {
@@ -53,7 +51,7 @@
                 lights.structureChanged = false;
             } else {
                 this.queue.forEach(function(obj) {
-                    if (obj.current == "Transform")
+                    if (obj.current == "NoLights")
                         obj.lightsChanged(lights, shaderManager);
                 }, this);
             }
@@ -139,50 +137,60 @@ var RenderObject = function(opt) {
     this.transform = opt.transform || RenderObject.IDENTITY_MATRIX;
     this.visible = opt.visible !== undefined ? opt.visible : true;
     this.meshAdapter.renderObject = this;
+    this.create();
 };
 
 RenderObject.IDENTITY_MATRIX = mat4.identity(mat4.create());
 
 RenderObject.prototype = {
-    onupdateMesh : function() {
-        console.log("Update mesh");
-        this.meshAdapter.updateData();
-        this.handler.moveFromQueueToReady(this);
-    },
-    onenterMaterial : function() {
-        console.log("Enter Material");
-        // Trigger the creation of the mesh now
-        this.meshAdapter.createMesh();
-        return true;
-    },
     onmaterialChanged : function() {
         console.log("Material changed");
     },
     onafterlightsChanged: function(name, from, to, lights, shaderManager) {
-        console.log("Lights changed");
         this.handler.moveFromReadyToQueue(this);
-        var shaderHandle = this.meshAdapter.getShaderHandle();
-        var shaderAdapter = shaderHandle && shaderHandle.getAdapter();
-        this.shader = shaderManager.createShader(shaderAdapter, lights);
+        if (lights) {
+            var shaderHandle = this.meshAdapter.getShaderHandle();
+            var shaderAdapter = shaderHandle && shaderHandle.getAdapter();
+            this.shader = shaderManager.createShader(shaderAdapter, lights);
+        }
     },
     onmeshChanged : function() {
         console.log("Mesh changed");
     },
-    onenterDispose : function() {
+    onbeforeprogress : function(name, from, to) {
+        switch(to) {
+            case "Ready":
+                this.meshAdapter.updateData()
+                return this.mesh.valid;
+            case "NoMaterial":
+                return this.shader != null;
+        }
+    },
+    onenterNoMesh: function() {
+        // Trigger the creation of the mesh now
+        this.meshAdapter.createMesh();
+        return true;
+    },
+    onenterReady: function() {
+        this.handler.moveFromQueueToReady(this);
+    },
+    onenterDisposed : function() {
         this.handler.remove(this);
     }
+    ,onchangestate : function(name, from, to) {}
 };
 
 window.StateMachine.create({
     target: RenderObject.prototype,
-    initial: 'Transform',
     events: [
-        { name: 'updateMaterial',    from: 'Transform',   to: 'Material'   },
-        { name: 'updateMesh', from: 'Material', to: 'Ready' },
-        { name: 'lightsChanged', from: '*',  to: 'Transform' },
-        { name: 'materialChanged', from: ['Material', 'Ready'],  to: 'Transform' },
-        { name: 'meshChanged', from: 'Ready',  to: 'Material' },
-        { name: 'dispose', from: '*',  to: 'Dispose' }
+        { name: 'create',   from: 'none',       to: 'NoLights'   },
+        { name: 'progress', from: 'NoLights',   to: 'NoMaterial'   },
+        { name: 'progress', from: 'NoMaterial', to: 'NoMesh'   },
+        { name: 'progress', from: 'NoMesh',     to: 'Ready' },
+        { name: 'lightsChanged',   from: '*',  to: 'NoLights' },
+        { name: 'materialChanged', from: ['NoMesh', 'Ready'],  to: 'NoMaterial' },
+        { name: 'meshChanged',     from: 'Ready',  to: 'NoMesh' },
+        { name: 'dispose',         from: '*',  to: 'Disposed' }
     ]});
 
 /**

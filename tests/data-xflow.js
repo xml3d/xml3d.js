@@ -404,6 +404,12 @@ test("Prototypes - Nested #2", function() {
     this.executeTests(response);
 });
 
+test("Prototypes - Nested with Operators", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/prototypes/test_proto6.xml", handler);
+    this.executeTests(response);
+});
+
 test("Prototypes - Name Mapping", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/prototypes/test_proto3.xml", handler);
@@ -415,4 +421,6 @@ test("Prototypes - With Operators", function() {
     var response = this.loadTestXML("./xflow-xml/prototypes/test_proto4.xml", handler);
     this.executeTests(response);
 });
+
+
 

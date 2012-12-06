@@ -622,10 +622,14 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
-        
+
         var width = image.videoWidth || image.width;
         var height = image.videoHeight || image.height;
-        if (!this.isPowerOfTwo(width) || !this.isPowerOfTwo(height)) {
+        // We need to scale texture when one of the wrap modes is not CLAMP_TO_EDGE and
+        // one of the texture dimensions is not power of two.
+        // Otherwise rendered texture will be just black.
+        if ((opt.wrapS != gl.CLAMP_TO_EDGE || opt.wrapT != gl.CLAMP_TO_EDGE) &&
+            (!this.isPowerOfTwo(width) || !this.isPowerOfTwo(height))) {
             // Scale up the texture to the next highest power of two dimensions.
             // Reuse existing canvas if available.
             var canvas = info.canvas !== null ? info.canvas : document.createElement("canvas");

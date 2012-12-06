@@ -31,15 +31,20 @@
         };
         this.consolidate = function() {
             this.queue.slice().forEach(function(obj) {
-                if (obj.can('updateMesh'))
-                    obj.onupdateMesh();
+                if (obj.can('updateMaterial'))
+                    obj.updateMaterial();
+                if(obj.can('updateMesh'))
+                    obj.updateMesh();
             })
         }
         this.updateLights = function(lights, shaderManager) {
             if (lights.changed) {
                 this.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
             } else {
-                this.queue.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
+                this.queue.forEach(function(obj) {
+                    if (obj.current == "Transform")
+                        obj.lightsChanged(lights, shaderManager);
+                }, this);
             }
         }
         this.forEach = function(func, that) {
@@ -121,35 +126,33 @@ var RenderObject = function(opt) {
     this.shader = opt.shader || null;
     this.transform = opt.transform || RenderObject.IDENTITY_MATRIX;
     this.visible = opt.visible !== undefined ? opt.visible : true;
-    this.meshNode = opt.meshNode || null;
-    var me = this;
-
-    // A getter for this particular RenderObject. Rather than storing a reference to the RenderObject
-    // mesh adapters will store a reference to this function and call it when they need to apply a change.
-    // This is just an arbitrary separation to aid in development.
-    this.getObject = function() {
-        return me;
-    };
+    this.meshAdapter.renderObject = this;
 };
 
 RenderObject.IDENTITY_MATRIX = mat4.identity(mat4.create());
 
 RenderObject.prototype = {
     onupdateMesh : function() {
-        this.meshAdapter.createMesh();
+        console.log("Update mesh");
+        this.meshAdapter.updateData();
         this.handler.moveFromQueueToReady(this);
     },
-    onupdateMaterial : function() {
-        console.log("Update material");
+    onenterMaterial : function() {
+        console.log("Enter Material");
+        // Trigger the creation of the mesh now
+        this.meshAdapter.createMesh();
+        return true;
     },
     onmaterialChanged : function() {
         console.log("Material changed");
     },
-    onlightsChanged: function(name, from, to, lights, shaderManager) {
+    onafterlightsChanged: function(name, from, to, lights, shaderManager) {
+        console.log("Lights changed");
         this.handler.moveFromReadyToQueue(this);
         var shaderHandle = this.meshAdapter.getShaderHandle();
         var shaderAdapter = shaderHandle && shaderHandle.getAdapter();
         this.shader = shaderManager.createShader(shaderAdapter, lights);
+
     },
     onmeshChanged : function() {
         console.log("Mesh changed");
@@ -242,9 +245,6 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
             transform: parent.transform,
             pickable: parent.pickable
         });
-        adapter.registerCallback(newObject.getObject);
-		//meshAdapter.createMesh();
-
         renderObjectArray.push(newObject);
         break;
 

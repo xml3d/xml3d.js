@@ -26,10 +26,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.processListeners();
         this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.parentVisible = true;
-        this.getRenderObject = NORENDEROBJECT;
 
         this.computeRequest = null;
         this.bboxComputeRequest = null;
+        this.renderObject = null;
     };
 
     XML3D.createClass(MeshRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -38,8 +38,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     p.applyTransformMatrix = function(m) {
 
-        if (this.getRenderObject().transform)
-            mat4.multiply(m, this.getRenderObject().transform);
+        if (this.renderObject.transform)
+            mat4.multiply(m, this.renderObject.transform);
 
         return m;
     };
@@ -60,14 +60,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 this.node.addEventListener(eventType,  new Function("evt", att.value), false);
             }
         }
-    };
-
-    /**
-     * @param {Function} callback
-     */
-    p.registerCallback = function(callback) {
-        if (callback instanceof Function)
-            this.getRenderObject = callback;
     };
 
     /**
@@ -95,7 +87,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         switch (target) {
             case "parenttransform":
-                this.getRenderObject().transform = evt.newValue;
+                this.renderObject.transform = evt.newValue;
                 break;
 
             case "parentshader":
@@ -105,11 +97,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 break;
 
             case "parentvisible":
-                this.getRenderObject().visible = evt.newValue && this.node.visible;
+                this.renderObject.visible = evt.newValue && this.node.visible;
                 break;
 
             case "visible":
-                this.getRenderObject().visible = (evt.wrapped.newValue == "true") && this.node.parentNode.visible;
+                this.renderObject.visible = (evt.wrapped.newValue == "true") && this.node.parentNode.visible;
                 break;
 
             case "src":
@@ -118,7 +110,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
             case "type":
                 var newGLType = this.getGLTypeFromString(evt.wrapped.newValue);
-                this.getRenderObject().mesh.glType = newGLType;
+                this.renderObject.mesh.glType = newGLType;
                 break;
 
             default:
@@ -141,7 +133,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.updateShader = function(adapter){
         var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
             this.factory.renderer.lights);
-        this.getRenderObject().shader = shaderName;
+        this.renderObject.shader = shaderName;
         this.factory.renderer.requestRedraw("Shader changed.", false);
     }
 
@@ -167,12 +159,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var that = this;
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes,
             function(request, changeType) {
-                that.dataChanged(request, changeType);
+                if(this.renderObject && this.renderObject.can("meshChanged"))
+                    this.renderObject.meshChanged();
         });
         this.bboxComputeRequest = this.dataAdapter.getComputeRequest(bboxAttributes);
-
-        this.updateData();
-
         this.bbox = this.calcBoundingBox();
     };
 
@@ -192,32 +182,15 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     }
 
     /**
-     * @param {Xflow.data.Request} request
-     * @param {Xflow.RESULT_STATE} changeType
-     */
-    p.dataChanged = function(request, changeType) {
-        var obj = this.getRenderObject();
-        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
-        if (obj.mesh.update === emptyFunction) {
-            var that = this;
-            obj.mesh.update = function() {
-                that.updateData.call(that, obj);
-                obj.mesh.update = emptyFunction;
-            };
-            this.factory.renderer.requestRedraw("Mesh data changed.");
-        };
-    };
-
-    /**
      * @param {Renderer.drawableObject} obj
      */
-    p.updateData = function(request, changeType) {
+    p.updateData = function() {
         var gl = this.factory.renderer.gl;
-        var obj = this.getRenderObject();
+        var obj = this.renderObject;
         var calculateBBox = false;
-        var meshInfo = obj.mesh || createMeshInfo(this.node.type);
-
         var dataResult =  this.computeRequest.getResult();
+
+        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
 
         if (!(dataResult.getOutputData("position") && dataResult.getOutputData("position").getValue())) {
             XML3D.debug.logInfo("Mesh " + this.node.id + " has no data for required attribute 'position'.");
@@ -253,14 +226,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                  break;
             }
 
-            meshInfo.vbos[attr] = [];
-            meshInfo.vbos[attr][0] = buffer;
+            obj.mesh.vbos[attr] = [];
+            obj.mesh.vbos[attr][0] = buffer;
 
             //TODO: must set isIndexed if indices are removed
             if (attr == "position")
                 calculateBBox = true;
             if (attr == "index")
-                meshInfo.isIndexed = true;
+                obj.mesh.isIndexed = true;
 
             delete entry.userData.webglDataChanged;
         }
@@ -268,23 +241,17 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         //Calculate a bounding box for the mesh
         if (calculateBBox) {
             this.bbox = this.calcBoundingBox();
-            meshInfo.bbox.set(this.bbox);
+            obj.mesh.bbox.set(this.bbox);
         }
 
-        meshInfo.valid = true;
-        obj.mesh = meshInfo;
+        obj.mesh.valid = true;
     };
 
     /**
      *
      */
     p.destroy = function() {
-        if (this.getRenderObject === NORENDEROBJECT) {
-            return; //This mesh either has no GL data or was already deleted
-        }
-        this.dataChanged();
-        this.factory.renderer.renderObjects.remove(this.getRenderObject());
-        this.getRenderObject = NORENDEROBJECT;
+        // TODO
         if (this.computeRequest)
             this.computeRequest.clear();
         if (this.bboxComputeRequest)
@@ -303,13 +270,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @return {XML3DMatrix}
      */
     p.getWorldMatrix = function() {
-
         var m = new window.XML3DMatrix();
-
-        var obj = this.getRenderObject();
-        if(obj)
-            m._data.set(obj.transform);
-
+        m._data.set(this.renderObject.transform);
         return m;
     };
 

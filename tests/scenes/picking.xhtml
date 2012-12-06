@@ -14,6 +14,7 @@
       <transform id="troot" rotation="0 1 0 1.57" />
       <transform id="t1" translation="-2 0 0" />
       <transform id="t2" translation="2 0 0" rotation="1 0 0 0.7" />
+      <transform id="tview" translation="5 0 0" />
       
       <data id="mySimpleMesh" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
@@ -37,7 +38,9 @@
       </data>
     </defs>
    
-    <view id="default_view" position="10 0 0" orientation="0 1 0 1.57" />
+    <group transform="#tview">
+      <view id="default_view" position="5 0 0" orientation="0 1 0 1.57" />
+    </group>
     
     <group transform="#troot">
       <group transform="#t1">

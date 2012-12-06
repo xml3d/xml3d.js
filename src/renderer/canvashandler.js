@@ -260,8 +260,9 @@ XML3D.webgl.MAXFPS = 30;
 
         // calculate ray
         var worldToViewMat = this.renderer.currentView.getViewMatrix().inverse();
+        var viewPos = new window.XML3DVec3(worldToViewMat.m41, worldToViewMat.m42, worldToViewMat.m43);
         
-        ray.origin.set(worldToViewMat.translation());
+        ray.origin.set(viewPos);
         ray.direction.set(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
         ray.direction.set(ray.direction.normalize());
 

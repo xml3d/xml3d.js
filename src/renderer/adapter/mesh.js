@@ -171,7 +171,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         });
         this.bboxComputeRequest = this.dataAdapter.getComputeRequest(bboxAttributes);
 
-        this.dataChanged();
+        this.updateData();
 
         this.bbox = this.calcBoundingBox();
     };

@@ -21,12 +21,18 @@
                 this.queue.splice(index, 1);
                 this.ready.push(obj);
             }
-
+        };
+        this.moveFromReadyToQueue = function(obj) {
+        	var index = this.ready.indexOf(obj);
+            if (index != -1) {
+                this.ready.splice(index, 1);
+                this.queue.push(obj);
+            }
         };
         this.consolidate = function() {
             this.queue.slice().forEach(function(obj) {
-                if (obj.can('objectReady'))
-                    obj.objectReady();
+                if (obj.can('updateMesh'))
+                    obj.onupdateMesh();
             })
         }
         this.updateLights = function(lights, shaderManager) {
@@ -124,29 +130,45 @@ var RenderObject = function(opt) {
     this.getObject = function() {
         return me;
     };
-    this.created();
 };
 
 RenderObject.IDENTITY_MATRIX = mat4.identity(mat4.create());
 
 RenderObject.prototype = {
-    //oncreated: function() { console.log("Object created", this, arguments) },
+    onupdateMesh : function() {
+        this.meshAdapter.createMesh();
+        this.handler.moveFromQueueToReady(this);
+    },
+    onupdateMaterial : function() {
+        console.log("Update material");
+    },
+    onmaterialChanged : function() {
+        console.log("Material changed");
+    },
     onlightsChanged: function(name, from, to, lights, shaderManager) {
+        this.handler.moveFromReadyToQueue(this);
         var shaderHandle = this.meshAdapter.getShaderHandle();
         var shaderAdapter = shaderHandle && shaderHandle.getAdapter();
         this.shader = shaderManager.createShader(shaderAdapter, lights);
     },
-    onrenderReady : function() {
-        this.handler.moveFromQueueToReady(this);
+    onmeshChanged : function() {
+        console.log("Mesh changed");
+    },
+    ondispose : function() {
+        console.log("Dispose");
     }
 };
 
 window.StateMachine.create({
     target: RenderObject.prototype,
+    initial: 'Transform',
     events: [
-        { name: 'created',    from: 'none',   to: 'transformReady'  },
-        { name: 'lightsChanged', from: '*',  to: 'materialReady' },
-        { name: 'objectReady',    from: 'materialReady',   to: 'renderReady'   }
+        { name: 'updateMaterial',    from: 'Transform',   to: 'Material'   },
+        { name: 'updateMesh', from: 'Material', to: 'Ready' },
+        { name: 'lightsChanged', from: '*',  to: 'Transform' },
+        { name: 'materialChanged', from: ['Material', 'Ready'],  to: 'Transform' },
+        { name: 'meshChanged', from: 'Ready',  to: 'Material' },
+        { name: 'dispose', from: '*',  to: 'Dispose' }
     ]});
 
 /**
@@ -197,9 +219,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         if (shaderHandle)
             downstream.shader = shaderHandle;
 
-        //console.log("In:", downstreamTransform);
         downstream.transform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
-        //console.log("Out:", downstreamTransform);
         break;
 
     case "mesh":
@@ -223,7 +243,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
             pickable: parent.pickable
         });
         adapter.registerCallback(newObject.getObject);
-		meshAdapter.createMesh();
+		//meshAdapter.createMesh();
 
         renderObjectArray.push(newObject);
         break;
@@ -232,6 +252,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         adapter.transform = mat4.create(parent.transform);
         adapter.visible = parent.visible && currentNode.visible;
 		adapter.addLight(this.lights);
+
         break;
 
     case "view":
@@ -332,7 +353,6 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     //Build any new objects and add them to the scene
     var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
     this.recursiveBuildScene(evt.wrapped.target, this.renderObjects.queue, state);
-
     this.requestRedraw("A node was added.");
 };
 
@@ -343,7 +363,6 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
         adapter.destroy();
 
     this.requestRedraw("A node was removed.");
-
 };
 
 Renderer.prototype.prepareRendering = function() {

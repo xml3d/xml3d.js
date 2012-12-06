@@ -113,20 +113,28 @@
     VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
         var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
-        var oncanplaythrough = function(event, video) {
-            video.play();
-            function tick() {
-                window.requestAnimFrame(tick, XML3D.webgl.MAXFPS);
-                if (that.textureEntry) {
-                    that.textureEntry.setImage(video);
+        this.video = XML3D.base.resourceManager.getVideo(uri, /* autoplay= */true,
+            {
+                canplaythrough : function(event, video) {
+                    XML3D.util.dispatchEvent(that.node, 'canplaythrough');
+                    video.play();
+                    function tick() {
+                        window.requestAnimFrame(tick, XML3D.webgl.MAXFPS);
+                        if (that.textureEntry) {
+                            that.textureEntry.setImage(video);
+                        }
+                    }
+                    tick();
+                },
+                load : function(event, video) {
+                    XML3D.util.dispatchEvent(that.node, 'load');
+                },
+                error : function(event, video) {
+                    XML3D.util.dispatchEvent(that.node, 'error');
+                    XML3D.debug.logError("Could not load video URI="+video.src);
                 }
             }
-            tick();
-        };
-        var onerror = function (event, video) {
-            XML3D.debug.logError("Could not load video URI="+video.src);
-        };
-        this.video = XML3D.base.resourceManager.getVideo(uri, /* autoplay= */true, oncanplaythrough, onerror);
+        );
     };
 
     /**

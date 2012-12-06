@@ -198,4 +198,34 @@ XML3D.base.NodeAdapterFactory.prototype.getAdapter = function(node) {
     return adapter;
 };
 
+/**
+* This function sends single or multiple adapter functions by calling functions
+* specified in funcs parameter for each adapter associated with the node.
+*
+* funcs parameter is used as a dictionary where each key is used as name of a
+* adapter function to call, and corresponding value is a list of arguments
+* (i.e. must be an array). For example sendAdapterEvent(node, {method : [1,2,3]})
+* will call function 'method' with arguments 1,2,3 for each adapter of the node.
+*
+* @param {Object} node
+* @param {Object} funcs
+* @return {Array} array of all returned values
+*/
+XML3D.base.callAdapterFunc = function(node, funcs) {
+    result = [];
+    if (!node || node._configured === undefined)
+            return result;
+    var adapters = node._configured.adapters;
+    for (var adapter in adapters) {
+        for (var func in funcs) {
+            var adapterObject = adapters[adapter];
+            var eventHandler = adapterObject[func];
+            if (eventHandler) {
+                result.push(eventHandler.apply(adapterObject, funcs[func]));
+            }
+        }
+    }
+    return result;
+};
+
 }());

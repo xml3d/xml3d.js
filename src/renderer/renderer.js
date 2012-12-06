@@ -673,7 +673,7 @@ Renderer.prototype.renderPickedNormals = function(pickedObj) {
     xform.model = transform;
     xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
-    var normalMatrix = mat4.toInverseMat3(xform.modelView);
+    var normalMatrix = mat4.toInverseMat3(transform);
 
     var parameters = {
         modelViewMatrix : transform,

@@ -116,7 +116,7 @@
         this.video = XML3D.base.resourceManager.getVideo(uri, /* autoplay= */true,
             {
                 canplaythrough : function(event, video) {
-                    XML3D.util.dispatchEvent(that.node, 'canplaythrough');
+                    XML3D.util.dispatchCustomEvent(that.node, 'canplaythrough', true, true, null);
                     video.play();
                     function tick() {
                         window.requestAnimFrame(tick, XML3D.webgl.MAXFPS);
@@ -130,7 +130,7 @@
                     XML3D.util.dispatchEvent(that.node, 'load');
                 },
                 error : function(event, video) {
-                    XML3D.util.dispatchEvent(that.node, 'error');
+                    XML3D.util.dispatchCustomEvent(that.node, 'error', true, true, null);
                     XML3D.debug.logError("Could not load video URI="+video.src);
                 }
             }

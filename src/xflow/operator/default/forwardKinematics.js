@@ -20,18 +20,16 @@ Xflow.registerOperator("forwardKinematics", {
                     //This bone has a parent bone
                     if(!computed[p]){
                         //The parent bone's transformation matrix hasn't been computed yet
-                        while(parent[p] >= 0 && !computed[parent[p]]) {
-                            //The current bone has a parent and its transform hasn't been computed yet
-                            p = parent[p];
+                        while(parent[p] >= 0 && !computed[parent[p]]) p = parent[p];
 
-                            if(parent[p] >= 0)
-                                mat4.multiplyOffset(result, p*16, xform, p*16, result, parent[p]*16);
-                            else
-                                for(var j = 0; j < 16; j++) {
-                                    result[p*16+j] = xform[p*16+j];
-                                }
-                            computed[p] = true;
-                        }
+                        if(parent[p] >= 0)
+                            mat4.multiplyOffset(result, p*16, xform, p*16, result, parent[p]*16);
+                        else
+                            for(var j = 0; j < 16; j++) {
+                                result[p*16+j] = xform[p*16+j];
+                            }
+                        computed[p] = true;
+                        continue;
                     }
                     else {
                         mat4.multiplyOffset(result, i*16, xform, i*16, result,  p*16);

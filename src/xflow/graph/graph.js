@@ -330,15 +330,22 @@ DataNode.prototype.setFilter = function(filterString){
     filterString = filterString || "";
     var newType = Xflow.DATA_FILTER_TYPE.RENAME;
     var newMapping = null;
-    var result = filterString.trim().match(filterParser);
-    if(result){
-        var type = result[1].trim();
-        switch(type){
-            case "keep": newType = Xflow.DATA_FILTER_TYPE.KEEP; break;
-            case "remove": newType = Xflow.DATA_FILTER_TYPE.REMOVE; break;
-            case "rename": newType = Xflow.DATA_FILTER_TYPE.RENAME; break;
+    if(filterString){
+        var result = filterString.trim().match(filterParser);
+        if(result){
+            var type = result[1].trim();
+            switch(type){
+                case "keep": newType = Xflow.DATA_FILTER_TYPE.KEEP; break;
+                case "remove": newType = Xflow.DATA_FILTER_TYPE.REMOVE; break;
+                case "rename": newType = Xflow.DATA_FILTER_TYPE.RENAME; break;
+                default:
+                    XML3D.debug.logError("Unknown filter type:" + type);
+            }
+            newMapping = Xflow.Mapping.parse(result[2], this);
         }
-        newMapping = Xflow.Mapping.parse(result[2], this);
+        else{
+            XML3D.debug.logError("Could not parse filter '" + filterString + "'");
+        }
     }
     if(!newMapping){
         newMapping = new Xflow.OrderMapping(this);

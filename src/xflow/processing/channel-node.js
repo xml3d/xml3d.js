@@ -188,12 +188,12 @@
     function setFinalOutputProtoNames(channelNode){
         var dataNode = channelNode.owner;
         dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, channelNode.protoInputChannels,
-            null, dataNode._filterType, setChannelMapProtoName);
+            null, null, dataNode._filterType, setChannelMapProtoName);
 
         if(dataNode._protoNode){
             var protoOutput = dataNode._protoNode._channelNode.finalOutputChannels;
             dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, protoOutput,
-                channelNode.protoNames, dataNode._filterType, setChannelMapProtoProtoName);
+                channelNode.protoNames, null, dataNode._filterType, setChannelMapProtoProtoName);
         }
     }
 
@@ -319,19 +319,19 @@
     function setSubNodeFinalOutputChannels(subNode, channelNode, substitution){
         var dataNode = channelNode.owner;
         dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, channelNode.protoInputChannels,
-            substitution, dataNode._filterType, setChannelMapChannel);
+            substitution, substitution, dataNode._filterType, setChannelMapChannel);
 
         if(subNode.protoSubNode){
             var protoChannelNode = subNode.protoSubNode.owner;
             var protoOutput = protoChannelNode.finalOutputChannels;
             dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, protoOutput,
-                subNode.protoSubNode.substitution, dataNode._filterType, setChannelMapChannel);
+                substitution, subNode.protoSubNode.substitution, dataNode._filterType, setChannelMapChannel);
         }
     }
 
-    function setChannelMapChannel(destMap, destName, srcMap, srcName, substitution){
-        var channel = srcMap.getChannel(srcName, substitution);
-        destMap.addChannel(destName, channel, substitution);
+    function setChannelMapChannel(destMap, destName, srcMap, srcName, destSub, srcSub){
+        var channel = srcMap.getChannel(srcName, srcSub);
+        destMap.addChannel(destName, channel, destSub);
     }
 
     function markChannelsAsDone(channelNode, substitution){

@@ -62,6 +62,8 @@
         Array.forEach(this.textures, function(t) {
             t.adapter.destroy();
         });
+        if (this.computeRequest)
+            this.computeRequest.clear();
     };
 
     // Export to XML3D.webgl namespace

@@ -78,16 +78,18 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             if(evt.key == "shader"){
                 this.updateShader(evt.adapter);
                 if(evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
-                    XML3D.debug.logError("Missing shader with id '" + evt.url + "', falling back to default shader.");
+                    XML3D.debug.logWarning("Missing shader with id '" + evt.url + "', falling back to default shader.");
                 }
             }
             return;
-        }
-        if (evt.type == XML3D.events.NODE_INSERTED)
+        } else if (evt.type == XML3D.events.NODE_INSERTED)
         // Node insertion is handled by the CanvasRenderAdapter
             return;
         else if (evt.type == XML3D.events.NODE_REMOVED)
             return this.factory.renderer.sceneTreeRemoval(evt);
+        else if (evt.type == XML3D.events.THIS_REMOVED) {
+            this.clearAdapterHandles();
+        }
 
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 
@@ -283,6 +285,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.dataChanged();
         this.factory.renderer.removeDrawableObject(this.getMyDrawableObject());
         this.getMyDrawableObject = noDrawableObject;
+        if (this.computeRequest)
+            this.computeRequest.clear();
+        if (this.bboxComputeRequest)
+            this.bboxComputeRequest.clear();
         this.clearAdapterHandles();
     };
 
@@ -314,7 +320,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.calcBoundingBox = function() {
 
         var bbox = new window.XML3DBox();
-        
+
         // try to compute bbox using the boundingbox property of xflow
         var bboxResult = this.bboxComputeRequest.getResult();
         var bboxOutData = bboxResult.getOutputData("boundingbox");
@@ -329,10 +335,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         // compute bounding box from positions and indices, if present
         var dataResult = this.computeRequest.getResult();
-        var posData = dataResult.getOutputData("position"); 
+        var posData = dataResult.getOutputData("position");
         if(!posData)
-            return bbox; 
-        
+            return bbox;
+
         var positions = posData.getValue();
 
         var idxOutData = dataResult.getOutputData("index");

@@ -48,8 +48,9 @@
             })
         }
         this.updateLights = function(lights, shaderManager) {
-            if (lights.changed) {
+            if (lights.structureChanged) {
                 this.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
+                lights.structureChanged = false;
             } else {
                 this.queue.forEach(function(obj) {
                     if (obj.current == "Transform")
@@ -58,8 +59,8 @@
             }
         }
         this.forEach = function(func, that) {
-            this.queue.forEach(func, that);
-            this.ready.forEach(func, that);
+            this.queue.slice().forEach(func, that);
+            this.ready.slice().forEach(func, that);
         }
         this.clear();
     };
@@ -106,6 +107,7 @@ Renderer.prototype.initialize = function() {
 Renderer.prototype.initializeScenegraph = function() {
     this.lights = {
         changed : true,
+        structureChanged : true,
         point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
         directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
             spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
@@ -162,7 +164,6 @@ RenderObject.prototype = {
         var shaderHandle = this.meshAdapter.getShaderHandle();
         var shaderAdapter = shaderHandle && shaderHandle.getAdapter();
         this.shader = shaderManager.createShader(shaderAdapter, lights);
-
     },
     onmeshChanged : function() {
         console.log("Mesh changed");

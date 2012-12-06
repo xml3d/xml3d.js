@@ -140,7 +140,7 @@
 
         var program = this.shaders[shaderId];
 
-        if (program)
+        if (program && !lights.structureChanged)
             return shaderId;
 
         var scriptURI = new XML3D.URI(shaderNode.script);

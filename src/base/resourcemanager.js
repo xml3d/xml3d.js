@@ -113,7 +113,7 @@
                 if (xmlHttp.readyState == 4) {
                     if(xmlHttp.status == 200){
                         XML3D.debug.logDebug("Loaded: " + url);
-                        XML3D.xmlHttpCallback && XML3D.xmlHttpCallback();
+                        XML3D.xmlHttpCallback && XML3D.xmlHttpCallback(xmlHttp);
                         processResponse(xmlHttp);
                     }
                     else

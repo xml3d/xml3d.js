@@ -30,9 +30,45 @@
 			    100 0 0 1
 			</float4x4>    	
     	</data>
+
+
+         <data id="inputData2" >
+    		<int name="parent" >3 4 1 1 -1</int>
+			<float4x4 name="xform" >
+                1 0 0 0
+			    0 1 0 0
+			    0 0 1 0
+			    100 0 0 1
+
+			    1 0 0 0
+			    0 1 0 0
+			    0 0 1 0
+			    0 2 0 1
+
+				0 1 0 0
+			    -1 0 0 0
+			    0 0 1 0
+			    0 0 0 1
+
+				0 -1 0 0
+			    1 0 0 0
+			    0 0 1 0
+			    0 0 0 1
+
+                1 0 0 0
+			    0 1 0 0
+			    0 0 1 0
+			    5 5 5 1
+
+			</float4x4>
+    	</data>
         
 		<data id="flattened1" compute="result = xflow.forwardKinematics(parent, xform)" >
 			<data src="#inputData" />
+		</data>
+
+        <data id="flattened2" compute="result = xflow.forwardKinematics(parent, xform)" >
+			<data src="#inputData2" />
 		</data>
 		
 		<data id="neutralized" compute="result = xflow.mul(xform2, xform1)" >
@@ -165,5 +201,37 @@
                 0 10 7 1         
             </MatchData>
         </Check>
+
+
+        <Check title="Check with unoptimized order" data="#flattened2" >
+            <MatchData name="result" type="float4x4" >
+				0 -1 0 0
+			    1 0 0 0
+			    0 0 1 0
+			    5 -93 5 1
+
+			    1 0 0 0
+			    0 1 0 0
+			    0 0 1 0
+			    5 7 5 1
+
+				0 1 0 0
+			    -1 0 0 0
+			    0 0 1 0
+			    5 7 5 1
+
+				0 -1 0 0
+			    1 0 0 0
+			    0 0 1 0
+			    5 7 5 1
+
+                1 0 0 0
+			    0 1 0 0
+			    0 0 1 0
+			    5 5 5 1
+            </MatchData>
+        </Check>
+
+
     </TestProcess>    
 </XflowTest>

@@ -47,16 +47,16 @@ mat4.makeTransformXflow = function(translation,rotation,scale,center,scaleOrient
     if(translation) mat4.translate(dest, translation);
     if(center) mat4.translate(dest, center);
     if(rotation){
-        quat4.toMat4([rotation[1],rotation[2],rotation[3],-rotation[0]], TMP_MATRIX);
+        quat4.toMat4([rotation[0],rotation[1],rotation[2],-rotation[3]], TMP_MATRIX);
         mat4.multiply(dest, TMP_MATRIX);
     }
     if(scaleOrientation){
-        quat4.toMat4([scaleOrientation[1],scaleOrientation[2],scaleOrientation[3],-scaleOrientation[0]], TMP_MATRIX);
+        quat4.toMat4([scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],-scaleOrientation[3]], TMP_MATRIX);
         mat4.multiply(dest, TMP_MATRIX);
     }
     if(scale) mat4.scale(dest, scale);
     if(scaleOrientation){
-        quat4.toMat4([scaleOrientation[1],scaleOrientation[2],scaleOrientation[3],scaleOrientation[0]], TMP_MATRIX);
+        quat4.toMat4([scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],scaleOrientation[3]], TMP_MATRIX);
         mat4.multiply(dest, TMP_MATRIX);
     }
     if(center){
@@ -70,16 +70,16 @@ mat4.makeTransformInvXflow = function(translation,rotation,scale,center,scaleOri
         mat4.translate(dest, center);
     }
     if(scaleOrientation){
-        quat4.toMat4([scaleOrientation[1],scaleOrientation[2],scaleOrientation[3],-scaleOrientation[0]], TMP_MATRIX);
+        quat4.toMat4([scaleOrientation[0],scaleOrientation[1],scaleOrientation[2],-scaleOrientation[3]], TMP_MATRIX);
         mat4.multiply(dest, TMP_MATRIX);
     }
     if(scale) mat4.scale(dest, vec3.reciprocal(scale,TMP_VEC) );
     if(scaleOrientation){
-        quat4.toMat4([scaleOrientation[1],scaleOrientation[2],scaleOrientation[3],scaleOrientation[0]], TMP_MATRIX);
+        quat4.toMat4([scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],scaleOrientation[3]], TMP_MATRIX);
         mat4.multiply(dest, TMP_MATRIX);
     }
     if(rotation){
-        quat4.toMat4([rotation[1],rotation[2],rotation[3],rotation[0]], TMP_MATRIX);
+        quat4.toMat4([rotation[0],rotation[1],rotation[2],rotation[3]], TMP_MATRIX);
         mat4.multiply(dest, TMP_MATRIX);
     }
     if(center) mat4.translate(dest, vec3.negate(center, TMP_VEC) );

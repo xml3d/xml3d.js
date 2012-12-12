@@ -212,7 +212,7 @@ XML3D.base.NodeAdapterFactory.prototype.getAdapter = function(node) {
 * @return {Array} array of all returned values
 */
 XML3D.base.callAdapterFunc = function(node, funcs) {
-    result = [];
+    var result = [];
     if (!node || node._configured === undefined)
             return result;
     var adapters = node._configured.adapters;

@@ -4,7 +4,7 @@ QUnit.extend( QUnit, {
         QUnit.push(passes, actual, expected, message);
     },
     imageClose: function(actual, expected, maxDifference, message) {
-        var passes = actual === expected || imagediff.equal(actual, expected);
+        var passes = actual === expected || imagediff.equal(actual, expected, maxDifference);
         QUnit.push(passes, actual, expected, message);
     }
 });

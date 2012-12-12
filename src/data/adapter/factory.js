@@ -78,6 +78,8 @@
     reg['texture']     = data.TextureDataAdapter;
     reg['data']        = data.DataAdapter;
     reg['proto']       = data.DataAdapter;
+    reg['iframe']      = data.IFrameDataAdapter;
+    reg['video']       = data.VideoDataAdapter;
 
    /**
      * Creates a DataAdapter associated with the given node.

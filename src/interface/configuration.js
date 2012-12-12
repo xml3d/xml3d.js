@@ -392,6 +392,9 @@ XML3D.classInfo['video'] = {
     id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for video
+    oncanplaythrough : {a: XML3D.EventAttributeHandler},
+    onended : {a: XML3D.EventAttributeHandler},
+    onerror : {a: XML3D.EventAttributeHandler},
     src : {a: XML3D.StringAttributeHandler},
     _term: undefined
 };

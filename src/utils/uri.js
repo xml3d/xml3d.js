@@ -5,28 +5,50 @@
  */
 XML3D.URI = function(str) {
     str = str || "";
-    // Based on the regex in RFC2396 Appendix B.
-    var parser = /^(?:([^:\/?\#]+):)?(?:\/\/([^\/?\#]*))?([^?\#]*)(?:\?([^\#]*))?(?:\#(.*))?/;
-    var result = str.match(parser);
-    /**  @type {boolean} */
-    this.valid = result != null;
-    /**  @type {?string} */
-    this.scheme = result[1] || null;
-    /**  @type {?string} */
-    this.authority = result[2] || null;
-    /**  @type {?string} */
-    this.path = result[3] || null;
-    /**  @type {?string} */
-    this.query = result[4] || null;
-    /**  @type {?string} */
-    this.fragment = result[5] || null;
+    if (str.indexOf("blob:") == 0) {
+        // Based on http://www.w3.org/TR/FileAPI/#url
+        var parser = /^(?:([^:\/?\#]+):)?([^\#]*)(?:\#(.*))?/;
+        var result = str.match(parser);
+        /**  @type {boolean} */
+        this.valid = result != null;
+        /**  @type {?string} */
+        this.scheme = result[1] || null;
+        /**  @type {?string} */
+        this.authority = null;
+        /**  @type {?string} */
+        this.path = null;
+        /**  @type {?string} */
+        this.query = null;
+        /**  @type {?string} */
+        this.opaqueString = result[2] || null;
+        /**  @type {?string} */
+        this.fragment = result[3] || null;
+    } else {
+        // Based on the regex in RFC2396 Appendix B.
+        var parser = /^(?:([^:\/?\#]+):)?(?:\/\/([^\/?\#]*))?([^?\#]*)(?:\?([^\#]*))?(?:\#(.*))?/;
+        var result = str.match(parser);
+        /**  @type {boolean} */
+        this.valid = result != null;
+        /**  @type {?string} */
+        this.scheme = result[1] || null;
+        /**  @type {?string} */
+        this.authority = result[2] || null;
+        /**  @type {?string} */
+        this.path = result[3] || null;
+        /**  @type {?string} */
+        this.query = result[4] || null;
+        /**  @type {?string} */
+        this.opaqueString = null;
+        /**  @type {?string} */
+        this.fragment = result[5] || null;
+    }
 };
 
 /**
  * @return {boolean} true if URI is relative to current document
  */
 XML3D.URI.prototype.isLocal = function(){
-    return !this.authority && !this.path;
+    return this.scheme != "blob" && !this.authority && !this.path;
 }
 
 /**
@@ -35,7 +57,7 @@ XML3D.URI.prototype.isLocal = function(){
  * @returns {XML3D.URI}
  */
 XML3D.URI.prototype.getAbsoluteURI = function(docUri){
-    if(!this.valid || this.authority){
+    if (!this.valid || this.authority || this.scheme == "blob") {
         return this;
     }
 
@@ -61,6 +83,13 @@ XML3D.URI.prototype.getAbsoluteURI = function(docUri){
 // Restore the URI to it's stringy glory.
 XML3D.URI.prototype.toString = function() {
     var str = "";
+    if  (this.scheme == "blob") {
+        str = "blob:" + this.opaqueString;
+        if (this.fragment) {
+            str += "#" + this.fragment;
+        }
+        return str;
+    }
     if (this.scheme) {
         str += this.scheme + ":";
     }
@@ -82,6 +111,10 @@ XML3D.URI.prototype.toString = function() {
 // Restore the URI to it's stringy glory minus the fragment
 XML3D.URI.prototype.toStringWithoutFragment = function() {
     var str = "";
+    if  (this.scheme == "blob") {
+        str = "blob:" + this.opaqueString;
+        return str;
+    }
     if (this.scheme) {
         str += this.scheme + ":";
     }
@@ -115,7 +148,7 @@ XML3D.URIResolver.resolveLocal = function(uri, document) {
         uri = new XML3D.URI(uri);
     document = document || window.document;
 
-    if (uri.scheme == 'urn')
+    if (uri.scheme == 'urn' || uri.scheme == "blob")
     {
         return null;
     }

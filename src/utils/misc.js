@@ -54,6 +54,24 @@ window.requestAnimFrame = (function(){
             target.fireEvent('on' + eventType, evt);
         }
     };
+
+    /**
+     *
+     * Dispatch custom HTML event
+     *
+     * @param {Object} target element or document.
+     * @param {string} eventType custom event type.
+     * @param {boolean} canBubble Whether the event propagates upward. Sets the value for the bubbles property.
+     * @param {boolean} cancelable Whether the event is cancelable and so preventDefault can be called. Sets the value
+     *                  for the cancelable property.
+     * @param {Object} detail A user-defined object that can contain additional information about the event.
+     *                        This parameter can be of any type, or null. This value is returned in the detail property of the event.
+     */
+    u.dispatchCustomEvent = function(target, eventType, canBubble, cancelable, detail) {
+        var event = document.createEvent('CustomEvent');
+        event.initCustomEvent(eventType, canBubble, cancelable, detail);
+        target.dispatchEvent(event);
+    };
     
     u.getStyle = function(oElm, strCssRule) {
         var strValue = "";

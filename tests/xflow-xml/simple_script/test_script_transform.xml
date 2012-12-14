@@ -4,7 +4,7 @@
     	<data id="input" >
     	    <float3 name="translation" >0 0 0  1 2 3  -8 10 9</float3>
             <float3 name="scale" >1 1 1  0.5 1 2  -0.5 4 1.25</float3>
-            <float4 name="rotation" >1 0 0 0  0.707107 0 0 0.707107  0.707107 -0 -0 -0.707107</float4>
+            <float4 name="rotation" >0 0 0 1  0 0 0.707107 0.707107  -0 -0 -0.707107 0.707107</float4>
     	</data>
     
         
@@ -80,10 +80,10 @@
             </MatchData>
         </Check>
         <Modification title="Change transform input" >
-            <ChangeAttribute node="#transform" attrName="compute" 
-                newValue="result = xflow.createTransform({scale : scale})" />
-            <ChangeAttribute node="#transformInv" attrName="compute" 
-                newValue="result = xflow.createTransformInv({scale : scale})" />
+            <ChangeAttribute node="#transform" attrName="compute"
+                             newValue="result = xflow.createTransform({scale : scale})" />
+            <ChangeAttribute node="#transformInv" attrName="compute"
+                             newValue="result = xflow.createTransformInv({scale : scale})" />
         </Modification>
         
         <Check title="Check Transform #2" data="#transform" >
@@ -143,10 +143,10 @@
         
         
         <Modification title="Change transform input" >
-            <ChangeAttribute node="#transform" attrName="compute" 
-                newValue="result = xflow.createTransform({rotation : rotation})" />
-            <ChangeAttribute node="#transformInv" attrName="compute" 
-                newValue="result = xflow.createTransformInv({rotation : rotation})" />
+            <ChangeAttribute node="#transform" attrName="compute"
+                             newValue="result = xflow.createTransform({rotation : rotation})" />
+            <ChangeAttribute node="#transformInv" attrName="compute"
+                             newValue="result = xflow.createTransformInv({rotation : rotation})" />
         </Modification>
         
         
@@ -157,9 +157,9 @@
                         0 0 1 0
                         0 0 0 1
             
-    		    		1 0 0 0
+    		    	    0 1 0 0
+                        -1 0 0 0
                         0 0 1 0
-                        0 -1 0 0
                         0 0 0 1
             
                 		0 -1 0 0
@@ -206,10 +206,10 @@
         </Check>
         
         <Modification title="Change transform input" >
-            <ChangeAttribute node="#transform" attrName="compute" 
-                newValue="result = xflow.createTransform(translation, rotation, scale)" />
-            <ChangeAttribute node="#transformInv" attrName="compute" 
-                newValue="result = xflow.createTransformInv(translation, rotation, scale)" />
+            <ChangeAttribute node="#transform" attrName="compute"
+                             newValue="result = xflow.createTransform(translation, rotation, scale)" />
+            <ChangeAttribute node="#transformInv" attrName="compute"
+                             newValue="result = xflow.createTransformInv(translation, rotation, scale)" />
         </Modification>
         
         <Check title="Check Transform #4" data="#transform" >

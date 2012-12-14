@@ -169,13 +169,24 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.updatePickObjectByPoint = function(canvasX, canvasY) {
         if (this._pickingDisabled)
             return null;
+        
         if(this.needPickingDraw)
-            this.renderer.renderSceneToPickingBuffer();
+            this.renderer.renderSceneToPickingBuffer();   
+        
+        /** Temporary workaround: this function is called when drawable objects are not yet 
+         *  updated. Thus, the renderer.render() updates the objects after the picking buffer
+         *  has been updated. In that case, the picking buffer needs to be updated again. 
+         *  Thus, we only set needPickingDraw to false when we are sure that objects don't 
+         *  need any updates, i.e. when needDraw is false.
+         *  A better solution would be to separate drawable objects updating from rendering 
+         *  and to update the objects either during render() or renderSceneToPickingBuffer().
+         */
+        if(!this.needDraw)
+            this.needPickingDraw = false;
         
         var glY = this.canvasToGlY(canvasY);
         
         this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, glY);
-        this.needPickingDraw = false;
         
         return this.currentPickObj;
     };

@@ -204,7 +204,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 that.updateData.call(that, obj);
                 obj.mesh.update = emptyFunction;
             };
-            this.factory.renderer.requestRedraw("Mesh data changed.", false);
+            this.factory.renderer.requestRedraw("Mesh data changed.");
         };
     };
 

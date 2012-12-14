@@ -335,6 +335,9 @@ test("Pick pass flag", 7, function() {
     var x = this.doc.getElementById("xml3DElem");
     var h = getHandler(x);
     h.updatePickObjectByPoint(0,0);
+    /** This test fails due to a workaround in the CanvasHandler.updatePickObjectByPoint(). 
+     *  See comment in that function for more details. 
+     */
     ok(!h.needPickingDraw, "No picking needed after pick rendering");
     this.doc.getElementById("group2").setAttribute("shader","#flatblack");
     ok(!h.needPickingDraw, "Changing shaders does not require a picking pass");

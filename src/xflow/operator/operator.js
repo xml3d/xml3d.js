@@ -112,7 +112,7 @@ function parseFunction(func){
     return result;
 }
 
-var c_bracketPattern = /([^+\-*/\s\[]+)(\[)/;
+var c_bracketPattern = /([a-zA-Z_$][\w$]*)(\[)/;
 
 function replaceArrayAccess(code, args, operator, operatorData){
     var result = "";
@@ -159,8 +159,7 @@ function createOperatorInlineLoop(operator, operatorData){
     body = replaceArrayAccess(body, funcData.args, operator, operatorData);
     code += body + "\n  }\n}";
 
-    var inlineFunc = null;
-    eval("inlineFunc = " + code + ";");
+    var inlineFunc = eval("(" + code + ")");
     return inlineFunc;
 }
 

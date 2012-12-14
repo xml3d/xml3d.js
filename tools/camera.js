@@ -20,7 +20,7 @@
 /*************************************************************************/
 
 //Check, if basics have already been defined
-if(!XML3D)    
+if(!XML3D)
     XML3D = {};
 if(!XML3D.util)
     XML3D.util = {};
@@ -211,13 +211,13 @@ XML3D.Xml3dSceneController.prototype.__defineGetter__("height", function() { ret
 XML3D.Xml3dSceneController.prototype.getView = function() {
     //var activeView = null;
     var activeView = this.xml3d.activeView; //? this.xml3d.activeView : this.xml3d.getAttribute("activeView");
-    XML3D.debug.logWarning("Active View: " + activeView);
+    XML3D.debug.logInfo("Active View: " + activeView);
 
     if (typeof activeView=="string")
     {
         if (activeView.indexOf('#') == 0)
             activeView = activeView.replace('#', '');
-        XML3D.debug.logWarning("Trying to resolve view '" + activeView +"'");
+        XML3D.debug.logInfo("Trying to resolve view '" + activeView +"'");
         activeView = document.getElementById(activeView);
     }
 

@@ -90,7 +90,7 @@
                     return f;
                 if (!this.hasAttribute(id) || f === undefined)
                     return null;
-                return eval("c = function onclick(event){\n  " + this.getAttribute(id) + "\n}");
+                return eval("crx = function onclick(event){\n  " + this.getAttribute(id) + "\n}");
             },
             set : function(value) {
                 f = (typeof value == 'function') ? value : undefined;

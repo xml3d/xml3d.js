@@ -194,9 +194,10 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.updatePickObjectByPoint = function(canvasX, canvasY) {
         if (this._pickingDisabled)
             return null;
-        
-        if(this.needPickingDraw)
+        if(this.needPickingDraw) {
+            this.renderer.prepareRendering();
             this.renderer.renderSceneToPickingBuffer();   
+        }
         
         /** Temporary workaround: this function is called when drawable objects are not yet 
          *  updated. Thus, the renderer.render() updates the objects after the picking buffer

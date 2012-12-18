@@ -4,6 +4,7 @@
     var handler = {}, events = XML3D.events;
 
     function attrModified(e) {
+
         var eh = e.target._configured;
         var handler = eh && eh.handlers[e.attrName];
         if(!handler)
@@ -11,19 +12,19 @@
 
         var notified = false;
         if (handler.setFromAttribute) {
-            notified = handler.setFromAttribute(e.newValue);
+            notified = handler.setFromAttribute(e.newValue, e.prevValue);
         }
         if (!notified) {
-                var n = new events.NotificationWrapper(e);
-                n.type = events.VALUE_MODIFIED;
-                eh.notify(n);
+            var n = new events.NotificationWrapper(e);
+            n.type = events.VALUE_MODIFIED;
+            eh.notify(n);
         }
     };
 
     function nodeRemoved(e) {
         var parent = e.relatedNode,
-            removedChild = e.target,
-            parentHandler = parent._configured;
+        removedChild = e.target,
+        parentHandler = parent._configured;
 
         if(!parentHandler)
             return;
@@ -62,12 +63,15 @@
             removeRecursive(n,evt);
             n = n.nextElementSibling;
         }
+        // We call this here in addition to nodeRemovedFromDocument, since the later is not supported by Firefox
+        // TODO: Remove this function call once DOMNodeRemoveFromDocument is supported by all major browsers
+        XML3D.base.resourceManager.notifyNodeIdChange(element, element.id, null);
     }
 
     function nodeInserted(e) {
         var parent = e.relatedNode,
-            insertedChild = e.target,
-            parentHandler = parent._configured;
+        insertedChild = e.target,
+        parentHandler = parent._configured;
 
         if(!parentHandler || e.currentTarget === insertedChild)
             return;
@@ -80,10 +84,33 @@
         } else {
             XML3D.config.element(insertedChild);
             n.type = events.NODE_INSERTED;
+            addRecursive(insertedChild);
         }
         parentHandler.notify(n);
         // TODO: Quick fix, solve issue of self monitoring elements better
         e.stopPropagation();
+    }
+
+    // TODO: Remove this function once DOMNodeInsertedIntoDocument is supported by all major browsers
+    function addRecursive(element){
+        var n = element.firstElementChild;
+        while(n) {
+            addRecursive(n);
+            n = n.nextElementSibling;
+        }
+        // We call this here in addition to nodeInsertedIntoDocument, since the later is not supported by Firefox
+
+        XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.id);
+    }
+
+    function nodeInsertedIntoDocument(e){
+        var node = e.target;
+        XML3D.base.resourceManager.notifyNodeIdChange(node, null, node.id);
+    }
+
+    function nodeRemovedFromDocument(e){
+        var node = e.target;
+        XML3D.base.resourceManager.notifyNodeIdChange(node, node.id, null);
     }
 
     handler.ElementHandler = function(elem, monitor) {
@@ -95,7 +122,9 @@
             if(monitor) {
                 elem.addEventListener('DOMNodeRemoved', nodeRemoved, true);
                 elem.addEventListener('DOMNodeInserted', nodeInserted, true);
-                elem.addEventListener('DOMAttrModified', attrModified, false);
+                elem.addEventListener('DOMNodeInsertedIntoDocument', nodeInsertedIntoDocument, true);
+                elem.addEventListener('DOMNodeRemovedFromDocument', nodeRemovedFromDocument, true);
+                elem.addEventListener('DOMAttrModified', attrModified, true);
                 this.monitoring = true;
             }
         }
@@ -125,6 +154,7 @@
         return a;
     };
 
+
     handler.ElementHandler.prototype.registerMixed = function() {
         this.element.addEventListener('DOMCharacterDataModified', this, false);
     };
@@ -135,11 +165,11 @@
         var n = new events.NotificationWrapper(e);
 
         switch (e.type) {
-        case "DOMCharacterDataModified":
-            n.type = events.VALUE_MODIFIED;
-            this.handlers.value.resetValue();
-            this.notify(n);
-            break;
+            case "DOMCharacterDataModified":
+                n.type = events.VALUE_MODIFIED;
+                this.handlers.value.resetValue();
+                this.notify(n);
+                break;
         };
     };
 
@@ -153,28 +183,8 @@
             try {
                 adapters[a].notifyChanged(evt);
             } catch (e) {
-                XML3D.debug.logError(e);
+                XML3D.debug.logException(e);
             }
-        }
-    };
-
-    handler.ElementHandler.prototype.addOpposite =  function(evt) {
-        (this.opposites || (this.opposites = [])).push(evt);
-    };
-
-    handler.ElementHandler.prototype.removeOpposite =  function(evt) {
-        for(var o in this.opposites) {
-            var oi = this.opposites[o];
-            if(oi.relatedNode === evt.relatedNode) {
-                this.opposites.splice(o,1);
-                return;
-            }
-        }
-    };
-
-    handler.ElementHandler.prototype.notifyOpposite = function(evt) {
-        if(evt.value && evt.value._configured) {
-            evt.value._configured.addOpposite(evt);
         }
     };
 
@@ -183,15 +193,6 @@
      */
     handler.ElementHandler.prototype.remove = function(evt) {
         //console.log("Remove " + this);
-        if (this.opposites) {
-            for(var o in this.opposites) {
-                var oi = this.opposites[o];
-                if(oi.relatedNode._configured) {
-                    var r = new events.ReferenceNotification(oi.relatedNode, oi.attrName);
-                    oi.relatedNode._configured.notify(r);
-                }
-            }
-        }
         for(var h in this.handlers) {
             var handler = this.handlers[h];
             if(handler.remove)
@@ -200,20 +201,12 @@
 
     };
 
-    handler.ElementHandler.prototype.resolve = function(attrName) {
-        var uri = new XML3D.URI(this.element[attrName]);
-        if (uri.valid && uri.fragment) {
-            return XML3D.URIResolver.resolveLocal(uri);
-        }
-        return null;
-    };
-
     handler.ElementHandler.prototype.toString = function() {
         return "ElementHandler ("+this.element.nodeName + ", id: "+this.element.id+")";
     };
 
     var delegateProperties = ["clientHeight", "clientLeft", "clientTop", "clientWidth",
-                              "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth"];
+        "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth"];
     function delegateProp(name, elem, canvas) {
         var desc = {
             get : function() {

@@ -1,0 +1,48 @@
+<XflowTest>
+    <Input>
+        <data id="skinned2" 
+                compute="normal = xflow.skinDirection(normal, boneIndices, boneWeights, boneXform)" >
+            <data id="skinned"     
+                compute="position = xflow.skinPosition(position, boneIndices, boneWeights, boneXform)" >
+	            <int4 name="boneIndices" >0 0 0 0  1 0 0 0  0 1 0 0</int4>
+				<float4 name="boneWeights" >1.0 0 0 0  1.0 0 0 0  0.5 0.5 0 0</float4>
+				<float4x4 name="boneXform" >
+					1 0 0 0
+				    0 1 0 0 
+				    0 0 1 0
+				    0 0 0 1
+				
+				    0 1 0 0
+				    1 0 0 0 
+				    0 0 1 0
+				    0 0 0 1
+				</float4x4>			
+				<data id="morphed3" compute="position = xflow.morph(position, posAdd3, weight3)" >
+			        <data id="morphed2" compute="position = xflow.morph(position, posAdd2, weight2)" >
+			            <data id="morphed1" compute="position = xflow.morph(position, posAdd1, weight1)" >
+			                
+			                <float3 name="posAdd1" id="positionAdd_1">0 0 1  1 0 0</float3>    
+			                <float3 name="posAdd2" id="positionAdd_1">1 0 0  0 -1 0</float3>        			        
+			                <float3 name="posAdd3" id="positionAdd_1">1 1 1  0 0 0</float3>
+
+				            <float name="weight1" id="weight_1" >0.7</float>                        
+                            <float name="weight2" id="weight_1" >0.5</float>  
+                            <float name="weight3" id="weight_1" >0.3</float>      
+                                                        				            
+				            <int name="index" id="index_1" >0 1 2 1 2 3</int>
+				            <float3 name="position" id="position_1">1 1 1  2 2 2</float3>
+				            <float3 name="normal" id="normal_1"  >1 0 0 1 0 0</float3>
+			            </data>	
+			        </data>
+				</data>                
+	        </data>   
+		</data>        
+    </Input>
+    <TestProcess>
+        <Show title="Show Vertex Shader" data="#skinned2" what="VertexShader" >
+        	<VSConnection in="position" out="position" type="FLOAT3_WORLD_POINT" />
+        	<VSConnection in="normal" out="normal" type="FLOAT3_WORLD_NORMAL" />
+        	<VSConnection in="color" out="color" type="FLOAT4" optional="true" />
+        </Show>
+    </TestProcess>
+</XflowTest>

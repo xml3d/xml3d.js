@@ -1,0 +1,40 @@
+<XflowTest>
+    <Input>
+        
+    	<data id="skinInput" >
+    		<int4 name="boneIndices" >0 0 0 0  1 0 0 0  0 1 0 0</int4>
+			<float4 name="boneWeights" >1.0 0 0 0  1.0 0 0 0  0.5 0.5 0 0</float4>
+			<float4x4 name="boneXform" >
+				1 0 0 0
+			    0 1 0 0 
+			    0 0 1 0
+			    0 0 0 1
+			
+			    0 1 0 0
+			    1 0 0 0 
+			    0 0 1 0
+			    0 0 0 1
+			</float4x4>
+    	</data>
+        
+		<data id="skinnedPos" compute="result = xflow.skinPosition(pos, boneIndices, boneWeights, boneXform)" >
+			<float3 name="pos" >1 0 0  2 0 0  3 0 0</float3>
+			<data src="#skinInput" />
+		</data>
+		
+		<data id="skinnedDir" compute="result = xflow.skinDirection(dir, boneIndices, boneWeights, boneXform)" >
+			<float3 name="dir" >1 0 0  0 1 0  1 0 0</float3>
+			<data src="#skinInput" />
+		</data>
+        
+    </Input>
+    <TestProcess>
+       	<Check title="Check Skinned Position" data="#skinnedPos" >
+            <MatchData name="result" type="float3" >1 0 0  0 2 0  1.5 1.5 0</MatchData>
+        </Check>
+        <Check title="Check Skinned Direction" data="#skinnedDir" >
+            <MatchData name="result" type="float3" >1 0 0  1 0 0  0.707107 0.707107 0</MatchData>
+        </Check>
+        
+    </TestProcess>
+</XflowTest>

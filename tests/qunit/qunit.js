@@ -839,6 +839,7 @@ function done() {
 
     var banner = id("qunit-banner"),
         tests = id("qunit-tests"),
+        xe = id("xml3dframe"),
         runtime = +new Date - config.started,
         passed = config.stats.all - config.stats.bad,
         html = [
@@ -856,6 +857,9 @@ function done() {
 
     if ( banner ) {
         banner.className = (config.stats.bad ? "qunit-fail" : "qunit-pass");
+    }
+    if ( xe ) {
+        xe.className = (config.stats.bad ? "qunit-fail" : "qunit-pass");
     }
 
     if ( tests ) {

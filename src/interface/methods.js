@@ -150,8 +150,8 @@ new (function() {
     methods.xml3dGenerateRay = function(x, y) {
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {
-            if (adapters[adapter].xml3dGenerateRay) {
-                return adapters[adapter].xml3dGenerateRay(x, y);
+            if (adapters[adapter].generateRay) {
+                return adapters[adapter].generateRay(x, y);
             }
         }
         return new window.XML3DRay();
@@ -208,11 +208,13 @@ new (function() {
         XML3D.debug.logError(this.nodeName + "::getOutputFieldNames is not implemeted yet.");
         return null;
     };
+    methods.protoGetOutputFieldNames = methods.dataGetOutputFieldNames;
 
     methods.dataGetResult = function() {
         XML3D.debug.logError(this.nodeName + "::getResult is not implemeted yet.");
         return null;
     };
+    methods.protoGetResult = methods.dataGetResult;
 
     // Export to xml3d namespace
     XML3D.extend(XML3D.methods, methods);

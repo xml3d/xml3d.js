@@ -23,6 +23,8 @@
         this.unit = opt.unit || 0;
         this.image = opt.image || null;
         this.config = opt.config || null;
+        this.canvas = opt.canvas || null;
+        this.context = opt.context || null; // canvas context
     };
 
     TextureInfo.prototype.setLoaded = function() {
@@ -52,10 +54,9 @@
         this.fSource = sources.fragment;
     };
 
-    var XML3DShaderManager = function(renderer, dataFactory, factory) {
+    var XML3DShaderManager = function(renderer, factory) {
         this.renderer = renderer;
         this.gl = renderer.gl;
-        this.dataFactory = dataFactory;
         this.factory = factory;
 
         this.shaderCache = {
@@ -97,7 +98,7 @@
         var mat = this.createMaterialFromShaderDescriptor(desc);
         var fallbackShader = mat.getProgram();
         this.bindShader(fallbackShader);
-        this.setUniform(fallbackShader.uniforms["diffuseColor"], [ 1, 0, 0 ]);
+        XML3DShaderManager.setUniform(this.gl, fallbackShader.uniforms["diffuseColor"], [ 1, 0, 0 ]);
         this.unbindShader(fallbackShader);
         this.shaders["defaultShader"] = fallbackShader;
     };
@@ -121,6 +122,7 @@
         return result;
     };
 
+
     /**
      *
      * @param shaderAdapter
@@ -133,7 +135,9 @@
         }
 
         var shaderNode = shaderAdapter.node;
-        var shaderId = shaderNode.id;
+        var uri = new XML3D.URI("#" + shaderNode.id);
+        var shaderId = uri.getAbsoluteURI(shaderNode.ownerDocument.documentURI).toString();
+
         var program = this.shaders[shaderId];
 
         if (program)
@@ -149,6 +153,11 @@
         var dataTable = shaderAdapter.requestData(material.getRequestFields());
 
         program = material.getProgram(lights, dataTable);
+
+        if (!program) {
+            return "defaultShader";
+        }
+
         this.shaders[shaderId] = program;
         this.gl.useProgram(program.handle);
 
@@ -160,7 +169,7 @@
 
     /**
      * @param {string} path
-     * @returns
+     * @returns {string}
      */
     XML3DShaderManager.getShaderDescriptor = function(path) {
         var shaderName = path.substring(path.lastIndexOf(':') + 1);
@@ -226,6 +235,7 @@
         }
 
         var programObject = new ProgramObject(prg, sources);
+        this.currentProgram = prg;
         gl.useProgram(prg);
 
         // Tally shader attributes
@@ -301,7 +311,9 @@
     };
 
     XML3DShaderManager.prototype.shaderDataChanged = function(adapter, request, changeType) {
-        var program = this.shaders[adapter.node.id];
+        var shaderId = new XML3D.URI("#" + adapter.node.id).getAbsoluteURI(adapter.node.ownerDocument.documentURI).toString();
+        var program = this.shaders[shaderId];
+        if(!program) return; // No Program - probably invalid shader
         var result = request.getResult();
         this.bindShader(program);
         this.setUniformsFromComputeResult(program, result);
@@ -311,7 +323,6 @@
             program.hasTransparency = program.material.isTransparent;
         }
         this.renderer.requestRedraw("Shader data changed");
-
     };
 
     XML3DShaderManager.prototype.getShaderById = function(shaderId) {
@@ -342,8 +353,7 @@
         for ( var name in uniforms) {
             var entry = dataMap[name];
             if (entry) {
-                var v = entry.getValue();
-                this.setUniform(uniforms[name], (v.length == 1) ? v[0] : v);
+                XML3DShaderManager.setUniform(this.gl, uniforms[name], entry.getValue());
             }
         }
     };
@@ -356,11 +366,9 @@
                 u = u.value;
             if (u.clean)
                 continue;
-            if (u.length == 1)
-                u = u[0]; // Either a single float, int or bool
 
             if (shader.uniforms[name]) {
-                this.setUniform(shader.uniforms[name], u);
+                XML3DShaderManager.setUniform(this.gl, shader.uniforms[name], u);
             }
         }
 
@@ -387,7 +395,7 @@
         for ( var i = 0, l = sp.changes.length; i < l; i++) {
             var change = sp.changes[i];
             if (change.type == "uniform" && sp.uniforms[change.name]) {
-                this.setUniform(sp.uniforms[change.name], change.newValue);
+                XML3DShaderManager.setUniform(this.gl, sp.uniforms[change.name], change.newValue);
             }
         }
         sp.changes = [];
@@ -409,17 +417,21 @@
 
     /**
      * Set uniforms for active program
+     * @param gl
      * @param u
      * @param value
      * @param {boolean=} transposed
      */
-    XML3DShaderManager.prototype.setUniform = function(u, value, transposed) {
-        var gl = this.gl;
+    XML3DShaderManager.setUniform = function(gl, u, value, transposed) {
+
         switch (u.glType) {
         case rc.BOOL:
         case rc.INT:
         case rc.SAMPLER_2D:
-            gl.uniform1i(u.location, value);
+            if (value.length)
+                gl.uniform1i(u.location, value[0]);
+            else
+                gl.uniform1i(u.location, value);
             break;
 
         case 35671: // gl.BOOL_VEC2
@@ -438,7 +450,10 @@
             break; // gl.INT_VEC4
 
         case 5126:
-            gl.uniform1f(u.location, value);
+            if (value.length != null)
+                gl.uniform1fv(u.location, value);
+            else
+                gl.uniform1f(u.location, value);
             break; // gl.FLOAT
         case 35664:
             gl.uniform2fv(u.location, value);
@@ -505,15 +520,28 @@
     XML3DShaderManager.prototype.createTextureFromEntry = function(texEntry, sampler, texUnit) {
         var img = texEntry.getImage();
         if (img) {
+            var handle = null;
+            var canvas = null;
+            var context = null;
+            if (sampler.info && sampler.info.status != TEXTURE_STATE.INVALID) {
+                handle = sampler.info.handle;
+                canvas = sampler.info.canvas;
+                context = sampler.info.context;
+            } else {
+                handle = this.gl.createTexture();
+            }
+
             var renderer = this.renderer;
-            var info = new TextureInfo(this.gl.createTexture(), {
-                status : img.complete ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
+            var info = new TextureInfo(handle, {
+                status : (img.complete || img.readyState) ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
                 onload : function() {
                     renderer.requestRedraw.call(renderer, "Texture loaded");
                 },
                 unit : texUnit,
                 image : img,
-                config : texEntry.getSamplerConfig()
+                config : texEntry.getSamplerConfig(),
+                canvas : canvas,
+                context : context
             });
             sampler.info = info;
         } else {
@@ -579,6 +607,10 @@
     };
 
     XML3DShaderManager.prototype.createTex2DFromImage = function(info) {
+        if (info.status == TEXTURE_STATE.INVALID) {
+            throw new Error("Invalid texture");
+        }
+
         var gl = this.gl;
         var opt = info.config || {};
         var image = info.image;
@@ -591,18 +623,37 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 
-        if (!this.isPowerOfTwo(image.width) || !this.isPowerOfTwo(image.height)) {
+        var width = image.videoWidth || image.width;
+        var height = image.videoHeight || image.height;
+        // We need to scale texture when one of the wrap modes is not CLAMP_TO_EDGE and
+        // one of the texture dimensions is not power of two.
+        // Otherwise rendered texture will be just black.
+        if ((opt.wrapS != gl.CLAMP_TO_EDGE || opt.wrapT != gl.CLAMP_TO_EDGE) &&
+            (!this.isPowerOfTwo(width) || !this.isPowerOfTwo(height))) {
             // Scale up the texture to the next highest power of two dimensions.
-            var canvas = document.createElement("canvas");
-            canvas.width = this.nextHighestPowerOfTwo(image.width);
-            canvas.height = this.nextHighestPowerOfTwo(image.height);
-            var ctx = canvas.getContext("2d");
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height); // stretch
-            // to
-            // fit
-            // ctx.drawImage(image, 0, 0, image.width, image.height); //centered
-            // with transparent padding around edges
+            // Reuse existing canvas if available.
+            var canvas = info.canvas !== null ? info.canvas : document.createElement("canvas");
+
+            var potWidth = this.nextHighestPowerOfTwo(width);
+            var potHeight = this.nextHighestPowerOfTwo(height);
+            var context = null;
+            // Reuse existing context if possible.
+            if (info.context !== null && potWidth == canvas.width && potHeight == canvas.height) {
+                context = info.context;
+            } else {
+                canvas.width = potWidth;
+                canvas.height = potHeight;
+                context = canvas.getContext("2d");
+            }
+
+            // stretch to fit
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            
+            // centered with transparent padding around edges
+            //ctx.drawImage(image, 0, 0, image.width, image.height); 
             image = canvas;
+            info.canvas = canvas;
+            info.context = context;
         }
 
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -633,7 +684,7 @@
             gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(info.glType, info.handle);
             // Should not be here, since the texunit is static
-            this.setUniform(tex, info.unit + 1);
+            XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
             break;
         case TEXTURE_STATE.LOADED:
             // console.dir("Creating '"+ tex.name + "' from " + info.image.src);
@@ -644,7 +695,7 @@
         case TEXTURE_STATE.UNLOADED:
             gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(gl.TEXTURE_2D, null);
-            this.setUniform(tex, info.unit + 1);
+            XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
         }
         ;
     };

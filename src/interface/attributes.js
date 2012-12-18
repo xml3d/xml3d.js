@@ -18,6 +18,20 @@
         };
     };
 
+    handler.IDHandler = function(elem, id) {
+        this.setFromAttribute = function(value, prevValue) {
+            XML3D.base.resourceManager.notifyNodeIdChange(elem, prevValue, value);
+        }
+        this.desc = {
+            get : function() {
+                return this.getAttribute(id) || "";
+            },
+            set : function(value) {
+                this.setAttribute(id, value);
+            }
+        };
+    };
+
     handler.StringAttributeHandler = function(elem, id) {
         this.desc = {
             get : function() {
@@ -29,30 +43,9 @@
         };
     };
 
+    // TODO: remove reference handler in webgl generator and remove this line
+    handler.ReferenceHandler = handler.StringAttributeHandler;
 
-    handler.ReferenceHandler = function(elem, id) {
-        this.setFromAttribute = function(value) {
-            var evt = new events.ReferenceNotification(elem, id, value);
-            elem._configured.notify(evt);
-            elem._configured.notifyOpposite(evt);
-            return true; // Already notified
-        };
-        this.remove = function() {
-            var evt = new events.ReferenceNotification(elem, id, elem.getAttribute(id));
-            if(evt.type == events.VALID_REFERENCE && evt.value._configured) {
-                evt.value._configured.removeOpposite(evt);
-            }
-        };
-        this.desc = {
-            get : function() {
-                return this.getAttribute(id) || "";
-            },
-            set : function(value) {
-                this.setAttribute(id, value);
-            }
-        };
-        elem._configured.notifyOpposite(new events.ReferenceNotification(elem, id, elem.getAttribute(id)));
-    };
 
     handler.EnumAttributeHandler = function(elem, id, p) {
         AttributeHandler.call(this, elem);
@@ -97,7 +90,7 @@
                     return f;
                 if (!this.hasAttribute(id) || f === undefined)
                     return null;
-                return eval("c = function onclick(event){\n  " + this.getAttribute(id) + "\n}");
+                return eval("crx = function onclick(event){\n  " + this.getAttribute(id) + "\n}");
             },
             set : function(value) {
                 f = (typeof value == 'function') ? value : undefined;

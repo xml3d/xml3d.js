@@ -30,11 +30,12 @@ test("Phong fragment shader", function() {
     equal(typeof phong.addDirectives, "function", "Function 'addDirectives' exists");
     var directives = [];
     phong.addDirectives.call(phong, directives, {}, {});
-    equal(directives.length, 5, "5 directives from phong shader");
+    equal(directives.length, 6, "6 directives from phong shader");
     var fragment1 = this.mergeDirectives(directives, phong.fragment);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment1, "Phong fragment without globals compiles.");
     notEqual(fragment1.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment1.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment1.indexOf("MAX_SPOTLIGHTS 0"), -1, "MAX_SPOTLIGHTS set");
     notEqual(fragment1.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
@@ -43,11 +44,12 @@ test("Phong fragment shader", function() {
             length : 2
         }
     }, {});
-    equal(directives.length, 5, "5 directives from phong shader");
+    equal(directives.length, 6, "6 directives from phong shader");
     var fragment2 = this.mergeDirectives(directives, phong.fragment);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment2, "Phong fragment with 2 point lights compiles.");
     notEqual(fragment2.indexOf("MAX_POINTLIGHTS 2"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment2.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment2.indexOf("MAX_SPOTLIGHTS 0"), -1, "MAX_SPOTLIGHTS set");
     notEqual(fragment2.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
@@ -60,6 +62,7 @@ test("Phong fragment shader", function() {
     this.compiles(this.gl.FRAGMENT_SHADER, fragment3, "Phong fragment with 1 directional light compiles.");
     notEqual(fragment3.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment3.indexOf("MAX_DIRECTIONALLIGHTS 1"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment3.indexOf("MAX_SPOTLIGHTS 0"), -1, "MAX_SPOTLIGHTS set");
     notEqual(fragment3.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
@@ -74,6 +77,7 @@ test("Phong fragment shader", function() {
     this.compiles(this.gl.FRAGMENT_SHADER, fragment4, "Phong fragment with 1 directional light and diffuseTexture compiles.");
     notEqual(fragment4.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment4.indexOf("MAX_DIRECTIONALLIGHTS 1"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment4.indexOf("MAX_SPOTLIGHTS 0"), -1, "MAX_SPOTLIGHTS set");
     notEqual(fragment4.indexOf("HAS_DIFFUSETEXTURE 1"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
@@ -92,6 +96,7 @@ test("Phong fragment shader", function() {
     this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with 1,350 point lights and a specular texture compiles.");
     notEqual(fragment5.indexOf("MAX_POINTLIGHTS 1350"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment5.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment5.indexOf("MAX_SPOTLIGHTS 0"), -1, "MAX_SPOTLIGHTS set");
     notEqual(fragment5.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
     notEqual(fragment5.indexOf("HAS_SPECULARTEXTURE 1"), -1, "HAS_SPECULARTEXTURE set");
     notEqual(fragment5.indexOf("HAS_EMISSIVETEXTURE 0"), -1, "HAS_EMISSIVETEXTURE set");
@@ -114,6 +119,7 @@ test("Phong fragment shader", function() {
     this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with all branches compiles.");
     notEqual(fragment5.indexOf("MAX_POINTLIGHTS 5"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment5.indexOf("MAX_DIRECTIONALLIGHTS 3"), -1, "MAX_DIRECTIONALLIGHTS set");
+    notEqual(fragment5.indexOf("MAX_SPOTLIGHTS 0"), -1, "MAX_SPOTLIGHTS set");
     notEqual(fragment5.indexOf("HAS_DIFFUSETEXTURE 1"), -1, "HAS_DIFFUSETEXTURE set");
     notEqual(fragment5.indexOf("HAS_SPECULARTEXTURE 1"), -1, "HAS_SPECULARTEXTURE set");
     notEqual(fragment5.indexOf("HAS_EMISSIVETEXTURE 1"), -1, "HAS_EMISSIVETEXTURE set");
@@ -145,10 +151,15 @@ test("Simple texture", 3, function() {
             testFunc(n);
     });
 
+    var tested = 0;
     testFunc = function(n) {
         actual = win.getPixelValue(gl, 40, 40);
         if (actual[0] == 0)
             return;
+        tested++;
+        if(tested == 2){
+            console.log("Tested twice!");
+        }
         deepEqual(actual, [ 241, 241, 0, 255 ], "Yellow texture");
         start();
     };
@@ -212,9 +223,15 @@ test("Diffuse shader with vertex colors", 3, function() {
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
     var cgroup = this.doc.getElementById("coloredMeshGroup");
-    h.draw();
+    //h.draw();
+    var tested = 0;
     x.addEventListener("framedrawn", function(n) {
         var actual = win.getPixelValue(gl, 90, 90);
+        tested++;
+        if(tested == 2){
+            console.log("Tested twice!");
+        }
+
         QUnit.closePixel(actual, [ 225, 225, 60, 255 ], 1, "Corners have colors red, yellow, green, blue");
         start();
     });

@@ -53,6 +53,7 @@ if (navigator.userAgent.indexOf("WebKit") != -1) {
             var prevVal = this.getAttribute(attrName);
             this.__setAttribute(attrName, newVal);
             newVal = this.getAttribute(attrName);
+
             // if (newVal != prevVal)
             {
                 var evt = document.createEvent("MutationEvent");

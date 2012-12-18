@@ -30,9 +30,11 @@ XML3D.webgl.MAXFPS = 30;
             // Creates the CanvasHandler for the <canvas>  Element
             var canvasHandler = new XML3D.webgl.CanvasHandler(canvas, xml3ds[i]);
             handlers[i] = canvasHandler;
-            canvasHandler._tick();
+            canvasHandler.tick();
         }
     };
+
+    var globalCanvasId = 0;
 
     /**
      * CanvasHandler class.
@@ -48,6 +50,7 @@ XML3D.webgl.MAXFPS = 30;
     function CanvasHandler(canvas, xml3dElem) {
         this.canvas = canvas;
         this.xml3dElem = xml3dElem;
+        this.id = ++globalCanvasId; // global canvas id starts at 1
 
         this.needDraw = true;
         this.needPickingDraw = true;
@@ -64,11 +67,13 @@ XML3D.webgl.MAXFPS = 30;
         // determine if a redraw
         // is needed
         var handler = this;
-        this._tick = function() {
-            if (handler.update())
+        this.tick = function() {
+            if (handler.needDraw) {
+                handler.dispatchUpdateEvent();
                 handler.draw();
+            }
 
-            window.requestAnimFrame(handler._tick, XML3D.webgl.MAXFPS);
+            window.requestAnimFrame(handler.tick, XML3D.webgl.MAXFPS);
         };
 
         this.redraw = function(reason, forcePickingRedraw) {
@@ -82,9 +87,6 @@ XML3D.webgl.MAXFPS = 30;
                 handler.needDraw = true;
             }
         };
-
-        // Create Ressource Manager:
-        this.resourceManager = new XML3D.base.ResourceManager();
 
         // Create renderer
         this.renderer = new XML3D.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
@@ -143,6 +145,19 @@ XML3D.webgl.MAXFPS = 30;
         return true;
     };
 
+    /** 
+     * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in 
+     * the GL context. The y-coordinate gets turned upside-down. The lowest possible 
+     * canvas coordinate is 0, so we need to subtract 1 from the height, too. 
+     * 
+     * @param {number} canvasY
+     * @return {number} the converted y-coordinate
+     */
+    CanvasHandler.prototype.canvasToGlY = function(canvasY) { 
+        
+        return this.canvas.height - canvasY - 1; 
+    }; 
+    
     /**
      * Binds the picking buffer and passes the request for a picking pass to the
      * renderer
@@ -154,10 +169,25 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.updatePickObjectByPoint = function(canvasX, canvasY) {
         if (this._pickingDisabled)
             return null;
+        
         if(this.needPickingDraw)
-            this.renderer.renderSceneToPickingBuffer();
-        this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, this.canvas.height - canvasY);
-        this.needPickingDraw = false;
+            this.renderer.renderSceneToPickingBuffer();   
+        
+        /** Temporary workaround: this function is called when drawable objects are not yet 
+         *  updated. Thus, the renderer.render() updates the objects after the picking buffer
+         *  has been updated. In that case, the picking buffer needs to be updated again. 
+         *  Thus, we only set needPickingDraw to false when we are sure that objects don't 
+         *  need any updates, i.e. when needDraw is false.
+         *  A better solution would be to separate drawable objects updating from rendering 
+         *  and to update the objects either during render() or renderSceneToPickingBuffer().
+         */
+        if(!this.needDraw)
+            this.needPickingDraw = false;
+        
+        var glY = this.canvasToGlY(canvasY);
+        
+        this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, glY);
+        
         return this.currentPickObj;
     };
 
@@ -170,8 +200,11 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, canvasX, canvasY) {
         if (!pickedObj || this._pickingDisabled)
             return null;
-        this.renderer.renderPickedNormals(pickedObj, canvasX, this.canvas.height - canvasY);
-        return this.renderer.readNormalFromPickingBuffer(canvasX, this.canvas.height - canvasY);
+        
+        var glY = this.canvasToGlY(canvasY);
+        
+        this.renderer.renderPickedNormals(pickedObj);
+        return this.renderer.readNormalFromPickingBuffer(canvasX, glY);
     };
 
     /**
@@ -183,18 +216,33 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.getWorldSpacePositionByPoint = function(pickedObj, canvasX, canvasY) {
     	if (!pickedObj)
     		return null;
+
+        var glY = this.canvasToGlY(canvasY); 
+        
         this.renderer.renderPickedPosition(pickedObj);
-        return this.renderer.readPositionFromPickingBuffer(canvasX, this.canvas.height - canvasY);
+        return this.renderer.readPositionFromPickingBuffer(canvasX, glY);
     };
+    
+    CanvasHandler.prototype.getCanvasHeight = function() { 
+    	
+    	return this.canvas.height; 
+    };
+    
+    CanvasHandler.prototype.getCanvasWidth = function() { 
+    	
+    	return this.canvas.width; 
+    };  
 
     /**
      * Uses gluUnProject() to transform the 2D screen point to a 3D ray.
      * Not tested!!
      *
-     * @param {number} glX
-     * @param {number} glY
+     * @param {number} canvasX
+     * @param {number} canvasY
      */
-    CanvasHandler.prototype.generateRay = function(glX, glY) {
+    CanvasHandler.prototype.generateRay = function(canvasX, canvasY) {
+        
+        var glY = this.canvasToGlY(canvasY); 
 
         // setup input to unproject
         var viewport = new Array();
@@ -213,39 +261,40 @@ XML3D.webgl.MAXFPS = 30;
         var farHit = new Array();
 
         // do unprojections
-        if (false === GLU.unProject(glX, glY, 0, viewMat, projMat, viewport, nearHit)) {
+        if (false === GLU.unProject(canvasX, glY, 0, viewMat, projMat, viewport, nearHit)) {
             return ray;
         }
 
-        if (false === GLU.unProject(glX, glY, 1, viewMat, projMat, viewport, farHit)) {
+        if (false === GLU.unProject(canvasX, glY, 1, viewMat, projMat, viewport, farHit)) {
             return ray;
         }
 
         // calculate ray
-
-        ray.origin = this.renderer.currentView.position;
-        ray.direction = new window.XML3DVec3(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
-        ray.direction = ray.direction.normalize();
+        var worldToViewMat = this.renderer.currentView.getViewMatrix().inverse();
+        var viewPos = new window.XML3DVec3(worldToViewMat.m41, worldToViewMat.m42, worldToViewMat.m43);
+        
+        ray.origin.set(viewPos);
+        ray.direction.set(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
+        ray.direction.set(ray.direction.normalize());
 
         return ray;
     };
 
-    // This function is called by _tick() at regular intervals to determine if a
-    // redraw of the scene is required
-    CanvasHandler.prototype.update = function() {
+    /**
+     * The update event can be used by user to sync actions
+     * with rendering
+     */
+    CanvasHandler.prototype.dispatchUpdateEvent = function() {
         var event = document.createEvent('CustomEvent');
         event.initCustomEvent('update', true, true, null);
         this.xml3dElem.dispatchEvent(event);
-
-        return this.needDraw;
     };
 
     /**
-     * Called by _tick() to redraw the scene if needed
+     * Called by tick() to redraw the scene if needed
      */
     CanvasHandler.prototype.draw = function() {
         try {
-
             var start = Date.now();
             var stats = this.renderer.render();
             var end = Date.now();
@@ -255,7 +304,6 @@ XML3D.webgl.MAXFPS = 30;
 
         } catch (e) {
             XML3D.debug.logException(e);
-            throw e;
         }
 
     };

@@ -1,0 +1,58 @@
+<XflowTest>
+    <Input>
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+#define PROGRAM_PARAMS(X)                       \
+    X(in,  float3, in_position, POSITION)       \
+    X(in,  float3, in_normal, NORMAL)           \
+    X(in,  float,  weight, WEIGHT)              \
+    X(out, float3, out_position, POSITION)      \
+    X(out, float3, out_normal, NORMAL)          \
+    X(uniform, float4x4, transform, TRANSFORM)
+
+    FLOW_PROGRAM_WITH_PARAMS(TestLerp, PROGRAM_PARAMS)
+    {
+        ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+
+        out_position = Lerp( in_position, Mul(transform, in_position), weight );
+
+        out_normal = in_normal;
+    }
+]]>
+      </script>
+
+      <data id="data1" compute="(position, normal) = TestLerp(position, normal, weight, transform) ">
+        <float3 name="position" id="position_1">
+          -1 0 2  1 0 2  -1 0 0  1 0 0
+        </float3>
+        <float3 name="normal" id="normal_1">
+          0 1 0 0 1 0 0 1 0 0 1 0
+        </float3>
+        <float name="weight" id="weight_1">
+          1.0 0.5 0.0 0.0
+        </float>
+        <float4x4 name="transform" id="transform_1">
+          1 0 0 0
+          0 1 0 0
+          0 0 1 0
+          0 2 0 1
+        </float4x4>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+        <Check title="First Check" data="#data1" >
+            <MatchInput name="weight" input="#weight_1" />
+            <MatchInput name="transform" input="#transform_1" />
+            <MatchData name="position" type="float3" >
+              -1 2 2 1 1 2 -1 0 0 1 0 0
+            </MatchData>
+            <MatchData name="normal" type="float3" >
+              0 1 0 0 1 0 0 1 0 0 1 0
+            </MatchData>
+        </Check>
+
+    </TestProcess>
+</XflowTest>

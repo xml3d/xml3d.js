@@ -1,8 +1,10 @@
 
 function NotifyingAdapterFactory() {
+    XML3D.base.NodeAdapterFactory.call(this, "test");
     var that = this;
     this.name = "test";
     this.event = null;
+    this.type = "NotifyingAdapterFactory"; 
     this.createAdapter = function() {
         return {
             init : function() {},
@@ -13,7 +15,7 @@ function NotifyingAdapterFactory() {
         };
     };
 };
-XML3D.createClass(NotifyingAdapterFactory, XML3D.base.AdapterFactory);
+XML3D.createClass(NotifyingAdapterFactory, XML3D.base.NodeAdapterFactory);
 
 module("Element notification tests", {
     factory : new NotifyingAdapterFactory()
@@ -91,16 +93,6 @@ test("Enumeration attribute notification tests", 5, function() {
     e.setAttribute("type", "asdf"); // invalid
 });
 
-test("Reference attribute notification tests", 5, function() {
-    var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
-    var a = this.factory.getAdapter(e);
-    e.setAttribute("activeView", "#myView");
-    ok(this.factory.event, "Event has been thrown");
-    equal(this.factory.event.type, XML3D.events.DANGLING_REFERENCE, "Can't resolve before insertion into DOM.");
-    equal(this.factory.event.value, null, "Can't resolve before insertion into DOM.");
-    e.activeView = "#hallo";
-});
-
 module("Composed Element notification tests", {
     setup : function() {
         stop();
@@ -173,7 +165,7 @@ test("DOMCharacterDataModified notification", 6, function() {
 
 });
 
-test("Text DOMNodeInserted notification", 7, function() {
+test("Text DOMNodeInserted notification", 8, function() {
     // 1: Found frame
     // 2: Scene loaded
     var index = this.doc.getElementById("indices");
@@ -184,6 +176,7 @@ test("Text DOMNodeInserted notification", 7, function() {
 
     var pos = this.doc.getElementById("positions");
     this.factory.getAdapter(pos);
+    equal(pos.value.length, 12, "Length of typed array is correct before modification");
     pos.textContent = "1 0 2"; // 6: Adapter notified: Notification (type:1)
     equal(pos.value.length, 3, "Length of typed array after textContent has been set"); // 7
 });

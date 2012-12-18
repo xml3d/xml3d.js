@@ -6,7 +6,7 @@
      * @param {RenderAdapterFactory} factory
      * @param {Element} node
      */
-    var XML3DLightRenderAdapter = function(factory, node) {
+    var LightRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
 
         this.visible = true;
@@ -16,11 +16,14 @@
 
         this.offset = 0;
         this.lightType = "point";
-    };
-    XML3D.createClass(XML3DLightRenderAdapter, XML3D.webgl.RenderAdapter);
+        this.updateLightShader();
 
-    XML3DLightRenderAdapter.prototype.notifyChanged = function(evt) {
+    };
+    XML3D.createClass(LightRenderAdapter, XML3D.webgl.RenderAdapter);
+
+    LightRenderAdapter.prototype.notifyChanged = function(evt) {
         var target = evt.internalType || evt.wrapped.attrName;
+        // TODO: Support change of lightshader
 
         switch(target) {
         case "visible":
@@ -44,10 +47,14 @@
             break;
         case "parenttransform":
             this.transform = evt.newValue;
-            if (this.lightType == "directional")
-                this.renderer.changeLightData(this.lightType, "direction", this.offset, this.applyTransform(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
-            else
+            if (this.lightType == "directional") {
+                this.renderer.changeLightData(this.lightType, "direction", this.offset, this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
+            } else if (this.lightType == "spot") {
+                this.renderer.changeLightData(this.lightType, "direction", this.offset, this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION));
                 this.renderer.changeLightData(this.lightType, "position", this.offset, this.applyTransform([0,0,0]));
+            } else {
+                this.renderer.changeLightData(this.lightType, "position", this.offset, this.applyTransform([0,0,0]));
+            }
 
             break;
         }
@@ -57,22 +64,33 @@
 
     /** @const */
 	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]), tmpDirection = vec3.create();
+    /** @const */
+	var XML3D_SPOTLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,1]);
 
 
-	XML3DLightRenderAdapter.prototype.applyTransform = function(vec) {
+	LightRenderAdapter.prototype.applyTransform = function(vec) {
 	    if (this.transform) {
             var t = this.transform;
-            var newVec = mat4.multiplyVec4(t, quat4.create([vec[0], vec[1], vec[2], 1]));
+            var newVec = mat4.multiplyVec4(t, [vec[0], vec[1], vec[2], 1]);
             return [newVec[0]/newVec[3], newVec[1]/newVec[3], newVec[2]/newVec[3]];
 	    }
 	    return vec;
 	};
-	
+
+	LightRenderAdapter.prototype.applyTransformDir = function(vec) {
+	    if (this.transform) {
+            var t = this.transform;
+            var newVec = mat4.multiplyVec4(t, [vec[0], vec[1], vec[2], 0]);
+            return [newVec[0], newVec[1], newVec[2]];
+	    }
+	    return vec;
+	};
+
 	/**
 	 *
 	 * @param {Object} lights
 	 */
-	XML3DLightRenderAdapter.prototype.addLight = function(lights) {
+	LightRenderAdapter.prototype.addLight = function(lights) {
 	    this.callback = lights.dataChanged;
 	    var shader = this.getLightShader();
         if (!shader)
@@ -100,9 +118,20 @@
                     this.offset = lo.length * 3;
                     this.lightType = "directional";
 
-                    Array.set(lo.direction, this.offset, this.applyTransform(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
+                    Array.set(lo.direction, this.offset, this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
                     Array.set(lo.visibility, this.offset, this.visible ? [1,1,1] : [0,0,0]);
                     shader.fillDirectionalLight(lo, this.node.intensity, this.offset);
+                    lo.length++;
+                    break;
+                case "spot":
+                    lo = lights.spot;
+                    this.offset = lo.length * 3;
+                    this.lightType = "spot";
+
+                    Array.set(lo.position, this.offset, this.applyTransform([0,0,0]));
+                    Array.set(lo.direction, this.offset, this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION));
+                    Array.set(lo.visibility, this.offset, this.visible ? [1,1,1] : [0,0,0]);
+                    shader.fillSpotLight(lo, this.node.intensity, this.offset);
                     lo.length++;
                     break;
                 default:
@@ -111,32 +140,44 @@
         }
 	};
 
-	/**
-	 *
-	 */
-    XML3DLightRenderAdapter.prototype.getLightShader = function() {
-        if (!this.lightShader) {
-            var shaderLink = this.node.shader;
-            var shader = null;
-            if (shaderLink != "")
-                shader = XML3D.URIResolver.resolveLocal(shaderLink);
-            // if no shader attribute is specified, try to get a shader from the style attribute
-            if(shader == null)
-            {
-                var styleValue = this.node.getAttribute('style');
-                if(!styleValue)
-                    return null;
+    LightRenderAdapter.prototype.updateLightShader = function(){
+        var shaderHref = this.node.shader;
+        if(!shaderHref)
+        {
+            var styleValue = this.node.getAttribute('style');
+            if(styleValue){
                 var pattern    = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
                 var result = pattern.exec(styleValue);
                 if (result)
-                    shader = this.node.xml3ddocument.resolve(result[1]);
+                    shaderHref = result[1];
             }
-            this.lightShader = this.factory.getAdapter(shader);
         }
-        return this.lightShader;
+        this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
     };
-    XML3DLightRenderAdapter.prototype.dispose = function() {
+
+	/**
+	 *
+	 */
+    LightRenderAdapter.prototype.getLightShader = function() {
+        return this.getConnectedAdapter("shader");
+    };
+    LightRenderAdapter.prototype.dispose = function() {
         this.isValid = false;
+    };
+    
+    LightRenderAdapter.prototype.destroy = function() {
+    	this.clearAdapterHandles();
+    };
+
+
+    /**
+     * @return {XML3DMatrix}
+     */
+    LightRenderAdapter.prototype.getWorldMatrix = function() {
+
+        var m = new window.XML3DMatrix();
+        m._data.set(this.transform);
+        return m;
     };
 
     /**
@@ -145,11 +186,11 @@
      * @param {Array.<number>} newValue
      * @return
      */
-    XML3DLightRenderAdapter.prototype.dataChanged = function(field, newValue) {
+    LightRenderAdapter.prototype.dataChanged = function(field, newValue) {
         this.renderer.changeLightData(this.lightType, field, this.offset, newValue);
     };
 
     // Export to XML3D.webgl namespace
-    XML3D.webgl.XML3DLightRenderAdapter = XML3DLightRenderAdapter;
+    XML3D.webgl.LightRenderAdapter = LightRenderAdapter;
 
 }());

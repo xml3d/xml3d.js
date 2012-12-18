@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+      <proto id="morphDouble" filter="keep(position)" >
+        <data compute="position = xflow.morph(position, posAdd2, weight2)" >
+          <data compute="position = xflow.morph(position, posAdd1, weight1)" >
+            <float3 param="true" name="position" />
+            <float3 param="true" name="posAdd1" />
+            <float3 param="true" name="posAdd2" />
+            <float3 param="true" name="weight1" />
+            <float3 param="true" name="weight2" />
+          </data>
+        </data>
+      </proto>
+
+      <data id="rectangle" >
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3>
+        <float3 name="posAdd1">-0.5 0 0  0 0 0 -1 0 0  0 0 0</float3>
+        <float3 name="posAdd2">0 0 0  0.5 0 0  0 0 0  1 0 0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      </data>
+    </defs>
+    <group id="meshGroup" >
+
+
+      <mesh id="myMesh02" proto="#morphDouble" >
+        <data src="#rectangle" />
+        <float name="weight1" >4.0</float>
+        <float name="weight2" >0.5</float>
+      </mesh>
+
+
+      <group style="transform: translate3d(-10px, 0,0)" >
+        <mesh id="myMesh03" proto="#morphDouble" >
+          <data src="#rectangle" />
+          <float name="weight1" >0.5</float>
+          <float name="weight2" >1.0</float>
+        </mesh>
+      </group>
+
+    </group>
+  </xml3d>
+</body>
+</html>

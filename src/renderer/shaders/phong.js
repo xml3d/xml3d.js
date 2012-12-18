@@ -73,6 +73,16 @@ XML3D.shaders.register("phong", {
         "uniform vec3 directionalLightVisibility[MAX_DIRECTIONALLIGHTS];",
         "#endif",
 
+        "#if MAX_SPOTLIGHTS > 0",
+        "uniform vec3 spotLightAttenuation[MAX_SPOTLIGHTS];",
+        "uniform vec3 spotLightPosition[MAX_SPOTLIGHTS];",
+        "uniform vec3 spotLightIntensity[MAX_SPOTLIGHTS];",
+        "uniform vec3 spotLightVisibility[MAX_SPOTLIGHTS];",
+        "uniform vec3 spotLightDirection[MAX_SPOTLIGHTS];",
+        "uniform float spotLightCosFalloffAngle[MAX_SPOTLIGHTS];",
+        "uniform float spotLightSoftness[MAX_SPOTLIGHTS];",
+        "#endif",
+
         "void main(void) {",
         "  float alpha =  max(0.0, 1.0 - transparency);",
         "  vec3 objDiffuse = diffuseColor;",
@@ -119,6 +129,30 @@ XML3D.shaders.register("phong", {
         "  }",
         "#endif",
 
+        "#if MAX_SPOTLIGHTS > 0",
+        "  for (int i=0; i<MAX_SPOTLIGHTS; i++) {",
+        "    vec4 lPosition = viewMatrix * vec4( spotLightPosition[ i ], 1.0 );",
+        "    vec3 L = lPosition.xyz - fragVertexPosition;",
+        "    float dist = length(L);",
+        "    L = normalize(L);",
+        "    vec3 R = normalize(reflect(L,fragNormal));",
+        "    float atten = 1.0 / (spotLightAttenuation[i].x + spotLightAttenuation[i].y * dist + spotLightAttenuation[i].z * dist * dist);",
+        "    vec3 Idiff = spotLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
+        "    vec3 Ispec = spotLightIntensity[i] * objSpecular * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
+        "    float spot = 0.0;",
+        "    vec4 lDirection = viewMatrix * vec4(spotLightDirection[i], 0.0);",
+        "    vec3 D = normalize(lDirection.xyz);",
+        "    float angle = dot(L, D);",
+        "    if(angle > spotLightCosFalloffAngle[i]) {",
+        "       float fullAngle = spotLightCosFalloffAngle[i] + spotLightSoftness[i] * (1.0 - spotLightCosFalloffAngle[i]);",
+        "       float softness = 1.0;",
+        "       if (angle < fullAngle)",
+        "           softness = (angle - spotLightCosFalloffAngle[i]) /  (fullAngle -  spotLightCosFalloffAngle[i]);",
+        "       color += atten*softness*(Idiff + Ispec) * spotLightVisibility[i];",
+        "    }",
+        "  }",
+        "#endif",
+
         "  gl_FragColor = vec4(color, alpha);",
         "}"
     ].join("\n"),
@@ -126,8 +160,10 @@ XML3D.shaders.register("phong", {
     addDirectives: function(directives, lights, params) {
         var pointLights = lights.point ? lights.point.length : 0;
         var directionalLights = lights.directional ? lights.directional.length : 0;
+        var spotLights = lights.spot ? lights.spot.length : 0;
         directives.push("MAX_POINTLIGHTS " + pointLights);
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
+        directives.push("MAX_SPOTLIGHTS " + spotLights);
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
         directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));

@@ -1,0 +1,28 @@
+<!--
+	Purpose of Test:
+	Check basic nesting of <data> and input elements
+-->
+<XflowTest>
+    <Input>
+    
+        <data id="data1">
+            <float name="A" id="a1" >0.0</float>
+        </data>
+        
+        <data id="data2">
+            <float name="B" id="b1" >1.0</float>
+        </data>
+             
+    </Input>
+    <TestProcess>
+
+        <Check title="Check #data1" data="#data1">
+            <MatchInput name="A" input="#a1" />
+        </Check>
+        
+        <Check title="Check #data2" data="#data2">
+            <MatchInput name="B" input="#b1" />
+        </Check>
+        
+    </TestProcess>
+</XflowTest>

@@ -1,0 +1,82 @@
+<XflowTest>
+    <Input>
+        
+    	<data id="sequence" >
+    		<float4 name="sequence" key="0" id="first_seq_entry" >
+    		    		0.707107 0 0 0.707107  
+    					0.891007 0 0.453991 0
+    					0.156434 0.987688 0 0
+    		</float4>   	
+    		<float4 name="sequence" key="1" >
+    		    		0.987688 0 0 0.156434
+    					0.453991 0.891007 0 0
+    					0.987688 0 0 0.156434
+    		</float4>
+    		<float4 name="sequence" key="3" >
+    		    		0.453991 0 0.630037 0.630037
+    					0.156434 0 -0.698401 0.698401
+    					0.587785 -0.467086 -0.467086 -0.467086
+    		</float4>
+    		
+    	</data>
+    
+        <data id="data1" compute="result = xflow.slerpSeq(sequence, key)" >
+            <data src="#sequence" />
+            <float name="key" id="seqIndex1" >0.0</float>
+        </data>
+        
+    </Input>
+    <TestProcess>
+
+        <Check title="Check interpolated value #1" data="#data1" >
+            <MatchData name="result" type="float4" >
+    		    		0.707107 0 0 0.707107  
+    					0.891007 0 0.453991 0
+    					0.156434 0.987688 0 0
+            </MatchData>
+        </Check>
+        
+        <Modification title="Change sequence weight #1" >
+            <ChangeData input="#seqIndex1" >0.5</ChangeData>
+        </Modification>
+        <Check title="Check interpolated value #2" data="#data1" >
+            <MatchData name="result" type="float4" >
+                     	0.891006 0 0 0.453991
+            			0.802498 0.531623 0.270875 0
+            			0.752938 0.64999 0 0.102948
+            </MatchData>
+        </Check>
+        <Modification title="Change sequence weight #2" >
+            <ChangeData input="#seqIndex1" >1.0</ChangeData>
+        </Modification>
+        <Check title="Check interpolated value #3" data="#data1" >
+            <MatchData name="result" type="float4" >
+    		    		0.987688 0 0 0.156434
+    					0.453991 0.891007 0 0
+    					0.987688 0 0 0.156434
+            </MatchData>
+        </Check>
+        <Modification title="Change sequence weight #3" >
+            <ChangeData input="#seqIndex1" >0.8</ChangeData>
+        </Modification>
+        <Check title="Check interpolated value #4" data="#data1" >
+            <MatchData name="result" type="float4" >
+    		    		0.960294 0 0 0.278991
+    					0.618934 0.777185 0.113593 0
+    					0.949446 0.27928 0 0.143372
+            </MatchData>
+        </Check>
+        <Modification title="Change sequence weight #4" >
+            <ChangeData input="#seqIndex1" >1.4</ChangeData>
+        </Modification>
+        <Check title="Check interpolated value #5" data="#data1" >
+            <MatchData name="result" type="float4" >
+    		    		0.948006 0 0.148346 0.281565
+    					0.470509 0.832482 -0.206876 0.206876
+    					0.987173 -0.111785 -0.111785 0.0222874
+            </MatchData>
+        </Check>
+        
+    </TestProcess>
+</XflowTest>
+

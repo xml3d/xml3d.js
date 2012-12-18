@@ -8,18 +8,22 @@
 </head>
 <body style="background-color: #fff;width:500px">
   <xml3d id="myXml3d" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
-	  <defs>
-        <transform id="t_identity"/>
-        <transform id="t_regular"/>
-        <transform id="t_translation" translation="1 2 3"/>
-        <transform id="t_rotation" rotation="1 0 0 1.57079632679489"/>
-        <transform id="t_rotation2" rotation="0 1 0 1.57079632679489"/>
-        <transform id="t_rotation3" rotation="0 0 1 1.57079632679489"/>
-        <transform id="t_scale" scale="1 2 3"/>
-        <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708"  translation="1 2 3"/>
-	  </defs>
-	<view id="myView" fieldOfView="0.5"/>
-	<light id="myLight"/>
+    <defs>
+      <transform id="t_identity"/>
+      <transform id="t_regular"/>
+      <transform id="t_translation" translation="1 2 3"/>
+      <transform id="t_rotation" rotation="1 0 0 1.57079632679489"/>
+      <transform id="t_rotation2" rotation="0 1 0 1.57079632679489"/>
+      <transform id="t_rotation3" rotation="0 0 1 1.57079632679489"/>
+      <transform id="t_scale" scale="1 2 3"/>
+      <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708"  translation="1 2 3"/>
+    </defs>
+    <group id="viewParent">
+        <view id="myView" fieldOfView="0.5"/>
+    </group>
+    <group id="lightParent">
+        <light id="myLight"/>
+    </group>
     <group id="myGroup" visible="false">
         <mesh id="myMesh01" type="lines" onclick="alert('Hallo');"/>
     </group>

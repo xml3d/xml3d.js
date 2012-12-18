@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>XML3D Basic Scene</title>
+      <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+      <script type="text/javascript" src="../../tools/camera.js"></script>
+  </head>
+  <body>
+    <div>
+      <xml3d id="MyXml3d" style="width: 640px; height: 480px; border: 1px solid gray" activeView="#myview"
+             xmlns="http://www.xml3d.org/2009/xml3d">
+        <defs>
+          <shader id="ex4_2_texShader" script="urn:xml3d:shader:phong">
+            <float3 name="diffuseColor">1.0 1.0 1.0</float3>
+            <float name="ambientIntensity">1.0</float>
+            <texture name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+              <video id="myvideo"/>
+            </texture>
+          </shader>
+        </defs>
+        <view id="myview" position="0 0 -8" orientation="0 1 0 3.14159" fieldOfView="0.7854" />
+        <group style="shader: url(#ex4_2_texShader)" >
+          <mesh type="triangles">
+            <int name="index">0 1 2  1 2 3</int>
+            <float3 name="position">
+              -1 -0.75 -6
+               1 -0.75 -6
+              -1  0.75 -6
+               1  0.75 -6
+            </float3>
+            <float2 name="texcoord">
+              1.0 0.0
+              0.0 0.0
+              1.0 1.0
+              0.0 1.0
+            </float2>
+          </mesh>
+        </group>
+      </xml3d>
+    </div>
+  </body>
+</html>

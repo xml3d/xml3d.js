@@ -1,0 +1,41 @@
+<XflowTest>
+    <Input>
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+#define PROGRAM_PARAMS(X)                   \
+    X(in,  Float4, diffuseColor, COLOR)     \
+    X(in,  Float, value, NO_SEMANTIC)       \
+    X(out, Float4, result, COLOR)
+
+FLOW_PROGRAM_WITH_PARAMS(TestVector4ScalarMult, PROGRAM_PARAMS)
+{
+    ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+
+    result = diffuseColor * value;
+}
+]]>
+      </script>
+
+      <data id="data1" compute="result = TestVector4ScalarMult(diffuseColor, value)">
+        <float4 name="diffuseColor" id="diffuseColor_1">
+          1.0 2.0 3.0 1.23 4.0 5.0 6.0 4.56 7.0 8.0 9.0 7.89 0.0 7.0 13.0 42.0
+        </float4>
+        <float name="value" id="value_1">
+          3.0 7.0 13.0 42.0
+        </float>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+        <Check title="First Check" data="#data1" >
+            <MatchInput name="diffuseColor" input="#diffuseColor_1" />
+            <MatchInput name="value" input="#value_1" />
+            <MatchData name="result" type="float4" >
+              3 6 9 3.69 28 35 42 31.92 91 104 117 102.57 0 294 546 1764
+            </MatchData>
+        </Check>
+
+    </TestProcess>
+</XflowTest>

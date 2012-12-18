@@ -1,0 +1,60 @@
+<XflowTest>
+    <Input>
+        
+        <data id="template1">
+            <data map="position:=result"  script="urn:xml3d:xflow:morph3">
+            <float3 name="valueAdd" replaceby="posAdd1" ></float3>
+            <float name="weight" replaceby="weight1" ></float>  
+            
+            <data map="value:=result" script="urn:xml3d:xflow:morph3">
+                <float3 name="valueAdd" replaceby="posAdd2" ></float3>
+                <float name="weight" replaceby="weight2" ></float>  
+                
+                <data map="value:=result" script="urn:xml3d:xflow:morph3">
+                    <float3 name="valueAdd" replaceby="posAdd3" ></float3>
+                    <float name="weight" replaceby="weight3" ></float>                        
+                    
+                    <float3 name="value" replaceby="position" ></float3>
+                </data> 
+            </data>
+        </data>
+            
+        </data>
+		
+		
+		<data id="someMesh" >
+			<int 	name="index" 	>0 1 2 1 2 3</int>
+			<float3 name="position"	>1 1 1  2 2 2</float3>
+			<float3 name="posAdd1"	>1 1 1  0 0 0</float3>
+			<float3 name="posAdd2"	>1 0 0  0 -1 0</float3>
+			<float3 name="posAdd3"	>0 0 1  1 0 0</float3>	
+		</data>
+		
+		<data id="instance1" template="template1" >
+			<data src="#someMesh" />
+			<float name="weight1">0.3</float>
+			<float name="weight2">0.5</float>
+			<float name="weight3">0.7</float>
+		</data>
+		
+		<data id="instance2" template="template1" map="position:=valueAdd" >
+			<data src="#someMesh" />
+			<float name="weight1">0.0</float>
+			<float name="weight2">0.0</float>
+			<float name="weight3">0.0</float>
+		</data>
+        
+    </Input>
+    <TestProcess>    
+    
+        <Show title="Show Vertex Shader Instance 1" data="#instance1" what="VertexShader" filter="position color" >
+        	<VSConnection in="position" out="position" type="FLOAT3_WORLD_POINT" />
+        	<VSConnection in="color" out="color" type="FLOAT4" optional="true" />
+        </Show>
+        
+        <Show title="Show Vertex Shader Instance 2" data="#instance2" what="VertexShader" filter="position color" >
+        	<VSConnection in="position" out="position" type="FLOAT3_VIEW_POINT" />
+        	<VSConnection in="color" out="color" type="FLOAT4" optional="true" />
+        </Show>
+    </TestProcess>
+</XflowTest>

@@ -73,11 +73,11 @@ QUnit.extend( QUnit, {
     },
 
     closeArray : function(actual, expected, maxDifference, message) {
-        if (actual.toString() != expected.toString())
-            QUnit.push(false, actual, expected, message);
 
-        if (actual.length != expected.length)
+        if(!actual || actual.toString() != expected.toString() || actual.length != expected.length){
             QUnit.push(false, actual, expected, message);
+            return;
+        }
 
         for (var i=0; i<actual.length; i++) {
             if (Math.abs(actual[i] - expected[i]) > maxDifference) {
@@ -141,9 +141,6 @@ new (function() {
 var loadDocument = function(url, f) {
     var v = document.getElementById("xml3dframe");
     ok(v, "Found frame.");
-    v.style.float = "right";
-    v.style.width = "500px";
-    v.style.height = "300px";
     v.addEventListener("load", f, true);
     v.src = url;
 };
@@ -194,7 +191,7 @@ XML3DUnit.loadSceneTestImages = function(doc, refSceneId, testSceneId, callback)
     var refImagesLoaded = 0;
     function onLoad(){
         refImagesLoaded++;
-        if(refImagesLoaded >= 2)
+        if(refImagesLoaded == 2)
             callback(refImage, testImage);
     }
 
@@ -213,3 +210,10 @@ XML3DUnit.getPixelValue = function(canvas, x,y) {
         a[i] = pixels[i];
     return a;
 };
+
+XML3DUnit.pixelsAreEqual = function(actual, shouldBe){
+    return actual[0] == shouldBe[0] &&
+            actual[1] == shouldBe[1] &&
+            actual[2] == shouldBe[2] &&
+            actual[3] == shouldBe[3];
+}

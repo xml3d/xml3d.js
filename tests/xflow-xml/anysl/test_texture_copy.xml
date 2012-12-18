@@ -1,0 +1,51 @@
+<XflowTest>
+    <Input>
+
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+program(TestTextureCopy,
+    param(in,  Sampler2D, in_image),
+    param(out,  Sampler2D, out_image, sizeof:in_image parallel))
+{
+    Int width = GetTextureWidth(in_image);
+    Int height = GetTextureHeight(in_image);
+
+    Int tid(arGetCurrentThreadID()); // = y * width + x
+    Int y = tid / width;
+    Int x = tid % width;
+
+    Vector4 color = GetTexel2D(in_image, x, y);
+    SetTexel2D(out_image, x, y, color);
+}
+]]>
+      </script>
+
+      <data id="image">
+        <texture name="image" id="texture_1">
+          <img src="test_rgba4.png"/>
+        </texture>
+      </data>
+
+      <data id="processedImage" compute="image = TestTextureCopy(image)" >
+	    <data src="#image" />
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="Check just the image" data="#image" >
+        <MatchInput name="image" input="#texture_1" />
+        <MatchData name="image" type="texture" >
+          <img src="test_rgba4.png"/>
+        </MatchData>
+      </Check>
+
+      <Check title="Check processed image" data="#processedImage" >
+        <MatchData name="image" type="texture" >
+          <img src="test_rgba4.png"/>
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

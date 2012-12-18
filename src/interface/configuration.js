@@ -60,7 +60,7 @@ XML3D.classInfo = {};
  * Properties and methods for <xml3d>
  **/
 XML3D.classInfo['xml3d'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.CanvasClassHandler, id: 'class'},
     style : {a: XML3D.CanvasStyleHandler},
     onclick : {a: XML3D.EventAttributeHandler},
@@ -90,7 +90,7 @@ XML3D.classInfo['xml3d'] = {
  * Properties and methods for <data>
  **/
 XML3D.classInfo['data'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     compute : {a: XML3D.StringAttributeHandler},
@@ -105,7 +105,7 @@ XML3D.classInfo['data'] = {
  * Properties and methods for <defs>
  **/
 XML3D.classInfo['defs'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for defs
     _term: undefined
@@ -114,7 +114,7 @@ XML3D.classInfo['defs'] = {
  * Properties and methods for <group>
  **/
 XML3D.classInfo['group'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for group
     onclick : {a: XML3D.EventAttributeHandler},
@@ -139,7 +139,7 @@ XML3D.classInfo['group'] = {
  * Properties and methods for <mesh>
  **/
 XML3D.classInfo['mesh'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for mesh
     onclick : {a: XML3D.EventAttributeHandler},
@@ -158,13 +158,14 @@ XML3D.classInfo['mesh'] = {
     getWorldMatrix : {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     getBoundingBox : {m: XML3D.methods.meshGetBoundingBox},
     src : {a: XML3D.ReferenceHandler},
+    proto : {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
  * Properties and methods for <transform>
  **/
 XML3D.classInfo['transform'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for transform
     translation : {a: XML3D.XML3DVec3AttributeHandler, params: [0, 0, 0]},
@@ -178,19 +179,20 @@ XML3D.classInfo['transform'] = {
  * Properties and methods for <shader>
  **/
 XML3D.classInfo['shader'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for shader
     compute : {a: XML3D.StringAttributeHandler},
     script : {a: XML3D.ReferenceHandler},
     src : {a: XML3D.ReferenceHandler},
+    proto : {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
  * Properties and methods for <light>
  **/
 XML3D.classInfo['light'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for light
     onclick : {a: XML3D.EventAttributeHandler},
@@ -214,19 +216,20 @@ XML3D.classInfo['light'] = {
  * Properties and methods for <lightshader>
  **/
 XML3D.classInfo['lightshader'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for lightshader
     compute : {a: XML3D.StringAttributeHandler},
     script : {a: XML3D.ReferenceHandler},
     src : {a: XML3D.ReferenceHandler},
+    proto : {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
  * Properties and methods for <script>
  **/
 XML3D.classInfo['script'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for script
     value : {a: XML3D.StringAttributeHandler},
@@ -235,15 +238,29 @@ XML3D.classInfo['script'] = {
     _term: undefined
 };
 /**
+ * Properties and methods for <proto>
+ **/
+XML3D.classInfo['proto'] = {
+    id : {a: XML3D.IDHandler},
+    className : {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for proto
+    compute : {a: XML3D.StringAttributeHandler},
+    filter : {a: XML3D.StringAttributeHandler},
+    getOutputFieldNames : {m: XML3D.methods.protoGetOutputFieldNames},
+    src : {a: XML3D.ReferenceHandler},
+    proto : {a: XML3D.ReferenceHandler},
+    _term: undefined
+};
+/**
  * Properties and methods for <float>
  **/
 XML3D.classInfo['float'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.FloatArrayValueHandler},
     _term: undefined
 };
@@ -251,12 +268,12 @@ XML3D.classInfo['float'] = {
  * Properties and methods for <float2>
  **/
 XML3D.classInfo['float2'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float2
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float2ArrayValueHandler},
     _term: undefined
 };
@@ -264,12 +281,12 @@ XML3D.classInfo['float2'] = {
  * Properties and methods for <float3>
  **/
 XML3D.classInfo['float3'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float3
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float3ArrayValueHandler},
     _term: undefined
 };
@@ -277,12 +294,12 @@ XML3D.classInfo['float3'] = {
  * Properties and methods for <float4>
  **/
 XML3D.classInfo['float4'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float4
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float4ArrayValueHandler},
     _term: undefined
 };
@@ -290,12 +307,12 @@ XML3D.classInfo['float4'] = {
  * Properties and methods for <float4x4>
  **/
 XML3D.classInfo['float4x4'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for float4x4
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float4x4ArrayValueHandler},
     _term: undefined
 };
@@ -303,12 +320,12 @@ XML3D.classInfo['float4x4'] = {
  * Properties and methods for <int>
  **/
 XML3D.classInfo['int'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for int
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.IntArrayValueHandler},
     _term: undefined
 };
@@ -316,12 +333,12 @@ XML3D.classInfo['int'] = {
  * Properties and methods for <int4>
  **/
 XML3D.classInfo['int4'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for int4
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.IntArrayValueHandler},
     _term: undefined
 };
@@ -329,12 +346,12 @@ XML3D.classInfo['int4'] = {
  * Properties and methods for <bool>
  **/
 XML3D.classInfo['bool'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for bool
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.BoolArrayValueHandler},
     _term: undefined
 };
@@ -342,12 +359,12 @@ XML3D.classInfo['bool'] = {
  * Properties and methods for <texture>
  **/
 XML3D.classInfo['texture'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for texture
     name : {a: XML3D.StringAttributeHandler},
-    replaceby : {a: XML3D.StringAttributeHandler},
-    seqnr : {a: XML3D.FloatAttributeHandler, params: 0.0},
+    param : {a: XML3D.BoolAttributeHandler, params: false},
+    key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     type : {a: XML3D.EnumAttributeHandler, params: {e: XML3D.TextureTypes, d: 0}},
     filterMin : {a: XML3D.EnumAttributeHandler, params: {e: XML3D.FilterTypes, d: 2}},
     filterMag : {a: XML3D.EnumAttributeHandler, params: {e: XML3D.FilterTypes, d: 2}},
@@ -362,7 +379,7 @@ XML3D.classInfo['texture'] = {
  * Properties and methods for <img>
  **/
 XML3D.classInfo['img'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for img
     src : {a: XML3D.StringAttributeHandler},
@@ -372,9 +389,12 @@ XML3D.classInfo['img'] = {
  * Properties and methods for <video>
  **/
 XML3D.classInfo['video'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for video
+    oncanplaythrough : {a: XML3D.EventAttributeHandler},
+    onended : {a: XML3D.EventAttributeHandler},
+    onerror : {a: XML3D.EventAttributeHandler},
     src : {a: XML3D.StringAttributeHandler},
     _term: undefined
 };
@@ -382,7 +402,7 @@ XML3D.classInfo['video'] = {
  * Properties and methods for <view>
  **/
 XML3D.classInfo['view'] = {
-    id : {a: XML3D.StringAttributeHandler},
+    id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for view
     onclick : {a: XML3D.EventAttributeHandler},

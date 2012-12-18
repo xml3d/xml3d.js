@@ -1,7 +1,7 @@
 // rotation.js
-(function($) {
-    // Is native?
-    if($) return;
+(function(isNative) {
+
+    if(isNative) return;
 
     function orthogonal(v) {
         if ((Math.abs(v._data[1]) >= 0.9*Math.abs(v._data[0])) && (Math.abs(v._data[2]) >= 0.9*Math.abs(v._data[0])))
@@ -49,7 +49,9 @@
             this._updateQuaternion();
         }
 
-    }, p = XML3DRotation.prototype;
+    }; 
+    
+    var p = XML3DRotation.prototype;
 
     /** @type {number} */
     Object.defineProperty(p, "axis", {
@@ -264,6 +266,15 @@
     p.normalize = function(that) {
         var na = this._axis.normalize();
         return new XML3DRotation(na, this._angle);
+    };
+    
+    /** 
+     * Returns the quaternion, that underlies this rotation. 
+     * 
+     * @return {Float32Array} 
+     */
+    p.getQuaternion = function() {
+        return quat4.create(this._data); 
     };
 
     XML3D.XML3DRotation = XML3DRotation;

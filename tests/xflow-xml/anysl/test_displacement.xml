@@ -1,0 +1,53 @@
+<XflowTest>
+    <Input>
+
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+
+#define PROGRAM_PARAMS(X)                          \
+    X(in,  Vector3, in_position, NONE)             \
+    X(in,  Vector3, in_normal, NONE)               \
+    X(in,  Float2, in_texcoord, NONE)              \
+    X(in,  Float, strength, NONE)                  \
+    X(in,  Sampler2D, diffuseTexture, SAMPLER)     \
+    X(out, Vector3, out_color, NONE)
+
+FLOW_PROGRAM_WITH_PARAMS(TestDisplacement, PROGRAM_PARAMS)
+{
+    ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+
+    Vector4 dv = SampleTexture2D( diffuseTexture, in_texcoord );
+    out_color = in_position + (in_normal * dv.x() * strength);
+}
+]]>
+      </script>
+
+      <data id="processing" compute=" color = TestDisplacement(position, normal, texcoord, strength, diffuseTexture) " >
+        <texture name="diffuseTexture" id="texture_1">
+          <img src="test_displacement.ppm"/>
+        </texture>
+        <float2 name="texcoord">0 0 0.25 0 0.5 0 0.75 0</float2>
+        <float3 name="position">0 0 0 1 1 1 2 2 2 3 3 3</float3>
+        <float3 name="normal">1 0 0 0 2 0 0 0 3 1.4142 1.4142 0</float3>
+        <float name="strength">2</float>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="Check just the image" data="#processing" >
+        <MatchInput name="diffuseTexture" input="#texture_1" />
+        <MatchData name="diffuseTexture" type="texture" >
+          <img src="test_displacement.ppm"/>
+        </MatchData>
+      </Check>
+
+      <Check title="Check processed data" data="#processing" >
+        <MatchData name="color" type="float3" epsilon="1e-6">
+          2 0 0 1 5 1 2 2 8 5.8284 5.8284 3
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

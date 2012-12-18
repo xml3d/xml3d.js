@@ -1,26 +1,25 @@
 // Adapter for <shader>
 (function() {
 
-    var XML3DShaderRenderAdapter = function(factory, node) {
+    var ShaderRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.renderer = this.factory.renderer;
 
-        this.dataAdapter = this.renderer.dataFactory.getAdapter(this.node);
-        this.table = new XML3D.data.ProcessTable(this, [], this.dataChanged);
+        this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.computeRequest;
     };
 
-    XML3D.createClass(XML3DShaderRenderAdapter, XML3D.webgl.RenderAdapter);
-    var p = XML3DShaderRenderAdapter.prototype;
+    XML3D.createClass(ShaderRenderAdapter, XML3D.webgl.RenderAdapter);
+    var p = ShaderRenderAdapter.prototype;
 
     p.notifyChanged = function(evt) {
-        if (evt.type == 0) {
+        if (evt.type == XML3D.events.NODE_INSERTED) {
             this.factory.renderer.sceneTreeAddition(evt);
             return;
-        } else if (evt.type == 2) {
+        } else if (evt.type == XML3D.events.NODE_REMOVED) {
             this.factory.renderer.sceneTreeRemoval(evt);
             return;
-        } else if (evt.type == 5) {
+        } else if (evt.type == XML3D.events.THIS_REMOVED) {
             var target = evt.wrapped.target;
             if (target && target.nodeName == "texture") {
                 // A texture was removed completely, so this shader has to be
@@ -63,9 +62,11 @@
         Array.forEach(this.textures, function(t) {
             t.adapter.destroy();
         });
+        if (this.computeRequest)
+            this.computeRequest.clear();
     };
 
     // Export to XML3D.webgl namespace
-    XML3D.webgl.XML3DShaderRenderAdapter = XML3DShaderRenderAdapter;
+    XML3D.webgl.ShaderRenderAdapter = ShaderRenderAdapter;
 
 }());

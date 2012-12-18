@@ -64,7 +64,7 @@
                 }
                 //console.dir(this.result);
             } catch (e) {
-                XML3D.debug.logError("Failed to evaluate xflow script: " + e);
+                XML3D.debug.logExecption(e, "Failed to evaluate xflow script: ");
             }
             this.needsEvaluation = false;
         };

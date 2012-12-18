@@ -1,0 +1,62 @@
+<XflowTest>
+    <Input>
+
+      <script id="add2" type="x-shader/anysl.vertex.text">
+<![CDATA[
+            #define PROGRAM_PARAMS(X)                    \
+                X(in,  float, value, NO_SEMANTIC)        \
+                X(out,  float, result, NO_SEMANTIC)
+
+            FLOW_PROGRAM_WITH_PARAMS(TestProgram1, PROGRAM_PARAMS)
+            {
+                ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+
+//printf("Program1\n");
+
+                result = value + Float(2);
+            }
+            #undef PROGRAM_PARAMS
+]]>
+      </script>
+
+      <script id="add3" type="x-shader/anysl.vertex.text">
+<![CDATA[
+            #define PROGRAM_PARAMS(X)                  \
+                X(in,  float, value, size:data)        \
+                X(out,  float, result, NO_SEMANTIC)
+
+            FLOW_PROGRAM_WITH_PARAMS(TestProgram2, PROGRAM_PARAMS)
+            {
+                ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+
+//printf("Program2\n");
+                result = value + Float(3);
+            }
+]]>
+      </script>
+
+      <data id="data2" compute="result = TestProgram2(value)"  >
+        <data id="data1" compute="value = TestProgram1(value)" >
+          <float name="value" id="value_1">
+            3.0 7.0 13.0 42.0
+          </float>
+        </data>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+        <Check title="First Check" data="#data1" >
+            <MatchData name="value" type="float" >
+              5 9 15 44
+            </MatchData>
+        </Check>
+
+        <Check title="Second Check" data="#data2" filter="result">
+            <MatchData name="result" type="float" >
+              8 12 18 47
+            </MatchData>
+        </Check>
+
+    </TestProcess>
+</XflowTest>

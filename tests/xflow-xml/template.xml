@@ -1,0 +1,48 @@
+<XflowTest>
+    <Input>
+        <!-- Declare the xflow graph here -->
+        <data id="data1">
+            <int name="index" id="index_1" >0 1 2 1 2 3</int>
+            <float3 name="position" id="position_1">0 1.0 2.0 3.0 5.0 4.0</float3>
+            <float3 name="normal" id="normal_1" >0 1 0 1 0 0 0 0 1</float3>
+        </data>
+    </Input>
+    <TestProcess>
+        
+        <!-- Check the output of a <data> node -->
+        <Check title="First Check" data="#data1" filter="index position normal" >
+                
+            <!-- Data pointer of output should match that of an input -->
+            <MatchInput name="index" input="#index_1" />
+            
+			<!-- Output data should have the specified value -->            
+            <MatchData name="position" type="float3" >0 1.0 2 3.0 5.0 4.0</MatchData>
+            
+            <!-- Output should be null -->
+            <MatchNull name="normal2" />
+        </Check>
+        
+        <!-- Modify the Xflow graph -->
+        <Modification title="Change morphing weight again" >
+            
+        	<!-- Change the data of an input -->
+            <ChangeData input="#position_1" >0 0 1</ChangeData>
+            
+            <!-- Change (add) an attribute (node or input) -->
+            <ChangeAttribute node="#data1" attrName="filter" newValue="rename({pos:position})" />     \
+            
+            <!-- Remove an attribute (node or input) -->
+            <ChangeAttribute node="#index_1" attrName="name" remove="true" />     
+            
+            <!-- Remove a node (input or data) -->
+            <RemoveNode node="#normal_1" />
+            
+            <!-- Add new nodes (data or input). If parentData is not specified, add to root -->
+            <AddNodes parentData="#data1" >
+           		<float3 name="normal" id="normal_2" >0 1 0 1 0 0</float3>
+            </AddNodes>
+        </Modification>
+        
+        
+    </TestProcess>
+</XflowTest>

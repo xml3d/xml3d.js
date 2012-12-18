@@ -6,7 +6,9 @@ XML3D.config.isXML3DElement = function(e) {
 
 /**
  * @param {Element} element
- * @param {boolean=} selfmonitoring
+ * @param {boolean=} selfmonitoring: whether to register listeners on element for node 
+ *                  addition/removal and attribute modification. This property is propagated
+ *                  to children. 
  * @return {undefined}
  */
 XML3D.config.element = function(element, selfmonitoring) {
@@ -23,17 +25,29 @@ XML3D.config.element = function(element, selfmonitoring) {
             if (element.style == undefined)
                 element.style = null;
             var n = element.firstElementChild;
+
+            XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.getAttribute("id"));
+
             while(n) {
-                XML3D.config.element(n);
+                XML3D.config.element(n, selfmonitoring);
                 n = n.nextElementSibling;
             }
         }
     }
 };
 
+/**
+ * @param {Element} element
+ * @param {boolean=} selfmonitoring: whether to register listeners on element for node 
+ *                  addition/removal and attribute modification. This property is propagated
+ *                  to children. 
+ * @return {undefined}
+ */
 XML3D.config.configure = function(element, selfmonitoring) {
     if (Array.isArray(element)) {
-        Array.forEach(element, XML3D.config.element);
+        Array.forEach(element, function(el) {
+            XML3D.config.element(el, selfmonitoring); 
+        });
     } else {
         XML3D.config.element(element, selfmonitoring);
     }

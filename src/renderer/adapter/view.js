@@ -1,6 +1,6 @@
 // Adapter for <view>
 (function() {
-    var XML3DViewRenderAdapter = function(factory, node) {
+    var ViewRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.zFar = 100000;
         this.zNear = 0.1;
@@ -10,8 +10,8 @@
         this.worldPosition = [0,0,0];
         this.updateViewMatrix();
     };
-    XML3D.createClass(XML3DViewRenderAdapter, XML3D.webgl.RenderAdapter);
-    var p = XML3DViewRenderAdapter.prototype;
+    XML3D.createClass(ViewRenderAdapter, XML3D.webgl.RenderAdapter);
+    var p = ViewRenderAdapter.prototype;
 
     var tmp = mat4.create(),
         tmp2 = mat4.create();
@@ -59,6 +59,19 @@
         m._data.set(this.viewMatrix);
         return m;
     };
+    
+    /** 
+     * @return {XML3DMatrix} returns the inverse of the view matrix, since now we 
+     * want to go world2view and not view2world
+     */
+    p.getWorldMatrix = function() {        
+        var m = new window.XML3DMatrix();  
+        var tmp = mat4.create(); 
+        mat4.inverse(this.viewMatrix, tmp); 
+        m._data.set(tmp);
+        return m; 
+    }; 
+
 
     p.getModelViewMatrix = function(model) {
         return mat4.multiply(this.viewMatrix, model, mat4.create());
@@ -99,6 +112,6 @@
     };
 
     // Export to XML3D.webgl namespace
-    XML3D.webgl.XML3DViewRenderAdapter = XML3DViewRenderAdapter;
+    XML3D.webgl.ViewRenderAdapter = ViewRenderAdapter;
 
 }());

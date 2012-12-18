@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xml3d-utils-module" default="concat" basedir=".">
+    <description>
+            All utility functionality
+    </description>
+    <import file="../../build/build-master.xml" />
+
+    <filelist dir="." id="sourceFiles">
+        <file name="./misc.js" />
+        <file name="./array.js" />
+        <file name="./debug.js" />
+        <file name="./uri.js" />
+        <file name="./css.js" />
+        <file name="./cssMatrix.js" />
+    </filelist>
+
+    <target name="concat">
+        <concat-module name="${ant.project.name}" path="${build.path}" sources="sourceFiles"/>
+    </target>
+
+    <target name="compile">
+        <compile-module name="${ant.project.name}" path="${build.path}" sources="sourceFiles"/>
+    </target>
+
+</project>

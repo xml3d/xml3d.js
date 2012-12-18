@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xml3d-renderer-module" default="concat" basedir=".">
+    <description>
+            All WebGL-rendering related functionality
+    </description>
+    <import file="../../build/build-master.xml" />
+
+    <filelist dir="." id="sourceFiles">
+        <file name="base.js" />
+        <file name="datachangelistener.js" />
+        <file name="canvashandler.js" />
+        <file name="utils.js" />
+        <file name="shadermanager.js" />
+        <file name="material.js" />
+        <file name="bufferhandler.js" />
+        <file name="renderer.js" />
+        <file name="adapter/misc.js" />
+        <file name="adapter/xml3d.js" />
+        <file name="adapter/transform.js" />
+        <file name="adapter/view.js" />
+        <file name="adapter/shader.js" />
+        <file name="adapter/texture.js" />
+        <file name="adapter/mesh.js" />
+        <file name="adapter/group.js" />
+        <file name="adapter/light.js" />
+        <file name="adapter/factory.js" />
+        <file name="shaders/base.js" />
+        <file name="shaders/matte.js" />
+        <file name="shaders/diffuse.js" />
+        <file name="shaders/phong.js" />
+        <file name="shaders/utility.js" />
+    </filelist>
+
+    <target name="concat">
+        <concat-module name="${ant.project.name}" path="${build.path}" sources="sourceFiles"/>
+    </target>
+
+</project>

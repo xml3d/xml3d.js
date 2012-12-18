@@ -13,6 +13,10 @@ XML3D._xml3d = document.createElementNS(XML3D.xml3dNS, "xml3d");
 XML3D._native = !!XML3D._xml3d.style;
 XML3D._parallel = XML3D._parallel != undefined ? XML3D._parallel : false;
 
+XML3D.createElement = function(tagName) {
+    return document.createElementNS(XML3D.xml3dNS, tagName);
+};
+
 XML3D.extend = function(a, b) {
     for ( var prop in b) {
         if (b[prop] === undefined) {
@@ -34,6 +38,7 @@ XML3D.extend = function(a, b) {
 XML3D.createClass = function(ctor, parent, methods) {
     methods = methods || {};
     if (parent) {
+        /** @constructor */
         var F = function() {
         };
         F.prototype = parent.prototype;
@@ -48,6 +53,8 @@ XML3D.createClass = function(ctor, parent, methods) {
 };
 (function() {
     var onload = function() {
+
+        XML3D.css.init();
 
         var debug = XML3D.debug.setup();
         debug && XML3D.debug.logInfo("xml3d.js version: " + XML3D.version);
@@ -120,31 +127,24 @@ XML3D.createClass = function(ctor, parent, methods) {
         try {
             XML3D.config.configure(xml3ds);
         } catch (e) {
-            debug && XML3D.debug.logError("Error initalizing interfaces: " + e);
+            debug && XML3D.debug.logException(e);
         }
         try {
             XML3D.webgl.configure(xml3ds);
         } catch (e) {
-            debug && XML3D.debug.logError("Error initalizing webgl: " + e);
+            debug && XML3D.debug.logException(e);
         }
 
-        var ready = (function(eventType) {
-            var evt = null;
-            if (document.createEvent) {
-                evt = document.createEvent("Events");
-                evt.initEvent(eventType, true, true);
-                document.dispatchEvent(evt);
-            } else if (document.createEventObject) {
-                evt = document.createEventObject();
-                document.fireEvent('on' + eventType, evt);
-            }
-        })('load');
+        // initialize all attached adapters
+        for (i in xml3ds) {
+            XML3D.base.sendAdapterEvent(xml3ds[i], {onConfigured : []});
+        }
     };
     var onunload = function() {
         if (XML3D.document)
             XML3D.document.onunload();
     };
-    window.addEventListener('load', onload, false);
+    window.addEventListener('DOMContentLoaded', onload, false);
     window.addEventListener('unload', onunload, false);
     window.addEventListener('reload', onunload, false);
 

@@ -1,0 +1,46 @@
+<XflowTest>
+    <Input>
+
+      <script id="test-script" type="x-shader/anysl.vertex.text">
+<![CDATA[
+
+#define PROGRAM_PARAMS(X)                       \
+    X(in, Int, index, INDEX)                    \
+    X(uniform, float, weight, WEIGHT)           \
+    X(uniform, FloatArray, array, NONE)         \
+    X(out, Float, result, NONE)
+
+FLOW_PROGRAM_WITH_PARAMS(TestUniformFloatArrayRead, PROGRAM_PARAMS)
+{
+    ANYSL_GET_PARAMETERS(PROGRAM_PARAMS)
+            
+    result = array[index] * weight;
+ }
+]]>
+      </script>
+
+      <data id="data1" compute="result = TestUniformFloatArrayRead(index, weight, array)" >
+        <float name="weight" id="weight_1">
+          2.0
+        </float>
+        <int name="index" id="index_1">
+          0 1 2 3 4 5 6 7 8 9 10 11
+        </int>
+        <float name="array" id="array_1">
+          0 1 2 3 4 5 6 7 8 9 10 11
+        </float>
+      </data>
+
+    </Input>
+    <TestProcess>
+
+      <Check title="First Check" data="#data1" >
+        <MatchInput name="weight" input="#weight_1" />
+        <MatchInput name="index" input="#index_1" />
+        <MatchData name="result" type="float">
+          0 2 4 6 8 10 12 14 16 18 20 22
+        </MatchData>
+      </Check>
+
+    </TestProcess>
+</XflowTest>

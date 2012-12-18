@@ -212,9 +212,13 @@
         var response = c_cachedDocuments[url].response;
         var mimetype = c_cachedDocuments[url].mimetype;
 
-        if(!response) return;
-
         var fullUrl = url + (fragment ? "#" + fragment : "");
+        if (!response) {
+            // In the case the loaded document is not supported we still need to decrement counter object
+            invalidateHandles(fullUrl);
+            return;
+        }
+
         var data = null;
         if (mimetype == "application/json") {
             // TODO: Select subset of data according to fragment

@@ -166,10 +166,10 @@ XML3D.base.IFactory.prototype.canvasId;
  * @param {string} mimetype The mimetype this factory is compatible to
  * @param {number} canvasId The id of the corresponding canvas handler. 0, if not dependent on any CanvasHandler
  */
-XML3D.base.AdapterFactory = function(aspect, mimetype, canvasId) {
+XML3D.base.AdapterFactory = function(aspect, mimetypes, canvasId) {
     this.aspect = aspect;
     this.canvasId = canvasId || 0;
-    this.mimetype = mimetype;
+    this.mimetypes = typeof mimetypes == "string" ? [ mimetypes] : mimetypes;
 
     XML3D.base.registerFactory(this);
 };
@@ -192,7 +192,7 @@ XML3D.base.AdapterFactory.prototype.createAdapter = function(obj) {
  * @param {number} canvasId The id of the corresponding canvas handler. 0, if not dependent on any CanvasHandler
  */
 XML3D.base.NodeAdapterFactory = function(aspect, canvasId) {
-    XML3D.base.AdapterFactory.call(this, aspect, "application/xml", canvasId);
+    XML3D.base.AdapterFactory.call(this, aspect, ["text/xml","application/xml"], canvasId);
 };
 XML3D.createClass(XML3D.base.NodeAdapterFactory, XML3D.base.AdapterFactory);
 

@@ -12,12 +12,9 @@
      */
     XML3D.base.registerFactory = function(factory) {
         var canvasId = factory.canvasId;
-        var mimetype = factory.mimetype;
         if(!c_factories[canvasId])
-            c_factories[canvasId] = {};
-        if (!c_factories[canvasId][mimetype])
-            c_factories[canvasId][mimetype] = [];
-        c_factories[canvasId][mimetype].push(factory);
+            c_factories[canvasId] = [];
+        c_factories[canvasId].push(factory);
     };
 
     /**
@@ -246,8 +243,7 @@
         for ( var adapterType in c_cachedAdapterHandles[url]) {
             for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
-                var factories = c_factories[canvasId];
-                if (!handle.hasAdapter() && factories[mimetype]) {
+                if (!handle.hasAdapter()) {
                     updateHandle(handle, adapterType, canvasId, mimetype, data);
                     loadComplete(canvasId, url);
                 }
@@ -282,9 +278,9 @@
     function updateHandle(handle, adapterType, canvasId, mimetype, data){
         var factories = c_factories[canvasId];
 
-        for ( var i = 0; i < factories[mimetype].length; ++i) {
-            var fac = factories[mimetype][i];
-            if (fac.aspect == adapterType) {
+        for ( var i = 0; i < factories.length; ++i) {
+            var fac = factories[i];
+            if (fac.aspect == adapterType && fac.mimetypes.indexOf(mimetype) != -1) {
                 var adapter = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
                 if (adapter) {
                     handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);

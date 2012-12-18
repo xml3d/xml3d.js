@@ -14,6 +14,7 @@ Mapping.parse = function(string, dataNode){
     results = string.trim().match(nameMappingParser);
     if(results)
         return NameMapping.parse(results[1], dataNode);
+    XML3D.debug.logError("Cannot parse name mapping '" + string + "'");
     return null;
 }
 
@@ -41,7 +42,7 @@ OrderMapping.parse = function(string, dataNode){
 
 
 Object.defineProperty(OrderMapping.prototype, "length", {
-    set: function(v){ throw "length is read-only";
+    set: function(v){ throw new Error("length is read-only");
     },
     get: function(){ return this._name.length; }
 });
@@ -71,13 +72,13 @@ OrderMapping.prototype.isEmpty = function(){
 
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
 
-OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, substitution, filterType, callback){
+OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, destSubstitution, srcSubstitution, filterType, callback){
     for(var i in sourceMap.map){
         var idx = this._names.indexOf(i);
         if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
             ( filterType == Xflow.DATA_FILTER_TYPE.KEEP && idx != -1) ||
             (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
-            callback(destMap, i, sourceMap, i, substitution);
+            callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
     }
 };
 OrderMapping.prototype.getScriptInputName = function(index, destName){
@@ -146,7 +147,7 @@ NameMapping.parse = function(string, dataNode)
 }
 
 Object.defineProperty(NameMapping.prototype, "length", {
-    set: function(v){ throw "length is read-only";
+    set: function(v){ throw new Error("length is read-only");
     },
     get: function(){ return this._srcNames.length; }
 });
@@ -206,21 +207,21 @@ NameMapping.prototype.filterNameset = function(nameset, filterType)
 
 }
 
-NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, substitution, filterType, callback)
+NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, destSubstitution, srcSubstitution, filterType, callback)
 {
     if(filterType == Xflow.DATA_FILTER_TYPE.REMOVE){
         for(var i in sourceMap.map)
             if(this._srcNames.indexOf(i) == -1)
-                callback(destMap, i, sourceMap, i, substitution);
+                callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
     }
     else{
         if(filterType == Xflow.DATA_FILTER_TYPE.RENAME){
             for(var i in sourceMap.map)
                 if(this._srcNames.indexOf(i) == -1)
-                    callback(destMap, i, sourceMap, i, substitution);
+                    callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
         }
         for(var i in this._destNames){
-            callback(destMap, this._destNames[i], sourceMap, this._srcNames[i], substitution);
+            callback(destMap, this._destNames[i], sourceMap, this._srcNames[i], destSubstitution, srcSubstitution);
         }
     }
 };

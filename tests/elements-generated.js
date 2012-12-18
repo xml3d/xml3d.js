@@ -183,7 +183,7 @@ test("&lt;float&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
 });
 test("&lt;float2&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float2");
@@ -193,7 +193,7 @@ test("&lt;float2&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
 });
 test("&lt;float3&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float3");
@@ -203,7 +203,7 @@ test("&lt;float3&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
 });
 test("&lt;float4&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float4");
@@ -213,7 +213,7 @@ test("&lt;float4&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
 });
 test("&lt;float4x4&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float4x4");
@@ -223,7 +223,7 @@ test("&lt;float4x4&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
 });
 test("&lt;int&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "int");
@@ -233,7 +233,7 @@ test("&lt;int&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
 });
 test("&lt;int4&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "int4");
@@ -243,7 +243,7 @@ test("&lt;int4&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
 });
 test("&lt;bool&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "bool");
@@ -253,7 +253,7 @@ test("&lt;bool&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
 });
 test("&lt;texture&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "texture");
@@ -263,7 +263,7 @@ test("&lt;texture&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
-    equal(typeof e.seqnr, "number", "seqnr is of type 'number'");
+    equal(typeof e.key, "number", "key is of type 'number'");
     equal(typeof e.type, "string", "type is of type 'string'");
     equal(typeof e.filterMin, "string", "filterMin is of type 'string'");
     equal(typeof e.filterMag, "string", "filterMag is of type 'string'");

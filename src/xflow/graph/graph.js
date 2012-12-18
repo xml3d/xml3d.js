@@ -63,7 +63,7 @@ var GraphNode = Xflow.GraphNode;
 Xflow.InputNode = function(graph){
     Xflow.GraphNode.call(this, graph);
     this._name = "";
-    this._seqnr = 0;
+    this._key = 0;
     this._data = null;
     this._param = false;
 };
@@ -85,14 +85,14 @@ Object.defineProperty(InputNode.prototype, "name", {
     /** @return {string} */
     get: function(){ return this._name; }
 });
-Object.defineProperty(InputNode.prototype, "seqnr", {
+Object.defineProperty(InputNode.prototype, "key", {
     /** @param {number} v */
     set: function(v){
-        this._seqnr = v;
+        this._key = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {number} */
-    get: function(){ return this._seqnr; }
+    get: function(){ return this._key; }
 });
 Object.defineProperty(InputNode.prototype, "param", {
     /** @param {boolean} v */
@@ -225,7 +225,7 @@ Object.defineProperty(DataNode.prototype, "filterType", {
 
 Object.defineProperty(DataNode.prototype, "filterMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw "filterMapping is readonly!";
+    set: function(v){ throw new Error("filterMapping is readonly!");
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._filterMapping; }
@@ -242,14 +242,14 @@ Object.defineProperty(DataNode.prototype, "computeOperator", {
 });
 Object.defineProperty(DataNode.prototype, "computeInputMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw "computeInputMapping is readonly!";
+    set: function(v){ throw new Error("computeInputMapping is readonly!");
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._computeInputMapping; }
 });
 Object.defineProperty(DataNode.prototype, "computeOutputMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw "computeOutputMapping is readonly!";
+    set: function(v){ throw new Error("computeOutputMapping is readonly!");
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._computeOutputMapping; }
@@ -330,15 +330,22 @@ DataNode.prototype.setFilter = function(filterString){
     filterString = filterString || "";
     var newType = Xflow.DATA_FILTER_TYPE.RENAME;
     var newMapping = null;
-    var result = filterString.trim().match(filterParser);
-    if(result){
-        var type = result[1].trim();
-        switch(type){
-            case "keep": newType = Xflow.DATA_FILTER_TYPE.KEEP; break;
-            case "remove": newType = Xflow.DATA_FILTER_TYPE.REMOVE; break;
-            case "rename": newType = Xflow.DATA_FILTER_TYPE.RENAME; break;
+    if(filterString){
+        var result = filterString.trim().match(filterParser);
+        if(result){
+            var type = result[1].trim();
+            switch(type){
+                case "keep": newType = Xflow.DATA_FILTER_TYPE.KEEP; break;
+                case "remove": newType = Xflow.DATA_FILTER_TYPE.REMOVE; break;
+                case "rename": newType = Xflow.DATA_FILTER_TYPE.RENAME; break;
+                default:
+                    XML3D.debug.logError("Unknown filter type:" + type);
+            }
+            newMapping = Xflow.Mapping.parse(result[2], this);
         }
-        newMapping = Xflow.Mapping.parse(result[2], this);
+        else{
+            XML3D.debug.logError("Could not parse filter '" + filterString + "'");
+        }
     }
     if(!newMapping){
         newMapping = new Xflow.OrderMapping(this);

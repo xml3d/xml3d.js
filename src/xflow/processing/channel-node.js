@@ -78,7 +78,7 @@
     }
 
     ChannelNode.prototype.notifyDataChange = function(inputNode){
-        var key = inputNode._name + ";" + inputNode._seqnr;
+        var key = inputNode._name + ";" + inputNode._key;
         if(this.inputSlots[key])
             this.inputSlots[key].setDataEntry(inputNode._data);
     }
@@ -151,8 +151,8 @@
                         channelNode.inputChannels.addProtoNames(child._name, child._name);
                         Xflow.nameset.add(channelNode.protoNames, child._name);
                     }
-                    var key = child._name + ";" + child._seqnr;
-                    channelNode.inputSlots[key] = new Xflow.DataSlot(child._data, child._seqnr);
+                    var key = child._name + ";" + child._key;
+                    channelNode.inputSlots[key] = new Xflow.DataSlot(child._data, child._key);
 
                 }
             }
@@ -188,12 +188,12 @@
     function setFinalOutputProtoNames(channelNode){
         var dataNode = channelNode.owner;
         dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, channelNode.protoInputChannels,
-            null, dataNode._filterType, setChannelMapProtoName);
+            null, null, dataNode._filterType, setChannelMapProtoName);
 
         if(dataNode._protoNode){
             var protoOutput = dataNode._protoNode._channelNode.finalOutputChannels;
             dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, protoOutput,
-                channelNode.protoNames, dataNode._filterType, setChannelMapProtoProtoName);
+                channelNode.protoNames, null, dataNode._filterType, setChannelMapProtoProtoName);
         }
     }
 
@@ -276,7 +276,7 @@
             }
             for(var i = 0; i < owner._children.length; ++i){
                 if((child = owner._children[i]) && !child._channelNode){
-                    var key = child._name + ";" + child._seqnr;
+                    var key = child._name + ";" + child._key;
                     channelNode.inputChannels.addDataEntry(child._name, channelNode.inputSlots[key],
                         child._param, substitution);
                 }
@@ -319,19 +319,19 @@
     function setSubNodeFinalOutputChannels(subNode, channelNode, substitution){
         var dataNode = channelNode.owner;
         dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, channelNode.protoInputChannels,
-            substitution, dataNode._filterType, setChannelMapChannel);
+            substitution, substitution, dataNode._filterType, setChannelMapChannel);
 
         if(subNode.protoSubNode){
             var protoChannelNode = subNode.protoSubNode.owner;
             var protoOutput = protoChannelNode.finalOutputChannels;
             dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, protoOutput,
-                subNode.protoSubNode.substitution, dataNode._filterType, setChannelMapChannel);
+                substitution, subNode.protoSubNode.substitution, dataNode._filterType, setChannelMapChannel);
         }
     }
 
-    function setChannelMapChannel(destMap, destName, srcMap, srcName, substitution){
-        var channel = srcMap.getChannel(srcName, substitution);
-        destMap.addChannel(destName, channel, substitution);
+    function setChannelMapChannel(destMap, destName, srcMap, srcName, destSub, srcSub){
+        var channel = srcMap.getChannel(srcName, srcSub);
+        destMap.addChannel(destName, channel, destSub);
     }
 
     function markChannelsAsDone(channelNode, substitution){

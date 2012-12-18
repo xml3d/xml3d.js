@@ -17,7 +17,7 @@ var Result = Xflow.Result;
 
 Object.defineProperty(Result.prototype, "outputNames", {
     set: function(v){
-       throw "outputNames is readonly";
+       throw new Error("outputNames is readonly");
     },
     get: function(){ return this._outputNames; }
 });

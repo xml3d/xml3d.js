@@ -1,21 +1,18 @@
 Xflow.registerOperator("sub", {
-    outputs: [{name: 'result', tupleSize: '3'}],
-    params:  ['value1','value2'],
-    evaluate: function(value1, value2) {
-        if(!(value1 && value2))
-            throw "Xflow::sub3: Not all parameters are set";
+    outputs: [  {type: 'float3', name: 'result'}],
+    params:  [  {type: 'float3', source: 'value1'},
+                {type: 'float3', source: 'value2'}],
+    evaluate: function(result, value1, value2, info) {
+        throw "Not used!";
 
-        if(value1.length != value1.length)
-            throw "Xflow::sub3: Input arrays differ in size";
-
-        if (!this.tmp || this.tmp.length != value1.length)
-            this.tmp = new Float32Array(value1.length);
-
-        var result = this.tmp;
-        for(var i = 0; i<value1.length; i++)
+        for(var i = 0; i< info.iterateCount*3; i++)
             result[i] = value1[i] - value2[i];
 
-        this.result.result = result;
         return true;
+    },
+    evaluate_core: function(result, value1, value2){
+        result[0] = value1[0] - value2[0];
+        result[1] = value1[1] - value2[1];
+        result[2] = value1[2] - value2[2];
     }
 });

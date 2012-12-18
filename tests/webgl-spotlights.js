@@ -52,8 +52,8 @@ test("Initialization: entries in lights.spot check", 11, function() {
     deepEqual(sl.intensity, array2floatArray2array([10, 10, 10]), "Test light intensity entry");
     deepEqual(sl.attenuation, array2floatArray2array([0, 0, 1]), "Test light attenuation entry");
     deepEqual(sl.visibility, array2floatArray2array([1, 1, 1]), "Test light visibility entry");
-    deepEqual(sl.beamWidth, array2floatArray2array([0.5]), "Test light beamWidth entry");
-    deepEqual(sl.cutOffAngle, array2floatArray2array([0.785]), "Test light cutOffAngle entry");
+    deepEqual(sl.softness, array2floatArray2array([0.5]), "Test light softness entry");
+    deepEqual(sl.falloffAngle, array2floatArray2array([0.785]), "Test light cutOffAngle entry");
     deepEqual(sl.position, array2floatArray2array([0, 0, 1]), "Test for default position entry");
     deepEqual(sl.direction, array2floatArray2array([0, 0, 1]), "Test for default direction entry");
 });
@@ -114,13 +114,13 @@ test("Change of light shader parameters check against lights.spot", 6, function(
     h = getHandler(x);
 
     var ls_Spot = this.doc.getElementById("ls_Spot");
-    sl = h.renderer.lights.spot
+    sl = h.renderer.lights.spot;
 
-    getChildNodeByName(ls_Spot, "beamWidth").textContent = "0.2";
-    deepEqual(sl.beamWidth, array2floatArray2array([0.2]), "Test beamWidth entry change");
+    getChildNodeByName(ls_Spot, "softness").textContent = "0.2";
+    deepEqual(sl.softness, array2floatArray2array([0.2]), "Test beamWidth entry change");
 
-    getChildNodeByName(ls_Spot, "cutOffAngle").textContent = "0.6";
-    deepEqual(sl.cutOffAngle, array2floatArray2array([0.6]), "Test cutOffAngle entry change");
+    getChildNodeByName(ls_Spot, "falloffAngle").textContent = "0.6";
+    deepEqual(sl.falloffAngle, array2floatArray2array([0.6]), "Test cutOffAngle entry change");
 
     getChildNodeByName(ls_Spot, "intensity").textContent = "1 0 1";
     deepEqual(sl.intensity, array2floatArray2array([1, 0, 1]), "Test intensity entry change");

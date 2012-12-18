@@ -153,7 +153,7 @@
             }
         }
         this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
-    }
+    };
 
 	/**
 	 *
@@ -163,6 +163,10 @@
     };
     LightRenderAdapter.prototype.dispose = function() {
         this.isValid = false;
+    };
+    
+    LightRenderAdapter.prototype.destroy = function() {
+    	this.clearAdapterHandles();
     };
 
 

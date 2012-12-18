@@ -37,7 +37,7 @@
         this.textureAdapter.notifyChanged(evt);
     };
 
-    var staticAttributes = ["position", "direction", "intensity", "attenuation", "beamWidth", "cutOffAngle"];
+    var staticAttributes = ["position", "direction", "intensity", "attenuation", "softness", "falloffAngle"];
 
     /**
      * Adapter for <lightshader>
@@ -59,9 +59,9 @@
     /** @const */
     var LIGHT_DEFAULT_ATTENUATION = vec3.create([0,0,1]);
     /** @const */
-    var SPOTLIGHT_DEFAULT_BEAMWIDTH = 1.570796;
+    var SPOTLIGHT_DEFAULT_FALLOFFANGLE = Math.PI / 4.0;
     /** @const */
-    var SPOTLIGHT_DEFAULT_CUTOFFANGLE = 2.356194;
+    var SPOTLIGHT_DEFAULT_SOFTNESS = 0.0;
 
     /**
      *
@@ -108,13 +108,13 @@
         var dataTable = this.computeRequest.getResult().getOutputMap();
         var intensity = dataTable["intensity"] ? dataTable["intensity"].getValue() : LIGHT_DEFAULT_INTENSITY;
         var attenuation = dataTable["attenuation"] ? dataTable["attenuation"].getValue() : LIGHT_DEFAULT_ATTENUATION;
-        var beamWidth = dataTable["beamWidth"] ? dataTable["beamWidth"].getValue() : [SPOTLIGHT_DEFAULT_BEAMWIDTH];
-        var cutOffAngle = dataTable["cutOffAngle"] ? dataTable["cutOffAngle"].getValue() : [SPOTLIGHT_DEFAULT_CUTOFFANGLE];
+        var falloffAngle = dataTable["falloffAngle"] ? dataTable["falloffAngle"].getValue() : [SPOTLIGHT_DEFAULT_FALLOFFANGLE];
+        var softness = dataTable["softness"] ? dataTable["softness"].getValue() : [SPOTLIGHT_DEFAULT_SOFTNESS];
 
         Array.set(spot.intensity, offset, [intensity[0]*i, intensity[1]*i, intensity[2]*i]);
         Array.set(spot.attenuation, offset, attenuation);
-        Array.set(spot.beamWidth, offset/3, [beamWidth[0]]);
-        Array.set(spot.cutOffAngle, offset/3, [cutOffAngle[0]]);
+        Array.set(spot.falloffAngle, offset/3, falloffAngle);
+        Array.set(spot.softness, offset/3, softness);
     };
 
     /**

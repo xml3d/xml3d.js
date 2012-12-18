@@ -14,37 +14,41 @@
         "bool" : Uint8Array
     };
 
-    function createXflowBuffer(data){
+    function createXflowInputs(dataNode, name, jsonData){
         var v = null;
-        var first = data.seq[0];
-        var value = first.value;
-        if(TYPED_ARRAY_MAP[data.type]){
-            var v = new (TYPED_ARRAY_MAP[data.type])(value);
-            var type = XML3D.data.BUFFER_TYPE_TABLE[data.type];
+
+        if(!TYPED_ARRAY_MAP[jsonData.type])
+            return;
+
+        for(var i = 0; i < jsonData.seq.length; ++i){
+            var entry = jsonData.seq[i];
+            var value = entry.value;
+            var key = entry.key;
+
+            var v = new (TYPED_ARRAY_MAP[jsonData.type])(value);
+            var type = XML3D.data.BUFFER_TYPE_TABLE[jsonData.type];
             var buffer = new Xflow.BufferEntry(type, v);
-            return buffer;
+
+            var inputNode = XML3D.data.xflowGraph.createInputNode();
+            inputNode.data = buffer;
+            inputNode.name = name;
+            inputNode.key = key;
+            dataNode.appendChild(inputNode);
+
         }
-        return null;
     }
 
     function createXflowNode(jsonData){
         if (jsonData.format != "xml3d-json")
-            throw "Unknown JSON format: " + jsonData.format;
+            throw new Error("Unknown JSON format: " + jsonData.format);
         if (jsonData.version != "0.4.0")
-            throw "Unknown JSON version: " + jsonData.version;
+            throw new Error("Unknown JSON version: " + jsonData.version);
 
         var node = XML3D.data.xflowGraph.createDataNode();
 
         var entries = jsonData.data;
-        for(var e in entries) {
-
-            var buffer = createXflowBuffer(entries[e]);
-            if(buffer){
-                var inputNode = XML3D.data.xflowGraph.createInputNode();
-                inputNode.data = buffer;
-                inputNode.name = e;
-                node.appendChild(inputNode);
-            }
+        for(var name in entries) {
+            createXflowInputs(node, name, entries[name]);
         }
         return node;
     }

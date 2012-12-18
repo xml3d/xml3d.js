@@ -45,7 +45,7 @@ XML3D.debug = {
                 window.console.info.apply(window.console, args);
                 break;
             case XML3D.debug.WARNING:
-                window.console.warning.apply(window.console, args);
+                window.console.warn.apply(window.console, args);
                 break;
             case XML3D.debug.ERROR:
                 window.console.error.apply(window.console, args);

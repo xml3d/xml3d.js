@@ -64,13 +64,13 @@
         </data>
         
         <data id="animationData">
-            <float4 name="pose" seqnr="0.0" >1 0 0 0  1 0 0 0  1 0 0 0</float4>
-            <float4 name="pose" seqnr="1.0" >1 0 0 0  1 0 0 0  0.707107 0 0 0.707107</float4>
-            <float4 name="pose" seqnr="2.0" >1 0 0 0   0.707107 0 0 -0.707107   0.707107 0 0 0.707107</float4>
-            <float4 name="pose" seqnr="3.0" >0.707107 0 0 0.707107   0.707107 0 0 -0.707107   0.707107 0 0 0.707107</float4>
-            <float4 name="pose" seqnr="4.0" >0.707107 0 0 0.707107   0.707107 0 0 -0.707107   1 0 0 0</float4>
-            <float4 name="pose" seqnr="5.0" >0.707107 0 0 0.707107   1 0 0 0   1 0 0 0</float4>
-            <float4 name="pose" seqnr="6.0" >1 0 0 0   1 0 0 0   1 0 0 0</float4>
+            <float4 name="pose" key="0.0" >1 0 0 0  1 0 0 0  1 0 0 0</float4>
+            <float4 name="pose" key="1.0" >1 0 0 0  1 0 0 0  0.707107 0 0 0.707107</float4>
+            <float4 name="pose" key="2.0" >1 0 0 0   0.707107 0 0 -0.707107   0.707107 0 0 0.707107</float4>
+            <float4 name="pose" key="3.0" >0.707107 0 0 0.707107   0.707107 0 0 -0.707107   0.707107 0 0 0.707107</float4>
+            <float4 name="pose" key="4.0" >0.707107 0 0 0.707107   0.707107 0 0 -0.707107   1 0 0 0</float4>
+            <float4 name="pose" key="5.0" >0.707107 0 0 0.707107   1 0 0 0   1 0 0 0</float4>
+            <float4 name="pose" key="6.0" >1 0 0 0   1 0 0 0   1 0 0 0</float4>
         </data>
                 
         <data id="timeSlot" >

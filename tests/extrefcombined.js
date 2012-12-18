@@ -64,6 +64,34 @@ test("Mesh JSON reference", 6, function() {
 });
 
 
+test("Sequence JSON reference", 3, function() {
+    var xTest = this.doc.getElementById("xml3dTest"),
+        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+    var self = this;
+
+    var testStep = 0;
+    function onFrameDrawn(){
+        if(testStep == 0){
+            if( XML3DUnit.getPixelValue(glTest, 128, 128)[0] == 0)
+                return;
+
+            XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference3", "xml3dTest", function(refImage, testImage){
+                QUnit.imageEqual(refImage, testImage, "JSON render matches");
+
+                start();
+            });
+        }
+    }
+
+    xTest.addEventListener("framedrawn", onFrameDrawn);
+
+    this.doc.getElementById("jsonSequenceGroup").visible = true;
+    hTest.draw();
+
+    stop();
+});
+
+
 test("Mesh XML reference", 5, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);

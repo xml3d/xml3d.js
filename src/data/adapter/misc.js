@@ -103,7 +103,7 @@
         if (node.src)
             this.createVideoFromURL(node.src);
     };
-    XML3D.createClass(VideoDataAdapter, XML3D.data.DataAdapter);
+    XML3D.createClass(VideoDataAdapter, XML3D.base.NodeAdapter);
 
     /**
      * Creates a new video object

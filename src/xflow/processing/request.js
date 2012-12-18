@@ -17,14 +17,14 @@ Xflow.Request = Request;
 
 Object.defineProperty(Request.prototype, "dataNode", {
     set: function(v){
-       throw "dataNode is readonly"
+       throw new Error("dataNode is readonly");
     },
     get: function(){ return this._dataNode; }
 });
 
 Object.defineProperty(Request.prototype, "filter", {
     set: function(v){
-        throw "filter is read-only"
+        throw new Error("filter is read-only");
     },
     get: function(){ return this._filter; }
 });

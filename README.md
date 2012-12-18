@@ -40,15 +40,28 @@ The xml3d.js is separated into several files. To build, run the ant script
 be started by running 'Run As->Ant build' from the files context menu.
 
 ### Change log ###
+4.3 - 18.20.2012
+* [Xflow](https://github.com/xml3d/xml3d.js/wiki/Xflow) support, including
+  * Skinning - [demo](http://xml3d.github.com/xml3d-examples/examples/xflowSkin/xflow-skin.xhtml) &amp; [demo](http://xml3d.github.com/xml3d-examples/examples/gangnam/style.xhtml)
+  * Sequential Morphing - [demo](http://xml3d.github.com/xml3d-examples/examples/xflowSequentialMorph/xflow-morph.xhtml)
+  * Mechanism for custom operators - [demo](http://xml3d.github.com/xml3d-examples/examples/facemorph/facemorph.xhtml) &amp; [demo](http://xml3d.github.com/xml3d-examples/examples/xflowWave/xflow-wave.xhtml)
+  * Prototypes - [demo](http://xml3d.github.com/xml3d-examples/examples/xflowPrototypes/xflow-prototypes.xhtml)
+* External references in XML format - [demo](http://xml3d.github.com/xml3d-examples/examples/externalXml/externalXml.xhtml)
+* ['onload' event](https://github.com/xml3d/xml3d.js/wiki/Events) for &lt;xml3d&gt; element
+* Support for video textures - [demo](http://xml3d.github.com/xml3d-examples/examples/video/video.xhtml)
+* Support to use a webcam stream as video texture via WebRTC API - [demo](http://xml3d.github.com/xml3d-examples/examples/webcam/webcam.xhtml)
+* Support of spot lights - [demo](http://xml3d.github.com/xml3d-examples/examples/spotLight/index.xhtml)
+* Support of CSS 3D Transforms in _style_ attribute - [demo](http://xml3d.github.com/xml3d-examples/examples/cssTransform/css-transform.xhtml)
+* Improved debug output
 
 4.2 - 14.09.2012
 * Hardware accelerated object picking expanded to 16,7 mio objects
-* Emissive texture map support in diffuse and phong shader – [demo](http://xml3d.github.com/xml3d-examples/examples/candle/candle.xhtml)
-* Specular map support in phong shader – [demo](http://xml3d.github.com/xml3d-museum/)
-* New mechanism for custom shaders – [demo](http://xml3d.github.com/xml3d-examples/examples/eyelight/eyelight.xhtml)
-* Support of directional lights (finally) – [demo](http://xml3d.github.com/xml3d-examples/examples/directionalLight/index.xhtml)
-* Support of external data resources in JSON format – [demo](http://xml3d.github.com/xml3d-examples/examples/suzanne/suzanne.xhtml)
-* New mechanism to register loaders for external formats – [demo](http://xml3d.github.com/xml3d-examples/examples/meshlab/meshlab.xhtml)
+* Emissive texture map support in diffuse and phong shader - [demo](http://xml3d.github.com/xml3d-examples/examples/candle/candle.xhtml)
+* Specular map support in phong shader - [demo](http://xml3d.github.com/xml3d-museum/)
+* New mechanism for custom shaders - [demo](http://xml3d.github.com/xml3d-examples/examples/eyelight/eyelight.xhtml)
+* Support of directional lights (finally) - [demo](http://xml3d.github.com/xml3d-examples/examples/directionalLight/index.xhtml)
+* Support of external data resources in JSON format - [demo](http://xml3d.github.com/xml3d-examples/examples/suzanne/suzanne.xhtml)
+* New mechanism to register loaders for external formats - [demo](http://xml3d.github.com/xml3d-examples/examples/meshlab/meshlab.xhtml)
 
 4.1 - 19.07.2012
 * Initial release on GitHub

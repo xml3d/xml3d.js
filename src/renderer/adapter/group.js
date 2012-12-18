@@ -1,9 +1,9 @@
 // Adapter for <group>
 (function() {
-    
+
 	var eventTypes = {onclick:1, ondblclick:1,
 			ondrop:1, ondragenter:1, ondragleave:1};
-	
+
     var GroupRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.processListeners();
@@ -44,7 +44,7 @@
 
         return null;
     }
-    
+
     p.updateTransformAdapter = function() {
         var transformHref = this.node.transform;
         this.connectAdapterHandle("transform", this.getAdapterHandle(transformHref));
@@ -83,9 +83,9 @@
             this.propagateTransform(evt);
             return;
         }
-        
+
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
-        
+
         switch (target) {
         case "shader":
             evt.internalType = "parentshader";
@@ -93,7 +93,7 @@
             this.notifyChildren(evt);
             this.factory.renderer.requestRedraw("Group shader changed.", false);
             break;
-            
+
         case "parentshader":
             this.parentShaderHandle = null;
             if (!this.getShaderHandle()) { // This node's shader would override parent shaders
@@ -101,7 +101,7 @@
             }
             this.parentShaderHandle = evt.newValue;
             break;
-            
+
         case "transform":
             //This group is now linked to a different transform node. We need to notify all
             //of its children with the new transformation matrix
@@ -110,9 +110,9 @@
             this.propagateTransform(evt);
 
             break;
-        
+
         //TODO: this will change once the wrapped events are sent to all listeners of a node
-        case "parenttransform":  
+        case "parenttransform":
             var parentValue = downstreamValue = evt.newValue;
             this.parentTransform = evt.newValue;
 
@@ -120,16 +120,16 @@
             var matrix = this.getLocalMatrixInternal();
             if (matrix)
                 downstreamValue = mat4.multiply(parentValue, matrix, mat4.create());
-            
+
             evt.newValue = downstreamValue;
             this.notifyChildren(evt);
             // Reset event value
             evt.newValue = parentValue;
             break;
-            
+
         case "visible":
             //TODO: improve visibility handling
-            //If this node is set visible=false then it overrides the parent node 
+            //If this node is set visible=false then it overrides the parent node
             if (this.parentVisible == false)
                 break;
             else {
@@ -138,20 +138,20 @@
                 this.notifyChildren(evt);
                 delete evt.internalType;
                 delete evt.newValue;
-                this.factory.renderer.requestRedraw("Group visibility changed.", true);    
+                this.factory.renderer.requestRedraw("Group visibility changed.", true);
             }
             break;
-        
+
         case "parentvisible":
             this.parentVisible = evt.newValue;
-            //If this node is set visible=false then it overrides the parent node 
+            //If this node is set visible=false then it overrides the parent node
             if (this.node.visible == false)
                 break;
             else
                 this.notifyChildren(evt);
-            
+
             break;
-            
+
         default:
             XML3D.debug.logWarning("Unhandled mutation event in group adapter for parameter '"+target+"'");
             break;
@@ -163,7 +163,7 @@
         var child = this.node.firstElementChild;
         while (child) {
             var adapter = this.factory.getAdapter(child);
-            adapter.notifyChanged(evt);
+            adapter && adapter.notifyChanged(evt);
             child = child.nextElementSibling;
         }
     };
@@ -218,7 +218,7 @@
                 adapter.destroy();
             child = child.nextElementSibling;
         }
-        
+
         this.isValid = false;
     };
 
@@ -235,7 +235,7 @@
         }
         return bbox;
     };
-  
+
     p.getLocalMatrix = function() {
         var m = new window.XML3DMatrix();
         var matrix = this.getLocalMatrixInternal();
@@ -243,9 +243,9 @@
             m._data.set(matrix);
         return m;
     };
-    
+
     var tmpIdMat = mat4.create();
-    
+
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
 

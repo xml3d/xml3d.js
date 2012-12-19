@@ -40,7 +40,7 @@ The xml3d.js is separated into several files. To build, run the ant script
 be started by running 'Run As->Ant build' from the files context menu.
 
 ### Change log ###
-4.3 - 18.20.2012
+4.3 - 18.12.2012
 * [Xflow](https://github.com/xml3d/xml3d.js/wiki/Xflow) support, including
   * Skinning - [demo](http://xml3d.github.com/xml3d-examples/examples/xflowSkin/xflow-skin.xhtml) &amp; [demo](http://xml3d.github.com/xml3d-examples/examples/gangnam/style.xhtml)
   * Sequential Morphing - [demo](http://xml3d.github.com/xml3d-examples/examples/xflowSequentialMorph/xflow-morph.xhtml)

@@ -14,6 +14,7 @@ XML3D is also an evaluation platform of the W3C Community Group [Declarative 3D 
 <a href="http://www.xml3d.org/xml3d/demos/12_MarsCity/marscity.xhtml"><img src="http://www.xml3d.org/xml3d/demos/thumbs/marscity.jpg?s"/></a>
 <a href="http://www.xml3d.org/xml3d/demos/32_WorldBank/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/worldbank.jpg"/></a>
 <a href="http://xml3d.github.com/xml3d-museum/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/museum.jpg"/></a>
+<a href="http://xml3d.github.com/xml3d-examples/examples/gangnam/style.xhtml"><img src="http://www.xml3d.org/xml3d/demos/thumbs/gangnam.jpg"/></a>
 
 #### Usage ####
 

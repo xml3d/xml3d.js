@@ -217,6 +217,9 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
         return;
 
     var shaderHandle = adapter.getShaderHandle ? adapter.getShaderHandle() : null;
+    if(adapter.updateTransformAdapter)
+        adapter.updateTransformAdapter();
+
     var visible = target.visible;
 
     var parentNode = target.parentElement;

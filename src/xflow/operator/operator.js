@@ -180,23 +180,41 @@ function allocateOutput(operator, inputData, output, operatorData){
         var d = operator.outputs[i];
         var entry = output[d.name].dataEntry;
 
-        var size = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount) * entry.getTupleSize();
+        if (entry.type == Xflow.DATA_TYPE.TEXTURE) {
+            // texture entry
+            // FIXME What to do when d.customAlloc == false ?
+            var texParams = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount /* WRONG */);
+            var newWidth = texParams.imageFormat.width;
+            var newHeight = texParams.imageFormat.height;
 
-        if( !entry._value || entry._value.length != size){
-            switch(entry.type){
-                case Xflow.DATA_TYPE.FLOAT:
-                case Xflow.DATA_TYPE.FLOAT2:
-                case Xflow.DATA_TYPE.FLOAT3:
-                case Xflow.DATA_TYPE.FLOAT4:
-                case Xflow.DATA_TYPE.FLOAT4X4: entry.setValue(new Float32Array(size)); break;
-                case Xflow.DATA_TYPE.INT:
-                case Xflow.DATA_TYPE.INT4:
-                case Xflow.DATA_TYPE.BOOL: entry.setValue(new Int32Array(size)); break;
-                default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + entry.type);
+            var entryImage = entry.getImage();
+            if (!entryImage || entryImage.width != newWidth || entryImage.height != newHeight) {
+                entry.setImage(new Image(newWidth, newHeight));
+                // FIXME What to do with texParams.samplerConfig ? There is no function entry.setSamplerConfig.
+                entry._samplerConfig.set(texParams.samplerConfig);
+            } else {
+                entry.notifyChanged();
             }
-        }
-        else{
-            entry.notifyChanged();
+        } else {
+            // buffer entry
+            var size = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount) * entry.getTupleSize();
+
+            if( !entry._value || entry._value.length != size){
+                switch(entry.type){
+                    case Xflow.DATA_TYPE.FLOAT:
+                    case Xflow.DATA_TYPE.FLOAT2:
+                    case Xflow.DATA_TYPE.FLOAT3:
+                    case Xflow.DATA_TYPE.FLOAT4:
+                    case Xflow.DATA_TYPE.FLOAT4X4: entry.setValue(new Float32Array(size)); break;
+                    case Xflow.DATA_TYPE.INT:
+                    case Xflow.DATA_TYPE.INT4:
+                    case Xflow.DATA_TYPE.BOOL: entry.setValue(new Int32Array(size)); break;
+                    default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + entry.type);
+                }
+            }
+            else{
+                entry.notifyChanged();
+            }
         }
     }
 }
@@ -206,7 +224,10 @@ function assembleFunctionArgs(operator, inputData, outputData){
     for(var i in operator.outputs){
         var d = operator.outputs[i];
         var entry = outputData[d.name].dataEntry;
-        args.push(entry ? entry._value : null);
+        var value = entry ?
+            (entry.type == Xflow.DATA_TYPE.TEXTURE ? entry.getImageManipulator() : entry._value) :
+            null;
+        args.push(value);
     }
     addInputToArgs(args, inputData);
     return args;
@@ -214,7 +235,11 @@ function assembleFunctionArgs(operator, inputData, outputData){
 
 function addInputToArgs(args, inputData){
     for(var i = 0; i < inputData.length; ++i){
-        args.push(inputData[i] ? inputData[i]._value : null);
+        var entry = inputData[i];
+        var value = entry ?
+            (entry.type == Xflow.DATA_TYPE.TEXTURE ? entry.getImageManipulator() : entry._value) :
+            null;
+        args.push(value);
     }
 }
 

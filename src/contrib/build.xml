@@ -11,6 +11,7 @@
         <file name="./glMatrix.js" />
         <file name="./stacktrace-0.4.js"/>
         <file name="./state-machine.js"/>
+        <file name="./perlin-noise-simplex.js"/>
     </filelist>
 
     <target name="concat">

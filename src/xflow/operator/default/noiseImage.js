@@ -1,18 +1,25 @@
 Xflow.registerOperator("noiseImage", {
-    outputs: [{name: 'image', tupleSize: '1'}],
-    params:  ['width','height','scale','minFreq','maxFreq'],
-    evaluate: function(width,height,scale,minFreq,maxFreq) {
-        var img = document.createElement('canvas');
+    outputs: [ {type: 'texture', name : 'image', tupleSize: '1', customAlloc: true} ],
+    params:  [ {type: 'int', source: 'width'},
+               {type: 'int', source:'height'},
+               {type: 'float2', source: 'scale'},
+               {type: 'float', source: 'minFreq'},
+               {type: 'float', source: 'maxFreq'} ],
+    alloc: function(sizes, width, height, scale, minFreq, maxFreq) {
+        var samplerConfig = new Xflow.SamplerConfig;
+        samplerConfig.setDefaults();
+        sizes['image'] = {
+            imageFormat : {width: width[0], height :height[0]},
+            samplerConfig : samplerConfig
+        };
+    },
+    evaluate: function(image, width, height, scale, minFreq, maxFreq) {
         width = width[0];
         height = height[0];
         minFreq = minFreq[0];
         maxFreq = maxFreq[0];
 
-        img.width =  width;
-        img.height = height;
-        var ctx = img.getContext("2d");
-        if(!ctx)
-            throw("Could not create 2D context.");
+        var ctx = image.getContext2D();
 
         var id = ctx.getImageData(0, 0, width, height);
         var pix = id.data;
@@ -22,7 +29,8 @@ Xflow.registerOperator("noiseImage", {
         var useTurbulence = minFreq != 0.0 && maxFreq != 0.0 && minFreq < maxFreq;
 
         var snoise = function(x,y) {
-            return 2.0 * noise.noise(x, y) - 1.0;
+            return noise.noise(x, y); // noise.noise returns values in range [-1,1]
+            //return 2.0 * noise.noise(x, y) - 1.0; // this code is for noise value in range [0,1]
         };
 
         var turbulence = function(minFreq, maxFreq, s, t) {
@@ -51,9 +59,22 @@ Xflow.registerOperator("noiseImage", {
             }
         }
 
+        /* Fill with green color
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                var offset = (x * width + y) * 4;
+                pix[offset] =  0
+                pix[offset+1] = 255;
+                pix[offset+2] = 0;
+                pix[offset+3] = 255;
+            }
+        }
+        */
+
         ctx.putImageData(id, 0, 0);
-        //console.log(img);
-        this.image = img;
+        image.finish();
         return true;
     }
 });

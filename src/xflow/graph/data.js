@@ -10,9 +10,9 @@
  * @constructor
  */
 Xflow.SamplerConfig = function(){
-    this.filterMin = 0;
-    this.filterMag = 0;
-    this.filterMip = 0;
+    this.minFilter = 0;
+    this.magFilter = 0;
+    this.mipFilter = 0;
     this.wrapS = 0;
     this.wrapT = 0;
     this.wrapU = 0;
@@ -21,6 +21,33 @@ Xflow.SamplerConfig = function(){
     this.colorG = 0;
     this.colorB = 0;
     this.generateMipMap = 0;
+};
+Xflow.SamplerConfig.prototype.setDefaults = function() {
+    // FIXME Generate this from the spec ?
+    this.minFilter = WebGLRenderingContext.LINEAR;
+    this.magFilter = WebGLRenderingContext.LINEAR;
+    this.mipFilter = WebGLRenderingContext.NEAREST;
+    this.wrapS = WebGLRenderingContext.CLAMP_TO_EDGE;
+    this.wrapT = WebGLRenderingContext.CLAMP_TO_EDGE;
+    this.wrapU = WebGLRenderingContext.CLAMP_TO_EDGE;
+    this.textureType = WebGLRenderingContext.TEXTURE_2D;
+    this.colorR = 0;
+    this.colorG = 0;
+    this.colorB = 0;
+    this.generateMipMap = 0;
+};
+Xflow.SamplerConfig.prototype.set = function(other) {
+    this.minFilter = other.minFilter;
+    this.magFilter = other.magFilter;
+    this.mipFilter = other.mipFilter;
+    this.wrapS = other.wrapS;
+    this.wrapT = other.wrapT;
+    this.wrapU = other.wrapU;
+    this.textureType = other.textureType;
+    this.colorR = other.colorR;
+    this.colorG = other.colorG;
+    this.colorB = other.colorB;
+    this.generateMipMap = other.generateMipMap;
 };
 var SamplerConfig = Xflow.SamplerConfig;
 
@@ -128,6 +155,59 @@ BufferEntry.prototype.isEmpty = function(){
 // Xflow.TextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
+/**
+ * @constructor
+ * @param {Xflow.TextureEntry} textureEntry
+ */
+Xflow.ImageManipulator = function(textureEntry) {
+    this._textureEntry = textureEntry;
+    this._image = textureEntry.getImage();
+    if (this._image) {
+        this.width = this._image.width;
+        this.height = this._image.height;
+        this._canvas = (this._image.nodeName.toLowerCase === 'canvas' ? this._image : null);
+    } else {
+        this.width = 0;
+        this.height = 0;
+        this._canvas = null;
+    }
+    // TODO if image is not canvas we should create canvas and fill it with the image
+    //      contents on demand
+    this._context = null;
+};
+Xflow.ImageManipulator.prototype.detach = function() {
+    this._textureEntry = null;
+    // FIXME if _canvas is shared between _textureEntry and this object, it must to be cloned
+};
+Xflow.ImageManipulator.prototype.getCanvas = function() {
+    if (!this._canvas) {
+        this._canvas = document.createElement('canvas');
+        this._canvas.width = this.width;
+        this._canvas.height = this.height;
+        this._canvas.complete = false; // for compatibility with img element
+    }
+    return this._canvas;
+};
+Xflow.ImageManipulator.prototype.getContext2D = function() {
+    if (!this._context) {
+        var canvas = this.getCanvas();
+        this._context = canvas.getContext("2d");
+        if (!this._context)
+            throw new Error("Could not create 2D context.");
+    }
+    return this._context;
+};
+/** Call this function when image editing is finished.
+ *
+ */
+Xflow.ImageManipulator.prototype.finish = function() {
+    if (this._textureEntry && this._canvas) {
+        this._canvas.complete = true; // for compatibility with img element
+        this._textureEntry._image = this._canvas;
+        // FIXME Do we need to call notifyChanged here ? Arrays in DataEntry are not calling callbacks.
+        this._textureEntry.notifyChanged();
+    }
+}
 
 /**
  * @constructor
@@ -138,6 +218,7 @@ Xflow.TextureEntry = function(image){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._image = image;
     this._samplerConfig = new SamplerConfig();
+    this._imageManipulator = null;
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
 XML3D.createClass(Xflow.TextureEntry, Xflow.DataEntry);
@@ -150,6 +231,10 @@ TextureEntry.prototype.isEmpty = function(){
 /** @param {Object} v */
 TextureEntry.prototype.setImage = function(v){
     this._image = v;
+    if (this._imageManipulator) {
+        this._imageManipulator.detach();
+        this._imageManipulator = null;
+    }
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }
 
@@ -159,6 +244,14 @@ TextureEntry.prototype.getImage = function(){
 }
 
 /** @return {Object} */
+TextureEntry.prototype.getImageManipulator = function() {
+    if (!this._imageManipulator) {
+        this._imageManipulator = new Xflow.ImageManipulator(this);
+    }
+    return this._imageManipulator;
+}
+
+    /** @return {Object} */
 TextureEntry.prototype.getSamplerConfig = function(){
     return this._samplerConfig;
 };

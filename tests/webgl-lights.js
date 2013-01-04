@@ -172,7 +172,7 @@ test("Adding lights", 10, function() {
 
     equal(lightsArray.spot.length, 1, "Spot light was added to the lights array");
     equal(lightsArray.spot.position.length, 3, "Light parameters were added to lights array");
-    equal(lightsArray.spot.beamWidth.length, 1, "Lightshader parameters were added to lights array");
+    equal(lightsArray.spot.falloffAngle.length, 1, "Lightshader parameters were added to lights array");
 
     this.doc.getElementById("dirlight").visible = false;
     this.doc.getElementById("pointlight").visible = false;

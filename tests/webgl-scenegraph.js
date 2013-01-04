@@ -187,7 +187,7 @@ test("Change visible/shader for nested groups", 8, function() {
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child shader overrides new parent shader]");
 });
 
-test("Add/remove meshes and groups", 6, function() {
+test("Simple add/remove mesh", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -203,7 +203,15 @@ test("Add/remove meshes and groups", 6, function() {
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove mesh]");
+});
 
+test("Simple add/remove group with mesh", 4, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+
+    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("src", "#meshdata");
     var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
     group.appendChild(mesh);
     x.appendChild(group);

@@ -257,6 +257,43 @@ test("Simple add/remove group with mesh", 10, function() {
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 });
 
+test("Simple add/remove transformed group with mesh", 10, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+    x.setAttribute("activeView", "#identView");
+    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("src", "#meshdata");
+    var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
+    group.setAttribute("transform", "#t_grouptransformed");
+
+    group.appendChild(mesh);
+    //console.log(getWebGLAdapter(mesh).renderObject.is("NoLights"));
+
+    // Add group
+    x.appendChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
+    h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
+
+    // Remove group
+    x.removeChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
+
+    // Re-add group
+    x.appendChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
+    h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
+});
+
 test("Nested transforms", 8, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);

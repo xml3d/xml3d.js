@@ -16,26 +16,28 @@ module("WebGL Scenegraph", {
 
 });
 
-function getContextForXml3DElement(x) {
+function getWebGLAdapter(x) {
     if(x._configured){
         for(var i in x._configured.adapters){
             if(i.indexOf("webgl") == 0){
-                return x._configured.adapters[i].factory.handler.renderer.gl;
-            }
-        }
-    }
-};
-
-function getHandler(x) {
-    if(x._configured){
-        for(var i in x._configured.adapters){
-            if(i.indexOf("webgl") == 0){
-                return x._configured.adapters[i].factory.handler;
+                return x._configured.adapters[i];
             }
         }
     }
     return null;
 };
+
+function getHandler(x) {
+    var adapter = getWebGLAdapter(x);
+    return adapter ? adapter.factory.handler : null;
+};
+
+function getContextForXml3DElement(x) {
+    var handler = getHandler(x);
+    return handler ? handler.renderer.gl : null;
+};
+
+
 
 test("Background and invisible mesh", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
@@ -187,25 +189,40 @@ test("Change visible/shader for nested groups", 8, function() {
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child shader overrides new parent shader]");
 });
 
-test("Simple add/remove mesh", 4, function() {
+test("Simple add/remove mesh", 10, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
 
     var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
     mesh.setAttribute("src", "#meshdata");
+
+    // Add a mesh
     x.appendChild(mesh);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
     h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add mesh]");
 
+    // Remove the mesh
     x.removeChild(mesh);
+    ok(getWebGLAdapter(mesh).renderObject.is("Disposed"), "RenderObject disposed");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove mesh]");
+
+    // Add the mesh again
+    x.appendChild(mesh);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
+    h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [re-add mesh]");
+
 });
 
-test("Simple add/remove group with mesh", 4, function() {
+test("Simple add/remove group with mesh", 10, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -214,15 +231,30 @@ test("Simple add/remove group with mesh", 4, function() {
     mesh.setAttribute("src", "#meshdata");
     var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
     group.appendChild(mesh);
+    //console.log(getWebGLAdapter(mesh).renderObject.is("NoLights"));
+
+    // Add group
     x.appendChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
     h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
+    // Remove group
     x.removeChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
+
+    // Re-add group
+    x.appendChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
+    h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 });
 
 test("Nested transforms", 8, function() {

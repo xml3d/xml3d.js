@@ -13,6 +13,7 @@
         <file name="shadermanager.js" />
         <file name="material.js" />
         <file name="bufferhandler.js" />
+        <file name="renderobject.js" />
         <file name="renderer.js" />
         <file name="adapter/misc.js" />
         <file name="adapter/xml3d.js" />

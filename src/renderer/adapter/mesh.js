@@ -5,7 +5,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     var eventTypes = {onclick:1, ondblclick:1,
         ondrop:1, ondragenter:1, ondragleave:1};
 
-    var NORENDEROBJECT = function() {
+    var noDrawableObject = function() {
         XML3D.debug.logError("Mesh adapter has no callback to its mesh object!");
     },
         /**
@@ -26,10 +26,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.processListeners();
         this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
         this.parentVisible = true;
+        this.renderObject = null; // This is set by renderObject itself
 
         this.computeRequest = null;
         this.bboxComputeRequest = null;
-        this.renderObject = null;
     };
 
     XML3D.createClass(MeshRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -105,7 +105,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 break;
 
             case "src":
-                this.createMesh();
+                // Handled by data component
                 break;
 
             case "type":
@@ -134,6 +134,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
             this.factory.renderer.lights);
         this.renderObject.shader = shaderName;
+        this.renderObject.materialChanged();
         this.factory.renderer.requestRedraw("Shader changed.", false);
     }
 
@@ -155,16 +156,23 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     /**
      *
      */
-    p.createMesh = function() {
+    p.createRequests = function() {
         var that = this;
-        this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes,
+        this.computeRequest = this.computeRequest || this.dataAdapter.getComputeRequest(staticAttributes,
             function(request, changeType) {
-                if(this.renderObject && this.renderObject.can("meshChanged"))
-                    this.renderObject.meshChanged();
+                that.dataChanged(request, changeType);
         });
-        this.bboxComputeRequest = this.dataAdapter.getComputeRequest(bboxAttributes);
-        this.bbox = this.calcBoundingBox();
+        this.bboxComputeRequest = this.bboxComputeRequest || this.dataAdapter.getComputeRequest(bboxAttributes);
     };
+
+    p.finishMesh = function() {
+        console.log("finish Mesh");
+        this.createRequests();
+
+        this.bbox = this.calcBoundingBox();
+        this.createMeshData();
+        return this.renderObject.mesh.valid;
+    }
 
     var emptyFunction = function() {};
 
@@ -182,15 +190,38 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     }
 
     /**
-     * @param {Renderer.drawableObject} obj
+     * @param {Xflow.data.Request} request
+     * @param {Xflow.RESULT_STATE} state
      */
-    p.updateData = function() {
+    p.dataChanged = function(request, state) {
+        var obj = this.renderObject;
+        switch(state) {
+            case Xflow.RESULT_STATE.CHANGED_STRUCTURE:
+                console.log("Mesh structure changed", arguments);
+                this.renderObject.dataStructureChanged();
+                this.factory.renderer.requestRedraw("Mesh structure changed.");
+                break;
+            case Xflow.RESULT_STATE.CHANGED_DATA:
+                console.log("Mesh values changed", arguments);
+                this.renderObject.dataValueChanged();
+                this.factory.renderer.requestRedraw("Mesh values changed.");
+                break;
+            default:
+                console.log("Unknown state: " + state);
+        }
+    };
+
+    /**
+     *
+     */
+    p.createMeshData = function() {
+        console.log("createMeshData");
         var gl = this.factory.renderer.gl;
         var obj = this.renderObject;
+        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
+
         var calculateBBox = false;
         var dataResult =  this.computeRequest.getResult();
-
-        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
 
         if (!(dataResult.getOutputData("position") && dataResult.getOutputData("position").getValue())) {
             XML3D.debug.logInfo("Mesh " + this.node.id + " has no data for required attribute 'position'.");
@@ -270,8 +301,13 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @return {XML3DMatrix}
      */
     p.getWorldMatrix = function() {
+
         var m = new window.XML3DMatrix();
-        m._data.set(this.renderObject.transform);
+
+        var obj = this.renderObject;
+        if(obj)
+            m._data.set(obj.transform);
+
         return m;
     };
 

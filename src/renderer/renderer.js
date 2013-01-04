@@ -2,69 +2,6 @@
 
 (function() {
 
-    var RenderObjectHandler = function() {
-        this.remove = function(obj) {
-            var index = this.ready.indexOf(obj);
-            if (index == -1) {
-                index = this.queue.indexOf(obj);
-                this.queue.splice(index, 1);
-            } else
-                this.ready.splice(index, 1);
-        };
-        this.clear = function() {
-            this.ready = new Array();
-            this.queue = new Array();
-        };
-        this.moveFromQueueToReady = function(obj) {
-            var index = this.queue.indexOf(obj);
-            if (index != -1) {
-                this.queue.splice(index, 1);
-                this.ready.push(obj);
-            }
-        };
-        this.moveFromReadyToQueue = function(obj) {
-        	var index = this.ready.indexOf(obj);
-            if (index != -1) {
-                this.ready.splice(index, 1);
-                this.queue.push(obj);
-            }
-        };
-        this.remove = function(obj) {
-            var index = this.queue.indexOf(obj);
-            if (index != -1) {
-                this.queue.splice(index, 1);
-            }
-            var index = this.ready.indexOf(obj);
-            if (index != -1) {
-                this.ready.splice(index, 1);
-            }
-        };
-        this.consolidate = function() {
-            this.queue.slice().forEach(function(obj) {
-                while (obj.can('progress') && obj.progress() == StateMachine.Result.SUCCEEDED )
-                   true
-            })
-        }
-        this.updateLights = function(lights, shaderManager) {
-            if (lights.structureChanged) {
-                this.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
-                lights.structureChanged = false;
-            } else {
-                this.queue.forEach(function(obj) {
-                    if (obj.current == "NoLights")
-                        obj.lightsChanged(lights, shaderManager);
-                }, this);
-            }
-        }
-        this.forEach = function(func, that) {
-            this.queue.slice().forEach(func, that);
-            this.ready.slice().forEach(func, that);
-        }
-        this.clear();
-    };
-
-
-
 /**
  * Constructor for the Renderer.
  *
@@ -86,7 +23,7 @@ var Renderer = function(handler, context, dimensions) {
     this.width = dimensions.width;
     this.height = dimensions.height;
 
-    this.renderObjects = new RenderObjectHandler();
+    this.renderObjects = new XML3D.webgl.RenderObjectHandler();
 
     this.initialize();
 };
@@ -116,82 +53,6 @@ Renderer.prototype.initializeScenegraph = function() {
     }
 };
 
-/**
- * Represents a renderable object in the scene.
- *
- * This object holds references to a mesh and shader stored in their respective managers, or in the
- * case of XFlow a local instance of these objects, since XFlow may be applied differently to different
- * instances of the same <data> element. It also holds the current transformation matrix for the object,
- * a flag to indicate visibility (not visible = will not be rendered), and a callback function to be used by
- * any adapters associated with this object (eg. the mesh adapter) to propagate changes (eg. when the
- * parent group's shader is changed).
- *
- * @constructor
- */
-
-
-var RenderObject = function(opt) {
-    this.handler = opt.handler,
-    this.meshAdapter = opt.meshAdapter;
-    this.shader = opt.shader || null;
-    this.transform = opt.transform || RenderObject.IDENTITY_MATRIX;
-    this.visible = opt.visible !== undefined ? opt.visible : true;
-    this.meshAdapter.renderObject = this;
-    this.create();
-};
-
-RenderObject.IDENTITY_MATRIX = mat4.identity(mat4.create());
-
-RenderObject.prototype = {
-    onmaterialChanged : function() {
-        console.log("Material changed");
-    },
-    onafterlightsChanged: function(name, from, to, lights, shaderManager) {
-        this.handler.moveFromReadyToQueue(this);
-        if (lights) {
-            var shaderHandle = this.meshAdapter.getShaderHandle();
-            var shaderAdapter = shaderHandle && shaderHandle.getAdapter();
-            this.shader = shaderManager.createShader(shaderAdapter, lights);
-        }
-    },
-    onmeshChanged : function() {
-        console.log("Mesh changed");
-    },
-    onbeforeprogress : function(name, from, to) {
-        switch(to) {
-            case "Ready":
-                this.meshAdapter.updateData()
-                return this.mesh.valid;
-            case "NoMaterial":
-                return this.shader != null;
-        }
-    },
-    onenterNoMesh: function() {
-        // Trigger the creation of the mesh now
-        this.meshAdapter.createMesh();
-        return true;
-    },
-    onenterReady: function() {
-        this.handler.moveFromQueueToReady(this);
-    },
-    onenterDisposed : function() {
-        this.handler.remove(this);
-    }
-    ,onchangestate : function(name, from, to) {}
-};
-
-window.StateMachine.create({
-    target: RenderObject.prototype,
-    events: [
-        { name: 'create',   from: 'none',       to: 'NoLights'   },
-        { name: 'progress', from: 'NoLights',   to: 'NoMaterial'   },
-        { name: 'progress', from: 'NoMaterial', to: 'NoMesh'   },
-        { name: 'progress', from: 'NoMesh',     to: 'Ready' },
-        { name: 'lightsChanged',   from: '*',  to: 'NoLights' },
-        { name: 'materialChanged', from: ['NoMesh', 'Ready'],  to: 'NoMaterial' },
-        { name: 'meshChanged',     from: 'Ready',  to: 'NoMesh' },
-        { name: 'dispose',         from: '*',  to: 'Disposed' }
-    ]});
 
 /**
  *
@@ -257,7 +118,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         adapter.setShaderHandle(parent.shader);
 
         // Add a new RenderObject to the scene
-        var newObject = new RenderObject({
+        var newObject = new XML3D.webgl.RenderObject({
             handler: this.renderObjects,
             meshAdapter : adapter,
             visible: parent.visible && currentNode.visible,

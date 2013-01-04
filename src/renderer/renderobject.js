@@ -96,11 +96,11 @@
 
     RenderObject.prototype = {
         onenterReady:function () {
-            console.log("Entering Ready state");
+            //console.log("Entering Ready state");
             this.handler.moveFromQueueToReady(this);
         },
         onleaveReady:function () {
-            console.log("Leaving Ready state");
+            //console.log("Leaving Ready state");
             this.handler.moveFromReadyToQueue(this);
         },
         onafterlightsChanged:function (name, from, to, lights, shaderManager) {
@@ -111,7 +111,7 @@
             }
         },
         onbeforedataComplete:function (name, from, to) {
-            console.log("Before data complete");
+            //console.log("Before data complete");
             if(!this.meshAdapter.finishMesh()) {
                 return false;
             }
@@ -133,7 +133,7 @@
             this.handler.remove(this);
         },
         onchangestate:function (name, from, to) {
-            console.log("Changed: ", name, from, to);
+            XML3D.debug.logInfo("Changed: ", name, from, to);
         }
     };
 

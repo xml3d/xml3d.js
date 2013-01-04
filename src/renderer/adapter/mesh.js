@@ -81,6 +81,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             return this.factory.renderer.sceneTreeRemoval(evt);
         else if (evt.type == XML3D.events.THIS_REMOVED) {
             this.clearAdapterHandles();
+            return;
         }
 
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
@@ -114,7 +115,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 break;
 
             default:
-                XML3D.debug.logWarning("Unhandled mutation event in mesh adapter for parameter '"+target+"'");
+                XML3D.debug.logWarning("Unhandled mutation event in mesh adapter for parameter '"+target+"'", evt);
                 break;
         }
 
@@ -166,7 +167,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     p.finishMesh = function() {
-        console.log("finish Mesh");
         this.createRequests();
 
         this.bbox = this.calcBoundingBox();
@@ -197,17 +197,17 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var obj = this.renderObject;
         switch(state) {
             case Xflow.RESULT_STATE.CHANGED_STRUCTURE:
-                console.log("Mesh structure changed", arguments);
+                XML3D.debug.logInfo("Mesh structure changed", arguments);
                 this.renderObject.dataStructureChanged();
                 this.factory.renderer.requestRedraw("Mesh structure changed.");
                 break;
             case Xflow.RESULT_STATE.CHANGED_DATA:
-                console.log("Mesh values changed", arguments);
+                XML3D.debug.logInfo("Mesh values changed", arguments);
                 this.renderObject.dataValueChanged();
                 this.factory.renderer.requestRedraw("Mesh values changed.");
                 break;
             default:
-                console.log("Unknown state: " + state);
+                XML3D.debug.logInfo("Unknown state: " + state);
         }
     };
 
@@ -215,7 +215,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      *
      */
     p.createMeshData = function() {
-        console.log("createMeshData");
         var gl = this.factory.renderer.gl;
         var obj = this.renderObject;
         obj.mesh = obj.mesh || createMeshInfo(this.node.type);

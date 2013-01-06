@@ -155,6 +155,19 @@ BufferEntry.prototype.isEmpty = function(){
 // Xflow.TextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
+function isLoading(image) {
+    if (!image)
+        return false;
+    var nodeName = image.nodeName.toLowerCase();
+    if (nodeName == 'img')
+        return !image.complete;
+    if (nodeName == 'canvas')
+        return false;
+    if (nodeName == 'video')
+        return image.readyState == 0; // 0 == HAVE_NOTHING
+    return false;
+}
+
 /**
  * @constructor
  * @param {Xflow.TextureEntry} textureEntry
@@ -165,15 +178,22 @@ Xflow.ImageManipulator = function(textureEntry) {
     if (this._image) {
         this.width = this._image.width;
         this.height = this._image.height;
-        this._canvas = (this._image.nodeName.toLowerCase === 'canvas' ? this._image : null);
+        if (this._image.nodeName.toLowerCase() === 'canvas') {
+            this._canvas = this._image;
+            this._copyImageToCtx = false;
+        } else {
+            this._canvas = null;
+            this._copyImageToCtx = true;
+        }
     } else {
         this.width = 0;
         this.height = 0;
         this._canvas = null;
     }
-    // TODO if image is not canvas we should create canvas and fill it with the image
-    //      contents on demand
     this._context = null;
+};
+Xflow.ImageManipulator.prototype.isLoading = function() {
+    return isLoading(this._image);
 };
 Xflow.ImageManipulator.prototype.detach = function() {
     this._textureEntry = null;
@@ -194,18 +214,36 @@ Xflow.ImageManipulator.prototype.getContext2D = function() {
         this._context = canvas.getContext("2d");
         if (!this._context)
             throw new Error("Could not create 2D context.");
+        if (this._copyImageToCtx) {
+            // FIXME What to do with video element ?
+            this._context.drawImage(this._image, 0, 0);
+        }
     }
     return this._context;
 };
+
+function createPlaceholder(w, h) {
+    var img = document.createElement('img');
+    img.setAttribute('style', 'width:'+w+'px;height:'+h+'px;border:none;display:block');
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+    return img;
+}
+
 /** Call this function when image editing is finished.
  *
  */
 Xflow.ImageManipulator.prototype.finish = function() {
     if (this._textureEntry && this._canvas) {
-        this._canvas.complete = true; // for compatibility with img element
-        this._textureEntry._image = this._canvas;
-        // FIXME Do we need to call notifyChanged here ? Arrays in DataEntry are not calling callbacks.
-        this._textureEntry.notifyChanged();
+        if (this._canvas) {
+            this._canvas.complete = true; // for compatibility with img element
+            this._textureEntry._image = this._canvas;
+            // FIXME Do we need to call notifyChanged here ? Arrays in DataEntry are not calling callbacks.
+            this._textureEntry.notifyChanged();
+        } else if (!this._image) {
+
+            // FIXME Do we need to call notifyChanged here ? Arrays in DataEntry are not calling callbacks.
+            this._textureEntry.notifyChanged();
+        }
     }
 }
 
@@ -226,6 +264,10 @@ var TextureEntry = Xflow.TextureEntry;
 
 TextureEntry.prototype.isEmpty = function(){
     return !this._image;
+};
+
+TextureEntry.prototype.isLoading = function() {
+    return isLoading(this._image);
 };
 
 /** @param {Object} v */
@@ -258,6 +300,11 @@ TextureEntry.prototype.getSamplerConfig = function(){
 
 /** @return {number} */
 TextureEntry.prototype.getLength = function(){
+    return 1;
+};
+
+/** @return {number} */
+TextureEntry.prototype.getIterateCount = function() {
     return 1;
 };
 

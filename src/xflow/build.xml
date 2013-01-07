@@ -33,6 +33,7 @@
         <file name="./operator/default/math.js" />
         <file name="./operator/default/noiseImage.js" />
         <file name="./operator/default/sobelImage.js" />
+        <file name="./operator/default/grayscaleImage.js" />
     </filelist>
 
     <target name="concat">

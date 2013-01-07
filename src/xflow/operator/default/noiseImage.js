@@ -1,5 +1,5 @@
 Xflow.registerOperator("noiseImage", {
-    outputs: [ {type: 'texture', name : 'image', tupleSize: '1', customAlloc: true} ],
+    outputs: [ {type: 'texture', name : 'image', customAlloc: true} ],
     params:  [ {type: 'int', source: 'width'},
                {type: 'int', source:'height'},
                {type: 'float2', source: 'scale'},

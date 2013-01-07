@@ -164,7 +164,8 @@ function isLoading(image) {
     if (nodeName == 'canvas')
         return false;
     if (nodeName == 'video')
-        return image.readyState == 0; // 0 == HAVE_NOTHING
+        // readyState == 0 is HAVE_NOTHING
+        return image.readyState == 0;
     return false;
 }
 
@@ -174,11 +175,20 @@ function isLoading(image) {
  */
 Xflow.ImageManipulator = function(textureEntry) {
     this._textureEntry = textureEntry;
-    this._image = textureEntry.getImage();
+    this.update();
+};
+Xflow.ImageManipulator.prototype.update = function() {
+    this._image = this._textureEntry.getImage();
     if (this._image) {
-        this.width = this._image.width;
-        this.height = this._image.height;
-        if (this._image.nodeName.toLowerCase() === 'canvas') {
+        var nodeName = this._image.nodeName.toLowerCase();
+        if (nodeName == 'video') {
+            this.width = this._image.videoWidth;
+            this.height = this._image.videoHeight;
+        } else {
+            this.width = this._image.width;
+            this.height = this._image.height;
+        }
+        if (nodeName == 'canvas') {
             this._canvas = this._image;
             this._copyImageToCtx = false;
         } else {
@@ -274,8 +284,12 @@ TextureEntry.prototype.isLoading = function() {
 TextureEntry.prototype.setImage = function(v){
     this._image = v;
     if (this._imageManipulator) {
-        this._imageManipulator.detach();
-        this._imageManipulator = null;
+        if (this._image === this._imageManipulator._image) {
+            this._imageManipulator.update();
+        } else {
+            this._imageManipulator.detach();
+            this._imageManipulator = null;
+        }
     }
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }

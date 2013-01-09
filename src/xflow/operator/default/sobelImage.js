@@ -222,10 +222,6 @@ Xflow.registerOperator("sobelImage", {
         };
     },
     evaluate: function(result, image) {
-        if (image.isLoading()) {
-            result.finish();
-            return false;
-        }
 
         var srcctx = image.getContext2D();
         var destctx = result.getContext2D();

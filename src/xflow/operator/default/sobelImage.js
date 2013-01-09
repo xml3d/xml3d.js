@@ -222,14 +222,8 @@ Xflow.registerOperator("sobelImage", {
         };
     },
     evaluate: function(result, image) {
-
-        var srcctx = image.getContext2D();
-        var destctx = result.getContext2D();
-
         var width = image.width;
         var height = image.height;
-        var destid = destctx.getImageData(0, 0, width, height);
-        var srcid = srcctx.getImageData(0, 0, width, height);
 
         // Sobel filter, AnySL method
         var gx = float4(0.0);
@@ -253,15 +247,15 @@ Xflow.registerOperator("sobelImage", {
                 /* Read each texel component and calculate the filtered value using neighbouring texel components */
                 if ( x >= 1 && x < (width-1) && y >= 1 && y < height - 1)
                 {
-                    getTexel2DTo(i00, srcid, x-1, y-1);
-                    getTexel2DTo(i10, srcid, x, y-1);
-                    getTexel2DTo(i20, srcid, x+1, y-1);
-                    getTexel2DTo(i01, srcid, x-1, y);
-                    getTexel2DTo(i11 , srcid, x, y);
-                    getTexel2DTo(i21 , srcid, x+1, y);
-                    getTexel2DTo(i02 , srcid, x-1, y+1);
-                    getTexel2DTo(i12 , srcid, x, y+1);
-                    getTexel2DTo(i22 , srcid, x+1, y+1);
+                    getTexel2DTo(i00, image, x-1, y-1);
+                    getTexel2DTo(i10, image, x, y-1);
+                    getTexel2DTo(i20, image, x+1, y-1);
+                    getTexel2DTo(i01, image, x-1, y);
+                    getTexel2DTo(i11, image, x, y);
+                    getTexel2DTo(i21, image, x+1, y);
+                    getTexel2DTo(i02, image, x-1, y+1);
+                    getTexel2DTo(i12, image, x, y+1);
+                    getTexel2DTo(i22, image, x+1, y+1);
 
                     gx[0] = i00[0] + 2 * i10[0] + i20[0] - i02[0]  - 2 * i12[0] - i22[0];
                     gx[1] = i00[1] + 2 * i10[1] + i20[1] - i02[1]  - 2 * i12[1] - i22[1];
@@ -277,7 +271,7 @@ Xflow.registerOperator("sobelImage", {
                     color[1]/=2;
                     color[2]/=2;
                     color[3]=1.0;
-                    setTexel2D(destid, x, y, color);
+                    setTexel2D(result, x, y, color);
                 }
             }
         }
@@ -287,31 +281,31 @@ Xflow.registerOperator("sobelImage", {
 // Sobel filter with separate steps
 //
 //        var vertical = Xflow.Filters.createImageDataFloat32(width, height);
-//        Xflow.Filters.convolute(destid, vertical,
+//        Xflow.Filters.convolute(result, vertical,
 //            [ -1, 0, 1,
 //              -2, 0, 2,
 //              -1, 0, 1 ]);
 //        var horizontal = Xflow.Filters.createImageDataFloat32(width, height);
-//        Xflow.Filters.convolute(destid, horizontal,
+//        Xflow.Filters.convolute(result, horizontal,
 //            [ -1, -2, -1,
 //               0,  0,  0,
 //               1,  2,  1 ]);
 //
-//        for (var i=0; i<destid.data.length; i+=4) {
+//        for (var i=0; i<result.data.length; i+=4) {
 //            // make the vertical gradient red
 //            var v = Math.abs(vertical.data[i]);
-//            destid.data[i] = v;
+//            result.data[i] = v;
 //            // make the horizontal gradient green
 //            var h = Math.abs(horizontal.data[i]);
-//            destid.data[i+1] = h;
+//            result.data[i+1] = h;
 //            // and mix in some blue for aesthetics
-//            destid.data[i+2] = (v+h)/4;
-//            destid.data[i+3] = 255; // opaque alpha
+//            result.data[i+2] = (v+h)/4;
+//            result.data[i+3] = 255; // opaque alpha
 //        }
 
         /* Copy image
-        var destpix = destid.data;
-        var srcpix = srcid.data;
+        var destpix = result.data;
+        var srcpix = image.data;
 
         for (var y = 0; y < height; ++y)
         {
@@ -325,9 +319,6 @@ Xflow.registerOperator("sobelImage", {
             }
         }
         */
-
-
-        destctx.putImageData(destid, 0, 0);
         return true;
     }
 });

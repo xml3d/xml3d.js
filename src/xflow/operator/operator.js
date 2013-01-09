@@ -230,9 +230,7 @@ function assembleFunctionArgs(operator, inputData, outputData){
     for(var i in operator.outputs){
         var d = operator.outputs[i];
         var entry = outputData[d.name].dataEntry;
-        var value = entry ?
-            (entry.type == Xflow.DATA_TYPE.TEXTURE ? entry.getImageManipulator() : entry._value) :
-            null;
+        var value = entry ? entry.getValue() : null;
         args.push(value);
     }
     addInputToArgs(args, inputData);
@@ -242,9 +240,7 @@ function assembleFunctionArgs(operator, inputData, outputData){
 function addInputToArgs(args, inputData){
     for(var i = 0; i < inputData.length; ++i){
         var entry = inputData[i];
-        var value = entry ?
-            (entry.type == Xflow.DATA_TYPE.TEXTURE ? entry.getImageManipulator() : entry._value) :
-            null;
+        var value = entry ? entry.getValue() : null;
         args.push(value);
     }
 }

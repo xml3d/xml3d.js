@@ -296,7 +296,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @return {XML3DBox}
      */
     p.getBoundingBox = function() {
-        return this.bbox;
+        return new window.XML3DBox(this.bbox);
     };
 
     /**

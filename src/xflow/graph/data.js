@@ -307,7 +307,7 @@ TextureEntry.prototype.getImageManipulator = function() {
     return this._imageManipulator;
 }
 
-    /** @return {Object} */
+/** @return {Object} */
 TextureEntry.prototype.getSamplerConfig = function(){
     return this._samplerConfig;
 };
@@ -322,7 +322,10 @@ TextureEntry.prototype.getIterateCount = function() {
     return 1;
 };
 
-
+TextureEntry.prototype.finish = function() {
+    if (this._imageManipulator)
+        this._imageManipulator.finish();
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.DataChangeNotifier

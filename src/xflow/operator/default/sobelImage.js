@@ -328,7 +328,6 @@ Xflow.registerOperator("sobelImage", {
 
 
         destctx.putImageData(destid, 0, 0);
-        result.finish();
         return true;
     }
 });

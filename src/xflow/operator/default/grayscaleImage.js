@@ -10,11 +10,6 @@ Xflow.registerOperator("grayscaleImage", {
         };
     },
     evaluate: function(result, image) {
-        if (image.isLoading()) {
-            result.finish();
-            return false;
-        }
-
         var srcctx = image.getContext2D();
         var destctx = result.getContext2D();
 
@@ -43,7 +38,6 @@ Xflow.registerOperator("grayscaleImage", {
         grayscale(srcid, destid);
 
         destctx.putImageData(destid, 0, 0);
-        result.finish();
         return true;
     }
 });

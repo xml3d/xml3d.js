@@ -78,4 +78,53 @@
     // Export to XML3D.webgl namespace
     XML3D.webgl.TransformRenderAdapter = TransformRenderAdapter;
 
+
+    var DataRenderAdapter = function(factory, node) {
+        XML3D.webgl.RenderAdapter.call(this, factory, node);
+    };
+    XML3D.createClass(DataRenderAdapter, XML3D.webgl.RenderAdapter);
+    var p = DataRenderAdapter.prototype;
+
+    p.init = function() {
+        // Create all matrices, no valid values yet
+        this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
+        var that = this;
+        this.computeRequest = this.dataAdapter.getComputeRequest(["transform"],
+            function(request, changeType) {
+                that.dataChanged(request, changeType);
+            }
+        );
+        this.matrix = mat4.create();
+        this.needsUpdate = true;
+    };
+
+    p.updateMatrix = function() {
+        var dataResult =  this.computeRequest.getResult();
+
+        var transformData = (dataResult.getOutputData("transform") && dataResult.getOutputData("transform").getValue());
+        if(!transformData){
+            this.matrix = mat4.create();
+            return;
+        }
+        for(var i = 0; i < 16; ++i){
+            this.matrix[i] = transformData[i];
+        }
+        this.needsUpdate = false;
+    };
+
+    p.getMatrix = function() {
+        this.needsUpdate && this.updateMatrix();
+        return this.matrix;
+    };
+
+    p.dataChanged = function(request, changeType){
+        this.factory.renderer.requestRedraw("Transformation changed.", true);
+        this.notifyOppositeAdapters();
+    }
+
+    // Export to XML3D.webgl namespace
+    XML3D.webgl.DataRenderAdapter = DataRenderAdapter;
+
 }());
+
+

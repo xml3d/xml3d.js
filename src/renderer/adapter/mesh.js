@@ -198,7 +198,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         switch(state) {
             case Xflow.RESULT_STATE.CHANGED_STRUCTURE:
                 XML3D.debug.logInfo("Mesh structure changed", arguments);
-                this.renderObject.dataStructureChanged();
+                if(this.renderObject.can("dataStructureChanged"))
+                    this.renderObject.dataStructureChanged();
                 this.factory.renderer.requestRedraw("Mesh structure changed.");
                 break;
             case Xflow.RESULT_STATE.CHANGED_DATA:
@@ -223,7 +224,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var dataResult =  this.computeRequest.getResult();
 
         if (!(dataResult.getOutputData("position") && dataResult.getOutputData("position").getValue())) {
-            XML3D.debug.logInfo("Mesh " + this.node.id + " has no data for required attribute 'position'.");
+            if(!dataResult.loading)
+                XML3D.debug.logWarning("Mesh " + this.node.id + " has no data for required attribute 'position'.");
             obj.mesh.valid = false;
             return;
         }

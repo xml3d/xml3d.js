@@ -35,6 +35,8 @@
         <file name="./operator/default/sobelImage.js" />
         <file name="./operator/default/grayscaleImage.js" />
         <file name="./operator/default/sepiaImage.js" />
+        <file name="./operator/default/clampImage.js" />
+        <file name="./operator/default/convoluteImage.js" />
     </filelist>
 
     <target name="concat">

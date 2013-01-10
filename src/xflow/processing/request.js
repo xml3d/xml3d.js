@@ -74,7 +74,7 @@ ComputeRequest.prototype.getResult = function(){
     return this.result;
 }
 
-ComputeRequest.prototype.onResultChanged = function(notification){
+ComputeRequest.prototype.onResultChanged = function(result, notification){
     this.notify(notification);
 }
 

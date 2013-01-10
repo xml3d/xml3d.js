@@ -148,12 +148,12 @@
 
   //===========================================================================
 
-  if ("function" === typeof define) {
+  /*if ("function" === typeof define) {
     define(function(require) { return StateMachine; });
   }
-  else {
+  else {*/
     window.StateMachine = StateMachine;
-  }
+  /*}*/
 
 }(this));
 

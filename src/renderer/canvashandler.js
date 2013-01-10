@@ -38,7 +38,7 @@ XML3D.webgl.MAXFPS = 30;
 
     /**
      * CanvasHandler class.
-     * Own the GL context. Registers and handles the events that happen on the canvas element.
+     * Registers and handles the events that happen on the canvas element.
      * This includes context lost events.
      *
      * @param {HTMLCanvasElement} canvas
@@ -60,6 +60,30 @@ XML3D.webgl.MAXFPS = 30;
         this.lastPickObj = null;
         this.timeNow = Date.now() / 1000.0;
 
+        var context = this.getContextForCanvas(canvas);
+        if (context) {
+            this.initialize(context);
+        }
+    }
+
+    /**
+     *
+     * @param {HTMLCanvasElement!} canvas
+     */
+    CanvasHandler.prototype.getContextForCanvas = function(canvas) {
+        try {
+            var args = {preserveDrawingBuffer: true};
+            return canvas.getContext('experimental-webgl', args);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param {WebGLRenderingContext!} context
+     */
+    CanvasHandler.prototype.initialize = function(context) {
         // Register listeners on canvas
         this.registerCanvasListeners();
 
@@ -77,6 +101,7 @@ XML3D.webgl.MAXFPS = 30;
         };
 
         this.redraw = function(reason, forcePickingRedraw) {
+            //XML3D.debug.logDebug("Request redraw:", reason);
             forcePickingRedraw = forcePickingRedraw === undefined ? true : forcePickingRedraw;
             if (this.needDraw !== undefined) {
                 this.needDraw = true;
@@ -89,7 +114,7 @@ XML3D.webgl.MAXFPS = 30;
         };
 
         // Create renderer
-        this.renderer = new XML3D.webgl.Renderer(this, canvas.clientWidth, canvas.clientHeight);
+        this.renderer = new XML3D.webgl.Renderer(this, context, { width: this.canvas.clientWidth, height: this.canvas.clientHeight });
     }
 
     CanvasHandler.prototype.registerCanvasListeners = function() {
@@ -169,9 +194,10 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.updatePickObjectByPoint = function(canvasX, canvasY) {
         if (this._pickingDisabled)
             return null;
-        
-        if(this.needPickingDraw)
+        if(this.needPickingDraw) {
+            this.renderer.prepareRendering();
             this.renderer.renderSceneToPickingBuffer();   
+        }
         
         /** Temporary workaround: this function is called when drawable objects are not yet 
          *  updated. Thus, the renderer.render() updates the objects after the picking buffer
@@ -186,7 +212,8 @@ XML3D.webgl.MAXFPS = 30;
         
         var glY = this.canvasToGlY(canvasY);
         
-        this.currentPickObj = this.renderer.getDrawableFromPickingBuffer(canvasX, glY);
+        this.currentPickObj = this.renderer.getRenderObjectFromPickingBuffer(canvasX, glY);
+        
         
         return this.currentPickObj;
     };
@@ -296,6 +323,7 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.draw = function() {
         try {
             var start = Date.now();
+            this.renderer.prepareRendering();
             var stats = this.renderer.render();
             var end = Date.now();
 
@@ -358,7 +386,7 @@ XML3D.webgl.MAXFPS = 30;
         if (target !== undefined && target !== null)
             tar = target;
         else if (this.currentPickObj)
-            tar = this.currentPickObj.meshNode;
+            tar = this.currentPickObj.meshAdapter.node;
         else
             tar = this.xml3dElem;
 
@@ -501,7 +529,7 @@ XML3D.webgl.MAXFPS = 30;
         this.updatePickObjectByPoint(pos.x, pos.y);
         this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt);
 
-        var curObj = this.currentPickObj ? this.currentPickObj.meshNode : null;
+        var curObj = this.currentPickObj ? this.currentPickObj.meshAdapter.node : null;
 
         // trigger mouseover and mouseout
         if (curObj !== this.lastPickObj) {

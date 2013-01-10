@@ -9,74 +9,55 @@
  * picked when the user clicks on elements of the canvas.
  * @constructor
  * @param handler The canvas handler
- * @param {number} width Initial width of renderer areas
- * @param {number} height Initial height of renderer areas
+ * @param {WebGLRenderingContext} context Initial width of renderer areas
+ * @param {dimensions} width and height of renderer areas
  */
-var Renderer = function(handler, width, height) {
+var Renderer = function(handler, context, dimensions) {
     this.handler = handler;
-    // TODO: Safe creation and what happens if this fails?
-    this.gl = handler.canvas.getContext("experimental-webgl", {preserveDrawingBuffer: true});
+    this.gl = context;
 
-    this.setGlobalStates();
+    this.setGlobalGLStates();
+
     this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
-    this.factory = new XML3D.webgl.RenderAdapterFactory(handler, this);
+    this.width = dimensions.width;
+    this.height = dimensions.height;
+
+    this.renderObjects = new XML3D.webgl.RenderObjectHandler();
+
+    this.initialize();
+};
+
+Renderer.prototype.initialize = function() {
+    this.factory = new XML3D.webgl.RenderAdapterFactory(this.handler, this);
     this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
     this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
     this.changeListener = new XML3D.webgl.DataChangeListener(this);
     this.camera = this.initCamera();
-    this.width = width;
-    this.height = height;
     this.fbos = this.initFrameBuffers(this.gl);
 
-    //Light information is needed to create shaders, so process them first
-	this.lights = {
-            changed : true,
-            point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
-            directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
-            spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
-	};
+    this.initializeScenegraph();
+};
 
-    this.drawableObjects = new Array();
-	this.recursiveBuildScene(this.drawableObjects, this.xml3dNode, true, mat4.identity(mat4.create()), null, false);
+Renderer.prototype.initializeScenegraph = function() {
+    this.lights = {
+        changed : true,
+        structureChanged : true,
+        point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
+        directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
+            spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
+    };
+    this.recursiveBuildScene(this.xml3dNode, this.renderObjects.queue, null);
     if (this.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
-    this.processShaders(this.drawableObjects);
 };
 
-/**
- * Represents a drawable object in the scene.
- *
- * This object holds references to a mesh and shader stored in their respective managers, or in the
- * case of XFlow a local instance of these objects, since XFlow may be applied differently to different
- * instances of the same <data> element. It also holds the current transformation matrix for the object,
- * a flag to indicate visibility (not visible = will not be rendered), and a callback function to be used by
- * any adapters associated with this object (eg. the mesh adapter) to propagate changes (eg. when the
- * parent group's shader is changed).
- *
- * @constructor
- */
-Renderer.drawableObject = function() {
-    this.mesh = null;
-    this.shader = null;
-    this.transform = null;
-    this.visible = true;
-    this.meshNode = null;
-    var me = this;
-
-    // A getter for this particular drawableObject. Rather than storing a reference to the drawableObject
-    // mesh adapters will store a reference to this function and call it when they need to apply a change.
-    // This is just an arbitrary separation to aid in development.
-    this.getObject = function() {
-        return me;
-    };
-};
 
 /**
  *
  */
-Renderer.prototype.setGlobalStates = function() {
+Renderer.prototype.setGlobalGLStates = function() {
     var gl = this.gl;
 
     gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
@@ -87,82 +68,75 @@ Renderer.prototype.setGlobalStates = function() {
 };
 
 Renderer.prototype.initCamera = function() {
-    var av = XML3D.util.getOrCreateActiveView(this.xml3dNode); 
+    var av = XML3D.util.getOrCreateActiveView(this.xml3dNode);
 
     this.currentView = av;
     return this.factory.getAdapter(av);
 };
 
-Renderer.prototype.processShaders = function(objects) {
-    for (var i=0, l=objects.length; i < l; i++) {
-        var obj = objects[i];
-        var shaderHandle = this.factory.getAdapter(obj.meshNode).getShaderHandle();
-        var shaderAdapter = null;
-        if(shaderHandle)
-            shaderAdapter = shaderHandle.getAdapter();
-        obj.shader = this.shaderManager.createShader(shaderAdapter, this.lights);
-    }
+var TraversalState = function(parent) {
+    parent = parent || {};
+    this.visible = parent.visible || true;
+    this.pickable = parent.pickable || true;
+    this.transform = parent.transform ? mat4.create(parent.transform) : mat4.identity(mat4.create());
+    this.shader = parent.shader || null;
 };
 
-Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, transform, parentShaderHandle, pickable) {
+Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray, parent) {
     var adapter = this.factory.getAdapter(currentNode);
-    var downstreamShaderHandle = parentShaderHandle;
-    var downstreamTransform = transform;
+
+    parent = parent || new TraversalState();
+    var downstream = new TraversalState(parent);
 
     switch(currentNode.nodeName) {
     case "group":
-        adapter.parentVisible = visible;
-        visible = visible && currentNode.visible;
+        adapter.parentVisible = parent.visible;
+        adapter.parentTransform = mat4.create(parent.transform);
+        adapter.parentShaderHandle = parent.shader;
+
+        downstream.visible = parent.visible && currentNode.visible;
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);
-		if (currentNode.hasAttribute("interactive"))
-			pickable = currentNode.getAttribute("interactive") == "true";
 
         var shaderHandle = adapter.getShaderHandle();
-        downstreamShaderHandle = shaderHandle ? shaderHandle : parentShaderHandle;
-        adapter.parentTransform = transform;
-        adapter.parentShaderHandle = parentShaderHandle;
-        adapter.isVisible = visible;
-        downstreamTransform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
+        if (shaderHandle)
+            downstream.shader = shaderHandle;
+
+        downstream.transform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
         break;
 
     case "mesh":
+        adapter.parentVisible = parent.visible;
+
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);
-	    if (currentNode.hasAttribute("interactive"))
-	    	pickable = currentNode.getAttribute("interactive") == "true";
 
         var meshAdapter = this.factory.getAdapter(currentNode);
         if (!meshAdapter)
             break; //TODO: error handling
 
-        adapter.parentVisible = visible;
-        adapter.setShaderHandle(parentShaderHandle);
+        adapter.setShaderHandle(parent.shader);
 
-        // Add a new drawable object to the scene
-        var newObject = new Renderer.drawableObject();
-        newObject.meshNode = currentNode;
-        newObject.visible = visible && currentNode.visible;
-
-        // Defer creation of the shaders until after the entire scene is processed, this is
-        // to ensure all lights and other shader information is available
-        newObject.shader = null;
-        newObject.transform = transform;
-		newObject.pickable = pickable;
-		adapter.registerCallback(newObject.getObject);
-		meshAdapter.createMesh();
-
-        scene.push(newObject);
+        // Add a new RenderObject to the scene
+        var newObject = new XML3D.webgl.RenderObject({
+            handler: this.renderObjects,
+            meshAdapter : adapter,
+            visible: parent.visible && currentNode.visible,
+            transform: parent.transform,
+            pickable: parent.pickable
+        });
+        renderObjectArray.push(newObject);
         break;
 
     case "light":
-        adapter.transform = transform;
-        adapter.visible = visible && currentNode.visible;
+        adapter.transform = mat4.create(parent.transform);
+        adapter.visible = parent.visible && currentNode.visible;
 		adapter.addLight(this.lights);
+
         break;
 
     case "view":
-        adapter.parentTransform = transform;
+        adapter.parentTransform = mat4.create(parent.transform);
         adapter.updateViewMatrix();
         break;
     default:
@@ -171,8 +145,8 @@ Renderer.prototype.recursiveBuildScene = function(scene, currentNode, visible, t
 
     var child = currentNode.firstElementChild;
     while (child) {
-		this.recursiveBuildScene(scene, child, visible, downstreamTransform, downstreamShaderHandle, pickable);
-        child = child.nextSibling;
+        this.recursiveBuildScene(child, renderObjectArray, downstream);
+        child = child.nextElementSibling;
     }
 };
 
@@ -209,11 +183,6 @@ Renderer.prototype.changeLightData = function(lightType, field, offset, newValue
     this.lights.changed = true;
 };
 
-Renderer.prototype.removeDrawableObject = function(obj) {
-    var index = this.drawableObjects.indexOf(obj);
-    this.drawableObjects.splice(index, 1);
-};
-
 /**
  * Propogates a change in the WebGL context to everyone who needs to know
  **/
@@ -247,52 +216,26 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     if (!adapter)
         return;
 
-    var shaderHandle = null;
-    if (adapter.getShaderHandle)
-        shaderHandle = adapter.getShaderHandle();
+    var shaderHandle = adapter.getShaderHandle ? adapter.getShaderHandle() : null;
+    if(adapter.updateTransformAdapter)
+        adapter.updateTransformAdapter();
 
-    var currentNode = evt.wrapped.target.parentElement;
-	var pickable = null;
-	var visible = null;
-    var didListener = false;
-    adapter.isValid = true;
+    var visible = target.visible;
 
+    var parentNode = target.parentElement;
     var parentTransform = mat4.identity(mat4.create());
-    if(currentNode && currentNode.nodeName == "group")
+    if(parentNode && parentNode.nodeName == "group")
     {
-        var parentAdapter = this.factory.getAdapter(currentNode);
+        var parentAdapter = this.factory.getAdapter(parentNode);
         parentTransform = parentAdapter.applyTransformMatrix(parentTransform);
+        if (!shaderHandle)
+    		shaderHandle = parentAdapter.getShaderHandle();
+		visible = parentNode.visible && parentAdapter.parentVisible;
     }
 
-    //Traverse parent group nodes to build any inherited shader and transform elements
-    while (currentNode) {
-        if (currentNode.nodeName == "group") {
-            var parentAdapter = this.factory.getAdapter(currentNode);
-            if (!shaderHandle)
-                shaderHandle = parentAdapter.getShaderHandle();
-			if (currentNode.hasAttribute("visible")) {
-				var visibleFlag = currentNode.getAttribute("visible");
-				visible = visible !== null ? visible : visibleFlag == "true";
-			}
-
-			if (currentNode.hasAttribute("interactive")) {
-				var pickFlag = currentNode.getAttribute("interactive");
-				pickable = pickable !== null ? pickable : pickFlag == "true";
-			}
-
-        } else {
-            break; //End of nested groups
-        }
-
-        currentNode = currentNode.parentElement;
-    }
-	visible = visible === null ? true : visible;
     //Build any new objects and add them to the scene
-    var newObjects = new Array();
-    this.recursiveBuildScene(newObjects, evt.wrapped.target, visible, parentTransform, shaderHandle, pickable);
-    this.processShaders(newObjects);
-    this.drawableObjects = this.drawableObjects.concat(newObjects);
-
+    var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
+    this.recursiveBuildScene(evt.wrapped.target, this.renderObjects.queue, state);
     this.requestRedraw("A node was added.");
 };
 
@@ -303,7 +246,12 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
         adapter.destroy();
 
     this.requestRedraw("A node was removed.");
+};
 
+Renderer.prototype.prepareRendering = function() {
+    var renderObjects = this.renderObjects;
+    renderObjects.updateLights(this.lights, this.shaderManager);
+    renderObjects.consolidate();
 };
 
 /**
@@ -328,7 +276,7 @@ Renderer.prototype.render = function() {
 
     var stats = { objCount : 0, triCount : 0 };
 	// Update mesh objects
-	var objects = this.drawableObjects;
+	var objects = this.renderObjects.ready;
 	for (var i = 0, l = objects.length; i < l; i++)
     {
 	    var o = objects[i];
@@ -337,7 +285,7 @@ Renderer.prototype.render = function() {
     //Sort objects by shader/transparency
     var opaqueObjects = {};
     var transparentObjects = [];
-    this.sortObjects(this.drawableObjects, opaqueObjects, transparentObjects, xform);
+    this.sortObjects(objects, opaqueObjects, transparentObjects, xform);
 
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
@@ -569,9 +517,10 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 
     var shader = this.shaderManager.getShaderById("pickobjectid");
     this.shaderManager.bindShader(shader);
+    var objects = this.renderObjects.ready;
 
-    for ( var j = 0, n = this.drawableObjects.length; j < n; j++) {
-        var obj = this.drawableObjects[j];
+    for ( var j = 0, n = objects.length; j < n; j++) {
+        var obj = objects[j];
         var transform = obj.transform;
         var mesh = obj.mesh;
 
@@ -699,7 +648,7 @@ var data = new Uint8Array(8);
  * @returns {Element|null} Picked Object
  *
  */
-Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
+Renderer.prototype.getRenderObjectFromPickingBuffer = function(screenX, screenY) {
     var data = this.readPixelDataFromBuffer(screenX, screenY, this.fbos.picking);
 
     if (!data)
@@ -709,7 +658,7 @@ Renderer.prototype.getDrawableFromPickingBuffer = function(screenX, screenY) {
     var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
     if (objId > 0) {
-        var pickedObj = this.drawableObjects[objId - 1];
+        var pickedObj = this.renderObjects.ready[objId - 1];
         result = pickedObj;
     }
     return result;
@@ -791,17 +740,11 @@ Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
 
 
 /**
- * Walks through the drawable objects and destroys each shape and shader
+ * Frees all resources
  * @return
  */
 Renderer.prototype.dispose = function() {
-    for ( var i = 0, n = this.drawableObjects.length; i < n; i++) {
-        var shape = this.drawableObjects[i][1];
-        var shader = this.drawableObjects[i][2];
-        shape.dispose();
-        if (shader)
-            shader.dispose();
-    }
+    this.renderObjects.clear();
 };
 
 /**

@@ -92,7 +92,7 @@
             if(hitPoint) hitPoint.set(NaN, NaN, NaN);
             if(hitNormal) hitNormal.set(NaN, NaN, NaN);
         }
-        return object ? object.meshNode : null;
+        return object ? object.meshAdapter.node : null;
     };
 
     XML3DRenderAdapter.prototype.generateRay = function(x, y) {

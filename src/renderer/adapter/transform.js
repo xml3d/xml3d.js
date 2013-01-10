@@ -88,19 +88,23 @@
     p.init = function() {
         // Create all matrices, no valid values yet
         this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
-        var that = this;
-        this.computeRequest = this.dataAdapter.getComputeRequest(["transform"],
-            function(request, changeType) {
-                that.dataChanged(request, changeType);
-            }
-        );
-        this.matrix = mat4.create();
-        this.needsUpdate = true;
+        this.needMatrixUpdate = true;
     };
 
     p.updateMatrix = function() {
-        var dataResult =  this.computeRequest.getResult();
 
+        if(!this.transformRequest){
+            var that = this;
+            this.transformRequest = this.dataAdapter.getComputeRequest(["transform"],
+                function(request, changeType) {
+                    that.dataChanged(request, changeType);
+                }
+            );
+        }
+
+        this.matrix = mat4.create();
+
+        var dataResult =  this.transformRequest.getResult();
         var transformData = (dataResult.getOutputData("transform") && dataResult.getOutputData("transform").getValue());
         if(!transformData){
             this.matrix = mat4.create();
@@ -109,16 +113,17 @@
         for(var i = 0; i < 16; ++i){
             this.matrix[i] = transformData[i];
         }
-        this.needsUpdate = false;
+        this.needMatrixUpdate = false;
     };
 
     p.getMatrix = function() {
-        this.needsUpdate && this.updateMatrix();
+        this.needMatrixUpdate && this.updateMatrix();
         return this.matrix;
     };
 
     p.dataChanged = function(request, changeType){
         this.factory.renderer.requestRedraw("Transformation changed.", true);
+        this.needMatrixUpdate = true;
         this.notifyOppositeAdapters();
     }
 

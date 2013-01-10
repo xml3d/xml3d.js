@@ -34,6 +34,7 @@
         <file name="./operator/default/noiseImage.js" />
         <file name="./operator/default/sobelImage.js" />
         <file name="./operator/default/grayscaleImage.js" />
+        <file name="./operator/default/sepiaImage.js" />
     </filelist>
 
     <target name="concat">

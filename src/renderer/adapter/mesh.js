@@ -204,7 +204,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 break;
             case Xflow.RESULT_STATE.CHANGED_DATA:
                 XML3D.debug.logInfo("Mesh values changed", arguments);
-                this.renderObject.dataValueChanged();
+                if(this.renderObject.can("dataValueChanged"))
+                    this.renderObject.dataValueChanged();
                 this.factory.renderer.requestRedraw("Mesh values changed.");
                 break;
             default:

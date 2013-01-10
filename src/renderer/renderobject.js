@@ -91,7 +91,7 @@
     RenderObject.IDENTITY_MATRIX = mat4.identity(mat4.create());
 
     RenderObject.prototype.onmaterialChanged = function() {
-        console.log("Material changed");
+        // console.log("Material changed");
     };
 
     RenderObject.prototype = {
@@ -123,6 +123,10 @@
                 case "NoMaterial":
                     return this.shader != null;
             }
+            switch (from) {
+                case "DirtyMeshData":
+                    this.meshAdapter.createMeshData();
+            }
         },
         onenterNoMesh:function () {
             // Trigger the creation of the mesh now
@@ -151,7 +155,7 @@
             { name:'lightsChanged', from: ['NoLights','NoMaterial', 'NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoLights' },
             { name:'materialChanged', from: ['NoMaterial', 'NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoMaterial' },
             { name:'dataStructureChanged', from: ['NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoMesh' },
-            { name:'dataValueChanged', from:'Ready', to:'DirtyMeshData' },
+            { name:'dataValueChanged', from: ['Ready', 'DirtyMeshData'], to:'DirtyMeshData' },
             { name:'dispose', from:'*', to:'Disposed' }
         ]});
 

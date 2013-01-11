@@ -37,6 +37,8 @@
         <file name="./operator/default/sepiaImage.js" />
         <file name="./operator/default/clampImage.js" />
         <file name="./operator/default/convoluteImage.js" />
+        <file name="./operator/default/funMirrorImage.js" />
+        <file name="./operator/default/popartImage.js" />
     </filelist>
 
     <target name="concat">

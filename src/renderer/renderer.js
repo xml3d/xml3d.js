@@ -377,6 +377,12 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         parameters["spotLightVisibility[0]"] = lights.spot.visibility;
         parameters["spotLightDirection[0]"] = lights.spot.direction;
         parameters["spotLightCosFalloffAngle[0]"] = lights.spot.falloffAngle.map(Math.cos);
+
+        var softFalloffAngle = lights.spot.falloffAngle.slice();
+        for(var i = 0; i < softFalloffAngle.length; i++)
+            softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - lights.spot.softness[i]);
+        parameters["spotLightCosSoftFalloffAngle[0]"] = softFalloffAngle.map(Math.cos);
+
         parameters["spotLightSoftness[0]"] = lights.spot.softness;
         shader.needsLights = false;
     }

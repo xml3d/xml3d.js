@@ -56,6 +56,28 @@
             sizes['result'] = {
                 imageFormat : {
                     width: Math.max(image.width, 1),
+                    height: Math.max(image.height, 1)
+                },
+                samplerConfig : samplerConfig
+            };
+        },
+        evaluate: function(result, image, kernel) {
+            convolute(image, result, kernel, true);
+            return true;
+        }
+    });
+
+    Xflow.registerOperator("convoluteImageToFloat", {
+        outputs: [ {type: 'texture', name : 'result', customAlloc: true} ],
+        params:  [ {type: 'texture', source : 'image'},
+            {type: 'float', source : 'kernel'}
+        ],
+        alloc: function(sizes, image, kernel) {
+            var samplerConfig = new Xflow.SamplerConfig;
+            samplerConfig.setDefaults();
+            sizes['result'] = {
+                imageFormat : {
+                    width: Math.max(image.width, 1),
                     height: Math.max(image.height, 1),
                     type: 'float32'
                 },

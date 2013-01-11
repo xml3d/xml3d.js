@@ -186,6 +186,7 @@ function allocateOutput(operator, inputData, output, operatorData){
             var texParams = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount /* WRONG */);
             var newWidth = texParams.imageFormat.width;
             var newHeight = texParams.imageFormat.height;
+            var newType = texParams.imageFormat.type;
 
             var entryImage = entry.getImage();
             if (!entryImage || entryImage.width != newWidth || entryImage.height != newHeight) {
@@ -196,6 +197,7 @@ function allocateOutput(operator, inputData, output, operatorData){
                 img.width = newWidth;
                 img.height = newHeight;
                 entry.setImage(img);
+                entry.setFormatType(newType);
                 // FIXME What to do with texParams.samplerConfig ? There is no function entry.setSamplerConfig.
                 entry._samplerConfig.set(texParams.samplerConfig);
             } else {

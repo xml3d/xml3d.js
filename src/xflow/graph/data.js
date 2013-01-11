@@ -163,6 +163,7 @@ BufferEntry.prototype.isEmpty = function(){
 Xflow.TextureEntry = function(image){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
+    this._formatType = null; // null | 'number' | 'float32' | 'float64'
     this._updateImage(image);
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
@@ -182,9 +183,9 @@ TextureEntry.prototype.isLoading = function() {
     if (nodeName == 'img')
         return !image.complete;
     if (nodeName == 'canvas')
-        return false;
+        return this._image.width <= 0 || this._image.height <= 0;
     if (nodeName == 'video')
-    // readyState == 0 is HAVE_NOTHING
+        // readyState == 0 is HAVE_NOTHING
         return image.readyState == 0;
     return false;
 };
@@ -220,7 +221,11 @@ TextureEntry.prototype._updateImage = function(image) {
 TextureEntry.prototype.setImage = function(v) {
     this._updateImage(v);
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
-}
+};
+
+TextureEntry.prototype.setFormatType = function(t) {
+    this._formatType = t;
+};
 
 /** @return {Object} */
 TextureEntry.prototype.getImage = function() {
@@ -256,6 +261,13 @@ TextureEntry.prototype.getValue = function() {
     if (!this._imageData) {
         var ctx = this.getContext2D();
         this._imageData = ctx.getImageData(0, 0, this.width, this.height)
+        if (this._formatType == 'float32') {
+            this._imageData = {
+                data : new Float32Array(this._imageData.data),
+                width : this._imageData.width,
+                height : this._imageData.height
+            };
+        }
     }
     return this._imageData;
 };
@@ -277,8 +289,14 @@ TextureEntry.prototype.getIterateCount = function() {
 
 TextureEntry.prototype.finish = function() {
     if (this._imageData && this._context) {
-        this._context.putImageData(this._imageData, 0, 0);
-        this._imageData = null;
+        if (this._imageData instanceof ImageData) {
+            // Do we need to do this always ?
+            // Better mark canvas dirty !
+            this._context.putImageData(this._imageData, 0, 0);
+            this._imageData = null;
+        } else {
+            // FIXME What to do here ?
+        }
     }
     if (this._canvas) {
         this._canvas.complete = true; // for compatibility with img element

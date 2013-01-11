@@ -56,7 +56,8 @@
             sizes['result'] = {
                 imageFormat : {
                     width: Math.max(image.width, 1),
-                    height: Math.max(image.height, 1)
+                    height: Math.max(image.height, 1),
+                    type: 'float32'
                 },
                 samplerConfig : samplerConfig
             };

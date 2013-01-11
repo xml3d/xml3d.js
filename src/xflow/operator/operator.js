@@ -186,23 +186,9 @@ function allocateOutput(operator, inputData, output, operatorData){
             var texParams = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount /* WRONG */);
             var newWidth = texParams.imageFormat.width;
             var newHeight = texParams.imageFormat.height;
-            var newType = texParams.imageFormat.type;
+            var newFormatType = texParams.imageFormat.type;
 
-            var entryImage = entry.getImage();
-            if (!entryImage || entryImage.width != newWidth || entryImage.height != newHeight) {
-                // create dummy image
-                var img = new Image();
-                img.setAttribute('style', 'width:'+newWidth+'px;height:'+newHeight+'px;border:none;display:block');
-                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
-                img.width = newWidth;
-                img.height = newHeight;
-                entry.setImage(img);
-                entry.setFormatType(newType);
-                // FIXME What to do with texParams.samplerConfig ? There is no function entry.setSamplerConfig.
-                entry._samplerConfig.set(texParams.samplerConfig);
-            } else {
-                entry.notifyChanged();
-            }
+            entry.createImage(newWidth, newHeight, newFormatType, texParams.samplerConfig);
         } else {
             // buffer entry
             var size = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount) * entry.getTupleSize();

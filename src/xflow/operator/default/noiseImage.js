@@ -19,9 +19,7 @@ Xflow.registerOperator("noiseImage", {
         minFreq = minFreq[0];
         maxFreq = maxFreq[0];
 
-        var ctx = image.getContext2D();
-
-        var id = ctx.getImageData(0, 0, width, height);
+        var id = image;
         var pix = id.data;
         this.noise = this.noise || new SimplexNoise();
         var noise = this.noise;
@@ -73,8 +71,6 @@ Xflow.registerOperator("noiseImage", {
         }
         */
 
-        ctx.putImageData(id, 0, 0);
-        image.finish();
         return true;
     }
 });

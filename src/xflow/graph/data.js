@@ -155,6 +155,9 @@ BufferEntry.prototype.isEmpty = function(){
 // Xflow.TextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
+// TextureEntry data conversion order
+// image -> canvas -> context -> -> imageData
+
 /**
  * @constructor
  * @extends {Xflow.DataEntry}
@@ -217,6 +220,31 @@ TextureEntry.prototype._updateImage = function(image) {
     }
 };
 
+/** Create new image
+ *
+ * @param width
+ * @param height
+ * @param formatType
+ * @param samplerConfig
+ * @return {Image|Canvas}
+ */
+TextureEntry.prototype.createImage = function(width, height, formatType, samplerConfig) {
+    if (!this._image || this.width != width || this.height != height || this._formatType != formatType) {
+        // create dummy image
+        var img = new Image();
+        img.setAttribute('style', 'width:'+width+'px;height:'+height+'px;border:none;display:block');
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+        img.width = width;
+        img.height = height;
+        this._formatType = formatType;
+        this._samplerConfig.set(samplerConfig);
+        this.setImage(img);
+    } else {
+        this.notifyChanged();
+    }
+    return this._image;
+};
+
 /** @param {Object} v */
 TextureEntry.prototype.setImage = function(v) {
     this._updateImage(v);
@@ -227,8 +255,25 @@ TextureEntry.prototype.setFormatType = function(t) {
     this._formatType = t;
 };
 
+TextureEntry.prototype._flush = function() {
+    if (this._imageData) {
+        if (this._imageData instanceof ImageData) {
+            this._context.putImageData(this._imageData, 0, 0);
+            this._imageData = null;
+        } else {
+            // FIXME What to do here ?
+            throw new Error("conversion of Arrays to ImageData not implemented yet");
+        }
+    }
+    if (this._canvas) {
+        this._canvas.complete = true; // for compatibility with img element
+        this._image = this._canvas;
+    }
+};
+
 /** @return {Object} */
 TextureEntry.prototype.getImage = function() {
+    this._flush();
     return this._image;
 };
 
@@ -238,7 +283,8 @@ TextureEntry.prototype.getCanvas = function() {
         this._canvas.width = this.width;
         this._canvas.height = this.height;
         this._canvas.complete = false; // for compatibility with img element
-    }
+    } else
+        this._flush();
     return this._canvas;
 };
 
@@ -250,8 +296,10 @@ TextureEntry.prototype.getContext2D = function() {
             throw new Error("Could not create 2D context.");
         if (this._copyImageToCtx) {
             this._context.drawImage(this._image, 0, 0);
+            this._copyImageToCtx = false;
         }
-    }
+    } else
+        this._flush();
     return this._context;
 };
 
@@ -264,6 +312,12 @@ TextureEntry.prototype.getValue = function() {
         if (this._formatType == 'float32') {
             this._imageData = {
                 data : new Float32Array(this._imageData.data),
+                width : this._imageData.width,
+                height : this._imageData.height
+            };
+        } else if (this._formatType == 'float64') {
+            this._imageData = {
+                data : new Float64Array(this._imageData.data),
                 width : this._imageData.width,
                 height : this._imageData.height
             };
@@ -287,22 +341,22 @@ TextureEntry.prototype.getIterateCount = function() {
     return 1;
 };
 
-TextureEntry.prototype.finish = function() {
-    if (this._imageData && this._context) {
-        if (this._imageData instanceof ImageData) {
-            // Do we need to do this always ?
-            // Better mark canvas dirty !
-            this._context.putImageData(this._imageData, 0, 0);
-            this._imageData = null;
-        } else {
-            // FIXME What to do here ?
-        }
-    }
-    if (this._canvas) {
-        this._canvas.complete = true; // for compatibility with img element
-        this._image = this._canvas;
-    }
-};
+//TextureEntry.prototype.finish = function() {
+//    if (this._imageData && this._context) {
+//        if (this._imageData instanceof ImageData) {
+//            // Do we need to do this always ?
+//            // Better mark canvas dirty !
+//            this._context.putImageData(this._imageData, 0, 0);
+//            this._imageData = null;
+//        } else {
+//            // FIXME What to do here ?
+//        }
+//    }
+//    if (this._canvas) {
+//        this._canvas.complete = true; // for compatibility with img element
+//        this._image = this._canvas;
+//    }
+//};
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.DataChangeNotifier

@@ -182,13 +182,33 @@ function allocateOutput(operator, inputData, output, operatorData){
 
         if (entry.type == Xflow.DATA_TYPE.TEXTURE) {
             // texture entry
-            // FIXME What to do when d.customAlloc == false ?
-            var texParams = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount /* WRONG */);
-            var newWidth = texParams.imageFormat.width;
-            var newHeight = texParams.imageFormat.height;
-            var newFormatType = texParams.imageFormat.type;
-
-            entry.createImage(newWidth, newHeight, newFormatType, texParams.samplerConfig);
+            if (d.customAlloc)
+            {
+                var texParams = c_sizes[d.name];
+                var newWidth = texParams.imageFormat.width;
+                var newHeight = texParams.imageFormat.height;
+                var newFormatType = texParams.imageFormat.type;
+                var newSamplerConfig = texParams.samplerConfig;
+                entry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+            } else if (d.sizeof) {
+                var srcEntry = null;
+                for (var j in operator.mapping) {
+                    if (operator.mapping[j].source == d.sizeof) {
+                        srcEntry = inputData[operator.mapping[j].paramIdx];
+                        break;
+                    }
+                }
+                if (srcEntry) {
+                    var newWidth = Math.max(srcEntry.width, 1);
+                    var newHeight = Math.max(srcEntry.height, 1);
+                    var newFormatType = d.formatType || srcEntry.getFormatType();
+                    var newSamplerConfig = d.samplerConfig || srcEntry.getSamplerConfig();
+                    entry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                }
+                else
+                    throw new Error("Unknown texture input parameter '" + d.sizeof+"' in operator '"+operator.name+"'");
+            } else
+                throw new Error("Cannot create texture. Use customAlloc or sizeof parameter attribute");
         } else {
             // buffer entry
             var size = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount) * entry.getTupleSize();

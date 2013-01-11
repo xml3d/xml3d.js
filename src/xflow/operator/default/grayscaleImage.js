@@ -1,14 +1,6 @@
 Xflow.registerOperator("grayscaleImage", {
-    outputs: [ {type: 'texture', name : 'result', customAlloc: true} ],
-    params:  [ {type: 'texture', name : 'image'} ],
-    alloc: function(sizes, image) {
-        var samplerConfig = new Xflow.SamplerConfig;
-        samplerConfig.setDefaults();
-        sizes['result'] = {
-            imageFormat : {width: Math.max(image.width, 1), height: Math.max(image.height, 1)},
-            samplerConfig : samplerConfig
-        };
-    },
+    outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],
+    params:  [ {type: 'texture', source : 'image'} ],
     evaluate: function(result, image) {
         var width = image.width;
         var height = image.height;

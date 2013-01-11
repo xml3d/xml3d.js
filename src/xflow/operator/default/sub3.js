@@ -10,6 +10,7 @@ Xflow.registerOperator("sub", {
 
         return true;
     },
+
     evaluate_core: function(result, value1, value2){
         result[0] = value1[0] - value2[0];
         result[1] = value1[1] - value2[1];

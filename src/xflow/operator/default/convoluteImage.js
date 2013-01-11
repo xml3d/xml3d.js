@@ -46,21 +46,11 @@
     };
 
     Xflow.registerOperator("convoluteImage", {
-        outputs: [ {type: 'texture', name : 'result', customAlloc: true} ],
-        params:  [ {type: 'texture', source : 'image'},
+        outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],
+        params:  [
+            {type: 'texture', source : 'image'},
             {type: 'float', source : 'kernel'}
         ],
-        alloc: function(sizes, image, kernel) {
-            var samplerConfig = new Xflow.SamplerConfig;
-            samplerConfig.setDefaults();
-            sizes['result'] = {
-                imageFormat : {
-                    width: Math.max(image.width, 1),
-                    height: Math.max(image.height, 1)
-                },
-                samplerConfig : samplerConfig
-            };
-        },
         evaluate: function(result, image, kernel) {
             convolute(image, result, kernel, true);
             return true;
@@ -68,22 +58,11 @@
     });
 
     Xflow.registerOperator("convoluteImageToFloat", {
-        outputs: [ {type: 'texture', name : 'result', customAlloc: true} ],
-        params:  [ {type: 'texture', source : 'image'},
+        outputs: [ {type: 'texture', name : 'result', sizeof: 'image', formatType : 'float32'} ],
+        params:  [
+            {type: 'texture', source : 'image'},
             {type: 'float', source : 'kernel'}
         ],
-        alloc: function(sizes, image, kernel) {
-            var samplerConfig = new Xflow.SamplerConfig;
-            samplerConfig.setDefaults();
-            sizes['result'] = {
-                imageFormat : {
-                    width: Math.max(image.width, 1),
-                    height: Math.max(image.height, 1),
-                    type: 'float32'
-                },
-                samplerConfig : samplerConfig
-            };
-        },
         evaluate: function(result, image, kernel) {
             convolute(image, result, kernel, true);
             return true;

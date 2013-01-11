@@ -166,7 +166,7 @@ BufferEntry.prototype.isEmpty = function(){
 Xflow.TextureEntry = function(image){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
-    this._formatType = null; // null | 'number' | 'float32' | 'float64'
+    this._formatType = null; // null | 'ImageData' | 'number' | 'float32' | 'float64'
     this._updateImage(image);
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
@@ -230,6 +230,8 @@ TextureEntry.prototype._updateImage = function(image) {
  */
 TextureEntry.prototype.createImage = function(width, height, formatType, samplerConfig) {
     if (!this._image || this.width != width || this.height != height || this._formatType != formatType) {
+        if (!width || !height)
+            throw new Error("Width or height is not specified");
         // create dummy image
         var img = new Image();
         img.setAttribute('style', 'width:'+width+'px;height:'+height+'px;border:none;display:block');
@@ -237,6 +239,10 @@ TextureEntry.prototype.createImage = function(width, height, formatType, sampler
         img.width = width;
         img.height = height;
         this._formatType = formatType;
+        if (!samplerConfig) {
+            samplerConfig = new Xflow.SamplerConfig();
+            samplerConfig.setDefaults();
+        }
         this._samplerConfig.set(samplerConfig);
         this.setImage(img);
     } else {
@@ -253,6 +259,10 @@ TextureEntry.prototype.setImage = function(v) {
 
 TextureEntry.prototype.setFormatType = function(t) {
     this._formatType = t;
+};
+
+TextureEntry.prototype.getFormatType = function() {
+    return this._formatType;
 };
 
 TextureEntry.prototype._flush = function() {

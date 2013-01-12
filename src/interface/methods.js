@@ -211,6 +211,15 @@ new (function() {
         }
         return null;
     };
+
+    methods.videoPlay = function() {
+        XML3D.base.sendAdapterEvent(this, {play: []});
+    };
+
+    methods.videoPause = function() {
+        XML3D.base.sendAdapterEvent(this, {pause: []});
+    };
+
     methods.protoGetOutputNames = methods.dataGetOutputNames;
 
     methods.dataGetResult = function(filter) {

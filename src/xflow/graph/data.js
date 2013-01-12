@@ -157,6 +157,8 @@ BufferEntry.prototype.isEmpty = function(){
 
 // TextureEntry data conversion order
 // image -> canvas -> context -> -> imageData
+// Note: don't use TextureEntry's width and height properties, they are deprecated and cause issues with video loading
+// Instead use getWidth and getHeight methods
 
 /**
  * @constructor
@@ -189,7 +191,7 @@ TextureEntry.prototype.isLoading = function() {
         return this._image.width <= 0 || this._image.height <= 0;
     if (nodeName == 'video')
         // readyState == 0 is HAVE_NOTHING
-        return image.readyState == 0;
+        return image.readyState == 0 || this._image.videoWidth <= 0 || this._image.videoHeight <= 0;
     return false;
 };
 
@@ -229,15 +231,15 @@ TextureEntry.prototype._updateImage = function(image) {
  * @return {Image|Canvas}
  */
 TextureEntry.prototype.createImage = function(width, height, formatType, samplerConfig) {
-    if (!this._image || this.width != width || this.height != height || this._formatType != formatType) {
+    if (!this._image || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
         if (!width || !height)
             throw new Error("Width or height is not specified");
         // create dummy image
-        var img = new Image();
-        img.setAttribute('style', 'width:'+width+'px;height:'+height+'px;border:none;display:block');
-        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+        var img = document.createElement('canvas');
         img.width = width;
         img.height = height;
+        img.complete = true;
+
         this._formatType = formatType;
         if (!samplerConfig) {
             samplerConfig = new Xflow.SamplerConfig();
@@ -265,6 +267,14 @@ TextureEntry.prototype.getFormatType = function() {
     return this._formatType;
 };
 
+TextureEntry.prototype.getWidth = function() {
+    return this._image.videoWidth || this._image.width || 0;
+};
+
+TextureEntry.prototype.getHeight = function() {
+    return this._image.videoHeight || this._image.height || 0;
+};
+
 TextureEntry.prototype._flush = function() {
     if (this._imageData) {
         if (this._imageData instanceof ImageData) {
@@ -290,8 +300,8 @@ TextureEntry.prototype.getImage = function() {
 TextureEntry.prototype.getCanvas = function() {
     if (!this._canvas) {
         this._canvas = document.createElement('canvas');
-        this._canvas.width = this.width;
-        this._canvas.height = this.height;
+        this._canvas.width = this.getWidth();
+        this._canvas.height = this.getHeight();
         this._canvas.complete = false; // for compatibility with img element
     } else
         this._flush();
@@ -316,9 +326,9 @@ TextureEntry.prototype.getContext2D = function() {
 
 /** @return {ImageData} */
 TextureEntry.prototype.getValue = function() {
-    if (!this._imageData) {
+    if (!this._imageData && !this.isLoading()) {
         var ctx = this.getContext2D();
-        this._imageData = ctx.getImageData(0, 0, this.width, this.height)
+        this._imageData = ctx.getImageData(0, 0, this.getWidth(), this.getHeight())
         if (this._formatType == 'float32') {
             this._imageData = {
                 data : new Float32Array(this._imageData.data),

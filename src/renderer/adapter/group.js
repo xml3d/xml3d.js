@@ -22,12 +22,12 @@
     /** It is assumed that this method uses the world matrix! */
     p.applyTransformMatrix = function(m) {
         if (this.parentTransform !== null)
-            mat4.multiply(this.parentTransform, m,  m);
+            mat4.multiply(m, this.parentTransform,  m);
 
         var matrix = this.getLocalMatrixInternal();
         if (matrix)
-            mat4.multiply(m, matrix);
-
+            mat4.multiply(m, m, matrix);
+    
         return m;
     };
 
@@ -119,7 +119,7 @@
             var downstreamValue;
             var matrix = this.getLocalMatrixInternal();
             if (matrix)
-                downstreamValue = mat4.multiply(parentValue, matrix, mat4.create());
+                downstreamValue = mat4.multiply(mat4.create(), parentValue, matrix);
 
             evt.newValue = downstreamValue;
             this.notifyChildren(evt);
@@ -179,7 +179,7 @@
             downstreamValue = null;
 
         if(this.parentTransform)
-            downstreamValue = mat4.multiply(this.parentTransform, downstreamValue, mat4.create());
+            downstreamValue = mat4.multiply(mat4.create(), this.parentTransform, downstreamValue);
 
         evt.internalType = "parenttransform";
         evt.newValue = downstreamValue;

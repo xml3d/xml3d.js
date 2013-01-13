@@ -85,15 +85,15 @@
     };
 
     /** @const */
-	var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,-1]), tmpDirection = vec3.create();
+    var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = vec3.fromValues(0,0,-1), tmpDirection = vec3.create();
     /** @const */
-	var XML3D_SPOTLIGHT_DEFAULT_DIRECTION = vec3.create([0,0,1]);
+    var XML3D_SPOTLIGHT_DEFAULT_DIRECTION = vec3.fromValues(0,0,1);
 
 
 	LightRenderAdapter.prototype.applyTransform = function(vec) {
 	    if (this.transform) {
             var t = this.transform;
-            var newVec = mat4.multiplyVec4(t, [vec[0], vec[1], vec[2], 1]);
+            var newVec = vec4.transformMat4(vec4.create(), [vec[0], vec[1], vec[2], 1], t);
             return [newVec[0]/newVec[3], newVec[1]/newVec[3], newVec[2]/newVec[3]];
 	    }
 	    return vec;
@@ -102,7 +102,7 @@
 	LightRenderAdapter.prototype.applyTransformDir = function(vec) {
 	    if (this.transform) {
             var t = this.transform;
-            var newVec = mat4.multiplyVec4(t, [vec[0], vec[1], vec[2], 0]);
+            var newVec = vec4.transformMat4(vec4.create(), [vec[0], vec[1], vec[2], 0], t);
             return [newVec[0], newVec[1], newVec[2]];
 	    }
 	    return vec;

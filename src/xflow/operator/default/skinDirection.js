@@ -17,11 +17,11 @@ Xflow.registerOperator("skinDirection", {
                     var mo = boneIdx[info.iterFlag[1] ? i*4+j : j]*16;
 
                     mat4.multiplyOffsetDirection(boneXform, mo, dir, offset, tmp);
-                    vec3.scale(tmp, weight);
-                    vec3.add(r, tmp);
+                    vec3.scale(tmp, tmp, weight);
+                    vec3.add(r, r, tmp);
                 }
             }
-            vec3.normalize(r);
+            vec3.normalize(r, r);
             result[offset] = r[0];
             result[offset+1] = r[1];
             result[offset+2] = r[2];

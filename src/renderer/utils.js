@@ -93,19 +93,21 @@
 
         var min = bbox.min._data;
         var max = bbox.max._data;
-
-        var center = vec3.scale(vec3.add(min, max, vec3.create()), 0.5);
-        var extend = vec3.scale(vec3.subtract(max, min, vec3.create()), 0.5);
-
-        mat4.toRotationMat(gmatrix, absMat);
+    
+        var center = vec3.scale(vec3.create(), vec3.add(vec3.create(), min, max), 0.5);
+        var extend = vec3.scale(vec3.create(), vec3.subtract(vec3.create(), max, min), 0.5);
+    
+        mat4.copy(absMat, gmatrix);
+        absMat.set([0, 0, 0, 1], 12)
         for ( var i = 0; i < 16; i++) {
             absMat[i] = Math.abs(absMat[i]);
         }
-        mat4.multiplyVec3(absMat, extend);
-        mat4.multiplyVec3(gmatrix, center);
-
-        vec3.add(center, extend, bbox.max._data);
-        vec3.subtract(center, extend, bbox.min._data);
+    
+        vec3.transformMat4(extend, extend, absMat);
+        vec3.transformMat4(center, center, gmatrix);
+    
+        vec3.add(bbox.max._data, center, extend);
+        vec3.subtract(bbox.min._data, center, extend);
     };
 
 
@@ -345,8 +347,8 @@
     XML3D.webgl.adjustMinMax = function(bbox, min, max, trafo) {
         var xfmmin = vec3.create();
         var xfmmax = vec3.create();
-        mat4.multiplyVec3(trafo, bbox.min._data, xfmmin);
-        mat4.multiplyVec3(trafo, bbox.max._data, xfmmax);
+        vec3.transformMat4(xfmmin, bbox.min._data, trafo);
+        vec3.transformMat4(xfmmax, bbox.max._data, trafo);
         
         /* bounding box is axis-aligned, but through transformation
          * min and max values might be shuffled (image e.g. a rotation (0, 1, 0, 1.57), 

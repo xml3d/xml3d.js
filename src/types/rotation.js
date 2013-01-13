@@ -139,7 +139,7 @@
             this._data[2] = this._axis.z * s;
             this._data[3] = Math.cos(this._angle / 2);
         } else {
-            quat4.set([ 0, 0, 0, 1 ], this._data);
+            quat.set(this._data, 0, 0, 0, 1);
         }
     };
 
@@ -165,8 +165,8 @@
      * @param {number} t the factor
      */
     p.interpolate = function(rot1, t) {
-        var dest = quat4.create(), result = new XML3DRotation();
-        quat4.slerp(this._data, rot1._data, t, dest);
+        var dest = quat.create(), result = new XML3DRotation();
+        quat.slerp(dest, this._data, rot1._data, t);
         result._setQuaternion(dest);
         return result;
     };
@@ -195,15 +195,10 @@
      * @return {XML3DMatrix} Rotation matrix
      */
     p.toMatrix = function() {
-      var q = quat4.create(this._data);
-      // FIXME: We have to inverse the rotation to get the same
-      // result as CSSMatrix::rotateAxisAngle
-      // Not sure why this is, could you have a look at it? - Chris
-      q[3] = -q[3];
-      
-      var m = new window.XML3DMatrix();
-      quat4.toMat4(q, m._data);
-      return m;
+        var q = quat.copy(quat.create(), this._data);
+        var m = new window.XML3DMatrix();
+        mat4.fromRotationTranslation(m._data, q, [0, 0, 0]);
+        return m;
     };
     
     /**
@@ -215,8 +210,8 @@
      * @return {XML3DVec3} The rotated vector
      */
     p.rotateVec3 = function(inputVector) {
-        var dest = vec3.create(), result = new window.XML3DVec3();
-        quat4.multiplyVec3(this._data, inputVector._data, result._data);
+        var result = new window.XML3DVec3();
+        vec3.transformQuat(result._data, inputVector._data, this._data)
         return result;
     };
     
@@ -226,8 +221,8 @@
      * @private
      * @param {Array} quat
      */
-    p._setQuaternion = function(quat) {
-        var s = Math.sqrt(1 - quat[3] * quat[3]);
+    p._setQuaternion = function(q) {
+        var s = Math.sqrt(1 - q[3] * q[3]);
         if (s < 0.001 || isNaN(s)) {
             this._axis._data[0] = 0;
             this._axis._data[1] = 0;
@@ -235,12 +230,12 @@
             this._angle = 0;
         } else {
             s = 1 / s;
-            this._axis._data[0] = quat[0] * s;
-            this._axis._data[1] = quat[1] * s;
-            this._axis._data[2] = quat[2] * s;
-            this._angle = 2 * Math.acos(quat[3]);
+            this._axis._data[0] = q[0] * s;
+            this._axis._data[1] = q[1] * s;
+            this._axis._data[2] = q[2] * s;
+            this._angle = 2 * Math.acos(q[3]);
         }
-        this._data = quat4.create(quat);
+        this._data = quat.copy(quat.create(), q);
         if (this._callback)
             this._callback(this);
     };
@@ -253,8 +248,8 @@
      * @return {XML3DVec3} The result
      */
     p.multiply = function(rot1) {
-        var result = new XML3DRotation(), q = quat4.create();
-        quat4.multiply(this._data,rot1._data, q);
+        var result = new XML3DRotation(), q = quat.create();
+        quat.multiply(q, this._data, rot1._data);
         result._setQuaternion(q);
         return result;
     };
@@ -274,7 +269,7 @@
      * @return {Float32Array} 
      */
     p.getQuaternion = function() {
-        return quat4.create(this._data); 
+        return quat.copy(quat.create(), this._data); 
     };
 
     XML3D.XML3DRotation = XML3DRotation;

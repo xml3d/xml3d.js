@@ -17,8 +17,8 @@ Xflow.registerOperator("skinPosition", {
                     var mo = boneIdx[info.iterFlag[1] ? i*4+j : j]*16;
 
                     mat4.multiplyOffsetVec3(boneXform, mo, pos, offset, tmp);
-                    vec3.scale(tmp, weight);
-                    vec3.add(r, tmp);
+                    vec3.scale(tmp, tmp, weight);
+                    vec3.add(r, r, tmp);
                 }
             }
             result[offset] = r[0];

@@ -28,16 +28,16 @@
         tmp[14] = pos[2];
 
         // tmp = T * O
-        mat4.multiply(tmp, orient);
+        mat4.multiply(tmp, tmp, orient);
 
         var p = this.factory.getAdapter(this.node.parentNode);
         this.parentTransform = p.applyTransformMatrix(mat4.identity(tmp2));
 
         if (this.parentTransform) {
-            mat4.multiply(this.parentTransform, tmp, tmp);
+            mat4.multiply(tmp, this.parentTransform, tmp);
         }
         this.worldPosition = [tmp[12], tmp[13], tmp[14]];
-        mat4.set(mat4.inverse(tmp), this.viewMatrix);
+        mat4.copy(this.viewMatrix, mat4.invert(tmp, tmp));
     };
 
     p.getProjectionMatrix = function(aspect) {
@@ -46,7 +46,7 @@
             var zfar = this.zFar;
             var znear = this.zNear;
             var f = 1 / Math.tan(fovy / 2);
-            this.projMatrix = mat4.create([ f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), -1, 0, 0,
+            this.projMatrix = mat4.copy(mat4.create(), [ f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), -1, 0, 0,
                    2 * znear * zfar / (znear - zfar), 0 ]);
 
         }
@@ -67,18 +67,18 @@
     p.getWorldMatrix = function() {        
         var m = new window.XML3DMatrix();  
         var tmp = mat4.create(); 
-        mat4.inverse(this.viewMatrix, tmp); 
+        mat4.invert(tmp, this.viewMatrix);
         m._data.set(tmp);
         return m; 
     }; 
 
 
     p.getModelViewMatrix = function(model) {
-        return mat4.multiply(this.viewMatrix, model, mat4.create());
+        return mat4.multiply(mat4.create(), this.viewMatrix, model);
     };
 
     p.getModelViewProjectionMatrix = function(modelViewMatrix) {
-        return mat4.multiply(this.projMatrix, modelViewMatrix, mat4.create());
+        return mat4.multiply(mat4.create(), this.projMatrix, modelViewMatrix);
     };
     
     p.getWorldSpacePosition = function() {

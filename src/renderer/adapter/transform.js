@@ -35,24 +35,24 @@
             so = n.scaleOrientation.toMatrix()._data,
             rot = n.rotation.toMatrix()._data;
 
-        mat4.translate(IDENT_MAT,transVec, transform.translate);
-        mat4.translate(IDENT_MAT,centerVec, transform.center);
-        mat4.translate(IDENT_MAT,vec3.negate(centerVec), transform.centerInverse);
-        mat4.scale(IDENT_MAT, s, transform.scale);
-        mat4.inverse(so, transform.scaleOrientationInv);
+        mat4.translate(transform.translate, IDENT_MAT, transVec);
+        mat4.translate(transform.center, IDENT_MAT, centerVec);
+        mat4.translate(transform.centerInverse, IDENT_MAT, vec3.negate(centerVec, centerVec));
+        mat4.scale(transform.scale, IDENT_MAT, s);
+        mat4.invert(transform.scaleOrientationInv, so);
 
         // M = T * C
-        mat4.multiply(transform.translate,transform.center, this.matrix);
+        mat4.multiply(this.matrix, transform.translate, transform.center);
         // M = T * C * R
-        mat4.multiply(this.matrix, rot);
+        mat4.multiply(this.matrix, this.matrix, rot);
         // M = T * C * R * SO
-        mat4.multiply(this.matrix, so);
+        mat4.multiply(this.matrix, this.matrix, so);
         // M = T * C * R * SO * S
-        mat4.multiply(this.matrix, transform.scale);
+        mat4.multiply(this.matrix, this.matrix, transform.scale);
         // M = T * C * R * SO * S * -SO
-        mat4.multiply(this.matrix, transform.scaleOrientationInv);
-        // M = T * C * R * SO * S * -SO * C
-        mat4.multiply(this.matrix, transform.centerInverse);
+        mat4.multiply(this.matrix, this.matrix, transform.scaleOrientationInv);
+        // M = T * C * R * SO * S * -SO * -C
+        mat4.multiply(this.matrix, this.matrix, transform.centerInverse);
 
         this.needsUpdate = false;
     };

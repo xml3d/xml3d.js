@@ -44,46 +44,46 @@ var TMP_VEC = vec3.create();
 
 mat4.makeTransformXflow = function(translation,rotation,scale,center,scaleOrientation,dest){
     mat4.identity(dest);
-    if(translation) mat4.translate(dest, translation);
-    if(center) mat4.translate(dest, center);
+    if(translation) mat4.translate(dest, dest, translation);
+    if(center) mat4.translate(dest, dest, center);
     if(rotation){
-        quat4.toMat4([rotation[0],rotation[1],rotation[2],-rotation[3]], TMP_MATRIX);
-        mat4.multiply(dest, TMP_MATRIX);
+        mat4.fromRotationTranslation(TMP_MATRIX, [rotation[0],rotation[1],rotation[2],rotation[3]], [0,0,0]);
+        mat4.multiply(dest, dest, TMP_MATRIX);
     }
     if(scaleOrientation){
-        quat4.toMat4([scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],-scaleOrientation[3]], TMP_MATRIX);
-        mat4.multiply(dest, TMP_MATRIX);
+        mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],scaleOrientation[3]], [0,0,0]);
+        mat4.multiply(dest, dest, TMP_MATRIX);
     }
-    if(scale) mat4.scale(dest, scale);
+    if(scale) mat4.scale(dest, dest, scale);
     if(scaleOrientation){
-        quat4.toMat4([scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],scaleOrientation[3]], TMP_MATRIX);
-        mat4.multiply(dest, TMP_MATRIX);
+        mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],-scaleOrientation[3]], [0,0,0]);
+        mat4.multiply(dest, dest, TMP_MATRIX);
     }
     if(center){
-        mat4.translate(dest, vec3.negate(center, TMP_VEC));
+        mat4.translate(dest, dest, vec3.negate(TMP_VEC, center));
     }
 };
 
 mat4.makeTransformInvXflow = function(translation,rotation,scale,center,scaleOrientation,dest){
     mat4.identity(dest);
     if(center){
-        mat4.translate(dest, center);
+        mat4.translate(dest, dest, center);
     }
     if(scaleOrientation){
-        quat4.toMat4([scaleOrientation[0],scaleOrientation[1],scaleOrientation[2],-scaleOrientation[3]], TMP_MATRIX);
-        mat4.multiply(dest, TMP_MATRIX);
+        mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0],scaleOrientation[1],scaleOrientation[2],scaleOrientation[3]], [0,0,0])
+        mat4.multiply(dest, dest, TMP_MATRIX);
     }
-    if(scale) mat4.scale(dest, vec3.reciprocal(scale,TMP_VEC) );
+    if(scale) mat4.scale(dest, dest, vec3.reciprocal(scale, TMP_VEC) );
     if(scaleOrientation){
-        quat4.toMat4([scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],scaleOrientation[3]], TMP_MATRIX);
-        mat4.multiply(dest, TMP_MATRIX);
+        mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1],scaleOrientation[2],-scaleOrientation[3]], [0,0,0])
+        mat4.multiply(dest, dest, TMP_MATRIX);
     }
     if(rotation){
-        quat4.toMat4([rotation[0],rotation[1],rotation[2],rotation[3]], TMP_MATRIX);
-        mat4.multiply(dest, TMP_MATRIX);
+        mat4.fromRotationTranslation(TMP_MATRIX, [rotation[0],rotation[1],rotation[2],-rotation[3]], [0,0,0])
+        mat4.multiply(dest, dest, TMP_MATRIX);
     }
-    if(center) mat4.translate(dest, vec3.negate(center, TMP_VEC) );
-    if(translation) mat4.translate(dest, vec3.negate(translation, TMP_VEC) );
+    if(center) mat4.translate(dest, dest, vec3.negate(TMP_VEC, center) );
+    if(translation) mat4.translate(dest, dest, vec3.negate(TMP_VEC, translation) );
 };
 
 /*
@@ -110,7 +110,7 @@ mat4.makeTransformInvOffset = function(translation,rotation,scale,center,scaleOr
     dest[mo+15] = 1;
 
     if (rotation) {
-        var rotM = quat4.toMat4([rotation[qo+1],rotation[qo+2],rotation[qo+3],rotation[qo]]);
+        var rotM = quat.toMat4([rotation[qo+1],rotation[qo+2],rotation[qo+3],rotation[qo]]);
         mat4.multiplyOffset(dest, mo,  rotM, 0,  dest, mo);
     }
 };
@@ -138,7 +138,7 @@ mat4.makeTransformOffset = function(translation,rotation,scale,center,scaleOrien
     dest[mo+15] = 1;
 
     if (rotation) {
-        var rotM = quat4.toMat4([rotation[qo+1],rotation[qo+2],rotation[qo+3],-rotation[qo]]);
+        var rotM = quat.toMat4([rotation[qo+1],rotation[qo+2],rotation[qo+3],-rotation[qo]]);
         mat4.multiplyOffset(dest, mo,  rotM, 0,  dest, mo);
     }
 };
@@ -172,7 +172,7 @@ mat4.multiplyOffset = function(dest, destOffset, mat, offset1, mat2, offset2) {
     dest[destOffset+15] = b30*a03 + b31*a13 + b32*a23 + b33*a33;
 };
 
-quat4.slerpOffset = function(quat, offset1, quat2, offset2, t, dest, destOffset, shortest) {
+quat.slerpOffset = function(quat, offset1, quat2, offset2, t, dest, destOffset, shortest) {
     if(!dest) { dest = quat; }
 
     var ix1 = offset1, iy1 = offset1+1, iz1 = offset1+2, iw1 = offset1+3;

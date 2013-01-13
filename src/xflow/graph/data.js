@@ -155,6 +155,40 @@ BufferEntry.prototype.isEmpty = function(){
 // Xflow.TextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
+var tmpCanvas = null;
+var tmpContext = null;
+
+/** Xflow.toImageData converts ImageData-like objects to real ImageData
+ *
+ * @param imageData
+ * @return {*}
+ */
+Xflow.toImageData = function(imageData) {
+    if (imageData instanceof ImageData)
+        return imageData;
+    if (!imageData.data)
+        throw new Error("no data property");
+    if (!imageData.width)
+        throw new Error("no width property");
+    if (!imageData.height)
+        throw new Error("no height property");
+    if (!tmpContext) {
+        tmpCanvas = document.createElement('canvas');
+        tmpContext = tmpCanvas.getContext('2d');
+    }
+    var newImageData = tmpContext.createImageData(imageData.width, imageData.height);
+    for (var i = 0; i < imageData.data.length; ++i) {
+        var v = imageData.data[i];
+        if (v > 255)
+            v = 255;
+        if (v < 0)
+            v = 0;
+        newImageData.data[i] = v;
+    }
+    return newImageData;
+};
+
+
 // TextureEntry data conversion order
 // image -> canvas -> context -> -> imageData
 // Note: don't use TextureEntry's width and height properties, they are deprecated and cause issues with video loading
@@ -281,8 +315,9 @@ TextureEntry.prototype._flush = function() {
             this._context.putImageData(this._imageData, 0, 0);
             this._imageData = null;
         } else {
-            // FIXME What to do here ?
-            throw new Error("conversion of Arrays to ImageData not implemented yet");
+            var imageData = Xflow.toImageData(this._imageData);
+            this._context.putImageData(imageData, 0, 0);
+            this._imageData = null;
         }
     }
     if (this._canvas) {

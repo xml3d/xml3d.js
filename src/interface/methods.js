@@ -263,6 +263,50 @@ new (function() {
     }
     methods.protoIsOutputConnected = methods.dataIsOutputConnected;
 
+
+    function createValues(result, names) {
+        var values = {};
+        for (var i in names) {
+            var name = names[i];
+            var data = result.getOutputData(name) && result.getOutputData(name).getValue();
+            if (data)
+                values[name] = data;
+        }
+        return values;
+    };
+
+    /** Register data listener for data fields specified by names.
+     *
+     * @param names   single name or array of names that are monitored.
+     * @param callback function that is called when selected data are changed.
+     * @return {Boolean}
+     */
+    methods.dataAddOutputFieldListener = function(names, callback) {
+        if (!names)
+            return false;
+
+        // check if names is a single string, and convert it to array then
+        var typeOfNames = Object.prototype.toString.call(names).slice(8, -1);
+        if (typeOfNames === "String") {
+            names = [names];
+        }
+        if (names.length == 0)
+            return false;
+
+        var request = XML3D.base.callAdapterFunc(this, {
+            getComputeRequest : [names, function(request, changeType) {
+                callback(createValues(request.getResult(), names));
+            }
+            ]});
+        if (request.length == 0)
+            return false;
+        var result = request[0].getResult();
+        var values = createValues(result, names);
+        if (Object.keys(values).length)
+            callback(values);
+        return true;
+    };
+
     // Export to xml3d namespace
     XML3D.extend(XML3D.methods, methods);
 });

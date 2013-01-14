@@ -40,6 +40,7 @@
         <file name="./operator/default/funMirrorImage.js" />
         <file name="./operator/default/popartImage.js" />
         <file name="./operator/default/magnitudeImage.js" />
+        <file name="./operator/default/flipVerticalImage.js" />
     </filelist>
 
     <target name="concat">

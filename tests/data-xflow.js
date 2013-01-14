@@ -385,6 +385,13 @@ test("Operators - Slerp on Sequences", function() {
     this.executeTests(response);
 });
 
+test("Operators - Lerp and Slerp on Key Arrays", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/simple_script/test_script_lerp_slerp_keys.xml", handler);
+    this.executeTests(response);
+});
+
+
 
 test("Prototypes - Basic", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));

@@ -169,6 +169,15 @@ Xflow.ORIGIN = {
     PROTO: 3
 };
 
+/**
+ * Types of platforms to perform computation on
+ * @type {Object}
+ */
+Xflow.PLATFORM = {
+    JAVASCRIPT: 1,
+    GLSL: 2
+}
+
 
 /* Tools */
 
@@ -195,3 +204,6 @@ Xflow.createClass = function(ctor, parent, methods) {
     }
     return ctor;
 };
+
+
+

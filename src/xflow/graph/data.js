@@ -302,10 +302,14 @@ TextureEntry.prototype.getFormatType = function() {
 };
 
 TextureEntry.prototype.getWidth = function() {
+    if (!this._image)
+        return 0;
     return this._image.videoWidth || this._image.width || 0;
 };
 
 TextureEntry.prototype.getHeight = function() {
+    if (!this._image)
+        return 0;
     return this._image.videoHeight || this._image.height || 0;
 };
 
@@ -361,6 +365,8 @@ TextureEntry.prototype.getContext2D = function() {
 
 /** @return {ImageData} */
 TextureEntry.prototype.getValue = function() {
+    if (!this._image)
+        return null;
     if (!this._imageData && !this.isLoading()) {
         var ctx = this.getContext2D();
         this._imageData = ctx.getImageData(0, 0, this.getWidth(), this.getHeight())

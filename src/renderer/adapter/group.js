@@ -40,7 +40,7 @@
 
         var handle = this.getConnectedAdapter("transform");
         if (handle)
-            return handle.getMatrix();
+            return handle.getMatrix("transform");
 
         return null;
     }

@@ -38,17 +38,25 @@
         }
         this.worldPosition = [tmp[12], tmp[13], tmp[14]];
         XML3D.math.mat4.copy(this.viewMatrix, XML3D.math.mat4.invert(tmp, tmp));
+
+        connectProjectionAdapater(this);
     };
 
     p.getProjectionMatrix = function(aspect) {
         if (this.projMatrix == null) {
-            var fovy = this.node.fieldOfView;
-            var zfar = this.zFar;
-            var znear = this.zNear;
-            var f = 1 / Math.tan(fovy / 2);
-            this.projMatrix = XML3D.math.mat4.copy(XML3D.math.mat4.create(), [ f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), -1, 0, 0,
-                   2 * znear * zfar / (znear - zfar), 0 ]);
+            var adapter = this.getConnectedAdapter("perspective");
+            if(adapter){
+                this.projMatrix = adapter.getMatrix("perspective");
+            }
+            else{
+                var fovy = this.node.fieldOfView;
+                var zfar = this.zFar;
+                var znear = this.zNear;
+                var f = 1 / Math.tan(fovy / 2);
+                this.projMatrix = XML3D.math.mat4.copy(XML3D.math.mat4.create(), [ f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), -1, 0, 0,
+                    2 * znear * zfar / (znear - zfar), 0 ]);
 
+            }
         }
         return this.projMatrix;
     };
@@ -86,30 +94,50 @@
     };
 
     p.notifyChanged = function(evt) {
-        var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 
-        switch (target) {
-        case "parenttransform":
-            this.parentTransform = evt.newValue;
-            this.updateViewMatrix();
-        break;
-        
-        case "orientation":
-        case "position":
-             this.updateViewMatrix();
-        break;
-        
-        case "fieldOfView":
-             this.projMatrix = null;
-        break;
-        
-        default:
-            XML3D.debug.logWarning("Unhandled event in view adapter for parameter " + target);
-        break;
+        if( (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) && !evt.internalType){
+            // The connected transform node changed;
+            this.projMatrix = null;
         }
- 
+        else{
+            var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+
+            switch (target) {
+                case "parenttransform":
+                    this.parentTransform = evt.newValue;
+                    this.updateViewMatrix();
+                    break;
+
+                case "orientation":
+                case "position":
+                    this.updateViewMatrix();
+                    break;
+                case "perspective":
+                case "fieldOfView":
+                    connectProjectionAdapater(this);
+                    this.projMatrix = null;
+                    break;
+
+                default:
+                    XML3D.debug.logWarning("Unhandled event in view adapter for parameter " + target);
+                    break;
+            }
+        }
+
         this.factory.handler.redraw("View changed");
     };
+
+    function connectProjectionAdapater(adapter){
+        var href = adapter.node.getAttribute("perspective");
+        if(href){
+            adapter.connectAdapterHandle("perspective", adapter.getAdapterHandle(href));
+        }
+        else{
+            adapter.disconnectAdapterHandle("perspective");
+        }
+
+    }
+
 
     // Export to XML3D.webgl namespace
     XML3D.webgl.ViewRenderAdapter = ViewRenderAdapter;

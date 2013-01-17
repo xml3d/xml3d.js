@@ -11,8 +11,8 @@
         this.subNodes = [];
         this.unprocessedDataNames = [];
 
-        this.operatorList = null;
-        this.programData = null;
+        this.operatorList =  new Xflow.OperatorList();
+        this.programData =  new Xflow.ProgramData();
 
         this.program = null;
 
@@ -20,12 +20,26 @@
     }
 
     Xflow.Executer.prototype.run = function(){
-        if(!runSubNodes(this)){
+        if(!runSubNodes(this))
+            return false;
+
+        /*
+        if(!this.operatorList.checkInput(this.programData)){
+            setMergedNodesValid(this, false);
             return false;
         }
+        */
 
-        if(!isInputValid(this))
-            return false;
+        updateIterateState(this);
+
+        if(!this.program){
+            this.program = Xflow.createProgram(this.operatorList);
+        }
+
+        if(this.program){
+            this.operatorList.allocateOutput(this.programData);
+            this.program.run(this.programData);
+        }
     }
 
     Xflow.Executer.prototype.getVertexShader = function(){
@@ -133,8 +147,6 @@
     }
 
     function constructFromData(executer, cData){
-        executer.operatorList = new Xflow.OperatorList();
-        executer.programData = new Xflow.ProgramData();
 
         for(var i = 0; i < cData.constructionOrder.length; ++i){
             var node = data.constructionOrder[i];
@@ -146,17 +158,18 @@
 
             constructOutputConnection(executer, entry, cData, node);
 
+            executer.programData.operatorData.push({});
             executer.operatorList.addEntry(entry);
             executer.mergedNodes.push(node);
+
         }
 
         constructLostOutput(executer, cData);
     }
 
     function constructInputConnection(executer, entry, cData, node){
-        var mapping = node.operator.params;
+        var mapping = node.operator.mapping;
         for(var j = 0; j < mapping.length; ++j){
-            var paramIdx = mapping[j].paramIdx;
             var channel = node.inputChannels[mapping[j].source];
             var operatorIndex;
             if(channel.creatorProcessNode && (operatorIndex =
@@ -164,7 +177,7 @@
             {
                 // it's transfer input
                 var outputIndex = getOperatorOutputIndex(channel.creatorProcessNode, channel);
-                entry.setTransferInput(paramIdx, operatorIndex, outputIndex);
+                entry.setTransferInput(j, operatorIndex, outputIndex);
                 if(!executer.operatorList[operatorIndex].isFinalOutput(outputIndex))
                     executer.operatorList[operatorIndex].setTransferOutput(outputIndex);
                 continue;
@@ -183,14 +196,14 @@
             var inputSlotIdx = cData.inputSlots[connectionKey];
             if(inputSlotIdx != undefined){
                 // Direct input already exists
-                entry.setDirectInput(paramIdx, inputSlotIdx, mappedInputName);
+                entry.setDirectInput(j, inputSlotIdx, mappedInputName);
             }
             else{
                 // new direct input
                 inputSlotIdx = executer.programData.inputs.length;
                 cData.inputSlots[connectionKey] = inputSlotIdx;
                 executer.programData.inputs.push(connection);
-                entry.setDirectInput(paramIdx, inputSlotIdx, mappedInputName);
+                entry.setDirectInput(j, inputSlotIdx, mappedInputName);
             }
         }
     }
@@ -250,7 +263,7 @@
     }
 
 
-    function updaterIterateState(executer){
+    function updateIterateState(executer){
         var inputs = executer.programData.inputs;
         for(var i = 0; i < executer.programData.inputs.length; ++i){
             var entry = executer.programData.getDataEntry(i);
@@ -273,7 +286,8 @@
     function runSubNodes(executer){
         for(var i = 0; i < executer.subNodes.length; ++i){
             executer.subNodes[i].process();
-            if(executer.subNodes[i])
+            if(!executer.subNodes[i].valid)
+                return false;
         }
     }
 

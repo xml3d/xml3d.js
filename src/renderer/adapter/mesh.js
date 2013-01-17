@@ -195,7 +195,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     this.renderNode.dataStructureChanged();
                 this.factory.renderer.requestRedraw("Mesh structure changed.");
                 break;
-            case Xflow.RESULT_STATE.CHANGED_DATA:
+            case Xflow.RESULT_STATE.CHANGED_DATA_VALUE:
+            case Xflow.RESULT_STATE.CHANGED_DATA_SIZE:
                 XML3D.debug.logInfo("Mesh values changed", arguments);
                 if(this.renderNode.can("dataValueChanged"))
                     this.renderNode.dataValueChanged();
@@ -282,7 +283,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 gl.bufferSubData(bufferType, 0, entry.getValue());
                 break;
             case Xflow.DATA_ENTRY_STATE.CHANGED_NEW:
-            case Xflow.DATA_ENTRY_STATE.CHANGE_SIZE:
+            case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE:
                 if (name == "index") {
                     buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
                 } else {

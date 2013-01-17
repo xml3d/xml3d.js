@@ -119,8 +119,8 @@ Xflow.DATA_FILTER_TYPE = {
 Xflow.DATA_ENTRY_STATE = {
     CHANGED_NEW: 1,
     CHANGED_VALUE: 2,
-    CHANGE_SIZE: 3,
-    CHANGE_REMOVED: 4
+    CHANGED_SIZE: 3,
+    CHANGED_REMOVED: 4
 };
 
 Xflow.RESULT_TYPE = {
@@ -135,8 +135,9 @@ Xflow.RESULT_TYPE = {
  */
 Xflow.RESULT_STATE = {
     NONE: 0,
-    CHANGED_DATA: 1,
-    CHANGED_STRUCTURE: 2
+    CHANGED_DATA_VALUE: 1,
+    CHANGED_DATA_SIZE: 2,
+    CHANGED_STRUCTURE: 3
 };
 
 
@@ -178,6 +179,16 @@ Xflow.PLATFORM = {
     GLSL: 2
 }
 
+Xflow.PROCESS_STATE = {
+    MODIFIED: 0,
+    LOADING: 1,
+    NEEDS_VALIDATION: 2,
+    INVALID: 3,
+    UNPROCESSED: 4,
+    PROCESSED: 5
+}
+
+
 
 /* Tools */
 
@@ -204,6 +215,9 @@ Xflow.createClass = function(ctor, parent, methods) {
     }
     return ctor;
 };
+
+
+
 
 
 

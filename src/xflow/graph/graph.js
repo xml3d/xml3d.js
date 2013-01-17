@@ -72,8 +72,8 @@ Xflow.createClass(Xflow.InputNode, Xflow.GraphNode);
 var InputNode = Xflow.InputNode;
 
 InputNode.prototype.notify = function(newValue, notification) {
-    var downstreamNotification = notification == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA :
-                                                Xflow.RESULT_STATE.CHANGED_STRUCTURE;
+    var downstreamNotification = notification == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA_VALUE :
+                                                Xflow.RESULT_STATE.CHANGED_DATA_SIZE;
     notifyParentsOnChanged(this,downstreamNotification);
 };
 
@@ -429,8 +429,9 @@ DataNode.prototype.notify = function(changeType, senderNode){
         for(var i in this._requests)
             this._requests[i].notify(changeType);
     }
-    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA){
-        this._channelNode.notifyDataChange(senderNode);
+    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ||
+        changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE){
+        this._channelNode.notifyDataChange(senderNode, changeType);
     }
 };
 

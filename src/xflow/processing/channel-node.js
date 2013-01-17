@@ -78,10 +78,10 @@
         }
     }
 
-    ChannelNode.prototype.notifyDataChange = function(inputNode){
+    ChannelNode.prototype.notifyDataChange = function(inputNode, changeType){
         var key = inputNode._name + ";" + inputNode._key;
         if(this.inputSlots[key])
-            this.inputSlots[key].setDataEntry(inputNode._data);
+            this.inputSlots[key].setDataEntry(inputNode._data, changeType);
     }
 
 
@@ -98,9 +98,6 @@
 
             for(var key in this.requestNodes){
                 this.requestNodes[key].setStructureOutOfSync();
-            }
-            for(var key in this.processNodes){
-
             }
 
         }

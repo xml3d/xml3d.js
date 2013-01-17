@@ -14,9 +14,7 @@ Xflow.ProcessNode = function(channelNode, operator, substitution){
     this.operator = operator;
     this.inputChannels = {};
     this.outputDataSlots = {};
-    this.processed = false;
-    this.valid = false;
-    this.loading = false;
+    this.status = Xflow.PROCESS_STATE.MODIFIED;
     this.useCount = 0;
 
     this.children = [];
@@ -26,10 +24,14 @@ Xflow.ProcessNode = function(channelNode, operator, substitution){
 };
 var ProcessNode = Xflow.ProcessNode;
 
-ProcessNode.prototype.onChannelChange = function(channel){
-    this.processed = false;
+ProcessNode.prototype.onChannelChange = function(channel, state){
+    if(state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE &&
+        this.status > Xflow.PROCESS_STATE.UNPROCESSED)
+        this.status = Xflow.PROCESS_STATE.UNPROCESSED;
+    else if(state == Xflow.DATA_ENTRY_STATE.CHANGED_SIZE)
+        this.status = Xflow.PROCESS_STATE.MODIFIED;
     for(var name in this.outputDataSlots){
-        this.outputDataSlots[name].notifyOnChange();
+        this.outputDataSlots[name].notifyOnChange(state);
     }
 }
 
@@ -37,14 +39,22 @@ ProcessNode.prototype.clear = function(){
     for(var name in this.inputChannels){
         this.inputChannels[name].removeListener(this.channelListener);
     }
+
+ProcessNode.prototype.validate = function(){
+    if(this.status < Xflow.PROCESS_STATE.INVALID){
+        var valid = true;
+        for(var i = 0; i < this.children.length; ++i){
+            valid = (this.children[i].validate() && valid);
+        }
+        valid = (valid && checkInput(this.operator, this.owner.owner._computeInputMapping, this.inputChannels));
+        this.status = valid ? Xflow.PROCESS_STATE.UNPROCESSED : Xflow.PROCESS_STATE.INVALID
+    }
+    return this.status > Xflow.PROCESS_STATE.INVALID;
 }
-/**
- *
- */
+
 ProcessNode.prototype.process = function(){
-    if(!this.processed){
-        this.loading = false;
-        this.valid = true;
+    // TODO: Fix this with respect to states
+    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
         for(var i = 0; i < this.children.length; ++i){
             this.children[i].process();
             if(this.children[i].loading){
@@ -52,7 +62,6 @@ ProcessNode.prototype.process = function(){
                 return;
             }
         }
-        this.processed = true;
         if(isInputLoading(this.operator, this.inputChannels)){
             this.loading = true;
             return;
@@ -61,7 +70,9 @@ ProcessNode.prototype.process = function(){
             this.valid = false;
             return;
         }
+
         this.applyOperator();
+        this.status = Xflow.PROCESS_STATE.PROCESSED;
     }
 
 }
@@ -115,10 +126,13 @@ function checkInput(operator, inputMapping, inputChannels){
                 return false;
             }
             var dataEntry = channel.getDataEntry();
-            if(!entry.optional && (!dataEntry || dataEntry.isEmpty())){
-                XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
-                    ' contains no data.');
-                return false;
+
+            if(!channel.creatorProcessNode){
+                if(!entry.optional && (!dataEntry || dataEntry.isEmpty()))){
+                    XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                        ' contains no data.');
+                    return false;
+                }
             }
             if(dataEntry && dataEntry.type != entry.type){
                 XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
@@ -172,6 +186,8 @@ Xflow.RequestNode = function(channelNode, filter){
     this.owner = channelNode;
     this.filter = filter;
     this.results = {};
+
+    this.status = Xflow.PROCESS_STATE.MODIFIED;
 
     this.channels = {};
     this.children = [];

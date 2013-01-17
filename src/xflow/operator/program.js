@@ -32,6 +32,10 @@
         return this.inputInfo[paramIdx].inputIndex;
     }
 
+    Xflow.OperatorEntry.prototype.getOutputIndex = function(operatorOutputIdx){
+        return this.outputIndex[operatorOutputIdx].final || this.outputIndex[operatorOutputIdx].lost || 0;
+    }
+
 
     Xflow.OperatorEntry.prototype.isFinalOutput = function(outputIndex){
         return this.outputInfo[outputIndex] && this.outputInfo[outputIndex].final != undefined;
@@ -129,11 +133,51 @@
         return count < 0 ? 1 : count;
     }
 
+    var c_sizes = {};
+
+    Xflow.OperatorList.prototype.allocateOutput = function(programData){
+        for(var i = 0; i < this.entries.length; ++i){
+            var entry = this.entries[i];
+            var operator = entry.operator;
+            var operatorData = programData.operatorData[i]
+            if(operator.alloc){
+                var args = [c_sizes];
+                addInputToArgs(args, entry, programData);
+                operator.alloc.apply(operatorData, args);
+            }
+            var iterateCount = this.getIterateCount();
+            for(var j = 0; j < operator.outputs.length; ++j){
+                var d = operator.outputs[i];
+                var dataEntry = programData.outputs[entry.getOutputIndex(j)].dataEntry;
+
+                var size = (d.customAlloc ? c_sizes[d.name] : iterateCount) * dataEntry.getTupleSize();
+
+                if( !dataEntry._value || dataEntry._value.length != size){
+                    switch(dataEntry.type){
+                        case Xflow.DATA_TYPE.FLOAT:
+                        case Xflow.DATA_TYPE.FLOAT2:
+                        case Xflow.DATA_TYPE.FLOAT3:
+                        case Xflow.DATA_TYPE.FLOAT4:
+                        case Xflow.DATA_TYPE.FLOAT4X4: dataEntry.setValue(new Float32Array(size)); break;
+                        case Xflow.DATA_TYPE.INT:
+                        case Xflow.DATA_TYPE.INT4:
+                        case Xflow.DATA_TYPE.BOOL: dataEntry.setValue(new Int32Array(size)); break;
+                        default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + dataEntry.type);
+                    }
+                }
+                else{
+                    dataEntry.notifyChanged();
+                }
+            }
+        }
+    }
+
+    /*
     Xflow.OperatorList.prototype.checkInput = function(programData){
         for(var i = 0; i < this.entries.length; ++i){
             var entry = this.entries[i];
-            var params = entry.operator.params;
-            for(var j = 0; j < params.length; ++j){
+            var mapping = entry.operator.mapping;
+            for(var j = 0; j < mapping.length; ++j){
                 if(entry.isTransferInput(j)){
                     var outputType = this.entries[entry.getTransferInputOperatorIndex(j)].operator.outputs[
                         entry.getTransferInputOutputIndex(j)].type;
@@ -177,6 +221,7 @@
             }
         }
     }
+    */
 
 
 
@@ -184,10 +229,23 @@
     Xflow.ProgramData = function(){
         this.inputs = [];
         this.outputs = [];
+        this.operatorData = [];
     }
 
     Xflow.ProgramData.prototype.getChannel = function(index){
         return this.inputs[index].channel;
+    }
+
+    Xflow.ProgramData.prototype.getDataEntry = function(index){
+        var channel = this.inputs[index].channel;
+        if(!channel) return null;
+        var key = 0;
+        if(this.sequenceKeySourceChannel){
+            var keyDataEntry = this.sequenceKeySourceChannel.getDataEntry();
+            key = keyDataEntry && keyDataEntry._value ? keyDataEntry._value[0] : 0;
+        }
+
+        return channel.getDataEntry(this.sequenceAccessType, key);
     }
 
     Xflow.ProgramInputConnection = function(){
@@ -201,5 +259,153 @@
         return this.channel.id + ";" + this.arrayAccess + ";" + this.sequenceAccessType + ";" +
         ( this.sequenceKeySourceChannel ? this.sequenceKeySourceChannel.id : "");
     }
+
+
+    var c_program_cache
+
+    Xflow.createProgram = function(operatorList){
+        var key = operatorList.getKey();
+        if(!c_program_cache[key]){
+            if(operatorList.entries.length == 1)
+                c_program_cache[key] = new Xflow.SingleProgram(operatorList);
+        }
+        return c_program_cache[key];
+    }
+
+
+
+    Xflow.SingleProgram = function(operatorList){
+        this.list = operatorList;
+        this.operator = operatorList.entries[0].operator;
+        this._inlineLoop = null;
+    }
+
+    Xflow.SingleProgram.prototype.run = function(programData){
+        var operatorData = prepareOperatorData(this.list, 0, programData);
+
+        if(this.operator.evaluate_core){
+            applyCoreOperation(this, programData, operatorData);
+        }
+        else{
+            applyDefaultOperation(this.operator, programData, operatorData);
+        }
+    }
+
+    function applyDefaultOperation(operator, programData, operatorData){
+        var args = assembleFunctionArgs(operator, programData);
+        args.push(operatorData);
+        operator.evaluate.apply(operatorData, args);
+    }
+
+    function applyCoreOperation(program, programData, operatorData){
+        var args = assembleFunctionArgs(program.operator, programData);
+        args.push(operatorData.iterateCount);
+
+        if(!program._inlineLoop){
+            program._inlineLoop = createOperatorInlineLoop(program.operator, operatorData);
+        }
+        program._inlineLoop.apply(operatorData, args);
+    }
+
+    var c_VarPattern = /var\s+(.)+[;\n]/;
+    var c_InnerVarPattern = /[^=,\s]+\s*(=[^,]+)?(,)?/;
+    function createOperatorInlineLoop(operator, operatorData){
+
+        var code = "function (";
+        var funcData = parseFunction(operator.evaluate_core);
+        code += funcData.args.join(",") + ",__xflowMax) {\n";
+        code += "    var __xflowI = __xflowMax\n" +
+            "    while(__xflowI--){\n";
+
+        var body = funcData.body;
+        body = replaceArrayAccess(body, funcData.args, operator, operatorData);
+        code += body + "\n  }\n}";
+
+        var inlineFunc = eval("(" + code + ")");
+        return inlineFunc;
+    }
+
+    var c_FunctionPattern = /function\s+([^(]*)\(([^)]*)\)\s*\{([\s\S]*)\}/;
+
+    function parseFunction(func){
+        var result = {};
+        var matches = func.toString().match(c_FunctionPattern);
+        if(!matches){
+            XML3D.debug.logError("Xflow Internal: Could not parse function: " + func);
+            return null;
+        }
+        result.args = matches[2].split(",");
+        for(var i in result.args) result.args[i] = result.args[i].trim();
+        result.body = matches[3];
+        return result;
+    }
+
+    var c_bracketPattern = /([a-zA-Z_$][\w$]*)(\[)/;
+
+    function replaceArrayAccess(code, args, operator, operatorData){
+        var result = "";
+        var index = 0, bracketIndex = code.indexOf("[", index);
+        while(bracketIndex != -1){
+            var key = code.substr(index).match(c_bracketPattern)[1];
+
+            var argIdx = args.indexOf(key);
+            var addIndex = false, tupleCnt = 0;
+            if(argIdx != -1){
+                if(argIdx < operator.outputs.length){
+                    addIndex = true;
+                    tupleCnt = Xflow.DATA_TYPE_TUPLE_SIZE[[operator.outputs[argIdx].type]];
+                }
+                else{
+                    var i = argIdx - operator.outputs.length;
+                    addIndex = operatorData.iterFlag[i];
+                    tupleCnt = Xflow.DATA_TYPE_TUPLE_SIZE[operator.mapping[i].internalType];
+                }
+            }
+
+            result += code.substring(index, bracketIndex) + "["
+            if(addIndex){
+                result += tupleCnt + "*__xflowI + ";
+            }
+            index = bracketIndex + 1;
+            bracketIndex = code.indexOf("[", index);
+        }
+        result +=  code.substring(index);
+        return result;
+    }
+
+
+    function prepareOperatorData(list, idx, programData){
+        var data = programData.operatorData[0];
+        var entry = list.entries[idx];
+        var mapping = entry.mapping;
+        for(var i = 0; i < mapping.length; ++i){
+            var doIterater = (entry.isTransferInput(i) || list.isInputIterate(entry.getDirectInputIndex(i)));
+                data.iterFlag[i] = true
+        }
+        data.iterateCount = list.getExecutionCount(programData);
+        return data;
+    }
+
+    function assembleFunctionArgs(entry, programData){
+        var args = [];
+        var outputs = entry.operator.outputs;
+        for(var i = 0; i < outputs.length; ++i){
+            var d = outputs[i];
+            var dataEntry = programData.outputs(entry.getOutputIndex(i)).dataEntry;
+            args.push(dataEntry ? dataEntry._value : null);
+        }
+        addInputToArgs(args, entry, programData);
+        return args;
+    }
+
+    function addInputToArgs(args, entry, programData){
+        var mapping = entry.operator.mapping;
+        for(var i = 0; i < mapping.length; ++i){
+            var mapEntry = mapping[i];
+            var dataEntry = programData.getDataEntry(entry.getDirectInputIndex(i));
+            args.push(dataEntry);
+        }
+    }
+
 
 }());

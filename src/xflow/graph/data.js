@@ -118,7 +118,7 @@ var BufferEntry = Xflow.BufferEntry;
 BufferEntry.prototype.setValue = function(v){
     var newSize = (this._value ? this._value.length : 0) != (v ? v.length : 0);
     this._value = v;
-    notifyListeners(this, newSize ? Xflow.DATA_ENTRY_STATE.CHANGE_SIZE : Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+    notifyListeners(this, newSize ? Xflow.DATA_ENTRY_STATE.CHANGED_SIZE : Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }
 
 /** @return {Object} */

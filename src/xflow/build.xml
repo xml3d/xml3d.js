@@ -41,6 +41,7 @@
         <file name="./operator/default/popartImage.js" />
         <file name="./operator/default/magnitudeImage.js" />
         <file name="./operator/default/flipVerticalImage.js" />
+        <file name="./operator/default/selectTransform.js" />
     </filelist>
 
     <target name="concat">

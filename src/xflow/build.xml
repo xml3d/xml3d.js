@@ -42,6 +42,7 @@
         <file name="./operator/default/magnitudeImage.js" />
         <file name="./operator/default/flipVerticalImage.js" />
         <file name="./operator/default/selectTransform.js" />
+        <file name="./operator/default/selectBool.js" />
     </filelist>
 
     <target name="concat">

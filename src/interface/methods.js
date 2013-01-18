@@ -34,11 +34,11 @@ new (function() {
         this.position = pos;
     };
 
-    var tmpX = vec3.create();
-    var tmpY = vec3.create();
-    var tmpZ = vec3.create();
+    var tmpX = XML3D.math.vec3.create();
+    var tmpY = XML3D.math.vec3.create();
+    var tmpZ = XML3D.math.vec3.create();
 
-    quat.setFromMat3 = function(m, dest) {
+    XML3D.math.quat.setFromMat3 = function(m, dest) {
         var tr = m[0] + m[4] + m[8];
 
         if (tr > 0) {
@@ -68,11 +68,11 @@ new (function() {
         }
     };
 
-    quat.setFromBasis = function(X,Y,Z,dest) {
-        var lx = 1.0 / vec3.length(X);
-        var ly = 1.0 / vec3.length(Y);
-        var lz = 1.0 / vec3.length(Z);
-        var m = mat3.create();
+    XML3D.math.quat.setFromBasis = function(X,Y,Z,dest) {
+        var lx = 1.0 / XML3D.math.vec3.length(X);
+        var ly = 1.0 / XML3D.math.vec3.length(Y);
+        var lz = 1.0 / XML3D.math.vec3.length(Z);
+        var m = XML3D.math.mat3.create();
         m[0] = X[0] * lx;
         m[1] = Y[0] * ly;
         m[2] = Z[0] * lz;
@@ -82,7 +82,7 @@ new (function() {
         m[6] = X[2] * lx;
         m[7] = Y[2] * ly;
         m[8] = Z[2] * lz;
-        quat.setFromMat3(m,dest);
+        XML3D.math.quat.setFromMat3(m,dest);
     };
 
     methods.viewSetDirection = function(direction) {
@@ -92,15 +92,15 @@ new (function() {
         var up = this.orientation.rotateVec3(new window.XML3DVec3(0,1,0));
         up = up.normalize();
 
-        vec3.cross(direction._data,up._data,tmpX);
-        if(!vec3.length(tmpX)) {
+        XML3D.math.vec3.cross(tmpX,direction._data,up._data);
+        if(!XML3D.math.vec3.length(tmpX)) {
                 tmpX = this.orientation.rotateVec3(new window.XML3DVec3(1,0,0))._data;
         }
-        vec3.cross(tmpX,direction._data,tmpY);
-        vec3.negate(direction._data,tmpZ);
+        XML3D.math.vec3.cross(tmpY,tmpX,direction._data);
+        XML3D.math.vec3.negate(tmpZ,direction._data);
 
-        var q = quat4.create();
-        quat4.setFromBasis(tmpX, tmpY, tmpZ, q);
+        var q = XML3D.math.quat.create();
+        XML3D.math.quat.setFromBasis(tmpX, tmpY, tmpZ, q);
         this.orientation._setQuaternion(q);
     };
 

@@ -152,7 +152,7 @@
      */
     p.multiply = function(secondMatrix) {
         var result = new XML3DMatrix();
-        mat4.multiply(result._data, this._data, secondMatrix._data);
+        XML3D.math.mat4.multiply(result._data, this._data, secondMatrix._data);
         return result;
     };
 
@@ -164,7 +164,7 @@
      */
     p.inverse = function() {
         var result = new XML3DMatrix();
-        result._data = mat4.invert(result._data, this._data);
+        result._data = XML3D.math.mat4.invert(result._data, this._data);
         if (result._data == null || isNaN(result._data[0]))
             throw new Error("Trying to invert matrix that is not invertable.");
         return result;
@@ -181,12 +181,12 @@
     p.rotate = function(rotX, rotY, rotZ) {
         var r = new XML3DMatrix();
         if(rotY === undefined && rotZ === undefined) {
-            mat4.rotateZ(r._data, this._data, rotX);
+            XML3D.math.mat4.rotateZ(r._data, this._data, rotX);
             return r;
         }
-        mat4.rotateZ(r._data, this._data, rotZ);
-        mat4.rotateY(r._data, r._data, rotY);
-        mat4.rotateX(r._data, r._data, rotX);
+        XML3D.math.mat4.rotateZ(r._data, this._data, rotZ);
+        XML3D.math.mat4.rotateY(r._data, r._data, rotY);
+        XML3D.math.mat4.rotateX(r._data, r._data, rotX);
         return r;
     };
 
@@ -203,7 +203,7 @@
      */
     p.rotateAxisAngle = function(x, y, z, angle) {
         var result = new XML3DMatrix();
-        mat4.rotate(result._data, this._data, angle, [ x, y, z ]);
+        XML3D.math.mat4.rotate(result._data, this._data, angle, [ x, y, z ]);
         return result;
     };
 
@@ -226,7 +226,7 @@
             scaleZ = 1;
         if (!scaleY)
             scaleY = scaleX;
-        mat4.scale(result._data, this._data, [ scaleX, scaleY, scaleZ ]);
+        XML3D.math.mat4.scale(result._data, this._data, [ scaleX, scaleY, scaleZ ]);
         return result;
     };
 
@@ -241,7 +241,7 @@
       */
     p.translate = function(x, y, z) {
         var result = new XML3DMatrix();
-        mat4.translate(result._data, this._data, [x, y, z]);
+        XML3D.math.mat4.translate(result._data, this._data, [x, y, z]);
         return result;
     };
 

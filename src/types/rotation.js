@@ -139,7 +139,7 @@
             this._data[2] = this._axis.z * s;
             this._data[3] = Math.cos(this._angle / 2);
         } else {
-            quat.set(this._data, 0, 0, 0, 1);
+            XML3D.math.quat.set(this._data, 0, 0, 0, 1);
         }
     };
 
@@ -165,8 +165,8 @@
      * @param {number} t the factor
      */
     p.interpolate = function(rot1, t) {
-        var dest = quat.create(), result = new XML3DRotation();
-        quat.slerp(dest, this._data, rot1._data, t);
+        var dest = XML3D.math.quat.create(), result = new XML3DRotation();
+        XML3D.math.quat.slerp(dest, this._data, rot1._data, t);
         result._setQuaternion(dest);
         return result;
     };
@@ -195,9 +195,9 @@
      * @return {XML3DMatrix} Rotation matrix
      */
     p.toMatrix = function() {
-        var q = quat.copy(quat.create(), this._data);
+        var q = XML3D.math.quat.copy(XML3D.math.quat.create(), this._data);
         var m = new window.XML3DMatrix();
-        mat4.fromRotationTranslation(m._data, q, [0, 0, 0]);
+        XML3D.math.mat4.fromRotationTranslation(m._data, q, [0, 0, 0]);
         return m;
     };
     
@@ -211,7 +211,7 @@
      */
     p.rotateVec3 = function(inputVector) {
         var result = new window.XML3DVec3();
-        vec3.transformQuat(result._data, inputVector._data, this._data)
+        XML3D.math.vec3.transformQuat(result._data, inputVector._data, this._data)
         return result;
     };
     
@@ -235,7 +235,7 @@
             this._axis._data[2] = q[2] * s;
             this._angle = 2 * Math.acos(q[3]);
         }
-        this._data = quat.copy(quat.create(), q);
+        this._data = XML3D.math.quat.copy(XML3D.math.quat.create(), q);
         if (this._callback)
             this._callback(this);
     };
@@ -248,8 +248,8 @@
      * @return {XML3DVec3} The result
      */
     p.multiply = function(rot1) {
-        var result = new XML3DRotation(), q = quat.create();
-        quat.multiply(q, this._data, rot1._data);
+        var result = new XML3DRotation(), q = XML3D.math.quat.create();
+        XML3D.math.quat.multiply(q, this._data, rot1._data);
         result._setQuaternion(q);
         return result;
     };
@@ -269,7 +269,7 @@
      * @return {Float32Array} 
      */
     p.getQuaternion = function() {
-        return quat.copy(quat.create(), this._data); 
+        return XML3D.math.quat.copy(XML3D.math.quat.create(), this._data); 
     };
 
     XML3D.XML3DRotation = XML3DRotation;

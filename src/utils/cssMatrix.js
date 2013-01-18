@@ -819,7 +819,7 @@ XML3D.css.CSSMatrix = FirminCSSMatrix;
 
 
 XML3D.css.convertCssToMat4 = function(cssMatrix, m){
-    var matrix = m || mat4.create();
+    var matrix = m || XML3D.math.mat4.create();
     matrix[0] = cssMatrix.m11;
     matrix[1] = cssMatrix.m12;
     matrix[2] = cssMatrix.m13;

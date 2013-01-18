@@ -7,10 +7,10 @@ Xflow.registerOperator("slerpSeq", {
                 {source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
     evaluate: function(result, value1, value2, weight, info) {
         for(var i = 0; i < info.iterateCount; ++i){
-            quat.slerpOffset(  value1,info.iterFlag[0] ? i*4 : 0,
-                               value2,info.iterFlag[1] ? i*4 : 0,
-                               weight[0],
-                               result, i*4, true);
+            XML3D.math.quat.slerpOffset(  value1,info.iterFlag[0] ? i*4 : 0,
+                                          value2,info.iterFlag[1] ? i*4 : 0,
+                                          weight[0],
+                                          result, i*4, true);
         }
     },
 
@@ -24,7 +24,7 @@ Xflow.registerOperator("slerpSeq", {
             var result = me.tmp;
             for(var i = 0; i < count / 4; i++) {
                 var offset = i*4;
-                quat.slerpOffset(v1,v2,offset,t,result, true);
+                XML3D.math.quat.slerpOffset(v1,v2,offset,t,result, true);
             };
             return result;
         });

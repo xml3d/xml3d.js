@@ -5,7 +5,7 @@
         this.zFar = 100000;
         this.zNear = 0.1;
         this.parentTransform = null;
-        this.viewMatrix = mat4.create();
+        this.viewMatrix = XML3D.math.mat4.create();
         this.projMatrix = null;
         this.worldPosition = [0,0,0];
         this.updateViewMatrix();
@@ -13,8 +13,8 @@
     XML3D.createClass(ViewRenderAdapter, XML3D.webgl.RenderAdapter);
     var p = ViewRenderAdapter.prototype;
 
-    var tmp = mat4.create(),
-        tmp2 = mat4.create();
+    var tmp = XML3D.math.mat4.create(),
+        tmp2 = XML3D.math.mat4.create();
 
     p.updateViewMatrix = function() {
         // Create local matrix
@@ -22,22 +22,22 @@
         var orient = this.node.orientation.toMatrix()._data;
 
         // tmp = T
-        mat4.identity(tmp);
+        XML3D.math.mat4.identity(tmp);
         tmp[12] = pos[0];
         tmp[13] = pos[1];
         tmp[14] = pos[2];
 
         // tmp = T * O
-        mat4.multiply(tmp, tmp, orient);
+        XML3D.math.mat4.multiply(tmp, tmp, orient);
 
         var p = this.factory.getAdapter(this.node.parentNode);
-        this.parentTransform = p.applyTransformMatrix(mat4.identity(tmp2));
+        this.parentTransform = p.applyTransformMatrix(XML3D.math.mat4.identity(tmp2));
 
         if (this.parentTransform) {
-            mat4.multiply(tmp, this.parentTransform, tmp);
+            XML3D.math.mat4.multiply(tmp, this.parentTransform, tmp);
         }
         this.worldPosition = [tmp[12], tmp[13], tmp[14]];
-        mat4.copy(this.viewMatrix, mat4.invert(tmp, tmp));
+        XML3D.math.mat4.copy(this.viewMatrix, XML3D.math.mat4.invert(tmp, tmp));
     };
 
     p.getProjectionMatrix = function(aspect) {
@@ -46,7 +46,7 @@
             var zfar = this.zFar;
             var znear = this.zNear;
             var f = 1 / Math.tan(fovy / 2);
-            this.projMatrix = mat4.copy(mat4.create(), [ f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), -1, 0, 0,
+            this.projMatrix = XML3D.math.mat4.copy(XML3D.math.mat4.create(), [ f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (znear + zfar) / (znear - zfar), -1, 0, 0,
                    2 * znear * zfar / (znear - zfar), 0 ]);
 
         }
@@ -66,19 +66,19 @@
      */
     p.getWorldMatrix = function() {        
         var m = new window.XML3DMatrix();  
-        var tmp = mat4.create(); 
-        mat4.invert(tmp, this.viewMatrix);
+        var tmp = XML3D.math.mat4.create(); 
+        XML3D.math.mat4.invert(tmp, this.viewMatrix);
         m._data.set(tmp);
         return m; 
     }; 
 
 
     p.getModelViewMatrix = function(model) {
-        return mat4.multiply(mat4.create(), this.viewMatrix, model);
+        return XML3D.math.mat4.multiply(XML3D.math.mat4.create(), this.viewMatrix, model);
     };
 
     p.getModelViewProjectionMatrix = function(modelViewMatrix) {
-        return mat4.multiply(mat4.create(), this.projMatrix, modelViewMatrix);
+        return XML3D.math.mat4.multiply(XML3D.math.mat4.create(), this.projMatrix, modelViewMatrix);
     };
     
     p.getWorldSpacePosition = function() {

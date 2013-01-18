@@ -5,8 +5,8 @@ Xflow.registerOperator("skinPosition", {
                 {type: 'float4', source: 'boneWeight' },
                 {type: 'float4x4', source: 'boneXform', array: true } ],
     evaluate: function(result, pos,boneIdx,boneWeight,boneXform, info) {
-        var r = vec3.create();
-        var tmp =  vec3.create();
+        var r = XML3D.math.vec3.create();
+        var tmp =  XML3D.math.vec3.create();
 
         for(var i = 0; i< info.iterateCount;++i) {
             var offset = i*3;
@@ -16,9 +16,9 @@ Xflow.registerOperator("skinPosition", {
                 if (weight) {
                     var mo = boneIdx[info.iterFlag[1] ? i*4+j : j]*16;
 
-                    mat4.multiplyOffsetVec3(boneXform, mo, pos, offset, tmp);
-                    vec3.scale(tmp, tmp, weight);
-                    vec3.add(r, r, tmp);
+                    XML3D.math.mat4.multiplyOffsetVec3(boneXform, mo, pos, offset, tmp);
+                    XML3D.math.vec3.scale(tmp, tmp, weight);
+                    XML3D.math.vec3.add(r, r, tmp);
                 }
             }
             result[offset] = r[0];

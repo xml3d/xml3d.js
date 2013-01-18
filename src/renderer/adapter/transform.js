@@ -133,7 +133,7 @@
 
     function createRequest(adapter, key){
         if(!adapter.requests[key]){
-            var that = this;
+            var that = adapter;
             adapter.requests[key] = adapter.dataAdapter.getComputeRequest([key],
                 function(request, changeType) {
                     that.dataChanged(request, changeType);

@@ -250,6 +250,11 @@ Xflow.ProcessNode.prototype.applyOperator = function(){
     else{
         applyDefaultOperation(this.operator, inputData, this.outputDataSlots, this._operatorData);
     }
+    for (var i in this.outputDataSlots) {
+        var entry = this.outputDataSlots[i].dataEntry;
+        if (entry.finish)
+            entry.finish();
+    }
 }
 
 })();

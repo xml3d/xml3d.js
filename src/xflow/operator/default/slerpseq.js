@@ -32,3 +32,33 @@ Xflow.registerOperator("slerpSeq", {
         return true;
     }
 });
+
+
+Xflow.registerOperator("slerpKeys", {
+    outputs: [  {type: 'float4', name: 'result'}],
+    params:  [  {type: 'float', source: 'keys', array: true},
+        {type: 'float4', source: 'values', array: true},
+        {type: 'float', source: 'key'}],
+    alloc: function(sizes, keys, values, key)
+    {
+        sizes['result'] = 4;
+    },
+    evaluate: function(result, keys, values, key) {
+        var maxIdx = Math.min(keys.length, Math.floor(values.length / 4));
+        var idx = Xflow.utils.binarySearch(keys, key[0], maxIdx);
+
+        if(idx < 0 || idx == maxIdx - 1){
+            idx = Math.max(0,idx);
+            result[0] = values[4*idx];
+            result[1] = values[4*idx+1];
+            result[2] = values[4*idx+2];
+            result[3] = values[4*idx+3];
+        }
+        else{
+            var weight = (key - keys[idx]) / (keys[idx+1] - keys[idx]);
+            quat4.slerpOffset(  values, idx*4,
+                values,(idx+1)*4, weight,
+                result, 0, true);
+        }
+    }
+});

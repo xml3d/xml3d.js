@@ -115,7 +115,7 @@ function checkInput(operator, inputMapping, inputChannels){
                 return false;
             }
             var dataEntry = channel.getDataEntry();
-            if(!entry.optional && (!dataEntry || dataEntry.getLength() == 0)){
+            if(!entry.optional && (!dataEntry || dataEntry.isEmpty())){
                 XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
                     ' contains no data.');
                 return false;

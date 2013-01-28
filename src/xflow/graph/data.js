@@ -210,10 +210,6 @@ Xflow.TextureEntry = function(image){
 XML3D.createClass(Xflow.TextureEntry, Xflow.DataEntry);
 var TextureEntry = Xflow.TextureEntry;
 
-TextureEntry.prototype.isEmpty = function(){
-    return !this._image;
-};
-
 TextureEntry.prototype.isLoading = function() {
     var image = this._image;
     if (!image)
@@ -347,20 +343,27 @@ TextureEntry.prototype.getCanvas = function() {
     return this._canvas;
 };
 
+TextureEntry.prototype.getFilledCanvas = function() {
+    var canvas = this.getCanvas();
+    this._context = canvas.getContext("2d");
+    if (!this._context)
+        throw new Error("Could not create 2D context.");
+    if (this._copyImageToCtx) {
+        this._context.drawImage(this._image, 0, 0);
+        this._copyImageToCtx = false;
+    }
+    return canvas;
+};
+
 TextureEntry.prototype.getContext2D = function() {
     if (!this._context) {
-        var canvas = this.getCanvas();
-        this._context = canvas.getContext("2d");
-        if (!this._context)
-            throw new Error("Could not create 2D context.");
-        if (this._copyImageToCtx) {
-            this._context.drawImage(this._image, 0, 0);
-            this._copyImageToCtx = false;
-        }
+        this.getFilledCanvas(); // will implicitly create context for filled canvas
     } else
         this._flush();
     return this._context;
 };
+
+
 
 
 /** @return {ImageData} */
@@ -396,8 +399,12 @@ TextureEntry.prototype.getSamplerConfig = function(){
 TextureEntry.prototype.getLength = function(){
     return 1;
 };
+TextureEntry.prototype.isEmpty = function(){
+    return !this._image
+};
 
-/** @return {number} */
+
+    /** @return {number} */
 TextureEntry.prototype.getIterateCount = function() {
     return 1;
 };

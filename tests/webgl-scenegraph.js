@@ -76,6 +76,34 @@ test("Change visibility via script", 9, function() {
     ok(h.needDraw, "Redraw required");
 });
 
+test("Add children in invisible group", 8, function() {
+    var x = this.doc.getElementById("xml3DElem"),
+        actual,
+        win = this.doc.defaultView,
+        gl = getContextForXml3DElement(x),
+        testFunc = null, h = getHandler(x);
+
+    x.addEventListener("framedrawn", function(n) {
+        ok("Redraw was triggered");
+        ok(!h.needDraw, "Redraw not required");
+        if(testFunc)
+            testFunc(n);
+        start();
+    });
+    testFunc = function(n) {
+        equal(n.detail.numberOfObjectsDrawn, 0, "0 Objects drawn");
+        equal(n.detail.numberOfTrianglesDrawn, 0, "0 Triangles drawn");
+        actual = win.getPixelValue(gl, 40, 40);
+        deepEqual(actual, [0,0,0,0], "Transparent at 40,40");
+    };
+    stop();
+    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("src", "#meshdata");
+
+    this.doc.getElementById("myEmptyGroup").appendChild(mesh);
+    ok(h.needDraw, "Redraw required");
+});
+
 test("Change active view via script", 8, function() {
     // 1: Found frame
     // 2: Scene loaded

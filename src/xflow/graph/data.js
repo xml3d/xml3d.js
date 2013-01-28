@@ -372,7 +372,7 @@ TextureEntry.prototype.getValue = function() {
         return null;
     if (!this._imageData && !this.isLoading()) {
         var ctx = this.getContext2D();
-        this._imageData = ctx.getImageData(0, 0, this.getWidth(), this.getHeight())
+        this._imageData = ctx.getImageData(0, 0, this.getWidth(), this.getHeight());
         if (this._formatType == 'float32') {
             this._imageData = {
                 data : new Float32Array(this._imageData.data),

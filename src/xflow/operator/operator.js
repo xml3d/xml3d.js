@@ -271,6 +271,64 @@ function applyCoreOperation(operator, inputData, outputData, operatorData){
     operator._inlineLoop[key].apply(operatorData, args);
 }
 
+if(window.ParallelArray){
+    var createParallelArray = (function() {
+        function F(args) {
+            return ParallelArray.apply(this, args);
+        }
+        F.prototype = ParallelArray.prototype;
+
+        return function() {
+            return new F(arguments);
+        }
+    })();
+}
+
+function riverTrailAvailable(){
+    return window.ParallelArray && window.RiverTrail && RiverTrail.compiler;
+}
+
+
+function applyParallelOperator(operator, inputData, outputData, operatorData){
+    var args = [];
+    // Compute Output image size:
+    var size = [];
+    args.push(size);
+    args.push(operator.evaluate_parallel);
+    for(var i = 0; i < operator.mapping.length; ++i){
+        var entry = inputData[i];
+        var value = null;
+        if(entry){
+            if(operator.mapping[i].internalType == Xflow.DATA_TYPE.TEXTURE){
+                if(size.length == 0){
+                    size[0] = inputData[i].getWidth();
+                    size[1] = inputData[i].getHeight();
+                }
+                else{
+                    size[0] = Math.min(size[0], inputData[i].getWidth());
+                    size[1] = Math.min(size[1], inputData[i].getHeight());
+                }
+                value = new ParallelArray(inputData[i].getFilledCanvas());
+            }
+            else{
+                value = new ParallelArray(inputData[i].getValue());
+            }
+        }
+        args.push(value);
+    }
+    var result = createParallelArray.apply(this, args);
+    result.materialize();
+    var outputName = operator.outputs[0].name;
+    var outputDataEntry = outputData[outputName].dataEntry;
+
+    RiverTrail.compiler.openCLContext.writeToContext2D(outputDataEntry.getContext2D(),
+        result.data, outputDataEntry.getWidth(), outputDataEntry.getHeight());
+
+    var value = outputDataEntry.getValue();
+    return value;
+}
+
+
 Xflow.ProcessNode.prototype.applyOperator = function(){
     if(!this._operatorData)
         this._operatorData = {
@@ -281,12 +339,17 @@ Xflow.ProcessNode.prototype.applyOperator = function(){
     var inputData = [];
     prepareInputs(this.operator, this.inputChannels, inputData);
     var count = getIterateCount(this.operator, inputData, this._operatorData);
-    allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
 
-    if(this.operator.evaluate_core){
+    if( this.operator.evaluate_parallel && riverTrailAvailable() ){
+        allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
+        applyParallelOperator(this.operator, inputData, this.outputDataSlots, this._operatorData);
+    }
+    else if(this.operator.evaluate_core){
+        allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
         applyCoreOperation(this.operator, inputData, this.outputDataSlots, this._operatorData);
     }
     else{
+        allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
         applyDefaultOperation(this.operator, inputData, this.outputDataSlots, this._operatorData);
     }
     for (var i in this.outputDataSlots) {

@@ -39,7 +39,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.applyTransformMatrix = function(m) {
 
         if (this.renderObject.transform)
-            mat4.multiply(m, this.renderObject.transform);
+            XML3D.math.mat4.multiply(m, m, this.renderObject.transform);
 
         return m;
     };

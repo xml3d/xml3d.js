@@ -88,7 +88,7 @@
         this.create();
     };
 
-    RenderObject.IDENTITY_MATRIX = mat4.identity(mat4.create());
+    RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.identity(XML3D.math.mat4.create());
 
     RenderObject.prototype.onmaterialChanged = function() {
         // console.log("Material changed");

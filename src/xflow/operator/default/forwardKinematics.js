@@ -23,7 +23,7 @@ Xflow.registerOperator("forwardKinematics", {
                         while(parent[p] >= 0 && !computed[parent[p]]) p = parent[p];
 
                         if(parent[p] >= 0)
-                            mat4.multiplyOffset(result, p*16, xform, p*16, result, parent[p]*16);
+                            XML3D.math.mat4.multiplyOffset(result, p*16, xform, p*16, result, parent[p]*16);
                         else
                             for(var j = 0; j < 16; j++) {
                                 result[p*16+j] = xform[p*16+j];
@@ -32,7 +32,7 @@ Xflow.registerOperator("forwardKinematics", {
                         continue;
                     }
                     else {
-                        mat4.multiplyOffset(result, i*16, xform, i*16, result,  p*16);
+                        XML3D.math.mat4.multiplyOffset(result, i*16, xform, i*16, result,  p*16);
                     }
                 }
                 else{

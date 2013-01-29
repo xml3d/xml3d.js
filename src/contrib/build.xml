@@ -6,6 +6,7 @@
     <import file="../../build/build-master.xml" />
 
     <filelist dir="." id="sourceFiles">
+    	<file name="./base.js" />
         <file name="./glu.js" />
         <file name="./glMatrix.js" />
         <file name="./stacktrace-0.4.js"/>

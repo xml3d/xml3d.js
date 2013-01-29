@@ -85,7 +85,7 @@
         return bbox;
     };
 
-    var absMat = mat4.create();
+    var absMat = XML3D.math.mat4.create();
 
     XML3D.webgl.transformAABB = function(bbox, gmatrix) {
         if (bbox.isEmpty())
@@ -93,19 +93,21 @@
 
         var min = bbox.min._data;
         var max = bbox.max._data;
-
-        var center = vec3.scale(vec3.add(min, max, vec3.create()), 0.5);
-        var extend = vec3.scale(vec3.subtract(max, min, vec3.create()), 0.5);
-
-        mat4.toRotationMat(gmatrix, absMat);
+    
+        var center = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.add(XML3D.math.vec3.create(), min, max), 0.5);
+        var extend = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.subtract(XML3D.math.vec3.create(), max, min), 0.5);
+    
+        XML3D.math.mat4.copy(absMat, gmatrix);
+        absMat.set([0, 0, 0, 1], 12)
         for ( var i = 0; i < 16; i++) {
             absMat[i] = Math.abs(absMat[i]);
         }
-        mat4.multiplyVec3(absMat, extend);
-        mat4.multiplyVec3(gmatrix, center);
-
-        vec3.add(center, extend, bbox.max._data);
-        vec3.subtract(center, extend, bbox.min._data);
+    
+        XML3D.math.vec3.transformMat4(extend, extend, absMat);
+        XML3D.math.vec3.transformMat4(center, center, gmatrix);
+    
+        XML3D.math.vec3.add(bbox.max._data, center, extend);
+        XML3D.math.vec3.subtract(bbox.min._data, center, extend);
     };
 
 
@@ -328,7 +330,7 @@
      */    
     function mapVec(v1, v2, f)
     {
-        var vec = vec3.create(); 
+        var vec = XML3D.math.vec3.create(); 
         vec[0] = f(v1[0], v2[0]); 
         vec[1] = f(v1[1], v2[1]);
         vec[2] = f(v1[2], v2[2]); 
@@ -343,10 +345,10 @@
      * @param {mat4} trafo
      */
     XML3D.webgl.adjustMinMax = function(bbox, min, max, trafo) {
-        var xfmmin = vec3.create();
-        var xfmmax = vec3.create();
-        mat4.multiplyVec3(trafo, bbox.min._data, xfmmin);
-        mat4.multiplyVec3(trafo, bbox.max._data, xfmmax);
+        var xfmmin = XML3D.math.vec3.create();
+        var xfmmax = XML3D.math.vec3.create();
+        XML3D.math.vec3.transformMat4(xfmmin, bbox.min._data, trafo);
+        XML3D.math.vec3.transformMat4(xfmmax, bbox.max._data, trafo);
         
         /* bounding box is axis-aligned, but through transformation
          * min and max values might be shuffled (image e.g. a rotation (0, 1, 0, 1.57), 

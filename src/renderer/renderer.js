@@ -78,7 +78,7 @@ var TraversalState = function(parent) {
     parent = parent || {};
     this.visible = parent.visible || true;
     this.pickable = parent.pickable || true;
-    this.transform = parent.transform ? mat4.create(parent.transform) : mat4.identity(mat4.create());
+    this.transform = parent.transform ? XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform) : XML3D.math.mat4.identity(XML3D.math.mat4.create());
     this.shader = parent.shader || null;
 };
 
@@ -91,7 +91,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
     switch(currentNode.nodeName) {
     case "group":
         adapter.parentVisible = parent.visible;
-        adapter.parentTransform = mat4.create(parent.transform);
+        adapter.parentTransform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
         adapter.parentShaderHandle = parent.shader;
 
         downstream.visible = parent.visible && currentNode.visible;
@@ -102,7 +102,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         if (shaderHandle)
             downstream.shader = shaderHandle;
 
-        downstream.transform = adapter.applyTransformMatrix(mat4.identity(mat4.create()));
+        downstream.transform = adapter.applyTransformMatrix(XML3D.math.mat4.identity(XML3D.math.mat4.create()));
         break;
 
     case "mesh":
@@ -129,14 +129,14 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         break;
 
     case "light":
-        adapter.transform = mat4.create(parent.transform);
+        adapter.transform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
         adapter.visible = parent.visible && currentNode.visible;
 		adapter.addLight(this.lights);
 
         break;
 
     case "view":
-        adapter.parentTransform = mat4.create(parent.transform);
+        adapter.parentTransform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
         adapter.updateViewMatrix();
         break;
     default:
@@ -223,7 +223,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     var visible = target.visible;
 
     var parentNode = target.parentElement;
-    var parentTransform = mat4.identity(mat4.create());
+    var parentTransform = XML3D.math.mat4.identity(XML3D.math.mat4.create());
     if(parentNode && parentNode.nodeName == "group")
     {
         var parentAdapter = this.factory.getAdapter(parentNode);
@@ -333,8 +333,8 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
             var obj = tempArray[i];
             var trafo = obj.transform;
             var center = obj.mesh.bbox.center()._data;
-            center = mat4.multiplyVec4(trafo, quat4.create([center[0], center[1], center[2], 1.0]));
-            center = mat4.multiplyVec4(xform.view, quat4.create([center[0], center[1], center[2], 1.0]));
+            center = XML3D.math.vec4.transformMat4(XML3D.math.vec4.create(), [center[0], center[1], center[2], 1.0], trafo);
+            center = XML3D.math.vec4.transformMat4(XML3D.math.vec4.create(), [center[0], center[1], center[2], 1.0], xform.view);
             tempArray[i] = [ obj, center[2] ];
         }
 
@@ -351,9 +351,10 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
 
 };
 
-var tmpModelView = mat4.create();
-var tmpModelViewProjection = mat4.create();
-var identMat3 = mat3.identity(mat3.create());
+var tmpModelView = XML3D.math.mat4.create();
+var tmpModelViewProjection = XML3D.math.mat4.create();
+var identMat3 = XML3D.math.mat3.identity(XML3D.math.mat3.create());
+var identMat4 = XML3D.math.mat4.identity(XML3D.math.mat4.create());
 
 Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, stats) {
     var objCount = 0;
@@ -377,6 +378,12 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         parameters["spotLightVisibility[0]"] = lights.spot.visibility;
         parameters["spotLightDirection[0]"] = lights.spot.direction;
         parameters["spotLightCosFalloffAngle[0]"] = lights.spot.falloffAngle.map(Math.cos);
+
+        var softFalloffAngle = lights.spot.falloffAngle.slice();
+        for(var i = 0; i < softFalloffAngle.length; i++)
+            softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - lights.spot.softness[i]);
+        parameters["spotLightCosSoftFalloffAngle[0]"] = softFalloffAngle.map(Math.cos);
+
         parameters["spotLightSoftness[0]"] = lights.spot.softness;
         shader.needsLights = false;
     }
@@ -402,13 +409,17 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
             continue;
 
         xform.model = transform;
-        xform.modelView = mat4.multiply(this.camera.viewMatrix, xform.model, tmpModelView);
+        xform.modelView = XML3D.math.mat4.multiply(tmpModelView, this.camera.viewMatrix, xform.model);
         parameters["modelMatrix"] = xform.model;
         parameters["modelViewMatrix"] = xform.modelView;
-        parameters["modelViewProjectionMatrix"] = mat4.multiply(this.camera.projMatrix, xform.modelView, tmpModelViewProjection);
-        var normalMatrix = mat4.toInverseMat3(xform.modelView);
-        parameters["normalMatrix"] = normalMatrix ? mat3.transpose(normalMatrix) : identMat3;
-
+        parameters["modelViewProjectionMatrix"] = XML3D.math.mat4.multiply(tmpModelViewProjection, this.camera.projMatrix, xform.modelView);
+        var normalMatrix = XML3D.math.mat4.invert(XML3D.math.mat4.create(), xform.modelView);
+        normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : identMat4;
+        parameters["normalMatrix"] = XML3D.math.mat3.copy(XML3D.math.mat3.create(),
+          [normalMatrix[0], normalMatrix[1], normalMatrix[2],
+          normalMatrix[4], normalMatrix[5], normalMatrix[6],
+          normalMatrix[8], normalMatrix[9], normalMatrix[10]]);
+    
         this.shaderManager.setUniformVariables(shader, parameters);
         triCount += this.drawObject(shader, mesh);
         objCount++;
@@ -513,7 +524,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 
     var viewMatrix = this.camera.viewMatrix;
     var projMatrix = this.camera.getProjectionMatrix(fbo.width / fbo.height);
-    var mvp = mat4.create();
+    var mvp = XML3D.math.mat4.create();
 
     var shader = this.shaderManager.getShaderById("pickobjectid");
     this.shaderManager.bindShader(shader);
@@ -529,8 +540,8 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 
         var parameters = {};
 
-        mat4.multiply(viewMatrix, transform, mvp);
-        mat4.multiply(projMatrix, mvp, mvp);
+        XML3D.math.mat4.multiply(mvp, viewMatrix, transform);
+        XML3D.math.mat4.multiply(mvp, projMatrix, mvp);
 
         var objId = j+1;
         var c1 = objId & 255;
@@ -622,12 +633,16 @@ Renderer.prototype.renderPickedNormals = function(pickedObj) {
     xform.model = transform;
     xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
-    var normalMatrix = mat4.toInverseMat3(transform);
+    var normalMatrix = XML3D.math.mat4.invert(XML3D.math.mat4.create(), transform);
+    normalMatrix = XML3D.math.mat3.copy(XML3D.math.mat3.create(),
+      [normalMatrix[0], normalMatrix[1], normalMatrix[2],
+      normalMatrix[4], normalMatrix[5], normalMatrix[6],
+      normalMatrix[8], normalMatrix[9], normalMatrix[10]]);
 
     var parameters = {
         modelViewMatrix : transform,
         modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
-        normalMatrix : normalMatrix ? mat3.transpose(normalMatrix) : identMat3
+        normalMatrix : normalMatrix ? XML3D.math.mat3.transpose(normalMatrix, normalMatrix) : identMat3
     };
 
     this.shaderManager.setUniformVariables(shader, parameters);
@@ -637,7 +652,7 @@ Renderer.prototype.renderPickedNormals = function(pickedObj) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 };
 
-var pickVector = vec3.create();
+var pickVector = XML3D.math.vec3.create();
 var data = new Uint8Array(8);
 
 /**
@@ -705,7 +720,7 @@ Renderer.prototype.readNormalFromPickingBuffer = function(glX, glY){
         pickVector[1] = data[1] / 254;
         pickVector[2] = data[2] / 254;
 
-        pickVector = vec3.subtract(vec3.scale(pickVector, 2.0), vec3.create([ 1, 1, 1 ]));
+        pickVector = XML3D.math.vec3.subtract(XML3D.math.vec3.create(), XML3D.math.vec3.scale(XML3D.math.vec3.create(), pickVector, 2.0), [ 1, 1, 1 ]);
 
         return pickVector;
     }
@@ -727,9 +742,9 @@ Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
         pickVector[1] = data[1] / 255;
         pickVector[2] = data[2] / 255;
 
-        var result = vec3.subtract(this.bbMax, this.bbMin, vec3.create());
-        result = vec3.create([ pickVector[0]*result[0], pickVector[1]*result[1], pickVector[2]*result[2] ]);
-        vec3.add(result, this.bbMin, result);
+        var result = XML3D.math.vec3.subtract(XML3D.math.vec3.create(), this.bbMax, this.bbMin);
+        result = XML3D.math.vec3.fromValues(pickVector[0]*result[0], pickVector[1]*result[1], pickVector[2]*result[2]);
+        XML3D.math.vec3.add(result, this.bbMin, result);
 
         return result;
     }

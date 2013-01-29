@@ -57,9 +57,9 @@
     XML3D.createClass(XML3D.webgl.LightShaderRenderAdapter, XML3D.webgl.RenderAdapter);
 
     /** @const */
-    var LIGHT_DEFAULT_INTENSITY = vec3.create([1,1,1]);
+    var LIGHT_DEFAULT_INTENSITY = XML3D.math.vec3.fromValues(1,1,1);
     /** @const */
-    var LIGHT_DEFAULT_ATTENUATION = vec3.create([0,0,1]);
+    var LIGHT_DEFAULT_ATTENUATION = XML3D.math.vec3.fromValues(0,0,1);
     /** @const */
     var SPOTLIGHT_DEFAULT_FALLOFFANGLE = Math.PI / 4.0;
     /** @const */

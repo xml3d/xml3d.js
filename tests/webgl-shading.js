@@ -307,7 +307,7 @@ test("Diffuse shader", 4, function() {
     var testFunc = function() {
         var actual = win.getPixelValue(gl, 88, 140);
         var diffuse = [ 1, 0.2, 0.3, 255 ];
-        diffuse = vec3.scale(diffuse, 0.8 * 255);
+        diffuse = XML3D.math.vec3.scale(diffuse, diffuse, 0.8 * 255);
         QUnit.closePixel(actual, diffuse, 1, "Simple Diffuse");
 
         actual = win.getPixelValue(gl, 150, 140);
@@ -333,7 +333,7 @@ test("Phong shader", 4, function() {
     var testFunc = function() {
         var actual = win.getPixelValue(gl, 88, 50);
         var diffuse = [ 1, 0.2, 0.3, 255 ];
-        diffuse = vec3.scale(diffuse, 0.8 * 255);
+        diffuse = XML3D.math.vec3.scale(diffuse, diffuse, 0.8 * 255);
         QUnit.closePixel(actual, diffuse, 1, "Simple Diffuse");
 
         actual = win.getPixelValue(gl, 150, 50);

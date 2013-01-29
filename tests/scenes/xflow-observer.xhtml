@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="400px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+      <data id="baseData" >
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3>
+        <float3 name="posAdd1">-0.5 0 0  0 0 0 -1 0 0  0 0 0</float3>
+        <float3 name="posAdd2">0 0 0  0.5 0 0  0 0 0  1 0 0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      </data>
+
+      <shader id="pink" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">1 0 1</float3>
+      </shader>
+
+      <data id="morphDouble" >
+        <data compute="position = xflow.morph(position, posAdd2, weight2)" >
+          <data compute="position = xflow.morph(position, posAdd1, weight1)" >
+            <data src="#baseData" />
+            <float name="weight1" id="doubleWeight1" >0</float>
+            <float name="weight2" id="doubleWeight2" >1</float>
+          </data>
+        </data>
+      </data>
+
+      <data id="morphSingle" >
+        <data compute="position = xflow.morph(position, posAdd1, weight)" >
+          <data src="#baseData" />
+          <float name="weight" id="singleWeight" >0.3</float>
+        </data>
+      </data>
+
+    </defs>
+    <group id="meshGroup" >
+      <mesh id="myMesh02" >
+        <data src="#morphDouble" />
+      </mesh>
+    </group>
+  </xml3d>
+</body>
+</html>

@@ -56,7 +56,7 @@ Xflow.registerOperator("slerpKeys", {
         }
         else{
             var weight = (key - keys[idx]) / (keys[idx+1] - keys[idx]);
-            quat4.slerpOffset(  values, idx*4,
+            XML3D.math.quat.slerpOffset(  values, idx*4,
                 values,(idx+1)*4, weight,
                 result, 0, true);
         }

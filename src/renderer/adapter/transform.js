@@ -102,12 +102,12 @@
             );
         }
 
-        this.matrix = mat4.create();
+        this.matrix = XML3D.math.mat4.create();
 
         var dataResult =  this.transformRequest.getResult();
         var transformData = (dataResult.getOutputData("transform") && dataResult.getOutputData("transform").getValue());
         if(!transformData){
-            this.matrix = mat4.create();
+            this.matrix = XML3D.math.mat4.create();
             return;
         }
         for(var i = 0; i < 16; ++i){

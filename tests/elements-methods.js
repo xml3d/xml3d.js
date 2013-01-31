@@ -72,7 +72,13 @@ test("view interface test", function() {
     equal(node.lookAt(new XML3DVec3(1, 0, 0)), undefined, "view::lookAt returns nothing");
     ok(node.getDirection() instanceof XML3DVec3, "view::getDirection returns XML3DVec3");
     ok(node.getUpVector() instanceof XML3DVec3, "view::getUpVector returns XML3DVec3");
+});
+test("data interface test", function() {
+    var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "data");
+    ok(node);
 
+    ok(node.getResult() instanceof XML3DDataResult, "data::getResult returns XML3DDataResult");
+    ok(node.getOutputNames() instanceof Array, "data::getOutputNames returns an Array");
 });
 
 

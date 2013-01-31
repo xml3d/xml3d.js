@@ -71,6 +71,17 @@ XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
     return new Xflow.ComputeRequest(this.xflowDataNode, filter, callback);
 }
 
+XML3D.data.DataAdapter.prototype.getComputeResult = function(filter)
+{
+    var result = this.xflowDataNode._getComputeResult(filter);
+    return result;
+}
+
+XML3D.data.DataAdapter.prototype.getOutputNames = function()
+{
+    return this.xflowDataNode.getOutputNames();
+}
+
 /**
  * The notifyChanged() method is called by the XML3D data structure to
  * notify the DataAdapter about data changes (DOM mustation events) in its

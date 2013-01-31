@@ -11,7 +11,7 @@
         <file name="box.js" />
         <file name="matrix.js" />
         <file name="ray.js" />
-        <file name="xflow-observer.js" />
+        <file name="data-observer.js" />
     </filelist>
 
     <target name="concat">

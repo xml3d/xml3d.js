@@ -714,10 +714,10 @@ test("XML3DBox::set", function()  {
 
 
 //============================================================================
-//--- XflowObserver ---
+//--- XML3DDataObserver ---
 //============================================================================
 
-module("XflowObserver tests", {
+module("XML3DDataObserver tests", {
     setup : function() {
         stop();
         var that = this;
@@ -727,7 +727,7 @@ module("XflowObserver tests", {
             that.window = document.getElementById("xml3dframe").contentWindow;
             start();
         };
-        loadDocument("scenes/xflow-observer.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/xml3d-observer.xhtml"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -738,7 +738,7 @@ module("XflowObserver tests", {
 
 test("Observe data disconnected from scene graph", function() {
 
-    ok(this.window.XflowObserver, "XflowObserver is defined");
+    ok(this.window.XML3DDataObserver, "XML3DDataObserver is defined");
 
 
     var xTest = this.doc.getElementById("myXml3d"),
@@ -752,23 +752,23 @@ test("Observe data disconnected from scene graph", function() {
 
         testNumber++;
         if(testNumber == 1){
-            ok(result["position"], "There is a position field.");
-            ok(!result["normal"], "There is no normal field.");
-            QUnit.closeArray(result["position"],
+            ok(result.get("position"), "There is a position field.");
+            ok(!result.get("normal"), "There is no normal field.");
+            QUnit.closeArray(result.get("position").value,
                 new Float32Array([-1, -1, -10,    1, -1, -10,   -1, 1, -10,   1, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
             self.doc.getElementById("singleWeight").firstChild.nodeValue = "0.5";
         }
         if(testNumber == 2){
-            QUnit.closeArray(result["position"],
+            QUnit.closeArray(result.get("position").value,
                 new Float32Array([-1.25, -1, -10,    1, -1, -10,   -1.5, 1, -10,   1, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
             self.doc.getElementById("singleWeight").firstChild.nodeValue = "1";
         }
         if(testNumber == 3){
-            QUnit.closeArray(result["position"],
+            QUnit.closeArray(result.get("position").value,
                 new Float32Array([-1.5, -1, -10,    1, -1, -10,   -2, 1, -10,   1, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
@@ -776,13 +776,12 @@ test("Observe data disconnected from scene graph", function() {
             self.doc.getElementById("singleWeight").firstChild.nodeValue = "0";
             window.setTimeout(function(){
                 ok(testNumber == 3, "Callback was not called after observer was disconnected");
-
                 start();
             }, 200);
         }
     };
 
-    var observer = new this.window.XflowObserver(callback);
+    var observer = new this.window.XML3DDataObserver(callback);
     observer.observe(this.doc.getElementById("morphSingle"), {names: "position" });
 
 
@@ -804,10 +803,10 @@ test("Observe data connected to scene graph", function() {
 
         testNumber++;
         if(testNumber == 1){
-            ok(result["position"], "There is a position field.");
-            ok(!result["normal"], "There is no normal field.");
+            ok(result.get("position"), "There is a position field.");
+            ok(!result.get("normal"), "There is no normal field.");
 
-            QUnit.closeArray(result["position"],
+            QUnit.closeArray(result.get("position").value,
                 new Float32Array([-1.5, -1, -10,    1.5, -1, -10,   -2, 1, -10,   2, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
@@ -825,7 +824,7 @@ test("Observe data connected to scene graph", function() {
         }
     }
 
-    var observer = new this.window.XflowObserver(callback);
+    var observer = new this.window.XML3DDataObserver(callback);
     observer.observe( this.doc.getElementById("morphDouble"), {names: "position" } );
     xTest.addEventListener("framedrawn", onFrameDrawn);
 

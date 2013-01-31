@@ -105,6 +105,12 @@
         }
     }
 
+    ChannelNode.prototype.getOutputNames = function(){
+        this.synchronize();
+        this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
+        return this.finalOutputChannels.getNames();
+    }
+
     ChannelNode.prototype.getComputeResult = function(filter){
         this.synchronize();
         this.getSubstitutionNode(null); // create emptySubstitutionNode if not available

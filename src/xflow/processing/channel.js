@@ -47,6 +47,16 @@
     var ChannelMap = Xflow.ChannelMap;
 
 
+    ChannelMap.prototype.getNames = function()
+    {
+        var result = [];
+        for(var name in this.map){
+            result.push(name);
+        }
+        return result;
+    }
+
+
     ChannelMap.prototype.getChannel = function(name, substitution)
     {
         if(!this.map[name])
@@ -234,9 +244,8 @@
 
     /**
      * @constructor
-     * @param {Xflow.ChannelMap} owner Owner of the channel - always a DataNode
+     * @param {Xflow.ChannelMap} map Owner of the channel
      * @param {Xflow.DataSlot=} dataEntry Optional DataEntry added to the channel
-     * @param {number=} key Optional key of the added DataEntry
      */
     Xflow.Channel = function(map, dataSlot){
         this.entries = [];

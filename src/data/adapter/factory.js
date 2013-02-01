@@ -85,15 +85,6 @@
         return null;
     };
 
-    XML3DDataAdapterFactory.prototype.addDataChangeListener = function(node)
-    {
-        if(!uri) {
-            return new XML3D.base.AdapterHandle();
-        }
-        var a = XML3D.base.resourceManager.getAdapterHandle(node.ownerDocument, uri, XML3D.data);
-        return a;
-    };
-
     // Export
     XML3D.data.XML3DDataAdapterFactory = XML3DDataAdapterFactory;
     XML3D.data.factory = new XML3DDataAdapterFactory();

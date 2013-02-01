@@ -219,7 +219,7 @@ new (function() {
         if(dataAdapter){
             var result = dataAdapter.getComputeResult(filter);
             if(!result) return null;
-            return new XML3DDataResult(result);
+            return new window.XML3DDataResult(result);
         }
         return null;
     };
@@ -229,7 +229,7 @@ new (function() {
         if(dataAdapter){
             var result = dataAdapter.getOutputChannelInfo(name);
             if(!result) return null;
-            return new XML3DDataChannelInfo(result.type, result.origin, result.originalName,
+            return new window.XML3DDataChannelInfo(result.type, result.origin, result.originalName,
                 result.seqLength, result.seqMinKey, result.seqMaxKey);
         }
         return null;

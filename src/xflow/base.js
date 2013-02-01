@@ -139,3 +139,10 @@ Xflow.EXTRACT = {
     TEX_WIDTH: 1,
     TEX_HEIGHT: 2
 };
+
+Xflow.ORIGIN = {
+    CHILD: 1,
+    COMPUTE: 2,
+    PROTO: 3
+};
+

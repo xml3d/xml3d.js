@@ -61,6 +61,38 @@
         </data>
       </data>
 
+
+      <data id="simpleSequence" >
+        <int name="A" key="0.4" >1</int>
+        <int name="A" key="1.5" >2</int>
+        <int name="A" key="3.5" >3</int>
+      </data>
+
+      <data id="simpleRenaming" filter="rename({pos: position, norm: normal})" >
+        <data src="#baseData" />
+      </data>
+
+
+      <data id="simpleCompute" compute="position = xflow.morph(position, posAdd1, weight)" >
+        <data src="#combinedData" />
+        <float name="weight" >0</float>
+      </data>
+
+
+      <proto id="simpleProto" compute="position = xflow.morph(position, posAdd, weight)" >
+        <float3 name="position" param="true" ></float3>
+        <float3 name="posAdd" param="true" ></float3>
+        <float3 name="weight" param="true" ></float3>
+      </proto>
+
+      <data id="simpleProtoInstance" proto="#simpleProto"
+            compute="posAdd = xflow.morph(posAdd1, posAdd2, subWeight)" >
+        <data src="#combinedData" />
+        <float name="weight" >1</float>
+        <float name="subWeight" >0.5</float>
+      </data>
+
+
       <shader id="pink" script="urn:xml3d:shader:flat">
         <float3 name="diffuseColor">1 0 1</float3>
       </shader>

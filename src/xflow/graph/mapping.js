@@ -93,6 +93,13 @@ OrderMapping.prototype.getScriptOutputName = function(index, srcName){
     else
         return null;
 };
+OrderMapping.prototype.getScriptOutputNameInv = function(destName, operatorOutputs){
+    var index = this._names.indexOf(destName);
+    if(index == -1)
+        return null;
+    return operatorOutputs[index].name;
+};
+
 OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
     var index = 0;
     for(var i in sourceMap){
@@ -104,6 +111,9 @@ OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
             break;
     }
 };
+OrderMapping.prototype.getRenameSrcName = function(name){
+    return name;
+}
 
 
 OrderMapping.prototype.filterNameset = function(nameset, filterType)
@@ -226,12 +236,23 @@ NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, des
     }
 };
 
+NameMapping.prototype.getRenameSrcName = function(name){
+    return this.getSrcNameFromDestName(name) || name;
+}
+
 NameMapping.prototype.getScriptInputName= function(index, destName){
     return this.getSrcNameFromDestName(destName);
 }
 NameMapping.prototype.getScriptOutputName = function(index, srcName){
     return this.getDestNameFromSrcName(srcName);
 }
+
+NameMapping.prototype.getScriptOutputNameInv = function(destName, operatorOutputs){
+    var index = this._destNames.indexOf(destName);
+    if(index == -1)
+        return null;
+    return this._srcNames[index];
+};
 
 NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
     for(var i in this._destNames){

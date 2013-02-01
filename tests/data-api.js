@@ -104,3 +104,42 @@ test("Access Results", function() {
 
 });
 
+
+test("Access Output ChannelInfo", function() {
+    var channelInfo = this.doc.getElementById("baseData").getOutputChannelInfo("position");
+    ok(channelInfo instanceof this.window.XML3DDataChannelInfo, "Channel info is of type XML3DDataChannelInfo");
+
+    equal(channelInfo.type, XML3DDataEntry.FLOAT3, "Type of 'position' channel info is float3");
+    equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_CHILD, "Origin of 'position' channel info is ORIGIN_CHILD");
+    equal(channelInfo.originalName, "position", "Original name of 'position' channel info is 'position'");
+    equal(channelInfo.seqLength, 1, "Sequence length of 'position' channel info is 1");
+    equal(channelInfo.seqMinKey, 0, "Minimum Key of 'position' channel info is 0");
+    equal(channelInfo.seqMaxKey, 0, "Maximum Key of 'position' channel info is 0");
+
+    channelInfo = this.doc.getElementById("simpleSequence").getOutputChannelInfo("A");
+    equal(channelInfo.seqLength, 3, "Sequence length of 'A' channel info is 3");
+    equal(channelInfo.seqMinKey, 0.4, "Minimum Key of 'A' channel info is 0.4");
+    equal(channelInfo.seqMaxKey, 3.5, "Maximum Key of 'A' channel info is 3.5");
+
+    channelInfo = this.doc.getElementById("simpleRenaming").getOutputChannelInfo("pos");
+    equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_CHILD, "Origin of 'pos' channel info is ORIGIN_CHILD");
+    equal(channelInfo.originalName, "position", "Original name of 'pos' channel info is 'position'");
+
+    channelInfo = this.doc.getElementById("simpleRenaming").getOutputChannelInfo("index");
+    equal(channelInfo.type, XML3DDataEntry.INT, "Type of 'index' channel info is int");
+    equal(channelInfo.originalName, "index", "Original name of 'index' channel info is 'index'");
+
+    channelInfo = this.doc.getElementById("simpleCompute").getOutputChannelInfo("position");
+    equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_COMPUTE, "Origin of 'position' channel info is ORIGIN_COMPUTE");
+    channelInfo = this.doc.getElementById("simpleCompute").getOutputChannelInfo("posAdd1");
+    equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_CHILD, "Origin of 'posAdd1' channel info is ORIGIN_CHILD");
+
+    channelInfo = this.doc.getElementById("simpleProtoInstance").getOutputChannelInfo("position");
+    equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_PROTO, "Origin of 'position' channel info is ORIGIN_PROTO");
+    channelInfo = this.doc.getElementById("simpleProtoInstance").getOutputChannelInfo("posAdd");
+    equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_COMPUTE, "Origin of 'posAdd' channel info is ORIGIN_COMPUTE");
+    channelInfo = this.doc.getElementById("simpleProtoInstance").getOutputChannelInfo("posAdd1");
+    equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_CHILD, "Origin of 'posAdd1' channel info is ORIGIN_CHILD");
+
+});
+

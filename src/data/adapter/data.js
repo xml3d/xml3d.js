@@ -82,6 +82,11 @@ XML3D.data.DataAdapter.prototype.getOutputNames = function()
     return this.xflowDataNode.getOutputNames();
 }
 
+XML3D.data.DataAdapter.prototype.getOutputChannelInfo = function(name)
+{
+    return this.xflowDataNode.getOutputChannelInfo(name);
+}
+
 /**
  * The notifyChanged() method is called by the XML3D data structure to
  * notify the DataAdapter about data changes (DOM mustation events) in its

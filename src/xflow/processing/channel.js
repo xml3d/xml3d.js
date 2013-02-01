@@ -158,6 +158,7 @@
 
     Xflow.ChannelMap.Entry = function(){
         this.protoNames = [];
+        this.origins = 0;
         this.channels = {};
     };
 
@@ -278,6 +279,16 @@
         }
         this.entries.push(dataSlot);
     };
+
+    Channel.prototype.getSequenceLength = function(){
+        return this.entries.length;
+    }
+    Channel.prototype.getSequenceMinKey = function(){
+        return this.entries[0].key;
+    }
+    Channel.prototype.getSequenceMaxKey = function(){
+        return this.entries[this.entries.length - 1].key;
+    }
 
     Channel.prototype.getType = function(){
         if(this.entries.length == 0)

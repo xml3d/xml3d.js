@@ -143,6 +143,20 @@
     XML3DDataEntry.BOOL = 20;
     XML3DDataEntry.TEXTURE = 30;
 
+    var XML3DDataChannelInfo = function(type, origin, originalName, seqLength, seqMinKey, seqMaxKey){
+        this.type = getXML3DDataType(type);
+        this.origin = origin;
+        this.originalName = originalName;
+        this.seqLength = seqLength;
+        this.seqMinKey = seqMinKey;
+        this.seqMaxKey = seqMaxKey;
+    }
+    window.XML3DDataChannelInfo = XML3DDataChannelInfo;
+
+    XML3DDataChannelInfo.ORIGIN_CHILD = 1;
+    XML3DDataChannelInfo.ORIGIN_COMPUTE = 2;
+    XML3DDataChannelInfo.ORIGIN_PROTO = 3;
+
 
 
 }(XML3D._native));

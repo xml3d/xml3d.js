@@ -416,6 +416,10 @@ DataNode.prototype.getOutputNames = function(){
     return this._channelNode.getOutputNames();
 }
 
+DataNode.prototype.getOutputChannelInfo = function(name){
+    return (getForwardNode(this) || this)._channelNode.getOutputChannelInfo(name);
+}
+
 DataNode.prototype._getComputeResult = function(filter){
     var forwardNode = getForwardNode(this);
     if(forwardNode){

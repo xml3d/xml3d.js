@@ -45,21 +45,6 @@
     };
     XML3D.createClass(XML3DDataAdapterFactory, XML3D.base.NodeAdapterFactory);
 
-    /**
-     * Tries to create an adapter from an URI
-     *
-     * @param {string} uri
-     * @returns {Adapter} An resolved adapter
-     */
-    XML3DDataAdapterFactory.prototype.getAdapterURI = function(node, uri)
-    {
-        if(!uri) {
-            return new XML3D.base.AdapterHandle();
-        }
-        var a = XML3D.base.resourceManager.getAdapterHandle(node.ownerDocument, uri, XML3D.data);
-        return a;
-    };
-
 
     var data = XML3D.data, reg = {};
 
@@ -98,6 +83,15 @@
         }
         XML3D.debug.logWarning("Not supported as data element: " + node.localName);
         return null;
+    };
+
+    XML3DDataAdapterFactory.prototype.addDataChangeListener = function(node)
+    {
+        if(!uri) {
+            return new XML3D.base.AdapterHandle();
+        }
+        var a = XML3D.base.resourceManager.getAdapterHandle(node.ownerDocument, uri, XML3D.data);
+        return a;
     };
 
     // Export

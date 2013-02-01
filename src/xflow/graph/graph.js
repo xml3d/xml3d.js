@@ -407,6 +407,18 @@ DataNode.prototype.notify = function(changeType, senderNode){
     }
 };
 
+DataNode.prototype.getOutputNames = function(){
+    var forwardNode = getForwardNode(this);
+    if(forwardNode){
+        return forwardNode.getOutputNames();
+    }
+
+    return this._channelNode.getOutputNames();
+}
+
+DataNode.prototype.getOutputChannelInfo = function(name){
+    return (getForwardNode(this) || this)._channelNode.getOutputChannelInfo(name);
+}
 
 DataNode.prototype._getComputeResult = function(filter){
     var forwardNode = getForwardNode(this);

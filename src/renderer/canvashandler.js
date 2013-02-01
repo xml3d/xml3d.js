@@ -92,6 +92,9 @@ XML3D.webgl.MAXFPS = 30;
         // is needed
         var handler = this;
         this.tick = function() {
+
+            XML3D.updateXflowObserver();
+
             if (handler.needDraw) {
                 handler.dispatchUpdateEvent();
                 handler.draw();

@@ -204,17 +204,55 @@ new (function() {
         return new window.XML3DMatrix();
     };
 
-    methods.dataGetOutputFieldNames = function() {
-        XML3D.debug.logError(this.nodeName + "::getOutputFieldNames is not implemeted yet.");
+    methods.dataGetOutputNames = function() {
+        var dataAdapter = XML3D.data.factory.getAdapter(this);
+        if(dataAdapter){
+            return dataAdapter.getOutputNames();
+        }
         return null;
     };
-    methods.protoGetOutputFieldNames = methods.dataGetOutputFieldNames;
+    methods.protoGetOutputNames = methods.dataGetOutputNames;
 
-    methods.dataGetResult = function() {
-        XML3D.debug.logError(this.nodeName + "::getResult is not implemeted yet.");
+    methods.dataGetResult = function(filter) {
+
+        var dataAdapter = XML3D.data.factory.getAdapter(this);
+        if(dataAdapter){
+            var result = dataAdapter.getComputeResult(filter);
+            if(!result) return null;
+            return new XML3DDataResult(result);
+        }
         return null;
     };
-    methods.protoGetResult = methods.dataGetResult;
+
+    methods.dataGetOutputChannelInfo = function(name){
+        var dataAdapter = XML3D.data.factory.getAdapter(this);
+        if(dataAdapter){
+            var result = dataAdapter.getOutputChannelInfo(name);
+            if(!result) return null;
+            return new XML3DDataChannelInfo(result.type, result.origin, result.originalName,
+                result.seqLength, result.seqMinKey, result.seqMaxKey);
+        }
+        return null;
+    }
+    methods.protoGetOutputChannelInfo = methods.dataGetOutputChannelInfo;
+
+    methods.dataGetComputeInfo = function(){
+        XML3D.debug.logError(this.nodeName + "::getComputeInfo is not implemeted yet.");
+        return null;
+    }
+    methods.protoGetComputeInfo = methods.dataGetComputeInfo;
+
+    methods.dataGetProtoInfo = function(){
+        XML3D.debug.logError(this.nodeName + "::getProtoInfo is not implemeted yet.");
+        return null;
+    }
+    methods.protoGetProtoInfo = methods.dataGetProtoInfo;
+
+    methods.dataIsOutputConnected = function(){
+        XML3D.debug.logError(this.nodeName + "::isOutputConnected is not implemeted yet.");
+        return false;
+    }
+    methods.protoIsOutputConnected = methods.dataIsOutputConnected;
 
     // Export to xml3d namespace
     XML3D.extend(XML3D.methods, methods);

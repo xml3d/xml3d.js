@@ -105,6 +105,12 @@
         }
     }
 
+    ChannelNode.prototype.getOutputNames = function(){
+        this.synchronize();
+        this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
+        return this.finalOutputChannels.getNames();
+    }
+
     ChannelNode.prototype.getComputeResult = function(filter){
         this.synchronize();
         this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
@@ -114,6 +120,44 @@
             this.requestNodes[key] = new Xflow.RequestNode(this, filter);
         }
         return this.requestNodes[key].getResult(Xflow.RESULT_TYPE.COMPUTE);
+    }
+
+    ChannelNode.prototype.getOutputChannelInfo = function(name){
+        this.synchronize();
+        this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
+
+        var channel = this.finalOutputChannels.getChannel(name);
+        if(!channel)
+            return null;
+        var result = {
+            type: channel.getType(),
+            seqLength: channel.getSequenceLength(),
+            seqMinKey: channel.getSequenceMinKey(),
+            seqMaxKey: channel.getSequenceMaxKey(),
+            origin: 0,
+            originalName: ""
+        }
+        var preFilterName = this.owner._filterMapping.getRenameSrcName(name);
+        var dataEntry = channel.getDataEntry();
+        if(this.owner._protoNode){
+            var protoInputChannel = this.protoInputChannels.getChannel(preFilterName);
+            if(!protoInputChannel || dataEntry != protoInputChannel.getDataEntry()){
+                result.origin = Xflow.ORIGIN.PROTO;
+                result.originalName = preFilterName;
+                return result;
+            }
+        }
+        if(this.operator){
+            var inputChannel = this.inputChannels.getChannel(preFilterName);
+            if(!inputChannel || dataEntry != inputChannel.getDataEntry()){
+                result.origin = Xflow.ORIGIN.COMPUTE;
+                result.originalName = this.owner._computeOutputMapping.getScriptOutputNameInv(preFilterName, this.operator.outputs);
+                return result;
+            }
+        }
+        result.origin = Xflow.ORIGIN.CHILD;
+        result.originalName = preFilterName;
+        return result;
     }
 
     function synchronizeChildren(channelNode, dataNode){

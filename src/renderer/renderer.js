@@ -76,8 +76,8 @@ Renderer.prototype.initCamera = function() {
 
 var TraversalState = function(parent) {
     parent = parent || {};
-    this.visible = parent.visible || true;
-    this.pickable = parent.pickable || true;
+    this.visible = parent.visible !== undefined ? parent.visible : true;
+    this.pickable = parent.pickable !== undefined ? parent.visible : true;
     this.transform = parent.transform ? XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform) : XML3D.math.mat4.identity(XML3D.math.mat4.create());
     this.shader = parent.shader || null;
 };
@@ -419,7 +419,7 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
           [normalMatrix[0], normalMatrix[1], normalMatrix[2],
           normalMatrix[4], normalMatrix[5], normalMatrix[6],
           normalMatrix[8], normalMatrix[9], normalMatrix[10]]);
-    
+
         this.shaderManager.setUniformVariables(shader, parameters);
         triCount += this.drawObject(shader, mesh);
         objCount++;

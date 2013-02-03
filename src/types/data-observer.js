@@ -105,8 +105,8 @@
             var name = result.outputNames[i];
             var entry = result.getOutputData(name);
             var value = entry && entry.getValue();
-            var type = getXML3DDataType(entry.type);
-            if(value !== null){
+            if (value !== null) {
+                var type = getXML3DDataType(entry.type);
                 dataResult._entries[name] = new XML3DDataEntry(type, value);
             }
         }
@@ -123,7 +123,7 @@
             case Xflow.DATA_TYPE.INT4 : return XML3DDataEntry.INT4;
             case Xflow.DATA_TYPE.BOOL : return XML3DDataEntry.BOOL;
             case Xflow.DATA_TYPE.TEXTURE : return XML3DDataEntry.TEXTURE;
-            default: throw "WHAT IS THIS I DON'T EVEN...";
+            default: throw new Error("WHAT IS THIS I DON'T EVEN...");
         }
     }
 

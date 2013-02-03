@@ -2,7 +2,15 @@
 
     var StateMachine = window.StateMachine;
 
+    // Entry:
+    // 1: WorldTransformation [16 floats]
+    var ENTRY_SIZE = 16;
+
     var RenderObjectHandler = function() {
+
+        this.page = new Float32Array(16000);
+        this.nextOffset = 0;
+
         this.remove = function(obj) {
             var index = this.ready.indexOf(obj);
             if (index == -1) {
@@ -64,26 +72,37 @@
             this.queue.slice().forEach(func, that);
             this.ready.slice().forEach(func, that);
         }
+
+        this.createPageEntry = function() {
+            var offset = this.nextOffset;
+            this.nextOffset += ENTRY_SIZE;
+            return { page: this.page, offset : offset};
+        }
+
+        this.createRenderObject = function(opt) {
+            var pageEntry = this.createPageEntry();
+            var renderObject = new RenderObject(this, pageEntry, opt);
+            return renderObject;
+        }
         this.clear();
     };
     /**
      * Represents a renderable object in the scene.
      *
-     * This object holds references to a mesh and shader stored in their respective managers, or in the
-     * case of XFlow a local instance of these objects, since XFlow may be applied differently to different
-     * instances of the same <data> element. It also holds the current transformation matrix for the object,
-     * a flag to indicate visibility (not visible = will not be rendered), and a callback function to be used by
-     * any adapters associated with this object (eg. the mesh adapter) to propagate changes (eg. when the
-     * parent group's shader is changed).
-     *
      * @constructor
+     * @param {RenderObjectHandler} handler
+     * @param {Object} pageEntry
+     * @param {Object} opt
      */
-    var RenderObject = function (opt) {
-        this.handler = opt.handler;
+    var RenderObject = function (handler, pageEntry, opt) {
+        console.log(pageEntry);
+        this.handler = handler;
+        this.page = pageEntry.page;
+        this.offset = pageEntry.offset;
         this.meshAdapter = opt.meshAdapter;
         this.shaderAdapter = null;
         this.shader = opt.shader || null;
-        this.transform = opt.transform || RenderObject.IDENTITY_MATRIX;
+        this.setTransformation(opt.transform || RenderObject.IDENTITY_MATRIX);
         this.visible = opt.visible !== undefined ? opt.visible : true;
         this.meshAdapter.renderObject = this;
         /** {Object?} **/
@@ -141,7 +160,21 @@
         }
     };
 
-    /**
+   RenderObject.prototype.getTransformation = function(target) {
+        var o = this.offset;
+        //console.log("Set at offset: " + o, target);
+        for(var i = 0; i < 16; i++, o++) {
+            target[i] = this.page[o];
+        }
+    };
+
+    RenderObject.prototype.setTransformation = function(source) {
+        var o = this.offset;
+        for(var i = 0; i < 16; i++, o++) {
+            this.page[o] = source[i];
+        }
+    };
+
      * @param {Xflow.Result} result
      */
     RenderObject.prototype.setOverride = function(result) {
@@ -157,6 +190,7 @@
         }
         XML3D.debug.logInfo("Shader attribute override", result, this.override);
     };
+
 
     StateMachine.create({
         target:RenderObject.prototype,

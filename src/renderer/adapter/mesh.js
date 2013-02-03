@@ -52,10 +52,13 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     var p = MeshRenderAdapter.prototype;
 
-    p.applyTransformMatrix = function(m) {
+    var c_tmpMatrix = XML3D.math.vec4.create();
 
-        if (this.renderObject.transform)
-            XML3D.math.mat4.multiply(m, m, this.renderObject.transform);
+    p.applyTransformMatrix = function(m) {
+        if (this.renderObject) {
+            this.renderObject.getTransformation(c_tmpMatrix);
+            XML3D.math.mat4.multiply(m, m, c_tmpMatrix);
+        }
 
         return m;
     };
@@ -86,7 +89,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         switch (target) {
             case "parenttransform":
-                this.renderObject.transform = evt.newValue;
+                this.renderObject.setTransformation(evt.newValue);
                 break;
 
             case "parentshader":
@@ -357,13 +360,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @return {window.XML3DMatrix}
      */
     p.getWorldMatrix = function() {
-
-        var m = new window.XML3DMatrix();
-
-        var obj = this.renderObject;
-        if(obj)
-            m._data.set(obj.transform);
-
+        var m = new window.XML3DMatrix(),
+            obj = this.renderObject;
+        if(obj) {
+            obj.getTransformation(m._data);
+        }
         return m;
     };
 

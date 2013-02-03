@@ -299,7 +299,7 @@ XML3D.webgl.MAXFPS = 30;
         try {
             var start = Date.now();
             this.renderer.prepareRendering();
-            var stats = this.renderer.render();
+            var stats = this.renderer.renderToCanvas();
             var end = Date.now();
 
             this.needDraw = false;

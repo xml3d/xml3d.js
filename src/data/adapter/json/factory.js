@@ -11,7 +11,9 @@
         "float3" : Float32Array,
         "float4" : Float32Array,
         "float4x4" : Float32Array,
-        "bool" : Uint8Array
+        "bool" : Uint8Array,
+        "byte" : Int8Array,
+        "ubyte" : Uint8Array
     };
 
     function createXflowInputs(dataNode, name, jsonData){

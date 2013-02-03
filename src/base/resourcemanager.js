@@ -169,6 +169,13 @@
             for(var i = 0; i < xml3dElements.length; ++i){
                 XML3D.config.element(xml3dElements[i]);
             }
+        } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
+            var buf = new ArrayBuffer(req.responseText.length);
+            var view = new Uint8Array(buf);
+            for (var i = 0; i < req.responseText.length; ++i) {
+                view[i] = req.responseText.charCodeAt(i) & 0xff;
+            }
+            docCache.response = buf;
         }
     }
 
@@ -222,6 +229,8 @@
             data = response;
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
             data = response.querySelectorAll("*[id="+fragment+"]")[0];
+        } else {
+            data = response; // for "application/octet-stream" and "text/plain; charset=x-user-defined"
         }
 
         if (data) {

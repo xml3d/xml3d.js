@@ -17,7 +17,9 @@ Xflow.DATA_TYPE = {
     INT : 20,
     INT4 : 21,
     BOOL: 30,
-    TEXTURE: 40
+    TEXTURE: 40,
+    BYTE : 50,
+    UBYTE : 60
 }
 
 Xflow.DATA_TYPE_TUPLE_SIZE = {};
@@ -30,6 +32,8 @@ Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.INT] = 1;
 Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.INT4] = 4;
 Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.BOOL] = 1;
 Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.TEXTURE] = 1;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.BYTE] = 1;
+Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.UBYTE] = 1;
 
 Xflow.DATA_TYPE_MAP = {
     'float' : Xflow.DATA_TYPE.FLOAT,
@@ -40,7 +44,9 @@ Xflow.DATA_TYPE_MAP = {
     'int' : Xflow.DATA_TYPE.INT,
     'int4' : Xflow.DATA_TYPE.INT4,
     'bool' : Xflow.DATA_TYPE.BOOL,
-    'texture' : Xflow.DATA_TYPE.TEXTURE
+    'texture' : Xflow.DATA_TYPE.TEXTURE,
+    'byte' : Xflow.DATA_TYPE.BYTE,
+    'ubyte' : Xflow.DATA_TYPE.UBYTE
 }
 
 Xflow.getTypeName = function(type){

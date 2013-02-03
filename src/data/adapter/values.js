@@ -5,6 +5,8 @@
     var BUFFER_TYPE_TABLE = {};
     BUFFER_TYPE_TABLE['float']    = Xflow.DATA_TYPE.FLOAT;
     BUFFER_TYPE_TABLE['int']      = Xflow.DATA_TYPE.INT;
+    BUFFER_TYPE_TABLE['byte']     = Xflow.DATA_TYPE.BYTE;
+    BUFFER_TYPE_TABLE['ubyte']    = Xflow.DATA_TYPE.UBYTE;
     BUFFER_TYPE_TABLE['bool']     = Xflow.DATA_TYPE.BOOL;
     BUFFER_TYPE_TABLE['float2']   = Xflow.DATA_TYPE.FLOAT2;
     BUFFER_TYPE_TABLE['float3']   = Xflow.DATA_TYPE.FLOAT3;

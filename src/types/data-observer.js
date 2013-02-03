@@ -130,6 +130,8 @@
             case Xflow.DATA_TYPE.INT4 : return XML3DDataEntry.INT4;
             case Xflow.DATA_TYPE.BOOL : return XML3DDataEntry.BOOL;
             case Xflow.DATA_TYPE.TEXTURE : return XML3DDataEntry.TEXTURE;
+            case Xflow.DATA_TYPE.BYTE : return XML3DDataEntry.BYTE;
+            case Xflow.DATA_TYPE.UBYTE : return XML3DDataEntry.UBYTE;
             default: throw new Error("WHAT IS THIS I DON'T EVEN...");
         }
     }
@@ -149,6 +151,8 @@
     XML3DDataEntry.INT4 = 11;
     XML3DDataEntry.BOOL = 20;
     XML3DDataEntry.TEXTURE = 30;
+    XML3DDataEntry.BYTE = 40;
+    XML3DDataEntry.UBYTE = 50;
 
     var XML3DDataChannelInfo = function(type, origin, originalName, seqLength, seqMinKey, seqMaxKey){
         this.type = getXML3DDataType(type);

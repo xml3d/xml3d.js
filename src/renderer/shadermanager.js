@@ -155,6 +155,7 @@
         program = material.getProgram(lights, dataTable);
 
         if (!program) {
+             XML3D.debug.logError("Unknown shader URI: " + scriptURI + ". Using default shader instead.");
             return "defaultShader";
         }
 

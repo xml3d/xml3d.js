@@ -313,14 +313,13 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
     var tempArray = [];
     for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
         var obj = sourceObjectArray[i];
-        var shaderName = obj.shader;
-        var shader = this.shaderManager.getShaderById(shaderName);
+        var shaderProgram = obj.shader.program;
 
-        if (shader.hasTransparency) {
+        if (shaderProgram.hasTransparency) {
             tempArray.push(obj);
         } else {
-            opaque[shaderName] = opaque[shaderName] || [];
-            opaque[shaderName].push(obj);
+            opaque[obj.shader.url] = opaque[obj.shader.url] || [];
+            opaque[obj.shader.url].push(obj);
         }
     }
 
@@ -364,13 +363,17 @@ Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId,
     var transparent = opts.transparent === true || false;
     var gl = this.gl;
 
+    if (objectArray.length == 0) {
+        return;
+    }
+
     if (transparent) {
         gl.enable(gl.BLEND);
         gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     }
 
-    shaderId = shaderId || objectArray[0].shader || "defaultShader";
-    var shader = this.shaderManager.getShaderById(shaderId);
+    // At this point, we have to gurantee (via FSM), that the RenderObject has a valid shader
+    var shader = objectArray[0].shader.program;
 
     if(shader.needsLights || lights.changed) {
         parameters["pointLightPosition"] = lights.point.position;
@@ -558,7 +561,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
     var projMatrix = this.camera.getProjectionMatrix(fbo.width / fbo.height);
     var mvp = XML3D.math.mat4.create();
 
-    var shader = this.shaderManager.getShaderById("pickobjectid");
+    var shader = this.shaderManager.getShaderByURL("pickobjectid");
     this.shaderManager.bindShader(shader);
     var objects = this.renderObjects.ready;
 
@@ -615,7 +618,7 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     this.bbMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
     XML3D.webgl.adjustMinMax(pickedObj.mesh.bbox, this.bbMin, this.bbMax, c_tmpMatrix);
 
-    var shader = this.shaderManager.getShaderById("pickedposition");
+    var shader = this.shaderManager.getShaderByURL("pickedposition");
     this.shaderManager.bindShader(shader);
 
 
@@ -661,7 +664,7 @@ Renderer.prototype.renderPickedNormals = function(pickedObj) {
     var transform = c_tmpMatrix;
     var mesh = pickedObj.mesh;
 
-    var shader = this.shaderManager.getShaderById("pickedNormals");
+    var shader = this.shaderManager.getShaderByURL("pickedNormals");
     this.shaderManager.bindShader(shader);
 
     var xform = {};

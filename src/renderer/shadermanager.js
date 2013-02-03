@@ -144,25 +144,26 @@
      *
      * @param shaderAdapter
      * @param lights
-     * @returns {string}
+     * @returns {Object}
      */
     XML3DShaderManager.prototype.createShader = function(shaderAdapter, lights) {
         if (!shaderAdapter || !shaderAdapter.node.script) {
-            return "defaultShader";
+            return { url: "defaultShader", program: this.shaders["defaultShader"]  };
         }
 
         var shaderNode = shaderAdapter.node;
         var uri = new XML3D.URI("#" + shaderNode.id);
-        var shaderId = uri.getAbsoluteURI(shaderNode.ownerDocument.documentURI).toString();
+        var shaderURL = uri.getAbsoluteURI(shaderNode.ownerDocument.documentURI).toString();
 
-        var program = this.shaders[shaderId];
+        var program = this.shaders[shaderURL];
 
-        if (program && !lights.structureChanged)
-            return shaderId;
+        if (program && !lights.structureChanged) {
+            return { url: shaderURL, program: program };
+        }
 
         var scriptURI = new XML3D.URI(shaderNode.script);
         if (scriptURI.scheme != "urn") {
-            return "defaultShader";
+            return { url: "defaultShader", program: this.shaders["defaultShader"]  };
         }
 
         var descriptor = XML3DShaderManager.getShaderDescriptor(scriptURI.path);
@@ -173,18 +174,17 @@
 
         if (!program) {
              XML3D.debug.logError("Unknown shader URI: " + scriptURI + ". Using default shader instead.");
-            return "defaultShader";
+            return { url: "defaultShader", program: this.shaders["defaultShader"]  };
         }
 
-        this.shaders[shaderId] = program;
+        this.shaders[shaderURL] = program;
         this.gl.useProgram(program.handle);
 
         var canvasId = shaderAdapter.factory.canvasId;
 
         this.setUniformsFromComputeResult(program, dataTable, canvasId, { force: true });
         this.createTexturesFromComputeResult(program, dataTable, canvasId, { force: true });
-        //XML3D.webgl.checkError(this.gl, "setSamplers");
-        return shaderId;
+        return { url: shaderURL, program: program };
     };
 
     /**
@@ -353,7 +353,7 @@
         var shaderName = shaderAdapter.node.id;
         var shader = this.shaders[shaderName];
         if (shader) {
-            this.destroyShader(shader);
+            this.disposeShader(shader);
             delete this.shaders[shaderName];
             this.createShader(shaderAdapter, lights);
         }
@@ -375,20 +375,20 @@
         this.renderer.requestRedraw("Shader data changed");
     };
 
-    XML3DShaderManager.prototype.getShaderById = function(shaderId) {
-        var sp = this.shaders[shaderId];
+    XML3DShaderManager.prototype.getShaderByURL = function(url) {
+        var sp = this.shaders[url];
         if (!sp) {
-            var shaderAdapter = XML3D.base.resourceManager.getAdapter(document.getElementById(shaderId), XML3D.webgl, this.canvasId);
+            var shaderAdapter = this.factory.getAdapter(document.getElementById(url));
             if (shaderAdapter) {
                 // This must be a shader we haven't created yet (maybe it was
                 // just added or
                 // was not assigned to a group until now
-                this.createShader(shaderAdapter, this.renderer.lights);
-                if (this.shaders[shaderId])
-                    return this.shaders[shaderId];
+                var shaderInfo = this.createShader(shaderAdapter, this.renderer.lights);
+                if (shaderInfo.url == url)
+                    return shaderInfo.program;
             }
 
-            XML3D.debug.logError("Could not find the shader [ " + shaderId + " ]");
+            XML3D.debug.logError("Could not find the shader [ " + url + " ]");
             sp = this.shaders["default"];
         }
         return sp;
@@ -500,7 +500,7 @@
 
     XML3DShaderManager.prototype.unbindShader = function(shader) {
         // TODO: unbind samplers (if any)
-        var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
+        var sp = (typeof shader == typeof "") ? this.getShaderByURL(shader) : shader;
         var samplers = sp.samplers;
         for ( var tex in samplers) {
             this.unbindTexture(samplers[tex]);
@@ -578,9 +578,9 @@
         }
     };
 
-    XML3DShaderManager.prototype.destroyShader = function(shader) {
+    XML3DShaderManager.prototype.disposeShader = function(shader) {
         for ( var tex in shader.samplers) {
-            this.destroyTexture(shader.samplers[tex]);
+            this.disposeTexture(shader.samplers[tex]);
         }
 
         this.gl.deleteProgram(shader.handle);
@@ -645,7 +645,7 @@
     };
 
     XML3DShaderManager.prototype.replaceTexture = function(adapter, texture) {
-        this.destroyTexture(texture);
+        this.disposeTexture(texture);
         var dtable = adapter.requestData([ texture.name ]);
         var dtopt = dtable[texture.name].getValue();
 
@@ -803,7 +803,7 @@
         this.gl.bindTexture(tex.info.glType, null);
     };
 
-    XML3DShaderManager.prototype.destroyTexture = function(tex) {
+    XML3DShaderManager.prototype.disposeTexture = function(tex) {
         if (tex.info && tex.info.handle)
             this.gl.deleteTexture(tex.info.handle);
     };

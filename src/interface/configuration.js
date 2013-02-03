@@ -113,8 +113,8 @@ XML3D.classInfo['data'] = {
     getProtoInfo : {m: XML3D.methods.dataGetProtoInfo},
     isOutputConnected : {m: XML3D.methods.dataIsOutputConnected},
     getResult : {m: XML3D.methods.dataGetResult},
-    getOutputFieldNames : {m: XML3D.methods.dataGetOutputFieldNames},
     addOutputFieldListener : {m: XML3D.methods.dataAddOutputFieldListener},
+    getOutputNames : {m: XML3D.methods.dataGetOutputNames},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
     _term: undefined

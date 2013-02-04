@@ -457,7 +457,7 @@
             loadComplete(0, uri);
         }
 
-        video.addEventListener("canplaythrough", loadCompleteCallback, true);
+        video.addEventListener("canplay", loadCompleteCallback, true);
         video.addEventListener("error", loadCompleteCallback, true);
         video.crossorigin = "anonymous";
         video.autoplay = autoplay;

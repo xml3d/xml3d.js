@@ -4,11 +4,12 @@
 
     // Entry:
     // 1: WorldTransformation [16 floats]
-    var ENTRY_SIZE = 16;
+    var ENTRY_SIZE = 32;
+    var PAGE_SIZE = 12;
 
     var RenderObjectHandler = function() {
 
-        this.page = new Float32Array(16000);
+        this.pages = [];
         this.nextOffset = 0;
 
         this.remove = function(obj) {
@@ -75,8 +76,13 @@
 
         this.createPageEntry = function() {
             var offset = this.nextOffset;
+            var page = offset>>PAGE_SIZE;
+            if(!this.pages[page]) {
+                console.log("New page:" + page);
+                this.pages[page] = new Float32Array(1<<PAGE_SIZE);
+            }
             this.nextOffset += ENTRY_SIZE;
-            return { page: this.page, offset : offset};
+            return { page: this.pages[page], offset : offset};
         }
 
         this.createRenderObject = function(opt) {

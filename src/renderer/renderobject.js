@@ -77,12 +77,13 @@
         this.createPageEntry = function() {
             var offset = this.nextOffset;
             var page = offset>>PAGE_SIZE;
+            var localOffset = offset&((1<<PAGE_SIZE)-1);
             if(!this.pages[page]) {
                 console.log("New page:" + page);
                 this.pages[page] = new Float32Array(1<<PAGE_SIZE);
             }
             this.nextOffset += ENTRY_SIZE;
-            return { page: this.pages[page], offset : offset};
+            return { page: this.pages[page], offset : localOffset};
         }
 
         this.createRenderObject = function(opt) {

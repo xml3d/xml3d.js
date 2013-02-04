@@ -91,6 +91,8 @@
         }
     };
 
+    var binaryContentTypes = ["application/octet-stream", "text/plain; charset=x-user-defined"];
+
     /**
      * Load a document via XMLHttpRequest
      * @private
@@ -105,9 +107,52 @@
         }
         if (xmlHttp) {
             xmlHttp._url = url;
+            xmlHttp._contentChecked = false;
             xmlHttp.open('GET', url, true);
+
             xmlHttp.onreadystatechange = function() {
-                if (xmlHttp.readyState == 4) {
+                if (xmlHttp._aborted) // This check is possibly not needed
+                    return;
+                if (!xmlHttp._contentChecked &&
+                    // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
+                    ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 ||xmlHttp.readyState == 4) &&
+                        xmlHttp.status == 200)) {
+                    // check if we need to enforce binary mode
+                    var contentType = xmlHttp.getResponseHeader("content-type");
+                    if (contentType) {
+                        var requestBinaryData = false;
+                        for (var i in binaryContentTypes) {
+                            if (contentType == binaryContentTypes[i]) {
+                                requestBinaryData = true;
+                                break;
+                            }
+                        }
+                        if (requestBinaryData) {
+                            xmlHttp._aborted = true;
+                            var cb = xmlHttp.onreadystatechange;
+                            xmlHttp.onreadystatechange = null;
+                            var url = xmlHttp._url;
+                            xmlHttp.abort();
+
+                            // Note: We do not recycle XMLHttpRequest !
+                            //       This does work only when responseType is changed to "arraybuffer",
+                            //       however the size of the xmlHttp.response buffer is then wrong !
+                            //       It does not work at all (at least in Chrome) when we use overrideMimeType
+                            //       with "text/plain; charset=x-user-defined" argument.
+                            //       The latter mode require creation of the fresh XMLHttpRequest.
+
+                            xmlHttp = new XMLHttpRequest(); // uncomment for use with overrideMimeType
+                            xmlHttp._url = url;
+                            xmlHttp._contentChecked = true;
+                            xmlHttp.open('GET', url, true);
+                            xmlHttp.overrideMimeType("text/plain; charset=x-user-defined"); // not needed when responseType is arraybuffer
+                            xmlHttp.responseType = "arraybuffer";
+                            xmlHttp.onreadystatechange = cb;
+                            xmlHttp.send(null);
+                        }
+                    }
+                }
+                else if (xmlHttp.readyState == 4) {
                     if(xmlHttp.status == 200){
                         XML3D.debug.logDebug("Loaded: " + url);
                         XML3D.xmlHttpCallback && XML3D.xmlHttpCallback(xmlHttp);
@@ -153,7 +198,9 @@
         var docCache = c_cachedDocuments[url];
         docCache.mimetype = mimetype;
 
-        if (mimetype == "application/json") {
+        if (req.responseType == "arraybuffer") {
+            docCache.response = req.response;
+        } else if (mimetype == "application/json") {
             docCache.response = JSON.parse(req.responseText);
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
             docCache.response = req.responseXML;
@@ -170,6 +217,7 @@
                 XML3D.config.element(xml3dElements[i]);
             }
         } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
+            // for backwards compatibility
             var buf = new ArrayBuffer(req.responseText.length);
             var view = new Uint8Array(buf);
             for (var i = 0; i < req.responseText.length; ++i) {

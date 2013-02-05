@@ -150,44 +150,54 @@ window.requestAnimFrame = (function(){
         return v; 
     }; 
     
-    /** Convert a given mouse page position to be relative to the given target element. 
+    /** Calculate the offset of the given element and return it.
+     *
+     *  @param {Object} element
+     *  @return {{top:number, left:number}} the offset
+     *
+     *  This code is taken from http://javascript.info/tutorial/coordinates .
+     *  We don't want to do it with the offsetParent way, because the xml3d
+     *  element is actually invisible and thus offsetParent will return null
+     *  at least in WebKit. Also it's slow. So we use getBoundingClientRect().
+     *  However it returns the box relative to the window, not the document.
+     *  Thus, we need to incorporate the scroll factor. And because IE is so
+     *  awesome some workarounds have to be done and the code gets complicated.
+     */
+    function calculateOffset(element)
+    {
+        var box = element.getBoundingClientRect();
+        var body = document.body;
+        var docElem = document.documentElement;
+
+        // get scroll factor (every browser except IE supports page offsets)
+        var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop;
+        var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft;
+
+        // the document (`html` or `body`) can be shifted from left-upper corner in IE. Get the shift.
+        var clientTop = docElem.clientTop || body.clientTop || 0;
+        var clientLeft = docElem.clientLeft || body.clientLeft || 0;
+
+        var top  = box.top +  scrollTop - clientTop;
+        var left = box.left + scrollLeft - clientLeft;
+
+        // for Firefox an additional rounding is sometimes required
+        return {top: Math.round(top), left: Math.round(left)};
+    }
+
+    /** Convert a given mouse page position to be relative to the given target element.
      *  Most probably the page position are the MouseEvent's pageX and pageY attributes.
-     *  The result are the proper coordinates to be given to e.g. 
-     *  the <xml3d>'s getElementByPoint() method.   
-     *  
+     *  The result are the proper coordinates to be given to e.g.
+     *  the <xml3d>'s getElementByPoint() method.
+     *
      *  @param {!Object} xml3dEl the xml3d element to which the coords need to be translated
      *  @param {!number} pageX the x-coordinate relative to the page
      *  @param {!number} pageY the y-coordinate relative to the page
      *  @return {{x: number, y: number}} the converted coordinates
-     */ 
+     */
     u.convertPageCoords = function(xml3dEl, pageX, pageY)
-    {        
-        // get xml3d wrapper node 
-        var wrapper = xml3dEl.parentNode;
-        
-        if(!XML3D._native)
-        {
-            /* in the webgl version we have to take the next parent
-             * because xml3d gets wrapped in an invisible div first
-             * and thus offsetParent below will return null on it at
-             * least in WebKit. 
-             * see https://developer.mozilla.org/en-US/docs/DOM/element.offsetParent 
-             */
-            wrapper = wrapper.parentNode;
-        }
-        
-        // calculate offset to root node 
-        var offX = wrapper.offsetLeft; 
-        var offY = wrapper.offsetTop; 
-        
-        var node = wrapper; 
-        while(node = node.offsetParent)
-        {
-            offX += node.offsetLeft; 
-            offY += node.offsetTop; 
-        }
-        
-        // construct and return result. 
-        return {x: pageX - offX, y: pageY - offY};  
+    {
+        var off = calculateOffset(xml3dEl);
+
+        return {x: pageX - off.left, y: pageY - off.top};
     };
 }());

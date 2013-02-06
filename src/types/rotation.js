@@ -269,14 +269,27 @@
         var na = this._axis.normalize();
         return new XML3DRotation(na, this._angle);
     };
-    
-    /** 
-     * Returns the quaternion, that underlies this rotation. 
-     * 
-     * @return {Float32Array} 
+
+    /**
+     * Returns the quaternion, that underlies this rotation.
+     *
+     * @return {Float32Array}
      */
     p.getQuaternion = function() {
-        return XML3D.math.quat.copy(XML3D.math.quat.create(), this._data); 
+        return XML3D.math.quat.copy(XML3D.math.quat.create(), this._data);
+    };
+
+    /**
+     * Set this rotation based on the given base vectors.
+     *
+     * @param {XML3DVec3} xAxis
+     * @param {XML3DVec3} yAxis
+     * @param {XML3DVec3} zAxis
+     */
+    p.setFromBasis = function(xAxis, yAxis, zAxis) {
+        var q = XML3D.math.quat.create();
+        XML3D.math.quat.setFromBasis(xAxis._data, yAxis._data, zAxis._data, q);
+        this._setQuaternion(q);
     };
 
     XML3D.XML3DRotation = XML3DRotation;

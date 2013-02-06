@@ -28,30 +28,45 @@
         var that = this;
         this._data = new Float32Array(4);
 
-        /** @private */
-        this._callback = typeof cb == 'function' ? cb : 0;
-
-        /** @private */
         var vec_cb = function() {
             that._updateQuaternion();
             if (that._callback)
                 that._callback(that);
         };
 
-        if (axis instanceof XML3DRotation) {
-            this._axis = new window.XML3DVec3(0, 0, 1, vec_cb);
-            this._angle = 0;
-            this.setAxisAngle(axis.axis, axis.angle);
-        } else {
-            this._axis = axis ? new window.XML3DVec3(axis.x, axis.y, axis.z, vec_cb) : new window.XML3DVec3(0, 0, 1, vec_cb);
-            /** @private */
-            this._angle = angle || 0;
-            this._updateQuaternion();
+        /** @private */
+        this._axis = new window.XML3DVec3(0, 0, 1, vec_cb);
+        /** @private */
+        this._angle = 0;
+
+        this._updateQuaternion();
+
+        if(axis !== undefined && axis !== null) {
+            this.set(axis, angle);
         }
 
-    }; 
-    
+        /** @private */
+        this._callback = typeof cb == 'function' ? cb : 0;
+    };
+
     var p = XML3DRotation.prototype;
+
+    /**
+     * The set method copies the values from other.
+     * @param {Object} other another XML3DRotation, Float32Array or XML3DVec3. In the last case the 2nd argument is considered.
+     * @param {number=} angle
+     */
+    p.set = function(other, angle) {
+        if(other.constructor === window.XML3DRotation) {
+            this.setAxisAngle(other.axis, other.angle);
+        } else if(other.constructor === Float32Array) {
+            this._setQuaternion(other);
+        } else if(other.constructor === window.XML3DVec3) {
+            this.setAxisAngle(other, angle);
+        } else {
+            XML3D.debug.logError("XML3DRotation.set(): invalid argument given. Expect XML3DRotation or Float32Array.");
+        }
+    };
 
     /** @type {number} */
     Object.defineProperty(p, "axis", {
@@ -182,15 +197,7 @@
     };
 
     /**
-     * The set method copies the values from other.
-     * @param {XML3DRotation} other The other rotation
-     */
-    p.set = function(other) {
-        this.setAxisAngle(other.axis, other.angle);
-    };
-
-    /**
-     * Returns a XML3DMatrix that describes this 3D rotation in a 
+     * Returns a XML3DMatrix that describes this 3D rotation in a
      * 4x4 matrix representation.
      * @return {XML3DMatrix} Rotation matrix
      */

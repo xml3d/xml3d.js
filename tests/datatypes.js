@@ -752,23 +752,23 @@ test("Observe data disconnected from scene graph", function() {
 
         testNumber++;
         if(testNumber == 1){
-            ok(result.get("position"), "There is a position field.");
-            ok(!result.get("normal"), "There is no normal field.");
-            QUnit.closeArray(result.get("position").value,
+            ok(result.getValue("position"), "There is a position field.");
+            ok(!result.getValue("normal"), "There is no normal field.");
+            QUnit.closeArray(result.getValue("position"),
                 new Float32Array([-1, -1, -10,    1, -1, -10,   -1, 1, -10,   1, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
             self.doc.getElementById("singleWeight").firstChild.nodeValue = "0.5";
         }
         if(testNumber == 2){
-            QUnit.closeArray(result.get("position").value,
+            QUnit.closeArray(result.getValue("position"),
                 new Float32Array([-1.25, -1, -10,    1, -1, -10,   -1.5, 1, -10,   1, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
             self.doc.getElementById("singleWeight").firstChild.nodeValue = "1";
         }
         if(testNumber == 3){
-            QUnit.closeArray(result.get("position").value,
+            QUnit.closeArray(result.getValue("position"),
                 new Float32Array([-1.5, -1, -10,    1, -1, -10,   -2, 1, -10,   1, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
@@ -803,10 +803,10 @@ test("Observe data connected to scene graph", function() {
 
         testNumber++;
         if(testNumber == 1){
-            ok(result.get("position"), "There is a position field.");
-            ok(!result.get("normal"), "There is no normal field.");
+            ok(result.getValue("position"), "There is a position field.");
+            ok(!result.getValue("normal"), "There is no normal field.");
 
-            QUnit.closeArray(result.get("position").value,
+            QUnit.closeArray(result.getValue("position"),
                 new Float32Array([-1.5, -1, -10,    1.5, -1, -10,   -2, 1, -10,   2, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 

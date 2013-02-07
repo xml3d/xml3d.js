@@ -86,9 +86,16 @@
     }
     window.XML3DDataResult = XML3DDataResult;
 
+    XML3DDataResult.prototype.getValue = function(name) {
+        if (this._entries[name])
+            return this._entries[name].value;
+        return null;
+    }
 
-    XML3DDataResult.prototype.get = function(name){
-        return this._entries[name];
+    XML3DDataResult.prototype.getType = function(name) {
+        if (this._entries[name])
+            return this._entries[name].type;
+        return null;
     }
 
     XML3DDataResult.prototype.getNames = function(){

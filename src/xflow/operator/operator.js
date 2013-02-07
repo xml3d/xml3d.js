@@ -14,9 +14,13 @@ Xflow.registerOperator = function(name, data){
 };
 
 Xflow.getOperator = function(name){
+    if (!operators[name])
+    {
+        XML3D.debug.logError("Unknown operator: '" + name+"'");
+        return null;
+    }
     return operators[name];
 };
-
 
 function initOperator(operator){
     var indexMap = {};

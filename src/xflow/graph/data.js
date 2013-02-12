@@ -110,7 +110,7 @@ Xflow.BufferEntry = function(type, value){
     this._value = value;
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
-XML3D.createClass(Xflow.BufferEntry, Xflow.DataEntry);
+Xflow.createClass(Xflow.BufferEntry, Xflow.DataEntry);
 var BufferEntry = Xflow.BufferEntry;
 
 
@@ -207,7 +207,7 @@ Xflow.TextureEntry = function(image){
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
-XML3D.createClass(Xflow.TextureEntry, Xflow.DataEntry);
+Xflow.createClass(Xflow.TextureEntry, Xflow.DataEntry);
 var TextureEntry = Xflow.TextureEntry;
 
 TextureEntry.prototype.isLoading = function() {
@@ -287,10 +287,6 @@ TextureEntry.prototype.createImage = function(width, height, formatType, sampler
 TextureEntry.prototype.setImage = function(v) {
     this._updateImage(v);
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
-};
-
-TextureEntry.prototype.setFormatType = function(t) {
-    this._formatType = t;
 };
 
 TextureEntry.prototype.getFormatType = function() {
@@ -425,6 +421,112 @@ TextureEntry.prototype.getIterateCount = function() {
 //        this._image = this._canvas;
 //    }
 //};
+
+//----------------------------------------------------------------------------------------------------------------------
+// Xflow.ImageDataTextureEntry
+//----------------------------------------------------------------------------------------------------------------------
+
+
+Xflow.ImageDataTextureEntry = function(imageData){
+    Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
+    this._samplerConfig = new SamplerConfig();
+    this._imageData = null;
+    this._formatType = null;
+    this._updateImageData(imageData);
+
+    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
+};
+Xflow.createClass(Xflow.ImageDataTextureEntry, Xflow.DataEntry);
+var ImageDataTextureEntry = Xflow.ImageDataTextureEntry;
+
+ImageDataTextureEntry.prototype.isLoading = function() {
+    return !this._imageData;
+};
+
+ImageDataTextureEntry.prototype._updateImageData = function(imageData) {
+    this._formatType = null;
+    this._imageData = imageData;
+};
+
+/** Create new image
+ *
+ * @param width
+ * @param height
+ * @param formatType
+ * @param samplerConfig
+ * @return {Image|Canvas}
+ */
+ImageDataTextureEntry.prototype.createImage = function(width, height, formatType, samplerConfig) {
+    if (!this._image || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
+        if (!width || !height)
+            throw new Error("Width or height is not specified");
+        this._formatType = formatType;
+        if (!samplerConfig) {
+            samplerConfig = new Xflow.SamplerConfig();
+            samplerConfig.setDefaults();
+        }
+        this._samplerConfig.set(samplerConfig);
+
+        var imageData = {
+            width: width,
+            height: height,
+            data: null
+        };
+        if(formatType == 'float64'){
+            imageData.data = new Float64Array(width*height*4);
+        }
+        else if(formatType == 'float32'){
+            imageData.data = new Float32Array(width*height*4);
+        }
+        else {
+            imageData.data = new Uint8Array(width*height*4);
+        }
+        this._imageData = imageData;
+    }
+    this.notifyChanged();
+};
+
+/** @param {Object} v */
+ImageDataTextureEntry.prototype.setImageData = function(v) {
+    this._updateImageData(v);
+    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+};
+
+ImageDataTextureEntry.prototype.getWidth = function() {
+    return this._imageData && this._imageData.width || 0;
+};
+
+ImageDataTextureEntry.prototype.getHeight = function() {
+    return this._imageData && this._imageData.height || 0;
+};
+
+/** @return {ImageData} */
+ImageDataTextureEntry.prototype.getValue = function() {
+    return this._imageData;
+};
+
+/** @return {SamplerConfig} */
+ImageDataTextureEntry.prototype.getSamplerConfig = function(){
+    return this._samplerConfig;
+};
+
+/** @return {number} */
+ImageDataTextureEntry.prototype.getLength = function(){
+    return 1;
+};
+ImageDataTextureEntry.prototype.isEmpty = function(){
+    return !this._imageData
+};
+
+ImageDataTextureEntry.prototype.getFormatType = function() {
+    return this._formatType;
+};
+
+
+/** @return {number} */
+ImageDataTextureEntry.prototype.getIterateCount = function() {
+    return 1;
+};
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.DataChangeNotifier

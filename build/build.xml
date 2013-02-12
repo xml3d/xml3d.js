@@ -26,6 +26,14 @@
         <file name="xml3d-renderer-module.js" />
     </filelist>
 
+    <filelist dir="${modulesBuildDir}" id="xflow-ip-worker">
+        <file name="../../../src/xflow-ip/base.js" />
+    	<file name="../../../src/utils/array.js" />
+        <file name="../../../src/contrib/glMatrix.js" />
+        <file name="xml3d-xflow-module.js" />
+        <file name="../../../src/xflow-ip/worker.js" />
+    </filelist>
+
     <target name="lastTag" depends="init, modules-concat, windowsGit, linuxGit">
         <tstamp />
         <git command="describe">
@@ -54,6 +62,10 @@
         <upload extension="-${continuous.extension}-min" />
     </target>
 
+    <target name="xflow-ip" depends="init, modules-concat">
+        <concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})" source="xflow-ip-worker" />
+    </target>
+
     <target name="develop" depends="init, modules-concat">
         <concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})" source="modules" />
     </target>
@@ -70,12 +82,12 @@
     </filelist>
 
     <target name="build-tools" depends="init, tools-modules-concat">
-        <concatScripts extension="-tools" source="tools-modules" 
-            version="DEVELOPMENT SNAPSHOT (${build.time})" /> 
+        <concatScripts extension="-tools" source="tools-modules"
+            version="DEVELOPMENT SNAPSHOT (${build.time})" />
     </target>
 
     <target name="build-tools-min" depends="init, tools-modules-compile">
-        <compileScripts extension="-tools" source="tools-modules"  
+        <compileScripts extension="-tools" source="tools-modules"
             version="DEVELOPMENT SNAPSHOT (${build.time})" />
     </target>
 
@@ -101,7 +113,7 @@
         </subant>
     </target>
 
-    <!-- There's no easy way to get around these duplicated targets. 
+    <!-- There's no easy way to get around these duplicated targets.
         target's don't have parameters and macrodefs don't support subant tasks -->
     <target name="tools-modules-concat">
         <subant target="concat">

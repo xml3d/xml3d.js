@@ -67,7 +67,7 @@ Xflow.InputNode = function(graph){
     this._data = null;
     this._param = false;
 };
-XML3D.createClass(Xflow.InputNode, Xflow.GraphNode);
+Xflow.createClass(Xflow.InputNode, Xflow.GraphNode);
 var InputNode = Xflow.InputNode;
 
 InputNode.prototype.notify = function(newValue, notification) {
@@ -133,7 +133,7 @@ Xflow.DataNode = function(graph, protoNode){
 
     this.loading = false;
 
-    
+
     this._isProtoNode = protoNode;
     this._children = [];
     this._sourceNode = null;
@@ -150,7 +150,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._requests = [];
 
 };
-XML3D.createClass(Xflow.DataNode, Xflow.GraphNode);
+Xflow.createClass(Xflow.DataNode, Xflow.GraphNode);
 var DataNode = Xflow.DataNode;
 
 
@@ -172,7 +172,7 @@ Xflow.OrderMapping = function(owner){
     Xflow.Mapping.call(this, owner);
     this._names = [];
 };
-XML3D.createClass(Xflow.OrderMapping, Xflow.Mapping);
+Xflow.createClass(Xflow.OrderMapping, Xflow.Mapping);
 
 /**
  * @constructor
@@ -185,7 +185,7 @@ Xflow.NameMapping = function(owner){
     this._srcNames = [];
 
 };
-XML3D.createClass(Xflow.NameMapping, Xflow.Mapping);
+Xflow.createClass(Xflow.NameMapping, Xflow.Mapping);
 
 
 

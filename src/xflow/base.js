@@ -1,3 +1,4 @@
+window=this;
 var Xflow = {};
 
 Xflow.EPSILON = 0.000001;
@@ -146,3 +147,29 @@ Xflow.ORIGIN = {
     PROTO: 3
 };
 
+
+/* Tools */
+
+/**
+ *
+ * @param {Object} ctor Constructor
+ * @param {Object} parent Parent class
+ * @param {Object=} methods Methods to add to the class
+ * @returns
+ */
+Xflow.createClass = function(ctor, parent, methods) {
+    methods = methods || {};
+    if (parent) {
+        /** @constructor */
+        var F = function() {
+        };
+        F.prototype = parent.prototype;
+        ctor.prototype = new F();
+        ctor.prototype.constructor = ctor;
+        ctor.superclass = parent.prototype;
+    }
+    for ( var m in methods) {
+        ctor.prototype[m] = methods[m];
+    }
+    return ctor;
+};

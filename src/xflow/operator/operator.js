@@ -14,7 +14,7 @@ Xflow.registerOperator = function(name, data){
 };
 
 Xflow.getOperator = function(name){
-    if (!operators[name])
+    if (name && !operators[name])
     {
         XML3D.debug.logError("Unknown operator: '" + name+"'");
         return null;
@@ -199,8 +199,8 @@ function allocateOutput(operator, inputData, output, operatorData){
                     }
                 }
                 if (srcEntry) {
-                    var newWidth = Math.max(srcEntry.width, 1);
-                    var newHeight = Math.max(srcEntry.height, 1);
+                    var newWidth = Math.max(srcEntry.getWidth(), 1);
+                    var newHeight = Math.max(srcEntry.getHeight(), 1);
                     var newFormatType = d.formatType || srcEntry.getFormatType();
                     var newSamplerConfig = d.samplerConfig || srcEntry.getSamplerConfig();
                     entry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
@@ -301,12 +301,12 @@ function applyParallelOperator(operator, inputData, outputData, operatorData){
         if(entry){
             if(operator.mapping[i].internalType == Xflow.DATA_TYPE.TEXTURE){
                 if(size.length == 0){
-                    size[0] = inputData[i].getWidth();
-                    size[1] = inputData[i].getHeight();
+                    size[0] = inputData[i].getHeight();
+                    size[1] = inputData[i].getWidth();
                 }
                 else{
-                    size[0] = Math.min(size[0], inputData[i].getWidth());
-                    size[1] = Math.min(size[1], inputData[i].getHeight());
+                    size[0] = Math.min(size[0], inputData[i].getHeight());
+                    size[1] = Math.min(size[1], inputData[i].getWidth());
                 }
                 value = new ParallelArray(inputData[i].getFilledCanvas());
             }

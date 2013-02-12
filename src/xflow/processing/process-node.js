@@ -154,7 +154,7 @@ function synchronizeOutput(operator, outputs){
             entry = new Xflow.BufferEntry(type, null);
         }
         else{
-            entry = new Xflow.TextureEntry(null);
+            entry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
         }
         outputs[d.name] = new Xflow.DataSlot(entry, 0);
     }

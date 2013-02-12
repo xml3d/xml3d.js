@@ -30,6 +30,7 @@
         <file name="./operator/default/forwardKinematics.js" />
         <file name="./operator/default/forwardKinematicsInv.js" />
         <file name="./operator/default/flipNormal.js" />
+        <file name="./operator/default/createIGIndex.js" />
         <file name="./operator/default/math.js" />
         <file name="./operator/default/noiseImage.js" />
         <file name="./operator/default/sobelImage.js" />

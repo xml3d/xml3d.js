@@ -391,7 +391,7 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
 
 
     this.shaderManager.bindShader(shader);
-    this.shaderManager.updateShader(shader);
+    this.shaderManager.updateActiveShader(shader);
 
     parameters["viewMatrix"] = this.camera.viewMatrix;
     parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
@@ -437,7 +437,7 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
     var triCount = 0;
     var vbos = meshInfo.vbos;
 
-    var numBins = meshInfo.isIndexed ? vbos.index.length : vbos.position.length;
+    var numBins = meshInfo.isIndexed ? vbos.index.length : (vbos.position ? vbos.position.length : 1);
 
     for (var i = 0; i < numBins; i++) {
     //Bind vertex buffers
@@ -486,9 +486,10 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
                     offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
                 }
             } else {
-                gl.drawArrays(meshInfo.glType, 0, vbos.position[i].length);
+                if(vbos.position && vbos.position[i] && vbos.position[i].length)
+                    gl.drawArrays(meshInfo.glType, 0, vbos.position[i].length);
             }
-            triCount = vbos.position[i].length / 3;
+            triCount = vbos.position ? vbos.position[i].length / 3 : 0;
         }
 
     //Unbind vertex buffers

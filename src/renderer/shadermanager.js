@@ -52,6 +52,10 @@
         this.needsLights = true;
         this.vSource = sources.vertex;
         this.fSource = sources.fragment;
+        var maxTextureUnit = 0;
+        this.nextTextureUnit = function() {
+            return maxTextureUnit++;
+        }
     };
 
     var XML3DShaderManager = function(renderer, factory) {
@@ -268,6 +272,7 @@
             uniInfo.location = gl.getUniformLocation(prg, uni.name);
 
             if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
+                uniInfo.unit = programObject.nextTextureUnit();
                 programObject.samplers[uni.name] = uniInfo;
             } else
                 programObject.uniforms[uni.name] = uniInfo;
@@ -413,8 +418,6 @@
 
             if (u.value)
                 u = u.value;
-            if (u.clean)
-                continue;
 
             if (shader.uniforms[name]) {
                 XML3DShaderManager.setUniform(this.gl, shader.uniforms[name], u);
@@ -423,8 +426,12 @@
 
     };
 
-    XML3DShaderManager.prototype.bindShader = function(shader) {
-        var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
+    /**
+     *
+     * @param {ProgramObject} programObject
+     */
+    XML3DShaderManager.prototype.bindShader = function(programObject) {
+        var sp = (typeof programObject == typeof "") ? this.getShaderById(programObject) : programObject;
 
         if (this.currentProgram != sp.handle) {
             this.currentProgram = sp.handle;
@@ -437,8 +444,8 @@
         }
     };
 
-    XML3DShaderManager.prototype.updateShader = function(sp) {
-        this.bindShader(sp);
+    /** Assumes, the shader is already bound **/
+    XML3DShaderManager.prototype.updateActiveShader = function(sp) {
         // Apply any changes encountered since the last time this shader was
         // rendered
         for ( var i = 0, l = sp.changes.length; i < l; i++) {
@@ -538,14 +545,32 @@
         this.gl.deleteProgram(shader.handle);
     };
 
+    /**
+     *
+     * @param {ProgramObject} programObject
+     * @param {Xflow.ComputeResult} result
+     */
+    XML3DShaderManager.prototype.createTexturesFromComputeResult = function(programObject, result) {
+        var samplers = programObject.samplers;
+        for ( var name in samplers) {
+            var sampler = samplers[name];
+            var entry = result.getOutputData(name);
+
+            if (!entry) {
+                sampler.info = sampler.info || new InvalidTexture();
+                continue;
+            }
+
+            this.createTextureFromEntry(entry, sampler);
+        }
+    };
 
     /**
      *
-     * @param {Xflow.TextureEntry} entry
+     * @param {Xflow.TextureEntry} texEntry
      * @param sampler
-     * @param {number} texUnit
      */
-    XML3DShaderManager.prototype.createTextureFromEntry = function(texEntry, sampler, texUnit) {
+    XML3DShaderManager.prototype.createTextureFromEntry = function(texEntry, sampler) {
         var img = texEntry.getImage();
         if (img) {
             var handle = null;
@@ -565,7 +590,7 @@
                 onload : function() {
                     renderer.requestRedraw.call(renderer, "Texture loaded");
                 },
-                unit : texUnit,
+                unit : sampler.unit,
                 image : img,
                 config : texEntry.getSamplerConfig(),
                 canvas : canvas,
@@ -716,7 +741,6 @@
             break;
         case TEXTURE_STATE.LOADED:
             // console.dir("Creating '"+ tex.name + "' from " + info.image.src);
-            // console.dir(info);
             this.createTex2DFromImage(info);
             this.bindTexture(tex);
             break;
@@ -724,6 +748,10 @@
             gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(gl.TEXTURE_2D, null);
             XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
+            break;
+        default:
+            XML3D.debug.logDebug("Invalid texture: ", tex);
+
         }
         ;
     };

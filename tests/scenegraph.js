@@ -137,6 +137,7 @@ module("Bounding Boxes", {
         this.cb = function(e) {
             ok(true, "Scene loaded");
             that.doc = document.getElementById("xml3dframe").contentDocument;
+            that.xml3dElement = that.doc.getElementById("myXml3d");
             start();
         };
         loadDocument("scenes/boundingBox.xhtml", this.cb);
@@ -181,6 +182,21 @@ test("Groups and Meshes", 16, function() {
     QUnit.closeBox(splitCubeBox1, new XML3DBox(new XML3DVec3(0, -1, -1),new XML3DVec3(1, 1, 1)), EPSILON, "Split part 1");
     QUnit.closeBox(splitCubeBox2, new XML3DBox(new XML3DVec3(-1, -1, -1),new XML3DVec3(0, 1, 1)), EPSILON, "Split part 2");
 
+});
+
+test("Dynamically added mesh", function() {
+
+    var mesh = XML3D.createElement("mesh");
+
+    ok(mesh.getBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
+
+    mesh.setAttribute("type", "triangles");
+    mesh.setAttribute("src", "#mySimpleMesh");
+
+    this.xml3dElement.appendChild(mesh);
+
+    QUnit.closeBox(mesh.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
+            "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
 });
 
 //============================================================================

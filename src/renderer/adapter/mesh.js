@@ -5,16 +5,26 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     var eventTypes = {onclick:1, ondblclick:1,
         ondrop:1, ondragenter:1, ondragleave:1};
 
-    var noDrawableObject = function() {
-        XML3D.debug.logError("Mesh adapter has no callback to its mesh object!");
-    },
-        /**
-         * @type WebGLRenderingContext
-         * @private
-         */
-            rc = window.WebGLRenderingContext;
-
     var bboxAttributes = ["boundingbox"];
+
+    /**
+     * @constructor
+     */
+    var MeshInfo = function(type) {
+        this.vbos = {};
+        this.isIndexed = false;
+        this.complete = false;
+        this.glType = getGLTypeFromString(type);
+        this.bbox = new window.XML3DBox();
+        this.getVertexCount = function() {
+            try {
+                return this.isIndexed ? this.vbos.index[i].length : (this.vertexCount !== undefined ? this.vertexCount[0] : this.vbos.position[0].length);
+            } catch(e) {
+                return 0;
+            }
+        }
+        this.update = emptyFunction;
+    }
 
     /**
      * @constructor
@@ -180,18 +190,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     var emptyFunction = function() {};
 
-    /**
-     * @param {string} type
-     */
-    function createMeshInfo(type) {
-        return {
-            vbos : {},
-            isIndexed: false,
-            glType: getGLTypeFromString(type),
-            bbox : new window.XML3DBox(),
-            update : emptyFunction
-        };
-    }
 
     /**
      * @param {Xflow.data.Request} request
@@ -222,21 +220,35 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      */
     p.createMeshData = function() {
         var obj = this.renderObject;
-        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
+        obj.mesh = obj.mesh || new MeshInfo(this.node.type);
 
         var dataResult =  this.computeRequest.getResult();
 
-        /*if (!(dataResult.getOutputData("position") && dataResult.getOutputData("position").getValue())) {
-            if(!dataResult.loading)
-                XML3D.debug.logWarning("Mesh " + this.node.id + " has no data for required attribute 'position'.");
-            obj.mesh.valid = false;
-            return;
-        }*/
+        obj.mesh.valid = obj.mesh.complete = true; // Optimistic appraoch
         for ( var name in this.requestObject) {
-            var attr = this.requestObject[name];
+            var attr = this.requestObject[name] || {};
             var entry = dataResult.getOutputData(name);
-            if (!entry || !entry.getValue())
+            /*if (!entry) {
+                if(attr.required) {
+                    // This needs a structural change before we get the required signature
+                    console.log("Invalid", name);
+                    obj.mesh.valid = false;
+                    return;
+                }
                 continue;
+            }*/
+            if(!entry || !entry.getValue()) {
+                if(attr.required) {
+                    obj.mesh.complete = false;
+                }
+                continue;
+            }
+
+            if (name == "vertexCount") {
+                obj.mesh.vertexCount = entry.getValue();
+                console.log("VertexCount", obj.mesh.vertexCount);
+                continue;
+            }
 
             switch(entry.type) {
                 case Xflow.DATA_TYPE.TEXTURE:
@@ -258,7 +270,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @param {string} name
      * @param {Object} attr
      * @param {Xflow.BufferEntry} entry
-     * @param {Object} meshInfo
+     * @param {MeshInfo} meshInfo
      */
     p.handleBuffer = function(name, attr, entry, meshInfo) {
         var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
@@ -292,9 +304,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         meshInfo.vbos[name] = [];
         meshInfo.vbos[name][0] = buffer;
         meshInfo.isIndexed = meshInfo.isIndexed || name == "index";
-        if(attr.size) {
-            meshInfo.size = entry.getValue().length;
-        }
 
             delete webglData.changed;
     }
@@ -302,7 +311,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @param {string} name
      * @param {Xflow.TextureEntry} entry
      * @param {string} shaderId
-     * @param {Object} meshInfo
+     * @param {MeshInfo} meshInfo
      */
     p.handleTexture = function(name, entry, shaderId, meshInfo) {
         var prog = this.factory.renderer.shaderManager.getShaderById(shaderId);
@@ -334,7 +343,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     /**
-     * @return {XML3DMatrix}
+     * @return {window.XML3DMatrix}
      */
     p.getWorldMatrix = function() {
 
@@ -382,42 +391,44 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     var getGLTypeFromArray = function(array) {
+        var GL = window.WebGLRenderingContext;
         if (array instanceof Int8Array)
-            return rc.BYTE;
+            return GL.BYTE;
         if (array instanceof Uint8Array)
-            return rc.UNSIGNED_BYTE;
+            return GL.UNSIGNED_BYTE;
         if (array instanceof Int16Array)
-            return rc.SHORT;
+            return GL.SHORT;
         if (array instanceof Uint16Array)
-            return rc.UNSIGNED_SHORT;
+            return GL.UNSIGNED_SHORT;
         if (array instanceof Int32Array)
-            return rc.INT;
+            return GL.INT;
         if (array instanceof Uint32Array)
-            return rc.UNSIGNED_INT;
+            return GL.UNSIGNED_INT;
         if (array instanceof Float32Array)
-            return rc.FLOAT;
-        return rc.FLOAT;
+            return GL.FLOAT;
+        return GL.FLOAT;
     };
 
     /**
      * @param {string} typeName
      */
     function getGLTypeFromString(typeName) {
-        if (typeName && typeName.toLowerCase)
+        var GL = window.WebGLRenderingContext;
+        if (typeName && typeName.toLoweGLase)
             typeName = typeName.toLowerCase();
         switch (typeName) {
             case "triangles":
-                return rc.TRIANGLES;
+                return GL.TRIANGLES;
             case "tristrips":
-                return rc.TRIANGLE_STRIP;
+                return GL.TRIANGLE_STRIP;
             case "points":
-                return rc.POINTS;
+                return GL.POINTS;
             case "lines":
-                return rc.LINES;
+                return GL.LINES;
             case "linestrips":
-                return rc.LINE_STRIP;
+                return GL.LINE_STRIP;
             default:
-                return rc.TRIANGLES;
+                return GL.TRIANGLES;
         }
     };
 

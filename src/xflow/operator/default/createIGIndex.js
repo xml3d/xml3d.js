@@ -1,6 +1,6 @@
 Xflow.registerOperator("createIGIndex", {
     outputs:[
-        {type:'int', name:'index', customAlloc:true },
+        //{type:'int', name:'index', customAlloc:true },
         {type:'float2', name:'texcoord', customAlloc:true }
     ],
     params:[
@@ -9,9 +9,9 @@ Xflow.registerOperator("createIGIndex", {
     ],
     alloc:function (sizes, vertexCount, image) {
         sizes['texcoord'] = image.width * image.height;
-        sizes['index'] = vertexCount[0];
+        //sizes['index'] = vertexCount[0];
     },
-    evaluate:function (index, texcoord, vertexCount, image, info) {
+    evaluate:function (texcoord, vertexCount, image, info) {
         // tex coords
         var halfPixel = {
             x: 0.5 / image.width,
@@ -28,9 +28,9 @@ Xflow.registerOperator("createIGIndex", {
         }
 
         // index creation
-        for(var i = 0; i < vertexCount[0]; i++) {
+        /*for(var i = 0; i < vertexCount[0]; i++) {
             index[i] = i;
-        }
+        }*/
         return true;
     }
 });

@@ -34,9 +34,10 @@ var XflowIP = {};
         var style = document.createElement("style");
         style.setAttribute("type", "text/css");
         style.innerHTML = "xflowip { display: none;}\n" +
-                "xflowimg { display: inline-block;}\n" +
+                "xflowimg { display: inline-block; position: relative;}\n" +
                 "xflowimg * { display: none;}\n" +
-                "xflowimg canvas { display: inline-block }";
+                "xflowimg canvas { display: inline-block }" +
+                "xflowimg .xflowipInfo { display: block; position: absolute; bottom: 0; left: 0; right: 0; background: black; color: white; font-size: 10pt}";
         document.head.appendChild(style);
     }
 
@@ -62,8 +63,11 @@ var XflowIP = {};
                 img.src = url;
                 break;
             case 'updateSinkImage':
+                endLoading(data['id']);
                 updateSinkImage(data['id'], data['imageData']);
                 break;
+            case 'modified':
+                startLoading(data['id']);
             case 'log':
                 XflowIP.log("Worker: " + event.data['msg']);
                 break;
@@ -149,9 +153,13 @@ var XflowIP = {};
     function initSinkNode(node){
         initNode(node);
         var canvas = document.createElement("canvas");
+        var info = document.createElement("div");
+        info.className = "xflowipInfo";
         node.appendChild(canvas);
+        node.appendChild(info);
         syncCanvasStyle(node, canvas);
         node._xflowip.canvas = canvas;
+        node._xflowip.info = info;
     }
 
     function syncCanvasStyle(node, canvas){
@@ -217,6 +225,27 @@ var XflowIP = {};
             }
             k = k.nextSibling;
         }
+    }
+
+    function startLoading(nodeId){
+        var node = c_nodes[nodeId];
+        if(!node || !node._xflowip.info) return;
+        if(node._xflowip.interval) return;
+        var point = 0;
+        node._xflowip.interval = window.setInterval(function(){
+            point = (point + 1) % 4;
+            var text = "loading";
+            for(var i=1; i < point; ++i) text += ".";
+            node._xflowip.info.innerHTML = text;
+        }, 200);
+    }
+
+    function endLoading(nodeId){
+        var node = c_nodes[nodeId];
+        if(!node || !node._xflowip.info) return;
+        window.clearInterval(node._xflowip.interval);
+        node._xflowip.interval = null;
+        node._xflowip.info.innerHTML = "";
     }
 
     var c_canvas = document.createElement("canvas");

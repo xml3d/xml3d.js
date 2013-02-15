@@ -307,6 +307,7 @@ function SinkNode(id, entry, source, xflowDataNode){
 };
 
 SinkNode.prototype.invalidate = function(){
+    self.postMessage({type: "modified", id: this.id});
     this.invalid = true;
 }
 

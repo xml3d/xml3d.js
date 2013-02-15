@@ -8,22 +8,18 @@
      ====================================================================== -->
 <project name="script-merge" default="develop">
     <description>
-           Merge all the single scripts to one global xml3d.js
+           Build the xflow-ip script
     </description>
 
     <import file="build-master.xml" />
-    <property file="build.properties" />
+    <property file="build-xflowip.properties" />
 
-    <filelist dir="${modulesBuildDir}" id="modules">
-        <file name="../../../src/xml3d.js" />
-        <file name="xml3d-utils-module.js" />
-        <file name="xml3d-contrib-module.js" />
-        <file name="xml3d-types-module.js" />
-        <file name="xml3d-base-module.js" />
-        <file name="xml3d-interface-module.js" />
+    <filelist dir="${modulesBuildDir}" id="xflow-ip-worker">
+        <file name="../../../src/xflow-ip/base.js" />
+    	<file name="../../../src/utils/array.js" />
+        <file name="../../../src/contrib/glMatrix.js" />
         <file name="xml3d-xflow-module.js" />
-        <file name="xml3d-data-module.js" />
-        <file name="xml3d-renderer-module.js" />
+        <file name="../../../src/xflow-ip/worker.js" />
     </filelist>
 
     <target name="lastTag" depends="init, modules-concat, windowsGit, linuxGit">
@@ -55,11 +51,10 @@
     </target>
 
     <target name="develop" depends="init, modules-concat">
-        <concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})" source="modules" />
-    </target>
-
-    <target name="develop-min" depends="init, modules-concat">
-        <compileScripts version="DEVELOPMENT SNAPSHOT (${build.time})" extension="" source="modules" />
+        <concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})" source="xflow-ip-worker" />
+        <concat destfile="${buildDir}/xflowip.js">
+            <fileset file="${srcDir}/xflow-ip/client.js" />
+        </concat>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - -

@@ -479,7 +479,14 @@ ImageDataTextureEntry.prototype.createImage = function(width, height, formatType
             imageData.data = new Float32Array(width*height*4);
         }
         else {
-            imageData.data = new Uint8Array(width*height*4);
+            // FIXME: We should allocate Uint8ClampedArray here instead
+            // But Uint8ClampedArray can't be allocated in Chrome inside a Web Worker
+            // See bug: http://code.google.com/p/chromium/issues/detail?id=176479
+            // As a work around, we allocate Int16Array which results in correct clamping outside of web worker
+            if(Uint8Array == Uint8ClampedArray)
+                imageData.data = new Int16Array(width*height*4);
+            else
+                imageData.data = new Uint8ClampedArray(width*height*4);
         }
         this._imageData = imageData;
     }

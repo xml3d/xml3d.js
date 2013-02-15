@@ -34,7 +34,9 @@ var XflowIP = {};
         var style = document.createElement("style");
         style.setAttribute("type", "text/css");
         style.innerHTML = "xflowip { display: none;}\n" +
-                "xflowimg * { display: none;}";
+                "xflowimg { display: inline-block;}\n" +
+                "xflowimg * { display: none;}\n" +
+                "xflowimg canvas { display: inline-block }";
         document.head.appendChild(style);
     }
 
@@ -146,21 +148,21 @@ var XflowIP = {};
 
     function initSinkNode(node){
         initNode(node);
-
         var canvas = document.createElement("canvas");
-        var hideDiv = document.createElement("div");
-        hideDiv.style.display = 'none';
-        node.parentNode.insertBefore(canvas, node);
-        node.parentNode.insertBefore(hideDiv, node);
-        hideDiv.appendChild(node);
+        node.appendChild(canvas);
         syncCanvasStyle(node, canvas);
-
         node._xflowip.canvas = canvas;
     }
 
     function syncCanvasStyle(node, canvas){
+
+
+        // We need to hide the node, because otherwise computed Style width and height won't return 'auto' but only precise pixel values
+        var prevDisplay = node.style.display;
+        node.style.display = 'none';
         var cStyle = window.getComputedStyle(node);
         var originalStyle = window.getComputedStyle(canvas);
+        /*
         for(var i in cStyle){
             if(isNaN(i) && i != "cssText"){
                 var newValue = cStyle[i] && cStyle[i].replace && cStyle[i].replace("0px", "0");
@@ -169,6 +171,12 @@ var XflowIP = {};
                     canvas.style[i] = cStyle[i];
             }
         }
+        */
+        canvas.style.width = cStyle.width;
+        canvas.style.height = cStyle.height;
+        node.style.display = prevDisplay;
+
+
     }
 
     function getNodeData(node){

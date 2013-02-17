@@ -185,6 +185,15 @@ XML3D.base.AdapterFactory.prototype.createAdapter = function(obj) {
 };
 
 /**
+ * Checks if the adapter factory supports specified mimetype. Can be overridden by subclass.
+ * @param {String} mimetype
+ * @return {Boolean} true if the adapter factory supports specified mimetype
+ */
+XML3D.base.AdapterFactory.prototype.supportsMimetype = function(mimetype) {
+    return this.mimetypes.indexOf(mimetype) != -1;
+};
+
+/**
  * A NodeAdaperFactory is a AdapterFactory, that works specifically for DOM nodes / elements.
  * @constructor
  * @implements {XML3D.base.AdapterFactory}

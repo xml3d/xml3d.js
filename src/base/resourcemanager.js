@@ -338,7 +338,7 @@
         for ( var i = 0; i < factories.length; ++i) {
             var fac = factories[i];
             if (fac.aspect == adapterType && fac.supportsMimetype(mimetype)) {
-                var adapter = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
+                var adapter = fac.getAdapter ? fac.getAdapter(data, mimetype) : fac.createAdapter(data, mimetype);
                 if (adapter) {
                     handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);
                 }

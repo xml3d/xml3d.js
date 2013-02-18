@@ -85,14 +85,13 @@
         this.transform = opt.transform || RenderObject.IDENTITY_MATRIX;
         this.visible = opt.visible !== undefined ? opt.visible : true;
         this.meshAdapter.renderObject = this;
+        /** {Object?} **/
+        this.override = null;
         this.create();
     };
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.identity(XML3D.math.mat4.create());
 
-    RenderObject.prototype.onmaterialChanged = function() {
-        // console.log("Material changed");
-    };
 
     RenderObject.prototype = {
         onenterReady:function () {
@@ -139,6 +138,20 @@
         onchangestate:function (name, from, to) {
             XML3D.debug.logInfo("Changed: ", name, from, to);
         }
+    };
+
+    /**
+     * @param {Xflow.Result} result
+     */
+    RenderObject.prototype.setOverride = function(result) {
+        var prog = this.meshAdapter.factory.renderer.shaderManager.getShaderById(this.shader);
+        this.override = Object.create(null);
+        for(var name in prog.uniforms) {
+            var entry = result.getOutputData(name);
+            if (entry && entry.getValue())
+                this.override[name] = entry.getValue();
+        }
+        XML3D.debug.logInfo("Shader attribute override", result, this.override);
     };
 
     StateMachine.create({

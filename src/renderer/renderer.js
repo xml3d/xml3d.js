@@ -356,6 +356,7 @@ var tmpModelViewProjection = XML3D.math.mat4.create();
 var identMat3 = XML3D.math.mat3.identity(XML3D.math.mat3.create());
 var identMat4 = XML3D.math.mat4.identity(XML3D.math.mat4.create());
 
+
 Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, stats) {
     var objCount = 0;
     var triCount = 0;
@@ -421,6 +422,10 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
           normalMatrix[8], normalMatrix[9], normalMatrix[10]]);
 
         this.shaderManager.setUniformVariables(shader, parameters);
+        if(obj.override !== null) { // TODO: Set back to default after rendering
+            this.shaderManager.setUniformVariables(shader, obj.override);
+        }
+
         triCount += this.drawObject(shader, mesh);
         objCount++;
     }
@@ -496,7 +501,7 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
                 offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
             }
         } else {
-            console.log("drawArrays: " + meshInfo.getVertexCount());
+                //console.log("drawArrays: " + meshInfo.getVertexCount());
                 gl.drawArrays(meshInfo.glType, 0, meshInfo.getVertexCount());
         }
         triCount = vbos.position ? vbos.position[i].length / 3 : 0;

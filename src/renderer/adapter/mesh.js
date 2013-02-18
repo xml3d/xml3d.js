@@ -166,13 +166,19 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     /**
      *
+     * @param {Array<String>} meshRequests
+     * @param {Array<String>} objectRequests
      */
-    p.createRequests = function(requestNames) {
+    p.createRequests = function(meshRequests, objectRequests) {
         var that = this;
-        this.computeRequest = this.computeRequest || this.dataAdapter.getComputeRequest(requestNames,
+        this.computeRequest = this.computeRequest || this.dataAdapter.getComputeRequest(meshRequests,
             function(request, changeType) {
                 that.dataChanged(request, changeType);
         });
+        this.objectRequest = this.objectRequest || this.dataAdapter.getComputeRequest(objectRequests,
+            function(request, changeType) {
+                XML3D.debug.logInfo("Per object shader attributes changes not handled yet", request, changeType);
+            });
         this.bboxComputeRequest = this.bboxComputeRequest || this.dataAdapter.getComputeRequest(bboxAttributes);
     };
 
@@ -181,10 +187,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         this.requestObject = prog.material.meshRequest;
 
-        this.createRequests(Object.keys(this.requestObject));
+        this.createRequests(Object.keys(this.requestObject), Object.keys(prog.uniforms));
 
         this.bbox = this.calcBoundingBox();
         this.createMeshData();
+        this.createPerObjectData();
         return this.renderObject.mesh.valid;
     }
 
@@ -213,6 +220,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             default:
                 XML3D.debug.logInfo("Unknown state: " + state);
         }
+    };
+
+    p.createPerObjectData = function() {
+        var perObjectData = this.objectRequest.getResult();
+        this.renderObject.setOverride(perObjectData);
     };
 
     /**
@@ -246,7 +258,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
             if (name == "vertexCount") {
                 obj.mesh.vertexCount = entry.getValue();
-                console.log("VertexCount", obj.mesh.vertexCount);
                 continue;
             }
 

@@ -271,11 +271,16 @@
             uniInfo.glType = uni.type;
             uniInfo.location = gl.getUniformLocation(prg, uni.name);
 
+            var name = uniInfo.name;
+            if(uni.size > 1 && name.substring(name.length-3) == "[0]") {
+                name = name.substring(0, name.length -3); // Remove [0]
+            }
+
             if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
                 uniInfo.unit = programObject.nextTextureUnit();
-                programObject.samplers[uni.name] = uniInfo;
+                programObject.samplers[name] = uniInfo;
             } else
-                programObject.uniforms[uni.name] = uniInfo;
+                programObject.uniforms[name] = uniInfo;
         }
 
         programObject.changes = [];

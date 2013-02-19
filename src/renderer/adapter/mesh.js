@@ -5,7 +5,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     var eventTypes = {onclick:1, ondblclick:1,
         ondrop:1, ondragenter:1, ondragleave:1};
 
-    var bboxAttributes = ["boundingbox"];
+    var bboxAttributes = ["boundingBox"];
 
     /**
      * @constructor
@@ -15,10 +15,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.isIndexed = false;
         this.complete = false;
         this.glType = getGLTypeFromString(type);
-        this.bbox = new window.XML3DBox();
+        this.bbox = new XML3DBox();
+
         this.getVertexCount = function() {
             try {
-                return this.isIndexed ? this.vbos.index[i].length : (this.vertexCount !== undefined ? this.vertexCount[0] : this.vbos.position[0].length);
+                return this.isIndexed ? this.vbos.index[0].length : (this.vertexCount !== undefined ? this.vertexCount[0] : this.vbos.position[0].length);
             } catch(e) {
                 return 0;
             }
@@ -197,7 +198,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         this.createRequests(Object.keys(this.requestObject), Object.keys(prog.uniforms));
 
-        this.bbox = this.calcBoundingBox();
         this.createMeshData();
         this.createPerObjectData();
         return this.renderObject.mesh.valid;
@@ -259,6 +259,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             }*/
             if(!entry || !entry.getValue()) {
                 if(attr.required) {
+                    XML3D.debug.logInfo("Mesh not complete, missing: ", name, entry);
                     obj.mesh.complete = false;
                 }
                 continue;
@@ -277,11 +278,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     this.handleBuffer(name, attr, entry, obj.mesh);
             };
         }
-        //Calculate a bounding box for the mesh
-        if (obj.mesh.vbos["positions"]) {
-            this.bbox = this.calcBoundingBox();
-            obj.mesh.bbox.set(this.bbox);
-        }
+        var bbox = this.calcBoundingBox();
+        if(bbox)
+            obj.mesh.bbox.set(bbox);
+
         obj.mesh.valid = true;
     };
 
@@ -323,6 +323,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         meshInfo.vbos[name] = [];
         meshInfo.vbos[name][0] = buffer;
         meshInfo.isIndexed = meshInfo.isIndexed || name == "index";
+        if(meshInfo.isIndexed)
+            console.error("Indexed");
 
             delete webglData.changed;
     }
@@ -354,10 +356,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     /**
-     * @return {XML3DBox}
+     * @return {window.XML3DBox}
      */
     p.getBoundingBox = function() {
-        return new window.XML3DBox(this.bbox);
+        return new window.XML3DBox(this.renderObject.mesh.bbox);
     };
 
     /**
@@ -376,7 +378,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     /**
      * @private
-     * @return {XML3DBox} the calculated bounding box of this mesh.
+     * @return {window.XML3DBox} the calculated bounding box of this mesh.
      */
     p.calcBoundingBox = function() {
 
@@ -384,7 +386,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         // try to compute bbox using the boundingbox property of xflow
         var bboxResult = this.bboxComputeRequest.getResult();
-        var bboxOutData = bboxResult.getOutputData("boundingbox");
+        var bboxOutData = bboxResult.getOutputData("boundingBox");
         if (bboxOutData)
         {
             var bboxVal = bboxOutData.getValue();

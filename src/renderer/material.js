@@ -18,7 +18,7 @@
     Material.prototype.vertex = null;
     Material.prototype.meshRequest = {
         index : null,
-        position: null,
+        position: { required: true },
         normal: null,
         color: null,
         texcoord: null

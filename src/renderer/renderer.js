@@ -538,7 +538,6 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
     gl.viewport(0, 0, fbo.width, fbo.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
-    return;
     var viewMatrix = this.camera.viewMatrix;
     var projMatrix = this.camera.getProjectionMatrix(fbo.width / fbo.height);
     var mvp = XML3D.math.mat4.create();

@@ -55,25 +55,24 @@ Xflow.getTypeName = function(type){
  * @enum {number}
  */
 Xflow.TEX_FILTER_TYPE = {
-    NONE: 0,
-    REPEAT: 1,
-    LINEAR: 2
+    NEAREST: 0x2600,
+    LINEAR: 0x2601,
+    MIPMAP_NEAREST: 0x2700,
+    MIPMAP_LINEAR: 0x2701
+
 };
 /**
  * @enum {number}
  */
 Xflow.TEX_WRAP_TYPE = {
-    CLAMP: 0,
-    REPEAT: 1,
-    BORDER: 2
+    CLAMP: 0x812F,
+    REPEAT: 0x2901
 };
 /**
  * @enum {number}
  */
 Xflow.TEX_TYPE = {
-    TEXTURE_1D: 0,
-    TEXTURE_2D: 1,
-    TEXTURE_3D: 2
+    TEXTURE_2D: 0x0DE1
 };
 
 
@@ -155,7 +154,7 @@ Xflow.ORIGIN = {
  * @param {Object} ctor Constructor
  * @param {Object} parent Parent class
  * @param {Object=} methods Methods to add to the class
- * @returns
+ * @returns {Object}
  */
 Xflow.createClass = function(ctor, parent, methods) {
     methods = methods || {};

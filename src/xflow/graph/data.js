@@ -24,13 +24,13 @@ Xflow.SamplerConfig = function(){
 };
 Xflow.SamplerConfig.prototype.setDefaults = function() {
     // FIXME Generate this from the spec ?
-    this.minFilter = WebGLRenderingContext.LINEAR;
-    this.magFilter = WebGLRenderingContext.LINEAR;
-    this.mipFilter = WebGLRenderingContext.NEAREST;
-    this.wrapS = WebGLRenderingContext.CLAMP_TO_EDGE;
-    this.wrapT = WebGLRenderingContext.CLAMP_TO_EDGE;
-    this.wrapU = WebGLRenderingContext.CLAMP_TO_EDGE;
-    this.textureType = WebGLRenderingContext.TEXTURE_2D;
+    this.minFilter = Xflow.TEX_FILTER_TYPE.LINEAR;
+    this.magFilter = Xflow.TEX_FILTER_TYPE.LINEAR;
+    this.mipFilter = Xflow.TEX_FILTER_TYPE.NEAREST;
+    this.wrapS = Xflow.TEX_WRAP_TYPE.CLAMP;
+    this.wrapT = Xflow.TEX_WRAP_TYPE.CLAMP;
+    this.wrapU = Xflow.TEX_WRAP_TYPE.CLAMP;
+    this.textureType = Xflow.TEX_TYPE.TEXTURE_2D;
     this.colorR = 0;
     this.colorG = 0;
     this.colorB = 0;

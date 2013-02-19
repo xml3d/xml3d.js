@@ -145,6 +145,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
             this.factory.renderer.lights);
         this.renderObject.shader = shaderName;
+        XML3D.debug.logInfo("New shader, clearing requests: ", shaderName);
+        this.clearRequests(); // New shader, new requests
         this.renderObject.materialChanged();
         this.factory.renderer.requestRedraw("Shader changed.", false);
     }
@@ -181,6 +183,12 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             });
         this.bboxComputeRequest = this.bboxComputeRequest || this.dataAdapter.getComputeRequest(bboxAttributes);
     };
+
+    p.clearRequests = function() {
+        this.computeRequest && this.computeRequest.clear();
+        this.objectRequest && this.objectRequest.clear();
+        this.computeRequest = this.objectRequest = null;
+    }
 
     p.finishMesh = function() {
         var prog = this.factory.renderer.shaderManager.getShaderById(this.renderObject.shader);
@@ -240,7 +248,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         for ( var name in this.requestObject) {
             var attr = this.requestObject[name] || {};
             var entry = dataResult.getOutputData(name);
-            /*if (!entry) {
+            /*if (entry == undefined) {
                 if(attr.required) {
                     // This needs a structural change before we get the required signature
                     console.log("Invalid", name);
@@ -326,12 +334,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      */
     p.handleTexture = function(name, entry, shaderId, meshInfo) {
         var prog = this.factory.renderer.shaderManager.getShaderById(shaderId);
-        //console.log("Handle Texture: " + name, prog);
         meshInfo.sampler = meshInfo.sampler || {};
-        if(name in prog.samplers) {
+        if((entry.userData.webglDataChanged != -1) && (name in prog.samplers)) {
             this.factory.renderer.shaderManager.createTextureFromEntry(entry, prog.samplers[name]);
         }
-
+        entry.userData.webglDataChanged = -1;
     }
 
     /**

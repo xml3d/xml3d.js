@@ -285,7 +285,7 @@ if(window.ParallelArray){
 }
 
 function riverTrailAvailable(){
-    return window.ParallelArray && window.RiverTrail && RiverTrail.compiler;
+    return window.ParallelArray && window.RiverTrail && window.RiverTrail.compiler;
 }
 
 

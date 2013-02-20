@@ -15,7 +15,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.isIndexed = false;
         this.complete = false;
         this.glType = getGLTypeFromString(type);
-        this.bbox = new XML3DBox();
+        this.bbox = new window.XML3DBox();
 
         this.getVertexCount = function() {
             try {

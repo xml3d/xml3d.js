@@ -487,7 +487,6 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
                 offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
             }
         } else {
-            console.log("drawElements: " + meshInfo.getVertexCount());
             gl.drawElements(meshInfo.glType, meshInfo.getVertexCount(), gl.UNSIGNED_SHORT, 0);
         }
 

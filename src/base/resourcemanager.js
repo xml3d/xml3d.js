@@ -219,12 +219,7 @@
                 XML3D.config.element(xml3dElements[i]);
             }
         } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
-            // for backwards compatibility
-            var buf = new ArrayBuffer(req.responseText.length);
-            var view = new Uint8Array(buf);
-            for (var i = 0; i < req.responseText.length; ++i) {
-                view[i] = req.responseText.charCodeAt(i) & 0xff;
-            }
+            XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
             docCache.response = buf;
         }
     }

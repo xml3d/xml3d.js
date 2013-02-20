@@ -145,7 +145,6 @@
                             xmlHttp._url = url;
                             xmlHttp._contentChecked = true;
                             xmlHttp.open('GET', url, true);
-                            xmlHttp.overrideMimeType("text/plain; charset=x-user-defined"); // not needed when responseType is arraybuffer
                             xmlHttp.responseType = "arraybuffer";
                             xmlHttp.onreadystatechange = cb;
                             xmlHttp.send(null);
@@ -156,7 +155,7 @@
                 // Non-binary
                 if (xmlHttp.readyState == 4) {
                     if(xmlHttp.status == 200){
-                        XML3D.debug.logDebug("Loaded: " + url);
+                        XML3D.debug.logDebug("Loaded: " + xmlHttp._url);
                         XML3D.xmlHttpCallback && XML3D.xmlHttpCallback(xmlHttp);
                         processResponse(xmlHttp);
                     }

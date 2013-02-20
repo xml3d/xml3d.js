@@ -117,6 +117,7 @@
                     // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
                     ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 ||xmlHttp.readyState == 4) &&
                         xmlHttp.status == 200)) {
+                    xmlHttp._contentChecked = true; // we check only once
                     // check if we need to enforce binary mode
                     var contentType = xmlHttp.getResponseHeader("content-type");
                     if (contentType) {

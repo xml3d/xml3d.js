@@ -92,6 +92,50 @@
     };
 
     var binaryContentTypes = ["application/octet-stream", "text/plain; charset=x-user-defined"];
+    var binaryExtensions = [".bin", ".bson"];
+
+    function endsWith(str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    }
+
+    ResourceManager.prototype.addBinaryContentType = function (type) {
+        if (binaryContentTypes.indexOf(type) == -1)
+            binaryContentTypes.push(type);
+    };
+
+    ResourceManager.prototype.removeBinaryContentType = function (type) {
+        var idx = binaryContentTypes.indexOf(type);
+        if (idx != -1)
+            binaryContentTypes.splice(idx, 1);
+    };
+
+    function isBinaryContentType(contentType) {
+        for (var i in binaryContentTypes) {
+            if (contentType == binaryContentTypes[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    ResourceManager.prototype.addBinaryExtension = function(extension) {
+        if (binaryExtensions.indexOf(extension) == -1)
+            binaryExtensions.push(extension);
+    };
+
+    ResourceManager.prototype.removeBinaryExtension = function(extension) {
+        var idx = binaryExtensions.indexOf(type);
+        if (idx != -1)
+            binaryExtensions.splice(idx, 1);
+    };
+
+    function isBinaryExtension(url) {
+        for (var i in binaryExtensions) {
+            if (endsWith(url, binaryExtensions[i]))
+                return true;
+        }
+        return false;
+    }
 
     /**
      * Load a document via XMLHttpRequest
@@ -109,26 +153,25 @@
             xmlHttp._url = url;
             xmlHttp._contentChecked = false;
             xmlHttp.open('GET', url, true);
+            if (isBinaryExtension(url))
+                xmlHttp.responseType = "arraybuffer";
 
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp._aborted) // This check is possibly not needed
                     return;
+                // check compatibility between content and request mode
                 if (!xmlHttp._contentChecked &&
                     // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
                     ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 ||xmlHttp.readyState == 4) &&
                         xmlHttp.status == 200)) {
                     xmlHttp._contentChecked = true; // we check only once
-                    // check if we need to enforce binary mode
+                    // check if we need to change request mode
                     var contentType = xmlHttp.getResponseHeader("content-type");
                     if (contentType) {
-                        var requestBinaryData = false;
-                        for (var i in binaryContentTypes) {
-                            if (contentType == binaryContentTypes[i]) {
-                                requestBinaryData = true;
-                                break;
-                            }
-                        }
-                        if (requestBinaryData) {
+                        var binaryContent = isBinaryContentType(contentType);
+                        var binaryRequest = (xmlHttp.responseType == "arraybuffer");
+                        // When content is not the same as request, we need to repeat request
+                        if (binaryContent != binaryRequest) {
                             xmlHttp._aborted = true;
                             var cb = xmlHttp.onreadystatechange;
                             xmlHttp.onreadystatechange = null;
@@ -142,18 +185,19 @@
                             //       with "text/plain; charset=x-user-defined" argument.
                             //       The latter mode require creation of the fresh XMLHttpRequest.
 
-                            xmlHttp = new XMLHttpRequest(); // uncomment for use with overrideMimeType
+                            xmlHttp = new XMLHttpRequest();
                             xmlHttp._url = url;
                             xmlHttp._contentChecked = true;
                             xmlHttp.open('GET', url, true);
-                            xmlHttp.responseType = "arraybuffer";
+                            if (binaryContent)
+                                xmlHttp.responseType = "arraybuffer";
                             xmlHttp.onreadystatechange = cb;
                             xmlHttp.send(null);
                             return;
                         }
                     }
                 }
-                // Non-binary
+                // Request mode and content type are compatible here (both binary or both text)
                 if (xmlHttp.readyState == 4) {
                     if(xmlHttp.status == 200){
                         XML3D.debug.logDebug("Loaded: " + xmlHttp._url);

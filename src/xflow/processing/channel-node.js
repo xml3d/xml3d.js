@@ -204,7 +204,8 @@
     }
 
     function setOperatorProtoNames(channelNode){
-        channelNode.operator = Xflow.getOperator(channelNode.owner._computeOperator);
+        var operatorName = channelNode.owner._computeOperator;
+        channelNode.operator = operatorName && Xflow.getOperator(operatorName);
         if(channelNode.operator){
             var operator = channelNode.operator, inputMapping = channelNode.owner._computeInputMapping;
             for(var i = 0; i < operator.params.length; ++i){

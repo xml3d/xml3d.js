@@ -323,8 +323,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         meshInfo.vbos[name] = [];
         meshInfo.vbos[name][0] = buffer;
         meshInfo.isIndexed = meshInfo.isIndexed || name == "index";
-        if(meshInfo.isIndexed)
-            console.error("Indexed");
+        //if(meshInfo.isIndexed)
+            //console.error("Indexed");
 
             delete webglData.changed;
     }

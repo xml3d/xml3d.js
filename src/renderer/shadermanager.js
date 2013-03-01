@@ -272,9 +272,10 @@
             uniInfo.location = gl.getUniformLocation(prg, uni.name);
 
             var name = uniInfo.name;
-            if(uni.size > 1 && name.substring(name.length-3) == "[0]") {
-                name = name.substring(0, name.length -3); // Remove [0]
-            }
+            // Need to discuss how to sort out the consequences of doing this in the renderer first --Chris
+            //if(uni.size > 1 && name.substring(name.length-3) == "[0]") {
+            //    name = name.substring(0, name.length -3); // Remove [0]
+            //}
 
             if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
                 uniInfo.unit = programObject.nextTextureUnit();

@@ -162,8 +162,10 @@
         this.shaders[shaderId] = program;
         this.gl.useProgram(program.handle);
 
-        this.setUniformsFromComputeResult(program, dataTable, { force: true });
-        this.createTexturesFromComputeResult(program, dataTable, { force: true });
+        var canvasId = shaderAdapter.factory.canvasId;
+
+        this.setUniformsFromComputeResult(program, dataTable, canvasId, { force: true });
+        this.createTexturesFromComputeResult(program, dataTable, canvasId, { force: true });
         //XML3D.webgl.checkError(this.gl, "setSamplers");
         return shaderId;
     };
@@ -312,12 +314,13 @@
     };
 
     XML3DShaderManager.prototype.shaderDataChanged = function(adapter, request, changeType) {
+        var canvasId = adapter.factory.canvasId;
         var shaderId = new XML3D.URI("#" + adapter.node.id).getAbsoluteURI(adapter.node.ownerDocument.documentURI).toString();
         var program = this.shaders[shaderId];
         if(!program) return; // No Program - probably invalid shader
         var result = request.getResult();
         this.bindShader(program);
-        this.setUniformsFromComputeResult(program, result);
+        this.setUniformsFromComputeResult(program, result, canvasId);
         this.createTexturesFromComputeResult(program, result);
         if(program.material) {
             program.material.parametersChanged(result.getOutputMap());
@@ -350,7 +353,7 @@
      * @param {Xflow.ComputeResult} data
      * @param {Object?} opt
      */
-    XML3DShaderManager.prototype.setUniformsFromComputeResult = function(programObject, data, opt) {
+    XML3DShaderManager.prototype.setUniformsFromComputeResult = function(programObject, data, canvasId, opt) {
         var dataMap = data.getOutputMap();
         var uniforms = programObject.uniforms;
         var opt = opt || {};
@@ -363,9 +366,11 @@
             if(!entry)
                 continue;
 
-            if(force || entry.userData.webglDataChanged != -1 ) {
+            var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, canvasId);
+
+            if(force || webglData.changed != -1 ) {
                 XML3DShaderManager.setUniform(this.gl, uniforms[name], entry.getValue());
-                entry.userData.webglDataChanged = -1;
+                webglData.changed = -1;
             }
         }
     };
@@ -375,7 +380,7 @@
      * @param {Xflow.ComputeResult} result
      * @param {Object?} opt options
      */
-    XML3DShaderManager.prototype.createTexturesFromComputeResult = function(programObject, result, opt) {
+    XML3DShaderManager.prototype.createTexturesFromComputeResult = function(programObject, result, canvasId, opt) {
         var texUnit = 0;
         var samplers = programObject.samplers;
         var opt = opt || {};
@@ -391,9 +396,11 @@
                 continue;
             }
 
-            if(force || entry.userData.webglDataChanged != -1 ) {
+            var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, canvasId);
+
+            if(force || webglData.changed != -1 ) {
                 this.createTextureFromEntry(entry, sampler, texUnit);
-                entry.userData.webglDataChanged = -1;
+                webglData.changed = -1;
             }
             texUnit++;
         }

@@ -236,9 +236,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             if (!entry || !entry.getValue())
                 continue;
 
-            var buffer = entry.userData.buffer;
 
-            switch(entry.userData.webglDataChanged) {
+            var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
+            var buffer = webglData.buffer;
+
+            switch(webglData.changed) {
             case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:
                 var bufferType = attr == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
@@ -253,7 +255,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.getValue());
                 }
                 buffer.tupleSize = entry.getTupleSize();
-                entry.userData.buffer = buffer;
+                webglData.buffer = buffer;
                 break;
              default:
                  break;
@@ -268,7 +270,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             if (attr == "index")
                 obj.mesh.isIndexed = true;
 
-            delete entry.userData.webglDataChanged;
+            delete webglData.changed;
         }
 
         //Calculate a bounding box for the mesh

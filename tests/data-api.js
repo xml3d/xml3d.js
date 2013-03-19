@@ -56,22 +56,22 @@ test("Access Results", function() {
     QUnit.closeArray(result.getNames().sort(),
         ["index", "position"], EPSILON, "filtered result of #baseData has correct output names" );
 
-    ok(result.get("index") instanceof this.window.XML3DDataEntry, "Entry for 'index' is of type XML3DDataEntry" );
-    equal(result.get("index").type, XML3DDataEntry.INT, "'index' field of #baseData has correct type" );
-    QUnit.closeArray(result.get("index").value,
+    equal(result.getType("index"), XML3DDataEntry.INT, "'index' field of #baseData has correct type" );
+    QUnit.closeArray(result.getValue("index"),
         new Int32Array([0,1,2,1,2,3]), EPSILON, "'index' field of #baseData has correct value"  );
 
-    equal(result.get("position").type, XML3DDataEntry.FLOAT3, "'position' field of #baseData has correct type" );
-    QUnit.closeArray(result.get("position").value,
+    equal(result.getType("position"), XML3DDataEntry.FLOAT3, "'position' field of #baseData has correct type" );
+    QUnit.closeArray(result.getValue("position"),
         new Float32Array([-1, -1, -10,  1, -1, -10,  -1, 1, -10,  1, 1, -10]), EPSILON,
         "'position' field of #baseData has correct value"  );
 
-    equal(result.get("normal"), null, "'normal' field of #baseData result is null (because not requested)" );
+    equal(result.getValue("normal"), null, "'normal' field value of #baseData result is null (because not requested)" );
+    equal(result.getType("normal"), null, "'normal' field type of #baseData result is null (because not requested)" );
 
 
     result = this.doc.getElementById("morphedData").getResult(["position"]);
 
-    QUnit.closeArray(result.get("position").value,
+    QUnit.closeArray(result.getValue("position"),
         new Float32Array([-1, -1, -10, 1.5, -1, -10, -1, 1, -10, 2, 1, -10]), EPSILON,
         "'position' field of #morphedData has correct value"  );
 
@@ -79,7 +79,7 @@ test("Access Results", function() {
 
 
     result = this.doc.getElementById("morphedData").getResult(["position"]);
-    QUnit.closeArray(result.get("position").value,
+    QUnit.closeArray(result.getValue("position"),
         new Float32Array([-1.5, -1, -10, 1.5, -1, -10, -2, 1, -10, 2, 1, -10]), EPSILON,
         "'position' field of #morphedData has correct value after change"  );
 
@@ -91,14 +91,14 @@ test("Access Results", function() {
 
     result = this.doc.getElementById("unusedMorphedData").getResult(["position"]);
 
-    QUnit.closeArray(result.get("position").value,
+    QUnit.closeArray(result.getValue("position"),
         new Float32Array([-1, -1, -10, 1.5, -1, -10, -1, 1, -10, 2, 1, -10]), EPSILON,
         "'position' field of #unusedMorphedData has correct value"  );
 
     this.doc.getElementById("doubleWeight1U").firstChild.nodeValue = "1";
 
     result = this.doc.getElementById("unusedMorphedData").getResult(["position"]);
-    QUnit.closeArray(result.get("position").value,
+    QUnit.closeArray(result.getValue("position"),
         new Float32Array([-1.5, -1, -10, 1.5, -1, -10, -2, 1, -10, 2, 1, -10]), EPSILON,
         "'position' field of #unusedMorphedData has correct value after change"  );
 

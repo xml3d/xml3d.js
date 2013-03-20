@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="xml3dScene1" width="400px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+      <data id="baseData" >
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3>
+        <float3 name="posAdd1">-0.5 0 0  0 0 0 -1 0 0  0 0 0</float3>
+        <float3 name="posAdd2">0 0 0  0.5 0 0  0 0 0  1 0 0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      </data>
+
+      <data id="morphSingle" >
+        <data compute="position = xflow.morph(position, posAdd1, weight)" >
+          <data src="#baseData" />
+          <float name="weight" id="singleWeight" >0.3</float>
+        </data>
+      </data>
+
+    </defs>
+
+    <group id="meshGroup" shader="#pink" >
+      <mesh id="myMesh02" >
+        <data src="#morphSingle" />
+      </mesh>
+    </group>
+
+    <group id="meshGroup" transform="#left" >
+        <mesh id="myMesh02" >
+          <data src="#baseData" />
+        </mesh>
+    </group>
+  </xml3d>
+
+  <xml3d id="xml3dScene2" width="400px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+
+      <shader id="pink" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">1 0 1</float3>
+      </shader>
+      <transform id="left" translation="-3 0 0" />
+
+      <group id="meshGroup" shader="#pink" >
+          <mesh id="myMesh02" >
+              <data src="#morphSingle" />
+          </mesh>
+      </group>
+
+      <group id="meshGroup" transform="#left" >
+          <mesh id="myMesh02" >
+              <data src="#baseData" />
+          </mesh>
+      </group>
+  </xml3d>
+</body>
+</html>

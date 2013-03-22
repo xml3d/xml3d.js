@@ -168,7 +168,9 @@ XML3D.webgl.MAXFPS = 30;
         if (width < 1 || height < 1)
             return false;
 
-        this.renderer.resize(width, height);
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.renderer.resizeCanvas(width, height);
 
         return true;
     };

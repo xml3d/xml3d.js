@@ -194,6 +194,7 @@ Renderer.prototype.setGLContext = function(gl) {
 Renderer.prototype.resizeCanvas = function (width, height) {
     this.width = width;
     this.height = height;
+	this.fbos = this.initFrameBuffers(this.gl);
 };
 
 Renderer.prototype.activeViewChanged = function () {

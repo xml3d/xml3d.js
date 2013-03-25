@@ -6,6 +6,7 @@
 module("XML3DVec3 tests", {
     ident : new XML3DVec3(),
     vec1 : new XML3DVec3(3.0, 2.5, -1.0),
+    vec1Array: new Float32Array([3.0, 2.5, -1.0]),
     vec2 : new XML3DVec3(1.5, -2.0, 3.5)
 });
 
@@ -29,6 +30,14 @@ test("Assigning Constructor", function()  {
 test("Copy Constructor", function()  {
     var c = new XML3DVec3(this.vec1);
     notStrictEqual(c, this.vec1);
+    equal(c.x, 3.0, "x is 3.0");
+    equal(c.y, 2.5, "y is 2.5");
+    equal(c.z, -1.0, "z is -1.0");
+});
+
+test("Array Constructor", function() {
+
+    var c = new XML3DVec3(this.vec1Array);
     equal(c.x, 3.0, "x is 3.0");
     equal(c.y, 2.5, "y is 2.5");
     equal(c.z, -1.0, "z is -1.0");
@@ -109,11 +118,23 @@ test("XML3DVec3::normalize", function()  {
     // TODO: Implement tests
 });
 
-test("XML3DVec3::set", function()  {
+test("XML3DVec3::set vector", function()  {
     equal(typeof this.vec1.__proto__.set, 'function', "XML3DVec3::set does not exist");
     var v = new XML3DVec3();
     v.set(this.vec2);
     notStrictEqual(v, this.vec2);
+    QUnit.closeVector(v, this.vec2, EPSILON);
+});
+
+test("XML3DVec3::set array", function() {
+    var v = new XML3DVec3();
+    v.set(this.vec1Array);
+    QUnit.closeVector(v, this.vec1, EPSILON);
+});
+
+test("XML3DVec3::set values", function() {
+    var v = new XML3DVec3();
+    v.set(1.5, -2.0, 3.5);
     QUnit.closeVector(v, this.vec2, EPSILON);
 });
 

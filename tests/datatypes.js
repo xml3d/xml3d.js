@@ -145,6 +145,7 @@ test("XML3DVec3::set values", function() {
 module("XML3DRotation tests", {
     ident : new XML3DRotation(),
     rot1 : new XML3DRotation(new XML3DVec3(1.0, 0.0, 0.0), Math.PI / 2),
+    rot1Quat: new Float32Array([0.7071067690849304, 0, 0, 0.7071067690849304]),
     vec2 : new XML3DVec3(1.5, -2.0, 3.5),
     mat_90x : new XML3DMatrix(
             1,  0, 0, 0,
@@ -293,7 +294,7 @@ test("XML3DRotation::rotateVec3", function()  {
     QUnit.closeVector(result, new XML3DVec3(0, 0, -1), EPSILON);
 });
 
-test("XML3DRotation::set", function()  {
+test("XML3DRotation::set rotation", function()  {
     equal(typeof this.ident.__proto__.set, 'function', "XML3DRotation::set does not exist");
     var v = new XML3DRotation();
     v.set(this.rot1);
@@ -302,6 +303,17 @@ test("XML3DRotation::set", function()  {
 
 });
 
+test("XML3DRotation::set array", function()  {
+    var v = new XML3DRotation();
+    v.set(this.rot1Quat);
+    QUnit.closeRotation(v, this.rot1, EPSILON);
+});
+
+test("XML3DRotation::set axis-angle", function()  {
+    var v = new XML3DRotation();
+    v.set(this.rot1.axis, this.rot1.angle);
+    QUnit.closeRotation(v, this.rot1, EPSILON);
+});
 
 //============================================================================
 //--- XML3DMatrix ---

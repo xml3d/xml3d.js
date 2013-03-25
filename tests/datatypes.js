@@ -336,6 +336,12 @@ module("XML3DMatrix tests", {
         9, 10, 11, 12,
        13, 14, 15, 16),
 
+    incValueMatArray: new Float32Array([
+        1,  2,  3,  4,
+        5,  6,  7,  8,
+        9, 10, 11, 12,
+       13, 14, 15, 16]),
+
     // mat1: arbitrary matrix, but mat1_inv must be inverse of it
     mat1 : new XML3DMatrix(
     2, 2, 12, 0,
@@ -440,6 +446,12 @@ test("Assigning Constructor", function() {
     equal(this.incValueMat.m43, 15, "m43 is 15");
     equal(this.incValueMat.m44, 16, "m44 is 16");
 
+});
+
+test("Array Constructor", function() {
+
+    var m = new XML3DMatrix(this.incValueMatArray);
+    QUnit.closeMatrix(m, this.incValueMat, EPSILON);
 });
 
 test("Copy Constructor", function() {
@@ -584,6 +596,42 @@ test("XML3DMatrix::CSSMatrix conformance", function() {
             QUnit.closeMatrix(rotmat, xrot, EPSILON, "CSSMatrix:rotate matches XML3DRotation.toMatrix()");
         }
     });
+
+test("XML3DMatrix::set numbers", function() {
+    var m = new XML3DMatrix();
+    m.set(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
+
+    equal(m.m11, 1, "m11 is 1");
+    equal(m.m12, 2, "m12 is 2");
+    equal(m.m13, 3, "m13 is 3");
+    equal(m.m14, 4, "m14 is 4");
+    equal(m.m21, 5, "m21 is 5");
+    equal(m.m22, 6, "m22 is 6");
+    equal(m.m23, 7, "m23 is 7");
+    equal(m.m24, 8, "m24 is 8");
+    equal(m.m31, 9, "m31 is 9");
+    equal(m.m32, 10, "m32 is 10");
+    equal(m.m33, 11, "m33 is 11");
+    equal(m.m34, 12, "m34 is 12");
+    equal(m.m41, 13, "m41 is 13");
+    equal(m.m42, 14, "m42 is 14");
+    equal(m.m43, 15, "m43 is 15");
+    equal(m.m44, 16, "m44 is 16");
+});
+
+test("XML3DMatrix::set array", function() {
+    var m = new XML3DMatrix();
+    m.set(this.incValueMatArray);
+    QUnit.closeMatrix(m, this.incValueMat, EPSILON);
+});
+
+test("XML3DMatrix::set matrix", function() {
+    var m = new XML3DMatrix();
+    m.set(this.mat1);
+
+    notStrictEqual(m, this.mat1);
+    QUnit.closeMatrix(m, this.mat1, EPSILON);
+});
 
 //============================================================================
 //--- XML3DRay ---

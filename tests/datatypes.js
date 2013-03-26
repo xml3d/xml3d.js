@@ -294,6 +294,26 @@ test("XML3DRotation::rotateVec3", function()  {
     QUnit.closeVector(result, new XML3DVec3(0, 0, -1), EPSILON);
 });
 
+test("XML3DRotation::setFromBasis", function()  {
+    equal(typeof this.ident.__proto__.setFromBasis, 'function', "XML3DRotation::setFromBasis exists");
+
+    // test axes
+    var xAxis = new XML3DVec3(-0.562, 0.000, -0.827);
+    var yAxis = new XML3DVec3(-0.589, 0.702, 0.401);
+    var zAxis = new XML3DVec3(0.580, 0.713, -0.394);
+
+    // expected outcome
+    var expAxis = new XML3DVec3(-0.200, 0.904, 0.378);
+    var expAngle = 2.2490517934077614
+    var expRot = new XML3DRotation(expAxis, expAngle);
+
+    // test itself
+    var rot = new XML3DRotation();
+    rot.setFromBasis(xAxis, yAxis, zAxis);
+
+    QUnit.closeRotation(rot, expRot, EPSILON);
+});
+
 test("XML3DRotation::set rotation", function()  {
     equal(typeof this.ident.__proto__.set, 'function', "XML3DRotation::set does not exist");
     var v = new XML3DRotation();

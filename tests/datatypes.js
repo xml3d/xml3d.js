@@ -304,7 +304,7 @@ test("XML3DRotation::setFromBasis", function()  {
 
     // expected outcome
     var expAxis = new XML3DVec3(-0.200, 0.904, 0.378);
-    var expAngle = 2.2490517934077614
+    var expAngle = 2.2490517934077614;
     var expRot = new XML3DRotation(expAxis, expAngle);
 
     // test itself

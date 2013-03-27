@@ -143,7 +143,7 @@ XML3D.createClass = function(ctor, parent, methods) {
         XML3D.base.sendAdapterEvent(xml3dElement, {onConfigured : []});
     };
 
-    function onNodeInsertedIntoDocument(evt) {
+    function onNodeInserted(evt) {
 
         if(evt.target.tagName === "xml3d") {
             initXML3DElement(evt.target);
@@ -183,6 +183,6 @@ XML3D.createClass = function(ctor, parent, methods) {
     window.addEventListener('DOMContentLoaded', onLoad, false);
     window.addEventListener('unload', onUnload, false);
     window.addEventListener('reload', onUnload, false);
-    window.addEventListener('DOMNodeInsertedIntoDocument', onNodeInsertedIntoDocument, false);
+    document.addEventListener('DOMNodeInserted', onNodeInserted, false);
 
 })();

@@ -14,6 +14,9 @@ XML3D.webgl.MAXFPS = 30;
 
 
     XML3D.webgl.configure = function(xml3ds) {
+        if(!(xml3ds instanceof Array))
+            xml3ds = [xml3ds];
+
         var handlers = {};
         for(var i in xml3ds) {
             // Creates a HTML <canvas> using the style of the <xml3d> Element

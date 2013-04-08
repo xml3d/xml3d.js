@@ -14,19 +14,12 @@ XML3D.webgl.MAXFPS = 30;
 
 
     XML3D.webgl.configure = function(xml3ds) {
+
         if(!(xml3ds instanceof Array))
             xml3ds = [xml3ds];
 
         var handlers = {};
         for(var i in xml3ds) {
-            if(xml3ds[i]._configuredWebGL)
-                continue;
-            // has to be set before anything else below is done
-            // because during createCanvas() below the xml3d element is replaced
-            // and thus, another DOMNodeInserted event is fired which will cause
-            // this function to be called again (see xml3d.js initXML3DElement())
-            xml3ds[i]._configuredWebGL = true;
-
             // Creates a HTML <canvas> using the style of the <xml3d> Element
             var canvas = XML3D.webgl.createCanvas(xml3ds[i], i);
             // Creates the CanvasHandler for the <canvas>  Element

@@ -113,16 +113,33 @@ XML3D.createClass = function(ctor, parent, methods) {
         hideDiv.parentNode.insertBefore(infoDiv, hideDiv);
     };
 
+    /*  a list of elements that are currently initialized. More specifically,
+     *  they're currently in a call to the method below.
+     *
+     *  Why?
+     *  In webgl we actually reattach the xml3d element in the DOM. Thus, when
+     *  we're in the middle of working on a onNodeInserted event, there will probably
+     *  come right another event which we actually don't care for.
+     *  So we use this list to keep track of which elements are currently initializing.
+     */
+    var curXML3DInitElements = [];
+
     function initXML3DElement(xml3dElement) {
 
         if (XML3D._native)
             return;
+
+        if(-1 < curXML3DInitElements.indexOf(xml3dElement))
+            return;
+
+        curXML3DInitElements.push(xml3dElement);
 
         var debug = XML3D.debug.setup();
 
         if (!(XML3D.webgl && XML3D.webgl.supported())) {
             debug && XML3D.debug.logWarning("Could not initialise WebGL, sorry :-(");
             displayWebGLNotSupportedInfo(xml3dElement);
+            curXML3DInitElements.splice(curXML3DInitElements.indexOf(xml3dElement), 1);
             return;
         }
 
@@ -130,23 +147,43 @@ XML3D.createClass = function(ctor, parent, methods) {
             XML3D.config.configure(xml3dElement);
         } catch (e) {
             debug && XML3D.debug.logException(e);
+            curXML3DInitElements.splice(curXML3DInitElements.indexOf(xml3dElement), 1);
             return;
         }
         try {
             XML3D.webgl.configure(xml3dElement);
         } catch (e) {
             debug && XML3D.debug.logException(e);
+            curXML3DInitElements.splice(curXML3DInitElements.indexOf(xml3dElement), 1);
             return;
         }
 
         // initialize all attached adapters
         XML3D.base.sendAdapterEvent(xml3dElement, {onConfigured : []});
+
+        curXML3DInitElements.splice(curXML3DInitElements.indexOf(xml3dElement), 1);
+    };
+
+    function destroyXML3DElement(xml3dElement)
+    {
+        if(-1 < curXML3DInitElements.indexOf(xml3dElement))
+            return;
+
+        xml3dElement._configured = undefined;
+        xml3dElement._configuredWebGL = undefined;
     };
 
     function onNodeInserted(evt) {
 
         if(evt.target.tagName === "xml3d") {
             initXML3DElement(evt.target);
+        }
+    };
+
+    function onNodeRemoved(evt) {
+
+        if(evt.target.tagName === "xml3d") {
+            destroyXML3DElement(evt.target);
         }
     };
 
@@ -184,5 +221,6 @@ XML3D.createClass = function(ctor, parent, methods) {
     window.addEventListener('unload', onUnload, false);
     window.addEventListener('reload', onUnload, false);
     document.addEventListener('DOMNodeInserted', onNodeInserted, false);
+    document.addEventListener('DOMNodeRemoved', onNodeRemoved, false);
 
 })();

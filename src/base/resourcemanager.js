@@ -257,6 +257,7 @@
                 return;
             }
 
+            // FIXME moved code to XML3DFormatHandler.prototype.getFormatData, cleanup
             // Configure all xml3d elements:
             var xml3dElements = docCache.response.querySelectorAll("xml3d");
             for(var i = 0; i < xml3dElements.length; ++i){
@@ -317,6 +318,7 @@
             // TODO: Select subset of data according to fragment
             data = response;
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
+            // FIXME: This code moved to XMLFormatHandler.prototype.getFragmentData, cleanup
             data = response.querySelectorAll("*[id="+fragment+"]")[0];
         } else {
             data = response; // for "application/octet-stream" and "text/plain; charset=x-user-defined"

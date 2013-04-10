@@ -1,4 +1,4 @@
-Xflow.registerOperator("noiseImage", {
+Xflow.registerOperator("xflow.noiseImage", {
     outputs: [ {type: 'texture', name : 'image', customAlloc: true} ],
     params:  [ {type: 'int', source: 'width'},
                {type: 'int', source:'height'},

@@ -1,4 +1,4 @@
-Xflow.registerOperator("clampImage", {
+Xflow.registerOperator("xflow.clampImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image', formatType: 'ImageData'} ],
     params:  [ {type: 'texture', source : 'image'},
                {type: 'float', source : 'min'},

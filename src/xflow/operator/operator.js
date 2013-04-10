@@ -7,7 +7,7 @@
 var operators = {};
 
 Xflow.registerOperator = function(name, data){
-    var actualName = "xflow." + name;
+    var actualName = name;
     initOperator(data);
     operators[actualName] = data;
     data.name = actualName;

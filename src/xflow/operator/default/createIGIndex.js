@@ -1,4 +1,4 @@
-Xflow.registerOperator("createIGIndex", {
+Xflow.registerOperator("xflow.createIGIndex", {
     outputs:[
         //{type:'int', name:'index', customAlloc:true },
         {type:'float2', name:'texcoord', customAlloc:true }

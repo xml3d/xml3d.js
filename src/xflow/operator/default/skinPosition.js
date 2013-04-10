@@ -1,4 +1,4 @@
-Xflow.registerOperator("skinPosition", {
+Xflow.registerOperator("xflow.skinPosition", {
     outputs: [  {type: 'float3', name: 'result' }],
     params:  [  {type: 'float3', source: 'pos' },
                 {type: 'int4', source: 'boneIdx' },

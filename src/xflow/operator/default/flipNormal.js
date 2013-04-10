@@ -1,4 +1,4 @@
-Xflow.registerOperator("flipNormal", {
+Xflow.registerOperator("xflow.flipNormal", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'value'}],
     evaluate: function(result, value, info) {

@@ -1,4 +1,4 @@
-Xflow.registerOperator("merge3", {
+Xflow.registerOperator("xflow.merge3", {
     outputs: [{name: 'result', tupleSize: '16'}],
     params:  ['value1','value2','value3'],
     evaluate: function(value1, value2, value3) {
@@ -16,7 +16,7 @@ Xflow.registerOperator("merge3", {
         return true;
     }
 });
-Xflow.registerOperator("merge8", {
+Xflow.registerOperator("xflow.merge8", {
     outputs: [{name: 'result', tupleSize: '16'}],
     params:  ['value1','value2','value3','value4','value5','value6','value7','value8'],
     evaluate: function(value1, value2, value3,value4,value5,value6,value7,value8) {

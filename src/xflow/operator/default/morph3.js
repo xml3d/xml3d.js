@@ -1,4 +1,4 @@
-Xflow.registerOperator("morph", {
+Xflow.registerOperator("xflow.morph", {
     outputs: [{type: 'float3', name: 'result'}],
     params:  [
         { type: 'float3', source: 'value' },

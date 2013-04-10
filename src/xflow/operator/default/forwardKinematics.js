@@ -1,4 +1,4 @@
-Xflow.registerOperator("forwardKinematics", {
+Xflow.registerOperator("xflow.forwardKinematics", {
     outputs: [  {type: 'float4x4',  name: 'result', customAlloc: true}],
     params:  [  {type: 'int',       source: 'parent', array: true },
                 {type: 'float4x4',  source: 'xform', array: true }],

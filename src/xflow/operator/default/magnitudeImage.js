@@ -1,4 +1,4 @@
-Xflow.registerOperator("magnitudeImage", {
+Xflow.registerOperator("xflow.magnitudeImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image1'} ],
     params:  [
         {type: 'texture', source : 'image1'},

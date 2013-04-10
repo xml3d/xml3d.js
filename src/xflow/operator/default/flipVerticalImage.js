@@ -1,4 +1,4 @@
-Xflow.registerOperator("flipVerticalImage", {
+Xflow.registerOperator("xflow.flipVerticalImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],
     params:  [ {type: 'texture', source : 'image'} ],
     evaluate: function(result, image) {

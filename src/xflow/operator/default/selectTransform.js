@@ -1,4 +1,4 @@
-Xflow.registerOperator("selectTransform", {
+Xflow.registerOperator("xflow.selectTransform", {
     outputs: [ {type: 'float4x4', name : 'result', customAlloc: true} ],
     params:  [ {type: 'int', source : 'index'},
                {type: 'float4x4', source: 'transform'} ],

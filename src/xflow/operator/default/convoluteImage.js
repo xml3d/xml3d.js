@@ -45,7 +45,7 @@
         return outpixels;
     };
 
-    Xflow.registerOperator("convoluteImage", {
+    Xflow.registerOperator("xflow.convoluteImage", {
         outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],
         params:  [
             {type: 'texture', source : 'image'},
@@ -57,7 +57,7 @@
         }
     });
 
-    Xflow.registerOperator("convoluteImageToFloat", {
+    Xflow.registerOperator("xflow.convoluteImageToFloat", {
         outputs: [ {type: 'texture', name : 'result', sizeof: 'image', formatType : 'float32'} ],
         params:  [
             {type: 'texture', source : 'image'},

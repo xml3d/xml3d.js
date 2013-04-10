@@ -1,4 +1,4 @@
-Xflow.registerOperator("createTransform", {
+Xflow.registerOperator("xflow.createTransform", {
     outputs: [  {type: 'float4x4', name: 'result'}],
     params:  [  {type: 'float3', source: 'translation', optional: true},
                 {type: 'float4', source: 'rotation', optional: true},

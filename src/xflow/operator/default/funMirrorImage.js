@@ -1,6 +1,6 @@
 // Based on: http://web.archive.org/web/20100310063925/http://dem.ocracy.org/libero/photobooth/
 
-Xflow.registerOperator("funMirrorImage", {
+Xflow.registerOperator("xflow.funMirrorImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],
     params:  [ {type: 'texture', source : 'image'},
                {type: 'float', source : 'time'} ],

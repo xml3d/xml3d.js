@@ -1,4 +1,4 @@
-Xflow.registerOperator("skinDirection", {
+Xflow.registerOperator("xflow.skinDirection", {
     outputs: [  {type: 'float3', name: 'result' }],
     params:  [  {type: 'float3', source: 'dir' },
                 {type: 'int4', source: 'boneIdx' },

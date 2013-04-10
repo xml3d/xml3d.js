@@ -210,7 +210,7 @@ function setTexel2D(imagedata, x, y, color) {
     data[offset+3] = color[3] * 255.0;
 }
 
-Xflow.registerOperator("sobelImage", {
+Xflow.registerOperator("xflow.sobelImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],
     params:  [ {type: 'texture', source : 'image'} ],
     evaluate: function(result, image) {

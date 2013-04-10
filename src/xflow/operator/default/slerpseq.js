@@ -1,4 +1,4 @@
-Xflow.registerOperator("slerpSeq", {
+Xflow.registerOperator("xflow.slerpSeq", {
     outputs: [  {type: 'float4', name: 'result'}],
     params:  [  {type: 'float4', source: 'sequence'},
                 {type: 'float', source: 'key'}],
@@ -34,7 +34,7 @@ Xflow.registerOperator("slerpSeq", {
 });
 
 
-Xflow.registerOperator("slerpKeys", {
+Xflow.registerOperator("xflow.slerpKeys", {
     outputs: [  {type: 'float4', name: 'result'}],
     params:  [  {type: 'float', source: 'keys', array: true},
         {type: 'float4', source: 'values', array: true},

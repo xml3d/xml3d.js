@@ -1,4 +1,4 @@
-Xflow.registerOperator("mul", {
+Xflow.registerOperator("xflow.mul", {
     outputs: [  {type: 'float4x4', name: 'result'}],
     params:  [  {type: 'float4x4', source: 'value1'},
                 {type: 'float4x4', source: 'value2'}],

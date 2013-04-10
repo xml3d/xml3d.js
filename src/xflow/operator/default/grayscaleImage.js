@@ -1,4 +1,4 @@
-Xflow.registerOperator("grayscaleImage", {
+Xflow.registerOperator("xflow.grayscaleImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],
     params:  [ {type: 'texture', source : 'image'} ],
     evaluate: function(result, image) {

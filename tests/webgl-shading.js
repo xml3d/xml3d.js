@@ -86,15 +86,15 @@ test("Phong fragment shader", function() {
             length : 0
         },
         point : {
-            length : 1350
+            length : 20
         }
     }, {
         specularTexture : {}
     });
     var fragment5 = this.mergeDirectives(directives, phong.fragment);
     console.log(fragment5);
-    this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with 1,350 point lights and a specular texture compiles.");
-    notEqual(fragment5.indexOf("MAX_POINTLIGHTS 1350"), -1, "MAX_POINTLIGHTS set");
+    this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with 20 point lights and a specular texture compiles.");
+    notEqual(fragment5.indexOf("MAX_POINTLIGHTS 20"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment5.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
     notEqual(fragment5.indexOf("MAX_SPOTLIGHTS 0"), -1, "MAX_SPOTLIGHTS set");
     notEqual(fragment5.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");

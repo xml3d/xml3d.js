@@ -60,6 +60,8 @@ XML3D.webgl.MAXFPS = 30;
         this.lastPickObj = null;
         this.timeNow = Date.now() / 1000.0;
 
+        this.lastKnownDimensions = {width : canvas.width, height : canvas.height};
+
         var context = this.getContextForCanvas(canvas);
         if (context) {
             this.initialize(context);
@@ -95,7 +97,7 @@ XML3D.webgl.MAXFPS = 30;
 
             XML3D.updateXflowObserver();
 
-            if (handler.needDraw) {
+            if (handler.canvasSizeChanged() || handler.needDraw) {
                 handler.dispatchUpdateEvent();
                 handler.draw();
             }
@@ -161,19 +163,6 @@ XML3D.webgl.MAXFPS = 30;
         }
     };
 
-
-
-    // TODO: Connect resize listener with this function
-    CanvasHandler.prototype.resize = function(gl, width, height) {
-        if (width < 1 || height < 1)
-            return false;
-
-        this.canvas.width = width;
-        this.canvas.height = height;
-        this.renderer.resizeCanvas(width, height);
-
-        return true;
-    };
 
     /** 
      * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in 
@@ -263,7 +252,22 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.getCanvasWidth = function() { 
     	
     	return this.canvas.width; 
-    };  
+    };
+
+    CanvasHandler.prototype.canvasSizeChanged = function() {
+        var rect = this.canvas.getBoundingClientRect();
+        if (rect.width !== this.lastKnownDimensions.width ||
+            rect.height !== this.lastKnownDimensions.height) {
+
+            this.renderer.resizeCanvas(rect.width, rect.height);
+            this.lastKnownDimensions.width = this.canvas.width = rect.width;
+            this.lastKnownDimensions.height = this.canvas.height = rect.height;
+
+            this.needDraw = this.needPickingDraw = true;
+            return true;
+        }
+        return false;
+    };
 
     /**
      * Uses gluUnProject() to transform the 2D screen point to a 3D ray.

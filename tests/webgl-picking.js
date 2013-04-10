@@ -123,5 +123,21 @@ test("Don't pick invisible objects", 3, function() {
     equal(actual, expected, "Pick object behind 'pickingMesh3'");
 });
 
+test("Resizing xml3d element reinitializes buffers", 5, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var expected = this.doc.getElementById("pickingMesh7");
+    var h = getHandler(xml3dElement);
+
+    var actual = xml3dElement.getElementByPoint(299,199);
+    equal(actual, expected, "Pick object 'pickingMesh7'");
+
+    xml3dElement.style.width = "500px";
+    h.tick();
+
+    equal(h.renderer.width / h.renderer.height, 500/200, "Renderer has the right aspect ratio");
+
+    actual = xml3dElement.getElementByPoint(416,199);
+    equal(actual, expected, "Pick object 'pickingMesh7'");
+});
 
 

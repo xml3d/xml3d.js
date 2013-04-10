@@ -195,6 +195,7 @@ Renderer.prototype.resizeCanvas = function (width, height) {
     this.width = width;
     this.height = height;
 	this.fbos = this.initFrameBuffers(this.gl);
+    this.camera && (this.camera.projMatrix = null);
 };
 
 Renderer.prototype.activeViewChanged = function () {

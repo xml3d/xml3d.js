@@ -321,7 +321,7 @@ function applyParallelOperator(operator, inputData, outputData, operatorData){
     var outputName = operator.outputs[0].name;
     var outputDataEntry = outputData[outputName].dataEntry;
 
-    RiverTrail.compiler.openCLContext.writeToContext2D(outputDataEntry.getContext2D(),
+    window.RiverTrail.compiler.openCLContext.writeToContext2D(outputDataEntry.getContext2D(),
         result.data, outputDataEntry.getWidth(), outputDataEntry.getHeight());
 
     var value = outputDataEntry.getValue();

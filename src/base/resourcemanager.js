@@ -124,7 +124,7 @@
     };
 
     ResourceManager.prototype.removeBinaryExtension = function(extension) {
-        var idx = binaryExtensions.indexOf(type);
+        var idx = binaryExtensions.indexOf(extension);
         if (idx != -1)
             binaryExtensions.splice(idx, 1);
     };
@@ -264,7 +264,7 @@
             }
         } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
             XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
-            docCache.response = buf;
+            docCache.response = req.response;
         }
     }
 

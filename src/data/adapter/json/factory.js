@@ -16,7 +16,7 @@
         "ubyte" : Uint8Array
     };
 
-    isLittleEndian = (function () {
+    var isLittleEndian = (function () {
         var buf = new ArrayBuffer(4);
         var dv = new DataView(buf);
         var view = new Int32Array(buf);
@@ -68,7 +68,7 @@
             if (realTypeOf(value) === 'Object' && value.url) {
                 if (!isLittleEndian()) {
                     // FIXME add big-endian -> little-endian conversion
-                    console.log("Big-endian binary data are not supported yet");
+                    throw new Error("Big-endian binary data are not supported yet");
                 }
                 XML3D.base.resourceManager.loadData(value.url, function (arrayBuffer) {
                     createXflowValueFromBuffer(dataNode, jsonData.type, name, key, arrayBuffer, value.byteOffset, value.byteLength);

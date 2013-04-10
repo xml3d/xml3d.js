@@ -296,10 +296,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var buffer = webglData.buffer;
         var gl = this.factory.renderer.gl;
 
-        switch(webglData.changed) {
-            var buffer = webglData.buffer;
 
-            switch(webglData.changed) {
+        switch(webglData.changed) {
             case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:
                 var bufferType = name == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
@@ -326,7 +324,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         //if(meshInfo.isIndexed)
             //console.error("Indexed");
 
-            delete webglData.changed;
+        delete webglData.changed;
     }
     /**
      * @param {string} name
@@ -337,10 +335,12 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.handleTexture = function(name, entry, shaderId, meshInfo) {
         var prog = this.factory.renderer.shaderManager.getShaderById(shaderId);
         meshInfo.sampler = meshInfo.sampler || {};
-        if((entry.userData.webglDataChanged != -1) && (name in prog.samplers)) {
+        var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
+
+        if(webglData.changed && (name in prog.samplers)) {
             this.factory.renderer.shaderManager.createTextureFromEntry(entry, prog.samplers[name]);
         }
-        entry.userData.webglDataChanged = -1;
+        delete webglData.changed;
     }
 
     /**

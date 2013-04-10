@@ -5,17 +5,27 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     var eventTypes = {onclick:1, ondblclick:1,
         ondrop:1, ondragenter:1, ondragleave:1};
 
-    var noDrawableObject = function() {
-        XML3D.debug.logError("Mesh adapter has no callback to its mesh object!");
-    },
-        /**
-         * @type WebGLRenderingContext
-         * @private
-         */
-            rc = window.WebGLRenderingContext;
+    var bboxAttributes = ["boundingBox"];
 
-    var staticAttributes = ["index", "position", "normal", "color", "texcoord", "size", "tangent"];
-    var bboxAttributes = ["boundingbox"];
+    /**
+     * @constructor
+     */
+    var MeshInfo = function(type) {
+        this.vbos = {};
+        this.isIndexed = false;
+        this.complete = false;
+        this.glType = getGLTypeFromString(type);
+        this.bbox = new window.XML3DBox();
+
+        this.getVertexCount = function() {
+            try {
+                return this.isIndexed ? this.vbos.index[0].length : (this.vertexCount !== undefined ? this.vertexCount[0] : this.vbos.position[0].length);
+            } catch(e) {
+                return 0;
+            }
+        }
+        this.update = emptyFunction;
+    }
 
     /**
      * @constructor
@@ -28,6 +38,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.parentVisible = true;
         this.renderObject = null; // This is set by renderObject itself
 
+        this.requestObject = {};
         this.computeRequest = null;
         this.bboxComputeRequest = null;
     };
@@ -135,6 +146,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
             this.factory.renderer.lights);
         this.renderObject.shader = shaderName;
+        XML3D.debug.logInfo("New shader, clearing requests: ", shaderName);
+        this.clearRequests(); // New shader, new requests
         this.renderObject.materialChanged();
         this.factory.renderer.requestRedraw("Shader changed.", false);
     }
@@ -156,38 +169,42 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     /**
      *
+     * @param {Array<String>} meshRequests
+     * @param {Array<String>} objectRequests
      */
-    p.createRequests = function() {
+    p.createRequests = function(meshRequests, objectRequests) {
         var that = this;
-        this.computeRequest = this.computeRequest || this.dataAdapter.getComputeRequest(staticAttributes,
+        this.computeRequest = this.computeRequest || this.dataAdapter.getComputeRequest(meshRequests,
             function(request, changeType) {
                 that.dataChanged(request, changeType);
         });
+        this.objectRequest = this.objectRequest || this.dataAdapter.getComputeRequest(objectRequests,
+            function(request, changeType) {
+                XML3D.debug.logInfo("Per object shader attributes changes not handled yet", request, changeType);
+            });
         this.bboxComputeRequest = this.bboxComputeRequest || this.dataAdapter.getComputeRequest(bboxAttributes);
     };
 
-    p.finishMesh = function() {
-        this.createRequests();
+    p.clearRequests = function() {
+        this.computeRequest && this.computeRequest.clear();
+        this.objectRequest && this.objectRequest.clear();
+        this.computeRequest = this.objectRequest = null;
+    }
 
-        this.bbox = this.calcBoundingBox();
+    p.finishMesh = function() {
+        var prog = this.factory.renderer.shaderManager.getShaderById(this.renderObject.shader);
+
+        this.requestObject = prog.material.meshRequest;
+
+        this.createRequests(Object.keys(this.requestObject), Object.keys(prog.uniforms));
+
         this.createMeshData();
+        this.createPerObjectData();
         return this.renderObject.mesh.valid;
     }
 
     var emptyFunction = function() {};
 
-    /**
-     * @param {string} type
-     */
-    function createMeshInfo(type) {
-        return {
-            vbos : {},
-            isIndexed: false,
-            glType: getGLTypeFromString(type),
-            bbox : new window.XML3DBox(),
-            update : emptyFunction
-        };
-    }
 
     /**
      * @param {Xflow.data.Request} request
@@ -213,43 +230,83 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         }
     };
 
+    p.createPerObjectData = function() {
+        var perObjectData = this.objectRequest.getResult();
+        this.renderObject.setOverride(perObjectData);
+    };
+
     /**
      *
      */
     p.createMeshData = function() {
-        var gl = this.factory.renderer.gl;
         var obj = this.renderObject;
-        obj.mesh = obj.mesh || createMeshInfo(this.node.type);
+        obj.mesh = obj.mesh || new MeshInfo(this.node.type);
 
-        var calculateBBox = false;
         var dataResult =  this.computeRequest.getResult();
 
-        if (!(dataResult.getOutputData("position") && dataResult.getOutputData("position").getValue())) {
-            if(!dataResult.loading)
-                XML3D.debug.logWarning("Mesh " + this.node.id + " has no data for required attribute 'position'.");
-            obj.mesh.valid = false;
-            return;
-        }
-        for ( var i in staticAttributes) {
-            var attr = staticAttributes[i];
-            var entry = dataResult.getOutputData(attr);
-            if (!entry || !entry.getValue())
+        obj.mesh.valid = obj.mesh.complete = true; // Optimistic appraoch
+        for ( var name in this.requestObject) {
+            var attr = this.requestObject[name] || {};
+            var entry = dataResult.getOutputData(name);
+            /*if (entry == undefined) {
+                if(attr.required) {
+                    // This needs a structural change before we get the required signature
+                    console.log("Invalid", name);
+                    obj.mesh.valid = false;
+                    return;
+                }
                 continue;
+            }*/
+            if(!entry || !entry.getValue()) {
+                if(attr.required) {
+                    XML3D.debug.logInfo("Mesh not complete, missing: ", name, entry);
+                    obj.mesh.complete = false;
+                }
+                continue;
+            }
+
+            if (name == "vertexCount") {
+                obj.mesh.vertexCount = entry.getValue();
+                continue;
+            }
+
+            switch(entry.type) {
+                case Xflow.DATA_TYPE.TEXTURE:
+                    this.handleTexture(name, entry, obj.shader, obj.mesh);
+                    break;
+                default:
+                    this.handleBuffer(name, attr, entry, obj.mesh);
+            };
+        }
+        var bbox = this.calcBoundingBox();
+        if(bbox)
+            obj.mesh.bbox.set(bbox);
+
+        obj.mesh.valid = true;
+    };
+
+    /**
+     * @param {string} name
+     * @param {Object} attr
+     * @param {Xflow.BufferEntry} entry
+     * @param {MeshInfo} meshInfo
+     */
+    p.handleBuffer = function(name, attr, entry, meshInfo) {
+        var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
+        var buffer = webglData.buffer;
+        var gl = this.factory.renderer.gl;
 
 
-            var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
-            var buffer = webglData.buffer;
-
-            switch(webglData.changed) {
+        switch(webglData.changed) {
             case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:
-                var bufferType = attr == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+                var bufferType = name == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
                 gl.bindBuffer(bufferType, buffer);
                 gl.bufferSubData(bufferType, 0, entry.getValue());
                 break;
             case Xflow.DATA_ENTRY_STATE.CHANGED_NEW:
             case Xflow.DATA_ENTRY_STATE.CHANGE_SIZE:
-                if (attr == "index") {
+                if (name == "index") {
                     buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
                 } else {
                     buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.getValue());
@@ -257,30 +314,34 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 buffer.tupleSize = entry.getTupleSize();
                 webglData.buffer = buffer;
                 break;
-             default:
-                 break;
-            }
-
-            obj.mesh.vbos[attr] = [];
-            obj.mesh.vbos[attr][0] = buffer;
-
-            //TODO: must set isIndexed if indices are removed
-            if (attr == "position")
-                calculateBBox = true;
-            if (attr == "index")
-                obj.mesh.isIndexed = true;
-
-            delete webglData.changed;
+            default:
+                break;
         }
 
-        //Calculate a bounding box for the mesh
-        if (calculateBBox) {
-            this.bbox = this.calcBoundingBox();
-            obj.mesh.bbox.set(this.bbox);
-        }
+        meshInfo.vbos[name] = [];
+        meshInfo.vbos[name][0] = buffer;
+        meshInfo.isIndexed = meshInfo.isIndexed || name == "index";
+        //if(meshInfo.isIndexed)
+            //console.error("Indexed");
 
-        obj.mesh.valid = true;
-    };
+        delete webglData.changed;
+    }
+    /**
+     * @param {string} name
+     * @param {Xflow.TextureEntry} entry
+     * @param {string} shaderId
+     * @param {MeshInfo} meshInfo
+     */
+    p.handleTexture = function(name, entry, shaderId, meshInfo) {
+        var prog = this.factory.renderer.shaderManager.getShaderById(shaderId);
+        meshInfo.sampler = meshInfo.sampler || {};
+        var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
+
+        if(webglData.changed && (name in prog.samplers)) {
+            this.factory.renderer.shaderManager.createTextureFromEntry(entry, prog.samplers[name]);
+        }
+        delete webglData.changed;
+    }
 
     /**
      *
@@ -295,14 +356,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     /**
-     * @return {XML3DBox}
+     * @return {window.XML3DBox}
      */
     p.getBoundingBox = function() {
-        return new window.XML3DBox(this.bbox);
+        return new window.XML3DBox(this.renderObject.mesh.bbox);
     };
 
     /**
-     * @return {XML3DMatrix}
+     * @return {window.XML3DMatrix}
      */
     p.getWorldMatrix = function() {
 
@@ -317,7 +378,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     /**
      * @private
-     * @return {XML3DBox} the calculated bounding box of this mesh.
+     * @return {window.XML3DBox} the calculated bounding box of this mesh.
      */
     p.calcBoundingBox = function() {
 
@@ -325,7 +386,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         // try to compute bbox using the boundingbox property of xflow
         var bboxResult = this.bboxComputeRequest.getResult();
-        var bboxOutData = bboxResult.getOutputData("boundingbox");
+        var bboxOutData = bboxResult.getOutputData("boundingBox");
         if (bboxOutData)
         {
             var bboxVal = bboxOutData.getValue();
@@ -350,42 +411,44 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
 
     var getGLTypeFromArray = function(array) {
+        var GL = window.WebGLRenderingContext;
         if (array instanceof Int8Array)
-            return rc.BYTE;
+            return GL.BYTE;
         if (array instanceof Uint8Array)
-            return rc.UNSIGNED_BYTE;
+            return GL.UNSIGNED_BYTE;
         if (array instanceof Int16Array)
-            return rc.SHORT;
+            return GL.SHORT;
         if (array instanceof Uint16Array)
-            return rc.UNSIGNED_SHORT;
+            return GL.UNSIGNED_SHORT;
         if (array instanceof Int32Array)
-            return rc.INT;
+            return GL.INT;
         if (array instanceof Uint32Array)
-            return rc.UNSIGNED_INT;
+            return GL.UNSIGNED_INT;
         if (array instanceof Float32Array)
-            return rc.FLOAT;
-        return rc.FLOAT;
+            return GL.FLOAT;
+        return GL.FLOAT;
     };
 
     /**
      * @param {string} typeName
      */
     function getGLTypeFromString(typeName) {
-        if (typeName && typeName.toLowerCase)
+        var GL = window.WebGLRenderingContext;
+        if (typeName && typeName.toLoweGLase)
             typeName = typeName.toLowerCase();
         switch (typeName) {
             case "triangles":
-                return rc.TRIANGLES;
+                return GL.TRIANGLES;
             case "tristrips":
-                return rc.TRIANGLE_STRIP;
+                return GL.TRIANGLE_STRIP;
             case "points":
-                return rc.POINTS;
+                return GL.POINTS;
             case "lines":
-                return rc.LINES;
+                return GL.LINES;
             case "linestrips":
-                return rc.LINE_STRIP;
+                return GL.LINE_STRIP;
             default:
-                return rc.TRIANGLES;
+                return GL.TRIANGLES;
         }
     };
 

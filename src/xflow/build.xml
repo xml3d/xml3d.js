@@ -30,7 +30,20 @@
         <file name="./operator/default/forwardKinematics.js" />
         <file name="./operator/default/forwardKinematicsInv.js" />
         <file name="./operator/default/flipNormal.js" />
+        <file name="./operator/default/createIGIndex.js" />
         <file name="./operator/default/math.js" />
+        <file name="./operator/default/noiseImage.js" />
+        <file name="./operator/default/sobelImage.js" />
+        <file name="./operator/default/grayscaleImage.js" />
+        <file name="./operator/default/sepiaImage.js" />
+        <file name="./operator/default/clampImage.js" />
+        <file name="./operator/default/convoluteImage.js" />
+        <file name="./operator/default/funMirrorImage.js" />
+        <file name="./operator/default/popartImage.js" />
+        <file name="./operator/default/magnitudeImage.js" />
+        <file name="./operator/default/flipVerticalImage.js" />
+        <file name="./operator/default/selectTransform.js" />
+        <file name="./operator/default/selectBool.js" />
     </filelist>
 
     <target name="concat">

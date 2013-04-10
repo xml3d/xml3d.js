@@ -100,6 +100,8 @@
         XML3D.data.DataAdapter.call(this, factory, node);
         this.textureEntry = null;
         this.video = null;
+        this._ticking = false;
+        this._boundTick = this._tick.bind(this);
         if (node.src)
             this.createVideoFromURL(node.src);
     };
@@ -113,18 +115,11 @@
     VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
         var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
-        this.video = XML3D.base.resourceManager.getVideo(uri, /* autoplay= */true,
+        this.video = XML3D.base.resourceManager.getVideo(uri, this.node.autoplay,
             {
-                canplaythrough : function(event, video) {
-                    XML3D.util.dispatchCustomEvent(that.node, 'canplaythrough', true, true, null);
-                    video.play();
-                    function tick() {
-                        window.requestAnimFrame(tick, XML3D.webgl.MAXFPS);
-                        if (that.textureEntry) {
-                            that.textureEntry.setImage(video);
-                        }
-                    }
-                    tick();
+                canplay : function(event, video) {
+                    XML3D.util.dispatchCustomEvent(that.node, 'canplay', true, true, null);
+                    that._startVideoRefresh();
                 },
                 ended : function(event, video) {
                     XML3D.util.dispatchCustomEvent(that.node, 'ended', true, true, null);
@@ -138,6 +133,32 @@
                 }
             }
         );
+        if (this.textureEntry)
+            this.textureEntry.setImage(this.video);
+    };
+
+    VideoDataAdapter.prototype.play = function() {
+        if (this.video)
+            this.video.play();
+    };
+
+    VideoDataAdapter.prototype.pause = function() {
+        if (this.video)
+            this.video.pause();
+    };
+
+    VideoDataAdapter.prototype._startVideoRefresh = function() {
+        if (!this._ticking)
+            this._tick();
+    };
+
+    VideoDataAdapter.prototype._tick = function() {
+        this._ticking = true;
+        window.requestAnimFrame(this._boundTick, XML3D.webgl.MAXFPS);
+        // FIXME Do this only when currentTime is changed (what about webcam ?)
+        if (this.textureEntry) {
+            this.textureEntry.setImage(this.video);
+        }
     };
 
     /**

@@ -178,10 +178,20 @@ XML3D.base.AdapterFactory = function(aspect, mimetypes, canvasId) {
  * Implemented by subclass
  * Create adapter from an object (node in case of an xml, and object in case of json)
  * @param {object} obj
+ * @param {String} mimetype optional mimetype of obj
  * @returns {XML3D.base.Adapter=} created adapter or null if no adapter can be created
  */
-XML3D.base.AdapterFactory.prototype.createAdapter = function(obj) {
+XML3D.base.AdapterFactory.prototype.createAdapter = function(obj, mimetype) {
     return null;
+};
+
+/**
+ * Checks if the adapter factory supports specified mimetype. Can be overridden by subclass.
+ * @param {String} mimetype
+ * @return {Boolean} true if the adapter factory supports specified mimetype
+ */
+XML3D.base.AdapterFactory.prototype.supportsMimetype = function(mimetype) {
+    return this.mimetypes.indexOf(mimetype) != -1;
 };
 
 /**
@@ -200,9 +210,10 @@ XML3D.createClass(XML3D.base.NodeAdapterFactory, XML3D.base.AdapterFactory);
  * This function first checks, if an adapter has been already created for the corresponding node
  * If yes, this adapter is returned, otherwise, a new adapter is created and returned.
  * @param {Object} node
+ * @param {String} mimetype optional mimetype of obj
  * @returns {XML3D.base.Adapter} The adapter of the node
  */
-XML3D.base.NodeAdapterFactory.prototype.getAdapter = function(node) {
+XML3D.base.NodeAdapterFactory.prototype.getAdapter = function(node, mimetype) {
     if (!node || node._configured === undefined)
         return null;
     var elemHandler = node._configured;
@@ -212,7 +223,7 @@ XML3D.base.NodeAdapterFactory.prototype.getAdapter = function(node) {
         return adapter;
 
     // No adapter found, try to create one
-    adapter = this.createAdapter(node);
+    adapter = this.createAdapter(node, mimetype);
     if (adapter) {
         elemHandler.adapters[key] = adapter;
         adapter.init();

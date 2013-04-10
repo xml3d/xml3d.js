@@ -16,6 +16,13 @@
     Material.prototype.samplers = {};
     Material.prototype.fragment = null;
     Material.prototype.vertex = null;
+    Material.prototype.meshRequest = {
+        index : null,
+        position: { required: true },
+        normal: null,
+        color: null,
+        texcoord: null
+    };
 
     Material.prototype.getRequestFields = function() {
         return Object.keys(this.uniforms).concat(Object.keys(this.samplers));
@@ -62,7 +69,7 @@
 
     /**
      * @param {Xflow.ComputeResult} dataTable
-     * @returns
+     * @returns {ProgramObject}
      */
     Material.prototype.getProgram = function(lights, dataTable) {
         if(!this.program) {

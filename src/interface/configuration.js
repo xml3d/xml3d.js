@@ -113,6 +113,8 @@ XML3D.classInfo['data'] = {
     getProtoInfo : {m: XML3D.methods.dataGetProtoInfo},
     isOutputConnected : {m: XML3D.methods.dataIsOutputConnected},
     getResult : {m: XML3D.methods.dataGetResult},
+    addOutputFieldListener : {m: XML3D.methods.dataAddOutputFieldListener},
+    getOutputNames : {m: XML3D.methods.dataGetOutputNames},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
     _term: undefined
@@ -413,6 +415,9 @@ XML3D.classInfo['video'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for video
     src : {a: XML3D.StringAttributeHandler},
+    play : {m: XML3D.methods.videoPlay},
+    pause : {m: XML3D.methods.videoPause},
+    autoplay : {a: XML3D.BoolAttributeHandler, params: false},
     _term: undefined
 };
 /**
@@ -436,6 +441,7 @@ XML3D.classInfo['view'] = {
     position : {a: XML3D.XML3DVec3AttributeHandler, params: [0, 0, 0]},
     orientation : {a: XML3D.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
     fieldOfView : {a: XML3D.FloatAttributeHandler, params: 0.785398},
+    perspective : {a: XML3D.ReferenceHandler},
     getWorldMatrix : {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     setDirection : {m: XML3D.methods.viewSetDirection},
     setUpVector : {m: XML3D.methods.viewSetUpVector},

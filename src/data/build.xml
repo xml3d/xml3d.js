@@ -13,6 +13,7 @@
         <file name="./adapter/misc.js" />
         <file name="./adapter/factory.js" />
         <file name="./adapter/json/factory.js" />
+        <file name="./adapter/binary/factory.js" />
     </filelist>
 
     <target name="concat">

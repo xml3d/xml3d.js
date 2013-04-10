@@ -59,6 +59,8 @@
     reg['int']         = data.ValueDataAdapter;
     reg['int4']        = data.ValueDataAdapter;
     reg['bool']        = data.ValueDataAdapter;
+    reg['byte']        = data.ValueDataAdapter;
+    reg['ubyte']        = data.ValueDataAdapter;
     reg['img']         = data.ImgDataAdapter;
     reg['texture']     = data.TextureDataAdapter;
     reg['data']        = data.DataAdapter;

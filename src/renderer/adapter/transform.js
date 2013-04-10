@@ -79,6 +79,12 @@
     XML3D.webgl.TransformRenderAdapter = TransformRenderAdapter;
 
 
+
+
+
+
+
+
     var DataRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
     };
@@ -88,43 +94,52 @@
     p.init = function() {
         // Create all matrices, no valid values yet
         this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
-        this.needMatrixUpdate = true;
+        this.matrixReady = {};
+        this.matrices = {};
+        this.requests = {};
     };
 
-    p.updateMatrix = function() {
+    p.updateMatrix = function(type) {
 
-        if(!this.transformRequest){
-            var that = this;
-            this.transformRequest = this.dataAdapter.getComputeRequest(["transform"],
+        createRequest(this, type);
+
+        this.matrices[type] = XML3D.math.mat4.create();
+
+        var dataResult =  this.requests[type].getResult();
+        var transformData = (dataResult.getOutputData(type) && dataResult.getOutputData(type).getValue());
+        if(!transformData){
+            XML3D.math.mat4.identity(this.matrices[type]);
+            return;
+        }
+        for(var i = 0; i < 16; ++i){
+            this.matrices[type][i] = transformData[i];
+        }
+        this.matrixReady[type] = true;
+    };
+
+    p.getMatrix = function(type) {
+        !this.matrixReady[type] && this.updateMatrix(type);
+        return this.matrices[type];
+    };
+
+    p.dataChanged = function(request, changeType){
+        this.factory.renderer.requestRedraw("Transformation changed.", true);
+        for(var type in this.requests){
+            if(this.requests[type] == request)
+                delete this.matrixReady[type];
+        }
+        this.notifyOppositeAdapters();
+    }
+
+    function createRequest(adapter, key){
+        if(!adapter.requests[key]){
+            var that = adapter;
+            adapter.requests[key] = adapter.dataAdapter.getComputeRequest([key],
                 function(request, changeType) {
                     that.dataChanged(request, changeType);
                 }
             );
         }
-
-        this.matrix = XML3D.math.mat4.create();
-
-        var dataResult =  this.transformRequest.getResult();
-        var transformData = (dataResult.getOutputData("transform") && dataResult.getOutputData("transform").getValue());
-        if(!transformData){
-            this.matrix = XML3D.math.mat4.create();
-            return;
-        }
-        for(var i = 0; i < 16; ++i){
-            this.matrix[i] = transformData[i];
-        }
-        this.needMatrixUpdate = false;
-    };
-
-    p.getMatrix = function() {
-        this.needMatrixUpdate && this.updateMatrix();
-        return this.matrix;
-    };
-
-    p.dataChanged = function(request, changeType){
-        this.factory.renderer.requestRedraw("Transformation changed.", true);
-        this.needMatrixUpdate = true;
-        this.notifyOppositeAdapters();
     }
 
     // Export to XML3D.webgl namespace

@@ -11,30 +11,71 @@
         "float3" : Float32Array,
         "float4" : Float32Array,
         "float4x4" : Float32Array,
-        "bool" : Uint8Array
+        "bool" : Uint8Array,
+        "byte" : Int8Array,
+        "ubyte" : Uint8Array
     };
+
+    var isLittleEndian = (function () {
+        var buf = new ArrayBuffer(4);
+        var dv = new DataView(buf);
+        var view = new Int32Array(buf);
+        view[0] = 0x01020304;
+        var littleEndian = (dv.getInt32(0, true) === 0x01020304);
+        return function () { return littleEndian; }
+    })();
+
+    function realTypeOf(obj) {
+        return Object.prototype.toString.call(obj).slice(8, -1);
+    }
+
+    function createXflowValue(dataNode, dataType, name, key, value) {
+        var v = new (TYPED_ARRAY_MAP[dataType])(value);
+        var type = XML3D.data.BUFFER_TYPE_TABLE[dataType];
+        var buffer = new Xflow.BufferEntry(type, v);
+
+        var inputNode = XML3D.data.xflowGraph.createInputNode();
+        inputNode.data = buffer;
+        inputNode.name = name;
+        inputNode.key = key;
+        dataNode.appendChild(inputNode);
+    }
+
+    function createXflowValueFromBuffer(dataNode, dataType, name, key, arrayBuffer, byteOffset, byteLength) {
+        var ArrayType = TYPED_ARRAY_MAP[dataType];
+        var v = new (ArrayType)(arrayBuffer, byteOffset, byteLength/ArrayType.BYTES_PER_ELEMENT);
+        var type = XML3D.data.BUFFER_TYPE_TABLE[dataType];
+        var buffer = new Xflow.BufferEntry(type, v);
+
+        var inputNode = XML3D.data.xflowGraph.createInputNode();
+        inputNode.data = buffer;
+        inputNode.name = name;
+        inputNode.key = key;
+        dataNode.appendChild(inputNode);
+    }
 
     function createXflowInputs(dataNode, name, jsonData){
         var v = null;
 
-        if(!TYPED_ARRAY_MAP[jsonData.type])
+        if (!TYPED_ARRAY_MAP[jsonData.type])
             return;
 
-        for(var i = 0; i < jsonData.seq.length; ++i){
+        for(var i = 0; i < jsonData.seq.length; ++i) {
             var entry = jsonData.seq[i];
             var value = entry.value;
             var key = entry.key;
 
-            var v = new (TYPED_ARRAY_MAP[jsonData.type])(value);
-            var type = XML3D.data.BUFFER_TYPE_TABLE[jsonData.type];
-            var buffer = new Xflow.BufferEntry(type, v);
-
-            var inputNode = XML3D.data.xflowGraph.createInputNode();
-            inputNode.data = buffer;
-            inputNode.name = name;
-            inputNode.key = key;
-            dataNode.appendChild(inputNode);
-
+            if (realTypeOf(value) === 'Object' && value.url) {
+                if (!isLittleEndian()) {
+                    // FIXME add big-endian -> little-endian conversion
+                    throw new Error("Big-endian binary data are not supported yet");
+                }
+                XML3D.base.resourceManager.loadData(value.url, function (arrayBuffer) {
+                    createXflowValueFromBuffer(dataNode, jsonData.type, name, key, arrayBuffer, value.byteOffset, value.byteLength);
+                }, null);
+            } else {
+                createXflowValue(dataNode, jsonData.type, name, key, value);
+            }
         }
     }
 

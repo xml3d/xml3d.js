@@ -193,6 +193,11 @@
      */
     handler.ElementHandler.prototype.remove = function(evt) {
         //console.log("Remove " + this);
+        for(var h in this.adapters) {
+            var adapter = this.adapters[h];
+            adapter.onDetach();
+        }
+        this.adapters = {};
         for(var h in this.handlers) {
             var handler = this.handlers[h];
             if(handler.remove)

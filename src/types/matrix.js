@@ -139,12 +139,12 @@
             return;
         }
 
-        if(m11.constructor === XML3DMatrix) {
+        if(m11._data && m11._data.length && m11._data.length === 16) {
             this._data = new Float32Array(m11._data);
             return;
         }
 
-        if(m11.constructor === Float32Array) {
+        if(m11.length && m11.length >= 16) {
             this._data = new Float32Array(m11);
             return;
         }

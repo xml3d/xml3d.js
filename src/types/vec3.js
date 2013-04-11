@@ -56,12 +56,12 @@
      * @param {number=} z
      */
     p.set = function(other,y,z) {
-        if(other.constructor === Float32Array) {
+        if(other.length && other.length >= 3) {
             this._data[0] = other[0];
             this._data[1] = other[1];
             this._data[2] = other[2];
         }
-        else if(other.constructor === window.XML3DVec3) {
+        else if(other._data && other._data.length && other._data.length === 3) {
             this._data[0] = other._data[0];
             this._data[1] = other._data[1];
             this._data[2] = other._data[2];

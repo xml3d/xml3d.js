@@ -56,11 +56,11 @@
      * @param {number=} angle
      */
     p.set = function(other, angle) {
-        if(other.constructor === window.XML3DRotation) {
+        if(other.axis && other.angle) {
             this.setAxisAngle(other.axis, other.angle);
-        } else if(other.constructor === Float32Array) {
+        } else if(other.length && other.length >= 4) {
             this._setQuaternion(other);
-        } else if(other.constructor === window.XML3DVec3) {
+        } else if(other._data && other._data.length && other._data.length === 3) {
             this.setAxisAngle(other, angle);
         } else {
             XML3D.debug.logError("XML3DRotation.set(): invalid argument given. Expect XML3DRotation or Float32Array.");

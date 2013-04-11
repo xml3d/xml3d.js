@@ -1,7 +1,5 @@
 (function() {
 
-    var c_factoryCache = {}; // maps unique keys (aspect + "_" + canvasId) to the factory instance
-
     /**
      * A format handler is provide functionality for detecting format of resources
      * and providing format-specific services.
@@ -10,6 +8,7 @@
      */
     var FormatHandler = function() {
         this.factoryClasses = {}; // a map from an aspect name to a factory class
+        this.factoryCache = {}; // maps unique keys (aspect + "_" + canvasId) to the factory instance
     };
 
     FormatHandler.prototype.registerFactoryClass = function(factoryClass) {
@@ -23,14 +22,15 @@
     }
 
     FormatHandler.prototype.getFactory = function(aspect, canvasId) {
+        canvasId = canvasId || 0;
         var key = aspect+"_"+canvasId;
-        var factory = c_factoryCache[key];
+        var factory = this.factoryCache[key];
         if (!factory) {
             var factoryClass = this.getFactoryClassByAspect(aspect);
             if (!factoryClass)
                 return null;
             factory = new factoryClass(canvasId);
-            c_factoryCache[key] = factory;
+            this.factoryCache[key] = factory;
         }
         return factory;
     }

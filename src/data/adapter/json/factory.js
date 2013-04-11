@@ -1,6 +1,14 @@
 // data/adapter/json/factory.js
 (function() {
 
+    var XML3DJSONFormatHandler = function() {
+        XML3D.base.JSONFormatHandler.call(this);
+    }
+    XML3D.createClass(XML3DJSONFormatHandler, XML3D.base.JSONFormatHandler);
+    var xml3dJsonFormatHandler = new XML3DJSONFormatHandler();
+    XML3D.base.registerFormat(xml3dJsonFormatHandler);
+
+
     var empty = function() {};
 
     var TYPED_ARRAY_MAP = {
@@ -117,14 +125,16 @@
      */
     var JSONFactory = function()
     {
-        XML3D.base.AdapterFactory.call(this, XML3D.data, "application/json");
+        XML3D.base.AdapterFactory.call(this, XML3D.data);
     };
-
     XML3D.createClass(JSONFactory, XML3D.base.AdapterFactory);
+
+
+    JSONFactory.prototype.aspect = XML3D.data;
 
     JSONFactory.prototype.createAdapter = function(data) {
         return new JSONDataAdapter(data);
     }
 
-    var jsonFactoryInstance = new JSONFactory();
+    xml3dJsonFormatHandler.registerFactoryClass(JSONFactory);
 }());

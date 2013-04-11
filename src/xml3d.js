@@ -161,24 +161,6 @@ XML3D.createClass = function(ctor, parent, methods) {
         // initialize all attached adapters
         XML3D.base.sendAdapterEvent(xml3dElement, {onConfigured : []});
 
-        xml3dElement.remove = function()
-        {
-            if(!this.parentNode)
-                return; // already removed
-
-            var canvas = this.parentNode.previousElementSibling;
-
-            var grandParentNode = this.parentNode.parentNode;
-            if(!grandParentNode)
-                return; // subtree containing canvas is not attached, can't remove it
-
-            if(!canvas || canvas.tagName !== "canvas")
-                return; // an element we didn't create, skip deletion
-
-            grandParentNode.removeChild(this.parentNode);
-            grandParentNode.removeChild(canvas);
-        };
-
         curXML3DInitElements.splice(curXML3DInitElements.indexOf(xml3dElement), 1);
     };
 
@@ -188,6 +170,21 @@ XML3D.createClass = function(ctor, parent, methods) {
             return;
 
         xml3dElement._configured = undefined;
+
+        if(!xml3dElement.parentNode)
+            return; // already removed
+
+        var canvas = xml3dElement.parentNode.previousElementSibling;
+
+        var grandParentNode = xml3dElement.parentNode.parentNode;
+        if(!grandParentNode)
+            return; // subtree containing canvas is not attached, can't remove it
+
+        if(!canvas || canvas.tagName !== "canvas")
+            return; // an element we didn't create, skip deletion
+
+        grandParentNode.removeChild(xml3dElement.parentNode);
+        grandParentNode.removeChild(canvas);
     };
 
     function onNodeInserted(evt) {

@@ -89,5 +89,5 @@
 
     // Export
     XML3D.data.XML3DDataAdapterFactory = XML3DDataAdapterFactory;
-    XML3D.data.factory = new XML3DDataAdapterFactory();
+    XML3D.base.xml3dFormatHandler.registerFactoryClass(XML3DDataAdapterFactory);
 }());

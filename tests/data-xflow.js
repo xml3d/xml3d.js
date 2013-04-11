@@ -44,7 +44,13 @@ module("Xflow tests", {
     },
 
     loadTestXML : function(url, handler) {
-        this.factory = document.getElementById("xml3dframe").contentWindow.XML3D.data.factory;
+        var win = document.getElementById("xml3dframe").contentWindow;
+        var resManager = win.XML3D.resourceManager;
+        var resType = win.XML3D.data;
+        this.getDataAdapter = function(node){
+            return resManager.getAdapter(node, res.Type);
+        }
+
         var defsElem = this.doc.getElementById("defsElem");
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.open("GET",url,false);
@@ -55,7 +61,7 @@ module("Xflow tests", {
         while (child) {
            temp = child.nextElementSibling;
            defsElem.appendChild(child);
-           this.factory.getAdapter(child);
+           this.getDataAdapter(child);
            child = temp;
         }
         return xmlhttp.responseXML;
@@ -168,7 +174,7 @@ module("Xflow tests", {
         while (child) {
             temp = child.nextElementSibling;
             parent.appendChild(child);
-            this.factory.getAdapter(child);
+            this.getDataAdapter(child);
             addedNodes += child.id+" ";
             child = temp;
         }

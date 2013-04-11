@@ -205,7 +205,7 @@ new (function() {
     };
 
     methods.dataGetOutputNames = function() {
-        var dataAdapter = XML3D.data.factory.getAdapter(this);
+        var dataAdapter = XML3D.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter){
             return dataAdapter.getOutputNames();
         }
@@ -224,7 +224,7 @@ new (function() {
 
     methods.dataGetResult = function(filter) {
 
-        var dataAdapter = XML3D.data.factory.getAdapter(this);
+        var dataAdapter = XML3D.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter){
             var result = dataAdapter.getComputeResult(filter);
             if(!result) return null;
@@ -234,7 +234,7 @@ new (function() {
     };
 
     methods.dataGetOutputChannelInfo = function(name){
-        var dataAdapter = XML3D.data.factory.getAdapter(this);
+        var dataAdapter = XML3D.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter){
             var result = dataAdapter.getOutputChannelInfo(name);
             if(!result) return null;

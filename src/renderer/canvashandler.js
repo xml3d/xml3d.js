@@ -36,6 +36,8 @@ XML3D.webgl.MAXFPS = 30;
 
     var globalCanvasId = 0;
 
+    XML3D.webgl.handlers = [];
+
     /**
      * CanvasHandler class.
      * Registers and handles the events that happen on the canvas element.
@@ -66,6 +68,7 @@ XML3D.webgl.MAXFPS = 30;
         if (context) {
             this.initialize(context);
         }
+        XML3D.webgl.handlers[this.id] = this;
     }
 
     /**
@@ -245,11 +248,13 @@ XML3D.webgl.MAXFPS = 30;
     };
 
     CanvasHandler.prototype.getCanvasHeight = function() {
-        return this.canvas.height;
+
+    	return this.canvas.height;
     };
 
     CanvasHandler.prototype.getCanvasWidth = function() {
-        return this.canvas.width;
+
+    	return this.canvas.width;
     };
 
     CanvasHandler.prototype.canvasSizeChanged = function() {

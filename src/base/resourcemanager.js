@@ -390,19 +390,14 @@
      */
     function updateHandle(handle, adapterType, canvasId, format, data){
 
+        var factory = format.getFactory(adapterType, canvasId);
 
-
-        var factories = c_factories[canvasId];
-
-        for ( var i = 0; i < factories.length; ++i) {
-            var fac = factories[i];
-            if (fac.aspect == adapterType && fac.supportsMimetype(mimetype)) {
-                var adapter = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
-                if (adapter) {
-                    handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);
-                }
-            }
+        var adapter = factory.getAdapter ? factory.getAdapter(data) : factory.createAdapter(data);
+        if (adapter) {
+            handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);
         }
+
+
     }
 
     /**
@@ -460,7 +455,7 @@
         if(uri.isLocal()){
             var node = XML3D.URIResolver.resolveLocal(uri);
             if(node)
-                updateHandle(handle, adapterType, canvasId, "application/xml", node);
+                updateHandle(handle, adapterType, canvasId, XML3D.base.xml3dFormatHandler, node);
             else
                 handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
         }
@@ -484,6 +479,16 @@
         }
         return handle;
     };
+    /**
+     * Get any adapter, internal or external.
+     */
+    ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId){
+        var factory = XML3D.base.xml3dFormatHandler.getFactory(adapterType, canvasId);
+        if(factory){
+            return factory.getAdapter(node);
+        }
+        return null;
+    }
 
     /**
      * This function is called when an id of an element changes or if that element is now reachable
@@ -503,7 +508,7 @@
             clearHandles("#" + previousId);
         }
         if(newId){
-            updateMissingHandles("#" + newId, "application/xml", node);
+            updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node);
         }
     }
 

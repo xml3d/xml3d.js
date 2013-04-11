@@ -430,6 +430,11 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
 
         triCount += this.drawObject(shader, mesh);
         objCount++;
+
+        if(obj.override !== null) {
+            this.shaderManager.resetUniformVariables(obj.shaderAdapter, shader, Object.keys(obj.override));
+        }
+
     }
 
     stats.objCount += objCount;

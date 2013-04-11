@@ -15,7 +15,7 @@ module("Shader overrides", {
     }
 });
 
-test("Uniform overrides", 4, function() {
+test("Uniform overrides", 8, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var win = this.doc.defaultView;
     var gl = getContextForXml3DElement(xml3dElement);

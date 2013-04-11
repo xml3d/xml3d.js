@@ -314,6 +314,26 @@
         return shd;
     };
 
+    /**
+     *
+     * @param {Object} shaderAdapter
+     * @param {ProgramObject} programObject
+     * @param {Array.<string>} names
+     */
+    XML3DShaderManager.prototype.resetUniformVariables = function(shaderAdapter, programObject, names)
+    {
+        if(!shaderAdapter)
+            return;
+        var result = shaderAdapter.computeRequest.getResult();
+        for(var i in names) {
+            var name = names[i];
+            var entry = result.getOutputData(name);
+            if(entry) {
+                XML3DShaderManager.setUniform(this.gl, programObject.uniforms[name], entry.getValue());
+            }
+        }
+    }
+
     XML3DShaderManager.prototype.recompileShader = function(shaderAdapter, lights) {
         var shaderName = shaderAdapter.node.id;
         var shader = this.shaders[shaderName];

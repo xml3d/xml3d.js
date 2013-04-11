@@ -81,6 +81,7 @@
     var RenderObject = function (opt) {
         this.handler = opt.handler;
         this.meshAdapter = opt.meshAdapter;
+        this.shaderAdapter = null;
         this.shader = opt.shader || null;
         this.transform = opt.transform || RenderObject.IDENTITY_MATRIX;
         this.visible = opt.visible !== undefined ? opt.visible : true;
@@ -105,8 +106,8 @@
         onafterlightsChanged:function (name, from, to, lights, shaderManager) {
             if (lights) {
                 var shaderHandle = this.meshAdapter.getShaderHandle();
-                var shaderAdapter = shaderHandle && shaderHandle.getAdapter();
-                this.shader = shaderManager.createShader(shaderAdapter, lights);
+                this.shaderAdapter = shaderHandle && shaderHandle.getAdapter();
+                this.shader = shaderManager.createShader(this.shaderAdapter, lights);
             }
         },
         onbeforedataComplete:function (name, from, to) {
@@ -144,6 +145,9 @@
      * @param {Xflow.Result} result
      */
     RenderObject.prototype.setOverride = function(result) {
+        if(!result.outputNames.length)
+            return;
+
         var prog = this.meshAdapter.factory.renderer.shaderManager.getShaderById(this.shader);
         this.override = Object.create(null);
         for(var name in prog.uniforms) {

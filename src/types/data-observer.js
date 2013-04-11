@@ -106,6 +106,18 @@
         return result;
     }
 
+    XML3DDataResult.FLOAT  = 0;
+    XML3DDataResult.FLOAT2 = 1;
+    XML3DDataResult.FLOAT3 = 2;
+    XML3DDataResult.FLOAT4 = 3;
+    XML3DDataResult.FLOAT4X4 = 4;
+    XML3DDataResult.INT = 10;
+    XML3DDataResult.INT4 = 11;
+    XML3DDataResult.BOOL = 20;
+    XML3DDataResult.TEXTURE = 30;
+    XML3DDataResult.BYTE = 40;
+    XML3DDataResult.UBYTE = 50;
+
 
     function constructDataResult(dataResult, result){
         for(var i = 0; i < result.outputNames.length; ++i){
@@ -114,45 +126,27 @@
             var value = entry && entry.getValue();
             if (value !== null) {
                 var type = getXML3DDataType(entry.type);
-                dataResult._entries[name] = new XML3DDataEntry(type, value);
+                dataResult._entries[name] = { type: type, value: value};
             }
         }
     }
 
     function getXML3DDataType(type){
         switch(type){
-            case Xflow.DATA_TYPE.FLOAT : return XML3DDataEntry.FLOAT;
-            case Xflow.DATA_TYPE.FLOAT2 : return XML3DDataEntry.FLOAT2;
-            case Xflow.DATA_TYPE.FLOAT3 : return XML3DDataEntry.FLOAT3;
-            case Xflow.DATA_TYPE.FLOAT4 : return XML3DDataEntry.FLOAT4;
-            case Xflow.DATA_TYPE.FLOAT4X4 : return XML3DDataEntry.FLOAT4X4;
-            case Xflow.DATA_TYPE.INT : return XML3DDataEntry.INT;
-            case Xflow.DATA_TYPE.INT4 : return XML3DDataEntry.INT4;
-            case Xflow.DATA_TYPE.BOOL : return XML3DDataEntry.BOOL;
-            case Xflow.DATA_TYPE.TEXTURE : return XML3DDataEntry.TEXTURE;
-            case Xflow.DATA_TYPE.BYTE : return XML3DDataEntry.BYTE;
-            case Xflow.DATA_TYPE.UBYTE : return XML3DDataEntry.UBYTE;
+            case Xflow.DATA_TYPE.FLOAT : return XML3DDataResult.FLOAT;
+            case Xflow.DATA_TYPE.FLOAT2 : return XML3DDataResult.FLOAT2;
+            case Xflow.DATA_TYPE.FLOAT3 : return XML3DDataResult.FLOAT3;
+            case Xflow.DATA_TYPE.FLOAT4 : return XML3DDataResult.FLOAT4;
+            case Xflow.DATA_TYPE.FLOAT4X4 : return XML3DDataResult.FLOAT4X4;
+            case Xflow.DATA_TYPE.INT : return XML3DDataResult.INT;
+            case Xflow.DATA_TYPE.INT4 : return XML3DDataResult.INT4;
+            case Xflow.DATA_TYPE.BOOL : return XML3DDataResult.BOOL;
+            case Xflow.DATA_TYPE.TEXTURE : return XML3DDataResult.TEXTURE;
+            case Xflow.DATA_TYPE.BYTE : return XML3DDataResult.BYTE;
+            case Xflow.DATA_TYPE.UBYTE : return XML3DDataResult.UBYTE;
             default: throw new Error("WHAT IS THIS I DON'T EVEN...");
         }
     }
-
-    var XML3DDataEntry = function(type, value){
-        this.type = type;
-        this.value = value;
-    }
-    window.XML3DDataEntry = XML3DDataEntry;
-
-    XML3DDataEntry.FLOAT  = 0;
-    XML3DDataEntry.FLOAT2 = 1;
-    XML3DDataEntry.FLOAT3 = 2;
-    XML3DDataEntry.FLOAT4 = 3;
-    XML3DDataEntry.FLOAT4X4 = 4;
-    XML3DDataEntry.INT = 10;
-    XML3DDataEntry.INT4 = 11;
-    XML3DDataEntry.BOOL = 20;
-    XML3DDataEntry.TEXTURE = 30;
-    XML3DDataEntry.BYTE = 40;
-    XML3DDataEntry.UBYTE = 50;
 
     var XML3DDataChannelInfo = function(type, origin, originalName, seqLength, seqMinKey, seqMaxKey){
         this.type = getXML3DDataType(type);

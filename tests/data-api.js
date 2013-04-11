@@ -56,11 +56,11 @@ test("Access Results", function() {
     QUnit.closeArray(result.getNames().sort(),
         ["index", "position"], EPSILON, "filtered result of #baseData has correct output names" );
 
-    equal(result.getType("index"), XML3DDataEntry.INT, "'index' field of #baseData has correct type" );
+    equal(result.getType("index"), XML3DDataResult.INT, "'index' field of #baseData has correct type" );
     QUnit.closeArray(result.getValue("index"),
         new Int32Array([0,1,2,1,2,3]), EPSILON, "'index' field of #baseData has correct value"  );
 
-    equal(result.getType("position"), XML3DDataEntry.FLOAT3, "'position' field of #baseData has correct type" );
+    equal(result.getType("position"), XML3DDataResult.FLOAT3, "'position' field of #baseData has correct type" );
     QUnit.closeArray(result.getValue("position"),
         new Float32Array([-1, -1, -10,  1, -1, -10,  -1, 1, -10,  1, 1, -10]), EPSILON,
         "'position' field of #baseData has correct value"  );
@@ -109,7 +109,7 @@ test("Access Output ChannelInfo", function() {
     var channelInfo = this.doc.getElementById("baseData").getOutputChannelInfo("position");
     ok(channelInfo instanceof this.window.XML3DDataChannelInfo, "Channel info is of type XML3DDataChannelInfo");
 
-    equal(channelInfo.type, XML3DDataEntry.FLOAT3, "Type of 'position' channel info is float3");
+    equal(channelInfo.type, XML3DDataResult.FLOAT3, "Type of 'position' channel info is float3");
     equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_CHILD, "Origin of 'position' channel info is ORIGIN_CHILD");
     equal(channelInfo.originalName, "position", "Original name of 'position' channel info is 'position'");
     equal(channelInfo.seqLength, 1, "Sequence length of 'position' channel info is 1");
@@ -126,7 +126,7 @@ test("Access Output ChannelInfo", function() {
     equal(channelInfo.originalName, "position", "Original name of 'pos' channel info is 'position'");
 
     channelInfo = this.doc.getElementById("simpleRenaming").getOutputChannelInfo("index");
-    equal(channelInfo.type, XML3DDataEntry.INT, "Type of 'index' channel info is int");
+    equal(channelInfo.type, XML3DDataResult.INT, "Type of 'index' channel info is int");
     equal(channelInfo.originalName, "index", "Original name of 'index' channel info is 'index'");
 
     channelInfo = this.doc.getElementById("simpleCompute").getOutputChannelInfo("position");

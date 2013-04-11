@@ -25,7 +25,7 @@ test("Grayscale Image", function() {
 
         var pixelData = canvas.getContext("2d").getImageData(0,0,1,1);
         var color = [pixelData.data[0], pixelData.data[1], pixelData.data[2], pixelData.data[3]];
-        Class XML3D.webgl.XML3DShaderManager
+        
         if(!color[0]) return;
 
         QUnit.closeArray(color, [182,182,182,255], EPSILON, "Color of processed image is gray." );

@@ -48,7 +48,7 @@ module("Xflow tests", {
         var resManager = win.XML3D.base.resourceManager;
         var resType = win.XML3D.data;
         this.getDataAdapter = function(node){
-            return resManager.getAdapter(node, res.Type);
+            return resManager.getAdapter(node, resType);
         }
 
         var defsElem = this.doc.getElementById("defsElem");

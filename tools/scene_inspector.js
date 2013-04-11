@@ -10,8 +10,7 @@ XML3D.SceneInspector = function(xml3d) {
     this.inspect = function(event){
         var button = (event.which || event.button);
         if(button == 2){
-            var pt = XML3D.util.convertPageCoords(this.xml3d, event.pageX, event.pageY);
-            var node = this.xml3d.getElementByPoint(pt.x, pt.y);
+            var node = this.xml3d.getElementByPoint(event.pageX, event.pageY);
             var path = "";
             while(node && node != xml3d){
                 path += " >> " + node + " (ID: " + node.id + ")";

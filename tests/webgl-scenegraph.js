@@ -234,8 +234,9 @@ test("Simple add/remove mesh", 10, function() {
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add mesh]");
 
     // Remove the mesh
+    var adapter = getWebGLAdapter(mesh);
     x.removeChild(mesh);
-    ok(getWebGLAdapter(mesh).renderObject.is("Disposed"), "RenderObject disposed");
+    ok(adapter.renderObject.is("Disposed"), "RenderObject disposed");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove mesh]");
@@ -269,9 +270,10 @@ test("Simple add/remove group with mesh", 10, function() {
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
+    var adapter = getWebGLAdapter(mesh);
     // Remove group
     x.removeChild(group);
-    ok(getWebGLAdapter(mesh).renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
+    ok(adapter.renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
@@ -307,8 +309,9 @@ test("Simple add/remove transformed group with mesh", 10, function() {
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
     // Remove group
+    var adapter = getWebGLAdapter(mesh);
     x.removeChild(group);
-    ok(getWebGLAdapter(mesh).renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
+    ok(adapter.renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
@@ -494,10 +497,12 @@ test("Remove group with references to transform", 6, function() {
     ok(outerHandles.transform !== undefined, "Outer transform reference is intact");
     ok(innerHandles.transform !== undefined, "Inner transform reference is intact");
 
+
+    var adapter = outerGroup._configured.adapters.webgl_1;
     outerGroup.parentNode.removeChild(outerGroup);
 
-    outerHandles = outerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
-    innerHandles = innerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
+    outerHandles = adapter.connectedAdapterHandles;
+    innerHandles = adapter.connectedAdapterHandles;
     ok(outerHandles.transform === undefined, "Outer transform reference has been removed");
     ok(innerHandles.transform === undefined, "Inner transform reference has been removed");
 });

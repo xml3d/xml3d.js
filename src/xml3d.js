@@ -29,6 +29,21 @@ XML3D.extend = function(a, b) {
 };
 
 /**
+ * Returns true if ctor is a superclass of subclassCtor.
+ * @param ctor
+ * @param subclassCtor
+ * @return {Boolean}
+ */
+XML3D.isSuperclassOf = function(ctor, subclassCtor) {
+    while (subclassCtor && subclassCtor.superclass) {
+        if (subclassCtor.superclass === ctor.prototype)
+            return true;
+        subclassCtor = subclassCtor.superclass.constructor;
+    }
+    return false;
+}
+
+/**
  *
  * @param {Object} ctor Constructor
  * @param {Object} parent Parent class
@@ -46,11 +61,13 @@ XML3D.createClass = function(ctor, parent, methods) {
         ctor.prototype.constructor = ctor;
         ctor.superclass = parent.prototype;
     }
+    ctor.isSuperclassOf = XML3D.isSuperclassOf.bind(ctor, ctor);
     for ( var m in methods) {
         ctor.prototype[m] = methods[m];
     }
     return ctor;
 };
+
 (function() {
     var onload = function() {
 

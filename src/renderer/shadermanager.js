@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
 
     /***************************************************************************
      * Class XML3D.webgl.XML3DShaderManager

@@ -1,4 +1,4 @@
-﻿// Adapter for <transform>
+// Adapter for <transform>
 (function() {
 
     var TransformRenderAdapter = function(factory, node) {

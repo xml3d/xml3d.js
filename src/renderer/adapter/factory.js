@@ -11,10 +11,11 @@
     var RenderAdapterFactory = function(canvasId) {
         XML3D.base.NodeAdapterFactory.call(this, XML3D.webgl, canvasId);
         this.handler = XML3D.webgl.handlers[canvasId];
-        this.renderer = this.handler.renderer;
+        this.renderer = XML3D.webgl.renderers[canvasId];
         this.type = "RenderAdapterFactory";
     };
     XML3D.createClass(RenderAdapterFactory, XML3D.base.NodeAdapterFactory);
+    RenderAdapterFactory.prototype.aspect = XML3D.webgl;
     XML3D.base.xml3dFormatHandler.registerFactoryClass(RenderAdapterFactory);
 
     var ns = XML3D.webgl,

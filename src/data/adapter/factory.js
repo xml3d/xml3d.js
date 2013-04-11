@@ -44,7 +44,7 @@
         XML3D.base.NodeAdapterFactory.call(this, XML3D.data);
     };
     XML3D.createClass(XML3DDataAdapterFactory, XML3D.base.NodeAdapterFactory);
-
+    XML3DDataAdapterFactory.prototype.aspect = XML3D.data;
 
     var data = XML3D.data, reg = {};
 

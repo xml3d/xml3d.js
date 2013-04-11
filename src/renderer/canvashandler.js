@@ -53,6 +53,7 @@ XML3D.webgl.MAXFPS = 30;
         this.canvas = canvas;
         this.xml3dElem = xml3dElem;
         this.id = ++globalCanvasId; // global canvas id starts at 1
+        XML3D.webgl.handlers[this.id] = this;
 
         this.needDraw = true;
         this.needPickingDraw = true;
@@ -68,7 +69,7 @@ XML3D.webgl.MAXFPS = 30;
         if (context) {
             this.initialize(context);
         }
-        XML3D.webgl.handlers[this.id] = this;
+
     }
 
     /**

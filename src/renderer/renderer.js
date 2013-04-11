@@ -2,6 +2,8 @@
 
 (function() {
 
+XML3D.webgl.renderers = [];
+
 /**
  * Constructor for the Renderer.
  *
@@ -15,6 +17,7 @@
 var Renderer = function(handler, context, dimensions) {
     this.handler = handler;
     this.gl = context;
+    XML3D.webgl.renderers[handler.id] = this;
 
     this.setGlobalGLStates();
 

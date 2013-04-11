@@ -18,9 +18,8 @@
      * three-dimensional vector as a 3-tuple floating point values.
      * @constructor
      * @this {XML3DRotation}
-     * @param {number=} x The x value (optional). Default: 0.
-     * @param {number=} y The y value (optional). Default: 0.
-     * @param {number=} z The z value (optional). Default: 0.
+     * @param {XML3DVec3=} axis
+     * @param {number=} angle
      * @param {function(XML3DVec3=)=} cb Called, if value has changed.
      *                                   Has this as first parameter.
      */
@@ -28,30 +27,45 @@
         var that = this;
         this._data = new Float32Array(4);
 
-        /** @private */
-        this._callback = typeof cb == 'function' ? cb : 0;
-
-        /** @private */
         var vec_cb = function() {
             that._updateQuaternion();
             if (that._callback)
                 that._callback(that);
         };
 
-        if (axis instanceof XML3DRotation) {
-            this._axis = new window.XML3DVec3(0, 0, 1, vec_cb);
-            this._angle = 0;
-            this.setAxisAngle(axis.axis, axis.angle);
-        } else {
-            this._axis = axis ? new window.XML3DVec3(axis.x, axis.y, axis.z, vec_cb) : new window.XML3DVec3(0, 0, 1, vec_cb);
-            /** @private */
-            this._angle = angle || 0;
-            this._updateQuaternion();
+        /** @private */
+        this._axis = new window.XML3DVec3(0, 0, 1, vec_cb);
+        /** @private */
+        this._angle = 0;
+
+        this._updateQuaternion();
+
+        if(axis !== undefined && axis !== null) {
+            this.set(axis, angle);
         }
 
-    }; 
-    
+        /** @private */
+        this._callback = typeof cb == 'function' ? cb : 0;
+    };
+
     var p = XML3DRotation.prototype;
+
+    /**
+     * The set method copies the values from other.
+     * @param {Object} other another XML3DRotation, Float32Array or XML3DVec3. In the last case the 2nd argument is considered.
+     * @param {number=} angle
+     */
+    p.set = function(other, angle) {
+        if(other.axis && other.angle) {
+            this.setAxisAngle(other.axis, other.angle);
+        } else if(other.length && other.length >= 4) {
+            this._setQuaternion(other);
+        } else if(other._data && other._data.length && other._data.length === 3) {
+            this.setAxisAngle(other, angle);
+        } else {
+            XML3D.debug.logError("XML3DRotation.set(): invalid argument given. Expect XML3DRotation or Float32Array.");
+        }
+    };
 
     /** @type {number} */
     Object.defineProperty(p, "axis", {
@@ -182,15 +196,7 @@
     };
 
     /**
-     * The set method copies the values from other.
-     * @param {XML3DRotation} other The other rotation
-     */
-    p.set = function(other) {
-        this.setAxisAngle(other.axis, other.angle);
-    };
-
-    /**
-     * Returns a XML3DMatrix that describes this 3D rotation in a 
+     * Returns a XML3DMatrix that describes this 3D rotation in a
      * 4x4 matrix representation.
      * @return {XML3DMatrix} Rotation matrix
      */
@@ -200,13 +206,13 @@
         XML3D.math.mat4.fromRotationTranslation(m._data, q, [0, 0, 0]);
         return m;
     };
-    
+
     /**
-     * Rotates the vector passed as parameter with this rotation 
+     * Rotates the vector passed as parameter with this rotation
      * representation. The result is returned as new vector instance.
      * Neither this nor the inputVector are changed.
      * 4x4 matrix representation.
-     * @param {XML3DVec3} inputVector 
+     * @param {XML3DVec3} inputVector
      * @return {XML3DVec3} The rotated vector
      */
     p.rotateVec3 = function(inputVector) {
@@ -214,7 +220,7 @@
         XML3D.math.vec3.transformQuat(result._data, inputVector._data, this._data)
         return result;
     };
-    
+
     /**
      * Replaces the existing rotation with the quaternion representation passed
      * as argument
@@ -243,7 +249,7 @@
     /**
      * Multiplies this rotation with the passed rotation. This rotation is not
      * changed.
-     * 
+     *
      * @param {XML3DRotation} rot1
      * @return {XML3DVec3} The result
      */
@@ -262,14 +268,27 @@
         var na = this._axis.normalize();
         return new XML3DRotation(na, this._angle);
     };
-    
-    /** 
-     * Returns the quaternion, that underlies this rotation. 
-     * 
-     * @return {Float32Array} 
+
+    /**
+     * Returns the quaternion, that underlies this rotation.
+     *
+     * @return {Float32Array}
      */
     p.getQuaternion = function() {
-        return XML3D.math.quat.copy(XML3D.math.quat.create(), this._data); 
+        return XML3D.math.quat.copy(XML3D.math.quat.create(), this._data);
+    };
+
+    /**
+     * Set this rotation based on the given base vectors.
+     *
+     * @param {XML3DVec3} xAxis
+     * @param {XML3DVec3} yAxis
+     * @param {XML3DVec3} zAxis
+     */
+    p.setFromBasis = function(xAxis, yAxis, zAxis) {
+        var q = XML3D.math.quat.create();
+        XML3D.math.quat.setFromBasis(xAxis._data, yAxis._data, zAxis._data, q);
+        this._setQuaternion(q);
     };
 
     XML3D.XML3DRotation = XML3DRotation;

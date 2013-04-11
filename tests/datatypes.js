@@ -6,6 +6,7 @@
 module("XML3DVec3 tests", {
     ident : new XML3DVec3(),
     vec1 : new XML3DVec3(3.0, 2.5, -1.0),
+    vec1Array: new Float32Array([3.0, 2.5, -1.0]),
     vec2 : new XML3DVec3(1.5, -2.0, 3.5)
 });
 
@@ -29,6 +30,14 @@ test("Assigning Constructor", function()  {
 test("Copy Constructor", function()  {
     var c = new XML3DVec3(this.vec1);
     notStrictEqual(c, this.vec1);
+    equal(c.x, 3.0, "x is 3.0");
+    equal(c.y, 2.5, "y is 2.5");
+    equal(c.z, -1.0, "z is -1.0");
+});
+
+test("Array Constructor", function() {
+
+    var c = new XML3DVec3(this.vec1Array);
     equal(c.x, 3.0, "x is 3.0");
     equal(c.y, 2.5, "y is 2.5");
     equal(c.z, -1.0, "z is -1.0");
@@ -109,11 +118,23 @@ test("XML3DVec3::normalize", function()  {
     // TODO: Implement tests
 });
 
-test("XML3DVec3::set", function()  {
+test("XML3DVec3::set vector", function()  {
     equal(typeof this.vec1.__proto__.set, 'function', "XML3DVec3::set does not exist");
     var v = new XML3DVec3();
     v.set(this.vec2);
     notStrictEqual(v, this.vec2);
+    QUnit.closeVector(v, this.vec2, EPSILON);
+});
+
+test("XML3DVec3::set array", function() {
+    var v = new XML3DVec3();
+    v.set(this.vec1Array);
+    QUnit.closeVector(v, this.vec1, EPSILON);
+});
+
+test("XML3DVec3::set values", function() {
+    var v = new XML3DVec3();
+    v.set(1.5, -2.0, 3.5);
     QUnit.closeVector(v, this.vec2, EPSILON);
 });
 
@@ -124,6 +145,7 @@ test("XML3DVec3::set", function()  {
 module("XML3DRotation tests", {
     ident : new XML3DRotation(),
     rot1 : new XML3DRotation(new XML3DVec3(1.0, 0.0, 0.0), Math.PI / 2),
+    rot1Quat: new Float32Array([0.7071067690849304, 0, 0, 0.7071067690849304]),
     vec2 : new XML3DVec3(1.5, -2.0, 3.5),
     mat_90x : new XML3DMatrix(
             1,  0, 0, 0,
@@ -272,7 +294,27 @@ test("XML3DRotation::rotateVec3", function()  {
     QUnit.closeVector(result, new XML3DVec3(0, 0, -1), EPSILON);
 });
 
-test("XML3DRotation::set", function()  {
+test("XML3DRotation::setFromBasis", function()  {
+    equal(typeof this.ident.__proto__.setFromBasis, 'function', "XML3DRotation::setFromBasis exists");
+
+    // test axes
+    var xAxis = new XML3DVec3(-0.562, 0.000, -0.827);
+    var yAxis = new XML3DVec3(-0.589, 0.702, 0.401);
+    var zAxis = new XML3DVec3(0.580, 0.713, -0.394);
+
+    // expected outcome
+    var expAxis = new XML3DVec3(-0.200, 0.904, 0.378);
+    var expAngle = 2.2490517934077614;
+    var expRot = new XML3DRotation(expAxis, expAngle);
+
+    // test itself
+    var rot = new XML3DRotation();
+    rot.setFromBasis(xAxis, yAxis, zAxis);
+
+    QUnit.closeRotation(rot, expRot, EPSILON);
+});
+
+test("XML3DRotation::set rotation", function()  {
     equal(typeof this.ident.__proto__.set, 'function', "XML3DRotation::set does not exist");
     var v = new XML3DRotation();
     v.set(this.rot1);
@@ -281,6 +323,17 @@ test("XML3DRotation::set", function()  {
 
 });
 
+test("XML3DRotation::set array", function()  {
+    var v = new XML3DRotation();
+    v.set(this.rot1Quat);
+    QUnit.closeRotation(v, this.rot1, EPSILON);
+});
+
+test("XML3DRotation::set axis-angle", function()  {
+    var v = new XML3DRotation();
+    v.set(this.rot1.axis, this.rot1.angle);
+    QUnit.closeRotation(v, this.rot1, EPSILON);
+});
 
 //============================================================================
 //--- XML3DMatrix ---
@@ -302,6 +355,12 @@ module("XML3DMatrix tests", {
         5,  6,  7,  8,
         9, 10, 11, 12,
        13, 14, 15, 16),
+
+    incValueMatArray: new Float32Array([
+        1,  2,  3,  4,
+        5,  6,  7,  8,
+        9, 10, 11, 12,
+       13, 14, 15, 16]),
 
     // mat1: arbitrary matrix, but mat1_inv must be inverse of it
     mat1 : new XML3DMatrix(
@@ -409,8 +468,15 @@ test("Assigning Constructor", function() {
 
 });
 
+test("Array Constructor", function() {
+
+    var m = new XML3DMatrix(this.incValueMatArray);
+    QUnit.closeMatrix(m, this.incValueMat, EPSILON);
+});
+
 test("Copy Constructor", function() {
     var m = new XML3DMatrix(this.mat1);
+    notStrictEqual(m,this.mat1);
     QUnit.closeMatrix(m, this.mat1, EPSILON);
 });
 
@@ -525,32 +591,68 @@ test("XML3DMatrix::setMatrixValue: invalid value", function() {
 test("XML3DMatrix::CSSMatrix conformance", function() {
 
     // TODO: Document that XML3DMatrix::rotate and XML3DMatrix::rotateAxisAngle
-        // are in radians while the same methods of CSSMatrix use degrees
-        if (window.WebKitCSSMatrix) {
-            var xml3d = new XML3DMatrix();
-            var css = new WebKitCSSMatrix();
-            QUnit.closeMatrix(xml3d, css, EPSILON, "Same identity");
-            QUnit.closeMatrix(xml3d.translate(1, 2, 3), css.translate(1, 2, 3), EPSILON, "CSSMatrix::translate");
-            QUnit.closeMatrix(xml3d.scale(1, 2, 3), css.scale(1, 2, 3), EPSILON, "CSSMatrix::scale");
-            QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, 0, 0), css.rotate(90, 0, 0), EPSILON, "CSSMatrix::rotate 1");
-            QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, Math.PI / 2, 0), css.rotate(90, 90, 0), EPSILON, "CSSMatrix::rotate 2");
-            QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4, Math.PI / 4, Math.PI / 2), css.rotate(-45, 45, 90), EPSILON, "CSSMatrix::rotate 3");
-            // temporarily disabled: QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4), css.rotate(-45), EPSILON, "CSSMatrix::rotate 4");
-            QUnit.closeMatrix(xml3d.rotate(0,0,-Math.PI / 4), css.rotate(0,0,-45), EPSILON, "CSSMatrix::rotate 4");
-            QUnit.closeMatrix(xml3d.rotateAxisAngle(1, 0, 0, Math.PI / 4), css.rotateAxisAngle(1, 0, 0, 45), EPSILON,
-                    "CSSMatrix::rotateAxisAngle");
-            QUnit.closeMatrix(xml3d.translate(1, 2, 3).inverse(), css.translate(1, 2, 3).inverse(), EPSILON,
-                    "CSSMatrix::inverse (test depends on correct ::translate)");
-            QUnit.closeMatrix(xml3d.translate(1, 2, 3).multiply(xml3d.scale(2, 2, 2)), css.translate(1, 2, 3).multiply(css.scale(2, 2, 2)), EPSILON,
-                    "CSSMatrix::multiply (test depends on correct ::translate and ::scale)");
-            // QUnit.closeMatrix(css.rotate(45,0,0),
-            // css.rotateAxisAngle(1,0,0,45), EPSILON);
-            var rotmat = new WebKitCSSMatrix();
-            rotmat = rotmat.rotate(45, 0, 0);
-            var xrot = new XML3DRotation(new XML3DVec3(1,0,0), Math.PI / 4).toMatrix();
-            QUnit.closeMatrix(rotmat, xrot, EPSILON, "CSSMatrix:rotate matches XML3DRotation.toMatrix()");
-        }
-    });
+    // are in radians while the same methods of CSSMatrix use degrees
+    if (window.WebKitCSSMatrix) {
+        var xml3d = new XML3DMatrix();
+        var css = new WebKitCSSMatrix();
+        QUnit.closeMatrix(xml3d, css, EPSILON, "Same identity");
+        QUnit.closeMatrix(xml3d.translate(1, 2, 3), css.translate(1, 2, 3), EPSILON, "CSSMatrix::translate");
+        QUnit.closeMatrix(xml3d.scale(1, 2, 3), css.scale(1, 2, 3), EPSILON, "CSSMatrix::scale");
+        QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, 0, 0), css.rotate(90, 0, 0), EPSILON, "CSSMatrix::rotate 1");
+        QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, Math.PI / 2, 0), css.rotate(90, 90, 0), EPSILON, "CSSMatrix::rotate 2");
+        QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4, Math.PI / 4, Math.PI / 2), css.rotate(-45, 45, 90), EPSILON, "CSSMatrix::rotate 3");
+        // temporarily disabled: QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4), css.rotate(-45), EPSILON, "CSSMatrix::rotate 4");
+        QUnit.closeMatrix(xml3d.rotate(0,0,-Math.PI / 4), css.rotate(0,0,-45), EPSILON, "CSSMatrix::rotate 4");
+        QUnit.closeMatrix(xml3d.rotateAxisAngle(1, 0, 0, Math.PI / 4), css.rotateAxisAngle(1, 0, 0, 45), EPSILON,
+                "CSSMatrix::rotateAxisAngle");
+        QUnit.closeMatrix(xml3d.translate(1, 2, 3).inverse(), css.translate(1, 2, 3).inverse(), EPSILON,
+                "CSSMatrix::inverse (test depends on correct ::translate)");
+        QUnit.closeMatrix(xml3d.translate(1, 2, 3).multiply(xml3d.scale(2, 2, 2)), css.translate(1, 2, 3).multiply(css.scale(2, 2, 2)), EPSILON,
+                "CSSMatrix::multiply (test depends on correct ::translate and ::scale)");
+        // QUnit.closeMatrix(css.rotate(45,0,0),
+        // css.rotateAxisAngle(1,0,0,45), EPSILON);
+        var rotmat = new WebKitCSSMatrix();
+        rotmat = rotmat.rotate(45, 0, 0);
+        var xrot = new XML3DRotation(new XML3DVec3(1,0,0), Math.PI / 4).toMatrix();
+        QUnit.closeMatrix(rotmat, xrot, EPSILON, "CSSMatrix:rotate matches XML3DRotation.toMatrix()");
+    }
+});
+
+test("XML3DMatrix::set numbers", function() {
+    var m = new XML3DMatrix();
+    m.set(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
+
+    equal(m.m11, 1, "m11 is 1");
+    equal(m.m12, 2, "m12 is 2");
+    equal(m.m13, 3, "m13 is 3");
+    equal(m.m14, 4, "m14 is 4");
+    equal(m.m21, 5, "m21 is 5");
+    equal(m.m22, 6, "m22 is 6");
+    equal(m.m23, 7, "m23 is 7");
+    equal(m.m24, 8, "m24 is 8");
+    equal(m.m31, 9, "m31 is 9");
+    equal(m.m32, 10, "m32 is 10");
+    equal(m.m33, 11, "m33 is 11");
+    equal(m.m34, 12, "m34 is 12");
+    equal(m.m41, 13, "m41 is 13");
+    equal(m.m42, 14, "m42 is 14");
+    equal(m.m43, 15, "m43 is 15");
+    equal(m.m44, 16, "m44 is 16");
+});
+
+test("XML3DMatrix::set array", function() {
+    var m = new XML3DMatrix();
+    m.set(this.incValueMatArray);
+    QUnit.closeMatrix(m, this.incValueMat, EPSILON);
+});
+
+test("XML3DMatrix::set matrix", function() {
+    var m = new XML3DMatrix();
+    m.set(this.mat1);
+
+    notStrictEqual(m, this.mat1);
+    QUnit.closeMatrix(m, this.mat1, EPSILON);
+});
 
 //============================================================================
 //--- XML3DRay ---

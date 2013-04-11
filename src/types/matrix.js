@@ -1,6 +1,6 @@
 // matrix.js
 (function(isNative) {
-    
+
     if(isNative) return;
 
     /**
@@ -66,10 +66,10 @@
             m32, m33, m34, m41, m42, m43, m44, cb) {
         /** @private */
         if (typeof m11 == 'number' && arguments.length >= 16) {
-            this._data = new Float32Array(arguments);
+            this.set(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44);
             this._callback = typeof cb == 'function' ? cb : 0;
         } else if (typeof m11 == 'object' && arguments.length == 1) {
-            this._data = new Float32Array(m11._data);
+            this.set(m11);
         } else{
             this._data = new Float32Array( [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
                     0, 0, 0, 0, 1 ]);
@@ -110,6 +110,47 @@
     Object.defineProperty(p, "m43", prop(14));
     /** @type {number} */
     Object.defineProperty(p, "m44", prop(15));
+
+    /**
+     * Set the value of the matrix.
+     *
+     * @param {Object} m11 another XML3DMatrix, Float32Array or a number. In the last case the remaining arguments are considered.
+     * @param {number=} m12
+     * @param {number=} m13
+     * @param {number=} m14
+     * @param {number=} m21
+     * @param {number=} m22
+     * @param {number=} m23
+     * @param {number=} m24
+     * @param {number=} m31
+     * @param {number=} m32
+     * @param {number=} m33
+     * @param {number=} m34
+     * @param {number=} m41
+     * @param {number=} m42
+     * @param {number=} m43
+     * @param {number=} m44
+     */
+    p.set = function(m11, m12, m13, m14, m21, m22, m23, m24, m31,
+            m32, m33, m34, m41, m42, m43, m44) {
+
+        if (typeof m11 == 'number' && arguments.length >= 16) {
+            this._data = new Float32Array(arguments);
+            return;
+        }
+
+        if(m11._data && m11._data.length && m11._data.length === 16) {
+            this._data = new Float32Array(m11._data);
+            return;
+        }
+
+        if(m11.length && m11.length >= 16) {
+            this._data = new Float32Array(m11);
+            return;
+        }
+
+        XML3D.debug.logError("XML3DMatrix.set(): invalid parameter(s). Expect XML3DMatrix, Float32Array or 16 numbers.");
+    };
 
     /**
      * String representation of the XML3DBox.

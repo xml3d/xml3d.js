@@ -23,7 +23,7 @@
                 request: null
             };
 
-            var names = options['names'];
+            var names = options && options['names'];
             var typeOfNames = Object.prototype.toString.call(names).slice(8, -1);
             if (typeOfNames === "String") {
                 names = [names];

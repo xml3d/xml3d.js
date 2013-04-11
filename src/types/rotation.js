@@ -56,7 +56,7 @@
      * @param {number=} angle
      */
     p.set = function(other, angle) {
-        if(other.axis && other.angle) {
+        if(other.axis && other.angle !== undefined) {
             this.setAxisAngle(other.axis, other.angle);
         } else if(other.length && other.length >= 4) {
             this._setQuaternion(other);

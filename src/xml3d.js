@@ -170,7 +170,6 @@ XML3D.createClass = function(ctor, parent, methods) {
             return;
 
         xml3dElement._configured = undefined;
-        xml3dElement._configuredWebGL = undefined;
     };
 
     function onNodeInserted(evt) {

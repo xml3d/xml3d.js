@@ -6,7 +6,7 @@
 
      Author: Kristian Sons
      ====================================================================== -->
-<project name="script-merge" default="develop">
+<project name="xflip-merge" default="develop">
     <description>
            Build the xflip script
     </description>

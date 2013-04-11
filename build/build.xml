@@ -6,7 +6,7 @@
 
      Author: Kristian Sons
      ====================================================================== -->
-<project name="script-merge" default="develop">
+<project name="script-merge" default="all">
     <description>
            Merge all the single scripts to one global xml3d.js
     </description>
@@ -114,6 +114,13 @@
         <subant target="compile">
             <property name="build.path" value="${modulesBuildDir}" />
             <fileset dir="${toolsDir}" includes="**/build.xml" />
+        </subant>
+    </target>
+
+    <target name="all">
+        <subant target="develop">
+            <fileset dir="." includes="build.xml"/>
+            <fileset dir="." includes="build-xflip.xml"/>
         </subant>
     </target>
 </project>

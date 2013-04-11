@@ -10,6 +10,8 @@ var Xflip = {};
     var c_initialized = false;
     var c_domLoaded = false;
     var c_observer = null;
+    var c_modified = {};
+    var c_done_callbacks = [];
 
 
     /** Load Xflow module to extend functionality
@@ -25,6 +27,15 @@ var Xflip = {};
             'root' : document.URL,
             'addons' : addOns
         });
+    }
+
+    Xflip.addCallback = function(callback){
+        c_done_callbacks.push(callback);
+    }
+
+    Xflip.removeCallback = function(callback){
+        var idx = c_done_callbacks.indexOf(callback);
+        c_done_callbacks.splice(idx,1);
     }
 
     function onDomLoaded(){
@@ -68,11 +79,12 @@ var Xflip = {};
                 img.src = url;
                 break;
             case 'updateSinkImage':
-                endLoading(data['id']);
                 updateSinkImage(data['id'], data['imageData']);
+                endLoading(data['id']);
                 break;
             case 'modified':
                 startLoading(data['id']);
+                break;
             case 'log':
                 Xflip.log("Worker: " + event.data['msg']);
                 break;
@@ -151,7 +163,6 @@ var Xflip = {};
                 c_observer.observe(k, {characterData: true});
             k = k.nextSibling;
         }
-
         initNodeChildren(node);
     }
 
@@ -165,6 +176,14 @@ var Xflip = {};
         syncCanvasStyle(node, canvas);
         node._xflowip.canvas = canvas;
         node._xflowip.info = info;
+
+        node.finished = function(){
+            return !c_modified[this._xflowip.id];
+        }
+        node.getCanvas = function(){
+            return this._xflowip.canvas;
+        }
+
     }
 
     function syncCanvasStyle(node, canvas){
@@ -234,6 +253,7 @@ var Xflip = {};
 
     function startLoading(nodeId){
         var node = c_nodes[nodeId];
+        c_modified[nodeId] = true;
         if(!node || !node._xflowip.info) return;
         if(node._xflowip.interval) return;
         var point = 0;
@@ -251,6 +271,20 @@ var Xflip = {};
         window.clearInterval(node._xflowip.interval);
         node._xflowip.interval = null;
         node._xflowip.info.innerHTML = "";
+
+        delete c_modified[nodeId];
+        notifyFinished();
+    }
+
+
+    function notifyFinished(){
+        var n;
+        for(var n in c_modified);
+        if(!n){
+            for(var i= 0; i < c_done_callbacks.length; ++i){
+                c_done_callbacks[i]();
+            }
+        }
     }
 
     var c_canvas = document.createElement("canvas");

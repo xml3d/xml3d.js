@@ -260,29 +260,33 @@
         var docCache = c_cachedDocuments[url];
         docCache.mimetype = mimetype;
 
+        var response = null;
         if (req.responseType == "arraybuffer") {
-            docCache.response = req.response;
+            response = req.response;
         } else if (mimetype == "application/json") {
-            docCache.response = JSON.parse(req.responseText);
+            response = JSON.parse(req.responseText);
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
-            docCache.response = req.responseXML;
-
-            if(!docCache.response){
+            response = req.responseXML;
+            if (!response) {
                 XML3D.debug.logError("Invalid external XML document '" + req._url +
-                "': XML Syntax error");
+                    "': XML Syntax error");
                 return;
-            }
-
-            // FIXME moved code to XML3DFormatHandler.prototype.getFormatData, cleanup
-            // Configure all xml3d elements:
-            var xml3dElements = docCache.response.querySelectorAll("xml3d");
-            for(var i = 0; i < xml3dElements.length; ++i){
-                XML3D.config.element(xml3dElements[i]);
             }
         } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
             XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
-            docCache.response = req.response;
+            response = req.response;
+        } else {
+            XML3D.debug.logError("Unidentified response type (response = '"+req.response+"', responseType = '"+req.responseType+"')");
+            response = req.response;
         }
+
+        var formatHandler = XML3D.base.findFormat(response, req.responseType, mimetype);
+        if (!formatHandler) {
+            XML3D.debug.logError("No format handler for resource (response = '"+response+"', responseType = '"+req.responseType+"')");
+            return;
+        }
+        docCache.format = formatHandler;
+        docCache.response = formatHandler.getFormatData(response, req.responseType, mimetype);
     }
 
     /**
@@ -321,6 +325,7 @@
 
         var response = c_cachedDocuments[url].response;
         var mimetype = c_cachedDocuments[url].mimetype;
+        var format = c_cachedDocuments[url].format;
 
         var fullUrl = url + (fragment ? "#" + fragment : "");
         if (!response) {
@@ -329,19 +334,11 @@
             return;
         }
 
-        var data = null;
-        if (mimetype == "application/json") {
-            // TODO: Select subset of data according to fragment
-            data = response;
-        } else if (mimetype == "application/xml" || mimetype == "text/xml") {
-            // FIXME: This code moved to XMLFormatHandler.prototype.getFragmentData, cleanup
-            data = response.querySelectorAll("*[id="+fragment+"]")[0];
-        } else {
-            data = response; // for "application/octet-stream" and "text/plain; charset=x-user-defined"
-        }
+        // get part of the resource represented by the fragment
+        var data = format.getFragmentData(response, fragment);
 
         if (data) {
-            updateMissingHandles(fullUrl, mimetype, data);
+            updateMissingHandles(fullUrl, format, data);
         }
         else{
             invalidateHandles(fullUrl);
@@ -352,15 +349,15 @@
     /**
      * Update all AdapterHandles without adapters of a certain url
      * @param {string} url The complete url + fragment
-     * @param {string} mimetype Mimetype of the document
+     * @param {FormatHandler} format Format handler
      * @param {Object} data Data of the document corresponding to the url. Possibily a DOM element
      */
-    function updateMissingHandles(url, mimetype, data){
+    function updateMissingHandles(url, format, data){
         for ( var adapterType in c_cachedAdapterHandles[url]) {
             for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (!handle.hasAdapter()) {
-                    updateHandle(handle, adapterType, canvasId, mimetype, data);
+                    updateHandle(handle, adapterType, canvasId, format, data);
                     loadComplete(canvasId, url);
                 }
             }
@@ -388,16 +385,19 @@
      * @param {XML3D.base.AdapterHandle} handle The AdapterHandle to be updated
      * @param {Object} adapterType The type / aspect of the adapter (e.g. XML3D.data or XML3D.webgl)
      * @param {number} canvasId Id of corresponding canvas handler. 0 if not dependent of canvas handler
-     * @param {mimetype} mimetype Mimetype of the corresponding document
+     * @param {FormatHandler} format Format handler of the corresponding document
      * @param {Object} data Data for this handle. Possibily a DOM element
      */
-    function updateHandle(handle, adapterType, canvasId, mimetype, data){
+    function updateHandle(handle, adapterType, canvasId, format, data){
+
+
+
         var factories = c_factories[canvasId];
 
         for ( var i = 0; i < factories.length; ++i) {
             var fac = factories[i];
             if (fac.aspect == adapterType && fac.supportsMimetype(mimetype)) {
-                var adapter = fac.getAdapter ? fac.getAdapter(data, mimetype) : fac.createAdapter(data, mimetype);
+                var adapter = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
                 if (adapter) {
                     handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);
                 }

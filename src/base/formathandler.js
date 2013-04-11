@@ -16,6 +16,10 @@
         this.factories[factoryClass.aspect] = factoryClass;
     }
 
+    FormatHandler.prototype.getFactoryClassByAspect = function(aspect) {
+        return this.factories[aspect];
+    }
+
     /**
      * Returns true if response data format is supported.
      * response, responseType, and mimetype values are returned by XMLHttpRequest.

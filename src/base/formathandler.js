@@ -7,15 +7,22 @@
      * @constructor
      */
     var FormatHandler = function() {
+        this.factories = {}; // a map from an aspect name to a factory class
     };
+
+    FormatHandler.prototype.registerFactoryClass = function(factoryClass) {
+        if (!factoryClass.aspect || !XML3D.isSuperclassOf(XML3D.base.AdapterFactory, factoryClass))
+            throw new Error("factoryClass must be a subclass of XML3D.base.AdapterFactory");
+        this.factories[factoryClass.aspect] = factoryClass;
+    }
 
     /**
      * Returns true if response data format is supported.
      * response, responseType, and mimetype values are returned by XMLHttpRequest.
-     * Data type of the response is one of ArrayBuffer, Blob, Document, String, Object
+     * Data type of the response is one of ArrayBuffer, Blob, Document, String, Object.
      * responseType is one of "", "arraybuffer", "blob", "document", "json", "text"
      *
-     *
+     * @override
      * @param {Object} response
      * @param {string} responseType
      * @param {string} mimetype
@@ -28,6 +35,8 @@
     /**
      * Converts response data to format data.
      * Default implementation returns value of response.
+     *
+     * @override
      * @param {Object} response
      * @param {string} responseType
      * @param {string} mimetype
@@ -39,6 +48,8 @@
 
     /**
      * Extracts data for a fragment from document data and fragment reference.
+     *
+     * @override
      * @param {Object} documentData
      * @param {string} fragment Fragment without pound key which defines the part of the document
      * @return {*}
@@ -57,7 +68,6 @@
      * @constructor
      */
     var XMLFormatHandler = function() {
-
     }
 
     XMLFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {

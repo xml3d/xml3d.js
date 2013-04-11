@@ -5,6 +5,7 @@
     var c_factories = {};
     var c_cachedAdapterHandles = {};
     var c_canvasIdCounters = {};
+    var c_formatHandlers = [];
 
     /**
      * Register a factory with the resource manager
@@ -16,6 +17,21 @@
             c_factories[canvasId] = [];
         c_factories[canvasId].push(factory);
     };
+
+    XML3D.base.registerFormat = function(formatHandler) {
+        if (formatHandler)
+            c_formatHandlers.push(formatHandler);
+    }
+
+    XML3D.base.findFormat = function(response, responseType, mimetype) {
+        for (var i = 0; i < c_formatHandlers.length; ++i) {
+            var formatHandler = c_formatHandlers[i];
+            if (c_formatHandlers[i].isFormatSupported(response, responseType, mimetype)) {
+                return formatHandler;
+            }
+        }
+        return null;
+    }
 
     /**
      * @constructor

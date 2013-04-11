@@ -67,7 +67,7 @@ Renderer.prototype.setGlobalGLStates = function() {
 };
 
 Renderer.prototype.getAdapter = function(node){
-    return XML3D.resourceManager.getAdapter(node, XML3D.webgl, this.handler.id);
+    return XML3D.base.resourceManager.getAdapter(node, XML3D.webgl, this.handler.id);
 }
 
 Renderer.prototype.initCamera = function() {

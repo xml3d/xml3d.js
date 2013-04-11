@@ -6,7 +6,7 @@
         this.gl = factory.renderer.handler.gl;
         this.factory = factory;
         this.node = node;
-        this.dataAdapter = XML3D.resourceManager.getAdapter(this.node, XML3D.data);
+        this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
     };
 
     XML3D.createClass(TextureRenderAdapter, XML3D.webgl.RenderAdapter);

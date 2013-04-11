@@ -45,7 +45,7 @@ module("Xflow tests", {
 
     loadTestXML : function(url, handler) {
         var win = document.getElementById("xml3dframe").contentWindow;
-        var resManager = win.XML3D.resourceManager;
+        var resManager = win.XML3D.base.resourceManager;
         var resType = win.XML3D.data;
         this.getDataAdapter = function(node){
             return resManager.getAdapter(node, res.Type);

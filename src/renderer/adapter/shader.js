@@ -5,7 +5,7 @@
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.renderer = this.factory.renderer;
 
-        this.dataAdapter = XML3D.resourceManager.getAdapter(this.node, XML3D.data);
+        this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
         this.computeRequest;
     };
 

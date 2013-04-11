@@ -93,7 +93,7 @@
 
     p.init = function() {
         // Create all matrices, no valid values yet
-        this.dataAdapter = XML3D.resourceManager.getAdapter(this.node, XML3D.data);
+        this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
         this.matrixReady = {};
         this.matrices = {};
         this.requests = {};

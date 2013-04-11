@@ -115,7 +115,7 @@
     // Export
     XML3D.base.XML3DFormatHandler = XML3DFormatHandler;
     XML3D.base.xml3dFormatHandler = new XML3DFormatHandler();
-    XML3D.resourceManager.registerFormat(XML3D.base.xml3dFormatHandler);
+    XML3D.base.resourceManager.registerFormat(XML3D.base.xml3dFormatHandler);
 
     var JSONFormatHandler = function() {
     }

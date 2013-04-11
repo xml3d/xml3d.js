@@ -1,6 +1,9 @@
-var XflowIP = {};
+var Xflip = {};
 
 (function() {
+
+    var scripts = document.getElementsByTagName("script"),
+        CURRENT_SCRIPT_PATH = scripts[scripts.length-1].src;
 
     var c_worker = null;
     var c_nodes = [];
@@ -10,14 +13,16 @@ var XflowIP = {};
 
 
     /** Load Xflow module to extend functionality
-     * @param workerUrl Url of worker file
      * @param addOns Array of urls for modules to load
      **/
-    XflowIP.init = function(workerUrl, addOns){
-        c_worker = new Worker(workerUrl);
+    Xflip.init = function(addOns){
+        var workerURL = CURRENT_SCRIPT_PATH.replace(/[^/]*$/,'xflip-worker.js');
+
+        c_worker = new Worker(workerURL);
         c_worker.onmessage = onMessage;
         c_worker.postMessage({
             'type' : 'initialize',
+            'root' : document.URL,
             'addons' : addOns
         });
     }
@@ -69,15 +74,15 @@ var XflowIP = {};
             case 'modified':
                 startLoading(data['id']);
             case 'log':
-                XflowIP.log("Worker: " + event.data['msg']);
+                Xflip.log("Worker: " + event.data['msg']);
                 break;
             case 'warning':
-                XflowIP.warning("Worker: " + event.data['msg']);
+                Xflip.warning("Worker: " + event.data['msg']);
                 break;
             case 'error':
-                XflowIP.error("Worker: " + event.data['msg']);
+                Xflip.error("Worker: " + event.data['msg']);
                 break;
-            default: XflowIP.error("Unknown Message Type: '" + type + "'");
+            default: Xflip.error("Unknown Message Type: '" + type + "'");
         }
     }
 
@@ -105,7 +110,7 @@ var XflowIP = {};
                     break;
                 case "childList" :
                     break;
-                default: XflowIP.error("Unknown Mutation Type: '" + record.type + "'");
+                default: Xflip.error("Unknown Mutation Type: '" + record.type + "'");
             }
         }
     }
@@ -117,7 +122,7 @@ var XflowIP = {};
 
 
     function parseDocument(){
-        XflowIP.log("Start Parsing!");
+        Xflip.log("Start Parsing!");
         var xflowips = document.querySelectorAll("xflowip");
         for(var i = 0; i < xflowips.length; ++i){
             initNode(xflowips[i]);
@@ -127,7 +132,7 @@ var XflowIP = {};
         for(var i = 0; i < xflowimg.length; ++i){
             initSinkNode(xflowimg[i]);
         }
-        XflowIP.log("End Parsing!");
+        Xflip.log("End Parsing!");
     }
 
 
@@ -290,19 +295,19 @@ var XflowIP = {};
     window.addEventListener('DOMContentLoaded', onDomLoaded, false);
 
     // Utils:
-    XflowIP.error = function(msg){
+    Xflip.error = function(msg){
         if(window.console){
             window.console.error(msg);
         }
     }
 
-    XflowIP.warning = function(msg){
+    Xflip.warning = function(msg){
         if(window.console){
             window.console.warning(msg);
         }
     }
 
-    XflowIP.log = function(msg){
+    Xflip.log = function(msg){
         if(window.console){
             window.console.log(msg);
         }

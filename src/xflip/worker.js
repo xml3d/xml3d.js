@@ -19,9 +19,7 @@ self.onmessage = function(event) {
     log("MESSAGE RECEIVED: " + type);
     switch(type){
         case "initialize":
-            var addons = data['addons'];
-            importScripts.apply(null, addons);
-            self.postMessage({"type": "initialized"});
+            initialize(data['root'], data['addons'])
             break;
         case "createNode":
             createNode(data.nodeData);
@@ -82,6 +80,25 @@ var c_parseConfig = {
     'bool' : { attr: c_input_attr, type: "InputNode", value: 'bool'},
     'texture' : { attr: c_input_attr, type: "InputNode", value: 'texture'},
     'img' : { type: "Image"}
+}
+
+function initialize(root, addons){
+    var relativeAddons = [];
+    root = root.replace(/[^/]*$/,"");
+    for(var i =0; i < addons.length; ++i){
+        var url = addons[i];
+        if(url.indexOf("http://") == -1){
+            if(url.charAt[0] == "/"){
+                url = root.replace(/\/.*$/, "") + url;
+            }
+            else{
+                url = root + url;
+            }
+        }
+        relativeAddons[i] = url;
+    }
+    importScripts.apply(null, relativeAddons);
+    self.postMessage({"type": "initialized"});
 }
 
 function createNode(data){

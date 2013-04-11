@@ -8,18 +8,18 @@
      ====================================================================== -->
 <project name="script-merge" default="develop">
     <description>
-           Build the xflow-ip script
+           Build the xflip script
     </description>
 
     <import file="build-master.xml" />
-    <property file="build-xflowip.properties" />
+    <property file="build-xflip.properties" />
 
-    <filelist dir="${modulesBuildDir}" id="xflow-ip-worker">
-        <file name="../../../src/xflow-ip/base.js" />
+    <filelist dir="${modulesBuildDir}" id="xflip-worker">
+        <file name="../../../src/xflip/base.js" />
     	<file name="../../../src/utils/array.js" />
         <file name="../../../src/contrib/glMatrix.js" />
         <file name="xml3d-xflow-module.js" />
-        <file name="../../../src/xflow-ip/worker.js" />
+        <file name="../../../src/xflip/worker.js" />
     </filelist>
 
     <target name="lastTag" depends="init, modules-concat, windowsGit, linuxGit">
@@ -51,9 +51,12 @@
     </target>
 
     <target name="develop" depends="init, modules-concat">
-        <concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})" source="xflow-ip-worker" />
-        <concat destfile="${buildDir}/xflowip.js">
-            <fileset file="${srcDir}/xflow-ip/client.js" />
+        <concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})" source="xflip-worker" />
+        <concat destfile="${buildDir}/xflip.js">
+            <fileset file="${srcDir}/xflip/client.js" />
+        </concat>
+        <concat destfile="${buildDir}/xflip-operators.js">
+            <fileset file="${srcDir}/xflip/operators.js" />
         </concat>
     </target>
 

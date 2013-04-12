@@ -195,8 +195,8 @@
         //console.log("Remove " + this);
         for(var h in this.adapters) {
             var adapter = this.adapters[h];
-            if(adapter.onDetach)
-                adapter.onDetach();
+            if(adapter.onDispose)
+                adapter.onDispose();
         }
         this.adapters = {};
         for(var h in this.handlers) {

@@ -89,7 +89,7 @@ XML3D.base.Adapter.prototype.getConnectedAdapter = function(key){
  * This function is called, when the adapater is detached from the node.
  * At this point, the adapater should disconnect from any other adapter and prepare to be properly garbage collected
  */
-XML3D.base.Adapter.prototype.onDetach = function(){
+XML3D.base.Adapter.prototype.onDispose = function(){
     this.clearAdapterHandles();
 }
 

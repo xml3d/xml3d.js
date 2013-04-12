@@ -5,6 +5,11 @@
         XML3D.base.JSONFormatHandler.call(this);
     }
     XML3D.createClass(XML3DJSONFormatHandler, XML3D.base.JSONFormatHandler);
+
+    XML3DJSONFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
+        return mimetype === "application/json" && response.format == "xml3d-json" && response.version == "0.4.0";
+    }
+
     var xml3dJsonFormatHandler = new XML3DJSONFormatHandler();
     XML3D.base.registerFormat(xml3dJsonFormatHandler);
 

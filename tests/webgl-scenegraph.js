@@ -217,7 +217,7 @@ test("Change visible/shader for nested groups", 8, function() {
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child shader overrides new parent shader]");
 });
 
-test("Simple add/remove mesh", 10, function() {
+test("Simple add/remove mesh", 11, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -236,6 +236,7 @@ test("Simple add/remove mesh", 10, function() {
     // Remove the mesh
     var adapter = getWebGLAdapter(mesh);
     x.removeChild(mesh);
+    ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
     ok(adapter.renderObject.is("Disposed"), "RenderObject disposed");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
@@ -251,7 +252,7 @@ test("Simple add/remove mesh", 10, function() {
 
 });
 
-test("Simple add/remove group with mesh", 10, function() {
+test("Simple add/remove group with mesh", 11, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -273,6 +274,7 @@ test("Simple add/remove group with mesh", 10, function() {
     var adapter = getWebGLAdapter(mesh);
     // Remove group
     x.removeChild(group);
+    ok(!getWebGLAdapter(group), "Group adapter is removed");
     ok(adapter.renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
@@ -287,7 +289,7 @@ test("Simple add/remove group with mesh", 10, function() {
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 });
 
-test("Simple add/remove transformed group with mesh", 10, function() {
+test("Simple add/remove transformed group with mesh", 12, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -311,6 +313,8 @@ test("Simple add/remove transformed group with mesh", 10, function() {
     // Remove group
     var adapter = getWebGLAdapter(mesh);
     x.removeChild(group);
+    ok(!getWebGLAdapter(group), "Group adapter is removed");
+    ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
     ok(adapter.renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);

@@ -100,10 +100,10 @@ Xflow.DATA_FILTER_TYPE = {
  * @enum {number}
  */
 Xflow.DATA_ENTRY_STATE = {
-    CHANGED_NEW: 0,
-    CHANGED_VALUE: 1,
-    CHANGE_SIZE: 2,
-    CHANGE_REMOVED: 3
+    CHANGED_NEW: 1,
+    CHANGED_VALUE: 2,
+    CHANGE_SIZE: 3,
+    CHANGE_REMOVED: 4
 };
 
 Xflow.RESULT_TYPE = {

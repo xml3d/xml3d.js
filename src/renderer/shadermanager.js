@@ -1,4 +1,4 @@
-(function() {
+﻿(function() {
 
     /***************************************************************************
      * Class XML3D.webgl.XML3DShaderManager
@@ -273,9 +273,9 @@
 
             var name = uniInfo.name;
             // Need to discuss how to sort out the consequences of doing this in the renderer first --Chris
-            //if(uni.size > 1 && name.substring(name.length-3) == "[0]") {
-            //    name = name.substring(0, name.length -3); // Remove [0]
-            //}
+            if(name.substring(name.length-3) == "[0]") {
+                name = name.substring(0, name.length -3); // Remove [0]
+            }
 
             if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
                 uniInfo.unit = programObject.nextTextureUnit();
@@ -399,9 +399,9 @@
 
             var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, canvasId);
 
-            if(force || webglData.changed != -1 ) {
+            if(force || webglData.changed) {
                 XML3DShaderManager.setUniform(this.gl, uniforms[name], entry.getValue());
-                webglData.changed = -1;
+                webglData.changed = 0;
             }
         }
     };
@@ -429,9 +429,9 @@
 
             var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, canvasId);
 
-            if(force || webglData.changed != -1 ) {
+            if(force || webglData.changed) {
                 this.createTextureFromEntry(entry, sampler, texUnit);
-                webglData.changed = -1;
+                webglData.changed = 0;
             }
             texUnit++;
         }
@@ -752,7 +752,7 @@
 
     /**
      *
-     * @param {WebGLSampler} tex
+     * @param {Object} tex
      */
     XML3DShaderManager.prototype.bindTexture = function(tex) {
         var info = tex.info;
@@ -762,11 +762,12 @@
         case TEXTURE_STATE.VALID:
             gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
             gl.bindTexture(info.glType, info.handle);
+            // console.log("Bind texture (unit, name)", info.unit, tex.name);
             // Should not be here, since the texunit is static
             XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
             break;
         case TEXTURE_STATE.LOADED:
-            // console.dir("Creating '"+ tex.name + "' from " + info.image.src);
+            // console.log("Creating '"+ tex.name + "' from " + info.image.src);
             this.createTex2DFromImage(info);
             this.bindTexture(tex);
             break;
@@ -776,7 +777,7 @@
             XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
             break;
         default:
-            XML3D.debug.logDebug("Invalid texture: ", tex);
+            XML3D.debug.logDebug("Invalid texture: ", tex.name, tex);
 
         }
         ;

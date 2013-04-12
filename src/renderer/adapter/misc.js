@@ -157,11 +157,11 @@
             var attr = dataTable.getOutputData(staticAttributes[i]);
             var webglData = XML3D.webgl.getXflowEntryWebGlData(attr, this.factory.canvasId);
 
-            if (attr && webglData && webglData.changed !== undefined) {
+            if (attr && webglData && webglData.changed) {
                 var value = attr.getValue();
                 for(var j=0; j<this.listeners.length; j++)
                     this.listeners[j].func(staticAttributes[i], value);
-                delete webglData.changed;
+                webglData.changed = 0;
             }
         }
     };

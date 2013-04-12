@@ -368,26 +368,26 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
     var shader = this.shaderManager.getShaderById(shaderId);
 
     if(shader.needsLights || lights.changed) {
-        parameters["pointLightPosition[0]"] = lights.point.position;
-        parameters["pointLightAttenuation[0]"] = lights.point.attenuation;
-        parameters["pointLightVisibility[0]"] = lights.point.visibility;
-        parameters["pointLightIntensity[0]"] = lights.point.intensity;
-        parameters["directionalLightDirection[0]"] = lights.directional.direction;
-        parameters["directionalLightVisibility[0]"] = lights.directional.visibility;
-        parameters["directionalLightIntensity[0]"] = lights.directional.intensity;
-        parameters["spotLightAttenuation[0]"] = lights.spot.attenuation;
-        parameters["spotLightPosition[0]"] = lights.spot.position;
-        parameters["spotLightIntensity[0]"] = lights.spot.intensity;
-        parameters["spotLightVisibility[0]"] = lights.spot.visibility;
-        parameters["spotLightDirection[0]"] = lights.spot.direction;
-        parameters["spotLightCosFalloffAngle[0]"] = lights.spot.falloffAngle.map(Math.cos);
+        parameters["pointLightPosition"] = lights.point.position;
+        parameters["pointLightAttenuation"] = lights.point.attenuation;
+        parameters["pointLightVisibility"] = lights.point.visibility;
+        parameters["pointLightIntensity"] = lights.point.intensity;
+        parameters["directionalLightDirection"] = lights.directional.direction;
+        parameters["directionalLightVisibility"] = lights.directional.visibility;
+        parameters["directionalLightIntensity"] = lights.directional.intensity;
+        parameters["spotLightAttenuation"] = lights.spot.attenuation;
+        parameters["spotLightPosition"] = lights.spot.position;
+        parameters["spotLightIntensity"] = lights.spot.intensity;
+        parameters["spotLightVisibility"] = lights.spot.visibility;
+        parameters["spotLightDirection"] = lights.spot.direction;
+        parameters["spotLightCosFalloffAngle"] = lights.spot.falloffAngle.map(Math.cos);
 
         var softFalloffAngle = lights.spot.falloffAngle.slice();
         for(var i = 0; i < softFalloffAngle.length; i++)
             softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - lights.spot.softness[i]);
-        parameters["spotLightCosSoftFalloffAngle[0]"] = softFalloffAngle.map(Math.cos);
+        parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
 
-        parameters["spotLightSoftness[0]"] = lights.spot.softness;
+        parameters["spotLightSoftness"] = lights.spot.softness;
         shader.needsLights = false;
     }
 

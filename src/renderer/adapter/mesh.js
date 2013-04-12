@@ -324,7 +324,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         //if(meshInfo.isIndexed)
             //console.error("Indexed");
 
-        delete webglData.changed;
+        webglData.changed = 0;
     }
     /**
      * @param {string} name
@@ -340,7 +340,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         if(webglData.changed && (name in prog.samplers)) {
             this.factory.renderer.shaderManager.createTextureFromEntry(entry, prog.samplers[name]);
         }
-        delete webglData.changed;
+        webglData.changed = 0;
     }
 
     /**

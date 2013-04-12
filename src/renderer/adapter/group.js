@@ -27,7 +27,7 @@
         var matrix = this.getLocalMatrixInternal();
         if (matrix)
             XML3D.math.mat4.multiply(m, m, matrix);
-    
+
         return m;
     };
 

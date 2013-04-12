@@ -67,18 +67,18 @@
         m._data.set(this.viewMatrix);
         return m;
     };
-    
-    /** 
-     * @return {XML3DMatrix} returns the inverse of the view matrix, since now we 
+
+    /**
+     * @return {XML3DMatrix} returns the inverse of the view matrix, since now we
      * want to go world2view and not view2world
      */
-    p.getWorldMatrix = function() {        
-        var m = new window.XML3DMatrix();  
-        var tmp = XML3D.math.mat4.create(); 
+    p.getWorldMatrix = function() {
+        var m = new window.XML3DMatrix();
+        var tmp = XML3D.math.mat4.create();
         XML3D.math.mat4.invert(tmp, this.viewMatrix);
         m._data.set(tmp);
-        return m; 
-    }; 
+        return m;
+    };
 
 
     p.getModelViewMatrix = function(model) {
@@ -88,7 +88,7 @@
     p.getModelViewProjectionMatrix = function(modelViewMatrix) {
         return XML3D.math.mat4.multiply(XML3D.math.mat4.create(), this.projMatrix, modelViewMatrix);
     };
-    
+
     p.getWorldSpacePosition = function() {
     	return this.worldPosition;
     };

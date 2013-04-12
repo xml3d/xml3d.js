@@ -8,8 +8,8 @@
     <filelist dir="." id="sourceFiles">
         <file name="./adapter.js" />
         <file name="./adapterhandle.js" />
-        <file name="./formathandler.js" />
         <file name="./resourcemanager.js" />
+        <file name="./formathandler.js" />
     </filelist>
 
     <target name="concat">

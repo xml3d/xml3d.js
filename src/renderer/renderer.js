@@ -2,6 +2,8 @@
 
 (function() {
 
+XML3D.webgl.renderers = [];
+
 /**
  * Constructor for the Renderer.
  *
@@ -15,6 +17,7 @@
 var Renderer = function(handler, context, dimensions) {
     this.handler = handler;
     this.gl = context;
+    XML3D.webgl.renderers[handler.id] = this;
 
     this.setGlobalGLStates();
 
@@ -29,8 +32,7 @@ var Renderer = function(handler, context, dimensions) {
 };
 
 Renderer.prototype.initialize = function() {
-    this.factory = new XML3D.webgl.RenderAdapterFactory(this.handler, this);
-    this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.factory);
+    this.shaderManager = new XML3D.webgl.XML3DShaderManager(this, this.handler.id);
     this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.gl, this, this.shaderManager);
     this.changeListener = new XML3D.webgl.DataChangeListener(this);
     this.camera = this.initCamera();
@@ -67,11 +69,15 @@ Renderer.prototype.setGlobalGLStates = function() {
     gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
 };
 
+Renderer.prototype.getAdapter = function(node){
+    return XML3D.base.resourceManager.getAdapter(node, XML3D.webgl, this.handler.id);
+}
+
 Renderer.prototype.initCamera = function() {
     var av = XML3D.util.getOrCreateActiveView(this.xml3dNode);
 
     this.currentView = av;
-    return this.factory.getAdapter(av);
+    return this.getAdapter(av);
 };
 
 var TraversalState = function(parent) {
@@ -83,7 +89,7 @@ var TraversalState = function(parent) {
 };
 
 Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray, parent) {
-    var adapter = this.factory.getAdapter(currentNode);
+    var adapter = this.getAdapter(currentNode);
 
     parent = parent || new TraversalState();
     var downstream = new TraversalState(parent);
@@ -111,7 +117,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);
 
-        var meshAdapter = this.factory.getAdapter(currentNode);
+        var meshAdapter = this.getAdapter(currentNode);
         if (!meshAdapter)
             break; //TODO: error handling
 
@@ -211,7 +217,7 @@ Renderer.prototype.requestRedraw = function(reason, forcePickingRedraw) {
 
 Renderer.prototype.sceneTreeAddition = function(evt) {
     var target = evt.wrapped.target;
-    var adapter = this.factory.getAdapter(target);
+    var adapter = this.getAdapter(target);
 
     //If no adapter is found the added node must be a text node, or something else
     //we're not interested in
@@ -228,7 +234,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
     var parentTransform = XML3D.math.mat4.identity(XML3D.math.mat4.create());
     if(parentNode && parentNode.nodeName == "group")
     {
-        var parentAdapter = this.factory.getAdapter(parentNode);
+        var parentAdapter = this.getAdapter(parentNode);
         parentTransform = parentAdapter.applyTransformMatrix(parentTransform);
         if (!shaderHandle)
     		shaderHandle = parentAdapter.getShaderHandle();
@@ -243,7 +249,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
 
 Renderer.prototype.sceneTreeRemoval = function (evt) {
     var currentNode = evt.wrapped.target;
-    var adapter = this.factory.getAdapter(currentNode);
+    var adapter = this.getAdapter(currentNode);
     if (adapter && adapter.destroy)
         adapter.destroy();
 

@@ -3,17 +3,36 @@
     /**
      * A format handler is provide functionality for detecting format of resources
      * and providing format-specific services.
-     * FormatHandlers are registered with XML3D.base.resourceManager.registerFormat() function.
+     * FormatHandlers are registered with XML3D.base.registerFormat() function.
      * @constructor
      */
     var FormatHandler = function() {
-        this.factories = {}; // a map from an aspect name to a factory class
+        this.factoryClasses = {}; // a map from an aspect name to a factory class
+        this.factoryCache = {}; // maps unique keys (aspect + "_" + canvasId) to the factory instance
     };
 
     FormatHandler.prototype.registerFactoryClass = function(factoryClass) {
-        if (!factoryClass.aspect || !XML3D.isSuperclassOf(XML3D.base.AdapterFactory, factoryClass))
+        if (!factoryClass.prototype.aspect || !XML3D.isSuperclassOf(XML3D.base.AdapterFactory, factoryClass))
             throw new Error("factoryClass must be a subclass of XML3D.base.AdapterFactory");
-        this.factories[factoryClass.aspect] = factoryClass;
+        this.factoryClasses[factoryClass.prototype.aspect] = factoryClass;
+    }
+
+    FormatHandler.prototype.getFactoryClassByAspect = function(aspect) {
+        return this.factoryClasses[aspect];
+    }
+
+    FormatHandler.prototype.getFactory = function(aspect, canvasId) {
+        canvasId = canvasId || 0;
+        var key = aspect+"_"+canvasId;
+        var factory = this.factoryCache[key];
+        if (!factory) {
+            var factoryClass = this.getFactoryClassByAspect(aspect);
+            if (!factoryClass)
+                return null;
+            factory = new factoryClass(canvasId);
+            this.factoryCache[key] = factory;
+        }
+        return factory;
     }
 
     /**
@@ -68,7 +87,9 @@
      * @constructor
      */
     var XMLFormatHandler = function() {
+        FormatHandler.call(this);
     }
+    XML3D.createClass(XMLFormatHandler, FormatHandler);
 
     XMLFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
         return response && response.nodeType === 9 && (mimetype === "application/xml" || mimetype === "text/xml");
@@ -82,13 +103,15 @@
         return documentData.querySelectorAll("*[id="+fragment+"]")[0];
     }
 
-    XML3D.createClass(XMLFormatHandler, FormatHandler);
+
 
     // Export
     XML3D.base.XMLFormatHandler = XMLFormatHandler;
 
     var XML3DFormatHandler = function() {
+        XMLFormatHandler.call(this);
     }
+    XML3D.createClass(XML3DFormatHandler, XMLFormatHandler);
 
     XML3DFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
         var supported = XMLFormatHandler.prototype.isFormatSupported.call(this, response, responseType, mimetype);
@@ -106,13 +129,15 @@
         return response;
     }
 
-    XML3D.createClass(XML3DFormatHandler, XMLFormatHandler);
-
     // Export
     XML3D.base.XML3DFormatHandler = XML3DFormatHandler;
+    XML3D.base.xml3dFormatHandler = new XML3DFormatHandler();
+    XML3D.base.registerFormat(XML3D.base.xml3dFormatHandler);
 
     var JSONFormatHandler = function() {
+        FormatHandler.call(this);
     }
+    XML3D.createClass(JSONFormatHandler, FormatHandler);
 
     JSONFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
         return mimetype === "application/json";
@@ -122,14 +147,12 @@
         return response;
     }
 
-    XML3D.createClass(JSONFormatHandler, FormatHandler);
-
     // Export
     XML3D.base.JSONFormatHandler = JSONFormatHandler;
 
     var BinaryFormatHandler = function() {
+        FormatHandler.call(this);
     }
-
     XML3D.createClass(BinaryFormatHandler, FormatHandler);
 
     // Export

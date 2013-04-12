@@ -58,10 +58,10 @@
         }
     };
 
-    var XML3DShaderManager = function(renderer, factory) {
+    var XML3DShaderManager = function(renderer, canvasId) {
         this.renderer = renderer;
         this.gl = renderer.gl;
-        this.factory = factory;
+        this.canvasId = canvasId;
 
         this.shaderCache = {
             fragment : {},
@@ -363,7 +363,7 @@
     XML3DShaderManager.prototype.getShaderById = function(shaderId) {
         var sp = this.shaders[shaderId];
         if (!sp) {
-            var shaderAdapter = this.factory.getAdapter(document.getElementById(shaderId));
+            var shaderAdapter = XML3D.base.resourceManager.getAdapter(document.getElementById(shaderId), XML3D.webgl, this.canvasId);
             if (shaderAdapter) {
                 // This must be a shader we haven't created yet (maybe it was
                 // just added or

@@ -14,7 +14,7 @@
     XML3DDataObserver.prototype.observe = function(node, options){
         if(this.observed.length == 0)
             c_XflowObserverList.push(this);
-        var dataAdapter = XML3D.data.factory.getAdapter(node);
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(node, XML3D.data);
         if(dataAdapter){
 
             var entry = {

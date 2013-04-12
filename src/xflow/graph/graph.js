@@ -132,6 +132,7 @@ Xflow.createBufferInputNode = function(type, name, size){
     var inputNode = XML3D.data.xflowGraph.createInputNode();
     inputNode.data = buffer;
     inputNode.name = name;
+    return inputNode;
 };
 
 

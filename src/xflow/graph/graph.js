@@ -119,6 +119,22 @@ Object.defineProperty(InputNode.prototype, "data", {
 });
 
 
+Xflow.createBufferInputNode = function(type, name, size){
+    if (size == 0)
+        return null;
+    var typeId = Xflow.DATA_TYPE_MAP[type];
+    var tupleSize = Xflow.DATA_TYPE_TUPLE_SIZE[typeId];
+    var arrayType = Xflow.TYPED_ARRAY_MAP[typeId];
+
+    var v = new (arrayType)(size * tupleSize);
+    var buffer = new Xflow.BufferEntry(typeId, v);
+
+    var inputNode = XML3D.data.xflowGraph.createInputNode();
+    inputNode.data = buffer;
+    inputNode.name = name;
+};
+
+
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.DataNode
 //----------------------------------------------------------------------------------------------------------------------

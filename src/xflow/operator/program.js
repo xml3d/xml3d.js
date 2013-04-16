@@ -268,6 +268,8 @@
         if(!c_program_cache[key]){
             if(operatorList.entries.length == 1)
                 c_program_cache[key] = new Xflow.SingleProgram(operatorList);
+            else
+                XML3D.debug.logError("Could not create program from operatorList");
         }
         return c_program_cache[key];
     }

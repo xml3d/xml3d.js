@@ -175,8 +175,8 @@ Xflow.ORIGIN = {
  * @type {Object}
  */
 Xflow.PLATFORM = {
-    JAVASCRIPT: 1,
-    GLSL: 2
+    JAVASCRIPT: 0,
+    GLSL: 1
 }
 
 Xflow.PROCESS_STATE = {

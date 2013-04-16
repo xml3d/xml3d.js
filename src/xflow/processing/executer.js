@@ -20,15 +20,7 @@
     }
 
     Xflow.Executer.prototype.run = function(){
-        if(!runSubNodes(this))
-            return false;
-
-        /*
-        if(!this.operatorList.checkInput(this.programData)){
-            setMergedNodesValid(this, false);
-            return false;
-        }
-        */
+        runSubNodes(this)
 
         updateIterateState(this);
 
@@ -105,7 +97,7 @@
     }
 
     function canOperatorMerge(cData, operator){
-        // TODO: Detech merge support
+        // TODO: Detect merge support
         return false;
     }
 
@@ -286,8 +278,6 @@
     function runSubNodes(executer){
         for(var i = 0; i < executer.subNodes.length; ++i){
             executer.subNodes[i].process();
-            if(!executer.subNodes[i].valid)
-                return false;
         }
     }
 

@@ -33,12 +33,12 @@
     }
 
     Xflow.OperatorEntry.prototype.getOutputIndex = function(operatorOutputIdx){
-        return this.outputInfo[operatorOutputIdx].final || this.outputInfo[operatorOutputIdx].lost || 0;
+        return this.outputInfo[operatorOutputIdx].finalOut || this.outputInfo[operatorOutputIdx].lost || 0;
     }
 
 
     Xflow.OperatorEntry.prototype.isFinalOutput = function(outputIndex){
-        return this.outputInfo[outputIndex] && this.outputInfo[outputIndex].final != undefined;
+        return this.outputInfo[outputIndex] && this.outputInfo[outputIndex].finalOut != undefined;
     }
     Xflow.OperatorEntry.prototype.isTransferOutput = function(outputIndex){
         return this.outputInfo[outputIndex] && this.outputInfo[outputIndex].transfer;
@@ -57,7 +57,7 @@
     }
 
     Xflow.OperatorEntry.prototype.setFinalOutput = function(operatorOutputIndex, globalOutputIndex){
-        this.outputInfo[operatorOutputIndex] = { final : globalOutputIndex };
+        this.outputInfo[operatorOutputIndex] = { finalOut : globalOutputIndex };
     }
     Xflow.OperatorEntry.prototype.setTransferOutput = function(operatorOutputIndex){
         this.outputInfo[operatorOutputIndex] = { transfer: true };
@@ -70,7 +70,7 @@
         var key = this.operator.name + "*O";
         for(var i = 0; i <this.outputInfo.length; ++i){
             var info = this.outputInfo[i];
-            key += "*" + ( info.transfer ? "_" : info.final || (info.lost + "?"));
+            key += "*" + ( info.transfer ? "_" : info.finalOut || (info.lost + "?"));
         }
         key += + "*I";
         for(var i = 0; i <this.inputInfo.length; ++i){

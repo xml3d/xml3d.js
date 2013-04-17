@@ -51,8 +51,8 @@ Xflow.registerOperator("xflow.lerpKeys", {
             result[2] = values[3*idx+2];
         }
         else{
-            var weight = (key - keys[idx]) / (keys[idx+1] - keys[idx]);
-            var invWeight = 1 - weight[0];
+            var weight = (key[0] - keys[idx]) / (keys[idx+1] - keys[idx]);
+            var invWeight = 1 - weight;
             result[0] = invWeight*values[3*idx] + weight*values[3*idx + 3];
             result[1] = invWeight*values[3*idx+1] + weight*values[3*idx + 4];
             result[2] = invWeight*values[3*idx+2] + weight*values[3*idx + 5];

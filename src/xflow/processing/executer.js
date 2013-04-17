@@ -24,9 +24,7 @@
 
         updateIterateState(this);
 
-        if(!this.program){
-            this.program = Xflow.createProgram(this.operatorList);
-        }
+        this.program = Xflow.createProgram(this.operatorList);
 
         if(this.program){
             this.operatorList.allocateOutput(this.programData);
@@ -45,7 +43,8 @@
             doneNodes: [],
             constructionOrder: [],
             inputSlots: {},
-            finalOutput: null
+            finalOutput: null,
+            firstOperator: null
         }
         initRequestNode(cData, executer, ownerNode);
 
@@ -78,6 +77,7 @@
                 return;
             }
             else{
+                if(!cData.firstOperator) cData.firstOperator = node.operator;
                 var mapping = node.operator.mapping;
                 for(var i = 0; i < mapping.length; ++i){
                     if(mapping[i].sequence){
@@ -98,7 +98,7 @@
 
     function canOperatorMerge(cData, operator){
         // TODO: Detect merge support
-        return false;
+        return !cData.firstOperator || false;
     }
 
     function blockSubtree(cData, node){
@@ -141,7 +141,7 @@
     function constructFromData(executer, cData){
 
         for(var i = 0; i < cData.constructionOrder.length; ++i){
-            var node = data.constructionOrder[i];
+            var node = cData.constructionOrder[i];
             var currentIdx = i;
 
             var entry = new Xflow.OperatorEntry(node.operator);
@@ -164,7 +164,7 @@
         for(var j = 0; j < mapping.length; ++j){
             var channel = node.inputChannels[mapping[j].source];
             var operatorIndex;
-            if(channel.creatorProcessNode && (operatorIndex =
+            if(channel && channel.creatorProcessNode && (operatorIndex =
                 executer.mergedNodes.indexOf(channel.creatorProcessNode) ) != -1 )
             {
                 // it's transfer input
@@ -240,7 +240,7 @@
 
     function constructLostOutput(executor, cData){
         for(var i = 0; i < cData.constructionOrder.length; ++i){
-            var node = data.constructionOrder[i];
+            var node = cData.constructionOrder[i];
             var entry = executor.operatorList.entries[i];
 
             var outputs = node.operator.outputs;

@@ -56,7 +56,7 @@ ProcessNode.prototype.updateState = function(){
                 this.status = Xflow.PROCESS_STATE.LOADING;
 
             if(this.status > Xflow.PROCESS_STATE.INVALID &&
-                checkInput(this.operator, this.owner.owner._computeInputMapping, this.inputChannels))
+                !checkInput(this.operator, this.owner.owner._computeInputMapping, this.inputChannels))
                 this.status = Xflow.PROCESS_STATE.INVALID;
         }
     }

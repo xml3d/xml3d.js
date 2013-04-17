@@ -80,7 +80,8 @@ QUnit.extend( QUnit, {
         }
 
         for (var i=0; i<actual.length; i++) {
-            if (Math.abs(actual[i] - expected[i]) > maxDifference) {
+            var diff = Math.abs(actual[i] - expected[i]);
+            if (isNaN(diff)  || diff > maxDifference) {
                 QUnit.push(false, actual, expected, message);
                 return;
             }

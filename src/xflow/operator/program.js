@@ -33,7 +33,7 @@
     }
 
     Xflow.OperatorEntry.prototype.getOutputIndex = function(operatorOutputIdx){
-        return this.outputIndex[operatorOutputIdx].final || this.outputIndex[operatorOutputIdx].lost || 0;
+        return this.outputInfo[operatorOutputIdx].final || this.outputInfo[operatorOutputIdx].lost || 0;
     }
 
 
@@ -103,11 +103,11 @@
     }
 
     Xflow.OperatorList.prototype.setInputIterate = function(inputIndex, value){
-        if(this.inputInfo[inputIndex]) this.inputInfo[inputIndex] = {};
+        if(!this.inputInfo[inputIndex]) this.inputInfo[inputIndex] = {};
         this.inputInfo[inputIndex].iterate = value;
     }
     Xflow.OperatorList.prototype.setInputSize = function(inputIndex, size){
-        if(this.inputInfo[inputIndex]) this.inputInfo[inputIndex] = {};
+        if(!this.inputInfo[inputIndex]) this.inputInfo[inputIndex] = {};
         this.inputInfo[inputIndex].size = size;
     }
 
@@ -119,7 +119,7 @@
         return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].size || 0;
     }
 
-    Xflow.OperatorList.prototype.getExecutionCount = function(programData){
+    Xflow.OperatorList.prototype.getIterateCount = function(programData){
         var count = -1;
         for(var i = 0; i < programData.inputs.length; ++i){
             if(this.isInputIterate(i)){
@@ -145,29 +145,65 @@
                 addInputToArgs(args, entry, programData);
                 operator.alloc.apply(operatorData, args);
             }
-            var iterateCount = this.getIterateCount();
+            var iterateCount = this.getIterateCount(programData);
             for(var j = 0; j < operator.outputs.length; ++j){
                 var d = operator.outputs[i];
                 var dataEntry = programData.outputs[entry.getOutputIndex(j)].dataEntry;
 
-                var size = (d.customAlloc ? c_sizes[d.name] : iterateCount) * dataEntry.getTupleSize();
 
-                if( !dataEntry._value || dataEntry._value.length != size){
-                    switch(dataEntry.type){
-                        case Xflow.DATA_TYPE.FLOAT:
-                        case Xflow.DATA_TYPE.FLOAT2:
-                        case Xflow.DATA_TYPE.FLOAT3:
-                        case Xflow.DATA_TYPE.FLOAT4:
-                        case Xflow.DATA_TYPE.FLOAT4X4: dataEntry.setValue(new Float32Array(size)); break;
-                        case Xflow.DATA_TYPE.INT:
-                        case Xflow.DATA_TYPE.INT4:
-                        case Xflow.DATA_TYPE.BOOL: dataEntry.setValue(new Int32Array(size)); break;
-                        default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + dataEntry.type);
+                if (dataEntry.type == Xflow.DATA_TYPE.TEXTURE) {
+                    // texture entry
+                    if (d.customAlloc)
+                    {
+                        var texParams = c_sizes[d.name];
+                        var newWidth = texParams.imageFormat.width;
+                        var newHeight = texParams.imageFormat.height;
+                        var newFormatType = texParams.imageFormat.type;
+                        var newSamplerConfig = texParams.samplerConfig;
+                        dataEntry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                    } else if (d.sizeof) {
+                        var srcEntry = null;
+                        for(var k = 0; k < operator.mapping.length; ++k){
+                            if (operator.mapping[j].source == d.sizeof) {
+                                srcEntry = programData.getDataEntry(entry.getDirectInputIndex(k));
+                                break;
+                            }
+                        }
+                        if (srcEntry) {
+                            var newWidth = Math.max(srcEntry.getWidth(), 1);
+                            var newHeight = Math.max(srcEntry.getHeight(), 1);
+                            var newFormatType = d.formatType || srcEntry.getFormatType();
+                            var newSamplerConfig = d.samplerConfig || srcEntry.getSamplerConfig();
+                            dataEntry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                        }
+                        else
+                            throw new Error("Unknown texture input parameter '" + d.sizeof+"' in operator '"+operator.name+"'");
+                    } else
+                        throw new Error("Cannot create texture. Use customAlloc or sizeof parameter attribute");
+                } else {
+
+                    var size = (d.customAlloc ? c_sizes[d.name] : iterateCount) * dataEntry.getTupleSize();
+
+                    if( !dataEntry._value || dataEntry._value.length != size){
+                        switch(dataEntry.type){
+                            case Xflow.DATA_TYPE.FLOAT:
+                            case Xflow.DATA_TYPE.FLOAT2:
+                            case Xflow.DATA_TYPE.FLOAT3:
+                            case Xflow.DATA_TYPE.FLOAT4:
+                            case Xflow.DATA_TYPE.FLOAT4X4: dataEntry.setValue(new Float32Array(size)); break;
+                            case Xflow.DATA_TYPE.INT:
+                            case Xflow.DATA_TYPE.INT4:
+                            case Xflow.DATA_TYPE.BOOL: dataEntry.setValue(new Int32Array(size)); break;
+                            default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + dataEntry.type);
+                        }
                     }
+                    else{
+                        dataEntry.notifyChanged();
+                    }
+
+
                 }
-                else{
-                    dataEntry.notifyChanged();
-                }
+
             }
         }
     }
@@ -237,15 +273,16 @@
     }
 
     Xflow.ProgramData.prototype.getDataEntry = function(index){
-        var channel = this.inputs[index].channel;
+        var entry = this.inputs[index];
+        var channel = entry.channel;
         if(!channel) return null;
         var key = 0;
-        if(this.sequenceKeySourceChannel){
-            var keyDataEntry = this.sequenceKeySourceChannel.getDataEntry();
+        if(entry.sequenceKeySourceChannel){
+            var keyDataEntry = entry.sequenceKeySourceChannel.getDataEntry();
             key = keyDataEntry && keyDataEntry._value ? keyDataEntry._value[0] : 0;
         }
 
-        return channel.getDataEntry(this.sequenceAccessType, key);
+        return channel.getDataEntry(entry.sequenceAccessType, key);
     }
 
     Xflow.ProgramInputConnection = function(){
@@ -256,12 +293,12 @@
     }
 
     Xflow.ProgramInputConnection.prototype.getKey = function(){
-        return this.channel.id + ";" + this.arrayAccess + ";" + this.sequenceAccessType + ";" +
+        return (this.channel ? this.channel.id : "NULL") + ";" + this.arrayAccess + ";" + this.sequenceAccessType + ";" +
         ( this.sequenceKeySourceChannel ? this.sequenceKeySourceChannel.id : "");
     }
 
 
-    var c_program_cache
+    var c_program_cache = {};
 
     Xflow.createProgram = function(operatorList){
         var key = operatorList.getKey();
@@ -278,7 +315,8 @@
 
     Xflow.SingleProgram = function(operatorList){
         this.list = operatorList;
-        this.operator = operatorList.entries[0].operator;
+        this.entry = operatorList.entries[0];
+        this.operator = this.entry.operator;
         this._inlineLoop = null;
     }
 
@@ -289,18 +327,18 @@
             applyCoreOperation(this, programData, operatorData);
         }
         else{
-            applyDefaultOperation(this.operator, programData, operatorData);
+            applyDefaultOperation(this.entry, programData, operatorData);
         }
     }
 
-    function applyDefaultOperation(operator, programData, operatorData){
-        var args = assembleFunctionArgs(operator, programData);
+    function applyDefaultOperation(entry, programData, operatorData){
+        var args = assembleFunctionArgs(entry, programData);
         args.push(operatorData);
-        operator.evaluate.apply(operatorData, args);
+        entry.operator.evaluate.apply(operatorData, args);
     }
 
     function applyCoreOperation(program, programData, operatorData){
-        var args = assembleFunctionArgs(program.operator, programData);
+        var args = assembleFunctionArgs(program.entry, programData);
         args.push(operatorData.iterateCount);
 
         if(!program._inlineLoop){
@@ -379,12 +417,13 @@
     function prepareOperatorData(list, idx, programData){
         var data = programData.operatorData[0];
         var entry = list.entries[idx];
-        var mapping = entry.mapping;
+        var mapping = entry.operator.mapping;
+        data.iterFlag = {};
         for(var i = 0; i < mapping.length; ++i){
-            var doIterater = (entry.isTransferInput(i) || list.isInputIterate(entry.getDirectInputIndex(i)));
-                data.iterFlag[i] = true
+            var doIterate = (entry.isTransferInput(i) || list.isInputIterate(entry.getDirectInputIndex(i)));
+            data.iterFlag[i] = doIterate;
         }
-        data.iterateCount = list.getExecutionCount(programData);
+        data.iterateCount = list.getIterateCount(programData);
         return data;
     }
 
@@ -393,8 +432,8 @@
         var outputs = entry.operator.outputs;
         for(var i = 0; i < outputs.length; ++i){
             var d = outputs[i];
-            var dataEntry = programData.outputs(entry.getOutputIndex(i)).dataEntry;
-            args.push(dataEntry ? dataEntry._value : null);
+            var dataEntry = programData.outputs[entry.getOutputIndex(i)].dataEntry;
+            args.push(dataEntry ? dataEntry.getValue() : null);
         }
         addInputToArgs(args, entry, programData);
         return args;
@@ -405,7 +444,7 @@
         for(var i = 0; i < mapping.length; ++i){
             var mapEntry = mapping[i];
             var dataEntry = programData.getDataEntry(entry.getDirectInputIndex(i));
-            args.push(dataEntry);
+            args.push(dataEntry ? dataEntry.getValue() : null);
         }
     }
 

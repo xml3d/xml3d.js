@@ -13,10 +13,12 @@
         <file name="./processing/channel.js" />
         <file name="./processing/channel-node.js" />
         <file name="./processing/process-node.js" />
+        <file name="./processing/executer.js" />
         <file name="./processing/request.js" />
         <file name="./processing/result.js" />
         <file name="./utils/nameset.js" />
         <file name="./operator/operator.js" />
+        <file name="./operator/program.js" />
         <file name="./operator/default/morph3.js" />
         <file name="./operator/default/sub3.js" />
         <file name="./operator/default/normalize3.js" />

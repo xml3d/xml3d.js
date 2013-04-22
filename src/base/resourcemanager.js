@@ -5,6 +5,7 @@
     var c_factories = {};
     var c_cachedAdapterHandles = {};
     var c_canvasIdCounters = {};
+    var c_formatHandlers = [];
 
     /**
      * Register a factory with the resource manager
@@ -16,6 +17,21 @@
             c_factories[canvasId] = [];
         c_factories[canvasId].push(factory);
     };
+
+    XML3D.base.registerFormat = function(formatHandler) {
+        if (formatHandler)
+            c_formatHandlers.push(formatHandler);
+    }
+
+    XML3D.base.findFormat = function(response, responseType, mimetype) {
+        for (var i = 0; i < c_formatHandlers.length; ++i) {
+            var formatHandler = c_formatHandlers[i];
+            if (c_formatHandlers[i].isFormatSupported(response, responseType, mimetype)) {
+                return formatHandler;
+            }
+        }
+        return null;
+    }
 
     /**
      * @constructor
@@ -91,6 +107,52 @@
         }
     };
 
+    var binaryContentTypes = ["application/octet-stream", "text/plain; charset=x-user-defined"];
+    var binaryExtensions = [".bin", ".bson"];
+
+    function endsWith(str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    }
+
+    ResourceManager.prototype.addBinaryContentType = function (type) {
+        if (binaryContentTypes.indexOf(type) == -1)
+            binaryContentTypes.push(type);
+    };
+
+    ResourceManager.prototype.removeBinaryContentType = function (type) {
+        var idx = binaryContentTypes.indexOf(type);
+        if (idx != -1)
+            binaryContentTypes.splice(idx, 1);
+    };
+
+    function isBinaryContentType(contentType) {
+        for (var i in binaryContentTypes) {
+            if (contentType == binaryContentTypes[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    ResourceManager.prototype.addBinaryExtension = function(extension) {
+        if (binaryExtensions.indexOf(extension) == -1)
+            binaryExtensions.push(extension);
+    };
+
+    ResourceManager.prototype.removeBinaryExtension = function(extension) {
+        var idx = binaryExtensions.indexOf(extension);
+        if (idx != -1)
+            binaryExtensions.splice(idx, 1);
+    };
+
+    function isBinaryExtension(url) {
+        for (var i in binaryExtensions) {
+            if (endsWith(url, binaryExtensions[i]))
+                return true;
+        }
+        return false;
+    }
+
     /**
      * Load a document via XMLHttpRequest
      * @private
@@ -105,11 +167,56 @@
         }
         if (xmlHttp) {
             xmlHttp._url = url;
+            xmlHttp._contentChecked = false;
             xmlHttp.open('GET', url, true);
+            if (isBinaryExtension(url))
+                xmlHttp.responseType = "arraybuffer";
+
             xmlHttp.onreadystatechange = function() {
+                if (xmlHttp._aborted) // This check is possibly not needed
+                    return;
+                // check compatibility between content and request mode
+                if (!xmlHttp._contentChecked &&
+                    // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
+                    ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 ||xmlHttp.readyState == 4) &&
+                        xmlHttp.status == 200)) {
+                    xmlHttp._contentChecked = true; // we check only once
+                    // check if we need to change request mode
+                    var contentType = xmlHttp.getResponseHeader("content-type");
+                    if (contentType) {
+                        var binaryContent = isBinaryContentType(contentType);
+                        var binaryRequest = (xmlHttp.responseType == "arraybuffer");
+                        // When content is not the same as request, we need to repeat request
+                        if (binaryContent != binaryRequest) {
+                            xmlHttp._aborted = true;
+                            var cb = xmlHttp.onreadystatechange;
+                            xmlHttp.onreadystatechange = null;
+                            var url = xmlHttp._url;
+                            xmlHttp.abort();
+
+                            // Note: We do not recycle XMLHttpRequest !
+                            //       This does work only when responseType is changed to "arraybuffer",
+                            //       however the size of the xmlHttp.response buffer is then wrong !
+                            //       It does not work at all (at least in Chrome) when we use overrideMimeType
+                            //       with "text/plain; charset=x-user-defined" argument.
+                            //       The latter mode require creation of the fresh XMLHttpRequest.
+
+                            xmlHttp = new XMLHttpRequest();
+                            xmlHttp._url = url;
+                            xmlHttp._contentChecked = true;
+                            xmlHttp.open('GET', url, true);
+                            if (binaryContent)
+                                xmlHttp.responseType = "arraybuffer";
+                            xmlHttp.onreadystatechange = cb;
+                            xmlHttp.send(null);
+                            return;
+                        }
+                    }
+                }
+                // Request mode and content type are compatible here (both binary or both text)
                 if (xmlHttp.readyState == 4) {
                     if(xmlHttp.status == 200){
-                        XML3D.debug.logDebug("Loaded: " + url);
+                        XML3D.debug.logDebug("Loaded: " + xmlHttp._url);
                         XML3D.xmlHttpCallback && XML3D.xmlHttpCallback(xmlHttp);
                         processResponse(xmlHttp);
                     }
@@ -153,23 +260,33 @@
         var docCache = c_cachedDocuments[url];
         docCache.mimetype = mimetype;
 
-        if (mimetype == "application/json") {
-            docCache.response = JSON.parse(req.responseText);
+        var response = null;
+        if (req.responseType == "arraybuffer") {
+            response = req.response;
+        } else if (mimetype == "application/json") {
+            response = JSON.parse(req.responseText);
         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
-            docCache.response = req.responseXML;
-
-            if(!docCache.response){
+            response = req.responseXML;
+            if (!response) {
                 XML3D.debug.logError("Invalid external XML document '" + req._url +
-                "': XML Syntax error");
+                    "': XML Syntax error");
                 return;
             }
-
-            // Configure all xml3d elements:
-            var xml3dElements = docCache.response.querySelectorAll("xml3d");
-            for(var i = 0; i < xml3dElements.length; ++i){
-                XML3D.config.element(xml3dElements[i]);
-            }
+        } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
+            XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
+            response = req.response;
+        } else {
+            XML3D.debug.logError("Unidentified response type (response = '"+req.response+"', responseType = '"+req.responseType+"')");
+            response = req.response;
         }
+
+        var formatHandler = XML3D.base.findFormat(response, req.responseType, mimetype);
+        if (!formatHandler) {
+            XML3D.debug.logError("No format handler for resource (response = '"+response+"', responseType = '"+req.responseType+"')");
+            return;
+        }
+        docCache.format = formatHandler;
+        docCache.response = formatHandler.getFormatData(response, req.responseType, mimetype);
     }
 
     /**
@@ -208,6 +325,7 @@
 
         var response = c_cachedDocuments[url].response;
         var mimetype = c_cachedDocuments[url].mimetype;
+        var format = c_cachedDocuments[url].format;
 
         var fullUrl = url + (fragment ? "#" + fragment : "");
         if (!response) {
@@ -216,16 +334,11 @@
             return;
         }
 
-        var data = null;
-        if (mimetype == "application/json") {
-            // TODO: Select subset of data according to fragment
-            data = response;
-        } else if (mimetype == "application/xml" || mimetype == "text/xml") {
-            data = response.querySelectorAll("*[id="+fragment+"]")[0];
-        }
+        // get part of the resource represented by the fragment
+        var data = format.getFragmentData(response, fragment);
 
         if (data) {
-            updateMissingHandles(fullUrl, mimetype, data);
+            updateMissingHandles(fullUrl, format, data);
         }
         else{
             invalidateHandles(fullUrl);
@@ -236,15 +349,15 @@
     /**
      * Update all AdapterHandles without adapters of a certain url
      * @param {string} url The complete url + fragment
-     * @param {string} mimetype Mimetype of the document
+     * @param {FormatHandler} format Format handler
      * @param {Object} data Data of the document corresponding to the url. Possibily a DOM element
      */
-    function updateMissingHandles(url, mimetype, data){
+    function updateMissingHandles(url, format, data){
         for ( var adapterType in c_cachedAdapterHandles[url]) {
             for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (!handle.hasAdapter()) {
-                    updateHandle(handle, adapterType, canvasId, mimetype, data);
+                    updateHandle(handle, adapterType, canvasId, format, data);
                     loadComplete(canvasId, url);
                 }
             }
@@ -272,21 +385,19 @@
      * @param {XML3D.base.AdapterHandle} handle The AdapterHandle to be updated
      * @param {Object} adapterType The type / aspect of the adapter (e.g. XML3D.data or XML3D.webgl)
      * @param {number} canvasId Id of corresponding canvas handler. 0 if not dependent of canvas handler
-     * @param {mimetype} mimetype Mimetype of the corresponding document
+     * @param {FormatHandler} format Format handler of the corresponding document
      * @param {Object} data Data for this handle. Possibily a DOM element
      */
-    function updateHandle(handle, adapterType, canvasId, mimetype, data){
-        var factories = c_factories[canvasId];
+    function updateHandle(handle, adapterType, canvasId, format, data){
 
-        for ( var i = 0; i < factories.length; ++i) {
-            var fac = factories[i];
-            if (fac.aspect == adapterType && fac.mimetypes.indexOf(mimetype) != -1) {
-                var adapter = fac.getAdapter ? fac.getAdapter(data) : fac.createAdapter(data);
-                if (adapter) {
-                    handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);
-                }
-            }
+        var factory = format.getFactory(adapterType, canvasId);
+
+        var adapter = factory.getAdapter ? factory.getAdapter(data) : factory.createAdapter(data);
+        if (adapter) {
+            handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);
         }
+
+
     }
 
     /**
@@ -344,7 +455,7 @@
         if(uri.isLocal()){
             var node = XML3D.URIResolver.resolveLocal(uri);
             if(node)
-                updateHandle(handle, adapterType, canvasId, "application/xml", node);
+                updateHandle(handle, adapterType, canvasId, XML3D.base.xml3dFormatHandler, node);
             else
                 handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
         }
@@ -368,6 +479,16 @@
         }
         return handle;
     };
+    /**
+     * Get any adapter, internal or external.
+     */
+    ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId){
+        var factory = XML3D.base.xml3dFormatHandler.getFactory(adapterType, canvasId);
+        if(factory){
+            return factory.getAdapter(node);
+        }
+        return null;
+    }
 
     /**
      * This function is called when an id of an element changes or if that element is now reachable
@@ -387,7 +508,7 @@
             clearHandles("#" + previousId);
         }
         if(newId){
-            updateMissingHandles("#" + newId, "application/xml", node);
+            updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node);
         }
     }
 
@@ -407,6 +528,100 @@
             c_cachedAdapterHandles[uri][adapterType][canvasId].notifyListeners(type);
         }
     }
+
+
+    /**
+     * Load data via XMLHttpRequest
+     * @private
+     * @param {string} url URL of the document
+     */
+    ResourceManager.prototype.loadData = function(url, loadListener, errorListener) {
+        var xmlHttp = null;
+        try {
+            xmlHttp = new XMLHttpRequest();
+        } catch (e) {
+            xmlHttp = null;
+        }
+        if (xmlHttp) {
+            xmlHttp._url = url;
+            xmlHttp._contentChecked = false;
+            xmlHttp.open('GET', url, true);
+            if (isBinaryExtension(url))
+                xmlHttp.responseType = "arraybuffer";
+
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp._aborted) // This check is possibly not needed
+                    return;
+                // check compatibility between content and request mode
+                if (!xmlHttp._contentChecked &&
+                    // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
+                    ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 ||xmlHttp.readyState == 4) &&
+                        xmlHttp.status == 200)) {
+                    xmlHttp._contentChecked = true; // we check only once
+                    // check if we need to change request mode
+                    var contentType = xmlHttp.getResponseHeader("content-type");
+                    if (contentType) {
+                        var binaryContent = isBinaryContentType(contentType);
+                        var binaryRequest = (xmlHttp.responseType == "arraybuffer");
+                        // When content is not the same as request, we need to repeat request
+                        if (binaryContent != binaryRequest) {
+                            xmlHttp._aborted = true;
+                            var cb = xmlHttp.onreadystatechange;
+                            xmlHttp.onreadystatechange = null;
+                            var url = xmlHttp._url;
+                            xmlHttp.abort();
+
+                            // Note: We do not recycle XMLHttpRequest !
+                            //       This does work only when responseType is changed to "arraybuffer",
+                            //       however the size of the xmlHttp.response buffer is then wrong !
+                            //       It does not work at all (at least in Chrome) when we use overrideMimeType
+                            //       with "text/plain; charset=x-user-defined" argument.
+                            //       The latter mode require creation of the fresh XMLHttpRequest.
+
+                            xmlHttp = new XMLHttpRequest();
+                            xmlHttp._url = url;
+                            xmlHttp._contentChecked = true;
+                            xmlHttp.open('GET', url, true);
+                            if (binaryContent)
+                                xmlHttp.responseType = "arraybuffer";
+                            xmlHttp.onreadystatechange = cb;
+                            xmlHttp.send(null);
+                            return;
+                        }
+                    }
+                }
+                // Request mode and content type are compatible here (both binary or both text)
+                if (xmlHttp.readyState == 4) {
+                    if(xmlHttp.status == 200) {
+                        XML3D.debug.logDebug("Loaded: " + xmlHttp._url);
+
+                        var mimetype = xmlHttp.getResponseHeader("content-type");
+                        var response = null;
+
+                        if (xmlHttp.responseType == "arraybuffer") {
+                            response = xmlHttp.response;
+                        } else if (mimetype == "application/json") {
+                            response = JSON.parse(xmlHttp.responseText);
+                        } else if (mimetype == "application/xml" || mimetype == "text/xml") {
+                            response = xmlHttp.responseXML;
+                        } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
+                            XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
+                            response = xmlHttp.responseText; // FIXME is this correct ?
+                        }
+                        if (loadListener)
+                            loadListener(response);
+                    }
+                    else {
+                        XML3D.debug.logError("Could not load external document '" + xmlHttp._url +
+                            "': " + xmlHttp.status + " - " + xmlHttp.statusText);
+                        if (errorListener)
+                            errorListener(xmlHttp);
+                    }
+                }
+            };
+            xmlHttp.send(null);
+        }
+    };
 
     /**
      * This function is called to load an Image.
@@ -457,7 +672,7 @@
             loadComplete(0, uri);
         }
 
-        video.addEventListener("canplaythrough", loadCompleteCallback, true);
+        video.addEventListener("canplay", loadCompleteCallback, true);
         video.addEventListener("error", loadCompleteCallback, true);
         video.crossorigin = "anonymous";
         video.autoplay = autoplay;

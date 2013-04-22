@@ -34,11 +34,11 @@ new (function() {
         this.position = pos;
     };
 
-    var tmpX = vec3.create();
-    var tmpY = vec3.create();
-    var tmpZ = vec3.create();
+    var tmpX = XML3D.math.vec3.create();
+    var tmpY = XML3D.math.vec3.create();
+    var tmpZ = XML3D.math.vec3.create();
 
-    quat4.setFromMat3 = function(m, dest) {
+    XML3D.math.quat.setFromMat3 = function(m, dest) {
         var tr = m[0] + m[4] + m[8];
 
         if (tr > 0) {
@@ -68,11 +68,11 @@ new (function() {
         }
     };
 
-    quat4.setFromBasis = function(X,Y,Z,dest) {
-        var lx = 1.0 / vec3.length(X);
-        var ly = 1.0 / vec3.length(Y);
-        var lz = 1.0 / vec3.length(Z);
-        var m = mat3.create();
+    XML3D.math.quat.setFromBasis = function(X,Y,Z,dest) {
+        var lx = 1.0 / XML3D.math.vec3.length(X);
+        var ly = 1.0 / XML3D.math.vec3.length(Y);
+        var lz = 1.0 / XML3D.math.vec3.length(Z);
+        var m = XML3D.math.mat3.create();
         m[0] = X[0] * lx;
         m[1] = Y[0] * ly;
         m[2] = Z[0] * lz;
@@ -82,7 +82,7 @@ new (function() {
         m[6] = X[2] * lx;
         m[7] = Y[2] * ly;
         m[8] = Z[2] * lz;
-        quat4.setFromMat3(m,dest);
+        XML3D.math.quat.setFromMat3(m,dest);
     };
 
     methods.viewSetDirection = function(direction) {
@@ -92,15 +92,15 @@ new (function() {
         var up = this.orientation.rotateVec3(new window.XML3DVec3(0,1,0));
         up = up.normalize();
 
-        vec3.cross(direction._data,up._data,tmpX);
-        if(!vec3.length(tmpX)) {
+        XML3D.math.vec3.cross(tmpX,direction._data,up._data);
+        if(!XML3D.math.vec3.length(tmpX)) {
                 tmpX = this.orientation.rotateVec3(new window.XML3DVec3(1,0,0))._data;
         }
-        vec3.cross(tmpX,direction._data,tmpY);
-        vec3.negate(direction._data,tmpZ);
+        XML3D.math.vec3.cross(tmpY,tmpX,direction._data);
+        XML3D.math.vec3.negate(tmpZ,direction._data);
 
-        var q = quat4.create();
-        quat4.setFromBasis(tmpX, tmpY, tmpZ, q);
+        var q = XML3D.math.quat.create();
+        XML3D.math.quat.setFromBasis(tmpX, tmpY, tmpZ, q);
         this.orientation._setQuaternion(q);
     };
 
@@ -204,17 +204,108 @@ new (function() {
         return new window.XML3DMatrix();
     };
 
-    methods.dataGetOutputFieldNames = function() {
-        XML3D.debug.logError(this.nodeName + "::getOutputFieldNames is not implemeted yet.");
+    methods.dataGetOutputNames = function() {
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+        if(dataAdapter){
+            return dataAdapter.getOutputNames();
+        }
         return null;
     };
-    methods.protoGetOutputFieldNames = methods.dataGetOutputFieldNames;
 
-    methods.dataGetResult = function() {
-        XML3D.debug.logError(this.nodeName + "::getResult is not implemeted yet.");
+    methods.videoPlay = function() {
+        XML3D.base.sendAdapterEvent(this, {play: []});
+    };
+
+    methods.videoPause = function() {
+        XML3D.base.sendAdapterEvent(this, {pause: []});
+    };
+
+    methods.protoGetOutputNames = methods.dataGetOutputNames;
+
+    methods.dataGetResult = function(filter) {
+
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+        if(dataAdapter){
+            var result = dataAdapter.getComputeResult(filter);
+            if(!result) return null;
+            return new window.XML3DDataResult(result);
+        }
         return null;
     };
-    methods.protoGetResult = methods.dataGetResult;
+
+    methods.dataGetOutputChannelInfo = function(name){
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+        if(dataAdapter){
+            var result = dataAdapter.getOutputChannelInfo(name);
+            if(!result) return null;
+            return new window.XML3DDataChannelInfo(result.type, result.origin, result.originalName,
+                result.seqLength, result.seqMinKey, result.seqMaxKey);
+        }
+        return null;
+    }
+    methods.protoGetOutputChannelInfo = methods.dataGetOutputChannelInfo;
+
+    methods.dataGetComputeInfo = function(){
+        XML3D.debug.logError(this.nodeName + "::getComputeInfo is not implemeted yet.");
+        return null;
+    }
+    methods.protoGetComputeInfo = methods.dataGetComputeInfo;
+
+    methods.dataGetProtoInfo = function(){
+        XML3D.debug.logError(this.nodeName + "::getProtoInfo is not implemeted yet.");
+        return null;
+    }
+    methods.protoGetProtoInfo = methods.dataGetProtoInfo;
+
+    methods.dataIsOutputConnected = function(){
+        XML3D.debug.logError(this.nodeName + "::isOutputConnected is not implemeted yet.");
+        return false;
+    }
+    methods.protoIsOutputConnected = methods.dataIsOutputConnected;
+
+
+    function createValues(result, names) {
+        var values = {};
+        for (var i in names) {
+            var name = names[i];
+            var data = result.getOutputData(name) && result.getOutputData(name).getValue();
+            if (data)
+                values[name] = data;
+        }
+        return values;
+    };
+
+    /** Register data listener for data fields specified by names.
+     *
+     * @param names   single name or array of names that are monitored.
+     * @param callback function that is called when selected data are changed.
+     * @return {Boolean}
+     */
+    methods.dataAddOutputFieldListener = function(names, callback) {
+        if (!names)
+            return false;
+
+        // check if names is a single string, and convert it to array then
+        var typeOfNames = Object.prototype.toString.call(names).slice(8, -1);
+        if (typeOfNames === "String") {
+            names = [names];
+        }
+        if (names.length == 0)
+            return false;
+
+        var request = XML3D.base.callAdapterFunc(this, {
+            getComputeRequest : [names, function(request, changeType) {
+                callback(createValues(request.getResult(), names));
+            }
+            ]});
+        if (request.length == 0)
+            return false;
+        var result = request[0].getResult();
+        var values = createValues(result, names);
+        if (Object.keys(values).length)
+            callback(values);
+        return true;
+    };
 
     // Export to xml3d namespace
     XML3D.extend(XML3D.methods, methods);

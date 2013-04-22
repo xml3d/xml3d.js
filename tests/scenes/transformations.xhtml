@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>XML3D CSS Scene</title>
+  <link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+
+  <xml3d id="xml3dTest" width="400" height="200" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+      <transform id="xfm" scale="0.75 0.5 1" translation="-3 0 -10" rotation="0 0 1 0.5"
+                 center="-1 -1 0" scaleOrientation="0 0 1 0.785398163" />
+      <transform id="t1" translation="0 0 -10"/>
+      <transform id="t2" rotation="0 0 1 0.785398163" />
+      <transform id="t3" scale="2 0.5 1" />
+      <data id="meshData" >
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 0  1.0 -1.0 0  -1.0 1.0 0  1.0 1.0 0 </float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+      </data>
+    <data id="t_t1">
+        <float4x4 name="transform">1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 -10.0 1.0</float4x4>
+    </data>
+    <data id="t_t2">
+        <float4x4 name="transform">0.70710677 0.70710677 0.0 0.0 -0.70710677 0.70710677 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0</float4x4>
+    </data>
+    <data id="t_t3">
+        <float4x4 name="transform">2.0 0.0 0.0 0.0 0.0 0.5 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0</float4x4>
+    </data>
+    <data id="t_xfm">
+        <float4x4 name="transform">0.4885609 0.40933874 0.0 0.0 -0.18994316 0.6084172 0.0 0.0 0.0 0.0 1.0 0.0 -3.7013822 0.017755985 -10.0 1.0</float4x4>
+    </data>
+    <data id="t_perspective" >
+        <float4x4 name="perspective">1.9581587314605713 0 0 0
+                                   0 3.9163174629211426 0 0
+                                   0 0 -1.0000020265579224 -1
+                                   0 0 -0.20000019669532776 0</float4x4>
+    </data>
+
+    </defs>
+    <view perspective="#t_perspective" />
+    <group transform="#t1" >
+      <group transform="#t2" >
+        <group id="group_transform1" transform="#t3" >
+          <mesh src="#meshData" />
+        </group>
+      </group>
+    </group>
+    <group transform="#xfm" id="group_transform2" >
+      <mesh src="#meshData" />
+    </group>
+
+    <group transform="#t_t1">
+      <group transform="#t_t2">
+          <group id="xflow_tranform1" transform="#t_t3">
+              <mesh src="#meshData"/>
+          </group>
+      </group>
+    </group>
+    <group id="xflow_tranform2" transform="#t_xfm">
+      <mesh src="#meshData"/>
+    </group>
+
+    <group id="rootGroup" style="transform: translate3d(0px,0px,-10px)" >
+      <group style="transform: rotateZ(45deg)"  >
+          <group id="css_transform1" style="transform: scale3d(2,0.5,1)" >
+              <mesh src="#meshData" />
+          </group>
+      </group>
+    </group>
+    <group  id="css_transform2" style="transform: translate3d(-3px, 0px, -10px) translate3d(-1px, -1px, 0)
+        rotate3d(0, 0, 1, 45deg) rotate3d(0, 0, 1, 0.5rad) scale(0.75, 0.5, 1)
+        rotate3d(0, 0, 1, -45deg) translate3d(1px, 1px, 0px)">
+      <mesh src="#meshData" />
+    </group>
+
+  </xml3d>
+
+</body>
+</html>

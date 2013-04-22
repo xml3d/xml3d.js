@@ -22,11 +22,11 @@
     /** It is assumed that this method uses the world matrix! */
     p.applyTransformMatrix = function(m) {
         if (this.parentTransform !== null)
-            mat4.multiply(this.parentTransform, m,  m);
+            XML3D.math.mat4.multiply(m, this.parentTransform,  m);
 
         var matrix = this.getLocalMatrixInternal();
         if (matrix)
-            mat4.multiply(m, matrix);
+            XML3D.math.mat4.multiply(m, m, matrix);
 
         return m;
     };
@@ -40,7 +40,7 @@
 
         var handle = this.getConnectedAdapter("transform");
         if (handle)
-            return handle.getMatrix();
+            return handle.getMatrix("transform");
 
         return null;
     }
@@ -119,7 +119,7 @@
             var downstreamValue;
             var matrix = this.getLocalMatrixInternal();
             if (matrix)
-                downstreamValue = mat4.multiply(parentValue, matrix, mat4.create());
+                downstreamValue = XML3D.math.mat4.multiply(XML3D.math.mat4.create(), parentValue, matrix);
 
             evt.newValue = downstreamValue;
             this.notifyChildren(evt);
@@ -174,12 +174,12 @@
         if (matrix)
             downstreamValue = matrix;
         else if (this.parentTransform)
-            downstreamValue = mat4.identity(mat4.create());
+            downstreamValue = XML3D.math.mat4.identity(XML3D.math.mat4.create());
         else
             downstreamValue = null;
 
         if(this.parentTransform)
-            downstreamValue = mat4.multiply(this.parentTransform, downstreamValue, mat4.create());
+            downstreamValue = XML3D.math.mat4.multiply(XML3D.math.mat4.create(), this.parentTransform, downstreamValue);
 
         evt.internalType = "parenttransform";
         evt.newValue = downstreamValue;
@@ -244,12 +244,12 @@
         return m;
     };
 
-    var tmpIdMat = mat4.create();
+    var tmpIdMat = XML3D.math.mat4.create();
 
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
 
-        mat4.identity(tmpIdMat);
+        XML3D.math.mat4.identity(tmpIdMat);
         m._data.set(this.applyTransformMatrix(tmpIdMat));
 
         return m;

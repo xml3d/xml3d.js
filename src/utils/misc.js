@@ -143,51 +143,10 @@ window.requestAnimFrame = (function(){
         var vid = "xml3d.autocreatedview_" + __autoCreatedViewId++; 
         var v = XML3D.createElement("view");
         v.setAttribute("id", vid);
-        
-        xml3d.appendChild(v); 
-        xml3d.setAttribute("activeView", "#" + vid); 
-        
-        return v; 
-    }; 
-    
-    /** Convert a given mouse page position to be relative to the given target element. 
-     *  Most probably the page position are the MouseEvent's pageX and pageY attributes.
-     *  The result are the proper coordinates to be given to e.g. 
-     *  the <xml3d>'s getElementByPoint() method.   
-     *  
-     *  @param {!Object} xml3dEl the xml3d element to which the coords need to be translated
-     *  @param {!number} pageX the x-coordinate relative to the page
-     *  @param {!number} pageY the y-coordinate relative to the page
-     *  @return {{x: number, y: number}} the converted coordinates
-     */ 
-    u.convertPageCoords = function(xml3dEl, pageX, pageY)
-    {        
-        // get xml3d wrapper node 
-        var wrapper = xml3dEl.parentNode;
-        
-        if(!XML3D._native)
-        {
-            /* in the webgl version we have to take the next parent
-             * because xml3d gets wrapped in an invisible div first
-             * and thus offsetParent below will return null on it at
-             * least in WebKit. 
-             * see https://developer.mozilla.org/en-US/docs/DOM/element.offsetParent 
-             */
-            wrapper = wrapper.parentNode;
-        }
-        
-        // calculate offset to root node 
-        var offX = wrapper.offsetLeft; 
-        var offY = wrapper.offsetTop; 
-        
-        var node = wrapper; 
-        while(node = node.offsetParent)
-        {
-            offX += node.offsetLeft; 
-            offY += node.offsetTop; 
-        }
-        
-        // construct and return result. 
-        return {x: pageX - offX, y: pageY - offY};  
+
+        xml3d.appendChild(v);
+        xml3d.setAttribute("activeView", "#" + vid);
+
+        return v;
     };
 }());

@@ -1,4 +1,4 @@
-﻿// Adapter for <transform>
+// Adapter for <transform>
 (function() {
 
     var TransformRenderAdapter = function(factory, node) {
@@ -10,18 +10,18 @@
     XML3D.createClass(TransformRenderAdapter, XML3D.webgl.RenderAdapter);
     var p = TransformRenderAdapter.prototype;
 
-	var IDENT_MAT = mat4.identity(mat4.create());
+	var IDENT_MAT = XML3D.math.mat4.identity(XML3D.math.mat4.create());
 
 	p.init = function() {
 	    // Create all matrices, no valid values yet
-	    this.matrix = mat4.create();
+	    this.matrix = XML3D.math.mat4.create();
 	    this.transform = {
-	            translate              : mat4.create(),
-	            scale                  : mat4.create(),
-	            scaleOrientationInv    : mat4.create(),
-	            center                 : mat4.create(),
-                centerInverse          : mat4.create()
-	            //rotation               : mat4.create()
+	            translate              : XML3D.math.mat4.create(),
+	            scale                  : XML3D.math.mat4.create(),
+	            scaleOrientationInv    : XML3D.math.mat4.create(),
+	            center                 : XML3D.math.mat4.create(),
+                centerInverse          : XML3D.math.mat4.create()
+	            //rotation               : XML3D.math.mat4.create()
 	    };
         this.needsUpdate = true;
 	};
@@ -35,24 +35,24 @@
             so = n.scaleOrientation.toMatrix()._data,
             rot = n.rotation.toMatrix()._data;
 
-        mat4.translate(IDENT_MAT,transVec, transform.translate);
-        mat4.translate(IDENT_MAT,centerVec, transform.center);
-        mat4.translate(IDENT_MAT,vec3.negate(centerVec), transform.centerInverse);
-        mat4.scale(IDENT_MAT, s, transform.scale);
-        mat4.inverse(so, transform.scaleOrientationInv);
+        XML3D.math.mat4.translate(transform.translate, IDENT_MAT, transVec);
+        XML3D.math.mat4.translate(transform.center, IDENT_MAT, centerVec);
+        XML3D.math.mat4.translate(transform.centerInverse, IDENT_MAT, XML3D.math.vec3.negate(centerVec, centerVec));
+        XML3D.math.mat4.scale(transform.scale, IDENT_MAT, s);
+        XML3D.math.mat4.invert(transform.scaleOrientationInv, so);
 
         // M = T * C
-        mat4.multiply(transform.translate,transform.center, this.matrix);
+        XML3D.math.mat4.multiply(this.matrix, transform.translate, transform.center);
         // M = T * C * R
-        mat4.multiply(this.matrix, rot);
+        XML3D.math.mat4.multiply(this.matrix, this.matrix, rot);
         // M = T * C * R * SO
-        mat4.multiply(this.matrix, so);
+        XML3D.math.mat4.multiply(this.matrix, this.matrix, so);
         // M = T * C * R * SO * S
-        mat4.multiply(this.matrix, transform.scale);
+        XML3D.math.mat4.multiply(this.matrix, this.matrix, transform.scale);
         // M = T * C * R * SO * S * -SO
-        mat4.multiply(this.matrix, transform.scaleOrientationInv);
-        // M = T * C * R * SO * S * -SO * C
-        mat4.multiply(this.matrix, transform.centerInverse);
+        XML3D.math.mat4.multiply(this.matrix, this.matrix, transform.scaleOrientationInv);
+        // M = T * C * R * SO * S * -SO * -C
+        XML3D.math.mat4.multiply(this.matrix, this.matrix, transform.centerInverse);
 
         this.needsUpdate = false;
     };
@@ -78,4 +78,73 @@
     // Export to XML3D.webgl namespace
     XML3D.webgl.TransformRenderAdapter = TransformRenderAdapter;
 
+
+
+
+
+
+
+
+    var DataRenderAdapter = function(factory, node) {
+        XML3D.webgl.RenderAdapter.call(this, factory, node);
+    };
+    XML3D.createClass(DataRenderAdapter, XML3D.webgl.RenderAdapter);
+    var p = DataRenderAdapter.prototype;
+
+    p.init = function() {
+        // Create all matrices, no valid values yet
+        this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
+        this.matrixReady = {};
+        this.matrices = {};
+        this.requests = {};
+    };
+
+    p.updateMatrix = function(type) {
+
+        createRequest(this, type);
+
+        this.matrices[type] = XML3D.math.mat4.create();
+
+        var dataResult =  this.requests[type].getResult();
+        var transformData = (dataResult.getOutputData(type) && dataResult.getOutputData(type).getValue());
+        if(!transformData){
+            XML3D.math.mat4.identity(this.matrices[type]);
+            return;
+        }
+        for(var i = 0; i < 16; ++i){
+            this.matrices[type][i] = transformData[i];
+        }
+        this.matrixReady[type] = true;
+    };
+
+    p.getMatrix = function(type) {
+        !this.matrixReady[type] && this.updateMatrix(type);
+        return this.matrices[type];
+    };
+
+    p.dataChanged = function(request, changeType){
+        this.factory.renderer.requestRedraw("Transformation changed.", true);
+        for(var type in this.requests){
+            if(this.requests[type] == request)
+                delete this.matrixReady[type];
+        }
+        this.notifyOppositeAdapters();
+    }
+
+    function createRequest(adapter, key){
+        if(!adapter.requests[key]){
+            var that = adapter;
+            adapter.requests[key] = adapter.dataAdapter.getComputeRequest([key],
+                function(request, changeType) {
+                    that.dataChanged(request, changeType);
+                }
+            );
+        }
+    }
+
+    // Export to XML3D.webgl namespace
+    XML3D.webgl.DataRenderAdapter = DataRenderAdapter;
+
 }());
+
+

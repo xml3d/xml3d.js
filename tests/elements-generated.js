@@ -39,8 +39,12 @@ test("&lt;data&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.compute, "string", "compute is of type 'string'");
     equal(typeof e.filter, "string", "filter is of type 'string'");
+    equal(typeof e.getOutputNames, "function", "getOutputNames is of type 'function'");
+    equal(typeof e.getOutputChannelInfo, "function", "getOutputChannelInfo is of type 'function'");
+    equal(typeof e.getComputeInfo, "function", "getComputeInfo is of type 'function'");
+    equal(typeof e.getProtoInfo, "function", "getProtoInfo is of type 'function'");
+    equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
-    equal(typeof e.getOutputFieldNames, "function", "getOutputFieldNames is of type 'function'");
     equal(typeof e.src, "string", "src is of type 'string'");
     equal(typeof e.proto, "string", "proto is of type 'string'");
 });
@@ -171,7 +175,11 @@ test("&lt;proto&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.compute, "string", "compute is of type 'string'");
     equal(typeof e.filter, "string", "filter is of type 'string'");
-    equal(typeof e.getOutputFieldNames, "function", "getOutputFieldNames is of type 'function'");
+    equal(typeof e.getOutputNames, "function", "getOutputNames is of type 'function'");
+    equal(typeof e.getOutputChannelInfo, "function", "getOutputChannelInfo is of type 'function'");
+    equal(typeof e.getComputeInfo, "function", "getComputeInfo is of type 'function'");
+    equal(typeof e.getProtoInfo, "function", "getProtoInfo is of type 'function'");
+    equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
     equal(typeof e.src, "string", "src is of type 'string'");
     equal(typeof e.proto, "string", "proto is of type 'string'");
 });

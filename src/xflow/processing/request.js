@@ -64,7 +64,7 @@ var ComputeRequest = function(dataNode, filter, callback){
     Xflow.Request.call(this, dataNode, filter, callback);
     this.callback = this.onResultChanged.bind(this);
 };
-XML3D.createClass(ComputeRequest, Xflow.Request);
+Xflow.createClass(ComputeRequest, Xflow.Request);
 Xflow.ComputeRequest = ComputeRequest;
 
 ComputeRequest.prototype.getResult = function(){
@@ -74,7 +74,7 @@ ComputeRequest.prototype.getResult = function(){
     return this.result;
 }
 
-ComputeRequest.prototype.onResultChanged = function(notification){
+ComputeRequest.prototype.onResultChanged = function(result, notification){
     this.notify(notification);
 }
 

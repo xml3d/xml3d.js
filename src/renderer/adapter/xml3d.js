@@ -76,15 +76,19 @@
     };
 
     XML3DRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) {
+        var relativeMousePos = XML3D.webgl.convertPageCoords(this.node, x, y);
+        var relX = relativeMousePos.x;
+        var relY = relativeMousePos.y;
+
         var handler = this.factory.handler;
-        var object = handler.updatePickObjectByPoint(x, y);
+        var object = handler.updatePickObjectByPoint(relX, relY);
         if(object){
             if(hitPoint){
-                var vec = handler.getWorldSpacePositionByPoint(object, x, y);
+                var vec = handler.getWorldSpacePositionByPoint(object, relX, relY);
                 hitPoint.set(vec[0],vec[1],vec[2]);
             }
             if(hitNormal){
-                var vec = handler.getWorldSpaceNormalByPoint(object, x, y);
+                var vec = handler.getWorldSpaceNormalByPoint(object, relX, relY);
                 hitNormal.set(vec[0],vec[1],vec[2]);
             }
         }
@@ -92,12 +96,13 @@
             if(hitPoint) hitPoint.set(NaN, NaN, NaN);
             if(hitNormal) hitNormal.set(NaN, NaN, NaN);
         }
-        return object ? object.meshNode : null;
+        return object ? object.meshAdapter.node : null;
     };
 
     XML3DRenderAdapter.prototype.generateRay = function(x, y) {
-        
-        return this.factory.handler.generateRay(x, y);
+        var relativeMousePos = XML3D.webgl.convertPageCoords(this.node, x, y);
+
+        return this.factory.handler.generateRay(relativeMousePos.x, relativeMousePos.y);
     };
     XML3D.webgl.XML3DRenderAdapter = XML3DRenderAdapter;
 

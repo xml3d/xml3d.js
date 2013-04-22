@@ -77,5 +77,20 @@ Xflow.nameset.intersection = function(nameSetA, nameSetB){
 }
 
 
+Xflow.utils.binarySearch = function(keys, key, maxIndex){
+    var min = 0, max = maxIndex - 1;
+    while(min <= max){
+        var i = Math.floor((min + max) / 2);
+        if(keys[i] == key){
+            return i;
+        }
+        else if(keys[i] < key)
+            min = i + 1;
+        else
+            max = i - 1;
+    }
+    return max;
+}
+
 
 })();

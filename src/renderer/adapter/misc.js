@@ -1,5 +1,7 @@
 // Misc adapters
 (function() {
+    var listenerID = 0;
+
     XML3D.webgl.RenderAdapter = function(factory, node) {
         XML3D.base.NodeAdapter.call(this, factory, node);
     };
@@ -47,7 +49,7 @@
      */
     XML3D.webgl.LightShaderRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.dataAdapter = XML3D.data.factory.getAdapter(this.node);
+        this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes, this.dataChanged.bind(this));
         this.offsets = [];
         this.listeners = [];
@@ -55,9 +57,9 @@
     XML3D.createClass(XML3D.webgl.LightShaderRenderAdapter, XML3D.webgl.RenderAdapter);
 
     /** @const */
-    var LIGHT_DEFAULT_INTENSITY = vec3.create([1,1,1]);
+    var LIGHT_DEFAULT_INTENSITY = XML3D.math.vec3.fromValues(1,1,1);
     /** @const */
-    var LIGHT_DEFAULT_ATTENUATION = vec3.create([0,0,1]);
+    var LIGHT_DEFAULT_ATTENUATION = XML3D.math.vec3.fromValues(0,0,1);
     /** @const */
     var SPOTLIGHT_DEFAULT_FALLOFFANGLE = Math.PI / 4.0;
     /** @const */
@@ -117,6 +119,32 @@
         Array.set(spot.softness, offset/3, softness);
     };
 
+    XML3D.webgl.LightShaderRenderAdapter.prototype.removeLight = function(type, lights, offset) {
+        var lo = lights[type];
+        if (!lo)
+            return;
+
+        switch (type) {
+        case "point":
+            lo.intensity.splice(offset, 3);
+            lo.attenuation.splice(offset, 3);
+            break;
+
+        case "directional":
+            lo.intensity.splice(offset, 3);
+            break;
+
+        case "spot":
+            lo.intensity.splice(offset, 3);
+            lo.attenuation.splice(offset, 3);
+            lo.beamWidth.splice(offset/3, 1);
+            lo.cutOffAngle.splice(offset/3, 1);
+            break;
+        }
+
+        lights.changed = true;
+    }
+
     /**
      *
      * @param {Xflow.data.Request} request
@@ -127,12 +155,25 @@
 
         for (var i=0; i<staticAttributes.length; i++) {
             var attr = dataTable.getOutputData(staticAttributes[i]);
-            if (attr && attr.userData.webglDataChanged) {
+            var webglData = XML3D.webgl.getXflowEntryWebGlData(attr, this.factory.canvasId);
+
+            if (attr && webglData && webglData.changed) {
                 var value = attr.getValue();
                 for(var j=0; j<this.listeners.length; j++)
-                    this.listeners[j](staticAttributes[i], value);
+                    this.listeners[j].func(staticAttributes[i], value);
+                webglData.changed = 0;
             }
         }
+    };
+
+    XML3D.webgl.LightShaderRenderAdapter.prototype.notifyChanged = function(evt) {
+        if (evt.type == XML3D.events.NODE_REMOVED) {
+            return;
+        } else if (evt.type == XML3D.events.THIS_REMOVED) {
+            this.notifyOppositeAdapters();
+            return;
+        }
+
     };
 
     /**
@@ -140,11 +181,21 @@
      * @param {Function} func
      */
     XML3D.webgl.LightShaderRenderAdapter.prototype.registerLightListener = function(func) {
-        this.listeners.push(func);
+        listenerID++;
+        this.listeners.push({id : listenerID, func : func});
+        return listenerID;
     };
-    XML3D.webgl.LightShaderRenderAdapter.prototype.removeLightListener = function(func) {
-        //this.listeners.splice(func);
-        //TODO: remove light node listeners
+    XML3D.webgl.LightShaderRenderAdapter.prototype.removeLightListener = function(idToRemove) {
+        for (var i=0; i<this.listeners.length; i++) {
+            if (this.listeners[i].id == idToRemove) {
+                this.listeners.splice(i, 1);
+                return;
+            }
+        }
+    };
+
+    XML3D.webgl.LightShaderRenderAdapter.prototype.destroy = function() {
+        this.notifyOppositeAdapters();
     };
 
     /**

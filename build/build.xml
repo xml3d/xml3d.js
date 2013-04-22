@@ -6,7 +6,7 @@
 
      Author: Kristian Sons
      ====================================================================== -->
-<project name="script-merge" default="develop">
+<project name="script-merge" default="all">
     <description>
            Merge all the single scripts to one global xml3d.js
     </description>
@@ -70,12 +70,12 @@
     </filelist>
 
     <target name="build-tools" depends="init, tools-modules-concat">
-        <concatScripts extension="-tools" source="tools-modules" 
-            version="DEVELOPMENT SNAPSHOT (${build.time})" /> 
+        <concatScripts extension="-tools" source="tools-modules"
+            version="DEVELOPMENT SNAPSHOT (${build.time})" />
     </target>
 
     <target name="build-tools-min" depends="init, tools-modules-compile">
-        <compileScripts extension="-tools" source="tools-modules"  
+        <compileScripts extension="-tools" source="tools-modules"
             version="DEVELOPMENT SNAPSHOT (${build.time})" />
     </target>
 
@@ -101,7 +101,7 @@
         </subant>
     </target>
 
-    <!-- There's no easy way to get around these duplicated targets. 
+    <!-- There's no easy way to get around these duplicated targets.
         target's don't have parameters and macrodefs don't support subant tasks -->
     <target name="tools-modules-concat">
         <subant target="concat">
@@ -114,6 +114,13 @@
         <subant target="compile">
             <property name="build.path" value="${modulesBuildDir}" />
             <fileset dir="${toolsDir}" includes="**/build.xml" />
+        </subant>
+    </target>
+
+    <target name="all">
+        <subant target="develop">
+            <fileset dir="." includes="build.xml"/>
+            <fileset dir="." includes="build-xflip.xml"/>
         </subant>
     </target>
 </project>

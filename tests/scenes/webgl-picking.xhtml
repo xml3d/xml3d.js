@@ -17,7 +17,8 @@
                <transform id="t4" translation="-2.5 -2 0"/>
                <transform id="t5" translation="0 -2 0"/>
                <transform id="t6" translation="2.5 -2 0"/>
-               
+               <transform id="t7" translation="6 -4 0"/>
+
                <shader id="shader_diffuse" script="urn:xml3d:shader:diffuse">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
                   <float name="ambientIntensity">0.8</float>
@@ -106,7 +107,9 @@
 			<group shader="#shader_phong_vertexcolors" transform="#t6">
 			   <mesh id="pickingMesh6" src="#mySimpleMesh"/>
 			</group>
-	   
+           <group shader="#shader_diffuse" transform="#t7">
+               <mesh id="pickingMesh7" src="#mySimpleMesh"/>
+           </group>
             	
 			
             

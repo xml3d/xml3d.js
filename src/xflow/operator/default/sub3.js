@@ -1,4 +1,4 @@
-Xflow.registerOperator("sub", {
+Xflow.registerOperator("xflow.sub", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'value1'},
                 {type: 'float3', source: 'value2'}],
@@ -10,6 +10,7 @@ Xflow.registerOperator("sub", {
 
         return true;
     },
+
     evaluate_core: function(result, value1, value2){
         result[0] = value1[0] - value2[0];
         result[1] = value1[1] - value2[1];

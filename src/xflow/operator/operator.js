@@ -7,16 +7,20 @@
 var operators = {};
 
 Xflow.registerOperator = function(name, data){
-    var actualName = "xflow." + name;
+    var actualName = name;
     initOperator(data);
     operators[actualName] = data;
     data.name = actualName;
 };
 
 Xflow.getOperator = function(name){
+    if (name && !operators[name])
+    {
+        XML3D.debug.logError("Unknown operator: '" + name+"'");
+        return null;
+    }
     return operators[name];
 };
-
 
 function initOperator(operator){
     var indexMap = {};
@@ -176,23 +180,55 @@ function allocateOutput(operator, inputData, output, operatorData){
         var d = operator.outputs[i];
         var entry = output[d.name].dataEntry;
 
-        var size = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount) * entry.getTupleSize();
+        if (entry.type == Xflow.DATA_TYPE.TEXTURE) {
+            // texture entry
+            if (d.customAlloc)
+            {
+                var texParams = c_sizes[d.name];
+                var newWidth = texParams.imageFormat.width;
+                var newHeight = texParams.imageFormat.height;
+                var newFormatType = texParams.imageFormat.type;
+                var newSamplerConfig = texParams.samplerConfig;
+                entry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+            } else if (d.sizeof) {
+                var srcEntry = null;
+                for (var j in operator.mapping) {
+                    if (operator.mapping[j].source == d.sizeof) {
+                        srcEntry = inputData[operator.mapping[j].paramIdx];
+                        break;
+                    }
+                }
+                if (srcEntry) {
+                    var newWidth = Math.max(srcEntry.getWidth(), 1);
+                    var newHeight = Math.max(srcEntry.getHeight(), 1);
+                    var newFormatType = d.formatType || srcEntry.getFormatType();
+                    var newSamplerConfig = d.samplerConfig || srcEntry.getSamplerConfig();
+                    entry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                }
+                else
+                    throw new Error("Unknown texture input parameter '" + d.sizeof+"' in operator '"+operator.name+"'");
+            } else
+                throw new Error("Cannot create texture. Use customAlloc or sizeof parameter attribute");
+        } else {
+            // buffer entry
+            var size = (d.customAlloc ? c_sizes[d.name] : operatorData.iterateCount) * entry.getTupleSize();
 
-        if( !entry._value || entry._value.length != size){
-            switch(entry.type){
-                case Xflow.DATA_TYPE.FLOAT:
-                case Xflow.DATA_TYPE.FLOAT2:
-                case Xflow.DATA_TYPE.FLOAT3:
-                case Xflow.DATA_TYPE.FLOAT4:
-                case Xflow.DATA_TYPE.FLOAT4X4: entry.setValue(new Float32Array(size)); break;
-                case Xflow.DATA_TYPE.INT:
-                case Xflow.DATA_TYPE.INT4:
-                case Xflow.DATA_TYPE.BOOL: entry.setValue(new Int32Array(size)); break;
-                default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + entry.type);
+            if( !entry._value || entry._value.length != size){
+                switch(entry.type){
+                    case Xflow.DATA_TYPE.FLOAT:
+                    case Xflow.DATA_TYPE.FLOAT2:
+                    case Xflow.DATA_TYPE.FLOAT3:
+                    case Xflow.DATA_TYPE.FLOAT4:
+                    case Xflow.DATA_TYPE.FLOAT4X4: entry.setValue(new Float32Array(size)); break;
+                    case Xflow.DATA_TYPE.INT:
+                    case Xflow.DATA_TYPE.INT4:
+                    case Xflow.DATA_TYPE.BOOL: entry.setValue(new Int32Array(size)); break;
+                    default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + entry.type);
+                }
             }
-        }
-        else{
-            entry.notifyChanged();
+            else{
+                entry.notifyChanged();
+            }
         }
     }
 }
@@ -202,7 +238,8 @@ function assembleFunctionArgs(operator, inputData, outputData){
     for(var i in operator.outputs){
         var d = operator.outputs[i];
         var entry = outputData[d.name].dataEntry;
-        args.push(entry ? entry._value : null);
+        var value = entry ? entry.getValue() : null;
+        args.push(value);
     }
     addInputToArgs(args, inputData);
     return args;
@@ -210,7 +247,9 @@ function assembleFunctionArgs(operator, inputData, outputData){
 
 function addInputToArgs(args, inputData){
     for(var i = 0; i < inputData.length; ++i){
-        args.push(inputData[i] ? inputData[i]._value : null);
+        var entry = inputData[i];
+        var value = entry ? entry.getValue() : null;
+        args.push(value);
     }
 }
 
@@ -232,6 +271,64 @@ function applyCoreOperation(operator, inputData, outputData, operatorData){
     operator._inlineLoop[key].apply(operatorData, args);
 }
 
+if(window.ParallelArray){
+    var createParallelArray = (function() {
+        function F(args) {
+            return ParallelArray.apply(this, args);
+        }
+        F.prototype = ParallelArray.prototype;
+
+        return function() {
+            return new F(arguments);
+        }
+    })();
+}
+
+function riverTrailAvailable(){
+    return window.ParallelArray && window.RiverTrail && window.RiverTrail.compiler;
+}
+
+
+function applyParallelOperator(operator, inputData, outputData, operatorData){
+    var args = [];
+    // Compute Output image size:
+    var size = [];
+    args.push(size);
+    args.push(operator.evaluate_parallel);
+    for(var i = 0; i < operator.mapping.length; ++i){
+        var entry = inputData[i];
+        var value = null;
+        if(entry){
+            if(operator.mapping[i].internalType == Xflow.DATA_TYPE.TEXTURE){
+                if(size.length == 0){
+                    size[0] = inputData[i].getHeight();
+                    size[1] = inputData[i].getWidth();
+                }
+                else{
+                    size[0] = Math.min(size[0], inputData[i].getHeight());
+                    size[1] = Math.min(size[1], inputData[i].getWidth());
+                }
+                value = new ParallelArray(inputData[i].getFilledCanvas());
+            }
+            else{
+                value = new ParallelArray(inputData[i].getValue());
+            }
+        }
+        args.push(value);
+    }
+    var result = createParallelArray.apply(this, args);
+    result.materialize();
+    var outputName = operator.outputs[0].name;
+    var outputDataEntry = outputData[outputName].dataEntry;
+
+    window.RiverTrail.compiler.openCLContext.writeToContext2D(outputDataEntry.getContext2D(),
+        result.data, outputDataEntry.getWidth(), outputDataEntry.getHeight());
+
+    var value = outputDataEntry.getValue();
+    return value;
+}
+
+
 Xflow.ProcessNode.prototype.applyOperator = function(){
     if(!this._operatorData)
         this._operatorData = {
@@ -242,13 +339,23 @@ Xflow.ProcessNode.prototype.applyOperator = function(){
     var inputData = [];
     prepareInputs(this.operator, this.inputChannels, inputData);
     var count = getIterateCount(this.operator, inputData, this._operatorData);
-    allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
 
-    if(this.operator.evaluate_core){
+    if( this.operator.evaluate_parallel && riverTrailAvailable() ){
+        allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
+        applyParallelOperator(this.operator, inputData, this.outputDataSlots, this._operatorData);
+    }
+    else if(this.operator.evaluate_core){
+        allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
         applyCoreOperation(this.operator, inputData, this.outputDataSlots, this._operatorData);
     }
     else{
+        allocateOutput(this.operator, inputData, this.outputDataSlots, this._operatorData);
         applyDefaultOperation(this.operator, inputData, this.outputDataSlots, this._operatorData);
+    }
+    for (var i in this.outputDataSlots) {
+        var entry = this.outputDataSlots[i].dataEntry;
+        if (entry.finish)
+            entry.finish();
     }
 }
 

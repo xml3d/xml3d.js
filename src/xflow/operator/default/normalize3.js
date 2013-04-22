@@ -1,4 +1,4 @@
-Xflow.registerOperator("normalize", {
+Xflow.registerOperator("xflow.normalize", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'value'}],
     evaluate: function(result, value, info) {

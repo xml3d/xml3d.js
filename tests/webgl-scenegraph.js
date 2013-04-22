@@ -16,26 +16,28 @@ module("WebGL Scenegraph", {
 
 });
 
-function getContextForXml3DElement(x) {
+function getWebGLAdapter(x) {
     if(x._configured){
         for(var i in x._configured.adapters){
             if(i.indexOf("webgl") == 0){
-                return x._configured.adapters[i].factory.handler.renderer.gl;
-            }
-        }
-    }
-};
-
-function getHandler(x) {
-    if(x._configured){
-        for(var i in x._configured.adapters){
-            if(i.indexOf("webgl") == 0){
-                return x._configured.adapters[i].factory.handler;
+                return x._configured.adapters[i];
             }
         }
     }
     return null;
 };
+
+function getHandler(x) {
+    var adapter = getWebGLAdapter(x);
+    return adapter ? adapter.factory.handler : null;
+};
+
+function getContextForXml3DElement(x) {
+    var handler = getHandler(x);
+    return handler ? handler.renderer.gl : null;
+};
+
+
 
 test("Background and invisible mesh", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
@@ -71,6 +73,34 @@ test("Change visibility via script", 9, function() {
     };
     stop();
     this.doc.getElementById("myGroup").visible = true;
+    ok(h.needDraw, "Redraw required");
+});
+
+test("Add children in invisible group", 8, function() {
+    var x = this.doc.getElementById("xml3DElem"),
+        actual,
+        win = this.doc.defaultView,
+        gl = getContextForXml3DElement(x),
+        testFunc = null, h = getHandler(x);
+
+    x.addEventListener("framedrawn", function(n) {
+        ok("Redraw was triggered");
+        ok(!h.needDraw, "Redraw not required");
+        if(testFunc)
+            testFunc(n);
+        start();
+    });
+    testFunc = function(n) {
+        equal(n.detail.numberOfObjectsDrawn, 0, "0 Objects drawn");
+        equal(n.detail.numberOfTrianglesDrawn, 0, "0 Triangles drawn");
+        actual = win.getPixelValue(gl, 40, 40);
+        deepEqual(actual, [0,0,0,0], "Transparent at 40,40");
+    };
+    stop();
+    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("src", "#meshdata");
+
+    this.doc.getElementById("myEmptyGroup").appendChild(mesh);
     ok(h.needDraw, "Redraw required");
 });
 
@@ -187,34 +217,116 @@ test("Change visible/shader for nested groups", 8, function() {
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child shader overrides new parent shader]");
 });
 
-test("Add/remove meshes and groups", 6, function() {
+test("Simple add/remove mesh", 11, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
 
     var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
     mesh.setAttribute("src", "#meshdata");
+
+    // Add a mesh
     x.appendChild(mesh);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
     h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add mesh]");
 
+    // Remove the mesh
+    var adapter = getWebGLAdapter(mesh);
     x.removeChild(mesh);
+    ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
+    ok(adapter.renderObject.is("Disposed"), "RenderObject disposed");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove mesh]");
 
+    // Add the mesh again
+    x.appendChild(mesh);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
+    h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [re-add mesh]");
+
+});
+
+test("Simple add/remove group with mesh", 11, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+
+    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("src", "#meshdata");
     var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
     group.appendChild(mesh);
+    //console.log(getWebGLAdapter(mesh).renderObject.is("NoLights"));
+
+    // Add group
     x.appendChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
     h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
+    var adapter = getWebGLAdapter(mesh);
+    // Remove group
     x.removeChild(group);
+    ok(!getWebGLAdapter(group), "Group adapter is removed");
+    ok(adapter.renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
+
+    // Re-add group
+    x.appendChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
+    h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
+});
+
+test("Simple add/remove transformed group with mesh", 12, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
+    x.setAttribute("activeView", "#identView");
+    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("src", "#meshdata");
+    var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
+    group.setAttribute("transform", "#t_grouptransformed");
+
+    group.appendChild(mesh);
+    //console.log(getWebGLAdapter(mesh).renderObject.is("NoLights"));
+
+    // Add group
+    x.appendChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
+    h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
+
+    // Remove group
+    var adapter = getWebGLAdapter(mesh);
+    x.removeChild(group);
+    ok(!getWebGLAdapter(group), "Group adapter is removed");
+    ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
+    ok(adapter.renderObject.is("Disposed"), "RenderObject in 'Disposed' after removal");
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
+
+    // Re-add group
+    x.appendChild(group);
+    ok(getWebGLAdapter(mesh).renderObject.is("NoLights"), "RenderObject in 'NoLights' after creation");
+    h.draw();
+    ok(getWebGLAdapter(mesh).renderObject.is("Ready"), "RenderObject in 'Ready' after draw");
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 });
 
 test("Nested transforms", 8, function() {
@@ -389,10 +501,12 @@ test("Remove group with references to transform", 6, function() {
     ok(outerHandles.transform !== undefined, "Outer transform reference is intact");
     ok(innerHandles.transform !== undefined, "Inner transform reference is intact");
 
+
+    var adapter = outerGroup._configured.adapters.webgl_1;
     outerGroup.parentNode.removeChild(outerGroup);
 
-    outerHandles = outerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
-    innerHandles = innerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
+    outerHandles = adapter.connectedAdapterHandles;
+    innerHandles = adapter.connectedAdapterHandles;
     ok(outerHandles.transform === undefined, "Outer transform reference has been removed");
     ok(innerHandles.transform === undefined, "Inner transform reference has been removed");
 });

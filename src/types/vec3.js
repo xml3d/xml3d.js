@@ -41,19 +41,38 @@
         /** @private */
         this._data = new Float32Array(3);
 
-        if (typeof x == 'object' && x._data) {
-            this._data[0] = x._data[0];
-            this._data[1] = x._data[1];
-            this._data[2] = x._data[2];
-        } else {
-            this._data[0] = x || 0;
-            this._data[1] = y || 0;
-            this._data[2] = z || 0;
+        if(x !== undefined && x !== null) {
+            this.set(x,y,z);
         }
 
         this._callback = typeof cb == 'function' ? cb : 0;
 
     }, p = XML3DVec3.prototype;
+
+    /**
+     * The set method copies the values from other.
+     * @param {Object} other another XML3DVec3, Float32Array or a number. In the last case the other args are considered, too.
+     * @param {number=} y
+     * @param {number=} z
+     */
+    p.set = function(other,y,z) {
+        if(other.length && other.length >= 3) {
+            this._data[0] = other[0];
+            this._data[1] = other[1];
+            this._data[2] = other[2];
+        }
+        else if(other._data && other._data.length && other._data.length === 3) {
+            this._data[0] = other._data[0];
+            this._data[1] = other._data[1];
+            this._data[2] = other._data[2];
+        } else if(arguments.length == 3) {
+            this._data[0] = other;
+            this._data[1] = y;
+            this._data[2] = z;
+        }
+        if (this._callback)
+            this._callback(this);
+    };
 
     /** @type {number} */
     Object.defineProperty(p, "x", prop(0));
@@ -125,24 +144,6 @@
         this._data[0] = +m[1];
         this._data[1] = +m[2];
         this._data[2] = +m[3];
-        if (this._callback)
-            this._callback(this);
-    };
-
-    /**
-     * The set method copies the values from other.
-     * @param {XML3DVec3} other The other vector
-     */
-    p.set = function(other,y,z) {
-        if(arguments.length == 1) {
-            this._data[0] = other._data[0];
-            this._data[1] = other._data[1];
-            this._data[2] = other._data[2];
-        } else if(arguments.length == 3) {
-            this._data[0] = other;
-            this._data[1] = y;
-            this._data[2] = z;
-        }
         if (this._callback)
             this._callback(this);
     };

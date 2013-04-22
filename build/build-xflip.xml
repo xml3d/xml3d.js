@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ======================================================================
+     project    xml3d.js
+     description
+     Deploy script that prepares a single xml3d.js script file
+
+     Author: Kristian Sons
+     ====================================================================== -->
+<project name="xflip-merge" default="develop">
+    <description>
+           Build the xflip script
+    </description>
+
+    <import file="build-master.xml" />
+    <property file="build-xflip.properties" />
+
+    <filelist dir="${modulesBuildDir}" id="xflip-worker">
+        <file name="../../../src/xflip/base.js" />
+    	<file name="../../../src/utils/array.js" />
+        <file name="../../../src/contrib/glMatrix.js" />
+        <file name="xml3d-xflow-module.js" />
+        <file name="../../../src/xflip/worker.js" />
+    </filelist>
+
+    <target name="lastTag" depends="init, modules-concat, windowsGit, linuxGit">
+        <tstamp />
+        <git command="describe">
+            <args>
+                <arg value="--tags" />
+                <arg value="--abbrev=0" />
+            </args>
+        </git>
+        <echo message="${git.output}" />
+        <concatScripts version="${git.output}" extension="-${git.output}" source="modules"/>
+        <compileScripts version="${git.output}" extension="-${git.output}-min" source="modules"/>
+    </target>
+
+    <target name="continuous" depends="init, modules-concat, windowsGit, linuxGit">
+        <tstamp />
+        <git command="log">
+            <args>
+                <arg value="-1" />
+                <arg value="--format=%h / %ci" />
+            </args>
+        </git>
+        <echo message="${git.output}" />
+        <concatScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}" source="modules"/>
+        <compileScripts version="CONTINUOUS BUILD / sha: ${git.output}" extension="-${continuous.extension}-min" source="modules"/>
+        <upload extension="-${continuous.extension}" />
+        <upload extension="-${continuous.extension}-min" />
+    </target>
+
+    <target name="develop" depends="init, modules-concat">
+        <concatScripts version="DEVELOPMENT SNAPSHOT (${build.time})" source="xflip-worker" />
+        <concat destfile="${buildDir}/xflip.js">
+            <fileset file="${srcDir}/xflip/client.js" />
+        </concat>
+        <concat destfile="${buildDir}/xflip-operators.js">
+            <fileset file="${srcDir}/xflip/operators.js" />
+        </concat>
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - -
+          Tools
+         - - - - - - - - - - - - - - - - - -->
+    <filelist dir="${modulesBuildDir}" id="tools-modules">
+        <file name="xml3d-tools-module.js" />
+    </filelist>
+
+    <target name="build-tools" depends="init, tools-modules-concat">
+        <concatScripts extension="-tools" source="tools-modules"
+            version="DEVELOPMENT SNAPSHOT (${build.time})" />
+    </target>
+
+    <target name="build-tools-min" depends="init, tools-modules-compile">
+        <compileScripts extension="-tools" source="tools-modules"
+            version="DEVELOPMENT SNAPSHOT (${build.time})" />
+    </target>
+
+    <target name="upload-tools">
+        <fail unless="upload.url" />
+        <post-file file="${buildDir}/xml3d-tools.js" url="${upload.url}/" />
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - -
+          Module building targets
+         - - - - - - - - - - - - - - - - - -->
+    <target name="modules-concat">
+        <subant target="concat">
+            <property name="build.path" value="${modulesBuildDir}" />
+            <fileset dir="${srcDir}" includes="*/build.xml" />
+        </subant>
+    </target>
+
+    <target name="modules-compile">
+        <subant target="compile">
+            <property name="build.path" value="${modulesBuildDir}" />
+            <fileset dir="${srcDir}" includes="*/build.xml" />
+        </subant>
+    </target>
+
+    <!-- There's no easy way to get around these duplicated targets.
+        target's don't have parameters and macrodefs don't support subant tasks -->
+    <target name="tools-modules-concat">
+        <subant target="concat">
+            <property name="build.path" value="${modulesBuildDir}" />
+            <fileset dir="${toolsDir}" includes="**/build.xml" />
+        </subant>
+    </target>
+
+    <target name="tools-modules-compile">
+        <subant target="compile">
+            <property name="build.path" value="${modulesBuildDir}" />
+            <fileset dir="${toolsDir}" includes="**/build.xml" />
+        </subant>
+    </target>
+</project>

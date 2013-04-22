@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="400px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+    <defs>
+
+      <data id="baseData" >
+        <int name="index">0 1 2 1 2 3</int>
+        <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      </data>
+
+      <data id="poseData" >
+        <float3 name="posAdd1">-0.5 0 0  0 0 0 -1 0 0  0 0 0</float3>
+        <float3 name="posAdd2">0 0 0  0.5 0 0  0 0 0  1 0 0</float3>
+      </data>
+
+      <data id="indirectPoseData" src="#poseData" />
+
+      <data id="combinedData" >
+        <data src="#baseData" />
+        <data src="#poseData" />
+      </data>
+
+      <data id="morphedData" >
+        <data compute="position = xflow.morph(position, posAdd2, weight2)" >
+          <data compute="position = xflow.morph(position, posAdd1, weight1)" >
+            <data src="#combinedData" />
+            <float name="weight1" id="doubleWeight1" >0</float>
+            <float name="weight2" id="doubleWeight2" >1</float>
+          </data>
+        </data>
+      </data>
+
+      <data id="unusedData" >
+        <int name="A">0</int>
+        <data id="swapReference" src="#unusedSubData" />
+      </data>
+
+      <data id="unusedSubData" >
+        <int name="B" >42</int>
+      </data>
+
+      <data id="unusedSubData2" >
+        <int name="C" >23</int>
+      </data>
+
+      <data id="unusedMorphedData" >
+        <data compute="position = xflow.morph(position, posAdd2, weight2)" >
+          <data compute="position = xflow.morph(position, posAdd1, weight1)" >
+            <data src="#combinedData" />
+            <float name="weight1" id="doubleWeight1U" >0</float>
+            <float name="weight2" id="doubleWeight2U" >1</float>
+          </data>
+        </data>
+      </data>
+
+
+      <data id="simpleSequence" >
+        <int name="A" key="0.4" >1</int>
+        <int name="A" key="1.5" >2</int>
+        <int name="A" key="3.5" >3</int>
+      </data>
+
+      <data id="simpleRenaming" filter="rename({pos: position, norm: normal})" >
+        <data src="#baseData" />
+      </data>
+
+
+      <data id="simpleCompute" compute="position = xflow.morph(position, posAdd1, weight)" >
+        <data src="#combinedData" />
+        <float name="weight" >0</float>
+      </data>
+
+
+      <proto id="simpleProto" compute="position = xflow.morph(position, posAdd, weight)" >
+        <float3 name="position" param="true" ></float3>
+        <float3 name="posAdd" param="true" ></float3>
+        <float3 name="weight" param="true" ></float3>
+      </proto>
+
+      <data id="simpleProtoInstance" proto="#simpleProto"
+            compute="posAdd = xflow.morph(posAdd1, posAdd2, subWeight)" >
+        <data src="#combinedData" />
+        <float name="weight" >1</float>
+        <float name="subWeight" >0.5</float>
+      </data>
+
+
+      <shader id="pink" script="urn:xml3d:shader:flat">
+        <float3 name="diffuseColor">1 0 1</float3>
+      </shader>
+
+
+    </defs>
+    <group id="meshGroup" >
+      <mesh id="myMesh02" src="#morphedData"  />
+    </group>
+  </xml3d>
+</body>
+</html>

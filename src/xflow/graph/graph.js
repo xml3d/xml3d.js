@@ -67,7 +67,7 @@ Xflow.InputNode = function(graph){
     this._data = null;
     this._param = false;
 };
-XML3D.createClass(Xflow.InputNode, Xflow.GraphNode);
+Xflow.createClass(Xflow.InputNode, Xflow.GraphNode);
 var InputNode = Xflow.InputNode;
 
 InputNode.prototype.notify = function(newValue, notification) {
@@ -119,6 +119,23 @@ Object.defineProperty(InputNode.prototype, "data", {
 });
 
 
+Xflow.createBufferInputNode = function(type, name, size){
+    if (size == 0)
+        return null;
+    var typeId = Xflow.DATA_TYPE_MAP[type];
+    var tupleSize = Xflow.DATA_TYPE_TUPLE_SIZE[typeId];
+    var arrayType = Xflow.TYPED_ARRAY_MAP[typeId];
+
+    var v = new (arrayType)(size * tupleSize);
+    var buffer = new Xflow.BufferEntry(typeId, v);
+
+    var inputNode = XML3D.data.xflowGraph.createInputNode();
+    inputNode.data = buffer;
+    inputNode.name = name;
+    return inputNode;
+};
+
+
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.DataNode
 //----------------------------------------------------------------------------------------------------------------------
@@ -133,7 +150,7 @@ Xflow.DataNode = function(graph, protoNode){
 
     this.loading = false;
 
-    
+
     this._isProtoNode = protoNode;
     this._children = [];
     this._sourceNode = null;
@@ -150,7 +167,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._requests = [];
 
 };
-XML3D.createClass(Xflow.DataNode, Xflow.GraphNode);
+Xflow.createClass(Xflow.DataNode, Xflow.GraphNode);
 var DataNode = Xflow.DataNode;
 
 
@@ -172,7 +189,7 @@ Xflow.OrderMapping = function(owner){
     Xflow.Mapping.call(this, owner);
     this._names = [];
 };
-XML3D.createClass(Xflow.OrderMapping, Xflow.Mapping);
+Xflow.createClass(Xflow.OrderMapping, Xflow.Mapping);
 
 /**
  * @constructor
@@ -185,7 +202,7 @@ Xflow.NameMapping = function(owner){
     this._srcNames = [];
 
 };
-XML3D.createClass(Xflow.NameMapping, Xflow.Mapping);
+Xflow.createClass(Xflow.NameMapping, Xflow.Mapping);
 
 
 
@@ -407,6 +424,18 @@ DataNode.prototype.notify = function(changeType, senderNode){
     }
 };
 
+DataNode.prototype.getOutputNames = function(){
+    var forwardNode = getForwardNode(this);
+    if(forwardNode){
+        return forwardNode.getOutputNames();
+    }
+
+    return this._channelNode.getOutputNames();
+}
+
+DataNode.prototype.getOutputChannelInfo = function(name){
+    return (getForwardNode(this) || this)._channelNode.getOutputChannelInfo(name);
+}
 
 DataNode.prototype._getComputeResult = function(filter){
     var forwardNode = getForwardNode(this);

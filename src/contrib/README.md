@@ -5,8 +5,8 @@ External libraries
 
 High performance matrix and vector operations for WebGL
 
-Version: 0.9.5
-Author: Brandon Jones
+Version: 2.0.1
+Author: Brandon Jones, Colin MacKenzie IV
 URL: https://github.com/toji/gl-matrix
 License: zlib License
 

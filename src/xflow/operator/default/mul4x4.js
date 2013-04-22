@@ -1,11 +1,11 @@
-Xflow.registerOperator("mul", {
+Xflow.registerOperator("xflow.mul", {
     outputs: [  {type: 'float4x4', name: 'result'}],
     params:  [  {type: 'float4x4', source: 'value1'},
                 {type: 'float4x4', source: 'value2'}],
     evaluate: function(result, value1, value2, info) {
         for(var i = 0; i < info.iterateCount; i++)
         {
-            mat4.multiplyOffset(result, i*16,
+            XML3D.math.mat4.multiplyOffset(result, i*16,
                 value1,  info.iterFlag[0] ? i*16 : 0,
                 value2, info.iterFlag[0] ? i*16 : 0);
         }
@@ -22,7 +22,7 @@ Xflow.registerOperator("mul", {
         for(var i = 0; i < count; i++)
         {
             var offset = i*16;
-            mat4.multiplyOffset(result, offset, value1, offset, value2, offset);
+            XML3D.math.mat4.multiplyOffset(result, offset, value1, offset, value2, offset);
         }
         //this.parallel_data = new ParallelArray(result).partition(16);
         this.result.result = result;

@@ -44,22 +44,7 @@
         XML3D.base.NodeAdapterFactory.call(this, XML3D.data);
     };
     XML3D.createClass(XML3DDataAdapterFactory, XML3D.base.NodeAdapterFactory);
-
-    /**
-     * Tries to create an adapter from an URI
-     *
-     * @param {string} uri
-     * @returns {Adapter} An resolved adapter
-     */
-    XML3DDataAdapterFactory.prototype.getAdapterURI = function(node, uri)
-    {
-        if(!uri) {
-            return new XML3D.base.AdapterHandle();
-        }
-        var a = XML3D.base.resourceManager.getAdapterHandle(node.ownerDocument, uri, XML3D.data);
-        return a;
-    };
-
+    XML3DDataAdapterFactory.prototype.aspect = XML3D.data;
 
     var data = XML3D.data, reg = {};
 
@@ -74,6 +59,8 @@
     reg['int']         = data.ValueDataAdapter;
     reg['int4']        = data.ValueDataAdapter;
     reg['bool']        = data.ValueDataAdapter;
+    reg['byte']        = data.ValueDataAdapter;
+    reg['ubyte']        = data.ValueDataAdapter;
     reg['img']         = data.ImgDataAdapter;
     reg['texture']     = data.TextureDataAdapter;
     reg['data']        = data.DataAdapter;
@@ -102,5 +89,5 @@
 
     // Export
     XML3D.data.XML3DDataAdapterFactory = XML3DDataAdapterFactory;
-    XML3D.data.factory = new XML3DDataAdapterFactory();
+    XML3D.base.xml3dFormatHandler.registerFactoryClass(XML3DDataAdapterFactory);
 }());

@@ -6,8 +6,12 @@
   <title>XML3D Picking</title>
 </head>
 <body style="background-color: #FFF;width:500px">
-  <xml3d xmlns="http://www.xml3d.org/2009/xml3d" 
-         id="xml3DElem" 
+  <!-- offset the xml3d element from the top and from the left about 111 pixels -->
+  <div style="float:top;width:500px;height:111px;" />
+  <div style="float:left;width:111px;height:500px;" />
+
+  <xml3d xmlns="http://www.xml3d.org/2009/xml3d"
+         id="xml3DElem"
          style="background-color: black; width: 300px; height: 200px;"
          activeView="#default_view">
     <defs>
@@ -15,7 +19,7 @@
       <transform id="t1" translation="-2 0 0" />
       <transform id="t2" translation="2 0 0" rotation="1 0 0 0.7" />
       <transform id="tview" translation="5 0 0" />
-      
+
       <data id="mySimpleMesh" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
         <float3 name="position">
@@ -37,11 +41,11 @@
         </float2>
       </data>
     </defs>
-   
+
     <group transform="#tview">
       <view id="default_view" position="5 0 0" orientation="0 1 0 1.57" />
     </group>
-    
+
     <group transform="#troot">
       <group transform="#t1">
         <mesh id="m1" src="#mySimpleMesh"/>

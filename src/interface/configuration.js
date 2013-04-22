@@ -45,14 +45,26 @@ XML3D.DataFieldType["float4"] = 3;
 XML3D.DataFieldType[3] = "float4";
 XML3D.DataFieldType["float4x4"] = 4;
 XML3D.DataFieldType[4] = "float4x4";
-XML3D.DataFieldType["int"] = 5;
-XML3D.DataFieldType[5] = "int";
-XML3D.DataFieldType["bool"] = 6;
-XML3D.DataFieldType[6] = "bool";
-XML3D.DataFieldType["texture"] = 7;
-XML3D.DataFieldType[7] = "texture";
-XML3D.DataFieldType["video"] = 8;
-XML3D.DataFieldType[8] = "video";
+XML3D.DataFieldType["int"] = 10;
+XML3D.DataFieldType[10] = "int";
+XML3D.DataFieldType["int4"] = 11;
+XML3D.DataFieldType[11] = "int4";
+XML3D.DataFieldType["bool"] = 20;
+XML3D.DataFieldType[20] = "bool";
+XML3D.DataFieldType["texture"] = 30;
+XML3D.DataFieldType[30] = "texture";
+// DataChannelOrigin
+XML3D.DataChannelOrigin = {};
+XML3D.DataChannelOrigin["origin_value "] = 0;
+XML3D.DataChannelOrigin[0] = "origin_value ";
+XML3D.DataChannelOrigin["origin_child"] = 1;
+XML3D.DataChannelOrigin[1] = "origin_child";
+XML3D.DataChannelOrigin["origin_source"] = 2;
+XML3D.DataChannelOrigin[2] = "origin_source";
+XML3D.DataChannelOrigin["origin_compute"] = 3;
+XML3D.DataChannelOrigin[3] = "origin_compute";
+XML3D.DataChannelOrigin["origin_proto"] = 4;
+XML3D.DataChannelOrigin[4] = "origin_proto";
 
 XML3D.classInfo = {};
 
@@ -95,8 +107,14 @@ XML3D.classInfo['data'] = {
     // TODO: Handle style for data
     compute : {a: XML3D.StringAttributeHandler},
     filter : {a: XML3D.StringAttributeHandler},
+    getOutputNames : {m: XML3D.methods.dataGetOutputNames},
+    getOutputChannelInfo : {m: XML3D.methods.dataGetOutputChannelInfo},
+    getComputeInfo : {m: XML3D.methods.dataGetComputeInfo},
+    getProtoInfo : {m: XML3D.methods.dataGetProtoInfo},
+    isOutputConnected : {m: XML3D.methods.dataIsOutputConnected},
     getResult : {m: XML3D.methods.dataGetResult},
-    getOutputFieldNames : {m: XML3D.methods.dataGetOutputFieldNames},
+    addOutputFieldListener : {m: XML3D.methods.dataAddOutputFieldListener},
+    getOutputNames : {m: XML3D.methods.dataGetOutputNames},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
     _term: undefined
@@ -246,7 +264,11 @@ XML3D.classInfo['proto'] = {
     // TODO: Handle style for proto
     compute : {a: XML3D.StringAttributeHandler},
     filter : {a: XML3D.StringAttributeHandler},
-    getOutputFieldNames : {m: XML3D.methods.protoGetOutputFieldNames},
+    getOutputNames : {m: XML3D.methods.protoGetOutputNames},
+    getOutputChannelInfo : {m: XML3D.methods.protoGetOutputChannelInfo},
+    getComputeInfo : {m: XML3D.methods.protoGetComputeInfo},
+    getProtoInfo : {m: XML3D.methods.protoGetProtoInfo},
+    isOutputConnected : {m: XML3D.methods.protoIsOutputConnected},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
     _term: undefined
@@ -392,10 +414,10 @@ XML3D.classInfo['video'] = {
     id : {a: XML3D.IDHandler},
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for video
-    oncanplaythrough : {a: XML3D.EventAttributeHandler},
-    onended : {a: XML3D.EventAttributeHandler},
-    onerror : {a: XML3D.EventAttributeHandler},
     src : {a: XML3D.StringAttributeHandler},
+    play : {m: XML3D.methods.videoPlay},
+    pause : {m: XML3D.methods.videoPause},
+    autoplay : {a: XML3D.BoolAttributeHandler, params: false},
     _term: undefined
 };
 /**
@@ -419,6 +441,7 @@ XML3D.classInfo['view'] = {
     position : {a: XML3D.XML3DVec3AttributeHandler, params: [0, 0, 0]},
     orientation : {a: XML3D.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
     fieldOfView : {a: XML3D.FloatAttributeHandler, params: 0.785398},
+    perspective : {a: XML3D.ReferenceHandler},
     getWorldMatrix : {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     setDirection : {m: XML3D.methods.viewSetDirection},
     setUpVector : {m: XML3D.methods.viewSetUpVector},

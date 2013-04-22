@@ -85,6 +85,14 @@ XML3D.base.Adapter.prototype.getConnectedAdapter = function(key){
     return handle && handle.getAdapter();
 };
 
+/**
+ * This function is called, when the adapater is detached from the node.
+ * At this point, the adapater should disconnect from any other adapter and prepare to be properly garbage collected
+ */
+XML3D.base.Adapter.prototype.onDispose = function(){
+    this.clearAdapterHandles();
+}
+
 
 /**
  * Internal function that converts an AdapterHandleNotification to a ConnectedAdapterNotification
@@ -185,6 +193,15 @@ XML3D.base.AdapterFactory.prototype.createAdapter = function(obj) {
 };
 
 /**
+ * Checks if the adapter factory supports specified mimetype. Can be overridden by subclass.
+ * @param {String} mimetype
+ * @return {Boolean} true if the adapter factory supports specified mimetype
+ */
+XML3D.base.AdapterFactory.prototype.supportsMimetype = function(mimetype) {
+    return this.mimetypes.indexOf(mimetype) != -1;
+};
+
+/**
  * A NodeAdaperFactory is a AdapterFactory, that works specifically for DOM nodes / elements.
  * @constructor
  * @implements {XML3D.base.AdapterFactory}
@@ -249,8 +266,8 @@ XML3D.base.callAdapterFunc = function(node, funcs) {
     }
     return result;
 };
-  
-/**    
+
+/**
  * This function sends single or multiple adapter events by calling functions
  * specified in events parameter for each adapter associated with the node.
  *

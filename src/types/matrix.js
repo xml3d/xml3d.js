@@ -1,6 +1,6 @@
 // matrix.js
 (function(isNative) {
-    
+
     if(isNative) return;
 
     /**
@@ -66,10 +66,10 @@
             m32, m33, m34, m41, m42, m43, m44, cb) {
         /** @private */
         if (typeof m11 == 'number' && arguments.length >= 16) {
-            this._data = new Float32Array(arguments);
+            this.set(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44);
             this._callback = typeof cb == 'function' ? cb : 0;
         } else if (typeof m11 == 'object' && arguments.length == 1) {
-            this._data = new Float32Array(m11._data);
+            this.set(m11);
         } else{
             this._data = new Float32Array( [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
                     0, 0, 0, 0, 1 ]);
@@ -112,6 +112,47 @@
     Object.defineProperty(p, "m44", prop(15));
 
     /**
+     * Set the value of the matrix.
+     *
+     * @param {Object} m11 another XML3DMatrix, Float32Array or a number. In the last case the remaining arguments are considered.
+     * @param {number=} m12
+     * @param {number=} m13
+     * @param {number=} m14
+     * @param {number=} m21
+     * @param {number=} m22
+     * @param {number=} m23
+     * @param {number=} m24
+     * @param {number=} m31
+     * @param {number=} m32
+     * @param {number=} m33
+     * @param {number=} m34
+     * @param {number=} m41
+     * @param {number=} m42
+     * @param {number=} m43
+     * @param {number=} m44
+     */
+    p.set = function(m11, m12, m13, m14, m21, m22, m23, m24, m31,
+            m32, m33, m34, m41, m42, m43, m44) {
+
+        if (typeof m11 == 'number' && arguments.length >= 16) {
+            this._data = new Float32Array(arguments);
+            return;
+        }
+
+        if(m11._data && m11._data.length && m11._data.length === 16) {
+            this._data = new Float32Array(m11._data);
+            return;
+        }
+
+        if(m11.length && m11.length >= 16) {
+            this._data = new Float32Array(m11);
+            return;
+        }
+
+        XML3D.debug.logError("XML3DMatrix.set(): invalid parameter(s). Expect XML3DMatrix, Float32Array or 16 numbers.");
+    };
+
+    /**
      * String representation of the XML3DBox.
      * @override
      * @return {string} Human-readable representation of this XML3DBox.
@@ -152,7 +193,7 @@
      */
     p.multiply = function(secondMatrix) {
         var result = new XML3DMatrix();
-        mat4.multiply(this._data, secondMatrix._data, result._data);
+        XML3D.math.mat4.multiply(result._data, this._data, secondMatrix._data);
         return result;
     };
 
@@ -164,8 +205,8 @@
      */
     p.inverse = function() {
         var result = new XML3DMatrix();
-        mat4.inverse(this._data, result._data);
-        if (isNaN(result._data[0]))
+        result._data = XML3D.math.mat4.invert(result._data, this._data);
+        if (result._data == null || isNaN(result._data[0]))
             throw new Error("Trying to invert matrix that is not invertable.");
         return result;
     };
@@ -181,12 +222,12 @@
     p.rotate = function(rotX, rotY, rotZ) {
         var r = new XML3DMatrix();
         if(rotY === undefined && rotZ === undefined) {
-            mat4.rotateZ(this._data, rotX, r._data);
-            return r;    
+            XML3D.math.mat4.rotateZ(r._data, this._data, rotX);
+            return r;
         }
-        mat4.rotateZ(this._data, rotZ, r._data);
-        mat4.rotateY(r._data, rotY);
-        mat4.rotateX(r._data, rotX);
+        XML3D.math.mat4.rotateZ(r._data, this._data, rotZ);
+        XML3D.math.mat4.rotateY(r._data, r._data, rotY);
+        XML3D.math.mat4.rotateX(r._data, r._data, rotX);
         return r;
     };
 
@@ -203,7 +244,7 @@
      */
     p.rotateAxisAngle = function(x, y, z, angle) {
         var result = new XML3DMatrix();
-        mat4.rotate(this._data, angle, [ x, y, z ], result._data);
+        XML3D.math.mat4.rotate(result._data, this._data, angle, [ x, y, z ]);
         return result;
     };
 
@@ -226,7 +267,7 @@
             scaleZ = 1;
         if (!scaleY)
             scaleY = scaleX;
-        mat4.scale(this._data, [ scaleX, scaleY, scaleZ ], result._data);
+        XML3D.math.mat4.scale(result._data, this._data, [ scaleX, scaleY, scaleZ ]);
         return result;
     };
 
@@ -241,7 +282,7 @@
       */
     p.translate = function(x, y, z) {
         var result = new XML3DMatrix();
-        mat4.translate(this._data, [x,y,z], result._data);
+        XML3D.math.mat4.translate(result._data, this._data, [x, y, z]);
         return result;
     };
 

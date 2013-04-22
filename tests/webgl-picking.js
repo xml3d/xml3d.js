@@ -22,7 +22,7 @@ test("Check current pick object (internal)", function() {
     var picked = h.updatePickObjectByPoint(88,60);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.meshNode, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
+    strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
 
     picked = h.updatePickObjectByPoint(5,5);
     strictEqual(h.currentPickObj, null, "Nothing picked");
@@ -34,10 +34,10 @@ test("Pick with large object ids", function() {
     var h = getHandler(xml3dElement);
     var target = this.doc.getElementById("pickingMesh6");
 
-    var drawables = h.renderer.drawableObjects;
+    var drawables = h.renderer.renderObjects.ready;
     var objId = -1;
     for ( var i = 0; i < drawables.length; i++) {
-        if (drawables[i].meshNode === target) {
+        if (drawables[i].meshAdapter.node === target) {
             objId = i;
             break;
         }
@@ -48,7 +48,7 @@ test("Pick with large object ids", function() {
     var picked = h.updatePickObjectByPoint(220, 150);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.meshNode, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
+    strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
 
 });
 
@@ -123,5 +123,21 @@ test("Don't pick invisible objects", 3, function() {
     equal(actual, expected, "Pick object behind 'pickingMesh3'");
 });
 
+test("Resizing xml3d element reinitializes buffers", 5, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var expected = this.doc.getElementById("pickingMesh7");
+    var h = getHandler(xml3dElement);
+
+    var actual = xml3dElement.getElementByPoint(299,199);
+    equal(actual, expected, "Pick object 'pickingMesh7'");
+
+    xml3dElement.style.width = "500px";
+    h.tick();
+
+    equal(h.renderer.width / h.renderer.height, 500/200, "Renderer has the right aspect ratio");
+
+    actual = xml3dElement.getElementByPoint(416,199);
+    equal(actual, expected, "Pick object 'pickingMesh7'");
+});
 
 

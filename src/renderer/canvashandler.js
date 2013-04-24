@@ -131,33 +131,42 @@ XML3D.webgl.MAXFPS = 30;
         var canvas = this.canvas;
         canvas.addEventListener("mousedown", function(e) {
             handler.mousedown(e);
+            e.stopPropagation();
         }, false);
         canvas.addEventListener("mouseup", function(e) {
             handler.mouseup(e);
+            e.stopPropagation();
         }, false);
         canvas.addEventListener("mousemove", function(e) {
             handler.mousemove(e);
+            e.stopPropagation();
         }, false);
         canvas.addEventListener("click", function(e) {
             handler.click(e);
+            e.stopPropagation();
         }, false);
         canvas.addEventListener("dblclick", function(e) {
             handler.click(e, true);
         }, false);
         canvas.addEventListener("mousewheel", function(e) {
             handler.mousewheel(e);
+            e.stopPropagation();
         }, false);
         canvas.addEventListener("DOMMouseScroll", function(e) {
             handler.mousewheel(e);
+            e.stopPropagation();
         }, false);
         canvas.addEventListener("mouseout", function(e) {
             handler.mouseout(e);
+            e.stopPropagation();
         }, false);
         canvas.addEventListener("drop", function(e) {
             handler.drop(e);
+            e.stopPropagation();
         }, false);
         canvas.addEventListener("dragover", function(e) {
             handler.dragover(e);
+            e.stopPropagation();
         }, false);
 
         // Block the right-click context menu on the canvas unless it's explicitly toggled

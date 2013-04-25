@@ -126,60 +126,6 @@ XML3D.webgl.MAXFPS = 30;
         this.renderer = new XML3D.webgl.Renderer(this, context, { width: this.canvas.clientWidth, height: this.canvas.clientHeight });
     }
 
-    CanvasHandler.prototype.registerCanvasListeners = function() {
-        var handler = this;
-        var canvas = this.canvas;
-        canvas.addEventListener("mousedown", function(e) {
-            handler.mousedown(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("mouseup", function(e) {
-            handler.mouseup(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("mousemove", function(e) {
-            handler.mousemove(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("click", function(e) {
-            handler.click(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("dblclick", function(e) {
-            handler.click(e, true);
-        }, false);
-        canvas.addEventListener("mousewheel", function(e) {
-            handler.mousewheel(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("DOMMouseScroll", function(e) {
-            handler.mousewheel(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("mouseout", function(e) {
-            handler.mouseout(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("mouseover", function(e) {
-            handler.mouseover(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("drop", function(e) {
-            handler.drop(e);
-            e.stopPropagation();
-        }, false);
-        canvas.addEventListener("dragover", function(e) {
-            handler.dragover(e);
-            e.stopPropagation();
-        }, false);
-
-        // Block the right-click context menu on the canvas unless it's explicitly toggled
-        var cm = this.xml3dElem.getAttribute("contextmenu");
-        if (!cm || cm == "false") {
-            this.canvas.addEventListener("contextmenu", function(e) {XML3D.webgl.stopEvent(e);}, false);
-        }
-    };
-
 
     /**
      * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in
@@ -479,9 +425,39 @@ XML3D.webgl.MAXFPS = 30;
     };
 
 
+    var canvasEvents = [
+        "click",
+        "dblclick",
+        "mousedown",
+        "mouseup",
+        "mouseover",
+        "mousemove",
+        "mouseout",
+        "mousewheel"
+    ]
+
+
+    CanvasHandler.prototype.registerCanvasListeners = function() {
+        var handler = this;
+        var canvas = this.canvas;
+
+        canvasEvents.forEach( function(name) {
+            canvas.addEventListener(name, function(e) {
+                handler[name].call(handler, e);
+                e.stopPropagation();
+            });
+        });
+
+        // Block the right-click context menu on the canvas unless it's explicitly toggled
+        var cm = this.xml3dElem.getAttribute("contextmenu");
+        if (!cm || cm == "false") {
+            this.canvas.addEventListener("contextmenu", function(e) {XML3D.webgl.stopEvent(e);}, false);
+        }
+    };
+
+
     /**
-     *
-     * @param evt
+     * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.drop = function(evt) {
         var pos = this.getMousePosition(evt);
@@ -526,18 +502,21 @@ XML3D.webgl.MAXFPS = 30;
     };
 
     /**
-     * This method is called each time a click event is triggered on the canvas
-     *
      * @param {MouseEvent} evt
-     * @param {boolean} isdbl
      */
-    CanvasHandler.prototype.click = function(evt, isdbl) {
+    CanvasHandler.prototype.click = function(evt) {
         var pos = this.getMousePosition(evt);
         // Click follows always 'mouseup' => no update of pick object needed
-        if (isdbl == true)
-            this.dispatchMouseEvent("dblclick", evt.button, pos.x, pos.y, evt);
-        else
-            this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
+        this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
+    };
+
+    /**
+     * @param {MouseEvent} evt
+     */
+    CanvasHandler.prototype.dblclick = function(evt) {
+        var pos = this.getMousePosition(evt);
+        // Click follows always 'mouseup' => no update of pick object needed
+        this.dispatchMouseEvent("dblclick", evt.button, pos.x, pos.y, evt);
     };
 
     /**

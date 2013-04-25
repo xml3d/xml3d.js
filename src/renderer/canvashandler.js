@@ -538,11 +538,15 @@ XML3D.webgl.MAXFPS = 30;
             if (this.lastPickObj) {
                 // The mouse has left the last object
                 this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this.lastPickObj);
+                if (!curObj) // Nothing picked, this means we enter the xml3d canvas
+                    this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y, null, this.xml3dElem);
             }
             if (curObj) {
                 // The mouse is now over a different object, so call the new
                 // object's mouseover method
                 this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y);
+                if (!this.lastPickObj) // Nothing was picked before, this means we leave the xml3d canvas
+                    this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this.xml3dElem);
             }
 
             this.lastPickObj = curObj;

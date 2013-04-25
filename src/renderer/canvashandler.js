@@ -160,6 +160,10 @@ XML3D.webgl.MAXFPS = 30;
             handler.mouseout(e);
             e.stopPropagation();
         }, false);
+        canvas.addEventListener("mouseover", function(e) {
+            handler.mouseover(e);
+            e.stopPropagation();
+        }, false);
         canvas.addEventListener("drop", function(e) {
             handler.drop(e);
             e.stopPropagation();
@@ -577,6 +581,16 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.mouseout = function(evt) {
         var pos = this.getMousePosition(evt);
         this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this.lastPickObj);
+    };
+
+    /**
+     * This method is called each time the mouse enters the canvas
+     *
+     * @param {MouseEvent} evt
+     */
+    CanvasHandler.prototype.mouseover = function(evt) {
+        var pos = this.getMousePosition(evt);
+        this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y, null, null);
     };
 
     /**

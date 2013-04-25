@@ -38,6 +38,19 @@ XML3D.webgl.MAXFPS = 30;
 
     XML3D.webgl.handlers = [];
 
+    // Events
+
+    var hasTouchEvents = 'ontouchstart' in window;
+    var events = {
+        mouse : [ "click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "mousewheel" ],
+        drag  : [  ],
+        touch : [ "touchstart", "touchmove", "touchend", "touchcancel"]
+    };
+
+    events.available = events.mouse.concat(events.drag, hasTouchEvents ? events.touch : [] );
+
+    XML3D.webgl.events = events;
+
     /**
      * CanvasHandler class.
      * Registers and handles the events that happen on the canvas element.
@@ -422,26 +435,12 @@ XML3D.webgl.MAXFPS = 30;
 
     };
 
-
-    var canvasEvents = [
-        "click",
-        "dblclick",
-        "mousedown",
-        "mouseup",
-        "mouseover",
-        "mousemove",
-        "mouseout",
-        "mousewheel"
-    ]
-
-
     CanvasHandler.prototype.registerCanvasListeners = function() {
         var handler = this;
-        var canvas = this.canvas;
 
-        canvasEvents.forEach( function(name) {
-            canvas.addEventListener(name, function(e) {
-                handler[name].call(handler, e);
+        events.available.forEach( function(name) {
+            handler.canvas.addEventListener(name, function(e) {
+                handler[name] && handler[name].call(handler, e);
                 e.stopPropagation();
             });
         });

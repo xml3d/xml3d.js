@@ -2,8 +2,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
 //Adapter for <mesh>
 (function() {
-    var eventTypes = {onclick:1, ondblclick:1,
-        ondrop:1, ondragenter:1, ondragleave:1};
 
     var bboxAttributes = ["boundingBox"];
 
@@ -33,7 +31,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     var MeshRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
 
-        this.processListeners();
+        this.initializeEventAttributes();
         this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
         this.parentVisible = true;
         this.renderObject = null; // This is set by renderObject itself
@@ -53,24 +51,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             XML3D.math.mat4.multiply(m, m, this.renderObject.transform);
 
         return m;
-    };
-
-    /**
-     *
-     */
-    p.processListeners  = function() {
-        var attributes = this.node.attributes;
-        for (var index in attributes) {
-            var att = attributes[index];
-            if (!att.name)
-                continue;
-
-            var type = att.name;
-            if (type.match(/onmouse/) || eventTypes[type]) {
-                var eventType = type.substring(2);
-                this.node.addEventListener(eventType,  new Function("event", att.value), false);
-            }
-        }
     };
 
     /**

@@ -1,12 +1,9 @@
 // Adapter for <group>
 (function() {
 
-	var eventTypes = {onclick:1, ondblclick:1,
-			ondrop:1, ondragenter:1, ondragleave:1};
-
     var GroupRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.processListeners();
+        this.initializeEventAttributes();
         this.factory = factory;
         this.parentTransform = null;
         this.parentShaderHandle = null;
@@ -48,21 +45,6 @@
     p.updateTransformAdapter = function() {
         var transformHref = this.node.transform;
         this.connectAdapterHandle("transform", this.getAdapterHandle(transformHref));
-    };
-
-    p.processListeners  = function() {
-        var attributes = this.node.attributes;
-        for (var index in attributes) {
-            var att = attributes[index];
-            if (!att.name)
-                continue;
-
-            var type = att.name;
-	        if (type.match(/onmouse/) || eventTypes[type]) {
-                var eventType = type.substring(2);
-                this.node.addEventListener(eventType, new Function("event", att.value), false);
-            }
-        }
     };
 
     p.notifyChanged = function(evt) {

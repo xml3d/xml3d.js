@@ -60,7 +60,7 @@
             var type = att.name;
 	        if (type.match(/onmouse/) || eventTypes[type]) {
                 var eventType = type.substring(2);
-                this.node.addEventListener(eventType, new Function("evt", att.value), false);
+                this.node.addEventListener(eventType, new Function("event", att.value), false);
             }
         }
     };

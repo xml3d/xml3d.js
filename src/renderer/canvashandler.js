@@ -354,13 +354,11 @@ XML3D.webgl.MAXFPS = 30;
         this.initExtendedMouseEvent(evt, x, y);
 
         // find event target
-        var tar = null;
+        var tar = this.xml3dElem; // Default is to dispace on xml3d element
         if (target !== undefined && target !== null)
             tar = target;
         else if (this.currentPickObj)
             tar = this.currentPickObj.meshAdapter.node;
-        else
-            tar = this.xml3dElem;
 
         tar.dispatchEvent(evt);
     };

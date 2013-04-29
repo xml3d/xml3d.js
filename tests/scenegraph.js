@@ -194,6 +194,10 @@ test("Dynamically added mesh", function() {
     mesh.setAttribute("src", "#mySimpleMesh");
 
     this.xml3dElement.appendChild(mesh);
+
+    // renderadapter is initialized but mesh data is still not initialized
+    ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
+
     //Mesh changes are not applied until frame renders
     var h = getHandler(this.xml3dElement);
     h.draw();

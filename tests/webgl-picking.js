@@ -79,7 +79,7 @@ test("Object picking test", 3, function() {
 
     h.updatePickObjectByPoint(88,60);
     stop();
-    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 88, clientY: 60 }), target);
 
 });
 
@@ -96,7 +96,7 @@ test("Position picking test", 4, function() {
 
     h.updatePickObjectByPoint(89,51);
     stop();
-    h.dispatchMouseEvent("click", 1, 89, 51, null, target);
+    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 89, clientY: 51 }), target);
 });
 
 test("Normal picking test", 4, function() {
@@ -113,7 +113,7 @@ test("Normal picking test", 4, function() {
 
     h.updatePickObjectByPoint(88,60);
     stop();
-    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 88, clientY: 60 }), target);
 });
 
 test("Don't pick invisible objects", 3, function() {

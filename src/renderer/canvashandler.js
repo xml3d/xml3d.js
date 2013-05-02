@@ -322,58 +322,29 @@ XML3D.webgl.MAXFPS = 30;
     };
 
     /**
-     * Initalizes an DOM MouseEvent, picks the scene and sends the event to the
-     * hit object, if one was hit.
-     *
-     * It dispatches it on two ways: calling dispatchEvent() on the target
-     * element and going through the tree up to the root xml3d element invoking
-     * all on[type] attribute code.
-     *
-     * @param type
-     *            the type string according to the W3 DOM MouseEvent
-     * @param button
-     *            which mouse button is pressed, if any
-     * @param x
-     *            the screen x-coordinate
-     * @param y
-     *            the screen y-coordinate
-     * @param event
-     *            the W3 DOM MouseEvent, if present (currently not when
-     *            SpiderGL's blur event occurs)
-     * @param target
-     *            the element to which the event is to be dispatched. If
-     *            this is not given, the currentPickObj will be taken or the
-     *            xml3d element, if no hit occured.
-     *
+     * @param {MouseEvent} event  The original event
+     * @param {object}     opt    Options
      */
-    CanvasHandler.prototype.dispatchMouseEvent = function(type, button, x, y, event, target) {
-        // init event
-        if (event === null || event === undefined) {
-            event = document.createEvent("MouseEvents");
-            event.initMouseEvent(type,
-            // canBubble, cancelable, view, detail
-            true, true, window, 0,
-            // screenX, screenY, clientX, clientY
-            0, 0, x, y,
-            // ctrl, alt, shift, meta, button
-            false, false, false, false, button,
-            // relatedTarget
-            null);
-        }
+    CanvasHandler.prototype.dispatchMouseEvent = function(event, target, opt) {
+        opt = opt || {};
+        target = target || this.xml3dElem;
+        var x = opt.x !== undefined ? opt.x : event.clientX;
+        var y = opt.y !== undefined ? opt.y : event.clientY;
+        var noCopy = opt.noCopy || false;
 
         // Copy event to avoid DOM dispatch errors (cannot dispatch event more
         // than once)
-        var evt = this.copyMouseEvent(event);
-        this.initExtendedMouseEvent(evt, x, y);
+        event = noCopy ? event : this.copyMouseEvent(event);
+        this.initExtendedMouseEvent(event, x, y);
 
         // find event target
-        var tar = this.xml3dElem; // Default is to dispace on xml3d element
+        /*var tar = this.xml3dElem; // Default is to dispace on xml3d element
         if (target !== undefined && target !== null)
             tar = target;
         else if (this.currentPickObj)
-            tar = this.currentPickObj.meshAdapter.node;
+            tar = this.currentPickObj.meshAdapter.node;*/
 
-        tar.dispatchEvent(evt);
+        target.dispatchEvent(event);
     };
 
     /**
@@ -399,7 +370,28 @@ XML3D.webgl.MAXFPS = 30;
         return evt;
     };
 
-    /**
+    CanvasHandler.prototype.createMouseEvent = function(type, opts) {
+        opts = opts || {};
+        var event = document.createEvent("MouseEvents");
+        event.initMouseEvent(type,
+            opts.canBubble !== undefined ? opts.canBubble : true,
+            opts.cancelable !== undefined ? opts.cancelable : true,
+            opts.view || window,
+            opts.detail != undefined ? opts.detail : 0,
+            opts.screenX != undefined ? opts.screenX : 0,
+            opts.screenY != undefined ? opts.screenY : 0,
+            opts.clientX != undefined ? opts.clientX : 0,
+            opts.clientY != undefined ? opts.clientY : 0,
+            opts.ctrl != undefined ? opts.ctrl : false,
+            opts.alt != undefined ? opts.alt : false,
+            opts.shift != undefined ? opts.shift : false,
+            opts.meta != undefined ? opts.meta : false,
+            opts.button != undefined ? opts.button : 0,
+            opts.relatedTarget);
+            return event;
+    }
+
+        /**
      * Adds position and normal attributes to the given event.
      *
      * @param {Event} event
@@ -452,15 +444,26 @@ XML3D.webgl.MAXFPS = 30;
         }
     };
 
+    /**
+     * @param {MouseEvent} evt
+     * @param {object} opt
+     */
+    CanvasHandler.prototype.dispatchEventOnPickedObject = function(evt, opt) {
+        opt = opt || {};
+        var pos = this.getMousePosition(evt);
+
+        if(!opt.omitUpdate)
+            this.updatePickObjectByPoint(pos.x, pos.y);
+
+        var picked = this.currentPickObj;
+        this.dispatchMouseEvent(evt, picked && picked.meshAdapter.node, pos);
+    }
 
     /**
      * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.drop = function(evt) {
-        var pos = this.getMousePosition(evt);
-
-        this.updatePickObjectByPoint(pos.x, pos.y);
-        this.dispatchMouseEvent("drop", evt.button, pos.x, pos.y, evt);
+        this.dispatchEventOnPickedObject(evt);
         evt.preventDefault();
     };
 
@@ -473,47 +476,33 @@ XML3D.webgl.MAXFPS = 30;
     };
 
     /**
-     * This method is called each time a 'mouseup' event is triggered on the
-     * canvas
-     *
      * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.mouseup = function(evt) {
-        var pos = this.getMousePosition(evt);
-
-        this.updatePickObjectByPoint(pos.x, pos.y);
-        this.dispatchMouseEvent("mouseup", evt.button, pos.x, pos.y, evt);
+        this.dispatchEventOnPickedObject(evt);
     };
 
     /**
-     * This method is called each time a 'mousedown' event is triggered on the
-     * canvas
-     *
      * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.mousedown = function(evt) {
-        var pos = this.getMousePosition(evt);
-        this.updatePickObjectByPoint(pos.x, pos.y);
-
-        this.dispatchMouseEvent("mousedown", evt.button, pos.x, pos.y, evt);
+        this.dispatchEventOnPickedObject(evt);
     };
 
     /**
      * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.click = function(evt) {
-        var pos = this.getMousePosition(evt);
         // Click follows always 'mouseup' => no update of pick object needed
-        this.dispatchMouseEvent("click", evt.button, pos.x, pos.y, evt);
+        this.dispatchEventOnPickedObject(evt, { omitUpdate: true });
     };
 
     /**
      * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.dblclick = function(evt) {
-        var pos = this.getMousePosition(evt);
         // Click follows always 'mouseup' => no update of pick object needed
-        this.dispatchMouseEvent("dblclick", evt.button, pos.x, pos.y, evt);
+        this.dispatchEventOnPickedObject(evt, { omitUpdate: true });
     };
 
     /**
@@ -525,11 +514,10 @@ XML3D.webgl.MAXFPS = 30;
      *
      * @param {MouseEvent} evt
      */
-    CanvasHandler.prototype.mousemove = function(evt) {
+    CanvasHandler.prototype.mousemove = function (evt) {
         var pos = this.getMousePosition(evt);
 
-        this.updatePickObjectByPoint(pos.x, pos.y);
-        this.dispatchMouseEvent("mousemove", 0, pos.x, pos.y, evt);
+        this.dispatchEventOnPickedObject(evt);
 
         var curObj = this.currentPickObj ? this.currentPickObj.meshAdapter.node : null;
 
@@ -537,16 +525,34 @@ XML3D.webgl.MAXFPS = 30;
         if (curObj !== this.lastPickObj) {
             if (this.lastPickObj) {
                 // The mouse has left the last object
-                this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this.lastPickObj);
-                if (!curObj) // Nothing picked, this means we enter the xml3d canvas
-                    this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y, null, this.xml3dElem);
+                this.dispatchMouseEvent(this.createMouseEvent("mouseout", {
+                    clientX:pos.x,
+                    clientY:pos.y,
+                    button:evt.button
+                }), this.lastPickObj);
+                if (!curObj) { // Nothing picked, this means we enter the xml3d canvas
+                    this.dispatchMouseEvent(this.createMouseEvent("mouseover", {
+                        clientX:pos.x,
+                        clientY:pos.y,
+                        button:evt.button
+                    }), this.xml3dElem);
+                }
             }
             if (curObj) {
                 // The mouse is now over a different object, so call the new
                 // object's mouseover method
-                this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y);
-                if (!this.lastPickObj) // Nothing was picked before, this means we leave the xml3d canvas
-                    this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this.xml3dElem);
+                this.dispatchMouseEvent(this.createMouseEvent("mouseover", {
+                    clientX:pos.x,
+                    clientY:pos.y,
+                    button:evt.button
+                }), curObj);
+                if (!this.lastPickObj) { // Nothing was picked before, this means we leave the xml3d canvas
+                    this.dispatchMouseEvent(this.createMouseEvent("mouseout", {
+                        clientX:pos.x,
+                        clientY:pos.y,
+                        button:evt.button
+                    }), this.xml3dElem);
+                }
             }
 
             this.lastPickObj = curObj;
@@ -554,34 +560,28 @@ XML3D.webgl.MAXFPS = 30;
     };
 
     /**
-     * This method is called each time the mouse leaves the canvas
-     *
      * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.mouseout = function(evt) {
         var pos = this.getMousePosition(evt);
-        this.dispatchMouseEvent("mouseout", 0, pos.x, pos.y, null, this.lastPickObj);
+        this.dispatchMouseEvent(evt, this.lastPickObj, pos);
     };
 
     /**
-     * This method is called each time the mouse enters the canvas
-     *
      * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.mouseover = function(evt) {
         var pos = this.getMousePosition(evt);
-        this.dispatchMouseEvent("mouseover", 0, pos.x, pos.y, null, null);
+        this.dispatchEventOnPickedObject(evt);
     };
 
     /**
-     * This method is called each time the mouse leaves the canvas
-     *
      * @param {MouseEvent} evt
      */
     CanvasHandler.prototype.mousewheel = function(evt) {
         var pos = this.getMousePosition(evt);
         // note: mousewheel type is not W3C standard, used in WebKit!
-        this.dispatchMouseEvent("mousewheel", 0, pos.x, pos.y, evt, this.xml3dElem);
+        this.dispatchEventOnPickedObject(evt);
     };
 
     /**
@@ -589,7 +589,7 @@ XML3D.webgl.MAXFPS = 30;
      *
      * @param start
      * @param end
-     * @param numObjDrawn
+     * @param stats
      * @return
      */
     CanvasHandler.prototype.dispatchFrameDrawnEvent = function(start, end, stats) {

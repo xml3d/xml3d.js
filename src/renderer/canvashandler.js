@@ -40,14 +40,12 @@ XML3D.webgl.MAXFPS = 30;
 
     // Events
 
-    var hasTouchEvents = 'ontouchstart' in window;
     var events = {
         mouse : [ "click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "mousewheel" ],
-        drag  : [  ],
-        touch : [ "touchstart", "touchmove", "touchend", "touchcancel"]
+        drag  : [  ]
     };
 
-    events.available = events.mouse.concat(events.drag, hasTouchEvents ? events.touch : [] );
+    events.available = events.mouse.concat(events.drag);
 
     XML3D.webgl.events = events;
 
@@ -323,6 +321,7 @@ XML3D.webgl.MAXFPS = 30;
 
     /**
      * @param {MouseEvent} event  The original event
+     * @param {Element} target  target to dispatch on
      * @param {object}     opt    Options
      */
     CanvasHandler.prototype.dispatchMouseEvent = function(event, target, opt) {
@@ -336,13 +335,6 @@ XML3D.webgl.MAXFPS = 30;
         // than once)
         event = noCopy ? event : this.copyMouseEvent(event);
         this.initExtendedMouseEvent(event, x, y);
-
-        // find event target
-        /*var tar = this.xml3dElem; // Default is to dispace on xml3d element
-        if (target !== undefined && target !== null)
-            tar = target;
-        else if (this.currentPickObj)
-            tar = this.currentPickObj.meshAdapter.node;*/
 
         target.dispatchEvent(event);
     };
@@ -459,6 +451,7 @@ XML3D.webgl.MAXFPS = 30;
         this.dispatchMouseEvent(evt, picked && picked.meshAdapter.node, pos);
     }
 
+
     /**
      * @param {MouseEvent} evt
      */
@@ -488,6 +481,7 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.mousedown = function(evt) {
         this.dispatchEventOnPickedObject(evt);
     };
+
 
     /**
      * @param {MouseEvent} evt

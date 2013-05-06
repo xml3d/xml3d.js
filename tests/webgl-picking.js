@@ -140,4 +140,20 @@ test("Resizing xml3d element reinitializes buffers", 5, function() {
     equal(actual, expected, "Pick object 'pickingMesh7'");
 });
 
+test("Touch", function() {
+    if('ontouchstart' in window) {
+        console.log("Available", XML3D.webgl.events.available.indexOf("touchstart"));
+        notEqual(-1, XML3D.webgl.events.available.indexOf("touchstart"), "touchstart listeners attached");
+        notEqual(-1, XML3D.webgl.events.available.indexOf("touchend"), "touchend listeners attached");
+        notEqual(-1, XML3D.webgl.events.available.indexOf("touchmove"), "touchmove listeners attached");
+
+    } else {
+        console.log("Not Available");
+        equal(-1, XML3D.webgl.events.available.indexOf("touchstart"), "No touchstart listeners attached");
+        equal(-1, XML3D.webgl.events.available.indexOf("touchend"), "No touchend listeners attached");
+        equal(-1, XML3D.webgl.events.available.indexOf("touchmove"), "No touchmove listeners attached");
+    }
+
+
+});
 

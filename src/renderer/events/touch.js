@@ -56,14 +56,14 @@
             try {
                 touchEvent = document.createEvent('TouchEvent');
             } catch (e) {
-                console.log("Create Touch Event failed, creating UI instead");
+                XML3D.debug.logWarning("Create Touch Event failed, creating UI instead");
                 touchEvent = document.createEvent('UIEvent');
             }
 
             if (touchEvent && touchEvent.initTouchEvent) {
                 touchEvent.initTouchEvent(data.touches, data.targetTouches, data.changedTouches,
                     data.type, data.view, data.screenX, data.screenY, data.clientX, data.clientY);
-                console.log(touchEvent.type);
+                //console.log(touchEvent.type);
             }
             return touchEvent;
         },

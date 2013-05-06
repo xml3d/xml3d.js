@@ -11,7 +11,7 @@
         return;
     }
 
-    XML3D.extend(module.events.available, [ "touchstart", "touchmove", "touchend", "touchcancel"]);
+    module.events.available.push("touchstart", "touchmove", "touchend", "touchcancel");
 
     XML3D.extend(module.CanvasHandler.prototype, {
 

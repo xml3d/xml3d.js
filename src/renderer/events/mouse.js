@@ -2,7 +2,7 @@
 
     var module = XML3D.webgl;
 
-    XML3D.extend(module.events.available, [ "click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "mousewheel" ]);
+    module.events.available.push("click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "mousewheel");
 
     XML3D.extend(module.CanvasHandler.prototype, {
         /**

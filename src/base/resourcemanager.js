@@ -260,19 +260,24 @@
         var docCache = c_cachedDocuments[url];
         docCache.mimetype = mimetype;
 
+        var cleanedMimetype = mimetype;
+
+        if (mimetype.indexOf(';') > 0)
+            cleanedMimetype = mimetype.substr(0, mimetype.indexOf(';'));
+
         var response = null;
         if (req.responseType == "arraybuffer") {
             response = req.response;
-        } else if (mimetype == "application/json") {
+        } else if (cleanedMimetype == "application/json") {
             response = JSON.parse(req.responseText);
-        } else if (mimetype == "application/xml" || mimetype == "text/xml") {
+        } else if (cleanedMimetype == "application/xml" || cleanedMimetype == "text/xml") {
             response = req.responseXML;
             if (!response) {
                 XML3D.debug.logError("Invalid external XML document '" + req._url +
                     "': XML Syntax error");
                 return;
             }
-        } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
+        } else if (cleanedMimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
             XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
             response = req.response;
         } else {
@@ -280,13 +285,13 @@
             response = req.response;
         }
 
-        var formatHandler = XML3D.base.findFormat(response, req.responseType, mimetype);
+        var formatHandler = XML3D.base.findFormat(response, req.responseType, cleanedMimetype);
         if (!formatHandler) {
             XML3D.debug.logError("No format handler for resource (response = '"+response+"', responseType = '"+req.responseType+"')");
             return;
         }
         docCache.format = formatHandler;
-        docCache.response = formatHandler.getFormatData(response, req.responseType, mimetype);
+        docCache.response = formatHandler.getFormatData(response, req.responseType, cleanedMimetype);
     }
 
     /**

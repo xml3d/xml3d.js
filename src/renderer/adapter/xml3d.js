@@ -3,7 +3,7 @@
     var XML3DRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.factory = factory;
-        this.processListeners();
+        this.initializeEventAttributes(["load"]);
     };
     XML3D.createClass(XML3DRenderAdapter, XML3D.webgl.RenderAdapter);
 
@@ -18,25 +18,6 @@
 
         if (target == "activeView") {
             this.factory.renderer.activeViewChanged();
-        }
-    };
-
-    XML3DRenderAdapter.prototype.processListeners = function() {
-        var attributes = this.node.attributes;
-        for ( var index in attributes) {
-            var att = attributes[index];
-            if (!att.name)
-                continue;
-
-            var type = att.name;
-            if (type.match(/onmouse/) || type == "onclick" || type == "ondblclick") {
-                var eventType = type.substring(2);
-                this.node.addEventListener(eventType, new Function("evt", att.value), false);
-            }
-            if (type == "onload") {
-                var eventType = type.substring(2);
-                this.node.addEventListener(eventType, new Function("evt", att.value), false);
-            }
         }
     };
 

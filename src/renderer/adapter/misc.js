@@ -21,6 +21,28 @@
         return transform;
     };
 
+    /**
+     * @param {Array.<string>} customAttributes
+     */
+    XML3D.webgl.RenderAdapter.prototype.initializeEventAttributes = function(customAttributes) {
+        var attributes = this.node.attributes;
+        customAttributes = customAttributes || [];
+
+        for (var index in attributes) {
+            var att = attributes[index];
+            if (!att.name)
+                continue;
+
+            var type = att.name;
+            if (type.substring(2,0) == "on")  {
+                var eventType = type.substring(2);
+                if (XML3D.webgl.events.available.indexOf(eventType) != -1 || customAttributes.indexOf(eventType) != -1) {
+                    this.node.addEventListener(eventType, new Function("event", att.value), false);
+                }
+            }
+        }
+    };
+
 
     //Adapter for <defs>
     XML3D.webgl.DefsRenderAdapter = function(factory, node) {

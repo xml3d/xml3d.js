@@ -9,6 +9,8 @@
         <file name="base.js" />
         <file name="datachangelistener.js" />
         <file name="canvashandler.js" />
+        <file name="events/touch.js" />
+        <file name="events/mouse.js" />
         <file name="utils.js" />
         <file name="shadermanager.js" />
         <file name="material.js" />

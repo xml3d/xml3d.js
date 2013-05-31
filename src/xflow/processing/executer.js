@@ -98,7 +98,7 @@
 
     function canOperatorMerge(cData, operator){
         // TODO: Detect merge support
-        return !cData.firstOperator || false;
+        return !cData.firstOperator || (cData.firstOperator.evaluate_core && operator.evaluate_core);
     }
 
     function blockSubtree(cData, node){
@@ -170,8 +170,8 @@
                 // it's transfer input
                 var outputIndex = getOperatorOutputIndex(channel.creatorProcessNode, channel);
                 entry.setTransferInput(j, operatorIndex, outputIndex);
-                if(!executer.operatorList[operatorIndex].isFinalOutput(outputIndex))
-                    executer.operatorList[operatorIndex].setTransferOutput(outputIndex);
+                if(!executer.operatorList.entries[operatorIndex].isFinalOutput(outputIndex))
+                    executer.operatorList.entries[operatorIndex].setTransferOutput(outputIndex);
                 continue;
             }
 

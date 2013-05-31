@@ -301,6 +301,9 @@
     var c_program_cache = {};
 
     Xflow.createProgram = function(operatorList){
+        if(operatorList.entries.length == 0)
+            return null;
+
         var key = operatorList.getKey();
         if(!c_program_cache[key]){
             if(operatorList.entries.length == 1)

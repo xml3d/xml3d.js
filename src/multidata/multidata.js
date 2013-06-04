@@ -78,6 +78,9 @@ XML3D.base.SubData = function(xflowNode){
     this.postCompute = null;
     this.postFilter = null;
     this.postAdd = [];
+    this.shader = null;
+    this.transform = null;
+    this.isMeshData = false;
 
     this.multiDataParent = null;
 };
@@ -86,7 +89,6 @@ XML3D.base.SubData.prototype.setName = function(name){
     this.name = name;
     invalidateParent(this);
 }
-
 
 XML3D.base.SubData.prototype.setPostProto = function(postProto){
     this.postProto = postProto;
@@ -108,34 +110,25 @@ XML3D.base.SubData.prototype.setPostAdd = function(postAdd){
     invalidateParent(this);
 }
 
-function invalidateParent(subData){
-    if(!subData.multiDataParent){
-        invalidateMultiData(subData.multiDataParent);
-    }
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-// XML3D.base.MeshData
-//----------------------------------------------------------------------------------------------------------------------
-
-XML3D.base.MeshData = function(){
-    XML3D.base.SubData.call(this);
-    this.shader = null;
-    this.transform = null;
-};
-XML3D.createClass(XML3D.base.MeshData, XML3D.base.SubData);
-
-
-XML3D.base.MeshData.prototype.isMeshData = true;
-
-XML3D.base.MeshData.prototype.setShader = function(shader){
+XML3D.base.SubData.prototype.setShader = function(shader){
     this.shader = shader;
     invalidateParent(this);
 }
 
-XML3D.base.MeshData.prototype.setTransform = function(transform){
+XML3D.base.SubData.prototype.setTransform = function(transform){
     this.transform = transform;
     invalidateParent(this);
+}
+
+XML3D.base.SubData.prototype.setMeshData = function(meshData){
+    this.isMeshData = meshData;
+    invalidateParent(this);
+}
+
+function invalidateParent(subData){
+    if(!subData.multiDataParent){
+        invalidateMultiData(subData.multiDataParent);
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -147,6 +140,50 @@ XML3D.base.MultiDataTable = function(multiData){
     constructMultiDataTable(this, multiData.srcMultiData, multiData.children);
 }
 
+
+XML3D.base.MultiDataTable.prototype.getMeshDataSets = function(){
+    var result = [];
+    for(var name in this.entries){
+        var entry = this.entries[name];
+        if(entry.isMeshData){
+            updateAccumulatedNode(this, entry);
+            result.push({
+                xflowNode: entry.accumulatedXflowNode,
+                shader: entry.shader
+            });
+        }
+    }
+    return result;
+}
+
+function updateAccumulatedNode(table, entry){
+    if(entry.accumulatedXflowNode)
+        return;
+    var dataNode = XML3D.data.xflowGraph.createDataNode(false);
+    for(var i = 0; i < entry.postAdd.length; ++i){
+        var addEntry = table.entries[entry.postAdd[i]];
+        updateAccumulatedNode(table, addEntry);
+        dataNode.appendChild(addEntry.accumulatedXflowNode);
+    }
+    for(var i = 0; i < entry.postQueue.length; ++i){
+        if(entry.postQueue[i].xflowNode)
+            dataNode.appendChild(entry.postQueue[i].xflowNode);
+    }
+    var node = dataNode, parentNode = null;
+    for(var i = 0; i < entry.postQueue.length; ++i){
+        var postEntry = entry.postQueue[i];
+        if(!node) node = XML3D.data.xflowGraph.createDataNode(false);
+        node.setCompute(postEntry.compute);
+        node.setFilter(postEntry.filter);
+        node.protoNode = postEntry.proto;
+        if(parentNode) parentNode.appendChild(node);
+        parentNode = node;
+        node = null;
+    }
+    entry.accumulatedXflowNode = parentNode;
+}
+
+
 function constructMultiDataTable(table, srcData, children){
     copySrcTable(table, srcData.getMultiDataTable());
     for(var i = 0; i < children.length; ++i){
@@ -156,8 +193,6 @@ function constructMultiDataTable(table, srcData, children){
             this.entries[name] = new MultiDataTableEntry();
         var entry = this.entries[name];
         entry.pushPostEntry(child);
-
-        if(child.xflowNode) entry.xflowNode = child.xflowNode;
 
         child.isMeshData = entry.isMeshData || child.isMeshData;
         if(child.shader) entry.shader = child.shader;
@@ -175,12 +210,13 @@ function copySrcTable(table, srcTable){
 
 function MultiDataTableEntry (srcEntry){
     this.isMeshData = srcEntry && srcEntry.isMeshData || false;
-    this.xflowNode = srcEntry && srcEntry.xflowNode || null;
 
     this.postAdd = srcEntry && srcEntry.postAdd.slice(0) || [];
     this.postQueue = srcEntry && srcEntry.postQueue.slice(0) || [];
     this.shader = srcEntry && srcEntry.shader || null;
     this.transform = srcEntry && srcEntry.transform || null;
+
+    this.accumulatedXflowNode = null;
 
 }
 
@@ -188,7 +224,8 @@ MultiDataTableEntry.prototype.pushPostEntry = function(subData){
     this.postQueue.push({
         proto: subData.postProto,
         compute: subData.postCompute,
-        filter: subData.postFilter
+        filter: subData.postFilter,
+        xflowNode: subData.xflowNode
     });
     Xflow.utils.setAdd(this.postAdd, subData.postAdd);
 }

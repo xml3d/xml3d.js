@@ -1,5 +1,9 @@
 (function() {
 
+    /**
+     * Types of change events
+     * @enum {number}
+     */
   var events = {
           NODE_INSERTED: 0,
           VALUE_MODIFIED:  1,

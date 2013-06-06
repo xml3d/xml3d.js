@@ -1,4 +1,4 @@
-(function() {
+(function(XML3D) {
 
 
 //-----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ XML3D.base.Adapter.prototype.clearAdapterHandles = function(){
 * Get the connected AdapterHandle of a certain key.
 * This will only return AdapterHandles previously added via connectAdapterHandle
 * @param {string} key
-* @return {XML3D.base.AdapterHandle=} the adapter of that key, or null if not available
+* @return {?XML3D.base.AdapterHandle} the adapter of that key, or null if not available
 */
 XML3D.base.Adapter.prototype.getConnectedAdapterHandle = function(key){
     return this.connectedAdapterHandles && this.connectedAdapterHandles[key];
@@ -78,7 +78,7 @@ XML3D.base.Adapter.prototype.getConnectedAdapterHandle = function(key){
  * Get the connected adapter of a certain key.
  * This will only return adapters of AdapterHandles previously added via connectAdapter
  * @param {string} key
- * @return {XML3D.base.Adapter=} the adapter of that key, or null if not available
+ * @return {?XML3D.base.Adapter} the adapter of that key, or null if not available
  */
 XML3D.base.Adapter.prototype.getConnectedAdapter = function(key){
     var handle = this.getConnectedAdapterHandle(key);
@@ -137,7 +137,7 @@ XML3D.base.NodeAdapter.prototype.notifyChanged = function(e) {
 };
 
 /**
- * @param {string,XML3D.URI} uri Uri to referred adapterHandle
+ * @param {string|XML3D.URI} uri Uri to referred adapterHandle
  * @returns an AdapterHandle to the referred Adapter of the same aspect and canvasId
  */
 XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri){
@@ -146,7 +146,7 @@ XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri){
 };
 /**
  * notifies all adapter that refer to this adapter through AdapterHandles.
- * @param {number,string} hint with type of change
+ * @param {number} type The type of change
  */
 XML3D.base.NodeAdapter.prototype.notifyOppositeAdapters = function(type){
     type = type || XML3D.events.ADAPTER_HANDLE_CHANGED;
@@ -162,7 +162,6 @@ XML3D.base.IFactory = function() {};
 
 /** @type {string} */
 XML3D.base.IFactory.prototype.aspect;
-XML3D.base.IFactory.prototype.canvasId;
 
 
 /**
@@ -186,7 +185,7 @@ XML3D.base.AdapterFactory = function(aspect, mimetypes, canvasId) {
  * Implemented by subclass
  * Create adapter from an object (node in case of an xml, and object in case of json)
  * @param {object} obj
- * @returns {XML3D.base.Adapter=} created adapter or null if no adapter can be created
+ * @returns {?XML3D.base.Adapter} created adapter or null if no adapter can be created
  */
 XML3D.base.AdapterFactory.prototype.createAdapter = function(obj) {
     return null;
@@ -297,4 +296,4 @@ XML3D.base.sendAdapterEvent = function(node, events) {
 
 
 
-}());
+}(window.XML3D));

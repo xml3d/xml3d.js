@@ -425,7 +425,7 @@
      * @param {XML3D.URI} uri - The URI used to find the referred AdapterHandle. Can be relative
      * @param {Object} adapterType The type of adapter required (e.g. XML3D.data or XML3D.webgl)
      * @param {number} canvasId Id of canvashandle this adapter depends on, 0 if not depending on any canvashandler
-     * @returns {XML3D.base.AdapterHandle=} The requested AdapterHandler. Note: might not contain any adapter.
+     * @returns {?XML3D.base.AdapterHandle} The requested AdapterHandler. Note: might be null
      */
     ResourceManager.prototype.getAdapterHandle = function(document, uri, adapterType, canvasId) {
         if(!uri)
@@ -540,6 +540,8 @@
      * Load data via XMLHttpRequest
      * @private
      * @param {string} url URL of the document
+     * @param {function(object)} loadListener Gets the response of the XHR
+     * @param {function(XMLHttpRequest)} errorListener Get the XHR object for further analyzis
      */
     ResourceManager.prototype.loadData = function(url, loadListener, errorListener) {
         var xmlHttp = null;
@@ -633,9 +635,9 @@
      * This function is called to load an Image.
      *
      * @param {string} uri Image URI
-     * @param {function} loadListener Function called when image was successfully loaded.
+     * @param {function(Event, HTMLImageElement)} loadListener Function called when image was successfully loaded.
      *                                It will be called with event as the first and image as the second parameter.
-     * @param {function} errorListener Function called when image could not be loaded.
+     * @param {function(Event, HTMLImageElement)} errorListener Function called when image could not be loaded.
      *                                 It will be called with event as the first and image as the second parameter.
      * @return {HTMLImageElement}
      */

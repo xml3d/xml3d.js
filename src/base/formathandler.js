@@ -79,12 +79,10 @@
         return null;
     }
 
-    // Export
-    XML3D.base.FormatHandler = FormatHandler;
-
     /**
      * XMLFormatHandler supports all XML and HTML-based documents.
      * @constructor
+     * @extends FormatHandler
      */
     var XMLFormatHandler = function() {
         FormatHandler.call(this);
@@ -104,10 +102,11 @@
     }
 
 
-
-    // Export
-    XML3D.base.XMLFormatHandler = XMLFormatHandler;
-
+    /**
+     *
+     * @constructor
+     * @extends FormatHandler
+     */
     var XML3DFormatHandler = function() {
         XMLFormatHandler.call(this);
     }
@@ -129,11 +128,10 @@
         return response;
     }
 
-    // Export
-    XML3D.base.XML3DFormatHandler = XML3DFormatHandler;
-    XML3D.base.xml3dFormatHandler = new XML3DFormatHandler();
-    XML3D.base.registerFormat(XML3D.base.xml3dFormatHandler);
-
+    /**
+     * @constructor
+     * @extends FormatHandler
+     */
     var JSONFormatHandler = function() {
         FormatHandler.call(this);
     }
@@ -147,15 +145,23 @@
         return response;
     }
 
-    // Export
-    XML3D.base.JSONFormatHandler = JSONFormatHandler;
-
+    /**
+     * @constructor
+     * @extends FormatHandler
+     */
     var BinaryFormatHandler = function() {
         FormatHandler.call(this);
     }
     XML3D.createClass(BinaryFormatHandler, FormatHandler);
 
-    // Export
+    // Exports
+    XML3D.base.JSONFormatHandler = JSONFormatHandler;
     XML3D.base.BinaryFormatHandler = BinaryFormatHandler;
+    XML3D.base.XMLFormatHandler = XMLFormatHandler;
+    XML3D.base.XML3DFormatHandler = XML3DFormatHandler;
+    XML3D.base.xml3dFormatHandler = new XML3DFormatHandler();
+    XML3D.base.FormatHandler = FormatHandler;
+
+    XML3D.base.registerFormat(XML3D.base.xml3dFormatHandler);
 
 }());

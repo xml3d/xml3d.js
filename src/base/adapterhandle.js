@@ -1,5 +1,7 @@
 (function() {
 
+    "use strict";
+
     /**
      * An adapter handle is a connection piece for an adapter that is referred through a uri (e.g. id reference)
      * AdapterHandles are always fetched from the XML3D.base.resourceManager

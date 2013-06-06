@@ -422,21 +422,21 @@
      * This function will trigger the loading of documents, if required.
      * An AdapterHandle will be always be returned, expect when an invalid (empty) uri is passed.
      *
-     * @param {Document} document - the document from which to look up the reference
+     * @param {Document} baseDocument - the document from which to look up the reference
      * @param {XML3D.URI} uri - The URI used to find the referred AdapterHandle. Can be relative
      * @param {Object} adapterType The type of adapter required (e.g. XML3D.data or XML3D.webgl)
      * @param {number} canvasId Id of canvashandle this adapter depends on, 0 if not depending on any canvashandler
      * @returns {?XML3D.base.AdapterHandle} The requested AdapterHandler. Note: might be null
      */
-    ResourceManager.prototype.getAdapterHandle = function(document, uri, adapterType, canvasId) {
+    ResourceManager.prototype.getAdapterHandle = function(baseDocument, uri, adapterType, canvasId) {
         if (!uri)
             return null;
 
         if (typeof uri == "string") uri = new XML3D.URI(uri);
 
         canvasId = canvasId || 0;
-        if (document != document || !uri.isLocal()) {
-            uri = uri.getAbsoluteURI(document.documentURI);
+        if (baseDocument != document || !uri.isLocal()) {
+            uri = uri.getAbsoluteURI(baseDocument.documentURI);
         }
 
         if (!c_cachedAdapterHandles[uri])

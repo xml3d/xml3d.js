@@ -217,8 +217,11 @@
                         XML3D.xmlHttpCallback && XML3D.xmlHttpCallback(xmlHttp);
                         processResponse(xmlHttp);
                     }
-                    else
-                        showError(xmlHttp);
+                    else {
+                        XML3D.debug.logError("Could not load external document '" + xmlHttp._url +
+                            "': " + xmlHttp.status + " - " + xmlHttp.statusText);
+                        invalidateDocumentHandles(xmlHttp._url);
+                    }
                 }
             };
             xmlHttp.send(null);
@@ -234,16 +237,6 @@
         var mimetype = httpRequest.getResponseHeader("content-type");
         setDocumentData(httpRequest, httpRequest._url, mimetype);
         updateDocumentHandles(httpRequest._url);
-    };
-
-    /**
-     * Show errors of ajax request from loadDocument()
-     * @param {XMLHttpRequest} httpRequest
-     */
-    function showError(httpRequest) {
-        XML3D.debug.logError("Could not load external document '" + httpRequest._url +
-            "': " + httpRequest.status + " - " + httpRequest.statusText);
-        invalidateDocumentHandles(httpRequest._url);
     };
 
     /**

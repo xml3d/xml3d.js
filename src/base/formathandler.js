@@ -23,7 +23,7 @@
 
     FormatHandler.prototype.getFactory = function(aspect, canvasId) {
         canvasId = canvasId || 0;
-        var key = aspect+"_"+canvasId;
+        var key = aspect + "_" + canvasId;
         var factory = this.factoryCache[key];
         if (!factory) {
             var factoryClass = this.getFactoryClassByAspect(aspect);
@@ -98,7 +98,7 @@
     }
 
     XMLFormatHandler.prototype.getFragmentData = function(documentData, fragment) {
-        return documentData.querySelectorAll("*[id="+fragment+"]")[0];
+        return documentData.querySelectorAll("*[id=" + fragment + "]")[0];
     }
 
 
@@ -121,7 +121,7 @@
     XML3DFormatHandler.prototype.getFormatData = function(response, responseType) {
         // Configure all xml3d elements:
         var xml3dElements = response.querySelectorAll("xml3d");
-        for(var i = 0; i < xml3dElements.length; ++i) {
+        for (var i = 0; i < xml3dElements.length; ++i) {
             XML3D.config.element(xml3dElements[i]);
         }
 

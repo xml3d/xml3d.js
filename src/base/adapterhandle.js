@@ -53,7 +53,7 @@
      * This function is called to notify all listeners of this AdapterHandle about some change.
      * @param {number} type A type number with the type of change (usually XML3D.events.ADAPTER_HANDLE_CHANGED)
      */
-    AdapterHandle.prototype.notifyListeners = function(type){
+    AdapterHandle.prototype.notifyListeners = function(type) {
         var event = new XML3D.events.AdapterHandleNotification(this, type);
         var i = this.listeners.length;
         while (i--) {

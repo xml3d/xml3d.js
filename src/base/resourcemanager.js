@@ -16,7 +16,7 @@
      */
     XML3D.base.registerFactory = function(factory) {
         var canvasId = factory.canvasId;
-        if(!c_factories[canvasId])
+        if (!c_factories[canvasId])
             c_factories[canvasId] = [];
         c_factories[canvasId].push(factory);
     };
@@ -39,7 +39,8 @@
     /**
      * @constructor
      */
-    var ResourceManager = function() {};
+    var ResourceManager = function() {
+    };
 
     function getCounterObject(canvasId) {
         return c_canvasIdCounters[canvasId];
@@ -48,7 +49,7 @@
     function getOrCreateCounterObject(canvasId) {
         var counterObject = c_canvasIdCounters[canvasId];
         if (!counterObject) {
-            counterObject = {counter: 0, listeners : new Array()};
+            counterObject = {counter: 0, listeners: new Array()};
             c_canvasIdCounters[canvasId] = counterObject;
         }
         return counterObject;
@@ -111,12 +112,12 @@
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
-    ResourceManager.prototype.addBinaryContentType = function (type) {
+    ResourceManager.prototype.addBinaryContentType = function(type) {
         if (c_binaryContentTypes.indexOf(type) == -1)
             c_binaryContentTypes.push(type);
     };
 
-    ResourceManager.prototype.removeBinaryContentType = function (type) {
+    ResourceManager.prototype.removeBinaryContentType = function(type) {
         var idx = c_binaryContentTypes.indexOf(type);
         if (idx != -1)
             c_binaryContentTypes.splice(idx, 1);
@@ -175,7 +176,7 @@
                 // check compatibility between content and request mode
                 if (!xmlHttp._contentChecked &&
                     // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
-                    ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 ||xmlHttp.readyState == 4) &&
+                    ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 || xmlHttp.readyState == 4) &&
                         xmlHttp.status == 200)) {
                     xmlHttp._contentChecked = true; // we check only once
                     // check if we need to change request mode
@@ -212,7 +213,7 @@
                 }
                 // Request mode and content type are compatible here (both binary or both text)
                 if (xmlHttp.readyState == 4) {
-                    if(xmlHttp.status == 200){
+                    if (xmlHttp.status == 200) {
                         XML3D.debug.logDebug("Loaded: " + xmlHttp._url);
                         XML3D.xmlHttpCallback && XML3D.xmlHttpCallback(xmlHttp);
                         processResponse(xmlHttp);
@@ -268,16 +269,16 @@
                 return;
             }
         } else if (cleanedMimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
-            XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
+            XML3D.debug.logError("Possibly wrong loading of resource " + url + ". Mimetype is " + mimetype + " but response is not an ArrayBuffer");
             response = httpRequest.response;
         } else {
-            XML3D.debug.logError("Unidentified response type (response = '"+httpRequest.response+"', responseType = '"+httpRequest.responseType+"')");
+            XML3D.debug.logError("Unidentified response type (response = '" + httpRequest.response + "', responseType = '" + httpRequest.responseType + "')");
             response = httpRequest.response;
         }
 
         var formatHandler = XML3D.base.findFormat(response, httpRequest.responseType, cleanedMimetype);
         if (!formatHandler) {
-            XML3D.debug.logError("No format handler for resource (response = '"+response+"', responseType = '"+httpRequest.responseType+"')");
+            XML3D.debug.logError("No format handler for resource (response = '" + response + "', responseType = '" + httpRequest.responseType + "')");
             return;
         }
         docCache.format = formatHandler;
@@ -288,11 +289,11 @@
      * Update all existing handles of a received document
      * @param {string} url The URL of the document
      */
-    function updateDocumentHandles(url){
+    function updateDocumentHandles(url) {
         var docCache = c_cachedDocuments[url];
         var fragments = docCache.fragments;
         docCache.fragments = [];
-        for ( var i = 0; i < fragments.length; ++i) {
+        for (var i = 0; i < fragments.length; ++i) {
             updateExternalHandles(url, fragments[i]);
         }
     }
@@ -301,11 +302,11 @@
      * Invalidate all handles of a document, that could not be loaded.
      * @param {string} url The URL of the document
      */
-    function invalidateDocumentHandles(url){
+    function invalidateDocumentHandles(url) {
         var docCache = c_cachedDocuments[url];
         var fragments = docCache.fragments;
         docCache.fragments = [];
-        for ( var i = 0; i < fragments.length; ++i) {
+        for (var i = 0; i < fragments.length; ++i) {
             var fullUrl = url + (fragments[i] ? "#" + fragments[i] : "");
             invalidateHandles(fullUrl);
         }
@@ -335,7 +336,7 @@
         if (data) {
             updateMissingHandles(fullUrl, format, data);
         }
-        else{
+        else {
             invalidateHandles(fullUrl);
         }
     }
@@ -347,9 +348,9 @@
      * @param {FormatHandler} formatHandler Format handler
      * @param {Object} data Data of the document corresponding to the url. Possibily a DOM element
      */
-    function updateMissingHandles(url, formatHandler, data){
-        for ( var adapterType in c_cachedAdapterHandles[url]) {
-            for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
+    function updateMissingHandles(url, formatHandler, data) {
+        for (var adapterType in c_cachedAdapterHandles[url]) {
+            for (var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (!handle.hasAdapter()) {
                     updateHandle(handle, adapterType, canvasId, formatHandler, data);
@@ -363,9 +364,9 @@
      * Invalidate all AdapterHandles without adapters of a certain url
      * @param {string} url The complete url + fragment
      */
-    function invalidateHandles(url){
-        for ( var adapterType in c_cachedAdapterHandles[url]) {
-            for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
+    function invalidateHandles(url) {
+        for (var adapterType in c_cachedAdapterHandles[url]) {
+            for (var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
                 loadComplete(canvasId, url);
@@ -383,7 +384,7 @@
      * @param {FormatHandler} format Format handler of the corresponding document
      * @param {Object} data Data for this handle. Possibily a DOM element
      */
-    function updateHandle(handle, adapterType, canvasId, format, data){
+    function updateHandle(handle, adapterType, canvasId, format, data) {
 
         var factory = format.getFactory(adapterType, canvasId);
 
@@ -405,9 +406,9 @@
      * This is called e.g. when a node is remove from the document, or an id changes
      * @param {string} url The URL of all AdapterHandles to be cleared.
      */
-    function clearHandles(url){
-        for ( var adapterType in c_cachedAdapterHandles[url]) {
-            for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
+    function clearHandles(url) {
+        for (var adapterType in c_cachedAdapterHandles[url]) {
+            for (var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (handle.hasAdapter()) {
                     handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
@@ -428,20 +429,20 @@
      * @returns {?XML3D.base.AdapterHandle} The requested AdapterHandler. Note: might be null
      */
     ResourceManager.prototype.getAdapterHandle = function(document, uri, adapterType, canvasId) {
-        if(!uri)
+        if (!uri)
             return null;
 
-        if(typeof uri == "string") uri = new XML3D.URI(uri);
+        if (typeof uri == "string") uri = new XML3D.URI(uri);
 
         canvasId = canvasId || 0;
-        if(document != document || !uri.isLocal()){
+        if (document != document || !uri.isLocal()) {
             uri = uri.getAbsoluteURI(document.documentURI);
         }
 
         if (!c_cachedAdapterHandles[uri])
             c_cachedAdapterHandles[uri] = {};
 
-        if(!c_cachedAdapterHandles[uri][adapterType]){
+        if (!c_cachedAdapterHandles[uri][adapterType]) {
             c_cachedAdapterHandles[uri][adapterType] = {};
         }
 
@@ -452,9 +453,9 @@
         var handle = new XML3D.base.AdapterHandle(uri);
         c_cachedAdapterHandles[uri][adapterType][canvasId] = handle;
 
-        if(uri.isLocal()){
+        if (uri.isLocal()) {
             var node = XML3D.URIResolver.resolveLocal(uri);
-            if(node)
+            if (node)
                 updateHandle(handle, adapterType, canvasId, XML3D.base.xml3dFormatHandler, node);
             else
                 handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
@@ -471,7 +472,7 @@
                 if (!docData) {
                     loadDocument(docURI);
                     c_cachedDocuments[docURI] = docData = {
-                        fragments : []
+                        fragments: []
                     };
                 }
                 docData.fragments.push(uri.fragment);
@@ -488,9 +489,9 @@
      * @param canvasId
      * @return {XML3D.base.Adapter?}
      */
-    ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId){
+    ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId) {
         var factory = XML3D.base.xml3dFormatHandler.getFactory(adapterType, canvasId);
-        if(factory){
+        if (factory) {
             return factory.getAdapter(node);
         }
         return null;
@@ -503,17 +504,17 @@
      * @param {string} previousId Previous id of element
      * @param {string} newId New id of element
      */
-    ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId){
+    ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId) {
         var parent = node;
-        while(parent.parentNode) parent = parent.parentNode;
-        if(parent != window.document)
+        while (parent.parentNode) parent = parent.parentNode;
+        if (parent != window.document)
             return;
 
         // clear cached adapters of previous id"
-        if(previousId){
+        if (previousId) {
             clearHandles("#" + previousId);
         }
-        if(newId){
+        if (newId) {
             updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node);
         }
     }
@@ -526,11 +527,11 @@
      * @param {number} canvasId CanvasHandler id of AdapterHandler, 0 if not depending on CanvasHandler
      * @param {number} type Type of Notification. Usually XML3D.events.ADAPTER_HANDLE_CHANGED
      */
-    ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterType, canvasId, type){
+    ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterType, canvasId, type) {
         canvasId = canvasId || 0;
         var uri = "#" + element.id;
-        if( c_cachedAdapterHandles[uri] && c_cachedAdapterHandles[uri][adapterType] &&
-            c_cachedAdapterHandles[uri][adapterType][canvasId] ){
+        if (c_cachedAdapterHandles[uri] && c_cachedAdapterHandles[uri][adapterType] &&
+            c_cachedAdapterHandles[uri][adapterType][canvasId]) {
             c_cachedAdapterHandles[uri][adapterType][canvasId].notifyListeners(type);
         }
     }
@@ -563,7 +564,7 @@
                 // check compatibility between content and request mode
                 if (!xmlHttp._contentChecked &&
                     // 2 - HEADERS_RECEIVED, 3 - LOADING, 4 - DONE
-                    ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 ||xmlHttp.readyState == 4) &&
+                    ((xmlHttp.readyState == 2 || xmlHttp.readyState == 3 || xmlHttp.readyState == 4) &&
                         xmlHttp.status == 200)) {
                     xmlHttp._contentChecked = true; // we check only once
                     // check if we need to change request mode
@@ -600,7 +601,7 @@
                 }
                 // Request mode and content type are compatible here (both binary or both text)
                 if (xmlHttp.readyState == 4) {
-                    if(xmlHttp.status == 200) {
+                    if (xmlHttp.status == 200) {
                         XML3D.debug.logDebug("Loaded: " + xmlHttp._url);
 
                         var mimetype = xmlHttp.getResponseHeader("content-type");
@@ -613,7 +614,7 @@
                         } else if (mimetype == "application/xml" || mimetype == "text/xml") {
                             response = xmlHttp.responseXML;
                         } else if (mimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
-                            XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
+                            XML3D.debug.logError("Possibly wrong loading of resource " + url + ". Mimetype is " + mimetype + " but response is not an ArrayBuffer");
                             response = xmlHttp.responseText; // FIXME is this correct ?
                         }
                         if (loadListener)

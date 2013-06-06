@@ -7,6 +7,9 @@
     var c_canvasIdCounters = {};
     var c_formatHandlers = [];
 
+    var c_binaryContentTypes = ["application/octet-stream", "text/plain; charset=x-user-defined"];
+    var c_binaryExtensions = [".bin", ".bson"];
+
     /**
      * Register a factory with the resource manager
      * @param {XML3D.base.AdapterFactory} factory - the factory to be registered
@@ -37,10 +40,6 @@
      * @constructor
      */
     var ResourceManager = function() {};
-
-    ResourceManager.prototype.getCanvasIdCounters = function () {
-        return c_canvasIdCounters;
-    };
 
     function getCounterObject(canvasId) {
         return c_canvasIdCounters[canvasId];
@@ -107,27 +106,25 @@
         }
     };
 
-    var binaryContentTypes = ["application/octet-stream", "text/plain; charset=x-user-defined"];
-    var binaryExtensions = [".bin", ".bson"];
 
-    function endsWith(str, suffix) {
+    function stringEndsWithSuffix(str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
     ResourceManager.prototype.addBinaryContentType = function (type) {
-        if (binaryContentTypes.indexOf(type) == -1)
-            binaryContentTypes.push(type);
+        if (c_binaryContentTypes.indexOf(type) == -1)
+            c_binaryContentTypes.push(type);
     };
 
     ResourceManager.prototype.removeBinaryContentType = function (type) {
-        var idx = binaryContentTypes.indexOf(type);
+        var idx = c_binaryContentTypes.indexOf(type);
         if (idx != -1)
-            binaryContentTypes.splice(idx, 1);
+            c_binaryContentTypes.splice(idx, 1);
     };
 
     function isBinaryContentType(contentType) {
-        for (var i in binaryContentTypes) {
-            if (contentType == binaryContentTypes[i]) {
+        for (var i in c_binaryContentTypes) {
+            if (contentType == c_binaryContentTypes[i]) {
                 return true;
             }
         }
@@ -135,19 +132,19 @@
     }
 
     ResourceManager.prototype.addBinaryExtension = function(extension) {
-        if (binaryExtensions.indexOf(extension) == -1)
-            binaryExtensions.push(extension);
+        if (c_binaryExtensions.indexOf(extension) == -1)
+            c_binaryExtensions.push(extension);
     };
 
     ResourceManager.prototype.removeBinaryExtension = function(extension) {
-        var idx = binaryExtensions.indexOf(extension);
+        var idx = c_binaryExtensions.indexOf(extension);
         if (idx != -1)
-            binaryExtensions.splice(idx, 1);
+            c_binaryExtensions.splice(idx, 1);
     };
 
     function isBinaryExtension(url) {
-        for (var i in binaryExtensions) {
-            if (endsWith(url, binaryExtensions[i]))
+        for (var i in c_binaryExtensions) {
+            if (stringEndsWithSuffix(url, c_binaryExtensions[i]))
                 return true;
         }
         return false;

@@ -228,32 +228,32 @@
     /**
      * Process response of ajax request from loadDocument()
      * @private
-     * @param {XMLHttpRequest} req
+     * @param {XMLHttpRequest} httpRequest
      */
-    function processResponse(req) {
-        var mimetype = req.getResponseHeader("content-type");
-        setDocumentData(req, req._url, mimetype);
-        updateDocumentHandles(req._url);
+    function processResponse(httpRequest) {
+        var mimetype = httpRequest.getResponseHeader("content-type");
+        setDocumentData(httpRequest, httpRequest._url, mimetype);
+        updateDocumentHandles(httpRequest._url);
     };
 
     /**
      * Show errors of ajax request from loadDocument()
-     * @param {XMLHttpRequest} req
+     * @param {XMLHttpRequest} httpRequest
      */
-    function showError(req) {
-        XML3D.debug.logError("Could not load external document '" + req._url +
-            "': " + req.status + " - " + req.statusText);
-        invalidateDocumentHandles(req._url);
+    function showError(httpRequest) {
+        XML3D.debug.logError("Could not load external document '" + httpRequest._url +
+            "': " + httpRequest.status + " - " + httpRequest.statusText);
+        invalidateDocumentHandles(httpRequest._url);
     };
 
     /**
      * Initialize data of a received document
      * @private
-     * @param {XMLHttpRequest} req The XMLHttpRequest of the loaded document
+     * @param {XMLHttpRequest} httpRequest The XMLHttpRequest of the loaded document
      * @param {string} url URL of the loaded document
      * @param {string} mimetype The mimetype of the loaded document
      */
-    function setDocumentData(req, url, mimetype) {
+    function setDocumentData(httpRequest, url, mimetype) {
         var docCache = c_cachedDocuments[url];
         docCache.mimetype = mimetype;
 
@@ -263,32 +263,32 @@
             cleanedMimetype = mimetype.substr(0, mimetype.indexOf(';'));
 
         var response = null;
-        if (req.responseType == "arraybuffer") {
-            response = req.response;
+        if (httpRequest.responseType == "arraybuffer") {
+            response = httpRequest.response;
         } else if (cleanedMimetype == "application/json") {
-            response = JSON.parse(req.responseText);
+            response = JSON.parse(httpRequest.responseText);
         } else if (cleanedMimetype == "application/xml" || cleanedMimetype == "text/xml") {
-            response = req.responseXML;
+            response = httpRequest.responseXML;
             if (!response) {
-                XML3D.debug.logError("Invalid external XML document '" + req._url +
+                XML3D.debug.logError("Invalid external XML document '" + httpRequest._url +
                     "': XML Syntax error");
                 return;
             }
         } else if (cleanedMimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
             XML3D.debug.logError("Possibly wrong loading of resource "+url+". Mimetype is "+mimetype+" but response is not an ArrayBuffer");
-            response = req.response;
+            response = httpRequest.response;
         } else {
-            XML3D.debug.logError("Unidentified response type (response = '"+req.response+"', responseType = '"+req.responseType+"')");
-            response = req.response;
+            XML3D.debug.logError("Unidentified response type (response = '"+httpRequest.response+"', responseType = '"+httpRequest.responseType+"')");
+            response = httpRequest.response;
         }
 
-        var formatHandler = XML3D.base.findFormat(response, req.responseType, cleanedMimetype);
+        var formatHandler = XML3D.base.findFormat(response, httpRequest.responseType, cleanedMimetype);
         if (!formatHandler) {
-            XML3D.debug.logError("No format handler for resource (response = '"+response+"', responseType = '"+req.responseType+"')");
+            XML3D.debug.logError("No format handler for resource (response = '"+response+"', responseType = '"+httpRequest.responseType+"')");
             return;
         }
         docCache.format = formatHandler;
-        docCache.response = formatHandler.getFormatData(response, req.responseType, cleanedMimetype);
+        docCache.response = formatHandler.getFormatData(response, httpRequest.responseType, cleanedMimetype);
     }
 
     /**
@@ -351,15 +351,15 @@
     /**
      * Update all AdapterHandles without adapters of a certain url
      * @param {string} url The complete url + fragment
-     * @param {FormatHandler} format Format handler
+     * @param {FormatHandler} formatHandler Format handler
      * @param {Object} data Data of the document corresponding to the url. Possibily a DOM element
      */
-    function updateMissingHandles(url, format, data){
+    function updateMissingHandles(url, formatHandler, data){
         for ( var adapterType in c_cachedAdapterHandles[url]) {
             for ( var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (!handle.hasAdapter()) {
-                    updateHandle(handle, adapterType, canvasId, format, data);
+                    updateHandle(handle, adapterType, canvasId, formatHandler, data);
                     loadComplete(canvasId, url);
                 }
             }
@@ -428,21 +428,21 @@
      * This function will trigger the loading of documents, if required.
      * An AdapterHandle will be always be returned, expect when an invalid (empty) uri is passed.
      *
-     * @param {Document} doc - the document from which to look up the reference
+     * @param {Document} document - the document from which to look up the reference
      * @param {XML3D.URI} uri - The URI used to find the referred AdapterHandle. Can be relative
      * @param {Object} adapterType The type of adapter required (e.g. XML3D.data or XML3D.webgl)
      * @param {number} canvasId Id of canvashandle this adapter depends on, 0 if not depending on any canvashandler
      * @returns {XML3D.base.AdapterHandle=} The requested AdapterHandler. Note: might not contain any adapter.
      */
-    ResourceManager.prototype.getAdapterHandle = function(doc, uri, adapterType, canvasId) {
+    ResourceManager.prototype.getAdapterHandle = function(document, uri, adapterType, canvasId) {
         if(!uri)
             return null;
 
         if(typeof uri == "string") uri = new XML3D.URI(uri);
 
         canvasId = canvasId || 0;
-        if(document != doc || !uri.isLocal()){
-            uri = uri.getAbsoluteURI(doc.documentURI);
+        if(document != document || !uri.isLocal()){
+            uri = uri.getAbsoluteURI(document.documentURI);
         }
 
         if (!c_cachedAdapterHandles[uri])
@@ -486,8 +486,14 @@
         }
         return handle;
     };
+
     /**
      * Get any adapter, internal or external.
+     *
+     * @param node
+     * @param adapterType
+     * @param canvasId
+     * @return {XML3D.base.Adapter?}
      */
     ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId){
         var factory = XML3D.base.xml3dFormatHandler.getFactory(adapterType, canvasId);
@@ -522,14 +528,14 @@
     /**
      * This function is called to notify an AdapterHandler about a change (can be triggered through adapters)
      * Note that this function only works with nodes inside window.document
-     * @param {Element} node Node of AdapterHandler. Must be from window.document
+     * @param {Element} element Element of AdapterHandler. Must be from window.document
      * @param {Object} adapterType Type/Aspect of AdapterHandler (e.g. XML3D.data or XML3D.webgl)
      * @param {number} canvasId CanvasHandler id of AdapterHandler, 0 if not depending on CanvasHandler
      * @param {number} type Type of Notification. Usually XML3D.events.ADAPTER_HANDLE_CHANGED
      */
-    ResourceManager.prototype.notifyNodeAdapterChange = function(node, adapterType, canvasId, type){
+    ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterType, canvasId, type){
         canvasId = canvasId || 0;
-        var uri = "#" + node.id;
+        var uri = "#" + element.id;
         if( c_cachedAdapterHandles[uri] && c_cachedAdapterHandles[uri][adapterType] &&
             c_cachedAdapterHandles[uri][adapterType][canvasId] ){
             c_cachedAdapterHandles[uri][adapterType][canvasId].notifyListeners(type);
@@ -638,7 +644,7 @@
      *                                It will be called with event as the first and image as the second parameter.
      * @param {function} errorListener Function called when image could not be loaded.
      *                                 It will be called with event as the first and image as the second parameter.
-     * @return {Image}
+     * @return {HTMLImageElement}
      */
     ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) {
         // we use canvasId 0 to represent images loaded in a document
@@ -667,7 +673,7 @@
      * @param {boolean} autoplay
      * @param {Object} listeners  Dictionary of all listeners to register with video element.
      *                            Listeners will be called with event as the first and video as the second parameter.
-     * @return {Image}
+     * @return {HTMLVideoElement}
      */
     ResourceManager.prototype.getVideo = function(uri, autoplay, listeners) {
         // we use canvasId 0 to represent videos loaded in a document

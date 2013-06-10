@@ -14,7 +14,7 @@ XML3D.data.MultiDataAdapter.prototype.init = function() {
     //if (xflow)
     //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
 
-    this.multiData = new XML3D.base.MultiData();
+    this.multiData = new XML3D.base.DataList();
     this.updateHandle("src");
     createMultiData(this);
 };

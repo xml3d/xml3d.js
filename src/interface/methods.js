@@ -204,14 +204,6 @@ new (function() {
         return new window.XML3DMatrix();
     };
 
-    methods.dataGetOutputNames = function() {
-        var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
-        if(dataAdapter){
-            return dataAdapter.getOutputNames();
-        }
-        return null;
-    };
-
     methods.videoPlay = function() {
         XML3D.base.sendAdapterEvent(this, {play: []});
     };
@@ -220,9 +212,19 @@ new (function() {
         XML3D.base.sendAdapterEvent(this, {pause: []});
     };
 
-    methods.protoGetOutputNames = methods.dataGetOutputNames;
+    methods.XML3DNestedDataContainerTypeGetOutputNames =
+    methods.XML3DShaderProviderTypeGetOutputNames =
+    methods.meshGetOutputNames = function() {
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+        if(dataAdapter){
+            return dataAdapter.getOutputNames();
+        }
+        return null;
+    };
 
-    methods.dataGetResult = function(filter) {
+    methods.XML3DNestedDataContainerTypeGetResult =
+    methods.XML3DShaderProviderTypeGetResult =
+    methods.meshGetResult = function(filter) {
 
         var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter){
@@ -233,7 +235,9 @@ new (function() {
         return null;
     };
 
-    methods.dataGetOutputChannelInfo = function(name){
+    methods.XML3DNestedDataContainerTypeGetOutputChannelInfo =
+    methods.XML3DShaderProviderTypeGetOutputChannelInfo =
+    methods.meshGetOutputChannelInfo = function(name){
         var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter){
             var result = dataAdapter.getOutputChannelInfo(name);
@@ -243,25 +247,27 @@ new (function() {
         }
         return null;
     }
-    methods.protoGetOutputChannelInfo = methods.dataGetOutputChannelInfo;
 
-    methods.dataGetComputeInfo = function(){
+    methods.XML3DNestedDataContainerTypeGetComputeInfo =
+    methods.XML3DShaderProviderTypeGetComputeInfo =
+    methods.meshGetComputeInfo = function(){
         XML3D.debug.logError(this.nodeName + "::getComputeInfo is not implemeted yet.");
         return null;
     }
-    methods.protoGetComputeInfo = methods.dataGetComputeInfo;
 
-    methods.dataGetProtoInfo = function(){
+    methods.XML3DNestedDataContainerTypeGetProtoInfo =
+    methods.XML3DShaderProviderTypeGetProtoInfo =
+    methods.meshGetProtoInfo = function(){
         XML3D.debug.logError(this.nodeName + "::getProtoInfo is not implemeted yet.");
         return null;
     }
-    methods.protoGetProtoInfo = methods.dataGetProtoInfo;
 
-    methods.dataIsOutputConnected = function(){
+    methods.XML3DNestedDataContainerTypeIsOutputConnected =
+    methods.XML3DShaderProviderTypeIsOutputConnected =
+    methods.meshIsOutputConnected = function(){
         XML3D.debug.logError(this.nodeName + "::isOutputConnected is not implemeted yet.");
         return false;
     }
-    methods.protoIsOutputConnected = methods.dataIsOutputConnected;
 
 
     function createValues(result, names) {

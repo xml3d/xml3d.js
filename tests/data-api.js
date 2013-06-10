@@ -36,7 +36,7 @@ test("Access Output Names", function() {
         ["index", "normal", "posAdd1", "posAdd2", "position", "weight1", "weight2"],
         EPSILON, "#unusedMorphedData has correct output names" );
 
-    ok(!this.doc.getElementById("pink").getOutputNames, "<shader> doesn't have getOutputNames method");
+    ok(this.doc.getElementById("pink").getOutputNames, "<shader> has getOutputNames method");
 
     this.doc.getElementById("swapReference").src = "#unusedSubData2";
 

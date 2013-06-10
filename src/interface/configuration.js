@@ -107,14 +107,12 @@ XML3D.classInfo['data'] = {
     // TODO: Handle style for data
     compute : {a: XML3D.StringAttributeHandler},
     filter : {a: XML3D.StringAttributeHandler},
-    getOutputNames : {m: XML3D.methods.dataGetOutputNames},
-    getOutputChannelInfo : {m: XML3D.methods.dataGetOutputChannelInfo},
-    getComputeInfo : {m: XML3D.methods.dataGetComputeInfo},
-    getProtoInfo : {m: XML3D.methods.dataGetProtoInfo},
-    isOutputConnected : {m: XML3D.methods.dataIsOutputConnected},
-    getResult : {m: XML3D.methods.dataGetResult},
-    addOutputFieldListener : {m: XML3D.methods.dataAddOutputFieldListener},
-    getOutputNames : {m: XML3D.methods.dataGetOutputNames},
+    getOutputNames : {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
+    getOutputChannelInfo : {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
+    getComputeInfo : {m: XML3D.methods.XML3DNestedDataContainerTypeGetComputeInfo},
+    getProtoInfo : {m: XML3D.methods.XML3DNestedDataContainerTypeGetProtoInfo},
+    isOutputConnected : {m: XML3D.methods.XML3DNestedDataContainerTypeIsOutputConnected},
+    getResult : {m: XML3D.methods.XML3DNestedDataContainerTypeGetResult},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
     _term: undefined
@@ -175,6 +173,12 @@ XML3D.classInfo['mesh'] = {
     compute : {a: XML3D.StringAttributeHandler},
     getWorldMatrix : {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     getBoundingBox : {m: XML3D.methods.meshGetBoundingBox},
+    getOutputNames : {m: XML3D.methods.meshGetOutputNames},
+    getOutputChannelInfo : {m: XML3D.methods.meshGetOutputChannelInfo},
+    getComputeInfo : {m: XML3D.methods.meshGetComputeInfo},
+    getProtoInfo : {m: XML3D.methods.meshGetProtoInfo},
+    isOutputConnected : {m: XML3D.methods.meshIsOutputConnected},
+    getResult : {m: XML3D.methods.meshGetResult},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
     _term: undefined
@@ -201,6 +205,12 @@ XML3D.classInfo['shader'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for shader
     compute : {a: XML3D.StringAttributeHandler},
+    getOutputNames : {m: XML3D.methods.XML3DShaderProviderTypeGetOutputNames},
+    getOutputChannelInfo : {m: XML3D.methods.XML3DShaderProviderTypeGetOutputChannelInfo},
+    getComputeInfo : {m: XML3D.methods.XML3DShaderProviderTypeGetComputeInfo},
+    getProtoInfo : {m: XML3D.methods.XML3DShaderProviderTypeGetProtoInfo},
+    isOutputConnected : {m: XML3D.methods.XML3DShaderProviderTypeIsOutputConnected},
+    getResult : {m: XML3D.methods.XML3DShaderProviderTypeGetResult},
     script : {a: XML3D.ReferenceHandler},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
@@ -238,6 +248,12 @@ XML3D.classInfo['lightshader'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for lightshader
     compute : {a: XML3D.StringAttributeHandler},
+    getOutputNames : {m: XML3D.methods.XML3DShaderProviderTypeGetOutputNames},
+    getOutputChannelInfo : {m: XML3D.methods.XML3DShaderProviderTypeGetOutputChannelInfo},
+    getComputeInfo : {m: XML3D.methods.XML3DShaderProviderTypeGetComputeInfo},
+    getProtoInfo : {m: XML3D.methods.XML3DShaderProviderTypeGetProtoInfo},
+    isOutputConnected : {m: XML3D.methods.XML3DShaderProviderTypeIsOutputConnected},
+    getResult : {m: XML3D.methods.XML3DShaderProviderTypeGetResult},
     script : {a: XML3D.ReferenceHandler},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
@@ -264,11 +280,12 @@ XML3D.classInfo['proto'] = {
     // TODO: Handle style for proto
     compute : {a: XML3D.StringAttributeHandler},
     filter : {a: XML3D.StringAttributeHandler},
-    getOutputNames : {m: XML3D.methods.protoGetOutputNames},
-    getOutputChannelInfo : {m: XML3D.methods.protoGetOutputChannelInfo},
-    getComputeInfo : {m: XML3D.methods.protoGetComputeInfo},
-    getProtoInfo : {m: XML3D.methods.protoGetProtoInfo},
-    isOutputConnected : {m: XML3D.methods.protoIsOutputConnected},
+    getOutputNames : {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
+    getOutputChannelInfo : {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
+    getComputeInfo : {m: XML3D.methods.XML3DNestedDataContainerTypeGetComputeInfo},
+    getProtoInfo : {m: XML3D.methods.XML3DNestedDataContainerTypeGetProtoInfo},
+    isOutputConnected : {m: XML3D.methods.XML3DNestedDataContainerTypeIsOutputConnected},
+    getResult : {m: XML3D.methods.XML3DNestedDataContainerTypeGetResult},
     src : {a: XML3D.ReferenceHandler},
     proto : {a: XML3D.ReferenceHandler},
     _term: undefined
@@ -415,9 +432,9 @@ XML3D.classInfo['video'] = {
     className : {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for video
     src : {a: XML3D.StringAttributeHandler},
+    autoplay : {a: XML3D.BoolAttributeHandler, params: false},
     play : {m: XML3D.methods.videoPlay},
     pause : {m: XML3D.methods.videoPause},
-    autoplay : {a: XML3D.BoolAttributeHandler, params: false},
     _term: undefined
 };
 /**
@@ -441,7 +458,6 @@ XML3D.classInfo['view'] = {
     position : {a: XML3D.XML3DVec3AttributeHandler, params: [0, 0, 0]},
     orientation : {a: XML3D.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
     fieldOfView : {a: XML3D.FloatAttributeHandler, params: 0.785398},
-    perspective : {a: XML3D.ReferenceHandler},
     getWorldMatrix : {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     setDirection : {m: XML3D.methods.viewSetDirection},
     setUpVector : {m: XML3D.methods.viewSetUpVector},
@@ -449,6 +465,7 @@ XML3D.classInfo['view'] = {
     getDirection : {m: XML3D.methods.viewGetDirection},
     getUpVector : {m: XML3D.methods.viewGetUpVector},
     getViewMatrix : {m: XML3D.methods.viewGetViewMatrix},
+    perspective : {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /* END GENERATED */

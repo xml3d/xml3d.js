@@ -45,7 +45,10 @@
                 metaKey:event.metaKey,
                 scale:event.scale,
                 rotation:event.rotation,
-                view:event.view
+                view:event.view,
+                touches:event.touches,
+                changedTouches:event.changedTouches,
+                targetTouches:event.targetTouches
             };
             return touchEventData;
         },
@@ -61,9 +64,19 @@
             }
 
             if (touchEvent && touchEvent.initTouchEvent) {
-                touchEvent.initTouchEvent(data.touches, data.targetTouches, data.changedTouches,
-                    data.type, data.view, data.screenX, data.screenY, data.clientX, data.clientY);
-                //console.log(touchEvent.type);
+                if (touchEvent.initTouchEvent.length == 0) { //chrome
+                    touchEvent.initTouchEvent(data.touches, data.targetTouches, data.changedTouches,
+                        data.type, data.view, data.screenX, data.screenY, data.clientX, data.clientY);
+                } else if ( touchEvent.initTouchEvent.length == 12 ) { //firefox
+                    touchEvent.initTouchEvent(data.type, data.bubbles, data.cancelable, data.view,
+                        data.detail, data.ctrlKey, data.altKey, data.shiftKey, data.metaKey, data.touches,
+                        data.targetTouches,	data.changedTouches);
+                } else { //iOS length = 18
+                    touchEvent.initTouchEvent(data.type, data.bubbles, data.cancelable, data.view,
+                        data.detail, data.screenX, data.screenY, data.pageX, data.pageY, data.ctrlKey,
+                        data.altKey, data.shiftKey, data.metaKey, data.touches, data.targetTouches,
+                        data.changedTouches, data.scale, data.rotation);
+                }
             }
             return touchEvent;
         },
@@ -75,6 +88,7 @@
         dispatchTouchEventOnPickedObject:function (evt, opt) {
             opt = opt || {};
             var touchEvent = this.copyTouchEvent(evt, opt);
+            touchEvent.preventDefault = function () { evt.preventDefault(); }
             this.xml3dElem.dispatchEvent(touchEvent);
         },
 
@@ -87,6 +101,10 @@
         },
 
         touchmove:function (evt) {
+            this.dispatchTouchEventOnPickedObject(evt);
+        },
+
+        touchcancel:function (evt) {
             this.dispatchTouchEventOnPickedObject(evt);
         }
 

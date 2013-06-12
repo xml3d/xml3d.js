@@ -48,7 +48,7 @@ XML3D.isSuperclassOf = function(ctor, subclassCtor) {
  * @param {Object} ctor Constructor
  * @param {Object} parent Parent class
  * @param {Object=} methods Methods to add to the class
- * @returns
+ * @return {Object!}
  */
 XML3D.createClass = function(ctor, parent, methods) {
     methods = methods || {};
@@ -124,6 +124,9 @@ XML3D.createClass = function(ctor, parent, methods) {
      */
     var curXML3DInitElements = [];
 
+    /**
+     * @param {Element} xml3dElement
+     */
     function initXML3DElement(xml3dElement) {
 
         if (XML3D._native)
@@ -164,6 +167,9 @@ XML3D.createClass = function(ctor, parent, methods) {
         curXML3DInitElements.splice(curXML3DInitElements.indexOf(xml3dElement), 1);
     };
 
+    /**
+     * @param {Element} xml3dElement
+     */
     function destroyXML3DElement(xml3dElement)
     {
         if(-1 < curXML3DInitElements.indexOf(xml3dElement))
@@ -187,6 +193,9 @@ XML3D.createClass = function(ctor, parent, methods) {
         grandParentNode.removeChild(canvas);
     };
 
+    /**
+     * @param {Event} evt
+     */
     function onNodeInserted(evt) {
 
         if(evt.target.tagName === "xml3d") {
@@ -194,6 +203,9 @@ XML3D.createClass = function(ctor, parent, methods) {
         }
     };
 
+    /**
+     * @param {Event} evt
+     */
     function onNodeRemoved(evt) {
 
         if(evt.target.tagName === "xml3d") {
@@ -208,11 +220,11 @@ XML3D.createClass = function(ctor, parent, methods) {
         var debug = XML3D.debug.setup();
         debug && XML3D.debug.logInfo("xml3d.js version: " + XML3D.version);
 
-        // Find all the XML3D tags in the document
+        /**
+         * Find all the XML3D tags in the document
+         * @type {NodeList}
+         */
         var xml3ds = document.querySelectorAll("xml3d");
-        xml3ds = Array.map(xml3ds, function(n) {
-            return n;
-        });
 
         debug && XML3D.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
 

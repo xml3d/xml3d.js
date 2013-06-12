@@ -12,7 +12,10 @@ XML3D.webgl.MAXFPS = 30;
         }
     };
 
-
+    /**
+     *
+     * @param {Element|Array.<Element>} xml3ds
+     */
     XML3D.webgl.configure = function(xml3ds) {
 
         if(!(xml3ds instanceof Array))

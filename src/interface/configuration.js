@@ -9,6 +9,8 @@ XML3D.MeshTypes["lines"] = 2;
 XML3D.MeshTypes[2] = "lines";
 XML3D.MeshTypes["linestrips"] = 3;
 XML3D.MeshTypes[3] = "linestrips";
+XML3D.MeshTypes["points"] = 4;
+XML3D.MeshTypes[4] = "points";
 // TextureTypes
 XML3D.TextureTypes = {};
 XML3D.TextureTypes["2d"] = 0;

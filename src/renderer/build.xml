@@ -31,6 +31,7 @@
         <file name="shaders/matte.js" />
         <file name="shaders/diffuse.js" />
         <file name="shaders/phong.js" />
+        <file name="shaders/point.js" />
         <file name="shaders/utility.js" />
     </filelist>
 

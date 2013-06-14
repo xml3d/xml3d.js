@@ -15,9 +15,16 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.glType = getGLTypeFromString(type);
         this.bbox = new window.XML3DBox();
 
+        this.getElementCount = function() {
+            try {
+                return this.vbos.index[0].length;
+            } catch(e) {
+                return 0;
+            }
+        }
         this.getVertexCount = function() {
             try {
-                return this.isIndexed ? this.vbos.index[0].length : (this.vertexCount !== undefined ? this.vertexCount[0] : this.vbos.position[0].length);
+                return (this.vertexCount !== undefined ? this.vertexCount[0] : this.vbos.position[0].length / 3);
             } catch(e) {
                 return 0;
             }
@@ -426,6 +433,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             case "tristrips":
                 return GL.TRIANGLE_STRIP;
             case "points":
+                console.log("POINTS!");
                 return GL.POINTS;
             case "lines":
                 return GL.LINES;

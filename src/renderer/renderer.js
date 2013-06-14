@@ -422,6 +422,8 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         parameters["modelMatrix"] = xform.model;
         parameters["modelViewMatrix"] = xform.modelView;
         parameters["modelViewProjectionMatrix"] = XML3D.math.mat4.multiply(tmpModelViewProjection, this.camera.projMatrix, xform.modelView);
+        parameters["projectionMatrix"] = this.camera.projMatrix;
+        parameters["screenWidth"] = this.width;
         var normalMatrix = XML3D.math.mat4.invert(XML3D.math.mat4.create(), xform.modelView);
         normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : identMat4;
         parameters["normalMatrix"] = XML3D.math.mat3.copy(XML3D.math.mat3.create(),
@@ -500,10 +502,10 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
                 offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
             }
         } else {
-            gl.drawElements(meshInfo.glType, meshInfo.getVertexCount(), gl.UNSIGNED_SHORT, 0);
+            gl.drawElements(meshInfo.glType, meshInfo.getElementCount(), gl.UNSIGNED_SHORT, 0);
         }
 
-        triCount = meshInfo.getVertexCount() / 3;
+        triCount = meshInfo.getElementCount() / 3;
     } else {
         if (meshInfo.size) {
             var offset = 0;
@@ -513,7 +515,7 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
                 offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
             }
         } else {
-                //console.log("drawArrays: " + meshInfo.getVertexCount());
+                console.log("drawArrays: " + meshInfo.getVertexCount());
                 gl.drawArrays(meshInfo.glType, 0, meshInfo.getVertexCount());
         }
         triCount = vbos.position ? vbos.position[i].length / 3 : 0;

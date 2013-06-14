@@ -8,6 +8,7 @@
 </head>
 <body style="background-color: #fff;width:500px">
   <xml3d id="myXml3d" width="600px" height="400px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
+
     <defs>
       <data id="pointData" >
         <float3 name="position">0 -1 0   1 0 0   -1 0 0   0 1 0</float3>
@@ -16,6 +17,7 @@
         <float name="pointSize" >0.5</float>
       </data>
     </defs>
+
     <shader id="pointColorShader" script="urn:xml3d:shader:point" >
         <bool name="useVertexColor">true</bool>
     </shader>
@@ -26,13 +28,14 @@
       </texture>
     </shader>
     <shader id="pointTexColorShader" script="urn:xml3d:shader:point" >
-
       <bool name="useVertexColor">true</bool>
       <float name="texCoordSize" >0.5 0.5</float>
       <texture name="diffuseTexture" >
           <img src="textures/points.png" />
       </texture>
     </shader>
+
+
     <group style="transform: translateZ(-15px)" >
         <group shader="#pointColorShader" >
             <mesh type="points" src="#pointData" />

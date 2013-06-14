@@ -313,6 +313,26 @@ new (function() {
         return true;
     };
 
+    XML3D.scriptValueLabel = "[value set by script]";
+
+
+    methods.XML3DDataSourceTypeSetScriptValue = function(data){
+        var configData = this._configured;
+
+        if(!configData)
+            return;
+
+        if(this.textContent != XML3D.scriptValueLabel)
+            this.textContent = XML3D.scriptValueLabel;
+        configData.scriptValue = data;
+
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+        if(dataAdapter)
+            dataAdapter.setScriptValue(data);
+
+
+    };
+
     // Export to xml3d namespace
     XML3D.extend(XML3D.methods, methods);
 });

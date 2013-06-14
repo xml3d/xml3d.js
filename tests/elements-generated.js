@@ -211,6 +211,7 @@ test("&lt;float&gt; interface test", function() {
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;float2&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float2");
@@ -221,6 +222,7 @@ test("&lt;float2&gt; interface test", function() {
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;float3&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float3");
@@ -231,6 +233,7 @@ test("&lt;float3&gt; interface test", function() {
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;float4&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float4");
@@ -241,6 +244,7 @@ test("&lt;float4&gt; interface test", function() {
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;float4x4&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float4x4");
@@ -251,6 +255,7 @@ test("&lt;float4x4&gt; interface test", function() {
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;int&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "int");
@@ -261,6 +266,7 @@ test("&lt;int&gt; interface test", function() {
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;int4&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "int4");
@@ -271,6 +277,7 @@ test("&lt;int4&gt; interface test", function() {
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;bool&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "bool");
@@ -281,6 +288,7 @@ test("&lt;bool&gt; interface test", function() {
     equal(typeof e.name, "string", "name is of type 'string'");
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;texture&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "texture");
@@ -299,6 +307,7 @@ test("&lt;texture&gt; interface test", function() {
     equal(typeof e.wrapT, "string", "wrapT is of type 'string'");
     equal(typeof e.wrapU, "string", "wrapU is of type 'string'");
     equal(typeof e.borderColor, "string", "borderColor is of type 'string'");
+    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;img&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "img");

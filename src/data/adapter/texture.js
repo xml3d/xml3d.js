@@ -54,6 +54,10 @@
         return xnode;
     };
 
+    TextureDataAdapter.prototype.setScriptValue = function(value){
+        XML3D.debug.logError("Texture currently does not support setScriptValue()");
+    }
+
     TextureDataAdapter.prototype.getOutputs = function() {
         var result = {};
         result[this.node.name] = this;

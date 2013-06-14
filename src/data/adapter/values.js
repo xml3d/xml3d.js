@@ -33,8 +33,17 @@
 
     ValueDataAdapter.prototype.init = function()
     {
+        var config = this.node._configured, value;
+        if(this.node.textContent == XML3D.scriptValueLabel){
+            value = config.scriptValue;
+        }
+        else{
+            delete config.scriptValue;
+            value = this.node.value;
+        }
+
         var type = BUFFER_TYPE_TABLE[this.node.localName];
-        var buffer = new Xflow.BufferEntry(type, this.node.value);
+        var buffer = new Xflow.BufferEntry(type, value);
 
         this.xflowInputNode = XML3D.data.xflowGraph.createInputNode();
         this.xflowInputNode.name = this.node.name;
@@ -55,6 +64,7 @@
         if(evt.type == XML3D.events.VALUE_MODIFIED){
             var attr = evt.wrapped.attrName;
             if(!attr){
+                delete this.node._configured.scriptValue;
                 this.xflowInputNode.data.setValue(this.node.value);
             }
             else if(attr == "name"){
@@ -68,6 +78,11 @@
             }
         }
     };
+
+    ValueDataAdapter.prototype.setScriptValue = function(value){
+        // TODO: Add Type check
+        this.xflowInputNode.data.setValue(value);
+    }
 
     /**
      * Returns String representation of this DataAdapter

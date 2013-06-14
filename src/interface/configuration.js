@@ -303,6 +303,7 @@ XML3D.classInfo['float'] = {
     param : {a: XML3D.BoolAttributeHandler, params: false},
     key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.FloatArrayValueHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**
@@ -316,6 +317,7 @@ XML3D.classInfo['float2'] = {
     param : {a: XML3D.BoolAttributeHandler, params: false},
     key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float2ArrayValueHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**
@@ -329,6 +331,7 @@ XML3D.classInfo['float3'] = {
     param : {a: XML3D.BoolAttributeHandler, params: false},
     key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float3ArrayValueHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**
@@ -342,6 +345,7 @@ XML3D.classInfo['float4'] = {
     param : {a: XML3D.BoolAttributeHandler, params: false},
     key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float4ArrayValueHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**
@@ -355,6 +359,7 @@ XML3D.classInfo['float4x4'] = {
     param : {a: XML3D.BoolAttributeHandler, params: false},
     key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.Float4x4ArrayValueHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**
@@ -368,6 +373,7 @@ XML3D.classInfo['int'] = {
     param : {a: XML3D.BoolAttributeHandler, params: false},
     key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.IntArrayValueHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**
@@ -381,6 +387,7 @@ XML3D.classInfo['int4'] = {
     param : {a: XML3D.BoolAttributeHandler, params: false},
     key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.IntArrayValueHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**
@@ -394,6 +401,7 @@ XML3D.classInfo['bool'] = {
     param : {a: XML3D.BoolAttributeHandler, params: false},
     key : {a: XML3D.FloatAttributeHandler, params: 0.0},
     value : {a: XML3D.BoolArrayValueHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**
@@ -414,6 +422,7 @@ XML3D.classInfo['texture'] = {
     wrapT : {a: XML3D.EnumAttributeHandler, params: {e: XML3D.WrapTypes, d: 0}},
     wrapU : {a: XML3D.EnumAttributeHandler, params: {e: XML3D.WrapTypes, d: 0}},
     borderColor : {a: XML3D.StringAttributeHandler},
+    setScriptValue : {m: XML3D.methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**

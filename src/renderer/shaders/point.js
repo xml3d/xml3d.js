@@ -66,6 +66,7 @@ XML3D.shaders.register("point", {
         "    alpha *= texDiffuse.a;",
         "    objDiffuse *= texDiffuse.rgb;",
         "  #endif",
+        "  if (alpha < 0.05) discard;",
         "  gl_FragColor = vec4(objDiffuse, alpha);",
         "}"
     ].join("\n"),

@@ -112,3 +112,57 @@ test("Texture Color Points", 6, function() {
     hTest.draw();
 });
 
+module("Geometry", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/lines.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Color Lines", 8, function() {
+    var xTest = this.doc.getElementById("myXml3d"),
+        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+    var self = this;
+
+    var testStep = 0;
+    function onFrameDrawn(){
+        if( XML3DUnit.getPixelValue(glTest, 300, 211)[0] == 0)
+            return;
+
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 300, 211), [188,0,0,127], EPSILON,
+            "Center Vertical Line exists" );
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 300, 233), [0,0,0,0], EPSILON,
+            "Center Vertical Line has right length" );
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 316, 200), [188,0,0,127], EPSILON,
+            "Center Horizontal Line exists" );
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 333, 200), [0,0,0,0], EPSILON,
+            "Center Horizontal Line has right length" );
+
+
+        ok(XML3DUnit.getPixelValue(glTest, 217, 200)[3] != 0 &&
+           XML3DUnit.getPixelValue(glTest, 203, 215)[3] != 0 &&
+           XML3DUnit.getPixelValue(glTest, 186, 200)[3] != 0,
+            "Indexed Line correct");
+
+        ok(XML3DUnit.getPixelValue(glTest, 410, 199)[3] != 0 &&
+            XML3DUnit.getPixelValue(glTest, 412, 216)[3] != 0 &&
+            XML3DUnit.getPixelValue(glTest, 379, 215)[3] != 0,
+            "Linestrips correct");
+        start();
+    }
+
+    stop();
+    xTest.addEventListener("framedrawn", onFrameDrawn);
+    hTest.draw();
+
+});

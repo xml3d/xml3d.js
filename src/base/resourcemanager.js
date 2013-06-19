@@ -397,6 +397,11 @@
 
         var factory = format.getFactory(adapterType, canvasId);
 
+        if(!factory) {
+            XML3D.debug.logError("Format does not support adapterType " + adapterType);
+            return;
+        }
+
         var adapter = factory.getAdapter ? factory.getAdapter(data) : factory.createAdapter(data);
         if (adapter) {
             handle.setAdapter(adapter, XML3D.base.AdapterHandle.STATUS.READY);

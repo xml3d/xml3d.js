@@ -21,7 +21,7 @@
             return;
         } else if (evt.type == XML3D.events.THIS_REMOVED) {
             var target = evt.wrapped.target;
-            if (target && target.nodeName == "texture") {
+            if (target && target.nodeName.toLowerCase() == "texture") {
                 // A texture was removed completely, so this shader has to be
                 // recompiled
                 this.renderer.recompileShader(this);

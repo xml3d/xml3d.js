@@ -94,7 +94,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
     parent = parent || new TraversalState();
     var downstream = new TraversalState(parent);
 
-    switch(currentNode.nodeName) {
+    switch(currentNode.nodeName.toLowerCase()) {
     case "group":
         adapter.parentVisible = parent.visible;
         adapter.parentTransform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
@@ -232,7 +232,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
 
     var parentNode = target.parentElement;
     var parentTransform = XML3D.math.mat4.identity(XML3D.math.mat4.create());
-    if(parentNode && parentNode.nodeName == "group")
+    if(parentNode && parentNode.nodeName.toLowerCase() == "group")
     {
         var parentAdapter = this.getAdapter(parentNode);
         parentTransform = parentAdapter.applyTransformMatrix(parentTransform);

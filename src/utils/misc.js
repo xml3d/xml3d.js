@@ -31,12 +31,12 @@ window.requestAnimFrame = (function(){
   })();
 
 (function() {
-    
-    if(!XML3D.util) 
+
+    if(!XML3D.util)
         XML3D.util = {};
-    
-    var u = XML3D.util; 
-    
+
+    var u = XML3D.util;
+
     /**
      * Dispatch HTML event
      *
@@ -72,7 +72,7 @@ window.requestAnimFrame = (function(){
         event.initCustomEvent(eventType, canBubble, cancelable, detail);
         target.dispatchEvent(event);
     };
-    
+
     u.getStyle = function(oElm, strCssRule) {
         var strValue = "";
         if (document.defaultView && document.defaultView.getComputedStyle) {
@@ -88,59 +88,66 @@ window.requestAnimFrame = (function(){
         return strValue;
     };
 
-    /** Evaluates the given XPath expression in the given xml3d element on 
-     *  xml3d elements and returns the result. 
-     *  
-     * @param {!Object} xml3d the xml3d element on which to evaluate the expression 
-     * @param {!Object} xpathExpr the XPath expression to be evaluated 
-     * 
+    /** Evaluates the given XPath expression in the given xml3d element on
+     *  xml3d elements and returns the result.
+     *
+     * @param {!Object} xml3d the xml3d element on which to evaluate the expression
+     * @param {!Object} xpathExpr the XPath expression to be evaluated
+     *
      * @return {XPathResult} the result of the evaluation
      */
     u.evaluateXPathExpr = function(xml3d, xpathExpr)
     {
         return document.evaluate(
-            xpathExpr, xml3d, 
-            function() {return XML3D.xml3dNS;}, 
-            XPathResult.FIRST_ORDERED_NODE_TYPE, null);         
-    }; 
-    
-    var __autoCreatedViewId = 0; 
-    /** 
-     * Returns the active view element corresponding to the given xml3d element. 
-     * 
+            xpathExpr, xml3d,
+            function() {return XML3D.xml3dNS;},
+            XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    };
+
+    var __autoCreatedViewId = 0;
+    /**
+     * Returns the active view element corresponding to the given xml3d element.
+     *
      * @param {!Object} xml3d
      * @return {Object} the active view element
-     */ 
+     */
     u.getOrCreateActiveView = function(xml3d)
     {
         // try to resolve reference
-        var ref = xml3d.activeView; 
+        var ref = xml3d.activeView;
         if(ref)
-        {       
-            var v = XML3D.URIResolver.resolveLocal(ref);      
+        {
+            var v = XML3D.URIResolver.resolveLocal(ref);
             if(!v)
-                throw "XML3D Error: xml3d references view that is not defined: '" + ref + "'."; 
-            
-            return v; 
+                throw "XML3D Error: xml3d references view that is not defined: '" + ref + "'.";
+
+            return v;
         }
-        
-        // didn't succeed, so now try to just take the first view 
-        var firstView = XML3D.util.evaluateXPathExpr(
+
+        // didn't succeed, so now try to just take the first view
+        var firstView;
+        if(XML3D.xhtml){
+            firstView = XML3D.util.evaluateXPathExpr(
                 xml3d, './/xml3d:view[1]').singleNodeValue;
-        
+        }
+        else{
+            firstView = xml3d.getElementsByTagName("view")[0];
+        }
+
+
         if(firstView)
         {
-            // if it has an id, set it as active 
+            // if it has an id, set it as active
             if(firstView.id && firstView.id.length > 0)
-                xml3d.activeView = "#" + firstView.id; 
-            
-            return firstView; 
+                xml3d.activeView = "#" + firstView.id;
+
+            return firstView;
         }
-        
+
         // didn't find any: create new one
         XML3D.debug.logWarning("xml3d element has no view defined: creating one.");
-        
-        var vid = "xml3d.autocreatedview_" + __autoCreatedViewId++; 
+
+        var vid = "xml3d.autocreatedview_" + __autoCreatedViewId++;
         var v = XML3D.createElement("view");
         v.setAttribute("id", vid);
 

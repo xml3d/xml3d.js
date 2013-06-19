@@ -233,6 +233,9 @@ XML3D.createClass = function(ctor, parent, methods) {
             return;
         }
 
+        // TODO: Improve check for xhtml:
+        XML3D.xhtml = ( xml3ds[0] && (xml3ds[0].tagName == "xml3d"));
+
         for(var i = 0; i < xml3ds.length; i++) {
             initXML3DElement(xml3ds[i]);
         }

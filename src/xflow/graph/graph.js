@@ -448,7 +448,7 @@ DataNode.prototype._getComputeResult = function(filter){
 
 
 function getForwardNode(dataNode){
-    if(!dataNode._filterMapping.isEmpty()  || dataNode._computeOperator)
+    if(!dataNode._filterMapping.isEmpty()  || dataNode._computeOperator || dataNode._protoNode)
         return null;
     if(dataNode._sourceNode && dataNode._children.length == 0)
         return dataNode._sourceNode;

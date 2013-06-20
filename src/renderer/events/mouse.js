@@ -42,6 +42,10 @@
                 event.relatedTarget);
             if (event.dataTransfer)
                 evt.data = {url:event.dataTransfer.getData("URL"), text:event.dataTransfer.getData("Text")};
+            // override preventDefault to actually prevent the default of the original event
+            evt.preventDefault = function(){
+                event.preventDefault();
+            };
             return evt;
         },
 

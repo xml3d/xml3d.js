@@ -515,7 +515,7 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
                 offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
             }
         } else {
-                console.log("drawArrays: " + meshInfo.getVertexCount());
+                // console.log("drawArrays: " + meshInfo.getVertexCount());
                 gl.drawArrays(meshInfo.glType, 0, meshInfo.getVertexCount());
         }
         triCount = vbos.position ? vbos.position[i].length / 3 : 0;

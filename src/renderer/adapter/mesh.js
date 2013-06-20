@@ -433,7 +433,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             case "tristrips":
                 return GL.TRIANGLE_STRIP;
             case "points":
-                console.log("POINTS!");
                 return GL.POINTS;
             case "lines":
                 return GL.LINES;

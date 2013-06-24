@@ -32,8 +32,8 @@ Xflow.registerOperator("xflow.debug.createSkinCubes", {
     outputs: [	{type: 'int', name: 'index', customAlloc: true},
                 {type: 'float3', name: 'position', customAlloc: true},
 				{type: 'float3', name: 'normal', customAlloc: true},
-				{type: 'int4', name: 'boneIdx', customAlloc: true},
-				{type: 'float4', name: 'boneWeight', customAlloc: true}],
+				{type: 'int4', name: 'boneIndices', customAlloc: true},
+				{type: 'float4', name: 'boneWeights', customAlloc: true}],
     params:  [{type: 'float4x4', source: 'bindTransforms', array: true},
               {type: 'float', source: 'size', array: true, optional: true}],
     alloc: function(sizes, bindTransforms)
@@ -41,8 +41,8 @@ Xflow.registerOperator("xflow.debug.createSkinCubes", {
         var s = bindTransforms.length / 16;
         sizes['position'] = s * 4 * 6;
         sizes['normal'] = s * 4 * 6;
-        sizes['boneIdx'] = s * 4 * 6;
-        sizes['boneWeight'] = s * 4 * 6;
+        sizes['boneIndices'] = s * 4 * 6;
+        sizes['boneWeights'] = s * 4 * 6;
         sizes['index'] = s * 6 * 6;
     },
     evaluate: function(index, position, normal, boneIdx, boneWeight, bindTransforms, size) {

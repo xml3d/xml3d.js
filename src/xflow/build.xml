@@ -44,6 +44,7 @@
         <file name="./operator/default/flipVerticalImage.js" />
         <file name="./operator/default/selectTransform.js" />
         <file name="./operator/default/selectBool.js" />
+        <file name="./operator/default/debug.js" />
     </filelist>
 
     <target name="concat">

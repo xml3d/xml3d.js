@@ -1,4 +1,6 @@
-(function() {
+(function(XML3D) {
+
+    "use strict";
 
     /**
      * An adapter handle is a connection piece for an adapter that is referred through a uri (e.g. id reference)
@@ -12,6 +14,10 @@
         this.status = 0; // STATUS.LOADING
     };
 
+    /**
+     * Enumaeration of states for the adapter handle
+     * @enum {number}
+     */
     AdapterHandle.STATUS = {
         LOADING: 0,
         NOT_FOUND: 1,
@@ -26,7 +32,7 @@
     };
 
     /**
-     * @returns {XML3D.base.Adapter=} the adapter connected to the handle. Can be null
+     * @returns {?XML3D.base.Adapter} the adapter connected to the handle. Can be null
      */
     AdapterHandle.prototype.getAdapter = function() {
         return this.adapter;
@@ -35,7 +41,7 @@
     /**
      * Note: this function should only be called by XML3D.base.resourceManager
      * @param {XML3D.base.Adapter} adapter The adapter connected to the AdapterHandler
-     * @param {number,XML3D.base.AdapterHandle.STATUS}
+     * @param {AdapterHandle.STATUS} status
      */
     AdapterHandle.prototype.setAdapter = function(adapter, status) {
         this.adapter = adapter;
@@ -47,7 +53,7 @@
      * This function is called to notify all listeners of this AdapterHandle about some change.
      * @param {number} type A type number with the type of change (usually XML3D.events.ADAPTER_HANDLE_CHANGED)
      */
-    AdapterHandle.prototype.notifyListeners = function(type){
+    AdapterHandle.prototype.notifyListeners = function(type) {
         var event = new XML3D.events.AdapterHandleNotification(this, type);
         var i = this.listeners.length;
         while (i--) {
@@ -79,4 +85,4 @@
     // Export
     XML3D.base.AdapterHandle = AdapterHandle;
 
-}());
+}(window.XML3D));

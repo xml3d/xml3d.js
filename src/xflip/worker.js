@@ -4,6 +4,7 @@ var c_sinknodes = [];
 var c_domid_nodes = {};
 var c_graph = new Xflow.Graph();
 var c_unresolved = [];
+var c_videoModification = false;
 
 function error(msg){
     throw new Error(msg);
@@ -182,10 +183,13 @@ function imageLoaded(nodeId, imageData){
 function videoUpdate(nodeId, imageData){
     var node = c_nodes[nodeId];
     if(!node) return error("videoUpdate: Node not found");
+
+    c_videoModification = true;
     node.imageData = imageData;
     if(node.parent){
         node.parent.data.setImageData(imageData);
     }
+    c_videoModification = false;
 }
 
 
@@ -346,7 +350,8 @@ function SinkNode(id, entry, source, xflowDataNode){
 };
 
 SinkNode.prototype.invalidate = function(){
-    self.postMessage({type: "modified", id: this.id});
+    if(!c_videoModification)
+        self.postMessage({type: "modified", id: this.id});
     this.invalid = true;
 }
 

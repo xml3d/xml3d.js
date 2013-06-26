@@ -16,7 +16,7 @@ function log(msg){
 self.onmessage = function(event) {
     var data = event.data;
     var type = data['type'];
-    log("MESSAGE RECEIVED: " + type);
+    //log("MESSAGE RECEIVED: " + type);
     switch(type){
         case "initialize":
             initialize(data['root'], data['addons'])
@@ -30,13 +30,16 @@ self.onmessage = function(event) {
         case "imageLoaded":
             imageLoaded(data.id, data.imageData);
             break;
+        case "videoUpdate":
+            videoUpdate(data.id, data.imageData);
+            break;
         case "updateValue":
             updateValue(data.id, data.value);
             break;
         case "updateAttribute":
             updateAttribute(data.id, data.attrName, data.attrValue);
     }
-    log("MESSAGE DONE: " + type);
+    //log("MESSAGE DONE: " + type);
 }
 
 window.setInterval(function(){
@@ -79,7 +82,8 @@ var c_parseConfig = {
     'int4' : { attr: c_input_attr, type: "InputNode", value: 'int4' },
     'bool' : { attr: c_input_attr, type: "InputNode", value: 'bool'},
     'texture' : { attr: c_input_attr, type: "InputNode", value: 'texture'},
-    'img' : { type: "Image"}
+    'img' : { type: "Image"},
+    'video' : { type: "Video"}
 }
 
 function initialize(root, addons){
@@ -118,6 +122,7 @@ function createNode(data){
         case "SinkNode":  node = initSinkNode(id, entry, data); break;
         case "InputNode": node = initInputNode(id, entry, data); break;
         case "Image":     node = initImageNode(id, entry, data); break;
+        case "Video":     node = initVideoNode(id, entry, data); break;
         default: error("Unknown Node Type: " + type);
     }
 
@@ -139,7 +144,7 @@ function connectNodes(parentId, childId){
     if(parent.xflow instanceof Xflow.DataNode && child.xflow instanceof Xflow.GraphNode){
         parent.xflow.appendChild(child.xflow);
     }
-    else if(parent instanceof InputNode && child instanceof ImageNode){
+    else if(parent instanceof InputNode && ( child instanceof ImageNode || child instanceof VideoNode)){
         child.parent = parent.xflow;
         if(child.imageData)
             parent.xflow.data.setImageData(child.imageData);
@@ -168,6 +173,15 @@ function updateAttribute(id, attrName, attrValue){
 function imageLoaded(nodeId, imageData){
     var node = c_nodes[nodeId];
     if(!node) return error("imageLoaded: Node not found");
+    node.imageData = imageData;
+    if(node.parent){
+        node.parent.data.setImageData(imageData);
+    }
+}
+
+function videoUpdate(nodeId, imageData){
+    var node = c_nodes[nodeId];
+    if(!node) return error("videoUpdate: Node not found");
     node.imageData = imageData;
     if(node.parent){
         node.parent.data.setImageData(imageData);
@@ -257,6 +271,14 @@ function initImageNode(id, entry, data){
     return node;
 }
 
+function initVideoNode(id, entry, data){
+    var node = new VideoNode(id, entry);
+    var src = data.attribs["src"];
+    self.postMessage({type: 'streamVideo', url: src, id: node.id });
+    return node;
+}
+
+
 function setNodeAttributes(node, entry, data){
     if(entry.attr){
         for(var name in entry.attr){
@@ -338,3 +360,9 @@ function ImageNode(id, entry){
     this.id = id;
     this.entry = entry;
 };
+
+function VideoNode(id, entry){
+    this.id = id;
+    this.entry = entry;
+};
+

@@ -14,6 +14,11 @@ var Xflip = {};
     var c_done_callbacks = [];
 
 
+    var requestAnimFrame =
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame;
+
     /** Load Xflow module to extend functionality
      * @param addOns Array of urls for modules to load
      **/
@@ -57,6 +62,8 @@ var Xflip = {};
         document.head.appendChild(style);
     }
 
+    var c_converCanvas
+
     function onMessage(event){
         var data = event.data;
         var type = data['type'];
@@ -77,6 +84,24 @@ var Xflip = {};
                         'id' : id, 'imageData': data });
                 }
                 img.src = url;
+                break;
+            case 'streamVideo':
+                var url = data['url'];
+                var id = data['id'];
+                var video = document.createElement("video");
+                video.autoplay = true;
+                video.addEventListener('canplay', function(){
+
+                    var tick = function(){
+                        var data = createImageData(video);
+                        c_worker.postMessage({ 'type' : 'videoUpdate' ,
+                            'id' : id, 'imageData': data });
+                        requestAnimFrame.call(window, arguments.callee);
+                    }
+                    requestAnimFrame.call(window, tick);
+
+                }, true)
+                video.src = url;
                 break;
             case 'updateSinkImage':
                 updateSinkImage(data['id'], data['imageData']);
@@ -239,7 +264,7 @@ var Xflip = {};
     function initNodeChildren(node){
         var k = node.firstChild;
         while (k) {
-            if(k.nodeType != 3){
+            if(k.nodeType != 3 && k.nodeType != 8){
                 initNode(k);
                 if(k._xflowip){
                     c_worker.postMessage({ 'type' : 'connectNodes' ,
@@ -288,12 +313,14 @@ var Xflip = {};
     }
 
     var c_canvas = document.createElement("canvas");
-    function createImageData(img){
-        c_canvas.width = img.width;
-        c_canvas.height = img.height;
+    function createImageData(imgOrVideo){
+        var width = imgOrVideo.width || imgOrVideo.videoWidth,
+            height = imgOrVideo.height || imgOrVideo.videoHeight;
+        c_canvas.width = width;
+        c_canvas.height = height;
         var ctx = c_canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        return ctx.getImageData(0, 0, img.width, img.height);
+        ctx.drawImage(imgOrVideo, 0, 0);
+        return ctx.getImageData(0, 0, width, height);
     }
     function getNativeImageData(imageData){
         if(imageData instanceof ImageData)

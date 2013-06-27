@@ -350,7 +350,7 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, firstOpaque, opaque
     } else if (tlength == 1) {
         transparent[0] = tempArray[0];
     }
-    console.log("Sorted: " + transparent.length);
+    //console.log("Sorted: " + transparent.length);
 };
 
 var tmpModelMatrix = XML3D.math.mat4.create();

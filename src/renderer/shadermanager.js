@@ -378,7 +378,7 @@
     XML3DShaderManager.prototype.getShaderByURL = function(url) {
         var sp = this.shaders[url];
         if (!sp) {
-            var shaderAdapter = this.factory.getAdapter(document.getElementById(url));
+            var shaderAdapter = XML3D.base.resourceManager.getAdapter(document.getElementById(url), XML3D.webgl, this.canvasId);
             if (shaderAdapter) {
                 // This must be a shader we haven't created yet (maybe it was
                 // just added or

@@ -95,7 +95,7 @@
             var page = offset>>PAGE_SIZE;
             var localOffset = offset&((1<<PAGE_SIZE)-1);
             if(!this.pages[page]) {
-                console.log("New page:" + page);
+                XML3D.debug.logInfo("New page:" + page);
                 this.pages[page] = new Float32Array(1<<PAGE_SIZE);
             }
             this.nextOffset += ENTRY_SIZE;
@@ -251,13 +251,14 @@
         }
     };
 
+    /**
      * @param {Xflow.Result} result
      */
     RenderObject.prototype.setOverride = function(result) {
         if(!result.outputNames.length)
             return;
 
-        var prog = this.meshAdapter.factory.renderer.shaderManager.getShaderById(this.shader);
+        var prog = this.shader.program;
         this.override = Object.create(null);
         for(var name in prog.uniforms) {
             var entry = result.getOutputData(name);

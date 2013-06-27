@@ -182,11 +182,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     }
 
     p.finishMesh = function() {
-        var prog = this.factory.renderer.shaderManager.getShaderById(this.renderObject.shader);
+        var programObject = this.renderObject.shader.program;
 
-        this.requestObject = prog.material.meshRequest;
+        this.requestObject = programObject.material.meshRequest;
 
-        this.createRequests(Object.keys(this.requestObject), Object.keys(prog.uniforms));
+        this.createRequests(Object.keys(this.requestObject), Object.keys(programObject.uniforms));
 
         this.createMeshData();
         this.createPerObjectData();
@@ -323,7 +323,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @param {MeshInfo} meshInfo
      */
     p.handleTexture = function(name, entry, shaderId, meshInfo) {
-        var prog = this.factory.renderer.shaderManager.getShaderById(shaderId);
+        var prog = this.factory.renderer.shaderManager.getShaderByURL(shaderId);
         meshInfo.sampler = meshInfo.sampler || {};
         var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
 

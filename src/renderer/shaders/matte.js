@@ -15,9 +15,6 @@ XML3D.shaders.register("matte", {
     ].join("\n"),
 
     fragment: [
-        "#ifdef GL_ES",
-          "precision highp float;",
-        "#endif",
         "uniform vec3 diffuseColor;",
         "uniform bool useVertexColor;",
 

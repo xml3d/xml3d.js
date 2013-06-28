@@ -33,10 +33,6 @@ XML3D.shaders.register("point", {
     ].join("\n"),
 
     fragment : [
-        "#ifdef GL_ES",
-          "precision highp float;",
-        "#endif",
-
         "uniform vec3 diffuseColor;",
         "uniform float transparency;",
         "uniform mat4 viewMatrix;",

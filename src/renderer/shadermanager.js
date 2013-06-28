@@ -1,4 +1,4 @@
-(function() {
+﻿(function() {
 
     /***************************************************************************
      * Class XML3D.webgl.XML3DShaderManager
@@ -74,6 +74,19 @@
         this.shaders = {};
 
         this.createDefaultShaders();
+    };
+
+    XML3DShaderManager.FRAGMENT_HEADER = [
+        "#ifdef GL_FRAGMENT_PRECISION_HIGH",
+        "precision highp float;",
+        "#else",
+        "precision mediump float;",
+        "#endif // GL_FRAGMENT_PRECISION_HIGH",
+        "\n"
+    ].join("\n");
+
+    XML3DShaderManager.addFragmentShaderHeader = function(fragmentShaderSource) {
+        return XML3DShaderManager.FRAGMENT_HEADER + fragmentShaderSource;
     };
 
     /**
@@ -191,6 +204,8 @@
             sources = {};
             XML3D.debug.logError("Unknown shader: " + name + ". Using flat shader instead.");
         }
+
+        sources.fragment = XML3DShaderManager.addFragmentShaderHeader(sources.fragment);
 
         var shaderProgram = this.createProgramFromSources(sources);
 

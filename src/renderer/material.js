@@ -38,6 +38,8 @@
 
         var directives = [],
             sources = {};
+
+        this.fragment = XML3D.webgl.XML3DShaderManager.addFragmentShaderHeader(this.fragment);
         this.addDirectives(directives, lights || {}, data ? data.getOutputMap() : {});
         sources.fragment = Material.addDirectivesToSource(directives, this.fragment);
         sources.vertex = Material.addDirectivesToSource(directives, this.vertex);

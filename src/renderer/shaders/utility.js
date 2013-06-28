@@ -9,9 +9,6 @@ XML3D.shaders.register("pickobjectid", {
     ].join("\n"),
 
     fragment : [
-        "#ifdef GL_ES",
-          "precision highp float;",
-        "#endif",
         "uniform vec3 id;",
 
         "void main(void) {",
@@ -42,10 +39,6 @@ XML3D.shaders.register("pickedposition", {
     ].join("\n"),
 
     fragment : [
-        "#ifdef GL_ES",
-          "precision highp float;",
-        "#endif",
-
         "varying vec3 worldCoord;",
 
         "void main(void) {",
@@ -74,10 +67,6 @@ XML3D.shaders.register("pickedNormals", {
     ].join("\n"),
 
     fragment : [
-        "#ifdef GL_ES",
-          "precision highp float;",
-        "#endif",
-
         "varying vec3 fragNormal;",
 
         "void main(void) {",

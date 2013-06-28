@@ -411,7 +411,9 @@ Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId,
     this.shaderManager.updateActiveShader(shader);
 
     parameters["viewMatrix"] = this.camera.viewMatrix;
+    parameters["projectionMatrix"] = this.camera.getProjectionMatrix(this.width / this.height);
     parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
+    parameters["screenWidth"] = this.width;
 
     //Set global data that is shared between all objects using this shader
     this.shaderManager.setUniformVariables(shader, parameters);

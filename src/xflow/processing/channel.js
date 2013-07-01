@@ -379,8 +379,14 @@
 // Xflow.Substitution
 //----------------------------------------------------------------------------------------------------------------------
 
-    Xflow.Substitution = function(channelMap, substitution){
+    Xflow.Substitution = function(channelMap, substitution, subtreeProtoNames){
         this.map = {};
+        if(substitution && subtreeProtoNames){
+            for(var i = 0; i < subtreeProtoNames.length; ++i){
+                var name = subtreeProtoNames[i];
+                this.map[name] = substitution.map[name];
+            }
+        }
         for(var name in channelMap.map){
             this.map[name] = channelMap.getChannel(name, substitution);
         }

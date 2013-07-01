@@ -97,12 +97,12 @@
     }
 
 
-    ChannelMap.prototype.addDataEntry = function(name, dataSlot, param, substitution)
+    ChannelMap.prototype.addDataEntry = function(name, dataSlot, paramName, substitution)
     {
         var entry = getEntry(this.map, name);
-        if(param && substitution){
-            if(substitution.map[name]){
-                mergeChannelsIntoMapEntry(this, entry, substitution.map[name], substitution);
+        if(paramName && substitution){
+            if(substitution.map[paramName]){
+                mergeChannelsIntoMapEntry(this, entry, substitution.map[paramName], substitution);
                 return;
             }else{
                 // TODO: at this point we use default values - we need to show an error, if a default values does not exists.

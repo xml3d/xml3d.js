@@ -51,7 +51,7 @@
     TextureDataAdapter.prototype.createXflowNode = function() {
         var xnode = XML3D.data.xflowGraph.createInputNode();
         xnode.name = this.node.name;
-        xnode.param = this.node.param;
+        xnode.paramName = this.node.param ? this.node.name : null;
         xnode.key = this.node.key;
         return xnode;
     };
@@ -81,7 +81,7 @@
                 this.xflowInputNode.key = this.node.key;
             }
             else if(attr == "param"){
-                this.xflowInputNode.param = this.node.param;
+                this.xflowInputNode.paramName = this.node.param ? this.node.name : null;
             }
         }
     };

@@ -1,66 +1,5 @@
-// Misc adapters
 (function() {
     var listenerID = 0;
-
-    XML3D.webgl.RenderAdapter = function(factory, node) {
-        XML3D.base.NodeAdapter.call(this, factory, node);
-    };
-    XML3D.createClass(XML3D.webgl.RenderAdapter, XML3D.base.NodeAdapter);
-
-    XML3D.webgl.RenderAdapter.prototype.getShader = function() {
-        return null;
-    };
-
-    XML3D.webgl.RenderAdapter.prototype.getAdapterHandle = function(uri) {
-        return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, uri,
-            XML3D.webgl, this.factory.handler.id);
-    };
-
-    XML3D.webgl.RenderAdapter.prototype.applyTransformMatrix = function(
-            transform) {
-        return transform;
-    };
-
-    /**
-     * @param {Array.<string>} customAttributes
-     */
-    XML3D.webgl.RenderAdapter.prototype.initializeEventAttributes = function(customAttributes) {
-        var attributes = this.node.attributes;
-        customAttributes = customAttributes || [];
-
-        for (var index in attributes) {
-            var att = attributes[index];
-            if (!att.name)
-                continue;
-
-            var type = att.name;
-            if (type.substring(2,0) == "on")  {
-                var eventType = type.substring(2);
-                if (XML3D.webgl.events.available.indexOf(eventType) != -1 || customAttributes.indexOf(eventType) != -1) {
-                    this.node.addEventListener(eventType, new Function("event", att.value), false);
-                }
-            }
-        }
-    };
-
-
-    //Adapter for <defs>
-    XML3D.webgl.DefsRenderAdapter = function(factory, node) {
-        XML3D.webgl.RenderAdapter.call(this, factory, node);
-    };
-    XML3D.createClass(XML3D.webgl.DefsRenderAdapter, XML3D.webgl.RenderAdapter);
-
-    //Adapter for <img>
-    XML3D.webgl.ImgRenderAdapter = function(factory, node) {
-        XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.textureAdapter = factory.getAdapter(node.parentNode);
-    };
-    XML3D.createClass(XML3D.webgl.ImgRenderAdapter, XML3D.webgl.RenderAdapter);
-
-    XML3D.webgl.ImgRenderAdapter.prototype.notifyChanged = function(evt) {
-        this.textureAdapter.notifyChanged(evt);
-    };
-
     var staticAttributes = ["position", "direction", "intensity", "attenuation", "softness", "falloffAngle"];
 
     /**
@@ -106,11 +45,11 @@
     };
 
     /**
-    *
-    * @param {Object} directional
-    * @param {number} i
-    * @param {number} offset
-    */
+     *
+     * @param {Object} directional
+     * @param {number} i
+     * @param {number} offset
+     */
     XML3D.webgl.LightShaderRenderAdapter.prototype.fillDirectionalLight = function(directional, i, offset) {
         this.callback = directional.dataChanged;
         this.offsets.push(offset);
@@ -121,11 +60,11 @@
     };
 
     /**
-    *
-    * @param {Object} directional
-    * @param {number} i
-    * @param {number} offset
-    */
+     *
+     * @param {Object} directional
+     * @param {number} i
+     * @param {number} offset
+     */
     XML3D.webgl.LightShaderRenderAdapter.prototype.fillSpotLight = function(spot, i, offset) {
         this.callback = spot.dataChanged;
         this.offsets.push(offset);
@@ -147,21 +86,21 @@
             return;
 
         switch (type) {
-        case "point":
-            lo.intensity.splice(offset, 3);
-            lo.attenuation.splice(offset, 3);
-            break;
+            case "point":
+                lo.intensity.splice(offset, 3);
+                lo.attenuation.splice(offset, 3);
+                break;
 
-        case "directional":
-            lo.intensity.splice(offset, 3);
-            break;
+            case "directional":
+                lo.intensity.splice(offset, 3);
+                break;
 
-        case "spot":
-            lo.intensity.splice(offset, 3);
-            lo.attenuation.splice(offset, 3);
-            lo.beamWidth.splice(offset/3, 1);
-            lo.cutOffAngle.splice(offset/3, 1);
-            break;
+            case "spot":
+                lo.intensity.splice(offset, 3);
+                lo.attenuation.splice(offset, 3);
+                lo.beamWidth.splice(offset/3, 1);
+                lo.cutOffAngle.splice(offset/3, 1);
+                break;
         }
 
         lights.changed = true;
@@ -228,4 +167,4 @@
         return this.computeRequest.getResult().getOutputData(name);
     };
 
-}());
+})();

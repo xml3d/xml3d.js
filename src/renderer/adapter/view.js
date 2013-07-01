@@ -1,7 +1,7 @@
 // Adapter for <view>
 (function() {
     var ViewRenderAdapter = function(factory, node) {
-        XML3D.webgl.RenderAdapter.call(this, factory, node);
+        XML3D.webgl.TransformableAdapter.call(this, factory, node);
         this.zFar = 100000;
         this.zNear = 0.1;
         this.parentTransform = null;
@@ -10,7 +10,7 @@
         this.worldPosition = [0,0,0];
         this.updateViewMatrix();
     };
-    XML3D.createClass(ViewRenderAdapter, XML3D.webgl.RenderAdapter);
+    XML3D.createClass(ViewRenderAdapter, XML3D.webgl.TransformableAdapter);
     var p = ViewRenderAdapter.prototype;
 
     var tmp = XML3D.math.mat4.create(),
@@ -90,7 +90,7 @@
     };
 
     p.getWorldSpacePosition = function() {
-    	return this.worldPosition;
+        return this.worldPosition;
     };
 
     p.notifyChanged = function(evt) {

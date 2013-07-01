@@ -109,13 +109,15 @@
         return this.finalOutputChannels.getNames();
     }
 
+
     ChannelNode.prototype.getParamNames = function(){
         this.synchronize();
         this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
         return this.protoNames;
     }
 
-    ChannelNode.prototype.getComputeResult = function(filter){
+    ChannelNode.prototype.getResult = function(type, filter)
+    {
         this.synchronize();
         this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
 
@@ -123,8 +125,9 @@
         if(!this.requestNodes[key]){
             this.requestNodes[key] = new Xflow.RequestNode(this, filter);
         }
-        return this.requestNodes[key].getResult(Xflow.RESULT_TYPE.COMPUTE);
+        return this.requestNodes[key].getResult(type);
     }
+
 
     ChannelNode.prototype.getOutputChannelInfo = function(name){
         this.synchronize();
@@ -212,8 +215,14 @@
     }
 
     function setOperatorProtoNames(channelNode){
-        var operatorName = channelNode.owner._computeOperator;
-        channelNode.operator = operatorName && Xflow.getOperator(operatorName);
+        if(typeof channelNode.owner._computeOperator == "string"){
+            var operatorName = channelNode.owner._computeOperator;
+            channelNode.operator = operatorName && Xflow.getOperator(operatorName);
+        }
+        else{
+            channelNode.operator = channelNode.owner._computeOperator;
+        }
+
         if(channelNode.operator){
             var operator = channelNode.operator, inputMapping = channelNode.owner._computeInputMapping;
             for(var i = 0; i < operator.params.length; ++i){

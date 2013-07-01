@@ -150,6 +150,10 @@ Xflow.createBufferInputNode = function(type, name, size){
 // Xflow.DataNode
 //----------------------------------------------------------------------------------------------------------------------
 
+var c_xflowNodeId = 0;
+function getXflowNodeId(){
+    return ++c_xflowNodeId;
+}
 
 /**
  * @constructor
@@ -160,7 +164,7 @@ Xflow.DataNode = function(graph, protoNode){
 
     this.loading = false;
 
-
+    this.id = getXflowNodeId();
     this._isProtoNode = protoNode;
     this._children = [];
     this._sourceNode = null;
@@ -446,8 +450,12 @@ DataNode.prototype.getParamNames = function(){
     return getForwardNode(this)._channelNode.getParamNames();
 }
 
-DataNode.prototype._getComputeResult = function(filter){
-    return getForwardNode(this)._channelNode.getComputeResult(filter);
+DataNode.prototype._getResult = function(type, filter){
+    return getForwardNode(this)._channelNode.getResult(type, filter);
+}
+
+DataNode.prototype._getForwardNode = function(){
+    return getForwardNode(this);
 }
 
 function getForwardNode(dataNode){

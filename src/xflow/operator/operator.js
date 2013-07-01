@@ -13,6 +13,12 @@ Xflow.registerOperator = function(name, data){
     data.name = actualName;
 };
 
+Xflow.initAnonymousOperator = function(data){
+    initOperator(data);
+    data.name = "Anonymous Operator";
+    return data;
+}
+
 Xflow.getOperator = function(name){
     if (name && !operators[name])
     {

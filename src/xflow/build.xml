@@ -7,9 +7,9 @@
 
     <filelist dir="." id="sourceFiles">
         <file name="./base.js" />
-        <file name="./graph/data.js" />
-        <file name="./graph/graph.js" />
-        <file name="./graph/mapping.js" />
+        <file name="./interface/data.js" />
+        <file name="./interface/graph.js" />
+        <file name="./interface/mapping.js" />
         <file name="./processing/channel.js" />
         <file name="./processing/channel-node.js" />
         <file name="./processing/process-node.js" />

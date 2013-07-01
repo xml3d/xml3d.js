@@ -73,7 +73,7 @@ XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
 
 XML3D.data.DataAdapter.prototype.getComputeResult = function(filter)
 {
-    var result = this.xflowDataNode._getComputeResult(filter);
+    var result = this.xflowDataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, filter);
     return result;
 }
 

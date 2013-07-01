@@ -98,6 +98,32 @@ Xflow.TEX_TYPE = {
     TEXTURE_2D: 0x0DE1
 };
 
+Xflow.SHADER_CONSTANT_KEY = {
+    WORLD_TRANSFORM: 1,
+    VIEW_TRANSFORM: 2,
+    SCREEN_TRANSFORM: 3,
+    WORLD_TRANSFORM_NORMAL: 4,
+    VIEW_TRANSFORM_NORMAL: 5,
+    SCREEN_TRANSFORM_NORMAL: 6,
+    OBJECT_ID: 7
+}
+
+Xflow.VS_ATTRIB_TYPE = {
+    FLOAT: 1,
+    FLOAT2: 2,
+    FLOAT3: 3,
+    FLOAT3_VIEW_POINT: 101,
+    FLOAT3_WORLD_POINT: 102,
+    FLOAT3_VIEW_NORMAL: 103,
+    FLOAT3_WORLD_NORMAL: 104,
+    FLOAT4 : 4,
+    FLOAT4X4 : 10,
+    INT: 20,
+    INT4: 21,
+    BOOL: 30,
+    TEXTURE: 40
+}
+
 
 /**
  * Filter Type of DataNode
@@ -124,7 +150,8 @@ Xflow.DATA_ENTRY_STATE = {
 };
 
 Xflow.RESULT_TYPE = {
-    COMPUTE: 0
+    COMPUTE: 0,
+    VS: 1
 }
 
 

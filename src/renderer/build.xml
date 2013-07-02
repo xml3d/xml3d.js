@@ -16,7 +16,7 @@
         <file name="material.js" />
         <file name="bufferhandler.js" />
         <file name="scenegraph/renderobject.js" />
-        <file name="scenegraph/renderobjecthandler.js" />
+        <file name="scenegraph/scene.js" />
         <file name="renderer.js" />
         <file name="adapter/base.js" />
         <file name="adapter/transformable.js" />

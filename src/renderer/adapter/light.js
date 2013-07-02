@@ -22,7 +22,7 @@
     };
     XML3D.createClass(LightRenderAdapter, XML3D.webgl.TransformableAdapter);
 
-    LightRenderAdapter.prototype.onConfigured = function() {
+    LightRenderAdapter.prototype.createRenderNode = function() {
         // Create renderNode
     };
 

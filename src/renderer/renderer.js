@@ -28,7 +28,7 @@ var Renderer = function(handler, context, dimensions) {
     this.width = dimensions.width;
     this.height = dimensions.height;
 
-    this.renderObjects = new XML3D.webgl.RenderObjectHandler();
+    this.scene = new XML3D.webgl.Scene();
 
     this.initialize();
 };
@@ -51,7 +51,7 @@ Renderer.prototype.initializeScenegraph = function() {
         directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
             spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
     };
-    this.recursiveBuildScene(this.xml3dNode, this.renderObjects.queue, null);
+    this.recursiveBuildScene(this.xml3dNode, this.scene.queue, null);
     if (this.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
@@ -126,13 +126,13 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         adapter.setShaderHandle(parent.shader);
 
         // Add a new RenderObject to the scene
-        var newObject = this.renderObjects.createRenderObject({
-            meshAdapter : adapter,
-            visible: parent.visible && currentNode.visible,
-            transform: parent.transform,
-            pickable: parent.pickable
-        });
-        renderObjectArray.push(newObject);
+//        var newObject = this.scene.createRenderObject({
+//            meshAdapter : adapter,
+//            visible: parent.visible && currentNode.visible,
+//            transform: parent.transform,
+//            pickable: parent.pickable
+//        });
+       // renderObjectArray.push(meshAdapter.renderNode);
         break;
 
     case "light":
@@ -244,7 +244,7 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
 
     //Build any new objects and add them to the scene
     var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
-    this.recursiveBuildScene(evt.wrapped.target, this.renderObjects.queue, state);
+    this.recursiveBuildScene(evt.wrapped.target, this.scene.queue, state);
     this.requestRedraw("A node was added.");
 };
 
@@ -258,9 +258,10 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
 };
 
 Renderer.prototype.prepareRendering = function() {
-    var renderObjects = this.renderObjects;
-    renderObjects.updateLights(this.lights, this.shaderManager);
-    renderObjects.consolidate();
+    var scene = this.scene;
+    scene.updateLights(this.lights, this.shaderManager);
+    scene.consolidate();
+    //scene.updateDirtyObjects();
 };
 
 /**
@@ -282,7 +283,7 @@ Renderer.prototype.renderToCanvas = function() {
     camera.view = this.camera.viewMatrix;
     camera.proj = this.camera.getProjectionMatrix(this.width / this.height);
 
-    this.renderObjects.ready.forEach( function(obj) {
+    this.scene.ready.forEach( function(obj) {
         obj.updateWorldSpaceMatrices(camera.view, camera.proj);
     });
 
@@ -291,7 +292,7 @@ Renderer.prototype.renderToCanvas = function() {
     //Sort objects by shader/transparency
     var opaqueObjects = [];
     var transparentObjects = [];
-    this.sortObjects(this.renderObjects.ready, this.renderObjects.firstOpaqueIndex, opaqueObjects, transparentObjects, camera);
+    this.sortObjects(this.scene.ready, this.scene.firstOpaqueIndex, opaqueObjects, transparentObjects, camera);
 
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
@@ -328,7 +329,7 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, firstOpaque, opaque
     if (tlength > 1) {
         for (i = 0; i < tlength; i++) {
             var obj = tempArray[i];
-            obj.getTransformation(tmpModelMatrix);
+            obj.getWorldMatrix(tmpModelMatrix);
             XML3D.math.vec3.set(obj.mesh.bbox.center()._data, c_tmpVec4);
             c_tmpVec4[3] = 1.0;
             XML3D.math.vec4.transformMat4(c_tmpVec4, c_tmpVec4, tmpModelMatrix);
@@ -418,13 +419,13 @@ Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId,
 
     for (var i = 0, n = objectArray.length; i < n; i++) {
         var obj = objectArray[i];
-        if (!obj.visible)
+        if (!obj.isVisible())
             continue;
 
         var mesh = obj.mesh;
         XML3D.debug.assert(mesh && mesh.valid, "Mesh has to be valid at his point.");
 
-        obj.getTransformation(tmpModelMatrix);
+        obj.getWorldMatrix(tmpModelMatrix);
         parameters["modelMatrix"] = tmpModelMatrix;
 
         obj.getModelViewMatrix(tmpModelView);
@@ -566,7 +567,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 
     var shader = this.shaderManager.getShaderByURL("pickobjectid");
     this.shaderManager.bindShader(shader);
-    var objects = this.renderObjects.ready;
+    var objects = this.scene.ready;
 
     for ( var j = 0, n = objects.length; j < n; j++) {
         var obj = objects[j];
@@ -577,7 +578,7 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
 
         var parameters = {};
 
-        obj.getTransformation(tmpModelMatrix);
+        obj.getWorldMatrix(tmpModelMatrix);
         XML3D.math.mat4.multiply(mvp, viewMatrix, tmpModelMatrix);
         XML3D.math.mat4.multiply(mvp, projMatrix, mvp);
 
@@ -616,7 +617,7 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     gl.disable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
 
-    pickedObj.getTransformation(tmpModelMatrix);
+    pickedObj.getWorldMatrix(tmpModelMatrix);
     this.bbMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
     this.bbMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
     XML3D.webgl.adjustMinMax(pickedObj.mesh.bbox, this.bbMin, this.bbMax, tmpModelMatrix);
@@ -663,7 +664,7 @@ Renderer.prototype.renderPickedNormals = function(pickedObj) {
     gl.disable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
 
-    pickedObj.getTransformation(tmpModelMatrix);
+    pickedObj.getWorldMatrix(tmpModelMatrix);
     var transform = tmpModelMatrix;
     var mesh = pickedObj.mesh;
 
@@ -714,7 +715,7 @@ Renderer.prototype.getRenderObjectFromPickingBuffer = function(screenX, screenY)
     var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
     if (objId > 0) {
-        var pickedObj = this.renderObjects.ready[objId - 1];
+        var pickedObj = this.scene.ready[objId - 1];
         result = pickedObj;
     }
     return result;
@@ -800,7 +801,7 @@ Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
  * @return
  */
 Renderer.prototype.dispose = function() {
-    this.renderObjects.clear();
+    this.scene.clear();
 };
 
 /**

@@ -5,14 +5,13 @@
      * @interface
      */
     var IRenderNode = function() {};
-    IRenderNode.prototype.getModelMatrix = function() {};
-    IRenderNode.prototype.setModelMatrix = function() {};
     IRenderNode.prototype.getObjectSpaceBoundingBox = function() {};
-    IRenderNode.prototype.getModelViewMatrix = function() {};
+    IRenderNode.prototype.getWorldMatrix = function() {};
     IRenderNode.prototype.getWorldSpaceBoundingBox = function() {};
-    IRenderNode.prototype.isVisible = function() {};
     IRenderNode.prototype.getChildren = function() {};
     IRenderNode.prototype.getParent = function() {};
+    IRenderNode.prototype.setParent = function() {};
+    IRenderNode.prototype.setTransformDirty = function() {};
 
     /**
      *
@@ -20,6 +19,9 @@
      * @extends {IRenderNode}
      */
     var IRenderGroup = function() {};
+    IRenderGroup.prototype.getLocalMatrix = function() {};
+    IRenderGroup.prototype.setLocalMatrix = function() {};
+    IRenderGroup.prototype.addChild = function() {};
 
     /**
      *
@@ -27,16 +29,95 @@
      * @extends {IRenderNode}
      */
     var IRenderObject = function() {};
-
+    IRenderObject.prototype.getModelViewMatrix = function() {};
+    IRenderObject.prototype.getModelViewProjectionMatrix = function() {};
+    IRenderObject.prototype.getNormalMatrix = function() {};
+    IRenderObject.prototype.isVisible = function() {};
 
     // Entry:
     // 1: WorldTransformation [16 floats]
-    var MODEL_MATRIX_OFFSET = 0;
-    var MODELVIEW_MATRIX_OFFSET = 16;
-    var MODELVIEWPROJECTION_MATRIX_OFFSET = 32;
-    var NORMAL_MATRIX_OFFSET = 48;
-    var c_tmpMatrix = XML3D.math.mat4.create();
+    var LOCAL_MATRIX_OFFSET = 0;
+    var WORLD_MATRIX_OFFSET = 16;
+    var MODELVIEW_MATRIX_OFFSET = 32;
+    var MODELVIEWPROJECTION_MATRIX_OFFSET = 48;
+    var NORMAL_MATRIX_OFFSET = 64;
 
+
+    /**
+     * @constructor
+     * @implements {IRenderNode}
+     * @param handler
+     * @param pageEntry
+     * @param opt
+     */
+    var RenderNode = function(handler, pageEntry, opt) {
+        this.parent = null;
+        this.handler = handler;
+        this.page = pageEntry.page;
+        this.offset = pageEntry.offset;
+        this.transformDirty = true;
+        this.shaderDirty = true;
+    };
+
+    XML3D.extend(RenderNode.prototype, {
+
+        getChildren: function() {
+            return [];
+        },
+
+        getParent: function() {
+            return this.parent;
+        },
+
+        setParent: function(parent) {
+            this.parent = parent;
+            if (parent && parent.addChild) {
+                parent.addChild(this);
+            }
+        },
+
+        getWorldSpaceBoundingBox: function() {
+            // TODO: Placeholder
+        },
+
+        getObjectSpaceBoundingBox: function() {
+            // TODO: Placeholder
+        },
+
+        getWorldMatrix: function(dest) {
+            if (this.transformDirty) {
+                this.parent.getWorldMatrix(dest);
+                this.setWorldMatrix(dest);
+                this.transformDirty = false;
+            }
+            var o = this.offset + WORLD_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                dest[i] = this.page[o];
+            }
+        },
+
+        setWorldMatrix: function(source) {
+            var o = this.offset + WORLD_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                this.page[o] = source[i];
+            }
+        },
+
+        setTransformDirty: function() {
+            this.transformDirty = true;
+        },
+
+        setVisible: function(newVisible) {
+            this.visible = newVisible;
+        },
+
+        setShaderDirty: function() {
+            this.shaderDirty = true;
+        }
+
+    });
+
+    XML3D.webgl.RenderNode = RenderNode;
 
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
     /**
@@ -49,23 +130,23 @@
      * @param {Object} opt
      */
     var RenderObject = function (handler, pageEntry, opt) {
+        XML3D.webgl.RenderNode.call(this, handler, pageEntry, opt);
         // console.log(pageEntry);
-        this.handler = handler;
-        this.page = pageEntry.page;
-        this.offset = pageEntry.offset;
         this.meshAdapter = opt.meshAdapter;
         this.shaderAdapter = null;
         this.shader = opt.shader || null;
-        this.setTransformation(opt.transform || RenderObject.IDENTITY_MATRIX);
-        this.visible = opt.visible !== undefined ? opt.visible : true;
         this.meshAdapter.renderObject = this;
         /** {Object?} **/
         this.override = null;
+        this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
+        this.transformDirty = true;
+        this.visible = opt.visible || true;
         this.create();
     };
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
-    RenderObject.prototype = {
+    XML3D.createClass(RenderObject, XML3D.webgl.RenderNode);
+    XML3D.extend(RenderObject.prototype, {
         onenterReady:function () {
             //console.log("Entering Ready state");
             this.handler.moveFromQueueToReady(this);
@@ -108,13 +189,6 @@
             XML3D.debug.logInfo("Changed: ", name, from, to);
         },
 
-        getModelMatrix: function(target) {
-            var o = this.offset + MODEL_MATRIX_OFFSET;
-            for(var i = 0; i < 16; i++, o++) {
-                target[i] = this.page[o];
-            }
-        },
-
         getModelViewMatrix: function(target) {
             var o = this.offset + MODELVIEW_MATRIX_OFFSET;
             for(var i = 0; i < 16; i++, o++) {
@@ -135,11 +209,19 @@
             target[8] = this.page[o+10];
         },
 
-        getModelViewProjectionMatrix: function(target) {
+        getModelViewProjectionMatrix: function(dest) {
             var o = this.offset + MODELVIEWPROJECTION_MATRIX_OFFSET;
             for(var i = 0; i < 16; i++, o++) {
-                target[i] = this.page[o];
+                dest[i] = this.page[o];
             }
+        },
+
+        setWorldMatrix: function(source) {
+            var o = this.offset + WORLD_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                this.page[o] = source[i];
+            }
+            this.transformDirty = false;
         },
 
         updateWorldSpaceMatrices: function(view, projection) {
@@ -152,30 +234,28 @@
         updateModelViewMatrix: function(view) {
             var page = this.page;
             var offset = this.offset;
-            XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEW_MATRIX_OFFSET, page, offset+MODEL_MATRIX_OFFSET,  view, 0);
+            XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEW_MATRIX_OFFSET, page, offset+WORLD_MATRIX_OFFSET,  view, 0);
         },
+
         /** Relies on an up-to-date view matrix **/
-        updateNormalMatrix: function() {
-            this.getModelViewMatrix(c_tmpMatrix);
-            var normalMatrix = XML3D.math.mat4.invert(c_tmpMatrix, c_tmpMatrix);
-            normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : RenderObject.IDENTITY_MATRIX;
-            var o = this.offset + NORMAL_MATRIX_OFFSET;
-            for(var i = 0; i < 16; i++, o++) {
-                this.page[o] = normalMatrix[i];
+        updateNormalMatrix: (function() {
+            var c_tmpMatrix = XML3D.math.mat4.create();
+            return function () {
+                this.getModelViewMatrix(c_tmpMatrix);
+                var normalMatrix = XML3D.math.mat4.invert(c_tmpMatrix, c_tmpMatrix);
+                normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : RenderObject.IDENTITY_MATRIX;
+                var o = this.offset + NORMAL_MATRIX_OFFSET;
+                for(var i = 0; i < 16; i++, o++) {
+                    this.page[o] = normalMatrix[i];
+                }
             }
-        },
+        })(),
+
         /** Relies on an up-to-date view matrix **/
         updateModelViewProjectionMatrix: function(projection) {
             var page = this.page;
             var offset = this.offset;
             XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEWPROJECTION_MATRIX_OFFSET, page, offset+MODELVIEW_MATRIX_OFFSET,  projection, 0);
-        },
-
-        setModelMatrix: function(source) {
-            var o = this.offset + MODEL_MATRIX_OFFSET;
-            for(var i = 0; i < 16; i++, o++) {
-                this.page[o] = source[i];
-            }
         },
 
         /*
@@ -195,22 +275,19 @@
             XML3D.debug.logInfo("Shader attribute override", result, this.override);
         },
 
-        getChildren: function() {
-            return [];
-        },
-        getParent: function() {
-            // TODO: Placeholder
-        },
+        updateWorldMatrix: (function() {
+            var wm_tmp = XML3D.math.mat4.create();
+            return function() {
+                this.parent.getWorldMatrix(wm_tmp);
+                this.setWorldMatrix(wm_tmp);
+            };
+        })(),
+
         isVisible: function() {
-            // TODO: Placeholder
-        },
-        getWorldSpaceBoundingBox: function() {
-            // TODO: Placeholder
-        },
-        getObjectSpaceBoundingBox: function() {
-            // TODO: Placeholder
+            return this.visible;
         }
-    };
+
+    });
 
     // Export
     XML3D.webgl.RenderObject = RenderObject;
@@ -221,32 +298,27 @@
      * @constructor
      * @implements {IRenderGroup}
      */
-    var RenderGroup = function() {
-
+    var RenderGroup = function(handler, pageEntry, opt) {
+        XML3D.webgl.RenderNode.call(this, handler, pageEntry, opt);
+        this.children = [];
+        this.shader = opt.shader || null;
+        this.localVisible = opt.visible || true;
     };
-
-    RenderGroup.prototype = {
-        getModelMatrix: function() {
-            // TODO: Placeholder
-        },
-        setModelMatrix: function() {
-            // TODO: Placeholder
-        },
-
-        getModelViewMatrix: function() {
-            // TODO: Placeholder
+    XML3D.createClass(RenderGroup, XML3D.webgl.RenderNode);
+    XML3D.extend(RenderGroup.prototype, {
+        getLocalMatrix: function(dest) {
+            var o = this.offset + LOCAL_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                dest[i] = this.page[o];
+            }
         },
 
-        getChildren: function() {
-            return [];
-        },
-
-        getParent: function() {
-            // TODO: Placeholder
-        },
-
-        isVisible: function() {
-            // TODO: Placeholder
+        setLocalMatrix: function(source) {
+            var o = this.offset + LOCAL_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                this.page[o] = source[i];
+            }
+            this.setTransformDirty();
         },
 
         getWorldSpaceBoundingBox: function() {
@@ -255,9 +327,57 @@
 
         getObjectSpaceBoundingBox: function() {
             // TODO: Placeholder
+        },
+
+        addChild: function(child) {
+            this.children.push(child);
+        },
+
+        getChildren: function() {
+            return this.children;
+        },
+
+        updateWorldMatrix: function(source) {
+            var page = this.page;
+            var offset = this.offset;
+            XML3D.math.mat4.multiplyOffset(page, offset+WORLD_MATRIX_OFFSET, page, offset+LOCAL_MATRIX_OFFSET,  source, 0);
+            this.getWorldMatrix(source);
+            for (var i=0; i < this.children.length; i++) {
+                this.children[i].updateWorldMatrix(source);
+            }
+            this.transformDirty = false;
+        },
+
+        setTransformDirty: function() {
+            this.transformDirty = true;
+            this.children.forEach(function(obj) {
+                obj.setTransformDirty();
+            });
+        },
+
+        setVisible: function(newVisible) {
+            if ((newVisible && this.localVisible) || !newVisible) {
+                this.children.forEach(function(obj) {
+                    obj.setVisible(newVisible);
+                });
+            }
+        },
+
+        setLocalVisible: function(newVisible) {
+            this.localVisible = newVisible;
+            this.setVisible(newVisible);
+        },
+
+        setShaderDirty: function() {
+            if (!this.shader) {
+                this.shaderDirty = true;
+                this.children.forEach(function(obj) {
+                    obj.setShaderDirty();
+                });
+            }
         }
 
-    };
+    });
 
     // Export
     XML3D.webgl.RenderGroup = RenderGroup;

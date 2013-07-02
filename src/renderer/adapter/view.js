@@ -16,7 +16,7 @@
     var tmp = XML3D.math.mat4.create(),
         tmp2 = XML3D.math.mat4.create();
 
-    p.onConfigured = function() {
+    p.createRenderNode = function() {
         // Create renderNode
     };
 

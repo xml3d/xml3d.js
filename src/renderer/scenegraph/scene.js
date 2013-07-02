@@ -1,9 +1,9 @@
 (function() {
 
-    var ENTRY_SIZE = 64;
+    var ENTRY_SIZE = 80;
     var PAGE_SIZE = 12;
 
-    var RenderObjectHandler = function() {
+    var Scene = function() {
 
         this.pages = [];
         this.nextOffset = 0;
@@ -96,7 +96,22 @@
         this.createRenderObject = function(opt) {
             var pageEntry = this.createPageEntry();
             var renderObject = new XML3D.webgl.RenderObject(this, pageEntry, opt);
+            this.queue.push(renderObject);
             return renderObject;
+        }
+
+        this.createRenderGroup = function(opt) {
+            var pageEntry = this.createPageEntry();
+            var renderGroup = new XML3D.webgl.RenderGroup(this, pageEntry, opt);
+            return renderGroup;
+        },
+
+        this.createRootNode = function() {
+            var pageEntry = this.createPageEntry();
+            var root = new XML3D.webgl.RenderNode(this, pageEntry, {});
+            root.setWorldMatrix(XML3D.math.mat4.create());
+            root.transformDirty = false;
+            return root;
         }
         this.clear();
     };
@@ -121,6 +136,6 @@
             { name:'dispose', from:'*', to:'Disposed' }
         ]});
 
-    XML3D.webgl.RenderObjectHandler = RenderObjectHandler;
+    XML3D.webgl.Scene = Scene;
 
 })();

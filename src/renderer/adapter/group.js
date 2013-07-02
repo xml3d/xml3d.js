@@ -16,8 +16,9 @@
 
     var p = GroupRenderAdapter.prototype;
 
-    p.onConfigured = function() {
+    p.createRenderNode = function() {
         // Create renderGroup
+        return null; // new RenderGroup();
     };
 
     /** It is assumed that this method uses the world matrix! */
@@ -32,19 +33,22 @@
         return m;
     };
 
-    p.getLocalMatrixInternal = function()
-    {
-        var cssMatrix = XML3D.css.getCSSMatrix(this.node);
-        if(cssMatrix){
-            return XML3D.css.convertCssToMat4(cssMatrix);
-        }
-
-        var handle = this.getConnectedAdapter("transform");
-        if (handle)
-            return handle.getMatrix("transform");
-
-        return null;
-    }
+    p.updateModelMatrix = (function () {
+        var IDENTITY = XML3D.math.mat4.create();
+        return function () {
+            var cssMatrix = XML3D.css.getCSSMatrix(this.node);
+            var result = IDENTITY;
+            if (cssMatrix) {
+                result = XML3D.css.convertCssToMat4(cssMatrix);
+            } else {
+                var handle = this.getConnectedAdapter("transform");
+                if (handle) {
+                    result = handle.getMatrix("transform");
+                }
+                this.renderNode.setLocalMatrix(result);
+            }
+        };
+    }());
 
     p.updateTransformAdapter = function() {
         var transformHref = this.node.transform;
@@ -224,9 +228,7 @@
 
     p.getLocalMatrix = function() {
         var m = new window.XML3DMatrix();
-        var matrix = this.getLocalMatrixInternal();
-        if (matrix)
-            m._data.set(matrix);
+        this.renderNode.getLocalMatrix(m._data);
         return m;
     };
 
@@ -234,10 +236,7 @@
 
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
-
-        XML3D.math.mat4.identity(tmpIdMat);
-        m._data.set(this.applyTransformMatrix(tmpIdMat));
-
+        this.renderNode.getWorldMatrix(m._data);
         return m;
     };
 

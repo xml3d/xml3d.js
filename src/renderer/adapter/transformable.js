@@ -8,7 +8,8 @@
     XML3D.createClass(TransformableAdapter, XML3D.webgl.RenderAdapter);
 
     TransformableAdapter.prototype.onConfigured = function() {
-        // Create renderNode
+        this.renderNode = this.createRenderNode();
+
     };
 
     TransformableAdapter.prototype.getModelMatrix = function() {

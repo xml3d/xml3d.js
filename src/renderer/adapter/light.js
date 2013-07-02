@@ -22,6 +22,10 @@
     };
     XML3D.createClass(LightRenderAdapter, XML3D.webgl.TransformableAdapter);
 
+    LightRenderAdapter.prototype.onConfigured = function() {
+        // Create renderNode
+    };
+
     LightRenderAdapter.prototype.notifyChanged = function(evt) {
         if (evt.type == XML3D.events.NODE_REMOVED) {
             this.destroy();

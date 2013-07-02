@@ -16,6 +16,10 @@
     var tmp = XML3D.math.mat4.create(),
         tmp2 = XML3D.math.mat4.create();
 
+    p.onConfigured = function() {
+        // Create renderNode
+    };
+
     p.updateViewMatrix = function() {
         // Create local matrix
         var pos = this.node.position._data;

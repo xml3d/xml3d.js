@@ -238,8 +238,8 @@ Renderer.prototype.sceneTreeAddition = function(evt) {
         var parentAdapter = this.getAdapter(parentNode);
         parentTransform = parentAdapter.applyTransformMatrix(parentTransform);
         if (!shaderHandle)
-    		shaderHandle = parentAdapter.getShaderHandle();
-		visible = parentNode.visible && parentAdapter.parentVisible;
+            shaderHandle = parentAdapter.getShaderHandle();
+        visible = parentNode.visible && parentAdapter.parentVisible;
     }
 
     //Build any new objects and add them to the scene
@@ -269,7 +269,6 @@ Renderer.prototype.prepareRendering = function() {
  */
 Renderer.prototype.renderToCanvas = function() {
     var gl = this.gl;
-	var sp = null;
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
     gl.viewport(0, 0, this.width, this.height);
@@ -284,10 +283,8 @@ Renderer.prototype.renderToCanvas = function() {
     camera.proj = this.camera.getProjectionMatrix(this.width / this.height);
 
     this.renderObjects.ready.forEach( function(obj) {
-        obj.updateModelViewMatrix(camera.view);
-        obj.updateNormalMatrix();
-        obj.updateModelViewProjectionMatrix(camera.proj);
-    })
+        obj.updateWorldSpaceMatrices(camera.view, camera.proj);
+    });
 
     var stats = { objCount : 0, triCount : 0 };
 

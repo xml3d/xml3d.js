@@ -16,6 +16,10 @@
 
     var p = GroupRenderAdapter.prototype;
 
+    p.onConfigured = function() {
+        // Create renderGroup
+    };
+
     /** It is assumed that this method uses the world matrix! */
     p.applyTransformMatrix = function(m) {
         if (this.parentTransform !== null)

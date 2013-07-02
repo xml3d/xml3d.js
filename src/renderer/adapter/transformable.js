@@ -7,8 +7,28 @@
     };
     XML3D.createClass(TransformableAdapter, XML3D.webgl.RenderAdapter);
 
-    TransformableAdapter.onConfigured = function() {
+    TransformableAdapter.prototype.onConfigured = function() {
         // Create renderNode
+    };
+
+    TransformableAdapter.prototype.getModelMatrix = function() {
+        return this.renderNode.getModelMatrix();
+    };
+
+    TransformableAdapter.prototype.getObjectSpaceBoundingBox = function() {
+
+    };
+
+    TransformableAdapter.prototype.getModelViewMatrix = function() {
+
+    };
+
+    TransformableAdapter.prototype.updateModelViewMatrix = function(view) {
+        this.renderNode.updateModelViewMatrix(view);
+    };
+
+    TransformableAdapter.prototype.updateObjectSpaceBoundingBox = function(view) {
+
     };
 
 

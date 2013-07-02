@@ -54,6 +54,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     var c_tmpMatrix = XML3D.math.vec4.create();
 
+    p.onConfigured = function() {
+        // Create renderObject
+    };
+
     p.applyTransformMatrix = function(m) {
         if (this.renderObject) {
             this.renderObject.getTransformation(c_tmpMatrix);

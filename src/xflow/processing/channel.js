@@ -97,12 +97,12 @@
     }
 
 
-    ChannelMap.prototype.addDataEntry = function(name, dataSlot, param, substitution)
+    ChannelMap.prototype.addDataEntry = function(name, dataSlot, paramName, substitution)
     {
         var entry = getEntry(this.map, name);
-        if(param && substitution){
-            if(substitution.map[name]){
-                mergeChannelsIntoMapEntry(this, entry, substitution.map[name], substitution);
+        if(paramName && substitution){
+            if(substitution.map[paramName]){
+                mergeChannelsIntoMapEntry(this, entry, substitution.map[paramName], substitution);
                 return;
             }else{
                 // TODO: at this point we use default values - we need to show an error, if a default values does not exists.
@@ -379,8 +379,14 @@
 // Xflow.Substitution
 //----------------------------------------------------------------------------------------------------------------------
 
-    Xflow.Substitution = function(channelMap, substitution){
+    Xflow.Substitution = function(channelMap, substitution, subtreeProtoNames){
         this.map = {};
+        if(substitution && subtreeProtoNames){
+            for(var i = 0; i < subtreeProtoNames.length; ++i){
+                var name = subtreeProtoNames[i];
+                this.map[name] = substitution.map[name];
+            }
+        }
         for(var name in channelMap.map){
             this.map[name] = channelMap.getChannel(name, substitution);
         }

@@ -19,6 +19,7 @@
 
         this.operator = null;
         this.protoNames = [];
+        this.subtreeProtoNames = [];
         this.operatorProtoNames = [];
         this.emptySubstitutionNode = null;
         this.processNodes = {};
@@ -111,6 +112,12 @@
         return this.finalOutputChannels.getNames();
     }
 
+    ChannelNode.prototype.getParamNames = function(){
+        this.synchronize();
+        this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
+        return this.protoNames;
+    }
+
     ChannelNode.prototype.getComputeResult = function(filter){
         this.synchronize();
         this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
@@ -187,13 +194,17 @@
                 if((child = owner._children[i]._channelNode)  && !owner._children[i].isProtoNode()){
                     channelNode.inputChannels.mergeProtoNames(child.finalOutputChannels);
                     Xflow.nameset.add(channelNode.protoNames, child.protoNames);
+                    Xflow.nameset.add(channelNode.subtreeProtoNames, child.subtreeProtoNames);
                 }
             }
             for(var i = 0; i < owner._children.length; ++i){
                 if((child = owner._children[i]) && !child._channelNode){
-                    if(child._param){
-                        channelNode.inputChannels.addProtoNames(child._name, child._name);
-                        Xflow.nameset.add(channelNode.protoNames, child._name);
+                    if(child._paramName){
+                        channelNode.inputChannels.addProtoNames(child._name, child._paramName);
+                        Xflow.nameset.add(channelNode.protoNames, child._paramName);
+                        if(child._paramGlobal){
+                            Xflow.nameset.add(channelNode.subtreeProtoNames, child._paramName);
+                        }
                     }
                     var key = child._name + ";" + child._key;
                     channelNode.inputSlots[key] = new Xflow.DataSlot(child._data, child._key);
@@ -236,7 +247,11 @@
             null, null, dataNode._filterType, setChannelMapProtoName);
 
         if(dataNode._protoNode){
-            var protoOutput = dataNode._protoNode._channelNode.finalOutputChannels;
+            var protoChannelNode = dataNode._protoNode._channelNode;
+            Xflow.nameset.add(channelNode.protoNames, protoChannelNode.subtreeProtoNames);
+            Xflow.nameset.add(channelNode.subtreeProtoNames, protoChannelNode.subtreeProtoNames);
+
+            var protoOutput = protoChannelNode.finalOutputChannels;
             dataNode._filterMapping.applyFilterOnChannelMap(channelNode.finalOutputChannels, protoOutput,
                 channelNode.protoNames, null, dataNode._filterType, setChannelMapProtoProtoName);
         }
@@ -323,7 +338,7 @@
                 if((child = owner._children[i]) && !child._channelNode){
                     var key = child._name + ";" + child._key;
                     channelNode.inputChannels.addDataEntry(child._name, channelNode.inputSlots[key],
-                        child._param, substitution);
+                        child._paramName, substitution);
                 }
             }
         }
@@ -339,7 +354,7 @@
 
         var dataNode = channelNode.owner;
         if(dataNode._protoNode){
-            var subSubstitution = new Xflow.Substitution(channelNode.protoInputChannels, substitution);
+            var subSubstitution = new Xflow.Substitution(channelNode.protoInputChannels, substitution, channelNode.subtreeProtoNames);
             subNode.protoSubNode = dataNode._protoNode._channelNode.getSubstitutionNode(subSubstitution);
         }
     }

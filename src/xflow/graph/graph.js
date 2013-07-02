@@ -65,7 +65,8 @@ Xflow.InputNode = function(graph){
     this._name = "";
     this._key = 0;
     this._data = null;
-    this._param = false;
+    this._paramName = null;
+    this._paramGlobal = false;
 };
 Xflow.createClass(Xflow.InputNode, Xflow.GraphNode);
 var InputNode = Xflow.InputNode;
@@ -94,14 +95,23 @@ Object.defineProperty(InputNode.prototype, "key", {
     /** @return {number} */
     get: function(){ return this._key; }
 });
-Object.defineProperty(InputNode.prototype, "param", {
+Object.defineProperty(InputNode.prototype, "paramName", {
+    /** @param {string} v */
+    set: function(v){
+        this._paramName = v;
+        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    },
+    /** @return {string} */
+    get: function(){ return this._paramName; }
+});
+Object.defineProperty(InputNode.prototype, "paramGlobal", {
     /** @param {boolean} v */
     set: function(v){
-        this._param = v;
+        this._paramGlobal = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {boolean} */
-    get: function(){ return this._param; }
+    get: function(){ return this._paramGlobal; }
 });
 Object.defineProperty(InputNode.prototype, "data", {
     /** @param {Object} v */
@@ -425,36 +435,28 @@ DataNode.prototype.notify = function(changeType, senderNode){
 };
 
 DataNode.prototype.getOutputNames = function(){
-    var forwardNode = getForwardNode(this);
-    if(forwardNode){
-        return forwardNode.getOutputNames();
-    }
-
-    return this._channelNode.getOutputNames();
+    return getForwardNode(this)._channelNode.getOutputNames();
 }
 
 DataNode.prototype.getOutputChannelInfo = function(name){
-    return (getForwardNode(this) || this)._channelNode.getOutputChannelInfo(name);
+    return getForwardNode(this)._channelNode.getOutputChannelInfo(name);
+}
+DataNode.prototype.getParamNames = function(){
+    return getForwardNode(this)._channelNode.getParamNames();
 }
 
 DataNode.prototype._getComputeResult = function(filter){
-    var forwardNode = getForwardNode(this);
-    if(forwardNode){
-        return forwardNode._getComputeResult(filter);
-    }
-
-    return this._channelNode.getComputeResult(filter);
+    return getForwardNode(this)._channelNode.getComputeResult(filter);
 }
-
 
 function getForwardNode(dataNode){
     if(!dataNode._filterMapping.isEmpty()  || dataNode._computeOperator || dataNode._protoNode)
-        return null;
+        return dataNode;
     if(dataNode._sourceNode && dataNode._children.length == 0)
-        return dataNode._sourceNode;
+        return getForwardNode(dataNode._sourceNode);
     if(dataNode._children.length == 1 && dataNode._children[0] instanceof DataNode)
-        return dataNode._children[0];
-    return null;
+        return getForwardNode(dataNode._children[0]);
+    return dataNode;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -49,7 +49,7 @@
         this.xflowInputNode.name = this.node.name;
         this.xflowInputNode.data = buffer;
         this.xflowInputNode.key = this.node.key;
-        this.xflowInputNode.param = this.node.param;
+        this.xflowInputNode.paramName = this.node.param ? this.node.name : null;
     }
 
     ValueDataAdapter.prototype.getXflowNode = function(){
@@ -74,7 +74,7 @@
                 this.xflowInputNode.key = this.node.key;
             }
             else if(attr == "param"){
-                this.xflowInputNode.param = this.node.param;
+                this.xflowInputNode.paramName = this.node.param ? this.node.name : null;
             }
         }
     };

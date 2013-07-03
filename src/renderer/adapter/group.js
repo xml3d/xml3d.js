@@ -7,6 +7,7 @@
         this.factory = factory;
         this.isValid = true;
         this.updateTransformAdapter();
+        this.createRenderNode();
     };
 
     XML3D.createClass(GroupRenderAdapter, XML3D.webgl.TransformableAdapter);
@@ -15,15 +16,9 @@
 
     p.createRenderNode = function() {
         //TODO: Shouldn't have to go through the renderer...
-        var renderNode = this.factory.renderer.scene.createRenderGroup({shader: this.getShaderHandle(), visible: this.node.visible});
         var parent = this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
-        if (parent.getRenderNode) {
-            renderNode.setParent(parent.getRenderNode());
-        } else {
-            var root = this.factory.renderer.scene.createRootNode();
-            renderNode.setParent(root);
-        }
-        this.renderNode = renderNode;
+        var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.rootNode;
+        this.renderNode = this.factory.renderer.scene.createRenderGroup({parent: parentNode, shaderHandle: this.getShaderHandle(), visible: this.node.visible});
         this.updateLocalMatrix();
     };
 
@@ -64,7 +59,8 @@
         }
         else if( (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) && !evt.internalType){
             // The connected transform node changed;
-            this.propagateTransform(evt);
+            this.updateTransformAdapter();
+            this.updateLocalMatrix();
             return;
         }
 
@@ -72,72 +68,21 @@
 
         switch (target) {
         case "shader":
-            evt.internalType = "parentshader";
-            evt.newValue = this.getShaderHandle();
-            this.notifyChildren(evt);
+            this.renderNode.setLocalShaderHandle(this.getShaderHandle());
             this.factory.renderer.requestRedraw("Group shader changed.", false);
-            break;
-
-        case "parentshader":
-            this.parentShaderHandle = null;
-            if (!this.getShaderHandle()) { // This node's shader would override parent shaders
-                this.notifyChildren(evt);
-            }
-            this.parentShaderHandle = evt.newValue;
             break;
 
         case "transform":
             //This group is now linked to a different transform node. We need to notify all
             //of its children with the new transformation matrix
             this.updateTransformAdapter();
-
-            this.propagateTransform(evt);
-
+            this.updateLocalMatrix();
             break;
-
-//        //TODO: this will change once the wrapped events are sent to all listeners of a node
-//        case "parenttransform":
-//            var parentValue = downstreamValue = evt.newValue;
-//            this.parentTransform = evt.newValue;
-//
-//            var downstreamValue;
-//            var matrix = this.getLocalMatrixInternal();
-//            if (matrix)
-//                downstreamValue = XML3D.math.mat4.multiply(XML3D.math.mat4.create(), parentValue, matrix);
-//
-//            evt.newValue = downstreamValue;
-//            this.notifyChildren(evt);
-//            // Reset event value
-//            evt.newValue = parentValue;
-//            break;
 
         case "visible":
-            //TODO: improve visibility handling
             this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
             this.factory.renderer.requestRedraw("Group visibility changed.", true);
-
-            //If this node is set visible=false then it overrides the parent node
-//            if (this.parentVisible == false)
-//                break;
-//            else {
-//                evt.internalType = "parentvisible";
-//                evt.newValue = evt.wrapped.newValue == "true";
-//                this.notifyChildren(evt);
-//                delete evt.internalType;
-//                delete evt.newValue;
-//                this.factory.renderer.requestRedraw("Group visibility changed.", true);
-//            }
             break;
-
-//        case "parentvisible":
-//            this.parentVisible = evt.newValue;
-//            //If this node is set visible=false then it overrides the parent node
-//            if (this.node.visible == false)
-//                break;
-//            else
-//                this.notifyChildren(evt);
-//
-//            break;
 
         default:
             XML3D.debug.logWarning("Unhandled mutation event in group adapter for parameter '"+target+"'");
@@ -155,28 +100,6 @@
         }
     };
 
-    p.propagateTransform = function(evt){
-//        var downstreamValue;
-//        var matrix = this.getLocalMatrixInternal();
-//        if (matrix)
-//            downstreamValue = matrix;
-//        else if (this.parentTransform)
-//            downstreamValue = XML3D.math.mat4.identity(XML3D.math.mat4.create());
-//        else
-//            downstreamValue = null;
-//
-//        if(this.parentTransform)
-//            downstreamValue = XML3D.math.mat4.multiply(XML3D.math.mat4.create(), this.parentTransform, downstreamValue);
-//
-//        evt.internalType = "parenttransform";
-//        evt.newValue = downstreamValue;
-//
-//        this.notifyChildren(evt);
-//        delete evt.internalType;
-//        delete evt.newValue;
-//        this.factory.renderer.requestRedraw("Group transform changed.", true);
-    }
-
     p.getShaderHandle = function()
     {
         var shaderHref = this.node.shader;
@@ -192,8 +115,6 @@
         }
         if(shaderHref)
             return this.getAdapterHandle(shaderHref);
-        else
-            return this.parentShaderHandle;
 
     };
 

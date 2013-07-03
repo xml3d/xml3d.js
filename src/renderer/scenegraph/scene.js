@@ -64,7 +64,7 @@
                     }
                 }
             });
-        }
+        };
         this.updateLights = function(lights, shaderManager) {
             if (lights.structureChanged) {
                 this.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
@@ -75,11 +75,11 @@
                         obj.lightsChanged(lights, shaderManager);
                 }, this);
             }
-        }
+        };
         this.forEach = function(func, that) {
             this.queue.slice().forEach(func, that);
             this.ready.slice().forEach(func, that);
-        }
+        };
 
         this.createPageEntry = function() {
             var offset = this.nextOffset;
@@ -91,28 +91,33 @@
             }
             this.nextOffset += ENTRY_SIZE;
             return { page: this.pages[page], offset : localOffset};
-        }
+        };
 
         this.createRenderObject = function(opt) {
             var pageEntry = this.createPageEntry();
             var renderObject = new XML3D.webgl.RenderObject(this, pageEntry, opt);
             this.queue.push(renderObject);
             return renderObject;
-        }
+        };
 
         this.createRenderGroup = function(opt) {
             var pageEntry = this.createPageEntry();
             var renderGroup = new XML3D.webgl.RenderGroup(this, pageEntry, opt);
             return renderGroup;
-        },
+        };
 
         this.createRootNode = function() {
             var pageEntry = this.createPageEntry();
-            var root = new XML3D.webgl.RenderNode(this, pageEntry, {});
+            var root = new XML3D.webgl.RenderGroup(this, pageEntry, {});
             root.setWorldMatrix(XML3D.math.mat4.create());
             root.transformDirty = false;
+            root.shaderDirty = false;
+            root.visible = false;
+            root.shaderHandle = {};
+            this.rootNode = root;
             return root;
-        }
+        };
+        this.rootNode = this.createRootNode();
         this.clear();
     };
 

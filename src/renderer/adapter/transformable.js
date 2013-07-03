@@ -4,7 +4,6 @@
     var TransformableAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.renderNode = null;
-        this.createRenderNode();
     };
     XML3D.createClass(TransformableAdapter, XML3D.webgl.RenderAdapter);
 

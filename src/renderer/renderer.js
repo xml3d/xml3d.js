@@ -52,6 +52,7 @@ Renderer.prototype.initializeScenegraph = function() {
             spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
     };
     this.recursiveBuildScene(this.xml3dNode, this.scene.queue, null);
+    this.scene.rootNode.setVisible(true);
     if (this.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }

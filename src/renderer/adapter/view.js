@@ -9,6 +9,7 @@
         this.projMatrix = null;
         this.worldPosition = [0,0,0];
         this.updateViewMatrix();
+        this.createRenderNode();
     };
     XML3D.createClass(ViewRenderAdapter, XML3D.webgl.TransformableAdapter);
     var p = ViewRenderAdapter.prototype;

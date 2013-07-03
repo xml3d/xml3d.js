@@ -18,6 +18,7 @@
         this.lightType = "point";
         this.updateLightShader();
         this.listenerID = -1;
+        this.createRenderNode();
 
     };
     XML3D.createClass(LightRenderAdapter, XML3D.webgl.TransformableAdapter);

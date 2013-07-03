@@ -51,18 +51,23 @@
      * @param opt
      */
     var RenderNode = function(handler, pageEntry, opt) {
-        this.parent = null;
+        this.parent = opt.parent;
+        if (this.parent)
+            this.parent.addChild(this);
+
         this.handler = handler;
         this.page = pageEntry.page;
         this.offset = pageEntry.offset;
+        this.localVisible = opt.visible;
+        this.visible = this.localVisible !== undefined ? this.localVisible : this.parent ? this.parent.isVisible() : true;
         this.transformDirty = true;
-        this.shaderDirty = true;
+        this.children = [];
     };
 
     XML3D.extend(RenderNode.prototype, {
 
         getChildren: function() {
-            return [];
+            return this.children;
         },
 
         getParent: function() {
@@ -87,8 +92,7 @@
         getWorldMatrix: function(dest) {
             if (this.transformDirty) {
                 this.parent.getWorldMatrix(dest);
-                this.setWorldMatrix(dest);
-                this.transformDirty = false;
+                this.updateWorldMatrix(dest);
             }
             var o = this.offset + WORLD_MATRIX_OFFSET;
             for(var i = 0; i < 16; i++, o++) {
@@ -101,18 +105,34 @@
             for(var i = 0; i < 16; i++, o++) {
                 this.page[o] = source[i];
             }
+            this.transformDirty = false;
+        },
+
+        isVisible: function() {
+            return this.visible;
         },
 
         setTransformDirty: function() {
             this.transformDirty = true;
         },
 
-        setVisible: function(newVisible) {
-            this.visible = newVisible;
+        setLocalVisible: function(newVal) {
+            this.localVisible = newVal;
+            if (this.parent.isVisible()) {
+                // if parent is not visible this group is also invisible
+                this.setVisible(newVal);
+            }
         },
 
-        setShaderDirty: function() {
-            this.shaderDirty = true;
+        setVisible: function(newVal) {
+            var downstream = newVal;
+            if (this.localVisible === false) {
+                downstream = false;
+            }
+            this.visible = downstream;
+            this.children.forEach(function(obj) {
+                obj.setVisible(downstream);
+            });
         }
 
     });
@@ -133,14 +153,11 @@
         XML3D.webgl.RenderNode.call(this, handler, pageEntry, opt);
         // console.log(pageEntry);
         this.meshAdapter = opt.meshAdapter;
-        this.shaderAdapter = null;
         this.shader = opt.shader || null;
-        this.meshAdapter.renderObject = this;
         /** {Object?} **/
         this.override = null;
         this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
         this.transformDirty = true;
-        this.visible = opt.visible || true;
         this.create();
     };
 
@@ -157,9 +174,9 @@
         },
         onafterlightsChanged:function (name, from, to, lights, shaderManager) {
             if (lights) {
-                var shaderHandle = this.meshAdapter.getShaderHandle();
-                this.shaderAdapter = shaderHandle && shaderHandle.getAdapter();
-                this.shader = shaderManager.createShader(this.shaderAdapter, lights);
+                var shaderHandle = this.parent.getShaderHandle();
+                this.shader = shaderManager.createShader(shaderHandle.adapter, lights);
+                this.shaderDirty = false;
             }
         },
         onbeforedataComplete:function (name, from, to) {
@@ -216,19 +233,23 @@
             }
         },
 
-        setWorldMatrix: function(source) {
-            var o = this.offset + WORLD_MATRIX_OFFSET;
-            for(var i = 0; i < 16; i++, o++) {
-                this.page[o] = source[i];
-            }
-            this.transformDirty = false;
-        },
-
         updateWorldSpaceMatrices: function(view, projection) {
+            if (this.transformDirty) {
+                this.updateWorldMatrix();
+            }
             this.updateModelViewMatrix(view);
             this.updateNormalMatrix();
             this.updateModelViewProjectionMatrix(projection);
         },
+
+        updateWorldMatrix: (function() {
+            var tmp_mat = XML3D.math.mat4.create();
+            return function() {
+                this.parent.getWorldMatrix(tmp_mat);
+                this.setWorldMatrix(tmp_mat);
+                this.transformDirty = false;
+            }
+        })(),
 
         /** Relies on an up-to-date transform matrix **/
         updateModelViewMatrix: function(view) {
@@ -275,16 +296,12 @@
             XML3D.debug.logInfo("Shader attribute override", result, this.override);
         },
 
-        updateWorldMatrix: (function() {
-            var wm_tmp = XML3D.math.mat4.create();
-            return function() {
-                this.parent.getWorldMatrix(wm_tmp);
-                this.setWorldMatrix(wm_tmp);
-            };
-        })(),
+        setTransformDirty: function() {
+            this.transformDirty = true;
+        },
 
-        isVisible: function() {
-            return this.visible;
+        setShader: function(newHandle) {
+            this.meshAdapter.updateShader(newHandle.adapter);
         }
 
     });
@@ -300,9 +317,7 @@
      */
     var RenderGroup = function(handler, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, handler, pageEntry, opt);
-        this.children = [];
-        this.shader = opt.shader || null;
-        this.localVisible = opt.visible || true;
+        this.shaderHandle = opt.shaderHandle || null;
     };
     XML3D.createClass(RenderGroup, XML3D.webgl.RenderNode);
     XML3D.extend(RenderGroup.prototype, {
@@ -341,10 +356,6 @@
             var page = this.page;
             var offset = this.offset;
             XML3D.math.mat4.multiplyOffset(page, offset+WORLD_MATRIX_OFFSET, page, offset+LOCAL_MATRIX_OFFSET,  source, 0);
-            this.getWorldMatrix(source);
-            for (var i=0; i < this.children.length; i++) {
-                this.children[i].updateWorldMatrix(source);
-            }
             this.transformDirty = false;
         },
 
@@ -355,30 +366,37 @@
             });
         },
 
-        setVisible: function(newVisible) {
-            if ((newVisible && this.localVisible) || !newVisible) {
-                this.children.forEach(function(obj) {
-                    obj.setVisible(newVisible);
-                });
+        setLocalShaderHandle: function(newHandle) {
+            this.shaderHandle = undefined;
+            if (newHandle === undefined) {
+                // Shader was removed, we need to propagate the parent shader down
+                this.setShader(this.parent.getShaderHandle());
+            } else {
+                this.setShader(newHandle);
             }
+            this.shaderHandle = newHandle;
         },
 
-        setLocalVisible: function(newVisible) {
-            this.localVisible = newVisible;
-            this.setVisible(newVisible);
+        setShader: function(newHandle) {
+            if (this.shaderHandle !== undefined) {
+                // Local shader overrides anything coming from upstream
+                return;
+            }
+            this.children.forEach(function(obj) {
+                obj.setShader(newHandle);
+            });
         },
 
-        setShaderDirty: function() {
-            if (!this.shader) {
-                this.shaderDirty = true;
-                this.children.forEach(function(obj) {
-                    obj.setShaderDirty();
-                });
+        getShaderHandle: function() {
+            if (!this.shaderHandle) {
+                return this.parent.getShaderHandle();
             }
+            return this.shaderHandle;
         }
 
     });
 
     // Export
     XML3D.webgl.RenderGroup = RenderGroup;
+
 }());

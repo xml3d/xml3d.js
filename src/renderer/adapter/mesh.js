@@ -46,28 +46,17 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.requestObject = {};
         this.computeRequest = null;
         this.bboxComputeRequest = null;
+        this.createRenderNode();
     };
 
     XML3D.createClass(MeshRenderAdapter, XML3D.webgl.TransformableAdapter);
 
     var p = MeshRenderAdapter.prototype;
 
-    var c_tmpMatrix = XML3D.math.vec4.create();
-
     p.createRenderNode = function() {
-        var renderNode = this.factory.renderer.scene.createRenderObject({meshAdapter : this, shader : this.getShaderHandle()});
         var parent = this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
-        renderNode.setParent(parent.getRenderNode());
-        this.renderNode = renderNode;
-    };
-
-    p.applyTransformMatrix = function(m) {
-        if (this.renderObject) {
-            this.renderObject.getTransformation(c_tmpMatrix);
-            XML3D.math.mat4.multiply(m, m, c_tmpMatrix);
-        }
-
-        return m;
+        var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
+        this.renderNode = this.factory.renderer.scene.createRenderObject({parent : parentNode, meshAdapter : this, shader : this.getShaderHandle()});
     };
 
     /**
@@ -95,22 +84,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 
         switch (target) {
-            case "parenttransform":
-                this.renderNode.setTransformation(evt.newValue);
-                break;
-
-            case "parentshader":
-                var adapterHandle = evt.newValue;
-                this.setShaderHandle(adapterHandle);
-                this.updateShader(adapterHandle ? adapterHandle.getAdapter() : null);
-                break;
-
-            case "parentvisible":
-                this.renderNode.visible = evt.newValue && this.node.visible;
-                break;
-
             case "visible":
-                this.renderNode.visible = (evt.wrapped.newValue == "true") && this.node.parentNode.visible;
+                this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
                 break;
 
             case "src":

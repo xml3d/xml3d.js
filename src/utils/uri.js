@@ -52,12 +52,19 @@ XML3D.URI.prototype.isLocal = function(){
 }
 
 /**
+ * @return {boolean} true if URI is absolute
+ */
+XML3D.URI.prototype.isAbsolute = function(){
+    return this.scheme != null;
+}
+
+/**
  * Get absolute URI relative to the provided document uri
  * @param {string} docUri uri of document from which this uri originates
  * @returns {XML3D.URI}
  */
 XML3D.URI.prototype.getAbsoluteURI = function(docUri){
-    if (!this.valid || this.authority || this.scheme == "blob") {
+    if (!this.valid || this.isAbsolute()) {
         return this;
     }
 

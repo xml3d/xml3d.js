@@ -34,8 +34,8 @@
                 if (handle) {
                     result = handle.getMatrix("transform");
                 }
-                this.renderNode.setLocalMatrix(result);
             }
+            this.renderNode.setLocalMatrix(result);
         };
     }());
 
@@ -137,10 +137,9 @@
             if(c.getBoundingBox)
                 bbox.extend(c.getBoundingBox());
         });
-        var matrix = this.getLocalMatrixInternal();
-        if (matrix) {
-            XML3D.webgl.transformAABB(bbox, matrix);
-        }
+        var matrix = XML3D.math.mat4.create();
+        this.renderNode.getLocalMatrix(matrix);
+        XML3D.webgl.transformAABB(bbox, matrix);
         return bbox;
     };
 

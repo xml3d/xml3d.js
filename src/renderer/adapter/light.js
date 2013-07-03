@@ -235,8 +235,7 @@
         var lights = this.renderer.lights;
         this.removeLight(lights);
 
-        //TODO: uncomment this once branches are merged
-        //this.clearAdapterHandles();
+        this.clearAdapterHandles();
     };
 
 

@@ -345,7 +345,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var m = new window.XML3DMatrix(),
             obj = this.renderNode;
         if(obj) {
-            obj.getTransformation(m._data);
+            obj.getWorldMatrix(m._data);
         }
         return m;
     };

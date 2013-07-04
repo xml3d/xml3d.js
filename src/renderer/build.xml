@@ -12,6 +12,7 @@
         <file name="events/touch.js" />
         <file name="events/mouse.js" />
         <file name="utils.js" />
+        <file name="gl/texture.js" />
         <file name="shadermanager.js" />
         <file name="material.js" />
         <file name="bufferhandler.js" />

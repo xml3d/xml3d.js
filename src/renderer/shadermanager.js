@@ -566,7 +566,7 @@
         }
 
         var handle = gl.createTexture();
-        gl.bindSampler(gl.TEXTURE_2D, handle);
+        gl.bindTexture(gl.TEXTURE_2D, handle);
 
         // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
@@ -585,7 +585,7 @@
             gl.generateMipmap(gl.TEXTURE_2D);
         }
 
-        gl.bindSampler(gl.TEXTURE_2D, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
 
         info.handle = handle;
         info.options = opt;

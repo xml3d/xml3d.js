@@ -155,7 +155,7 @@ test("Adding lights", 10, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    var lightsArray = h.renderer.lights;
+    var lightsArray = h.renderer.scene.lights;
     ok(lightsArray.point.length == 1 && lightsArray.directional.length == 1, "Renderer sees 2 lights");
 
     var newLight = this.doc.createElementNS(XML3D.ns, "light");
@@ -188,7 +188,7 @@ test("Removing lights", 8, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    var lightsArray = h.renderer.lights;
+    var lightsArray = h.renderer.scene.lights;
     ok(lightsArray.point.length == 1 && lightsArray.directional.length == 1, "Renderer sees 2 lights");
     this.doc.getElementById("dirlight").visible = true;
     this.doc.getElementById("pointlight").visible = true;

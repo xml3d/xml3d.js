@@ -46,16 +46,16 @@
     /**
      * @constructor
      * @implements {IRenderNode}
-     * @param handler
+     * @param scene
      * @param pageEntry
      * @param opt
      */
-    var RenderNode = function(handler, pageEntry, opt) {
+    var RenderNode = function(scene, pageEntry, opt) {
         this.parent = opt.parent;
         if (this.parent)
             this.parent.addChild(this);
 
-        this.handler = handler;
+        this.scene = scene;
         this.page = pageEntry.page;
         this.offset = pageEntry.offset;
         this.localVisible = opt.visible;
@@ -145,12 +145,12 @@
      *
      * @constructor
      * @implements {IRenderObject}
-     * @param {RenderObjectHandler} handler
+     * @param {Scene} scene
      * @param {Object} pageEntry
      * @param {Object} opt
      */
-    var RenderObject = function (handler, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, handler, pageEntry, opt);
+    var RenderObject = function (scene, pageEntry, opt) {
+        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
         // console.log(pageEntry);
         this.meshAdapter = opt.meshAdapter;
         this.shader = opt.shader || null;
@@ -166,17 +166,16 @@
     XML3D.extend(RenderObject.prototype, {
         onenterReady:function () {
             //console.log("Entering Ready state");
-            this.handler.moveFromQueueToReady(this);
+            this.scene.moveFromQueueToReady(this);
         },
         onleaveReady:function () {
             //console.log("Leaving Ready state");
-            this.handler.moveFromReadyToQueue(this);
+            this.scene.moveFromReadyToQueue(this);
         },
         onafterlightsChanged:function (name, from, to, lights, shaderManager) {
             if (lights) {
                 var shaderHandle = this.parent.getShaderHandle();
                 this.shader = shaderManager.createShader(shaderHandle.adapter, lights);
-                this.shaderDirty = false;
             }
         },
         onbeforedataComplete:function (name, from, to) {
@@ -200,7 +199,7 @@
             return true;
         },
         onenterDisposed:function () {
-            this.handler.remove(this);
+            this.scene.remove(this);
         },
         onchangestate:function (name, from, to) {
             XML3D.debug.logInfo("Changed: ", name, from, to);
@@ -315,8 +314,8 @@
      * @constructor
      * @implements {IRenderGroup}
      */
-    var RenderGroup = function(handler, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, handler, pageEntry, opt);
+    var RenderGroup = function(scene, pageEntry, opt) {
+        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
         this.shaderHandle = opt.shaderHandle || null;
     };
     XML3D.createClass(RenderGroup, XML3D.webgl.RenderNode);
@@ -398,5 +397,74 @@
 
     // Export
     XML3D.webgl.RenderGroup = RenderGroup;
+
+
+    var RenderLight = function(scene, pageEntry, opt) {
+        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        this.lightType = opt.lightType;
+        this.lightOffset = pageEntry.lightOffset;
+        this.lightAdapter = opt.adapter;
+        //this.fillLightData();
+    };
+
+    XML3D.createClass(RenderLight, XML3D.webgl.RenderNode);
+    XML3D.extend(RenderLight.prototype, {
+
+        fillLightData: function() {
+            var lightEntry = this.scene.lights[this.lightType];
+            var offset = this.lightOffset;
+            lightEntry.renderLight[offset] = this;
+            //TODO: Move transform handling and lightdata creation out of the adapter
+            var transform = XML3D.math.mat4.create();
+            this.parent.getWorldMatrix(transform);
+            this.lightAdapter.transform = transform;
+            this.lightAdapter.addLight(lightEntry, offset);
+        },
+
+        setWorldMatrix: function(source) {
+            var o = this.offset + WORLD_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                this.page[o] = source[i];
+            }
+            this.transformDirty = false;
+        },
+
+        updateLightData: function(field, newValue) {
+            var offset = this.lightOffset;
+            var data = this.scene.lights[this.lightType][field];
+            if (!data) return;
+            if(field=="falloffAngle" || field=="softness") offset/=3; //some parameters are scalar
+            Array.set(data, offset, newValue);
+            this.scene.lights.changed = true;
+        },
+
+        setTransformDirty: function() {
+            this.updateWorldMatrix();
+        },
+
+        updateWorldMatrix: (function() {
+            var tmp_mat = XML3D.math.mat4.create();
+            return function() {
+                this.parent.getWorldMatrix(tmp_mat);
+                this.setWorldMatrix(tmp_mat);
+                this.transformDirty = false;
+                var copy = XML3D.math.mat4.copy(XML3D.math.mat4.create(), tmp_mat);
+                this.lightAdapter.transform = copy;
+                //TODO: handle this stuff here in the render node
+                this.lightAdapter.notifyChanged({internalType : "parenttransform"});
+                this.scene.lights.changed = true;
+            }
+        })(),
+
+        setVisible: function(newVal) {
+            if (this.localVisible !== false) {
+                this.visible = newVal;
+                this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
+            }
+        }
+
+    });
+
+    XML3D.webgl.RenderLight = RenderLight;
 
 }());

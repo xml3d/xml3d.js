@@ -80,8 +80,8 @@
         Array.set(spot.softness, offset/3, softness);
     };
 
-    XML3D.webgl.LightShaderRenderAdapter.prototype.removeLight = function(type, lights, offset) {
-        var lo = lights[type];
+    XML3D.webgl.LightShaderRenderAdapter.prototype.removeLight = function(type, lightEntry, offset) {
+        var lo = lightEntry;
         if (!lo)
             return;
 
@@ -98,12 +98,11 @@
             case "spot":
                 lo.intensity.splice(offset, 3);
                 lo.attenuation.splice(offset, 3);
-                lo.beamWidth.splice(offset/3, 1);
-                lo.cutOffAngle.splice(offset/3, 1);
+                lo.softness.splice(offset/3, 1);
+                lo.falloffAngle.splice(offset/3, 1);
                 break;
         }
 
-        lights.changed = true;
     }
 
     /**

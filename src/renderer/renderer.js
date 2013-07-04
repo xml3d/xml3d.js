@@ -44,16 +44,9 @@ Renderer.prototype.initialize = function() {
 };
 
 Renderer.prototype.initializeScenegraph = function() {
-    this.lights = {
-        changed : true,
-        structureChanged : true,
-        point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
-        directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
-            spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
-    };
     this.recursiveBuildScene(this.xml3dNode, this.scene.queue, null);
     this.scene.rootNode.setVisible(true);
-    if (this.lights.length < 1) {
+    if (this.scene.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
 };
@@ -99,10 +92,6 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
 
     switch(currentNode.nodeName.toLowerCase()) {
     case "group":
-        adapter.parentVisible = parent.visible;
-        adapter.parentTransform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
-        adapter.parentShaderHandle = parent.shader;
-
         downstream.visible = parent.visible && currentNode.visible;
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);
@@ -115,7 +104,6 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         break;
 
     case "mesh":
-        adapter.parentVisible = parent.visible;
 
         if (currentNode.onmouseover || currentNode.onmouseout)
             this.handler.setMouseMovePicking(true);
@@ -137,10 +125,6 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         break;
 
     case "light":
-        adapter.transform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
-        adapter.visible = parent.visible && currentNode.visible;
-		adapter.addLight(this.lights);
-
         break;
 
     case "view":
@@ -170,7 +154,7 @@ Renderer.prototype.initFrameBuffers = function(gl) {
 };
 
 Renderer.prototype.recompileShader = function(shaderAdapter) {
-    this.shaderManager.recompileShader(shaderAdapter, this.lights);
+    this.shaderManager.recompileShader(shaderAdapter, this.scene.lights);
     this.handler.redraw("A shader was recompiled");
 };
 
@@ -184,11 +168,11 @@ Renderer.prototype.recompileShader = function(shaderAdapter) {
  * @return
  */
 Renderer.prototype.changeLightData = function(lightType, field, offset, newValue) {
-    var data = this.lights[lightType][field];
+    var data = this.scene.lights[lightType][field];
     if (!data) return;
     if(field=="falloffAngle" || field=="softness") offset/=3; //some parameters are scalar
     Array.set(data, offset, newValue);
-    this.lights.changed = true;
+    this.scene.lights.changed = true;
 };
 
 /**
@@ -260,7 +244,7 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
 
 Renderer.prototype.prepareRendering = function() {
     var scene = this.scene;
-    scene.updateLights(this.lights, this.shaderManager);
+    scene.updateLights(this.scene.lights, this.shaderManager);
     scene.consolidate();
     //scene.updateDirtyObjects();
 };
@@ -298,17 +282,17 @@ Renderer.prototype.renderToCanvas = function() {
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
         var objectArray = opaqueObjects[shaderName];
-		this.renderObjectsToActiveBuffer(objectArray, shaderName, camera, this.lights, { transparent: false, stats: stats });
+		this.renderObjectsToActiveBuffer(objectArray, shaderName, camera, this.scene.lights, { transparent: false, stats: stats });
     }
 
     //Render transparent objects
 	if (transparentObjects.length > 0) {
         for (var k=0; k < transparentObjects.length; k++) {
             var objectArray = [transparentObjects[k]];
-			this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, camera, this.lights, { transparent: true, stats: stats });
+			this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, camera, this.scene.lights, { transparent: true, stats: stats });
         }
     }
-	this.lights.changed = false;
+	this.scene.lights.changed = false;
     return [stats.objCount, stats.triCount];
 };
 

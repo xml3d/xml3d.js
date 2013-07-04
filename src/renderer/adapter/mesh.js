@@ -56,7 +56,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.createRenderNode = function() {
         var parent = this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
         var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
-        this.renderNode = this.factory.renderer.scene.createRenderObject({parent : parentNode, meshAdapter : this, shader : this.getShaderHandle()});
+        this.renderNode = this.factory.renderer.scene.createRenderObject({parent : parentNode, meshAdapter : this,
+                         visible : !this.node.visible ? false : undefined});
     };
 
     /**

@@ -1,6 +1,6 @@
 (function() {
 
-    var ENTRY_SIZE = 80;
+    var PAGE_ENTRY_SIZES = {object : 80, group : 80, light : 80};
     var PAGE_SIZE = 12;
 
     var StateMachine = window.StateMachine;
@@ -10,6 +10,13 @@
         this.pages = [];
         this.nextOffset = 0;
         this.firstOpaqueIndex = 0;
+        this.lights = {
+            changed : true,
+            structureChanged : true,
+            point: { length: 0, renderLight: [], intensity: [], position: [], attenuation: [], visibility: [] },
+            directional: { length: 0, renderLight: [], intensity: [], direction: [], visibility: [] },
+            spot: { length: 0, renderLight: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
+        };
 
         this.remove = function(obj) {
             var index = this.ready.indexOf(obj);
@@ -83,33 +90,47 @@
             this.ready.slice().forEach(func, that);
         };
 
-        this.createPageEntry = function() {
+        this.createPageEntry = function(pageType) {
             var offset = this.nextOffset;
-            var page = offset>>PAGE_SIZE;
-            var localOffset = offset&((1<<PAGE_SIZE)-1);
+            var entrySize = PAGE_ENTRY_SIZES[pageType];
+            var page = offset>>entrySize;
+            var localOffset = offset&((1<<entrySize)-1);
             if(!this.pages[page]) {
                 XML3D.debug.logInfo("New page:" + page);
-                this.pages[page] = new Float32Array(1<<PAGE_SIZE);
+                this.pages[page] = new Float32Array(1<<entrySize);
             }
-            this.nextOffset += ENTRY_SIZE;
+            this.nextOffset += entrySize;
             return { page: this.pages[page], offset : localOffset};
         };
 
         this.createRenderObject = function(opt) {
-            var pageEntry = this.createPageEntry();
+            var pageEntry = this.createPageEntry("object");
             var renderObject = new XML3D.webgl.RenderObject(this, pageEntry, opt);
             this.queue.push(renderObject);
             return renderObject;
         };
 
         this.createRenderGroup = function(opt) {
-            var pageEntry = this.createPageEntry();
+            var pageEntry = this.createPageEntry("group");
             var renderGroup = new XML3D.webgl.RenderGroup(this, pageEntry, opt);
             return renderGroup;
         };
 
-        this.createRootNode = function() {
+        this.createRenderLight = function(opt) {
             var pageEntry = this.createPageEntry();
+            this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
+            var renderLight = new XML3D.webgl.RenderLight(this, pageEntry, opt);
+            this.lights.structureChanged = true;
+            return renderLight;
+        };
+
+        this.addLightDataOffsetToPageEntry = function(pageEntry, lightType) {
+            var lightObj = this.lights[lightType];
+            pageEntry.lightOffset = lightObj.length++;
+        };
+
+        this.createRootNode = function() {
+            var pageEntry = this.createPageEntry("light");
             var root = new XML3D.webgl.RenderGroup(this, pageEntry, {});
             root.setWorldMatrix(XML3D.math.mat4.create());
             root.transformDirty = false;

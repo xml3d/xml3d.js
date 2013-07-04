@@ -135,7 +135,7 @@
             root.setWorldMatrix(XML3D.math.mat4.create());
             root.transformDirty = false;
             root.shaderDirty = false;
-            root.visible = false;
+            root.visible = true;
             root.shaderHandle = {};
             this.rootNode = root;
             return root;

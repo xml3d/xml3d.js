@@ -3,6 +3,8 @@
     var ENTRY_SIZE = 80;
     var PAGE_SIZE = 12;
 
+    var StateMachine = window.StateMachine;
+
     var Scene = function() {
 
         this.pages = [];

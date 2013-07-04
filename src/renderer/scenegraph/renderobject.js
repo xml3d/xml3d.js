@@ -293,8 +293,9 @@
             this.override = Object.create(null);
             for(var name in prog.uniforms) {
                 var entry = result.getOutputData(name);
-                if (entry && entry.getValue())
+                if (entry && entry.getValue()) {
                     this.override[name] = entry.getValue();
+                }
             }
             XML3D.debug.logInfo("Shader attribute override", result, this.override);
         },
@@ -413,23 +414,23 @@
 
     var RenderLight = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        this.lightShader = opt.shader;
         this.lightType = opt.lightType;
         this.lightOffset = pageEntry.lightOffset;
+        this.localIntensity = opt.localIntensity;
         this.lightAdapter = opt.adapter;
+        this.fillLightData();
     };
 
     XML3D.createClass(RenderLight, XML3D.webgl.RenderNode);
     XML3D.extend(RenderLight.prototype, {
-
         fillLightData: function() {
             var lightEntry = this.scene.lights[this.lightType];
             var offset = this.lightOffset;
             lightEntry.renderLight[offset] = this;
-            //TODO: Move transform handling and lightdata creation out of the adapter
-            var transform = XML3D.math.mat4.create();
-            this.parent.getWorldMatrix(transform);
-            this.lightAdapter.transform = transform;
-            this.lightAdapter.addLight(lightEntry, offset);
+            this.updateWorldMatrix(); //Implicitly fills light position/direction
+            this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
+            this.lightShader.fillLightData(this.lightType, lightEntry, this.localIntensity, offset);
         },
 
         setWorldMatrix: function(source) {
@@ -441,7 +442,7 @@
         },
 
         updateLightData: function(field, newValue) {
-            var offset = this.lightOffset;
+            var offset = this.lightOffset*3;
             var data = this.scene.lights[this.lightType][field];
             if (!data) return;
             if(field=="falloffAngle" || field=="softness") {
@@ -492,11 +493,18 @@
             }
         },
 
+        setLocalIntensity: function(intensity) {
+            this.localIntensity = intensity;
+            var shaderIntensity = this.lightShader.requestParameter("intensity").getValue();
+            this.updateLightData("intensity", [shaderIntensity[0]*intensity, shaderIntensity[1]*intensity, shaderIntensity[2]*intensity]);
+        },
+
         remove: function() {
             this.parent.removeChild(this);
             var lightArray = this.scene.lights[this.lightType];
             lightArray.renderLight.splice(this.lightOffset, 1);
             lightArray.length--;
+            //TODO: remove lightAdapter reference
             this.lightAdapter.removeLight(lightArray, this.lightOffset);
             this.scene.lights.structureChanged = true;
         }

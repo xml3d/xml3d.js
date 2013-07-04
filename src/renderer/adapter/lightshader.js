@@ -26,58 +26,49 @@
     /** @const */
     var SPOTLIGHT_DEFAULT_SOFTNESS = 0.0;
 
+    XML3D.webgl.LightShaderRenderAdapter.prototype.fillLightData = function(type, lights, localIntensity, offset) {
+        this.callback = lights.dataChanged;
+        this.offsets.push(offset);
+        var dataTable = this.computeRequest.getResult().getOutputMap();
+        this.fillCommonLightData(lights, dataTable, offset, localIntensity);
+
+        if (type === "spot") {
+            this.fillSpotLightSpecialData(lights, dataTable, offset);
+        } else if (type === "point") {
+            this.fillPointLightSpecialData(lights, dataTable,offset);
+        }
+    };
+
+    XML3D.webgl.LightShaderRenderAdapter.prototype.fillCommonLightData = function(lights, dataTable, offset, localIntensity) {
+        var intensity = dataTable["intensity"] ? dataTable["intensity"].getValue() : LIGHT_DEFAULT_INTENSITY;
+        Array.set(lights.intensity, offset*3, [intensity[0]*localIntensity, intensity[1]*localIntensity, intensity[2]*localIntensity]);
+    }
+
     /**
      *
      * @param {Object} point
      * @param {number} i
      * @param {number} offset
      */
-    XML3D.webgl.LightShaderRenderAdapter.prototype.fillPointLight = function(point, i, offset) {
-        this.callback = point.dataChanged;
-        this.offsets.push(offset);
-        var dataTable = this.computeRequest.getResult().getOutputMap();
-
-        var intensity = dataTable["intensity"] ? dataTable["intensity"].getValue() : LIGHT_DEFAULT_INTENSITY;
+    XML3D.webgl.LightShaderRenderAdapter.prototype.fillPointLightSpecialData = function(point, dataTable, offset) {
         var attenuation = dataTable["attenuation"] ? dataTable["attenuation"].getValue() : LIGHT_DEFAULT_ATTENUATION;
-
-        Array.set(point.intensity, offset, [intensity[0]*i, intensity[1]*i, intensity[2]*i]);
-        Array.set(point.attenuation, offset, attenuation);
+        Array.set(point.attenuation, offset*3, attenuation);
     };
 
     /**
      *
      * @param {Object} directional
-     * @param {number} i
+     * @param {Object} dataTable
      * @param {number} offset
      */
-    XML3D.webgl.LightShaderRenderAdapter.prototype.fillDirectionalLight = function(directional, i, offset) {
-        this.callback = directional.dataChanged;
-        this.offsets.push(offset);
-        var dataTable = this.computeRequest.getResult().getOutputMap();
-        var intensity = dataTable["intensity"] ? dataTable["intensity"].getValue() : LIGHT_DEFAULT_INTENSITY;
-
-        Array.set(directional.intensity, offset, [intensity[0]*i, intensity[1]*i, intensity[2]*i]);
-    };
-
-    /**
-     *
-     * @param {Object} directional
-     * @param {number} i
-     * @param {number} offset
-     */
-    XML3D.webgl.LightShaderRenderAdapter.prototype.fillSpotLight = function(spot, i, offset) {
-        this.callback = spot.dataChanged;
-        this.offsets.push(offset);
-        var dataTable = this.computeRequest.getResult().getOutputMap();
-        var intensity = dataTable["intensity"] ? dataTable["intensity"].getValue() : LIGHT_DEFAULT_INTENSITY;
+    XML3D.webgl.LightShaderRenderAdapter.prototype.fillSpotLightSpecialData = function(spot, dataTable, offset) {
         var attenuation = dataTable["attenuation"] ? dataTable["attenuation"].getValue() : LIGHT_DEFAULT_ATTENUATION;
         var falloffAngle = dataTable["falloffAngle"] ? dataTable["falloffAngle"].getValue() : [SPOTLIGHT_DEFAULT_FALLOFFANGLE];
         var softness = dataTable["softness"] ? dataTable["softness"].getValue() : [SPOTLIGHT_DEFAULT_SOFTNESS];
 
-        Array.set(spot.intensity, offset, [intensity[0]*i, intensity[1]*i, intensity[2]*i]);
-        Array.set(spot.attenuation, offset, attenuation);
-        Array.set(spot.falloffAngle, offset/3, falloffAngle);
-        Array.set(spot.softness, offset/3, softness);
+        Array.set(spot.attenuation, offset*3, attenuation);
+        Array.set(spot.falloffAngle, offset, falloffAngle);
+        Array.set(spot.softness, offset, softness);
     };
 
     XML3D.webgl.LightShaderRenderAdapter.prototype.removeLight = function(type, lightEntry, offset) {

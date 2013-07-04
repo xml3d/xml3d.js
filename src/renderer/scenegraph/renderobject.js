@@ -133,6 +133,10 @@
             this.children.forEach(function(obj) {
                 obj.setVisible(downstream);
             });
+        },
+
+        remove: function() {
+            this.parent.removeChild(this);
         }
 
     });
@@ -347,6 +351,10 @@
             this.children.push(child);
         },
 
+        removeChild: function(child) {
+            this.children.splice(this.children.indexOf(child), 1);
+        },
+
         getChildren: function() {
             return this.children;
         },
@@ -398,13 +406,16 @@
     // Export
     XML3D.webgl.RenderGroup = RenderGroup;
 
+    /** @const */
+    var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = XML3D.math.vec3.fromValues(0,0,-1);
+    /** @const */
+    var XML3D_SPOTLIGHT_DEFAULT_DIRECTION = XML3D.math.vec3.fromValues(0,0,1);
 
     var RenderLight = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
         this.lightType = opt.lightType;
         this.lightOffset = pageEntry.lightOffset;
         this.lightAdapter = opt.adapter;
-        //this.fillLightData();
     };
 
     XML3D.createClass(RenderLight, XML3D.webgl.RenderNode);
@@ -433,7 +444,9 @@
             var offset = this.lightOffset;
             var data = this.scene.lights[this.lightType][field];
             if (!data) return;
-            if(field=="falloffAngle" || field=="softness") offset/=3; //some parameters are scalar
+            if(field=="falloffAngle" || field=="softness") {
+                offset/=3; //some parameters are scalar
+            }
             Array.set(data, offset, newValue);
             this.scene.lights.changed = true;
         },
@@ -447,20 +460,45 @@
             return function() {
                 this.parent.getWorldMatrix(tmp_mat);
                 this.setWorldMatrix(tmp_mat);
-                this.transformDirty = false;
-                var copy = XML3D.math.mat4.copy(XML3D.math.mat4.create(), tmp_mat);
-                this.lightAdapter.transform = copy;
-                //TODO: handle this stuff here in the render node
-                this.lightAdapter.notifyChanged({internalType : "parenttransform"});
-                this.scene.lights.changed = true;
+                this.updateLightTransformData(tmp_mat);
             }
         })(),
+
+        updateLightTransformData: function(transform) {
+            if (this.lightType == "directional") {
+                this.updateLightData("direction", this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION, transform));
+            } else if (this.lightType == "spot") {
+                this.updateLightData("direction", this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION, transform));
+                this.updateLightData("position", this.applyTransform([0,0,0], transform));
+            } else {
+                this.updateLightData("position", this.applyTransform([0,0,0], transform));
+            }
+        },
+
+        applyTransform: function(vec, transform) {
+            var newVec = XML3D.math.vec4.transformMat4(XML3D.math.vec4.create(), [vec[0], vec[1], vec[2], 1], transform);
+            return [newVec[0]/newVec[3], newVec[1]/newVec[3], newVec[2]/newVec[3]];
+        },
+
+        applyTransformDir: function(vec, transform) {
+            var newVec = XML3D.math.vec4.transformMat4(XML3D.math.vec4.create(), [vec[0], vec[1], vec[2], 0], transform);
+            return [newVec[0], newVec[1], newVec[2]];
+        },
 
         setVisible: function(newVal) {
             if (this.localVisible !== false) {
                 this.visible = newVal;
                 this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
             }
+        },
+
+        remove: function() {
+            this.parent.removeChild(this);
+            var lightArray = this.scene.lights[this.lightType];
+            lightArray.renderLight.splice(this.lightOffset, 1);
+            lightArray.length--;
+            this.lightAdapter.removeLight(lightArray, this.lightOffset);
+            this.scene.lights.structureChanged = true;
         }
 
     });

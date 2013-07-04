@@ -117,7 +117,7 @@
         };
 
         this.createRenderLight = function(opt) {
-            var pageEntry = this.createPageEntry();
+            var pageEntry = this.createPageEntry("light");
             this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
             var renderLight = new XML3D.webgl.RenderLight(this, pageEntry, opt);
             this.lights.structureChanged = true;

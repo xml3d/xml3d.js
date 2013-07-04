@@ -117,7 +117,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     };
     p.updateShader = function(adapter){
         var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
-            this.factory.renderer.lights);
+            this.factory.renderer.scene.lights);
         this.renderNode.shader = shaderName;
         XML3D.debug.logInfo("New shader, clearing requests: ", shaderName);
         this.clearRequests(); // New shader, new requests

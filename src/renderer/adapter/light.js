@@ -13,8 +13,8 @@
         this.renderer = factory.renderer;
         this.offset = 0;
         this.lightType = "point";
-        this.updateLightShader();
         this.listenerID = -1;
+        this.updateLightShader();
         this.createRenderNode();
     };
     XML3D.createClass(LightRenderAdapter, XML3D.webgl.TransformableAdapter);
@@ -37,7 +37,7 @@
         else if( evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
             // The connected transform node changed;
             if (evt.key == "shader") {
-                this.removeLight(this.renderer.scene.lights[this.lightType]);
+                this.renderNode.remove();
                 return;
             }
         }
@@ -49,10 +49,6 @@
             this.visible = (evt.wrapped.newValue == "true") && this.node.parentNode.visible;
             this.renderNode.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
             break;
-        case "parentvisible":
-            this.visible = evt.newValue && this.node.visible;
-            this.renderNode.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
-            break;
         case "intensity":
             var i = this.intensity = evt.wrapped.newValue;
             var lsIntensity = this.lightShader.requestParameter("intensity");
@@ -61,22 +57,10 @@
             lsIntensity = lsIntensity.getValue();
             this.renderNode.updateLightData("intensity", [lsIntensity[0]*i, lsIntensity[1]*i, lsIntensity[2]*i]);
             break;
-        case "parenttransform":
-            //this.transform = evt.newValue;
-            if (this.lightType == "directional") {
-                this.renderNode.updateLightData("intensity", this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
-            } else if (this.lightType == "spot") {
-                this.renderNode.updateLightData("direction", this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION));
-                this.renderNode.updateLightData("position", this.applyTransform([0,0,0]));
-            } else {
-                this.renderNode.updateLightData("position", this.applyTransform([0,0,0]));
-            }
-
-            break;
         case "shader":
-            this.removeLight(this.renderer.scene.lights[this.lightType]);
+            this.renderNode.remove();
             this.updateLightShader();
-            this.addLight(this.renderer.scene.lights[this.lightType]);
+            this.createRenderNode();
             break;
         }
 
@@ -117,54 +101,53 @@
             return;
 
         var lo = lightEntry;
+        var off3 = offset*3;
         switch(this.lightType) {
             case "point":
-                Array.set(lo.position, offset, this.applyTransform([0,0,0]));
-                Array.set(lo.visibility, offset, this.renderNode.isVisible() ? [1,1,1] : [0,0,0]);
-                shader.fillPointLight(lo, this.node.intensity, offset);
+                Array.set(lo.position, off3, this.applyTransform([0,0,0]));
+                Array.set(lo.visibility, off3, this.renderNode.isVisible() ? [1,1,1] : [0,0,0]);
+                shader.fillPointLight(lo, this.node.intensity, off3);
                 break;
             case "directional":
-                Array.set(lo.direction, offset, this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
-                Array.set(lo.visibility, offset, this.renderNode.isVisible() ? [1,1,1] : [0,0,0]);
-                shader.fillDirectionalLight(lo, this.node.intensity, offset);
+                Array.set(lo.direction, off3, this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION));
+                Array.set(lo.visibility, off3, this.renderNode.isVisible() ? [1,1,1] : [0,0,0]);
+                shader.fillDirectionalLight(lo, this.node.intensity, off3);
                 break;
             case "spot":
-                Array.set(lo.position, offset, this.applyTransform([0,0,0]));
-                Array.set(lo.direction, offset, this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION));
-                Array.set(lo.visibility, offset, this.renderNode.isVisible() ? [1,1,1] : [0,0,0]);
-                shader.fillSpotLight(lo, this.node.intensity, offset);
+                Array.set(lo.position, off3, this.applyTransform([0,0,0]));
+                Array.set(lo.direction, off3, this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION));
+                Array.set(lo.visibility, off3, this.renderNode.isVisible() ? [1,1,1] : [0,0,0]);
+                shader.fillSpotLight(lo, this.node.intensity, off3);
                 break;
             default:
-                XML3D.debug.logWarning("Unsupported lightshader type: " + script);
+                XML3D.debug.logWarning("Unsupported lightshader type: " + this.lightType);
         }
     };
 
     LightRenderAdapter.prototype.removeLight = function(lightEntry, offset) {
         var lo = lightEntry;
         var shader = this.getLightShader();
-
+        var off3 = offset*3;
         if (shader) {
             switch(this.lightType) {
             case "point":
-                lo.position.splice(offset, 3);
+                lo.position.splice(off3, 3);
                 break;
 
             case "directional":
-                lo.direction.splice(offset, 3);
+                lo.direction.splice(off3, 3);
                 break;
 
             case "spot":
-                lo.position.splice(offset, 3);
-                lo.direction.splice(offset, 3);
+                lo.position.splice(off3, 3);
+                lo.direction.splice(off3, 3);
                 break;
             }
 
-            lo.visibility.splice(offset, 3);
+            lo.visibility.splice(off3, 3);
 
-            shader.removeLight(this.lightType, lightEntry, offset);
+            shader.removeLight(this.lightType, lightEntry, off3);
             shader.removeLightListener(this.listenerID);
-
-            lo.length--;
         }
     };
 
@@ -182,8 +165,11 @@
             }
         }
         this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
-        this.listenerID = this.getLightShader().registerLightListener(this.dataChanged.bind(this));
-        this.updateLightType();
+        var shader = this.getLightShader();
+        if (shader) {
+            this.listenerID = shader.registerLightListener(this.dataChanged.bind(this));
+            this.updateLightType();
+        }
     };
 
     LightRenderAdapter.prototype.updateLightType = function() {
@@ -205,8 +191,7 @@
     };
 
     LightRenderAdapter.prototype.destroy = function() {
-        this.removeLight(this.renderer.scene.lights[this.lightType]);
-
+        this.renderNode.remove();
         this.clearAdapterHandles();
     };
 

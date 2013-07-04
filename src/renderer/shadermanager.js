@@ -478,8 +478,6 @@
         this.gl.useProgram(null);
     };
 
-    var rc = window.WebGLRenderingContext;
-
     /**
      * Set uniforms for active program
      * @param gl
@@ -490,9 +488,9 @@
     XML3DShaderManager.setUniform = function(gl, u, value, transposed) {
 
         switch (u.glType) {
-        case rc.BOOL:
-        case rc.INT:
-        case rc.SAMPLER_2D:
+        case 35670: //gl.BOOL
+        case 5124:  //gl.INT
+        case 35678: //gl.SAMPLER_2D
             if (value.length)
                 gl.uniform1i(u.location, value[0]);
             else

@@ -114,11 +114,11 @@
         },
         bind : function(unit) {
             this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-            this.gl.bindTexture(this.textureType, this.handle);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.handle);
         },
         unbind : function(unit) {
             this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-            this.gl.bindTexture(this.textureType, null);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, null);
         },
         destroy : function() {
             this.gl.deleteTexture(this.handle);

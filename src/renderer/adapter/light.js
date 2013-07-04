@@ -8,10 +8,8 @@
      */
     var LightRenderAdapter = function(factory, node) {
         XML3D.webgl.TransformableAdapter.call(this, factory, node);
-        this.transform = null;
         this.lightShader = null;
         this.renderer = factory.renderer;
-        this.offset = 0;
         this.lightType = "point";
         this.listenerID = -1;
         this.updateLightShader();
@@ -38,16 +36,15 @@
             return;
         } else if (evt.type == XML3D.events.THIS_REMOVED) {
             return;
-        }
-        else if( evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
-            // The connected transform node changed;
+        } else if( evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
             if (evt.key == "shader") {
+                //The lightshader was destroyed, so this light is now invalid
                 this.renderNode.remove();
                 return;
             }
         }
 
-        var target = evt.internalType || evt.wrapped.attrName;
+        var target = evt.wrapped.attrName;
 
         switch(target) {
         case "visible":
@@ -63,7 +60,6 @@
             this.createRenderNode();
             break;
         }
-
         this.factory.handler.redraw("Light attribute changed.");
     };
 
@@ -86,9 +82,7 @@
                 lo.direction.splice(off3, 3);
                 break;
             }
-
             lo.visibility.splice(off3, 3);
-
             shader.removeLight(this.lightType, lightEntry, off3);
             shader.removeLightListener(this.listenerID);
         }

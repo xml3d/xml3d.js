@@ -111,16 +111,14 @@
 
         this.createRenderGroup = function(opt) {
             var pageEntry = this.createPageEntry();
-            var renderGroup = new XML3D.webgl.RenderGroup(this, pageEntry, opt);
-            return renderGroup;
+            return new XML3D.webgl.RenderGroup(this, pageEntry, opt);
         };
 
         this.createRenderLight = function(opt) {
             var pageEntry = this.createPageEntry();
             this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
-            var renderLight = new XML3D.webgl.RenderLight(this, pageEntry, opt);
             this.lights.structureChanged = true;
-            return renderLight;
+            return new XML3D.webgl.RenderLight(this, pageEntry, opt);
         };
 
         this.addLightDataOffsetToPageEntry = function(pageEntry, lightType) {

@@ -16,8 +16,11 @@
         <file name="shadermanager.js" />
         <file name="material.js" />
         <file name="bufferhandler.js" />
-        <file name="scenegraph/renderobject.js" />
-        <file name="scenegraph/scene.js" />
+        <file name="scene/rendernode.js" />
+        <file name="scene/renderobject.js" />
+        <file name="scene/rendergroup.js" />
+        <file name="scene/renderlight.js" />
+        <file name="scene/scene.js" />
         <file name="renderer.js" />
         <file name="adapter/base.js" />
         <file name="adapter/transformable.js" />

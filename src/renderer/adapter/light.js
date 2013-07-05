@@ -46,8 +46,7 @@
 
         switch(target) {
         case "visible":
-            this.visible = (evt.wrapped.newValue == "true") && this.node.parentNode.visible;
-            this.renderNode.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
+            this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
             break;
         case "intensity":
             this.renderNode.setLocalIntensity(evt.wrapped.newValue);
@@ -62,7 +61,6 @@
     };
 
     LightRenderAdapter.prototype.updateLightShader = function(){
-       // this.disconnectAdapterHandle("shader");
         var shaderHref = this.node.shader;
         if(!shaderHref)
         {

@@ -423,7 +423,6 @@
     XML3D.extend(RenderLight.prototype, {
         initializeLightData: function() {
             var lightEntry = this.scene.lights[this.lightType];
-            lightEntry.renderLight[this.lightOffset/3] = this;
             this.updateWorldMatrix(); //Implicitly fills light position/direction
             this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
             this.lightShader.fillLightData(this.lightType, lightEntry, this.localIntensity, this.lightOffset);
@@ -476,6 +475,16 @@
             return [newVec[0], newVec[1], newVec[2]];
         },
 
+        setLocalVisible: function(newVal) {
+            this.localVisible = newVal;
+            if (newVal === false) {
+                this.visible = false;
+                this.updateLightData("visibility", [0,0,0]);
+            } else {
+                this.setVisible(this.parent.isVisible());
+            }
+        },
+
         setVisible: function(newVal) {
             if (this.localVisible !== false) {
                 this.visible = newVal;
@@ -507,7 +516,6 @@
             }
             lo.visibility.splice(offset, 3);
             this.lightShader.removeLight(this.lightType, lo, offset);
-            lo.renderLight.splice(this.lightOffset/3, 1);
             lo.length--;
         }
 

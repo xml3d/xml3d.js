@@ -17,6 +17,7 @@
             directional: { length: 0, intensity: [], direction: [], visibility: [] },
             spot: { length: 0, intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
         };
+        this.activeView = null;
 
         this.remove = function(obj) {
             var index = this.ready.indexOf(obj);
@@ -112,6 +113,11 @@
         this.createRenderGroup = function(opt) {
             var pageEntry = this.createPageEntry();
             return new XML3D.webgl.RenderGroup(this, pageEntry, opt);
+        };
+
+        this.createRenderView = function(opt) {
+            var pageEntry = this.createPageEntry();
+            return new XML3D.webgl.RenderView(this, pageEntry, opt);
         };
 
         this.createRenderLight = function(opt) {

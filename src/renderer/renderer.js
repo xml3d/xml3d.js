@@ -71,9 +71,9 @@ Renderer.prototype.getAdapter = function(node){
 
 Renderer.prototype.initCamera = function() {
     var av = XML3D.util.getOrCreateActiveView(this.xml3dNode);
-
-    this.currentView = av;
-    return this.getAdapter(av);
+    var adapter = this.getAdapter(av);
+    this.scene.activeView = adapter.getRenderNode();
+    return this.scene.activeView;
 };
 
 var TraversalState = function(parent) {
@@ -187,12 +187,10 @@ Renderer.prototype.resizeCanvas = function (width, height) {
     this.width = width;
     this.height = height;
 	this.fbos = this.initFrameBuffers(this.gl);
-    this.camera && (this.camera.projMatrix = null);
+    this.camera && (this.camera.setTransformDirty());
 };
 
 Renderer.prototype.activeViewChanged = function () {
-    this._projMatrix = null;
-    this._viewMatrix = null;
     this.camera = this.initCamera();
     this.requestRedraw("Active view changed", true);
 };
@@ -249,6 +247,9 @@ Renderer.prototype.prepareRendering = function() {
     //scene.updateDirtyObjects();
 };
 
+
+var c_viewMat_tmp = XML3D.math.mat4.create();
+var c_projMat_tmp = XML3D.math.mat4.create();
 /**
  *
  * @returns {Array}
@@ -265,8 +266,10 @@ Renderer.prototype.renderToCanvas = function() {
         return [0, 0];
 
     var camera = {};
-    camera.view = this.camera.viewMatrix;
-    camera.proj = this.camera.getProjectionMatrix(this.width / this.height);
+    this.camera.getViewMatrix(c_viewMat_tmp);
+    camera.view = c_viewMat_tmp;
+    this.camera.getProjectionMatrix(c_projMat_tmp, this.width / this.height);
+    camera.proj = c_projMat_tmp;
 
     this.scene.ready.forEach( function(obj) {
         obj.updateWorldSpaceMatrices(camera.view, camera.proj);
@@ -277,19 +280,19 @@ Renderer.prototype.renderToCanvas = function() {
     //Sort objects by shader/transparency
     var opaqueObjects = [];
     var transparentObjects = [];
-    this.sortObjects(this.scene.ready, this.scene.firstOpaqueIndex, opaqueObjects, transparentObjects, camera);
+    this.sortObjects(this.scene.ready, this.scene.firstOpaqueIndex, opaqueObjects, transparentObjects);
 
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
         var objectArray = opaqueObjects[shaderName];
-		this.renderObjectsToActiveBuffer(objectArray, shaderName, camera, this.scene.lights, { transparent: false, stats: stats });
+		this.renderObjectsToActiveBuffer(objectArray, shaderName, this.scene.lights, { transparent: false, stats: stats });
     }
 
     //Render transparent objects
 	if (transparentObjects.length > 0) {
         for (var k=0; k < transparentObjects.length; k++) {
             var objectArray = [transparentObjects[k]];
-			this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, camera, this.scene.lights, { transparent: true, stats: stats });
+			this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, this.scene.lights, { transparent: true, stats: stats });
         }
     }
 	this.scene.lights.changed = false;
@@ -297,7 +300,7 @@ Renderer.prototype.renderToCanvas = function() {
 };
 
 
-Renderer.prototype.sortObjects = function(sourceObjectArray, firstOpaque, opaque, transparent, camera) {
+Renderer.prototype.sortObjects = function(sourceObjectArray, firstOpaque, opaque, transparent) {
     var tempArray = [];
     for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
         var obj = sourceObjectArray[i];
@@ -344,7 +347,7 @@ var tmpNormalMatrix = XML3D.math.mat3.create();
 var identMat3 = XML3D.math.mat3.create();
 var identMat4 = XML3D.math.mat4.create();
 
-Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId, xform, lights, opts) {
+Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId, lights, opts) {
     var objCount = 0;
     var triCount = 0;
     var parameters = {};
@@ -392,9 +395,11 @@ Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId,
 
     this.shaderManager.bindShader(shader);
     this.shaderManager.updateActiveShader(shader);
+    this.camera.getViewMatrix(c_viewMat_tmp);
+    this.camera.getProjectionMatrix(c_projMat_tmp, this.width / this.height);
 
-    parameters["viewMatrix"] = this.camera.viewMatrix;
-    parameters["projectionMatrix"] = this.camera.getProjectionMatrix(this.width / this.height);
+    parameters["viewMatrix"] = c_viewMat_tmp;
+    parameters["projectionMatrix"] = c_projMat_tmp;
     parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
     parameters["screenWidth"] = this.width;
 
@@ -546,8 +551,8 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
     gl.viewport(0, 0, fbo.width, fbo.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
-    var viewMatrix = this.camera.viewMatrix;
-    var projMatrix = this.camera.getProjectionMatrix(fbo.width / fbo.height);
+    this.camera.getViewMatrix(c_viewMat_tmp);
+    this.camera.getProjectionMatrix(c_projMat_tmp, fbo.width / fbo.height);
     var mvp = XML3D.math.mat4.create();
 
     var shader = this.shaderManager.getShaderByURL("pickobjectid");
@@ -564,8 +569,8 @@ Renderer.prototype.renderSceneToPickingBuffer = function() {
         var parameters = {};
 
         obj.getWorldMatrix(tmpModelMatrix);
-        XML3D.math.mat4.multiply(mvp, viewMatrix, tmpModelMatrix);
-        XML3D.math.mat4.multiply(mvp, projMatrix, mvp);
+        XML3D.math.mat4.multiply(mvp, c_viewMat_tmp, tmpModelMatrix);
+        XML3D.math.mat4.multiply(mvp, c_projMat_tmp, mvp);
 
         var objId = j+1;
         var c1 = objId & 255;
@@ -610,16 +615,21 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     var shader = this.shaderManager.getShaderByURL("pickedposition");
     this.shaderManager.bindShader(shader);
 
-
-    var xform = {};
-    xform.model = tmpModelMatrix;
-    xform.modelView = this.camera.getModelViewMatrix(xform.model);
+    var modelViewProjMat = XML3D.math.mat4.create();
+    pickedObj.getModelViewProjectionMatrix(modelViewProjMat);
 
     var parameters = {
+<<<<<<< HEAD
         bbMin : this.bbMin,
         bbMax : this.bbMax,
         modelMatrix : xform.model,
         modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)
+=======
+    	min : this.bbMin,
+    	max : this.bbMax,
+        modelMatrix : tmpModelMatrix,
+        modelViewProjectionMatrix : modelViewProjMat
+>>>>>>> Added RenderView nodes and adapted renderer
     };
 
     this.shaderManager.setUniformVariables(shader, parameters);
@@ -641,39 +651,41 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
  */
 Renderer.prototype.renderPickedNormals = function(pickedObj) {
     var gl = this.gl;
+    var fbo = this.fbos.vectorPicking;
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.vectorPicking.handle);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
 
-    pickedObj.getWorldMatrix(tmpModelMatrix);
-    var transform = tmpModelMatrix;
-    var mesh = pickedObj.mesh;
+    this.camera.getViewMatrix(c_viewMat_tmp);
+    this.camera.getProjectionMatrix(c_projMat_tmp, fbo.width / fbo.height);
+    var mvm = XML3D.math.mat4.create();
+    var mvp = XML3D.math.mat4.create();
+
+    obj.getWorldMatrix(tmpModelMatrix);
+    XML3D.math.mat4.multiply(mvm, c_viewMat_tmp, tmpModelMatrix);
+    XML3D.math.mat4.multiply(mvp, c_projMat_tmp, mvm);
 
     var shader = this.shaderManager.getShaderByURL("pickedNormals");
     this.shaderManager.bindShader(shader);
 
-    var xform = {};
-    xform.model = transform;
-    xform.modelView = this.camera.getModelViewMatrix(xform.model);
-
-    var normalMatrix = XML3D.math.mat4.invert(XML3D.math.mat4.create(), transform);
+    var normalMatrix = XML3D.math.mat4.invert(XML3D.math.mat4.create(), mvm);
     normalMatrix = XML3D.math.mat3.copy(XML3D.math.mat3.create(),
       [normalMatrix[0], normalMatrix[1], normalMatrix[2],
       normalMatrix[4], normalMatrix[5], normalMatrix[6],
       normalMatrix[8], normalMatrix[9], normalMatrix[10]]);
 
     var parameters = {
-        modelViewMatrix : transform,
-        modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
+        modelViewMatrix : mvm,
+        modelViewProjectionMatrix : mvp,
         normalMatrix : normalMatrix ? XML3D.math.mat3.transpose(normalMatrix, normalMatrix) : identMat3
     };
 
     this.shaderManager.setUniformVariables(shader, parameters);
-    this.drawObject(shader, mesh);
+    this.drawObject(shader, pickedObj.mesh);
 
     this.shaderManager.unbindShader(shader);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);

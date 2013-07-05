@@ -8,7 +8,7 @@
         this.viewMatrix = XML3D.math.mat4.create();
         this.projMatrix = null;
         this.worldPosition = [0,0,0];
-        this.updateViewMatrix();
+        //this.updateViewMatrix();
         this.createRenderNode();
     };
     XML3D.createClass(ViewRenderAdapter, XML3D.webgl.TransformableAdapter);
@@ -18,7 +18,15 @@
         tmp2 = XML3D.math.mat4.create();
 
     p.createRenderNode = function() {
-        // Create renderNode
+        var parent = this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
+        var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
+
+        this.renderNode = this.factory.renderer.scene.createRenderView({
+            position : this.node.position._data,
+            orientation : this.node.orientation.toMatrix()._data,
+            fieldOfView : this.node.fieldOfView,
+            parent : parentNode
+        });
     };
 
     p.updateViewMatrix = function() {
@@ -68,8 +76,8 @@
 
     /* Interface method */
     p.getViewMatrix = function() {
-        var m = new window.XML3DMatrix();
-        m._data.set(this.viewMatrix);
+        var m = new XML3DMatrix();
+        this.renderNode.getViewMatrix(m._data);
         return m;
     };
 
@@ -78,49 +86,33 @@
      * want to go world2view and not view2world
      */
     p.getWorldMatrix = function() {
-        var m = new window.XML3DMatrix();
-        var tmp = XML3D.math.mat4.create();
-        XML3D.math.mat4.invert(tmp, this.viewMatrix);
-        m._data.set(tmp);
+        var m = new XML3DMatrix();
+        this.renderNode.getViewMatrix(m._data);
+        XML3D.math.mat4.invert(m._data, m._data);
         return m;
-    };
-
-
-    p.getModelViewMatrix = function(model) {
-        return XML3D.math.mat4.multiply(XML3D.math.mat4.create(), this.viewMatrix, model);
-    };
-
-    p.getModelViewProjectionMatrix = function(modelViewMatrix) {
-        return XML3D.math.mat4.multiply(XML3D.math.mat4.create(), this.projMatrix, modelViewMatrix);
-    };
-
-    p.getWorldSpacePosition = function() {
-        return this.worldPosition;
     };
 
     p.notifyChanged = function(evt) {
 
         if( (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) && !evt.internalType){
             // The connected transform node changed;
+            //TODO: What to do here?
             this.projMatrix = null;
         }
         else{
-            var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+            var target = evt.attrName || evt.wrapped.attrName;
 
             switch (target) {
-                case "parenttransform":
-                    this.parentTransform = evt.newValue;
-                    this.updateViewMatrix();
-                    break;
-
                 case "orientation":
+                    this.renderNode.updateOrientation(this.node.orientation.toMatrix()._data);
+                    break;
                 case "position":
-                    this.updateViewMatrix();
+                    this.renderNode.updatePosition(this.node.position._data);
                     break;
                 case "perspective":
                 case "fieldOfView":
                     connectProjectionAdapater(this);
-                    this.projMatrix = null;
+                    this.renderNode.updateFieldOfView(this.node.fieldOfView);
                     break;
 
                 default:

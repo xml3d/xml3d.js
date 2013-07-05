@@ -6,12 +6,18 @@
     IRenderObject.prototype.getModelViewMatrix = function() {};
     IRenderObject.prototype.getModelViewProjectionMatrix = function() {};
     IRenderObject.prototype.getNormalMatrix = function() {};
+    IRenderObject.prototype.getObjectSpaceBoundingBox = function() {};
+    IRenderObject.prototype.getWorldSpaceBoundingBox = function() {};
     IRenderObject.prototype.updateWorldSpaceMatrices = function() {};
     IRenderObject.prototype.isVisible = function() {};
     IRenderObject.prototype.setTransformDirty = function() {};
     IRenderObject.prototype.setShader = function() {};
 
     // Entry:
+    /** @const */
+    var OBJECT_BB_OFFSET = 0;
+    /** @const */
+    var WORLD_BB_OFFSET = 6;
     /** @const */
     var WORLD_MATRIX_OFFSET = 16;
     /** @const */
@@ -39,6 +45,7 @@
         this.override = null;
         this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
         this.transformDirty = true;
+        this.boundingBoxDirty = true;
         this.create();
     };
 
@@ -58,7 +65,11 @@
             }
         },
         onbeforedataComplete:function (name, from, to) {
-            return this.meshAdapter.finishMesh();
+            var success = this.meshAdapter.finishMesh();
+            if (success) {
+                this.updateObjectSpaceBoundingBox();
+            }
+            return success;
         },
         onbeforeprogress: function(name, from, to) {
             switch (to) {
@@ -68,6 +79,7 @@
             switch (from) {
                 case "DirtyMeshData":
                     this.meshAdapter.createMeshData();
+                    this.updateObjectSpaceBoundingBox();
             }
         },
         onenterNoMesh:function () {
@@ -116,6 +128,7 @@
             this.updateModelViewMatrix(view);
             this.updateNormalMatrix();
             this.updateModelViewProjectionMatrix(projection);
+            this.setBoundingBoxDirty();
         },
 
         updateWorldMatrix: (function() {
@@ -123,15 +136,20 @@
             return function() {
                 this.parent.getWorldMatrix(tmp_mat);
                 this.setWorldMatrix(tmp_mat);
+                this.updateWorldSpaceBoundingBox();
                 this.transformDirty = false;
             }
         })(),
 
         /** Relies on an up-to-date transform matrix **/
         updateModelViewMatrix: function(view) {
+            if (this.transformDirty) {
+                this.updateWorldMatrix();
+            }
             var page = this.page;
             var offset = this.offset;
             XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEW_MATRIX_OFFSET, page, offset+WORLD_MATRIX_OFFSET,  view, 0);
+            this.setBoundingBoxDirty();
         },
 
         /** Relies on an up-to-date view matrix **/
@@ -179,7 +197,77 @@
 
         setShader: function(newHandle) {
             this.meshAdapter.updateShader(newHandle.adapter);
-        }
+        },
+
+        setObjectSpaceBoundingBox: function(min, max) {
+            var o = this.offset + OBJECT_BB_OFFSET;
+            this.page[o] = min[0];
+            this.page[o+1] = min[1];
+            this.page[o+2] = min[2];
+            this.page[o+3] = max[0];
+            this.page[o+4] = max[1];
+            this.page[o+5] = max[2];
+        },
+
+        getObjectSpaceBoundingBox: function(min, max) {
+            var o = this.offset + OBJECT_BB_OFFSET;
+            min[0] = this.page[o];
+            min[1] = this.page[o+1];
+            min[2] = this.page[o+2];
+            max[0] = this.page[o+3];
+            max[1] = this.page[o+4];
+            max[2] = this.page[o+5];
+        },
+
+        updateObjectSpaceBoundingBox: function() {
+            var bbox = this.meshAdapter.calcBoundingBox();
+            this.setObjectSpaceBoundingBox(bbox.min._data, bbox.max._data);
+            this.setBoundingBoxDirty();
+        },
+
+        setBoundingBoxDirty: function() {
+            this.boundingBoxDirty = true;
+            this.parent.setBoundingBoxDirty();
+        },
+
+        setWorldSpaceBoundingBox: function(min, max) {
+            var o = this.offset + WORLD_BB_OFFSET;
+            this.page[o] = min[0];
+            this.page[o+1] = min[1];
+            this.page[o+2] = min[2];
+            this.page[o+3] = max[0];
+            this.page[o+4] = max[1];
+            this.page[o+5] = max[2];
+
+            this.boundingBoxDirty = false;
+        },
+
+        getWorldSpaceBoundingBox: function(min, max) {
+            if (this.boundingBoxDirty) {
+                this.updateWorldSpaceBoundingBox();
+            }
+            var o = this.offset + WORLD_BB_OFFSET;
+            min[0] = this.page[o];
+            min[1] = this.page[o+1];
+            min[2] = this.page[o+2];
+            max[0] = this.page[o+3];
+            max[1] = this.page[o+4];
+            max[2] = this.page[o+5];
+        },
+
+        updateWorldSpaceBoundingBox: (function() {
+            var t_min = XML3D.math.vec3.create();
+            var t_max = XML3D.math.vec3.create();
+            var t_mat = XML3D.math.mat4.create();
+
+            return function() {
+                this.getWorldMatrix(t_mat);
+                this.getObjectSpaceBoundingBox(t_min, t_max);
+                XML3D.math.vec3.transformMat4(t_min, t_min, t_mat);
+                XML3D.math.vec3.transformMat4(t_max, t_max, t_mat);
+                this.setWorldSpaceBoundingBox(t_min, t_max);
+            }
+        })()
 
     });
 

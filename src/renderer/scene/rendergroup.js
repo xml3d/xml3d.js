@@ -3,6 +3,8 @@
     var LOCAL_MATRIX_OFFSET = 0;
     /** @const */
     var WORLD_MATRIX_OFFSET = 16;
+    /** @const */
+    var WORLD_BB_OFFSET = 32;
 
     /**
      *
@@ -12,6 +14,7 @@
     var RenderGroup = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
         this.shaderHandle = opt.shaderHandle || null;
+        this.boundingBoxDirty = false;
     };
     XML3D.createClass(RenderGroup, XML3D.webgl.RenderNode);
     XML3D.extend(RenderGroup.prototype, {
@@ -30,13 +33,43 @@
             this.setTransformDirty();
         },
 
-        getWorldSpaceBoundingBox: function() {
-            // TODO: Placeholder
+        getWorldSpaceBoundingBox: function(min, max) {
+            if (this.boundingBoxDirty) {
+                this.updateWorldSpaceBoundingBox();
+            }
+            var o = this.offset + WORLD_BB_OFFSET;
+            min[0] = this.page[o];
+            min[1] = this.page[o+1];
+            min[2] = this.page[o+2];
+            max[0] = this.page[o+3];
+            max[1] = this.page[o+4];
+            max[2] = this.page[o+5];
         },
 
-        getObjectSpaceBoundingBox: function() {
-            // TODO: Placeholder
+        setWorldSpaceBoundingBox: function(min, max) {
+            var o = this.offset + WORLD_BB_OFFSET;
+            this.page[o] = min[0];
+            this.page[o+1] = min[1];
+            this.page[o+2] = min[2];
+            this.page[o+3] = max[0];
+            this.page[o+4] = max[1];
+            this.page[o+5] = max[2];
+
+            this.boundingBoxDirty = false;
         },
+
+        updateWorldSpaceBoundingBox: (function() {
+            var c_bb = new XML3DBox();
+            var t_bb = new XML3DBox();
+
+            return function() {
+                this.children.forEach(function(obj) {
+                    obj.getWorldSpaceBoundingBox(c_bb.min._data, c_bb.max._data);
+                    t_bb.extend(c_bb);
+                });
+                this.setWorldSpaceBoundingBox(t_bb.min._data, t_bb.max._data);
+            }
+        })(),
 
         addChild: function(child) {
             this.children.push(child);
@@ -90,6 +123,13 @@
                 return this.parent.getShaderHandle();
             }
             return this.shaderHandle;
+        },
+
+        setBoundingBoxDirty: function() {
+            this.boundingBoxDirty = true;
+            if (this.parent) {
+                this.parent.setBoundingBoxDirty();
+            }
         }
 
     });

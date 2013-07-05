@@ -20,14 +20,6 @@
     };
     XML3D.createClass(RenderView, XML3D.webgl.RenderNode);
     XML3D.extend(RenderView.prototype, {
-        getWorldSpaceBoundingBox: function() {
-            // TODO: Placeholder
-        },
-
-        getObjectSpaceBoundingBox: function() {
-            // TODO: Placeholder
-        },
-
         updateViewMatrix: (function() {
             var tmp_mat4 = XML3D.math.mat4.create();
             var tmp_parent = XML3D.math.mat4.create();
@@ -77,9 +69,22 @@
             }
         })(),
 
-        getClippingPlane: function() {
-            return {near : 0.1, far : 10000};
-        },
+        getClippingPlane: (function() {
+            var t_mat = XML3D.math.mat4.create();
+            var t_min = XML3D.math.vec3.create();
+            var t_max = XML3D.math.vec3.create();
+
+            return function() {
+                /*
+                this.getViewMatrix(t_mat);
+                this.scene.getBoundingBox(t_min, t_max);
+
+                XML3D.math.vec3.transformMat4(t_min, t_min, t_mat);
+                XML3D.math.vec3.transformMat4(t_max, t_max, t_mat);
+                */
+                return {near : 0.1, far : 10000};
+            }
+        })(),
 
         setViewMatrix: function(source) {
             var o = this.offset + VIEW_MATRIX_OFFSET;
@@ -139,6 +144,15 @@
 
         getWorldSpacePosition: function() {
             return this.worldSpacePosition;
+        },
+
+        getWorldSpaceBoundingBox: function(min, max) {
+            min[0] = Number.MAX_VALUE;
+            min[1] = Number.MAX_VALUE;
+            min[2] = Number.MAX_VALUE;
+            max[0] = -Number.MAX_VALUE;
+            max[1] = -Number.MAX_VALUE;
+            max[2] = -Number.MAX_VALUE;
         }
     });
 

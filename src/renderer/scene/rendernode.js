@@ -40,14 +40,6 @@
             }
         },
 
-        getWorldSpaceBoundingBox: function() {
-            // TODO: Placeholder
-        },
-
-        getObjectSpaceBoundingBox: function() {
-            // TODO: Placeholder
-        },
-
         getWorldMatrix: function(dest) {
             if (this.transformDirty) {
                 this.parent.getWorldMatrix(dest);

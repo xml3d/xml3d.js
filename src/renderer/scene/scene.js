@@ -10,6 +10,7 @@
         this.pages = [];
         this.nextOffset = 0;
         this.firstOpaqueIndex = 0;
+        this.boundingBox = {min : [0,0,0], max : [0,0,0]};
         this.lights = {
             changed : true,
             structureChanged : true,
@@ -143,6 +144,16 @@
             this.rootNode = root;
             return root;
         };
+
+        this.updateBoundingBox = function() {
+            this.rootNode.getWorldSpaceBoundingBox(this.boundingBox.min, this.boundingBox.max);
+        };
+
+        this.getBoundingBox = function(min, max) {
+            XML3D.math.vec3.copy(min, this.boundingBox.min);
+            XML3D.math.vec3.copy(max, this.boundingBox.max);
+        };
+
         this.rootNode = this.createRootNode();
         this.clear();
     };

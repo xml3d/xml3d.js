@@ -90,7 +90,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
     parent = parent || new TraversalState();
     var downstream = new TraversalState(parent);
 
-    switch(currentNode.nodeName.toLowerCase()) {
+    /*switch(currentNode.nodeName.toLowerCase()) {
     case "group":
         downstream.visible = parent.visible && currentNode.visible;
         if (currentNode.onmouseover || currentNode.onmouseout)
@@ -100,7 +100,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         if (shaderHandle)
             downstream.shader = shaderHandle;
 
-        downstream.transform = adapter.applyTransformMatrix(XML3D.math.mat4.identity(XML3D.math.mat4.create()));
+        //downstream.transform = adapter.applyTransformMatrix(XML3D.math.mat4.identity(XML3D.math.mat4.create()));
         break;
 
     case "mesh":
@@ -133,7 +133,7 @@ Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray
         break;
     default:
         break;
-    }
+    }*/
 
     var child = currentNode.firstElementChild;
     while (child) {
@@ -268,11 +268,18 @@ Renderer.prototype.renderToCanvas = function() {
     var camera = {};
     this.camera.getViewMatrix(c_viewMat_tmp);
     camera.view = c_viewMat_tmp;
+
+    this.scene.ready.forEach( function(obj) {
+        obj.updateModelViewMatrix(camera.view);
+        obj.updateNormalMatrix();
+    });
+
+    this.scene.updateBoundingBox();
     this.camera.getProjectionMatrix(c_projMat_tmp, this.width / this.height);
     camera.proj = c_projMat_tmp;
 
     this.scene.ready.forEach( function(obj) {
-        obj.updateWorldSpaceMatrices(camera.view, camera.proj);
+        obj.updateModelViewProjectionMatrix(camera.proj);
     });
 
     var stats = { objCount : 0, triCount : 0 };

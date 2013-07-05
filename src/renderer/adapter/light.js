@@ -9,9 +9,6 @@
     var LightRenderAdapter = function(factory, node) {
         XML3D.webgl.TransformableAdapter.call(this, factory, node);
         this.lightShader = null;
-        this.renderer = factory.renderer;
-        this.lightType = "point";
-        this.listenerID = -1;
         this.updateLightShader();
         this.createRenderNode();
     };
@@ -22,8 +19,9 @@
         var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
         var lightShader = this.getLightShader();
         if (lightShader !== undefined) {
-            this.renderNode = this.factory.renderer.scene.createRenderLight({lightType : this.lightType, parent : parentNode, shader : this.getLightShader(),
-                visible : !this.node.visible ? false : undefined, localIntensity : this.node.intensity, adapter : this});
+            var lightType = this.getLightType();
+            this.renderNode = this.factory.renderer.scene.createRenderLight({lightType : lightType, parent : parentNode, shader : this.getLightShader(),
+                visible : !this.node.visible ? false : undefined, localIntensity : this.node.intensity});
         } else {
             XML3D.debug.logWarning("Encountered a light node with no lightshader, this light will be ignored.");
         }
@@ -63,31 +61,6 @@
         this.factory.handler.redraw("Light attribute changed.");
     };
 
-    LightRenderAdapter.prototype.removeLight = function(lightEntry, offset) {
-        var lo = lightEntry;
-        var shader = this.getLightShader();
-        var off3 = offset*3;
-        if (shader) {
-            switch(this.lightType) {
-            case "point":
-                lo.position.splice(off3, 3);
-                break;
-
-            case "directional":
-                lo.direction.splice(off3, 3);
-                break;
-
-            case "spot":
-                lo.position.splice(off3, 3);
-                lo.direction.splice(off3, 3);
-                break;
-            }
-            lo.visibility.splice(off3, 3);
-            shader.removeLight(this.lightType, lightEntry, off3);
-            shader.removeLightListener(this.listenerID);
-        }
-    };
-
     LightRenderAdapter.prototype.updateLightShader = function(){
        // this.disconnectAdapterHandle("shader");
         var shaderHref = this.node.shader;
@@ -102,18 +75,15 @@
             }
         }
         this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
-        var shader = this.getLightShader();
-        if (shader) {
-            this.listenerID = shader.registerLightListener(this.dataChanged.bind(this));
-            this.updateLightType();
-        }
     };
 
-    LightRenderAdapter.prototype.updateLightType = function() {
+    LightRenderAdapter.prototype.getLightType = function() {
         var shader = this.getLightShader();
         var script = shader.node.script;
         if (script.indexOf("urn:xml3d:lightshader:") === 0) {
-            this.lightType = script.substring(22, script.length);
+            return script.substring(22, script.length);
+        } else {
+            XML3D.debug.logError("Unsupported light type "+script);
         }
     };
 
@@ -123,15 +93,11 @@
     LightRenderAdapter.prototype.getLightShader = function() {
         return this.getConnectedAdapter("shader");
     };
-    LightRenderAdapter.prototype.dispose = function() {
-        this.isValid = false;
-    };
 
     LightRenderAdapter.prototype.destroy = function() {
         this.renderNode.remove();
         this.clearAdapterHandles();
     };
-
 
     /**
      * @return {XML3DMatrix}

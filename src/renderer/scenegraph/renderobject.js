@@ -52,8 +52,9 @@
      */
     var RenderNode = function(scene, pageEntry, opt) {
         this.parent = opt.parent;
-        if (this.parent)
+        if (this.parent) {
             this.parent.addChild(this);
+        }
 
         this.scene = scene;
         this.page = pageEntry.page;
@@ -169,11 +170,9 @@
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode);
     XML3D.extend(RenderObject.prototype, {
         onenterReady:function () {
-            //console.log("Entering Ready state");
             this.scene.moveFromQueueToReady(this);
         },
         onleaveReady:function () {
-            //console.log("Leaving Ready state");
             this.scene.moveFromReadyToQueue(this);
         },
         onafterlightsChanged:function (name, from, to, lights, shaderManager) {
@@ -183,11 +182,9 @@
             }
         },
         onbeforedataComplete:function (name, from, to) {
-            //console.log("Before data complete");
             return this.meshAdapter.finishMesh();
         },
         onbeforeprogress: function(name, from, to) {
-            //console.log("Before progress", arguments);
             switch (to) {
                 case "NoMaterial":
                     return this.shader != null;
@@ -415,36 +412,29 @@
     var RenderLight = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
         this.lightShader = opt.shader;
+        this.listenerID = this.lightShader.registerLightListener(this.updateLightData.bind(this));
         this.lightType = opt.lightType;
-        this.lightOffset = pageEntry.lightOffset;
+        this.lightOffset = pageEntry.lightOffset * 3;
         this.localIntensity = opt.localIntensity;
-        this.lightAdapter = opt.adapter;
-        this.fillLightData();
+        this.initializeLightData();
     };
 
     XML3D.createClass(RenderLight, XML3D.webgl.RenderNode);
     XML3D.extend(RenderLight.prototype, {
-        fillLightData: function() {
+        initializeLightData: function() {
             var lightEntry = this.scene.lights[this.lightType];
-            var offset = this.lightOffset;
-            lightEntry.renderLight[offset] = this;
+            lightEntry.renderLight[this.lightOffset/3] = this;
             this.updateWorldMatrix(); //Implicitly fills light position/direction
             this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
-            this.lightShader.fillLightData(this.lightType, lightEntry, this.localIntensity, offset);
-        },
-
-        setWorldMatrix: function(source) {
-            var o = this.offset + WORLD_MATRIX_OFFSET;
-            for(var i = 0; i < 16; i++, o++) {
-                this.page[o] = source[i];
-            }
-            this.transformDirty = false;
+            this.lightShader.fillLightData(this.lightType, lightEntry, this.localIntensity, this.lightOffset);
         },
 
         updateLightData: function(field, newValue) {
-            var offset = this.lightOffset*3;
+            var offset = this.lightOffset;
             var data = this.scene.lights[this.lightType][field];
-            if (!data) return;
+            if (!data) {
+                return;
+            }
             if(field=="falloffAngle" || field=="softness") {
                 offset/=3; //some parameters are scalar
             }
@@ -501,12 +491,24 @@
 
         remove: function() {
             this.parent.removeChild(this);
-            var lightArray = this.scene.lights[this.lightType];
-            lightArray.renderLight.splice(this.lightOffset, 1);
-            lightArray.length--;
-            //TODO: remove lightAdapter reference
-            this.lightAdapter.removeLight(lightArray, this.lightOffset);
+            this.removeLightData();
             this.scene.lights.structureChanged = true;
+            this.lightShader.removeLightListener(this.listenerID);
+        },
+
+        removeLightData: function() {
+            var lo = this.scene.lights[this.lightType];
+            var offset = this.lightOffset;
+            if (this.lightType == "directional" || this.lightType === "spot") {
+                lo.direction.splice(offset, 3);
+            }
+            if (this.lightType !== "directional") {
+                lo.position.splice(offset, 3);
+            }
+            lo.visibility.splice(offset, 3);
+            this.lightShader.removeLight(this.lightType, lo, offset);
+            lo.renderLight.splice(this.lightOffset/3, 1);
+            lo.length--;
         }
 
     });

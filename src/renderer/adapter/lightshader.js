@@ -12,7 +12,6 @@
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes, this.dataChanged.bind(this));
-        this.offsets = [];
         this.listeners = [];
     };
     XML3D.createClass(XML3D.webgl.LightShaderRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -28,7 +27,6 @@
 
     XML3D.webgl.LightShaderRenderAdapter.prototype.fillLightData = function(type, lights, localIntensity, offset) {
         this.callback = lights.dataChanged;
-        this.offsets.push(offset);
         var dataTable = this.computeRequest.getResult().getOutputMap();
         this.fillCommonLightData(lights, dataTable, offset, localIntensity);
 
@@ -41,18 +39,18 @@
 
     XML3D.webgl.LightShaderRenderAdapter.prototype.fillCommonLightData = function(lights, dataTable, offset, localIntensity) {
         var intensity = dataTable["intensity"] ? dataTable["intensity"].getValue() : LIGHT_DEFAULT_INTENSITY;
-        Array.set(lights.intensity, offset*3, [intensity[0]*localIntensity, intensity[1]*localIntensity, intensity[2]*localIntensity]);
+        Array.set(lights.intensity, offset, [intensity[0]*localIntensity, intensity[1]*localIntensity, intensity[2]*localIntensity]);
     }
 
     /**
      *
      * @param {Object} point
-     * @param {number} i
+     * @param {Object} dataTable
      * @param {number} offset
      */
     XML3D.webgl.LightShaderRenderAdapter.prototype.fillPointLightSpecialData = function(point, dataTable, offset) {
         var attenuation = dataTable["attenuation"] ? dataTable["attenuation"].getValue() : LIGHT_DEFAULT_ATTENUATION;
-        Array.set(point.attenuation, offset*3, attenuation);
+        Array.set(point.attenuation, offset, attenuation);
     };
 
     /**
@@ -66,34 +64,23 @@
         var falloffAngle = dataTable["falloffAngle"] ? dataTable["falloffAngle"].getValue() : [SPOTLIGHT_DEFAULT_FALLOFFANGLE];
         var softness = dataTable["softness"] ? dataTable["softness"].getValue() : [SPOTLIGHT_DEFAULT_SOFTNESS];
 
-        Array.set(spot.attenuation, offset*3, attenuation);
-        Array.set(spot.falloffAngle, offset, falloffAngle);
-        Array.set(spot.softness, offset, softness);
+        Array.set(spot.attenuation, offset, attenuation);
+        Array.set(spot.falloffAngle, offset/3, falloffAngle);
+        Array.set(spot.softness, offset/3, softness);
     };
 
     XML3D.webgl.LightShaderRenderAdapter.prototype.removeLight = function(type, lightEntry, offset) {
         var lo = lightEntry;
         if (!lo)
             return;
-
-        switch (type) {
-            case "point":
-                lo.intensity.splice(offset, 3);
-                lo.attenuation.splice(offset, 3);
-                break;
-
-            case "directional":
-                lo.intensity.splice(offset, 3);
-                break;
-
-            case "spot":
-                lo.intensity.splice(offset, 3);
-                lo.attenuation.splice(offset, 3);
-                lo.softness.splice(offset/3, 1);
-                lo.falloffAngle.splice(offset/3, 1);
-                break;
+        if (type === "point") {
+            lo.attenuation.splice(offset, 3);
+        } else if (type === "spot") {
+            lo.attenuation.splice(offset, 3);
+            lo.softness.splice(offset/3, 1);
+            lo.falloffAngle.splice(offset/3, 1);
         }
-
+        lo.intensity.splice(offset, 3);
     }
 
     /**
@@ -118,13 +105,9 @@
     };
 
     XML3D.webgl.LightShaderRenderAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.NODE_REMOVED) {
-            return;
-        } else if (evt.type == XML3D.events.THIS_REMOVED) {
-            this.notifyOppositeAdapters();
-            return;
+        if (evt.type == XML3D.events.THIS_REMOVED) {
+            this.destroy();
         }
-
     };
 
     /**

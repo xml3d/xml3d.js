@@ -45,12 +45,12 @@
     };
 
     /**
-     * @param {Image|Video} img
+     * @param {Image|HTMLVideoElement} img
      * @returns {boolean}
      */
-    var isLoaded = function(img) {
+    var isLoaded = function (img) {
         return img.complete || img.readyState;
-    }
+    };
 
     XML3D.extend(GLTexture.prototype, {
         /**
@@ -86,7 +86,7 @@
         },
 
         /**
-         * @param {Image|Video} image
+         * @param {Image|HTMLVideoElement} image
          */
         updateTex2DFromImage : function(image) {
             var gl = this.gl;

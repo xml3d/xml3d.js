@@ -76,7 +76,7 @@
 
     /* Interface method */
     p.getViewMatrix = function() {
-        var m = new XML3DMatrix();
+        var m = new window.XML3DMatrix();
         this.renderNode.getViewMatrix(m._data);
         return m;
     };
@@ -86,7 +86,7 @@
      * want to go world2view and not view2world
      */
     p.getWorldMatrix = function() {
-        var m = new XML3DMatrix();
+        var m = new window.XML3DMatrix();
         this.renderNode.getViewMatrix(m._data);
         XML3D.math.mat4.invert(m._data, m._data);
         return m;

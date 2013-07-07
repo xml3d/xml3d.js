@@ -101,7 +101,7 @@
      * @return {XML3DMatrix}
      */
     LightRenderAdapter.prototype.getWorldMatrix = function() {
-        var m = new XML3DMatrix();
+        var m = new window.XML3DMatrix();
         this.renderNode.getWorldMatrix(m._data);
         return m;
     };

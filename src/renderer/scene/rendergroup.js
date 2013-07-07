@@ -59,8 +59,8 @@
         },
 
         updateWorldSpaceBoundingBox: (function() {
-            var c_bb = new XML3DBox();
-            var t_bb = new XML3DBox();
+            var c_bb = new window.XML3DBox();
+            var t_bb = new window.XML3DBox();
 
             return function() {
                 this.children.forEach(function(obj) {

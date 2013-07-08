@@ -15,6 +15,7 @@
         this.orientation = opt.orientation;
         this.fieldOfView = opt.fieldOfView;
         this.worldSpacePosition = [0,0,0];
+        this.projectionAdapter = opt.projectionAdapter;
         this.viewDirty = true;
         this.projectionDirty = true;
     };
@@ -45,6 +46,10 @@
             var tmp = XML3D.math.mat4.create();
 
             return function(aspect) {
+                if (this.projectionAdapter) {
+                    this.setProjectionMatrix(this.projectionAdapter.getMatrix("perspective"));
+                    return;
+                }
                 var clipPlane = this.getClippingPlane();
                 var f = 1 / Math.tan(this.fieldOfView / 2);
 
@@ -100,6 +105,11 @@
                 this.page[o] = source[i];
             }
             this.projectionDirty = false;
+        },
+
+        setProjectionAdapter: function(projAdapter) {
+            this.projectionAdapter = projAdapter;
+            this.projectionDirty = true;
         },
 
         setTransformDirty: function() {

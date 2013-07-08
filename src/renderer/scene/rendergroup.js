@@ -5,6 +5,9 @@
     var WORLD_MATRIX_OFFSET = 16;
     /** @const */
     var WORLD_BB_OFFSET = 32;
+    /** @const */
+    var ENTRY_SIZE = WORLD_BB_OFFSET + 6;
+
 
     /**
      *
@@ -13,9 +16,12 @@
      */
     var RenderGroup = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        opt = opt || {};
         this.shaderHandle = opt.shaderHandle || null;
         this.boundingBoxDirty = false;
     };
+    RenderGroup.ENTRY_SIZE = ENTRY_SIZE;
+
     XML3D.createClass(RenderGroup, XML3D.webgl.RenderNode);
     XML3D.extend(RenderGroup.prototype, {
         getLocalMatrix: function(dest) {

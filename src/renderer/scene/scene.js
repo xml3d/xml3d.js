@@ -1,7 +1,6 @@
-(function() {
+(function(webgl) {
 
-    var ENTRY_SIZE = 80;
-    var PAGE_SIZE = 12;
+    var PAGE_SIZE = 1<<12;
 
     var StateMachine = window.StateMachine;
 
@@ -92,40 +91,50 @@
             this.ready.slice().forEach(func, that);
         };
 
-        this.createPageEntry = function() {
-            var offset = this.nextOffset;
-            var page = offset>>ENTRY_SIZE;
-            var localOffset = offset&((1<<ENTRY_SIZE)-1);
-            if(!this.pages[page]) {
-                XML3D.debug.logInfo("New page:" + page);
-                this.pages[page] = new Float32Array(1<<PAGE_SIZE);
+        this.addPage = function() {
+            var page = new Float32Array(PAGE_SIZE);
+            this.pages.push(page);
+            this.nextOffset = 0;
+            XML3D.debug.logInfo("adding page", this.pages.length, page.length);
+        };
+        this.createPageEntry = function(size) {
+            if(!size)
+                throw new Error("No size given for page entry");
+            if (this.nextOffset + size > PAGE_SIZE) {
+                this.addPage();
+                this.createPageEntry(size);
+                return;
             }
-            this.nextOffset += ENTRY_SIZE;
-            return { page: this.pages[page], offset : localOffset};
+            var page = this.pages[this.pages.length-1];
+            var localOffset = this.nextOffset;
+            this.nextOffset += size;
+            var result = { page: page, offset : localOffset};
+            console.log(result);
+            return result;
         };
 
         this.createRenderObject = function(opt) {
-            var pageEntry = this.createPageEntry();
-            var renderObject = new XML3D.webgl.RenderObject(this, pageEntry, opt);
+            var pageEntry = this.createPageEntry(webgl.RenderObject.ENTRY_SIZE);
+            var renderObject = new webgl.RenderObject(this, pageEntry, opt);
             this.queue.push(renderObject);
             return renderObject;
         };
 
         this.createRenderGroup = function(opt) {
-            var pageEntry = this.createPageEntry();
-            return new XML3D.webgl.RenderGroup(this, pageEntry, opt);
+            var pageEntry = this.createPageEntry(webgl.RenderGroup.ENTRY_SIZE);
+            return new webgl.RenderGroup(this, pageEntry, opt);
         };
 
         this.createRenderView = function(opt) {
-            var pageEntry = this.createPageEntry();
-            return new XML3D.webgl.RenderView(this, pageEntry, opt);
+            var pageEntry = this.createPageEntry(webgl.RenderView.ENTRY_SIZE);
+            return new webgl.RenderView(this, pageEntry, opt);
         };
 
         this.createRenderLight = function(opt) {
-            var pageEntry = this.createPageEntry();
+            var pageEntry = {};
             this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
             this.lights.structureChanged = true;
-            return new XML3D.webgl.RenderLight(this, pageEntry, opt);
+            return new webgl.RenderLight(this, pageEntry, opt);
         };
 
         this.addLightDataOffsetToPageEntry = function(pageEntry, lightType) {
@@ -134,8 +143,8 @@
         };
 
         this.createRootNode = function() {
-            var pageEntry = this.createPageEntry();
-            var root = new XML3D.webgl.RenderGroup(this, pageEntry, {});
+            var pageEntry = this.createPageEntry(webgl.RenderGroup.ENTRY_SIZE);
+            var root = new webgl.RenderGroup(this, pageEntry, {});
             root.setWorldMatrix(XML3D.math.mat4.create());
             root.transformDirty = false;
             root.shaderDirty = false;
@@ -155,9 +164,12 @@
             XML3D.math.vec3.copy(max, this.boundingBox.max);
         };
 
+        this.addPage();
         this.rootNode = this.createRootNode();
         this.clear();
+
     };
+    Scene.PAGE_SIZE = PAGE_SIZE;
 
 
     window.StateMachine.create({
@@ -179,6 +191,6 @@
             { name:'dispose', from:'*', to:'Disposed' }
         ]});
 
-    XML3D.webgl.Scene = Scene;
+    webgl.Scene = Scene;
 
-})();
+})(XML3D.webgl);

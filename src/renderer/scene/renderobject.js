@@ -26,6 +26,9 @@
     var MODELVIEWPROJECTION_MATRIX_OFFSET = 48;
     /** @const */
     var NORMAL_MATRIX_OFFSET = 64;
+    /** @const */
+    var ENTRY_SIZE = NORMAL_MATRIX_OFFSET + 16;
+
 
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
     /**
@@ -39,6 +42,7 @@
      */
     var RenderObject = function (scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        opt = opt || {};
         this.meshAdapter = opt.meshAdapter;
         this.shader = opt.shader || null;
         /** {Object?} **/
@@ -48,6 +52,7 @@
         this.boundingBoxDirty = true;
         this.create();
     };
+    RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode);

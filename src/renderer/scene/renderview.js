@@ -3,6 +3,8 @@
     var VIEW_MATRIX_OFFSET = 0;
     /** @const */
     var PROJECTION_MATRIX_OFFSET = 16;
+    /** @const */
+    var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
 
     /**
      *
@@ -11,6 +13,7 @@
      */
     var RenderView = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        opt = opt || {};
         this.position = opt.position;
         this.orientation = opt.orientation;
         this.fieldOfView = opt.fieldOfView;
@@ -19,6 +22,8 @@
         this.viewDirty = true;
         this.projectionDirty = true;
     };
+    RenderView.ENTRY_SIZE = ENTRY_SIZE;
+
     XML3D.createClass(RenderView, XML3D.webgl.RenderNode);
     XML3D.extend(RenderView.prototype, {
         updateViewMatrix: (function() {

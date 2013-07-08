@@ -43,17 +43,13 @@ Renderer.prototype.initialize = function() {
 };
 
 Renderer.prototype.initializeScenegraph = function() {
-    this.recursiveBuildScene(this.xml3dNode, this.scene.queue, null);
+    this.recursiveBuildScene(this.xml3dNode, this.scene.queue);
     this.scene.rootNode.setVisible(true);
     if (this.scene.lights.length < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
 };
 
-
-/**
- *
- */
 Renderer.prototype.setGlobalGLStates = function() {
     var gl = this.gl;
 
@@ -66,7 +62,7 @@ Renderer.prototype.setGlobalGLStates = function() {
 
 Renderer.prototype.getAdapter = function(node){
     return XML3D.base.resourceManager.getAdapter(node, XML3D.webgl, this.handler.id);
-}
+};
 
 Renderer.prototype.initCamera = function() {
     var av = XML3D.util.getOrCreateActiveView(this.xml3dNode);
@@ -75,68 +71,11 @@ Renderer.prototype.initCamera = function() {
     return this.scene.activeView;
 };
 
-var TraversalState = function(parent) {
-    parent = parent || {};
-    this.visible = parent.visible !== undefined ? parent.visible : true;
-    this.pickable = parent.pickable !== undefined ? parent.visible : true;
-    this.transform = parent.transform ? XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform) : XML3D.math.mat4.identity(XML3D.math.mat4.create());
-    this.shader = parent.shader || null;
-};
-
-Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray, parent) {
+Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray) {
     var adapter = this.getAdapter(currentNode);
-
-    parent = parent || new TraversalState();
-    var downstream = new TraversalState(parent);
-
-    /*switch(currentNode.nodeName.toLowerCase()) {
-    case "group":
-        downstream.visible = parent.visible && currentNode.visible;
-        if (currentNode.onmouseover || currentNode.onmouseout)
-            this.handler.setMouseMovePicking(true);
-
-        var shaderHandle = adapter.getShaderHandle();
-        if (shaderHandle)
-            downstream.shader = shaderHandle;
-
-        //downstream.transform = adapter.applyTransformMatrix(XML3D.math.mat4.identity(XML3D.math.mat4.create()));
-        break;
-
-    case "mesh":
-
-        if (currentNode.onmouseover || currentNode.onmouseout)
-            this.handler.setMouseMovePicking(true);
-
-        var meshAdapter = this.getAdapter(currentNode);
-        if (!meshAdapter)
-            break; //TODO: error handling
-
-        adapter.setShaderHandle(parent.shader);
-
-        // Add a new RenderObject to the scene
-//        var newObject = this.scene.createRenderObject({
-//            meshAdapter : adapter,
-//            visible: parent.visible && currentNode.visible,
-//            transform: parent.transform,
-//            pickable: parent.pickable
-//        });
-       // renderObjectArray.push(meshAdapter.renderNode);
-        break;
-
-    case "light":
-        break;
-
-    case "view":
-        adapter.parentTransform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
-        adapter.updateViewMatrix();
-        break;
-    default:
-        break;
-    }*/
-
     var child = currentNode.firstElementChild;
     while (child) {
-        this.recursiveBuildScene(child, renderObjectArray, downstream);
+        this.recursiveBuildScene(child, renderObjectArray);
         child = child.nextElementSibling;
     }
 };
@@ -179,13 +118,12 @@ Renderer.prototype.changeLightData = function(lightType, field, offset, newValue
  **/
 Renderer.prototype.setGLContext = function(gl) {
     this.shaderManager.setGLContext(gl);
-    this.meshManager.setGLContext(gl);
 };
 
 Renderer.prototype.resizeCanvas = function (width, height) {
     this.width = width;
     this.height = height;
-	this.fbos = this.initFrameBuffers(this.gl);
+    this.fbos = this.initFrameBuffers(this.gl);
     this.camera && (this.camera.setTransformDirty());
 };
 
@@ -199,34 +137,7 @@ Renderer.prototype.requestRedraw = function(reason, forcePickingRedraw) {
 };
 
 Renderer.prototype.sceneTreeAddition = function(evt) {
-    var target = evt.wrapped.target;
-    var adapter = this.getAdapter(target);
-
-    //If no adapter is found the added node must be a text node, or something else
-    //we're not interested in
-    if (!adapter)
-        return;
-
-    var shaderHandle = adapter.getShaderHandle ? adapter.getShaderHandle() : null;
-    if(adapter.updateTransformAdapter)
-        adapter.updateTransformAdapter();
-
-    var visible = target.visible;
-
-    var parentNode = target.parentElement;
-    var parentTransform = XML3D.math.mat4.identity(XML3D.math.mat4.create());
-    if(parentNode && parentNode.nodeName.toLowerCase() == "group")
-    {
-        var parentAdapter = this.getAdapter(parentNode);
-        parentTransform = parentAdapter.applyTransformMatrix(parentTransform);
-        if (!shaderHandle)
-            shaderHandle = parentAdapter.getShaderHandle();
-        visible = parentNode.visible && parentAdapter.parentVisible;
-    }
-
-    //Build any new objects and add them to the scene
-    var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
-    this.recursiveBuildScene(evt.wrapped.target, this.scene.queue, state);
+    this.recursiveBuildScene(evt.wrapped.target, this.scene.queue);
     this.requestRedraw("A node was added.");
 };
 
@@ -243,7 +154,6 @@ Renderer.prototype.prepareRendering = function() {
     var scene = this.scene;
     scene.updateLights(this.scene.lights, this.shaderManager);
     scene.consolidate();
-    //scene.updateDirtyObjects();
 };
 
 
@@ -290,18 +200,15 @@ Renderer.prototype.renderToCanvas = function() {
 
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
-        var objectArray = opaqueObjects[shaderName];
-		this.renderObjectsToActiveBuffer(objectArray, shaderName, this.scene.lights, { transparent: false, stats: stats });
+        this.renderObjectsToActiveBuffer(opaqueObjects[shaderName], shaderName, this.scene.lights, { transparent: false, stats: stats });
     }
 
     //Render transparent objects
-	if (transparentObjects.length > 0) {
-        for (var k=0; k < transparentObjects.length; k++) {
-            var objectArray = [transparentObjects[k]];
-			this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, this.scene.lights, { transparent: true, stats: stats });
-        }
+    for (var k=0; k < transparentObjects.length; k++) {
+        var objectArray = [transparentObjects[k]];
+        this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, this.scene.lights, { transparent: true, stats: stats });
     }
-	this.scene.lights.changed = false;
+    this.scene.lights.changed = false;
     return [stats.objCount, stats.triCount];
 };
 
@@ -349,9 +256,6 @@ var tmpModelMatrix = XML3D.math.mat4.create();
 var tmpModelView = XML3D.math.mat4.create();
 var tmpModelViewProjection = XML3D.math.mat4.create();
 var tmpNormalMatrix = XML3D.math.mat3.create();
-
-var identMat3 = XML3D.math.mat3.create();
-var identMat4 = XML3D.math.mat4.create();
 
 Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId, lights, opts) {
     var objCount = 0;

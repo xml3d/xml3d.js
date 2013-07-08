@@ -655,47 +655,48 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
  * @param screenY
  * @return
  */
-Renderer.prototype.renderPickedNormals = function(pickedObj) {
-    var gl = this.gl;
-    var fbo = this.fbos.vectorPicking;
+Renderer.prototype.renderPickedNormals = (function () {
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
+    var c_mvp = XML3D.math.mat4.create();
+    var c_world = XML3D.math.mat4.create();
+    var c_normalMatrix3 = XML3D.math.mat3.create();
 
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-    gl.disable(gl.CULL_FACE);
-    gl.disable(gl.BLEND);
+    return function (pickedObj) {
+        var gl = this.gl;
+        var fbo = this.fbos.vectorPicking;
 
-    this.camera.getViewMatrix(c_viewMat_tmp);
-    this.camera.getProjectionMatrix(c_projMat_tmp, fbo.width / fbo.height);
-    var mvm = XML3D.math.mat4.create();
-    var mvp = XML3D.math.mat4.create();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
 
-    pickedObj.getWorldMatrix(tmpModelMatrix);
-    XML3D.math.mat4.multiply(mvm, c_viewMat_tmp, tmpModelMatrix);
-    XML3D.math.mat4.multiply(mvp, c_projMat_tmp, mvm);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
 
-    var shader = this.shaderManager.getShaderByURL("pickedNormals");
-    this.shaderManager.bindShader(shader);
+        pickedObj.getModelViewProjectionMatrix(c_mvp);
+        pickedObj.getWorldMatrix(c_world);
 
-    var normalMatrix = XML3D.math.mat4.invert(XML3D.math.mat4.create(), mvm);
-    normalMatrix = XML3D.math.mat3.copy(XML3D.math.mat3.create(),
-      [normalMatrix[0], normalMatrix[1], normalMatrix[2],
-      normalMatrix[4], normalMatrix[5], normalMatrix[6],
-      normalMatrix[8], normalMatrix[9], normalMatrix[10]]);
+        if(XML3D.math.mat4.invert(c_world, c_world)) {
+            XML3D.math.mat3.fromMat4(c_normalMatrix3, c_world);
+            XML3D.math.mat3.transpose(c_normalMatrix3,c_normalMatrix3);
+        } else {
+            XML3D.math.mat3.identity(c_normalMatrix3);
+        }
 
-    var parameters = {
-        modelViewMatrix : mvm,
-        modelViewProjectionMatrix : mvp,
-        normalMatrix : normalMatrix ? XML3D.math.mat3.transpose(normalMatrix, normalMatrix) : identMat3
-    };
+        var shader = this.shaderManager.getShaderByURL("pickedNormals");
+        this.shaderManager.bindShader(shader);
 
-    this.shaderManager.setUniformVariables(shader, parameters);
-    this.drawObject(shader, pickedObj.mesh);
+        var parameters = {
+            modelViewProjectionMatrix: c_mvp,
+            normalMatrix: c_normalMatrix3
+        };
 
-    this.shaderManager.unbindShader(shader);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-};
+        this.shaderManager.setUniformVariables(shader, parameters);
+        this.drawObject(shader, pickedObj.mesh);
+
+        this.shaderManager.unbindShader(shader);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+}());
 
 var pickVector = XML3D.math.vec3.create();
 var data = new Uint8Array(8);

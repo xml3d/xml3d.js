@@ -35,6 +35,10 @@
         case "script":
             this.renderer.recompileShader(this);
             break;
+        case "id":
+            this.renderer.recompileShader(this);
+            this.notifyOppositeAdapters();
+            break;
 
         default:
             XML3D.debug.logWarning("Unhandled mutation event in shader adapter for parameter '" + target + "'");

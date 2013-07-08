@@ -326,8 +326,8 @@
         if (shader) {
             this.disposeShader(shader);
             delete this.shaders[shaderName];
-            this.createShader(shaderAdapter, lights);
         }
+        this.createShader(shaderAdapter, lights);
     };
 
     XML3DShaderManager.prototype.shaderDataChanged = function(adapter, request, changeType) {

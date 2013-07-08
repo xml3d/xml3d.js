@@ -5,7 +5,6 @@
         XML3D.webgl.TransformableAdapter.call(this, factory, node);
         this.initializeEventAttributes();
         this.factory = factory;
-        this.isValid = true;
         this.updateTransformAdapter();
         this.createRenderNode();
     };
@@ -45,29 +44,14 @@
     };
 
     p.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.NODE_INSERTED) {
-            this.factory.renderer.sceneTreeAddition(evt);
-            return;
+        if (evt.type !== XML3D.events.VALUE_MODIFIED) {
+            return this.handleConnectedAdapterEvent(evt);
         }
-        else if (evt.type == XML3D.events.NODE_REMOVED) {
-            this.factory.renderer.sceneTreeRemoval(evt);
-            return;
-        } else if (evt.type == XML3D.events.THIS_REMOVED) {
-            //Clear all references to shader and transform adapters
-            this.clearAdapterHandles();
-            return;
-        }
-        else if( (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) && !evt.internalType){
-            // The connected transform node changed;
-            this.updateTransformAdapter();
-            this.updateLocalMatrix();
-            return;
-        }
-
-        var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+        var target = evt.attrName || evt.wrapped.attrName;
 
         switch (target) {
         case "shader":
+            this.disconnectAdapterHandle("shader");
             this.renderNode.setLocalShaderHandle(this.getShaderHandle());
             this.factory.renderer.requestRedraw("Group shader changed.", false);
             break;
@@ -88,7 +72,31 @@
             XML3D.debug.logWarning("Unhandled mutation event in group adapter for parameter '"+target+"'");
             break;
         };
+    };
 
+    p.handleConnectedAdapterEvent = function(evt) {
+        switch(evt.type) {
+            case XML3D.events.NODE_INSERTED:
+                this.factory.renderer.sceneTreeAddition(evt);
+                break;
+            case XML3D.events.NODE_REMOVED:
+                this.factory.renderer.sceneTreeRemoval(evt);
+                break;
+            case XML3D.events.THIS_REMOVED:
+                this.clearAdapterHandles();
+                break;
+            case XML3D.events.ADAPTER_HANDLE_CHANGED:
+                if (evt.key === "transform") {
+                    this.updateTransformAdapter();
+                    this.updateLocalMatrix();
+                } else if (evt.key === "shader") {
+                    var handle = this.getShaderHandle();
+                    this.renderNode.setLocalShaderHandle(handle);
+                }
+                break;
+            default:
+                XML3D.debug.logWarning("Unhandled connected adapter event for "+evt.key+" in shader adapter");
+        }
     };
 
     p.notifyChildren = function(evt) {
@@ -113,9 +121,10 @@
                     shaderHref = result[1];
             }
         }
-        if(shaderHref)
-            return this.getAdapterHandle(shaderHref);
-
+        if(shaderHref) {
+            this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
+            return this.getConnectedAdapterHandle("shader");
+        }
     };
 
     p.destroy = function() {
@@ -126,8 +135,7 @@
                 adapter.destroy();
             child = child.nextElementSibling;
         }
-
-        this.isValid = false;
+        this.clearAdapterHandles();
     };
 
     /* Interface methods */

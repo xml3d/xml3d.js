@@ -41,3 +41,35 @@ test("Uniform overrides", 8, function() {
     stop();
     handler.draw();
 });
+
+test("Uniform override with default shader", 4, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(xml3dElement);
+    var handler = getHandler(xml3dElement);
+    this.doc.getElementById("test1").visible = false;
+    this.doc.getElementById("test2").visible = true;
+    var testStep = 0;
+
+    var testFunc = function(n) {
+        var actual;
+        if (testStep === 0) {
+            actual = win.getPixelValue(gl, 250, 175);
+            deepEqual(actual, [ 0, 255, 0, 255 ], "Green override");
+            start();
+            testStep++;
+        } else {
+            console.log("2");
+            actual = win.getPixelValue(gl, 250, 175);
+            deepEqual(actual, [ 255, 0, 0, 255 ], "Default shader, override removed");
+            start();
+        }
+    };
+
+    xml3dElement.addEventListener("framedrawn", testFunc);
+    stop();
+    handler.draw();
+    var override = this.doc.getElementById("override");
+    override.parentNode.removeChild(override);
+    handler.draw();
+});

@@ -434,7 +434,7 @@ Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId,
         parameters["normalMatrix"] = tmpNormalMatrix;
 
         this.shaderManager.setUniformVariables(shader, parameters);
-        if(obj.override !== null) { // TODO: Set back to default after rendering
+        if(obj.override !== null) {
             this.shaderManager.setUniformVariables(shader, obj.override);
         }
 
@@ -442,11 +442,11 @@ Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId,
         objCount++;
 
         if(obj.override !== null) {
-            this.shaderManager.resetUniformVariables(obj.shaderAdapter, shader, Object.keys(obj.override));
+            this.shaderManager.resetUniformVariables(obj.parent.getShaderHandle(), shader, Object.keys(obj.override));
         }
-    if (transparent) {
-        gl.disable(gl.BLEND);
-    }
+        if (transparent) {
+            gl.disable(gl.BLEND);
+        }
 
     }
 

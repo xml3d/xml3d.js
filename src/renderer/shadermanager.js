@@ -302,14 +302,15 @@
 
     /**
      *
-     * @param {Object} shaderAdapter
+     * @param {Object} shaderHandle
      * @param {ProgramObject} programObject
      * @param {Array.<string>} names
      */
-    XML3DShaderManager.prototype.resetUniformVariables = function(shaderAdapter, programObject, names)
+    XML3DShaderManager.prototype.resetUniformVariables = function(shaderHandle, programObject, names)
     {
-        if(!shaderAdapter)
+        if(!shaderHandle.adapter)
             return;
+        var shaderAdapter = shaderHandle.adapter;
         var result = shaderAdapter.computeRequest.getResult();
         for(var i in names) {
             var name = names[i];

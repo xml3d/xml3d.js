@@ -23,7 +23,6 @@ var Renderer = function(handler, context, dimensions) {
 
     this.setGlobalGLStates();
 
-    this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
     this.width = dimensions.width;
     this.height = dimensions.height;
@@ -672,7 +671,7 @@ Renderer.prototype.renderPickedNormals = function(pickedObj) {
     var mvm = XML3D.math.mat4.create();
     var mvp = XML3D.math.mat4.create();
 
-    obj.getWorldMatrix(tmpModelMatrix);
+    pickedObj.getWorldMatrix(tmpModelMatrix);
     XML3D.math.mat4.multiply(mvm, c_viewMat_tmp, tmpModelMatrix);
     XML3D.math.mat4.multiply(mvp, c_projMat_tmp, mvm);
 

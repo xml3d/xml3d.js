@@ -242,45 +242,51 @@ XML3D.webgl.MAXFPS = 30;
      * @param {number} canvasX
      * @param {number} canvasY
      */
-    CanvasHandler.prototype.generateRay = function(canvasX, canvasY) {
+    CanvasHandler.prototype.generateRay = (function() {
 
-        var glY = this.canvasToGlY(canvasY);
+        var VIEW_MAT = XML3D.math.mat4.create();
+        var PROJ_MAT = XML3D.math.mat4.create();
 
-        // setup input to unproject
-        var viewport = new Array();
-        viewport[0] = 0;
-        viewport[1] = 0;
-        viewport[2] = this.renderer.width;
-        viewport[3] = this.renderer.height;
+        return function(canvasX, canvasY) {
 
-        // get view and projection matrix arrays
-        var viewMat = this.renderer.camera.viewMatrix;
-        var projMat = this.renderer.camera.getProjectionMatrix(viewport[2] / viewport[3]);
+            var glY = this.canvasToGlY(canvasY);
 
-        var ray = new window.XML3DRay();
+            // setup input to unproject
+            var viewport = new Array();
+            viewport[0] = 0;
+            viewport[1] = 0;
+            viewport[2] = this.renderer.width;
+            viewport[3] = this.renderer.height;
 
-        var nearHit = new Array();
-        var farHit = new Array();
+            // get view and projection matrix arrays
+            this.renderer.camera.getViewMatrix(VIEW_MAT);
+            this.renderer.camera.getProjectionMatrix(PROJ_MAT, viewport[2] / viewport[3]);
 
-        // do unprojections
-        if (false === GLU.unProject(canvasX, glY, 0, viewMat, projMat, viewport, nearHit)) {
+            var ray = new window.XML3DRay();
+
+            var nearHit = new Array();
+            var farHit = new Array();
+
+            // do unprojections
+            if (false === GLU.unProject(canvasX, glY, 0, VIEW_MAT, PROJ_MAT, viewport, nearHit)) {
+                return ray;
+            }
+
+            if (false === GLU.unProject(canvasX, glY, 1, VIEW_MAT, PROJ_MAT, viewport, farHit)) {
+                return ray;
+            }
+
+            // calculate ray
+            XML3D.math.mat4.invert(VIEW_MAT, VIEW_MAT);
+            var viewPos = new window.XML3DVec3(VIEW_MAT[12],VIEW_MAT[13],VIEW_MAT[14]);
+
+            ray.origin.set(viewPos);
+            ray.direction.set(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
+            ray.direction.set(ray.direction.normalize());
+
             return ray;
         }
-
-        if (false === GLU.unProject(canvasX, glY, 1, viewMat, projMat, viewport, farHit)) {
-            return ray;
-        }
-
-        // calculate ray
-        var worldToViewMat = this.renderer.currentView.getViewMatrix().inverse();
-        var viewPos = new window.XML3DVec3(worldToViewMat.m41, worldToViewMat.m42, worldToViewMat.m43);
-
-        ray.origin.set(viewPos);
-        ray.direction.set(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
-        ray.direction.set(ray.direction.normalize());
-
-        return ray;
-    };
+    }());
 
     /**
      * The update event can be used by user to sync actions

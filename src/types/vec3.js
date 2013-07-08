@@ -51,7 +51,7 @@
 
     /**
      * The set method copies the values from other.
-     * @param {Object} other another XML3DVec3, Float32Array or a number. In the last case the other args are considered, too.
+     * @param {Object|number} other another XML3DVec3, Float32Array or a number. In the last case the other args are considered, too.
      * @param {number=} y
      * @param {number=} z
      */

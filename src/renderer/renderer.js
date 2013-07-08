@@ -448,61 +448,60 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
  * Render the scene using the picking shader.
  * Modifies current picking buffer.
  */
-Renderer.prototype.renderSceneToPickingBuffer = function() {
-    var gl = this.gl;
-    var fbo = this.fbos.picking;
+Renderer.prototype.renderSceneToPickingBuffer = (function () {
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
+    var c_mvp = XML3D.math.mat4.create();
 
-    gl.enable(gl.DEPTH_TEST);
-    gl.disable(gl.CULL_FACE);
-    gl.disable(gl.BLEND);
+    return function () {
+        var gl = this.gl;
+        var fbo = this.fbos.picking;
 
-    gl.viewport(0, 0, fbo.width, fbo.height);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
 
-    this.camera.getViewMatrix(c_viewMat_tmp);
-    this.camera.getProjectionMatrix(c_projMat_tmp, fbo.width / fbo.height);
-    var mvp = XML3D.math.mat4.create();
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
 
-    var shader = this.shaderManager.getShaderByURL("pickobjectid");
-    this.shaderManager.bindShader(shader);
-    var objects = this.scene.ready;
+        gl.viewport(0, 0, fbo.width, fbo.height);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
-    for ( var j = 0, n = objects.length; j < n; j++) {
-        var obj = objects[j];
-        var mesh = obj.mesh;
+        var shader = this.shaderManager.getShaderByURL("pickobjectid");
+        this.shaderManager.bindShader(shader);
+        var objects = this.scene.ready;
 
-        if (!mesh.valid  || !obj.visible)
-            continue;
+        for (var j = 0, n = objects.length; j < n; j++) {
+            var obj = objects[j];
+            var mesh = obj.mesh;
 
-        var parameters = {};
+            if (!mesh.valid || !obj.visible)
+                continue;
 
-        obj.getWorldMatrix(tmpModelMatrix);
-        XML3D.math.mat4.multiply(mvp, c_viewMat_tmp, tmpModelMatrix);
-        XML3D.math.mat4.multiply(mvp, c_projMat_tmp, mvp);
+            var parameters = {};
 
-        var objId = j+1;
-        var c1 = objId & 255;
-        objId = objId >> 8;
-        var c2 = objId & 255;
-        objId = objId >> 8;
-        var c3 = objId & 255;
+            obj.getModelViewProjectionMatrix(c_mvp);
 
-        parameters.id = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
-        parameters.modelViewProjectionMatrix = mvp;
+            var objId = j + 1;
+            var c1 = objId & 255;
+            objId = objId >> 8;
+            var c2 = objId & 255;
+            objId = objId >> 8;
+            var c3 = objId & 255;
 
-        this.shaderManager.setUniformVariables(shader, parameters);
-        this.drawObject(shader, mesh);
-    }
-    this.shaderManager.unbindShader(shader);
+            parameters.id = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
+            parameters.modelViewProjectionMatrix = c_mvp;
 
-    gl.disable(gl.DEPTH_TEST);
+            this.shaderManager.setUniformVariables(shader, parameters);
+            this.drawObject(shader, mesh);
+        }
+        this.shaderManager.unbindShader(shader);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-};
+        gl.disable(gl.DEPTH_TEST);
 
-/**
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    };
+}());
+
+    /**
  * Render the picked object using the normal picking shader
  *
  * @param {Object} pickedObj

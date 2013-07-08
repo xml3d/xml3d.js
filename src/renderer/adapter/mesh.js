@@ -72,9 +72,13 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         } else if (evt.type == XML3D.events.NODE_INSERTED)
         // Node insertion is handled by the CanvasRenderAdapter
             return;
-        else if (evt.type == XML3D.events.NODE_REMOVED)
-            return this.factory.renderer.sceneTreeRemoval(evt);
-        else if (evt.type == XML3D.events.THIS_REMOVED) {
+        else if (evt.type == XML3D.events.NODE_REMOVED) {
+            if (evt.wrapped.target.nodeName === "mesh") {
+                this.destroy();
+            } else if (evt.wrapped.target.nodeName !== "data") {
+                this.createPerObjectData();
+            }
+        } else if (evt.type == XML3D.events.THIS_REMOVED) {
             this.clearAdapterHandles();
             return;
         }

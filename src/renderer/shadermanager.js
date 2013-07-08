@@ -308,8 +308,12 @@
      */
     XML3DShaderManager.prototype.resetUniformVariables = function(shaderHandle, programObject, names)
     {
-        if(!shaderHandle.adapter)
+        if(shaderHandle.status === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+            //We must be using the defaultShader so this is the only override possible
+            XML3DShaderManager.setUniform(this.gl, programObject.uniforms.diffuseColor, [1,0,0]);
             return;
+        }
+
         var shaderAdapter = shaderHandle.adapter;
         var result = shaderAdapter.computeRequest.getResult();
         for(var i in names) {

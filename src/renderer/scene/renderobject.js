@@ -177,8 +177,10 @@
          * @param {Xflow.Result} result
          */
         setOverride: function(result) {
-            if(!result.outputNames.length)
+            if(!result.outputNames.length) {
+                this.override = null;
                 return;
+            }
 
             var prog = this.shader.program;
             this.override = Object.create(null);

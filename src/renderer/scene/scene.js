@@ -140,7 +140,8 @@
             root.transformDirty = false;
             root.shaderDirty = false;
             root.visible = true;
-            root.shaderHandle = {};
+            root.shaderHandle = new XML3D.base.AdapterHandle("not_found");
+            root.shaderHandle.status = XML3D.base.AdapterHandle.STATUS.NOT_FOUND;
             this.rootNode = root;
             return root;
         };

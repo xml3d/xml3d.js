@@ -15,17 +15,17 @@
 
     // Entry:
     /** @const */
-    var OBJECT_BB_OFFSET = 0;
+    var WORLD_MATRIX_OFFSET = 0;
     /** @const */
-    var WORLD_BB_OFFSET = 6;
+    var OBJECT_BB_OFFSET = WORLD_MATRIX_OFFSET + 16;
     /** @const */
-    var WORLD_MATRIX_OFFSET = 16;
+    var WORLD_BB_OFFSET = OBJECT_BB_OFFSET + 6;
     /** @const */
-    var MODELVIEW_MATRIX_OFFSET = 32;
+    var MODELVIEW_MATRIX_OFFSET = WORLD_BB_OFFSET + 6;
     /** @const */
-    var MODELVIEWPROJECTION_MATRIX_OFFSET = 48;
+    var MODELVIEWPROJECTION_MATRIX_OFFSET = MODELVIEW_MATRIX_OFFSET + 16;
     /** @const */
-    var NORMAL_MATRIX_OFFSET = 64;
+    var NORMAL_MATRIX_OFFSET = MODELVIEWPROJECTION_MATRIX_OFFSET + 16;
     /** @const */
     var ENTRY_SIZE = NORMAL_MATRIX_OFFSET + 16;
 

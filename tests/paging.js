@@ -52,6 +52,6 @@ test("RenderObject", 6, function() {
         this.scene.createRenderObject();
     }
     equal(this.scene.pages.length, 2, "New page size");
-    equal(this.scene.nextOffset, 3 * ENTRY_SIZE, "New offset");
+    equal(this.scene.nextOffset, 2 * ENTRY_SIZE, "New offset");
 
 });

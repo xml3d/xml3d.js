@@ -1,10 +1,10 @@
 (function() {
     /** @const */
-    var LOCAL_MATRIX_OFFSET = 0;
+    var WORLD_MATRIX_OFFSET = 0;
     /** @const */
-    var WORLD_MATRIX_OFFSET = 16;
+    var LOCAL_MATRIX_OFFSET = WORLD_MATRIX_OFFSET + 16;
     /** @const */
-    var WORLD_BB_OFFSET = 32;
+    var WORLD_BB_OFFSET = LOCAL_MATRIX_OFFSET + 16;
     /** @const */
     var ENTRY_SIZE = WORLD_BB_OFFSET + 6;
 

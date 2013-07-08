@@ -4,6 +4,8 @@
     var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = XML3D.math.vec3.fromValues(0,0,-1);
     /** @const */
     var XML3D_SPOTLIGHT_DEFAULT_DIRECTION = XML3D.math.vec3.fromValues(0,0,1);
+    /** @const */
+    var ENTRY_SIZE = 16;
 
     /**
      * @constructor
@@ -21,6 +23,7 @@
         this.localIntensity = opt.localIntensity;
         this.initializeLightData();
     };
+    RenderLight.ENTRY_SIZE = ENTRY_SIZE;
 
     XML3D.createClass(RenderLight, XML3D.webgl.RenderNode);
     XML3D.extend(RenderLight.prototype, {

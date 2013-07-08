@@ -1,6 +1,6 @@
 (function() {
     /** @const */
-    var WORLD_MATRIX_OFFSET = 16;
+    var WORLD_MATRIX_OFFSET = 0;
 
     /**
      * @constructor
@@ -18,7 +18,7 @@
         this.scene = scene;
         this.page = pageEntry.page || 0;
         this.offset = pageEntry.offset || 0;
-        this.localVisible = opt.visible ==! undefined ? opt.visible : true;
+        this.localVisible = opt.visible;
         this.visible = this.localVisible !== undefined ? this.localVisible : this.parent ? this.parent.isVisible() : true;
         this.transformDirty = true;
         this.children = [];

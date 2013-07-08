@@ -109,7 +109,6 @@
             var localOffset = this.nextOffset;
             this.nextOffset += size;
             var result = { page: page, offset : localOffset};
-            console.log(result);
             return result;
         };
 
@@ -131,7 +130,7 @@
         };
 
         this.createRenderLight = function(opt) {
-            var pageEntry = {};
+            var pageEntry = this.createPageEntry(webgl.RenderLight.ENTRY_SIZE);
             this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
             this.lights.structureChanged = true;
             return new webgl.RenderLight(this, pageEntry, opt);

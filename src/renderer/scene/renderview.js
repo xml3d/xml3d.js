@@ -85,14 +85,14 @@
             var t_max = XML3D.math.vec3.create();
 
             return function() {
-                /*
                 this.getViewMatrix(t_mat);
                 this.scene.getBoundingBox(t_min, t_max);
 
                 XML3D.math.vec3.transformMat4(t_min, t_min, t_mat);
                 XML3D.math.vec3.transformMat4(t_max, t_max, t_mat);
-                */
-                return {near : 0.1, far : 10000};
+
+               // return {near : Math.max(t_min[2], 0.1), far : t_max[2]};
+                return {near:0.1, far:10000};
             }
         })(),
 

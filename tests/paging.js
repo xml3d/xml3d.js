@@ -56,7 +56,7 @@ test("RenderObject", 6, function() {
 });
 
 
-test("Delete render objects", 7, function() {
+test("Delete render objects", 13, function() {
     // Attach to root object
     var ENTRY_SIZE = XML3D.webgl.RenderObject.ENTRY_SIZE;
     var expectedOffset = this.scene.nextOffset;
@@ -75,8 +75,27 @@ test("Delete render objects", 7, function() {
     equal(this.scene.queue.length, 4, "4 render objects in queue");
     equal(this.scene.nextOffset, expectedOffset, "Offset not changed");
 
-    children[i] = this.scene.createRenderObject();
+    children[2] = this.scene.createRenderObject();
     equal(this.scene.nextOffset, expectedOffset, "Page entry reused");
+
+    children[5] = this.scene.createRenderObject();
+    expectedOffset += ENTRY_SIZE;
+    equal(this.scene.nextOffset, expectedOffset, "New page entry created");
+
+    for (var i = 6; i < Math.floor(XML3D.webgl.Scene.PAGE_SIZE / ENTRY_SIZE)+1; i++) {
+        children[i] = this.scene.createRenderObject();
+    }
+    expectedOffset = ENTRY_SIZE;
+    equal(this.scene.nextOffset, expectedOffset, "Offset reset");
+    strictEqual(children[children.length-1].page, this.scene.pages[1], "Child on second page");
+
+    children[5].remove();
+    equal(this.scene.nextOffset, expectedOffset, "Offset not changed");
+    children[2] = this.scene.createRenderObject();
+    strictEqual(children[2].page, this.scene.pages[0], "New child on first page");
+
+    children.push(this.scene.createRenderObject());
+    strictEqual(children[children.length-1].page, this.scene.pages[1], "New child on second page");
 
 
 });

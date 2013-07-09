@@ -5,9 +5,11 @@
     var StateMachine = window.StateMachine;
 
     var Scene = function() {
-
+        /** @type Array<Float32Array> */
         this.pages = [];
+        /** @type number */
         this.nextOffset = 0;
+
         this.firstOpaqueIndex = 0;
         this.boundingBox = {min : [0,0,0], max : [0,0,0]};
         this.lights = {
@@ -97,19 +99,22 @@
             this.nextOffset = 0;
             XML3D.debug.logInfo("adding page", this.pages.length, page.length);
         };
+        /**
+         *
+         * @param size {number} Size in number of floats
+         * @returns {{ page: Float32Array, offset: number }}
+         */
         this.createPageEntry = function(size) {
             if(!size)
                 throw new Error("No size given for page entry");
             if (this.nextOffset + size > PAGE_SIZE) {
                 this.addPage();
-                this.createPageEntry(size);
-                return;
+                return this.createPageEntry(size);
             }
             var page = this.pages[this.pages.length-1];
             var localOffset = this.nextOffset;
             this.nextOffset += size;
-            var result = { page: page, offset : localOffset};
-            return result;
+            return { page: page, offset: localOffset};
         };
 
         this.createRenderObject = function(opt) {

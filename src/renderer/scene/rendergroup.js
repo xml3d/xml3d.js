@@ -70,9 +70,11 @@
 
             return function() {
                 this.children.forEach(function(obj) {
+                    //noinspection JSAccessibilityCheck
                     obj.getWorldSpaceBoundingBox(c_bb.min._data, c_bb.max._data);
                     t_bb.extend(c_bb);
                 });
+                //noinspection JSAccessibilityCheck
                 this.setWorldSpaceBoundingBox(t_bb.min._data, t_bb.max._data);
             }
         })(),

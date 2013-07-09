@@ -43,6 +43,7 @@
     var RenderObject = function (scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
         opt = opt || {};
+        /** @type {XML3D.webl.MeshRenderAdapter} */
         this.meshAdapter = opt.meshAdapter;
         this.shader = opt.shader || null;
         /** {Object?} **/

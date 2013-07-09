@@ -17,7 +17,7 @@
         this.position = opt.position;
         this.orientation = opt.orientation;
         this.fieldOfView = opt.fieldOfView;
-        this.worldSpacePosition = [0,0,0];
+        this.worldSpacePosition = XML3D.math.vec3.create();
         this.projectionAdapter = opt.projectionAdapter;
         this.viewDirty = true;
         this.projectionDirty = true;
@@ -41,7 +41,7 @@
                 XML3D.math.mat4.multiply(tmp_mat4, tmp_mat4, this.orientation);
                 this.parent.getWorldMatrix(tmp_parent);
                 XML3D.math.mat4.multiply(tmp_mat4, tmp_parent, tmp_mat4);
-                this.worldPosition = [tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]];
+                XML3D.math.vec3.set(this.worldSpacePosition, tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
                 XML3D.math.mat4.invert(tmp_mat4, tmp_mat4);
                 this.setViewMatrix(tmp_mat4);
             }

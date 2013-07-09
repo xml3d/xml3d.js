@@ -22,7 +22,7 @@ test("RenderGroup", 6, function() {
     equal(this.scene.nextOffset, expectedOffset, "New offset");
 
     var childGroup = this.scene.createRenderGroup({parent: renderGroup });
-    strictEqual(childGroup.parent, renderGroup, "Parent is set");
+    strictEqual(childGroup.getParent(), renderGroup, "Parent is set");
     notEqual(renderGroup.children.indexOf(childGroup),-1, "In child list");
     expectedOffset += ENTRY_SIZE;
     equal(this.scene.nextOffset, expectedOffset, "New offset");

@@ -9,17 +9,13 @@
      * @param {Object} opt
      */
     var RenderNode = function(scene, pageEntry, opt) {
-        var opt = opt || {};
-        this.parent = opt.parent;
-        if (this.parent) {
-            this.parent.addChild(this);
-        }
-        var pageEntry = pageEntry || {};
+        opt = opt || {};
+        this.setParent(opt.parent);
         this.scene = scene;
         this.page = pageEntry.page || 0;
         this.offset = pageEntry.offset || 0;
         this.localVisible = opt.visible;
-        this.visible = this.localVisible !== undefined ? this.localVisible : this.parent ? this.parent.isVisible() : true;
+        this.visible = this.localVisible !== undefined ? this.localVisible : this.getParent() ? this.getParent().isVisible() : true;
         this.transformDirty = true;
         this.children = [];
     };

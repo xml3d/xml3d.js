@@ -132,16 +132,5 @@
         program._glslCode = code;
     }
 
-    Xflow.JSMergeProgram.prototype.run = function(programData){
-        var operatorData = prepareOperatorData(this.list, 0, programData);
-
-        if(this.operator.evaluate_core){
-            applyCoreOperation(this, programData, operatorData);
-        }
-        else{
-            applyDefaultOperation(this.entry, programData, operatorData);
-        }
-    }
-
 
 }());

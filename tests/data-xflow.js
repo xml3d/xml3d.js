@@ -12,6 +12,7 @@ module("Xflow tests", {
         this.cb = function(e) {
             ok(true, "Scene loaded");
             that.doc = document.getElementById("xml3dframe").contentDocument;
+            that.win = document.getElementById("xml3dframe").contentWindow;
             start();
         };
         loadDocument("scenes/data-xflow.xhtml", this.cb);
@@ -85,21 +86,52 @@ module("Xflow tests", {
 
     //Test functions
 
+    Show: function(testNode){
+        var dataNodeId = testNode.getAttribute("data").substring(1);
+        var dataElement = this.doc.getElementById(dataNodeId);
+        var what = testNode.getAttribute("what");
+        var title = testNode.getAttribute("title");
+
+        if(what == "VertexShader"){
+            var vsConfig = new this.win.Xflow.VSConfig();
+
+            var connect = testNode.firstElementChild;
+            if (connect.nodeName == "VSConnection")
+                this.VSConnection(connect, vsConfig);
+        }
+
+
+    },
+
+    VSConnection: function(node, vsConfig){
+        var typeString = node.getAttribute("type");
+        var type = Xflow.VS_ATTRIB_TYPE[typeString];
+        if(!type)
+            throw new Error("Unknown VS connection Type: " + typeString);
+
+        vsConfig.addAttribute( type, node.getAttribute("in"), node.getAttribute("out"),
+            node.getAttribute("optional") == "true" );
+    },
+
+
     Check : function(testNode) {
         var dataNodeId = testNode.getAttribute("data").substring(1);
         var dataElement = this.doc.getElementById(dataNodeId);
+        var title =  testNode.getAttribute("title") || "No Title";
         if (!dataElement)
             console.log("Couldn't find element "+dataNodeId);
 
         var action = testNode.firstElementChild;
         while (action) {
             if (this[action.nodeName])
-                this[action.nodeName](dataElement, action);
+                this[action.nodeName](dataElement, action, title);
 
             action = action.nextElementSibling;
         }
     },
-    MatchInput : function (have, action) {
+
+
+    MatchInput : function (have, action, title) {
         var shouldMatchName = action.getAttribute("input").substring(1);
         var shouldMatch = this.doc.getElementById(shouldMatchName);
         shouldMatch = this.formatData(shouldMatch.textContent, shouldMatch.nodeName);
@@ -112,24 +144,24 @@ module("Xflow tests", {
 
         var actualData = adapterOutputs.getOutputData(property);
         if (!actualData) {
-            ok(false, "Property "+property+" does not exist");
+            ok(false,  title + " => " + "Property "+property+" does exist");
             return;
         }
 
-        QUnit.closeArray(actualData.getValue(), shouldMatch, EPSILON, shouldMatchName+" in "+have.id+" matches reference data");
+        QUnit.closeArray(actualData.getValue(), shouldMatch, EPSILON, title + "=> " + shouldMatchName+" in "+have.id+" matches reference data");
     },
 
-    MatchNull : function (have, action) {
+    MatchNull : function (have, action, title) {
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
         var adapterOutputs = dataAdapter.getComputeRequest().getResult();
 
         var property = action.getAttribute("name");
 
-        ok(!adapterOutputs.getOutputData(property), "Parameter "+property+" does not exist");
+        ok(!adapterOutputs.getOutputData(property), title + " => " + "Parameter "+property+" does not exist");
     },
 
-    MatchData : function(have, action) {
+    MatchData : function(have, action, title) {
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
         var adapterOutputs = dataAdapter.getComputeRequest().getResult();
@@ -143,7 +175,7 @@ module("Xflow tests", {
         }
         var shouldMatch = this.formatData(action.textContent, action.getAttribute("type"));
 
-        QUnit.closeArray(actualData.getValue(), shouldMatch, EPSILON, property+" in "+have.id+" matches expected data");
+        QUnit.closeArray(actualData.getValue(), shouldMatch, EPSILON,  title + " => " + property+" in "+have.id+" matches expected data");
 
     },
 
@@ -155,6 +187,7 @@ module("Xflow tests", {
 
             action = action.nextElementSibling;
         }
+        ok(true, testNode.getAttribute("title"));
     },
 
     RemoveNode : function(action) {
@@ -162,7 +195,6 @@ module("Xflow tests", {
         target = this.doc.getElementById(target);
         var parent = target.parentNode;
         target.parentNode.removeChild(target);
-        ok(true, "Removed node '"+target.id+"' from '"+parent.id+"'");
     },
 
     AddNodes : function(action) {
@@ -179,7 +211,6 @@ module("Xflow tests", {
             child = temp;
         }
         addedNodes = addedNodes.trim();
-        ok(true, "Added node(s) '"+addedNodes+"' to '"+parent.id+"'");
     },
 
     ChangeAttribute : function(action) {
@@ -190,11 +221,9 @@ module("Xflow tests", {
         var targetNode = this.doc.getElementById(targetNodeName);
         if(!remove){
             targetNode.setAttribute(attrName, newValue);
-            ok(true, "Changed attr '"+attrName+"' to '"+newValue+"'");
         }
         else{
             targetNode.removeAttribute(attrName);
-            ok(true, "Removed attr '"+attrName+"'");
         }
 
     },
@@ -205,8 +234,6 @@ module("Xflow tests", {
 
         var newText = action.textContent;
         input.firstChild.nodeValue = newText;
-
-        ok(true, "Changed data of '"+inputId+"' to '"+newText+"'");
     }
 
 

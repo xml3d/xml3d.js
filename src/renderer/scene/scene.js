@@ -22,12 +22,16 @@
         this.activeView = null;
 
         this.remove = function(obj) {
-            var index = this.ready.indexOf(obj);
-            if (index == -1) {
-                index = this.queue.indexOf(obj);
+            var index = this.queue.indexOf(obj);
+            if (index != -1) {
                 this.queue.splice(index, 1);
-            } else
+            }
+            index = this.ready.indexOf(obj);
+            if (index != -1) {
                 this.ready.splice(index, 1);
+                if(index < this.firstOpaqueIndex)
+                    this.firstOpaqueIndex--;
+            }
         };
         this.clear = function() {
             this.ready = [];
@@ -55,18 +59,7 @@
                 this.queue.push(obj);
             }
         };
-        this.remove = function(obj) {
-            var index = this.queue.indexOf(obj);
-            if (index != -1) {
-                this.queue.splice(index, 1);
-            }
-            index = this.ready.indexOf(obj);
-            if (index != -1) {
-                this.ready.splice(index, 1);
-                if(index < this.firstOpaqueIndex)
-                    this.firstOpaqueIndex--;
-            }
-        };
+
         this.consolidate = function() {
             this.queue.slice().forEach(function(obj) {
                 while (obj.can('progress') && obj.progress() == StateMachine.Result.SUCCEEDED ) {};

@@ -15,9 +15,9 @@
 
     p.createRenderNode = function() {
         //TODO: Shouldn't have to go through the renderer...
-        var parent = this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
-        var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.rootNode;
-        this.renderNode = this.factory.renderer.scene.createRenderGroup({parent: parentNode, shaderHandle: this.getShaderHandle(), visible: this.node.visible});
+        var parent = this.getParentRenderAdapter();
+        var parentNode = parent.getRenderNode && parent.getRenderNode();
+        this.renderNode = this.getScene().createRenderGroup({parent: parentNode, shaderHandle: this.getShaderHandle(), visible: this.node.visible});
         this.updateLocalMatrix();
     };
 
@@ -83,7 +83,7 @@
                 this.factory.renderer.sceneTreeRemoval(evt);
                 break;
             case XML3D.events.THIS_REMOVED:
-                this.clearAdapterHandles();
+                this.dispose();
                 break;
             case XML3D.events.ADAPTER_HANDLE_CHANGED:
                 if (evt.key === "transform") {
@@ -96,15 +96,6 @@
                 break;
             default:
                 XML3D.debug.logWarning("Unhandled connected adapter event for "+evt.key+" in shader adapter");
-        }
-    };
-
-    p.notifyChildren = function(evt) {
-        var child = this.node.firstElementChild;
-        while (child) {
-            var adapter = this.factory.getAdapter(child);
-            adapter && adapter.notifyChanged(evt);
-            child = child.nextElementSibling;
         }
     };
 
@@ -127,14 +118,13 @@
         }
     };
 
-    p.destroy = function() {
-        var child = this.node.firstElementChild;
-        while (child) {
-            var adapter = this.factory.getAdapter(child);
+    p.dispose = function() {
+        // Dispose all children as well
+        this.traverse(function(adapter) {
             if (adapter && adapter.destroy)
-                adapter.destroy();
-            child = child.nextElementSibling;
-        }
+                adapter.dispose();
+        });
+        this.getRenderNode().remove();
         this.clearAdapterHandles();
     };
 

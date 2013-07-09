@@ -30,9 +30,9 @@
 
     LightRenderAdapter.prototype.notifyChanged = function(evt) {
         if (evt.type == XML3D.events.NODE_REMOVED) {
-            this.destroy();
             return;
         } else if (evt.type == XML3D.events.THIS_REMOVED) {
+            this.dispose();
             return;
         } else if( evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
             if (evt.key == "shader") {
@@ -92,8 +92,8 @@
         return this.getConnectedAdapter("shader");
     };
 
-    LightRenderAdapter.prototype.destroy = function() {
-        this.renderNode.remove();
+    LightRenderAdapter.prototype.dispose = function() {
+        this.getRenderNode().remove();
         this.clearAdapterHandles();
     };
 

@@ -10,8 +10,8 @@
      */
     var RenderNode = function(scene, pageEntry, opt) {
         opt = opt || {};
-        this.setParent(opt.parent);
         this.scene = scene;
+        this.setParent(opt.parent || scene.rootNode);
         this.page = pageEntry.page || 0;
         this.offset = pageEntry.offset || 0;
         this.localVisible = opt.visible;
@@ -85,6 +85,7 @@
 
         remove: function() {
             this.parent.removeChild(this);
+            this.dispose && this.dispose();
         }
 
     });

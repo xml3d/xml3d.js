@@ -1,22 +1,22 @@
-
-(function() {
+(function(webgl) {
 
     var TransformableAdapter = function(factory, node) {
-        XML3D.webgl.RenderAdapter.call(this, factory, node);
+        webgl.RenderAdapter.call(this, factory, node);
         this.renderNode = null;
     };
-    XML3D.createClass(TransformableAdapter, XML3D.webgl.RenderAdapter);
+    XML3D.createClass(TransformableAdapter, webgl.RenderAdapter);
 
-    TransformableAdapter.prototype.onConfigured = function() {
-        //this.renderNode = this.createRenderNode();
-    };
-
-    TransformableAdapter.prototype.getRenderNode = function() {
-        if (!this.renderNode) {
-           this.renderNode = this.createRenderNode ? this.createRenderNode() : null;
+    XML3D.extend(TransformableAdapter.prototype, {
+        onConfigured : function() {},
+        getRenderNode : function() {
+            if (!this.renderNode) {
+                this.renderNode = this.createRenderNode ? this.createRenderNode() : null;
+            }
+            return this.renderNode;
+        },
+        getScene: function() {
+            return this.factory.renderer.scene;
         }
-        return this.renderNode;
-    };
-
-    XML3D.webgl.TransformableAdapter = TransformableAdapter;
-})();
+    })
+    webgl.TransformableAdapter = TransformableAdapter;
+})(XML3D.webgl);

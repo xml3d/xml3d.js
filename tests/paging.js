@@ -53,5 +53,23 @@ test("RenderObject", 6, function() {
     }
     equal(this.scene.pages.length, 2, "New page size");
     equal(this.scene.nextOffset, 2 * ENTRY_SIZE, "New offset");
+});
+
+
+test("Delete render objects", 4, function() {
+
+    // Attach to root object
+    var parent = null;
+    var children = [];
+    for(var i= 0; i < 5; i++) {
+        children[i] = this.scene.createRenderObject();
+    }
+    equal(this.scene.rootNode.getChildren().length, 5, "5 children added");
+    equal(this.scene.queue.length, 5, "5 render objects in queue");
+    children[2].remove();
+    equal(this.scene.rootNode.getChildren().length, 4, "1 child removed");
+    equal(this.scene.queue.length, 4, "4 render objects in queue");
+
+
 
 });

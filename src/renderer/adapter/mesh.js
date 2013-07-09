@@ -51,9 +51,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     var p = MeshRenderAdapter.prototype;
 
     p.createRenderNode = function() {
-        var parent = this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
-        var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
-        this.renderNode = this.factory.renderer.scene.createRenderObject({parent : parentNode, meshAdapter : this,
+        var parent = this.getParentRenderAdapter();
+        var parentNode = parent.getRenderNode && parent.getRenderNode();
+        this.renderNode = this.getScene().createRenderObject({parent : parentNode, meshAdapter : this,
                          visible : !this.node.visible ? false : undefined});
     };
 
@@ -74,12 +74,12 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             return;
         else if (evt.type == XML3D.events.NODE_REMOVED) {
             if (evt.wrapped.target.nodeName === "mesh") {
-                this.destroy();
+                this.dispose();
             } else if (evt.wrapped.target.nodeName !== "data") {
                 this.createPerObjectData();
             }
         } else if (evt.type == XML3D.events.THIS_REMOVED) {
-            this.clearAdapterHandles();
+            this.dispose();
             return;
         }
 
@@ -320,8 +320,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     /**
      *
      */
-    p.destroy = function() {
-        this.renderNode.dispose();
+    p.dispose = function() {
+        this.getRenderNode().remove();
         if (this.computeRequest)
             this.computeRequest.clear();
         if (this.bboxComputeRequest)

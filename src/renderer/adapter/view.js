@@ -29,8 +29,9 @@
     };
 
     /**
-     * @return {XML3DMatrix} returns the inverse of the view matrix, since now we
+     * returns the inverse of the view matrix, since now we
      * want to go world2view and not view2world
+     * @return {window.XML3DMatrix}
      */
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
@@ -43,7 +44,10 @@
         if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) {
             connectProjectionAdapter(this);
             this.renderNode.setProjectionAdapter(this.getConnectedAdapter("perspective"));
-        } else{
+        }  if (evt.type == XML3D.events.THIS_REMOVED) {
+            this.dispose();
+        } else
+        {
             var target = evt.attrName || evt.wrapped.attrName;
 
             switch (target) {
@@ -77,6 +81,11 @@
         } else {
             adapter.disconnectAdapterHandle("perspective");
         }
+    }
+
+    p.dispose = function() {
+        this.getRenderNode().remove();
+        this.clearAdapterHandles();
     }
 
     // Export to XML3D.webgl namespace

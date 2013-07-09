@@ -14,6 +14,10 @@
             XML3D.webgl, this.factory.handler.id);
     };
 
+    XML3D.webgl.RenderAdapter.prototype.getParentRenderAdapter = function() {
+        return this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
+    };
+
     XML3D.webgl.RenderAdapter.prototype.applyTransformMatrix = function(transform) {
         return transform;
     };

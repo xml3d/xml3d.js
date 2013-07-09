@@ -10,6 +10,7 @@
         /** @type number */
         this.nextOffset = 0;
 
+        this.freeEntries = [];
         this.firstOpaqueIndex = 0;
         this.boundingBox = {min : [0,0,0], max : [0,0,0]};
         this.lights = {
@@ -92,43 +93,71 @@
             this.nextOffset = 0;
             XML3D.debug.logInfo("adding page", this.pages.length, page.length);
         };
-        /**
-         *
-         * @param size {number} Size in number of floats
-         * @returns {{ page: Float32Array, offset: number }}
-         */
-        this.createPageEntry = function(size) {
+
+        this.getPageEntry = function(size) {
             if(!size)
                 throw new Error("No size given for page entry");
+            return this.reusePageEntry(size) || this.createPageEntry(size);
+        };
+
+        /**
+         * @param {number} size Requested size in number of floats
+         * @returns {{ page: Float32Array, offset: number, size: number }}
+         */
+        this.reusePageEntry = function(size) {
+            var sameSizeEntries = this.freeEntries[size];
+            if(sameSizeEntries && sameSizeEntries.length) {
+                return sameSizeEntries.pop();
+            }
+            return null;
+        };
+
+        /**
+         * @param {number} size  Size in number of floats
+         * @returns {{ page: Float32Array, offset: number, size: number }}
+         */
+        this.createPageEntry = function(size) {
             if (this.nextOffset + size > PAGE_SIZE) {
                 this.addPage();
-                return this.createPageEntry(size);
+                return this.getPageEntry(size);
             }
             var page = this.pages[this.pages.length-1];
             var localOffset = this.nextOffset;
             this.nextOffset += size;
-            return { page: page, offset: localOffset};
+            return { page: page, offset: localOffset, size: size };
         };
 
+        /**
+         *
+         * @param {{ page: Float32Array, offset: number, size: number }} entryInfo
+         */
+        this.freePageEntry = function(entryInfo) {
+            var sameSizeEntries = this.freeEntries[entryInfo.size];
+            if(!sameSizeEntries) {
+                sameSizeEntries = this.freeEntries[entryInfo.size] = [];
+            }
+            sameSizeEntries.push(entryInfo);
+        }
+
         this.createRenderObject = function(opt) {
-            var pageEntry = this.createPageEntry(webgl.RenderObject.ENTRY_SIZE);
+            var pageEntry = this.getPageEntry(webgl.RenderObject.ENTRY_SIZE);
             var renderObject = new webgl.RenderObject(this, pageEntry, opt);
             this.queue.push(renderObject);
             return renderObject;
         };
 
         this.createRenderGroup = function(opt) {
-            var pageEntry = this.createPageEntry(webgl.RenderGroup.ENTRY_SIZE);
+            var pageEntry = this.getPageEntry(webgl.RenderGroup.ENTRY_SIZE);
             return new webgl.RenderGroup(this, pageEntry, opt);
         };
 
         this.createRenderView = function(opt) {
-            var pageEntry = this.createPageEntry(webgl.RenderView.ENTRY_SIZE);
+            var pageEntry = this.getPageEntry(webgl.RenderView.ENTRY_SIZE);
             return new webgl.RenderView(this, pageEntry, opt);
         };
 
         this.createRenderLight = function(opt) {
-            var pageEntry = this.createPageEntry(webgl.RenderLight.ENTRY_SIZE);
+            var pageEntry = this.getPageEntry(webgl.RenderLight.ENTRY_SIZE);
             this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
             this.lights.structureChanged = true;
             return new webgl.RenderLight(this, pageEntry, opt);
@@ -140,7 +169,7 @@
         };
 
         this.createRootNode = function() {
-            var pageEntry = this.createPageEntry(webgl.RenderGroup.ENTRY_SIZE);
+            var pageEntry = this.getPageEntry(webgl.RenderGroup.ENTRY_SIZE);
             var root = new webgl.RenderGroup(this, pageEntry, {});
             root.setWorldMatrix(XML3D.math.mat4.create());
             root.transformDirty = false;

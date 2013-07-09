@@ -56,20 +56,27 @@ test("RenderObject", 6, function() {
 });
 
 
-test("Delete render objects", 4, function() {
-
+test("Delete render objects", 7, function() {
     // Attach to root object
-    var parent = null;
+    var ENTRY_SIZE = XML3D.webgl.RenderObject.ENTRY_SIZE;
+    var expectedOffset = this.scene.nextOffset;
+
     var children = [];
     for(var i= 0; i < 5; i++) {
         children[i] = this.scene.createRenderObject();
+        expectedOffset += ENTRY_SIZE;
     }
+    equal(this.scene.nextOffset, expectedOffset, "New offset");
+
     equal(this.scene.rootNode.getChildren().length, 5, "5 children added");
     equal(this.scene.queue.length, 5, "5 render objects in queue");
     children[2].remove();
     equal(this.scene.rootNode.getChildren().length, 4, "1 child removed");
     equal(this.scene.queue.length, 4, "4 render objects in queue");
+    equal(this.scene.nextOffset, expectedOffset, "Offset not changed");
 
+    children[i] = this.scene.createRenderObject();
+    equal(this.scene.nextOffset, expectedOffset, "Page entry reused");
 
 
 });

@@ -12,8 +12,9 @@
         opt = opt || {};
         this.scene = scene;
         this.setParent(opt.parent || scene.rootNode);
-        this.page = pageEntry.page || 0;
-        this.offset = pageEntry.offset || 0;
+        this.page = pageEntry.page;
+        this.offset = pageEntry.offset;
+        this.entrySize = pageEntry.size;
         this.localVisible = opt.visible;
         this.visible = this.localVisible !== undefined ? this.localVisible : this.getParent() ? this.getParent().isVisible() : true;
         this.transformDirty = true;
@@ -86,6 +87,7 @@
         remove: function() {
             this.parent.removeChild(this);
             this.dispose && this.dispose();
+            this.scene.freePageEntry({ page: this.page, offset: this.offset, size: this.entrySize });
         }
 
     });

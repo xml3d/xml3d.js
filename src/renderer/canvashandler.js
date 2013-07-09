@@ -3,14 +3,7 @@ XML3D.webgl.MAXFPS = 30;
 
 (function() {
 
-    var canvas = document.createElement("canvas");
-    XML3D.webgl.supported = function() {
-        try {
-            return !!(window.WebGLRenderingContext && (canvas.getContext('experimental-webgl')));
-        } catch (e) {
-            return false;
-        }
-    };
+
 
     /**
      *
@@ -55,11 +48,10 @@ XML3D.webgl.MAXFPS = 30;
     function CanvasHandler(canvas, xml3dElem) {
         this.canvas = canvas;
         this.xml3dElem = xml3dElem;
+
         this.id = ++globalCanvasId; // global canvas id starts at 1
         XML3D.webgl.handlers[this.id] = this;
 
-        this.needDraw = true;
-        this.needPickingDraw = true;
         this._pickingDisabled = false;
         /** @type {Drawable} */
         this.currentPickObj = null;
@@ -90,45 +82,58 @@ XML3D.webgl.MAXFPS = 30;
 
     /**
      *
-     * @param {WebGLRenderingContext!} context
+     * @param {WebGLRenderingContext!} renderingContext
      */
-    CanvasHandler.prototype.initialize = function(context) {
+    CanvasHandler.prototype.initialize = function(renderingContext) {
         // Register listeners on canvas
         this.registerCanvasListeners();
 
         // This function is called at regular intervals by requestAnimFrame to
         // determine if a redraw
         // is needed
-        var handler = this;
+        var that = this;
         this.tick = function() {
 
             XML3D.updateXflowObserver();
 
-            if (handler.canvasSizeChanged() || handler.needDraw) {
-                handler.dispatchUpdateEvent();
-                handler.draw();
+            if (that.canvasSizeChanged() || that.renderer.needsRedraw()) {
+                that.dispatchUpdateEvent();
+                that.draw();
             }
 
-            window.requestAnimFrame(handler.tick, XML3D.webgl.MAXFPS);
+            window.requestAnimFrame(that.tick, XML3D.webgl.MAXFPS);
         };
 
-        this.redraw = function(reason, forcePickingRedraw) {
-            //XML3D.debug.logDebug("Request redraw:", reason);
-            forcePickingRedraw = forcePickingRedraw === undefined ? true : forcePickingRedraw;
-            if (this.needDraw !== undefined) {
-                this.needDraw = true;
-                this.needPickingDraw = this.needPickingDraw || forcePickingRedraw;
-            } else {
-                // This is a callback from a texture, don't need to redraw the
-                // picking buffers
-                handler.needDraw = true;
-            }
-        };
-
+        var context = new XML3D.webgl.GLContext(renderingContext, this.id);
+        var scene = new XML3D.webgl.Scene(new XML3D.webgl.ShaderTemplateFactory(context));
+        var factory = XML3D.base.xml3dFormatHandler.getFactory(XML3D.webgl, this.id);
+        factory.setScene(scene);
         // Create renderer
-        this.renderer = new XML3D.webgl.Renderer(this, context, { width: this.canvas.clientWidth, height: this.canvas.clientHeight });
+        /** @type XML3D.webgl.IRenderer */
+        this.renderer = XML3D.webgl.rendererFactory.createRenderer(context, scene, this.canvas);
+        factory.setRenderer(this.renderer);
+
+        var xml3dAdapter = factory.getAdapter(this.xml3dElem);
+        xml3dAdapter.traverse(function(){});
+
+        scene.rootNode.setVisible(true);
+
+
     }
 
+    /*
+    CanvasHandler.prototype.redraw = function(reason, forcePickingRedraw) {
+        //XML3D.debug.logDebug("Request redraw:", reason);
+        forcePickingRedraw = (forcePickingRedraw === undefined) ? true : forcePickingRedraw;
+        if (this.needDraw !== undefined) {
+            this.needDraw = true;
+            this.needPickingDraw = this.needPickingDraw || forcePickingRedraw;
+        } else {
+            // This is a callback from a texture, don't need to redraw the
+            // picking buffers
+            handler.needDraw = true;
+        }
+    };   */
 
     /**
      * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in
@@ -185,39 +190,18 @@ XML3D.webgl.MAXFPS = 30;
      * @return {vec3|null} The world space normal on the object's surface at the given coordinates
      */
     CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, canvasX, canvasY) {
-        if (!pickedObj || this._pickingDisabled)
-            return null;
-
         var glY = this.canvasToGlY(canvasY);
-
-        this.renderer.renderPickedNormals(pickedObj);
-        return this.renderer.readNormalFromPickingBuffer(canvasX, glY);
+        return this.renderer.getWorldSpaceNormalByPoint(canvasX, glY);
     };
 
     /**
-     * @param {Object} pickedObj
      * @param {number} canvasX
      * @param {number} canvasY
      * @return {vec3|null} The world space position on the object's surface at the given coordinates
      */
-    CanvasHandler.prototype.getWorldSpacePositionByPoint = function(pickedObj, canvasX, canvasY) {
-    	if (!pickedObj)
-    		return null;
-
-        var glY = this.canvasToGlY(canvasY);
-
-        this.renderer.renderPickedPosition(pickedObj);
-        return this.renderer.readPositionFromPickingBuffer(canvasX, glY);
-    };
-
-    CanvasHandler.prototype.getCanvasHeight = function() {
-
-    	return this.canvas.height;
-    };
-
-    CanvasHandler.prototype.getCanvasWidth = function() {
-
-    	return this.canvas.width;
+    CanvasHandler.prototype.getWorldSpacePositionByPoint = function(canvasX, canvasY) {
+	var glY = this.canvasToGlY(canvasY);
+        return this.renderer.getWorldSpacePositionByPoint(canvasX, glY);
     };
 
     CanvasHandler.prototype.canvasSizeChanged = function() {
@@ -304,11 +288,9 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.draw = function() {
         try {
             var start = Date.now();
-            this.renderer.prepareRendering();
+
             var stats = this.renderer.renderToCanvas();
             var end = Date.now();
-
-            this.needDraw = false;
             this.dispatchFrameDrawnEvent(start, end, stats);
 
         } catch (e) {

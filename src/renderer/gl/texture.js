@@ -7,17 +7,43 @@
      */
     var GLTexture = function(gl) {
         Xflow.SamplerConfig.call(this);
+        this.setDefaults();
         this.gl = gl;
         this.handle = null;
     };
     XML3D.createClass(GLTexture, Xflow.SamplerConfig);
 
     GLTexture.State = {
-        NONE :    1,
-        LOADING : 2,
-        READY :   3,
-        ERROR :   4
+        NONE :    "none",
+        LOADING : "loading",
+        READY :   "ready",
+        ERROR :   "error"
     };
+
+
+    var getOrCreateFallbackTexture = (function () {
+
+        var c_fallbackTexture = null;
+
+        return function (gl) {
+            if (!c_fallbackTexture) {
+                c_fallbackTexture = new GLTexture(gl);
+                var size = 16;
+                var texels = new Uint8Array(size * size * 3);
+                for (var i = 0; i < texels.length; i++) {
+                    texels[i] = 128;
+                }
+                c_fallbackTexture.createTex2DFromData(gl.RGB, size, size, gl.RGB, gl.UNSIGNED_BYTE, {
+                    texels: texels,
+                    wrapS: gl.REPEAT,
+                    wrapT: gl.REPEAT,
+                    minFilter: gl.LINEAR,
+                    magFilter: gl.LINEAR
+                });
+            }
+            return c_fallbackTexture;
+        }
+    }());
 
     var isPowerOfTwo = function(dimension) {
         return (dimension & (dimension - 1)) == 0;
@@ -113,8 +139,12 @@
             this.created();
         },
         bind : function(unit) {
-            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-            this.gl.bindTexture(this.textureType, this.handle);
+            if (this.canBind()) {
+                this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+                this.gl.bindTexture(this.textureType, this.handle);
+            } else {
+                getOrCreateFallbackTexture(this.gl).bind(unit);
+            }
         },
         unbind : function(unit) {
             this.gl.activeTexture(this.gl.TEXTURE0 + unit);
@@ -125,7 +155,46 @@
         },
         canBind : function() {
             return this.current == GLTexture.State.READY;
+        },
+        createTex2DFromData: function(internalFormat, width, height, sourceFormat, sourceType, opt) {
+            var gl = this.gl;
+
+            var opt = opt || {};
+            var texels = opt.texels;
+
+            if (!texels) {
+                if (sourceType == gl.FLOAT) {
+                    texels = new Float32Array(width * height * 4);
+                } else {
+                    texels = new Uint8Array(width * height * 4);
+                }
+            }
+
+            this.handle = gl.createTexture();
+            this.textureType = gl.TEXTURE_2D;
+            gl.bindTexture(gl.TEXTURE_2D, this.handle);
+
+            // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
+
+            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels);
+
+            if (opt.isDepth) {
+                gl.texParameteri(gl.TEXTURE_2D, gl.DEPTH_TEXTURE_MODE, opt.depthMode);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, opt.depthCompareMode);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, opt.depthCompareFunc);
+            }
+            if (opt.generateMipmap) {
+                gl.generateMipmap(gl.TEXTURE_2D);
+            }
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            this.created();
         }
+
     });
 
     window.StateMachine.create({
@@ -137,6 +206,7 @@
             { name:'loads',   from: '*',    to: GLTexture.State.LOADING }
         ]
     });
+
 
     webgl.GLTexture = GLTexture;
 

@@ -160,7 +160,7 @@
         var child = this.node.firstElementChild;
         while (child) {
             var adapter = this.factory.getAdapter(child);
-            adapter.traverse(callback);
+            adapter && adapter.traverse(callback);
             child = child.nextElementSibling;
         }
     }

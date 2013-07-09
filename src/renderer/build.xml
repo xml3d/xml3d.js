@@ -12,8 +12,13 @@
         <file name="events/touch.js" />
         <file name="events/mouse.js" />
         <file name="utils.js" />
+        <file name="gl/context.js" />
+        <file name="gl/renderer.js" />
         <file name="gl/texture.js" />
-        <file name="shadermanager.js" />
+        <file name="gl/program.js" />
+        <file name="gl/passes/forward.js" />
+        <file name="programfactory.js" />
+        <file name="shadertemplate.js" />
         <file name="material.js" />
         <file name="bufferhandler.js" />
         <file name="scene/boundingbox.js" />

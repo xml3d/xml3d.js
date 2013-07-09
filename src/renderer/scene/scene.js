@@ -4,7 +4,7 @@
 
     var StateMachine = window.StateMachine;
 
-    var Scene = function() {
+    var Scene = function(shaderFactory) {
         /** @type Array<Float32Array> */
         this.pages = [];
         /** @type number */
@@ -24,6 +24,16 @@
             }
         };
         this.activeView = null;
+
+        this.getActiveView = function() {
+            return this.activeView;
+        }
+
+        this.setActiveView = function(view) {
+            this.activeView = view;
+        }
+
+        this.shaderFactory = shaderFactory;
 
         this.remove = function(obj) {
             var index = this.queue.indexOf(obj);
@@ -45,7 +55,7 @@
             var index = this.queue.indexOf(obj);
             if (index != -1) {
                 this.queue.splice(index, 1);
-                if(obj.shader.program.hasTransparency) {
+                if(obj.shader.hasTransparency) {
                     this.ready.unshift(obj);
                     this.firstOpaqueIndex++;
                 }
@@ -64,6 +74,11 @@
             }
         };
 
+        this.update = function() {
+            this.updateLights(this.lights);
+            this.shaderFactory.update();
+            this.consolidate();
+        };
         this.consolidate = function() {
             this.queue.slice().forEach(function(obj) {
                 while (obj.can('progress') && obj.progress() == StateMachine.Result.SUCCEEDED ) {};
@@ -74,15 +89,15 @@
                 }
             });
         };
-        this.updateLights = function(lights, shaderManager) {
+        this.updateLights = function(lights) {
             if (lights.structureChanged) {
-                shaderManager.removeAllShaders();
-                this.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
+                //shaderManager.removeAllShaders();
+                this.forEach(function(obj) { obj.lightsChanged(lights); }, this);
                 lights.structureChanged = false;
             } else {
                 this.queue.forEach(function(obj) {
                     if (obj.current == "NoLights")
-                        obj.lightsChanged(lights, shaderManager);
+                        obj.lightsChanged(lights);
                 }, this);
             }
         };
@@ -201,7 +216,6 @@
         this.addPage();
         this.rootNode = this.createRootNode();
         this.clear();
-
     };
     Scene.PAGE_SIZE = PAGE_SIZE;
 

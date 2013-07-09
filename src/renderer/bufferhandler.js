@@ -23,10 +23,9 @@ XML3D.webgl.MAX_PICK_BUFFER_HEIGHT = 512;
 /**
  * @constructor
  */
-XML3D.webgl.XML3DBufferHandler = function(gl, renderer, shaderManager) {
+XML3D.webgl.XML3DBufferHandler = function(gl, renderer) {
     this.renderer = renderer;
     this.gl = gl;
-    this.shaderManager = shaderManager;
 };
 
 XML3D.webgl.XML3DBufferHandler.prototype.createPickingBuffer = function(width, height) {
@@ -78,12 +77,9 @@ XML3D.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
             colorTarget.isTexture = false;
         } else {
             //opt.generateMipmap = opt.generateColorsMipmap;
-            // TODO: Use GLTexture
-            var ctex = this.shaderManager.createTex2DFromData(colorFormat, width, height, gl.RGBA,
-                    gl.UNSIGNED_BYTE, null, options);
-
+            var ctex = new XML3D.webgl.GLTexture(gl);
+            ctex.createTex2DFromData(colorFormat, width, height, gl.RGBA, gl.UNSIGNED_BYTE, options);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
-
             colorTarget.handle = handle;
             colorTarget.isTexture = true;
         }
@@ -104,8 +100,8 @@ XML3D.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
             depthTarget.isTexture = false;
         } else {
             //opt.generateMipmap = opt.generateDepthMipmap;
-            var dtex = this.shaderManager.createTex2DFromData(depthFormat, width, height,
-                                    gl.DEPTH_COMPONENT, gl.FLOAT, null, options);
+            var dtex = new XML3D.webgl.GLTexture(gl);
+            dtex.createTex2DFromData(depthFormat, width, height, gl.DEPTH_COMPONENT, gl.FLOAT, options);
 
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, dtex.handle, 0);
 
@@ -130,9 +126,8 @@ XML3D.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
         }
         else {
             //opt.generateMipmap = opt.generateStencilMipmap;
-            var stex = this.shaderManager.createTex2DFromData(stencilFormat, width, height,
-                                    gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, null, options);
-
+            var stex = new XML3D.webgl.GLTexture(gl);
+            stex.createTex2DFromData(stencilFormat, width, height, gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, options);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);
 
             stencilTarget.handle = stex.handle;

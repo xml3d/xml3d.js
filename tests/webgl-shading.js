@@ -22,7 +22,7 @@ module("WebGL shaders internal", {
             return fragment + "\n" + source;
         }
         this.addFragmentShaderHeader = function(src) {
-            return XML3D.webgl.XML3DShaderManager.addFragmentShaderHeader(src);
+            return XML3D.webgl.addFragmentShaderHeader(src);
         }
     }
 });

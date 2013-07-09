@@ -1,7 +1,7 @@
 // Utility functions
-(function() {
+(function(webgl) {
 
-    XML3D.webgl.checkError = function(gl, text)
+    webgl.checkError = function(gl, text)
     {
         var error = gl.getError();
         if (error !== gl.NO_ERROR) {
@@ -21,7 +21,7 @@
         }
     };
 
-    XML3D.webgl.calculateBoundingBox = function(positions, index) {
+    webgl.calculateBoundingBox = function(positions, index) {
         var bbox = new XML3D.webgl.BoundingBox();
         var min = bbox.min;
         var max = bbox.max;
@@ -85,7 +85,7 @@
 
     var absMat = XML3D.math.mat4.create();
 
-    XML3D.webgl.transformAABB = function(bbox, gmatrix) {
+    transformAABB = function(bbox, gmatrix) {
         if (bbox.isEmpty())
             return;
 
@@ -411,11 +411,90 @@
      *  @param {!number} pageY the y-coordinate relative to the page
      *  @return {{x: number, y: number}} the converted coordinates
      */
-    XML3D.webgl.convertPageCoords = function(xml3dEl, pageX, pageY)
+    webgl.convertPageCoords = function(xml3dEl, pageX, pageY)
     {
         var off = calculateOffset(xml3dEl);
 
         return {x: pageX - off.left, y: pageY - off.top};
     };
 
-})();
+    webgl.FRAGMENT_HEADER = [
+        "#ifdef GL_FRAGMENT_PRECISION_HIGH",
+        "precision highp float;",
+        "#else",
+        "precision mediump float;",
+        "#endif // GL_FRAGMENT_PRECISION_HIGH",
+        "\n"
+    ].join("\n");
+
+    webgl.addFragmentShaderHeader = function(fragmentShaderSource) {
+        return webgl.FRAGMENT_HEADER + fragmentShaderSource;
+    };
+
+    /**
+     * Set uniforms for active program
+     * @param gl
+     * @param u
+     * @param value
+     * @param {boolean=} transposed
+     */
+    webgl.setUniform = function(gl, u, value, transposed) {
+
+        switch (u.glType) {
+            case 35670: //gl.BOOL
+            case 5124:  //gl.INT
+            case 35678: //gl.SAMPLER_2D
+                if (value.length)
+                    gl.uniform1i(u.location, value[0]);
+                else
+                    gl.uniform1i(u.location, value);
+                break;
+
+            case 35671: // gl.BOOL_VEC2
+            case 35667:
+                gl.uniform2iv(u.location, value);
+                break; // gl.INT_VEC2
+
+            case 35672: // gl.BOOL_VEC3
+            case 35668:
+                gl.uniform3iv(u.location, value);
+                break; // gl.INT_VEC3
+
+            case 35673: // gl.BOOL_VEC4
+            case 35669:
+                gl.uniform4iv(u.location, value);
+                break; // gl.INT_VEC4
+
+            case 5126:
+                if (value.length != null)
+                    gl.uniform1fv(u.location, value);
+                else
+                    gl.uniform1f(u.location, value);
+                break; // gl.FLOAT
+            case 35664:
+                gl.uniform2fv(u.location, value);
+                break; // gl.FLOAT_VEC2
+            case 35665:
+                gl.uniform3fv(u.location, value);
+                break; // gl.FLOAT_VEC3
+            case 35666:
+                gl.uniform4fv(u.location, value);
+                break; // gl.FLOAT_VEC4
+
+            case 35674:
+                gl.uniformMatrix2fv(u.location, transposed || false, value);
+                break;// gl.FLOAT_MAT2
+            case 35675:
+                gl.uniformMatrix3fv(u.location, transposed || false, value);
+                break;// gl.FLOAT_MAT3
+            case 35676:
+                gl.uniformMatrix4fv(u.location, transposed || false, value);
+                break;// gl.FLOAT_MAT4
+
+            default:
+                XML3D.debug.logError("Unknown uniform type " + u.glType);
+                break;
+        }
+    };
+
+})(XML3D.webgl);

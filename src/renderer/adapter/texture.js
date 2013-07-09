@@ -3,7 +3,6 @@
 
     var TextureRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.gl = factory.renderer.handler.gl;
         this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
     };
 

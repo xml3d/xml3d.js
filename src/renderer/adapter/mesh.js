@@ -119,10 +119,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         }
     };
     p.updateShader = function(adapter){
-        var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
+        /*var shaderName = this.factory.renderer.shaderManager.createShader(adapter,
             this.factory.renderer.scene.lights);
-        this.renderNode.shader = shaderName;
-        XML3D.debug.logInfo("New shader, clearing requests: ", shaderName);
+        this.renderNode.shader = shaderName;*/
+        XML3D.debug.logInfo("New shader, clearing requests: ", this.node.id);
         this.clearRequests(); // New shader, new requests
         this.renderNode.materialChanged();
         this.factory.renderer.requestRedraw("Shader changed.", false);
@@ -168,7 +168,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     }
 
     p.finishMesh = function() {
-        var programObject = this.renderNode.shader.program;
+        var programObject = this.renderNode.shader;
 
         this.requestObject = programObject.material.meshRequest;
 
@@ -276,7 +276,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.handleBuffer = function(name, attr, entry, meshInfo) {
         var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
         var buffer = webglData.buffer;
-        var gl = this.factory.renderer.gl;
+        var gl = this.factory.renderer.context.gl;
 
 
         switch(webglData.changed) {

@@ -13,9 +13,6 @@
                 this.renderNode = this.createRenderNode ? this.createRenderNode() : null;
             }
             return this.renderNode;
-        },
-        getScene: function() {
-            return this.factory.renderer.scene;
         }
     })
     webgl.TransformableAdapter = TransformableAdapter;

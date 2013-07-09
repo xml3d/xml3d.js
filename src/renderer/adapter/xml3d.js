@@ -2,16 +2,35 @@
 (function() {
     var XML3DRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.factory = factory;
         this.initializeEventAttributes(["load"]);
+        this.updateActiveViewAdapter();
     };
     XML3D.createClass(XML3DRenderAdapter, XML3D.webgl.RenderAdapter);
 
+    XML3D.extend(XML3DRenderAdapter.prototype, {
+        updateActiveViewAdapter: function() {
+                var activeViewURL = this.node.getAttribute("activeView");
+                this.connectAdapterHandle("activeView", this.getAdapterHandle(activeViewURL));
+        }
+    })
+
     XML3DRenderAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.NODE_INSERTED) {
-            this.factory.renderer.sceneTreeAddition(evt);
-        } else if (evt.type == XML3D.events.NODE_REMOVED) {
-            this.factory.renderer.sceneTreeRemoval(evt);
+        switch(evt.type) {
+            case XML3D.events.ADAPTER_HANDLE_CHANGED:
+                console.log("NOTIFY:", evt);
+                var viewAdapter = evt.adapter;
+                if (viewAdapter) {
+                    this.getScene().setActiveView(viewAdapter.getRenderNode());
+                } else {
+                    this.getScene().setActiveView(null);
+                }
+                return;
+            case XML3D.events.NODE_INSERTED:
+                this.factory.renderer.sceneTreeAddition(evt);
+                return;
+            case XML3D.events.NODE_REMOVED:
+                this.factory.renderer.sceneTreeRemoval(evt);
+                return;
         }
 
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
@@ -39,12 +58,12 @@
             }
 
             return handler;
-        })(this.node, this.factory.handler.id);
+        })(this.node, this.factory.canvasId);
 
         // register callback for canvasId == 0 i.e. global resources
         XML3D.base.resourceManager.addLoadCompleteListener(0, callback);
         // register callback for canvasId of this node
-        XML3D.base.resourceManager.addLoadCompleteListener(this.factory.handler.id, callback);
+        XML3D.base.resourceManager.addLoadCompleteListener(this.factory.canvasId, callback);
     }
 
     XML3DRenderAdapter.prototype.getBoundingBox = function() {

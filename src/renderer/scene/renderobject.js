@@ -64,10 +64,11 @@
         onleaveReady:function () {
             this.scene.moveFromReadyToQueue(this);
         },
-        onafterlightsChanged:function (name, from, to, lights, shaderManager) {
+        onafterlightsChanged:function (name, from, to, lights) {
             if (lights) {
                 var shaderHandle = this.parent.getShaderHandle();
-                this.shader = shaderManager.createShader(shaderHandle.adapter, lights);
+                this.shaderClosure = this.scene.shaderFactory.create(shaderHandle, lights);
+                //this.shader = shaderManager.createShader(shaderHandle.adapter, lights);
             }
         },
         onbeforedataComplete:function (name, from, to) {
@@ -76,7 +77,11 @@
         onbeforeprogress: function(name, from, to) {
             switch (to) {
                 case "NoMaterial":
-                    return this.shader != null;
+                    if(this.shaderClosure) {
+                        this.shaderClosure.update();
+                        this.shader = this.shaderClosure.getProgram();
+                    }
+                    return !!this.shader;
             }
             switch (from) {
                 case "DirtyMeshData":
@@ -182,7 +187,7 @@
                 return;
             }
 
-            var prog = this.shader.program;
+            var prog = this.shader;
             this.override = Object.create(null);
             for(var name in prog.uniforms) {
                 var entry = result.getOutputData(name);
@@ -198,7 +203,8 @@
         },
 
         setShader: function(newHandle) {
-            this.meshAdapter.updateShader(newHandle.adapter);
+            this.shaderClosure = this.scene.shaderFactory.create(newHandle, this.scene.lights);
+            this.materialChanged();
         },
 
         setObjectSpaceBoundingBox: function(min, max) {

@@ -1,12 +1,17 @@
 // Adapter for <shader>
 (function() {
 
+    /**
+     * @param factory
+     * @param {Element} node
+     * @extends RenderAdapter
+     * @constructor
+     */
     var ShaderRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.renderer = this.factory.renderer;
-
         this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
-        this.computeRequest;
+        this.templateId = -1;
     };
 
     XML3D.createClass(ShaderRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -48,26 +53,15 @@
 
     };
 
-    p.requestData = function(parameters) {
-        if (!this.computeRequest) {
-            var that = this;
-            this.computeRequest = this.dataAdapter.getComputeRequest(parameters, function(request, changeType) {
-                that.notifyDataChanged(request, changeType);
-            });
-        }
-        return this.computeRequest.getResult();
-    };
+    p.getShaderScriptURI = function() {
+        return new XML3D.URI(this.node.getAttribute("script"));
+    }
 
-    p.notifyDataChanged = function(request, changeType) {
-        this.renderer.shaderManager.shaderDataChanged(this, request, changeType);
-    };
+    p.getDataAdapter = function() {
+        return this.dataAdapter;
+    }
 
     p.destroy = function() {
-        Array.forEach(this.textures, function(t) {
-            t.adapter.destroy();
-        });
-        if (this.computeRequest)
-            this.computeRequest.clear();
     };
 
     // Export to XML3D.webgl namespace

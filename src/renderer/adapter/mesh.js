@@ -55,6 +55,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var parentNode = parent.getRenderNode && parent.getRenderNode();
         this.renderNode = this.getScene().createRenderObject({parent : parentNode, meshAdapter : this,
                          visible : !this.node.visible ? false : undefined});
+        var bbox = new XML3D.webgl.BoundingBox();
+        this.renderNode.setObjectSpaceBoundingBox(bbox.min, bbox.max);
     };
 
     /**
@@ -253,8 +255,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             };
         }
         var bbox = this.calcBoundingBox();
-        if(bbox)
-            obj.mesh.bbox.set(bbox);
+        if(bbox) {
+            this.renderNode.setObjectSpaceBoundingBox(bbox.min, bbox.max);
+        }
 
         obj.mesh.valid = true;
     };
@@ -333,8 +336,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @return {window.XML3DBox}
      */
     p.getBoundingBox = function() {
-        if(this.renderNode && this.renderNode.mesh) {
-            return new window.XML3DBox(this.renderNode.mesh.bbox);
+        if(this.renderNode) {
+            var bbox = new window.XML3DBox();
+            this.renderNode.getObjectSpaceBoundingBox(bbox.min._data, bbox.max._data);
+            return bbox;
         }
 
         return new window.XML3DBox();
@@ -354,11 +359,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     /**
      * @private
-     * @return {window.XML3DBox} the calculated bounding box of this mesh.
+     * @return {XML3D.webgl.BoundingBox} the calculated bounding box of this mesh.
      */
     p.calcBoundingBox = function() {
 
-        var bbox = new window.XML3DBox();
+        var bbox = new XML3D.webgl.BoundingBox();
 
         // try to compute bbox using the boundingbox property of xflow
         var bboxResult = this.bboxComputeRequest.getResult();

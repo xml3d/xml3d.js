@@ -12,7 +12,7 @@
 
         this.freeEntries = [];
         this.firstOpaqueIndex = 0;
-        this.boundingBox = {min : [0,0,0], max : [0,0,0]};
+        this.boundingBox = new XML3D.webgl.BoundingBox();
         this.lights = {
             changed : true,
             structureChanged : true,
@@ -172,6 +172,7 @@
             var pageEntry = this.getPageEntry(webgl.RenderGroup.ENTRY_SIZE);
             var root = new webgl.RenderGroup(this, pageEntry, {});
             root.setWorldMatrix(XML3D.math.mat4.create());
+            root.setLocalMatrix(XML3D.math.mat4.create());
             root.transformDirty = false;
             root.shaderDirty = false;
             root.visible = true;
@@ -182,7 +183,7 @@
         };
 
         this.updateBoundingBox = function() {
-            this.rootNode.getWorldSpaceBoundingBox(this.boundingBox.min, this.boundingBox.max);
+            this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
         };
 
         this.getBoundingBox = function(min, max) {

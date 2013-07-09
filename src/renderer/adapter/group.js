@@ -19,6 +19,8 @@
         var parentNode = parent.getRenderNode && parent.getRenderNode();
         this.renderNode = this.getScene().createRenderGroup({parent: parentNode, shaderHandle: this.getShaderHandle(), visible: this.node.visible});
         this.updateLocalMatrix();
+        var bbox = new XML3D.webgl.BoundingBox();
+        this.renderNode.setWorldSpaceBoundingBox(bbox.min, bbox.max);
     };
 
     p.updateLocalMatrix = (function () {
@@ -130,15 +132,9 @@
 
     /* Interface methods */
     p.getBoundingBox = function() {
-        var bbox = new window.XML3DBox();
-        Array.prototype.forEach.call(this.node.childNodes, function(c) {
-            if(c.getBoundingBox)
-                bbox.extend(c.getBoundingBox());
-        });
-        var matrix = XML3D.math.mat4.create();
-        this.renderNode.getLocalMatrix(matrix);
-        XML3D.webgl.transformAABB(bbox, matrix);
-        return bbox;
+        var bbox = new XML3D.webgl.BoundingBox();
+        this.renderNode.getWorldSpaceBoundingBox(bbox);
+        return bbox.getAsXML3DBox();
     };
 
     p.getLocalMatrix = function() {

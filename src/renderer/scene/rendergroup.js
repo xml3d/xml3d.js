@@ -19,6 +19,8 @@
         opt = opt || {};
         this.shaderHandle = opt.shaderHandle || null;
         this.boundingBoxDirty = false;
+        var bbox = new XML3D.webgl.BoundingBox();
+        this.setWorldSpaceBoundingBox(bbox.min, bbox.max);
     };
     RenderGroup.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -37,19 +39,20 @@
                 this.page[o] = source[i];
             }
             this.setTransformDirty();
+            this.setBoundingBoxDirty();
         },
 
-        getWorldSpaceBoundingBox: function(min, max) {
+        getWorldSpaceBoundingBox: function(bbox) {
             if (this.boundingBoxDirty) {
                 this.updateWorldSpaceBoundingBox();
             }
             var o = this.offset + WORLD_BB_OFFSET;
-            min[0] = this.page[o];
-            min[1] = this.page[o+1];
-            min[2] = this.page[o+2];
-            max[0] = this.page[o+3];
-            max[1] = this.page[o+4];
-            max[2] = this.page[o+5];
+            bbox.min[0] = this.page[o];
+            bbox.min[1] = this.page[o+1];
+            bbox.min[2] = this.page[o+2];
+            bbox.max[0] = this.page[o+3];
+            bbox.max[1] = this.page[o+4];
+            bbox.max[2] = this.page[o+5];
         },
 
         setWorldSpaceBoundingBox: function(min, max) {
@@ -60,22 +63,22 @@
             this.page[o+3] = max[0];
             this.page[o+4] = max[1];
             this.page[o+5] = max[2];
-
-            this.boundingBoxDirty = false;
         },
 
         updateWorldSpaceBoundingBox: (function() {
-            var c_bb = new window.XML3DBox();
-            var t_bb = new window.XML3DBox();
+            var local_mat = XML3D.math.mat4.create();
 
             return function() {
+                var localBB = new XML3D.webgl.BoundingBox();
                 this.children.forEach(function(obj) {
-                    //noinspection JSAccessibilityCheck
-                    obj.getWorldSpaceBoundingBox(c_bb.min._data, c_bb.max._data);
-                    t_bb.extend(c_bb);
+                    var childBB = new XML3D.webgl.BoundingBox();
+                    obj.getWorldSpaceBoundingBox(childBB);
+                    localBB.extend(childBB);
                 });
-                //noinspection JSAccessibilityCheck
-                this.setWorldSpaceBoundingBox(t_bb.min._data, t_bb.max._data);
+                this.getLocalMatrix(local_mat);
+                localBB.makeAxisAligned(local_mat);
+                this.setWorldSpaceBoundingBox(localBB.min, localBB.max);
+                this.boundingBoxDirty = false;
             }
         })(),
 

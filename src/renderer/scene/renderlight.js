@@ -125,13 +125,13 @@
             lo.length--;
         },
 
-        getWorldSpaceBoundingBox: function(min, max) {
-            min[0] = Number.MAX_VALUE;
-            min[1] = Number.MAX_VALUE;
-            min[2] = Number.MAX_VALUE;
-            max[0] = -Number.MAX_VALUE;
-            max[1] = -Number.MAX_VALUE;
-            max[2] = -Number.MAX_VALUE;
+        getWorldSpaceBoundingBox: function(bbox) {
+            bbox.min[0] = Number.MAX_VALUE;
+            bbox.min[1] = Number.MAX_VALUE;
+            bbox.min[2] = Number.MAX_VALUE;
+            bbox.max[0] = -Number.MAX_VALUE;
+            bbox.max[1] = -Number.MAX_VALUE;
+            bbox.max[2] = -Number.MAX_VALUE;
         }
 
     });

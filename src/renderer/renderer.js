@@ -517,9 +517,11 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     gl.disable(gl.BLEND);
 
     pickedObj.getWorldMatrix(tmpModelMatrix);
-    this.bbMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
-    this.bbMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
-    XML3D.webgl.adjustMinMax(pickedObj.mesh.bbox, this.bbMin, this.bbMax, tmpModelMatrix);
+    this.bbMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
+    this.bbMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+    var objBB = new XML3D.webgl.BoundingBox();
+    pickedObj.getObjectSpaceBoundingBox(objBB.min, objBB.max);
+    XML3D.webgl.adjustMinMax(objBB, this.bbMin, this.bbMax, tmpModelMatrix);
 
     var shader = this.shaderManager.getShaderByURL("pickedposition");
     this.shaderManager.bindShader(shader);

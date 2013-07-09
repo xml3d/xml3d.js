@@ -21,22 +21,78 @@
         }
     };
 
-    var minmax = new Float32Array(6);
+    XML3D.webgl.BoundingBox = function() {
+        this.min = new Float32Array(3);
+        this.max = new Float32Array(3);
+        this.getAsXML3DBox = function() {
+            return new window.XML3DBox(this.min, this.max);
+        };
+        this.extend = function(that) {
+            if(that.min[0] < this.min[0])
+                this.min[0] = that.min[0];
+            if(that.min[1] < this.min[1])
+                this.min[1] = that.min[1];
+            if(that.min[2] < this.min[2])
+                this.min[2] = that.min[2];
+
+            if(that.max[0] > this.max[0])
+                this.max[0] = that.max[0];
+            if(that.max[1] > this.max[1])
+                this.max[1] = that.max[1];
+            if(that.max[2] > this.max[2])
+                this.max[2] = that.max[2];
+        };
+        this.makeAxisAligned = (function() {
+            var absMat = XML3D.math.mat4.create();
+            return function(mat) {
+                if (this.isEmpty())
+                    return;
+
+                var center = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.add(XML3D.math.vec3.create(), this.min, this.max), 0.5);
+                var extend = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.subtract(XML3D.math.vec3.create(), this.max, this.min), 0.5);
+
+                XML3D.math.mat4.copy(absMat, mat);
+                absMat.set([0, 0, 0, 1], 12);
+                for ( var i = 0; i < 16; i++) {
+                    absMat[i] = Math.abs(absMat[i]);
+                }
+
+                XML3D.math.vec3.transformMat4(extend, extend, absMat);
+                XML3D.math.vec3.transformMat4(center, center, mat);
+
+                XML3D.math.vec3.add(this.max, center, extend);
+                XML3D.math.vec3.subtract(this.min, center, extend);
+            }
+        })();
+
+        this.reset = function() {
+            this.min[0] = Number.MAX_VALUE; this.min[1] = Number.MAX_VALUE; this.min[2] = Number.MAX_VALUE;
+            this.max[0] = -Number.MAX_VALUE; this.max[1] = -Number.MAX_VALUE; this.max[2] = -Number.MAX_VALUE;
+        };
+
+        this.isEmpty = function() {
+            return (this.min[0] > this.max[0] || this.min[1] > this.max[1] || this.min[2] > this.max[2]);
+        };
+
+        this.reset();
+    };
 
     XML3D.webgl.calculateBoundingBox = function(positions, index) {
-        var bbox = new window.XML3DBox();
+        var bbox = new XML3D.webgl.BoundingBox();
+        var min = bbox.min;
+        var max = bbox.max;
 
         if (!positions || positions.length < 3)
             return bbox;
 
         if (index) {
             var i0 = index[0]*3;
-            minmax[0] = positions[i0];
-            minmax[1] = positions[i0 + 1];
-            minmax[2] = positions[i0 + 2];
-            minmax[3] = positions[i0];
-            minmax[4] = positions[i0 + 1];
-            minmax[5] = positions[i0 + 2];
+            min[0] = positions[i0];
+            min[1] = positions[i0 + 1];
+            min[2] = positions[i0 + 2];
+            max[0] = positions[i0];
+            max[1] = positions[i0 + 1];
+            max[2] = positions[i0 + 2];
 
             for ( var i = 1; i < index.length; i++) {
                 var i1 = index[i] * 3;
@@ -44,44 +100,42 @@
                 var p2 = positions[i1 + 1];
                 var p3 = positions[i1 + 2];
 
-                if (p1 < minmax[0])
-                    minmax[0] = p1;
-                if (p2 < minmax[1])
-                    minmax[1] = p2;
-                if (p3 < minmax[2])
-                    minmax[2] = p3;
-                if (p1 > minmax[3])
-                    minmax[3] = p1;
-                if (p2 > minmax[4])
-                    minmax[4] = p2;
-                if (p3 > minmax[5])
-                    minmax[5] = p3;
+                if (p1 < min[0])
+                    min[0] = p1;
+                if (p2 < min[1])
+                    min[1] = p2;
+                if (p3 < min[2])
+                    min[2] = p3;
+                if (p1 > max[0])
+                    max[0] = p1;
+                if (p2 > max[1])
+                    max[1] = p2;
+                if (p3 > max[2])
+                    max[2] = p3;
             }
         } else {
-            minmax[0] = positions[0];
-            minmax[1] = positions[1];
-            minmax[2] = positions[2];
-            minmax[3] = positions[0];
-            minmax[4] = positions[1];
-            minmax[5] = positions[2];
+            min[0] = positions[0];
+            min[1] = positions[1];
+            min[2] = positions[2];
+            max[0] = positions[0];
+            max[1] = positions[1];
+            max[2] = positions[2];
 
             for ( var i = 3; i < positions.length; i += 3) {
-                if (positions[i] < minmax[0])
-                    minmax[0] = positions[i];
-                if (positions[i + 1] < minmax[1])
-                    minmax[1] = positions[i + 1];
-                if (positions[i + 2] < minmax[2])
-                    minmax[2] = positions[i + 2];
-                if (positions[i] > minmax[3])
-                    minmax[3] = positions[i];
-                if (positions[i + 1] > minmax[4])
-                    minmax[4] = positions[i + 1];
-                if (positions[i + 2] > minmax[5])
-                    minmax[5] = positions[i + 2];
+                if (positions[i] < min[0])
+                    min[0] = positions[i];
+                if (positions[i + 1] < min[1])
+                    min[1] = positions[i + 1];
+                if (positions[i + 2] < min[2])
+                    min[2] = positions[i + 2];
+                if (positions[i] > max[0])
+                    max[0] = positions[i];
+                if (positions[i + 1] > max[1])
+                    max[1] = positions[i + 1];
+                if (positions[i + 2] > max[2])
+                    max[2] = positions[i + 2];
             }
         }
-        bbox.min.set(minmax[0], minmax[1], minmax[2]);
-        bbox.max.set(minmax[3], minmax[4], minmax[5]);
         return bbox;
     };
 
@@ -93,23 +147,22 @@
 
         var min = bbox.min._data;
         var max = bbox.max._data;
-    
+
         var center = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.add(XML3D.math.vec3.create(), min, max), 0.5);
         var extend = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.subtract(XML3D.math.vec3.create(), max, min), 0.5);
-    
+
         XML3D.math.mat4.copy(absMat, gmatrix);
         absMat.set([0, 0, 0, 1], 12)
         for ( var i = 0; i < 16; i++) {
             absMat[i] = Math.abs(absMat[i]);
         }
-    
+
         XML3D.math.vec3.transformMat4(extend, extend, absMat);
         XML3D.math.vec3.transformMat4(center, center, gmatrix);
-    
+
         XML3D.math.vec3.add(bbox.max._data, center, extend);
         XML3D.math.vec3.subtract(bbox.min._data, center, extend);
     };
-
 
     /**
      * Splits mesh data into smaller chunks. WebGL only supports 65,535 indices, meshes of greater size are
@@ -319,44 +372,44 @@
 
 
     };
-    
-    /** for every component of v1 and v2 applies f, i.e. f(v1[.],v2[.]), 
+
+    /** for every component of v1 and v2 applies f, i.e. f(v1[.],v2[.]),
      *  and returns it.
-     *  
-     *  @param {vec3} v1 
+     *
+     *  @param {vec3} v1
      *  @param {vec3} v2
      *  @param {function(number, number):number} f
-     *  @return {vec3} the mapped vector 
-     */    
+     *  @return {vec3} the mapped vector
+     */
     function mapVec(v1, v2, f)
     {
-        var vec = XML3D.math.vec3.create(); 
-        vec[0] = f(v1[0], v2[0]); 
+        var vec = XML3D.math.vec3.create();
+        vec[0] = f(v1[0], v2[0]);
         vec[1] = f(v1[1], v2[1]);
-        vec[2] = f(v1[2], v2[2]); 
-        
-        return vec; 
+        vec[2] = f(v1[2], v2[2]);
+
+        return vec;
     };
 
     /**
-     * @param {XML3DBox} bbox
-     * @param {XML3DVec3} min
-     * @param {XML3DVec3} max
+     * @param {XML3D.webgl.BoundingBox} bbox
+     * @param {vec3} min
+     * @param {vec3} max
      * @param {mat4} trafo
      */
     XML3D.webgl.adjustMinMax = function(bbox, min, max, trafo) {
         var xfmmin = XML3D.math.vec3.create();
         var xfmmax = XML3D.math.vec3.create();
-        XML3D.math.vec3.transformMat4(xfmmin, bbox.min._data, trafo);
-        XML3D.math.vec3.transformMat4(xfmmax, bbox.max._data, trafo);
-        
+        XML3D.math.vec3.transformMat4(xfmmin, bbox.min, trafo);
+        XML3D.math.vec3.transformMat4(xfmmax, bbox.max, trafo);
+
         /* bounding box is axis-aligned, but through transformation
-         * min and max values might be shuffled (image e.g. a rotation (0, 1, 0, 1.57), 
-         * here min's and max' x and z values are swapped). So we 
-         * order them now. 
+         * min and max values might be shuffled (image e.g. a rotation (0, 1, 0, 1.57),
+         * here min's and max' x and z values are swapped). So we
+         * order them now.
          */
-        var bbmin = mapVec(xfmmin, xfmmax, Math.min); 
-        var bbmax = mapVec(xfmmin, xfmmax, Math.max); 
+        var bbmin = mapVec(xfmmin, xfmmax, Math.min);
+        var bbmax = mapVec(xfmmin, xfmmax, Math.max);
 
         if (bbmin[0] < min[0])
             min[0] = bbmin[0];
@@ -420,4 +473,5 @@
 
         return {x: pageX - off.left, y: pageY - off.top};
     };
+
 })();

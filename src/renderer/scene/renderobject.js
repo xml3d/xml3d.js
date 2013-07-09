@@ -71,11 +71,7 @@
             }
         },
         onbeforedataComplete:function (name, from, to) {
-            var success = this.meshAdapter.finishMesh();
-            if (success) {
-                this.updateObjectSpaceBoundingBox();
-            }
-            return success;
+            return this.meshAdapter.finishMesh();
         },
         onbeforeprogress: function(name, from, to) {
             switch (to) {
@@ -85,7 +81,6 @@
             switch (from) {
                 case "DirtyMeshData":
                     this.meshAdapter.createMeshData();
-                    this.updateObjectSpaceBoundingBox();
             }
         },
         onenterNoMesh:function () {
@@ -134,7 +129,6 @@
             this.updateModelViewMatrix(view);
             this.updateNormalMatrix();
             this.updateModelViewProjectionMatrix(projection);
-            this.setBoundingBoxDirty();
         },
 
         updateWorldMatrix: (function() {
@@ -155,7 +149,6 @@
             var page = this.page;
             var offset = this.offset;
             XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEW_MATRIX_OFFSET, page, offset+WORLD_MATRIX_OFFSET,  view, 0);
-            this.setBoundingBoxDirty();
         },
 
         /** Relies on an up-to-date view matrix **/
@@ -215,6 +208,7 @@
             this.page[o+3] = max[0];
             this.page[o+4] = max[1];
             this.page[o+5] = max[2];
+            this.setBoundingBoxDirty();
         },
 
         getObjectSpaceBoundingBox: function(min, max) {
@@ -225,12 +219,6 @@
             max[0] = this.page[o+3];
             max[1] = this.page[o+4];
             max[2] = this.page[o+5];
-        },
-
-        updateObjectSpaceBoundingBox: function() {
-            var bbox = this.meshAdapter.calcBoundingBox();
-            this.setObjectSpaceBoundingBox(bbox.min._data, bbox.max._data);
-            this.setBoundingBoxDirty();
         },
 
         setBoundingBoxDirty: function() {
@@ -246,34 +234,28 @@
             this.page[o+3] = max[0];
             this.page[o+4] = max[1];
             this.page[o+5] = max[2];
-
-            this.boundingBoxDirty = false;
         },
 
-        getWorldSpaceBoundingBox: function(min, max) {
+        getWorldSpaceBoundingBox: function(bbox) {
             if (this.boundingBoxDirty) {
                 this.updateWorldSpaceBoundingBox();
             }
             var o = this.offset + WORLD_BB_OFFSET;
-            min[0] = this.page[o];
-            min[1] = this.page[o+1];
-            min[2] = this.page[o+2];
-            max[0] = this.page[o+3];
-            max[1] = this.page[o+4];
-            max[2] = this.page[o+5];
+            bbox.min[0] = this.page[o];
+            bbox.min[1] = this.page[o+1];
+            bbox.min[2] = this.page[o+2];
+            bbox.max[0] = this.page[o+3];
+            bbox.max[1] = this.page[o+4];
+            bbox.max[2] = this.page[o+5];
         },
 
         updateWorldSpaceBoundingBox: (function() {
-            var t_min = XML3D.math.vec3.create();
-            var t_max = XML3D.math.vec3.create();
-            var t_mat = XML3D.math.mat4.create();
+            var t_box = new XML3D.webgl.BoundingBox();
 
             return function() {
-                this.getWorldMatrix(t_mat);
-                this.getObjectSpaceBoundingBox(t_min, t_max);
-                XML3D.math.vec3.transformMat4(t_min, t_min, t_mat);
-                XML3D.math.vec3.transformMat4(t_max, t_max, t_mat);
-                this.setWorldSpaceBoundingBox(t_min, t_max);
+                this.getObjectSpaceBoundingBox(t_box.min, t_box.max);
+                this.setWorldSpaceBoundingBox(t_box.min, t_box.max);
+                this.boundingBoxDirty = false;
             }
         })()
 

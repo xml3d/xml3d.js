@@ -91,7 +91,7 @@
                 XML3D.math.vec3.transformMat4(t_min, t_min, t_mat);
                 XML3D.math.vec3.transformMat4(t_max, t_max, t_mat);
 
-               // return {near : Math.max(t_min[2], 0.1), far : t_max[2]};
+                //return {near : Math.max(t_min[2], 0.1), far : t_max[2]};
                 return {near:0.1, far:10000};
             }
         })(),
@@ -161,13 +161,13 @@
             return this.worldSpacePosition;
         },
 
-        getWorldSpaceBoundingBox: function(min, max) {
-            min[0] = Number.MAX_VALUE;
-            min[1] = Number.MAX_VALUE;
-            min[2] = Number.MAX_VALUE;
-            max[0] = -Number.MAX_VALUE;
-            max[1] = -Number.MAX_VALUE;
-            max[2] = -Number.MAX_VALUE;
+        getWorldSpaceBoundingBox: function(bbox) {
+            bbox.min[0] = Number.MAX_VALUE;
+            bbox.min[1] = Number.MAX_VALUE;
+            bbox.min[2] = Number.MAX_VALUE;
+            bbox.max[0] = -Number.MAX_VALUE;
+            bbox.max[1] = -Number.MAX_VALUE;
+            bbox.max[2] = -Number.MAX_VALUE;
         }
     });
 

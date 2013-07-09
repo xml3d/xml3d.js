@@ -11,7 +11,7 @@
         this.subNodes = [];
         this.unprocessedDataNames = [];
 
-        this.operatorList =  new Xflow.OperatorList();
+        this.operatorList =  new Xflow.OperatorList(platform);
         this.programData =  new Xflow.ProgramData();
 
         this.program = null;
@@ -20,8 +20,7 @@
     }
 
     Xflow.Executer.prototype.run = function(){
-        runSubNodes(this)
-
+        runSubNodes(this);
         updateIterateState(this);
 
         this.program = Xflow.createProgram(this.operatorList);
@@ -33,7 +32,12 @@
     }
 
     Xflow.Executer.prototype.getVertexShader = function(){
-        // TODO: Implement
+        runSubNodes(this);
+        updateIterateState(this);
+
+        this.program = Xflow.createProgram(this.operatorList);
+
+        return this.program;
     }
 
 
@@ -48,7 +52,7 @@
         }
         initRequestNode(cData, executer, ownerNode);
 
-        constructPreScan(cData, ownerNode);
+        constructPreScan(cData, ownerNode, executer.platform);
 
         setConstructionOrderAndSubNodes(cData, executer, ownerNode);
 
@@ -67,12 +71,12 @@
         }
     }
 
-    function constructPreScan(cData, node){
+    function constructPreScan(cData, node, platform){
         if(cData.blockedNodes.indexOf(node) != -1)
             return;
 
         if(node.operator){
-            if(!canOperatorMerge(cData, node.operator)){
+            if(!canOperatorMerge(cData, node.operator, platform)){
                 blockSubtree(cData, node);
                 return;
             }
@@ -96,9 +100,10 @@
         }
     }
 
-    function canOperatorMerge(cData, operator){
+    function canOperatorMerge(cData, operator, platform){
         // TODO: Detect merge support
-        return !cData.firstOperator || (cData.firstOperator.evaluate_core && operator.evaluate_core);
+        return !cData.firstOperator ||
+            (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl);
     }
 
     function blockSubtree(cData, node){

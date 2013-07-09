@@ -49,9 +49,10 @@ function initOperator(operator){
         var type = operator.params[paramIdx].type;
         if(mapping.sequence)
             mapping.keyParamIdx = indexMap[mapping.keySource];
-        if(operator.mapping[i].sequence == Xflow.SEQUENCE.LINEAR_WEIGHT)
+        if(mapping.sequence == Xflow.SEQUENCE.LINEAR_WEIGHT)
             type = Xflow.DATA_TYPE.FLOAT;
-        operator.mapping[i].internalType = type;
+        mapping.internalType = type;
+        mapping.name = mapping.name || mapping.source;
     }
 }
 

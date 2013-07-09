@@ -10,26 +10,31 @@
         this.inputInfo = [];
         this.outputInfo = [];
     }
-    Xflow.OperatorEntry.prototype.isTransferInput = function(paramIndex){
-        return !!this.inputInfo[paramIndex].operatorIndex;
+    Xflow.OperatorEntry.prototype.isTransferInput = function(mappingIndex){
+        return !!this.inputInfo[mappingIndex].operatorIndex;
     }
-    Xflow.OperatorEntry.prototype.getTransferInputOperatorIndex = function(paramIndex){
-        return this.inputInfo[paramIndex].operatorIndex;
+    Xflow.OperatorEntry.prototype.getTransferInputOperatorIndex = function(mappingIndex){
+        return this.inputInfo[mappingIndex].operatorIndex;
     }
-    Xflow.OperatorEntry.prototype.getTransferInputOutputIndex = function(paramIndex){
-        return this.inputInfo[paramIndex].outputIndex;
+    Xflow.OperatorEntry.prototype.getTransferInputOutputIndex = function(mappingIndex){
+        return this.inputInfo[mappingIndex].outputIndex;
     }
 
-    Xflow.OperatorEntry.prototype.getTransferInputId = function(paramIdx){
-        var info = this.inputInfo[paramIdx];
+    Xflow.OperatorEntry.prototype.getTransferInputId = function(mappingIdx){
+        var info = this.inputInfo[mappingIdx];
         return info.operatorIndex + "_" + info.outputIndex;
     }
-
-    Xflow.OperatorEntry.prototype.getInputMappingName = function(paramIdx){
-        return this.inputInfo[paramIdx].mappedName;
+    Xflow.OperatorEntry.prototype.getTransferOutputId = function(outputIndex){
+        return this.index + "_" + outputIndex;
     }
-    Xflow.OperatorEntry.prototype.getDirectInputIndex = function(paramIdx){
-        return this.inputInfo[paramIdx].inputIndex;
+
+
+
+    Xflow.OperatorEntry.prototype.getInputMappingName = function(mappingIdx){
+        return this.inputInfo[mappingIdx].mappedName;
+    }
+    Xflow.OperatorEntry.prototype.getDirectInputIndex = function(mappingIdx){
+        return this.inputInfo[mappingIdx].inputIndex;
     }
 
     Xflow.OperatorEntry.prototype.getOutputIndex = function(operatorOutputIdx){
@@ -48,12 +53,12 @@
     }
 
 
-    Xflow.OperatorEntry.prototype.setTransferInput = function(paramIndex, operatorIndex, outputIndex){
-        this.inputInfo[paramIndex] = { operatorIndex: operatorIndex, outputIndex: outputIndex};
+    Xflow.OperatorEntry.prototype.setTransferInput = function(mappingIndex, operatorIndex, outputIndex){
+        this.inputInfo[mappingIndex] = { operatorIndex: operatorIndex, outputIndex: outputIndex};
     }
 
-    Xflow.OperatorEntry.prototype.setDirectInput = function(paramIndex, inputIndex, mappedName){
-        this.inputInfo[paramIndex] = { inputIndex: inputIndex, mappedName: mappedName };
+    Xflow.OperatorEntry.prototype.setDirectInput = function(mappingIndex, inputIndex, mappedName){
+        this.inputInfo[mappingIndex] = { inputIndex: inputIndex, mappedName: mappedName };
     }
 
     Xflow.OperatorEntry.prototype.setFinalOutput = function(operatorOutputIndex, globalOutputIndex){
@@ -80,7 +85,8 @@
         return key;
     }
 
-    Xflow.OperatorList = function(){
+    Xflow.OperatorList = function(platform){
+        this.platform = platform
         this.entries = [];
         this.inputInfo = {};
     }
@@ -95,7 +101,7 @@
         for(var i = 0; i < this.entries.length; ++i){
             keys.push(this.entries[i].getKey());
         }
-        var result = keys.join("!") + "|";
+        var result = this.platform + ">" + keys.join("!") + "|";
         for(var i in this.inputInfo){
             result += i + ">" + (this.inputInfo[i].iterate || false) + "x" + (this.inputInfo[i].size || 0);
         }
@@ -200,10 +206,7 @@
                     else{
                         dataEntry.notifyChanged();
                     }
-
-
                 }
-
             }
         }
     }
@@ -306,7 +309,10 @@
 
         var key = operatorList.getKey();
         if(!c_program_cache[key]){
-            if(operatorList.entries.length == 1)
+            if(operatorList.platform == Xflow.PLATFORM.GLSL){
+                c_program_cache[key] = new Xflow.VSProgram(operatorList);
+            }
+            else if(operatorList.entries.length == 1)
                 c_program_cache[key] = new Xflow.SingleProgram(operatorList);
             else
                 XML3D.debug.logError("Could not create program from operatorList");

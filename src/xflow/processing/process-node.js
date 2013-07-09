@@ -237,16 +237,20 @@ RequestNode.prototype.isReady = function(){
 
 RequestNode.prototype.getResult = function(resultType){
     this.updateState();
+
+
     if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
-
-        var executer = getOrCreateExecuter(this, Xflow.PLATFORM.JAVASCRIPT);
-        executer.run();
-
+        if(resultType == Xflow.RESULT_TYPE.COMPUTE){
+            var executer = getOrCreateExecuter(this, Xflow.PLATFORM.JAVASCRIPT);
+            executer.run();
+        }
         this.status = Xflow.PROCESS_STATE.PROCESSED;
     }
     var result = null;
     if(resultType == Xflow.RESULT_TYPE.COMPUTE){
         result = getRequestComputeResult(this);
+    }else if(resultType == Xflow.RESULT_TYPE.VS){
+        result = getRequestVSResult(this);
     }
     result.loading = (this.status == Xflow.PROCESS_STATE.LOADING);
     return result;
@@ -309,6 +313,22 @@ function getRequestComputeResult(requestNode)
     }
     return result;
 }
+
+function getRequestVSResult(requestNode)
+{
+    var executer = getOrCreateExecuter(requestNode, Xflow.PLATFORM.GLSL);
+    if(!requestNode.results[Xflow.RESULT_TYPE.VS])
+        requestNode.results[Xflow.RESULT_TYPE.VS] = new Xflow.VertexShaderResult();
+    var result = requestNode.results[Xflow.RESULT_TYPE.VS];
+    result._dataEntries = {}; result._outputNames = [];
+    for(var name in requestNode.channels){
+        var entry = requestNode.channels[name].getDataEntry();
+        result._dataEntries[name] = entry && !entry.isEmpty() ? entry : null;
+        result._outputNames.push(name);
+    }
+    return result;
+}
+
 
 
 })();

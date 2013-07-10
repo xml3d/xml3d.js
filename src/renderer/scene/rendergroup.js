@@ -73,7 +73,7 @@
                 this.children.forEach(function(obj) {
                     var childBB = new XML3D.webgl.BoundingBox();
                     obj.getWorldSpaceBoundingBox(childBB);
-                    localBB.extend(childBB);
+                    localBB.extendWithBox(childBB);
                 });
                 this.getLocalMatrix(local_mat);
                 localBB.makeAxisAligned(local_mat);

@@ -183,12 +183,15 @@
         };
 
         this.updateBoundingBox = function() {
+            if (this.rootNode.boundingBoxDirty) {
+                this.activeView.setProjectionDirty();
+            }
             this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
         };
 
-        this.getBoundingBox = function(min, max) {
-            XML3D.math.vec3.copy(min, this.boundingBox.min);
-            XML3D.math.vec3.copy(max, this.boundingBox.max);
+        this.getBoundingBox = function(bb) {
+            XML3D.math.vec3.copy(bb.min, this.boundingBox.min);
+            XML3D.math.vec3.copy(bb.max, this.boundingBox.max);
         };
 
         this.addPage();

@@ -21,62 +21,6 @@
         }
     };
 
-    XML3D.webgl.BoundingBox = function() {
-        this.min = new Float32Array(3);
-        this.max = new Float32Array(3);
-        this.getAsXML3DBox = function() {
-            return new window.XML3DBox(this.min, this.max);
-        };
-        this.extend = function(that) {
-            if(that.min[0] < this.min[0])
-                this.min[0] = that.min[0];
-            if(that.min[1] < this.min[1])
-                this.min[1] = that.min[1];
-            if(that.min[2] < this.min[2])
-                this.min[2] = that.min[2];
-
-            if(that.max[0] > this.max[0])
-                this.max[0] = that.max[0];
-            if(that.max[1] > this.max[1])
-                this.max[1] = that.max[1];
-            if(that.max[2] > this.max[2])
-                this.max[2] = that.max[2];
-        };
-        this.makeAxisAligned = (function() {
-            var absMat = XML3D.math.mat4.create();
-            return function(mat) {
-                if (this.isEmpty())
-                    return;
-
-                var center = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.add(XML3D.math.vec3.create(), this.min, this.max), 0.5);
-                var extend = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.subtract(XML3D.math.vec3.create(), this.max, this.min), 0.5);
-
-                XML3D.math.mat4.copy(absMat, mat);
-                absMat.set([0, 0, 0, 1], 12);
-                for ( var i = 0; i < 16; i++) {
-                    absMat[i] = Math.abs(absMat[i]);
-                }
-
-                XML3D.math.vec3.transformMat4(extend, extend, absMat);
-                XML3D.math.vec3.transformMat4(center, center, mat);
-
-                XML3D.math.vec3.add(this.max, center, extend);
-                XML3D.math.vec3.subtract(this.min, center, extend);
-            }
-        })();
-
-        this.reset = function() {
-            this.min[0] = Number.MAX_VALUE; this.min[1] = Number.MAX_VALUE; this.min[2] = Number.MAX_VALUE;
-            this.max[0] = -Number.MAX_VALUE; this.max[1] = -Number.MAX_VALUE; this.max[2] = -Number.MAX_VALUE;
-        };
-
-        this.isEmpty = function() {
-            return (this.min[0] > this.max[0] || this.min[1] > this.max[1] || this.min[2] > this.max[2]);
-        };
-
-        this.reset();
-    };
-
     XML3D.webgl.calculateBoundingBox = function(positions, index) {
         var bbox = new XML3D.webgl.BoundingBox();
         var min = bbox.min;

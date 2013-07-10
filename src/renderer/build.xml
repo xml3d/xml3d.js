@@ -16,6 +16,7 @@
         <file name="shadermanager.js" />
         <file name="material.js" />
         <file name="bufferhandler.js" />
+        <file name="scene/boundingbox.js" />
         <file name="scene/rendernode.js" />
         <file name="scene/renderobject.js" />
         <file name="scene/rendergroup.js" />

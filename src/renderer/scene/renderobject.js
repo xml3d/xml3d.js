@@ -149,6 +149,7 @@
             var page = this.page;
             var offset = this.offset;
             XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEW_MATRIX_OFFSET, page, offset+WORLD_MATRIX_OFFSET,  view, 0);
+            this.setBoundingBoxDirty();
         },
 
         /** Relies on an up-to-date view matrix **/

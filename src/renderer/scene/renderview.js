@@ -55,7 +55,7 @@
                     this.setProjectionMatrix(this.projectionAdapter.getMatrix("perspective"));
                     return;
                 }
-                var clipPlane = this.getClippingPlane();
+                var clipPlane = this.getClippingPlanes();
                 var f = 1 / Math.tan(this.fieldOfView / 2);
 
                 tmp[0] = f / aspect;
@@ -79,20 +79,17 @@
             }
         })(),
 
-        getClippingPlane: (function() {
+        getClippingPlanes: (function() {
             var t_mat = XML3D.math.mat4.create();
-            var t_min = XML3D.math.vec3.create();
-            var t_max = XML3D.math.vec3.create();
 
             return function() {
+                var bb = new XML3D.webgl.BoundingBox();
+                this.scene.getBoundingBox(bb);
                 this.getViewMatrix(t_mat);
-                this.scene.getBoundingBox(t_min, t_max);
+                var bounds = bb.getZMinMax(t_mat);
+                var length = Math.abs(bounds.zMax - bounds.zMin);
 
-                XML3D.math.vec3.transformMat4(t_min, t_min, t_mat);
-                XML3D.math.vec3.transformMat4(t_max, t_max, t_mat);
-
-                //return {near : Math.max(t_min[2], 0.1), far : t_max[2]};
-                return {near:0.1, far:10000};
+                return {near: Math.max(-bounds.zMax, 0.01*length), far: -bounds.zMin};
             }
         })(),
 
@@ -114,11 +111,15 @@
 
         setProjectionAdapter: function(projAdapter) {
             this.projectionAdapter = projAdapter;
-            this.projectionDirty = true;
+            this.setProjectionDirty();
         },
 
         setTransformDirty: function() {
             this.viewDirty = true;
+            this.setProjectionDirty();
+        },
+
+        setProjectionDirty: function() {
             this.projectionDirty = true;
         },
 

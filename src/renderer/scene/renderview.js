@@ -86,8 +86,13 @@
                 var bb = new XML3D.webgl.BoundingBox();
                 this.scene.getBoundingBox(bb);
                 this.getViewMatrix(t_mat);
-                var bounds = bb.getZMinMax(t_mat);
-                var length = Math.abs(bounds.zMax - bounds.zMin);
+                bb.applyTransform(t_mat);
+                var bounds = bb.getZMinMax();
+                var length = bb.getLongestSide();
+
+                // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
+                bounds.zMin -= length * 0.005;
+                bounds.zMax += length * 0.005;
 
                 return {near: Math.max(-bounds.zMax, 0.01*length), far: -bounds.zMin};
             }

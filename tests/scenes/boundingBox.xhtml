@@ -52,6 +52,8 @@
         <transform id="t_Bottom" translation="0.0 -1.0 0.0" rotation="1 0 0 1.57" />
         <transform id="t_Scaled" scale="20 5 20"/>
         <transform id="t_Translated" translation="1 -1 5"/>
+        <transform id="t_Cube_vis" translation="3 0 0"/>
+        <transform id="t_Cube_invis" translation="-3 0 0"/>
         <transform id="t_Rotated" rotation="1 0 0 0.707106"/>
              <shader id="red" script="urn:xml3d:shader:matte">
         <float3 name="diffuseColor">1 0 0</float3>
@@ -122,6 +124,8 @@
             <mesh type="triangles" src="#cube_data" />
         </group>
       </group>
+
+
        <group id="hierarchy" shader="#red" transform="#t_Rotated" visible="true">
             <group transform="#t_Scaled" visible="true">
                 <mesh type="triangles" src="#cube_data" />
@@ -135,6 +139,15 @@
             <mesh id="split_cube_mesh2" type="triangles" src="#split_cube_mat2" />
             </group>
        </group>
+
+      <group id="g_PartiallyHidden" transform="#t_TopCube" visible="false">
+        <group id="visible_cube" transform="#t_Cube_vis" visible="true">
+            <mesh type="triangles" src="#cube_data" />
+        </group>
+        <group id="invisible_cube" transform="#t_Cube_invis" visible="false">
+            <mesh id="invisible_mesh" type="triangles" src="#cube_data" />
+      </group>
+    </group>
     </xml3d>
   </body>
 </html>

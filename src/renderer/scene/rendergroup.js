@@ -71,9 +71,11 @@
             return function() {
                 var localBB = new XML3D.webgl.BoundingBox();
                 this.children.forEach(function(obj) {
-                    var childBB = new XML3D.webgl.BoundingBox();
-                    obj.getWorldSpaceBoundingBox(childBB);
-                    localBB.extendWithBox(childBB);
+                    if (obj.isVisible()) {
+                        var childBB = new XML3D.webgl.BoundingBox();
+                        obj.getWorldSpaceBoundingBox(childBB);
+                        localBB.extendWithBox(childBB);
+                    }
                 });
                 this.getLocalMatrix(local_mat);
                 localBB.makeAxisAligned(local_mat);
@@ -140,6 +142,15 @@
             this.boundingBoxDirty = true;
             if (this.parent) {
                 this.parent.setBoundingBoxDirty();
+            }
+        },
+
+        setLocalVisible: function(newVal) {
+            this.localVisible = newVal;
+            if (this.parent.isVisible()) {
+                // if parent is not visible this group is also invisible
+                this.setVisible(newVal);
+                this.setBoundingBoxDirty();
             }
         }
 

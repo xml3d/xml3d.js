@@ -134,7 +134,7 @@ module("Mutation tests", {
         var v = document.getElementById("xml3dframe");
         v.removeEventListener("load", this.cb, true);
     },
-    factory : new TestAdapterFactory(),
+    factory : new TestAdapterFactory()
 });
 
 test("DOMNodeInserted on xml3d", 5, function() {

@@ -89,7 +89,6 @@
      * At this point, the adapater should disconnect from any other adapter and prepare to be properly garbage collected
      */
     XML3D.base.Adapter.prototype.onDispose = function() {
-        this.clearAdapterHandles();
     }
 
 

@@ -99,7 +99,7 @@
         return this.vertices = v;
     };
 
-    BoundingBox.prototype.getZMinMax = function() {
+    BoundingBox.prototype.getZMinMax = function(mat) {
         var v = this.getVertices();
         var min = Number.MAX_VALUE;
         var max = -Number.MAX_VALUE;
@@ -113,9 +113,17 @@
     };
 
     BoundingBox.prototype.applyTransform = function(mat) {
+        var v = this.getVertices();
+        var vec = new Float32Array(3);
+        for (var i=0; i < 24; i+=3) {
+            vec[0] = v[i];
+            vec[1] = v[i+1];
+            vec[2] = v[i+2];
+            XML3D.math.vec3.transformMat4(vec, vec, mat);
+            v.set(vec, i);
+        }
         XML3D.math.vec3.transformMat4(this.min, this.min, mat);
         XML3D.math.vec3.transformMat4(this.max, this.max, mat);
-        this.vertices = null;
     };
 
     BoundingBox.prototype.getLongestSide = function() {

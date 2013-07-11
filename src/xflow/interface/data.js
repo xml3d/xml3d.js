@@ -203,6 +203,7 @@ Xflow.TextureEntry = function(image){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
     this._formatType = null; // null | 'ImageData' | 'number' | 'float32' | 'float64'
+    this._loading = false;
     this._updateImage(image);
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
@@ -286,7 +287,17 @@ TextureEntry.prototype.createImage = function(width, height, formatType, sampler
 /** @param {Object} v */
 TextureEntry.prototype.setImage = function(v) {
     this._updateImage(v);
-    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+    var loading = this.isLoading();
+    if(loading){
+        this._loading = true;
+        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_START);
+    }
+    else if(this._loading){
+        this._loading = false;
+        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_END);
+    }
+    else
+        notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 };
 
 TextureEntry.prototype.getFormatType = function() {

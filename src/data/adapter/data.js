@@ -148,7 +148,7 @@ function updateLoadState(dataAdpater){
     if(handle && handle.status == XML3D.base.AdapterHandle.STATUS.LOADING){
         loading = true;
     }
-    dataAdpater.xflowDataNode.loading = loading;
+    dataAdpater.xflowDataNode.setLoading(loading);
 }
 
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {

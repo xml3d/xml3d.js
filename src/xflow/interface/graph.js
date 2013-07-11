@@ -72,9 +72,14 @@ Xflow.createClass(Xflow.InputNode, Xflow.GraphNode);
 var InputNode = Xflow.InputNode;
 
 InputNode.prototype.notify = function(newValue, notification) {
-    var downstreamNotification = notification == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA_VALUE :
-                                                Xflow.RESULT_STATE.CHANGED_DATA_SIZE;
-    notifyParentsOnChanged(this,downstreamNotification);
+    var downNote;
+    switch(notification){
+        case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE: downNote = Xflow.RESULT_STATE.CHANGED_DATA_VALUE; break;
+        case Xflow.DATA_ENTRY_STATE.LOAD_START: downNote = Xflow.RESULT_STATE.IMAGE_LOAD_START; break;
+        case Xflow.DATA_ENTRY_STATE.LOAD_END: downNote = Xflow.RESULT_STATE.IMAGE_LOAD_START; break;
+        default: downNote = Xflow.RESULT_STATE.CHANGED_DATA_SIZE; break;
+    }
+    notifyParentsOnChanged(this,downNote);
 };
 
 Object.defineProperty(InputNode.prototype, "name", {
@@ -116,13 +121,18 @@ Object.defineProperty(InputNode.prototype, "paramGlobal", {
 Object.defineProperty(InputNode.prototype, "data", {
     /** @param {Object} v */
     set: function(v){
+        var prevDataLoading = false;
         if(this._data) {
+            prevDataLoading = this._data._loading;
             this._data.removeListener(this);
         }
         this._data = v;
         if(this._data)
             this._data.addListener(this);
-        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        if(prevDataLoading != this._data._loading){
+            notifyParentsOnChanged(this, this._data._loading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
+                Xflow.RESULT_STATE.IMAGE_LOAD_END);
+        }
     },
     /** @return {Object} */
     get: function(){ return this._data; }
@@ -145,7 +155,6 @@ Xflow.createBufferInputNode = function(type, name, size){
     return inputNode;
 };
 
-
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.DataNode
 //----------------------------------------------------------------------------------------------------------------------
@@ -162,7 +171,9 @@ function getXflowNodeId(){
 Xflow.DataNode = function(graph, protoNode){
     Xflow.GraphNode.call(this, graph);
 
-    this.loading = false;
+    this._loading = false;
+    this._subTreeLoading = false;
+    this._imageLoading = false;
 
     this.id = getXflowNodeId();
     this._isProtoNode = protoNode;
@@ -219,15 +230,14 @@ Xflow.NameMapping = function(owner){
 Xflow.createClass(Xflow.NameMapping, Xflow.Mapping);
 
 
-
-
 Object.defineProperty(DataNode.prototype, "sourceNode", {
     /** @param {?Xflow.DataNode} v */
     set: function(v){
         if(this._sourceNode) removeParent(this, this._sourceNode);
         this._sourceNode = v;
         if(this._sourceNode) addParent(this, this._sourceNode);
-        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        if(!updateNodeLoading(this))
+            this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {?Xflow.DataNode} */
     get: function(){ return this._sourceNode; }
@@ -238,11 +248,20 @@ Object.defineProperty(DataNode.prototype, "protoNode", {
         if(this._protoNode) removeParent(this, this._protoNode);
         this._protoNode = v;
         if(this._protoNode) addParent(this, this._protoNode);
-        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        if(!updateNodeLoading(this))
+            this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     },
     /** @return {?Xflow.DataNode} */
     get: function(){ return this._protoNode; }
 });
+
+DataNode.prototype.setLoading = function(loading){
+    if(this._loading != loading){
+        this._loading = loading;
+        updateSubtreeLoading(this);
+    }
+}
+
 
 Object.defineProperty(DataNode.prototype, "filterType", {
     /** @param {Xflow.DATA_FILTER_TYPE} v */
@@ -295,16 +314,18 @@ DataNode.prototype.isProtoNode = function(){
  */
 DataNode.prototype.appendChild = function(child){
     this._children.push(child);
-    addParent(this, child)
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    addParent(this, child);
+    if(!updateNodeLoading(this))
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 /**
  * @param {Xflow.GraphNode} child
  */
 DataNode.prototype.removeChild = function(child){
     Array.erase(this._children, child);
-    removeParent(this, child)
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    removeParent(this, child);
+    if(!updateNodeLoading(this))
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 /**
  * @param {Xflow.GraphNode} child
@@ -316,8 +337,9 @@ DataNode.prototype.insertBefore = function(child, beforeNode){
         this._children.push(child);
     else
         this._children.splice(idx, 0, child);
-    addParent(this, child)
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    addParent(this, child);
+    if(!updateNodeLoading(this))
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 /**
  * remove all children of the DataNode
@@ -327,7 +349,8 @@ DataNode.prototype.clearChildren = function(){
         removeParent(this, this._children[i]);
     }
     this._children = [];
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    if(!updateNodeLoading(this))
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
 };
 
 /**
@@ -424,17 +447,28 @@ DataNode.prototype.setCompute = function(computeString){
  * @param {GraphNode} senderNode
  */
 DataNode.prototype.notify = function(changeType, senderNode){
-    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
+    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE ||
+       changeType == Xflow.RESULT_STATE.LOAD_START ||
+       changeType == Xflow.RESULT_STATE.LOAD_END )
     {
         this._channelNode.setStructureOutOfSync();
 
-        notifyParentsOnChanged(this, changeType);
+        if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
+            notifyParentsOnChanged(this, changeType);
+        else
+            updateSubtreeLoading(this);
 
         for(var i in this._requests)
             this._requests[i].notify(changeType);
     }
     else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ||
-        changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE){
+        changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE ||
+        changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
+        changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END)
+    {
+        if(changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
+           changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END )
+            updateImageLoading(this);
         this._channelNode.notifyDataChange(senderNode, changeType);
     }
 };
@@ -467,6 +501,42 @@ function getForwardNode(dataNode){
         return getForwardNode(dataNode._children[0]);
     return dataNode;
 }
+
+function updateNodeLoading(node){
+    updateImageLoading(node);
+    return updateSubtreeLoading(node);
+}
+
+function updateImageLoading(node){
+    var imageLoading = false;
+    for(var i = 0; !imageLoading && i < node._children.length; ++i){
+        var child = node._children[i];
+        imageLoading = child instanceof Xflow.DataNode ? child._imageLoading :
+                child._data && child._data.isLoading && child._data.isLoading();
+    }
+    if(imageLoading != node._imageLoading){
+        node._imageLoading = imageLoading;
+        for(var i = 0; node._parents.length; ++i)
+            node._parents[i].notify(imageLoading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
+            Xflow.RESULT_STATE.IMAGE_LOAD_END);
+    }
+}
+function updateSubtreeLoading(node){
+    var subtreeLoading = node._loading;
+    for(var i = 0; !subtreeLoading && i < node._children.length; ++i){
+        var child = node._children[i];
+        subtreeLoading = child instanceof Xflow.DataNode ? child._subTreeLoading : false;
+    }
+    if(subtreeLoading != node._subTreeLoading){
+        node._subTreeLoading = subtreeLoading;
+        for(var i = 0; node._parents.length; ++i)
+            node._parents[i].notify(subtreeLoading ? Xflow.RESULT_STATE.LOAD_START :
+                Xflow.RESULT_STATE.LOAD_END);
+        return true;
+    }
+    return false;
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // Helpers

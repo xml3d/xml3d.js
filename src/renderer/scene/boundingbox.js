@@ -127,9 +127,9 @@
     };
 
     BoundingBox.prototype.getLongestSide = function() {
-        var x = this.max[0] - this.min[0];
-        var y = this.max[1] - this.min[1];
-        var z = this.max[2] - this.min[2];
+        var x = Math.abs(this.max[0] - this.min[0]);
+        var y = Math.abs(this.max[1] - this.min[1]);
+        var z = Math.abs(this.max[2] - this.min[2]);
         return Math.max(x, Math.max(y, z));
     };
 

@@ -73,6 +73,7 @@
         };
         this.updateLights = function(lights, shaderManager) {
             if (lights.structureChanged) {
+                shaderManager.removeAllShaders();
                 this.forEach(function(obj) { obj.lightsChanged(lights, shaderManager); }, this);
                 lights.structureChanged = false;
             } else {

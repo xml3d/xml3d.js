@@ -72,6 +72,11 @@
         return fragment + "\n" + source;
     };
 
+    XML3DShaderManager.prototype.removeAllShaders = function() {
+        this.shaders = [];
+        this.createDefaultShaders();
+    };
+
     XML3DShaderManager.prototype.createDefaultShaders = function() {
         this.createFallbackShader();
         this.createPickingShader();
@@ -127,7 +132,7 @@
 
         var program = this.shaders[shaderURL];
 
-        if (program && !lights.structureChanged) {
+        if (program) {
             return { url: shaderURL, program: program };
         }
 

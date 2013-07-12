@@ -620,8 +620,8 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     xform.modelView = this.camera.getModelViewMatrix(xform.model);
 
     var parameters = {
-    	min : this.bbMin,
-    	max : this.bbMax,
+        bbMin : this.bbMin,
+        bbMax : this.bbMax,
         modelMatrix : xform.model,
         modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)
     };

@@ -24,15 +24,15 @@ XML3D.shaders.register("pickedposition", {
         "attribute vec3 position;",
         "uniform mat4 modelMatrix;",
         "uniform mat4 modelViewProjectionMatrix;",
-        "uniform vec3 min;",
-        "uniform vec3 max;",
+        "uniform vec3 bbMin;",
+        "uniform vec3 bbMax;",
 
         "varying vec3 worldCoord;",
 
         "void main(void) {",
         "    worldCoord = (modelMatrix * vec4(position, 1.0)).xyz;",
-        "    vec3 diff = max - min;",
-        "    worldCoord = worldCoord - min;",
+        "    vec3 diff = bbMax - bbMin;",
+        "    worldCoord = worldCoord - bbMin;",
         "    worldCoord = worldCoord / diff;",
         "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
         "}"

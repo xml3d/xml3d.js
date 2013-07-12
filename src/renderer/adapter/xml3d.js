@@ -8,22 +8,29 @@
     XML3D.createClass(XML3DRenderAdapter, XML3D.webgl.RenderAdapter);
 
     XML3D.extend(XML3DRenderAdapter.prototype, {
-        updateActiveViewAdapter: function() {
-                var activeViewURL = this.node.getAttribute("activeView");
-                this.connectAdapterHandle("activeView", this.getAdapterHandle(activeViewURL));
+        updateActiveViewAdapter: function () {
+            var activeViewURL = this.node.getAttribute("activeView");
+            this.connectAdapterHandle("activeView", this.getAdapterHandle(activeViewURL));
+            var viewAdapter = this.getConnectedAdapter("activeView");
+            this.updateActiveView(viewAdapter);
+        },
+        updateActiveView: function (viewAdapter) {
+            if (viewAdapter) {
+                this.getScene().setActiveView(viewAdapter.getRenderNode());
+            } else {
+                this.getScene().setActiveView(null);
+            }
+        },
+        dispose: function() {
+            this.clearAdapterHandles();
         }
     })
 
     XML3DRenderAdapter.prototype.notifyChanged = function(evt) {
+
         switch(evt.type) {
             case XML3D.events.ADAPTER_HANDLE_CHANGED:
-                console.log("NOTIFY:", evt);
-                var viewAdapter = evt.adapter;
-                if (viewAdapter) {
-                    this.getScene().setActiveView(viewAdapter.getRenderNode());
-                } else {
-                    this.getScene().setActiveView(null);
-                }
+                this.updateActiveView(evt.adapter);
                 return;
             case XML3D.events.NODE_INSERTED:
                 this.factory.renderer.sceneTreeAddition(evt);
@@ -36,7 +43,8 @@
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 
         if (target == "activeView") {
-            this.factory.renderer.activeViewChanged();
+            console.log("NOTIFYALL:", evt);
+            this.updateActiveViewAdapter();
         }
     };
 
@@ -81,7 +89,7 @@
         var relY = relativeMousePos.y;
 
         var handler = this.factory.handler;
-        var object = handler.updatePickObjectByPoint(relX, relY);
+        var object = handler.getPickObjectByPoint(relX, relY);
         if(object){
             if(hitPoint){
                 var vec = handler.getWorldSpacePositionByPoint(object, relX, relY);

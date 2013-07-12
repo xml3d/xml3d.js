@@ -446,17 +446,17 @@ test("Camera setDirection/upVector", 5, function() {
 test("Pick pass flag", 6, function() {
     var x = this.doc.getElementById("xml3DElem");
     var h = getHandler(x);
-    h.updatePickObjectByPoint(0,0);
+    h.getPickObjectByPoint(0,0);
     ok(!h.needPickingDraw, "No picking needed after pick rendering");
     this.doc.getElementById("group2").setAttribute("shader","#flatblack");
     ok(!h.needPickingDraw, "Changing shaders does not require a picking pass");
     this.doc.getElementById("t_cubebottom").translation.x = 5;
     ok(h.needPickingDraw, "Changing transformation does require a picking pass");
-    /** This test fails due to a workaround in the CanvasHandler.updatePickObjectByPoint().
+    /** This test fails due to a workaround in the CanvasHandler.getPickObjectByPoint().
      *  It's a performance optimization, thus disbaled for now.
      *  See comment in that function for more details.
      */
-    h.updatePickObjectByPoint(0,0);
+    h.getPickObjectByPoint(0,0);
     //ok(!h.needPickingDraw, "No picking needed after pick rendering");
     this.doc.getElementById("t_cubebottom").translation.x = 3;
     this.doc.getElementById("group2").setAttribute("shader","#flatblue");

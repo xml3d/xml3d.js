@@ -73,62 +73,7 @@ GLRenderer.prototype.sceneTreeRemoval = function (evt) {
 
 
 
-/**
- * Render the scene using the picking shader.
- * Modifies current picking buffer.
- */
-GLRenderer.prototype.renderSceneToPickingBuffer = (function () {
 
-    var c_mvp = XML3D.math.mat4.create();
-
-    return function () {
-        var gl = this.context.gl;
-        var fbo = this.fbos.picking;
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
-
-        gl.enable(gl.DEPTH_TEST);
-        gl.disable(gl.CULL_FACE);
-        gl.disable(gl.BLEND);
-
-        gl.viewport(0, 0, fbo.width, fbo.height);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-
-    var shader = this.context.programFactory.getPickingObjectIdProgram();
-    shader.bind();
-        var objects = this.scene.ready;
-
-        for (var j = 0, n = objects.length; j < n; j++) {
-            var obj = objects[j];
-            var mesh = obj.mesh;
-
-            if (!mesh.valid || !obj.visible)
-                continue;
-
-            var parameters = {};
-
-            obj.getModelViewProjectionMatrix(c_mvp);
-
-            var objId = j + 1;
-            var c1 = objId & 255;
-            objId = objId >> 8;
-            var c2 = objId & 255;
-            objId = objId >> 8;
-            var c3 = objId & 255;
-
-            parameters.id = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
-            parameters.modelViewProjectionMatrix = c_mvp;
-
-        shader.setUniformVariables(parameters);
-            this.drawObject(shader, mesh);
-        }
-    shader.unbind(shader);
-
-        gl.disable(gl.DEPTH_TEST);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    };
-}());
 
     /**
  * Render the picked object using the normal picking shader
@@ -225,59 +170,7 @@ GLRenderer.prototype.renderPickedNormals = (function () {
 }());
 
 var pickVector = XML3D.math.vec3.create();
-var data = new Uint8Array(8);
 
-/**
- * Reads pixels from the screenbuffer to determine picked object or normals.
- *
- * @param {number} screenX Screen Coordinate of color buffer
- * @param {number} screenY Screen Coordinate of color buffer
- * @returns {Element|null} Picked Object
- *
- */
-GLRenderer.prototype.getRenderObjectFromPickingBuffer = function(screenX, screenY) {
-    var data = this.readPixelDataFromBuffer(screenX, screenY, this.fbos.picking);
-
-    if (!data)
-        return null;
-
-    var result = null;
-    var objId = data[0] * 65536 + data[1] * 256 + data[2];
-
-    if (objId > 0) {
-        var pickedObj = this.scene.ready[objId - 1];
-        result = pickedObj;
-    }
-    return result;
-};
-
-/**
- * Reads pixels from the provided buffer
- *
- * @param {number} glX OpenGL Coordinate of color buffer
- * @param {number} glY OpenGL Coordinate of color buffer
- * @param {Object} buffer Buffer to read pixels from
- * @returns {Uint8Array} pixel data
- */
-GLRenderer.prototype.readPixelDataFromBuffer = function(glX, glY, buffer){
-    var fbo = buffer;
-    var scale = fbo.scale;
-    var x = glX * scale;
-    var y = glY * scale;
-    var gl = this.context.gl;
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
-    try {
-        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, data);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-        return data;
-    } catch (e) {
-        XML3D.debug.logException(e);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        return null;
-    }
-};
 
 /**
  * Read normal from picking buffer

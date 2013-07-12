@@ -16,7 +16,9 @@
         <file name="gl/renderer.js" />
         <file name="gl/texture.js" />
         <file name="gl/program.js" />
+        <file name="gl/passes/core.js" />
         <file name="gl/passes/forward.js" />
+        <file name="gl/passes/picking.js" />
         <file name="programfactory.js" />
         <file name="shadertemplate.js" />
         <file name="material.js" />

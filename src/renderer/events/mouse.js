@@ -117,10 +117,10 @@
             opt = opt || {};
             var pos = this.getMousePosition(evt);
 
+            var picked = null;
             if (!opt.omitUpdate)
-                this.updatePickObjectByPoint(pos.x, pos.y);
+                picked = this.getPickObjectByPoint(pos.x, pos.y);
 
-            var picked = this.currentPickObj;
             this.dispatchMouseEvent(evt, picked && picked.meshAdapter.node, pos);
         },
 

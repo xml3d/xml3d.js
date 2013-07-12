@@ -19,12 +19,12 @@ module("WebGL Picking tests", {
 test("Check current pick object (internal)", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
-    var picked = h.updatePickObjectByPoint(88,60);
+    var picked = h.getPickObjectByPoint(88,60);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
     strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
 
-    picked = h.updatePickObjectByPoint(5,5);
+    picked = h.getPickObjectByPoint(5,5);
     strictEqual(h.currentPickObj, null, "Nothing picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
 });
@@ -45,7 +45,7 @@ test("Pick with large object ids", function() {
     notEqual(objId, -1, "Found Drawable");
     ok(objId > 255, "Object id larger than 255");
 
-    var picked = h.updatePickObjectByPoint(220, 150);
+    var picked = h.getPickObjectByPoint(220, 150);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
     strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
@@ -77,7 +77,7 @@ test("Object picking test", 3, function() {
         strictEqual(evt.target, target);
     }, false);
 
-    h.updatePickObjectByPoint(88,60);
+    h.getPickObjectByPoint(88,60);
     stop();
     h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 88, clientY: 60 }), target);
 
@@ -94,7 +94,7 @@ test("Position picking test", 4, function() {
     	QUnit.closeVector(evt.position, new XML3DVec3(-2.503,2.01,-10), EPSILON, "Picked position is correct");
     }, false);
 
-    h.updatePickObjectByPoint(89,51);
+    h.getPickObjectByPoint(89,51);
     stop();
     h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 89, clientY: 51 }), target);
 });
@@ -111,7 +111,7 @@ test("Normal picking test", 4, function() {
         start();
     }, false);
 
-    h.updatePickObjectByPoint(88,60);
+    h.getPickObjectByPoint(88,60);
     stop();
     h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 88, clientY: 60 }), target);
 });

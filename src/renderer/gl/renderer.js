@@ -12,6 +12,7 @@
     IRenderer.prototype.needsRedraw = function() {};
     IRenderer.prototype.getWorldSpaceNormalByPoint = function(x,y) {};
     IRenderer.prototype.getWorldSpacePositionByPoint = function(x,y) {};
+    IRenderer.prototype.getRenderObjectFromPickingBuffer = function(x,y) {};
     IRenderer.prototype.dispose = function() {};
 
 
@@ -31,8 +32,11 @@
         this.needsDraw = true;
         this.needPickingDraw = true;
         this.pickingDisabled = false;
+        /** @type {XML3D.webgl.RenderObject} */
+        this.currentPickObj = null;
 
         this.mainPass = new webgl.ForwardRenderPass(context);
+        this.pickingPass = new webgl.PickingRenderPass(context);
 
         this.init();
     };
@@ -96,8 +100,19 @@
             this.needDraw = false;
             return stats;
         },
+        getRenderObjectFromPickingBuffer : function(x,y) {
+            if(this.needsDraw) {
+                this.prepareRendering();
+                this.pickingPass.renderSceneToPickingBuffer(this.scene, this.fbos.picking);
+                this.currentPickObj = this.pickingPass.getRenderObjectFromPickingBuffer(x,y,this.scene, this.fbos.picking);
+            }
+            return this.currentPickObj;
+        },
         prepareRendering : function() {
             this.scene.update();
+        },
+        dispose: function() {
+            this.scene.clear();
         }
     })
 

@@ -11,7 +11,7 @@
         this._glslCode = null;
         this._shaderInputNames = [];
         this._shaderOutputNames = [];
-        this._inputIndices = [];
+        this._inputIndices = {};
         constructVS(this);
     }
 
@@ -30,7 +30,7 @@
         }
 
         var code = "#version 140 \n\n";
-
+        code += "// GLOBALS\n"
         // Start with Globals
         for(var type in Xflow.shaderConstant){
             var name = Xflow.shaderConstant[type];
@@ -39,7 +39,7 @@
             Xflow.nameset.add(usedNames, name);
         }
         code += "\n";
-
+        code += "// OUTPUT\n"
         // First: collect output names
         for( var i = 0; i < entries.length; ++i){
             var entry = entries[i], operator = entry.operator;
@@ -54,7 +54,7 @@
             }
         }
         code += "\n";
-
+        code += "// INPUT\n"
         // Second: collect input names
         for(var i = 0; i < entries.length; ++i){
             var entry = entries[i], operator = entry.operator;
@@ -78,7 +78,8 @@
         }
 
         // Start main
-        code += "\n" + "void main(void){\n";
+        code += "\n// CODE\n"
+        code += "void main(void){\n";
 
         // Create Code
         for(var i = 0; i < entries.length; ++i){

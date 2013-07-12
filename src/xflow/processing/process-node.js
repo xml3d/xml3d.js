@@ -317,6 +317,12 @@ function getRequestVSResult(requestNode)
     if(!requestNode.results[Xflow.RESULT_TYPE.VS])
         requestNode.results[Xflow.RESULT_TYPE.VS] = new Xflow.VertexShaderResult();
     var result = requestNode.results[Xflow.RESULT_TYPE.VS];
+
+    var program = executer.getVertexShader();
+    result._program = program;
+    result._programData = executer.programData;
+    result._shaderInputNames = Object.keys(program._inputIndices);
+
     result._dataEntries = {}; result._outputNames = [];
     for(var name in requestNode.channels){
         var entry = requestNode.channels[name].getDataEntry();

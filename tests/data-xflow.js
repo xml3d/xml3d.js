@@ -84,34 +84,47 @@ module("Xflow tests", {
         }
     },
 
+
+    getXflowData: function(node){
+        var adapter = this.getDataAdapter(node);
+        return adapter && adapter.getXflowNode && adapter.getXflowNode().data;
+    },
+
     //Test functions
 
-    Show: function(testNode){
+    VSCheck: function(testNode){
         var dataNodeId = testNode.getAttribute("data").substring(1);
         var dataElement = this.doc.getElementById(dataNodeId);
-        var what = testNode.getAttribute("what");
         var title = testNode.getAttribute("title");
 
-        if(what == "VertexShader"){
-            var vsConfig = new this.win.Xflow.VSConfig();
+        var vsConfig = new this.win.Xflow.VSConfig();
 
-            var connect = testNode.firstElementChild;
-            while (connect) {
-                if (connect.nodeName == "VSConnection")
-                    this.VSConnection(connect, vsConfig);
-                connect = connect.nextElementSibling;
-            };
+        var connect = testNode.getElementsByTagName("VSConfig")[0].firstElementChild;
+        while (connect) {
+            if (connect.nodeName == "VSConnection")
+                this.VSConnection(connect, vsConfig);
+            connect = connect.nextElementSibling;
+        };
 
-            var dataAdapter = dataElement._configured.adapters;
-            dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
-            var xflowNode = dataAdapter.getXflowNode();
-            var request = new Xflow.VertexShaderRequest(xflowNode, vsConfig);
-            var result = request.getResult();
-            var code = result.getGLSLCode();
-            ok(true, code);
+        var dataAdapter = dataElement._configured.adapters;
+        dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
+        var xflowNode = dataAdapter.getXflowNode();
+        var request = new this.win.Xflow.VertexShaderRequest(xflowNode, vsConfig);
+        var result = request.getResult();
+        var code = result.getGLSLCode();
+        var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE"),
+            outputIdx = code.indexOf("// OUTPUT"), globalsIdx = code.indexOf("// GLOBALS");
+
+        ok(inputIdx != -1 && codeIdx != -1 && outputIdx != -1 && globalsIdx != -1,
+            title + "=> Shader has expected structure");
+
+        var action = testNode.firstElementChild;
+        while (action) {
+            if (this[action.nodeName])
+                this[action.nodeName](result, action, title);
+
+            action = action.nextElementSibling;
         }
-
-
     },
 
     VSConnection: function(node, vsConfig){
@@ -124,6 +137,69 @@ module("Xflow tests", {
             node.getAttribute("optional") == "true" );
     },
 
+    VSInputBufferCount: function(result, action, title){
+        var count = action.getAttribute("count")*1;
+        equal(result.shaderInputNames.length, count, title + "=> Vertex Shader has " +
+            count + " input buffers.");
+    },
+    VSOutAttribCount: function(result, action, title){
+        var count = action.getAttribute("count")*1;
+        var code = result.getGLSLCode();
+        var outputIdx = code.indexOf("// OUTPUT"), inputIdx = code.indexOf("// INPUT");
+        var fragment = code.substring(outputIdx, inputIdx);
+
+        var matches = fragment.match(/out /g), actualCount = matches && matches.length || 0;
+        equal(actualCount, count, title + "=> Vertex Shader has " +
+            count + " 'out' attributes.");
+    },
+    VSInAttribCount: function(result, action, title){
+        var count = action.getAttribute("count")*1;
+        var code = result.getGLSLCode();
+        var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE");
+        var fragment = code.substring(inputIdx, codeIdx);
+
+        var matches = fragment.match(/in /g), actualCount = matches && matches.length || 0;
+        equal(actualCount, count, title + "=> Vertex Shader has " +
+            count + " 'in' attributes.");
+    },
+    VSUniformAttribCount: function(result, action, title){
+        var count = action.getAttribute("count")*1;
+        var code = result.getGLSLCode();
+        var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE");
+        var fragment = code.substring(inputIdx, codeIdx);
+
+        var matches = fragment.match(/uniform /g), actualCount = matches && matches.length || 0;
+        equal(actualCount, count, title + "=> Vertex Shader has " +
+            count + " 'uniform' attributes.");
+    },
+    VSHasInputBuffer : function (result, action, title) {
+        var shouldMatchName = action.getAttribute("input").substring(1);
+        var shouldMatch = this.doc.getElementById(shouldMatchName);
+        var shouldMatchData = this.getXflowData(shouldMatch);
+
+        var shouldBeUniform = (action.getAttribute("uniform") == "true");
+
+        var names = result.shaderInputNames, entryName = null;
+        for(var i =0; i < names.length; ++i){
+            var name = names[i];
+            if(result.getShaderInputData(name) == shouldMatchData){
+                entryName = name;
+                break;
+            }
+        }
+        ok(entryName, title + " => InputBuffer '" + shouldMatchName + "' is used");
+
+        if(shouldBeUniform)
+            equal(result.isShaderInputUniform(entryName), true, title + " => InputBuffer '" + shouldMatchName + "' is uniform");
+        else
+            equal(result.isShaderInputUniform(entryName), false, title + " => InputBuffer '" + shouldMatchName + "' is not uniform");
+    },
+
+    VSCodeMatchesRegexp: function(result, action, title){
+        var regexp = new RegExp(action.getAttribute("regexp"));
+        var code = result.getGLSLCode();
+        ok(!!code.match(regexp), title + " => GLSL Code matches regexp: " + regexp);
+    },
 
     Check : function(testNode) {
         var dataNodeId = testNode.getAttribute("data").substring(1);
@@ -145,7 +221,8 @@ module("Xflow tests", {
     MatchInput : function (have, action, title) {
         var shouldMatchName = action.getAttribute("input").substring(1);
         var shouldMatch = this.doc.getElementById(shouldMatchName);
-        shouldMatch = this.formatData(shouldMatch.textContent, shouldMatch.nodeName);
+
+        var shouldMatchData = this.getXflowData(shouldMatch);
 
         var property = action.getAttribute("name");
 
@@ -159,7 +236,7 @@ module("Xflow tests", {
             return;
         }
 
-        QUnit.closeArray(actualData.getValue(), shouldMatch, EPSILON, title + "=> " + shouldMatchName+" in "+have.id+" matches reference data");
+        equal(actualData, shouldMatchData, title + "=> " + shouldMatchName+" in "+have.id+" matches reference data");
     },
 
     MatchNull : function (have, action, title) {
@@ -473,10 +550,16 @@ test("Prototypes - With Operators", function() {
     this.executeTests(response);
 });
 
-
-test("GLSL - With Operators", function() {
+test("GLSL basic", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_normal.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_basic.xml", handler);
+    this.executeTests(response);
+});
+
+
+test("GLSL with 3x Morph", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_morphing.xml", handler);
     this.executeTests(response);
 });
 

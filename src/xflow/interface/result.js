@@ -74,9 +74,10 @@ ComputeResult.prototype.getOutputMap = function() {
 Xflow.VertexShaderResult = function(){
     Xflow.Result.call(this);
     this._shaderInputNames = null;
-    this._uniform = []
-    this._dataEntries = {};
-    this._glslCode;
+    this._program = null;
+    this._programData = null;
+    this._shaderInputNames = null;
+
 };
 Xflow.createClass(Xflow.VertexShaderResult, Xflow.Result);
 var VertexShaderResult = Xflow.VertexShaderResult;
@@ -85,19 +86,19 @@ Object.defineProperty(VertexShaderResult.prototype, "shaderInputNames", {
     set: function(v){
         throw new Error("shaderInputNames is readonly");
     },
-    get: function(){ return this._outputNames; }
+    get: function(){ return this._shaderInputNames; }
 });
 
 VertexShaderResult.prototype.getShaderInputData = function(name){
-    return this._dataEntries[name];
+    return this._programData.getDataEntry(this._program._inputIndices[name].index);
 };
 
 VertexShaderResult.prototype.isShaderInputUniform = function(name){
-    return this._uniform[name];
+    return this._program._inputIndices[name].uniform;
 }
 
 VertexShaderResult.prototype.getGLSLCode = function(){
-    return this._glslCode;
+    return this._program._glslCode;
 }
 
 

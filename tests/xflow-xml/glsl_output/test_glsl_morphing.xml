@@ -1,48 +1,50 @@
 <XflowTest>
     <Input>
         
-	<data id="faceBase">
-		<int name='index'>0 1 2 2 3 0</int>
-		<float3 name='position'>-9.480105 -13.51214 10.48553 -7.449495 -14.95502 10.49484 -7.61096 -10.68768 10.55452 -10.14189 -10.56985 10.52351 </float3>
-		<float3 name='normal'>-0.4716944 -0.6363447 0.610385 -0.121907 -0.6732379 0.7293075 -0.006795116 -0.08907415 0.9960018 -0.7543877 -0.1368277 0.6420104 </float3>
-	</data>
-	<data id="faceBlink">
-		<float3 name="posBlink" >-9.480105 -13.51214 10.48553 -7.449495 -14.95502 10.49484 -7.61096 -10.68768 10.55452 -10.14189 -10.56985 10.52351</float3>
-	</data>
-	<data id="faceSmile">
-		<float3 name="posSmile" >-9.480105 -13.51214 10.48553 -7.449495 -14.95502 10.49484 -7.61096 -10.68768 10.55452 -10.14189 -10.56985 10.52351 </float3>
-	</data>
+        <data id="morphed3" compute="position = xflow.morph(position, posAdd3, weight3)" >
+	       <data id="morphed2" compute="position = xflow.morph(position, posAdd2, weight2)" >
+	           <data id="morphed1" compute="position = xflow.morph(position, posAdd1, weight1)" >
+	                
+	                <float3 name="posAdd1" id="positionAdd_1">0 0 1  1 0 0</float3>    
+	                <float3 name="posAdd2" id="positionAdd_2">1 0 0  0 -1 0</float3>
+	                <float3 name="posAdd3" id="positionAdd_3">1 1 1  0 0 0</float3>
 	
-	<data id="morphedMesh" map="position:=result"
-	   script="urn:xml3d:xflow:morph3" >
-	   
-		<data id="morphedMeshSub" map="value:=result" script="urn:xml3d:xflow:morph3" >
-		    <data map="value:=position" src="#faceBase" />
-		    <data map="valueAdd:=result" script="urn:xml3d:xflow:sub3" >
-				<data map="value1:=posSmile" src="#faceSmile" />
-				<data map="value2:=position" src="#faceBase" />
-		    </data>
-			<float name="weight" id="morphTarget1" >0.0</float>
+	                <float name="weight1" id="weight_1" >0.7</float>                        
+	                <float name="weight2" id="weight_2" >0.5</float>
+	                <float name="weight3" id="weight_3" >0.3</float>
+		            
+		            <int name="index" id="index_1" >0 1 2 1 2 3</int>
+		            <float3 name="position" id="position_1">1 1 1  2 2 2</float3>
+		            <float3 name="normal" id="normal_1">1 0 0 1 0 0</float3>
+	            </data>	
+	        </data>
 		</data>
-		
-		<data map="valueAdd:=result" script="urn:xml3d:xflow:sub3" >
-			<data map="value1:=posBlink" src="#faceBlink" />
-			<data map="value2:=position" src="#faceBase" />
-	    </data>
-		
-		<float name="weight" id="morphTarget2" >1.0</float>
-	</data>
-        
+
     </Input>
     <TestProcess>
-        <Show title="Show Vertex Shader" data="#morphedMesh" what="VertexShader" 
-                filter="worldPosition worldNormal viewPosition viewNormal fragColor fragTexcoord index" >
-            <VSConnection in="position" out="viewPosition" type="FLOAT3_VIEW_POINT" />
-            <VSConnection in="normal" out="viewNormal" type="FLOAT3_VIEW_NORMAL" />
-        	<VSConnection in="position" out="worldPosition" type="FLOAT3_WORLD_POINT" />
-        	<VSConnection in="normal" out="worldNormal" type="FLOAT3_WORLD_NORMAL" />
-        	<VSConnection in="color" out="fragColor" type="FLOAT3" optional="true" />
-        	<VSConnection in="texCoord" out="fragTexcoord" type="FLOAT2" optional="true" />
-        </Show>
+        <VSCheck title="Check Vertex Shader" data="#morphed3" >
+            <VSConfig>
+                <VSConnection in="position" out="worldPosition" type="FLOAT3_WORLD_POINT" />
+                <VSConnection in="normal" out="worldNormal" type="FLOAT3_WORLD_NORMAL" />
+                <VSConnection in="color" out="fragColor" type="FLOAT3" optional="true" />
+                <VSConnection in="texCoord" out="fragTexCoord" type="FLOAT2" optional="true" />
+            </VSConfig>
+
+            <VSInputBufferCount count="10" />
+            <VSInAttribCount count="7"/>
+            <VSUniformAttribCount count="3"/>
+            <VSOutAttribCount count="4"/>
+
+            <VSHasInputBuffer input="#positionAdd_1" uniform="false" />
+            <VSHasInputBuffer input="#positionAdd_2" uniform="false" />
+            <VSHasInputBuffer input="#positionAdd_3" uniform="false" />
+            <VSHasInputBuffer input="#weight_1" uniform="true" />
+            <VSHasInputBuffer input="#weight_2" uniform="true" />
+            <VSHasInputBuffer input="#weight_3" uniform="true" />
+            <VSHasInputBuffer input="#position_1" uniform="false" />
+            <VSHasInputBuffer input="#normal_1" uniform="false" />
+
+            <VSCodeMatchesRegexp regexp="gl_Position ?= ?.+\*.*vec4\(.+, 1.0\);" />
+        </VSCheck>
     </TestProcess>
 </XflowTest>

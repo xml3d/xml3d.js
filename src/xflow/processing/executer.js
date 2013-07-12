@@ -62,12 +62,14 @@
     function initRequestNode(cData, executer, ownerNode){
         if(ownerNode instanceof Xflow.RequestNode){
             cData.finalOutput = {};
-            for(var name in ownerNode.filter){
-                var channel = ownerNode.owner.finalOutputChannels.getChannel();
+            var filter = ownerNode.filter || ownerNode.owner.finalOutputChannels.getNames();
+            for(var i = 0; i < filter.length; ++i){
+                var name = filter[i];
+                var channel = ownerNode.owner.finalOutputChannels.getChannel(name);
                 if(channel && channel.creatorProcessNode)
                     cData.finalOutput[name] = channel.getDataEntry();
             }
-            Xflow.nameset.add(executer.unprocessedDataNames, ownerNode.filter);
+            Xflow.nameset.add(executer.unprocessedDataNames, filter);
         }
     }
 
@@ -96,7 +98,7 @@
             }
         }
         for(var i = 0; i < node.children.length; ++i){
-            constructPreScan(cData, node.children[i]);
+            constructPreScan(cData, node.children[i], platform);
         }
     }
 
@@ -180,18 +182,19 @@
                 continue;
             }
 
-            var mappedInputName = node.owner.owner._computeInputMapping.getScriptInputName(entry.paramIdx, entry.source);
+            var mappedInputName = node.owner.owner._computeInputMapping.getScriptInputName(mapping[j].paramIdx,
+                mapping[j].source);
 
             var connection = new Xflow.ProgramInputConnection();
             connection.channel = channel;
-            connection.arrayAccess = mapping[j].array;
-            connection.sequenceAccessType = mapping[j].sequence;
+            connection.arrayAccess = mapping[j].array || false;
+            connection.sequenceAccessType = mapping[j].sequence || 0;
             if(connection.sequenceAccessType)
                 connection.sequenceKeySourceChannel = node.inputChannels[mapping[j].keySource];
 
             var connectionKey = connection.getKey();
             var inputSlotIdx = cData.inputSlots[connectionKey];
-            if(inputSlotIdx != undefined){
+            if(channel && inputSlotIdx != undefined){
                 // Direct input already exists
                 entry.setDirectInput(j, inputSlotIdx, mappedInputName);
             }
@@ -264,8 +267,8 @@
         var inputs = executer.programData.inputs;
         for(var i = 0; i < executer.programData.inputs.length; ++i){
             var entry = executer.programData.getDataEntry(i);
-            var iterateCount = entry && entry.getIterateCount ? entry.getIterateCount() : 1;
-            if(!inputs[i].arrayAccess && iterateCount > 1)
+            var iterateCount = entry ? entry.getIterateCount ? entry.getIterateCount() : 1 : 0;
+            if(!inputs[i].arrayAccess && iterateCount != 1)
                 executer.operatorList.setInputIterate(i, true);
             else
                 executer.operatorList.setInputIterate(i, false);

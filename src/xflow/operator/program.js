@@ -11,7 +11,7 @@
         this.outputInfo = [];
     }
     Xflow.OperatorEntry.prototype.isTransferInput = function(mappingIndex){
-        return !!this.inputInfo[mappingIndex].operatorIndex;
+        return this.inputInfo[mappingIndex].operatorIndex !== undefined;
     }
     Xflow.OperatorEntry.prototype.getTransferInputOperatorIndex = function(mappingIndex){
         return this.inputInfo[mappingIndex].operatorIndex;
@@ -28,8 +28,6 @@
         return this.index + "_" + outputIndex;
     }
 
-
-
     Xflow.OperatorEntry.prototype.getInputMappingName = function(mappingIdx){
         return this.inputInfo[mappingIdx].mappedName;
     }
@@ -43,7 +41,7 @@
 
 
     Xflow.OperatorEntry.prototype.isFinalOutput = function(outputIndex){
-        return this.outputInfo[outputIndex] && this.outputInfo[outputIndex].finalOut != undefined;
+        return this.outputInfo[outputIndex] && this.outputInfo[outputIndex].finalOut !== undefined;
     }
     Xflow.OperatorEntry.prototype.isTransferOutput = function(outputIndex){
         return this.outputInfo[outputIndex] && this.outputInfo[outputIndex].transfer;

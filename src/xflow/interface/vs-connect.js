@@ -2,6 +2,13 @@
 
 
 Xflow.shaderConstant = {}
+Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.OBJECT_ID] = "objectID";
+Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM] = "screenTransform";
+Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM_NORMAL] = "screenTransformNormal";
+Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM] = "viewTransform";
+Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] = "viewTransformNormal";
+Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM] = "worldTransform";
+Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] = "worldTransformNormal";
 
 Xflow.setShaderConstant = function(type, name){
     Xflow.shaderConstant[type] = name;
@@ -43,7 +50,7 @@ Xflow.VSConfig.prototype.getBlockedNames = function(){
 Xflow.VSConfig.prototype.getFilter = function(){
     var result = [];
     for(var i = 0; i < this._attributes.length; ++i)
-        result[this._attributes[i].inputName];
+        result.push(this._attributes[i].outputName);
     return result;
 }
 Xflow.VSConfig.prototype.getKey = function(){
@@ -53,6 +60,7 @@ Xflow.VSConfig.prototype.getKey = function(){
         key += ";" + this._attributes.type + "," + this._attributes.inputName + "," + this._attributes.outputName
             + "," + this._attributes.optional;
     }
+    return key;
 }
 
 var c_vs_operator_cache = {};
@@ -105,12 +113,11 @@ Xflow.VSConfig.prototype.getOperator = function(){
     }
 
     glslCode += "\tgl_Position = #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM]
-             + "} * vec4(#I{position), 1.0);\n";
+             + "} * vec4(#I{position}, 1.0);\n";
 
     var operator = Xflow.initAnonymousOperator({
-        outputs: [  {type: 'float3', name: 'result'}],
-        params:  [  {type: 'float3', source: 'value1'},
-            {type: 'float3', source: 'value2'}],
+        outputs: outputs,
+        params:  params,
         evaluate_glsl: glslCode,
         blockedNames: this._blockedNames
     });
@@ -121,8 +128,14 @@ Xflow.VSConfig.prototype.getOperator = function(){
 }
 
 Xflow.VSConfig.prototype.setInputMapping = function(orderMapping){
+    var inputAdded = {};
     for(var i = 0; i < this._attributes.length; ++i){
-        orderMapping.setName(i, this._attributes[i].inputName);
+        var name = this._attributes[i].inputName;
+        if(!inputAdded[name]){
+            orderMapping.setName(i, name);
+            inputAdded[name] = true;
+        }
+
     }
 }
 Xflow.VSConfig.prototype.setOutputMapping = function(orderMapping){

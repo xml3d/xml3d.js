@@ -536,7 +536,7 @@ function updateSubtreeLoading(node){
     }
     if(subtreeLoading != node._subTreeLoading){
         node._subTreeLoading = subtreeLoading;
-        for(var i = 0; node._parents.length; ++i)
+        for(var i = 0; i < node._parents.length; ++i)
             node._parents[i].notify(subtreeLoading ? Xflow.RESULT_STATE.LOAD_START :
                 Xflow.RESULT_STATE.LOAD_END);
         return true;

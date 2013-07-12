@@ -1,0 +1,33 @@
+<XflowTest>
+    <Input>
+
+		<data id="mesh" >
+            <int name="index" id="index_1" >0 1 2 1 2 3</int>
+            <float3 name="position" id="position_1">1 1 1  2 2 2</float3>
+            <float3 name="normal" id="normal_1">1 0 0 1 0 0</float3>
+		</data>
+
+    </Input>
+    <TestProcess>
+        <VSCheck title="Check Vertex Shader" data="#mesh" >
+            <VSConfig>
+                <VSConnection in="position" out="viewPosition" type="FLOAT3_VIEW_POINT" />
+                <VSConnection in="normal" out="viewNormal" type="FLOAT3_VIEW_NORMAL" />
+                <VSConnection in="position" out="worldPosition" type="FLOAT3_WORLD_POINT" />
+                <VSConnection in="normal" out="worldNormal" type="FLOAT3_WORLD_NORMAL" />
+                <VSConnection in="color" out="fragColor" type="FLOAT3" optional="true" />
+                <VSConnection in="texCoord" out="fragTexcoord" type="FLOAT2" optional="true" />
+            </VSConfig>
+
+            <VSInputBufferCount count="4" />
+            <VSInAttribCount count="4"/>
+            <VSUniformAttribCount count="0"/>
+            <VSOutAttribCount count="6"/>
+
+            <VSHasInputBuffer input="#position_1" uniform="false" />
+            <VSHasInputBuffer input="#normal_1" uniform="false" />
+
+            <VSCodeMatchesRegexp regexp="gl_Position ?= ?.+\*.*vec4\(.+, 1.0\);" />
+        </VSCheck>
+    </TestProcess>
+</XflowTest>

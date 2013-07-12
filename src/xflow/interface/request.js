@@ -11,7 +11,8 @@ var Request = function(dataNode, filter, callback){
     this._filter = filter ? filter.slice().sort() : null;
     this._listener = callback;
     this._result = null;
-    this._dataNode._requests.push(this);
+    this._dataNodeListener = this.onDataNodeChange.bind(this);
+    this._dataNode.addListener(this._dataNodeListener);
 };
 Xflow.Request = Request;
 
@@ -35,7 +36,7 @@ Object.defineProperty(Request.prototype, "filter", {
 Request.prototype.clear = function(){
     this._listener = null;
     if(this._result) this._result.removeListener(this.callback);
-    Array.erase(this._dataNode._requests, this);
+    this._dataNode.removeListener(this._dataNodeListener);
 };
 
 /**
@@ -50,7 +51,7 @@ function notifyListeners(request, notification){
 /**
  * @param {Xflow.RESULT_STATE} notification
  */
-Request.prototype.notify = function(notification){
+Request.prototype.onDataNodeChange = function(notification){
     notifyListeners(this, notification);
 }
 
@@ -75,7 +76,7 @@ ComputeRequest.prototype.getResult = function(){
 }
 
 ComputeRequest.prototype.onResultChanged = function(result, notification){
-    this.notify(notification);
+    this.onDataNodeChange(notification);
 }
 
 

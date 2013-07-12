@@ -352,7 +352,7 @@
 
     Channel.prototype.notifyOnChange = function(state){
         for(var i = 0; i < this.listeners.length; i++){
-            this.listeners[i](this, state);
+            this.listeners[i].onXflowChannelChange(this, state);
         }
     }
 

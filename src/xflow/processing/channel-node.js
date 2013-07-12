@@ -168,17 +168,15 @@
     }
 
     function synchronizeChildren(channelNode, dataNode){
-        channelNode.loading = dataNode.loading;
+        channelNode.loading = dataNode._subTreeLoading;
         if(dataNode._sourceNode){
             dataNode._sourceNode._channelNode.synchronize();
-            channelNode.loading = channelNode.loading || dataNode._sourceNode._channelNode.loading;
         }
         else{
             var child;
             for(var i = 0; i < dataNode._children.length; ++i){
                 if((child = dataNode._children[i]._channelNode) && !dataNode._children[i].isProtoNode()){
                     child.synchronize();
-                    channelNode.loading = channelNode.loading || child.loading;
                 }
             }
         }

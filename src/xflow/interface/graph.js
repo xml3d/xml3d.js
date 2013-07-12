@@ -67,11 +67,12 @@ Xflow.InputNode = function(graph){
     this._data = null;
     this._paramName = null;
     this._paramGlobal = false;
+    this._dataListener = this.onDataChange.bind(this);
 };
 Xflow.createClass(Xflow.InputNode, Xflow.GraphNode);
 var InputNode = Xflow.InputNode;
 
-InputNode.prototype.notify = function(newValue, notification) {
+InputNode.prototype.onDataChange = function(newValue, notification) {
     var downNote;
     switch(notification){
         case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE: downNote = Xflow.RESULT_STATE.CHANGED_DATA_VALUE; break;
@@ -124,11 +125,11 @@ Object.defineProperty(InputNode.prototype, "data", {
         var prevDataLoading = false;
         if(this._data) {
             prevDataLoading = this._data._loading;
-            this._data.removeListener(this);
+            this._data.removeListener(this._dataListener);
         }
         this._data = v;
         if(this._data)
-            this._data.addListener(this);
+            this._data.addListener(this._dataListener);
         if(prevDataLoading != this._data._loading){
             notifyParentsOnChanged(this, this._data._loading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
                 Xflow.RESULT_STATE.IMAGE_LOAD_END);
@@ -189,7 +190,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._computeOutputMapping = new Xflow.OrderMapping(this);
 
     this._channelNode = new Xflow.ChannelNode(this);
-    this._requests = [];
+    this._listeners = [];
 
 };
 Xflow.createClass(Xflow.DataNode, Xflow.GraphNode);
@@ -457,9 +458,6 @@ DataNode.prototype.notify = function(changeType, senderNode){
             notifyParentsOnChanged(this, changeType);
         else
             updateSubtreeLoading(this);
-
-        for(var i in this._requests)
-            this._requests[i].notify(changeType);
     }
     else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ||
         changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE ||
@@ -471,7 +469,16 @@ DataNode.prototype.notify = function(changeType, senderNode){
             updateImageLoading(this);
         this._channelNode.notifyDataChange(senderNode, changeType);
     }
+    for(var i = 0; i < this._listeners.length; ++i)
+        this._listeners[i](changeType);
 };
+
+DataNode.prototype.addListener = function(listener){
+    this._listeners.push(listener)
+}
+DataNode.prototype.removeListener = function(listener){
+    Array.erase(this._listeners, listener);
+}
 
 DataNode.prototype.getOutputNames = function(){
     return getForwardNode(this)._channelNode.getOutputNames();

@@ -19,13 +19,12 @@ Xflow.ProcessNode = function(channelNode, operator, substitution){
 
     this.children = [];
     this.descendants = [];
-    this.channelListener = this.onChannelChange.bind(this);
     this.executers = [];
     constructProcessNode(this, channelNode, operator, substitution);
 };
 var ProcessNode = Xflow.ProcessNode;
 
-ProcessNode.prototype.onChannelChange = function(channel, state){
+ProcessNode.prototype.onXflowChannelChange = function(channel, state){
     if(state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE &&
         this.status > Xflow.PROCESS_STATE.UNPROCESSED)
         this.status = Xflow.PROCESS_STATE.UNPROCESSED;
@@ -38,7 +37,7 @@ ProcessNode.prototype.onChannelChange = function(channel, state){
 
 ProcessNode.prototype.clear = function(){
     for(var name in this.inputChannels){
-        this.inputChannels[name].removeListener(this.channelListener);
+        this.inputChannels[name].removeListener(this);
     }
 }
 
@@ -88,7 +87,7 @@ function synchronizeInputChannels(processNode, channelNode, dataNode, substituti
         var dataName = inputMapping.getScriptInputName(i, sourceName);
         if(dataName){
             var channel = channelNode.inputChannels.getChannel(dataName, substitution);
-            if(channel) channel.addListener(processNode.channelListener);
+            if(channel) channel.addListener(processNode);
             processNode.inputChannels[sourceName] = channel;
         }
     }
@@ -198,8 +197,6 @@ Xflow.RequestNode = function(channelNode, filter){
     this.channels = {};
     this.children = [];
 
-    this.channelListener = this.onChannelChange.bind(this);
-
     this.executers = [];
 
     this.outOfSync = true;
@@ -263,14 +260,14 @@ RequestNode.prototype.setStructureOutOfSync = function(){
         this.results[type].notifyChanged(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     }
     for(var name in this.channels){
-        this.channels[name].removeListener(this.channelListener);
+        this.channels[name].removeListener(this);
     }
     this.channels = [];
     this.children = [];
     this.executers = [];
 }
 
-RequestNode.prototype.onChannelChange = function(channel, state){
+RequestNode.prototype.onXflowChannelChange = function(channel, state){
     this.status = Xflow.PROCESS_STATE.MODIFIED;
     var notifyState = (state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA_VALUE
             : Xflow.RESULT_STATE.CHANGED_DATA_SIZE);
@@ -294,7 +291,7 @@ function synchronizeRequestChannels(requestNode, channelNode){
         var channel = channelNode.finalOutputChannels.getChannel(name);
         if(channel){
             requestNode.channels[name] = channel;
-            channel.addListener(requestNode.channelListener);
+            channel.addListener(requestNode);
         }
 
     }

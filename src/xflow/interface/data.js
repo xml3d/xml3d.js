@@ -580,7 +580,7 @@ function notifyListeners(dataEntry, notification){
         DataChangeNotifier._listeners[i](dataEntry, notification);
     }
     for(var i = 0; i < dataEntry._listeners.length; ++i){
-        dataEntry._listeners[i].notify(dataEntry, notification);
+        dataEntry._listeners[i](dataEntry, notification);
     }
 };
 })();

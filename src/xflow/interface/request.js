@@ -121,9 +121,7 @@ VertexShaderRequest.prototype.onResultChanged = function(result, notification){
 }
 
 function getVsConnectNode(dataNode, vsConfig){
-    var forwardNode ;
-    while(forwardNode = dataNode._getForwardNode())
-        dataNode = forwardNode;
+    var forwardNode = dataNode._getForwardNode();
 
     var key = getDataNodeShaderKey(dataNode, vsConfig);
     var connectNode;

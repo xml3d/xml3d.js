@@ -88,15 +88,15 @@ Object.defineProperty(VertexShaderResult.prototype, "shaderInputNames", {
     get: function(){ return this._outputNames; }
 });
 
-ComputeResult.prototype.getShaderInputData = function(name){
+VertexShaderResult.prototype.getShaderInputData = function(name){
     return this._dataEntries[name];
 };
 
-ComputeResult.prototype.isShaderInputUniform = function(name){
+VertexShaderResult.prototype.isShaderInputUniform = function(name){
     return this._uniform[name];
 }
 
-ComputeResult.prototype.getGLSLCode = function(){
+VertexShaderResult.prototype.getGLSLCode = function(){
     return this._glslCode;
 }
 

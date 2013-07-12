@@ -37,7 +37,6 @@
             code += "uniform " + (type == Xflow.SHADER_CONSTANT_KEY.OBJECT_ID ? 'float' : 'mat4')  +
                     " " + name + ";\n";
             Xflow.nameset.add(usedNames, name);
-            usedNames.push()
         }
         code += "\n";
 
@@ -87,9 +86,8 @@
             // Declare transfer output names
             for(var j = 0; j < operator.outputs.length; ++j){
                 if(!entry.isFinalOutput(j)){
-                    var name = getFreeName(operator.outputs[j].name);
+                    var name = getFreeName(operator.outputs[j].name, usedNames);
                     transferNames[entry.getTransferOutputId(j)] = name;
-                    Xflow.nameset.add(usedNames, name);
                     code += "\t" + getGLSLType(operator.outputs[j].type) + " " + name + ";\n";
                 }
             }
@@ -115,7 +113,6 @@
                 var key = codeFragment.substring(index+3,end);
                 if(!localNames[key]){
                     localNames[key] = getFreeName(key, usedNames);
-                    Xflow.nameset.add(usedNames, localNames[key]);
                 }
                 var replaceName = localNames[key];
                 codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
@@ -130,6 +127,45 @@
         code += "}\n";
 
         program._glslCode = code;
+    }
+
+    function getFreeName(name, usedNames){
+        var result = name, i = 1;
+        while(usedNames.indexOf(result) != -1){
+            result = name + "_" + (++i);
+        }
+        Xflow.nameset.add(usedNames, result);
+        return result;
+    }
+
+    function getMappingIndex(operator, name){
+        for(var i = 0; i < operator.mapping.length; ++i){
+            if(operator.mapping[i].name == name)
+                return i;
+        }
+        throw new Error("Invalid input name '" + name  + "' inside of code fragment" );
+    }
+
+    function getOutputIndex(operator, name){
+        for(var i = 0; i < operator.outputs.length; ++i){
+            if(operator.outputs[i].name == name)
+                return i;
+        }
+    }
+
+    function getGLSLType(xflowType){
+        switch(xflowType){
+            case Xflow.DATA_TYPE.BOOL : return 'bool';
+            case Xflow.DATA_TYPE.BYTE : return 'uint';
+            case Xflow.DATA_TYPE.FLOAT : return 'float';
+            case Xflow.DATA_TYPE.FLOAT2 : return 'vec2';
+            case Xflow.DATA_TYPE.FLOAT3 : return 'vec3';
+            case Xflow.DATA_TYPE.FLOAT4 : return 'vec4';
+            case Xflow.DATA_TYPE.FLOAT4X4 : return 'mat4';
+            case Xflow.DATA_TYPE.INT : return 'int';
+            case Xflow.DATA_TYPE.INT4 : return 'ivec4';
+        }
+        throw new Error("Type not supported for GLSL " + Xflow.getTypeName(xflowType) );
     }
 
 

@@ -96,8 +96,19 @@ module("Xflow tests", {
             var vsConfig = new this.win.Xflow.VSConfig();
 
             var connect = testNode.firstElementChild;
-            if (connect.nodeName == "VSConnection")
-                this.VSConnection(connect, vsConfig);
+            while (connect) {
+                if (connect.nodeName == "VSConnection")
+                    this.VSConnection(connect, vsConfig);
+                connect = connect.nextElementSibling;
+            };
+
+            var dataAdapter = dataElement._configured.adapters;
+            dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
+            var xflowNode = dataAdapter.getXflowNode();
+            var request = new Xflow.VertexShaderRequest(xflowNode, vsConfig);
+            var result = request.getResult();
+            var code = result.getGLSLCode();
+            ok(true, code);
         }
 
 
@@ -462,5 +473,11 @@ test("Prototypes - With Operators", function() {
     this.executeTests(response);
 });
 
+
+test("GLSL - With Operators", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_normal.xml", handler);
+    this.executeTests(response);
+});
 
 

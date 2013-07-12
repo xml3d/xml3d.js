@@ -18,7 +18,10 @@
             structureChanged : true,
             point: { length: 0, intensity: [], position: [], attenuation: [], visibility: [] },
             directional: { length: 0, intensity: [], direction: [], visibility: [] },
-            spot: { length: 0, intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
+            spot: { length: 0, intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] },
+            length: function() {
+                return this.point.length + this.directional.length + this.spot.length;
+            }
         };
         this.activeView = null;
 

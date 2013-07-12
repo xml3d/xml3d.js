@@ -86,6 +86,7 @@
 
         addChild: function(child) {
             this.children.push(child);
+            this.setBoundingBoxDirty();
         },
 
         removeChild: function(child) {
@@ -104,6 +105,10 @@
         },
 
         setTransformDirty: function() {
+            if (this.transformDirty) {
+                //We can be sure all child nodes are already set to transformDirty from here
+                return;
+            }
             this.transformDirty = true;
             this.children.forEach(function(obj) {
                 obj.setTransformDirty();

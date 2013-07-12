@@ -4,7 +4,8 @@
     var BoundingBox = function() {
         this.min = new Float32Array(3);
         this.max = new Float32Array(3);
-        this.vertices = null;
+        this.vertices = new Float32Array(8*3);
+        this.vertices.dirty = true;
         this.reset();
     };
 
@@ -50,12 +51,15 @@
 
     BoundingBox.prototype.makeAxisAligned = (function() {
         var absMat = XML3D.math.mat4.create();
+        var center = XML3D.math.vec3.create();
+        var extend = XML3D.math.vec3.create();
+
         return function(mat) {
             if (this.isEmpty())
                 return;
 
-            var center = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.add(XML3D.math.vec3.create(), this.min, this.max), 0.5);
-            var extend = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.subtract(XML3D.math.vec3.create(), this.max, this.min), 0.5);
+            XML3D.math.vec3.scale(center, XML3D.math.vec3.add(center, this.min, this.max), 0.5);
+            XML3D.math.vec3.scale(extend, XML3D.math.vec3.subtract(extend, this.max, this.min), 0.5);
 
             XML3D.math.mat4.copy(absMat, mat);
             absMat.set([0, 0, 0, 1], 12);
@@ -74,6 +78,7 @@
     BoundingBox.prototype.reset = function() {
         this.min[0] = Number.MAX_VALUE; this.min[1] = Number.MAX_VALUE; this.min[2] = Number.MAX_VALUE;
         this.max[0] = -Number.MAX_VALUE; this.max[1] = -Number.MAX_VALUE; this.max[2] = -Number.MAX_VALUE;
+        this.vertices.dirty = true;
     };
 
     BoundingBox.prototype.isEmpty = function() {
@@ -81,12 +86,13 @@
     };
 
     BoundingBox.prototype.getVertices = function() {
-        if (this.vertices) {
+        if (!this.vertices.dirty) {
             return this.vertices;
         }
-        var v = new Float32Array(8*3);
+        this.vertices.dirty = false;
         var min = this.min;
         var max = this.max;
+        var v = this.vertices;
 
         v.set(min, 0);
         v[3] = min[0]; v[4] = max[1]; v[5] = min[2];
@@ -96,7 +102,7 @@
         v[15] = min[0]; v[16] = max[1]; v[17] = max[2];
         v.set(max, 18);
         v[21] = max[0]; v[22] = min[1]; v[23] = max[2];
-        return this.vertices = v;
+        return this.vertices;
     };
 
     BoundingBox.prototype.getZMinMax = function(mat) {
@@ -112,19 +118,22 @@
         return {zMin : min, zMax : max};
     };
 
-    BoundingBox.prototype.applyTransform = function(mat) {
-        var v = this.getVertices();
-        var vec = new Float32Array(3);
-        for (var i=0; i < 24; i+=3) {
-            vec[0] = v[i];
-            vec[1] = v[i+1];
-            vec[2] = v[i+2];
-            XML3D.math.vec3.transformMat4(vec, vec, mat);
-            v.set(vec, i);
+    BoundingBox.prototype.applyTransform = (function() {
+        var vec = XML3D.math.vec3.create();
+
+        return function(mat) {
+            var v = this.getVertices();
+            for (var i=0; i < 24; i+=3) {
+                vec[0] = v[i];
+                vec[1] = v[i+1];
+                vec[2] = v[i+2];
+                XML3D.math.vec3.transformMat4(vec, vec, mat);
+                v.set(vec, i);
+            }
+            XML3D.math.vec3.transformMat4(this.min, this.min, mat);
+            XML3D.math.vec3.transformMat4(this.max, this.max, mat);
         }
-        XML3D.math.vec3.transformMat4(this.min, this.min, mat);
-        XML3D.math.vec3.transformMat4(this.max, this.max, mat);
-    };
+    })();
 
     BoundingBox.prototype.getLongestSide = function() {
         var x = Math.abs(this.max[0] - this.min[0]);

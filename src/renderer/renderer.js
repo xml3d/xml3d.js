@@ -530,17 +530,10 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     pickedObj.getModelViewProjectionMatrix(modelViewProjMat);
 
     var parameters = {
-<<<<<<< HEAD
         bbMin : this.bbMin,
         bbMax : this.bbMax,
-        modelMatrix : xform.model,
-        modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)
-=======
-    	min : this.bbMin,
-    	max : this.bbMax,
         modelMatrix : tmpModelMatrix,
         modelViewProjectionMatrix : modelViewProjMat
->>>>>>> Added RenderView nodes and adapted renderer
     };
 
     this.shaderManager.setUniformVariables(shader, parameters);

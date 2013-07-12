@@ -31,8 +31,6 @@
             var tmp_parent = XML3D.math.mat4.create();
 
             return function (source) {
-                var page = this.page;
-                var offset = this.offset;
                 XML3D.math.mat4.identity(tmp_mat4);
                 tmp_mat4[12] = this.position[0];
                 tmp_mat4[13] = this.position[1];
@@ -81,9 +79,10 @@
 
         getClippingPlanes: (function() {
             var t_mat = XML3D.math.mat4.create();
+            var bb = new XML3D.webgl.BoundingBox();
 
             return function() {
-                var bb = new XML3D.webgl.BoundingBox();
+                bb.reset();
                 this.scene.getBoundingBox(bb);
                 this.getViewMatrix(t_mat);
                 bb.applyTransform(t_mat);

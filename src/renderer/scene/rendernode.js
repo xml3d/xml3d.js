@@ -55,6 +55,9 @@
                 this.page[o] = source[i];
             }
             this.transformDirty = false;
+            if (this.setBoundingBoxDirty) {
+                this.setBoundingBoxDirty();
+            }
         },
 
         isVisible: function() {

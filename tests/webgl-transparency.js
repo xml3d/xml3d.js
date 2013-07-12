@@ -20,21 +20,21 @@ test("ProgramObject.hastransparency is set correctly", function() {
     var h = getHandler(xml3dElement);
     var shaderManager = h.renderer.shaderManager;
 
-    var shader = shaderManager.getShaderById(new XML3D.URI("#opaque").getAbsoluteURI(this.doc.documentURI));
+    var shader = shaderManager.getShaderByURL(new XML3D.URI("#opaque").getAbsoluteURI(this.doc.documentURI));
     ok(shader, "Found #opaque shader");
     if(shader) equal(shader.hasTransparency, false, "Opaque shader has no transparency set");
 
-    shader = shaderManager.getShaderById(new XML3D.URI("#non-opaque").getAbsoluteURI(this.doc.documentURI));
+    shader = shaderManager.getShaderByURL(new XML3D.URI("#non-opaque").getAbsoluteURI(this.doc.documentURI));
     ok(shader, "Found #non-opaque shader");
     if(shader) equal(shader.hasTransparency, true, "Non-Opaque shader has transparency set");
 
-    shader = shaderManager.getShaderById(new XML3D.URI("#matte").getAbsoluteURI(this.doc.documentURI));
+    shader = shaderManager.getShaderByURL(new XML3D.URI("#matte").getAbsoluteURI(this.doc.documentURI));
     ok(shader, "Found #matte shader");
     if(shader) equal(shader.hasTransparency, false, "Matte shader is always opaque");
 
     var transparencyAttribute = this.doc.getElementById("change_transparencyAttribute");
 
-    shader = shaderManager.getShaderById(new XML3D.URI("#change").getAbsoluteURI(this.doc.documentURI));
+    shader = shaderManager.getShaderByURL(new XML3D.URI("#change").getAbsoluteURI(this.doc.documentURI));
     ok(shader, "Found #change shader");
     if(shader){
         equal(shader.hasTransparency, false, "Initially opaque");

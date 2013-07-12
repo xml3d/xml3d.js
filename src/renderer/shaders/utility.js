@@ -54,7 +54,6 @@ XML3D.shaders.register("pickedNormals", {
     vertex : [
         "attribute vec3 position;",
         "attribute vec3 normal;",
-        "uniform mat4 modelViewMatrix;",
         "uniform mat4 modelViewProjectionMatrix;",
         "uniform mat3 normalMatrix;",
 

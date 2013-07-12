@@ -17,12 +17,15 @@
       <transform id="t_rotation3" rotation="0 0 1 1.57079632679489"/>
       <transform id="t_scale" scale="1 2 3"/>
       <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708"  translation="1 2 3"/>
+      <lightshader id="basic_point" script="urn:xml3d:lightshader:point">
+
+      </lightshader>
     </defs>
     <group id="viewParent">
         <view id="myView" fieldOfView="0.5"/>
     </group>
     <group id="lightParent">
-        <light id="myLight"/>
+        <light id="myLight" shader="#basic_point"/>
     </group>
     <group id="myGroup" visible="false">
         <mesh id="myMesh01" type="lines" onclick="alert('Hallo');"/>

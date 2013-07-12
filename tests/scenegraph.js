@@ -145,7 +145,7 @@ module("Bounding Boxes", {
     teardown : function() {
         var v = document.getElementById("xml3dframe");
         v.removeEventListener("load", this.cb, true);
-    },
+    }
 });
 
 
@@ -182,6 +182,22 @@ test("Groups and Meshes", 16, function() {
     QUnit.closeBox(splitCubeBox1, new XML3DBox(new XML3DVec3(0, -1, -1),new XML3DVec3(1, 1, 1)), EPSILON, "Split part 1");
     QUnit.closeBox(splitCubeBox2, new XML3DBox(new XML3DVec3(-1, -1, -1),new XML3DVec3(0, 1, 1)), EPSILON, "Split part 2");
 
+});
+
+test("Hidden groups", 5, function() {
+    var root = this.doc.getElementById("g_Root").getBoundingBox();
+    root.visible = false;
+    var group = this.doc.getElementById("g_PartiallyHidden");
+    group.visible = true;
+
+    var boundingBox = group.getBoundingBox();
+    QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(2,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Hidden child group: (2 1.5 -1) to (4 3.5 1)");
+    this.doc.getElementById("invisible_cube").visible = true;
+    boundingBox = group.getBoundingBox();
+    QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(-4,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Visible child group: (-4 1.5 -1) to (4 3.5 1)");
+    this.doc.getElementById("invisible_mesh").visible = false;
+    boundingBox = group.getBoundingBox();
+    QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(2,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Hidden child mesh: (2 1.5 -1) to (4 3.5 1)");
 });
 
 test("Dynamically added mesh", function() {
@@ -275,7 +291,7 @@ module("getWorldMatrix() Tests", {
 
         parGrp.setAttribute("transform", "#t_mixed");
         QUnit.closeMatrix(node.getWorldMatrix(), this.matMixed, EPSILON, "parent='#t_mixed'");
-    },
+    }
 });
 
 test("group's getWorldMatrix()", function() {

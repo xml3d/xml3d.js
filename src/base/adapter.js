@@ -151,6 +151,20 @@
             this.factory.aspect, this.factory.canvasId, type);
     };
 
+    /**
+     * Depth-first traversal over element hierarchy
+     * @param {function(NodeAdapter)} callback
+     */
+    XML3D.base.NodeAdapter.prototype.traverse = function(callback) {
+        callback(this);
+        var child = this.node.firstElementChild;
+        while (child) {
+            var adapter = this.factory.getAdapter(child);
+            adapter.traverse(callback);
+            child = child.nextElementSibling;
+        }
+    }
+
 
     /**
      * @interface

@@ -44,9 +44,9 @@ test("Initialization: entries in lights.spot check", 11, function() {
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
 
-    ok(h.renderer.lights.spot!=null, "Test for spotlight data existence");
+    ok(h.renderer.scene.lights.spot!=null, "Test for spotlight data existence");
 
-    sl = h.renderer.lights.spot;
+    sl = h.renderer.scene.lights.spot;
     ok(sl.length==1, "Test light count");
 
     deepEqual(sl.intensity, array2floatArray2array([10, 10, 10]), "Test light intensity entry");
@@ -114,7 +114,7 @@ test("Change of light shader parameters check against lights.spot", 6, function(
     h = getHandler(x);
 
     var ls_Spot = this.doc.getElementById("ls_Spot");
-    sl = h.renderer.lights.spot;
+    sl = h.renderer.scene.lights.spot;
 
     getChildNodeByName(ls_Spot, "softness").textContent = "0.2";
     deepEqual(sl.softness, array2floatArray2array([0.2]), "Test beamWidth entry change");
@@ -137,7 +137,7 @@ test("Change in transformation hierarchy check against lights.spot", 4, function
     h = getHandler(x);
 
     var t_Lamp = this.doc.getElementById("t_Lamp");
-    sl = h.renderer.lights.spot
+    sl = h.renderer.scene.lights.spot
 
     t_Lamp.setAttribute("translation", "0 0 3");
     deepEqual(sl.position, array2floatArray2array([0, 0, 3]), "Test position entry change");

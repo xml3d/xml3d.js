@@ -3,6 +3,8 @@
 (function() {
 
 XML3D.webgl.renderers = [];
+var c_tmpVec4 = XML3D.math.vec4.create();
+
 
 /**
  * Constructor for the Renderer.
@@ -21,12 +23,11 @@ var Renderer = function(handler, context, dimensions) {
 
     this.setGlobalGLStates();
 
-    this.currentView = null;
     this.xml3dNode = handler.xml3dElem;
     this.width = dimensions.width;
     this.height = dimensions.height;
 
-    this.renderObjects = new XML3D.webgl.RenderObjectHandler();
+    this.scene = new XML3D.webgl.Scene();
 
     this.initialize();
 };
@@ -42,23 +43,13 @@ Renderer.prototype.initialize = function() {
 };
 
 Renderer.prototype.initializeScenegraph = function() {
-    this.lights = {
-        changed : true,
-        structureChanged : true,
-        point: { length: 0, adapter: [], intensity: [], position: [], attenuation: [], visibility: [] },
-        directional: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [] },
-            spot: { length: 0, adapter: [], intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] }
-    };
-    this.recursiveBuildScene(this.xml3dNode, this.renderObjects.queue, null);
-    if (this.lights.length < 1) {
+    this.recursiveBuildScene(this.xml3dNode, this.scene.queue);
+    this.scene.rootNode.setVisible(true);
+    if (this.scene.lights.length() < 1) {
         XML3D.debug.logWarning("No lights were found. The scene will be rendered without lighting!");
     }
 };
 
-
-/**
- *
- */
 Renderer.prototype.setGlobalGLStates = function() {
     var gl = this.gl;
 
@@ -71,87 +62,20 @@ Renderer.prototype.setGlobalGLStates = function() {
 
 Renderer.prototype.getAdapter = function(node){
     return XML3D.base.resourceManager.getAdapter(node, XML3D.webgl, this.handler.id);
-}
+};
 
 Renderer.prototype.initCamera = function() {
     var av = XML3D.util.getOrCreateActiveView(this.xml3dNode);
-
-    this.currentView = av;
-    return this.getAdapter(av);
+    var adapter = this.getAdapter(av);
+    this.scene.activeView = adapter.getRenderNode();
+    return this.scene.activeView;
 };
 
-var TraversalState = function(parent) {
-    parent = parent || {};
-    this.visible = parent.visible !== undefined ? parent.visible : true;
-    this.pickable = parent.pickable !== undefined ? parent.visible : true;
-    this.transform = parent.transform ? XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform) : XML3D.math.mat4.identity(XML3D.math.mat4.create());
-    this.shader = parent.shader || null;
-};
-
-Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray, parent) {
+Renderer.prototype.recursiveBuildScene = function(currentNode, renderObjectArray) {
     var adapter = this.getAdapter(currentNode);
-
-    parent = parent || new TraversalState();
-    var downstream = new TraversalState(parent);
-
-    switch(currentNode.nodeName.toLowerCase()) {
-    case "group":
-        adapter.parentVisible = parent.visible;
-        adapter.parentTransform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
-        adapter.parentShaderHandle = parent.shader;
-
-        downstream.visible = parent.visible && currentNode.visible;
-        if (currentNode.onmouseover || currentNode.onmouseout)
-            this.handler.setMouseMovePicking(true);
-
-        var shaderHandle = adapter.getShaderHandle();
-        if (shaderHandle)
-            downstream.shader = shaderHandle;
-
-        downstream.transform = adapter.applyTransformMatrix(XML3D.math.mat4.identity(XML3D.math.mat4.create()));
-        break;
-
-    case "mesh":
-        adapter.parentVisible = parent.visible;
-
-        if (currentNode.onmouseover || currentNode.onmouseout)
-            this.handler.setMouseMovePicking(true);
-
-        var meshAdapter = this.getAdapter(currentNode);
-        if (!meshAdapter)
-            break; //TODO: error handling
-
-        adapter.setShaderHandle(parent.shader);
-
-        // Add a new RenderObject to the scene
-        var newObject = new XML3D.webgl.RenderObject({
-            handler: this.renderObjects,
-            meshAdapter : adapter,
-            visible: parent.visible && currentNode.visible,
-            transform: parent.transform,
-            pickable: parent.pickable
-        });
-        renderObjectArray.push(newObject);
-        break;
-
-    case "light":
-        adapter.transform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
-        adapter.visible = parent.visible && currentNode.visible;
-		adapter.addLight(this.lights);
-
-        break;
-
-    case "view":
-        adapter.parentTransform = XML3D.math.mat4.copy(XML3D.math.mat4.create(), parent.transform);
-        adapter.updateViewMatrix();
-        break;
-    default:
-        break;
-    }
-
     var child = currentNode.firstElementChild;
     while (child) {
-        this.recursiveBuildScene(child, renderObjectArray, downstream);
+        this.recursiveBuildScene(child, renderObjectArray);
         child = child.nextElementSibling;
     }
 };
@@ -168,7 +92,7 @@ Renderer.prototype.initFrameBuffers = function(gl) {
 };
 
 Renderer.prototype.recompileShader = function(shaderAdapter) {
-    this.shaderManager.recompileShader(shaderAdapter, this.lights);
+    this.shaderManager.recompileShader(shaderAdapter, this.scene.lights);
     this.handler.redraw("A shader was recompiled");
 };
 
@@ -182,11 +106,11 @@ Renderer.prototype.recompileShader = function(shaderAdapter) {
  * @return
  */
 Renderer.prototype.changeLightData = function(lightType, field, offset, newValue) {
-    var data = this.lights[lightType][field];
+    var data = this.scene.lights[lightType][field];
     if (!data) return;
     if(field=="falloffAngle" || field=="softness") offset/=3; //some parameters are scalar
     Array.set(data, offset, newValue);
-    this.lights.changed = true;
+    this.scene.lights.changed = true;
 };
 
 /**
@@ -194,19 +118,16 @@ Renderer.prototype.changeLightData = function(lightType, field, offset, newValue
  **/
 Renderer.prototype.setGLContext = function(gl) {
     this.shaderManager.setGLContext(gl);
-    this.meshManager.setGLContext(gl);
 };
 
 Renderer.prototype.resizeCanvas = function (width, height) {
     this.width = width;
     this.height = height;
-	this.fbos = this.initFrameBuffers(this.gl);
-    this.camera && (this.camera.projMatrix = null);
+    this.fbos = this.initFrameBuffers(this.gl);
+    this.camera && (this.camera.setTransformDirty());
 };
 
 Renderer.prototype.activeViewChanged = function () {
-    this._projMatrix = null;
-    this._viewMatrix = null;
     this.camera = this.initCamera();
     this.requestRedraw("Active view changed", true);
 };
@@ -216,34 +137,7 @@ Renderer.prototype.requestRedraw = function(reason, forcePickingRedraw) {
 };
 
 Renderer.prototype.sceneTreeAddition = function(evt) {
-    var target = evt.wrapped.target;
-    var adapter = this.getAdapter(target);
-
-    //If no adapter is found the added node must be a text node, or something else
-    //we're not interested in
-    if (!adapter)
-        return;
-
-    var shaderHandle = adapter.getShaderHandle ? adapter.getShaderHandle() : null;
-    if(adapter.updateTransformAdapter)
-        adapter.updateTransformAdapter();
-
-    var visible = target.visible;
-
-    var parentNode = target.parentElement;
-    var parentTransform = XML3D.math.mat4.identity(XML3D.math.mat4.create());
-    if(parentNode && parentNode.nodeName.toLowerCase() == "group")
-    {
-        var parentAdapter = this.getAdapter(parentNode);
-        parentTransform = parentAdapter.applyTransformMatrix(parentTransform);
-        if (!shaderHandle)
-    		shaderHandle = parentAdapter.getShaderHandle();
-		visible = parentNode.visible && parentAdapter.parentVisible;
-    }
-
-    //Build any new objects and add them to the scene
-    var state = new TraversalState({ visible: visible, pickable: true, transform: parentTransform, shader: shaderHandle });
-    this.recursiveBuildScene(evt.wrapped.target, this.renderObjects.queue, state);
+    this.recursiveBuildScene(evt.wrapped.target, this.scene.queue);
     this.requestRedraw("A node was added.");
 };
 
@@ -257,18 +151,20 @@ Renderer.prototype.sceneTreeRemoval = function (evt) {
 };
 
 Renderer.prototype.prepareRendering = function() {
-    var renderObjects = this.renderObjects;
-    renderObjects.updateLights(this.lights, this.shaderManager);
-    renderObjects.consolidate();
+    var scene = this.scene;
+    scene.updateLights(this.scene.lights, this.shaderManager);
+    scene.consolidate();
 };
 
+
+var c_viewMat_tmp = XML3D.math.mat4.create();
+var c_projMat_tmp = XML3D.math.mat4.create();
 /**
  *
  * @returns {Array}
  */
-Renderer.prototype.render = function() {
+Renderer.prototype.renderToCanvas = function() {
     var gl = this.gl;
-	var sp = null;
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
     gl.viewport(0, 0, this.width, this.height);
@@ -278,59 +174,54 @@ Renderer.prototype.render = function() {
     if (!this.camera)
         return [0, 0];
 
-    var xform = {};
-    xform.view = this.camera.viewMatrix;
-    xform.proj = this.camera.getProjectionMatrix(this.width / this.height);
+    var camera = {};
+    this.camera.getViewMatrix(c_viewMat_tmp);
+    camera.view = c_viewMat_tmp;
+
+    this.scene.ready.forEach( function(obj) {
+        obj.updateModelViewMatrix(camera.view);
+        obj.updateNormalMatrix();
+    });
+
+    this.scene.updateBoundingBox();
+    this.camera.getProjectionMatrix(c_projMat_tmp, this.width / this.height);
+    camera.proj = c_projMat_tmp;
+
+    this.scene.ready.forEach( function(obj) {
+        obj.updateModelViewProjectionMatrix(camera.proj);
+    });
 
     var stats = { objCount : 0, triCount : 0 };
-	// Update mesh objects
-	var objects = this.renderObjects.ready;
-	for (var i = 0, l = objects.length; i < l; i++)
-    {
-	    var o = objects[i];
-	    o && o.mesh && o.mesh.update();
-    }
+
     //Sort objects by shader/transparency
-    var opaqueObjects = {};
+    var opaqueObjects = [];
     var transparentObjects = [];
-    this.sortObjects(objects, opaqueObjects, transparentObjects, xform);
+    this.sortObjects(this.scene.ready, this.scene.firstOpaqueIndex, opaqueObjects, transparentObjects);
 
     //Render opaque objects
     for (var shaderName in opaqueObjects) {
-        var objectArray = opaqueObjects[shaderName];
-		this.drawObjects(objectArray, shaderName, xform, this.lights, stats);
+        this.renderObjectsToActiveBuffer(opaqueObjects[shaderName], shaderName, this.scene.lights, { transparent: false, stats: stats });
     }
 
-	if (transparentObjects.length > 0) {
-        //Render transparent objects
-        //gl.depthMask(gl.FALSE);
-        gl.enable(gl.BLEND);
-		gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        for (var k=0; k < transparentObjects.length; k++) {
-            var objectArray = [transparentObjects[k]];
-			this.drawObjects(objectArray, objectArray[0].shader, xform, this.lights, stats);
-        }
-        gl.disable(gl.BLEND);
-        //gl.depthMask(gl.TRUE);
+    //Render transparent objects
+    for (var k=0; k < transparentObjects.length; k++) {
+        var objectArray = [transparentObjects[k]];
+        this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, this.scene.lights, { transparent: true, stats: stats });
     }
-
-	this.lights.changed = false;
-
+    this.scene.lights.changed = false;
     return [stats.objCount, stats.triCount];
 };
 
-Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent, xform) {
+
+Renderer.prototype.sortObjects = function(sourceObjectArray, firstOpaque, opaque, transparent) {
     var tempArray = [];
     for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
         var obj = sourceObjectArray[i];
-        var shaderName = obj.shader;
-        var shader = this.shaderManager.getShaderById(shaderName);
-
-        if (shader.hasTransparency) {
+        if(i < firstOpaque) {
             tempArray.push(obj);
         } else {
-            opaque[shaderName] = opaque[shaderName] || [];
-            opaque[shaderName].push(obj);
+            opaque[obj.shader.url] = opaque[obj.shader.url] || [];
+            opaque[obj.shader.url].push(obj);
         }
     }
 
@@ -339,10 +230,12 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
     if (tlength > 1) {
         for (i = 0; i < tlength; i++) {
             var obj = tempArray[i];
-            var trafo = obj.transform;
-            var center = obj.mesh.bbox.center()._data;
-            center = XML3D.math.vec4.transformMat4(XML3D.math.vec4.create(), [center[0], center[1], center[2], 1.0], trafo);
-            center = XML3D.math.vec4.transformMat4(XML3D.math.vec4.create(), [center[0], center[1], center[2], 1.0], xform.view);
+            obj.getWorldMatrix(tmpModelMatrix);
+            XML3D.math.vec3.set(obj.mesh.bbox.center()._data, c_tmpVec4);
+            c_tmpVec4[3] = 1.0;
+            XML3D.math.vec4.transformMat4(c_tmpVec4, c_tmpVec4, tmpModelMatrix);
+            c_tmpVec4[3] = 1.0;
+            var center = XML3D.math.vec4.transformMat4(c_tmpVec4, c_tmpVec4, tmpModelMatrix);
             tempArray[i] = [ obj, center[2] ];
         }
 
@@ -356,22 +249,33 @@ Renderer.prototype.sortObjects = function(sourceObjectArray, opaque, transparent
     } else if (tlength == 1) {
         transparent[0] = tempArray[0];
     }
-
+    //console.log("Sorted: " + transparent.length);
 };
 
+var tmpModelMatrix = XML3D.math.mat4.create();
 var tmpModelView = XML3D.math.mat4.create();
 var tmpModelViewProjection = XML3D.math.mat4.create();
-var identMat3 = XML3D.math.mat3.identity(XML3D.math.mat3.create());
-var identMat4 = XML3D.math.mat4.identity(XML3D.math.mat4.create());
+var tmpNormalMatrix = XML3D.math.mat3.create();
 
-
-Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, stats) {
+Renderer.prototype.renderObjectsToActiveBuffer = function(objectArray, shaderId, lights, opts) {
     var objCount = 0;
     var triCount = 0;
     var parameters = {};
+    var stats = opts.stats || {};
+    var transparent = opts.transparent === true || false;
+    var gl = this.gl;
 
-    shaderId = shaderId || objectArray[0].shader || "defaultShader";
-    var shader = this.shaderManager.getShaderById(shaderId);
+    if (objectArray.length == 0) {
+        return;
+    }
+
+    if (transparent) {
+        gl.enable(gl.BLEND);
+        gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    }
+
+    // At this point, we have to gurantee (via FSM), that the RenderObject has a valid shader
+    var shader = objectArray[0].shader.program;
 
     if(shader.needsLights || lights.changed) {
         parameters["pointLightPosition"] = lights.point.position;
@@ -401,9 +305,13 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
 
     this.shaderManager.bindShader(shader);
     this.shaderManager.updateActiveShader(shader);
+    this.camera.getViewMatrix(c_viewMat_tmp);
+    this.camera.getProjectionMatrix(c_projMat_tmp, this.width / this.height);
 
-    parameters["viewMatrix"] = this.camera.viewMatrix;
+    parameters["viewMatrix"] = c_viewMat_tmp;
+    parameters["projectionMatrix"] = c_projMat_tmp;
     parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
+    parameters["screenWidth"] = this.width;
 
     //Set global data that is shared between all objects using this shader
     this.shaderManager.setUniformVariables(shader, parameters);
@@ -411,28 +319,26 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
 
     for (var i = 0, n = objectArray.length; i < n; i++) {
         var obj = objectArray[i];
-        var transform = obj.transform;
-        var mesh = obj.mesh;
-
-		if (!mesh || !mesh.valid || !obj.visible)
+        if (!obj.isVisible())
             continue;
 
-        xform.model = transform;
-        xform.modelView = XML3D.math.mat4.multiply(tmpModelView, this.camera.viewMatrix, xform.model);
-        parameters["modelMatrix"] = xform.model;
-        parameters["modelViewMatrix"] = xform.modelView;
-        parameters["modelViewProjectionMatrix"] = XML3D.math.mat4.multiply(tmpModelViewProjection, this.camera.projMatrix, xform.modelView);
-        parameters["projectionMatrix"] = this.camera.projMatrix;
-        parameters["screenWidth"] = this.width;
-        var normalMatrix = XML3D.math.mat4.invert(XML3D.math.mat4.create(), xform.modelView);
-        normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : identMat4;
-        parameters["normalMatrix"] = XML3D.math.mat3.copy(XML3D.math.mat3.create(),
-          [normalMatrix[0], normalMatrix[1], normalMatrix[2],
-          normalMatrix[4], normalMatrix[5], normalMatrix[6],
-          normalMatrix[8], normalMatrix[9], normalMatrix[10]]);
+        var mesh = obj.mesh;
+        XML3D.debug.assert(mesh && mesh.valid, "Mesh has to be valid at his point.");
+
+        obj.getWorldMatrix(tmpModelMatrix);
+        parameters["modelMatrix"] = tmpModelMatrix;
+
+        obj.getModelViewMatrix(tmpModelView);
+        parameters["modelViewMatrix"] = tmpModelView;
+
+        obj.getModelViewProjectionMatrix(tmpModelViewProjection);
+        parameters["modelViewProjectionMatrix"] = tmpModelViewProjection;
+
+        obj.getNormalMatrix(tmpNormalMatrix);
+        parameters["normalMatrix"] = tmpNormalMatrix;
 
         this.shaderManager.setUniformVariables(shader, parameters);
-        if(obj.override !== null) { // TODO: Set back to default after rendering
+        if(obj.override !== null) {
             this.shaderManager.setUniformVariables(shader, obj.override);
         }
 
@@ -440,7 +346,10 @@ Renderer.prototype.drawObjects = function(objectArray, shaderId, xform, lights, 
         objCount++;
 
         if(obj.override !== null) {
-            this.shaderManager.resetUniformVariables(obj.shaderAdapter, shader, Object.keys(obj.override));
+            this.shaderManager.resetUniformVariables(obj.parent.getShaderHandle(), shader, Object.keys(obj.override));
+        }
+        if (transparent) {
+            gl.disable(gl.BLEND);
         }
 
     }
@@ -539,61 +448,60 @@ Renderer.prototype.drawObject = function(shader, meshInfo) {
  * Render the scene using the picking shader.
  * Modifies current picking buffer.
  */
-Renderer.prototype.renderSceneToPickingBuffer = function() {
-    var gl = this.gl;
-    var fbo = this.fbos.picking;
+Renderer.prototype.renderSceneToPickingBuffer = (function () {
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
+    var c_mvp = XML3D.math.mat4.create();
 
-    gl.enable(gl.DEPTH_TEST);
-    gl.disable(gl.CULL_FACE);
-    gl.disable(gl.BLEND);
+    return function () {
+        var gl = this.gl;
+        var fbo = this.fbos.picking;
 
-    gl.viewport(0, 0, fbo.width, fbo.height);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
 
-    var viewMatrix = this.camera.viewMatrix;
-    var projMatrix = this.camera.getProjectionMatrix(fbo.width / fbo.height);
-    var mvp = XML3D.math.mat4.create();
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
 
-    var shader = this.shaderManager.getShaderById("pickobjectid");
-    this.shaderManager.bindShader(shader);
-    var objects = this.renderObjects.ready;
+        gl.viewport(0, 0, fbo.width, fbo.height);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
-    for ( var j = 0, n = objects.length; j < n; j++) {
-        var obj = objects[j];
-        var transform = obj.transform;
-        var mesh = obj.mesh;
+        var shader = this.shaderManager.getShaderByURL("pickobjectid");
+        this.shaderManager.bindShader(shader);
+        var objects = this.scene.ready;
 
-        if (!mesh.valid  || !obj.visible)
-            continue;
+        for (var j = 0, n = objects.length; j < n; j++) {
+            var obj = objects[j];
+            var mesh = obj.mesh;
 
-        var parameters = {};
+            if (!mesh.valid || !obj.visible)
+                continue;
 
-        XML3D.math.mat4.multiply(mvp, viewMatrix, transform);
-        XML3D.math.mat4.multiply(mvp, projMatrix, mvp);
+            var parameters = {};
 
-        var objId = j+1;
-        var c1 = objId & 255;
-        objId = objId >> 8;
-        var c2 = objId & 255;
-        objId = objId >> 8;
-        var c3 = objId & 255;
+            obj.getModelViewProjectionMatrix(c_mvp);
 
-        parameters.id = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
-        parameters.modelViewProjectionMatrix = mvp;
+            var objId = j + 1;
+            var c1 = objId & 255;
+            objId = objId >> 8;
+            var c2 = objId & 255;
+            objId = objId >> 8;
+            var c3 = objId & 255;
 
-        this.shaderManager.setUniformVariables(shader, parameters);
-        this.drawObject(shader, mesh);
-    }
-    this.shaderManager.unbindShader(shader);
+            parameters.id = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
+            parameters.modelViewProjectionMatrix = c_mvp;
 
-    gl.disable(gl.DEPTH_TEST);
+            this.shaderManager.setUniformVariables(shader, parameters);
+            this.drawObject(shader, mesh);
+        }
+        this.shaderManager.unbindShader(shader);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-};
+        gl.disable(gl.DEPTH_TEST);
 
-/**
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    };
+}());
+
+    /**
  * Render the picked object using the normal picking shader
  *
  * @param {Object} pickedObj
@@ -608,22 +516,24 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
     gl.disable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
 
-    this.bbMax = new window.XML3DVec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE)._data;
-    this.bbMin = new window.XML3DVec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE)._data;
-    XML3D.webgl.adjustMinMax(pickedObj.mesh.bbox, this.bbMin, this.bbMax, pickedObj.transform);
+    pickedObj.getWorldMatrix(tmpModelMatrix);
+    this.bbMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
+    this.bbMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+    var objBB = new XML3D.webgl.BoundingBox();
+    pickedObj.getObjectSpaceBoundingBox(objBB.min, objBB.max);
+    XML3D.webgl.adjustMinMax(objBB, this.bbMin, this.bbMax, tmpModelMatrix);
 
-    var shader = this.shaderManager.getShaderById("pickedposition");
+    var shader = this.shaderManager.getShaderByURL("pickedposition");
     this.shaderManager.bindShader(shader);
 
-    var xform = {};
-    xform.model = pickedObj.transform;
-    xform.modelView = this.camera.getModelViewMatrix(xform.model);
+    var modelViewProjMat = XML3D.math.mat4.create();
+    pickedObj.getModelViewProjectionMatrix(modelViewProjMat);
 
     var parameters = {
         bbMin : this.bbMin,
         bbMax : this.bbMax,
-        modelMatrix : xform.model,
-        modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView)
+        modelMatrix : tmpModelMatrix,
+        modelViewProjectionMatrix : modelViewProjMat
     };
 
     this.shaderManager.setUniformVariables(shader, parameters);
@@ -643,44 +553,48 @@ Renderer.prototype.renderPickedPosition = function(pickedObj) {
  * @param screenY
  * @return
  */
-Renderer.prototype.renderPickedNormals = function(pickedObj) {
-    var gl = this.gl;
+Renderer.prototype.renderPickedNormals = (function () {
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbos.vectorPicking.handle);
+    var c_mvp = XML3D.math.mat4.create();
+    var c_world = XML3D.math.mat4.create();
+    var c_normalMatrix3 = XML3D.math.mat3.create();
 
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-    gl.disable(gl.CULL_FACE);
-    gl.disable(gl.BLEND);
+    return function (pickedObj) {
+        var gl = this.gl;
+        var fbo = this.fbos.vectorPicking;
 
-    var transform = pickedObj.transform;
-    var mesh = pickedObj.mesh;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.handle);
 
-    var shader = this.shaderManager.getShaderById("pickedNormals");
-    this.shaderManager.bindShader(shader);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
 
-    var xform = {};
-    xform.model = transform;
-    xform.modelView = this.camera.getModelViewMatrix(xform.model);
+        pickedObj.getModelViewProjectionMatrix(c_mvp);
+        pickedObj.getWorldMatrix(c_world);
 
-    var normalMatrix = XML3D.math.mat4.invert(XML3D.math.mat4.create(), transform);
-    normalMatrix = XML3D.math.mat3.copy(XML3D.math.mat3.create(),
-      [normalMatrix[0], normalMatrix[1], normalMatrix[2],
-      normalMatrix[4], normalMatrix[5], normalMatrix[6],
-      normalMatrix[8], normalMatrix[9], normalMatrix[10]]);
+        if(XML3D.math.mat4.invert(c_world, c_world)) {
+            XML3D.math.mat3.fromMat4(c_normalMatrix3, c_world);
+            XML3D.math.mat3.transpose(c_normalMatrix3,c_normalMatrix3);
+        } else {
+            XML3D.math.mat3.identity(c_normalMatrix3);
+        }
 
-    var parameters = {
-        modelViewMatrix : transform,
-        modelViewProjectionMatrix : this.camera.getModelViewProjectionMatrix(xform.modelView),
-        normalMatrix : normalMatrix ? XML3D.math.mat3.transpose(normalMatrix, normalMatrix) : identMat3
-    };
+        var shader = this.shaderManager.getShaderByURL("pickedNormals");
+        this.shaderManager.bindShader(shader);
 
-    this.shaderManager.setUniformVariables(shader, parameters);
-    this.drawObject(shader, mesh);
+        var parameters = {
+            modelViewProjectionMatrix: c_mvp,
+            normalMatrix: c_normalMatrix3
+        };
 
-    this.shaderManager.unbindShader(shader);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-};
+        this.shaderManager.setUniformVariables(shader, parameters);
+        this.drawObject(shader, pickedObj.mesh);
+
+        this.shaderManager.unbindShader(shader);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+}());
 
 var pickVector = XML3D.math.vec3.create();
 var data = new Uint8Array(8);
@@ -703,7 +617,7 @@ Renderer.prototype.getRenderObjectFromPickingBuffer = function(screenX, screenY)
     var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
     if (objId > 0) {
-        var pickedObj = this.renderObjects.ready[objId - 1];
+        var pickedObj = this.scene.ready[objId - 1];
         result = pickedObj;
     }
     return result;
@@ -789,7 +703,7 @@ Renderer.prototype.readPositionFromPickingBuffer = function(glX, glY){
  * @return
  */
 Renderer.prototype.dispose = function() {
-    this.renderObjects.clear();
+    this.scene.clear();
 };
 
 /**

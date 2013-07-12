@@ -40,6 +40,7 @@
         config.wrapT = clampToGL(node.wrapT);
         config.minFilter = filterToGL(node.filterMin);
         config.magFilter = filterToGL(node.filterMin);
+        config.textureType = Xflow.TEX_TYPE.TEXTURE_2D;
 
         var imageAdapter = this.factory.getAdapter(this.node.firstElementChild, XML3D.data.XML3DDataAdapterFactory.prototype);
         if(imageAdapter) {

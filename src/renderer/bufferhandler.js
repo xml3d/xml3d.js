@@ -78,6 +78,7 @@ XML3D.webgl.XML3DBufferHandler.prototype.createFrameBuffer = function(width, hei
             colorTarget.isTexture = false;
         } else {
             //opt.generateMipmap = opt.generateColorsMipmap;
+            // TODO: Use GLTexture
             var ctex = this.shaderManager.createTex2DFromData(colorFormat, width, height, gl.RGBA,
                     gl.UNSIGNED_BYTE, null, options);
 

@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
 
     /***************************************************************************
      * Class XML3D.webgl.XML3DShaderManager
@@ -8,36 +8,6 @@
      * including internal shaders (eg. picking shader).
      *
      **************************************************************************/
-    var TEXTURE_STATE = {
-        INVALID : -1,
-        UNLOADED : 0,
-        LOADED : 1,
-        VALID : 2
-    };
-
-    var TextureInfo = function(handle, opt) {
-        opt = opt || {};
-        this.handle = handle;
-        this.status = opt.status || TEXTURE_STATE.INVALID;
-        this.onload = opt.onload;
-        this.unit = opt.unit || 0;
-        this.image = opt.image || null;
-        this.config = opt.config || null;
-        this.canvas = opt.canvas || null;
-        this.context = opt.context || null; // canvas context
-    };
-
-    TextureInfo.prototype.setLoaded = function() {
-        if (this.status != TEXTURE_STATE.UNLOADED)
-            XML3D.debug.logError("Trying to set Texture with state " + this.status + " to 'loaded'");
-        this.status = TEXTURE_STATE.LOADED;
-        if (this.onload)
-            this.onload.call(this);
-    };
-
-    var InvalidTexture = function() {
-        this.status = TEXTURE_STATE.INVALID;
-    };
 
     /**
      * @constructor
@@ -102,6 +72,11 @@
         return fragment + "\n" + source;
     };
 
+    XML3DShaderManager.prototype.removeAllShaders = function() {
+        this.shaders = [];
+        this.createDefaultShaders();
+    };
+
     XML3DShaderManager.prototype.createDefaultShaders = function() {
         this.createFallbackShader();
         this.createPickingShader();
@@ -144,25 +119,26 @@
      *
      * @param shaderAdapter
      * @param lights
-     * @returns {string}
+     * @returns {Object}
      */
     XML3DShaderManager.prototype.createShader = function(shaderAdapter, lights) {
         if (!shaderAdapter || !shaderAdapter.node.script) {
-            return "defaultShader";
+            return { url: "defaultShader", program: this.shaders["defaultShader"]  };
         }
 
         var shaderNode = shaderAdapter.node;
         var uri = new XML3D.URI("#" + shaderNode.id);
-        var shaderId = uri.getAbsoluteURI(shaderNode.ownerDocument.documentURI).toString();
+        var shaderURL = uri.getAbsoluteURI(shaderNode.ownerDocument.documentURI).toString();
 
-        var program = this.shaders[shaderId];
+        var program = this.shaders[shaderURL];
 
-        if (program && !lights.structureChanged)
-            return shaderId;
+        if (program) {
+            return { url: shaderURL, program: program };
+        }
 
         var scriptURI = new XML3D.URI(shaderNode.script);
         if (scriptURI.scheme != "urn") {
-            return "defaultShader";
+            return { url: "defaultShader", program: this.shaders["defaultShader"]  };
         }
 
         var descriptor = XML3DShaderManager.getShaderDescriptor(scriptURI.path);
@@ -173,18 +149,17 @@
 
         if (!program) {
              XML3D.debug.logError("Unknown shader URI: " + scriptURI + ". Using default shader instead.");
-            return "defaultShader";
+            return { url: "defaultShader", program: this.shaders["defaultShader"]  };
         }
 
-        this.shaders[shaderId] = program;
+        this.shaders[shaderURL] = program;
         this.gl.useProgram(program.handle);
 
         var canvasId = shaderAdapter.factory.canvasId;
 
         this.setUniformsFromComputeResult(program, dataTable, canvasId, { force: true });
-        this.createTexturesFromComputeResult(program, dataTable, canvasId, { force: true });
-        //XML3D.webgl.checkError(this.gl, "setSamplers");
-        return shaderId;
+        this.updateTextureDataFromComputeResult(program, dataTable, canvasId, { force: true });
+        return { url: shaderURL, program: program };
     };
 
     /**
@@ -294,6 +269,7 @@
 
             if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
                 uniInfo.unit = programObject.nextTextureUnit();
+                uniInfo.texture = new XML3D.webgl.GLTexture(gl);
                 programObject.samplers[name] = uniInfo;
             } else
                 programObject.uniforms[name] = uniInfo;
@@ -331,14 +307,19 @@
 
     /**
      *
-     * @param {Object} shaderAdapter
+     * @param {Object} shaderHandle
      * @param {ProgramObject} programObject
      * @param {Array.<string>} names
      */
-    XML3DShaderManager.prototype.resetUniformVariables = function(shaderAdapter, programObject, names)
+    XML3DShaderManager.prototype.resetUniformVariables = function(shaderHandle, programObject, names)
     {
-        if(!shaderAdapter)
+        if(shaderHandle.status === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+            //We must be using the defaultShader so this is the only override possible
+            XML3DShaderManager.setUniform(this.gl, programObject.uniforms.diffuseColor, [1,0,0]);
             return;
+        }
+
+        var shaderAdapter = shaderHandle.adapter;
         var result = shaderAdapter.computeRequest.getResult();
         for(var i in names) {
             var name = names[i];
@@ -353,10 +334,10 @@
         var shaderName = shaderAdapter.node.id;
         var shader = this.shaders[shaderName];
         if (shader) {
-            this.destroyShader(shader);
+            this.disposeShader(shader);
             delete this.shaders[shaderName];
-            this.createShader(shaderAdapter, lights);
         }
+        this.createShader(shaderAdapter, lights);
     };
 
     XML3DShaderManager.prototype.shaderDataChanged = function(adapter, request, changeType) {
@@ -367,7 +348,7 @@
         var result = request.getResult();
         this.bindShader(program);
         this.setUniformsFromComputeResult(program, result, canvasId);
-        this.createTexturesFromComputeResult(program, result);
+        this.updateTextureDataFromComputeResult(program, result, canvasId);
         if(program.material) {
             program.material.parametersChanged(result.getOutputMap());
             program.hasTransparency = program.material.isTransparent;
@@ -375,20 +356,20 @@
         this.renderer.requestRedraw("Shader data changed");
     };
 
-    XML3DShaderManager.prototype.getShaderById = function(shaderId) {
-        var sp = this.shaders[shaderId];
+    XML3DShaderManager.prototype.getShaderByURL = function(url) {
+        var sp = this.shaders[url];
         if (!sp) {
-            var shaderAdapter = XML3D.base.resourceManager.getAdapter(document.getElementById(shaderId), XML3D.webgl, this.canvasId);
+            var shaderAdapter = XML3D.base.resourceManager.getAdapter(document.getElementById(url), XML3D.webgl, this.canvasId);
             if (shaderAdapter) {
                 // This must be a shader we haven't created yet (maybe it was
                 // just added or
                 // was not assigned to a group until now
-                this.createShader(shaderAdapter, this.renderer.lights);
-                if (this.shaders[shaderId])
-                    return this.shaders[shaderId];
+                var shaderInfo = this.createShader(shaderAdapter, this.renderer.lights);
+                if (shaderInfo.url == url)
+                    return shaderInfo.program;
             }
 
-            XML3D.debug.logError("Could not find the shader [ " + shaderId + " ]");
+            XML3D.debug.logError("Could not find the shader [ " + url + " ]");
             sp = this.shaders["default"];
         }
         return sp;
@@ -426,11 +407,10 @@
      * @param {Xflow.ComputeResult} result
      * @param {Object?} opt options
      */
-    XML3DShaderManager.prototype.createTexturesFromComputeResult = function(programObject, result, canvasId, opt) {
-        var texUnit = 0;
+    XML3DShaderManager.prototype.updateTextureDataFromComputeResult = function(programObject, result, canvasId, opt) {
         var samplers = programObject.samplers;
-        var opt = opt || {};
 
+        var opt = opt || {};
         var force = opt.force || false;
 
         for ( var name in samplers) {
@@ -438,20 +418,18 @@
             var entry = result.getOutputData(name);
 
             if (!entry) {
-                sampler.info = new InvalidTexture();
+                sampler.texture.failed();
                 continue;
             }
 
             var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, canvasId);
 
             if(force || webglData.changed) {
-                this.createTextureFromEntry(entry, sampler, texUnit);
+                sampler.texture.updateFromTextureEntry(entry);
                 webglData.changed = 0;
             }
-            texUnit++;
         }
     };
-
 
     XML3DShaderManager.prototype.setUniformVariables = function(shader, uniforms) {
         for ( var name in uniforms) {
@@ -481,7 +459,7 @@
 
         var samplers = sp.samplers;
         for ( var tex in samplers) {
-            this.bindTexture(samplers[tex]);
+            this.bindSampler(samplers[tex]);
         }
     };
 
@@ -500,7 +478,7 @@
 
     XML3DShaderManager.prototype.unbindShader = function(shader) {
         // TODO: unbind samplers (if any)
-        var sp = (typeof shader == typeof "") ? this.getShaderById(shader) : shader;
+        var sp = (typeof shader == typeof "") ? this.getShaderByURL(shader) : shader;
         var samplers = sp.samplers;
         for ( var tex in samplers) {
             this.unbindTexture(samplers[tex]);
@@ -509,8 +487,6 @@
         this.currentProgram = null;
         this.gl.useProgram(null);
     };
-
-    var rc = window.WebGLRenderingContext;
 
     /**
      * Set uniforms for active program
@@ -522,9 +498,9 @@
     XML3DShaderManager.setUniform = function(gl, u, value, transposed) {
 
         switch (u.glType) {
-        case rc.BOOL:
-        case rc.INT:
-        case rc.SAMPLER_2D:
+        case 35670: //gl.BOOL
+        case 5124:  //gl.INT
+        case 35678: //gl.SAMPLER_2D
             if (value.length)
                 gl.uniform1i(u.location, value[0]);
             else
@@ -578,86 +554,14 @@
         }
     };
 
-    XML3DShaderManager.prototype.destroyShader = function(shader) {
+    XML3DShaderManager.prototype.disposeShader = function(shader) {
         for ( var tex in shader.samplers) {
-            this.destroyTexture(shader.samplers[tex]);
+            shader.samplers[tex].texture.destroy();
         }
-
         this.gl.deleteProgram(shader.handle);
     };
 
-    /**
-     *
-     * @param {ProgramObject} programObject
-     * @param {Xflow.ComputeResult} result
-     */
-    XML3DShaderManager.prototype.createTexturesFromComputeResult = function(programObject, result) {
-        var samplers = programObject.samplers;
-        for ( var name in samplers) {
-            var sampler = samplers[name];
-            var entry = result.getOutputData(name);
-
-            if (!entry) {
-                sampler.info = sampler.info || new InvalidTexture();
-                continue;
-            }
-
-            this.createTextureFromEntry(entry, sampler);
-        }
-    };
-
-    /**
-     *
-     * @param {Xflow.TextureEntry} texEntry
-     * @param sampler
-     */
-    XML3DShaderManager.prototype.createTextureFromEntry = function(texEntry, sampler) {
-        var img = texEntry.getImage();
-        if (img) {
-            var handle = null;
-            var canvas = null;
-            var context = null;
-            if (sampler.info && sampler.info.status != TEXTURE_STATE.INVALID) {
-                handle = sampler.info.handle;
-                canvas = sampler.info.canvas;
-                context = sampler.info.context;
-            } else {
-                handle = this.gl.createTexture();
-            }
-
-            var renderer = this.renderer;
-            var info = new TextureInfo(handle, {
-                status : (img.complete || img.readyState) ? TEXTURE_STATE.LOADED : TEXTURE_STATE.UNLOADED,
-                onload : function() {
-                    renderer.requestRedraw.call(renderer, "Texture loaded");
-                },
-                unit : sampler.unit,
-                image : img,
-                config : texEntry.getSamplerConfig(),
-                canvas : canvas,
-                context : context
-            });
-            sampler.info = info;
-        } else {
-            sampler.info = new InvalidTexture();
-            XML3D.debug.logWarning("No image found for texture: " + sampler);
-        }
-    };
-
-    XML3DShaderManager.prototype.replaceTexture = function(adapter, texture) {
-        this.destroyTexture(texture);
-        var dtable = adapter.requestData([ texture.name ]);
-        var dtopt = dtable[texture.name].getValue();
-
-        // FIX ME PLEASE
-        dtopt.imageAdapter.image = null;
-
-        this.createTexture(dtopt, texture, texture.texUnit);
-
-        return texture;
-
-    };
-
+    // TODO: Remove here
     XML3DShaderManager.prototype.createTex2DFromData = function(internalFormat, width, height, sourceFormat, sourceType, texels, opt) {
         var gl = this.gl;
         var info = {};
@@ -693,131 +597,28 @@
 
         info.handle = handle;
         info.options = opt;
-        info.status = TEXTURE_STATE.VALID;
         info.glType = gl.TEXTURE_2D;
         info.format = internalFormat;
 
         return info;
     };
 
-    XML3DShaderManager.prototype.createTex2DFromImage = function(info) {
-        if (info.status == TEXTURE_STATE.INVALID) {
-            throw new Error("Invalid texture");
-        }
-
-        var gl = this.gl;
-        var opt = info.config || {};
-        var image = info.image;
-
-        gl.bindTexture(gl.TEXTURE_2D, info.handle);
-
-        // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
-
-        var width = image.videoWidth || image.width;
-        var height = image.videoHeight || image.height;
-        // We need to scale texture when one of the wrap modes is not CLAMP_TO_EDGE and
-        // one of the texture dimensions is not power of two.
-        // Otherwise rendered texture will be just black.
-        if ((opt.wrapS != gl.CLAMP_TO_EDGE || opt.wrapT != gl.CLAMP_TO_EDGE) &&
-            (!this.isPowerOfTwo(width) || !this.isPowerOfTwo(height))) {
-            // Scale up the texture to the next highest power of two dimensions.
-            // Reuse existing canvas if available.
-            var canvas = info.canvas !== null ? info.canvas : document.createElement("canvas");
-
-            var potWidth = this.nextHighestPowerOfTwo(width);
-            var potHeight = this.nextHighestPowerOfTwo(height);
-            var context = null;
-            // Reuse existing context if possible.
-            if (info.context !== null && potWidth == canvas.width && potHeight == canvas.height) {
-                context = info.context;
-            } else {
-                canvas.width = potWidth;
-                canvas.height = potHeight;
-                context = canvas.getContext("2d");
-            }
-
-            // stretch to fit
-            context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-            // centered with transparent padding around edges
-            //ctx.drawImage(image, 0, 0, image.width, image.height);
-            image = canvas;
-            info.canvas = canvas;
-            info.context = context;
-        }
-
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-        if (opt.generateMipmap) {
-            gl.generateMipmap(gl.TEXTURE_2D);
-        }
-
-        gl.bindTexture(gl.TEXTURE_2D, null);
-
-        info.status = TEXTURE_STATE.VALID;
-        info.glType = gl.TEXTURE_2D;
-        info.format = gl.RGBA;
-
-        return info;
-    };
-
-    /**
+   /**
      *
-     * @param {Object} tex
+     * @param {Object} sampler
      */
-    XML3DShaderManager.prototype.bindTexture = function(tex) {
-        var info = tex.info;
+    XML3DShaderManager.prototype.bindSampler = function(sampler) {
+        var texture = sampler.texture;
         var gl = this.gl;
 
-        switch (info.status) {
-        case TEXTURE_STATE.VALID:
-            gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
-            gl.bindTexture(info.glType, info.handle);
-            // console.log("Bind texture (unit, name)", info.unit, tex.name);
-            // Should not be here, since the texunit is static
-            XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
-            break;
-        case TEXTURE_STATE.LOADED:
-            // console.log("Creating '"+ tex.name + "' from " + info.image.src);
-            this.createTex2DFromImage(info);
-            this.bindTexture(tex);
-            break;
-        case TEXTURE_STATE.UNLOADED:
-            gl.activeTexture(gl.TEXTURE0 + info.unit + 1);
-            gl.bindTexture(gl.TEXTURE_2D, null);
-            XML3DShaderManager.setUniform(gl, tex, info.unit + 1);
-            break;
-        default:
-            XML3D.debug.logDebug("Invalid texture: ", tex.name, tex);
-
+        if (texture.canBind()) {
+            texture.bind(sampler.unit);
+            // FIXME: Should not be here, since the texunit is static
+            XML3DShaderManager.setUniform(gl, sampler, texture.unit + 1);
+        } else {
+            texture.unbind(sampler.unit);
         }
-        ;
     };
 
-    XML3DShaderManager.prototype.unbindTexture = function(tex) {
-        this.gl.activeTexture(this.gl.TEXTURE1 + tex.info.unit);
-        this.gl.bindTexture(tex.info.glType, null);
-    };
-
-    XML3DShaderManager.prototype.destroyTexture = function(tex) {
-        if (tex.info && tex.info.handle)
-            this.gl.deleteTexture(tex.info.handle);
-    };
-
-    XML3DShaderManager.prototype.isPowerOfTwo = function(dimension) {
-        return (dimension & (dimension - 1)) == 0;
-    };
-
-    XML3DShaderManager.prototype.nextHighestPowerOfTwo = function(x) {
-        --x;
-        for ( var i = 1; i < 32; i <<= 1) {
-            x = x | x >> i;
-        }
-        return x + 1;
-    };
     XML3D.webgl.XML3DShaderManager = XML3DShaderManager;
 }());

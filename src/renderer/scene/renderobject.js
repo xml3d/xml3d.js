@@ -1,4 +1,4 @@
-(function () {
+(function (webgl) {
     /**
      * @interface
      */
@@ -41,7 +41,7 @@
      * @param {Object} opt
      */
     var RenderObject = function (scene, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.OBJECT, scene, pageEntry, opt);
         opt = opt || {};
         /** @type {XML3D.webl.MeshRenderAdapter} */
         this.meshAdapter = opt.meshAdapter;
@@ -302,6 +302,6 @@
 
 
     // Export
-    XML3D.webgl.RenderObject = RenderObject;
+    webgl.RenderObject = RenderObject;
 
-}());
+}(XML3D.webgl));

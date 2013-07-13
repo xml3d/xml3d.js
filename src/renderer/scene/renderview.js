@@ -1,4 +1,4 @@
-(function() {
+(function(webgl) {
     /** @const */
     var VIEW_MATRIX_OFFSET = 0;
     /** @const */
@@ -12,7 +12,7 @@
      * @extends {RenderNode}
      */
     var RenderView = function(scene, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.VIEW, scene, pageEntry, opt);
         opt = opt || {};
         this.position = opt.position;
         this.orientation = opt.orientation;
@@ -177,6 +177,6 @@
     });
 
     // Export
-    XML3D.webgl.RenderView = RenderView;
+    webgl.RenderView = RenderView;
 
-})();
+})(XML3D.webgl);

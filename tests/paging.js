@@ -56,7 +56,7 @@ test("RenderObject", 6, function() {
 });
 
 
-test("Delete render objects", 13, function() {
+test("Delete render objects", 11, function() {
     // Attach to root object
     var ENTRY_SIZE = XML3D.webgl.RenderObject.ENTRY_SIZE;
     var expectedOffset = this.scene.nextOffset;
@@ -69,10 +69,10 @@ test("Delete render objects", 13, function() {
     equal(this.scene.nextOffset, expectedOffset, "New offset");
 
     equal(this.scene.rootNode.getChildren().length, 5, "5 children added");
-    equal(this.scene.queue.length, 5, "5 render objects in queue");
+    //equal(this.scene.queue.length, 5, "5 render objects in queue");
     children[2].remove();
     equal(this.scene.rootNode.getChildren().length, 4, "1 child removed");
-    equal(this.scene.queue.length, 4, "4 render objects in queue");
+    //equal(this.scene.queue.length, 4, "4 render objects in queue");
     equal(this.scene.nextOffset, expectedOffset, "Offset not changed");
 
     children[2] = this.scene.createRenderObject();

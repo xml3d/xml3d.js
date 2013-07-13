@@ -8,8 +8,9 @@
      * @param {Object} pageEntry
      * @param {Object} opt
      */
-    var RenderNode = function(scene, pageEntry, opt) {
+    var RenderNode = function(type, scene, pageEntry, opt) {
         opt = opt || {};
+        this.type = type;
         this.scene = scene;
         this.setParent(opt.parent || scene.rootNode);
         this.page = pageEntry.page;
@@ -89,7 +90,6 @@
 
         remove: function() {
             this.parent.removeChild(this);
-            this.dispose && this.dispose();
             this.scene.freePageEntry({ page: this.page, offset: this.offset, size: this.entrySize });
         }
 

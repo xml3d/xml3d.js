@@ -1,4 +1,4 @@
-(function() {
+(function(webgl) {
     /** @const */
     var WORLD_MATRIX_OFFSET = 0;
     /** @const */
@@ -15,7 +15,7 @@
      * @extends {RenderNode}
      */
     var RenderGroup = function(scene, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.GROUP, scene, pageEntry, opt);
         opt = opt || {};
         this.shaderHandle = opt.shaderHandle || null;
         this.boundingBoxDirty = false;
@@ -24,7 +24,7 @@
     };
     RenderGroup.ENTRY_SIZE = ENTRY_SIZE;
 
-    XML3D.createClass(RenderGroup, XML3D.webgl.RenderNode);
+    XML3D.createClass(RenderGroup, webgl.RenderNode);
     XML3D.extend(RenderGroup.prototype, {
         getLocalMatrix: function(dest) {
             var o = this.offset + LOCAL_MATRIX_OFFSET;
@@ -87,10 +87,12 @@
         addChild: function(child) {
             this.children.push(child);
             this.setBoundingBoxDirty();
+            this.scene.addChildEvent(this, child);
         },
 
         removeChild: function(child) {
             this.children.splice(this.children.indexOf(child), 1);
+            this.scene.removeChildEvent(this, child);
         },
 
         getChildren: function() {
@@ -162,6 +164,6 @@
     });
 
     // Export
-    XML3D.webgl.RenderGroup = RenderGroup;
+    webgl.RenderGroup = RenderGroup;
 
-})();
+})(XML3D.webgl);

@@ -1,4 +1,4 @@
-(function() {
+(function(webgl) {
 
     /** @const */
     var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = XML3D.math.vec3.fromValues(0,0,-1);
@@ -15,7 +15,7 @@
      * @extends {RenderNode}
      */
     var RenderLight = function(scene, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.LIGHT ,scene, pageEntry, opt);
         this.lightShader = opt.shader;
         this.listenerID = this.lightShader.registerLightListener(this.updateLightData.bind(this));
         this.lightType = opt.lightType;
@@ -25,7 +25,7 @@
     };
     RenderLight.ENTRY_SIZE = ENTRY_SIZE;
 
-    XML3D.createClass(RenderLight, XML3D.webgl.RenderNode);
+    XML3D.createClass(RenderLight, webgl.RenderNode);
     XML3D.extend(RenderLight.prototype, {
         initializeLightData: function() {
             var lightEntry = this.scene.lights[this.lightType];
@@ -136,7 +136,7 @@
 
     });
 
-    XML3D.webgl.RenderLight = RenderLight;
+    webgl.RenderLight = RenderLight;
 
 
-})();
+})(XML3D.webgl);

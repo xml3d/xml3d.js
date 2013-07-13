@@ -103,7 +103,7 @@ XML3D.webgl.MAXFPS = 30;
         };
 
         var context = new XML3D.webgl.GLContext(renderingContext, this.id, this.canvas.clientWidth, this.canvas.clientHeight);
-        var scene = new XML3D.webgl.Scene(new XML3D.webgl.ShaderTemplateFactory(context));
+        var scene = new XML3D.webgl.GLScene(context);
         var factory = XML3D.base.xml3dFormatHandler.getFactory(XML3D.webgl, this.id);
         factory.setScene(scene);
         // Create renderer

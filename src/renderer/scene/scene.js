@@ -240,26 +240,6 @@
     };
     Scene.PAGE_SIZE = PAGE_SIZE;
 
-
-    window.StateMachine.create({
-        target:XML3D.webgl.RenderObject.prototype,
-        events:[
-            { name:'create', from:'none', to:'NoLights'   },
-            // batch processing
-            { name:'progress', from:'NoLights', to:'NoMaterial'   },
-            { name:'progress', from:'NoMaterial', to:'NoMesh'   },
-            { name:'dataNotComplete', from:'NoMesh', to:'NoMeshData' },
-            { name:'dataComplete', from:'NoMesh', to:'Ready' },
-            { name:'progress', from:'DirtyMeshData', to:'Ready' },
-            // events
-            { name:'lightsChanged', from: ['NoLights','NoMaterial', 'NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoLights' },
-            { name:'materialChanged', from: ['NoMaterial', 'NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoMaterial' },
-            { name:'materialChanged', from: ['NoLights'], to:'NoLights' },
-            { name:'dataStructureChanged', from: ['NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoMesh' },
-            { name:'dataValueChanged', from: ['Ready', 'DirtyMeshData'], to:'DirtyMeshData' },
-            { name:'dispose', from:'*', to:'Disposed' }
-        ]});
-
     webgl.Scene = Scene;
 
 })(XML3D.webgl);

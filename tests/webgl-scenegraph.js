@@ -27,9 +27,26 @@ function getWebGLAdapter(x) {
     return null;
 };
 
-function getHandler(x) {
+function getWebGLFactory(x) {
     var adapter = getWebGLAdapter(x);
-    return adapter ? adapter.factory.handler : null;
+    return adapter ? adapter.factory : null;
+};
+
+function getCanvasId(x) {
+    var factory = getWebGLFactory(x);
+    return factory ? factory.canvasId : null;
+}
+
+function getRenderer(x) {
+    console.dir(x);
+    var factory = getWebGLFactory(x);
+    return factory ? factory.getRenderer() : null;
+};
+
+function getHandler(x) {
+    console.dir(x);
+    var id = getCanvasId(x);
+    return id ? x.ownerDocument.defaultView.XML3D.webgl.handlers[id] : null;
 };
 
 function getContextForXml3DElement(x) {

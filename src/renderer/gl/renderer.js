@@ -36,7 +36,7 @@
         this.currentPickObj = null;
 
         this.mainPass = new webgl.ForwardRenderPass(context);
-        this.pickingPass = new webgl.PickingRenderPass(context);
+        this.pickingPass = new webgl.PickingRenderPass(context, this.width, this.height);
 
         this.init();
     };
@@ -103,8 +103,8 @@
         getRenderObjectFromPickingBuffer : function(x,y) {
             if(this.needsDraw) {
                 this.prepareRendering();
-                this.pickingPass.renderSceneToPickingBuffer(this.scene, this.fbos.picking);
-                this.currentPickObj = this.pickingPass.getRenderObjectFromPickingBuffer(x,y,this.scene, this.fbos.picking);
+                this.pickingPass.renderScene(this.scene);
+                this.currentPickObj = this.pickingPass.getRenderObjectFromPickingBuffer(x,y,this.scene);
             }
             return this.currentPickObj;
         },

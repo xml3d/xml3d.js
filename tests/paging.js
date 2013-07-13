@@ -37,7 +37,7 @@ test("RenderView", 2, function() {
     equal(this.scene.nextOffset, expectedOffset, "New offset");
 });
 
-test("RenderObject", 6, function() {
+test("RenderObject", 9, function() {
     var ENTRY_SIZE = XML3D.webgl.RenderObject.ENTRY_SIZE;
     var expectedOffset = this.scene.nextOffset;
     this.scene.createRenderObject();
@@ -53,10 +53,20 @@ test("RenderObject", 6, function() {
     }
     equal(this.scene.pages.length, 2, "New page size");
     equal(this.scene.nextOffset, 2 * ENTRY_SIZE, "New offset");
+
+    var scene = this.scene;
+    scene.addChildEvent = function(parent, child) {
+        ok(true, "Event on add child");
+        strictEqual(parent, scene.rootNode, "Parent is first parameter");
+        ok(child, "Child is second parameter");
+        start();
+    }
+    stop();
+    this.scene.createRenderObject();
 });
 
 
-test("Delete render objects", 11, function() {
+test("Delete render objects", 14, function() {
     // Attach to root object
     var ENTRY_SIZE = XML3D.webgl.RenderObject.ENTRY_SIZE;
     var expectedOffset = this.scene.nextOffset;
@@ -97,7 +107,15 @@ test("Delete render objects", 11, function() {
     children.push(this.scene.createRenderObject());
     strictEqual(children[children.length-1].page, this.scene.pages[1], "New child on second page");
 
-
+    var scene = this.scene;
+    this.scene.removeChildEvent = function(parent, child) {
+        ok(true, "Event on remove child");
+        strictEqual(parent, scene.rootNode, "Parent is first parameter");
+        strictEqual(child, children[1], "Child is second parameter");
+        start();
+    }
+    stop();
+    children[1].remove();
 });
 
 test("Bounding Boxes", 7, function() {

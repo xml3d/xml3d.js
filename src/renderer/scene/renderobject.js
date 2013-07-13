@@ -282,7 +282,7 @@
 
 
     window.StateMachine.create({
-        target:XML3D.webgl.RenderObject.prototype,
+        target: RenderObject.prototype,
         events:[
             { name:'create', from:'none', to:'NoLights'   },
             // batch processing

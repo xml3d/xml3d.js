@@ -1,16 +1,10 @@
 (function(webgl) {
 
-    var PAGE_SIZE = 1<<12;
-
     var StateMachine = window.StateMachine;
 
     var Scene = function(shaderFactory) {
-        /** @type Array<Float32Array> */
-        this.pages = [];
-        /** @type number */
-        this.nextOffset = 0;
+        webgl.Pager.call(this);
 
-        this.freeEntries = [];
         this.firstOpaqueIndex = 0;
         this.boundingBox = new XML3D.webgl.BoundingBox();
         this.lights = {
@@ -24,18 +18,22 @@
             }
         };
         this.activeView = null;
-
-        this.getActiveView = function() {
-            return this.activeView;
-        }
-
-        this.setActiveView = function(view) {
-            this.activeView = view;
-        }
-
         this.shaderFactory = shaderFactory;
+        this.rootNode = this.createRootNode();
+        this.clear();
+    };
+    XML3D.createClass(Scene, webgl.Pager);
 
-        this.remove = function(obj) {
+    XML3D.extend(Scene.prototype, {
+
+        getActiveView : function() {
+            return this.activeView;
+        },
+
+        setActiveView : function(view) {
+            this.activeView = view;
+        },
+        remove : function(obj) {
             var index = this.queue.indexOf(obj);
             if (index != -1) {
                 this.queue.splice(index, 1);
@@ -46,12 +44,12 @@
                 if(index < this.firstOpaqueIndex)
                     this.firstOpaqueIndex--;
             }
-        };
-        this.clear = function() {
+        },
+        clear : function() {
             this.ready = [];
             this.queue = [];
-        };
-        this.moveFromQueueToReady = function(obj) {
+        },
+        moveFromQueueToReady : function(obj) {
             var index = this.queue.indexOf(obj);
             if (index != -1) {
                 this.queue.splice(index, 1);
@@ -63,8 +61,8 @@
                     this.ready.push(obj);
                 }
             }
-        };
-        this.moveFromReadyToQueue = function(obj) {
+        },
+        moveFromReadyToQueue : function(obj) {
             var index = this.ready.indexOf(obj);
             if (index != -1) {
                 this.ready.splice(index, 1);
@@ -72,14 +70,13 @@
                     this.firstOpaqueIndex--;
                 this.queue.push(obj);
             }
-        };
-
-        this.update = function() {
+        },
+        update : function() {
             this.updateLights(this.lights);
             this.shaderFactory.update();
             this.consolidate();
-        };
-        this.consolidate = function() {
+        },
+        consolidate : function() {
             this.queue.slice().forEach(function(obj) {
                 while (obj.can('progress') && obj.progress() == StateMachine.Result.SUCCEEDED ) {};
                 if(obj.current == "NoMesh") {
@@ -88,8 +85,8 @@
                     }
                 }
             });
-        };
-        this.updateLights = function(lights) {
+        },
+        updateLights : function(lights) {
             if (lights.structureChanged) {
                 //shaderManager.removeAllShaders();
                 this.forEach(function(obj) { obj.lightsChanged(lights); }, this);
@@ -100,94 +97,43 @@
                         obj.lightsChanged(lights);
                 }, this);
             }
-        };
-        this.forEach = function(func, that) {
+        },
+        forEach : function(func, that) {
             this.queue.slice().forEach(func, that);
             this.ready.slice().forEach(func, that);
-        };
+        },
 
-        this.addPage = function() {
-            var page = new Float32Array(PAGE_SIZE);
-            this.pages.push(page);
-            this.nextOffset = 0;
-            XML3D.debug.logInfo("adding page", this.pages.length, page.length);
-        };
 
-        this.getPageEntry = function(size) {
-            if(!size)
-                throw new Error("No size given for page entry");
-            return this.reusePageEntry(size) || this.createPageEntry(size);
-        };
-
-        /**
-         * @param {number} size Requested size in number of floats
-         * @returns {{ page: Float32Array, offset: number, size: number }}
-         */
-        this.reusePageEntry = function(size) {
-            var sameSizeEntries = this.freeEntries[size];
-            if(sameSizeEntries && sameSizeEntries.length) {
-                return sameSizeEntries.pop();
-            }
-            return null;
-        };
-
-        /**
-         * @param {number} size  Size in number of floats
-         * @returns {{ page: Float32Array, offset: number, size: number }}
-         */
-        this.createPageEntry = function(size) {
-            if (this.nextOffset + size > PAGE_SIZE) {
-                this.addPage();
-                return this.getPageEntry(size);
-            }
-            var page = this.pages[this.pages.length-1];
-            var localOffset = this.nextOffset;
-            this.nextOffset += size;
-            return { page: page, offset: localOffset, size: size };
-        };
-
-        /**
-         *
-         * @param {{ page: Float32Array, offset: number, size: number }} entryInfo
-         */
-        this.freePageEntry = function(entryInfo) {
-            var sameSizeEntries = this.freeEntries[entryInfo.size];
-            if(!sameSizeEntries) {
-                sameSizeEntries = this.freeEntries[entryInfo.size] = [];
-            }
-            sameSizeEntries.push(entryInfo);
-        }
-
-        this.createRenderObject = function(opt) {
+        createRenderObject : function(opt) {
             var pageEntry = this.getPageEntry(webgl.RenderObject.ENTRY_SIZE);
             var renderObject = new webgl.RenderObject(this, pageEntry, opt);
             this.queue.push(renderObject);
             return renderObject;
-        };
+        },
 
-        this.createRenderGroup = function(opt) {
+        createRenderGroup : function(opt) {
             var pageEntry = this.getPageEntry(webgl.RenderGroup.ENTRY_SIZE);
             return new webgl.RenderGroup(this, pageEntry, opt);
-        };
+        },
 
-        this.createRenderView = function(opt) {
+        createRenderView : function(opt) {
             var pageEntry = this.getPageEntry(webgl.RenderView.ENTRY_SIZE);
             return new webgl.RenderView(this, pageEntry, opt);
-        };
+        },
 
-        this.createRenderLight = function(opt) {
+        createRenderLight : function(opt) {
             var pageEntry = this.getPageEntry(webgl.RenderLight.ENTRY_SIZE);
             this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
             this.lights.structureChanged = true;
             return new webgl.RenderLight(this, pageEntry, opt);
-        };
+        },
 
-        this.addLightDataOffsetToPageEntry = function(pageEntry, lightType) {
+        addLightDataOffsetToPageEntry : function(pageEntry, lightType) {
             var lightObj = this.lights[lightType];
             pageEntry.lightOffset = lightObj.length++;
-        };
+        },
 
-        this.createRootNode = function() {
+        createRootNode : function() {
             var pageEntry = this.getPageEntry(webgl.RenderGroup.ENTRY_SIZE);
             var root = new webgl.RenderGroup(this, pageEntry, {});
             root.setWorldMatrix(XML3D.math.mat4.create());
@@ -199,16 +145,14 @@
             root.shaderHandle.status = XML3D.base.AdapterHandle.STATUS.NOT_FOUND;
             this.rootNode = root;
             return root;
-        };
-
-        this.updateBoundingBox = function() {
+        },
+        updateBoundingBox : function() {
             if (this.rootNode.boundingBoxDirty) {
                 this.activeView.setProjectionDirty();
             }
             this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
-        };
-
-        this.updateReadyObjectsFromActiveView = (function() {
+        },
+        updateReadyObjectsFromActiveView : (function() {
             var c_viewMat_tmp = XML3D.math.mat4.create();
             var c_projMat_tmp = XML3D.math.mat4.create();
 
@@ -227,18 +171,15 @@
                     obj.updateModelViewProjectionMatrix(c_projMat_tmp);
                 });
             }
-        }());
+        }()),
 
-        this.getBoundingBox = function(bb) {
+        getBoundingBox : function(bb) {
             XML3D.math.vec3.copy(bb.min, this.boundingBox.min);
             XML3D.math.vec3.copy(bb.max, this.boundingBox.max);
-        };
+        }});
 
-        this.addPage();
-        this.rootNode = this.createRootNode();
-        this.clear();
-    };
-    Scene.PAGE_SIZE = PAGE_SIZE;
+
+
 
     webgl.Scene = Scene;
 

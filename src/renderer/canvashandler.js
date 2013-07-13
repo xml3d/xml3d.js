@@ -305,13 +305,16 @@ XML3D.webgl.MAXFPS = 30;
      * @return
      */
     CanvasHandler.prototype.dispatchFrameDrawnEvent = function(start, end, stats) {
+        stats = stats || {};
+
         var event = document.createEvent('CustomEvent');
+
         var data = {
                 timeStart : start,
                 timeEnd : end,
                 renderTimeInMilliseconds : end - start,
-                numberOfObjectsDrawn : stats[0],
-                numberOfTrianglesDrawn : Math.floor(stats[1])
+                numberOfObjectsDrawn : stats.numberOfObjectsDrawn || 0,
+                numberOfTrianglesDrawn : stats.numberOfTrianglesDrawn || 0
         };
         event.initCustomEvent('framedrawn', true, true, data);
 

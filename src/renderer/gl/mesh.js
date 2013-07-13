@@ -81,7 +81,7 @@
                 triCount = 0;
 
             if (!this.complete)
-                return;
+                return 0;
 
             //Bind vertex buffers
             for (var name in sAttributes) {

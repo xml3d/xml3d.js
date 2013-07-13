@@ -61,7 +61,7 @@
         getHeight: function() {
             return this.height;
         },
-        getHeight: function() {
+        getScale: function() {
             return this.scale;
         },
         bind: function () {

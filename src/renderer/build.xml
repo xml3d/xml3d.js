@@ -24,7 +24,6 @@
         <file name="programfactory.js" />
         <file name="shadertemplate.js" />
         <file name="material.js" />
-        <file name="bufferhandler.js" />
         <file name="scene/boundingbox.js" />
         <file name="scene/rendernode.js" />
         <file name="scene/renderobject.js" />

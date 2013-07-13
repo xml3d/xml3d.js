@@ -73,7 +73,6 @@
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
             gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
 
-            this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.context.gl, this);
             this.changeListener = new XML3D.webgl.DataChangeListener(this);
 
         },
@@ -84,14 +83,14 @@
             this.camera && (this.camera.setTransformDirty());
         },
         initFrameBuffers: function() {
-            var fbos = {};
+            /*var fbos = {};
 
             fbos.picking = this.bufferHandler.createPickingBuffer(this.width, this.height);
             fbos.vectorPicking = this.bufferHandler.createPickingBuffer(this.width, this.height);
             if (!fbos.picking.valid || !fbos.vectorPicking.valid) {
                 XML3D.debug.logError("Picking buffer creation failed. Disabled picking");
                 this.pickingDisabled = true;
-            }
+            } */
         },
         requestRedraw: function(reason, forcePickingRedraw) {
 

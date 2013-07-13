@@ -18,7 +18,7 @@
         <file name="gl/program.js" />
         <file name="gl/rendertarget.js" />
         <file name="gl/mesh.js" />
-        <file name="gl/passes/core.js" />
+        <file name="gl/passes/base.js" />
         <file name="gl/passes/forward.js" />
         <file name="gl/passes/picking.js" />
         <file name="programfactory.js" />

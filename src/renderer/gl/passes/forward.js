@@ -4,21 +4,24 @@
      *
      * @constructor
      */
-    var ForwardRenderPass = function (context) {
-        this.context = context;
+    var ForwardRenderPass = function (context, opt) {
+        webgl.BaseRenderPass.call(this, context, opt);
     };
+    XML3D.createClass(ForwardRenderPass, webgl.BaseRenderPass);
 
     XML3D.extend(ForwardRenderPass.prototype, {
-        renderToCanvas: (function () {
+        renderScene: (function () {
 
             var c_viewMat_tmp = XML3D.math.mat4.create();
             var c_projMat_tmp = XML3D.math.mat4.create();
 
-            return function (scene, width, height) {
-                var gl = this.context.gl;
+            return function (scene) {
+                var gl = this.context.gl,
+                    target = this.target;
 
+                target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-                gl.viewport(0, 0, width, height);
+                gl.viewport(0, 0, target.getWidth(), target.getHeight());
                 gl.enable(gl.DEPTH_TEST);
 
                 var camera = {};
@@ -31,7 +34,7 @@
                 });
 
                 scene.updateBoundingBox();
-                scene.getActiveView().getProjectionMatrix(c_projMat_tmp, width / height);
+                scene.getActiveView().getProjectionMatrix(c_projMat_tmp, target.getWidth() / target.getHeight());
                 camera.proj = c_projMat_tmp;
 
                 scene.ready.forEach(function (obj) {

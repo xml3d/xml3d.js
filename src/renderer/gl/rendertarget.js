@@ -9,6 +9,7 @@
     IRenderTarget.prototype.unbind = function(){};
     IRenderTarget.prototype.getWidth = function(){};
     IRenderTarget.prototype.getHeight = function(){};
+    IRenderTarget.prototype.getScale = function(){};
     IRenderTarget.prototype.resize = function(width, height){};
 
     /**
@@ -26,8 +27,9 @@
     var empty = function(){};
 
     XML3D.extend(GLCanvasTarget.prototype, {
-        getWidth: function() { return this.width },
-        getHeight: function() { return this.height },
+        getWidth: function() { return this.width; },
+        getHeight: function() { return this.height; },
+        getScale: function() { return 1; },
         bind: empty,
         unbind: empty,
         resize: empty
@@ -58,6 +60,9 @@
         },
         getHeight: function() {
             return this.height;
+        },
+        getHeight: function() {
+            return this.scale;
         },
         bind: function () {
             var created = false;

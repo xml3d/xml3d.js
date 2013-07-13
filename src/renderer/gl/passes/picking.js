@@ -11,7 +11,7 @@
      * @returns {Uint8Array} pixel data
      */
     var readPixelDataFromBuffer = function (gl, glX, glY, target) {
-        var scale = target.scale;
+        var scale = target.getScale();
         var x = glX * scale;
         var y = glY * scale;
 
@@ -28,55 +28,19 @@
     };
 
     /**
-     * @param {number} width
-     * @param {number} height
-     * @returns {{width: number, height: number, scale: number}}
-     */
-    var calcPickingBufferDimension = function (width, height) {
-        var scale = 1.0;
-
-        var hDiff = height - XML3D.webgl.MAX_PICK_BUFFER_HEIGHT;
-        var wDiff = width - XML3D.webgl.MAX_PICK_BUFFER_WIDTH;
-
-        if (hDiff > 0 || wDiff > 0) {
-            if (hDiff > wDiff) {
-                scale = XML3D.webgl.MAX_PICK_BUFFER_HEIGHT / height;
-            } else {
-                scale = XML3D.webgl.MAX_PICK_BUFFER_WIDTH / width;
-            }
-        }
-        return {
-            width: Math.floor(width * scale),
-            height: Math.floor(height * scale),
-            scale: scale
-        }
-    }
-
-    /**
      *
      * @param {XML3D.webgl.GLContext} context
      * @param {number} width
      * @param {number} height
      * @constructor
      */
-    var PickingRenderPass = function (context, width, height) {
-        this.context = context;
+    var PickingRenderPass = function (context, opt) {
+        webgl.BaseRenderPass.call(this, context, opt);
         this.program = context.programFactory.getPickingObjectIdProgram();
-
-        var dim = calcPickingBufferDimension(width, height);
-
         var gl = this.context.gl;
-        this.target = new webgl.GLRenderTarget(context, {
-            width: dim.width,
-            height: dim.height,
-            colorFormat: gl.RGBA,
-            depthFormat: gl.DEPTH_COMPONENT16,
-            stencilFormat: null,
-            depthAsRenderbuffer : true,
-            scale: dim.scale
-        });
         this.clearBits = gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT;
     };
+    XML3D.createClass(PickingRenderPass, webgl.BaseRenderPass);
 
     XML3D.extend(PickingRenderPass.prototype, {
         renderScene: (function () {

@@ -15,9 +15,31 @@
     IRenderer.prototype.getRenderObjectFromPickingBuffer = function(x,y) {};
     IRenderer.prototype.dispose = function() {};
 
+    /**
+     * @param {number} width
+     * @param {number} height
+     * @returns {{width: number, height: number, scale: number}}
+     */
+    var calcPickingBufferDimension = function (width, height) {
+        var scale = 1.0;
 
-    /** @interface */
-    XML3D.webgl.IRenderer = IRenderer;
+        var hDiff = height - XML3D.webgl.MAX_PICK_BUFFER_HEIGHT;
+        var wDiff = width - XML3D.webgl.MAX_PICK_BUFFER_WIDTH;
+
+        if (hDiff > 0 || wDiff > 0) {
+            if (hDiff > wDiff) {
+                scale = XML3D.webgl.MAX_PICK_BUFFER_HEIGHT / height;
+            } else {
+                scale = XML3D.webgl.MAX_PICK_BUFFER_WIDTH / width;
+            }
+        }
+        return {
+            width: Math.floor(width * scale),
+            height: Math.floor(height * scale),
+            scale: scale
+        }
+    }
+
 
     /**
      * @implements {IRenderer}
@@ -36,7 +58,7 @@
         this.currentPickObj = null;
 
         this.mainPass = new webgl.ForwardRenderPass(context);
-        this.pickingPass = new webgl.PickingRenderPass(context, this.width, this.height);
+        this.pickingPass = this.createPickingPass();new webgl.PickingRenderPass(context, this.width, this.height);
 
         this.init();
     };
@@ -54,7 +76,6 @@
             this.bufferHandler = new XML3D.webgl.XML3DBufferHandler(this.context.gl, this);
             this.changeListener = new XML3D.webgl.DataChangeListener(this);
 
-            this.initFrameBuffers();
         },
         resizeCanvas : function (width, height) {
             this.width = width;
@@ -71,8 +92,6 @@
                 XML3D.debug.logError("Picking buffer creation failed. Disabled picking");
                 this.pickingDisabled = true;
             }
-
-            this.fbos = fbos;
         },
         requestRedraw: function(reason, forcePickingRedraw) {
 
@@ -96,7 +115,7 @@
         },
         renderToCanvas : function() {
             this.prepareRendering();
-            var stats = this.mainPass.renderToCanvas(this.scene, this.width, this.height);
+            var stats = this.mainPass.renderScene(this.scene);
             this.needDraw = false;
             return stats;
         },
@@ -110,6 +129,21 @@
         },
         prepareRendering : function() {
             this.scene.update();
+        },
+        createPickingPass : function() {
+            var gl = this.context.gl;
+            var dim = calcPickingBufferDimension(this.width, this.height);
+
+            var target = new webgl.GLRenderTarget(this.context, {
+                width: dim.width,
+                height: dim.height,
+                colorFormat: gl.RGBA,
+                depthFormat: gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer : true,
+                scale: dim.scale
+            });
+            return new webgl.PickingRenderPass(this.context, { target: target });
         },
         dispose: function() {
             this.scene.clear();

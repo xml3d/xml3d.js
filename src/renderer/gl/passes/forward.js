@@ -12,9 +12,6 @@
     XML3D.extend(ForwardRenderPass.prototype, {
         renderScene: (function () {
 
-            var c_viewMat_tmp = XML3D.math.mat4.create();
-            var c_projMat_tmp = XML3D.math.mat4.create();
-
             return function (scene) {
                 var gl = this.context.gl,
                     target = this.target;
@@ -24,22 +21,7 @@
                 gl.viewport(0, 0, target.getWidth(), target.getHeight());
                 gl.enable(gl.DEPTH_TEST);
 
-                var camera = {};
-                scene.getActiveView().getViewMatrix(c_viewMat_tmp);
-                camera.view = c_viewMat_tmp;
-
-                scene.ready.forEach(function (obj) {
-                    obj.updateModelViewMatrix(camera.view);
-                    obj.updateNormalMatrix();
-                });
-
-                scene.updateBoundingBox();
-                scene.getActiveView().getProjectionMatrix(c_projMat_tmp, target.getWidth() / target.getHeight());
-                camera.proj = c_projMat_tmp;
-
-                scene.ready.forEach(function (obj) {
-                    obj.updateModelViewProjectionMatrix(camera.proj);
-                });
+                scene.updateReadyObjectsFromActiveView(target.getWidth() / target.getHeight());
 
                 var stats = { objCount: 0, triCount: 0 };
 
@@ -180,7 +162,7 @@
                         continue;
 
                     var mesh = obj.mesh;
-                    XML3D.debug.assert(mesh && mesh.valid, "Mesh has to be valid at his point.");
+                    XML3D.debug.assert(mesh, "We need a mesh at his point.");
 
                     obj.getWorldMatrix(tmpModelMatrix);
                     parameters["modelMatrix"] = tmpModelMatrix;

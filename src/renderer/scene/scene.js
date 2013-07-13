@@ -208,6 +208,27 @@
             this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
         };
 
+        this.updateReadyObjectsFromActiveView = (function() {
+            var c_viewMat_tmp = XML3D.math.mat4.create();
+            var c_projMat_tmp = XML3D.math.mat4.create();
+
+            return function(aspectRatio) {
+                this.getActiveView().getViewMatrix(c_viewMat_tmp);
+
+                this.ready.forEach(function (obj) {
+                    obj.updateModelViewMatrix(c_viewMat_tmp);
+                    obj.updateNormalMatrix();
+                });
+
+                this.updateBoundingBox();
+                this.getActiveView().getProjectionMatrix(c_projMat_tmp, aspectRatio);
+
+                this.ready.forEach(function (obj) {
+                    obj.updateModelViewProjectionMatrix(c_projMat_tmp);
+                });
+            }
+        }());
+
         this.getBoundingBox = function(bb) {
             XML3D.math.vec3.copy(bb.min, this.boundingBox.min);
             XML3D.math.vec3.copy(bb.max, this.boundingBox.max);

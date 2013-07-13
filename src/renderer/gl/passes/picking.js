@@ -55,8 +55,11 @@
                 gl.disable(gl.CULL_FACE);
                 gl.disable(gl.BLEND);
 
-                gl.viewport(0, 0, this.target.width, this.target.height);
+                gl.viewport(0, 0, this.target.getWidth(), this.target.getHeight());
                 gl.clear(this.clearBits);
+
+                scene.updateReadyObjectsFromActiveView(this.target.getWidth() / this.target.getHeight());
+
 
                 this.program.bind();
                 var objects = scene.ready;
@@ -65,7 +68,7 @@
                     var obj = objects[j];
                     var mesh = obj.mesh;
 
-                    if (!mesh.valid || !obj.visible)
+                    if (!obj.isVisible())
                         continue;
 
                     var parameters = {};

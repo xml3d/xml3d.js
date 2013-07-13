@@ -78,9 +78,9 @@
                 bbMin[0] = bboxVal[0];
                 bbMin[1] = bboxVal[1];
                 bbMin[2] = bboxVal[2];
-                bbMax[0] = bboxVal[0];
-                bbMax[1] = bboxVal[1];
-                bbMax[2] = bboxVal[2];
+                bbMax[0] = bboxVal[3];
+                bbMax[1] = bboxVal[4];
+                bbMax[2] = bboxVal[5];
                 this.setObjectSpaceBoundingBox(bbMin, bbMax);
                 this.boundingBoxAnnotated = true;
             } else {

@@ -1,6 +1,5 @@
 module("Paging", {
     setup : function() {
-        console.log("setup")
         this.scene = new XML3D.webgl.Scene();
     }
 });
@@ -158,4 +157,26 @@ test("Bounding Boxes", 7, function() {
     group.setLocalMatrix(XML3D.math.mat4.create());
     group.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeBox(actualBB.getAsXML3DBox(), new XML3DBox(new XML3DVec3(-2,-2,-2),new XML3DVec3(2,5,2)) , EPSILON, "Original group's transformation removed");
+});
+
+test("Annotated Bounding Box", function() {
+    var xflowGraph = new Xflow.Graph();
+    var dataNode = xflowGraph.createDataNode(false);
+    var obj = this.scene.createRenderObject({
+        xflow : dataNode
+    });
+    var actualBB = new XML3D.webgl.BoundingBox();
+    this.scene.getBoundingBox(actualBB);
+    ok(actualBB.isEmpty(), "No data annotated: BB is empty");
+    ok(!obj.boundingBoxAnnotated, "RenderObject marked as not annotated");
+
+    var buffer = new Xflow.BufferEntry(Xflow.DATA_TYPE.FLOAT3, new Float32Array([-2,-2,-2,2,2,2]));
+    var xflowInputNode = XML3D.data.xflowGraph.createInputNode();
+    xflowInputNode.name = "boundingBox";
+    xflowInputNode.data = buffer;
+    dataNode.appendChild(xflowInputNode);
+
+    this.scene.rootNode.getWorldSpaceBoundingBox(actualBB);
+    QUnit.closeBox(actualBB.getAsXML3DBox(), new XML3DBox(new XML3DVec3(-2,-2,-2),new XML3DVec3(2,2,2)) , EPSILON, "Group BB matches annotated BB");
+
 });

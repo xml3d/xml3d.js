@@ -109,7 +109,22 @@
                     obj.updateModelViewProjectionMatrix(c_projMat_tmp);
                 });
             }
-        }())
+        }()),
+        addChildEvent: function(parent, child) {
+            if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
+                this.queue.push(child);
+                this.context.requestRedraw("Object was added to scene.");
+            }
+        },
+        removeChildEvent: function(parent, child) {
+            if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
+                this.remove(child);
+                this.context.requestRedraw("Object was removed from scene.");
+            }
+        },
+        viewChanged: function() {
+            this.context.requestRedraw("Active view changed.");
+        }
     });
     webgl.GLScene = GLScene;
 

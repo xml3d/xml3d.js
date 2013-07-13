@@ -32,7 +32,8 @@
         VIEW: 4
     }
 
-    var empty = function() {};
+    var empty = function () {
+    };
 
     XML3D.extend(Scene.prototype, {
         /**
@@ -48,7 +49,7 @@
             this.activeView = view;
             this.viewChanged();
         },
-       createRenderObject: function (opt) {
+        createRenderObject: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderObject.ENTRY_SIZE);
             var renderObject = new webgl.RenderObject(this, pageEntry, opt);
             return renderObject;
@@ -94,7 +95,7 @@
             }
             this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
         },
-       getBoundingBox: function (bb) {
+        getBoundingBox: function (bb) {
             XML3D.math.vec3.copy(bb.min, this.boundingBox.min);
             XML3D.math.vec3.copy(bb.max, this.boundingBox.max);
         },

@@ -57,6 +57,7 @@
         /** @type {XML3D.webgl.RenderObject} */
         this.currentPickObj = null;
 
+        this.context.requestRedraw = this.requestRedraw.bind(this);
         this.mainPass = new webgl.ForwardRenderPass(context);
         this.pickingPass = this.createPickingPass();new webgl.PickingRenderPass(context, this.width, this.height);
 
@@ -93,7 +94,8 @@
             } */
         },
         requestRedraw: function(reason, forcePickingRedraw) {
-
+            XML3D.debug.logDebug("Request redraw because:", reason);
+            this.needsDraw = true;
         },
         getWorldSpaceNormalByPoint: function(x,y) {
             if (!this.pickedObject || this._pickingDisabled)

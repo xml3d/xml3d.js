@@ -264,7 +264,6 @@
     }
 
     MaterialShaderTemplate.prototype.update = function(lights) {
-        console.log("MaterialShaderTmeplate::update");
         if(!this.isValid())
             return;
         if (this.dataChanged) {

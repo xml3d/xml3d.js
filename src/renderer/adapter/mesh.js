@@ -26,8 +26,12 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     p.createRenderNode = function() {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();
-        this.renderNode = this.getScene().createRenderObject({parent : parentNode, meshAdapter : this,
-                         visible : !this.node.visible ? false : undefined});
+        this.renderNode = this.getScene().createRenderObject({
+            parent : parentNode,
+            meshAdapter : this,
+            xflow: this.dataAdapter.getXflowNode(),
+            visible : !this.node.visible ? false : undefined
+        });
         var bbox = new XML3D.webgl.BoundingBox();
         this.renderNode.setObjectSpaceBoundingBox(bbox.min, bbox.max);
     };
@@ -70,8 +74,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 break;
 
             case "type":
-                var newGLType = this.getGLTypeFromString(evt.wrapped.newValue);
-                this.renderNode.mesh.glType = newGLType;
+                this.renderNode.setType(evt.wrapped.newValue);
                 break;
 
             default:

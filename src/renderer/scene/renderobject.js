@@ -28,6 +28,8 @@
     var NORMAL_MATRIX_OFFSET = MODELVIEWPROJECTION_MATRIX_OFFSET + 16;
     /** @const */
     var ENTRY_SIZE = NORMAL_MATRIX_OFFSET + 16;
+    /** @const */
+    var BBOX_ANNOTATION_FILTER = ["boundingBox"];
 
 
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
@@ -45,6 +47,14 @@
         opt = opt || {};
         /** @type {XML3D.webl.MeshRenderAdapter} */
         this.meshAdapter = opt.meshAdapter;
+        this.data = opt.xflow;
+
+        this.boundingBoxAnnotated = false;
+        if (this.data) {
+            // Bounding Box annotated
+            this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
+            this.boundingBoxAnnotationChanged(this.annotatedBoundingBoxRequest);
+        }
         this.shader = opt.shader || null;
         /** {Object?} **/
         this.override = null;
@@ -58,6 +68,25 @@
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode);
     XML3D.extend(RenderObject.prototype, {
+        boundingBoxAnnotationChanged: function(request){
+            var result = request.getResult();
+            var bboxData = result.getOutputData(BBOX_ANNOTATION_FILTER[0]);
+            if(bboxData) {
+                var bboxVal = bboxData.getValue();
+                var bbMin = XML3D.math.vec3.create();
+                var bbMax = XML3D.math.vec3.create();
+                bbMin[0] = bboxVal[0];
+                bbMin[1] = bboxVal[1];
+                bbMin[2] = bboxVal[2];
+                bbMax[0] = bboxVal[0];
+                bbMax[1] = bboxVal[1];
+                bbMax[2] = bboxVal[2];
+                this.setObjectSpaceBoundingBox(bbMin, bbMax);
+                this.boundingBoxAnnotated = true;
+            } else {
+                this.boundingBoxAnnotated = false;
+            }
+        },
         onenterReady:function () {
             this.scene.moveFromQueueToReady(this);
         },

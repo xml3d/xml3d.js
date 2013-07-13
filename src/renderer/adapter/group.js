@@ -17,7 +17,12 @@
         //TODO: Shouldn't have to go through the renderer...
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();
-        this.renderNode = this.getScene().createRenderGroup({parent: parentNode, shaderHandle: this.getShaderHandle(), visible: this.node.visible});
+        this.renderNode = this.getScene().createRenderGroup({
+            parent: parentNode,
+            shaderHandle: this.getShaderHandle(),
+            visible: this.node.visible,
+            name: this.node.id
+        });
         this.updateLocalMatrix();
         var bbox = new XML3D.webgl.BoundingBox();
         this.renderNode.setWorldSpaceBoundingBox(bbox.min, bbox.max);

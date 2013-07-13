@@ -13,6 +13,7 @@
         this.type = type;
         this.scene = scene;
         this.setParent(opt.parent || scene.rootNode);
+        this.name = opt.name || "";
         this.page = pageEntry.page;
         this.offset = pageEntry.offset;
         this.entrySize = pageEntry.size;
@@ -37,6 +38,12 @@
             if (parent && parent.addChild) {
                 parent.addChild(this);
             }
+        },
+        traverse: function(callback) {
+            callback(this);
+            this.children.forEach(function(child){
+                child.traverse(callback);
+            })
         },
 
         getWorldMatrix: function(dest) {

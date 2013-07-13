@@ -71,7 +71,7 @@
             var adapter = shaderAdapterHandler.getAdapter();
 
             if (adapter.templateId !== -1) {
-                return this.closures[adapter.closure];
+                return this.closures[adapter.templateId];
             }
             var sc = new MaterialShaderTemplate(this.context, adapter, lights);
             adapter.templateId = this.nextShaderId();

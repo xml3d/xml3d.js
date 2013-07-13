@@ -110,7 +110,7 @@
                         this.shaderClosure.update();
                         this.shader = this.shaderClosure.getProgram();
                     } else {
-                        // DefaultShader
+                        console.log("No shader:", this.name);// DefaultShader
                     }
                     return !!this.shader;
             }

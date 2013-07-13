@@ -178,5 +178,6 @@ test("Annotated Bounding Box", function() {
 
     this.scene.rootNode.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeBox(actualBB.getAsXML3DBox(), new XML3DBox(new XML3DVec3(-2,-2,-2),new XML3DVec3(2,2,2)) , EPSILON, "Group BB matches annotated BB");
+    ok(obj.boundingBoxAnnotated, "RenderObject marked as annotated");
 
 });

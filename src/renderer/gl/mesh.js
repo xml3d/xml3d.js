@@ -55,7 +55,7 @@
             try {
                 return this.buffers.index.length;
             } catch (e) {
-                XML3D.debug.logError("Could not calculate element count.", e);
+                //XML3D.debug.logError("Could not calculate element count.", e);
                 return 0;
             }
         },
@@ -66,7 +66,7 @@
             try {
                 return (this.vertexCount != null ? this.vertexCount : this.buffers.position.length / 3);
             } catch (e) {
-                XML3D.debug.logError("Could not calculate vertex count.", e);
+                //XML3D.debug.logError("Could not calculate vertex count.", e);
                 return 0;
             }
         },

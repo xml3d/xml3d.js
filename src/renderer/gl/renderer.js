@@ -117,7 +117,7 @@
         renderToCanvas : function() {
             this.prepareRendering();
             var stats = this.mainPass.renderScene(this.scene);
-            this.needDraw = false;
+            this.needsDraw = false;
             return stats;
         },
         getRenderObjectFromPickingBuffer : function(x,y) {

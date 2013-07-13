@@ -129,10 +129,10 @@
                 }
 
                 // At this point, we have to gurantee (via FSM), that the RenderObject has a valid shader
-                var shader = objectArray[0].shader;
+                var program = objectArray[0].shader;
                 var lights = scene.lights;
 
-                if (shader.needsLights || lights.changed) {
+                if (program.needsLights || lights.changed) {
                     parameters["pointLightPosition"] = lights.point.position;
                     parameters["pointLightAttenuation"] = lights.point.attenuation;
                     parameters["pointLightVisibility"] = lights.point.visibility;
@@ -153,11 +153,11 @@
                     parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
 
                     parameters["spotLightSoftness"] = lights.spot.softness;
-                    shader.needsLights = false;
+                    program.needsLights = false;
                 }
 
 
-                shader.bind();
+                program.bind();
                 //this.shaderManager.updateActiveShader(shader);
                 scene.getActiveView().getViewMatrix(c_viewMat_tmp);
                 scene.getActiveView().getProjectionMatrix(c_projMat_tmp, this.width / this.height);
@@ -168,7 +168,7 @@
                 parameters["screenWidth"] = this.width;
 
                 //Set global data that is shared between all objects using this shader
-                shader.setUniformVariables(parameters);
+                program.setUniformVariables(parameters);
                 parameters = {};
 
                 for (var i = 0, n = objectArray.length; i < n; i++) {
@@ -191,13 +191,13 @@
                     obj.getNormalMatrix(tmpNormalMatrix);
                     parameters["normalMatrix"] = tmpNormalMatrix;
 
-                    shader.setUniformVariables(parameters);
+                    program.setUniformVariables(parameters);
                     if (obj.override !== null) {
                         // TODO: Set back to default after rendering
                         // this.shaderManager.setUniformVariables(shader, obj.override);
                     }
 
-                    triCount += webgl.CoreRenderer.drawObject(gl, shader, mesh);
+                    triCount += mesh.draw(program);
                     objCount++;
 
                     if (obj.override !== null) {

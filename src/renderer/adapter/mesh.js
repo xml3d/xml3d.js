@@ -8,33 +8,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     /**
      * @constructor
      */
-    var MeshInfo = function(type) {
-        this.vbos = {};
-        this.isIndexed = false;
-        this.complete = false;
-        this.glType = getGLTypeFromString(type);
-        this.bbox = new window.XML3DBox();
-
-        this.getElementCount = function() {
-            try {
-                return this.vbos.index[0].length;
-            } catch(e) {
-                return 0;
-            }
-        }
-        this.getVertexCount = function() {
-            try {
-                return (this.vertexCount !== undefined ? this.vertexCount[0] : this.vbos.position[0].length / 3);
-            } catch(e) {
-                return 0;
-            }
-        }
-        this.update = emptyFunction;
-    }
-
-    /**
-     * @constructor
-     */
     var MeshRenderAdapter = function(factory, node) {
         XML3D.webgl.TransformableAdapter.call(this, factory, node);
 
@@ -176,11 +149,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
         this.createMeshData();
         this.createPerObjectData();
-        return this.renderNode.mesh.valid;
+        return true;
     }
-
-    var emptyFunction = function() {};
-
 
     /**
      * @param {Xflow.data.Request} request
@@ -221,11 +191,13 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      */
     p.createMeshData = function() {
         var obj = this.renderNode;
-        obj.mesh = obj.mesh || new MeshInfo(this.node.type);
+        obj.mesh = obj.mesh || new XML3D.webgl.GLMesh(this.factory.getRenderer().context, this.node.type);
 
         var dataResult =  this.computeRequest.getResult();
 
-        obj.mesh.valid = obj.mesh.complete = true; // Optimistic appraoch
+        var vertexCount = 0,
+            complete = true; // Optimistic appraoch
+
         for ( var name in this.requestObject) {
             var attr = this.requestObject[name] || {};
             var entry = dataResult.getOutputData(name);
@@ -240,14 +212,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             }*/
             if(!entry || !entry.getValue()) {
                 if(attr.required) {
-                    XML3D.debug.logInfo("Mesh not complete, missing: ", name, entry);
-                    obj.mesh.complete = false;
+                    XML3D.debug.logInfo("Mesh not complete, missing required: ", name, entry);
+                    complete = false;
                 }
                 continue;
             }
 
             if (name == "vertexCount") {
-                obj.mesh.vertexCount = entry.getValue();
+                vertexCount = entry.getValue();
                 continue;
             }
 
@@ -263,21 +235,21 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         if(bbox) {
             this.renderNode.setObjectSpaceBoundingBox(bbox.min, bbox.max);
         }
-
-        obj.mesh.valid = true;
+        obj.mesh.setComplete(complete);
+        if(vertexCount)
+            obj.mesh.setVertexCount(vertexCount[0]);
     };
 
     /**
      * @param {string} name
      * @param {Object} attr
      * @param {Xflow.BufferEntry} entry
-     * @param {MeshInfo} meshInfo
+     * @param {GLMesh} mesh
      */
-    p.handleBuffer = function(name, attr, entry, meshInfo) {
+    p.handleBuffer = function(name, attr, entry, mesh) {
         var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
         var buffer = webglData.buffer;
         var gl = this.factory.renderer.context.gl;
-
 
         switch(webglData.changed) {
             case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:
@@ -295,24 +267,18 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 }
                 buffer.tupleSize = entry.getTupleSize();
                 webglData.buffer = buffer;
+                mesh.setBuffer(name, buffer);
                 break;
             default:
                 break;
         }
-
-        meshInfo.vbos[name] = [];
-        meshInfo.vbos[name][0] = buffer;
-        meshInfo.isIndexed = meshInfo.isIndexed || name == "index";
-        //if(meshInfo.isIndexed)
-            //console.error("Indexed");
-
         webglData.changed = 0;
     }
     /**
      * @param {string} name
      * @param {Xflow.TextureEntry} entry
      * @param {string} shaderId
-     * @param {MeshInfo} meshInfo
+     * @param {GLMesh} meshInfo
      */
     p.handleTexture = function(name, entry, shaderId, meshInfo) {
         var prog = this.factory.renderer.shaderManager.getShaderByURL(shaderId);
@@ -415,28 +381,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         return GL.FLOAT;
     };
 
-    /**
-     * @param {string} typeName
-     */
-    function getGLTypeFromString(typeName) {
-        var GL = window.WebGLRenderingContext;
-        if (typeName && typeName.toLoweGLase)
-            typeName = typeName.toLowerCase();
-        switch (typeName) {
-            case "triangles":
-                return GL.TRIANGLES;
-            case "tristrips":
-                return GL.TRIANGLE_STRIP;
-            case "points":
-                return GL.POINTS;
-            case "lines":
-                return GL.LINES;
-            case "linestrips":
-                return GL.LINE_STRIP;
-            default:
-                return GL.TRIANGLES;
-        }
-    };
+
 
     // Export to XML3D.webgl namespace
     XML3D.webgl.MeshRenderAdapter = MeshRenderAdapter;

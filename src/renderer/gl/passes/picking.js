@@ -119,7 +119,7 @@
                     parameters.modelViewProjectionMatrix = c_mvp;
 
                     this.program.setUniformVariables(parameters);
-                    webgl.CoreRenderer.drawObject(gl, this.program, mesh);
+                    mesh.draw(this.program);
                 }
                 this.program.unbind();
                 this.target.unbind();

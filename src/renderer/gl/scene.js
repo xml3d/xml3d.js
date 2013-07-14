@@ -119,6 +119,7 @@
         removeChildEvent: function(parent, child) {
             if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
                 this.remove(child);
+                child.dispose();
                 this.context.requestRedraw("Object was removed from scene.");
             }
         },

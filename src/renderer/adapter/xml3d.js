@@ -34,10 +34,10 @@
                 this.updateActiveView(evt.adapter);
                 return;
             case XML3D.events.NODE_INSERTED:
-                this.factory.renderer.sceneTreeAddition(evt);
+                this.initElement(evt.wrapped.target);
                 return;
             case XML3D.events.NODE_REMOVED:
-                this.factory.renderer.sceneTreeRemoval(evt);
+                // Handled in removed node
                 return;
         }
 

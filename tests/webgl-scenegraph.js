@@ -50,8 +50,8 @@ function getHandler(x) {
 };
 
 function getContextForXml3DElement(x) {
-    var handler = getHandler(x);
-    return handler ? handler.renderer.gl : null;
+    var renderer = getRenderer(x);
+    return renderer ? renderer.context.gl : null;
 };
 
 

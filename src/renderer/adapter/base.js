@@ -18,6 +18,14 @@
         return this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
     };
 
+    /**
+     * @param element
+     */
+    XML3D.webgl.RenderAdapter.prototype.initElement = function(element) {
+        this.factory.getAdapter(element);
+    };
+
+
     XML3D.webgl.RenderAdapter.prototype.applyTransformMatrix = function(transform) {
         return transform;
     };

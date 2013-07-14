@@ -273,7 +273,10 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 webglData.buffer = buffer;
                 mesh.setBuffer(name, buffer);
                 break;
-            default:
+            case 0:
+                // No change, but maybe not set as request comes from other mesh than the
+                // creating mesh
+                mesh.setBuffer(name, buffer);
                 break;
         }
         webglData.changed = 0;

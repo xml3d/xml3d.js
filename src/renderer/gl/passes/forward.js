@@ -23,8 +23,7 @@
 
                 scene.updateReadyObjectsFromActiveView(target.getWidth() / target.getHeight());
 
-                var stats = { objCount: 0, triCount: 0 };
-
+                var count = { objects: 0, primitives: 0 };
                 //Sort objects by shader/transparency
                 var opaqueObjects = [];
                 var transparentObjects = [];
@@ -32,16 +31,16 @@
 
                 //Render opaque objects
                 for (var shaderName in opaqueObjects) {
-                    this.renderObjectsToActiveBuffer(opaqueObjects[shaderName], shaderName, scene, { transparent: false, stats: stats });
+                    this.renderObjectsToActiveBuffer(opaqueObjects[shaderName], shaderName, scene, { transparent: false, stats: count });
                 }
 
                 //Render transparent objects
                 for (var k = 0; k < transparentObjects.length; k++) {
                     var objectArray = [transparentObjects[k]];
-                    this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, scene, { transparent: true, stats: stats });
+                    this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, scene, { transparent: true, stats: count });
                 }
                 scene.lights.changed = false;
-                return [stats.objCount, stats.triCount];
+                return { count: count };
             }
         }()),
         sortObjects: (function () {
@@ -98,7 +97,7 @@
 
             return function (objectArray, shaderId, scene, opts) {
                 var objCount = 0;
-                var triCount = 0;
+                var primitiveCount = 0;
                 var parameters = {};
                 var stats = opts.stats || {};
                 var transparent = opts.transparent === true || false;
@@ -182,7 +181,7 @@
                         // this.shaderManager.setUniformVariables(shader, obj.override);
                     }
 
-                    triCount += mesh.draw(program);
+                    primitiveCount += mesh.draw(program);
                     objCount++;
 
                     if (obj.override !== null) {
@@ -194,8 +193,8 @@
 
                 }
 
-                stats.objCount += objCount;
-                stats.triCount += triCount;
+                stats.objects += objCount;
+                stats.primitives += primitiveCount;
                 return stats;
             }
         }())

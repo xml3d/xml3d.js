@@ -41,7 +41,6 @@
 
         this.needsDraw = true;
         this.needPickingDraw = true;
-        this.pickingDisabled = false;
 
         this.context.requestRedraw = this.requestRedraw.bind(this);
         this.mainPass = new webgl.ForwardRenderPass(context);
@@ -52,6 +51,9 @@
 
         this.init();
     };
+
+    // Just to satisfy jslint
+    GLRenderer.prototype.generateRay = function() {};
 
     XML3D.extend(GLRenderer.prototype, {
         init: function () {

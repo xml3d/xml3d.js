@@ -71,18 +71,18 @@ test("Change visibility via script", 9, function() {
         actual,
         win = this.doc.defaultView,
         gl = getContextForXml3DElement(x),
-        testFunc = null, h = getHandler(x);
+        testFunc = null, renderer = getRenderer(x);
 
     x.addEventListener("framedrawn", function(n) {
             ok("Redraw was triggered");
-            ok(!h.needDraw, "Redraw not required");
+            ok(!renderer.needsRedraw(), "Redraw not required");
             if(testFunc)
                 testFunc(n);
             start();
     });
     testFunc = function(n) {
-        equal(n.detail.numberOfObjectsDrawn, 1, "1 Object drawn");
-        equal(n.detail.numberOfTrianglesDrawn, 2, "2 Triangles drawn");
+        equal(n.detail.count.objects, 1, "1 Object drawn");
+        equal(n.detail.count.primitives, 2, "2 Triangles drawn");
         actual = win.getPixelValue(gl, 40, 40);
         deepEqual(actual, [255,0,0,255], "Red at 40,40");
         actual = win.getPixelValue(gl, 0, 0);
@@ -90,7 +90,7 @@ test("Change visibility via script", 9, function() {
     };
     stop();
     this.doc.getElementById("myGroup").visible = true;
-    ok(h.needDraw, "Redraw required");
+    ok(renderer.needsRedraw(), "Redraw required");
 });
 
 test("Add children in invisible group", 8, function() {

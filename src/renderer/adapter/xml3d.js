@@ -111,8 +111,7 @@
 
     XML3DRenderAdapter.prototype.generateRay = function(x, y) {
         var relativeMousePos = XML3D.webgl.convertPageCoords(this.node, x, y);
-
-        return this.factory.handler.generateRay(relativeMousePos.x, relativeMousePos.y);
+        return this.factory.getRenderer().generateRay(relativeMousePos.x, relativeMousePos.y);
     };
     XML3D.webgl.XML3DRenderAdapter = XML3DRenderAdapter;
 

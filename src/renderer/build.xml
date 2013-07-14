@@ -29,7 +29,7 @@
         <file name="gl/mesh.js" />
         <file name="gl/passes/base.js" />
         <file name="gl/passes/forward.js" />
-        <file name="gl/passes/picking.js" />
+        <file name="gl/passes/pickObject.js" />
         <file name="gl/passes/pickPosition.js" />
         <file name="gl/passes/pickNormal.js" />
         <file name="programfactory.js" />

@@ -45,7 +45,7 @@
         this.context.requestRedraw = this.requestRedraw.bind(this);
         this.mainPass = new webgl.ForwardRenderPass(context);
         var pickingTarget = this.createPickingTarget();
-        this.pickingPass = new webgl.PickingRenderPass(this.context, { target: pickingTarget });
+        this.pickObjectPass = new webgl.PickObjectRenderPass(this.context, { target: pickingTarget });
         this.pickPositionPass = new webgl.PickPositionRenderPass(this.context, { target: pickingTarget });
         this.pickNormalPass = new webgl.PickNormalRenderPass(this.context, { target: pickingTarget });
 
@@ -118,8 +118,8 @@
             y = webgl.canvasToGlY(this.canvas, y);
             //if(this.needsDraw) {
             this.prepareRendering();
-            this.pickingPass.renderScene(this.scene);
-            this.pickedObject = this.pickingPass.getRenderObjectFromPickingBuffer(x, y, this.scene);
+            this.pickObjectPass.renderScene(this.scene);
+            this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene);
             //}
             return this.pickedObject;
         },

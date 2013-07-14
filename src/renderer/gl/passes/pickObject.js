@@ -8,15 +8,15 @@
      * @param {number} height
      * @constructor
      */
-    var PickingRenderPass = function (context, opt) {
+    var PickObjectRenderPass = function (context, opt) {
         webgl.BaseRenderPass.call(this, context, opt);
         this.program = context.programFactory.getPickingObjectIdProgram();
         var gl = this.context.gl;
         this.clearBits = gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT;
     };
-    XML3D.createClass(PickingRenderPass, webgl.BaseRenderPass);
+    XML3D.createClass(PickObjectRenderPass, webgl.BaseRenderPass);
 
-    XML3D.extend(PickingRenderPass.prototype, {
+    XML3D.extend(PickObjectRenderPass.prototype, {
         renderScene: (function () {
 
             var c_mvp = XML3D.math.mat4.create();
@@ -94,6 +94,6 @@
         }
     });
 
-    webgl.PickingRenderPass = PickingRenderPass;
+    webgl.PickObjectRenderPass = PickObjectRenderPass;
 
 }(XML3D.webgl));

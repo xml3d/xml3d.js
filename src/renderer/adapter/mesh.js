@@ -28,11 +28,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         var parentNode = parent.getRenderNode && parent.getRenderNode();
         this.renderNode = this.getScene().createRenderObject({
             parent : parentNode,
-            meshAdapter : this,
-            xflow: this.dataAdapter.getXflowNode(),
+            node: this.node,
+            object: {
+                data: this.dataAdapter.getXflowNode(),
+                type: this.node.getAttribute("type")
+            },
             name: this.node.id,
             visible : !this.node.visible ? false : undefined,
-            node: this.node
+            meshAdapter : this
         });
         var bbox = new XML3D.webgl.BoundingBox();
         this.renderNode.setObjectSpaceBoundingBox(bbox.min, bbox.max);

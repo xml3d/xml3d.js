@@ -62,32 +62,32 @@
         this.nextShaderId = function() {
             return uniqueShaderId++;
         }
-        this.closures = [];
+        this.templates = [];
+        this.defaultTemplate = new DefaultTemplate(context);
     };
 
-    ShaderTemplateFactory.prototype.create = function(shaderAdapterHandler, lights) {
-        //shaderAdapterHandler.addEventListener(XML3D.events.ADAPTER_HANDLE_CHANGED);
-        if(shaderAdapterHandler.hasAdapter()) {
-            var adapter = shaderAdapterHandler.getAdapter();
-
-            if (adapter.templateId !== -1) {
-                return this.closures[adapter.templateId];
-            }
-            var sc = new MaterialShaderTemplate(this.context, adapter, lights);
-            adapter.templateId = this.nextShaderId();
-            this.closures[adapter.templateId] = sc;
-            return sc;
-        } else {
-            return new DefaultTemplate(this.context);
+    ShaderTemplateFactory.prototype.create = function (adapter) {
+        if (!adapter) {
+            return this.defaultTemplate;
         }
+        if (adapter.templateId !== -1) {
+            return this.templates[adapter.templateId];
+        }
+
+        var sc = new MaterialShaderTemplate(this.context, adapter);
+
+        adapter.templateId = this.nextShaderId();
+        this.templates[adapter.templateId] = sc;
+
+        return sc;
     }
 
     ShaderTemplateFactory.prototype.getTemplateById = function(id) {
-        return this.closures[id];
+        return this.templates[id];
     }
 
-        ShaderTemplateFactory.prototype.update = function(scene) {
-        this.closures.forEach(function(c) {
+    ShaderTemplateFactory.prototype.update = function (scene) {
+        this.templates.forEach(function (c) {
             c.update();
         })
     }

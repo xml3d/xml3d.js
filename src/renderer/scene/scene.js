@@ -19,6 +19,7 @@
                 return this.point.length + this.directional.length + this.spot.length;
             }
         };
+        this.shaderInfos = [];
         /** @type RenderView */
         this.activeView = null;
         this.rootNode = this.createRootNode();
@@ -74,6 +75,9 @@
             this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
             this.lights.structureChanged = true;
             return new webgl.RenderLight(this, pageEntry, opt);
+        },
+        createShaderInfo: function (opt) {
+            return new webgl.ShaderInfo(this, opt);
         },
 
         addLightDataOffsetToPageEntry: function (pageEntry, lightType) {

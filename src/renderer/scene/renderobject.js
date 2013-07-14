@@ -45,18 +45,18 @@
     var RenderObject = function (scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.OBJECT, scene, pageEntry, opt);
         opt = opt || {};
-        /** @type {XML3D.webl.MeshRenderAdapter} */
+        /** TODO: Remove mesh adapter as soon as it's superfluous */
         this.meshAdapter = opt.meshAdapter;
-        this.data = opt.xflow;
+        this.object = opt.object || {};
+        this.shader = opt.shader || {};
         this.node = opt.node;
 
         this.boundingBoxAnnotated = false;
-        if (this.data) {
+        if (this.object.data) {
             // Bounding Box annotated
-            this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
+            this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.object.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
             this.boundingBoxAnnotationChanged(this.annotatedBoundingBoxRequest);
         }
-        this.shader = opt.shader || null;
         /** {Object?} **/
         this.override = null;
         this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
@@ -69,6 +69,10 @@
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode);
     XML3D.extend(RenderObject.prototype, {
+        setType: function(type) {
+            this.type = type;
+            // TODO: this.typeChangedEvent
+        },
         boundingBoxAnnotationChanged: function(request){
             var result = request.getResult();
             var bboxData = result.getOutputData(BBOX_ANNOTATION_FILTER[0]);
@@ -96,9 +100,7 @@
         },
         onafterlightsChanged:function (name, from, to, lights) {
             if (lights) {
-                var shaderHandle = this.parent.getShaderHandle();
-                this.shaderClosure = this.scene.shaderFactory.create(shaderHandle, lights);
-                //this.shader = shaderManager.createShader(shaderHandle.adapter, lights);
+                this.setShader(this.parent.getShaderHandle());
             }
         },
         onbeforedataComplete:function (name, from, to) {
@@ -235,8 +237,11 @@
         },
 
         setShader: function(newHandle) {
-            this.shaderClosure = this.scene.shaderFactory.create(newHandle, this.scene.lights);
-            this.materialChanged();
+            if (newHandle !== this.shader.handle) {
+                this.shader.template = this.scene.shaderFactory.create(newHandle);
+                this.shader.handle = newHandle;
+                this.materialChanged();
+            }
         },
 
         setObjectSpaceBoundingBox: function(min, max) {

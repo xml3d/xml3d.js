@@ -73,9 +73,7 @@
          * @param {number} x Screen Coordinate of color buffer
          * @param {number} y Screen Coordinate of color buffer
          * @param {XML3D.webgl.GLScene} scene Scene
-         * @param {Object} buffer Buffer
          * @returns {XML3D.webgl.RenderObject|null} Picked Object
-         *
          */
         getRenderObjectFromPickingBuffer: function (x, y, scene) {
             var data = this.readPixelDataFromBuffer(x, y);

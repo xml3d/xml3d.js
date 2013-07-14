@@ -48,6 +48,7 @@
         /** @type {XML3D.webl.MeshRenderAdapter} */
         this.meshAdapter = opt.meshAdapter;
         this.data = opt.xflow;
+        this.node = opt.node;
 
         this.boundingBoxAnnotated = false;
         if (this.data) {

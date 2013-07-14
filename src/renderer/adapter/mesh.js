@@ -31,7 +31,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             meshAdapter : this,
             xflow: this.dataAdapter.getXflowNode(),
             name: this.node.id,
-            visible : !this.node.visible ? false : undefined
+            visible : !this.node.visible ? false : undefined,
+            node: this.node
         });
         var bbox = new XML3D.webgl.BoundingBox();
         this.renderNode.setObjectSpaceBoundingBox(bbox.min, bbox.max);

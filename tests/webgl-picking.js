@@ -22,7 +22,7 @@ test("Check current pick object (internal)", function() {
     var picked = h.getPickObjectByPoint(88,60);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
+    strictEqual(h.currentPickObj.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
 
     picked = h.getPickObjectByPoint(5,5);
     strictEqual(h.currentPickObj, null, "Nothing picked");
@@ -37,7 +37,7 @@ test("Pick with large object ids", function() {
     var drawables = h.renderer.scene.ready;
     var objId = -1;
     for ( var i = 0; i < drawables.length; i++) {
-        if (drawables[i].meshAdapter.node === target) {
+        if (drawables[i].node === target) {
             objId = i;
             break;
         }
@@ -48,7 +48,7 @@ test("Pick with large object ids", function() {
     var picked = h.getPickObjectByPoint(220, 150);
     ok(h.currentPickObj, "Object picked");
     strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
+    strictEqual(h.currentPickObj.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
 
 });
 

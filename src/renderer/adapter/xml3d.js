@@ -3,24 +3,25 @@
     var XML3DRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
         this.initializeEventAttributes(["load"]);
-        XML3D.util.getOrCreateActiveView(node);
-        this.updateActiveViewAdapter();
     };
     XML3D.createClass(XML3DRenderAdapter, XML3D.webgl.RenderAdapter);
 
     XML3D.extend(XML3DRenderAdapter.prototype, {
         updateActiveViewAdapter: function () {
-            var activeViewURL = this.node.getAttribute("activeView");
-            this.connectAdapterHandle("activeView", this.getAdapterHandle(activeViewURL));
-            var viewAdapter = this.getConnectedAdapter("activeView");
-            this.updateActiveView(viewAdapter);
-        },
-        updateActiveView: function (viewAdapter) {
-            if (viewAdapter) {
-                this.getScene().setActiveView(viewAdapter.getRenderNode());
+            var href = this.node.getAttribute("activeView");
+            if(href) {
+                this.connectAdapterHandle("activeView", this.getAdapterHandle(href));
             } else {
-                this.getScene().setActiveView(null);
+                this.disconnectAdapterHandle("activeView");
             }
+        },
+        setViewAdapter: function(adapter) {
+            adapter = adapter || this.getConnectedAdapter("activeView");
+            if(!(adapter && adapter.getRenderNode)) {
+                var viewElement = XML3D.util.getOrCreateActiveView(this.node);
+                adapter = this.factory.getAdapter(viewElement);
+            }
+            this.factory.getScene().setActiveView(adapter.getRenderNode());
         },
         dispose: function() {
             this.clearAdapterHandles();
@@ -31,7 +32,7 @@
 
         switch(evt.type) {
             case XML3D.events.ADAPTER_HANDLE_CHANGED:
-                this.updateActiveView(evt.adapter);
+                this.setViewAdapter(evt.adapter);
                 return;
             case XML3D.events.NODE_INSERTED:
                 this.initElement(evt.wrapped.target);
@@ -44,8 +45,8 @@
         var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
 
         if (target == "activeView") {
-            console.log("NOTIFYALL:", evt);
             this.updateActiveViewAdapter();
+            this.setViewAdapter();
         }
     };
 
@@ -55,6 +56,9 @@
      * This function is called when scene DOM is loaded and all adapters are attached
      */
     XML3DRenderAdapter.prototype.onConfigured = function() {
+        this.updateActiveViewAdapter();
+        this.setViewAdapter();
+
         // emit load event when all resources currently loading are completed
         var callback = (function (node, nodeCanvasId) {
             var counter = 2; // we fire load event when callback is called twice
@@ -106,7 +110,7 @@
             if(hitPoint) hitPoint.set(NaN, NaN, NaN);
             if(hitNormal) hitNormal.set(NaN, NaN, NaN);
         }
-        return object ? object.meshAdapter.node : null;
+        return object ? object.node : null;
     };
 
     XML3DRenderAdapter.prototype.generateRay = function(x, y) {

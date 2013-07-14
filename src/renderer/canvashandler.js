@@ -21,7 +21,7 @@ XML3D.webgl.MAXFPS = 30;
             // Creates the CanvasHandler for the <canvas>  Element
             var canvasHandler = new XML3D.webgl.CanvasHandler(canvas, xml3ds[i]);
             handlers[i] = canvasHandler;
-            canvasHandler.tick();
+            window.requestAnimFrame(canvasHandler.tick, XML3D.webgl.MAXFPS);
         }
     };
 

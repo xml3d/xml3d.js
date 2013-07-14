@@ -121,7 +121,7 @@
             if (!opt.omitUpdate)
                 picked = this.getPickObjectByPoint(pos.x, pos.y);
 
-            this.dispatchMouseEvent(evt, picked && picked.meshAdapter.node, pos);
+            this.dispatchMouseEvent(evt, picked && picked.node, pos);
         },
 
         getMousePosition:function (evt) {
@@ -178,7 +178,7 @@
 
             this.dispatchMouseEventOnPickedObject(evt);
 
-            var curObj = this.currentPickObj ? this.currentPickObj.meshAdapter.node : null;
+            var curObj = this.currentPickObj ? this.currentPickObj.node : null;
 
             // trigger mouseover and mouseout
             if (curObj !== this.lastPickObj) {

@@ -46,8 +46,12 @@
          * @param {RenderView} view
          */
         setActiveView: function (view) {
-            this.activeView = view;
-            this.viewChanged();
+            if(view != this.activeView) {
+                if(!view)
+                    throw new Error("Active view must not be null");
+                this.activeView = view;
+                this.viewChanged();
+            }
         },
         createRenderObject: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderObject.ENTRY_SIZE);

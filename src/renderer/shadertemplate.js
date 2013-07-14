@@ -58,39 +58,40 @@
      */
     var ShaderTemplateFactory = function(context) {
         this.context = context;
-        var uniqueShaderId = 0;
-        this.nextShaderId = function() {
-            return uniqueShaderId++;
-        }
-        this.templates = [];
+        /** @type {Object<number, IShaderTemplate>} */
+        this.templates = {};
         this.defaultTemplate = new DefaultTemplate(context);
     };
 
-    ShaderTemplateFactory.prototype.create = function (adapter) {
-        if (!adapter) {
+    XML3D.extend(ShaderTemplateFactory.prototype, {
+        /**
+         *
+         * @param {XML3D.webgl.ShaderInfo} shaderInfo
+         * @returns {IShaderTemplate}
+         */
+        createTemplateForShaderInfo : function (shaderInfo) {
+            if (!shaderInfo) {
+                return this.defaultTemplate;
+            }
+            var result = this.templates[shaderInfo.id];
+            if (!result) {
+                result = new MaterialShaderTemplate(this.context, shaderInfo);
+                this.templates[shaderInfo.id] = result;
+            }
+            return result;
+        },
+        getDefaultTemplate : function() {
             return this.defaultTemplate;
+        },
+        getTemplateById : function(id) {
+           return this.templates[id];
+        },
+        update : function (scene) {
+            for(var i in this.templates) {
+                this.templates[i].update();
+            }
         }
-        if (adapter.templateId !== -1) {
-            return this.templates[adapter.templateId];
-        }
-
-        var sc = new MaterialShaderTemplate(this.context, adapter);
-
-        adapter.templateId = this.nextShaderId();
-        this.templates[adapter.templateId] = sc;
-
-        return sc;
-    }
-
-    ShaderTemplateFactory.prototype.getTemplateById = function(id) {
-        return this.templates[id];
-    }
-
-    ShaderTemplateFactory.prototype.update = function (scene) {
-        this.templates.forEach(function (c) {
-            c.update();
-        })
-    }
+    })
 
     /**
      * @implements IShaderTemplate
@@ -134,11 +135,11 @@
      * @implements {IShaderTemplate}
      * @constructor
      */
-    var MaterialShaderTemplate = function(context, shaderAdapter, lights, id) {
+    var MaterialShaderTemplate = function(context, shaderInfo) {
         this.context = context;
         this.programs = [];
-        this.setShaderAdapter(shaderAdapter);
-        var id = id;
+        this.setShaderInfo(shaderInfo);
+        var id = shaderInfo.id;
         this.getId = function() {
             return id;
         }
@@ -146,15 +147,15 @@
 
     /**
      *
-     * @param {XML3D.webgl.ShaderRenderAdapter} adapter
+     * @param {XML3D.webgl.ShaderInfo} shaderInfo
      */
-    MaterialShaderTemplate.prototype.setShaderAdapter = function(adapter) {
-        var shaderScriptURI = adapter.getShaderScriptURI();
+    MaterialShaderTemplate.prototype.setShaderInfo = function(shaderInfo) {
+        var shaderScriptURI = shaderInfo.getScript();
         this.setShaderScript(shaderScriptURI);
 
         var that = this;
         if(this.material) {
-            this.request = adapter.getDataAdapter().getComputeRequest(this.material.getRequestFields(), function(request, changeType) {
+            this.request = new Xflow.ComputeRequest(shaderInfo.getData(), this.material.getRequestFields(), function(request, changeType) {
                 that.dataChanged = true;
                 that.context.requestRedraw("Shader data changed");
             });

@@ -30,14 +30,14 @@
                 this.sortObjects(scene.ready, scene.firstOpaqueIndex, opaqueObjects, transparentObjects);
 
                 //Render opaque objects
-                for (var shaderName in opaqueObjects) {
-                    this.renderObjectsToActiveBuffer(opaqueObjects[shaderName], shaderName, scene, { transparent: false, stats: count });
+                for (var program in opaqueObjects) {
+                    this.renderObjectsToActiveBuffer(opaqueObjects[program], scene, { transparent: false, stats: count });
                 }
 
                 //Render transparent objects
                 for (var k = 0; k < transparentObjects.length; k++) {
                     var objectArray = [transparentObjects[k]];
-                    this.renderObjectsToActiveBuffer(objectArray, objectArray[0].shader, scene, { transparent: true, stats: count });
+                    this.renderObjectsToActiveBuffer(objectArray, scene, { transparent: true, stats: count });
                 }
                 scene.lights.changed = false;
                 return { count: count };
@@ -54,8 +54,8 @@
                     if (i < firstOpaque) {
                         tempArray.push(obj);
                     } else {
-                        opaque[obj.shader.id] = opaque[obj.shader.id] || [];
-                        opaque[obj.shader.id].push(obj);
+                        opaque[obj.program.id] = opaque[obj.program.id] || [];
+                        opaque[obj.program.id].push(obj);
                     }
                 }
 
@@ -95,7 +95,7 @@
             var tmpModelViewProjection = XML3D.math.mat4.create();
             var tmpNormalMatrix = XML3D.math.mat4.create();
 
-            return function (objectArray, shaderId, scene, opts) {
+            return function (objectArray, scene, opts) {
                 var objCount = 0;
                 var primitiveCount = 0;
                 var parameters = {};
@@ -113,7 +113,7 @@
                 }
 
                 // At this point, we have to gurantee (via FSM), that the RenderObject has a valid shader
-                var program = objectArray[0].shader;
+                var program = objectArray[0].program;
                 var lights = scene.lights;
 
                 if (program.needsLights || lights.changed) {

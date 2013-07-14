@@ -109,13 +109,13 @@
         onbeforeprogress: function(name, from, to) {
             switch (to) {
                 case "NoMaterial":
-                    if(this.shaderClosure) {
-                        this.shaderClosure.update();
-                        this.shader = this.shaderClosure.getProgram();
+                    if(this.shader.template) {
+                        this.shader.template.update();
+                        this.program = this.shader.template.getProgram(this.scene.lights);
                     } else {
                         console.log("No shader:", this.name);// DefaultShader
                     }
-                    return !!this.shader;
+                    return !!this.program;
             }
             switch (from) {
                 case "DirtyMeshData":
@@ -235,10 +235,31 @@
         setTransformDirty: function() {
             this.transformDirty = true;
         },
-
+        shaderHandleCallback: function() {
+            console.log("Shader handle state changed.", arguments);
+        },
         setShader: function(newHandle) {
-            if (newHandle !== this.shader.handle) {
-                this.shader.template = this.scene.shaderFactory.create(newHandle);
+            var oldHandle = this.shader.handle;
+            if (newHandle === oldHandle) {
+            } else {
+                if (oldHandle) {
+                    oldHandle.removeListener(this.shaderHandleCallback);
+                }
+                if (newHandle) {
+                    newHandle.addListener(this.shaderHandleCallback)
+                    switch (newHandle.status) {
+                        case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
+                            XML3D.debug.logWarning("Shader not found.", newHandle.url, this.name);
+                        // ↓ Fallthrough
+                        case XML3D.base.AdapterHandle.STATUS.LOADING:
+                            this.shader.template = this.scene.shaderFactory.getDefaultTemplate();
+                            break;
+                        case XML3D.base.AdapterHandle.STATUS.READY:
+                            this.shader.template = this.scene.shaderFactory.createTemplateForShaderInfo(newHandle.getAdapter().getShaderInfo());
+                    }
+                } else {
+                    this.shader.template = this.scene.shaderFactory.getDefaultTemplate();
+                }
                 this.shader.handle = newHandle;
                 this.materialChanged();
             }

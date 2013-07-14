@@ -104,10 +104,12 @@
 
     };
 
-    var programObjectId = 0;
-    var uniqueObjectId = function() {
-        return programObjectId++;
-    }
+    var uniqueObjectId = (function() {
+        var c_counter = 0;
+        return function() {
+            return c_counter++;
+        }
+    }());
 
     /**
      * @constructor

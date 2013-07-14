@@ -149,11 +149,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     }
 
     p.finishMesh = function() {
-        var programObject = this.renderNode.shader;
+        var template = this.renderNode.shader.template;
 
-        this.requestObject = programObject.material.meshRequest;
+        this.requestObject = template.material.meshRequest;
 
-        this.createRequests(Object.keys(this.requestObject), Object.keys(programObject.uniforms));
+        this.createRequests(Object.keys(this.requestObject));//, Object.keys(template.uniforms));
 
         this.createMeshData();
         this.createPerObjectData();

@@ -20,6 +20,7 @@
         <file name="scene/renderlight.js" />
         <file name="scene/renderview.js" />
         <file name="scene/scene.js" />
+        <file name="scene/shaderinfo.js" />
         <file name="gl/context.js" />
         <file name="gl/renderer.js" />
         <file name="gl/scene.js" />

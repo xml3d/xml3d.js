@@ -86,18 +86,19 @@
 
     XML3DRenderAdapter.prototype.getElementByPoint = function(x, y, hitPoint, hitNormal) {
         var relativeMousePos = XML3D.webgl.convertPageCoords(this.node, x, y);
+
         var relX = relativeMousePos.x;
         var relY = relativeMousePos.y;
 
-        var handler = this.factory.handler;
-        var object = handler.getPickObjectByPoint(relX, relY);
+        var renderer = this.factory.getRenderer();
+        var object = renderer.getRenderObjectFromPickingBuffer(relX, relY);
         if(object){
             if(hitPoint){
-                var vec = handler.getWorldSpacePositionByPoint(object, relX, relY);
+                var vec = renderer.getWorldSpacePositionByPoint(object, relX, relY);
                 hitPoint.set(vec[0],vec[1],vec[2]);
             }
             if(hitNormal){
-                var vec = handler.getWorldSpaceNormalByPoint(object, relX, relY);
+                var vec = renderer.getWorldSpaceNormalByPoint(object, relX, relY);
                 hitNormal.set(vec[0],vec[1],vec[2]);
             }
         }

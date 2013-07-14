@@ -256,8 +256,34 @@
         }
     });
 
+    var GLScaledRenderTarget = function(context, maxDimension, opt) {
+          GLRenderTarget.call(this, context, opt);
+          this.scaleToMaxDimension(maxDimension);
+    };
+
+    XML3D.createClass(GLScaledRenderTarget, GLRenderTarget);
+    XML3D.extend(GLScaledRenderTarget.prototype, {
+        scaleToMaxDimension: function(maxDimension) {
+            var hDiff = this.height - maxDimension;
+            var wDiff = this.width - maxDimension;
+
+            if (hDiff > 0 || wDiff > 0) {
+                var scale;
+                if (hDiff > wDiff) {
+                    scale = maxDimension / this.height;
+                } else {
+                    scale = maxDimension / this.width;
+                }
+                this.width = Math.floor(this.width * scale);
+                this.height = Math.floor(this.height * scale);
+                this.scale = scale;
+            }
+        }
+    });
+
     webgl.GLCanvasTarget = GLCanvasTarget;
     webgl.GLRenderTarget = GLRenderTarget;
+    webgl.GLScaledRenderTarget = GLScaledRenderTarget;
 
 
 }(XML3D.webgl));

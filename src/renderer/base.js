@@ -13,6 +13,5 @@ XML3D.webgl = {
             }
         };
     }()),
-    MAX_PICK_BUFFER_WIDTH : 512,
-    MAX_PICK_BUFFER_HEIGHT : 512
+    MAX_PICK_BUFFER_DIMENSION : 512
 };

@@ -134,19 +134,6 @@ XML3D.webgl.MAXFPS = 30;
     };   */
 
     /**
-     * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in
-     * the GL context. The y-coordinate gets turned upside-down. The lowest possible
-     * canvas coordinate is 0, so we need to subtract 1 from the height, too.
-     *
-     * @param {number} canvasY
-     * @return {number} the converted y-coordinate
-     */
-    CanvasHandler.prototype.canvasToGlY = function(canvasY) {
-
-        return this.canvas.height - canvasY - 1;
-    };
-
-    /**
      * Binds the picking buffer and passes the request for a picking pass to the
      * renderer
      *
@@ -157,8 +144,7 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.getPickObjectByPoint = function(canvasX, canvasY) {
         if (this._pickingDisabled)
             return null;
-        var glY = this.canvasToGlY(canvasY);
-        return this.renderer.getRenderObjectFromPickingBuffer(canvasX, glY);
+        return this.renderer.getRenderObjectFromPickingBuffer(canvasX, canvasY);
     };
 
     /**
@@ -168,8 +154,7 @@ XML3D.webgl.MAXFPS = 30;
      * @return {vec3|null} The world space normal on the object's surface at the given coordinates
      */
     CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(pickedObj, canvasX, canvasY) {
-        var glY = this.canvasToGlY(canvasY);
-        return this.renderer.getWorldSpaceNormalByPoint(canvasX, glY);
+        return this.renderer.getWorldSpaceNormalByPoint(canvasX, canvasX);
     };
 
     /**
@@ -178,8 +163,7 @@ XML3D.webgl.MAXFPS = 30;
      * @return {vec3|null} The world space position on the object's surface at the given coordinates
      */
     CanvasHandler.prototype.getWorldSpacePositionByPoint = function(canvasX, canvasY) {
-	var glY = this.canvasToGlY(canvasY);
-        return this.renderer.getWorldSpacePositionByPoint(canvasX, glY);
+	    return this.renderer.getWorldSpacePositionByPoint(canvasX, canvasY);
     };
 
     CanvasHandler.prototype.canvasSizeChanged = function() {
@@ -211,7 +195,7 @@ XML3D.webgl.MAXFPS = 30;
 
         return function(canvasX, canvasY) {
 
-            var glY = this.canvasToGlY(canvasY);
+            var glY = XML3D.webgl.canvasToGlY(this.canvas, canvasY);
 
             // setup input to unproject
             var viewport = new Array();

@@ -418,6 +418,19 @@
         return {x: pageX - off.left, y: pageY - off.top};
     };
 
+    /**
+     * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in
+     * the GL context. The y-coordinate gets turned upside-down. The lowest possible
+     * canvas coordinate is 0, so we need to subtract 1 from the height, too.
+     *
+     * @param {HTMLCanvasElement} canvas
+     * @param {number} y
+     * @return {number} the converted y-coordinate
+     */
+    webgl.canvasToGlY = function(canvas, y) {
+        return canvas.height - y - 1;
+    }
+
     webgl.FRAGMENT_HEADER = [
         "#ifdef GL_FRAGMENT_PRECISION_HIGH",
         "precision highp float;",

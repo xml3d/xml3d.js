@@ -1,31 +1,5 @@
 (function (webgl) {
 
-    var c_data = new Uint8Array(8);
-
-    /**
-     * Reads pixels from the provided buffer
-     *
-     * @param {number} glX OpenGL Coordinate of color buffer
-     * @param {number} glY OpenGL Coordinate of color buffer
-     * @param {XML3D.webgl.GLRenderTarget} buffer Buffer to read pixels from
-     * @returns {Uint8Array} pixel data
-     */
-    var readPixelDataFromBuffer = function (gl, glX, glY, target) {
-        var scale = target.getScale();
-        var x = glX * scale;
-        var y = glY * scale;
-
-        target.bind();
-        try {
-            gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, c_data);
-            target.unbind();
-            return c_data;
-        } catch (e) {
-            XML3D.debug.logException(e);
-            target.unbind();
-            return null;
-        }
-    };
 
     /**
      *
@@ -98,13 +72,13 @@
          *
          * @param {number} x Screen Coordinate of color buffer
          * @param {number} y Screen Coordinate of color buffer
-         * @param {XML3D.webgl.Scene} scene Scene
+         * @param {XML3D.webgl.GLScene} scene Scene
          * @param {Object} buffer Buffer
          * @returns {XML3D.webgl.RenderObject|null} Picked Object
          *
          */
         getRenderObjectFromPickingBuffer: function (x, y, scene) {
-            var data = readPixelDataFromBuffer(this.context.gl, x, y, this.target);
+            var data = this.readPixelDataFromBuffer(x, y);
 
             if (!data)
                 return null;

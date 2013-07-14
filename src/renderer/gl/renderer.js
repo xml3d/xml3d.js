@@ -10,36 +10,10 @@
     IRenderer.prototype.resizeCanvas = function(width, height) {};
     IRenderer.prototype.requestRedraw = function(reason, forcePickingRedraw) {};
     IRenderer.prototype.needsRedraw = function() {};
-    IRenderer.prototype.getWorldSpaceNormalByPoint = function(x,y) {};
-    IRenderer.prototype.getWorldSpacePositionByPoint = function(x,y) {};
+    IRenderer.prototype.getWorldSpaceNormalByPoint = function(obj, x, y) {};
+    IRenderer.prototype.getWorldSpacePositionByPoint = function(obj, x, y) {};
     IRenderer.prototype.getRenderObjectFromPickingBuffer = function(x,y) {};
     IRenderer.prototype.dispose = function() {};
-
-    /**
-     * @param {number} width
-     * @param {number} height
-     * @returns {{width: number, height: number, scale: number}}
-     */
-    var calcPickingBufferDimension = function (width, height) {
-        var scale = 1.0;
-
-        var hDiff = height - XML3D.webgl.MAX_PICK_BUFFER_HEIGHT;
-        var wDiff = width - XML3D.webgl.MAX_PICK_BUFFER_WIDTH;
-
-        if (hDiff > 0 || wDiff > 0) {
-            if (hDiff > wDiff) {
-                scale = XML3D.webgl.MAX_PICK_BUFFER_HEIGHT / height;
-            } else {
-                scale = XML3D.webgl.MAX_PICK_BUFFER_WIDTH / width;
-            }
-        }
-        return {
-            width: Math.floor(width * scale),
-            height: Math.floor(height * scale),
-            scale: scale
-        }
-    }
-
 
     /**
      * @implements {IRenderer}
@@ -48,18 +22,23 @@
     var GLRenderer = function(context, scene, canvas) {
         this.context = context;
         this.scene = scene;
+        this.canvas = canvas;
         this.width = canvas.clientWidth;
         this.height = canvas.clientHeight;
+
+        /** @type {XML3D.webgl.RenderObject} */
         this.pickedObject = null;
+
         this.needsDraw = true;
         this.needPickingDraw = true;
         this.pickingDisabled = false;
-        /** @type {XML3D.webgl.RenderObject} */
-        this.currentPickObj = null;
 
         this.context.requestRedraw = this.requestRedraw.bind(this);
         this.mainPass = new webgl.ForwardRenderPass(context);
-        this.pickingPass = this.createPickingPass();new webgl.PickingRenderPass(context, this.width, this.height);
+        var pickingTarget = this.createPickingTarget();
+        this.pickingPass = new webgl.PickingRenderPass(this.context, { target: pickingTarget });
+        this.pickPositionPass = new webgl.PickPositionRenderPass(this.context, { target: pickingTarget });
+        this.pickNormalPass = new webgl.PickNormalRenderPass(this.context, { target: pickingTarget });
 
         this.init();
     };
@@ -97,20 +76,23 @@
             XML3D.debug.logDebug("Request redraw because:", reason);
             this.needsDraw = true;
         },
-        getWorldSpaceNormalByPoint: function(x,y) {
-            if (!this.pickedObject || this._pickingDisabled)
+        getWorldSpaceNormalByPoint: function(obj, x,y) {
+            obj = obj || this.pickedObject;
+            if (!obj)
                 return null;
-
-            this.renderPickedNormals(this.pickedObject);
-            return; // Something
+            y = webgl.canvasToGlY(this.canvas, y);
+            this.pickNormalPass.renderObject(obj);
+            return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
         },
-        getWorldSpacePositionByPoint: function(x,y) {
-            if (!this.pickedObject)
+        getWorldSpacePositionByPoint: function(obj,x,y) {
+            obj = obj || this.pickedObject;
+            if (!obj)
                 return null;
-
-            this.renderPickedPosition(this.pickedObject);
-            return this.readPositionFromPickingBuffer(x, y);
+            y = webgl.canvasToGlY(this.canvas, y);
+            this.pickPositionPass.renderObject(obj);
+            return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
         },
+
         needsRedraw : function() {
             return this.needsDraw;
         },
@@ -121,30 +103,34 @@
             return stats;
         },
         getRenderObjectFromPickingBuffer : function(x,y) {
-            if(this.needsDraw) {
+            y = webgl.canvasToGlY(this.canvas, y);
+            //if(this.needsDraw) {
                 this.prepareRendering();
                 this.pickingPass.renderScene(this.scene);
-                this.currentPickObj = this.pickingPass.getRenderObjectFromPickingBuffer(x,y,this.scene);
-            }
-            return this.currentPickObj;
+                this.pickedObject = this.pickingPass.getRenderObjectFromPickingBuffer(x,y,this.scene);
+            //}
+            return this.pickedObject;
         },
         prepareRendering : function() {
             this.scene.update();
         },
-        createPickingPass : function() {
+        createPickingTarget : function() {
             var gl = this.context.gl;
-            var dim = calcPickingBufferDimension(this.width, this.height);
 
-            var target = new webgl.GLRenderTarget(this.context, {
-                width: dim.width,
-                height: dim.height,
+            var target = new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
+                width: this.width,
+                height: this.height,
                 colorFormat: gl.RGBA,
                 depthFormat: gl.DEPTH_COMPONENT16,
                 stencilFormat: null,
-                depthAsRenderbuffer : true,
-                scale: dim.scale
+                depthAsRenderbuffer : true
             });
-            return new webgl.PickingRenderPass(this.context, { target: target });
+            return target;
+        },
+        createPickPositionPass : function() {
+
+
+            return new webgl.PickPositionPass(this.context);
         },
         dispose: function() {
             this.scene.clear();

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link href="frame.css" media="all" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <script type="text/javascript" src="./scripts/myxflow.js"></script>
+    <script type="text/javascript" src="../../tools/camera.js"></script>
+</head>
+<body>
+<h1>
+
+</h1>
+
+<div>
+    <xml3d id="xml3DElem" activeView="#Camera" style="width: 500px; height: 350px; background-color:grey;"
+           xmlns="http://www.xml3d.org/2009/xml3d">
+        <defs id="mainDef">
+            <transform id="t_1" translation="-7.5 0 0"/>
+            <transform id="t_2" translation="-4.5 0 0"/>
+            <transform id="t_3" translation="-1.5 0 0"/>
+            <transform id="t_4" translation="1.5 0 0"/>
+            <transform id="t_5" translation="4.5 0 0"/>
+            <transform id="t_6" translation="7.5 0 0"/>
+            <transform id="t_7" translation="0 -2 0"/>
+            <transform id="t_light" rotation="-1 0 0 2"/>
+
+            <data id="wave" compute="(position, normal) = xflow.mywave(position, normal, str, len, phase)">
+                <float name="str" id="strength">0.11</float>
+                <float name="len" id="wavelength">20.0</float>
+                <float name="phase" id="ph">0.5</float>
+                <data id="grid" compute="(position, normal, texcoord, index) = xflow.mygrid(size)">
+                    <int name="size" id="size">50</int>
+                </data>
+            </data>
+
+            <lightshader id="ls_dir" script="urn:xml3d:lightshader:directional">
+                <float3 name="intensity">1 1 1</float3>
+            </lightshader>
+
+            <shader id="mat" script="urn:xml3d:shader:phong">
+                <float3 name="diffuseColor">0.5 0.5 1</float3>
+                <float3 name="specularColor">0.5 0.5 0.5</float3>
+                <float name="ambientIntensity">0.3</float>
+            </shader>
+        </defs>
+        <view id="Camera" position="0 11 11" orientation="-1 0 0 0.707"/>
+        <group transform="#t_light">
+            <light shader="#ls_dir"/>
+        </group>
+        <group id="test1" shader="#mat">
+            <group transform="#t_1">
+                <mesh type="triangles">
+                    <data src="#wave"/>
+                    <texture name="diffuseTexture">
+                        <img src="textures/water.jpg"/>
+                    </texture>
+                </mesh>
+            </group>
+            <group transform="#t_2">
+                <mesh type="triangles">
+                    <data src="#grid"/>
+                    <float3 name="diffuseColor">1 0 0</float3>
+                </mesh>
+            </group>
+            <group transform="#t_3">
+                <mesh type="triangles">
+                    <data src="#grid"/>
+                </mesh>
+            </group>
+            <group transform="#t_4">
+                <mesh type="triangles">
+                    <data src="#grid"/>
+                    <texture name="diffuseTexture">
+                        <img src="textures/water.jpg"/>
+                    </texture>
+                </mesh>
+            </group>
+            <group transform="#t_5">
+                <mesh type="triangles">
+                    <data src="#wave"/>
+                </mesh>
+            </group>
+            <group transform="#t_6">
+                <mesh src="#grid" type="triangles"/>
+            </group>
+        </group>
+    </xml3d>
+</div>
+<p style="position: absolute; top: 130px; left: 40px">1: wave/tex</p>
+
+<p style="position: absolute; top: 130px; left: 120px">2: red</p>
+
+<p style="position: absolute; top: 130px; left: 200px">3: blue</p>
+
+<p style="position: absolute; top: 130px; left: 280px">4: tex</p>
+
+<p style="position: absolute; top: 130px; left: 340px">5: wave</p>
+
+<p style="position: absolute; top: 130px; left: 420px">6: blue</p>
+<script type="text/javascript">
+    function getPixelValue(canvas, x, y) {
+        var pixels = new Uint8Array(4), a = new Array(4);
+        canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
+        for (var i = 0; i &lt; 4; i++)
+            a[i] = pixels[i];
+        return a;
+    }
+</script>
+</body>
+</html>

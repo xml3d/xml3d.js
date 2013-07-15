@@ -58,7 +58,7 @@
         },
         update: function () {
             this.updateLights(this.lights);
-            this.shaderFactory.update();
+            this.shaderFactory.update(this);
             this.consolidate();
         },
         consolidate: function () {

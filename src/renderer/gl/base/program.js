@@ -138,6 +138,7 @@
 
     XML3D.extend(ProgramObject.prototype, {
         create: function () {
+            XML3D.debug.logDebug("Create shader program: ", this.id);
             this.handle = createProgramFromSources(this.gl, [this.sources.vertex], [this.sources.fragment]);
             if (!this.handle)
                 return;

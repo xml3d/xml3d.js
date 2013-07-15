@@ -15,6 +15,9 @@
     var SPOTLIGHT_DEFAULT_SOFTNESS = 0.0;
 
     /** @const */
+    var LIGHT_PARAMETERS = ["intensity", "attenuation", "softness", "falloffAngle"];
+
+    /** @const */
     var ENTRY_SIZE = 16;
 
     /**
@@ -36,8 +39,15 @@
         this.direction   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
         this.attenuation = XML3D.math.vec3.clone(LIGHT_DEFAULT_ATTENUATION);
 
-        this.lightShader = opt.shader;
-        //this.listenerID = this.lightShader.registerLightListener(this.updateLightData.bind(this));
+        if (this.light.data) {
+            // Bounding Box annotated
+            this.lightParameterRequest = new Xflow.ComputeRequest(
+                this.light.data, LIGHT_PARAMETERS, this.lightParametersChanged.bind(this));
+            this.lightParametersChanged(this.lightParameterRequest, null);
+        } else {
+            XML3D.debug.logWarning("External light shaders not supported yet"); // TODO
+        }
+
         this.localIntensity = opt.localIntensity;
         this.initializeLightData();
     };
@@ -55,9 +65,21 @@
         },
         addLightToScene : function(container) {
             container.push(this);
-            this.updateWorldMatrix(); //Implicitly fills light position/direction
-            //this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
-            //this.lightShader.fillLightData(this.lightType, lightEntry, this.localIntensity, this.lightOffset);
+            this.updateWorldMatrix(); // Implicitly fills light position/direction
+        },
+        lightParametersChanged: function(request, changeType) {
+            // console.log("Light parameters have changed", arguments);
+            var result = request.getResult();
+            if (result) {
+                var entry = result.getOutputData("intensity");
+                entry && XML3D.math.vec3.copy(this.intensity, entry.getValue());
+                entry = result.getOutputData("attenuation");
+                entry && XML3D.math.vec3.copy(this.attenuation, entry.getValue());
+                changeType && this.lightValueChanged();
+            }
+        },
+        lightValueChanged: function() {
+            this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, light: this });
         },
         getLightData: function(target, offset) {
             var off3 = offset*3;
@@ -76,20 +98,7 @@
             if (target["on"]) {
                 target["on"][offset] = this.visible;
             }
-
-        },
-
-        updateLightData: function(field, newValue) {
-            var offset = this.lightOffset;
-            var data = this.scene.lights[this.lightType][field];
-            if (!data) {
-                return;
-            }
-            if(field=="falloffAngle" || field=="softness") {
-                offset/=3; //some parameters are scalar
-            }
-            Array.set(data, offset, newValue);
-            this.scene.lights.changed = true;
+            // TODO: "softness", "falloffAngle"
         },
 
         setTransformDirty: function() {
@@ -117,14 +126,15 @@
                 case "point":
                     XML3D.math.vec3.copy(this.position, this.applyTransform([0,0,0], transform));
             }
+            this.lightValueChanged();
         },
 
-        applyTransform: function(vec, transform) {
+        applyTransform: function(vec, transform) { // TODO: closure
             var newVec = XML3D.math.vec4.transformMat4(XML3D.math.vec4.create(), [vec[0], vec[1], vec[2], 1], transform);
             return [newVec[0]/newVec[3], newVec[1]/newVec[3], newVec[2]/newVec[3]];
         },
 
-        applyTransformDir: function(vec, transform) {
+        applyTransformDir: function(vec, transform) { // TODO: closure
             var newVec = XML3D.math.vec4.transformMat4(XML3D.math.vec4.create(), [vec[0], vec[1], vec[2], 0], transform);
             return [newVec[0], newVec[1], newVec[2]];
         },
@@ -133,7 +143,7 @@
             this.localVisible = newVal;
             if (newVal === false) {
                 this.visible = false;
-                this.updateLightData("visibility", [0,0,0]);
+                this.lightValueChanged();
             } else {
                 this.setVisible(this.parent.isVisible());
             }
@@ -142,35 +152,18 @@
         setVisible: function(newVal) {
             if (this.localVisible !== false) {
                 this.visible = newVal;
-                // this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
+                this.lightValueChanged();
             }
         },
 
         setLocalIntensity: function(intensity) {
             this.localIntensity = intensity;
-            var shaderIntensity = this.lightShader.requestParameter("intensity").getValue();
-            this.updateLightData("intensity", [shaderIntensity[0]*intensity, shaderIntensity[1]*intensity, shaderIntensity[2]*intensity]);
+            this.lightValueChanged();
         },
 
         remove: function() {
             this.parent.removeChild(this);
-            this.removeLightData();
-            this.scene.lights.structureChanged = true;
-            this.lightShader.removeLightListener(this.listenerID);
-        },
-
-        removeLightData: function() {
-            var lo = this.scene.lights[this.lightType];
-            var offset = this.lightOffset;
-            if (this.lightType == "directional" || this.lightType === "spot") {
-                lo.direction.splice(offset, 3);
-            }
-            if (this.lightType !== "directional") {
-                lo.position.splice(offset, 3);
-            }
-            lo.visibility.splice(offset, 3);
-            this.lightShader.removeLight(this.lightType, lo, offset);
-            lo.length--;
+            // TODO: this.scene.lights.structureChanged = true;
         },
 
         getWorldSpaceBoundingBox: function(bbox) {

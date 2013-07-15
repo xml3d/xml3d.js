@@ -111,6 +111,7 @@
         renderToCanvas: function () {
             this.prepareRendering();
             var stats = this.mainPass.renderScene(this.scene);
+            XML3D.debug.logDebug("Rendered to Canvas");
             this.needsDraw = false;
             return stats;
         },

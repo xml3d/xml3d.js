@@ -1,4 +1,4 @@
-(function() {
+(function(webgl) {
 
     /**
      * Adapter for <light>
@@ -7,12 +7,11 @@
      * @param {Element} node
      */
     var LightRenderAdapter = function(factory, node) {
-        XML3D.webgl.TransformableAdapter.call(this, factory, node);
-        this.lightShader = null;
+        webgl.TransformableAdapter.call(this, factory, node);
         this.updateLightShader();
         this.createRenderNode();
     };
-    XML3D.createClass(LightRenderAdapter, XML3D.webgl.TransformableAdapter);
+    XML3D.createClass(LightRenderAdapter, webgl.TransformableAdapter);
 
     LightRenderAdapter.prototype.createRenderNode = function () {
         var parentAdapter = this.getParentRenderAdapter();
@@ -59,7 +58,6 @@
             this.createRenderNode();
             break;
         }
-        this.factory.getRenderer().requestRedraw("Light attribute changed.");
     };
 
     LightRenderAdapter.prototype.updateLightShader = function(){
@@ -98,17 +96,7 @@
         return m;
     };
 
-    /**
-     *
-     * @param {string} field
-     * @param {Array.<number>} newValue
-     * @return
-     */
-    LightRenderAdapter.prototype.dataChanged = function(field, newValue) {
-        this.renderNode.updateLightData(field, newValue);
-    };
-
     // Export to XML3D.webgl namespace
-    XML3D.webgl.LightRenderAdapter = LightRenderAdapter;
+    webgl.LightRenderAdapter = LightRenderAdapter;
 
-}());
+}(XML3D.webgl));

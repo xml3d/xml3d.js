@@ -128,8 +128,8 @@
                 this.shaderFactory.setLightStructureDirty();
             });
             this.addEventListener( EVENT_TYPE.LIGHT_VALUE_CHANGED, function(event){
-                console.log("Light value changed");
                 this.shaderFactory.setLightValueChanged();
+                this.context.requestRedraw("Light value changed.");
             });
         },
         addChildEvent: function(child) {

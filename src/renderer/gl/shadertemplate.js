@@ -25,7 +25,7 @@
      * @param {XML3D.webgl.scene} scene
      * @returns {IShaderTemplate.UpdateState}
      */
-    IShaderTemplate.prototype.update = function (scene, lightStructureChanged) {
+    IShaderTemplate.prototype.update = function (scene, opt) {
         return IShaderTemplate.UpdateState.SHADER_UNCHANGED;
     };
 
@@ -60,7 +60,7 @@
         this.context = context;
         /** @type {Object.<number, IShaderTemplate>} */
         this.templates = {};
-        this.lightStructureDirty = true;
+        this.needsCompileCheck = true;
         this.defaultTemplate = new DefaultTemplate(context);
     };
 
@@ -89,12 +89,16 @@
         },
         update: function (scene) {
             for (var i in this.templates) {
-                this.templates[i].update(scene, this.lightStructureDirty);
+                this.templates[i].update(scene, { evaluateShader: this.needsCompileCheck, updateLightValues: this.lightValuesDirty });
+                this.needsCompileCheck = this.lightValuesDirty = false;
             }
         },
         setLightStructureDirty: function() {
-            console.log("Light structure changed");
-            this.lightStructureDirty = true;
+            XML3D.debug.logWarning("Light structure changes not yet supported.");
+            this.needsCompileCheck = true;
+        },
+        setLightValueChanged: function() {
+            this.lightValuesDirty = true;
         }
 
     });
@@ -208,8 +212,8 @@
                 this.updateUniformsFromComputeResult(program, opt);
                 this.updateSamplersFromComputeResult(program, opt);
                 this.material.parametersChanged(this.request.getResult().getOutputMap());
-                this.dataChanged = false;
             }, this);
+            this.dataChanged = false;
         },
 
         updateProgramsLightParameters: function (lights) {
@@ -230,13 +234,13 @@
             parameters["pointLightPosition"] = pointLightData.position;
             parameters["pointLightAttenuation"] = pointLightData.attenuation;
             parameters["pointLightIntensity"] = pointLightData.intensity;
-            //parameters["pointLightVisibility"] = lights.point.visibility;
+            parameters["pointLightVisibility"] = pointLightData.on;
 
             var directionalLightData = { direction: [], intensity: [], on: [] };
             lights.directional.forEach(function(light, index) {
                 light.getLightData(directionalLightData, index);
             });
-
+            // TODO: Rename  *LightVisibility to *LightOn and adapt in all standard shaders
             parameters["directionalLightDirection"] = directionalLightData.direction;
             parameters["directionalLightIntensity"] = directionalLightData.intensity;
             parameters["directionalLightVisibility"] = directionalLightData.on;
@@ -249,8 +253,9 @@
             parameters["spotLightPosition"] = spotLightData.position;
             parameters["spotLightIntensity"] = spotLightData.intensity;
             parameters["spotLightDirection"] = spotLightData.direction;
+            parameters["spotLightVisibility"] = spotLightData.on;
 
-            //parameters["spotLightVisibility"] = lights.spot.visibility;
+            // TODO: Support spot light parameters
             //parameters["spotLightCosFalloffAngle"] = lights.spot.falloffAngle.map(Math.cos);
 
             /*var softFalloffAngle = lights.spot.falloffAngle.slice();
@@ -258,7 +263,7 @@
                 softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - lights.spot.softness[i]);
             parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
             parameters["spotLightSoftness"] = lights.spot.softness;*/
-            console.log(parameters);
+            // console.log(parameters);
             return parameters;
     },
 
@@ -325,7 +330,8 @@
             if (!this.programs[0]) {
                 this.programs[0] = this.createProgram(scene);
                 // Update everything after creation
-                this.update(scene, {updateShaderData: true, updateLights: true});
+                this.update(scene, {updateShaderData: true, updateLightValues: true});
+                this.needsCompileCheck = false;
             }
             return this.programs[0];
         },
@@ -340,14 +346,21 @@
         update: function (scene, opt) {
             opt = opt || {}
 
-            if (!this.isValid())
+            if(!this.programs.length)
                 return;
+
+            if(opt.evaluateShader) {
+                XML3D.debug.logError("Recompilation not supported yet.");
+                this.needsCompileCheck = false;
+            }
+
+
             if (opt.updateShaderData || this.dataChanged) {
                 this.updateProgramsFromComputeResult();
             } else if (this.structureChanged) {
 
             }
-            if (opt.updateLights) {
+            if (opt.updateLightValues) {
                 var lights = scene.lights;
                 this.updateProgramsLightParameters(lights);
             }

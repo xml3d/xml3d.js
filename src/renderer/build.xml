@@ -36,7 +36,7 @@
         <file name="gl/programfactory.js" />
         <file name="gl/shadertemplate.js" />
         <file name="material.js" />
-        <file name="renderer.js" />
+        <file name="rendererfactory.js" />
         <file name="adapter/base.js" />
         <file name="adapter/transformable.js" />
         <file name="adapter/defs.js" />

@@ -108,8 +108,8 @@ test("Add children in invisible group", 8, function() {
         start();
     });
     testFunc = function(n) {
-        equal(n.detail.numberOfObjectsDrawn, 0, "0 Objects drawn");
-        equal(n.detail.numberOfTrianglesDrawn, 0, "0 Triangles drawn");
+        equal(n.detail.count.objects, 0, "0 Objects drawn");
+        equal(n.detail.count.objects, 0, "0 Triangles drawn");
         actual = win.getPixelValue(gl, 40, 40);
         deepEqual(actual, [0,0,0,0], "Transparent at 40,40");
     };
@@ -489,7 +489,7 @@ test("Add a mesh dynamically", 4, function() {
 
     x.addEventListener("framedrawn", function(n) {
             if (count == 0) {
-                equal(n.detail.numberOfObjectsDrawn, 1, "Initially one drawable object");
+                equal(n.detail.count.objects, 1, "Initially one drawable object");
                 var group = document.createElementNS(XML3D.xml3dNS,"group");
                 var mesh = document.createElementNS(XML3D.xml3dNS,"mesh");
                 mesh.setAttribute('id',"new_mesh");
@@ -498,7 +498,7 @@ test("Add a mesh dynamically", 4, function() {
                 group.appendChild(mesh);
                 stop();
             } else if (count == 1) {
-                equal(n.detail.numberOfObjectsDrawn, 2, "Now two drawable objects");
+                equal(n.detail.count.obects, 2, "Now two drawable objects");
             }
             count++;
             start();

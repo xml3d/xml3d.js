@@ -36,6 +36,7 @@
                 return;
             case XML3D.events.NODE_INSERTED:
                 this.initElement(evt.wrapped.target);
+                this.initChildElements(evt.wrapped.target);
                 return;
             case XML3D.events.NODE_REMOVED:
                 // Handled in removed node

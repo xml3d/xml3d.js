@@ -23,6 +23,14 @@
      */
     XML3D.webgl.RenderAdapter.prototype.initElement = function(element) {
         this.factory.getAdapter(element);
+        this.initChildElements(element);
+    };
+
+    /**
+     * @param element
+     */
+    XML3D.webgl.RenderAdapter.prototype.initChildElements = function(element) {
+        this.traverse(this.factory.getAdapter);
     };
 
 

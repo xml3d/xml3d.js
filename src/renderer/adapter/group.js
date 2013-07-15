@@ -84,7 +84,8 @@
     p.handleConnectedAdapterEvent = function(evt) {
         switch(evt.type) {
             case XML3D.events.NODE_INSERTED:
-                this.factory.renderer.sceneTreeAddition(evt);
+                this.initElement(evt.wrapped.target);
+                this.initChildElements(evt.wrapped.target);
                 break;
             case XML3D.events.NODE_REMOVED:
                 this.factory.renderer.sceneTreeRemoval(evt);

@@ -115,7 +115,8 @@
                 index: null,
                 position: {
                     required: true
-                }
+                },
+                normal: null
             }
         }
     });

@@ -163,8 +163,11 @@ test("Annotated Bounding Box", function() {
     var xflowGraph = new Xflow.Graph();
     var dataNode = xflowGraph.createDataNode(false);
     var obj = this.scene.createRenderObject({
-        xflow : dataNode
+        object : {
+            data: dataNode
+        }
     });
+    strictEqual(obj.object.data, dataNode, "Xflow data source is set in RenderObject");
     var actualBB = new XML3D.webgl.BoundingBox();
     this.scene.getBoundingBox(actualBB);
     ok(actualBB.isEmpty(), "No data annotated: BB is empty");

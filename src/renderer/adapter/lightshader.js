@@ -24,12 +24,14 @@
             }
         },
         notifyChanged: function (evt) {
-            if (evt.type == XML3D.events.THIS_REMOVED) {
-                this.dispose();
+            switch (evt.type) {
+                case XML3D.events.THIS_REMOVED:
+                    this.notifyOppositeAdapters();
+                    break;
+                case XML3D.events.VALUE_MODIFIED:
+                    this.notifyOppositeAdapters(XML3D.events.ADAPTER_VALUE_CHANGED);
+                    break;
             }
-        },
-        dispose: function () {
-            this.notifyOppositeAdapters();
         }
     });
 

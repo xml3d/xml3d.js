@@ -161,6 +161,9 @@
             this.lightValueChanged();
         },
 
+        setLightType: function(type) {
+            XML3D.debug.logError("Changing light type is not supported yet");
+        },
         remove: function() {
             this.parent.removeChild(this);
             // TODO: this.scene.lights.structureChanged = true;

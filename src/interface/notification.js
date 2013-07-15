@@ -11,7 +11,8 @@
           DANGLING_REFERENCE: 3,
           VALID_REFERENCE: 4,
           THIS_REMOVED: 5,
-          ADAPTER_HANDLE_CHANGED: 6
+          ADAPTER_HANDLE_CHANGED: 6,
+          ADAPTER_VALUE_CHANGED: 7
   };
 
   //-----------------------------------------------------------------------------

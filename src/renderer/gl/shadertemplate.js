@@ -321,32 +321,33 @@
             return this.state == IShaderTemplate.State.OK;
         },
 
-        getProgram: function (lights) {
+        getProgram: function (scene) {
             if (!this.programs[0]) {
-                this.programs[0] = this.createProgram(lights);
-
+                this.programs[0] = this.createProgram(scene);
+                // Update everything after creation
+                this.update(scene, {updateShaderData: true, updateLights: true});
             }
             return this.programs[0];
         },
-        createProgram: function(lights) {
-            var result = this.material.getProgram(lights, this.request.getResult());
+        createProgram: function(scene) {
+            var result = this.material.getProgram(scene.lights, this.request.getResult());
             if (!result.isValid()) {
                 throw new Error("Failed to create shader program.");
             }
-            this.updateProgramsFromComputeResult();
             return result;
         },
 
-        update: function (scene, lightStructureChanged) {
+        update: function (scene, opt) {
+            opt = opt || {}
+
             if (!this.isValid())
                 return;
-            if (this.dataChanged) {
+            if (opt.updateShaderData || this.dataChanged) {
                 this.updateProgramsFromComputeResult();
-                this.state = IShaderTemplate.State.OK;
             } else if (this.structureChanged) {
-                // TODO
+
             }
-            if (lightStructureChanged) {
+            if (opt.updateLights) {
                 var lights = scene.lights;
                 this.updateProgramsLightParameters(lights);
             }

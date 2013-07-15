@@ -111,7 +111,7 @@
                 case "NoMaterial":
                     if(this.shader.template) {
                         this.shader.template.update();
-                        this.program = this.shader.template.getProgram(this.scene.lights);
+                        this.program = this.shader.template.getProgram(this.scene);
                     } else {
                         console.log("No shader:", this.name);// DefaultShader
                     }

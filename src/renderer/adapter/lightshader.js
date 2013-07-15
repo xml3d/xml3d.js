@@ -14,7 +14,20 @@
         this.computeRequest = this.dataAdapter.getComputeRequest(staticAttributes, this.dataChanged.bind(this));
         this.listeners = [];
     };
-    XML3D.createClass(XML3D.webgl.LightShaderRenderAdapter, XML3D.webgl.RenderAdapter);
+    XML3D.createClass(XML3D.webgl.LightShaderRenderAdapter, XML3D.webgl.RenderAdapter, {
+        getDataNode: function() {
+            return this.dataAdapter.getXflowNode();
+        },
+        getLightType: function() {
+            var script = this.node.getAttribute("script");
+                if (script.indexOf("urn:xml3d:lightshader:") === 0) {
+                    return script.substring(22, script.length);
+                } else {
+                    XML3D.debug.logError("Unsupported light type "+script);
+                    return null;
+                }
+        }
+    });
 
     /** @const */
     var LIGHT_DEFAULT_INTENSITY = XML3D.math.vec3.fromValues(1,1,1);

@@ -14,18 +14,20 @@
     };
     XML3D.createClass(LightRenderAdapter, XML3D.webgl.TransformableAdapter);
 
-    LightRenderAdapter.prototype.createRenderNode = function() {
-        var parent = this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
-        var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
+    LightRenderAdapter.prototype.createRenderNode = function () {
+        var parentAdapter = this.getParentRenderAdapter();
+        var parentNode = parentAdapter.getRenderNode && parentAdapter.getRenderNode();
         var lightShader = this.getLightShader();
-        if (lightShader !== undefined) {
-            var lightType = this.getLightType();
-            this.renderNode = this.factory.renderer.scene.createRenderLight({lightType : lightType, parent : parentNode, shader : this.getLightShader(),
-                visible : !this.node.visible ? false : undefined, localIntensity : this.node.intensity});
-        } else {
-            XML3D.debug.logWarning("Encountered a light node with no lightshader, this light will be ignored.");
-        }
-
+        this.renderNode = this.factory.getScene().createRenderLight({
+            light: {
+                type: lightShader ? lightShader.getLightType() : null,
+                data: lightShader ? lightShader.getDataNode() : null
+            },
+            parent: parentNode,
+            shader: lightShader,
+            visible: !this.node.visible ? false : undefined,
+            localIntensity: this.node.intensity
+        });
     };
 
     LightRenderAdapter.prototype.notifyChanged = function(evt) {
@@ -57,7 +59,7 @@
             this.createRenderNode();
             break;
         }
-        this.factory.handler.redraw("Light attribute changed.");
+        this.factory.getRenderer().requestRedraw("Light attribute changed.");
     };
 
     LightRenderAdapter.prototype.updateLightShader = function(){
@@ -73,16 +75,6 @@
             }
         }
         this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
-    };
-
-    LightRenderAdapter.prototype.getLightType = function() {
-        var shader = this.getLightShader();
-        var script = shader.node.script;
-        if (script.indexOf("urn:xml3d:lightshader:") === 0) {
-            return script.substring(22, script.length);
-        } else {
-            XML3D.debug.logError("Unsupported light type "+script);
-        }
     };
 
     /**

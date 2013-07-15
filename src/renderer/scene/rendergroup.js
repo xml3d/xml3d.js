@@ -87,12 +87,12 @@
         addChild: function(child) {
             this.children.push(child);
             this.setBoundingBoxDirty();
-            this.scene.addChildEvent(this, child);
+            this.scene.dispatchEvent({type : webgl.Scene.EVENT_TYPE.SCENE_STRUCTURE_CHANGED, newChild: child});
         },
 
         removeChild: function(child) {
             this.children.splice(this.children.indexOf(child), 1);
-            this.scene.removeChildEvent(this, child);
+            this.scene.dispatchEvent({type : webgl.Scene.EVENT_TYPE.SCENE_STRUCTURE_CHANGED, removedChild: child});
         },
 
         getChildren: function() {

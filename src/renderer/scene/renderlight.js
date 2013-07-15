@@ -4,6 +4,16 @@
     var XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION = XML3D.math.vec3.fromValues(0,0,-1);
     /** @const */
     var XML3D_SPOTLIGHT_DEFAULT_DIRECTION = XML3D.math.vec3.fromValues(0,0,1);
+
+    /** @const */
+    var LIGHT_DEFAULT_INTENSITY = XML3D.math.vec3.fromValues(1,1,1);
+    /** @const */
+    var LIGHT_DEFAULT_ATTENUATION = XML3D.math.vec3.fromValues(0,0,1);
+    /** @const */
+    var SPOTLIGHT_DEFAULT_FALLOFFANGLE = Math.PI / 4.0;
+    /** @const */
+    var SPOTLIGHT_DEFAULT_SOFTNESS = 0.0;
+
     /** @const */
     var ENTRY_SIZE = 16;
 
@@ -16,10 +26,18 @@
      */
     var RenderLight = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.LIGHT ,scene, pageEntry, opt);
+        var light = opt.light || {};
+        this.light = {
+            type : light.type,
+            data : light.data
+        }
+        this.intensity   = XML3D.math.vec3.clone(LIGHT_DEFAULT_INTENSITY);
+        this.position    = XML3D.math.vec3.fromValues(0,0,0);
+        this.direction   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
+        this.attenuation = XML3D.math.vec3.clone(LIGHT_DEFAULT_ATTENUATION);
+
         this.lightShader = opt.shader;
-        this.listenerID = this.lightShader.registerLightListener(this.updateLightData.bind(this));
-        this.lightType = opt.lightType;
-        this.lightOffset = pageEntry.lightOffset * 3;
+        //this.listenerID = this.lightShader.registerLightListener(this.updateLightData.bind(this));
         this.localIntensity = opt.localIntensity;
         this.initializeLightData();
     };
@@ -28,10 +46,37 @@
     XML3D.createClass(RenderLight, webgl.RenderNode);
     XML3D.extend(RenderLight.prototype, {
         initializeLightData: function() {
-            var lightEntry = this.scene.lights[this.lightType];
+            var lightEntry = this.scene.lights[this.light.type];
+            if (Array.isArray(lightEntry)) {
+                this.addLightToScene(lightEntry);
+            } else {
+                this.scene.lights.queue.push(this);
+            }
+        },
+        addLightToScene : function(container) {
+            container.push(this);
             this.updateWorldMatrix(); //Implicitly fills light position/direction
-            this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
-            this.lightShader.fillLightData(this.lightType, lightEntry, this.localIntensity, this.lightOffset);
+            //this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
+            //this.lightShader.fillLightData(this.lightType, lightEntry, this.localIntensity, this.lightOffset);
+        },
+        getLightData: function(target, offset) {
+            var off3 = offset*3;
+            ["position", "direction", "attenuation"].forEach( function(name) {
+                if(target[name]) {
+                    target[name][off3+0] = this[name][0];
+                    target[name][off3+1] = this[name][1];
+                    target[name][off3+2] = this[name][2];
+                }
+            }, this);
+            if (target["intensity"]) {
+                target["intensity"][off3+0] = this.intensity[0] * this.localIntensity;
+                target["intensity"][off3+1] = this.intensity[1] * this.localIntensity;
+                target["intensity"][off3+2] = this.intensity[2] * this.localIntensity;
+            }
+            if (target["on"]) {
+                target["on"][offset] = this.visible;
+            }
+
         },
 
         updateLightData: function(field, newValue) {
@@ -61,13 +106,16 @@
         })(),
 
         updateLightTransformData: function(transform) {
-            if (this.lightType == "directional") {
-                this.updateLightData("direction", this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION, transform));
-            } else if (this.lightType == "spot") {
-                this.updateLightData("direction", this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION, transform));
-                this.updateLightData("position", this.applyTransform([0,0,0], transform));
-            } else {
-                this.updateLightData("position", this.applyTransform([0,0,0], transform));
+            switch (this.light.type) {
+                case "directional":
+                    XML3D.math.vec3.copy(this.direction, this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION, transform));
+                    break;
+                case "spot":
+                    XML3D.math.vec3.copy(this.direction, this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION, transform));
+                    XML3D.math.vec3.copy(this.position, this.applyTransform([0,0,0], transform));
+                    break;
+                case "point":
+                    XML3D.math.vec3.copy(this.position, this.applyTransform([0,0,0], transform));
             }
         },
 
@@ -94,7 +142,7 @@
         setVisible: function(newVal) {
             if (this.localVisible !== false) {
                 this.visible = newVal;
-                this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
+                // this.updateLightData("visibility", this.visible ? [1,1,1] : [0,0,0]);
             }
         },
 

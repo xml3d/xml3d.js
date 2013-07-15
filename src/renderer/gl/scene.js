@@ -13,6 +13,7 @@
         this.firstOpaqueIndex = 0;
         this.ready = [];
         this.queue = [];
+        this.addListeners();
     };
 
     XML3D.createClass(GLScene, webgl.Scene);
@@ -110,21 +111,39 @@
                 });
             }
         }()),
-        addChildEvent: function(parent, child) {
+        addListeners: function() {
+            var EVENT_TYPE = webgl.Scene.EVENT_TYPE;
+            this.addEventListener( EVENT_TYPE.SCENE_STRUCTURE_CHANGED, function(event){
+                console.log("Scene strcuture changed", event);
+                if(event.newChild !== undefined) {
+                    this.addChildEvent(event.newChild);
+                } else if (event.removedChild !== undefined) {
+                    this.removeChildEvent(event.removedChild);
+                }
+            });
+            this.addEventListener( EVENT_TYPE.VIEW_CHANGED, function(event){
+                this.context.requestRedraw("Active view changed.");
+            });
+            this.addEventListener( EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function(event){
+                this.shaderFactory.setLightStructureDirty();
+            });
+            this.addEventListener( EVENT_TYPE.LIGHT_VALUE_CHANGED, function(event){
+                console.log("Light value changed");
+                this.shaderFactory.setLightValueChanged();
+            });
+        },
+        addChildEvent: function(child) {
             if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
                 this.queue.push(child);
                 this.context.requestRedraw("Object was added to scene.");
             }
         },
-        removeChildEvent: function(parent, child) {
+        removeChildEvent: function(child) {
             if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
                 this.remove(child);
                 child.dispose();
                 this.context.requestRedraw("Object was removed from scene.");
             }
-        },
-        viewChanged: function() {
-            this.context.requestRedraw("Active view changed.");
         }
     });
     webgl.GLScene = GLScene;

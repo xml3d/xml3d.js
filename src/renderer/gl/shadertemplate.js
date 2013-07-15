@@ -22,10 +22,10 @@
     };
 
     /**
-     * @param {Object} lights
+     * @param {XML3D.webgl.scene} scene
      * @returns {IShaderTemplate.UpdateState}
      */
-    IShaderTemplate.prototype.update = function (lights) {
+    IShaderTemplate.prototype.update = function (scene, lightStructureChanged) {
         return IShaderTemplate.UpdateState.SHADER_UNCHANGED;
     };
 
@@ -60,6 +60,7 @@
         this.context = context;
         /** @type {Object.<number, IShaderTemplate>} */
         this.templates = {};
+        this.lightStructureDirty = true;
         this.defaultTemplate = new DefaultTemplate(context);
     };
 
@@ -88,9 +89,14 @@
         },
         update: function (scene) {
             for (var i in this.templates) {
-                this.templates[i].update(scene.lights);
+                this.templates[i].update(scene, this.lightStructureDirty);
             }
+        },
+        setLightStructureDirty: function() {
+            console.log("Light structure changed");
+            this.lightStructureDirty = true;
         }
+
     });
 
     /**
@@ -217,25 +223,42 @@
 
         createLightParameters: function(lights) {
             var parameters = {};
-            parameters["pointLightPosition"] = lights.point.position;
-            parameters["pointLightAttenuation"] = lights.point.attenuation;
-            parameters["pointLightVisibility"] = lights.point.visibility;
-            parameters["pointLightIntensity"] = lights.point.intensity;
-            parameters["directionalLightDirection"] = lights.directional.direction;
-            parameters["directionalLightVisibility"] = lights.directional.visibility;
-            parameters["directionalLightIntensity"] = lights.directional.intensity;
-            parameters["spotLightAttenuation"] = lights.spot.attenuation;
-            parameters["spotLightPosition"] = lights.spot.position;
-            parameters["spotLightIntensity"] = lights.spot.intensity;
-            parameters["spotLightVisibility"] = lights.spot.visibility;
-            parameters["spotLightDirection"] = lights.spot.direction;
-            parameters["spotLightCosFalloffAngle"] = lights.spot.falloffAngle.map(Math.cos);
+            var pointLightData = { position: [], attenuation: [], intensity: [], on: [] };
+            lights.point.forEach(function(light, index) {
+                light.getLightData(pointLightData, index);
+            });
+            parameters["pointLightPosition"] = pointLightData.position;
+            parameters["pointLightAttenuation"] = pointLightData.attenuation;
+            parameters["pointLightIntensity"] = pointLightData.intensity;
+            //parameters["pointLightVisibility"] = lights.point.visibility;
 
-            var softFalloffAngle = lights.spot.falloffAngle.slice();
+            var directionalLightData = { direction: [], intensity: [], on: [] };
+            lights.directional.forEach(function(light, index) {
+                light.getLightData(directionalLightData, index);
+            });
+
+            parameters["directionalLightDirection"] = directionalLightData.direction;
+            parameters["directionalLightIntensity"] = directionalLightData.intensity;
+            parameters["directionalLightVisibility"] = directionalLightData.on;
+
+            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [] };
+            lights.spot.forEach(function(light, index) {
+                light.getLightData(spotLightData, index);
+            });
+            parameters["spotLightAttenuation"] = spotLightData.attenuation;
+            parameters["spotLightPosition"] = spotLightData.position;
+            parameters["spotLightIntensity"] = spotLightData.intensity;
+            parameters["spotLightDirection"] = spotLightData.direction;
+
+            //parameters["spotLightVisibility"] = lights.spot.visibility;
+            //parameters["spotLightCosFalloffAngle"] = lights.spot.falloffAngle.map(Math.cos);
+
+            /*var softFalloffAngle = lights.spot.falloffAngle.slice();
             for (var i = 0; i < softFalloffAngle.length; i++)
                 softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - lights.spot.softness[i]);
             parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
-            parameters["spotLightSoftness"] = lights.spot.softness;
+            parameters["spotLightSoftness"] = lights.spot.softness;*/
+            console.log(parameters);
             return parameters;
     },
 
@@ -300,17 +323,21 @@
 
         getProgram: function (lights) {
             if (!this.programs[0]) {
-                this.programs[0] = this.material.getProgram(lights, this.request.getResult());
-                if (!this.programs[0].isValid()) {
-                    this.state = IShaderTemplate.State.NO_PROGRAM;
-                }
-                this.updateProgramsFromComputeResult();
-                this.updateProgramsLightParameters(lights);
+                this.programs[0] = this.createProgram(lights);
+
             }
             return this.programs[0];
         },
+        createProgram: function(lights) {
+            var result = this.material.getProgram(lights, this.request.getResult());
+            if (!result.isValid()) {
+                throw new Error("Failed to create shader program.");
+            }
+            this.updateProgramsFromComputeResult();
+            return result;
+        },
 
-        update: function (lights) {
+        update: function (scene, lightStructureChanged) {
             if (!this.isValid())
                 return;
             if (this.dataChanged) {
@@ -318,6 +345,10 @@
                 this.state = IShaderTemplate.State.OK;
             } else if (this.structureChanged) {
                 // TODO
+            }
+            if (lightStructureChanged) {
+                var lights = scene.lights;
+                this.updateProgramsLightParameters(lights);
             }
 
         },

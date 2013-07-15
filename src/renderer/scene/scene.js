@@ -10,11 +10,10 @@
 
         this.boundingBox = new XML3D.webgl.BoundingBox();
         this.lights = {
-            changed: true,
-            structureChanged: true,
-            point: { length: 0, intensity: [], position: [], attenuation: [], visibility: [] },
-            directional: { length: 0, intensity: [], direction: [], visibility: [] },
-            spot: { length: 0, intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] },
+            queue: [],
+            point: [], //{  intensity: [], position: [], attenuation: [], visibility: [] },
+            directional: [],//{ intensity: [], direction: [], visibility: [] },
+            spot: [], //{ intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] },
             length: function () {
                 return this.point.length + this.directional.length + this.spot.length;
             }
@@ -27,11 +26,19 @@
     XML3D.createClass(Scene, webgl.Pager);
 
     Scene.NODE_TYPE = {
-        GROUP: 1,
-        OBJECT: 2,
-        LIGHT: 3,
-        VIEW: 4
+        GROUP:  "group",
+        OBJECT: "object",
+        LIGHT:  "light",
+        VIEW:   "view"
+    },
+
+    Scene.EVENT_TYPE = {
+        VIEW_CHANGED: "view_changed",
+        LIGHT_STRUCTURE_CHANGED: "light_structure_changed",
+        LIGHT_VALUE_CHANGED: "light_value_changed",
+        SCENE_STRUCTURE_CHANGED: "scene_structure_changed"
     }
+
 
     var empty = function () {
     };
@@ -51,7 +58,7 @@
                 if(!view)
                     throw new Error("Active view must not be null");
                 this.activeView = view;
-                this.viewChanged();
+                this.dispatchEvent({type: Scene.EVENT_TYPE.VIEW_CHANGED, newView: this.activeView });
             }
         },
         createRenderObject: function (opt) {
@@ -72,17 +79,12 @@
 
         createRenderLight: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderLight.ENTRY_SIZE);
-            this.addLightDataOffsetToPageEntry(pageEntry, opt.lightType);
-            this.lights.structureChanged = true;
-            return new webgl.RenderLight(this, pageEntry, opt);
+            var renderLight = new webgl.RenderLight(this, pageEntry, opt);
+            this.dispatchEvent({type: Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, newLight: renderLight });
+            return renderLight;
         },
         createShaderInfo: function (opt) {
             return new webgl.ShaderInfo(this, opt);
-        },
-
-        addLightDataOffsetToPageEntry: function (pageEntry, lightType) {
-            var lightObj = this.lights[lightType];
-            pageEntry.lightOffset = lightObj.length++;
         },
 
         createRootNode: function () {
@@ -107,8 +109,6 @@
             XML3D.math.vec3.copy(bb.min, this.boundingBox.min);
             XML3D.math.vec3.copy(bb.max, this.boundingBox.max);
         },
-        viewChanged: empty,
-        addChildEvent: empty,
         removeChildEvent: empty
 
     });

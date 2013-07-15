@@ -11,7 +11,7 @@
         this.addPage();
     };
 
-    XML3D.extend(Pager.prototype, {
+    XML3D.createClass(Pager, XML3D.util.EventDispatcher, {
         addPage : function() {
             var page = new Float32Array(Pager.PAGE_SIZE);
             this.pages.push(page);

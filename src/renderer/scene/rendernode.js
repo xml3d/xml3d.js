@@ -10,9 +10,8 @@
      */
     var RenderNode = function(type, scene, pageEntry, opt) {
         opt = opt || {};
-        this.type = type;
         this.scene = scene;
-        this.setParent(opt.parent || scene.rootNode);
+        this.type = type;
         this.name = opt.name || "";
         this.page = pageEntry.page;
         this.offset = pageEntry.offset;
@@ -21,6 +20,7 @@
         this.visible = this.localVisible !== undefined ? this.localVisible : this.getParent() ? this.getParent().isVisible() : true;
         this.transformDirty = true;
         this.children = [];
+        this.setParent(opt.parent || scene.rootNode);
     };
 
     XML3D.extend(RenderNode.prototype, {

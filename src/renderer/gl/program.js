@@ -162,8 +162,8 @@
         },
         setUniformVariables: function(uniforms) {
             for ( var name in uniforms) {
-                var value = uniforms[name];
                 if (this.uniforms[name]) {
+                    var value = uniforms[name];
                     webgl.setUniform(this.gl, this.uniforms[name], value);
                 }
             }

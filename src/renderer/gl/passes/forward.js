@@ -93,7 +93,7 @@
             var tmpModelMatrix = XML3D.math.mat4.create();
             var tmpModelView = XML3D.math.mat4.create();
             var tmpModelViewProjection = XML3D.math.mat4.create();
-            var tmpNormalMatrix = XML3D.math.mat4.create();
+            var tmpNormalMatrix = XML3D.math.mat3.create();
 
             return function (objectArray, scene, opts) {
                 var objCount = 0;
@@ -114,32 +114,6 @@
 
                 // At this point, we have to gurantee (via FSM), that the RenderObject has a valid shader
                 var program = objectArray[0].program;
-                var lights = scene.lights;
-
-                if (program.needsLights || lights.changed) {
-                    parameters["pointLightPosition"] = lights.point.position;
-                    parameters["pointLightAttenuation"] = lights.point.attenuation;
-                    parameters["pointLightVisibility"] = lights.point.visibility;
-                    parameters["pointLightIntensity"] = lights.point.intensity;
-                    parameters["directionalLightDirection"] = lights.directional.direction;
-                    parameters["directionalLightVisibility"] = lights.directional.visibility;
-                    parameters["directionalLightIntensity"] = lights.directional.intensity;
-                    parameters["spotLightAttenuation"] = lights.spot.attenuation;
-                    parameters["spotLightPosition"] = lights.spot.position;
-                    parameters["spotLightIntensity"] = lights.spot.intensity;
-                    parameters["spotLightVisibility"] = lights.spot.visibility;
-                    parameters["spotLightDirection"] = lights.spot.direction;
-                    parameters["spotLightCosFalloffAngle"] = lights.spot.falloffAngle.map(Math.cos);
-
-                    var softFalloffAngle = lights.spot.falloffAngle.slice();
-                    for (i = 0; i < softFalloffAngle.length; i++)
-                        softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - lights.spot.softness[i]);
-                    parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
-
-                    parameters["spotLightSoftness"] = lights.spot.softness;
-                    program.needsLights = false;
-                }
-
 
                 program.bind();
                 //this.shaderManager.updateActiveShader(shader);
@@ -149,7 +123,7 @@
                 parameters["viewMatrix"] = c_viewMat_tmp;
                 parameters["projectionMatrix"] = c_projMat_tmp;
                 //parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
-                parameters["screenWidth"] = this.width;
+                parameters["screenWidth"] = this.target.width;
 
                 //Set global data that is shared between all objects using this shader
                 program.setUniformVariables(parameters);

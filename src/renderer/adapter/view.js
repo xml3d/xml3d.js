@@ -71,7 +71,7 @@
             }
         }
 
-        this.factory.handler.redraw("View changed");
+        this.factory.getRenderer().requestRedraw("View changed");
     };
 
     function connectProjectionAdapter(adapter){

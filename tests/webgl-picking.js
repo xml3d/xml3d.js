@@ -31,10 +31,10 @@ test("Check current pick object (internal)", function() {
 
 test("Pick with large object ids", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
-    var h = getHandler(xml3dElement);
+    var renderer = getRenderer(xml3dElement);
     var target = this.doc.getElementById("pickingMesh6");
 
-    var drawables = h.renderer.scene.ready;
+    var drawables = renderer.scene.ready;
     var objId = -1;
     for ( var i = 0; i < drawables.length; i++) {
         if (drawables[i].node === target) {
@@ -45,10 +45,10 @@ test("Pick with large object ids", function() {
     notEqual(objId, -1, "Found Drawable");
     ok(objId > 255, "Object id larger than 255");
 
-    var picked = h.getPickObjectByPoint(220, 150);
-    ok(h.currentPickObj, "Object picked");
-    strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
+    var picked = renderer.getRenderObjectFromPickingBuffer(220, 150);
+    ok(renderer.pickedObject, "Object picked");
+    strictEqual(renderer.pickedObject, picked, "Return value matches");
+    strictEqual(renderer.pickedObject.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
 
 });
 

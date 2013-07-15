@@ -498,7 +498,7 @@ test("Add a mesh dynamically", 4, function() {
                 group.appendChild(mesh);
                 stop();
             } else if (count == 1) {
-                equal(n.detail.count.obects, 2, "Now two drawable objects");
+                equal(n.detail.count.objects, 2, "Now two drawable objects");
             }
             count++;
             start();

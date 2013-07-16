@@ -42,6 +42,7 @@
                 this.renderNode.remove();
                 return;
             }
+                break;
             case XML3D.events.VALUE_MODIFIED:
                 this.valueModified(evt.wrapped.attrName, evt.wrapped.newValue);
                 break;

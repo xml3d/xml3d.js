@@ -32,7 +32,7 @@
         opt = opt || {};
         var light = opt.light || {};
         this.light = {
-            type : light.type,
+            type : light.type || "directional",
             data : light.data
         }
         this.intensity   = XML3D.math.vec3.clone(LIGHT_DEFAULT_INTENSITY);
@@ -61,6 +61,7 @@
             if (Array.isArray(lightEntry)) {
                 this.addLightToScene(lightEntry);
             } else {
+                // Remove queue
                 this.scene.lights.queue.push(this);
             }
         },
@@ -174,7 +175,8 @@
         },
         remove: function() {
             this.parent.removeChild(this);
-            // TODO: this.scene.lights.structureChanged = true;
+            // TODO: Remove from containers
+            this.lightStructureChanged(); // TODO: test
         },
 
         getWorldSpaceBoundingBox: function(bbox) {

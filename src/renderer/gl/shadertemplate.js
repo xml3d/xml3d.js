@@ -90,8 +90,8 @@
         update: function (scene) {
             for (var i in this.templates) {
                 this.templates[i].update(scene, { evaluateShader: this.needsCompileCheck, updateLightValues: this.lightValuesDirty });
-                this.needsCompileCheck = this.lightValuesDirty = false;
             }
+            this.needsCompileCheck = this.lightValuesDirty = false;
         },
         setLightStructureDirty: function() {
             XML3D.debug.logWarning("Light structure changes not yet supported.");

@@ -29,6 +29,7 @@
      */
     var RenderLight = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.LIGHT ,scene, pageEntry, opt);
+        opt = opt || {};
         var light = opt.light || {};
         this.light = {
             type : light.type,
@@ -48,7 +49,7 @@
             XML3D.debug.logWarning("External light shaders not supported yet"); // TODO
         }
 
-        this.localIntensity = opt.localIntensity;
+        this.localIntensity = opt.localIntensity || 1;
         this.initializeLightData();
     };
     RenderLight.ENTRY_SIZE = ENTRY_SIZE;
@@ -80,6 +81,9 @@
         },
         lightValueChanged: function() {
             this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, light: this });
+        },
+        lightStructureChanged: function() {
+            this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, light: this });
         },
         getLightData: function(target, offset) {
             var off3 = offset*3;
@@ -162,7 +166,11 @@
         },
 
         setLightType: function(type) {
-            XML3D.debug.logError("Changing light type is not supported yet");
+            if(type != this.light.type) {
+                this.light.type = type;
+                XML3D.debug.logError("Changing light type is not supported yet");
+                this.lightStructureChanged();
+            }
         },
         remove: function() {
             this.parent.removeChild(this);

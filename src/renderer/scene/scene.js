@@ -11,9 +11,9 @@
         this.boundingBox = new XML3D.webgl.BoundingBox();
         this.lights = {
             queue: [],
-            point: [], //{  intensity: [], position: [], attenuation: [], visibility: [] },
-            directional: [],//{ intensity: [], direction: [], visibility: [] },
-            spot: [], //{ intensity: [], direction: [], attenuation: [], visibility: [], position: [], falloffAngle: [], softness: [] },
+            point: [],
+            directional: [],
+            spot: [],
             length: function () {
                 return this.point.length + this.directional.length + this.spot.length;
             }
@@ -80,7 +80,7 @@
         createRenderLight: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderLight.ENTRY_SIZE);
             var renderLight = new webgl.RenderLight(this, pageEntry, opt);
-            this.dispatchEvent({type: Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, newLight: renderLight });
+            this.dispatchEvent({type: Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, light: renderLight });
             return renderLight;
         },
         createShaderInfo: function (opt) {
@@ -109,7 +109,6 @@
             XML3D.math.vec3.copy(bb.min, this.boundingBox.min);
             XML3D.math.vec3.copy(bb.max, this.boundingBox.max);
         },
-        removeChildEvent: empty
 
     });
 

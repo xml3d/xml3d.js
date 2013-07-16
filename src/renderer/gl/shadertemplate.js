@@ -234,16 +234,16 @@
             parameters["pointLightPosition"] = pointLightData.position;
             parameters["pointLightAttenuation"] = pointLightData.attenuation;
             parameters["pointLightIntensity"] = pointLightData.intensity;
-            parameters["pointLightVisibility"] = pointLightData.on;
+            parameters["pointLightOn"] = pointLightData.on;
 
             var directionalLightData = { direction: [], intensity: [], on: [] };
             lights.directional.forEach(function(light, index) {
+
                 light.getLightData(directionalLightData, index);
             });
-            // TODO: Rename  *LightVisibility to *LightOn and adapt in all standard shaders
             parameters["directionalLightDirection"] = directionalLightData.direction;
             parameters["directionalLightIntensity"] = directionalLightData.intensity;
-            parameters["directionalLightVisibility"] = directionalLightData.on;
+            parameters["directionalLightOn"] = directionalLightData.on;
 
             var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [] };
             lights.spot.forEach(function(light, index) {
@@ -253,7 +253,7 @@
             parameters["spotLightPosition"] = spotLightData.position;
             parameters["spotLightIntensity"] = spotLightData.intensity;
             parameters["spotLightDirection"] = spotLightData.direction;
-            parameters["spotLightVisibility"] = spotLightData.on;
+            parameters["spotLightOn"] = spotLightData.on;
 
             // TODO: Support spot light parameters
             //parameters["spotLightCosFalloffAngle"] = lights.spot.falloffAngle.map(Math.cos);

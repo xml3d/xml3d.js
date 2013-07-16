@@ -103,7 +103,24 @@
             if (target["on"]) {
                 target["on"][offset] = this.visible;
             }
-            // TODO: "softness", "falloffAngle"
+            var result;
+            var data;
+            if (target["softness"]) {
+                target["softness"][offset] = SPOTLIGHT_DEFAULT_SOFTNESS;
+                if (this.light.data) {
+                    result = this.lightParameterRequest.result;
+                    data = result.getOutputData("softness");
+                    target["softness"][offset] = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_SOFTNESS;
+                }
+            }
+            if (target["falloffAngle"]) {
+                target["falloffAngle"][offset] = SPOTLIGHT_DEFAULT_FALLOFFANGLE;
+                if (this.light.data) {
+                    result = this.lightParameterRequest.result;
+                    data = result.getOutputData("falloffAngle");
+                    target["falloffAngle"][offset] = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_FALLOFFANGLE;
+                }
+            }
         },
 
         setTransformDirty: function() {

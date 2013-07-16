@@ -238,14 +238,13 @@
 
             var directionalLightData = { direction: [], intensity: [], on: [] };
             lights.directional.forEach(function(light, index) {
-
                 light.getLightData(directionalLightData, index);
             });
             parameters["directionalLightDirection"] = directionalLightData.direction;
             parameters["directionalLightIntensity"] = directionalLightData.intensity;
             parameters["directionalLightOn"] = directionalLightData.on;
 
-            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [] };
+            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
             lights.spot.forEach(function(light, index) {
                 light.getLightData(spotLightData, index);
             });
@@ -254,16 +253,14 @@
             parameters["spotLightIntensity"] = spotLightData.intensity;
             parameters["spotLightDirection"] = spotLightData.direction;
             parameters["spotLightOn"] = spotLightData.on;
+            parameters["spotLightSoftness"] = spotLightData.softness;
+            parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
 
-            // TODO: Support spot light parameters
-            //parameters["spotLightCosFalloffAngle"] = lights.spot.falloffAngle.map(Math.cos);
-
-            /*var softFalloffAngle = lights.spot.falloffAngle.slice();
+            var softFalloffAngle = spotLightData.softness.slice();
             for (var i = 0; i < softFalloffAngle.length; i++)
-                softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - lights.spot.softness[i]);
+                softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - spotLightData.softness[i]);
             parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
-            parameters["spotLightSoftness"] = lights.spot.softness;*/
-            // console.log(parameters);
+
             return parameters;
     },
 

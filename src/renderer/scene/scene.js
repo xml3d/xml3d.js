@@ -30,14 +30,14 @@
         OBJECT: "object",
         LIGHT:  "light",
         VIEW:   "view"
-    },
+    };
 
     Scene.EVENT_TYPE = {
         VIEW_CHANGED: "view_changed",
         LIGHT_STRUCTURE_CHANGED: "light_structure_changed",
         LIGHT_VALUE_CHANGED: "light_value_changed",
         SCENE_STRUCTURE_CHANGED: "scene_structure_changed"
-    }
+    };
 
 
     var empty = function () {
@@ -108,7 +108,7 @@
         getBoundingBox: function (bb) {
             XML3D.math.vec3.copy(bb.min, this.boundingBox.min);
             XML3D.math.vec3.copy(bb.max, this.boundingBox.max);
-        },
+        }
 
     });
 

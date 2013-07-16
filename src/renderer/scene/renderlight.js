@@ -192,7 +192,10 @@
         },
         remove: function() {
             this.parent.removeChild(this);
-            // TODO: Remove from containers
+            var container = this.scene.lights[this.light.type];
+            if (Array.isArray(container)) {
+                container = container.splice(this);
+            }
             this.lightStructureChanged(); // TODO: test
         },
 

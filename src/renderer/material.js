@@ -37,20 +37,13 @@
      * @param {Xflow.ComputeResult} data
      * @returns {XML3D.webgl.GLProgramObject}
      */
-    Material.prototype.createProgram = function (lights, data) {
+    Material.prototype.createProgram = function (lights, data, overrides) {
         if (!this.fragment)
             return null;
         if (!this.vertex)
             return null;
 
-        var directives = [];
-
-        this.fragment = XML3D.webgl.addFragmentShaderHeader(this.fragment);
-        this.addDirectives(directives, lights || {}, data ? data.getOutputMap() : {});
-        var sources = {
-            fragment: Material.addDirectivesToSource(directives, this.fragment),
-            vertex: Material.addDirectivesToSource(directives, this.vertex)
-        };
+        var sources = this.createSources(lights, data, overrides);
         var programObject = new XML3D.webgl.GLProgramObject(this.context.gl, sources);
         if (programObject.isValid()) {
             programObject.setUniformVariables(this.uniforms);
@@ -68,6 +61,16 @@
         return programObject;
     };
 
+    Material.prototype.createSources = function (lights, data, overrides) {
+        var directives = [];
+        this.fragment = XML3D.webgl.addFragmentShaderHeader(this.fragment);
+        this.addDirectives(directives, lights || {}, data ? data.getOutputMap() : {});
+        return {
+            fragment: Material.addDirectivesToSource(directives, this.fragment),
+            vertex: Material.addDirectivesToSource(directives, this.vertex)
+        };
+    };
+
 
     /**
      * @param {Array} directives
@@ -82,15 +85,14 @@
         return header + "\n" + source;
     };
 
-
     /**
      * @param {Object} lights
      * @param {Xflow.ComputeResult} dataTable
      * @returns {XML3D.webgl.GLProgramObject}
      */
-    Material.prototype.getProgram = function (lights, dataTable) {
+    Material.prototype.getProgram = function (lights, dataTable, overrides) {
         if (!this.program) {
-            this.program = this.createProgram(lights, dataTable);
+            this.program = this.createProgram(lights, dataTable, overrides);
         }
         return this.program;
     };

@@ -64,6 +64,10 @@
         this.defaultTemplate = new DefaultTemplate(context);
     };
 
+    ShaderTemplateFactory.EVENT_TYPE = {
+        LIGHT_STRUCTURE_CHANGED: "light_structure_changed"
+    };
+
     XML3D.extend(ShaderTemplateFactory.prototype, {
         /**
          *
@@ -159,9 +163,9 @@
         this.programs = [];
         this.setShaderInfo(shaderInfo);
         var id = shaderInfo.id;
-    }
+    };
 
-    XML3D.extend(MaterialShaderTemplate.prototype, {
+    XML3D.createClass(MaterialShaderTemplate, XML3D.util.EventDispatcher, {
         /**
          *
          * @param {XML3D.webgl.ShaderInfo} shaderInfo
@@ -323,17 +327,28 @@
             return this.state == IShaderTemplate.State.OK;
         },
 
-        getProgram: function (scene) {
+        getProgram: function (scene, overrides) {
             if (!this.programs[0]) {
-                this.programs[0] = this.createProgram(scene);
-                // Update everything after creation
+                this.programs[0] = this.createProgram(scene, overrides);
                 this.update(scene, {updateShaderData: true, updateLightValues: true});
                 this.needsCompileCheck = false;
             }
             return this.programs[0];
         },
-        createProgram: function(scene) {
-            var result = this.material.getProgram(scene.lights, this.request.getResult());
+        refreshProgram: function(program, scene, overrides) {
+            var sources = this.material.createSources(scene.lights, this.request.getResult(), overrides);
+            if (sources.vertex !== program.sources.vertex || sources.fragment !== program.sources.fragment) {
+                this.programs.splice(program);
+                var newProgram = this.createProgram(scene, overrides);
+                this.programs.push(newProgram);
+                this.update(scene, {updateShaderData: true, updateLightValues: true});
+                this.needsCompileCheck = false;
+                return newProgram;
+            }
+            return program;
+        },
+        createProgram: function(scene, overrides) {
+            var result = this.material.getProgram(scene.lights, this.request.getResult(), overrides);
             if (!result.isValid()) {
                 throw new Error("Failed to create shader program.");
             }
@@ -348,7 +363,8 @@
 
             if(opt.evaluateShader) {
                 XML3D.debug.logError("Recompilation not supported yet.");
-                this.needsCompileCheck = false;
+                this.dispatchEvent({type: webgl.ShaderTemplateFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED});
+                return;
             }
 
 

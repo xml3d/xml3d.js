@@ -110,8 +110,10 @@
             switch (to) {
                 case "NoMaterial":
                     if(this.shader.template) {
+                        this.shader.template.addEventListener(webgl.ShaderTemplateFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED,
+                            this.refreshShaderProgram.bind(this, webgl.ShaderTemplateFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED));
                         this.shader.template.update();
-                        this.program = this.shader.template.getProgram(this.scene);
+                        this.program = this.shader.template.getProgram(this.scene, this.override);
                     } else {
                         console.log("No shader:", this.name);// DefaultShader
                     }
@@ -132,6 +134,10 @@
         },
         onchangestate:function (name, from, to) {
             XML3D.debug.logInfo("Changed: ", name, from, to);
+        },
+
+        refreshShaderProgram: function() {
+            this.program = this.shader.template.refreshProgram(this.program, this.scene, this.override);
         },
 
         getModelViewMatrix: function(target) {
@@ -331,6 +337,10 @@
                 this.setVisible(newVal);
                 this.setBoundingBoxDirty();
             }
+        },
+
+        getProgram: function() {
+            return this.shader.template.getProgram();
         }
 
     });

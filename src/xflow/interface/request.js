@@ -1,6 +1,5 @@
 (function(){
 
-
 /**
  * @constructor
  * @param {Xflow.DataNode} dataNode
@@ -11,7 +10,7 @@ var Request = function(dataNode, filter, callback){
     this._filter = filter ? filter.slice().sort() : null;
     this._listener = callback;
     this._result = null;
-    this._dataNodeListener = this.onDataNodeChange.bind(this);
+    this._dataNodeListener = this._onDataNodeChange.bind(this);
     this._dataNode.addListener(this._dataNodeListener);
 };
 Xflow.Request = Request;
@@ -39,19 +38,29 @@ Request.prototype.clear = function(){
     this._dataNode.removeListener(this._dataNodeListener);
 };
 
+Request.prototype._onListedCallback = function(data){
+    this._listener && this._listener(this, data)
+};
+
+function swapResultRequest(request, newResult){
+    if(request._result) request._result._removeRequest(request);
+    request._result = newResult
+    if(newResult) newResult._addRequest(request);
+    return newResult;
+}
+
 /**
  * @param {Xflow.Request} request
  * @param {Xflow.RESULT_STATE} notification
  */
 function notifyListeners(request, notification){
-    if(request._listener)
-        request._listener(request, notification)
+    Xflow._listCallback(request, notification);
 };
 
 /**
  * @param {Xflow.RESULT_STATE} notification
  */
-Request.prototype.onDataNodeChange = function(notification){
+Request.prototype._onDataNodeChange = function(notification){
     notifyListeners(this, notification);
 }
 
@@ -63,20 +72,16 @@ Request.prototype.onDataNodeChange = function(notification){
  */
 var ComputeRequest = function(dataNode, filter, callback){
     Xflow.Request.call(this, dataNode, filter, callback);
-    this._bindedResultChange = this.onResultChanged.bind(this);
 };
 Xflow.createClass(ComputeRequest, Xflow.Request);
 Xflow.ComputeRequest = ComputeRequest;
 
 ComputeRequest.prototype.getResult = function(){
-    if(this._result) this._result.removeListener(this._bindedResultChange);
-    this._result = this._dataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, this._filter);
-    if(this._result) this._result.addListener(this._bindedResultChange);
-    return this._result;
+    return swapResultRequest(this, this._dataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, this._filter));
 }
 
-ComputeRequest.prototype.onResultChanged = function(result, notification){
-    this.onDataNodeChange(notification);
+ComputeRequest.prototype._onResultChanged = function(notification){
+    this._onDataNodeChange(notification);
 }
 
 
@@ -94,19 +99,15 @@ var VertexShaderRequest = function(dataNode, vsConfig, callback){
     Xflow.Request.call(this, dataNode, filter, callback);
     this._vsConfig = vsConfig;
     this._vsConnectNode = getVsConnectNode(dataNode, vsConfig);
-    this._bindedResultChange = this.onResultChanged.bind(this);
 };
 Xflow.createClass(VertexShaderRequest, Xflow.Request);
 Xflow.VertexShaderRequest = VertexShaderRequest;
 
 VertexShaderRequest.prototype.getResult = function(){
-    if(this._result) this._result.removeListener(this._bindedResultChange);
-    this._result = this._vsConnectNode._getResult(Xflow.RESULT_TYPE.VS, this._filter);
-    if(this._result) this._result.addListener(this._bindedResultChange);
-    return this._result;
+    return swapResultRequest(this, this._vsConnectNode._getResult(Xflow.RESULT_TYPE.VS, this._filter));
 }
 
-VertexShaderRequest.prototype.notify = function(notification){
+VertexShaderRequest.prototype._onDataNodeChange = function(notification){
     if(notification == Xflow.RESULT_STATE.CHANGED_STRUCTURE){
         var newVSConnectedNode = getVsConnectNode(this._dataNode, this._vsConfig);
         if(newVSConnectedNode != this._vsConnectNode){
@@ -114,11 +115,11 @@ VertexShaderRequest.prototype.notify = function(notification){
             this._vsConnectNode = newVSConnectedNode;
         }
     }
-    Request.prototype.notify.call(this, notification);
+    Request.prototype._onDataNodeChange.call(this, notification);
 }
 
-VertexShaderRequest.prototype.onResultChanged = function(result, notification){
-    this.notify(notification);
+VertexShaderRequest.prototype._onResultChanged = function(result, notification){
+    this._onDataNodeChange(notification);
 }
 
 function getVsConnectNode(dataNode, vsConfig){

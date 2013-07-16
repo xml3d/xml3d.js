@@ -257,7 +257,7 @@ RequestNode.prototype.setStructureOutOfSync = function(){
     this.outOfSync = true;
     this.status = Xflow.PROCESS_STATE.MODIFIED;
     for(var type in this.results){
-        this.results[type].notifyChanged(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        this.results[type]._notifyChanged(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     }
     for(var name in this.channels){
         this.channels[name].removeListener(this);
@@ -273,7 +273,7 @@ RequestNode.prototype.onXflowChannelChange = function(channel, state){
             : Xflow.RESULT_STATE.CHANGED_DATA_SIZE);
 
     for(var type in this.results){
-        this.results[type].notifyChanged(notifyState);
+        this.results[type]._notifyChanged(notifyState);
     }
 }
 

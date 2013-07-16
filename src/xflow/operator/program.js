@@ -164,7 +164,7 @@
                         var newHeight = texParams.imageFormat.height;
                         var newFormatType = texParams.imageFormat.type;
                         var newSamplerConfig = texParams.samplerConfig;
-                        dataEntry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                        dataEntry._createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
                     } else if (d.sizeof) {
                         var srcEntry = null;
                         for(var k = 0; k < operator.mapping.length; ++k){
@@ -178,7 +178,7 @@
                             var newHeight = Math.max(srcEntry.getHeight(), 1);
                             var newFormatType = d.formatType || srcEntry.getFormatType();
                             var newSamplerConfig = d.samplerConfig || srcEntry.getSamplerConfig();
-                            dataEntry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                            dataEntry._createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
                         }
                         else
                             throw new Error("Unknown texture input parameter '" + d.sizeof+"' in operator '"+operator.name+"'");
@@ -202,7 +202,7 @@
                         }
                     }
                     else{
-                        dataEntry.notifyChanged();
+                        dataEntry._notifyChanged();
                     }
                 }
             }

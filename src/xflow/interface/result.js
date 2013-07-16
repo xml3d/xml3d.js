@@ -9,6 +9,7 @@ Xflow.Result = function(){
     this.loading = false;
     this.valid = false;
     this._listeners = [];
+    this._requests = [];
 };
 var Result = Xflow.Result;
 
@@ -26,12 +27,35 @@ Result.prototype.removeListener = function(callback){
     Array.erase(this._listeners, callback);
 };
 
-Result.prototype.notifyChanged = function(state){
+/**
+ * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ */
+Result.prototype._addRequest = function(request){
+    this._requests.push(request);
+};
+
+/**
+ * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ */
+Result.prototype._removeRequest = function(request){
+    Array.erase(this._requests, request);
+};
+
+
+Result.prototype._notifyChanged = function(state){
     this.valid = false;
+    for(var i = 0; i < this._requests.length; ++i){
+        this._requests[i]._onResultChanged(state);
+    }
+    Xflow._listCallback(this, state);
+}
+
+Result.prototype._onListedCallback = function(state){
     for(var i = 0; i < this._listeners.length; ++i){
         this._listeners[i](this, state);
     }
 }
+
 
 
 /**

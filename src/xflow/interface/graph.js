@@ -88,6 +88,7 @@ Object.defineProperty(InputNode.prototype, "name", {
     set: function(v){
         this._name = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {string} */
     get: function(){ return this._name; }
@@ -97,6 +98,7 @@ Object.defineProperty(InputNode.prototype, "key", {
     set: function(v){
         this._key = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {number} */
     get: function(){ return this._key; }
@@ -106,6 +108,7 @@ Object.defineProperty(InputNode.prototype, "paramName", {
     set: function(v){
         this._paramName = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {string} */
     get: function(){ return this._paramName; }
@@ -115,6 +118,7 @@ Object.defineProperty(InputNode.prototype, "paramGlobal", {
     set: function(v){
         this._paramGlobal = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {boolean} */
     get: function(){ return this._paramGlobal; }
@@ -134,6 +138,7 @@ Object.defineProperty(InputNode.prototype, "data", {
             notifyParentsOnChanged(this, this._data._loading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
                 Xflow.RESULT_STATE.IMAGE_LOAD_END);
         }
+        Xflow._callListedCallback();
     },
     /** @return {Object} */
     get: function(){ return this._data; }
@@ -239,6 +244,7 @@ Object.defineProperty(DataNode.prototype, "sourceNode", {
         if(this._sourceNode) addParent(this, this._sourceNode);
         if(!updateNodeLoading(this))
             this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {?Xflow.DataNode} */
     get: function(){ return this._sourceNode; }
@@ -251,6 +257,7 @@ Object.defineProperty(DataNode.prototype, "protoNode", {
         if(this._protoNode) addParent(this, this._protoNode);
         if(!updateNodeLoading(this))
             this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {?Xflow.DataNode} */
     get: function(){ return this._protoNode; }
@@ -260,6 +267,7 @@ DataNode.prototype.setLoading = function(loading){
     if(this._loading != loading){
         this._loading = loading;
         updateSubtreeLoading(this);
+        Xflow._callListedCallback();
     }
 }
 
@@ -269,6 +277,7 @@ Object.defineProperty(DataNode.prototype, "filterType", {
     set: function(v){
         this._filterType = v;
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {Xflow.DATA_FILTER_TYPE} */
     get: function(){ return this._filterType; }
@@ -287,6 +296,7 @@ Object.defineProperty(DataNode.prototype, "computeOperator", {
     set: function(v){
         this._computeOperator = v;
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {string} */
     get: function(){ return this._computeOperator; }
@@ -318,6 +328,7 @@ DataNode.prototype.appendChild = function(child){
     addParent(this, child);
     if(!updateNodeLoading(this))
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 /**
  * @param {Xflow.GraphNode} child
@@ -327,6 +338,7 @@ DataNode.prototype.removeChild = function(child){
     removeParent(this, child);
     if(!updateNodeLoading(this))
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 /**
  * @param {Xflow.GraphNode} child
@@ -341,6 +353,7 @@ DataNode.prototype.insertBefore = function(child, beforeNode){
     addParent(this, child);
     if(!updateNodeLoading(this))
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 /**
  * remove all children of the DataNode
@@ -352,6 +365,7 @@ DataNode.prototype.clearChildren = function(){
     this._children = [];
     if(!updateNodeLoading(this))
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 
 /**
@@ -409,6 +423,7 @@ DataNode.prototype.setFilter = function(filterString){
     this._filterMapping = newMapping;
     this._filterType = newType;
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 
 var computeParser = /^(([^=]+)\=)?([^(]+)\(([^()]*)\)$/;
@@ -441,6 +456,7 @@ DataNode.prototype.setCompute = function(computeString){
     this._computeOutputMapping = outputMapping;
     this._computeOperator = newOperator;
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 }
 /**
  * Notifies DataNode about a change. Notification will be forwarded to parents, if necessary

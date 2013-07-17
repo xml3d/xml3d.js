@@ -34,8 +34,8 @@
         <file name="gl/passes/pickPosition.js" />
         <file name="gl/passes/pickNormal.js" />
         <file name="gl/programfactory.js" />
-        <file name="gl/shadertemplate.js" />
-        <file name="material.js" />
+        <file name="gl/shadercomposer.js" />
+        <file name="gl/shaderclosure.js" />
         <file name="rendererfactory.js" />
         <file name="adapter/base.js" />
         <file name="adapter/transformable.js" />

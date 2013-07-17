@@ -10,6 +10,7 @@
      */
     var RenderNode = function(type, scene, pageEntry, opt) {
         opt = opt || {};
+
         this.scene = scene;
         this.type = type;
         this.name = opt.name || "";
@@ -17,7 +18,7 @@
         this.offset = pageEntry.offset;
         this.entrySize = pageEntry.size;
         this.localVisible = opt.visible;
-        this.visible = this.localVisible !== undefined ? this.localVisible : this.getParent() ? this.getParent().isVisible() : true;
+        this.visible = this.localVisible !== undefined ? this.localVisible : opt.parent ? opt.parent.isVisible() : true;
         this.transformDirty = true;
         this.children = [];
         this.setParent(opt.parent || scene.rootNode);

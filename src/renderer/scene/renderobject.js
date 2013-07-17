@@ -57,8 +57,8 @@
             this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.object.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
             this.boundingBoxAnnotationChanged(this.annotatedBoundingBoxRequest);
         }
-        /** {Object?} **/
-        this.override = null;
+        /** {Object!} **/
+        this.override = {};
         this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
         this.transformDirty = true;
         this.boundingBoxDirty = true;
@@ -110,10 +110,11 @@
             switch (to) {
                 case "NoMaterial":
                     if(this.shader.template) {
-                        this.shader.template.addEventListener(webgl.ShaderTemplateFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED,
-                            this.refreshShaderProgram.bind(this, webgl.ShaderTemplateFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED));
+                        this.shader.template.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED,
+                            this.refreshShaderProgram.bind(this, webgl.ShaderComposerFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED));
                         this.shader.template.update();
-                        this.program = this.shader.template.getProgram(this.scene, this.override);
+                        //TODO Provide mesh data to the shader
+                        this.program = this.shader.template.getShaderClosure(this.scene, {});
                     } else {
                         console.log("No shader:", this.name);// DefaultShader
                     }
@@ -252,19 +253,19 @@
                     oldHandle.removeListener(this.shaderHandleCallback);
                 }
                 if (newHandle) {
-                    newHandle.addListener(this.shaderHandleCallback)
+                    newHandle.addListener(this.shaderHandleCallback);
                     switch (newHandle.status) {
                         case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
                             XML3D.debug.logWarning("Shader not found.", newHandle.url, this.name);
                         // ↓ Fallthrough
                         case XML3D.base.AdapterHandle.STATUS.LOADING:
-                            this.shader.template = this.scene.shaderFactory.getDefaultTemplate();
+                            this.shader.template = this.scene.shaderFactory.getDefaultComposer();
                             break;
                         case XML3D.base.AdapterHandle.STATUS.READY:
-                            this.shader.template = this.scene.shaderFactory.createTemplateForShaderInfo(newHandle.getAdapter().getShaderInfo());
+                            this.shader.template = this.scene.shaderFactory.createComposerForShaderInfo(newHandle.getAdapter().getShaderInfo());
                     }
                 } else {
-                    this.shader.template = this.scene.shaderFactory.getDefaultTemplate();
+                    this.shader.template = this.scene.shaderFactory.getDefaultComposer();
                 }
                 this.shader.handle = newHandle;
                 this.materialChanged();

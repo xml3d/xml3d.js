@@ -15,22 +15,28 @@
     XML3D.extend(ProgramFactory.prototype, {
 
         getProgramByName: function (name) {
-            var sources = XML3D.shaders.getScript(name);
-            if (!sources || !sources.vertex) {
+            var scriptDescriptor = XML3D.shaders.getScript(name);
+            if (!scriptDescriptor || !scriptDescriptor.vertex) {
                 XML3D.debug.logError("Unknown shader: ", name);
                 return null;
             }
-            sources.fragment = webgl.addFragmentShaderHeader(sources.fragment);
-            return new webgl.GLProgramObject(this.context.gl, sources);
+            var descriptor = new webgl.ShaderDescriptor();
+            XML3D.extend(descriptor, scriptDescriptor);
+            var shader = new webgl.ShaderClosure(this.context, descriptor);
+            shader.createSources({}, null, null);
+            shader.compile();
+            return shader;
         },
         getFallbackProgram: function () {
             if (!this.programs.fallback) {
-                var matte = XML3D.shaders.getScript("matte");
-                var material = new webgl.Material(this.context);
-                XML3D.extend(material, matte);
-                this.programs.fallback = material.getProgram();
+                var descriptor = new webgl.ShaderDescriptor();
+                XML3D.extend(descriptor, XML3D.shaders.getScript("matte"));
+                var shader = new webgl.ShaderClosure(this.context, descriptor);
+                shader.createSources({}, null, null);
+                shader.compile();
+                this.programs.fallback = shader;
                 this.programs.fallback.bind();
-                webgl.setUniform(this.context.gl, this.programs.fallback.uniforms["diffuseColor"], [ 1, 0, 0 ]);
+                this.programs.fallback.setUniformVariables({diffuseColor : [ 1, 0, 0 ]});
                 this.programs.fallback.unbind();
             }
             return this.programs.fallback;

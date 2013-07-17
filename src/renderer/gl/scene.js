@@ -9,7 +9,7 @@
     var GLScene = function (context) {
         webgl.Scene.call(this);
         this.context = context;
-        this.shaderFactory = new webgl.ShaderTemplateFactory(context);
+        this.shaderFactory = new webgl.ShaderComposerFactory(context);
         this.firstOpaqueIndex = 0;
         this.ready = [];
         this.queue = [];
@@ -114,7 +114,6 @@
         addListeners: function() {
             var EVENT_TYPE = webgl.Scene.EVENT_TYPE;
             this.addEventListener( EVENT_TYPE.SCENE_STRUCTURE_CHANGED, function(event){
-                console.log("Scene strcuture changed", event);
                 if(event.newChild !== undefined) {
                     this.addChildEvent(event.newChild);
                 } else if (event.removedChild !== undefined) {

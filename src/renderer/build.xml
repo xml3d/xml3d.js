@@ -27,7 +27,7 @@
         <file name="gl/base/rendertarget.js" />
         <file name="gl/base/mesh.js" />
         <file name="gl/renderer.js" />
-        <file name="gl/scene.js" />
+        <file name="gl/glscene.js" />
         <file name="gl/passes/base.js" />
         <file name="gl/passes/forward.js" />
         <file name="gl/passes/pickObject.js" />

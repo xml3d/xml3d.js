@@ -131,6 +131,18 @@
                 header += "#define " + v + "\n";
             });
             return header + "\n" + source;
+        },
+
+        setUniformVariableOverride: function(override) {
+            this.program.setUniformVariables(override);
+        },
+
+        undoUniformVariableOverride: function(override) {
+            var defaults = {};
+            for (var name in override) {
+                defaults[name] = this.descriptor.uniforms[name];
+            }
+            this.program.setUniformVariables(defaults);
         }
 });
 

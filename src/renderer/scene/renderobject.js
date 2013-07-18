@@ -57,8 +57,8 @@
             this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.object.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
             this.boundingBoxAnnotationChanged(this.annotatedBoundingBoxRequest);
         }
-        /** {Object!} **/
-        this.override = {};
+        /** {Object?} **/
+        this.override = null;
         this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
         this.transformDirty = true;
         this.boundingBoxDirty = true;
@@ -135,7 +135,7 @@
         },
 
         refreshShaderProgram: function() {
-            this.program = this.shader.template.getShaderAfterStructureChanged(this.program, this.scene, this.override);
+            this.program = this.shader.template.getShaderAfterStructureChanged(this.program, this.scene, this.override || {});
         },
 
         getModelViewMatrix: function(target) {
@@ -225,13 +225,16 @@
                 return;
             }
 
-            var prog = this.shader;
-            this.override = Object.create(null);
+            var prog = this.program;
+            var overrides = {};
             for(var name in prog.uniforms) {
                 var entry = result.getOutputData(name);
                 if (entry && entry.getValue()) {
-                    this.override[name] = entry.getValue();
+                    overrides[name] = entry.getValue();
                 }
+            }
+            if (Object.keys(overrides).length > 0) {
+                this.override = overrides;
             }
             XML3D.debug.logInfo("Shader attribute override", result, this.override);
         },

@@ -87,9 +87,6 @@
                 this.initElement(evt.wrapped.target);
                 this.initChildElements(evt.wrapped.target);
                 break;
-            case XML3D.events.NODE_REMOVED:
-                this.factory.renderer.sceneTreeRemoval(evt);
-                break;
             case XML3D.events.THIS_REMOVED:
                 this.dispose();
                 break;

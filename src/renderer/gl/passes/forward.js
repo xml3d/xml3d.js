@@ -151,15 +151,15 @@
 
                     program.setUniformVariables(parameters);
                     if (obj.override !== null) {
-                        // TODO: Set back to default after rendering
-                        // this.shaderManager.setUniformVariables(shader, obj.override);
+                        program.setUniformVariableOverride(obj.override);
                     }
 
                     primitiveCount += mesh.draw(program);
                     objCount++;
 
                     if (obj.override !== null) {
-                        // this.shaderManager.resetUniformVariables(obj.shaderAdapter, shader, Object.keys(obj.override));
+                        //TODO variable needs to be set back to the proper value instead of the default one
+                        program.undoUniformVariableOverride(obj.override);
                     }
                     if (transparent) {
                         gl.disable(gl.BLEND);

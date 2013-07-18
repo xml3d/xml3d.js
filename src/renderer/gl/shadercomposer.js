@@ -169,6 +169,7 @@
     var MaterialShaderComposer = function (context, shaderInfo) {
         this.context = context;
         this.shaderClosures = [];
+        this.obsoleteClosures = [];
         this.descriptor = new ShaderDescriptor();
         this.dataChanged = false;
         this.structureChanged = false;
@@ -190,6 +191,8 @@
                     that.dataChanged = true;
                     that.context.requestRedraw("Shader data changed");
                 });
+                //TODO Build this into the XML3D.webgl.getScript function? It's needed everywhere anyway...
+                this.descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(this.descriptor.fragment);
                 this.structureChanged = true;
             }
         },
@@ -222,35 +225,42 @@
 
         update: function (scene, opt) {
             opt = opt || {};
+            var that = this;
 
             if(!this.shaderClosures.length)
                 return;
 
             if(opt.evaluateShader || this.structureChanged) {
-                this.dispatchEvent({type: webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED});
-                return;
+                this.handleShaderStructureChanged(scene);
+                this.dataChanged = true;
+                opt.updateLightValues = true;
             }
 
             if (opt.updateShaderData || this.dataChanged) {
+                var result = this.request.getResult();
                 this.shaderClosures.forEach(function(shader) {
-                    this.updateClosureFromComputeResult(shader, opt);
+                    that.updateClosureFromComputeResult(shader, result, opt);
                 });
+                this.dataChanged = false;
             }
 
             if (opt.updateLightValues) {
                 var lightParameters = this.createLightParameters(scene.lights);
                 this.shaderClosures.forEach(function(shader) {
-                    this.updateClosureFromLightParameters(shader, lightParameters);
+                    that.updateClosureFromLightParameters(shader, lightParameters);
                 });
             }
         },
 
         /**
-         * @param {XML3D.webgl.ShaderClosure!} shaderClosure
-         * @param {Xflow.ComputeResult!} result
+         * @param {webgl.ShaderClosure} shaderClosure
+         * @param {Xflow.ComputeResult} result
          * @param {Object?} opt
          */
         updateClosureFromComputeResult: function (shaderClosure, result, opt) {
+            if (!result.getOutputMap) {
+                return;
+            }
             shaderClosure.bind();
             shaderClosure.updateUniformsFromComputeResult(result, opt);
             shaderClosure.updateSamplersFromComputeResult(result, opt);
@@ -321,6 +331,34 @@
             //this.updateClosureFromComputeResult(shaderClosure, objectData, {force : true});
             this.updateClosureFromLightParameters(shaderClosure, this.createLightParameters(scene.lights));
             this.shaderClosures.push(shaderClosure);
+        },
+
+        handleShaderStructureChanged: function(scene) {
+            this.obsoleteClosures = this.shaderClosures.splice(0);
+            this.shaderClosures = [];
+            this.dispatchEvent({type: webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED});
+            this.structureChanged = false;
+            this.obsoleteClosures = [];
+        },
+
+        getShaderAfterStructureChanged: function(shaderClosure, scene, objectData) {
+            var index = this.obsoleteClosures.indexOf(shaderClosure);
+            if (index >= 0) {
+                var newShader = new webgl.ShaderClosure(this.context, this.descriptor);
+                var shaderData = this.request.getResult();
+                newShader.createSources(scene, shaderData, objectData);
+                if (newShader.equals(shaderClosure)) {
+                    this.shaderClosures.push(shaderClosure);
+                } else {
+                    newShader.compile();
+                    this.updateClosureFromComputeResult(newShader, objectData, {force:true});
+                    this.shaderClosures.push(newShader);
+                    return newShader;
+                }
+            } else {
+                XML3D.debug.logWarning("After structure change the shader was not found in list of obsolete closures");
+            }
+            return shaderClosure;
         },
 
         getObjectRequests: function() {

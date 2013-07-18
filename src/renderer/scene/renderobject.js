@@ -135,7 +135,7 @@
         },
 
         refreshShaderProgram: function() {
-            this.program = this.shader.template.refreshProgram(this.program, this.scene, this.override);
+            this.program = this.shader.template.getShaderAfterStructureChanged(this.program, this.scene, this.override);
         },
 
         getModelViewMatrix: function(target) {
@@ -260,6 +260,7 @@
                             break;
                         case XML3D.base.AdapterHandle.STATUS.READY:
                             this.shader.template = this.scene.shaderFactory.createComposerForShaderInfo(newHandle.getAdapter().getShaderInfo());
+                            this.shader.template.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
                             //TODO Provide mesh data to the shader
                             this.program = this.shader.template.getShaderClosure(this.scene, {});
                     }

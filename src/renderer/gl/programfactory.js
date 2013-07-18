@@ -22,6 +22,7 @@
             }
             var descriptor = new webgl.ShaderDescriptor();
             XML3D.extend(descriptor, scriptDescriptor);
+            descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(descriptor.fragment);
             var shader = new webgl.ShaderClosure(this.context, descriptor);
             shader.createSources({}, null, null);
             shader.compile();
@@ -31,6 +32,7 @@
             if (!this.programs.fallback) {
                 var descriptor = new webgl.ShaderDescriptor();
                 XML3D.extend(descriptor, XML3D.shaders.getScript("matte"));
+                descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(descriptor.fragment);
                 var shader = new webgl.ShaderClosure(this.context, descriptor);
                 shader.createSources({}, null, null);
                 shader.compile();

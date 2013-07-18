@@ -64,7 +64,6 @@
 
         createSources: function(scene, shaderData, objectData) {
             var directives = [];
-            this.descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(this.descriptor.fragment);
             //TODO add object data to directives
             this.descriptor.addDirectives(directives, scene.lights || {}, shaderData ? shaderData.getOutputMap() : {});
             this.source = {

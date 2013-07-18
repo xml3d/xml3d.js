@@ -1,7 +1,8 @@
 (function (webgl) {
 
-    var ShaderClosure = function(context, descriptor) {
+    var ShaderClosure = function(context, descriptor, dataCallback) {
         this.descriptor = descriptor;
+        this.getShaderParameters = dataCallback || function(){ {} };
         this.source = {};
         this.program = null;
         this.context = context;
@@ -139,11 +140,13 @@
         },
 
         undoUniformVariableOverride: function(override) {
-            var defaults = {};
+            var previousValues = {};
+            var shaderData = this.getShaderParameters();
             for (var name in override) {
-                defaults[name] = this.descriptor.uniforms[name];
+                var value = shaderData[name] ? shaderData[name] : this.descriptor.uniforms[name];
+                previousValues[name] = value.getValue ? value.getValue() : value;
             }
-            this.program.setUniformVariables(defaults);
+            this.program.setUniformVariables(previousValues);
         }
 });
 

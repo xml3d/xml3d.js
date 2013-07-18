@@ -312,7 +312,7 @@
 
         getShaderClosure: function (scene, objectData) {
             var shaderData = this.request.getResult();
-            var shader = new webgl.ShaderClosure(this.context, this.descriptor);
+            var shader = new webgl.ShaderClosure(this.context, this.descriptor, this.getShaderParameters.bind(this));
             shader.createSources(scene, shaderData, objectData);
             for (var i=0; i < this.shaderClosures.length; i++) {
                 if (this.shaderClosures[i].equals(shader))
@@ -343,7 +343,7 @@
         getShaderAfterStructureChanged: function(shaderClosure, scene, objectData) {
             var index = this.obsoleteClosures.indexOf(shaderClosure);
             if (index >= 0) {
-                var newShader = new webgl.ShaderClosure(this.context, this.descriptor);
+                var newShader = new webgl.ShaderClosure(this.context, this.descriptor, this.getShaderParameters.bind(this));
                 var shaderData = this.request.getResult();
                 newShader.createSources(scene, shaderData, objectData);
                 if (newShader.equals(shaderClosure)) {
@@ -372,6 +372,10 @@
 
         isValid: function () {
             return true;
+        },
+
+        getShaderParameters: function() {
+            return this.request.getResult().getOutputMap();
         }
 
     });

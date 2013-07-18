@@ -221,8 +221,8 @@
          * @param {Xflow.Result} result
          */
         setOverride: function(result) {
+            this.override = null;
             if(!result.outputNames.length) {
-                this.override = null;
                 return;
             }
 

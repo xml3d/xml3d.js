@@ -110,9 +110,6 @@
             switch (to) {
                 case "NoMaterial":
                     if(this.shader.template) {
-                        this.shader.template.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED,
-                            this.refreshShaderProgram.bind(this, webgl.ShaderComposerFactory.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED));
-                        this.shader.template.update();
                         //TODO Provide mesh data to the shader
                         this.program = this.shader.template.getShaderClosure(this.scene, {});
                     } else {
@@ -263,6 +260,8 @@
                             break;
                         case XML3D.base.AdapterHandle.STATUS.READY:
                             this.shader.template = this.scene.shaderFactory.createComposerForShaderInfo(newHandle.getAdapter().getShaderInfo());
+                            //TODO Provide mesh data to the shader
+                            this.program = this.shader.template.getShaderClosure(this.scene, {});
                     }
                 } else {
                     this.shader.template = this.scene.shaderFactory.getDefaultComposer();

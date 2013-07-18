@@ -6,29 +6,30 @@
         this.program = null;
         this.context = context;
         this.id = "";
-        //TODO Better way to add getters?
-        var that = this;
-        Object.defineProperty(this, "attributes", {
-            get: function() {
-                return  that.program.attributes;
-            }
-        });
-        Object.defineProperty(this, "uniforms", {
-            get: function() {
-                return  that.program.uniforms;
-            }
-        });
-        Object.defineProperty(this, "samplers", {
-            get: function() {
-                return  that.program.samplers;
-            }
-        });
     };
     XML3D.extend(ShaderClosure.prototype, {
+        get attributes() {
+            return this.program ? this.program.attributes : {};
+        },
+        set attributes(arg) {},
+
+        get uniforms() {
+            return this.program ? this.program.uniforms : {};
+        },
+        set uniforms(arg) {},
+
+        get samplers() {
+            return this.program ? this.program.samplers : {};
+        },
+        set samplers(arg) {},
+
+        //TODO Change this to work with parametersChanged
+        get hasTransparency() {
+            return this.descriptor.hasTransparency();
+        },
+
         equals: function(that) {
-            //TODO Need to support multiple shaders of same type (eg. Phong) with different <shader> nodes
-            //return this.source.vertex === that.source.vertex && this.source.fragment === that.source.fragment;
-            return false;
+            return this.source.vertex === that.source.vertex && this.source.fragment === that.source.fragment;
         },
 
         compile: function () {
@@ -40,11 +41,6 @@
             var programObject = new XML3D.webgl.GLProgramObject(this.context.gl, this.source);
             if (programObject.isValid()) {
                 programObject.setUniformVariables(this.descriptor.uniforms);
-                //TODO Not sure how to add generic shader logic here
-                this.addShaderLogic();
-                //if (data) {
-                //    this.parametersChanged(data.getOutputMap());
-                //}
             }
             this.program = programObject;
             this.id = programObject.id;
@@ -77,17 +73,8 @@
             };
         },
 
-        addShaderLogic: function() {
-            var that = this;
-            Object.defineProperty(this, "hasTransparency", {
-                get: function() {
-                    return  that.isTransparent;
-                }
-            });
-        },
-
         /**
-         * @param {XML3D.webgl.GLProgramObject} program
+         * @param {Xflow.data.ComputeResult} result
          * @param {Object?} options
          */
         updateUniformsFromComputeResult: function (result, options) {
@@ -112,7 +99,7 @@
 
         /**
          *
-         * @param {XML3D.webgl.GLProgram} program
+         * @param {Xflow.data.ComputeResult} result
          * @param {Object} options
          */
         updateSamplersFromComputeResult: function (result, options) {

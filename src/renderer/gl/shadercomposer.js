@@ -157,6 +157,7 @@
     };
     ShaderDescriptor.prototype.addDirectives = function() {};
     ShaderDescriptor.prototype.parametersChanged = function() {};
+    ShaderDescriptor.prototype.hasTransparency = function(params) { return false; };
 
     webgl.ShaderDescriptor = ShaderDescriptor;
 

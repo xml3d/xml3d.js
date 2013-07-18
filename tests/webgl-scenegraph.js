@@ -102,7 +102,7 @@ test("Add children in invisible group", 8, function() {
 
     x.addEventListener("framedrawn", function(n) {
         ok("Redraw was triggered");
-        ok(!h.needDraw, "Redraw not required");
+        ok(!h.renderer.needsDraw, "Redraw not required");
         if(testFunc)
             testFunc(n);
         start();
@@ -118,7 +118,7 @@ test("Add children in invisible group", 8, function() {
     mesh.setAttribute("src", "#meshdata");
 
     this.doc.getElementById("myEmptyGroup").appendChild(mesh);
-    ok(h.needDraw, "Redraw required");
+    ok(h.renderer.needsDraw, "Redraw required");
 });
 
 test("Change active view via script", 8, function() {
@@ -128,7 +128,7 @@ test("Change active view via script", 8, function() {
     var h = getHandler(x);
     x.addEventListener("framedrawn", function(n) {
             ok("Redraw was triggered"); // 7
-            ok(!h.needDraw, "Redraw not required"); // 8
+            ok(!h.renderer.needsDraw, "Redraw not required"); // 8
             start();
     });
     stop();
@@ -139,7 +139,7 @@ test("Change active view via script", 8, function() {
 
     x.activeView = "#viewOrientationTest";
     equal(x.activeView, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
-    ok(h.needDraw, "Redraw required"); // 6, fails in < 920181
+    ok(h.renderer.needsDraw, "Redraw required"); // 6, fails in < 920181
 });
 
 

@@ -47,7 +47,7 @@ test("ProgramObject.hastransparency is set correctly", function() {
         });
         transparencyAttribute.textContent = "0.5";
         stop();
-        h.redraw();
+        h.draw();
     }
 
 
@@ -64,5 +64,5 @@ test("Pick transparency values", 3, function() {
         start();
     });
     stop();
-    h.redraw();
+    h.draw();
 });

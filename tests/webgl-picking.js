@@ -20,13 +20,13 @@ test("Check current pick object (internal)", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
     var picked = h.getPickObjectByPoint(88,60);
-    ok(h.currentPickObj, "Object picked");
-    strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
+    ok(h.renderer.pickedObject, "Object picked");
+    strictEqual(h.renderer.pickedObject, picked, "Return value matches");
+    strictEqual(h.renderer.pickedObject.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
 
     picked = h.getPickObjectByPoint(5,5);
-    strictEqual(h.currentPickObj, null, "Nothing picked");
-    strictEqual(h.currentPickObj, picked, "Return value matches");
+    strictEqual(h.renderer.pickedObject, null, "Nothing picked");
+    strictEqual(h.renderer.pickedObject, picked, "Return value matches");
 });
 
 test("Pick with large object ids", function() {

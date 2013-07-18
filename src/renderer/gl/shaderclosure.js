@@ -6,6 +6,7 @@
         this.program = null;
         this.context = context;
         this.id = "";
+        this.isTransparent = false;
     };
     XML3D.extend(ShaderClosure.prototype, {
         get attributes() {
@@ -23,13 +24,12 @@
         },
         set samplers(arg) {},
 
-        //TODO Change this to work with parametersChanged
-        get hasTransparency() {
-            return this.descriptor.hasTransparency();
-        },
-
         equals: function(that) {
             return this.source.vertex === that.source.vertex && this.source.fragment === that.source.fragment;
+        },
+
+        hasTransparency: function() {
+            return this.isTransparent;
         },
 
         compile: function () {
@@ -94,6 +94,7 @@
                     webglData.changed = 0;
                 }
             }
+            this.isTransparent = this.descriptor.hasTransparency(dataMap);
         },
 
         /**

@@ -12,7 +12,7 @@
         this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
         /** @type webgl.ShaderInfo **/
         this.shaderInfo = this.createShaderInfo();
-        this.templateId = -1;
+        this.templateId = this.shaderInfo.id;
     };
 
     XML3D.createClass(ShaderRenderAdapter, XML3D.webgl.RenderAdapter);

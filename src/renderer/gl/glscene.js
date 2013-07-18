@@ -39,7 +39,7 @@
             var index = this.queue.indexOf(obj);
             if (index != -1) {
                 this.queue.splice(index, 1);
-                if (obj.shader.hasTransparency) {
+                if (obj.program.hasTransparency()) {
                     this.ready.unshift(obj);
                     this.firstOpaqueIndex++;
                 }

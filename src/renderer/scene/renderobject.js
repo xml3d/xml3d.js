@@ -48,6 +48,7 @@
         /** TODO: Remove mesh adapter as soon as it's superfluous */
         this.meshAdapter = opt.meshAdapter;
         this.object = opt.object || {};
+        //TODO: Clean up the relationship between RenderObject, shader (template/adapterHandle) and program (shaderClosure)
         this.shader = opt.shader || {};
         this.node = opt.node;
 

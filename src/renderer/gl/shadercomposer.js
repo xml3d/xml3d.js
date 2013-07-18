@@ -156,8 +156,7 @@
         this.vertex =  "";
     };
     ShaderDescriptor.prototype.addDirectives = function() {};
-    ShaderDescriptor.prototype.parametersChanged = function() {};
-    ShaderDescriptor.prototype.hasTransparency = function(params) { return false; };
+    ShaderDescriptor.prototype.hasTransparency = function() { return false; };
 
     webgl.ShaderDescriptor = ShaderDescriptor;
 
@@ -264,7 +263,7 @@
             shaderClosure.bind();
             shaderClosure.updateUniformsFromComputeResult(result, opt);
             shaderClosure.updateSamplersFromComputeResult(result, opt);
-            shaderClosure.descriptor.parametersChanged(result.getOutputMap());
+            //shaderClosure.descriptor.parametersChanged(result.getOutputMap());
         },
 
         updateClosureFromLightParameters: function (shaderClosure, lightParameters) {

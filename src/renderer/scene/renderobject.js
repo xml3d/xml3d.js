@@ -248,32 +248,31 @@
         },
         setShader: function(newHandle) {
             var oldHandle = this.shader.handle;
-            if (newHandle === oldHandle) {
-            } else {
-                if (oldHandle) {
-                    oldHandle.removeListener(this.shaderHandleCallback);
-                }
-                if (newHandle) {
-                    newHandle.addListener(this.shaderHandleCallback);
-                    switch (newHandle.status) {
-                        case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
-                            XML3D.debug.logWarning("Shader not found.", newHandle.url, this.name);
-                        // ↓ Fallthrough
-                        case XML3D.base.AdapterHandle.STATUS.LOADING:
-                            this.shader.template = this.scene.shaderFactory.getDefaultComposer();
-                            break;
-                        case XML3D.base.AdapterHandle.STATUS.READY:
-                            this.shader.template = this.scene.shaderFactory.createComposerForShaderInfo(newHandle.getAdapter().getShaderInfo());
-                            this.shader.template.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
-                            //TODO Provide mesh data to the shader
-                            this.program = this.shader.template.getShaderClosure(this.scene, {});
-                    }
-                } else {
-                    this.shader.template = this.scene.shaderFactory.getDefaultComposer();
-                }
-                this.shader.handle = newHandle;
-                this.materialChanged();
+
+            if (oldHandle) {
+                oldHandle.removeListener(this.shaderHandleCallback);
             }
+            if (newHandle) {
+                newHandle.addListener(this.shaderHandleCallback);
+                switch (newHandle.status) {
+                    case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
+                        XML3D.debug.logWarning("Shader not found.", newHandle.url, this.name);
+                    // ↓ Fallthrough
+                    case XML3D.base.AdapterHandle.STATUS.LOADING:
+                        this.shader.template = this.scene.shaderFactory.getDefaultComposer();
+                        this.program = this.shader.template.getShaderClosure(this.scene, {});
+                        break;
+                    case XML3D.base.AdapterHandle.STATUS.READY:
+                        this.shader.template = this.scene.shaderFactory.createComposerForShaderInfo(newHandle.getAdapter().getShaderInfo());
+                        this.shader.template.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
+                        //TODO Provide mesh data to the shader
+                        this.program = this.shader.template.getShaderClosure(this.scene, {});
+                }
+            } else {
+                this.shader.template = this.scene.shaderFactory.getDefaultComposer();
+            }
+            this.shader.handle = newHandle;
+            this.materialChanged();
         },
 
         setObjectSpaceBoundingBox: function(min, max) {

@@ -16,7 +16,7 @@
         getXflowEntryWebGlData: function (entry) {
             return XML3D.webgl.getXflowEntryWebGlData(entry, this.id);
         },
-        requestRedraw: function(reason, forcePicking) {
+        requestRedraw: function(reason) {
             //handler.redraw(reason, forcePicking);
         }
     });

@@ -60,7 +60,7 @@
         case "shader":
             this.disconnectAdapterHandle("shader");
             this.renderNode.setLocalShaderHandle(this.getShaderHandle());
-            this.factory.renderer.requestRedraw("Group shader changed.", false);
+            this.factory.renderer.requestRedraw("Group shader changed.");
             break;
 
         case "transform":
@@ -72,7 +72,7 @@
 
         case "visible":
             this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
-            this.factory.renderer.requestRedraw("Group visibility changed.", true);
+            this.factory.renderer.requestRedraw("Group visibility changed.");
             break;
 
         default:

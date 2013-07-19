@@ -10,7 +10,7 @@
     };
     IRenderer.prototype.resizeCanvas = function (width, height) {
     };
-    IRenderer.prototype.requestRedraw = function (reason, forcePickingRedraw) {
+    IRenderer.prototype.requestRedraw = function (reason) {
     };
     IRenderer.prototype.needsRedraw = function () {
     };
@@ -40,7 +40,7 @@
         this.pickedObject = null;
 
         this.needsDraw = true;
-        this.needPickingDraw = true;
+        this.needsPickingDraw = true;
         this.context.requestRedraw = this.requestRedraw.bind(this);
         this.createRenderPasses(context);
         this.init();
@@ -67,6 +67,7 @@
             this.height = height;
             this.createRenderPasses(this.context);
             this.camera && (this.camera.setTransformDirty());
+            this.needsDraw = this.needsPickingDraw = true;
         },
         createRenderPasses: function (context) {
             this.mainPass = new webgl.ForwardRenderPass(context);
@@ -75,9 +76,10 @@
             this.pickPositionPass = new webgl.PickPositionRenderPass(context, { target: pickingTarget });
             this.pickNormalPass = new webgl.PickNormalRenderPass(context, { target: pickingTarget });
         },
-        requestRedraw: function (reason, forcePickingRedraw) {
+        requestRedraw: function (reason) {
             XML3D.debug.logDebug("Request redraw because:", reason);
             this.needsDraw = true;
+            this.needsPickingDraw = true;
         },
         getWorldSpaceNormalByPoint: function (x, y, object) {
             var obj = object || this.pickedObject;
@@ -108,11 +110,12 @@
         },
         getRenderObjectFromPickingBuffer: function (x, y) {
             y = webgl.canvasToGlY(this.canvas, y);
-            //if(this.needsDraw) {
-            this.prepareRendering();
-            this.pickObjectPass.renderScene(this.scene);
+            if(this.needsPickingDraw) {
+                this.prepareRendering();
+                this.pickObjectPass.renderScene(this.scene);
+                this.needsPickingDraw = false;
+            }
             this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene);
-            //}
             return this.pickedObject;
         },
         prepareRendering: function () {

@@ -106,7 +106,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         XML3D.debug.logInfo("New shader, clearing requests: ", this.node.id);
         this.clearRequests(); // New shader, new requests
         this.renderNode.materialChanged();
-        this.factory.renderer.requestRedraw("Shader changed.", false);
+        this.factory.renderer.requestRedraw("Shader changed.");
     }
 
 

@@ -270,6 +270,7 @@ NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
 function mappingNotifyOwner(mapping){
     if(mapping._owner)
         mapping._owner.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 
 })();

@@ -91,7 +91,7 @@ DataEntry.prototype.removeListener = function(callback){
     Array.erase(this._listeners, callback);
 };
 
-DataEntry.prototype.notifyChanged = function(){
+DataEntry.prototype._notifyChanged = function(){
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }
 
@@ -116,9 +116,14 @@ var BufferEntry = Xflow.BufferEntry;
 
 /** @param {Object} v */
 BufferEntry.prototype.setValue = function(v){
+    this._setValue(v);
+    Xflow._callListedCallback();
+}
+
+BufferEntry.prototype._setValue = function(v){
     var newSize = (this._value ? this._value.length : 0) != (v ? v.length : 0);
     this._value = v;
-    notifyListeners(this, newSize ? Xflow.DATA_ENTRY_STATE.CHANGE_SIZE : Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+    notifyListeners(this, newSize ? Xflow.DATA_ENTRY_STATE.CHANGED_SIZE : Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 }
 
 /** @return {Object} */
@@ -203,6 +208,7 @@ Xflow.TextureEntry = function(image){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
     this._formatType = null; // null | 'ImageData' | 'number' | 'float32' | 'float64'
+    this._loading = false;
     this._updateImage(image);
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
@@ -260,7 +266,7 @@ TextureEntry.prototype._updateImage = function(image) {
  * @param samplerConfig
  * @return {Image|Canvas}
  */
-TextureEntry.prototype.createImage = function(width, height, formatType, samplerConfig) {
+TextureEntry.prototype._createImage = function(width, height, formatType, samplerConfig) {
     if (!this._image || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
         if (!width || !height)
             throw new Error("Width or height is not specified");
@@ -276,18 +282,34 @@ TextureEntry.prototype.createImage = function(width, height, formatType, sampler
             samplerConfig.setDefaults();
         }
         this._samplerConfig.set(samplerConfig);
-        this.setImage(img);
+        this._setImage(img);
     } else {
-        this.notifyChanged();
+        this._notifyChanged();
     }
     return this._image;
 };
 
 /** @param {Object} v */
 TextureEntry.prototype.setImage = function(v) {
-    this._updateImage(v);
-    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+    this._setImage(v);
+    Xflow._callListedCallback();
 };
+
+TextureEntry.prototype._setImage = function(v) {
+    this._updateImage(v);
+    var loading = this.isLoading();
+    if(loading){
+        this._loading = true;
+        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_START);
+    }
+    else if(this._loading){
+        this._loading = false;
+        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_END);
+    }
+    else
+        notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+}
+
 
 TextureEntry.prototype.getFormatType = function() {
     return this._formatType;
@@ -456,7 +478,7 @@ ImageDataTextureEntry.prototype._updateImageData = function(imageData) {
  * @param samplerConfig
  * @return {Image|Canvas}
  */
-ImageDataTextureEntry.prototype.createImage = function(width, height, formatType, samplerConfig) {
+ImageDataTextureEntry.prototype._createImage = function(width, height, formatType, samplerConfig) {
     if (!this._image || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
         if (!width || !height)
             throw new Error("Width or height is not specified");
@@ -490,13 +512,14 @@ ImageDataTextureEntry.prototype.createImage = function(width, height, formatType
         }
         this._imageData = imageData;
     }
-    this.notifyChanged();
+    this._notifyChanged();
 };
 
 /** @param {Object} v */
 ImageDataTextureEntry.prototype.setImageData = function(v) {
     this._updateImageData(v);
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+    Xflow._callListedCallback();
 };
 
 ImageDataTextureEntry.prototype.getWidth = function() {
@@ -569,7 +592,8 @@ function notifyListeners(dataEntry, notification){
         DataChangeNotifier._listeners[i](dataEntry, notification);
     }
     for(var i = 0; i < dataEntry._listeners.length; ++i){
-        dataEntry._listeners[i].notify(dataEntry, notification);
+        dataEntry._listeners[i](dataEntry, notification);
     }
-};
-})();
+}
+
+}());

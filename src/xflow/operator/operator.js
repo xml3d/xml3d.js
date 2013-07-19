@@ -13,6 +13,12 @@ Xflow.registerOperator = function(name, data){
     data.name = actualName;
 };
 
+Xflow.initAnonymousOperator = function(data){
+    initOperator(data);
+    data.name = "Anonymous Operator";
+    return data;
+}
+
 Xflow.getOperator = function(name){
     if (name && !operators[name])
     {
@@ -43,9 +49,10 @@ function initOperator(operator){
         var type = operator.params[paramIdx].type;
         if(mapping.sequence)
             mapping.keyParamIdx = indexMap[mapping.keySource];
-        if(operator.mapping[i].sequence == Xflow.SEQUENCE.LINEAR_WEIGHT)
+        if(mapping.sequence == Xflow.SEQUENCE.LINEAR_WEIGHT)
             type = Xflow.DATA_TYPE.FLOAT;
-        operator.mapping[i].internalType = type;
+        mapping.internalType = type;
+        mapping.name = mapping.name || mapping.source;
     }
 }
 
@@ -189,7 +196,7 @@ function allocateOutput(operator, inputData, output, operatorData){
                 var newHeight = texParams.imageFormat.height;
                 var newFormatType = texParams.imageFormat.type;
                 var newSamplerConfig = texParams.samplerConfig;
-                entry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                entry._createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
             } else if (d.sizeof) {
                 var srcEntry = null;
                 for (var j in operator.mapping) {
@@ -203,7 +210,7 @@ function allocateOutput(operator, inputData, output, operatorData){
                     var newHeight = Math.max(srcEntry.getHeight(), 1);
                     var newFormatType = d.formatType || srcEntry.getFormatType();
                     var newSamplerConfig = d.samplerConfig || srcEntry.getSamplerConfig();
-                    entry.createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                    entry._createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
                 }
                 else
                     throw new Error("Unknown texture input parameter '" + d.sizeof+"' in operator '"+operator.name+"'");
@@ -227,7 +234,7 @@ function allocateOutput(operator, inputData, output, operatorData){
                 }
             }
             else{
-                entry.notifyChanged();
+                entry._notifyChanged();
             }
         }
     }

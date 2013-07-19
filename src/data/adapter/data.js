@@ -73,7 +73,7 @@ XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
 
 XML3D.data.DataAdapter.prototype.getComputeResult = function(filter)
 {
-    var result = this.xflowDataNode._getComputeResult(filter);
+    var result = this.xflowDataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, filter);
     return result;
 }
 
@@ -148,7 +148,7 @@ function updateLoadState(dataAdpater){
     if(handle && handle.status == XML3D.base.AdapterHandle.STATUS.LOADING){
         loading = true;
     }
-    dataAdpater.xflowDataNode.loading = loading;
+    dataAdpater.xflowDataNode.setLoading(loading);
 }
 
 XML3D.data.DataAdapter.prototype.updateHandle = function(attributeName) {

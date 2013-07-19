@@ -78,10 +78,10 @@
         }
     }
 
-    ChannelNode.prototype.notifyDataChange = function(inputNode){
+    ChannelNode.prototype.notifyDataChange = function(inputNode, changeType){
         var key = inputNode._name + ";" + inputNode._key;
         if(this.inputSlots[key])
-            this.inputSlots[key].setDataEntry(inputNode._data);
+            this.inputSlots[key].setDataEntry(inputNode._data, changeType);
     }
 
 
@@ -99,9 +99,6 @@
             for(var key in this.requestNodes){
                 this.requestNodes[key].setStructureOutOfSync();
             }
-            for(var key in this.processNodes){
-
-            }
 
         }
     }
@@ -112,13 +109,15 @@
         return this.finalOutputChannels.getNames();
     }
 
+
     ChannelNode.prototype.getParamNames = function(){
         this.synchronize();
         this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
         return this.protoNames;
     }
 
-    ChannelNode.prototype.getComputeResult = function(filter){
+    ChannelNode.prototype.getResult = function(type, filter)
+    {
         this.synchronize();
         this.getSubstitutionNode(null); // create emptySubstitutionNode if not available
 
@@ -126,8 +125,9 @@
         if(!this.requestNodes[key]){
             this.requestNodes[key] = new Xflow.RequestNode(this, filter);
         }
-        return this.requestNodes[key].getResult(Xflow.RESULT_TYPE.COMPUTE);
+        return this.requestNodes[key].getResult(type);
     }
+
 
     ChannelNode.prototype.getOutputChannelInfo = function(name){
         this.synchronize();
@@ -168,17 +168,15 @@
     }
 
     function synchronizeChildren(channelNode, dataNode){
-        channelNode.loading = dataNode.loading;
+        channelNode.loading = dataNode._subTreeLoading;
         if(dataNode._sourceNode){
             dataNode._sourceNode._channelNode.synchronize();
-            channelNode.loading = channelNode.loading || dataNode._sourceNode._channelNode.loading;
         }
         else{
             var child;
             for(var i = 0; i < dataNode._children.length; ++i){
                 if((child = dataNode._children[i]._channelNode) && !dataNode._children[i].isProtoNode()){
                     child.synchronize();
-                    channelNode.loading = channelNode.loading || child.loading;
                 }
             }
         }
@@ -215,8 +213,14 @@
     }
 
     function setOperatorProtoNames(channelNode){
-        var operatorName = channelNode.owner._computeOperator;
-        channelNode.operator = operatorName && Xflow.getOperator(operatorName);
+        if(typeof channelNode.owner._computeOperator == "string"){
+            var operatorName = channelNode.owner._computeOperator;
+            channelNode.operator = operatorName && Xflow.getOperator(operatorName);
+        }
+        else{
+            channelNode.operator = channelNode.owner._computeOperator;
+        }
+
         if(channelNode.operator){
             var operator = channelNode.operator, inputMapping = channelNode.owner._computeInputMapping;
             for(var i = 0; i < operator.params.length; ++i){

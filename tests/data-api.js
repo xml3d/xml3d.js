@@ -18,21 +18,21 @@ module("Data API tests", {
 
 test("Access Output Names", function() {
 
-    QUnit.closeArray(this.doc.getElementById("baseData").getOutputNames().sort(),
-        ["index", "normal", "position"], EPSILON, "#baseData has correct output names" );
-    QUnit.closeArray(this.doc.getElementById("poseData").getOutputNames().sort(),
-        ["posAdd1", "posAdd2"], EPSILON, "#poseData has correct output names" );
-    QUnit.closeArray(this.doc.getElementById("indirectPoseData").getOutputNames().sort(),
-        ["posAdd1", "posAdd2"], EPSILON, "#indirectPoseData has correct output names" );
-    QUnit.closeArray(this.doc.getElementById("combinedData").getOutputNames().sort(),
-        ["index", "normal", "posAdd1", "posAdd2", "position"], EPSILON, "#combinedData has correct output names" );
-    QUnit.closeArray(this.doc.getElementById("morphedData").getOutputNames().sort(),
+    QUnit.deepEqual(this.doc.getElementById("baseData").getOutputNames().sort(),
+        ["index", "normal", "position"], "#baseData has correct output names" );
+    QUnit.deepEqual(this.doc.getElementById("poseData").getOutputNames().sort(),
+        ["posAdd1", "posAdd2"], "#poseData has correct output names" );
+    QUnit.deepEqual(this.doc.getElementById("indirectPoseData").getOutputNames().sort(),
+        ["posAdd1", "posAdd2"], "#indirectPoseData has correct output names" );
+    QUnit.deepEqual(this.doc.getElementById("combinedData").getOutputNames().sort(),
+        ["index", "normal", "posAdd1", "posAdd2", "position"], "#combinedData has correct output names" );
+    QUnit.deepEqual(this.doc.getElementById("morphedData").getOutputNames().sort(),
         ["index", "normal", "posAdd1", "posAdd2", "position", "weight1", "weight2"],
-        EPSILON, "#combinedData has correct output names" );
+        "#combinedData has correct output names" );
 
-    QUnit.closeArray(this.doc.getElementById("unusedData").getOutputNames().sort(),
+    QUnit.deepEqual(this.doc.getElementById("unusedData").getOutputNames().sort(),
         ["A", "B"], EPSILON, "#unusedData has correct output names" );
-    QUnit.closeArray(this.doc.getElementById("unusedMorphedData").getOutputNames().sort(),
+    QUnit.deepEqual(this.doc.getElementById("unusedMorphedData").getOutputNames().sort(),
         ["index", "normal", "posAdd1", "posAdd2", "position", "weight1", "weight2"],
         EPSILON, "#unusedMorphedData has correct output names" );
 
@@ -40,21 +40,21 @@ test("Access Output Names", function() {
 
     this.doc.getElementById("swapReference").src = "#unusedSubData2";
 
-    QUnit.closeArray(this.doc.getElementById("unusedData").getOutputNames().sort(),
-        ["A", "C"], EPSILON, "#unusedData has correct output names after modification" );
+    QUnit.deepEqual(this.doc.getElementById("unusedData").getOutputNames().sort(),
+        ["A", "C"], "#unusedData has correct output names after modification" );
 });
 
 test("Access Results", function() {
 
     var result = this.doc.getElementById("baseData").getResult();
     ok(result instanceof this.window.XML3DDataResult, "Result of #baseData is of type XML3DDataResult");
-    QUnit.closeArray(result.getNames().sort(),
-        ["index", "normal", "position"], EPSILON, "result of #baseData has correct output names" );
+    QUnit.deepEqual(result.getNames().sort(),
+        ["index", "normal", "position"], "result of #baseData has correct output names" );
 
     result = this.doc.getElementById("baseData").getResult(["index", "position"]);
 
-    QUnit.closeArray(result.getNames().sort(),
-        ["index", "position"], EPSILON, "filtered result of #baseData has correct output names" );
+    QUnit.deepEqual(result.getNames().sort(),
+        ["index", "position"], "filtered result of #baseData has correct output names" );
 
     equal(result.getType("index"), XML3DDataResult.INT, "'index' field of #baseData has correct type" );
     QUnit.closeArray(result.getValue("index"),
@@ -85,8 +85,8 @@ test("Access Results", function() {
 
 
     result = this.doc.getElementById("unusedData").getResult();
-    QUnit.closeArray(result.getNames().sort(),
-        ["A", "B"], EPSILON, "result of #unusedData has correct output names" );
+    QUnit.deepEqual(result.getNames().sort(),
+        ["A", "B"], "result of #unusedData has correct output names" );
 
 
     result = this.doc.getElementById("unusedMorphedData").getResult(["position"]);

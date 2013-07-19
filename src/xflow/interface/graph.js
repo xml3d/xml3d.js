@@ -67,14 +67,20 @@ Xflow.InputNode = function(graph){
     this._data = null;
     this._paramName = null;
     this._paramGlobal = false;
+    this._dataListener = this.onDataChange.bind(this);
 };
 Xflow.createClass(Xflow.InputNode, Xflow.GraphNode);
 var InputNode = Xflow.InputNode;
 
-InputNode.prototype.notify = function(newValue, notification) {
-    var downstreamNotification = notification == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA :
-                                                Xflow.RESULT_STATE.CHANGED_STRUCTURE;
-    notifyParentsOnChanged(this,downstreamNotification);
+InputNode.prototype.onDataChange = function(newValue, notification) {
+    var downNote;
+    switch(notification){
+        case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE: downNote = Xflow.RESULT_STATE.CHANGED_DATA_VALUE; break;
+        case Xflow.DATA_ENTRY_STATE.LOAD_START: downNote = Xflow.RESULT_STATE.IMAGE_LOAD_START; break;
+        case Xflow.DATA_ENTRY_STATE.LOAD_END: downNote = Xflow.RESULT_STATE.IMAGE_LOAD_START; break;
+        default: downNote = Xflow.RESULT_STATE.CHANGED_DATA_SIZE; break;
+    }
+    notifyParentsOnChanged(this,downNote);
 };
 
 Object.defineProperty(InputNode.prototype, "name", {
@@ -82,6 +88,7 @@ Object.defineProperty(InputNode.prototype, "name", {
     set: function(v){
         this._name = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {string} */
     get: function(){ return this._name; }
@@ -91,6 +98,7 @@ Object.defineProperty(InputNode.prototype, "key", {
     set: function(v){
         this._key = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {number} */
     get: function(){ return this._key; }
@@ -100,6 +108,7 @@ Object.defineProperty(InputNode.prototype, "paramName", {
     set: function(v){
         this._paramName = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {string} */
     get: function(){ return this._paramName; }
@@ -109,6 +118,7 @@ Object.defineProperty(InputNode.prototype, "paramGlobal", {
     set: function(v){
         this._paramGlobal = v;
         notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {boolean} */
     get: function(){ return this._paramGlobal; }
@@ -116,13 +126,19 @@ Object.defineProperty(InputNode.prototype, "paramGlobal", {
 Object.defineProperty(InputNode.prototype, "data", {
     /** @param {Object} v */
     set: function(v){
+        var prevDataLoading = false;
         if(this._data) {
-            this._data.removeListener(this);
+            prevDataLoading = this._data._loading;
+            this._data.removeListener(this._dataListener);
         }
         this._data = v;
         if(this._data)
-            this._data.addListener(this);
-        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+            this._data.addListener(this._dataListener);
+        if(prevDataLoading != this._data._loading){
+            notifyParentsOnChanged(this, this._data._loading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
+                Xflow.RESULT_STATE.IMAGE_LOAD_END);
+        }
+        Xflow._callListedCallback();
     },
     /** @return {Object} */
     get: function(){ return this._data; }
@@ -145,11 +161,14 @@ Xflow.createBufferInputNode = function(type, name, size){
     return inputNode;
 };
 
-
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.DataNode
 //----------------------------------------------------------------------------------------------------------------------
 
+var c_xflowNodeId = 0;
+function getXflowNodeId(){
+    return ++c_xflowNodeId;
+}
 
 /**
  * @constructor
@@ -158,9 +177,11 @@ Xflow.createBufferInputNode = function(type, name, size){
 Xflow.DataNode = function(graph, protoNode){
     Xflow.GraphNode.call(this, graph);
 
-    this.loading = false;
+    this._loading = false;
+    this._subTreeLoading = false;
+    this._imageLoading = false;
 
-
+    this.id = getXflowNodeId();
     this._isProtoNode = protoNode;
     this._children = [];
     this._sourceNode = null;
@@ -174,7 +195,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._computeOutputMapping = new Xflow.OrderMapping(this);
 
     this._channelNode = new Xflow.ChannelNode(this);
-    this._requests = [];
+    this._listeners = [];
 
 };
 Xflow.createClass(Xflow.DataNode, Xflow.GraphNode);
@@ -215,15 +236,15 @@ Xflow.NameMapping = function(owner){
 Xflow.createClass(Xflow.NameMapping, Xflow.Mapping);
 
 
-
-
 Object.defineProperty(DataNode.prototype, "sourceNode", {
     /** @param {?Xflow.DataNode} v */
     set: function(v){
         if(this._sourceNode) removeParent(this, this._sourceNode);
         this._sourceNode = v;
         if(this._sourceNode) addParent(this, this._sourceNode);
-        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        if(!updateNodeLoading(this))
+            this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {?Xflow.DataNode} */
     get: function(){ return this._sourceNode; }
@@ -234,17 +255,29 @@ Object.defineProperty(DataNode.prototype, "protoNode", {
         if(this._protoNode) removeParent(this, this._protoNode);
         this._protoNode = v;
         if(this._protoNode) addParent(this, this._protoNode);
-        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        if(!updateNodeLoading(this))
+            this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {?Xflow.DataNode} */
     get: function(){ return this._protoNode; }
 });
+
+DataNode.prototype.setLoading = function(loading){
+    if(this._loading != loading){
+        this._loading = loading;
+        updateSubtreeLoading(this);
+        Xflow._callListedCallback();
+    }
+}
+
 
 Object.defineProperty(DataNode.prototype, "filterType", {
     /** @param {Xflow.DATA_FILTER_TYPE} v */
     set: function(v){
         this._filterType = v;
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {Xflow.DATA_FILTER_TYPE} */
     get: function(){ return this._filterType; }
@@ -263,6 +296,7 @@ Object.defineProperty(DataNode.prototype, "computeOperator", {
     set: function(v){
         this._computeOperator = v;
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {string} */
     get: function(){ return this._computeOperator; }
@@ -291,16 +325,20 @@ DataNode.prototype.isProtoNode = function(){
  */
 DataNode.prototype.appendChild = function(child){
     this._children.push(child);
-    addParent(this, child)
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    addParent(this, child);
+    if(!updateNodeLoading(this))
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 /**
  * @param {Xflow.GraphNode} child
  */
 DataNode.prototype.removeChild = function(child){
     Array.erase(this._children, child);
-    removeParent(this, child)
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    removeParent(this, child);
+    if(!updateNodeLoading(this))
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 /**
  * @param {Xflow.GraphNode} child
@@ -312,8 +350,10 @@ DataNode.prototype.insertBefore = function(child, beforeNode){
         this._children.push(child);
     else
         this._children.splice(idx, 0, child);
-    addParent(this, child)
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    addParent(this, child);
+    if(!updateNodeLoading(this))
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 /**
  * remove all children of the DataNode
@@ -323,7 +363,9 @@ DataNode.prototype.clearChildren = function(){
         removeParent(this, this._children[i]);
     }
     this._children = [];
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    if(!updateNodeLoading(this))
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 
 /**
@@ -381,6 +423,7 @@ DataNode.prototype.setFilter = function(filterString){
     this._filterMapping = newMapping;
     this._filterType = newType;
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 
 var computeParser = /^(([^=]+)\=)?([^(]+)\(([^()]*)\)$/;
@@ -413,6 +456,7 @@ DataNode.prototype.setCompute = function(computeString){
     this._computeOutputMapping = outputMapping;
     this._computeOperator = newOperator;
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 }
 /**
  * Notifies DataNode about a change. Notification will be forwarded to parents, if necessary
@@ -420,19 +464,37 @@ DataNode.prototype.setCompute = function(computeString){
  * @param {GraphNode} senderNode
  */
 DataNode.prototype.notify = function(changeType, senderNode){
-    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
+    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE ||
+       changeType == Xflow.RESULT_STATE.LOAD_START ||
+       changeType == Xflow.RESULT_STATE.LOAD_END )
     {
         this._channelNode.setStructureOutOfSync();
 
-        notifyParentsOnChanged(this, changeType);
-
-        for(var i in this._requests)
-            this._requests[i].notify(changeType);
+        if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
+            notifyParentsOnChanged(this, changeType);
+        else
+            updateSubtreeLoading(this);
     }
-    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA){
-        this._channelNode.notifyDataChange(senderNode);
+    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ||
+        changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE ||
+        changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
+        changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END)
+    {
+        if(changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
+           changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END )
+            updateImageLoading(this);
+        this._channelNode.notifyDataChange(senderNode, changeType);
     }
+    for(var i = 0; i < this._listeners.length; ++i)
+        this._listeners[i](changeType);
 };
+
+DataNode.prototype.addListener = function(listener){
+    this._listeners.push(listener)
+}
+DataNode.prototype.removeListener = function(listener){
+    Array.erase(this._listeners, listener);
+}
 
 DataNode.prototype.getOutputNames = function(){
     return getForwardNode(this)._channelNode.getOutputNames();
@@ -445,8 +507,12 @@ DataNode.prototype.getParamNames = function(){
     return getForwardNode(this)._channelNode.getParamNames();
 }
 
-DataNode.prototype._getComputeResult = function(filter){
-    return getForwardNode(this)._channelNode.getComputeResult(filter);
+DataNode.prototype._getResult = function(type, filter){
+    return getForwardNode(this)._channelNode.getResult(type, filter);
+}
+
+DataNode.prototype._getForwardNode = function(){
+    return getForwardNode(this);
 }
 
 function getForwardNode(dataNode){
@@ -458,6 +524,42 @@ function getForwardNode(dataNode){
         return getForwardNode(dataNode._children[0]);
     return dataNode;
 }
+
+function updateNodeLoading(node){
+    updateImageLoading(node);
+    return updateSubtreeLoading(node);
+}
+
+function updateImageLoading(node){
+    var imageLoading = false;
+    for(var i = 0; !imageLoading && i < node._children.length; ++i){
+        var child = node._children[i];
+        imageLoading = child instanceof Xflow.DataNode ? child._imageLoading :
+                child._data && child._data.isLoading && child._data.isLoading();
+    }
+    if(imageLoading != node._imageLoading){
+        node._imageLoading = imageLoading;
+        for(var i = 0; node._parents.length; ++i)
+            node._parents[i].notify(imageLoading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
+            Xflow.RESULT_STATE.IMAGE_LOAD_END);
+    }
+}
+function updateSubtreeLoading(node){
+    var subtreeLoading = node._loading;
+    for(var i = 0; !subtreeLoading && i < node._children.length; ++i){
+        var child = node._children[i];
+        subtreeLoading = child instanceof Xflow.DataNode ? child._subTreeLoading : false;
+    }
+    if(subtreeLoading != node._subTreeLoading){
+        node._subTreeLoading = subtreeLoading;
+        for(var i = 0; i < node._parents.length; ++i)
+            node._parents[i].notify(subtreeLoading ? Xflow.RESULT_STATE.LOAD_START :
+                Xflow.RESULT_STATE.LOAD_END);
+        return true;
+    }
+    return false;
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // Helpers

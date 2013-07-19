@@ -23,14 +23,16 @@
         if(idx != -1) this.parentChannels.splice(idx, 1);
     }
 
-    Xflow.DataSlot.prototype.setDataEntry = function(dataEntry){
+    Xflow.DataSlot.prototype.setDataEntry = function(dataEntry, changeType){
         this.dataEntry = dataEntry;
-        this.notifyOnChange();
+        var state = changeType !== Xflow.RESULT_STATE.CHANGED_DATA_VALUE ? Xflow.DATA_ENTRY_STATE.CHANGED_VALUE :
+            Xflow.DATA_ENTRY_STATE.CHANGED_SIZE;
+        this.notifyOnChange(state);
     }
 
-    Xflow.DataSlot.prototype.notifyOnChange = function(){
+    Xflow.DataSlot.prototype.notifyOnChange = function(state){
         for(var i = 0; i < this.parentChannels.length; ++i){
-            this.parentChannels[i].notifyOnChange();
+            this.parentChannels[i].notifyOnChange(state);
         }
     }
 
@@ -348,9 +350,9 @@
         return false;
     }
 
-    Channel.prototype.notifyOnChange = function(){
+    Channel.prototype.notifyOnChange = function(state){
         for(var i = 0; i < this.listeners.length; i++){
-            this.listeners[i](this);
+            this.listeners[i].onXflowChannelChange(this, state);
         }
     }
 

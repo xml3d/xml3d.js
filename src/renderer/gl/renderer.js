@@ -41,14 +41,8 @@
 
         this.needsDraw = true;
         this.needPickingDraw = true;
-
         this.context.requestRedraw = this.requestRedraw.bind(this);
-        this.mainPass = new webgl.ForwardRenderPass(context);
-        var pickingTarget = this.createPickingTarget();
-        this.pickObjectPass = new webgl.PickObjectRenderPass(this.context, { target: pickingTarget });
-        this.pickPositionPass = new webgl.PickPositionRenderPass(this.context, { target: pickingTarget });
-        this.pickNormalPass = new webgl.PickNormalRenderPass(this.context, { target: pickingTarget });
-
+        this.createRenderPasses(context);
         this.init();
     };
 
@@ -71,18 +65,15 @@
         resizeCanvas: function (width, height) {
             this.width = width;
             this.height = height;
-            this.initFrameBuffers();
+            this.createRenderPasses(this.context);
             this.camera && (this.camera.setTransformDirty());
         },
-        initFrameBuffers: function () {
-            /*var fbos = {};
-
-             fbos.picking = this.bufferHandler.createPickingBuffer(this.width, this.height);
-             fbos.vectorPicking = this.bufferHandler.createPickingBuffer(this.width, this.height);
-             if (!fbos.picking.valid || !fbos.vectorPicking.valid) {
-             XML3D.debug.logError("Picking buffer creation failed. Disabled picking");
-             this.pickingDisabled = true;
-             } */
+        createRenderPasses: function (context) {
+            this.mainPass = new webgl.ForwardRenderPass(context);
+            var pickingTarget = this.createPickingTarget();
+            this.pickObjectPass = new webgl.PickObjectRenderPass(context, { target: pickingTarget });
+            this.pickPositionPass = new webgl.PickPositionRenderPass(context, { target: pickingTarget });
+            this.pickNormalPass = new webgl.PickNormalRenderPass(context, { target: pickingTarget });
         },
         requestRedraw: function (reason, forcePickingRedraw) {
             XML3D.debug.logDebug("Request redraw because:", reason);

@@ -99,11 +99,11 @@
         var object = renderer.getRenderObjectFromPickingBuffer(relX, relY);
         if(object){
             if(hitPoint){
-                var vec = renderer.getWorldSpacePositionByPoint(object, relX, relY);
+                var vec = renderer.getWorldSpacePositionByPoint(relX, relY, object);
                 hitPoint.set(vec[0],vec[1],vec[2]);
             }
             if(hitNormal){
-                var vec = renderer.getWorldSpaceNormalByPoint(object, relX, relY);
+                var vec = renderer.getWorldSpaceNormalByPoint(relX, relY, object);
                 hitNormal.set(vec[0],vec[1],vec[2]);
             }
         }

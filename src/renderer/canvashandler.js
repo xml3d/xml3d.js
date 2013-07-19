@@ -153,7 +153,7 @@ XML3D.webgl.MAXFPS = 30;
      * @return {vec3|null} The world space normal on the object's surface at the given coordinates
      */
     CanvasHandler.prototype.getWorldSpaceNormalByPoint = function(canvasX, canvasY) {
-        return this.renderer.getWorldSpaceNormalByPoint(canvasX, canvasX);
+        return this.renderer.getWorldSpaceNormalByPoint(canvasX, canvasY);
     };
 
     /**

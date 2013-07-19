@@ -88,16 +88,16 @@
             XML3D.debug.logDebug("Request redraw because:", reason);
             this.needsDraw = true;
         },
-        getWorldSpaceNormalByPoint: function (x, y) {
-            var obj = this.pickedObject;
+        getWorldSpaceNormalByPoint: function (x, y, object) {
+            var obj = object || this.pickedObject;
             if (!obj)
                 return null;
             y = webgl.canvasToGlY(this.canvas, y);
             this.pickNormalPass.renderObject(obj);
             return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
         },
-        getWorldSpacePositionByPoint: function (x, y) {
-            var obj = this.pickedObject;
+        getWorldSpacePositionByPoint: function (x, y, object) {
+            var obj = object || this.pickedObject;
             if (!obj)
                 return null;
             y = webgl.canvasToGlY(this.canvas, y);

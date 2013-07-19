@@ -73,6 +73,14 @@
             };
         },
 
+        convertToJSArray: function(value) {
+            var jsArray = [value.length];
+            for (var i=0; i<value.length; i++) {
+                jsArray[i] = value[i];
+            }
+            return jsArray;
+        },
+
         /**
          * @param {Xflow.data.ComputeResult} result
          * @param {Object?} options
@@ -91,7 +99,13 @@
 
                 var webglData = this.context.getXflowEntryWebGlData(entry);
                 if (force || webglData.changed) {
-                    webgl.setUniform(this.context.gl, uniforms[name], entry.getValue());
+                    if (uniforms[name].glType === this.context.gl.BOOL) {
+                        //TODO Can we get Xflow to return boolean arrays as normal JS arrays? WebGL doesn't accept Uint8Arrays here...
+                        //TODO Alternatively we could set boolean uniforms using uniform1fv together with Float32Arrays, which apparently works too
+                        webgl.setUniform(this.context.gl, uniforms[name], this.convertToJSArray(entry.getValue()));
+                    } else {
+                        webgl.setUniform(this.context.gl, uniforms[name], entry.getValue());
+                    }
                     webglData.changed = 0;
                 }
             }

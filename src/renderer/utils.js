@@ -457,10 +457,11 @@
             case 35670: //gl.BOOL
             case 5124:  //gl.INT
             case 35678: //gl.SAMPLER_2D
-                if (value.length)
-                    gl.uniform1i(u.location, value[0]);
-                else
+                if (value.length !== undefined) {
+                    gl.uniform1iv(u.location, value);
+                } else {
                     gl.uniform1i(u.location, value);
+                }
                 break;
 
             case 35671: // gl.BOOL_VEC2

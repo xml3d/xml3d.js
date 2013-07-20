@@ -18,6 +18,7 @@
         <file name="../../../src/xml3d.js" />
         <file name="xml3d-utils-module.js" />
         <file name="xml3d-contrib-module.js" />
+        <file name="xml3d-math-module.js" />
         <file name="xml3d-types-module.js" />
         <file name="xml3d-base-module.js" />
         <file name="xml3d-interface-module.js" />

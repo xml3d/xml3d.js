@@ -24,8 +24,8 @@
             name: this.node.id
         });
         this.updateLocalMatrix();
-        var bbox = new XML3D.webgl.BoundingBox();
-        this.renderNode.setWorldSpaceBoundingBox(bbox.min, bbox.max);
+        var bbox = XML3D.math.bbox.create();
+        this.renderNode.setWorldSpaceBoundingBox(bbox);
     };
 
     p.updateLocalMatrix = (function () {
@@ -135,9 +135,9 @@
 
     /* Interface methods */
     p.getBoundingBox = function() {
-        var bbox = new XML3D.webgl.BoundingBox();
+        var bbox = XML3D.math.bbox.create();
         this.renderNode.getWorldSpaceBoundingBox(bbox);
-        return bbox.getAsXML3DBox();
+        return XML3D.math.bbox.asXML3DBox(bbox);
     };
 
     p.getLocalMatrix = function() {

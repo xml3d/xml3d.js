@@ -8,7 +8,7 @@
     var Scene = function () {
         webgl.Pager.call(this);
 
-        this.boundingBox = new XML3D.webgl.BoundingBox();
+        this.boundingBox = new XML3D.math.bbox.create();
         this.lights = {
             queue: [],
             point: [],
@@ -106,8 +106,7 @@
             this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
         },
         getBoundingBox: function (bb) {
-            XML3D.math.vec3.copy(bb.min, this.boundingBox.min);
-            XML3D.math.vec3.copy(bb.max, this.boundingBox.max);
+            XML3D.math.bbox.copy(bb, this.boundingBox);
         }
 
     });

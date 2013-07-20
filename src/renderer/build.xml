@@ -13,7 +13,6 @@
         <file name="events/mouse.js" />
         <file name="utils.js" />
         <file name="scene/pager.js" />
-        <file name="scene/boundingbox.js" />
         <file name="scene/rendernode.js" />
         <file name="scene/renderobject.js" />
         <file name="scene/rendergroup.js" />

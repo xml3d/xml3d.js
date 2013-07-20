@@ -79,15 +79,14 @@
 
         getClippingPlanes: (function() {
             var t_mat = XML3D.math.mat4.create();
-            var bb = new XML3D.webgl.BoundingBox();
+            var bb = new XML3D.math.bbox.create();
 
             return function() {
-                bb.reset();
                 this.scene.getBoundingBox(bb);
                 this.getViewMatrix(t_mat);
-                bb.applyTransform(t_mat);
-                var bounds = bb.getZMinMax();
-                var length = bb.getLongestSide();
+                XML3D.math.bbox.transform(bb, t_mat, bb);
+                var bounds = { zMin: 0, zMax: 1000 };//bb.getZMinMax();
+                var length = XML3D.math.bbox.longestSide(bb);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
                 bounds.zMin -= length * 0.005;
@@ -167,12 +166,7 @@
         },
 
         getWorldSpaceBoundingBox: function(bbox) {
-            bbox.min[0] = Number.MAX_VALUE;
-            bbox.min[1] = Number.MAX_VALUE;
-            bbox.min[2] = Number.MAX_VALUE;
-            bbox.max[0] = -Number.MAX_VALUE;
-            bbox.max[1] = -Number.MAX_VALUE;
-            bbox.max[2] = -Number.MAX_VALUE;
+            XML3D.math.bbox.empty(bbox);
         }
     });
 

@@ -22,21 +22,19 @@
     };
 
     webgl.calculateBoundingBox = function(positions, index) {
-        var bbox = new XML3D.webgl.BoundingBox();
-        var min = bbox.min;
-        var max = bbox.max;
+        var bbox = new XML3D.math.bbox.create();
 
         if (!positions || positions.length < 3)
             return bbox;
 
         if (index) {
             var i0 = index[0]*3;
-            min[0] = positions[i0];
-            min[1] = positions[i0 + 1];
-            min[2] = positions[i0 + 2];
-            max[0] = positions[i0];
-            max[1] = positions[i0 + 1];
-            max[2] = positions[i0 + 2];
+            bbox[0] = positions[i0];
+            bbox[1] = positions[i0 + 1];
+            bbox[2] = positions[i0 + 2];
+            bbox[3] = positions[i0];
+            bbox[4] = positions[i0 + 1];
+            bbox[5] = positions[i0 + 2];
 
             for ( var i = 1; i < index.length; i++) {
                 var i1 = index[i] * 3;
@@ -44,40 +42,40 @@
                 var p2 = positions[i1 + 1];
                 var p3 = positions[i1 + 2];
 
-                if (p1 < min[0])
-                    min[0] = p1;
-                if (p2 < min[1])
-                    min[1] = p2;
-                if (p3 < min[2])
-                    min[2] = p3;
-                if (p1 > max[0])
-                    max[0] = p1;
-                if (p2 > max[1])
-                    max[1] = p2;
-                if (p3 > max[2])
-                    max[2] = p3;
+                if (p1 < bbox[0])
+                    bbox[0] = p1;
+                if (p2 < bbox[1])
+                    bbox[1] = p2;
+                if (p3 < bbox[2])
+                    bbox[2] = p3;
+                if (p1 > bbox[3])
+                    bbox[3] = p1;
+                if (p2 > bbox[4])
+                    bbox[4] = p2;
+                if (p3 > bbox[5])
+                    bbox[5] = p3;
             }
         } else {
-            min[0] = positions[0];
-            min[1] = positions[1];
-            min[2] = positions[2];
-            max[0] = positions[0];
-            max[1] = positions[1];
-            max[2] = positions[2];
+            bbox[0] = positions[0];
+            bbox[1] = positions[1];
+            bbox[2] = positions[2];
+            bbox[3] = positions[0];
+            bbox[4] = positions[1];
+            bbox[5] = positions[2];
 
             for ( var i = 3; i < positions.length; i += 3) {
-                if (positions[i] < min[0])
-                    min[0] = positions[i];
-                if (positions[i + 1] < min[1])
-                    min[1] = positions[i + 1];
-                if (positions[i + 2] < min[2])
-                    min[2] = positions[i + 2];
-                if (positions[i] > max[0])
-                    max[0] = positions[i];
-                if (positions[i + 1] > max[1])
-                    max[1] = positions[i + 1];
-                if (positions[i + 2] > max[2])
-                    max[2] = positions[i + 2];
+                if (positions[i] < bbox[0])
+                    bbox[0] = positions[i];
+                if (positions[i + 1] < bbox[1])
+                    bbox[1] = positions[i + 1];
+                if (positions[i + 2] < bbox[2])
+                    bbox[2] = positions[i + 2];
+                if (positions[i] > bbox[3])
+                    bbox[3] = positions[i];
+                if (positions[i + 1] > bbox[4])
+                    bbox[4] = positions[i + 1];
+                if (positions[i + 2] > bbox[5])
+                    bbox[5] = positions[i + 2];
             }
         }
         return bbox;

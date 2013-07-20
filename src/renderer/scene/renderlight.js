@@ -200,12 +200,7 @@
         },
 
         getWorldSpaceBoundingBox: function(bbox) {
-            bbox.min[0] = Number.MAX_VALUE;
-            bbox.min[1] = Number.MAX_VALUE;
-            bbox.min[2] = Number.MAX_VALUE;
-            bbox.max[0] = -Number.MAX_VALUE;
-            bbox.max[1] = -Number.MAX_VALUE;
-            bbox.max[2] = -Number.MAX_VALUE;
+            XML3D.math.bbox.empty(bbox);
         }
 
     });

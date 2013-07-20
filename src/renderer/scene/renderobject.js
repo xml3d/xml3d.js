@@ -79,15 +79,7 @@
             var bboxData = result.getOutputData(BBOX_ANNOTATION_FILTER[0]);
             if(bboxData) {
                 var bboxVal = bboxData.getValue();
-                var bbMin = XML3D.math.vec3.create();
-                var bbMax = XML3D.math.vec3.create();
-                bbMin[0] = bboxVal[0];
-                bbMin[1] = bboxVal[1];
-                bbMin[2] = bboxVal[2];
-                bbMax[0] = bboxVal[3];
-                bbMax[1] = bboxVal[4];
-                bbMax[2] = bboxVal[5];
-                this.setObjectSpaceBoundingBox(bbMin, bbMax);
+                this.setObjectSpaceBoundingBox(bboxVal);
                 this.boundingBoxAnnotated = true;
             } else {
                 this.boundingBoxAnnotated = false;
@@ -275,25 +267,25 @@
             this.materialChanged();
         },
 
-        setObjectSpaceBoundingBox: function(min, max) {
+        setObjectSpaceBoundingBox: function(box) {
             var o = this.offset + OBJECT_BB_OFFSET;
-            this.page[o] = min[0];
-            this.page[o+1] = min[1];
-            this.page[o+2] = min[2];
-            this.page[o+3] = max[0];
-            this.page[o+4] = max[1];
-            this.page[o+5] = max[2];
+            this.page[o] =   box[0];
+            this.page[o+1] = box[1];
+            this.page[o+2] = box[2];
+            this.page[o+3] = box[3];
+            this.page[o+4] = box[4];
+            this.page[o+5] = box[5];
             this.setBoundingBoxDirty();
         },
 
-        getObjectSpaceBoundingBox: function(min, max) {
+        getObjectSpaceBoundingBox: function(box) {
             var o = this.offset + OBJECT_BB_OFFSET;
-            min[0] = this.page[o];
-            min[1] = this.page[o+1];
-            min[2] = this.page[o+2];
-            max[0] = this.page[o+3];
-            max[1] = this.page[o+4];
-            max[2] = this.page[o+5];
+            box[0] = this.page[o];
+            box[1] = this.page[o+1];
+            box[2] = this.page[o+2];
+            box[3] = this.page[o+3];
+            box[4] = this.page[o+4];
+            box[5] = this.page[o+5];
         },
 
         setBoundingBoxDirty: function() {
@@ -301,14 +293,14 @@
             this.parent.setBoundingBoxDirty();
         },
 
-        setWorldSpaceBoundingBox: function(min, max) {
+        setWorldSpaceBoundingBox: function(bbox) {
             var o = this.offset + WORLD_BB_OFFSET;
-            this.page[o] = min[0];
-            this.page[o+1] = min[1];
-            this.page[o+2] = min[2];
-            this.page[o+3] = max[0];
-            this.page[o+4] = max[1];
-            this.page[o+5] = max[2];
+            this.page[o] = bbox[0];
+            this.page[o+1] = bbox[1];
+            this.page[o+2] = bbox[2];
+            this.page[o+3] = bbox[3];
+            this.page[o+4] = bbox[4];
+            this.page[o+5] = bbox[5];
         },
 
         getWorldSpaceBoundingBox: function(bbox) {
@@ -316,20 +308,20 @@
                 this.updateWorldSpaceBoundingBox();
             }
             var o = this.offset + WORLD_BB_OFFSET;
-            bbox.min[0] = this.page[o];
-            bbox.min[1] = this.page[o+1];
-            bbox.min[2] = this.page[o+2];
-            bbox.max[0] = this.page[o+3];
-            bbox.max[1] = this.page[o+4];
-            bbox.max[2] = this.page[o+5];
+            bbox[0] = this.page[o];
+            bbox[1] = this.page[o+1];
+            bbox[2] = this.page[o+2];
+            bbox[3] = this.page[o+3];
+            bbox[4] = this.page[o+4];
+            bbox[5] = this.page[o+5];
         },
 
         updateWorldSpaceBoundingBox: (function() {
-            var t_box = new XML3D.webgl.BoundingBox();
+            var c_box = new XML3D.math.bbox.create();
 
             return function() {
-                this.getObjectSpaceBoundingBox(t_box.min, t_box.max);
-                this.setWorldSpaceBoundingBox(t_box.min, t_box.max);
+                this.getObjectSpaceBoundingBox(c_box);
+                this.setWorldSpaceBoundingBox(c_box);
                 this.boundingBoxDirty = false;
             }
         })(),

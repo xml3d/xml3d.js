@@ -24,8 +24,8 @@
                 this.bbMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
                 this.bbMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
 
-                var objBB = new XML3D.webgl.BoundingBox();
-                obj.getObjectSpaceBoundingBox(objBB.min, objBB.max);
+                var objBB = XML3D.math.bbox.create();
+                obj.getObjectSpaceBoundingBox(objBB);
                 XML3D.webgl.adjustMinMax(objBB, this.bbMin, this.bbMax, c_modelMatrix);
 
                 this.program.bind();

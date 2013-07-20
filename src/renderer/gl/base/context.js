@@ -4,6 +4,8 @@
      * Contex that includes all GL related resources / handlers
      * @param {WebGLRenderingContext} gl
      * @param {number} id
+     * @param {number} height
+     * @param {number} width
      * @constructor
      */
     var GLContext = function(gl, id, height, width) {

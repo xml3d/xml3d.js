@@ -12,13 +12,16 @@
         webgl.Scene.call(this);
         this.context = context;
         this.shaderFactory = new webgl.ShaderComposerFactory(context);
+        this.drawableFactory = new webgl.DrawableFactory(context);
         this.firstOpaqueIndex = 0;
         this.ready = [];
         this.queue = [];
         this.addListeners();
     };
+    var EVENT_TYPE = webgl.Scene.EVENT_TYPE;
 
     XML3D.createClass(GLScene, webgl.Scene);
+
 
     XML3D.extend(GLScene.prototype, {
         remove: function (obj) {
@@ -60,38 +63,24 @@
             }
         },
         update: function () {
-            this.updateLights(this.lights);
             this.shaderFactory.update(this);
+            this.updateMeshes();
             this.consolidate();
         },
         consolidate: function () {
-            this.queue.slice().forEach(function (obj) {
-                while (obj.can('progress') && obj.progress() == StateMachine.Result.SUCCEEDED) {
-                }
-                if (obj.current == "NoMesh") {
-                    if (obj.dataComplete() !== StateMachine.Result.SUCCEEDED) {
-                        obj.dataNotComplete();
-                    }
-                }
-            });
         },
-        updateLights: function (lights) {
-            if (lights.structureChanged) {
-                //shaderManager.removeAllShaders();
-                this.forEach(function (obj) {
-                    obj.lightsChanged(lights);
-                }, this);
-                lights.structureChanged = false;
-            } else {
-                this.queue.forEach(function (obj) {
-                    if (obj.current == "NoLights")
-                        obj.lightsChanged(lights);
-                }, this);
-            }
+        updateMeshes: function () {
+            var that = this;
+            this.forEach(function(obj) {
+                obj.drawable && obj.drawable.update();
+            });
         },
         forEach: function (func, that) {
             this.queue.slice().forEach(func, that);
             this.ready.slice().forEach(func, that);
+        },
+        objectReadyStateChanged: function() {
+            console.log("objectReadyStateChanged", arguments);
         },
         updateReadyObjectsFromActiveView: (function () {
             var c_viewMat_tmp = XML3D.math.mat4.create();
@@ -114,7 +103,6 @@
             }
         }()),
         addListeners: function() {
-            var EVENT_TYPE = webgl.Scene.EVENT_TYPE;
             this.addEventListener( EVENT_TYPE.SCENE_STRUCTURE_CHANGED, function(event){
                 if(event.newChild !== undefined) {
                     this.addChildEvent(event.newChild);
@@ -148,6 +136,9 @@
         },
         handleResizeEvent: function(width, height) {
             this.getActiveView().setProjectionDirty();
+        },
+        createDrawable: function(obj) {
+            return this.drawableFactory.createDrawable(obj);
         }
     });
     webgl.GLScene = GLScene;

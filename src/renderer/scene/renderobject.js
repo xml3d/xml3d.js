@@ -31,6 +31,7 @@
     /** @const */
     var BBOX_ANNOTATION_FILTER = ["boundingBox"];
 
+    var EMPTY_BOUNDING_BOX = new webgl.BoundingBox();
 
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
     /**
@@ -45,36 +46,54 @@
     var RenderObject = function (scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.OBJECT, scene, pageEntry, opt);
         opt = opt || {};
-        /** TODO: Remove mesh adapter as soon as it's superfluous */
-        this.meshAdapter = opt.meshAdapter;
         this.object = opt.object || {};
         //TODO: Clean up the relationship between RenderObject, shader (template/adapterHandle) and program (shaderClosure)
         this.shader = opt.shader || {};
         this.node = opt.node;
-
-        this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
-        this.boundingBoxAnnotated = false;
-
-        if (this.object.data) {
-            // Bounding Box annotated
-            this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.object.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
-            this.boundingBoxAnnotationChanged(this.annotatedBoundingBoxRequest);
-        }
-        /** {Object?} **/
-        this.override = null;
         this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
-        this.transformDirty = true;
-        this.boundingBoxDirty = true;
-        this.create();
+        this.initialize();
     };
     RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
-    XML3D.createClass(RenderObject, XML3D.webgl.RenderNode);
-    XML3D.extend(RenderObject.prototype, {
+    XML3D.createClass(RenderObject, XML3D.webgl.RenderNode, {
+        initialize : function() {
+            // Initialize Bounding Box to empty
+            this.setObjectSpaceBoundingBox(EMPTY_BOUNDING_BOX.min, EMPTY_BOUNDING_BOX.max);
+
+        this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
+            this.boundingBoxAnnotated = false;
+
+            if (this.object.data) {
+                // Bounding Box annotated
+                this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.object.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
+                this.boundingBoxAnnotationChanged(this.annotatedBoundingBoxRequest);
+            }
+            /** {Object?} **/
+            this.override = null;
+            this.transformDirty = true;
+            this.boundingBoxDirty = true;
+            this.drawable = this.scene.createDrawable(this);
+            var that = this;
+            this.drawable.addEventListener( webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function(evt) {
+                if (evt.newState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                    that.scene.moveFromQueueToReady(that);
+                }
+                else if (evt.newState === webgl.DrawableClosure.READY_STATE.INCOMPLETE &&
+                         evt.oldState === webgl.DrawableClosure.READY_STATE.COMPLETE ) {
+                    that.scene.moveFromReadyToQueue(that);
+                }
+            })
+        },
         setType: function(type) {
             this.type = type;
             // TODO: this.typeChangedEvent
+        },
+        getType: function() {
+            return this.type;
+        },
+        getDataNode: function() {
+            return this.object ? this.object.data : null;
         },
         boundingBoxAnnotationChanged: function(request){
             var result = request.getResult();
@@ -88,7 +107,7 @@
             }
         },
         onenterReady:function () {
-            this.scene.moveFromQueueToReady(this);
+
         },
         onleaveReady:function () {
             this.scene.moveFromReadyToQueue(this);
@@ -97,9 +116,6 @@
             if (lights) {
                 this.setShader(this.parent.getShaderHandle());
             }
-        },
-        onbeforedataComplete:function (name, from, to) {
-            return this.meshAdapter.finishMesh();
         },
         onbeforeprogress: function(name, from, to) {
             switch (to) {
@@ -117,12 +133,7 @@
                     this.meshAdapter.createMeshData();
             }
         },
-        onenterNoMesh:function () {
-            // Trigger the creation of the mesh now
-            // this.meshAdapter.createMesh();
-            return true;
-        },
-        onenterDisposed:function () {
+        dispose :function () {
             this.scene.remove(this);
         },
         onchangestate:function (name, from, to) {
@@ -241,6 +252,7 @@
             // console.log("Shader handle state changed.", arguments);
         },
         setShader: function(newHandle) {
+            console.log("RenderObject::setShader");
             var oldHandle = this.shader.handle;
 
             if (oldHandle) {
@@ -266,7 +278,7 @@
                 this.shader.template = this.scene.shaderFactory.getDefaultComposer();
             }
             this.shader.handle = newHandle;
-            this.materialChanged();
+            // TODO this.materialChanged();
         },
 
         setObjectSpaceBoundingBox: function(box) {
@@ -343,27 +355,6 @@
         }
 
     });
-
-
-
-    window.StateMachine.create({
-        target: RenderObject.prototype,
-        events:[
-            { name:'create', from:'none', to:'NoLights'   },
-            // batch processing
-            { name:'progress', from:'NoLights', to:'NoMaterial'   },
-            { name:'progress', from:'NoMaterial', to:'NoMesh'   },
-            { name:'dataNotComplete', from:'NoMesh', to:'NoMeshData' },
-            { name:'dataComplete', from:'NoMesh', to:'Ready' },
-            { name:'progress', from:'DirtyMeshData', to:'Ready' },
-            // events
-            { name:'lightsChanged', from: ['NoLights','NoMaterial', 'NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoLights' },
-            { name:'materialChanged', from: ['NoMaterial', 'NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoMaterial' },
-            { name:'materialChanged', from: ['NoLights'], to:'NoLights' },
-            { name:'dataStructureChanged', from: ['NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoMesh' },
-            { name:'dataValueChanged', from: ['Ready', 'DirtyMeshData'], to:'DirtyMeshData' },
-            { name:'dispose', from:'*', to:'Disposed' }
-        ]});
 
 
     // Export

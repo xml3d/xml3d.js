@@ -106,6 +106,7 @@
             this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
         },
         getBoundingBox: function (bb) {
+            this.updateBoundingBox();
             XML3D.math.bbox.copy(bb, this.boundingBox);
         }
 

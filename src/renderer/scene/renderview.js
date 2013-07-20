@@ -14,9 +14,9 @@
     var RenderView = function(scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.VIEW, scene, pageEntry, opt);
         opt = opt || {};
-        this.position = opt.position;
-        this.orientation = opt.orientation;
-        this.fieldOfView = opt.fieldOfView;
+        this.position = opt.position || XML3D.math.vec3.create();
+        this.orientation = opt.orientation || XML3D.math.mat4.create();
+        this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : 0.78;
         this.worldSpacePosition = XML3D.math.vec3.create();
         this.projectionAdapter = opt.projectionAdapter;
         this.viewDirty = true;
@@ -85,12 +85,14 @@
                 this.scene.getBoundingBox(bb);
                 this.getViewMatrix(t_mat);
                 XML3D.math.bbox.transform(bb, t_mat, bb);
-                var bounds = { zMin: 0, zMax: 1000 };//bb.getZMinMax();
+                var bounds = { zMin: bb[2], zMax: bb[5] };
                 var length = XML3D.math.bbox.longestSide(bb);
+                console.log(bb, bounds, length);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
                 bounds.zMin -= length * 0.005;
                 bounds.zMax += length * 0.005;
+                console.log(bounds);
 
                 return {near: Math.max(-bounds.zMax, 0.01*length), far: -bounds.zMin};
             }

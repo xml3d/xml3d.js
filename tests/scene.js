@@ -112,6 +112,54 @@ test("Bounding Boxes", 7, function () {
     QUnit.closeArray(actualBB, new Float32Array([-2, -2, -2,2, 5, 2]), EPSILON, "Original group's transformation removed");
 });
 
+test("View", function() {
+    var view = this.scene.createRenderView();
+    ok(view);
+
+    this.scene.setActiveView(view);
+
+    deepEqual(view.getClippingPlanes(), { near: 1, far: 10 }, "Default values");
+
+    var obj = this.scene.createRenderObject();
+    obj.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
+    deepEqual(view.getClippingPlanes(), { near: 0.02, far: 1.01 }, "Unit box");
+
+    var obj = this.scene.createRenderObject();
+    obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
+    deepEqual(view.getClippingPlanes(), { near: 0.04, far: 2.02 }, "Default values");
+
+    view.updateOrientation(new XML3DRotation(new XML3DVec3(0,1,0), Math.PI / 2.0).toMatrix()._data);
+    var planes = view.getClippingPlanes();
+    QUnit.close(planes.near, 0.04, EPSILON, "Rotated 180: near");
+    QUnit.close(planes.far, 2.02, EPSILON, "Rotated 180: far");
+
+    view.updateOrientation(new XML3DRotation(new XML3DVec3(0,0.707,0.707), Math.PI / 3.0).toMatrix()._data);
+
+    planes = view.getClippingPlanes();
+    QUnit.close(planes.near, 0.0645 , EPSILON, "Rotated arbitrary: near");
+    QUnit.close(planes.far, 3.257, EPSILON, "Rotated arbitrary: far");
+
+    var group2 = this.scene.createRenderGroup();
+    var trans2 = XML3D.math.mat4.create();
+    XML3D.math.mat4.translate(trans2, trans2, [0, 4, 0]);
+    group2.setLocalMatrix(trans2);
+
+    obj.remove();
+
+    obj = this.scene.createRenderObject({parent: group2});
+    obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
+
+    view.updateOrientation(XML3D.math.mat4.create());
+    deepEqual(view.getClippingPlanes(), { near: 0.07, far: 2.035 }, "Translated group");
+
+    XML3D.math.mat4.scale(trans2, trans2, [20,20,20]);
+    group2.setLocalMatrix(trans2);
+
+    deepEqual(view.getClippingPlanes(), { near: 0.8, far: 40.4 }, "Scaled group");
+
+});
+
+
 test("Annotated Bounding Box", function () {
     var dataNode = this.xflowGraph.createDataNode(false);
     var obj = this.scene.createRenderObject({

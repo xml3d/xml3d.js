@@ -110,19 +110,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     }
 
 
-    /**
-     * @param {WebGLRenderingContext} gl
-     * @param {number} type
-     * @param {Object} data
-     */
-    var createBuffer = function(gl, type, data) {
-        var buffer = gl.createBuffer();
-        gl.bindBuffer(type, buffer);
-        gl.bufferData(type, data, gl.STATIC_DRAW);
-        buffer.length = data.length;
-        buffer.glType = getGLTypeFromArray(data);
-        return buffer;
-    };
+
 
     /**
      *

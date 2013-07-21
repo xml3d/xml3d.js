@@ -44,7 +44,7 @@
             var index = this.queue.indexOf(obj);
             if (index != -1) {
                 this.queue.splice(index, 1);
-                if (obj.program.hasTransparency()) {
+                if (obj.hasTransparency()) {
                     this.ready.unshift(obj);
                     this.firstOpaqueIndex++;
                 }

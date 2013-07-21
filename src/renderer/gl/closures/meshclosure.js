@@ -18,6 +18,39 @@
         TYPE_FILTER[param] = Object.keys(MESH_PARAMETERS[param]);
     }
 
+
+    var getGLTypeFromArray = function(array) {
+        var GL = window.WebGLRenderingContext;
+        if (array instanceof Int8Array)
+            return GL.BYTE;
+        if (array instanceof Uint8Array)
+            return GL.UNSIGNED_BYTE;
+        if (array instanceof Int16Array)
+            return GL.SHORT;
+        if (array instanceof Uint16Array)
+            return GL.UNSIGNED_SHORT;
+        if (array instanceof Int32Array)
+            return GL.INT;
+        if (array instanceof Uint32Array)
+            return GL.UNSIGNED_INT;
+        if (array instanceof Float32Array)
+            return GL.FLOAT;
+        return GL.FLOAT;
+    };
+    /**
+     * @param {WebGLRenderingContext} gl
+     * @param {number} type
+     * @param {Object} data
+     */
+    var createBuffer = function(gl, type, data) {
+        var buffer = gl.createBuffer();
+        gl.bindBuffer(type, buffer);
+        gl.bufferData(type, data, gl.STATIC_DRAW);
+        buffer.length = data.length;
+        buffer.glType = getGLTypeFromArray(data);
+        return buffer;
+    };
+
     /**
      *
      * @param context
@@ -87,7 +120,9 @@
             var vertexCount = 0,
                 complete = true; // Optimistic appraoch
 
-            var meshParams = MESH_PARAMETERS[this.getType()];
+            var meshParams = MESH_PARAMETERS[this.getMeshType()];
+            XML3D.debug.assert(meshParams, "At this point, we need parameters for the type");
+
             for (var name in meshParams) {
                 var param = meshParams[name] || {};
                 var entry = dataResult.getOutputData(name);
@@ -129,9 +164,9 @@
          * @param {GLMesh} mesh
          */
         handleBuffer: function (name, attr, entry, mesh) {
-            var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.factory.canvasId);
+            var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.context.id);
             var buffer = webglData.buffer;
-            var gl = this.factory.renderer.context.gl;
+            var gl = this.context.gl;
 
             switch (webglData.changed) {
                 case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:

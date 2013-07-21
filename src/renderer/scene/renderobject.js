@@ -12,6 +12,7 @@
     IRenderObject.prototype.isVisible = function() {};
     IRenderObject.prototype.setTransformDirty = function() {};
     IRenderObject.prototype.setShader = function() {};
+    IRenderObject.prototype.hasTransparency = function() {};
 
     // Entry:
     /** @const */
@@ -31,11 +32,20 @@
     /** @const */
     var BBOX_ANNOTATION_FILTER = ["boundingBox"];
 
-    var EMPTY_BOUNDING_BOX = new webgl.BoundingBox();
+    var EMPTY_BOUNDING_BOX = XML3D.math.bbox.create();
 
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
     /**
      * Represents a renderable object in the scene.
+     * The RenderObject has these responsibilities:
+     *  1. Keep track of the transformation hierarchy and bounding boxes
+     *  2. Connect the DrawableClosure with the ShaderClosure
+     *
+     *  The {@link DrawableClosure} is a DrawableObject plus it's data
+     *  The {@link ShaderClosure} is a ProgramObject plus it's data
+     *  The concrete ShaderClosure can vary per DrawableObject and change
+     *  due to scene or object changes. Thus we have to keep track of the
+     *  related {@link IShaderComposer}.
      *
      * @constructor
      * @implements {IRenderObject}
@@ -46,23 +56,75 @@
     var RenderObject = function (scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.OBJECT, scene, pageEntry, opt);
         opt = opt || {};
-        this.object = opt.object || {};
-        //TODO: Clean up the relationship between RenderObject, shader (template/adapterHandle) and program (shaderClosure)
-        this.shader = opt.shader || {};
+
+        /**
+         * Keep reference to DOM Element need e.g. for picking
+         * @type {Element}
+         */
         this.node = opt.node;
-        this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
+
+        /**
+         * Object related data
+         * @type {{data: Xflow.DataNode|null, type: string}}
+         */
+        this.object = opt.object || { data: null, type: "" };
+
+        /**
+         * Can we take an annotated bounding box or do we have to
+         * calculate it from the drawable?
+         * @type {boolean}
+         */
+        this.boundingBoxAnnotated = false;
+
+        /**
+         * Can we rely on current WorldMatrix?
+         * @type {boolean}
+         */
+        this.transformDirty = true;
+
+        /**
+         * Can we rely on current Bounding Boxes?
+         * @type {boolean}
+         */
+        this.boundingBoxDirty = true;
+
+        /**
+         * The drawable closure transforms object data and type into
+         * a drawable entity
+         * @type {DrawableClosure!}
+         */
+        this.drawable = this.createDrawable();
+
+        this.shader = opt.shader || {};
+        // Set start values;
         this.initialize();
     };
     RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode, {
+        createDrawable: function () {
+            var result = this.scene.createDrawable(this);
+            var that = this;
+            result.addEventListener(webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function (evt) {
+                if (evt.newState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                    that.scene.moveFromQueueToReady(that);
+                }
+                else if (evt.newState === webgl.DrawableClosure.READY_STATE.INCOMPLETE &&
+                    evt.oldState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                    that.scene.moveFromReadyToQueue(that);
+                }
+            });
+            return result;
+        },
         initialize : function() {
+            // Initialize World Matrix
+            this.setWorldMatrix(RenderObject.IDENTITY_MATRIX);
+
             // Initialize Bounding Box to empty
-            this.setObjectSpaceBoundingBox(EMPTY_BOUNDING_BOX.min, EMPTY_BOUNDING_BOX.max);
+            this.setObjectSpaceBoundingBox(EMPTY_BOUNDING_BOX);
 
         this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
-            this.boundingBoxAnnotated = false;
 
             if (this.object.data) {
                 // Bounding Box annotated
@@ -71,19 +133,7 @@
             }
             /** {Object?} **/
             this.override = null;
-            this.transformDirty = true;
-            this.boundingBoxDirty = true;
-            this.drawable = this.scene.createDrawable(this);
-            var that = this;
-            this.drawable.addEventListener( webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function(evt) {
-                if (evt.newState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
-                    that.scene.moveFromQueueToReady(that);
-                }
-                else if (evt.newState === webgl.DrawableClosure.READY_STATE.INCOMPLETE &&
-                         evt.oldState === webgl.DrawableClosure.READY_STATE.COMPLETE ) {
-                    that.scene.moveFromReadyToQueue(that);
-                }
-            })
+            this.setShader(this.parent.getShaderHandle());
         },
         setType: function(type) {
             this.type = type;
@@ -106,38 +156,9 @@
                 this.boundingBoxAnnotated = false;
             }
         },
-        onenterReady:function () {
 
-        },
-        onleaveReady:function () {
-            this.scene.moveFromReadyToQueue(this);
-        },
-        onafterlightsChanged:function (name, from, to, lights) {
-            if (lights) {
-                this.setShader(this.parent.getShaderHandle());
-            }
-        },
-        onbeforeprogress: function(name, from, to) {
-            switch (to) {
-                case "NoMaterial":
-                    if(this.shader.template) {
-                        //TODO Provide mesh data to the shader
-                        this.program = this.shader.template.getShaderClosure(this.scene, {});
-                    } else {
-                        XML3D.debug.logError("No shader:", this.name);// DefaultShader
-                    }
-                    return !!this.program;
-            }
-            switch (from) {
-                case "DirtyMeshData":
-                    this.meshAdapter.createMeshData();
-            }
-        },
         dispose :function () {
             this.scene.remove(this);
-        },
-        onchangestate:function (name, from, to) {
-            XML3D.debug.logInfo("Changed: ", name, from, to);
         },
 
         refreshShaderProgram: function() {
@@ -275,7 +296,9 @@
                         this.program = this.shader.template.getShaderClosure(this.scene, {});
                 }
             } else {
+                console.log("Null shader");
                 this.shader.template = this.scene.shaderFactory.getDefaultComposer();
+                this.program = this.shader.template.getShaderClosure(this.scene, {});
             }
             this.shader.handle = newHandle;
             // TODO this.materialChanged();
@@ -352,6 +375,10 @@
 
         getProgram: function() {
             return this.shader.template.getProgram();
+        },
+
+        hasTransparency : function() {
+            return this.program ? this.program.hasTransparency() : false;
         }
 
     });

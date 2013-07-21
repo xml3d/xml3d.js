@@ -42,9 +42,6 @@
             this.buffers[name] = buffer;
             this.isIndexed = this.isIndexed || name == "index";
         },
-        setComplete: function (complete) {
-            this.complete = complete;
-        },
         setVertexCount: function (vertexCount) {
             this.vertexCount = vertexCount;
         },
@@ -79,11 +76,6 @@
                 sAttributes = program.attributes,
                 buffers = this.buffers,
                 triCount = 0;
-
-            if (!this.complete) {
-                console.log("Mesh not complete");
-                return 0;
-            }
 
             //Bind vertex buffers
             for (var name in sAttributes) {

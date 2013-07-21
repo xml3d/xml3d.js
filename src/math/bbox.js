@@ -100,17 +100,48 @@
         return target;
     };
 
-    bbox.transform = (function () {
+    bbox.transform = function (out, mat, box) {
+        if (box[0] > box[3] || box[1] > box[4] || box[2] > box[5]) {
+            bbox.copy(out, box); // an empty box remains empty
+            return;
+        }
+        box = bbox.clone(box);
+
+        if (mat[3] == 0 && mat[7] == 0 && mat[11] == 0 && mat[15] == 1) {
+
+            for (var i = 0; i < 3; i++) {
+                out[i] = out[i + 3] = mat[12 + i];
+
+                for (var j = 0; j < 3; j++) {
+                    var a, b;
+
+                    a = mat[j * 4 + i] * box[j];
+                    b = mat[j * 4 + i] * box[j + 3];
+
+                    if (a < b) {
+                        out[i] += a;
+                        out[i + 3] += b;
+                    }
+                    else {
+                        out[i] += b;
+                        out[i + 3] += a;
+                    }
+                }
+            }
+            return out;
+        }
+        throw new Error("Matrix is not affine");
+    };
+
+    bbox.transform2 = (function () {
         var absMat = XML3D.math.mat4.create();
         var center = XML3D.math.vec3.create();
         var extend = XML3D.math.vec3.create();
 
-        return function (out, mat, b) {
-            if (b[0] > b[3] || b[1] > b[4] || b[2] > b[5])
-                return;
+        return function (out, mat, box) {
 
-            bbox.center(center, b);
-            bbox.halfSize(extend, b);
+            bbox.center(center, box);
+            bbox.halfSize(extend, box);
 
             XML3D.math.mat4.copy(absMat, mat);
             absMat.set([0, 0, 0, 1], 12);
@@ -139,7 +170,7 @@
         return Math.max(x, Math.max(y, z));
     };
 
-    bbox.asXML3DBox = function(bb) {
+    bbox.asXML3DBox = function (bb) {
         var result = new XML3DBox();
         result.min._data[0] = bb[0];
         result.min._data[1] = bb[1];
@@ -149,6 +180,12 @@
         result.max._data[2] = bb[5];
         return result;
     };
+
+    bbox.str = function (a) {
+        return 'bbox(' + a[0] + ', ' + a[1] + ', ' + a[2] + ', ' + a[3] + ', ' +
+            a[4] + ', ' + a[5] + ')';
+    };
+
 
     math.bbox = bbox;
 

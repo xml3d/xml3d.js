@@ -49,7 +49,7 @@
             XML3D.debug.logWarning("External light shaders not supported yet"); // TODO
         }
 
-        this.localIntensity = opt.localIntensity || 1;
+        this.localIntensity = opt.localIntensity !== undefined ? opt.localIntensity : 1.0;
         this.initializeLightData();
     };
     RenderLight.ENTRY_SIZE = ENTRY_SIZE;

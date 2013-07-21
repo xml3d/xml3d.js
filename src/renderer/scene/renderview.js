@@ -83,16 +83,20 @@
 
             return function() {
                 this.scene.getBoundingBox(bb);
+                if (XML3D.math.bbox.isEmpty(bb)) {
+                    return { near: 1, far: 10 };
+                };
+
                 this.getViewMatrix(t_mat);
                 XML3D.math.bbox.transform(bb, t_mat, bb);
+
                 var bounds = { zMin: bb[2], zMax: bb[5] };
                 var length = XML3D.math.bbox.longestSide(bb);
-                console.log(bb, bounds, length);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
                 bounds.zMin -= length * 0.005;
                 bounds.zMax += length * 0.005;
-                console.log(bounds);
+                //console.log(bounds);
 
                 return {near: Math.max(-bounds.zMax, 0.01*length), far: -bounds.zMin};
             }

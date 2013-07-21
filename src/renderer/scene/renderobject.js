@@ -185,7 +185,6 @@
             var page = this.page;
             var offset = this.offset;
             XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEW_MATRIX_OFFSET, page, offset+WORLD_MATRIX_OFFSET,  view, 0);
-            this.setBoundingBoxDirty();
         },
 
         /** Relies on an up-to-date view matrix **/
@@ -314,6 +313,7 @@
             bbox[3] = this.page[o+3];
             bbox[4] = this.page[o+4];
             bbox[5] = this.page[o+5];
+
         },
 
         updateWorldSpaceBoundingBox: (function() {

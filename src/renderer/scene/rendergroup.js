@@ -65,18 +65,23 @@
             this.page[o+5] = bbox[5];
         },
 
-        updateWorldSpaceBoundingBox: (function() {
+
+
+    updateWorldSpaceBoundingBox: (function() {
             var local_mat = XML3D.math.mat4.create();
 
             return function() {
-                var localBB = XML3D.math.bbox.create();
-                this.children.forEach(function(obj) {
+                var localBB = XML3D.math.bbox.create(),
+                    childBB = XML3D.math.bbox.create();
+
+                for(var i = 0, j = this.children.length; i < j; i++) {
+                    var obj = this.children[i];
                     if (obj.isVisible()) {
-                        var childBB = XML3D.math.bbox.create();
                         obj.getWorldSpaceBoundingBox(childBB);
                         XML3D.math.bbox.extendWithBox(localBB, childBB);
                     }
-                });
+                }
+
                 this.getLocalMatrix(local_mat);
                 XML3D.math.bbox.transform(localBB, local_mat, localBB);
                 this.setWorldSpaceBoundingBox(localBB);

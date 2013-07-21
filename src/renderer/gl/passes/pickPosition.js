@@ -3,6 +3,7 @@
     var PickPositionRenderPass = function(context, opt) {
         webgl.BaseRenderPass.call(this, context, opt);
         this.program = context.programFactory.getPickingPositionProgram();
+        this.objectBoundingBox = XML3D.math.bbox.create();
     };
     XML3D.createClass(PickPositionRenderPass, webgl.BaseRenderPass, {
 
@@ -21,19 +22,15 @@
                 gl.disable(gl.BLEND);
 
                 obj.getWorldMatrix(c_modelMatrix);
-                this.bbMax = [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE];
-                this.bbMin = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
 
-                var objBB = XML3D.math.bbox.create();
-                obj.getObjectSpaceBoundingBox(objBB);
-                XML3D.webgl.adjustMinMax(objBB, this.bbMin, this.bbMax, c_modelMatrix);
+                obj.getObjectSpaceBoundingBox(this.objectBoundingBox);
+                XML3D.math.bbox.transform(this.objectBoundingBox, c_modelMatrix, this.objectBoundingBox);
 
                 this.program.bind();
                 obj.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
                 var parameters = {
-                    bbMin : this.bbMin,
-                    bbMax : this.bbMax,
+                    bbox : this.objectBoundingBox,
                     modelMatrix : c_modelMatrix,
                     modelViewProjectionMatrix : c_modelViewProjectionMatrix
                 };
@@ -58,12 +55,10 @@
                     c_vec3[1] = data[1] / 255;
                     c_vec3[2] = data[2] / 255;
 
-                    // TODO: Optimize (2 float arrays created)
-                    var result = XML3D.math.vec3.subtract(XML3D.math.vec3.create(), this.bbMax, this.bbMin);
-                    result = XML3D.math.vec3.fromValues(c_vec3[0]*result[0], c_vec3[1]*result[1], c_vec3[2]*result[2]);
-                    XML3D.math.vec3.add(result, this.bbMin, result);
-
-                    return result;
+                    var size = XML3D.math.bbox.size(XML3D.math.vec3.create(), this.objectBoundingBox);
+                    size = XML3D.math.vec3.mul(size, c_vec3, size);
+                    XML3D.math.vec3.add(size, this.objectBoundingBox, size);
+                    return size;
                 }
                 else{
                     return null;

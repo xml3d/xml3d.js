@@ -172,9 +172,7 @@ XML3D.webgl.MAXFPS = 30;
 
             this.lastKnownDimensions.width = canvas.width = canvas.clientWidth;
             this.lastKnownDimensions.height = canvas.height = canvas.clientHeight;
-            this.renderer.resizeCanvas(canvas.width, canvas.height);
-
-            this.needDraw = this.needPickingDraw = true;
+            this.renderer.handleResizeEvent(canvas.width, canvas.height);
             return true;
         }
         return false;

@@ -4,14 +4,14 @@
      * Contex that includes all GL related resources / handlers
      * @param {WebGLRenderingContext} gl
      * @param {number} id
-     * @param {number} height
      * @param {number} width
+     * @param {number} height
      * @constructor
      */
-    var GLContext = function(gl, id, height, width) {
+    var GLContext = function(gl, id, width, height) {
         this.gl = gl;
         this.id = id;
-        this.canvasTarget = new XML3D.webgl.GLCanvasTarget(this, height, width);
+        this.canvasTarget = new XML3D.webgl.GLCanvasTarget(this, width, height);
         this.programFactory = new XML3D.webgl.ProgramFactory(this);
     };
     XML3D.extend(GLContext.prototype, {
@@ -20,6 +20,9 @@
         },
         requestRedraw: function(reason) {
             //handler.redraw(reason, forcePicking);
+        },
+        handleResizeEvent: function(width, height) {
+            this.canvasTarget = new XML3D.webgl.GLCanvasTarget(this, width, height);
         }
     });
 

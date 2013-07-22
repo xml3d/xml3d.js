@@ -143,6 +143,9 @@
                 child.dispose();
                 this.context.requestRedraw("Object was removed from scene.");
             }
+        },
+        handleResizeEvent: function(width, height) {
+            this.getActiveView().setProjectionDirty();
         }
     });
     webgl.GLScene = GLScene;

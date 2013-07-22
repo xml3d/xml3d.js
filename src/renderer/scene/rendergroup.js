@@ -69,10 +69,10 @@
 
     updateWorldSpaceBoundingBox: (function() {
             var local_mat = XML3D.math.mat4.create();
+            var childBB = XML3D.math.bbox.create();
 
             return function() {
-                var localBB = XML3D.math.bbox.create(),
-                    childBB = XML3D.math.bbox.create();
+                var localBB = XML3D.math.bbox.create();
 
                 for(var i = 0, j = this.children.length; i < j; i++) {
                     var obj = this.children[i];

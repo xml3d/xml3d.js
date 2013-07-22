@@ -8,7 +8,7 @@
 
     IRenderer.prototype.renderToCanvas = function () {
     };
-    IRenderer.prototype.resizeCanvas = function (width, height) {
+    IRenderer.prototype.handleResizeEvent = function (width, height) {
     };
     IRenderer.prototype.requestRedraw = function (reason) {
     };
@@ -62,11 +62,12 @@
             this.changeListener = new XML3D.webgl.DataChangeListener(this);
 
         },
-        resizeCanvas: function (width, height) {
+        handleResizeEvent: function (width, height) {
             this.width = width;
             this.height = height;
+            this.context.handleResizeEvent(width, height);
             this.createRenderPasses(this.context);
-            this.camera && (this.camera.setTransformDirty());
+            this.scene.handleResizeEvent(width, height);
             this.needsDraw = this.needsPickingDraw = true;
         },
         createRenderPasses: function (context) {

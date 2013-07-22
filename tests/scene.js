@@ -6,7 +6,7 @@ module("RenderScene", {
     }
 });
 
-test("Lights", 16, function () {
+test("Light attributes", 10, function () {
 
     var dataNode = this.xflowGraph.createDataNode(false);
 
@@ -21,26 +21,43 @@ test("Lights", 16, function () {
     actualVector.set(light.intensity);
     QUnit.closeVector(actualVector, new XML3DVec3(1, 1, 1), EPSILON, "Intensity default");
 
-    equal(this.scene.lights.queue.length, 1, "Invalid light is in queue");
-    light.setLightType("directional");
-    equal(light.light.type, "directional");
+    equal(this.scene.lights.directional.length, 1, "Light without type is in directional container (default)");
+    light.setLightType("spot");
+    equal(light.light.type, "spot", "Changed type to 'spot'");
 
-    equal(this.scene.lights.queue.length, 0, "Valid light is not in queue");
-    equal(this.scene.lights.directional.length, 1, "Valid directional light is in 'scene.lights.directional'");
+    equal(this.scene.lights.directional.length, 0, "Light has left directional light container");
+    equal(this.scene.lights.spot.length, 1, "Light is in spot light container");
     //strictEqual(this.scene.lights.directional[0], light, "Valid directional light is in 'scene.lights.directional'");
 
+    light.setLightType("unknown");
+    equal(light.light.type, "unknown", "Changed type to 'unknwon'");
+    equal(this.scene.lights.spot.length, 0, "Light has left spot light container");
+
+    light.setLightType("");
+    equal(light.light.type, "directional", "Reset light type (leads to default: directional");
+    equal(this.scene.lights.directional.length, 1, "Light without type is in directional container (default)");
+});
+
+test("Light callbacks", 9, function () {
+
+    var dataNode = this.xflowGraph.createDataNode(false);
+
+    var light = this.scene.createRenderLight({
+        light: {
+            data: dataNode
+        }
+    });
+
     this.scene.addEventListener(XML3D.webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (event) {
-        ok(event.light, "Light passed as parameter in structure changed callback");
+        ok(event.light, "Got a structure changed callback");
         start();
     });
 
-    stop();
-    light.setLightType("spot");
+    stop(3);
+    light.setLightType("spot");  // SC 1+2: Change type of light (creates two because remove/add)
 
     var group = this.scene.createRenderGroup();
-
-    stop();
-    light = this.scene.createRenderLight({
+    light = this.scene.createRenderLight({ // SC 3: Add a new light to the scene
         parent: group,
         light: {
             data: dataNode,
@@ -48,11 +65,8 @@ test("Lights", 16, function () {
         }
     });
 
-    ok(light.parent === group);
-    equal(this.scene.lights.point.length, 1, "Valid directional light is in 'scene.lights.point'");
-
     this.scene.addEventListener(XML3D.webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (event) {
-        ok(true, "Value changed callback");
+        ok(true, "Got a value changed callback");
         start();
     });
 
@@ -65,7 +79,6 @@ test("Lights", 16, function () {
     group.setLocalMatrix(XML3D.math.mat4.create());
 
     // REMOVE
-
 
 });
 

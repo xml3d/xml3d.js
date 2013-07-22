@@ -50,24 +50,29 @@
         }
 
         this.localIntensity = opt.localIntensity !== undefined ? opt.localIntensity : 1.0;
-        this.initializeLightData();
+        this.addLightToScene();
     };
     RenderLight.ENTRY_SIZE = ENTRY_SIZE;
 
     XML3D.createClass(RenderLight, webgl.RenderNode);
     XML3D.extend(RenderLight.prototype, {
-        initializeLightData: function() {
+
+        addLightToScene : function() {
             var lightEntry = this.scene.lights[this.light.type];
             if (Array.isArray(lightEntry)) {
-                this.addLightToScene(lightEntry);
+                lightEntry.push(this);
+                this.updateWorldMatrix(); // Implicitly fills light position/direction
+                this.lightStructureChanged();
             } else {
-                // Remove queue
-                this.scene.lights.queue.push(this);
+                XML3D.debug.logError("Unsupported light shader script: urn:xml3d:lightshader:" + this.light.type);
             }
         },
-        addLightToScene : function(container) {
-            container.push(this);
-            this.updateWorldMatrix(); // Implicitly fills light position/direction
+        removeLightFromScene : function() {
+            var container = this.scene.lights[this.light.type];
+            if (Array.isArray(container)) {
+                container = container.splice(this);
+                this.lightStructureChanged();
+            }
         },
         lightParametersChanged: function(request, changeType) {
             // console.log("Light parameters have changed", arguments);
@@ -184,19 +189,16 @@
         },
 
         setLightType: function(type) {
+            type = type || "directional";
             if(type != this.light.type) {
+                this.removeLightFromScene();
                 this.light.type = type;
-                XML3D.debug.logError("Changing light type is not supported yet");
-                this.lightStructureChanged();
+                this.addLightToScene();
             }
         },
         remove: function() {
             this.parent.removeChild(this);
-            var container = this.scene.lights[this.light.type];
-            if (Array.isArray(container)) {
-                container = container.splice(this);
-            }
-            this.lightStructureChanged(); // TODO: test
+            this.removeLightFromScene();
         },
 
         getWorldSpaceBoundingBox: function(bbox) {

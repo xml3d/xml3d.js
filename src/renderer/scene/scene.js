@@ -80,7 +80,6 @@
         createRenderLight: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderLight.ENTRY_SIZE);
             var renderLight = new webgl.RenderLight(this, pageEntry, opt);
-            this.dispatchEvent({type: Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, light: renderLight });
             return renderLight;
         },
         createShaderInfo: function (opt) {

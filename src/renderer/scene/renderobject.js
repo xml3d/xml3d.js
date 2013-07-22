@@ -52,7 +52,9 @@
         this.shader = opt.shader || {};
         this.node = opt.node;
 
+        this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
         this.boundingBoxAnnotated = false;
+
         if (this.object.data) {
             // Bounding Box annotated
             this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.object.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));

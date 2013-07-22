@@ -19,8 +19,7 @@
         opt = opt || {};
         this.shaderHandle = opt.shaderHandle || null;
         this.boundingBoxDirty = false;
-        var bbox = new XML3D.math.bbox.create();
-        this.setWorldSpaceBoundingBox(bbox);
+        this.setWorldSpaceBoundingBox(XML3D.math.EMPTY_BOX);
     };
     RenderGroup.ENTRY_SIZE = ENTRY_SIZE;
 

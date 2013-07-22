@@ -100,7 +100,8 @@
         },
         updateBoundingBox: function () {
             if (this.rootNode.boundingBoxDirty) {
-                this.activeView.setProjectionDirty();
+                // TODO: There should always be an active view
+                this.activeView && this.activeView.setProjectionDirty();
             }
             this.rootNode.getWorldSpaceBoundingBox(this.boundingBox);
         },

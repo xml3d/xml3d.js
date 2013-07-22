@@ -188,6 +188,7 @@
 
 
     math.bbox = bbox;
+    math.EMPTY_BOX = bbox.create();
 
 
 }(XML3D.math)

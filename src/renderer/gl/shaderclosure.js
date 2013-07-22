@@ -9,21 +9,29 @@
         this.id = "";
         this.isTransparent = false;
     };
+
+    Object.defineProperties(ShaderClosure.prototype, {
+            attributes: {
+                writeable: false,
+                get: function() {
+                    return this.program ? this.program.attributes : {}
+                }
+            },
+            uniforms: {
+                writeable: false,
+                get: function() {
+                    return this.program ? this.program.uniforms : {}
+                }
+            },
+            samplers: {
+                writeable: false,
+                get: function() {
+                    return this.program ? this.program.samplers : {}
+                }
+            }
+        }
+    );
     XML3D.extend(ShaderClosure.prototype, {
-        get attributes() {
-            return this.program ? this.program.attributes : {};
-        },
-        set attributes(arg) {},
-
-        get uniforms() {
-            return this.program ? this.program.uniforms : {};
-        },
-        set uniforms(arg) {},
-
-        get samplers() {
-            return this.program ? this.program.samplers : {};
-        },
-        set samplers(arg) {},
 
         equals: function(that) {
             return this.source.vertex === that.source.vertex && this.source.fragment === that.source.fragment;

@@ -1,5 +1,7 @@
 (function (webgl) {
 
+    var StateMachine = window.StateMachine;
+
     /**
      *
      * @param {shaderFactory

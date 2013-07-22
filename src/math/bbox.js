@@ -171,7 +171,7 @@
     };
 
     bbox.asXML3DBox = function (bb) {
-        var result = new XML3DBox();
+        var result = new window.XML3DBox();
         result.min._data[0] = bb[0];
         result.min._data[1] = bb[1];
         result.min._data[2] = bb[2];

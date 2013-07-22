@@ -83,7 +83,7 @@
 
     var absMat = XML3D.math.mat4.create();
 
-    transformAABB = function(bbox, gmatrix) {
+    var transformAABB = function(bbox, gmatrix) {
         if (bbox.isEmpty())
             return;
 

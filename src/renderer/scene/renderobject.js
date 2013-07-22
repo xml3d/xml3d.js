@@ -108,7 +108,7 @@
                         //TODO Provide mesh data to the shader
                         this.program = this.shader.template.getShaderClosure(this.scene, {});
                     } else {
-                        console.log("No shader:", this.name);// DefaultShader
+                        XML3D.debug.logError("No shader:", this.name);// DefaultShader
                     }
                     return !!this.program;
             }
@@ -237,7 +237,7 @@
             this.transformDirty = true;
         },
         shaderHandleCallback: function() {
-            console.log("Shader handle state changed.", arguments);
+            // console.log("Shader handle state changed.", arguments);
         },
         setShader: function(newHandle) {
             var oldHandle = this.shader.handle;

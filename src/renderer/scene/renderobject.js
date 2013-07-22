@@ -235,6 +235,7 @@
 
         setTransformDirty: function() {
             this.transformDirty = true;
+            this.scene.context.requestRedraw("Transformation changed");
         },
         shaderHandleCallback: function() {
             // console.log("Shader handle state changed.", arguments);

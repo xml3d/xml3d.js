@@ -126,6 +126,7 @@
         setTransformDirty: function() {
             this.viewDirty = true;
             this.setProjectionDirty();
+            this.scene.context.requestRedraw("Transformation changed");
         },
 
         setProjectionDirty: function() {

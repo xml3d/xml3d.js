@@ -23,8 +23,8 @@
             return function (glX, glY) {
                 var gl = this.context.gl;
                 var scale = this.target.getScale();
-                var x = Math.round(glX * scale);
-                var y = Math.round(glY * scale);
+                var x = glX * scale;
+                var y = glY * scale;
 
                 this.target.bind();
                 try {

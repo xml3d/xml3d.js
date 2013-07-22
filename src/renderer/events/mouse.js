@@ -175,10 +175,8 @@
          */
         mousemove:function (evt) {
             var pos = this.getMousePosition(evt);
-
             this.dispatchMouseEventOnPickedObject(evt);
-
-            var curObj = this.currentPickObj ? this.currentPickObj.node : null;
+            var curObj = this.renderer.pickedObject ? this.renderer.pickedObject.node : null;
 
             // trigger mouseover and mouseout
             if (curObj !== this.lastPickObj) {

@@ -113,7 +113,7 @@
             if (target["softness"]) {
                 target["softness"][offset] = SPOTLIGHT_DEFAULT_SOFTNESS;
                 if (this.light.data) {
-                    result = this.lightParameterRequest.result;
+                    result = this.lightParameterRequest.getResult();
                     data = result.getOutputData("softness");
                     target["softness"][offset] = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_SOFTNESS;
                 }
@@ -121,7 +121,7 @@
             if (target["falloffAngle"]) {
                 target["falloffAngle"][offset] = SPOTLIGHT_DEFAULT_FALLOFFANGLE;
                 if (this.light.data) {
-                    result = this.lightParameterRequest.result;
+                    result = this.lightParameterRequest.getResult();
                     data = result.getOutputData("falloffAngle");
                     target["falloffAngle"][offset] = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_FALLOFFANGLE;
                 }

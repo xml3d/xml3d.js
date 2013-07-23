@@ -3,7 +3,13 @@ XML3D.webgl.MAXFPS = 30;
 
 (function() {
 
-
+    var CONTEXT_OPTIONS = {
+        alpha: true,
+        premultipliedAlpha: true,
+        antialias: true,
+        stencil: true,
+        preserveDrawingBuffer: true
+    };
 
     /**
      *
@@ -71,8 +77,7 @@ XML3D.webgl.MAXFPS = 30;
      */
     CanvasHandler.prototype.getContextForCanvas = function(canvas) {
         try {
-            var args = {preserveDrawingBuffer: true};
-            return canvas.getContext('experimental-webgl', args);
+            return canvas.getContext('experimental-webgl', CONTEXT_OPTIONS);
         } catch (e) {
             return null;
         }

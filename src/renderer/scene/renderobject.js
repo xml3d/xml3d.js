@@ -29,8 +29,6 @@
     var NORMAL_MATRIX_OFFSET = MODELVIEWPROJECTION_MATRIX_OFFSET + 16;
     /** @const */
     var ENTRY_SIZE = NORMAL_MATRIX_OFFSET + 16;
-    /** @const */
-    var BBOX_ANNOTATION_FILTER = ["boundingBox"];
 
     var EMPTY_BOUNDING_BOX = XML3D.math.bbox.create();
 
@@ -70,13 +68,6 @@
         this.object = opt.object || { data: null, type: "" };
 
         /**
-         * Can we take an annotated bounding box or do we have to
-         * calculate it from the drawable?
-         * @type {boolean}
-         */
-        this.boundingBoxAnnotated = false;
-
-        /**
          * Can we rely on current WorldMatrix?
          * @type {boolean}
          */
@@ -102,6 +93,7 @@
     RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
+
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode, {
         createDrawable: function () {
             var result = this.scene.createDrawable(this);
@@ -117,20 +109,15 @@
             });
             return result;
         },
-        initialize : function() {
+        initialize: function () {
             // Initialize World Matrix
             this.setWorldMatrix(RenderObject.IDENTITY_MATRIX);
 
             // Initialize Bounding Box to empty
             this.setObjectSpaceBoundingBox(EMPTY_BOUNDING_BOX);
 
-        this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
+            this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
 
-            if (this.object.data) {
-                // Bounding Box annotated
-                this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.object.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
-                this.boundingBoxAnnotationChanged(this.annotatedBoundingBoxRequest);
-            }
             /** {Object?} **/
             this.override = null;
             this.setShader(this.parent.getShaderHandle());
@@ -144,17 +131,6 @@
         },
         getDataNode: function() {
             return this.object ? this.object.data : null;
-        },
-        boundingBoxAnnotationChanged: function(request){
-            var result = request.getResult();
-            var bboxData = result.getOutputData(BBOX_ANNOTATION_FILTER[0]);
-            if(bboxData) {
-                var bboxVal = bboxData.getValue();
-                this.setObjectSpaceBoundingBox(bboxVal);
-                this.boundingBoxAnnotated = true;
-            } else {
-                this.boundingBoxAnnotated = false;
-            }
         },
 
         dispose :function () {

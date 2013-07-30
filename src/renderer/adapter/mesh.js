@@ -21,7 +21,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             var parent = this.getParentRenderAdapter();
             var parentNode = parent.getRenderNode && parent.getRenderNode();
 
-            this.renderNode = this.getScene().createRenderObject({
+            this.renderNode = this.getScene().createRenderMesh({
                 parent: parentNode,
                 node: this.node,
                 object: {

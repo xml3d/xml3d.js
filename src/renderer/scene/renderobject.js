@@ -276,6 +276,8 @@
                 this.shader.template = this.scene.shaderFactory.getDefaultComposer();
                 this.program = this.shader.template.getShaderClosure(this.scene, {});
             }
+            // Request the attributes required for shader from the drawable (e.g. normal, color etc)
+            this.drawable.setAttributeRequest(this.shader.template.getShaderAttributes());
             this.shader.handle = newHandle;
             // TODO this.materialChanged();
         },

@@ -151,6 +151,7 @@
     var ShaderDescriptor = function() {
         this.uniforms = {};
         this.samplers = {};
+        this.attributes = {};
         this.name = "";
         this.fragment = "";
         this.vertex =  "";
@@ -221,6 +222,15 @@
         getRequestFields: function () {
             return Object.keys(this.descriptor.uniforms).concat(Object.keys(this.descriptor.samplers));
         },
+
+        /**
+         * Get the attributes required by the shader
+         * @returns {Object<string, *>}
+         */
+        getShaderAttributes: function () {
+            return this.descriptor.attributes;
+        },
+
 
         update: function (scene, opt) {
             opt = opt || {};

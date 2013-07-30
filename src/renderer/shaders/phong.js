@@ -187,5 +187,13 @@ XML3D.shaders.register("phong", {
         diffuseTexture : null,
         emissiveTexture : null,
         specularTexture : null
+    },
+
+    attributes: {
+        normal : {
+            required: true
+        },
+        texcoord: null,
+        color: null
     }
 });

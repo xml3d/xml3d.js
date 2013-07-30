@@ -1,10 +1,23 @@
 (function (webgl) {
 
+    /**
+     * A ShaderClosure connects a mesh-specific GLProgram with it's Xflow data
+     * @param {GLContext} context
+     * @param descriptor
+     * @param dataCallback
+     * @constructor
+     */
     var ShaderClosure = function(context, descriptor, dataCallback) {
         this.descriptor = descriptor;
         this.getShaderParameters = dataCallback || function(){ {} };
         this.source = {};
+
+        /**
+         * @private
+         * @type {GLProgramObject|null}
+         */
         this.program = null;
+
         this.context = context;
         this.id = "";
         this.isTransparent = false;

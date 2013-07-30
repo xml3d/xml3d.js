@@ -12,7 +12,7 @@
     XML3D.extend(DrawableFactory.prototype, {
         createDrawable: function(obj) {
             console.log("DrawableFactory::createDrawable", obj);
-            var result = new webgl.MeshClosure(this.context, obj.getType(), obj.getDataNode());
+            var result = new webgl.MeshClosure(this.context, obj.getType(), obj.getDataNode(), { boundingBoxChanged: obj.setObjectSpaceBoundingBox.bind(obj)});
             obj.mesh = result.getMesh();
             return result;
         }

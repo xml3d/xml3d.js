@@ -46,14 +46,6 @@
     };
 
     /**
-     *
-     * @returns Object.<string, *>
-     */
-    IShaderComposer.prototype.getObjectRequests = function () {
-        return {};
-    };
-
-    /**
      * @param {XML3D.webgl.GLContext} context
      * @constructor
      */
@@ -127,15 +119,10 @@
         getShaderClosure: function () {
             return this.context.programFactory.getFallbackProgram();
         },
-        getObjectRequests: function () {
-            return {
-                index: null,
-                position: {
-                    required: true
-                },
-                normal: null
-            }
+        getShaderAttributes: function() {
+            return {color: null };
         }
+
     });
 
     /**
@@ -368,16 +355,6 @@
                 XML3D.debug.logWarning("After structure change the shader was not found in list of obsolete closures");
             }
             return shaderClosure;
-        },
-
-        getObjectRequests: function() {
-            return  {
-                    index: null,
-                    position: { required: true },
-                    normal: null,
-                    color: null,
-                    texcoord: null
-                    };
         },
 
         isValid: function () {

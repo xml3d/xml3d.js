@@ -63,8 +63,9 @@
      * @extends {DrawableClosure}
      * @constructor
      */
-    var MeshClosure = function (context, type, data) {
+    var MeshClosure = function (context, type, data, opt) {
         webgl.DrawableClosure.call(this, context, webgl.DrawableClosure.TYPES.MESH);
+        opt = opt || {};
         this.mesh = new webgl.GLMesh(context, type);
         this.data = data;
 
@@ -99,6 +100,18 @@
          */
         this.changeState = CHANGE_STATE.TYPE_STRUCTURE_CHANGED;
 
+        /**
+         * Do we have to calculate the bounding box of this mesh?
+         * @type {boolean}
+         */
+        this.boundingBoxRequired = true;
+
+        /**
+         * Callback if bounding box has changed. Gets only called if
+         * this.boundingBoxRequired is true.
+         * @type {*|function(Float32Array)}
+         */
+        this.boundingBoxChanged = opt.boundingBoxChanged || function() {};
 
         this.initialize();
     };
@@ -114,6 +127,31 @@
             this.typeRequest = new Xflow.ComputeRequest(this.data, typeFilter, this.typeDataChanged.bind(this));
             this.typeDataChanged(this.typeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         },
+        setBoundingBoxRequired: function(required) {
+            this.boundingBoxRequired = required;
+            this.calculateBoundingBox();
+        },
+        calculateBoundingBox: (function() {
+            var c_empty = XML3D.math.bbox.create();
+
+            return function() {
+                if(!this.boundingBoxRequired)
+                    return;
+
+                console.log("Calc bounding box");
+                // compute bounding box from positions and indices, if present
+                var dataResult = this.typeRequest.getResult();
+                var positionEntry = dataResult.getOutputData("position");
+                if(!positionEntry)   {
+                    this.boundingBoxChanged(c_empty);
+                    return;
+                }
+                console.log("Really Calc bounding box");
+
+                var indexEntry = dataResult.getOutputData("index");
+                this.boundingBoxChanged(XML3D.webgl.calculateBoundingBox(positionEntry.getValue(), indexEntry ? indexEntry.getValue() : null));
+            }
+        }()),
         /**
          *
          * @param {Xflow.ComputeRequest} req
@@ -198,7 +236,7 @@
             var dataResult = this.attributeRequest.getResult();
             var attributes = this.attributes;
             var complete = this.updateMeshFromResult(attributes, dataResult, function(name) {
-                XML3D.logError("Required shader attribute ", name, "is missing for mesh");
+                XML3D.debug.logError("Required shader attribute ", name, "is missing for mesh");
             });
 
             this.attributeDataValid = complete;
@@ -214,9 +252,10 @@
 
             var vertexCount = 0;
             var complete = this.updateMeshFromResult(meshParams, dataResult, function(name) {
-                XML3D.logError("Required mesh attribute ", name, "is missing for mesh");
+                XML3D.debug.logError("Required mesh attribute ", name, "is missing for mesh");
             });
 
+            this.calculateBoundingBox();
             var entry = dataResult.getOutputData("vertexCount");
             this.mesh.setVertexCount(entry && entry.getValue() ? entry.getValue()[0] : null);
             this.typeDataValid = complete;

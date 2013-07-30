@@ -42,6 +42,7 @@
             } else {
                 this.boundingBoxAnnotated = false;
             }
+            this.drawable.setBoundingBoxRequired(!this.boundingBoxAnnotated);
         }
     });
 

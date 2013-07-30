@@ -113,7 +113,7 @@
         setTransformDirty: function() {
             if (this.transformDirty) {
                 //We can be sure all child nodes are already set to transformDirty from here
-                return;
+                //return;
             }
             this.transformDirty = true;
             this.children.forEach(function(obj) {

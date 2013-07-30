@@ -21,6 +21,13 @@
         }
     };
 
+    /**
+     * Calculate bounding box from psoitions and optional indices
+     * TODO: Remove FloatArray creation
+     * @param {Float32Array} positions
+     * @param {Int16Array|null} index
+     * @returns {Float32Array}
+     */
     webgl.calculateBoundingBox = function(positions, index) {
         var bbox = new XML3D.math.bbox.create();
 

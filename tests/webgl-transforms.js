@@ -52,3 +52,25 @@ test("Global Transformations", 4, function() {
     stop();
     hTest.draw();
 });
+
+test("Redraw triggers", 5, function() {
+    var xTest = this.doc.getElementById("xml3dTest"),
+        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+    var self = this;
+    var renderer = hTest.renderer;
+
+    var camtrans = this.doc.getElementById("t1");
+    var grouptrans = this.doc.getElementById("xfm");
+    hTest.draw();
+
+    renderer.needsDraw = false;
+    renderer.needsPickingDraw = false;
+    camtrans.setAttribute("translation", "0 0 -9");
+    ok(renderer.needsDraw && renderer.needsPickingDraw, "Camera transformation change needs full redraw");
+    hTest.draw();
+    ok(!renderer.needsDraw, "Redraw flag was set back after draw");
+    renderer.needsPickingDraw = false;
+
+    grouptrans.setAttribute("translation", "-3 0 -9");
+    ok(renderer.needsDraw && renderer.needsPickingDraw, "Group transformation change needs full redraw");
+});

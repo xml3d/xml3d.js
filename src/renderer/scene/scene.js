@@ -130,6 +130,9 @@
         },
         requestRedraw: function(reason) {
             throw new Error("Scene::requestRedraw not implemented");
+        },
+        traverse: function(callback) {
+            this.rootNode.traverse(callback);
         }
     });
 

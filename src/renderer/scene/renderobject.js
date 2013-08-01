@@ -63,7 +63,7 @@
          * Object related data
          * @type {{data: Xflow.DataNode|null, type: string}}
          */
-        this.object = opt.object || { data: null, type: "" };
+        this.object = opt.object || { data: null, type: "triangles" };
 
         /**
          * Can we rely on current WorldMatrix?
@@ -80,7 +80,7 @@
         /**
          * The drawable closure transforms object data and type into
          * a drawable entity
-         * @type {DrawableClosure!}
+         * @type {DrawableClosure}
          */
         this.drawable = this.createDrawable();
 
@@ -95,16 +95,18 @@
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode, {
         createDrawable: function () {
             var result = this.scene.createDrawable(this);
-            var that = this;
-            result.addEventListener(webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function (evt) {
-                if (evt.newState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
-                    that.scene.moveFromQueueToReady(that);
-                }
-                else if (evt.newState === webgl.DrawableClosure.READY_STATE.INCOMPLETE &&
-                    evt.oldState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
-                    that.scene.moveFromReadyToQueue(that);
-                }
-            });
+            if (result) {
+                var that = this;
+                result.addEventListener(webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function (evt) {
+                    if (evt.newState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                        that.scene.moveFromQueueToReady(that);
+                    }
+                    else if (evt.newState === webgl.DrawableClosure.READY_STATE.INCOMPLETE &&
+                        evt.oldState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                        that.scene.moveFromReadyToQueue(that);
+                    }
+                });
+            }
             return result;
         },
         initialize: function () {
@@ -235,7 +237,7 @@
 
         setTransformDirty: function() {
             this.transformDirty = true;
-            this.scene.context.requestRedraw("Transformation changed");
+            this.scene.requestRedraw("Transformation changed");
         },
         shaderHandleCallback: function() {
             // console.log("Shader handle state changed.", arguments);
@@ -247,12 +249,12 @@
             this.setOverride(objectData);
         },
 
-        createShader: function (shaderInfo) {
+        createShaderForDrawable: function (shaderInfo, drawable) {
             var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
             composer.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
 
             var that = this;
-            var objectRequest = this.drawable.getRequest(composer.getRequestFields(), function (req, state) {
+            var objectRequest = drawable.getRequest(composer.getRequestFields(), function (req, state) {
                 that.createProgram(composer, req.getResult());
             });
 
@@ -263,9 +265,14 @@
             }
         },
 
-
         setShader: function(newHandle) {
-            console.log("RenderObject::setShader");
+
+            // If we don't have a drawable, we don't need a shader
+            // This is for testing purposes and won't occur during normal
+            // run
+            if(!this.drawable)
+                return;
+
             var oldHandle = this.shader.handle;
 
             if (oldHandle) {
@@ -286,7 +293,7 @@
             } else {
                 console.log("Null shader");
             }
-            this.shader = this.createShader(shaderInfo);
+            this.shader = this.createShaderForDrawable(shaderInfo, this.drawable);
 
             // Request the attributes required for shader from the drawable (e.g. normal, color etc)
             this.drawable.setAttributeRequest(this.shader.composer.getShaderAttributes());

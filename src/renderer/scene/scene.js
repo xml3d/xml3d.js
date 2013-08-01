@@ -127,8 +127,10 @@
         },
         createDrawable: function(obj) {
             throw new Error("Scene::createDrawable not implemented");
+        },
+        requestRedraw: function(reason) {
+            throw new Error("Scene::requestRedraw not implemented");
         }
-
     });
 
 

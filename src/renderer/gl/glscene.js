@@ -141,6 +141,9 @@
         },
         createDrawable: function(obj) {
             return this.drawableFactory.createDrawable(obj);
+        },
+        requestRedraw: function(reason) {
+            return this.context.requestRedraw(reason);
         }
     });
     webgl.GLScene = GLScene;

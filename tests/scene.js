@@ -1,6 +1,11 @@
 module("RenderScene", {
     setup: function () {
         this.scene = new XML3D.webgl.Scene();
+        this.scene.createDrawable = function() {
+            return null;
+        };
+        this.scene.requestRedraw = function() {
+        };
         this.xflowGraph = new Xflow.Graph();
 
     }

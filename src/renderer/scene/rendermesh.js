@@ -42,7 +42,8 @@
             } else {
                 this.boundingBoxAnnotated = false;
             }
-            this.drawable.setBoundingBoxRequired(!this.boundingBoxAnnotated);
+            // Check for drawable only necessary for tests
+            this.drawable && this.drawable.setBoundingBoxRequired(!this.boundingBoxAnnotated);
         }
     });
 

@@ -28,6 +28,7 @@
         <file name="gl/base/frustum.js" />
         <file name="gl/base/mesh.js" />
         <file name="gl/base/utils.js" />
+        <file name="gl/base/fullscreenquad.js" />
         <file name="gl/base/pipeline.js" />
         <file name="gl/renderer.js" />
         <file name="gl/glscene.js" />

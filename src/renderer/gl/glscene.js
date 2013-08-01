@@ -65,9 +65,6 @@
         update: function () {
             this.shaderFactory.update(this);
             this.updateMeshes();
-            this.consolidate();
-        },
-        consolidate: function () {
         },
         updateMeshes: function () {
             var that = this;

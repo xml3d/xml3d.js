@@ -30,8 +30,6 @@
     /** @const */
     var ENTRY_SIZE = NORMAL_MATRIX_OFFSET + 16;
 
-    var EMPTY_BOUNDING_BOX = XML3D.math.bbox.create();
-
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
     /**
      * Represents a renderable object in the scene.
@@ -110,12 +108,6 @@
             return result;
         },
         initialize: function () {
-            // Initialize World Matrix
-            this.setWorldMatrix(RenderObject.IDENTITY_MATRIX);
-
-            // Initialize Bounding Box to empty
-            this.setObjectSpaceBoundingBox(EMPTY_BOUNDING_BOX);
-
             this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
 
             /** {Object?} **/

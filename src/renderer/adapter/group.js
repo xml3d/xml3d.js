@@ -31,8 +31,8 @@
     p.updateLocalMatrix = (function () {
         var IDENTITY = XML3D.math.mat4.create();
         return function () {
-            var cssMatrix = XML3D.css.getCSSMatrix(this.node);
             var result = IDENTITY;
+            var cssMatrix = XML3D.css.getCSSMatrix(this.node);
             if (cssMatrix) {
                 result = XML3D.css.convertCssToMat4(cssMatrix);
             } else {

@@ -57,7 +57,7 @@
         initGL: function () {
             var gl = this.context.gl;
 
-            gl.clearColor(0, 0, 0, 1);
+            gl.clearColor(0, 0, 0, 0);
             gl.clearDepth(1);
             gl.clearStencil(0);
 

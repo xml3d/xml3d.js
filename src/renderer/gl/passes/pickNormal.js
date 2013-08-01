@@ -1,12 +1,26 @@
 (function (webgl) {
 
-    var PickNormalRenderPass = function (context, opt) {
-        webgl.BaseRenderPass.call(this, context, opt);
-        this.program = context.programFactory.getPickingNormalProgram();
+    var PickNormalRenderPass = function (opt) {
+        webgl.BaseRenderPass.call(this, opt);
     };
 
     XML3D.createClass(PickNormalRenderPass, webgl.BaseRenderPass, {
-        renderObject: (function () {
+        init: function(context) {
+            var target = this.pipeline.getRenderTarget("pickBuffer");
+            if (!target) {
+                target = new webgl.GLScaledRenderTarget(context, webgl.MAX_PICK_BUFFER_DIMENSION, {
+                    width: context.canvasTarget.width,
+                    height: context.canvasTarget.height,
+                    colorFormat: context.gl.RGBA,
+                    depthFormat: context.gl.DEPTH_COMPONENT16,
+                    stencilFormat: null,
+                    depthAsRenderbuffer: true
+                });
+                this.pipeline.addRenderTarget("pickBuffer", target);
+            }
+        },
+
+        render: (function () {
             var c_modelViewProjectionMatrix = XML3D.math.mat4.create();
             var c_worldMatrix = XML3D.math.mat4.create();
             var c_normalMatrix3 = XML3D.math.mat3.create();
@@ -14,9 +28,10 @@
                 c_systemUniformNames = ["modelViewProjectionMatrix", "normalMatrix"];
 
             return function (object, viewMatrix, projMatrix) {
-                var gl = this.context.gl;
-                this.target.bind();
+                var gl = this.pipeline.context.gl,
+                    target = this.pipeline.getRenderTarget("pickBuffer");
 
+                target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
                 gl.enable(gl.DEPTH_TEST);
                 gl.disable(gl.CULL_FACE);
@@ -37,7 +52,7 @@
                     XML3D.math.mat3.identity(c_normalMatrix3);
                 }
 
-                var program = this.program;
+                var program = this.pipeline.context.programFactory.getPickingNormalProgram();
                 program.bind();
 
                 c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
@@ -47,7 +62,7 @@
                 object.mesh.draw(program);
 
                 program.unbind();
-                this.target.unbind();
+                target.unbind();
             }
         }()),
         /**
@@ -61,7 +76,7 @@
             var c_one = XML3D.math.vec3.fromValues(1, 1, 1);
 
             return function (glX, glY) {
-                var data = this.readPixelDataFromBuffer(glX, glY);
+                var data = this.readPixelDataFromBuffer(glX, glY, this.pipeline.getRenderTarget("pickBuffer"));
                 if (!data) {
                     return null;
                 }

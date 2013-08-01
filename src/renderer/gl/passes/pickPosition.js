@@ -1,13 +1,27 @@
 (function(webgl){
 
-    var PickPositionRenderPass = function(context, opt) {
-        webgl.BaseRenderPass.call(this, context, opt);
-        this.program = context.programFactory.getPickingPositionProgram();
+    var PickPositionRenderPass = function(opt) {
+        webgl.BaseRenderPass.call(this, opt);
         this.objectBoundingBox = XML3D.math.bbox.create();
     };
     XML3D.createClass(PickPositionRenderPass, webgl.BaseRenderPass, {
 
-        renderObject: (function() {
+        init: function(context) {
+            var target = this.pipeline.getRenderTarget("pickBuffer");
+            if (!target) {
+                target = new webgl.GLScaledRenderTarget(context, webgl.MAX_PICK_BUFFER_DIMENSION, {
+                    width: context.canvasTarget.width,
+                    height: context.canvasTarget.height,
+                    colorFormat: context.gl.RGBA,
+                    depthFormat: context.gl.DEPTH_COMPONENT16,
+                    stencilFormat: null,
+                    depthAsRenderbuffer: true
+                });
+                this.pipeline.addRenderTarget("pickBuffer", target);
+            }
+        },
+
+        render: (function() {
 
             var c_modelMatrix = XML3D.math.mat4.create();
             var c_modelViewProjectionMatrix = XML3D.math.mat4.create(),
@@ -15,9 +29,10 @@
                 c_systemUniformNames = ["bbox", "modelMatrix", "modelViewProjectionMatrix"];
 
             return function(obj, viewMatrix, projMatrix) {
-                var gl = this.context.gl;
+                var gl = this.pipeline.context.gl,
+                    target = this.pipeline.getRenderTarget("pickBuffer");
 
-                this.target.bind();
+                target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
                 gl.enable(gl.DEPTH_TEST);
                 gl.disable(gl.CULL_FACE);
@@ -32,7 +47,8 @@
                 obj.getObjectSpaceBoundingBox(this.objectBoundingBox);
                 XML3D.math.bbox.transform(this.objectBoundingBox, c_modelMatrix, this.objectBoundingBox);
 
-                this.program.bind();
+                var program = this.pipeline.context.programFactory.getPickingPositionProgram();
+                program.bind();
                 obj.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
                 c_uniformCollection.sysBase["bbox"] = this.objectBoundingBox;
@@ -42,8 +58,8 @@
                 this.program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
                 obj.mesh.draw(this.program);
 
-                this.program.unbind();
-                this.target.unbind();
+                program.unbind();
+                target.unbind();
             };
         }()),
 
@@ -52,7 +68,7 @@
             var c_vec3 = XML3D.math.vec3.create();
 
             return function(x,y) {
-                var data = this.readPixelDataFromBuffer(x, y);
+                var data = this.readPixelDataFromBuffer(x, y, this.pipeline.getRenderTarget("pickBuffer"));
                 if(data){
 
                     c_vec3[0] = data[0] / 255;

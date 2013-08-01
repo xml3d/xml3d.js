@@ -3,7 +3,6 @@
      * @interface
      */
     var IRenderer = function () {
-
     };
 
     IRenderer.prototype.renderToCanvas = function () {
@@ -51,7 +50,8 @@
         this.changeListener = new XML3D.webgl.DataChangeListener(this);
 
         this.renderInterface = this.createRenderInterface();
-        this.createRenderPasses(context);
+        this.createDefaultPipelines(context);
+
     };
 
     // Just to satisfy jslint
@@ -89,16 +89,29 @@
             this.width = width;
             this.height = height;
             this.context.handleResizeEvent(width, height);
-            this.createRenderPasses(this.context);
+            this.createDefaultPipelines(this.context);
             this.scene.handleResizeEvent(width, height);
             this.needsDraw = this.needsPickingDraw = true;
         },
-        createRenderPasses: function (context) {
-            var pickingTarget = this.createPickingTarget();
-            this.mainPass = new webgl.ForwardRenderPass(context, { target:  context.canvasTarget });
-            this.pickObjectPass = new webgl.PickObjectRenderPass(context, { target:  this.createPickingTarget() });
-            this.pickPositionPass = new webgl.PickPositionRenderPass(context, { target: pickingTarget });
-            this.pickNormalPass = new webgl.PickNormalRenderPass(context, { target: pickingTarget });
+        createDefaultPipelines: function (context) {
+            var pipeline = new XML3D.webgl.RenderPipeline(context);
+            var opt = {pipeline : pipeline};
+            pipeline.addRenderTarget("screen", context.canvasTarget);
+            pipeline.addRenderPass(new webgl.ForwardRenderPass(opt));
+            pipeline.init();
+            this.renderInterface.setRenderPipeline(pipeline);
+
+            var pickingPipeline = new XML3D.webgl.RenderPipeline(context);
+            opt = {pipeline : pickingPipeline};
+            pickingPipeline.addRenderPass(this.pickObjectPass = new webgl.PickObjectRenderPass(opt));
+            pickingPipeline.addRenderPass(this.pickPositionPass = new webgl.PickPositionRenderPass(opt));
+            pickingPipeline.addRenderPass(this.pickNormalPass = new webgl.PickNormalRenderPass(opt));
+            pickingPipeline.init();
+            this.pickingPipeline = pickingPipeline;
+        },
+        createRenderInterface: function () {
+            return new XML3D.webgl.RenderInterface(this.context);
+            //TODO need to provide an interface for creating shaders, buffers and so on
         },
         requestRedraw: function (reason) {
             XML3D.debug.logDebug("Request redraw because:", reason);
@@ -110,7 +123,8 @@
             if (!obj)
                 return null;
             y = webgl.canvasToGlY(this.canvas, y);
-            this.pickNormalPass.renderObject(obj);
+            this.pickNormalPass.render(obj);
+            this.needsPickingDraw = true;
             return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
         },
         getWorldSpacePositionByPoint: function (x, y, object) {
@@ -118,7 +132,8 @@
             if (!obj)
                 return null;
             y = webgl.canvasToGlY(this.canvas, y);
-            this.pickPositionPass.renderObject(obj);
+            this.pickPositionPass.render(obj);
+            this.needsPickingDraw = true;
             return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
         },
 
@@ -187,7 +202,7 @@
         },
         renderToCanvas: function () {
             this.prepareRendering();
-            var stats = this.mainPass.renderScene(this.scene);
+            var stats = this.renderInterface.getRenderPipeline().render(this.scene);
             XML3D.debug.logDebug("Rendered to Canvas");
             this.needsDraw = false;
             return stats;
@@ -197,7 +212,7 @@
             if(this.needsPickingDraw) {
                 this.prepareRendering();
                 this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight());
-                this.pickObjectPass.renderObjects(this.scene.ready);
+                this.pickObjectPass.render(this.scene.ready);
                 this.needsPickingDraw = false;
                 XML3D.debug.logDebug("Rendered Picking Buffer");
             }
@@ -206,18 +221,6 @@
         },
         prepareRendering: function () {
             this.scene.update();
-        },
-        createPickingTarget: function () {
-            var gl = this.context.gl;
-
-            return new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
-                width: this.width,
-                height: this.height,
-                colorFormat: gl.RGBA,
-                depthFormat: gl.DEPTH_COMPONENT16,
-                stencilFormat: null,
-                depthAsRenderbuffer: true
-            });
         },
         /**
          * Uses gluUnProject() to transform the 2D screen point to a 3D ray.
@@ -274,6 +277,10 @@
         }()),
         dispose: function () {
             this.scene.clear();
+        },
+
+        getRenderInterface: function() {
+            return this.renderInterface;
         }
 
     });

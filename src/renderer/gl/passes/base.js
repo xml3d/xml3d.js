@@ -3,13 +3,17 @@
     /**
      * @contructor
      */
-    var BaseRenderPass = function(context, opt) {
+    var BaseRenderPass = function(opt) {
         opt = opt || {};
-        this.context = context;
-        this.target = opt.target || context.canvasTarget;
+        this.inputs = opt.inputs || {};
+        this.pipeline = opt.pipeline || null;
     };
 
     XML3D.extend(BaseRenderPass.prototype, {
+
+        init: function(context) {
+        },
+
         /**
          * Reads pixels from the pass's target
          *
@@ -20,24 +24,29 @@
         readPixelDataFromBuffer : (function() {
             var c_data = new Uint8Array(8);
 
-            return function (glX, glY) {
-                var gl = this.context.gl;
-                var scale = this.target.getScale();
+            return function (glX, glY, target) {
+                var gl = this.pipeline.context.gl;
+                var scale = target.getScale();
                 var x = glX * scale;
                 var y = glY * scale;
 
-                this.target.bind();
+                target.bind();
                 try {
                     gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, c_data);
-                    this.target.unbind();
+                    target.unbind();
                     return c_data;
                 } catch (e) {
                     XML3D.debug.logException(e);
-                    this.target.unbind();
+                    target.unbind();
                     return null;
                 }
             }
-        }())
+        }()),
+
+        setRenderPipeline: function(pipeline) {
+            this.pipeline = pipeline;
+        }
+
     });
 
     webgl.BaseRenderPass = BaseRenderPass;

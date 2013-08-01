@@ -130,7 +130,7 @@
         },
 
         refreshShaderProgram: function() {
-            this.program = this.shader.template.getShaderAfterStructureChanged(this.program, this.scene, this.override || {});
+            this.program = this.shader.composer.getShaderAfterStructureChanged(this.program, this.scene, this.override || {});
         },
 
         getModelViewMatrix: function(target) {
@@ -240,6 +240,30 @@
         shaderHandleCallback: function() {
             // console.log("Shader handle state changed.", arguments);
         },
+
+
+        createProgram: function(composer, objectData) {
+            this.program = composer.getShaderClosure(this.scene, objectData);
+            this.setOverride(objectData);
+        },
+
+        createShader: function (shaderInfo) {
+            var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
+            composer.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
+
+            var that = this;
+            var objectRequest = this.drawable.getRequest(composer.getRequestFields(), function (req, state) {
+                that.createProgram(composer, req.getResult());
+            });
+
+            this.createProgram(composer, objectRequest.getResult());
+
+            return {
+                composer: composer
+            }
+        },
+
+
         setShader: function(newHandle) {
             console.log("RenderObject::setShader");
             var oldHandle = this.shader.handle;
@@ -247,29 +271,25 @@
             if (oldHandle) {
                 oldHandle.removeListener(this.shaderHandleCallback);
             }
+            var shaderInfo = null;
             if (newHandle) {
                 newHandle.addListener(this.shaderHandleCallback);
                 switch (newHandle.status) {
                     case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
                         XML3D.debug.logWarning("Shader not found.", newHandle.url, this.name);
-                    // ↓ Fallthrough
+                        break;
                     case XML3D.base.AdapterHandle.STATUS.LOADING:
-                        this.shader.template = this.scene.shaderFactory.getDefaultComposer();
-                        this.program = this.shader.template.getShaderClosure(this.scene, {});
                         break;
                     case XML3D.base.AdapterHandle.STATUS.READY:
-                        this.shader.template = this.scene.shaderFactory.createComposerForShaderInfo(newHandle.getAdapter().getShaderInfo());
-                        this.shader.template.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
-                        //TODO Provide mesh data to the shader
-                        this.program = this.shader.template.getShaderClosure(this.scene, {});
+                        shaderInfo = newHandle.getAdapter().getShaderInfo();
                 }
             } else {
                 console.log("Null shader");
-                this.shader.template = this.scene.shaderFactory.getDefaultComposer();
-                this.program = this.shader.template.getShaderClosure(this.scene, {});
             }
+            this.shader = this.createShader(shaderInfo);
+
             // Request the attributes required for shader from the drawable (e.g. normal, color etc)
-            this.drawable.setAttributeRequest(this.shader.template.getShaderAttributes());
+            this.drawable.setAttributeRequest(this.shader.composer.getShaderAttributes());
             this.shader.handle = newHandle;
             // TODO this.materialChanged();
         },
@@ -344,7 +364,7 @@
         },
 
         getProgram: function() {
-            return this.shader.template.getProgram();
+            return this.shader.composer.getProgram();
         },
 
         hasTransparency : function() {

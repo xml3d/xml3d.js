@@ -153,12 +153,12 @@
         }()),
         /**
          *
-         * @param {Xflow.ComputeRequest} req
+         * @param {Xflow.ComputeRequest} request
          * @param {Xflow.RESULT_STATE} state
          */
-        typeDataChanged: function (req, state) {
-            console.log("MeshClosure::typeDataChanged", state === Xflow.RESULT_STATE.CHANGED_STRUCTURE ? "data_changed" : "structure_changed", req);
+        typeDataChanged: function (request, state) {
             this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.TYPE_STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
+            XML3D.debug.logInfo("MeshClosure: Type data changed", request, state, this.changeState);
         },
         getMesh: function () {
             return this.mesh;
@@ -310,9 +310,17 @@
          * @param {Xflow.RESULT_STATE} state
          */
         attributeDataChanged: function (request, state) {
-            console.log("Attribute data changed", request, state);
             this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.ATTRIBUTE_STRUCTURE_CHANGED : CHANGE_STATE.ATTRIBUTE_DATA_CHANGED;
-            console.log("Change state: " + this.changeState);
+            XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
+        },
+
+        /**
+         * Returns a compute request for custom mesh parameters
+         * @param {Array.<string>} filter
+         * @param {function(Xflow.ComputeRequest, Xflow.RESULT_STATE)} callback
+         */
+        getRequest: function(filter, callback) {
+            return new Xflow.ComputeRequest(this.data, filter, callback);
         }
     });
 

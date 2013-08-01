@@ -35,6 +35,7 @@
         this.buffers = {};
         this.isIndexed = false;
         this.vertexCount = null;
+        this.context.getStatistics().meshes++;
     };
 
     XML3D.extend(GLMesh.prototype, {

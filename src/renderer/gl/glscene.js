@@ -4,9 +4,9 @@
 
     /**
      *
-     * @param {shaderFactory
-     * @constructor
+     * @param {GLContext} context
      * @extends {Scene}
+     * @constructor
      */
     var GLScene = function (context) {
         webgl.Scene.call(this);
@@ -63,9 +63,14 @@
             }
         },
         update: function () {
-            this.shaderFactory.update(this);
+            this.updateShaders();
             this.updateMeshes();
         },
+
+        updateShaders: function() {
+            this.shaderFactory.update(this);
+        },
+
         updateMeshes: function () {
             var that = this;
             this.forEach(function(obj) {

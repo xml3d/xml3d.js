@@ -41,7 +41,7 @@
      *
      * @returns XML3D.webgl.ShaderClosure|null
      */
-    IShaderComposer.prototype.getShaderClosure = function (lights) {
+    IShaderComposer.prototype.getShaderClosure = function (scene) {
         return null;
     };
 
@@ -75,6 +75,7 @@
             if (!result) {
                 result = new MaterialShaderComposer(this.context, shaderInfo);
                 this.composers[shaderInfo.id] = result;
+                this.context.getStatistics().materials++;
             }
             return result;
         },
@@ -121,6 +122,9 @@
         },
         getShaderAttributes: function() {
             return {color: null };
+        },
+        getRequestFields: function() {
+            return ["diffuseColor", "useVertexColor"];
         }
 
     });
@@ -307,7 +311,7 @@
             return parameters;
         },
 
-        getShaderClosure: function (scene, objectData) {
+        getShaderClosure: function (scene, objectData, opt) {
             var shaderData = this.request.getResult();
             var shader = new webgl.ShaderClosure(this.context, this.descriptor, this.getShaderParameters.bind(this));
             shader.createSources(scene, shaderData, objectData);

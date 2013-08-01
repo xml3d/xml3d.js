@@ -50,6 +50,7 @@
         this.initGL();
         this.changeListener = new XML3D.webgl.DataChangeListener(this);
 
+        this.renderInterface = this.createRenderInterface();
         this.createRenderPasses(context);
     };
 

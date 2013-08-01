@@ -12,6 +12,7 @@
         <file name="events/touch.js" />
         <file name="events/mouse.js" />
         <file name="utils.js" />
+        <file name="renderinterface.js" />
         <file name="scene/pager.js" />
         <file name="scene/rendernode.js" />
         <file name="scene/renderobject.js" />

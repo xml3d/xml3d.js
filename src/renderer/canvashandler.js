@@ -114,6 +114,7 @@ XML3D.webgl.MAXFPS = 30;
         // Create renderer
         /** @type XML3D.webgl.IRenderer */
         this.renderer = XML3D.webgl.rendererFactory.createRenderer(context, scene, this.canvas);
+        this.renderOptions = this.renderer.renderInterface.options;
         factory.setRenderer(this.renderer);
 
         var xml3dAdapter = factory.getAdapter(this.xml3dElem);
@@ -147,7 +148,7 @@ XML3D.webgl.MAXFPS = 30;
      * @return {Drawable|null} newly picked object
      */
     CanvasHandler.prototype.getPickObjectByPoint = function(canvasX, canvasY) {
-        if (this._pickingDisabled)
+        if (!this.renderOptions.pickingEnabled)
             return null;
         return this.renderer.getRenderObjectFromPickingBuffer(canvasX, canvasY);
     };

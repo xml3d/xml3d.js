@@ -199,6 +199,17 @@ new (function() {
         return new window.XML3DBox();
     };
 
+    methods.xml3dGetRenderInterface = function() {
+        var adapters = this._configured.adapters || {};
+        for ( var adapter in adapters) {
+            if (adapters[adapter].getRenderInterface) {
+                return adapters[adapter].getRenderInterface();
+            }
+        }
+        return {};
+    };
+
+
     methods.XML3DGraphTypeGetWorldMatrix = function() {
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {

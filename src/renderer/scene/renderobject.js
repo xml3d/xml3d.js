@@ -123,11 +123,11 @@
             this.setShader(this.parent.getShaderHandle());
         },
         setType: function(type) {
-            this.type = type;
+            this.object.type = type;
             // TODO: this.typeChangedEvent
         },
         getType: function() {
-            return this.type;
+            return this.object.type;
         },
         getDataNode: function() {
             return this.object ? this.object.data : null;

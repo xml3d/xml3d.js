@@ -37,7 +37,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         },
 
         getMeshType: function() {
-            return this.node.getAttribute("type");
+            return this.node.hasAttribute("type") ? this.node.getAttribute("type") : "triangles";
         },
 
         /**

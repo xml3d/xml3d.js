@@ -19,7 +19,7 @@
             case "linestrips":
                 return GL.LINE_STRIP;
             default:
-                return GL.TRIANGLES;
+                throw new Error("Unknown primitive type: " + typeName);
         }
     };
 

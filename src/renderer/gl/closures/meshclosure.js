@@ -15,7 +15,9 @@
 
     var MESH_PARAMETERS = {};
     MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = { position: { required: true }, index: true, vertexCount: true };
+    MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = { position: { required: true }, index: true, vertexCount: true  };
     MESH_PARAMETERS[WebGLRenderingContext.LINES] = { position: { required: true }, index: true, vertexCount: true  };
+    MESH_PARAMETERS[WebGLRenderingContext.POINTS] = { position: { required: true }, index: true, vertexCount: true  };
 
     var TYPE_FILTER = {};
     for (var param in MESH_PARAMETERS) {
@@ -138,7 +140,6 @@
                 if(!this.boundingBoxRequired)
                     return;
 
-                console.log("Calc bounding box");
                 // compute bounding box from positions and indices, if present
                 var dataResult = this.typeRequest.getResult();
                 var positionEntry = dataResult.getOutputData("position");
@@ -146,8 +147,6 @@
                     this.boundingBoxChanged(c_empty);
                     return;
                 }
-                console.log("Really Calc bounding box");
-
                 var indexEntry = dataResult.getOutputData("index");
                 this.boundingBoxChanged(XML3D.webgl.calculateBoundingBox(positionEntry.getValue(), indexEntry ? indexEntry.getValue() : null));
             }

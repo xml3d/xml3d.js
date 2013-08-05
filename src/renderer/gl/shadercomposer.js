@@ -121,7 +121,7 @@
             return this.context.programFactory.getFallbackProgram();
         },
         getShaderAttributes: function() {
-            return {color: null };
+            return {color: null, normal: null /* for picking */};
         },
         getRequestFields: function() {
             return ["diffuseColor", "useVertexColor"];

@@ -12,6 +12,13 @@ module("WebGL Scenegraph", {
     teardown : function() {
         var v = document.getElementById("xml3dframe");
         v.removeEventListener("load", this.cb, true);
+    },
+    isRenderNodeInScene: function(name, scene) {
+        var found = false;
+        scene.traverse(function(node) {
+            found = found || node.name == name;
+        });
+        return found;
     }
 
 });
@@ -234,7 +241,7 @@ test("Change visible/shader for nested groups", 8, function() {
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child shader overrides new parent shader]");
 });
 
-test("Simple add/remove mesh", 11, function() {
+test("Simple add/remove mesh", 12, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -244,9 +251,11 @@ test("Simple add/remove mesh", 11, function() {
 
     // Add a mesh
     x.appendChild(mesh);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    var renderNode = getWebGLAdapter(mesh).renderNode;
+    var scene = renderNode.scene;
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add mesh]");
 
@@ -254,22 +263,23 @@ test("Simple add/remove mesh", 11, function() {
     var adapter = getWebGLAdapter(mesh);
     x.removeChild(mesh);
     ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
-    ok(adapter.renderNode.is("Disposed"), "renderNode disposed");
+    equal(scene.ready.indexOf(adapter.renderNode), -1, "renderNode not in ready list after dispose");
+    equal(scene.queue.indexOf(adapter.renderNode), -1, "renderNode not in queue list after dispose");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove mesh]");
 
     // Add the mesh again
     x.appendChild(mesh);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(getWebGLAdapter(mesh).renderNode), -1, "renderNode in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [re-add mesh]");
 
 });
 
-test("Simple add/remove group with mesh", 11, function() {
+test("Simple add/remove group with mesh", 10, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -282,9 +292,11 @@ test("Simple add/remove group with mesh", 11, function() {
 
     // Add group
     x.appendChild(group);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    var renderNode = getWebGLAdapter(mesh).renderNode;
+    var scene = renderNode.scene;
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
@@ -292,28 +304,29 @@ test("Simple add/remove group with mesh", 11, function() {
     // Remove group
     x.removeChild(group);
     ok(!getWebGLAdapter(group), "Group adapter is removed");
-    ok(adapter.renderNode.is("Disposed"), "renderNode in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
 
     // Re-add group
     x.appendChild(group);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), 1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 });
 
-test("Simple add/remove transformed group with mesh", 12, function() {
+test("Simple add/remove transformed group with mesh", 17, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
     x.setAttribute("activeView", "#identView");
     var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("id", "addedMesh");
     mesh.setAttribute("src", "#meshdata");
     var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
+    group.setAttribute("id", "addedGroup");
     group.setAttribute("transform", "#t_grouptransformed");
 
     group.appendChild(mesh);
@@ -321,27 +334,41 @@ test("Simple add/remove transformed group with mesh", 12, function() {
 
     // Add group
     x.appendChild(group);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+
+    var renderNode = getWebGLAdapter(mesh).renderNode;
+    var scene = renderNode.scene;
+
+    ok(this.isRenderNodeInScene("addedMesh", scene), "Render node in scene");
+    ok(this.isRenderNodeInScene("addedGroup", scene), "Group in scene");
+
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
     // Remove group
     var adapter = getWebGLAdapter(mesh);
     x.removeChild(group);
+    ok(!this.isRenderNodeInScene("addedMesh", scene), "Mesh not in scene");
+    ok(!this.isRenderNodeInScene("addedGroup", scene), "Group not in scene");
+
+
     ok(!getWebGLAdapter(group), "Group adapter is removed");
     ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
-    ok(adapter.renderNode.is("Disposed"), "renderNode in 'Disposed' after removal");
+    //ok(adapter.renderNode.is("Disposed"), "renderNode in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
 
     // Re-add group
     x.appendChild(group);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    ok(this.isRenderNodeInScene("addedMesh", scene), "Render node in scene");
+    ok(this.isRenderNodeInScene("addedGroup", scene), "Group in scene");
+    var renderNode = getWebGLAdapter(mesh).renderNode;
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 });

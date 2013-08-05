@@ -69,6 +69,7 @@ Request.prototype._onDataNodeChange = function(notification){
  * @extends {Xflow.Request}
  * @param {Xflow.DataNode} dataNode
  * @param {Array.<string>} filter
+ * @param {function} callback
  */
 var ComputeRequest = function(dataNode, filter, callback){
     Xflow.Request.call(this, dataNode, filter, callback);

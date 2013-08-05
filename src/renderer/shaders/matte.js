@@ -31,6 +31,9 @@ XML3D.shaders.register("matte", {
     uniforms: {
         diffuseColor : [1.0, 1.0, 1.0],
         useVertexColor: false
+    },
+    attributes: {
+        color: null
     }
 });
 

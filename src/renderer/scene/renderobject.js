@@ -12,6 +12,7 @@
     IRenderObject.prototype.isVisible = function() {};
     IRenderObject.prototype.setTransformDirty = function() {};
     IRenderObject.prototype.setShader = function() {};
+    IRenderObject.prototype.hasTransparency = function() {};
 
     // Entry:
     /** @const */
@@ -28,13 +29,19 @@
     var NORMAL_MATRIX_OFFSET = MODELVIEWPROJECTION_MATRIX_OFFSET + 16;
     /** @const */
     var ENTRY_SIZE = NORMAL_MATRIX_OFFSET + 16;
-    /** @const */
-    var BBOX_ANNOTATION_FILTER = ["boundingBox"];
-
 
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
     /**
      * Represents a renderable object in the scene.
+     * The RenderObject has these responsibilities:
+     *  1. Keep track of the transformation hierarchy and bounding boxes
+     *  2. Connect the DrawableClosure with the ShaderClosure
+     *
+     *  The {@link DrawableClosure} is a DrawableObject plus it's data
+     *  The {@link ShaderClosure} is a ProgramObject plus it's data
+     *  The concrete ShaderClosure can vary per DrawableObject and change
+     *  due to scene or object changes. Thus we have to keep track of the
+     *  related {@link IShaderComposer}.
      *
      * @constructor
      * @implements {IRenderObject}
@@ -45,92 +52,87 @@
     var RenderObject = function (scene, pageEntry, opt) {
         XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.OBJECT, scene, pageEntry, opt);
         opt = opt || {};
-        /** TODO: Remove mesh adapter as soon as it's superfluous */
-        this.meshAdapter = opt.meshAdapter;
-        this.object = opt.object || {};
-        //TODO: Clean up the relationship between RenderObject, shader (template/adapterHandle) and program (shaderClosure)
-        this.shader = opt.shader || {};
+
+        /**
+         * Keep reference to DOM Element need e.g. for picking
+         * @type {Element}
+         */
         this.node = opt.node;
 
-        this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
-        this.boundingBoxAnnotated = false;
+        /**
+         * Object related data
+         * @type {{data: Xflow.DataNode|null, type: string}}
+         */
+        this.object = opt.object || { data: null, type: "triangles" };
 
-        if (this.object.data) {
-            // Bounding Box annotated
-            this.annotatedBoundingBoxRequest = new Xflow.ComputeRequest(this.object.data, BBOX_ANNOTATION_FILTER, this.boundingBoxAnnotationChanged.bind(this));
-            this.boundingBoxAnnotationChanged(this.annotatedBoundingBoxRequest);
-        }
-        /** {Object?} **/
-        this.override = null;
-        this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
+        /**
+         * Can we rely on current WorldMatrix?
+         * @type {boolean}
+         */
         this.transformDirty = true;
+
+        /**
+         * Can we rely on current Bounding Boxes?
+         * @type {boolean}
+         */
         this.boundingBoxDirty = true;
-        this.create();
+
+        /**
+         * The drawable closure transforms object data and type into
+         * a drawable entity
+         * @type {DrawableClosure}
+         */
+        this.drawable = this.createDrawable();
+
+        this.shader = opt.shader || {};
+        // Set start values;
+        this.initialize();
     };
     RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
-    XML3D.createClass(RenderObject, XML3D.webgl.RenderNode);
-    XML3D.extend(RenderObject.prototype, {
+
+    XML3D.createClass(RenderObject, XML3D.webgl.RenderNode, {
+        createDrawable: function () {
+            var result = this.scene.createDrawable(this);
+            if (result) {
+                var that = this;
+                result.addEventListener(webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function (evt) {
+                    if (evt.newState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                        that.scene.moveFromQueueToReady(that);
+                    }
+                    else if (evt.newState === webgl.DrawableClosure.READY_STATE.INCOMPLETE &&
+                        evt.oldState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                        that.scene.moveFromReadyToQueue(that);
+                    }
+                });
+            }
+            return result;
+        },
+        initialize: function () {
+            this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
+
+            /** {Object?} **/
+            this.override = null;
+            this.setShader(this.parent.getShaderHandle());
+        },
         setType: function(type) {
-            this.type = type;
+            this.object.type = type;
             // TODO: this.typeChangedEvent
         },
-        boundingBoxAnnotationChanged: function(request){
-            var result = request.getResult();
-            var bboxData = result.getOutputData(BBOX_ANNOTATION_FILTER[0]);
-            if(bboxData) {
-                var bboxVal = bboxData.getValue();
-                this.setObjectSpaceBoundingBox(bboxVal);
-                this.boundingBoxAnnotated = true;
-            } else {
-                this.boundingBoxAnnotated = false;
-            }
+        getType: function() {
+            return this.object.type;
         },
-        onenterReady:function () {
-            this.scene.moveFromQueueToReady(this);
+        getDataNode: function() {
+            return this.object ? this.object.data : null;
         },
-        onleaveReady:function () {
-            this.scene.moveFromReadyToQueue(this);
-        },
-        onafterlightsChanged:function (name, from, to, lights) {
-            if (lights) {
-                this.setShader(this.parent.getShaderHandle());
-            }
-        },
-        onbeforedataComplete:function (name, from, to) {
-            return this.meshAdapter.finishMesh();
-        },
-        onbeforeprogress: function(name, from, to) {
-            switch (to) {
-                case "NoMaterial":
-                    if(this.shader.template) {
-                        //TODO Provide mesh data to the shader
-                        this.program = this.shader.template.getShaderClosure(this.scene, {});
-                    } else {
-                        XML3D.debug.logError("No shader:", this.name);// DefaultShader
-                    }
-                    return !!this.program;
-            }
-            switch (from) {
-                case "DirtyMeshData":
-                    this.meshAdapter.createMeshData();
-            }
-        },
-        onenterNoMesh:function () {
-            // Trigger the creation of the mesh now
-            // this.meshAdapter.createMesh();
-            return true;
-        },
-        onenterDisposed:function () {
+
+        dispose :function () {
             this.scene.remove(this);
-        },
-        onchangestate:function (name, from, to) {
-            XML3D.debug.logInfo("Changed: ", name, from, to);
         },
 
         refreshShaderProgram: function() {
-            this.program = this.shader.template.getShaderAfterStructureChanged(this.program, this.scene, this.override || {});
+            this.program = this.shader.composer.getShaderAfterStructureChanged(this.program, this.scene, this.override || {});
         },
 
         getModelViewMatrix: function(target) {
@@ -235,38 +237,68 @@
 
         setTransformDirty: function() {
             this.transformDirty = true;
-            this.scene.context.requestRedraw("Transformation changed");
+            this.scene.requestRedraw("Transformation changed");
         },
         shaderHandleCallback: function() {
             // console.log("Shader handle state changed.", arguments);
         },
+
+
+        createProgram: function(composer, objectData) {
+            this.program = composer.getShaderClosure(this.scene, objectData);
+            this.setOverride(objectData);
+        },
+
+        createShaderForDrawable: function (shaderInfo, drawable) {
+            var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
+            composer.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
+
+            var that = this;
+            var objectRequest = drawable.getRequest(composer.getRequestFields(), function (req, state) {
+                that.createProgram(composer, req.getResult());
+            });
+
+            this.createProgram(composer, objectRequest.getResult());
+
+            return {
+                composer: composer
+            }
+        },
+
         setShader: function(newHandle) {
+
+            // If we don't have a drawable, we don't need a shader
+            // This is for testing purposes and won't occur during normal
+            // run
+            if(!this.drawable)
+                return;
+
             var oldHandle = this.shader.handle;
 
             if (oldHandle) {
                 oldHandle.removeListener(this.shaderHandleCallback);
             }
+            var shaderInfo = null;
             if (newHandle) {
                 newHandle.addListener(this.shaderHandleCallback);
                 switch (newHandle.status) {
                     case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
                         XML3D.debug.logWarning("Shader not found.", newHandle.url, this.name);
-                    // ↓ Fallthrough
+                        break;
                     case XML3D.base.AdapterHandle.STATUS.LOADING:
-                        this.shader.template = this.scene.shaderFactory.getDefaultComposer();
-                        this.program = this.shader.template.getShaderClosure(this.scene, {});
                         break;
                     case XML3D.base.AdapterHandle.STATUS.READY:
-                        this.shader.template = this.scene.shaderFactory.createComposerForShaderInfo(newHandle.getAdapter().getShaderInfo());
-                        this.shader.template.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
-                        //TODO Provide mesh data to the shader
-                        this.program = this.shader.template.getShaderClosure(this.scene, {});
+                        shaderInfo = newHandle.getAdapter().getShaderInfo();
                 }
             } else {
-                this.shader.template = this.scene.shaderFactory.getDefaultComposer();
+                console.log("Null shader");
             }
+            this.shader = this.createShaderForDrawable(shaderInfo, this.drawable);
+
+            // Request the attributes required for shader from the drawable (e.g. normal, color etc)
+            this.drawable.setAttributeRequest(this.shader.composer.getShaderAttributes());
             this.shader.handle = newHandle;
-            this.materialChanged();
+            // TODO this.materialChanged();
         },
 
         setObjectSpaceBoundingBox: function(box) {
@@ -339,31 +371,14 @@
         },
 
         getProgram: function() {
-            return this.shader.template.getProgram();
+            return this.shader.composer.getProgram();
+        },
+
+        hasTransparency : function() {
+            return this.program ? this.program.hasTransparency() : false;
         }
 
     });
-
-
-
-    window.StateMachine.create({
-        target: RenderObject.prototype,
-        events:[
-            { name:'create', from:'none', to:'NoLights'   },
-            // batch processing
-            { name:'progress', from:'NoLights', to:'NoMaterial'   },
-            { name:'progress', from:'NoMaterial', to:'NoMesh'   },
-            { name:'dataNotComplete', from:'NoMesh', to:'NoMeshData' },
-            { name:'dataComplete', from:'NoMesh', to:'Ready' },
-            { name:'progress', from:'DirtyMeshData', to:'Ready' },
-            // events
-            { name:'lightsChanged', from: ['NoLights','NoMaterial', 'NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoLights' },
-            { name:'materialChanged', from: ['NoMaterial', 'NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoMaterial' },
-            { name:'materialChanged', from: ['NoLights'], to:'NoLights' },
-            { name:'dataStructureChanged', from: ['NoMesh', 'Ready', 'NoMeshData', 'DirtyMeshData'], to:'NoMesh' },
-            { name:'dataValueChanged', from: ['Ready', 'DirtyMeshData'], to:'DirtyMeshData' },
-            { name:'dispose', from:'*', to:'Disposed' }
-        ]});
 
 
     // Export

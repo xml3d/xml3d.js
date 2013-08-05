@@ -36,7 +36,8 @@
         VIEW_CHANGED: "view_changed",
         LIGHT_STRUCTURE_CHANGED: "light_structure_changed",
         LIGHT_VALUE_CHANGED: "light_value_changed",
-        SCENE_STRUCTURE_CHANGED: "scene_structure_changed"
+        SCENE_STRUCTURE_CHANGED: "scene_structure_changed",
+        DRAWABLE_STATE_CHANGED: "drawable_state_changed"
     };
 
 
@@ -61,6 +62,21 @@
                 this.dispatchEvent({type: Scene.EVENT_TYPE.VIEW_CHANGED, newView: this.activeView });
             }
         },
+        /**
+         *
+         * @param opt
+         * @returns {webgl.RenderMesh}
+         */
+        createRenderMesh: function (opt) {
+            var pageEntry = this.getPageEntry(webgl.RenderMesh.ENTRY_SIZE);
+            var renderObject = new webgl.RenderMesh(this, pageEntry, opt);
+            return renderObject;
+        },
+        /**
+         * @param opt
+         * @returns {webgl.RenderObject}
+         * @deprecated
+         */
         createRenderObject: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderObject.ENTRY_SIZE);
             var renderObject = new webgl.RenderObject(this, pageEntry, opt);
@@ -108,8 +124,16 @@
         getBoundingBox: function (bb) {
             this.updateBoundingBox();
             XML3D.math.bbox.copy(bb, this.boundingBox);
+        },
+        createDrawable: function(obj) {
+            throw new Error("Scene::createDrawable not implemented");
+        },
+        requestRedraw: function(reason) {
+            throw new Error("Scene::requestRedraw not implemented");
+        },
+        traverse: function(callback) {
+            this.rootNode.traverse(callback);
         }
-
     });
 
 

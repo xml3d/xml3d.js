@@ -168,5 +168,12 @@ XML3D.shaders.register("diffuse", {
     samplers: {
         diffuseTexture : null,
         emissiveTexture : null
+    },
+    attributes: {
+        normal : {
+            required: true
+        },
+        texcoord: null,
+        color: null
     }
 });

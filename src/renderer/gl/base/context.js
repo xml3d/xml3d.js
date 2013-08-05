@@ -13,6 +13,10 @@
         this.id = id;
         this.canvasTarget = new XML3D.webgl.GLCanvasTarget(this, width, height);
         this.programFactory = new XML3D.webgl.ProgramFactory(this);
+        this.stats = {
+            materials: 0,
+            meshes: 0
+        };
     };
     XML3D.extend(GLContext.prototype, {
         getXflowEntryWebGlData: function (entry) {
@@ -23,6 +27,9 @@
         },
         handleResizeEvent: function(width, height) {
             this.canvasTarget = new XML3D.webgl.GLCanvasTarget(this, width, height);
+        },
+        getStatistics: function() {
+            return this.stats;
         }
     });
 

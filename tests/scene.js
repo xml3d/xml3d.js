@@ -1,6 +1,11 @@
 module("RenderScene", {
     setup: function () {
         this.scene = new XML3D.webgl.Scene();
+        this.scene.createDrawable = function() {
+            return null;
+        };
+        this.scene.requestRedraw = function() {
+        };
         this.xflowGraph = new Xflow.Graph();
 
     }
@@ -86,7 +91,7 @@ test("Light callbacks", 9, function () {
 test("Bounding Boxes", 7, function () {
     var group = this.scene.createRenderGroup();
     group.setLocalMatrix(XML3D.math.mat4.create());
-    var obj = this.scene.createRenderObject();
+    var obj = this.scene.createRenderMesh();
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
     obj.setParent(group);
 
@@ -105,7 +110,7 @@ test("Bounding Boxes", 7, function () {
     XML3D.math.mat4.translate(trans2, trans2, [0, 4, 0]);
     group2.setLocalMatrix(trans2);
 
-    var obj2 = this.scene.createRenderObject();
+    var obj2 = this.scene.createRenderMesh();
     obj2.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
     obj2.setParent(group2);
     group2.setParent(group);
@@ -133,11 +138,11 @@ test("View", function() {
 
     deepEqual(view.getClippingPlanes(), { near: 1, far: 10 }, "Default values");
 
-    var obj = this.scene.createRenderObject();
+    var obj = this.scene.createRenderMesh();
     obj.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
     deepEqual(view.getClippingPlanes(), { near: 0.02, far: 1.01 }, "Unit box");
 
-    var obj = this.scene.createRenderObject();
+    var obj = this.scene.createRenderMesh();
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
     deepEqual(view.getClippingPlanes(), { near: 0.04, far: 2.02 }, "Default values");
 
@@ -159,7 +164,7 @@ test("View", function() {
 
     obj.remove();
 
-    obj = this.scene.createRenderObject({parent: group2});
+    obj = this.scene.createRenderMesh({parent: group2});
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
 
     view.updateOrientation(XML3D.math.mat4.create());
@@ -175,7 +180,7 @@ test("View", function() {
 
 test("Annotated Bounding Box", function () {
     var dataNode = this.xflowGraph.createDataNode(false);
-    var obj = this.scene.createRenderObject({
+    var obj = this.scene.createRenderMesh({
         object: {
             data: dataNode
         }

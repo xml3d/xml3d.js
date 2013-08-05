@@ -41,16 +41,8 @@
      *
      * @returns XML3D.webgl.ShaderClosure|null
      */
-    IShaderComposer.prototype.getShaderClosure = function (lights) {
+    IShaderComposer.prototype.getShaderClosure = function (scene) {
         return null;
-    };
-
-    /**
-     *
-     * @returns Object.<string, *>
-     */
-    IShaderComposer.prototype.getObjectRequests = function () {
-        return {};
     };
 
     /**
@@ -83,6 +75,7 @@
             if (!result) {
                 result = new MaterialShaderComposer(this.context, shaderInfo);
                 this.composers[shaderInfo.id] = result;
+                this.context.getStatistics().materials++;
             }
             return result;
         },
@@ -127,15 +120,13 @@
         getShaderClosure: function () {
             return this.context.programFactory.getFallbackProgram();
         },
-        getObjectRequests: function () {
-            return {
-                index: null,
-                position: {
-                    required: true
-                },
-                normal: null
-            }
+        getShaderAttributes: function() {
+            return {color: null, normal: null /* for picking */};
+        },
+        getRequestFields: function() {
+            return ["diffuseColor", "useVertexColor"];
         }
+
     });
 
     /**
@@ -151,6 +142,7 @@
     var ShaderDescriptor = function() {
         this.uniforms = {};
         this.samplers = {};
+        this.attributes = {};
         this.name = "";
         this.fragment = "";
         this.vertex =  "";
@@ -221,6 +213,15 @@
         getRequestFields: function () {
             return Object.keys(this.descriptor.uniforms).concat(Object.keys(this.descriptor.samplers));
         },
+
+        /**
+         * Get the attributes required by the shader
+         * @returns {Object<string, *>}
+         */
+        getShaderAttributes: function () {
+            return this.descriptor.attributes;
+        },
+
 
         update: function (scene, opt) {
             opt = opt || {};
@@ -310,7 +311,7 @@
             return parameters;
         },
 
-        getShaderClosure: function (scene, objectData) {
+        getShaderClosure: function (scene, objectData, opt) {
             var shaderData = this.request.getResult();
             var shader = new webgl.ShaderClosure(this.context, this.descriptor, this.getShaderParameters.bind(this));
             shader.createSources(scene, shaderData, objectData);
@@ -358,16 +359,6 @@
                 XML3D.debug.logWarning("After structure change the shader was not found in list of obsolete closures");
             }
             return shaderClosure;
-        },
-
-        getObjectRequests: function() {
-            return  {
-                    index: null,
-                    position: { required: true },
-                    normal: null,
-                    color: null,
-                    texcoord: null
-                    };
         },
 
         isValid: function () {

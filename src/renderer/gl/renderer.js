@@ -42,24 +42,43 @@
         this.needsDraw = true;
         this.needsPickingDraw = true;
         this.context.requestRedraw = this.requestRedraw.bind(this);
+
+
+        this.initGL();
+        this.changeListener = new XML3D.webgl.DataChangeListener(this);
+
         this.createRenderPasses(context);
-        this.init();
     };
 
     // Just to satisfy jslint
     GLRenderer.prototype.generateRay = function() {};
 
     XML3D.extend(GLRenderer.prototype, {
-        init: function () {
+        initGL: function () {
             var gl = this.context.gl;
+
+            gl.clearColor(0, 0, 0, 0);
+            gl.clearDepth(1);
+            gl.clearStencil(0);
+
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+
+            gl.frontFace(gl.CCW);
+            gl.cullFace(gl.BACK);
+            gl.disable(gl.CULL_FACE);
+
+            gl.blendEquation(gl.FUNC_ADD);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.disable(gl.BLEND);
+
+            gl.viewport(0, 0, this.width, this.height);
 
             gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
             gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
             gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
-
-            this.changeListener = new XML3D.webgl.DataChangeListener(this);
 
         },
         handleResizeEvent: function (width, height) {

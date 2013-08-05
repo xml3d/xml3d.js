@@ -19,7 +19,7 @@
             case "linestrips":
                 return GL.LINE_STRIP;
             default:
-                return GL.TRIANGLES;
+                throw new Error("Unknown primitive type: " + typeName);
         }
     };
 
@@ -35,15 +35,13 @@
         this.buffers = {};
         this.isIndexed = false;
         this.vertexCount = null;
+        this.context.getStatistics().meshes++;
     };
 
     XML3D.extend(GLMesh.prototype, {
         setBuffer: function (name, buffer) {
             this.buffers[name] = buffer;
             this.isIndexed = this.isIndexed || name == "index";
-        },
-        setComplete: function (complete) {
-            this.complete = complete;
         },
         setVertexCount: function (vertexCount) {
             this.vertexCount = vertexCount;
@@ -79,9 +77,6 @@
                 sAttributes = program.attributes,
                 buffers = this.buffers,
                 triCount = 0;
-
-            if (!this.complete)
-                return 0;
 
             //Bind vertex buffers
             for (var name in sAttributes) {

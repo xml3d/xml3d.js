@@ -15,6 +15,7 @@
         <file name="scene/pager.js" />
         <file name="scene/rendernode.js" />
         <file name="scene/renderobject.js" />
+        <file name="scene/rendermesh.js" />
         <file name="scene/rendergroup.js" />
         <file name="scene/renderlight.js" />
         <file name="scene/renderview.js" />
@@ -33,8 +34,11 @@
         <file name="gl/passes/pickPosition.js" />
         <file name="gl/passes/pickNormal.js" />
         <file name="gl/programfactory.js" />
+        <file name="gl/drawablefactory.js" />
         <file name="gl/shadercomposer.js" />
         <file name="gl/shaderclosure.js" />
+        <file name="gl/closures/drawableclosure.js" />
+        <file name="gl/closures/meshclosure.js" />
         <file name="rendererfactory.js" />
         <file name="adapter/base.js" />
         <file name="adapter/transformable.js" />

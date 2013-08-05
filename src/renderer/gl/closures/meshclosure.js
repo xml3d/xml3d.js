@@ -158,6 +158,7 @@
          */
         typeDataChanged: function (request, state) {
             this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.TYPE_STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
+            this.context.requestRedraw("Mesh Type Data Change");
             XML3D.debug.logInfo("MeshClosure: Type data changed", request, state, this.changeState);
         },
         getMesh: function () {
@@ -311,6 +312,7 @@
          */
         attributeDataChanged: function (request, state) {
             this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.ATTRIBUTE_STRUCTURE_CHANGED : CHANGE_STATE.ATTRIBUTE_DATA_CHANGED;
+            this.context.requestRedraw("Mesh Atttribute Data Change");
             XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
         },
 

@@ -63,26 +63,23 @@
             }
         },
         update: function () {
+            this.updateObjectsForRendering();
             this.updateShaders();
-            this.updateMeshes();
         },
 
         updateShaders: function() {
             this.shaderFactory.update(this);
         },
 
-        updateMeshes: function () {
+        updateObjectsForRendering: function () {
             var that = this;
             this.forEach(function(obj) {
-                obj.drawable && obj.drawable.update();
+                obj.updateForRendering();
             });
         },
         forEach: function (func, that) {
             this.queue.slice().forEach(func, that);
             this.ready.slice().forEach(func, that);
-        },
-        objectReadyStateChanged: function() {
-            console.log("objectReadyStateChanged", arguments);
         },
         updateReadyObjectsFromActiveView: (function () {
             var c_viewMat_tmp = XML3D.math.mat4.create();

@@ -44,8 +44,9 @@
             }
         }()),
         sortObjects: (function () {
-            var c_tmpVec4 = XML3D.math.vec4.create();
             var c_tmpModelMatrix = XML3D.math.mat4.create();
+            var c_bbox = XML3D.math.bbox.create();
+            var c_center = XML3D.math.vec3.create();
 
             return function (sourceObjectArray, firstOpaque, opaque, transparent) {
                 var tempArray = [], obj;
@@ -64,12 +65,12 @@
                 if (tlength > 1) {
                     for (i = 0; i < tlength; i++) {
                         obj = tempArray[i];
+
+                        obj.getObjectSpaceBoundingBox(c_bbox);
+                        XML3D.math.bbox.center(c_center, c_bbox);
+
                         obj.getWorldMatrix(c_tmpModelMatrix);
-                        XML3D.math.vec3.set(obj.mesh.bbox.center()._data, c_tmpVec4);
-                        c_tmpVec4[3] = 1.0;
-                        XML3D.math.vec4.transformMat4(c_tmpVec4, c_tmpVec4, c_tmpModelMatrix);
-                        c_tmpVec4[3] = 1.0;
-                        var center = XML3D.math.vec4.transformMat4(c_tmpVec4, c_tmpVec4, c_tmpModelMatrix);
+                        var center = XML3D.math.vec3.transformMat4(c_center, c_center, c_tmpModelMatrix);
                         tempArray[i] = [ obj, center[2] ];
                     }
 

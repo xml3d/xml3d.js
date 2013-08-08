@@ -202,7 +202,7 @@
             }
             var descriptor = getShaderDescriptor(uri.path);
             if (!descriptor) {
-                XML3D.debug.logError("No Shader registerd for urn:", uri);
+                XML3D.debug.logError("No Shader registered for urn:", uri);
                 return;
             }
 

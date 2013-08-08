@@ -114,7 +114,6 @@
 
             /** {Object?} **/
             this.override = null;
-            this.setShader(this.parent.getShaderHandle());
         },
         setType: function(type) {
             this.object.type = type;
@@ -239,8 +238,12 @@
             this.transformDirty = true;
             this.scene.requestRedraw("Transformation changed");
         },
-        shaderHandleCallback: function() {
-            // console.log("Shader handle state changed.", arguments);
+        /**
+         * @param {AdapterHandleNotification} notification
+         */
+        shaderHandleCallback: function(notification) {
+            XML3D.debug.assert(notification.type == XML3D.events.ADAPTER_HANDLE_CHANGED);
+            this.updateShaderFromHandle(notification.adapterHandle);
         },
 
 
@@ -275,30 +278,43 @@
 
             var oldHandle = this.shader.handle;
 
+            if(oldHandle == newHandle)
+                return;
+
             if (oldHandle) {
-                oldHandle.removeListener(this.shaderHandleCallback);
+                oldHandle.removeListener(this.shaderHandleCallback.bind(this));
             }
-            var shaderInfo = null;
             if (newHandle) {
-                newHandle.addListener(this.shaderHandleCallback);
-                switch (newHandle.status) {
+                newHandle.addListener(this.shaderHandleCallback.bind(this));
+            }
+            this.updateShaderFromHandle(newHandle);
+
+            this.shader.handle = newHandle;
+            // TODO this.materialChanged();
+        },
+
+        /**
+         *
+         * @param {AdapterHandle|null} handle
+         */
+        updateShaderFromHandle: function(handle) {
+            var shaderInfo = null;
+
+            if(handle) {
+                switch (handle.status) {
                     case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
-                        XML3D.debug.logWarning("Shader not found.", newHandle.url, this.name);
+                        XML3D.debug.logWarning("Shader not found.", handle.url, this.name);
                         break;
                     case XML3D.base.AdapterHandle.STATUS.LOADING:
                         break;
                     case XML3D.base.AdapterHandle.STATUS.READY:
-                        shaderInfo = newHandle.getAdapter().getShaderInfo();
+                        shaderInfo = handle.getAdapter().getShaderInfo();
                 }
-            } else {
-                console.log("Null shader");
             }
-            this.shader = this.createShaderForDrawable(shaderInfo, this.drawable);
 
+            this.shader = this.createShaderForDrawable(shaderInfo, this.drawable);
             // Request the attributes required for shader from the drawable (e.g. normal, color etc)
             this.drawable.setAttributeRequest(this.shader.composer.getShaderAttributes());
-            this.shader.handle = newHandle;
-            // TODO this.materialChanged();
         },
 
         setObjectSpaceBoundingBox: function(box) {
@@ -376,6 +392,11 @@
 
         hasTransparency : function() {
             return this.program ? this.program.hasTransparency() : false;
+        },
+
+        updateForRendering: function() {
+            this.setShader(this.parent.getShaderHandle());
+            this.drawable.update();
         }
 
     });

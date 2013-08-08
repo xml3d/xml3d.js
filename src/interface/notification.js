@@ -38,15 +38,20 @@
 
   //-----------------------------------------------------------------------------
 
-  events.AdapterHandleNotification = function(handle, type) {
-    this.adapterHandle = handle;
-    this.type = type;
-  };
-  XML3D.createClass(events.AdapterHandleNotification, events.Notification);
-  events.AdapterHandleNotification.prototype.toString = function() {
-      return "AdapterHandleNotification (type:" + this.type + ")";
-  };
-  //-----------------------------------------------------------------------------
+    /**
+     * @param {AdapterHandle} handle
+     * @param {int} type
+     * @constructor
+     */
+    events.AdapterHandleNotification = function (handle, type) {
+        this.adapterHandle = handle;
+        this.type = type;
+    };
+    XML3D.createClass(events.AdapterHandleNotification, events.Notification);
+    events.AdapterHandleNotification.prototype.toString = function () {
+        return "AdapterHandleNotification (type:" + this.type + ")";
+    };
+    //-----------------------------------------------------------------------------
 
   events.ConnectedAdapterNotification = function(adapterHandleNotification, key) {
     this.adapter = adapterHandleNotification.adapterHandle.getAdapter();

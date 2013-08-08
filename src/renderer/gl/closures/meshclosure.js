@@ -177,11 +177,9 @@
             var oldValid = this.attributeDataValid && this.typeDataValid;
 
             if (this.changeState & CHANGE_STATE.TYPE_CHANGED) {
-                console.log("Update type data");
                 this.updateTypeData();
             }
             if (this.changeState & CHANGE_STATE.ATTRIBUTE_CHANGED) {
-                console.log("Update attribute data");
                 this.updateAttributeData();
             }
 
@@ -312,7 +310,7 @@
          */
         attributeDataChanged: function (request, state) {
             this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.ATTRIBUTE_STRUCTURE_CHANGED : CHANGE_STATE.ATTRIBUTE_DATA_CHANGED;
-            this.context.requestRedraw("Mesh Atttribute Data Change");
+            this.context.requestRedraw("Mesh Attribute Data Changed");
             XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
         },
 

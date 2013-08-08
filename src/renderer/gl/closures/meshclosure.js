@@ -14,10 +14,10 @@
 
 
     var MESH_PARAMETERS = {};
-    MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = { position: { required: true }, index: true, vertexCount: true };
-    MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = { position: { required: true }, index: true, vertexCount: true  };
-    MESH_PARAMETERS[WebGLRenderingContext.LINES] = { position: { required: true }, index: true, vertexCount: true  };
-    MESH_PARAMETERS[WebGLRenderingContext.POINTS] = { position: { required: true }, index: true, vertexCount: true  };
+    MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = { position: { required: true }, index: true };
+    MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = { position: { required: true }, index: true };
+    MESH_PARAMETERS[WebGLRenderingContext.LINES] = { position: { required: true }, index: true };
+    MESH_PARAMETERS[WebGLRenderingContext.POINTS] = { position: { required: true }, index: true };
 
     var TYPE_FILTER = {};
     for (var param in MESH_PARAMETERS) {
@@ -209,7 +209,8 @@
                 var entry = dataResult.getOutputData(name);
                 if (!entry || !entry.getValue()) {
                     if (param.required) {
-                        missingCB(name);
+                        // If required and loading has finished, give a call
+                        dataResult.loading || missingCB(name);
                         complete = false;
                     }
                     continue;
@@ -234,7 +235,7 @@
             var dataResult = this.attributeRequest.getResult();
             var attributes = this.attributes;
             var complete = this.updateMeshFromResult(attributes, dataResult, function(name) {
-                XML3D.debug.logError("Required shader attribute ", name, "is missing for mesh");
+                XML3D.debug.logError("Required shader attribute", name, "is missing for mesh");
             });
 
             this.attributeDataValid = complete;
@@ -285,14 +286,12 @@
                     }
                     buffer.tupleSize = entry.getTupleSize();
                     webglData.buffer = buffer;
-                    mesh.setBuffer(name, buffer);
-                    break;
-                case 0:
-                    // No change, but maybe not set as request comes from other mesh than the
-                    // creating mesh
-                    mesh.setBuffer(name, buffer);
                     break;
             }
+            // In every case, set the buffer, because other meshes might have already
+            // performed one or more of the tasks above
+            mesh.setBuffer(name, buffer);
+
             webglData.changed = 0;
         },
         /**

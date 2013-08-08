@@ -28,7 +28,7 @@ ProcessNode.prototype.onXflowChannelChange = function(channel, state){
     if(state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE &&
         this.status > Xflow.PROCESS_STATE.UNPROCESSED)
         this.status = Xflow.PROCESS_STATE.UNPROCESSED;
-    else if(state == Xflow.DATA_ENTRY_STATE.CHANGED_SIZE)
+    else
         this.status = Xflow.PROCESS_STATE.MODIFIED;
     for(var name in this.outputDataSlots){
         this.outputDataSlots[name].notifyOnChange(state);

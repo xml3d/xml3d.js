@@ -483,7 +483,7 @@ DataNode.prototype.notify = function(changeType, senderNode){
         if(changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
            changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END )
             updateImageLoading(this);
-        this._channelNode.notifyDataChange(senderNode, changeType);
+        senderNode && this._channelNode.notifyDataChange(senderNode, changeType);
     }
     for(var i = 0; i < this._listeners.length; ++i)
         this._listeners[i](changeType);
@@ -539,7 +539,7 @@ function updateImageLoading(node){
     }
     if(imageLoading != node._imageLoading){
         node._imageLoading = imageLoading;
-        for(var i = 0; node._parents.length; ++i)
+        for(var i = 0; i < node._parents.length; ++i)
             node._parents[i].notify(imageLoading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
             Xflow.RESULT_STATE.IMAGE_LOAD_END);
     }

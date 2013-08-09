@@ -168,7 +168,7 @@
                     } else if (d.sizeof) {
                         var srcEntry = null;
                         for(var k = 0; k < operator.mapping.length; ++k){
-                            if (operator.mapping[j].source == d.sizeof) {
+                            if (operator.mapping[k].source == d.sizeof) {
                                 srcEntry = programData.getDataEntry(entry.getDirectInputIndex(k));
                                 break;
                             }

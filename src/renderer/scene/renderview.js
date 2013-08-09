@@ -1,4 +1,4 @@
-(function() {
+(function(webgl) {
     /** @const */
     var VIEW_MATRIX_OFFSET = 0;
     /** @const */
@@ -12,11 +12,11 @@
      * @extends {RenderNode}
      */
     var RenderView = function(scene, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.VIEW, scene, pageEntry, opt);
         opt = opt || {};
-        this.position = opt.position;
-        this.orientation = opt.orientation;
-        this.fieldOfView = opt.fieldOfView;
+        this.position = opt.position || XML3D.math.vec3.create();
+        this.orientation = opt.orientation || XML3D.math.mat4.create();
+        this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : 0.78;
         this.worldSpacePosition = XML3D.math.vec3.create();
         this.projectionAdapter = opt.projectionAdapter;
         this.viewDirty = true;
@@ -79,19 +79,24 @@
 
         getClippingPlanes: (function() {
             var t_mat = XML3D.math.mat4.create();
-            var bb = new XML3D.webgl.BoundingBox();
+            var bb = new XML3D.math.bbox.create();
 
             return function() {
-                bb.reset();
                 this.scene.getBoundingBox(bb);
+                if (XML3D.math.bbox.isEmpty(bb)) {
+                    return { near: 1, far: 10 };
+                };
+
                 this.getViewMatrix(t_mat);
-                bb.applyTransform(t_mat);
-                var bounds = bb.getZMinMax();
-                var length = bb.getLongestSide();
+                XML3D.math.bbox.transform(bb, t_mat, bb);
+
+                var bounds = { zMin: bb[2], zMax: bb[5] };
+                var length = XML3D.math.bbox.longestSide(bb);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
                 bounds.zMin -= length * 0.005;
                 bounds.zMax += length * 0.005;
+                //console.log(bounds);
 
                 return {near: Math.max(-bounds.zMax, 0.01*length), far: -bounds.zMin};
             }
@@ -121,6 +126,7 @@
         setTransformDirty: function() {
             this.viewDirty = true;
             this.setProjectionDirty();
+            this.scene.requestRedraw("Transformation changed");
         },
 
         setProjectionDirty: function() {
@@ -167,16 +173,11 @@
         },
 
         getWorldSpaceBoundingBox: function(bbox) {
-            bbox.min[0] = Number.MAX_VALUE;
-            bbox.min[1] = Number.MAX_VALUE;
-            bbox.min[2] = Number.MAX_VALUE;
-            bbox.max[0] = -Number.MAX_VALUE;
-            bbox.max[1] = -Number.MAX_VALUE;
-            bbox.max[2] = -Number.MAX_VALUE;
+            XML3D.math.bbox.empty(bbox);
         }
     });
 
     // Export
-    XML3D.webgl.RenderView = RenderView;
+    webgl.RenderView = RenderView;
 
-})();
+})(XML3D.webgl);

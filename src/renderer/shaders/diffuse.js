@@ -55,20 +55,20 @@ XML3D.shaders.register("diffuse", {
         "uniform vec3 pointLightAttenuation[MAX_POINTLIGHTS];",
         "uniform vec3 pointLightPosition[MAX_POINTLIGHTS];",
         "uniform vec3 pointLightIntensity[MAX_POINTLIGHTS];",
-        "uniform vec3 pointLightVisibility[MAX_POINTLIGHTS];",
+        "uniform bool pointLightOn[MAX_POINTLIGHTS];",
         "#endif",
 
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "uniform vec3 directionalLightDirection[MAX_DIRECTIONALLIGHTS];",
         "uniform vec3 directionalLightIntensity[MAX_DIRECTIONALLIGHTS];",
-        "uniform vec3 directionalLightVisibility[MAX_DIRECTIONALLIGHTS];",
+        "uniform bool directionalLightOn[MAX_DIRECTIONALLIGHTS];",
         "#endif",
 
         "#if MAX_SPOTLIGHTS > 0",
         "uniform vec3 spotLightAttenuation[MAX_SPOTLIGHTS];",
         "uniform vec3 spotLightPosition[MAX_SPOTLIGHTS];",
         "uniform vec3 spotLightIntensity[MAX_SPOTLIGHTS];",
-        "uniform vec3 spotLightVisibility[MAX_SPOTLIGHTS];",
+        "uniform bool spotLightOn[MAX_SPOTLIGHTS];",
         "uniform vec3 spotLightDirection[MAX_SPOTLIGHTS];",
         "uniform float spotLightCosFalloffAngle[MAX_SPOTLIGHTS];",
         "uniform float spotLightCosSoftFalloffAngle[MAX_SPOTLIGHTS];",
@@ -95,27 +95,33 @@ XML3D.shaders.register("diffuse", {
 
         "  #if MAX_POINTLIGHTS > 0",
         "    for (int i=0; i<MAX_POINTLIGHTS; i++) {",
+        "      if (!pointLightOn[i])",
+        "         continue;",
         "      vec4 lPosition = viewMatrix * vec4( pointLightPosition[ i ], 1.0 );",
         "      vec3 L = lPosition.xyz - fragVertexPosition;",
         "      float dist = length(L);",
         "      L = normalize(L);",
         "      float atten = 1.0 / (pointLightAttenuation[i].x + pointLightAttenuation[i].y * dist + pointLightAttenuation[i].z * dist * dist);",
         "      vec3 Idiff = pointLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
-        "      color = color + (atten*Idiff) * pointLightVisibility[i];",
+        "      color = color + atten*Idiff;",
         "    }",
         "  #endif",
 
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
+        "      if (!directionalLightOn[i])",
+        "         continue;",
         "    vec4 lDirection = viewMatrix * vec4(directionalLightDirection[i], 0.0);",
         "    vec3 L =  normalize(-lDirection.xyz);",
         "    vec3 Idiff = directionalLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
-        "    color = color + (Idiff * directionalLightVisibility[i]);",
+        "    color = color + Idiff;",
         "  }",
         "#endif",
 
         "#if MAX_SPOTLIGHTS > 0",
         "  for (int i=0; i<MAX_SPOTLIGHTS; i++) {",
+        "      if (!spotLightOn[i])",
+        "         continue;",
         "    vec4 lPosition = viewMatrix * vec4( spotLightPosition[ i ], 1.0 );",
         "    vec3 L = lPosition.xyz - fragVertexPosition;",
         "    float dist = length(L);",
@@ -130,7 +136,7 @@ XML3D.shaders.register("diffuse", {
         "       float softness = 1.0;",
         "       if (angle < spotLightCosSoftFalloffAngle[i])",
         "           softness = (angle - spotLightCosFalloffAngle[i]) /  (spotLightCosSoftFalloffAngle[i] -  spotLightCosFalloffAngle[i]);",
-        "       color += (atten*softness*Idiff) * spotLightVisibility[i];",
+        "       color += atten * softness * Idiff;",
         "    }",
         "  }",
         "#endif",
@@ -162,5 +168,12 @@ XML3D.shaders.register("diffuse", {
     samplers: {
         diffuseTexture : null,
         emissiveTexture : null
+    },
+    attributes: {
+        normal : {
+            required: true
+        },
+        texcoord: null,
+        color: null
     }
 });

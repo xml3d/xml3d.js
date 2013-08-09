@@ -17,17 +17,22 @@
         //TODO: Shouldn't have to go through the renderer...
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();
-        this.renderNode = this.getScene().createRenderGroup({parent: parentNode, shaderHandle: this.getShaderHandle(), visible: this.node.visible});
+        this.renderNode = this.getScene().createRenderGroup({
+            parent: parentNode,
+            shaderHandle: this.getShaderHandle(),
+            visible: this.node.visible,
+            name: this.node.id
+        });
         this.updateLocalMatrix();
-        var bbox = new XML3D.webgl.BoundingBox();
-        this.renderNode.setWorldSpaceBoundingBox(bbox.min, bbox.max);
+        var bbox = XML3D.math.bbox.create();
+        this.renderNode.setWorldSpaceBoundingBox(bbox);
     };
 
     p.updateLocalMatrix = (function () {
         var IDENTITY = XML3D.math.mat4.create();
         return function () {
-            var cssMatrix = XML3D.css.getCSSMatrix(this.node);
             var result = IDENTITY;
+            var cssMatrix = XML3D.css.getCSSMatrix(this.node);
             if (cssMatrix) {
                 result = XML3D.css.convertCssToMat4(cssMatrix);
             } else {
@@ -55,7 +60,7 @@
         case "shader":
             this.disconnectAdapterHandle("shader");
             this.renderNode.setLocalShaderHandle(this.getShaderHandle());
-            this.factory.renderer.requestRedraw("Group shader changed.", false);
+            this.factory.renderer.requestRedraw("Group shader changed.");
             break;
 
         case "transform":
@@ -67,7 +72,7 @@
 
         case "visible":
             this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
-            this.factory.renderer.requestRedraw("Group visibility changed.", true);
+            this.factory.renderer.requestRedraw("Group visibility changed.");
             break;
 
         default:
@@ -79,10 +84,8 @@
     p.handleConnectedAdapterEvent = function(evt) {
         switch(evt.type) {
             case XML3D.events.NODE_INSERTED:
-                this.factory.renderer.sceneTreeAddition(evt);
-                break;
-            case XML3D.events.NODE_REMOVED:
-                this.factory.renderer.sceneTreeRemoval(evt);
+                this.initElement(evt.wrapped.target);
+                this.initChildElements(evt.wrapped.target);
                 break;
             case XML3D.events.THIS_REMOVED:
                 this.dispose();
@@ -132,9 +135,9 @@
 
     /* Interface methods */
     p.getBoundingBox = function() {
-        var bbox = new XML3D.webgl.BoundingBox();
+        var bbox = XML3D.math.bbox.create();
         this.renderNode.getWorldSpaceBoundingBox(bbox);
-        return bbox.getAsXML3DBox();
+        return XML3D.math.bbox.asXML3DBox(bbox);
     };
 
     p.getLocalMatrix = function() {

@@ -89,13 +89,13 @@
 
                 event.__defineGetter__("normal", function () {
                     if (cachedNormal !== undefined) return cachedNormal;
-                    var norm = (handler.getWorldSpaceNormalByPoint(handler.currentPickObj, x, y));
+                    var norm = (handler.getWorldSpaceNormalByPoint(x, y));
                     cachedNormal = norm ? new window.XML3DVec3(norm[0], norm[1], norm[2]) : null;
                     return cachedNormal;
                 });
                 event.__defineGetter__("position", function () {
                     if (!cachedPosition) {
-                        var pos = handler.getWorldSpacePositionByPoint(handler.currentPickObj, x, y);
+                        var pos = handler.getWorldSpacePositionByPoint(x, y);
                         cachedPosition = pos ? new window.XML3DVec3(pos[0], pos[1], pos[2]) : null;
                     }
                     return cachedPosition;
@@ -117,11 +117,11 @@
             opt = opt || {};
             var pos = this.getMousePosition(evt);
 
+            var picked = null;
             if (!opt.omitUpdate)
-                this.updatePickObjectByPoint(pos.x, pos.y);
+                picked = this.getPickObjectByPoint(pos.x, pos.y);
 
-            var picked = this.currentPickObj;
-            this.dispatchMouseEvent(evt, picked && picked.meshAdapter.node, pos);
+            this.dispatchMouseEvent(evt, picked && picked.node, pos);
         },
 
         getMousePosition:function (evt) {
@@ -175,10 +175,8 @@
          */
         mousemove:function (evt) {
             var pos = this.getMousePosition(evt);
-
             this.dispatchMouseEventOnPickedObject(evt);
-
-            var curObj = this.currentPickObj ? this.currentPickObj.meshAdapter.node : null;
+            var curObj = this.renderer.pickedObject ? this.renderer.pickedObject.node : null;
 
             // trigger mouseover and mouseout
             if (curObj !== this.lastPickObj) {

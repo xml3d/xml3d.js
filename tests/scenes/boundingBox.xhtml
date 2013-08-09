@@ -64,10 +64,10 @@
       <shader id="yellow" script="urn:xml3d:shader:matte">
         <float3 name="diffuseColor">1 1 0</float3>
       </shader>
+          <shader id="red" script="urn:xml3d:shader:matte">
+              <float3 name="color">1 0 0</float3>
+          </shader>
       </defs>
-      <shader id="red" script="urn:xml3d:shader:matte">
-        <float3 name="color">1 0 0</float3>
-      </shader>
       <view id="controller_view" position="0 0 10" />
       <group id="g_Root">
         <group id="g_TopCube" transform="#t_TopCube">
@@ -95,19 +95,19 @@
             <mesh id="m_BotFront" type="triangles" src="#mySimpleMesh" />
           </group>
           <group transform="#t_Back">
-            <mesh type="triangles" src="#mySimpleMesh" />
+            <mesh id="m_BotBack" type="triangles" src="#mySimpleMesh" />
           </group>
           <group transform="#t_Left">
-            <mesh type="triangles" src="#mySimpleMesh" />
+            <mesh id="m_BotLeft" type="triangles" src="#mySimpleMesh" />
           </group>
           <group transform="#t_Right">
-            <mesh type="triangles" src="#mySimpleMesh" />
+            <mesh id="m_BotRight" type="triangles" src="#mySimpleMesh" />
           </group>
           <group transform="#t_Top">
-            <mesh type="triangles" src="#mySimpleMesh" />
+            <mesh id="m_BotTop" type="triangles" src="#mySimpleMesh" />
           </group>
           <group transform="#t_Bottom">
-            <mesh type="triangles" src="#mySimpleMesh" />
+            <mesh id="m_BotBottom" type="triangles" src="#mySimpleMesh" />
           </group>
         </group>
         <group id="empty_group" transform="#t_BotCube"/>
@@ -115,13 +115,13 @@
             <mesh id="cube_mesh" type="triangles" src="#cube_data" />
         </group>
         <group id="scaled_group" shader="#yellow" transform="#t_Scaled" visible="true">
-            <mesh type="triangles" src="#cube_data" />
+            <mesh id="m_scaled" type="triangles" src="#cube_data" />
         </group>
         <group id="translated_group" shader="#yellow" transform="#t_Translated" visible="true">
-            <mesh type="triangles" src="#cube_data" />
+            <mesh id="m_translated" type="triangles" src="#cube_data" />
         </group>
         <group id="rotated_group" shader="#yellow" transform="#t_Rotated" visible="true">
-            <mesh type="triangles" src="#cube_data" />
+            <mesh id="m_rotated" type="triangles" src="#cube_data" />
         </group>
       </group>
 

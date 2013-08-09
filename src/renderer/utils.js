@@ -1,7 +1,7 @@
 // Utility functions
-(function() {
+(function(webgl) {
 
-    XML3D.webgl.checkError = function(gl, text)
+    webgl.checkError = function(gl, text)
     {
         var error = gl.getError();
         if (error !== gl.NO_ERROR) {
@@ -21,22 +21,27 @@
         }
     };
 
-    XML3D.webgl.calculateBoundingBox = function(positions, index) {
-        var bbox = new XML3D.webgl.BoundingBox();
-        var min = bbox.min;
-        var max = bbox.max;
+    /**
+     * Calculate bounding box from psoitions and optional indices
+     * TODO: Remove FloatArray creation
+     * @param {Float32Array} positions
+     * @param {Int16Array|null} index
+     * @returns {Float32Array}
+     */
+    webgl.calculateBoundingBox = function(positions, index) {
+        var bbox = new XML3D.math.bbox.create();
 
         if (!positions || positions.length < 3)
             return bbox;
 
         if (index) {
             var i0 = index[0]*3;
-            min[0] = positions[i0];
-            min[1] = positions[i0 + 1];
-            min[2] = positions[i0 + 2];
-            max[0] = positions[i0];
-            max[1] = positions[i0 + 1];
-            max[2] = positions[i0 + 2];
+            bbox[0] = positions[i0];
+            bbox[1] = positions[i0 + 1];
+            bbox[2] = positions[i0 + 2];
+            bbox[3] = positions[i0];
+            bbox[4] = positions[i0 + 1];
+            bbox[5] = positions[i0 + 2];
 
             for ( var i = 1; i < index.length; i++) {
                 var i1 = index[i] * 3;
@@ -44,40 +49,40 @@
                 var p2 = positions[i1 + 1];
                 var p3 = positions[i1 + 2];
 
-                if (p1 < min[0])
-                    min[0] = p1;
-                if (p2 < min[1])
-                    min[1] = p2;
-                if (p3 < min[2])
-                    min[2] = p3;
-                if (p1 > max[0])
-                    max[0] = p1;
-                if (p2 > max[1])
-                    max[1] = p2;
-                if (p3 > max[2])
-                    max[2] = p3;
+                if (p1 < bbox[0])
+                    bbox[0] = p1;
+                if (p2 < bbox[1])
+                    bbox[1] = p2;
+                if (p3 < bbox[2])
+                    bbox[2] = p3;
+                if (p1 > bbox[3])
+                    bbox[3] = p1;
+                if (p2 > bbox[4])
+                    bbox[4] = p2;
+                if (p3 > bbox[5])
+                    bbox[5] = p3;
             }
         } else {
-            min[0] = positions[0];
-            min[1] = positions[1];
-            min[2] = positions[2];
-            max[0] = positions[0];
-            max[1] = positions[1];
-            max[2] = positions[2];
+            bbox[0] = positions[0];
+            bbox[1] = positions[1];
+            bbox[2] = positions[2];
+            bbox[3] = positions[0];
+            bbox[4] = positions[1];
+            bbox[5] = positions[2];
 
             for ( var i = 3; i < positions.length; i += 3) {
-                if (positions[i] < min[0])
-                    min[0] = positions[i];
-                if (positions[i + 1] < min[1])
-                    min[1] = positions[i + 1];
-                if (positions[i + 2] < min[2])
-                    min[2] = positions[i + 2];
-                if (positions[i] > max[0])
-                    max[0] = positions[i];
-                if (positions[i + 1] > max[1])
-                    max[1] = positions[i + 1];
-                if (positions[i + 2] > max[2])
-                    max[2] = positions[i + 2];
+                if (positions[i] < bbox[0])
+                    bbox[0] = positions[i];
+                if (positions[i + 1] < bbox[1])
+                    bbox[1] = positions[i + 1];
+                if (positions[i + 2] < bbox[2])
+                    bbox[2] = positions[i + 2];
+                if (positions[i] > bbox[3])
+                    bbox[3] = positions[i];
+                if (positions[i + 1] > bbox[4])
+                    bbox[4] = positions[i + 1];
+                if (positions[i + 2] > bbox[5])
+                    bbox[5] = positions[i + 2];
             }
         }
         return bbox;
@@ -85,7 +90,7 @@
 
     var absMat = XML3D.math.mat4.create();
 
-    XML3D.webgl.transformAABB = function(bbox, gmatrix) {
+    var transformAABB = function(bbox, gmatrix) {
         if (bbox.isEmpty())
             return;
 
@@ -411,11 +416,104 @@
      *  @param {!number} pageY the y-coordinate relative to the page
      *  @return {{x: number, y: number}} the converted coordinates
      */
-    XML3D.webgl.convertPageCoords = function(xml3dEl, pageX, pageY)
+    webgl.convertPageCoords = function(xml3dEl, pageX, pageY)
     {
         var off = calculateOffset(xml3dEl);
 
         return {x: pageX - off.left, y: pageY - off.top};
     };
 
-})();
+    /**
+     * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in
+     * the GL context. The y-coordinate gets turned upside-down. The lowest possible
+     * canvas coordinate is 0, so we need to subtract 1 from the height, too.
+     *
+     * @param {HTMLCanvasElement} canvas
+     * @param {number} y
+     * @return {number} the converted y-coordinate
+     */
+    webgl.canvasToGlY = function(canvas, y) {
+        return canvas.height - y - 1;
+    }
+
+    webgl.FRAGMENT_HEADER = [
+        "#ifdef GL_FRAGMENT_PRECISION_HIGH",
+        "precision highp float;",
+        "#else",
+        "precision mediump float;",
+        "#endif // GL_FRAGMENT_PRECISION_HIGH",
+        "\n"
+    ].join("\n");
+
+    webgl.addFragmentShaderHeader = function(fragmentShaderSource) {
+        return webgl.FRAGMENT_HEADER + fragmentShaderSource;
+    };
+
+    /**
+     * Set uniforms for active program
+     * @param gl
+     * @param u
+     * @param value
+     * @param {boolean=} transposed
+     */
+    webgl.setUniform = function(gl, u, value, transposed) {
+
+        switch (u.glType) {
+            case 35670: //gl.BOOL
+            case 5124:  //gl.INT
+            case 35678: //gl.SAMPLER_2D
+                if (value.length !== undefined) {
+                    gl.uniform1iv(u.location, value);
+                } else {
+                    gl.uniform1i(u.location, value);
+                }
+                break;
+
+            case 35671: // gl.BOOL_VEC2
+            case 35667:
+                gl.uniform2iv(u.location, value);
+                break; // gl.INT_VEC2
+
+            case 35672: // gl.BOOL_VEC3
+            case 35668:
+                gl.uniform3iv(u.location, value);
+                break; // gl.INT_VEC3
+
+            case 35673: // gl.BOOL_VEC4
+            case 35669:
+                gl.uniform4iv(u.location, value);
+                break; // gl.INT_VEC4
+
+            case 5126:
+                if (value.length != null)
+                    gl.uniform1fv(u.location, value);
+                else
+                    gl.uniform1f(u.location, value);
+                break; // gl.FLOAT
+            case 35664:
+                gl.uniform2fv(u.location, value);
+                break; // gl.FLOAT_VEC2
+            case 35665:
+                gl.uniform3fv(u.location, value);
+                break; // gl.FLOAT_VEC3
+            case 35666:
+                gl.uniform4fv(u.location, value);
+                break; // gl.FLOAT_VEC4
+
+            case 35674:
+                gl.uniformMatrix2fv(u.location, transposed || false, value);
+                break;// gl.FLOAT_MAT2
+            case 35675:
+                gl.uniformMatrix3fv(u.location, transposed || false, value);
+                break;// gl.FLOAT_MAT3
+            case 35676:
+                gl.uniformMatrix4fv(u.location, transposed || false, value);
+                break;// gl.FLOAT_MAT4
+
+            default:
+                XML3D.debug.logError("Unknown uniform type " + u.glType);
+                break;
+        }
+    };
+
+})(XML3D.webgl);

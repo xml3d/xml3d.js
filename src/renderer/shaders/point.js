@@ -73,14 +73,18 @@ XML3D.shaders.register("point", {
         return params.transparency && params.transparency.getValue()[0] > 0.001;
     },
     uniforms: {
-        diffuseColor    : [1.0, 1.0, 1.0],
-        texCoordOffset     : [0,0],
-        texCoordSize    : [1,1],
-        transparency    : 0.0,
-        useVertexColor  : false,
-        pointSize       : 1.0
-},
-samplers: {
-    diffuseTexture : null
-}
+        diffuseColor: [1.0, 1.0, 1.0],
+        texCoordOffset: [0, 0],
+        texCoordSize: [1, 1],
+        transparency: 0.0,
+        useVertexColor: false,
+        pointSize: 1.0
+    },
+    samplers: {
+        diffuseTexture: null
+    },
+    attributes: {
+        texcoord: null,
+        color: null
+    }
 });

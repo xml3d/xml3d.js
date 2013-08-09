@@ -28,7 +28,7 @@ test("Grayscale Image", function() {
         
         if(!color[0]) return;
 
-        QUnit.closeArray(color, [182,182,182,255], EPSILON, "Color of processed image is gray." );
+        QUnit.closeArray(color, [182,182,182,255], 1, "Color of processed image is gray." );
 
         start();
     });

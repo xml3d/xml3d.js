@@ -1,4 +1,4 @@
-(function () {
+(function (webgl) {
     /**
      * @interface
      */
@@ -12,6 +12,7 @@
     IRenderObject.prototype.isVisible = function() {};
     IRenderObject.prototype.setTransformDirty = function() {};
     IRenderObject.prototype.setShader = function() {};
+    IRenderObject.prototype.hasTransparency = function() {};
 
     // Entry:
     /** @const */
@@ -29,10 +30,18 @@
     /** @const */
     var ENTRY_SIZE = NORMAL_MATRIX_OFFSET + 16;
 
-
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
     /**
      * Represents a renderable object in the scene.
+     * The RenderObject has these responsibilities:
+     *  1. Keep track of the transformation hierarchy and bounding boxes
+     *  2. Connect the DrawableClosure with the ShaderClosure
+     *
+     *  The {@link DrawableClosure} is a DrawableObject plus it's data
+     *  The {@link ShaderClosure} is a ProgramObject plus it's data
+     *  The concrete ShaderClosure can vary per DrawableObject and change
+     *  due to scene or object changes. Thus we have to keep track of the
+     *  related {@link IShaderComposer}.
      *
      * @constructor
      * @implements {IRenderObject}
@@ -41,58 +50,88 @@
      * @param {Object} opt
      */
     var RenderObject = function (scene, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.OBJECT, scene, pageEntry, opt);
         opt = opt || {};
-        /** @type {XML3D.webl.MeshRenderAdapter} */
-        this.meshAdapter = opt.meshAdapter;
-        this.shader = opt.shader || null;
-        /** {Object?} **/
-        this.override = null;
-        this.setWorldMatrix(opt.transform || RenderObject.IDENTITY_MATRIX);
+
+        /**
+         * Keep reference to DOM Element need e.g. for picking
+         * @type {Element}
+         */
+        this.node = opt.node;
+
+        /**
+         * Object related data
+         * @type {{data: Xflow.DataNode|null, type: string}}
+         */
+        this.object = opt.object || { data: null, type: "triangles" };
+
+        /**
+         * Can we rely on current WorldMatrix?
+         * @type {boolean}
+         */
         this.transformDirty = true;
+
+        /**
+         * Can we rely on current Bounding Boxes?
+         * @type {boolean}
+         */
         this.boundingBoxDirty = true;
-        this.create();
+
+        /**
+         * The drawable closure transforms object data and type into
+         * a drawable entity
+         * @type {DrawableClosure}
+         */
+        this.drawable = this.createDrawable();
+
+        this.shader = opt.shader || {};
+        // Set start values;
+        this.initialize();
     };
     RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
-    XML3D.createClass(RenderObject, XML3D.webgl.RenderNode);
-    XML3D.extend(RenderObject.prototype, {
-        onenterReady:function () {
-            this.scene.moveFromQueueToReady(this);
-        },
-        onleaveReady:function () {
-            this.scene.moveFromReadyToQueue(this);
-        },
-        onafterlightsChanged:function (name, from, to, lights, shaderManager) {
-            if (lights) {
-                var shaderHandle = this.parent.getShaderHandle();
-                this.shader = shaderManager.createShader(shaderHandle.adapter, lights);
+
+    XML3D.createClass(RenderObject, XML3D.webgl.RenderNode, {
+        createDrawable: function () {
+            var result = this.scene.createDrawable(this);
+            if (result) {
+                var that = this;
+                result.addEventListener(webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function (evt) {
+                    if (evt.newState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                        that.scene.moveFromQueueToReady(that);
+                    }
+                    else if (evt.newState === webgl.DrawableClosure.READY_STATE.INCOMPLETE &&
+                        evt.oldState === webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                        that.scene.moveFromReadyToQueue(that);
+                    }
+                });
             }
+            return result;
         },
-        onbeforedataComplete:function (name, from, to) {
-            return this.meshAdapter.finishMesh();
+        initialize: function () {
+            this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
+
+            /** {Object?} **/
+            this.override = null;
         },
-        onbeforeprogress: function(name, from, to) {
-            switch (to) {
-                case "NoMaterial":
-                    return this.shader != null;
-            }
-            switch (from) {
-                case "DirtyMeshData":
-                    this.meshAdapter.createMeshData();
-            }
+        setType: function(type) {
+            this.object.type = type;
+            // TODO: this.typeChangedEvent
         },
-        onenterNoMesh:function () {
-            // Trigger the creation of the mesh now
-            // this.meshAdapter.createMesh();
-            return true;
+        getType: function() {
+            return this.object.type;
         },
-        onenterDisposed:function () {
+        getDataNode: function() {
+            return this.object ? this.object.data : null;
+        },
+
+        dispose :function () {
             this.scene.remove(this);
         },
-        onchangestate:function (name, from, to) {
-            XML3D.debug.logInfo("Changed: ", name, from, to);
+
+        refreshShaderProgram: function() {
+            this.program = this.shader.composer.getShaderAfterStructureChanged(this.program, this.scene, this.override || {});
         },
 
         getModelViewMatrix: function(target) {
@@ -149,7 +188,6 @@
             var page = this.page;
             var offset = this.offset;
             XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEW_MATRIX_OFFSET, page, offset+WORLD_MATRIX_OFFSET,  view, 0);
-            this.setBoundingBoxDirty();
         },
 
         /** Relies on an up-to-date view matrix **/
@@ -177,49 +215,127 @@
          * @param {Xflow.Result} result
          */
         setOverride: function(result) {
+            this.override = null;
             if(!result.outputNames.length) {
-                this.override = null;
                 return;
             }
 
-            var prog = this.shader.program;
-            this.override = Object.create(null);
+            var prog = this.program;
+            var overrides = {};
             for(var name in prog.uniforms) {
                 var entry = result.getOutputData(name);
                 if (entry && entry.getValue()) {
-                    this.override[name] = entry.getValue();
+                    overrides[name] = entry.getValue();
                 }
+            }
+            if (Object.keys(overrides).length > 0) {
+                this.override = overrides;
             }
             XML3D.debug.logInfo("Shader attribute override", result, this.override);
         },
 
         setTransformDirty: function() {
             this.transformDirty = true;
+            this.scene.requestRedraw("Transformation changed");
+        },
+        /**
+         * @param {AdapterHandleNotification} notification
+         */
+        shaderHandleCallback: function(notification) {
+            XML3D.debug.assert(notification.type == XML3D.events.ADAPTER_HANDLE_CHANGED);
+            this.updateShaderFromHandle(notification.adapterHandle);
+        },
+
+
+        createProgram: function(composer, objectData) {
+            this.program = composer.getShaderClosure(this.scene, objectData);
+            this.setOverride(objectData);
+        },
+
+        createShaderForDrawable: function (shaderInfo, drawable) {
+            var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
+            composer.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
+
+            var that = this;
+            var objectRequest = drawable.getRequest(composer.getRequestFields(), function (req, state) {
+                that.createProgram(composer, req.getResult());
+            });
+
+            this.createProgram(composer, objectRequest.getResult());
+
+            return {
+                composer: composer
+            }
         },
 
         setShader: function(newHandle) {
-            this.meshAdapter.updateShader(newHandle.adapter);
+
+            // If we don't have a drawable, we don't need a shader
+            // This is for testing purposes and won't occur during normal
+            // run
+            if(!this.drawable)
+                return;
+
+            var oldHandle = this.shader.handle;
+
+            if(oldHandle == newHandle)
+                return;
+
+            if (oldHandle) {
+                oldHandle.removeListener(this.shaderHandleCallback.bind(this));
+            }
+            if (newHandle) {
+                newHandle.addListener(this.shaderHandleCallback.bind(this));
+            }
+            this.updateShaderFromHandle(newHandle);
+
+            this.shader.handle = newHandle;
+            // TODO this.materialChanged();
         },
 
-        setObjectSpaceBoundingBox: function(min, max) {
+        /**
+         *
+         * @param {AdapterHandle|null} handle
+         */
+        updateShaderFromHandle: function(handle) {
+            var shaderInfo = null;
+
+            if(handle) {
+                switch (handle.status) {
+                    case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
+                        XML3D.debug.logWarning("Shader not found.", handle.url, this.name);
+                        break;
+                    case XML3D.base.AdapterHandle.STATUS.LOADING:
+                        break;
+                    case XML3D.base.AdapterHandle.STATUS.READY:
+                        shaderInfo = handle.getAdapter().getShaderInfo();
+                }
+            }
+
+            this.shader = this.createShaderForDrawable(shaderInfo, this.drawable);
+            // Request the attributes required for shader from the drawable (e.g. normal, color etc)
+            this.drawable.setAttributeRequest(this.shader.composer.getShaderAttributes());
+        },
+
+        setObjectSpaceBoundingBox: function(box) {
             var o = this.offset + OBJECT_BB_OFFSET;
-            this.page[o] = min[0];
-            this.page[o+1] = min[1];
-            this.page[o+2] = min[2];
-            this.page[o+3] = max[0];
-            this.page[o+4] = max[1];
-            this.page[o+5] = max[2];
+            this.page[o] =   box[0];
+            this.page[o+1] = box[1];
+            this.page[o+2] = box[2];
+            this.page[o+3] = box[3];
+            this.page[o+4] = box[4];
+            this.page[o+5] = box[5];
             this.setBoundingBoxDirty();
         },
 
-        getObjectSpaceBoundingBox: function(min, max) {
+        getObjectSpaceBoundingBox: function(box) {
             var o = this.offset + OBJECT_BB_OFFSET;
-            min[0] = this.page[o];
-            min[1] = this.page[o+1];
-            min[2] = this.page[o+2];
-            max[0] = this.page[o+3];
-            max[1] = this.page[o+4];
-            max[2] = this.page[o+5];
+            box[0] = this.page[o];
+            box[1] = this.page[o+1];
+            box[2] = this.page[o+2];
+            box[3] = this.page[o+3];
+            box[4] = this.page[o+4];
+            box[5] = this.page[o+5];
         },
 
         setBoundingBoxDirty: function() {
@@ -227,14 +343,14 @@
             this.parent.setBoundingBoxDirty();
         },
 
-        setWorldSpaceBoundingBox: function(min, max) {
+        setWorldSpaceBoundingBox: function(bbox) {
             var o = this.offset + WORLD_BB_OFFSET;
-            this.page[o] = min[0];
-            this.page[o+1] = min[1];
-            this.page[o+2] = min[2];
-            this.page[o+3] = max[0];
-            this.page[o+4] = max[1];
-            this.page[o+5] = max[2];
+            this.page[o] = bbox[0];
+            this.page[o+1] = bbox[1];
+            this.page[o+2] = bbox[2];
+            this.page[o+3] = bbox[3];
+            this.page[o+4] = bbox[4];
+            this.page[o+5] = bbox[5];
         },
 
         getWorldSpaceBoundingBox: function(bbox) {
@@ -242,20 +358,21 @@
                 this.updateWorldSpaceBoundingBox();
             }
             var o = this.offset + WORLD_BB_OFFSET;
-            bbox.min[0] = this.page[o];
-            bbox.min[1] = this.page[o+1];
-            bbox.min[2] = this.page[o+2];
-            bbox.max[0] = this.page[o+3];
-            bbox.max[1] = this.page[o+4];
-            bbox.max[2] = this.page[o+5];
+            bbox[0] = this.page[o];
+            bbox[1] = this.page[o+1];
+            bbox[2] = this.page[o+2];
+            bbox[3] = this.page[o+3];
+            bbox[4] = this.page[o+4];
+            bbox[5] = this.page[o+5];
+
         },
 
         updateWorldSpaceBoundingBox: (function() {
-            var t_box = new XML3D.webgl.BoundingBox();
+            var c_box = new XML3D.math.bbox.create();
 
             return function() {
-                this.getObjectSpaceBoundingBox(t_box.min, t_box.max);
-                this.setWorldSpaceBoundingBox(t_box.min, t_box.max);
+                this.getObjectSpaceBoundingBox(c_box);
+                this.setWorldSpaceBoundingBox(c_box);
                 this.boundingBoxDirty = false;
             }
         })(),
@@ -267,11 +384,25 @@
                 this.setVisible(newVal);
                 this.setBoundingBoxDirty();
             }
+        },
+
+        getProgram: function() {
+            return this.shader.composer.getProgram();
+        },
+
+        hasTransparency : function() {
+            return this.program ? this.program.hasTransparency() : false;
+        },
+
+        updateForRendering: function() {
+            this.setShader(this.parent.getShaderHandle());
+            this.drawable.update();
         }
 
     });
 
-    // Export
-    XML3D.webgl.RenderObject = RenderObject;
 
-}());
+    // Export
+    webgl.RenderObject = RenderObject;
+
+}(XML3D.webgl));

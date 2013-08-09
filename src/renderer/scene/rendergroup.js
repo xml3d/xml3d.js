@@ -1,4 +1,4 @@
-(function() {
+(function(webgl) {
     /** @const */
     var WORLD_MATRIX_OFFSET = 0;
     /** @const */
@@ -15,16 +15,15 @@
      * @extends {RenderNode}
      */
     var RenderGroup = function(scene, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, scene, pageEntry, opt);
+        webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.GROUP, scene, pageEntry, opt);
         opt = opt || {};
         this.shaderHandle = opt.shaderHandle || null;
         this.boundingBoxDirty = false;
-        var bbox = new XML3D.webgl.BoundingBox();
-        this.setWorldSpaceBoundingBox(bbox.min, bbox.max);
+        this.setWorldSpaceBoundingBox(XML3D.math.EMPTY_BOX);
     };
     RenderGroup.ENTRY_SIZE = ENTRY_SIZE;
 
-    XML3D.createClass(RenderGroup, XML3D.webgl.RenderNode);
+    XML3D.createClass(RenderGroup, webgl.RenderNode);
     XML3D.extend(RenderGroup.prototype, {
         getLocalMatrix: function(dest) {
             var o = this.offset + LOCAL_MATRIX_OFFSET;
@@ -47,39 +46,44 @@
                 this.updateWorldSpaceBoundingBox();
             }
             var o = this.offset + WORLD_BB_OFFSET;
-            bbox.min[0] = this.page[o];
-            bbox.min[1] = this.page[o+1];
-            bbox.min[2] = this.page[o+2];
-            bbox.max[0] = this.page[o+3];
-            bbox.max[1] = this.page[o+4];
-            bbox.max[2] = this.page[o+5];
+            bbox[0] = this.page[o];
+            bbox[1] = this.page[o+1];
+            bbox[2] = this.page[o+2];
+            bbox[3] = this.page[o+3];
+            bbox[4] = this.page[o+4];
+            bbox[5] = this.page[o+5];
         },
 
-        setWorldSpaceBoundingBox: function(min, max) {
+        setWorldSpaceBoundingBox: function(bbox) {
             var o = this.offset + WORLD_BB_OFFSET;
-            this.page[o] = min[0];
-            this.page[o+1] = min[1];
-            this.page[o+2] = min[2];
-            this.page[o+3] = max[0];
-            this.page[o+4] = max[1];
-            this.page[o+5] = max[2];
+            this.page[o] = bbox[0];
+            this.page[o+1] = bbox[1];
+            this.page[o+2] = bbox[2];
+            this.page[o+3] = bbox[3];
+            this.page[o+4] = bbox[4];
+            this.page[o+5] = bbox[5];
         },
 
-        updateWorldSpaceBoundingBox: (function() {
+
+
+    updateWorldSpaceBoundingBox: (function() {
             var local_mat = XML3D.math.mat4.create();
+            var childBB = XML3D.math.bbox.create();
 
             return function() {
-                var localBB = new XML3D.webgl.BoundingBox();
-                this.children.forEach(function(obj) {
+                var localBB = XML3D.math.bbox.create();
+
+                for(var i = 0, j = this.children.length; i < j; i++) {
+                    var obj = this.children[i];
                     if (obj.isVisible()) {
-                        var childBB = new XML3D.webgl.BoundingBox();
                         obj.getWorldSpaceBoundingBox(childBB);
-                        localBB.extendWithBox(childBB);
+                        XML3D.math.bbox.extendWithBox(localBB, childBB);
                     }
-                });
+                }
+
                 this.getLocalMatrix(local_mat);
-                localBB.makeAxisAligned(local_mat);
-                this.setWorldSpaceBoundingBox(localBB.min, localBB.max);
+                XML3D.math.bbox.transform(localBB, local_mat, localBB);
+                this.setWorldSpaceBoundingBox(localBB);
                 this.boundingBoxDirty = false;
             }
         })(),
@@ -87,10 +91,12 @@
         addChild: function(child) {
             this.children.push(child);
             this.setBoundingBoxDirty();
+            this.scene.dispatchEvent({type : webgl.Scene.EVENT_TYPE.SCENE_STRUCTURE_CHANGED, newChild: child});
         },
 
         removeChild: function(child) {
             this.children.splice(this.children.indexOf(child), 1);
+            this.scene.dispatchEvent({type : webgl.Scene.EVENT_TYPE.SCENE_STRUCTURE_CHANGED, removedChild: child});
         },
 
         getChildren: function() {
@@ -107,7 +113,7 @@
         setTransformDirty: function() {
             if (this.transformDirty) {
                 //We can be sure all child nodes are already set to transformDirty from here
-                return;
+                //return;
             }
             this.transformDirty = true;
             this.children.forEach(function(obj) {
@@ -162,6 +168,6 @@
     });
 
     // Export
-    XML3D.webgl.RenderGroup = RenderGroup;
+    webgl.RenderGroup = RenderGroup;
 
-})();
+})(XML3D.webgl);

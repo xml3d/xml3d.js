@@ -8,17 +8,20 @@
      * @param {Object} pageEntry
      * @param {Object} opt
      */
-    var RenderNode = function(scene, pageEntry, opt) {
+    var RenderNode = function(type, scene, pageEntry, opt) {
         opt = opt || {};
+
         this.scene = scene;
-        this.setParent(opt.parent || scene.rootNode);
+        this.type = type;
+        this.name = opt.name || "";
         this.page = pageEntry.page;
         this.offset = pageEntry.offset;
         this.entrySize = pageEntry.size;
         this.localVisible = opt.visible;
-        this.visible = this.localVisible !== undefined ? this.localVisible : this.getParent() ? this.getParent().isVisible() : true;
+        this.visible = this.localVisible !== undefined ? this.localVisible : opt.parent ? opt.parent.isVisible() : true;
         this.transformDirty = true;
         this.children = [];
+        this.setParent(opt.parent || scene.rootNode);
     };
 
     XML3D.extend(RenderNode.prototype, {
@@ -36,6 +39,12 @@
             if (parent && parent.addChild) {
                 parent.addChild(this);
             }
+        },
+        traverse: function(callback) {
+            callback(this);
+            this.children.forEach(function(child){
+                child.traverse(callback);
+            })
         },
 
         getWorldMatrix: function(dest) {
@@ -89,7 +98,6 @@
 
         remove: function() {
             this.parent.removeChild(this);
-            this.dispose && this.dispose();
             this.scene.freePageEntry({ page: this.page, offset: this.offset, size: this.entrySize });
         }
 

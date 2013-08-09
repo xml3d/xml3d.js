@@ -11,15 +11,35 @@
 
     XML3D.webgl.RenderAdapter.prototype.getAdapterHandle = function(uri) {
         return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, uri,
-            XML3D.webgl, this.factory.handler.id);
+            XML3D.webgl, this.factory.canvasId);
     };
 
     XML3D.webgl.RenderAdapter.prototype.getParentRenderAdapter = function() {
         return this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
     };
 
+    /**
+     * @param element
+     */
+    XML3D.webgl.RenderAdapter.prototype.initElement = function(element) {
+        this.factory.getAdapter(element);
+        this.initChildElements(element);
+    };
+
+    /**
+     * @param element
+     */
+    XML3D.webgl.RenderAdapter.prototype.initChildElements = function(element) {
+        this.traverse(this.factory.getAdapter);
+    };
+
+
     XML3D.webgl.RenderAdapter.prototype.applyTransformMatrix = function(transform) {
         return transform;
+    };
+
+    XML3D.webgl.RenderAdapter.prototype.getScene = function() {
+        return this.factory.renderer.scene;
     };
 
     /**

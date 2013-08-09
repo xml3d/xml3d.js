@@ -12,6 +12,13 @@ module("WebGL Scenegraph", {
     teardown : function() {
         var v = document.getElementById("xml3dframe");
         v.removeEventListener("load", this.cb, true);
+    },
+    isRenderNodeInScene: function(name, scene) {
+        var found = false;
+        scene.traverse(function(node) {
+            found = found || node.name == name;
+        });
+        return found;
     }
 
 });
@@ -27,14 +34,31 @@ function getWebGLAdapter(x) {
     return null;
 };
 
-function getHandler(x) {
+function getWebGLFactory(x) {
     var adapter = getWebGLAdapter(x);
-    return adapter ? adapter.factory.handler : null;
+    return adapter ? adapter.factory : null;
+};
+
+function getCanvasId(x) {
+    var factory = getWebGLFactory(x);
+    return factory ? factory.canvasId : null;
+}
+
+function getRenderer(x) {
+    console.dir(x);
+    var factory = getWebGLFactory(x);
+    return factory ? factory.getRenderer() : null;
+};
+
+function getHandler(x) {
+    console.dir(x);
+    var id = getCanvasId(x);
+    return id ? x.ownerDocument.defaultView.XML3D.webgl.handlers[id] : null;
 };
 
 function getContextForXml3DElement(x) {
-    var handler = getHandler(x);
-    return handler ? handler.renderer.gl : null;
+    var renderer = getRenderer(x);
+    return renderer ? renderer.context.gl : null;
 };
 
 
@@ -54,18 +78,18 @@ test("Change visibility via script", 9, function() {
         actual,
         win = this.doc.defaultView,
         gl = getContextForXml3DElement(x),
-        testFunc = null, h = getHandler(x);
+        testFunc = null, renderer = getRenderer(x);
 
     x.addEventListener("framedrawn", function(n) {
             ok("Redraw was triggered");
-            ok(!h.needDraw, "Redraw not required");
+            ok(!renderer.needsRedraw(), "Redraw not required");
             if(testFunc)
                 testFunc(n);
             start();
     });
     testFunc = function(n) {
-        equal(n.detail.numberOfObjectsDrawn, 1, "1 Object drawn");
-        equal(n.detail.numberOfTrianglesDrawn, 2, "2 Triangles drawn");
+        equal(n.detail.count.objects, 1, "1 Object drawn");
+        equal(n.detail.count.primitives, 2, "2 Triangles drawn");
         actual = win.getPixelValue(gl, 40, 40);
         deepEqual(actual, [255,0,0,255], "Red at 40,40");
         actual = win.getPixelValue(gl, 0, 0);
@@ -73,7 +97,7 @@ test("Change visibility via script", 9, function() {
     };
     stop();
     this.doc.getElementById("myGroup").visible = true;
-    ok(h.needDraw, "Redraw required");
+    ok(renderer.needsRedraw(), "Redraw required");
 });
 
 test("Add children in invisible group", 8, function() {
@@ -85,14 +109,14 @@ test("Add children in invisible group", 8, function() {
 
     x.addEventListener("framedrawn", function(n) {
         ok("Redraw was triggered");
-        ok(!h.needDraw, "Redraw not required");
+        ok(!h.renderer.needsDraw, "Redraw not required");
         if(testFunc)
             testFunc(n);
         start();
     });
     testFunc = function(n) {
-        equal(n.detail.numberOfObjectsDrawn, 0, "0 Objects drawn");
-        equal(n.detail.numberOfTrianglesDrawn, 0, "0 Triangles drawn");
+        equal(n.detail.count.objects, 0, "0 Objects drawn");
+        equal(n.detail.count.objects, 0, "0 Triangles drawn");
         actual = win.getPixelValue(gl, 40, 40);
         deepEqual(actual, [0,0,0,0], "Transparent at 40,40");
     };
@@ -101,7 +125,7 @@ test("Add children in invisible group", 8, function() {
     mesh.setAttribute("src", "#meshdata");
 
     this.doc.getElementById("myEmptyGroup").appendChild(mesh);
-    ok(h.needDraw, "Redraw required");
+    ok(h.renderer.needsDraw, "Redraw required");
 });
 
 test("Change active view via script", 8, function() {
@@ -111,7 +135,7 @@ test("Change active view via script", 8, function() {
     var h = getHandler(x);
     x.addEventListener("framedrawn", function(n) {
             ok("Redraw was triggered"); // 7
-            ok(!h.needDraw, "Redraw not required"); // 8
+            ok(!h.renderer.needsDraw, "Redraw not required"); // 8
             start();
     });
     stop();
@@ -122,7 +146,7 @@ test("Change active view via script", 8, function() {
 
     x.activeView = "#viewOrientationTest";
     equal(x.activeView, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
-    ok(h.needDraw, "Redraw required"); // 6, fails in < 920181
+    ok(h.renderer.needsDraw, "Redraw required"); // 6, fails in < 920181
 });
 
 
@@ -217,7 +241,7 @@ test("Change visible/shader for nested groups", 8, function() {
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child shader overrides new parent shader]");
 });
 
-test("Simple add/remove mesh", 11, function() {
+test("Simple add/remove mesh", 12, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -227,9 +251,11 @@ test("Simple add/remove mesh", 11, function() {
 
     // Add a mesh
     x.appendChild(mesh);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    var renderNode = getWebGLAdapter(mesh).renderNode;
+    var scene = renderNode.scene;
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add mesh]");
 
@@ -237,22 +263,23 @@ test("Simple add/remove mesh", 11, function() {
     var adapter = getWebGLAdapter(mesh);
     x.removeChild(mesh);
     ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
-    ok(adapter.renderNode.is("Disposed"), "renderNode disposed");
+    equal(scene.ready.indexOf(adapter.renderNode), -1, "renderNode not in ready list after dispose");
+    equal(scene.queue.indexOf(adapter.renderNode), -1, "renderNode not in queue list after dispose");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove mesh]");
 
     // Add the mesh again
     x.appendChild(mesh);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(getWebGLAdapter(mesh).renderNode), -1, "renderNode in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [re-add mesh]");
 
 });
 
-test("Simple add/remove group with mesh", 11, function() {
+test("Simple add/remove group with mesh", 10, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -265,9 +292,11 @@ test("Simple add/remove group with mesh", 11, function() {
 
     // Add group
     x.appendChild(group);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    var renderNode = getWebGLAdapter(mesh).renderNode;
+    var scene = renderNode.scene;
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
@@ -275,28 +304,29 @@ test("Simple add/remove group with mesh", 11, function() {
     // Remove group
     x.removeChild(group);
     ok(!getWebGLAdapter(group), "Group adapter is removed");
-    ok(adapter.renderNode.is("Disposed"), "renderNode in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
 
     // Re-add group
     x.appendChild(group);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), 1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 });
 
-test("Simple add/remove transformed group with mesh", 12, function() {
+test("Simple add/remove transformed group with mesh", 17, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
     x.setAttribute("activeView", "#identView");
     var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("id", "addedMesh");
     mesh.setAttribute("src", "#meshdata");
     var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
+    group.setAttribute("id", "addedGroup");
     group.setAttribute("transform", "#t_grouptransformed");
 
     group.appendChild(mesh);
@@ -304,27 +334,41 @@ test("Simple add/remove transformed group with mesh", 12, function() {
 
     // Add group
     x.appendChild(group);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+
+    var renderNode = getWebGLAdapter(mesh).renderNode;
+    var scene = renderNode.scene;
+
+    ok(this.isRenderNodeInScene("addedMesh", scene), "Render node in scene");
+    ok(this.isRenderNodeInScene("addedGroup", scene), "Group in scene");
+
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode in 'Ready' after draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 
     // Remove group
     var adapter = getWebGLAdapter(mesh);
     x.removeChild(group);
+    ok(!this.isRenderNodeInScene("addedMesh", scene), "Mesh not in scene");
+    ok(!this.isRenderNodeInScene("addedGroup", scene), "Group not in scene");
+
+
     ok(!getWebGLAdapter(group), "Group adapter is removed");
     ok(!getWebGLAdapter(mesh), "Mesh adapter is removed");
-    ok(adapter.renderNode.is("Disposed"), "renderNode in 'Disposed' after removal");
+    //ok(adapter.renderNode.is("Disposed"), "renderNode in 'Disposed' after removal");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [remove group]");
 
     // Re-add group
     x.appendChild(group);
-    ok(getWebGLAdapter(mesh).renderNode.is("NoLights"), "renderNode in 'NoLights' after creation");
+    ok(this.isRenderNodeInScene("addedMesh", scene), "Render node in scene");
+    ok(this.isRenderNodeInScene("addedGroup", scene), "Group in scene");
+    var renderNode = getWebGLAdapter(mesh).renderNode;
+    equal(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     h.draw();
-    ok(getWebGLAdapter(mesh).renderNode.is("Ready"), "renderNode in 'Ready' after draw");
+    notEqual(scene.ready.indexOf(renderNode), -1, "renderNode not in 'Ready' before draw");
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [add group with mesh]");
 });
@@ -443,28 +487,6 @@ test("Camera setDirection/upVector", 5, function() {
     deepEqual(actual, [255,255,0,255], "Camera looking left, yellow");
 });
 
-test("Pick pass flag", 6, function() {
-    var x = this.doc.getElementById("xml3DElem");
-    var h = getHandler(x);
-    h.updatePickObjectByPoint(0,0);
-    ok(!h.needPickingDraw, "No picking needed after pick rendering");
-    this.doc.getElementById("group2").setAttribute("shader","#flatblack");
-    ok(!h.needPickingDraw, "Changing shaders does not require a picking pass");
-    this.doc.getElementById("t_cubebottom").translation.x = 5;
-    ok(h.needPickingDraw, "Changing transformation does require a picking pass");
-    /** This test fails due to a workaround in the CanvasHandler.updatePickObjectByPoint().
-     *  It's a performance optimization, thus disbaled for now.
-     *  See comment in that function for more details.
-     */
-    h.updatePickObjectByPoint(0,0);
-    //ok(!h.needPickingDraw, "No picking needed after pick rendering");
-    this.doc.getElementById("t_cubebottom").translation.x = 3;
-    this.doc.getElementById("group2").setAttribute("shader","#flatblue");
-    // This failed because setting shader set flag to 'false'
-    ok(h.needPickingDraw, "Changing transformation does require a picking pass");
-});
-
-
 test("Add a mesh dynamically", 4, function() {
     var x = this.doc.getElementById("xml3DElem");
     var g = this.doc.getElementById("myGroup");
@@ -472,7 +494,7 @@ test("Add a mesh dynamically", 4, function() {
 
     x.addEventListener("framedrawn", function(n) {
             if (count == 0) {
-                equal(n.detail.numberOfObjectsDrawn, 1, "Initially one drawable object");
+                equal(n.detail.count.objects, 1, "Initially one drawable object");
                 var group = document.createElementNS(XML3D.xml3dNS,"group");
                 var mesh = document.createElementNS(XML3D.xml3dNS,"mesh");
                 mesh.setAttribute('id',"new_mesh");
@@ -481,7 +503,7 @@ test("Add a mesh dynamically", 4, function() {
                 group.appendChild(mesh);
                 stop();
             } else if (count == 1) {
-                equal(n.detail.numberOfObjectsDrawn, 2, "Now two drawable objects");
+                equal(n.detail.count.objects, 2, "Now two drawable objects");
             }
             count++;
             start();

@@ -11,7 +11,8 @@
           DANGLING_REFERENCE: 3,
           VALID_REFERENCE: 4,
           THIS_REMOVED: 5,
-          ADAPTER_HANDLE_CHANGED: 6
+          ADAPTER_HANDLE_CHANGED: 6,
+          ADAPTER_VALUE_CHANGED: 7
   };
 
   //-----------------------------------------------------------------------------
@@ -37,15 +38,20 @@
 
   //-----------------------------------------------------------------------------
 
-  events.AdapterHandleNotification = function(handle, type) {
-    this.adapterHandle = handle;
-    this.type = type;
-  };
-  XML3D.createClass(events.AdapterHandleNotification, events.Notification);
-  events.AdapterHandleNotification.prototype.toString = function() {
-      return "AdapterHandleNotification (type:" + this.type + ")";
-  };
-  //-----------------------------------------------------------------------------
+    /**
+     * @param {AdapterHandle} handle
+     * @param {int} type
+     * @constructor
+     */
+    events.AdapterHandleNotification = function (handle, type) {
+        this.adapterHandle = handle;
+        this.type = type;
+    };
+    XML3D.createClass(events.AdapterHandleNotification, events.Notification);
+    events.AdapterHandleNotification.prototype.toString = function () {
+        return "AdapterHandleNotification (type:" + this.type + ")";
+    };
+    //-----------------------------------------------------------------------------
 
   events.ConnectedAdapterNotification = function(adapterHandleNotification, key) {
     this.adapter = adapterHandleNotification.adapterHandle.getAdapter();

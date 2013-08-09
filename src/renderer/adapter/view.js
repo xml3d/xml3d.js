@@ -40,38 +40,41 @@
         return m;
     };
 
-    p.notifyChanged = function(evt) {
-        if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) {
-            connectProjectionAdapter(this);
-            this.renderNode.setProjectionAdapter(this.getConnectedAdapter("perspective"));
-        }  if (evt.type == XML3D.events.THIS_REMOVED) {
-            this.dispose();
-        } else
-        {
-            var target = evt.attrName || evt.wrapped.attrName;
+    p.notifyChanged = function (evt) {
+        switch (evt.type) {
+            case XML3D.events.THIS_REMOVED:
+                this.dispose();
+                break;
+            case XML3D.events.VALUE_MODIFIED:
+                var target = evt.wrapped.attrName;
 
-            switch (target) {
-                case "orientation":
-                    this.renderNode.updateOrientation(this.node.orientation.toMatrix()._data);
-                    break;
-                case "position":
-                    this.renderNode.updatePosition(this.node.position._data);
-                    break;
-                case "perspective":
-                    connectProjectionAdapter(this);
-                    this.renderNode.setProjectionAdapter(this.getConnectedAdapter("perspective"));
-                    break;
-                case "fieldOfView":
-                    this.renderNode.updateFieldOfView(this.node.fieldOfView);
-                    break;
+                switch (target) {
+                    case "orientation":
+                        this.renderNode.updateOrientation(this.node.orientation.toMatrix()._data);
+                        break;
+                    case "position":
+                        this.renderNode.updatePosition(this.node.position._data);
+                        break;
+                    case "fieldOfView":
+                        this.renderNode.updateFieldOfView(this.node.fieldOfView);
+                        break;
+                    default:
+                        XML3D.debug.logWarning("Unhandled value changed event in view adapter for attribute:" + target);
+                }
+                break;
+            case XML3D.events.ADAPTER_HANDLE_CHANGED:
+                switch (evt.key) {
+                    case "perspective":
+                        connectProjectionAdapter(this);
+                        this.renderNode.setProjectionAdapter(this.getConnectedAdapter("perspective"));
+                        break;
 
-                default:
-                    XML3D.debug.logWarning("Unhandled event in view adapter for parameter " + target);
-                    break;
-            }
+                    default:
+                        XML3D.debug.logWarning("Unhandled adapter handle changed event in view adapter for parameter " + target);
+                        break;
+                }
         }
-
-        this.factory.handler.redraw("View changed");
+        this.factory.getRenderer().requestRedraw("View changed");
     };
 
     function connectProjectionAdapter(adapter){

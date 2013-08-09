@@ -141,7 +141,7 @@ test("Change lightshader intensity", 4, function() {
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,255,255], "Initial light intensity");
 
-    var test = this.doc.getElementById("lsIntensity");
+    var test = this.doc.getElementById("lsdIntensity");
     test.textContent = "10 10 0";
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
@@ -149,7 +149,7 @@ test("Change lightshader intensity", 4, function() {
 
 });
 
-test("Adding lights", 10, function() {
+test("Adding lights", 6, function() {
     var x = this.doc.getElementById("xml3DElem"),
     actual,
     win = this.doc.defaultView,
@@ -163,16 +163,12 @@ test("Adding lights", 10, function() {
     this.doc.getElementById("pointlight2").appendChild(newLight);
 
     equal(lightsArray.point.length, 2, "Light was added to the lights array");
-    equal(lightsArray.point.position.length, 6, "Light parameters were added to lights array");
-    equal(lightsArray.point.intensity.length, 6, "Lightshader parameters were added to lights array");
 
     var newSpot = this.doc.createElementNS(XML3D.ns, "light");
     newSpot.setAttribute("shader", "#ls_Spot");
     this.doc.getElementById("spotlight").appendChild(newSpot);
 
     equal(lightsArray.spot.length, 1, "Spot light was added to the lights array");
-    equal(lightsArray.spot.position.length, 3, "Light parameters were added to lights array");
-    equal(lightsArray.spot.falloffAngle.length, 1, "Lightshader parameters were added to lights array");
 
     this.doc.getElementById("dirlight").visible = false;
     this.doc.getElementById("pointlight").visible = false;
@@ -182,7 +178,7 @@ test("Adding lights", 10, function() {
     deepEqual(actual, [0,255,255,255], "Phong object is lit by the new lights");
 });
 
-test("Removing lights", 8, function() {
+test("Removing lights", 6, function() {
     var x = this.doc.getElementById("xml3DElem"),
     actual,
     win = this.doc.defaultView,
@@ -202,8 +198,6 @@ test("Removing lights", 8, function() {
     dirLight.parentElement.removeChild(dirLight);
 
     equal(lightsArray.directional.length, 0, "Light was removed from the lights array");
-    equal(lightsArray.directional.direction.length, 0, "Light parameters were removed correctly");
-    equal(lightsArray.directional.intensity.length, 0, "Lightshader parameters removed correctly");
 
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);

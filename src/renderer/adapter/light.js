@@ -1,4 +1,4 @@
-(function() {
+(function(webgl) {
 
     /**
      * Adapter for <light>
@@ -7,49 +7,57 @@
      * @param {Element} node
      */
     var LightRenderAdapter = function(factory, node) {
-        XML3D.webgl.TransformableAdapter.call(this, factory, node);
-        this.lightShader = null;
+        webgl.TransformableAdapter.call(this, factory, node);
         this.updateLightShader();
         this.createRenderNode();
     };
-    XML3D.createClass(LightRenderAdapter, XML3D.webgl.TransformableAdapter);
+    XML3D.createClass(LightRenderAdapter, webgl.TransformableAdapter);
 
-    LightRenderAdapter.prototype.createRenderNode = function() {
-        var parent = this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
-        var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
+    LightRenderAdapter.prototype.createRenderNode = function () {
+        var parentAdapter = this.getParentRenderAdapter();
+        var parentNode = parentAdapter.getRenderNode && parentAdapter.getRenderNode();
         var lightShader = this.getLightShader();
-        if (lightShader !== undefined) {
-            var lightType = this.getLightType();
-            this.renderNode = this.factory.renderer.scene.createRenderLight({lightType : lightType, parent : parentNode, shader : this.getLightShader(),
-                visible : !this.node.visible ? false : undefined, localIntensity : this.node.intensity});
-        } else {
-            XML3D.debug.logWarning("Encountered a light node with no lightshader, this light will be ignored.");
-        }
-
+        this.renderNode = this.factory.getScene().createRenderLight({
+            light: {
+                type: lightShader ? lightShader.getLightType() : null,
+                data: lightShader ? lightShader.getDataNode() : null
+            },
+            parent: parentNode,
+            shader: lightShader,
+            visible: !this.node.visible ? false : undefined,
+            localIntensity: this.node.intensity
+        });
     };
 
     LightRenderAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.NODE_REMOVED) {
-            return;
-        } else if (evt.type == XML3D.events.THIS_REMOVED) {
-            this.dispose();
-            return;
-        } else if( evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
+        switch (evt.type) {
+            case XML3D.events.NODE_REMOVED:
+                return;
+            case XML3D.events.THIS_REMOVED:
+                this.dispose();
+                return;
+            case XML3D.events.ADAPTER_HANDLE_CHANGED:
             if (evt.key == "shader") {
                 //The lightshader was destroyed, so this light is now invalid
                 this.renderNode.remove();
                 return;
             }
+                break;
+            case XML3D.events.VALUE_MODIFIED:
+                this.valueModified(evt.wrapped.attrName, evt.wrapped.newValue);
+                break;
+            case XML3D.events.ADAPTER_VALUE_CHANGED:
+                this.renderNode.setLightType(evt.adapter.getLightType());
         }
+    };
 
-        var target = evt.wrapped.attrName;
-
-        switch(target) {
+    LightRenderAdapter.prototype.valueModified = function(name, newValue) {
+        switch(name) {
         case "visible":
-            this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
+            this.renderNode.setLocalVisible(newValue === "true");
             break;
         case "intensity":
-            this.renderNode.setLocalIntensity(evt.wrapped.newValue);
+            this.renderNode.setLocalIntensity(newValue);
             break;
         case "shader":
             this.renderNode.remove();
@@ -57,7 +65,6 @@
             this.createRenderNode();
             break;
         }
-        this.factory.handler.redraw("Light attribute changed.");
     };
 
     LightRenderAdapter.prototype.updateLightShader = function(){
@@ -73,16 +80,6 @@
             }
         }
         this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
-    };
-
-    LightRenderAdapter.prototype.getLightType = function() {
-        var shader = this.getLightShader();
-        var script = shader.node.script;
-        if (script.indexOf("urn:xml3d:lightshader:") === 0) {
-            return script.substring(22, script.length);
-        } else {
-            XML3D.debug.logError("Unsupported light type "+script);
-        }
     };
 
     /**
@@ -106,17 +103,7 @@
         return m;
     };
 
-    /**
-     *
-     * @param {string} field
-     * @param {Array.<number>} newValue
-     * @return
-     */
-    LightRenderAdapter.prototype.dataChanged = function(field, newValue) {
-        this.renderNode.updateLightData(field, newValue);
-    };
-
     // Export to XML3D.webgl namespace
-    XML3D.webgl.LightRenderAdapter = LightRenderAdapter;
+    webgl.LightRenderAdapter = LightRenderAdapter;
 
-}());
+}(XML3D.webgl));

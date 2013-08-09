@@ -10,8 +10,6 @@
      */
     var RenderAdapterFactory = function(canvasId) {
         XML3D.base.NodeAdapterFactory.call(this, XML3D.webgl, canvasId);
-        this.handler = XML3D.webgl.handlers[canvasId];
-        this.renderer = XML3D.webgl.renderers[canvasId];
         this.type = "RenderAdapterFactory";
     };
     XML3D.createClass(RenderAdapterFactory, XML3D.base.NodeAdapterFactory);
@@ -46,6 +44,22 @@
         }
         return null;
     };
+
+    RenderAdapterFactory.prototype.setScene = function(scene) {
+        this.scene = scene;
+    }
+
+    RenderAdapterFactory.prototype.getScene = function() {
+        return this.scene;
+    }
+
+    RenderAdapterFactory.prototype.setRenderer = function(renderer) {
+        this.renderer = renderer;
+    }
+
+    RenderAdapterFactory.prototype.getRenderer = function() {
+        return this.renderer;
+    }
 
     // Export
     XML3D.webgl.RenderAdapterFactory = RenderAdapterFactory;

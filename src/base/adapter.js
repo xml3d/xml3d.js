@@ -143,7 +143,7 @@
     };
     /**
      * notifies all adapter that refer to this adapter through AdapterHandles.
-     * @param {number} type The type of change
+     * @param {number?} type The type of change
      */
     XML3D.base.NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
         type = type || XML3D.events.ADAPTER_HANDLE_CHANGED;
@@ -160,7 +160,7 @@
         var child = this.node.firstElementChild;
         while (child) {
             var adapter = this.factory.getAdapter(child);
-            adapter.traverse(callback);
+            adapter && adapter.traverse(callback);
             child = child.nextElementSibling;
         }
     }

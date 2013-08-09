@@ -194,10 +194,10 @@
                             case Xflow.DATA_TYPE.FLOAT2:
                             case Xflow.DATA_TYPE.FLOAT3:
                             case Xflow.DATA_TYPE.FLOAT4:
-                            case Xflow.DATA_TYPE.FLOAT4X4: dataEntry.setValue(new Float32Array(size)); break;
+                            case Xflow.DATA_TYPE.FLOAT4X4: dataEntry._setValue(new Float32Array(size)); break;
                             case Xflow.DATA_TYPE.INT:
                             case Xflow.DATA_TYPE.INT4:
-                            case Xflow.DATA_TYPE.BOOL: dataEntry.setValue(new Int32Array(size)); break;
+                            case Xflow.DATA_TYPE.BOOL: dataEntry._setValue(new Int32Array(size)); break;
                             default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + dataEntry.type);
                         }
                     }

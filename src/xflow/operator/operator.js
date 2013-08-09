@@ -226,10 +226,10 @@ function allocateOutput(operator, inputData, output, operatorData){
                     case Xflow.DATA_TYPE.FLOAT2:
                     case Xflow.DATA_TYPE.FLOAT3:
                     case Xflow.DATA_TYPE.FLOAT4:
-                    case Xflow.DATA_TYPE.FLOAT4X4: entry.setValue(new Float32Array(size)); break;
+                    case Xflow.DATA_TYPE.FLOAT4X4: entry._setValue(new Float32Array(size)); break;
                     case Xflow.DATA_TYPE.INT:
                     case Xflow.DATA_TYPE.INT4:
-                    case Xflow.DATA_TYPE.BOOL: entry.setValue(new Int32Array(size)); break;
+                    case Xflow.DATA_TYPE.BOOL: entry._setValue(new Int32Array(size)); break;
                     default: XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + entry.type);
                 }
             }

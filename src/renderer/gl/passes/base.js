@@ -3,10 +3,11 @@
     /**
      * @contructor
      */
-    var BaseRenderPass = function(opt) {
+    var BaseRenderPass = function(pipeline, output, opt) {
         opt = opt || {};
         this.inputs = opt.inputs || {};
-        this.pipeline = opt.pipeline || null;
+        this.output = output;
+        this.pipeline = pipeline;
     };
 
     XML3D.extend(BaseRenderPass.prototype, {

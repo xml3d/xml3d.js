@@ -1,25 +1,10 @@
 (function (webgl) {
 
-    var PickNormalRenderPass = function (opt) {
-        webgl.BaseRenderPass.call(this, opt);
+    var PickNormalRenderPass = function (pipeline, output, opt) {
+        webgl.BaseRenderPass.call(this, pipeline, output, opt);
     };
 
     XML3D.createClass(PickNormalRenderPass, webgl.BaseRenderPass, {
-        init: function(context) {
-            var target = this.pipeline.getRenderTarget("pickBuffer");
-            if (!target) {
-                target = new webgl.GLScaledRenderTarget(context, webgl.MAX_PICK_BUFFER_DIMENSION, {
-                    width: context.canvasTarget.width,
-                    height: context.canvasTarget.height,
-                    colorFormat: context.gl.RGBA,
-                    depthFormat: context.gl.DEPTH_COMPONENT16,
-                    stencilFormat: null,
-                    depthAsRenderbuffer: true
-                });
-                this.pipeline.addRenderTarget("pickBuffer", target);
-            }
-        },
-
         render: (function () {
             var c_modelViewProjectionMatrix = XML3D.math.mat4.create();
             var c_worldMatrix = XML3D.math.mat4.create();
@@ -29,7 +14,7 @@
 
             return function (object, viewMatrix, projMatrix) {
                 var gl = this.pipeline.context.gl,
-                    target = this.pipeline.getRenderTarget("pickBuffer");
+                    target = this.pipeline.getRenderTarget(this.output);
 
                 target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
@@ -76,7 +61,7 @@
             var c_one = XML3D.math.vec3.fromValues(1, 1, 1);
 
             return function (glX, glY) {
-                var data = this.readPixelDataFromBuffer(glX, glY, this.pipeline.getRenderTarget("pickBuffer"));
+                var data = this.readPixelDataFromBuffer(glX, glY, this.pipeline.getRenderTarget(this.output));
                 if (!data) {
                     return null;
                 }

@@ -1,26 +1,11 @@
 (function (webgl) {
 
-    var PickObjectRenderPass = function (opt) {
-        webgl.BaseRenderPass.call(this, opt);
+    var PickObjectRenderPass = function (pipeline, output, opt) {
+        webgl.BaseRenderPass.call(this, pipeline, output, opt);
     };
     XML3D.createClass(PickObjectRenderPass, webgl.BaseRenderPass);
 
     XML3D.extend(PickObjectRenderPass.prototype, {
-        init: function(context) {
-            var target = this.pipeline.getRenderTarget("pickBuffer");
-            if (!target) {
-                target = new webgl.GLScaledRenderTarget(context, webgl.MAX_PICK_BUFFER_DIMENSION, {
-                    width: context.canvasTarget.width,
-                    height: context.canvasTarget.height,
-                    colorFormat: context.gl.RGBA,
-                    depthFormat: context.gl.DEPTH_COMPONENT16,
-                    stencilFormat: null,
-                    depthAsRenderbuffer: true
-                });
-                this.pipeline.addRenderTarget("pickBuffer", target);
-            }
-        },
-
         render: (function () {
             var c_mvp = XML3D.math.mat4.create(),
                 c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
@@ -28,7 +13,7 @@
 
             return function (objects, viewMatrix, projMatrix) {
                 var gl = this.pipeline.context.gl,
-                    target = this.pipeline.getRenderTarget("pickBuffer");
+                    target = this.pipeline.getRenderTarget(this.output);
                 target.bind();
 
                 gl.enable(gl.DEPTH_TEST);
@@ -80,7 +65,7 @@
          * @returns {XML3D.webgl.RenderObject|null} Picked Object
          */
         getRenderObjectFromPickingBuffer: function (x, y, objects) {
-            var data = this.readPixelDataFromBuffer(x, y, this.pipeline.getRenderTarget("pickBuffer"));
+            var data = this.readPixelDataFromBuffer(x, y, this.pipeline.getRenderTarget(this.output));
 
             if (!data)
                 return null;

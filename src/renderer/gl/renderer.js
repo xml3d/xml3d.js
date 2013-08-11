@@ -94,18 +94,14 @@
             this.needsDraw = this.needsPickingDraw = true;
         },
         createDefaultPipelines: function (context) {
-            var pipeline = new XML3D.webgl.RenderPipeline(context);
-            var opt = {pipeline : pipeline};
-            pipeline.addRenderTarget("screen", context.canvasTarget);
-            pipeline.addRenderPass(new webgl.ForwardRenderPass(opt));
+            var pipeline = new XML3D.webgl.ForwardRenderPipeline(context);
             pipeline.init();
             this.renderInterface.setRenderPipeline(pipeline);
 
-            var pickingPipeline = new XML3D.webgl.RenderPipeline(context);
-            opt = {pipeline : pickingPipeline};
-            pickingPipeline.addRenderPass(this.pickObjectPass = new webgl.PickObjectRenderPass(opt));
-            pickingPipeline.addRenderPass(this.pickPositionPass = new webgl.PickPositionRenderPass(opt));
-            pickingPipeline.addRenderPass(this.pickNormalPass = new webgl.PickNormalRenderPass(opt));
+            var pickingPipeline = new XML3D.webgl.PickingRenderPipeline(context);
+            pickingPipeline.addRenderPass(this.pickObjectPass = new webgl.PickObjectRenderPass(pickingPipeline, "pickBuffer"));
+            pickingPipeline.addRenderPass(this.pickPositionPass = new webgl.PickPositionRenderPass(pickingPipeline, "pickBuffer"));
+            pickingPipeline.addRenderPass(this.pickNormalPass = new webgl.PickNormalRenderPass(pickingPipeline, "pickBuffer"));
             pickingPipeline.init();
             this.pickingPipeline = pickingPipeline;
         },

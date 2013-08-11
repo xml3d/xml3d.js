@@ -4,19 +4,13 @@
      *
      * @constructor
      */
-    var ForwardRenderPass = function (opt) {
-        webgl.BaseRenderPass.call(this, opt);
+    var ForwardRenderPass = function (pipeline, output, opt) {
+        webgl.BaseRenderPass.call(this, pipeline, output, opt);
 		this.sorter = new webgl.ObjectSorter();
     };
     XML3D.createClass(ForwardRenderPass, webgl.BaseRenderPass);
 
     XML3D.extend(ForwardRenderPass.prototype, {
- 		init: function(context) {
-            var target = this.pipeline.getRenderTarget("screen");
-            if (!target) {
-                this.pipeline.addRenderTarget("screen", context.canvasTarget);
-            }
-        },
         renderScene: (function () {
             /**
              * @type Float32Array
@@ -26,7 +20,7 @@
             return function (scene) {
                 var gl = this.pipeline.context.gl,
                     count = { objects: 0, primitives: 0 },
-                    target = this.pipeline.getRenderTarget("screen"),
+                    target = this.pipeline.getRenderTarget(this.output);
                     width = target.getWidth(),
                     height = target.getHeight(),
                     aspect = width / height;

@@ -19,10 +19,6 @@
     MESH_PARAMETERS[WebGLRenderingContext.LINES] = { position: { required: true }, index: true };
     MESH_PARAMETERS[WebGLRenderingContext.POINTS] = { position: { required: true }, index: true };
 
-    var TYPE_FILTER = {};
-    for (var param in MESH_PARAMETERS) {
-        TYPE_FILTER[param] = Object.keys(MESH_PARAMETERS[param]);
-    }
 
 
     var getGLTypeFromArray = function(array) {
@@ -120,14 +116,13 @@
 
     XML3D.createClass(MeshClosure, webgl.DrawableClosure, {
         initialize: function () {
-            var typeFilter = TYPE_FILTER[this.getMeshType()];
-            if (!typeFilter) {
-                XML3D.debug.logError("Unsupported Mesh request: ", this.mesh);
+            var meshConfig = MESH_PARAMETERS[this.getMeshType()];
+            if (!meshConfig) {
+                XML3D.debug.logError("Unsupported Mesh request: ", this.mesh, this.getMeshType());
                 this.typeDataValid = false;
                 return;
             }
-            this.typeRequest = new Xflow.ComputeRequest(this.data, typeFilter, this.typeDataChanged.bind(this));
-            this.typeDataChanged(this.typeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+            this.setTypeRequest(meshConfig);
         },
         setBoundingBoxRequired: function(required) {
             this.boundingBoxRequired = required;
@@ -246,11 +241,10 @@
                 return; // only if structure has changed, it can't get valid after update
             }
             var dataResult = this.typeRequest.getResult();
-            var meshParams = MESH_PARAMETERS[this.getMeshType()];
-            XML3D.debug.assert(meshParams, "At this point, we need parameters for the type");
+            var meshAttributes = this.meshAttributes;
 
             var vertexCount = 0;
-            var complete = this.updateMeshFromResult(meshParams, dataResult, function(name) {
+            var complete = this.updateMeshFromResult(meshAttributes, dataResult, function(name) {
                 XML3D.debug.logError("Required mesh attribute ", name, "is missing for mesh");
             });
 
@@ -303,6 +297,17 @@
             this.attributeRequest = new Xflow.ComputeRequest(this.data, Object.keys(attributes), this.attributeDataChanged.bind(this));
             this.attributeDataChanged(this.attributeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         },
+
+        /**
+         *
+         * @param {Object.<string, *>} attributes
+         */
+        setTypeRequest: function(attributes) {
+            this.meshAttributes = attributes;
+            this.typeRequest = new Xflow.ComputeRequest(this.data, Object.keys(attributes), this.typeDataChanged.bind(this));
+            this.typeDataChanged(this.typeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        },
+
         /**
          * @param {Xflow.ComputeRequest} request
          * @param {Xflow.RESULT_STATE} state

@@ -20,6 +20,10 @@
 
         createPasses: function() {
             this.addRenderPass(new webgl.ForwardRenderPass(this, "screen"));
+        },
+
+        render: function(scene) {
+            return this.renderPasses[0].render(scene);
         }
     });
 

@@ -268,10 +268,13 @@
         for(var i = 0; i < executer.programData.inputs.length; ++i){
             var entry = executer.programData.getDataEntry(i);
             var iterateCount = entry ? entry.getIterateCount ? entry.getIterateCount() : 1 : 0;
-            if(!inputs[i].arrayAccess && iterateCount != 1)
-                executer.operatorList.setInputIterate(i, true);
+            if(!iterateCount)
+                executer.operatorList.setInputIterateType(i, Xflow.ITERATION_TYPE.NULL);
+            else if(!inputs[i].arrayAccess && iterateCount > 1)
+                executer.operatorList.setInputIterateType(i, Xflow.ITERATION_TYPE.MANY);
             else
-                executer.operatorList.setInputIterate(i, false);
+                executer.operatorList.setInputIterateType(i, Xflow.ITERATION_TYPE.ONE);
+
             if(inputs[i].arrayAccess && platformRequiresArraySize(executer. platform)){
                 executer.operatorList.setInputSize(i, iterateCount);
             }

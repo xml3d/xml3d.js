@@ -187,6 +187,13 @@ var Xflow = {};
         LINEAR_WEIGHT: 3
     }
 
+
+    Xflow.ITERATION_TYPE = {
+        NULL: 0,
+        ONE: 1,
+        MANY: 2
+    }
+
     /**
      * Type of Information Extraction - used by operators
      * @private

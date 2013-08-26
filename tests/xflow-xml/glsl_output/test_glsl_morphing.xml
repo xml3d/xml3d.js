@@ -30,10 +30,15 @@
                 <VSConnection in="texCoord" out="fragTexCoord" type="FLOAT2" optional="true" />
             </VSConfig>
 
-            <VSInputBufferCount count="10" />
-            <VSInAttribCount count="7"/>
+            <VSInputBufferCount count="8" />
+            <VSInAttribCount count="5"/>
             <VSUniformAttribCount count="3"/>
-            <VSOutAttribCount count="4"/>
+            <VSOutAttribCount count="2"/>
+
+            <VSOutputIsVarying name="worldPosition" />
+            <VSOutputIsVarying name="worldNormal" />
+            <VSOutputIsNull name="fragColor" />
+            <VSOutputIsNull name="fragTexCoord" />
 
             <VSHasInputBuffer input="#positionAdd_1" uniform="false" />
             <VSHasInputBuffer input="#positionAdd_2" uniform="false" />

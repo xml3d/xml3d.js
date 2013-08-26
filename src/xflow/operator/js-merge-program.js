@@ -112,7 +112,7 @@
         var mapping = entry.operator.mapping;
         data.iterFlag = {};
         for(var i = 0; i < mapping.length; ++i){
-            var doIterate = (entry.isTransferInput(i) || list.isInputIterate(entry.getDirectInputIndex(i)));
+            var doIterate = entry.isTransferInput(i) || list.isInputIterate(entry.getDirectInputIndex(i));
             data.iterFlag[i] = doIterate;
         }
         data.iterateCount = list.getIterateCount(programData);

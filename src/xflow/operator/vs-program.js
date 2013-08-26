@@ -11,8 +11,28 @@
         this._glslCode = null;
         this._shaderInputNames = [];
         this._shaderOutputNames = [];
-        this._inputIndices = {};
+        this._inputInfo = {};
+        this._outputInfo = {};
         constructVS(this);
+    }
+
+    Xflow.VSProgram.prototype.isInputUniform = function(name){
+        return this._inputInfo[name].uniform;
+    }
+    Xflow.VSProgram.prototype.getInputData = function(name, programData){
+        return programData.getDataEntry(this._inputInfo[name].index);
+    }
+
+    Xflow.VSProgram.prototype.isOutputUniform = function(name){
+        return this._outputInfo[name].type == Xflow.ITERATION_TYPE.ONE;
+    }
+
+    Xflow.VSProgram.prototype.isOutputNull = function(name){
+        return this._outputInfo[name].type == Xflow.ITERATION_TYPE.NULL;
+    }
+
+    Xflow.VSProgram.prototype.getUniformOutputData = function(name, programData){
+        return programData.getDataEntry(this._outputInfo[name].index);
     }
 
 
@@ -22,6 +42,12 @@
         var usedNames = [],
             directInputNames = {},
             transferNames = {};
+
+        var baseEntry = entries[entries.length - 1], acceptedBaseShaderInput = [], baseOperator = baseEntry.operator;
+        var vsConfig = baseOperator.vsConfig, outputInputMap = baseOperator.outputInputMap;
+
+        if(!vsConfig)
+            throw new Error("Could not find vsConfig! Attempt to create vertex shader programm without VS operator?");
 
         for(var i = 0; i < entries.length; ++i){
             if(entries[i].blockedNames){
@@ -41,17 +67,33 @@
         code += "\n";
         code += "// OUTPUT\n"
         // First: collect output names
-        for( var i = 0; i < entries.length; ++i){
-            var entry = entries[i], operator = entry.operator;
-            for(var j = 0; j < operator.outputs.length; ++j){
-                if(entry.isFinalOutput(j)){
-                    var name = operator.outputs[j].name;
-                    code += "out " + getGLSLType(operator.outputs[j].type) + " " + name + ";\n";
-                    Xflow.nameset.add(usedNames, name);
-                    Xflow.nameset.add(program._shaderOutputNames, name);
-                    transferNames[entry.getTransferOutputId(j)] = name;
-                }
+
+        for( var i = 0; i < vsConfig._attributes.length; ++i){
+            var configAttr = vsConfig._attributes[i],
+                inputIndex = outputInputMap[i],
+                directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
+            var outputInfo = {type: 0, index: 0},
+                outputName = configAttr.outputName;
+            if(vsConfig.isAttributeTransformed(i) ||
+                baseEntry.isTransferInput(inputIndex) ||
+                operatorList.isInputIterate(directInputIndex))
+            {
+                acceptedBaseShaderInput[inputIndex] = true;
+                outputInfo.type = Xflow.ITERATION_TYPE.MANY;
+
+                code += "out " + getGLSLType(baseOperator.outputs[i].type) + " " + outputName + ";\n";
+                Xflow.nameset.add(usedNames, outputName);
+                transferNames[baseEntry.getTransferOutputId(i)] = outputName;
             }
+            else if(operatorList.isInputUniform(directInputIndex)){
+                outputInfo.type = Xflow.ITERATION_TYPE.ONE;
+                outputInfo.index = directInputIndex;
+            }
+            else{
+                outputInfo.type = Xflow.ITERATION_TYPE.NULL;
+            }
+            Xflow.nameset.add(program._shaderOutputNames, outputName);
+            program._outputInfo[outputName] = outputInfo;
         }
         code += "\n";
         code += "// INPUT\n"
@@ -59,11 +101,13 @@
         for(var i = 0; i < entries.length; ++i){
             var entry = entries[i], operator = entry.operator;
             for(var j = 0; j < operator.mapping.length; ++j){
-                if(!entry.isTransferInput(j) && !directInputNames[entry.getDirectInputIndex(j)]){
+                if( (i < entries.length - 1 || acceptedBaseShaderInput[j]) &&
+                        !entry.isTransferInput(j) && !directInputNames[entry.getDirectInputIndex(j)])
+                {
                     var mapEntry = operator.mapping[j];
                     var name = getFreeName(mapEntry.name, usedNames), inputIndex = entry.getDirectInputIndex(j),
                         uniform = !operatorList.isInputIterate(inputIndex);
-                    program._inputIndices[name] = { index: inputIndex, uniform: uniform };
+                    program._inputInfo[name] = { index: inputIndex, uniform: uniform };
                     Xflow.nameset.add(program._shaderInputNames, name);
                     directInputNames[inputIndex] = name;
 

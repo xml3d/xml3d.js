@@ -37,11 +37,12 @@
         <file name="gl/passes/pickNormal.js" />
         <file name="gl/programfactory.js" />
         <file name="gl/drawablefactory.js" />
-        <file name="gl/urnshadercomposer.js" />
+        <file name="gl/composers/abstractshadercomposer.js" />
+        <file name="gl/composers/urnshadercomposer.js" />
         <file name="gl/closures/abstractshaderclosure.js" />
         <file name="gl/closures/urnshaderclosure.js" />
-        <file name="gl/jsshadercomposer.js" />
-        <file name="gl/shadercomposerfactory.js" />
+        <file name="gl/composers/jsshadercomposer.js" />
+        <file name="gl/composers/shadercomposerfactory.js" />
         <file name="gl/closures/drawableclosure.js" />
         <file name="gl/closures/meshclosure.js" />
         <file name="rendererfactory.js" />

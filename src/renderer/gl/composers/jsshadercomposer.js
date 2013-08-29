@@ -62,12 +62,14 @@
 
             var contextData = {"global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]};
 
-            var entries = shaderResult.getOutputMap();
+            if (shaderResult) {
+                var entries = shaderResult.getOutputMap();
 
-            for(var name in entries) {
-                var entry = entries[name];
-                if(entry) {
-                    contextData["global.shade"][0].extra.info[name] = convertXflow2ShadeType(entry.type);
+                for (var name in entries) {
+                    var entry = entries[name];
+                    if (entry) {
+                        contextData["global.shade"][0].extra.info[name] = convertXflow2ShadeType(entry.type);
+                    }
                 }
             }
 
@@ -100,7 +102,13 @@
                 }
             }
             this.program.setUniformVariables(previousValues);
-        }
+        },
+
+
+
+        /* Default values are compiled into shade.js */
+        setDefaultUniforms: function() {}
+
 
     });
 
@@ -110,9 +118,12 @@
      * @param shaderInfo
      * @param {HTMLScriptElement} node
      * @implements IShaderComposer
+     * @extends AbstractShaderComposer
      * @constructor
      */
     var JSShaderComposer = function(context, shaderInfo, node) {
+        webgl.AbstractShaderComposer.call(this, context);
+
         if (!window.Shade)
             throw new Error("Shade.js not found");
 
@@ -136,7 +147,7 @@
         this.updateRequests(shaderInfo);
     };
 
-    XML3D.createClass(JSShaderComposer, XML3D.util.EventDispatcher, {
+    XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
         updateRequests: function(shaderInfo) {
             this.extractedParams = Shade.extractParameters(this.sourceTemplate);
             var that = this;
@@ -152,37 +163,11 @@
         getRequestFields: function() {
             return this.extractedParams;
         },
-        getShaderClosure: function(scene, objectData, opt)  {
-            var shaderData = this.request ? this.request.getResult() : null;
-            var shader = new JSShaderClosure(this.context, this.sourceTemplate);
-            shader.createSources(scene, shaderData, objectData);
-            /*for (var i=0; i < this.shaderClosures.length; i++) {
-                if (this.shaderClosures[i].equals(shader))
-                    return this.shaderClosures[i];
-            } */
-            this.initializeShaderClosure(shader, scene, objectData);
-            return shader;
-        },
         getShaderAttributes: function() {
             return { color: null, normal: null, texcoord: null };
         },
-        update: function(scene, opt) {
-            opt = opt || {};
-            var that = this;
-        },
-
-        /**
-         *
-         * @param shaderClosure
-         * @param scene
-         * @param objectData
-         * @private
-         */
-        initializeShaderClosure: function(shaderClosure, scene, objectData) {
-            shaderClosure.compile();
-            var result = this.request.getResult();
-            this.updateClosureFromComputeResult(shaderClosure, result, {force : true});
-
+        createShaderClosure: function () {
+            return new JSShaderClosure(this.context, this.sourceTemplate);
         }
 
     });

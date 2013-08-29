@@ -126,7 +126,7 @@
                     webglData.changed = 0;
                 }
             }
-            this.isTransparent = this.descriptor.hasTransparency(dataMap);
+            // TODO: this.isTransparent = this.descriptor.hasTransparency(dataMap);
         },
 
         /**

@@ -1,4 +1,12 @@
 (function (webgl) {
+
+    /** @type ResourceManager */
+    var resourceManager = XML3D.base.resourceManager;
+
+    var ComposerConstructors = {
+        "text/shade-javascript": webgl.JSShaderComposer
+    }
+
     /**
      * @param {XML3D.webgl.GLContext} context
      * @constructor
@@ -28,9 +36,30 @@
             }
             var result = this.composers[shaderInfo.id];
             if (!result) {
-                result = new webgl.URNShaderComposer(this.context, shaderInfo);
-                this.composers[shaderInfo.id] = result;
-                this.context.getStatistics().materials++;
+                /** @type XML3D.URI */
+                var scriptURI = shaderInfo.script;
+                if(scriptURI.scheme == "urn") {
+                    result = new webgl.URNShaderComposer(this.context, shaderInfo);
+                    this.composers[shaderInfo.id] = result;
+                    this.context.getStatistics().materials++;
+                } else {
+                    // TODO: This should be done via resourceManager, but script node is not yet
+                    // configured
+                    if (scriptURI.isLocal()) {
+                        var node = XML3D.URIResolver.resolveLocal(scriptURI);
+                        if (!node)
+                            XML3D.debug.logError("Could not resolve script for shader: " + scriptURI.toString());
+
+                        try {
+                            var Constructor = ComposerConstructors[node.type];
+                            result = new Constructor(this.context, shaderInfo, node);
+                        } catch(e) {
+                            XML3D.debug.logError("No shader found for : " + node.type);
+                        }
+                    }
+
+                }
+                return this.defaultComposer;
             }
             return result;
         },

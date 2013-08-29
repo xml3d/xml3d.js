@@ -23,18 +23,9 @@
 
     /**
      * @param {XML3D.webgl.scene} scene
-     * @returns {IShaderComposer.UpdateState}
+     * @param {{}=} opt
      */
     IShaderComposer.prototype.update = function (scene, opt) {
-        return IShaderComposer.UpdateState.SHADER_UNCHANGED;
-    };
-
-    //TODO Do we still need this?
-    /**
-     * @returns {boolean}
-     */
-    IShaderComposer.prototype.isValid = function () {
-        return false;
     };
 
     /**
@@ -44,6 +35,21 @@
     IShaderComposer.prototype.getShaderClosure = function (scene) {
         return null;
     };
+
+    /**
+     * @returns {Array.<string>}
+     */
+    IShaderComposer.prototype.getRequestFields = function() {
+        return [];
+    };
+
+    /**
+     * @returns {{}}
+     */
+    IShaderComposer.prototype.getShaderAttributes = function() {
+        return {};
+    };
+
 
 
 
@@ -57,9 +63,6 @@
 
     XML3D.createClass(DefaultComposer, XML3D.util.EventDispatcher, {
         update: function () {
-        },
-        isValid: function () {
-            return true;
         },
         getShaderClosure: function () {
             return this.context.programFactory.getFallbackProgram();
@@ -269,6 +272,7 @@
 
         initializeShaderClosure: function(shaderClosure, scene, objectData) {
             shaderClosure.compile();
+            shaderClosure.setDefaultUniforms();
             var result = this.request.getResult();
             //TODO Merge compute results
             this.updateClosureFromComputeResult(shaderClosure, result, {force : true});
@@ -295,6 +299,7 @@
                     this.shaderClosures.push(shaderClosure);
                 } else {
                     newShader.compile();
+                    newShader.setDefaultUniforms();
                     this.updateClosureFromComputeResult(newShader, objectData, {force:true});
                     this.shaderClosures.push(newShader);
                     return newShader;
@@ -303,10 +308,6 @@
                 XML3D.debug.logWarning("After structure change the shader was not found in list of obsolete closures");
             }
             return shaderClosure;
-        },
-
-        isValid: function () {
-            return true;
         },
 
         getShaderParameters: function() {

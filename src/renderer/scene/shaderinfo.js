@@ -23,12 +23,18 @@
     };
 
     XML3D.extend(ShaderInfo.prototype, {
+        /**
+         * @param {XML3D.URI} script
+         */
         setScript: function(script) {
             if(this.script != script) {
                 this.script = script;
                 this.scriptChangedEvent();
             }
         },
+        /**
+         * @returns {XML3D.URI}
+         */
         getScript: function() {
             return this.script;
         },

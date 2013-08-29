@@ -3,27 +3,36 @@
     /**
      * A ShaderClosure connects a mesh-specific GLProgram with it's Xflow data
      * @param {GLContext} context
-     * @param descriptor
-     * @param dataCallback
      * @constructor
      */
-    var ShaderClosure = function(context, descriptor, dataCallback) {
-        this.descriptor = descriptor;
-        this.getShaderParameters = dataCallback || function(){ {} };
-        this.source = {};
-
+    var AbstractShaderClosure = function(context) {
         /**
          * @private
          * @type {GLProgramObject|null}
          */
         this.program = null;
-
         this.context = context;
         this.id = "";
+
+        /**
+         * Stores, if the underlying shader has semi-transparencies
+         * and thus needs to considered for alpha-blending
+         * @type {boolean}
+         */
         this.isTransparent = false;
+
+        /**
+         * The source of a shader
+         * @private
+         * @type {{vertex: string, fragment: string}}
+         */
+        this.source = {
+            vertex: "",
+            fragment: ""
+        }
     };
 
-    Object.defineProperties(ShaderClosure.prototype, {
+    Object.defineProperties(AbstractShaderClosure.prototype, {
             attributes: {
                 writeable: false,
                 get: function() {
@@ -44,7 +53,7 @@
             }
         }
     );
-    XML3D.extend(ShaderClosure.prototype, {
+    XML3D.extend(AbstractShaderClosure.prototype, {
 
         equals: function(that) {
             return this.source.vertex === that.source.vertex && this.source.fragment === that.source.fragment;
@@ -55,15 +64,12 @@
         },
 
         compile: function () {
-            if (!this.source.fragment)
+            if (!this.source.fragment || !this.source.vertex) {
+                XML3D.debug.logError("No source found for shader", this);
                 return;
-            if (!this.source.vertex)
-                return;
+            }
 
             var programObject = new XML3D.webgl.GLProgramObject(this.context.gl, this.source);
-            if (programObject.isValid()) {
-                programObject.setUniformVariables(this.descriptor.uniforms);
-            }
             this.program = programObject;
             this.id = programObject.id;
         },
@@ -84,16 +90,6 @@
             return this.program.isValid();
         },
 
-        createSources: function(scene, shaderData, objectData) {
-            var directives = [];
-            //TODO add object data to directives
-            this.descriptor.addDirectives(directives, scene.lights || {}, shaderData ? shaderData.getOutputMap() : {});
-            this.source = {
-                fragment: this.addDirectivesToSource(directives, this.descriptor.fragment),
-                vertex: this.addDirectivesToSource(directives, this.descriptor.vertex)
-            };
-        },
-
         convertToJSArray: function(value) {
             var jsArray = [value.length];
             for (var i=0; i<value.length; i++) {
@@ -103,7 +99,7 @@
         },
 
         /**
-         * @param {Xflow.data.ComputeResult} result
+         * @param {Xflow.ComputeResult} result
          * @param {Object?} options
          */
         updateUniformsFromComputeResult: function (result, options) {
@@ -162,29 +158,12 @@
             }
         },
 
-        addDirectivesToSource: function (directives, source) {
-            var header = "";
-            directives.forEach(function (v) {
-                header += "#define " + v + "\n";
-            });
-            return header + "\n" + source;
-        },
-
         setUniformVariableOverride: function(override) {
             this.program.setUniformVariables(override);
-        },
-
-        undoUniformVariableOverride: function(override) {
-            var previousValues = {};
-            var shaderData = this.getShaderParameters();
-            for (var name in override) {
-                var value = shaderData[name] ? shaderData[name] : this.descriptor.uniforms[name];
-                previousValues[name] = value.getValue ? value.getValue() : value;
-            }
-            this.program.setUniformVariables(previousValues);
         }
-});
 
-    webgl.ShaderClosure = ShaderClosure;
+    });
+
+    webgl.AbstractShaderClosure = AbstractShaderClosure;
 
 }(XML3D.webgl));

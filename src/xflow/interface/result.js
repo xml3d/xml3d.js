@@ -110,16 +110,35 @@ Object.defineProperty(VertexShaderResult.prototype, "shaderInputNames", {
     set: function(v){
         throw new Error("shaderInputNames is readonly");
     },
-    get: function(){ return this._shaderInputNames; }
+    get: function(){ return this._program._shaderInputNames; }
+});
+Object.defineProperty(VertexShaderResult.prototype, "shaderOutputNames", {
+    set: function(v){
+        throw new Error("shaderOutputNames is readonly");
+    },
+    get: function(){ return this._program._shaderOutputNames; }
 });
 
+
 VertexShaderResult.prototype.getShaderInputData = function(name){
-    return this._programData.getDataEntry(this._program._inputIndices[name].index);
+    return this._program.getInputData(name, this._programData);
 };
 
 VertexShaderResult.prototype.isShaderInputUniform = function(name){
-    return this._program._inputIndices[name].uniform;
+    return this._program.isInputUniform(name);
 }
+
+VertexShaderResult.prototype.isShaderOutputUniform = function(name){
+    return this._program.isOutputUniform(name);
+}
+VertexShaderResult.prototype.getUniformOutputData = function(name){
+    return this._program.getUniformOutputData(name, this._programData);
+}
+VertexShaderResult.prototype.isShaderOutputNull = function(name){
+    return this._program.isOutputNull(name);
+}
+
+
 
 VertexShaderResult.prototype.getGLSLCode = function(){
     return this._program._glslCode;

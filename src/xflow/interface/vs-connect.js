@@ -39,6 +39,17 @@ Xflow.VSConfig.prototype.getAttribute = function(i){
     return this._attributes[i];
 }
 
+Xflow.VSConfig.prototype.isAttributeTransformed = function(i){
+    var type = this._attributes[i].type;
+    switch(type){
+        case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_NORMAL:
+        case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_POINT:
+        case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_NORMAL:
+        case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_POINT: return true;
+        default: return false;
+    }
+}
+
 Xflow.VSConfig.prototype.addBlockedName = function(name){
     this._blockedNames.push(name);
 }
@@ -82,15 +93,20 @@ Xflow.VSConfig.prototype.getOperator = function(){
 
     var outputs = [], params = [], glslCode = "\t// VS Connector\n";
 
-    var inputAdded = {};
+    var inputAdded = {}, outputInputMap = [];
 
     for(var i = 0; i < this._attributes.length; ++i){
         var attr = this._attributes[i];
         var type = Xflow.getTypeName(getXflowTypeFromGLSLType(attr.type));
         outputs.push( { type: type, name: attr.outputName} );
-        if(!inputAdded[attr.inputName]){
+        if(inputAdded[attr.inputName] === undefined){
+            var idx = params.length;
+            outputInputMap[i] = idx;
             params.push({ type: type, source: attr.inputName, optional: attr.optional} );
-            inputAdded[attr.inputName] = true;
+            inputAdded[attr.inputName] = idx;
+        }
+        else{
+            outputInputMap[i] = inputAdded[attr.inputName];
         }
         var line = "\t#O{" + attr.outputName + "} = ";
         switch(attr.type){
@@ -119,7 +135,9 @@ Xflow.VSConfig.prototype.getOperator = function(){
         outputs: outputs,
         params:  params,
         evaluate_glsl: glslCode,
-        blockedNames: this._blockedNames
+        blockedNames: this._blockedNames,
+        vsConfig: this,
+        outputInputMap: outputInputMap
     });
 
     c_vs_operator_cache[key] = operator;

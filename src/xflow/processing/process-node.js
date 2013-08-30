@@ -321,7 +321,6 @@ function getRequestVSResult(requestNode)
     var program = executer.getVertexShader();
     result._program = program;
     result._programData = executer.programData;
-    result._shaderInputNames = Object.keys(program._inputIndices);
 
     result._dataEntries = {}; result._outputNames = [];
     for(var name in requestNode.channels){

@@ -101,14 +101,14 @@
         }
         var result = this.platform + ">" + keys.join("!") + "|";
         for(var i in this.inputInfo){
-            result += i + ">" + (this.inputInfo[i].iterate || false) + "x" + (this.inputInfo[i].size || 0);
+            result += i + ">" + (this.inputInfo[i].iterate || 0) + "x" + (this.inputInfo[i].size || 0);
         }
         return result;
     }
 
-    Xflow.OperatorList.prototype.setInputIterate = function(inputIndex, value){
+    Xflow.OperatorList.prototype.setInputIterateType = function(inputIndex, type){
         if(!this.inputInfo[inputIndex]) this.inputInfo[inputIndex] = {};
-        this.inputInfo[inputIndex].iterate = value;
+        this.inputInfo[inputIndex].iterate = type;
     }
     Xflow.OperatorList.prototype.setInputSize = function(inputIndex, size){
         if(!this.inputInfo[inputIndex]) this.inputInfo[inputIndex] = {};
@@ -117,8 +117,18 @@
 
 
     Xflow.OperatorList.prototype.isInputIterate = function(inputIndex){
+        return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == Xflow.ITERATION_TYPE.MANY;
+    }
+    Xflow.OperatorList.prototype.isInputUniform = function(inputIndex){
+        return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == Xflow.ITERATION_TYPE.ONE;
+    }
+    Xflow.OperatorList.prototype.isInputNull = function(inputIndex){
+        return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == Xflow.ITERATION_TYPE.NULL;
+    }
+    Xflow.OperatorList.prototype.getInputIterateType = function(inputIndex){
         return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate;
     }
+
     Xflow.OperatorList.prototype.getInputSize = function(inputIndex){
         return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].size || 0;
     }

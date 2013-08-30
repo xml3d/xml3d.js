@@ -172,6 +172,30 @@ module("Xflow tests", {
         equal(actualCount, count, title + "=> Vertex Shader has " +
             count + " 'uniform' attributes.");
     },
+    VSOutputIsVarying: function(result, action, title){
+        var name = action.getAttribute("name");
+        equal(!result.isShaderOutputUniform(name) && !result.isShaderOutputNull(name),
+                true, title + "=> Output '" + name + "' is varying.");
+    },
+    VSOutputIsNull: function(result, action, title){
+        var name = action.getAttribute("name");
+        equal(result.isShaderOutputNull(name),
+                true, title + "=> Output '" + name + "' is null.");
+    },
+    VSOutputIsUniform: function(result, action, title){
+        var name = action.getAttribute("name");
+        equal(result.isShaderOutputUniform(name),
+                true, title + "=> Output '" + name + "' is unform.");
+        if(action.hasAttribute("input")){
+            var shouldMatchName = action.getAttribute("input").substring(1);
+            var shouldMatch = this.doc.getElementById(shouldMatchName);
+            var shouldMatchData = this.getXflowData(shouldMatch);
+            equal(result.getUniformOutputData(name), shouldMatchData,
+                title + "=> Uniform output '" + name + "' forwards correct input data.");
+        }
+
+    },
+
     VSHasInputBuffer : function (result, action, title) {
         var shouldMatchName = action.getAttribute("input").substring(1);
         var shouldMatch = this.doc.getElementById(shouldMatchName);
@@ -563,4 +587,14 @@ test("GLSL with 3x Morph", function() {
     this.executeTests(response);
 });
 
+test("GLSL with Uniforms", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_uniform.xml", handler);
+    this.executeTests(response);
+});
 
+test("GLSL with Processing on Uniforms", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_uniform_processing.xml", handler);
+    this.executeTests(response);
+});

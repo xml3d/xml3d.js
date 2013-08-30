@@ -33,6 +33,7 @@
         this.context = context;
         this.glType = getGLTypeFromString(type);
         this.buffers = {};
+        this.uniformOverride = {};
         this.isIndexed = false;
         this.vertexCount = null;
         this.context.getStatistics().meshes++;
@@ -42,6 +43,12 @@
         setBuffer: function (name, buffer) {
             this.buffers[name] = buffer;
             this.isIndexed = this.isIndexed || name == "index";
+        },
+        clearBuffers: function(){
+            this.buffers = {};
+        },
+        setUniformOverride: function (name, buffer) {
+            this.uniformOverride[name] = buffer;
         },
         setVertexCount: function (vertexCount) {
             this.vertexCount = vertexCount;

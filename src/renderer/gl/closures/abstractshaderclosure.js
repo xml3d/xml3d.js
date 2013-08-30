@@ -12,6 +12,11 @@
          */
         this.program = null;
         this.context = context;
+        /**
+         * A flag used by shadercomposer to sort out obsolete shaderclosures
+         * @type {boolean}
+         */
+        this.obsolete = false;
         this.id = "";
 
         /**

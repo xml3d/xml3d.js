@@ -63,19 +63,8 @@
             }
         },
         /**
-         *
-         * @param opt
-         * @returns {webgl.RenderMesh}
-         */
-        createRenderMesh: function (opt) {
-            var pageEntry = this.getPageEntry(webgl.RenderMesh.ENTRY_SIZE);
-            var renderObject = new webgl.RenderMesh(this, pageEntry, opt);
-            return renderObject;
-        },
-        /**
          * @param opt
          * @returns {webgl.RenderObject}
-         * @deprecated
          */
         createRenderObject: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderObject.ENTRY_SIZE);

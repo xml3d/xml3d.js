@@ -81,7 +81,6 @@
     var AbstractShaderComposer = function (context) {
         this.context = context;
         this.shaderClosures = [];
-        this.obsoleteClosures = [];
         this.dataChanged = false;
         this.structureChanged = false;
         this.request = null;
@@ -95,6 +94,12 @@
         update: function (scene, opt) {
             opt = opt || {};
             var that = this;
+
+            // Clean up shaderClosures that are not used!
+            var i = this.shaderClosures.length;
+            while(i--){
+                if(this.shaderClosures[i].obsolete) this.shaderClosures.splice(i,1);
+            }
 
             if (!this.shaderClosures.length)
                 return;
@@ -183,13 +188,20 @@
             throw new Error("AbstractComposer::createShaderClosure needs to be overridden");
         },
 
-        getShaderClosure: function (scene, objectData) {
+        createVsRequest: function(objectDataNode, callback){
+            throw new Error("AbstractComposer::createVsRequest needs to be overridden");
+        },
+
+        getShaderClosure: function (scene, vsResult) {
             var shader = this.createShaderClosure();
 
-            shader.createSources(scene, this.getShaderDataResult(), objectData);
+            shader.createSources(scene, this.getShaderDataResult(), vsResult);
             for (var i = 0; i < this.shaderClosures.length; i++) {
-                if (this.shaderClosures[i].equals(shader))
+                if (this.shaderClosures[i].equals(shader)){
+                    this.shaderClosures[i].obsolete = false;
                     return this.shaderClosures[i];
+                }
+
             }
 
             this.initializeShaderClosure(shader, scene, objectData);
@@ -201,37 +213,17 @@
             shaderClosure.setDefaultUniforms();
             //TODO Merge compute results
             this.updateClosureFromComputeResult(shaderClosure, this.getShaderDataResult(), {force: true});
-            //this.updateClosureFromComputeResult(shaderClosure, objectData, {force : true});
             this.updateClosureFromLightParameters(shaderClosure, this.createLightParameters(scene.lights));
             this.shaderClosures.push(shaderClosure);
         },
 
         handleShaderStructureChanged: function () {
-            this.obsoleteClosures = this.shaderClosures.splice(0);
-            this.shaderClosures = [];
+
+            for(var i = 0; i < this.shaderClosures.length; ++i){
+                this.shaderClosures[i].obsolete = true;
+            }
             this.dispatchEvent({type: webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED});
             this.structureChanged = false;
-            this.obsoleteClosures = [];
-        },
-
-        getShaderAfterStructureChanged: function (shaderClosure, scene, objectData) {
-            var index = this.obsoleteClosures.indexOf(shaderClosure);
-            if (index >= 0) {
-                var newShader = this.createShaderClosure();
-                newShader.createSources(scene, this.getShaderDataResult(), objectData);
-                if (newShader.equals(shaderClosure)) {
-                    this.shaderClosures.push(shaderClosure);
-                } else {
-                    newShader.compile();
-                    newShader.setDefaultUniforms();
-                    this.updateClosureFromComputeResult(newShader, objectData, {force: true});
-                    this.shaderClosures.push(newShader);
-                    return newShader;
-                }
-            } else {
-                XML3D.debug.logWarning("After structure change the shader was not found in list of obsolete closures");
-            }
-            return shaderClosure;
         },
         /**
          * @returns {Xflow.ComputeResult|null}

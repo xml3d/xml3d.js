@@ -5,19 +5,34 @@
         TYPE_STRUCTURE_CHANGED : 1,
         TYPE_DATA_CHANGED : 2,
         TYPE_CHANGED: 3,
-        ATTRIBUTE_STRUCTURE_CHANGED : 8,
-        ATTRIBUTE_DATA_CHANGED : 16,
-        ATTRIBUTE_CHANGED: 24
+        VS_STRUCTURE_CHANGED : 8,
+        VS_DATA_CHANGED : 16,
+        VS_CHANGED: 24,
+        SHADER_CHANGED: 32
     };
+    var SHADER_CLOSURE_NEEDS_UPDATE = CHANGE_STATE.VS_STRUCTURE_CHANGED | CHANGE_STATE.SHADER_CHANGED;
 
     var READY_STATE = webgl.DrawableClosure.READY_STATE;
 
 
     var MESH_PARAMETERS = {};
-    MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = { position: { required: true }, index: true };
-    MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = { position: { required: true }, index: true };
-    MESH_PARAMETERS[WebGLRenderingContext.LINES] = { position: { required: true }, index: true };
-    MESH_PARAMETERS[WebGLRenderingContext.POINTS] = { position: { required: true }, index: true };
+
+    MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = {
+        attributeData: {"position": Xflow.DATA_TYPE.FLOAT3 },
+        typeData: {
+            "index": Xflow.DATA_TYPE.INT,
+            "solid": Xflow.DATA_TYPE.BOOL,
+            "vertexCount": Xflow.DATA_TYPE.INT
+        },
+        bboxFix: {
+            "boundingBox" : Xflow.DATA_TYPE.FLOAT3
+        },
+        bboxCompute: {
+            "position" : Xflow.DATA_TYPE.FLOAT3
+        } };
+    MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
+    MESH_PARAMETERS[WebGLRenderingContext.LINES] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
+    MESH_PARAMETERS[WebGLRenderingContext.POINTS] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
 
 
 
@@ -57,15 +72,32 @@
      *
      * @param {webgl.GLContext} context
      * @param {string} type
-     * @param {Xflow.DataNode} data
+     * @param {Xflow.DataNode} dataNode
      * @extends {DrawableClosure}
      * @constructor
      */
-    var MeshClosure = function (context, type, data, opt) {
+    var MeshClosure = function (context, type, dataNode, opt) {
         webgl.DrawableClosure.call(this, context, webgl.DrawableClosure.TYPES.MESH);
         opt = opt || {};
         this.mesh = new webgl.GLMesh(context, type);
-        this.data = data;
+
+        /**
+         * Data Node of the renderObject
+         * @type {Xflow.DataNode}
+         */
+        this.dataNode = dataNode;
+
+        /**
+         * Shader Composer that will provide ShaderClosure and Program
+         * @type {webgl.AbstractShaderComposer}
+         */
+        this.shaderComposer = null;
+
+        /**
+         * Shader Closure used by this mesh
+         * @type {webgl.AbstractShaderClosure}
+         */
+        this.shaderClosure = null;
 
         /**
          * Attributes required to create the GLMesh
@@ -77,19 +109,13 @@
          * Are all attributes required by drawable available?
          * @type {boolean}
          */
-        this.typeDataValid = false;
+        this.typeDataValid = true;
 
         /**
          * Attributes required for the attached shader
-         * @type {Xflow.ComputeRequest}
+         * @type {Xflow.VertexShaderRequest}
          */
-        this.attributeRequest = null;
-
-        /**
-         * Are all attributes required by shader available?
-         * @type {boolean}
-         */
-        this.attributeDataValid = true;
+        this.vsRequest = null;
 
         /**
          * Bitfield that records the changes reported by Xflow
@@ -97,12 +123,6 @@
          * @type {number}
          */
         this.changeState = CHANGE_STATE.TYPE_STRUCTURE_CHANGED;
-
-        /**
-         * Do we have to calculate the bounding box of this mesh?
-         * @type {boolean}
-         */
-        this.boundingBoxRequired = true;
 
         /**
          * Callback if bounding box has changed. Gets only called if
@@ -116,27 +136,77 @@
 
     XML3D.createClass(MeshClosure, webgl.DrawableClosure, {
         initialize: function () {
-            var meshConfig = MESH_PARAMETERS[this.getMeshType()];
-            if (!meshConfig) {
-                XML3D.debug.logError("Unsupported Mesh request: ", this.mesh, this.getMeshType());
-                this.typeDataValid = false;
+            this.typeDataChanged(this.typeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+            this.shaderChanged();
+        },
+
+        setShaderComposer: function(shaderComposer){
+            if(!this.bindedShaderChanged) this.bindedShaderChanged = this.shaderChanged.bind(this);
+
+            if(this.shaderComposer)
+                this.shaderComposer.removeEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED,
+                                                            this.bindedShaderChanged);
+
+            this.shaderComposer = shaderComposer;
+            if(this.shaderComposer)
+                this.shaderComposer.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED,
+                                                            this.bindedShaderChanged);
+
+            this.changeState |= CHANGE_STATE.SHADER_CHANGED;
+        },
+
+        update: function () {
+            if(this.changeState === CHANGE_STATE.NOTHING_CHANGED) {
                 return;
             }
-            this.setTypeRequest(meshConfig);
+            XML3D.debug.logDebug("Update mesh closure", this.changeState);
+
+            var oldValid = !!this.shaderClosure && this.typeDataValid;
+
+            if(this.changeState & SHADER_CLOSURE_NEEDS_UPDATE)
+                this.mesh.clearBuffers();
+
+            if (this.changeState & CHANGE_STATE.TYPE_CHANGED) {
+                this.updateTypeData();
+            }
+
+            if(this.changeState & (SHADER_CLOSURE_NEEDS_UPDATE | CHANGE_STATE.TYPE_CHANGED)){
+                this.updateIndexBuffer();
+            }
+
+            if (this.changeState & SHADER_CLOSURE_NEEDS_UPDATE) {
+                this.updateVSRequest();
+                this.updateShaderClosure();
+                this.updateVsData();
+            }
+            else if (this.changeState & CHANGE_STATE.VS_CHANGED) {
+                this.updateVsData();
+            }
+
+            var newValid = !!this.shaderClosure && this.typeDataValid;
+
+            if(oldValid != newValid) {
+                this.dispatchEvent({
+                    type: webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED,
+                    newState: newValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE,
+                    oldState: oldValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE
+                });
+            }
+
+            this.changeState = CHANGE_STATE.NOTHING_CHANGED;
         },
-        setBoundingBoxRequired: function(required) {
-            this.boundingBoxRequired = required;
-            this.calculateBoundingBox();
-        },
+
         calculateBoundingBox: (function() {
             var c_empty = XML3D.math.bbox.create();
 
             return function() {
-                if(!this.boundingBoxRequired)
-                    return;
-
                 // compute bounding box from positions and indices, if present
                 var dataResult = this.typeRequest.getResult();
+                var boundingBoxEntry = dataResult.getOutputData("boundingBox");
+                if(boundingBoxEntry){
+                    this.boundingBoxChanged(XML3D.webgl.calculateBoundingBox(boundingBoxEntry.getValue(), null));
+                    return;
+                }
                 var positionEntry = dataResult.getOutputData("position");
                 if(!positionEntry)   {
                     this.boundingBoxChanged(c_empty);
@@ -162,35 +232,16 @@
         getMeshType: function () {
             return this.mesh.glType;
         },
-        update: function () {
 
-            if(this.changeState === CHANGE_STATE.NOTHING_CHANGED) {
-                return;
-            }
-            XML3D.debug.logDebug("Update mesh closure", this.changeState);
+        updateVSRequest: function(){
+            if(this.vsRequest) this.vsRequest.clear();
 
-            var oldValid = this.attributeDataValid && this.typeDataValid;
-
-            if (this.changeState & CHANGE_STATE.TYPE_CHANGED) {
-                this.updateTypeData();
-            }
-            if (this.changeState & CHANGE_STATE.ATTRIBUTE_CHANGED) {
-                this.updateAttributeData();
-            }
-
-            var newValid = this.attributeDataValid && this.typeDataValid;
-
-            if(oldValid != newValid) {
-                this.dispatchEvent({
-                    type: webgl.Scene.EVENT_TYPE.DRAWABLE_STATE_CHANGED,
-                    newState: newValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE,
-                    oldState: oldValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE
-                });
-            }
-
-
-            this.changeState = CHANGE_STATE.NOTHING_CHANGED;
+            this.vsRequest = this.shaderComposer.createVsRequest(this.dataNode, this.vsDataChanged.bind(this));
         },
+        updateShaderClosure: function(){
+            this.shaderClosure = this.shaderComposer.getShaderClosure(this.scene, this.vsRequest.getResult());
+        },
+
         /**
          * @param {Object<string,*>} attributes
          * @param {Xflow.ComputeResult} dataResult
@@ -218,40 +269,62 @@
                         XML3D.debug.logError("Texture as mesh parameter is not yet supported");
                         break;
                     default:
-                        this.handleBuffer(name, param, entry, this.mesh);
+                        this.handleBuffer(name, entry, this.mesh);
                 }
             }
             return complete;
         },
-        updateAttributeData: function() {
-            if (!this.attributeDataValid && !(this.changeState & CHANGE_STATE.ATTRIBUTE_STRUCTURE_CHANGED)) {
+        updateIndexBuffer: function(){
+            // Add Index buffer, if available
+            var dataResult = this.typeRequest.getResult();
+            var entry = dataResult.getOutputData("index");
+            if(entry && entry.getValue())
+                this.handleBuffer("index", entry, this.mesh );
+        },
+
+        updateVsData: function() {
+            if (!this.shaderClosure) {
                 return; // if only the data has changed, it can't get valid after update
             }
-            var dataResult = this.attributeRequest.getResult();
-            var attributes = this.attributes;
-            var complete = this.updateMeshFromResult(attributes, dataResult, function(name) {
-                XML3D.debug.logError("Required shader attribute", name, "is missing for mesh");
-            });
 
-            this.attributeDataValid = complete;
+            var result = this.vsRequest.getResult();
+
+            var inputNames = result.shaderInputNames;
+            for(var i = 0; i < inputNames.length; ++i){
+                var name = inputNames[i];
+                if(result.isShaderInputUniform(name)){
+                    this.mesh.setUniformOverride(name, result.getShaderInputData(name));
+                }
+                else{
+                    this.handleBuffer(name, result.getShaderInputData(name), this.mesh )
+                }
+            }
+            var outputNames = result.shaderOutputNames;
+            for(var i = 0; i < outputNames.length; ++i){
+                var name = outputNames[i];
+                if(result.isShaderOutputUniform(name)){
+                    this.mesh.setUniformOverride(name, result.getUniformOutputData(name));
+                }
+            }
         },
 
         updateTypeData: function () {
             if (!this.typeDataValid && !(this.changeState & CHANGE_STATE.TYPE_STRUCTURE_CHANGED)) {
                 return; // only if structure has changed, it can't get valid after update
             }
-            var dataResult = this.typeRequest.getResult();
-            var meshAttributes = this.meshAttributes;
 
-            var vertexCount = 0;
-            var complete = this.updateMeshFromResult(meshAttributes, dataResult, function(name) {
-                XML3D.debug.logError("Required mesh attribute ", name, "is missing for mesh");
-            });
+            this.updateTypeRequest();
 
             this.calculateBoundingBox();
-            var entry = dataResult.getOutputData("vertexCount");
+
+            var dataResult = this.typeRequest.getResult();
+            var entry = dataResult.getOutputData("index");
+            if(entry && entry.getValue())
+                this.handleBuffer("index", entry, this.mesh );
+
+            entry = dataResult.getOutputData("vertexCount");
             this.mesh.setVertexCount(entry && entry.getValue() ? entry.getValue()[0] : null);
-            this.typeDataValid = complete;
+            this.typeDataValid = true;
         },
         /**
          * @param {string} name
@@ -259,7 +332,7 @@
          * @param {Xflow.BufferEntry} entry
          * @param {GLMesh} mesh
          */
-        handleBuffer: function (name, attr, entry, mesh) {
+        handleBuffer: function (name, entry, mesh) {
             var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.context.id);
             var buffer = webglData.buffer;
             var gl = this.context.gl;
@@ -294,28 +367,67 @@
          */
         setAttributeRequest: function(attributes) {
             this.attributes = attributes;
-            this.attributeRequest = new Xflow.ComputeRequest(this.data, Object.keys(attributes), this.attributeDataChanged.bind(this));
+            this.attributeRequest = new Xflow.ComputeRequest(this.dataNode, Object.keys(attributes), this.attributeDataChanged.bind(this));
             this.attributeDataChanged(this.attributeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         },
 
         /**
          *
-         * @param {Object.<string, *>} attributes
          */
-        setTypeRequest: function(attributes) {
-            this.meshAttributes = attributes;
-            this.typeRequest = new Xflow.ComputeRequest(this.data, Object.keys(attributes), this.typeDataChanged.bind(this));
-            this.typeDataChanged(this.typeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        updateTypeRequest: function() {
+            var meshConfig = MESH_PARAMETERS[this.getMeshType()];
+            if (!meshConfig) {
+                XML3D.debug.logError("Unsupported Mesh request: ", this.mesh, this.getMeshType());
+                this.typeDataValid = false;
+                return;
+            }
+            var requestNames = this.getTypeRequestNames(meshConfig);
+
+            if(!this.typeRequest || this.typeRequest.filter != requestNames){
+                if(this.typeRequest) this.typeRequest.clear();
+                this.typeRequest = new Xflow.ComputeRequest(this.dataNode, requestNames, this.typeDataChanged.bind(this));
+            }
+        },
+
+        getTypeRequestNames: function(meshConfig){
+            var requestNames = [];
+            requestNames.push.apply(requestNames, Object.keys(meshConfig.typeData));
+            // We always request fixed bounding box values: that way we can react, when those values get available
+            requestNames.push.apply(requestNames, Object.keys(meshConfig.bboxFix));
+            var computeBBox = !this.checkXflowTypes(this.dataNode, meshConfig.bboxFix);
+
+            if(computeBBox){
+                if(!this.checkXflowTypes(this.dataNode, meshConfig.bboxCompute)){
+                    XML3D.debug.logError("Mesh does not contain valid data required to compute BBOX.", this.mesh, this.getMeshType());
+                    this.typeDataValid = false;
+                    return;
+                }
+                requestNames.push.apply(requestNames, Object.keys(meshConfig.bboxCompute));
+            }
+            return requestNames;
+        },
+        checkXflowTypes: function(dataNode, requirements){
+            for(var name in requirements){
+                var info = dataNode.getOutputChannelInfo(name);
+                if(!info) return false;
+                if(!info.type != requirements[name])
+                    return false;
+            }
+            return true;
         },
 
         /**
          * @param {Xflow.ComputeRequest} request
          * @param {Xflow.RESULT_STATE} state
          */
-        attributeDataChanged: function (request, state) {
-            this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.ATTRIBUTE_STRUCTURE_CHANGED : CHANGE_STATE.ATTRIBUTE_DATA_CHANGED;
+        vsDataChanged: function (request, state) {
+            this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.VS_STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
             this.context.requestRedraw("Mesh Attribute Data Changed");
             XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
+        },
+
+        shaderChanged: function(){
+            this.changeState |= CHANGE_STATE.SHADER_CHANGED;
         },
 
         /**
@@ -324,7 +436,7 @@
          * @param {function(Xflow.ComputeRequest, Xflow.RESULT_STATE)} callback
          */
         getRequest: function(filter, callback) {
-            return new Xflow.ComputeRequest(this.data, filter, callback);
+            return new Xflow.ComputeRequest(this.dataNode, filter, callback);
         }
     });
 

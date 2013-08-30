@@ -80,9 +80,10 @@
         },
         update: function () {
             this.updateObjectsForRendering();
+            // Make sure that shaders are updates AFTER objects
+            // Because obsolete shader closures are cleared on updateShaders()
             this.updateShaders();
         },
-
         updateShaders: function() {
             this.shaderFactory.update(this);
         },

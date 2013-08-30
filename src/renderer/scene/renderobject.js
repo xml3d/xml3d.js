@@ -84,7 +84,7 @@
          */
         this.drawable = this.createDrawable();
 
-        this.shader = opt.shader || {};
+        this.shaderHandle = opt.shaderHandle || null;
         // Set start values;
         this.initialize();
     };
@@ -253,8 +253,11 @@
             this.setOverride(objectData);
         },
 
+        /*
         createShaderForDrawable: function (shaderInfo, drawable) {
             var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
+            drawable.setShaderComposer(composer);
+
             composer.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
 
             var that = this;
@@ -267,8 +270,9 @@
             return {
                 composer: composer
             }
-        },
 
+        },
+        */
         setShader: function(newHandle) {
 
             // If we don't have a drawable, we don't need a shader
@@ -277,20 +281,23 @@
             if(!this.drawable)
                 return;
 
-            var oldHandle = this.shader.handle;
+            var oldHandle = this.shaderHandle;
 
             if(oldHandle == newHandle)
                 return;
 
+            if(!this.bindedShaderHandleCallback) this.bindedShaderHandleCallback = this.shaderHandleCallback.bind(this);
+
             if (oldHandle) {
-                oldHandle.removeListener(this.shaderHandleCallback.bind(this));
+                oldHandle.removeListener(this.bindedShaderHandleCallback);
             }
             if (newHandle) {
-                newHandle.addListener(this.shaderHandleCallback.bind(this));
+                newHandle.addListener(this.bindedShaderHandleCallback);
             }
+            this.shaderHandle = newHandle;
             this.updateShaderFromHandle(newHandle);
 
-            this.shader.handle = newHandle;
+
             // TODO this.materialChanged();
         },
 
@@ -313,9 +320,14 @@
                 }
             }
 
+            var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
+            this.drawable.setShaderComposer(composer);
+
+            /*
             this.shader = this.createShaderForDrawable(shaderInfo, this.drawable);
             // Request the attributes required for shader from the drawable (e.g. normal, color etc)
             this.drawable.setAttributeRequest(this.shader.composer.getShaderAttributes());
+            */
         },
 
         setObjectSpaceBoundingBox: function(box) {

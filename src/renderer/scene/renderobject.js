@@ -369,9 +369,12 @@
 
         updateWorldSpaceBoundingBox: (function() {
             var c_box = new XML3D.math.bbox.create();
+            var c_trans = new XML3D.math.mat4.create();
 
             return function() {
                 this.getObjectSpaceBoundingBox(c_box);
+                this.parent.getWorldMatrix(c_trans);
+                XML3D.math.bbox.transform(c_box, c_trans, c_box);
                 this.setWorldSpaceBoundingBox(c_box);
                 this.boundingBoxDirty = false;
             }

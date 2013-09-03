@@ -67,7 +67,6 @@
 
 
     updateWorldSpaceBoundingBox: (function() {
-            var local_mat = XML3D.math.mat4.create();
             var childBB = XML3D.math.bbox.create();
 
             return function() {
@@ -80,9 +79,6 @@
                         XML3D.math.bbox.extendWithBox(localBB, childBB);
                     }
                 }
-
-                this.getLocalMatrix(local_mat);
-                XML3D.math.bbox.transform(localBB, local_mat, localBB);
                 this.setWorldSpaceBoundingBox(localBB);
                 this.boundingBoxDirty = false;
             }

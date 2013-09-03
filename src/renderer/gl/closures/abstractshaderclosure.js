@@ -19,6 +19,8 @@
         this.obsolete = false;
         this.id = "";
 
+        this.uniformValues = {};
+
         /**
          * Stores, if the underlying shader has semi-transparencies
          * and thus needs to considered for alpha-blending
@@ -58,7 +60,7 @@
             }
         }
     );
-    XML3D.extend(AbstractShaderClosure.prototype, {
+    XML3D.createClass(AbstractShaderClosure, null, {
 
         equals: function(that) {
             return this.source.vertex === that.source.vertex && this.source.fragment === that.source.fragment;
@@ -107,12 +109,11 @@
          * @param {Xflow.ComputeResult} result
          * @param {Object?} options
          */
-        updateUniformsFromComputeResult: function (result, options) {
+        updateUniformsFromComputeResult: function (result) {
             var dataMap = result.getOutputMap();
             var uniforms = this.program.uniforms;
 
-            var opt = options || {};
-            var force = opt.force || false;
+            this.uniformValues = {};
 
             for (var name in uniforms) {
                 var entry = dataMap[name];
@@ -120,53 +121,49 @@
                     continue;
 
                 var webglData = this.context.getXflowEntryWebGlData(entry);
-                if (force || webglData.changed) {
-                    if (uniforms[name].glType === this.context.gl.BOOL) {
-                        //TODO Can we get Xflow to return boolean arrays as normal JS arrays? WebGL doesn't accept Uint8Arrays here...
-                        //TODO Alternatively we could set boolean uniforms using uniform1fv together with Float32Arrays, which apparently works too
-                        webgl.setUniform(this.context.gl, uniforms[name], this.convertToJSArray(entry.getValue()));
-                    } else {
-                        webgl.setUniform(this.context.gl, uniforms[name], entry.getValue());
-                    }
-                    webglData.changed = 0;
+
+                var value;
+                if (uniforms[name].glType === this.context.gl.BOOL) {
+                    //TODO Can we get Xflow to return boolean arrays as normal JS arrays? WebGL doesn't accept Uint8Arrays here...
+                    //TODO Alternatively we could set boolean uniforms using uniform1fv together with Float32Arrays, which apparently works too
+                    value = this.convertToJSArray(entry.getValue());
+                } else {
+                    value = entry.getValue();
                 }
+                webgl.setUniform(this.context.gl, uniforms[name], value);
+                this.uniformValues[name] = value;
+                webglData.changed = 0;
+
             }
-            // TODO: this.isTransparent = this.descriptor.hasTransparency(dataMap);
-        },
-
-        /**
-         *
-         * @param {Xflow.data.ComputeResult} result
-         * @param {Object} options
-         */
-        updateSamplersFromComputeResult: function (result, options) {
-            var samplers = this.program.samplers;
-
-            var opt = options || {};
-            var force = opt.force || false;
-
+            var samplers = this.program.samplers
             for (var name in samplers) {
                 var sampler = samplers[name];
                 var entry = result.getOutputData(name);
-
-                if (!entry) {
-                    sampler.texture.failed();
-                    continue;
-                }
-
                 var webglData = this.context.getXflowEntryWebGlData(entry);
 
-                if (force || webglData.changed) {
-                    sampler.texture.updateFromTextureEntry(entry);
-                    webglData.changed = 0;
+                if(webglData.texture){
+                    samplers[name].texture = webglData.texture;
+                    this.uniformValues[name] = webglData.texture;
                 }
             }
+
+            this.isTransparent = this.getTransparencyFromInputData(dataMap);
         },
 
         setUniformVariableOverride: function(override) {
             this.program.setUniformVariables(override);
-        }
+        },
 
+        undoUniformVariableOverride: function(override) {
+            var previousValues = {};
+            var shaderData = this.uniformValues;
+            for (var name in override) {
+                var value = shaderData[name] ? shaderData[name] : this.getUniformDefault(name);
+                if(value)
+                    previousValues[name] = value;
+            }
+            this.program.setUniformVariables(previousValues);
+        }
     });
 
     webgl.AbstractShaderClosure = AbstractShaderClosure;

@@ -81,7 +81,7 @@
         update: function () {
             this.updateObjectsForRendering();
             // Make sure that shaders are updates AFTER objects
-            // Because obsolete shader closures are cleared on updateShaders()
+            // Because unused shader closures are cleared on updae
             this.updateShaders();
         },
         updateShaders: function() {

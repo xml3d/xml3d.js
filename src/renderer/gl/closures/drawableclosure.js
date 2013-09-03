@@ -26,7 +26,7 @@
         setShaderComposer: function(shaderComposer){
             // implemented by subclass
         },
-        update: function(){
+        update: function(scene){
             // implemented by subclass
         }
     });

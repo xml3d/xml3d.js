@@ -44,11 +44,23 @@
             this.buffers[name] = buffer;
             this.isIndexed = this.isIndexed || name == "index";
         },
-        clearBuffers: function(){
+        clear: function(){
             this.buffers = {};
+            this.uniformOverride = {};
         },
-        setUniformOverride: function (name, buffer) {
-            this.uniformOverride[name] = buffer;
+        setUniformOverride: function (name, xflowDataEntry) {
+            if(!xflowDataEntry)
+                delete this.uniformOverride[name];
+
+            var value;
+            if(xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE){
+                var webglData = this.context.getXflowEntryWebGlData(xflowDataEntry);
+                value = webglData.texture;
+            }
+            else
+                value = xflowDataEntry.getValue();
+
+            this.uniformOverride[name] = value;
         },
         setVertexCount: function (vertexCount) {
             this.vertexCount = vertexCount;
@@ -76,7 +88,7 @@
             }
         },
         /**
-         * @param {XML3D.webgl.GLProgram} program
+         * @param {XML3D.webgl.AbstractShaderClosure} program
          * @returns {number}
          */
         draw: function (program) {
@@ -135,6 +147,9 @@
             }
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            if(program.undoUniformVariableOverride)
+                program.undoUniformVariableOverride(this.uniformOverride);
 
             return triCount;
         }

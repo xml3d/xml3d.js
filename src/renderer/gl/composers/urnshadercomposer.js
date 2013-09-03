@@ -29,7 +29,7 @@
      */
     var URNShaderComposer = function (context, shaderInfo) {
         webgl.AbstractShaderComposer.call(this, context);
-        this.descriptor = new ShaderDescriptor();
+        this.descriptor = null;
         this.setShaderInfo(shaderInfo);
     };
 
@@ -44,13 +44,9 @@
 
             var that = this;
             if (this.descriptor) {
-                this.request = new Xflow.ComputeRequest(shaderInfo.getData(), this.getRequestFields(), function (request, changeType) {
-                    that.dataChanged = true;
-                    that.context.requestRedraw("Shader data changed");
-                });
+                this.updateRequest(shaderInfo.getData());
                 //TODO Build this into the XML3D.webgl.getScript function? It's needed everywhere anyway...
                 this.descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(this.descriptor.fragment);
-                this.structureChanged = true;
             }
         },
 
@@ -70,8 +66,8 @@
                 return;
             }
 
+            this.descriptor = new ShaderDescriptor();
             XML3D.extend(this.descriptor, descriptor);
-
         },
 
         getRequestFields: function () {
@@ -87,12 +83,29 @@
         },
 
         createShaderClosure: function() {
-            return new webgl.ShaderClosure(this.context, this.descriptor, this.getShaderParameters.bind(this));
+            return new webgl.ShaderClosure(this.context, this.descriptor);
         },
 
-        getShaderParameters: function() {
-            var result = this.getShaderDataResult();
-            return result ? result.getOutputMap() : null;
+        createObjectDataRequest: function(objectDataNode, callback){
+            var requestNames = ["position"];
+            requestNames.push.apply(requestNames, Object.keys(this.descriptor.attributes));
+            requestNames.push.apply(requestNames, Object.keys(this.descriptor.uniforms));
+            requestNames.push.apply(requestNames, Object.keys(this.descriptor.samplers));
+            return new Xflow.ComputeRequest(objectDataNode, requestNames, callback);
+        },
+
+        distributeObjectShaderData: function(objectRequest, attributeCallback, uniformCallback){
+            var result = objectRequest.getResult();
+
+            var dataMap = result.getOutputMap();
+            for(var name in dataMap){
+
+                if(name == "position" || this.descriptor.attributes[name] !== undefined)
+                    attributeCallback(name, dataMap[name]);
+                else if(this.descriptor.uniforms[name] !== undefined || this.descriptor.samplers[name] !== undefined){
+                    uniformCallback(name, dataMap[name]);
+                }
+            }
         }
 
     });

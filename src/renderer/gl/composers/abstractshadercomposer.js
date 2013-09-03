@@ -50,30 +50,6 @@
         return {};
     };
 
-
-    /**
-     * @implements IShaderComposer
-     * @constructor
-     */
-    var DefaultComposer = function (context) {
-        this.context = context;
-    };
-
-    XML3D.createClass(DefaultComposer, XML3D.util.EventDispatcher, {
-        update: function () {
-        },
-        getShaderClosure: function () {
-            return this.context.programFactory.getFallbackProgram();
-        },
-        getShaderAttributes: function () {
-            return {color: null, normal: null /* for picking */};
-        },
-        getRequestFields: function () {
-            return ["diffuseColor", "useVertexColor"];
-        }
-
-    });
-
     /**
      * @constructor
      * @implements IShaderComposer
@@ -82,11 +58,27 @@
         this.context = context;
         this.shaderClosures = [];
         this.dataChanged = false;
-        this.structureChanged = false;
+        this.updateLightValues = false;
         this.request = null;
     };
 
     XML3D.createClass(AbstractShaderComposer, XML3D.util.EventDispatcher, {
+
+        updateRequest: function(xflowDataNode){
+            if(this.request) this.request.clear();
+
+            this.request = new Xflow.ComputeRequest(xflowDataNode, this.getRequestFields(),
+                this.onShaderRequestChange.bind(this));
+            this.setShaderRecompile();
+        },
+
+        onShaderRequestChange: function(request, changeType){
+            this.dataChanged = true;
+            if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
+                this.setShaderRecompile();
+            this.context.requestRedraw("Shader data changed");
+        },
+
         /**
          * @param {Scene} scene
          * @param {{}=} opt
@@ -104,21 +96,16 @@
             if (!this.shaderClosures.length)
                 return;
 
-            if (opt.evaluateShader || this.structureChanged) {
-                this.handleShaderStructureChanged(scene);
-                this.dataChanged = true;
-                opt.updateLightValues = true;
-            }
-
             if (opt.updateShaderData || this.dataChanged) {
                 var result = this.getShaderDataResult();
+                this.updateUniformTexturesAndBuffers(result);
                 this.shaderClosures.forEach(function (shader) {
-                    that.updateClosureFromComputeResult(shader, result, opt);
+                    that.updateClosureFromComputeResult(shader, result);
                 });
                 this.dataChanged = false;
             }
 
-            if (opt.updateLightValues) {
+            if (opt.updateLightValues || this.updateLightValues) {
                 var lightParameters = this.createLightParameters(scene.lights);
                 this.shaderClosures.forEach(function (shader) {
                     that.updateClosureFromLightParameters(shader, lightParameters);
@@ -126,18 +113,38 @@
             }
         },
 
+        updateUniformTexturesAndBuffers: function(result){
+            if(!result) return;
+            var dataMap = result.getOutputMap();
+
+
+            for(var name in dataMap){
+                this.updateUniformEntryTextureOrBuffer(dataMap[name]);
+            }
+        },
+        updateUniformEntryTextureOrBuffer: function(entry){
+            if(entry.type == Xflow.DATA_TYPE.TEXTURE){
+                var gl = this.context.gl;
+                var webglData = this.context.getXflowEntryWebGlData(entry);
+                var texture = webglData.texture || new XML3D.webgl.GLTexture(gl);
+                texture.updateFromTextureEntry(entry);
+
+                webglData.texture = texture;
+                webglData.changed = 0;
+            }
+        },
+
         /**
-         * @param {webgl.ShaderClosure} shaderClosure
+         * @param {webgl.AbstractShaderClosure} shaderClosure
          * @param {Xflow.ComputeResult} result
          * @param {Object?} opt
          */
-        updateClosureFromComputeResult: function (shaderClosure, result, opt) {
+        updateClosureFromComputeResult: function (shaderClosure, result) {
             if (!result || !result.getOutputMap) {
                 return;
             }
             shaderClosure.bind();
-            shaderClosure.updateUniformsFromComputeResult(result, opt);
-            shaderClosure.updateSamplersFromComputeResult(result, opt);
+            shaderClosure.updateUniformsFromComputeResult(result);
         },
 
         updateClosureFromLightParameters: function (shaderClosure, lightParameters) {
@@ -188,43 +195,52 @@
             throw new Error("AbstractComposer::createShaderClosure needs to be overridden");
         },
 
-        createVsRequest: function(objectDataNode, callback){
-            throw new Error("AbstractComposer::createVsRequest needs to be overridden");
+        createObjectDataRequest: function(objectDataNode, callback){
+            throw new Error("AbstractComposer::createObjectDataRequest needs to be overridden");
+        },
+
+        distributeObjectShaderData: function(objectRequest, attributeCallback, uniformCallback){
+            throw new Error("AbstractComposer::distributeObjectShaderData needs to be overridden");
         },
 
         getShaderClosure: function (scene, vsResult) {
             var shader = this.createShaderClosure();
 
-            shader.createSources(scene, this.getShaderDataResult(), vsResult);
+            if(!shader.createSources(scene, this.getShaderDataResult(), vsResult))
+                return null;
+
             for (var i = 0; i < this.shaderClosures.length; i++) {
                 if (this.shaderClosures[i].equals(shader)){
                     this.shaderClosures[i].obsolete = false;
                     return this.shaderClosures[i];
                 }
-
             }
 
-            this.initializeShaderClosure(shader, scene, objectData);
+            this.initializeShaderClosure(shader, scene, vsResult);
             return shader;
         },
 
-        initializeShaderClosure: function (shaderClosure, scene) {
+        initializeShaderClosure: function (shaderClosure, scene, vsResult) {
             shaderClosure.compile();
             shaderClosure.setDefaultUniforms();
-            //TODO Merge compute results
-            this.updateClosureFromComputeResult(shaderClosure, this.getShaderDataResult(), {force: true});
+
+            this.updateClosureFromComputeResult(shaderClosure, this.getShaderDataResult());
             this.updateClosureFromLightParameters(shaderClosure, this.createLightParameters(scene.lights));
             this.shaderClosures.push(shaderClosure);
         },
 
-        handleShaderStructureChanged: function () {
+        setShaderRecompile: function () {
 
             for(var i = 0; i < this.shaderClosures.length; ++i){
                 this.shaderClosures[i].obsolete = true;
             }
             this.dispatchEvent({type: webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED});
-            this.structureChanged = false;
+            this.dataChanged = true;
+            this.updateLightValues = true;
         },
+
+
+
         /**
          * @returns {Xflow.ComputeResult|null}
          */
@@ -232,9 +248,49 @@
             return this.request ? this.request.getResult() : null;
         }
 
+
+
     });
 
-    webgl.DefaultComposer = DefaultComposer;
+
+    /**
+     * @implements IShaderComposer
+     * @constructor
+     */
+    var DefaultComposer = function (context) {
+        this.context = context;
+    };
+    XML3D.createClass(DefaultComposer, AbstractShaderComposer, {
+        update: function () {
+        },
+        getShaderClosure: function (scene, vsResult) {
+            return this.context.programFactory.getFallbackProgram();
+        },
+        getShaderAttributes: function () {
+            return {color: null, normal: null /* for picking */};
+        },
+        getRequestFields: function () {
+            return ["diffuseColor", "useVertexColor"];
+        },
+        createObjectDataRequest: function(objectDataNode, callback){
+            return new Xflow.ComputeRequest(objectDataNode,
+                ["position", "color", "normal", "diffuseColor", "useVertexColor"], callback);
+        },
+        distributeObjectShaderData: function(objectRequest, attributeCallback, uniformCallback){
+            var result = objectRequest.getResult();
+
+            var dataMap = result.getOutputMap(), requestFields = this.getRequestFields();
+            for(var name in dataMap){
+                if(requestFields.indexOf(name) != -1)
+                    uniformCallback(name, dataMap[name]);
+                else
+                    attributeCallback(name, dataMap[name]);
+                }
+        }
+    });
+
+
     webgl.AbstractShaderComposer = AbstractShaderComposer;
+    webgl.DefaultComposer = DefaultComposer;
 
 }(XML3D.webgl));

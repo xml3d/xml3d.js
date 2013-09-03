@@ -161,11 +161,18 @@
         isValid: function() {
             return !!this.handle;
         },
-        setUniformVariables: function(uniforms) {
+        setUniformVariables: function(uniforms, bindTextures) {
             for ( var name in uniforms) {
                 if (this.uniforms[name]) {
                     var value = uniforms[name];
                     webgl.setUniform(this.gl, this.uniforms[name], value);
+                }
+                else if(this.samplers[name]){
+                    var sampler = this.sampler[name];
+                    sampler.texture = uniforms[name];
+                    if(bindTextures)
+                        sampler.texture.bind(sampler.unit);
+
                 }
             }
         }

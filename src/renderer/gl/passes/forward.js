@@ -46,7 +46,6 @@
                 return { count: count };
             }
         }()),
-
         renderObjectsToActiveBuffer: (function () {
 
             var c_viewMat_tmp = XML3D.math.mat4.create();
@@ -74,7 +73,7 @@
                 }
 
                 // At this point, we have to gurantee (via FSM), that the RenderObject has a valid shader
-                var program = objectArray[0].program;
+                var program = objectArray[0].getProgram();
 
                 program.bind();
                 //this.shaderManager.updateActiveShader(shader);
@@ -111,17 +110,14 @@
                     parameters["normalMatrix"] = tmpNormalMatrix;
 
                     program.setUniformVariables(parameters);
-                    if (obj.override !== null) {
-                        program.setUniformVariableOverride(obj.override);
-                    }
+
+                    program.setUniformVariableOverride(mesh.uniformOverride);
 
                     primitiveCount += mesh.draw(program);
                     objCount++;
 
-                    if (obj.override !== null) {
-                        //TODO variable needs to be set back to the proper value instead of the default one
-                        program.undoUniformVariableOverride(obj.override);
-                    }
+                    program.undoUniformVariableOverride(mesh.uniformOverride);
+
                     if (transparent) {
                         gl.disable(gl.BLEND);
                     }

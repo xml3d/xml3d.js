@@ -33,7 +33,8 @@
                 var descriptor = new webgl.ShaderDescriptor();
                 XML3D.extend(descriptor, XML3D.shaders.getScript("matte"));
                 descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(descriptor.fragment);
-                var shader = new webgl.ShaderClosure(this.context, descriptor, function() { return {diffuseColor:[1,0,0]} });
+                var shader = new webgl.ShaderClosure(this.context, descriptor);
+                shader.uniformValues.diffuseColor = [1,0,0];
                 shader.createSources({}, null, null);
                 shader.compile();
                 this.programs.fallback = shader;

@@ -15,7 +15,6 @@
         this.context = context;
         /** @type {Object.<number, IShaderComposer>} */
         this.composers = {};
-        this.needsCompileCheck = true;
         this.defaultComposer = new webgl.DefaultComposer(context);
     };
 
@@ -76,13 +75,15 @@
         },
         update: function (scene) {
             for (var i in this.composers) {
-                this.composers[i].update(scene, { evaluateShader: this.needsCompileCheck, updateLightValues: this.lightValuesDirty });
+                this.composers[i].update(scene, { updateLightValues: this.lightValuesDirty });
             }
-            this.needsCompileCheck = this.lightValuesDirty = false;
+            this.lightValuesDirty = false;
         },
         setLightStructureDirty: function() {
             XML3D.debug.logWarning("Light structure changes not yet supported.");
-            this.needsCompileCheck = true;
+            for (var i in this.composers) {
+                this.composers[i].setShaderRecompile();
+            }
         },
         setLightValueChanged: function() {
             this.lightValuesDirty = true;

@@ -31,23 +31,18 @@
          */
         this.request = null;
 
-        this.updateRequests(shaderInfo);
+        this.setShaderInfo(shaderInfo);
     };
 
     XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
-        updateRequests: function(shaderInfo) {
+        setShaderInfo: function(shaderInfo) {
             this.extractedParams = Shade.extractParameters(this.sourceTemplate);
             var that = this;
             // The composer is interested in changes of all possible shader parameters (extracted)
             // the instances (closures) will only set those, that occur in the instance
             if (this.extractedParams.length) {
-                this.request = new Xflow.ComputeRequest(shaderInfo.getData(), this.extractedParams, function (request, changeType) {
-                    that.dataChanged = true;
-                    that.context.requestRedraw("Shader data changed");
-                });
-                this.structureChanged = true;
+                this.updateRequest(shaderInfo.getData());
             }
-
         },
         getRequestFields: function() {
             return this.extractedParams;
@@ -57,6 +52,37 @@
         },
         createShaderClosure: function () {
             return new webgl.JSShaderClosure(this.context, this.sourceTemplate);
+        },
+
+        createObjectDataRequest: function(objectDataNode, callback){
+            var vsConfig = new Xflow.VSConfig();
+            for(var inputName in this.descriptor.attributes){
+                var entry = this.descriptor.attributes;
+                vsConfig.addAttribute(entry.type, inputName, entry.dest, !entry.required);
+            }
+            for(var inputName in this.descriptor.uniforms){
+                var entry = this.descriptor.attributes;
+                vsConfig.addAttribute(entry.type, inputName, inputName, true);
+            }
+        },
+
+        distributeObjectShaderData: function(objectRequest, attributeCallback, uniformCallback){
+            var result = objectRequest.getResult();
+            var inputNames = result.shaderInputNames;
+            for(var i = 0; i < inputNames.length; ++i){
+                var name = inputNames[i], entry = result.getShaderInputData(name);
+                if(result.isShaderInputUniform(name))
+                    uniformCallback(name, entry);
+                else
+                    attributeCallback(name, entry);
+            }
+            var outputNames = result.shaderOutputNames;
+            for(var i = 0; i < outputNames.length; ++i){
+                var name = outputNames[i];
+                if(result.isShaderOutputUniform(name)){
+                    uniformCallback(name, entry);
+                }
+            }
         }
 
     });

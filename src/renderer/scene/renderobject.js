@@ -130,10 +130,6 @@
             this.scene.remove(this);
         },
 
-        refreshShaderProgram: function() {
-            this.program = this.shader.composer.getShaderAfterStructureChanged(this.program, this.scene, this.override || {});
-        },
-
         getModelViewMatrix: function(target) {
             var o = this.offset + MODELVIEW_MATRIX_OFFSET;
             for(var i = 0; i < 16; i++, o++) {
@@ -211,29 +207,6 @@
             XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEWPROJECTION_MATRIX_OFFSET, page, offset+MODELVIEW_MATRIX_OFFSET,  projection, 0);
         },
 
-        /*
-         * @param {Xflow.Result} result
-         */
-        setOverride: function(result) {
-            this.override = null;
-            if(!result.outputNames.length) {
-                return;
-            }
-
-            var prog = this.program;
-            var overrides = {};
-            for(var name in prog.uniforms) {
-                var entry = result.getOutputData(name);
-                if (entry && entry.getValue()) {
-                    overrides[name] = entry.getValue();
-                }
-            }
-            if (Object.keys(overrides).length > 0) {
-                this.override = overrides;
-            }
-            XML3D.debug.logInfo("Shader attribute override", result, this.override);
-        },
-
         setTransformDirty: function() {
             this.transformDirty = true;
             this.setBoundingBoxDirty();
@@ -247,32 +220,6 @@
             this.updateShaderFromHandle(notification.adapterHandle);
         },
 
-
-        createProgram: function(composer, objectData) {
-            this.program = composer.getShaderClosure(this.scene, objectData);
-            this.setOverride(objectData);
-        },
-
-        /*
-        createShaderForDrawable: function (shaderInfo, drawable) {
-            var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
-            drawable.setShaderComposer(composer);
-
-            composer.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.refreshShaderProgram.bind(this));
-
-            var that = this;
-            var objectRequest = drawable.getRequest(composer.getRequestFields(), function (req, state) {
-                that.createProgram(composer, req.getResult());
-            });
-
-            this.createProgram(composer, objectRequest.getResult());
-
-            return {
-                composer: composer
-            }
-
-        },
-        */
         setShader: function(newHandle) {
 
             // If we don't have a drawable, we don't need a shader
@@ -322,12 +269,6 @@
 
             var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
             this.drawable.setShaderComposer(composer);
-
-            /*
-            this.shader = this.createShaderForDrawable(shaderInfo, this.drawable);
-            // Request the attributes required for shader from the drawable (e.g. normal, color etc)
-            this.drawable.setAttributeRequest(this.shader.composer.getShaderAttributes());
-            */
         },
 
         setObjectSpaceBoundingBox: function(box) {
@@ -403,16 +344,17 @@
         },
 
         getProgram: function() {
-            return this.shader.composer.getProgram();
+            return this.drawable.getProgram();
         },
 
         hasTransparency : function() {
-            return this.program ? this.program.hasTransparency() : false;
+            var program = this.getProgram();
+            return program ? program.hasTransparency() : false;
         },
 
         updateForRendering: function() {
             this.setShader(this.parent.getShaderHandle());
-            this.drawable.update();
+            this.drawable.update(this.scene);
         }
 
     });

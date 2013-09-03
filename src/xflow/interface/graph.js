@@ -271,6 +271,14 @@ DataNode.prototype.setLoading = function(loading){
     }
 }
 
+DataNode.prototype.isSubtreeLoading = function(){
+    return this._subTreeLoading;
+}
+
+DataNode.prototype.isImageLoading = function(){
+    return this._imageLoading;
+}
+
 
 Object.defineProperty(DataNode.prototype, "filterType", {
     /** @param {Xflow.DATA_FILTER_TYPE} v */

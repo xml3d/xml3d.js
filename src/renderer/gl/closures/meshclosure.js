@@ -112,10 +112,10 @@
         this.typeDataValid = true;
 
         /**
-         * Attributes required for the attached shader
-         * @type {Xflow.VertexShaderRequest}
+         * Attributes and uniforms values for the shader
+         * @type {Xflow.Request}
          */
-        this.vsRequest = null;
+        this.objectShaderRequest = null;
 
         /**
          * Bitfield that records the changes reported by Xflow
@@ -155,7 +155,7 @@
             this.changeState |= CHANGE_STATE.SHADER_CHANGED;
         },
 
-        update: function () {
+        update: function (scene) {
             if(this.changeState === CHANGE_STATE.NOTHING_CHANGED) {
                 return;
             }
@@ -164,7 +164,7 @@
             var oldValid = !!this.shaderClosure && this.typeDataValid;
 
             if(this.changeState & SHADER_CLOSURE_NEEDS_UPDATE)
-                this.mesh.clearBuffers();
+                this.mesh.clear();
 
             if (this.changeState & CHANGE_STATE.TYPE_CHANGED) {
                 this.updateTypeData();
@@ -175,12 +175,25 @@
             }
 
             if (this.changeState & SHADER_CLOSURE_NEEDS_UPDATE) {
-                this.updateVSRequest();
-                this.updateShaderClosure();
-                this.updateVsData();
+                this.updateObjectShaderRequest();
+                this.updateShaderClosure(scene);
+                this.updateObjectShaderData();
             }
             else if (this.changeState & CHANGE_STATE.VS_CHANGED) {
-                this.updateVsData();
+                this.updateObjectShaderData();
+            }
+
+            if(this.dataNode.isSubtreeLoading()){
+                this.shaderClosure = null;
+                this.typeDataValid = false;
+            }
+            else if(!this.dataNode.getOutputChannelInfo("position")){
+                XML3D.debug.logError("Mesh is missing 'position' attribute.");
+                this.shaderClosure = null;
+                this.typeDataValid = false;
+            }
+            else{
+
             }
 
             var newValid = !!this.shaderClosure && this.typeDataValid;
@@ -233,79 +246,40 @@
             return this.mesh.glType;
         },
 
-        updateVSRequest: function(){
-            if(this.vsRequest) this.vsRequest.clear();
+        updateObjectShaderRequest: function(){
+            if(this.objectShaderRequest) this.objectShaderRequest.clear();
 
-            this.vsRequest = this.shaderComposer.createVsRequest(this.dataNode, this.vsDataChanged.bind(this));
+            this.objectShaderRequest = this.shaderComposer.createObjectDataRequest(this.dataNode, this.shaderInputDataChanged.bind(this));
         },
-        updateShaderClosure: function(){
-            this.shaderClosure = this.shaderComposer.getShaderClosure(this.scene, this.vsRequest.getResult());
-        },
-
-        /**
-         * @param {Object<string,*>} attributes
-         * @param {Xflow.ComputeResult} dataResult
-         * @param {function(string)} missingCB
-         * @returns boolean true, if all required attributes were set
-         */
-        updateMeshFromResult: function (attributes, dataResult, missingCB) {
-            var complete = true;
-            for (var name in attributes) {
-                var param = attributes[name] || {};
-                var entry = dataResult.getOutputData(name);
-                if (!entry || !entry.getValue()) {
-                    if (param.required) {
-                        // If required and loading has finished, give a call
-                        dataResult.loading || missingCB(name);
-                        complete = false;
-                    }
-                    continue;
-                }
-                if (name == "vertexCount") {
-                    continue;
-                }
-                switch (entry.type) {
-                    case Xflow.DATA_TYPE.TEXTURE:
-                        XML3D.debug.logError("Texture as mesh parameter is not yet supported");
-                        break;
-                    default:
-                        this.handleBuffer(name, entry, this.mesh);
-                }
+        updateShaderClosure: function(scene){
+            this.shaderClosure = null;
+            if(!this.dataNode.isSubtreeLoading() && !this.dataNode.getOutputChannelInfo("position"))
+            {
+                XML3D.debug.logError("Mesh does not have 'position' attribute.", this.mesh, this.getMeshType());
             }
-            return complete;
+            else if(!this.dataNode.isSubtreeLoading()){
+                this.shaderClosure = this.shaderComposer.getShaderClosure(scene, this.objectShaderRequest.getResult());
+            }
         },
+
         updateIndexBuffer: function(){
             // Add Index buffer, if available
             var dataResult = this.typeRequest.getResult();
             var entry = dataResult.getOutputData("index");
             if(entry && entry.getValue())
-                this.handleBuffer("index", entry, this.mesh );
+                this.handleBuffer("index", entry);
         },
 
-        updateVsData: function() {
+        updateObjectShaderData: function() {
             if (!this.shaderClosure) {
                 return; // if only the data has changed, it can't get valid after update
             }
 
-            var result = this.vsRequest.getResult();
+            if(!this.bindedHandleBuffer) this.bindedHandleBuffer = this.handleBuffer.bind(this);
+            if(!this.bindedHandleUniform) this.bindedHandleUniform = this.handleUniform.bind(this);
 
-            var inputNames = result.shaderInputNames;
-            for(var i = 0; i < inputNames.length; ++i){
-                var name = inputNames[i];
-                if(result.isShaderInputUniform(name)){
-                    this.mesh.setUniformOverride(name, result.getShaderInputData(name));
-                }
-                else{
-                    this.handleBuffer(name, result.getShaderInputData(name), this.mesh )
-                }
-            }
-            var outputNames = result.shaderOutputNames;
-            for(var i = 0; i < outputNames.length; ++i){
-                var name = outputNames[i];
-                if(result.isShaderOutputUniform(name)){
-                    this.mesh.setUniformOverride(name, result.getUniformOutputData(name));
-                }
-            }
+            this.shaderComposer.distributeObjectShaderData(this.objectShaderRequest,
+                this.bindedHandleBuffer, this.bindedHandleUniform);
         },
 
         updateTypeData: function () {
@@ -320,7 +294,7 @@
             var dataResult = this.typeRequest.getResult();
             var entry = dataResult.getOutputData("index");
             if(entry && entry.getValue())
-                this.handleBuffer("index", entry, this.mesh );
+                this.handleBuffer("index", entry);
 
             entry = dataResult.getOutputData("vertexCount");
             this.mesh.setVertexCount(entry && entry.getValue() ? entry.getValue()[0] : null);
@@ -329,29 +303,35 @@
         /**
          * @param {string} name
          * @param {Object} attr
-         * @param {Xflow.BufferEntry} entry
+         * @param {Xflow.BufferEntry} xflowDataEntry
          * @param {GLMesh} mesh
          */
-        handleBuffer: function (name, entry, mesh) {
-            var webglData = XML3D.webgl.getXflowEntryWebGlData(entry, this.context.id);
+        handleBuffer: function (name, xflowDataEntry) {
+            var mesh = this.mesh;
+            var webglData = XML3D.webgl.getXflowEntryWebGlData(xflowDataEntry, this.context.id);
             var buffer = webglData.buffer;
             var gl = this.context.gl;
+
+            if(xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE){
+                XML3D.debug.logError("Texture as mesh parameter is not yet supported");
+                return;
+            }
 
             switch (webglData.changed) {
                 case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:
                     var bufferType = name == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
                     gl.bindBuffer(bufferType, buffer);
-                    gl.bufferSubData(bufferType, 0, entry.getValue());
+                    gl.bufferSubData(bufferType, 0, xflowDataEntry.getValue());
                     break;
                 case Xflow.DATA_ENTRY_STATE.CHANGED_NEW:
                 case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE:
                     if (name == "index") {
-                        buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(entry.getValue()));
+                        buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(xflowDataEntry.getValue()));
                     } else {
-                        buffer = createBuffer(gl, gl.ARRAY_BUFFER, entry.getValue());
+                        buffer = createBuffer(gl, gl.ARRAY_BUFFER, xflowDataEntry.getValue());
                     }
-                    buffer.tupleSize = entry.getTupleSize();
+                    buffer.tupleSize = xflowDataEntry.getTupleSize();
                     webglData.buffer = buffer;
                     break;
             }
@@ -361,16 +341,11 @@
 
             webglData.changed = 0;
         },
-        /**
-         *
-         * @param {Object.<string, *>} attributes
-         */
-        setAttributeRequest: function(attributes) {
-            this.attributes = attributes;
-            this.attributeRequest = new Xflow.ComputeRequest(this.dataNode, Object.keys(attributes), this.attributeDataChanged.bind(this));
-            this.attributeDataChanged(this.attributeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        },
 
+        handleUniform: function(name, xflowDataEntry){
+            this.shaderComposer.updateUniformEntryTextureOrBuffer(xflowDataEntry);
+            this.mesh.setUniformOverride(name, xflowDataEntry);
+        },
         /**
          *
          */
@@ -398,9 +373,7 @@
 
             if(computeBBox){
                 if(!this.checkXflowTypes(this.dataNode, meshConfig.bboxCompute)){
-                    XML3D.debug.logError("Mesh does not contain valid data required to compute BBOX.", this.mesh, this.getMeshType());
                     this.typeDataValid = false;
-                    return;
                 }
                 requestNames.push.apply(requestNames, Object.keys(meshConfig.bboxCompute));
             }
@@ -410,7 +383,7 @@
             for(var name in requirements){
                 var info = dataNode.getOutputChannelInfo(name);
                 if(!info) return false;
-                if(!info.type != requirements[name])
+                if(info.type != requirements[name])
                     return false;
             }
             return true;
@@ -420,7 +393,7 @@
          * @param {Xflow.ComputeRequest} request
          * @param {Xflow.RESULT_STATE} state
          */
-        vsDataChanged: function (request, state) {
+        shaderInputDataChanged: function (request, state) {
             this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.VS_STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
             this.context.requestRedraw("Mesh Attribute Data Changed");
             XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
@@ -430,14 +403,10 @@
             this.changeState |= CHANGE_STATE.SHADER_CHANGED;
         },
 
-        /**
-         * Returns a compute request for custom mesh parameters
-         * @param {Array.<string>} filter
-         * @param {function(Xflow.ComputeRequest, Xflow.RESULT_STATE)} callback
-         */
-        getRequest: function(filter, callback) {
-            return new Xflow.ComputeRequest(this.dataNode, filter, callback);
+        getProgram: function(){
+            return this.shaderClosure;
         }
+
     });
 
     webgl.MeshClosure = MeshClosure;

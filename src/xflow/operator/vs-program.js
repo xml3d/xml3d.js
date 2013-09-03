@@ -4,6 +4,14 @@
 // Xflow.OperatorList
 //----------------------------------------------------------------------------------------------------------------------
 
+    var c_SHADER_CONSTANT_TYPES = {}
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.OBJECT_ID] = 'int';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM] = 'mat4';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM_NORMAL] = 'mat3';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM] = 'mat4';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] = 'mat3';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM] = 'mat4';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] = 'mat3';
 
     Xflow.VSProgram = function(operatorList){
         this.list = operatorList;
@@ -60,7 +68,7 @@
         // Start with Globals
         for(var type in Xflow.shaderConstant){
             var name = Xflow.shaderConstant[type];
-            code += "uniform " + (type == Xflow.SHADER_CONSTANT_KEY.OBJECT_ID ? 'float' : 'mat4')  +
+            code += "uniform " + c_SHADER_CONSTANT_TYPES[type]  +
                     " " + name + ";\n";
             Xflow.nameset.add(usedNames, name);
         }
@@ -81,7 +89,7 @@
                 acceptedBaseShaderInput[inputIndex] = true;
                 outputInfo.type = Xflow.ITERATION_TYPE.MANY;
 
-                code += "out " + getGLSLType(baseOperator.outputs[i].type) + " " + outputName + ";\n";
+                code += "varying " + getGLSLType(baseOperator.outputs[i].type) + " " + outputName + ";\n";
                 Xflow.nameset.add(usedNames, outputName);
                 transferNames[baseEntry.getTransferOutputId(i)] = outputName;
             }
@@ -111,7 +119,7 @@
                     Xflow.nameset.add(program._shaderInputNames, name);
                     directInputNames[inputIndex] = name;
 
-                    code += (uniform ? "uniform " : "in ") + getGLSLType(mapEntry.internalType) + " " + name;
+                    code += (uniform ? "uniform " : "attribute ") + getGLSLType(mapEntry.internalType) + " " + name;
 
                     if(mapEntry.array)
                         code += "[" + operatorList.getInputSize(inputIndex) + "]"

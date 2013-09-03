@@ -148,9 +148,9 @@ module("Xflow tests", {
         var outputIdx = code.indexOf("// OUTPUT"), inputIdx = code.indexOf("// INPUT");
         var fragment = code.substring(outputIdx, inputIdx);
 
-        var matches = fragment.match(/out /g), actualCount = matches && matches.length || 0;
+        var matches = fragment.match(/varying /g), actualCount = matches && matches.length || 0;
         equal(actualCount, count, title + "=> Vertex Shader has " +
-            count + " 'out' attributes.");
+            count + " 'varying' parameters.");
     },
     VSInAttribCount: function(result, action, title){
         var count = action.getAttribute("count")*1;
@@ -158,9 +158,9 @@ module("Xflow tests", {
         var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE");
         var fragment = code.substring(inputIdx, codeIdx);
 
-        var matches = fragment.match(/in /g), actualCount = matches && matches.length || 0;
+        var matches = fragment.match(/attribute /g), actualCount = matches && matches.length || 0;
         equal(actualCount, count, title + "=> Vertex Shader has " +
-            count + " 'in' attributes.");
+            count + " 'attribute' parameters.");
     },
     VSUniformAttribCount: function(result, action, title){
         var count = action.getAttribute("count")*1;
@@ -170,7 +170,7 @@ module("Xflow tests", {
 
         var matches = fragment.match(/uniform /g), actualCount = matches && matches.length || 0;
         equal(actualCount, count, title + "=> Vertex Shader has " +
-            count + " 'uniform' attributes.");
+            count + " 'uniform' parameters.");
     },
     VSOutputIsVarying: function(result, action, title){
         var name = action.getAttribute("name");

@@ -14,7 +14,6 @@ Xflow.setShaderConstant = function(type, name){
     Xflow.shaderConstant[type] = name;
 }
 
-
 Xflow.VSConfig = function(){
     this._blockedNames = [];
     this._attributes = [];
@@ -111,14 +110,14 @@ Xflow.VSConfig.prototype.getOperator = function(){
         var line = "\t#O{" + attr.outputName + "} = ";
         switch(attr.type){
             case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_NORMAL:
-                line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] + "} "
-                    + "* vec4( #I{" + attr.inputName + "} , 0.0)).xyz;"; break;
+                line += "normalize( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] + "} "
+                    + "* #I{" + attr.inputName + "} )"; break;
             case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_POINT:
                 line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM] + "} "
                     + "* vec4( #I{" + attr.inputName + "} , 1.0)).xyz;"; break;
             case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_NORMAL:
-                line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] + "} "
-                    + "* vec4( #I{" + attr.inputName + "} , 0.0)).xyz;"; break;
+                line += "normalize( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] + "} "
+                    + "* #I{" + attr.inputName + "} );"; break;
             case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_POINT:
                 line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM] + "} "
                     + "* vec4( #I{" + attr.inputName + "} , 1.0)).xyz;"; break;

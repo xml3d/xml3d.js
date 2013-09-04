@@ -31,12 +31,16 @@
         return programData.getDataEntry(this._inputInfo[name].index);
     }
 
+    Xflow.VSProgram.prototype.getShaderOutputType = function(name){
+        return this._outputInfo[name].type;
+    }
+
     Xflow.VSProgram.prototype.isOutputUniform = function(name){
-        return this._outputInfo[name].type == Xflow.ITERATION_TYPE.ONE;
+        return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.ONE;
     }
 
     Xflow.VSProgram.prototype.isOutputNull = function(name){
-        return this._outputInfo[name].type == Xflow.ITERATION_TYPE.NULL;
+        return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.NULL;
     }
 
     Xflow.VSProgram.prototype.getUniformOutputData = function(name, programData){
@@ -80,25 +84,25 @@
             var configAttr = vsConfig._attributes[i],
                 inputIndex = outputInputMap[i],
                 directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
-            var outputInfo = {type: 0, index: 0},
+            var outputInfo = {type: configAttr.type, iteration: 0, index: 0},
                 outputName = configAttr.outputName;
             if(vsConfig.isAttributeTransformed(i) ||
                 baseEntry.isTransferInput(inputIndex) ||
                 operatorList.isInputIterate(directInputIndex))
             {
                 acceptedBaseShaderInput[inputIndex] = true;
-                outputInfo.type = Xflow.ITERATION_TYPE.MANY;
+                outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
 
                 code += "varying " + getGLSLType(baseOperator.outputs[i].type) + " " + outputName + ";\n";
                 Xflow.nameset.add(usedNames, outputName);
                 transferNames[baseEntry.getTransferOutputId(i)] = outputName;
             }
             else if(operatorList.isInputUniform(directInputIndex)){
-                outputInfo.type = Xflow.ITERATION_TYPE.ONE;
+                outputInfo.iteration = Xflow.ITERATION_TYPE.ONE;
                 outputInfo.index = directInputIndex;
             }
             else{
-                outputInfo.type = Xflow.ITERATION_TYPE.NULL;
+                outputInfo.iteration = Xflow.ITERATION_TYPE.NULL;
             }
             Xflow.nameset.add(program._shaderOutputNames, outputName);
             program._outputInfo[outputName] = outputInfo;

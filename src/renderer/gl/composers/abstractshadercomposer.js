@@ -143,8 +143,13 @@
             if (!result || !result.getOutputMap) {
                 return;
             }
+            var uniforms = {}, xflowMap = result.getOutputMap();
+            for(var name in xflowMap){
+                uniforms[this.getUniformName(name)] = xflowMap[name];
+            }
+
             shaderClosure.bind();
-            shaderClosure.updateUniformsFromComputeResult(result);
+            shaderClosure.updateUniformsFromComputeResult(uniforms);
         },
 
         updateClosureFromLightParameters: function (shaderClosure, lightParameters) {
@@ -201,6 +206,10 @@
 
         distributeObjectShaderData: function(objectRequest, attributeCallback, uniformCallback){
             throw new Error("AbstractComposer::distributeObjectShaderData needs to be overridden");
+        },
+
+        getUniformName: function(name){
+            return name;
         },
 
         getShaderClosure: function (scene, vsResult) {

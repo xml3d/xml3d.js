@@ -3,7 +3,7 @@
     /**
      * @param {Xflow.DATA_TYPE} xflowType
      */
-    var convertXflow2ShadeType = function(xflowType) {
+    var convertXflow2ShadeType = function(xflowType, source) {
         var result = {}
         switch (xflowType) {
             case Xflow.DATA_TYPE.BOOL:
@@ -35,7 +35,7 @@
             default:
                 throw new Error("Unknown Xflow DataType: " + xflowType);
         }
-        result.source = Shade.SOURCES.UNIFORM;
+        result.source = source;
         return result;
     }
 
@@ -60,14 +60,26 @@
         createSources: function(scene, shaderResult, objectData) {
 
             var contextData = {"global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]};
-
+            var contextInfo = contextData["global.shade"][0].extra.info;
             if (shaderResult) {
                 var entries = shaderResult.getOutputMap();
 
                 for (var name in entries) {
                     var entry = entries[name];
                     if (entry) {
-                        contextData["global.shade"][0].extra.info[name] = convertXflow2ShadeType(entry.type);
+                        contextInfo[name] = convertXflow2ShadeType(entry.type, Shade.SOURCES.UNIFORM);
+                    }
+                }
+            }
+            if (objectData) {
+                var outputNames = objectData.shaderOutputNames;
+
+                for (var i = 0; i < outputNames.length; ++i) {
+                    var name = outputNames[i];
+                    if (entry) {
+                        contextInfo[name] = convertXflow2ShadeType(objectData.getShaderOutputType(name)
+                            , objectData.isShaderInputUniform(name) ? Shade.SOURCES.UNIFORM
+                                : Shade.SOURCES.VERTEX);
                     }
                 }
             }

@@ -109,8 +109,7 @@
          * @param {Xflow.ComputeResult} result
          * @param {Object?} options
          */
-        updateUniformsFromComputeResult: function (result) {
-            var dataMap = result.getOutputMap();
+        updateUniformsFromComputeResult: function (dataMap) {
             var uniforms = this.program.uniforms;
 
             this.uniformValues = {};
@@ -137,8 +136,7 @@
             }
             var samplers = this.program.samplers
             for (var name in samplers) {
-                var sampler = samplers[name];
-                var entry = result.getOutputData(name);
+                var entry = dataMap[name];
                 var webglData = this.context.getXflowEntryWebGlData(entry);
 
                 if(webglData.texture){

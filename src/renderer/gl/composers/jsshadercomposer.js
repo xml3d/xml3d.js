@@ -34,6 +34,17 @@
         this.setShaderInfo(shaderInfo);
     };
 
+
+    function getVSShaderAttribTransform(inputName){
+        if(inputName == "position")
+            return Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT;
+        else if(inputNAme == "normal")
+            return Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL;
+        else
+            return Xflow.VS_ATTRIB_TRANSFORM.NONE;
+
+    }
+
     XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
         setShaderInfo: function(shaderInfo) {
             this.extractedParams = Shade.extractParameters(this.sourceTemplate);
@@ -54,16 +65,23 @@
             return new webgl.JSShaderClosure(this.context, this.sourceTemplate);
         },
 
+        getUniformName: function(name){
+            return ("_env_" + name).replace(/_+/g, "_");
+        },
+
         createObjectDataRequest: function(objectDataNode, callback){
+
             var vsConfig = new Xflow.VSConfig();
-            for(var inputName in this.descriptor.attributes){
-                var entry = this.descriptor.attributes;
-                vsConfig.addAttribute(entry.type, inputName, entry.dest, !entry.required);
+            for(var i = 0; i < this.extractedParams.length; ++i){
+                var name = this.extractedParams[i];
+                var xflowInfo = objectDataNode.getOutputChannelInfo();
+                if(xflowInfo){
+                    vsConfig.addAttribute(xflowInfo.type, name, this.getUniformName(name),
+                        true, getVSShaderAttribTransform(name));
+                }
             }
-            for(var inputName in this.descriptor.uniforms){
-                var entry = this.descriptor.attributes;
-                vsConfig.addAttribute(entry.type, inputName, inputName, true);
-            }
+            var request = new Xflow.VertexShaderRequest(objectDataNode, vsConfig);
+            return request;
         },
 
         distributeObjectShaderData: function(objectRequest, attributeCallback, uniformCallback){
@@ -80,7 +98,7 @@
             for(var i = 0; i < outputNames.length; ++i){
                 var name = outputNames[i];
                 if(result.isShaderOutputUniform(name)){
-                    uniformCallback(name, entry);
+                    uniformCallback(this.getUniformName(name), result.getUniformOutputData(name));
                 }
             }
         }

@@ -128,13 +128,14 @@ module("Xflow tests", {
     },
 
     VSConnection: function(node, vsConfig){
-        var typeString = node.getAttribute("type");
-        var type = Xflow.VS_ATTRIB_TYPE[typeString];
+        var typeString = node.getAttribute("type"), transformString = node.getAttribute("transform");
+        var type = Xflow.DATA_TYPE[typeString];
         if(!type)
             throw new Error("Unknown VS connection Type: " + typeString);
+        var transform = Xflow.VS_ATTRIB_TRANSFORM[transformString] || Xflow.VS_ATTRIB_TRANSFORM.NONE;
 
         vsConfig.addAttribute( type, node.getAttribute("in"), node.getAttribute("out"),
-            node.getAttribute("optional") == "true" );
+            node.getAttribute("optional") == "true", transform );
     },
 
     VSInputBufferCount: function(result, action, title){

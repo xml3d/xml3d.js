@@ -2,15 +2,14 @@
 
     var CHANGE_STATE = {
         NOTHING_CHANGED : 0,
-        TYPE_STRUCTURE_CHANGED : 1,
+        STRUCTURE_CHANGED : 1,
         TYPE_DATA_CHANGED : 2,
-        TYPE_CHANGED: 3,
-        VS_STRUCTURE_CHANGED : 8,
-        VS_DATA_CHANGED : 16,
-        VS_CHANGED: 24,
+        VS_DATA_CHANGED : 4,
+        TYPE_CHANGED: 2+1,
+        VS_CHANGED: 4+1,
         SHADER_CHANGED: 32
     };
-    var SHADER_CLOSURE_NEEDS_UPDATE = CHANGE_STATE.VS_STRUCTURE_CHANGED | CHANGE_STATE.SHADER_CHANGED;
+    var SHADER_CLOSURE_NEEDS_UPDATE = CHANGE_STATE.STRUCTURE_CHANGED | CHANGE_STATE.SHADER_CHANGED;
 
     var READY_STATE = webgl.DrawableClosure.READY_STATE;
 
@@ -122,7 +121,7 @@
          * @private
          * @type {number}
          */
-        this.changeState = CHANGE_STATE.TYPE_STRUCTURE_CHANGED;
+        this.changeState = CHANGE_STATE.STRUCTURE_CHANGE;
 
         /**
          * Callback if bounding box has changed. Gets only called if
@@ -192,9 +191,6 @@
                 this.shaderClosure = null;
                 this.typeDataValid = false;
             }
-            else{
-
-            }
 
             var newValid = !!this.shaderClosure && this.typeDataValid;
 
@@ -235,7 +231,7 @@
          * @param {Xflow.RESULT_STATE} state
          */
         typeDataChanged: function (request, state) {
-            this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.TYPE_STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
+            this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
             this.context.requestRedraw("Mesh Type Data Change");
             XML3D.debug.logInfo("MeshClosure: Type data changed", request, state, this.changeState);
         },
@@ -248,6 +244,9 @@
 
         updateObjectShaderRequest: function(){
             if(this.objectShaderRequest) this.objectShaderRequest.clear();
+            this.objectShaderRequest = null;
+            if(this.dataNode.isSubtreeLoading())
+                return;
 
             this.objectShaderRequest = this.shaderComposer.createObjectDataRequest(this.dataNode, this.shaderInputDataChanged.bind(this));
         },
@@ -283,7 +282,7 @@
         },
 
         updateTypeData: function () {
-            if (!this.typeDataValid && !(this.changeState & CHANGE_STATE.TYPE_STRUCTURE_CHANGED)) {
+            if (!this.typeDataValid && !(this.changeState & CHANGE_STATE.STRUCTURE_CHANGED)) {
                 return; // only if structure has changed, it can't get valid after update
             }
 
@@ -394,7 +393,7 @@
          * @param {Xflow.RESULT_STATE} state
          */
         shaderInputDataChanged: function (request, state) {
-            this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.VS_STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
+            this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
             this.context.requestRedraw("Mesh Attribute Data Changed");
             XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
         },

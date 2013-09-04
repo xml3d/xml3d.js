@@ -34,11 +34,15 @@
         this.setShaderInfo(shaderInfo);
     };
 
+    JSShaderComposer.convertEnvName = function(name){
+        return ("_env_" + name).replace(/_+/g, "_");
+    }
+
 
     function getVSShaderAttribTransform(inputName){
         if(inputName == "position")
             return Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT;
-        else if(inputNAme == "normal")
+        else if(inputName == "normal")
             return Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL;
         else
             return Xflow.VS_ATTRIB_TRANSFORM.NONE;
@@ -47,7 +51,7 @@
 
     XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
         setShaderInfo: function(shaderInfo) {
-            this.extractedParams = Shade.extractParameters(this.sourceTemplate);
+            this.extractedParams = Shade.extractParameters(this.sourceTemplate).shaderParameters;
             var that = this;
             // The composer is interested in changes of all possible shader parameters (extracted)
             // the instances (closures) will only set those, that occur in the instance
@@ -62,19 +66,22 @@
             return { color: null, normal: null, texcoord: null };
         },
         createShaderClosure: function () {
-            return new webgl.JSShaderClosure(this.context, this.sourceTemplate);
+            return new webgl.JSShaderClosure(this.context, this.sourceTemplate, this.extractedParams);
         },
 
         getUniformName: function(name){
-            return ("_env_" + name).replace(/_+/g, "_");
+            return JSShaderComposer.convertEnvName(name);
         },
 
         createObjectDataRequest: function(objectDataNode, callback){
 
             var vsConfig = new Xflow.VSConfig();
-            for(var i = 0; i < this.extractedParams.length; ++i){
-                var name = this.extractedParams[i];
-                var xflowInfo = objectDataNode.getOutputChannelInfo();
+            var names = this.extractedParams.slice();
+            if(names.indexOf("position") == -1) names.push("position");
+
+            for(var i = 0; i < names.length; ++i){
+                var name = names[i];
+                var xflowInfo = objectDataNode.getOutputChannelInfo(name);
                 if(xflowInfo){
                     vsConfig.addAttribute(xflowInfo.type, name, this.getUniformName(name),
                         true, getVSShaderAttribTransform(name));
@@ -98,7 +105,7 @@
             for(var i = 0; i < outputNames.length; ++i){
                 var name = outputNames[i];
                 if(result.isShaderOutputUniform(name)){
-                    uniformCallback(this.getUniformName(name), result.getUniformOutputData(name));
+                    uniformCallback(name, result.getUniformOutputData(name));
                 }
             }
         }

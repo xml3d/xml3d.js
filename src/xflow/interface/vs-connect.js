@@ -76,7 +76,7 @@ Xflow.VSConfig.prototype.getOperator = function(){
 
     var outputs = [], params = [], glslCode = "\t// VS Connector\n";
 
-    var inputAdded = {}, outputInputMap = [];
+    var inputAdded = {}, outputInputMap = [], fragments = {};
 
     for(var i = 0; i < this._attributes.length; ++i){
         var attr = this._attributes[i];
@@ -95,7 +95,6 @@ Xflow.VSConfig.prototype.getOperator = function(){
 
         if(attr.transform && attr.type != Xflow.DATA_TYPE.FLOAT3)
             throw new Error("Xflow VS Shader only supports transformation of float3 values at this point");
-
         switch(attr.transform){
             case Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
                 line += "normalize( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] + "} "
@@ -112,7 +111,11 @@ Xflow.VSConfig.prototype.getOperator = function(){
             default:
                 line += "#I{" + attr.inputName + "};";
         }
-        glslCode += line + "\n";
+        fragments[attr.outputName] = line;
+    }
+
+    if(!inputAdded["position"]){
+
     }
 
     glslCode += "\tgl_Position = #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM]
@@ -122,6 +125,7 @@ Xflow.VSConfig.prototype.getOperator = function(){
         outputs: outputs,
         params:  params,
         evaluate_glsl: glslCode,
+        glsl_fragments: fragments,
         blockedNames: this._blockedNames,
         vsConfig: this,
         outputInputMap: outputInputMap

@@ -96,7 +96,10 @@ var c_vsConnectNodeCount = {},
  * @param {Xflow.VSConfig} vsConfig
  */
 var VertexShaderRequest = function(dataNode, vsConfig, callback){
+
     var filter = vsConfig.getFilter();
+    if(filter.length == 0)
+        throw new Error("vsConfig requires at least one attribute entry.");
     Xflow.Request.call(this, dataNode, filter, callback);
     this._vsConfig = vsConfig;
     this._vsConnectNode = getVsConnectNode(dataNode, vsConfig);

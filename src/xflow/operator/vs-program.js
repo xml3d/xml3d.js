@@ -67,7 +67,7 @@
             }
         }
 
-        var code = "#version 140 \n\n";
+        var code = "";
         code += "// GLOBALS\n"
         // Start with Globals
         for(var type in Xflow.shaderConstant){
@@ -150,6 +150,14 @@
             }
             // Take Code Fragment
             var codeFragment = operator.evaluate_glsl, index;
+
+            if(operator.glsl_fragments){
+                for(var outputName in program._outputInfo){
+                    if(program._outputInfo[outputName].iteration == Xflow.ITERATION_TYPE.MANY)
+                        codeFragment += "\n" + operator.glsl_fragments[outputName];
+                }
+            }
+
             while((index = codeFragment.indexOf("#I{")) != -1){
                 var end = codeFragment.indexOf("}",index);
                 var mappingIndex = getMappingIndex(operator, codeFragment.substring(index+3,end));

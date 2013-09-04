@@ -45,9 +45,10 @@
      * @param dataCallback
      * @constructor
      */
-    var JSShaderClosure = function(context, sourceTemplate) {
+    var JSShaderClosure = function(context, sourceTemplate, extractedParams) {
         webgl.AbstractShaderClosure.call(this, context);
         this.sourceTemplate = sourceTemplate;
+        this.extractedParams = extractedParams;
     };
 
     XML3D.createClass(JSShaderClosure, webgl.AbstractShaderClosure, {
@@ -61,47 +62,33 @@
 
             var contextData = {"global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]};
             var contextInfo = contextData["global.shade"][0].extra.info;
-            if (shaderResult) {
-                var entries = shaderResult.getOutputMap();
 
-                for (var name in entries) {
-                    var entry = entries[name];
-                    if (entry) {
-                        contextInfo[name] = convertXflow2ShadeType(entry.type, Shade.SOURCES.UNIFORM);
-                    }
+            var shaderEntries = shaderResult && shaderResult.getOutputMap(),
+                vsShaderOutput = objectData && objectData.shaderOutputNames;
+
+            for(var i = 0; i < this.extractedParams.length; ++i){
+                var paramName = this.extractedParams[i];
+                var envName = webgl.JSShaderComposer.convertEnvName(paramName);
+                if(vsShaderOutput && vsShaderOutput.indexOf(envName) != -1){
+                    contextInfo[paramName] = convertXflow2ShadeType(objectData.getShaderOutputType(envName),
+                        objectData.isShaderOutputUniform(envName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
+                }
+                else if(shaderEntries && shaderEntries[paramName]){
+                    contextInfo[paramName] = convertXflow2ShadeType(shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
                 }
             }
-            if (objectData) {
-                var outputNames = objectData.shaderOutputNames;
 
-                for (var i = 0; i < outputNames.length; ++i) {
-                    var name = outputNames[i];
-                    if (entry) {
-                        contextInfo[name] = convertXflow2ShadeType(objectData.getShaderOutputType(name)
-                            , objectData.isShaderInputUniform(name) ? Shade.SOURCES.UNIFORM
-                                : Shade.SOURCES.VERTEX);
-                    }
-                }
-            }
 
             var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, { inject: contextData, loc: true });
             this.source = {
                 fragment: Shade.compileFragmentShader(aast),
-                vertex:  [
-                    "attribute vec3 position;",
-                    "attribute vec3 color;",
-
-                    "varying vec3 fragVertexColor;",
-
-                    "uniform mat4 modelViewProjectionMatrix;",
-
-                    "void main(void) {",
-                    "   fragVertexColor = color;",
-                    "   gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
-                    "}"
-                ].join("\n")
+                vertex:  objectData.getGLSLCode()
             }
+            // TODO: Handle errors.
+            console.log(this.source.vertex);
             console.log(this.source.fragment);
+            return true;
+
         },
 
         getTransparencyFromInputData: function(dataMap){

@@ -9,13 +9,14 @@
      * @constructor
      */
     var JSShaderComposer = function(context, shaderInfo, node) {
-        webgl.AbstractShaderComposer.call(this, context);
+        webgl.AbstractShaderComposer.call(this, context, shaderInfo.getScript());
 
         if (!window.Shade)
             throw new Error("Shade.js not found");
 
         this.context = context;
 
+        this.shaderURL = null;
         /** @type string*/
         this.sourceTemplate = node.innerText;
 
@@ -51,6 +52,7 @@
 
     XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
         setShaderInfo: function(shaderInfo) {
+
             this.extractedParams = Shade.extractParameters(this.sourceTemplate).shaderParameters;
             var that = this;
             // The composer is interested in changes of all possible shader parameters (extracted)

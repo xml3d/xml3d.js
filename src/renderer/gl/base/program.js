@@ -1,4 +1,5 @@
 (function (webgl) {
+
     /**
      * @param {WebGLRenderingContext} gl
      * @param {number} type
@@ -18,9 +19,10 @@
                 errorString = "Fragment shader failed to compile: \n";
 
             errorString += gl.getShaderInfoLog(shader) + "\n--------\n";
-            XML3D.debug.logError(errorString);
+            errorString += "Shader Source:\n--------\n";
+            errorString += XML3D.debug.formatSourceCode(shaderSource);
             gl.getError();
-            return null;
+            throw new Error(errorString)
         }
         return shader;
     };
@@ -52,9 +54,8 @@
             var errorString = "Shader linking failed: \n";
             errorString += gl.getProgramInfoLog(program);
             errorString += "\n--------\n";
-            XML3D.debug.logError(errorString);
             gl.getError();
-            return null;
+            throw new Error(errorString);
         }
         return program;
     }

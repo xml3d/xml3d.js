@@ -35,7 +35,7 @@
             for(var attrName in this.descriptor.attributes){
                 var entry = this.descriptor.attributes[attrName];
                 if(entry && entry.required && !inputData[attrName]){
-                    XML3D.debug.logError("Mesh is missing '" + attrName + "' attribute.");
+                    throw new Error("Mesh is missing '" + attrName + "' attribute.");
                     return false;
                 }
             }

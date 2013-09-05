@@ -29,7 +29,6 @@
          * @returns {IShaderComposer}
          */
         createComposerForShaderInfo: function (shaderInfo) {
-            console.log(shaderInfo);
             if (!shaderInfo) {
                 return this.defaultComposer;
             }

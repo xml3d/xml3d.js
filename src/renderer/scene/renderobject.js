@@ -354,7 +354,13 @@
 
         updateForRendering: function() {
             this.setShader(this.parent.getShaderHandle());
-            this.drawable.update(this.scene);
+            try{
+                this.drawable.update(this.scene);
+            }
+            catch(e){
+                XML3D.debug.logError("Mesh Error: " + e.message, this.node);
+            }
+
         }
 
     });

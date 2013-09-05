@@ -160,37 +160,40 @@
             }
             XML3D.debug.logDebug("Update mesh closure", this.changeState);
 
-            var oldValid = !!this.shaderClosure && this.typeDataValid;
+            var oldValid = !!this.shaderClosure && this.typeDataValid, someError = null;
 
-            if(this.changeState & SHADER_CLOSURE_NEEDS_UPDATE)
+            try{
+                if(this.changeState & SHADER_CLOSURE_NEEDS_UPDATE)
                 this.mesh.clear();
 
-            if (this.changeState & CHANGE_STATE.TYPE_CHANGED) {
-                this.updateTypeData();
-            }
+                if (this.changeState & CHANGE_STATE.TYPE_CHANGED) {
+                    this.updateTypeData();
+                }
 
-            if(this.changeState & (SHADER_CLOSURE_NEEDS_UPDATE | CHANGE_STATE.TYPE_CHANGED)){
-                this.updateIndexBuffer();
-            }
+                if(this.changeState & (SHADER_CLOSURE_NEEDS_UPDATE | CHANGE_STATE.TYPE_CHANGED)){
+                    this.updateIndexBuffer();
+                }
 
-            if (this.changeState & SHADER_CLOSURE_NEEDS_UPDATE) {
-                this.updateObjectShaderRequest();
-                this.updateShaderClosure(scene);
-                this.updateObjectShaderData();
-            }
-            else if (this.changeState & CHANGE_STATE.VS_CHANGED) {
-                this.updateObjectShaderData();
-            }
+                if (this.changeState & SHADER_CLOSURE_NEEDS_UPDATE) {
+                    this.updateObjectShaderRequest();
+                    this.updateShaderClosure(scene);
+                    this.updateObjectShaderData();
+                }
+                else if (this.changeState & CHANGE_STATE.VS_CHANGED) {
+                    this.updateObjectShaderData();
+                }
 
-            if(this.dataNode.isSubtreeLoading()){
+                if(this.dataNode.isSubtreeLoading()){
+                    this.shaderClosure = null;
+                    this.typeDataValid = false;
+                }
+            }
+            catch(e){
+                someError = e;
                 this.shaderClosure = null;
                 this.typeDataValid = false;
             }
-            else if(!this.dataNode.getOutputChannelInfo("position")){
-                XML3D.debug.logError("Mesh is missing 'position' attribute.");
-                this.shaderClosure = null;
-                this.typeDataValid = false;
-            }
+
 
             var newValid = !!this.shaderClosure && this.typeDataValid;
 
@@ -201,8 +204,9 @@
                     oldState: oldValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE
                 });
             }
-
             this.changeState = CHANGE_STATE.NOTHING_CHANGED;
+
+            if(someError) throw someError;
         },
 
         calculateBoundingBox: (function() {
@@ -254,7 +258,8 @@
             this.shaderClosure = null;
             if(!this.dataNode.isSubtreeLoading() && !this.dataNode.getOutputChannelInfo("position"))
             {
-                XML3D.debug.logError("Mesh does not have 'position' attribute.", this.mesh, this.getMeshType());
+                throw new Error("Mesh does not have 'position' attribute.");
+                //XML3D.debug.logError("Mesh does not have 'position' attribute.", this.mesh, this.getMeshType());
             }
             else if(!this.dataNode.isSubtreeLoading()){
                 this.shaderClosure = this.shaderComposer.getShaderClosure(scene, this.objectShaderRequest.getResult());
@@ -266,7 +271,7 @@
             var dataResult = this.typeRequest.getResult();
             var entry = dataResult.getOutputData("index");
             if(entry && entry.getValue())
-                this.handleBuffer("index", entry);
+                this.handleBuffer("index", entry, true);
         },
 
         updateObjectShaderData: function() {
@@ -291,11 +296,8 @@
             this.calculateBoundingBox();
 
             var dataResult = this.typeRequest.getResult();
-            var entry = dataResult.getOutputData("index");
-            if(entry && entry.getValue())
-                this.handleBuffer("index", entry);
 
-            entry = dataResult.getOutputData("vertexCount");
+            var entry = dataResult.getOutputData("vertexCount");
             this.mesh.setVertexCount(entry && entry.getValue() ? entry.getValue()[0] : null);
             this.typeDataValid = true;
         },
@@ -303,9 +305,10 @@
          * @param {string} name
          * @param {Object} attr
          * @param {Xflow.BufferEntry} xflowDataEntry
-         * @param {GLMesh} mesh
+         * @param {boolean=} isIndex
          */
-        handleBuffer: function (name, xflowDataEntry) {
+        handleBuffer: function (name, xflowDataEntry, isIndex) {
+            isIndex = isIndex || false;
             var mesh = this.mesh;
             var webglData = XML3D.webgl.getXflowEntryWebGlData(xflowDataEntry, this.context.id);
             var buffer = webglData.buffer;
@@ -314,6 +317,13 @@
             if(xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE){
                 XML3D.debug.logError("Texture as mesh parameter is not yet supported");
                 return;
+            }
+
+            if(isIndex){
+                this.updateIndexRange(xflowDataEntry, webglData);
+            }
+            else{
+                this.mesh.checkBufferCompatible(name, xflowDataEntry);
             }
 
             switch (webglData.changed) {
@@ -334,11 +344,37 @@
                     webglData.buffer = buffer;
                     break;
             }
+
+
             // In every case, set the buffer, because other meshes might have already
             // performed one or more of the tasks above
             mesh.setBuffer(name, buffer);
 
             webglData.changed = 0;
+        },
+
+        updateIndexRange: function(xflowDataEntry, webglData){
+            if(webglData.changed){
+                var indexValue = xflowDataEntry.getValue();
+                var minIndex = 100000000, maxIndex = 0;
+                var i = indexValue.length;
+                while(i--){
+                    minIndex = Math.min(minIndex, indexValue[i]);
+                    maxIndex = Math.max(maxIndex, indexValue[i]);
+                }
+                webglData.maxIndex = maxIndex;
+                webglData.minIndex = minIndex;
+            }
+            this.mesh.setIndexRange(webglData.minIndex, webglData.maxIndex);
+        },
+
+        checkBufferSize: function(name, xflowDataEntry){
+            if(xflowDataEntry.getIterateCount){
+                var cnt = xflowDataEntry.getIterateCount();
+                if(cnt >= this.mesh.maxIndex)
+                    throw new Error("Index range of [" + this.mesh.minIndex + ", " + this.mesh.maxIndex + "] " +
+                        " goes beyond element count " + cnt + " of attribute '" + name + "'");
+            }
         },
 
         handleUniform: function(name, xflowDataEntry){

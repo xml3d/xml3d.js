@@ -54,7 +54,8 @@
      * @constructor
      * @implements IShaderComposer
      */
-    var AbstractShaderComposer = function (context) {
+    var AbstractShaderComposer = function (context, identifier) {
+        this.identifier = identifier || "NO IDENTIFIER";
         this.context = context;
         this.shaderClosures = [];
         this.dataChanged = false;
@@ -215,8 +216,12 @@
         getShaderClosure: function (scene, vsResult) {
             var shader = this.createShaderClosure();
 
-            if(!shader.createSources(scene, this.getShaderDataResult(), vsResult))
-                return null;
+            try{
+                shader.createSources(scene, this.getShaderDataResult(), vsResult)
+            }
+            catch(e){
+                throw new Error("Shader '" + this.identifier + "': " + e.message)
+            }
 
             for (var i = 0; i < this.shaderClosures.length; i++) {
                 if (this.shaderClosures[i].equals(shader)){

@@ -78,15 +78,22 @@
                 }
             }
 
-
-            var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, { inject: contextData, loc: true });
-            this.source = {
-                fragment: Shade.compileFragmentShader(aast),
-                vertex:  objectData.getGLSLCode()
+            try{
+                var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, { inject: contextData, loc: true });
+                this.source = {
+                    fragment: Shade.compileFragmentShader(aast),
+                    vertex:  objectData.getGLSLCode()
+                }
             }
+            catch(e){
+                var errorMessage = "Shade.js Compile Error:\n" + e.message + "\n------------\n"
+                + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
+                throw new Error(errorMessage);
+            }
+
             // TODO: Handle errors.
-            console.log(this.source.vertex);
-            console.log(this.source.fragment);
+            XML3D.debug.logDebug(this.source.vertex);
+            XML3D.debug.logDebug(this.source.fragment);
             return true;
 
         },

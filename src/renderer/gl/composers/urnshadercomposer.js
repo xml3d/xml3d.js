@@ -28,7 +28,7 @@
      * @constructor
      */
     var URNShaderComposer = function (context, shaderInfo) {
-        webgl.AbstractShaderComposer.call(this, context);
+        webgl.AbstractShaderComposer.call(this, context, shaderInfo.getScript());
         this.descriptor = null;
         this.setShaderInfo(shaderInfo);
     };

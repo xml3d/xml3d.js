@@ -94,5 +94,18 @@ XML3D.debug = {
             msg && stack.splice(0,0,msg);
             XML3D.debug.doLog(logType, stack);
         }
+    },
+    getNumberWithPadding: function(number, width){
+        var res = "" + number;
+        while(res.length < width) res= " " + res;
+        return res;
+    },
+    formatSourceCode: function(source){
+        var result = "";
+        var sourceLines = source.split("\n");
+        for(var i =0; i < sourceLines.length; ++i){
+            result += this.getNumberWithPadding(i+1, 3) + "  " + sourceLines[i] + "\n";
+        }
+        return result;
     }
 };

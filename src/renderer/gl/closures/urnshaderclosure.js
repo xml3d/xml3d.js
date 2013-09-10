@@ -18,10 +18,8 @@
     XML3D.extend(ShaderClosure.prototype, {
 
 
-        setDefaultUniforms: function() {
-            if (this.program.isValid()) {
-                this.program.setUniformVariables(this.descriptor.uniforms);
-            }
+        setDefaultUniforms: function(dest) {
+            XML3D.extend(dest, this.descriptor.uniforms);
         },
 
         createSources: function(scene, shaderData, objectData) {
@@ -58,10 +56,6 @@
 
         getTransparencyFromInputData: function(dataMap){
             return this.descriptor.hasTransparency(dataMap);
-        },
-
-        getUniformDefault: function(name){
-            return this.descriptor.uniforms[name];
         }
 });
 

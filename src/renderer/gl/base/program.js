@@ -127,6 +127,7 @@
         this.samplers = {};
         this.needsLights = true;
         this.handle = null;
+        this.texturesBinded = false;
 
 
         var maxTextureUnit = 0;
@@ -155,26 +156,42 @@
                 var sampler = this.samplers[s];
                 sampler.texture.bind(sampler.unit);
             }
+            this.texturesBinded = true;
         },
         unbind: function () {
             //this.gl.useProgram(null);
+            this.texturesBinded = false;
         },
         isValid: function() {
             return !!this.handle;
         },
-        setUniformVariables: function(uniforms, bindTextures) {
-            for ( var name in uniforms) {
-                if (this.uniforms[name]) {
-                    var value = uniforms[name];
-                    webgl.setUniform(this.gl, this.uniforms[name], value);
+        setUniformVariables: function(envNames, sysNames, inputCollection){
+            var i, base, override;
+            if(envNames && inputCollection.envBase){
+                i = envNames.length; base = inputCollection.envBase; override = inputCollection.envOverride;
+                while(i--){
+                    var name = envNames[i];
+                    this.setUniformVariable(name,override && override[name] !== undefined ? override[name] : base[name]);
                 }
-                else if(this.samplers[name]){
-                    var sampler = this.sampler[name];
-                    sampler.texture = uniforms[name];
-                    if(bindTextures)
+            }
+            if(sysNames && inputCollection.sysBase){
+                i = sysNames.length; base = inputCollection.sysBase;
+                while(i--){
+                    var name = sysNames[i];
+                    this.setUniformVariable(name, base[name]);
+                }
+            }
+        },
+        setUniformVariable: function(name, value){
+            if(value === undefined) return;
+            if(this.uniforms[name]){
+                webgl.setUniform(this.gl, this.uniforms[name], value);
+            }
+            else if(this.samplers[name]){
+                var sampler = this.samplers[name];
+                    sampler.texture = value;
+                    if(this.texturesBinded && false)
                         sampler.texture.bind(sampler.unit);
-
-                }
             }
         }
     });

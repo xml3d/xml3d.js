@@ -85,7 +85,9 @@
             }
         },
         setLightValueChanged: function() {
-            this.lightValuesDirty = true;
+            for (var i in this.composers) {
+                this.composers[i].updateLightValues = true;
+            }
         }
 
     });

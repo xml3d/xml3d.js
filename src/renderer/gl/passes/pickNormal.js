@@ -11,6 +11,8 @@
             var c_modelViewProjectionMatrix = XML3D.math.mat4.create();
             var c_worldMatrix = XML3D.math.mat4.create();
             var c_normalMatrix3 = XML3D.math.mat3.create();
+            var c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
+                c_systemUniformNames = ["modelViewProjectionMatrix", "normalMatrix"];
 
             return function (object) {
                 var gl = this.context.gl;
@@ -34,11 +36,10 @@
                 var program = this.program;
                 program.bind();
 
-                var parameters = {
-                    modelViewProjectionMatrix: c_modelViewProjectionMatrix,
-                    normalMatrix: c_normalMatrix3
-                };
-                program.setUniformVariables(parameters);
+                c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
+                c_uniformCollection.sysBase["normalMatrix"] = c_normalMatrix3;
+
+                program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
                 object.mesh.draw(program);
 
                 program.unbind();

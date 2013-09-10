@@ -97,41 +97,18 @@
             if (!this.shaderClosures.length)
                 return;
 
-            if (opt.updateShaderData || this.dataChanged) {
+            if (this.dataChanged) {
                 var result = this.getShaderDataResult();
-                this.updateUniformTexturesAndBuffers(result);
                 this.shaderClosures.forEach(function (shader) {
                     that.updateClosureFromComputeResult(shader, result);
                 });
                 this.dataChanged = false;
             }
 
-            if (opt.updateLightValues || this.updateLightValues) {
-                var lightParameters = this.createLightParameters(scene.lights);
+            if (this.updateLightValues) {
                 this.shaderClosures.forEach(function (shader) {
-                    that.updateClosureFromLightParameters(shader, lightParameters);
+                    that.updateClosureFromLightParameters(shader, scene);
                 });
-            }
-        },
-
-        updateUniformTexturesAndBuffers: function(result){
-            if(!result) return;
-            var dataMap = result.getOutputMap();
-
-
-            for(var name in dataMap){
-                this.updateUniformEntryTextureOrBuffer(dataMap[name]);
-            }
-        },
-        updateUniformEntryTextureOrBuffer: function(entry){
-            if(entry.type == Xflow.DATA_TYPE.TEXTURE){
-                var gl = this.context.gl;
-                var webglData = this.context.getXflowEntryWebGlData(entry);
-                var texture = webglData.texture || new XML3D.webgl.GLTexture(gl);
-                texture.updateFromTextureEntry(entry);
-
-                webglData.texture = texture;
-                webglData.changed = 0;
             }
         },
 
@@ -144,18 +121,13 @@
             if (!result || !result.getOutputMap) {
                 return;
             }
-            var uniforms = {}, xflowMap = result.getOutputMap();
-            for(var name in xflowMap){
-                uniforms[this.getUniformName(name)] = xflowMap[name];
-            }
-
             shaderClosure.bind();
-            shaderClosure.updateUniformsFromComputeResult(uniforms);
+            shaderClosure.updateUniformsFromComputeResult(result);
         },
 
-        updateClosureFromLightParameters: function (shaderClosure, lightParameters) {
+        updateClosureFromLightParameters: function (shaderClosure, scene) {
             shaderClosure.bind();
-            shaderClosure.setUniformVariables(lightParameters);
+            shaderClosure.setSystemUniformVariables( webgl.GLScene.LIGHT_PARAMETERS, scene.systemUniforms);
         },
 
         createLightParameters: function (lights) {
@@ -209,10 +181,6 @@
             throw new Error("AbstractComposer::distributeObjectShaderData needs to be overridden");
         },
 
-        getUniformName: function(name){
-            return name;
-        },
-
         getShaderClosure: function (scene, vsResult) {
             var shader = this.createShaderClosure();
 
@@ -236,10 +204,9 @@
 
         initializeShaderClosure: function (shaderClosure, scene, vsResult) {
             shaderClosure.compile();
-            shaderClosure.setDefaultUniforms();
 
             this.updateClosureFromComputeResult(shaderClosure, this.getShaderDataResult());
-            this.updateClosureFromLightParameters(shaderClosure, this.createLightParameters(scene.lights));
+            this.updateClosureFromLightParameters(shaderClosure, scene);
             this.shaderClosures.push(shaderClosure);
         },
 

@@ -49,6 +49,7 @@
         webgl.AbstractShaderClosure.call(this, context);
         this.sourceTemplate = sourceTemplate;
         this.extractedParams = extractedParams;
+        this.uniformConverter = [];
     };
 
     XML3D.createClass(JSShaderClosure, webgl.AbstractShaderClosure, {
@@ -98,13 +99,28 @@
 
         },
 
+        setUniformVariables: function(envNames, sysNames, inputCollection){
+            var i, base, override;
+            if(envNames && inputCollection.envBase){
+                i = envNames.length; base = inputCollection.envBase; override = inputCollection.envOverride;
+                while(i--){
+                    var name = webgl.JSShaderComposer.convertEnvName(envNames[i]);
+                    this.program.setUniformVariable(name,
+                        override && override[name] !== undefined ? override[name] : base[name]);
+                }
+            }
+            if(sysNames && inputCollection.sysBase){
+                i = sysNames.length; base = inputCollection.sysBase;
+                while(i--){
+                    var name = webgl.JSShaderComposer.convertSysName(sysNames[i]);
+                    this.program.setUniformVariable(name, base[name]);
+                }
+            }
+        },
+
         getTransparencyFromInputData: function(dataMap){
             // TODO: Compute Transparency
             return false;
-        },
-
-        getUniformDefault: function(name){
-            return null;
         },
 
         /* Default values are compiled into shade.js */

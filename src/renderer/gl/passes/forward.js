@@ -54,11 +54,13 @@
             var tmpModelView = XML3D.math.mat4.create();
             var tmpModelViewProjection = XML3D.math.mat4.create();
             var tmpNormalMatrix = XML3D.math.mat3.create();
+            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth"],
+                c_objectSystemUniforms = ["modelMatrix", "modelViewMatrix", "modelViewProjectionMatrix", "normalMatrix"];
 
             return function (objectArray, scene, opts) {
                 var objCount = 0;
                 var primitiveCount = 0;
-                var parameters = {};
+                var systemUniforms = scene.systemUniforms;
                 var stats = opts.stats || {};
                 var transparent = opts.transparent === true || false;
                 var gl = this.context.gl;
@@ -80,14 +82,15 @@
                 scene.getActiveView().getWorldToViewMatrix(c_viewMat_tmp);
                 scene.getActiveView().getProjectionMatrix(c_projMat_tmp, this.width / this.height);
 
-                parameters["viewMatrix"] = c_viewMat_tmp;
-                parameters["projectionMatrix"] = c_projMat_tmp;
+                systemUniforms["viewMatrix"] = c_viewMat_tmp;
+                systemUniforms["projectionMatrix"] = c_projMat_tmp;
                 //parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
-                parameters["screenWidth"] = this.target.width;
+                systemUniforms["screenWidth"] = this.target.width;
 
                 //Set global data that is shared between all objects using this shader
-                program.setUniformVariables(parameters);
-                parameters = {};
+                program.setSystemUniformVariables(c_programSystemUniforms, systemUniforms);
+
+                var prevOverride = null;
 
                 for (var i = 0, n = objectArray.length; i < n; i++) {
                     var obj = objectArray[i];
@@ -98,32 +101,33 @@
                     XML3D.debug.assert(mesh, "We need a mesh at his point.");
 
                     obj.getWorldMatrix(tmpModelMatrix);
-                    parameters["modelMatrix"] = tmpModelMatrix;
+                    systemUniforms["modelMatrix"] = tmpModelMatrix;
 
                     obj.getModelViewMatrix(tmpModelView);
-                    parameters["modelViewMatrix"] = tmpModelView;
+                    systemUniforms["modelViewMatrix"] = tmpModelView;
 
                     obj.getModelViewProjectionMatrix(tmpModelViewProjection);
-                    parameters["modelViewProjectionMatrix"] = tmpModelViewProjection;
+                    systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection;
 
                     obj.getNormalMatrix(tmpNormalMatrix);
-                    parameters["normalMatrix"] = tmpNormalMatrix;
+                    systemUniforms["normalMatrix"] = tmpNormalMatrix;
 
-                    program.setUniformVariables(parameters);
+                    program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
 
-                    program.setUniformVariableOverride(mesh.uniformOverride);
+                    program.changeUniformVariableOverride(prevOverride, mesh.uniformOverride);
+                    prevOverride = mesh.uniformOverride;
 
                     primitiveCount += mesh.draw(program);
                     objCount++;
-
-                    program.undoUniformVariableOverride(mesh.uniformOverride);
 
                     if (transparent) {
                         gl.disable(gl.BLEND);
                     }
 
                 }
+                program.changeUniformVariableOverride(prevOverride, null);
 
+                program.unbind();
                 stats.objects += objCount;
                 stats.primitives += primitiveCount;
                 return stats;

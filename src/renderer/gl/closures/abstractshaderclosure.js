@@ -19,7 +19,11 @@
         this.obsolete = false;
         this.id = "";
 
-        this.uniformValues = {};
+        this.uniformCollection = {
+            envBase: {},
+            envOverride: null,
+            sysBase: null
+        };
 
         /**
          * Stores, if the underlying shader has semi-transparencies
@@ -89,78 +93,43 @@
             this.program.unbind();
         },
 
-        setUniformVariables: function(uniforms) {
-            this.program.setUniformVariables(uniforms);
-        },
-
         isValid: function() {
             return this.program.isValid();
         },
 
-        convertToJSArray: function(value) {
-            var jsArray = [value.length];
-            for (var i=0; i<value.length; i++) {
-                jsArray[i] = value[i];
-            }
-            return jsArray;
-        },
-
         /**
-         * @param {Xflow.ComputeResult} result
-         * @param {Object?} options
+         * @param {Xflow.ComputeResult} xflowResult
          */
-        updateUniformsFromComputeResult: function (dataMap) {
-            var uniforms = this.program.uniforms;
+        updateUniformsFromComputeResult: function (xflowResult) {
+            var map = xflowResult.getOutputMap();
 
-            this.uniformValues = {};
+            var envBase = this.uniformCollection.envBase = {};
+            this.setDefaultUniforms(this.uniformCollection.envBase);
 
-            for (var name in uniforms) {
-                var entry = dataMap[name];
-                if (!entry)
-                    continue;
-
-                var webglData = this.context.getXflowEntryWebGlData(entry);
-
-                var value;
-                if (uniforms[name].glType === this.context.gl.BOOL) {
-                    //TODO Can we get Xflow to return boolean arrays as normal JS arrays? WebGL doesn't accept Uint8Arrays here...
-                    //TODO Alternatively we could set boolean uniforms using uniform1fv together with Float32Arrays, which apparently works too
-                    value = this.convertToJSArray(entry.getValue());
-                } else {
-                    value = entry.getValue();
-                }
-                webgl.setUniform(this.context.gl, uniforms[name], value);
-                this.uniformValues[name] = value;
-                webglData.changed = 0;
-
+            for(var name in map){
+                var value = webgl.getGLUniformValueFromXflowDataEntry(map[name], this.context);
+                envBase[name] = value;
             }
-            var samplers = this.program.samplers
-            for (var name in samplers) {
-                var entry = dataMap[name];
-                var webglData = this.context.getXflowEntryWebGlData(entry);
+            var names = Object.keys(envBase);
+            this.setUniformVariables(names, null, this.uniformCollection);
 
-                if(webglData.texture){
-                    samplers[name].texture = webglData.texture;
-                    this.uniformValues[name] = webglData.texture;
-                }
-            }
-
-            this.isTransparent = this.getTransparencyFromInputData(dataMap);
+            this.isTransparent = this.getTransparencyFromInputData(map);
         },
 
-        setUniformVariableOverride: function(override) {
-            this.program.setUniformVariables(override);
+        setUniformVariables: function(envNames, sysNames, uniformCollection){
+            this.program.setUniformVariables(envNames, sysNames, uniformCollection);
         },
 
-        undoUniformVariableOverride: function(override) {
-            var previousValues = {};
-            var shaderData = this.uniformValues;
-            for (var name in override) {
-                var value = shaderData[name] ? shaderData[name] : this.getUniformDefault(name);
-                if(value)
-                    previousValues[name] = value;
-            }
-            this.program.setUniformVariables(previousValues);
+        setSystemUniformVariables: function(sysNames, sysValues){
+            this.uniformCollection.sysBase = sysValues;
+            this.setUniformVariables(null, sysNames, this.uniformCollection);
+        },
+
+        changeUniformVariableOverride: function(prevOverride, newOverride){
+            var overrideNames = prevOverride ? Object.keys(prevOverride) : [];
+            if(newOverride) overrideNames.push.apply(overrideNames, Object.keys(newOverride));
+            this.uniformCollection.envOverride = newOverride;
+            this.setUniformVariables(overrideNames, null, this.uniformCollection);
         }
     });
 

@@ -10,7 +10,9 @@
         renderObject: (function() {
 
             var c_modelMatrix = XML3D.math.mat4.create();
-            var c_modelViewProjectionMatrix = XML3D.math.mat4.create();
+            var c_modelViewProjectionMatrix = XML3D.math.mat4.create(),
+                c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
+                c_systemUniformNames = ["bbox", "modelMatrix", "modelViewProjectionMatrix"];
 
             return function(obj) {
                 var gl = this.context.gl;
@@ -29,13 +31,11 @@
                 this.program.bind();
                 obj.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
-                var parameters = {
-                    bbox : this.objectBoundingBox,
-                    modelMatrix : c_modelMatrix,
-                    modelViewProjectionMatrix : c_modelViewProjectionMatrix
-                };
+                c_uniformCollection.sysBase["bbox"] = this.objectBoundingBox;
+                c_uniformCollection.sysBase["modelMatrix"] = c_modelMatrix;
+                c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
 
-                this.program.setUniformVariables(parameters);
+                this.program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
                 obj.mesh.draw(this.program);
 
                 this.program.unbind();

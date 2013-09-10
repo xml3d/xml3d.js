@@ -39,6 +39,10 @@
         return ("_env_" + name).replace(/_+/g, "_");
     }
 
+    JSShaderComposer.convertSysName = function(name){
+        return ("_sys_" + name).replace(/_+/g, "_");
+    }
+
 
     function getVSShaderAttribTransform(inputName){
         if(inputName == "position")
@@ -70,11 +74,6 @@
         createShaderClosure: function () {
             return new webgl.JSShaderClosure(this.context, this.sourceTemplate, this.extractedParams);
         },
-
-        getUniformName: function(name){
-            return JSShaderComposer.convertEnvName(name);
-        },
-
         createObjectDataRequest: function(objectDataNode, callback){
 
             var vsConfig = new Xflow.VSConfig();
@@ -85,7 +84,7 @@
                 var name = names[i];
                 var xflowInfo = objectDataNode.getOutputChannelInfo(name);
                 if(xflowInfo){
-                    vsConfig.addAttribute(xflowInfo.type, name, this.getUniformName(name),
+                    vsConfig.addAttribute(xflowInfo.type, name, JSShaderComposer.convertEnvName(name),
                         true, getVSShaderAttribTransform(name));
                 }
             }

@@ -19,7 +19,9 @@
     XML3D.extend(PickObjectRenderPass.prototype, {
         renderScene: (function () {
 
-            var c_mvp = XML3D.math.mat4.create();
+            var c_mvp = XML3D.math.mat4.create(),
+                c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
+                c_systemUniformNames = ["id", "modelViewProjectionMatrix"];
 
             return function (scene) {
                 var gl = this.context.gl;
@@ -45,8 +47,6 @@
                     if (!obj.isVisible())
                         continue;
 
-                    var parameters = {};
-
                     obj.getModelViewProjectionMatrix(c_mvp);
 
                     var objId = j + 1;
@@ -56,10 +56,10 @@
                     objId = objId >> 8;
                     var c3 = objId & 255;
 
-                    parameters.id = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
-                    parameters.modelViewProjectionMatrix = c_mvp;
+                    c_uniformCollection.sysBase["id"] = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
+                    c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_mvp;
 
-                    this.program.setUniformVariables(parameters);
+                    this.program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
                     mesh.draw(this.program);
                 }
                 this.program.unbind();

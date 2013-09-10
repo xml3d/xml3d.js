@@ -77,18 +77,9 @@
             this.isIndexed = false;
             this.minAttributeCount = 10000000;
         },
-        setUniformOverride: function (name, xflowDataEntry) {
-            if(!xflowDataEntry)
+        setUniformOverride: function (name, value) {
+            if(value === undefined)
                 delete this.uniformOverride[name];
-
-            var value;
-            if(xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE){
-                var webglData = this.context.getXflowEntryWebGlData(xflowDataEntry);
-                value = webglData.texture;
-            }
-            else
-                value = xflowDataEntry.getValue();
-
             this.uniformOverride[name] = value;
         },
         setVertexCount: function (vertexCount) {

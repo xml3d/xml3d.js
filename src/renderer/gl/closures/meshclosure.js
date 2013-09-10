@@ -34,39 +34,6 @@
     MESH_PARAMETERS[WebGLRenderingContext.POINTS] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
 
 
-
-    var getGLTypeFromArray = function(array) {
-        var GL = window.WebGLRenderingContext;
-        if (array instanceof Int8Array)
-            return GL.BYTE;
-        if (array instanceof Uint8Array)
-            return GL.UNSIGNED_BYTE;
-        if (array instanceof Int16Array)
-            return GL.SHORT;
-        if (array instanceof Uint16Array)
-            return GL.UNSIGNED_SHORT;
-        if (array instanceof Int32Array)
-            return GL.INT;
-        if (array instanceof Uint32Array)
-            return GL.UNSIGNED_INT;
-        if (array instanceof Float32Array)
-            return GL.FLOAT;
-        return GL.FLOAT;
-    };
-    /**
-     * @param {WebGLRenderingContext} gl
-     * @param {number} type
-     * @param {Object} data
-     */
-    var createBuffer = function(gl, type, data) {
-        var buffer = gl.createBuffer();
-        gl.bindBuffer(type, buffer);
-        gl.bufferData(type, data, gl.STATIC_DRAW);
-        buffer.length = data.length;
-        buffer.glType = getGLTypeFromArray(data);
-        return buffer;
-    };
-
     /**
      *
      * @param {webgl.GLContext} context
@@ -310,61 +277,26 @@
         handleBuffer: function (name, xflowDataEntry, isIndex) {
             isIndex = isIndex || false;
             var mesh = this.mesh;
-            var webglData = XML3D.webgl.getXflowEntryWebGlData(xflowDataEntry, this.context.id);
-            var buffer = webglData.buffer;
-            var gl = this.context.gl;
 
             if(xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE){
                 XML3D.debug.logError("Texture as mesh parameter is not yet supported");
                 return;
             }
 
+            var buffer = webgl.getGLBufferFromXflowDataEntry(xflowDataEntry, this.context, name == "index");
             if(isIndex){
-                this.updateIndexRange(xflowDataEntry, webglData);
+                this.updateIndexRange(xflowDataEntry);
             }
             else{
                 this.mesh.checkBufferCompatible(name, xflowDataEntry);
             }
-
-            switch (webglData.changed) {
-                case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:
-                    var bufferType = name == "index" ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
-
-                    gl.bindBuffer(bufferType, buffer);
-                    gl.bufferSubData(bufferType, 0, xflowDataEntry.getValue());
-                    break;
-                case Xflow.DATA_ENTRY_STATE.CHANGED_NEW:
-                case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE:
-                    if (name == "index") {
-                        buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(xflowDataEntry.getValue()));
-                    } else {
-                        buffer = createBuffer(gl, gl.ARRAY_BUFFER, xflowDataEntry.getValue());
-                    }
-                    buffer.tupleSize = xflowDataEntry.getTupleSize();
-                    webglData.buffer = buffer;
-                    break;
-            }
-
-
             // In every case, set the buffer, because other meshes might have already
             // performed one or more of the tasks above
             mesh.setBuffer(name, buffer);
-
-            webglData.changed = 0;
         },
 
-        updateIndexRange: function(xflowDataEntry, webglData){
-            if(webglData.changed){
-                var indexValue = xflowDataEntry.getValue();
-                var minIndex = 100000000, maxIndex = 0;
-                var i = indexValue.length;
-                while(i--){
-                    minIndex = Math.min(minIndex, indexValue[i]);
-                    maxIndex = Math.max(maxIndex, indexValue[i]);
-                }
-                webglData.maxIndex = maxIndex;
-                webglData.minIndex = minIndex;
-            }
+        updateIndexRange: function(xflowDataEntry){
+            var webglData = XML3D.webgl.getXflowEntryWebGlData(xflowDataEntry, this.context.id);
             this.mesh.setIndexRange(webglData.minIndex, webglData.maxIndex);
         },
 
@@ -378,8 +310,8 @@
         },
 
         handleUniform: function(name, xflowDataEntry){
-            this.shaderComposer.updateUniformEntryTextureOrBuffer(xflowDataEntry);
-            this.mesh.setUniformOverride(name, xflowDataEntry);
+            var value = webgl.getGLUniformValueFromXflowDataEntry(xflowDataEntry, this.context);
+            this.mesh.setUniformOverride(name, value);
         },
         /**
          *

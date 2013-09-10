@@ -21,6 +21,7 @@
         this.projectionAdapter = opt.projectionAdapter;
         this.viewDirty = true;
         this.projectionDirty = true;
+        this.frustum = new XML3D.webgl.Frustum(1, 10, 0, this.fieldOfView, 3/4);
     };
     RenderView.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -54,26 +55,13 @@
                     return;
                 }
                 var clipPlane = this.getClippingPlanes();
-                var f = 1 / Math.tan(this.fieldOfView / 2);
 
-                tmp[0] = f / aspect;
-                tmp[1] = 0;
-                tmp[2] = 0;
-                tmp[3] = 0;
-                tmp[4] = 0;
-                tmp[5] = f;
-                tmp[6] = 0;
-                tmp[7] = 0;
-                tmp[8] = 0;
-                tmp[9] = 0;
-                tmp[10] = (clipPlane.near + clipPlane.far) / (clipPlane.near - clipPlane.far);
-                tmp[11] = -1;
-                tmp[12] = 0;
-                tmp[13] = 0;
-                tmp[14] = 2 * clipPlane.near * clipPlane.far / (clipPlane.near - clipPlane.far);
-                tmp[15] = 0;
-
+                // Calculate perspective projectionMatrix
+                XML3D.math.mat4.perspective(tmp, this.fieldOfView, aspect, clipPlane.near, clipPlane.far);
+                // Set projectionMatrix
                 this.setProjectionMatrix(tmp);
+                // Update Frustum
+                this.frustum.getProjectionMatrix(tmp);
             }
         })(),
 

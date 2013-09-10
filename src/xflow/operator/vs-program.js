@@ -34,6 +34,9 @@
     Xflow.VSProgram.prototype.getShaderOutputType = function(name){
         return this._outputInfo[name].type;
     }
+    Xflow.VSProgram.prototype.getShaderOutputSourceName = function(name){
+        return this._outputInfo[name].sourceName;
+    }
 
     Xflow.VSProgram.prototype.isOutputUniform = function(name){
         return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.ONE;
@@ -84,7 +87,7 @@
             var configAttr = vsConfig._attributes[i],
                 inputIndex = outputInputMap[i],
                 directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
-            var outputInfo = {type: configAttr.type, iteration: 0, index: 0},
+            var outputInfo = {type: configAttr.type, iteration: 0, index: 0, sourceName: configAttr.inputName},
                 outputName = configAttr.outputName;
             if(vsConfig.isAttributeTransformed(i) ||
                 baseEntry.isTransferInput(inputIndex) ||

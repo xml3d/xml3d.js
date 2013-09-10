@@ -133,6 +133,9 @@ VertexShaderResult.prototype.isShaderOutputUniform = function(name){
 VertexShaderResult.prototype.getShaderOutputType = function(name){
     return this._program.getShaderOutputType(name);
 }
+VertexShaderResult.prototype.getShaderOutputSourceName = function(name){
+    return this._program.getShaderOutputSourceName(name);
+}
 
 VertexShaderResult.prototype.getUniformOutputData = function(name){
     return this._program.getUniformOutputData(name, this._programData);

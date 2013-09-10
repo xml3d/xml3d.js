@@ -104,16 +104,16 @@
             if(envNames && inputCollection.envBase){
                 i = envNames.length; base = inputCollection.envBase; override = inputCollection.envOverride;
                 while(i--){
-                    var name = webgl.JSShaderComposer.convertEnvName(envNames[i]);
-                    this.program.setUniformVariable(name,
-                        override && override[name] !== undefined ? override[name] : base[name]);
+                    var srcName = envNames[i], destName = webgl.JSShaderComposer.convertEnvName(envNames[i]);
+                    this.program.setUniformVariable(destName,
+                        override && override[srcName] !== undefined ? override[srcName] : base[srcName]);
                 }
             }
             if(sysNames && inputCollection.sysBase){
                 i = sysNames.length; base = inputCollection.sysBase;
                 while(i--){
-                    var name = webgl.JSShaderComposer.convertSysName(sysNames[i]);
-                    this.program.setUniformVariable(name, base[name]);
+                    var srcName = sysNames[i], destName = webgl.JSShaderComposer.convertSysName(sysNames[i]);
+                    this.program.setUniformVariable(destName, base[srcName]);
                 }
             }
         },

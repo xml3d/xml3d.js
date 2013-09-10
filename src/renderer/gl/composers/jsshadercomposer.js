@@ -40,7 +40,7 @@
     }
 
     JSShaderComposer.convertSysName = function(name){
-        return ("_sys_" + name).replace(/_+/g, "_");
+        return name;
     }
 
 
@@ -106,7 +106,7 @@
             for(var i = 0; i < outputNames.length; ++i){
                 var name = outputNames[i];
                 if(result.isShaderOutputUniform(name)){
-                    uniformCallback(name, result.getUniformOutputData(name));
+                    uniformCallback(result.getShaderOutputSourceName(name), result.getUniformOutputData(name));
                 }
             }
         }

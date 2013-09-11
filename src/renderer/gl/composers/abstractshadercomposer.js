@@ -130,45 +130,6 @@
             shaderClosure.setSystemUniformVariables( webgl.GLScene.LIGHT_PARAMETERS, scene.systemUniforms);
         },
 
-        createLightParameters: function (lights) {
-            var parameters = {};
-            var pointLightData = { position: [], attenuation: [], intensity: [], on: [] };
-            lights.point.forEach(function (light, index) {
-                light.getLightData(pointLightData, index);
-            });
-            parameters["pointLightPosition"] = pointLightData.position;
-            parameters["pointLightAttenuation"] = pointLightData.attenuation;
-            parameters["pointLightIntensity"] = pointLightData.intensity;
-            parameters["pointLightOn"] = pointLightData.on;
-
-            var directionalLightData = { direction: [], intensity: [], on: [] };
-            lights.directional.forEach(function (light, index) {
-                light.getLightData(directionalLightData, index);
-            });
-            parameters["directionalLightDirection"] = directionalLightData.direction;
-            parameters["directionalLightIntensity"] = directionalLightData.intensity;
-            parameters["directionalLightOn"] = directionalLightData.on;
-
-            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
-            lights.spot.forEach(function (light, index) {
-                light.getLightData(spotLightData, index);
-            });
-            parameters["spotLightAttenuation"] = spotLightData.attenuation;
-            parameters["spotLightPosition"] = spotLightData.position;
-            parameters["spotLightIntensity"] = spotLightData.intensity;
-            parameters["spotLightDirection"] = spotLightData.direction;
-            parameters["spotLightOn"] = spotLightData.on;
-            parameters["spotLightSoftness"] = spotLightData.softness;
-            parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
-
-            var softFalloffAngle = spotLightData.softness.slice();
-            for (var i = 0; i < softFalloffAngle.length; i++)
-                softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - spotLightData.softness[i]);
-            parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
-
-            return parameters;
-        },
-
         createShaderClosure: function () {
             throw new Error("AbstractComposer::createShaderClosure needs to be overridden");
         },

@@ -98,7 +98,7 @@ Xflow.VSConfig.prototype.getOperator = function(){
         switch(attr.transform){
             case Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
                 line += "normalize( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] + "} "
-                    + "* #I{" + attr.inputName + "} )"; break;
+                    + "* #I{" + attr.inputName + "} );"; break;
             case Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT:
                 line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM] + "} "
                     + "* vec4( #I{" + attr.inputName + "} , 1.0)).xyz;"; break;

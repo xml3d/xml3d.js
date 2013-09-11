@@ -1,5 +1,36 @@
 (function (webgl) {
 
+    var SYSTEM_CONTEXT = {
+        "type": "object",
+        "kind": "any",
+        "info": {
+            "coords": { "type": "object", "kind": "float3", "source": "uniform" },
+            "viewMatrix": { "type": "object", "kind": "matrix4", "source": "uniform" },
+            "MAX_POINTLIGHTS": { "type": "int", "source": "constant", "staticValue": 5 },
+            "pointLightOn": { "type": "array", "elements": { "type": "boolean" }, "staticSize": 5, "source": "uniform"},
+            "pointLightAttenuation": {
+                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
+                "source": "uniform"
+            },
+            "pointLightIntensity": {
+                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
+                "source": "uniform"
+            },
+            "pointLightPosition": {
+                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
+                "source": "uniform"
+            }
+        }
+    };
+
+    var c_SystemUpdate = {
+        "pointLightOn": {
+            staticValue : "MAX_POINTLIGHTS",
+            staticSize: ["pointLightOn", "pointLightAttenuation", "pointLightIntensity", "pointLightPosition"]
+        }
+    }
+
+
     /**
      * @param {Xflow.DATA_TYPE} xflowType
      */
@@ -55,13 +86,26 @@
     XML3D.createClass(JSShaderClosure, webgl.AbstractShaderClosure, {
         /**
          *
-         * @param {Scene} scene
+         * @param {GLScene} scene
          * @param {Xflow.ComputeResult} shaderResult
          * @param objectData
          */
         createSources: function(scene, shaderResult, objectData) {
 
-            var contextData = {"global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]};
+            var contextData = {
+                "this" : SYSTEM_CONTEXT,
+                "global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]
+            };
+
+            var systemUniforms = scene.systemUniforms, systemInfo = SYSTEM_CONTEXT.info;
+            for(var systemSource in c_SystemUpdate){
+                var entry = c_SystemUpdate[systemSource];
+                var length = systemUniforms[systemSource] && systemUniforms[systemSource].length;
+                systemInfo[entry.staticValue].staticValue = length;
+                for(var i = 0; i < entry.staticSize.length; ++i)
+                    systemInfo[entry.staticSize[i]].staticSize = length;
+            }
+
             var contextInfo = contextData["global.shade"][0].extra.info;
 
             var shaderEntries = shaderResult && shaderResult.getOutputMap(),
@@ -79,10 +123,12 @@
                 }
             }
 
+            XML3D.debug.logDebug("CONTEXT:", contextData);
             try{
-                var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, { inject: contextData, loc: true });
+                var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, {
+                    inject: contextData, loc: true, implementation: "xml3d-glsl-forward" });
                 this.source = {
-                    fragment: Shade.compileFragmentShader(aast),
+                    fragment: Shade.compileFragmentShader(aast, {useStatic: true}),
                     vertex:  objectData.getGLSLCode()
                 }
             }

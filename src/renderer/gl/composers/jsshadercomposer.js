@@ -57,7 +57,10 @@
     XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
         setShaderInfo: function(shaderInfo) {
 
-            this.extractedParams = Shade.extractParameters(this.sourceTemplate).shaderParameters;
+            this.extractedParams = Shade.extractParameters(this.sourceTemplate,
+                {implementation: "xml3d-glsl-forward"}).shaderParameters;
+            // FIXME: Shader.js should always request position (in case
+            if(this.extractedParams.indexOf("position") == -1) this.extractedParams.push("position");
             var that = this;
             // The composer is interested in changes of all possible shader parameters (extracted)
             // the instances (closures) will only set those, that occur in the instance
@@ -78,7 +81,7 @@
 
             var vsConfig = new Xflow.VSConfig();
             var names = this.extractedParams.slice();
-            if(names.indexOf("position") == -1) names.push("position");
+            //if(names.indexOf("position") == -1) names.push("position");
 
             for(var i = 0; i < names.length; ++i){
                 var name = names[i];

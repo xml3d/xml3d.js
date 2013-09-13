@@ -42,6 +42,7 @@
         <file name="gl/composers/urnshadercomposer.js" />
         <file name="gl/composers/jsshadercomposer.js" />
         <file name="gl/composers/shadercomposerfactory.js" />
+        <file name="gl/closures/jssystemconfiguration.js" />
         <file name="gl/closures/abstractshaderclosure.js" />
         <file name="gl/closures/urnshaderclosure.js" />
         <file name="gl/closures/jsshaderclosure.js" />

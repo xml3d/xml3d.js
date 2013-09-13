@@ -17,7 +17,14 @@
             materials: 0,
             meshes: 0
         };
+        this.extensions = populateExtensions(gl);
+
     };
+
+    var EXTENSIONS = GLContext.EXTENSIONS = {};
+    EXTENSIONS.STANDARD_DERIVATES = 'OES_standard_derivatives';
+
+
     XML3D.extend(GLContext.prototype, {
         getXflowEntryWebGlData: function (entry) {
             return XML3D.webgl.getXflowEntryWebGlData(entry, this.id);
@@ -30,8 +37,29 @@
         },
         getStatistics: function() {
             return this.stats;
+        },
+        getExtensionByName: function(name) {
+            return this.extensions[name];
         }
     });
+
+    /**
+     * @param {WebGLRenderingContext} gl
+     * @returns {{}}
+     */
+    function populateExtensions(gl) {
+        var result = {};
+        for (var name in EXTENSIONS) {
+            var extensionName = EXTENSIONS[name];
+            var ext = gl.getExtension(extensionName);
+            if (!ext) {
+                XML3D.debug.logInfo(extensionName, "is not supported on your graphics card");
+            } else {
+                result[extensionName] = ext;
+            }
+        }
+        return result;
+    }
 
     webgl.GLContext = GLContext;
 

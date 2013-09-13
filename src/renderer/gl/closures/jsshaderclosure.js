@@ -1,66 +1,6 @@
 (function (webgl) {
 
-    var SYSTEM_CONTEXT = {
-        "type": "object",
-        "kind": "any",
-        "info": {
-            "coords": { "type": "object", "kind": "float3", "source": "uniform" },
-            "viewMatrix": { "type": "object", "kind": "matrix4", "source": "uniform" },
 
-            "MAX_POINTLIGHTS": { "type": "int", "source": "constant", "staticValue": 5 },
-            "pointLightOn": { "type": "array", "elements": { "type": "boolean" }, "staticSize": 5, "source": "uniform"},
-            "pointLightAttenuation": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-            "pointLightIntensity": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-            "pointLightPosition": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-
-            "MAX_DIRECTIONALLIGHTS": { "type": "int", "source": "constant", "staticValue": 5 },
-            "directionalLightOn": { "type": "array", "elements": { "type": "boolean" }, "staticSize": 5, "source": "uniform"},
-            "directionalLightIntensity": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-            "directionalLightDirection": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-
-            "MAX_SPOTLIGHTS": { "type": "int", "source": "constant", "staticValue": 5 },
-            "spotLightOn": { "type": "array", "elements": { "type": "boolean" }, "staticSize": 5, "source": "uniform"},
-            "spotLightAttenuation": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-            "spotLightIntensity": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-            "spotLightPosition": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-            "spotLightDirection": {
-                "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
-                "source": "uniform"
-            },
-            "spotLightCosFalloffAngle": {
-                "type": "array", "elements": { "type": "number" }, "staticSize": 5,
-                "source": "uniform"
-            },
-            "spotLightCosSoftFalloffAngle": {
-                "type": "array", "elements": { "type": "number" }, "staticSize": 5,
-                "source": "uniform"
-            }
-        }
-    };
 
     var c_SystemUpdate = {
         "pointLightOn": {
@@ -141,11 +81,11 @@
         createSources: function(scene, shaderResult, objectData) {
 
             var contextData = {
-                "this" : SYSTEM_CONTEXT,
+                "this" : webgl.getJSSystemConfiguration(this.context),
                 "global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]
             };
 
-            var systemUniforms = scene.systemUniforms, systemInfo = SYSTEM_CONTEXT.info;
+            var systemUniforms = scene.systemUniforms, systemInfo = contextData.this.info;
             for(var systemSource in c_SystemUpdate){
                 var entry = c_SystemUpdate[systemSource];
                 var length = systemUniforms[systemSource] && systemUniforms[systemSource].length;

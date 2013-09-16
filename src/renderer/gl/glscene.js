@@ -2,6 +2,18 @@
 
     var StateMachine = window.StateMachine;
 
+    var shouldCull = (function () {
+        var params = {},
+            p = window.location.search.substr(1).split('&');
+
+        p.forEach(function (e, i, a) {
+            var keyVal = e.split('=');
+            params[keyVal[0].toLowerCase()] = decodeURIComponent(keyVal[1]);
+        });
+        return params.hasOwnProperty("xml3d_culling");
+    }());
+
+
     /**
      *
      * @param {GLContext} context
@@ -14,6 +26,10 @@
         this.shaderFactory = new webgl.ShaderComposerFactory(context);
         this.drawableFactory = new webgl.DrawableFactory(context);
         this.firstOpaqueIndex = 0;
+
+        /**
+         * @type {Array.<RenderObject>}
+         */
         this.ready = [];
         this.queue = [];
         this.addListeners();
@@ -82,23 +98,38 @@
             this.ready.slice().forEach(func, that);
         },
         updateReadyObjectsFromActiveView: (function () {
-            var c_viewMat_tmp = XML3D.math.mat4.create();
+            var c_worldToViewMatrix = XML3D.math.mat4.create();
+            var c_viewToWorldMatrix = XML3D.math.mat4.create();
             var c_projMat_tmp = XML3D.math.mat4.create();
+            var c_bbox = XML3D.math.bbox.create();
+            var c_frustumTest = new XML3D.webgl.FrustumTest();
 
             return function (aspectRatio) {
-                this.getActiveView().getViewMatrix(c_viewMat_tmp);
+                var activeView = this.getActiveView(),
+                    readyObjects = this.ready;
 
-                this.ready.forEach(function (obj) {
-                    obj.updateModelViewMatrix(c_viewMat_tmp);
+                // Update all MV matrices
+                activeView.getWorldToViewMatrix(c_worldToViewMatrix);
+                readyObjects.forEach(function (obj) {
+                    obj.updateModelViewMatrix(c_worldToViewMatrix);
                     obj.updateNormalMatrix();
                 });
 
                 this.updateBoundingBox();
-                this.getActiveView().getProjectionMatrix(c_projMat_tmp, aspectRatio);
 
-                this.ready.forEach(function (obj) {
+
+                activeView.getProjectionMatrix(c_projMat_tmp, aspectRatio);
+                activeView.getViewToWorldMatrix(c_viewToWorldMatrix);
+
+                var frustum = activeView.getFrustum();
+                c_frustumTest.set(frustum,c_viewToWorldMatrix);
+
+                for(var i = 0, l = readyObjects.length; i < l; i++) {
+                    var obj = readyObjects[i];
                     obj.updateModelViewProjectionMatrix(c_projMat_tmp);
-                });
+                    obj.getWorldSpaceBoundingBox(c_bbox);
+                    obj.inFrustum = shouldCull ? c_frustumTest.isBoxVisible(c_bbox) : true;
+                };
             }
         }()),
         addListeners: function() {

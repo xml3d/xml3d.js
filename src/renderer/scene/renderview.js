@@ -1,8 +1,10 @@
 (function(webgl) {
     /** @const */
-    var VIEW_MATRIX_OFFSET = 0;
+    var VIEW_TO_WORLD_MATRIX_OFFSET = 0;
     /** @const */
-    var PROJECTION_MATRIX_OFFSET = 16;
+    var WORLD_TO_VIEW_MATRIX_OFFSET = 16;
+    /** @const */
+    var PROJECTION_MATRIX_OFFSET = 32;
     /** @const */
     var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
 
@@ -21,17 +23,21 @@
         this.projectionAdapter = opt.projectionAdapter;
         this.viewDirty = true;
         this.projectionDirty = true;
-        this.frustum = new XML3D.webgl.Frustum(1, 10, 0, this.fieldOfView, 3/4);
+        this.frustum = new XML3D.webgl.Frustum(1, 100000, 0, this.fieldOfView, 1);
     };
     RenderView.ENTRY_SIZE = ENTRY_SIZE;
 
     XML3D.createClass(RenderView, XML3D.webgl.RenderNode);
     XML3D.extend(RenderView.prototype, {
+        getFrustum: function() {
+            return this.frustum;
+        },
+
         updateViewMatrix: (function() {
             var tmp_mat4 = XML3D.math.mat4.create();
             var tmp_parent = XML3D.math.mat4.create();
 
-            return function (source) {
+            return function () {
                 XML3D.math.mat4.identity(tmp_mat4);
                 tmp_mat4[12] = this.position[0];
                 tmp_mat4[13] = this.position[1];
@@ -41,8 +47,10 @@
                 this.parent.getWorldMatrix(tmp_parent);
                 XML3D.math.mat4.multiply(tmp_mat4, tmp_parent, tmp_mat4);
                 XML3D.math.vec3.set(this.worldSpacePosition, tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
+                this.setViewToWorldMatrix(tmp_mat4);
                 XML3D.math.mat4.invert(tmp_mat4, tmp_mat4);
-                this.setViewMatrix(tmp_mat4);
+                this.setWorldToViewMatrix(tmp_mat4);
+                this.viewDirty = false;
             }
         })(),
 
@@ -54,14 +62,17 @@
                     this.setProjectionMatrix(this.projectionAdapter.getMatrix("perspective"));
                     return;
                 }
-                var clipPlane = this.getClippingPlanes();
+                var clipPlane = this.getClippingPlanes(),
+                    near = clipPlane.near,
+                    far = clipPlane.far,
+                    fovy = this.fieldOfView;
 
                 // Calculate perspective projectionMatrix
-                XML3D.math.mat4.perspective(tmp, this.fieldOfView, aspect, clipPlane.near, clipPlane.far);
+                XML3D.math.mat4.perspective(tmp, fovy, aspect, near, far);
                 // Set projectionMatrix
                 this.setProjectionMatrix(tmp);
                 // Update Frustum
-                this.frustum.getProjectionMatrix(tmp);
+                this.frustum.setFrustum(near, far, 0, fovy, aspect);
             }
         })(),
 
@@ -75,7 +86,7 @@
                     return { near: 1, far: 10 };
                 };
 
-                this.getViewMatrix(t_mat);
+                this.getWorldToViewMatrix(t_mat);
                 XML3D.math.bbox.transform(bb, t_mat, bb);
 
                 var bounds = { zMin: bb[2], zMax: bb[5] };
@@ -84,18 +95,28 @@
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
                 bounds.zMin -= length * 0.005;
                 bounds.zMax += length * 0.005;
-                //console.log(bounds);
 
                 return {near: Math.max(-bounds.zMax, 0.01*length), far: -bounds.zMin};
             }
         })(),
 
-        setViewMatrix: function(source) {
-            var o = this.offset + VIEW_MATRIX_OFFSET;
+        /**
+         * @param {Float32Array} source
+         * @param {number} offset
+         */
+        setMatrix: function(source, offset) {
+            var o = this.offset + offset;
             for(var i = 0; i < 16; i++, o++) {
                 this.page[o] = source[i];
             }
-            this.viewDirty = false;
+        },
+
+        setWorldToViewMatrix: function(source) {
+            this.setMatrix(source, WORLD_TO_VIEW_MATRIX_OFFSET);
+        },
+
+        setViewToWorldMatrix: function(source) {
+            this.setMatrix(source, VIEW_TO_WORLD_MATRIX_OFFSET);
         },
 
         setProjectionMatrix: function(source) {
@@ -136,14 +157,24 @@
             this.fieldOfView = newFov;
         },
 
-        getViewMatrix: function(dest) {
-                if (this.viewDirty) {
-                    this.updateViewMatrix();
-                }
-                var o = this.offset + VIEW_MATRIX_OFFSET;
-                for(var i = 0; i < 16; i++, o++) {
-                    dest[i] = this.page[o];
-                }
+        getViewToWorldMatrix: function (dest) {
+            if (this.viewDirty) {
+                this.updateViewMatrix();
+            }
+            var o = this.offset + VIEW_TO_WORLD_MATRIX_OFFSET;
+            for (var i = 0; i < 16; i++, o++) {
+                dest[i] = this.page[o];
+            }
+        },
+
+        getWorldToViewMatrix: function (dest) {
+            if (this.viewDirty) {
+                this.updateViewMatrix();
+            }
+            var o = this.offset + WORLD_TO_VIEW_MATRIX_OFFSET;
+            for (var i = 0; i < 16; i++, o++) {
+                dest[i] = this.page[o];
+            }
         },
 
         getProjectionMatrix: function(dest, aspect) {

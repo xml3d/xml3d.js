@@ -179,7 +179,7 @@
 
                 // get view and projection matrix arrays
                 var view = this.scene.getActiveView();
-                view.getViewMatrix(c_viewMatrix);
+                view.getWorldToViewMatrix(c_viewMatrix);
                 view.getProjectionMatrix(c_projectionMatrix, viewport[2] / viewport[3]);
 
                 var ray = new window.XML3DRay();

@@ -68,6 +68,7 @@
         webgl.AbstractShaderClosure.call(this, context);
         this.sourceTemplate = sourceTemplate;
         this.extractedParams = extractedParams;
+        this.uniformSetter = function() {};
         this.uniformConverter = [];
     };
 
@@ -115,8 +116,10 @@
             try{
                 var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, {
                     inject: contextData, loc: true, implementation: "xml3d-glsl-forward" });
+                var glslShader = Shade.compileFragmentShader(aast, {useStatic: true});
+                this.uniformSetter = glslShader.uniformSetter;
                 this.source = {
-                    fragment: Shade.compileFragmentShader(aast, {useStatic: true}),
+                    fragment: glslShader.source,
                     vertex:  objectData.getGLSLCode()
                 }
             }
@@ -134,22 +137,7 @@
         },
 
         setUniformVariables: function(envNames, sysNames, inputCollection){
-            var i, base, override;
-            if(envNames && inputCollection.envBase){
-                i = envNames.length; base = inputCollection.envBase; override = inputCollection.envOverride;
-                while(i--){
-                    var srcName = envNames[i], destName = webgl.JSShaderComposer.convertEnvName(envNames[i]);
-                    this.program.setUniformVariable(destName,
-                        override && override[srcName] !== undefined ? override[srcName] : base[srcName]);
-                }
-            }
-            if(sysNames && inputCollection.sysBase){
-                i = sysNames.length; base = inputCollection.sysBase;
-                while(i--){
-                    var srcName = sysNames[i], destName = webgl.JSShaderComposer.convertSysName(sysNames[i]);
-                    this.program.setUniformVariable(destName, base[srcName]);
-                }
-            }
+            this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
         },
 
         getTransparencyFromInputData: function(dataMap){

@@ -161,7 +161,7 @@
             }
             var iterateCount = this.getIterateCount(programData);
             for(var j = 0; j < operator.outputs.length; ++j){
-                var d = operator.outputs[i];
+                var d = operator.outputs[j];
                 var dataEntry = programData.outputs[entry.getOutputIndex(j)].dataEntry;
 
 

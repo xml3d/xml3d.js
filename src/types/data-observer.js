@@ -12,33 +12,42 @@
     window.XML3DDataObserver = XML3DDataObserver;
 
     XML3DDataObserver.prototype.observe = function(node, options){
+        if(!node)
+            throw new Error("The node to observe is null.");
+
+
+        if(!node._configured)
+            throw new Error("Note to observe is not configured (yet). Make sure to pass an XML3D node and to execute " +
+                "this function after XML3D has been configured e.g. inside a DOMContentLoaded listener.");
+
+
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(node, XML3D.data);
+        if(!dataAdapter)
+            throw new Error("Can't observe node. XML3DataObserver can only observe data containers such as <data>, <mesh> or <shader>");
+
         if(this.observed.length == 0)
             c_XflowObserverList.push(this);
-        var dataAdapter = XML3D.base.resourceManager.getAdapter(node, XML3D.data);
-        if(dataAdapter){
 
-            var entry = {
-                node: node,
-                changed: false,
-                request: null
-            };
+        var entry = {
+            node: node,
+            changed: false,
+            request: null
+        };
 
-            var names = options && options['names'];
-            var typeOfNames = Object.prototype.toString.call(names).slice(8, -1);
-            if (typeOfNames === "String") {
-                names = [names];
-            }
-
-            entry.request = dataAdapter.getComputeRequest(names, function(request, changeType){
-                entry.changed = true;
-            });
-            // Fetch result to synchronize Xflow structures and connect to callbacks
-            // TODO: Find an option to connect request to callback structure without computing result
-            entry.request.getResult();
-
-            this.observed.push(entry);
+        var names = options && options['names'];
+        var typeOfNames = Object.prototype.toString.call(names).slice(8, -1);
+        if (typeOfNames === "String") {
+            names = [names];
         }
 
+        entry.request = dataAdapter.getComputeRequest(names, function(request, changeType){
+            entry.changed = true;
+        });
+        // Fetch result to synchronize Xflow structures and connect to callbacks
+        // TODO: Find an option to connect request to callback structure without computing result
+        entry.request.getResult();
+
+        this.observed.push(entry);
     }
 
     XML3DDataObserver.prototype.disconnect = function(){

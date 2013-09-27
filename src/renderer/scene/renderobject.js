@@ -236,6 +236,7 @@
 
         setTransformDirty: function() {
             this.transformDirty = true;
+            this.setBoundingBoxDirty();
             this.scene.requestRedraw("Transformation changed");
         },
         /**

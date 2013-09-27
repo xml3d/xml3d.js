@@ -115,9 +115,9 @@ test("Bounding Boxes", 7, function () {
     obj2.setParent(group2);
     group2.setParent(group);
     group2.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([-1, 3, -1,1, 5, 1]), EPSILON, "New group's transform was applied correctly");
+    QUnit.closeArray(actualBB, new Float32Array([3, 3, -1, 5, 5, 1]), EPSILON, "New group's transform was applied correctly");
     group.getWorldSpaceBoundingBox(actualBB);
-    QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 5, 2]), EPSILON, "Original group's BB was expanded correctly");
+    QUnit.closeArray(actualBB, new Float32Array([2, -2, -2, 6, 5, 2]), EPSILON, "Original group's BB was expanded correctly");
     obj2.setLocalVisible(false);
     group.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 2, 2]), EPSILON, "Making new object invisible reverts original group's BB");

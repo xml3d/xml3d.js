@@ -124,6 +124,12 @@
                 }
             }
             catch(e){
+                webgl.SystemNotifier.sendEvent('shadejs', {
+                    shadejsType : "error",
+                    event: e,
+                    code: this.sourceTemplate
+                });
+
                 var errorMessage = "Shade.js Compile Error:\n" + e.message + "\n------------\n"
                 + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
                 throw new Error(errorMessage);
@@ -132,6 +138,13 @@
             // TODO: Handle errors.
             XML3D.debug.logDebug(this.source.vertex);
             XML3D.debug.logDebug(this.source.fragment);
+
+            webgl.SystemNotifier.sendEvent('shadejs', {
+                shadejsType : "success",
+                vertexShader: this.source.vertex,
+                fragmentShader: this.source.fragment
+            });
+
             return true;
 
         },

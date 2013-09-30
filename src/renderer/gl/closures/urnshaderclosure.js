@@ -43,6 +43,13 @@
                 fragment: this.addDirectivesToSource(directives, this.descriptor.fragment),
                 vertex: this.addDirectivesToSource(directives, this.descriptor.vertex)
             };
+
+            webgl.SystemNotifier.sendEvent('urnshader', {
+                urnshaderType : "code",
+                vertexShader: this.source.vertex,
+                fragmentShader: this.source.fragment
+            });
+
             return true;
         },
 

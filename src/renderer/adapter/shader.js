@@ -46,7 +46,7 @@
 
             switch (target) {
                 case "script":
-                    this.getShaderInfo().setScriptURI(this.getShaderScriptURI());
+                    this.getShaderInfo().setScript(this.getShaderScriptURI());
                     break;
                 case "id":
                     this.notifyOppositeAdapters();

@@ -12,16 +12,21 @@
         gl.compileShader(shader);
 
         if (gl.getShaderParameter(shader, gl.COMPILE_STATUS) == 0) {
+            var message = gl.getShaderInfoLog(shader);
             var errorString = "";
             if (type == gl.VERTEX_SHADER)
                 errorString = "Vertex shader failed to compile: \n";
             else
                 errorString = "Fragment shader failed to compile: \n";
 
-            errorString += gl.getShaderInfoLog(shader) + "\n--------\n";
+            errorString += message + "\n--------\n";
             errorString += "Shader Source:\n--------\n";
             errorString += XML3D.debug.formatSourceCode(shaderSource);
             gl.getError();
+            webgl.SystemNotifier.sendEvent('glsl',
+                {glslType: "compile_error", shaderType : type == gl.VERTEX_SHADER ? "vertex" : "fragment",
+                    code: shaderSource, message: message });
+
             throw new Error(errorString)
         }
         return shader;
@@ -51,10 +56,13 @@
         }
         gl.linkProgram(program);
         if (gl.getProgramParameter(program, gl.LINK_STATUS) == 0) {
+            var message = gl.getProgramInfoLog(program);
             var errorString = "Shader linking failed: \n";
-            errorString += gl.getProgramInfoLog(program);
+            errorString += message;
             errorString += "\n--------\n";
             gl.getError();
+            webgl.SystemNotifier.sendEvent('glsl',
+                {glslType: "link_error", message: message });
             throw new Error(errorString);
         }
         return program;
@@ -144,6 +152,7 @@
             this.handle = createProgramFromSources(this.gl, [this.sources.vertex], [this.sources.fragment]);
             if (!this.handle)
                 return;
+            webgl.SystemNotifier.sendEvent('glsl', {glslType: "success"});
             this.bind();
             tally(this.gl, this.handle, this);
         },

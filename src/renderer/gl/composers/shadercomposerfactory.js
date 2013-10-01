@@ -40,24 +40,17 @@
                     result = new webgl.URNShaderComposer(this.context, shaderInfo);
                 } else {
                     // TODO: This should be done via resourceManager, but script node is not yet
-                    // configured
-                    if (scriptURI.isLocal()) {
-                        var node = XML3D.URIResolver.resolveLocal(scriptURI);
-                        if (!node) {
-                            XML3D.debug.logError("Could not resolve script for shader: " + scriptURI.toString());
-                            return this.defaultComposer;
-                        }
-
-                        try {
-                            var Constructor = ComposerConstructors[node.type];
-                            result = new Constructor(this.context, shaderInfo, node);
-                        } catch(e) {
-                            XML3D.debug.logError("No shader found for : " + node.type);
-                            return this.defaultComposer;
-                        }
+                    // configure
+                    if (!shaderInfo.node)
+                        return this.defaultComposer;
+                    try {
+                        var Constructor = ComposerConstructors[shaderInfo.node.type];
+                        result = new Constructor(this.context, shaderInfo);
+                    } catch(e) {
+                        XML3D.debug.logError("No shader found for : " + shaderInfo.node.type);
+                        return this.defaultComposer;
                     }
-
-                }
+                                    }
                 if (result) {
                     this.composers[shaderInfo.id] = result;
                     this.context.getStatistics().materials++;

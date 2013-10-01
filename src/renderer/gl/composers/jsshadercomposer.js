@@ -9,7 +9,7 @@
      * @constructor
      */
     var JSShaderComposer = function(context, shaderInfo, node) {
-        webgl.AbstractShaderComposer.call(this, context, shaderInfo.getScript());
+        webgl.AbstractShaderComposer.call(this, context, shaderInfo);
 
         if (!window.Shade)
             throw new Error("Shade.js not found");
@@ -18,7 +18,7 @@
 
         this.shaderURL = null;
         /** @type string*/
-        this.sourceTemplate = node.innerText;
+        this.sourceTemplate = null;
 
         /**
          * @private
@@ -56,12 +56,18 @@
 
     XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
         setShaderInfo: function(shaderInfo) {
-
-            this.extractedParams = Shade.extractParameters(this.sourceTemplate,
-                {implementation: "xml3d-glsl-forward"}).shaderParameters;
-            // FIXME: Shader.js should always request position (in case
+            this.sourceTemplate = shaderInfo.node.innerText;
+            try{
+                this.extractedParams = Shade.extractParameters(this.sourceTemplate,
+                    {implementation: "xml3d-glsl-forward"}).shaderParameters;
+                // FIXME: Shader.js should always request position (in case
+            }
+            catch(e){
+                // We ignore errors here. They will reoccur when updating connected mesh closures
+                this.extractedParams = [];
+            }
             if(this.extractedParams.indexOf("position") == -1) this.extractedParams.push("position");
-            var that = this;
+
             // The composer is interested in changes of all possible shader parameters (extracted)
             // the instances (closures) will only set those, that occur in the instance
             if (this.extractedParams.length) {

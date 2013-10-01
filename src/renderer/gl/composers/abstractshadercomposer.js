@@ -54,22 +54,32 @@
      * @constructor
      * @implements IShaderComposer
      */
-    var AbstractShaderComposer = function (context, identifier) {
-        this.identifier = identifier || "NO IDENTIFIER";
+    var AbstractShaderComposer = function (context, shaderInfo) {
         this.context = context;
         this.shaderClosures = [];
         this.dataChanged = false;
         this.updateLightValues = false;
         this.request = null;
+
+        shaderInfo.addChangeListener(this.onShaderInfoChanged.bind(this));
     };
 
     XML3D.createClass(AbstractShaderComposer, XML3D.util.EventDispatcher, {
+
+        // Implemented by subclass
+        setShaderInfo: null,
+
 
         updateRequest: function(xflowDataNode){
             if(this.request) this.request.clear();
 
             this.request = new Xflow.ComputeRequest(xflowDataNode, this.getRequestFields(),
                 this.onShaderRequestChange.bind(this));
+            this.setShaderRecompile();
+        },
+
+        onShaderInfoChanged: function(shaderInfo){
+            this.setShaderInfo(shaderInfo, this.node);
             this.setShaderRecompile();
         },
 
@@ -149,7 +159,7 @@
                 shader.createSources(scene, this.getShaderDataResult(), vsResult)
             }
             catch(e){
-                throw new Error("Shader '" + this.identifier + "': " + e.message)
+                throw new Error("Shader: " + e.message)
             }
 
             for (var i = 0; i < this.shaderClosures.length; i++) {

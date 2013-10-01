@@ -127,7 +127,7 @@
             }
             XML3D.debug.logDebug("Update mesh closure", this.changeState);
 
-            var oldValid = !!this.shaderClosure && this.typeDataValid, someError = null;
+            var oldValid = !!this.shaderClosure && this.typeDataValid, someError = null, typeDataResolved = false;
 
             try{
                 if(this.changeState & SHADER_CLOSURE_NEEDS_UPDATE)
@@ -136,6 +136,8 @@
                 if (this.changeState & CHANGE_STATE.TYPE_CHANGED) {
                     this.updateTypeData();
                 }
+
+                typeDataResolved = true;
 
                 if(this.changeState & (SHADER_CLOSURE_NEEDS_UPDATE | CHANGE_STATE.TYPE_CHANGED)){
                     this.updateIndexBuffer();
@@ -157,8 +159,10 @@
             }
             catch(e){
                 someError = e;
-                this.shaderClosure = null;
-                this.typeDataValid = false;
+                if(!typeDataResolved)
+                    this.typeDataValid = false;
+                else
+                    this.shaderClosure = null;
             }
 
 

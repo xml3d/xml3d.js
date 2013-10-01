@@ -255,7 +255,7 @@ XML3D.createClass = function(ctor, parent, methods) {
             XML3D.document.onunload();
     };
 
-    window.addEventListener('DOMContentLoaded', onLoad, false);
+    document.addEventListener('DOMContentLoaded', onLoad, false);
     window.addEventListener('unload', onUnload, false);
     window.addEventListener('reload', onUnload, false);
     document.addEventListener('DOMNodeInserted', onNodeInserted, false);

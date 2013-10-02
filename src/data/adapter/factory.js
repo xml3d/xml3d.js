@@ -67,6 +67,7 @@
     reg['proto']       = data.DataAdapter;
     reg['iframe']      = data.IFrameDataAdapter;
     reg['video']       = data.VideoDataAdapter;
+    reg['script']       = data.ScriptDataAdapter;
 
    /**
      * Creates a DataAdapter associated with the given node.

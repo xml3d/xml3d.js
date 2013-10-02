@@ -18,9 +18,10 @@
         this.scene = scene;
         this.data = opt.data;
         /** @type XML3D.URI */
-        this.script = opt.script;
+        this.scriptUri = null;
+        this.scriptType = null;
+        this.scriptCode = null;
         this.scene.shaderInfos.push(this);
-        this.node = null;
         this.changeListener = [];
     };
 
@@ -28,30 +29,23 @@
         /**
          * @param {XML3D.URI} script
          */
-        setScript: function(script) {
-            if(this.script != script) {
-                this.script = script;
-                if(script.scheme == "urn") {
-                    this.node = null;
-                } else {
-                    // TODO: This should be done via resourceManager, but script node is not yet
-                    // configured
-                    if (script.isLocal()) {
-                        this.node = XML3D.URIResolver.resolveLocal(script);
-                        if(!this.node){
-                            XML3D.debug.logError("Could not resolve script for shader: " + script.toString());
-                        }
-                    }
-                }
-
-                this.scriptChangedEvent();
-            }
+        setScript: function(scriptUri, scriptType, scriptCode) {
+            this.scriptUri = scriptUri;
+            this.scriptType = scriptType;
+            this.scriptCode = scriptCode;
+            this.scriptChangedEvent();
         },
         /**
          * @returns {XML3D.URI}
          */
-        getScript: function() {
-            return this.script;
+        getScriptUri: function() {
+            return this.scriptUri;
+        },
+        getScriptType: function() {
+            return this.scriptType;
+        },
+        getScriptCode: function() {
+            return this.scriptCode;
         },
         getData: function() {
             return this.data;

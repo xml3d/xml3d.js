@@ -135,11 +135,12 @@
 
     /**
      * @param {string|XML3D.URI} uri Uri to referred adapterHandle
+     * @param {Object=} adapterType Optional: the type of adapter required (use same adapter type by default)
      * @returns an AdapterHandle to the referred Adapter of the same aspect and canvasId
      */
-    XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri) {
+    XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType) {
         return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, uri,
-            this.factory.aspect, this.factory.canvasId);
+            aspectType || this.factory.aspect, this.factory.canvasId);
     };
     /**
      * notifies all adapter that refer to this adapter through AdapterHandles.
@@ -231,8 +232,11 @@
      * @returns {XML3D.base.Adapter} The adapter of the node
      */
     XML3D.base.NodeAdapterFactory.prototype.getAdapter = function(node) {
+        if(node && node._configured === undefined)
+            XML3D.config.element(node, true);
         if (!node || node._configured === undefined)
             return null;
+
         var elemHandler = node._configured;
         var key = this.aspect + "_" + this.canvasId;
         var adapter = elemHandler.adapters[key];

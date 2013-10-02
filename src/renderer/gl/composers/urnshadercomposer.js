@@ -39,10 +39,9 @@
          * @param {XML3D.webgl.ShaderInfo} shaderInfo
          */
         setShaderInfo: function (shaderInfo) {
-            var shaderScriptURI = shaderInfo.getScript();
+            var shaderScriptURI = shaderInfo.getScriptUri();
             this.setShaderScript(shaderScriptURI);
 
-            var that = this;
             if (this.descriptor) {
                 this.updateRequest(shaderInfo.getData());
                 //TODO Build this into the XML3D.webgl.getScript function? It's needed everywhere anyway...

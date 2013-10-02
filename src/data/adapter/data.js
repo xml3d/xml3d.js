@@ -113,7 +113,9 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
     }
     else if (evt.type == XML3D.events.NODE_INSERTED) {
         var insertedNode = evt.wrapped.target;
-        var insertedXflowNode = this.factory.getAdapter(insertedNode).getXflowNode();
+        var adapter = this.factory.getAdapter(insertedNode);
+        if(!adapter) return;
+        var insertedXflowNode = adapter.getXflowNode();
         var sibling = insertedNode, followUpAdapter = null;
         do{
             sibling = sibling.nextSibling;
@@ -125,7 +127,9 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
         return;
     }
     else if (evt.type == XML3D.events.NODE_REMOVED) {
-        var removedXflowNode = this.factory.getAdapter(evt.wrapped.target).getXflowNode();
+        var adapter = this.factory.getAdapter(evt.wrapped.target);
+        if(!adapter) return;
+        var removedXflowNode = adapter.getXflowNode();
         this.xflowDataNode.removeChild(removedXflowNode);
         return;
     } else if (evt.type == XML3D.events.VALUE_MODIFIED) {

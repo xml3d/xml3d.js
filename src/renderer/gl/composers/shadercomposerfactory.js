@@ -35,19 +35,19 @@
             var result = this.composers[shaderInfo.id];
             if (!result) {
                 /** @type XML3D.URI */
-                var scriptURI = shaderInfo.script;
+                var scriptURI = shaderInfo.getScriptUri();
                 if(scriptURI.scheme == "urn") {
                     result = new webgl.URNShaderComposer(this.context, shaderInfo);
                 } else {
                     // TODO: This should be done via resourceManager, but script node is not yet
                     // configure
-                    if (!shaderInfo.node)
+                    if (!shaderInfo.getScriptType())
                         return this.defaultComposer;
                     try {
-                        var Constructor = ComposerConstructors[shaderInfo.node.type];
+                        var Constructor = ComposerConstructors[shaderInfo.getScriptType()];
                         result = new Constructor(this.context, shaderInfo);
                     } catch(e) {
-                        XML3D.debug.logError("No shader found for : " + shaderInfo.node.type);
+                        XML3D.debug.logError("No shader found for : " + shaderInfo.getScriptType());
                         return this.defaultComposer;
                     }
                                     }

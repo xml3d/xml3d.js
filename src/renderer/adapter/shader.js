@@ -13,15 +13,35 @@
         /** @type webgl.ShaderInfo **/
         this.shaderInfo = this.createShaderInfo();
         this.templateId = this.shaderInfo.id;
+        this.updateScript();
     };
 
     XML3D.createClass(ShaderRenderAdapter, XML3D.webgl.RenderAdapter);
     XML3D.extend(ShaderRenderAdapter.prototype, {
         createShaderInfo: function () {
             return this.getScene().createShaderInfo({
-                script: this.getShaderScriptURI(),
                 data: this.getDataAdapter().getXflowNode()
             });
+        },
+        updateScript: function(){
+            var uri = this.getShaderScriptURI();
+            if(uri.scheme != "urn"){
+                var adapterHandle = this.getAdapterHandle(uri,XML3D.data);
+                this.connectAdapterHandle('script', adapterHandle);
+            }
+            else{
+                this.disconnectAdapterHandle('script');
+            }
+            this.updateShaderInfoDetails();
+        },
+        updateShaderInfoDetails: function(){
+            var scriptType = null, scriptCode = null;
+            var adapter = this.getConnectedAdapter('script');
+            if(adapter && adapter.getScriptType){
+                scriptType = adapter.getScriptType();
+                scriptCode = adapter.getScriptCode();
+            }
+            this.shaderInfo.setScript(this.getShaderScriptURI(), scriptType, scriptCode);
         },
         getShaderInfo: function () {
             return this.shaderInfo;
@@ -34,30 +54,26 @@
         },
         notifyChanged: function (evt) {
             switch (evt.type) {
-                case XML3D.events.NODE_INSERTED:
-                case XML3D.events.NODE_REMOVED:
-                    return;    // Not handled here
-                case XML3D.events.THIS_REMOVED:
-                    this.dispose();
-                    return;
+                case XML3D.events.VALUE_MODIFIED:
+                    var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+                    switch (target) {
+                        case "script":
+                            this.updateScript();
+                            break;
+                        default:
+                            XML3D.debug.logWarning("Unhandled mutation event in shader adapter for parameter '" + target + "'");
+                            break;
+
+                    }
+                break;
+                case XML3D.events.ADAPTER_HANDLE_CHANGED:
+                    if(evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
+                        XML3D.debug.logError("Could not find script of url '" + evt.url + "'");
+                    }
+                    this.updateShaderInfoDetails();
+                break;
             }
 
-            var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
-
-            switch (target) {
-                case "script":
-                    this.getShaderInfo().setScript(this.getShaderScriptURI());
-                    break;
-                case "id":
-                    this.notifyOppositeAdapters();
-                    break;
-                default:
-                    XML3D.debug.logWarning("Unhandled mutation event in shader adapter for parameter '" + target + "'");
-                    break;
-
-            }
-        },
-        dispose: function () {
 
         }
     });

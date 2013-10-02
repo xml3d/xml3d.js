@@ -56,7 +56,7 @@
 
     XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
         setShaderInfo: function(shaderInfo) {
-            this.sourceTemplate = shaderInfo.node.innerText;
+            this.sourceTemplate = shaderInfo.getScriptCode();
             try{
                 this.extractedParams = Shade.extractParameters(this.sourceTemplate,
                     {implementation: "xml3d-glsl-forward"}).shaderParameters;

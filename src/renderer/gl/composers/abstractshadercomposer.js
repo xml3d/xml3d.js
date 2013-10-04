@@ -79,8 +79,9 @@
         },
 
         onShaderInfoChanged: function(shaderInfo){
-            this.setShaderInfo(shaderInfo, this.node);
+            this.setShaderInfo(shaderInfo);
             this.setShaderRecompile();
+            this.context.requestRedraw("Shader script changed");
         },
 
         onShaderRequestChange: function(request, changeType){

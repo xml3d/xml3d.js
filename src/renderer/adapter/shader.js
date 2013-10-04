@@ -26,7 +26,7 @@
         updateScript: function(){
             var uri = this.getShaderScriptURI();
             if(uri.scheme != "urn"){
-                var adapterHandle = this.getAdapterHandle(uri,XML3D.data);
+                var adapterHandle = this.getAdapterHandle(uri, XML3D.data, 0);
                 this.connectAdapterHandle('script', adapterHandle);
             }
             else{

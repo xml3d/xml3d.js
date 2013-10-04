@@ -268,7 +268,8 @@ RequestNode.prototype.setStructureOutOfSync = function(){
 }
 
 RequestNode.prototype.onXflowChannelChange = function(channel, state){
-    this.status = Xflow.PROCESS_STATE.MODIFIED;
+    if(channel.creatorProcessNode)
+        this.status = Xflow.PROCESS_STATE.MODIFIED;
     var notifyState = (state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA_VALUE
             : Xflow.RESULT_STATE.CHANGED_DATA_SIZE);
 

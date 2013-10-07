@@ -137,14 +137,14 @@
          * @param {MouseEvent} evt
          */
         mouseup:function (evt) {
-            this.dispatchMouseEventOnPickedObject(evt);
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.pickingEnabled});
         },
 
         /**
          * @param {MouseEvent} evt
          */
         mousedown:function (evt) {
-            this.dispatchMouseEventOnPickedObject(evt);
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.pickingEnabled});
         },
 
 
@@ -177,7 +177,10 @@
          */
         mousemove:function (evt) {
             var pos = this.getMousePosition(evt);
-            this.dispatchMouseEventOnPickedObject(evt);
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.mouseMovePickingEnabled});
+            if (!this.renderOptions.mouseMovePickingEnabled)
+                return;
+
             var curObj = this.renderer.pickedObject ? this.renderer.pickedObject.node : null;
 
             // trigger mouseover and mouseout
@@ -231,7 +234,7 @@
          */
         mouseover:function (evt) {
             var pos = this.getMousePosition(evt);
-            this.dispatchMouseEventOnPickedObject(evt);
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.mouseMovePickingEnabled});
         },
 
         /**

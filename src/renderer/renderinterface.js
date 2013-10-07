@@ -1,12 +1,13 @@
 (function (webgl) {
 
+    // Note: This context should only be used to access GL constants
     var gl = window.WebGLRenderingContext;
 
     var RenderInterface = function (context) {
         this.context = context;
         this.options = {
             pickingEnabled          : true,
-            mousemovePickingEnabled : true,
+            mouseMovePickingEnabled : true,
             glBlendFuncSeparate     : [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
         };
         this.renderPipeline = null;
@@ -26,7 +27,6 @@
         getRenderOptions: function() {
             return this.options;
         }
-
     });
 
     webgl.RenderInterface = RenderInterface;

@@ -54,6 +54,7 @@ XML3D.webgl.MAXFPS = 30;
     function CanvasHandler(canvas, xml3dElem) {
         this.canvas = canvas;
         this.xml3dElem = xml3dElem;
+        this.renderInterface = {};
 
         this.id = ++globalCanvasId; // global canvas id starts at 1
         XML3D.webgl.handlers[this.id] = this;
@@ -81,7 +82,7 @@ XML3D.webgl.MAXFPS = 30;
         } catch (e) {
             return null;
         }
-    }
+    };
 
     /**
      *
@@ -121,9 +122,7 @@ XML3D.webgl.MAXFPS = 30;
         xml3dAdapter.traverse(function(){});
 
         scene.rootNode.setVisible(true);
-
-
-    }
+    };
 
     /*
     CanvasHandler.prototype.redraw = function(reason, forcePickingRedraw) {

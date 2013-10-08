@@ -456,6 +456,9 @@ DataNode.prototype.setCompute = function(computeString){
         inputMapping = Xflow.Mapping.parse(input, this);
         outputMapping = Xflow.Mapping.parse(output, this);
     }
+    else if(computeString){
+        XML3D.debug.logError("Error parsing Compute value '" + computeString + "'");
+    }
     if(!inputMapping) inputMapping = new Xflow.OrderMapping(this);
     if(!outputMapping) outputMapping = new Xflow.OrderMapping(this);
     removeMappingOwner(this._computeInputMapping);
@@ -545,6 +548,9 @@ function updateImageLoading(node){
         imageLoading = child instanceof Xflow.DataNode ? child._imageLoading :
                 child._data && child._data.isLoading && child._data.isLoading();
     }
+    if(!imageLoading && node._sourceNode) imageLoading = node._sourceNode._imageLoading;
+    if(!imageLoading && node._protoNode) imageLoading = node._protoNode._imageLoading;
+
     if(imageLoading != node._imageLoading){
         node._imageLoading = imageLoading;
         for(var i = 0; i < node._parents.length; ++i)
@@ -558,6 +564,9 @@ function updateSubtreeLoading(node){
         var child = node._children[i];
         subtreeLoading = child instanceof Xflow.DataNode ? child._subTreeLoading : false;
     }
+    if(!subtreeLoading && node._sourceNode) subtreeLoading = node._sourceNode._subTreeLoading;
+    if(!subtreeLoading && node._protoNode) subtreeLoading = node._protoNode._subTreeLoading;
+
     if(subtreeLoading != node._subTreeLoading){
         node._subTreeLoading = subtreeLoading;
         for(var i = 0; i < node._parents.length; ++i)

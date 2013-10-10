@@ -551,6 +551,7 @@ function updateImageLoading(node){
     if(!imageLoading && node._sourceNode) imageLoading = node._sourceNode._imageLoading;
     if(!imageLoading && node._protoNode) imageLoading = node._protoNode._imageLoading;
 
+    imageLoading = imageLoading || false;
     if(imageLoading != node._imageLoading){
         node._imageLoading = imageLoading;
         for(var i = 0; i < node._parents.length; ++i)

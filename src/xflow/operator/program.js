@@ -153,13 +153,14 @@
         for(var i = 0; i < this.entries.length; ++i){
             var entry = this.entries[i];
             var operator = entry.operator;
-            var operatorData = programData.operatorData[i]
+            var operatorData = programData.operatorData[i];
+            var iterateCount = this.getIterateCount(programData);
             if(operator.alloc){
                 var args = [c_sizes];
                 addInputToArgs(args, entry, programData);
+                args.push(iterateCount);
                 operator.alloc.apply(operatorData, args);
             }
-            var iterateCount = this.getIterateCount(programData);
             for(var j = 0; j < operator.outputs.length; ++j){
                 var d = operator.outputs[j];
                 var dataEntry = programData.outputs[entry.getOutputIndex(j)].dataEntry;

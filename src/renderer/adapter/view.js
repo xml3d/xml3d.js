@@ -24,19 +24,17 @@
     /* Interface method */
     p.getViewMatrix = function() {
         var m = new window.XML3DMatrix();
-        this.renderNode.getViewMatrix(m._data);
+        this.renderNode.getWorldToViewMatrix(m._data);
         return m;
     };
 
     /**
-     * returns the inverse of the view matrix, since now we
-     * want to go world2view and not view2world
+     * returns view2world matrix
      * @return {window.XML3DMatrix}
      */
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
-        this.renderNode.getViewMatrix(m._data);
-        XML3D.math.mat4.invert(m._data, m._data);
+        this.renderNode.getViewToWorldMatrix(m._data);
         return m;
     };
 

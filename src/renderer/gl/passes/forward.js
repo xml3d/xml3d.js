@@ -52,6 +52,9 @@
                 var tempArray = [], obj;
                 for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
                     obj = sourceObjectArray[i];
+                    if (obj.inFrustum === false) {
+                        continue;
+                    }
                     if (i < firstOpaque) {
                         tempArray.push(obj);
                     } else {
@@ -118,7 +121,7 @@
 
                 program.bind();
                 //this.shaderManager.updateActiveShader(shader);
-                scene.getActiveView().getViewMatrix(c_viewMat_tmp);
+                scene.getActiveView().getWorldToViewMatrix(c_viewMat_tmp);
                 scene.getActiveView().getProjectionMatrix(c_projMat_tmp, this.width / this.height);
 
                 parameters["viewMatrix"] = c_viewMat_tmp;

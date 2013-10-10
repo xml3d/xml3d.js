@@ -63,7 +63,7 @@
         var result = {};
         var matches = func.toString().match(c_FunctionPattern);
         if(!matches){
-            XML3D.debug.logError("Xflow Internal: Could not parse function: " + func);
+            Xflow.notifyError("Xflow Internal: Could not parse function: " + func);
             return null;
         }
         result.args = matches[2].split(",");

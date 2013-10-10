@@ -14,7 +14,7 @@ Mapping.parse = function(string, dataNode){
     results = string.trim().match(nameMappingParser);
     if(results)
         return NameMapping.parse(results[1], dataNode);
-    XML3D.debug.logError("Cannot parse name mapping '" + string + "'");
+    Xflow.notifyError("Cannot parse name mapping '" + string + "'", dataNode);
     return null;
 }
 

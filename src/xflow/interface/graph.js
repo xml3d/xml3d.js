@@ -186,6 +186,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._children = [];
     this._sourceNode = null;
     this._protoNode = null;
+    this._userData = null;
 
     this._filterType = 0;
     this._filterMapping = new Xflow.OrderMapping(this);
@@ -262,6 +263,15 @@ Object.defineProperty(DataNode.prototype, "protoNode", {
     /** @return {?Xflow.DataNode} */
     get: function(){ return this._protoNode; }
 });
+Object.defineProperty(DataNode.prototype, "userData", {
+    /** @param {?Xflow.DataNode} v */
+    set: function(v){
+        this._userData = v;
+    },
+    /** @return {?Xflow.DataNode} */
+    get: function(){ return this._userData; }
+});
+
 
 DataNode.prototype.setLoading = function(loading){
     if(this._loading != loading){
@@ -416,12 +426,12 @@ DataNode.prototype.setFilter = function(filterString){
                 case "remove": newType = Xflow.DATA_FILTER_TYPE.REMOVE; break;
                 case "rename": newType = Xflow.DATA_FILTER_TYPE.RENAME; break;
                 default:
-                    XML3D.debug.logError("Unknown filter type:" + type);
+                    Xflow.notifyError("Unknown filter type:" + type, this);
             }
             newMapping = Xflow.Mapping.parse(result[2], this);
         }
         else{
-            XML3D.debug.logError("Could not parse filter '" + filterString + "'");
+            Xflow.notifyError("Could not parse filter '" + filterString + "'", this);
         }
     }
     if(!newMapping){
@@ -457,7 +467,7 @@ DataNode.prototype.setCompute = function(computeString){
         outputMapping = Xflow.Mapping.parse(output, this);
     }
     else if(computeString){
-        XML3D.debug.logError("Error parsing Compute value '" + computeString + "'");
+        Xflow.notifyError("Error parsing Compute value '" + computeString + "'", this);
     }
     if(!inputMapping) inputMapping = new Xflow.OrderMapping(this);
     if(!outputMapping) outputMapping = new Xflow.OrderMapping(this);

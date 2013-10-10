@@ -324,7 +324,7 @@
             else if(operatorList.entries.length == 1)
                 c_program_cache[key] = new Xflow.SingleProgram(operatorList);
             else
-                XML3D.debug.logError("Could not create program from operatorList");
+                Xflow.notifyError("Could not create program from operatorList");
         }
         return c_program_cache[key];
     }
@@ -389,7 +389,7 @@
         var result = {};
         var matches = func.toString().match(c_FunctionPattern);
         if(!matches){
-            XML3D.debug.logError("Xflow Internal: Could not parse function: " + func);
+            Xflow.notifyError("Xflow Internal: Could not parse function: " + func);
             return null;
         }
         result.args = matches[2].split(",");

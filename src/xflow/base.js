@@ -221,6 +221,22 @@ var Xflow = {};
         PROCESSED: 5
     }
 
+    // Error Callbacks:
+    var c_errorCallbacks = [];
+    Xflow.registerErrorCallback = function(callback){
+        c_errorCallbacks.push(callback)
+    }
+
+    Xflow.notifyError = function(message, node){
+        if(c_errorCallbacks.length > 0){
+            for(var i = 0; i < c_errorCallbacks.length; ++i)
+                c_errorCallbacks[i](message, node);
+        }
+        else{
+            // TODO: Do Default error printing
+        }
+    };
+
 
 
     /* Tools */

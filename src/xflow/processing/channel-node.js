@@ -214,8 +214,14 @@
 
     function setOperatorProtoNames(channelNode){
         if(typeof channelNode.owner._computeOperator == "string"){
-            var operatorName = channelNode.owner._computeOperator;
-            channelNode.operator = operatorName && Xflow.getOperator(operatorName);
+            var operatorName = channelNode.owner._computeOperator, operator = null;
+            if(operatorName){
+                operator = Xflow.getOperator(operatorName);
+                if(!operator){
+                    Xflow.notifyError("Unknown operator: '" + operatorName+"'", channelNode.owner);
+                }
+            }
+            channelNode.operator = operator;
         }
         else{
             channelNode.operator = channelNode.owner._computeOperator;

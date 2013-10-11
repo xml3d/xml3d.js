@@ -103,6 +103,8 @@
 
     webgl.getGLUniformValueFromXflowDataEntry = function(xflowDataEntry, context){
         var value;
+        if(!xflowDataEntry)
+            return null;
         if(xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE){
             var gl = context.gl;
             var webglData = context.getXflowEntryWebGlData(xflowDataEntry);
@@ -164,10 +166,10 @@
             case 35670: //gl.BOOL
             case 5124:  //gl.INT
             case 35678: //gl.SAMPLER_2D
-                if (value.length !== undefined) {
+                if (value && value.length !== undefined) {
                     gl.uniform1iv(u.location, value);
                 } else {
-                    gl.uniform1i(u.location, value);
+                    gl.uniform1i(u.location, value || 0);
                 }
                 break;
 

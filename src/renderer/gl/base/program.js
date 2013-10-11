@@ -163,7 +163,7 @@
             this.gl.useProgram(this.handle);
             for(var s in this.samplers) {
                 var sampler = this.samplers[s];
-                sampler.texture.bind(sampler.unit);
+                sampler.texture && sampler.texture.bind(sampler.unit);
             }
             this.texturesBinded = true;
         },
@@ -200,7 +200,7 @@
                 var sampler = this.samplers[name];
                     sampler.texture = value;
                     if(this.texturesBinded && false)
-                        sampler.texture.bind(sampler.unit);
+                        sampler.texture && sampler.texture.bind(sampler.unit);
             }
         }
     });

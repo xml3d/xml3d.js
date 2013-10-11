@@ -86,7 +86,7 @@
                 "global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]
             };
 
-            var systemUniforms = scene.systemUniforms, systemInfo = contextData.this.info;
+            var systemUniforms = scene.systemUniforms, systemInfo = contextData["this"].info;
             for(var systemSource in c_SystemUpdate){
                 var entry = c_SystemUpdate[systemSource];
                 var length = systemUniforms[systemSource] && systemUniforms[systemSource].length;

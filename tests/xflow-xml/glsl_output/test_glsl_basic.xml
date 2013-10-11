@@ -11,10 +11,10 @@
     <TestProcess>
         <VSCheck title="Check Vertex Shader" data="#mesh" >
             <VSConfig>
-                <VSConnection in="position" out="viewPosition" type="FLOAT3_VIEW_POINT" />
-                <VSConnection in="normal" out="viewNormal" type="FLOAT3_VIEW_NORMAL" />
-                <VSConnection in="position" out="worldPosition" type="FLOAT3_WORLD_POINT" />
-                <VSConnection in="normal" out="worldNormal" type="FLOAT3_WORLD_NORMAL" />
+                <VSConnection in="position" out="viewPosition" type="FLOAT3" transform="VIEW_POINT" />
+                <VSConnection in="normal" out="viewNormal" type="FLOAT3" transform="VIEW_NORMAL" />
+                <VSConnection in="position" out="worldPosition" type="FLOAT3" transform="WORLD_POINT" />
+                <VSConnection in="normal" out="worldNormal" type="FLOAT3" transform="WORLD_NORMAL" />
                 <VSConnection in="color" out="fragColor" type="FLOAT3" optional="true" />
                 <VSConnection in="texCoord" out="fragTexcoord" type="FLOAT2" optional="true" />
             </VSConfig>

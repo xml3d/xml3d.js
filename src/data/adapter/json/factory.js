@@ -99,6 +99,7 @@
             throw new Error("Unknown JSON version: " + jsonData.version);
 
         var node = XML3D.data.xflowGraph.createDataNode();
+        node.userData = "External Json"; // TODO: Try to add document URL here (how to get it?)
 
         var entries = jsonData.data;
         for(var name in entries) {

@@ -186,6 +186,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._children = [];
     this._sourceNode = null;
     this._protoNode = null;
+    this._userData = null;
 
     this._filterType = 0;
     this._filterMapping = new Xflow.OrderMapping(this);
@@ -262,6 +263,15 @@ Object.defineProperty(DataNode.prototype, "protoNode", {
     /** @return {?Xflow.DataNode} */
     get: function(){ return this._protoNode; }
 });
+Object.defineProperty(DataNode.prototype, "userData", {
+    /** @param {?Xflow.DataNode} v */
+    set: function(v){
+        this._userData = v;
+    },
+    /** @return {?Xflow.DataNode} */
+    get: function(){ return this._userData; }
+});
+
 
 DataNode.prototype.setLoading = function(loading){
     if(this._loading != loading){
@@ -269,6 +279,14 @@ DataNode.prototype.setLoading = function(loading){
         updateSubtreeLoading(this);
         Xflow._callListedCallback();
     }
+}
+
+DataNode.prototype.isSubtreeLoading = function(){
+    return this._subTreeLoading;
+}
+
+DataNode.prototype.isImageLoading = function(){
+    return this._imageLoading;
 }
 
 
@@ -408,12 +426,12 @@ DataNode.prototype.setFilter = function(filterString){
                 case "remove": newType = Xflow.DATA_FILTER_TYPE.REMOVE; break;
                 case "rename": newType = Xflow.DATA_FILTER_TYPE.RENAME; break;
                 default:
-                    XML3D.debug.logError("Unknown filter type:" + type);
+                    Xflow.notifyError("Unknown filter type:" + type, this);
             }
             newMapping = Xflow.Mapping.parse(result[2], this);
         }
         else{
-            XML3D.debug.logError("Could not parse filter '" + filterString + "'");
+            Xflow.notifyError("Could not parse filter '" + filterString + "'", this);
         }
     }
     if(!newMapping){
@@ -447,6 +465,9 @@ DataNode.prototype.setCompute = function(computeString){
         }
         inputMapping = Xflow.Mapping.parse(input, this);
         outputMapping = Xflow.Mapping.parse(output, this);
+    }
+    else if(computeString){
+        Xflow.notifyError("Error parsing Compute value '" + computeString + "'", this);
     }
     if(!inputMapping) inputMapping = new Xflow.OrderMapping(this);
     if(!outputMapping) outputMapping = new Xflow.OrderMapping(this);
@@ -537,6 +558,10 @@ function updateImageLoading(node){
         imageLoading = child instanceof Xflow.DataNode ? child._imageLoading :
                 child._data && child._data.isLoading && child._data.isLoading();
     }
+    if(!imageLoading && node._sourceNode) imageLoading = node._sourceNode._imageLoading;
+    if(!imageLoading && node._protoNode) imageLoading = node._protoNode._imageLoading;
+
+    imageLoading = imageLoading || false;
     if(imageLoading != node._imageLoading){
         node._imageLoading = imageLoading;
         for(var i = 0; i < node._parents.length; ++i)
@@ -550,6 +575,9 @@ function updateSubtreeLoading(node){
         var child = node._children[i];
         subtreeLoading = child instanceof Xflow.DataNode ? child._subTreeLoading : false;
     }
+    if(!subtreeLoading && node._sourceNode) subtreeLoading = node._sourceNode._subTreeLoading;
+    if(!subtreeLoading && node._protoNode) subtreeLoading = node._protoNode._subTreeLoading;
+
     if(subtreeLoading != node._subTreeLoading){
         node._subTreeLoading = subtreeLoading;
         for(var i = 0; i < node._parents.length; ++i)

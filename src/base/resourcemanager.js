@@ -425,7 +425,7 @@
      * @param {Document} baseDocument - the document from which to look up the reference
      * @param {XML3D.URI} uri - The URI used to find the referred AdapterHandle. Can be relative
      * @param {Object} adapterType The type of adapter required (e.g. XML3D.data or XML3D.webgl)
-     * @param {number} canvasId Id of canvashandle this adapter depends on, 0 if not depending on any canvashandler
+     * @param {number=} canvasId Id of canvashandle this adapter depends on, 0 if not depending on any canvashandler
      * @returns {?XML3D.base.AdapterHandle} The requested AdapterHandler. Note: might be null
      */
     ResourceManager.prototype.getAdapterHandle = function(baseDocument, uri, adapterType, canvasId) {

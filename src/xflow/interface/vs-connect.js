@@ -14,19 +14,19 @@ Xflow.setShaderConstant = function(type, name){
     Xflow.shaderConstant[type] = name;
 }
 
-
 Xflow.VSConfig = function(){
     this._blockedNames = [];
     this._attributes = [];
 };
     
     
-Xflow.VSConfig.prototype.addAttribute = function(type, inputName, outputName, optional){
+Xflow.VSConfig.prototype.addAttribute = function(type, inputName, outputName, optional, transform){
     this._attributes.push({
         type: type,
         inputName: inputName,
         outputName: outputName,
-        optional: optional
+        optional: optional || false,
+        transform: transform || Xflow.VS_ATTRIB_TRANSFORM.NONE
     });
 }
 
@@ -40,14 +40,7 @@ Xflow.VSConfig.prototype.getAttribute = function(i){
 }
 
 Xflow.VSConfig.prototype.isAttributeTransformed = function(i){
-    var type = this._attributes[i].type;
-    switch(type){
-        case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_NORMAL:
-        case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_POINT:
-        case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_NORMAL:
-        case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_POINT: return true;
-        default: return false;
-    }
+    return !!this._attributes[i].transform;
 }
 
 Xflow.VSConfig.prototype.addBlockedName = function(name){
@@ -76,16 +69,6 @@ Xflow.VSConfig.prototype.getKey = function(){
 
 var c_vs_operator_cache = {};
 
-function getXflowTypeFromGLSLType(glslType){
-    switch(glslType){
-        case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_NORMAL:
-        case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_POINT:
-        case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_NORMAL:
-        case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_POINT: return Xflow.DATA_TYPE.FLOAT3;
-        default: return glslType;
-    }
-}
-
 Xflow.VSConfig.prototype.getOperator = function(){
     var key = this.getKey();
     if(c_vs_operator_cache[key])
@@ -93,11 +76,11 @@ Xflow.VSConfig.prototype.getOperator = function(){
 
     var outputs = [], params = [], glslCode = "\t// VS Connector\n";
 
-    var inputAdded = {}, outputInputMap = [];
+    var inputAdded = {}, outputInputMap = [], fragments = {};
 
     for(var i = 0; i < this._attributes.length; ++i){
         var attr = this._attributes[i];
-        var type = Xflow.getTypeName(getXflowTypeFromGLSLType(attr.type));
+        var type = Xflow.getTypeName(attr.type);
         outputs.push( { type: type, name: attr.outputName} );
         if(inputAdded[attr.inputName] === undefined){
             var idx = params.length;
@@ -109,23 +92,30 @@ Xflow.VSConfig.prototype.getOperator = function(){
             outputInputMap[i] = inputAdded[attr.inputName];
         }
         var line = "\t#O{" + attr.outputName + "} = ";
-        switch(attr.type){
-            case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_NORMAL:
-                line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] + "} "
-                    + "* vec4( #I{" + attr.inputName + "} , 0.0)).xyz;"; break;
-            case Xflow.VS_ATTRIB_TYPE.FLOAT3_VIEW_POINT:
+
+        if(attr.transform && attr.type != Xflow.DATA_TYPE.FLOAT3)
+            throw new Error("Xflow VS Shader only supports transformation of float3 values at this point");
+        switch(attr.transform){
+            case Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
+                line += "normalize( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] + "} "
+                    + "* #I{" + attr.inputName + "} );"; break;
+            case Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT:
                 line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM] + "} "
                     + "* vec4( #I{" + attr.inputName + "} , 1.0)).xyz;"; break;
-            case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_NORMAL:
-                line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] + "} "
-                    + "* vec4( #I{" + attr.inputName + "} , 0.0)).xyz;"; break;
-            case Xflow.VS_ATTRIB_TYPE.FLOAT3_WORLD_POINT:
+            case Xflow.VS_ATTRIB_TRANSFORM.WORLD_NORMAL:
+                line += "normalize( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] + "} "
+                    + "* #I{" + attr.inputName + "} );"; break;
+            case Xflow.VS_ATTRIB_TRANSFORM.WORLD_POINT:
                 line += "( #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM] + "} "
                     + "* vec4( #I{" + attr.inputName + "} , 1.0)).xyz;"; break;
             default:
                 line += "#I{" + attr.inputName + "};";
         }
-        glslCode += line + "\n";
+        fragments[attr.outputName] = line;
+    }
+
+    if(!inputAdded["position"]){
+
     }
 
     glslCode += "\tgl_Position = #G{" + Xflow.shaderConstant[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM]
@@ -135,6 +125,7 @@ Xflow.VSConfig.prototype.getOperator = function(){
         outputs: outputs,
         params:  params,
         evaluate_glsl: glslCode,
+        glsl_fragments: fragments,
         blockedNames: this._blockedNames,
         vsConfig: this,
         outputInputMap: outputInputMap

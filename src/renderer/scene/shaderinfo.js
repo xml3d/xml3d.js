@@ -18,25 +18,46 @@
         this.scene = scene;
         this.data = opt.data;
         /** @type XML3D.URI */
-        this.script = opt.script;
+        this.scriptUri = null;
+        this.scriptType = null;
+        this.scriptCode = null;
         this.scene.shaderInfos.push(this);
+        this.changeListener = [];
     };
 
     XML3D.extend(ShaderInfo.prototype, {
-        setScript: function(script) {
-            if(this.script != script) {
-                this.script = script;
-                this.scriptChangedEvent();
-            }
+        /**
+         * @param {XML3D.URI} script
+         */
+        setScript: function(scriptUri, scriptType, scriptCode) {
+            this.scriptUri = scriptUri;
+            this.scriptType = scriptType;
+            this.scriptCode = scriptCode;
+            this.scriptChangedEvent();
         },
-        getScript: function() {
-            return this.script;
+        /**
+         * @returns {XML3D.URI}
+         */
+        getScriptUri: function() {
+            return this.scriptUri;
+        },
+        getScriptType: function() {
+            return this.scriptType;
+        },
+        getScriptCode: function() {
+            return this.scriptCode;
         },
         getData: function() {
             return this.data;
         },
-        scriptChangedEvent: function() {
+        addChangeListener: function(listener){
+            this.changeListener.push(listener);
+        },
 
+        scriptChangedEvent: function() {
+            for(var i = 0; i < this.changeListener.length; ++i){
+                this.changeListener[i](this);
+            }
         }
     });
 

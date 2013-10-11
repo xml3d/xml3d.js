@@ -27,8 +27,9 @@
                 if (i < firstOpaque) {
                     tempArray.push(obj);
                 } else {
-                    opaque[obj.program.id] = opaque[obj.program.id] || [];
-                    opaque[obj.program.id].push(obj);
+                    var program = obj.getProgram();
+                    opaque[program.id] = opaque[program.id] || [];
+                    opaque[program.id].push(obj);
                 }
             }
 

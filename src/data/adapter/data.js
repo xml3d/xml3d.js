@@ -4,6 +4,37 @@ XML3D.data = XML3D.data || {};
 
 
 XML3D.data.xflowGraph = new Xflow.Graph();
+Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.OBJECT_ID, "objectID");
+Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM, "modelViewProjectionMatrix");
+Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM_NORMAL, "modelViewProjectionNormalMatrix");
+Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM, "modelViewMatrix");
+Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL, "normalMatrix");
+Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM, "modelMatrix");
+Xflow.registerErrorCallback(function(message, xflowNode){
+    message = "Xflow: " + message;
+    var userData = xflowNode.userData;
+    if(userData && userData.ownerDocument){
+        if(userData.ownerDocument == document){
+            XML3D.debug.logError(message, userData);
+        }
+        else if(userData.id){
+            var uri = new XML3D.URI("#" + userData.id);
+            uri = uri.getAbsoluteURI(userData.ownerDocument.documentURI);
+            XML3D.debug.logError(message, "External Node: " + uri);
+        }
+        else{
+            XML3D.debug.logError(message, "External Document: " + userData.ownerDocument.documentURI);
+        }
+    }
+    else if(typeof userData == "string"){
+        XML3D.debug.logError(message, userData);
+    }
+    else{
+        XML3D.debug.logError(message);
+    }
+});
+
+//Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL, "objectID");
 
 /**
  * @interface
@@ -11,8 +42,6 @@ XML3D.data.xflowGraph = new Xflow.Graph();
 var IDataAdapter = function() {
 };
 IDataAdapter.prototype.getOutputs = function() {
-};
-IDataAdapter.prototype.addParentAdapter = function(adapter) {
 };
 
 /**
@@ -45,6 +74,7 @@ XML3D.data.DataAdapter.prototype.init = function() {
 
     var protoNode = (this.node.localName == "proto");
     this.xflowDataNode = XML3D.data.xflowGraph.createDataNode(protoNode);
+    this.xflowDataNode.userData = this.node;
 
     this.updateHandle("src");
     this.updateHandle("proto");
@@ -106,7 +136,9 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
     }
     else if (evt.type == XML3D.events.NODE_INSERTED) {
         var insertedNode = evt.wrapped.target;
-        var insertedXflowNode = this.factory.getAdapter(insertedNode).getXflowNode();
+        var adapter = this.factory.getAdapter(insertedNode);
+        if(!adapter) return;
+        var insertedXflowNode = adapter.getXflowNode();
         var sibling = insertedNode, followUpAdapter = null;
         do{
             sibling = sibling.nextSibling;
@@ -118,7 +150,9 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
         return;
     }
     else if (evt.type == XML3D.events.NODE_REMOVED) {
-        var removedXflowNode = this.factory.getAdapter(evt.wrapped.target).getXflowNode();
+        var adapter = this.factory.getAdapter(evt.wrapped.target);
+        if(!adapter) return;
+        var removedXflowNode = adapter.getXflowNode();
         this.xflowDataNode.removeChild(removedXflowNode);
         return;
     } else if (evt.type == XML3D.events.VALUE_MODIFIED) {

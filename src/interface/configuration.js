@@ -268,7 +268,7 @@ XML3D.classInfo['script'] = {
     id: {a: XML3D.IDHandler},
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for script
-    value: {a: XML3D.StringAttributeHandler},
+    value: {a: XML3D.StringValueHandler},
     src: {a: XML3D.StringAttributeHandler},
     type: {a: XML3D.StringAttributeHandler},
     _term: undefined

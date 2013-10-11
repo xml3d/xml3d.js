@@ -100,7 +100,6 @@ Xflow.VertexShaderResult = function(){
     this._shaderInputNames = null;
     this._program = null;
     this._programData = null;
-    this._shaderInputNames = null;
 
 };
 Xflow.createClass(Xflow.VertexShaderResult, Xflow.Result);
@@ -131,6 +130,13 @@ VertexShaderResult.prototype.isShaderInputUniform = function(name){
 VertexShaderResult.prototype.isShaderOutputUniform = function(name){
     return this._program.isOutputUniform(name);
 }
+VertexShaderResult.prototype.getShaderOutputType = function(name){
+    return this._program.getShaderOutputType(name);
+}
+VertexShaderResult.prototype.getShaderOutputSourceName = function(name){
+    return this._program.getShaderOutputSourceName(name);
+}
+
 VertexShaderResult.prototype.getUniformOutputData = function(name){
     return this._program.getUniformOutputData(name, this._programData);
 }

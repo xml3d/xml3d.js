@@ -46,7 +46,6 @@
                 return { count: count };
             }
         }()),
-
         renderObjectsToActiveBuffer: (function () {
 
             var c_viewMat_tmp = XML3D.math.mat4.create();
@@ -55,11 +54,13 @@
             var tmpModelView = XML3D.math.mat4.create();
             var tmpModelViewProjection = XML3D.math.mat4.create();
             var tmpNormalMatrix = XML3D.math.mat3.create();
+            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition"],
+                c_objectSystemUniforms = ["modelMatrix", "modelViewMatrix", "modelViewProjectionMatrix", "normalMatrix"];
 
             return function (objectArray, scene, opts) {
                 var objCount = 0;
                 var primitiveCount = 0;
-                var parameters = {};
+                var systemUniforms = scene.systemUniforms;
                 var stats = opts.stats || {};
                 var transparent = opts.transparent === true || false;
                 var gl = this.context.gl;
@@ -74,21 +75,22 @@
                 }
 
                 // At this point, we have to gurantee (via FSM), that the RenderObject has a valid shader
-                var program = objectArray[0].program;
+                var program = objectArray[0].getProgram();
 
                 program.bind();
                 //this.shaderManager.updateActiveShader(shader);
                 scene.getActiveView().getWorldToViewMatrix(c_viewMat_tmp);
                 scene.getActiveView().getProjectionMatrix(c_projMat_tmp, this.width / this.height);
 
-                parameters["viewMatrix"] = c_viewMat_tmp;
-                parameters["projectionMatrix"] = c_projMat_tmp;
-                //parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
-                parameters["screenWidth"] = this.target.width;
+                systemUniforms["viewMatrix"] = c_viewMat_tmp;
+                systemUniforms["projectionMatrix"] = c_projMat_tmp;
+                systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
+                systemUniforms["screenWidth"] = this.target.width;
 
                 //Set global data that is shared between all objects using this shader
-                program.setUniformVariables(parameters);
-                parameters = {};
+                program.setSystemUniformVariables(c_programSystemUniforms, systemUniforms);
+
+                var prevOverride = null;
 
                 for (var i = 0, n = objectArray.length; i < n; i++) {
                     var obj = objectArray[i];
@@ -99,35 +101,33 @@
                     XML3D.debug.assert(mesh, "We need a mesh at his point.");
 
                     obj.getWorldMatrix(tmpModelMatrix);
-                    parameters["modelMatrix"] = tmpModelMatrix;
+                    systemUniforms["modelMatrix"] = tmpModelMatrix;
 
                     obj.getModelViewMatrix(tmpModelView);
-                    parameters["modelViewMatrix"] = tmpModelView;
+                    systemUniforms["modelViewMatrix"] = tmpModelView;
 
                     obj.getModelViewProjectionMatrix(tmpModelViewProjection);
-                    parameters["modelViewProjectionMatrix"] = tmpModelViewProjection;
+                    systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection;
 
                     obj.getNormalMatrix(tmpNormalMatrix);
-                    parameters["normalMatrix"] = tmpNormalMatrix;
+                    systemUniforms["normalMatrix"] = tmpNormalMatrix;
 
-                    program.setUniformVariables(parameters);
-                    if (obj.override !== null) {
-                        program.setUniformVariableOverride(obj.override);
-                    }
+                    program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
+
+                    program.changeUniformVariableOverride(prevOverride, mesh.uniformOverride);
+                    prevOverride = mesh.uniformOverride;
 
                     primitiveCount += mesh.draw(program);
                     objCount++;
 
-                    if (obj.override !== null) {
-                        //TODO variable needs to be set back to the proper value instead of the default one
-                        program.undoUniformVariableOverride(obj.override);
-                    }
                     if (transparent) {
                         gl.disable(gl.BLEND);
                     }
 
                 }
+                program.changeUniformVariableOverride(prevOverride, null);
 
+                program.unbind();
                 stats.objects += objCount;
                 stats.primitives += primitiveCount;
                 return stats;

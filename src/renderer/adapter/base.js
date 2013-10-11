@@ -9,11 +9,6 @@
         return null;
     };
 
-    XML3D.webgl.RenderAdapter.prototype.getAdapterHandle = function(uri) {
-        return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, uri,
-            XML3D.webgl, this.factory.canvasId);
-    };
-
     XML3D.webgl.RenderAdapter.prototype.getParentRenderAdapter = function() {
         return this.factory.getAdapter(this.node.parentElement, XML3D.webgl.RenderAdapter);
     };

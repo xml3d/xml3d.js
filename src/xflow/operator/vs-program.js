@@ -4,6 +4,14 @@
 // Xflow.OperatorList
 //----------------------------------------------------------------------------------------------------------------------
 
+    var c_SHADER_CONSTANT_TYPES = {}
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.OBJECT_ID] = 'int';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM] = 'mat4';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM_NORMAL] = 'mat3';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM] = 'mat4';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] = 'mat3';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM] = 'mat4';
+    c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] = 'mat3';
 
     Xflow.VSProgram = function(operatorList){
         this.list = operatorList;
@@ -23,12 +31,19 @@
         return programData.getDataEntry(this._inputInfo[name].index);
     }
 
+    Xflow.VSProgram.prototype.getShaderOutputType = function(name){
+        return this._outputInfo[name].type;
+    }
+    Xflow.VSProgram.prototype.getShaderOutputSourceName = function(name){
+        return this._outputInfo[name].sourceName;
+    }
+
     Xflow.VSProgram.prototype.isOutputUniform = function(name){
-        return this._outputInfo[name].type == Xflow.ITERATION_TYPE.ONE;
+        return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.ONE;
     }
 
     Xflow.VSProgram.prototype.isOutputNull = function(name){
-        return this._outputInfo[name].type == Xflow.ITERATION_TYPE.NULL;
+        return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.NULL;
     }
 
     Xflow.VSProgram.prototype.getUniformOutputData = function(name, programData){
@@ -55,12 +70,12 @@
             }
         }
 
-        var code = "#version 140 \n\n";
+        var code = "";
         code += "// GLOBALS\n"
         // Start with Globals
         for(var type in Xflow.shaderConstant){
             var name = Xflow.shaderConstant[type];
-            code += "uniform " + (type == Xflow.SHADER_CONSTANT_KEY.OBJECT_ID ? 'float' : 'mat4')  +
+            code += "uniform " + c_SHADER_CONSTANT_TYPES[type]  +
                     " " + name + ";\n";
             Xflow.nameset.add(usedNames, name);
         }
@@ -72,25 +87,25 @@
             var configAttr = vsConfig._attributes[i],
                 inputIndex = outputInputMap[i],
                 directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
-            var outputInfo = {type: 0, index: 0},
+            var outputInfo = {type: configAttr.type, iteration: 0, index: 0, sourceName: configAttr.inputName},
                 outputName = configAttr.outputName;
             if(vsConfig.isAttributeTransformed(i) ||
                 baseEntry.isTransferInput(inputIndex) ||
                 operatorList.isInputIterate(directInputIndex))
             {
                 acceptedBaseShaderInput[inputIndex] = true;
-                outputInfo.type = Xflow.ITERATION_TYPE.MANY;
+                outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
 
-                code += "out " + getGLSLType(baseOperator.outputs[i].type) + " " + outputName + ";\n";
+                code += "varying " + getGLSLType(baseOperator.outputs[i].type) + " " + outputName + ";\n";
                 Xflow.nameset.add(usedNames, outputName);
                 transferNames[baseEntry.getTransferOutputId(i)] = outputName;
             }
             else if(operatorList.isInputUniform(directInputIndex)){
-                outputInfo.type = Xflow.ITERATION_TYPE.ONE;
+                outputInfo.iteration = Xflow.ITERATION_TYPE.ONE;
                 outputInfo.index = directInputIndex;
             }
             else{
-                outputInfo.type = Xflow.ITERATION_TYPE.NULL;
+                outputInfo.iteration = Xflow.ITERATION_TYPE.NULL;
             }
             Xflow.nameset.add(program._shaderOutputNames, outputName);
             program._outputInfo[outputName] = outputInfo;
@@ -111,7 +126,7 @@
                     Xflow.nameset.add(program._shaderInputNames, name);
                     directInputNames[inputIndex] = name;
 
-                    code += (uniform ? "uniform " : "in ") + getGLSLType(mapEntry.internalType) + " " + name;
+                    code += (uniform ? "uniform " : "attribute ") + getGLSLType(mapEntry.internalType) + " " + name;
 
                     if(mapEntry.array)
                         code += "[" + operatorList.getInputSize(inputIndex) + "]"
@@ -138,6 +153,14 @@
             }
             // Take Code Fragment
             var codeFragment = operator.evaluate_glsl, index;
+
+            if(operator.glsl_fragments){
+                for(var outputName in program._outputInfo){
+                    if(program._outputInfo[outputName].iteration == Xflow.ITERATION_TYPE.MANY)
+                        codeFragment += "\n" + operator.glsl_fragments[outputName];
+                }
+            }
+
             while((index = codeFragment.indexOf("#I{")) != -1){
                 var end = codeFragment.indexOf("}",index);
                 var mappingIndex = getMappingIndex(operator, codeFragment.substring(index+3,end));

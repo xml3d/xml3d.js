@@ -55,7 +55,7 @@ ProcessNode.prototype.updateState = function(){
                 this.status = Xflow.PROCESS_STATE.LOADING;
 
             if(this.status > Xflow.PROCESS_STATE.INVALID &&
-                !checkInput(this.operator, this.owner.owner._computeInputMapping, this.inputChannels))
+                !checkInput(this, this.operator, this.owner.owner._computeInputMapping, this.inputChannels))
                 this.status = Xflow.PROCESS_STATE.INVALID;
         }
     }
@@ -105,35 +105,36 @@ function isInputLoading(operator, inputChannels){
     return false;
 }
 
-function checkInput(operator, inputMapping, inputChannels){
+function checkInput(processNode, operator, inputMapping, inputChannels){
+    var dataNode = processNode.owner.owner;
     for(var i in operator.params){
         var entry = operator.params[i];
         var dataName = inputMapping.getScriptInputName(i, entry.source);
         if(!entry.optional && !dataName){
-            XML3D.debug.logError("Xflow: operator " + operator.name + ": Missing input argument for "
-                + entry.source);
+            Xflow.notifyError("Xflow: operator " + operator.name + ": Missing input argument for "
+                + entry.source, dataNode);
             return false;
         }
         if(dataName){
             var channel = inputChannels[entry.source];
             if(!channel){
-                XML3D.debug.logError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
-                    "' not found. Used for parameter " + entry.source);
+                Xflow.notifyError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
+                    "' not found. Used for parameter " + entry.source, dataNode);
                 return false;
             }
             var dataEntry = channel.getDataEntry();
 
             if(!channel.creatorProcessNode){
                 if(!entry.optional && (!dataEntry || dataEntry.isEmpty())){
-                    XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
-                        ' contains no data.');
+                    Xflow.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                        ' contains no data.', dataNode);
                     return false;
                 }
             }
             if(dataEntry && dataEntry.type != entry.type){
-                XML3D.debug.logError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                Xflow.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
                     " has wrong type. Expected: " + Xflow.getTypeName(entry.type)
-                    + ", but got: " +  Xflow.getTypeName(dataEntry.type) );
+                    + ", but got: " +  Xflow.getTypeName(dataEntry.type), dataNode);
                 return false;
             }
         }

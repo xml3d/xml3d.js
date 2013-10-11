@@ -34,7 +34,7 @@ Object.defineProperty(Request.prototype, "filter", {
  */
 Request.prototype.clear = function(){
     this._listener = null;
-    if(this._result) this._result.removeListener(this.callback);
+    if(this._result) this._result._removeRequest(this);
     this._dataNode.removeListener(this._dataNodeListener);
 };
 
@@ -96,7 +96,10 @@ var c_vsConnectNodeCount = {},
  * @param {Xflow.VSConfig} vsConfig
  */
 var VertexShaderRequest = function(dataNode, vsConfig, callback){
+
     var filter = vsConfig.getFilter();
+    if(filter.length == 0)
+        throw new Error("vsConfig requires at least one attribute entry.");
     Xflow.Request.call(this, dataNode, filter, callback);
     this._vsConfig = vsConfig;
     this._vsConnectNode = getVsConnectNode(dataNode, vsConfig);

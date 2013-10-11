@@ -32,11 +32,18 @@
          */
         this.ready = [];
         this.queue = [];
+        this.lightsNeedUpdate = true;
+        this.systemUniforms = {};
         this.addListeners();
     };
     var EVENT_TYPE = webgl.Scene.EVENT_TYPE;
 
     XML3D.createClass(GLScene, webgl.Scene);
+
+    GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn",
+         "directionalLightDirection", "directionalLightIntensity", "directionalLightOn",
+         "spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection",
+         "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle"];
 
 
     XML3D.extend(GLScene.prototype, {
@@ -79,14 +86,58 @@
             }
         },
         update: function () {
+            if(this.lightsNeedUpdate){
+                this.lightsNeedUpdate = false;
+                this.updateLightParameters();
+            }
+
             this.updateObjectsForRendering();
+            // Make sure that shaders are updates AFTER objects
+            // Because unused shader closures are cleared on updae
             this.updateShaders();
         },
+        updateLightParameters: function(){
+            var parameters = this.systemUniforms, lights = this.lights;
+
+            var pointLightData = { position: [], attenuation: [], intensity: [], on: [] };
+            lights.point.forEach(function (light, index) {
+                light.getLightData(pointLightData, index);
+            });
+            parameters["pointLightPosition"] = pointLightData.position;
+            parameters["pointLightAttenuation"] = pointLightData.attenuation;
+            parameters["pointLightIntensity"] = pointLightData.intensity;
+            parameters["pointLightOn"] = pointLightData.on;
+
+            var directionalLightData = { direction: [], intensity: [], on: [] };
+            lights.directional.forEach(function (light, index) {
+                light.getLightData(directionalLightData, index);
+            });
+            parameters["directionalLightDirection"] = directionalLightData.direction;
+            parameters["directionalLightIntensity"] = directionalLightData.intensity;
+            parameters["directionalLightOn"] = directionalLightData.on;
+
+            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
+            lights.spot.forEach(function (light, index) {
+                light.getLightData(spotLightData, index);
+            });
+            parameters["spotLightAttenuation"] = spotLightData.attenuation;
+            parameters["spotLightPosition"] = spotLightData.position;
+            parameters["spotLightIntensity"] = spotLightData.intensity;
+            parameters["spotLightDirection"] = spotLightData.direction;
+            parameters["spotLightOn"] = spotLightData.on;
+            parameters["spotLightSoftness"] = spotLightData.softness;
+            parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
+
+            var softFalloffAngle = spotLightData.softness.slice();
+            for (var i = 0; i < softFalloffAngle.length; i++)
+                softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - spotLightData.softness[i]);
+            parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
+        },
+
 
         updateShaders: function() {
             this.shaderFactory.update(this);
         },
-
         updateObjectsForRendering: function () {
             var that = this;
             this.forEach(function(obj) {
@@ -144,9 +195,11 @@
                 this.context.requestRedraw("Active view changed.");
             });
             this.addEventListener( EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function(event){
+                this.lightsNeedUpdate = true;
                 this.shaderFactory.setLightStructureDirty();
             });
             this.addEventListener( EVENT_TYPE.LIGHT_VALUE_CHANGED, function(event){
+                this.lightsNeedUpdate = true;
                 this.shaderFactory.setLightValueChanged();
                 this.context.requestRedraw("Light value changed.");
             });

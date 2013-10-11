@@ -109,20 +109,12 @@ var Xflow = {};
         OBJECT_ID: 7
     }
 
-    Xflow.VS_ATTRIB_TYPE = {
-        FLOAT: 1,
-        FLOAT2: 2,
-        FLOAT3: 3,
-        FLOAT3_VIEW_POINT: 101,
-        FLOAT3_WORLD_POINT: 102,
-        FLOAT3_VIEW_NORMAL: 103,
-        FLOAT3_WORLD_NORMAL: 104,
-        FLOAT4 : 4,
-        FLOAT4X4 : 10,
-        INT: 20,
-        INT4: 21,
-        BOOL: 30,
-        TEXTURE: 40
+    Xflow.VS_ATTRIB_TRANSFORM = {
+        NONE: 0,
+        VIEW_POINT: 1,
+        WORLD_POINT: 2,
+        VIEW_NORMAL: 3,
+        WORLD_NORMAL: 4
     }
 
 
@@ -228,6 +220,22 @@ var Xflow = {};
         UNPROCESSED: 4,
         PROCESSED: 5
     }
+
+    // Error Callbacks:
+    var c_errorCallbacks = [];
+    Xflow.registerErrorCallback = function(callback){
+        c_errorCallbacks.push(callback)
+    }
+
+    Xflow.notifyError = function(message, node){
+        if(c_errorCallbacks.length > 0){
+            for(var i = 0; i < c_errorCallbacks.length; ++i)
+                c_errorCallbacks[i](message, node);
+        }
+        else{
+            // TODO: Do Default error printing
+        }
+    };
 
 
 

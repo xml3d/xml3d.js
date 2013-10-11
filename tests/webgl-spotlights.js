@@ -58,7 +58,7 @@ test("Initialization: entries in lights.spot check", 11, function() {
     deepEqual(sld.softness, array2floatArray2array([0.5]), "Test light softness entry");
     deepEqual(sld.falloffAngle, array2floatArray2array([0.785]), "Test light cutOffAngle entry");
     deepEqual(sld.position, array2floatArray2array([0, 0, 1]), "Test for default position entry");
-    deepEqual(sld.direction, array2floatArray2array([0, 0, 1]), "Test for default direction entry");
+    deepEqual(sld.direction, array2floatArray2array([0, 0, -1]), "Test for default direction entry");
 });
 
 test("All spot lights visibility off", 4, function() {
@@ -155,7 +155,7 @@ test("Change in transformation hierarchy check against lights.spot", 4, function
 
     t_Lamp.setAttribute("rotation", "0 1 0 1.57079632679");
     sl[0].getLightData(sld, 0);
-    ok(equarr(sld.direction, [1, 0, 0], 0.0001), "Test direction entry change");
+    ok(equarr(sld.direction, [-1, 0, 0], 0.0001), "Test direction entry change");
 
 });
 

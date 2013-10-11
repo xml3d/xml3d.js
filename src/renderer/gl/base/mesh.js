@@ -33,15 +33,54 @@
         this.context = context;
         this.glType = getGLTypeFromString(type);
         this.buffers = {};
+        this.uniformOverride = {};
+        this.minIndex = 0;
+        this.maxIndex = 0;
         this.isIndexed = false;
         this.vertexCount = null;
+        this.minAttributeCount = 10000000;
         this.context.getStatistics().meshes++;
     };
 
     XML3D.extend(GLMesh.prototype, {
+        setIndexRange: function(minIndex, maxIndex){
+            this.minIndex = minIndex;
+            this.maxIndex = maxIndex;
+        },
+
+        checkBufferCompatible: function(name, xflowDataBuffer){
+            var cnt = xflowDataBuffer.getIterateCount();
+            if(this.isIndexed){
+                if(cnt <= this.maxIndex){
+                    throw new Error("Index range of [" + this.minIndex + ", " + this.maxIndex + "] " +
+                        " goes beyond element count " + cnt + " of attribute '" + name + "'");
+                }
+            }
+            else if(this.vertexCount !== null){
+                if(cnt < this.vertexCount)
+                    throw new Error("VertexCount " + this.vertexCount +
+                        " is larger than element count " + cnt + " of attribute '" + name + "'");
+            }
+            else{
+                this.minAttributeCount = Math.min(this.minAttributeCount, cnt);
+            }
+        },
+
         setBuffer: function (name, buffer) {
             this.buffers[name] = buffer;
             this.isIndexed = this.isIndexed || name == "index";
+        },
+        clear: function(){
+            this.buffers = {};
+            this.uniformOverride = {};
+            this.minIndex = this.maxIndex = 0;
+            this.isIndexed = false;
+            this.minAttributeCount = 10000000;
+        },
+        setUniformOverride: function (name, value) {
+            if(value === undefined)
+                delete this.uniformOverride[name];
+            this.uniformOverride[name] = value;
         },
         setVertexCount: function (vertexCount) {
             this.vertexCount = vertexCount;
@@ -62,14 +101,14 @@
          */
         getVertexCount: function () {
             try {
-                return (this.vertexCount != null ? this.vertexCount : this.buffers.position.length / 3);
+                return (this.vertexCount != null ? this.vertexCount : this.minAttributeCount );
             } catch (e) {
                 //XML3D.debug.logError("Could not calculate vertex count.", e);
                 return 0;
             }
         },
         /**
-         * @param {XML3D.webgl.GLProgram} program
+         * @param {XML3D.webgl.AbstractShaderClosure} program
          * @returns {number}
          */
         draw: function (program) {
@@ -118,7 +157,7 @@
                     // console.log("drawArrays: " + mesh.getVertexCount());
                     gl.drawArrays(this.glType, 0, this.getVertexCount());
                 }
-                triCount = buffers.position ? buffers.position.length / 3 : 0;
+                triCount = this.getVertexCount();
             }
 
             //Unbind vertex buffers
@@ -128,6 +167,9 @@
             }
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            if(program.undoUniformVariableOverride)
+                program.undoUniformVariableOverride(this.uniformOverride);
 
             return triCount;
         }

@@ -22,6 +22,12 @@
         },
         isValid: function () {
             return this._valid;
+        },
+        setShaderComposer: function(shaderComposer){
+            // implemented by subclass
+        },
+        update: function(scene){
+            // implemented by subclass
         }
     });
 

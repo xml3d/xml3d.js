@@ -24,8 +24,8 @@
     <TestProcess>
         <VSCheck title="Check Vertex Shader" data="#morphed3" >
             <VSConfig>
-                <VSConnection in="position" out="worldPosition" type="FLOAT3_WORLD_POINT" />
-                <VSConnection in="normal" out="worldNormal" type="FLOAT3_WORLD_NORMAL" />
+                <VSConnection in="position" out="worldPosition" type="FLOAT3" transform="WORLD_POINT" />
+                <VSConnection in="normal" out="worldNormal" type="FLOAT3" transform="WORLD_NORMAL" />
                 <VSConnection in="color" out="fragColor" type="FLOAT3" optional="true" />
                 <VSConnection in="texCoord" out="fragTexCoord" type="FLOAT2" optional="true" />
             </VSConfig>

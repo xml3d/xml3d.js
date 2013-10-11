@@ -8,11 +8,9 @@
           NODE_INSERTED: 0,
           VALUE_MODIFIED:  1,
           NODE_REMOVED: 2,
-          DANGLING_REFERENCE: 3,
-          VALID_REFERENCE: 4,
-          THIS_REMOVED: 5,
-          ADAPTER_HANDLE_CHANGED: 6,
-          ADAPTER_VALUE_CHANGED: 7
+          THIS_REMOVED: 3,
+          ADAPTER_HANDLE_CHANGED: 4,
+          ADAPTER_VALUE_CHANGED: 5
   };
 
   //-----------------------------------------------------------------------------

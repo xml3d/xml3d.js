@@ -72,6 +72,9 @@ test("Sequence JSON reference", 4, function() {
     var testStep = 0;
     function onFrameDrawn(){
         if(testStep == 0){
+            if(XML3DUnit.getPixelValue(glTest, 128, 128)[0] == 0)
+                return;
+
             notEqual(XML3DUnit.getPixelValue(glTest, 128, 128)[0], 0, "Something was rendered at all");
 
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference3", "xml3dTest", function(refImage, testImage){

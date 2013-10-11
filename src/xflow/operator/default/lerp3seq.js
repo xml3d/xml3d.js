@@ -3,9 +3,9 @@ Xflow.registerOperator("xflow.lerpSeq", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'sequence'},
         {type: 'float', source: 'key'}],
-    mapping: [  {source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
-        {source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
-        {source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
+    mapping: [  { name: 'value1', source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
+        { name: 'value2', source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
+        { name: 'weight', source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
     evaluate_core: function(result, value1, value2, weight){
         var invWeight = 1 - weight[0];
         result[0] = invWeight*value1[0] + weight[0]*value2[0];

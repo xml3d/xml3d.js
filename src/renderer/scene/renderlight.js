@@ -15,7 +15,7 @@
     var SPOTLIGHT_DEFAULT_SOFTNESS = 0.0;
 
     /** @const */
-    var LIGHT_PARAMETERS = ["intensity", "attenuation", "softness", "falloffAngle"];
+    var LIGHT_PARAMETERS = ["intensity", "attenuation", "softness", "falloffAngle", "direction", "position"];
 
     /** @const */
     var ENTRY_SIZE = 16;
@@ -36,6 +36,8 @@
             data : light.data
         }
         this.intensity   = XML3D.math.vec3.clone(LIGHT_DEFAULT_INTENSITY);
+        this.srcPosition    = XML3D.math.vec3.fromValues(0,0,0);
+        this.srcDirection   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
         this.position    = XML3D.math.vec3.fromValues(0,0,0);
         this.direction   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
         this.attenuation = XML3D.math.vec3.clone(LIGHT_DEFAULT_ATTENUATION);
@@ -82,6 +84,11 @@
                 entry && XML3D.math.vec3.copy(this.intensity, entry.getValue());
                 entry = result.getOutputData("attenuation");
                 entry && XML3D.math.vec3.copy(this.attenuation, entry.getValue());
+                entry = result.getOutputData("position");
+                entry && XML3D.math.vec3.copy(this.srcPosition, entry.getValue());
+                entry = result.getOutputData("direction");
+                entry && XML3D.math.vec3.copy(this.srcDirection, entry.getValue());
+                this.updateWorldMatrix();
                 changeType && this.lightValueChanged();
             }
         },
@@ -135,23 +142,25 @@
         updateWorldMatrix: (function() {
             var tmp_mat = XML3D.math.mat4.create();
             return function() {
-                this.parent.getWorldMatrix(tmp_mat);
-                this.setWorldMatrix(tmp_mat);
-                this.updateLightTransformData(tmp_mat);
+                if(this.parent){
+                    this.parent.getWorldMatrix(tmp_mat);
+                    this.setWorldMatrix(tmp_mat);
+                    this.updateLightTransformData(tmp_mat);
+                }
             }
         })(),
 
         updateLightTransformData: function(transform) {
             switch (this.light.type) {
                 case "directional":
-                    XML3D.math.vec3.copy(this.direction, this.applyTransformDir(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION, transform));
+                    XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
                     break;
                 case "spot":
-                    XML3D.math.vec3.copy(this.direction, this.applyTransformDir(XML3D_SPOTLIGHT_DEFAULT_DIRECTION, transform));
-                    XML3D.math.vec3.copy(this.position, this.applyTransform([0,0,0], transform));
+                    XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
+                    XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
                     break;
                 case "point":
-                    XML3D.math.vec3.copy(this.position, this.applyTransform([0,0,0], transform));
+                    XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
             }
             this.lightValueChanged();
         },

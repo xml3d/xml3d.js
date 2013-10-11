@@ -70,13 +70,6 @@
         return canvas;
     };
 
-    /**
-     * @param {Image|HTMLVideoElement} img
-     * @returns {boolean}
-     */
-    var isLoaded = function (img) {
-        return img.complete || img.readyState;
-    };
 
     XML3D.extend(GLTexture.prototype, {
         /**
@@ -89,7 +82,7 @@
                     this.handle = this.gl.createTexture();
                 }
                 this.set(textureEntry.getSamplerConfig());
-                if(isLoaded(img)) {
+                if(!textureEntry.isLoading()) {
                     this.updateTex2DFromImage(img);
                 } else {
                     this.loads();

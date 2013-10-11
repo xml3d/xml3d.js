@@ -54,7 +54,7 @@
             var tmpModelView = XML3D.math.mat4.create();
             var tmpModelViewProjection = XML3D.math.mat4.create();
             var tmpNormalMatrix = XML3D.math.mat3.create();
-            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth"],
+            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition"],
                 c_objectSystemUniforms = ["modelMatrix", "modelViewMatrix", "modelViewProjectionMatrix", "normalMatrix"];
 
             return function (objectArray, scene, opts) {
@@ -84,7 +84,7 @@
 
                 systemUniforms["viewMatrix"] = c_viewMat_tmp;
                 systemUniforms["projectionMatrix"] = c_projMat_tmp;
-                //parameters["cameraPosition"] = this.camera.getWorldSpacePosition();
+                systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
                 systemUniforms["screenWidth"] = this.target.width;
 
                 //Set global data that is shared between all objects using this shader

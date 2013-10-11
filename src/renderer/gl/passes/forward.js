@@ -6,15 +6,21 @@
      */
     var ForwardRenderPass = function (context, opt) {
         webgl.BaseRenderPass.call(this, context, opt);
+        this.sorter = new webgl.ObjectSorter();
     };
     XML3D.createClass(ForwardRenderPass, webgl.BaseRenderPass);
 
     XML3D.extend(ForwardRenderPass.prototype, {
         renderScene: (function () {
+            /**
+             * @type Float32Array
+             */
+            var c_worldToViewMatrix = XML3D.math.mat4.create();
 
             return function (scene) {
                 var gl = this.context.gl,
-                    target = this.target;
+                    target = this.target,
+                    count = { objects: 0, primitives: 0 };
 
                 target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
@@ -22,74 +28,25 @@
                 gl.enable(gl.DEPTH_TEST);
 
                 scene.updateReadyObjectsFromActiveView(target.getWidth() / target.getHeight());
+                scene.getActiveView().getWorldToViewMatrix(c_worldToViewMatrix);
 
-                var count = { objects: 0, primitives: 0 };
-                //Sort objects by shader/transparency
-                var opaqueObjects = [];
-                var transparentObjects = [];
-                this.sortObjects(scene.ready, scene.firstOpaqueIndex, opaqueObjects, transparentObjects);
+                var sorted = this.sorter.sortScene(scene, c_worldToViewMatrix);
 
                 //Render opaque objects
-                for (var program in opaqueObjects) {
-                    this.renderObjectsToActiveBuffer(opaqueObjects[program], scene, { transparent: false, stats: count });
+                for (var program in sorted.opaque) {
+                    this.renderObjectsToActiveBuffer(sorted.opaque[program], scene, { transparent: false, stats: count });
                 }
 
                 //Render transparent objects
-                for (var k = 0; k < transparentObjects.length; k++) {
-                    var objectArray = [transparentObjects[k]];
+                for (var k = 0; k < sorted.transparent.length; k++) {
+                    var objectArray = [sorted.transparent[k]];
                     this.renderObjectsToActiveBuffer(objectArray, scene, { transparent: true, stats: count });
                 }
                 scene.lights.changed = false;
                 return { count: count };
             }
         }()),
-        sortObjects: (function () {
-            var c_tmpModelMatrix = XML3D.math.mat4.create();
-            var c_bbox = XML3D.math.bbox.create();
-            var c_center = XML3D.math.vec3.create();
 
-            return function (sourceObjectArray, firstOpaque, opaque, transparent) {
-                var tempArray = [], obj;
-                for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
-                    obj = sourceObjectArray[i];
-                    if (obj.inFrustum === false) {
-                        continue;
-                    }
-                    if (i < firstOpaque) {
-                        tempArray.push(obj);
-                    } else {
-                        opaque[obj.program.id] = opaque[obj.program.id] || [];
-                        opaque[obj.program.id].push(obj);
-                    }
-                }
-
-                //Sort transparent objects from back to front
-                var tlength = tempArray.length;
-                if (tlength > 1) {
-                    for (i = 0; i < tlength; i++) {
-                        obj = tempArray[i];
-
-                        obj.getObjectSpaceBoundingBox(c_bbox);
-                        XML3D.math.bbox.center(c_center, c_bbox);
-
-                        obj.getWorldMatrix(c_tmpModelMatrix);
-                        var center = XML3D.math.vec3.transformMat4(c_center, c_center, c_tmpModelMatrix);
-                        tempArray[i] = [ obj, center[2] ];
-                    }
-
-                    tempArray.sort(function (a, b) {
-                        return a[1] - b[1];
-                    });
-
-                    for (i = 0; i < tlength; i++) {
-                        transparent[i] = tempArray[i][0];
-                    }
-                } else if (tlength == 1) {
-                    transparent[0] = tempArray[0];
-                }
-                //console.log("Sorted: " + transparent.length);
-            }
-        }()),
         renderObjectsToActiveBuffer: (function () {
 
             var c_viewMat_tmp = XML3D.math.mat4.create();

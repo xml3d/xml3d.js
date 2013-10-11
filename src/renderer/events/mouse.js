@@ -153,7 +153,8 @@
          */
         click:function (evt) {
             // Click follows always 'mouseup' => no update of pick object needed
-            this.dispatchMouseEventOnPickedObject(evt, { omitUpdate:true });
+            // Felix: Removed optimization, as this resulted in passing 'null' as event target.
+            this.dispatchMouseEventOnPickedObject(evt /*, { omitUpdate:true } */);
         },
 
         /**
@@ -161,7 +162,8 @@
          */
         dblclick:function (evt) {
             // Click follows always 'mouseup' => no update of pick object needed
-            this.dispatchMouseEventOnPickedObject(evt, { omitUpdate:true });
+            // Felix: Removed optimization, as this resulted in passing 'null' as event target.
+            this.dispatchMouseEventOnPickedObject(evt /*, { omitUpdate:true } */);
         },
 
         /**

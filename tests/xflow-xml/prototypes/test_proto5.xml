@@ -7,8 +7,12 @@
     (with the prototype itself not being another prototype instance)
 -->
 <XflowTest>
-    <Input>        
-    
+    <Input>
+
+        <proto id="template1">
+            <float param="true" name="A" >0.1</float>
+            <float param="true" name="B" >0.2</float>
+        </proto>
         
         <proto id="template2" >
 	        
@@ -20,11 +24,6 @@
 	                <float param="true" name="A" >1.4</float>
 	            </data>	        	        
 	        </data>
-	        
-	        <proto id="template1">
-                <float param="true" name="A" >0.1</float>
-                <float param="true" name="B" >0.2</float>
-            </proto>
 
         </proto>
        
@@ -34,24 +33,26 @@
          </data>
     </Input>
     <TestProcess>
-        
+<!--
         <Check title="Check template1 output" data="#template1">
             <MatchData name="A" type="float" >0.1</MatchData>
             <MatchData name="B" type="float" >0.2</MatchData>
         </Check>
+
         <Check title="Check template2 output" data="#template2">
             <MatchData name="A" type="float" >1.1</MatchData>
             <MatchData name="B" type="float" >1.2</MatchData>
             <MatchData name="C" type="float" >1.3</MatchData>
             <MatchData name="D" type="float" >1.4</MatchData>
         </Check>
-        
+-->
         <Check title="Check instance output" data="#data1">
             <MatchData name="A" type="float" >1.1</MatchData>
             <MatchData name="B" type="float" >1.2</MatchData>
             <MatchData name="C" type="float" >2.2</MatchData>
             <MatchData name="D" type="float" >2.1</MatchData>
         </Check>
-        
+
+
     </TestProcess>
 </XflowTest>

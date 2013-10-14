@@ -78,13 +78,13 @@ OrderMapping.prototype.isEmpty = function(){
 
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
 
-OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, destSubstitution, srcSubstitution, filterType, callback){
+OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback){
     for(var i in sourceMap.map){
         var idx = this._names.indexOf(i);
         if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
             ( filterType == Xflow.DATA_FILTER_TYPE.KEEP && idx != -1) ||
             (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
-            callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
+            callback(destMap, i, sourceMap, i);
     }
 };
 OrderMapping.prototype.getScriptInputName = function(index, destName){
@@ -223,21 +223,21 @@ NameMapping.prototype.filterNameset = function(nameset, filterType)
 
 }
 
-NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, destSubstitution, srcSubstitution, filterType, callback)
+NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback)
 {
     if(filterType == Xflow.DATA_FILTER_TYPE.REMOVE){
         for(var i in sourceMap.map)
             if(this._srcNames.indexOf(i) == -1)
-                callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
+                callback(destMap, i, sourceMap, i);
     }
     else{
         if(filterType == Xflow.DATA_FILTER_TYPE.RENAME){
             for(var i in sourceMap.map)
                 if(this._srcNames.indexOf(i) == -1)
-                    callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
+                    callback(destMap, i, sourceMap, i);
         }
         for(var i in this._destNames){
-            callback(destMap, this._destNames[i], sourceMap, this._srcNames[i], destSubstitution, srcSubstitution);
+            callback(destMap, this._destNames[i], sourceMap, this._srcNames[i]);
         }
     }
 };

@@ -151,6 +151,8 @@ function getVsConnectNode(dataNode, vsConfig){
 
         var operator = vsConfig.getOperator();
         connectNode.computeOperator = operator;
+        connectNode._computeInputMapping = new Xflow.OrderMapping(connectNode);
+        connectNode._computeOutputMapping = new Xflow.OrderMapping(connectNode);
         vsConfig.setInputMapping(connectNode._computeInputMapping);
         vsConfig.setOutputMapping(connectNode._computeOutputMapping);
 

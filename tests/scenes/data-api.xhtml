@@ -85,11 +85,12 @@
         <float3 name="weight" param="true" ></float3>
       </proto>
 
-      <data id="simpleProtoInstance" proto="#simpleProto"
-            compute="posAdd = xflow.morph(posAdd1, posAdd2, subWeight)" >
-        <data src="#combinedData" />
-        <float name="weight" >1</float>
-        <float name="subWeight" >0.5</float>
+      <data id="simpleProtoInstance" proto="#simpleProto">
+        <data id="simpleProtoInstanceCompute" compute="posAdd = xflow.morph(posAdd1, posAdd2, subWeight)" >
+            <data src="#combinedData" />
+            <float name="weight" >1</float>
+            <float name="subWeight" >0.5</float>
+        </data>
       </data>
 
 

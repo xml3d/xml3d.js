@@ -136,7 +136,7 @@ test("Access Output ChannelInfo", function() {
 
     channelInfo = this.doc.getElementById("simpleProtoInstance").getOutputChannelInfo("position");
     equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_PROTO, "Origin of 'position' channel info is ORIGIN_PROTO");
-    channelInfo = this.doc.getElementById("simpleProtoInstance").getOutputChannelInfo("posAdd");
+    channelInfo = this.doc.getElementById("simpleProtoInstanceCompute").getOutputChannelInfo("posAdd");
     equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_COMPUTE, "Origin of 'posAdd' channel info is ORIGIN_COMPUTE");
     channelInfo = this.doc.getElementById("simpleProtoInstance").getOutputChannelInfo("posAdd1");
     equal(channelInfo.origin, XML3DDataChannelInfo.ORIGIN_CHILD, "Origin of 'posAdd1' channel info is ORIGIN_CHILD");

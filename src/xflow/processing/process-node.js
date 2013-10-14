@@ -9,18 +9,17 @@
  * @constructor
  * @extends {Xflow.GraphNode}
  */
-Xflow.ProcessNode = function(channelNode, operator, substitution){
+Xflow.ProcessNode = function(channelNode){
     this.owner = channelNode;
-    this.operator = operator;
+    this.operator = channelNode.operator;
     this.inputChannels = {};
     this.outputDataSlots = {};
     this.status = Xflow.PROCESS_STATE.MODIFIED;
-    this.useCount = 0;
 
     this.children = [];
     this.descendants = [];
     this.executers = [];
-    constructProcessNode(this, channelNode, operator, substitution);
+    constructProcessNode(this, channelNode);
 };
 var ProcessNode = Xflow.ProcessNode;
 
@@ -37,7 +36,7 @@ ProcessNode.prototype.onXflowChannelChange = function(channel, state){
 
 ProcessNode.prototype.clear = function(){
     for(var name in this.inputChannels){
-        this.inputChannels[name].removeListener(this);
+        this.inputChannels[name] && this.inputChannels[name].removeListener(this);
     }
 }
 
@@ -73,20 +72,20 @@ ProcessNode.prototype.process = function(){
     }
 }
 
-function constructProcessNode(processNode, channelNode, operator, substitution){
+function constructProcessNode(processNode, channelNode){
     var dataNode = channelNode.owner;
-    synchronizeInputChannels(processNode, channelNode, dataNode, substitution);
+    synchronizeInputChannels(processNode, channelNode, dataNode);
     synchronizeChildren(processNode.children, processNode.descendants, processNode.inputChannels);
     synchronizeOutput(processNode.operator, processNode.outputDataSlots);
 }
 
-function synchronizeInputChannels(processNode, channelNode, dataNode, substitution){
+function synchronizeInputChannels(processNode, channelNode, dataNode){
     var operator = processNode.operator, inputMapping = dataNode._computeInputMapping;
     for(var i = 0; i < operator.params.length; ++i){
         var sourceName = operator.params[i].source;
         var dataName = inputMapping.getScriptInputName(i, sourceName);
         if(dataName){
-            var channel = channelNode.inputChannels.getChannel(dataName, substitution);
+            var channel = channelNode.inputChannels.getChannel(dataName);
             if(channel) channel.addListener(processNode);
             processNode.inputChannels[sourceName] = channel;
         }
@@ -282,20 +281,16 @@ RequestNode.prototype.onXflowChannelChange = function(channel, state){
 function synchronizeRequestChannels(requestNode, channelNode){
     var names = requestNode.filter;
     if(!names){
-        names = [];
-        for(var name in channelNode.finalOutputChannels.map){
-            names.push(name);
-        }
+        names = channelNode.outputChannels.getNames();
     }
 
     for(var i = 0; i < names.length; ++i){
         var name = names[i];
-        var channel = channelNode.finalOutputChannels.getChannel(name);
+        var channel = channelNode.outputChannels.getChannel(name);
         if(channel){
             requestNode.channels[name] = channel;
             channel.addListener(requestNode);
         }
-
     }
 }
 

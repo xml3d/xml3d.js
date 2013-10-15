@@ -5,7 +5,7 @@ XML3D.webgl.MAXFPS = 30;
 
     var CONTEXT_OPTIONS = {
         alpha: true,
-        premultipliedAlpha: true,
+        premultipliedAlpha: false,
         antialias: true,
         stencil: true,
         preserveDrawingBuffer: true

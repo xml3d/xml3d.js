@@ -39,8 +39,8 @@
                 c_uniformCollection.sysBase["modelMatrix"] = c_modelMatrix;
                 c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
 
-                this.program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
-                obj.mesh.draw(this.program);
+                program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
+                obj.mesh.draw(program);
 
                 program.unbind();
                 target.unbind();

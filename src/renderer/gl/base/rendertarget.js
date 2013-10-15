@@ -114,7 +114,7 @@
             } else {
                 //opt.generateMipmap = opt.generateColorsMipmap;
                 var ctex = new XML3D.webgl.GLTexture(gl);
-                ctex.createTex2DFromData(colorFormat, this.width, this.height, gl.RGBA, gl.UNSIGNED_BYTE, this.opt);
+                ctex.createTex2DFromData(colorFormat, this.width, this.height, gl.RGBA, this.opt.colorType || gl.UNSIGNED_BYTE, this.opt);
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
                 this.colorTarget = {
                     handle: ctex,
@@ -167,7 +167,7 @@
             else {
                 //opt.generateMipmap = opt.generateStencilMipmap;
                 var stex = new XML3D.webgl.GLTexture(gl);
-                stex.createTex2DFromData(stencilFormat, this.width, this.height, gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, this.opt);
+                stex.createTex2DFromData(stencilFormat, this.width, this.height, gl.STENCIL_COMPONENT, this.opt.colorType || gl.UNSIGNED_BYTE, this.opt);
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);
 
                 this.stencilTarget = {

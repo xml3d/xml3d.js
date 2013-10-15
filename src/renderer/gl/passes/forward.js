@@ -11,7 +11,7 @@
     XML3D.createClass(ForwardRenderPass, webgl.BaseRenderPass);
 
     XML3D.extend(ForwardRenderPass.prototype, {
-        renderScene: (function () {
+        render: (function () {
             /**
              * @type Float32Array
              */
@@ -89,7 +89,7 @@
                 systemUniforms["viewMatrix"] = c_viewMat_tmp;
                 systemUniforms["projectionMatrix"] = c_projMat_tmp;
                 systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
-                systemUniforms["screenWidth"] = this.target.width;
+                systemUniforms["screenWidth"] = target.width;
 
                 //Set global data that is shared between all objects using this shader
                 program.setSystemUniformVariables(c_programSystemUniforms, systemUniforms);

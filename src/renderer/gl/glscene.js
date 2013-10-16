@@ -116,7 +116,7 @@
             parameters["directionalLightIntensity"] = directionalLightData.intensity;
             parameters["directionalLightOn"] = directionalLightData.on;
 
-            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
+            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [], castShadow: [], lightMatrix: [] };
             lights.spot.forEach(function (light, index) {
                 light.getLightData(spotLightData, index);
             });
@@ -127,6 +127,8 @@
             parameters["spotLightOn"] = spotLightData.on;
             parameters["spotLightSoftness"] = spotLightData.softness;
             parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
+            parameters["spotLightCastShadow"] = spotLightData.castShadow;
+            parameters["spotLightMatrix"] = spotLightData.lightMatrix;
 
             var softFalloffAngle = spotLightData.softness.slice();
             for (var i = 0; i < softFalloffAngle.length; i++)
@@ -183,6 +185,15 @@
                 };
             }
         }()),
+        updateReadyObjectsFromMatrices: function (worldToViewMatrix, projectionMatrix) {
+            var readyObjects = this.ready;
+            for(var i = 0, l = readyObjects.length; i < l; i++) {
+                var obj = readyObjects[i];
+                obj.updateModelViewMatrix(worldToViewMatrix);
+                obj.updateNormalMatrix();
+                obj.updateModelViewProjectionMatrix(projectionMatrix);
+            };
+        },
         addListeners: function() {
             this.addEventListener( EVENT_TYPE.SCENE_STRUCTURE_CHANGED, function(event){
                 if(event.newChild !== undefined) {

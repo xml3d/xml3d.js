@@ -1,13 +1,16 @@
 (function (webgl) {
 
     /**
-     * @contructor
+     * @constructor
      */
     var BaseRenderPass = function(pipeline, output, opt) {
         opt = opt || {};
         this.inputs = opt.inputs || {};
         this.output = output;
         this.pipeline = pipeline;
+
+        var gl = pipeline.context.gl;
+        this.clearBits = gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT;
     };
 
     XML3D.extend(BaseRenderPass.prototype, {

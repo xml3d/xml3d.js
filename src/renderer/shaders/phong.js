@@ -11,6 +11,11 @@ XML3D.shaders.register("phong", {
         "varying vec3 fragEyeVector;",
         "varying vec2 fragTexCoord;",
         "varying vec3 fragVertexColor;",
+        "#if MAX_SPOTLIGHTS > 0 && HAS_SPOTLIGHT_SHADOWMAPS",
+        "varying vec4 spotLightShadowMapCoord[ MAX_SPOTLIGHTS ];",
+        "uniform mat4 spotLightMatrix[ MAX_SPOTLIGHTS ];",
+        "#endif",
+
 
         "uniform mat4 modelViewProjectionMatrix;",
         "uniform mat4 modelViewMatrix;",
@@ -27,6 +32,11 @@ XML3D.shaders.register("phong", {
         "    fragEyeVector = normalize(fragVertexPosition);",
         "    fragTexCoord = texcoord;",
         "    fragVertexColor = color;",
+        "#if MAX_SPOTLIGHTS > 0 && HAS_SPOTLIGHT_SHADOWMAPS",
+        "    for(int i = 0; i < MAX_SPOTLIGHTS; i++) {",
+        "      spotLightShadowMapCoord[i] = spotLightMatrix[i] * vec4(position, 1.0);",
+        "    }",
+        "#endif",
         "}"
     ].join("\n"),
 
@@ -78,6 +88,11 @@ XML3D.shaders.register("phong", {
         "uniform float spotLightCosFalloffAngle[MAX_SPOTLIGHTS];",
         "uniform float spotLightCosSoftFalloffAngle[MAX_SPOTLIGHTS];",
         "uniform float spotLightSoftness[MAX_SPOTLIGHTS];",
+        "uniform bool spotLightCastShadow[MAX_SPOTLIGHTS];",
+            "#if HAS_SPOTLIGHT_SHADOWMAPS",
+            "uniform sampler2D spotLightShadowMap[MAX_SPOTLIGHTS];",
+            "varying vec4 spotLightShadowMapCoord[MAX_SPOTLIGHTS];",
+            "#endif",
         "#endif",
 
         "void main(void) {",
@@ -147,8 +162,9 @@ XML3D.shaders.register("phong", {
         "    float angle = dot(L, D);",
         "    if(angle > spotLightCosFalloffAngle[i]) {",
         "       float softness = 1.0;",
-        "       if (angle < spotLightCosSoftFalloffAngle[i])",
-        "           softness = (angle - spotLightCosFalloffAngle[i]) /  (spotLightCosSoftFalloffAngle[i] -  spotLightCosFalloffAngle[i]);",
+        "       //if (angle < spotLightCosSoftFalloffAngle[i])",
+        "       //    softness = (angle - spotLightCosFalloffAngle[i]) /  (spotLightCosSoftFalloffAngle[i] -  spotLightCosFalloffAngle[i]);",
+        "       if (spotLightCastShadow[i])",
         "       color += atten*softness*(Idiff + Ispec);",
         "    }",
         "  }",
@@ -165,6 +181,7 @@ XML3D.shaders.register("phong", {
         directives.push("MAX_POINTLIGHTS " + pointLights);
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
         directives.push("MAX_SPOTLIGHTS " + spotLights);
+        directives.push("HAS_SPOTLIGHT_SHADOWMAPS " + (!lights.spot.every(function(light) { return !light.castShadow; }) | 0));
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
         directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));

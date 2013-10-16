@@ -38,7 +38,7 @@
         this.maxIndex = 0;
         this.isIndexed = false;
         this.vertexCount = null;
-        this.minAttributeCount = 10000000;
+        this.minAttributeCount = -1;
         this.context.getStatistics().meshes++;
     };
 
@@ -50,8 +50,10 @@
 
         checkBufferCompatible: function(name, xflowDataBuffer){
             var cnt = xflowDataBuffer.getIterateCount();
+            this.minAttributeCount = (this.minAttributeCount == -1 ? cnt : Math.min(this.minAttributeCount, cnt));
+
             if(this.isIndexed){
-                if(cnt <= this.maxIndex){
+                if(cnt <= this.maxIndex){minAttributeCount
                     throw new Error("Index range of [" + this.minIndex + ", " + this.maxIndex + "] " +
                         " goes beyond element count " + cnt + " of attribute '" + name + "'");
                 }
@@ -61,9 +63,9 @@
                     throw new Error("VertexCount " + this.vertexCount +
                         " is larger than element count " + cnt + " of attribute '" + name + "'");
             }
-            else{
-                this.minAttributeCount = Math.min(this.minAttributeCount, cnt);
-            }
+        },
+        removeBuffer: function(name, buffer){
+            delete this.buffers[name];
         },
 
         setBuffer: function (name, buffer) {
@@ -75,7 +77,7 @@
             this.uniformOverride = {};
             this.minIndex = this.maxIndex = 0;
             this.isIndexed = false;
-            this.minAttributeCount = 10000000;
+            this.minAttributeCount = -1;
         },
         setUniformOverride: function (name, value) {
             if(value === undefined)
@@ -85,6 +87,10 @@
         setVertexCount: function (vertexCount) {
             this.vertexCount = vertexCount;
         },
+        isReadyToRender: function(){
+            return this.minAttributeCount > 0;
+        },
+
         /**
          * @returns {number}
          */

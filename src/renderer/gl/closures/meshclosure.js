@@ -255,6 +255,10 @@
 
             this.shaderComposer.distributeObjectShaderData(this.objectShaderRequest,
                 this.bindedHandleBuffer, this.bindedHandleUniform);
+
+            if(!this.mesh.isReadyToRender()){
+                throw new Error("Mesh has empty vertex attributes.");
+            }
         },
 
         updateTypeData: function () {
@@ -281,6 +285,11 @@
         handleBuffer: function (name, xflowDataEntry, isIndex) {
             isIndex = isIndex || false;
             var mesh = this.mesh;
+
+            if(!xflowDataEntry){
+                this.mesh.removeBuffer(name);
+                return;
+            }
 
             if(xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE){
                 XML3D.debug.logError("Texture as mesh parameter is not yet supported");
@@ -365,7 +374,7 @@
          * @param {Xflow.RESULT_STATE} state
          */
         shaderInputDataChanged: function (request, state) {
-            this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
+            this.changeState |= state != Xflow.RESULT_STATE.CHANGED_DATA_VALUE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
             this.context.requestRedraw("Mesh Attribute Data Changed");
             XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
         },

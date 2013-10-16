@@ -504,7 +504,9 @@ DataNode.prototype.notify = function(changeType, senderNode){
         if(changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
            changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END )
             updateImageLoading(this);
-        senderNode && this._channelNode.notifyDataChange(senderNode, changeType);
+        if(senderNode){
+            this._channelNode.notifyDataChange(senderNode, changeType);
+        }
     }
     for(var i = 0; i < this._listeners.length; ++i)
         this._listeners[i](changeType);

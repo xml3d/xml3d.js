@@ -25,7 +25,7 @@
 
     Xflow.DataSlot.prototype.setDataEntry = function(dataEntry, changeType){
         this.dataEntry = dataEntry;
-        var state = changeType !== Xflow.RESULT_STATE.CHANGED_DATA_VALUE ? Xflow.DATA_ENTRY_STATE.CHANGED_VALUE :
+        var state = changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ? Xflow.DATA_ENTRY_STATE.CHANGED_VALUE :
             Xflow.DATA_ENTRY_STATE.CHANGED_SIZE;
         this.notifyOnChange(state);
     }

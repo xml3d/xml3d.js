@@ -17,7 +17,8 @@ XML3D.webgl.DataChangeListener = function(renderer) {
 XML3D.webgl.DataChangeListener.prototype.dataEntryChanged = function(entry, notification) {
     if(entry.userData.webglData){
         for(var i in entry.userData.webglData){
-            entry.userData.webglData[i].changed = notification;
+            var oldChanged = entry.userData.webglData[i].changed;
+            entry.userData.webglData[i].changed = Math.max(oldChanged, notification);
         }
     }
 

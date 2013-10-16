@@ -136,10 +136,10 @@ var Xflow = {};
      * @enum {number}
      */
     Xflow.DATA_ENTRY_STATE = {
-        CHANGED_NEW: 1,
-        LOAD_START: 2,
-        LOAD_END: 3,
-        CHANGED_VALUE: 4,
+        CHANGED_VALUE: 1,
+        CHANGED_NEW: 2,
+        LOAD_START: 3,
+        LOAD_END: 4,
         CHANGED_SIZE: 5,
         CHANGED_REMOVED: 6
     };

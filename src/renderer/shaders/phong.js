@@ -17,8 +17,9 @@ XML3D.shaders.register("phong", {
         "#endif",
 
 
-        "uniform mat4 modelViewProjectionMatrix;",
+        "uniform mat4 modelMatrix;",
         "uniform mat4 modelViewMatrix;",
+        "uniform mat4 modelViewProjectionMatrix;",
         "uniform mat3 normalMatrix;",
         "uniform vec3 eyePosition;",
 
@@ -33,8 +34,9 @@ XML3D.shaders.register("phong", {
         "    fragTexCoord = texcoord;",
         "    fragVertexColor = color;",
         "#if MAX_SPOTLIGHTS > 0 && HAS_SPOTLIGHT_SHADOWMAPS",
+        "    vec4 worldPosition = modelMatrix * vec4(position, 1.0);",
         "    for(int i = 0; i < MAX_SPOTLIGHTS; i++) {",
-        "      spotLightShadowMapCoord[i] = spotLightMatrix[i] * vec4(position, 1.0);",
+        "      spotLightShadowMapCoord[i] = spotLightMatrix[i] * worldPosition;",
         "    }",
         "#endif",
         "}"
@@ -91,7 +93,14 @@ XML3D.shaders.register("phong", {
         "uniform bool spotLightCastShadow[MAX_SPOTLIGHTS];",
             "#if HAS_SPOTLIGHT_SHADOWMAPS",
             "uniform sampler2D spotLightShadowMap[MAX_SPOTLIGHTS];",
+            "uniform float spotLightShadowBias[MAX_SPOTLIGHTS];",
             "varying vec4 spotLightShadowMapCoord[MAX_SPOTLIGHTS];",
+
+            "float unpackDepth( const in vec4 rgba_depth ) {",
+            "  const vec4 bit_shift = vec4( 1.0 / ( 256.0 * 256.0 * 256.0 ), 1.0 / ( 256.0 * 256.0 ), 1.0 / 256.0, 1.0 );",
+            "  float depth = dot( rgba_depth, bit_shift );",
+            "  return depth;",
+            "} ",
             "#endif",
         "#endif",
 
@@ -117,7 +126,7 @@ XML3D.shaders.register("phong", {
         "  #endif",
 
         "#if MAX_POINTLIGHTS > 0",
-        "  for (int i=0; i<MAX_POINTLIGHTS; i++) {",
+        "  for (int i = 0; i < MAX_POINTLIGHTS; i++) {",
         "    if(!pointLightOn[i])",
         "      continue;",
         "    vec4 lPosition = viewMatrix * vec4( pointLightPosition[ i ], 1.0 );",
@@ -147,8 +156,15 @@ XML3D.shaders.register("phong", {
 
         "#if MAX_SPOTLIGHTS > 0",
         "  for (int i=0; i<MAX_SPOTLIGHTS; i++) {",
-        "    if(!spotLightOn[i])",
-        "      continue;",
+        "    if(spotLightOn[i]) {",
+        "  #if HAS_SPOTLIGHT_SHADOWMAPS",
+        "         vec3 shadowCoord = spotLightShadowMapCoord[i].xyz / spotLightShadowMapCoord[i].w;",
+        "         bvec4 inFrustumVec = bvec4 ( shadowCoord.x >= 0.0, shadowCoord.x <= 1.0, shadowCoord.y >= 0.0, shadowCoord.y <= 1.0 );",
+        "         bool inFrustum = all( inFrustumVec );",
+        "         if(inFrustum && (shadowCoord.z <= 1.0)) {",
+        "           float depth = unpackDepth(texture2D(spotLightShadowMap[i], shadowCoord.xy));",
+        "           if (shadowCoord.z-depth <= spotLightShadowBias[i]) {",
+        "  #endif",
         "    vec4 lPosition = viewMatrix * vec4( spotLightPosition[ i ], 1.0 );",
         "    vec3 L = lPosition.xyz - fragVertexPosition;",
         "    float dist = length(L);",
@@ -164,10 +180,13 @@ XML3D.shaders.register("phong", {
         "       float softness = 1.0;",
         "       //if (angle < spotLightCosSoftFalloffAngle[i])",
         "       //    softness = (angle - spotLightCosFalloffAngle[i]) /  (spotLightCosSoftFalloffAngle[i] -  spotLightCosFalloffAngle[i]);",
-        "       if (spotLightCastShadow[i])",
         "       color += atten*softness*(Idiff + Ispec);",
         "    }",
-        "  }",
+        "  #if HAS_SPOTLIGHT_SHADOWMAPS",
+        "   }}",
+        "  #endif",
+        "    } ", // spotlight on
+        "  }", // light loop
         "#endif",
 
         "  gl_FragColor = vec4(color, alpha);",
@@ -202,7 +221,8 @@ XML3D.shaders.register("phong", {
     samplers: {
         diffuseTexture : null,
         emissiveTexture : null,
-        specularTexture : null
+        specularTexture : null,
+        spotLightShadowMap : null
     },
 
     attributes: {

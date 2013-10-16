@@ -10,18 +10,20 @@
     /** @const */
     var LIGHT_DEFAULT_ATTENUATION = XML3D.math.vec3.fromValues(0,0,1);
     /** @const */
+    var LIGHT_DEFAULT_SHADOW_BIAS = 0.001;
+    /** @const */
     var SPOTLIGHT_DEFAULT_FALLOFFANGLE = Math.PI / 4.0;
     /** @const */
     var SPOTLIGHT_DEFAULT_SOFTNESS = 0.0;
 
     /** @const */
-    var LIGHT_PARAMETERS = ["intensity", "attenuation", "softness", "falloffAngle", "direction", "position", "castShadow"];
+    var LIGHT_PARAMETERS = ["intensity", "attenuation", "softness", "falloffAngle", "direction", "position", "castShadow", "shadowBias"];
 
     var SHADOWMAP_OFFSET_MATRIX = new Float32Array([
-        0.5, 0.0, 0.0, 0.5,
-        0.0, 0.5, 0.0, 0.5,
-        0.0, 0.0, 0.5, 0.5,
-        0.0, 0.0, 0.0, 1.0
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.0,
+        0.5, 0.5, 0.5, 1.0
     ]);
 
 
@@ -50,6 +52,7 @@
         this.direction   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
         this.attenuation = XML3D.math.vec3.clone(LIGHT_DEFAULT_ATTENUATION);
         this.castShadow = false;
+        this.fallOffAngle = SPOTLIGHT_DEFAULT_FALLOFFANGLE;
 
         if (this.light.data) {
             // Bounding Box annotated
@@ -70,7 +73,7 @@
 
         getFrustum: function(aspect) {
             //console.log("Light Frustum: ", 1, 1000, this.fallOffAngle, aspect);
-            return  new XML3D.webgl.Frustum(1, 1000, 0, this.fallOffAngle, aspect);
+            return  new XML3D.webgl.Frustum(1, 11, 0, this.fallOffAngle*2, aspect);
         },
 
         addLightToScene : function() {
@@ -132,17 +135,6 @@
             if (target["on"]) {
                 target["on"][offset] = this.visible;
             }
-            if (target["castShadow"]) {
-                target["castShadow"][offset] = this.castShadow;
-                if(this.castShadow && target["lightMatrix"]) {
-                    var tmp = XML3D.math.mat4.create();
-                    this.getShadowMapLightMatrix(tmp);
-                    var off16 = offset*16;
-                    for(var i = 0; i < 16; i++) {
-                        target["lightMatrix"][off16+i] = tmp[i];
-                    }
-                }
-            }
             var result;
             var data;
             if (target["softness"]) {
@@ -163,19 +155,45 @@
                     this.fallOffAngle = fallOffAngle;
                 }
             }
+            if (target["castShadow"]) {
+                target["castShadow"][offset] = this.castShadow;
+                if(this.castShadow) {
+                    if(target["shadowBias"]) {
+                        result = this.lightParameterRequest.getResult();
+                        data = result.getOutputData("shadowBias");
+                        target["shadowBias"][offset] = data ? data.getValue()[0] : LIGHT_DEFAULT_SHADOW_BIAS;
+                    }
+                    if(target["lightMatrix"]) {
+                        var tmp = XML3D.math.mat4.create();
+                        this.getShadowMapLightMatrix(tmp);
+                        var off16 = offset*16;
+                        for(var i = 0; i < 16; i++) {
+                            target["lightMatrix"][off16+i] = tmp[i];
+                        }
+                    }
+                }
+            }
         },
 
         setTransformDirty: function() {
             this.updateWorldMatrix();
         },
 
-        getShadowMapLightMatrix: function(mat4) {
-            this.getWorldMatrix(mat4);
-            XML3D.math.mat4.invert(mat4, mat4);
-            var projMatrix = XML3D.math.mat4.create();
-            this.getFrustum().getProjectionMatrix(projMatrix, 1);
-            XML3D.math.mat4.multiply(mat4, projMatrix, mat4);
-            XML3D.math.mat4.multiply(mat4, SHADOWMAP_OFFSET_MATRIX, mat4);
+        getShadowMapLightMatrix: function(target) {
+            var L = XML3D.math.mat4.create();
+            this.getWorldToLightMatrix(L);
+            console.log("W2L", XML3D.math.mat4.str(L));
+
+            var lightProjectionMatrix = XML3D.math.mat4.create();
+            this.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
+
+            var tmp = XML3D.math.mat4.create();
+
+            // offsetMatrix * lightProjectionMatrix
+            XML3D.math.mat4.multiply(tmp, SHADOWMAP_OFFSET_MATRIX, lightProjectionMatrix);
+            // offsetMatrix * lightProjectionMatrix * lightModelViewMatrix
+            XML3D.math.mat4.multiply(target, tmp, L);
+            console.log("SMM", XML3D.math.mat4.str(target));
         },
 
         updateWorldMatrix: (function() {
@@ -189,11 +207,9 @@
             }
         })(),
 
-        getWorldToLightMatrix: function(mat4) {
-            return function() {
-                this.getWorldMatrix(mat4);
-                XML3D.math.mat4.invert(mat4, mat4);
-            }
+        getWorldToLightMatrix: function (mat4) {
+            this.getWorldMatrix(mat4);
+            XML3D.math.mat4.invert(mat4, mat4);
         },
 
         updateLightTransformData: function(transform) {

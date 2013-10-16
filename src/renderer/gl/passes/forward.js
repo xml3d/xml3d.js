@@ -17,7 +17,7 @@
              */
             var c_worldToViewMatrix = XML3D.math.mat4.create();
             var c_projectionMatrix = XML3D.math.mat4.create();
-            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition"];
+            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition", "spotLightShadowMap"];
 
             return function (scene) {
                 var gl = this.pipeline.context.gl,
@@ -43,6 +43,16 @@
                 systemUniforms["projectionMatrix"] = c_projectionMatrix;
                 systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
                 systemUniforms["screenWidth"] = width;
+
+                var shadowMapTarget = this.pipeline.getRenderTarget("lightFramebuffer");
+                if(shadowMapTarget) {
+                    console.log("Found shadow map");
+                    systemUniforms["spotLightShadowMap"] = shadowMapTarget.colorTarget.handle;
+                }
+
+
+                //systemUniforms["spotLightShadowMap"] = this.pipeline.getRenderTarget(this.inputs.sInTexture).colorTarget;
+
 
                 //Render opaque objects
                 for (var program in sorted.opaque) {

@@ -43,7 +43,7 @@
     GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn",
          "directionalLightDirection", "directionalLightIntensity", "directionalLightOn",
          "spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection",
-         "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle"];
+         "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias"];
 
 
     XML3D.extend(GLScene.prototype, {
@@ -116,7 +116,7 @@
             parameters["directionalLightIntensity"] = directionalLightData.intensity;
             parameters["directionalLightOn"] = directionalLightData.on;
 
-            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [], castShadow: [], lightMatrix: [] };
+            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [], castShadow: [], lightMatrix: [], shadowBias: [] };
             lights.spot.forEach(function (light, index) {
                 light.getLightData(spotLightData, index);
             });
@@ -129,6 +129,7 @@
             parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
             parameters["spotLightCastShadow"] = spotLightData.castShadow;
             parameters["spotLightMatrix"] = spotLightData.lightMatrix;
+            parameters["spotLightShadowBias"] = spotLightData.shadowBias;
 
             var softFalloffAngle = spotLightData.softness.slice();
             for (var i = 0; i < softFalloffAngle.length; i++)

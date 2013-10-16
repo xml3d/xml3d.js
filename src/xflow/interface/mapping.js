@@ -24,6 +24,17 @@ Mapping.parse = function(string, dataNode){
     return null;
 }
 
+Xflow.Mapping.prototype._addOwner = function(owner){
+    var idx = this._owners.indexOf(owner);
+    if(idx == -1)
+        this._owners.push(owner);
+}
+
+Xflow.Mapping.prototype._removeOwner = function(owner){
+    var idx = this._owners.indexOf(owner);
+    if(idx != -1)
+        this._owners.splice(idx, -1);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.OrderMapping
@@ -274,8 +285,8 @@ NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
 
 
 function mappingNotifyOwner(mapping){
-    if(mapping._owner)
-        mapping._owner.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    for(var i = 0; i < mapping._owners.length; ++i)
+        mapping._owners[i].notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 };
 

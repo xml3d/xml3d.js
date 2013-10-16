@@ -9,7 +9,7 @@
             <float param="true" name="B" >0.2</float>
         </proto>
         
-        <proto id="template2" proto="#template1">
+        <proto id="template2" compute="dataflow['#template1']">
             <float name="A" >1.1</float>
             <float name="B" >1.2</float>
             <data filter="rename({C: B, D: A})" >
@@ -18,7 +18,7 @@
             </data>
         </proto>
        
-         <data id="data1" proto="#template2" >        
+         <data id="data1" compute="dataflow['#template2']" >
             <float name="A" >2.1</float>  
             <float name="B" >2.2</float>
          </data>

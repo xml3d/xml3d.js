@@ -83,7 +83,7 @@ function synchronizeInputChannels(processNode, channelNode, dataNode){
     var operator = processNode.operator, inputMapping = dataNode._computeInputMapping;
     for(var i = 0; i < operator.params.length; ++i){
         var sourceName = operator.params[i].source;
-        var dataName = inputMapping.getScriptInputName(i, sourceName);
+        var dataName = inputMapping ? inputMapping.getScriptInputName(i, sourceName) : sourceName;
         if(dataName){
             var channel = channelNode.inputChannels.getChannel(dataName);
             if(channel) channel.addListener(processNode);
@@ -108,7 +108,7 @@ function checkInput(processNode, operator, inputMapping, inputChannels){
     var dataNode = processNode.owner.owner;
     for(var i in operator.params){
         var entry = operator.params[i];
-        var dataName = inputMapping.getScriptInputName(i, entry.source);
+        var dataName = inputMapping ? inputMapping.getScriptInputName(i, entry.source) : entry.source;
         if(!entry.optional && !dataName){
             Xflow.notifyError("Xflow: operator " + operator.name + ": Missing input argument for "
                 + entry.source, dataNode);

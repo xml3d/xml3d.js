@@ -10,7 +10,7 @@
 
     </Input>
     <TestProcess>
-        <!--
+
         <Check title="First Check" data="#data1" >
             <MatchInput name="index" input="#index_1" />
             <MatchInput name="valueAdd" input="#positionAdd_1" />
@@ -24,7 +24,7 @@
         <Check title="Second Check" data="#data1" >
             <MatchData name="result" type="float3" >0 0 1  1 0 -1  1 1 1  0 1 -1</MatchData>
         </Check>
-        -->
+
 
         <Modification title="Change morphing weight again" >
             <ChangeData input="#weight_1" >-0.5</ChangeData>

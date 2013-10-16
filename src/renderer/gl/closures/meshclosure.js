@@ -286,6 +286,10 @@
             isIndex = isIndex || false;
             var mesh = this.mesh;
 
+            if(name == "position" && !xflowDataEntry){
+                throw new Error("'position' attribute of mesh is empty.");
+            }
+
             if(!xflowDataEntry){
                 this.mesh.removeBuffer(name);
                 return;

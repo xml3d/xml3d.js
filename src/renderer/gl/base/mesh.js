@@ -53,7 +53,7 @@
             this.minAttributeCount = (this.minAttributeCount == -1 ? cnt : Math.min(this.minAttributeCount, cnt));
 
             if(this.isIndexed){
-                if(cnt <= this.maxIndex){minAttributeCount
+                if(cnt <= this.maxIndex){
                     throw new Error("Index range of [" + this.minIndex + ", " + this.maxIndex + "] " +
                         " goes beyond element count " + cnt + " of attribute '" + name + "'");
                 }

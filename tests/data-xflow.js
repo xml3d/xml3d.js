@@ -257,7 +257,7 @@ module("Xflow tests", {
 
         var actualData = adapterOutputs.getOutputData(property);
         if (!actualData) {
-            ok(false,  title + " => " + "Property "+property+" does exist");
+            ok(false,  title + "=> " + shouldMatchName+" in "+have.id+" matches reference data");
             return;
         }
 
@@ -283,7 +283,7 @@ module("Xflow tests", {
 
         var actualData = adapterOutputs.getOutputData(property);
         if (!actualData) {
-            ok(false, "Property "+property+" does not exist");
+            ok(false, title + " => " + property+" in "+have.id+" matches expected data");
             return;
         }
         var shouldMatch = this.formatData(action.textContent, action.getAttribute("type"));
@@ -597,5 +597,12 @@ test("GLSL with Uniforms", function() {
 test("GLSL with Processing on Uniforms", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_uniform_processing.xml", handler);
+    this.executeTests(response);
+});
+
+
+test("Errors with empty arguments", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/error/test_empty_argument.xml", handler);
     this.executeTests(response);
 });

@@ -152,7 +152,7 @@ BufferEntry.prototype.getIterateCount = function(){
 };
 
 BufferEntry.prototype.isEmpty = function(){
-    return !this._value;
+    return !this._value || !this.getLength();
 };
 
 

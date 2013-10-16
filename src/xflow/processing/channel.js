@@ -72,6 +72,7 @@
     }
 
     ChannelMap.prototype.addChannel = function(name, channel){
+        if(!channel) return;
         var finalChannel = mergeChannelIntoChannel(this, this.map[name], channel);
         this.map[name] = finalChannel;
     }

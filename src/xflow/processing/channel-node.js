@@ -109,7 +109,7 @@
             origin: 0,
             originalName: ""
         }
-        var preFilterName = this.owner._filterMapping.getRenameSrcName(name);
+        var preFilterName = this.owner._filterMapping ? this.owner._filterMapping.getRenameSrcName(name) : name;
         var dataEntry = channel.getDataEntry();
         if(this.dataflowChannelNode){
             var protoInputChannel = this.inputChannels.getChannel(preFilterName);
@@ -196,12 +196,12 @@
 
         var oldDataflowChannelNode = channelNode.dataflowChannelNode;
 
-        if( owner._computeUsesDataflow){
+        if( owner._computeUsesDataflow && owner._dataflowNode){
             channelNode.operator = null;
             updateDataflowChannelNode(channelNode);
             updateComputedChannelsFromDataflow(channelNode);
         }
-        else if(owner._computeOperator){
+        else if(!owner._computeUsesDataflow && owner._computeOperator){
             channelNode.dataflowChannelNode = null;
             updateOperator(channelNode);
             updateComputedChannelsFromOperator(channelNode);
@@ -269,8 +269,11 @@
 
     function updateOutputChannels(channelNode){
         var dataNode = channelNode.owner;
-        dataNode._filterMapping.applyFilterOnChannelMap(channelNode.outputChannels, channelNode.computedChannels,
-            dataNode._filterType, setChannelFilterCallback);
+        if(dataNode._filterMapping)
+            dataNode._filterMapping.applyFilterOnChannelMap(channelNode.outputChannels, channelNode.computedChannels,
+                dataNode._filterType, setChannelFilterCallback);
+        else
+            channelNode.outputChannels.merge(channelNode.computedChannels);
     }
 
     function setChannelFilterCallback(destMap, destName, srcMap, srcName){
@@ -298,11 +301,13 @@
         var key = "";
         var globalParamNames = subDataflowNode._getGlobalParamNames();
         for(var i = 0; i < globalParamNames.length; ++i){
-            key+= this.map[globalParamNames[i]].id + "!";
+            var channel = this.map[globalParamNames[i]];
+            key+= (channel && channel.id || "-") + "!";
         }
         var paramNames = subDataflowNode._getParamNames();
         for(var i = 0; i < paramNames.length; ++i){
-            key+= this.map[paramNames[i]].id + ".";
+            var channel = this.map[paramNames[i]];
+            key+= (channel && channel.id || "-") + ".";
         }
         return key;
     }

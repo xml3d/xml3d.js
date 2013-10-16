@@ -214,7 +214,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._userData = null;
 
     this._filterType = 0;
-    this._filterMapping = new Xflow.OrderMapping(this);
+    this._filterMapping = null;
 
     this._computeOperator = "";
     this._computeUsesDataflow = false;
@@ -239,8 +239,8 @@ var DataNode = Xflow.DataNode;
  * @abstract
  * @param {Xflow.DataNode} owner
  */
-Xflow.Mapping = function(owner){
-    this._owner = owner;
+Xflow.Mapping = function(){
+    this._owners = [];
 };
 
 
@@ -253,8 +253,8 @@ Xflow.Mapping = function(owner){
  * @extends {Xflow.Mapping}
  * @param {Xflow.DataNode} owner
  */
-Xflow.OrderMapping = function(owner){
-    Xflow.Mapping.call(this, owner);
+Xflow.OrderMapping = function(){
+    Xflow.Mapping.call(this);
     this._names = [];
 };
 Xflow.createClass(Xflow.OrderMapping, Xflow.Mapping);
@@ -268,8 +268,8 @@ Xflow.createClass(Xflow.OrderMapping, Xflow.Mapping);
  * @extends {Xflow.Mapping}
  * @param {Xflow.DataNode} owner
  */
-Xflow.NameMapping = function(owner){
-    Xflow.Mapping.call(this, owner);
+Xflow.NameMapping = function(){
+    Xflow.Mapping.call(this);
     this._destNames = [];
     this._srcNames = [];
 
@@ -359,7 +359,10 @@ Object.defineProperty(DataNode.prototype, "filterType", {
 
 Object.defineProperty(DataNode.prototype, "filterMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw new Error("filterMapping is readonly!");
+    set: function(v){
+        swapMapping(this, "_filterMapping", v);
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._filterMapping; }
@@ -369,22 +372,42 @@ Object.defineProperty(DataNode.prototype, "computeOperator", {
     /** @param {string} v */
     set: function(v){
         this._computeOperator = v;
+        this._computeUsesDataflow = false;
         this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         Xflow._callListedCallback();
     },
     /** @return {string} */
-    get: function(){ return this._computeOperator; }
+    get: function(){ return this._computeUsesDataflow ? null : this._computeOperator; }
 });
+
+Object.defineProperty(DataNode.prototype, "computeDataflowUrl", {
+    /** @param {string} v */
+    set: function(v){
+        this._computeOperator = v;
+        this._computeUsesDataflow = true;
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
+    },
+    /** @return {string} */
+    get: function(){ return this._computeUsesDataflow ? this._computeOperator : null; }
+});
+
 Object.defineProperty(DataNode.prototype, "computeInputMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw new Error("computeInputMapping is readonly!");
+    set: function(v){
+        swapMapping(this, "_computeInputMapping", v);
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._computeInputMapping; }
 });
 Object.defineProperty(DataNode.prototype, "computeOutputMapping", {
     /** @param {Xflow.Mapping} v */
-    set: function(v){ throw new Error("computeOutputMapping is readonly!");
+    set: function(v){
+        swapMapping(this, "_computeOutputMapping", v);
+        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        Xflow._callListedCallback();
     },
     /** @return {Xflow.Mapping} */
     get: function(){ return this._computeOutputMapping; }
@@ -491,17 +514,18 @@ DataNode.prototype.setFilter = function(filterString){
         }
     }
     if(!newMapping){
-        newMapping = new Xflow.OrderMapping(this);
+        // TODO Remove this? (Mapping can be null from now on)
+        newMapping = new Xflow.OrderMapping();
     }
-    removeMappingOwner(this._filterMapping);
-    this._filterMapping = newMapping;
+    swapMapping(this, "_filterMapping", newMapping);
     this._filterType = newType;
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 };
 
-var computeParser = /^(([^=]+)\=)?([^(]+)\(([^()]*)\)$/;
+var computeParser = /^(([^=]+)\=)?([^'(]+('[^']+')?[^'(]+)(\(([^()]*)?\))?$/;
 var bracketsParser = /^\(([^()]*)\)$/;
+var dataflowParser = /^dataflow\['([^']+)'\]$/;
 
 /**
  * Set compute by string
@@ -515,22 +539,29 @@ DataNode.prototype.setCompute = function(computeString){
     if(result){
         var output = result[2] ? result[2].trim() : "";
         newOperator = result[3].trim();
-        var input = result[4] ? result[4].trim() : "";
+        var input = result[6] ? result[6].trim() : "";
         if(result = output.match(bracketsParser)){
             output = result[1];
         }
-        inputMapping = Xflow.Mapping.parse(input, this);
-        outputMapping = Xflow.Mapping.parse(output, this);
+        if(input)
+            inputMapping = Xflow.Mapping.parse(input, this);
+        if(output)
+            outputMapping = Xflow.Mapping.parse(output, this);
+
+        if(result = newOperator.match(dataflowParser)){
+            this._computeUsesDataflow = true;
+            newOperator = result[1];
+        }
+        else{
+            this._computeUsesDataflow = false;
+        }
         this._dataflowNode = null;
-        this._computeUsesDataflow = false;
     }
     else if(computeString){
         Xflow.notifyError("Error parsing Compute value '" + computeString + "'", this);
     }
-    removeMappingOwner(this._computeInputMapping);
-    removeMappingOwner(this._computeOutputMapping);
-    this._computeInputMapping = inputMapping;
-    this._computeOutputMapping = outputMapping;
+    swapMapping(this, "_computeInputMapping", inputMapping);
+    swapMapping(this, "_computeOutputMapping", outputMapping);
     this._computeOperator = newOperator;
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
@@ -655,7 +686,7 @@ function clearSubstitutionNodes(dataNode){
 
 
 function getForwardNode(dataNode){
-    if(!dataNode._filterMapping.isEmpty()  || dataNode._computeOperator || dataNode._dataflowNode)
+    if( (dataNode._filterMapping && !dataNode._filterMapping.isEmpty())  || dataNode._computeOperator || dataNode._dataflowNode)
         return dataNode;
     if(dataNode._sourceNode && dataNode._children.length == 0)
         return getForwardNode(dataNode._sourceNode);
@@ -742,15 +773,11 @@ function notifyParentsOnChanged(node, changeType){
     }
 };
 
-/**
- * Remove owner from mapping, small helper function
- * @param {Xflow.Mapping} mapping
- * @private
- */
-function removeMappingOwner(mapping){
-    if(mapping)
-        mapping._owner = null;
-};
+function swapMapping(dataNode, key, mapping){
+    dataNode[key] && dataNode[key]._removeOwner(dataNode);
+    dataNode[key] = mapping;
+    dataNode[key] && dataNode[key]._addOwner(dataNode);
+}
 
 
 })();

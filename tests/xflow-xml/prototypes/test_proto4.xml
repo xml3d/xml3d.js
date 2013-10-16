@@ -26,7 +26,7 @@
 	        </data>
 		</proto>
 		
-		<data id="instance1" proto="#template1" >
+		<data id="instance1" compute="dataflow['#template1']" >
 			<float3 name="position">1 1 1  2 2 2</float3>
 			<float3 name="posAdd1">1 1 1  0 0 0</float3>
 			<float3 name="posAdd2">1 0 0  0 -1 0</float3>
@@ -36,7 +36,7 @@
 			<float name="weight3">0.7</float>
 		</data>
 		
-		<data id="instance2" proto="#template1" >
+		<data id="instance2" compute="dataflow['#template1']" >
 			<float3 name="position">3 3 3  2 2 2</float3>
 			<float3 name="posAdd1">0 0 0  1 1 1</float3>
 			<float3 name="posAdd2">0 0 -1  0 2 0</float3>

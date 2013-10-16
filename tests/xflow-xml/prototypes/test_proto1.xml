@@ -11,7 +11,7 @@
             <float param="true" name="C" id="tB1" >0.3</float>
         </proto>
       
-         <data id="data1" proto="#template1" >        
+         <data id="data1" compute="dataflow['#template1']" >
             <float name="A" >1.1</float>  
             <float name="B" id="B1" >1.2</float>
             <float name="C" id="C1" >1.3</float>

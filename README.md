@@ -41,10 +41,10 @@ be started by running 'Run As->Ant build' from the files context menu.
 
 ### Documentation ###
 We have an overview documentation in each subfolder of the project:
-* [build](build/README.md) - The build system of xml3d.js.
-* [src](src/README.md) - The actual source code of the xml3d.js library
-* [test](test/README.md) - The test suite
-* [tools](tools/README.md) - Several tools that can be used optionally with xml3d.js
+* [build](build/) - The build system of xml3d.js.
+* [src](src/) - The actual source code of the xml3d.js library
+* [test](test/) - The test suite
+* [tools](tools/) - Several tools that can be used optionally with xml3d.js
 
 
 ### Change log ###

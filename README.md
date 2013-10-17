@@ -51,12 +51,12 @@ We have an overview documentation in each subfolder of the project:
 
 4.2 - 14.09.2012
 * Hardware accelerated object picking expanded to 16,7 mio objects
-* Emissive texture map support in diffuse and phong shader � [demo](http://xml3d.github.com/xml3d-examples/examples/candle/candle.xhtml)
-* Specular map support in phong shader � [demo](http://xml3d.github.com/xml3d-museum/)
-* New mechanism for custom shaders � [demo](http://xml3d.github.com/xml3d-examples/examples/eyelight/eyelight.xhtml)
-* Support of directional lights (finally) � [demo](http://xml3d.github.com/xml3d-examples/examples/directionalLight/index.xhtml)
-* Support of external data resources in JSON format � [demo](http://xml3d.github.com/xml3d-examples/examples/suzanne/suzanne.xhtml)
-* New mechanism to register loaders for external formats � [demo](http://xml3d.github.com/xml3d-examples/examples/meshlab/meshlab.xhtml)
+* Emissive texture map support in diffuse and phong shader - [demo](http://xml3d.github.com/xml3d-examples/examples/candle/candle.xhtml)
+* Specular map support in phong shader - [demo](http://xml3d.github.com/xml3d-museum/)
+* New mechanism for custom shaders - [demo](http://xml3d.github.com/xml3d-examples/examples/eyelight/eyelight.xhtml)
+* Support of directional lights (finally) - [demo](http://xml3d.github.com/xml3d-examples/examples/directionalLight/index.xhtml)
+* Support of external data resources in JSON format - [demo](http://xml3d.github.com/xml3d-examples/examples/suzanne/suzanne.xhtml)
+* New mechanism to register loaders for external formats - [demo](http://xml3d.github.com/xml3d-examples/examples/meshlab/meshlab.xhtml)
 
 4.1 - 19.07.2012
 * Initial release on GitHub

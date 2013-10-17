@@ -1,7 +1,12 @@
 (function(){
+/**
+ * Content of this file:
+ * Result classes of an Xflow graph which are received through Requests.
+ */
 
 /**
- * @constructor
+ * Abstract Result structure containing a (processed) result of the Xflow graph.
+ * @abstract
  * @param {Xflow.DataNode} dataNode
  * @param {Array.<string>} filter
  */
@@ -59,6 +64,7 @@ Result.prototype._onListedCallback = function(state){
 
 
 /**
+ * ComputeResult contains a named map of typed values.
  * @constructor
  * @extends {Xflow.Result}
  */
@@ -91,7 +97,8 @@ ComputeResult.prototype.getOutputMap = function() {
 
 
 
-    /**
+/**
+ * VertexShaderResult is used to generate a VertexShader that includes dataflow processing
  * @constructor
  * @extends {Xflow.Result}
  */

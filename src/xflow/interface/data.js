@@ -1,5 +1,12 @@
 (function(){
-
+/**
+ * Content of this file:
+ * All Code for handling data structures connected to Xflow including:
+ *  - Typed value buffers (e.g float3 buffer)
+ *  - Images
+ *
+ * This file also includes the Xflow.DataChangeNotifier used to react to changes on Xflow data structures
+ */
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.SamplerConfig
@@ -7,6 +14,7 @@
 
 
 /**
+ * SamplerConfig is used to define sampler properties of an Xflow.TextureEntry or Xflow.ImageDataTextureEntry
  * @constructor
  */
 Xflow.SamplerConfig = function(){
@@ -58,7 +66,8 @@ var SamplerConfig = Xflow.SamplerConfig;
 
 
 /**
- * @constructor
+ * The abstract base class for all DataEntries connected to an xflow graph.
+ * @abstract
  * @param {Xflow.DATA_TYPE} type Type of DataEntry
  */
 Xflow.DataEntry = function(type){
@@ -100,10 +109,11 @@ DataEntry.prototype._notifyChanged = function(){
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
+ * A typed value buffer basically linking to a typed array.
  * @constructor
  * @extends {Xflow.DataEntry}
  * @param {Xflow.DATA_TYPE} type
- * @param {Object} value
+ * @param {Object} value A typed array
  */
 Xflow.BufferEntry = function(type, value){
     Xflow.DataEntry.call(this, type);
@@ -163,8 +173,8 @@ BufferEntry.prototype.isEmpty = function(){
 var tmpCanvas = null;
 var tmpContext = null;
 
-/** Xflow.toImageData converts ImageData-like objects to real ImageData
- *
+/**
+ * Xflow.toImageData converts ImageData-like objects to real ImageData
  * @param imageData
  * @return {*}
  */
@@ -200,6 +210,8 @@ Xflow.toImageData = function(imageData) {
 // Instead use getWidth and getHeight methods
 
 /**
+ * A data entry for a texture.
+ * Note: each TextureEntry includes a samplerConfig.
  * @constructor
  * @extends {Xflow.DataEntry}
  * @param {Object} image
@@ -289,7 +301,10 @@ TextureEntry.prototype._createImage = function(width, height, formatType, sample
     return this._image;
 };
 
-/** @param {Object} v */
+/**
+ * Change the image of the TextureEntry
+ * @param {Object} v
+ **/
 TextureEntry.prototype.setImage = function(v) {
     this._setImage(v);
     Xflow._callListedCallback();
@@ -421,34 +436,21 @@ TextureEntry.prototype.isEmpty = function(){
     return !this._image
 };
 
-
-    /** @return {number} */
+/** @return {number} */
 TextureEntry.prototype.getIterateCount = function() {
     return 1;
 };
-
-//TextureEntry.prototype.finish = function() {
-//    if (this._imageData && this._context) {
-//        if (this._imageData instanceof ImageData) {
-//            // Do we need to do this always ?
-//            // Better mark canvas dirty !
-//            this._context.putImageData(this._imageData, 0, 0);
-//            this._imageData = null;
-//        } else {
-//            // FIXME What to do here ?
-//        }
-//    }
-//    if (this._canvas) {
-//        this._canvas.complete = true; // for compatibility with img element
-//        this._image = this._canvas;
-//    }
-//};
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.ImageDataTextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
-
+/**
+ * Same as Xflow.TextureEntry, only based on imageData.
+ * This class is used for xflow running inside Web Workers (which don't support HTML images)
+ * @param imageData
+ * @constructor
+ */
 Xflow.ImageDataTextureEntry = function(imageData){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
@@ -563,7 +565,10 @@ ImageDataTextureEntry.prototype.getIterateCount = function() {
 //----------------------------------------------------------------------------------------------------------------------
 
 
-
+/**
+ * Used to listen to modifications of any DataEntry connected to an Xflow graph.
+ * @global
+ */
 Xflow.DataChangeNotifier = {
     _listeners: []
 }

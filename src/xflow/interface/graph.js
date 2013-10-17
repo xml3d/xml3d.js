@@ -1,4 +1,8 @@
 (function(){
+/**
+ * Content of this file:
+ * Classes to construct an Xflow graph.
+ */
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -7,6 +11,7 @@
 
 /**
  * The Xflow graph includes the whole dataflow graph
+ * It is recommended to use one Xflow.Graph per web document.
  * @constructor
  */
 Xflow.Graph = function(){
@@ -56,6 +61,9 @@ var GraphNode = Xflow.GraphNode;
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
+ * An InputNode include an Xflow.DataEntry, a name and other information
+ * This class mirrors XML3D elements such as <float3>, <int> or <texture>
+ *
  * @constructor
  * @param {Xflow.Graph} graph
  * @extends {Xflow.GraphNode}
@@ -144,7 +152,13 @@ Object.defineProperty(InputNode.prototype, "data", {
     get: function(){ return this._data; }
 });
 
-
+/**
+ * Helper class to create a InputNode with a newly created BufferDataEntry.
+ * @param {string} type Type of the DataEntry A string key from Xflow.DATA_TYPE_MAP
+ * @param {string} name Name of the InputNode
+ * @param {number} size Size of the DataEntry in number of typed values, NOT bytes.
+ * @returns {Xflow.InputNode}
+ */
 Xflow.createBufferInputNode = function(type, name, size){
     if (size == 0)
         return null;
@@ -171,6 +185,10 @@ function getXflowNodeId(){
 }
 
 /**
+ * The DataNode is the central structure of an Xflow Graph.
+ * It is used to build a data composition graph as well as a data flow.
+ * It mirror the <data> element of XML3D
+ *
  * @constructor
  * @extends {Xflow.GraphNode}
  */
@@ -204,7 +222,8 @@ var DataNode = Xflow.DataNode;
 
 
 /**
- * @constructor
+ * A mapping used for a filter or a compute properties of a DataNode
+ * @abstract
  * @param {Xflow.DataNode} owner
  */
 Xflow.Mapping = function(owner){
@@ -213,6 +232,10 @@ Xflow.Mapping = function(owner){
 
 
 /**
+ * An OrderMapping used for a filter or compute properties of a DataNode
+ * It describes a mapping of names referring to the order of arguments / output values.
+ * OrderMapping syntax examples in compute:
+ * position = xflow.morph(position, posAdd, weight)
  * @constructor
  * @extends {Xflow.Mapping}
  * @param {Xflow.DataNode} owner
@@ -224,6 +247,10 @@ Xflow.OrderMapping = function(owner){
 Xflow.createClass(Xflow.OrderMapping, Xflow.Mapping);
 
 /**
+ * An NameMapping used for a filter or compute properties of a DataNode
+ * It describes a mapping of names referring to the original names of the arguments / output values.
+ * NameMapping syntax examples in compute:
+ * {position: result} = xflow.morph({value: position, valueAdd: posAdd, weight: weight})
  * @constructor
  * @extends {Xflow.Mapping}
  * @param {Xflow.DataNode} owner

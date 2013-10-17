@@ -1,9 +1,18 @@
 (function(){
+/**
+ * Content of this file:
+ * Classes to request results from an Xflow graph.
+ */
 
 /**
- * @constructor
- * @param {Xflow.DataNode} dataNode
- * @param {Array.<string>} filter
+ * Abstract Request class.
+ * Any Request is created from a DataNode to receive the result of that DataNode.
+ * To allow effective optimiziation, it is recommended to create only one Request per DataNode and receive all
+ * results through that Request.
+ * @abstract
+ * @param {Xflow.DataNode} dataNode The DataNode from which to request results
+ * @param {?Array.<string>} filter A list of names filtering the values to be received (only return values with names inside the filter)
+ * @param {?function} callback A callback function that gets called whenever the result of the Request changes
  */
 var Request = function(dataNode, filter, callback){
     this._dataNode = dataNode;
@@ -65,11 +74,12 @@ Request.prototype._onDataNodeChange = function(notification){
 }
 
 /**
+ * A ComputeRequest is a Request for a ComputeResult, which contains a named map of typed values.
  * @constructor
  * @extends {Xflow.Request}
- * @param {Xflow.DataNode} dataNode
- * @param {Array.<string>} filter
- * @param {function} callback
+ * @param {Xflow.DataNode} dataNode The DataNode from which to request results
+ * @param {?Array.<string>} filter A list of names filtering the values to be received (only return values with names inside the filter)
+ * @param {?function} callback A callback function that gets called whenever the result of the Request changes
  */
 var ComputeRequest = function(dataNode, filter, callback){
     Xflow.Request.call(this, dataNode, filter, callback);
@@ -90,10 +100,13 @@ var c_vsConnectNodeCount = {},
     c_vsConnectNodeCache = {};
 
 /**
+ * A VertexShaderRequest is a Request for a VertexShaderResult, used to generate a vertex shader that includes
+ * dataflow processing
  * @constructor
  * @extends {Xflow.Request}
  * @param {Xflow.DataNode} dataNode
- * @param {Xflow.VSConfig} vsConfig
+ * @param {Xflow.VSConfig} vsConfig Configuraton for the output of the generated vertex shader
+ * @param {?function} callback A callback function that gets called whenever the result of the Request changes
  */
 var VertexShaderRequest = function(dataNode, vsConfig, callback){
 

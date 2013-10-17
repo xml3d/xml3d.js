@@ -6,6 +6,12 @@
 
 var Mapping = Xflow.Mapping;
 
+/**
+ * Parse a Mapping (both Xflow.OrderMapping or Xflow.ComputeMapping) from a syntax string.
+ * @param {string} string The syntax string.
+ * @param {Xflow.DataNode} dataNode DataNode of the Mapping
+ * @returns {?Xflow.Mapping}
+ */
 Mapping.parse = function(string, dataNode){
     string = string.trim()
     var results = string.trim().match(orderMappingParser);

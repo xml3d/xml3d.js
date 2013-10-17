@@ -1,5 +1,7 @@
-External libraries
+Folder: src/contrib/
 ========
+
+Here you find a collection of external libraries used by xml3d.js
 
 #### glMatrix.js ####
 

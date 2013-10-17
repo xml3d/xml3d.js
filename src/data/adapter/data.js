@@ -44,6 +44,48 @@ var IDataAdapter = function() {
 IDataAdapter.prototype.getOutputs = function() {
 };
 
+
+/**
+ *
+ * @extends XML3D.base.NodeAdapter
+ * @implements IDataAdapter
+ * @abtract
+ *
+ * @param factory
+ * @param node
+ */
+XML3D.data.BaseDataAdapter = function(factory, node) {
+    XML3D.base.NodeAdapter.call(this, factory, node);
+    this.xflowDataNode = null;
+};
+XML3D.createClass(XML3D.data.BaseDataAdapter, XML3D.base.NodeAdapter);
+
+
+XML3D.data.BaseDataAdapter.prototype.getXflowNode = function(){
+    return this.xflowDataNode;
+}
+
+XML3D.data.BaseDataAdapter.prototype.getComputeRequest = function(filter, callback){
+    return new Xflow.ComputeRequest(this.xflowDataNode, filter, callback);
+}
+
+XML3D.data.BaseDataAdapter.prototype.getComputeResult = function(filter)
+{
+    var result = this.xflowDataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, filter);
+    return result;
+}
+
+XML3D.data.BaseDataAdapter.prototype.getOutputNames = function()
+{
+    return this.xflowDataNode.getOutputNames();
+}
+
+XML3D.data.BaseDataAdapter.prototype.getOutputChannelInfo = function(name)
+{
+    return this.xflowDataNode.getOutputChannelInfo(name);
+}
+
+
 /**
  * Constructor of XML3D.data.DataAdapter The DataAdapter implements the
  * DataCollector concept and serves as basis of all DataAdapter classes. In
@@ -59,13 +101,10 @@ IDataAdapter.prototype.getOutputs = function() {
  * @param node
  */
 XML3D.data.DataAdapter = function(factory, node) {
-    XML3D.base.NodeAdapter.call(this, factory, node);
-
-    // Node handles for src and proto
-    this.handles = {};
+    XML3D.data.BaseDataAdapter.call(this, factory, node);
     this.xflowDataNode = null;
 };
-XML3D.createClass(XML3D.data.DataAdapter, XML3D.base.NodeAdapter);
+XML3D.createClass(XML3D.data.DataAdapter, XML3D.data.BaseDataAdapter);
 
 XML3D.data.DataAdapter.prototype.init = function() {
     //var xflow = this.resolveScript();
@@ -91,29 +130,6 @@ function recursiveDataAdapterConstruction(adapter){
     }
 }
 
-XML3D.data.DataAdapter.prototype.getXflowNode = function(){
-    return this.xflowDataNode;
-}
-
-XML3D.data.DataAdapter.prototype.getComputeRequest = function(filter, callback){
-    return new Xflow.ComputeRequest(this.xflowDataNode, filter, callback);
-}
-
-XML3D.data.DataAdapter.prototype.getComputeResult = function(filter)
-{
-    var result = this.xflowDataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, filter);
-    return result;
-}
-
-XML3D.data.DataAdapter.prototype.getOutputNames = function()
-{
-    return this.xflowDataNode.getOutputNames();
-}
-
-XML3D.data.DataAdapter.prototype.getOutputChannelInfo = function(name)
-{
-    return this.xflowDataNode.getOutputChannelInfo(name);
-}
 
 /**
  * The notifyChanged() method is called by the XML3D data structure to
@@ -222,5 +238,127 @@ XML3D.data.DataAdapter.prototype.connectedAdapterChanged = function(key, adapter
 XML3D.data.DataAdapter.prototype.toString = function() {
     return "XML3D.data.DataAdapter";
 };
+
+/**
+ * DataAdapter handling a <dataflow> element
+ * @param factory
+ * @param node
+ * @constructor
+ */
+XML3D.data.DataflowDataAdapter = function(factory, node) {
+    XML3D.data.BaseDataAdapter.call(this, factory, node);
+    this.xflowDataNode = null;
+};
+XML3D.createClass(XML3D.data.DataflowDataAdapter, XML3D.data.BaseDataAdapter);
+
+XML3D.data.DataflowDataAdapter.prototype.init = function() {
+    this.xflowDataNode = XML3D.data.xflowGraph.createDataNode();
+    updateDataflowXflowNode(this, this.node);
+};
+
+/**
+ * @param evt notification of type XML3D.Notification
+ */
+XML3D.data.DataflowDataAdapter.prototype.notifyChanged = function(evt) {
+    switch(evt.type){
+        case XML3D.events.NODE_INSERTED:
+        case XML3D.events.NODE_REMOVED:
+            updateDataflowXflowNode(this);
+            break;
+        case XML3D.events.VALUE_MODIFIED:
+            var attr = evt.wrapped.attrName;
+            if(attr == "out"){
+                updateDataflowOut(this);
+            }
+            break;
+    }
+};
+
+XML3D.data.DataflowDataAdapter.prototype.updateXflowNode = function(){
+    updateDataflowXflowNode(this, this.node);
+}
+
+function updateDataflowOut(adapter){
+    var out = adapter.node.getAttribute("out");
+    if(out)
+        adapter.xflowDataNode.setFilter("keep(" + out + ")");
+    else
+        adapter.xflowDataNode.setFilter("");
+
+}
+
+function updateDataflowXflowNode(adapter, node){
+    adapter.xflowDataNode.clearChildren();
+    adapter.xflowDataNode.setCompute("");
+    updateDataflowOut(adapter);
+
+    var child = node.lastElementChild, firstNode = true, prevNode = null, currentNode = adapter.xflowDataNode;
+    do{
+        var subAdapter = adapter.factory.getAdapter(child);
+        if(!subAdapter) continue;
+
+        if(subAdapter.getXflowNode){
+             var xflowNode = subAdapter.getXflowNode();
+             if(prevNode)
+                currentNode.insertBefore(xflowNode, prevNode);
+             else
+                currentNode.appendChild(xflowNode);
+             prevNode = xflowNode;
+        }
+        else if(subAdapter.getComputeCode){
+            var statements = subAdapter.getComputeCode().split(";");
+            var j = statements.length;
+            while(j--)
+            {
+                if(firstNode){
+                    firstNode = false;
+                }
+                else{
+                    var xflowNode = XML3D.data.xflowGraph.createDataNode();
+                    if(prevNode)
+                        currentNode.insertBefore(xflowNode, prevNode);
+                    else
+                        currentNode.appendChild(xflowNode);
+                    currentNode = xflowNode; prevNode = null;
+                }
+                currentNode.userData = child;
+                currentNode.setCompute(statements[j].trim());
+            }
+        }
+
+    }while(child = child.previousElementSibling);
+}
+
+/**
+ * DataAdapter handling a <dataflow> element
+ * @param factory
+ * @param node
+ * @constructor
+ */
+XML3D.data.ComputeDataAdapter = function(factory, node) {
+    XML3D.base.NodeAdapter.call(this, factory, node);
+};
+XML3D.createClass(XML3D.data.DataflowDataAdapter, XML3D.base.NodeAdapter);
+
+XML3D.data.ComputeDataAdapter.prototype.getComputeCode = function(){
+    return this.node.innerText;
+}
+
+/**
+ * @param evt notification of type XML3D.Notification
+ */
+XML3D.data.ComputeDataAdapter.prototype.notifyChanged = function(evt) {
+    switch(evt.type){
+        case XML3D.events.VALUE_MODIFIED:
+        case XML3D.events.NODE_INSERTED:
+        case XML3D.events.NODE_REMOVED:
+            var parent = this.node.parentNode;
+            if(parent){
+                var parentAdapter = this.factory.getAdapter(parent);
+                parentAdapter && parentAdapter.updateXflowNode();
+            }
+    }
+};
+
 
 }());

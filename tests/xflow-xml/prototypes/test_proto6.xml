@@ -13,7 +13,7 @@
         </proto>
 
         <proto id="morphShape"  filter="keep(position)">
-          <data compute="position = dataflow['#simpleBlend'](position, blendPos2, weight)">
+          <data compute="position = dataflow['#simpleBlend'](position, blendPos, weight)">
               <float3 param="true" name="position"></float3>
               <float3 param="true" name="blendPos"></float3>
               <float param="true" name="weight"></float>

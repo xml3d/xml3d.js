@@ -5,9 +5,9 @@ This folder contains all sources files used to generate the final **xml3d.js** l
 
 
 Subfolders:
-* [base](base/) - Base systems used throughout xml3d.js, such as ressource manager, base adapter classes etc.
+* [base](base/) - Base systems used throughout xml3d.js, such as resource manager, base adapter classes etc.
 * [contrib](contrib/) - External libraries
-* [data](data/) - The data adpater - the connecting piece between XML3D and Xflow for inline nodes as well as external ressources
+* [data](data/) - The data adpater - the connecting piece between XML3D and Xflow for inline nodes as well as external resources
 * [interfaces](interfaces/) - Connection of XML3D with the DOM 
 * [math](math/) - ... what does this folder do exactly? 
 * [renderer](renderer/) - The rendering implementation. WebGL specific code should stay in here.

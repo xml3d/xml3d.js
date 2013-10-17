@@ -15,7 +15,6 @@
         <file name="scene/pager.js" />
         <file name="scene/rendernode.js" />
         <file name="scene/renderobject.js" />
-        <file name="scene/rendermesh.js" />
         <file name="scene/rendergroup.js" />
         <file name="scene/renderlight.js" />
         <file name="scene/renderview.js" />

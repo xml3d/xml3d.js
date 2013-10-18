@@ -50,7 +50,7 @@
         this.changeListener = new XML3D.webgl.DataChangeListener(this);
 
         this.renderInterface = this.createRenderInterface();
-        this.createDefaultPipelines(context);
+        this.createDefaultPipelines();
 
     };
 
@@ -93,12 +93,12 @@
             this.scene.handleResizeEvent(width, height);
             this.needsDraw = this.needsPickingDraw = true;
         },
-        createDefaultPipelines: function (context) {
-            var pipeline = new XML3D.webgl.ForwardRenderPipeline(context);
+        createDefaultPipelines: function () {
+            var pipeline = new XML3D.webgl.ForwardRenderPipeline(this.context, this.scene);
             pipeline.init();
             this.renderInterface.setRenderPipeline(pipeline);
 
-            var pickingPipeline = new XML3D.webgl.PickingRenderPipeline(context);
+            var pickingPipeline = new XML3D.webgl.PickingRenderPipeline(this.context);
             pickingPipeline.addRenderPass(this.pickObjectPass = new webgl.PickObjectRenderPass(pickingPipeline, "pickBuffer"));
             pickingPipeline.addRenderPass(this.pickPositionPass = new webgl.PickPositionRenderPass(pickingPipeline, "pickBuffer"));
             pickingPipeline.addRenderPass(this.pickNormalPass = new webgl.PickNormalRenderPass(pickingPipeline, "pickBuffer"));

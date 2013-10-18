@@ -37,6 +37,7 @@
         <file name="gl/tools/objectsorter.js" />
         <file name="gl/passes/base.js" />
         <file name="gl/passes/scenerenderpass.js" />
+        <file name="gl/passes/lightpass.js" />
         <file name="gl/passes/forward.js" />
         <file name="gl/passes/pickObject.js" />
         <file name="gl/passes/pickPosition.js" />

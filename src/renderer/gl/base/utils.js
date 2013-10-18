@@ -114,7 +114,7 @@
 
             webglData.texture = texture;
             webglData.changed = 0;
-            value = texture;
+            value = [texture];
         }
         else if(xflowDataEntry.type == Xflow.DATA_TYPE.BOOL)
             //TODO Can we get Xflow to return boolean arrays as normal JS arrays? WebGL doesn't accept Uint8Arrays here...

@@ -103,8 +103,12 @@
             }
 
             if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
-                uniInfo.unit = programObject.nextTextureUnit();
-                uniInfo.texture = new XML3D.webgl.GLTexture(gl);
+                uniInfo.unit = [];
+                uniInfo.texture = [];
+                for(var j = 0; j < uniInfo.size; j++) {
+                    uniInfo.unit[j] = programObject.nextTextureUnit();
+                    uniInfo.texture[j] = new XML3D.webgl.GLTexture(gl);
+                }
                 webgl.setUniform(gl, uniInfo, uniInfo.unit);
                 programObject.samplers[name] = uniInfo;
             } else
@@ -163,7 +167,9 @@
             this.gl.useProgram(this.handle);
             for(var s in this.samplers) {
                 var sampler = this.samplers[s];
-                sampler.texture && sampler.texture.bind(sampler.unit);
+                for(var i = 0; i < sampler.texture.length; i++) {
+                    sampler.texture[i] && sampler.texture[i].bind(sampler.unit[i]);
+                }
             }
             this.texturesBinded = true;
         },

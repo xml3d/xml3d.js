@@ -27,6 +27,13 @@
             pass.setRenderPipeline(this);
         },
 
+        removeRenderPass: function(pass) {
+            var passPos = this.renderPasses.indexOf(pass);
+            if(passPos != -1) {
+                this.renderPasses.splice(passPos, 1);
+            }
+        },
+
         addRenderTarget: function(name, target) {
             if (this.targets[name]) {
                 XML3D.debug.logWarning("Render pipeline already contains a target with name '"+name+"', it will be overwritten!");

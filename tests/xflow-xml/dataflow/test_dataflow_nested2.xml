@@ -2,8 +2,7 @@
     Purpose of Test:
     Nested Prototypes #2 (Prototypes that include prototype instantiations as well as prototypes)
 
-    This test checks, if the proto#template1 is not executed as a child of proto#template1
-    It also checks, that a prototype can be instaniated inside of a prototype 
+    This test checks, if a prototype can be instaniated inside of a prototype
     (with the prototype itself not being another prototype instance)
 -->
 <XflowTest>

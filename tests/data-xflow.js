@@ -541,39 +541,47 @@ test("Operators - Lerp and Slerp on Key Arrays", function() {
 
 test("Prototypes - Basic", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/prototypes/test_proto1.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/dataflow/test_dataflow_basic.xml", handler);
     this.executeTests(response);
 });
 
 test("Prototypes - Nested", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/prototypes/test_proto2.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/dataflow/test_dataflow_nested.xml", handler);
     this.executeTests(response);
 });
 
 test("Prototypes - Nested #2", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/prototypes/test_proto5.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/dataflow/test_dataflow_nested2.xml", handler);
     this.executeTests(response);
 });
 
 test("Prototypes - Nested with Operators", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/prototypes/test_proto6.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/dataflow/test_dataflow_nested_operators.xml", handler);
     this.executeTests(response);
 });
 
 test("Prototypes - Name Mapping", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/prototypes/test_proto3.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/dataflow/test_dataflow_mapping.xml", handler);
     this.executeTests(response);
 });
 
 test("Prototypes - With Operators", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/prototypes/test_proto4.xml", handler);
+    var response = this.loadTestXML("./xflow-xml/dataflow/test_dataflow_operators.xml", handler);
     this.executeTests(response);
 });
+
+
+test("Prototypes - Complex Operators", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/dataflow/test_dataflow_complex.xml", handler);
+    this.executeTests(response);
+});
+
 
 test("GLSL basic", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));

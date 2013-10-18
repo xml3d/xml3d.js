@@ -9,23 +9,22 @@
 <XflowTest>
     <Input>
 
-        <proto id="template1">
+        <dataflow id="template1">
             <float param="true" name="A" >0.1</float>
             <float param="true" name="B" >0.2</float>
-        </proto>
+        </dataflow>
         
-        <proto id="template2" >
-	        
-	        <data compute="dataflow['#template1']" >
-	            <float name="A" >1.1</float>
-	            <float name="B" >1.2</float>
-	            <data filter="rename({C: B, D: A})" >
-	                <float param="true" name="B" >1.3</float>
-	                <float param="true" name="A" >1.4</float>
-	            </data>	        	        
-	        </data>
-
-        </proto>
+        <dataflow id="template2" >
+            <float name="A" >1.1</float>
+            <float name="B" >1.2</float>
+            <data filter="rename({C: B, D: A})" >
+                <float param="true" name="B" >1.3</float>
+                <float param="true" name="A" >1.4</float>
+            </data>
+            <compute>
+                dataflow['#template1'];
+            </compute>
+        </dataflow>
        
          <data id="data1" compute="dataflow['#template2']" >
             <float name="A" >2.1</float>  

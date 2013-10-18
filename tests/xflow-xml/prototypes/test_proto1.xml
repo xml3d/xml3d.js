@@ -5,11 +5,11 @@
 <XflowTest>
     <Input>
          
-        <proto id="template1">
+        <dataflow id="template1">
             <float param="true" name="A" >0.1</float>
             <float param="true" name="B" id="tC1" >0.2</float>
             <float param="true" name="C" id="tB1" >0.3</float>
-        </proto>
+        </dataflow>
       
          <data id="data1" compute="dataflow['#template1']" >
             <float name="A" >1.1</float>  

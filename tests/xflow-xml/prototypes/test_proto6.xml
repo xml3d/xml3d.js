@@ -4,21 +4,24 @@
 -->
 <XflowTest>
     <Input>
-        <proto id="simpleBlend" filter="keep(result)" compute="result = xflow.morph(value, valueAdd, weight)">
-            <data compute="valueAdd = xflow.sub(blend, value)" >
-                <float3 param="true" name="value" ></float3>
-                <float3 param="true" name="blend" ></float3>
-                <float param="true" name="weight" ></float>
-            </data>
-        </proto>
+        <dataflow id="simpleBlend" out="result" >
+            <float3 param="true" name="value" ></float3>
+            <float3 param="true" name="blend" ></float3>
+            <float param="true" name="weight" ></float>
+            <compute>
+                valueAdd = xflow.sub(blend, value);
+                result = xflow.morph(value, valueAdd, weight);
+            </compute>
+        </dataflow>
 
-        <proto id="morphShape"  filter="keep(position)">
-          <data compute="position = dataflow['#simpleBlend'](position, blendPos, weight)">
-              <float3 param="true" name="position"></float3>
-              <float3 param="true" name="blendPos"></float3>
-              <float param="true" name="weight"></float>
-          </data>
-        </proto>
+        <dataflow id="morphShape" out="position">
+            <float3 param="true" name="position"></float3>
+            <float3 param="true" name="blendPos"></float3>
+            <float param="true" name="weight"></float>
+            <compute>
+                position = dataflow['#simpleBlend'](position, blendPos, weight);
+            </compute>
+        </dataflow>
 
          <data id="data1" compute="dataflow['#morphShape']" >
             <float3 name='position'>1 1 1</float3>

@@ -115,7 +115,7 @@ XML3D.data.DataAdapter.prototype.init = function() {
     this.xflowDataNode = XML3D.data.xflowGraph.createDataNode(protoNode);
     this.xflowDataNode.userData = this.node;
 
-    this.updateHandle("src", this.node.getAttribute("src"));
+    updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     this.xflowDataNode.setFilter(this.node.getAttribute("filter"));
     updateCompute(this);
     recursiveDataAdapterConstruction(this);
@@ -142,9 +142,9 @@ function recursiveDataAdapterConstruction(adapter){
  */
 XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
     if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
-        this.connectedAdapterChanged(evt.key, evt.adapter);
+        this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
         if(evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
-            XML3D.debug.logError("Could not find <data> element of url '" + evt.url + "' for " + evt.key);
+            XML3D.debug.logError("Could not find <data> element of url '" + evt.url + "' for " + evt.key, this.node);
         }
         return;
     }
@@ -178,7 +178,7 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
             updateCompute(this);
         }
         else if(attr == "src"){
-            this.updateHandle(attr, this.node.getAttribute(attr));
+            updateAdapterHandle(this, attr, this.node.getAttribute(attr));
         }
         return;
     } else if (evt.type == XML3D.events.THIS_REMOVED) {
@@ -186,15 +186,31 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
     }
 };
 
-function updateCompute(dataNode){
-    var xflowNode = dataNode.xflowDataNode;
-    xflowNode.setCompute(dataNode.node.getAttribute("compute"));
+XML3D.data.DataAdapter.prototype.connectedAdapterChanged = function(key, adapter, status) {
+    if(key == "src"){
+        this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
+    }
+    if(key == "dataflow"){
+        this.xflowDataNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
+    }
+    updateLoadState(this);
+};
+/**
+ * Returns String representation of this DataAdapter
+ */
+XML3D.data.DataAdapter.prototype.toString = function() {
+    return "XML3D.data.DataAdapter";
+};
+
+function updateCompute(dataAdapter){
+    var xflowNode = dataAdapter.xflowDataNode;
+    xflowNode.setCompute(dataAdapter.node.getAttribute("compute"));
     if(xflowNode.computeDataflowUrl){
-        dataNode.updateHandle("dataflow", xflowNode.computeDataflowUrl);
+        updateAdapterHandle(dataAdapter, "dataflow", xflowNode.computeDataflowUrl);
     }
     else{
-        dataNode.disconnectAdapterHandle("dataflow");
-        updateLoadState(dataNode);
+        dataAdapter.disconnectAdapterHandle("dataflow");
+        updateLoadState(dataAdapter);
     }
 }
 
@@ -212,32 +228,16 @@ function updateLoadState(dataAdpater){
     dataAdpater.xflowDataNode.setLoading(loading);
 }
 
-XML3D.data.DataAdapter.prototype.updateHandle = function(key, url) {
-    var adapterHandle = this.getAdapterHandle(url);
-    if(adapterHandle && adapterHandle.status == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
-        XML3D.debug.logError("Could not find <data> element of url '" + adapterHandle.url + "' for " + key);
+function updateAdapterHandle(adapter, key, url){
+    var adapterHandle = adapter.getAdapterHandle(url);
+    var status = (adapterHandle && adapterHandle.status);
+    if(status == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
+        XML3D.debug.logError("Could not find element of url '" + adapterHandle.url + "' for " + key, adapter.node);
     }
+    adapter.connectAdapterHandle(key, adapterHandle);
+    adapter.connectedAdapterChanged(key, adapterHandle ? adapterHandle.getAdapter() : null, status);
+}
 
-    this.connectAdapterHandle(key, adapterHandle);
-    this.connectedAdapterChanged(key, adapterHandle ? adapterHandle.getAdapter() : null);
-    updateLoadState(this);
-};
-
-XML3D.data.DataAdapter.prototype.connectedAdapterChanged = function(key, adapter) {
-    if(key == "src"){
-        this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
-    }
-    if(key == "dataflow"){
-        this.xflowDataNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
-    }
-    updateLoadState(this);
-};
-/**
- * Returns String representation of this DataAdapter
- */
-XML3D.data.DataAdapter.prototype.toString = function() {
-    return "XML3D.data.DataAdapter";
-};
 
 /**
  * DataAdapter handling a <dataflow> element
@@ -253,6 +253,7 @@ XML3D.createClass(XML3D.data.DataflowDataAdapter, XML3D.data.BaseDataAdapter);
 
 XML3D.data.DataflowDataAdapter.prototype.init = function() {
     this.xflowDataNode = XML3D.data.xflowGraph.createDataNode();
+    this.dataflowRefs = [];
     updateDataflowXflowNode(this, this.node);
 };
 
@@ -260,7 +261,17 @@ XML3D.data.DataflowDataAdapter.prototype.init = function() {
  * @param evt notification of type XML3D.Notification
  */
 XML3D.data.DataflowDataAdapter.prototype.notifyChanged = function(evt) {
+    if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
+
+    }
     switch(evt.type){
+        case XML3D.events.ADAPTER_HANDLE_CHANGED:
+            this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
+            if(evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
+                XML3D.debug.logError("Could not find dataflow of url '" + evt.url, this.node);
+            }
+            break;
+
         case XML3D.events.NODE_INSERTED:
         case XML3D.events.NODE_REMOVED:
             updateDataflowXflowNode(this);
@@ -278,18 +289,27 @@ XML3D.data.DataflowDataAdapter.prototype.updateXflowNode = function(){
     updateDataflowXflowNode(this, this.node);
 }
 
+XML3D.data.DataflowDataAdapter.prototype.connectedAdapterChanged = function(key, adapter, status) {
+    var xflowNode = this.dataflowRefs[key];
+    if(xflowNode){
+        xflowNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
+        xflowNode.setLoading(status == XML3D.base.AdapterHandle.STATUS.LOADING);
+    }
+};
+
 function updateDataflowOut(adapter){
     var out = adapter.node.getAttribute("out");
     if(out)
         adapter.xflowDataNode.setFilter("keep(" + out + ")");
     else
         adapter.xflowDataNode.setFilter("");
-
 }
 
 function updateDataflowXflowNode(adapter, node){
     adapter.xflowDataNode.clearChildren();
     adapter.xflowDataNode.setCompute("");
+    adapter.clearAdapterHandles();
+    adapter.dataflowRefs = [];
     updateDataflowOut(adapter);
 
     var child = node.lastElementChild, firstNode = true, prevNode = null, currentNode = adapter.xflowDataNode;
@@ -310,6 +330,8 @@ function updateDataflowXflowNode(adapter, node){
             var j = statements.length;
             while(j--)
             {
+                var compute = statements[j].trim();
+                if(!compute) continue;
                 if(firstNode){
                     firstNode = false;
                 }
@@ -323,6 +345,11 @@ function updateDataflowXflowNode(adapter, node){
                 }
                 currentNode.userData = child;
                 currentNode.setCompute(statements[j].trim());
+                if(currentNode.computeDataflowUrl){
+                    var idx = adapter.dataflowRefs.length;
+                    adapter.dataflowRefs.push(currentNode);
+                    updateAdapterHandle(adapter, idx, currentNode.computeDataflowUrl);
+                }
             }
         }
 
@@ -338,10 +365,10 @@ function updateDataflowXflowNode(adapter, node){
 XML3D.data.ComputeDataAdapter = function(factory, node) {
     XML3D.base.NodeAdapter.call(this, factory, node);
 };
-XML3D.createClass(XML3D.data.DataflowDataAdapter, XML3D.base.NodeAdapter);
+XML3D.createClass(XML3D.data.ComputeDataAdapter, XML3D.base.NodeAdapter);
 
 XML3D.data.ComputeDataAdapter.prototype.getComputeCode = function(){
-    return this.node.innerText;
+    return this.node.value;
 }
 
 /**

@@ -48,7 +48,7 @@
     }
 
     ScriptDataAdapter.prototype.getScriptCode = function(){
-        return this.node.innerText;
+        return this.node.value;
     }
 
     ScriptDataAdapter.prototype.notifyChanged = function(evt) {

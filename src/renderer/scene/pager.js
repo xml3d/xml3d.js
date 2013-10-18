@@ -1,5 +1,9 @@
 (function(webgl){
 
+    /**
+     * @extends {EventDispatcher}
+     * @constructor
+     */
     var Pager = function() {
         /** @type Array<Float32Array> */
         this.pages = [];

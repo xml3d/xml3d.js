@@ -90,13 +90,22 @@ OrderMapping.prototype.isEmpty = function(){
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
 
 OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback){
-    for(var i in sourceMap.map){
-        var idx = this._names.indexOf(i);
-        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
-            ( filterType == Xflow.DATA_FILTER_TYPE.KEEP && idx != -1) ||
-            (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
-            callback(destMap, i, sourceMap, i);
+    if(filterType == Xflow.DATA_FILTER_TYPE.KEEP){
+        for(var i = 0; i < this._names.length; ++i){
+            var name = this._names[i];
+            if(sourceMap.map[name])
+                callback(destMap, name, sourceMap, name);
+        }
     }
+    else{
+        for(var i in sourceMap.map){
+            var idx = this._names.indexOf(i);
+            if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
+                (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
+                callback(destMap, i, sourceMap, i);
+        }
+    }
+
 };
 OrderMapping.prototype.getScriptInputName = function(index, destName){
     if(this._names[index])

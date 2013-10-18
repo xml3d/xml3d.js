@@ -197,9 +197,6 @@
                     var name = sysNames[i];
                     this.setUniformVariable(name, base[name]);
                 }
-                if (this.samplers[name] && uniforms[name].isTexture) {
-                    uniforms[name].handle.bind(this.samplers[name].unit);
-                }
             }
         },
         setUniformVariable: function(name, value){

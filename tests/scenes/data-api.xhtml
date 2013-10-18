@@ -79,11 +79,14 @@
       </data>
 
 
-      <proto id="simpleProto" compute="position = xflow.morph(position, posAdd, weight)" >
+      <dataflow id="simpleProto" out="position" >
         <float3 name="position" param="true" ></float3>
         <float3 name="posAdd" param="true" ></float3>
         <float3 name="weight" param="true" ></float3>
-      </proto>
+        <compute>
+            position = xflow.morph(position, posAdd, weight);
+        </compute>
+      </dataflow>
 
       <data id="simpleProtoInstance" compute="dataflow['#simpleProto']" >
         <data id="simpleProtoInstanceCompute" compute="posAdd = xflow.morph(posAdd1, posAdd2, subWeight)" >

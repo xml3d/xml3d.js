@@ -439,31 +439,31 @@ test("Test compute parsing", function() {
 });
 
 
-test("Very basic test", 4, function() {
+test("Very basic test", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_verybasic.xml", handler);
     this.executeTests(response);
  });
 
-test("Nested nodes test", 13, function() {
+test("Nested nodes test", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_nesting.xml", handler);
     this.executeTests(response);
  });
 
-test("Renaming nodes 1", 13, function() {
+test("Renaming nodes 1", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_renaming.xml", handler);
     this.executeTests(response);
  });
 
-test("Renaming nodes 2", 14, function() {
+test("Renaming nodes 2", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_renaming2.xml", handler);
     this.executeTests(response);
  });
 
-test("Renaming nodes 3", 6, function() {
+test("Renaming nodes 3", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_renaming3.xml", handler);
     this.executeTests(response);

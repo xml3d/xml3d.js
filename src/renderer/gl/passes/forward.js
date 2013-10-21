@@ -44,15 +44,10 @@
                 systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
                 systemUniforms["screenWidth"] = width;
 
-                var shadowMapTarget = this.pipeline.getRenderTarget("lightFramebuffer");
-                if(shadowMapTarget) {
-                    console.log("Found shadow map");
-                    systemUniforms["spotLightShadowMap"] = shadowMapTarget.colorTarget.handle;
+                var shadowMapTarget = this.pipeline.getRenderTarget("spotLight0")
+                if (shadowMapTarget) {
+                    systemUniforms["spotLightShadowMap"] = [shadowMapTarget.colorTarget.handle];
                 }
-
-
-                //systemUniforms["spotLightShadowMap"] = this.pipeline.getRenderTarget(this.inputs.sInTexture).colorTarget;
-
 
                 //Render opaque objects
                 for (var program in sorted.opaque) {

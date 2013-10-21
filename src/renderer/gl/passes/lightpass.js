@@ -4,14 +4,13 @@
      * @param {RenderPipeline} pipeline
      * @param {string} output
      * @param {RenderLight} light
-     * @param opt
+     * @param {*} opt
      * @extends {SceneRenderPass}
      * @constructor
      */
     var LightPass = function (pipeline, output, light, opt) {
         webgl.SceneRenderPass.call(this, pipeline, output, opt);
         this.light = light;
-        this.screenQuad = {};
     };
 
     XML3D.createClass(LightPass, webgl.SceneRenderPass, {

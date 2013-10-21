@@ -62,31 +62,50 @@
     {
         if(!this.map[name])
             return null;
-        return this.map[name];
+        return this.map[name].channel;
     }
 
-    ChannelMap.prototype.merge = function(otherChannelMap){
+    ChannelMap.prototype.getChildDataIndex = function(name)
+    {
+        if(!this.map[name])
+            return undefined;
+        return this.map[name].childDataIndex;
+    }
+    ChannelMap.prototype.getChildDataIndexForFilter = function(filter){
+        var result;
+        filter = filter || this.getNames();
+        for(var i = 0; i < filter.length; ++i){
+            var idx = this.getChildDataIndex(filter[i]);
+            if(idx == undefined) continue;
+            if(result != undefined && result != idx)
+                result = -1;
+            else
+                result = idx;
+        }
+        return result;
+    }
+
+    ChannelMap.prototype.merge = function(otherChannelMap, childDataIndex){
         for(var name in otherChannelMap.map){
-            this.addChannel(name, otherChannelMap.getChannel(name));
+            var index = childDataIndex == undefined ? otherChannelMap.getChildDataIndex(name) : childDataIndex;
+            this.addChannel(name, otherChannelMap.getChannel(name), index);
         }
     }
 
-    ChannelMap.prototype.addChannel = function(name, channel){
+    ChannelMap.prototype.addChannel = function(name, channel, childDataIndex){
         if(!channel) return;
-        var finalChannel = mergeChannelIntoChannel(this, this.map[name], channel);
-        this.map[name] = finalChannel;
+        if(childDataIndex == undefined) childDataIndex = -1;
+        mergeChannelIntoChannel(this, name, channel, childDataIndex);
     }
 
     ChannelMap.prototype.addDataEntry = function(name, dataSlot)
     {
-        var finalChannel = mergeDataSlotIntoChannel(this, this.map[name], dataSlot);
-        this.map[name] = finalChannel;
+        mergeDataSlotIntoChannel(this, name, dataSlot, -1);
     }
 
     ChannelMap.prototype.addOutputDataSlot = function(name, dataSlot, creatorNode){
-        var finalChannel = mergeDataSlotIntoChannel(this, this.map[name], dataSlot);
+        var finalChannel = mergeDataSlotIntoChannel(this, name, dataSlot, -1);
         finalChannel.creatorProcessNode = creatorNode;
-        this.map[name] = finalChannel;
     }
 
     ChannelMap.prototype.clear = function(){
@@ -98,23 +117,43 @@
         this.map = {};
     }
 
+    function initChannelSlot(channelMap, name){
+        if(!channelMap.map[name]){
+            channelMap.map[name] = {
+                channel: null,
+                childDataIndex: undefined
+            }
+        }
+    }
 
-    function mergeChannelIntoChannel(map, currentChannel, newChannel){
-        if(!currentChannel) return newChannel;
-        if(!currentChannel.willMergeWithChannel(newChannel))
+    function mergeChannelIntoChannel(channelMap, name, newChannel, childDataIndex){
+        initChannelSlot(channelMap, name);
+        var currentChannel = channelMap.map[name].channel;
+        if(!currentChannel || !currentChannel.willMergeWithChannel(newChannel)) {
+            channelMap.map[name].channel = newChannel;
+            channelMap.map[name].childDataIndex = childDataIndex;
             return newChannel;
-        currentChannel = getMapOwnedChannel(map, currentChannel);
+        }
+        currentChannel = getMapOwnedChannel(channelMap, currentChannel);
         currentChannel.addChannelEntries(newChannel);
+        channelMap.map[name].channel = currentChannel;
+        channelMap.map[name].childDataIndex = -1;
         return currentChannel;
     }
 
-    function mergeDataSlotIntoChannel(map, currentChannel, dataSlot){
-        if(!currentChannel)
-            return new Xflow.Channel(map, dataSlot);
-        if(!currentChannel.willMergeWithDataSlot(dataSlot))
-            return new Xflow.Channel(map, dataSlot);
-        currentChannel = getMapOwnedChannel(map, currentChannel);
+    function mergeDataSlotIntoChannel(channelMap, name, dataSlot, childDataIndex){
+        initChannelSlot(channelMap, name);
+        var currentChannel = channelMap.map[name].channel;
+        if(!currentChannel || !currentChannel.willMergeWithDataSlot(dataSlot)){
+            var channel = new Xflow.Channel(channelMap, dataSlot);
+            channelMap.map[name].channel = channel;
+            channelMap.map[name].childDataIndex = childDataIndex;
+            return channel;
+        }
+        currentChannel = getMapOwnedChannel(channelMap, currentChannel);
         currentChannel.addDataSlot(dataSlot);
+        channelMap.map[name].channel = currentChannel;
+        channelMap.map[name].childDataIndex = -1;
         return currentChannel;
     }
 

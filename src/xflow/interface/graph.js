@@ -621,11 +621,11 @@ DataNode.prototype.getParamNames = function(){
 }
 
 DataNode.prototype._getResult = function(type, filter){
-    return getForwardNode(this)._channelNode.getResult(type, filter);
+    return getForwardNode(this, filter)._channelNode.getResult(type, filter);
 }
 
-DataNode.prototype._getForwardNode = function(){
-    return getForwardNode(this);
+DataNode.prototype._getForwardNode = function(filter){
+    return getForwardNode(this, filter);
 }
 
 DataNode.prototype._getParamNames = function(){
@@ -685,13 +685,23 @@ function clearSubstitutionNodes(dataNode){
 }
 
 
-function getForwardNode(dataNode){
-    if( (dataNode._filterMapping && !dataNode._filterMapping.isEmpty())  || dataNode._computeOperator || dataNode._dataflowNode)
-        return dataNode;
-    if(dataNode._sourceNode && dataNode._children.length == 0)
-        return getForwardNode(dataNode._sourceNode);
-    if(dataNode._children.length == 1 && dataNode._children[0] instanceof DataNode)
-        return getForwardNode(dataNode._children[0]);
+function getForwardNode(dataNode, filter){
+    var filteredBadly = (dataNode._filterMapping && !dataNode._filterMapping.isEmpty());
+    if(!filteredBadly){
+        if(!dataNode._computeOperator ){
+            if(dataNode._sourceNode && dataNode._children.length == 0)
+                return getForwardNode(dataNode._sourceNode);
+            if(dataNode._children.length == 1 && dataNode._children[0] instanceof DataNode)
+                return getForwardNode(dataNode._children[0]);
+        }
+        var idx = dataNode._channelNode.getChildDataIndex(filter);
+        if(idx != -1 && idx != undefined){
+            if(dataNode._sourceNode)
+                return getForwardNode(dataNode._sourceNode);
+            else
+                return getForwardNode(dataNode._children[idx]);
+        }
+    }
     return dataNode;
 }
 

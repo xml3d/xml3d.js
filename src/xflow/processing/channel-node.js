@@ -63,6 +63,11 @@
         return this.outputChannels.getNames();
     }
 
+    Xflow.ChannelNode.prototype.getChildDataIndex = function(filter){
+        this.synchronize();
+        return this.outputChannels.getChildDataIndexForFilter(filter);
+    }
+
     Xflow.ChannelNode.prototype.setStructureOutOfSync = function()
     {
         if(!this.outOfSync){
@@ -158,13 +163,13 @@
     function updateInputChannels(channelNode){
         var owner = channelNode.owner;
         if(owner._sourceNode){
-            channelNode.inputChannels.merge(owner._sourceNode._getChannelNode(channelNode.substitution).outputChannels);
+            channelNode.inputChannels.merge(owner._sourceNode._getChannelNode(channelNode.substitution).outputChannels, 0);
         }
         else{
             var children = owner._children;
             for(var i = 0; i < children.length; ++i){
                 if(children[i]._getChannelNode){
-                    channelNode.inputChannels.merge(children[i]._getChannelNode(channelNode.substitution).outputChannels);
+                    channelNode.inputChannels.merge(children[i]._getChannelNode(channelNode.substitution).outputChannels, i);
                 }
             }
             for(var i = 0; i < children.length; ++i){
@@ -278,7 +283,7 @@
 
     function setChannelFilterCallback(destMap, destName, srcMap, srcName){
         var channel = srcMap.getChannel(srcName);
-        destMap.addChannel(destName, channel);
+        destMap.addChannel(destName, channel, srcMap.getChildDataIndex(srcName));
     }
 
 //----------------------------------------------------------------------------------------------------------------------

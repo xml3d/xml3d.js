@@ -6,6 +6,14 @@
     function attrModified(e) {
 
         var eh = e.target._configured;
+
+        if(e.attrName == "style"){
+            var n = new events.NotificationWrapper(e);
+            n.type = events.VALUE_MODIFIED;
+            eh.notify(n);
+            return;
+        }
+
         var handler = eh && eh.handlers[e.attrName];
         if(!handler)
             return;

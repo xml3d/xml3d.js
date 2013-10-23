@@ -93,7 +93,7 @@
 
             this.updateObjectsForRendering();
             // Make sure that shaders are updates AFTER objects
-            // Because unused shader closures are cleared on updae
+            // Because unused shader closures are cleared on update
             this.updateShaders();
         },
         updateLightParameters: function(){
@@ -137,6 +137,9 @@
             parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
         },
 
+        updateSystemUniforms: function(names){
+            this.shaderFactory.updateSystemUniforms(names, this);
+        },
 
         updateShaders: function() {
             this.shaderFactory.update(this);

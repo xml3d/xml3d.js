@@ -77,6 +77,11 @@
                 this.composers[i].setShaderRecompile();
             }
         },
+        updateSystemUniforms: function(names, scene){
+            for (var i in this.composers) {
+                this.composers[i].updateSystemUniforms(names, scene);
+            }
+        },
         setLightValueChanged: function() {
             for (var i in this.composers) {
                 this.composers[i].updateLightValues = true;

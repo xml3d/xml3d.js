@@ -140,6 +140,13 @@
             shaderClosure.bind();
             shaderClosure.setSystemUniformVariables( webgl.GLScene.LIGHT_PARAMETERS, scene.systemUniforms);
         },
+        updateSystemUniforms: function(names, scene){
+            this.shaderClosures.forEach(function (shader) {
+                shader.bind();
+                shader.setSystemUniformVariables( names, scene.systemUniforms);
+            });
+        },
+
 
         createShaderClosure: function () {
             throw new Error("AbstractComposer::createShaderClosure needs to be overridden");

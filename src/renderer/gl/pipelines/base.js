@@ -2,7 +2,6 @@
 
     var RenderPipeline = function (context) {
         this.renderPasses = [];
-        this.targets = {};
         this.shaders = {};
         this.context = context;
     };
@@ -34,23 +33,9 @@
             }
         },
 
-        addRenderTarget: function(name, target) {
-            if (this.targets[name]) {
-                XML3D.debug.logWarning("Render pipeline already contains a target with name '"+name+"', it will be overwritten!");
-            }
-            this.targets[name] = target;
-        },
-
-        getRenderTarget: function(name) {
-            if (name === "screen") {
-                return this.context.canvasTarget;
-            }
-            return this.targets[name];
-        },
-
         render : function(scene) {
             for (var i=0; i < this.renderPasses.length; i++) {
-                this.renderPasses[i].render(scene);
+                this.renderPasses[i].renderTree(scene);
             }
         },
 
@@ -61,9 +46,6 @@
         addShader: function(name, shader) {
             this.shaders[name] = shader;
         }
-
-
-
 
     });
 

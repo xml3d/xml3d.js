@@ -30,14 +30,14 @@
 
             return function (scene) {
                 var gl = this.pipeline.context.gl,
-                    target = this.pipeline.getRenderTarget(this.output),
+                    target = this.output,
                     width = target.getWidth(),
                     height = target.getHeight(),
                     aspect = width / height,
                     frustum = this.light.getFrustum(aspect),
                     program = this.pipeline.getShader("light-depth");
 
-
+                console.log("Update Shadow Map!");
                 target.bind();
                 gl.clear(this.clearBits);
                 gl.viewport(0, 0, width, height);

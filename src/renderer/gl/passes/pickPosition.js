@@ -14,7 +14,7 @@
 
             return function(obj, viewMatrix, projMatrix) {
                 var gl = this.pipeline.context.gl,
-                    target = this.pipeline.getRenderTarget(this.output);
+                    target = this.output;
 
                 target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
@@ -52,7 +52,7 @@
             var c_vec3 = XML3D.math.vec3.create();
 
             return function(x,y) {
-                var data = this.readPixelDataFromBuffer(x, y, this.pipeline.getRenderTarget(this.output));
+                var data = this.readPixelDataFromBuffer(x, y, this.output);
                 if(data){
 
                     c_vec3[0] = data[0] / 255;

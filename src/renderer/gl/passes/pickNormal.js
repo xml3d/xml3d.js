@@ -14,7 +14,7 @@
 
             return function (object, viewMatrix, projMatrix) {
                 var gl = this.pipeline.context.gl,
-                    target = this.pipeline.getRenderTarget(this.output);
+                    target = this.output;
 
                 target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
@@ -61,7 +61,7 @@
             var c_one = XML3D.math.vec3.fromValues(1, 1, 1);
 
             return function (glX, glY) {
-                var data = this.readPixelDataFromBuffer(glX, glY, this.pipeline.getRenderTarget(this.output));
+                var data = this.readPixelDataFromBuffer(glX, glY, this.output);
                 if (!data) {
                     return null;
                 }

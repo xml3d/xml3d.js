@@ -2,7 +2,7 @@
 
     var StateMachine = window.StateMachine;
 
-    var shouldCull = (function () {
+    var omitCulling = (function () {
         var params = {},
             p = window.location.search.substr(1).split('&');
 
@@ -10,7 +10,7 @@
             var keyVal = e.split('=');
             params[keyVal[0].toLowerCase()] = decodeURIComponent(keyVal[1]);
         });
-        return params.hasOwnProperty("xml3d_culling");
+        return params.hasOwnProperty("xml3d_noculling");
     }());
 
 
@@ -179,7 +179,7 @@
                     var obj = readyObjects[i];
                     obj.updateModelViewProjectionMatrix(c_projMat_tmp);
                     obj.getWorldSpaceBoundingBox(c_bbox);
-                    obj.inFrustum = shouldCull ? c_frustumTest.isBoxVisible(c_bbox) : true;
+                    obj.inFrustum = omitCulling ? true : c_frustumTest.isBoxVisible(c_bbox);
                 };
             }
         }()),

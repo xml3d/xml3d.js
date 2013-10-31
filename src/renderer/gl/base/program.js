@@ -167,8 +167,10 @@
             this.gl.useProgram(this.handle);
             for(var s in this.samplers) {
                 var sampler = this.samplers[s];
-                for(var i = 0; i < sampler.texture.length; i++) {
-                    sampler.texture[i] && sampler.texture[i].bind(sampler.unit[i]);
+                if(sampler.texture) {
+                    for(var i = 0; i < sampler.texture.length; i++) {
+                        sampler.texture[i] && sampler.texture[i].bind(sampler.unit[i]);
+                    }
                 }
             }
             this.texturesBinded = true;
@@ -204,9 +206,13 @@
             }
             else if(this.samplers[name]){
                 var sampler = this.samplers[name];
+
+                if (value && sampler.texture !== value) {
                     sampler.texture = value;
-                    if(this.texturesBinded && false)
-                        sampler.texture && sampler.texture.bind(sampler.unit);
+                    for(var i = 0; i < sampler.texture.length; i++) {
+                        sampler.texture[i] && sampler.texture[i].bind(sampler.unit[i]);
+                    }
+                }
             }
         }
     });

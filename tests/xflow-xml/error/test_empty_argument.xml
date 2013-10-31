@@ -1,0 +1,49 @@
+<XflowTest>
+    <Input>
+
+        <data id="base" >
+            <float3 name="value" id="position_1">0 0 0  1 0 0  1 1 0  0 1 0</float3>
+            <float3 name="valueAdd" id="positionAdd_1">0 0 1  0 0 -1  0 0 1  0 0 -1</float3>
+            <float name="weight" id="weight_1" >0.0</float>
+        </data>
+
+        <data id="data1" compute="result = xflow.morph(value, valueAdd, weight)" >
+            <data src="#base" filter="keep(value, weight)" />
+            <float3 name="valueAdd"></float3>
+        </data>
+
+        <data id="data2" compute="result = xflow.morph(value, valueAdd, weight)" >
+            <data src="#base" filter="keep(value, weight)" />
+        </data>
+
+        <data id="data3" compute="value = xflow.morph(value, valueAdd, weight)" >
+            <data src="#base" filter="keep(value, weight)" />
+        </data>
+
+    </Input>
+    <TestProcess>
+
+        <Check title="Empty Buffer Argument" data="#data1" >
+            <MatchNull name="result" ></MatchNull>
+            <MatchNull name="valueAdd" ></MatchNull>
+            <MatchInput name="value" input="#position_1" />
+            <MatchInput name="weight" input="#weight_1" />
+        </Check>
+
+        <Check title="Missing Argument" data="#data2" >
+            <MatchNull name="result" ></MatchNull>
+            <MatchNull name="valueAdd" ></MatchNull>
+            <MatchInput name="value" input="#position_1" />
+        </Check>
+
+        <Check title="Invalid Output override" data="#data3" >
+            <MatchNull name="value" ></MatchNull>
+            <MatchNull name="valueAdd" ></MatchNull>
+            <MatchInput name="weight" input="#weight_1" />
+        </Check>
+
+
+
+    </TestProcess>
+</XflowTest>
+

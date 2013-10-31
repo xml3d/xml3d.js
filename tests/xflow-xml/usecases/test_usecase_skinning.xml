@@ -3,37 +3,35 @@
         
         <!-- Templates: -->
 
-        <proto id="bindPoseTransform" filter="keep(bindPose)"
-             compute="bindPose = xflow.forwardKinematicsInv(boneParent, xform)" >  
-          
+        <dataflow id="bindPoseTransform" out="bindPose" >
             <int param="" name="boneParent" ></int>
-           
-            <data compute="xform = xflow.createTransformInv( {translation: bonePosition, rotation: bindPose } )" >
-                <float3 param="" name="bonePosition" ></float3>
-                <float4 param="" name="bindPose" ></float4>
-            </data>
-        </proto>
+            <float3 param="" name="bonePosition" ></float3>
+            <float4 param="" name="bindPose" ></float4>
+            <compute>
+                xform = xflow.createTransformInv( {translation: bonePosition, rotation: bindPose } );
+                bindPose = xflow.forwardKinematicsInv(boneParent, xform)
+            </compute>
+        </dataflow>
             
-        <proto id="poseTransform" filter="keep(pose)"
-              compute="pose = xflow.forwardKinematics(boneParent, xform)"  >
+        <dataflow id="poseTransform" out="pose" >
             <int param="" name="boneParent"  ></int>
-            
-            <data id="poseTransformLocal"
-                  compute="xform = xflow.createTransform({translation: bonePosition, rotation: poseRotation} )">
-                        
-                <float3 param="" name="bonePosition"></float3>
-                
-                <data id="poseRotation" compute="poseRotation = xflow.slerpSeq(pose, time)" >
-                    <float4 param="" name="pose" ></float4>
-                    <float param="" name="time" ></float>
-                </data>
-            </data>                     
-        </proto>
+            <float3 param="" name="bonePosition"></float3>
+            <float4 param="" name="pose" ></float4>
+            <float param="" name="time" ></float>
+            <compute>
+                poseRotation = xflow.slerpSeq(pose, time);
+                xform = xflow.createTransform({translation: bonePosition, rotation: poseRotation} );
+                pose = xflow.forwardKinematics(boneParent, xform);
+            </compute>
+        </dataflow>
         
-        <data id="finalTransform" compute="boneXform = xflow.mul(bindPose, pose)" >  
+        <dataflow id="finalTransform" >
             <data src="#bindPoseTransform" />
-            <data src="#poseTransform" />            
-        </data>
+            <data src="#poseTransform" />
+            <compute>
+                boneXform = xflow.mul(bindPose, pose);
+            </compute>
+        </dataflow>
       
         <data id="skinning" compute="position = xflow.skinPosition(position, boneIdx, boneWeight, boneXform)" >
             <data compute="normal = xflow.skinDirection(normal, boneIdx, boneWeight, boneXform)" >
@@ -81,18 +79,6 @@
         <!-- Instances: -->
         
         <data id="instanceBindPose" proto="#bindPoseTransform" >
-            <data src="#baseData" />
-            <data src="#animationData" />
-            <data src="#timeSlot" />
-        </data>
-        
-        <data id="instancePoseRotation" proto="#poseRotation" >
-            <data src="#baseData" />
-            <data src="#animationData" />
-            <data src="#timeSlot" />
-        </data>
-        
-        <data id="instancePoseLocal" proto="#poseTransformLocal" >
             <data src="#baseData" />
             <data src="#animationData" />
             <data src="#timeSlot" />
@@ -179,36 +165,9 @@
         <Modification>
             <ChangeData input="#time" >1</ChangeData>    
         </Modification>
+
         
 
-        <Check title="Check Rotation #2" data="#instancePoseRotation" >
-            <MatchData name="time" type="float" >
-                1
-            </MatchData>
-            <MatchData name="poseRotation" type="float4" >
-                1 0 0 0  1 0 0 0  0.707107 0 0 0.707107    
-            </MatchData>
-        </Check>
-        
-        
-        <Check title="Check Local Pose #2" data="#instancePoseLocal" >
-            <MatchData name="xform" type="float4x4" >
-                1 0 0 0
-                0 1 0 0
-                0 0 1 0
-                0 0 7 1 
-            
-                1 0 0 0
-                0 1 0 0
-                0 0 1 0
-                0 5 0 1 
-            
-                0 1 0 0
-                -1 0 0 0
-                0 0 1 0
-                0 5 0 1       
-            </MatchData>
-        </Check>
 
                 
         <Check title="Check Pose #2" data="#instancePose" >

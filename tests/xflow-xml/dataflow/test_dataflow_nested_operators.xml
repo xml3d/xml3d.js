@@ -1,0 +1,39 @@
+<!-- 
+	Purpose of Test:
+    Nested Prototypes (Templates using Templates #2)
+-->
+<XflowTest>
+    <Input>
+        <dataflow id="simpleBlend" out="result" >
+            <float3 param="true" name="value" ></float3>
+            <float3 param="true" name="blend" ></float3>
+            <float param="true" name="weight" ></float>
+            <compute>
+                valueAdd = xflow.sub(blend, value);
+                result = xflow.morph(value, valueAdd, weight);
+            </compute>
+        </dataflow>
+
+        <dataflow id="morphShape" out="position">
+            <float3 param="true" name="position"></float3>
+            <float3 param="true" name="blendPos"></float3>
+            <float param="true" name="weight"></float>
+            <compute>
+                position = dataflow['#simpleBlend'](position, blendPos, weight);
+            </compute>
+        </dataflow>
+
+         <data id="data1" compute="dataflow['#morphShape']" >
+            <float3 name='position'>1 1 1</float3>
+            <float3 name='blendPos'>2 2 2</float3>
+            <float name="weight" >0.5</float>
+         </data>
+    </Input>
+    <TestProcess>
+
+        <Check title="Check final output" data="#data1">
+            <MatchData name="position" type="float" >1.5 1.5 1.5</MatchData>
+        </Check>
+        
+    </TestProcess>
+</XflowTest>

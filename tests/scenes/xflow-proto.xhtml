@@ -9,17 +9,17 @@
 <body style="background-color: #fff;width:500px">
   <xml3d id="myXml3d" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
     <defs>
-      <proto id="morphDouble" filter="keep(position)" >
-        <data compute="position = xflow.morph(position, posAdd2, weight2)" >
-          <data compute="position = xflow.morph(position, posAdd1, weight1)" >
-            <float3 param="true" name="position" />
-            <float3 param="true" name="posAdd1" />
-            <float3 param="true" name="posAdd2" />
-            <float3 param="true" name="weight1" />
-            <float3 param="true" name="weight2" />
-          </data>
-        </data>
-      </proto>
+      <dataflow id="morphDouble" out="position" >
+        <float3 param="true" name="position" />
+        <float3 param="true" name="posAdd1" />
+        <float3 param="true" name="posAdd2" />
+        <float3 param="true" name="weight1" />
+        <float3 param="true" name="weight2" />
+        <compute>
+            position = xflow.morph(position, posAdd1, weight1);
+            position = xflow.morph(position, posAdd2, weight2);
+        </compute>
+      </dataflow>
 
       <data id="rectangle" >
         <int name="index">0 1 2 1 2 3</int>

@@ -100,6 +100,15 @@ XML3D.classInfo['xml3d'] = {
     activeView: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
+
+XML3D.classInfo['compute'] = {
+    id: {a: XML3D.IDHandler},
+    className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for script
+    value: {a: XML3D.StringValueHandler},
+    _term: undefined
+};
+
 /**
  * Properties and methods for <data>
  **/
@@ -117,6 +126,20 @@ XML3D.classInfo['data'] = {
     getResult: {m: XML3D.methods.XML3DNestedDataContainerTypeGetResult},
     src: {a: XML3D.ReferenceHandler},
     proto: {a: XML3D.ReferenceHandler},
+    _term: undefined
+};
+
+XML3D.classInfo['dataflow'] = {
+    id: {a: XML3D.IDHandler},
+    className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for data
+    out: {a: XML3D.StringAttributeHandler},
+    getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
+    getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
+    getComputeInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetComputeInfo},
+    getProtoInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetProtoInfo},
+    isOutputConnected: {m: XML3D.methods.XML3DNestedDataContainerTypeIsOutputConnected},
+    getResult: {m: XML3D.methods.XML3DNestedDataContainerTypeGetResult},
     _term: undefined
 };
 /**

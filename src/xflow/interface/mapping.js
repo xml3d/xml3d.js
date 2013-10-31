@@ -24,6 +24,17 @@ Mapping.parse = function(string, dataNode){
     return null;
 }
 
+Xflow.Mapping.prototype._addOwner = function(owner){
+    var idx = this._owners.indexOf(owner);
+    if(idx == -1)
+        this._owners.push(owner);
+}
+
+Xflow.Mapping.prototype._removeOwner = function(owner){
+    var idx = this._owners.indexOf(owner);
+    if(idx != -1)
+        this._owners.splice(idx, -1);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.OrderMapping
@@ -78,14 +89,23 @@ OrderMapping.prototype.isEmpty = function(){
 
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
 
-OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, destSubstitution, srcSubstitution, filterType, callback){
-    for(var i in sourceMap.map){
-        var idx = this._names.indexOf(i);
-        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
-            ( filterType == Xflow.DATA_FILTER_TYPE.KEEP && idx != -1) ||
-            (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
-            callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
+OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback){
+    if(filterType == Xflow.DATA_FILTER_TYPE.KEEP){
+        for(var i = 0; i < this._names.length; ++i){
+            var name = this._names[i];
+            if(sourceMap.map[name])
+                callback(destMap, name, sourceMap, name);
+        }
     }
+    else{
+        for(var i in sourceMap.map){
+            var idx = this._names.indexOf(i);
+            if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
+                (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
+                callback(destMap, i, sourceMap, i);
+        }
+    }
+
 };
 OrderMapping.prototype.getScriptInputName = function(index, destName){
     if(this._names[index])
@@ -223,21 +243,21 @@ NameMapping.prototype.filterNameset = function(nameset, filterType)
 
 }
 
-NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, destSubstitution, srcSubstitution, filterType, callback)
+NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback)
 {
     if(filterType == Xflow.DATA_FILTER_TYPE.REMOVE){
         for(var i in sourceMap.map)
             if(this._srcNames.indexOf(i) == -1)
-                callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
+                callback(destMap, i, sourceMap, i);
     }
     else{
         if(filterType == Xflow.DATA_FILTER_TYPE.RENAME){
             for(var i in sourceMap.map)
                 if(this._srcNames.indexOf(i) == -1)
-                    callback(destMap, i, sourceMap, i, destSubstitution, srcSubstitution);
+                    callback(destMap, i, sourceMap, i);
         }
         for(var i in this._destNames){
-            callback(destMap, this._destNames[i], sourceMap, this._srcNames[i], destSubstitution, srcSubstitution);
+            callback(destMap, this._destNames[i], sourceMap, this._srcNames[i]);
         }
     }
 };
@@ -274,8 +294,8 @@ NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
 
 
 function mappingNotifyOwner(mapping){
-    if(mapping._owner)
-        mapping._owner.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    for(var i = 0; i < mapping._owners.length; ++i)
+        mapping._owners[i].notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 };
 

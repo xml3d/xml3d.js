@@ -62,10 +62,10 @@
     function initRequestNode(cData, executer, ownerNode){
         if(ownerNode instanceof Xflow.RequestNode){
             cData.finalOutput = {};
-            var filter = ownerNode.filter || ownerNode.owner.finalOutputChannels.getNames();
+            var filter = ownerNode.filter || ownerNode.owner.outputChannels.getNames();
             for(var i = 0; i < filter.length; ++i){
                 var name = filter[i];
-                var channel = ownerNode.owner.finalOutputChannels.getChannel(name);
+                var channel = ownerNode.owner.outputChannels.getChannel(name);
                 if(channel && channel.creatorProcessNode)
                     cData.finalOutput[name] = channel.getDataEntry();
             }

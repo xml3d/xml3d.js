@@ -126,7 +126,7 @@ VertexShaderRequest.prototype.getResult = function(){
 
 VertexShaderRequest.prototype._onDataNodeChange = function(notification){
     if(notification == Xflow.RESULT_STATE.CHANGED_STRUCTURE){
-        var newVSConnectedNode = getVsConnectNode(this._dataNode, this._vsConfig);
+        var newVSConnectedNode = getVsConnectNode(this._dataNode, this._vsConfig, this._filter);
         if(newVSConnectedNode != this._vsConnectNode){
             clearVsConnectNode(this._vsConnectNode, this._dataNode, this._vsConfig);
             this._vsConnectNode = newVSConnectedNode;
@@ -139,18 +139,20 @@ VertexShaderRequest.prototype._onResultChanged = function(result, notification){
     this._onDataNodeChange(notification);
 }
 
-function getVsConnectNode(dataNode, vsConfig){
-    var forwardNode = dataNode._getForwardNode();
+function getVsConnectNode(dataNode, vsConfig, filter){
+    var forwardNode = dataNode._getForwardNode(filter);
 
-    var key = getDataNodeShaderKey(dataNode, vsConfig);
+    var key = getDataNodeShaderKey(forwardNode, vsConfig);
     var connectNode;
     if(!(connectNode = c_vsConnectNodeCache[key])){
-        var graph = dataNode._graph;
+        var graph = forwardNode._graph;
         connectNode = graph.createDataNode(false);
-        connectNode.appendChild(dataNode);
+        connectNode.appendChild(forwardNode);
 
         var operator = vsConfig.getOperator();
         connectNode.computeOperator = operator;
+        connectNode.computeInputMapping = new Xflow.OrderMapping();
+        connectNode.computeOutputMapping = new Xflow.OrderMapping();
         vsConfig.setInputMapping(connectNode._computeInputMapping);
         vsConfig.setOutputMapping(connectNode._computeOutputMapping);
 

@@ -1,0 +1,61 @@
+<!-- 
+	Purpose of Test:
+    Nested Prototypes (Templates using Templates #2)
+-->
+<XflowTest>
+    <Input>
+        <dataflow id="doubleBlend" out="result2, result1" >
+            <float param="true" name="weight" ></float>
+            <float3 param="true" name="value1" ></float3>
+            <float3 param="true" name="baseValue1" ></float3>
+            <float3 param="true" name="blend1" ></float3>
+            <compute>
+                valueAdd1 = xflow.sub(blend1, baseValue1);
+                result1 = xflow.morph(value1, valueAdd1, weight);
+            </compute>
+            <float3 param="true" name="value2" ></float3>
+            <float3 param="true" name="baseValue2" ></float3>
+            <float3 param="true" name="blend2" ></float3>
+            <compute>
+                valueAdd2 = xflow.sub(blend2, baseValue2);
+                result2 = xflow.morph(value2, valueAdd2, weight);
+            </compute>
+        </dataflow>
+
+        <dataflow id="morphShape" out="position, normal">
+            <float3 param="true" name="position"> </float3>
+            <float3 param="true" name="blendPos1"> </float3>
+            <float3 param="true" name="blendPos2"> </float3>
+            <float3 param="true" name="normal"> </float3>
+            <float3 param="true" name="blendNormal1"> </float3>
+            <float3 param="true" name="blendNormal2"> </float3>
+            <float  param="true" name="weight1"> </float>
+            <float  param="true" name="weight2"> </float>
+            <compute>
+                (normalTmp, posTmp) = dataflow['#doubleBlend'](weight1, position, position, blendPos1,
+                                                               normal, normal, blendNormal1);
+                (normal, position) = dataflow['#doubleBlend'](weight2, posTmp, position, blendPos2,
+                                                               normalTmp, normal, blendNormal2);
+            </compute>
+        </dataflow>
+
+         <data id="data1" compute="dataflow['#morphShape']" >
+            <float3 name='position'>3 3 3</float3>
+            <float3 name='blendPos1'>4 3 3</float3>
+            <float3 name='blendPos2'>3 3 1</float3>
+            <float3 name='normal'>1 0 0</float3>
+            <float3 name='blendNormal1'>0 1 0</float3>
+            <float3 name='blendNormal2'>0 0 1</float3>
+            <float name="weight1" >0.25</float>
+            <float name="weight2" >0.75</float>
+         </data>
+    </Input>
+    <TestProcess>
+
+        <Check title="Check final output" data="#data1">
+            <MatchData name="position" type="float" >3.25 3 1.5</MatchData>
+            <MatchData name="normal" type="float" >0 0.25 0.75</MatchData>
+        </Check>
+        
+    </TestProcess>
+</XflowTest>

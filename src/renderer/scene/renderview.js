@@ -8,6 +8,9 @@
     /** @const */
     var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
 
+    /** @const */
+    var CLIPPLANE_NEAR_MIN = 1;
+
     /**
      *
      * @constructor
@@ -89,14 +92,15 @@
                 this.getWorldToViewMatrix(t_mat);
                 XML3D.math.bbox.transform(bb, t_mat, bb);
 
-                var bounds = { zMin: bb[2], zMax: bb[5] };
-                var length = XML3D.math.bbox.longestSide(bb);
+                var near = -bb[5],
+                    far = -bb[2],
+                    expand = Math.max((far - near) * 0.01, 0.1);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
-                bounds.zMin -= length * 0.005;
-                bounds.zMax += length * 0.005;
+                far += expand;
+                near -= expand;
 
-                return {near: Math.max(-bounds.zMax, 0.01*length), far: -bounds.zMin};
+                return {near: Math.max(near, CLIPPLANE_NEAR_MIN), far: far};
             }
         })(),
 

@@ -65,8 +65,8 @@ test("Uniform override changes", 8, function() {
     };
 
     handler.draw();
-    var colorElement = xml3dElement.querySelector("#m_5 float3[name=diffuseColor]");
-    var mesh5 = xml3dElement.querySelector("#m_6");
+    var colorElement = this.doc.getElementById("m_5").querySelector("float3[name=diffuseColor]");
+    var mesh5 = this.doc.getElementById("m_6");
 
     colorElement.parentNode.removeChild(colorElement);
     mesh5.appendChild(colorElement);
@@ -181,8 +181,8 @@ test("Texture override changes", 8, function() {
     };
 
     handler.draw();
-    var textureElement = xml3dElement.querySelector("#m_1 texture");
-    var mesh3 = xml3dElement.querySelector("#m_3");
+    var textureElement = this.doc.getElementById("m_1").querySelector("texture");
+    var mesh3 = this.doc.getElementById("m_3");
 
     textureElement.parentNode.removeChild(textureElement);
     mesh3.appendChild(textureElement);

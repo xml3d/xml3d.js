@@ -24,7 +24,7 @@ XML3D.shaders.register("matte", {
         "    vec3 color = diffuseColor;",
         "    if (useVertexColor)",
         "       color *=  fragVertexColor;",
-        "    gl_FragColor = vec4(diffuseColor, 1.0);",
+        "    gl_FragColor = vec4(color, 1.0);",
         "}"
     ].join("\n"),
 

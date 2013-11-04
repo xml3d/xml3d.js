@@ -25,7 +25,6 @@
             data:           ns.DataRenderAdapter,
             transform:      ns.TransformRenderAdapter,
             shader:         ns.ShaderRenderAdapter,
-            texture:        ns.TextureRenderAdapter,
             group:          ns.GroupRenderAdapter,
             img:            ns.ImgRenderAdapter,
             light:          ns.LightRenderAdapter,

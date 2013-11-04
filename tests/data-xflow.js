@@ -15,7 +15,7 @@ module("Xflow tests", {
             that.win = document.getElementById("xml3dframe").contentWindow;
             start();
         };
-        loadDocument("scenes/data-xflow.xhtml", this.cb);
+        loadDocument("scenes/data-xflow.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -61,6 +61,7 @@ module("Xflow tests", {
         var temp;
         while (child) {
            temp = child.nextElementSibling;
+           console.log(child);
            defsElem.appendChild(child);
            this.getDataAdapter(child);
            child = temp;

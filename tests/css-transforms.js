@@ -7,7 +7,7 @@ module("CSS Transformations", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/css-transforms.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/css-transforms.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

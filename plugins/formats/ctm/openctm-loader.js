@@ -34,8 +34,11 @@
 
     function createXflowBuffer(dataNode, name, type, size, key) {
         var inputNode = Xflow.createBufferInputNode(type, name, size);
-        dataNode.appendChild(inputNode);
-        return inputNode.data.getValue();
+        if (inputNode) {
+            dataNode.appendChild(inputNode);
+            return inputNode.data.getValue();
+        }
+        return null;
     }
 
     // OpenCTM
@@ -89,7 +92,7 @@
                 normal[i * 3 + 2] = 0;
             }
         }
-        if (file.body.uvMaps) {
+        if (file.body.uvMaps && texcoord) {
             var uvMap = file.body.uvMaps[0];
             for (var i = 0; i < uvMap.uv.length; ++i) {
                 texcoord[i] = uvMap.uv[i];

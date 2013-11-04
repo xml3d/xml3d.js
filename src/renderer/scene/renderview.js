@@ -11,6 +11,9 @@
     /** @const */
     var CLIPPLANE_NEAR_MIN = 0.01;
 
+    /** @const */
+    var DEFAULT_FIELDOFVIEW = 45 / 180 * Math.PI;
+
     /**
      *
      * @constructor
@@ -21,12 +24,13 @@
         opt = opt || {};
         this.position = opt.position || XML3D.math.vec3.create();
         this.orientation = opt.orientation || XML3D.math.mat4.create();
-        this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : 0.78;
+        this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : DEFAULT_FIELDOFVIEW;
         this.worldSpacePosition = XML3D.math.vec3.create();
         this.projectionAdapter = opt.projectionAdapter;
         this.viewDirty = true;
         this.projectionDirty = true;
         this.frustum = new XML3D.webgl.Frustum(1, 100000, 0, this.fieldOfView, 1);
+        this.lastAspectRatio = 1;
     };
     RenderView.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -65,6 +69,7 @@
                     this.setProjectionMatrix(this.projectionAdapter.getMatrix("perspective"));
                     return;
                 }
+
                 var clipPlane = this.getClippingPlanes(),
                     near = clipPlane.near,
                     far = clipPlane.far,
@@ -76,6 +81,8 @@
                 this.setProjectionMatrix(tmp);
                 // Update Frustum
                 this.frustum.setFrustum(near, far, 0, fovy, aspect);
+
+                this.lastAspectRatio = aspect;
             }
         })(),
 
@@ -182,7 +189,7 @@
         },
 
         getProjectionMatrix: function(dest, aspect) {
-                if (this.projectionDirty) {
+                if (this.projectionDirty || aspect != this.lastAspectRatio) {
                     this.updateProjectionMatrix(aspect);
                 }
                 var o = this.offset + PROJECTION_MATRIX_OFFSET;

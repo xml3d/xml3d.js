@@ -20,14 +20,17 @@
             return function (scene) {
                 var gl = this.context.gl,
                     target = this.target,
+                    width = target.getWidth(),
+                    height = target.getHeight(),
+                    aspect = width / height,
                     count = { objects: 0, primitives: 0 };
 
                 target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-                gl.viewport(0, 0, target.getWidth(), target.getHeight());
+                gl.viewport(0, 0, width, height);
                 gl.enable(gl.DEPTH_TEST);
 
-                scene.updateReadyObjectsFromActiveView(target.getWidth() / target.getHeight());
+                scene.updateReadyObjectsFromActiveView(aspect);
                 scene.getActiveView().getWorldToViewMatrix(c_worldToViewMatrix);
 
                 var sorted = this.sorter.sortScene(scene, c_worldToViewMatrix);
@@ -80,7 +83,7 @@
                 program.bind();
                 //this.shaderManager.updateActiveShader(shader);
                 scene.getActiveView().getWorldToViewMatrix(c_viewMat_tmp);
-                scene.getActiveView().getProjectionMatrix(c_projMat_tmp, this.width / this.height);
+                scene.getActiveView().getProjectionMatrix(c_projMat_tmp, this.target.getWidth() / this.target.getHeight());
 
                 systemUniforms["viewMatrix"] = c_viewMat_tmp;
                 systemUniforms["projectionMatrix"] = c_projMat_tmp;

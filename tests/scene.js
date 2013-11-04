@@ -130,7 +130,7 @@ test("Bounding Boxes", 7, function () {
     QUnit.closeArray(actualBB, new Float32Array([-2, -2, -2,2, 5, 2]), EPSILON, "Original group's transformation removed");
 });
 
-test("View", function() {
+test("Clipping Planes", function() {
     var view = this.scene.createRenderView();
     ok(view);
     var CLIPING_NEAR_MINIMUM = 0.01;
@@ -184,6 +184,27 @@ test("View", function() {
 
     deepEqual(view.getClippingPlanes(), { near: trans - 2.1, far: trans+2.1 }, "Translated to exceed minimum of near");
 
+
+});
+
+test("View projection matrix", function() {
+    var view = this.scene.createRenderView();
+    ok(view);
+
+    var projectionMatrixActual = XML3D.math.mat4.create();
+    var projectionMatrixExpected = XML3D.math.mat4.create();
+
+    this.scene.setActiveView(view);
+
+    view.getProjectionMatrix(projectionMatrixActual, 0.5 );
+    var cp = view.getClippingPlanes();
+    XML3D.math.mat4.perspective(projectionMatrixExpected,  45 / 180 * Math.PI, 0.5, cp.near, cp.far);
+    QUnit.closeArray(projectionMatrixActual, projectionMatrixExpected, EPSILON, "Projection, aspect ration 0.5");
+
+    view.getProjectionMatrix(projectionMatrixActual, 0.6 );
+    var cp = view.getClippingPlanes();
+    XML3D.math.mat4.perspective(projectionMatrixExpected,  45 / 180 * Math.PI, 0.6, cp.near, cp.far);
+    QUnit.closeArray(projectionMatrixActual, projectionMatrixExpected, EPSILON, "Projection, aspect ration 0.6");
 
 });
 

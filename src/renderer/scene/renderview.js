@@ -9,7 +9,7 @@
     var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
 
     /** @const */
-    var CLIPPLANE_NEAR_MIN = 1;
+    var CLIPPLANE_NEAR_MIN = 0.01;
 
     /**
      *

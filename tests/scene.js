@@ -133,6 +133,7 @@ test("Bounding Boxes", 7, function () {
 test("View", function() {
     var view = this.scene.createRenderView();
     ok(view);
+    var CLIPING_NEAR_MINIMUM = 0.01;
 
     this.scene.setActiveView(view);
 
@@ -140,21 +141,22 @@ test("View", function() {
 
     var obj = this.scene.createRenderObject();
     obj.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
-    deepEqual(view.getClippingPlanes(), { near: 1, far: 1.1 }, "Unit box");
+    deepEqual(view.getClippingPlanes(), { near: CLIPING_NEAR_MINIMUM, far: 1.1 }, "Unit box");
+    obj.remove();
 
     var obj = this.scene.createRenderObject();
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
-    deepEqual(view.getClippingPlanes(), { near: 1, far: 2.1 }, "Larger values");
+    deepEqual(view.getClippingPlanes(), { near: CLIPING_NEAR_MINIMUM, far: 2.1 }, "Larger values");
 
     view.updateOrientation(new XML3DRotation(new XML3DVec3(0,1,0), Math.PI / 2.0).toMatrix()._data);
     var planes = view.getClippingPlanes();
-    QUnit.close(planes.near, 1, EPSILON, "Rotated 180: near");
+    QUnit.close(planes.near, CLIPING_NEAR_MINIMUM, EPSILON, "Rotated 180: near");
     QUnit.close(planes.far, 2.1, EPSILON, "Rotated 180: far");
 
     view.updateOrientation(new XML3DRotation(new XML3DVec3(0,0.707,0.707), Math.PI / 3.0).toMatrix()._data);
 
     planes = view.getClippingPlanes();
-    QUnit.close(planes.near, 1 , EPSILON, "Rotated arbitrary: near");
+    QUnit.close(planes.near, CLIPING_NEAR_MINIMUM , EPSILON, "Rotated arbitrary: near");
     QUnit.close(planes.far, 3.324, EPSILON, "Rotated arbitrary: far");
 
     var group2 = this.scene.createRenderGroup();
@@ -168,12 +170,20 @@ test("View", function() {
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
 
     view.updateOrientation(XML3D.math.mat4.create());
-    deepEqual(view.getClippingPlanes(), { near: 1, far: 2.1 }, "Translated group");
+    deepEqual(view.getClippingPlanes(), { near: CLIPING_NEAR_MINIMUM, far: 2.1 }, "Translated group");
 
     XML3D.math.mat4.scale(trans2, trans2, [20,20,20]);
     group2.setLocalMatrix(trans2);
 
-    deepEqual(view.getClippingPlanes(), { near: 1, far: 40.8 }, "Scaled group");
+    deepEqual(view.getClippingPlanes(), { near: CLIPING_NEAR_MINIMUM, far: 40.8 }, "Scaled group");
+
+    var trans = 80;
+    XML3D.math.mat4.identity(trans2);
+    XML3D.math.mat4.translate(trans2, trans2, [0, 0, -trans]);
+    group2.setLocalMatrix(trans2);
+
+    deepEqual(view.getClippingPlanes(), { near: trans - 2.1, far: trans+2.1 }, "Translated to exceed minimum of near");
+
 
 });
 

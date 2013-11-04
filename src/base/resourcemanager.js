@@ -281,9 +281,14 @@
             return;
         }
         docCache.format = formatHandler;
-        formatHandler.getFormatData(response, httpRequest.responseType, cleanedMimetype, function(result){
-            docCache.response = result;
-            updateDocumentHandles(url)
+        formatHandler.getFormatData(response, httpRequest.responseType, cleanedMimetype, function(success, result){
+            if(success){
+                docCache.response = result;
+                updateDocumentHandles(url)
+            }
+            else{
+                invalidateDocumentHandles(url);
+            }
         } );
 
     }

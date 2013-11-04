@@ -62,7 +62,7 @@
      * @return {Object}
      */
     FormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
-        callback(response);
+        callback(true, response);
     }
 
     /**
@@ -94,7 +94,7 @@
     }
 
     XMLFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
-        callback(response);
+        callback(true, response);
     }
 
     XMLFormatHandler.prototype.getFragmentData = function(documentData, fragment) {
@@ -124,7 +124,7 @@
         for (var i = 0; i < xml3dElements.length; ++i) {
             XML3D.config.element(xml3dElements[i]);
         }
-        callback(response);
+        callback(true, response);
     }
 
     /**
@@ -138,10 +138,6 @@
 
     JSONFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
         return mimetype === "application/json";
-    }
-
-    JSONFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
-        callback(response);
     }
 
     /**

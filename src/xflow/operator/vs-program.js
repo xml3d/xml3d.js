@@ -15,14 +15,48 @@
 
     Xflow.VSProgram = function(operatorList){
         this.list = operatorList;
-
-        this._glslCode = null;
-        this._shaderInputNames = [];
-        this._shaderOutputNames = [];
-        this._inputInfo = {};
-        this._outputInfo = {};
-        constructVS(this);
+        this._outputIterate = {};
+        setOutputIterate(this);
     }
+
+    Xflow.VSProgram.prototype.isOutputUniform = function(name){
+        return this._outputIterate[name] == Xflow.ITERATION_TYPE.ONE;
+    }
+
+    Xflow.VSProgram.prototype.isOutputNull = function(name){
+        return this._outputIterate[name] == Xflow.ITERATION_TYPE.NULL;
+    }
+
+    Xflow.VSProgram.prototype.createVertexShader = function(programData, vsConfig){
+        var result = new Xflow.VertexShader(programData);
+        constructVS(result, this, vsConfig)
+    }
+
+    function setOutputIterate(program){
+        var operatorList = program.list, entries = operatorList.entries;
+
+        var baseEntry = entries[entries.length - 1], baseOperator = baseEntry.operator;
+
+        for( var i = 0; i < baseOperator.params.length; ++i){
+            var entry = baseOperator.params[i],
+                name = baseOperator.params[i].source,
+                inputIndex = i,
+                directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
+            if( baseEntry.isTransferInput(inputIndex) ||
+                operatorList.isInputIterate(directInputIndex))
+            {
+                program._outputIterate[name] = Xflow.ITERATION_TYPE.MANY;
+            }
+            else if(operatorList.isInputUniform(directInputIndex)){
+                program._outputIterate[name] = Xflow.ITERATION_TYPE.ONE;
+            }
+            else{
+                program._outputIterate[name] = Xflow.ITERATION_TYPE.NULL;
+            }
+        }
+    }
+
+
 
     Xflow.VSProgram.prototype.isInputUniform = function(name){
         return this._inputInfo[name].uniform;
@@ -38,20 +72,13 @@
         return this._outputInfo[name].sourceName;
     }
 
-    Xflow.VSProgram.prototype.isOutputUniform = function(name){
-        return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.ONE;
-    }
 
-    Xflow.VSProgram.prototype.isOutputNull = function(name){
-        return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.NULL;
-    }
 
     Xflow.VSProgram.prototype.getUniformOutputData = function(name, programData){
         return programData.getDataEntry(this._outputInfo[name].index);
     }
 
-
-    function constructVS(program){
+    function constructVS(vs, program, vsConfig){
         var operatorList = program.list, entries = operatorList.entries;
 
         var usedNames = [],
@@ -59,59 +86,59 @@
             transferNames = {};
 
         var baseEntry = entries[entries.length - 1], acceptedBaseShaderInput = [], baseOperator = baseEntry.operator;
-        var vsConfig = baseOperator.vsConfig, outputInputMap = baseOperator.outputInputMap;
 
         if(!vsConfig)
             throw new Error("Could not find vsConfig! Attempt to create vertex shader programm without VS operator?");
 
-        for(var i = 0; i < entries.length; ++i){
-            if(entries[i].blockedNames){
-                Xflow.nameset.add(usedNames, entries[i].blockedNames);
-            }
-        }
+        Xflow.nameset.add(usedNames, vsConfig.getBlockedNames());
 
         var code = "";
-        code += "// GLOBALS\n"
-        // Start with Globals
-        for(var type in Xflow.shaderConstant){
-            var name = Xflow.shaderConstant[type];
-            code += "uniform " + c_SHADER_CONSTANT_TYPES[type]  +
-                    " " + name + ";\n";
+
+        // First: collect output names
+        for(var name in vsConfig._addOutput){
+            var entry = vsConfig._addOutput[name];
+            code += "varying " + getGLSLType(entry.type) + " " + name + ";\n";
             Xflow.nameset.add(usedNames, name);
         }
-        code += "\n";
-        code += "// OUTPUT\n"
-        // First: collect output names
-
-        for( var i = 0; i < vsConfig._attributes.length; ++i){
-            var configAttr = vsConfig._attributes[i],
-                inputIndex = outputInputMap[i],
+        var inputIndex = 0;
+        for( var name in vsConfig._attributes){
+            var configAttr = vsConfig._attributes[name],
                 directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
-            var outputInfo = {type: configAttr.type, iteration: 0, index: 0, sourceName: configAttr.inputName},
-                outputName = configAttr.outputName;
-            if(vsConfig.isAttributeTransformed(i) ||
-                baseEntry.isTransferInput(inputIndex) ||
-                operatorList.isInputIterate(directInputIndex))
-            {
-                acceptedBaseShaderInput[inputIndex] = true;
-                outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
-
-                code += "varying " + getGLSLType(baseOperator.outputs[i].type) + " " + outputName + ";\n";
-                Xflow.nameset.add(usedNames, outputName);
-                transferNames[baseEntry.getTransferOutputId(i)] = outputName;
+            for(var i = 0; i < configAttr.channeling.length; ++i){
+                var channeling = configAttr.channeling[i];
+                var outputInfo = {type: configAttr.type, iteration: 0, index: 0, sourceName: name},
+                    outputName = channeling.outputName;
+                if( channeling.code ||
+                    baseEntry.isTransferInput(inputIndex) ||
+                    operatorList.isInputIterate(directInputIndex))
+                {
+                    acceptedBaseShaderInput[inputIndex] = true;
+                    outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
+                    var type = baseOperator.outputs[inputIndex].type;
+                    code += "varying " + getGLSLType(type) + " " + outputName + ";\n";
+                    Xflow.nameset.add(usedNames, outputName);
+                    transferNames[baseEntry.getTransferOutputId(i)] = outputName;
+                }
+                else if(operatorList.isInputUniform(directInputIndex)){
+                    outputInfo.iteration = Xflow.ITERATION_TYPE.ONE;
+                    outputInfo.index = directInputIndex;
+                }
+                else{
+                    outputInfo.iteration = Xflow.ITERATION_TYPE.NULL;
+                }
+                Xflow.nameset.add(vs._outputNames, outputName);
+                vs._outputInfo[outputName] = outputInfo;
             }
-            else if(operatorList.isInputUniform(directInputIndex)){
-                outputInfo.iteration = Xflow.ITERATION_TYPE.ONE;
-                outputInfo.index = directInputIndex;
-            }
-            else{
-                outputInfo.iteration = Xflow.ITERATION_TYPE.NULL;
-            }
-            Xflow.nameset.add(program._shaderOutputNames, outputName);
-            program._outputInfo[outputName] = outputInfo;
+            inputIndex++;
         }
         code += "\n";
         code += "// INPUT\n"
+        // Add additional input
+        for(var name in vsConfig._addInput){
+            var entry = vsConfig._addInput[name];
+            code += (entry.uniform ? "uniform " : "attribute " ) + getGLSLType(entry.type) + " " + name + ";\n";
+            Xflow.nameset.add(usedNames, name);
+        }
         // Second: collect input names
         for(var i = 0; i < entries.length; ++i){
             var entry = entries[i], operator = entry.operator;
@@ -122,15 +149,12 @@
                     var mapEntry = operator.mapping[j];
                     var name = getFreeName(mapEntry.name, usedNames), inputIndex = entry.getDirectInputIndex(j),
                         uniform = !operatorList.isInputIterate(inputIndex);
-                    program._inputInfo[name] = { index: inputIndex, uniform: uniform };
-                    Xflow.nameset.add(program._shaderInputNames, name);
+                    vs._inputInfo[name] = { index: inputIndex, uniform: uniform };
+                    Xflow.nameset.add(vs._inputNames, name);
                     directInputNames[inputIndex] = name;
-
                     code += (uniform ? "uniform " : "attribute ") + getGLSLType(mapEntry.internalType) + " " + name;
-
                     if(mapEntry.array)
-                        code += "[" + operatorList.getInputSize(inputIndex) + "]"
-
+                        code += "[" + operatorList.getInputSize(inputIndex) + "]";
                     code += ";\n";
                 }
             }
@@ -152,49 +176,72 @@
                 }
             }
             // Take Code Fragment
-            var codeFragment = operator.evaluate_glsl, index;
-
-            if(operator.glsl_fragments){
-                for(var outputName in program._outputInfo){
-                    if(program._outputInfo[outputName].iteration == Xflow.ITERATION_TYPE.MANY)
-                        codeFragment += "\n" + operator.glsl_fragments[outputName];
-                }
-            }
-
-            while((index = codeFragment.indexOf("#I{")) != -1){
-                var end = codeFragment.indexOf("}",index);
-                var mappingIndex = getMappingIndex(operator, codeFragment.substring(index+3,end));
-                var replaceName = entry.isTransferInput(mappingIndex) ?
-                    transferNames[entry.getTransferInputId(mappingIndex)] :
-                    directInputNames[entry.getDirectInputIndex(mappingIndex)];
-                codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
-            }
-            while((index = codeFragment.indexOf("#O{")) != -1){
-                var end = codeFragment.indexOf("}",index);
-                var outputIndex = getOutputIndex(operator, codeFragment.substring(index+3,end));
-                var replaceName = transferNames[entry.getTransferOutputId(outputIndex)];
-                codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
-            }
-            var localNames = [];
-            while((index = codeFragment.indexOf("#L{")) != -1){
-                var end = codeFragment.indexOf("}",index);
-                var key = codeFragment.substring(index+3,end);
-                if(!localNames[key]){
-                    localNames[key] = getFreeName(key, usedNames);
-                }
-                var replaceName = localNames[key];
-                codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
-            }
-            while((index = codeFragment.indexOf("#G{")) != -1){
-                var end = codeFragment.indexOf("}",index);
-                var replaceName = codeFragment.substring(index+3,end);
-                codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
-            }
+            var codeFragment = convertCodeFragment(operator.evaluate_glsl, entry,
+                                    transferNames, directInputNames, usedNames);
             code += codeFragment + "\n";
         }
-        code += "}\n";
 
-        program._glslCode = code;
+        if(operator.glsl_fragments){
+            for(var outputName in program._outputInfo){
+                if(program._outputInfo[outputName].iteration == Xflow.ITERATION_TYPE.MANY)
+                    codeFragment += "\n" + operator.glsl_fragments[outputName];
+            }
+        }
+        // Add attribute channeling code
+        var mappingIndex = 0, conversionCode = "";
+        for( var name in vsConfig._attributes){
+            var entry = vsConfig._attributes[name];
+            for(var i = 0; i < entry.channeling.length; ++i){
+                var channeling = entry.channeling[i], outputName = channeling.outputName;
+                if(vs._outputInfo[outputName].iteration == Xflow.ITERATION_TYPE.MANY){
+                    if(channeling.code)
+                        conversionCode += "\t" + channeling.code + ";\n";
+                    else
+                        conversionCode += "\t" + outputName + " = #I{" + name + "};\n";
+                }
+            }
+            mappingIndex++;
+        }
+        for( var i = 0; i < vsConfig._codeFragments.length; ++i){
+            conversionCode += "\t" + vsConfig._codeFragments[i] + ";\n";
+        }
+        code += convertCodeFragment(conversionCode, baseEntry, transferNames, directInputNames, usedNames) + "\n";
+
+        code += "}\n";
+        vs._glslCode = code;
+    }
+
+    function convertCodeFragment(codeFragment, entry, transferNames, directInputNames, usedNames){
+        var index, operator = entry.operator;
+        while((index = codeFragment.indexOf("#I{")) != -1){
+            var end = codeFragment.indexOf("}",index);
+            var mappingIndex = getMappingIndex(operator, codeFragment.substring(index+3,end));
+            var replaceName = entry.isTransferInput(mappingIndex) ?
+                transferNames[entry.getTransferInputId(mappingIndex)] :
+                directInputNames[entry.getDirectInputIndex(mappingIndex)];
+            codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
+        }
+        while((index = codeFragment.indexOf("#O{")) != -1){
+            var end = codeFragment.indexOf("}",index);
+            var outputIndex = getOutputIndex(operator, codeFragment.substring(index+3,end));
+            var replaceName = transferNames[entry.getTransferOutputId(outputIndex)];
+            codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
+        }
+        var localNames = [];
+        while((index = codeFragment.indexOf("#L{")) != -1){
+            var end = codeFragment.indexOf("}",index);
+            var key = codeFragment.substring(index+3,end);
+            if(!localNames[key]){
+                localNames[key] = getFreeName(key, usedNames);
+            }
+            var replaceName = localNames[key];
+            codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
+        }
+        while((index = codeFragment.indexOf("#G{")) != -1){
+            var end = codeFragment.indexOf("}",index);
+            var replaceName = codeFragment.substring(index+3,end);
+            codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
+        }
     }
 
     function getFreeName(name, usedNames){

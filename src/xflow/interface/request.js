@@ -135,6 +135,13 @@ VertexShaderRequest.prototype._onDataNodeChange = function(notification){
     Request.prototype._onDataNodeChange.call(this, notification);
 }
 
+VertexShaderRequest.prototype.getVertexShader = function(){
+    if(!this._vertexShader){
+        this._vertexShader = this._result.getVertexShader(this._vsConfig);
+    }
+    return this._vertexShader;
+}
+
 VertexShaderRequest.prototype._onResultChanged = function(result, notification){
     this._onDataNodeChange(notification);
 }
@@ -149,12 +156,9 @@ function getVsConnectNode(dataNode, vsConfig, filter){
         connectNode = graph.createDataNode(false);
         connectNode.appendChild(forwardNode);
 
-        var operator = vsConfig.getOperator();
-        connectNode.computeOperator = operator;
-        connectNode.computeInputMapping = new Xflow.OrderMapping();
-        connectNode.computeOutputMapping = new Xflow.OrderMapping();
-        vsConfig.setInputMapping(connectNode._computeInputMapping);
-        vsConfig.setOutputMapping(connectNode._computeOutputMapping);
+        connectNode.computeOperator = vsConfig.getOperator();
+        connectNode.computeInputMapping = null;
+        connectNode.computeOutputMapping = null;
 
         c_vsConnectNodeCache[key] = connectNode;
         c_vsConnectNodeCount[connectNode.id] = 1;

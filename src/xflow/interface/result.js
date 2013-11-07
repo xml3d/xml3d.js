@@ -102,61 +102,38 @@ ComputeResult.prototype.getOutputMap = function() {
  * @constructor
  * @extends {Xflow.Result}
  */
-Xflow.VertexShaderResult = function(){
+Xflow.VSDataResult = function(){
     Xflow.Result.call(this);
-    this._shaderInputNames = null;
     this._program = null;
     this._programData = null;
-
 };
-Xflow.createClass(Xflow.VertexShaderResult, Xflow.Result);
-var VertexShaderResult = Xflow.VertexShaderResult;
+Xflow.createClass(Xflow.VSDataResult, Xflow.Result);
+var VSDataResult = Xflow.VSDataResult;
 
-Object.defineProperty(VertexShaderResult.prototype, "shaderInputNames", {
-    set: function(v){
-        throw new Error("shaderInputNames is readonly");
-    },
-    get: function(){ return this._program._shaderInputNames; }
-});
-Object.defineProperty(VertexShaderResult.prototype, "shaderOutputNames", {
+Object.defineProperty(VSDataResult.prototype, "shaderOutputNames", {
     set: function(v){
         throw new Error("shaderOutputNames is readonly");
     },
-    get: function(){ return this._program._shaderOutputNames; }
+    get: function(){ return this._programData.getFinalOutputNames(); }
 });
 
-
-VertexShaderResult.prototype.getShaderInputData = function(name){
-    return this._program.getInputData(name, this._programData);
-};
-
-VertexShaderResult.prototype.isShaderInputUniform = function(name){
-    return this._program.isInputUniform(name);
-}
-
-VertexShaderResult.prototype.isShaderOutputUniform = function(name){
+VSDataResult.prototype.isOutputUniform = function(name){
     return this._program.isOutputUniform(name);
+    if(this._programData.isFinalOutputProcessed(name))
+        return false;
+    var entry = this._programData.getFinalOutputDataEntry(name);
+    if(!entry)
+        return false;
+    var iterateCount = entry.getIterateCount ? entry.getIterateCount() : 1
+    return iterateCount == 1;
 }
-VertexShaderResult.prototype.getShaderOutputType = function(name){
-    return this._program.getShaderOutputType(name);
-}
-VertexShaderResult.prototype.getShaderOutputSourceName = function(name){
-    return this._program.getShaderOutputSourceName(name);
-}
-
-VertexShaderResult.prototype.getUniformOutputData = function(name){
-    return this._program.getUniformOutputData(name, this._programData);
-}
-VertexShaderResult.prototype.isShaderOutputNull = function(name){
+VSDataResult.prototype.isOutputNull = function(name){
     return this._program.isOutputNull(name);
 }
 
-
-
-VertexShaderResult.prototype.getGLSLCode = function(){
-    return this._program._glslCode;
+VSDataResult.prototype.getVertexShader = function(vsConfig){
+    return this._program.createVertexShader(this._programData, vsConfig);
 }
-
 
 
 })();

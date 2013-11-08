@@ -169,6 +169,8 @@
             for(var i = 0; i < names.length; ++i){
                 channelVsAttribute(vsConfig, names[i]);
             }
+            vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
+            vsConfig.addCodeFragment( "gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");
             return vsRequest.getVertexShader().getGLSLCode();
         },
 

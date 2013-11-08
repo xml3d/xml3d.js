@@ -169,12 +169,6 @@
             code += codeFragment + "\n";
         }
 
-        if(operator.glsl_fragments){
-            for(var outputName in program._outputInfo){
-                if(program._outputInfo[outputName].iteration == Xflow.ITERATION_TYPE.MANY)
-                    codeFragment += "\n" + operator.glsl_fragments[outputName];
-            }
-        }
         // Add attribute channeling code
         var mappingIndex = 0, conversionCode = "";
         for( var name in vsConfig._attributes){
@@ -191,7 +185,7 @@
             mappingIndex++;
         }
         for( var i = 0; i < vsConfig._codeFragments.length; ++i){
-            conversionCode += "\t" + vsConfig._codeFragments[i] + ";\n";
+            conversionCode += "\t" + vsConfig._codeFragments[i] + "\n";
         }
         code += convertCodeFragment(conversionCode, baseEntry, transferNames, directInputNames, usedNames) + "\n";
 

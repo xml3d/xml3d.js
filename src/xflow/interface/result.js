@@ -125,7 +125,9 @@ VSDataResult.prototype.isOutputUniform = function(name){
 VSDataResult.prototype.isOutputNull = function(name){
     return this._program.isOutputNull(name);
 }
-
+VSDataResult.prototype.getOutputType = function(name){
+    return this._program.getOutputType(name);
+}
 VSDataResult.prototype.getVertexShader = function(vsConfig){
     return this._program.createVertexShader(this._programData, vsConfig);
 }

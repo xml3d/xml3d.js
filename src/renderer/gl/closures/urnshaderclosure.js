@@ -22,7 +22,9 @@
             XML3D.extend(dest, this.descriptor.uniforms);
         },
 
-        createSources: function(scene, shaderData, objectData) {
+        createSources: function(scene, shaderData, vsRequest) {
+
+            var objectData = vsRequest && vsRequest.getResult();
             var directives = [];
 
             var inputData = {};

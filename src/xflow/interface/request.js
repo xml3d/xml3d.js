@@ -120,6 +120,10 @@ var VertexShaderRequest = function(dataNode, vsConfig, callback){
 Xflow.createClass(VertexShaderRequest, Xflow.Request);
 Xflow.VertexShaderRequest = VertexShaderRequest;
 
+VertexShaderRequest.prototype.getConfig = function(){
+    return this._vsConfig;
+}
+
 VertexShaderRequest.prototype.getResult = function(){
     return swapResultRequest(this, this._vsConnectNode._getResult(Xflow.RESULT_TYPE.VS, this._filter));
 }

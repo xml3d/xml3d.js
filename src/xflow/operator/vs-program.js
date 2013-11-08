@@ -15,20 +15,24 @@
 
     Xflow.VSProgram = function(operatorList){
         this.list = operatorList;
-        this._outputIterate = {};
+        this._outputInfo = {};
         setOutputIterate(this);
     }
 
     Xflow.VSProgram.prototype.getOutputNames = function(){
-        return Object.keys(this._outputIterate);
+        return Object.keys(this._outputInfo);
+    }
+
+    Xflow.VSProgram.prototype.getOutputType = function(name){
+        return this._outputInfo[name].type;
     }
 
     Xflow.VSProgram.prototype.isOutputUniform = function(name){
-        return this._outputIterate[name] == Xflow.ITERATION_TYPE.ONE;
+        return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.ONE;
     }
 
     Xflow.VSProgram.prototype.isOutputNull = function(name){
-        return this._outputIterate[name] == Xflow.ITERATION_TYPE.NULL;
+        return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.NULL;
     }
 
     Xflow.VSProgram.prototype.createVertexShader = function(programData, vsConfig){
@@ -44,19 +48,20 @@
 
         for( var i = 0; i < baseOperator.params.length; ++i){
             var entry = baseOperator.params[i],
-                name = baseOperator.params[i].source,
+                name = entry.source,
                 inputIndex = i,
                 directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
+            program._outputInfo[name] = {type: entry.type};
             if( baseEntry.isTransferInput(inputIndex) ||
                 operatorList.isInputIterate(directInputIndex))
             {
-                program._outputIterate[name] = Xflow.ITERATION_TYPE.MANY;
+                program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.MANY;
             }
             else if(operatorList.isInputUniform(directInputIndex)){
-                program._outputIterate[name] = Xflow.ITERATION_TYPE.ONE;
+                program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.ONE;
             }
             else{
-                program._outputIterate[name] = Xflow.ITERATION_TYPE.NULL;
+                program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.NULL;
             }
         }
     }

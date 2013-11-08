@@ -19,6 +19,20 @@
     };
 
 
+    function channelVsAttribute(vsConfig, inputName){
+        var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(inputName), code = null;
+        if(inputName == "position"){
+            vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
+            code = outputName + " = ( modelViewMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
+        }
+        else if(inputName == "normal"){
+            vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "normalMatrix", true);
+            code =  outputName + " = normalize( normalMatrix * #I{" + inputName + "} );";
+        }
+        vsConfig.channelAttribute(inputName, outputName, code);
+    }
+
+
     /**
      * @param {Xflow.DATA_TYPE} xflowType
      */
@@ -79,7 +93,9 @@
          * @param {Xflow.ComputeResult} shaderResult
          * @param objectData
          */
-        createSources: function(scene, shaderResult, objectData) {
+        createSources: function(scene, shaderResult, vsRequest) {
+
+            var vsDataResult = vsRequest.getResult();
 
             var contextData = {
                 "this" : webgl.getJSSystemConfiguration(this.context),
@@ -98,14 +114,13 @@
             var contextInfo = contextData["global.shade"][0].extra.info;
 
             var shaderEntries = shaderResult && shaderResult.getOutputMap(),
-                vsShaderOutput = objectData && objectData.shaderOutputNames;
+                vsShaderOutput = vsDataResult && vsDataResult.outputNames;
 
             for(var i = 0; i < this.extractedParams.length; ++i){
                 var paramName = this.extractedParams[i];
-                var envName = webgl.JSShaderComposer.convertEnvName(paramName);
-                if(vsShaderOutput && vsShaderOutput.indexOf(envName) != -1){
-                    contextInfo[paramName] = convertXflow2ShadeType(objectData.getShaderOutputType(envName),
-                        objectData.isShaderOutputUniform(envName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
+                if(vsShaderOutput && vsShaderOutput.indexOf(paramName) != -1){
+                    contextInfo[paramName] = convertXflow2ShadeType(vsDataResult.getOutputType(paramName),
+                        vsDataResult.isOutputUniform(paramName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
                 }
                 else if(shaderEntries && shaderEntries[paramName]){
                     contextInfo[paramName] = convertXflow2ShadeType(shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
@@ -120,7 +135,7 @@
                 this.uniformSetter = glslShader.uniformSetter;
                 this.source = {
                     fragment: glslShader.source,
-                    vertex:  objectData.getGLSLCode()
+                    vertex:  this.createVertexShader(vsRequest, vsDataResult)
                 }
             }
             catch(e){
@@ -146,7 +161,15 @@
             });
 
             return true;
+        },
 
+        createVertexShader: function(vsRequest, vsDataResult){
+            var vsConfig = vsRequest.getConfig();
+            var names = vsDataResult.outputNames;
+            for(var i = 0; i < names.length; ++i){
+                channelVsAttribute(vsConfig, names[i]);
+            }
+            return vsRequest.getVertexShader().getGLSLCode();
         },
 
         setUniformVariables: function(envNames, sysNames, inputCollection){

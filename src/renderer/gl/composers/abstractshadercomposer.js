@@ -160,11 +160,11 @@
             throw new Error("AbstractComposer::distributeObjectShaderData needs to be overridden");
         },
 
-        getShaderClosure: function (scene, vsResult) {
+        getShaderClosure: function (scene, vsRequest) {
             var shader = this.createShaderClosure();
 
             try{
-                shader.createSources(scene, this.getShaderDataResult(), vsResult)
+                shader.createSources(scene, this.getShaderDataResult(), vsRequest)
             }
             catch(e){
                 throw new Error("Shader: " + e.message)
@@ -177,11 +177,11 @@
                 }
             }
 
-            this.initializeShaderClosure(shader, scene, vsResult);
+            this.initializeShaderClosure(shader, scene);
             return shader;
         },
 
-        initializeShaderClosure: function (shaderClosure, scene, vsResult) {
+        initializeShaderClosure: function (shaderClosure, scene) {
             shaderClosure.compile();
 
             this.updateClosureFromComputeResult(shaderClosure, this.getShaderDataResult());
@@ -223,7 +223,7 @@
     XML3D.createClass(DefaultComposer, AbstractShaderComposer, {
         update: function () {
         },
-        getShaderClosure: function (scene, vsResult) {
+        getShaderClosure: function (scene, vsRequest) {
             return this.context.programFactory.getFallbackProgram();
         },
         getShaderAttributes: function () {

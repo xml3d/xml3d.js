@@ -19,6 +19,10 @@
         setOutputIterate(this);
     }
 
+    Xflow.VSProgram.prototype.getOutputNames = function(){
+        return Object.keys(this._outputIterate);
+    }
+
     Xflow.VSProgram.prototype.isOutputUniform = function(name){
         return this._outputIterate[name] == Xflow.ITERATION_TYPE.ONE;
     }
@@ -30,6 +34,7 @@
     Xflow.VSProgram.prototype.createVertexShader = function(programData, vsConfig){
         var result = new Xflow.VertexShader(programData);
         constructVS(result, this, vsConfig)
+        return result;
     }
 
     function setOutputIterate(program){
@@ -56,28 +61,6 @@
         }
     }
 
-
-
-    Xflow.VSProgram.prototype.isInputUniform = function(name){
-        return this._inputInfo[name].uniform;
-    }
-    Xflow.VSProgram.prototype.getInputData = function(name, programData){
-        return programData.getDataEntry(this._inputInfo[name].index);
-    }
-
-    Xflow.VSProgram.prototype.getShaderOutputType = function(name){
-        return this._outputInfo[name].type;
-    }
-    Xflow.VSProgram.prototype.getShaderOutputSourceName = function(name){
-        return this._outputInfo[name].sourceName;
-    }
-
-
-
-    Xflow.VSProgram.prototype.getUniformOutputData = function(name, programData){
-        return programData.getDataEntry(this._outputInfo[name].index);
-    }
-
     function constructVS(vs, program, vsConfig){
         var operatorList = program.list, entries = operatorList.entries;
 
@@ -93,7 +76,7 @@
         Xflow.nameset.add(usedNames, vsConfig.getBlockedNames());
 
         var code = "";
-
+        code += "// OUTPUT\n"
         // First: collect output names
         for(var name in vsConfig._addOutput){
             var entry = vsConfig._addOutput[name];
@@ -195,7 +178,7 @@
                 var channeling = entry.channeling[i], outputName = channeling.outputName;
                 if(vs._outputInfo[outputName].iteration == Xflow.ITERATION_TYPE.MANY){
                     if(channeling.code)
-                        conversionCode += "\t" + channeling.code + ";\n";
+                        conversionCode += "\t" + channeling.code + "\n";
                     else
                         conversionCode += "\t" + outputName + " = #I{" + name + "};\n";
                 }
@@ -242,6 +225,7 @@
             var replaceName = codeFragment.substring(index+3,end);
             codeFragment = codeFragment.substring(0, index) + replaceName + codeFragment.substring(end+1);
         }
+        return codeFragment;
     }
 
     function getFreeName(name, usedNames){
@@ -276,6 +260,7 @@
             case Xflow.DATA_TYPE.FLOAT2 : return 'vec2';
             case Xflow.DATA_TYPE.FLOAT3 : return 'vec3';
             case Xflow.DATA_TYPE.FLOAT4 : return 'vec4';
+            case Xflow.DATA_TYPE.FLOAT3X3 : return 'mat3';
             case Xflow.DATA_TYPE.FLOAT4X4 : return 'mat4';
             case Xflow.DATA_TYPE.INT : return 'int';
             case Xflow.DATA_TYPE.INT4 : return 'ivec4';

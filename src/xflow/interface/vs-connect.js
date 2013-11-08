@@ -29,6 +29,12 @@ Xflow.VSConfig = function(){
 };
 
 Xflow.VSConfig.prototype.addAttribute = function(type, name, optional){
+    if(this._attributes[name]){
+        if(this._attributes[name].type != type)
+            throw new Error("Tries to add two attributes with different types of name '" + name + '"');
+        this._attributes[name].optional = this._attributes[name].optional && optional;
+        return;
+    }
     this._attributes[name] = {type: type, optional: optional, channeling: []};
 }
 
@@ -105,24 +111,34 @@ Xflow.VertexShader = function(programData){
     this._outputInfo = {};
 }
 
-Object.defineProperty(VSDataResult.prototype, "inputNames", {
+Object.defineProperty(Xflow.VertexShader.prototype, "inputNames", {
     set: function(v){
         throw new Error("inputNames is readonly");
     },
     get: function(){ return this._inputNames; }
 });
 
+Object.defineProperty(Xflow.VertexShader.prototype, "outputNames", {
+    set: function(v){
+        throw new Error("outputNames is readonly");
+    },
+    get: function(){ return this._outputNames; }
+});
 
 Xflow.VertexShader.prototype.isInputUniform = function(name){
     return this._inputInfo[name].uniform;
 }
-Xflow.VSProgram.prototype.getInputData = function(name){
+Xflow.VertexShader.prototype.getInputData = function(name){
     return this._programData.getDataEntry(this._inputInfo[name].index);
+}
+
+Xflow.VertexShader.prototype.isOutputNull = function(name){
+    return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.NULL;
 }
 Xflow.VertexShader.prototype.isOutputFragmentUniform = function(name){
     return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.ONE;
 }
-Xflow.VertexShader.prototype.getOutputData = function(name){
+Xflow.VertexShader.prototype.getUniformOutputData = function(name){
     return this._programData.getDataEntry(this._outputInfo[name].index);
 }
 Xflow.VertexShader.prototype.getOutputType = function(name){
@@ -131,7 +147,9 @@ Xflow.VertexShader.prototype.getOutputType = function(name){
 Xflow.VertexShader.prototype.getOutputSourceName = function(name){
     return this._outputInfo[name].sourceName;
 }
-
+Xflow.VertexShader.prototype.getGLSLCode = function(){
+    return this._glslCode;
+}
 
 
 }());

@@ -100,7 +100,7 @@ var c_vsConnectNodeCount = {},
     c_vsConnectNodeCache = {};
 
 /**
- * A VertexShaderRequest is a Request for a VertexShaderResult, used to generate a vertex shader that includes
+ * A VertexShaderRequest is a Request for a VSDataResult, used to generate a Xflow.VertexShader that includes
  * dataflow processing
  * @constructor
  * @extends {Xflow.Request}
@@ -136,6 +136,7 @@ VertexShaderRequest.prototype._onDataNodeChange = function(notification){
 }
 
 VertexShaderRequest.prototype.getVertexShader = function(){
+    this.getResult(); // Update the result first
     if(!this._vertexShader){
         this._vertexShader = this._result.getVertexShader(this._vsConfig);
     }

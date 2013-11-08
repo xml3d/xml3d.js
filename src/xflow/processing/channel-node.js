@@ -270,7 +270,8 @@
             var procNode = channelNode.processNode = new Xflow.ProcessNode(channelNode);
             var index = 0;
             for(var name in procNode.outputDataSlots){
-                var destName = owner._computeOutputMapping.getScriptOutputName(index, name);
+                var destName = name;
+                if(owner._computeOutputMapping) destName = owner._computeOutputMapping.getScriptOutputName(index, name);
                 if(destName){
                     channelNode.computedChannels.addOutputDataSlot(destName, procNode.outputDataSlots[name], procNode);
                 }

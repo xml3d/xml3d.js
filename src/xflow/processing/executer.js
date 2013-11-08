@@ -188,8 +188,9 @@
                 continue;
             }
 
-            var mappedInputName = node.owner.owner._computeInputMapping.getScriptInputName(mapping[j].paramIdx,
-                mapping[j].source);
+            var mappedInputName = mapping[j].source;
+            if(node.owner.owner._computeInputMapping)
+                mappedInputName = node.owner.owner._computeInputMapping.getScriptInputName(mapping[j].paramIdx, mapping[j].source);
 
             var connection = new Xflow.ProgramInputConnection();
             connection.channel = channel;

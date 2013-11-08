@@ -98,7 +98,9 @@ ComputeResult.prototype.getOutputMap = function() {
 
 
 /**
- * VertexShaderResult is used to generate a VertexShader that includes dataflow processing
+ * VSDataResult is used to analyse the output of a VertexShader
+ * Note that the VSDataResult is not used to generate the VertexShader directly.
+ * For that, the Xflow.VertexShader structure must be created from Xflow.VertexShaderRequest
  * @constructor
  * @extends {Xflow.Result}
  */
@@ -110,22 +112,15 @@ Xflow.VSDataResult = function(){
 Xflow.createClass(Xflow.VSDataResult, Xflow.Result);
 var VSDataResult = Xflow.VSDataResult;
 
-Object.defineProperty(VSDataResult.prototype, "shaderOutputNames", {
+Object.defineProperty(VSDataResult.prototype, "outputNames", {
     set: function(v){
         throw new Error("shaderOutputNames is readonly");
     },
-    get: function(){ return this._programData.getFinalOutputNames(); }
+    get: function(){ return this._program.getOutputNames(); }
 });
 
 VSDataResult.prototype.isOutputUniform = function(name){
     return this._program.isOutputUniform(name);
-    if(this._programData.isFinalOutputProcessed(name))
-        return false;
-    var entry = this._programData.getFinalOutputDataEntry(name);
-    if(!entry)
-        return false;
-    var iterateCount = entry.getIterateCount ? entry.getIterateCount() : 1
-    return iterateCount == 1;
 }
 VSDataResult.prototype.isOutputNull = function(name){
     return this._program.isOutputNull(name);

@@ -45,13 +45,13 @@ function getCanvasId(x) {
 }
 
 function getRenderer(x) {
-    console.dir(x);
+    //console.dir(x);
     var factory = getWebGLFactory(x);
     return factory ? factory.getRenderer() : null;
 };
 
 function getHandler(x) {
-    console.dir(x);
+    //console.dir(x);
     var id = getCanvasId(x);
     return id ? x.ownerDocument.defaultView.XML3D.webgl.handlers[id] : null;
 };

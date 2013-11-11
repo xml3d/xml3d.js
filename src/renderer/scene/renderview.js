@@ -101,13 +101,13 @@
 
                 var near = -bb[5],
                     far = -bb[2],
-                    expand = Math.max((far - near) * 0.01, 0.1);
+                    expand = Math.max((far - near) * 0.005, 0.05);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
                 far += expand;
                 near -= expand;
 
-                return {near: Math.max(near, CLIPPLANE_NEAR_MIN), far: far};
+                return {near: Math.max(near, expand, CLIPPLANE_NEAR_MIN), far: far};
             }
         })(),
 

@@ -93,17 +93,17 @@
             var vertexShader = objectRequest.getVertexShader();
             var inputNames = vertexShader.inputNames;
             for(var i = 0; i < inputNames.length; ++i){
-                var name = inputNames[i], entry = result.getInputData(name);
-                if(result.isInputUniform(name))
+                var name = inputNames[i], entry = vertexShader.getInputData(name);
+                if(vertexShader.isInputUniform(name))
                     uniformCallback(name, entry);
                 else
                     attributeCallback(name, entry);
             }
-            var outputNames = result.outputNames;
+            var outputNames = vertexShader.outputNames;
             for(var i = 0; i < outputNames.length; ++i){
                 var name = outputNames[i];
-                if(result.isOutputUniform(name)){
-                    uniformCallback(result.getOutputSourceName(name), result.getUniformOutputData(name));
+                if(vertexShader.isOutputFragmentUniform(name)){
+                    uniformCallback(vertexShader.getOutputSourceName(name), vertexShader.getUniformOutputData(name));
                 }
             }
         }

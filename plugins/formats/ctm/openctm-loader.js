@@ -2,48 +2,48 @@
 
 	var hasWebWorkerSupport = !!window.Worker;
 
-    var OpenCTMFormatHandler = function() {
-        XML3D.base.BinaryFormatHandler.call(this);
-	    if (hasWebWorkerSupport) {
-	        this.worker = new Worker("openctm-worker.js");
-		    this.callbackMap = [];
-		    this.worker.addEventListener("error", function (error) {
-			    XML3D.debug.logError("[OpenCTMFormatHandler] Failed to process OpenCTM file: " + error);
-			    if (error.id)
-			        self.callbackMap[error.id](true, xflowDataNode);
-		    });
-		    var self = this;
-		    this.worker.addEventListener("message", function (event) {
-			    var message = event.data;
-			    switch (message.type) {
-				    case "file":
-					    var xflowDataNode = createXflowDataNode(message);
-					    self.callbackMap[message.id](true, xflowDataNode);
-					    break;
-				    default:
-					    XML3D.debug.logError("[OpenCTMFormatHandler] Unrecognized message received: " + message.type);
-					    self.callbackMap[message.id](false);
-					    break;
-			    }
-		    })
-	    }
-    };
+	var OpenCTMFormatHandler = function() {
+		XML3D.base.BinaryFormatHandler.call(this);
+		if (hasWebWorkerSupport) {
+			this.worker = new Worker("openctm-worker.js");
+			this.callbackMap = [];
+			this.worker.addEventListener("error", function (error) {
+				XML3D.debug.logError("[OpenCTMFormatHandler] Failed to process OpenCTM file: " + error.message);
+				if (error.id)
+					self.callbackMap[error.id](false);
+			});
+			var self = this;
+			this.worker.addEventListener("message", function (event) {
+				var message = event.data;
+				switch (message.type) {
+					case "file":
+						var xflowDataNode = createXflowDataNode(message);
+						self.callbackMap[message.id](true, xflowDataNode);
+						break;
+					default:
+						XML3D.debug.logError("[OpenCTMFormatHandler] Unrecognized message received: " + message.type);
+						self.callbackMap[message.id](false);
+						break;
+				}
+			})
+		}
+	};
 
 	XML3D.createClass(OpenCTMFormatHandler, XML3D.base.BinaryFormatHandler);
 
-    OpenCTMFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
-	    if (!(response instanceof ArrayBuffer))
-	        return false;
+	OpenCTMFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
+		if (!(response instanceof ArrayBuffer))
+			return false;
 
-	    var stream = new CTM.Stream(response);
-	    try {
-		    new CTM.FileHeader(stream);
-	    } catch (e) {
-		    return false;
-	    }
+		var stream = new CTM.Stream(response);
+		try {
+			new CTM.FileHeader(stream);
+		} catch (e) {
+			return false;
+		}
 
-	    return true;
-    };
+		return true;
+	};
 
 	function getFormatDataWebWorker(response, responseType, mimetype, callback) {
 		var id = this.callbackMap.push(callback) - 1;
@@ -94,35 +94,35 @@
 		OpenCTMFormatHandler.prototype.getFormatData = getFormatDataSynchronously;
 
 	var openctmFormatHandler = new OpenCTMFormatHandler();
-    XML3D.base.registerFormat(openctmFormatHandler);
+	XML3D.base.registerFormat(openctmFormatHandler);
 
-    /**
-     * @implements IDataAdapter
-     */
-    var OpenCTMDataAdapter = function (xflowNode) {
+	/**
+	 * @implements IDataAdapter
+	 */
+	var OpenCTMDataAdapter = function (xflowNode) {
 		this._xflowDataNode = xflowNode;
-    };
+	};
 
-    OpenCTMDataAdapter.prototype.getXflowNode = function() {
-        return this._xflowDataNode;
-    };
+	OpenCTMDataAdapter.prototype.getXflowNode = function() {
+		return this._xflowDataNode;
+	};
 
-    /**
-     * @constructor
-     * @implements {XML3D.base.IFactory}
-     */
-    var OpenCTMFactory = function(){
-        XML3D.base.AdapterFactory.call(this, XML3D.data);
-    };
+	/**
+	 * @constructor
+	 * @implements {XML3D.base.IFactory}
+	 */
+	var OpenCTMFactory = function(){
+		XML3D.base.AdapterFactory.call(this, XML3D.data);
+	};
 
-    XML3D.createClass(OpenCTMFactory, XML3D.base.AdapterFactory);
+	XML3D.createClass(OpenCTMFactory, XML3D.base.AdapterFactory);
 
-    OpenCTMFactory.prototype.aspect = XML3D.data;
-    OpenCTMFactory.prototype.createAdapter = function(xflowNode) {
-        return new OpenCTMDataAdapter(xflowNode);
-    };
+	OpenCTMFactory.prototype.aspect = XML3D.data;
+	OpenCTMFactory.prototype.createAdapter = function(xflowNode) {
+		return new OpenCTMDataAdapter(xflowNode);
+	};
 
-    XML3D.base.resourceManager.addBinaryExtension('.ctm');
-    openctmFormatHandler.registerFactoryClass(OpenCTMFactory);
+	XML3D.base.resourceManager.addBinaryExtension('.ctm');
+	openctmFormatHandler.registerFactoryClass(OpenCTMFactory);
 
 }());

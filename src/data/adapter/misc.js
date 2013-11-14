@@ -35,6 +35,30 @@
     // Export
     XML3D.data.SinkDataAdapter = SinkDataAdapter;
 
+
+
+    var ScriptDataAdapter = function(factory, node) {
+        XML3D.base.NodeAdapter.call(this, factory, node);
+    };
+    XML3D.createClass(ScriptDataAdapter, XML3D.base.NodeAdapter);
+    XML3D.data.ScriptDataAdapter = ScriptDataAdapter;
+
+    ScriptDataAdapter.prototype.getScriptType = function(){
+        return this.node.type;
+    }
+
+    ScriptDataAdapter.prototype.getScriptCode = function(){
+        return this.node.value;
+    }
+
+    ScriptDataAdapter.prototype.notifyChanged = function(evt) {
+        switch(evt.type){
+            case XML3D.events.VALUE_MODIFIED:
+            case XML3D.events.NODE_INSERTED:
+            case XML3D.events.NODE_REMOVED: this.notifyOppositeAdapters();
+        }
+    };
+
     var ImgDataAdapter = function(factory, node) {
         XML3D.base.NodeAdapter.call(this, factory, node);
         this.textureEntry = null;

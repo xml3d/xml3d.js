@@ -129,8 +129,15 @@ XML3D.Xml3dSceneController = function(xml3dElement) {
     this.camera = new XML3D.Camera(view);
     this.timer = new XML3D.util.Timer();
     this.prevPos = {x: -1, y: -1};
+    this.prevTouchPositions = new Array();
+    this.prevTouchPositions[0] = {
+        x : -1,
+        y : -1
+    };
+    this.prevZoomVectorLength;
 
     this.mode = "examine";
+    this.touchTranslateMode = "twofinger";
     this.revolveAroundPoint = new window.XML3DVec3(0, 0, 0);
     this.rotateSpeed = 1;
     this.zoomSpeed = 20;
@@ -154,6 +161,11 @@ XML3D.Xml3dSceneController = function(xml3dElement) {
 
         if(this.mode != "walk" && this.mode != "examine" )
             this.mode = "examine";
+
+        this.touchTranslateMode = config.getAttribute("touchtranslate");
+
+        if(this.touchTranslateMode != "twofinger" && this.touchTranslateMode != "threefinger" )
+            this.touchTranslateMode = "twofinger";
 
         if(config.getAttribute("resolveAround")){
             XML3D.debug.logWarning("resolveAround is obsolete. Use 'revolveAround' instead!");
@@ -188,9 +200,21 @@ XML3D.Xml3dSceneController.prototype.attach = function() {
     this._evt_contextmenu = function(e) {self.stopEvent(e);};
     this._evt_keydown = function(e) {self.keyHandling(e);};
 
+    this._evt_touchstart = function(e) {self.touchStartEvent(e);};
+    this._evt_touchmove = function(e) {self.touchMoveEvent(e);};
+    this._evt_touchend = function(e) {self.touchEndEvent(e);};
+    this._evt_touchcancel = function(e) {self.touchEndEvent(e);};
+
+
     this.canvas.addEventListener("mousedown", this._evt_mousedown, false);
     document.addEventListener("mouseup", this._evt_mouseup, false);
     document.addEventListener("mousemove",this._evt_mousemove, false);
+
+    this.canvas.addEventListener("touchstart", this._evt_touchstart, false);
+    document.addEventListener("touchend", this._evt_touchend, false);
+    document.addEventListener("touchmove",this._evt_touchmove, false);
+    document.addEventListener("touchcancel", this._evt_touchend, false);
+
     this.canvas.addEventListener("contextmenu", this._evt_contextmenu, false);
     if (this.useKeys)
         document.addEventListener("keydown", this._evt_keydown, false);
@@ -200,6 +224,12 @@ XML3D.Xml3dSceneController.prototype.detach = function() {
     this.canvas.removeEventListener("mousedown", this._evt_mousedown, false);
     document.removeEventListener("mouseup", this._evt_mouseup, false);
     document.removeEventListener("mousemove",this._evt_mousemove, false);
+
+    this.canvas.removeEventListener("touchstart", this._evt_touchstart, false);
+    document.removeEventListener("touchend", this._evt_touchend, false);
+    document.removeEventListener("touchmove",this._evt_touchmove, false);
+    document.removeEventListener("touchcancel", this._evt_touchend, false);
+
     this.canvas.removeEventListener("contextmenu", this._evt_contextmenu, false);
     if (this.useKeys)
         document.removeEventListener("keydown", this._evt_keydown, false);
@@ -209,14 +239,14 @@ XML3D.Xml3dSceneController.prototype.__defineGetter__("width", function() { retu
 XML3D.Xml3dSceneController.prototype.__defineGetter__("height", function() { return this.canvas.height;});
 
 XML3D.Xml3dSceneController.prototype.getView = function() {
-    //var activeView = null;
-    var activeView = this.xml3d.activeView; //? this.xml3d.activeView : this.xml3d.getAttribute("activeView");
+    var activeView = this.xml3d.activeView;
     XML3D.debug.logInfo("Active View: " + activeView);
 
-    if (typeof activeView=="string")
+    if (activeView)
     {
-        if (activeView.indexOf('#') == 0)
-            activeView = activeView.replace('#', '');
+        if (activeView.substring(0, 1) == '#') {
+            activeView = activeView.substring(1);
+        }
         XML3D.debug.logInfo("Trying to resolve view '" + activeView +"'");
         activeView = document.getElementById(activeView);
     }
@@ -226,9 +256,7 @@ XML3D.Xml3dSceneController.prototype.getView = function() {
     if (!activeView)
     {
         XML3D.debug.logWarning("No view referenced. Trying to use first view.");
-        activeView = document.evaluate('xml3d:view[1]', this.xml3d, function() {
-            return XML3D.xml3dNS;
-        }, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        activeView = this.xml3d.querySelector('view');
     }
 
     if(false)
@@ -349,7 +377,7 @@ XML3D.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
             var f = 2.0* Math.tan(this.camera.fieldOfView/2.0) / this.height;
             var dx = f*(ev.pageX - this.prevPos.x);
             var dy = f*(ev.pageY - this.prevPos.y);
-			var trans = new window.XML3DVec3(-dx, dy, 0.0);
+            var trans = new window.XML3DVec3(-dx, dy, 0.0);
             this.camera.translate(this.camera.inverseTransformOf(trans));
             break;
         case(this.DOLLY):
@@ -391,6 +419,176 @@ XML3D.Xml3dSceneController.prototype.mouseMoveEvent = function(event, camera) {
     return false;
 };
 
+
+// -----------------------------------------------------
+// touch rotation and movement
+// -----------------------------------------------------
+
+
+XML3D.Xml3dSceneController.prototype.touchStartEvent = function(event) {
+    if (event.target.nodeName.toLowerCase() == "xml3d") {
+        this.stopEvent(event);
+    }
+
+    var ev = event || window.event;
+
+    var button = (ev.which || ev.button);
+
+    switch (ev.touches.length) {
+        case 1:
+            if(this.mode == "examine")
+                this.action = this.ROTATE;
+            else
+                this.action = this.LOOKAROUND;
+            break;
+        case 2:
+            this.action = this.DOLLY;
+            break;
+        case 3:
+            this.action = this.TRANSLATE;
+            break;
+        default:
+            this.action = this.NO_MOUSE_ACTION;
+    }
+
+    var touchPositions = new Array();
+    for (var i=0; i<ev.touches.length; i++) {
+            touchPositions[i] = {x: ev.touches[i].pageX, y: ev.touches[i].pageY};
+    }
+    this.prevTouchPositions = touchPositions;
+
+    return false;
+};
+
+XML3D.Xml3dSceneController.prototype.touchEndEvent = function(event) {
+    if (event.target.nodeName.toLowerCase() == "xml3d") {
+        this.stopEvent(event);
+    }
+
+    var ev = event || window.event;
+    //if (this.action == this.ROTATE && this.mouseSpeed > this.spinningSensitivity)
+    //    this.startSpinning();
+
+    switch (ev.touches.length) {
+        case 1:
+            this.prevZoomVectorLength = undefined;
+            if(this.mode == "examine")
+                this.action = this.ROTATE;
+            else
+                this.action = this.LOOKAROUND;
+            break;
+        case 2:
+            this.action = this.DOLLY;
+            break;
+        case 3:
+            this.action = this.TRANSLATE;
+            break;
+        default:
+            this.action = this.NO_MOUSE_ACTION;
+    }
+
+    var touchPositions = new Array();
+    for (var i=0; i<ev.touches.length; i++) {
+            touchPositions[i] = {x: ev.touches[i].pageX, y: ev.touches[i].pageY};
+    }
+    this.prevTouchPositions = touchPositions;
+
+    return false;
+};
+
+
+XML3D.Xml3dSceneController.prototype.touchMoveEvent = function(event, camera) {
+    if (event.target.nodeName.toLowerCase() == "xml3d") {
+        this.stopEvent(event);
+    }
+
+    var ev = event || window.event;
+    if (!this.action)
+        return;
+
+    switch(this.action) {
+        case(this.TRANSLATE):
+            if (this.touchTranslateMode == "threefinger") {
+                var f = 2.0* Math.tan(this.camera.fieldOfView/2.0) / this.height;
+                var dx = f*(ev.touches[0].pageX - this.prevTouchPositions[0].x);
+                var dy = f*(ev.touches[0].pageY - this.prevTouchPositions[0].y);
+                var trans = new window.XML3DVec3(-dx*this.zoomSpeed, dy*this.zoomSpeed, 0.0);
+                this.camera.translate(this.camera.inverseTransformOf(trans));
+            }
+            break;
+        case(this.DOLLY):
+            if (this.touchTranslateMode == "twofinger") {
+                //apple-style 2-finger dolly + translate
+                var prevMidpoint;
+
+                if (this.prevTouchPositions.length > 1) {
+                    prevMidpoint = {x:(this.prevTouchPositions[0].x + this.prevTouchPositions[1].x) / 2 ,
+                                    y:(this.prevTouchPositions[0].y + this.prevTouchPositions[1].y) / 2 }
+                }
+
+                if (prevMidpoint !== undefined) {
+                    var curMidpoint = {x:(ev.touches[0].pageX + ev.touches[1].pageX) / 2 ,
+                                       y:(ev.touches[0].pageY + ev.touches[1].pageY) / 2 }
+                    var f = 2.0* Math.tan(this.camera.fieldOfView/2.0) / this.height;
+                    var dx = f*(curMidpoint.x - prevMidpoint.x);
+                    var dy = f*(curMidpoint.y - prevMidpoint.y);
+                    var trans = new window.XML3DVec3(-dx*this.zoomSpeed, dy*this.zoomSpeed, 0.0);
+                    this.camera.translate(this.camera.inverseTransformOf(trans));
+                }
+            }
+
+            if (this.prevZoomVectorLength !== undefined) {
+                var dv = {x: ev.touches[0].pageX - ev.touches[1].pageX, y: ev.touches[0].pageY - ev.touches[1].pageY};
+                var currLength = Math.sqrt(dv.x*dv.x + dv.y*dv.y);
+
+                var dy = this.zoomSpeed * (currLength - this.prevZoomVectorLength) / this.height;
+                this.camera.translate(this.camera.inverseTransformOf(new window.XML3DVec3(0, 0, -dy)));
+
+                this.prevZoomVectorLength = currLength;
+            } else {
+                var dv = {x: ev.touches[0].pageX - ev.touches[1].pageX, y: ev.touches[0].pageY - ev.touches[1].pageY};
+                this.prevZoomVectorLength = Math.sqrt(dv.x*dv.x + dv.y*dv.y);
+            }
+
+            break;
+        case(this.ROTATE):
+            var dx = -this.rotateSpeed * (ev.touches[0].pageX - this.prevTouchPositions[0].x) * 2.0 * Math.PI / this.width;
+            var dy = -this.rotateSpeed * (ev.touches[0].pageY - this.prevTouchPositions[0].y) * 2.0 * Math.PI / this.height;
+
+            var mx = new window.XML3DRotation(new window.XML3DVec3(0,1,0), dx);
+            var my = new window.XML3DRotation(new window.XML3DVec3(1,0,0), dy);
+            //this.computeMouseSpeed(ev);
+            this.camera.rotateAroundPoint(mx.multiply(my), this.revolveAroundPoint);
+            break;
+        case(this.LOOKAROUND):
+            var dx = -this.rotateSpeed * (ev.touches[0].pageX - this.prevTouchPositions[0].x) * 2.0 * Math.PI / this.width;
+            var dy = this.rotateSpeed * (ev.touches[0].pageY - this.prevTouchPositions[0].y) * 2.0 * Math.PI / this.height;
+            var cross = this.upVector.cross(this.camera.direction);
+
+            var mx = new window.XML3DRotation( this.upVector , dx);
+            var my = new window.XML3DRotation( cross , dy);
+
+            this.camera.lookAround(mx, my, this.upVector);
+            break;
+    }
+
+    if (this.action != this.NO_MOUSE_ACTION)
+    {
+        this.needUpdate = true;
+
+        var touchPositions = new Array();
+        for (var i=0; i<ev.touches.length; i++) {
+            touchPositions[i] = {x: ev.touches[i].pageX, y: ev.touches[i].pageY};
+        }
+        this.prevTouchPositions = touchPositions;
+
+        event.returnValue = false;
+
+        this.update();
+    }
+
+    return false;
+};
 
 
 // -----------------------------------------------------
@@ -497,7 +695,7 @@ XML3D.Xml3dSceneController.getController = function(xml3d) {
 
     var onload = function() {
 
-        var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(XML3D.xml3dNS, 'xml3d') );
+        var xml3dList = Array.prototype.slice.call( document.querySelectorAll('xml3d') );
 
         XML3D.Xml3dSceneController.controllers = new Array();
         for(var i in xml3dList) {

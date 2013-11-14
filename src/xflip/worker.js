@@ -4,6 +4,7 @@ var c_sinknodes = [];
 var c_domid_nodes = {};
 var c_graph = new Xflow.Graph();
 var c_unresolved = [];
+var c_videoModification = false;
 
 function error(msg){
     throw new Error(msg);
@@ -16,7 +17,7 @@ function log(msg){
 self.onmessage = function(event) {
     var data = event.data;
     var type = data['type'];
-    log("MESSAGE RECEIVED: " + type);
+    //log("MESSAGE RECEIVED: " + type);
     switch(type){
         case "initialize":
             initialize(data['root'], data['addons'])
@@ -30,13 +31,16 @@ self.onmessage = function(event) {
         case "imageLoaded":
             imageLoaded(data.id, data.imageData);
             break;
+        case "videoUpdate":
+            videoUpdate(data.id, data.imageData);
+            break;
         case "updateValue":
             updateValue(data.id, data.value);
             break;
         case "updateAttribute":
             updateAttribute(data.id, data.attrName, data.attrValue);
     }
-    log("MESSAGE DONE: " + type);
+    //log("MESSAGE DONE: " + type);
 }
 
 window.setInterval(function(){
@@ -79,7 +83,8 @@ var c_parseConfig = {
     'int4' : { attr: c_input_attr, type: "InputNode", value: 'int4' },
     'bool' : { attr: c_input_attr, type: "InputNode", value: 'bool'},
     'texture' : { attr: c_input_attr, type: "InputNode", value: 'texture'},
-    'img' : { type: "Image"}
+    'img' : { type: "Image"},
+    'video' : { type: "Video"}
 }
 
 function initialize(root, addons){
@@ -118,6 +123,7 @@ function createNode(data){
         case "SinkNode":  node = initSinkNode(id, entry, data); break;
         case "InputNode": node = initInputNode(id, entry, data); break;
         case "Image":     node = initImageNode(id, entry, data); break;
+        case "Video":     node = initVideoNode(id, entry, data); break;
         default: error("Unknown Node Type: " + type);
     }
 
@@ -139,7 +145,7 @@ function connectNodes(parentId, childId){
     if(parent.xflow instanceof Xflow.DataNode && child.xflow instanceof Xflow.GraphNode){
         parent.xflow.appendChild(child.xflow);
     }
-    else if(parent instanceof InputNode && child instanceof ImageNode){
+    else if(parent instanceof InputNode && ( child instanceof ImageNode || child instanceof VideoNode)){
         child.parent = parent.xflow;
         if(child.imageData)
             parent.xflow.data.setImageData(child.imageData);
@@ -172,6 +178,18 @@ function imageLoaded(nodeId, imageData){
     if(node.parent){
         node.parent.data.setImageData(imageData);
     }
+}
+
+function videoUpdate(nodeId, imageData){
+    var node = c_nodes[nodeId];
+    if(!node) return error("videoUpdate: Node not found");
+
+    c_videoModification = true;
+    node.imageData = imageData;
+    if(node.parent){
+        node.parent.data.setImageData(imageData);
+    }
+    c_videoModification = false;
 }
 
 
@@ -257,6 +275,14 @@ function initImageNode(id, entry, data){
     return node;
 }
 
+function initVideoNode(id, entry, data){
+    var node = new VideoNode(id, entry);
+    var src = data.attribs["src"];
+    self.postMessage({type: 'streamVideo', url: src, id: node.id });
+    return node;
+}
+
+
 function setNodeAttributes(node, entry, data){
     if(entry.attr){
         for(var name in entry.attr){
@@ -324,7 +350,8 @@ function SinkNode(id, entry, source, xflowDataNode){
 };
 
 SinkNode.prototype.invalidate = function(){
-    self.postMessage({type: "modified", id: this.id});
+    if(!c_videoModification)
+        self.postMessage({type: "modified", id: this.id});
     this.invalid = true;
 }
 
@@ -338,3 +365,9 @@ function ImageNode(id, entry){
     this.id = id;
     this.entry = entry;
 };
+
+function VideoNode(id, entry){
+    this.id = id;
+    this.entry = entry;
+};
+

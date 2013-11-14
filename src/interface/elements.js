@@ -40,6 +40,7 @@
             if(removedChild._configured) {
                 n.type = events.THIS_REMOVED;
                 removeRecursive(removedChild,n);
+                notifyNodeIdChangeRecursive(removedChild);
             }
         }
         // TODO: Quick fix, solve issue of self monitoring elements better
@@ -63,10 +64,20 @@
             removeRecursive(n,evt);
             n = n.nextElementSibling;
         }
+    }
+
+    function notifyNodeIdChangeRecursive(element){
         // We call this here in addition to nodeRemovedFromDocument, since the later is not supported by Firefox
         // TODO: Remove this function call once DOMNodeRemoveFromDocument is supported by all major browsers
         XML3D.base.resourceManager.notifyNodeIdChange(element, element.id, null);
+
+        var n = element.firstElementChild;
+        while(n) {
+            notifyNodeIdChangeRecursive(n);
+            n = n.nextElementSibling;
+        }
     }
+
 
     function nodeInserted(e) {
         var parent = e.relatedNode,
@@ -197,6 +208,8 @@
             var adapter = this.adapters[h];
             if(adapter.onDispose)
                 adapter.onDispose();
+            if(adapter.clearAdapterHandles)
+                adapter.clearAdapterHandles();
         }
         this.adapters = {};
         for(var h in this.handlers) {

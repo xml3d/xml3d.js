@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="600px" height="400px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
+
+    <defs>
+      <data id="lineData" >
+        <float3 name="position">0 0 0   1 0 0   0 0 0   0 1 0</float3>
+      </data>
+
+      <data id="lineData2" >
+        <float3 name="position">0 0 0   1 0 0  0 1 0  -1 0 0</float3>
+        <int name="index" >0 1 0 2 0 3</int>
+        <float3 name="diffuseColor">0 0 1</float3>
+      </data>
+      <data id="lineData3" >
+        <float3 name="position">0 0 0   1 0 0  0 1 0  -1 0 0</float3>
+        <float3 name="diffuseColor">0 1 0</float3>
+      </data>
+    </defs>
+
+    <shader id="lineShader" script="urn:xml3d:shader:flat" >
+        <float3 name="diffuseColor">1 0 0</float3>
+    </shader>
+
+    <group style="transform: translateZ(-15px)" >
+        <group shader="#lineShader" >
+            <mesh type="lines" src="#lineData" />
+        </group>
+        <group shader="#lineShader" style="transform: translateX(-3px)"  >
+            <mesh type="lines" src="#lineData2" />
+        </group>
+        <group shader="#lineShader" style="transform: translateX(3px)"  >
+            <mesh type="linestrips" src="#lineData3" />
+        </group>
+    </group>
+
+  </xml3d>
+</body>
+</html>

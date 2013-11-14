@@ -15,9 +15,6 @@ XML3D.shaders.register("matte", {
     ].join("\n"),
 
     fragment: [
-        "#ifdef GL_ES",
-          "precision highp float;",
-        "#endif",
         "uniform vec3 diffuseColor;",
         "uniform bool useVertexColor;",
 
@@ -27,13 +24,16 @@ XML3D.shaders.register("matte", {
         "    vec3 color = diffuseColor;",
         "    if (useVertexColor)",
         "       color *=  fragVertexColor;",
-        "    gl_FragColor = vec4(diffuseColor, 1.0);",
+        "    gl_FragColor = vec4(color, 1.0);",
         "}"
     ].join("\n"),
 
     uniforms: {
         diffuseColor : [1.0, 1.0, 1.0],
         useVertexColor: false
+    },
+    attributes: {
+        color: null
     }
 });
 

@@ -1,42 +1,27 @@
 // Utility functions
-(function() {
+(function(webgl) {
 
-    XML3D.webgl.checkError = function(gl, text)
-    {
-        var error = gl.getError();
-        if (error !== gl.NO_ERROR) {
-            var textErr = ""+error;
-            switch (error) {
-            case 1280: textErr = "1280 ( GL_INVALID_ENUM )"; break;
-            case 1281: textErr = "1281 ( GL_INVALID_VALUE )"; break;
-            case 1282: textErr = "1282 ( GL_INVALID_OPERATION )"; break;
-            case 1283: textErr = "1283 ( GL_STACK_OVERFLOW )"; break;
-            case 1284: textErr = "1284 ( GL_STACK_UNDERFLOW )"; break;
-            case 1285: textErr = "1285 ( GL_OUT_OF_MEMORY )"; break;
-            }
-            var msg = "GL error " + textErr + " occured.";
-            if (text !== undefined)
-                msg += " " + text;
-            XML3D.debug.trace(msg);
-        }
-    };
-
-    var minmax = new Float32Array(6);
-
-    XML3D.webgl.calculateBoundingBox = function(positions, index) {
-        var bbox = new window.XML3DBox();
+    /**
+     * Calculate bounding box from psoitions and optional indices
+     * TODO: Remove FloatArray creation
+     * @param {Float32Array} positions
+     * @param {Int16Array|null} index
+     * @returns {Float32Array}
+     */
+    webgl.calculateBoundingBox = function(positions, index) {
+        var bbox = new XML3D.math.bbox.create();
 
         if (!positions || positions.length < 3)
             return bbox;
 
         if (index) {
             var i0 = index[0]*3;
-            minmax[0] = positions[i0];
-            minmax[1] = positions[i0 + 1];
-            minmax[2] = positions[i0 + 2];
-            minmax[3] = positions[i0];
-            minmax[4] = positions[i0 + 1];
-            minmax[5] = positions[i0 + 2];
+            bbox[0] = positions[i0];
+            bbox[1] = positions[i0 + 1];
+            bbox[2] = positions[i0 + 2];
+            bbox[3] = positions[i0];
+            bbox[4] = positions[i0 + 1];
+            bbox[5] = positions[i0 + 2];
 
             for ( var i = 1; i < index.length; i++) {
                 var i1 = index[i] * 3;
@@ -44,72 +29,69 @@
                 var p2 = positions[i1 + 1];
                 var p3 = positions[i1 + 2];
 
-                if (p1 < minmax[0])
-                    minmax[0] = p1;
-                if (p2 < minmax[1])
-                    minmax[1] = p2;
-                if (p3 < minmax[2])
-                    minmax[2] = p3;
-                if (p1 > minmax[3])
-                    minmax[3] = p1;
-                if (p2 > minmax[4])
-                    minmax[4] = p2;
-                if (p3 > minmax[5])
-                    minmax[5] = p3;
+                if (p1 < bbox[0])
+                    bbox[0] = p1;
+                if (p2 < bbox[1])
+                    bbox[1] = p2;
+                if (p3 < bbox[2])
+                    bbox[2] = p3;
+                if (p1 > bbox[3])
+                    bbox[3] = p1;
+                if (p2 > bbox[4])
+                    bbox[4] = p2;
+                if (p3 > bbox[5])
+                    bbox[5] = p3;
             }
         } else {
-            minmax[0] = positions[0];
-            minmax[1] = positions[1];
-            minmax[2] = positions[2];
-            minmax[3] = positions[0];
-            minmax[4] = positions[1];
-            minmax[5] = positions[2];
+            bbox[0] = positions[0];
+            bbox[1] = positions[1];
+            bbox[2] = positions[2];
+            bbox[3] = positions[0];
+            bbox[4] = positions[1];
+            bbox[5] = positions[2];
 
             for ( var i = 3; i < positions.length; i += 3) {
-                if (positions[i] < minmax[0])
-                    minmax[0] = positions[i];
-                if (positions[i + 1] < minmax[1])
-                    minmax[1] = positions[i + 1];
-                if (positions[i + 2] < minmax[2])
-                    minmax[2] = positions[i + 2];
-                if (positions[i] > minmax[3])
-                    minmax[3] = positions[i];
-                if (positions[i + 1] > minmax[4])
-                    minmax[4] = positions[i + 1];
-                if (positions[i + 2] > minmax[5])
-                    minmax[5] = positions[i + 2];
+                if (positions[i] < bbox[0])
+                    bbox[0] = positions[i];
+                if (positions[i + 1] < bbox[1])
+                    bbox[1] = positions[i + 1];
+                if (positions[i + 2] < bbox[2])
+                    bbox[2] = positions[i + 2];
+                if (positions[i] > bbox[3])
+                    bbox[3] = positions[i];
+                if (positions[i + 1] > bbox[4])
+                    bbox[4] = positions[i + 1];
+                if (positions[i + 2] > bbox[5])
+                    bbox[5] = positions[i + 2];
             }
         }
-        bbox.min.set(minmax[0], minmax[1], minmax[2]);
-        bbox.max.set(minmax[3], minmax[4], minmax[5]);
         return bbox;
     };
 
     var absMat = XML3D.math.mat4.create();
 
-    XML3D.webgl.transformAABB = function(bbox, gmatrix) {
+    var transformAABB = function(bbox, gmatrix) {
         if (bbox.isEmpty())
             return;
 
         var min = bbox.min._data;
         var max = bbox.max._data;
-    
+
         var center = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.add(XML3D.math.vec3.create(), min, max), 0.5);
         var extend = XML3D.math.vec3.scale(XML3D.math.vec3.create(), XML3D.math.vec3.subtract(XML3D.math.vec3.create(), max, min), 0.5);
-    
+
         XML3D.math.mat4.copy(absMat, gmatrix);
         absMat.set([0, 0, 0, 1], 12)
         for ( var i = 0; i < 16; i++) {
             absMat[i] = Math.abs(absMat[i]);
         }
-    
+
         XML3D.math.vec3.transformMat4(extend, extend, absMat);
         XML3D.math.vec3.transformMat4(center, center, gmatrix);
-    
+
         XML3D.math.vec3.add(bbox.max._data, center, extend);
         XML3D.math.vec3.subtract(bbox.min._data, center, extend);
     };
-
 
     /**
      * Splits mesh data into smaller chunks. WebGL only supports 65,535 indices, meshes of greater size are
@@ -319,44 +301,44 @@
 
 
     };
-    
-    /** for every component of v1 and v2 applies f, i.e. f(v1[.],v2[.]), 
+
+    /** for every component of v1 and v2 applies f, i.e. f(v1[.],v2[.]),
      *  and returns it.
-     *  
-     *  @param {vec3} v1 
+     *
+     *  @param {vec3} v1
      *  @param {vec3} v2
      *  @param {function(number, number):number} f
-     *  @return {vec3} the mapped vector 
-     */    
+     *  @return {vec3} the mapped vector
+     */
     function mapVec(v1, v2, f)
     {
-        var vec = XML3D.math.vec3.create(); 
-        vec[0] = f(v1[0], v2[0]); 
+        var vec = XML3D.math.vec3.create();
+        vec[0] = f(v1[0], v2[0]);
         vec[1] = f(v1[1], v2[1]);
-        vec[2] = f(v1[2], v2[2]); 
-        
-        return vec; 
+        vec[2] = f(v1[2], v2[2]);
+
+        return vec;
     };
 
     /**
-     * @param {XML3DBox} bbox
-     * @param {XML3DVec3} min
-     * @param {XML3DVec3} max
+     * @param {XML3D.webgl.BoundingBox} bbox
+     * @param {vec3} min
+     * @param {vec3} max
      * @param {mat4} trafo
      */
     XML3D.webgl.adjustMinMax = function(bbox, min, max, trafo) {
         var xfmmin = XML3D.math.vec3.create();
         var xfmmax = XML3D.math.vec3.create();
-        XML3D.math.vec3.transformMat4(xfmmin, bbox.min._data, trafo);
-        XML3D.math.vec3.transformMat4(xfmmax, bbox.max._data, trafo);
-        
+        XML3D.math.vec3.transformMat4(xfmmin, bbox.min, trafo);
+        XML3D.math.vec3.transformMat4(xfmmax, bbox.max, trafo);
+
         /* bounding box is axis-aligned, but through transformation
-         * min and max values might be shuffled (image e.g. a rotation (0, 1, 0, 1.57), 
-         * here min's and max' x and z values are swapped). So we 
-         * order them now. 
+         * min and max values might be shuffled (image e.g. a rotation (0, 1, 0, 1.57),
+         * here min's and max' x and z values are swapped). So we
+         * order them now.
          */
-        var bbmin = mapVec(xfmmin, xfmmax, Math.min); 
-        var bbmax = mapVec(xfmmin, xfmmax, Math.max); 
+        var bbmin = mapVec(xfmmin, xfmmax, Math.min);
+        var bbmax = mapVec(xfmmin, xfmmax, Math.max);
 
         if (bbmin[0] < min[0])
             min[0] = bbmin[0];
@@ -370,15 +352,6 @@
             max[1] = bbmax[1];
         if (bbmax[2] > max[2])
             max[2] = bbmax[2];
-    };
-
-    XML3D.webgl.createEmptyTexture = function(gl) {
-        var handle = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, handle);
-        var data = new Uint8Array([ 255, 128, 128, 255 ]);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     };
 
     /** Calculate the offset of the given element and return it.
@@ -423,10 +396,11 @@
      *  @param {!number} pageY the y-coordinate relative to the page
      *  @return {{x: number, y: number}} the converted coordinates
      */
-    XML3D.webgl.convertPageCoords = function(xml3dEl, pageX, pageY)
+    webgl.convertPageCoords = function(xml3dEl, pageX, pageY)
     {
         var off = calculateOffset(xml3dEl);
 
         return {x: pageX - off.left, y: pageY - off.top};
     };
-})();
+
+})(XML3D.webgl);

@@ -40,6 +40,7 @@
         config.wrapT = clampToGL(node.wrapT);
         config.minFilter = filterToGL(node.filterMin);
         config.magFilter = filterToGL(node.filterMin);
+        config.textureType = Xflow.TEX_TYPE.TEXTURE_2D;
 
         var imageAdapter = this.factory.getAdapter(this.node.firstElementChild, XML3D.data.XML3DDataAdapterFactory.prototype);
         if(imageAdapter) {
@@ -51,8 +52,14 @@
     TextureDataAdapter.prototype.createXflowNode = function() {
         var xnode = XML3D.data.xflowGraph.createInputNode();
         xnode.name = this.node.name;
+        xnode.paramName = this.node.param ? this.node.name : null;
+        xnode.key = this.node.key;
         return xnode;
     };
+
+    TextureDataAdapter.prototype.setScriptValue = function(value){
+        XML3D.debug.logError("Texture currently does not support setScriptValue()");
+    }
 
     TextureDataAdapter.prototype.getOutputs = function() {
         var result = {};
@@ -62,6 +69,22 @@
 
     TextureDataAdapter.prototype.getValue = function() {
         return this.value;
+    };
+
+    TextureDataAdapter.prototype.notifyChanged = function(evt)
+    {
+        if(evt.type == XML3D.events.VALUE_MODIFIED){
+            var attr = evt.wrapped.attrName;
+            if(attr == "name"){
+                this.xflowInputNode.name = this.node.name;
+            }
+            else if(attr == "key"){
+                this.xflowInputNode.key = this.node.key;
+            }
+            else if(attr == "param"){
+                this.xflowInputNode.paramName = this.node.param ? this.node.name : null;
+            }
+        }
     };
 
     /**

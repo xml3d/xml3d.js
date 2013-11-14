@@ -23,11 +23,20 @@
     var nativeCreateElementNS = document.createElementNS;
     doc.createElementNS = function(ns, name) {
         var r = nativeCreateElementNS.call(this, ns, name);
-        if (ns == XML3D.xml3dNS) {
+        if (ns == XML3D.xml3dNS || XML3D.classInfo[name.toLowerCase()]) {
             XML3D.config.element(r, true);
         }
         return r;
     };
+    var nativeCreateElement = document.createElement;
+    doc.createElement = function(name) {
+        var r = nativeCreateElement.call(this, name);
+        if (XML3D.classInfo[name.toLowerCase()] ) {
+            XML3D.config.element(r, true);
+        }
+        return r;
+    };
+
     XML3D.extend(window.document, doc);
 
 }(XML3D._native));

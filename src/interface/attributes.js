@@ -328,6 +328,16 @@
         return m ? new Uint8Array(m) : new Uint8Array();
     };
 
+    handler.StringValueHandler = function(elem, id) {
+        var ta = {};
+        this.desc = mixedContent(elem, ta, this);
+        this.resetValue = function() { ta.value = null; };
+    };
+    handler.StringValueHandler.prototype.parse = function(elem) {
+        var str = getContent(elem);
+        return str;
+    };
+
     handler.CanvasStyleHandler = function(e, id, d) {
         var canvas = e._configured.canvas;
         this.desc = {};

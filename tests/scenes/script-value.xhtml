@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="600px" height="400px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: #ddd">
+
+    <defs>
+      <data id="pointData" >
+        <float3 name="position" id="posValue" >0 -1 0   1 0 0</float3>
+        <float name="pointSize" id="pointSize" >0.5</float>
+      </data>
+    </defs>
+
+    <shader id="pointColorShader" script="urn:xml3d:shader:point" >
+        <bool name="useVertexColor">true</bool>
+    </shader>
+
+    <group style="transform: translateZ(-15px)" >
+        <group shader="#pointColorShader" >
+            <mesh type="points" src="#pointData" />
+        </group>
+    </group>
+
+  </xml3d>
+</body>
+</html>

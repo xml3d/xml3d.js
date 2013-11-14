@@ -1,194 +1,108 @@
 // Adapter for <group>
 (function() {
 
-	var eventTypes = {onclick:1, ondblclick:1,
-			ondrop:1, ondragenter:1, ondragleave:1};
-
     var GroupRenderAdapter = function(factory, node) {
-        XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.processListeners();
+        XML3D.webgl.TransformableAdapter.call(this, factory, node);
+        this.initializeEventAttributes();
         this.factory = factory;
-        this.parentTransform = null;
-        this.parentShaderHandle = null;
-        this.parentVisible = true;
-        this.isValid = true;
         this.updateTransformAdapter();
+        this.createRenderNode();
     };
 
-    XML3D.createClass(GroupRenderAdapter, XML3D.webgl.RenderAdapter);
+    XML3D.createClass(GroupRenderAdapter, XML3D.webgl.TransformableAdapter);
 
     var p = GroupRenderAdapter.prototype;
 
-    /** It is assumed that this method uses the world matrix! */
-    p.applyTransformMatrix = function(m) {
-        if (this.parentTransform !== null)
-            XML3D.math.mat4.multiply(m, this.parentTransform,  m);
-
-        var matrix = this.getLocalMatrixInternal();
-        if (matrix)
-            XML3D.math.mat4.multiply(m, m, matrix);
-
-        return m;
+    p.createRenderNode = function() {
+        //TODO: Shouldn't have to go through the renderer...
+        var parent = this.getParentRenderAdapter();
+        var parentNode = parent.getRenderNode && parent.getRenderNode();
+        this.renderNode = this.getScene().createRenderGroup({
+            parent: parentNode,
+            shaderHandle: this.getShaderHandle(),
+            visible: this.node.visible,
+            name: this.node.id
+        });
+        this.updateLocalMatrix();
+        var bbox = XML3D.math.bbox.create();
+        this.renderNode.setWorldSpaceBoundingBox(bbox);
     };
 
-    p.getLocalMatrixInternal = function()
-    {
-        var cssMatrix = XML3D.css.getCSSMatrix(this.node);
-        if(cssMatrix){
-            return XML3D.css.convertCssToMat4(cssMatrix);
-        }
-
-        var handle = this.getConnectedAdapter("transform");
-        if (handle)
-            return handle.getMatrix("transform");
-
-        return null;
-    }
+    p.updateLocalMatrix = (function () {
+        var IDENTITY = XML3D.math.mat4.create();
+        return function () {
+            var result = IDENTITY;
+            var cssMatrix = XML3D.css.getCSSMatrix(this.node);
+            if (cssMatrix) {
+                result = XML3D.css.convertCssToMat4(cssMatrix);
+            } else {
+                var handle = this.getConnectedAdapter("transform");
+                if (handle) {
+                    result = handle.getMatrix("transform");
+                }
+            }
+            this.renderNode.setLocalMatrix(result);
+        };
+    }());
 
     p.updateTransformAdapter = function() {
         var transformHref = this.node.transform;
         this.connectAdapterHandle("transform", this.getAdapterHandle(transformHref));
     };
 
-    p.processListeners  = function() {
-        var attributes = this.node.attributes;
-        for (var index in attributes) {
-            var att = attributes[index];
-            if (!att.name)
-                continue;
-
-            var type = att.name;
-	        if (type.match(/onmouse/) || eventTypes[type]) {
-                var eventType = type.substring(2);
-                this.node.addEventListener(eventType, new Function("evt", att.value), false);
-            }
-        }
-    };
-
     p.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.NODE_INSERTED) {
-            this.factory.renderer.sceneTreeAddition(evt);
-            return;
+        if (evt.type !== XML3D.events.VALUE_MODIFIED) {
+            return this.handleConnectedAdapterEvent(evt);
         }
-        else if (evt.type == XML3D.events.NODE_REMOVED) {
-            this.factory.renderer.sceneTreeRemoval(evt);
-            return;
-        } else if (evt.type == XML3D.events.THIS_REMOVED) {
-            //Clear all references to shader and transform adapters
-            this.clearAdapterHandles();
-            return;
-        }
-        else if( (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) && !evt.internalType){
-            // The connected transform node changed;
-            this.propagateTransform(evt);
-            return;
-        }
-
-        var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+        var target = evt.attrName || evt.wrapped.attrName;
 
         switch (target) {
         case "shader":
-            evt.internalType = "parentshader";
-            evt.newValue = this.getShaderHandle();
-            this.notifyChildren(evt);
-            this.factory.renderer.requestRedraw("Group shader changed.", false);
-            break;
-
-        case "parentshader":
-            this.parentShaderHandle = null;
-            if (!this.getShaderHandle()) { // This node's shader would override parent shaders
-                this.notifyChildren(evt);
-            }
-            this.parentShaderHandle = evt.newValue;
+            this.disconnectAdapterHandle("shader");
+            this.renderNode.setLocalShaderHandle(this.getShaderHandle());
+            this.factory.renderer.requestRedraw("Group shader changed.");
             break;
 
         case "transform":
             //This group is now linked to a different transform node. We need to notify all
             //of its children with the new transformation matrix
             this.updateTransformAdapter();
-
-            this.propagateTransform(evt);
-
-            break;
-
-        //TODO: this will change once the wrapped events are sent to all listeners of a node
-        case "parenttransform":
-            var parentValue = downstreamValue = evt.newValue;
-            this.parentTransform = evt.newValue;
-
-            var downstreamValue;
-            var matrix = this.getLocalMatrixInternal();
-            if (matrix)
-                downstreamValue = XML3D.math.mat4.multiply(XML3D.math.mat4.create(), parentValue, matrix);
-
-            evt.newValue = downstreamValue;
-            this.notifyChildren(evt);
-            // Reset event value
-            evt.newValue = parentValue;
+            this.updateLocalMatrix();
             break;
 
         case "visible":
-            //TODO: improve visibility handling
-            //If this node is set visible=false then it overrides the parent node
-            if (this.parentVisible == false)
-                break;
-            else {
-                evt.internalType = "parentvisible";
-                evt.newValue = evt.wrapped.newValue == "true";
-                this.notifyChildren(evt);
-                delete evt.internalType;
-                delete evt.newValue;
-                this.factory.renderer.requestRedraw("Group visibility changed.", true);
-            }
-            break;
-
-        case "parentvisible":
-            this.parentVisible = evt.newValue;
-            //If this node is set visible=false then it overrides the parent node
-            if (this.node.visible == false)
-                break;
-            else
-                this.notifyChildren(evt);
-
+            this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
+            this.factory.renderer.requestRedraw("Group visibility changed.");
             break;
 
         default:
             XML3D.debug.logWarning("Unhandled mutation event in group adapter for parameter '"+target+"'");
             break;
         };
-
     };
 
-    p.notifyChildren = function(evt) {
-        var child = this.node.firstElementChild;
-        while (child) {
-            var adapter = this.factory.getAdapter(child);
-            adapter && adapter.notifyChanged(evt);
-            child = child.nextElementSibling;
+    p.handleConnectedAdapterEvent = function(evt) {
+        switch(evt.type) {
+            case XML3D.events.NODE_INSERTED:
+                this.initElement(evt.wrapped.target);
+                this.initChildElements(evt.wrapped.target);
+                break;
+            case XML3D.events.THIS_REMOVED:
+                this.dispose();
+                break;
+            case XML3D.events.ADAPTER_HANDLE_CHANGED:
+                if (evt.key === "transform") {
+                    this.updateTransformAdapter();
+                    this.updateLocalMatrix();
+                } else if (evt.key === "shader") {
+                    var handle = this.getShaderHandle();
+                    this.renderNode.setLocalShaderHandle(handle);
+                }
+                break;
+            default:
+                XML3D.debug.logWarning("Unhandled connected adapter event for "+evt.key+" in shader adapter");
         }
     };
-
-    p.propagateTransform = function(evt){
-        var downstreamValue;
-        var matrix = this.getLocalMatrixInternal();
-        if (matrix)
-            downstreamValue = matrix;
-        else if (this.parentTransform)
-            downstreamValue = XML3D.math.mat4.identity(XML3D.math.mat4.create());
-        else
-            downstreamValue = null;
-
-        if(this.parentTransform)
-            downstreamValue = XML3D.math.mat4.multiply(XML3D.math.mat4.create(), this.parentTransform, downstreamValue);
-
-        evt.internalType = "parenttransform";
-        evt.newValue = downstreamValue;
-
-        this.notifyChildren(evt);
-        delete evt.internalType;
-        delete evt.newValue;
-        this.factory.renderer.requestRedraw("Group transform changed.", true);
-    }
 
     p.getShaderHandle = function()
     {
@@ -203,44 +117,32 @@
                     shaderHref = result[1];
             }
         }
-        if(shaderHref)
-            return this.getAdapterHandle(shaderHref);
-        else
-            return this.parentShaderHandle;
-
+        if(shaderHref) {
+            this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
+            return this.getConnectedAdapterHandle("shader");
+        }
     };
 
-    p.destroy = function() {
-        var child = this.node.firstElementChild;
-        while (child) {
-            var adapter = this.factory.getAdapter(child);
+    p.dispose = function() {
+        // Dispose all children as well
+        this.traverse(function(adapter) {
             if (adapter && adapter.destroy)
-                adapter.destroy();
-            child = child.nextElementSibling;
-        }
-
-        this.isValid = false;
+                adapter.dispose();
+        });
+        this.getRenderNode().remove();
+        this.clearAdapterHandles();
     };
 
     /* Interface methods */
     p.getBoundingBox = function() {
-        var bbox = new window.XML3DBox();
-        Array.prototype.forEach.call(this.node.childNodes, function(c) {
-            if(c.getBoundingBox)
-                bbox.extend(c.getBoundingBox());
-        });
-        var matrix = this.getLocalMatrixInternal();
-        if (matrix) {
-            XML3D.webgl.transformAABB(bbox, matrix);
-        }
-        return bbox;
+        var bbox = XML3D.math.bbox.create();
+        this.renderNode.getWorldSpaceBoundingBox(bbox);
+        return XML3D.math.bbox.asXML3DBox(bbox);
     };
 
     p.getLocalMatrix = function() {
         var m = new window.XML3DMatrix();
-        var matrix = this.getLocalMatrixInternal();
-        if (matrix)
-            m._data.set(matrix);
+        this.renderNode.getLocalMatrix(m._data);
         return m;
     };
 
@@ -248,10 +150,7 @@
 
     p.getWorldMatrix = function() {
         var m = new window.XML3DMatrix();
-
-        XML3D.math.mat4.identity(tmpIdMat);
-        m._data.set(this.applyTransformMatrix(tmpIdMat));
-
+        this.renderNode.getWorldMatrix(m._data);
         return m;
     };
 

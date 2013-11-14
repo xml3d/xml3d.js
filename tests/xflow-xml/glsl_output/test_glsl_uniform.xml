@@ -1,0 +1,39 @@
+<XflowTest>
+    <Input>
+
+		<data id="mesh" >
+            <int name="index" id="index_1" >0 1 2 1 2 3</int>
+            <float3 name="position" id="position_1">1 1 1  2 2 2</float3>
+            <float3 name="normal" id="normal_1">1 0 0</float3>
+            <float3 name="color" id="color_1" >1 1 0</float3>
+            <float2 name="texcoord" id="texcoord_1"  >0 0 1 0</float2>
+		</data>
+
+    </Input>
+    <TestProcess>
+        <VSCheck title="Check Vertex Shader" data="#mesh" >
+            <VSConfig>
+                <VSConnection in="position" out="worldPosition" type="FLOAT3" transform="WORLD_POINT" />
+                <VSConnection in="normal" out="worldNormal" type="FLOAT3" transform="WORLD_NORMAL" />
+                <VSConnection in="color" out="fragColor" type="FLOAT3" optional="true" />
+                <VSConnection in="texcoord" out="fragTexcoord" type="FLOAT2" optional="true" />
+            </VSConfig>
+
+            <VSInputBufferCount count="3" />
+            <VSInAttribCount count="2"/>
+            <VSUniformAttribCount count="1"/>
+            <VSOutAttribCount count="3"/>
+
+            <VSOutputIsVarying name="worldPosition" />
+            <VSOutputIsVarying name="worldNormal" />
+            <VSOutputIsUniform name="fragColor" input="#color_1" />
+            <VSOutputIsVarying name="fragTexcoord" />
+
+            <VSHasInputBuffer input="#position_1" uniform="false" />
+            <VSHasInputBuffer input="#normal_1" uniform="true" />
+            <VSHasInputBuffer input="#texcoord_1" uniform="false" />
+
+            <VSCodeMatchesRegexp regexp="gl_Position ?= ?.+\*.*vec4\(.+, 1.0\);" />
+        </VSCheck>
+    </TestProcess>
+</XflowTest>

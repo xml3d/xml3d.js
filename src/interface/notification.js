@@ -1,13 +1,16 @@
 (function() {
 
+    /**
+     * Types of change events
+     * @enum {number}
+     */
   var events = {
           NODE_INSERTED: 0,
           VALUE_MODIFIED:  1,
           NODE_REMOVED: 2,
-          DANGLING_REFERENCE: 3,
-          VALID_REFERENCE: 4,
-          THIS_REMOVED: 5,
-          ADAPTER_HANDLE_CHANGED: 6
+          THIS_REMOVED: 3,
+          ADAPTER_HANDLE_CHANGED: 4,
+          ADAPTER_VALUE_CHANGED: 5
   };
 
   //-----------------------------------------------------------------------------
@@ -33,15 +36,20 @@
 
   //-----------------------------------------------------------------------------
 
-  events.AdapterHandleNotification = function(handle, type) {
-    this.adapterHandle = handle;
-    this.type = type;
-  };
-  XML3D.createClass(events.AdapterHandleNotification, events.Notification);
-  events.AdapterHandleNotification.prototype.toString = function() {
-      return "AdapterHandleNotification (type:" + this.type + ")";
-  };
-  //-----------------------------------------------------------------------------
+    /**
+     * @param {AdapterHandle} handle
+     * @param {int} type
+     * @constructor
+     */
+    events.AdapterHandleNotification = function (handle, type) {
+        this.adapterHandle = handle;
+        this.type = type;
+    };
+    XML3D.createClass(events.AdapterHandleNotification, events.Notification);
+    events.AdapterHandleNotification.prototype.toString = function () {
+        return "AdapterHandleNotification (type:" + this.type + ")";
+    };
+    //-----------------------------------------------------------------------------
 
   events.ConnectedAdapterNotification = function(adapterHandleNotification, key) {
     this.adapter = adapterHandleNotification.adapterHandle.getAdapter();

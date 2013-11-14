@@ -18,10 +18,10 @@ module("Adapter Handles", {
 
 test("Get Local Adapters", function() {
     var xTest = this.doc.getElementById("xml3dTest"),
-        hTest = getHandler(xTest);
+        canvasId = getCanvasId(xTest);
     var XML3D = this.window.XML3D;
 
-    var handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#transform1", XML3D.webgl, hTest.id);
+    var handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#transform1", XML3D.webgl, canvasId);
 
     ok(handle.hasAdapter(), "Handle of #transform1 has XML3D.webgl adapter ");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
@@ -40,13 +40,13 @@ test("Get Local Adapters", function() {
     ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,
         "Adapter is instanceof XML3D.data.DataAdapter");
 
-    handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#shader1", XML3D.webgl, hTest.id);
+    handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#shader1", XML3D.webgl, canvasId);
     ok(handle.hasAdapter(), "Handle of #shader1 has XML3D.webgl adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     ok(handle.getAdapter() instanceof XML3D.webgl.ShaderRenderAdapter,
         "Adapter is instanceof XML3D.webgl.ShaderRenderAdapter");
 
-    handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#group1", XML3D.webgl, hTest.id);
+    handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#group1", XML3D.webgl, canvasId);
     ok(handle.hasAdapter(), "Handle of #group1 has XML3D.webgl adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     ok(handle.getAdapter() instanceof XML3D.webgl.GroupRenderAdapter,
@@ -58,7 +58,7 @@ test("Get Local Adapters", function() {
     ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,
         "Adapter is instanceof XML3D.data.DataAdapter");
 
-    handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.webgl, hTest.id);
+    handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.webgl, canvasId);
     ok(handle.hasAdapter(), "Handle of #mesh1 has XML3D.webgl adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     ok(handle.getAdapter() instanceof XML3D.webgl.MeshRenderAdapter,
@@ -67,7 +67,7 @@ test("Get Local Adapters", function() {
 
 test("Get External Adapters", function() {
     var xTest = this.doc.getElementById("xml3dTest"),
-        hTest = getHandler(xTest);
+        canvasId = getCanvasId(xTest);
     var XML3D = this.window.XML3D;
 
     var handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "xml/meshes.xml#simpleMesh", XML3D.data);
@@ -95,7 +95,7 @@ test("Get External Adapters", function() {
             "Adapter is instanceof XML3D.data.DataAdapter");
 
         var handle2 = XML3D.base.resourceManager.getAdapterHandle(self.doc, "xml/shaders.xml#flatgreen2",
-            XML3D.webgl, hTest.id);
+            XML3D.webgl, canvasId);
         ok(!handle2.hasAdapter(), "Handle of 'xml/shaders.xml#flatgreen2' has no XML3D.webgl adapter yet");
         ok(handle2.status == XML3D.base.AdapterHandle.STATUS.LOADING, "Handle status is 'LOADING'" );
 
@@ -172,13 +172,13 @@ test("Get Missing Handles", function() {
 
 test("Notify Adapters", 8, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
-        hTest = getHandler(xTest);
+        canvasId = getCanvasId(xTest);
     var XML3D = this.window.XML3D;
 
     var node = this.doc.getElementById("mesh1");
     var dataHandle1 = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.data);
     var dataHandle2 = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.data);
-    var webglHandle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.webgl, hTest.id);
+    var webglHandle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.webgl, canvasId);
     dataHandle1.addListener(function(e){
         ok(true, "First Data Adapter got notified");
         ok(e.type == XML3D.events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
@@ -191,7 +191,7 @@ test("Notify Adapters", 8, function() {
         ok(true, "WebGL Adapter got notified");
         ok(e.type == XML3D.events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
     });
-    XML3D.base.resourceManager.notifyNodeAdapterChange(node, XML3D.webgl, hTest.id, XML3D.events.ADAPTER_HANDLE_CHANGED);
+    XML3D.base.resourceManager.notifyNodeAdapterChange(node, XML3D.webgl, canvasId, XML3D.events.ADAPTER_HANDLE_CHANGED);
     XML3D.base.resourceManager.notifyNodeAdapterChange(node, XML3D.data, 0, XML3D.events.ADAPTER_HANDLE_CHANGED);
 });
 

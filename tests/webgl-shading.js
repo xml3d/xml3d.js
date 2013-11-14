@@ -21,6 +21,9 @@ module("WebGL shaders internal", {
             });
             return fragment + "\n" + source;
         }
+        this.addFragmentShaderHeader = function(src) {
+            return XML3D.webgl.addFragmentShaderHeader(src);
+        }
     }
 });
 
@@ -31,7 +34,8 @@ test("Phong fragment shader", function() {
     var directives = [];
     phong.addDirectives.call(phong, directives, {}, {});
     equal(directives.length, 6, "6 directives from phong shader");
-    var fragment1 = this.mergeDirectives(directives, phong.fragment);
+
+    var fragment1 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment1, "Phong fragment without globals compiles.");
     notEqual(fragment1.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment1.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
@@ -45,7 +49,7 @@ test("Phong fragment shader", function() {
         }
     }, {});
     equal(directives.length, 6, "6 directives from phong shader");
-    var fragment2 = this.mergeDirectives(directives, phong.fragment);
+    var fragment2 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment2, "Phong fragment with 2 point lights compiles.");
     notEqual(fragment2.indexOf("MAX_POINTLIGHTS 2"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment2.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
@@ -58,7 +62,7 @@ test("Phong fragment shader", function() {
             length : 1
         }
     }, {});
-    var fragment3 = this.mergeDirectives(directives, phong.fragment);
+    var fragment3 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment3, "Phong fragment with 1 directional light compiles.");
     notEqual(fragment3.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment3.indexOf("MAX_DIRECTIONALLIGHTS 1"), -1, "MAX_DIRECTIONALLIGHTS set");
@@ -73,7 +77,7 @@ test("Phong fragment shader", function() {
     }, {
         diffuseTexture : {}
     });
-    var fragment4 = this.mergeDirectives(directives, phong.fragment);
+    var fragment4 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment4, "Phong fragment with 1 directional light and diffuseTexture compiles.");
     notEqual(fragment4.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment4.indexOf("MAX_DIRECTIONALLIGHTS 1"), -1, "MAX_DIRECTIONALLIGHTS set");
@@ -91,8 +95,8 @@ test("Phong fragment shader", function() {
     }, {
         specularTexture : {}
     });
-    var fragment5 = this.mergeDirectives(directives, phong.fragment);
-    console.log(fragment5);
+    var fragment5 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
+    //console.log(fragment5);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with 20 point lights and a specular texture compiles.");
     notEqual(fragment5.indexOf("MAX_POINTLIGHTS 20"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment5.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
@@ -114,8 +118,8 @@ test("Phong fragment shader", function() {
         specularTexture : {},
         emissiveTexture : {}
     });
-    var fragment5 = this.mergeDirectives(directives, phong.fragment);
-    console.log(fragment5);
+    var fragment5 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
+    //console.log(fragment5);
     this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with all branches compiles.");
     notEqual(fragment5.indexOf("MAX_POINTLIGHTS 5"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment5.indexOf("MAX_DIRECTIONALLIGHTS 3"), -1, "MAX_DIRECTIONALLIGHTS set");

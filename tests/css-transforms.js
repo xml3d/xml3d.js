@@ -7,7 +7,7 @@ module("CSS Transformations", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/css-transforms.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/css-transforms.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -23,8 +23,10 @@ test("Static Transforms", 3, function() {
     var testStep = 0;
     function onFrameDrawn(){
         if(testStep == 0){
-            if( XML3DUnit.getPixelValue(glTest, 200, 100)[0] == 0)
+            if( XML3DUnit.getPixelValue(glTest, 200, 100)[0] == 0) {
+                ok(false, "Nothing rendered at all");
                 return;
+            }
 
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
                 QUnit.imageEqual(refImage, testImage, "CSS-Tranform Render matches");

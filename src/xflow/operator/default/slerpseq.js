@@ -2,9 +2,9 @@ Xflow.registerOperator("xflow.slerpSeq", {
     outputs: [  {type: 'float4', name: 'result'}],
     params:  [  {type: 'float4', source: 'sequence'},
                 {type: 'float', source: 'key'}],
-    mapping: [  {source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
-                {source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
-                {source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
+    mapping: [  {name: 'value1', source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
+                {name: 'value2',  source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
+                {name: 'weight',  source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
     evaluate: function(result, value1, value2, weight, info) {
         for(var i = 0; i < info.iterateCount; ++i){
             XML3D.math.quat.slerpOffset(  value1,info.iterFlag[0] ? i*4 : 0,
@@ -55,7 +55,7 @@ Xflow.registerOperator("xflow.slerpKeys", {
             result[3] = values[4*idx+3];
         }
         else{
-            var weight = (key - keys[idx]) / (keys[idx+1] - keys[idx]);
+            var weight = (key[0] - keys[idx]) / (keys[idx+1] - keys[idx]);
             XML3D.math.quat.slerpOffset(  values, idx*4,
                 values,(idx+1)*4, weight,
                 result, 0, true);

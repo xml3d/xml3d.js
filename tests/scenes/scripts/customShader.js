@@ -12,10 +12,6 @@ XML3D.shaders.register("customtest", {
     ].join("\n"),
 
     fragment : [
-        "#ifdef GL_ES",
-          "precision highp float;",
-        "#endif",
-
         "uniform vec3 someColor;",
 
         "void main(void) {",

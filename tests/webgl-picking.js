@@ -19,25 +19,25 @@ module("WebGL Picking tests", {
 test("Check current pick object (internal)", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
-    var picked = h.updatePickObjectByPoint(88,60);
-    ok(h.currentPickObj, "Object picked");
-    strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
+    var picked = h.getPickObjectByPoint(88,60);
+    ok(h.renderer.pickedObject, "Object picked");
+    strictEqual(h.renderer.pickedObject, picked, "Return value matches");
+    strictEqual(h.renderer.pickedObject.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
 
-    picked = h.updatePickObjectByPoint(5,5);
-    strictEqual(h.currentPickObj, null, "Nothing picked");
-    strictEqual(h.currentPickObj, picked, "Return value matches");
+    picked = h.getPickObjectByPoint(5,5);
+    strictEqual(h.renderer.pickedObject, null, "Nothing picked");
+    strictEqual(h.renderer.pickedObject, picked, "Return value matches");
 });
 
 test("Pick with large object ids", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
-    var h = getHandler(xml3dElement);
+    var renderer = getRenderer(xml3dElement);
     var target = this.doc.getElementById("pickingMesh6");
 
-    var drawables = h.renderer.renderObjects.ready;
+    var drawables = renderer.scene.ready;
     var objId = -1;
     for ( var i = 0; i < drawables.length; i++) {
-        if (drawables[i].meshAdapter.node === target) {
+        if (drawables[i].node === target) {
             objId = i;
             break;
         }
@@ -45,10 +45,10 @@ test("Pick with large object ids", function() {
     notEqual(objId, -1, "Found Drawable");
     ok(objId > 255, "Object id larger than 255");
 
-    var picked = h.updatePickObjectByPoint(220, 150);
-    ok(h.currentPickObj, "Object picked");
-    strictEqual(h.currentPickObj, picked, "Return value matches");
-    strictEqual(h.currentPickObj.meshAdapter.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
+    var picked = renderer.getRenderObjectFromPickingBuffer(220, 150);
+    ok(renderer.pickedObject, "Object picked");
+    strictEqual(renderer.pickedObject, picked, "Return value matches");
+    strictEqual(renderer.pickedObject.node, this.doc.getElementById("pickingMesh6"), "Picked object 'pickingMesh1'");
 
 });
 
@@ -77,9 +77,9 @@ test("Object picking test", 3, function() {
         strictEqual(evt.target, target);
     }, false);
 
-    h.updatePickObjectByPoint(88,60);
+    h.getPickObjectByPoint(88,60);
     stop();
-    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 88, clientY: 60 }), target);
 
 });
 
@@ -94,9 +94,9 @@ test("Position picking test", 4, function() {
     	QUnit.closeVector(evt.position, new XML3DVec3(-2.503,2.01,-10), EPSILON, "Picked position is correct");
     }, false);
 
-    h.updatePickObjectByPoint(89,51);
+    h.getPickObjectByPoint(89,51);
     stop();
-    h.dispatchMouseEvent("click", 1, 89, 51, null, target);
+    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 89, clientY: 51 }), target);
 });
 
 test("Normal picking test", 4, function() {
@@ -111,9 +111,9 @@ test("Normal picking test", 4, function() {
         start();
     }, false);
 
-    h.updatePickObjectByPoint(88,60);
+    h.getPickObjectByPoint(88,60);
     stop();
-    h.dispatchMouseEvent("click", 1, 88, 60, null, target);
+    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 88, clientY: 60 }), target);
 });
 
 test("Don't pick invisible objects", 3, function() {
@@ -140,4 +140,20 @@ test("Resizing xml3d element reinitializes buffers", 5, function() {
     equal(actual, expected, "Pick object 'pickingMesh7'");
 });
 
+test("Touch", function() {
+    if('ontouchstart' in window) {
+        console.log("Available", XML3D.webgl.events.available.indexOf("touchstart"));
+        notEqual(-1, XML3D.webgl.events.available.indexOf("touchstart"), "touchstart listeners attached");
+        notEqual(-1, XML3D.webgl.events.available.indexOf("touchend"), "touchend listeners attached");
+        notEqual(-1, XML3D.webgl.events.available.indexOf("touchmove"), "touchmove listeners attached");
+
+    } else {
+        console.log("Not Available");
+        equal(-1, XML3D.webgl.events.available.indexOf("touchstart"), "No touchstart listeners attached");
+        equal(-1, XML3D.webgl.events.available.indexOf("touchend"), "No touchend listeners attached");
+        equal(-1, XML3D.webgl.events.available.indexOf("touchmove"), "No touchmove listeners attached");
+    }
+
+
+});
 

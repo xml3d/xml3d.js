@@ -41,6 +41,14 @@ The xml3d.js is separated into several files. To build, run the ant script
 'build.xml' located in the 'build' folder. From Eclipse IDE the build can also
 be started by running 'Run As->Ant build' from the files context menu.
 
+### Documentation ###
+We have an overview documentation in each subfolder of the project:
+* [build](build/) - The build system of xml3d.js.
+* [src](src/) - The actual source code of the xml3d.js library
+* [tests](tests/) - The test suite
+* [tools](tools/) - Several tools that can be used optionally with xml3d.js
+
+
 ### Change log ###
 4.4 - 23.04.2013
 * Image Processing with Xflow (also as standalone library) - [demo](http://xml3d.github.io/xml3d-examples/examples/xflowIP/pixel-wise.html)
@@ -79,3 +87,4 @@ be started by running 'Run As->Ant build' from the files context menu.
 
 4.1 - 19.07.2012
 * Initial release on GitHub
+#

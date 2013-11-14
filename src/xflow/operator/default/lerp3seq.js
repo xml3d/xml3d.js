@@ -3,9 +3,9 @@ Xflow.registerOperator("xflow.lerpSeq", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'sequence'},
         {type: 'float', source: 'key'}],
-    mapping: [  {source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
-        {source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
-        {source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
+    mapping: [  { name: 'value1', source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
+        { name: 'value2', source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
+        { name: 'weight', source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
     evaluate_core: function(result, value1, value2, weight){
         var invWeight = 1 - weight[0];
         result[0] = invWeight*value1[0] + weight[0]*value2[0];
@@ -51,8 +51,8 @@ Xflow.registerOperator("xflow.lerpKeys", {
             result[2] = values[3*idx+2];
         }
         else{
-            var weight = (key - keys[idx]) / (keys[idx+1] - keys[idx]);
-            var invWeight = 1 - weight[0];
+            var weight = (key[0] - keys[idx]) / (keys[idx+1] - keys[idx]);
+            var invWeight = 1 - weight;
             result[0] = invWeight*values[3*idx] + weight*values[3*idx + 3];
             result[1] = invWeight*values[3*idx+1] + weight*values[3*idx + 4];
             result[2] = invWeight*values[3*idx+2] + weight*values[3*idx + 5];

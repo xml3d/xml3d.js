@@ -66,7 +66,6 @@
     p.notifyChanged = function(e) {
         if (e.type == 1) {
 			this.needsUpdate = true;
-            this.factory.renderer.requestRedraw("Transformation changed.", true);
         } else if (e.type == 2) {
             this.dispose();
         }
@@ -123,7 +122,6 @@
     };
 
     p.dataChanged = function(request, changeType){
-        this.factory.renderer.requestRedraw("Transformation changed.", true);
         for(var type in this.requests){
             if(this.requests[type] == request)
                 delete this.matrixReady[type];

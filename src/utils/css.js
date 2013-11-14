@@ -59,7 +59,7 @@ XML3D.css.getCSSMatrix = function(node){
         result = new XML3D.css.CSSMatrix(style);
     }
     catch(e){
-        XML3D.debug.logException(e, "Error parsing transform property: " + style);
+        XML3D.debug.logError("Error parsing transform property: " + style);
     }
     return result;
 

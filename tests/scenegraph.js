@@ -145,7 +145,7 @@ module("Bounding Boxes", {
     teardown : function() {
         var v = document.getElementById("xml3dframe");
         v.removeEventListener("load", this.cb, true);
-    },
+    }
 });
 
 
@@ -184,6 +184,22 @@ test("Groups and Meshes", 16, function() {
 
 });
 
+test("Hidden groups", 5, function() {
+    var root = this.doc.getElementById("g_Root").getBoundingBox();
+    root.visible = false;
+    var group = this.doc.getElementById("g_PartiallyHidden");
+    group.visible = true;
+
+    var boundingBox = group.getBoundingBox();
+    QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(2,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Hidden child group: (2 1.5 -1) to (4 3.5 1)");
+    this.doc.getElementById("invisible_cube").visible = true;
+    boundingBox = group.getBoundingBox();
+    QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(-4,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Visible child group: (-4 1.5 -1) to (4 3.5 1)");
+    this.doc.getElementById("invisible_mesh").visible = false;
+    boundingBox = group.getBoundingBox();
+    QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(2,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Hidden child mesh: (2 1.5 -1) to (4 3.5 1)");
+});
+
 test("Dynamically added mesh", function() {
 
     var mesh = XML3D.createElement("mesh");
@@ -194,6 +210,10 @@ test("Dynamically added mesh", function() {
     mesh.setAttribute("src", "#mySimpleMesh");
 
     this.xml3dElement.appendChild(mesh);
+
+    // renderadapter is initialized but mesh data is still not initialized
+    ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
+
     //Mesh changes are not applied until frame renders
     var h = getHandler(this.xml3dElement);
     h.draw();
@@ -271,7 +291,7 @@ module("getWorldMatrix() Tests", {
 
         parGrp.setAttribute("transform", "#t_mixed");
         QUnit.closeMatrix(node.getWorldMatrix(), this.matMixed, EPSILON, "parent='#t_mixed'");
-    },
+    }
 });
 
 test("group's getWorldMatrix()", function() {

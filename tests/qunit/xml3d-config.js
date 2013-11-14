@@ -74,13 +74,14 @@ QUnit.extend( QUnit, {
 
     closeArray : function(actual, expected, maxDifference, message) {
 
-        if(!actual || actual.toString() != expected.toString() || actual.length != expected.length){
+        if(!actual || actual.length != expected.length){
             QUnit.push(false, actual, expected, message);
             return;
         }
 
         for (var i=0; i<actual.length; i++) {
-            if (Math.abs(actual[i] - expected[i]) > maxDifference) {
+            var diff = Math.abs(actual[i] - expected[i]);
+            if (isNaN(diff)  || diff > maxDifference) {
                 QUnit.push(false, actual, expected, message);
                 return;
             }
@@ -146,7 +147,7 @@ var loadDocument = function(url, f) {
 };
 
 var EPSILON = 0.0001;
-QUnit.config.testTimeout = 20000;
+QUnit.config.testTimeout = 5000;
 XML3DUnit = {};
 
 XML3DUnit.getRendererString = function() {

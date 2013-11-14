@@ -239,14 +239,14 @@ XML3D.Xml3dSceneController.prototype.__defineGetter__("width", function() { retu
 XML3D.Xml3dSceneController.prototype.__defineGetter__("height", function() { return this.canvas.height;});
 
 XML3D.Xml3dSceneController.prototype.getView = function() {
-    //var activeView = null;
-    var activeView = this.xml3d.activeView; //? this.xml3d.activeView : this.xml3d.getAttribute("activeView");
+    var activeView = this.xml3d.activeView;
     XML3D.debug.logInfo("Active View: " + activeView);
 
-    if (typeof activeView=="string")
+    if (activeView)
     {
-        if (activeView.indexOf('#') == 0)
-            activeView = activeView.replace('#', '');
+        if (activeView.substring(0, 1) == '#') {
+            activeView = activeView.substring(1);
+        }
         XML3D.debug.logInfo("Trying to resolve view '" + activeView +"'");
         activeView = document.getElementById(activeView);
     }
@@ -256,9 +256,7 @@ XML3D.Xml3dSceneController.prototype.getView = function() {
     if (!activeView)
     {
         XML3D.debug.logWarning("No view referenced. Trying to use first view.");
-        activeView = document.evaluate('xml3d:view[1]', this.xml3d, function() {
-            return XML3D.xml3dNS;
-        }, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        activeView = this.xml3d.querySelector('view');
     }
 
     if(false)
@@ -697,7 +695,7 @@ XML3D.Xml3dSceneController.getController = function(xml3d) {
 
     var onload = function() {
 
-        var xml3dList = Array.prototype.slice.call( document.getElementsByTagNameNS(XML3D.xml3dNS, 'xml3d') );
+        var xml3dList = Array.prototype.slice.call( document.querySelectorAll('xml3d') );
 
         XML3D.Xml3dSceneController.controllers = new Array();
         for(var i in xml3dList) {

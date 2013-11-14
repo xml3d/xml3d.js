@@ -130,9 +130,10 @@ test("Bounding Boxes", 7, function () {
     QUnit.closeArray(actualBB, new Float32Array([-2, -2, -2,2, 5, 2]), EPSILON, "Original group's transformation removed");
 });
 
-test("View", function() {
+test("Clipping Planes", function() {
     var view = this.scene.createRenderView();
     ok(view);
+    var CLIPING_NEAR_MINIMUM = 0.01;
 
     this.scene.setActiveView(view);
 
@@ -140,22 +141,23 @@ test("View", function() {
 
     var obj = this.scene.createRenderObject();
     obj.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
-    deepEqual(view.getClippingPlanes(), { near: 0.02, far: 1.01 }, "Unit box");
+    deepEqual(view.getClippingPlanes(), { near: 0.05, far: 1.05 }, "Unit box");
+    obj.remove();
 
     var obj = this.scene.createRenderObject();
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
-    deepEqual(view.getClippingPlanes(), { near: 0.04, far: 2.02 }, "Default values");
+    deepEqual(view.getClippingPlanes(), { near: 0.05, far: 2.05 }, "Larger values");
 
     view.updateOrientation(new XML3DRotation(new XML3DVec3(0,1,0), Math.PI / 2.0).toMatrix()._data);
     var planes = view.getClippingPlanes();
-    QUnit.close(planes.near, 0.04, EPSILON, "Rotated 180: near");
-    QUnit.close(planes.far, 2.02, EPSILON, "Rotated 180: far");
+    QUnit.close(planes.near, 0.05, EPSILON, "Rotated 180: near");
+    QUnit.close(planes.far, 2.05, EPSILON, "Rotated 180: far");
 
     view.updateOrientation(new XML3DRotation(new XML3DVec3(0,0.707,0.707), Math.PI / 3.0).toMatrix()._data);
 
     planes = view.getClippingPlanes();
-    QUnit.close(planes.near, 0.0645 , EPSILON, "Rotated arbitrary: near");
-    QUnit.close(planes.far, 3.257, EPSILON, "Rotated arbitrary: far");
+    QUnit.close(planes.near, 0.05 , EPSILON, "Rotated arbitrary: near");
+    QUnit.close(planes.far, 3.274, EPSILON, "Rotated arbitrary: far");
 
     var group2 = this.scene.createRenderGroup();
     var trans2 = XML3D.math.mat4.create();
@@ -168,12 +170,41 @@ test("View", function() {
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
 
     view.updateOrientation(XML3D.math.mat4.create());
-    deepEqual(view.getClippingPlanes(), { near: 0.07, far: 2.035 }, "Translated group");
+    deepEqual(view.getClippingPlanes(), { near: 0.05, far: 2.05 }, "Translated group");
 
     XML3D.math.mat4.scale(trans2, trans2, [20,20,20]);
     group2.setLocalMatrix(trans2);
 
-    deepEqual(view.getClippingPlanes(), { near: 0.8, far: 40.4 }, "Scaled group");
+    deepEqual(view.getClippingPlanes(), { near: 0.4, far: 40.4 }, "Scaled group");
+
+    var trans = 80;
+    XML3D.math.mat4.identity(trans2);
+    XML3D.math.mat4.translate(trans2, trans2, [0, 0, -trans]);
+    group2.setLocalMatrix(trans2);
+
+    deepEqual(view.getClippingPlanes(), { near: trans - 2.05, far: trans+2.05 }, "Translated to exceed minimum of near");
+
+
+});
+
+test("View projection matrix", function() {
+    var view = this.scene.createRenderView();
+    ok(view);
+
+    var projectionMatrixActual = XML3D.math.mat4.create();
+    var projectionMatrixExpected = XML3D.math.mat4.create();
+
+    this.scene.setActiveView(view);
+
+    view.getProjectionMatrix(projectionMatrixActual, 0.5 );
+    var cp = view.getClippingPlanes();
+    XML3D.math.mat4.perspective(projectionMatrixExpected,  45 / 180 * Math.PI, 0.5, cp.near, cp.far);
+    QUnit.closeArray(projectionMatrixActual, projectionMatrixExpected, EPSILON, "Projection, aspect ration 0.5");
+
+    view.getProjectionMatrix(projectionMatrixActual, 0.6 );
+    var cp = view.getClippingPlanes();
+    XML3D.math.mat4.perspective(projectionMatrixExpected,  45 / 180 * Math.PI, 0.6, cp.near, cp.far);
+    QUnit.closeArray(projectionMatrixActual, projectionMatrixExpected, EPSILON, "Projection, aspect ration 0.6");
 
 });
 

@@ -237,7 +237,6 @@
     function processResponse(httpRequest) {
         var mimetype = httpRequest.getResponseHeader("content-type");
         setDocumentData(httpRequest, httpRequest._url, mimetype);
-        updateDocumentHandles(httpRequest._url);
     };
 
     /**
@@ -282,7 +281,16 @@
             return;
         }
         docCache.format = formatHandler;
-        docCache.response = formatHandler.getFormatData(response, httpRequest.responseType, cleanedMimetype);
+        formatHandler.getFormatData(response, httpRequest.responseType, cleanedMimetype, function(success, result){
+            if(success){
+                docCache.response = result;
+                updateDocumentHandles(url)
+            }
+            else{
+                invalidateDocumentHandles(url);
+            }
+        } );
+
     }
 
     /**

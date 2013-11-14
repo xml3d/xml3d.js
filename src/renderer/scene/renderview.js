@@ -8,6 +8,12 @@
     /** @const */
     var ENTRY_SIZE = PROJECTION_MATRIX_OFFSET + 16;
 
+    /** @const */
+    var CLIPPLANE_NEAR_MIN = 0.01;
+
+    /** @const */
+    var DEFAULT_FIELDOFVIEW = 45 / 180 * Math.PI;
+
     /**
      *
      * @constructor
@@ -18,12 +24,13 @@
         opt = opt || {};
         this.position = opt.position || XML3D.math.vec3.create();
         this.orientation = opt.orientation || XML3D.math.mat4.create();
-        this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : 0.78;
+        this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : DEFAULT_FIELDOFVIEW;
         this.worldSpacePosition = XML3D.math.vec3.create();
         this.projectionAdapter = opt.projectionAdapter;
         this.viewDirty = true;
         this.projectionDirty = true;
         this.frustum = new XML3D.webgl.Frustum(1, 100000, 0, this.fieldOfView, 1);
+        this.lastAspectRatio = 1;
     };
     RenderView.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -62,6 +69,7 @@
                     this.setProjectionMatrix(this.projectionAdapter.getMatrix("perspective"));
                     return;
                 }
+
                 var clipPlane = this.getClippingPlanes(),
                     near = clipPlane.near,
                     far = clipPlane.far,
@@ -73,6 +81,8 @@
                 this.setProjectionMatrix(tmp);
                 // Update Frustum
                 this.frustum.setFrustum(near, far, 0, fovy, aspect);
+
+                this.lastAspectRatio = aspect;
             }
         })(),
 
@@ -89,14 +99,15 @@
                 this.getWorldToViewMatrix(t_mat);
                 XML3D.math.bbox.transform(bb, t_mat, bb);
 
-                var bounds = { zMin: bb[2], zMax: bb[5] };
-                var length = XML3D.math.bbox.longestSide(bb);
+                var near = -bb[5],
+                    far = -bb[2],
+                    expand = Math.max((far - near) * 0.005, 0.05);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
-                bounds.zMin -= length * 0.005;
-                bounds.zMax += length * 0.005;
+                far += expand;
+                near -= expand;
 
-                return {near: Math.max(-bounds.zMax, 0.01*length), far: -bounds.zMin};
+                return {near: Math.max(near, expand, CLIPPLANE_NEAR_MIN), far: far};
             }
         })(),
 
@@ -178,7 +189,7 @@
         },
 
         getProjectionMatrix: function(dest, aspect) {
-                if (this.projectionDirty) {
+                if (this.projectionDirty || aspect != this.lastAspectRatio) {
                     this.updateProjectionMatrix(aspect);
                 }
                 var o = this.offset + PROJECTION_MATRIX_OFFSET;

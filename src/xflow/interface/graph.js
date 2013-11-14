@@ -15,7 +15,6 @@
  * @constructor
  */
 Xflow.Graph = function(){
-    this._nodes = [];
 };
 var Graph = Xflow.Graph;
 
@@ -26,7 +25,6 @@ var Graph = Xflow.Graph;
  */
 Graph.prototype.createInputNode = function(){
     var node = new Xflow.InputNode(this);
-    this._nodes.push(node);
     return node;
 };
 
@@ -35,7 +33,6 @@ Graph.prototype.createInputNode = function(){
  */
 Graph.prototype.createDataNode = function(protoNode){
     var node = new Xflow.DataNode(this, protoNode);
-    this._nodes.push(node);
     return node;
 };
 

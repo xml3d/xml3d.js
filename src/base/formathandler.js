@@ -61,8 +61,8 @@
      * @param {string} mimetype
      * @return {Object}
      */
-    FormatHandler.prototype.getFormatData = function(response, responseType, mimetype) {
-        return response;
+    FormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
+        callback(true, response);
     }
 
     /**
@@ -93,8 +93,8 @@
         return response && response.nodeType === 9 && (mimetype === "application/xml" || mimetype === "text/xml");
     }
 
-    XMLFormatHandler.prototype.getFormatData = function(response, responseType, mimetype) {
-        return response;
+    XMLFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
+        callback(true, response);
     }
 
     XMLFormatHandler.prototype.getFragmentData = function(documentData, fragment) {
@@ -118,14 +118,13 @@
         return supported;
     }
 
-    XML3DFormatHandler.prototype.getFormatData = function(response, responseType) {
+    XML3DFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
         // Configure all xml3d elements:
         var xml3dElements = response.querySelectorAll("xml3d");
         for (var i = 0; i < xml3dElements.length; ++i) {
             XML3D.config.element(xml3dElements[i]);
         }
-
-        return response;
+        callback(true, response);
     }
 
     /**
@@ -139,10 +138,6 @@
 
     JSONFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
         return mimetype === "application/json";
-    }
-
-    JSONFormatHandler.prototype.getFormatData = function(response, responseType, mimetype) {
-        return response;
     }
 
     /**

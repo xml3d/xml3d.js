@@ -44,7 +44,11 @@
                 var bufferType = elementBuffer ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
                 gl.bindBuffer(bufferType, buffer);
-                gl.bufferSubData(bufferType, 0, xflowDataEntry.getValue());
+                if (elementBuffer) {
+                    gl.bufferSubData(bufferType, 0, new Uint16Array(xflowDataEntry.getValue()));
+                } else {
+                    gl.bufferSubData(bufferType, 0, xflowDataEntry.getValue());
+                }
                 break;
             case Xflow.DATA_ENTRY_STATE.CHANGED_NEW:
             case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE:

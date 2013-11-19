@@ -90,9 +90,9 @@
             this.needsDraw = this.needsPickingDraw = true;
         },
         createRenderPasses: function (context) {
-            this.mainPass = new webgl.ForwardRenderPass(context);
             var pickingTarget = this.createPickingTarget();
-            this.pickObjectPass = new webgl.PickObjectRenderPass(context, { target: pickingTarget });
+            this.mainPass = new webgl.ForwardRenderPass(context, { target:  context.canvasTarget });
+            this.pickObjectPass = new webgl.PickObjectRenderPass(context, { target:  this.createPickingTarget() });
             this.pickPositionPass = new webgl.PickPositionRenderPass(context, { target: pickingTarget });
             this.pickNormalPass = new webgl.PickNormalRenderPass(context, { target: pickingTarget });
         },
@@ -134,6 +134,7 @@
                 this.prepareRendering();
                 this.pickObjectPass.renderScene(this.scene);
                 this.needsPickingDraw = false;
+                XML3D.debug.logDebug("Rendered Picking Buffer");
             }
             this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene);
             return this.pickedObject;

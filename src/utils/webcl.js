@@ -1,8 +1,8 @@
 //TODO: This file is work in progress! Helpful API methods concerning WebCL will be added when needed. Please provide feedback!
 
 /**
- * WebCL API
- * 
+ * @file WebCL API. Provides useful methods for initialising and utilising the WebCL platform.
+ * @version 0.2
  * @author Toni Dahl
  */
 
@@ -11,7 +11,7 @@
     "use strict";
 
     var platforms,
-        devices = {"CPU": [], "GPU": []},
+        devices = [],
         ctx = null,
 
         WebCLNamespaceAvailable = false,
@@ -20,8 +20,10 @@
         DEFAULT_DEVICE = "CPU";
 
     /**
+     * Creates instance of WebCLError
      *
-     * @param msg
+     * @name WebCLError
+     * @param {string} msg The desired error message
      * @constructor
      */
 
@@ -40,6 +42,7 @@
 
 
     /**
+     * Checks if WebCL namespace is available. The namespace can be provided by a WebCL plugin or native implementation.
      *
      * @returns {boolean}
      */
@@ -52,6 +55,7 @@
     }
 
     /**
+     * Tests a basic WebCL method to see if the OpenCL drivers on users computer are working.
      *
      * @returns {boolean}
      */
@@ -70,7 +74,9 @@
     }
 
     /**
+     * Combines WebCL namespace and driver test.
      *
+     * @function XML3D.webcl~isAvailable
      * @returns {boolean}
      */
 
@@ -80,10 +86,12 @@
 
 
     /**
+     * Initialises the WebCL API using a predefined device type or a default device type.
      *
+     * @param {string} type Device type
      */
 
-    function init() {
+    function init(type) {
         // Checking if WebCL is available in the users system
         if (!hasWebCLNamespace()) {
             XML3D.debug.logWarning("WebCL: Error: Unfortunately your system does not support WebCL. " +
@@ -98,14 +106,17 @@
         }
 
         platforms = WebCL.getPlatforms();
+        devices = getDevicesByType(type || DEFAULT_DEVICE);
 
         // Creating default context
-        createContext({devices: getDevicesByType(DEFAULT_DEVICE)});
+        createContext({devices: devices});
 
     }
 
     /**
+     * Returns all available WebCL device platforms.
      *
+     * @function XML3D.webcl~getPlatforms
      * @returns {Array}
      */
 
@@ -114,9 +125,10 @@
     }
 
     /**
+     * Returns all devices of a chosen type from a selected platform.
      *
-     * @param type
-     * @param platform
+     * @param {string} type
+     * @param {IWebCLPlatform} platform
      * @returns {Array}
      */
 
@@ -124,15 +136,15 @@
         var deviceArr = [];
 
         try {
-        if (type === "CPU") {
-            deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_CPU);
-        } else if (type === "GPU") {
-            deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_GPU);
-        } else if (type === "ALL") {
-            deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_ALL);
-        }
+            if (type === "CPU") {
+                deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_CPU);
+            } else if (type === "GPU") {
+                deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_GPU);
+            } else if (type === "ALL") {
+                deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_ALL);
+            }
 
-        }catch(e){
+        } catch (e) {
             return deviceArr;
         }
 
@@ -140,8 +152,10 @@
     }
 
     /**
+     * Gets all devices of a selected type from all available platforms.
      *
-     * @param type
+     * @function XML3D.webcl~getDevicesByType
+     * @param {string} type
      * @returns {Array}
      */
 
@@ -160,9 +174,11 @@
     }
 
     /**
+     * Gets the platform on where the device is.
      *
-     * @param device
-     * @returns {*}
+     * @function XML3D.webcl~getDevicePlatform
+     * @param {IWebCLDevice} device
+     * @returns {IWebCLPlatform}
      */
 
     function getDevicePlatform(device) {
@@ -178,9 +194,11 @@
     }
 
     /**
+     * Creates a WebCL context
      *
-     * @param properties
-     * @returns {*}
+     * @function XML3D.webcl~createContext
+     * @param {object} properties
+     * @returns {IWebCLContext}
      */
 
     function createContext(properties) {
@@ -188,7 +206,7 @@
             devices: getDevicesByType(DEFAULT_DEVICE)
         };
 
-        properties = properties || defaultProps;
+        properties = properties || defaultProps;
 
         try {
             ctx = WebCL.createContext(properties);
@@ -200,8 +218,10 @@
     }
 
     /**
+     * Gets the WebCL context.
      *
-     * @returns {*}
+     * @function XML3D.webcl~getContext
+     * @returns {IWebCLContext}
      */
 
     function getContext() {
@@ -210,9 +230,11 @@
 
 
     /**
+     * Creates a WebCL program from a string of WebCL code.
      *
-     * @param codeStr
-     * @returns {*}
+     * @function XML3D.webcl~createProgram
+     * @param {string} codeStr
+     * @returns {IWebCLProgram}
      */
 
     function createProgram(codeStr) {
@@ -221,18 +243,7 @@
         try {
             program = ctx.createProgram(codeStr);
         } catch (e) {
-            XML3D.debug.logError("WebCL: Failed to build WebCL program: " +
-                program.getProgramBuildInfo(devices[0], WebCL.CL_PROGRAM_BUILD_STATUS) +
-                ":  " + program.getProgramBuildInfo(devices[0], WebCL.CL_PROGRAM_BUILD_LOG));
-            return false;
-        }
-
-        try {
-            program.build([devices[0]], "");
-        } catch (e) {
-            XML3D.debug.logError("WebCL: Failed to build a WebCL program: " +
-                program.getProgramBuildInfo(devices[0], WebCL.CL_PROGRAM_BUILD_STATUS) +
-                ":  " + program.getProgramBuildInfo(devices[0], WebCL.CL_PROGRAM_BUILD_LOG));
+            XML3D.debug.logError("WebCL: Failed to create WebCL program: ", e);
             return false;
         }
 
@@ -240,10 +251,36 @@
     }
 
     /**
+     * Builds a WebCL program.
      *
-     * @param program
-     * @param name
-     * @returns {*}
+     * @function XML3D.webcl~buildProgram
+     * @param {IWebCLProgram} program
+     * @param {Array} deviceArr
+     * @returns {IWebCLProgram}
+     */
+
+    function buildProgram(program, deviceArr) {
+        deviceArr = deviceArr || devices;
+
+        try {
+            program.build(deviceArr, "");
+        } catch (e) {
+            XML3D.debug.logError("WebCL: Failed to build a WebCL program: " +
+                program.getBuildInfo(deviceArr, WebCL.CL_PROGRAM_BUILD_STATUS) +
+                ":  " + program.getBuildInfo(deviceArr, WebCL.CL_PROGRAM_BUILD_LOG));
+            return false;
+        }
+
+        return program;
+    }
+
+    /**
+     * Creates a WebCL Kernel using a defined program.
+     *
+     * @function XML3D.webcl~createKernel
+     * @param {IWebCLProgram} program
+     * @param {string} name
+     * @returns {IWebCLKernel}
      */
 
     function createKernel(program, name) {
@@ -252,16 +289,18 @@
         try {
             kernel = program.createKernel(name);
         } catch (e) {
-            XML3D.debug.logError("WebCL: Failed to create a WebCL kernel.");
+            XML3D.debug.logError("WebCL: Failed to create a WebCL kernel:", e);
         }
 
         return kernel;
     }
 
     /**
+     * Creates a WebCL Command Queue for queueing kernels for execution.
      *
-     * @param device
-     * @returns {*}
+     * @function XML3D.webcl~createCommandQueue
+     * @param {IWebCLDevice} device
+     * @returns {IWebCLCommandQueue}
      */
 
     function createCommandQueue(device) {
@@ -277,19 +316,21 @@
     }
 
     /**
+     * Creates an input/output buffer to be used with a WebCL kernel
      *
-     * @param size
-     * @param type
-     * @returns {*}
+     * @function XML3D.webcl~createBuffer
+     * @param {int} size
+     * @param {string} type
+     * @returns {IWebCLMemoryObject | boolean}
      */
 
     function createBuffer(size, type) {
 
-        if(type === "r"){
+        if (type === "r") {
             return ctx.createBuffer(WebCL.CL_MEM_READ_ONLY, size);
-        } else if(type === "w") {
+        } else if (type === "w") {
             return ctx.createBuffer(WebCL.CL_MEM_WRITE_ONLY, size);
-        } else if(type === "rw"){
+        } else if (type === "rw") {
             return ctx.createBuffer(WebCL.CL_MEM_READ_WRITE, size);
         }
 
@@ -297,7 +338,9 @@
     }
 
     /**
+     * Creates an instance of KernelManager.
      *
+     * @name KernelManager
      * @constructor
      */
 
@@ -307,9 +350,11 @@
         return {
 
             /**
+             * Creates and builds a WebCL program from a code string and creates a WebCL kernel from the program.
              *
-             * @param name
-             * @param codeStr
+             * @function KernelManager~register
+             * @param {string} name
+             * @param {string} codeStr
              */
 
             register: function (name, codeStr) {
@@ -326,31 +371,37 @@
                 var program, kernel;
 
                 program = createProgram(codeStr);
-                if(program){
+                buildProgram(program);
+
+                if (program) {
                     kernel = createKernel(program, name);
                 }
 
-                if(kernel && !kernels.hasOwnProperty(name)){
+                if (kernel && !kernels.hasOwnProperty(name)) {
                     kernels[name] = kernel;
                 }
 
             },
 
             /**
+             * Deallocates and unregisters a kernel.
              *
-             * @param name
+             * @function KernelManager~unRegister
+             * @param {string} name
              */
-            unRegister: function(name) {
-                if(kernels.hasOwnProperty(name)){
+            unRegister: function (name) {
+                if (kernels.hasOwnProperty(name)) {
                     kernels[name].releaseCLResources();
                     delete kernels[name];
                 }
             },
 
             /**
+             * Gets a kernel of a specified name.
              *
-             * @param name
-             * @returns {*}
+             * @function KernelManager~getKernel
+             * @param {string} name
+             * @returns {IWebCLKernel | boolean}
              */
 
             getKernel: function (name) {
@@ -366,12 +417,15 @@
             },
 
             /**
+             * Sets arguments of a specified kernel.
+             * The first argument of this function is a registered kernel name, other arguments are the kernel arguments respectively.
              *
+             * @function KernelManager~setArgs
              * @returns {boolean}
              */
 
-            setArgs: function(){
-                if(arguments.length < 2) {
+            setArgs: function () {
+                if (arguments.length < 2) {
                     return false;
                 }
 
@@ -380,11 +434,11 @@
                     args = arguments.slice(1),
                     i = args.length;
 
-                if(!kernel){
+                if (!kernel) {
                     return false;
                 }
 
-                while(i--){
+                while (i--) {
                     kernel.setArgs(i, args[i]);
                 }
 
@@ -398,12 +452,15 @@
     /**
      * API
      *
+     * @namespace webcl
+     * @memberOf XML3D
      */
 
     namespace['webcl'] = {
         init: init,
         createContext: createContext,
         createProgram: createProgram,
+        buildProgram: buildProgram,
         createKernel: createKernel,
         createCommandQueue: createCommandQueue,
         createBuffer: createBuffer,
@@ -413,6 +470,7 @@
         getDevicesByType: getDevicesByType,
         getDevicePlatform: getDevicePlatform,
 
+        /** @name XML3D.webcl~kernels */
         kernels: new KernelManager(),
 
         isAvailable: isAvailable

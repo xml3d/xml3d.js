@@ -15,15 +15,20 @@
         ctx = null,
 
         WebCLNamespaceAvailable = false,
-        OpenCLDriversAvailable = false,
+        OpenCLDriversAvailable = false;
 
-        DEFAULT_DEVICE = "CPU";
+    /**
+     *     @constant {string} DEFAULT_DEVICE
+     *     @default "CPU"
+     */
+    var DEFAULT_DEVICE = "CPU";
+
 
     /**
      * Creates instance of WebCLError
      *
      * @name WebCLError
-     * @param {string} msg The desired error message
+     * @param {string} [msg="WebCL error."] The desired error message
      * @constructor
      */
 
@@ -48,14 +53,14 @@
      */
 
     function hasWebCLNamespace() {
-        WebCLNamespaceAvailable = window.WebCL && WebCL.getPlatforms ? true : false;
+        WebCLNamespaceAvailable = window.WebCL && WebCL.getPlatforms;
 
         return WebCLNamespaceAvailable;
 
     }
 
     /**
-     * Tests a basic WebCL method to see if the OpenCL drivers on users computer are working.
+     * Tests a basic WebCL method to see if the OpenCL drivers are working on users device.
      *
      * @returns {boolean}
      */
@@ -88,19 +93,20 @@
     /**
      * Initialises the WebCL API using a predefined device type or a default device type.
      *
-     * @param {string} type Device type
+     * @function XML3D.webcl~init
+     * @param {string} [type="CPU"] Device type
      */
 
     function init(type) {
         // Checking if WebCL is available in the users system
         if (!hasWebCLNamespace()) {
-            XML3D.debug.logWarning("WebCL: Error: Unfortunately your system does not support WebCL. " +
+            XML3D.debug.logWarning("WebCL: Unfortunately your system does not support WebCL. " +
                 "WebCL namespace is not available.");
             return;
         }
 
         if (!hasOpenCLDrivers()) {
-            XML3D.debug.logWarning("WebCL: Error: Unfortunately your system does not support WebCL. " +
+            XML3D.debug.logWarning("WebCL: Unfortunately your system does not support WebCL. " +
                 "OpenCL drivers are not working properly.");
             return;
         }
@@ -127,13 +133,19 @@
     /**
      * Returns all devices of a chosen type from a selected platform.
      *
-     * @param {string} type
+     * @param {string} [type="CPU"] Device type
      * @param {IWebCLPlatform} platform
      * @returns {Array}
      */
 
     function getPlatformDevicesByType(type, platform) {
         var deviceArr = [];
+
+        if(!platform){
+            throw new WebCLError("getPlatformDevicesByType: platform is not defined.");
+        }
+
+        type = type || DEFAULT_DEVICE;
 
         try {
             if (type === "CPU") {
@@ -155,19 +167,17 @@
      * Gets all devices of a selected type from all available platforms.
      *
      * @function XML3D.webcl~getDevicesByType
-     * @param {string} type
+     * @param {string} type Device type
      * @returns {Array}
      */
 
     function getDevicesByType(type) {
         var deviceArr = [], i;
 
-        function push(v) {
-            deviceArr.push(v);
-        }
-
         for (i = platforms.length; i--;) {
-            getPlatformDevicesByType(type, platforms[i]).forEach(push);
+            getPlatformDevicesByType(type, platforms[i]).forEach(function (v) {
+                deviceArr.push(v);
+            });
         }
 
         return deviceArr;
@@ -184,10 +194,15 @@
     function getDevicePlatform(device) {
         var platform;
 
+        if(!device){
+            throw new WebCLError("Device is not defined");
+        }
+
         try {
             platform = device.getInfo(WebCL.DEVICE_PLATFORM);
         } catch (e) {
-            return false;
+            XML3D.debug.logError("WebCL: Could not get platform of the device.", e.message);
+            throw new WebCLError("Could not get the platform of the device.");
         }
 
         return platform;
@@ -197,7 +212,7 @@
      * Creates a WebCL context
      *
      * @function XML3D.webcl~createContext
-     * @param {object} properties
+     * @param {object} [properties]
      * @returns {IWebCLContext}
      */
 
@@ -211,7 +226,8 @@
         try {
             ctx = WebCL.createContext(properties);
         } catch (e) {
-            return false;
+            XML3D.debug.logError("WebCL: Failed to create a WebCL context.", e.message);
+            throw new WebCLError("Failed to create a WebCL context.");
         }
 
         return ctx;
@@ -240,11 +256,15 @@
     function createProgram(codeStr) {
         var program;
 
+        if(!codeStr){
+            throw new WebCLError("createProgram: codeStr was not defined.");
+        }
+
         try {
             program = ctx.createProgram(codeStr);
         } catch (e) {
-            XML3D.debug.logError("WebCL: Failed to create WebCL program: ", e);
-            return false;
+            XML3D.debug.logError("WebCL: Failed to create WebCL program: ", e.message);
+            throw new WebCLError("Failed to create WebCL program.");
         }
 
         return program;
@@ -262,13 +282,17 @@
     function buildProgram(program, deviceArr) {
         deviceArr = deviceArr || devices;
 
+        if(!program){
+            throw new WebCLError("buildProgram: program was not defined.");
+        }
+
         try {
             program.build(deviceArr, "");
         } catch (e) {
             XML3D.debug.logError("WebCL: Failed to build a WebCL program: " +
-                program.getBuildInfo(deviceArr, WebCL.CL_PROGRAM_BUILD_STATUS) +
-                ":  " + program.getBuildInfo(deviceArr, WebCL.CL_PROGRAM_BUILD_LOG));
-            return false;
+                program.getBuildInfo(deviceArr[0], WebCL.CL_PROGRAM_BUILD_STATUS) +
+                ":  " + program.getBuildInfo(deviceArr[0], WebCL.CL_PROGRAM_BUILD_LOG));
+            throw new WebCLError("Failed to build WebCL program.");
         }
 
         return program;
@@ -286,10 +310,19 @@
     function createKernel(program, name) {
         var kernel;
 
+        if(!program){
+            throw new WebCLError("createKernel: program was not defined.");
+        }
+
+        if(!name){
+            throw new WebCLError("createKernel: name was not defined.");
+        }
+
         try {
             kernel = program.createKernel(name);
         } catch (e) {
-            XML3D.debug.logError("WebCL: Failed to create a WebCL kernel:", e);
+            XML3D.debug.logError("WebCL: Failed to create a WebCL kernel:", e.message);
+            throw new WebCLError("Failed to create a WebCL kernel.");
         }
 
         return kernel;
@@ -307,9 +340,9 @@
         var cmdQueue;
 
         try {
-            cmdQueue = ctx.createCommandQueue(device);
+            cmdQueue = ctx.createCommandQueue(device || devices[0]);
         } catch (e) {
-            return false;
+            throw new WebCLError("Could not create CommandQueue.");
         }
 
         return cmdQueue;
@@ -321,10 +354,17 @@
      * @function XML3D.webcl~createBuffer
      * @param {int} size
      * @param {string} type
-     * @returns {IWebCLMemoryObject | boolean}
+     * @returns {IWebCLMemoryObject}
      */
 
     function createBuffer(size, type) {
+        if(!size){
+            throw new WebCLError("createBuffer: Size was not defined.");
+        }
+
+        if(!type){
+            throw new WebCLError("createBuffer: Type was not defined.");
+        }
 
         if (type === "r") {
             return ctx.createBuffer(WebCL.CL_MEM_READ_ONLY, size);
@@ -332,9 +372,10 @@
             return ctx.createBuffer(WebCL.CL_MEM_WRITE_ONLY, size);
         } else if (type === "rw") {
             return ctx.createBuffer(WebCL.CL_MEM_READ_WRITE, size);
+        } else {
+            throw new WebCLError("createBuffer: Unknown buffer type.");
         }
 
-        return false;
     }
 
     /**
@@ -364,8 +405,8 @@
                 }
 
                 if (typeof name !== "string" || typeof codeStr !== "string") {
-                    XML3D.debug.logWarning("WebCL: Kernel name and code must be a string!");
-                    return;
+                    XML3D.debug.logError("WebCL: Kernel name and code must be a string!");
+                    throw new WebCLError("Kernel name and code must be a string.");
                 }
 
                 var program, kernel;
@@ -389,6 +430,7 @@
              * @function KernelManager~unRegister
              * @param {string} name
              */
+
             unRegister: function (name) {
                 if (kernels.hasOwnProperty(name)) {
                     kernels[name].releaseCLResources();
@@ -421,25 +463,32 @@
              * The first argument of this function is a registered kernel name, other arguments are the kernel arguments respectively.
              *
              * @function KernelManager~setArgs
+             * @param {IWebCLKernel} kernel WebCL kernel
+             * @param {...*} args Kernel arguments in the same order as defined in the kernel code
              * @returns {boolean}
              */
 
             setArgs: function () {
-                if (arguments.length < 2) {
-                    return false;
+                var args = Array.prototype.slice.call(arguments),
+                    kernel, kernelArgs, i;
+
+                if (args.length < 2) {
+                    throw new WebCLError("setArgs: No kernel arguments were defined.");
                 }
 
-                var kernelName = arguments[0],
-                    kernel = this.getKernel(kernelName),
-                    args = arguments.slice(1),
-                    i = args.length;
+                kernel = args[0];
+                kernelArgs = args.slice(1);
+                i = kernelArgs.length;
 
                 if (!kernel) {
-                    return false;
+                    throw new WebCLError("setArgs: WebCL kernel was not defined.");
                 }
 
+                XML3D.debug.logDebug("Args for kernel:", kernel.getInfo(WebCL.KERNEL_FUNCTION_NAME));
+
                 while (i--) {
-                    kernel.setArgs(i, args[i]);
+                    XML3D.debug.logDebug("Arg:", i, kernelArgs[i]);
+                    kernel.setArg(i, kernelArgs[i]);
                 }
 
                 return true;

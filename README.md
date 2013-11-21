@@ -50,6 +50,19 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
+4.5 - 14.11.2013
+* Full support for HTML encoding, all [demos](http://xml3d.github.io/xml3d-examples/) in HTML now
+* Set data values efficiently using TypedArray - [demo](http://xml3d.github.io/xml3d-examples/examples/scriptValue/scriptValue.html), [doc](https://github.com/xml3d/xml3d.js/wiki/How-to-efficiently-set-Xflow-input-with-TypedArrays)
+* Override shader attributes on a per-object basis - [demo](http://xml3d.github.io/xml3d-examples/examples/shaderOverrides/index.html)
+* Improved Error Messages
+* Reuse of Xflow graphs using new `<dataflow>` element - [demo](http://xml3d.github.io/xml3d-examples/examples/xflowSkin/xflow-skin.html), [doc](https://github.com/xml3d/xml3d.js/wiki/How-to-use-Xflow#wiki-Dataflows)
+* Many performance improvements, e.g. Frustum Culling and Paging
+* Support for mult-touch events
+* Dynamic near/far clip planes that adapt to scene size
+* [#24](https://github.com/xml3d/xml3d.js/issues/24): WebWorker support for MeshLoader plug-ins - [demo](http://localhost:8080/xml3d-examples/examples/openctm/openctm.html)
+* [#25](https://github.com/xml3d/xml3d.js/issues/25): Smarter handling of cached resources
+
+
 4.4 - 23.04.2013
 * Image Processing with Xflow (also as standalone library) - [demo](http://xml3d.github.io/xml3d-examples/examples/xflowIP/pixel-wise.html)
 * Transformations as Xflow sink

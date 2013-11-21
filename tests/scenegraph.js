@@ -212,7 +212,9 @@ test("Dynamically added mesh", function() {
     this.xml3dElement.appendChild(mesh);
 
     // renderadapter is initialized but mesh data is still not initialized
-    ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
+    //ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
+    QUnit.closeBox(mesh.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
+        "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
 
     //Mesh changes are not applied until frame renders
     var h = getHandler(this.xml3dElement);
@@ -220,6 +222,29 @@ test("Dynamically added mesh", function() {
 
     QUnit.closeBox(mesh.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
             "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
+});
+
+test("Dynamically added group", function() {
+
+    var mesh = XML3D.createElement("mesh");
+
+    ok(mesh.getBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
+
+    mesh.setAttribute("type", "triangles");
+    mesh.setAttribute("src", "#mySimpleMesh");
+
+    var group = XML3D.createElement("group");
+    group.appendChild(mesh);
+    this.xml3dElement.appendChild(group);
+
+    // renderadapter is initialized but mesh data is still not initialized
+    //ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
+    QUnit.closeBox(mesh.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
+        "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
+
+    QUnit.closeBox(group.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
+        "simple group bounding box: (-1 -1 0) to (1 1 0)");
+
 });
 
 //============================================================================

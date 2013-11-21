@@ -31,9 +31,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 name: this.node.id,
                 visible: !this.node.visible ? false : undefined
             });
-        var bbox = XML3D.math.bbox.create();
-        this.renderNode.setObjectSpaceBoundingBox(bbox);
-
         },
 
         getMeshType: function() {

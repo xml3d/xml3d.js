@@ -27,6 +27,12 @@ test("Check current pick object (internal)", function() {
     picked = h.getPickObjectByPoint(5,5);
     strictEqual(h.renderer.pickedObject, null, "Nothing picked");
     strictEqual(h.renderer.pickedObject, picked, "Return value matches");
+
+    var picked = h.getPickObjectByPoint(88,60);
+    ok(h.renderer.pickedObject, "Object picked");
+    strictEqual(h.renderer.pickedObject, picked, "Return value matches");
+    strictEqual(h.renderer.pickedObject.node, this.doc.getElementById("pickingMesh1"), "Picked object 'pickingMesh1'");
+
 });
 
 test("Pick with large object ids", function() {
@@ -65,6 +71,12 @@ test("xml3d Apadater getElementByPoint test", function() {
     strictEqual(element, null, "Nothing picked");
     ok(isNaN(position.x) && isNaN(position.y) && isNaN(position.z), "Picked correct position");
     ok(isNaN(normal.x) && isNaN(normal.y) && isNaN(normal.z), "Picked correct normal");
+
+    element = xml3dElement.getElementByPoint(88,60, position , normal);
+    ok(element, "Object picked");
+    strictEqual(element, this.doc.getElementById("pickingMesh1"));
+    QUnit.closeVector(normal, new XML3DVec3(0,0,1), EPSILON, "Picked correct normal");
+
 });
 
 test("Object picking test", 3, function() {

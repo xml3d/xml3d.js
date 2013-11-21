@@ -85,8 +85,10 @@
         this.drawable = this.createDrawable();
 
         this.shaderHandle = opt.shaderHandle || null;
-        // Set start values;
-        this.initialize();
+
+        /** {Object?} **/
+        this.override = null;
+
     };
     RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -106,14 +108,10 @@
                         that.scene.moveFromReadyToQueue(that);
                     }
                 });
+                result.updateTypeRequest();
+                result.calculateBoundingBox();
             }
             return result;
-        },
-        initialize: function () {
-            this.setObjectSpaceBoundingBox(XML3D.math.EMPTY_BOX);
-
-            /** {Object?} **/
-            this.override = null;
         },
         setType: function(type) {
             this.object.type = type;

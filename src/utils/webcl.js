@@ -1,4 +1,4 @@
-//TODO: This file is work in progress! Helpful API methods concerning WebCL will be added when needed. Please provide feedback!
+//TODO: Helpful API methods concerning WebCL will be added when needed. Please provide feedback!
 
 /**
  * @file WebCL API. Provides useful methods for initialising and utilising the WebCL platform.
@@ -89,10 +89,12 @@
      */
 
     function getCLErrorName(errorCode) {
+        var prop;
+
         if (!isNaN(errorCode)) {
-            for (var p in CL_ERROR_CODES) {
-                if (CL_ERROR_CODES[p] === errorCode) {
-                    return p;
+            for (prop in CL_ERROR_CODES) {
+                if (CL_ERROR_CODES[prop] === errorCode) {
+                    return prop;
                 }
             }
         }
@@ -104,13 +106,13 @@
      * Gets an error code from a CL error message (thrown by Nokia WebCL Plugin)
      *
      * @param msg
-     * @returns {*}
+     * @returns {Integer|Boolean}
      */
 
     function getErrorCodeFromCLError(msg) {
         var code = null;
         if (typeof msg === "string") {
-            code = msg.match(/[+-]?\d+/g);
+            code = msg.match(/-?\d+/g);
 
             if (code !== null) {
                 return parseInt(code[code.length - 1], 10);
@@ -129,8 +131,14 @@
      */
 
     function WebCLError(name, msg) {
-        if (msg && typeof msg !== "string" || name && typeof name !== "string") {
-            throw new TypeError();
+        if (name && typeof name !== "string") {
+            XML3D.debug.logDebug("WebCL API: WebCLError: Error name not type of String");
+            name = "";
+        }
+
+        if (msg && typeof msg !== "string") {
+            XML3D.debug.logDebug("WebCL API: WebCLError: Error message not type of String");
+            msg = "";
         }
 
         this.name = name || "WebCLError";
@@ -145,7 +153,8 @@
     /**
      * Checks if WebCL namespace is available. The namespace can be provided by a WebCL plugin or native implementation.
      *
-     * @returns {boolean}
+     * @function XML3D.webcl~hasWebCLNamespace
+     * @returns {Boolean}
      */
 
     function hasWebCLNamespace() {
@@ -158,7 +167,8 @@
     /**
      * Tests a basic WebCL method to see if the OpenCL drivers are working on users device.
      *
-     * @returns {boolean}
+     * @function XML3D.webcl~hasOpenCLDrivers
+     * @returns {Boolean}
      */
 
     function hasOpenCLDrivers() {
@@ -178,7 +188,7 @@
      * Combines WebCL namespace and driver test.
      *
      * @function XML3D.webcl~isAvailable
-     * @returns {boolean}
+     * @returns {Boolean}
      */
 
     function isAvailable() {
@@ -191,28 +201,31 @@
      *
      * @function XML3D.webcl~init
      * @param {string} [type="CPU"] Device type
+     * @return {Boolean}
      */
 
     function init(type) {
         // Checking if WebCL is available in the users system
         if (!hasWebCLNamespace()) {
-            XML3D.debug.logWarning("WebCL: Unfortunately your system does not support WebCL. " +
+            XML3D.debug.logWarning("WebCL API: Unfortunately your system does not support WebCL. " +
                 "WebCL namespace is not available.");
-            return;
+            return false;
         }
 
         if (!hasOpenCLDrivers()) {
-            XML3D.debug.logWarning("WebCL: Unfortunately your system does not support WebCL. " +
+            XML3D.debug.logWarning("WebCL API: Unfortunately your system does not support WebCL. " +
                 "OpenCL drivers are not working properly.");
-            return;
+            return false;
         }
 
         platforms = WebCL.getPlatforms();
+
         devices = getDevicesByType(type || DEFAULT_DEVICE);
 
         // Creating default context
         createContext({devices: devices});
 
+        return true;
     }
 
     /**
@@ -231,14 +244,15 @@
      *
      * @param {string} [type="CPU"] Device type
      * @param {IWebCLPlatform} platform
-     * @returns {Array}
+     * @returns {Array|Boolean}
      */
 
     function getPlatformDevicesByType(type, platform) {
-        var deviceArr = [];
+        var deviceArr = [], errCode;
 
         if (!platform) {
-            throw new WebCLError("API_ERROR", "getPlatformDevicesByType: platform is not defined.");
+            XML3D.debug.logError("WebCL API: getPlatformDevicesByType(): platform was not defined.");
+            return false;
         }
 
         type = type || DEFAULT_DEVICE;
@@ -253,7 +267,12 @@
             }
 
         } catch (e) {
-            return deviceArr;
+            errCode = getErrorCodeFromCLError(e.message);
+
+            if (errCode !== CL_ERROR_CODES.DEVICE_NOT_FOUND) {
+                throw new WebCLError(getCLErrorName(errCode), "Could not get devices.");
+            }
+            return false;
         }
 
         return deviceArr;
@@ -268,15 +287,19 @@
      */
 
     function getDevicesByType(type) {
-        var deviceArr = [], i;
+        var resultArr = [], deviceArr, i;
 
         for (i = platforms.length; i--;) {
-            getPlatformDevicesByType(type, platforms[i]).forEach(function (v) {
-                deviceArr.push(v);
-            });
+            deviceArr = getPlatformDevicesByType(type, platforms[i]);
+
+            if (deviceArr) {
+                deviceArr.forEach(function (v) {
+                    resultArr.push(v);
+                });
+            }
         }
 
-        return deviceArr;
+        return resultArr;
     }
 
     /**
@@ -284,14 +307,15 @@
      *
      * @function XML3D.webcl~getDevicePlatform
      * @param {IWebCLDevice} device
-     * @returns {IWebCLPlatform}
+     * @returns {IWebCLPlatform | Boolean}
      */
 
     function getDevicePlatform(device) {
         var platform;
 
         if (!device) {
-            throw new WebCLError("API_ERROR", "Device is not defined.");
+            XML3D.debug.logError("WebCL API: getDevicePlatform(): device was not defined.");
+            return false;
         }
 
         try {
@@ -312,14 +336,14 @@
      */
 
     function createContext(properties) {
-        var defaultProps = {
+        var props = {
             devices: getDevicesByType(DEFAULT_DEVICE)
         };
 
-        properties = properties || defaultProps;
+        XML3D.extend(props, properties);
 
         try {
-            ctx = WebCL.createContext(properties);
+            ctx = WebCL.createContext(props);
         } catch (e) {
             throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Failed to create a WebCL context.");
         }
@@ -344,20 +368,21 @@
      *
      * @function XML3D.webcl~createProgram
      * @param {string} codeStr
-     * @returns {IWebCLProgram}
+     * @returns {IWebCLProgram | Boolean}
      */
 
     function createProgram(codeStr) {
         var program;
 
         if (!codeStr) {
-            throw new WebCLError("API_ERROR", "createProgram: codeStr was not defined.");
+            XML3D.debug.logError("WebCL API: createProgram(): codeStr was not defined.");
+            return false;
         }
 
         try {
             program = ctx.createProgram(codeStr);
         } catch (e) {
-            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Failed to create WebCL program.");
+            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Failed to create a WebCL program.");
         }
 
         return program;
@@ -369,14 +394,15 @@
      * @function XML3D.webcl~buildProgram
      * @param {IWebCLProgram} program
      * @param {Array} deviceArr
-     * @returns {IWebCLProgram}
+     * @returns {IWebCLProgram|Boolean}
      */
 
     function buildProgram(program, deviceArr) {
         deviceArr = deviceArr || devices;
 
         if (!program) {
-            throw new WebCLError("API_ERROR", "buildProgram: program was not defined.");
+            XML3D.debug.logError("WebCL API: buildProgram(): program was not defined.");
+            return false;
         }
 
         try {
@@ -395,18 +421,20 @@
      * @function XML3D.webcl~createKernel
      * @param {IWebCLProgram} program
      * @param {string} name
-     * @returns {IWebCLKernel}
+     * @returns {IWebCLKernel|Boolean}
      */
 
     function createKernel(program, name) {
         var kernel;
 
         if (!program) {
-            throw new WebCLError("API_ERROR", "createKernel: program was not defined.");
+            XML3D.debug.logError("WebCL API: createKernel(): program was not defined.");
+            return false;
         }
 
         if (!name) {
-            throw new WebCLError("API_ERROR", "createKernel: name was not defined.");
+            XML3D.debug.logError("WebCL API: createKernel(): name was not defined.");
+            return false;
         }
 
         try {
@@ -444,16 +472,18 @@
      * @function XML3D.webcl~createBuffer
      * @param {int} size
      * @param {string} type
-     * @returns {IWebCLMemoryObject}
+     * @returns {IWebCLMemoryObject|Boolean}
      */
 
     function createBuffer(size, type) {
         if (!size) {
-            throw new WebCLError("API_ERROR", "createBuffer: Size was not defined.");
+            XML3D.debug.logError("WebCL API: createBuffer(): Buffer size was not defined.");
+            return false;
         }
 
         if (!type) {
-            throw new WebCLError("API_ERROR", "createBuffer: Type was not defined.");
+            XML3D.debug.logError("WebCL API: createBuffer(): Buffer type was not defined.");
+            return false;
         }
 
         try {
@@ -463,13 +493,13 @@
                 return ctx.createBuffer(WebCL.CL_MEM_WRITE_ONLY, size);
             } else if (type === "rw") {
                 return ctx.createBuffer(WebCL.CL_MEM_READ_WRITE, size);
+            } else {
+                XML3D.debug.logError("WebCL API: createBuffer(): Unknown buffer type:", type);
+                return false;
             }
         } catch (e) {
             throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Could not create a WebCL buffer.");
         }
-        throw new WebCLError("API_ERROR", "createBuffer: Unknown buffer type.");
-
-
     }
 
     /**
@@ -494,12 +524,18 @@
 
             register: function (name, codeStr) {
                 if (kernels.hasOwnProperty(name)) {
-                    XML3D.debug.logWarning("WebCL: Kernel with a same name is already defined.");
-                    return;
+                    XML3D.debug.logWarning("WebCL API: kernels.register(): Kernel with a same name is already defined.");
+                    return false;
                 }
 
-                if (typeof name !== "string" || typeof codeStr !== "string") {
-                    throw new WebCLError("API_ERROR", "Kernel name and code must be a string.");
+                if(typeof name !== "string") {
+                    XML3D.debug.logError("WebCL API: kernels.register(): Kernel name was not defined or was not type of String.");
+                    return false;
+                }
+
+                if(typeof codeStr !== "string") {
+                    XML3D.debug.logError("WebCL API: kernels.register(): Kernel code was not defined or was not type of String.");
+                    return false;
                 }
 
                 var program, kernel;
@@ -511,9 +547,13 @@
                     kernel = createKernel(program, name);
                 }
 
-                if (kernel && !kernels.hasOwnProperty(name)) {
+                if (kernel) {
                     kernels[name] = kernel;
+
+                    return true;
                 }
+
+                return false;
 
             },
 
@@ -528,7 +568,11 @@
                 if (kernels.hasOwnProperty(name)) {
                     kernels[name].releaseCLResources();
                     delete kernels[name];
+
+                    return true;
                 }
+
+                return false;
             },
 
             /**
@@ -536,7 +580,7 @@
              *
              * @function KernelManager~getKernel
              * @param {string} name
-             * @returns {IWebCLKernel | boolean}
+             * @returns {IWebCLKernel | Boolean}
              */
 
             getKernel: function (name) {
@@ -566,14 +610,16 @@
                     kernel, inputArgs, nKernelArgs, i;
 
                 if (args.length < 2) {
-                    throw new WebCLError("API_ERROR", "setArgs: No kernel arguments were defined.");
+                    XML3D.debug.logWarning("WebCL API: setArgs(): No kernel arguments were defined.");
+                    return false;
                 }
 
                 kernel = args[0];
                 inputArgs = args.slice(1);
 
                 if (!kernel) {
-                    throw new WebCLError("API_ERROR", "setArgs: WebCL kernel was not defined.");
+                    XML3D.debug.logWarning("WebCL API: setArgs(): WebCL kernel was not defined.");
+                    return false;
                 }
 
                 nKernelArgs = kernel.getInfo(WebCL.CL_KERNEL_NUM_ARGS);
@@ -589,11 +635,11 @@
                 i = nKernelArgs;
 
                 try {
-                while (i--) {
-                    XML3D.debug.logDebug("Arg:", i, inputArgs[i]);
-                    kernel.setArg(i, inputArgs[i]);
-                }
-                }catch (e) {
+                    while (i--) {
+                        XML3D.debug.logDebug("Arg:", i, inputArgs[i]);
+                        kernel.setArg(i, inputArgs[i]);
+                    }
+                } catch (e) {
                     throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Could not set kernel arguments.");
                 }
 
@@ -627,6 +673,8 @@
         /** @name XML3D.webcl~kernels */
         "kernels": new KernelManager(),
 
+        "hasWebCLNamespace": hasWebCLNamespace,
+        "hasOpenCLDrivers": hasOpenCLDrivers,
         "isAvailable": isAvailable,
         "WebCLError": WebCLError,
         "getCLErrorName": getCLErrorName

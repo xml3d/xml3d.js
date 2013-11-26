@@ -102,7 +102,6 @@
                 }
             }
             XML3D.debug.logDebug("Got unknown OpenCL Error Code:", errorCode);
-            console.log("Got unknown OpenCL Error Code:", errorCode)
         }
 
         return "UNKNOWN_ERROR";

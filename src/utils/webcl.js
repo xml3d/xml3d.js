@@ -10,7 +10,7 @@
 
     "use strict";
 
-    var platforms,
+    var platforms = [],
         devices = [],
         ctx = null,
 
@@ -80,6 +80,10 @@
     Object.freeze(CL_ERROR_CODES);
 
 
+    function isNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
     /**
      * Returns a CL error name corresponding to a CL error code
      *
@@ -91,12 +95,14 @@
     function getCLErrorName(errorCode) {
         var prop;
 
-        if (!isNaN(errorCode)) {
+        if (isNumber(errorCode)) {
             for (prop in CL_ERROR_CODES) {
                 if (CL_ERROR_CODES[prop] === errorCode) {
                     return prop;
                 }
             }
+            XML3D.debug.logDebug("Got unknown OpenCL Error Code:", errorCode);
+            console.log("Got unknown OpenCL Error Code:", errorCode)
         }
 
         return "UNKNOWN_ERROR";
@@ -105,16 +111,22 @@
     /**
      * Gets an error code from a CL error message (thrown by Nokia WebCL Plugin)
      *
-     * @param msg
+     * @param e
      * @returns {Integer|Boolean}
      */
 
-    function getErrorCodeFromCLError(msg) {
+    function getErrorCodeFromCLError(e) {
         var code = null;
-        if (typeof msg === "string") {
-            code = msg.match(/-?\d+/g);
 
-            if (code !== null) {
+        if (e.name && typeof e.name === "string") {
+            if (CL_ERROR_CODES[e.name]) {
+                return CL_ERROR_CODES[e.name];
+            }
+        }
+        if (e.message && typeof e.message === "string") {
+            code = e.message.match(/-?\d+/g);
+
+            if (code instanceof Array) {
                 return parseInt(code[code.length - 1], 10);
             }
         }
@@ -172,11 +184,16 @@
      */
 
     function hasOpenCLDrivers() {
+        var platArr;
         OpenCLDriversAvailable = true;
 
         try {
-            WebCL.getPlatforms();
+            platArr = WebCL.getPlatforms();
         } catch (e) {
+            OpenCLDriversAvailable = false;
+        }
+
+        if (!platArr || platArr.length === 0) {
             OpenCLDriversAvailable = false;
         }
 
@@ -267,11 +284,14 @@
             }
 
         } catch (e) {
-            errCode = getErrorCodeFromCLError(e.message);
+            errCode = getErrorCodeFromCLError(e);
 
-            if (errCode !== CL_ERROR_CODES.DEVICE_NOT_FOUND) {
+            if (!errCode) {
+                throw e;
+            } else if (errCode !== CL_ERROR_CODES.DEVICE_NOT_FOUND) {
                 throw new WebCLError(getCLErrorName(errCode), "Could not get devices.");
             }
+
             return false;
         }
 
@@ -321,7 +341,13 @@
         try {
             platform = device.getInfo(WebCL.DEVICE_PLATFORM);
         } catch (e) {
-            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Could not get the platform of the device.");
+            var errCode = getErrorCodeFromCLError(e);
+
+            if (!errCode) {
+                throw e;
+            }
+
+            throw new WebCLError(getCLErrorName(errCode), "Could not get the platform of the device.");
         }
 
         return platform;
@@ -345,7 +371,12 @@
         try {
             ctx = WebCL.createContext(props);
         } catch (e) {
-            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Failed to create a WebCL context.");
+            var errCode = getErrorCodeFromCLError(e);
+
+            if (!errCode) {
+                throw e;
+            }
+            throw new WebCLError(getCLErrorName(errCode), "Failed to create a WebCL context.");
         }
 
         return ctx;
@@ -382,7 +413,13 @@
         try {
             program = ctx.createProgram(codeStr);
         } catch (e) {
-            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Failed to create a WebCL program.");
+            var errCode = getErrorCodeFromCLError(e);
+
+            if (!errCode) {
+                throw e;
+            }
+
+            throw new WebCLError(getCLErrorName(errCode), "Failed to create a WebCL program.");
         }
 
         return program;
@@ -408,7 +445,12 @@
         try {
             program.build(deviceArr, "");
         } catch (e) {
-            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)),
+            var errCode = getErrorCodeFromCLError(e);
+
+            if (!errCode) {
+                throw e;
+            }
+            throw new WebCLError(getCLErrorName(errCode),
                 program.getBuildInfo(deviceArr[0], WebCL.CL_PROGRAM_BUILD_LOG));
         }
 
@@ -440,7 +482,12 @@
         try {
             kernel = program.createKernel(name);
         } catch (e) {
-            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Failed to create a WebCL kernel.");
+            var errCode = getErrorCodeFromCLError(e);
+
+            if (!errCode) {
+                throw e;
+            }
+            throw new WebCLError(getCLErrorName(errCode), "Failed to create a WebCL kernel.");
         }
 
         return kernel;
@@ -460,7 +507,12 @@
         try {
             cmdQueue = ctx.createCommandQueue(device || devices[0]);
         } catch (e) {
-            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Could not create CommandQueue.");
+            var errCode = getErrorCodeFromCLError(e);
+
+            if (!errCode) {
+                throw e;
+            }
+            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e)), "Could not create CommandQueue.");
         }
 
         return cmdQueue;
@@ -478,6 +530,9 @@
     function createBuffer(size, type) {
         if (!size) {
             XML3D.debug.logError("WebCL API: createBuffer(): Buffer size was not defined.");
+            return false;
+        }else if (!isNumber(size) || size < 0) {
+            XML3D.debug.logError("WebCL API: createBuffer(): Buffer size must be a positive number.");
             return false;
         }
 
@@ -498,7 +553,12 @@
                 return false;
             }
         } catch (e) {
-            throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Could not create a WebCL buffer.");
+            var errCode = getErrorCodeFromCLError(e);
+
+            if (!errCode) {
+                throw e;
+            }
+            throw new WebCLError(getCLErrorName(errCode), "Could not create a WebCL buffer.");
         }
     }
 
@@ -528,12 +588,12 @@
                     return false;
                 }
 
-                if(typeof name !== "string") {
+                if (typeof name !== "string") {
                     XML3D.debug.logError("WebCL API: kernels.register(): Kernel name was not defined or was not type of String.");
                     return false;
                 }
 
-                if(typeof codeStr !== "string") {
+                if (typeof codeStr !== "string") {
                     XML3D.debug.logError("WebCL API: kernels.register(): Kernel code was not defined or was not type of String.");
                     return false;
                 }
@@ -566,7 +626,17 @@
 
             unRegister: function (name) {
                 if (kernels.hasOwnProperty(name)) {
-                    kernels[name].releaseCLResources();
+                    try {
+                        kernels[name].release();
+                    } catch (e) {
+                        var errCode = getErrorCodeFromCLError(e);
+
+                        if (!errCode) {
+                            throw e;
+                        }
+
+                        throw new WebCLError(getCLErrorName(errCode), "Could not release kernel resources.");
+                    }
                     delete kernels[name];
 
                     return true;
@@ -627,7 +697,8 @@
                 if (inputArgs.length > nKernelArgs) {
                     XML3D.debug.logWarning("WebCL: setArgs: Input args amount > kernel program args amount! Ignoring extra arguments.");
                 } else if (inputArgs.length < nKernelArgs) {
-                    throw new WebCLError("API_ERROR", "setArgs: Not enough arguments were given to WebCL kernel.");
+                    XML3D.debug.logError("WebCL: setArgs: Not enough arguments were given to WebCL kernel.");
+                    return false;
                 }
 
                 XML3D.debug.logDebug("Args for kernel:", kernel.getInfo(WebCL.KERNEL_FUNCTION_NAME));
@@ -640,7 +711,12 @@
                         kernel.setArg(i, inputArgs[i]);
                     }
                 } catch (e) {
-                    throw new WebCLError(getCLErrorName(getErrorCodeFromCLError(e.message)), "Could not set kernel arguments.");
+                    var errCode = getErrorCodeFromCLError(e);
+
+                    if (!errCode) {
+                        throw e;
+                    }
+                    throw new WebCLError(getCLErrorName(errCode), "Could not set kernel arguments.");
                 }
 
                 return true;

@@ -18,18 +18,37 @@
         }
     };
 
+    function addDefaultChanneling(vsConfig, inputName){
+        var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(inputName);
+        vsConfig.channelAttribute(inputName, outputName, null);
+    }
 
-    function channelVsAttribute(vsConfig, inputName){
-        var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(inputName), code = null;
-        if(inputName == "position"){
-            vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
-            code = outputName + " = ( modelViewMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
+
+    function channelVsAttribute(vsConfig, inputName, spaceInfo){
+        if(!spaceInfo[inputName]){
+            addDefaultChanneling(vsConfig, inputName);
+            return;
         }
-        else if(inputName == "normal"){
-            vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "normalMatrix", true);
-            code =  outputName + " = normalize( normalMatrix * #I{" + inputName + "} );";
+
+        var i = spaceInfo[inputName].length;
+        while(i--){
+            var entry = spaceInfo[inputName][i];
+            var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(entry.name), code = null;
+            switch(entry.space){
+                case Shade.SPACE_VECTOR_TYPES.OBJECT: break;
+                case Shade.SPACE_VECTOR_TYPES.VIEW_POINT:
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
+                    code = outputName + " = ( modelViewMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
+                    break;
+                case Shade.SPACE_VECTOR_TYPES.VIEW_NORMAL:
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "normalMatrix", true);
+                    code =  outputName + " = normalize( normalMatrix * #I{" + inputName + "} );";
+                    break;
+                default:
+                    XML3D.error("Can't handle Space Type: " + entry.space);
+            }
+            vsConfig.channelAttribute(inputName, outputName, code);
         }
-        vsConfig.channelAttribute(inputName, outputName, code);
     }
 
 
@@ -129,13 +148,15 @@
 
             XML3D.debug.logDebug("CONTEXT:", contextData);
             try{
-                var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, {
-                    inject: contextData, loc: true, implementation: "xml3d-glsl-forward" });
+                var ast = Shade.getSanitizedAst(this.sourceTemplate, {loc: true});
+                var aast = Shade.parseAndInferenceExpression(ast, {
+                    inject: contextData, implementation: "xml3d-glsl-forward" });
+                var spaceInfo = Shade.resolveSpaces(aast);
                 var glslShader = Shade.compileFragmentShader(aast, {useStatic: true});
                 this.uniformSetter = glslShader.uniformSetter;
                 this.source = {
                     fragment: glslShader.source,
-                    vertex:  this.createVertexShader(vsRequest, vsDataResult)
+                    vertex:  this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
                 }
             }
             catch(e){
@@ -163,11 +184,11 @@
             return true;
         },
 
-        createVertexShader: function(vsRequest, vsDataResult){
+        createVertexShader: function(vsRequest, vsDataResult, spaceInfo){
             var vsConfig = vsRequest.getConfig();
             var names = vsDataResult.outputNames;
             for(var i = 0; i < names.length; ++i){
-                channelVsAttribute(vsConfig, names[i]);
+                channelVsAttribute(vsConfig, names[i], spaceInfo);
             }
             vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
             vsConfig.addCodeFragment( "gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");

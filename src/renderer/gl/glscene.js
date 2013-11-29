@@ -169,7 +169,8 @@
                 activeView.getWorldToViewMatrix(c_worldToViewMatrix);
                 readyObjects.forEach(function (obj) {
                     obj.updateModelViewMatrix(c_worldToViewMatrix);
-                    obj.updateNormalMatrix();
+                    obj.updateModelMatrixN();
+                    obj.updateModelViewMatrixN();
                 });
 
                 this.updateBoundingBox();

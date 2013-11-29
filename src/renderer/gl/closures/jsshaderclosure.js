@@ -41,11 +41,19 @@
                     code = outputName + " = ( modelViewMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
                     break;
                 case Shade.SPACE_VECTOR_TYPES.VIEW_NORMAL:
-                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "normalMatrix", true);
-                    code =  outputName + " = normalize( normalMatrix * #I{" + inputName + "} );";
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelViewMatrixN", true);
+                    code =  outputName + " = normalize( modelViewMatrixN * #I{" + inputName + "} );";
+                    break;
+                case Shade.SPACE_VECTOR_TYPES.WORLD_POINT:
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelMatrix", true);
+                    code = outputName + " = ( modelMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
+                    break;
+                case Shade.SPACE_VECTOR_TYPES.WORLD_NORMAL:
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelMatrixN", true);
+                    code =  outputName + " = normalize( modelMatrixN * #I{" + inputName + "} );";
                     break;
                 default:
-                    XML3D.error("Can't handle Space Type: " + entry.space);
+                    throw new Error("Can't handle Space Type: " + entry.space);
             }
             vsConfig.channelAttribute(inputName, outputName, code);
         }

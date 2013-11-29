@@ -14,7 +14,7 @@ XML3D.shaders.register("point", {
         "uniform mat4 modelViewProjectionMatrix;",
         "uniform mat4 modelViewMatrix;",
         "uniform mat4 projectionMatrix;",
-        "uniform mat3 normalMatrix;",
+        "uniform mat3 modelViewMatrixN;",
         "uniform vec3 eyePosition;",
         "uniform float screenWidth;",
         "uniform float pointSize;",

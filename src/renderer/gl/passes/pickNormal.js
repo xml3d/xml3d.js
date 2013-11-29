@@ -10,7 +10,7 @@
             var c_worldMatrix = XML3D.math.mat4.create();
             var c_normalMatrix3 = XML3D.math.mat3.create();
             var c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
-                c_systemUniformNames = ["modelViewProjectionMatrix", "normalMatrix"];
+                c_systemUniformNames = ["modelViewProjectionMatrix", "modelViewMatrixN"];
 
             return function (object, viewMatrix, projMatrix) {
                 var gl = this.pipeline.context.gl,
@@ -41,7 +41,7 @@
                 program.bind();
 
                 c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
-                c_uniformCollection.sysBase["normalMatrix"] = c_normalMatrix3;
+                c_uniformCollection.sysBase["modelViewMatrixN"] = c_normalMatrix3;
 
                 program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
                 object.mesh.draw(program);

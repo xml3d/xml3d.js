@@ -16,11 +16,9 @@ XML3D.shaders.register("phong", {
         "uniform mat4 spotLightMatrix[ MAX_SPOTLIGHTS ];",
         "#endif",
 
-
-        "uniform mat4 modelMatrix;",
-        "uniform mat4 modelViewMatrix;",
         "uniform mat4 modelViewProjectionMatrix;",
-        "uniform mat3 normalMatrix;",
+        "uniform mat4 modelViewMatrix;",
+        "uniform mat3 modelViewMatrixN;",
         "uniform vec3 eyePosition;",
 
         "void main(void) {",
@@ -28,7 +26,7 @@ XML3D.shaders.register("phong", {
         "    vec3 norm = normal;",
 
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
-        "    fragNormal = normalize(normalMatrix * norm);",
+        "    fragNormal = normalize(modelViewMatrixN * norm);",
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
         "    fragEyeVector = normalize(fragVertexPosition);",
         "    fragTexCoord = texcoord;",

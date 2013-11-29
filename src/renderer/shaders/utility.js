@@ -54,12 +54,12 @@ XML3D.shaders.register("pickedNormals", {
         "attribute vec3 position;",
         "attribute vec3 normal;",
         "uniform mat4 modelViewProjectionMatrix;",
-        "uniform mat3 normalMatrix;",
+        "uniform mat3 modelViewMatrixN;",
 
         "varying vec3 fragNormal;",
 
         "void main(void) {",
-        "    fragNormal = normalize(normalMatrix * normal);",
+        "    fragNormal = normalize(modelViewMatrixN * normal);",
         "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
         "}"
     ].join("\n"),

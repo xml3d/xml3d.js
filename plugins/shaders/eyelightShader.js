@@ -12,11 +12,11 @@ XML3D.shaders.register("eyelight", {
 
         "uniform mat4 modelViewProjectionMatrix;",
         "uniform mat4 modelViewMatrix;",
-        "uniform mat3 normalMatrix;",
+        "uniform mat3 modelViewMatrixN;",
 
         "void main(void) {",
         "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
-        "    fragNormal = normalize(normalMatrix * normal);",
+        "    fragNormal = normalize(modelViewMatrixN * normal);",
         "    fragVertexPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;",
         "    fragTexCoord = texcoord;",
         "}"

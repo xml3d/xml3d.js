@@ -77,9 +77,10 @@
             var vsConfig = new Xflow.VSConfig();
             var names = this.extractedParams.slice();
             //if(names.indexOf("position") == -1) names.push("position");
-
+            vsConfig.addAttribute(Xflow.DATA_TYPE.FLOAT3, "position", true);
             for(var i = 0; i < names.length; ++i){
                 var name = names[i];
+                if(name == "position") continue;
                 var xflowInfo = objectDataNode.getOutputChannelInfo(name);
                 if(xflowInfo){
                     vsConfig.addAttribute(xflowInfo.type, name, true);

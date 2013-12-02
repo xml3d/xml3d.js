@@ -86,14 +86,16 @@ Xflow.VSConfig.prototype.getOperator = function(){
         return c_vs_operator_cache[key];
 
     var outputs = [], params = [], glslCode = "\t// VS Connector\n";
-
+    name = "VSConnect";
     for(var name in this._attributes){
         var attr = this._attributes[name];
         var type = Xflow.getTypeName(attr.type);
         outputs.push( { type: type, name: name} );
         params.push( { type: type, source: name, optional: attr.optional} );
+        name += "T" + type + "N" + name + "O" + attr.optional + ".";
     }
-    var operator = Xflow.initAnonymousOperator({
+    var operator = Xflow.initAnonymousOperator(name,
+    {
         outputs: outputs,
         params:  params,
         evaluate_glsl: glslCode

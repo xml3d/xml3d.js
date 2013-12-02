@@ -47,9 +47,9 @@ Xflow.registerOperator = function(name, data){
 
 };
 
-Xflow.initAnonymousOperator = function(data){
+Xflow.initAnonymousOperator = function(name, data){
     initOperator(data);
-    data.name = "Anonymous Operator";
+    data.name = name;
     return data;
 }
 

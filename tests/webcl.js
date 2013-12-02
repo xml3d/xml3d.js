@@ -46,7 +46,8 @@ module("WebCL API", {
     }
 });
 
-test("Init", 7, function () {
+test("Init", function () {
+    expect(7);
 
     var WebCLNamespaceOK = this.webcl.hasWebCLNamespace();
     ok(WebCLNamespaceOK, "WebCL Namespace available (WebCL plugin is installed / native WebCL implementation available)");
@@ -55,6 +56,7 @@ test("Init", 7, function () {
     ok(OpenCLDriversOK, "OpenCL drivers working");
 
     if (!WebCLNamespaceOK) {
+        expect(2);
         return;
     }
 
@@ -78,10 +80,13 @@ test("Init", 7, function () {
 });
 
 
-test("Programs and Kernels", 8, function () {
+test("Programs and Kernels", function () {
     if (!this.webcl.isAvailable()) {
+        expect(0);
         return;
     }
+
+    expect(8);
 
     var self = this;
 
@@ -118,10 +123,13 @@ test("Programs and Kernels", 8, function () {
 
 });
 
-test("Buffers", 7, function () {
+test("Buffers", function () {
     if (!this.webcl.isAvailable()) {
+        expect(0);
         return;
     }
+
+    expect(7);
 
     var self = this,
         buffSize = 1024;
@@ -156,10 +164,13 @@ test("Buffers", 7, function () {
 
 });
 
-test("Processing", 8, function () {
+test("Processing", function () {
     if (!this.webcl.isAvailable()) {
+        expect(0);
         return;
     }
+
+    expect(8);
 
     var self = this,
         testData = new Uint8Array([20, 20, 20, 255, 80, 80, 80, 255, 45, 45, 45, 255]),

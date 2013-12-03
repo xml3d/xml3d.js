@@ -7,6 +7,7 @@
         "kind": "any",
         "info": {
             "coords": { "type": "object", "kind": "float3", "source": "uniform" },
+            "cameraPosition": { "type": "object", "kind": "float3", "source": "uniform" },
             "viewMatrix": { "type": "object", "kind": "matrix4", "source": "uniform" },
 
             "MAX_POINTLIGHTS": { "type": "int", "source": "constant", "staticValue": 5 },

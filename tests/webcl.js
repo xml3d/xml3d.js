@@ -47,18 +47,15 @@ module("WebCL API", {
 });
 
 test("Init", function () {
-    expect(7);
+    if (!this.webcl.hasWebCLNamespace()) {
+        expect(0);
+        return;
+    }
 
-    var WebCLNamespaceOK = this.webcl.hasWebCLNamespace();
-    ok(WebCLNamespaceOK, "WebCL Namespace available (WebCL plugin is installed / native WebCL implementation available)");
+    expect(6);
 
     var OpenCLDriversOK = this.webcl.hasOpenCLDrivers();
     ok(OpenCLDriversOK, "OpenCL drivers working");
-
-    if (!WebCLNamespaceOK) {
-        expect(2);
-        return;
-    }
 
     var platforms = this.webcl.getPlatforms();
 

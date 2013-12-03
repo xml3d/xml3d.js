@@ -78,8 +78,13 @@ XML3D.debug = {
     },
     assert : function(c, msg) {
         if (!c) {
-            XML3D.debug.doLog(XML3D.debug.WARNING, ["Assertion failed in "
-                    + XML3D.debug.assert.caller.name, msg ]);
+            var caller = XML3D.debug.assert.caller ? XML3D.debug.assert.caller.name : null;
+
+            if (caller)
+                XML3D.debug.doLog(XML3D.debug.WARNING, ["Assertion failed in "
+                        + caller, msg ]);
+            else
+                XML3D.debug.doLog(XML3D.debug.WARNING, ["Assertion failed", msg ]);
         }
     },
     trace  : function(msg, logType) {

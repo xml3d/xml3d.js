@@ -156,9 +156,14 @@
 
             XML3D.debug.logDebug("CONTEXT:", contextData);
             try{
-                var ast = Shade.getSanitizedAst(this.sourceTemplate, {loc: true});
-                var aast = Shade.parseAndInferenceExpression(ast, {
-                    inject: contextData, implementation: "xml3d-glsl-forward" });
+                var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, {
+                    inject: contextData,
+                    implementation: "xml3d-glsl-forward",
+                    propagateConstants: false,
+                    validate: true,
+                    sanitize: true,
+                    transformSpaces: false
+                });
                 var spaceInfo = Shade.resolveSpaces(aast);
                 var glslShader = Shade.compileFragmentShader(aast, {useStatic: true});
                 this.uniformSetter = glslShader.uniformSetter;

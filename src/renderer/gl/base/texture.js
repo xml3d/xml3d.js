@@ -8,6 +8,8 @@
     var GLTexture = function(gl) {
         Xflow.SamplerConfig.call(this);
         this.setDefaults();
+        this.width = 0;
+        this.height = 0;
         this.gl = gl;
         this.handle = null;
     };
@@ -111,8 +113,8 @@
             var gl = this.gl;
             gl.bindTexture(gl.TEXTURE_2D, this.handle);
 
-            var width = image.videoWidth || image.width;
-            var height = image.videoHeight || image.height;
+            this.width = width = image.videoWidth || image.width;
+            this.height = height = image.videoHeight || image.height;
 
             if(this.needsScale(width, height)) {
                 image = scaleImage(image, width, height);
@@ -162,7 +164,8 @@
                     texels = new Uint8Array(width * height * 4);
                 }
             }
-
+            this.width = width;
+            this.height = height;
             this.handle = gl.createTexture();
             this.textureType = gl.TEXTURE_2D;
             gl.bindTexture(gl.TEXTURE_2D, this.handle);

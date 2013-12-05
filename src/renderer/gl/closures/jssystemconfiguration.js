@@ -9,6 +9,11 @@
             "coords": { "type": "object", "kind": "float3", "source": "uniform" },
             "cameraPosition": { "type": "object", "kind": "float3", "source": "uniform" },
             "viewMatrix": { "type": "object", "kind": "matrix4", "source": "uniform" },
+            "modelMatrix": { "type": "object", "kind": "matrix4", "source": "uniform" },
+            "modelViewMatrix": { "type": "object", "kind": "matrix4", "source": "uniform" },
+            "modelViewProjectionMatrix": { "type": "object", "kind": "matrix4", "source": "uniform" },
+            "modelMatrixN": { "type": "object", "kind": "matrix3", "source": "uniform" },
+            "modelViewMatrixN": { "type": "object", "kind": "matrix3", "source": "uniform" },
 
             "MAX_POINTLIGHTS": { "type": "int", "source": "constant", "staticValue": 5 },
             "pointLightOn": { "type": "array", "elements": { "type": "boolean" }, "staticSize": 5, "source": "uniform"},

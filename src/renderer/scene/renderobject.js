@@ -110,6 +110,9 @@
                 });
                 result.updateTypeRequest();
                 result.calculateBoundingBox();
+                result.addEventListener(webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED, function(evt){
+                    that.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED })
+                })
             }
             return result;
         },
@@ -208,6 +211,7 @@
         setTransformDirty: function() {
             this.transformDirty = true;
             this.setBoundingBoxDirty();
+            this.scene.dispatchEvent({type: webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED});
             this.scene.requestRedraw("Transformation changed");
         },
         /**

@@ -207,6 +207,7 @@
          */
         typeDataChanged: function (request, state) {
             this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
+            this.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED });
             this.context.requestRedraw("Mesh Type Data Change");
             XML3D.debug.logInfo("MeshClosure: Type data changed", request, state, this.changeState);
         },
@@ -379,6 +380,8 @@
          */
         shaderInputDataChanged: function (request, state) {
             this.changeState |= state != Xflow.RESULT_STATE.CHANGED_DATA_VALUE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
+            // TODO: We don't know if the change of data only influences the surface shading or the actual mesh shape
+            this.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED });
             this.context.requestRedraw("Mesh Attribute Data Changed");
             XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
         },

@@ -53,6 +53,7 @@
         this.attenuation = XML3D.math.vec3.clone(LIGHT_DEFAULT_ATTENUATION);
         this.castShadow = false;
         this.fallOffAngle = SPOTLIGHT_DEFAULT_FALLOFFANGLE;
+        this.userData = null;
 
         if (this.light.data) {
             // Bounding Box annotated
@@ -81,7 +82,7 @@
             if (Array.isArray(lightEntry)) {
                 lightEntry.push(this);
                 this.updateWorldMatrix(); // Implicitly fills light position/direction
-                this.lightStructureChanged();
+                this.lightStructureChanged(false);
             } else {
                 XML3D.debug.logError("Unsupported light shader script: urn:xml3d:lightshader:" + this.light.type);
             }
@@ -90,7 +91,7 @@
             var container = this.scene.lights[this.light.type];
             if (Array.isArray(container)) {
                 container = container.splice(this);
-                this.lightStructureChanged();
+                this.lightStructureChanged(true);
             }
         },
         lightParametersChanged: function(request, changeType) {
@@ -115,8 +116,8 @@
         lightValueChanged: function() {
             this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, light: this });
         },
-        lightStructureChanged: function() {
-            this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, light: this });
+        lightStructureChanged: function(removed) {
+            this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, light: this, removed: removed });
         },
         getLightData: function(target, offset) {
             var off3 = offset*3;
@@ -170,6 +171,13 @@
                         for(var i = 0; i < 16; i++) {
                             target["lightMatrix"][off16+i] = tmp[i];
                         }
+                    }
+                }
+                else{
+                    target["shadowBias"][offset] = 0;
+                    var off16 = offset*16;
+                    for(var i = 0; i < 16; i++) {
+                        target["lightMatrix"][off16+i] = 0;
                     }
                 }
             }

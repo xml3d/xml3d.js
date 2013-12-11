@@ -159,7 +159,7 @@
                 var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, {
                     inject: contextData,
                     implementation: "xml3d-glsl-forward",
-                    propagateConstants: false,
+                    propagateConstants: true,
                     validate: true,
                     sanitize: true,
                     transformSpaces: false

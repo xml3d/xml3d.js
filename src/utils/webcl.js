@@ -192,7 +192,7 @@
             OpenCLDriversAvailable = false;
         }
 
-        if (!platArr || platArr.length === 0) {
+        if (!platArr || platArr.length === 0) {
             OpenCLDriversAvailable = false;
         }
 

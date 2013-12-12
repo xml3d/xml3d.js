@@ -16,7 +16,7 @@
             var tmpModelMatrix = XML3D.math.mat4.create();
             var tmpModelView = XML3D.math.mat4.create();
             var tmpModelViewProjection = XML3D.math.mat4.create();
-            var tmpNormalMatrix = XML3D.math.mat3.create();
+            var tmpModelViewN = XML3D.math.mat3.create();
             var c_objectSystemUniforms = ["modelMatrix", "modelViewMatrix", "modelViewProjectionMatrix", "normalMatrix"];
 
             return function (objectArray, scene, target, systemUniforms, sceneParameterFilter, opt) {
@@ -61,8 +61,8 @@
                     obj.getModelViewProjectionMatrix(tmpModelViewProjection);
                     systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection;
 
-                    obj.getNormalMatrix(tmpNormalMatrix);
-                    systemUniforms["normalMatrix"] = tmpNormalMatrix;
+                    obj.getModelViewMatrixN(tmpModelViewN);
+                    systemUniforms["modelViewMatrixN"] = tmpModelViewN;
 
                     program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
 

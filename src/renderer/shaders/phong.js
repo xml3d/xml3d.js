@@ -16,6 +16,7 @@ XML3D.shaders.register("phong", {
         "uniform mat4 spotLightMatrix[ MAX_SPOTLIGHTS ];",
         "#endif",
 
+        "uniform mat4 modelMatrix;",
         "uniform mat4 modelViewProjectionMatrix;",
         "uniform mat4 modelViewMatrix;",
         "uniform mat3 modelViewMatrixN;",

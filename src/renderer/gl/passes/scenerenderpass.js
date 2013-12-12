@@ -17,7 +17,7 @@
             var tmpModelView = XML3D.math.mat4.create();
             var tmpModelViewProjection = XML3D.math.mat4.create();
             var tmpModelViewN = XML3D.math.mat3.create();
-            var c_objectSystemUniforms = ["modelMatrix", "modelViewMatrix", "modelViewProjectionMatrix", "normalMatrix"];
+            var c_objectSystemUniforms = ["modelMatrix", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
 
             return function (objectArray, scene, target, systemUniforms, sceneParameterFilter, opt) {
                 var objCount = 0;

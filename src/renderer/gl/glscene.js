@@ -195,7 +195,7 @@
             for(var i = 0, l = readyObjects.length; i < l; i++) {
                 var obj = readyObjects[i];
                 obj.updateModelViewMatrix(worldToViewMatrix);
-                obj.updateNormalMatrix();
+                obj.updateModelMatrixN();
                 obj.updateModelViewProjectionMatrix(projectionMatrix);
             };
         },

@@ -6,11 +6,41 @@
 
 var operators = {};
 
+    /**
+     * Registers Xflow operator.
+     *
+     * @param name
+     * @param data
+     */
+
 Xflow.registerOperator = function(name, data){
-    var actualName = name;
+    var opCollection, platform = data['platform'];
+
     initOperator(data);
-    operators[actualName] = data;
-    data.name = actualName;
+    if(!operators[name]) {
+        operators[name] = {};
+    }
+
+    opCollection = operators[name];
+
+    if (!name) {
+        XML3D.logWarning("Xflow.registerOperator: Operator name undefined.");
+        return;
+    }
+
+    if (!data) {
+        XML3D.logWarning("Xflow.registerOperator: Operator data undefined.");
+        return;
+    }
+
+    data.name = name;
+
+    if (platform && !opCollection.hasOwnProperty(platform)) {
+        opCollection[platform] = data;
+    } else if (!platform) {
+        opCollection[Xflow.PLATFORM.JAVASCRIPT] = data;
+    }
+
 };
 
 Xflow.initAnonymousOperator = function(data){

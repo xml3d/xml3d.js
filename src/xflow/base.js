@@ -213,6 +213,13 @@ var Xflow = {};
         CL: 2
     }
 
+    /**
+     * Default platform for the whole Xflow architecture. Will be overridden if better platform is found.
+     *
+     * @type {Xflow.PLATFORM}
+     */
+    Xflow.platform = Xflow.PLATFORM.JAVASCRIPT;
+
     Xflow.PROCESS_STATE = {
         MODIFIED: 0,
         LOADING: 1,

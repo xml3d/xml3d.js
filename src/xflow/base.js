@@ -21,7 +21,7 @@ var Xflow = {};
         TEXTURE: 40,
         BYTE : 50,
         UBYTE : 60
-    }
+    };
 
     Xflow.DATA_TYPE_MAP = {
         'float' : Xflow.DATA_TYPE.FLOAT,
@@ -35,7 +35,7 @@ var Xflow = {};
         'texture' : Xflow.DATA_TYPE.TEXTURE,
         'byte' : Xflow.DATA_TYPE.BYTE,
         'ubyte' : Xflow.DATA_TYPE.UBYTE
-    }
+    };
 
 
 
@@ -73,7 +73,7 @@ var Xflow = {};
                 return i;
             }
         }
-    }
+    };
 
     /**
      * @enum {number}
@@ -107,7 +107,7 @@ var Xflow = {};
         VIEW_TRANSFORM_NORMAL: 5,
         SCREEN_TRANSFORM_NORMAL: 6,
         OBJECT_ID: 7
-    }
+    };
 
     Xflow.VS_ATTRIB_TRANSFORM = {
         NONE: 0,
@@ -115,7 +115,7 @@ var Xflow = {};
         WORLD_POINT: 2,
         VIEW_NORMAL: 3,
         WORLD_NORMAL: 4
-    }
+    };
 
 
     /**
@@ -129,7 +129,7 @@ var Xflow = {};
         RENAME: 0,
         KEEP: 1,
         REMOVE: 2
-    }
+    };
 
 
     /**
@@ -147,7 +147,7 @@ var Xflow = {};
     Xflow.RESULT_TYPE = {
         COMPUTE: 0,
         VS: 1
-    }
+    };
 
 
     /**
@@ -177,14 +177,14 @@ var Xflow = {};
         PREV_BUFFER: 1,
         NEXT_BUFFER: 2,
         LINEAR_WEIGHT: 3
-    }
+    };
 
 
     Xflow.ITERATION_TYPE = {
         NULL: 0,
         ONE: 1,
         MANY: 2
-    }
+    };
 
     /**
      * Type of Information Extraction - used by operators
@@ -211,7 +211,7 @@ var Xflow = {};
         JAVASCRIPT: 0,
         GLSL: 1,
         CL: 2
-    }
+    };
 
     /**
      * Default platform for the whole Xflow architecture. Will be overridden if better platform is found.
@@ -227,18 +227,19 @@ var Xflow = {};
         INVALID: 3,
         UNPROCESSED: 4,
         PROCESSED: 5
-    }
+    };
 
     // Error Callbacks:
     var c_errorCallbacks = [];
     Xflow.registerErrorCallback = function(callback){
-        c_errorCallbacks.push(callback)
-    }
+        c_errorCallbacks.push(callback);
+    };
 
     Xflow.notifyError = function(message, node){
         if(c_errorCallbacks.length > 0){
-            for(var i = 0; i < c_errorCallbacks.length; ++i)
+            for(var i = 0; i < c_errorCallbacks.length; ++i) {
                 c_errorCallbacks[i](message, node);
+            }
         }
         else{
             // TODO: Do Default error printing
@@ -286,7 +287,7 @@ var Xflow = {};
         if(!prevData || prevData < data){
             c_listedCallbacksData[index] = data;
         }
-    }
+    };
 
     Xflow._callListedCallback = function(){
         if(c_listedCallbacks.length){
@@ -295,7 +296,7 @@ var Xflow = {};
             c_listedCallbacks = [];
             c_listedCallbacksData = [];
         }
-    }
+    };
 }());
 
 

@@ -49,12 +49,18 @@ Xflow.initAnonymousOperator = function(data){
     return data;
 }
 
-Xflow.getOperator = function(name){
-    if (name && !operators[name])
-    {
+Xflow.getOperator = function(name, platform){
+    platform = platform || Xflow.PLATFORM.JAVASCRIPT;
+
+    if (name && !operators[name]) {
         return null;
     }
-    return operators[name];
+
+    if(!operators[name][platform]) {
+        return null;
+    }
+
+    return operators[name][platform];
 };
 
 function initOperator(operator){

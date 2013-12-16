@@ -222,7 +222,7 @@
         if(typeof owner._computeOperator == "string"){
             var operatorName = owner._computeOperator, operator = null;
             if(operatorName){
-                operator = Xflow.getOperator(operatorName);
+                operator = Xflow.getOperator(operatorName, Xflow.platform);
                 if(!operator){
                     Xflow.notifyError("Unknown operator: '" + operatorName+"'", channelNode.owner);
                 }

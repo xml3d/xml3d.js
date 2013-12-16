@@ -209,7 +209,8 @@ var Xflow = {};
      */
     Xflow.PLATFORM = {
         JAVASCRIPT: 0,
-        GLSL: 1
+        GLSL: 1,
+        CL: 2
     }
 
     Xflow.PROCESS_STATE = {
@@ -219,6 +220,11 @@ var Xflow = {};
         INVALID: 3,
         UNPROCESSED: 4,
         PROCESSED: 5
+    }
+
+    Xflow.NODE_TYPE = {
+        PRE_PROCESS: 0,
+        REAL_TIME: 1
     }
 
     // Error Callbacks:

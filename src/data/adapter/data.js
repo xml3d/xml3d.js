@@ -111,8 +111,11 @@ XML3D.data.DataAdapter.prototype.init = function() {
     //if (xflow)
     //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
 
-    var protoNode = (this.node.localName == "proto");
-    this.xflowDataNode = XML3D.data.xflowGraph.createDataNode(protoNode);
+    var protoNode = (this.node.localName == "proto"),
+        platform = getPlatformFromString(this.node.getAttribute("platform")),
+        nodeType = getNodeTypeFromString(this.node.getAttribute("nodeType"));
+
+    this.xflowDataNode = XML3D.data.xflowGraph.createDataNode(protoNode, platform, nodeType);
     this.xflowDataNode.userData = this.node;
 
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
@@ -120,6 +123,31 @@ XML3D.data.DataAdapter.prototype.init = function() {
     updateCompute(this);
     recursiveDataAdapterConstruction(this);
 };
+
+    function getPlatformFromString(platform) {
+
+        if (platform === "cl") {
+            platform = Xflow.PLATFORM.CL;
+        }
+        else if (platform === "gl") {
+            platform = Xflow.PLATFORM.GLSL;
+        }
+        else if (platform === "js") {
+            platform = Xflow.PLATFORM.JAVASCRIPT;
+        }
+        return platform;
+    }
+
+    function getNodeTypeFromString(nodeType) {
+
+        if (nodeType === "preProcess") {
+            nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
+        }
+        else if (nodeType === "realTime") {
+            nodeType = Xflow.NODE_TYPE.REAL_TIME;
+        }
+        return nodeType;
+    }
 
 function recursiveDataAdapterConstruction(adapter){
     for ( var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {

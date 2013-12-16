@@ -31,8 +31,8 @@ Graph.prototype.createInputNode = function(){
 /**
  * @return {Xflow.DataNode}
  */
-Graph.prototype.createDataNode = function(protoNode, platform, nodeType){
-    var node = new Xflow.DataNode(this, protoNode, platform, nodeType);
+Graph.prototype.createDataNode = function(protoNode){
+    var node = new Xflow.DataNode(this, protoNode);
     return node;
 };
 
@@ -197,7 +197,7 @@ function getXflowNodeId(){
  * @constructor
  * @extends {Xflow.GraphNode}
  */
-Xflow.DataNode = function(graph, protoNode, platform, nodeType){
+Xflow.DataNode = function(graph, protoNode){
     Xflow.GraphNode.call(this, graph);
 
     this._loading = false;
@@ -224,8 +224,8 @@ Xflow.DataNode = function(graph, protoNode, platform, nodeType){
     this._paramNames = null;
     this._globalParamNames = null;
 
-    this._platform = platform;
-    this._nodeType = nodeType;
+    this._platform = Xflow.PLATFORM.JAVASCRIPT;
+    this._nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
 
     this._listeners = [];
 
@@ -482,6 +482,27 @@ DataNode.prototype.detachFromParents = function(){
     }
     this._children = [];
 };
+
+DataNode.prototype.setPlatform = function(platformSrc) {
+        if (platformSrc === "cl") {
+            this._platform = Xflow.PLATFORM.CL;
+        }
+        else if (platformSrc === "gl") {
+            this._platform = Xflow.PLATFORM.GLSL;
+        }
+        else if (platformSrc === "js") {
+            this._platform = Xflow.PLATFORM.JAVASCRIPT;
+        }
+}
+
+DataNode.prototype.setNodeType = function(nodeTypeSrc) {
+        if (nodeTypeSrc === "preProcess") {
+            this._nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
+        }
+        else if (nodeTypeSrc === "realTime") {
+            this._nodeType = Xflow.NODE_TYPE.REAL_TIME;
+        }
+}
 
 /**
  * @const

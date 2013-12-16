@@ -8,6 +8,8 @@ var operators = {};
 
     /**
      * Registers Xflow operator.
+     * The operators are stored in collections using their platform as a key. If no platform is defined, the operator
+     * will be registered as a JavaScript-based operator.
      *
      * @param name
      * @param data

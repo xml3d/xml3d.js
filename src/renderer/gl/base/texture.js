@@ -110,11 +110,11 @@
          * @param {Image|HTMLVideoElement} image
          */
         updateTex2DFromImage : function(image) {
-            var gl = this.gl;
+            var gl = this.gl,
+            width = this.width = image.videoWidth || image.width,
+            height = this.height = image.videoHeight || image.height;
+            
             gl.bindTexture(gl.TEXTURE_2D, this.handle);
-
-            this.width = width = image.videoWidth || image.width;
-            this.height = height = image.videoHeight || image.height;
 
             if(this.needsScale(width, height)) {
                 image = scaleImage(image, width, height);

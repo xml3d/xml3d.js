@@ -31,8 +31,8 @@ Graph.prototype.createInputNode = function(){
 /**
  * @return {Xflow.DataNode}
  */
-Graph.prototype.createDataNode = function(protoNode){
-    var node = new Xflow.DataNode(this, protoNode);
+Graph.prototype.createDataNode = function(protoNode, platform, nodeType){
+    var node = new Xflow.DataNode(this, protoNode, platform, nodeType);
     return node;
 };
 
@@ -197,7 +197,7 @@ function getXflowNodeId(){
  * @constructor
  * @extends {Xflow.GraphNode}
  */
-Xflow.DataNode = function(graph, protoNode){
+Xflow.DataNode = function(graph, protoNode, platform, nodeType){
     Xflow.GraphNode.call(this, graph);
 
     this._loading = false;
@@ -223,6 +223,9 @@ Xflow.DataNode = function(graph, protoNode){
     this._substitutionNodes = {};
     this._paramNames = null;
     this._globalParamNames = null;
+
+    this._platform = platform;
+    this._nodeType = nodeType;
 
     this._listeners = [];
 

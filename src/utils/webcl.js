@@ -310,7 +310,7 @@
      */
 
     function getDevicesByType(type) {
-        var resultArr = [], deviceArr, platArr, i;
+        var resultArr = [], deviceArr, i;
 
         getPlatforms();
 
@@ -332,7 +332,7 @@
      *
      * @function XML3D.webcl~getDevicePlatform
      * @param {IWebCLDevice} device
-     * @returns {IWebCLPlatform | Boolean}
+     * @returns {IWebCLPlatform|Boolean}
      */
 
     function getDevicePlatform(device) {
@@ -356,6 +356,36 @@
         }
 
         return platform;
+    }
+
+    /**
+     *
+     * @param clCtx
+     * @returns {boolean}
+     */
+
+    function getContextDevices(clCtx) {
+        var deviceArr = [], errCode;
+
+        if(!clCtx) {
+            XML3D.debug.logError("WebCL API: getContextDevices(): clCtx was not defined.");
+            return false;
+        }
+
+        try {
+            deviceArr = clCtx.getInfo(WebCL.CONTEXT_DEVICES);
+        }catch(e) {
+            errCode = getErrorCodeFromCLError(e);
+
+            if (!errCode) {
+                throw e;
+            } else {
+                throw new WebCLError(getCLErrorName(errCode), "Could not get devices.");
+            }
+
+        }
+
+        return deviceArr.length === 0 ? false : deviceArr;
     }
 
     /**
@@ -420,6 +450,7 @@
 
         if (!clCtx) {
             XML3D.debug.logError("WebCL API: createProgram(): clCtx was not defined.");
+            return false;
         }
 
         try {
@@ -594,10 +625,10 @@
      * Creates an instance of KernelManager.
      *
      * @name KernelManager
-     * @constructor
+     * @constructor XML3D.webcl~KernelManager
      */
 
-    var KernelManager = function (clCtx) {
+    var KernelManager = function (clCtx, deviceArr) {
         var kernels = {};
 
         return {
@@ -630,7 +661,7 @@
 
                 program = createProgram(codeStr, clCtx);
 
-                buildProgram(program);
+                buildProgram(program, deviceArr);
 
                 if (program) {
                     kernel = createKernel(program, name);
@@ -773,10 +804,12 @@
         "getDefaultContext": getDefaultContext,
         "getPlatforms": getPlatforms,
         "getDevicesByType": getDevicesByType,
+        "getContextDevices": getContextDevices,
         "getDevicePlatform": getDevicePlatform,
 
         /** @name XML3D.webcl~kernels */
         "kernels": new KernelManager(),
+        "KernelManager": KernelManager,
 
         "hasWebCLNamespace": hasWebCLNamespace,
         "hasOpenCLDrivers": hasOpenCLDrivers,

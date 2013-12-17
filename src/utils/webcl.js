@@ -213,7 +213,7 @@
 
 
     /**
-     * Initialises the WebCL API using a predefined device type or a default device type.
+     * Initialises the WebCL API with default values using a predefined device type or a default device type.
      *
      * @function XML3D.webcl~init
      * @param {string} [type="CPU"] Device type
@@ -234,12 +234,12 @@
             return false;
         }
 
-        platforms = WebCL.getPlatforms();
+        getPlatforms();
 
         devices = getDevicesByType(type || DEFAULT_DEVICE);
 
         // Creating default context
-        createContext({devices: devices});
+        ctx = createContext({devices: devices});
 
         return true;
     }
@@ -252,6 +252,10 @@
      */
 
     function getPlatforms() {
+        if(platforms.length === 0) {
+            platforms = WebCL.getPlatforms();
+        }
+
         return platforms;
     }
 
@@ -302,11 +306,13 @@
      *
      * @function XML3D.webcl~getDevicesByType
      * @param {string} type Device type
-     * @returns {Array}
+     * @returns {Array|Boolean}
      */
 
     function getDevicesByType(type) {
-        var resultArr = [], deviceArr, i;
+        var resultArr = [], deviceArr, platArr, i;
+
+        getPlatforms();
 
         for (i = platforms.length; i--;) {
             deviceArr = getPlatformDevicesByType(type, platforms[i]);
@@ -317,9 +323,9 @@
                 });
             }
         }
-
-        return resultArr;
+        return resultArr.length === 0 ? false : resultArr;
     }
+
 
     /**
      * Gets the platform on where the device is.
@@ -363,12 +369,12 @@
     function createContext(properties) {
         var props = {
             devices: getDevicesByType(DEFAULT_DEVICE)
-        };
+            }, context;
 
         XML3D.extend(props, properties);
 
         try {
-            ctx = WebCL.createContext(props);
+            context = WebCL.createContext(props);
         } catch (e) {
             var errCode = getErrorCodeFromCLError(e);
 
@@ -378,17 +384,17 @@
             throw new WebCLError(getCLErrorName(errCode), "Failed to create a WebCL context.");
         }
 
-        return ctx;
+        return context;
     }
 
     /**
-     * Gets the WebCL context.
+     * Gets the default WebCL context.
      *
-     * @function XML3D.webcl~getContext
+     * @function XML3D.webcl~getDefaultContext
      * @returns {IWebCLContext}
      */
 
-    function getContext() {
+    function getDefaultContext() {
         return ctx;
     }
 
@@ -398,19 +404,26 @@
      *
      * @function XML3D.webcl~createProgram
      * @param {string} codeStr
+     * @param {IWebCLContext} clCtx
      * @returns {IWebCLProgram | Boolean}
      */
 
-    function createProgram(codeStr) {
+    function createProgram(codeStr, clCtx) {
         var program;
+
+        clCtx = clCtx || ctx;
 
         if (!codeStr) {
             XML3D.debug.logError("WebCL API: createProgram(): codeStr was not defined.");
             return false;
         }
 
+        if (!clCtx) {
+            XML3D.debug.logError("WebCL API: createProgram(): clCtx was not defined.");
+        }
+
         try {
-            program = ctx.createProgram(codeStr);
+            program = clCtx.createProgram(codeStr);
         } catch (e) {
             var errCode = getErrorCodeFromCLError(e);
 
@@ -497,14 +510,22 @@
      *
      * @function XML3D.webcl~createCommandQueue
      * @param {IWebCLDevice} device
-     * @returns {IWebCLCommandQueue}
+     * @param {IWebCLContext} clCtx
+     * @returns {IWebCLCommandQueue|Boolean}
      */
 
-    function createCommandQueue(device) {
+    function createCommandQueue(device, clCtx) {
         var cmdQueue;
 
+        clCtx = clCtx || ctx;
+
+        if(!clCtx) {
+            XML3D.debug.logError("WebCL API: createCommandQueue: clCtx was not defined");
+            return false;
+        }
+
         try {
-            cmdQueue = ctx.createCommandQueue(device || devices[0]);
+            cmdQueue = clCtx.createCommandQueue(device || devices[0]);
         } catch (e) {
             var errCode = getErrorCodeFromCLError(e);
 
@@ -523,10 +544,13 @@
      * @function XML3D.webcl~createBuffer
      * @param {int} size
      * @param {string} type
+     * @param {IWebCLContext} clCtx
      * @returns {IWebCLMemoryObject|Boolean}
      */
 
-    function createBuffer(size, type) {
+    function createBuffer(size, type, clCtx) {
+        clCtx = clCtx || ctx;
+
         if (!size) {
             XML3D.debug.logError("WebCL API: createBuffer(): Buffer size was not defined.");
             return false;
@@ -540,13 +564,18 @@
             return false;
         }
 
+        if(!clCtx) {
+            XML3D.debug.logError("WebCL API: createBuffer(): clCtx was not defined.");
+            return false;
+        }
+
         try {
             if (type === "r") {
-                return ctx.createBuffer(WebCL.CL_MEM_READ_ONLY, size);
+                return clCtx.createBuffer(WebCL.CL_MEM_READ_ONLY, size);
             } else if (type === "w") {
-                return ctx.createBuffer(WebCL.CL_MEM_WRITE_ONLY, size);
+                return clCtx.createBuffer(WebCL.CL_MEM_WRITE_ONLY, size);
             } else if (type === "rw") {
-                return ctx.createBuffer(WebCL.CL_MEM_READ_WRITE, size);
+                return clCtx.createBuffer(WebCL.CL_MEM_READ_WRITE, size);
             } else {
                 XML3D.debug.logError("WebCL API: createBuffer(): Unknown buffer type:", type);
                 return false;
@@ -568,7 +597,7 @@
      * @constructor
      */
 
-    var KernelManager = function () {
+    var KernelManager = function (clCtx) {
         var kernels = {};
 
         return {
@@ -599,7 +628,8 @@
 
                 var program, kernel;
 
-                program = createProgram(codeStr);
+                program = createProgram(codeStr, clCtx);
+
                 buildProgram(program);
 
                 if (program) {
@@ -740,7 +770,7 @@
         "createKernel": createKernel,
         "createCommandQueue": createCommandQueue,
         "createBuffer": createBuffer,
-        "getContext": getContext,
+        "getDefaultContext": getDefaultContext,
         "getPlatforms": getPlatforms,
         "getDevicesByType": getDevicesByType,
         "getDevicePlatform": getDevicePlatform,

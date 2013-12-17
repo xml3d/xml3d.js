@@ -5,6 +5,7 @@
  */
 
 
+
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.Graph
 //----------------------------------------------------------------------------------------------------------------------
@@ -15,12 +16,61 @@
  * @constructor
  */
 Xflow.Graph = function(){
+    this.initPlatform();
 };
+
 var Graph = Xflow.Graph;
 
 
+Graph.prototype.initPlatform = function () {
+    this.platform = Xflow.PLATFORM.JAVASCRIPT;
 
-/**
+    var webcl = XML3D.webcl;
+
+    if (webcl && webcl.isAvailable()) {
+        var clPlatforms, clDevices, clCtx, cmdQueue;
+
+        clPlatforms = webcl.getPlatforms();
+
+        if (!clPlatforms) {
+            return;
+        }
+
+        try {
+            clDevices = webcl.getDevicesByType("GPU") || webcl.getDevicesByType("CPU");
+        } catch (e) {
+            return;
+        }
+
+        if (!clDevices) {
+            return;
+        }
+
+        try {
+            clCtx = webcl.createContext({devices: clDevices});
+        } catch (e) {
+            return;
+        }
+
+        try {
+            cmdQueue = webcl.createCommandQueue(clDevices[0], clCtx);
+        } catch (e) {
+            return;
+        }
+
+        this.cl = {
+            kernelManager: new webcl.KernelManager(clCtx, clDevices),
+            platforms: clPlatforms,
+            devices: clDevices,
+            ctx: clCtx,
+            cmdQueue: cmdQueue
+        };
+
+        this.platform = Xflow.PLATFORM.CL;
+    }
+};
+
+ /**
  * @return {Xflow.InputNode}
  */
 Graph.prototype.createInputNode = function(){

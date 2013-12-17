@@ -218,11 +218,12 @@
     }
 
     function updateOperator(channelNode){
-        var owner = channelNode.owner;
+        var owner = channelNode.owner, graph = owner._graph;
+
         if(typeof owner._computeOperator == "string"){
             var operatorName = owner._computeOperator, operator = null;
             if(operatorName){
-                operator = Xflow.getOperator(operatorName, Xflow.platform);
+                operator = Xflow.getOperator(operatorName, graph.platform);
                 if(!operator){
                     Xflow.notifyError("Unknown operator: '" + operatorName+"'", channelNode.owner);
                 }

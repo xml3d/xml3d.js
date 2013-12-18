@@ -12,6 +12,8 @@
         scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChange.bind(this));
         scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChange.bind(this));
         scene.addEventListener(webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChange.bind(this));
+        scene.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_INITIALIZED, this.onShaderChange.bind(this));
+
         this.mainPass = null;
 
         this.createMainPass();
@@ -56,12 +58,15 @@
                     spotLight.userData && spotLight.userData.setProcessed(false);
             }
         },
+        onShaderChange: function(evt) {
+            this.reassignLightPasses(evt.target);
+        },
 
         createLightPass: function(light){
             var context = this.context
             var lightFramebuffer  = new webgl.GLRenderTarget(context, {
-                width: 1024,
-                height: 1024,
+                width: 2048,
+                height: 2048,
                 colorFormat: context.gl.RGBA,
                 depthFormat: context.gl.DEPTH_COMPONENT16,
                 stencilFormat: null,
@@ -96,8 +101,8 @@
                 var spotLight = scene.lights.spot[i];
                 if (spotLight.castShadow) {
                     var lightFramebuffer  = new webgl.GLRenderTarget(context, {
-                        width: 1024,
-                        height: 1024,
+                        width: 2048,
+                        height: 2048,
                         colorFormat: context.gl.RGBA,
                         depthFormat: context.gl.DEPTH_COMPONENT16,
                         stencilFormat: null,
@@ -112,7 +117,16 @@
         },
 
         createMainPass: function() {
+
             this.mainPass = new webgl.ForwardRenderPass(this, this.context.canvasTarget);
+//            webgl.GLRenderTarget(this.context, {
+//                width: 1024,
+//                height: 1024,
+//                colorFormat: this.context.gl.RGBA,
+//                depthFormat: this.context.gl.DEPTH_COMPONENT16,
+//                stencilFormat: null,
+//                depthAsRenderbuffer: true
+//            }));
             this.addRenderPass(this.mainPass);
         },
 

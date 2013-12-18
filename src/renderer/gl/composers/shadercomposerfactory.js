@@ -19,7 +19,8 @@
     };
 
     ShaderComposerFactory.EVENT_TYPE = {
-        MATERIAL_STRUCTURE_CHANGED: "material_structure_changed"
+        MATERIAL_STRUCTURE_CHANGED: "material_structure_changed",
+        MATERIAL_INITIALIZED: "material_initialized"
     };
 
     XML3D.extend(ShaderComposerFactory.prototype, {

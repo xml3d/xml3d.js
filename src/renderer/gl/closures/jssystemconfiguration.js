@@ -66,7 +66,19 @@
             "spotLightCosSoftFalloffAngle": {
                 "type": "array", "elements": { "type": "number" }, "staticSize": 5,
                 "source": "uniform"
-            }
+            },
+            "spotLightCastShadow": {
+                "type": "array", "elements": { "type": "boolean" }, "staticSize": 5,
+                "source": "uniform"
+            },
+            "spotLightShadowBias": {
+                "type": "array", "elements": { "type": "number" }, "staticSize": 5,
+                "source": "uniform"
+            },
+            "spotLightShadowMap": {
+                "type": "array", "elements": { "type": "object", "kind": "texture" }, "staticSize": 5, "source": "uniform"
+            },
+            "spotLightMatrix": { "type": "array", "elements": { "type": "object", "kind": "matrix4" },  "staticSize": 5, "source": "uniform" }
         }
     };
 

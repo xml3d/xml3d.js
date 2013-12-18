@@ -184,6 +184,7 @@
         initializeShaderClosure: function (shaderClosure, scene) {
             shaderClosure.compile();
 
+            scene.dispatchEvent({type: webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_INITIALIZED});
             this.updateClosureFromComputeResult(shaderClosure, this.getShaderDataResult());
             this.updateClosureFromLightParameters(shaderClosure, scene);
             this.shaderClosures.push(shaderClosure);

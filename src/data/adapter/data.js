@@ -203,6 +203,10 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
         }
         else if(attr == "src"){
             updateAdapterHandle(this, attr, this.node.getAttribute(attr));
+        } else if ( attr == "platform") {
+            updatePlatform(this);
+        } else if ( attr == "nodeType") {
+            updateNodeType(this);
         }
         return;
     } else if (evt.type == XML3D.events.THIS_REMOVED) {
@@ -235,6 +239,26 @@ function updateCompute(dataAdapter){
     else{
         dataAdapter.disconnectAdapterHandle("dataflow");
         updateLoadState(dataAdapter);
+    }
+}
+
+function updatePlatform(dataAdapter) {
+    var xflowNode = dataAdapter.xflowDataNode;
+
+    xflowNode.setPlatform(dataAdapter.node.getAttribute("platform"));
+
+    if (xflowNode._platform) {
+        recursiveDataNodeAttrInit(xflowNode);
+    }
+}
+
+function updateNodeType(dataAdapter) {
+    var xflowNode = dataAdapter.xflowDataNode;
+
+    xflowNode.setNodeType(dataAdapter.node.getAttribute("nodeType"));
+
+    if (xflowNode._nodeType) {
+        recursiveDataNodeAttrInit(xflowNode);
     }
 }
 

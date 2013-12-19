@@ -126,11 +126,31 @@ XML3D.data.DataAdapter.prototype.init = function() {
     recursiveDataAdapterConstruction(this);
 };
 
+function recursiveDataNodeAttrInit(parentNode) {
+    var children = parentNode._children, NChildren, i;
+
+    if (children && children.length > 0) {
+        NChildren = children.length;
+
+        for (i = NChildren; i--;) {
+            if (children[i] instanceof Xflow.DataNode) {
+                children[i].setPlatform(parentNode._platform);
+                children[i].setNodeType(parentNode._nodeType);
+                recursiveDataNodeAttrInit(children[i]);
+            }
+        }
+    }
+}
+
 function recursiveDataAdapterConstruction(adapter){
     for ( var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
         var subadapter = adapter.factory.getAdapter(child);
         if(subadapter){
             adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
+
+            if(adapter.xflowDataNode._platform !== null || adapter.xflowDataNode._nodeType !== Xflow.NODE_TYPE.PRE_PROCESS){
+                recursiveDataNodeAttrInit(adapter.xflowDataNode);
+            }
         }
     }
 }

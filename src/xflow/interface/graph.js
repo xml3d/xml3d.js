@@ -224,7 +224,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._paramNames = null;
     this._globalParamNames = null;
 
-    this._platform = Xflow.PLATFORM.JAVASCRIPT;
+    this._platform = null;
     this._nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
 
     this._listeners = [];
@@ -484,6 +484,7 @@ DataNode.prototype.detachFromParents = function(){
 };
 
 DataNode.prototype.setPlatform = function(platformSrc) {
+    if (typeof platformSrc === 'string') {
         if (platformSrc === "cl") {
             this._platform = Xflow.PLATFORM.CL;
         }
@@ -493,16 +494,29 @@ DataNode.prototype.setPlatform = function(platformSrc) {
         else if (platformSrc === "js") {
             this._platform = Xflow.PLATFORM.JAVASCRIPT;
         }
-}
+    } else {
+        this._platform = platformSrc;
+    }
+
+    this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
+};
 
 DataNode.prototype.setNodeType = function(nodeTypeSrc) {
+    if (typeof nodeTypeSrc === 'string') {
         if (nodeTypeSrc === "preProcess") {
             this._nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
         }
         else if (nodeTypeSrc === "realTime") {
             this._nodeType = Xflow.NODE_TYPE.REAL_TIME;
         }
-}
+    }else{
+        this._nodeType = nodeTypeSrc;
+    }
+
+    this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
+};
 
 /**
  * @const

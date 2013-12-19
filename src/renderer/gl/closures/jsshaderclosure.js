@@ -156,9 +156,10 @@
 
             XML3D.debug.logDebug("CONTEXT:", contextData);
             try{
+                var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
                 var workSet = new Shade.WorkingSet();
                 workSet.parse(this.sourceTemplate);
-                workSet.analyze(contextData, "xml3d-glsl-deferred", {
+                workSet.analyze(contextData, implementation, {
                     propagateConstants: true,
                     validate: true,
                     sanitize: true,
@@ -171,9 +172,11 @@
                     fragment: glslShader.source,
                     vertex:  this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
                 }
-                console.log(this.source.fragment);
-                var signatures = workSet.getProcessingData("colorClosureSignatures");
-                scene.colorClosureSignatures.push.apply(scene.colorClosureSignatures, signatures);
+                if(scene.deferred){
+                    var signatures = workSet.getProcessingData("colorClosureSignatures");
+                    scene.colorClosureSignatures.push.apply(scene.colorClosureSignatures, signatures);
+                }
+
             }
             catch(e){
                 webgl.SystemNotifier.sendEvent('shadejs', {

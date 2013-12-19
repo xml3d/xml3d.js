@@ -34,6 +34,7 @@
         this.queue = [];
         this.lightsNeedUpdate = true;
         this.systemUniforms = {};
+        this.deferred = window['XML3D_DEFERRED'] || false;
         this.colorClosureSignatures = [];
         this.addListeners();
     };

@@ -494,8 +494,10 @@ DataNode.prototype.setPlatform = function(platformSrc) {
         else if (platformSrc === "js") {
             this._platform = Xflow.PLATFORM.JAVASCRIPT;
         }
-    } else {
+    } else if (!isNaN(parseFloat(platformSrc)) && isFinite(platformSrc)) {
         this._platform = platformSrc;
+    } else {
+        this._platform = null;
     }
 
     this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
@@ -510,8 +512,10 @@ DataNode.prototype.setNodeType = function(nodeTypeSrc) {
         else if (nodeTypeSrc === "realTime") {
             this._nodeType = Xflow.NODE_TYPE.REAL_TIME;
         }
-    }else{
+    } else if (!isNaN(parseFloat(nodeTypeSrc)) && isFinite(nodeTypeSrc)) {
         this._nodeType = nodeTypeSrc;
+    } else {
+        this._nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
     }
 
     this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);

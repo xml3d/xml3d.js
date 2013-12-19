@@ -203,9 +203,9 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function(evt) {
         }
         else if(attr == "src"){
             updateAdapterHandle(this, attr, this.node.getAttribute(attr));
-        } else if ( attr == "platform") {
+        } else if (attr == "platform") {
             updatePlatform(this);
-        } else if ( attr == "nodeType") {
+        } else if (attr == "nodeType") {
             updateNodeType(this);
         }
         return;
@@ -246,20 +246,14 @@ function updatePlatform(dataAdapter) {
     var xflowNode = dataAdapter.xflowDataNode;
 
     xflowNode.setPlatform(dataAdapter.node.getAttribute("platform"));
-
-    if (xflowNode._platform) {
-        recursiveDataNodeAttrInit(xflowNode);
-    }
+    recursiveDataNodeAttrInit(xflowNode);
 }
 
 function updateNodeType(dataAdapter) {
     var xflowNode = dataAdapter.xflowDataNode;
 
     xflowNode.setNodeType(dataAdapter.node.getAttribute("nodeType"));
-
-    if (xflowNode._nodeType) {
-        recursiveDataNodeAttrInit(xflowNode);
-    }
+    recursiveDataNodeAttrInit(xflowNode);
 }
 
 function updateLoadState(dataAdpater){
@@ -328,6 +322,8 @@ XML3D.data.DataflowDataAdapter.prototype.notifyChanged = function(evt) {
             var attr = evt.wrapped.attrName;
             if(attr == "out"){
                 updateDataflowOut(this);
+            } else if (attr == "platform" || attr == "nodeType"){
+                updateDataflowXflowNode(this, this.node);
             }
             break;
     }
@@ -354,6 +350,9 @@ function updateDataflowOut(adapter){
 }
 
 function updateDataflowXflowNode(adapter, node){
+    var platform = node.getAttribute("platform"),
+    nodeType = node.getAttribute("nodeType");
+
     adapter.xflowDataNode.clearChildren();
     adapter.xflowDataNode.setCompute("");
     adapter.clearAdapterHandles();
@@ -392,6 +391,10 @@ function updateDataflowXflowNode(adapter, node){
                     currentNode = xflowNode; prevNode = null;
                 }
                 currentNode.userData = child;
+
+                currentNode.setPlatform(platform);
+                currentNode.setNodeType(nodeType);
+
                 currentNode.setCompute(statements[j].trim());
                 if(currentNode.computeDataflowUrl){
                     var idx = adapter.dataflowRefs.length;

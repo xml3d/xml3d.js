@@ -231,7 +231,7 @@ XML3D.shaders.register("compositeSSAO", {
         render: (function () {
             return function (scene) {
                 var gl = this.pipeline.context.gl,
-                    target = this.pipeline.getRenderTarget(this.output);
+                    target = this.output;
 
                 target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -300,7 +300,7 @@ XML3D.shaders.register("compositeSSAO", {
         render: (function () {
             return function (scene) {
                 var gl = this.pipeline.context.gl,
-                    target = this.pipeline.getRenderTarget(this.output);
+                    target = this.output;
 
                 target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -385,11 +385,11 @@ XML3D.shaders.register("compositeSSAO", {
                     return;
                 }
                 var program = this.pipeline.getShader("boxblur");
-                var target = this.pipeline.getRenderTarget(this.output);
+                var target = this.output;
                 program.bind();
                 target.bind();
                 c_uniformCollection["canvasSize"] = [target.width, target.height];
-                c_uniformCollection["sInTexture"] = this.pipeline.getRenderTarget(this.inputs.sInTexture).colorTarget;
+                c_uniformCollection["sInTexture"] = this.inputs.sInTexture.colorTarget.handle;
                 c_uniformCollection["blurOffset"] = this.blurOffset;
                 program.setSystemUniformVariables(c_systemUniformNames, c_uniformCollection);
                 program.unbind();
@@ -400,7 +400,7 @@ XML3D.shaders.register("compositeSSAO", {
 
         render: function(scene) {
             var gl = this.pipeline.context.gl;
-            var target = this.pipeline.getRenderTarget(this.output);
+            var target = this.output;
             target.bind();
 
             gl.clear(gl.COLOR_BUFFER_BIT);
@@ -451,18 +451,18 @@ XML3D.shaders.register("compositeSSAO", {
         createRandomVectorTexture: function(context) {
             var gl = context.gl;
             var tex = new XML3D.webgl.GLTexture(gl);
-            tex.createTex2DFromData(gl.RGBA, 64,64, gl.RGBA, gl.UNSIGNED_BYTE,
+            tex.createTex2DFromData(gl.RGBA, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE,
             { wrapS : gl.REPEAT,
               wrapT : gl.REPEAT,
               minFilter : gl.LINEAR,
-              magFilter : gl.LINEAR});
+              magFilter : gl.LINEAR });
             tex.isTexture = true;
             return tex;
         },
 
         loadRandomVectorImage: function() {
                 var img = new Image();
-                img.src = "resources/textures/random-normals.png";
+                img.src = "random.png";
                 var gl = this.pipeline.context.gl;
                 var texhandle = this.randomVectorTexture.handle;
 
@@ -475,7 +475,7 @@ XML3D.shaders.register("compositeSSAO", {
         render: (function () {
             return function (scene) {
                 var gl = this.pipeline.context.gl,
-                    target = this.pipeline.getRenderTarget(this.output);
+                    target = this.output;
 
                 target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -499,12 +499,12 @@ XML3D.shaders.register("compositeSSAO", {
                 var uniforms = {};
                 var program = this.pipeline.getShader("ssao-positions");
                 program.bind();
-                var target = this.pipeline.getRenderTarget(this.output);
+                var target = this.output;
                 uniforms["canvasSize"] = [target.width, target.height];
-                uniforms["sPositionTex"] = this.pipeline.getRenderTarget(this.inputs.positionTexture).colorTarget;
-                uniforms["sNormalTex"] = this.pipeline.getRenderTarget(this.inputs.normalTexture).colorTarget;
-                uniforms["sRandomNormals"] = this.randomVectorTexture;
-                uniforms["uRandomTexSize"] = [64,64];
+                uniforms["sPositionTex"] = [this.inputs.positionTexture.colorTarget.handle];
+                uniforms["sNormalTex"] = [this.inputs.normalTexture.colorTarget.handle];
+                uniforms["sRandomNormals"] = [this.randomVectorTexture];
+                uniforms["uRandomTexSize"] = [64, 64];
                 uniforms["uScale"] = window.SSAOParameters.scale;
                 uniforms["uBias"] = window.SSAOParameters.bias;
                 uniforms["uIntensity"] = window.SSAOParameters.intensity;
@@ -573,11 +573,11 @@ XML3D.shaders.register("compositeSSAO", {
                 }
                 var uniforms = {};
                 var program = this.pipeline.getShader("compositeShader");
-                var target = this.pipeline.getRenderTarget(this.output);
+                var target = this.output;
                 program.bind();
                 uniforms["canvasSize"] = [target.width, target.height];
-                uniforms["ssaoTexture"] = this.pipeline.getRenderTarget(this.inputs.ssaoTexture).colorTarget;
-                uniforms["forwardTexture"] = this.pipeline.getRenderTarget(this.inputs.forwardTexture).colorTarget;
+                uniforms["ssaoTexture"] = [this.inputs.ssaoTexture.colorTarget.handle];
+                uniforms["forwardTexture"] = [this.inputs.forwardTexture.colorTarget.handle];
                 program.setSystemUniformVariables(c_systemUniformNames, uniforms);
                 program.unbind();
                 this.uniformsDirty = false;
@@ -586,7 +586,7 @@ XML3D.shaders.register("compositeSSAO", {
 
         render: function(scene) {
                 var gl = this.pipeline.context.gl;
-                var target = this.pipeline.getRenderTarget(this.output);
+                var target = this.output;
                 target.bind();
 
                 gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
@@ -610,7 +610,6 @@ XML3D.shaders.register("compositeSSAO", {
 
     var SSAOPostRenderPipeline = function (context) {
         webgl.RenderPipeline.call(this, context);
-        this.createRenderPasses();
         this.ext = {};
         this.ext.OES_texture_float = context.gl.getExtension('OES_texture_float');
     };
@@ -619,7 +618,6 @@ XML3D.shaders.register("compositeSSAO", {
 
     XML3D.extend(SSAOPostRenderPipeline.prototype, {
         init: function() {
-            // Create render targets
             var context = this.context;
             var positionBuffer = new webgl.GLRenderTarget(context, {
                 width: context.canvasTarget.width,
@@ -630,8 +628,10 @@ XML3D.shaders.register("compositeSSAO", {
                 stencilFormat: null,
                 depthAsRenderbuffer: true
             });
+            var positionPass = new XML3D.webgl.PositionPass(this, positionBuffer);
+            this.addRenderPass(positionPass);
+            this.positionBuffer = positionBuffer;
 
-            this.addRenderTarget("positionBuffer", positionBuffer);
 
             var normalBuffer = new webgl.GLRenderTarget(context, {
                 width: context.canvasTarget.width,
@@ -642,7 +642,10 @@ XML3D.shaders.register("compositeSSAO", {
                 stencilFormat: null,
                 depthAsRenderbuffer: true
             });
-            this.addRenderTarget("normalBuffer", normalBuffer);
+            var normalPass = new XML3D.webgl.NormalPass(this, normalBuffer);
+            this.addRenderPass(normalPass);
+            this.normalBuffer = normalBuffer;
+
             var backBuffer = new webgl.GLRenderTarget(context, {
                 width: context.canvasTarget.width,
                 height: context.canvasTarget.height,
@@ -651,7 +654,9 @@ XML3D.shaders.register("compositeSSAO", {
                 stencilFormat: null,
                 depthAsRenderbuffer: true
             });
-            this.addRenderTarget("backBufferOne", backBuffer);
+            var ssaoPass = new XML3D.webgl.SSAOPass(this, backBuffer, {inputs: { positionTexture: positionBuffer, normalTexture: normalBuffer } });
+            this.addRenderPass(ssaoPass);
+            this.backBuffer = backBuffer;
 
             var backBufferTwo = new webgl.GLRenderTarget(context, {
                 width: context.canvasTarget.width,
@@ -661,34 +666,21 @@ XML3D.shaders.register("compositeSSAO", {
                 stencilFormat: null,
                 depthAsRenderbuffer: true
             });
-            this.addRenderTarget("backBufferTwo", backBufferTwo);
-            this.addRenderTarget("screen", context.canvastarget); // Already available in context object
+            var boxBlurPass = new XML3D.webgl.BoxBlurPass(this, backBufferTwo, { inputs: { sInTexture: backBuffer }});
+            this.addRenderPass(boxBlurPass);
+            this.backBufferTwo = backBufferTwo;
+
+            var forwardPass = new XML3D.webgl.ForwardRenderPass(this, backBuffer);
+            this.addRenderPass(forwardPass);
+
+            var ssaoCompositePass = new XML3D.webgl.SSAOCompositePass(this, context.canvasTarget, { inputs: { ssaoTexture: backBuffer, forwardTexture: backBuffer }});
+            this.addRenderPass(ssaoCompositePass);
 
             this.renderPasses.forEach(function(pass) {
                 if (pass.init) {
                     pass.init(context);
                 }
             });
-        },
-
-        createRenderPasses: function() {
-            var normalPass = new XML3D.webgl.NormalPass(this, "normalBuffer");
-            this.addRenderPass(normalPass);
-
-            var positionPass = new XML3D.webgl.PositionPass(this, "positionBuffer");
-            this.addRenderPass(positionPass);
-
-            var ssaoPass = new XML3D.webgl.SSAOPass(this, "backBufferOne", {inputs: { positionTexture:"positionBuffer", normalTexture:"normalBuffer" } });
-            this.addRenderPass(ssaoPass);
-
-            var boxBlurPass = new XML3D.webgl.BoxBlurPass(this, "backBufferTwo", {inputs: { sInTexture:"backBufferOne" }});
-            this.addRenderPass(boxBlurPass);
-
-            var forwardPass = new XML3D.webgl.ForwardRenderPass(this, "backBufferOne");
-            this.addRenderPass(forwardPass);
-
-            var ssaoCompositePass = new XML3D.webgl.SSAOCompositePass(this, "screen", {inputs: { ssaoTexture:"backBufferTwo", forwardTexture:"backBufferOne" }});
-            this.addRenderPass(ssaoCompositePass);
         },
 
         render: function(scene) {

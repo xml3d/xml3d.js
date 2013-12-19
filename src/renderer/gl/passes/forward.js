@@ -60,7 +60,7 @@
              */
             var c_worldToViewMatrix = XML3D.math.mat4.create();
             var c_projectionMatrix = XML3D.math.mat4.create();
-            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition"];
+            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition", "coords"];
 
             return function (scene) {
                 var gl = this.pipeline.context.gl,
@@ -89,6 +89,7 @@
                 systemUniforms["projectionMatrix"] = c_projectionMatrix;
                 systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
                 systemUniforms["screenWidth"] = width;
+                systemUniforms["coords"] = [target.width, target.height, 1];
 
                 //Render opaque objects
                 for (var program in sorted.opaque) {

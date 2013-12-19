@@ -43,15 +43,11 @@ XML3D.shaders.register("compositeShader", {
     ].join("\n"),
 
     fragment: [
-        "uniform sampler2D ct0;",
-        "uniform sampler2D ct1;",
-        "uniform sampler2D ct2;",
-        "uniform sampler2D ct3;",
-        "uniform sampler2D db;",
+        "uniform sampler2D deferred0;",
         "uniform vec2 canvasSize;",
         "void main(void) {",
         "    vec2 screenUV = gl_FragCoord.xy / canvasSize.xy;",
-        "    gl_FragColor = vec4(texture2D(ct3, screenUV).rgb, 1);",
+        "    gl_FragColor = vec4(texture2D(deferred0, screenUV).gba, 1);",
         "}"
     ].join("\n"),
 
@@ -165,6 +161,22 @@ XML3D.shaders.register("compositeShader", {
         }
     }
 
+    var c_SystemUpdate = {
+        "pointLightOn": {
+            staticValue : "MAX_POINTLIGHTS",
+            staticSize: ["pointLightOn", "pointLightAttenuation", "pointLightIntensity", "pointLightPosition"]
+        },
+        "directionalLightOn" : {
+            staticValue: "MAX_DIRECTIONALLIGHTS",
+            staticSize: ["directionalLightOn", "directionalLightIntensity", "directionalLightDirection" ]
+        },
+        "spotLightOn" : {
+            staticValue: "MAX_SPOTLIGHTS",
+            staticSize: ["spotLightOn", "spotLightAttenuation", "spotLightIntensity",
+                "spotLightPosition", "spotLightDirection", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightShadowBias", "spotLightShadowMap", "spotLightMatrix"]
+        }
+    };
+
     var DeferredPipeline = function (context, scene) {
         if (!context.extensions['WEBGL_draw_buffers']
             || !context.extensions['OES_texture_float']
@@ -172,8 +184,12 @@ XML3D.shaders.register("compositeShader", {
             XML3D.debug.logError("Deferred shading is not supported due to missing WebGL extensions. Sorry!");
 
         webgl.RenderPipeline.call(this, context);
-
+        this.scene = scene;
         scene.addEventListener(webgl.Scene.EVENT_TYPE.SHADER_CHANGED, this.onShaderChange.bind(this));
+        scene.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_INITIALIZED, this.onShaderChange.bind(this));
+
+        scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightChange.bind(this));
+        scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightChange.bind(this));
         this.gbufferPass = null;
         this.shadePass = null;
 
@@ -185,13 +201,62 @@ XML3D.shaders.register("compositeShader", {
     XML3D.extend(DeferredPipeline.prototype, {
         init: function () {
             var context = this.context;
+            this.createLightPassProgram(this.scene);
             this.gbufferTarget = createFrameBuffer(context);
             this.gbufferPass.init(context);
             this.shadePass.init(context)
         },
 
+        createLightPassProgram: function (scene) {
+            var contextData = {
+                "this" : webgl.getJSSystemConfiguration(this.context),
+                "global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]
+            };
+
+            var systemUniforms = scene.systemUniforms, systemInfo = contextData["this"].info;
+            for(var systemSource in c_SystemUpdate){
+                var entry = c_SystemUpdate[systemSource];
+                var length = systemUniforms[systemSource] && systemUniforms[systemSource].length;
+                systemInfo[entry.staticValue].staticValue = length;
+                for(var i = 0; i < entry.staticSize.length; ++i)
+                    systemInfo[entry.staticSize[i]].staticSize = length;
+            }
+
+            var contextInfo = contextData["global.shade"][0].extra.info;
+
+            var renderTargets =  ["db", "deferred0", "deferred1", "deferred2", "deferred3"];
+            for (var i = 0; i < renderTargets.length; ++i) {
+                var paramName = renderTargets[i];
+                contextInfo[paramName] = { type: Shade.TYPES.OBJECT, kind: Shade.OBJECT_KINDS.TEXTURE, source: Shade.SOURCES.UNIFORM};
+            }
+
+            var aast = Shade.getLightPassAast(scene.colorClosureSignatures, contextData);
+            var glslShader = Shade.compileFragmentShader(aast);
+            var source = {
+                fragment: glslShader.source,
+                vertex: [
+                    "attribute vec3 position;",
+
+                    "void main(void) {",
+                    "   gl_Position = vec4(position, 1.0);",
+                    "}"
+                ].join("\n")
+            };
+            this.uniformSetter = glslShader.uniformSetter;
+            this.lightProgram = new XML3D.webgl.GLProgramObject(this.context.gl, source);
+            console.log(source.fragment);
+        },
+
         onShaderChange: function (event) {
-            // Get new list of attributes and build render targets.
+            this.createLightPassProgram(event.target);
+            this.onLightChange(event);
+        },
+
+        onLightChange: function (event) {
+            this.setUniformVariables([], webgl.GLScene.LIGHT_PARAMETERS, {
+                envBase: {},
+                sysBase: event.target.systemUniforms
+            }, this.lightProgram.setUniformVariable.bind(this.lightProgram));
         },
 
         createRenderPasses: function() {
@@ -205,6 +270,10 @@ XML3D.shaders.register("compositeShader", {
             this.gbufferPass.setProcessed(false);
             this.shadePass.setProcessed(false);
             webgl.RenderPipeline.prototype.render.call(this, scene);
+        },
+
+        setUniformVariables: function (envNames, sysNames, inputCollection) {
+            this.uniformSetter(envNames, sysNames, inputCollection, this.lightProgram.setUniformVariable.bind(this.lightProgram));
         }
 
     });
@@ -276,8 +345,8 @@ XML3D.shaders.register("compositeShader", {
             var c_objectSystemUniforms = ["modelMatrix", "modelMatrixN", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
 
             return function (objectArray, scene, systemUniforms, sceneParameterFilter) {
-                //var program = objectArray[0].getProgram();
-                var program = this.pipeline.getShader("position");
+                var program = objectArray[0].getProgram();
+//                var program = this.pipeline.getShader("position");
                 if (objectArray.length === 0) {
                     return;
                 }
@@ -338,21 +407,34 @@ XML3D.shaders.register("compositeShader", {
         },
 
         setNonVolatileShaderUniforms: (function() {
-            var c_systemUniformNames = ["db", "ct0", "ct1", "ct2", "ct3", "canvasSize"];
+            var envNames = ["deferred0", "deferred1", "deferred2"];//, "deferred3"];
 
             return function(program) {
-//                if (!this.uniformsDirty) {
-//                    return;
-//                }
                 var uniforms = {};
-                uniforms["canvasSize"] = this.canvasSize;
-                uniforms["db"] = [this.pipeline.gbufferTarget.depthTargetHandle];
-                uniforms["ct0"] = [this.pipeline.gbufferTarget.colorTargetHandles[0]];
-                uniforms["ct1"] = [this.pipeline.gbufferTarget.colorTargetHandles[1]];
-                uniforms["ct2"] = [this.pipeline.gbufferTarget.colorTargetHandles[2]];
-                uniforms["ct3"] = [this.pipeline.gbufferTarget.colorTargetHandles[3]];
-                program.setSystemUniformVariables(c_systemUniformNames, uniforms);
+//                uniforms["db"] = [this.pipeline.gbufferTarget.depthTargetHandle];
+                uniforms["deferred0"] = [this.pipeline.gbufferTarget.colorTargetHandles[0]];
+                uniforms["deferred1"] = [this.pipeline.gbufferTarget.colorTargetHandles[1]];
+                uniforms["deferred2"] = [this.pipeline.gbufferTarget.colorTargetHandles[2]];
+//                uniforms["deferred3"] = [this.pipeline.gbufferTarget.colorTargetHandles[3]];
+
+                this.pipeline.setUniformVariables(envNames, ["coords"], {
+                    envBase: uniforms,
+                    sysBase: {
+                        "coords": [this.output.width, this.output.height, 1]
+                    }
+                });
                 this.uniformsDirty = false;
+
+//                var uniforms = {};
+//                uniforms["canvasSize"] = this.canvasSize;
+//                uniforms["db"] = [this.pipeline.gbufferTarget.depthTargetHandle];
+//                uniforms["deferred0"] = [this.pipeline.gbufferTarget.colorTargetHandles[0]];
+//                uniforms["deferred1"] = [this.pipeline.gbufferTarget.colorTargetHandles[1]];
+//                uniforms["deferred2"] = [this.pipeline.gbufferTarget.colorTargetHandles[2]];
+//                uniforms["deferred3"] = [this.pipeline.gbufferTarget.colorTargetHandles[3]];
+//                program.setSystemUniformVariables(envNames, uniforms);
+//                this.uniformsDirty = false;
+
             }
         })(),
 
@@ -360,12 +442,11 @@ XML3D.shaders.register("compositeShader", {
             var gl = this.pipeline.context.gl;
             this.output.bind();
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
-            var program = this.pipeline.getShader("composite");
+            var program = this.pipeline.lightProgram;
             program.bind();
             this.setNonVolatileShaderUniforms(program);
             this.screenQuad.draw(program);
             program.unbind();
-//            this.output.unbind();
         }
     });
 

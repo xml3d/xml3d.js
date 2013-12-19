@@ -14,7 +14,7 @@
         "spotLightOn" : {
             staticValue: "MAX_SPOTLIGHTS",
             staticSize: ["spotLightOn", "spotLightAttenuation", "spotLightIntensity",
-                "spotLightPosition", "spotLightDirection", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle"]
+                "spotLightPosition", "spotLightDirection", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightShadowBias", "spotLightShadowMap", "spotLightMatrix"]
         }
     };
 
@@ -158,7 +158,7 @@
             try{
                 var workSet = new Shade.WorkingSet();
                 workSet.parse(this.sourceTemplate);
-                workSet.analyze(contextData, "xml3d-glsl-forward", {
+                workSet.analyze(contextData, "xml3d-glsl-deferred", {
                     propagateConstants: true,
                     validate: true,
                     sanitize: true,
@@ -171,6 +171,9 @@
                     fragment: glslShader.source,
                     vertex:  this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
                 }
+                console.log(this.source.fragment);
+                var signatures = workSet.getProcessingData("colorClosureSignatures");
+                scene.colorClosureSignatures.push.apply(scene.colorClosureSignatures, signatures);
             }
             catch(e){
                 webgl.SystemNotifier.sendEvent('shadejs', {

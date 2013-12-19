@@ -34,6 +34,7 @@
         this.queue = [];
         this.lightsNeedUpdate = true;
         this.systemUniforms = {};
+        this.colorClosureSignatures = [];
         this.addListeners();
     };
     var EVENT_TYPE = webgl.Scene.EVENT_TYPE;

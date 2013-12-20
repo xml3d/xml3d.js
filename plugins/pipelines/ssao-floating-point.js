@@ -1,3 +1,4 @@
+
 XML3D.shaders.register("positionShader", {
     vertex : [
         "attribute vec3 position;",
@@ -28,12 +29,12 @@ XML3D.shaders.register("normalShader", {
         "attribute vec3 position;",
         "attribute vec3 normal;",
         "uniform mat4 modelViewProjectionMatrix;",
-        "uniform mat4 modelMatrix;",
+        "uniform mat3 modelMatrixN;",
 
         "varying vec3 fragNormal;",
 
         "void main(void) {",
-        "    fragNormal = (modelMatrix * vec4(normal, 0.0)).xyz;",
+        "    fragNormal = modelMatrixN * normal;",
         "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
         "}"
     ].join("\n"),
@@ -140,10 +141,10 @@ XML3D.shaders.register("ssao-positions", {
 
          "void main(void) {",
         "   vec2 screenUV = gl_FragCoord.xy / canvasSize.xy;",
-        "	vec2 rand = normalize(texture2D(sRandomNormals, gl_FragCoord.xy / uRandomTexSize).xy * 2.0 - 1.0 ) ;",
+        "	vec2 rand = normalize(texture2D(sRandomNormals, gl_FragCoord.xy / uRandomTexSize).xy * 2.0 - 1.0 );",
         "   vec3 norm = normalize(texture2D(sNormalTex, screenUV).xyz * 2.0 - 1.0 );",
         "	vec3 origin = getPosition(screenUV);",
-        "	float radius = uSampleRadius / (viewMatrix * vec4(origin,1.0)).z;",
+        "	float radius = uSampleRadius / (viewMatrix * vec4(origin, 1.0)).z;",
         "	float ao = 0.0;",
 
         "	const int iterations = 4;",
@@ -155,9 +156,8 @@ XML3D.shaders.register("ssao-positions", {
         "		ao += calcAmbientOcclusion(screenUV, coord1*0.75, origin, norm);",
         "		ao += calcAmbientOcclusion(screenUV, coord2, origin, norm);",
         "	}",
-        "	ao /= float(iterations)*4.0;",
+        "	ao /= (float(iterations) * 4.0);",
         "   gl_FragColor = vec4(ao, ao, ao, 1.0);",
-
         "}"
     ].join("\n"),
 
@@ -165,9 +165,9 @@ XML3D.shaders.register("ssao-positions", {
         canvasSize      : [512, 512],
         uConstVectors   : [1,0, -1,0, 0,1, 0,-1],
         uRandomTexSize  : [64,64],
-        uSampleRadius   : 0.5,
-        uScale			: 2.0,
-        uBias			: 0.1,
+        uSampleRadius   : 0.9,
+        uScale			: 0.9,
+        uBias			: 0.2,
         uIntensity		: 1.0
     },
 
@@ -216,7 +216,6 @@ XML3D.shaders.register("compositeSSAO", {
 });
 
 (function (webgl) {
-
     var PositionPass = function (pipeline, output, opt) {
         webgl.BaseRenderPass.call(this, pipeline, output, opt);
     };
@@ -313,10 +312,10 @@ XML3D.shaders.register("compositeSSAO", {
         }()),
 
         renderObjectsToActiveBuffer: (function () {
-            var tmpModel = XML3D.math.mat4.create(),
+            var tmpModelN = XML3D.math.mat3.create(),
                 tmpModelViewProjection = XML3D.math.mat4.create(),
                 c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
-                c_systemUniformNames = ["modelMatrix", "modelViewProjectionMatrix"];
+                c_systemUniformNames = ["modelMatrixN", "modelViewProjectionMatrix"];
 
             return function (objectArray, scene) {
                 if (objectArray.length == 0) {
@@ -334,8 +333,8 @@ XML3D.shaders.register("compositeSSAO", {
                     var mesh = obj.mesh;
                     XML3D.debug.assert(mesh, "We need a mesh at this point.");
 
-                    obj.getWorldMatrix(tmpModel);
-                    c_uniformCollection.sysBase["modelMatrix"] = tmpModel;
+                    obj.getModelMatrixN(tmpModelN);
+                    c_uniformCollection.sysBase["modelMatrixN"] = tmpModelN;
 
                     obj.getModelViewProjectionMatrix(tmpModelViewProjection);
                     c_uniformCollection.sysBase["modelViewProjectionMatrix"] = tmpModelViewProjection;
@@ -389,7 +388,7 @@ XML3D.shaders.register("compositeSSAO", {
                 program.bind();
                 target.bind();
                 c_uniformCollection["canvasSize"] = [target.width, target.height];
-                c_uniformCollection["sInTexture"] = this.inputs.sInTexture.colorTarget.handle;
+                c_uniformCollection["sInTexture"] = [this.inputs.sInTexture.colorTarget.handle];
                 c_uniformCollection["blurOffset"] = this.blurOffset;
                 program.setSystemUniformVariables(c_systemUniformNames, c_uniformCollection);
                 program.unbind();
@@ -426,11 +425,10 @@ XML3D.shaders.register("compositeSSAO", {
 (function (webgl) {
 
     window.SSAOParameters = {};
-    window.SSAOParameters.scale = 0.06;
-    window.SSAOParameters.intensity = 1.3;
-    window.SSAOParameters.bias = 0.01;
-    window.SSAOParameters.radius = 17;
-
+    window.SSAOParameters.scale = 0.9;
+    window.SSAOParameters.intensity = 2;
+    window.SSAOParameters.bias = 0.3;
+    window.SSAOParameters.radius = 1;
 
     var SSAOPass = function (pipeline, output, opt) {
         webgl.BaseRenderPass.call(this, pipeline, output, opt);
@@ -630,8 +628,6 @@ XML3D.shaders.register("compositeSSAO", {
             });
             var positionPass = new XML3D.webgl.PositionPass(this, positionBuffer);
             this.addRenderPass(positionPass);
-            this.positionBuffer = positionBuffer;
-
 
             var normalBuffer = new webgl.GLRenderTarget(context, {
                 width: context.canvasTarget.width,
@@ -644,7 +640,6 @@ XML3D.shaders.register("compositeSSAO", {
             });
             var normalPass = new XML3D.webgl.NormalPass(this, normalBuffer);
             this.addRenderPass(normalPass);
-            this.normalBuffer = normalBuffer;
 
             var backBuffer = new webgl.GLRenderTarget(context, {
                 width: context.canvasTarget.width,
@@ -656,7 +651,6 @@ XML3D.shaders.register("compositeSSAO", {
             });
             var ssaoPass = new XML3D.webgl.SSAOPass(this, backBuffer, {inputs: { positionTexture: positionBuffer, normalTexture: normalBuffer } });
             this.addRenderPass(ssaoPass);
-            this.backBuffer = backBuffer;
 
             var backBufferTwo = new webgl.GLRenderTarget(context, {
                 width: context.canvasTarget.width,
@@ -668,12 +662,11 @@ XML3D.shaders.register("compositeSSAO", {
             });
             var boxBlurPass = new XML3D.webgl.BoxBlurPass(this, backBufferTwo, { inputs: { sInTexture: backBuffer }});
             this.addRenderPass(boxBlurPass);
-            this.backBufferTwo = backBufferTwo;
 
             var forwardPass = new XML3D.webgl.ForwardRenderPass(this, backBuffer);
             this.addRenderPass(forwardPass);
 
-            var ssaoCompositePass = new XML3D.webgl.SSAOCompositePass(this, context.canvasTarget, { inputs: { ssaoTexture: backBuffer, forwardTexture: backBuffer }});
+            var ssaoCompositePass = new XML3D.webgl.SSAOCompositePass(this, context.canvasTarget, { inputs: { ssaoTexture: backBufferTwo, forwardTexture: backBuffer }});
             this.addRenderPass(ssaoCompositePass);
 
             this.renderPasses.forEach(function(pass) {

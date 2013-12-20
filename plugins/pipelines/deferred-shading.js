@@ -324,8 +324,9 @@
         },
 
         render: (function () {
-            var systemUniformNames = ["viewMatrix", "coords", "projectionMatrix", "cameraPosition"];
+            var systemUniformNames = ["viewMatrix", "viewInverseMatrix", "coords", "projectionMatrix", "cameraPosition"];
             var worldToViewMatrix = XML3D.math.mat4.create();
+            var viewToWorldMatrix = XML3D.math.mat4.create();
             var projectionMatrix = XML3D.math.mat4.create();
             return function (scene) {
                 var gl = this.pipeline.context.gl;
@@ -336,9 +337,11 @@
                     renderTargetUniforms[targetNames[i]] = [this.pipeline.gbufferTarget.colorTargetHandles[i]];
 
                 scene.getActiveView().getWorldToViewMatrix(worldToViewMatrix);
+                scene.getActiveView().getViewToWorldMatrix(viewToWorldMatrix )
                 scene.getActiveView().getProjectionMatrix(projectionMatrix, aspect);
                 var systemUniforms = {};
                 systemUniforms["viewMatrix"] = worldToViewMatrix;
+                systemUniforms["viewInverseMatrix"] = viewToWorldMatrix;
                 systemUniforms["projectionMatrix"] = projectionMatrix;
                 systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
                 systemUniforms["coords"] = [this.output.width, this.output.height, 1];

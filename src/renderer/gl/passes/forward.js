@@ -59,8 +59,9 @@
              * @type Float32Array
              */
             var c_worldToViewMatrix = XML3D.math.mat4.create();
+            var c_viewToWorldMatrix = XML3D.math.mat4.create();
             var c_projectionMatrix = XML3D.math.mat4.create();
-            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition", "coords"];
+            var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "screenWidth", "cameraPosition", "coords"];
 
             return function (scene) {
                 var gl = this.pipeline.context.gl,
@@ -81,11 +82,13 @@
 
                 scene.updateReadyObjectsFromActiveView(aspect);
                 scene.getActiveView().getWorldToViewMatrix(c_worldToViewMatrix);
+                scene.getActiveView().getViewToWorldMatrix(c_viewToWorldMatrix);
                 scene.getActiveView().getProjectionMatrix(c_projectionMatrix, aspect);
 
                 var sorted = this.sorter.sortScene(scene, c_worldToViewMatrix);
 
                 systemUniforms["viewMatrix"] = c_worldToViewMatrix;
+                systemUniforms["viewInverseMatrix"] = c_viewToWorldMatrix;
                 systemUniforms["projectionMatrix"] = c_projectionMatrix;
                 systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
                 systemUniforms["screenWidth"] = width;

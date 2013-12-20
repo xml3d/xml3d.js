@@ -229,6 +229,11 @@ var Xflow = {};
         PROCESSED: 5
     };
 
+    /**
+     * Node types for DataNode. Node type affects the behaviour of a data sequence or a Dataflow
+     *
+     * @type {{PRE_PROCESS: number, REAL_TIME: number}}
+     */
     Xflow.NODE_TYPE = {
         PRE_PROCESS: 0,
         REAL_TIME: 1

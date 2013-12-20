@@ -483,6 +483,13 @@ DataNode.prototype.detachFromParents = function(){
     this._children = [];
 };
 
+    /**
+     * Sets platform of a DataNode. If _platform is defined, it will override the default platform setting of
+     * an Xflow graph.
+     *
+     * @param {String|Xflow.PLATFORM|null} platformSrc
+     */
+
 DataNode.prototype.setPlatform = function(platformSrc) {
     if (typeof platformSrc === 'string') {
         if (platformSrc === "cl") {
@@ -503,6 +510,13 @@ DataNode.prototype.setPlatform = function(platformSrc) {
     this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 };
+
+    /**
+     * Sets node type of a DataNode.
+     * By default all DataNodes are "pre-processing" type.
+     *
+     * @param {String|Xflow.NODE_TYPE|null} nodeTypeSrc
+     */
 
 DataNode.prototype.setNodeType = function(nodeTypeSrc) {
     if (typeof nodeTypeSrc === 'string') {

@@ -1,69 +1,3 @@
-XML3D.shaders.register("positionShader", {
-    vertex : [
-        "attribute vec3 position;",
-        "attribute vec3 normal;",
-        "uniform mat4 modelMatrix;",
-        "uniform mat4 modelMatrixN;",
-        "uniform mat4 modelViewProjectionMatrix;",
-
-        "varying vec3 pos;",
-        "varying vec3 norm;",
-
-        "void main(void) {",
-        "    pos = (modelMatrix * vec4(position, 1.0)).xyz;",
-        "    norm = (modelMatrixN * vec4(normal, 0.0)).xyz;",
-        "    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);",
-        "}"
-    ].join("\n"),
-
-    fragment : [
-        "#extension GL_EXT_draw_buffers : require",
-        "varying vec3 pos;",
-        "varying vec3 norm;",
-        "uniform vec3 color;",
-        "void main(void) {",
-        "    gl_FragData[0] = vec4(pos, 1);",
-        "    gl_FragData[1] = vec4(norm, 1.0);",
-        "    gl_FragData[2] = vec4(color, 1.0);",
-        "    gl_FragData[3] = vec4(1.0, 0.0, 0.0, 1.0);",
-        "}"
-    ].join("\n"),
-
-    uniforms : {}
-});
-
-XML3D.shaders.register("compositeShader", {
-
-    vertex: [
-        "attribute vec3 position;",
-
-        "void main(void) {",
-        "   gl_Position = vec4(position, 1.0);",
-        "}"
-    ].join("\n"),
-
-    fragment: [
-        "uniform sampler2D deferred0;",
-        "uniform vec2 canvasSize;",
-        "void main(void) {",
-        "    vec2 screenUV = gl_FragCoord.xy / canvasSize.xy;",
-        "    gl_FragColor = vec4(texture2D(deferred0, screenUV).gba, 1);",
-        "}"
-    ].join("\n"),
-
-    uniforms: {
-        canvasSize : [512, 512]
-    },
-
-    samplers: {
-        ct0: null,
-        ct1: null,
-        ct2: null,
-        ct3: null,
-        db: null
-    }
-});
-
 (function (webgl) {
 
     function createFrameBuffer(context) {
@@ -89,36 +23,21 @@ XML3D.shaders.register("compositeShader", {
         opt.isDepth = false;
 
         //color attachments
-        var colorTargetHandles = []
-        var ctex = new XML3D.webgl.GLTexture(gl);
-        ctex.createTex2DFromData(gl.RGBA, width, height, gl.RGBA, gl.FLOAT, opt);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
-        colorTargetHandles[0] = ctex;
+        var targetCount = 8;
+        var colorTargetHandles = [];
+        var attachments = [];
+        for (var i = 0; i < targetCount; ++i) {
+            var ctex = new XML3D.webgl.GLTexture(gl);
+            var attachment = gl.COLOR_ATTACHMENT0 + i;
+            ctex.createTex2DFromData(gl.RGBA, width, height, gl.RGBA, gl.FLOAT, opt);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment, gl.TEXTURE_2D, ctex.handle, 0);
+            colorTargetHandles[i] = ctex;
+            attachments[i] = attachment;
+        }
 
-        ctex = new XML3D.webgl.GLTexture(gl);
-        ctex.createTex2DFromData(gl.RGBA, width, height, gl.RGBA, gl.FLOAT, opt);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + 1, gl.TEXTURE_2D, ctex.handle, 0);
-        colorTargetHandles[1] = ctex;
-
-        ctex = new XML3D.webgl.GLTexture(gl);
-        ctex.createTex2DFromData(gl.RGBA, width, height, gl.RGBA, gl.FLOAT, opt);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + 2, gl.TEXTURE_2D, ctex.handle, 0);
-        colorTargetHandles[2] = ctex;
-
-        ctex = new XML3D.webgl.GLTexture(gl);
-        ctex.createTex2DFromData(gl.RGBA, width, height, gl.RGBA, gl.FLOAT, opt);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + 3, gl.TEXTURE_2D, ctex.handle, 0);
-        colorTargetHandles[3] = ctex;
-
-        drawBuffersExt.drawBuffersWEBGL([
-            gl.COLOR_ATTACHMENT0,
-            gl.COLOR_ATTACHMENT0 + 1,
-            gl.COLOR_ATTACHMENT0 + 2,
-            gl.COLOR_ATTACHMENT0 + 3
-        ]);
+        drawBuffersExt.drawBuffersWEBGL(attachments);
 
         var fbStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-
         switch (fbStatus) {
             case gl.FRAMEBUFFER_COMPLETE:
                 break;
@@ -137,7 +56,6 @@ XML3D.shaders.register("compositeShader", {
             default:
                 XML3D.debug.logError("Incomplete framebuffer: " + fbStatus);
         }
-
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -176,6 +94,7 @@ XML3D.shaders.register("compositeShader", {
                 "spotLightPosition", "spotLightDirection", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightShadowBias", "spotLightShadowMap", "spotLightMatrix"]
         }
     };
+    var targetNames = ["deferred0", "deferred1", "deferred2", "deferred3", "deferred4", "deferred5", "deferred6", "deferred7"];
 
     var DeferredPipeline = function (context, scene) {
         if (!context.extensions['WEBGL_draw_buffers']
@@ -210,7 +129,7 @@ XML3D.shaders.register("compositeShader", {
         createLightPassProgram: function (scene) {
             var contextData = {
                 "this" : webgl.getJSSystemConfiguration(this.context),
-                "global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]
+                "global.shade" :[{"extra": {"type": "object", "kind": "any", "global": true, "info": {}}}]
             };
 
             var systemUniforms = scene.systemUniforms, systemInfo = contextData["this"].info;
@@ -224,9 +143,8 @@ XML3D.shaders.register("compositeShader", {
 
             var contextInfo = contextData["global.shade"][0].extra.info;
 
-            var renderTargets =  ["db", "deferred0", "deferred1", "deferred2", "deferred3"];
-            for (var i = 0; i < renderTargets.length; ++i) {
-                var paramName = renderTargets[i];
+            for (var i = 0; i < targetNames.length; ++i) {
+                var paramName = targetNames[i];
                 contextInfo[paramName] = { type: Shade.TYPES.OBJECT, kind: Shade.OBJECT_KINDS.TEXTURE, source: Shade.SOURCES.UNIFORM};
             }
 
@@ -243,7 +161,7 @@ XML3D.shaders.register("compositeShader", {
                 ].join("\n")
             };
             this.uniformSetter = glslShader.uniformSetter;
-            this.lightProgram = new XML3D.webgl.GLProgramObject(this.context.gl, source);
+            this.lightPassProgram = new XML3D.webgl.GLProgramObject(this.context.gl, source);
             console.log(source.fragment);
         },
 
@@ -256,7 +174,7 @@ XML3D.shaders.register("compositeShader", {
             this.setUniformVariables([], webgl.GLScene.LIGHT_PARAMETERS, {
                 envBase: {},
                 sysBase: event.target.systemUniforms
-            }, this.lightProgram.setUniformVariable.bind(this.lightProgram));
+            }, this.lightPassProgram.setUniformVariable.bind(this.lightPassProgram));
         },
 
         createRenderPasses: function() {
@@ -273,7 +191,7 @@ XML3D.shaders.register("compositeShader", {
         },
 
         setUniformVariables: function (envNames, sysNames, inputCollection) {
-            this.uniformSetter(envNames, sysNames, inputCollection, this.lightProgram.setUniformVariable.bind(this.lightProgram));
+            this.uniformSetter(envNames, sysNames, inputCollection, this.lightPassProgram.setUniformVariable.bind(this.lightPassProgram));
         }
 
     });
@@ -293,9 +211,9 @@ XML3D.shaders.register("compositeShader", {
         },
 
         render: (function () {
-            var c_worldToViewMatrix = XML3D.math.mat4.create();
-            var c_projectionMatrix = XML3D.math.mat4.create();
-            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition"];
+            var worldToViewMatrix = XML3D.math.mat4.create();
+            var projectionMatrix = XML3D.math.mat4.create();
+            var programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition"];
 
             return function (scene) {
                 var gl = this.pipeline.context.gl,
@@ -311,11 +229,11 @@ XML3D.shaders.register("compositeShader", {
                 gl.enable(gl.DEPTH_TEST);
 
                 scene.updateReadyObjectsFromActiveView(aspect);
-                scene.getActiveView().getWorldToViewMatrix(c_worldToViewMatrix);
-                scene.getActiveView().getProjectionMatrix(c_projectionMatrix, aspect);
+                scene.getActiveView().getWorldToViewMatrix(worldToViewMatrix);
+                scene.getActiveView().getProjectionMatrix(projectionMatrix, aspect);
 
-                systemUniforms["viewMatrix"] = c_worldToViewMatrix;
-                systemUniforms["projectionMatrix"] = c_projectionMatrix;
+                systemUniforms["viewMatrix"] = worldToViewMatrix;
+                systemUniforms["projectionMatrix"] = projectionMatrix;
                 systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
                 systemUniforms["screenWidth"] = width;
 
@@ -329,7 +247,7 @@ XML3D.shaders.register("compositeShader", {
                 });
                 var self = this;
                 programIdObjectsMapping.forEach(function (objectList) {
-                    self.renderObjectsToActiveBuffer(objectList, scene, systemUniforms, c_programSystemUniforms);
+                    self.renderObjectsToActiveBuffer(objectList, scene, systemUniforms, programSystemUniforms);
                 });
 
                 target.unbind();
@@ -337,12 +255,12 @@ XML3D.shaders.register("compositeShader", {
         }()),
 
         renderObjectsToActiveBuffer: (function () {
-            var tmpModelMatrix = XML3D.math.mat4.create();
-            var tmpModelMatrixN = XML3D.math.mat4.create();
-            var tmpModelView = XML3D.math.mat4.create();
-            var tmpModelViewProjection = XML3D.math.mat4.create();
-            var tmpModelViewN = XML3D.math.mat3.create();
-            var c_objectSystemUniforms = ["modelMatrix", "modelMatrixN", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
+            var modelMatrix = XML3D.math.mat4.create();
+            var modelMatrixN = XML3D.math.mat3.create();
+            var modelView = XML3D.math.mat4.create();
+            var modelViewProjection = XML3D.math.mat4.create();
+            var modelViewN = XML3D.math.mat3.create();
+            var objectSystemUniformNames = ["modelMatrix", "modelMatrixN", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
 
             return function (objectArray, scene, systemUniforms, sceneParameterFilter) {
                 var program = objectArray[0].getProgram();
@@ -364,22 +282,22 @@ XML3D.shaders.register("compositeShader", {
                     var mesh = obj.mesh;
                     XML3D.debug.assert(mesh, "We need a mesh at this point.");
 
-                    obj.getWorldMatrix(tmpModelMatrix);
-                    systemUniforms["modelMatrix"] = tmpModelMatrix;
+                    obj.getWorldMatrix(modelMatrix);
+                    systemUniforms["modelMatrix"] = modelMatrix;
 
-                    obj.getModelMatrixN(tmpModelMatrixN);
-                    systemUniforms["modelMatrixN"] = tmpModelMatrixN;
+                    obj.getModelMatrixN(modelMatrixN);
+                    systemUniforms["modelMatrixN"] = modelMatrixN;
 
-                    obj.getModelViewMatrix(tmpModelView);
-                    systemUniforms["modelViewMatrix"] = tmpModelView;
+                    obj.getModelViewMatrix(modelView);
+                    systemUniforms["modelViewMatrix"] = modelView;
 
-                    obj.getModelViewProjectionMatrix(tmpModelViewProjection);
-                    systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection;
+                    obj.getModelViewProjectionMatrix(modelViewProjection);
+                    systemUniforms["modelViewProjectionMatrix"] = modelViewProjection;
 
-                    obj.getModelViewMatrixN(tmpModelViewN);
-                    systemUniforms["modelViewMatrixN"] = tmpModelViewN;
+                    obj.getModelViewMatrixN(modelViewN);
+                    systemUniforms["modelViewMatrixN"] = modelViewN;
 
-                    program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
+                    program.setSystemUniformVariables(objectSystemUniformNames, systemUniforms);
 
                     mesh.draw(program);
                 }
@@ -400,54 +318,45 @@ XML3D.shaders.register("compositeShader", {
     XML3D.extend(ShadePass.prototype, {
         init: function(context) {
             this.output = context.canvasTarget;
-            this.pipeline.addShader("composite", context.programFactory.getProgramByName("compositeShader"));
             this.screenQuad = new XML3D.webgl.FullscreenQuad(context);
             this.canvasSize = new Float32Array([context.canvasTarget.width, context.canvasTarget.height]);
             this.uniformsDirty = true;
         },
 
-        setNonVolatileShaderUniforms: (function() {
-            var envNames = ["deferred0", "deferred1", "deferred2"];//, "deferred3"];
+        render: (function () {
+            var systemUniformNames = ["viewMatrix", "coords", "projectionMatrix", "cameraPosition"];
+            var worldToViewMatrix = XML3D.math.mat4.create();
+            var projectionMatrix = XML3D.math.mat4.create();
+            return function (scene) {
+                var gl = this.pipeline.context.gl;
+                var aspect = this.output.width / this.output.height;
 
-            return function(program) {
-                var uniforms = {};
-//                uniforms["db"] = [this.pipeline.gbufferTarget.depthTargetHandle];
-                uniforms["deferred0"] = [this.pipeline.gbufferTarget.colorTargetHandles[0]];
-                uniforms["deferred1"] = [this.pipeline.gbufferTarget.colorTargetHandles[1]];
-                uniforms["deferred2"] = [this.pipeline.gbufferTarget.colorTargetHandles[2]];
-//                uniforms["deferred3"] = [this.pipeline.gbufferTarget.colorTargetHandles[3]];
+                var renderTargetUniforms= {};
+                for (var i = 0; i < targetNames.length; ++i)
+                    renderTargetUniforms[targetNames[i]] = [this.pipeline.gbufferTarget.colorTargetHandles[i]];
 
-                this.pipeline.setUniformVariables(envNames, ["coords"], {
-                    envBase: uniforms,
-                    sysBase: {
-                        "coords": [this.output.width, this.output.height, 1]
-                    }
+                scene.getActiveView().getWorldToViewMatrix(worldToViewMatrix);
+                scene.getActiveView().getProjectionMatrix(projectionMatrix, aspect);
+                var systemUniforms = {};
+                systemUniforms["viewMatrix"] = worldToViewMatrix;
+                systemUniforms["projectionMatrix"] = projectionMatrix;
+                systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
+                systemUniforms["coords"] = [this.output.width, this.output.height, 1];
+
+                this.output.bind();
+                gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+                var program = this.pipeline.lightPassProgram;
+                program.bind();
+
+                this.pipeline.setUniformVariables(targetNames, systemUniformNames, {
+                    envBase: renderTargetUniforms,
+                    sysBase: systemUniforms
                 });
-                this.uniformsDirty = false;
 
-//                var uniforms = {};
-//                uniforms["canvasSize"] = this.canvasSize;
-//                uniforms["db"] = [this.pipeline.gbufferTarget.depthTargetHandle];
-//                uniforms["deferred0"] = [this.pipeline.gbufferTarget.colorTargetHandles[0]];
-//                uniforms["deferred1"] = [this.pipeline.gbufferTarget.colorTargetHandles[1]];
-//                uniforms["deferred2"] = [this.pipeline.gbufferTarget.colorTargetHandles[2]];
-//                uniforms["deferred3"] = [this.pipeline.gbufferTarget.colorTargetHandles[3]];
-//                program.setSystemUniformVariables(envNames, uniforms);
-//                this.uniformsDirty = false;
-
+                this.screenQuad.draw(program);
+                program.unbind();
             }
-        })(),
-
-        render: function () {
-            var gl = this.pipeline.context.gl;
-            this.output.bind();
-            gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
-            var program = this.pipeline.lightProgram;
-            program.bind();
-            this.setNonVolatileShaderUniforms(program);
-            this.screenQuad.draw(program);
-            program.unbind();
-        }
+        })()
     });
 
     webgl.DeferredShadingPass = ShadePass;

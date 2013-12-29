@@ -159,14 +159,17 @@
                 var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
                 var workSet = new Shade.WorkingSet();
                 workSet.parse(this.sourceTemplate);
-                workSet.analyze(contextData, implementation, {
+                var options = {
                     propagateConstants: true,
                     validate: true,
                     sanitize: true,
-                    transformSpaces: true
-                });
+                    transformSpaces: true,
+                    extractUniformExpressions: true
+                };
+
+                workSet.analyze(contextData, implementation, options);
                 var spaceInfo = workSet.getProcessingData('spaceInfo');
-                var glslShader = workSet.compileFragmentShader({useStatic: true});
+                var glslShader = workSet.compileFragmentShader({useStatic: true, uniformExpressions: options.uniformExpressions});
                 this.uniformSetter = glslShader.uniformSetter;
                 this.source = {
                     fragment: glslShader.source,

@@ -8,7 +8,7 @@
 
     XML3D.extend(RenderPipeline.prototype, {
 
-        init: function() {
+        init: function(scene) {
             var context = this.context;
             this.renderPasses.forEach(function(pass) {
                 if (pass.init) {
@@ -19,7 +19,7 @@
 
         addRenderPass: function(pass, position) {
             if (position !== undefined) {
-                this.renderPasses = this.renderPasses.splice(position, 0, pass);
+                this.renderPasses.splice(position, 0, pass);
             } else {
                 this.renderPasses.push(pass);
             }

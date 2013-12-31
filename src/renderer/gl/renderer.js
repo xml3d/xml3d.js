@@ -106,7 +106,7 @@
             this.pickingPipeline = pickingPipeline;
         },
         createRenderInterface: function () {
-            return new XML3D.webgl.RenderInterface(this.context);
+            return new XML3D.webgl.RenderInterface(this.context, this.scene);
             //TODO need to provide an interface for creating shaders, buffers and so on
         },
         requestRedraw: function (reason) {

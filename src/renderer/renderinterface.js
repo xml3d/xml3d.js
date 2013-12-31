@@ -3,8 +3,9 @@
     // Note: This context should only be used to access GL constants
     var gl = window.WebGLRenderingContext;
 
-    var RenderInterface = function (context) {
+    var RenderInterface = function (context, scene) {
         this.context = context;
+        this.scene = scene;
         this.options = {
             pickingEnabled          : true,
             mouseMovePickingEnabled : true,
@@ -21,6 +22,7 @@
         setRenderPipeline: function(pipeline) {
             //TODO cleanup old pipeline
             this.renderPipeline = pipeline;
+            this.renderPipeline.init(this.scene);
             this.context.requestRedraw("Pipeline changed");
         },
 

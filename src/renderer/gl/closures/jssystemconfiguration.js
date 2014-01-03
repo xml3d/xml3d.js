@@ -88,8 +88,8 @@
         var ext = context.getExtensionByName(ns.GLContext.EXTENSIONS.STANDARD_DERIVATES);
         if (ext) {
             result.info.fwidth = { type: Shade.TYPES.FUNCTION };
-            result.info.dFdx = { type: Shade.TYPES.FUNCTION };
-            result.info.dFdy = { type: Shade.TYPES.FUNCTION };
+            result.info.dx = { type: Shade.TYPES.FUNCTION };
+            result.info.dy = { type: Shade.TYPES.FUNCTION };
         }
         return result;
     }

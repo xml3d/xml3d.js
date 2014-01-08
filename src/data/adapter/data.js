@@ -115,7 +115,6 @@ XML3D.data.DataAdapter.prototype.init = function () {
 
     // Setting platform and node type information for a data sequence
     this.xflowDataNode.setPlatform(this.node.getAttribute("platform"));
-    this.xflowDataNode.setNodeType(this.node.getAttribute("nodeType"));
 
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     this.xflowDataNode.setFilter(this.node.getAttribute("filter"));
@@ -124,7 +123,7 @@ XML3D.data.DataAdapter.prototype.init = function () {
     recursiveDataAdapterConstruction(this);
 };
 
-    /** Recursively passing platform and node type information to children of a data node
+    /** Recursively passing platform information to children of a data node
      *  Requires that the children and the parents of data nodes are defined
      *
      * @param {Xflow.DataNode} parentNode
@@ -138,7 +137,6 @@ function recursiveDataNodeAttrInit(parentNode) {
         for (i = NChildren; i--;) {
             if (children[i] instanceof Xflow.DataNode) {
                 children[i].setPlatform(parentNode._platform);
-                children[i].setNodeType(parentNode._nodeType);
                 recursiveDataNodeAttrInit(children[i]);
             }
         }
@@ -151,9 +149,9 @@ function recursiveDataAdapterConstruction(adapter) {
         if (subadapter) {
             adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
 
-            // Passes _platform and _nodeType values to children nodes starting from the node
+            // Passes _platform values to children nodes starting from the node
             // where these attributes are first defined
-            if (adapter.xflowDataNode._platform !== null || adapter.xflowDataNode._nodeType !== Xflow.NODE_TYPE.PRE_PROCESS) {
+            if (adapter.xflowDataNode._platform !== null) {
                 recursiveDataNodeAttrInit(adapter.xflowDataNode);
             }
         }
@@ -218,8 +216,6 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function (evt) {
             updateAdapterHandle(this, attr, this.node.getAttribute(attr));
         } else if (attr === "platform") {
             updatePlatform(this);
-        } else if (attr === "nodeType") {
-            updateNodeType(this);
         }
 
     } else if (evt.type === XML3D.events.THIS_REMOVED) {
@@ -260,13 +256,6 @@ function updatePlatform(dataAdapter) {
     var xflowNode = dataAdapter.xflowDataNode;
 
     xflowNode.setPlatform(dataAdapter.node.getAttribute("platform"));
-    recursiveDataNodeAttrInit(xflowNode);
-}
-
-function updateNodeType(dataAdapter) {
-    var xflowNode = dataAdapter.xflowDataNode;
-
-    xflowNode.setNodeType(dataAdapter.node.getAttribute("nodeType"));
     recursiveDataNodeAttrInit(xflowNode);
 }
 
@@ -341,7 +330,7 @@ XML3D.data.DataflowDataAdapter.prototype.notifyChanged = function (evt) {
             var attr = evt.wrapped.attrName;
             if (attr === "out") {
                 updateDataflowOut(this);
-            } else if (attr === "platform" || attr === "nodeType") {
+            } else if (attr === "platform") {
                 updateDataflowXflowNode(this, this.node);
             }
             break;
@@ -371,8 +360,7 @@ function updateDataflowOut(adapter) {
 
 function updateDataflowXflowNode(adapter, node) {
     // Getting platform and node type information for a Dataflow node
-    var platform = node.getAttribute("platform"),
-        nodeType = node.getAttribute("nodeType");
+    var platform = node.getAttribute("platform");
 
     adapter.xflowDataNode.clearChildren();
     adapter.xflowDataNode.setCompute("");
@@ -423,7 +411,6 @@ function updateDataflowXflowNode(adapter, node) {
                 currentNode.userData = child;
 
                 currentNode.setPlatform(platform);
-                currentNode.setNodeType(nodeType);
 
                 currentNode.setCompute(statements[j].trim());
 

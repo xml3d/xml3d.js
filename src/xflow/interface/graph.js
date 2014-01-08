@@ -225,7 +225,6 @@ Xflow.DataNode = function(graph, protoNode){
     this._globalParamNames = null;
 
     this._platform = null;
-    this._nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
 
     this._listeners = [];
 
@@ -505,31 +504,6 @@ DataNode.prototype.setPlatform = function(platformSrc) {
         this._platform = platformSrc;
     } else {
         this._platform = null;
-    }
-
-    this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
-};
-
-    /**
-     * Sets node type of a DataNode.
-     * By default all DataNodes are "pre-processing" type.
-     *
-     * @param {String|Xflow.NODE_TYPE|null} nodeTypeSrc
-     */
-
-DataNode.prototype.setNodeType = function(nodeTypeSrc) {
-    if (typeof nodeTypeSrc === 'string') {
-        if (nodeTypeSrc === "preProcess") {
-            this._nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
-        }
-        else if (nodeTypeSrc === "realTime") {
-            this._nodeType = Xflow.NODE_TYPE.REAL_TIME;
-        }
-    } else if (!isNaN(parseFloat(nodeTypeSrc)) && isFinite(nodeTypeSrc)) {
-        this._nodeType = nodeTypeSrc;
-    } else {
-        this._nodeType = Xflow.NODE_TYPE.PRE_PROCESS;
     }
 
     this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);

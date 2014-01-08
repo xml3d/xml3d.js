@@ -556,7 +556,7 @@
         }
 
         try {
-            cmdQueue = clCtx.createCommandQueue(device || devices[0]);
+            cmdQueue = clCtx.createCommandQueue(device || devices[0], 0);
         } catch (e) {
             var errCode = getErrorCodeFromCLError(e);
 

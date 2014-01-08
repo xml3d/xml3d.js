@@ -124,6 +124,11 @@
         },
         traverse: function(callback) {
             this.rootNode.traverse(callback);
+        },
+        findFirstRayIntersection: function(ray) {
+            var closestIntersection = {obj : null, dist : Number.MAX_VALUE};
+            this.rootNode.findFirstRayIntersection(ray, closestIntersection);
+            return closestIntersection;
         }
     });
 

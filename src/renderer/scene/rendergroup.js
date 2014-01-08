@@ -159,7 +159,20 @@
                 this.setVisible(newVal);
                 this.setBoundingBoxDirty();
             }
-        }
+        },
+
+        findFirstRayIntersection: (function() {
+            var bbox = XML3D.math.bbox.create();
+
+            return function(ray, closestIntersection) {
+                this.getWorldSpaceBoundingBox(bbox);
+                if (XML3D.math.bbox.intersects(bbox, ray)) {
+                    for (var i=0; i < this.children.length; i++) {
+                        this.children[i].findFirstRayIntersection(ray, closestIntersection);
+                    }
+                }
+            }
+        })()
 
     });
 

@@ -360,7 +360,22 @@
                 XML3D.debug.logError("Mesh Error: " + e.message, this.node);
             }
             webgl.SystemNotifier.setNode(null);
-        }
+        },
+
+        findFirstRayIntersection: (function() {
+            var bbox = XML3D.math.bbox.create();
+            var opt = {dist:0};
+
+            return function(ray, closestIntersection) {
+                this.getWorldSpaceBoundingBox(bbox);
+                if (XML3D.math.bbox.intersects(bbox, ray, opt)) {
+                    if (opt.dist < closestIntersection.dist) {
+                        closestIntersection.dist = opt.dist;
+                        closestIntersection.obj = this;
+                    }
+                }
+            }
+        })()
 
     });
 

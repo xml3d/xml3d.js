@@ -118,6 +118,27 @@
         var relativeMousePos = XML3D.webgl.convertPageCoords(this.node, x, y);
         return this.factory.getRenderer().generateRay(relativeMousePos.x, relativeMousePos.y);
     };
+
+    XML3DRenderAdapter.prototype.getElementByRay = function(xml3dRay, hitPoint, hitNormal) {
+        var renderer = this.factory.getRenderer();
+        var object = renderer.getRenderObjectByRay(xml3dRay).obj;
+        if(object){
+            if(hitPoint){
+                var vec = renderer.getWorldSpacePositionByRay(xml3dRay, object);
+                hitPoint.set(vec[0],vec[1],vec[2]);
+            }
+            if(hitNormal){
+                var vec = renderer.getWorldSpaceNormalByRay(xml3dRay, object);
+                hitNormal.set(vec[0],vec[1],vec[2]);
+            }
+        }
+        else{
+            if(hitPoint) hitPoint.set(NaN, NaN, NaN);
+            if(hitNormal) hitNormal.set(NaN, NaN, NaN);
+        }
+        return object ? object.node : null;
+    };
+
     XML3D.webgl.XML3DRenderAdapter = XML3DRenderAdapter;
 
 }());

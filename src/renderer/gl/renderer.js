@@ -118,6 +118,24 @@
             return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
         },
 
+        getRenderObjectByRay: function(xml3dRay) {
+            return this.scene.findFirstRayIntersection(xml3dRay);
+        },
+        getWorldSpaceNormalByRay: function (ray, object) {
+            var obj = object || this.pickedObject;
+            if (!obj)
+                return null;
+            this.pickNormalPass.renderObject(obj);
+            return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
+        },
+        getWorldSpacePositionByRay: function (ray, object) {
+            var obj = object || this.pickedObject;
+            if (!obj)
+                return null;
+            this.pickPositionPass.renderObject(obj);
+            return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
+        },
+
         needsRedraw: function () {
             return this.needsDraw;
         },
@@ -145,7 +163,7 @@
         createPickingTarget: function () {
             var gl = this.context.gl;
 
-            var target = new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
+            return new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
                 width: this.width,
                 height: this.height,
                 colorFormat: gl.RGBA,
@@ -153,7 +171,6 @@
                 stencilFormat: null,
                 depthAsRenderbuffer: true
             });
-            return target;
         },
         /**
          * Uses gluUnProject() to transform the 2D screen point to a 3D ray.

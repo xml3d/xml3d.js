@@ -169,3 +169,26 @@ test("Touch", function() {
 
 });
 
+test("Simple picking with getElementByRay", 5, function() {
+	var xml3dElement = this.doc.getElementById("xml3DElem");
+	var h = getHandler(xml3dElement);
+	var target = this.doc.getElementById("pickingMesh8");
+	var target2 = this.doc.getElementById("pickingMesh9");
+
+	var ray = new XML3DRay();
+	ray.origin.set(new XML3DVec3(10, -0.1, -10));
+	ray.direction.set(new XML3DVec3(-1, 0, 0));
+
+	var obj = xml3dElement.getElementByRay(ray);
+	equal(obj, target, "Ray orthogonal to camera returned the first intersected mesh");
+
+	ray.direction.set(new XML3DVec3(1, 0, 0));
+	obj = xml3dElement.getElementByRay(ray);
+	equal(obj, null, "The same ray with inverted direction returned null");
+
+	ray.origin.set(new XML3DVec3(-10, -0.1, -10));
+	obj = xml3dElement.getElementByRay(ray);
+	equal(obj, target2, "The inverted ray shot from the other side returns the right mesh");
+});
+
+

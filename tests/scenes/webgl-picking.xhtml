@@ -10,19 +10,25 @@
   <body style="background-color: #FFF;width:500px">
    <xml3d xmlns="http://www.xml3d.org/2009/xml3d" id="xml3DElem" style="background-color: grey; width: 300px; height: 200px;">
             <defs>
-               <transform id="t1" translation="-2.5 2 0"/>
-               <transform id="t2" translation="0 2 0"/>
-               <transform id="t3" translation="2.5 2 0"/>
-               <transform id="t3_back" translation="2.5 2 -1"/>
-               <transform id="t4" translation="-2.5 -2 0"/>
-               <transform id="t5" translation="0 -2 0"/>
-               <transform id="t6" translation="2.5 -2 0"/>
-               <transform id="t7" translation="6 -4 0"/>
+               <transform id="t1" translation="-2.5 2 -10"/>
+               <transform id="t2" translation="0 2 -10"/>
+               <transform id="t3" translation="2.5 2 -10"/>
+               <transform id="t3_back" translation="2.5 2 -10"/>
+               <transform id="t4" translation="-2.5 -2 -10"/>
+               <transform id="t5" translation="0 -2 -10"/>
+               <transform id="t6" translation="2.5 -2 -10"/>
+               <transform id="t7" translation="6 -4 -10"/>
+               <transform id="t8" translation="0 0 -10" rotation="0 1 0 1.57"/>
+               <transform id="t9" translation="-1 0 -10" rotation="0 1 0 1.57"/>
 
                <shader id="shader_diffuse" script="urn:xml3d:shader:diffuse">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
                   <float name="ambientIntensity">0.8</float>
                </shader>
+                <shader id="shader_diffuse_yellow" script="urn:xml3d:shader:diffuse">
+                    <float3 name="diffuseColor">1 1 0</float3>
+                    <float name="ambientIntensity">0.8</float>
+                </shader>
                  <shader id="shader_diffuse2" script="urn:xml3d:shader:diffuse">
                   <float3 name="diffuseColor">1 0.2 1</float3>
                   <float name="ambientIntensity">0.8</float>
@@ -58,10 +64,10 @@
 
                <data id="mySimpleMesh" type="triangles">
                   <int name="index">0 1 2 1 2 3</int>
-                  <float3 name="position">-1.0 -1.0 -10.0
-                         1.0 -1.0 -10.0
-                        -1.0  1.0 -10.0
-                         1.0  1.0 -10.0</float3>
+                  <float3 name="position">-1.0 -1.0 0.0
+                         1.0 -1.0 0.0
+                        -1.0  1.0 0.0
+                         1.0  1.0 0.0</float3>
                   <float3 name="normal">
                     0.0 0.0 1.0
                     0.0 0.0 1.0
@@ -110,9 +116,17 @@
            <group shader="#shader_diffuse" transform="#t7">
                <mesh id="pickingMesh7" src="#mySimpleMesh"/>
            </group>
-            	
-			
-            
+
+           <group shader="#shader_diffuse_yellow" transform="#t8">
+               <mesh id="pickingMesh8" src="#mySimpleMesh"/>
+           </group>
+
+           <group shader="#shader_diffuse_yellow" transform="#t9">
+               <mesh id="pickingMesh9" src="#mySimpleMesh"/>
+           </group>
+
+
+
          </xml3d>
   </body>
  </html>

@@ -126,14 +126,16 @@
             if (!obj)
                 return null;
             this.pickNormalPass.renderObject(obj);
-            return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
+            //return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
+            return [0,0,0];
         },
         getWorldSpacePositionByRay: function (ray, object) {
             var obj = object || this.pickedObject;
             if (!obj)
                 return null;
             this.pickPositionPass.renderObject(obj);
-            return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
+            //return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
+            return [0,0,0];
         },
 
         needsRedraw: function () {

@@ -167,12 +167,18 @@
                 var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
                 var workSet = new Shade.WorkingSet();
                 workSet.parse(this.sourceTemplate);
+
+                var shadeConfig = window.XML3D_CONFIG || {
+                    extractUniformExpressions: true,
+                    transformSpaces: true
+                };
+
                 var options = {
                     propagateConstants: true,
                     validate: true,
                     sanitize: true,
-                    transformSpaces: true,
-                    extractUniformExpressions: true
+                    transformSpaces: shadeConfig.transformSpaces || false,
+                    extractUniformExpressions: shadeConfig.extractUniformExpressions || false
                 };
 
                 workSet.analyze(contextData, implementation, options);

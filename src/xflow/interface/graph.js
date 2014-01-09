@@ -21,44 +21,59 @@ Xflow.Graph = function(){
 
 var Graph = Xflow.Graph;
 
+    /**
+     *
+     */
 
 Graph.prototype.initPlatform = function () {
-    this.platform = Xflow.PLATFORM.JAVASCRIPT;
+    this.platform = Xflow.PLATFORM.JAVASCRIPT; // Setting default platform for the graph
 
+    if(initWebCLPlatform(this)) {
+        this.platform = Xflow.PLATFORM.CL;
+    }
+
+};
+
+function initWebCLPlatform(graph) {
+    var clPlatforms, clDevices, clCtx, cmdQueue;
     var webcl = XML3D.webcl;
 
     if (webcl && webcl.isAvailable()) {
-        var clPlatforms, clDevices, clCtx, cmdQueue;
 
+        // Fetching WebCL device platforms
         clPlatforms = webcl.getPlatforms();
 
-        if (!clPlatforms) {
-            return;
+        if (!clPlatforms || typeof clPlatforms === 'array' && clPlatforms.length === 0) {
+            return false;
         }
 
+        // Fetching WebCL devices
         try {
+            // Trying initially to use GPU (for the best performance). Using CPU as a fallback.
             clDevices = webcl.getDevicesByType("GPU") || webcl.getDevicesByType("CPU");
         } catch (e) {
-            return;
+            return false;
         }
 
         if (!clDevices) {
-            return;
+            return false;
         }
 
+        // Creating a new WebCL context
         try {
             clCtx = webcl.createContext({devices: clDevices});
         } catch (e) {
-            return;
+            return false;
         }
 
+        // Creating a command queue for WebCL processing
         try {
             cmdQueue = webcl.createCommandQueue(clDevices[0], clCtx);
         } catch (e) {
-            return;
+            return false;
         }
 
-        this.cl = {
+        graph.cl = {
             kernelManager: new webcl.KernelManager(clCtx, clDevices),
             platforms: clPlatforms,
             devices: clDevices,
@@ -66,9 +81,11 @@ Graph.prototype.initPlatform = function () {
             cmdQueue: cmdQueue
         };
 
-        this.platform = Xflow.PLATFORM.CL;
+        return true;
     }
-};
+
+    return false;
+}
 
  /**
  * @return {Xflow.InputNode}

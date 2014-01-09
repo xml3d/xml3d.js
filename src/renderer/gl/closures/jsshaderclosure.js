@@ -87,6 +87,14 @@
                 result.type = Shade.TYPES.OBJECT;
                 result.kind = Shade.OBJECT_KINDS.FLOAT4;
                 break;
+            case Xflow.DATA_TYPE.FLOAT3X3:
+                result.type = Shade.TYPES.OBJECT;
+                result.kind = Shade.OBJECT_KINDS.MATRIX3;
+                break;
+            case Xflow.DATA_TYPE.FLOAT4X4:
+                result.type = Shade.TYPES.OBJECT;
+                result.kind = Shade.OBJECT_KINDS.MATRIX4;
+                break;
             case Xflow.DATA_TYPE.TEXTURE:
                 result.type = Shade.TYPES.OBJECT;
                 result.kind = Shade.OBJECT_KINDS.TEXTURE;

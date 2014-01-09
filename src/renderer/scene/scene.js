@@ -70,8 +70,7 @@
          */
         createRenderObject: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderObject.ENTRY_SIZE);
-            var renderObject = new webgl.RenderObject(this, pageEntry, opt);
-            return renderObject;
+            return new webgl.RenderObject(this, pageEntry, opt);
         },
 
         createRenderGroup: function (opt) {
@@ -86,8 +85,7 @@
 
         createRenderLight: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderLight.ENTRY_SIZE);
-            var renderLight = new webgl.RenderLight(this, pageEntry, opt);
-            return renderLight;
+            return new webgl.RenderLight(this, pageEntry, opt);
         },
         createShaderInfo: function (opt) {
             return new webgl.ShaderInfo(this, opt);
@@ -126,7 +124,7 @@
             this.rootNode.traverse(callback);
         },
         findFirstRayIntersection: function(ray) {
-            var closestIntersection = {obj : null, dist : Number.MAX_VALUE};
+            var closestIntersection = {object : null, dist : Number.MAX_VALUE};
             this.rootNode.findFirstRayIntersection(ray, closestIntersection);
             return closestIntersection;
         }

@@ -17,28 +17,21 @@
     XML3D.createClass(PickObjectRenderPass, webgl.BaseRenderPass);
 
     XML3D.extend(PickObjectRenderPass.prototype, {
-        renderScene: (function () {
-
+        renderObjects: (function () {
             var c_mvp = XML3D.math.mat4.create(),
                 c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
                 c_systemUniformNames = ["id", "modelViewProjectionMatrix"];
 
-            return function (scene) {
+            return function (objects, viewMatrix, projMatrix) {
                 var gl = this.context.gl;
                 this.target.bind();
+                this.program.bind();
 
                 gl.enable(gl.DEPTH_TEST);
                 gl.disable(gl.CULL_FACE);
                 gl.disable(gl.BLEND);
-
                 gl.viewport(0, 0, this.target.getWidth(), this.target.getHeight());
                 gl.clear(this.clearBits);
-
-                scene.updateReadyObjectsFromActiveView(this.target.getWidth() / this.target.getHeight());
-
-
-                this.program.bind();
-                var objects = scene.ready;
 
                 for (var j = 0, n = objects.length; j < n; j++) {
                     var obj = objects[j];
@@ -46,6 +39,11 @@
 
                     if (!obj.isVisible())
                         continue;
+
+                    if (viewMatrix && projMatrix) {
+                        obj.updateModelViewMatrix(viewMatrix);
+                        obj.updateModelViewProjectionMatrix(projMatrix);
+                    }
 
                     obj.getModelViewProjectionMatrix(c_mvp);
 
@@ -72,10 +70,10 @@
          *
          * @param {number} x Screen Coordinate of color buffer
          * @param {number} y Screen Coordinate of color buffer
-         * @param {XML3D.webgl.GLScene} scene Scene
+         * @param {Array} objects List of objects that were rendered in the previous picking pass
          * @returns {XML3D.webgl.RenderObject|null} Picked Object
          */
-        getRenderObjectFromPickingBuffer: function (x, y, scene) {
+        getRenderObjectFromPickingBuffer: function (x, y, objects) {
             var data = this.readPixelDataFromBuffer(x, y);
 
             if (!data)
@@ -85,7 +83,7 @@
             var objId = data[0] * 65536 + data[1] * 256 + data[2];
 
             if (objId > 0) {
-                var pickedObj = scene.ready[objId - 1];
+                var pickedObj = objects[objId - 1];
                 result = pickedObj;
             }
             return result;

@@ -14,7 +14,7 @@
                 c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
                 c_systemUniformNames = ["bbox", "modelMatrix", "modelViewProjectionMatrix"];
 
-            return function(obj) {
+            return function(obj, viewMatrix, projMatrix) {
                 var gl = this.context.gl;
 
                 this.target.bind();
@@ -23,6 +23,10 @@
                 gl.disable(gl.CULL_FACE);
                 gl.disable(gl.BLEND);
 
+                if (viewMatrix && projMatrix) {
+                    obj.updateModelViewMatrix(viewMatrix);
+                    obj.updateModelViewProjectionMatrix(projMatrix);
+                }
                 obj.getWorldMatrix(c_modelMatrix);
 
                 obj.getObjectSpaceBoundingBox(this.objectBoundingBox);

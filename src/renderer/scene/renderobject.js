@@ -371,7 +371,7 @@
                 if (XML3D.math.bbox.intersects(bbox, ray, opt)) {
                     if (opt.dist < closestIntersection.dist) {
                         closestIntersection.dist = opt.dist;
-                        closestIntersection.obj = this;
+                        closestIntersection.object = this;
                     }
                 }
             }

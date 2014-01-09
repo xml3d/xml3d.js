@@ -42,7 +42,7 @@
         this.needsDraw = true;
         this.needsPickingDraw = true;
         this.context.requestRedraw = this.requestRedraw.bind(this);
-
+        this.rayViewHelper = scene.createRenderView();
 
         this.initGL();
         this.changeListener = new XML3D.webgl.DataChangeListener(this);
@@ -121,22 +121,56 @@
         getRenderObjectByRay: function(xml3dRay) {
             return this.scene.findFirstRayIntersection(xml3dRay);
         },
-        getWorldSpaceNormalByRay: function (ray, object) {
-            var obj = object || this.pickedObject;
-            if (!obj)
-                return null;
-            this.pickNormalPass.renderObject(obj);
-            //return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
-            return [0,0,0];
+        getWorldSpaceNormalByRay: (function() {
+            var c_viewMat = XML3D.math.mat4.create();
+            var c_projMat = XML3D.math.mat4.create();
+
+            return function (ray, intersection) {
+                if (!intersection || !intersection.object)
+                    return null;
+                var aspect = this.pickNormalPass.target.getWidth() / this.pickNormalPass.target.getHeight();
+                this.rayViewHelper.getWorldToViewMatrix(c_viewMat);
+                this.rayViewHelper.getProjectionMatrix(c_projMat, aspect);
+                this.pickNormalPass.renderObject(intersection.object, c_viewMat, c_projMat);
+                var x = Math.floor(this.pickNormalPass.target.getWidth() / 2);
+                var y = Math.floor(this.pickNormalPass.target.getHeight() / 2);
+                return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
+            }
+        })(),
+        getWorldSpacePositionByRay: (function() {
+            var c_viewMat = XML3D.math.mat4.create();
+            var c_projMat = XML3D.math.mat4.create();
+
+            return function (ray, intersection) {
+                if (!intersection || !intersection.object)
+                    return null;
+                var aspect = this.pickNormalPass.target.getWidth() / this.pickNormalPass.target.getHeight();
+                this.rayViewHelper.getWorldToViewMatrix(c_viewMat);
+                this.rayViewHelper.getProjectionMatrix(c_projMat, aspect);
+                this.pickPositionPass.renderObject(intersection.object, c_viewMat, c_projMat);
+                var x = Math.floor(this.pickPositionPass.target.getWidth() / 2);
+                var y = Math.floor(this.pickPositionPass.target.getHeight() / 2);
+                return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
+            }
+        })(),
+
+        setCameraForRay: function(ray, intersection) {
+            this.rayViewHelper.updatePosition(ray.origin._data);
+            var orientation = this.generateOrientationMatrixForRay(ray, intersection);
+            this.rayViewHelper.updateOrientation(orientation);
         },
-        getWorldSpacePositionByRay: function (ray, object) {
-            var obj = object || this.pickedObject;
-            if (!obj)
-                return null;
-            this.pickPositionPass.renderObject(obj);
-            //return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
-            return [0,0,0];
-        },
+
+        generateOrientationMatrixForRay: (function() {
+            var c_rot = XML3D.math.mat4.create();
+
+            return function(ray, intersection) {
+                var lookAtPoint = new XML3DVec3(ray.origin).subtract(new XML3DVec3(ray.direction).scale(intersection.dist));
+                XML3D.math.mat4.lookAt(c_rot, ray.origin._data, lookAtPoint._data, [0,1,0]);
+                //Remove translation data
+                c_rot[12] = 0; c_rot[13] = 0; c_rot[14] = 0;
+                return c_rot;
+            }
+        })(),
 
         needsRedraw: function () {
             return this.needsDraw;
@@ -152,11 +186,12 @@
             y = webgl.canvasToGlY(this.canvas, y);
             if(this.needsPickingDraw) {
                 this.prepareRendering();
-                this.pickObjectPass.renderScene(this.scene);
+                this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight());
+                this.pickObjectPass.renderObjects(this.scene.ready);
                 this.needsPickingDraw = false;
                 XML3D.debug.logDebug("Rendered Picking Buffer");
             }
-            this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene);
+            this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene.ready);
             return this.pickedObject;
         },
         prepareRendering: function () {

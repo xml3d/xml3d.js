@@ -80,7 +80,8 @@
                 "type": "array", "elements": { "type": "object", "kind": "texture" }, "staticSize": 5, "source": "uniform"
             },
             "spotLightMatrix": { "type": "array", "elements": { "type": "object", "kind": "matrix4" },  "staticSize": 5, "source": "uniform" },
-            "ssaoMap": { "type": "object", "kind": "texture", "source": "uniform" }
+            "ssaoMap": { "type": "object", "kind": "texture", "source": "uniform" },
+            "environment": { "type": "object", "kind": "texture", "source": "uniform" }
         }
     };
 

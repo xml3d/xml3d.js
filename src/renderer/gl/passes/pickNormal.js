@@ -8,6 +8,7 @@
     XML3D.createClass(PickNormalRenderPass, webgl.BaseRenderPass, {
         renderObject: (function () {
             var c_modelViewProjectionMatrix = XML3D.math.mat4.create();
+            var c_worldMatrix = XML3D.math.mat4.create();
             var c_normalMatrix3 = XML3D.math.mat3.create();
             var c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
                 c_systemUniformNames = ["modelViewProjectionMatrix", "normalMatrix"];
@@ -27,7 +28,14 @@
                 }
 
                 object.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
-                object.getNormalMatrix(c_normalMatrix3);
+
+                object.getWorldMatrix(c_worldMatrix);
+                if (XML3D.math.mat4.invert(c_worldMatrix, c_worldMatrix)) {
+                    XML3D.math.mat3.fromMat4(c_normalMatrix3, c_worldMatrix);
+                    XML3D.math.mat3.transpose(c_normalMatrix3, c_normalMatrix3);
+                } else {
+                    XML3D.math.mat3.identity(c_normalMatrix3);
+                }
 
                 var program = this.program;
                 program.bind();

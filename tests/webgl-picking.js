@@ -191,20 +191,25 @@ test("Simple picking with getElementByRay", 5, function() {
     equal(obj, target2, "The inverted ray shot from the other side returns the right mesh");
 });
 
-test("Position and normal with getElementByRay", 4, function() {
+test("Position and normal with getElementByRay", 6, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
 
     var ray = new XML3DRay();
-    ray.origin.set(new XML3DVec3(10, 0, -10));
-    ray.direction.set(new XML3DVec3(-1, 0, 0));
+    ray.origin.set(new XML3DVec3(-10, 0, -10));
+    ray.direction.set(new XML3DVec3(1, 0, 0));
 
     var foundNormal = new XML3DVec3();
     var foundPosition = new XML3DVec3();
 
     var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
-    QUnit.closeVector(foundPosition, new XML3DVec3(-1,0,-10), EPSILON, "Found correct position");
+    QUnit.closeVector(foundPosition, new XML3DVec3(-1,0.02,-9.98), EPSILON, "Found correct position");
     QUnit.closeVector(foundNormal, new XML3DVec3(1, 0, 0), EPSILON, "Found correct normal");
+
+    ray.origin.set(new XML3DVec3(10, 0, -10));
+    obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
+    ok(isNaN(foundPosition.x) && isNaN(foundPosition.y) && isNaN(foundPosition.z), "Position returns NaN for no hit object");
+    ok(isNaN(foundNormal.x) && isNaN(foundNormal.y) && isNaN(foundNormal.z), "Normal returns NaN for no hit object");
 });
 
 

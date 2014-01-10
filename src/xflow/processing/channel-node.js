@@ -143,7 +143,7 @@
     function updatePlatform(channelNode) {
         var owner = channelNode.owner;
         var graph = owner._graph;
-        this.platform = graph.platform; //TODO: Add more adaptive platform selection logic.
+        channelNode.platform = graph.platform; //TODO: Add more adaptive platform selection logic.
     }
 
 

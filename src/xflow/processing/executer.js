@@ -11,7 +11,8 @@
         this.subNodes = [];
         this.unprocessedDataNames = [];
 
-        this.operatorList =  new Xflow.OperatorList(platform);
+        // TODO: Maybe we should just store the cl-platform objects in XFlow.cl instead of passing those trough Graph
+        this.operatorList =  new Xflow.OperatorList(platform, ownerNode.owner.owner._graph);
         this.programData =  new Xflow.ProgramData();
 
         this.program = null;

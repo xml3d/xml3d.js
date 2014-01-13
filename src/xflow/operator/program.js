@@ -83,8 +83,9 @@
         return key;
     }
 
-    Xflow.OperatorList = function(platform){
-        this.platform = platform
+    Xflow.OperatorList = function(platform, graph){
+        this.graph = graph;
+        this.platform = platform;
         this.entries = [];
         this.inputInfo = {};
     }

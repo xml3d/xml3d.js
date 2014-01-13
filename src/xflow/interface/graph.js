@@ -73,6 +73,7 @@ function initWebCLPlatform(graph) {
             return false;
         }
 
+        // TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available
         graph.cl = {
             kernelManager: new webcl.KernelManager(clCtx, clDevices),
             platforms: clPlatforms,

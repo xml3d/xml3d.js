@@ -75,9 +75,11 @@
     XML3D.extend(RenderLight.prototype, {
 
         getFrustum: function(aspect) {
+            return new XML3D.webgl.Frustum(1.0, 200.0, 0, this.fallOffAngle*2, aspect)
             var t_mat = XML3D.math.mat4.create();
             var bb = new XML3D.math.bbox.create();
             this.scene.getBoundingBox(bb);
+
             if (XML3D.math.bbox.isEmpty(bb)) {
                 return new XML3D.webgl.Frustum(1.0, 110.0, 0, this.fallOffAngle*2, aspect)
             }
@@ -87,12 +89,12 @@
 
             var near = -bb[5],
                 far = -bb[2],
-                expand = Math.max((far - near) * 0.20, 0.05);
+                expand = Math.max((far - near) * 0.30, 0.05);
 
             // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
             far += expand;
             near -= expand;
-            return  new XML3D.webgl.Frustum(Math.max(Math.min(near, expand), CLIPPLANE_NEAR_MIN), far, 0, this.fallOffAngle*2, aspect);
+            return new XML3D.webgl.Frustum(1.0, far, 0, this.fallOffAngle*2, aspect);
         },
 
         addLightToScene : function() {
@@ -213,12 +215,7 @@
             var lightProjectionMatrix = XML3D.math.mat4.create();
             this.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
 
-            var tmp = XML3D.math.mat4.create();
-
-            // offsetMatrix * lightProjectionMatrix
-            XML3D.math.mat4.multiply(tmp, SHADOWMAP_OFFSET_MATRIX, lightProjectionMatrix);
-            // offsetMatrix * lightProjectionMatrix * lightModelViewMatrix
-            XML3D.math.mat4.multiply(target, tmp, L);
+            XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
             console.log("SMM", XML3D.math.mat4.str(target));
         },
 

@@ -1,5 +1,16 @@
 (function (webgl) {
 
+
+    // All the shader flags
+    var FLAGS = {
+        "shade.js.extractUniformExpressions" : {defaultValue: true, recompileOnChange: true },
+        "shade.js.transformSpaces" : {defaultValue: true, recompileOnChange: true }
+    };
+    for(var flag in FLAGS){
+        XML3D.flags.register(flag, FLAGS[flag].defaultValue);
+    }
+
+
     var StateMachine = window.StateMachine;
 
     var omitCulling = (function () {
@@ -46,6 +57,7 @@
          "directionalLightDirection", "directionalLightIntensity", "directionalLightOn",
          "spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection",
          "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias"];
+
 
 
     XML3D.extend(GLScene.prototype, {
@@ -221,6 +233,7 @@
                 this.shaderFactory.setLightValueChanged();
                 this.context.requestRedraw("Light value changed.");
             });
+            XML3D.flags.addObserver(this.onFlagsChange.bind(this));
         },
         addChildEvent: function(child) {
             if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
@@ -243,6 +256,10 @@
         },
         requestRedraw: function(reason) {
             return this.context.requestRedraw(reason);
+        },
+        onFlagsChange: function(key, value){
+            if(FLAGS[key] && FLAGS[key].recompileOnChange)
+                this.shaderFactory.setShaderRecompile();
         }
     });
     webgl.GLScene = GLScene;

@@ -168,17 +168,12 @@
                 var workSet = new Shade.WorkingSet();
                 workSet.parse(this.sourceTemplate);
 
-                var shadeConfig = window.XML3D_CONFIG || {
-                    extractUniformExpressions: true,
-                    transformSpaces: true
-                };
-
                 var options = {
                     propagateConstants: true,
                     validate: true,
                     sanitize: true,
-                    transformSpaces: shadeConfig.transformSpaces || false,
-                    extractUniformExpressions: shadeConfig.extractUniformExpressions || false
+                    transformSpaces: XML3DFlags.getValue("shade.js.transformSpaces"),
+                    extractUniformExpressions: XML3DFlags.getValue("shade.js.extractUniformExpressions")
                 };
 
                 workSet.analyze(contextData, implementation, options);

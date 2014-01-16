@@ -10,6 +10,7 @@
         <file name="./adapterhandle.js" />
         <file name="./resourcemanager.js" />
         <file name="./formathandler.js" />
+        <file name="./xml3d-flags.js" />
     </filelist>
 
     <target name="concat">

@@ -74,6 +74,9 @@
         },
         setLightStructureDirty: function() {
             XML3D.debug.logWarning("Light structure changes not yet supported.");
+            this.setShaderRecompile();
+        },
+        setShaderRecompile: function(){
             for (var i in this.composers) {
                 this.composers[i].setShaderRecompile();
             }

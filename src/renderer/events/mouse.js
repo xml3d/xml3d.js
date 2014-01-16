@@ -2,6 +2,8 @@
 
     var module = XML3D.webgl;
 
+    XML3D.flags.register("renderer.mouseMovePicking", true);
+
     module.events.available.push("click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "mousewheel");
 
     XML3D.extend(module.CanvasHandler.prototype, {
@@ -177,8 +179,11 @@
          */
         mousemove:function (evt) {
             var pos = this.getMousePosition(evt);
-            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.mouseMovePickingEnabled});
-            if (!this.renderOptions.mouseMovePickingEnabled)
+
+            var doMouseMovePick = this.renderOptions.mouseMovePickingEnabled && XML3DFlags.getValue("renderer.mouseMovePicking");
+
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !doMouseMovePick});
+            if (!doMouseMovePick)
                 return;
 
             var curObj = this.renderer.pickedObject ? this.renderer.pickedObject.node : null;
@@ -233,8 +238,10 @@
          * @param {MouseEvent} evt
          */
         mouseover:function (evt) {
+            var doMouseMovePick = this.renderOptions.mouseMovePickingEnabled && XML3DFlags.getValue("renderer.mouseMovePicking");
+
             var pos = this.getMousePosition(evt);
-            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.mouseMovePickingEnabled});
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !doMouseMovePick});
         },
 
         /**

@@ -101,7 +101,7 @@
             this.scene.freePageEntry({ page: this.page, offset: this.offset, size: this.entrySize });
         },
 
-        findFirstRayIntersection: function(ray, closestIntersection) {
+        findRayIntersections: function(ray, closestIntersection) {
             //This function is overridden by groups and drawables
             return;
         }

@@ -119,26 +119,31 @@
         return this.factory.getRenderer().generateRay(relativeMousePos.x, relativeMousePos.y);
     };
 
-    XML3DRenderAdapter.prototype.getElementByRay = function(xml3dRay, hitPoint, hitNormal) {
-        var renderer = this.factory.getRenderer();
-        var result = renderer.getRenderObjectByRay(xml3dRay);
-        if(result.object !== null && (hitPoint || hitNormal)){
-            renderer.setCameraForRay(xml3dRay, result);
-            if(hitPoint){
-                var vec = renderer.getWorldSpacePositionByRay(xml3dRay, result);
-                hitPoint.set(vec[0],vec[1],vec[2]);
+    XML3DRenderAdapter.prototype.getElementByRay = (function() {
+        var c_viewMat = XML3D.math.mat4.create();
+        var c_projMat = XML3D.math.mat4.create();
+
+        return function(xml3dRay, hitPoint, hitNormal) {
+            var renderer = this.factory.getRenderer();
+            renderer.calculateMatricesForRay(xml3dRay, c_viewMat, c_projMat);
+            var hitObject = renderer.getRenderObjectByRay(xml3dRay, c_viewMat, c_projMat);
+            if(hitObject !== null && (hitPoint || hitNormal)){
+                if(hitPoint){
+                    var vec = renderer.getWorldSpacePositionByRay(xml3dRay, hitObject, c_viewMat, c_projMat);
+                    hitPoint.set(vec[0],vec[1],vec[2]);
+                }
+                if(hitNormal){
+                    var vec = renderer.getWorldSpaceNormalByRay(xml3dRay, hitObject, c_viewMat, c_projMat);
+                    hitNormal.set(vec[0],vec[1],vec[2]);
+                }
             }
-            if(hitNormal){
-                var vec = renderer.getWorldSpaceNormalByRay(xml3dRay, result);
-                hitNormal.set(vec[0],vec[1],vec[2]);
+            else{
+                if(hitPoint) hitPoint.set(NaN, NaN, NaN);
+                if(hitNormal) hitNormal.set(NaN, NaN, NaN);
             }
+            return hitObject !== null ? hitObject.node : null;
         }
-        else{
-            if(hitPoint) hitPoint.set(NaN, NaN, NaN);
-            if(hitNormal) hitNormal.set(NaN, NaN, NaN);
-        }
-        return result.object !== null ? result.object.node : null;
-    };
+    })();
 
     XML3D.webgl.XML3DRenderAdapter = XML3DRenderAdapter;
 

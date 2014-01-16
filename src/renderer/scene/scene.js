@@ -123,10 +123,10 @@
         traverse: function(callback) {
             this.rootNode.traverse(callback);
         },
-        findFirstRayIntersection: function(ray) {
-            var closestIntersection = {object : null, dist : Number.MAX_VALUE};
-            this.rootNode.findFirstRayIntersection(ray, closestIntersection);
-            return closestIntersection;
+        findRayIntersections: function(ray) {
+            var intersections = [];
+            this.rootNode.findRayIntersections(ray, intersections);
+            return intersections;
         }
     });
 

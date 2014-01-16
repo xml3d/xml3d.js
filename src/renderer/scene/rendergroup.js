@@ -161,14 +161,14 @@
             }
         },
 
-        findFirstRayIntersection: (function() {
+        findRayIntersections: (function() {
             var bbox = XML3D.math.bbox.create();
 
-            return function(ray, closestIntersection) {
+            return function(ray, intersections) {
                 this.getWorldSpaceBoundingBox(bbox);
                 if (XML3D.math.bbox.intersects(bbox, ray)) {
                     for (var i=0; i < this.children.length; i++) {
-                        this.children[i].findFirstRayIntersection(ray, closestIntersection);
+                        this.children[i].findRayIntersections(ray, intersections);
                     }
                 }
             }

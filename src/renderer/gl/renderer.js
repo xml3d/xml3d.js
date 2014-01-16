@@ -42,7 +42,7 @@
         this.needsDraw = true;
         this.needsPickingDraw = true;
         this.context.requestRedraw = this.requestRedraw.bind(this);
-        this.rayViewHelper = scene.createRenderView();
+        this.rayCamera = this.scene.createRenderView();
 
         this.initGL();
         this.changeListener = new XML3D.webgl.DataChangeListener(this);
@@ -118,57 +118,63 @@
             return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
         },
 
-        getRenderObjectByRay: function(xml3dRay) {
-            return this.scene.findFirstRayIntersection(xml3dRay);
-        },
-        getWorldSpaceNormalByRay: (function() {
-            var c_viewMat = XML3D.math.mat4.create();
-            var c_projMat = XML3D.math.mat4.create();
+        getRenderObjectByRay: function(xml3dRay, viewMat, projMat) {
+            var intersectedObjects = this.scene.findRayIntersections(xml3dRay);
+            this.pickObjectPass.renderObjects(intersectedObjects, viewMat, projMat);
+            //Target the middle of the buffer
+            var x = Math.floor(this.pickObjectPass.target.getWidth() / 2 / this.pickObjectPass.target.getScale());
+            var y = Math.floor(this.pickObjectPass.target.getHeight() / 2 / this.pickObjectPass.target.getScale());
+            return this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, intersectedObjects);
 
-            return function (ray, intersection) {
-                if (!intersection || !intersection.object)
-                    return null;
-                var aspect = this.pickNormalPass.target.getWidth() / this.pickNormalPass.target.getHeight();
-                this.rayViewHelper.getWorldToViewMatrix(c_viewMat);
-                this.rayViewHelper.getProjectionMatrix(c_projMat, aspect);
-                this.pickNormalPass.renderObject(intersection.object, c_viewMat, c_projMat);
-                var x = Math.floor(this.pickNormalPass.target.getWidth() / 2);
-                var y = Math.floor(this.pickNormalPass.target.getHeight() / 2);
-                return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
-            }
-        })(),
-        getWorldSpacePositionByRay: (function() {
-            var c_viewMat = XML3D.math.mat4.create();
-            var c_projMat = XML3D.math.mat4.create();
-
-            return function (ray, intersection) {
-                if (!intersection || !intersection.object)
-                    return null;
-                var aspect = this.pickNormalPass.target.getWidth() / this.pickNormalPass.target.getHeight();
-                this.rayViewHelper.getWorldToViewMatrix(c_viewMat);
-                this.rayViewHelper.getProjectionMatrix(c_projMat, aspect);
-                this.pickPositionPass.renderObject(intersection.object, c_viewMat, c_projMat);
-                var x = Math.floor(this.pickPositionPass.target.getWidth() / 2);
-                var y = Math.floor(this.pickPositionPass.target.getHeight() / 2);
-                return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
-            }
-        })(),
-
-        setCameraForRay: function(ray, intersection) {
-            this.rayViewHelper.updatePosition(ray.origin._data);
-            var orientation = this.generateOrientationMatrixForRay(ray, intersection);
-            this.rayViewHelper.updateOrientation(orientation);
         },
 
-        generateOrientationMatrixForRay: (function() {
-            var c_rot = XML3D.math.mat4.create();
+        getWorldSpaceNormalByRay: function (ray, intersectedObject, viewMat, projMat) {
+            if (!intersectedObject)
+                return null;
+            this.pickNormalPass.renderObject(intersectedObject, viewMat, projMat);
+            var x = Math.floor(this.pickNormalPass.target.getWidth() / 2 / this.pickNormalPass.target.getScale());
+            var y = Math.floor(this.pickNormalPass.target.getHeight() / 2 / this.pickNormalPass.target.getScale());
+            return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
 
-            return function(ray, intersection) {
-                var lookAtPoint = new XML3DVec3(ray.origin).subtract(new XML3DVec3(ray.direction).scale(intersection.dist));
-                XML3D.math.mat4.lookAt(c_rot, ray.origin._data, lookAtPoint._data, [0,1,0]);
-                //Remove translation data
-                c_rot[12] = 0; c_rot[13] = 0; c_rot[14] = 0;
-                return c_rot;
+        },
+        getWorldSpacePositionByRay: function (ray, intersectedObject, viewMat, projMat) {
+            if (!intersectedObject)
+                return null;
+            this.pickPositionPass.renderObject(intersectedObject, viewMat, projMat);
+            var x = Math.floor(this.pickPositionPass.target.getWidth() / 2 / this.pickPositionPass.target.getScale());
+            var y = Math.floor(this.pickPositionPass.target.getHeight() / 2 / this.pickPositionPass.target.getScale());
+            return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
+
+        },
+
+        calculateMatricesForRay: function(ray, viewMat, projMat) {
+            this.rayCamera.updatePosition(ray.origin._data);
+            this.rayCamera.updateOrientation( this.calculateOrientationForRayDirection(ray) );
+            this.rayCamera.getWorldToViewMatrix(viewMat);
+            var aspect = this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight();
+            this.rayCamera.getProjectionMatrix(projMat, aspect);
+        },
+
+        calculateOrientationForRayDirection: (function() {
+            var tmpX = XML3D.math.vec3.create();
+            var tmpY = XML3D.math.vec3.create();
+            var tmpZ = XML3D.math.vec3.create();
+            var up = XML3D.math.vec3.create();
+            var q = XML3D.math.quat.create();
+            var m = XML3D.math.mat4.create();
+
+            return function(ray) {
+                XML3D.math.vec3.set(up, 0, 1, 0);
+                XML3D.math.vec3.cross(tmpX, ray.direction._data, up);
+                if(!XML3D.math.vec3.length(tmpX)) {
+                    XML3D.math.vec3.set(tmpX, 1,0,0);
+                }
+                XML3D.math.vec3.cross(tmpY, tmpX, ray.direction._data);
+                XML3D.math.vec3.negate(tmpZ, ray.direction._data);
+
+                XML3D.math.quat.setFromBasis(tmpX, tmpY, tmpZ, q);
+                XML3D.math.mat4.fromRotationTranslation(m, q, [0, 0, 0]);
+                return m;
             }
         })(),
 
@@ -266,7 +272,7 @@
             this.scene.clear();
         }
 
-    })
+    });
 
     webgl.GLRenderer = GLRenderer;
 

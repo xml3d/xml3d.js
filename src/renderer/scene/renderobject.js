@@ -362,17 +362,14 @@
             webgl.SystemNotifier.setNode(null);
         },
 
-        findFirstRayIntersection: (function() {
+        findRayIntersections: (function() {
             var bbox = XML3D.math.bbox.create();
             var opt = {dist:0};
 
-            return function(ray, closestIntersection) {
+            return function(ray, intersections) {
                 this.getWorldSpaceBoundingBox(bbox);
                 if (XML3D.math.bbox.intersects(bbox, ray, opt)) {
-                    if (opt.dist < closestIntersection.dist) {
-                        closestIntersection.dist = opt.dist;
-                        closestIntersection.object = this;
-                    }
+                   intersections.push(this);
                 }
             }
         })()

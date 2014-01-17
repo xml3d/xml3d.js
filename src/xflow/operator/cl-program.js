@@ -43,7 +43,7 @@
             }
 
             console.log("Executing kernel...");
-            program.mainProgram.apply(program);
+            program.mainProgram();
         }
     }
 
@@ -122,7 +122,7 @@
 
         functionParams.push(resultParam.join(' '));
 
-        if (helperMap) {
+        if (helperMap && input) {
 
             helperMap.params.forEach(function (p) {
                 var pName = param.name + '_' + p;

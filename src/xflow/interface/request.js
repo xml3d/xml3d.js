@@ -97,6 +97,7 @@ ComputeRequest.prototype._onResultChanged = function(notification){
 
 
 var c_vsConnectNodeCount = {},
+    c_vsConnectNodeKey = {},
     c_vsConnectNodeCache = {};
 
 /**
@@ -132,7 +133,7 @@ VertexShaderRequest.prototype._onDataNodeChange = function(notification){
     if(notification == Xflow.RESULT_STATE.CHANGED_STRUCTURE){
         var newVSConnectedNode = getVsConnectNode(this._dataNode, this._vsConfig, this._filter);
         if(newVSConnectedNode != this._vsConnectNode){
-            clearVsConnectNode(this._vsConnectNode, this._dataNode, this._vsConfig);
+            clearVsConnectNode(this._vsConnectNode);
             this._vsConnectNode = newVSConnectedNode;
         }
     }
@@ -167,6 +168,7 @@ function getVsConnectNode(dataNode, vsConfig, filter){
 
         c_vsConnectNodeCache[key] = connectNode;
         c_vsConnectNodeCount[connectNode.id] = 1;
+        c_vsConnectNodeKey[connectNode.id] = key;
     }
     else{
         c_vsConnectNodeCount[connectNode.id]++;
@@ -175,10 +177,10 @@ function getVsConnectNode(dataNode, vsConfig, filter){
     return connectNode;
 }
 
-function clearVsConnectNode(connectNode, dataNode, vsConfig){
+function clearVsConnectNode(connectNode){
     c_vsConnectNodeCount[connectNode.id]--;
     if(!c_vsConnectNodeCount[connectNode.id]){
-        var key = getDataNodeShaderKey(dataNode, vsConfig);
+        var key = c_vsConnectNodeKey[connectNode.id];
         c_vsConnectNodeCache[key] = null;
         connectNode.clearChildren();
     }

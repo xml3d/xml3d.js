@@ -26,10 +26,13 @@
         this.useCount = 1;
         // State:
         this.outOfSync = true; // true if ChannelNode is not synchronized for no substitution
+        console.log(this.owner)
+        console.log("ChannelNode", this);
     };
 
 
     Xflow.ChannelNode.prototype.synchronize = function(){
+
         if(this.outOfSync){
             updatePlatform(this);
             synchronizeChildren(this);
@@ -93,6 +96,7 @@
     Xflow.ChannelNode.prototype.getResult = function(type, filter)
     {
         this.synchronize();
+        console.log("ChannelNode.getResult(), operator:", this.operator)
 
         var key = filter ? filter.join(";") : "[null]";
         if(!this.requestNodes[key]){
@@ -141,9 +145,21 @@
 
 
     function updatePlatform(channelNode) {
+        var platform;
         var owner = channelNode.owner;
         var graph = owner._graph;
-        channelNode.platform = graph.platform; //TODO: Add more adaptive platform selection logic.
+
+        // Platforms other than JavaScript are available only for computing operators
+        if(!channelNode.owner._computeOperator) {
+            return;
+        }
+
+        //TODO: Add better platform selection logic: Apply forced platform attribute value from Xml3D Data/Dataflow adapter
+
+        platform = graph.platform;
+
+        channelNode.platform = platform;
+        console.log("graph platform", graph.platform);
     }
 
 
@@ -242,6 +258,8 @@
                 if(!operator){
                     Xflow.notifyError("Unknown operator: '" + operatorName+"'", channelNode.owner);
                 }
+
+                channelNode.platform = operator.platform;
             }
 
             channelNode.operator = operator;

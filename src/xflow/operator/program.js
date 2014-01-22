@@ -314,20 +314,30 @@
     var c_program_cache = {};
 
     Xflow.createProgram = function(operatorList){
-        if(operatorList.entries.length == 0)
+        var firstOperator;
+
+        if(operatorList.entries.length === 0) {
             return null;
+        }
+
+        firstOperator = operatorList.entries[0].operator;
 
         var key = operatorList.getKey();
         if(!c_program_cache[key]){
-            if(operatorList.platform == Xflow.PLATFORM.GLSL){
+            // GLSL operators are implemented in a different way, so platform information is fetched from the operatorList
+            // as a fallback mode to not break the old implementations
+            if(operatorList.platform === Xflow.PLATFORM.GLSL){
                 c_program_cache[key] = new Xflow.VSProgram(operatorList);
-            } else if (operatorList.platform === Xflow.PLATFORM.CL) {
+
+            } else if (firstOperator.platform === Xflow.PLATFORM.CL) {
                 c_program_cache[key] = new Xflow.CLProgram(operatorList);
-            }else if(operatorList.entries.length == 1) {
+
+            }else if(firstOperator.platform === Xflow.PLATFORM.JAVASCRIPT && operatorList.entries.length === 1 ) {
                 c_program_cache[key] = new Xflow.SingleProgram(operatorList);
-            }
-            else
+
+            }else {
                 Xflow.notifyError("Could not create program from operatorList");
+            }
         }
         return c_program_cache[key];
     }

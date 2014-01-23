@@ -42,6 +42,9 @@
         this.needsDraw = true;
         this.needsPickingDraw = true;
         this.context.requestRedraw = this.requestRedraw.bind(this);
+
+        //Currently used as a helper to calculate view and projection matrices for ray casting, since the scene
+        //must be rendered from the point of view of the ray
         this.rayCamera = this.scene.createRenderView();
 
         this.initGL();

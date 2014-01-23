@@ -123,6 +123,12 @@
         traverse: function(callback) {
             this.rootNode.traverse(callback);
         },
+
+        /**
+         * Returns all objects intersected by the given ray, based on their bounding boxes
+         * @param ray
+         * @returns {Array} An array of RenderObjects that were hit by this ray
+         */
         findRayIntersections: function(ray) {
             var intersections = [];
             this.rootNode.findRayIntersections(ray, intersections);

@@ -26,8 +26,6 @@
         this.useCount = 1;
         // State:
         this.outOfSync = true; // true if ChannelNode is not synchronized for no substitution
-        console.log(this.owner)
-        console.log("ChannelNode", this);
     };
 
 
@@ -96,7 +94,6 @@
     Xflow.ChannelNode.prototype.getResult = function(type, filter)
     {
         this.synchronize();
-        console.log("ChannelNode.getResult(), operator:", this.operator)
 
         var key = filter ? filter.join(";") : "[null]";
         if(!this.requestNodes[key]){
@@ -159,7 +156,6 @@
         platform = graph.platform;
 
         channelNode.platform = platform;
-        console.log("graph platform", graph.platform);
     }
 
 

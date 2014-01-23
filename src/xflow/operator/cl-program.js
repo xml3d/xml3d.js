@@ -33,7 +33,7 @@
 
     function applyDefaultOperation(entry, programData, operatorData, program) {
         if (program.operator.evaluate && program.operator.evaluate instanceof Array) {
-                assembleFunctionArgs(entry, programData, program);
+            assembleFunctionArgs(entry, programData, program);
 
             if (program.kernelCode === null) {
                 //console.log("Preparing WebCL kernel for:", entry.operator.name);
@@ -41,8 +41,6 @@
                 //console.log("Creating main WebCL program...");
                 program.mainProgram = createMainWebCLProgram(program);
             }
-
-            //console.log("Executing kernel...");
 
             program.mainProgram();
         }
@@ -80,6 +78,10 @@
     }
 
 
+    function isSameType(a,b) {
+        return a.toString() === b.toString();
+    }
+
     function prepareKernelParameter(param, input, program, functionParams, arg, i) {
         var paramType, helperMap, kernelParams;
         var resultParam = [];
@@ -93,11 +95,13 @@
             kernelParams = program.kernelParamMap.outputs;
         }
 
-        if(kernelParams[i]) {
+        if (kernelParams[i]) {
             kernelParams[i].val = entryVal;
+            if (isSameType(kernelParams[i].arg, kernelParams[i].val)) {
+                kernelParams[i].arg = kernelParams[i].val;
+            }
             return;
         }
-
 
 
         // Mapping Xflow types to WebCL types
@@ -279,9 +283,7 @@
         var memObjects = {inputs: [], outputs: []};
 
         var preparedArgs = prepareKernelArguments(program.kernelParamMap, cl, memObjects);
-        var args = preparedArgs.map(function (a) {
-            return a.arg;
-        });
+
 
         var WSSizes = computeWorkGroupSize(program.kernelParamMap.inputs[0]);
 
@@ -290,7 +292,7 @@
         //console.log("WS Sizes:", WSSizes);
 
         return function () {
-            var i, len, memObj, val;
+            var i, len, memObj, args;
             var inputMemObjs = memObjects.inputs;
             var outputMemObjs = memObjects.outputs;
 
@@ -298,6 +300,9 @@
                 return false;
             }
 
+            args = preparedArgs.map(function (a) {
+                return a.arg;
+            });
             kernelManager.setArgs.apply(null, [kernel].concat(args));
 
             try {

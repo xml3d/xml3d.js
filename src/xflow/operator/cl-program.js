@@ -18,11 +18,157 @@
         this.kernelProgram = null;
         this.mainProgram = null;
 
-        this.helperParamMap = {
-            'texture': {type: "uint", params: ["width", "height"]},
-            'buffer': {type: "uint", params: ["length"]}
-        };
+
     };
+
+    var helperParamMap = {
+        'texture': {type: "uint", params: ["width", "height"]},
+        'buffer': {type: "uint", params: ["length"]}
+    };
+
+
+    function KernelParam(cl, name, xflowType, clType, entryValue, isInput) {
+        this.cl = cl;
+        this.name = name;
+        this.type = clType || null;
+        this.isInput = !!isInput;
+        this.needsMemObject = false;
+        this.hasMemObject = false;
+        this.memObjectSize = null;
+        this.arg = null;
+        this.clFunctionParam = null;
+        this.xflowType = xflowType;
+        this.helperMap = null;
+        this.helpers = [];
+        this.entryValue = entryValue || null;
+        this.val = null;
+
+        this.prepareParam();
+        this.initHelperParams();
+        this.initKernelArg();
+        this.updateValue(this.entryValue);
+
+    }
+
+    KernelParam.prototype = {
+        prepareParam: function () {
+            var helperMap;
+            var xflowDataTypes = Xflow.DATA_TYPE;
+            var kernelFuncParam = [];
+            var addressSpace = '';
+            var declarations = '';
+
+            if (!this.type) {
+                switch (this.xflowType) {
+                    case xflowDataTypes.TEXTURE:
+                    {
+                        helperMap = helperParamMap.texture;
+                        this.type = "uchar4*";
+                        addressSpace = "__global";
+                        this.needsMemObject = true;
+                    }
+                        break;
+                    case xflowDataTypes.INT:
+                    {
+                        this.type = "int";
+                    }
+                        break;
+                    case xflowDataTypes.FLOAT:
+                    {
+                        this.type = "float";
+                    }
+                        break;
+                    default:
+                        return;
+                }
+
+                this.helperMap = helperMap;
+            }
+
+            // Arranging parameter parts
+            if (addressSpace) {
+                kernelFuncParam.push(addressSpace);
+            }
+
+            if (this.isInput) {
+                declarations = 'const';
+            }
+
+            if (declarations) {
+                kernelFuncParam.push(declarations);
+            }
+
+            kernelFuncParam.push(this.type);
+            kernelFuncParam.push(this.name);
+            this.clFunctionParam = kernelFuncParam.join(' ');
+        },
+
+        initHelperParams: function () {
+            var helperVal;
+            var self = this;
+            var helperMap = this.helperMap;
+
+            if (helperMap && this.isInput) {
+                helperMap.params.forEach(function (p) {
+                    var pName = self.name + '_' + p;
+                    if (p === "width") {
+                        helperVal = self.entryValue.width;
+                    } else if (p === "height") {
+                        helperVal = self.entryValue.height;
+                    } else if (p === "length") {
+                        helperVal = self.entryValue.length;
+                    }
+                    self.helpers.push(new KernelParam(self.cl, pName, null, helperMap.type, new Uint32Array([helperVal])));
+                });
+            }
+        },
+        initKernelArg: function () {
+            if (this.needsMemObject) {
+                this.allocateMemObject();
+            } else {
+                this.arg = this.entryValue;
+            }
+        },
+
+        allocateMemObject: function () {
+            var clAPI = this.cl.API;
+            var clCtx = this.cl.ctx;
+            var paramType = this.type;
+            var byteSize = parseInt(paramType.substring(paramType.length - 2, paramType.length - 1), 10);
+            var memObjectMode = this.isInput ? 'r' : 'w';
+            var entryValue = this.entryValue;
+            var memObjectSize, memObject;
+
+            if (this.hasMemObject) {
+                this.arg.release();
+            }
+
+            if (this.xflowType === Xflow.DATA_TYPE.TEXTURE) { // Texture is a special case
+                memObjectSize = entryValue.width * entryValue.height * byteSize;
+            } else {
+                memObjectSize = entryValue.length * byteSize;
+            }
+
+            memObject = clAPI.createBuffer(memObjectSize, memObjectMode, clCtx);
+
+            this.memObjectSize = memObjectSize;
+            this.arg = memObject;
+
+            this.hasMemObject = true;
+            this.needsMemObject = false;
+
+        },
+
+        updateValue: function (entry) {
+            if (this.hasMemObject) {
+                this.val = entry.data;
+                this.entryValue = entry;
+            } else {
+                this.arg = this.entryValue = entry;
+            }
+        }
+    };
+
 
     Xflow.CLProgram.prototype.run = function (programData) {
         var operatorData = prepareOperatorData(this.list, 0, programData);
@@ -30,127 +176,6 @@
         applyDefaultOperation(this.entry, programData, operatorData, this);
 
     };
-
-    function applyDefaultOperation(entry, programData, operatorData, program) {
-        if (program.operator.evaluate && program.operator.evaluate instanceof Array) {
-            assembleFunctionArgs(entry, programData, program);
-
-            if (program.kernelCode === null) {
-                //console.log("Preparing WebCL kernel for:", entry.operator.name);
-                prepareWebCLKernel(programData, program);
-                //console.log("Creating main WebCL program...");
-                program.mainProgram = createMainWebCLProgram(program);
-            }
-
-            program.mainProgram();
-        }
-    }
-
-    function assembleFunctionArgs(entry, programData, program) {
-        var d, dataEntry, i;
-        var kernelFunctionParams = program.kernelFunctionParams;
-        var outputs = program.operator.outputs;
-
-        kernelFunctionParams.length = 0;
-
-        for (i = 0; i < outputs.length; ++i) {
-            d = outputs[i];
-            dataEntry = programData.outputs[entry.getOutputIndex(i)].dataEntry;
-
-            //console.log("Output_" + i + ":", d);
-            prepareKernelParameter(d, !!(d.source), program, kernelFunctionParams, dataEntry, i);
-        }
-
-        addInputToArgs(entry, programData, program, kernelFunctionParams);
-    }
-
-    function addInputToArgs(entry, programData, program, kernelFunctionParams) {
-        var mapEntry, dataEntry, i;
-        var mapping = entry.operator.mapping;
-
-        for (i = 0; i < mapping.length; ++i) {
-            mapEntry = mapping[i];
-            dataEntry = programData.getDataEntry(entry.getDirectInputIndex(i));
-
-            //console.log("Input_" + i + ":", mapEntry);
-            prepareKernelParameter(mapEntry, !!(mapEntry.source), program, kernelFunctionParams, dataEntry, i);
-        }
-    }
-
-
-    function isSameType(a,b) {
-        return a.toString() === b.toString();
-    }
-
-    function prepareKernelParameter(param, input, program, functionParams, arg, i) {
-        var paramType, helperMap, kernelParams;
-        var resultParam = [];
-        var addressSpace = '';
-        var declarations = '';
-        var entryVal = arg ? arg.getValue() : null;
-
-        if (input) {
-            kernelParams = program.kernelParamMap.inputs;
-        } else {
-            kernelParams = program.kernelParamMap.outputs;
-        }
-
-        if (kernelParams[i]) {
-            kernelParams[i].val = entryVal;
-            if (isSameType(kernelParams[i].arg, kernelParams[i].val)) {
-                kernelParams[i].arg = kernelParams[i].val;
-            }
-            return;
-        }
-
-
-        // Mapping Xflow types to WebCL types
-        if (param.type === Xflow.DATA_TYPE.TEXTURE) {
-            helperMap = program.helperParamMap['texture'];
-            paramType = "uchar4*";
-            addressSpace = "__global";
-
-        } else if (param.type === Xflow.DATA_TYPE.INT) {
-            paramType = "int";
-        } else {
-            return;
-        }
-
-        kernelParams[i] = {type: paramType, name: param.name, helpers: [], val: entryVal};
-
-
-        // Arranging parameter parts
-        if (addressSpace) {
-            resultParam.push(addressSpace);
-        }
-
-        if (input) {
-            declarations = 'const';
-        }
-
-        if (declarations) {
-            resultParam.push(declarations);
-        }
-
-        resultParam.push(paramType);
-        resultParam.push(param.name);
-
-
-        functionParams.push(resultParam.join(' '));
-
-        if (helperMap && input) {
-
-            helperMap.params.forEach(function (p) {
-                var pName = param.name + '_' + p;
-
-                kernelParams[kernelParams.length - 1].helpers.push({type: helperMap.type, name: pName});
-                functionParams.push(helperMap.type + ' ' + pName);
-            });
-        }
-
-        //console.log("Prepared kernel paramater:", kernelParams[kernelParams.length - 1]);
-
-    }
 
     function prepareOperatorData(list, idx, programData) {
         var doIterate, i;
@@ -170,6 +195,72 @@
         return data;
     }
 
+    function applyDefaultOperation(entry, programData, operatorData, program) {
+        if (program.operator.evaluate && program.operator.evaluate instanceof Array) {
+            assembleFunctionArgs(entry, programData, program);
+
+            if (program.kernelCode === null) {
+                prepareWebCLKernel(programData, program);
+                program.mainProgram = createMainWebCLProgram(program);
+            }
+
+            program.mainProgram();
+        }
+    }
+
+    function assembleFunctionArgs(entry, programData, program) {
+        var d, dataEntry, i;
+        var kernelFunctionParams = program.kernelFunctionParams;
+        var outputs = program.operator.outputs;
+
+        kernelFunctionParams.length = 0;
+
+        for (i = 0; i < outputs.length; ++i) {
+            d = outputs[i];
+            dataEntry = programData.outputs[entry.getOutputIndex(i)].dataEntry;
+
+            prepareKernelParameter(d, !!(d.source), program, kernelFunctionParams, dataEntry, i);
+        }
+
+        addInputToArgs(entry, programData, program, kernelFunctionParams);
+    }
+
+    function addInputToArgs(entry, programData, program, kernelFunctionParams) {
+        var mapEntry, dataEntry, i;
+        var mapping = entry.operator.mapping;
+
+        for (i = 0; i < mapping.length; ++i) {
+            mapEntry = mapping[i];
+            dataEntry = programData.getDataEntry(entry.getDirectInputIndex(i));
+
+            prepareKernelParameter(mapEntry, !!(mapEntry.source), program, kernelFunctionParams, dataEntry, i);
+        }
+    }
+
+    function prepareKernelParameter(param, input, program, functionParams, arg, i) {
+        var kernelParams;
+        var entryVal = arg ? arg.getValue() : null;
+
+        if (input) {
+            kernelParams = program.kernelParamMap.inputs;
+        } else {
+            kernelParams = program.kernelParamMap.outputs;
+        }
+
+        if (kernelParams[i]) {
+            kernelParams[i].updateValue(entryVal);
+            return;
+        }
+
+        kernelParams[i] = new KernelParam(program.cl, param.name, param.type, null, entryVal, input);
+
+        functionParams.push(kernelParams[i].clFunctionParam);
+
+        kernelParams[i].helpers.forEach(function (p) {
+            functionParams.push(p.clFunctionParam);
+        });
+    }
+
 
     /** KERNEL CODE PREPARATION **/
 
@@ -183,21 +274,15 @@
             return false;
         }
 
-        //console.log(kernelName, inputKernel);
-
         kernelCode = program.kernelCode = prepareKernelCode(kernelName, inputKernel, program);
 
         try {
             kernelManager.register(kernelName, kernelCode);
         } catch (e) {
-            console.log(e.name, e.message);
             return false;
         }
 
         program.kernelProgram = kernelManager.getKernel(program.kernelName);
-
-        //console.log(program.operator.outputs);
-        //console.log(program.operator.params);
 
         return true;
     }
@@ -223,13 +308,10 @@
         result += inputKernel.join('\n');
         result += '\n}';
 
-        //console.log(result);
-
         return result;
     }
 
     function createKernelHeader(kernelName, program) {
-        //console.log("Creating kernel header...");
         var functionHeader = [];
 
         functionHeader.push("__kernel void");
@@ -270,26 +352,14 @@
 
     /** MAIN PROGRAM INITIALISATION **/
 
-
     function createMainWebCLProgram(program) {
         var cl = program.cl;
-
         var kernelManager = cl.kernelManager;
         var cmdQueue = cl.cmdQueue;
-
-        //console.log("KernelFunction params", program.kernelFunctionParams);
-        //console.log("KernelParamMap", program.kernelParamMap);
-
         var memObjects = {inputs: [], outputs: []};
-
-        var preparedArgs = prepareKernelArguments(program.kernelParamMap, cl, memObjects);
-
-
+        var assembledArgs = assembleKernelArguments(program.kernelParamMap,memObjects);
         var WSSizes = computeWorkGroupSize(program.kernelParamMap.inputs[0]);
-
         var kernel = program.kernelProgram;
-
-        //console.log("WS Sizes:", WSSizes);
 
         return function () {
             var i, len, memObj, args;
@@ -300,7 +370,7 @@
                 return false;
             }
 
-            args = preparedArgs.map(function (a) {
+            args = assembledArgs.map(function (a) {
                 return a.arg;
             });
             kernelManager.setArgs.apply(null, [kernel].concat(args));
@@ -310,7 +380,7 @@
                 len = inputMemObjs.length;
                 for (i = 0; i < len; i++) {
                     memObj = inputMemObjs[i];
-                    cmdQueue.enqueueWriteBuffer(memObj.arg, false, 0, memObj.arg.getInfo(WebCL.MEM_SIZE), memObj.val.data, []);
+                    cmdQueue.enqueueWriteBuffer(memObj.arg, false, 0, memObj.arg.getInfo(WebCL.MEM_SIZE), memObj.val, []);
                 }
 
                 // Execute (enqueue) kernel
@@ -320,14 +390,12 @@
                 len = outputMemObjs.length;
                 for (i = 0; i < len; i++) {
                     memObj = outputMemObjs[i];
-                    cmdQueue.enqueueReadBuffer(memObj.arg, false, 0, memObj.arg.getInfo(WebCL.MEM_SIZE), memObj.val.data, []);
+                    cmdQueue.enqueueReadBuffer(memObj.arg, false, 0, memObj.arg.getInfo(WebCL.MEM_SIZE), memObj.val, []);
                 }
 
                 cmdQueue.finish(); //Finish all the operations
 
             } catch (e) {
-                console.log(e.name, e.message);
-
                 return false;
             }
 
@@ -335,123 +403,45 @@
         };
     }
 
-    function prepareCLMemObject(param, cl, kernelArgs, memObjects) {
-        var memObject, memObjectSize;
-        var memObjectMode = param.input ? 'r' : 'w';
-
-        var clAPI = cl.API;
-        var clCtx = cl.ctx;
-
-        var paramType = param.type;
-        var byteSize = parseInt(paramType.substring(paramType.length - 2, paramType.length - 1), 10);
-        var entryVal = param.val;//param.dataEntry ? param.dataEntry.getValue() : null;
-
-        if (paramType === "uchar4*") { // Texture is a special case
-            //console.log("Creating uint4* buffer");
-            memObjectSize = entryVal.width * entryVal.height * 4;
-            memObject = clAPI.createBuffer(memObjectSize, memObjectMode, clCtx);
-
-            param.arg = memObject;
-            //param.val = entryVal;
-
-            kernelArgs.push(param);
-
-            if (param.helpers.length > 0) {
-                param.helpers.forEach(function (p) {
-                    //console.log(p);
-                    if (p.name.indexOf("width") !== -1) {
-                        p.val = entryVal.width;
-                        initialiseCLType(p, kernelArgs);
-                    } else if (p.name.indexOf("height") !== -1) {
-                        p.val = entryVal.height;
-                        initialiseCLType(p, kernelArgs);
-                    }
-                });
-            }
-        } else {
-            //console.log("Creating", paramType, "buffer");
-            memObjectSize = entryVal.length * byteSize;
-            memObject = clAPI.createBuffer(memObjectSize, memObjectMode, clCtx);
-
-            param.arg = memObject;
-            //param.val = entryVal;
-
-            kernelArgs.push(param);
-
-            if (param.helpers.length > 0) {
-                param.helpers.forEach(function (p) {
-                    //console.log(p);
-                    if (p.name.indexOf("length") !== -1) {
-                        p.val = entryVal.length;
-                        initialiseCLType(p, kernelArgs);
-                    }
-                });
-            }
-        }
-
-        // Storing pointer to param with the accompanying memObject
-        memObjects.push(param);
-    }
-
-    function initialiseCLType(param, kernelArgs) {
-        var paramType = param.type;
-        var entryVal = param.val;//param.dataEntry ? param.dataEntry.getValue() : null || param.val;
-
-        if (paramType === 'uint') {
-            if (!(entryVal instanceof Uint32Array)) {
-                entryVal = new Uint32Array([entryVal]);
-            }
-        } else if (paramType === 'int') {
-            //console.log("dataEntry", param.dataEntry);
-            if (!(entryVal instanceof Int32Array)) {
-                entryVal = new Int32Array([entryVal]);
-            }
-        }
-        param.arg = entryVal;
-
+    function mapKernelArgument(param, kernelArgs, memObjects) {
         kernelArgs.push(param);
-    }
 
-    function initialiseCLArgument(param, cl, kernelArgs, memObjects) {
-        if (param.type.match(/\d\*$/)) {
-            prepareCLMemObject(param, cl, kernelArgs, memObjects);
-        } else {
-            initialiseCLType(param, kernelArgs);
+        if (param.hasMemObject) {
+            memObjects.push(param);
+            param.helpers.forEach(function (p) {
+                kernelArgs.push(p);
+            });
         }
-
     }
 
-    function prepareKernelArguments(paramMap, cl, memObjects) {
+
+    function assembleKernelArguments(paramMap, memObjects) {
         var outputs = paramMap.outputs;
         var inputs = paramMap.inputs;
         var kernelArgs = [];
 
-        //console.log("Preparing arguments for kernel program...");
-
         outputs.forEach(function (p) {
-            initialiseCLArgument(p, cl, kernelArgs, memObjects.outputs);
+            mapKernelArgument(p, kernelArgs, memObjects.outputs);
         });
 
         inputs.forEach(function (p) {
-            initialiseCLArgument(p, cl, kernelArgs, memObjects.inputs);
+            mapKernelArgument(p, kernelArgs, memObjects.inputs);
         });
-
-        //console.log("Prepared arguments:", kernelArgs);
 
         return kernelArgs;
     }
 
     function computeWorkGroupSize(targetInput) {
         var localWS, globalWS;
-        var inputVal = targetInput.val;
+        var entryVal = targetInput.entryValue;
 
-        if (targetInput.type === "uchar4*") {
+        if (targetInput.xflowType === Xflow.DATA_TYPE.TEXTURE) {
             localWS = [16, 4];
-            globalWS = [Math.ceil(inputVal.width / localWS[0]) * localWS[0],
-                Math.ceil(inputVal.height / localWS[1]) * localWS[1]];
+            globalWS = [Math.ceil(entryVal.width / localWS[0]) * localWS[0],
+                Math.ceil(entryVal.height / localWS[1]) * localWS[1]];
         } else {
             localWS = [16];
-            globalWS = [Math.ceil(inputVal.length / localWS[0]) * localWS[0]];
+            globalWS = [Math.ceil(entryVal.length / localWS[0]) * localWS[0]];
         }
 
         return [localWS, globalWS];

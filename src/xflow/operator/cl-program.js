@@ -1,8 +1,15 @@
 (function () {
     "use strict";
 
+    /**
+     * CLProgram implements automatic Xflow input/output adaptive WebCL kernel and application code generation.
+     *
+     * @param operatorList
+     * @constructor
+     */
+
     Xflow.CLProgram = function (operatorList) {
-        this.cl = operatorList.graph.cl;
+        this.cl = operatorList.graph.cl; // CL wrapper
 
         if (!this.cl) {
             return;
@@ -12,20 +19,37 @@
         this.entry = operatorList.entries[0];
         this.operator = this.entry.operator;
 
-        this.kernelParamMap = {inputs: [], outputs: []};
-        this.kernelFunctionParams = [];
-        this.kernelCode = null;
-        this.kernelProgram = null;
-        this.mainProgram = null;
+        this.kernelParamMap = {inputs: [], outputs: []}; // Stores initialised KernelParam objects
+        this.kernelFunctionParams = []; // Stores generated function parameters for kernel function header.
+        this.kernelCode = null; // Generated kernel code
+        this.kernelProgram = null; // Compiled kernel program
+        this.mainProgram = null; // Main WebCL application code
 
 
     };
 
+    /**
+     * Map of helper kernel parameters required for certain input data types.
+     *
+     * @type Object
+     */
     var helperParamMap = {
         'texture': {type: "uint", params: ["width", "height"]},
         'buffer': {type: "uint", params: ["length"]}
     };
 
+    /**
+     * Utility prototype object for mapping Xflow inputs to kernel parameters and for generating kernel code.
+     *
+     * @param {Object} cl
+     * @param {String} name
+     * @param {Xflow.DATA_TYPE} xflowType
+     * @param {String} clType
+     * @param entryValue
+     * @param {Boolean} isInput
+     * @name KernelParam
+     * @constructor KernelParam
+     */
 
     function KernelParam(cl, name, xflowType, clType, entryValue, isInput) {
         this.cl = cl;
@@ -40,7 +64,7 @@
         this.xflowType = xflowType;
         this.helperMap = null;
         this.helpers = [];
-        this.entryValue = entryValue || null;
+        this.entryValue = entryValue || null;
         this.val = null;
 
         this.prepareParam();
@@ -51,6 +75,11 @@
     }
 
     KernelParam.prototype = {
+        /**
+         * Prepares the kernel parameter data.
+         * Maps the input xflow data type to webcl data type and creates a kernel function header parameter with proper
+         * declarations.
+         */
         prepareParam: function () {
             var helperMap;
             var xflowDataTypes = Xflow.DATA_TYPE;
@@ -103,6 +132,11 @@
             this.clFunctionParam = kernelFuncParam.join(' ');
         },
 
+        /**
+         * Initialises helper parameters for an input parameter if needed.
+         *
+         */
+
         initHelperParams: function () {
             var helperVal;
             var self = this;
@@ -122,6 +156,12 @@
                 });
             }
         },
+
+        /**
+         * Initialises kernel argument that will be passed directly into the compiled kernel.
+         * Creates a WebCL memory object if needed (e.g. for texture).
+         */
+
         initKernelArg: function () {
             if (this.needsMemObject) {
                 this.allocateMemObject();
@@ -170,6 +210,12 @@
     };
 
 
+    /**
+     * Runs CLProgram. WebCL related code initialised in the first run.
+     *
+     * @param programData
+     */
+
     Xflow.CLProgram.prototype.run = function (programData) {
         var operatorData = prepareOperatorData(this.list, 0, programData);
 
@@ -208,6 +254,15 @@
         }
     }
 
+    /**
+     * Maps Xflow inputs and outputs into WebCL kernel inputs and outputs.
+     *
+     * @function assembleFunctionArgs
+     * @param entry
+     * @param programData
+     * @param program
+     */
+
     function assembleFunctionArgs(entry, programData, program) {
         var d, dataEntry, i;
         var kernelFunctionParams = program.kernelFunctionParams;
@@ -225,6 +280,7 @@
         addInputToArgs(entry, programData, program, kernelFunctionParams);
     }
 
+
     function addInputToArgs(entry, programData, program, kernelFunctionParams) {
         var mapEntry, dataEntry, i;
         var mapping = entry.operator.mapping;
@@ -236,6 +292,19 @@
             prepareKernelParameter(mapEntry, !!(mapEntry.source), program, kernelFunctionParams, dataEntry, i);
         }
     }
+
+    /**
+     * Creates a new KernelParam utility object or updates the existing object if input value has been changed.
+     * Additionally, this is used for generating the WebCL kernel function header.
+     *
+     * @function prepareKernelParameter
+     * @param param
+     * @param input
+     * @param program
+     * @param functionParams
+     * @param arg
+     * @param i
+     */
 
     function prepareKernelParameter(param, input, program, functionParams, arg, i) {
         var kernelParams;
@@ -254,6 +323,8 @@
 
         kernelParams[i] = new KernelParam(program.cl, param.name, param.type, null, entryVal, input);
 
+        // Pushing generated kernel function params into array.
+        // This array is later used in generating the WebCL kernel function header.
         functionParams.push(kernelParams[i].clFunctionParam);
 
         kernelParams[i].helpers.forEach(function (p) {
@@ -263,6 +334,16 @@
 
 
     /** KERNEL CODE PREPARATION **/
+
+
+    /**
+     * Compiles and registers the prepared WebCL kernel code.
+     *
+     * @function prepareWebCLKernel
+     * @param programData
+     * @param program
+     * @returns {boolean}
+     */
 
     function prepareWebCLKernel(programData, program) {
         var kernelCode;
@@ -286,6 +367,17 @@
 
         return true;
     }
+
+    /**
+     *
+     * Generates kernel function header and helper kernel code and combines it with user's input kernel code.
+     *
+     * @function prepareKernelCode
+     * @param {String} kernelName
+     * @param {Array} inputKernel
+     * @param program
+     * @returns {String}
+     */
 
     function prepareKernelCode(kernelName, inputKernel, program) {
         var result, innerKernelCode;
@@ -311,6 +403,15 @@
         return result;
     }
 
+    /**
+     * Generates a kernel function header from assembled kernel parameters.
+     *
+     * @function createKernelHeader
+     * @param kernelName
+     * @param program
+     * @returns {string}
+     */
+
     function createKernelHeader(kernelName, program) {
         var functionHeader = [];
 
@@ -321,6 +422,14 @@
 
         return functionHeader.join(' ');
     }
+
+    /**
+     * Generates helper kernel code.
+     *
+     * @function createInnerKernelCode
+     * @param program
+     * @returns {string}
+     */
 
     function createInnerKernelCode(program) {
         var codeLines = [];
@@ -350,14 +459,22 @@
     }
 
 
-    /** MAIN PROGRAM INITIALISATION **/
+    /** MAIN WEBCL PROGRAM INITIALISATION **/
+
+    /**
+     * Initialises the main WebCL application code that executes the WebCL kernel
+     *
+     * @function createMainWebCLProgram
+     * @param program
+     * @returns {Function}
+     */
 
     function createMainWebCLProgram(program) {
         var cl = program.cl;
         var kernelManager = cl.kernelManager;
         var cmdQueue = cl.cmdQueue;
         var memObjects = {inputs: [], outputs: []};
-        var assembledArgs = assembleKernelArguments(program.kernelParamMap,memObjects);
+        var assembledArgs = assembleKernelArguments(program.kernelParamMap, memObjects);
         var WSSizes = computeWorkGroupSize(program.kernelParamMap.inputs[0]);
         var kernel = program.kernelProgram;
 
@@ -403,17 +520,16 @@
         };
     }
 
-    function mapKernelArgument(param, kernelArgs, memObjects) {
-        kernelArgs.push(param);
 
-        if (param.hasMemObject) {
-            memObjects.push(param);
-            param.helpers.forEach(function (p) {
-                kernelArgs.push(p);
-            });
-        }
-    }
-
+    /**
+     * Arranges initialised kernel arguments into helper arrays so they are more easily available in
+     * the main WebCL application.
+     *
+     * @function assembleKernelArguments
+     * @param paramMap
+     * @param memObjects
+     * @returns {Array}
+     */
 
     function assembleKernelArguments(paramMap, memObjects) {
         var outputs = paramMap.outputs;
@@ -430,6 +546,25 @@
 
         return kernelArgs;
     }
+
+    function mapKernelArgument(param, kernelArgs, memObjects) {
+        kernelArgs.push(param);
+
+        if (param.hasMemObject) {
+            memObjects.push(param);
+            param.helpers.forEach(function (p) {
+                kernelArgs.push(p);
+            });
+        }
+    }
+
+    /**
+     * Computes a proper WebCL kernel workgroup size for target input buffer
+     *
+     * @function computeWorkGroupSize
+     * @param targetInput
+     * @returns {Array}
+     */
 
     function computeWorkGroupSize(targetInput) {
         var localWS, globalWS;

@@ -73,7 +73,11 @@ function initWebCLPlatform(graph) {
             return false;
         }
 
-        // TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available
+        /**
+         *  TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available and
+         *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
+         *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
+         */
         graph.cl = {
             API: webcl,
             kernelManager: new webcl.KernelManager(clCtx, clDevices),

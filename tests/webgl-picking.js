@@ -101,9 +101,9 @@ test("Position picking test", 4, function() {
     var target = this.doc.getElementById("pickingMesh1");
 
     target.addEventListener("click", function(evt) {
-    	start();
-    	ok(evt.position);
-    	QUnit.closeVector(evt.position, new XML3DVec3(-2.503,2.01,-10), EPSILON, "Picked position is correct");
+        start();
+        ok(evt.position);
+        QUnit.closeVector(evt.position, new XML3DVec3(-2.503,2.01,-10), EPSILON, "Picked position is correct");
     }, false);
 
     h.getPickObjectByPoint(89,51);
@@ -168,4 +168,91 @@ test("Touch", function() {
 
 
 });
+
+test("Simple picking with getElementByRay", 5, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
+    var target = this.doc.getElementById("pickingMesh8");
+    var target2 = this.doc.getElementById("pickingMesh9");
+
+    var ray = new XML3DRay();
+    ray.origin.set(new XML3DVec3(10, -0.1, -10));
+    ray.direction.set(new XML3DVec3(-1, 0, 0));
+
+    var obj = xml3dElement.getElementByRay(ray);
+    equal(obj, target, "Ray orthogonal to camera returned the first intersected mesh");
+
+    ray.direction.set(new XML3DVec3(1, 0, 0));
+    obj = xml3dElement.getElementByRay(ray);
+    equal(obj, null, "The same ray with inverted direction returned null");
+
+    ray.origin.set(new XML3DVec3(-10, -0.1, -10));
+    obj = xml3dElement.getElementByRay(ray);
+    equal(obj, target2, "The inverted ray shot from the other side returns the right mesh");
+});
+
+test("Position and normal with getElementByRay", 6, function() {
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
+
+    var ray = new XML3DRay();
+    ray.origin.set(new XML3DVec3(-10, 0, -10));
+    ray.direction.set(new XML3DVec3(1, 0, 0));
+
+    var foundNormal = new XML3DVec3();
+    var foundPosition = new XML3DVec3();
+
+    var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
+    QUnit.closeVector(foundPosition, new XML3DVec3(-1,0.02,-9.98), EPSILON, "Found correct position");
+    QUnit.closeVector(foundNormal, new XML3DVec3(1, 0, 0), EPSILON, "Found correct normal");
+
+    ray.origin.set(new XML3DVec3(10, 0, -10));
+    obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
+    ok(isNaN(foundPosition.x) && isNaN(foundPosition.y) && isNaN(foundPosition.z), "Position returns NaN for no hit object");
+    ok(isNaN(foundNormal.x) && isNaN(foundNormal.y) && isNaN(foundNormal.z), "Normal returns NaN for no hit object");
+});
+
+test("Overlapping objects with getElementByRay", 6, function() {
+	var xml3dElement = this.doc.getElementById("xml3DElem");
+	var h = getHandler(xml3dElement);
+	var target = this.doc.getElementById("pickingMesh11");
+	var target2 = this.doc.getElementById("pickingMesh10");
+
+	var ray = new XML3DRay();
+	ray.origin.set(new XML3DVec3(-5, 0, 100));
+	ray.direction.set(new XML3DVec3(0, 0, -1));
+
+	var foundNormal = new XML3DVec3();
+	var foundPosition = new XML3DVec3();
+
+	var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
+	equal(obj, target, "Returned the correct object");
+	QUnit.closeVector(foundPosition, new XML3DVec3(-4.77, 0.23, -10), EPSILON, "Found correct position");
+	QUnit.closeVector(foundNormal, new XML3DVec3(0, 0, 1), EPSILON, "Found correct normal");
+
+	ray.origin.set(new XML3DVec3(-4, 0, 100));
+	obj = xml3dElement.getElementByRay(ray);
+	equal(obj, target2, "Returned the square donut object");
+});
+
+test("Ray parallel to an object", 4, function() {
+	var xml3dElement = this.doc.getElementById("xml3DElem");
+	var h = getHandler(xml3dElement);
+	var target = this.doc.getElementById("pickingMesh2");
+
+	var ray = new XML3DRay();
+	ray.origin.set(new XML3DVec3(0, 0, -9));
+	ray.direction.set(new XML3DVec3(0, 1, -0.5));
+
+	var obj = xml3dElement.getElementByRay(ray);
+	equal(obj, target, "Slightly downward angle returns the plane");
+
+	ray.origin.set(new XML3DVec3(0, 0, -10));
+	ray.direction.set(new XML3DVec3(0, 1, 0));
+
+	obj = xml3dElement.getElementByRay(ray);
+	equal(obj, null, "Ray parallel to plane returns null");
+
+});
+
 

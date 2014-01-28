@@ -360,7 +360,19 @@
                 XML3D.debug.logError("Mesh Error: " + e.message, this.node);
             }
             webgl.SystemNotifier.setNode(null);
-        }
+        },
+
+        findRayIntersections: (function() {
+            var bbox = XML3D.math.bbox.create();
+            var opt = {dist:0};
+
+            return function(ray, intersections) {
+                this.getWorldSpaceBoundingBox(bbox);
+                if (XML3D.math.bbox.intersects(bbox, ray, opt)) {
+                   intersections.push(this);
+                }
+            }
+        })()
 
     });
 

@@ -99,6 +99,11 @@
         remove: function() {
             this.parent.removeChild(this);
             this.scene.freePageEntry({ page: this.page, offset: this.offset, size: this.entrySize });
+        },
+
+        findRayIntersections: function(ray, closestIntersection) {
+            //This function is overridden by groups and drawables
+            return;
         }
 
     });

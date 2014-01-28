@@ -170,6 +170,47 @@
         return Math.max(x, Math.max(y, z));
     };
 
+    /**
+     * Tests a given ray against a given bounding box and returns true if the ray intersects it, false otherwise.
+     * @param bb The axis aligned bounding box to test against
+     * @param xml3dRay The ray to test for intersection with
+     * @param opt {object} If opt.dist is provided the function will fill it with the distance from the ray origin to
+     *                     the hit point on the bounding box, or MAX_VALUE if the ray does not intersect.
+     * @returns {boolean}
+     */
+    bbox.intersects = function(bb, xml3dRay, opt) {
+        var inverseDirX = 1 / xml3dRay._direction.x;
+        var inverseDirY = 1 / xml3dRay._direction.y;
+        var inverseDirZ = 1 / xml3dRay._direction.z;
+
+        var t1 = (bb[0] - xml3dRay._origin.x) * inverseDirX;
+        var t2 = (bb[3] - xml3dRay._origin.x) * inverseDirX;
+        var t3 = (bb[1] - xml3dRay._origin.y) * inverseDirY;
+        var t4 = (bb[4] - xml3dRay._origin.y) * inverseDirY;
+        var t5 = (bb[2] - xml3dRay._origin.z) * inverseDirZ;
+        var t6 = (bb[5] - xml3dRay._origin.z) * inverseDirZ;
+
+        var tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
+        var tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
+
+        if (opt === undefined || opt.dist === undefined) {
+            return tmax > 0 && tmin <= tmax;
+        }
+
+        if (tmax < 0) {
+            opt.dist = Number.MAX_VALUE;
+            return false;
+        }
+
+        if (tmin > tmax) {
+            opt.dist = Number.MAX_VALUE;
+            return false;
+        }
+
+        opt.dist = tmin;
+        return true;
+    };
+
     bbox.asXML3DBox = function (bb) {
         var result = new window.XML3DBox();
         result.min._data[0] = bb[0];

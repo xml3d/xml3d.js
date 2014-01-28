@@ -70,8 +70,7 @@
          */
         createRenderObject: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderObject.ENTRY_SIZE);
-            var renderObject = new webgl.RenderObject(this, pageEntry, opt);
-            return renderObject;
+            return new webgl.RenderObject(this, pageEntry, opt);
         },
 
         createRenderGroup: function (opt) {
@@ -86,8 +85,7 @@
 
         createRenderLight: function (opt) {
             var pageEntry = this.getPageEntry(webgl.RenderLight.ENTRY_SIZE);
-            var renderLight = new webgl.RenderLight(this, pageEntry, opt);
-            return renderLight;
+            return new webgl.RenderLight(this, pageEntry, opt);
         },
         createShaderInfo: function (opt) {
             return new webgl.ShaderInfo(this, opt);
@@ -124,6 +122,17 @@
         },
         traverse: function(callback) {
             this.rootNode.traverse(callback);
+        },
+
+        /**
+         * Returns all objects intersected by the given ray, based on their bounding boxes
+         * @param ray
+         * @returns {Array} An array of RenderObjects that were hit by this ray
+         */
+        findRayIntersections: function(ray) {
+            var intersections = [];
+            this.rootNode.findRayIntersections(ray, intersections);
+            return intersections;
         }
     });
 

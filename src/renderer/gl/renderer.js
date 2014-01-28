@@ -43,6 +43,9 @@
         this.needsPickingDraw = true;
         this.context.requestRedraw = this.requestRedraw.bind(this);
 
+        //Currently used as a helper to calculate view and projection matrices for ray casting, since the scene
+        //must be rendered from the point of view of the ray
+        this.rayCamera = this.scene.createRenderView();
 
         this.initGL();
         this.changeListener = new XML3D.webgl.DataChangeListener(this);
@@ -118,6 +121,66 @@
             return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
         },
 
+        getRenderObjectByRay: function(xml3dRay, viewMat, projMat) {
+            var intersectedObjects = this.scene.findRayIntersections(xml3dRay);
+            this.pickObjectPass.renderObjects(intersectedObjects, viewMat, projMat);
+            //Target the middle of the buffer
+            var x = Math.floor(this.pickObjectPass.target.getWidth() / 2 / this.pickObjectPass.target.getScale());
+            var y = Math.floor(this.pickObjectPass.target.getHeight() / 2 / this.pickObjectPass.target.getScale());
+            return this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, intersectedObjects);
+
+        },
+
+        getWorldSpaceNormalByRay: function (ray, intersectedObject, viewMat, projMat) {
+            if (!intersectedObject)
+                return null;
+            this.pickNormalPass.renderObject(intersectedObject, viewMat, projMat);
+            var x = Math.floor(this.pickNormalPass.target.getWidth() / 2 / this.pickNormalPass.target.getScale());
+            var y = Math.floor(this.pickNormalPass.target.getHeight() / 2 / this.pickNormalPass.target.getScale());
+            return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
+
+        },
+        getWorldSpacePositionByRay: function (ray, intersectedObject, viewMat, projMat) {
+            if (!intersectedObject)
+                return null;
+            this.pickPositionPass.renderObject(intersectedObject, viewMat, projMat);
+            var x = Math.floor(this.pickPositionPass.target.getWidth() / 2 / this.pickPositionPass.target.getScale());
+            var y = Math.floor(this.pickPositionPass.target.getHeight() / 2 / this.pickPositionPass.target.getScale());
+            return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
+
+        },
+
+        calculateMatricesForRay: function(ray, viewMat, projMat) {
+            this.rayCamera.updatePosition(ray.origin._data);
+            this.rayCamera.updateOrientation( this.calculateOrientationForRayDirection(ray) );
+            this.rayCamera.getWorldToViewMatrix(viewMat);
+            var aspect = this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight();
+            this.rayCamera.getProjectionMatrix(projMat, aspect);
+        },
+
+        calculateOrientationForRayDirection: (function() {
+            var tmpX = XML3D.math.vec3.create();
+            var tmpY = XML3D.math.vec3.create();
+            var tmpZ = XML3D.math.vec3.create();
+            var up = XML3D.math.vec3.create();
+            var q = XML3D.math.quat.create();
+            var m = XML3D.math.mat4.create();
+
+            return function(ray) {
+                XML3D.math.vec3.set(up, 0, 1, 0);
+                XML3D.math.vec3.cross(tmpX, ray.direction._data, up);
+                if(!XML3D.math.vec3.length(tmpX)) {
+                    XML3D.math.vec3.set(tmpX, 1,0,0);
+                }
+                XML3D.math.vec3.cross(tmpY, tmpX, ray.direction._data);
+                XML3D.math.vec3.negate(tmpZ, ray.direction._data);
+
+                XML3D.math.quat.setFromBasis(tmpX, tmpY, tmpZ, q);
+                XML3D.math.mat4.fromRotationTranslation(m, q, [0, 0, 0]);
+                return m;
+            }
+        })(),
+
         needsRedraw: function () {
             return this.needsDraw;
         },
@@ -132,11 +195,12 @@
             y = webgl.canvasToGlY(this.canvas, y);
             if(this.needsPickingDraw) {
                 this.prepareRendering();
-                this.pickObjectPass.renderScene(this.scene);
+                this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight());
+                this.pickObjectPass.renderObjects(this.scene.ready);
                 this.needsPickingDraw = false;
                 XML3D.debug.logDebug("Rendered Picking Buffer");
             }
-            this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene);
+            this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene.ready);
             return this.pickedObject;
         },
         prepareRendering: function () {
@@ -145,7 +209,7 @@
         createPickingTarget: function () {
             var gl = this.context.gl;
 
-            var target = new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
+            return new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
                 width: this.width,
                 height: this.height,
                 colorFormat: gl.RGBA,
@@ -153,7 +217,6 @@
                 stencilFormat: null,
                 depthAsRenderbuffer: true
             });
-            return target;
         },
         /**
          * Uses gluUnProject() to transform the 2D screen point to a 3D ray.
@@ -212,7 +275,7 @@
             this.scene.clear();
         }
 
-    })
+    });
 
     webgl.GLRenderer = GLRenderer;
 

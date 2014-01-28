@@ -20,6 +20,8 @@
                <transform id="t7" translation="6 -4 -10"/>
                <transform id="t8" translation="0 0 -10" rotation="0 1 0 1.57"/>
                <transform id="t9" translation="-1 0 -10" rotation="0 1 0 1.57"/>
+               <transform id="t10" translation="-4.5 0 -9"/>
+               <transform id="t11" translation="0 0 -1"/>
 
                <shader id="shader_diffuse" script="urn:xml3d:shader:diffuse">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
@@ -85,6 +87,12 @@
                     1.0 0.5 0.25
                 </float3>
                </data>
+
+               <data id="square_donut" type="triangles">
+                   <int name="index">0 1 2 0 2 3 4 0 3 4 3 5 1 6 7 1 7 2 5 3 8 5 8 9 2 7 10 2 10 11 9 8 12 9 12 13 11 10 14 11 14 15 8 11 15 8 15 12</int>
+                   <float3 name="position">-0.333333 -1.000000 0.000000 0.333333 -1.000000 0.000000 0.333333 -0.333333 0.000000 -0.333333 -0.333333 0.000000 -1.000000 -1.000000 0.000000 -1.000000 -0.333333 0.000000 1.000000 -1.000000 0.000000 1.000000 -0.333333 0.000000 -0.333333 0.333333 0.000000 -1.000000 0.333333 0.000000 1.000000 0.333333 0.000000 0.333333 0.333333 0.000000 -0.333333 1.000000 0.000000 -1.000000 1.000000 0.000000 1.000000 1.000000 0.000000 0.333333 1.000000 0.000000</float3>
+                   <float3 name="normal">0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000</float3>
+               </data>
             </defs>
             <view/>
             <group onmouseover="console.log(evt.x, evt.y);" onmousemove="console.log(evt.x, evt.y);">
@@ -125,7 +133,12 @@
                <mesh id="pickingMesh9" src="#mySimpleMesh"/>
            </group>
 
-
+           <group shader="#shader_diffuse2" transform="#t10">
+               <mesh id="pickingMesh10" src="#square_donut"/>
+               <group shader="#shader_diffuse" transform="#t11">
+                   <mesh id="pickingMesh11" src="#mySimpleMesh"/>
+               </group>
+           </group>
 
          </xml3d>
   </body>

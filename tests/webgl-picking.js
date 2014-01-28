@@ -212,4 +212,47 @@ test("Position and normal with getElementByRay", 6, function() {
     ok(isNaN(foundNormal.x) && isNaN(foundNormal.y) && isNaN(foundNormal.z), "Normal returns NaN for no hit object");
 });
 
+test("Overlapping objects with getElementByRay", 6, function() {
+	var xml3dElement = this.doc.getElementById("xml3DElem");
+	var h = getHandler(xml3dElement);
+	var target = this.doc.getElementById("pickingMesh11");
+	var target2 = this.doc.getElementById("pickingMesh10");
+
+	var ray = new XML3DRay();
+	ray.origin.set(new XML3DVec3(-5, 0, 100));
+	ray.direction.set(new XML3DVec3(0, 0, -1));
+
+	var foundNormal = new XML3DVec3();
+	var foundPosition = new XML3DVec3();
+
+	var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
+	equal(obj, target, "Returned the correct object");
+	QUnit.closeVector(foundPosition, new XML3DVec3(-4.77, 0.23, -10), EPSILON, "Found correct position");
+	QUnit.closeVector(foundNormal, new XML3DVec3(0, 0, 1), EPSILON, "Found correct normal");
+
+	ray.origin.set(new XML3DVec3(-4, 0, 100));
+	obj = xml3dElement.getElementByRay(ray);
+	equal(obj, target2, "Returned the square donut object");
+});
+
+test("Ray parallel to an object", 4, function() {
+	var xml3dElement = this.doc.getElementById("xml3DElem");
+	var h = getHandler(xml3dElement);
+	var target = this.doc.getElementById("pickingMesh2");
+
+	var ray = new XML3DRay();
+	ray.origin.set(new XML3DVec3(0, 0, -9));
+	ray.direction.set(new XML3DVec3(0, 1, -0.5));
+
+	var obj = xml3dElement.getElementByRay(ray);
+	equal(obj, target, "Slightly downward angle returns the plane");
+
+	ray.origin.set(new XML3DVec3(0, 0, -10));
+	ray.direction.set(new XML3DVec3(0, 1, 0));
+
+	obj = xml3dElement.getElementByRay(ray);
+	equal(obj, null, "Ray parallel to plane returns null");
+
+});
+
 

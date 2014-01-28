@@ -25,7 +25,6 @@
         this.kernelProgram = null; // Compiled kernel program
         this.mainProgram = null; // Main WebCL application code
 
-
     };
 
     /**
@@ -41,7 +40,7 @@
     /**
      * Utility prototype object for mapping Xflow inputs to kernel parameters and for generating kernel code.
      *
-     * @param {Object} cl
+     * @param {Object} program
      * @param {String} name
      * @param {Xflow.DATA_TYPE} xflowType
      * @param {String} clType
@@ -51,13 +50,15 @@
      * @constructor KernelParam
      */
 
-    function KernelParam(cl, name, xflowType, clType, entryValue, isInput) {
-        this.cl = cl;
+    function KernelParam(program, name, xflowType, clType, entryValue, isInput) {
+        this.program = program;
+        this.cl = program.cl;
         this.name = name;
         this.type = clType || null;
         this.isInput = !!isInput;
         this.needsMemObject = false;
         this.hasMemObject = false;
+        this.byteSize = null;
         this.memObjectSize = null;
         this.arg = null;
         this.clFunctionParam = null;
@@ -152,7 +153,7 @@
                     } else if (p === "length") {
                         helperVal = self.entryValue.length;
                     }
-                    self.helpers.push(new KernelParam(self.cl, pName, null, helperMap.type, new Uint32Array([helperVal])));
+                    self.helpers.push(new KernelParam(self.program, pName, null, helperMap.type, new Uint32Array([helperVal])));
                 });
             }
         },
@@ -183,6 +184,8 @@
                 this.arg.release();
             }
 
+            this.byteSize = byteSize;
+
             if (this.xflowType === Xflow.DATA_TYPE.TEXTURE) { // Texture is a special case
                 memObjectSize = entryValue.width * entryValue.height * byteSize;
             } else {
@@ -203,8 +206,39 @@
             if (this.hasMemObject) {
                 this.val = entry.data;
                 this.entryValue = entry;
+                this.checkEntrySize();
             } else {
                 this.arg = this.entryValue = entry;
+            }
+        },
+        updateHelpers: function() {
+            var helpers = this.helpers;
+            var self = this;
+
+            helpers.forEach(function (p) {
+                var name = p.name;
+                    if (name.indexOf("width") !== -1) {
+                        p.updateValue(new Uint32Array([self.entryValue.width]));
+                    } else if (name.indexOf("height") !== -1) {
+                        p.updateValue(new Uint32Array([self.entryValue.height]));
+                    } else if (name.indexOf("length") !== -1) {
+                        p.updateValue(new Uint32Array([self.entryValue.length]));
+                    }
+                });
+        },
+        checkEntrySize: function() {
+            var newSize;
+            var entryVal = this.entryValue;
+
+            if(this.xflowType === Xflow.DATA_TYPE.TEXTURE) {
+                newSize = entryVal.width * entryVal.height * this.byteSize;
+            } else {
+                newSize = entryVal.length * this.byteSize;
+            }
+            if(this.memObjectSize !== newSize) {
+                this.allocateMemObject();
+                this.updateHelpers();
+                this.program.mainProgram = null; // Forcing CL application program update
             }
         }
     };
@@ -247,10 +281,13 @@
 
             if (program.kernelCode === null) {
                 prepareWebCLKernel(programData, program);
+            }
+            //console.time('CLProgram (' + program.operator.name + ')');
+            if(program.mainProgram === null) {
                 program.mainProgram = createMainWebCLProgram(program);
             }
-
             program.mainProgram();
+            //console.timeEnd('CLProgram (' + program.operator.name + ')');
         }
     }
 
@@ -321,7 +358,7 @@
             return;
         }
 
-        kernelParams[i] = new KernelParam(program.cl, param.name, param.type, null, entryVal, input);
+        kernelParams[i] = new KernelParam(program, param.name, param.type, null, entryVal, input);
 
         // Pushing generated kernel function params into array.
         // This array is later used in generating the WebCL kernel function header.
@@ -490,6 +527,7 @@
             args = assembledArgs.map(function (a) {
                 return a.arg;
             });
+
             kernelManager.setArgs.apply(null, [kernel].concat(args));
 
             try {

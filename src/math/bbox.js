@@ -194,7 +194,7 @@
         var tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
 
         if (opt === undefined || opt.dist === undefined) {
-            return tmax > 0 && tmin < tmax;
+            return tmax > 0 && tmin <= tmax;
         }
 
         if (tmax < 0) {

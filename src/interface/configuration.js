@@ -35,6 +35,16 @@ XML3D.WrapTypes["repeat"] = 1;
 XML3D.WrapTypes[1] = "repeat";
 XML3D.WrapTypes["border"] = 2;
 XML3D.WrapTypes[2] = "border";
+// PlatformTypes
+XML3D.PlatformTypes = {};
+XML3D.PlatformTypes["auto"] = 1;
+XML3D.PlatformTypes[1] = "auto";
+XML3D.PlatformTypes["js"] = 2;
+XML3D.PlatformTypes[2] = "js";
+XML3D.PlatformTypes["gl"] = 3;
+XML3D.PlatformTypes[3] = "gl";
+XML3D.PlatformTypes["cl"] = 4;
+XML3D.PlatformTypes[4] = "cl";
 // DataFieldType
 XML3D.DataFieldType = {};
 XML3D.DataFieldType["float "] = 0;
@@ -117,6 +127,7 @@ XML3D.classInfo['data'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     compute: {a: XML3D.StringAttributeHandler},
+    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     filter: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
@@ -128,11 +139,14 @@ XML3D.classInfo['data'] = {
     proto: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
-
+/**
+ * Properties and methods for <dataflow>
+ **/
 XML3D.classInfo['dataflow'] = {
     id: {a: XML3D.IDHandler},
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for data
+    // TODO: Handle style for dataflow
+    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     out: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
@@ -304,6 +318,7 @@ XML3D.classInfo['proto'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for proto
     compute: {a: XML3D.StringAttributeHandler},
+    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     filter: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},

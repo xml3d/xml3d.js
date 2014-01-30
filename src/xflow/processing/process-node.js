@@ -63,9 +63,10 @@ ProcessNode.prototype.updateState = function(){
 
 ProcessNode.prototype.process = function(){
     // TODO: Fix this with respect to states
-    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
+    var executer;
 
-        var executer = getOrCreateExecuter(this, Xflow.PLATFORM.JAVASCRIPT);
+    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
+        executer = getOrCreateExecuter(this, this.owner.platform);
         executer.run();
 
         this.status = Xflow.PROCESS_STATE.PROCESSED;
@@ -238,7 +239,7 @@ RequestNode.prototype.getResult = function(resultType){
 
     if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
         if(resultType == Xflow.RESULT_TYPE.COMPUTE){
-            var executer = getOrCreateExecuter(this, Xflow.PLATFORM.JAVASCRIPT);
+            var executer = getOrCreateExecuter(this, this.owner.platform);
             executer.run();
         }
         this.status = Xflow.PROCESS_STATE.PROCESSED;

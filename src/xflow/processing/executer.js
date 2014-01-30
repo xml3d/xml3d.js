@@ -11,7 +11,13 @@
         this.subNodes = [];
         this.unprocessedDataNames = [];
 
-        this.operatorList =  new Xflow.OperatorList(platform);
+        /**
+         *  TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available and
+         *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
+         *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
+         *  e.g. passing graph information here requires a long prototype chain
+         */
+        this.operatorList =  new Xflow.OperatorList(platform, ownerNode.owner.owner._graph);
         this.programData =  new Xflow.ProgramData();
 
         this.program = null;

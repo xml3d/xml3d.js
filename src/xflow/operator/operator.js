@@ -16,12 +16,14 @@ var operators = {};
      */
 
 Xflow.registerOperator = function(name, data){
-    var opCollection, platform = data['platform'];
+    var opCollection, platform;
 
     initOperator(data);
     if(!operators[name]) {
         operators[name] = {};
     }
+
+    platform = data['platform'];
 
     opCollection = operators[name];
 
@@ -91,6 +93,9 @@ function initOperator(operator){
         mapping.internalType = type;
         mapping.name = mapping.name || mapping.source;
     }
+
+    //Check/init platform
+    operator.platform = operator.platform || Xflow.PLATFORM.JAVASCRIPT;
 }
 
 })();

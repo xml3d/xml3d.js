@@ -23,6 +23,7 @@
         <file name="./operator/operator.js" />
         <file name="./operator/program.js" />
         <file name="./operator/vs-program.js" />
+        <file name="./operator/cl-program.js" />
 
         <file name="./operator/default/morph3.js" />
         <file name="./operator/default/sub3.js" />

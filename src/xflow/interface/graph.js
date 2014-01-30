@@ -5,6 +5,7 @@
  */
 
 
+
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.Graph
 //----------------------------------------------------------------------------------------------------------------------
@@ -15,12 +16,84 @@
  * @constructor
  */
 Xflow.Graph = function(){
+    this.initPlatform();
 };
+
 var Graph = Xflow.Graph;
 
+    /**
+     *
+     */
 
+Graph.prototype.initPlatform = function () {
+    this.platform = Xflow.PLATFORM.JAVASCRIPT; // Setting default platform for the graph
 
-/**
+    if(initWebCLPlatform(this)) {
+        this.platform = Xflow.PLATFORM.CL;
+    }
+
+};
+
+function initWebCLPlatform(graph) {
+    var clPlatforms, clDevices, clCtx, cmdQueue;
+    var webcl = XML3D.webcl;
+
+    if (webcl && webcl.isAvailable()) {
+
+        // Fetching WebCL device platforms
+        clPlatforms = webcl.getPlatforms();
+
+        if (!clPlatforms || typeof clPlatforms === 'array' && clPlatforms.length === 0) {
+            return false;
+        }
+
+        // Fetching WebCL devices
+        try {
+            // Trying initially to use GPU (for the best performance). Using CPU as a fallback.
+            clDevices = webcl.getDevicesByType("GPU") || webcl.getDevicesByType("CPU");
+        } catch (e) {
+            return false;
+        }
+
+        if (!clDevices) {
+            return false;
+        }
+
+        // Creating a new WebCL context
+        try {
+            clCtx = webcl.createContext({devices: clDevices});
+        } catch (e) {
+            return false;
+        }
+
+        // Creating a command queue for WebCL processing
+        try {
+            cmdQueue = webcl.createCommandQueue(clDevices[0], clCtx);
+        } catch (e) {
+            return false;
+        }
+
+        /**
+         *  TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available and
+         *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
+         *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
+         */
+        graph.cl = {
+            API: webcl,
+            kernelManager: new webcl.KernelManager(clCtx, clDevices),
+            platforms: clPlatforms,
+            devices: clDevices,
+            ctx: clCtx,
+            cmdQueue: cmdQueue
+        };
+
+        return true;
+    }
+
+    return false;
+}
+
+ /**
  * @return {Xflow.InputNode}
  */
 Graph.prototype.createInputNode = function(){

@@ -11,6 +11,7 @@
      */
     Xflow.ChannelNode = function(dataNode, substitution){
         this.owner = dataNode;
+        this.platform = Xflow.PLATFORM.JAVASCRIPT;
         this.substitution = substitution;
         this.loading = false;
         this.inputSlots = {};
@@ -29,7 +30,9 @@
 
 
     Xflow.ChannelNode.prototype.synchronize = function(){
+
         if(this.outOfSync){
+            updatePlatform(this);
             synchronizeChildren(this);
             updateInputChannels(this);
             updateComputedChannels(this);
@@ -138,6 +141,23 @@
     }
 
 
+    function updatePlatform(channelNode) {
+        var platform;
+        var owner = channelNode.owner;
+        var graph = owner._graph;
+
+        // Platforms other than JavaScript are available only for computing operators
+        if(!channelNode.owner._computeOperator) {
+            return;
+        }
+
+        //TODO: Add better platform selection logic: Apply forced platform attribute value from Xml3D Data/Dataflow adapter
+
+        platform = graph.platform;
+
+        channelNode.platform = platform;
+    }
+
 
     function synchronizeChildren(channelNode){
 
@@ -218,18 +238,28 @@
     }
 
     function updateOperator(channelNode){
+        var operatorName, operator;
         var owner = channelNode.owner;
+
         if(typeof owner._computeOperator == "string"){
-            var operatorName = owner._computeOperator, operator = null;
+            operatorName = owner._computeOperator;
+            operator = null;
+
+            // Getting a correct operator for the selected platform. If operator is not available, we'll try to get
+            // the default JavaScript platform operator
             if(operatorName){
-                operator = Xflow.getOperator(operatorName, Xflow.platform);
+                operator = Xflow.getOperator(operatorName, channelNode.platform) ||
+                    Xflow.getOperator(operatorName, Xflow.PLATFORM.JAVASCRIPT);
+
                 if(!operator){
                     Xflow.notifyError("Unknown operator: '" + operatorName+"'", channelNode.owner);
                 }
+
+                channelNode.platform = operator.platform;
             }
+
             channelNode.operator = operator;
-        }
-        else{
+        }else{
             channelNode.operator = owner._computeOperator;
         }
     }

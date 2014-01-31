@@ -297,6 +297,8 @@ Xflow.DataNode = function(graph, protoNode){
     this._paramNames = null;
     this._globalParamNames = null;
 
+    this._platform = null;
+
     this._listeners = [];
 
 };
@@ -551,6 +553,34 @@ DataNode.prototype.detachFromParents = function(){
         }
     }
     this._children = [];
+};
+
+    /**
+     * Sets platform of a DataNode. If _platform is defined, it will override the default platform setting of
+     * an Xflow graph.
+     *
+     * @param {String|Xflow.PLATFORM|null} platformSrc
+     */
+
+DataNode.prototype.setPlatform = function(platformSrc) {
+    if (typeof platformSrc === 'string') {
+        if (platformSrc === "cl") {
+            this._platform = Xflow.PLATFORM.CL;
+        }
+        else if (platformSrc === "gl") {
+            this._platform = Xflow.PLATFORM.GLSL;
+        }
+        else if (platformSrc === "js") {
+            this._platform = Xflow.PLATFORM.JAVASCRIPT;
+        }
+    } else if (!isNaN(parseFloat(platformSrc)) && isFinite(platformSrc)) {
+        this._platform = platformSrc;
+    } else {
+        this._platform = null;
+    }
+
+    this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    Xflow._callListedCallback();
 };
 
 /**

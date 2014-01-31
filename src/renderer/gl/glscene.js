@@ -3,7 +3,7 @@
 
     // All the shader flags
     var FLAGS = {
-        "shade.js.extractUniformExpressions" : {defaultValue: true, recompileOnChange: true },
+        "shade.js.extractUniformExpressions" : {defaultValue: false, recompileOnChange: true },
         "shade.js.transformSpaces" : {defaultValue: true, recompileOnChange: true }
     };
     for(var flag in FLAGS){

@@ -25,7 +25,7 @@
 
 
     function channelVsAttribute(vsConfig, inputName, spaceInfo){
-        if(!spaceInfo[inputName]){
+        if(!spaceInfo || !spaceInfo[inputName]){
             addDefaultChanneling(vsConfig, inputName);
             return;
         }

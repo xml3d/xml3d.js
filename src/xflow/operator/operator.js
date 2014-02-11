@@ -54,7 +54,7 @@ Xflow.initAnonymousOperator = function(data){
 }
 
 Xflow.getOperator = function(name, platform){
-    platform = platform || Xflow.PLATFORM.JAVASCRIPT;
+    platform = platform || Xflow.PLATFORM.JAVASCRIPT;
 
     if (name && !operators[name]) {
         return null;
@@ -95,7 +95,7 @@ function initOperator(operator){
     }
 
     //Check/init platform
-    operator.platform = operator.platform || Xflow.PLATFORM.JAVASCRIPT;
+    operator.platform = operator.platform || Xflow.PLATFORM.JAVASCRIPT;
 }
 
 })();

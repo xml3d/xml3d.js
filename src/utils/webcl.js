@@ -580,7 +580,7 @@
      */
 
     function createBuffer(size, type, clCtx) {
-        clCtx = clCtx || ctx;
+        clCtx = clCtx || ctx;
 
         if (!size) {
             XML3D.debug.logError("WebCL API: createBuffer(): Buffer size was not defined.");

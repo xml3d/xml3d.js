@@ -354,7 +354,7 @@
             webgl.SystemNotifier.setNode(this.node);
             this.setShader(this.parent.getShaderHandle());
             try{
-                this.drawable.update(this.scene);
+                this.drawable && this.drawable.update(this.scene);
             }
             catch(e){
                 XML3D.debug.logError("Mesh Error: " + e.message, this.node);

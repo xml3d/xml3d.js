@@ -455,6 +455,8 @@
             data.iterFlag[i] = doIterate;
         }
         data.iterateCount = list.getIterateCount(programData);
+        if(!data.customData)
+            data.customData = {};
         return data;
     }
 

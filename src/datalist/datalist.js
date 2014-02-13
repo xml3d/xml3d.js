@@ -86,7 +86,7 @@ XML3D.base.SubData = function(xflowNode){
     this.postAdd = [];
     this.shader = null;
     this.transform = null;
-    this.meshtype = null;
+    this.meshType = null;
     this.dataListParent = null;
 };
 

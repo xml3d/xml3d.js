@@ -9,9 +9,27 @@ XML3D.base.DataList = function(){
     this.children = [];
     this.dataListResult = null;
     this.listener = [];
+    this.loading = false;
 };
 
-XML3D.base.DataList.prototype.pushChild = function(index, child){
+XML3D.base.DataList.prototype.setLoading = function(loading){
+    if(loading != this.loading){
+        this.loading = loading;
+        invalidateDataList(this);
+    }
+}
+
+XML3D.base.DataList.prototype.isSubtreeLoading = function(){
+    if(this.srcDataList && this.srcDataList.isSubtreeLoading())
+        return true;
+    var i = this.children.length;
+    while(i--){
+        if(this.children[i].loading) return true;
+    }
+    return false;
+}
+
+XML3D.base.DataList.prototype.appendChild = function(index, child){
     this.children.push(child);
     child.dataListParent = this;
     invalidateDataList(this);
@@ -47,14 +65,12 @@ XML3D.base.DataList.prototype.onDataListChange = function(){
     invalidateDataList(this);
 }
 
-
-XML3D.base.DataList.prototype.getDataListTable = function(){
+XML3D.base.DataList.prototype.getResult = function(){
     if(!this.dataListResult)
         this.dataListResult = new XML3D.base.DataListResult(this);
 
     return this.dataListResult;
 }
-
 
 function invalidateDataList(dataList){
     if(dataList.dataListResult){
@@ -65,38 +81,38 @@ function invalidateDataList(dataList){
     }
 }
 
-function createDataListResult(dataList){
-    if(dataList.children.length == 0 && dataList.srcDataList){
-        dataList.dataListResult = dataList.srcDa
-    }
-}
-
 //----------------------------------------------------------------------------------------------------------------------
 // XML3D.base.SubData
 //----------------------------------------------------------------------------------------------------------------------
 
-
-
 XML3D.base.SubData = function(xflowNode){
     this.xflowNode = xflowNode;
     this.name = null;
-    this.postProto = null;
+    this.postDataflow = null;
     this.postCompute = null;
     this.postFilter = null;
-    this.postAdd = [];
+    this.includes = [];
     this.shader = null;
     this.transform = null;
     this.meshType = null;
     this.dataListParent = null;
+    this.loading = false;
 };
+
+XML3D.base.SubData.prototype.setLoading = function(loading){
+    if(loading != this.loading){
+        this.loading = loading;
+        invalidateParent(this);
+    }
+}
 
 XML3D.base.SubData.prototype.setName = function(name){
     this.name = name;
     invalidateParent(this);
 }
 
-XML3D.base.SubData.prototype.setPostProto = function(postProto){
-    this.postProto = postProto;
+XML3D.base.SubData.prototype.setPostDataflow = function(postDataflow){
+    this.postDataflow = postDataflow;
     invalidateParent(this);
 }
 
@@ -110,8 +126,8 @@ XML3D.base.SubData.prototype.setPostFilter = function(postFilter){
     invalidateParent(this);
 }
 
-XML3D.base.SubData.prototype.setPostAdd = function(postAdd){
-    this.postAdd = postAdd;
+XML3D.base.SubData.prototype.setIncludes = function(includes){
+    this.includes = includes;
     invalidateParent(this);
 }
 
@@ -142,7 +158,7 @@ function invalidateParent(subData){
 
 XML3D.base.DataListResult = function(dataList){
     this.entries = {};
-    constructdataListTable(this, dataList.srcDataList, dataList.children);
+    constructDataListTable(this, dataList.srcDataList, dataList.children);
 }
 
 
@@ -166,8 +182,8 @@ function updateAccumulatedNode(table, entry){
     if(entry.accumulatedXflowNode)
         return;
     var dataNode = XML3D.data.xflowGraph.createDataNode(false);
-    for(var i = 0; i < entry.postAdd.length; ++i){
-        var addEntry = table.entries[entry.postAdd[i]];
+    for(var i = 0; i < entry.includes.length; ++i){
+        var addEntry = table.entries[entry.includes[i]];
         updateAccumulatedNode(table, addEntry);
         dataNode.appendChild(addEntry.accumulatedXflowNode);
     }
@@ -181,7 +197,8 @@ function updateAccumulatedNode(table, entry){
         if(!node) node = XML3D.data.xflowGraph.createDataNode(false);
         node.setCompute(postEntry.compute);
         node.setFilter(postEntry.filter);
-        node.protoNode = postEntry.proto;
+        node.dataflowNode = postEntry.dataflow;
+        node.setLoading(postEntry.dataflowLoading);
         if(parentNode) parentNode.appendChild(node);
         parentNode = node;
         node = null;
@@ -190,7 +207,7 @@ function updateAccumulatedNode(table, entry){
 }
 
 
-function constructdataListTable(table, srcData, children){
+function constructDataListTable(table, srcData, children){
     copySrcTable(table, srcData.getDataListTable());
     for(var i = 0; i < children.length; ++i){
         var child = children[i];
@@ -202,7 +219,7 @@ function constructdataListTable(table, srcData, children){
 
         child.meshType = entry.meshType || child.meshType;
         if(child.shader) entry.shader = child.shader;
-        if(child.transform) entry.transform = child.transform;
+        if(child.transform) entry.transform = child.transform;  // TODO: Better accumulate?
     }
 }
 
@@ -217,7 +234,7 @@ function copySrcTable(table, srcTable){
 function DataListTableEntry (srcEntry){
     this.isMeshData = srcEntry && srcEntry.isMeshData || false;
 
-    this.postAdd = srcEntry && srcEntry.postAdd.slice(0) || [];
+    this.includes = srcEntry && srcEntry.includes.slice(0) || [];
     this.postQueue = srcEntry && srcEntry.postQueue.slice(0) || [];
     this.shader = srcEntry && srcEntry.shader || null;
     this.transform = srcEntry && srcEntry.transform || null;
@@ -228,12 +245,13 @@ function DataListTableEntry (srcEntry){
 
 DataListTableEntry.prototype.pushPostEntry = function(subData){
     this.postQueue.push({
-        proto: subData.postProto,
+        dataflow: subData.postDataflow,
+        dataflowLoading: subData.loading,
         compute: subData.postCompute,
         filter: subData.postFilter,
         xflowNode: subData.xflowNode
     });
-    Xflow.utils.setAdd(this.postAdd, subData.postAdd);
+    Xflow.utils.setAdd(this.includes, subData.includes);
 }
 
 

@@ -17,7 +17,7 @@
 
 
         if(!node._configured)
-            throw new Error("Note to observe is not configured (yet). Make sure to pass an XML3D node and to execute " +
+            throw new Error("Note to observe is not   (yet). Make sure to pass an XML3D node and to execute " +
                 "this function after XML3D has been configured e.g. inside a DOMContentLoaded listener.");
 
 

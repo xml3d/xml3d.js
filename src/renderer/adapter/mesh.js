@@ -42,14 +42,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
          */
         notifyChanged: function (evt) {
             switch(evt.type) {
-                case XML3D.events.ADAPTER_HANDLE_CHANGED:
-                    if (evt.key == "shader") {
-                        this.updateShader(evt.adapter);
-                        if (evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
-                            XML3D.debug.logWarning("Missing shader with id '" + evt.url + "', falling back to default shader.");
-                        }
-                    }
-                    return;
                 case  XML3D.events.NODE_INSERTED:
                     return;
                 case XML3D.events.THIS_REMOVED:

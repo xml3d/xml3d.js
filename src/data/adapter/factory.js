@@ -69,7 +69,10 @@
     reg['compute']     = data.ComputeDataAdapter;
     reg['iframe']      = data.IFrameDataAdapter;
     reg['video']       = data.VideoDataAdapter;
-    reg['script']       = data.ScriptDataAdapter;
+    reg['script']      = data.ScriptDataAdapter;
+    reg['datalist']    = data.DataListAdapter;
+    reg['subdata']     = data.SubDataAdapter;
+    reg['multimesh']   = data.DataListAdapter;
 
    /**
      * Creates a DataAdapter associated with the given node.

@@ -199,7 +199,7 @@ function updateAccumulatedNode(table, entry){
         node.setFilter(postEntry.filter);
         node.dataflowNode = postEntry.dataflow;
         node.setLoading(postEntry.dataflowLoading);
-        if(parentNode) parentNode.appendChild(node);
+        if(parentNode) node.appendChild(parentNode);
         parentNode = node;
         node = null;
     }

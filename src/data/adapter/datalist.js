@@ -87,24 +87,25 @@ XML3D.data.DataListAdapter.prototype.notifyChanged = function(evt) {
 };
 
 XML3D.data.SubDataAdapter = function(factory, node) {
-    XML3D.base.DataAdapter.call(this, factory, node);
+    XML3D.data.DataAdapter.call(this, factory, node);
 
     // Node handles for src and proto
     this.dataListEntry = null;
 };
-XML3D.createClass(XML3D.data.SubDataAdapter, XML3D.base.DataAdapter);
+XML3D.createClass(XML3D.data.SubDataAdapter, XML3D.data.DataAdapter);
 
 XML3D.data.SubDataAdapter.prototype.init = function() {
     //var xflow = this.resolveScript();
     //if (xflow)
     //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
-    XML3D.base.DataAdapter.prototype.init.call(this);
+    XML3D.data.DataAdapter.prototype.init.call(this);
     this.dataListEntry = new XML3D.base.SubData(this.getXflowNode());
     this.dataListEntry.setName(this.node.getAttribute("name"));
     updatePostCompute(this);
     this.dataListEntry.setPostFilter(this.node.getAttribute("postfilter"));
-    this.dataListEntry.setIncludes(this.node.getAttribute("postadd").split(" "));
+    updateIncludes(this.dataListEntry, this.node.getAttribute("includes"));
     setShaderUrl(this);
+    this.dataListEntry.setMeshType(this.node.getAttribute("meshtype"))
 };
 
 XML3D.data.SubDataAdapter.prototype.connectedAdapterChanged = function(attributeName, adapter){
@@ -125,25 +126,32 @@ XML3D.data.SubDataAdapter.prototype.notifyChanged = function(evt) {
             case "name": this.dataListEntry.setName(this.node.getAttribute("name")); break;
             case "postcompute": updatePostCompute(this); break;
             case "postfilter": this.dataListEntry.setPostFilter(this.node.getAttribute("postfilter")); break;
-            case "includes": this.dataListEntry.setIncludes(this.node.getAttribute("includes")); break;
+            case "includes": updateIncludes(this.node.getAttribute("includes")); break;
             case "shader": setShaderUrl(this); break;
-            case "meshtype": this.dataListEntry.setMeshType(this.node.getAttribute("meshType"))
+            case "meshtype": this.dataListEntry.setMeshType(this.node.getAttribute("meshtype"))
         }
         return;
     }
 };
 
+function updateIncludes(dataListEntry, includeString){
+    if(!includeString)
+        dataListEntry.setIncludes([]);
+    else
+        dataListEntry.setIncludes(includeString.split(" "));
+}
+
 function updatePostCompute(adapter){
-    var computeString = this.node.getAttribute("postcompute");
+    var computeString = adapter.node.getAttribute("postcompute");
     var dataflowUrl = Xflow.getComputeDataflowUrl(computeString);
     if (dataflowUrl) {
         updateAdapterHandle(adapter, "postDataflow", dataflowUrl);
     }
     else {
-        adapter.disconnectAdapterHandle("dataflow");
+        adapter.disconnectAdapterHandle("postDataflow");
         updateSubDataLoadState(adapter);
     }
-    this.dataListEntry.setPostCompute(computeString);
+    adapter.dataListEntry.setPostCompute(computeString);
 }
 
 function updateSubDataLoadState(dataAdapter) {
@@ -159,9 +167,14 @@ function updateSubDataLoadState(dataAdapter) {
 
 function setShaderUrl(adapter){
     var node = adapter.node;
-    var uri = new XML3D.URI(node.getAttribute("shader"));
-    var shaderId = uri.getAbsoluteURI(node.ownerDocument.documentURI).toString();
-    adapter.dataListEntry.setShader(shaderId);
+    if(node.hasAttribute("shader")){
+        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument.documentURI,
+             node.getAttribute("shader"));
+        adapter.dataListEntry.setShader(shaderId.toString());
+    }
+    else{
+        adapter.dataListEntry.setShader(null);
+    }
 }
 
 

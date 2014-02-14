@@ -88,7 +88,7 @@
         this.drawable = this.createDrawable();
 
         this.localShaderHandle = opt.shaderHandle || null;
-        this.shaderHandle = opt.shaderHandle || null;
+        this.shaderHandle = null;
 
         /** {Object?} **/
         this.override = null;
@@ -255,13 +255,14 @@
         },
 
         setLocalShaderHandle: function(newHandle) {
+            this.localShaderHandle = newHandle;
             if (newHandle === undefined) {
                 // Shader was removed, we need to propagate the parent shader down
                 this.setShader(this.parent.getShaderHandle());
             } else {
                 this.setShader(newHandle);
             }
-            this.localShaderHandle = newHandle;
+
         },
 
         setShader: function(newHandle) {
@@ -272,7 +273,10 @@
             if(!this.drawable)
                 return;
 
-            var oldHandle = this.localShaderHandle || this.shaderHandle;
+            if(this.localShaderHandle)
+                newHandle = this.localShaderHandle;
+
+            var oldHandle = this.shaderHandle;
 
             if(oldHandle == newHandle)
                 return;

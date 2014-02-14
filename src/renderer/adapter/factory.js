@@ -22,6 +22,7 @@
             view:           ns.ViewRenderAdapter,
             defs:           ns.DefsRenderAdapter,
             mesh:           ns.MeshRenderAdapter,
+            multimesh:      ns.MultiMeshRenderAdapter,
             data:           ns.DataRenderAdapter,
             transform:      ns.TransformRenderAdapter,
             shader:         ns.ShaderRenderAdapter,

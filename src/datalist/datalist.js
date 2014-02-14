@@ -29,7 +29,7 @@ XML3D.base.DataList.prototype.isSubtreeLoading = function(){
     return false;
 }
 
-XML3D.base.DataList.prototype.appendChild = function(index, child){
+XML3D.base.DataList.prototype.appendChild = function(child){
     this.children.push(child);
     child.dataListParent = this;
     invalidateDataList(this);
@@ -147,7 +147,7 @@ XML3D.base.SubData.prototype.setMeshType = function(meshType){
 }
 
 function invalidateParent(subData){
-    if(!subData.dataListParent){
+    if(subData.dataListParent){
         invalidateDataList(subData.dataListParent);
     }
 }
@@ -208,16 +208,16 @@ function updateAccumulatedNode(table, entry){
 
 
 function constructDataListTable(table, srcData, children){
-    copySrcTable(table, srcData.getDataListTable());
+    if(srcData) copySrcTable(table, srcData.getResult());
     for(var i = 0; i < children.length; ++i){
         var child = children[i];
         var name = child.name;
-        if(!this.entries[name])
-            this.entries[name] = new DataListTableEntry();
-        var entry = this.entries[name];
+        if(!table.entries[name])
+            table.entries[name] = new DataListTableEntry();
+        var entry = table.entries[name];
         entry.pushPostEntry(child);
 
-        child.meshType = entry.meshType || child.meshType;
+        entry.meshType = child.meshType || entry.meshType;
         if(child.shader) entry.shader = child.shader;
         if(child.transform) entry.transform = child.transform;  // TODO: Better accumulate?
     }
@@ -232,7 +232,7 @@ function copySrcTable(table, srcTable){
 
 
 function DataListTableEntry (srcEntry){
-    this.isMeshData = srcEntry && srcEntry.isMeshData || false;
+    this.meshType = srcEntry && srcEntry.meshType || null;
 
     this.includes = srcEntry && srcEntry.includes.slice(0) || [];
     this.postQueue = srcEntry && srcEntry.postQueue.slice(0) || [];

@@ -14,6 +14,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.createRenderNode();
     };
 
+    var c_IDENTITY = XML3D.math.mat4.create();
+
     XML3D.createClass(MultiMeshRenderAdapter, webgl.TransformableAdapter, {
 
         createRenderNode: function () {
@@ -31,6 +33,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 visible: this.node.visible,
                 name: this.node.id
             });
+            this.renderNode.setLocalMatrix(c_IDENTITY);
 
             this.createSubRenderObjects();
         },

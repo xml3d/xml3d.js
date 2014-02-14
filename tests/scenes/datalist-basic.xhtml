@@ -7,70 +7,125 @@
 <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
-  <xml3d id="myXml3d" width="1000px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
+  <xml3d id="xml3dReference" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
     <defs>
         <shader id="redShader" script="urn:xml3d:shader:flat">
-            <float3 name="diffuseColor">1 0 0</float3>
+            <float3 name="diffuseColor">1 0.5 0.5</float3>
             <float name="ambientIntensity">1.0</float>
         </shader>
         <shader id="blueShader" script="urn:xml3d:shader:flat">
             <float3 name="diffuseColor">0 0 1</float3>
             <float name="ambientIntensity">1.0</float>
         </shader>
+        <shader id="greenShader" script="urn:xml3d:shader:flat">
+            <float3 name="diffuseColor">0 1 0</float3>
+            <float name="ambientIntensity">1.0</float>
+        </shader>
 
+        <data id="rectBase" >
+            <int name="index">0 1 2 1 2 3</int>
+
+            <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        </data>
+        <data id="shortIndex" >
+            <int name="index">0 1 2</int>
+        </data>
+        <data id="position1" >
+            <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+        </data>
+        <data id="position2" >
+           <float3 id="positions" name="position">1.0 -1.0 -10.0  3.0 -1.0 -10.0  1.0 1.0 -10.0  3.0 1.0 -10.0</float3>
+        </data>
+        <data id="position3" >
+           <float3 id="positions" name="position">-3.0 -1.0 -10.0 -1.0 -1.0 -10.0 -3.0 1.0 -10.0 -1.0 1.0 -10.0</float3>
+        </data>
+
+
+
+    </defs>
+    <group id="meshGroup" >
+        <group shader="#redShader" >
+            <mesh shader="#redShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+            </mesh>
+        </group>
+        <group style="transform: translateX(-5px)" >
+            <group shader="#redShader" >
+                 <mesh shader="#redShader" >
+                    <data src="#rectBase" />
+                    <data src="#position1" />
+                </mesh>
+            </group>
+            <group shader="#greenShader" >
+                 <mesh shader="#redShader" >
+                    <data src="#rectBase" />
+                    <data src="#position2" />
+                    <data src="#shortIndex" />
+                </mesh>
+            </group>
+        </group>
+        <group style="transform: translateY(-3px)" >
+            <group shader="#redShader" >
+                 <mesh shader="#redShader" >
+                    <data src="#rectBase" />
+                    <data src="#position1" />
+                </mesh>
+            </group>
+            <group shader="#blueShader" >
+                 <mesh shader="#redShader" >
+                    <data src="#rectBase" />
+                    <data src="#position2" />
+                </mesh>
+            </group>
+            <group shader="#greenShader" >
+                 <mesh shader="#redShader" >
+                    <data src="#rectBase" />
+                    <data src="#position3" />
+                </mesh>
+            </group>
+        </group>
+    </group>
+  </xml3d>
+  <xml3d id="xml3dTest" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
+    <defs>
         <datalist id="datalist1" >
-            <subdata name="mesh1" meshtype="triangles" shader="#redShader" id="mesh1" >
-                <int name="index">0 1 2 1 2 3</int>
-                <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
-                <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
-            </subdata>
-            <subdata name="mesh2" meshtype="triangles" shader="#blueShader" id="mesh2">
-                <int name="index">0 1 2 1 2 3</int>
-                <float3 id="positions" name="position">1.0 -1.0 -10.0  3.0 -1.0 -10.0  1.0 1.0 -10.0  3.0 1.0 -10.0</float3>
-                <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+            <subdata name="mesh1" meshtype="triangles" shader="#redShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
             </subdata>
         </datalist>
         <datalist id="datalist2" >
             <subdata name="base" >
-                <int name="index">0 1 2 1 2 3</int>
-                <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+                <data src="#rectBase" />
             </subdata>
             <subdata name="mesh1" includes="base" meshtype="triangles" shader="#redShader"  >
-                <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+                <data src="#position1" />
             </subdata>
             <subdata name="mesh2" includes="base" meshtype="triangles" shader="#blueShader">
-                <float3 id="positions" name="position">1.0 -1.0 -10.0  3.0 -1.0 -10.0  1.0 1.0 -10.0  3.0 1.0 -10.0</float3>
+                <data src="#position2" />
             </subdata>
         </datalist>
-        <datalist id="datalist3" >
-            <subdata name="mesh1" meshtype="triangles" shader="#redShader" id="mesh1" >
-                <int name="index">0 1 2 1 2 3</int>
-                <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
-                <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        <datalist id="datalist3" src="#datalist2">
+            <subdata name="mesh3" includes="base" meshtype="triangles" shader="#greenShader"  >
+                <data src="#position3" />
             </subdata>
         </datalist>
+
     </defs>
     <group id="meshGroup" >
-        <!--
-        <multimesh src="#datalist1" ></multimesh>
-        -->
+        <multimesh id="mm1" src="#datalist1" ></multimesh>
+
         <group style="transform: translateX(-5px)" >
-            <multimesh src="#datalist2" >
-                <subdata name="mesh2" >
+            <multimesh id="mm2" src="#datalist2" >
+                <subdata name="mesh2" shader="#greenShader" >
                      <int name="index">0 1 2</int>
                 </subdata>
             </multimesh>
         </group>
-        <!--
-        <group shader="#redShader" >
-            <mesh src="#mesh1" ></mesh>
+        <group style="transform: translateY(-3px)" >
+            <multimesh id="mm3" src="#datalist3" ></multimesh>
         </group>
-        <group shader="#blueShader" >
-            <mesh src="#mesh2" ></mesh>
-        </group>
-        -->
-
-
     </group>
   </xml3d>
 </body>

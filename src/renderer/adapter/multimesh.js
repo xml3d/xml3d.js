@@ -70,8 +70,12 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         getShaderHandle: function(shaderHref, index)
         {
             if(shaderHref) {
-                this.connectAdapterHandle("shader_" + index, this.getAdapterHandle(shaderHref));
-                return this.getConnectedAdapterHandle("shader_" + index);
+                var adapterHandle = this.getAdapterHandle(shaderHref);
+                if(adapterHandle && adapterHandle.status == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
+                    XML3D.debug.logError("Could not find <shader> of url '" + adapterHandle.url + "' ", this.node);
+                }
+                this.connectAdapterHandle("shader_" + index, adapterHandle);
+                return adapterHandle;
             }
             return null;
         },
@@ -88,7 +92,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                         if (evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
                             XML3D.debug.logWarning("Missing shader with id '" + evt.url + "', falling back to default shader.");
                         }
-                        this.renderObjects[idx].setLocalShaderHandle(evt.adapter);
                     }
                     return;
                 case  XML3D.events.NODE_INSERTED:

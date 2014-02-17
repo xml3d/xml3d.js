@@ -14,7 +14,7 @@ XML3D.data.DataListAdapter.prototype.init = function() {
     //if (xflow)
     //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
 
-    this.dataList = new XML3D.base.DataList();
+    this.dataList = new XML3D.base.DataList(this.node);
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     updateChildren(this);
 };
@@ -91,6 +91,7 @@ XML3D.data.SubDataAdapter = function(factory, node) {
 
     // Node handles for src and proto
     this.dataListEntry = null;
+    this.outputXflowNode = null;
 };
 XML3D.createClass(XML3D.data.SubDataAdapter, XML3D.data.DataAdapter);
 
@@ -99,7 +100,8 @@ XML3D.data.SubDataAdapter.prototype.init = function() {
     //if (xflow)
     //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
     XML3D.data.DataAdapter.prototype.init.call(this);
-    this.dataListEntry = new XML3D.base.SubData(this.getXflowNode());
+    this.outputXflowNode = XML3D.data.xflowGraph.createDataNode(false);
+    this.dataListEntry = new XML3D.base.SubData(this.outputXflowNode, this.getXflowNode(), this.node);
     this.dataListEntry.setName(this.node.getAttribute("name"));
     updatePostCompute(this);
     this.dataListEntry.setPostFilter(this.node.getAttribute("postfilter"));
@@ -167,9 +169,9 @@ function updateSubDataLoadState(dataAdapter) {
 
 function setShaderUrl(adapter){
     var node = adapter.node;
-    if(node.hasAttribute("shader")){
-        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument.documentURI,
-             node.getAttribute("shader"));
+    var shaderUrl = node.getAttribute("shader");
+    if(shaderUrl){
+        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument.documentURI, shaderUrl);
         adapter.dataListEntry.setShader(shaderId.toString());
     }
     else{

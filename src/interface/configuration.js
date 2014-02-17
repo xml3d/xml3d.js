@@ -357,6 +357,7 @@ XML3D.classInfo['subdata'] = {
     postfilter: {a: XML3D.StringAttributeHandler},
     includes: {a: XML3D.StringAttributeHandler},
     compute: {a: XML3D.StringAttributeHandler},
+    shader: {a: XML3D.ReferenceHandler},
     platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     filter: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},

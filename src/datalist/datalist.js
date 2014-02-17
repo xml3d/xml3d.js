@@ -4,13 +4,64 @@
 // XML3D.base.DataList
 //----------------------------------------------------------------------------------------------------------------------
 
-XML3D.base.DataList = function(){
+function DataListError(message, node){
+    this.message = message;
+    this.node = node;
+}
+
+XML3D.base.DataList = function(refNode){
     this.srcDataList = null;
     this.children = [];
     this.dataListResult = null;
     this.listener = [];
     this.loading = false;
+    this.refNode = refNode || null;
 };
+
+XML3D.base.DataList.prototype.checkValidity = function(){
+    if(this.isSubtreeLoading())
+        return;
+    checkRecursive(this);
+}
+function checkRecursive(datalist){
+    var parentNames;
+    if(datalist.srcDataList){
+        parentNames = checkRecursive(datalist.srcDataList);
+    }
+    var localNames = [];
+    for(var i = 0; i < datalist.children.length; ++i){
+        var child = datalist.children[i], name = child.name;
+        if(!name){
+            throw new DataListError("Child subdata without a name.", child.refNode);
+        }
+        if(localNames.indexOf(name) != -1){
+            throw new DataListError("Two subdata elements with the same name: '" + name + "'", child.refNode);
+        }
+        localNames.push(name);
+    }
+    var totalNames = localNames.slice();
+    if(parentNames){
+        Xflow.utils.setAdd(totalNames, parentNames);
+    }
+    for(var i = 0; i < datalist.children.length; ++i){
+        checkIncludes(datalist.children[i], totalNames);
+    }
+
+    return totalNames;
+}
+function checkIncludes(subData, totalNames){
+    if(!subData.includes)
+        return;
+    for(var i = 0; i < subData.includes.length; ++i){
+        var inclName = subData.includes[i];
+        if(totalNames.indexOf(inclName) == -1){
+            throw new DataListError("Subdata '" + subData.name +
+                 "' includes non existing subdata of name '" + inclName + "'", subData.refNode);
+        }
+    }
+}
+
+
 
 XML3D.base.DataList.prototype.setLoading = function(loading){
     if(loading != this.loading){
@@ -85,8 +136,10 @@ function invalidateDataList(dataList){
 // XML3D.base.SubData
 //----------------------------------------------------------------------------------------------------------------------
 
-XML3D.base.SubData = function(xflowNode){
-    this.xflowNode = xflowNode;
+XML3D.base.SubData = function(xflowNodeOut, xflowNodeIn, refNode){
+    this.xflowNodeOut = xflowNodeOut;
+    this.xflowNodeIn = xflowNodeIn;
+    this.refNode = refNode || null;
     this.name = null;
     this.postDataflow = null;
     this.postCompute = null;
@@ -179,9 +232,21 @@ XML3D.base.DataListResult.prototype.getMeshDataSets = function(){
 }
 
 function updateAccumulatedNode(table, entry){
-    if(entry.accumulatedXflowNode)
+    if(!entry.outOfSync){
         return;
-    var dataNode = XML3D.data.xflowGraph.createDataNode(false);
+    }
+    if(entry.accumulatedXflowNode){
+        entry.accumulatedXflowNode.clearChildren();
+        entry.accumulatedXflowNode.setCompute("");
+        entry.accumulatedXflowNode.setFilter("");
+        entry.accumulatedXflowNode.dataflowNode = null;
+        entry.accumulatedXflowNode.setLoading(false);
+    }
+    else{
+        entry.accumulatedXflowNode = XML3D.data.xflowGraph.createDataNode(false);
+    }
+
+    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : XML3D.data.xflowGraph.createDataNode(false);
     for(var i = 0; i < entry.includes.length; ++i){
         var addEntry = table.entries[entry.includes[i]];
         updateAccumulatedNode(table, addEntry);
@@ -194,7 +259,7 @@ function updateAccumulatedNode(table, entry){
     var node = dataNode, parentNode = null;
     for(var i = 0; i < entry.postQueue.length; ++i){
         var postEntry = entry.postQueue[i];
-        if(!node) node = XML3D.data.xflowGraph.createDataNode(false);
+        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : XML3D.data.xflowGraph.createDataNode(false));
         node.setCompute(postEntry.compute);
         node.setFilter(postEntry.filter);
         node.dataflowNode = postEntry.dataflow;
@@ -203,7 +268,7 @@ function updateAccumulatedNode(table, entry){
         parentNode = node;
         node = null;
     }
-    entry.accumulatedXflowNode = parentNode;
+    entry.outOfSync = false;
 }
 
 
@@ -240,6 +305,7 @@ function DataListTableEntry (srcEntry){
     this.transform = srcEntry && srcEntry.transform || null;
 
     this.accumulatedXflowNode = null;
+    this.outOfSync = true;
 
 }
 
@@ -249,8 +315,9 @@ DataListTableEntry.prototype.pushPostEntry = function(subData){
         dataflowLoading: subData.loading,
         compute: subData.postCompute,
         filter: subData.postFilter,
-        xflowNode: subData.xflowNode
+        xflowNode: subData.xflowNodeIn
     });
+    this.accumulatedXflowNode = subData.xflowNodeOut;
     Xflow.utils.setAdd(this.includes, subData.includes);
 }
 

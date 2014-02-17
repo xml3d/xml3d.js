@@ -49,21 +49,28 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         createSubRenderObjects: function(){
             this.clearSubRenderObjects();
             if(!this.dataList.isSubtreeLoading()){
-                var dataListResult = this.dataList.getResult();
-                var meshSets = dataListResult.getMeshDataSets();
-                for(var i = 0; i < meshSets.length; ++i){
-                    var renderNode = this.getScene().createRenderObject({
-                        parent: this.renderNode,
-                        node: this.node,
-                        object: {
-                            data: meshSets[i].xflowNode,
-                            type: meshSets[i].type
-                        },
-                        shaderHandle: this.getShaderHandle(meshSets[i].shader, i),
-                        name: this.node.id,
-                        visible: !this.node.visible ? false : undefined
-                    });
-                    this.renderObjects.push(renderNode);
+                try{
+                    this.dataList.checkValidity();
+                    var dataListResult = this.dataList.getResult();
+                    var meshSets = dataListResult.getMeshDataSets();
+                    for(var i = 0; i < meshSets.length; ++i){
+                        var renderNode = this.getScene().createRenderObject({
+                            parent: this.renderNode,
+                            node: this.node,
+                            object: {
+                                data: meshSets[i].xflowNode,
+                                type: meshSets[i].type
+                            },
+                            shaderHandle: this.getShaderHandle(meshSets[i].shader, i),
+                            name: this.node.id,
+                            visible: !this.node.visible ? false : undefined
+                        });
+                        this.renderObjects.push(renderNode);
+                    }
+                }
+                catch(e){
+                    XML3D.debug.logError("DataList Error: " + e.message, e.node || this.node);
+                    this.clearSubRenderObjects();
                 }
             }
         },

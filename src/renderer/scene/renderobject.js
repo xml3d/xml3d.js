@@ -80,6 +80,8 @@
          */
         this.boundingBoxDirty = true;
 
+        this.transformDataRequest = this.createTransformRequest();
+
         /**
          * The drawable closure transforms object data and type into
          * a drawable entity
@@ -93,12 +95,19 @@
         /** {Object?} **/
         this.override = null;
 
+
     };
     RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
 
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode, {
+        createTransformRequest: function(){
+            if(!this.object.data)
+                return null;
+            var request = new Xflow.ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this) );
+            return request;
+        },
         createDrawable: function () {
             var result = this.scene.createDrawable(this);
             if (result) {
@@ -120,6 +129,7 @@
             }
             return result;
         },
+
         setType: function(type) {
             this.object.type = type;
             // TODO: this.typeChangedEvent
@@ -132,7 +142,11 @@
         },
 
         dispose :function () {
+            this.transformDataRequest && this.transformDataRequest.clear();
             this.scene.remove(this);
+        },
+        onTransformDataChange: function(){
+            this.setTransformDirty();
         },
 
         getModelViewMatrix: function(target) {
@@ -188,6 +202,13 @@
             var tmp_mat = XML3D.math.mat4.create();
             return function() {
                 this.parent.getWorldMatrix(tmp_mat);
+                if(this.transformDataRequest){
+                    var result = this.transformDataRequest.getResult();
+                    var transformData = result.getOutputData("meshTransform");
+                    if(transformData && transformData.getValue()){
+                        XML3D.math.mat4.multiply(tmp_mat, tmp_mat, transformData.getValue());
+                    }
+                }
                 this.setWorldMatrix(tmp_mat);
                 this.updateWorldSpaceBoundingBox();
                 this.transformDirty = false;

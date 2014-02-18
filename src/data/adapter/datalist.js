@@ -92,6 +92,7 @@ XML3D.data.SubDataAdapter = function(factory, node) {
     // Node handles for src and proto
     this.dataListEntry = null;
     this.outputXflowNode = null;
+    this.transformFetcher = new XML3D.data.DOMTransformFetcher(this, "transform", "transform");
 };
 XML3D.createClass(XML3D.data.SubDataAdapter, XML3D.data.DataAdapter);
 
@@ -107,7 +108,8 @@ XML3D.data.SubDataAdapter.prototype.init = function() {
     this.dataListEntry.setPostFilter(this.node.getAttribute("postfilter"));
     updateIncludes(this.dataListEntry, this.node.getAttribute("includes"));
     setShaderUrl(this);
-    this.dataListEntry.setMeshType(this.node.getAttribute("meshtype"))
+    this.dataListEntry.setMeshType(this.node.getAttribute("meshtype"));
+    this.transformFetcher.update();
 };
 
 XML3D.data.SubDataAdapter.prototype.connectedAdapterChanged = function(attributeName, adapter){
@@ -130,11 +132,17 @@ XML3D.data.SubDataAdapter.prototype.notifyChanged = function(evt) {
             case "postfilter": this.dataListEntry.setPostFilter(this.node.getAttribute("postfilter")); break;
             case "includes": updateIncludes(this.node.getAttribute("includes")); break;
             case "shader": setShaderUrl(this); break;
+            case "style":
+            case "transform": this.transformFetcher.update(); break;
             case "meshtype": this.dataListEntry.setMeshType(this.node.getAttribute("meshtype"))
         }
         return;
     }
 };
+
+XML3D.data.SubDataAdapter.prototype.onTransformChange = function(attrName, matrix){
+    this.dataListEntry.setTransform(matrix);
+}
 
 function updateIncludes(dataListEntry, includeString){
     if(!includeString)

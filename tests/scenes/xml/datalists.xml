@@ -32,7 +32,13 @@
        <float3 id="positions" name="position">1.0 -1.0 -10.0  3.0 -1.0 -10.0  1.0 1.0 -10.0  3.0 1.0 -10.0</float3>
     </data>
     <data id="position3" >
-       <float3 id="positions" name="position">-3.0 -1.0 -10.0 -1.0 -1.0 -10.0 -3.0 1.0 -10.0 -1.0 1.0 -10.0</float3>
+       <data src="#position1" />
+       <float4x4 name="meshTransform" >
+            0.5 0 0 0
+            0 0.5 0 0
+            0 0 1 0
+            0 0 0 1
+        </float4x4>
     </data>
 
 
@@ -65,7 +71,7 @@
     </datalist>
 
     <datalist id="datalist3" src="#datalist2">
-        <subdata name="mesh3" includes="base" meshtype="triangles" shader="#greenShader"  >
+        <subdata name="mesh3" includes="base" meshtype="triangles" shader="#greenShader" style="transform: translateX(-2px)" >
             <data src="#position3" />
         </subdata>
     </datalist>

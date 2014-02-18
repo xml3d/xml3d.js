@@ -3,11 +3,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 //Adapter for <mesh>
 (function (webgl) {
 
+
+    var c_IDENTITY = XML3D.math.mat4.create();
+
     /**
      * @constructor
      */
     var MeshRenderAdapter = function (factory, node) {
-        webgl.TransformableAdapter.call(this, factory, node);
+        webgl.TransformableAdapter.call(this, factory, node, true);
 
         this.initializeEventAttributes();
         this.createRenderNode();
@@ -31,6 +34,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 name: this.node.id,
                 visible: !this.node.visible ? false : undefined
             });
+            this.updateLocalMatrix();
         },
 
         getMeshType: function() {
@@ -41,6 +45,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
          * @param {XML3D.events.Notification} evt
          */
         notifyChanged: function (evt) {
+            XML3D.webgl.TransformableAdapter.prototype.notifyChanged.call(this, evt);
             switch(evt.type) {
                 case  XML3D.events.NODE_INSERTED:
                     return;
@@ -61,9 +66,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             var target = evt.attrName;
 
             switch (target) {
-                case "visible":
-                    this.renderNode.setLocalVisible(evt.newValue === "true");
-                    break;
 
                 case "src":
                     // Handled by data component
@@ -71,10 +73,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
                 case "type":
                     this.renderNode.setType(evt.newValue);
-                    break;
-
-                default:
-                    XML3D.debug.logWarning("Unhandled mutation event in mesh adapter for parameter '" + target + "'", evt);
                     break;
             }
 

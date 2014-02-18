@@ -140,7 +140,7 @@
      * @returns an AdapterHandle to the referred Adapter of the same aspect and canvasId
      */
     XML3D.base.NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
-        canvasId = canvasId === undefined ? this.factory.canvasId : 0;
+        canvasId = canvasId === undefined ? this.factory.canvasId : canvasId;
         return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument, uri,
             aspectType || this.factory.aspect, canvasId);
     };

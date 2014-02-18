@@ -224,7 +224,8 @@ XML3D.base.DataListResult.prototype.getMeshDataSets = function(){
             result.push({
                 xflowNode: entry.accumulatedXflowNode,
                 type: entry.meshType,
-                shader: entry.shader
+                shader: entry.shader,
+                transform: entry.transform
             });
         }
     }

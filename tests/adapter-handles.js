@@ -21,12 +21,12 @@ test("Get Local Adapters", function() {
         canvasId = getCanvasId(xTest);
     var XML3D = this.window.XML3D;
 
-    var handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#transform1", XML3D.webgl, canvasId);
+    var handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#transform1", XML3D.data, 0);
 
-    ok(handle.hasAdapter(), "Handle of #transform1 has XML3D.webgl adapter ");
+    ok(handle.hasAdapter(), "Handle of #transform1 has XML3D.data adapter ");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.webgl.TransformRenderAdapter,
-        "Adapter is instanceof XML3D.webgl.TransformRenderAdapter");
+    ok(handle.getAdapter() instanceof XML3D.data.TransformDataAdapter,
+        "Adapter is instanceof XML3D.data.TransformDataAdapter");
 
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#data1", XML3D.data);
     ok(handle.hasAdapter(), "Handle of #data1 has XML3D.data adapter");

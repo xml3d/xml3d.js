@@ -11,6 +11,7 @@
         <file name="./adapter/datalist.js" />
         <file name="./adapter/values.js" />
         <file name="./adapter/texture.js" />
+        <file name="./adapter/transform.js" />
         <file name="./adapter/misc.js" />
         <file name="./adapter/factory.js" />
         <file name="./adapter/json/factory.js" />

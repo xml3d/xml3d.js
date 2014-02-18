@@ -138,11 +138,11 @@ test("Modify datalist src", 4, function() {
             self.doc.getElementById("mm2").src = "#datalist2Alt";
         }
         else if(testStep == 1){
-            if( XML3DUnit.getPixelValue(glTest, 68, 150)[3] != 0)
+            if( XML3DUnit.getPixelValue(glTest, 69, 121)[3] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 68, 150), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 121), [0,0,0,0], EPSILON,
                 "Old Rectangle removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 8, 150), [255,127,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 150), [255,127,255,255], EPSILON,
                 "New Rectangle added" );
             start();
         }

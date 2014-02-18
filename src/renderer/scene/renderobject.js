@@ -19,7 +19,9 @@
     /** @const */
     var WORLD_MATRIX_OFFSET = 0;
     /** @const */
-    var OBJECT_BB_OFFSET = WORLD_MATRIX_OFFSET + 16;
+    var LOCAL_MATRIX_OFFSET = WORLD_MATRIX_OFFSET + 16;
+    /** @const */
+    var OBJECT_BB_OFFSET = LOCAL_MATRIX_OFFSET + 16;
     /** @const */
     var WORLD_BB_OFFSET = OBJECT_BB_OFFSET + 6;
     /** @const */
@@ -141,6 +143,22 @@
             return this.object ? this.object.data : null;
         },
 
+        getLocalMatrix: function(dest) {
+            var o = this.offset + LOCAL_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                dest[i] = this.page[o];
+            }
+        },
+
+        setLocalMatrix: function(source) {
+            var o = this.offset + LOCAL_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                this.page[o] = source[i];
+            }
+            this.setTransformDirty();
+            this.setBoundingBoxDirty();
+        },
+
         dispose :function () {
             this.transformDataRequest && this.transformDataRequest.clear();
             this.scene.remove(this);
@@ -202,6 +220,9 @@
             var tmp_mat = XML3D.math.mat4.create();
             return function() {
                 this.parent.getWorldMatrix(tmp_mat);
+                var page = this.page;
+                var offset = this.offset;
+                XML3D.math.mat4.multiplyOffset(tmp_mat, 0, page, offset+LOCAL_MATRIX_OFFSET,  tmp_mat, 0);
                 if(this.transformDataRequest){
                     var result = this.transformDataRequest.getResult();
                     var transformData = result.getOutputData("meshTransform");

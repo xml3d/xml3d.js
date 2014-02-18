@@ -7,7 +7,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @constructor
      */
     var MultiMeshRenderAdapter = function (factory, node) {
-        webgl.TransformableAdapter.call(this, factory, node);
+        webgl.TransformableAdapter.call(this, factory, node, true);
         this.dataList = null;
         this.renderObjects = [];
         this.initializeEventAttributes();
@@ -33,15 +33,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 visible: this.node.visible,
                 name: this.node.id
             });
-            this.renderNode.setLocalMatrix(c_IDENTITY);
-
+            this.updateLocalMatrix();
             this.createSubRenderObjects();
         },
         clearSubRenderObjects: function(){
             var i = this.renderObjects.length;
             while(i--){
                 this.renderObjects[i].remove();
-                this.disconnectAdapterHandle("shader_" + i);
+                //this.disconnectAdapterHandle("shader_" + i);
             }
             this.renderObjects.length = 0;
 
@@ -61,10 +60,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                                 data: meshSets[i].xflowNode,
                                 type: meshSets[i].type
                             },
-                            shaderHandle: this.getShaderHandle(meshSets[i].shader, i),
+                            shaderHandle: this.getSubShaderHandle(meshSets[i].shader, i),
                             name: this.node.id,
                             visible: !this.node.visible ? false : undefined
                         });
+                        renderNode.setLocalMatrix(meshSets[i].transform || c_IDENTITY);
                         this.renderObjects.push(renderNode);
                     }
                 }
@@ -74,14 +74,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 }
             }
         },
-        getShaderHandle: function(shaderHref, index)
+        getSubShaderHandle: function(shaderHref, index)
         {
             if(shaderHref) {
                 var adapterHandle = this.getAdapterHandle(shaderHref);
                 if(adapterHandle && adapterHandle.status == XML3D.base.AdapterHandle.STATUS.NOT_FOUND){
                     XML3D.debug.logError("Could not find <shader> of url '" + adapterHandle.url + "' ", this.node);
                 }
-                this.connectAdapterHandle("shader_" + index, adapterHandle);
+                //this.connectAdapterHandle("shader_" + index, adapterHandle);
                 return adapterHandle;
             }
             return null;
@@ -91,45 +91,14 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
          * @param evt
          */
         notifyChanged: function (evt) {
+            XML3D.webgl.TransformableAdapter.prototype.notifyChanged.call(this, evt);
             switch(evt.type) {
-                case XML3D.events.ADAPTER_HANDLE_CHANGED:
-                    var shaderKey = "shader_";
-                    if (evt.key.indexOf(shaderKey) == 0 ) {
-                        var idx = evt.key.substr(shaderKey.length)*1;
-                        if (evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
-                            XML3D.debug.logWarning("Missing shader with id '" + evt.url + "', falling back to default shader.");
-                        }
-                    }
-                    return;
                 case  XML3D.events.NODE_INSERTED:
                     return;
                 case XML3D.events.THIS_REMOVED:
                     this.dispose();
                     return;
-                case XML3D.events.VALUE_MODIFIED:
-                    this.valueChanged(evt.wrapped);
             }
-        },
-        /**
-         * @param {MutationEvent} evt
-         */
-        valueChanged: function(evt) {
-            var target = evt.attrName;
-
-            switch (target) {
-                case "visible":
-                    this.renderNode.setLocalVisible(evt.newValue === "true");
-                    break;
-
-                case "src":
-                    // Handled by data component
-                    break;
-
-                default:
-                    XML3D.debug.logWarning("Unhandled mutation event in mesh adapter for parameter '" + target + "'", evt);
-                    break;
-            }
-
         },
         onDataListChange: function(){
             this.createSubRenderObjects();

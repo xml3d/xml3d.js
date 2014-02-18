@@ -24,7 +24,6 @@
             mesh:           ns.MeshRenderAdapter,
             multimesh:      ns.MultiMeshRenderAdapter,
             data:           ns.DataRenderAdapter,
-            transform:      ns.TransformRenderAdapter,
             shader:         ns.ShaderRenderAdapter,
             group:          ns.GroupRenderAdapter,
             img:            ns.ImgRenderAdapter,

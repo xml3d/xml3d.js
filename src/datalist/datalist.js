@@ -12,6 +12,7 @@ function DataListError(message, node){
 XML3D.base.DataList = function(refNode){
     this.srcDataList = null;
     this.children = [];
+    this.pickFilter = null;
     this.dataListResult = null;
     this.listener = [];
     this.loading = false;
@@ -83,6 +84,11 @@ XML3D.base.DataList.prototype.isSubtreeLoading = function(){
 XML3D.base.DataList.prototype.appendChild = function(child){
     this.children.push(child);
     child.dataListParent = this;
+    invalidateDataList(this);
+}
+
+XML3D.base.DataList.prototype.setPickFilter = function(pickFilter){
+    this.pickFilter = pickFilter;
     invalidateDataList(this);
 }
 
@@ -211,7 +217,8 @@ function invalidateParent(subData){
 
 XML3D.base.DataListResult = function(dataList){
     this.entries = {};
-    constructDataListTable(this, dataList.srcDataList, dataList.children);
+    this.pickFilter = null;
+    constructDataListTable(this, dataList);
 }
 
 
@@ -219,7 +226,7 @@ XML3D.base.DataListResult.prototype.getMeshDataSets = function(){
     var result = [];
     for(var name in this.entries){
         var entry = this.entries[name];
-        if(entry.meshType){
+        if(entry.meshType && (!this.pickFilter || this.pickFilter.indexOf(name) != -1) ){
             updateAccumulatedNode(this, entry);
             result.push({
                 xflowNode: entry.accumulatedXflowNode,
@@ -233,9 +240,9 @@ XML3D.base.DataListResult.prototype.getMeshDataSets = function(){
 }
 
 function updateAccumulatedNode(table, entry){
-    if(!entry.outOfSync){
+    if(!entry.outOfSync)
         return;
-    }
+
     if(entry.accumulatedXflowNode){
         entry.accumulatedXflowNode.clearChildren();
         entry.accumulatedXflowNode.setCompute("");
@@ -273,8 +280,13 @@ function updateAccumulatedNode(table, entry){
 }
 
 
-function constructDataListTable(table, srcData, children){
-    if(srcData) copySrcTable(table, srcData.getResult());
+function constructDataListTable(table, datalist){
+    var srcData = datalist.srcDataList;
+    var children = datalist.children;
+    if(srcData)
+        copySrcTable(table, srcData.getResult(), datalist.pickFilter);
+    else
+        table.pickFilter = datalist.pickFilter;
     for(var i = 0; i < children.length; ++i){
         var child = children[i];
         var name = child.name;
@@ -289,10 +301,21 @@ function constructDataListTable(table, srcData, children){
     }
 }
 
-function copySrcTable(table, srcTable){
+function copySrcTable(table, srcTable, pickFilter){
     for(var name in srcTable.entries){
         var srcEntry = srcTable.entries[name];
         table.entries[name] = new DataListTableEntry(srcEntry);
+    }
+    if(pickFilter && srcTable.pickFilter){
+        table.pickFilter = [];
+        var i = pickFilter.length;
+        while(i--){
+            if(srcTable.pickFilter.indexOf(pickFilter[i]) != -1)
+                table.pickFilter.push(pickFilter[i]);
+        }
+    }
+    else{
+        table.pickFilter = pickFilter || srcTable.pickFilter;
     }
 }
 

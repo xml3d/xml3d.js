@@ -152,6 +152,43 @@ test("Modify datalist src", 4, function() {
     stop();
 });
 
+test("Modify datalist pick", 6, function() {
+    var xTest = this.doc.getElementById("xml3dTest"),
+        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+    var self = this;
+
+    var testStep = 0;
+    function onFrameDrawn(){
+        if(testStep == 0){
+            if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
+                return;
+            testStep++;
+            self.doc.getElementById("mm4").pick = "mesh1";
+        }
+        else if(testStep == 1){
+            if( XML3DUnit.getPixelValue(glTest, 434, 150)[3] != 0)
+                return;
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], EPSILON,
+                "mesh2 Rectangle removed" );
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [255,127,127,255], EPSILON,
+                "mesh1 Rectangle added" );
+            testStep++;
+            self.doc.getElementById("mm4").pick = "";
+        }
+        else if(testStep == 2){
+            if( XML3DUnit.getPixelValue(glTest, 360, 150)[3] != 0)
+                return;
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], EPSILON,
+                "mesh2 Rectangle still removed" );
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [0,0,0,0], EPSILON,
+                "mesh1 Rectangle also removed" );
+            start();
+        }
+    }
+    xTest.addEventListener("framedrawn", onFrameDrawn);
+    hTest.draw();
+    stop();
+});
 
 test("External datalists", 3, function() {
     var xTest = this.doc.getElementById("xml3dTest"),

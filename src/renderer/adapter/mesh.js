@@ -32,6 +32,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     type: this.getMeshType()
                 },
                 name: this.node.id,
+                shaderHandle: this.getShaderHandle(),
                 visible: !this.node.visible ? false : undefined
             });
             this.updateLocalMatrix();

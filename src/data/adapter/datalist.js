@@ -16,6 +16,7 @@ XML3D.data.DataListAdapter.prototype.init = function() {
 
     this.dataList = new XML3D.base.DataList(this.node);
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
+    updatePickFilter(this);
     updateChildren(this);
 };
 
@@ -54,6 +55,15 @@ function updateDataListLoadState(dataAdapter){
     dataAdapter.dataList.setLoading(loading);
 }
 
+function updatePickFilter(adapter){
+    if(!adapter.node.hasAttribute("pick"))
+        adapter.dataList.setPickFilter(null);
+    else{
+        var value = adapter.node.getAttribute("pick");
+        adapter.dataList.setPickFilter(value.split(/\s+/))
+    }
+}
+
 XML3D.data.DataListAdapter.prototype.connectedAdapterChanged = function(attributeName, adapter){
     if(attributeName == "src")
         this.dataList.setSrcDataList(adapter && adapter.dataList || null);
@@ -80,6 +90,8 @@ XML3D.data.DataListAdapter.prototype.notifyChanged = function(evt) {
         var attr = evt.wrapped.attrName;
         if(attr == "src" )
             updateAdapterHandle(this, "src", this.node.getAttribute("src"));
+        if(attr == "pick" )
+            updatePickFilter(this);
         return;
     } else if (evt.type == XML3D.events.THIS_REMOVED) {
         this.clearAdapterHandles();
@@ -148,7 +160,7 @@ function updateIncludes(dataListEntry, includeString){
     if(!includeString)
         dataListEntry.setIncludes([]);
     else
-        dataListEntry.setIncludes(includeString.split(" "));
+        dataListEntry.setIncludes(includeString.split(/\s+/));
 }
 
 function updatePostCompute(adapter){

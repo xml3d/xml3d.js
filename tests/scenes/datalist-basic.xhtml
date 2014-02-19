@@ -101,6 +101,9 @@
         <group style="transform: translateY(-3px)" >
             <multimesh id="mm3" src="#datalist3" ></multimesh>
         </group>
+        <group style="transform: translateX(3px)" >
+            <multimesh id="mm4" src="#datalist2" pick="mesh2" ></multimesh>
+        </group>
     </group>
   </xml3d>
 
@@ -114,34 +117,42 @@
         </group>
         <group style="transform: translateX(-5px)" >
             <group shader="#redShader" >
-                 <mesh shader="#redShader" >
+                 <mesh >
                     <data src="#rectBase" />
                     <data src="#position1" />
                 </mesh>
             </group>
             <group shader="#greenShader" >
-                 <mesh shader="#redShader" >
+                 <mesh >
                     <data src="#rectBase" />
                     <data src="#position2" />
                     <data src="#shortIndex" />
                 </mesh>
             </group>
         </group>
+        <group style="transform: translateX(3px)" >
+            <group shader="#blueShader" >
+                 <mesh >
+                    <data src="#rectBase" />
+                    <data src="#position2" />
+                </mesh>
+            </group>
+        </group>
         <group style="transform: translateY(-3px)" >
             <group shader="#redShader" >
-                 <mesh shader="#redShader" >
+                 <mesh >
                     <data src="#rectBase" />
                     <data src="#position1" />
                 </mesh>
             </group>
             <group shader="#blueShader" >
-                 <mesh shader="#redShader" >
+                 <mesh >
                     <data src="#rectBase" />
                     <data src="#position2" />
                 </mesh>
             </group>
             <group shader="#greenShader" style="transform: translateX(-2px)" >
-                 <mesh shader="#redShader" >
+                 <mesh >
                     <data src="#rectBase" />
                     <data src="#position3" />
                 </mesh>

@@ -165,6 +165,7 @@ XML3D.classInfo['datalist'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     src: {a: XML3D.ReferenceHandler},
+    pick: {a: XML3D.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -256,6 +257,7 @@ XML3D.classInfo['multimesh'] = {
     getWorldMatrix: {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     getBoundingBox: {m: XML3D.methods.meshGetBoundingBox},
     src: {a: XML3D.ReferenceHandler},
+    pick: {a: XML3D.StringAttributeHandler},
     _term: undefined
 };
 /**

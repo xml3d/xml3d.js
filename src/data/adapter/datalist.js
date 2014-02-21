@@ -135,7 +135,7 @@ XML3D.data.SubDataAdapter.prototype.connectedAdapterChanged = function(attribute
 }
 
 XML3D.data.SubDataAdapter.prototype.notifyChanged = function(evt) {
-    XML3D.data.DataAdapter.prototype.notifyChanged.call(evt, this);
+    XML3D.data.DataAdapter.prototype.notifyChanged.call(this, evt);
     if (evt.type == XML3D.events.VALUE_MODIFIED) {
         var attr = evt.wrapped.attrName;
         switch(attr){
@@ -191,7 +191,7 @@ function setShaderUrl(adapter){
     var node = adapter.node;
     var shaderUrl = node.getAttribute("shader");
     if(shaderUrl){
-        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument.documentURI, shaderUrl);
+        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument, shaderUrl);
         adapter.dataListEntry.setShader(shaderId.toString());
     }
     else{

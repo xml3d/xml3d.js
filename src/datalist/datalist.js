@@ -132,9 +132,9 @@ XML3D.base.DataList.prototype.getResult = function(){
 function invalidateDataList(dataList){
     if(dataList.dataListResult){
         dataList.dataListResult = null;
-        for(var i = 0; i < dataList.listener.length; ++i){
-            dataList.listener[i].onDataListChange(this);
-        }
+    }
+    for(var i = 0; i < dataList.listener.length; ++i){
+        dataList.listener[i].onDataListChange(this);
     }
 }
 

@@ -35,15 +35,16 @@
         return true;
     }
 
-    Xflow.Executer.prototype.run = function(){
+
+    Xflow.Executer.prototype.run = function(asyncCallback){
         runSubNodes(this);
         updateIterateState(this);
 
         this.program = Xflow.createProgram(this.operatorList);
 
         if(this.program){
-            this.operatorList.allocateOutput(this.programData);
-            this.program.run(this.programData);
+            this.operatorList.allocateOutput(this.programData, !!asyncCallback);
+            this.program.run(this.programData, asyncCallback);
         }
         var i = this.mergedOutputNodes.length;
         while(i--){
@@ -173,7 +174,6 @@
 
         for(var i = 0; i < cData.constructionOrder.length; ++i){
             var node = cData.constructionOrder[i];
-            var currentIdx = i;
 
             var entry = new Xflow.OperatorEntry(node.operator);
 

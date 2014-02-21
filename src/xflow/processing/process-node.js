@@ -5,6 +5,13 @@
 // Xflow.ProcessNode
 //----------------------------------------------------------------------------------------------------------------------
 
+var ASYNC_PROCESS_STATE = {
+    IDLE : 0,
+    RUNNING : 1,
+    RESCHEDULED : 2
+}
+
+
 /**
  * @constructor
  * @extends {Xflow.GraphNode}
@@ -19,20 +26,58 @@ Xflow.ProcessNode = function(channelNode){
     this.children = [];
     this.descendants = [];
     this.executers = [];
+    this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
     constructProcessNode(this, channelNode);
+    if(Xflow.isOperatorAsync(this.operator)){
+        this._bindedAsyncCallback = this.receiveAsyncProcessing.bind(this);
+        this.startAsyncProcessing();
+
+    }
 };
 var ProcessNode = Xflow.ProcessNode;
 
 ProcessNode.prototype.onXflowChannelChange = function(channel, state){
-    if(state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE &&
-        this.status > Xflow.PROCESS_STATE.UNPROCESSED)
-        this.status = Xflow.PROCESS_STATE.UNPROCESSED;
-    else
-        this.status = Xflow.PROCESS_STATE.MODIFIED;
+    if(Xflow.isOperatorAsync(this.operator)){
+        Xflow.startAsyncProcessing(this);
+    }
+    else{
+        if(state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE &&
+            this.status > Xflow.PROCESS_STATE.UNPROCESSED)
+            this.status = Xflow.PROCESS_STATE.UNPROCESSED;
+        else
+            this.status = Xflow.PROCESS_STATE.MODIFIED;
+        this.notifyOutputChanged(state);
+    }
+}
+
+ProcessNode.prototype.startAsyncProcessing = function(){
+    if(this.asyncProcessState == ASYNC_PROCESS_STATE.IDLE){
+        this.asyncProcessState = ASYNC_PROCESS_STATE.RUNNING;
+        this.process(this._bindedAsyncCallback);
+    }
+    else{
+        this.asyncProcessState = ASYNC_PROCESS_STATE.RESCHEDULED;
+    }
+}
+ProcessNode.prototype.receiveAsyncProcessing = function(){
+    this.notifyOutputChanged(Xflow.DATA_ENTRY_STATE.CHANGED_SIZE);
+    if(this.asyncProcessState == ASYNC_PROCESS_STATE.RESCHEDULED){
+        this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
+        this.startAsyncProcessing();
+    }
+    else{
+        this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
+    }
+}
+
+
+
+ProcessNode.prototype.notifyOutputChanged = function(state){
     for(var name in this.outputDataSlots){
         this.outputDataSlots[name].notifyOnChange(state);
     }
 }
+
 
 ProcessNode.prototype.clear = function(){
     for(var name in this.inputChannels){
@@ -42,9 +87,11 @@ ProcessNode.prototype.clear = function(){
 
 ProcessNode.prototype.updateState = function(){
     if(this.status == Xflow.PROCESS_STATE.MODIFIED){
-        this.status = Xflow.PROCESS_STATE.UNPROCESSED
+        this.status = Xflow.PROCESS_STATE.UNPROCESSED;
 
-        if(this.owner.loading)
+        if(Xflow.isOperatorAsync(this.operator))
+            this.status = Xflow.PROCESS_STATE.LOADING;
+        else if(this.owner.loading)
             this.status = Xflow.PROCESS_STATE.LOADING;
         else{
             for(var i = 0; i < this.children.length; ++i){
@@ -61,13 +108,12 @@ ProcessNode.prototype.updateState = function(){
     return this.status;
 }
 
-ProcessNode.prototype.process = function(){
-    // TODO: Fix this with respect to states
+ProcessNode.prototype.process = function(asyncCallback){
     var executer;
 
     if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
         executer = getOrCreateExecuter(this, this.owner.platform);
-        executer.run();
+        executer.run(asyncCallback);
 
         this.status = Xflow.PROCESS_STATE.PROCESSED;
     }
@@ -156,18 +202,22 @@ function synchronizeChildren(children, descendants, inputChannels){
 }
 
 function synchronizeOutput(operator, outputs){
+    var async = Xflow.isOperatorAsync(operator);
     for(var i in operator.outputs){
         var d = operator.outputs[i];
 
-        var entry;
+        var entry, asyncEntry;
         var type = d.type;
         if(type != Xflow.DATA_TYPE.TEXTURE){
             entry = new Xflow.BufferEntry(type, null);
+            if(async) asyncEntry = new Xflow.BufferEntry(type, null);
         }
         else{
             entry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
+            if(async) asyncEntry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
         }
         outputs[d.name] = new Xflow.DataSlot(entry, 0);
+        if(async) outputs[d.name].asyncDataEntry = asyncEntry;
     }
 }
 
@@ -176,7 +226,6 @@ function getOrCreateExecuter(node, platform){
         node.executers[platform] = new Xflow.Executer(node, platform);
     }
     return node.executers[platform];
-
 }
 
 

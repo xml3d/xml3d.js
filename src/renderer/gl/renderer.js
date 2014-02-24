@@ -198,7 +198,8 @@
         },
         renderToCanvas: function () {
             this.prepareRendering();
-            var stats = this.renderInterface.getRenderPipeline().render(this.scene);
+            this.renderInterface.getRenderPipeline().render(this.scene);
+            var stats = this.renderInterface.getRenderPipeline().getRenderStats();
             XML3D.debug.logDebug("Rendered to Canvas");
             this.needsDraw = false;
             return stats;

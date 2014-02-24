@@ -9,6 +9,7 @@
         this.sorter = new webgl.ObjectSorter();
         this.reassignShadowMaps = {};
         this.lightPasses = {};
+        this.lastRenderStats = {};
     };
     XML3D.createClass(ForwardRenderPass, webgl.SceneRenderPass);
 
@@ -106,9 +107,13 @@
                 }
                 scene.lights.changed = false;
                 target.unbind();
-                return { count: count };
+                this.lastRenderStats.count = count;
             }
-        }())
+        }()),
+
+        getRenderStats: function(){
+            return this.lastRenderStats;
+        }
 
     });
 

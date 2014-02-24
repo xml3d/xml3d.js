@@ -133,6 +133,10 @@
         render: function(scene){
             this.mainPass.setProcessed(false);
             webgl.RenderPipeline.prototype.render.call(this, scene);
+        },
+
+        getRenderStats: function(){
+            return this.mainPass.getRenderStats();
         }
     });
 

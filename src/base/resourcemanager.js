@@ -460,8 +460,6 @@
 
         var handle = new XML3D.base.AdapterHandle(uri);
         c_cachedAdapterHandles[uri][adapterType][canvasId] = handle;
-        var counterObject = getOrCreateCounterObject(canvasId);
-        counterObject.counter++;
 
         if (uri.isLocal()) {
             var node = XML3D.URIResolver.resolveLocal(uri);
@@ -471,6 +469,9 @@
                 handle.setAdapter(null, XML3D.base.AdapterHandle.STATUS.NOT_FOUND);
         }
         else {
+            var counterObject = getOrCreateCounterObject(canvasId);
+            counterObject.counter++;
+
             var docURI = uri.toStringWithoutFragment();
             var docData = c_cachedDocuments[docURI];
             if (docData && docData.response) {

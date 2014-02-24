@@ -205,7 +205,7 @@ XML3D.shaders.register("phong", {
         directives.push("MAX_POINTLIGHTS " + pointLights);
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
         directives.push("MAX_SPOTLIGHTS " + spotLights);
-        directives.push("HAS_SPOTLIGHT_SHADOWMAPS " + (!lights.spot.every(function(light) { return !light.castShadow; }) | 0));
+        directives.push("HAS_SPOTLIGHT_SHADOWMAPS " + (lights.spot && !lights.spot.every(function(light) { return !light.castShadow; }) | 0));
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
         directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));

@@ -3,8 +3,8 @@
     /**
      * @constructor
      */
-    var SceneRenderPass = function (pipeline, output, opt) {
-        webgl.BaseRenderPass.call(this, pipeline, output, opt);
+    var SceneRenderPass = function (renderInterface, output, opt) {
+        webgl.BaseRenderPass.call(this, renderInterface, output, opt);
     };
 
     XML3D.createClass(SceneRenderPass, webgl.BaseRenderPass, {
@@ -25,7 +25,7 @@
                 var primitiveCount = 0;
                 var stats = opt.stats || {};
                 var transparent = opt.transparent === true || false;
-                var gl = this.pipeline.context.gl;
+                var gl = this.renderInterface.context.gl;
                 var program = opt.program || objectArray[0].getProgram();
 
                 if (objectArray.length == 0) {

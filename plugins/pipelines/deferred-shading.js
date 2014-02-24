@@ -96,35 +96,18 @@
     };
     var targetNames = ["deferred0", "deferred1", "deferred2", "deferred3", "deferred4", "deferred5", "deferred6", "deferred7"];
 
-    var DeferredPipeline = function (context, scene) {
-        if (!context.extensions['WEBGL_draw_buffers']
-            || !context.extensions['OES_texture_float']
-            || !context.extensions['WEBGL_depth_texture'])
-            XML3D.debug.logError("Deferred shading is not supported due to missing WebGL extensions. Sorry!");
-
-        webgl.RenderPipeline.call(this, context);
-        this.scene = scene;
+    var DeferredEnv = function(scene){
+        this.gbufferTarget = null;
+        this.lightPassProgram = null;
+        this.uniformSetter = null;
         scene.addEventListener(webgl.Scene.EVENT_TYPE.SHADER_CHANGED, this.onShaderChange.bind(this));
         scene.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_INITIALIZED, this.onShaderChange.bind(this));
 
         scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightChange.bind(this));
         scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightChange.bind(this));
-        this.gbufferPass = null;
-        this.shadePass = null;
 
-        this.createRenderPasses();
     };
-
-    XML3D.createClass(DeferredPipeline, webgl.RenderPipeline);
-
-    XML3D.extend(DeferredPipeline.prototype, {
-        init: function () {
-            var context = this.context;
-            this.createLightPassProgram(this.scene);
-            this.gbufferTarget = createFrameBuffer(context);
-            this.gbufferPass.init(context);
-            this.shadePass.init(context)
-        },
+    XML3D.extend(DeferredEnv.prototype, {
 
         createLightPassProgram: function (scene) {
             var contextData = {
@@ -165,21 +148,56 @@
             console.log(source.fragment);
         },
 
+        setLightPassUniformVariables: function (envNames, sysNames, inputCollection) {
+            this.uniformSetter(envNames, sysNames, inputCollection, this.lightPassProgram.setUniformVariable.bind(this.lightPassProgram));
+        },
+
         onShaderChange: function (event) {
             this.createLightPassProgram(event.target);
             this.onLightChange(event);
         },
 
         onLightChange: function (event) {
-            this.setUniformVariables([], webgl.GLScene.LIGHT_PARAMETERS, {
+            this.setLightPassUniformVariables([], webgl.GLScene.LIGHT_PARAMETERS, {
                 envBase: {},
                 sysBase: event.target.systemUniforms
-            }, this.lightPassProgram.setUniformVariable.bind(this.lightPassProgram));
+            });
+        }
+    });
+
+
+    var DeferredPipeline = function (renderInterface) {
+        var context = renderInterface.context,
+            scene = renderInterface.scene;
+        if (!context.extensions['WEBGL_draw_buffers']
+            || !context.extensions['OES_texture_float']
+            || !context.extensions['WEBGL_depth_texture'])
+            XML3D.debug.logError("Deferred shading is not supported due to missing WebGL extensions. Sorry!");
+
+        webgl.RenderPipeline.call(this, renderInterface);
+        this.scene = scene;
+        this.env = new DeferredEnv(scene);
+
+        this.gbufferPass = null;
+        this.shadePass = null;
+
+        this.createRenderPasses();
+    };
+
+    XML3D.createClass(DeferredPipeline, webgl.RenderPipeline);
+
+    XML3D.extend(DeferredPipeline.prototype, {
+        init: function () {
+            var context = this.renderInterface.context;
+            this.env.createLightPassProgram(this.scene);
+            this.env.gbufferTarget = createFrameBuffer(context);
+            this.gbufferPass.output = this.gbufferTarget;
+            this.shadePass.init(context)
         },
 
         createRenderPasses: function() {
-            this.gbufferPass = new webgl.GBufferPass(this);
-            this.shadePass = new webgl.DeferredShadingPass(this);
+            this.gbufferPass = new webgl.GBufferPass(this.renderInterface, this.env);
+            this.shadePass = new webgl.DeferredShadingPass(this.renderInterface, this.env);
             this.addRenderPass(this.gbufferPass);
             this.addRenderPass(this.shadePass);
         },
@@ -188,26 +206,22 @@
             this.gbufferPass.setProcessed(false);
             this.shadePass.setProcessed(false);
             webgl.RenderPipeline.prototype.render.call(this, scene);
-        },
-
-        setUniformVariables: function (envNames, sysNames, inputCollection) {
-            this.uniformSetter(envNames, sysNames, inputCollection, this.lightPassProgram.setUniformVariable.bind(this.lightPassProgram));
         }
 
     });
 
     webgl.DeferredPipeline = DeferredPipeline;
 
-    var GBufferPass = function (pipeline) {
-        webgl.BaseRenderPass.call(this, pipeline);
+    var GBufferPass = function (renderInterface, deferredEnv) {
+        webgl.BaseRenderPass.call(this, renderInterface);
+        this.env = deferredEnv;
+        this.posProgram = this.renderInterface.context.programFactory.getProgramByName("positionShader");
     };
 
     XML3D.createClass(GBufferPass, webgl.BaseRenderPass);
 
     XML3D.extend(GBufferPass.prototype, {
-        init: function(context) {
-            this.output = this.pipeline.gbufferTarget;
-            this.pipeline.addShader("position", context.programFactory.getProgramByName("positionShader"));
+        init: function() {
         },
 
         render: (function () {
@@ -216,7 +230,7 @@
             var programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth", "cameraPosition"];
 
             return function (scene) {
-                var gl = this.pipeline.context.gl,
+                var gl = this.renderInterface.context.gl,
                     target = this.output,
                     systemUniforms = scene.systemUniforms,
                     width = target.getWidth(),
@@ -264,7 +278,7 @@
 
             return function (objectArray, scene, systemUniforms, sceneParameterFilter) {
                 var program = objectArray[0].getProgram();
-//                var program = this.pipeline.getShader("position");
+//                var program = this.posProgram
                 if (objectArray.length === 0) {
                     return;
                 }
@@ -309,8 +323,9 @@
 
     webgl.GBufferPass = GBufferPass;
 
-    var ShadePass = function (pipeline) {
-        webgl.BaseRenderPass.call(this, pipeline);
+    var ShadePass = function (renderInterface, deferredEnv) {
+        webgl.BaseRenderPass.call(this, renderInterface);
+        this.env = deferredEnv;
     };
 
     XML3D.createClass(ShadePass, webgl.BaseRenderPass);
@@ -329,12 +344,12 @@
             var viewToWorldMatrix = XML3D.math.mat4.create();
             var projectionMatrix = XML3D.math.mat4.create();
             return function (scene) {
-                var gl = this.pipeline.context.gl;
+                var gl = this.renderInterface.context.gl;
                 var aspect = this.output.width / this.output.height;
 
                 var renderTargetUniforms= {};
                 for (var i = 0; i < targetNames.length; ++i)
-                    renderTargetUniforms[targetNames[i]] = [this.pipeline.gbufferTarget.colorTargetHandles[i]];
+                    renderTargetUniforms[targetNames[i]] = [this.env.gbufferTarget.colorTargetHandles[i]];
 
                 scene.getActiveView().getWorldToViewMatrix(worldToViewMatrix);
                 scene.getActiveView().getViewToWorldMatrix(viewToWorldMatrix )
@@ -348,10 +363,10 @@
 
                 this.output.bind();
                 gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
-                var program = this.pipeline.lightPassProgram;
+                var program = this.env.lightPassProgram;
                 program.bind();
 
-                this.pipeline.setUniformVariables(targetNames, systemUniformNames, {
+                this.env.setLightPassUniformVariables(targetNames, systemUniformNames, {
                     envBase: renderTargetUniforms,
                     sysBase: systemUniforms
                 });

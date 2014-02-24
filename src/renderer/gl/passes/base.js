@@ -4,17 +4,17 @@
     /**
      * @constructor
      */
-    var BaseRenderPass = function(pipeline, output, opt) {
+    var BaseRenderPass = function(renderInterface, output, opt) {
         opt = opt || {};
         this.inputs = opt.inputs || {};
         this.output = output;
-        this.pipeline = pipeline;
+        this.renderInterface = renderInterface;
         this.prePasses = [];
         this.postPasses = [];
         this.processed = false;
 
 
-        var gl = pipeline.context.gl;
+        var gl = renderInterface.context.gl;
         this.clearBits = gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT;
     };
 
@@ -73,7 +73,7 @@
             var c_data = new Uint8Array(8);
 
             return function (glX, glY, target) {
-                var gl = this.pipeline.context.gl;
+                var gl = this.renderInterface.context.gl;
                 var scale = target.getScale();
                 var x = glX * scale;
                 var y = glY * scale;
@@ -89,11 +89,7 @@
                     return null;
                 }
             }
-        }()),
-
-        setRenderPipeline: function(pipeline) {
-            this.pipeline = pipeline;
-        }
+        }())
 
     });
 

@@ -8,9 +8,10 @@
      * @extends {SceneRenderPass}
      * @constructor
      */
-    var LightPass = function (pipeline, output, light, opt) {
-        webgl.SceneRenderPass.call(this, pipeline, output, opt);
+    var LightPass = function (renderInterface, output, light, opt) {
+        webgl.SceneRenderPass.call(this, renderInterface, output, opt);
         this.light = light;
+        this.program = null;
     };
 
     XML3D.createClass(LightPass, webgl.SceneRenderPass, {
@@ -18,9 +19,7 @@
         init: function (context) {
             this.sorter = new webgl.ObjectSorter();
             console.log("Init LightPass")
-            var shader = context.programFactory.getProgramByName("light-depth");
-            this.pipeline.addShader("light-depth", shader);
-
+            this.program = context.programFactory.getProgramByName("light-depth");
         },
 
         render:  (function () {
@@ -29,13 +28,13 @@
             var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth"];
 
             return function (scene) {
-                var gl = this.pipeline.context.gl,
+                var gl = this.renderInterface.context.gl,
                     target = this.output,
                     width = target.getWidth(),
                     height = target.getHeight(),
                     aspect = width / height,
                     frustum = this.light.getFrustum(aspect),
-                    program = this.pipeline.getShader("light-depth");
+                    program = this.program;
 
                 console.log("Update Shadow Map!");
                 target.bind();

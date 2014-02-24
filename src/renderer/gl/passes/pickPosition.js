@@ -1,7 +1,7 @@
 (function(webgl){
 
-    var PickPositionRenderPass = function(pipeline, output, opt) {
-        webgl.BaseRenderPass.call(this, pipeline, output, opt);
+    var PickPositionRenderPass = function(renderInterface, output, opt) {
+        webgl.BaseRenderPass.call(this, renderInterface, output, opt);
         this.objectBoundingBox = XML3D.math.bbox.create();
     };
     XML3D.createClass(PickPositionRenderPass, webgl.BaseRenderPass, {
@@ -13,7 +13,7 @@
                 c_systemUniformNames = ["bbox", "modelMatrix", "modelViewProjectionMatrix"];
 
             return function(obj, viewMatrix, projMatrix) {
-                var gl = this.pipeline.context.gl,
+                var gl = this.renderInterface.context.gl,
                     target = this.output;
 
                 target.bind();
@@ -31,7 +31,7 @@
                 obj.getObjectSpaceBoundingBox(this.objectBoundingBox);
                 XML3D.math.bbox.transform(this.objectBoundingBox, c_modelMatrix, this.objectBoundingBox);
 
-                var program = this.pipeline.context.programFactory.getPickingPositionProgram();
+                var program = this.renderInterface.context.programFactory.getPickingPositionProgram();
                 program.bind();
                 obj.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 

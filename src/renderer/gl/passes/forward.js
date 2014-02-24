@@ -4,8 +4,8 @@
      *
      * @constructor
      */
-    var ForwardRenderPass = function (pipeline, output, opt) {
-        webgl.SceneRenderPass.call(this, pipeline, output, opt);
+    var ForwardRenderPass = function (renderInterface, output, opt) {
+        webgl.SceneRenderPass.call(this, renderInterface, output, opt);
         this.sorter = new webgl.ObjectSorter();
         this.reassignShadowMaps = {};
         this.lightPasses = {};
@@ -65,7 +65,7 @@
             var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "screenWidth", "cameraPosition", "coords"];
 
             return function (scene) {
-                var gl = this.pipeline.context.gl,
+                var gl = this.renderInterface.context.gl,
                     count = { objects: 0, primitives: 0 },
                     target = this.output,
                     systemUniforms = scene.systemUniforms,

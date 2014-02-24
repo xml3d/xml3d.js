@@ -6,9 +6,9 @@
      * @param {GLScene} scene
      * @constructor
      */
-    var ForwardRenderPipeline = function (context, scene) {
-        webgl.RenderPipeline.call(this, context);
-
+    var ForwardRenderPipeline = function (renderInterface) {
+        webgl.RenderPipeline.call(this, renderInterface);
+        var scene = renderInterface.scene;
         scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChange.bind(this));
         scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChange.bind(this));
         scene.addEventListener(webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChange.bind(this));
@@ -23,7 +23,7 @@
 
     XML3D.extend(ForwardRenderPipeline.prototype, {
         init: function() {
-            var context = this.context;
+            var context = this.renderInterface.context
             this.renderPasses.forEach(function(pass) {
                 if (pass.init) {
                     pass.init(context);
@@ -63,7 +63,7 @@
         },
 
         createLightPass: function(light){
-            var context = this.context
+            var context = this.renderInterface.context
             var lightFramebuffer  = new webgl.GLRenderTarget(context, {
                 width: 2048,
                 height: 2048,
@@ -72,13 +72,13 @@
                 stencilFormat: null,
                 depthAsRenderbuffer: true
             });
-            var lightPass = new webgl.LightPass(this, lightFramebuffer, light);
+            var lightPass = new webgl.LightPass(this.renderInterface, lightFramebuffer, light);
             lightPass.init(context);
             return lightPass;
         },
 
         reassignLightPasses: function(scene){
-            var context = this.context;
+            var context = this.renderInterface.context;
 
             this.mainPass.clearLightPasses();
             for (var i = 0; i < scene.lights.spot.length; i++) {
@@ -87,38 +87,10 @@
             }
         },
 
-        /**
-         * @param {GLScene} scene
-         */
-        initLightMaps: function(evt) {
-            var scene = evt.target,
-                context = this.context
-
-            if(this.lightPass)
-                return;
-
-            for (var i = 0; i < scene.lights.spot.length; i++) {
-                var spotLight = scene.lights.spot[i];
-                if (spotLight.castShadow) {
-                    var lightFramebuffer  = new webgl.GLRenderTarget(context, {
-                        width: 2048,
-                        height: 2048,
-                        colorFormat: context.gl.RGBA,
-                        depthFormat: context.gl.DEPTH_COMPONENT16,
-                        stencilFormat: null,
-                        depthAsRenderbuffer: true
-                    });
-                    this.addRenderTarget("spotLight" + i, lightFramebuffer);
-                    this.lightPass = new webgl.LightPass(this, "spotLight" + i, spotLight);
-                    this.addRenderPass(this.lightPass);
-                    this.lightPass.init(context);
-                }
-            }
-        },
-
         createMainPass: function() {
 
-            this.mainPass = new webgl.ForwardRenderPass(this, this.context.canvasTarget);
+            var outputTarget = this.renderInterface.context.canvasTarget;
+            this.mainPass = new webgl.ForwardRenderPass(this.renderInterface, outputTarget);
 //            webgl.GLRenderTarget(this.context, {
 //                width: 1024,
 //                height: 1024,

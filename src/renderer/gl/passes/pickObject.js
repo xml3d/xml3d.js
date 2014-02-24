@@ -1,7 +1,7 @@
 (function (webgl) {
 
-    var PickObjectRenderPass = function (pipeline, output, opt) {
-        webgl.BaseRenderPass.call(this, pipeline, output, opt);
+    var PickObjectRenderPass = function (renderInterface, output, opt) {
+        webgl.BaseRenderPass.call(this, renderInterface, output, opt);
     };
     XML3D.createClass(PickObjectRenderPass, webgl.BaseRenderPass);
 
@@ -12,7 +12,7 @@
                 c_systemUniformNames = ["id", "modelViewProjectionMatrix"];
 
             return function (objects, viewMatrix, projMatrix) {
-                var gl = this.pipeline.context.gl,
+                var gl = this.renderInterface.context.gl,
                     target = this.output;
                 target.bind();
 
@@ -22,7 +22,7 @@
                 gl.viewport(0, 0, target.getWidth(), target.getHeight());
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                var program = this.pipeline.context.programFactory.getPickingObjectIdProgram();
+                var program = this.renderInterface.context.programFactory.getPickingObjectIdProgram();
                 program.bind();
                 for (var j = 0, n = objects.length; j < n; j++) {
                     var obj = objects[j];

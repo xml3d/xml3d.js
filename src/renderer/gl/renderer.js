@@ -89,21 +89,26 @@
             this.width = width;
             this.height = height;
             this.context.handleResizeEvent(width, height);
-            this.createDefaultPipelines(this.context);
+            this.createDefaultPipelines();
             this.scene.handleResizeEvent(width, height);
             this.needsDraw = this.needsPickingDraw = true;
         },
         createDefaultPipelines: function () {
-            var pipeline = new XML3D.webgl.ForwardRenderPipeline(this.context, this.scene);
+            var pipeline = new XML3D.webgl.ForwardRenderPipeline(this.renderInterface);
             pipeline.init();
             this.renderInterface.setRenderPipeline(pipeline);
 
-            var pickingPipeline = new XML3D.webgl.PickingRenderPipeline(this.context);
-            pickingPipeline.addRenderPass(this.pickObjectPass = new webgl.PickObjectRenderPass(pickingPipeline, pickingPipeline.getPickTarget()));
-            pickingPipeline.addRenderPass(this.pickPositionPass = new webgl.PickPositionRenderPass(pickingPipeline, pickingPipeline.getPickTarget()));
-            pickingPipeline.addRenderPass(this.pickNormalPass = new webgl.PickNormalRenderPass(pickingPipeline, pickingPipeline.getPickTarget()));
-            pickingPipeline.init();
-            this.pickingPipeline = pickingPipeline;
+            var pickTarget = new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
+                width: this.context.canvasTarget.width,
+                height: this.context.canvasTarget.height,
+                colorFormat: this.context.gl.RGBA,
+                depthFormat: this.context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
+            this.pickObjectPass = new webgl.PickObjectRenderPass(this.renderInterface, pickTarget);
+            this.pickPositionPass = new webgl.PickPositionRenderPass(this.renderInterface, pickTarget);
+            this.pickNormalPass = new webgl.PickNormalRenderPass(this.renderInterface, pickTarget);
         },
         createRenderInterface: function () {
             return new XML3D.webgl.RenderInterface(this.context, this.scene);

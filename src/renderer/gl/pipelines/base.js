@@ -1,15 +1,15 @@
 (function (webgl) {
 
-    var RenderPipeline = function (context) {
+    var RenderPipeline = function (renderInterface) {
         this.renderPasses = [];
         this.shaders = {};
-        this.context = context;
+        this.renderInterface = renderInterface;
     };
 
     XML3D.extend(RenderPipeline.prototype, {
 
         init: function(scene) {
-            var context = this.context;
+            var context = this.renderInterface.context;
             this.renderPasses.forEach(function(pass) {
                 if (pass.init) {
                     pass.init(context);
@@ -23,7 +23,6 @@
             } else {
                 this.renderPasses.push(pass);
             }
-            pass.setRenderPipeline(this);
         },
 
         removeRenderPass: function(pass) {

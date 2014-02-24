@@ -1,7 +1,7 @@
 (function (webgl) {
 
-    var PickNormalRenderPass = function (pipeline, output, opt) {
-        webgl.BaseRenderPass.call(this, pipeline, output, opt);
+    var PickNormalRenderPass = function (renderInterface, output, opt) {
+        webgl.BaseRenderPass.call(this, renderInterface, output, opt);
     };
 
     XML3D.createClass(PickNormalRenderPass, webgl.BaseRenderPass, {
@@ -13,7 +13,7 @@
                 c_systemUniformNames = ["modelViewProjectionMatrix", "modelViewMatrixN"];
 
             return function (object, viewMatrix, projMatrix) {
-                var gl = this.pipeline.context.gl,
+                var gl = this.renderInterface.context.gl,
                     target = this.output;
 
                 target.bind();
@@ -37,7 +37,7 @@
                     XML3D.math.mat3.identity(c_normalMatrix3);
                 }
 
-                var program = this.pipeline.context.programFactory.getPickingNormalProgram();
+                var program = this.renderInterface.context.programFactory.getPickingNormalProgram();
                 program.bind();
 
                 c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;

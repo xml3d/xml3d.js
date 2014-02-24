@@ -129,8 +129,9 @@
 
     function canOperatorMerge(cData, operator, platform){
         // TODO: Detect merge support
-        return !cData.firstOperator ||
-            (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl);
+        return (platform == Xflow.PLATFORM.ASYNC || !Xflow.isOperatorAsync(operator)) &&
+            (!cData.firstOperator ||
+            (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl));
     }
 
     function blockSubtree(cData, node){

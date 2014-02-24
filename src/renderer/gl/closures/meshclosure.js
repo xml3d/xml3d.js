@@ -234,7 +234,9 @@
                 //XML3D.debug.logError("Mesh does not have 'position' attribute.", this.mesh, this.getMeshType());
             }
             else if(!this.dataNode.isSubtreeLoading()){
-                this.shaderClosure = this.shaderComposer.getShaderClosure(scene, this.objectShaderRequest);
+                var objectShaderResult = this.objectShaderRequest.getResult();
+                if(!objectShaderResult.loading)
+                    this.shaderClosure = this.shaderComposer.getShaderClosure(scene, this.objectShaderRequest);
             }
         },
 

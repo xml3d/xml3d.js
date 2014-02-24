@@ -356,7 +356,7 @@
         var operatorData = prepareOperatorData(this.list, 0, programData);
 
         if(asyncCallback)
-            applyAsyncOperator(this, programData, operatorData, asyncCallback);
+            applyAsyncOperator(this.entry, programData, operatorData, asyncCallback);
         else if(this.operator.evaluate_core){
             applyCoreOperation(this, programData, operatorData);
         }
@@ -378,7 +378,7 @@
             swapAsyncDataEntries(entry, programData);
             asyncCallback();
         });
-        entry.operator.evaluate.apply(operatorData, args);
+        entry.operator.evaluate_async.apply(operatorData, args);
     }
 
     function applyCoreOperation(program, programData, operatorData){

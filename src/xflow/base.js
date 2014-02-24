@@ -212,7 +212,8 @@ var Xflow = {};
     Xflow.PLATFORM = {
         JAVASCRIPT: 0,
         GLSL: 1,
-        CL: 2
+        CL: 2,
+        ASYNC: 3
     };
 
     Xflow.PROCESS_STATE = {

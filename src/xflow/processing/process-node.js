@@ -8,7 +8,8 @@
 var ASYNC_PROCESS_STATE = {
     IDLE : 0,
     RUNNING : 1,
-    RESCHEDULED : 2
+    RESCHEDULED : 2,
+    INIT: 3
 }
 
 
@@ -26,19 +27,18 @@ Xflow.ProcessNode = function(channelNode){
     this.children = [];
     this.descendants = [];
     this.executers = [];
-    this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
+    this.asyncProcessState = ASYNC_PROCESS_STATE.INIT;
     constructProcessNode(this, channelNode);
     if(Xflow.isOperatorAsync(this.operator)){
         this._bindedAsyncCallback = this.receiveAsyncProcessing.bind(this);
-        this.startAsyncProcessing();
-
     }
 };
 var ProcessNode = Xflow.ProcessNode;
 
 ProcessNode.prototype.onXflowChannelChange = function(channel, state){
     if(Xflow.isOperatorAsync(this.operator)){
-        Xflow.startAsyncProcessing(this);
+        if(this.asyncProcessState != ASYNC_PROCESS_STATE.INIT)
+            this.startAsyncProcessing();
     }
     else{
         if(state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE &&
@@ -51,15 +51,17 @@ ProcessNode.prototype.onXflowChannelChange = function(channel, state){
 }
 
 ProcessNode.prototype.startAsyncProcessing = function(){
-    if(this.asyncProcessState == ASYNC_PROCESS_STATE.IDLE){
+    if(this.asyncProcessState == ASYNC_PROCESS_STATE.IDLE || this.asyncProcessState == ASYNC_PROCESS_STATE.INIT){
         this.asyncProcessState = ASYNC_PROCESS_STATE.RUNNING;
-        this.process(this._bindedAsyncCallback);
+        var executer = getOrCreateExecuter(this, Xflow.PLATFORM.ASYNC);
+        executer.run(this._bindedAsyncCallback);
     }
     else{
         this.asyncProcessState = ASYNC_PROCESS_STATE.RESCHEDULED;
     }
 }
 ProcessNode.prototype.receiveAsyncProcessing = function(){
+    this.status = Xflow.PROCESS_STATE.PROCESSED;
     this.notifyOutputChanged(Xflow.DATA_ENTRY_STATE.CHANGED_SIZE);
     if(this.asyncProcessState == ASYNC_PROCESS_STATE.RESCHEDULED){
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
@@ -68,6 +70,7 @@ ProcessNode.prototype.receiveAsyncProcessing = function(){
     else{
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
     }
+    Xflow._callListedCallback();
 }
 
 
@@ -89,9 +92,7 @@ ProcessNode.prototype.updateState = function(){
     if(this.status == Xflow.PROCESS_STATE.MODIFIED){
         this.status = Xflow.PROCESS_STATE.UNPROCESSED;
 
-        if(Xflow.isOperatorAsync(this.operator))
-            this.status = Xflow.PROCESS_STATE.LOADING;
-        else if(this.owner.loading)
+        if(this.owner.loading)
             this.status = Xflow.PROCESS_STATE.LOADING;
         else{
             for(var i = 0; i < this.children.length; ++i){
@@ -103,17 +104,23 @@ ProcessNode.prototype.updateState = function(){
             if(this.status > Xflow.PROCESS_STATE.INVALID &&
                 !checkInput(this, this.operator, this.owner.owner._computeInputMapping, this.inputChannels))
                 this.status = Xflow.PROCESS_STATE.INVALID;
+
+            if(this.status == Xflow.PROCESS_STATE.UNPROCESSED && Xflow.isOperatorAsync(this.operator)){
+                this.status = Xflow.PROCESS_STATE.LOADING;
+                this.startAsyncProcessing();
+            }
+
         }
     }
     return this.status;
 }
 
-ProcessNode.prototype.process = function(asyncCallback){
+ProcessNode.prototype.process = function(){
     var executer;
 
     if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
         executer = getOrCreateExecuter(this, this.owner.platform);
-        executer.run(asyncCallback);
+        executer.run();
 
         this.status = Xflow.PROCESS_STATE.PROCESSED;
     }

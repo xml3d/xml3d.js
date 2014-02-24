@@ -225,6 +225,8 @@ XML3D.createClass = function(ctor, parent, methods) {
 
     function onLoad() {
 
+        XML3D.options.setOptionsFromQuery();
+
         XML3D.css.init();
 
         var debug = XML3D.debug.setup();

@@ -1,28 +1,19 @@
 (function (webgl) {
 
+    var OPTION_FRUSTUM_CULLING = "renderer.frustum-culling";
+    var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shade.js.extractUniformExpressions";
+    var OPTION_SHADEJS_TRANSFORM_SPACES =  "shade.js.transformSpaces";
+
 
     // All the shader flags
-    var FLAGS = {
-        "shade.js.extractUniformExpressions" : {defaultValue: false, recompileOnChange: true },
-        "shade.js.transformSpaces" : {defaultValue: true, recompileOnChange: true }
-    };
+    var FLAGS = {};
+    FLAGS[OPTION_SHADEJS_EXTRACT_UNIFORMS] = {defaultValue: false, recompileOnChange: true };
+    FLAGS[OPTION_SHADEJS_TRANSFORM_SPACES] = {defaultValue: true, recompileOnChange: true };
+    FLAGS[OPTION_FRUSTUM_CULLING] = {defaultValue: true, recompileOnChange: false };
+
     for(var flag in FLAGS){
-        XML3D.flags.register(flag, FLAGS[flag].defaultValue);
+        XML3D.options.register(flag, FLAGS[flag].defaultValue);
     }
-
-
-    var StateMachine = window.StateMachine;
-
-    var omitCulling = (function () {
-        var params = {},
-            p = window.location.search.substr(1).split('&');
-
-        p.forEach(function (e, i, a) {
-            var keyVal = e.split('=');
-            params[keyVal[0].toLowerCase()] = decodeURIComponent(keyVal[1]);
-        });
-        return params.hasOwnProperty("xml3d_noculling");
-    }());
 
 
     /**
@@ -47,6 +38,7 @@
         this.systemUniforms = {};
         this.deferred = window['XML3D_DEFERRED'] || false;
         this.colorClosureSignatures = [];
+        this.doFrustumCulling = !!XML3D.options.getValue(OPTION_FRUSTUM_CULLING);
         this.addListeners();
     };
     var EVENT_TYPE = webgl.Scene.EVENT_TYPE;
@@ -200,7 +192,7 @@
                     var obj = readyObjects[i];
                     obj.updateModelViewProjectionMatrix(c_projMat_tmp);
                     obj.getWorldSpaceBoundingBox(c_bbox);
-                    obj.inFrustum = omitCulling ? true : c_frustumTest.isBoxVisible(c_bbox);
+                    obj.inFrustum = this.doFrustumCulling ? c_frustumTest.isBoxVisible(c_bbox) : true;
                 };
             }
         }()),
@@ -233,7 +225,7 @@
                 this.shaderFactory.setLightValueChanged();
                 this.context.requestRedraw("Light value changed.");
             });
-            XML3D.flags.addObserver(this.onFlagsChange.bind(this));
+            XML3D.options.addObserver(this.onFlagsChange.bind(this));
         },
         addChildEvent: function(child) {
             if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
@@ -260,6 +252,9 @@
         onFlagsChange: function(key, value){
             if(FLAGS[key] && FLAGS[key].recompileOnChange)
                 this.shaderFactory.setShaderRecompile();
+            if(key == OPTION_FRUSTUM_CULLING) {
+                this.doFrustumCulling = !!value;
+            }
         }
     });
     webgl.GLScene = GLScene;

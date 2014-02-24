@@ -172,8 +172,8 @@
                     propagateConstants: true,
                     validate: true,
                     sanitize: true,
-                    transformSpaces: XML3DFlags.getValue("shade.js.transformSpaces"),
-                    extractUniformExpressions: XML3DFlags.getValue("shade.js.extractUniformExpressions")
+                    transformSpaces: XML3D.options.getValue("shade.js.transformSpaces"),
+                    extractUniformExpressions: XML3D.options.getValue("shade.js.extractUniformExpressions")
                 };
 
                 workSet.analyze(contextData, implementation, options);

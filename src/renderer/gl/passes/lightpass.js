@@ -18,7 +18,6 @@
 
         init: function (context) {
             this.sorter = new webgl.ObjectSorter();
-            console.log("Init LightPass")
             this.program = context.programFactory.getProgramByName("light-depth");
         },
 
@@ -36,7 +35,6 @@
                     frustum = this.light.getFrustum(aspect),
                     program = this.program;
 
-                console.log("Update Shadow Map!");
                 target.bind();
                 gl.clear(this.clearBits);
                 gl.viewport(0, 0, width, height);

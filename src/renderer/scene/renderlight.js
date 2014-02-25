@@ -210,13 +210,9 @@
         getShadowMapLightMatrix: function(target) {
             var L = XML3D.math.mat4.create();
             this.getWorldToLightMatrix(L);
-            console.log("W2L", XML3D.math.mat4.str(L));
-
             var lightProjectionMatrix = XML3D.math.mat4.create();
             this.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
-
             XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
-            console.log("SMM", XML3D.math.mat4.str(target));
         },
 
         updateWorldMatrix: (function() {

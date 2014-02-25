@@ -7,7 +7,7 @@
      */
     var Options = function () {
         this._options = {};
-        this._listeners = [];
+        this._listeners = { "*": [] };
     };
 
     Options.prototype = {
@@ -41,17 +41,38 @@
             return Object.keys(this._options);
         },
         notifyObservers: function (key, value) {
-            for (var i = 0; i < this._listeners.length; ++i) {
-                this._listeners[i](key, value);
+            // Notify specific observers
+            if(this._listeners.hasOwnProperty(key)) {
+                this._listeners[key].forEach(function(l) {
+                   l(key, value);
+                });
             }
+            // Notify generic observers
+            this._listeners["*"].forEach(function(l) {
+               l(key, value);
+            });
         },
-        addObserver: function (observer) {
-            this._listeners.push(observer);
+        addObserver: function (key, observer) {
+            if(typeof key == 'function') {
+                observer = key;
+                key = "*"
+            }
+            if(!this._options.hasOwnProperty(key) && key !== "*") {
+                throw new Error("Can't register to unknown option '" + key + "'");
+            }
+            if(!this._listeners.hasOwnProperty(key)) {
+                this._listeners[key] = [];
+            }
+            this._listeners[key].push(observer);
         },
         removeObserver: function (observer) {
-            var idx = this._listeners.indexOf(observer);
-            if (idx != -1)
-                this._listeners.splice(idx, 1);
+            for(var filter in this._listeners) {
+                var listeners = this._listeners[filter];
+                var idx = listeners.indexOf(observer);
+                if (idx != -1)
+                    listeners.splice(idx, 1);
+            }
+
         }
     };
 

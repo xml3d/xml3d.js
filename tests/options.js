@@ -53,6 +53,26 @@ test("observer", 5, function() {
     stop();
     XML3D.options.setValue("option.observer", "newvalue");
     XML3D.options.removeObserver(callback);
+    XML3D.options.setValue("option.observer", "newvalue2");
+});
+
+
+test("filtered observer", 5, function() {
+    var callback = function(opt, value) {
+        ok(true, "Observer notified");
+        equal(opt, "option.option1", "correct option");
+        equal(value, "newvalue1", "correct value");
+        start();
+    };
+
+    XML3D.options.register("option.option1", "myValue1");
+    XML3D.options.register("option.option2", "myValue2");
+    XML3D.options.addObserver("option.option1", callback);
+    stop();
+    XML3D.options.setValue("option.option1", "newvalue1");
+    XML3D.options.setValue("option.option2", "newvalue2");
+    XML3D.options.removeObserver(callback);
+    XML3D.options.setValue("option.option1", "newvalue1");
 });
 
 test("reset", 8, function() {

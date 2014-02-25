@@ -55,6 +55,27 @@ test("observer", 5, function() {
     XML3D.options.removeObserver(callback);
 });
 
+test("reset", 8, function() {
+    var hasRun = false;
+    var callback = function(opt, value) {
+
+        ok(true, "Observer notified");
+        equal(opt, "option.reset", "correct option");
+        equal(value, hasRun? "myValue" : "newvalue", "correct value");
+        start();
+        hasRun = true;
+    };
+
+    XML3D.options.register("option.reset", "myValue");
+    XML3D.options.addObserver(callback);
+    stop();
+    XML3D.options.setValue("option.reset", "newvalue");
+    stop();
+    XML3D.options.resetValue("option.reset");
+    XML3D.options.removeObserver(callback);
+
+});
+
 test("as query string", 4, function() {
     var options = this.doc.defaultView.XML3D.options;
     notEqual(options.getKeys().indexOf("loglevel"), -1, "Loglevel set via query string");

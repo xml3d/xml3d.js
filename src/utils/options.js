@@ -1,12 +1,11 @@
 (function (ns) {
 
-
     /**
-     *
+     * Class to handle options. Currently only used for global options, could
+     * be extended to work hierarchically to configure other elements.
      * @constructor
      */
-    var Options = function (parent) {
-        this._parent = parent;
+    var Options = function () {
         this._options = {};
         this._listeners = [];
     };
@@ -15,23 +14,28 @@
         register: function (key, defaultValue) {
             if (this._options.hasOwnProperty(key))
                 throw new Error("Option already registered '" + key + "'");
-            this._options[key] = defaultValue;
+            this._options[key] = {
+                currentValue: defaultValue,
+                defaultValue: defaultValue
+            };
+        },
+        resetValue: function (key) {
+            if (!this._options.hasOwnProperty(key))
+                throw new Error("Invalid configuration key '" + key + "'");
+            this._options[key].currentValue = this._options[key].defaultValue;
+            this.notifyObservers(key, this._options[key].currentValue);
         },
         setValue: function (key, value) {
             if (!this._options.hasOwnProperty(key))
                 throw new Error("Invalid configuration key '" + key + "'");
-            this._options[key] = value;
+            this._options[key].currentValue = value;
             this.notifyObservers(key, value);
         },
         getValue: function (key) {
             if (!this._options.hasOwnProperty(key)) {
-                if (this._parent) {
-                    return this._parent.getValue();
-                } else {
-                    throw new Error("Invalid configuration key '" + key + "'");
-                }
+                throw new Error("Invalid configuration key '" + key + "'");
             }
-            return this._options[key];
+            return this._options[key].currentValue;
         },
         getKeys: function () {
             return Object.keys(this._options);
@@ -51,7 +55,7 @@
         }
     };
 
-    var GlobalOptions = new Options(null);
+    var GlobalOptions = new Options();
 
     GlobalOptions.setOptionsFromQuery = function () {
         var p = window.location.search.substr(1).split('&');

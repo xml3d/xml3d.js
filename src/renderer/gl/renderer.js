@@ -140,10 +140,10 @@
 
         getRenderObjectByRay: function(xml3dRay, viewMat, projMat) {
             var intersectedObjects = this.scene.findRayIntersections(xml3dRay);
-            this.pickObjectPass.renderObjects(intersectedObjects, viewMat, projMat);
+            this.pickObjectPass.render(intersectedObjects, viewMat, projMat);
             //Target the middle of the buffer
-            var x = Math.floor(this.pickObjectPass.target.getWidth() / 2 / this.pickObjectPass.target.getScale());
-            var y = Math.floor(this.pickObjectPass.target.getHeight() / 2 / this.pickObjectPass.target.getScale());
+            var x = Math.floor(this.pickObjectPass.output.getWidth() / 2 / this.pickObjectPass.output.getScale());
+            var y = Math.floor(this.pickObjectPass.output.getHeight() / 2 / this.pickObjectPass.output.getScale());
             return this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, intersectedObjects);
 
         },
@@ -151,18 +151,18 @@
         getWorldSpaceNormalByRay: function (ray, intersectedObject, viewMat, projMat) {
             if (!intersectedObject)
                 return null;
-            this.pickNormalPass.renderObject(intersectedObject, viewMat, projMat);
-            var x = Math.floor(this.pickNormalPass.target.getWidth() / 2 / this.pickNormalPass.target.getScale());
-            var y = Math.floor(this.pickNormalPass.target.getHeight() / 2 / this.pickNormalPass.target.getScale());
+            this.pickNormalPass.render(intersectedObject, viewMat, projMat);
+            var x = Math.floor(this.pickNormalPass.output.getWidth() / 2 / this.pickNormalPass.output.getScale());
+            var y = Math.floor(this.pickNormalPass.output.getHeight() / 2 / this.pickNormalPass.output.getScale());
             return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
 
         },
         getWorldSpacePositionByRay: function (ray, intersectedObject, viewMat, projMat) {
             if (!intersectedObject)
                 return null;
-            this.pickPositionPass.renderObject(intersectedObject, viewMat, projMat);
-            var x = Math.floor(this.pickPositionPass.target.getWidth() / 2 / this.pickPositionPass.target.getScale());
-            var y = Math.floor(this.pickPositionPass.target.getHeight() / 2 / this.pickPositionPass.target.getScale());
+            this.pickPositionPass.render(intersectedObject, viewMat, projMat);
+            var x = Math.floor(this.pickPositionPass.output.getWidth() / 2 / this.pickPositionPass.output.getScale());
+            var y = Math.floor(this.pickPositionPass.output.getHeight() / 2 / this.pickPositionPass.output.getScale());
             return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
 
         },
@@ -171,7 +171,7 @@
             this.rayCamera.updatePosition(ray.origin._data);
             this.rayCamera.updateOrientation( this.calculateOrientationForRayDirection(ray) );
             this.rayCamera.getWorldToViewMatrix(viewMat);
-            var aspect = this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight();
+            var aspect = this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight();
             this.rayCamera.getProjectionMatrix(projMat, aspect);
         },
 
@@ -213,7 +213,7 @@
             y = webgl.canvasToGlY(this.canvas, y);
             if(this.needsPickingDraw) {
                 this.prepareRendering();
-                this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight());
+                this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight());
                 this.pickObjectPass.render(this.scene.ready);
                 this.needsPickingDraw = false;
                 XML3D.debug.logDebug("Rendered Picking Buffer");

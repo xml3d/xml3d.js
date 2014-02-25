@@ -77,9 +77,8 @@
 
 
                 target.bind();
-                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+                this.setGLStates();
                 gl.viewport(0, 0, width, height);
-                gl.enable(gl.DEPTH_TEST);
 
                 scene.updateReadyObjectsFromActiveView(aspect);
                 scene.getActiveView().getWorldToViewMatrix(c_worldToViewMatrix);

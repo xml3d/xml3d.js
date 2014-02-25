@@ -1,8 +1,8 @@
 (function (webgl) {
 
-    var OPTION_FRUSTUM_CULLING = "renderer.frustum-culling";
-    var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shade.js.extractUniformExpressions";
-    var OPTION_SHADEJS_TRANSFORM_SPACES =  "shade.js.transformSpaces";
+    var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
+    var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
+    var OPTION_SHADEJS_TRANSFORM_SPACES =  "shadejs-transformSpaces";
 
 
     // All the shader flags

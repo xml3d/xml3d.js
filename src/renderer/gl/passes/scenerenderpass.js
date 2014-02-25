@@ -1,13 +1,43 @@
 (function (webgl) {
 
+    var OPTION_FACECULLING = "renderer-faceculling";
+    var OPTION_FRONTFACE = "renderer-frontface";
+
+    XML3D.options.register(OPTION_FACECULLING, "none");
+    XML3D.options.register(OPTION_FRONTFACE, "cw");
+
     /**
      * @constructor
      */
     var SceneRenderPass = function (renderInterface, output, opt) {
         webgl.BaseRenderPass.call(this, renderInterface, output, opt);
+
+        /**
+         * @type {function}
+         */
+        this.setFaceCulling = getGlobalFaceCullingSetter(XML3D.options.getValue(OPTION_FACECULLING));
+        /**
+         * @type {function}
+         */
+        this.setFrontFace = getGlobalFrontFaceSetter(XML3D.options.getValue(OPTION_FRONTFACE));
+
+        var that = this;
+        XML3D.options.addObserver(OPTION_FACECULLING, function (key, value) {
+            that.setFaceCulling = getGlobalFaceCullingSetter(value);
+        });
+        XML3D.options.addObserver(OPTION_FRONTFACE, function (key, value) {
+            that.setFrontFace = getGlobalFrontFaceSetter(value);
+        });
     };
 
     XML3D.createClass(SceneRenderPass, webgl.BaseRenderPass, {
+        setGLStates: function () {
+            var gl = this.renderInterface.context.gl;
+            gl.clear(this.clearBits);
+            this.setFaceCulling(gl);
+            this.setFrontFace(gl);
+            gl.enable(gl.DEPTH_TEST);
+        },
         /**
          * @param Array
          */
@@ -29,7 +59,7 @@
                 var program = opt.program || objectArray[0].getProgram();
 
                 if (objectArray.length == 0) {
-                    return;
+                    return stats;
                 }
 
                 if (transparent) {
@@ -92,6 +122,47 @@
 
 
     });
+
+    function getGlobalFrontFaceSetter(mode) {
+        if (mode.toLowerCase() == "cw") {
+            return function (gl) {
+                gl.frontFace(gl.CW);
+            };
+        }
+        return function (gl) {
+            gl.frontFace(gl.CCW);
+        };
+    }
+
+    function getGlobalFaceCullingSetter(mode) {
+        //noinspection FallthroughInSwitchStatementJS
+        switch (mode.toLowerCase()) {
+            case "back":
+                return function (gl) {
+                    gl.enable(gl.CULL_FACE);
+                    gl.cullFace(gl.BACK);
+                };
+                break;
+            case "front":
+                return function (gl) {
+                    gl.enable(gl.CULL_FACE);
+                    gl.cullFace(gl.FRONT);
+                };
+                break;
+            case "both":
+                return function (gl) {
+                    gl.enable(gl.CULL_FACE);
+                    gl.cullFace(gl.FRONT_AND_BACK);
+                };
+                break;
+            case "none":
+            default:
+                return function (gl) {
+                    gl.disable(gl.CULL_FACE);
+                };
+        }
+    }
+
     webgl.SceneRenderPass = SceneRenderPass;
 
 }(XML3D.webgl));

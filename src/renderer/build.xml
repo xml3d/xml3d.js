@@ -31,7 +31,6 @@
         <file name="gl/base/fullscreenquad.js" />
         <file name="gl/pipelines/base.js" />
         <file name="gl/pipelines/forwardpipeline.js" />
-        <file name="gl/pipelines/pickingpipeline.js" />
         <file name="gl/renderer.js" />
         <file name="gl/glscene.js" />
         <file name="gl/tools/objectsorter.js" />

@@ -184,7 +184,6 @@
 
             var cacheEntry;
             if(!(cacheEntry = c_jsShaderCache[jsShaderKey])){
-                console.log("CREATE SHADEJS SHADER!");
                 try{
                     var workSet = new Shade.WorkingSet();
                     workSet.parse(this.sourceTemplate, {loc: true});
@@ -220,8 +219,6 @@
                     + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
                     throw new Error(errorMessage);
                 }
-            }else{
-                console.log("USE CACHED SHADER!");
             }
             this.source = {
                 fragment: cacheEntry.source,

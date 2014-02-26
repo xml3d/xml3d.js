@@ -16,7 +16,7 @@ XML3D.shaders.register("point", {
         "uniform mat4 projectionMatrix;",
         "uniform mat3 modelViewMatrixN;",
         "uniform vec3 eyePosition;",
-        "uniform float screenWidth;",
+        "uniform vec3 coords;",
         "uniform float pointSize;",
 
         "void main(void) {",
@@ -28,7 +28,7 @@ XML3D.shaders.register("point", {
         "    fragTexCoord = texcoord;",
         "    fragVertexColor = color;",
         "    vec4 pos2 = vec4(fragVertexPosition, 1.0); pos2.x += pointSize;",
-        "    gl_PointSize = distance( gl_Position.xy, (projectionMatrix * pos2).xy ) * screenWidth / gl_Position.w;",
+        "    gl_PointSize = distance( gl_Position.xy, (projectionMatrix * pos2).xy ) * coords.x / gl_Position.w;",
         "}"
     ].join("\n"),
 

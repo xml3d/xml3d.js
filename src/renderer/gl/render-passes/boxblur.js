@@ -2,8 +2,6 @@
 
 	"use strict";
 
-	window.SSAOParameters.blurOffset = [1.0, 1.0];
-
 	var BoxBlurPass = function (renderInterface, output, opt) {
 		webgl.BaseRenderPass.call(this, renderInterface, output, opt);
 		this._program = this.renderInterface.context.programFactory.getProgramByName("boxblur");
@@ -46,7 +44,7 @@
 
 				uniforms["canvasSize"] = [target.width, target.height];
 				uniforms["sInTexture"] = [this.inputs.buffer.colorTarget.handle];
-				uniforms["blurOffset"] = window.SSAOParameters.blurOffset;
+				uniforms["blurOffset"] = [1.0, 1.0];
 				program.setSystemUniformVariables(uniformNames, uniforms);
 
 //                this._uniformsDirty = false;

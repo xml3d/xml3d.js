@@ -61,7 +61,7 @@
             var c_worldToViewMatrix = XML3D.math.mat4.create();
             var c_viewToWorldMatrix = XML3D.math.mat4.create();
             var c_projectionMatrix = XML3D.math.mat4.create();
-            var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "cameraPosition", "coords", "ssaoMap"];
+            var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "cameraPosition", "coords", "ssaoMap", "width"];
 
             return function (scene) {
                 var gl = this.renderInterface.context.gl,

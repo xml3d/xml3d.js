@@ -2,7 +2,7 @@
 
 	var OPTION_SSAO = "renderer-ssao";
 	var FLAGS = {};
-	FLAGS[OPTION_SSAO] = {defaultValue: true, recompileOnChange: true };
+	FLAGS[OPTION_SSAO] = {defaultValue: false, recompileOnChange: true };
 	for(var flag in FLAGS){
 		XML3D.options.register(flag, FLAGS[flag].defaultValue);
 	}
@@ -294,6 +294,7 @@
 		onFlagsChange: function(key, value){
 			if(key == OPTION_SSAO) {
 				this.scene.shaderFactory.setShaderRecompile();
+				this.createDefaultPipelines();
 			}
 		}
     });

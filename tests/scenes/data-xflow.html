@@ -3,6 +3,7 @@
   <head>
     <link rel="stylesheet" type="text/css" media="all" href="frame.css" />
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+
     <title>
         XML3D
     </title>
@@ -14,5 +15,30 @@
         </defs>
         <view></view>
    </xml3d>
+   <script type="text/javascript">
+       Xflow.registerOperator("xflow.thresholdImage", {
+           outputs: [
+               {type: 'texture', name: 'result', sizeof: 'image'}
+           ],
+           params: [
+               {type: 'texture', source: 'image'},
+               {type: 'int', source: 'threshold'}
+           ],
+
+           platform: Xflow.PLATFORM.CL,
+
+           evaluate: [
+               "int color = image[image_i].x;",
+               "if (color > threshold)",
+               "{",
+               "color=0;",
+               "}else{",
+               "color=255;",
+               "}",
+               "result[image_i] = (uchar4)(color, color, color, 255);"
+           ]
+       });
+   </script>
   </body>
+
  </html>

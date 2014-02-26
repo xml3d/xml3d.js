@@ -15,6 +15,7 @@ module("Xflow tests", {
             that.win = document.getElementById("xml3dframe").contentWindow;
             start();
         };
+
         loadDocument("scenes/data-xflow.html", this.cb);
     },
     teardown : function() {
@@ -263,6 +264,28 @@ module("Xflow tests", {
         }
 
         equal(actualData, shouldMatchData, title + "=> " + shouldMatchName+" in "+have.id+" matches reference data");
+    },
+
+    MatchTexture: function (have, action, title) {
+        var shouldMatchName = action.getAttribute("reference").substring(1);
+        var shouldMatchElement = this.doc.getElementById(shouldMatchName);
+
+        var shouldMatchData = this.getXflowData(shouldMatchElement).getValue();
+
+        var property = action.getAttribute("name");
+
+        var dataAdapter = have._configured.adapters;
+        dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
+        var adapterOutputs = dataAdapter.getComputeRequest().getResult();
+
+        var actualData = adapterOutputs.getOutputData(property).getValue();
+
+        if (!actualData) {
+            ok(false, title + "=> " + shouldMatchName + " in " + have.id + " matches reference data");
+            return;
+        }
+
+        QUnit.closeArray(actualData.data, shouldMatchData.data, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
     },
 
     MatchNull : function (have, action, title) {
@@ -606,6 +629,18 @@ test("GLSL with Uniforms", function() {
 test("GLSL with Processing on Uniforms", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_uniform_processing.xml", handler);
+    this.executeTests(response);
+});
+
+test("WebCL Image Processing", function () {
+    var xflowGraph = XML3D.data.xflowGraph;
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/webcl_output/test_webcl_image_processing.xml", handler);
+
+    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+        console.log("WebCL Image Processing tests could not be executed because WebCL platform is not available");
+        return true;
+    }
     this.executeTests(response);
 });
 

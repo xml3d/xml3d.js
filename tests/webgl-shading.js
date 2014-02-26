@@ -33,7 +33,7 @@ test("Phong fragment shader", function() {
     equal(typeof phong.addDirectives, "function", "Function 'addDirectives' exists");
     var directives = [];
     phong.addDirectives.call(phong, directives, {}, {});
-    equal(directives.length, 7, "7 directives from phong shader");
+    equal(directives.length, 8, "8 directives from phong shader");
 
     var fragment1 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment1, "Phong fragment without globals compiles.");
@@ -48,7 +48,7 @@ test("Phong fragment shader", function() {
             length : 2
         }
     }, {});
-    equal(directives.length, 7, "7 directives from phong shader");
+    equal(directives.length, 8, "8 directives from phong shader");
     var fragment2 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment2, "Phong fragment with 2 point lights compiles.");
     notEqual(fragment2.indexOf("MAX_POINTLIGHTS 2"), -1, "MAX_POINTLIGHTS set");

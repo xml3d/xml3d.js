@@ -1,4 +1,11 @@
 (function (webgl) {
+
+	var OPTION_SSAO = "renderer-ssao";
+	var FLAGS = {};
+	FLAGS[OPTION_SSAO] = {defaultValue: true, recompileOnChange: true };
+	for(var flag in FLAGS){
+		XML3D.options.register(flag, FLAGS[flag].defaultValue);
+	}
     /**
      * @interface
      */
@@ -51,7 +58,7 @@
 
         this.renderInterface = this.createRenderInterface();
         this.createDefaultPipelines();
-
+		XML3D.options.addObserver(this.onFlagsChange.bind(this));
     };
 
     // Just to satisfy jslint
@@ -94,8 +101,7 @@
             this.needsDraw = this.needsPickingDraw = true;
         },
         createDefaultPipelines: function () {
-            var pipeline = new XML3D.webgl.ForwardRenderPipeline(this.renderInterface);
-            pipeline.init();
+            var pipeline = new XML3D.webgl.ForwardRenderTree(this.renderInterface, XML3D.options.getValue(OPTION_SSAO));
             this.renderInterface.setRenderPipeline(pipeline);
 
             var pickTarget = new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
@@ -283,8 +289,13 @@
 
         getRenderInterface: function() {
             return this.renderInterface;
-        }
+        },
 
+		onFlagsChange: function(key, value){
+			if(key == OPTION_SSAO) {
+				this.scene.shaderFactory.setShaderRecompile();
+			}
+		}
     });
 
     webgl.GLRenderer = GLRenderer;

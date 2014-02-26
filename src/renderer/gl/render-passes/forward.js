@@ -1,9 +1,5 @@
 (function (webgl) {
 
-    /**
-     *
-     * @constructor
-     */
     var ForwardRenderPass = function (renderInterface, output, opt) {
         webgl.SceneRenderPass.call(this, renderInterface, output, opt);
         this.sorter = new webgl.ObjectSorter();
@@ -11,18 +7,21 @@
         this.lightPasses = {};
         this.lastRenderStats = {};
     };
+
     XML3D.createClass(ForwardRenderPass, webgl.SceneRenderPass);
 
     XML3D.extend(ForwardRenderPass.prototype, {
-
-        clearLightPasses: function(){
+        clearLightPasses: function() {
+			var self = this;
+			Object.keys(this.lightPasses).forEach(function (uniformName) {
+				self.removePrePass(self.lightPasses[uniformName]);
+			});
             this.lightPasses = {};
-            this.clearPrePasses();
             for(var name in this.reassignShadowMaps)
                 this.reassignShadowMaps[name] = true;
         },
 
-        addLightPass: function(uniformName, pass){
+        addLightPass: function(uniformName, pass) {
             if(!this.lightPasses[uniformName])
                 this.lightPasses[uniformName] = [];
             this.lightPasses[uniformName].push(pass);
@@ -62,7 +61,7 @@
             var c_worldToViewMatrix = XML3D.math.mat4.create();
             var c_viewToWorldMatrix = XML3D.math.mat4.create();
             var c_projectionMatrix = XML3D.math.mat4.create();
-            var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "screenWidth", "cameraPosition", "coords"];
+            var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "cameraPosition", "coords", "ssaoMap"];
 
             return function (scene) {
                 var gl = this.renderInterface.context.gl,
@@ -91,8 +90,10 @@
                 systemUniforms["viewInverseMatrix"] = c_viewToWorldMatrix;
                 systemUniforms["projectionMatrix"] = c_projectionMatrix;
                 systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
-                systemUniforms["screenWidth"] = width;
                 systemUniforms["coords"] = [target.width, target.height, 1];
+
+				if (this.inputs.ssaoMap)
+					systemUniforms["ssaoMap"] = [this.inputs.ssaoMap.colorTarget.handle];
 
                 //Render opaque objects
                 for (var program in sorted.opaque) {

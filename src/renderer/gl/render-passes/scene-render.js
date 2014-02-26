@@ -4,14 +4,13 @@
     var OPTION_FRONTFACE = "renderer-frontface";
 
     XML3D.options.register(OPTION_FACECULLING, "none");
-    XML3D.options.register(OPTION_FRONTFACE, "cw");
+    XML3D.options.register(OPTION_FRONTFACE, "ccw");
 
     /**
      * @constructor
      */
     var SceneRenderPass = function (renderInterface, output, opt) {
         webgl.BaseRenderPass.call(this, renderInterface, output, opt);
-
         /**
          * @type {function}
          */
@@ -33,7 +32,7 @@
     XML3D.createClass(SceneRenderPass, webgl.BaseRenderPass, {
         setGLStates: function () {
             var gl = this.renderInterface.context.gl;
-            gl.clear(this.clearBits);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
             this.setFaceCulling(gl);
             this.setFrontFace(gl);
             gl.enable(gl.DEPTH_TEST);
@@ -42,7 +41,6 @@
          * @param Array
          */
         renderObjectsToActiveBuffer: (function () {
-
             var tmpModelMatrix = XML3D.math.mat4.create();
             var tmpModelMatrixN = XML3D.math.mat3.create();
             var tmpModelView = XML3D.math.mat4.create();

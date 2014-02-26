@@ -24,7 +24,7 @@
         render:  (function () {
             var c_viewMat_tmp = XML3D.math.mat4.create();
             var c_projMat_tmp = XML3D.math.mat4.create();
-            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix", "screenWidth"];
+            var c_programSystemUniforms = ["viewMatrix", "projectionMatrix"];
 
             return function (scene) {
                 var gl = this.renderInterface.context.gl,
@@ -51,7 +51,6 @@
                 var parameters = {};
                 parameters["viewMatrix"] = c_viewMat_tmp;
                 parameters["projectionMatrix"] = c_projMat_tmp;
-                parameters["screenWidth"] = width;
 
                 //Render opaque objects
                 for (var shader in objects.opaque) {

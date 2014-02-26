@@ -22,7 +22,6 @@
         setRenderPipeline: function(pipeline) {
             //TODO cleanup old pipeline
             this.renderPipeline = pipeline;
-            this.renderPipeline.init(this.scene);
             this.context.requestRedraw("Pipeline changed");
         },
 

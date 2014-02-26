@@ -187,7 +187,7 @@
                 console.log("CREATE SHADEJS SHADER!");
                 try{
                     var workSet = new Shade.WorkingSet();
-                    workSet.parse(this.sourceTemplate);
+                    workSet.parse(this.sourceTemplate, {loc: true});
                     workSet.analyze(contextData, implementation, options);
                     var spaceInfo = workSet.getProcessingData('spaceInfo');
                     var glslShader = workSet.compileFragmentShader(compileOptions);

@@ -14,6 +14,7 @@ var Xflow = {};
         FLOAT2: 2,
         FLOAT3: 3,
         FLOAT4: 4,
+        FLOAT3X3 : 5,
         FLOAT4X4: 10,
         INT: 20,
         INT4: 21,
@@ -28,6 +29,7 @@ var Xflow = {};
         'float2': Xflow.DATA_TYPE.FLOAT2,
         'float3': Xflow.DATA_TYPE.FLOAT3,
         'float4': Xflow.DATA_TYPE.FLOAT4,
+        'float3x3' : Xflow.DATA_TYPE.FLOAT3X3,
         'float4x4': Xflow.DATA_TYPE.FLOAT4X4,
         'int': Xflow.DATA_TYPE.INT,
         'int4': Xflow.DATA_TYPE.INT4,
@@ -43,6 +45,7 @@ var Xflow = {};
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT2] = 2;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT3] = 3;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT4] = 4;
+    Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT3X3] = 9;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT4X4] = 16;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.INT] = 1;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.INT4] = 4;

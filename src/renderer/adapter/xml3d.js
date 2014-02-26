@@ -114,6 +114,10 @@
         return object ? object.node : null;
     };
 
+    XML3DRenderAdapter.prototype.getRenderInterface = function() {
+        return this.factory.getRenderer().getRenderInterface();
+    };
+
     XML3DRenderAdapter.prototype.generateRay = function(x, y) {
         var relativeMousePos = XML3D.webgl.convertPageCoords(this.node, x, y);
         return this.factory.getRenderer().generateRay(relativeMousePos.x, relativeMousePos.y);

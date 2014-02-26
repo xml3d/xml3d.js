@@ -1,9 +1,15 @@
 (function (webgl) {
+
+	var OPTION_SSAO = "renderer-ssao";
+	var FLAGS = {};
+	FLAGS[OPTION_SSAO] = {defaultValue: false, recompileOnChange: true };
+	for(var flag in FLAGS){
+		XML3D.options.register(flag, FLAGS[flag].defaultValue);
+	}
     /**
      * @interface
      */
     var IRenderer = function () {
-
     };
 
     IRenderer.prototype.renderToCanvas = function () {
@@ -50,7 +56,9 @@
         this.initGL();
         this.changeListener = new XML3D.webgl.DataChangeListener(this);
 
-        this.createRenderPasses(context);
+        this.renderInterface = this.createRenderInterface();
+        this.createDefaultPipelines();
+		XML3D.options.addObserver(this.onFlagsChange.bind(this));
     };
 
     // Just to satisfy jslint
@@ -80,7 +88,7 @@
             gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
             gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
             gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
 
         },
@@ -88,16 +96,29 @@
             this.width = width;
             this.height = height;
             this.context.handleResizeEvent(width, height);
-            this.createRenderPasses(this.context);
+            this.createDefaultPipelines();
             this.scene.handleResizeEvent(width, height);
             this.needsDraw = this.needsPickingDraw = true;
         },
-        createRenderPasses: function (context) {
-            var pickingTarget = this.createPickingTarget();
-            this.mainPass = new webgl.ForwardRenderPass(context, { target:  context.canvasTarget });
-            this.pickObjectPass = new webgl.PickObjectRenderPass(context, { target:  this.createPickingTarget() });
-            this.pickPositionPass = new webgl.PickPositionRenderPass(context, { target: pickingTarget });
-            this.pickNormalPass = new webgl.PickNormalRenderPass(context, { target: pickingTarget });
+        createDefaultPipelines: function () {
+            var pipeline = new XML3D.webgl.ForwardRenderTree(this.renderInterface, XML3D.options.getValue(OPTION_SSAO));
+            this.renderInterface.setRenderPipeline(pipeline);
+
+            var pickTarget = new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
+                width: this.context.canvasTarget.width,
+                height: this.context.canvasTarget.height,
+                colorFormat: this.context.gl.RGBA,
+                depthFormat: this.context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
+            this.pickObjectPass = new webgl.PickObjectRenderPass(this.renderInterface, pickTarget);
+            this.pickPositionPass = new webgl.PickPositionRenderPass(this.renderInterface, pickTarget);
+            this.pickNormalPass = new webgl.PickNormalRenderPass(this.renderInterface, pickTarget);
+        },
+        createRenderInterface: function () {
+            return new XML3D.webgl.RenderInterface(this.context, this.scene);
+            //TODO need to provide an interface for creating shaders, buffers and so on
         },
         requestRedraw: function (reason) {
             XML3D.debug.logDebug("Request redraw because:", reason);
@@ -109,7 +130,8 @@
             if (!obj)
                 return null;
             y = webgl.canvasToGlY(this.canvas, y);
-            this.pickNormalPass.renderObject(obj);
+            this.pickNormalPass.render(obj);
+            this.needsPickingDraw = true;
             return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
         },
         getWorldSpacePositionByPoint: function (x, y, object) {
@@ -117,16 +139,17 @@
             if (!obj)
                 return null;
             y = webgl.canvasToGlY(this.canvas, y);
-            this.pickPositionPass.renderObject(obj);
+            this.pickPositionPass.render(obj);
+            this.needsPickingDraw = true;
             return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
         },
 
         getRenderObjectByRay: function(xml3dRay, viewMat, projMat) {
             var intersectedObjects = this.scene.findRayIntersections(xml3dRay);
-            this.pickObjectPass.renderObjects(intersectedObjects, viewMat, projMat);
+            this.pickObjectPass.render(intersectedObjects, viewMat, projMat);
             //Target the middle of the buffer
-            var x = Math.floor(this.pickObjectPass.target.getWidth() / 2 / this.pickObjectPass.target.getScale());
-            var y = Math.floor(this.pickObjectPass.target.getHeight() / 2 / this.pickObjectPass.target.getScale());
+            var x = Math.floor(this.pickObjectPass.output.getWidth() / 2 / this.pickObjectPass.output.getScale());
+            var y = Math.floor(this.pickObjectPass.output.getHeight() / 2 / this.pickObjectPass.output.getScale());
             return this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, intersectedObjects);
 
         },
@@ -134,18 +157,18 @@
         getWorldSpaceNormalByRay: function (ray, intersectedObject, viewMat, projMat) {
             if (!intersectedObject)
                 return null;
-            this.pickNormalPass.renderObject(intersectedObject, viewMat, projMat);
-            var x = Math.floor(this.pickNormalPass.target.getWidth() / 2 / this.pickNormalPass.target.getScale());
-            var y = Math.floor(this.pickNormalPass.target.getHeight() / 2 / this.pickNormalPass.target.getScale());
+            this.pickNormalPass.render(intersectedObject, viewMat, projMat);
+            var x = Math.floor(this.pickNormalPass.output.getWidth() / 2 / this.pickNormalPass.output.getScale());
+            var y = Math.floor(this.pickNormalPass.output.getHeight() / 2 / this.pickNormalPass.output.getScale());
             return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
 
         },
         getWorldSpacePositionByRay: function (ray, intersectedObject, viewMat, projMat) {
             if (!intersectedObject)
                 return null;
-            this.pickPositionPass.renderObject(intersectedObject, viewMat, projMat);
-            var x = Math.floor(this.pickPositionPass.target.getWidth() / 2 / this.pickPositionPass.target.getScale());
-            var y = Math.floor(this.pickPositionPass.target.getHeight() / 2 / this.pickPositionPass.target.getScale());
+            this.pickPositionPass.render(intersectedObject, viewMat, projMat);
+            var x = Math.floor(this.pickPositionPass.output.getWidth() / 2 / this.pickPositionPass.output.getScale());
+            var y = Math.floor(this.pickPositionPass.output.getHeight() / 2 / this.pickPositionPass.output.getScale());
             return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
 
         },
@@ -154,7 +177,7 @@
             this.rayCamera.updatePosition(ray.origin._data);
             this.rayCamera.updateOrientation( this.calculateOrientationForRayDirection(ray) );
             this.rayCamera.getWorldToViewMatrix(viewMat);
-            var aspect = this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight();
+            var aspect = this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight();
             this.rayCamera.getProjectionMatrix(projMat, aspect);
         },
 
@@ -186,7 +209,8 @@
         },
         renderToCanvas: function () {
             this.prepareRendering();
-            var stats = this.mainPass.renderScene(this.scene);
+            this.renderInterface.getRenderPipeline().render(this.scene);
+            var stats = this.renderInterface.getRenderPipeline().getRenderStats();
             XML3D.debug.logDebug("Rendered to Canvas");
             this.needsDraw = false;
             return stats;
@@ -195,8 +219,8 @@
             y = webgl.canvasToGlY(this.canvas, y);
             if(this.needsPickingDraw) {
                 this.prepareRendering();
-                this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.target.getWidth() / this.pickObjectPass.target.getHeight());
-                this.pickObjectPass.renderObjects(this.scene.ready);
+                this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight());
+                this.pickObjectPass.render(this.scene.ready);
                 this.needsPickingDraw = false;
                 XML3D.debug.logDebug("Rendered Picking Buffer");
             }
@@ -205,18 +229,6 @@
         },
         prepareRendering: function () {
             this.scene.update();
-        },
-        createPickingTarget: function () {
-            var gl = this.context.gl;
-
-            return new webgl.GLScaledRenderTarget(this.context, webgl.MAX_PICK_BUFFER_DIMENSION, {
-                width: this.width,
-                height: this.height,
-                colorFormat: gl.RGBA,
-                depthFormat: gl.DEPTH_COMPONENT16,
-                stencilFormat: null,
-                depthAsRenderbuffer: true
-            });
         },
         /**
          * Uses gluUnProject() to transform the 2D screen point to a 3D ray.
@@ -273,8 +285,18 @@
         }()),
         dispose: function () {
             this.scene.clear();
-        }
+        },
 
+        getRenderInterface: function() {
+            return this.renderInterface;
+        },
+
+		onFlagsChange: function(key, value){
+			if(key == OPTION_SSAO) {
+				this.scene.shaderFactory.setShaderRecompile();
+				this.createDefaultPipelines();
+			}
+		}
     });
 
     webgl.GLRenderer = GLRenderer;

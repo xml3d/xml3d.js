@@ -207,7 +207,7 @@
             else if(this.samplers[name]){
                 var sampler = this.samplers[name];
 
-                if (value && sampler.texture !== value) {
+                if (value && sampler.texture !== value && value instanceof Array) {
                     sampler.texture = value;
                     for(var i = 0; i < sampler.texture.length; i++) {
                         sampler.texture[i] && sampler.texture[i].bind(sampler.unit[i]);

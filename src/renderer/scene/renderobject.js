@@ -5,7 +5,8 @@
     var IRenderObject = function() {};
     IRenderObject.prototype.getModelViewMatrix = function() {};
     IRenderObject.prototype.getModelViewProjectionMatrix = function() {};
-    IRenderObject.prototype.getNormalMatrix = function() {};
+    IRenderObject.prototype.getModelMatrixN = function() {};
+    IRenderObject.prototype.getModelViewMatrixN = function() {};
     IRenderObject.prototype.getObjectSpaceBoundingBox = function() {};
     IRenderObject.prototype.getWorldSpaceBoundingBox = function() {};
     IRenderObject.prototype.updateWorldSpaceMatrices = function() {};
@@ -26,9 +27,11 @@
     /** @const */
     var MODELVIEWPROJECTION_MATRIX_OFFSET = MODELVIEW_MATRIX_OFFSET + 16;
     /** @const */
-    var NORMAL_MATRIX_OFFSET = MODELVIEWPROJECTION_MATRIX_OFFSET + 16;
+    var MODEL_MATRIX_N_OFFSET = MODELVIEWPROJECTION_MATRIX_OFFSET + 16;
     /** @const */
-    var ENTRY_SIZE = NORMAL_MATRIX_OFFSET + 16;
+    var MODELVIEW_MATRIX_N_OFFSET = MODEL_MATRIX_N_OFFSET + 16;
+    /** @const */
+    var ENTRY_SIZE = MODELVIEW_MATRIX_N_OFFSET + 16;
 
     //noinspection JSClosureCompilerSyntax,JSClosureCompilerSyntax
     /**
@@ -110,6 +113,9 @@
                 });
                 result.updateTypeRequest();
                 result.calculateBoundingBox();
+                result.addEventListener(webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED, function(evt){
+                    that.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED })
+                })
             }
             return result;
         },
@@ -134,9 +140,8 @@
                 target[i] = this.page[o];
             }
         },
-
-        getNormalMatrix: function(target) {
-            var o = this.offset + NORMAL_MATRIX_OFFSET;
+        getModelMatrixN: function(target) {
+            var o = this.offset + MODEL_MATRIX_N_OFFSET;
             target[0] = this.page[o];
             target[1] = this.page[o+1];
             target[2] = this.page[o+2];
@@ -147,6 +152,19 @@
             target[7] = this.page[o+9];
             target[8] = this.page[o+10];
         },
+        getModelViewMatrixN: function(target) {
+            var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
+            target[0] = this.page[o];
+            target[1] = this.page[o+1];
+            target[2] = this.page[o+2];
+            target[3] = this.page[o+4];
+            target[4] = this.page[o+5];
+            target[5] = this.page[o+6];
+            target[6] = this.page[o+8];
+            target[7] = this.page[o+9];
+            target[8] = this.page[o+10];
+        },
+
 
         getModelViewProjectionMatrix: function(dest) {
             var o = this.offset + MODELVIEWPROJECTION_MATRIX_OFFSET;
@@ -160,7 +178,8 @@
                 this.updateWorldMatrix();
             }
             this.updateModelViewMatrix(view);
-            this.updateNormalMatrix();
+            this.updateModelMatrixN();
+            this.updateModelViewMatrixN();
             this.updateModelViewProjectionMatrix(projection);
         },
 
@@ -184,19 +203,34 @@
             XML3D.math.mat4.multiplyOffset(page, offset+MODELVIEW_MATRIX_OFFSET, page, offset+WORLD_MATRIX_OFFSET,  view, 0);
         },
 
-        /** Relies on an up-to-date view matrix **/
-        updateNormalMatrix: (function() {
+        updateModelMatrixN: (function() {
             var c_tmpMatrix = XML3D.math.mat4.create();
             return function () {
-                this.getModelViewMatrix(c_tmpMatrix);
+                this.getWorldMatrix(c_tmpMatrix);
                 var normalMatrix = XML3D.math.mat4.invert(c_tmpMatrix, c_tmpMatrix);
                 normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : RenderObject.IDENTITY_MATRIX;
-                var o = this.offset + NORMAL_MATRIX_OFFSET;
+                var o = this.offset + MODEL_MATRIX_N_OFFSET;
                 for(var i = 0; i < 16; i++, o++) {
                     this.page[o] = normalMatrix[i];
                 }
             }
         })(),
+
+        /** Relies on an up-to-date view matrix **/
+        updateModelViewMatrixN: (function() {
+            var c_tmpMatrix = XML3D.math.mat4.create();
+            return function () {
+                this.getModelViewMatrix(c_tmpMatrix);
+                var normalMatrix = XML3D.math.mat4.invert(c_tmpMatrix, c_tmpMatrix);
+                normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : RenderObject.IDENTITY_MATRIX;
+                var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
+                for(var i = 0; i < 16; i++, o++) {
+                    this.page[o] = normalMatrix[i];
+                }
+            }
+        })(),
+
+
 
         /** Relies on an up-to-date view matrix **/
         updateModelViewProjectionMatrix: function(projection) {
@@ -208,6 +242,7 @@
         setTransformDirty: function() {
             this.transformDirty = true;
             this.setBoundingBoxDirty();
+            this.scene.dispatchEvent({type: webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED});
             this.scene.requestRedraw("Transformation changed");
         },
         /**

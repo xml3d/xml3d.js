@@ -43,17 +43,6 @@
         return name;
     }
 
-
-    function getVSShaderAttribTransform(inputName){
-        if(inputName == "position")
-            return Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT;
-        else if(inputName == "normal")
-            return Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL;
-        else
-            return Xflow.VS_ATTRIB_TRANSFORM.NONE;
-
-    }
-
     XML3D.createClass(JSShaderComposer, webgl.AbstractShaderComposer, {
         setShaderInfo: function(shaderInfo) {
             this.sourceTemplate = shaderInfo.getScriptCode();
@@ -88,34 +77,34 @@
             var vsConfig = new Xflow.VSConfig();
             var names = this.extractedParams.slice();
             //if(names.indexOf("position") == -1) names.push("position");
-
+            vsConfig.addAttribute(Xflow.DATA_TYPE.FLOAT3, "position", true);
             for(var i = 0; i < names.length; ++i){
                 var name = names[i];
+                if(name == "position") continue;
                 var xflowInfo = objectDataNode.getOutputChannelInfo(name);
                 if(xflowInfo){
-                    vsConfig.addAttribute(xflowInfo.type, name, JSShaderComposer.convertEnvName(name),
-                        true, getVSShaderAttribTransform(name));
+                    vsConfig.addAttribute(xflowInfo.type, name, true);
                 }
             }
-            var request = new Xflow.VertexShaderRequest(objectDataNode, vsConfig);
+            var request = new Xflow.VertexShaderRequest(objectDataNode, vsConfig, callback);
             return request;
         },
 
         distributeObjectShaderData: function(objectRequest, attributeCallback, uniformCallback){
-            var result = objectRequest.getResult();
-            var inputNames = result.shaderInputNames;
+            var vertexShader = objectRequest.getVertexShader();
+            var inputNames = vertexShader.inputNames;
             for(var i = 0; i < inputNames.length; ++i){
-                var name = inputNames[i], entry = result.getShaderInputData(name);
-                if(result.isShaderInputUniform(name))
+                var name = inputNames[i], entry = vertexShader.getInputData(name);
+                if(vertexShader.isInputUniform(name))
                     uniformCallback(name, entry);
                 else
                     attributeCallback(name, entry);
             }
-            var outputNames = result.shaderOutputNames;
+            var outputNames = vertexShader.outputNames;
             for(var i = 0; i < outputNames.length; ++i){
                 var name = outputNames[i];
-                if(result.isShaderOutputUniform(name)){
-                    uniformCallback(result.getShaderOutputSourceName(name), result.getUniformOutputData(name));
+                if(vertexShader.isOutputFragmentUniform(name)){
+                    uniformCallback(vertexShader.getOutputSourceName(name), vertexShader.getUniformOutputData(name));
                 }
             }
         }

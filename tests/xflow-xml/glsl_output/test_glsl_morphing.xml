@@ -32,7 +32,7 @@
 
             <VSInputBufferCount count="8" />
             <VSInAttribCount count="5"/>
-            <VSUniformAttribCount count="3"/>
+            <VSUniformAttribCount count="6"/>
             <VSOutAttribCount count="2"/>
 
             <VSOutputIsVarying name="worldPosition" />

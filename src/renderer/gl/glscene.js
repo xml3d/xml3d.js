@@ -1,17 +1,21 @@
 (function (webgl) {
 
-    var StateMachine = window.StateMachine;
+    var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
+    var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
+    var OPTION_SHADEJS_TRANSFORM_SPACES =  "shadejs-transformSpaces";
+    var OPTION_SHADEJS_CACHE = "shadejs-cache";
 
-    var omitCulling = (function () {
-        var params = {},
-            p = window.location.search.substr(1).split('&');
 
-        p.forEach(function (e, i, a) {
-            var keyVal = e.split('=');
-            params[keyVal[0].toLowerCase()] = decodeURIComponent(keyVal[1]);
-        });
-        return params.hasOwnProperty("xml3d_noculling");
-    }());
+    // All the shader flags
+    var FLAGS = {};
+    FLAGS[OPTION_SHADEJS_EXTRACT_UNIFORMS] = {defaultValue: false, recompileOnChange: true };
+    FLAGS[OPTION_SHADEJS_TRANSFORM_SPACES] = {defaultValue: true, recompileOnChange: true };
+    FLAGS[OPTION_FRUSTUM_CULLING] = {defaultValue: true, recompileOnChange: false };
+    FLAGS[OPTION_SHADEJS_CACHE] = {defaultValue: true, recompileOnChange: false };
+
+    for(var flag in FLAGS){
+        XML3D.options.register(flag, FLAGS[flag].defaultValue);
+    }
 
 
     /**
@@ -34,6 +38,9 @@
         this.queue = [];
         this.lightsNeedUpdate = true;
         this.systemUniforms = {};
+        this.deferred = window['XML3D_DEFERRED'] || false;
+        this.colorClosureSignatures = [];
+        this.doFrustumCulling = !!XML3D.options.getValue(OPTION_FRUSTUM_CULLING);
         this.addListeners();
     };
     var EVENT_TYPE = webgl.Scene.EVENT_TYPE;
@@ -43,7 +50,8 @@
     GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn",
          "directionalLightDirection", "directionalLightIntensity", "directionalLightOn",
          "spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection",
-         "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle"];
+         "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias"];
+
 
 
     XML3D.extend(GLScene.prototype, {
@@ -93,7 +101,7 @@
 
             this.updateObjectsForRendering();
             // Make sure that shaders are updates AFTER objects
-            // Because unused shader closures are cleared on updae
+            // Because unused shader closures are cleared on update
             this.updateShaders();
         },
         updateLightParameters: function(){
@@ -116,7 +124,7 @@
             parameters["directionalLightIntensity"] = directionalLightData.intensity;
             parameters["directionalLightOn"] = directionalLightData.on;
 
-            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
+            var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [], castShadow: [], lightMatrix: [], shadowBias: [] };
             lights.spot.forEach(function (light, index) {
                 light.getLightData(spotLightData, index);
             });
@@ -127,6 +135,9 @@
             parameters["spotLightOn"] = spotLightData.on;
             parameters["spotLightSoftness"] = spotLightData.softness;
             parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
+            parameters["spotLightCastShadow"] = spotLightData.castShadow;
+            parameters["spotLightMatrix"] = spotLightData.lightMatrix;
+            parameters["spotLightShadowBias"] = spotLightData.shadowBias;
 
             var softFalloffAngle = spotLightData.softness.slice();
             for (var i = 0; i < softFalloffAngle.length; i++)
@@ -134,6 +145,9 @@
             parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
         },
 
+        updateSystemUniforms: function(names){
+            this.shaderFactory.updateSystemUniforms(names, this);
+        },
 
         updateShaders: function() {
             this.shaderFactory.update(this);
@@ -163,7 +177,8 @@
                 activeView.getWorldToViewMatrix(c_worldToViewMatrix);
                 readyObjects.forEach(function (obj) {
                     obj.updateModelViewMatrix(c_worldToViewMatrix);
-                    obj.updateNormalMatrix();
+                    obj.updateModelMatrixN();
+                    obj.updateModelViewMatrixN();
                 });
 
                 this.updateBoundingBox();
@@ -179,10 +194,19 @@
                     var obj = readyObjects[i];
                     obj.updateModelViewProjectionMatrix(c_projMat_tmp);
                     obj.getWorldSpaceBoundingBox(c_bbox);
-                    obj.inFrustum = omitCulling ? true : c_frustumTest.isBoxVisible(c_bbox);
+                    obj.inFrustum = this.doFrustumCulling ? c_frustumTest.isBoxVisible(c_bbox) : true;
                 };
             }
         }()),
+        updateReadyObjectsFromMatrices: function (worldToViewMatrix, projectionMatrix) {
+            var readyObjects = this.ready;
+            for(var i = 0, l = readyObjects.length; i < l; i++) {
+                var obj = readyObjects[i];
+                obj.updateModelViewMatrix(worldToViewMatrix);
+                obj.updateModelMatrixN();
+                obj.updateModelViewProjectionMatrix(projectionMatrix);
+            };
+        },
         addListeners: function() {
             this.addEventListener( EVENT_TYPE.SCENE_STRUCTURE_CHANGED, function(event){
                 if(event.newChild !== undefined) {
@@ -203,6 +227,7 @@
                 this.shaderFactory.setLightValueChanged();
                 this.context.requestRedraw("Light value changed.");
             });
+            XML3D.options.addObserver(this.onFlagsChange.bind(this));
         },
         addChildEvent: function(child) {
             if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
@@ -225,6 +250,13 @@
         },
         requestRedraw: function(reason) {
             return this.context.requestRedraw(reason);
+        },
+        onFlagsChange: function(key, value){
+            if(FLAGS[key] && FLAGS[key].recompileOnChange)
+                this.shaderFactory.setShaderRecompile();
+            if(key == OPTION_FRUSTUM_CULLING) {
+                this.doFrustumCulling = !!value;
+            }
         }
     });
     webgl.GLScene = GLScene;

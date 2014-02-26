@@ -1,38 +1,29 @@
 (function (webgl) {
 
-
-    /**
-     *
-     * @param {XML3D.webgl.GLContext} context
-     * @param {number} width
-     * @param {number} height
-     * @constructor
-     */
-    var PickObjectRenderPass = function (context, opt) {
-        webgl.BaseRenderPass.call(this, context, opt);
-        this.program = context.programFactory.getPickingObjectIdProgram();
-        var gl = this.context.gl;
-        this.clearBits = gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT;
+    var PickObjectRenderPass = function (renderInterface, output, opt) {
+        webgl.BaseRenderPass.call(this, renderInterface, output, opt);
     };
     XML3D.createClass(PickObjectRenderPass, webgl.BaseRenderPass);
 
     XML3D.extend(PickObjectRenderPass.prototype, {
-        renderObjects: (function () {
+        render: (function () {
             var c_mvp = XML3D.math.mat4.create(),
                 c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
                 c_systemUniformNames = ["id", "modelViewProjectionMatrix"];
 
             return function (objects, viewMatrix, projMatrix) {
-                var gl = this.context.gl;
-                this.target.bind();
-                this.program.bind();
+                var gl = this.renderInterface.context.gl,
+                    target = this.output;
+                target.bind();
 
                 gl.enable(gl.DEPTH_TEST);
                 gl.disable(gl.CULL_FACE);
                 gl.disable(gl.BLEND);
-                gl.viewport(0, 0, this.target.getWidth(), this.target.getHeight());
-                gl.clear(this.clearBits);
+                gl.viewport(0, 0, target.getWidth(), target.getHeight());
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+                var program = this.renderInterface.context.programFactory.getPickingObjectIdProgram();
+                program.bind();
                 for (var j = 0, n = objects.length; j < n; j++) {
                     var obj = objects[j];
                     var mesh = obj.mesh;
@@ -57,11 +48,11 @@
                     c_uniformCollection.sysBase["id"] = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
                     c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_mvp;
 
-                    this.program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
-                    mesh.draw(this.program);
+                    program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
+                    mesh.draw(program);
                 }
-                this.program.unbind();
-                this.target.unbind();
+                program.unbind();
+                target.unbind();
             };
         }()),
 
@@ -74,7 +65,7 @@
          * @returns {XML3D.webgl.RenderObject|null} Picked Object
          */
         getRenderObjectFromPickingBuffer: function (x, y, objects) {
-            var data = this.readPixelDataFromBuffer(x, y);
+            var data = this.readPixelDataFromBuffer(x, y, this.output);
 
             if (!data)
                 return null;

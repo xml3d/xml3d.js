@@ -11,10 +11,15 @@ XML3D.shaders.register("phong", {
         "varying vec3 fragEyeVector;",
         "varying vec2 fragTexCoord;",
         "varying vec3 fragVertexColor;",
+        "#if MAX_SPOTLIGHTS > 0 && HAS_SPOTLIGHT_SHADOWMAPS",
+        "varying vec4 spotLightShadowMapCoord[ MAX_SPOTLIGHTS ];",
+        "uniform mat4 spotLightMatrix[ MAX_SPOTLIGHTS ];",
+        "#endif",
 
+        "uniform mat4 modelMatrix;",
         "uniform mat4 modelViewProjectionMatrix;",
         "uniform mat4 modelViewMatrix;",
-        "uniform mat3 normalMatrix;",
+        "uniform mat3 modelViewMatrixN;",
         "uniform vec3 eyePosition;",
 
         "void main(void) {",
@@ -22,11 +27,17 @@ XML3D.shaders.register("phong", {
         "    vec3 norm = normal;",
 
         "    gl_Position = modelViewProjectionMatrix * vec4(pos, 1.0);",
-        "    fragNormal = normalize(normalMatrix * norm);",
+        "    fragNormal = normalize(modelViewMatrixN * norm);",
         "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
         "    fragEyeVector = normalize(fragVertexPosition);",
         "    fragTexCoord = texcoord;",
         "    fragVertexColor = color;",
+        "#if MAX_SPOTLIGHTS > 0 && HAS_SPOTLIGHT_SHADOWMAPS",
+        "    vec3 worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;",
+        "    for(int i = 0; i < MAX_SPOTLIGHTS; i++) {",
+        "      spotLightShadowMapCoord[i] = spotLightMatrix[i] * vec4(worldPosition, 1);",
+        "    }",
+        "#endif",
         "}"
     ].join("\n"),
 
@@ -39,6 +50,7 @@ XML3D.shaders.register("phong", {
         "uniform float transparency;",
         "uniform mat4 viewMatrix;",
         "uniform bool useVertexColor;",
+		"uniform vec3 coords;",
 
         "#if HAS_EMISSIVETEXTURE",
         "uniform sampler2D emissiveTexture;",
@@ -78,8 +90,20 @@ XML3D.shaders.register("phong", {
         "uniform float spotLightCosFalloffAngle[MAX_SPOTLIGHTS];",
         "uniform float spotLightCosSoftFalloffAngle[MAX_SPOTLIGHTS];",
         "uniform float spotLightSoftness[MAX_SPOTLIGHTS];",
-        "#endif",
+        "uniform bool spotLightCastShadow[MAX_SPOTLIGHTS];",
+            "#if HAS_SPOTLIGHT_SHADOWMAPS",
+            "uniform sampler2D spotLightShadowMap[MAX_SPOTLIGHTS];",
+            "uniform float spotLightShadowBias[MAX_SPOTLIGHTS];",
+            "varying vec4 spotLightShadowMapCoord[MAX_SPOTLIGHTS];",
 
+            "float unpackDepth( const in vec4 rgba_depth ) {",
+            "  const vec4 bit_shift = vec4( 1.0 / ( 256.0 * 256.0 * 256.0 ), 1.0 / ( 256.0 * 256.0 ), 1.0 / 256.0, 1.0 );",
+            "  float depth = dot( rgba_depth, bit_shift );",
+            "  return depth;",
+            "} ",
+            "#endif",
+        "#endif",
+		"uniform sampler2D ssaoMap;",
         "void main(void) {",
         "  float alpha =  max(0.0, 1.0 - transparency);",
         "  vec3 objDiffuse = diffuseColor;",
@@ -100,9 +124,11 @@ XML3D.shaders.register("phong", {
         "  #if HAS_SPECULARTEXTURE",
         "    objSpecular = objSpecular * texture2D(specularTexture, fragTexCoord).rgb;",
         "  #endif",
-
-        "#if MAX_POINTLIGHTS > 0",
-        "  for (int i=0; i<MAX_POINTLIGHTS; i++) {",
+		"  #if HAS_SSAOMAP",
+		"	 float ssao = 1.0 - texture2D(ssaoMap, gl_FragCoord.xy / coords.xy).r;",
+		"  #endif",
+		"#if MAX_POINTLIGHTS > 0",
+        "  for (int i = 0; i < MAX_POINTLIGHTS; i++) {",
         "    if(!pointLightOn[i])",
         "      continue;",
         "    vec4 lPosition = viewMatrix * vec4( pointLightPosition[ i ], 1.0 );",
@@ -112,6 +138,9 @@ XML3D.shaders.register("phong", {
         "    vec3 R = normalize(reflect(L,fragNormal));",
         "    float atten = 1.0 / (pointLightAttenuation[i].x + pointLightAttenuation[i].y * dist + pointLightAttenuation[i].z * dist * dist);",
         "    vec3 Idiff = pointLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
+		"  #if HAS_SSAOMAP",
+		"	 Idiff *= ssao;",
+		"  #endif",
         "    vec3 Ispec = pointLightIntensity[i] * objSpecular * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
         "    color = color + (atten*(Idiff + Ispec));",
         "  }",
@@ -125,6 +154,9 @@ XML3D.shaders.register("phong", {
         "    vec3 L =  normalize(-lDirection.xyz);",
         "    vec3 R = normalize(reflect(L,fragNormal));",
         "    vec3 Idiff = directionalLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
+		"  #if HAS_SSAOMAP",
+		"	 Idiff *= ssao;",
+		"  #endif",
         "    vec3 Ispec = directionalLightIntensity[i] * objSpecular * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
         "    color = color + ((Idiff + Ispec));",
         "  }",
@@ -132,29 +164,47 @@ XML3D.shaders.register("phong", {
 
         "#if MAX_SPOTLIGHTS > 0",
         "  for (int i=0; i<MAX_SPOTLIGHTS; i++) {",
-        "    if(!spotLightOn[i])",
-        "      continue;",
+        "    if(spotLightOn[i]) {",
+        "  #if HAS_SPOTLIGHT_SHADOWMAPS",
+        "         bool lightIsVisible = true;",
+        "         if(spotLightCastShadow[i]){",
+        "             lightIsVisible = false;",
+        "             vec4 lspos = spotLightShadowMapCoord[i];",
+		"			  vec3 perspectiveDivPos = lspos.xyz / lspos.w * 0.5 + 0.5;",
+		"			  float lsDepth = perspectiveDivPos.z;",
+		"			  vec2 lightuv = perspectiveDivPos.xy;",
+        "			  float depth = unpackDepth(texture2D(spotLightShadowMap[i], lightuv)) + spotLightShadowBias[i];",
+        "             lightIsVisible = lsDepth < depth;",
+        "          }",
+        "          if(lightIsVisible){",
+        "  #endif",
         "    vec4 lPosition = viewMatrix * vec4( spotLightPosition[ i ], 1.0 );",
-        "    vec3 L = lPosition.xyz - fragVertexPosition;",
+        "    vec3 L = lPosition.xyz - fragVertexPosition;",	
         "    float dist = length(L);",
         "    L = normalize(L);",
         "    vec3 R = normalize(reflect(L,fragNormal));",
         "    float atten = 1.0 / (spotLightAttenuation[i].x + spotLightAttenuation[i].y * dist + spotLightAttenuation[i].z * dist * dist);",
         "    vec3 Idiff = spotLightIntensity[i] * objDiffuse * max(dot(fragNormal,L),0.0);",
+		"  #if HAS_SSAOMAP",
+		"	 Idiff *= ssao;",
+		"  #endif",
         "    vec3 Ispec = spotLightIntensity[i] * objSpecular * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
         "    vec4 lDirection = viewMatrix * vec4(-spotLightDirection[i], 0.0);",
         "    vec3 D = normalize(lDirection.xyz);",
         "    float angle = dot(L, D);",
         "    if(angle > spotLightCosFalloffAngle[i]) {",
         "       float softness = 1.0;",
-        "       if (angle < spotLightCosSoftFalloffAngle[i])",
-        "           softness = (angle - spotLightCosFalloffAngle[i]) /  (spotLightCosSoftFalloffAngle[i] -  spotLightCosFalloffAngle[i]);",
+        "       //if (angle < spotLightCosSoftFalloffAngle[i])",
+        "       //    softness = (angle - spotLightCosFalloffAngle[i]) /  (spotLightCosSoftFalloffAngle[i] -  spotLightCosFalloffAngle[i]);",
         "       color += atten*softness*(Idiff + Ispec);",
         "    }",
-        "  }",
+        "  #if HAS_SPOTLIGHT_SHADOWMAPS",
+        "   }",
+        "  #endif",
+        "    } ", // spotlight on
+        "  }", // light loop
         "#endif",
-
-        "  gl_FragColor = vec4(color, alpha);",
+		"  gl_FragColor = vec4(color, alpha);",
         "}"
     ].join("\n"),
 
@@ -165,9 +215,11 @@ XML3D.shaders.register("phong", {
         directives.push("MAX_POINTLIGHTS " + pointLights);
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
         directives.push("MAX_SPOTLIGHTS " + spotLights);
+        directives.push("HAS_SPOTLIGHT_SHADOWMAPS " + (lights.spot && !lights.spot.every(function(light) { return !light.castShadow; }) | 0));
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
         directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));
+		directives.push("HAS_SSAOMAP " + (XML3D.options.getValue("renderer-ssao") ? "1" : "0"));
     },
     hasTransparency: function(params) {
         return params.transparency && params.transparency.getValue()[0] > 0.001;
@@ -185,7 +237,9 @@ XML3D.shaders.register("phong", {
     samplers: {
         diffuseTexture : null,
         emissiveTexture : null,
-        specularTexture : null
+        specularTexture : null,
+        spotLightShadowMap : null,
+		ssaoMap: null
     },
 
     attributes: {

@@ -23,7 +23,10 @@
 
     var EXTENSIONS = GLContext.EXTENSIONS = {};
     EXTENSIONS.STANDARD_DERIVATES = 'OES_standard_derivatives';
-
+    EXTENSIONS.MULTIPLE_RENDER_TARGETS = 'WEBGL_draw_buffers';
+    EXTENSIONS.DEPTH_TEXTURE = 'WEBGL_depth_texture';
+    EXTENSIONS.FLOAT_COLOR_BUFFER = 'WEBGL_color_buffer_float';
+    EXTENSIONS.FLOAT_TEXTURES = 'OES_texture_float';
 
     XML3D.extend(GLContext.prototype, {
         getXflowEntryWebGlData: function (entry) {

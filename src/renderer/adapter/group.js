@@ -69,7 +69,9 @@
             this.updateTransformAdapter();
             this.updateLocalMatrix();
             break;
-
+        case "style":
+            this.updateLocalMatrix();
+            break;
         case "visible":
             this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
             this.factory.renderer.requestRedraw("Group visibility changed.");

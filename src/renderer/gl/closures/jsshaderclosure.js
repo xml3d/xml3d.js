@@ -14,9 +14,53 @@
         "spotLightOn" : {
             staticValue: "MAX_SPOTLIGHTS",
             staticSize: ["spotLightOn", "spotLightAttenuation", "spotLightIntensity",
-                "spotLightPosition", "spotLightDirection", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle"]
+                "spotLightPosition", "spotLightDirection", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightShadowBias", "spotLightShadowMap", "spotLightMatrix"]
         }
     };
+
+
+    var c_jsShaderCache = {};
+
+    function addDefaultChanneling(vsConfig, inputName){
+        var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(inputName);
+        vsConfig.channelAttribute(inputName, outputName, null);
+    }
+
+
+    function channelVsAttribute(vsConfig, inputName, spaceInfo){
+        if(!spaceInfo || !spaceInfo[inputName]){
+            addDefaultChanneling(vsConfig, inputName);
+            return;
+        }
+
+        var i = spaceInfo[inputName].length;
+        while(i--){
+            var entry = spaceInfo[inputName][i];
+            var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(entry.name), code = null;
+            switch(entry.space){
+                case Shade.SPACE_VECTOR_TYPES.OBJECT: break;
+                case Shade.SPACE_VECTOR_TYPES.VIEW_POINT:
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
+                    code = outputName + " = ( modelViewMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
+                    break;
+                case Shade.SPACE_VECTOR_TYPES.VIEW_NORMAL:
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelViewMatrixN", true);
+                    code =  outputName + " = normalize( modelViewMatrixN * #I{" + inputName + "} );";
+                    break;
+                case Shade.SPACE_VECTOR_TYPES.WORLD_POINT:
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelMatrix", true);
+                    code = outputName + " = ( modelMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
+                    break;
+                case Shade.SPACE_VECTOR_TYPES.WORLD_NORMAL:
+                    vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelMatrixN", true);
+                    code =  outputName + " = normalize( modelMatrixN * #I{" + inputName + "} );";
+                    break;
+                default:
+                    throw new Error("Can't handle Space Type: " + entry.space);
+            }
+            vsConfig.channelAttribute(inputName, outputName, code);
+        }
+    }
 
 
     /**
@@ -45,6 +89,14 @@
             case Xflow.DATA_TYPE.FLOAT4:
                 result.type = Shade.TYPES.OBJECT;
                 result.kind = Shade.OBJECT_KINDS.FLOAT4;
+                break;
+            case Xflow.DATA_TYPE.FLOAT3X3:
+                result.type = Shade.TYPES.OBJECT;
+                result.kind = Shade.OBJECT_KINDS.MATRIX3;
+                break;
+            case Xflow.DATA_TYPE.FLOAT4X4:
+                result.type = Shade.TYPES.OBJECT;
+                result.kind = Shade.OBJECT_KINDS.MATRIX4;
                 break;
             case Xflow.DATA_TYPE.TEXTURE:
                 result.type = Shade.TYPES.OBJECT;
@@ -79,7 +131,9 @@
          * @param {Xflow.ComputeResult} shaderResult
          * @param objectData
          */
-        createSources: function(scene, shaderResult, objectData) {
+        createSources: function(scene, shaderResult, vsRequest) {
+
+            var vsDataResult = vsRequest.getResult();
 
             var contextData = {
                 "this" : webgl.getJSSystemConfiguration(this.context),
@@ -98,41 +152,81 @@
             var contextInfo = contextData["global.shade"][0].extra.info;
 
             var shaderEntries = shaderResult && shaderResult.getOutputMap(),
-                vsShaderOutput = objectData && objectData.shaderOutputNames;
+                vsShaderOutput = vsDataResult && vsDataResult.outputNames;
 
             for(var i = 0; i < this.extractedParams.length; ++i){
                 var paramName = this.extractedParams[i];
-                var envName = webgl.JSShaderComposer.convertEnvName(paramName);
-                if(vsShaderOutput && vsShaderOutput.indexOf(envName) != -1){
-                    contextInfo[paramName] = convertXflow2ShadeType(objectData.getShaderOutputType(envName),
-                        objectData.isShaderOutputUniform(envName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
+                if(vsShaderOutput && vsShaderOutput.indexOf(paramName) != -1){
+                    contextInfo[paramName] = convertXflow2ShadeType(vsDataResult.getOutputType(paramName),
+                        vsDataResult.isOutputUniform(paramName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
                 }
                 else if(shaderEntries && shaderEntries[paramName]){
                     contextInfo[paramName] = convertXflow2ShadeType(shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
                 }
             }
-
             XML3D.debug.logDebug("CONTEXT:", contextData);
-            try{
-                var aast = Shade.parseAndInferenceExpression(this.sourceTemplate, {
-                    inject: contextData, loc: true, implementation: "xml3d-glsl-forward" });
-                var glslShader = Shade.compileFragmentShader(aast, {useStatic: true});
-                this.uniformSetter = glslShader.uniformSetter;
-                this.source = {
-                    fragment: glslShader.source,
-                    vertex:  objectData.getGLSLCode()
+
+            var options = {
+                propagateConstants: true,
+                validate: true,
+                sanitize: true,
+                transformSpaces: XML3D.options.getValue("shadejs-transformSpaces"),
+                extractUniformExpressions: XML3D.options.getValue("shadejs-extractUniformExpressions")
+            };
+            var compileOptions = {
+                useStatic: true,
+                uniformExpressions: options.uniformExpressions
+            };
+            var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
+
+            var jsShaderKey = implementation + ";" + JSON.stringify(options) + ";" + JSON.stringify(contextInfo) + ";"
+               + this.sourceTemplate;
+
+            var cacheEntry;
+            if(!(cacheEntry = c_jsShaderCache[jsShaderKey])){
+                try{
+                    var workSet = new Shade.WorkingSet();
+                    workSet.parse(this.sourceTemplate, {loc: true});
+                    workSet.analyze(contextData, implementation, options);
+                    var spaceInfo = workSet.getProcessingData('spaceInfo');
+                    var glslShader = workSet.compileFragmentShader(compileOptions);
+
+                    cacheEntry = {
+                        source: glslShader.source,
+                        uniformSetter: glslShader.uniformSetter,
+                        spaceInfo: spaceInfo
+                    }
+
+                    this.uniformSetter = glslShader.uniformSetter;
+                    this.source = {
+                        fragment: glslShader.source,
+                        vertex:  this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
+                    }
+                    if(scene.deferred){
+                        cacheEntry.signatures = workSet.getProcessingData("colorClosureSignatures");
+                    }
+                    if(XML3D.options.getValue("shadejs-cache"))
+                        c_jsShaderCache[jsShaderKey] = cacheEntry;
+                }
+                catch(e){
+                    webgl.SystemNotifier.sendEvent('shadejs', {
+                        shadejsType : "error",
+                        event: e,
+                        code: this.sourceTemplate
+                    });
+
+                    var errorMessage = "Shade.js Compile Error:\n" + e.message + "\n------------\n"
+                    + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
+                    throw new Error(errorMessage);
                 }
             }
-            catch(e){
-                webgl.SystemNotifier.sendEvent('shadejs', {
-                    shadejsType : "error",
-                    event: e,
-                    code: this.sourceTemplate
-                });
-
-                var errorMessage = "Shade.js Compile Error:\n" + e.message + "\n------------\n"
-                + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
-                throw new Error(errorMessage);
+            this.source = {
+                fragment: cacheEntry.source,
+                vertex:  this.createVertexShader(vsRequest, vsDataResult, cacheEntry.spaceInfo)
+            }
+            this.uniformSetter = cacheEntry.uniformSetter;
+            if(scene.deferred){
+                scene.colorClosureSignatures.push.apply(scene.colorClosureSignatures, cacheEntry.signatures);
             }
 
             // TODO: Handle errors.
@@ -146,7 +240,17 @@
             });
 
             return true;
+        },
 
+        createVertexShader: function(vsRequest, vsDataResult, spaceInfo){
+            var vsConfig = vsRequest.getConfig();
+            var names = vsDataResult.outputNames;
+            for(var i = 0; i < names.length; ++i){
+                channelVsAttribute(vsConfig, names[i], spaceInfo);
+            }
+            vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
+            vsConfig.addCodeFragment( "gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");
+            return vsRequest.getVertexShader().getGLSLCode();
         },
 
         setUniformVariables: function(envNames, sysNames, inputCollection){

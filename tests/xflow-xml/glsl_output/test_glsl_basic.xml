@@ -21,7 +21,7 @@
 
             <VSInputBufferCount count="2" />
             <VSInAttribCount count="2"/>
-            <VSUniformAttribCount count="0"/>
+            <VSUniformAttribCount count="5"/>
             <VSOutAttribCount count="4"/>
 
             <VSOutputIsVarying name="viewPosition" />

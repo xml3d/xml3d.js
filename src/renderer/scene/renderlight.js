@@ -10,12 +10,24 @@
     /** @const */
     var LIGHT_DEFAULT_ATTENUATION = XML3D.math.vec3.fromValues(0,0,1);
     /** @const */
+    var LIGHT_DEFAULT_SHADOW_BIAS = 0.001;
+    /** @const */
     var SPOTLIGHT_DEFAULT_FALLOFFANGLE = Math.PI / 4.0;
     /** @const */
     var SPOTLIGHT_DEFAULT_SOFTNESS = 0.0;
 
     /** @const */
-    var LIGHT_PARAMETERS = ["intensity", "attenuation", "softness", "falloffAngle", "direction", "position"];
+    var LIGHT_PARAMETERS = ["intensity", "attenuation", "softness", "falloffAngle", "direction", "position", "castShadow", "shadowBias"];
+
+    var SHADOWMAP_OFFSET_MATRIX = new Float32Array([
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.0,
+        0.5, 0.5, 0.5, 1.0
+    ]);
+
+    /** @const */
+    var CLIPPLANE_NEAR_MIN = 1.0;
 
     /** @const */
     var ENTRY_SIZE = 16;
@@ -41,6 +53,9 @@
         this.position    = XML3D.math.vec3.fromValues(0,0,0);
         this.direction   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
         this.attenuation = XML3D.math.vec3.clone(LIGHT_DEFAULT_ATTENUATION);
+        this.castShadow = false;
+        this.fallOffAngle = SPOTLIGHT_DEFAULT_FALLOFFANGLE;
+        this.userData = null;
 
         if (this.light.data) {
             // Bounding Box annotated
@@ -59,12 +74,35 @@
     XML3D.createClass(RenderLight, webgl.RenderNode);
     XML3D.extend(RenderLight.prototype, {
 
+        getFrustum: function(aspect) {
+            return new XML3D.webgl.Frustum(1.0, 200.0, 0, this.fallOffAngle*2, aspect)
+            var t_mat = XML3D.math.mat4.create();
+            var bb = new XML3D.math.bbox.create();
+            this.scene.getBoundingBox(bb);
+
+            if (XML3D.math.bbox.isEmpty(bb)) {
+                return new XML3D.webgl.Frustum(1.0, 110.0, 0, this.fallOffAngle*2, aspect)
+            }
+            this.getWorldToLightMatrix(t_mat);
+
+            XML3D.math.bbox.transform(bb, t_mat, bb);
+
+            var near = -bb[5],
+                far = -bb[2],
+                expand = Math.max((far - near) * 0.30, 0.05);
+
+            // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
+            far += expand;
+            near -= expand;
+            return new XML3D.webgl.Frustum(1.0, far, 0, this.fallOffAngle*2, aspect);
+        },
+
         addLightToScene : function() {
             var lightEntry = this.scene.lights[this.light.type];
             if (Array.isArray(lightEntry)) {
                 lightEntry.push(this);
                 this.updateWorldMatrix(); // Implicitly fills light position/direction
-                this.lightStructureChanged();
+                this.lightStructureChanged(false);
             } else {
                 XML3D.debug.logError("Unsupported light shader script: urn:xml3d:lightshader:" + this.light.type);
             }
@@ -73,7 +111,7 @@
             var container = this.scene.lights[this.light.type];
             if (Array.isArray(container)) {
                 container = container.splice(this);
-                this.lightStructureChanged();
+                this.lightStructureChanged(true);
             }
         },
         lightParametersChanged: function(request, changeType) {
@@ -89,14 +127,17 @@
                 entry = result.getOutputData("direction");
                 entry && XML3D.math.vec3.copy(this.srcDirection, entry.getValue());
                 this.updateWorldMatrix();
+                entry = result.getOutputData("castShadow");
+                if(entry)
+                    this.castShadow = entry.getValue()[0];
                 changeType && this.lightValueChanged();
             }
         },
         lightValueChanged: function() {
             this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, light: this });
         },
-        lightStructureChanged: function() {
-            this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, light: this });
+        lightStructureChanged: function(removed) {
+            this.scene.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, light: this, removed: removed });
         },
         getLightData: function(target, offset) {
             var off3 = offset*3;
@@ -130,13 +171,48 @@
                 if (this.light.data) {
                     result = this.lightParameterRequest.getResult();
                     data = result.getOutputData("falloffAngle");
-                    target["falloffAngle"][offset] = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_FALLOFFANGLE;
+                    var fallOffAngle = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_FALLOFFANGLE;
+                    target["falloffAngle"][offset] = fallOffAngle;
+                    this.fallOffAngle = fallOffAngle;
+                }
+            }
+            if (target["castShadow"]) {
+                target["castShadow"][offset] = this.castShadow;
+                if(this.castShadow) {
+                    if(target["shadowBias"]) {
+                        result = this.lightParameterRequest.getResult();
+                        data = result.getOutputData("shadowBias");
+                        target["shadowBias"][offset] = data ? data.getValue()[0] : LIGHT_DEFAULT_SHADOW_BIAS;
+                    }
+                    if(target["lightMatrix"]) {
+                        var tmp = XML3D.math.mat4.create();
+                        this.getShadowMapLightMatrix(tmp);
+                        var off16 = offset*16;
+                        for(var i = 0; i < 16; i++) {
+                            target["lightMatrix"][off16+i] = tmp[i];
+                        }
+                    }
+                }
+                else{
+                    target["shadowBias"][offset] = 0;
+                    var off16 = offset*16;
+                    for(var i = 0; i < 16; i++) {
+                        target["lightMatrix"][off16+i] = 0;
+                    }
                 }
             }
         },
 
         setTransformDirty: function() {
             this.updateWorldMatrix();
+        },
+
+        getShadowMapLightMatrix: function(target) {
+            var L = XML3D.math.mat4.create();
+            this.getWorldToLightMatrix(L);
+            var lightProjectionMatrix = XML3D.math.mat4.create();
+            this.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
+            XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
         },
 
         updateWorldMatrix: (function() {
@@ -149,6 +225,11 @@
                 }
             }
         })(),
+
+        getWorldToLightMatrix: function (mat4) {
+            this.getWorldMatrix(mat4);
+            XML3D.math.mat4.invert(mat4, mat4);
+        },
 
         updateLightTransformData: function(transform) {
             switch (this.light.type) {
@@ -209,6 +290,7 @@
             this.parent.removeChild(this);
             this.removeLightFromScene();
         },
+
 
         getWorldSpaceBoundingBox: function(bbox) {
             XML3D.math.bbox.empty(bbox);

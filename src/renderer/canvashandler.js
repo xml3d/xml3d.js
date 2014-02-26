@@ -5,7 +5,7 @@ XML3D.webgl.MAXFPS = 30;
 
     var CONTEXT_OPTIONS = {
         alpha: true,
-        premultipliedAlpha: true,
+        premultipliedAlpha: false,
         antialias: true,
         stencil: true,
         preserveDrawingBuffer: true
@@ -54,6 +54,7 @@ XML3D.webgl.MAXFPS = 30;
     function CanvasHandler(canvas, xml3dElem) {
         this.canvas = canvas;
         this.xml3dElem = xml3dElem;
+        this.renderInterface = {};
 
         this.id = ++globalCanvasId; // global canvas id starts at 1
         XML3D.webgl.handlers[this.id] = this;
@@ -81,7 +82,7 @@ XML3D.webgl.MAXFPS = 30;
         } catch (e) {
             return null;
         }
-    }
+    };
 
     /**
      *
@@ -114,15 +115,14 @@ XML3D.webgl.MAXFPS = 30;
         // Create renderer
         /** @type XML3D.webgl.IRenderer */
         this.renderer = XML3D.webgl.rendererFactory.createRenderer(context, scene, this.canvas);
+        this.renderOptions = this.renderer.renderInterface.options;
         factory.setRenderer(this.renderer);
 
         var xml3dAdapter = factory.getAdapter(this.xml3dElem);
         xml3dAdapter.traverse(function(){});
 
         scene.rootNode.setVisible(true);
-
-
-    }
+    };
 
     /*
     CanvasHandler.prototype.redraw = function(reason, forcePickingRedraw) {
@@ -147,7 +147,7 @@ XML3D.webgl.MAXFPS = 30;
      * @return {Drawable|null} newly picked object
      */
     CanvasHandler.prototype.getPickObjectByPoint = function(canvasX, canvasY) {
-        if (this._pickingDisabled)
+        if (!this.renderOptions.pickingEnabled)
             return null;
         return this.renderer.getRenderObjectFromPickingBuffer(canvasX, canvasY);
     };

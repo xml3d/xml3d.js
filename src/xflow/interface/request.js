@@ -97,10 +97,11 @@ ComputeRequest.prototype._onResultChanged = function(notification){
 
 
 var c_vsConnectNodeCount = {},
+    c_vsConnectNodeKey = {},
     c_vsConnectNodeCache = {};
 
 /**
- * A VertexShaderRequest is a Request for a VertexShaderResult, used to generate a vertex shader that includes
+ * A VertexShaderRequest is a Request for a VSDataResult, used to generate a Xflow.VertexShader that includes
  * dataflow processing
  * @constructor
  * @extends {Xflow.Request}
@@ -120,6 +121,10 @@ var VertexShaderRequest = function(dataNode, vsConfig, callback){
 Xflow.createClass(VertexShaderRequest, Xflow.Request);
 Xflow.VertexShaderRequest = VertexShaderRequest;
 
+VertexShaderRequest.prototype.getConfig = function(){
+    return this._vsConfig;
+}
+
 VertexShaderRequest.prototype.getResult = function(){
     return swapResultRequest(this, this._vsConnectNode._getResult(Xflow.RESULT_TYPE.VS, this._filter));
 }
@@ -128,11 +133,19 @@ VertexShaderRequest.prototype._onDataNodeChange = function(notification){
     if(notification == Xflow.RESULT_STATE.CHANGED_STRUCTURE){
         var newVSConnectedNode = getVsConnectNode(this._dataNode, this._vsConfig, this._filter);
         if(newVSConnectedNode != this._vsConnectNode){
-            clearVsConnectNode(this._vsConnectNode, this._dataNode, this._vsConfig);
+            clearVsConnectNode(this._vsConnectNode);
             this._vsConnectNode = newVSConnectedNode;
         }
     }
     Request.prototype._onDataNodeChange.call(this, notification);
+}
+
+VertexShaderRequest.prototype.getVertexShader = function(){
+    this.getResult(); // Update the result first
+    if(!this._vertexShader){
+        this._vertexShader = this._result.getVertexShader(this._vsConfig);
+    }
+    return this._vertexShader;
 }
 
 VertexShaderRequest.prototype._onResultChanged = function(result, notification){
@@ -149,15 +162,13 @@ function getVsConnectNode(dataNode, vsConfig, filter){
         connectNode = graph.createDataNode(false);
         connectNode.appendChild(forwardNode);
 
-        var operator = vsConfig.getOperator();
-        connectNode.computeOperator = operator;
-        connectNode.computeInputMapping = new Xflow.OrderMapping();
-        connectNode.computeOutputMapping = new Xflow.OrderMapping();
-        vsConfig.setInputMapping(connectNode._computeInputMapping);
-        vsConfig.setOutputMapping(connectNode._computeOutputMapping);
+        connectNode.computeOperator = vsConfig.getOperator();
+        connectNode.computeInputMapping = null;
+        connectNode.computeOutputMapping = null;
 
         c_vsConnectNodeCache[key] = connectNode;
         c_vsConnectNodeCount[connectNode.id] = 1;
+        c_vsConnectNodeKey[connectNode.id] = key;
     }
     else{
         c_vsConnectNodeCount[connectNode.id]++;
@@ -166,10 +177,10 @@ function getVsConnectNode(dataNode, vsConfig, filter){
     return connectNode;
 }
 
-function clearVsConnectNode(connectNode, dataNode, vsConfig){
+function clearVsConnectNode(connectNode){
     c_vsConnectNodeCount[connectNode.id]--;
     if(!c_vsConnectNodeCount[connectNode.id]){
-        var key = getDataNodeShaderKey(dataNode, vsConfig);
+        var key = c_vsConnectNodeKey[connectNode.id];
         c_vsConnectNodeCache[key] = null;
         connectNode.clearChildren();
     }

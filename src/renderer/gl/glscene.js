@@ -3,6 +3,7 @@
     var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
     var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
     var OPTION_SHADEJS_TRANSFORM_SPACES =  "shadejs-transformSpaces";
+    var OPTION_SHADEJS_CACHE = "shadejs-cache";
 
 
     // All the shader flags
@@ -10,6 +11,7 @@
     FLAGS[OPTION_SHADEJS_EXTRACT_UNIFORMS] = {defaultValue: false, recompileOnChange: true };
     FLAGS[OPTION_SHADEJS_TRANSFORM_SPACES] = {defaultValue: true, recompileOnChange: true };
     FLAGS[OPTION_FRUSTUM_CULLING] = {defaultValue: true, recompileOnChange: false };
+    FLAGS[OPTION_SHADEJS_CACHE] = {defaultValue: true, recompileOnChange: false };
 
     for(var flag in FLAGS){
         XML3D.options.register(flag, FLAGS[flag].defaultValue);

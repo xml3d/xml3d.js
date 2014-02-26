@@ -18,6 +18,9 @@
         }
     };
 
+
+    var c_jsShaderCache = {};
+
     function addDefaultChanneling(vsConfig, inputName){
         var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(inputName);
         vsConfig.channelAttribute(inputName, outputName, null);
@@ -161,45 +164,72 @@
                     contextInfo[paramName] = convertXflow2ShadeType(shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
                 }
             }
-
             XML3D.debug.logDebug("CONTEXT:", contextData);
-            try{
-                var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
-                var workSet = new Shade.WorkingSet();
-                workSet.parse(this.sourceTemplate);
 
-                var options = {
-                    propagateConstants: true,
-                    validate: true,
-                    sanitize: true,
-                    transformSpaces: XML3D.options.getValue("shade.js.transformSpaces"),
-                    extractUniformExpressions: XML3D.options.getValue("shade.js.extractUniformExpressions")
-                };
+            var options = {
+                propagateConstants: true,
+                validate: true,
+                sanitize: true,
+                transformSpaces: XML3D.options.getValue("shadejs-transformSpaces"),
+                extractUniformExpressions: XML3D.options.getValue("shadejs-extractUniformExpressions")
+            };
+            var compileOptions = {
+                useStatic: true,
+                uniformExpressions: options.uniformExpressions
+            };
+            var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
 
-                workSet.analyze(contextData, implementation, options);
-                var spaceInfo = workSet.getProcessingData('spaceInfo');
-                var glslShader = workSet.compileFragmentShader({useStatic: true, uniformExpressions: options.uniformExpressions});
-                this.uniformSetter = glslShader.uniformSetter;
-                this.source = {
-                    fragment: glslShader.source,
-                    vertex:  this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
+            var jsShaderKey = implementation + ";" + JSON.stringify(options) + ";" + JSON.stringify(contextInfo) + ";"
+               + this.sourceTemplate;
+
+            var cacheEntry;
+            if(!(cacheEntry = c_jsShaderCache[jsShaderKey])){
+                console.log("CREATE SHADEJS SHADER!");
+                try{
+                    var workSet = new Shade.WorkingSet();
+                    workSet.parse(this.sourceTemplate);
+                    workSet.analyze(contextData, implementation, options);
+                    var spaceInfo = workSet.getProcessingData('spaceInfo');
+                    var glslShader = workSet.compileFragmentShader(compileOptions);
+
+                    cacheEntry = {
+                        source: glslShader.source,
+                        uniformSetter: glslShader.uniformSetter,
+                        spaceInfo: spaceInfo
+                    }
+
+                    this.uniformSetter = glslShader.uniformSetter;
+                    this.source = {
+                        fragment: glslShader.source,
+                        vertex:  this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
+                    }
+                    if(scene.deferred){
+                        cacheEntry.signatures = workSet.getProcessingData("colorClosureSignatures");
+                    }
+                    if(XML3D.options.getValue("shadejs-cache"))
+                        c_jsShaderCache[jsShaderKey] = cacheEntry;
                 }
-                if(scene.deferred){
-                    var signatures = workSet.getProcessingData("colorClosureSignatures");
-                    scene.colorClosureSignatures.push.apply(scene.colorClosureSignatures, signatures);
-                }
+                catch(e){
+                    webgl.SystemNotifier.sendEvent('shadejs', {
+                        shadejsType : "error",
+                        event: e,
+                        code: this.sourceTemplate
+                    });
 
+                    var errorMessage = "Shade.js Compile Error:\n" + e.message + "\n------------\n"
+                    + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
+                    throw new Error(errorMessage);
+                }
+            }else{
+                console.log("USE CACHED SHADER!");
             }
-            catch(e){
-                webgl.SystemNotifier.sendEvent('shadejs', {
-                    shadejsType : "error",
-                    event: e,
-                    code: this.sourceTemplate
-                });
-
-                var errorMessage = "Shade.js Compile Error:\n" + e.message + "\n------------\n"
-                + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
-                throw new Error(errorMessage);
+            this.source = {
+                fragment: cacheEntry.source,
+                vertex:  this.createVertexShader(vsRequest, vsDataResult, cacheEntry.spaceInfo)
+            }
+            this.uniformSetter = cacheEntry.uniformSetter;
+            if(scene.deferred){
+                scene.colorClosureSignatures.push.apply(scene.colorClosureSignatures, cacheEntry.signatures);
             }
 
             // TODO: Handle errors.

@@ -102,7 +102,7 @@
          * @returns {boolean}
          */
         needsScale: function(width, height) {
-            return (this.wrapS != this.gl.CLAMP_TO_EDGE || this.wrapT != this.gl.CLAMP_TO_EDGE) &&
+            return (this.generateMipMap || this.wrapS != this.gl.CLAMP_TO_EDGE || this.wrapT != this.gl.CLAMP_TO_EDGE) &&
             (!isPowerOfTwo(width) || !isPowerOfTwo(height))
         },
 

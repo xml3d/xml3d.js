@@ -299,5 +299,4 @@ XML3D.webgl.stopEvent = function(ev) {
         ev.preventDefault();
     if (ev.stopPropagation)
         ev.stopPropagation();
-    ev.returnValue = false;
 };

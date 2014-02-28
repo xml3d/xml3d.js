@@ -70,12 +70,12 @@
         <file name="adapter/lightshader.js" />
         <file name="adapter/light.js" />
         <file name="adapter/factory.js" />
-        <file name="shaders/base.js" />
-        <file name="shaders/matte.js" />
-        <file name="shaders/diffuse.js" />
-        <file name="shaders/phong.js" />
-        <file name="shaders/point.js" />
-        <file name="shaders/utility.js" />
+        <file name="gl/shaders/base.js" />
+        <file name="gl/shaders/matte.js" />
+        <file name="gl/shaders/diffuse.js" />
+        <file name="gl/shaders/phong.js" />
+        <file name="gl/shaders/point.js" />
+        <file name="gl/shaders/utility.js" />
     </filelist>
 
     <target name="concat">

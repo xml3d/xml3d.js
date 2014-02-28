@@ -167,6 +167,8 @@
                 var dataSlot = programData.outputs[entry.getOutputIndex(j)], dataEntry;
                 dataEntry = async ? dataSlot.asyncDataEntry : dataSlot.dataEntry;
 
+                if(d.noAlloc)
+                    continue;
 
                 if (dataEntry.type == Xflow.DATA_TYPE.TEXTURE) {
                     // texture entry
@@ -369,13 +371,14 @@
         var args = assembleFunctionArgs(entry, programData);
         args.push(operatorData);
         entry.operator.evaluate.apply(operatorData, args);
+        handlePostProcessOutput(entry, programData, args, false);
     }
 
     function applyAsyncOperator(entry, programData, operatorData, asyncCallback){
         var args = assembleFunctionArgs(entry, programData, true);
         args.push(operatorData);
         args.push(function(){
-            swapAsyncDataEntries(entry, programData);
+            handlePostProcessOutput(entry, programData, args, true);
             asyncCallback();
         });
         entry.operator.evaluate_async.apply(operatorData, args);
@@ -477,18 +480,34 @@
         var args = [];
         var outputs = entry.operator.outputs;
         for(var i = 0; i < outputs.length; ++i){
-            var dataSlot = programData.outputs[entry.getOutputIndex(i)];
-            var dataEntry = async ? dataSlot.asyncDataEntry : dataSlot.dataEntry;
-            args.push(dataEntry ? dataEntry.getValue() : null);
+            if(outputs[i].noAlloc){
+                args.push({assign: null});
+            }
+            else{
+                var dataSlot = programData.outputs[entry.getOutputIndex(i)];
+                var dataEntry = async ? dataSlot.asyncDataEntry : dataSlot.dataEntry;
+                args.push(dataEntry ? dataEntry.getValue() : null);
+            }
         }
         addInputToArgs(args, entry, programData);
         return args;
     }
-    function swapAsyncDataEntries(entry, programData){
+    function handlePostProcessOutput(entry, programData, arguments, async){
         var outputs = entry.operator.outputs;
         for(var i = 0; i < outputs.length; ++i){
             var dataSlot = programData.outputs[entry.getOutputIndex(i)];
-            dataSlot.swapAsync();
+            if(outputs[i].noAlloc){
+                var dataEntry = async ? dataSlot.asyncDataEntry : dataSlot.dataEntry;
+                if(dataEntry.type == Xflow.DATA_TYPE.TEXTURE ){
+                    dataEntry._setImage(arguments[i].assign);
+                }
+                else{
+                    dataEntry._setValue(arguments[i].assign);
+                }
+            }
+            if(async){
+                dataSlot.swapAsync();
+            }
         }
     }
 

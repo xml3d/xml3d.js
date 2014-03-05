@@ -512,6 +512,19 @@ test("Operator - Platform - JS", function() {
     this.executeTests(response);
 });
 
+test("Operator - Platform - WebCL", function () {
+    var xflowGraph = XML3D.data.xflowGraph;
+
+    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+        console.log("Operator - Platform - WebCL tests were not executed because WebCL platform is not available");
+        return true;
+    }
+
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_platform_cl.xml", handler);
+    this.executeTests(response);
+});
+
 test("Operators - Simple", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/simple_script/test_script_simple.xml", handler);

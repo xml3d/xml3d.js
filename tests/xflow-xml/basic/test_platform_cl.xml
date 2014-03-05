@@ -1,0 +1,53 @@
+<XflowTest>
+    <Input>
+        <data id="textures">
+            <texture name="input">
+                <img src="./textures/white.png" style="display:none;"/>
+            </texture>
+            <texture name="tex" id="reference">
+                <img src="./textures/black.png" style="display:none;"/>
+            </texture>
+        </data>
+
+        <dataflow id="emptyPlatform" out="output">
+            <int name="threshold">0</int>
+            <data src="#textures" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+
+        <dataflow id="illegalPlatform" out="output" platform="thePlatform">
+            <int name="threshold">0</int>
+            <data src="#textures" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+
+        <dataflow id="validPlatform" out="output" platform="cl">
+            <int name="threshold">0</int>
+            <data src="#textures" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+    </Input>
+
+    <TestProcess>
+        <Check title="Check empty platform" data="#emptyPlatform">
+            <MatchTexture name="output" reference="#reference"/>
+        </Check>
+
+        <Check title="Check illegal platform" data="#illegalPlatform">
+            <MatchTexture name="output" reference="#reference"/>
+        </Check>
+
+        <Check title="Check valid platform" data="#validPlatform">
+            <MatchTexture name="output" reference="#reference"/>
+        </Check>
+    </TestProcess>
+</XflowTest>

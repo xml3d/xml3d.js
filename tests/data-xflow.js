@@ -269,23 +269,27 @@ module("Xflow tests", {
     MatchTexture: function (have, action, title) {
         var shouldMatchName = action.getAttribute("reference").substring(1);
         var shouldMatchElement = this.doc.getElementById(shouldMatchName);
-
-        var shouldMatchData = this.getXflowData(shouldMatchElement).getValue();
-
+        var shouldMatchData = this.getXflowData(shouldMatchElement).getValue().data;
         var property = action.getAttribute("name");
 
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
 
         var adapterOutputs = dataAdapter.getComputeRequest().getResult();
-        var actualData = adapterOutputs.getOutputData(property);
+        var dataOutput = adapterOutputs.getOutputData(property);
+        var actualData;
 
-        if (!actualData) {
+        if (!dataOutput) {
             ok(false, title + "=> " + shouldMatchName + " in " + have.id + " matches reference data");
             return;
         }
 
-        QUnit.closeArray(actualData.getValue().data, shouldMatchData.data, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
+        actualData = dataOutput.getValue().data;
+
+        dataAdapter.xflowDataNode._getChannelNode().clear();
+
+        QUnit.closeArray(actualData, shouldMatchData, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
+
     },
 
     MatchNull : function (have, action, title) {
@@ -506,17 +510,43 @@ test("Operator - Later Input", function() {
     this.executeTests(response);
 });
 
-test("Operator - Platform - JS", function() {
+test("Operator - Platform fallback - JS", function() {
+        var xflowGraph = XML3D.data.xflowGraph;
+
+    if (xflowGraph.platform !== Xflow.PLATFORM.JAVASCRIPT) {
+        console.log("Operator - Platform fallback - JS tests were not executed because Xflow platform is not JavaScript.");
+        return true;
+    }
+
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_js.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operator - Platform fallback - WebCL", function () {
+    var xflowGraph = XML3D.data.xflowGraph;
+
+    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+        console.log("Operator - Platform fallback - WebCL tests were not executed because WebCL platform is not available.");
+        return true;
+    }
+
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_cl.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operator - Platform attribute - JS", function () {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_platform_js.xml", handler);
     this.executeTests(response);
 });
 
-test("Operator - Platform - WebCL", function () {
+test("Operator - Platform attribute - WebCL", function () {
     var xflowGraph = XML3D.data.xflowGraph;
 
     if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
-        console.log("Operator - Platform - WebCL tests were not executed because WebCL platform is not available");
+        console.log("Operator - Platform - WebCL tests were not executed because WebCL platform is not available.");
         return true;
     }
 

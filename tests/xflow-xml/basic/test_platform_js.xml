@@ -1,35 +1,18 @@
 <XflowTest>
     <Input>
-        <data id="textures">
+        <data id="texturesJS">
             <texture name="input">
-                <img src="./textures/white.png" style="display:none;"/>
+                <img src="textures/white.png" style="display:none;"/>
             </texture>
-            <texture name="tex" id="reference">
-                <img src="./textures/white.png" style="display:none;"/>
+            <texture name="ref" id="reference_JS">
+                <img src="textures/white.png" style="display:none;"/>
             </texture>
         </data>
 
-        <dataflow id="emptyPlatform" out="output">
+        <dataflow id="validPlatform_JS" out="output" platform="js">
             <int name="threshold">0</int>
-            <data src="#textures" />
 
-            <compute>
-                output = xflow.thresholdImage(input, threshold);
-            </compute>
-        </dataflow>
-
-        <dataflow id="illegalPlatform" out="output" platform="thePlatform">
-            <int name="threshold">0</int>
-            <data src="#textures" />
-
-            <compute>
-                output = xflow.thresholdImage(input, threshold);
-            </compute>
-        </dataflow>
-
-        <dataflow id="validPlatform" out="output" platform="js">
-            <int name="threshold">0</int>
-            <data src="#textures" />
+            <data src="#texturesJS" />
 
             <compute>
                 output = xflow.thresholdImage(input, threshold);
@@ -38,16 +21,8 @@
     </Input>
 
     <TestProcess>
-        <Check title="Check empty platform" data="#emptyPlatform">
-            <MatchTexture name="output" reference="#reference"/>
-        </Check>
-
-        <Check title="Check illegal platform" data="#illegalPlatform">
-            <MatchTexture name="output" reference="#reference"/>
-        </Check>
-
-        <Check title="Check valid platform" data="#validPlatform">
-            <MatchTexture name="output" reference="#reference"/>
+        <Check title="Check valid platform output" data="#validPlatform_JS">
+            <MatchTexture name="output" reference="#reference_JS"/>
         </Check>
     </TestProcess>
 </XflowTest>

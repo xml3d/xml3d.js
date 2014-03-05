@@ -38,6 +38,30 @@
                "result[image_i] = (uchar4)(color, color, color, 255);"
            ]
        });
+
+       Xflow.registerOperator("xflow.thresholdImage", {
+        outputs: [
+            {type: 'texture', name: 'output', sizeof: 'input'}
+        ],
+        params: [
+            {type: 'texture', source: 'input'},
+            {type: 'int', source: 'threshold'}
+        ],
+
+        platform: Xflow.PLATFORM.JAVASCRIPT,
+
+        evaluate: function (output, input, threshold) {
+            var s = input.data,
+                d = output.data;
+
+            for (var i = 0; i < s.length; i += 4) {
+                d[i] = d[i + 1] = d[i + 2] = ((s[i] < threshold[0]) ? 0 : 255);
+                d[i + 3] = s[i + 3];
+            }
+
+            return true;
+        }
+    });
    </script>
   </body>
 

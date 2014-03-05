@@ -276,16 +276,16 @@ module("Xflow tests", {
 
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
-        var adapterOutputs = dataAdapter.getComputeRequest().getResult();
 
-        var actualData = adapterOutputs.getOutputData(property).getValue();
+        var adapterOutputs = dataAdapter.getComputeRequest().getResult();
+        var actualData = adapterOutputs.getOutputData(property);
 
         if (!actualData) {
             ok(false, title + "=> " + shouldMatchName + " in " + have.id + " matches reference data");
             return;
         }
 
-        QUnit.closeArray(actualData.data, shouldMatchData.data, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
+        QUnit.closeArray(actualData.getValue().data, shouldMatchData.data, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
     },
 
     MatchNull : function (have, action, title) {
@@ -503,6 +503,12 @@ test("Operator - Add/Remove", function() {
 test("Operator - Later Input", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_operator_later_input.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operator - Platform - JS", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_platform_js.xml", handler);
     this.executeTests(response);
 });
 

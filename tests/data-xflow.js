@@ -269,26 +269,42 @@ module("Xflow tests", {
     MatchTexture: function (have, action, title) {
         var shouldMatchName = action.getAttribute("reference").substring(1);
         var shouldMatchElement = this.doc.getElementById(shouldMatchName);
-        var shouldMatchData = this.getXflowData(shouldMatchElement).getValue().data;
+        var shouldMatchData = this.getXflowData(shouldMatchElement);
         var property = action.getAttribute("name");
 
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
 
-        var adapterOutputs = dataAdapter.getComputeRequest().getResult();
-        var dataOutput = adapterOutputs.getOutputData(property);
-        var actualData;
+        start();
 
-        if (!dataOutput) {
-            ok(false, title + "=> " + shouldMatchName + " in " + have.id + " matches reference data");
-            return;
+        function executeTest() {
+            var shouldMatchTexture = shouldMatchData.getValue().data;
+            var adapterOutputs = dataAdapter.getComputeRequest().getResult();
+            var dataOutput = adapterOutputs.getOutputData(property);
+            var actualData;
+            if (!dataOutput) {
+                ok(false, title + "=> " + shouldMatchName + " in " + have.id + " matches reference data");
+                return;
+            }
+
+            actualData = dataOutput.getValue().data;
+            dataAdapter.xflowDataNode._getChannelNode().clear();
+
+            QUnit.closeArray(actualData, shouldMatchTexture, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
+            start();
         }
 
-        actualData = dataOutput.getValue().data;
+        if (shouldMatchData.isLoading()) {
+            shouldMatchData.addListener(function (handle, notfication) {
+                if (notfication === Xflow.DATA_ENTRY_STATE.LOAD_END || !shouldMatchData.isLoading()) {
+                    executeTest();
+                }
+            });
+        } else {
+            executeTest();
+        }
 
-        dataAdapter.xflowDataNode._getChannelNode().clear();
-
-        QUnit.closeArray(actualData, shouldMatchData, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
+        stop();
 
     },
 

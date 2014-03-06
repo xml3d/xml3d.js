@@ -151,9 +151,11 @@
             return;
         }
 
-        //TODO: Add better platform selection logic: Apply forced platform attribute value from Xml3D Data/Dataflow adapter
+        //TODO: Improve platform selection logic.
+        // Currently we use forced platform if graph platform is something other than JavaScript
+        // and forced platform (owner._platform) is defined
 
-        platform = graph.platform;
+        platform = owner._platform !== null && graph.platform !== Xflow.PLATFORM.JAVASCRIPT ? owner._platform : graph.platform;
 
         channelNode.platform = platform;
     }

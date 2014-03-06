@@ -267,6 +267,8 @@ module("Xflow tests", {
     },
 
     MatchTexture: function (have, action, title) {
+        stop();
+
         var shouldMatchName = action.getAttribute("reference").substring(1);
         var shouldMatchElement = this.doc.getElementById(shouldMatchName);
         var shouldMatchData = this.getXflowData(shouldMatchElement);
@@ -275,15 +277,15 @@ module("Xflow tests", {
         var dataAdapter = have._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
 
-        start();
-
         function executeTest() {
             var shouldMatchTexture = shouldMatchData.getValue().data;
             var adapterOutputs = dataAdapter.getComputeRequest().getResult();
             var dataOutput = adapterOutputs.getOutputData(property);
             var actualData;
+
             if (!dataOutput) {
                 ok(false, title + "=> " + shouldMatchName + " in " + have.id + " matches reference data");
+                start();
                 return;
             }
 
@@ -303,9 +305,6 @@ module("Xflow tests", {
         } else {
             executeTest();
         }
-
-        stop();
-
     },
 
     MatchNull : function (have, action, title) {

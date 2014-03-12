@@ -201,16 +201,19 @@ test("External datalists", 3, function() {
             if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
                 return;
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-                QUnit.imageEqual(refImage, testImage, "Multidata render matches");
+                QUnit.imageClose(refImage, testImage, 1, "Multidata render matches");
                 start();
             });
         }
     }
-    xTest.addEventListener("framedrawn", onFrameDrawn);
     self.doc.getElementById("mm1").src = "xml/datalists.xml#datalist1";
     self.doc.getElementById("mm2").src = "xml/datalists.xml#datalist2";
     self.doc.getElementById("mm3").src = "xml/datalists.xml#datalist3";
-    hTest.draw();
+    window.setTimeout(function(){
+        xTest.addEventListener("framedrawn", onFrameDrawn);
+        hTest.draw();
+    }, 100);
+
     stop();
 });
 

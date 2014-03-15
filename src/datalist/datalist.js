@@ -32,13 +32,13 @@ function checkRecursive(datalist){
     var localNames = [];
     for(var i = 0; i < datalist.children.length; ++i){
         var child = datalist.children[i], name = child.name;
-        if(!name){
-            throw new DataListError("Child subdata without a name.", child.refNode);
-        }
-        if(localNames.indexOf(name) != -1){
+//        if(!name){
+//            throw new DataListError("Child subdata without a name.", child.refNode);
+//        }
+        if(name && localNames.indexOf(name) != -1){
             throw new DataListError("Two subdata elements with the same name: '" + name + "'", child.refNode);
         }
-        localNames.push(name);
+        if(name) localNames.push(name);
     }
     var totalNames = localNames.slice();
     if(parentNames){
@@ -61,7 +61,6 @@ function checkIncludes(subData, totalNames){
         }
     }
 }
-
 
 
 XML3D.base.DataList.prototype.setLoading = function(loading){
@@ -216,7 +215,8 @@ function invalidateParent(subData){
 //----------------------------------------------------------------------------------------------------------------------
 
 XML3D.base.DataListResult = function(dataList){
-    this.entries = {};
+    this.namedEntries = {};
+    this.allEntries = [];
     this.pickFilter = null;
     constructDataListTable(this, dataList);
 }
@@ -224,9 +224,11 @@ XML3D.base.DataListResult = function(dataList){
 
 XML3D.base.DataListResult.prototype.getMeshDataSets = function(){
     var result = [];
-    for(var name in this.entries){
-        var entry = this.entries[name];
-        if(entry.meshType && (!this.pickFilter || this.pickFilter.indexOf(name) != -1) ){
+
+    for(var i = 0; i < this.allEntries.length; ++i){
+
+        var entry = this.allEntries[i];
+        if(entry.meshType && (!entry.name || !this.pickFilter || this.pickFilter.indexOf(entry.name) != -1) ){
             updateAccumulatedNode(this, entry);
             result.push({
                 xflowNode: entry.accumulatedXflowNode,
@@ -256,7 +258,7 @@ function updateAccumulatedNode(table, entry){
 
     var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : XML3D.data.xflowGraph.createDataNode(false);
     for(var i = 0; i < entry.includes.length; ++i){
-        var addEntry = table.entries[entry.includes[i]];
+        var addEntry = table.namedEntries[entry.includes[i]];
         updateAccumulatedNode(table, addEntry);
         dataNode.appendChild(addEntry.accumulatedXflowNode);
     }
@@ -290,9 +292,20 @@ function constructDataListTable(table, datalist){
     for(var i = 0; i < children.length; ++i){
         var child = children[i];
         var name = child.name;
-        if(!table.entries[name])
-            table.entries[name] = new DataListTableEntry();
-        var entry = table.entries[name];
+        var entry;
+        if(name){
+            if(!table.namedEntries[name]){
+                entry = new DataListTableEntry();
+                table.namedEntries[name] = entry
+                table.allEntries.push(entry);
+            }
+            else
+                entry = table.namedEntries[name];
+        }
+        else{
+            entry = new DataListTableEntry();
+            table.allEntries.push(entry);
+        }
         entry.pushPostEntry(child);
 
         entry.meshType = child.meshType || entry.meshType;
@@ -302,9 +315,11 @@ function constructDataListTable(table, datalist){
 }
 
 function copySrcTable(table, srcTable, pickFilter){
-    for(var name in srcTable.entries){
-        var srcEntry = srcTable.entries[name];
-        table.entries[name] = new DataListTableEntry(srcEntry);
+    var i = srcTable.allEntries.length;
+    while(i--){
+        var newEntry = new DataListTableEntry(srcTable.allEntries[i]);
+        table.allEntries.push(newEntry);
+        if(newEntry.name) table.namedEntries[newEntry.name] = newEntry;
     }
     if(pickFilter && srcTable.pickFilter){
         table.pickFilter = [];
@@ -321,6 +336,7 @@ function copySrcTable(table, srcTable, pickFilter){
 
 
 function DataListTableEntry (srcEntry){
+    this.name = srcEntry && srcEntry.name;
     this.meshType = srcEntry && srcEntry.meshType || null;
 
     this.includes = srcEntry && srcEntry.includes.slice(0) || [];
@@ -334,6 +350,7 @@ function DataListTableEntry (srcEntry){
 }
 
 DataListTableEntry.prototype.pushPostEntry = function(subData){
+    this.name = subData.name;
     this.postQueue.push({
         dataflow: subData.postDataflow,
         dataflowLoading: subData.loading,

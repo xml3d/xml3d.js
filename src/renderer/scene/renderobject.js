@@ -231,7 +231,7 @@
                     }
                 }
                 this.setWorldMatrix(tmp_mat);
-                this.updateWorldSpaceBoundingBox();
+                this.boundingBoxDirty = true;
                 this.transformDirty = false;
             }
         })(),

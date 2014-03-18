@@ -416,7 +416,7 @@
 
             return function() {
                 this.getObjectSpaceBoundingBox(c_box);
-                this.parent.getWorldMatrix(c_trans);
+                this.getWorldMatrix(c_trans);
                 XML3D.math.bbox.transform(c_box, c_trans, c_box);
                 this.setWorldSpaceBoundingBox(c_box);
                 this.boundingBoxDirty = false;

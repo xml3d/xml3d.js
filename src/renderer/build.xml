@@ -65,7 +65,7 @@
         <file name="adapter/shader.js" />
         <file name="adapter/img.js" />
         <file name="adapter/mesh.js" />
-        <file name="adapter/multimesh.js" />
+        <file name="adapter/model.js" />
         <file name="adapter/group.js" />
         <file name="adapter/lightshader.js" />
         <file name="adapter/light.js" />

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="xml3d-datalist-module" default="concat" basedir=".">
+<project name="xml3d-asset-module" default="concat" basedir=".">
     <description>
             All data handling related functionality
     </description>
     <import file="../../build/build-master.xml" />
 
     <filelist dir="." id="sourceFiles">
-        <file name="./datalist.js" />
+        <file name="./asset.js" />
     </filelist>
 
     <target name="concat">

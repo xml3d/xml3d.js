@@ -6,9 +6,9 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     /**
      * @constructor
      */
-    var MultiMeshRenderAdapter = function (factory, node) {
+    var ModelRenderAdapter = function (factory, node) {
         webgl.TransformableAdapter.call(this, factory, node, true);
-        this.dataList = null;
+        this.asset = null;
         this.renderObjects = [];
         this.initializeEventAttributes();
         this.createRenderNode();
@@ -16,13 +16,13 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     var c_IDENTITY = XML3D.math.mat4.create();
 
-    XML3D.createClass(MultiMeshRenderAdapter, webgl.TransformableAdapter, {
+    XML3D.createClass(ModelRenderAdapter, webgl.TransformableAdapter, {
 
         createRenderNode: function () {
             var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
-            this.dataList = dataAdapter.getDataList();
+            this.asset = dataAdapter.getAsset();
 
-            this.dataList.addChangeListener(this);
+            this.asset.addChangeListener(this);
 
             var parent = this.getParentRenderAdapter();
             var parentNode = parent.getRenderNode && parent.getRenderNode();
@@ -47,15 +47,15 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         },
         createSubRenderObjects: function(){
             this.clearSubRenderObjects();
-            if(!this.dataList.isSubtreeLoading()){
+            if(!this.asset.isSubtreeLoading()){
                 try{
-                    this.dataList.checkValidity();
-                    var dataListResult = this.dataList.getResult();
-                    var meshSets = dataListResult.getMeshDataSets();
+                    this.asset.checkValidity();
+                    var assetResult = this.asset.getResult();
+                    var meshSets = assetResult.getMeshDataSets();
                     for(var i = 0; i < meshSets.length; ++i){
                         var renderNode = this.getScene().createRenderObject({
                             parent: this.renderNode,
-                            node: this.node,
+                            node: meshSets[i].refNode || this.node,
                             object: {
                                 data: meshSets[i].xflowNode,
                                 type: meshSets[i].type
@@ -69,7 +69,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     }
                 }
                 catch(e){
-                    XML3D.debug.logError("DataList Error: " + e.message, e.node || this.node);
+                    XML3D.debug.logError("Asset Error: " + e.message, e.node || this.node);
                     this.clearSubRenderObjects();
                 }
             }
@@ -100,11 +100,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                     return;
             }
         },
-        onDataListChange: function(){
+        onAssetChange: function(){
             this.createSubRenderObjects();
         },
         dispose: function () {
-            this.dataList.removeChangeListener(this);
+            this.asset.removeChangeListener(this);
             this.clearSubRenderObjects();
             this.getRenderNode().remove();
             this.clearAdapterHandles();
@@ -115,7 +115,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 
     // Interface methods
 
-    XML3D.extend(MultiMeshRenderAdapter.prototype, {
+    XML3D.extend(ModelRenderAdapter.prototype, {
         /**
          * @return {window.XML3DBox}
          */
@@ -143,6 +143,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     });
 
     // Export to XML3D.webgl namespace
-    webgl.MultiMeshRenderAdapter = MultiMeshRenderAdapter;
+    webgl.ModelRenderAdapter = ModelRenderAdapter;
 
 }(XML3D.webgl));

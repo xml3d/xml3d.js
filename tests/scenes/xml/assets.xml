@@ -42,38 +42,38 @@
     </data>
 
 
-    <datalist id="datalist1" >
-        <subdata name="mesh1" meshtype="triangles" shader="#redShader" >
+    <asset id="asset1" >
+        <assetmesh name="mesh1" type="triangles" shader="#redShader" >
             <data src="#rectBase" />
             <data src="#position1" />
-        </subdata>
-    </datalist>
-    <datalist id="datalist2" >
-        <subdata name="base" id="baseSubData" >
+        </assetmesh>
+    </asset>
+    <asset id="asset2" >
+        <assetdata name="base" id="baseSubData" >
             <data src="#rectBase" />
-        </subdata>
-        <subdata name="mesh1" includes="base" meshtype="triangles" shader="#redShader"  >
+        </assetdata>
+        <assetmesh name="mesh1" includes="base" type="triangles" shader="#redShader"  >
             <data src="#position1" />
-        </subdata>
-        <subdata name="mesh2" includes="base" meshtype="triangles" shader="#blueShader" id="innerSubData" >
+        </assetmesh>
+        <assetmesh name="mesh2" includes="base" type="triangles" shader="#blueShader" id="innerSubData" >
             <data src="#position2" />
-        </subdata>
-    </datalist>
-    <datalist id="datalist2Alt" >
-        <subdata name="blaBlubb" meshtype="triangles" shader="#pinkShader"  >
+        </assetmesh>
+    </asset>
+    <asset id="asset2Alt" >
+        <assetmesh name="blaBlubb" type="triangles" shader="#pinkShader"  >
             <data src="#rectBase" />
             <data src="#position3" />
-        </subdata>
-        <subdata name="mesh2" meshtype="triangles" shader="#blueShader"  >
+        </assetmesh>
+        <assetmesh name="mesh2" type="triangles" shader="#blueShader"  >
             <data src="#rectBase" />
             <data src="#position2" />
-        </subdata>
-    </datalist>
+        </assetmesh>
+    </asset>
 
-    <datalist id="datalist3" src="#datalist2">
-        <subdata name="mesh3" includes="base" meshtype="triangles" shader="#greenShader" style="transform: translateX(-2px)" >
+    <asset id="asset3" src="#asset2">
+        <assetmesh name="mesh3" includes="base" type="triangles" shader="#greenShader" style="transform: translateX(-2px)" >
             <data src="#position3" />
-        </subdata>
-    </datalist>
+        </assetmesh>
+    </asset>
 
 </xml3d>

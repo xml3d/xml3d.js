@@ -46,7 +46,6 @@ test("&lt;data&gt; interface test", function() {
     equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
     equal(typeof e.src, "string", "src is of type 'string'");
-    equal(typeof e.proto, "string", "proto is of type 'string'");
 });
 test("&lt;defs&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "defs");
@@ -106,7 +105,6 @@ test("&lt;mesh&gt; interface test", function() {
     equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
     equal(typeof e.src, "string", "src is of type 'string'");
-    equal(typeof e.proto, "string", "proto is of type 'string'");
 });
 test("&lt;transform&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "transform");
@@ -135,7 +133,6 @@ test("&lt;shader&gt; interface test", function() {
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
     equal(typeof e.script, "string", "script is of type 'string'");
     equal(typeof e.src, "string", "src is of type 'string'");
-    equal(typeof e.proto, "string", "proto is of type 'string'");
 });
 test("&lt;light&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "light");
@@ -174,7 +171,6 @@ test("&lt;lightshader&gt; interface test", function() {
     equal(typeof e.getResult, "function", "getResult is of type 'function'");
     equal(typeof e.script, "string", "script is of type 'string'");
     equal(typeof e.src, "string", "src is of type 'string'");
-    equal(typeof e.proto, "string", "proto is of type 'string'");
 });
 test("&lt;script&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "script");
@@ -184,23 +180,6 @@ test("&lt;script&gt; interface test", function() {
     equal(typeof e.id, "string", "id is of type 'string'");
     equal(typeof e.src, "string", "src is of type 'string'");
     equal(typeof e.type, "string", "type is of type 'string'");
-});
-test("&lt;proto&gt; interface test", function() {
-    var e = document.createElementNS(XML3D.xml3dNS, "proto");
-    ok(e, "proto exits");
-    equal(typeof e.className, "string", "className is of type 'string'");
-    equal(typeof e.style, "object", "style is of type 'object'");
-    equal(typeof e.id, "string", "id is of type 'string'");
-    equal(typeof e.compute, "string", "compute is of type 'string'");
-    equal(typeof e.filter, "string", "filter is of type 'string'");
-    equal(typeof e.getOutputNames, "function", "getOutputNames is of type 'function'");
-    equal(typeof e.getOutputChannelInfo, "function", "getOutputChannelInfo is of type 'function'");
-    equal(typeof e.getComputeInfo, "function", "getComputeInfo is of type 'function'");
-    equal(typeof e.getProtoInfo, "function", "getProtoInfo is of type 'function'");
-    equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
-    equal(typeof e.getResult, "function", "getResult is of type 'function'");
-    equal(typeof e.src, "string", "src is of type 'string'");
-    equal(typeof e.proto, "string", "proto is of type 'string'");
 });
 test("&lt;float&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "float");

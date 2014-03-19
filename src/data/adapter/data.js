@@ -105,21 +105,17 @@ XML3D.data.DataAdapter = function (factory, node) {
 XML3D.createClass(XML3D.data.DataAdapter, XML3D.data.BaseDataAdapter);
 
 XML3D.data.DataAdapter.prototype.init = function () {
-    //var xflow = this.resolveScript();
-    //if (xflow)
-    //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
-
-    var protoNode = (this.node.localName === "proto");
-
-    this.xflowDataNode = XML3D.data.xflowGraph.createDataNode(protoNode);
+    this.xflowDataNode = XML3D.data.xflowGraph.createDataNode();
     this.xflowDataNode.userData = this.node;
 
     // Setting platform and node type information for a data sequence
     this.xflowDataNode.setPlatform(this.node.getAttribute("platform"));
 
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
-    this.xflowDataNode.setFilter(this.node.getAttribute("filter"));
-    updateCompute(this);
+    if(!this.assetData){
+        this.xflowDataNode.setFilter(this.node.getAttribute("filter"));
+        updateCompute(this);
+    }
     recursiveDataAdapterConstruction(this);
 };
 
@@ -206,10 +202,10 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function (evt) {
     } else if (evt.type === XML3D.events.VALUE_MODIFIED) {
         var attr = evt.wrapped.attrName;
 
-        if (attr === "filter") {
+        if (attr === "filter" && !this.assetData) {
             this.xflowDataNode.setFilter(this.node.getAttribute(attr));
         }
-        else if (attr === "compute") {
+        else if (attr === "compute" && !this.assetData) {
             updateCompute(this);
         }
         else if (attr === "src") {

@@ -71,9 +71,10 @@
     reg['video']       = data.VideoDataAdapter;
     reg['script']      = data.ScriptDataAdapter;
     reg['transform']   = data.TransformDataAdapter;
-    reg['datalist']    = data.DataListAdapter;
-    reg['subdata']     = data.SubDataAdapter;
-    reg['multimesh']   = data.DataListAdapter;
+    reg['asset']       = data.AssetAdapter;
+    reg['assetdata']   = data.AssetDataAdapter;
+    reg['assetmesh']   = data.AssetMeshAdapter;
+    reg['model']       = data.AssetAdapter;
 
    /**
      * Creates a DataAdapter associated with the given node.

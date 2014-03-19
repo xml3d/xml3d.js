@@ -8,7 +8,7 @@
     <filelist dir="." id="sourceFiles">
         <file name="./base.js" />
         <file name="./adapter/data.js" />
-        <file name="./adapter/datalist.js" />
+        <file name="./adapter/asset.js" />
         <file name="./adapter/values.js" />
         <file name="./adapter/texture.js" />
         <file name="./adapter/transform.js" />

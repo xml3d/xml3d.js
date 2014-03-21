@@ -134,7 +134,7 @@
                 return;
             }
             this.children.forEach(function(obj) {
-                obj.setShader(newHandle);
+                obj.setShader && obj.setShader(newHandle);
             });
         },
 

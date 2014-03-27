@@ -110,7 +110,10 @@
         removeLightFromScene : function() {
             var container = this.scene.lights[this.light.type];
             if (Array.isArray(container)) {
-                container = container.splice(this);
+                var index = container.indexOf(this);
+                if (index > -1) {
+                    container.splice(container.indexOf(this), 1);
+                }
                 this.lightStructureChanged(true);
             }
         },

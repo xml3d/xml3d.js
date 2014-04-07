@@ -66,7 +66,7 @@ function updatePickFilter(adapter){
 
 XML3D.data.AssetAdapter.prototype.connectedAdapterChanged = function(attributeName, adapter){
     if(attributeName == "src")
-        this.asset.setSrcAsset(adapter && adapter.asset || null);
+        this.asset.setSrcAsset(adapter && adapter.getAsset() || null);
     updateAssetLoadState(this);
 }
 

@@ -56,9 +56,10 @@
             finalOutput: null,
             firstOperator: null
         }
-        initRequestNode(cData, executer, ownerNode);
+        var requestNode = initRequestNode(cData, executer, ownerNode);
 
-        constructPreScan(cData, ownerNode, executer.platform);
+        var noOperators = (requestNode && executer.platform != Xflow.PLATFORM.GLSL);
+        constructPreScan(cData, ownerNode, executer.platform, noOperators);
 
         setConstructionOrderAndSubNodes(cData, executer, ownerNode);
 
@@ -76,15 +77,17 @@
                     cData.finalOutput[name] = channel.getDataEntry();
             }
             Xflow.nameset.add(executer.unprocessedDataNames, filter);
+            return true;
         }
+        return false;
     }
 
-    function constructPreScan(cData, node, platform){
+    function constructPreScan(cData, node, platform, noOperators){
         if(cData.blockedNodes.indexOf(node) != -1)
             return;
 
         if(node.operator){
-            if(!canOperatorMerge(cData, node.operator, platform)){
+            if(noOperators || !canOperatorMerge(cData, node.operator, platform)){
                 blockSubtree(cData, node);
                 return;
             }
@@ -104,7 +107,7 @@
             }
         }
         for(var i = 0; i < node.children.length; ++i){
-            constructPreScan(cData, node.children[i], platform);
+            constructPreScan(cData, node.children[i], platform, noOperators);
         }
     }
 

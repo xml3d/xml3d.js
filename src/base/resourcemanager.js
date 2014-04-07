@@ -426,6 +426,25 @@
     }
 
     /**
+     * This methods returns an absolute URI compatible with the resource manager.
+     * This means: Any reference from an external document will be absolute and any id reference from the current
+     * document will remain an id reference.
+     * @param {Document} baseDocument - the document from which to look up the reference
+     * @param {XML3D.URI} uri - The URI used to find the referred AdapterHandle. Can be relative
+     * @returns {XML3D.URI} The (sometimes) absolute URI
+     */
+    ResourceManager.prototype.getAbsoluteURI = function(baseDocument, uri){
+        if (!uri)
+            return null;
+
+        if (typeof uri == "string") uri = new XML3D.URI(uri);
+        if (baseDocument != document || !uri.isLocal()) {
+            uri = uri.getAbsoluteURI(baseDocument.documentURI);
+        }
+        return uri;
+    }
+
+    /**
      * Get any adapter, internal or external.
      * This function will trigger the loading of documents, if required.
      * An AdapterHandle will be always be returned, expect when an invalid (empty) uri is passed.
@@ -437,15 +456,11 @@
      * @returns {?XML3D.base.AdapterHandle} The requested AdapterHandler. Note: might be null
      */
     ResourceManager.prototype.getAdapterHandle = function(baseDocument, uri, adapterType, canvasId) {
+        canvasId = canvasId || 0;
+        uri = this.getAbsoluteURI(baseDocument, uri);
+
         if (!uri)
             return null;
-
-        if (typeof uri == "string") uri = new XML3D.URI(uri);
-
-        canvasId = canvasId || 0;
-        if (baseDocument != document || !uri.isLocal()) {
-            uri = uri.getAbsoluteURI(baseDocument.documentURI);
-        }
 
         if (!c_cachedAdapterHandles[uri])
             c_cachedAdapterHandles[uri] = {};

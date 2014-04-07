@@ -627,6 +627,22 @@ var computeParser = /^(([^=]+)\=)?([^'(]+('[^']+')?[^'(]+)(\(([^()]*)?\))?$/;
 var bracketsParser = /^\(([^()]*)\)$/;
 var dataflowParser = /^dataflow\['([^']+)'\]$/;
 
+Xflow.getComputeDataflowUrl = function(computeString){
+    computeString = computeString || "";
+    var newOperator = "";
+    var result = computeString.trim().match(computeParser);
+    if(result){
+        newOperator = result[3].trim();
+        if(result = newOperator.match(dataflowParser)){
+            return result[1];
+        }
+        else{
+            return null;
+        }
+    }
+}
+
+
 /**
  * Set compute by string
  * @param {string} computeString
@@ -666,6 +682,10 @@ DataNode.prototype.setCompute = function(computeString){
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 }
+
+
+
+
 /**
  * Notifies DataNode about a change. Notification will be forwarded to parents, if necessary
  * @param {Xflow.RESULT_STATE} changeType

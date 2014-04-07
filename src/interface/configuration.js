@@ -137,7 +137,6 @@ XML3D.classInfo['data'] = {
     isOutputConnected: {m: XML3D.methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: XML3D.methods.XML3DNestedDataContainerTypeGetResult},
     src: {a: XML3D.ReferenceHandler},
-    proto: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
@@ -155,6 +154,17 @@ XML3D.classInfo['dataflow'] = {
     getProtoInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetProtoInfo},
     isOutputConnected: {m: XML3D.methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: XML3D.methods.XML3DNestedDataContainerTypeGetResult},
+    _term: undefined
+};
+/**
+ * Properties and methods for <data>
+ **/
+XML3D.classInfo['asset'] = {
+    id: {a: XML3D.IDHandler},
+    className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for data
+    src: {a: XML3D.ReferenceHandler},
+    pick: {a: XML3D.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -211,6 +221,8 @@ XML3D.classInfo['mesh'] = {
     visible: {a: XML3D.BoolAttributeHandler, params: true},
     type: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.MeshTypes, d: 0}},
     compute: {a: XML3D.StringAttributeHandler},
+    transform: {a: XML3D.ReferenceHandler},
+    shader: {a: XML3D.ReferenceHandler},
     getWorldMatrix: {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     getBoundingBox: {m: XML3D.methods.meshGetBoundingBox},
     getOutputNames: {m: XML3D.methods.meshGetOutputNames},
@@ -220,7 +232,30 @@ XML3D.classInfo['mesh'] = {
     isOutputConnected: {m: XML3D.methods.meshIsOutputConnected},
     getResult: {m: XML3D.methods.meshGetResult},
     src: {a: XML3D.ReferenceHandler},
-    proto: {a: XML3D.ReferenceHandler},
+    _term: undefined
+};
+/**
+ * Properties and methods for <model>
+ **/
+XML3D.classInfo['model'] = {
+    id: {a: XML3D.IDHandler},
+    className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for mesh
+    onclick: {a: XML3D.EventAttributeHandler},
+    ondblclick: {a: XML3D.EventAttributeHandler},
+    onmousedown: {a: XML3D.EventAttributeHandler},
+    onmouseup: {a: XML3D.EventAttributeHandler},
+    onmouseover: {a: XML3D.EventAttributeHandler},
+    onmousemove: {a: XML3D.EventAttributeHandler},
+    onmouseout: {a: XML3D.EventAttributeHandler},
+    onkeypress: {a: XML3D.EventAttributeHandler},
+    onkeydown: {a: XML3D.EventAttributeHandler},
+    onkeyup: {a: XML3D.EventAttributeHandler},
+    visible: {a: XML3D.BoolAttributeHandler, params: true},
+    getWorldMatrix: {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
+    getBoundingBox: {m: XML3D.methods.meshGetBoundingBox},
+    src: {a: XML3D.ReferenceHandler},
+    pick: {a: XML3D.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -253,7 +288,6 @@ XML3D.classInfo['shader'] = {
     getResult: {m: XML3D.methods.XML3DShaderProviderTypeGetResult},
     script: {a: XML3D.ReferenceHandler},
     src: {a: XML3D.ReferenceHandler},
-    proto: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
@@ -296,7 +330,6 @@ XML3D.classInfo['lightshader'] = {
     getResult: {m: XML3D.methods.XML3DShaderProviderTypeGetResult},
     script: {a: XML3D.ReferenceHandler},
     src: {a: XML3D.ReferenceHandler},
-    proto: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
@@ -312,15 +345,20 @@ XML3D.classInfo['script'] = {
     _term: undefined
 };
 /**
- * Properties and methods for <proto>
+ * Properties and methods for <assetmesh>
  **/
-XML3D.classInfo['proto'] = {
+XML3D.classInfo['assetmesh'] = {
     id: {a: XML3D.IDHandler},
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for proto
+    // TODO: Handle style for data
+    name: {a: XML3D.StringAttributeHandler},
+    type: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.MeshTypes, d: 0}},
     compute: {a: XML3D.StringAttributeHandler},
-    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     filter: {a: XML3D.StringAttributeHandler},
+    includes: {a: XML3D.StringAttributeHandler},
+    shader: {a: XML3D.ReferenceHandler},
+    transform: {a: XML3D.ReferenceHandler},
+    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
     getComputeInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetComputeInfo},
@@ -328,7 +366,27 @@ XML3D.classInfo['proto'] = {
     isOutputConnected: {m: XML3D.methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: XML3D.methods.XML3DNestedDataContainerTypeGetResult},
     src: {a: XML3D.ReferenceHandler},
-    proto: {a: XML3D.ReferenceHandler},
+    _term: undefined
+};
+/**
+ * Properties and methods for <assetdata>
+ **/
+XML3D.classInfo['assetdata'] = {
+    id: {a: XML3D.IDHandler},
+    className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for data
+    name: {a: XML3D.StringAttributeHandler},
+    compute: {a: XML3D.StringAttributeHandler},
+    filter: {a: XML3D.StringAttributeHandler},
+    includes: {a: XML3D.StringAttributeHandler},
+    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
+    getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
+    getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
+    getComputeInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetComputeInfo},
+    getProtoInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetProtoInfo},
+    isOutputConnected: {m: XML3D.methods.XML3DNestedDataContainerTypeIsOutputConnected},
+    getResult: {m: XML3D.methods.XML3DNestedDataContainerTypeGetResult},
+    src: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**

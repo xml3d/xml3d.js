@@ -23,6 +23,7 @@
         <file name="xml3d-base-module.js" />
         <file name="xml3d-interface-module.js" />
         <file name="xml3d-xflow-module.js" />
+        <file name="xml3d-asset-module.js" />
         <file name="xml3d-data-module.js" />
         <file name="xml3d-renderer-module.js" />
     </filelist>

@@ -26,7 +26,7 @@
         this.orientation = opt.orientation || XML3D.math.mat4.create();
         this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : DEFAULT_FIELDOFVIEW;
         this.worldSpacePosition = XML3D.math.vec3.create();
-        this.projectionAdapter = opt.projectionAdapter;
+        this.projectionOverride = opt.projectionOverride;
         this.viewDirty = true;
         this.projectionDirty = true;
         this.frustum = new XML3D.webgl.Frustum(1, 100000, 0, this.fieldOfView, 1);
@@ -65,8 +65,8 @@
             var tmp = XML3D.math.mat4.create();
 
             return function(aspect) {
-                if (this.projectionAdapter) {
-                    this.setProjectionMatrix(this.projectionAdapter.getMatrix("perspective"));
+                if (this.projectionOverride) {
+                    this.setProjectionMatrix(this.projectionOverride);
                     return;
                 }
 
@@ -138,8 +138,8 @@
             this.projectionDirty = false;
         },
 
-        setProjectionAdapter: function(projAdapter) {
-            this.projectionAdapter = projAdapter;
+        setProjectionOverride: function(projAdapter) {
+            this.projectionOverride = projAdapter;
             this.setProjectionDirty();
         },
 

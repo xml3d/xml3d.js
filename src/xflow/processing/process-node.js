@@ -239,7 +239,8 @@ RequestNode.prototype.getResult = function(resultType){
     if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
         if(resultType == Xflow.RESULT_TYPE.COMPUTE){
             var executer = getOrCreateExecuter(this, this.owner.platform);
-            executer.run();
+            if(!executer.isProcessed())
+                executer.run();
         }
         this.status = Xflow.PROCESS_STATE.PROCESSED;
     }

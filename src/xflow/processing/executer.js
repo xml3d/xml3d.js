@@ -8,6 +8,7 @@
 
         this.platform = platform;
         this.mergedNodes = [];
+        this.mergedOutputNodes = [];
         this.subNodes = [];
         this.unprocessedDataNames = [];
 
@@ -25,6 +26,15 @@
         constructExecuter(this, ownerNode);
     }
 
+    Xflow.Executer.prototype.isProcessed = function(){
+        var i = this.mergedOutputNodes.length;
+        while(i--){
+            if(this.mergedOutputNodes[i].status != Xflow.PROCESS_STATE.PROCESSED)
+                return false;
+        }
+        return true;
+    }
+
     Xflow.Executer.prototype.run = function(){
         runSubNodes(this);
         updateIterateState(this);
@@ -35,6 +45,11 @@
             this.operatorList.allocateOutput(this.programData);
             this.program.run(this.programData);
         }
+        var i = this.mergedOutputNodes.length;
+        while(i--){
+            this.mergedOutputNodes[i].status = Xflow.PROCESS_STATE.PROCESSED;
+        }
+
     }
 
     Xflow.Executer.prototype.getVertexShader = function(){
@@ -58,7 +73,7 @@
         }
         var requestNode = initRequestNode(cData, executer, ownerNode);
 
-        var noOperators = (requestNode && executer.platform != Xflow.PLATFORM.GLSL);
+        var noOperators = false;
         constructPreScan(cData, ownerNode, executer.platform, noOperators);
 
         setConstructionOrderAndSubNodes(cData, executer, ownerNode);
@@ -164,11 +179,13 @@
 
             constructInputConnection(executer, entry, cData, node);
 
-            constructOutputConnection(executer, entry, cData, node);
+            var isOutputNode = constructOutputConnection(executer, entry, cData, node);
 
             executer.programData.operatorData.push({});
             executer.operatorList.addEntry(entry);
             executer.mergedNodes.push(node);
+            if(isOutputNode || (i == cData.constructionOrder.length-1))
+                executer.mergedOutputNodes.push(node)
 
         }
 
@@ -220,6 +237,7 @@
 
     function constructOutputConnection(executer, entry, cData, node){
         var outputs = node.operator.outputs;
+        var isOutputNode = true;
         for(var i = 0; i < outputs.length; ++i){
             var slot = node.outputDataSlots[outputs[i].name];
             var finalOutputName = getFinalOutputName(slot, cData);
@@ -231,7 +249,11 @@
                     Xflow.nameset.remove(executer.unprocessedDataNames, finalOutputName);
                 }
             }
+            else{
+                isOutputNode = false;
+            }
         }
+        return isOutputNode;
     }
 
 

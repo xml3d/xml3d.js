@@ -290,7 +290,7 @@
             return;
         }
         docCache.format = formatHandler;
-        formatHandler.getFormatData(response, httpRequest.responseType, cleanedMimetype, function(success, result){
+        formatHandler.getFormatData(response, url, httpRequest.responseType, cleanedMimetype, function(success, result){
             if(success){
                 docCache.response = result;
                 updateDocumentHandles(url)

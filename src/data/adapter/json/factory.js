@@ -11,7 +11,7 @@
     }
 
 
-    XML3DJSONFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
+    XML3DJSONFormatHandler.prototype.getFormatData = function(response, url, responseType, mimetype, callback) {
         try{
             var xflowNode = createXflowNode(response);
             callback(true, xflowNode);

@@ -57,11 +57,12 @@
      *
      * @override
      * @param {Object} response
+     * @param {string} absolute url of the file
      * @param {string} responseType
      * @param {string} mimetype
      * @return {Object}
      */
-    FormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
+    FormatHandler.prototype.getFormatData = function(response, url, responseType, mimetype, callback) {
         callback(true, response);
     }
 
@@ -93,7 +94,7 @@
         return response && response.nodeType === 9 && (mimetype === "application/xml" || mimetype === "text/xml");
     }
 
-    XMLFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
+    XMLFormatHandler.prototype.getFormatData = function(response, url, responseType, mimetype, callback) {
         callback(true, response);
     }
 
@@ -118,7 +119,7 @@
         return supported;
     }
 
-    XML3DFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
+    XML3DFormatHandler.prototype.getFormatData = function(response, url, responseType, mimetype, callback) {
         // Configure all xml3d elements:
         var xml3dElements = response.querySelectorAll("xml3d");
         for (var i = 0; i < xml3dElements.length; ++i) {

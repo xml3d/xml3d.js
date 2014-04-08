@@ -45,7 +45,7 @@
 		return true;
 	};
 
-	function getFormatDataWebWorker(response, responseType, mimetype, callback) {
+	function getFormatDataWebWorker(response, url, responseType, mimetype, callback) {
 		var id = this.callbackMap.push(callback) - 1;
 		this.worker.postMessage({
 			type: "decodeFile",
@@ -54,7 +54,7 @@
 		}, [response]);
 	}
 
-	function getFormatDataSynchronously(response, responseType, mimetype, callback) {
+	function getFormatDataSynchronously(response, url, responseType, mimetype, callback) {
 		try {
 			var stream = new CTM.Stream(response);
 			var file = new CTM.File(stream);

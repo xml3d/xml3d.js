@@ -11,7 +11,7 @@
             && response.version == "0.1.0";
     };
 
-    MeshLabFormatHandler.prototype.getFormatData = function (response, responseType, mimetype, callback) {
+    MeshLabFormatHandler.prototype.getFormatData = function (response, url, responseType, mimetype, callback) {
          try {
             var xflowDataNode = createXflowNode(response);
             callback(true, xflowDataNode);

@@ -13,7 +13,7 @@
         return mimetype === "application/json" && response.metadata && response.metadata.formatVersion == "3.1";
     };
 
-    ThreeJsFormatHandler.prototype.getFormatData = function (response, responseType, mimetype, callback) {
+    ThreeJsFormatHandler.prototype.getFormatData = function (response, url, responseType, mimetype, callback) {
          try {
             var parsed = parse(response);
 
@@ -38,7 +38,7 @@
             }
 
             var result = {};
-            result.xflowData = createXflowData(materials, indices, attribs, bindAttribs, animations);
+            result.xflowData = createXflowData(materials, indices, attribs, bindAttribs, animations, url);
             result.asset = createAsset(result.xflowData);
 
             callback(true, result);
@@ -630,8 +630,32 @@
         return inputNode;
     }
 
+    function createXflowTexture(name, value, docUrl){
+        var absoluteUrl = new XML3D.URI(value).getAbsoluteURI(docUrl).toString();
+        console.log(absoluteUrl);
+        var image = new Image();
+        image.src = absoluteUrl;
+        var textureEntry = new Xflow.TextureEntry(image);
+        var config = textureEntry.getSamplerConfig();
+        config.wrapS = WebGLRenderingContext.CLAMP_TO_EDGE;;
+        config.wrapT = WebGLRenderingContext.CLAMP_TO_EDGE;;
+        config.minFilter = WebGLRenderingContext.LINEAR;
+        config.magFilter = WebGLRenderingContext.LINEAR;
+        config.textureType = Xflow.TEX_TYPE.TEXTURE_2D;
+        config.generateMipMap = 1;
 
-    function createXflowData(materials, indices, attribs, bindAttribs, animations){
+        image.onload = function(){
+            textureEntry.setImage(image);
+        };
+
+        var inputNode = XML3D.data.xflowGraph.createInputNode();
+        inputNode.data = textureEntry;
+        inputNode.name = name;
+        return inputNode;
+    }
+
+
+    function createXflowData(materials, indices, attribs, bindAttribs, animations, url){
         var result = {
             indices: {},
             attribs: XML3D.data.xflowGraph.createDataNode(),
@@ -687,7 +711,7 @@
                 matXflowNode.appendChild(createXflowValue("float", "transparency", 0, [1 - material["transparency"]]))
             }
             if(material["mapDiffuse"]){
-                //matXflowNode.appendChild(createXflowValue("texture", "diffuseTexture", 0, material["mapDiffuse"]))
+                matXflowNode.appendChild(createXflowTexture("diffuseTexture", material["mapDiffuse"], url))
             }
         };
         return result;
@@ -709,13 +733,19 @@
         // TODO: Append Dataflow Stuff
         result.appendChild(baseEntry);
 
+        for(var matName in xflowData.materials){
+            var shaderEntry = new XML3D.base.SubData(XML3D.data.xflowGraph.createDataNode(), xflowData.materials[matName]);
+            shaderEntry.setName("shader_" + matName);
+            // TODO: Append Dataflow Stuff
+            result.appendChild(shaderEntry);
+        }
+
         for(var matName in xflowData.indices){
             var meshXflowNode = XML3D.data.xflowGraph.createDataNode();
             meshXflowNode.appendChild(xflowData.indices[matName]);
-            meshXflowNode.appendChild(xflowData.materials[matName]);
             var meshEntry = new XML3D.base.SubData(XML3D.data.xflowGraph.createDataNode(), meshXflowNode);
             meshEntry.setMeshType("triangles");
-            meshEntry.setIncludes(["base"]);
+            meshEntry.setIncludes(["shader_" + matName, "base"]);
             result.appendChild(meshEntry);
         }
 

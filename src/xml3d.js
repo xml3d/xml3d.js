@@ -156,6 +156,8 @@ XML3D.createClass = function(ctor, parent, methods) {
             return;
         }
 
+        XML3D.debug.logInfo("Configuring", xml3dElement.querySelectorAll("*").length, "elements");
+
         try {
             XML3D.config.configure(xml3dElement);
         } catch (e) {
@@ -238,7 +240,7 @@ XML3D.createClass = function(ctor, parent, methods) {
          */
         var xml3ds = document.querySelectorAll("xml3d");
 
-        debug && XML3D.debug.logInfo("Found " + xml3ds.length + " xml3d nodes...");
+        debug && XML3D.debug.logInfo("Found " + xml3ds.length + " xml3d node(s)");
 
         if (xml3ds.length && XML3D._native) {
             debug && XML3D.debug.logInfo("Using native implementation.");

@@ -63,9 +63,10 @@ ProcessNode.prototype.updateState = function(){
 
 ProcessNode.prototype.process = function(){
     // TODO: Fix this with respect to states
-    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
+    var executer;
 
-        var executer = getOrCreateExecuter(this, Xflow.PLATFORM.JAVASCRIPT);
+    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
+        executer = getOrCreateExecuter(this, this.owner.platform);
         executer.run();
 
         this.status = Xflow.PROCESS_STATE.PROCESSED;
@@ -235,10 +236,9 @@ RequestNode.prototype.isReady = function(){
 RequestNode.prototype.getResult = function(resultType){
     this.updateState();
 
-
     if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
         if(resultType == Xflow.RESULT_TYPE.COMPUTE){
-            var executer = getOrCreateExecuter(this, Xflow.PLATFORM.JAVASCRIPT);
+            var executer = getOrCreateExecuter(this, this.owner.platform);
             executer.run();
         }
         this.status = Xflow.PROCESS_STATE.PROCESSED;
@@ -312,19 +312,12 @@ function getRequestVSResult(requestNode)
 {
     var executer = getOrCreateExecuter(requestNode, Xflow.PLATFORM.GLSL);
     if(!requestNode.results[Xflow.RESULT_TYPE.VS])
-        requestNode.results[Xflow.RESULT_TYPE.VS] = new Xflow.VertexShaderResult();
+        requestNode.results[Xflow.RESULT_TYPE.VS] = new Xflow.VSDataResult();
     var result = requestNode.results[Xflow.RESULT_TYPE.VS];
 
     var program = executer.getVertexShader();
     result._program = program;
     result._programData = executer.programData;
-
-    result._dataEntries = {}; result._outputNames = [];
-    for(var name in requestNode.channels){
-        var entry = requestNode.channels[name].getDataEntry();
-        result._dataEntries[name] = entry && !entry.isEmpty() ? entry : null;
-        result._outputNames.push(name);
-    }
     return result;
 }
 

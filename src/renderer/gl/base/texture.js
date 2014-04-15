@@ -8,6 +8,8 @@
     var GLTexture = function(gl) {
         Xflow.SamplerConfig.call(this);
         this.setDefaults();
+        this.width = 0;
+        this.height = 0;
         this.gl = gl;
         this.handle = null;
     };
@@ -100,7 +102,7 @@
          * @returns {boolean}
          */
         needsScale: function(width, height) {
-            return (this.wrapS != this.gl.CLAMP_TO_EDGE || this.wrapT != this.gl.CLAMP_TO_EDGE) &&
+            return (this.generateMipMap || this.wrapS != this.gl.CLAMP_TO_EDGE || this.wrapT != this.gl.CLAMP_TO_EDGE) &&
             (!isPowerOfTwo(width) || !isPowerOfTwo(height))
         },
 
@@ -108,11 +110,11 @@
          * @param {Image|HTMLVideoElement} image
          */
         updateTex2DFromImage : function(image) {
-            var gl = this.gl;
+            var gl = this.gl,
+            width = this.width = image.videoWidth || image.width,
+            height = this.height = image.videoHeight || image.height;
+            
             gl.bindTexture(gl.TEXTURE_2D, this.handle);
-
-            var width = image.videoWidth || image.width;
-            var height = image.videoHeight || image.height;
 
             if(this.needsScale(width, height)) {
                 image = scaleImage(image, width, height);
@@ -162,7 +164,8 @@
                     texels = new Uint8Array(width * height * 4);
                 }
             }
-
+            this.width = width;
+            this.height = height;
             this.handle = gl.createTexture();
             this.textureType = gl.TEXTURE_2D;
             gl.bindTexture(gl.TEXTURE_2D, this.handle);
@@ -173,13 +176,11 @@
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 
-            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels);
+            if (!opt.isDepth)
+                gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels);
+            else
+                gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, null);
 
-            if (opt.isDepth) {
-                gl.texParameteri(gl.TEXTURE_2D, gl.DEPTH_TEXTURE_MODE, opt.depthMode);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, opt.depthCompareMode);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, opt.depthCompareFunc);
-            }
             if (opt.generateMipmap) {
                 gl.generateMipmap(gl.TEXTURE_2D);
             }

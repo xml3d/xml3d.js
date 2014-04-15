@@ -1,7 +1,7 @@
-window=this;
+window = this;
 var Xflow = {};
 
-(function(){
+(function () {
     Xflow.EPSILON = 0.000001;
 
     /**
@@ -11,32 +11,33 @@ var Xflow = {};
     Xflow.DATA_TYPE = {
         UNKNOWN: 0,
         FLOAT: 1,
-        FLOAT2 : 2,
-        FLOAT3 : 3,
-        FLOAT4 : 4,
-        FLOAT4X4 : 10,
-        INT : 20,
-        INT4 : 21,
+        FLOAT2: 2,
+        FLOAT3: 3,
+        FLOAT4: 4,
+        FLOAT3X3 : 5,
+        FLOAT4X4: 10,
+        INT: 20,
+        INT4: 21,
         BOOL: 30,
         TEXTURE: 40,
-        BYTE : 50,
-        UBYTE : 60
-    }
+        BYTE: 50,
+        UBYTE: 60
+    };
 
     Xflow.DATA_TYPE_MAP = {
-        'float' : Xflow.DATA_TYPE.FLOAT,
-        'float2' : Xflow.DATA_TYPE.FLOAT2,
-        'float3' : Xflow.DATA_TYPE.FLOAT3,
-        'float4' : Xflow.DATA_TYPE.FLOAT4,
-        'float4x4' : Xflow.DATA_TYPE.FLOAT4X4,
-        'int' : Xflow.DATA_TYPE.INT,
-        'int4' : Xflow.DATA_TYPE.INT4,
-        'bool' : Xflow.DATA_TYPE.BOOL,
-        'texture' : Xflow.DATA_TYPE.TEXTURE,
-        'byte' : Xflow.DATA_TYPE.BYTE,
-        'ubyte' : Xflow.DATA_TYPE.UBYTE
-    }
-
+        'float': Xflow.DATA_TYPE.FLOAT,
+        'float2': Xflow.DATA_TYPE.FLOAT2,
+        'float3': Xflow.DATA_TYPE.FLOAT3,
+        'float4': Xflow.DATA_TYPE.FLOAT4,
+        'float3x3' : Xflow.DATA_TYPE.FLOAT3X3,
+        'float4x4': Xflow.DATA_TYPE.FLOAT4X4,
+        'int': Xflow.DATA_TYPE.INT,
+        'int4': Xflow.DATA_TYPE.INT4,
+        'bool': Xflow.DATA_TYPE.BOOL,
+        'texture': Xflow.DATA_TYPE.TEXTURE,
+        'byte': Xflow.DATA_TYPE.BYTE,
+        'ubyte': Xflow.DATA_TYPE.UBYTE
+    };
 
 
     Xflow.DATA_TYPE_TUPLE_SIZE = {};
@@ -44,6 +45,7 @@ var Xflow = {};
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT2] = 2;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT3] = 3;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT4] = 4;
+    Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT3X3] = 9;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT4X4] = 16;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.INT] = 1;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.INT4] = 4;
@@ -51,7 +53,6 @@ var Xflow = {};
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.TEXTURE] = 1;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.BYTE] = 1;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.UBYTE] = 1;
-
 
 
     Xflow.TYPED_ARRAY_MAP = {};
@@ -67,13 +68,14 @@ var Xflow = {};
     Xflow.TYPED_ARRAY_MAP[Xflow.DATA_TYPE.UBYTE] = Uint8Array;
 
 
-    Xflow.getTypeName = function(type){
-        for(var i in Xflow.DATA_TYPE_MAP){
-            if(Xflow.DATA_TYPE_MAP[i] == type){
+    Xflow.getTypeName = function (type) {
+        var i;
+        for (i in Xflow.DATA_TYPE_MAP) {
+            if (Xflow.DATA_TYPE_MAP[i] === type) {
                 return i;
             }
         }
-    }
+    };
 
     /**
      * @enum {number}
@@ -107,7 +109,7 @@ var Xflow = {};
         VIEW_TRANSFORM_NORMAL: 5,
         SCREEN_TRANSFORM_NORMAL: 6,
         OBJECT_ID: 7
-    }
+    };
 
     Xflow.VS_ATTRIB_TRANSFORM = {
         NONE: 0,
@@ -115,7 +117,7 @@ var Xflow = {};
         WORLD_POINT: 2,
         VIEW_NORMAL: 3,
         WORLD_NORMAL: 4
-    }
+    };
 
 
     /**
@@ -129,7 +131,7 @@ var Xflow = {};
         RENAME: 0,
         KEEP: 1,
         REMOVE: 2
-    }
+    };
 
 
     /**
@@ -147,7 +149,7 @@ var Xflow = {};
     Xflow.RESULT_TYPE = {
         COMPUTE: 0,
         VS: 1
-    }
+    };
 
 
     /**
@@ -177,14 +179,14 @@ var Xflow = {};
         PREV_BUFFER: 1,
         NEXT_BUFFER: 2,
         LINEAR_WEIGHT: 3
-    }
+    };
 
 
     Xflow.ITERATION_TYPE = {
         NULL: 0,
         ONE: 1,
         MANY: 2
-    }
+    };
 
     /**
      * Type of Information Extraction - used by operators
@@ -209,8 +211,9 @@ var Xflow = {};
      */
     Xflow.PLATFORM = {
         JAVASCRIPT: 0,
-        GLSL: 1
-    }
+        GLSL: 1,
+        CL: 2
+    };
 
     Xflow.PROCESS_STATE = {
         MODIFIED: 0,
@@ -219,24 +222,24 @@ var Xflow = {};
         INVALID: 3,
         UNPROCESSED: 4,
         PROCESSED: 5
-    }
+    };
 
     // Error Callbacks:
     var c_errorCallbacks = [];
-    Xflow.registerErrorCallback = function(callback){
-        c_errorCallbacks.push(callback)
-    }
+    Xflow.registerErrorCallback = function (callback) {
+        c_errorCallbacks.push(callback);
+    };
 
-    Xflow.notifyError = function(message, node){
-        if(c_errorCallbacks.length > 0){
-            for(var i = 0; i < c_errorCallbacks.length; ++i)
+    Xflow.notifyError = function (message, node) {
+        if (c_errorCallbacks.length > 0) {
+            var i;
+            for (i = 0; i < c_errorCallbacks.length; ++i) {
                 c_errorCallbacks[i](message, node);
-        }
-        else{
+            }
+        } else {
             // TODO: Do Default error printing
         }
     };
-
 
 
     /* Tools */
@@ -248,18 +251,18 @@ var Xflow = {};
      * @param {Object=} methods Methods to add to the class
      * @returns {Object}
      */
-    Xflow.createClass = function(ctor, parent, methods) {
+    Xflow.createClass = function (ctor, parent, methods) {
         methods = methods || {};
         if (parent) {
             /** @constructor */
-            var F = function() {
+            var F = function () {
             };
             F.prototype = parent.prototype;
             ctor.prototype = new F();
             ctor.prototype.constructor = ctor;
             ctor.superclass = parent.prototype;
         }
-        for ( var m in methods) {
+        for (var m in methods) {
             ctor.prototype[m] = methods[m];
         }
         return ctor;
@@ -268,26 +271,28 @@ var Xflow = {};
 
     var c_listedCallbacks = [];
     var c_listedCallbacksData = [];
-    Xflow._listCallback = function(object, data){
+    Xflow._listCallback = function (object, data) {
         var index;
-        if(( index = c_listedCallbacks.indexOf(object)) == -1){
+        if (( index = c_listedCallbacks.indexOf(object)) == -1) {
             index = c_listedCallbacks.length;
             c_listedCallbacks.push(object);
         }
         var prevData = c_listedCallbacksData[index];
-        if(!prevData || prevData < data){
+        if (!prevData || prevData < data) {
             c_listedCallbacksData[index] = data;
         }
-    }
+    };
 
-    Xflow._callListedCallback = function(){
-        if(c_listedCallbacks.length){
-            for(var i = 0; i < c_listedCallbacks.length; ++i)
+    Xflow._callListedCallback = function () {
+        if (c_listedCallbacks.length) {
+            var i;
+            for (i = 0; i < c_listedCallbacks.length; ++i) {
                 c_listedCallbacks[i]._onListedCallback(c_listedCallbacksData[i]);
+            }
             c_listedCallbacks = [];
             c_listedCallbacksData = [];
         }
-    }
+    };
 }());
 
 

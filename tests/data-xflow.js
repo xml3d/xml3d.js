@@ -107,16 +107,19 @@ module("Xflow tests", {
             connect = connect.nextElementSibling;
         };
 
+        vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "screenTransform", true);
+        vsConfig.addCodeFragment("gl_Position = screenTransform * vec4(#I{position}, 1.0);");
+
         var dataAdapter = dataElement._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
         var xflowNode = dataAdapter.getXflowNode();
         var request = new this.win.Xflow.VertexShaderRequest(xflowNode, vsConfig);
-        var result = request.getResult();
+        var result = request.getVertexShader();
         var code = result.getGLSLCode();
         var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE"),
-            outputIdx = code.indexOf("// OUTPUT"), globalsIdx = code.indexOf("// GLOBALS");
+            outputIdx = code.indexOf("// OUTPUT");
 
-        ok(inputIdx != -1 && codeIdx != -1 && outputIdx != -1 && globalsIdx != -1,
+        ok(inputIdx != -1 && codeIdx != -1 && outputIdx != -1,
             title + "=> Shader has expected structure");
 
         var action = testNode.firstElementChild;
@@ -134,14 +137,29 @@ module("Xflow tests", {
         if(!type)
             throw new Error("Unknown VS connection Type: " + typeString);
         var transform = Xflow.VS_ATTRIB_TRANSFORM[transformString] || Xflow.VS_ATTRIB_TRANSFORM.NONE;
-
-        vsConfig.addAttribute( type, node.getAttribute("in"), node.getAttribute("out"),
-            node.getAttribute("optional") == "true", transform );
+        var name = node.getAttribute("in"), outName = node.getAttribute("out");
+        vsConfig.addAttribute( type, node.getAttribute("in"), node.getAttribute("optional") == "true");
+        var code = null;
+        switch(transform){
+            case Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
+                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "viewTransformNormal", true);
+                code = outName + " = normalize( viewTransformNormal * #I{" + name + "} );"; break;
+            case Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT:
+                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "viewTransform", true);
+                code = outName + " = ( viewTransform * vec4( #I{" + name + "} , 1.0)).xyz;"; break;
+            case Xflow.VS_ATTRIB_TRANSFORM.WORLD_NORMAL:
+                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "worldTransformNormal", true);
+                code = outName + " = normalize( worldTransformNormal * vec4( #I{" + name + "} );"; break;
+            case Xflow.VS_ATTRIB_TRANSFORM.WORLD_POINT:
+                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "worldTransform", true);
+                code = outName + " = ( worldTransform * vec4( #I{" + name + "} , 1.0)).xyz;"; break;
+        }
+        vsConfig.channelAttribute(name, outName, code);
     },
 
     VSInputBufferCount: function(result, action, title){
         var count = action.getAttribute("count")*1;
-        equal(result.shaderInputNames.length, count, title + "=> Vertex Shader has " +
+        equal(result.inputNames.length, count, title + "=> Vertex Shader has " +
             count + " input buffers.");
     },
     VSOutAttribCount: function(result, action, title){
@@ -176,17 +194,17 @@ module("Xflow tests", {
     },
     VSOutputIsVarying: function(result, action, title){
         var name = action.getAttribute("name");
-        equal(!result.isShaderOutputUniform(name) && !result.isShaderOutputNull(name),
+        equal(!result.isOutputFragmentUniform(name) && !result.isOutputNull(name),
                 true, title + "=> Output '" + name + "' is varying.");
     },
     VSOutputIsNull: function(result, action, title){
         var name = action.getAttribute("name");
-        equal(result.isShaderOutputNull(name),
+        equal(result.isOutputNull(name),
                 true, title + "=> Output '" + name + "' is null.");
     },
     VSOutputIsUniform: function(result, action, title){
         var name = action.getAttribute("name");
-        equal(result.isShaderOutputUniform(name),
+        equal(result.isOutputFragmentUniform(name),
                 true, title + "=> Output '" + name + "' is unform.");
         if(action.hasAttribute("input")){
             var shouldMatchName = action.getAttribute("input").substring(1);
@@ -205,10 +223,10 @@ module("Xflow tests", {
 
         var shouldBeUniform = (action.getAttribute("uniform") == "true");
 
-        var names = result.shaderInputNames, entryName = null;
+        var names = result.inputNames, entryName = null;
         for(var i =0; i < names.length; ++i){
             var name = names[i];
-            if(result.getShaderInputData(name) == shouldMatchData){
+            if(result.getInputData(name) == shouldMatchData){
                 entryName = name;
                 break;
             }
@@ -216,9 +234,9 @@ module("Xflow tests", {
         ok(entryName, title + " => InputBuffer '" + shouldMatchName + "' is used");
 
         if(shouldBeUniform)
-            equal(result.isShaderInputUniform(entryName), true, title + " => InputBuffer '" + shouldMatchName + "' is uniform");
+            equal(result.isInputUniform(entryName), true, title + " => InputBuffer '" + shouldMatchName + "' is uniform");
         else
-            equal(result.isShaderInputUniform(entryName), false, title + " => InputBuffer '" + shouldMatchName + "' is not uniform");
+            equal(result.isInputUniform(entryName), false, title + " => InputBuffer '" + shouldMatchName + "' is not uniform");
     },
 
     VSCodeMatchesRegexp: function(result, action, title){

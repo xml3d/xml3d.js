@@ -50,6 +50,12 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
+4.6 - 15.04.2013
+* [Custom RenderTrees and the RenderInterface](https://github.com/xml3d/xml3d.js/wiki/Custom-RenderTrees-and-the-RenderInterface)
+* Added Screen-space Ambient Occlusion to standard render pipeline
+* Added system to set renderer-specific [options](https://github.com/xml3d/xml3d.js/wiki/Options)
+* Infrastructure for [WebCL-based Xflow operators](https://github.com/xml3d/xml3d.js/wiki/WebCL-API)
+
 4.5 - 14.11.2013
 * Full support for HTML encoding, all [demos](http://xml3d.github.io/xml3d-examples/) in HTML now
 * Set data values efficiently using TypedArray - [demo](http://xml3d.github.io/xml3d-examples/examples/scriptValue/scriptValue.html), [doc](https://github.com/xml3d/xml3d.js/wiki/How-to-efficiently-set-Xflow-input-with-TypedArrays)

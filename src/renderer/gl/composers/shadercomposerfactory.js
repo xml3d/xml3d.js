@@ -19,7 +19,8 @@
     };
 
     ShaderComposerFactory.EVENT_TYPE = {
-        MATERIAL_STRUCTURE_CHANGED: "material_structure_changed"
+        MATERIAL_STRUCTURE_CHANGED: "material_structure_changed",
+        MATERIAL_INITIALIZED: "material_initialized"
     };
 
     XML3D.extend(ShaderComposerFactory.prototype, {
@@ -73,8 +74,16 @@
         },
         setLightStructureDirty: function() {
             XML3D.debug.logWarning("Light structure changes not yet supported.");
+            this.setShaderRecompile();
+        },
+        setShaderRecompile: function(){
             for (var i in this.composers) {
                 this.composers[i].setShaderRecompile();
+            }
+        },
+        updateSystemUniforms: function(names, scene){
+            for (var i in this.composers) {
+                this.composers[i].updateSystemUniforms(names, scene);
             }
         },
         setLightValueChanged: function() {

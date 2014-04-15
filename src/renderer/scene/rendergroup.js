@@ -134,7 +134,7 @@
                 return;
             }
             this.children.forEach(function(obj) {
-                obj.setShader(newHandle);
+                obj.setShader && obj.setShader(newHandle);
             });
         },
 
@@ -159,7 +159,20 @@
                 this.setVisible(newVal);
                 this.setBoundingBoxDirty();
             }
-        }
+        },
+
+        findRayIntersections: (function() {
+            var bbox = XML3D.math.bbox.create();
+
+            return function(ray, intersections) {
+                this.getWorldSpaceBoundingBox(bbox);
+                if (XML3D.math.bbox.intersects(bbox, ray)) {
+                    for (var i=0; i < this.children.length; i++) {
+                        this.children[i].findRayIntersections(ray, intersections);
+                    }
+                }
+            }
+        })()
 
     });
 

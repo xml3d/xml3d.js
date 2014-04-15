@@ -35,6 +35,16 @@ XML3D.WrapTypes["repeat"] = 1;
 XML3D.WrapTypes[1] = "repeat";
 XML3D.WrapTypes["border"] = 2;
 XML3D.WrapTypes[2] = "border";
+// PlatformTypes
+XML3D.PlatformTypes = {};
+XML3D.PlatformTypes["auto"] = 1;
+XML3D.PlatformTypes[1] = "auto";
+XML3D.PlatformTypes["js"] = 2;
+XML3D.PlatformTypes[2] = "js";
+XML3D.PlatformTypes["gl"] = 3;
+XML3D.PlatformTypes[3] = "gl";
+XML3D.PlatformTypes["cl"] = 4;
+XML3D.PlatformTypes[4] = "cl";
 // DataFieldType
 XML3D.DataFieldType = {};
 XML3D.DataFieldType["float "] = 0;
@@ -74,30 +84,31 @@ XML3D.classInfo = {};
  * Properties and methods for <xml3d>
  **/
 XML3D.classInfo['xml3d'] = {
-    id: {a: XML3D.IDHandler},
-    className: {a: XML3D.CanvasClassHandler, id: 'class'},
-    style: {a: XML3D.CanvasStyleHandler},
-    onclick: {a: XML3D.EventAttributeHandler},
-    ondblclick: {a: XML3D.EventAttributeHandler},
-    onmousedown: {a: XML3D.EventAttributeHandler},
-    onmouseup: {a: XML3D.EventAttributeHandler},
-    onmouseover: {a: XML3D.EventAttributeHandler},
-    onmousemove: {a: XML3D.EventAttributeHandler},
-    onmouseout: {a: XML3D.EventAttributeHandler},
-    onkeypress: {a: XML3D.EventAttributeHandler},
-    onkeydown: {a: XML3D.EventAttributeHandler},
-    onkeyup: {a: XML3D.EventAttributeHandler},
-    height: {a: XML3D.IntAttributeHandler, params: 600},
-    width: {a: XML3D.IntAttributeHandler, params: 800},
-    createXML3DVec3: {m: XML3D.methods.xml3dCreateXML3DVec3},
-    createXML3DRotation: {m: XML3D.methods.xml3dCreateXML3DRotation},
-    createXML3DMatrix: {m: XML3D.methods.xml3dCreateXML3DMatrix},
-    createXML3DRay: {m: XML3D.methods.xml3dCreateXML3DRay},
-    getElementByPoint: {m: XML3D.methods.xml3dGetElementByPoint},
-    generateRay: {m: XML3D.methods.xml3dGenerateRay},
-    getElementByRay: {m: XML3D.methods.xml3dGetElementByRay},
-    getBoundingBox: {m: XML3D.methods.xml3dGetBoundingBox},
-    activeView: {a: XML3D.ReferenceHandler},
+    id : {a: XML3D.IDHandler},
+    className : {a: XML3D.CanvasClassHandler, id: 'class'},
+    style : {a: XML3D.CanvasStyleHandler},
+    onclick : {a: XML3D.EventAttributeHandler},
+    ondblclick : {a: XML3D.EventAttributeHandler},
+    onmousedown : {a: XML3D.EventAttributeHandler},
+    onmouseup : {a: XML3D.EventAttributeHandler},
+    onmouseover : {a: XML3D.EventAttributeHandler},
+    onmousemove : {a: XML3D.EventAttributeHandler},
+    onmouseout : {a: XML3D.EventAttributeHandler},
+    onkeypress : {a: XML3D.EventAttributeHandler},
+    onkeydown : {a: XML3D.EventAttributeHandler},
+    onkeyup : {a: XML3D.EventAttributeHandler},
+    height : {a: XML3D.IntAttributeHandler, params: 600},
+    width : {a: XML3D.IntAttributeHandler, params: 800},
+    createXML3DVec3 : {m: XML3D.methods.xml3dCreateXML3DVec3},
+    createXML3DRotation : {m: XML3D.methods.xml3dCreateXML3DRotation},
+    createXML3DMatrix : {m: XML3D.methods.xml3dCreateXML3DMatrix},
+    createXML3DRay : {m: XML3D.methods.xml3dCreateXML3DRay},
+    getElementByPoint : {m: XML3D.methods.xml3dGetElementByPoint},
+    generateRay : {m: XML3D.methods.xml3dGenerateRay},
+    getElementByRay : {m: XML3D.methods.xml3dGetElementByRay},
+    getBoundingBox : {m: XML3D.methods.xml3dGetBoundingBox},
+    getRenderInterface : {m: XML3D.methods.xml3dGetRenderInterface},
+    activeView : {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 
@@ -117,6 +128,7 @@ XML3D.classInfo['data'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     compute: {a: XML3D.StringAttributeHandler},
+    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     filter: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
@@ -128,11 +140,14 @@ XML3D.classInfo['data'] = {
     proto: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
-
+/**
+ * Properties and methods for <dataflow>
+ **/
 XML3D.classInfo['dataflow'] = {
     id: {a: XML3D.IDHandler},
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for data
+    // TODO: Handle style for dataflow
+    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     out: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
@@ -304,6 +319,7 @@ XML3D.classInfo['proto'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for proto
     compute: {a: XML3D.StringAttributeHandler},
+    platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     filter: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},

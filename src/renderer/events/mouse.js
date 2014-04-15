@@ -2,6 +2,9 @@
 
     var module = XML3D.webgl;
 
+    var OPTION_MOUSEMOVE_PICKING = "renderer-mousemove-picking";
+    XML3D.options.register(OPTION_MOUSEMOVE_PICKING, true);
+
     module.events.available.push("click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "mousewheel");
 
     XML3D.extend(module.CanvasHandler.prototype, {
@@ -137,14 +140,14 @@
          * @param {MouseEvent} evt
          */
         mouseup:function (evt) {
-            this.dispatchMouseEventOnPickedObject(evt);
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.pickingEnabled});
         },
 
         /**
          * @param {MouseEvent} evt
          */
         mousedown:function (evt) {
-            this.dispatchMouseEventOnPickedObject(evt);
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.pickingEnabled});
         },
 
 
@@ -177,7 +180,13 @@
          */
         mousemove:function (evt) {
             var pos = this.getMousePosition(evt);
-            this.dispatchMouseEventOnPickedObject(evt);
+
+            var doMouseMovePick = XML3D.options.getValue(OPTION_MOUSEMOVE_PICKING);
+
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !doMouseMovePick});
+            if (!doMouseMovePick)
+                return;
+
             var curObj = this.renderer.pickedObject ? this.renderer.pickedObject.node : null;
 
             // trigger mouseover and mouseout
@@ -230,8 +239,10 @@
          * @param {MouseEvent} evt
          */
         mouseover:function (evt) {
+            var doMouseMovePick = XML3D.options.getValue(OPTION_MOUSEMOVE_PICKING);
+
             var pos = this.getMousePosition(evt);
-            this.dispatchMouseEventOnPickedObject(evt);
+            this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !doMouseMovePick});
         },
 
         /**

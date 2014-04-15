@@ -1,31 +1,35 @@
 (function (webgl) {
 
-    var PickNormalRenderPass = function (context, opt) {
-        webgl.BaseRenderPass.call(this, context, opt);
-        this.program = context.programFactory.getPickingNormalProgram();
+    var PickNormalRenderPass = function (renderInterface, output, opt) {
+        webgl.BaseRenderPass.call(this, renderInterface, output, opt);
     };
 
     XML3D.createClass(PickNormalRenderPass, webgl.BaseRenderPass, {
-        renderObject: (function () {
-
+        render: (function () {
             var c_modelViewProjectionMatrix = XML3D.math.mat4.create();
             var c_worldMatrix = XML3D.math.mat4.create();
             var c_normalMatrix3 = XML3D.math.mat3.create();
             var c_uniformCollection = {envBase: {}, envOverride: null, sysBase: {}},
-                c_systemUniformNames = ["modelViewProjectionMatrix", "normalMatrix"];
+                c_systemUniformNames = ["modelViewProjectionMatrix", "modelViewMatrixN"];
 
-            return function (object) {
-                var gl = this.context.gl;
-                this.target.bind();
+            return function (object, viewMatrix, projMatrix) {
+                var gl = this.renderInterface.context.gl,
+                    target = this.output;
 
+                target.bind();
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
                 gl.enable(gl.DEPTH_TEST);
                 gl.disable(gl.CULL_FACE);
                 gl.disable(gl.BLEND);
 
-                object.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
-                object.getWorldMatrix(c_worldMatrix);
+                if (viewMatrix && projMatrix) {
+                    object.updateModelViewMatrix(viewMatrix);
+                    object.updateModelViewProjectionMatrix(projMatrix);
+                }
 
+                object.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
+
+                object.getWorldMatrix(c_worldMatrix);
                 if (XML3D.math.mat4.invert(c_worldMatrix, c_worldMatrix)) {
                     XML3D.math.mat3.fromMat4(c_normalMatrix3, c_worldMatrix);
                     XML3D.math.mat3.transpose(c_normalMatrix3, c_normalMatrix3);
@@ -33,17 +37,17 @@
                     XML3D.math.mat3.identity(c_normalMatrix3);
                 }
 
-                var program = this.program;
+                var program = this.renderInterface.context.programFactory.getPickingNormalProgram();
                 program.bind();
 
                 c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
-                c_uniformCollection.sysBase["normalMatrix"] = c_normalMatrix3;
+                c_uniformCollection.sysBase["modelViewMatrixN"] = c_normalMatrix3;
 
                 program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
                 object.mesh.draw(program);
 
                 program.unbind();
-                this.target.unbind();
+                target.unbind();
             }
         }()),
         /**
@@ -57,7 +61,7 @@
             var c_one = XML3D.math.vec3.fromValues(1, 1, 1);
 
             return function (glX, glY) {
-                var data = this.readPixelDataFromBuffer(glX, glY);
+                var data = this.readPixelDataFromBuffer(glX, glY, this.output);
                 if (!data) {
                     return null;
                 }

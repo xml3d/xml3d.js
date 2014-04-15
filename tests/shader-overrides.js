@@ -137,6 +137,7 @@ test("Texture overrides", 8, function() {
     var gl = getContextForXml3DElement(xml3dElement);
     var handler = getHandler(xml3dElement);
     var testFunc = function(n) {
+
         var actual = win.getPixelValue(gl, 40, 150);
         deepEqual(actual, [ 255, 255, 0, 255 ], "1: wave & texture");
         actual = win.getPixelValue(gl, 125, 150);
@@ -164,12 +165,15 @@ test("Texture override changes", 8, function() {
     var gl = getContextForXml3DElement(xml3dElement);
     var handler = getHandler(xml3dElement);
     var testFunc = function(n) {
+        if(win.getPixelValue(gl, 200, 150)[2] != 0)
+            return;
+
         var actual = win.getPixelValue(gl, 40, 150);
         deepEqual(actual, [ 255, 255, 255, 255 ], "1: wave without texture: white");
         actual = win.getPixelValue(gl, 125, 150);
         deepEqual(actual, [ 255, 0, 0, 255 ], "2: red");
         actual = win.getPixelValue(gl, 200, 150);
-        deepEqual(actual, [ 87, 87, 0, 255 ], "3: grey");
+        deepEqual(actual, [ 87, 87, 0, 255 ], "3: dark yellow (originally gray)");
         actual = win.getPixelValue(gl, 280, 150);
         deepEqual(actual, [ 87, 87, 0, 255 ], "4: dark yellow");
         actual = win.getPixelValue(gl, 372, 150);

@@ -140,6 +140,13 @@
             shaderClosure.bind();
             shaderClosure.setSystemUniformVariables( webgl.GLScene.LIGHT_PARAMETERS, scene.systemUniforms);
         },
+        updateSystemUniforms: function(names, scene){
+            this.shaderClosures.forEach(function (shader) {
+                shader.bind();
+                shader.setSystemUniformVariables( names, scene.systemUniforms);
+            });
+        },
+
 
         createShaderClosure: function () {
             throw new Error("AbstractComposer::createShaderClosure needs to be overridden");
@@ -153,11 +160,11 @@
             throw new Error("AbstractComposer::distributeObjectShaderData needs to be overridden");
         },
 
-        getShaderClosure: function (scene, vsResult) {
+        getShaderClosure: function (scene, vsRequest) {
             var shader = this.createShaderClosure();
 
             try{
-                shader.createSources(scene, this.getShaderDataResult(), vsResult)
+                shader.createSources(scene, this.getShaderDataResult(), vsRequest)
             }
             catch(e){
                 throw new Error("Shader: " + e.message)
@@ -170,13 +177,14 @@
                 }
             }
 
-            this.initializeShaderClosure(shader, scene, vsResult);
+            this.initializeShaderClosure(shader, scene);
             return shader;
         },
 
-        initializeShaderClosure: function (shaderClosure, scene, vsResult) {
+        initializeShaderClosure: function (shaderClosure, scene) {
             shaderClosure.compile();
 
+            scene.dispatchEvent({type: webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_INITIALIZED});
             this.updateClosureFromComputeResult(shaderClosure, this.getShaderDataResult());
             this.updateClosureFromLightParameters(shaderClosure, scene);
             this.shaderClosures.push(shaderClosure);
@@ -216,7 +224,7 @@
     XML3D.createClass(DefaultComposer, AbstractShaderComposer, {
         update: function () {
         },
-        getShaderClosure: function (scene, vsResult) {
+        getShaderClosure: function (scene, vsRequest) {
             return this.context.programFactory.getFallbackProgram();
         },
         getShaderAttributes: function () {

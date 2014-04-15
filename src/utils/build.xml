@@ -6,8 +6,10 @@
     <import file="../../build/build-master.xml" />
 
     <filelist dir="." id="sourceFiles">
+        <file name="./webcl.js" />
         <file name="./misc.js" />
         <file name="./array.js" />
+        <file name="./options.js" />
         <file name="./debug.js" />
         <file name="./uri.js" />
         <file name="./css.js" />

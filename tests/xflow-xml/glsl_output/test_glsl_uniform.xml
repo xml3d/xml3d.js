@@ -21,7 +21,7 @@
 
             <VSInputBufferCount count="3" />
             <VSInAttribCount count="2"/>
-            <VSUniformAttribCount count="1"/>
+            <VSUniformAttribCount count="4"/>
             <VSOutAttribCount count="3"/>
 
             <VSOutputIsVarying name="worldPosition" />

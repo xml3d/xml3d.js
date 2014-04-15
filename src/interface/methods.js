@@ -13,8 +13,13 @@ new (function() {
         return new window.XML3DRay();
     };
 
-    methods.xml3dGetElementByRay = function() {
-        XML3D.debug.logError(this.nodeName + "::getElementByRay is not implemeted yet.");
+    methods.xml3dGetElementByRay = function(ray, hitPoint, hitNormal) {
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].getElementByRay) {
+                return adapters[adapter].getElementByRay(ray, hitPoint, hitNormal);
+            }
+        }
         return null;
     };
 
@@ -193,6 +198,17 @@ new (function() {
         }
         return new window.XML3DBox();
     };
+
+    methods.xml3dGetRenderInterface = function() {
+        var adapters = this._configured.adapters || {};
+        for ( var adapter in adapters) {
+            if (adapters[adapter].getRenderInterface) {
+                return adapters[adapter].getRenderInterface();
+            }
+        }
+        return {};
+    };
+
 
     methods.XML3DGraphTypeGetWorldMatrix = function() {
         var adapters = this._configured.adapters || {};

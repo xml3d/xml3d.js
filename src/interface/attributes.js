@@ -334,8 +334,7 @@
         this.resetValue = function() { ta.value = null; };
     };
     handler.StringValueHandler.prototype.parse = function(elem) {
-        var str = getContent(elem);
-        return str;
+        return elem.textContent;
     };
 
     handler.CanvasStyleHandler = function(e, id, d) {

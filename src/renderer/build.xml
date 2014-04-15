@@ -12,6 +12,7 @@
         <file name="events/touch.js" />
         <file name="events/mouse.js" />
         <file name="utils.js" />
+        <file name="renderinterface.js" />
         <file name="scene/pager.js" />
         <file name="scene/rendernode.js" />
         <file name="scene/renderobject.js" />
@@ -27,14 +28,22 @@
         <file name="gl/base/frustum.js" />
         <file name="gl/base/mesh.js" />
         <file name="gl/base/utils.js" />
+        <file name="gl/base/fullscreenquad.js" />
+        <file name="gl/render-trees/base.js" />
+        <file name="gl/render-trees/forward.js" />
         <file name="gl/renderer.js" />
         <file name="gl/glscene.js" />
         <file name="gl/tools/objectsorter.js" />
-        <file name="gl/passes/base.js" />
-        <file name="gl/passes/forward.js" />
-        <file name="gl/passes/pickObject.js" />
-        <file name="gl/passes/pickPosition.js" />
-        <file name="gl/passes/pickNormal.js" />
+        <file name="gl/render-passes/base.js" />
+        <file name="gl/render-passes/scene-render.js" />
+        <file name="gl/render-passes/lightpass.js" />
+        <file name="gl/render-passes/forward.js" />
+        <file name="gl/render-passes/pickObject.js" />
+        <file name="gl/render-passes/pickPosition.js" />
+        <file name="gl/render-passes/pickNormal.js" />
+        <file name="gl/render-passes/vertexattribute.js" />
+        <file name="gl/render-passes/ssao.js" />
+        <file name="gl/render-passes/boxblur.js" />
         <file name="gl/programfactory.js" />
         <file name="gl/drawablefactory.js" />
         <file name="gl/composers/abstractshadercomposer.js" />
@@ -61,12 +70,12 @@
         <file name="adapter/lightshader.js" />
         <file name="adapter/light.js" />
         <file name="adapter/factory.js" />
-        <file name="shaders/base.js" />
-        <file name="shaders/matte.js" />
-        <file name="shaders/diffuse.js" />
-        <file name="shaders/phong.js" />
-        <file name="shaders/point.js" />
-        <file name="shaders/utility.js" />
+        <file name="gl/shaders/base.js" />
+        <file name="gl/shaders/matte.js" />
+        <file name="gl/shaders/diffuse.js" />
+        <file name="gl/shaders/phong.js" />
+        <file name="gl/shaders/point.js" />
+        <file name="gl/shaders/utility.js" />
     </filelist>
 
     <target name="concat">

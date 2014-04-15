@@ -114,7 +114,7 @@
             } else {
                 //opt.generateMipmap = opt.generateColorsMipmap;
                 var ctex = new XML3D.webgl.GLTexture(gl);
-                ctex.createTex2DFromData(colorFormat, this.width, this.height, gl.RGBA, gl.UNSIGNED_BYTE, this.opt);
+                ctex.createTex2DFromData(colorFormat, this.width, this.height, gl.RGBA, this.opt.colorType || gl.UNSIGNED_BYTE, this.opt);
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
                 this.colorTarget = {
                     handle: ctex,

@@ -50,7 +50,7 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
-4.6 - 15.04.2013
+4.6 - 15.04.2014
 * [Custom RenderTrees and the RenderInterface](https://github.com/xml3d/xml3d.js/wiki/Custom-RenderTrees-and-the-RenderInterface)
 * Added Screen-space Ambient Occlusion to standard render pipeline
 * Added system to set renderer-specific [options](https://github.com/xml3d/xml3d.js/wiki/Options)

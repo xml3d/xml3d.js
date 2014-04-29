@@ -37,7 +37,6 @@
         </Check>
 
         <Check title="Invalid Output override" data="#data3" >
-            <MatchNull name="value" ></MatchNull>
             <MatchNull name="valueAdd" ></MatchNull>
             <MatchInput name="weight" input="#weight_1" />
         </Check>

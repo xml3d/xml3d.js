@@ -122,7 +122,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         getBoundingBox: function () {
             if (this.renderNode) {
             var bbox = new XML3D.math.bbox.create();
-            this.renderNode.getObjectSpaceBoundingBox(bbox);
+            this.renderNode.getWorldSpaceBoundingBox(bbox);
             return XML3D.math.bbox.asXML3DBox(bbox);
             }
 

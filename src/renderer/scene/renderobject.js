@@ -425,11 +425,8 @@
 
         setLocalVisible: function(newVal) {
             this.localVisible = newVal;
-            if (this.parent.isVisible()) {
-                // if parent is not visible this group is also invisible
-                this.setVisible(newVal);
-                this.setBoundingBoxDirty();
-            }
+            this.setVisible(this.parent && this.parent.isVisible() && newVal);
+            this.setBoundingBoxDirty();
         },
 
         getProgram: function() {

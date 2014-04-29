@@ -259,19 +259,10 @@
             return [newVec[0], newVec[1], newVec[2]];
         },
 
-        setLocalVisible: function(newVal) {
-            this.localVisible = newVal;
-            if (newVal === false) {
-                this.visible = false;
-                this.lightValueChanged();
-            } else {
-                this.setVisible(this.parent.isVisible());
-            }
-        },
-
         setVisible: function(newVal) {
-            if (this.localVisible !== false) {
-                this.visible = newVal;
+            var visible = (this.localVisible && newVal);
+            if(this.visible != visible){
+                this.visible = visible;
                 this.lightValueChanged();
             }
         },

@@ -11,14 +11,16 @@
     var RenderNode = function(type, scene, pageEntry, opt) {
         opt = opt || {};
 
+        var visible = (opt.visible === false ? false : true);
+
         this.scene = scene;
         this.type = type;
         this.name = opt.name || "";
         this.page = pageEntry.page;
         this.offset = pageEntry.offset;
         this.entrySize = pageEntry.size;
-        this.localVisible = opt.visible;
-        this.visible = this.localVisible !== undefined ? this.localVisible : opt.parent ? opt.parent.isVisible() : true;
+        this.localVisible = visible;
+        this.visible = visible;
         this.transformDirty = true;
         this.children = [];
         this.setParent(opt.parent || scene.rootNode);
@@ -36,6 +38,7 @@
 
         setParent: function(parent) {
             this.parent = parent;
+            this.setLocalVisible(this.localVisible);
             if (parent && parent.addChild) {
                 parent.addChild(this);
             }
@@ -79,10 +82,7 @@
 
         setLocalVisible: function(newVal) {
             this.localVisible = newVal;
-            if (this.parent.isVisible()) {
-                // if parent is not visible this group is also invisible
-                this.setVisible(newVal);
-            }
+            this.setVisible(this.parent && this.parent.isVisible() && newVal);
         },
 
         setVisible: function(newVal) {
@@ -90,6 +90,8 @@
             if (this.localVisible === false) {
                 downstream = false;
             }
+            if(this.visible == downstream)
+                return;
             this.visible = downstream;
             this.children.forEach(function(obj) {
                 obj.setVisible(downstream);

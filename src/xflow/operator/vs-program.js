@@ -66,6 +66,28 @@
         }
     }
 
+    function constructVSShadeJs(vs, program, vsConfig){
+        var operatorList = program.list, entries = operatorList.entries;
+        var baseEntry = entries[entries.length - 1], acceptedBaseShaderInput = [], baseOperator = baseEntry.operator;
+
+        if(!vsConfig)
+            throw new Error("Could not find vsConfig! Attempt to create vertex shader programm without VS operator?");
+
+        var inputIndex = 0;
+        for( var name in vsConfig._attributes){
+            var configAttr = vsConfig._attributes[name],
+                directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
+            for(var i = 0; i < configAttr.channeling.length; ++i){
+
+            }
+        }
+    }
+
+    function constructVsOperator(vsConfig, baseEntry, operatorList){
+
+
+    }
+
     function constructVS(vs, program, vsConfig){
         var operatorList = program.list, entries = operatorList.entries;
 
@@ -266,6 +288,9 @@
         }
         throw new Error("Type not supported for GLSL " + Xflow.getTypeName(xflowType) );
     }
+
+
+
 
 
 }());

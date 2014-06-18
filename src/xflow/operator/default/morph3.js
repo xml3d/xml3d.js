@@ -19,7 +19,7 @@ Xflow.registerOperator("xflow.morph", {
         result[1] = value[1] + weight[0] * valueAdd[1];
         result[2] = value[2] + weight[0] * valueAdd[2];
     },
-    evaluate_glsl:
-        "\t// xflow.morph \n" +
-        "\t#O{result} = #I{value} + vec3(#I{weight}) * #I{valueAdd};\n"
+    evaluate_glsl: function(value, valueAdd, weight){
+        return value.add(valueAdd.mul(weight));
+    }
 });

@@ -15,6 +15,10 @@ XML3D.shaders.register("phong", {
         "varying vec4 spotLightShadowMapCoord[ MAX_SPOTLIGHTS ];",
         "uniform mat4 spotLightMatrix[ MAX_SPOTLIGHTS ];",
         "#endif",
+        "#if MAX_DIRECTIONALLIGHTS > 0 && HAS_DIRECTIONALLIGHT_SHADOWMAPS",
+        "varying vec4 directionalLightShadowMapCoord[ MAX_DIRECTIONALLIGHTS ];",
+        "uniform mat4 directionalLightMatrix[ MAX_DIRECTIONALLIGHTS ];",
+        "#endif",
 
         "uniform mat4 modelMatrix;",
         "uniform mat4 modelViewProjectionMatrix;",
@@ -36,6 +40,12 @@ XML3D.shaders.register("phong", {
         "    vec3 worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;",
         "    for(int i = 0; i < MAX_SPOTLIGHTS; i++) {",
         "      spotLightShadowMapCoord[i] = spotLightMatrix[i] * vec4(worldPosition, 1);",
+        "    }",
+        "#endif",
+        "#if MAX_DIRECTIONALLIGHTS > 0 && HAS_DIRECTIONALLIGHT_SHADOWMAPS",
+        "    vec3 worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;",
+        "    for(int i = 0; i < MAX_DIRECTIONALLIGHTS; i++) {",
+        "      directionalLightShadowMapCoord[i] = directionalLightMatrix[i] * vec4(worldPosition, 1);",
         "    }",
         "#endif",
         "}"
@@ -79,6 +89,18 @@ XML3D.shaders.register("phong", {
         "uniform vec3 directionalLightDirection[MAX_DIRECTIONALLIGHTS];",
         "uniform vec3 directionalLightIntensity[MAX_DIRECTIONALLIGHTS];",
         "uniform bool directionalLightOn[MAX_DIRECTIONALLIGHTS];",
+        "uniform bool directionalLightCastShadow[MAX_DIRECTIONALLIGHTS];",
+            "#if HAS_DIRECTIONALLIGHT_SHADOWMAPS",
+            "uniform sampler2D directionalLightShadowMap[MAX_DIRECTIONALLIGHTS];",
+            "uniform float directionalLightShadowBias[MAX_DIRECTIONALLIGHTS];",
+            "varying vec4 directionalLightShadowMapCoord[MAX_DIRECTIONALLIGHTS];",
+
+            "float unpackDepth( const in vec4 rgba_depth ) {",
+            "  const vec4 bit_shift = vec4( 1.0 / ( 256.0 * 256.0 * 256.0 ), 1.0 / ( 256.0 * 256.0 ), 1.0 / 256.0, 1.0 );",
+            "  float depth = dot( rgba_depth, bit_shift );",
+            "  return depth;",
+            "} ",
+            "#endif",
         "#endif",
 
         "#if MAX_SPOTLIGHTS > 0",
@@ -150,6 +172,20 @@ XML3D.shaders.register("phong", {
         "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
         "    if(!directionalLightOn[i])",
         "      continue;",
+        "#if HAS_DIRECTIONALLIGHT_SHADOWMAPS",
+        "    bool lightIsVisible =true;",
+        "    if(directionalLightCastShadow[i]){",
+        "       lightIsVisible = false;",
+        "       vec4 lspos = directionalLightShadowMapCoord[i];",
+        "       vec3 orthogonalDivPos = lspos.xyz / lspos.w *0.5 + 0.5;",
+        "       float lsDepth = orthogonalDivPos.z;",
+        "       vec2 lightuv = orthogonalDivPos.xy;",
+        "       float depth = unpackDepth(texture2D(directionalLightShadowMap[i], lightuv))+directionalLightShadowBias[i];",
+        "       lightIsVisible = lsDepth < depth;",
+        "    }",
+        "    if(!lightIsVisible)",
+        "    continue;",
+        "#endif",
         "    vec4 lDirection = viewMatrix * vec4(directionalLightDirection[i], 0.0);",
         "    vec3 L =  normalize(-lDirection.xyz);",
         "    vec3 R = normalize(reflect(L,fragNormal));",
@@ -216,6 +252,7 @@ XML3D.shaders.register("phong", {
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
         directives.push("MAX_SPOTLIGHTS " + spotLights);
         directives.push("HAS_SPOTLIGHT_SHADOWMAPS " + (lights.spot && !lights.spot.every(function(light) { return !light.castShadow; }) | 0));
+        directives.push("HAS_DIRECTIONALLIGHT_SHADOWMAPS " + (lights.directional && !lights.directional.every(function(light) { return !light.castShadow; }) | 0));
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
         directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));

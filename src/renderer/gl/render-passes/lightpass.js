@@ -36,7 +36,7 @@
                     program = this.program;
 
                 target.bind();
-                gl.clear(this.clearBits);
+                gl.clear(gl.DEPTH_BUFFER_BIT);
                 gl.viewport(0, 0, width, height);
                 gl.enable(gl.DEPTH_TEST);
 

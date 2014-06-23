@@ -75,13 +75,15 @@
     XML3D.extend(RenderLight.prototype, {
 
         getFrustum: function(aspect) {
-            return new XML3D.webgl.Frustum(1.0, 200.0, 0, this.fallOffAngle*2, aspect)
+            var orthogonal = this.light.type == "directional";
+
+            return new XML3D.webgl.Frustum(1.0, 200.0, 0, this.fallOffAngle*2, aspect, orthogonal)
             var t_mat = XML3D.math.mat4.create();
             var bb = new XML3D.math.bbox.create();
             this.scene.getBoundingBox(bb);
 
             if (XML3D.math.bbox.isEmpty(bb)) {
-                return new XML3D.webgl.Frustum(1.0, 110.0, 0, this.fallOffAngle*2, aspect)
+                return new XML3D.webgl.Frustum(1.0, 110.0, 0, this.fallOffAngle*2, aspect, orthogonal)
             }
             this.getWorldToLightMatrix(t_mat);
 
@@ -94,7 +96,7 @@
             // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
             far += expand;
             near -= expand;
-            return new XML3D.webgl.Frustum(1.0, far, 0, this.fallOffAngle*2, aspect);
+            return new XML3D.webgl.Frustum(1.0, far, 0, this.fallOffAngle*2, aspect, orthogonal);
         },
 
         addLightToScene : function() {

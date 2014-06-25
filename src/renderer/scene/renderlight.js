@@ -47,6 +47,7 @@
             type : light.type || "directional",
             data : light.data
         }
+        console.log("initialize light: "+ this.light.type);
         this.intensity   = XML3D.math.vec3.clone(LIGHT_DEFAULT_INTENSITY);
         this.srcPosition    = XML3D.math.vec3.fromValues(0,0,0);
         this.srcDirection   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
@@ -225,8 +226,22 @@
             return function() {
                 if(this.parent){
                     this.parent.getWorldMatrix(tmp_mat);
-                    this.setWorldMatrix(tmp_mat);
+                    //hotfix, perhaps move to shader ??? TODO
+                    console.log("1Pos" + XML3D.math.vec3.str(this.position) + " src Pos" + XML3D.math.vec3.str(this.srcPosition) +"Dir" + XML3D.math.vec3.str(this.direction) +" SrcDir " +XML3D.math.vec3.str(this.srcDirection))
                     this.updateLightTransformData(tmp_mat);
+                    var lookat_mat = XML3D.math.mat4.create();
+                    var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
+                    var up_vec = XML3D.math.vec3.create();
+                    var dir_len = XML3D.math.vec3.len(this.srcDirection);
+                    XML3D.math.vec3.scale(up_vec, this.srcDirection, -XML3D.math.vec3.dot(top_vec, this.srcDirection)/(dir_len*dir_len));
+                    XML3D.math.vec3.add(up_vec, up_vec, top_vec);
+                    XML3D.math.vec3.normalize(up_vec, up_vec);
+                    console.log("2__up: " + XML3D.math.vec3.str(up_vec));
+                    XML3D.math.mat4.lookAt(lookat_mat,XML3D.math.vec3.fromValues(0.0,0.0,0.0), this.srcDirection, up_vec);
+                    XML3D.math.mat4.invert(lookat_mat,lookat_mat);
+                    XML3D.math.mat4.translate(tmp_mat,tmp_mat,this.srcPosition);
+                    XML3D.math.mat4.multiply(tmp_mat, tmp_mat, lookat_mat);
+                    this.setWorldMatrix(tmp_mat);
                 }
             }
         })(),

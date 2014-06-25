@@ -86,7 +86,7 @@
         },
         "directionalLightOn" : {
             staticValue: "MAX_DIRECTIONALLIGHTS",
-            staticSize: ["directionalLightOn", "directionalLightIntensity", "directionalLightDirection" ]
+            staticSize: ["directionalLightOn", "directionalLightIntensity", "directionalLightDirection", "directionalLightCastShadow", "directionalLightShadowBias", "directionalLightShadowMap", "directionalLightMatrix" ]
         },
         "spotLightOn" : {
             staticValue: "MAX_SPOTLIGHTS",

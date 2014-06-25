@@ -14,17 +14,20 @@
      * @param {number} aspect
      * @constructor
      */
-    var Frustum = function (nearPlane, farPlane, fovx, fovy, aspect) {
+    var Frustum = function (nearPlane, farPlane, fovx, fovy, aspect, orthographic) {
         /**
          *
          * @type {boolean}
          */
-        this.orthographic = false;
-        this.setFrustum(nearPlane, farPlane, fovx, fovy, aspect);
+        if(typeof(orthographic) === "undefined")
+            this.orthographic = false;
+        else
+            this.orthographic = orthographic;
+        this.setFrustum(nearPlane, farPlane, fovx, fovy, aspect, orthographic);
     };
 
     XML3D.extend(Frustum.prototype, {
-        setFrustum: function (nearPlane, farPlane, fovx, fovy, aspect) {
+        setFrustum: function (nearPlane, farPlane, fovx, fovy, aspect, orthographic) {
             if (fovx && fovy)
                 throw new Error("fovx and fovy cannot both be non-zero.");
 
@@ -42,7 +45,7 @@
             }
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
-            this.orthographic = false;
+            this.orthographic = orthographic;
 
         },
         getProjectionMatrix: function (matrix) {

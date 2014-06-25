@@ -36,8 +36,9 @@
     }
 
     Xflow.VSProgram.prototype.createVertexShader = function(programData, vsConfig){
+        // TODO: ... Please try to cache code generation here. Code generation does not seem to depend on programData
         var result = new Xflow.VertexShader(programData);
-        constructVS(result, this, vsConfig)
+        constructVSShadeJs(result, this, vsConfig);
         return result;
     }
 
@@ -46,21 +47,20 @@
 
         var baseEntry = entries[entries.length - 1], baseOperator = baseEntry.operator;
 
-        for( var i = 0; i < baseOperator.params.length; ++i){
+        for( var i = 0; i < baseOperator.params.length; ++i) {
             var entry = baseOperator.params[i],
                 name = entry.source,
                 inputIndex = i,
                 directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
             program._outputInfo[name] = {type: entry.type};
-            if( baseEntry.isTransferInput(inputIndex) ||
-                operatorList.isInputIterate(directInputIndex))
-            {
+            if(baseEntry.isTransferInput(inputIndex) ||
+                operatorList.isInputIterate(directInputIndex)) {
                 program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.MANY;
             }
-            else if(operatorList.isInputUniform(directInputIndex)){
+            else if(operatorList.isInputUniform(directInputIndex)) {
                 program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.ONE;
             }
-            else{
+            else {
                 program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.NULL;
             }
         }
@@ -73,19 +73,122 @@
         if(!vsConfig)
             throw new Error("Could not find vsConfig! Attempt to create vertex shader programm without VS operator?");
 
-        var inputIndex = 0;
-        for( var name in vsConfig._attributes){
-            var configAttr = vsConfig._attributes[name],
-                directInputIndex = baseEntry.getDirectInputIndex(inputIndex);
-            for(var i = 0; i < configAttr.channeling.length; ++i){
+        var snippetList = convertOperatorListToSnippets(operatorList, 0, entries.length-1);
+        var vsSnippet = constructVsSnippet(vsConfig, baseEntry, operatorList, vs);
+        snippetList.addEntry(vsSnippet);
 
-            }
+        // TODO: Make System params fetching independent of webgl namespace.
+        var systemParams = XML3D.webgl.getJSSystemConfiguration(this.context);
+        var result = Shade.compileVertexShader(snippetList, systemParams);
+        vs._glslCode = result.code;
+
+        for(var inputName in result.inputIndices){
+            Xflow.nameset.add(vs._inputNames.push, inputName);
+            var inputIndex = result.inputIndices[inputName];
+            var uniform = !operatorList.isInputIterate(inputIndex);
+            vs._inputInfo[inputName] = { index: inputIndex, uniform: uniform };
         }
+
     }
 
-    function constructVsOperator(vsConfig, baseEntry, operatorList){
+    function constructVsSnippet(vsConfig, baseEntry, operatorList, vs){
+        var snippetArgs = [];
+        var returnEntries = [];
 
+        var snippet = new Shade.SnippetEntry();
+        var inputIndex = 0;
+        var baseOperator = baseEntry.operator;
 
+        for( var name in vsConfig._attributes){
+            var configAttr = vsConfig._attributes[name],
+                isTransfer = baseEntry.isTransferInput(inputIndex),
+                directInputIndex = isTransfer ? null : baseEntry.getDirectInputIndex(inputIndex),
+                isIterate = !isTransfer && operatorList.isInputIterate(directInputIndex);
+
+            var shadeJsType = Xflow.convertXflowToShadeType(configAttr.type, null);
+            snippetArgs.push(name);
+            if(isTransfer){
+                snippet.addTransferInput(shadeJsType, false, baseEntry.getTransferInputOperatorIndex(inputIndex),
+                        baseEntry.getTransferInputOutputIndex(inputIndex));
+            }
+            else{
+                snippet.addDirectInput(shadeJsType, isIterate, false, directInputIndex);
+            }
+
+            for(var i = 0; i < configAttr.channeling.length; ++i){
+                var channeling = configAttr.channeling[i];
+                var outputInfo = {type: configAttr.type, iteration: 0, index: 0, sourceName: name},
+                    outputName = channeling.outputName;
+                if( channeling.code || isTransfer || isIterate)
+                {
+                    if(channeling.code)
+                        returnEntries.push(outputName + " : " + channeling.code);
+                    else
+                        returnEntries.push(outputName + " : " + name);
+                    outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
+                    snippet.addFinalOutput(Xflow.convertXflowToShadeType(configAttr.type, null),
+                        outputName, 0); // Actual final output index is not relevant here
+                }
+                else if(operatorList.isInputUniform(directInputIndex)){
+                    outputInfo.iteration = Xflow.ITERATION_TYPE.ONE;
+                    outputInfo.index = directInputIndex;
+                }
+                else{
+                    outputInfo.iteration = Xflow.ITERATION_TYPE.NULL;
+                }
+                Xflow.nameset.add(vs._outputNames, outputName);
+                vs._outputInfo[outputName] = outputInfo;
+            }
+            inputIndex++;
+        }
+
+        var functionBody = " return {\n    " + returnEntries.join(",\n    ") + "\n}";
+        snippetArgs.push(functionBody);
+        var snippetFunc = Function.apply(null, snippetArgs);
+        snippet.setAst(Shade.getSnippetAst(snippetFunc));
+        return snippet;
+    }
+
+    function convertOperatorListToSnippets(operatorList, startIndex, endIndex){
+        var snippetList = new Shade.SnippetList();
+        var entries = operatorList.entries;
+
+        if(startIndex === undefined) startIndex = 0;
+        if(endIndex === undefined) endIndex = entries.length;
+
+        for(var i = startIndex; i < endIndex; ++i){
+            var entry = entries[i], operator = entry.operator;
+
+            var snippet = new Shade.SnippetEntry();
+            snippet.setAst(Shade.getSnippetAst(operator.evaluate_glsl));
+
+            for(var j = 0; j < operator.output.length; ++j){
+                var outputEntry = operator.output[j];
+                var shadeJsType = Xflow.convertXflowToShadeType(outputEntry.type, null);
+                if(entry.isFinalOutput(j)){
+                    snippet.addFinalOutput(shadeJsType, outputEntry.name, entry.getOutputIndex(j));
+                }
+                else{
+                    snippet.addLostOutput(shadeJsType, outputEntry.name);
+                }
+            }
+            for(var j = 0; j < operator.mapping.length; ++j){
+                var mappingEntry = operator.mapping[j];
+                var shadeJsType = Xflow.convertXflowToShadeType(mappingEntry.type, null),
+                    arrayAccess = mappingEntry.array;
+                if(entry.isTransferInput(j)){
+                    snippet.addTransferInput(shadeJsType, arrayAccess,
+                        entry.getTransferInputOperatorIndex(j),
+                        entry.getTransferInputOutputIndex(j));
+                }
+                else{
+                    var directInputIndex = entry.getDirectInputIndex(j),
+                        isIterate = operatorList.isInputIterate(directInputIndex);
+                    snippet.addDirectInput(shadeJsType, isIterate, arrayAccess, directInputIndex);
+                }
+            }
+            snippetList.addEntry(snippet);
+        }
     }
 
     function constructVS(vs, program, vsConfig){

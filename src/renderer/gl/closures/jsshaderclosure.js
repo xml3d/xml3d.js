@@ -22,7 +22,7 @@
     var c_jsShaderCache = {};
 
     function addDefaultChanneling(vsConfig, inputName){
-        var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(inputName);
+        var outputName = inputName;
         vsConfig.channelAttribute(inputName, outputName, null);
     }
 
@@ -36,24 +36,24 @@
         var i = spaceInfo[inputName].length;
         while(i--){
             var entry = spaceInfo[inputName][i];
-            var outputName = XML3D.webgl.JSShaderComposer.convertEnvName(entry.name), code = null;
+            var outputName = entry.name, code = null;
             switch(entry.space){
                 case Shade.SPACE_VECTOR_TYPES.OBJECT: break;
                 case Shade.SPACE_VECTOR_TYPES.VIEW_POINT:
                     vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
-                    code = "this.modelViewMatrix.mul(" + inputName + ", 1.0).xyz();";
+                    code = "this.modelViewMatrix.mulVec(" + inputName + ", 1.0).xyz()";
                     break;
                 case Shade.SPACE_VECTOR_TYPES.VIEW_NORMAL:
                     vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelViewMatrixN", true);
-                    code = "this.modelViewMatrixN.mul(" + inputName + ").normalize();";
+                    code = "this.modelViewMatrixN.mulVec(" + inputName + ").normalize()";
                     break;
                 case Shade.SPACE_VECTOR_TYPES.WORLD_POINT:
                     vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelMatrix", true);
-                    code = "this.modelMatrix.mul(" + inputName + ", 1.0).xyz();";
+                    code = "this.modelMatrix.mulVec(" + inputName + ", 1.0).xyz()";
                     break;
                 case Shade.SPACE_VECTOR_TYPES.WORLD_NORMAL:
                     vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelMatrixN", true);
-                    code = "this.modelMatrixN.mul(" + inputName + ").normalize();";
+                    code = "this.modelMatrixN.mulVec(" + inputName + ").normalize()";
                     break;
                 default:
                     throw new Error("Can't handle Space Type: " + entry.space);
@@ -202,7 +202,8 @@
                 channelVsAttribute(vsConfig, names[i], spaceInfo);
             }
             vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
-            vsConfig.addCodeFragment( "gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");
+            vsConfig.channelAttribute("position", "_glPosition", "this.modelViewProjectionMatrix.mulVec(position, 1.0)");
+            //vsConfig.addCodeFragment( "gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");
             return vsRequest.getVertexShader().getGLSLCode();
         },
 

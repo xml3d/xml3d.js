@@ -83,7 +83,7 @@
         vs._glslCode = result.code;
 
         for(var inputName in result.inputIndices){
-            Xflow.nameset.add(vs._inputNames.push, inputName);
+            Xflow.nameset.add(vs._inputNames, inputName);
             var inputIndex = result.inputIndices[inputName];
             var uniform = !operatorList.isInputIterate(inputIndex);
             vs._inputInfo[inputName] = { index: inputIndex, uniform: uniform };
@@ -96,9 +96,8 @@
         var returnEntries = [];
 
         var snippet = new Shade.SnippetEntry();
-        var inputIndex = 0;
+        var inputIndex = 0, outputIndex = 0;
         var baseOperator = baseEntry.operator;
-
         for( var name in vsConfig._attributes){
             var configAttr = vsConfig._attributes[name],
                 isTransfer = baseEntry.isTransferInput(inputIndex),
@@ -122,12 +121,16 @@
                 if( channeling.code || isTransfer || isIterate)
                 {
                     if(channeling.code)
-                        returnEntries.push(outputName + " : " + channeling.code);
+                        returnEntries.push("\"" + outputName + "\" : " + channeling.code);
                     else
-                        returnEntries.push(outputName + " : " + name);
-                    outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
-                    snippet.addFinalOutput(Xflow.convertXflowToShadeType(configAttr.type, null),
-                        outputName, 0); // Actual final output index is not relevant here
+                        returnEntries.push("\"" + outputName + "\" : " + name);
+                    if(outputName != "_glPosition"){
+                        outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
+                        snippet.addFinalOutput(Xflow.convertXflowToShadeType(configAttr.type, null),
+                            outputName, outputIndex);
+                        outputIndex++;
+                    }
+
                 }
                 else if(operatorList.isInputUniform(directInputIndex)){
                     outputInfo.iteration = Xflow.ITERATION_TYPE.ONE;
@@ -136,8 +139,11 @@
                 else{
                     outputInfo.iteration = Xflow.ITERATION_TYPE.NULL;
                 }
-                Xflow.nameset.add(vs._outputNames, outputName);
-                vs._outputInfo[outputName] = outputInfo;
+                if(outputName != "_glPosition"){
+                    Xflow.nameset.add(vs._outputNames, outputName);
+                    vs._outputInfo[outputName] = outputInfo;
+                }
+
             }
             inputIndex++;
         }
@@ -189,6 +195,7 @@
             }
             snippetList.addEntry(snippet);
         }
+        return snippetList
     }
 
     function constructVS(vs, program, vsConfig){

@@ -77,8 +77,8 @@
 
         getFrustum: function(aspect) {
             var orthogonal = this.light.type == "directional";
-
-            return new XML3D.webgl.Frustum(1.0, 200.0, 0, this.fallOffAngle*2, aspect, orthogonal)
+            //TODO why is farplane 200? maybe this line doesnt belong there...
+            //return new XML3D.webgl.Frustum(1.0, 200.0, 0, this.fallOffAngle*2, aspect, orthogonal)
             var t_mat = XML3D.math.mat4.create();
             var bb = new XML3D.math.bbox.create();
             this.scene.getBoundingBox(bb);
@@ -226,8 +226,10 @@
             return function() {
                 if(this.parent){
                     this.parent.getWorldMatrix(tmp_mat);
+                    //TODO translating the light externally causes problems, need to isolate the rotation from the worldmatrix
+                    if (this.light.type == "directional")
+                        XML3D.math.mat4.identity(tmp_mat);
                     //hotfix, perhaps move to shader ??? TODO
-                    console.log("1Pos" + XML3D.math.vec3.str(this.position) + " src Pos" + XML3D.math.vec3.str(this.srcPosition) +"Dir" + XML3D.math.vec3.str(this.direction) +" SrcDir " +XML3D.math.vec3.str(this.srcDirection))
                     this.updateLightTransformData(tmp_mat);
                     var lookat_mat = XML3D.math.mat4.create();
                     var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
@@ -236,7 +238,6 @@
                     XML3D.math.vec3.scale(up_vec, this.srcDirection, -XML3D.math.vec3.dot(top_vec, this.srcDirection)/(dir_len*dir_len));
                     XML3D.math.vec3.add(up_vec, up_vec, top_vec);
                     XML3D.math.vec3.normalize(up_vec, up_vec);
-                    console.log("2__up: " + XML3D.math.vec3.str(up_vec));
                     XML3D.math.mat4.lookAt(lookat_mat,XML3D.math.vec3.fromValues(0.0,0.0,0.0), this.srcDirection, up_vec);
                     XML3D.math.mat4.invert(lookat_mat,lookat_mat);
                     XML3D.math.mat4.translate(tmp_mat,tmp_mat,this.srcPosition);
@@ -254,11 +255,29 @@
         updateLightTransformData: function(transform) {
             switch (this.light.type) {
                 case "directional":
+
+                    //TODO enhance code
+                    var bb = new XML3D.math.bbox.create();
+                    this.scene.getBoundingBox(bb);
+                    if (XML3D.math.bbox.isEmpty(bb)) {break;}
+                    var bbSize = XML3D.math.vec3.create();
+                    var bbCenter = XML3D.math.vec3.create();
+                    var off = XML3D.math.vec3.create();
+                    XML3D.math.bbox.center(bbCenter, bb);
+                    XML3D.math.bbox.size(bbSize,bb);
+                    var r = XML3D.math.vec3.len(bbSize); //double brounding sphere radius
+                    XML3D.math.vec3.scale(off, this.srcDirection, -0.75*r);
+                    this.srcPosition = XML3D.math.vec3.add(this.srcPosition, bbCenter, off);
+                    console.log("fallofAngle: " +  this.fallOffAngle );
+                    //TODO calculate boundingbox dependend fOA
+                    this.fallOffAngle = 1.568;
+                    console.log("fallofAngle: " +  this.fallOffAngle );
                     XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
                     break;
                 case "spot":
                     XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
                     XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
+
                     break;
                 case "point":
                     XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));

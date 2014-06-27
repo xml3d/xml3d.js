@@ -127,7 +127,7 @@ if(XML3D && !XML3D._native)
             "uniform sampler2D ssaoMap;",
             "void main(void) {",
             "  float depth = unpackDepth(texture2D(directionalLightShadowMap[0], vec2(fragTexCoord.x, fragTexCoord.y)));",
-            "  gl_FragColor = vec4(1.0-depth, 1.0-depth, 1.0-depth, 1.0);",
+            "  gl_FragColor = vec4(depth, depth, depth, 1.0);",
             "}"
         ].join("\n"),
 

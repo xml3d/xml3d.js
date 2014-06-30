@@ -91,7 +91,7 @@ ComputeRequest.prototype.getResult = function(){
     return swapResultRequest(this, this._dataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, this._filter));
 }
 
-ComputeRequest.prototype._onResultChanged = function(notification){
+ComputeRequest.prototype._onResultChanged = function(result, notification){
     this._onDataNodeChange(notification);
 }
 

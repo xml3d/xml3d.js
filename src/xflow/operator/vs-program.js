@@ -103,23 +103,15 @@
                 isTransfer = baseEntry.isTransferInput(inputIndex),
                 directInputIndex = isTransfer ? null : baseEntry.getDirectInputIndex(inputIndex),
                 isIterate = !isTransfer && operatorList.isInputIterate(directInputIndex);
-
+            var usedInput = false;
             var shadeJsType = Xflow.convertXflowToShadeType(configAttr.type, null);
-            snippetArgs.push(name);
-            if(isTransfer){
-                snippet.addTransferInput(shadeJsType, false, baseEntry.getTransferInputOperatorIndex(inputIndex),
-                        baseEntry.getTransferInputOutputIndex(inputIndex));
-            }
-            else{
-                snippet.addDirectInput(shadeJsType, isIterate, false, directInputIndex);
-            }
-
             for(var i = 0; i < configAttr.channeling.length; ++i){
                 var channeling = configAttr.channeling[i];
                 var outputInfo = {type: configAttr.type, iteration: 0, index: 0, sourceName: name},
                     outputName = channeling.outputName;
                 if( channeling.code || isTransfer || isIterate)
                 {
+                    usedInput = true;
                     if(channeling.code)
                         returnEntries.push("\"" + outputName + "\" : " + channeling.code);
                     else
@@ -145,6 +137,17 @@
                 }
 
             }
+            if(usedInput){
+                snippetArgs.push(name);
+                if(isTransfer){
+                    snippet.addTransferInput(shadeJsType, false, baseEntry.getTransferInputOperatorIndex(inputIndex),
+                            baseEntry.getTransferInputOutputIndex(inputIndex));
+                }
+                else{
+                    snippet.addDirectInput(shadeJsType, isIterate, false, directInputIndex);
+                }
+            }
+
             inputIndex++;
         }
 
@@ -180,7 +183,7 @@
             }
             for(var j = 0; j < operator.mapping.length; ++j){
                 var mappingEntry = operator.mapping[j];
-                var shadeJsType = Xflow.convertXflowToShadeType(mappingEntry.type, null),
+                var shadeJsType = Xflow.convertXflowToShadeType(mappingEntry.internalType, null),
                     arrayAccess = mappingEntry.array;
                 if(entry.isTransferInput(j)){
                     snippet.addTransferInput(shadeJsType, arrayAccess,

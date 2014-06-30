@@ -72,6 +72,7 @@
         webgl.AbstractShaderClosure.call(this, context);
         this.sourceTemplate = sourceTemplate;
         this.extractedParams = extractedParams;
+        this.vertexUniforms = [];
         this.uniformSetter = function() {};
         this.uniformConverter = [];
     };
@@ -204,10 +205,27 @@
             vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
             vsConfig.channelAttribute("position", "_glPosition", "this.modelViewProjectionMatrix.mulVec(position, 1.0)");
             //vsConfig.addCodeFragment( "gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");
-            return vsRequest.getVertexShader().getGLSLCode();
+            var vertexShader =  vsRequest.getVertexShader();
+            this.vertexUniforms.length = 0;
+            var inputNames = vertexShader.inputNames;
+            for(var i = 0; i < inputNames.length; ++i){
+                var name = inputNames[i];
+                if(vertexShader.isInputUniform(name))
+                    this.vertexUniforms.push(name);
+            }
+            return vertexShader.getGLSLCode();
         },
 
         setUniformVariables: function(envNames, sysNames, inputCollection){
+            var i = envNames && envNames.length;
+            var override = inputCollection.envOverride, base = inputCollection.envBase;
+            while(i--){
+                var name = envNames[i];
+                if(this.vertexUniforms.indexOf(name) != -1){
+                    this.program.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
+                }
+            }
+
             this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
         },
 

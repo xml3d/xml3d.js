@@ -50,7 +50,7 @@ Result.prototype._removeRequest = function(request){
 Result.prototype._notifyChanged = function(state){
     this.valid = false;
     for(var i = 0; i < this._requests.length; ++i){
-        this._requests[i]._onResultChanged(state);
+        this._requests[i]._onResultChanged(this, state);
     }
     Xflow._listCallback(this, state);
 }

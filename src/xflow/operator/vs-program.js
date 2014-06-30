@@ -168,8 +168,8 @@
             var snippet = new Shade.SnippetEntry();
             snippet.setAst(Shade.getSnippetAst(operator.evaluate_glsl));
 
-            for(var j = 0; j < operator.output.length; ++j){
-                var outputEntry = operator.output[j];
+            for(var j = 0; j < operator.outputs.length; ++j){
+                var outputEntry = operator.outputs[j];
                 var shadeJsType = Xflow.convertXflowToShadeType(outputEntry.type, null);
                 if(entry.isFinalOutput(j)){
                     snippet.addFinalOutput(shadeJsType, outputEntry.name, entry.getOutputIndex(j));

@@ -140,11 +140,14 @@
             if(usedInput){
                 snippetArgs.push(name);
                 if(isTransfer){
-                    snippet.addTransferInput(shadeJsType, false, baseEntry.getTransferInputOperatorIndex(inputIndex),
+                    snippet.addTransferInput(shadeJsType, baseEntry.getTransferInputOperatorIndex(inputIndex),
                             baseEntry.getTransferInputOutputIndex(inputIndex));
                 }
+                else if(isIterate){
+                    snippet.addVertexInput(shadeJsType, directInputIndex);
+                }
                 else{
-                    snippet.addDirectInput(shadeJsType, isIterate, false, directInputIndex);
+                    snippet.addUniformInput(shadeJsType, directInputIndex);
                 }
             }
 
@@ -183,17 +186,22 @@
             }
             for(var j = 0; j < operator.mapping.length; ++j){
                 var mappingEntry = operator.mapping[j];
-                var shadeJsType = Xflow.convertXflowToShadeType(mappingEntry.internalType, null),
-                    arrayAccess = mappingEntry.array;
+                var shadeJsType = Xflow.convertXflowToShadeType(mappingEntry.internalType, null);
                 if(entry.isTransferInput(j)){
-                    snippet.addTransferInput(shadeJsType, arrayAccess,
+                    snippet.addTransferInput(shadeJsType,
                         entry.getTransferInputOperatorIndex(j),
                         entry.getTransferInputOutputIndex(j));
                 }
                 else{
                     var directInputIndex = entry.getDirectInputIndex(j),
-                        isIterate = operatorList.isInputIterate(directInputIndex);
-                    snippet.addDirectInput(shadeJsType, isIterate, arrayAccess, directInputIndex);
+                        isIterate = operatorList.isInputIterate(directInputIndex),
+                        arrayAccess = mappingEntry.array;
+                    if(isIterate)
+                        snippet.addVertexInput(shadeJsType, directInputIndex);
+                    else if(arrayAccess)
+                        snippet.addUniformArray(shadeJsType, directInputIndex, operatorList.getInputSize(directInputIndex));
+                    else
+                        snippet.addUniformInput(shadeJsType, directInputIndex);
                 }
             }
             snippetList.addEntry(snippet);

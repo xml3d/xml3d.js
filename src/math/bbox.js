@@ -222,6 +222,17 @@
         return result;
     };
 
+    bbox.fromXML3DBox = function(bb) {
+        var out = new Float32Array(6);
+        out[0] = bb.min._data[0];
+        out[1] = bb.min._data[1];
+        out[2] = bb.min._data[2];
+        out[3] = bb.max._data[0];
+        out[4] = bb.max._data[1];
+        out[5] = bb.max._data[2];
+        return out;
+    }
+
     bbox.str = function (a) {
         return 'bbox(' + a[0] + ', ' + a[1] + ', ' + a[2] + ', ' + a[3] + ', ' +
             a[4] + ', ' + a[5] + ')';

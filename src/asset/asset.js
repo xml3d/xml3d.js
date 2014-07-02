@@ -260,12 +260,13 @@ function updateAccumulatedNode(table, entry){
     }
 
     var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : XML3D.data.xflowGraph.createDataNode(false);
-    for(var i = 0; i < entry.includes.length; ++i){
-        var addEntry = table.namedEntries[entry.includes[i]];
-        updateAccumulatedNode(table, addEntry);
-        dataNode.appendChild(addEntry.accumulatedXflowNode);
-    }
     for(var i = 0; i < entry.postQueue.length; ++i){
+        var includes = entry.postQueue[i].includes;
+        for(var j = 0; j < includes.length; ++j){
+            var addEntry = table.namedEntries[includes[j]];
+            updateAccumulatedNode(table, addEntry);
+            dataNode.appendChild(addEntry.accumulatedXflowNode);
+        }
         if(entry.postQueue[i].xflowNode)
             dataNode.appendChild(entry.postQueue[i].xflowNode);
     }
@@ -342,7 +343,6 @@ function AssetTableEntry (srcEntry){
     this.name = srcEntry && srcEntry.name;
     this.meshType = srcEntry && srcEntry.meshType || null;
 
-    this.includes = srcEntry && srcEntry.includes.slice(0) || [];
     this.postQueue = srcEntry && srcEntry.postQueue.slice(0) || [];
     this.shader = srcEntry && srcEntry.shader || null;
     this.transform = srcEntry && srcEntry.transform || null;
@@ -360,11 +360,11 @@ AssetTableEntry.prototype.pushPostEntry = function(subData){
         dataflowLoading: subData.loading,
         compute: subData.postCompute,
         filter: subData.postFilter,
+        includes: subData.includes,
         xflowNode: subData.xflowNodeIn
     });
     this.refNode = subData.refNode;
     this.accumulatedXflowNode = subData.xflowNodeOut;
-    Xflow.utils.setAdd(this.includes, subData.includes);
 }
 
 

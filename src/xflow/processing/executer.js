@@ -131,10 +131,17 @@
     }
 
     function canOperatorMerge(cData, operator, platform){
-        // TODO: Detect merge support
-        return (platform == Xflow.PLATFORM.ASYNC || !Xflow.isOperatorAsync(operator)) &&
-            (!cData.firstOperator ||
-            (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl));
+        if(platform != Xflow.PLATFORM.ASYNC && Xflow.isOperatorAsync(operator))
+            return false;
+
+        if(!cData.firstOperator)
+            return true;
+
+        if(Xflow.shadejs.hasSupport() && cData.firstOperator.evaluate_shadejs && operator.evaluate_shadejs){
+            if(platform == Xflow.PLATFORM.JAVASCRIPT)
+                return true;
+        }
+        return false;
     }
 
     function blockSubtree(cData, node){

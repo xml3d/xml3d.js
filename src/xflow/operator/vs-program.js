@@ -17,6 +17,7 @@
         this.list = operatorList;
         this._outputInfo = {};
         setOutputIterate(this);
+        this._vsShaderData = {};
     }
 
     Xflow.VSProgram.prototype.getOutputNames = function(){
@@ -36,9 +37,17 @@
     }
 
     Xflow.VSProgram.prototype.createVertexShader = function(programData, vsConfig){
-        // TODO: ... Please try to cache code generation here. Code generation does not seem to depend on programData
         var result = new Xflow.VertexShader(programData);
-        constructVSShadeJs(result, this, vsConfig);
+        var key = vsConfig.getChannelingKey();
+        if(!this._vsShaderData[key]){
+            this._vsShaderData[key] = constructVSShadeJs(this, vsConfig);
+        }
+        var data = this._vsShaderData[key];
+        result._glslCode = data._glslCode;
+        result._inputNames = data._inputNames;
+        result._outputNames = data._outputNames;
+        result._inputInfo = data._inputInfo;
+        result._outputInfo = data._outputInfo;
         return result;
     }
 
@@ -66,14 +75,22 @@
         }
     }
 
-    function constructVSShadeJs(vs, program, vsConfig){
+    function constructVSShadeJs(program, vsConfig){
+        var vs = {
+            _glslCode: null,
+            _inputNames: [],
+            _outputNames: [],
+            _inputInfo: {},
+            _outputInfo: {}
+        }
+
         var operatorList = program.list, entries = operatorList.entries;
         var baseEntry = entries[entries.length - 1], acceptedBaseShaderInput = [], baseOperator = baseEntry.operator;
 
         if(!vsConfig)
             throw new Error("Could not find vsConfig! Attempt to create vertex shader programm without VS operator?");
 
-        var snippetList = convertOperatorListToSnippets(operatorList, 0, entries.length-1);
+        var snippetList = Xflow.shadejs.convertOperatorListToSnippets(operatorList, 0, entries.length-1);
         var vsSnippet = constructVsSnippet(vsConfig, baseEntry, operatorList, vs);
         snippetList.addEntry(vsSnippet);
 
@@ -88,6 +105,7 @@
             var uniform = !operatorList.isInputIterate(inputIndex);
             vs._inputInfo[inputName] = { index: inputIndex, uniform: uniform };
         }
+        return vs;
 
     }
 
@@ -104,7 +122,7 @@
                 directInputIndex = isTransfer ? null : baseEntry.getDirectInputIndex(inputIndex),
                 isIterate = !isTransfer && operatorList.isInputIterate(directInputIndex);
             var usedInput = false;
-            var shadeJsType = Xflow.convertXflowToShadeType(configAttr.type, null);
+            var shadeJsType = Xflow.shadejs.convertFromXflow(configAttr.type, null);
             for(var i = 0; i < configAttr.channeling.length; ++i){
                 var channeling = configAttr.channeling[i];
                 var outputInfo = {type: configAttr.type, iteration: 0, index: 0, sourceName: name},
@@ -118,7 +136,7 @@
                         returnEntries.push("\"" + outputName + "\" : " + name);
                     if(outputName != "_glPosition"){
                         outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
-                        snippet.addFinalOutput(Xflow.convertXflowToShadeType(configAttr.type, null),
+                        snippet.addFinalOutput(Xflow.shadejs.convertFromXflow(configAttr.type, null),
                             outputName, outputIndex);
                         outputIndex++;
                     }
@@ -159,54 +177,6 @@
         var snippetFunc = Function.apply(null, snippetArgs);
         snippet.setAst(Shade.getSnippetAst(snippetFunc));
         return snippet;
-    }
-
-    function convertOperatorListToSnippets(operatorList, startIndex, endIndex){
-        var snippetList = new Shade.SnippetList();
-        var entries = operatorList.entries;
-
-        if(startIndex === undefined) startIndex = 0;
-        if(endIndex === undefined) endIndex = entries.length;
-
-        for(var i = startIndex; i < endIndex; ++i){
-            var entry = entries[i], operator = entry.operator;
-
-            var snippet = new Shade.SnippetEntry();
-            snippet.setAst(Shade.getSnippetAst(operator.evaluate_glsl));
-
-            for(var j = 0; j < operator.outputs.length; ++j){
-                var outputEntry = operator.outputs[j];
-                var shadeJsType = Xflow.convertXflowToShadeType(outputEntry.type, null);
-                if(entry.isFinalOutput(j)){
-                    snippet.addFinalOutput(shadeJsType, outputEntry.name, entry.getOutputIndex(j));
-                }
-                else{
-                    snippet.addLostOutput(shadeJsType, outputEntry.name);
-                }
-            }
-            for(var j = 0; j < operator.mapping.length; ++j){
-                var mappingEntry = operator.mapping[j];
-                var shadeJsType = Xflow.convertXflowToShadeType(mappingEntry.internalType, null);
-                if(entry.isTransferInput(j)){
-                    snippet.addTransferInput(shadeJsType,
-                        entry.getTransferInputOperatorIndex(j),
-                        entry.getTransferInputOutputIndex(j));
-                }
-                else{
-                    var directInputIndex = entry.getDirectInputIndex(j),
-                        isIterate = operatorList.isInputIterate(directInputIndex),
-                        arrayAccess = mappingEntry.array;
-                    if(isIterate)
-                        snippet.addVertexInput(shadeJsType, directInputIndex);
-                    else if(arrayAccess)
-                        snippet.addUniformArray(shadeJsType, directInputIndex, operatorList.getInputSize(directInputIndex));
-                    else
-                        snippet.addUniformInput(shadeJsType, directInputIndex);
-                }
-            }
-            snippetList.addEntry(snippet);
-        }
-        return snippetList
     }
 
     function constructVS(vs, program, vsConfig){
@@ -307,7 +277,7 @@
                 }
             }
             // Take Code Fragment
-            var codeFragment = convertCodeFragment(operator.evaluate_glsl, entry,
+            var codeFragment = convertCodeFragment(operator.evaluate_shadejs, entry,
                                     transferNames, directInputNames, usedNames);
             code += codeFragment + "\n";
         }

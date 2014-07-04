@@ -77,6 +77,19 @@ Xflow.VSConfig.prototype.getKey = function(){
     }
     return key;
 }
+Xflow.VSConfig.prototype.getChannelingKey = function(){
+    var key = "";
+    for(var name in this._attributes){
+        var attr = this._attributes[name];
+        key += ";" + attr.type + "," + name + "," + attr.optional + "[";
+        var i = attr.channeling.length;
+        while(i--){
+            key += attr.channeling[i].outputName + ">" + attr.channeling[i].code + ",";
+        }
+        key += "]";
+    }
+    return key;
+}
 
 var c_vs_operator_cache = {};
 
@@ -98,7 +111,7 @@ Xflow.VSConfig.prototype.getOperator = function(){
     {
         outputs: outputs,
         params:  params,
-        evaluate_glsl: glslCode
+        evaluate_shadejs: glslCode
     });
     c_vs_operator_cache[key] = operator;
     return operator;

@@ -110,11 +110,11 @@
             for(var i = 0; i < this.extractedParams.length; ++i){
                 var paramName = this.extractedParams[i];
                 if(vsShaderOutput && vsShaderOutput.indexOf(paramName) != -1){
-                    contextInfo[paramName] = Xflow.convertXflowToShadeType(vsDataResult.getOutputType(paramName),
+                    contextInfo[paramName] = Xflow.shadejs.convertFromXflow(vsDataResult.getOutputType(paramName),
                         vsDataResult.isOutputUniform(paramName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
                 }
                 else if(shaderEntries && shaderEntries[paramName]){
-                    contextInfo[paramName] = Xflow.convertXflowToShadeType(
+                    contextInfo[paramName] = Xflow.shadejs.convertFromXflow(
                         shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
                 }
             }

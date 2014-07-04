@@ -47,7 +47,7 @@
             type : light.type || "directional",
             data : light.data
         }
-        console.log("initialize light: "+ this.light.type);
+
         this.intensity   = XML3D.math.vec3.clone(LIGHT_DEFAULT_INTENSITY);
         this.srcPosition    = XML3D.math.vec3.fromValues(0,0,0);
         this.srcDirection   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
@@ -224,25 +224,51 @@
         updateWorldMatrix: (function() {
             var tmp_mat = XML3D.math.mat4.create();
             return function() {
-                if(this.parent){
+                if(this.parent) {
                     this.parent.getWorldMatrix(tmp_mat);
+                    this.updateLightTransformData(tmp_mat);
+
                     //TODO translating the light externally causes problems, need to isolate the rotation from the worldmatrix
                     if (this.light.type == "directional")
-                        XML3D.math.mat4.identity(tmp_mat);
-                    //hotfix, perhaps move to shader ??? TODO
-                    this.updateLightTransformData(tmp_mat);
+                     {
+                         //TODO enhance code
+                         var bb = new XML3D.math.bbox.create();
+                         this.scene.getBoundingBox(bb);
+                         // if (XML3D.math.bbox.isEmpty(bb)) {break;}
+                         var bbSize = XML3D.math.vec3.create();
+                         var bbCenter = XML3D.math.vec3.create();
+                         var off = XML3D.math.vec3.create();
+                         XML3D.math.bbox.center(bbCenter, bb);
+                         XML3D.math.bbox.size(bbSize,bb);
+                         var r = XML3D.math.vec3.len(bbSize); //double brounding sphere radius
+                         XML3D.math.vec3.scale(off, this.direction, -0.75*r);
+                         this.position = XML3D.math.vec3.add(this.position, bbCenter, off);
+                         //TODO calculate boundingbox dependend fOA
+                         this.fallOffAngle = 1.568;
+
+                    } else if (this.light.type == "spot") {
+
+                    } else if (this.light.type == "point"){
+
+                    } else {
+                        XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type); // TODO
+                    }
+
+                    //create and  new transformation matrix depending on the updated parameters TODO move to shader?
+                    XML3D.math.mat4.identity(tmp_mat);
                     var lookat_mat = XML3D.math.mat4.create();
                     var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
                     var up_vec = XML3D.math.vec3.create();
-                    var dir_len = XML3D.math.vec3.len(this.srcDirection);
-                    XML3D.math.vec3.scale(up_vec, this.srcDirection, -XML3D.math.vec3.dot(top_vec, this.srcDirection)/(dir_len*dir_len));
+                    var dir_len = XML3D.math.vec3.len(this.direction);
+                    XML3D.math.vec3.scale(up_vec, this.direction, -XML3D.math.vec3.dot(top_vec, this.direction) / (dir_len * dir_len));
                     XML3D.math.vec3.add(up_vec, up_vec, top_vec);
                     XML3D.math.vec3.normalize(up_vec, up_vec);
-                    XML3D.math.mat4.lookAt(lookat_mat,XML3D.math.vec3.fromValues(0.0,0.0,0.0), this.srcDirection, up_vec);
-                    XML3D.math.mat4.invert(lookat_mat,lookat_mat);
-                    XML3D.math.mat4.translate(tmp_mat,tmp_mat,this.srcPosition);
+                    XML3D.math.mat4.lookAt(lookat_mat, XML3D.math.vec3.fromValues(0.0, 0.0, 0.0), this.direction, up_vec);
+                    XML3D.math.mat4.invert(lookat_mat, lookat_mat);
+                    XML3D.math.mat4.translate(tmp_mat, tmp_mat, this.position);
                     XML3D.math.mat4.multiply(tmp_mat, tmp_mat, lookat_mat);
                     this.setWorldMatrix(tmp_mat);
+
                 }
             }
         })(),
@@ -255,24 +281,9 @@
         updateLightTransformData: function(transform) {
             switch (this.light.type) {
                 case "directional":
-
-                    //TODO enhance code
-                    var bb = new XML3D.math.bbox.create();
-                    this.scene.getBoundingBox(bb);
-                    if (XML3D.math.bbox.isEmpty(bb)) {break;}
-                    var bbSize = XML3D.math.vec3.create();
-                    var bbCenter = XML3D.math.vec3.create();
-                    var off = XML3D.math.vec3.create();
-                    XML3D.math.bbox.center(bbCenter, bb);
-                    XML3D.math.bbox.size(bbSize,bb);
-                    var r = XML3D.math.vec3.len(bbSize); //double brounding sphere radius
-                    XML3D.math.vec3.scale(off, this.srcDirection, -0.75*r);
-                    this.srcPosition = XML3D.math.vec3.add(this.srcPosition, bbCenter, off);
-                    console.log("fallofAngle: " +  this.fallOffAngle );
-                    //TODO calculate boundingbox dependend fOA
-                    this.fallOffAngle = 1.568;
-                    console.log("fallofAngle: " +  this.fallOffAngle );
                     XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
+                    XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
+
                     break;
                 case "spot":
                     XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));

@@ -335,6 +335,8 @@
                 c_program_cache[key] = new Xflow.VSProgram(operatorList);
             } else if (firstOperator.platform === Xflow.PLATFORM.CL) {
                 c_program_cache[key] = new Xflow.CLProgram(operatorList);
+            }else if(firstOperator.platform === Xflow.PLATFORM.JAVASCRIPT && Xflow.shadejs.hasSupport() ) {
+                c_program_cache[key] = new Xflow.FastJsProgram(operatorList);
             }else if(firstOperator.platform === Xflow.PLATFORM.JAVASCRIPT && operatorList.entries.length === 1 ) {
                 c_program_cache[key] = new Xflow.SingleProgram(operatorList);
             }else {

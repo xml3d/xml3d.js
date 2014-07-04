@@ -10,10 +10,6 @@ XML3D.data.AssetAdapter = function(factory, node) {
 XML3D.createClass(XML3D.data.AssetAdapter, XML3D.base.NodeAdapter);
 
 XML3D.data.AssetAdapter.prototype.init = function() {
-    //var xflow = this.resolveScript();
-    //if (xflow)
-    //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
-
     this.asset = new XML3D.base.Asset(this.node);
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     updatePickFilter(this);
@@ -60,7 +56,7 @@ function updatePickFilter(adapter){
         adapter.asset.setPickFilter(null);
     else{
         var value = adapter.node.getAttribute("pick");
-        adapter.asset.setPickFilter(value.split(/\s+/))
+        adapter.asset.setPickFilter(value);
     }
 }
 
@@ -116,6 +112,7 @@ XML3D.data.AssetDataAdapter.prototype.init = function() {
     this.outputXflowNode = XML3D.data.xflowGraph.createDataNode(false);
     this.assetEntry = new XML3D.base.SubData(this.outputXflowNode, this.getXflowNode(), this.node);
     this.assetEntry.setName(this.node.getAttribute("name"));
+    updateClassNames(this);
     updatePostCompute(this);
     this.assetEntry.setPostFilter(this.node.getAttribute("filter"));
     updateIncludes(this.assetEntry, this.node.getAttribute("includes"));
@@ -138,6 +135,7 @@ XML3D.data.AssetDataAdapter.prototype.notifyChanged = function(evt) {
         switch(attr){
             case "name": this.assetEntry.setName(this.node.getAttribute("name")); break;
             case "compute": updatePostCompute(this); break;
+            case "class": updateClassNames(this); break;
             case "filter": this.assetEntry.setPostFilter(this.node.getAttribute("filter")); break;
             case "includes": updateIncludes(this.node.getAttribute("includes")); break;
         }
@@ -154,6 +152,11 @@ function updateIncludes(assetEntry, includeString){
         assetEntry.setIncludes([]);
     else
         assetEntry.setIncludes(includeString.split(/\s+/));
+}
+
+function updateClassNames(adapter){
+    var classNames = adapter.node.getAttribute("class");
+    adapter.assetEntry.setClassNamesString(classNames)
 }
 
 function updatePostCompute(adapter){

@@ -204,12 +204,12 @@ function synchronizeChildren(children, descendants, inputChannels){
     for(var name in inputChannels){
         channel = inputChannels[name];
         if(channel && channel.creatorProcessNode){
-            Xflow.utils.setAdd(children, channel.creatorProcessNode);
-            Xflow.utils.setAdd(descendants, channel.creatorProcessNode.descendants);
+            Xflow.utils.set.add(children, channel.creatorProcessNode);
+            Xflow.utils.set.add(descendants, channel.creatorProcessNode.descendants);
         }
     }
-    Xflow.utils.setRemove(children, descendants);
-    Xflow.utils.setAdd(descendants, children);
+    Xflow.utils.set.remove(children, descendants);
+    Xflow.utils.set.add(descendants, children);
 }
 
 function synchronizeOutput(operator, outputs){

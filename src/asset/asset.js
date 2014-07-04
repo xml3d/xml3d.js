@@ -42,7 +42,7 @@ function checkRecursive(asset){
     }
     var totalNames = localNames.slice();
     if(parentNames){
-        Xflow.utils.setAdd(totalNames, parentNames);
+        Xflow.utils.set.add(totalNames, parentNames);
     }
     for(var i = 0; i < asset.children.length; ++i){
         checkIncludes(asset.children[i], totalNames);
@@ -88,8 +88,13 @@ XML3D.base.Asset.prototype.appendChild = function(child){
     invalidateAsset(this);
 }
 
-XML3D.base.Asset.prototype.setPickFilter = function(pickFilter){
-    this.pickFilter = pickFilter;
+XML3D.base.Asset.prototype.setPickFilter = function(pickFilterString){
+    if(typeof pickFilterString == "string"){
+        this.pickFilter = new AssetPickFilter();
+        this.pickFilter.parse(pickFilterString);
+    }
+    else
+        this.pickFilter = null;
     invalidateAsset(this);
 }
 
@@ -113,10 +118,10 @@ XML3D.base.Asset.prototype.clearChildren = function(){
 }
 
 XML3D.base.Asset.prototype.addChangeListener = function(listener){
-    Xflow.utils.setAdd(this.listener, listener);
+    Xflow.utils.set.add(this.listener, listener);
 }
 XML3D.base.Asset.prototype.removeChangeListener = function(listener){
-    Xflow.utils.setRemove(this.listener, listener);
+    Xflow.utils.set.remove(this.listener, listener);
 }
 
 XML3D.base.Asset.prototype.onAssetChange = function(){
@@ -148,6 +153,7 @@ XML3D.base.SubData = function(xflowNodeOut, xflowNodeIn, refNode){
     this.xflowNodeIn = xflowNodeIn;
     this.refNode = refNode || null;
     this.name = null;
+    this.classNames = [];
     this.postDataflow = null;
     this.postCompute = null;
     this.postFilter = null;
@@ -170,6 +176,22 @@ XML3D.base.SubData.prototype.setName = function(name){
     this.name = name;
     invalidateParent(this);
 }
+
+XML3D.base.SubData.prototype.setClassNames = function(classNames){
+    this.classNames = classNames;
+    invalidateParent(this);
+}
+XML3D.base.SubData.prototype.setClassNamesString = function(classNamesString){
+    if(!classNamesString)
+        this.setClassNames([]);
+    else{
+        var array = classNamesString.split(/\s+/);
+        var i = array.length;
+        while(i--) array[i] = array[i].trim();
+        this.setClassNames(array);
+    }
+}
+
 
 XML3D.base.SubData.prototype.setPostDataflow = function(postDataflow){
     this.postDataflow = postDataflow;
@@ -230,7 +252,7 @@ XML3D.base.AssetResult.prototype.getMeshDataSets = function(){
     for(var i = 0; i < this.allEntries.length; ++i){
 
         var entry = this.allEntries[i];
-        if(entry.meshType && (!entry.name || !this.pickFilter || this.pickFilter.indexOf(entry.name) != -1) ){
+        if(entry.meshType && (!this.pickFilter || this.pickFilter.check(entry)) ){
             updateAccumulatedNode(this, entry);
             result.push({
                 xflowNode: entry.accumulatedXflowNode,
@@ -326,12 +348,8 @@ function copySrcTable(table, srcTable, pickFilter){
         if(newEntry.name) table.namedEntries[newEntry.name] = newEntry;
     }
     if(pickFilter && srcTable.pickFilter){
-        table.pickFilter = [];
-        var i = pickFilter.length;
-        while(i--){
-            if(srcTable.pickFilter.indexOf(pickFilter[i]) != -1)
-                table.pickFilter.push(pickFilter[i]);
-        }
+        table.pickFilter = new AssetPickFilter();
+        table.pickFilter.intersection(pickFilter, srcTable.pickFilter);
     }
     else{
         table.pickFilter = pickFilter || srcTable.pickFilter;
@@ -341,6 +359,7 @@ function copySrcTable(table, srcTable, pickFilter){
 
 function AssetTableEntry (srcEntry){
     this.name = srcEntry && srcEntry.name;
+    this.classNames = srcEntry && srcEntry.classNames.slice() || [];
     this.meshType = srcEntry && srcEntry.meshType || null;
 
     this.postQueue = srcEntry && srcEntry.postQueue.slice(0) || [];
@@ -365,8 +384,50 @@ AssetTableEntry.prototype.pushPostEntry = function(subData){
     });
     this.refNode = subData.refNode;
     this.accumulatedXflowNode = subData.xflowNodeOut;
+    Xflow.utils.set.add(this.classNames, subData.classNames);
 }
 
+
+function AssetPickFilter(){
+    this.names = [];
+    this.classNames = [];
+}
+
+AssetPickFilter.prototype.parse = function(string){
+    var entries = string.split(",");
+    var i = entries.length;
+    while(i--){
+        var entry = entries[i].trim();
+        if(entry.indexOf(".") == 0){
+            var classNames = entry.split(".");
+            var j = classNames.length;
+            while(j--){
+                if(!classNames[j].trim())
+                    classNames.splice(j,1);
+            }
+            this.classNames.push(classNames);
+        }
+        else{
+            Xflow.utils.set.add(this.names, entry);
+        }
+    }
+}
+
+AssetPickFilter.prototype.intersection = function(setA, setB){
+    Xflow.utils.set.intersection(this.names, setA.names, setB.names);
+    Xflow.utils.set.intersection(this.classNames, setA.classNames, setB.classNames);
+}
+
+AssetPickFilter.prototype.check = function(entry){
+    if(entry.classNames.length > 0){
+        var i = this.classNames.length;
+        while(i--){
+            if(Xflow.utils.set.isSubset(this.classNames[i], entry.classNames))
+                return true;
+        }
+    }
+    return (entry.name && this.names.indexOf(entry.name) != -1);
+}
 
 
 

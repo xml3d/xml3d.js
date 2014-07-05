@@ -249,7 +249,6 @@
                     } else if (this.light.type == "spot") {
 
                     } else if (this.light.type == "point"){
-
                     } else {
                         XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type); // TODO
                     }

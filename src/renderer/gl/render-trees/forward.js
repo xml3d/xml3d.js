@@ -29,9 +29,12 @@
             }
             else{
                 if(light.light.type == "spot")
-                    light.userData = this.createLightPass(light)
+                    light.userData = this.createLightPass(light);
                 if(light.light.type == "directional")
-                    light.userData = this.createLightPass(light)
+                    light.userData = this.createLightPass(light);
+                if(light.light.type == "point") {
+                    light.userData = this.createLightPass(light);
+                }
             }
             this.reassignLightPasses(evt.target);
         },
@@ -53,6 +56,11 @@
                 var directionalLight = scene.lights.directional[i];
                 if(directionalLight.castShadow)
                     directionalLight.userData && directionalLight.userData.setProcessed(false);
+            }
+            for (var i = 0; i < scene.lights.point.length; i++) {
+                var pointLight = scene.lights.point[i];
+                if(pointLight.castShadow)
+                    pointLight.userData && pointLight.userData.setProcessed(false);
             }
         },
         onShaderChange: function(evt) {
@@ -86,6 +94,10 @@
             for (var i = 0; i < scene.lights.directional.length; i++) {
                 var directionalLight = scene.lights.directional[i];
                 this.mainPass.addLightPass("directionalLightShadowMap", directionalLight.userData);
+            }
+            for (var i = 0; i < scene.lights.point.length; i++) {
+                var pointLight = scene.lights.point[i];
+                this.mainPass.addLightPass("pointLightShadowMap", pointLight.userData);
             }
         },
 

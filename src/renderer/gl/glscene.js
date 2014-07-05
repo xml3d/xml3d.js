@@ -47,7 +47,7 @@
 
     XML3D.createClass(GLScene, webgl.Scene);
 
-    GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn",
+    GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn", "pointLightCastShadow", "pointLightMatrix", "pointLightShadowBias",
          "directionalLightDirection", "directionalLightIntensity", "directionalLightOn", "directionalLightCastShadow", "directionalLightMatrix", "directionalLightShadowBias",
          "spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection",
          "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias"];
@@ -115,6 +115,9 @@
             parameters["pointLightAttenuation"] = pointLightData.attenuation;
             parameters["pointLightIntensity"] = pointLightData.intensity;
             parameters["pointLightOn"] = pointLightData.on;
+            parameters["pointLightCastShadow"] = pointLightData.castShadow;
+            parameters["pointLightMatrix"] = pointLightData.lightMatrix;
+            parameters["pointLightShadowBias"] = pointLightData.shadowBias;
 
             var directionalLightData = { direction: [], intensity: [], on: [], castShadow: [], lightMatrix: [], shadowBias: []  };
             lights.directional.forEach(function (light, index) {

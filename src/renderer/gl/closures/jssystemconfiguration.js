@@ -30,6 +30,18 @@
                 "type": "array", "elements": { "type": "object", "kind": "float3" }, "staticSize": 5,
                 "source": "uniform"
             },
+            "pointLightCastShadow": {
+                "type": "array", "elements": { "type": "boolean" }, "staticSize": 5,
+                "source": "uniform"
+            },
+            "pointLightShadowBias": {
+                "type": "array", "elements": { "type": "number" }, "staticSize": 5,
+                "source": "uniform"
+            },
+            "pointLightShadowMap": {
+                "type": "array", "elements": { "type": "object", "kind": "texture" }, "staticSize": 5, "source": "uniform"
+            },
+            "pointLightMatrix": { "type": "array", "elements": { "type": "object", "kind": "matrix4" },  "staticSize": 5, "source": "uniform" },
 
             "MAX_DIRECTIONALLIGHTS": { "type": "int", "source": "constant", "staticValue": 5 },
             "directionalLightOn": { "type": "array", "elements": { "type": "boolean" }, "staticSize": 5, "source": "uniform"},

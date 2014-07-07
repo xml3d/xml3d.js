@@ -33,7 +33,7 @@
                 if(light.light.type == "directional")
                     light.userData = this.createLightPass(light);
                 if(light.light.type == "point") {
-                    light.userData = this.createLightPass(light);
+                    light.userData = this.createPointLightPass(light);
                 }
             }
             this.reassignLightPasses(evt.target);
@@ -69,16 +69,32 @@
 
         createLightPass: function(light){
             var context = this.renderInterface.context
-			var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
-			var lightFramebuffer  = new webgl.GLRenderTarget(context, {
-				width: dimension,
-				height: dimension,
-				colorFormat: context.gl.RGBA,
-				depthFormat: context.gl.DEPTH_COMPONENT16,
-				stencilFormat: null,
-				depthAsRenderbuffer: true
-			});
+            var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
+            var lightFramebuffer  = new webgl.GLRenderTarget(context, {
+                width: dimension,
+                height: dimension,
+                colorFormat: context.gl.RGBA,
+                depthFormat: context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
             var lightPass = new webgl.LightPass(this.renderInterface, lightFramebuffer, light);
+            lightPass.init(context);
+            return lightPass;
+        },
+
+        createPointLightPass: function(light){
+            var context = this.renderInterface.context
+            var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
+            var lightFramebuffer  = new webgl.GLCubeMapRenderTarget(context, {
+                    width: dimension,
+                    height: dimension,
+                    colorFormat: context.gl.RGBA,
+                    depthFormat: context.gl.DEPTH_COMPONENT16,
+                    stencilFormat: null,
+                    depthAsRenderbuffer: true
+                });
+            var lightPass = new webgl.PointLightPass(this.renderInterface, lightFramebuffer, light);
             lightPass.init(context);
             return lightPass;
         },

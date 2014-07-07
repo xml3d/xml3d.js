@@ -16,10 +16,9 @@
 
     XML3D.createClass(LightPass, webgl.SceneRenderPass, {
 
-        init: function (context, pointDir) {
+        init: function (context) {
             this.sorter = new webgl.ObjectSorter();
             this.program = context.programFactory.getProgramByName("light-depth");
-            this.pointDir = pointDir;
         },
 
         render:  (function () {
@@ -33,7 +32,7 @@
                     width = target.getWidth(),
                     height = target.getHeight(),
                     aspect = width / height,
-                    frustum = this.light.getFrustum(aspect, this.pointDir),
+                    frustum = this.light.getFrustum(aspect),
                     program = this.program;
 
                 target.bind();

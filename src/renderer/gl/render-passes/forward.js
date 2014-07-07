@@ -44,8 +44,17 @@
                     scene.systemUniforms[name] = [];
                     for(var i = 0; i < lightPasses.length; ++i){
                         var output = lightPasses[i].output;
-                        var handle = output && output.colorTarget && output.colorTarget.handle;
-                        scene.systemUniforms[name].push(handle);
+                        //add depthtexture and colortexture for pointlights
+                        /*if(name == "")
+                        {
+                                var handle = obj && obj.colorTarget && obj.colorTarget.handle;
+                                scene.systemUniforms[name].push(handle);
+
+                        } else {*/
+                            var handle = output && output.colorTarget && output.colorTarget.handle;
+                            scene.systemUniforms[name].push(handle);
+
+                        //}
                     }
                 }
             }

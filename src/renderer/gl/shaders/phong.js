@@ -101,7 +101,7 @@ XML3D.shaders.register("phong", {
         "uniform bool pointLightOn[MAX_POINTLIGHTS];",
         "uniform bool pointLightCastShadow[MAX_POINTLIGHTS];",
             "#if HAS_POINTLIGHT_SHADOWMAPS",
-            "uniform sampler2D pointLightShadowMap[MAX_POINTLIGHTS];",
+            "uniform samplerCube pointLightShadowMap[MAX_POINTLIGHTS];",
             "uniform float pointLightShadowBias[MAX_POINTLIGHTS];",
             "varying vec4 pointLightShadowMapCoord[MAX_POINTLIGHTS];",
             "#endif",
@@ -167,14 +167,13 @@ XML3D.shaders.register("phong", {
         "    bool lightIsVisible = true;",
         "    if(pointLightCastShadow[i]){",
         "       lightIsVisible = false;",
-        "       for(int j = 0; j < 6; j++){",
-        "               vec4 lspos = pointLightShadowMapCoord[i*j+j];",
-        "			    vec3 perspectiveDivPos = lspos.xyz / lspos.w * 0.5 + 0.5;",
+        "               vec3 shadowMapDir =  normalize(fragVertexPosition - pointLightPosition[i]);",
+        "               vec4 lspos = pointLightShadowMapCoord[i];",
+        "			    vec3 perspectiveDivPos = lspos.xyz / lspos.w;",
         "			    float lsDepth = perspectiveDivPos.z;",
-        "			    vec2 lightuv = perspectiveDivPos.xy;",
-        "			    float depth = unpackDepth(texture2D(pointLightShadowMap[i*j+j], lightuv)) + pointLightShadowBias[i];",
-        "               lightIsVisible = lightIsVisible || (lsDepth < depth);",
-        "       }",
+        "			    vec3 lightuv = perspectiveDivPos.xyz;",
+        "			    float depth = unpackDepth( textureCube(pointLightShadowMap[i], lightuv)) + pointLightShadowBias[i];",
+        "               lightIsVisible = lsDepth < depth;",
         "    }",
         "    if(!lightIsVisible)",
         "    continue;",
@@ -266,7 +265,9 @@ XML3D.shaders.register("phong", {
         "    } ", // spotlight on
         "  }", // light loop
         "#endif",
-		"  gl_FragColor = vec4(color, alpha);",
+        "  gl_FragColor = vec4(color, alpha);",
+        " //gl_FragColor =  textureCube(pointLightShadowMap[0], fragNormal);",
+
         "}"
     ].join("\n"),
 
@@ -302,7 +303,9 @@ XML3D.shaders.register("phong", {
         diffuseTexture : null,
         emissiveTexture : null,
         specularTexture : null,
+        directionalLightShadowMap : null,
         spotLightShadowMap : null,
+        pointLightShadowMap : null,
 		ssaoMap: null
     },
 

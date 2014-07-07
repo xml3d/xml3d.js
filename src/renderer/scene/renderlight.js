@@ -247,8 +247,13 @@
                          this.fallOffAngle = 1.568;
 
                     } else if (this.light.type == "spot") {
-
+                        //nothing to do
                     } else if (this.light.type == "point"){
+                        /*XML3D.math.mat4.identity(tmp_mat);
+                        XML3D.math.mat4.translate(tmp_mat, tmp_mat, this.position);
+                        this.setWorldMatrix(tmp_mat);
+                        console.log(XML3D.math.mat4.str(tmp_mat)+ " pos:" +this.position);
+                        return;*/
                     } else {
                         XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type); // TODO
                     }
@@ -267,6 +272,7 @@
                     XML3D.math.mat4.translate(tmp_mat, tmp_mat, this.position);
                     XML3D.math.mat4.multiply(tmp_mat, tmp_mat, lookat_mat);
                     this.setWorldMatrix(tmp_mat);
+                    console.log(XML3D.math.mat4.str(tmp_mat)+ " pos:" +this.position);
 
                 }
             }
@@ -291,6 +297,9 @@
                     break;
                 case "point":
                     XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
+                    //console.log("direction: "+ XML3D.math.vec3.str(this.direction));
+                    //XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
+                    //console.log("direction: "+ XML3D.math.vec3.str(this.direction));
             }
             this.lightValueChanged();
         },

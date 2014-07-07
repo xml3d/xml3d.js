@@ -107,7 +107,7 @@
         updateLightParameters: function(){
             var parameters = this.systemUniforms, lights = this.lights;
 
-            var pointLightData = { position: [], attenuation: [], intensity: [], on: [] };
+            var pointLightData = { position: [], attenuation: [], intensity: [], on: [], castShadow: [], lightMatrix: [], shadowBias: [] };
             lights.point.forEach(function (light, index) {
                 light.getLightData(pointLightData, index);
             });

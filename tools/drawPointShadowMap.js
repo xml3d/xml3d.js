@@ -37,7 +37,7 @@ if(XML3D && !XML3D._native)
             "    vec3 norm = normal;",
 
             "    fragNormal = normalize(modelViewMatrixN * norm);",
-
+            "    fragVertexPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;",
             "    gl_Position = vec4(position,1.0);",
             "    fragTexCoord = texcoord;",
             "    fragVertexColor = color;",
@@ -136,7 +136,10 @@ if(XML3D && !XML3D._native)
             "#endif",
             "uniform sampler2D ssaoMap;",
             "void main(void) {",
-            "  float depth = unpackDepth(textureCube(pointLightShadowMap[0], fragNormal));",
+            "  float depth = unpackDepth(textureCube(pointLightShadowMap[0], fragNormal));", //works fine
+            "  //vec3 fPos = fragVertexPosition;",
+            "  //fPos.z = -0.4;",
+            "  //float depth = unpackDepth(textureCube(pointLightShadowMap[0], normalize(fPos)));", //works fine
             "  //vec3 shadowMapDir =  normalize(pointLightShadowMapCoord[0].xyz);",
             "  //float depth = unpackDepth(textureCube(pointLightShadowMap[0], -shadowMapDir));",
             "  gl_FragColor = vec4((depth-0.95)*20.0, (depth-0.8)*5.0, (depth-0.7)*2.5, 1.0);",

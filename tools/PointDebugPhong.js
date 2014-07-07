@@ -1,4 +1,5 @@
-XML3D.shaders.register("phong", {
+/*Draws the Depth from PointLight[0] instead of the color */
+XML3D.shaders.register("pointDebugPhong", {
 
     vertex : [
         "attribute vec3 position;",
@@ -268,7 +269,14 @@ XML3D.shaders.register("phong", {
         "    } ", // spotlight on
         "  }", // light loop
         "#endif",
-        "  gl_FragColor = vec4(color, alpha);",
+        "               vec3 shadowMapDir =  fragVertexPosition - pointLightPosition[0];",
+        "               vec4 lspos = pointLightShadowMapCoord[0];",
+        "			    vec4 abspos = abs(lspos);",
+        "               float fs_z = -max(abspos.x, max(abspos.y, abspos.z));",
+        "               vec4 clip = pointLightPerspective[0]*vec4(0.0, 0.0, fs_z, 1.0);",
+        "               float lsDepth = (clip.z / clip.w) * 0.5 + 0.5;",
+        "			    float depth = lsDepth;// pointLightShadowMapCoord[0].z/pointLightShadowMapCoord[0].w;",
+        "               gl_FragColor =  vec4((depth-0.95)*20.0, (depth-0.8)*5.0, (depth-0.7)*2.5, 1.0);",
         "}"
     ].join("\n"),
 

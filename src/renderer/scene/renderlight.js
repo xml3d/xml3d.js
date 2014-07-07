@@ -198,6 +198,14 @@
                             target["lightMatrix"][off16+i] = tmp[i];
                         }
                     }
+                    if(target["lightPerspective"]) {
+                        var tmp = XML3D.math.mat4.create();
+                        this.getShadowMapLightPerspective(tmp);
+                        var off16 = offset*16;
+                        for(var i = 0; i < 16; i++) {
+                            target["lightPerspective"][off16+i] = tmp[i];
+                        }
+                    }
                 }
                 else{
                     target["shadowBias"][offset] = 0;
@@ -219,6 +227,10 @@
             var lightProjectionMatrix = XML3D.math.mat4.create();
             this.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
             XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
+        },
+
+        getShadowMapLightPerspective: function(target) {
+            this.getFrustum(1).getProjectionMatrix(target);
         },
 
         updateWorldMatrix: (function() {
@@ -249,6 +261,7 @@
                     } else if (this.light.type == "spot") {
                         //nothing to do
                     } else if (this.light.type == "point"){
+                        this.fallOffAngle = Math.PI/4.0;
                         /*XML3D.math.mat4.identity(tmp_mat);
                         XML3D.math.mat4.translate(tmp_mat, tmp_mat, this.position);
                         this.setWorldMatrix(tmp_mat);
@@ -272,7 +285,7 @@
                     XML3D.math.mat4.translate(tmp_mat, tmp_mat, this.position);
                     XML3D.math.mat4.multiply(tmp_mat, tmp_mat, lookat_mat);
                     this.setWorldMatrix(tmp_mat);
-                    console.log(XML3D.math.mat4.str(tmp_mat)+ " pos:" +this.position);
+                    //console.log(XML3D.math.mat4.str(tmp_mat)+ " pos:" +this.position);
 
                 }
             }

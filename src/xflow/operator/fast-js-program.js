@@ -6,19 +6,22 @@
 
     Xflow.FastJsProgram = function(operatorList){
         this.func = createFastJsProgram(operatorList);
+        this.list = operatorList;
     }
 
     Xflow.FastJsProgram.prototype.run = function(programData){
-        /*
-        var operatorData = prepareOperatorData(this.list, 0, programData);
-
-        if(this.operator.evaluate_core){
-            applyCoreOperation(this, programData, operatorData);
+        var args = [];
+        for(var i = 0; i < programData.outputs.length; ++i){
+            var dataEntry = programData.outputs[i].dataEntry;
+            args.push(dataEntry ? dataEntry.getValue() : null);
         }
-        else{
-            applyDefaultOperation(this.entry, programData, operatorData);
+        for(var i = 0; i < programData.inputs.length; ++i){
+            var dataEntry = programData.getDataEntry(i);
+            args.push(dataEntry ? dataEntry.getValue() : null);
         }
-        */
+        var iterateCount = this.list.getIterateCount(programData);
+        args.push(iterateCount);
+        this.func.apply(null, args);
     }
 
     function createFastJsProgram(operatorList){

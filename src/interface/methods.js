@@ -186,6 +186,16 @@ new (function() {
     };
     methods.xml3dGetBoundingBox = methods.groupGetBoundingBox;
 
+    methods.meshSetWorldSpaceBoundingBox = function(bboxNew) {
+        var adapters = this._configured.adapters || {};
+        for (var adapter in adapters) {
+            if (adapters[adapter].setWorldSpaceBoundingBox) {
+                adapters[adapter].setWorldSpaceBoundingBox(bboxNew);
+            }
+        }
+    }
+    methods.groupSetWorldSpaceBoundingBox = methods.meshSetWorldSpaceBoundingBox;
+
     /**
      * returns the bounding box of this mesh in world space.
      */

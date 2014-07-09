@@ -23,7 +23,7 @@ Xflow.registerOperator = function(name, data){
         operators[name] = {};
     }
 
-    platform = data['platform'];
+    platform = data['platform'] || Xflow.PLATFORM.JAVASCRIPT;
 
     opCollection = operators[name];
 
@@ -38,13 +38,10 @@ Xflow.registerOperator = function(name, data){
     }
 
     data.name = name;
+    if(!opCollection[platform])
+        opCollection[platform] = [];
 
-    if (platform && !opCollection.hasOwnProperty(platform)) {
-        opCollection[platform] = data;
-    } else if (!platform) {
-        opCollection[Xflow.PLATFORM.JAVASCRIPT] = data;
-    }
-
+    opCollection[platform].push(data);
 };
 
 Xflow.initAnonymousOperator = function(name, data){
@@ -53,14 +50,14 @@ Xflow.initAnonymousOperator = function(name, data){
     return data;
 }
 
-Xflow.getOperator = function(name, platform){
+Xflow.getOperators = function(name, platform){
     platform = platform || Xflow.PLATFORM.JAVASCRIPT;
 
     if (name && !operators[name]) {
         return null;
     }
 
-    if(!operators[name][platform]) {
+    if(!operators[name][platform] || operators[name][platform].length == 0) {
         return null;
     }
 

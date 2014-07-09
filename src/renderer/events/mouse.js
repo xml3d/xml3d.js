@@ -3,11 +3,14 @@
     var module = XML3D.webgl;
 
     var OPTION_MOUSEMOVE_PICKING = "renderer-mousemove-picking";
+    var OPTION_MOVEMENT_AWARE_CLICK_HANDLER = "renderer-movement-aware-click-handler";
     XML3D.options.register(OPTION_MOUSEMOVE_PICKING, true);
+    XML3D.options.register(OPTION_MOVEMENT_AWARE_CLICK_HANDLER, false);
 
     module.events.available.push("click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "mousewheel");
 
     XML3D.extend(module.CanvasHandler.prototype, {
+        lastMousePosition: {x:0, y:0},
         /**
          * @param {MouseEvent} event  The original event
          * @param {Element} target  target to dispatch on
@@ -147,6 +150,7 @@
          * @param {MouseEvent} evt
          */
         mousedown:function (evt) {
+            this.lastMousePosition = this.getMousePosition(evt);
             this.dispatchMouseEventOnPickedObject(evt, {omitUpdate : !this.renderOptions.pickingEnabled});
         },
 
@@ -155,6 +159,11 @@
          * @param {MouseEvent} evt
          */
         click:function (evt) {
+           if (XML3D.options.getValue("renderer-movement-aware-click-handler") === true) {
+                var pos = this.getMousePosition(evt);
+                if (Math.abs(pos.x - this.lastMousePosition.x) > 4 || Math.abs(pos.y - this.lastMousePosition.y) > 4)
+                    return;
+            }
             // Click follows always 'mouseup' => no update of pick object needed
             // Felix: Removed optimization, as this resulted in passing 'null' as event target.
             this.dispatchMouseEventOnPickedObject(evt /*, { omitUpdate:true } */);

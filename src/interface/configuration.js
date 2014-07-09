@@ -197,6 +197,7 @@ XML3D.classInfo['group'] = {
     getWorldMatrix: {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     getLocalMatrix: {m: XML3D.methods.groupGetLocalMatrix},
     getBoundingBox: {m: XML3D.methods.groupGetBoundingBox},
+    setWorldSpaceBoundingBox: {m: XML3D.methods.groupSetWorldSpaceBoundingBox},
     transform: {a: XML3D.ReferenceHandler},
     shader: {a: XML3D.ReferenceHandler},
     _term: undefined
@@ -225,6 +226,7 @@ XML3D.classInfo['mesh'] = {
     shader: {a: XML3D.ReferenceHandler},
     getWorldMatrix: {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     getBoundingBox: {m: XML3D.methods.meshGetBoundingBox},
+    setWorldSpaceBoundingBox: {m: XML3D.methods.meshSetWorldSpaceBoundingBox},
     getOutputNames: {m: XML3D.methods.meshGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.meshGetOutputChannelInfo},
     getComputeInfo: {m: XML3D.methods.meshGetComputeInfo},
@@ -254,6 +256,7 @@ XML3D.classInfo['model'] = {
     visible: {a: XML3D.BoolAttributeHandler, params: true},
     getWorldMatrix: {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     getBoundingBox: {m: XML3D.methods.meshGetBoundingBox},
+    setWorldSpaceBoundingBox: {m: XML3D.methods.meshSetWorldSpaceBoundingBox},
     src: {a: XML3D.ReferenceHandler},
     pick: {a: XML3D.StringAttributeHandler},
     _term: undefined

@@ -241,6 +241,10 @@
         var operatorName, operator;
         var owner = channelNode.owner;
 
+        if(channelNode.loading){
+            channelNode.operator = null;
+            return;
+        }
         if(typeof owner._computeOperator == "string"){
             operatorName = owner._computeOperator;
             operator = null;
@@ -248,21 +252,83 @@
             // Getting a correct operator for the selected platform. If operator is not available, we'll try to get
             // the default JavaScript platform operator
             if(operatorName){
-                operator = Xflow.getOperator(operatorName, channelNode.platform) ||
-                    Xflow.getOperator(operatorName, Xflow.PLATFORM.JAVASCRIPT);
-
-                if(!operator){
-                    Xflow.notifyError("Unknown operator: '" + operatorName+"'", channelNode.owner);
+                operator = findOperatorByName(channelNode, owner);
+                if(operator){
+                    channelNode.platform = operator.platform;
                 }
-
-                channelNode.platform = operator.platform;
             }
-
             channelNode.operator = operator;
         }else{
             channelNode.operator = owner._computeOperator;
         }
     }
+
+    var c_typeComparisons = [];
+
+    function findOperatorByName(channelNode, dataNode){
+        var operatorName = dataNode._computeOperator,
+            inputMapping = dataNode._computeInputMapping,
+            inputChannels = channelNode.inputChannels;
+
+        var operators = Xflow.getOperators(operatorName, channelNode.platform) ||
+                    Xflow.getOperators(operatorName, Xflow.PLATFORM.JAVASCRIPT);
+        if(!operators){
+            Xflow.notifyError("No operator with name '" + operatorName+"' found", channelNode.owner);
+        }
+
+        var i = operators.length;
+        while(i--){
+            if(checkOperator(operators[i], inputMapping, inputChannels)){
+                return operators[i];
+            }
+        }
+        c_typeComparisons.length = 0;
+        var i = operators.length;
+        while(i--){
+            checkOperator(operators[i], inputMapping, inputChannels, c_typeComparisons);
+        }
+        var errorMessage = "No operator '" + operatorName+"' with matching type signature found:\n\n"
+                            + c_typeComparisons.join("\n");
+        Xflow.notifyError(errorMessage, channelNode.owner);
+        return null;
+    }
+    function checkOperator(operator, inputMapping, inputChannels, typeComparisons){
+        var inputs, errors;
+        if(typeComparisons){
+            inputs = [], errors = [];
+        }
+        for(var i = 0; i < operator.params.length; ++i){
+            var inputEntry = operator.params[i], sourceName = inputEntry.source;
+            var dataName = inputMapping ? inputMapping.getScriptInputName(i, sourceName) : sourceName;
+            var errorHeader;
+            if(typeComparisons){
+                errorHeader = "For " + (i+1) + ". argument '" + sourceName + "': ";
+                inputs.push( Xflow.getTypeName(inputEntry.type) + " " + sourceName + (inputEntry.optional ? " [optional]" : ""));
+            }
+            if(dataName){
+                var channel = inputChannels.getChannel(dataName);
+                if(!channel && !inputEntry.optional){
+                    if(!typeComparisons)
+                        return false;
+                    else{
+                        errors.push(errorHeader + "DataEntry '" + dataName + "' does not exist");
+                    }
+                }
+                if(channel && channel.getType() != inputEntry.type){
+                    if(!typeComparisons)
+                        return false;
+                    else{
+                        errors.push(errorHeader + "DataEntry '" + dataName + "' has wrong type '" + Xflow.getTypeName(channel.getType()) + "'");
+                    }
+                }
+            }
+        }
+        if(typeComparisons){
+            typeComparisons.push(operator.name + "(" + inputs.join(", ") + ")\n\t * " + errors.join("\n\t * "));
+        }
+        return true;
+    }
+
 
     function updateComputedChannelsFromOperator(channelNode){
         var owner = channelNode.owner;

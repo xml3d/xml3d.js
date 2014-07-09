@@ -139,6 +139,18 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 obj.getWorldMatrix(m._data);
             }
             return m;
+        },
+
+        setWorldSpaceBoundingBox: function(bboxNew) {
+            if (bboxNew instanceof XML3DBox) {
+                var bb = XML3D.math.bbox.fromXML3DBox(bboxNew);
+                this.renderNode.setBoundingBoxDirty();
+                this.renderNode.setWorldSpaceBoundingBox(bb);
+                this.renderNode.boundingBoxDirty = false;
+                this.getScene().requestRedraw("A world space bounding box was changed");
+            } else {
+                console.error("Input to setWorldSpaceBoundingBox must be an XML3DBox object!");
+            }
         }
     });
 

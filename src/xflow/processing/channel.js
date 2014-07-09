@@ -232,6 +232,8 @@
             var slot = otherChannel.entries[i];
             this.addDataSlot(slot);
         }
+        if(otherChannel.creatorProcessNode)
+            this.creatorProcessNode = otherChannel.creatorProcessNode;
     }
 
     Channel.prototype.getDataEntry = function(sequenceAccessType, sequenceKey){

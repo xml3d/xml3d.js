@@ -78,7 +78,10 @@
         getFrustum: function(aspect) {
             var orthogonal = this.light.type == "directional";
             //TODO why is farplane 200? maybe this line doesnt belong there...
-            //return new XML3D.webgl.Frustum(1.0, 200.0, 0, this.fallOffAngle*2, aspect, orthogonal)
+            if(this.light.type == "point") {
+                console.log("TODO: set Frustum accordingly");
+                return new XML3D.webgl.Frustum(1.0, 2000.0, 0, this.fallOffAngle * 2, aspect, orthogonal);
+            }
             var t_mat = XML3D.math.mat4.create();
             var bb = new XML3D.math.bbox.create();
             this.scene.getBoundingBox(bb);
@@ -97,6 +100,7 @@
             // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
             far += expand;
             near -= expand;
+            console.log("Near: 1 - Far: "+ far);
             return new XML3D.webgl.Frustum(1.0, far, 0, this.fallOffAngle*2, aspect, orthogonal);
         },
 
@@ -198,12 +202,12 @@
                             target["lightMatrix"][off16+i] = tmp[i];
                         }
                     }
-                    if(target["lightPerspective"]) {
+                    if(target["lightProjection"]) {
                         var tmp = XML3D.math.mat4.create();
-                        this.getShadowMapLightPerspective(tmp);
+                        this.getShadowMapLightProjection(tmp);
                         var off16 = offset*16;
                         for(var i = 0; i < 16; i++) {
-                            target["lightPerspective"][off16+i] = tmp[i];
+                            target["lightProjection"][off16+i] = tmp[i];
                         }
                     }
                 }
@@ -229,7 +233,7 @@
             XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
         },
 
-        getShadowMapLightPerspective: function(target) {
+        getShadowMapLightProjection: function(target) {
             this.getFrustum(1).getProjectionMatrix(target);
         },
 
@@ -310,7 +314,7 @@
                     break;
                 case "point":
                     XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
-                    //console.log("direction: "+ XML3D.math.vec3.str(this.direction));
+                    //console.log("PointLightPosition: "+ XML3D.math.vec3.str(this.position));
                     //XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
                     //console.log("direction: "+ XML3D.math.vec3.str(this.direction));
             }

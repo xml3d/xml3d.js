@@ -42,7 +42,7 @@
                 "type": "array", "elements": { "type": "object", "kind": "texture" }, "staticSize": 5, "source": "uniform"
             },
             "pointLightMatrix": { "type": "array", "elements": { "type": "object", "kind": "matrix4" },  "staticSize": 5, "source": "uniform" },
-            "pointLightPerspective": { "type": "array", "elements": { "type": "object", "kind": "matrix4" },  "staticSize": 5, "source": "uniform" },
+            "pointLightProjection": { "type": "array", "elements": { "type": "object", "kind": "matrix4" },  "staticSize": 5, "source": "uniform" },
 
             "MAX_DIRECTIONALLIGHTS": { "type": "int", "source": "constant", "staticValue": 5 },
             "directionalLightOn": { "type": "array", "elements": { "type": "boolean" }, "staticSize": 5, "source": "uniform"},

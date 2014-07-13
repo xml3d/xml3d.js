@@ -41,56 +41,47 @@
                     XML3D.math.mat4.identity(mat_rot);
 
                     if(side == 0) { //works if letting renderlight unmodified for pointlight transform
-                        XML3D.math.mat4.rotateY(mat_rot, mat_rot, Math.PI / 2);      //look into +x o
-                        XML3D.math.mat4.rotateX(mat_rot, mat_rot, Math.PI);
+                        //XML3D.math.mat4.rotateY(mat_rot, mat_rot, Math.PI / 2);      //look into +x o
+                        //XML3D.math.mat4.rotateX(mat_rot, mat_rot, Math.PI);
+                        mat_rot[0] = 0;   mat_rot[1] = 0;   mat_rot[2] = -1;
+                        mat_rot[4] = 0;   mat_rot[5] = -1;   mat_rot[6] = 0;
+                        mat_rot[8] = -1;   mat_rot[9] = 0;   mat_rot[10] = 0;
 
                     }else if(side == 1) {
-                        XML3D.math.mat4.rotateY(mat_rot, mat_rot, -Math.PI/2);      //look into -x o
-                        XML3D.math.mat4.rotateX(mat_rot, mat_rot, Math.PI);
+                        //XML3D.math.mat4.rotateY(mat_rot, mat_rot, -Math.PI/2);      //look into -x o
+                        //XML3D.math.mat4.rotateX(mat_rot, mat_rot, Math.PI);
+                        mat_rot[0] = 0;   mat_rot[1] = 0;   mat_rot[2] = 1;
+                        mat_rot[4] = 0;   mat_rot[5] = -1;   mat_rot[6] = 0;
+                        mat_rot[8] = 1;   mat_rot[9] = 0;   mat_rot[10] = 0;
 
                     }else if(side == 2){
-                        XML3D.math.mat4.rotateX(mat_rot, mat_rot, -Math.PI/2.0); //look into +y
-                        XML3D.math.mat4.rotateY(mat_rot, mat_rot, Math.PI);
+                        //XML3D.math.mat4.rotateX(mat_rot, mat_rot, -Math.PI/2.0); //look into +y
+                        //XML3D.math.mat4.rotateY(mat_rot, mat_rot, Math.PI);
+                        mat_rot[0] = 1;   mat_rot[1] = 0;   mat_rot[2] = 0;
+                        mat_rot[4] = 0;   mat_rot[5] = 0;   mat_rot[6] = -1;
+                        mat_rot[8] = 0;   mat_rot[9] = 1;   mat_rot[10] = 0;
 
                     }else if(side == 3){
-                        XML3D.math.mat4.rotateX(mat_rot, mat_rot, Math.PI/2.0);  //look into -y
-                        XML3D.math.mat4.rotateY(mat_rot, mat_rot, Math.PI);
+                        //XML3D.math.mat4.rotateX(mat_rot, mat_rot, Math.PI/2.0);  //look into -y
+                        //XML3D.math.mat4.rotateY(mat_rot, mat_rot, Math.PI);
+                        mat_rot[0] = 1;   mat_rot[1] = 0;   mat_rot[2] = 0;
+                        mat_rot[4] = 0;   mat_rot[5] = 0;   mat_rot[6] = 1;
+                        mat_rot[8] = 0;   mat_rot[9] = -1;   mat_rot[10] = 0;
 
                     }else if(side == 4){
-                        XML3D.math.mat4.rotateZ(mat_rot, mat_rot, Math.PI);  //look into -z
+                        //XML3D.math.mat4.rotateZ(mat_rot, mat_rot, Math.PI);  //look into +z
+                        mat_rot[0] = 1;   mat_rot[1] = 0;   mat_rot[2] = 0;
+                        mat_rot[4] = 0;   mat_rot[5] = -1;   mat_rot[6] = 0;
+                        mat_rot[8] = 0;   mat_rot[9] = 0;   mat_rot[10] = -1;
 
                     }else if(side == 5) {
-                        XML3D.math.mat4.rotateX(mat_rot, mat_rot, Math.PI);  //look into +z
+                        //XML3D.math.mat4.rotateX(mat_rot, mat_rot, Math.PI);  //look into -z
                         //XML3D.math.mat4.rotateZ(mat_rot, mat_rot, Math.PI);
                         //console.log("ith pointshadow rendering: "+ side +" rotationMatrix "+ XML3D.math.mat4.str(mat_rot));
+                        mat_rot[0] = -1;   mat_rot[1] = 0;   mat_rot[2] = 0;
+                        mat_rot[4] = 0;   mat_rot[5] = -1;   mat_rot[6] = 0;
+                        mat_rot[8] = 0;   mat_rot[9] = 0;   mat_rot[10] = 1;
                     }
-
-                    /*if(side == 0) {
-                     mat_rot[0] = 0; mat_rot[5] = 0; mat_rot[10] = 0;     //0 1 2 3
-                     mat_rot[8] = -1; mat_rot[5] = -1; mat_rot[3] = -1;   //4 5 6 7
-                     //8 9 10 11
-                     }else if(side == 1) {
-                     mat_rot[0] = 0; mat_rot[5] = 0; mat_rot[10] = 0;     //0 1 2 3
-                     mat_rot[8] = +1; mat_rot[5] = -1; mat_rot[3] = +1;   //4 5 6 7
-
-                     }else if(side == 2){
-                     mat_rot[0] = 0; mat_rot[5] = 0; mat_rot[10] = 0;     //0 1 2 3
-                     mat_rot[0] = +1; mat_rot[9] = -1; mat_rot[6] = +1;   //4 5 6 7
-
-                     }else if(side == 3){
-                     mat_rot[0] = 0; mat_rot[5] = 0; mat_rot[10] = 0;     //0 1 2 3
-                     mat_rot[0] = +1; mat_rot[9] = +1; mat_rot[6] = -1;   //4 5 6 7
-
-                     }else if(side == 4){
-                     mat_rot[0] = 0; mat_rot[5] = 0; mat_rot[10] = 0;     //0 1 2 3
-                     mat_rot[0] = +1; mat_rot[5] = -1; mat_rot[10] = -1;   //4 5 6 7
-
-                     }else if(side == 5) {
-                     mat_rot[0] = 0; mat_rot[5] = 0; mat_rot[10] = 0;     //0 1 2 3
-                     mat_rot[0] = -1; mat_rot[5] = -1; mat_rot[10] = +1;   //4 5 6 7
-                     //XML3D.math.mat4.rotateZ(mat_rot, mat_rot, Math.PI);
-                     //console.log("ith pointshadow rendering: "+ side +" rotationMatrix "+ XML3D.math.mat4.str(mat_rot));
-                     }*/
 
                     target.bind(side);
 
@@ -106,7 +97,7 @@
 
                     var mat_flip = XML3D.math.mat4.create();
                     XML3D.math.mat4.identity(mat_flip);
-                    mat_flip[0] = -1;
+                    //mat_flip[5] = -1;
                     XML3D.math.mat4.mul(c_viewMat_tmp, mat_flip, c_viewMat_tmp);
 
                     frustum.getProjectionMatrix(c_projMat_tmp, aspect);

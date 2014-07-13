@@ -47,7 +47,7 @@
 
     XML3D.createClass(GLScene, webgl.Scene);
 
-    GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn", "pointLightCastShadow", "pointLightMatrix", "pointLightPerspective", "pointLightShadowBias",
+    GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn", "pointLightCastShadow", "pointLightMatrix", "pointLightProjection", "pointLightShadowBias",
          "directionalLightDirection", "directionalLightIntensity", "directionalLightOn", "directionalLightCastShadow", "directionalLightMatrix", "directionalLightShadowBias",
          "spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection",
          "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias"];
@@ -107,7 +107,7 @@
         updateLightParameters: function(){
             var parameters = this.systemUniforms, lights = this.lights;
 
-            var pointLightData = { position: [], attenuation: [], intensity: [], on: [], castShadow: [], lightMatrix: [],lightPerspective: [], shadowBias: [] };
+            var pointLightData = { position: [], attenuation: [], intensity: [], on: [], castShadow: [], lightMatrix: [],lightProjection: [], shadowBias: [] };
             lights.point.forEach(function (light, index) {
                 light.getLightData(pointLightData, index);
             });
@@ -117,7 +117,7 @@
             parameters["pointLightOn"] = pointLightData.on;
             parameters["pointLightCastShadow"] = pointLightData.castShadow;
             parameters["pointLightMatrix"] = pointLightData.lightMatrix;
-            parameters["pointLightPerspective"] = pointLightData.lightPerspective;
+            parameters["pointLightProjection"] = pointLightData.lightProjection;
             parameters["pointLightShadowBias"] = pointLightData.shadowBias;
 
             var directionalLightData = { direction: [], intensity: [], on: [], castShadow: [], lightMatrix: [], shadowBias: []  };

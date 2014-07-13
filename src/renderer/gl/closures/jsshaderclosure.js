@@ -4,8 +4,8 @@
 
     var c_SystemUpdate = {
         "pointLightOn": {
-            staticValue : ["MAX_POINTLIGHTS", "MAX_POINTLIGHTS_T6"],
-            staticSize: ["pointLightOn", "pointLightAttenuation", "pointLightIntensity", "pointLightPosition", "pointLightCastShadow", "pointLightShadowBias", "pointLightShadowMap", "pointLightMatrix", "pointLightPerspective"]
+            staticValue : "MAX_POINTLIGHTS",
+            staticSize: ["pointLightOn", "pointLightAttenuation", "pointLightIntensity", "pointLightPosition", "pointLightCastShadow", "pointLightShadowBias", "pointLightShadowMap", "pointLightMatrix", "pointLightProjection"]
         },
         "directionalLightOn" : {
             staticValue: "MAX_DIRECTIONALLIGHTS",

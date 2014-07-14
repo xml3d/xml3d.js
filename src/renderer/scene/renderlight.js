@@ -10,7 +10,9 @@
     /** @const */
     var LIGHT_DEFAULT_ATTENUATION = XML3D.math.vec3.fromValues(0,0,1);
     /** @const */
-    var LIGHT_DEFAULT_SHADOW_BIAS = 0.001;
+    var POINT_LIGHT_DEFAULT_SHADOW_BIAS = 0.0001;
+    var SPOT_LIGHT_DEFAULT_SHADOW_BIAS = 0.001;
+    var DIRECTIONAL_LIGHT_DEFAULT_SHADOW_BIAS = 0.0045;
     /** @const */
     var SPOTLIGHT_DEFAULT_FALLOFFANGLE = Math.PI / 4.0;
     /** @const */
@@ -78,10 +80,6 @@
         getFrustum: function(aspect) {
             var orthogonal = this.light.type == "directional";
             //TODO why is farplane 200? maybe this line doesnt belong there...
-            if(this.light.type == "point") {
-                console.log("TODO: set Frustum accordingly");
-                return new XML3D.webgl.Frustum(1.0, 2000.0, 0, this.fallOffAngle * 2, aspect, orthogonal);
-            }
             var t_mat = XML3D.math.mat4.create();
             var bb = new XML3D.math.bbox.create();
             this.scene.getBoundingBox(bb);
@@ -93,14 +91,21 @@
 
             XML3D.math.bbox.transform(bb, t_mat, bb);
 
-            var near = -bb[5],
-                far = -bb[2],
-                expand = Math.max((far - near) * 0.30, 0.05);
+            var near = 1.0,
+                far  = 2.0;
+            if(this.light.type == "point") {
+                //TODO optimise near
+                near = 1.0;
+                far = Math.max(Math.abs(bb[0]),Math.abs(bb[1]), Math.abs(bb[2]), Math.abs(bb[3]), Math.abs(bb[4]), Math.abs(bb[5]));
+            }else {
+                near = -bb[5];
+                far = -bb[2];
+            }
+            var expand = Math.max((far - near) * 0.30, 0.05);
 
             // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
             far += expand;
             near -= expand;
-            console.log("Near: 1 - Far: "+ far);
             return new XML3D.webgl.Frustum(1.0, far, 0, this.fallOffAngle*2, aspect, orthogonal);
         },
 
@@ -192,7 +197,12 @@
                     if(target["shadowBias"]) {
                         result = this.lightParameterRequest.getResult();
                         data = result.getOutputData("shadowBias");
-                        target["shadowBias"][offset] = data ? data.getValue()[0] : LIGHT_DEFAULT_SHADOW_BIAS;
+                        if(this.light.type == "point")
+                            target["shadowBias"][offset] = data ? data.getValue()[0] : POINT_LIGHT_DEFAULT_SHADOW_BIAS;
+                        else if(this.light.type == "spot")
+                            target["shadowBias"][offset] = data ? data.getValue()[0] : SPOT_LIGHT_DEFAULT_SHADOW_BIAS;
+                        else if(this.light.type == "directional")
+                            target["shadowBias"][offset] = data ? data.getValue()[0] : DIRECTIONAL_LIGHT_DEFAULT_SHADOW_BIAS;
                     }
                     if(target["lightMatrix"]) {
                         var tmp = XML3D.math.mat4.create();
@@ -244,33 +254,25 @@
                     this.parent.getWorldMatrix(tmp_mat);
                     this.updateLightTransformData(tmp_mat);
 
-                    //TODO translating the light externally causes problems, need to isolate the rotation from the worldmatrix
                     if (this.light.type == "directional")
                      {
                          //TODO enhance code
                          var bb = new XML3D.math.bbox.create();
                          this.scene.getBoundingBox(bb);
-                         // if (XML3D.math.bbox.isEmpty(bb)) {break;}
                          var bbSize = XML3D.math.vec3.create();
                          var bbCenter = XML3D.math.vec3.create();
                          var off = XML3D.math.vec3.create();
                          XML3D.math.bbox.center(bbCenter, bb);
                          XML3D.math.bbox.size(bbSize,bb);
-                         var r = XML3D.math.vec3.len(bbSize); //double brounding sphere radius
+                         var r = XML3D.math.vec3.len(bbSize); //double bounding sphere radius
                          XML3D.math.vec3.scale(off, this.direction, -0.75*r);
                          this.position = XML3D.math.vec3.add(this.position, bbCenter, off);
-                         //TODO calculate boundingbox dependend fOA
                          this.fallOffAngle = 1.568;
 
                     } else if (this.light.type == "spot") {
                         //nothing to do
                     } else if (this.light.type == "point"){
-                        this.fallOffAngle = Math.PI/4.0;
-                        /*XML3D.math.mat4.identity(tmp_mat);
-                        XML3D.math.mat4.translate(tmp_mat, tmp_mat, this.position);
-                        this.setWorldMatrix(tmp_mat);
-                        console.log(XML3D.math.mat4.str(tmp_mat)+ " pos:" +this.position);
-                        return;*/
+                        //this.fallOffAngle = Math.PI/4.0;
                     } else {
                         XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type); // TODO
                     }
@@ -279,6 +281,8 @@
                     XML3D.math.mat4.identity(tmp_mat);
                     var lookat_mat = XML3D.math.mat4.create();
                     var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
+                    if((this.direction[0] == 0.0) && (this.direction[2] == 0.0)) //check if top_vec colinear with direction
+                        top_vec = XML3D.math.vec3.fromValues(0.0, 0.0, 1.0);
                     var up_vec = XML3D.math.vec3.create();
                     var dir_len = XML3D.math.vec3.len(this.direction);
                     XML3D.math.vec3.scale(up_vec, this.direction, -XML3D.math.vec3.dot(top_vec, this.direction) / (dir_len * dir_len));
@@ -289,7 +293,18 @@
                     XML3D.math.mat4.translate(tmp_mat, tmp_mat, this.position);
                     XML3D.math.mat4.multiply(tmp_mat, tmp_mat, lookat_mat);
                     this.setWorldMatrix(tmp_mat);
-                    //console.log(XML3D.math.mat4.str(tmp_mat)+ " pos:" +this.position);
+
+
+                    if (this.light.type == "directional") { //adjust foa for directional light - needs world Matrix
+                        var bb = new XML3D.math.bbox.create();
+                        this.scene.getBoundingBox(bb);
+                        XML3D.math.bbox.transform(bb, tmp_mat, bb);
+                        var bbSize = XML3D.math.vec3.create();
+                        XML3D.math.bbox.size(bbSize,bb);
+                        var max = (bbSize[0]>bbSize[1])?bbSize[0]:bbSize[1];
+                        max = 0.55*(max);//enlarge 10percent to make sure nothing gets cut off
+                        this.fallOffAngle = Math.atan(max);
+                    }
 
                 }
             }
@@ -314,9 +329,6 @@
                     break;
                 case "point":
                     XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
-                    //console.log("PointLightPosition: "+ XML3D.math.vec3.str(this.position));
-                    //XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
-                    //console.log("direction: "+ XML3D.math.vec3.str(this.direction));
             }
             this.lightValueChanged();
         },

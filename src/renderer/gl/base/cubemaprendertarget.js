@@ -80,7 +80,6 @@
                 } else {
 
                     this.dtex = new XML3D.webgl.GLCubeMap(gl);
-                    console.log("Depthformat: " + depthFormat + " <-> " + gl.DEPTH_COMPONENT);
                     this.dtex.createTex2DFromData(depthFormat, this.width, this.height, gl.DEPTH_COMPONENT, gl.FLOAT, this.opt);
                     this.depthTarget = {
                         handle: this.dtex,

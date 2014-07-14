@@ -297,37 +297,6 @@ XML3D.shaders.register("phong", {
         "  }", // light loop
         "#endif",
         "  gl_FragColor = vec4(color, alpha);",
-
-
-        "             /*  vec3 shadowMapDir =  fragWorldPosition - pointLightPosition[0];",
-        "			    vec3 abspos = abs(shadowMapDir);",
-        "               float fs_z = max(abspos.x, max(abspos.y, abspos.z));",
-        "               if(fs_z == shadowMapDir.x) fs_z = pointLightShadowMapCoord[0].x;",
-        "               if(fs_z == shadowMapDir.y) fs_z = pointLightShadowMapCoord[0].y;",
-        "               if(fs_z == shadowMapDir.z) fs_z = pointLightShadowMapCoord[0].z;",
-        "               vec4 clip = pointLightPerspective[0]*vec4(0.0, 0.0, -fs_z, 1.0);",
-        "               float lsDepth = (clip.z / clip.w) * 0.5 + 0.5;",
-        "			    float depth = unpackDepth( textureCube(pointLightShadowMap[0], shadowMapDir)) + pointLightShadowBias[0];",
-        "                ",
-        "               vec3 shadowMapDir =  fragWorldPosition - pointLightPosition[0];",
-
-        "			    float depth = unpackDepth( textureCube(pointLightShadowMap[0], shadowMapDir)); // + pointLightShadowBias[i];",
-        "               vec4 dvec  = pointLightProjection[0] * vec4(0.0, 0.0, depth ,1.0);",
-        "               depth = -dvec.z / dvec.w;",
-        "               depth = length(shadowMapDir);",
-
-        "               depth = depth/200.0;",
-        "            */",
-
-        "               vec3 shadowMapDir =  fragWorldPosition - pointLightPosition[0];",
-        "               float lsDepth = length(shadowMapDir);",
-        "               vec4 dvec  = pointLightProjection[0] * vec4(0.0, 0.0, -lsDepth ,1.0);",
-        "               lsDepth = dvec.z / dvec.w;",
-        "			    float depth = unpackDepth( textureCube(pointLightShadowMap[0], shadowMapDir)) + pointLightShadowBias[0];",
-
-        "  //gl_FragColor = vec4((depth)*1.0, (depth)*0.5, (depth)*0.25, 1.0);",
-        "  //gl_FragColor = vec4((lsDepth-0.95)*20.0, (lsDepth-0.8)*5.0, (lsDepth-0.7)*2.5, 1.0);",
-        "  //gl_FragColor = vec4(color, alpha);",
         "}"
     ].join("\n"),
 

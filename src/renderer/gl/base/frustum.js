@@ -96,7 +96,6 @@
                 matrix[13] = ty;
                 matrix[14] = tz;
                 matrix[15] = 1.0;
-                console.log("rightMinusLeft: "+rightMinusLeft+" topMinusBottom: "+ topMinusBottom);
             }
             else {
                 A = rightPlusLeft / rightMinusLeft;

@@ -7,7 +7,16 @@ XML3D.webgl = {
 
         return function () {
             try {
-                return !!(window.WebGLRenderingContext && (canvas.getContext('experimental-webgl')));
+                var hasContextClass = !!(window.WebGLRenderingContext);
+                if (hasContextClass) {
+                    var context = canvas.getContext('experimental-webgl');
+                    if (!!context) {
+                        var renderer = context.getParameter(context.RENDERER);
+                        // IE 11 does not work yet :-(
+                        return renderer !== "Internet Explorer";
+                    }
+                }
+                return false;
             } catch (e) {
                 return false;
             }

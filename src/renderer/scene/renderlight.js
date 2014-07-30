@@ -220,6 +220,15 @@
                             target["lightProjection"][off16+i] = tmp[i];
                         }
                     }
+
+                    if(target["lightNearFar"]){
+                        var tmpFrustum = this.getFrustum(1);
+                        var tmp = XML3D.math.vec2.fromValues(tmpFrustum.nearPlane, tmpFrustum.farPlane);
+                        var off2 = offset*2;
+                        for(var i = 0; i < 2; i++) {
+                            target["lightNearFar"][off2+i] = tmp[i];
+                        }
+                    }
                 }
                 else{
                     target["shadowBias"][offset] = 0;

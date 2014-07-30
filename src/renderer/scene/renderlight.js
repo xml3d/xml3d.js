@@ -212,14 +212,14 @@
                             target["lightMatrix"][off16+i] = tmp[i];
                         }
                     }
-                    if(target["lightProjection"]) {
+                    /*if(target["lightProjection"]) {
                         var tmp = XML3D.math.mat4.create();
                         this.getShadowMapLightProjection(tmp);
                         var off16 = offset*16;
                         for(var i = 0; i < 16; i++) {
                             target["lightProjection"][off16+i] = tmp[i];
                         }
-                    }
+                    }*/
 
                     if(target["lightNearFar"]){
                         var tmpFrustum = this.getFrustum(1);

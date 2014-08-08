@@ -93,11 +93,26 @@ XML3D.shaders.register("phong", {
         "varying vec3 fragVertexColor;",
 
         "#if (HAS_POINTLIGHT_SHADOWMAPS || HAS_DIRECTIONALLIGHT_SHADOWMAPS || HAS_SPOTLIGHT_SHADOWMAPS)",
+        /*"float random(vec3 vi, int ii){",
+        "   vec4 seed4 = vec4(vi, ii);",
+        "   float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));",
+        "   return fract(sin(dot_product) * 43758.5453);",
+        "}",*/
+
+        "vec2 poisson( const in int idx ) {",
+        "   vec2 poissonDisk = vec2(0.0,0.0);",
+        "   if(idx == 0) poissonDisk = vec2( -0.94201624, -0.39906216);",
+        "   if(idx == 1) poissonDisk = vec2( 0.94558609, -0.76890725);",
+        "   if(idx == 2) poissonDisk = vec2( -0.094184101, -0.92938870);",
+        "   if(idx == 3) poissonDisk = vec2( 0.34495938, 0.29387760);",
+        "   return poissonDisk;",
+        "}",
+
         "float unpackDepth( const in vec4 rgba_depth ) {",
         "  const vec4 bit_shift = vec4( 1.0 / ( 256.0 * 256.0 * 256.0 ), 1.0 / ( 256.0 * 256.0 ), 1.0 / 256.0, 1.0 );",
         "  float depth = dot( rgba_depth, bit_shift );",
         "  return depth;",
-        "} ",
+        "}",
         "#endif",
 
         "#if MAX_POINTLIGHTS > 0",
@@ -173,7 +188,10 @@ XML3D.shaders.register("phong", {
         "  #endif",
 		"  #if HAS_SSAOMAP",
 		"	 float ssao = 1.0 - texture2D(ssaoMap, gl_FragCoord.xy / coords.xy).r;",
-		"  #endif",
+        "  #endif",
+
+        "  float shadowInfluence = 0.0;", //used for sampling shadow
+
 		"#if MAX_POINTLIGHTS > 0",
         "  for (int i = 0; i < MAX_POINTLIGHTS; i++) {",
         "    if(pointLightOn[i]){",
@@ -210,18 +228,22 @@ XML3D.shaders.register("phong", {
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
         "   if(directionalLightOn[i]){",
+        "      shadowInfluence = 1.0;",
         "   #if HAS_DIRECTIONALLIGHT_SHADOWMAPS",
-        "       bool lightIsVisible = true;",
         "       if(directionalLightCastShadow[i]){",
-        "           lightIsVisible = false;",
+        "           shadowInfluence = 0.0;",
         "           vec4 lspos = directionalLightShadowMapCoord[i];",
         "           vec3 orthogonalDivPos = lspos.xyz / lspos.w *0.5 + 0.5;",
         "           float lsDepth = orthogonalDivPos.z;",
         "           vec2 lightuv = orthogonalDivPos.xy;",
-        "           float depth = unpackDepth(texture2D(directionalLightShadowMap[i], lightuv))+directionalLightShadowBias[i];",
-        "           lightIsVisible = lsDepth < depth;",
+        "           for(int i = 0; i<4; i++){",         //TODO add samplecount instead of magic number
+        //"               int index = int(5.0*random(gl_FragCoord.xyy, i));",
+        "               float depth = unpackDepth(texture2D(directionalLightShadowMap[i], lightuv+poisson(i)/550.0))+directionalLightShadowBias[i];",
+        "               if(lsDepth < depth) shadowInfluence = shadowInfluence+1.0;",
+        "           }",
+        "           shadowInfluence = shadowInfluence/4.0;",//TODO replace 5 thru samplecount
         "       }",
-        "       if(lightIsVisible){",
+        "       if(shadowInfluence > 0.0){",
         "   #endif",
         "       vec4 lDirection = viewMatrix * vec4(directionalLightDirection[i], 0.0);",
         "       vec3 L =  normalize(-lDirection.xyz);",
@@ -231,7 +253,7 @@ XML3D.shaders.register("phong", {
 		"       Idiff *= ssao;",
 		"   #endif",
         "       vec3 Ispec = directionalLightIntensity[i] * objSpecular * pow(max(dot(R,fragEyeVector),0.0), shininess*128.0);",
-        "       color = color + ((Idiff + Ispec));",
+        "       color = color + shadowInfluence*((Idiff + Ispec));",
         "   #if HAS_DIRECTIONALLIGHT_SHADOWMAPS",
         "       }", //light visible
         "   #endif",

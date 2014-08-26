@@ -83,7 +83,7 @@
 
     <target name="upload-tools">
         <fail unless="upload.url" />
-        <post-file file="${buildDir}/xml3d-tools.js" url="${upload.url}/" />
+        <post-file file="${buildDir}/xml3d-tools.js" url="${upload.url}" />
     </target>
 
     <!-- - - - - - - - - - - - - - - - - -

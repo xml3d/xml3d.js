@@ -188,31 +188,46 @@ BufferEntry.prototype.isEmpty = function(){
 // Xflow.TextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
-function TexelSource(source) {
-    if (source.nodeName) {
-        var nodeName = source.nodeName.toLowerCase();
-        if (nodeName === "video" && (typeof source.complete === "undefined")) {
-            Object.defineProperties(source, {
-                width: {
-                    get: function () {
-                        return this.videoWidth;
+function TexelSource(sourceOrWidth, height, format, type) {
+    if (typeof sourceOrWidth === "object") {
+        if (sourceOrWidth.nodeName) {
+            var nodeName = sourceOrWidth.nodeName.toLowerCase();
+            if (nodeName === "video" && (typeof sourceOrWidth.complete === "undefined")) {
+                Object.defineProperties(sourceOrWidth, {
+                    width: {
+                        get: function () {
+                            return this.videoWidth;
+                        }
+                    },
+                    height: {
+                        get: function () {
+                            return this.videoHeight;
+                        }
+                    },
+                    complete: {
+                        get: function () {
+                            return !(this.readyState == 0 || this.videoWidth <= 0 || this.videoHeight <= 0);
+                        }
                     }
-                },
-                height: {
-                    get: function () {
-                        return this.videoHeight;
-                    }
-                },
-                complete: {
-                    get: function () {
-                        return !(this.readyState == 0 || this.videoWidth <= 0 || this.videoHeight <= 0);
-                    }
-                }
-            });
+                });
+            }
+            sourceOrWidth.texelFormat = Xflow.TEXTURE_FORMAT.RGBA;
+            sourceOrWidth.texelType = Xflow.TEXTURE_TYPE.UBYTE;
+        }
+        //assume source is a image data like object
+        this._source = sourceOrWidth;
+    } else {
+        format = format || Xflow.TEXTURE_FORMAT.RGBA;
+        type =  type || Xflow.TEXTURE_TYPE.UBYTE;
+        //create a new texel source backed by type array
+        this._source = {
+            width: sourceOrWidth,
+            height: height,
+            texelFormat: format,
+            texelType: type,
+            data: new Xflow.TYPED_ARRAY_MAP[type](sourceOrWidth * height * Xflow.TEXTURE_FORMAT_TUPLE_SIZE[format])
         }
     }
-    //assume source is a image data like object
-    this._source = source;
 }
 
 Object.defineProperties(TexelSource.prototype, {
@@ -224,11 +239,13 @@ Object.defineProperties(TexelSource.prototype, {
                 canvas.height = this._source.height;
                 var ctx = canvas.getContext("2d");
                 ctx.drawImage(this._source, 0, 0);
-                var source= ctx.getImageData(0, 0, this._source.width, this._source.height);
+                var source = ctx.getImageData(0, 0, this._source.width, this._source.height);
                 this._source = {
                     data: new Uint8Array(source.data),
                     width: source.width,
-                    height: source.height
+                    height: source.height,
+                    texelFormat: this._source.texelFormat,
+                    texelType: this._source.texelType
                 }
             }
             return this._source;
@@ -243,6 +260,26 @@ Object.defineProperties(TexelSource.prototype, {
         get: function () {
             return typeof this._source.complete === "undefined" ? true : this._source.complete;
         }
+    },
+    width: {
+        get: function () {
+            return this._source ? this._source.width : -1;
+        }
+    },
+    height: {
+        get: function () {
+            return this._source ? this._source.height : -1;
+        }
+    },
+    texelFormat: {
+        get: function () {
+            return this._source ? this._source.texelFormat: Xflow.TEXTURE_FORMAT.UNKNOWN;
+        }
+    },
+    texelType: {
+        get: function () {
+            return this._source ? this._source.texelType: Xflow.TEXTURE_TYPE.UNKNOWN;
+        }
     }
 });
 
@@ -256,14 +293,37 @@ Object.defineProperties(TexelSource.prototype, {
 Xflow.TextureEntry = function(source){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
-    this._formatType = null; // null | 'ImageData' | 'number' | 'float32' | 'float64'
     this._loading = false;
     this._updateSource(source);
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
+
 Xflow.createClass(Xflow.TextureEntry, Xflow.DataEntry);
 var TextureEntry = Xflow.TextureEntry;
+
+Object.defineProperties(Xflow.TextureEntry.prototype, {
+    width: {
+        get: function () {
+            return this._source ? this._source.width : -1;
+        }
+    },
+    height: {
+        get: function () {
+            return this._source ? this._source.height : -1;
+        }
+    },
+    texelFormat: {
+        get: function () {
+            return this._source ? this._source.texelFormat: Xflow.TEXTURE_FORMAT.UNKNOWN;
+        }
+    },
+    texelType: {
+        get: function () {
+            return this._source ? this._source.texelType: Xflow.TEXTURE_TYPE.UNKNOWN;
+        }
+    }
+});
 
 TextureEntry.prototype.isLoading = function() {
     if (!this._source)
@@ -274,35 +334,15 @@ TextureEntry.prototype.isLoading = function() {
 
 TextureEntry.prototype._updateSource = function(source) {
     if (source)
-        this._source = new TexelSource(source);
+        this._source = source;
     else
         this._source = null;
+    Xflow._callListedCallback();
 };
 
-TextureEntry.prototype._createImage = TextureEntry.prototype._createSource = function(width, height, formatType, samplerConfig) {
-    if (!this._source || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
-        if (!width || !height)
-            throw new Error("Width or height is not specified");
-        // create dummy image
-        var source = {};
-        source.width = width;
-        source.height = height;
-        source.complete = true;
-        this._formatType = formatType;
-
-        var size = source.width * source.height * 4;
-        var constructor = null;
-        if (formatType === "float32")
-            constructor = Float32Array;
-        else if (formatType === "float64")
-            constructor = Float64Array;
-        else
-            if(Uint8Array == Uint8ClampedArray)
-                constructor = Int16Array;
-            else
-                constructor = Uint8ClampedArray;
-
-        source.data = new constructor(size);
+TextureEntry.prototype._createImage = function(width, height, format, type, samplerConfig) {
+    if (!this._source || this.width != width || this.height != height || this.format != format || this.type != type) {
+        var source = new TexelSource(width, height, format, type);
 
         if (!samplerConfig) {
             samplerConfig = new Xflow.SamplerConfig();
@@ -310,20 +350,19 @@ TextureEntry.prototype._createImage = TextureEntry.prototype._createSource = fun
         }
 
         this._samplerConfig.set(samplerConfig);
-        this.setSource(source);
+        this._setSource(source);
     } else {
         this._notifyChanged();
     }
     return this._source;
 };
 
-TextureEntry.prototype.setSource = TextureEntry.prototype.setImage = function(v) {
-    this._setSource(v);
-    Xflow._callListedCallback();
+TextureEntry.prototype.setImage = function (v) {
+    this._setSource(new TexelSource(v));
 };
 
-TextureEntry.prototype._setSource = function(v) {
-    this._updateSource(v);
+TextureEntry.prototype._setSource = function(s) {
+    this._updateSource(s);
     var loading = this.isLoading();
     if(loading){
         this._loading = true;
@@ -337,19 +376,7 @@ TextureEntry.prototype._setSource = function(v) {
         notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
 };
 
-TextureEntry.prototype.getFormatType = function() {
-    return this._formatType;
-};
-
-TextureEntry.prototype.getWidth = function() {
-    return this.width;
-};
-
-TextureEntry.prototype.getHeight = function() {
-    return this.height;
-};
-
-TextureEntry.prototype.getGLTextureValue = function () {
+TextureEntry.prototype.asGLTextureValue = function () {
     return this._source.glTextureData;
 };
 

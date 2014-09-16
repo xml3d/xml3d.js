@@ -39,6 +39,24 @@ var Xflow = {};
         'ubyte': Xflow.DATA_TYPE.UBYTE
     };
 
+    // Values are chosen to be in line with DATA_TYPE
+    Xflow.TEXTURE_TYPE = {
+        UNKNOWN: 0,
+        FLOAT: 1,
+        UBYTE: 60,
+        USHORT_5_6_5: 70,
+        USHORT_4_4_4_4: 71,
+        USHORT_5_5_5_1: 72
+    };
+
+    Xflow.TEXTURE_FORMAT = {
+        UNKNOWN: 0,
+        ALPHA: 100,
+        RGB: 101,
+        RGBA: 102,
+        LUMINANCE: 103,
+        LUMINANCE_ALPHA: 104
+    };
 
     Xflow.DATA_TYPE_TUPLE_SIZE = {};
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.FLOAT] = 1;
@@ -54,7 +72,6 @@ var Xflow = {};
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.BYTE] = 1;
     Xflow.DATA_TYPE_TUPLE_SIZE[Xflow.DATA_TYPE.UBYTE] = 1;
 
-
     Xflow.TYPED_ARRAY_MAP = {};
     Xflow.TYPED_ARRAY_MAP[Xflow.DATA_TYPE.FLOAT] = Float32Array;
     Xflow.TYPED_ARRAY_MAP[Xflow.DATA_TYPE.FLOAT2] = Float32Array;
@@ -67,6 +84,18 @@ var Xflow = {};
     Xflow.TYPED_ARRAY_MAP[Xflow.DATA_TYPE.BYTE] = Int8Array;
     Xflow.TYPED_ARRAY_MAP[Xflow.DATA_TYPE.UBYTE] = Uint8Array;
 
+    // texture formats
+    // float and ubyte are mapped to DATA_TYPE values above
+    Xflow.TYPED_ARRAY_MAP[Xflow.TEXTURE_TYPE.USHORT_4_4_4_4] = Uint16Array;
+    Xflow.TYPED_ARRAY_MAP[Xflow.TEXTURE_TYPE.USHORT_5_6_5] = Uint16Array;
+    Xflow.TYPED_ARRAY_MAP[Xflow.TEXTURE_TYPE.USHORT_5_5_5_1] = Uint16Array;
+
+    Xflow.TEXTURE_FORMAT_TUPLE_SIZE = {};
+    Xflow.TEXTURE_FORMAT_TUPLE_SIZE[Xflow.TEXTURE_FORMAT.ALPHA] = 1;
+    Xflow.TEXTURE_FORMAT_TUPLE_SIZE[Xflow.TEXTURE_FORMAT.RGB] = 3;
+    Xflow.TEXTURE_FORMAT_TUPLE_SIZE[Xflow.TEXTURE_FORMAT.RGBA] = 4;
+    Xflow.TEXTURE_FORMAT_TUPLE_SIZE[Xflow.TEXTURE_FORMAT.LUMINANCE] = 1;
+    Xflow.TEXTURE_FORMAT_TUPLE_SIZE[Xflow.TEXTURE_FORMAT.LUMINANCE_ALPHA] = 2;
 
     Xflow.getTypeName = function (type) {
         var i;

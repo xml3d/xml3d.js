@@ -188,44 +188,63 @@ BufferEntry.prototype.isEmpty = function(){
 // Xflow.TextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
-var tmpCanvas = null;
-var tmpContext = null;
-
-/**
- * Xflow.toImageData converts ImageData-like objects to real ImageData
- * @param imageData
- * @return {*}
- */
-Xflow.toImageData = function(imageData) {
-    if (imageData instanceof ImageData)
-        return imageData;
-    if (!imageData.data)
-        throw new Error("no data property");
-    if (!imageData.width)
-        throw new Error("no width property");
-    if (!imageData.height)
-        throw new Error("no height property");
-    if (!tmpContext) {
-        tmpCanvas = document.createElement('canvas');
-        tmpContext = tmpCanvas.getContext('2d');
+function TexelSource(source) {
+    if (source.nodeName) {
+        var nodeName = source.nodeName.toLowerCase();
+        if (nodeName === "video" && (typeof source.complete === "undefined")) {
+            Object.defineProperties(source, {
+                width: {
+                    get: function () {
+                        return this.videoWidth;
+                    }
+                },
+                height: {
+                    get: function () {
+                        return this.videoHeight;
+                    }
+                },
+                complete: {
+                    get: function () {
+                        return !(this.readyState == 0 || this.videoWidth <= 0 || this.videoHeight <= 0);
+                    }
+                }
+            });
+        }
     }
-    var newImageData = tmpContext.createImageData(imageData.width, imageData.height);
-    for (var i = 0; i < imageData.data.length; ++i) {
-        var v = imageData.data[i];
-        if (v > 255)
-            v = 255;
-        if (v < 0)
-            v = 0;
-        newImageData.data[i] = v;
+    //assume source is a image data like object
+    this._source = source;
+}
+
+Object.defineProperties(TexelSource.prototype, {
+    imageData: {
+        get: function () {
+            if (this._source instanceof HTMLElement) {
+                var canvas = document.createElement("canvas");
+                canvas.width = this._source.width;
+                canvas.height = this._source.height;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(this._source, 0, 0);
+                var source= ctx.getImageData(0, 0, this._source.width, this._source.height);
+                this._source = {
+                    data: new Uint8Array(source.data),
+                    width: source.width,
+                    height: source.height
+                }
+            }
+            return this._source;
+        }
+    },
+    glTextureData: {
+        get: function () {
+            return this._source;
+        }
+    },
+    complete: {
+        get: function () {
+            return typeof this._source.complete === "undefined" ? true : this._source.complete;
+        }
     }
-    return newImageData;
-};
-
-
-// TextureEntry data conversion order
-// image -> canvas -> context -> -> imageData
-// Note: don't use TextureEntry's width and height properties, they are deprecated and cause issues with video loading
-// Instead use getWidth and getHeight methods
+});
 
 /**
  * A data entry for a texture.
@@ -234,12 +253,12 @@ Xflow.toImageData = function(imageData) {
  * @extends {Xflow.DataEntry}
  * @param {Object} image
  */
-Xflow.TextureEntry = function(image){
+Xflow.TextureEntry = function(source){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
     this._formatType = null; // null | 'ImageData' | 'number' | 'float32' | 'float64'
     this._loading = false;
-    this._updateImage(image);
+    this._updateSource(source);
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
@@ -247,89 +266,64 @@ Xflow.createClass(Xflow.TextureEntry, Xflow.DataEntry);
 var TextureEntry = Xflow.TextureEntry;
 
 TextureEntry.prototype.isLoading = function() {
-    var image = this._image;
-    if (!image)
+    if (!this._source)
         return false;
-    var nodeName = image.nodeName.toLowerCase();
-    if (nodeName == 'img')
-        return !image.complete;
-    if (nodeName == 'canvas')
-        return this._image.width <= 0 || this._image.height <= 0;
-    if (nodeName == 'video')
-        // readyState == 0 is HAVE_NOTHING
-        return image.readyState == 0 || this._image.videoWidth <= 0 || this._image.videoHeight <= 0;
-    return false;
+
+    return !this._source.complete;
 };
 
-TextureEntry.prototype._updateImage = function(image) {
-    this._image = image;
-    this._context = null;
-    this._imageData = null;
-    if (this._image) {
-        var nodeName = this._image.nodeName.toLowerCase();
-        if (nodeName == 'video') {
-            this.width = this._image.videoWidth;
-            this.height = this._image.videoHeight;
-        } else {
-            this.width = this._image.width;
-            this.height = this._image.height;
-        }
-        if (nodeName == 'canvas') {
-            this._canvas = this._image;
-            this._copyImageToCtx = false;
-        } else {
-            this._canvas = null;
-            this._copyImageToCtx = true;
-        }
-    } else {
-        this.width = 0;
-        this.height = 0;
-        this._canvas = null;
-    }
+TextureEntry.prototype._updateSource = function(source) {
+    if (source)
+        this._source = new TexelSource(source);
+    else
+        this._source = null;
 };
 
-/** Create new image
- *
- * @param width
- * @param height
- * @param formatType
- * @param samplerConfig
- * @return {Image|Canvas}
- */
-TextureEntry.prototype._createImage = function(width, height, formatType, samplerConfig) {
-    if (!this._image || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
+TextureEntry.prototype._createImage = TextureEntry.prototype._createSource = function(width, height, formatType, samplerConfig) {
+    if (!this._source || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
         if (!width || !height)
             throw new Error("Width or height is not specified");
         // create dummy image
-        var img = document.createElement('canvas');
-        img.width = width;
-        img.height = height;
-        img.complete = true;
-
+        var source = {};
+        source.width = width;
+        source.height = height;
+        source.complete = true;
         this._formatType = formatType;
+
+        var size = source.width * source.height * 4;
+        var constructor = null;
+        if (formatType === "float32")
+            constructor = Float32Array;
+        else if (formatType === "float64")
+            constructor = Float64Array;
+        else
+            if(Uint8Array == Uint8ClampedArray)
+                constructor = Int16Array;
+            else
+                constructor = Uint8ClampedArray;
+
+        source.data = new constructor(size);
+
         if (!samplerConfig) {
             samplerConfig = new Xflow.SamplerConfig();
             samplerConfig.setDefaults();
         }
+
         this._samplerConfig.set(samplerConfig);
-        this._setImage(img);
+        this.setSource(source);
     } else {
         this._notifyChanged();
     }
-    return this._image;
+    return this._source;
 };
 
-/**
- * Change the image of the TextureEntry
- * @param {Object} v
- **/
-TextureEntry.prototype.setImage = function(v) {
-    this._setImage(v);
+TextureEntry.prototype.setSource = TextureEntry.prototype.setImage = function(v) {
+    this._setSource(v);
     Xflow._callListedCallback();
 };
 
-TextureEntry.prototype._setImage = function(v) {
-    this._updateImage(v);
+TextureEntry.prototype._setSource = function(v) {
+    this._updateSource(v);
     var loading = this.isLoading();
     if(loading){
         this._loading = true;
@@ -341,104 +335,32 @@ TextureEntry.prototype._setImage = function(v) {
     }
     else
         notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
-}
-
+};
 
 TextureEntry.prototype.getFormatType = function() {
     return this._formatType;
 };
 
 TextureEntry.prototype.getWidth = function() {
-    if (!this._image)
-        return 0;
-    return this._image.videoWidth || this._image.width || 0;
+    return this.width;
 };
 
 TextureEntry.prototype.getHeight = function() {
-    if (!this._image)
-        return 0;
-    return this._image.videoHeight || this._image.height || 0;
+    return this.height;
 };
 
-TextureEntry.prototype._flush = function() {
-    if (this._imageData) {
-        if (this._imageData instanceof ImageData) {
-            this._context.putImageData(this._imageData, 0, 0);
-            this._imageData = null;
-        } else {
-            var imageData = Xflow.toImageData(this._imageData);
-            this._context.putImageData(imageData, 0, 0);
-            this._imageData = null;
-        }
-    }
-    if (this._canvas) {
-        this._canvas.complete = true; // for compatibility with img element
-        this._image = this._canvas;
-    }
+TextureEntry.prototype.getGLTextureValue = function () {
+    return this._source.glTextureData;
 };
-
-/** @return {Object} */
-TextureEntry.prototype.getImage = function() {
-    this._flush();
-    return this._image;
-};
-
-TextureEntry.prototype.getCanvas = function() {
-    if (!this._canvas) {
-        this._canvas = document.createElement('canvas');
-        this._canvas.width = this.getWidth();
-        this._canvas.height = this.getHeight();
-        this._canvas.complete = false; // for compatibility with img element
-    } else
-        this._flush();
-    return this._canvas;
-};
-
-TextureEntry.prototype.getFilledCanvas = function() {
-    var canvas = this.getCanvas();
-    this._context = canvas.getContext("2d");
-    if (!this._context)
-        throw new Error("Could not create 2D context.");
-    if (this._copyImageToCtx) {
-        this._context.drawImage(this._image, 0, 0);
-        this._copyImageToCtx = false;
-    }
-    return canvas;
-};
-
-TextureEntry.prototype.getContext2D = function() {
-    if (!this._context) {
-        this.getFilledCanvas(); // will implicitly create context for filled canvas
-    } else
-        this._flush();
-    return this._context;
-};
-
-
-
 
 /** @return {ImageData} */
 TextureEntry.prototype.getValue = function() {
-    if (!this._image)
+    if (!this._source)
         return null;
-    if (!this._imageData && !this.isLoading()) {
-        var ctx = this.getContext2D();
-        this._imageData = ctx.getImageData(0, 0, this.getWidth(), this.getHeight());
-        if (this._formatType == 'float32') {
-            this._imageData = {
-                data : new Float32Array(this._imageData.data),
-                width : this._imageData.width,
-                height : this._imageData.height
-            };
-        } else if (this._formatType == 'float64') {
-            this._imageData = {
-                data : new Float64Array(this._imageData.data),
-                width : this._imageData.width,
-                height : this._imageData.height
-            };
-        }
-    }
-    return this._imageData;
+    if (!this.isLoading())
+        return this._source.imageData;
+    else
+        return null;
 };
 
 /** @return {SamplerConfig} */
@@ -451,7 +373,7 @@ TextureEntry.prototype.getLength = function(){
     return 1;
 };
 TextureEntry.prototype.isEmpty = function(){
-    return false;
+    return !this._source;
 };
 
 /** @return {number} */
@@ -498,7 +420,7 @@ ImageDataTextureEntry.prototype._updateImageData = function(imageData) {
  * @param samplerConfig
  * @return {Image|Canvas}
  */
-ImageDataTextureEntry.prototype._createImage = function(width, height, formatType, samplerConfig) {
+ImageDataTextureEntry.prototype._createImage = ImageDataTextureEntry.prototype._createSource = function(width, height, formatType, samplerConfig) {
     if (!this._image || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
         if (!width || !height)
             throw new Error("Width or height is not specified");

@@ -7,7 +7,6 @@
             return WebGLRenderingContext.CLAMP_TO_EDGE;
         if (modeStr == "repeat")
             return WebGLRenderingContext.REPEAT;
-        return WebGLRenderingContext.CLAMP_TO_EDGE;
     };
 
     var filterToGL = function(modeStr) {
@@ -15,11 +14,14 @@
             return WebGLRenderingContext.NEAREST;
         if (modeStr == "linear")
             return WebGLRenderingContext.LINEAR;
-        if (modeStr == "mipmap_linear")
-            return WebGLRenderingContext.LINEAR_MIPMAP_NEAREST;
-        if (modeStr == "mipmap_nearest")
+        if (modeStr == "nearest-mipmap-nearest")
             return WebGLRenderingContext.NEAREST_MIPMAP_NEAREST;
-        return WebGLRenderingContext.LINEAR;
+        if (modeStr == "linear-mipmap-nearest")
+            return WebGLRenderingContext.LINEAR_MIPMAP_NEAREST;
+        if (modeStr == "nearest-mipmap-linear")
+            return WebGLRenderingContext.NEAREST_MIPMAP_LINEAR;
+        if (modeStr == "linear-mipmap-linear")
+            return WebGLRenderingContext.LINEAR_MIPMAP_LINEAR;
     };
 
     var TextureDataAdapter = function(factory, node) {
@@ -41,13 +43,18 @@
         config.minFilter = filterToGL(node.filterMin);
         config.magFilter = filterToGL(node.filterMag);
         config.textureType = Xflow.TEX_TYPE.TEXTURE_2D;
-        config.generateMipMap = 1;
+        config.generateMipMap = this.shouldGenerateMipMaps(config.minFilter, config.magFilter);
 
         var imageAdapter = this.factory.getAdapter(this.node.firstElementChild, XML3D.data.XML3DDataAdapterFactory.prototype);
         if(imageAdapter) {
             imageAdapter.setTextureEntry(entry);
         }
         return entry;
+    };
+
+    TextureDataAdapter.prototype.shouldGenerateMipMaps = function(minFilter, magFilter) {
+        return (minFilter != WebGLRenderingContext.NEAREST && minFilter != WebGLRenderingContext.LINEAR) ||
+            (magFilter != WebGLRenderingContext.NEAREST && magFilter != WebGLRenderingContext.LINEAR);
     };
 
     TextureDataAdapter.prototype.createXflowNode = function() {

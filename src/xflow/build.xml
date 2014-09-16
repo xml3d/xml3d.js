@@ -54,6 +54,7 @@
         <file name="./operator/default/selectTransform.js" />
         <file name="./operator/default/selectBool.js" />
         <file name="./operator/default/debug.js" />
+        <file name="./operator/default/rgbePNGtoFloat.js" />
     </filelist>
 
     <target name="concat">

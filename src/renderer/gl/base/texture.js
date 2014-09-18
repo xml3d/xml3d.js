@@ -69,13 +69,20 @@
 
         var context = canvas.getContext("2d");
         if (image instanceof HTMLElement) {
-            context.drawImage(image, 0, 0);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
         }
         else {
-            var imageData = context.createImageData(image.width, image.height);
+            var tmpCanvas = document.createElement("canvas");
+            tmpCanvas.width = width;
+            tmpCanvas.height = height;
+            var tmpContext = tmpCanvas.getContext("2d");
+            var imageData = tmpContext.createImageData(width, height);
             imageData.data.set(image.data);
-            context.putImageData(imageData, 0, 0);
+            tmpContext.putImageData(imageData, 0, 0);
+
+            context.drawImage(tmpCanvas, 0, 0, canvas.width, canvas.height);
         }
+
         return canvas;
     };
 
@@ -187,8 +194,8 @@
             var height = texelSource.height;
             this.height = height;
 
-            if (this.generateMipMap) {
-                if (this.needsScale(width, height) && type === gl.FLOAT)
+            if (this.generateMipMap && this.needsScale(width, height)) {
+                if (type === gl.FLOAT)
                     throw new Error("Should generate MipMaps but texture data is float and not power of two in size!");
                 else
                     texelSource = scaleImage(texelSource, width, height);
@@ -200,7 +207,7 @@
                 gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, type, texelSource.data);
 
             if (this.generateMipMap)
-                    gl.generateMipmap(gl.TEXTURE_2D);
+                gl.generateMipmap(gl.TEXTURE_2D);
 
             gl.bindTexture(gl.TEXTURE_2D, null);
             this.created();

@@ -294,7 +294,7 @@ Xflow.TextureEntry = function(source){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
     this._loading = false;
-    this._updateSource(source);
+    this.setImage(source);
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
@@ -332,14 +332,6 @@ TextureEntry.prototype.isLoading = function() {
     return !this._source.complete;
 };
 
-TextureEntry.prototype._updateSource = function(source) {
-    if (source)
-        this._source = source;
-    else
-        this._source = null;
-    Xflow._callListedCallback();
-};
-
 TextureEntry.prototype._createImage = function(width, height, format, type, samplerConfig) {
     if (!this._source || this.width != width || this.height != height || this.format != format || this.type != type) {
         var source = new TexelSource(width, height, format, type);
@@ -350,19 +342,26 @@ TextureEntry.prototype._createImage = function(width, height, format, type, samp
         }
 
         this._samplerConfig.set(samplerConfig);
-        this._setSource(source);
+        this.setImage(source);
     } else {
         this._notifyChanged();
     }
+
     return this._source;
 };
 
-TextureEntry.prototype.setImage = function (v) {
-    this._setSource(new TexelSource(v));
+TextureEntry.prototype.setImage = function (s) {
+    if (!s)
+        this._setSource(null);
+    else if (s instanceof TexelSource)
+        this._setSource(s);
+    else
+        this._setSource(new TexelSource(s));
+    Xflow._callListedCallback();
 };
 
 TextureEntry.prototype._setSource = function(s) {
-    this._updateSource(s);
+    this._source = s;
     var loading = this.isLoading();
     if(loading){
         this._loading = true;

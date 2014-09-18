@@ -68,7 +68,14 @@
         canvas.height = nextHighestPowerOfTwo(height);
 
         var context = canvas.getContext("2d");
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        if (image instanceof HTMLElement) {
+            context.drawImage(image, 0, 0);
+        }
+        else {
+            var imageData = context.createImageData(image.width, image.height);
+            imageData.data.set(image.data);
+            context.putImageData(imageData, 0, 0);
+        }
         return canvas;
     };
 

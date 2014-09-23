@@ -62,16 +62,13 @@
         </sequential>
     </macrodef>
 
-    <macrodef name="post-file" description="Use Curl to post the file to the WEBDAV path">
+    <macrodef name="post-file" description="Use SCP to upload file to server">
         <attribute name="file" />
         <attribute name="url" />
         <sequential>
-            <echo message="Using CURL to upload @{file} to @{url}" />
-            <!--Execute curl to post the file to the URL -->
-            <exec executable="${curl.path}">
-                <arg value="-n" />
-                <arg value="-s" />
-                <arg value="-T" />
+            <echo message="Using SCP to upload @{file} to @{url}" />
+            <!--Execute scp to post the file to the URL -->
+            <exec executable="${scp.path}">
                 <arg value='@{file}' />
                 <arg value='@{url}' />
             </exec>
@@ -137,7 +134,7 @@
     </target>
 
     <target name="windowsGit" depends="checkOS" if="isWindows">
-        <property name="git.cmd" value="git.cmd" />
+        <property name="git.cmd" value="git.exe" />
     </target>
     <target name="linuxGit" depends="checkOS" if="isLinux">
         <property name="git.cmd" value="git" />

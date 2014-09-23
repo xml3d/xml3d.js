@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Style -->
+    <link rel="stylesheet" type="text/css" media="all" href="style/page.css"/>
+    <link rel="stylesheet" type="text/css" media="all" href="style/jquery-ui.css"/>
+    <!-- Scripts -->
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <script type="text/javascript" src="../../../shadejs/lib/shade.js"></script>
+    <script type="text/javascript" src="../../tools/camera.js"></script>
+    <script type="text/javascript" src="scripts/myxflow-shadejs.js" ></script>
+    <title>XML3D Examples</title>
+
+  </head>
+  <body>
+  <div id="overall"><div id="content">
+   <h1>
+    Wave it!
+   </h1>
+   <script id="shader" type="text/shade-javascript" >
+        function shade(env) {
+            var color = env.diffuseColor;
+            if(env.diffuseTexture && env.texcoord){
+                var texColor = env.diffuseTexture.sample2D(env.texcoord).rgb();
+                texColor = Math.pow(texColor, new Vec3(2.2));
+                color = color.mul(texColor);
+            }
+            //return color;
+            return new Shade().diffuse(color, env.normal, 1)
+                    .phong(env.specularColor, env.normal, env.shininess);
+        }
+   </script>
+
+    <xml3d id="myxml3d" class="xml3d" activeView="#Camera" style="background: black;" >
+     <defs id="mainDef">
+
+      <!--- Not so important part: -->
+
+      <lightshader id="ls_Spot" script="urn:xml3d:lightshader:point">
+       <float3 name="attenuation">1 0.033333 1</float3>
+       <float3 name="intensity">100 100 100</float3>
+      </lightshader>
+
+      <shader id="Material" script="#shader" >
+       <float name="ambientIntensity">0.1</float>
+       <texture name="diffuseTexture"><img src="textures/water.jpg"/></texture>
+       <float3 name="diffuseColor">1 1 1</float3>
+       <float3 name="specularColor">0.5 0.5 0.5</float3>
+       <float name="shininess">0.0978473581213</float>
+      </shader>
+
+      <transform id="t_Camera" rotation="-0.641815 0.733700 0.223063 1.145952" scale="1 1 1" translation="3.184399 3.711076 2.405665"></transform>
+      <transform id="t_Grid" rotation="1 0.000000 0.000000 0.000000" scale="25.000000 25.000000 25.000000" translation="0.000000 0.00 0.000000"></transform>
+      <transform id="t_Lamp" rotation="0.205942 0.331517 0.920698 1.926274" scale="1 1 1" translation="2.086632 10.648042 1.161145"></transform>
+
+      <!-- Example Data: -->
+
+      <data id="exampleGrid" >
+        <float3 name="position">-1 0 -1  -1 0 0  -1 0 1    0 0 -1  0 0 0  0 0 1    1 0 -1  1 0 0  1 0 1</float3>
+        <float3 name="normal">0 1 0  0 1 0  0 1 0    0 1 0  0 1 0  0 1 0    0 1 0  0 1 0  0 1 0</float3>
+        <float2 name="texcoord">0 0  0 0.5  0 1    0.5 0  0.5 0.5  0.5 1    1 0  1 0.5  1 1</float2>
+        <int name="index">0 1 3  1 3 4    1 2 4  2 4 5    3 4 6  4 6 7    4 5 7  5 7 8 </int>
+      </data>
+
+      <!-- Generate Grid: -->
+
+      <data id="generatedGrid" compute="xflow.mygrid(size)">
+		    <int name="size" id="size">200</int>
+	    </data>
+
+      <!-- Transform Grid to Waves: -->
+
+      <data id="wave" compute="(position, normal) = xflow.mywave(position, normal, strength, wavelength, phase)" >
+        <float name="strength" id="strength">0.01</float>
+        <float name="wavelength" id="wavelength">40.0</float>
+        <float name="phase" id="ph">0.0</float>
+        <data src="#generatedGrid"></data>
+      </data>
+
+     </defs>
+
+     <view id="Camera" orientation="-0.3941052556037903 0.9096987843513489 0.13087835907936096 0.8260897732744243" position="13.423173904418945 6.755307197570801 14.065818786621094"></view>
+
+     <!-- Wave Shape Display: -->
+
+     <group shader="#Material" transform="#t_Grid">
+      <mesh type="triangles" id="waveMesh">
+        <data src="#wave"></data>
+      </mesh>
+     </group>
+
+     <!-- Light Source: -->
+     <group transform="#t_Lamp">
+		<light shader="#ls_Spot"></light>
+     </group>
+
+    </xml3d>
+
+    <script type="text/javascript">
+    /* Run timer for wave animation */
+    var mytime = 0;
+    var lastTime = Date.now();
+    var myupdate = function() {
+      var phase = document.getElementById("ph")
+      if (phase && phase._configured) {
+        phase.textContent = ""+mytime;
+      }
+      var diff = Date.now() - lastTime;
+      lastTime = Date.now();
+      mytime += diff / 500;
+    }
+    window.setInterval(myupdate, 20);
+
+    document.querySelector("#waveMesh").addEventListener('xml3dsystem', function(){
+        console.log("XML3D SYSTEM: " + event.detail.systemtype);
+        console.log(event.detail);
+    })
+  </script>
+
+   </div></div>
+  </body>
+ </html>

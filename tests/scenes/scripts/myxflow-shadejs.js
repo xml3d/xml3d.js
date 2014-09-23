@@ -70,6 +70,7 @@ Xflow.registerOperator("xflow.mywave", {
                 {type: 'float',  source: 'strength'},
                 {type: 'float',  source: 'wavelength'},
                 {type: 'float',  source: 'phase'}],
+    platforms: ["JAVASCRIPT", "GLSL_VS"],
     evaluate: function(newpos, newnormal, position, normal, strength, wavelength, phase, info) {
 
 		for(var i = 0; i < info.iterateCount; i++) {

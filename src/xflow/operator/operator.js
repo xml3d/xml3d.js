@@ -97,6 +97,20 @@ function initOperator(operator){
 
     //Check/init platform
     operator.platform = operator.platform || Xflow.PLATFORM.JAVASCRIPT;
+
+    // Init 'platforms'
+    var platforms = {};
+    for (var name in Xflow.PLATFORM){
+        var platformSupport = (!operator.platforms || operator.platforms.indexOf(name) != -1);
+        platforms[Xflow.PLATFORM[name]] = platformSupport;
+    }
+    if(!operator.evaluate_shadejs){
+        platforms[Xflow.PLATFORM.GLSL_VS] = false;
+        platforms[Xflow.PLATFORM.GLSL_FS] = false;
+    }
+    operator.platforms = platforms;
+
+
 }
 
 })();

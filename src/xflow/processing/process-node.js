@@ -371,7 +371,7 @@ function getRequestComputeResult(requestNode)
 
 function getRequestVSResult(requestNode)
 {
-    var executer = getOrCreateExecuter(requestNode, Xflow.PLATFORM.GLSL);
+    var executer = getOrCreateExecuter(requestNode, Xflow.PLATFORM.GLSL_VS);
     if(!requestNode.results[Xflow.RESULT_TYPE.VS])
         requestNode.results[Xflow.RESULT_TYPE.VS] = new Xflow.VSDataResult();
     var result = requestNode.results[Xflow.RESULT_TYPE.VS];

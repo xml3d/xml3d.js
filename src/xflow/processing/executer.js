@@ -138,6 +138,8 @@
             return true;
 
         if(Xflow.shadejs.hasSupport() && cData.firstOperator.evaluate_shadejs && operator.evaluate_shadejs){
+            if(platform == Xflow.PLATFORM.GLSL_VS)
+                return true;
             if(platform == Xflow.PLATFORM.JAVASCRIPT)
                 return true;
         }
@@ -325,7 +327,7 @@
     }
 
     function platformRequiresArraySize(platform){
-        return platform == Xflow.PLATFORM.GLSL;
+        return platform == Xflow.PLATFORM.GLSL_VS;
     }
 
 

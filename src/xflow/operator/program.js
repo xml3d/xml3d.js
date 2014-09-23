@@ -331,7 +331,7 @@
         if(!c_program_cache[key]){
             // GLSL operators are implemented in a different way, so platform information is fetched from the operatorList
             // as a fallback mode to not break the old implementations
-            if(operatorList.platform === Xflow.PLATFORM.GLSL){
+            if(operatorList.platform === Xflow.PLATFORM.GLSL_VS){
                 c_program_cache[key] = new Xflow.VSProgram(operatorList);
             } else if (firstOperator.platform === Xflow.PLATFORM.CL) {
                 c_program_cache[key] = new Xflow.CLProgram(operatorList);

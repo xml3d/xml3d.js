@@ -239,9 +239,10 @@ var Xflow = {};
      */
     Xflow.PLATFORM = {
         JAVASCRIPT: 0,
-        GLSL: 1,
-        CL: 2,
-        ASYNC: 3
+        GLSL_VS: 1,
+        GLSL_FS: 2,
+        CL: 3,
+        ASYNC: 4
     };
 
     Xflow.PROCESS_STATE = {

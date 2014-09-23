@@ -573,7 +573,7 @@ DataNode.prototype.setPlatform = function(platformSrc) {
             this._platform = Xflow.PLATFORM.CL;
         }
         else if (platformSrc === "gl") {
-            this._platform = Xflow.PLATFORM.GLSL;
+            this._platform = Xflow.PLATFORM.GLSL_VS;
         }
         else if (platformSrc === "js") {
             this._platform = Xflow.PLATFORM.JAVASCRIPT;

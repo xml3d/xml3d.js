@@ -23,7 +23,7 @@
             this.orthographic = false;
         else
             this.orthographic = orthographic;
-        this.setFrustum(nearPlane, farPlane, fovx, fovy, aspect, orthographic);
+        this.setFrustum(nearPlane, farPlane, fovx, fovy, aspect, this.orthographic);
     };
 
     XML3D.extend(Frustum.prototype, {
@@ -45,7 +45,11 @@
             }
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
-            this.orthographic = orthographic;
+
+            if(typeof(orthographic) === "undefined")
+                this.orthographic = false;
+            else
+                this.orthographic = orthographic;
 
         },
         getProjectionMatrix: function (matrix) {

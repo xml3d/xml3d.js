@@ -170,6 +170,7 @@
             case 35670: //gl.BOOL
             case 5124:  //gl.INT
             case 35678: //gl.SAMPLER_2D
+            case 35680: //gl.SAMPLER_CUBE
                 if (value && value.length !== undefined) {
                     gl.uniform1iv(u.location, value);
                 } else {
@@ -183,13 +184,6 @@
                 break; // gl.INT_VEC2
 
             case 35672: // gl.BOOL_VEC3
-            case 35680: //gl.SAMPLER_CUBE
-                if (value && value.length !== undefined) {
-                    gl.uniform1iv(u.location, value);
-                } else {
-                    gl.uniform1i(u.location, value || 0);
-                }
-                break;
             case 35668:
                 gl.uniform3iv(u.location, value);
                 break; // gl.INT_VEC3

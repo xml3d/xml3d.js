@@ -79,7 +79,6 @@
 
         getFrustum: function(aspect) {
             var orthogonal = this.light.type == "directional";
-            //TODO why is farplane 200? maybe this line doesnt belong there...
             var t_mat = XML3D.math.mat4.create();
             var bb = new XML3D.math.bbox.create();
             this.scene.getBoundingBox(bb);
@@ -94,7 +93,7 @@
             var near = 1.0,
                 far  = 2.0;
             if(this.light.type == "point") {
-                //TODO optimise near
+                //TODO optimise near ?
                 near = 1.0;
                 far = Math.max(Math.abs(bb[0]),Math.abs(bb[1]), Math.abs(bb[2]), Math.abs(bb[3]), Math.abs(bb[4]), Math.abs(bb[5]));
             }else {
@@ -212,15 +211,6 @@
                             target["lightMatrix"][off16+i] = tmp[i];
                         }
                     }
-                    /*if(target["lightProjection"]) {
-                        var tmp = XML3D.math.mat4.create();
-                        this.getShadowMapLightProjection(tmp);
-                        var off16 = offset*16;
-                        for(var i = 0; i < 16; i++) {
-                            target["lightProjection"][off16+i] = tmp[i];
-                        }
-                    }*/
-
                     if(target["lightNearFar"]){
                         var tmpFrustum = this.getFrustum(1);
                         var tmp = XML3D.math.vec2.fromValues(tmpFrustum.nearPlane, tmpFrustum.farPlane);
@@ -252,20 +242,16 @@
             XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
         },
 
-        getShadowMapLightProjection: function(target) {
-            this.getFrustum(1).getProjectionMatrix(target);
-        },
-
         updateWorldMatrix: (function() {
             var tmp_mat = XML3D.math.mat4.create();
             return function() {
-                if(this.parent) {
+                if(this.parent){
                     this.parent.getWorldMatrix(tmp_mat);
                     this.updateLightTransformData(tmp_mat);
 
+                    //calculate parameters for corresp. light type
                     if (this.light.type == "directional")
                      {
-                         //TODO enhance code
                          var bb = new XML3D.math.bbox.create();
                          this.scene.getBoundingBox(bb);
                          var bbSize = XML3D.math.vec3.create();
@@ -273,26 +259,26 @@
                          var off = XML3D.math.vec3.create();
                          XML3D.math.bbox.center(bbCenter, bb);
                          XML3D.math.bbox.size(bbSize,bb);
-                         var r = XML3D.math.vec3.len(bbSize); //double bounding sphere radius
-                         XML3D.math.vec3.scale(off, this.direction, -0.75*r);
+                         var d = XML3D.math.vec3.len(bbSize); //diameter of bounding sphere of the scene
+                         XML3D.math.vec3.scale(off, this.direction, -0.55*d); //enlarge a bit on the radius of the scene
                          this.position = XML3D.math.vec3.add(this.position, bbCenter, off);
-                         this.fallOffAngle = 1.568;
+                         this.fallOffAngle = 1.568;// set to a default of PI/2, recalculated later
 
                     } else if (this.light.type == "spot") {
                         //nothing to do
                     } else if (this.light.type == "point"){
-                        //this.fallOffAngle = Math.PI/4.0;
+                        //this.fallOffAngle = Math.PI/4.0;  //calculated on initialization of renderlight
                     } else {
-                        XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type); // TODO
+                        XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type);
                     }
 
-                    //create and  new transformation matrix depending on the updated parameters TODO move to shader?
+                    //create new transformation matrix depending on the updated parameters
                     XML3D.math.mat4.identity(tmp_mat);
                     var lookat_mat = XML3D.math.mat4.create();
                     var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
                     if((this.direction[0] == 0.0) && (this.direction[2] == 0.0)) //check if top_vec colinear with direction
                         top_vec = XML3D.math.vec3.fromValues(0.0, 0.0, 1.0);
-                    var up_vec = XML3D.math.vec3.create();
+                    var up_vec  = XML3D.math.vec3.create();
                     var dir_len = XML3D.math.vec3.len(this.direction);
                     XML3D.math.vec3.scale(up_vec, this.direction, -XML3D.math.vec3.dot(top_vec, this.direction) / (dir_len * dir_len));
                     XML3D.math.vec3.add(up_vec, up_vec, top_vec);
@@ -304,7 +290,7 @@
                     this.setWorldMatrix(tmp_mat);
 
 
-                    if (this.light.type == "directional") { //adjust foa for directional light - needs world Matrix
+                    if (this.light.type == "directional"){ //adjust foa for directional light - needs world Matrix
                         var bb = new XML3D.math.bbox.create();
                         this.scene.getBoundingBox(bb);
                         XML3D.math.bbox.transform(bb, tmp_mat, bb);

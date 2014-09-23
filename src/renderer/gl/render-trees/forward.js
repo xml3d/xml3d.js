@@ -30,9 +30,9 @@
             else{
                 if(light.light.type == "spot")
                     light.userData = this.createLightPass(light);
-                if(light.light.type == "directional")
+                else if(light.light.type == "directional")
                     light.userData = this.createLightPass(light);
-                if(light.light.type == "point") {
+                else if(light.light.type == "point") {
                     light.userData = this.createPointLightPass(light);
                 }
             }
@@ -68,7 +68,7 @@
         },
 
         createLightPass: function(light){
-            var context = this.renderInterface.context
+            var context = this.renderInterface.context;
             var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
             var lightFramebuffer  = new webgl.GLRenderTarget(context, {
                 width: dimension,
@@ -84,7 +84,7 @@
         },
 
         createPointLightPass: function(light){
-            var context = this.renderInterface.context
+            var context = this.renderInterface.context;
             var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
             var lightFramebuffer  = new webgl.GLCubeMapRenderTarget(context, {
                     width: dimension,

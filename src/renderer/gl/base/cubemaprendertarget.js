@@ -113,7 +113,7 @@
         },
         createDepthTarget: function (depthFormat, side) {
             var gl = this.context.gl;
-            //TODO depthtexture doesnt work...
+            
             if (this.opt.depthAsRenderbuffer) {
                 if (!this.dtex) this.dtex = [];
                 this.dtex[side] = gl.createRenderbuffer();
@@ -186,9 +186,6 @@
             for (var item in options) {
                 opt[item] = options[item];
             }
-            //opt.colorsAsRenderbuffer = false;
-            //opt.depthAsRenderbuffer  = false;
-            //opt.stencilAsRenderbuffer = false;
 
             return opt;
         },

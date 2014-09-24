@@ -3,11 +3,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
 //Adapter for <mesh>
 (function (webgl) {
 
-    /**
-     * @constructor
-     */
     var ModelRenderAdapter = function (factory, node) {
-        webgl.TransformableAdapter.call(this, factory, node, true);
+        webgl.TransformableAdapter.call(this, factory, node, false, false);
         this.asset = null;
         this.renderObjects = [];
         this.initializeEventAttributes();
@@ -33,48 +30,29 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 visible: this.node.visible,
                 name: this.node.id
             });
-            this.updateLocalMatrix();
-            this.createSubRenderObjects();
+            this.renderNode.setLocalMatrix(c_IDENTITY);
+            this.createModelRenderNodes();
         },
-        clearSubRenderObjects: function(){
-            var i = this.renderObjects.length;
-            while(i--){
-                this.renderObjects[i].remove();
-                //this.disconnectAdapterHandle("shader_" + i);
-            }
-            this.renderObjects.length = 0;
+        clearModelRenderNodes: function(){
+            rec_removeRenderNodes(this.renderNode, true);
+        },
 
-        },
-        createSubRenderObjects: function(){
-            this.clearSubRenderObjects();
+        createModelRenderNodes: function(){
+            this.clearModelRenderNodes();
             if(!this.asset.isSubtreeLoading()){
                 try{
                     this.asset.checkValidity();
                     var assetResult = this.asset.getResult();
-                    var meshSets = assetResult.getMeshDataSets();
-                    for(var i = 0; i < meshSets.length; ++i){
-                        var renderNode = this.getScene().createRenderObject({
-                            parent: this.renderNode,
-                            node: meshSets[i].refNode || this.node,
-                            object: {
-                                data: meshSets[i].xflowNode,
-                                type: meshSets[i].type
-                            },
-                            shaderHandle: this.getSubShaderHandle(meshSets[i].shader, i),
-                            name: this.node.id,
-                            visible: !this.node.visible ? false : undefined
-                        });
-                        renderNode.setLocalMatrix(meshSets[i].transform || c_IDENTITY);
-                        this.renderObjects.push(renderNode);
-                    }
+                    var dataTree = assetResult.getDataTree();
+                    rec_createRenderNodes(this, this.renderNode, dataTree);
                 }
                 catch(e){
                     XML3D.debug.logError("Asset Error: " + e.message, e.node || this.node);
-                    this.clearSubRenderObjects();
+                    this.clearModelRenderNodes();
                 }
             }
         },
-        getSubShaderHandle: function(shaderHref, index)
+        getSubShaderHandle: function(shaderHref)
         {
             if(shaderHref) {
                 var adapterHandle = this.getAdapterHandle(shaderHref);
@@ -101,15 +79,56 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             }
         },
         onAssetChange: function(){
-            this.createSubRenderObjects();
+            this.createModelRenderNodes();
         },
         dispose: function () {
             this.asset.removeChangeListener(this);
-            this.clearSubRenderObjects();
+            this.clearModelRenderNodes();
             this.getRenderNode().remove();
             this.clearAdapterHandles();
         }
     });
+
+    function rec_removeRenderNodes(node, keepCurrentNode){
+        if(!keepCurrentNode)
+            node.remove();
+        var children = node.getChildren();
+        var i = children.length;
+        while(i--){
+            rec_removeRenderNodes(children[i], false);
+        }
+    }
+
+    function rec_createRenderNodes(adapter, parentNode, dataTreeNode){
+        var groupNode = adapter.getScene().createRenderGroup({
+            parent: parentNode,
+            shaderHandle: adapter.getSubShaderHandle(dataTreeNode.shader),
+            visible: undefined,
+            name: adapter.node.id
+        });
+        groupNode.setLocalMatrix(dataTreeNode.transform || c_IDENTITY);
+
+        var meshSets = dataTreeNode.meshes;
+        for(var i = 0; i < meshSets.length; ++i){
+            var renderNode = adapter.getScene().createRenderObject({
+                parent: groupNode,
+                node: meshSets[i].refNode || adapter.node,
+                object: {
+                    data: meshSets[i].xflowNode,
+                    type: meshSets[i].type
+                },
+                shaderHandle: adapter.getSubShaderHandle(meshSets[i].shader),
+                name: adapter.node.id,
+                visible: !adapter.node.visible ? false : undefined
+            });
+            renderNode.setLocalMatrix(meshSets[i].transform || c_IDENTITY);
+            adapter.renderObjects.push(renderNode);
+        }
+        var groups = dataTreeNode.groups;
+        for(var i = 0; i < groups.length; ++i){
+            rec_createRenderNodes(adapter, groupNode, groups[i]);
+        }
+    }
 
 
 

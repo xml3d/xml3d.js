@@ -7,7 +7,7 @@
      * @param {Element} node
      */
     var LightRenderAdapter = function(factory, node) {
-        webgl.TransformableAdapter.call(this, factory, node);
+        webgl.TransformableAdapter.call(this, factory, node, false, true);
         this.updateLightShader();
         this.createRenderNode();
     };

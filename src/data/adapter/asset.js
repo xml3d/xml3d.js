@@ -6,14 +6,17 @@ XML3D.data.AssetAdapter = function(factory, node) {
 
     // Node handles for src and proto
     this.asset = null;
+    this.transformFetcher = new XML3D.data.DOMTransformFetcher(this, "transform", "transform");
 };
 XML3D.createClass(XML3D.data.AssetAdapter, XML3D.base.NodeAdapter);
 
 XML3D.data.AssetAdapter.prototype.init = function() {
     this.asset = new XML3D.base.Asset(this.node);
+    this.asset.setName(this.node.getAttribute("name"));
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     updatePickFilter(this);
     updateChildren(this);
+    this.transformFetcher.update();
 };
 
 XML3D.data.AssetAdapter.prototype.getAsset = function(){
@@ -22,8 +25,12 @@ XML3D.data.AssetAdapter.prototype.getAsset = function(){
 
 function updateChildren(adapter){
     adapter.asset.clearChildren();
+    adapter.asset.clearSubAssets();
     for ( var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
         var subadapter = adapter.factory.getAdapter(child);
+        if(subadapter && subadapter.getAsset){
+            adapter.asset.appendSubAsset(subadapter.getAsset());
+        }
         if(subadapter && subadapter.assetEntry){
             adapter.asset.appendChild(subadapter.assetEntry);
         }
@@ -66,6 +73,10 @@ XML3D.data.AssetAdapter.prototype.connectedAdapterChanged = function(attributeNa
     updateAssetLoadState(this);
 }
 
+XML3D.data.AssetAdapter.prototype.onTransformChange = function(attrName, matrix){
+    this.asset.setTransform(matrix);
+}
+
 
 XML3D.data.AssetAdapter.prototype.notifyChanged = function(evt) {
     if(evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED){
@@ -84,10 +95,14 @@ XML3D.data.AssetAdapter.prototype.notifyChanged = function(evt) {
         return;
     } else if (evt.type == XML3D.events.VALUE_MODIFIED) {
         var attr = evt.wrapped.attrName;
-        if(attr == "src" )
-            updateAdapterHandle(this, "src", this.node.getAttribute("src"));
-        if(attr == "pick" )
-            updatePickFilter(this);
+        switch(attr){
+            case "name": this.asset.setName(this.node.getAttribute("name")); break;
+            case "shader": setShaderUrl(this, this.asset); break;
+            case "style":
+            case "transform": this.transformFetcher.update(); break;
+            case "src": updateAdapterHandle(this, "src", this.node.getAttribute("src"));
+            case "pick": updatePickFilter(this); break;
+        }
         return;
     } else if (evt.type == XML3D.events.THIS_REMOVED) {
         this.clearAdapterHandles();
@@ -183,15 +198,15 @@ function updateSubDataLoadState(dataAdapter) {
 }
 
 
-function setShaderUrl(adapter){
+function setShaderUrl(adapter, dest){
     var node = adapter.node;
     var shaderUrl = node.getAttribute("shader");
     if(shaderUrl){
         var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument, shaderUrl);
-        adapter.assetEntry.setShader(shaderId.toString());
+        dest.setShader(shaderId.toString());
     }
     else{
-        adapter.assetEntry.setShader(null);
+        dest.setShader(null);
     }
 }
 
@@ -203,7 +218,7 @@ XML3D.createClass(XML3D.data.AssetMeshAdapter, XML3D.data.AssetDataAdapter);
 
 XML3D.data.AssetMeshAdapter.prototype.init = function() {
     XML3D.data.AssetDataAdapter.prototype.init.call(this);
-    setShaderUrl(this);
+    setShaderUrl(this, this.assetEntry);
     this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles");
     this.transformFetcher.update();
 };
@@ -212,7 +227,7 @@ XML3D.data.AssetMeshAdapter.prototype.notifyChanged = function(evt) {
     if (evt.type == XML3D.events.VALUE_MODIFIED) {
         var attr = evt.wrapped.attrName;
         switch(attr){
-            case "shader": setShaderUrl(this); break;
+            case "shader": setShaderUrl(this, this.assetEntry); break;
             case "style":
             case "transform": this.transformFetcher.update(); break;
             case "type": this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles")

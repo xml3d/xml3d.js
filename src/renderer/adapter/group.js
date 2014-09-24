@@ -2,7 +2,7 @@
 (function() {
 
     var GroupRenderAdapter = function(factory, node) {
-        XML3D.webgl.TransformableAdapter.call(this, factory, node, true);
+        XML3D.webgl.TransformableAdapter.call(this, factory, node, true, true);
         this.initializeEventAttributes();
         this.factory = factory;
         this.createRenderNode();

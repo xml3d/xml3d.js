@@ -170,6 +170,7 @@ XML3D.classInfo['asset'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     src: {a: XML3D.ReferenceHandler},
+    name: {a: XML3D.StringAttributeHandler},
     pick: {a: XML3D.StringAttributeHandler},
     _term: undefined
 };

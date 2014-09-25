@@ -349,9 +349,9 @@ function copySrcTable(table, srcTable, pickFilter){
         }
         else{
             destEntry = new AssetTableEntry();
-            destEntry.pushTableEntry(srcEntry);
+            table.allEntries.push(destEntry);
         }
-        table.allEntries.push(destEntry);
+        destEntry.pushTableEntry(srcEntry);
         if(destEntry.name) table.namedEntries[destEntry.name] = destEntry;
     }
     var i = srcTable.allSubResults.length;
@@ -377,7 +377,7 @@ function mergeSubAssetResult(table, srcSubTable){
         destSubTable = table.namedSubResults[srcSubTable.name];
     }
     else{
-        destSubTable = new Xflow.base.AssetResult();
+        destSubTable = new XML3D.base.AssetResult();
         destSubTable.name = srcSubTable.name;
         table.allSubResults.push(destSubTable);
         if(destSubTable.name) table.namedSubResults[destSubTable.name] = destSubTable;
@@ -435,7 +435,7 @@ function updateAccumulatedNode(table, entry, parentTables){
     for(var i = 0; i < entry.postQueue.length; ++i){
         var includes = entry.postQueue[i].includes;
         for(var j = 0; j < includes.length; ++j){
-            var addEntry = getIncludeEntry(parentTables, includes[i]);
+            var addEntry = getIncludeEntry(parentTables, includes[j]);
             dataNode.appendChild(addEntry.accumulatedXflowNode);
         }
         if(entry.postQueue[i].xflowNode)

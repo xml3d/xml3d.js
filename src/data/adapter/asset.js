@@ -16,6 +16,7 @@ XML3D.data.AssetAdapter.prototype.init = function() {
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     updatePickFilter(this);
     updateChildren(this);
+    setShaderUrl(this, this.asset);
     this.transformFetcher.update();
 };
 
@@ -166,7 +167,7 @@ function updateIncludes(assetEntry, includeString){
     if(!includeString)
         assetEntry.setIncludes([]);
     else
-        assetEntry.setIncludes(includeString.split(/\s+/));
+        assetEntry.setIncludes(includeString.trim().split(/\s*,\s*/));
 }
 
 function updateClassNames(adapter){

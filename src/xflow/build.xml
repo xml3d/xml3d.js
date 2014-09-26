@@ -28,6 +28,7 @@
         <file name="./operator/default/morph3.js" />
         <file name="./operator/default/sub3.js" />
         <file name="./operator/default/bufferSelect.js" />
+        <file name="./operator/default/get.js" />
         <file name="./operator/default/normalize3.js" />
         <file name="./operator/default/lerp3seq.js" />
         <file name="./operator/default/slerpseq.js" />

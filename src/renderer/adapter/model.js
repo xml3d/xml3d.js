@@ -6,9 +6,11 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     var ModelRenderAdapter = function (factory, node) {
         webgl.TransformableAdapter.call(this, factory, node, false, false);
         this.asset = null;
-        this.renderObjects = [];
+        this.postTransformXflowRequests = [];
+        this.postTransformRenderGroups = [];
         this.initializeEventAttributes();
         this.createRenderNode();
+        this._bindedRequestCallback = this.onXflowRequestChange.bind(this);
     };
 
     var c_IDENTITY = XML3D.math.mat4.create();
@@ -34,7 +36,13 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             this.createModelRenderNodes();
         },
         clearModelRenderNodes: function(){
+            var i = this.postTransformXflowRequests.length;
+            while(i--){
+                this.postTransformXflowRequests[i].clear();
+            }
             rec_removeRenderNodes(this.renderNode, true);
+            this.postTransformXflowRequests.length = 0;
+            this.postTransformRenderGroups.length = 0;
         },
 
         createModelRenderNodes: function(){
@@ -81,6 +89,22 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         onAssetChange: function(){
             this.createModelRenderNodes();
         },
+        onXflowRequestChange: function(request){
+            var index = this.postTransformXflowRequests.indexOf(request);
+            if(index != -1){
+                this.updatePostTransform(this.postTransformRenderGroups[index], request);
+            }
+        },
+        updatePostTransform: function(renderNode, xflowRequest){
+            var dataResult =  xflowRequest.getResult();
+            var transformData = (dataResult.getOutputData("transform") && dataResult.getOutputData("transform").getValue());
+            if(!transformData){
+                XML3D.debug.logWarning("Post Transform entry does not contain any 'transform' value.", this.node);
+                renderNode.setLocalMatrix(c_IDENTITY);
+                return;
+            }
+            renderNode.setLocalMatrix(transformData);
+        },
         dispose: function () {
             this.asset.removeChangeListener(this);
             this.clearModelRenderNodes();
@@ -100,6 +124,21 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
     }
 
     function rec_createRenderNodes(adapter, parentNode, dataTreeNode){
+
+        if(dataTreeNode.postTransformXflowNode){
+            var request = new Xflow.ComputeRequest(dataTreeNode.postTransformXflowNode,
+                ["transform"], adapter._bindedRequestCallback);
+            parentNode = adapter.getScene().createRenderGroup({
+                parent: parentNode,
+                shaderHandle: undefined,
+                visible: undefined,
+                name: undefined
+            });
+            adapter.postTransformXflowRequests.push(request);
+            adapter.postTransformRenderGroups.push(parentNode);
+            adapter.updatePostTransform(parentNode, request);
+        }
+
         var groupNode = adapter.getScene().createRenderGroup({
             parent: parentNode,
             shaderHandle: adapter.getSubShaderHandle(dataTreeNode.shader),
@@ -107,6 +146,8 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
             name: adapter.node.id
         });
         groupNode.setLocalMatrix(dataTreeNode.transform || c_IDENTITY);
+
+
 
         var meshSets = dataTreeNode.meshes;
         for(var i = 0; i < meshSets.length; ++i){
@@ -122,7 +163,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
                 visible: !adapter.node.visible ? false : undefined
             });
             renderNode.setLocalMatrix(meshSets[i].transform || c_IDENTITY);
-            adapter.renderObjects.push(renderNode);
         }
         var groups = dataTreeNode.groups;
         for(var i = 0; i < groups.length; ++i){

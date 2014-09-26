@@ -276,6 +276,7 @@ function invalidateParent(subData){
 //----------------------------------------------------------------------------------------------------------------------
 
 XML3D.base.AssetResult = function(){
+    this.parentResult = null;
     this.name = null;
     this.namedEntries = {};
     this.allEntries = [];
@@ -292,7 +293,7 @@ XML3D.base.AssetResult.prototype.construct = function(asset){
 }
 
 XML3D.base.AssetResult.prototype.getDataTree = function(){
-    return rec_getDataTree(this, []);
+    return rec_getDataTree(this);
 }
 
 
@@ -378,6 +379,7 @@ function mergeSubAssetResult(table, srcSubTable){
     }
     else{
         destSubTable = new XML3D.base.AssetResult();
+        destSubTable.parentResult = table;
         destSubTable.name = srcSubTable.name;
         table.allSubResults.push(destSubTable);
         if(destSubTable.name) table.namedSubResults[destSubTable.name] = destSubTable;
@@ -385,20 +387,19 @@ function mergeSubAssetResult(table, srcSubTable){
     copySrcTable(destSubTable, srcSubTable, destSubTable.pickFilter);
 }
 
-function rec_getDataTree(table, parentTables){
+function rec_getDataTree(table){
     var node = {
         meshes: [],
         groups: [],
         transform: table.transform,
         shader: table.shader,
-        postTransformNode: null
+        postTransformXflowNode: null
     };
-    parentTables.push(table);
 
     for(var i = 0; i < table.allEntries.length; ++i){
         var entry = table.allEntries[i];
         if(entry.meshType && (!table.pickFilter || table.pickFilter.check(entry)) ){
-            updateAccumulatedNode(table, entry, parentTables);
+            updateAccumulatedNode(table, entry);
             node.meshes.push({
                 xflowNode: entry.accumulatedXflowNode,
                 type: entry.meshType,
@@ -408,15 +409,19 @@ function rec_getDataTree(table, parentTables){
             });
         }
     }
+    var postTransformEntry = table.namedEntries["_postTransform"];
+    if(postTransformEntry){
+        updateAccumulatedNode(table, postTransformEntry);
+        node.postTransformXflowNode = postTransformEntry.accumulatedXflowNode;
+    }
     for(var i = 0; i < table.allSubResults.length; ++i){
-        var subNode = rec_getDataTree(table.allSubResults[i], parentTables);
+        var subNode = rec_getDataTree(table.allSubResults[i]);
         node.groups.push(subNode);
     }
-    parentTables.pop();
     return node;
 }
 
-function updateAccumulatedNode(table, entry, parentTables){
+function updateAccumulatedNode(table, entry){
     if(!entry.outOfSync)
         return;
 
@@ -435,7 +440,7 @@ function updateAccumulatedNode(table, entry, parentTables){
     for(var i = 0; i < entry.postQueue.length; ++i){
         var includes = entry.postQueue[i].includes;
         for(var j = 0; j < includes.length; ++j){
-            var addEntry = getIncludeEntry(parentTables, includes[j]);
+            var addEntry = getIncludeEntry(table, includes[j]);
             dataNode.appendChild(addEntry.accumulatedXflowNode);
         }
         if(entry.postQueue[i].xflowNode)
@@ -456,20 +461,28 @@ function updateAccumulatedNode(table, entry, parentTables){
     entry.outOfSync = false;
 }
 
-function getIncludeEntry(parentTables, includeString){
-    var parentSteps = 0;
-    var key = "parent.";
-    while(includeString.indexOf(key) == 0){
-        includeString = includeString.substr(key.length);
-        parentSteps++;
+function getIncludeEntry(table, includeString){
+    var segments = includeString.split(".");
+    for(var i = 0; i < segments.length -1; ++i){
+        var seg = segments[i];
+        if(seg == "parent"){
+            if(!table.parentResult)
+                throw new Error("Includes entry '" + includeString + "' (token "+ i +") accesses non existent parent.");
+            table = table.parentResult;
+        }
+        else{
+            if(!table.namedSubResults[seg])
+                throw new Error("Includes entry '" + includeString + "' (token "+ i +") accesses non existent sub result '" + seg + "'");
+            table = table.namedSubResults[seg];
+        }
     }
-    if(parentSteps >= parentTables.length){
-        throw new Error("Parent access out of bounds!");
+    var entryKey = segments[segments.length - 1];
+    var entry = table.namedEntries[entryKey];
+    if(!entry){
+        throw new Error("Includes entry '" + includeString + "' accesses non existent asset entry '" + entryKey + "'" );
     }
-    var table = parentTables[parentTables.length - 1 - parentSteps];
-    var entry = table.namedEntries[includeString];
 
-    updateAccumulatedNode(table, entry, parentSteps ? parentTables.slice(0, -parentSteps) : parentTables);
+    updateAccumulatedNode(table, entry);
     return entry;
 }
 

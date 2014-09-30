@@ -173,9 +173,9 @@ XML3D.shaders.register("phong", {
 
 		"#if MAX_POINTLIGHTS > 0",
         "  for (int i = 0; i < MAX_POINTLIGHTS; i++) {",
+        "    shadowInfluence = 1.0;",
         "    if(pointLightOn[i]){",
         "   #if HAS_POINTLIGHT_SHADOWMAPS",
-        "       shadowInfluence = 1.0;",
         "       if(pointLightCastShadow[i]){",
         "           shadowInfluence = 0.0;",
         "           float lsDepth = vecToDepth(pointLightShadowMapDirection[i], pointLightNearFar[i].x, pointLightNearFar[i].y );",
@@ -206,9 +206,9 @@ XML3D.shaders.register("phong", {
 
         "#if MAX_SPOTLIGHTS > 0",
         "  for (int i=0; i<MAX_SPOTLIGHTS; i++) {",
+        "    shadowInfluence = 1.0;",
         "    if(spotLightOn[i]) {",
         "  #if HAS_SPOTLIGHT_SHADOWMAPS",
-        "       shadowInfluence = 1.0;",
         "       if(spotLightCastShadow[i]){",
         "           shadowInfluence = 0.0;",
         "           vec4 lspos = spotLightShadowMapCoord[i];",
@@ -250,8 +250,8 @@ XML3D.shaders.register("phong", {
 
         "#if MAX_DIRECTIONALLIGHTS > 0",
         "  for (int i=0; i<MAX_DIRECTIONALLIGHTS; i++) {",
+        "   shadowInfluence = 1.0;",
         "   if(directionalLightOn[i]){",
-        "      shadowInfluence = 1.0;",
         "   #if HAS_DIRECTIONALLIGHT_SHADOWMAPS",
         "       if(directionalLightCastShadow[i]){",
         "           shadowInfluence = 0.0;",
@@ -290,9 +290,9 @@ XML3D.shaders.register("phong", {
         directives.push("MAX_POINTLIGHTS " + pointLights);
         directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
         directives.push("MAX_SPOTLIGHTS " + spotLights);
-        directives.push("HAS_POINTLIGHT_SHADOWMAPS " + (lights.point && !lights.point.every(function(light) { return !light.castShadow; }) | 0));
-        directives.push("HAS_SPOTLIGHT_SHADOWMAPS " + (lights.spot && !lights.spot.every(function(light) { return !light.castShadow; }) | 0));
-        directives.push("HAS_DIRECTIONALLIGHT_SHADOWMAPS " + (lights.directional && !lights.directional.every(function(light) { return !light.castShadow; }) | 0));
+        directives.push("HAS_POINTLIGHT_SHADOWMAPS " + (lights.point && !lights.point.every(function(light) { return !light.castShadow; })? "1" : "0"));
+        directives.push("HAS_SPOTLIGHT_SHADOWMAPS " + (lights.spot && !lights.spot.every(function(light) { return !light.castShadow; })? "1" : "0"));
+        directives.push("HAS_DIRECTIONALLIGHT_SHADOWMAPS " + (lights.directional && !lights.directional.every(function(light) { return !light.castShadow; }) ? "1" : "0"));
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
         directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));

@@ -27,6 +27,7 @@
     EXTENSIONS.DEPTH_TEXTURE = 'WEBGL_depth_texture';
     EXTENSIONS.FLOAT_COLOR_BUFFER = 'WEBGL_color_buffer_float';
     EXTENSIONS.FLOAT_TEXTURES = 'OES_texture_float';
+    EXTENSIONS.UINT32_INDICES = 'OES_element_index_uint';
 
     XML3D.extend(GLContext.prototype, {
         getXflowEntryWebGlData: function (entry) {

@@ -143,7 +143,8 @@ var Xflow = {};
         LOAD_START: 3,
         LOAD_END: 4,
         CHANGED_SIZE: 5,
-        CHANGED_REMOVED: 6
+        CHANGED_REMOVED: 6,
+        CHANGED_SIZE_TYPE: 7
     };
 
     Xflow.RESULT_TYPE = {

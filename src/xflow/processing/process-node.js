@@ -64,7 +64,7 @@ ProcessNode.prototype.startAsyncProcessing = function(){
 }
 ProcessNode.prototype.receiveAsyncProcessing = function(){
     this.status = Xflow.PROCESS_STATE.PROCESSED;
-    this.notifyOutputChanged(Xflow.DATA_ENTRY_STATE.CHANGED_SIZE);
+    this.notifyOutputChanged(Xflow.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE);
     if(this.asyncProcessState == ASYNC_PROCESS_STATE.RESCHEDULED){
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
         this.status = Xflow.PROCESS_STATE.MODIFIED;

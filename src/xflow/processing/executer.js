@@ -46,10 +46,13 @@
             this.operatorList.allocateOutput(this.programData, !!asyncCallback);
             this.program.run(this.programData, asyncCallback);
         }
-        var i = this.mergedOutputNodes.length;
-        while(i--){
-            this.mergedOutputNodes[i].status = Xflow.PROCESS_STATE.PROCESSED;
+        if(this.platform != Xflow.PLATFORM.ASYNC){
+            var i = this.mergedOutputNodes.length;
+            while(i--){
+                this.mergedOutputNodes[i].status = Xflow.PROCESS_STATE.PROCESSED;
+            }
         }
+
 
     }
 

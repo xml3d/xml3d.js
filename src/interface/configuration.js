@@ -363,6 +363,7 @@ XML3D.classInfo['assetmesh'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     name: {a: XML3D.StringAttributeHandler},
+    match: {a: XML3D.StringAttributeHandler},
     type: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.MeshTypes, d: 0}},
     compute: {a: XML3D.StringAttributeHandler},
     filter: {a: XML3D.StringAttributeHandler},

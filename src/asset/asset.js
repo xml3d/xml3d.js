@@ -190,6 +190,7 @@ XML3D.base.SubData = function(xflowNodeOut, xflowNodeIn, refNode){
     this.xflowNodeIn = xflowNodeIn;
     this.refNode = refNode || null;
     this.name = null;
+    this.matchFilter = null;
     this.classNames = [];
     this.postDataflow = null;
     this.postCompute = null;
@@ -209,8 +210,22 @@ XML3D.base.SubData.prototype.setLoading = function(loading){
     }
 }
 
+XML3D.base.SubData.prototype.isMesh = function(){
+    return !!this.meshType;
+}
+
 XML3D.base.SubData.prototype.setName = function(name){
     this.name = name;
+    invalidateParent(this);
+}
+
+XML3D.base.SubData.prototype.setMatchFilter = function(matchString){
+    if(typeof matchString == "string"){
+        this.matchFilter = new AssetPickFilter();
+        this.matchFilter.parse(matchString);
+    }
+    else
+        this.matchFilter = null;
     invalidateParent(this);
 }
 
@@ -280,6 +295,7 @@ XML3D.base.AssetResult = function(){
     this.name = null;
     this.namedEntries = {};
     this.allEntries = [];
+    this.matchEntries = [];
     this.namedSubResults = {};
     this.allSubResults = [];
 
@@ -317,44 +333,95 @@ function constructAssetTable(table, asset){
         var result = subAssets[i].getResult();
         mergeSubAssetResult(table, result);
     }
-
+    var matchChildren = [];
     var children = asset.children;
     for(var i = 0; i < children.length; ++i){
         var child = children[i];
         var name = child.name;
         var entry;
+        if(child.name && child.matchFilter){
+            XML3D.debug.logWarning("Asset entry defines both name and match attribute. Match attribute will be ignored", child.refNode);
+        }
         if(name){
             if(!table.namedEntries[name]){
-                entry = new AssetTableEntry();
+                entry = new AssetTableEntry(child);
+                applyMatchEntries(entry, table.matchEntries);
                 table.namedEntries[name] = entry;
                 table.allEntries.push(entry);
             }
             else
                 entry = table.namedEntries[name];
         }
+        else if(child.matchFilter){
+            matchChildren.push(child);
+            continue;
+        }
         else{
-            entry = new AssetTableEntry();
+            entry = new AssetTableEntry(child);
+            applyMatchEntries(entry, table.matchEntries);
             table.allEntries.push(entry);
         }
         entry.pushPostEntry(child);
     }
+    for(var i = 0; i < matchChildren.length; ++i){
+        var child = matchChildren[i];
+        var matchEntry = {filter: child.matchFilter, subdata: child};
+        table.matchEntries.push(matchEntry);
+        for(var j = 0; j < table.allEntries.length; ++j){
+            applyMatchEntry(table.allEntries[j], matchEntry);
+        }
+    }
 }
 
+function applyMatchEntries(destEntry, matchEntries){
+    for(var i = 0; i < matchEntries.length; ++i){
+        applyMatchEntry(destEntry, matchEntries[i]);
+    }
+}
+
+function applyMatchEntry(destEntry, matchEntry){
+    var child = matchEntry.subdata;
+    if(child.isMesh() == destEntry.isMesh() && matchEntry.filter.check(destEntry)){
+        destEntry.pushPostEntry(child);
+    }
+}
+
+
 function copySrcTable(table, srcTable, pickFilter){
+
+    if(srcTable.matchEntries.length > 0){
+        var i = table.allEntries.length;
+        while(i--){
+            var entry = table.allEntries[i];
+            if(!entry.name || !srcTable.namedEntries[entry.name]){
+                applyMatchEntries(entry, srcTable.matchEntries);
+            }
+        }
+    }
+
+
     var i = srcTable.allEntries.length;
     while(i--){
         var srcEntry = srcTable.allEntries[i];
-        var destEntry;
+        var destEntry, newlyCreated = false;
         if(srcEntry.name && table.namedEntries[srcEntry.name]){
             destEntry = table.namedEntries[srcEntry.name];
         }
         else{
             destEntry = new AssetTableEntry();
+            newlyCreated = true;
             table.allEntries.push(destEntry);
         }
         destEntry.pushTableEntry(srcEntry);
+        if(newlyCreated)
+            applyMatchEntries(destEntry, table.matchEntries);
+
         if(destEntry.name) table.namedEntries[destEntry.name] = destEntry;
     }
+
+    table.matchEntries.push.apply(table.matchEntries, srcTable.matchEntries);
+
+
     var i = srcTable.allSubResults.length;
     while(i--){
         mergeSubAssetResult(table, srcTable.allSubResults[i]);
@@ -489,7 +556,7 @@ function getIncludeEntry(table, includeString){
 
 
 
-function AssetTableEntry (){
+function AssetTableEntry (subData){
     this.name = null;
     this.classNames = [];
     this.meshType = null;
@@ -501,6 +568,14 @@ function AssetTableEntry (){
     this.accumulatedXflowNode = null;
     this.outOfSync = true;
     this.refNode = null;
+    if(subData){
+        this.name = subData.name;
+        Xflow.utils.set.add(this.classNames, subData.classNames);
+    }
+}
+
+AssetTableEntry.prototype.isMesh = function(){
+    return !!this.meshType;
 }
 
 AssetTableEntry.prototype.pushTableEntry = function(srcEntry){
@@ -541,6 +616,7 @@ function combineTransform(oldTransform, newTransform){
 
 
 function AssetPickFilter(){
+    this.all = false;
     this.names = [];
     this.classNames = [];
 }
@@ -550,7 +626,10 @@ AssetPickFilter.prototype.parse = function(string){
     var i = entries.length;
     while(i--){
         var entry = entries[i].trim();
-        if(entry.indexOf(".") == 0){
+        if(entry == "*"){
+            this.all = true;
+        }
+        else if(entry.indexOf(".") == 0){
             var classNames = entry.split(".");
             var j = classNames.length;
             while(j--){
@@ -571,6 +650,8 @@ AssetPickFilter.prototype.intersection = function(setA, setB){
 }
 
 AssetPickFilter.prototype.check = function(entry){
+    if(this.all)
+        return true;
     if(entry.classNames.length > 0){
         var i = this.classNames.length;
         while(i--){

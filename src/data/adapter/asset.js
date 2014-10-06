@@ -221,6 +221,7 @@ XML3D.data.AssetMeshAdapter.prototype.init = function() {
     XML3D.data.AssetDataAdapter.prototype.init.call(this);
     setShaderUrl(this, this.assetEntry);
     this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles");
+    this.assetEntry.setMatchFilter(this.node.getAttribute("match"));
     this.transformFetcher.update();
 };
 XML3D.data.AssetMeshAdapter.prototype.notifyChanged = function(evt) {
@@ -229,6 +230,7 @@ XML3D.data.AssetMeshAdapter.prototype.notifyChanged = function(evt) {
         var attr = evt.wrapped.attrName;
         switch(attr){
             case "shader": setShaderUrl(this, this.assetEntry); break;
+            case "match": this.assetEntry.setMatchFilter(this.node.getAttribute("match")); break;
             case "style":
             case "transform": this.transformFetcher.update(); break;
             case "type": this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles")

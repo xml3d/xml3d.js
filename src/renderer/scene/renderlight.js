@@ -247,66 +247,67 @@
             return function() {
                 if(this.parent){
                     this.parent.getWorldMatrix(tmp_mat);
-                    this.updateLightTransformData(tmp_mat);
-
-                    //calculate parameters for corresp. light type
-                    if (this.light.type == "directional")
-                     {
-                         var bb = new XML3D.math.bbox.create();
-                         this.scene.getBoundingBox(bb);
-                         var bbSize = XML3D.math.vec3.create();
-                         var bbCenter = XML3D.math.vec3.create();
-                         var off = XML3D.math.vec3.create();
-                         XML3D.math.bbox.center(bbCenter, bb);
-                         XML3D.math.bbox.size(bbSize,bb);
-                         var d = XML3D.math.vec3.len(bbSize); //diameter of bounding sphere of the scene
-                         XML3D.math.vec3.scale(off, this.direction, -0.55*d); //enlarge a bit on the radius of the scene
-                         this.position = XML3D.math.vec3.add(this.position, bbCenter, off);
-                         this.fallOffAngle = 1.568;// set to a default of PI/2, recalculated later
-
-                    } else if (this.light.type == "spot") {
-                        //nothing to do
-                    } else if (this.light.type == "point"){
-                        //this.fallOffAngle = Math.PI/4.0;  //calculated on initialization of renderlight
-                    } else {
-                        XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type);
-                    }
-
-                    //create new transformation matrix depending on the updated parameters
-                    XML3D.math.mat4.identity(tmp_mat);
-                    var lookat_mat = XML3D.math.mat4.create();
-                    var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
-                    if((this.direction[0] == 0.0) && (this.direction[2] == 0.0)) //check if top_vec colinear with direction
-                        top_vec = XML3D.math.vec3.fromValues(0.0, 0.0, 1.0);
-                    var up_vec  = XML3D.math.vec3.create();
-                    var dir_len = XML3D.math.vec3.len(this.direction);
-                    XML3D.math.vec3.scale(up_vec, this.direction, -XML3D.math.vec3.dot(top_vec, this.direction) / (dir_len * dir_len));
-                    XML3D.math.vec3.add(up_vec, up_vec, top_vec);
-                    XML3D.math.vec3.normalize(up_vec, up_vec);
-                    XML3D.math.mat4.lookAt(lookat_mat, XML3D.math.vec3.fromValues(0.0, 0.0, 0.0), this.direction, up_vec);
-                    XML3D.math.mat4.invert(lookat_mat, lookat_mat);
-                    XML3D.math.mat4.translate(tmp_mat, tmp_mat, this.position);
-                    XML3D.math.mat4.multiply(tmp_mat, tmp_mat, lookat_mat);
                     this.setWorldMatrix(tmp_mat);
-
-
-                    if (this.light.type == "directional"){ //adjust foa for directional light - needs world Matrix
-                        var bb = new XML3D.math.bbox.create();
-                        this.scene.getBoundingBox(bb);
-                        XML3D.math.bbox.transform(bb, tmp_mat, bb);
-                        var bbSize = XML3D.math.vec3.create();
-                        XML3D.math.bbox.size(bbSize,bb);
-                        var max = (bbSize[0]>bbSize[1])?bbSize[0]:bbSize[1];
-                        max = 0.55*(max);//enlarge 10percent to make sure nothing gets cut off
-                        this.fallOffAngle = Math.atan(max);
-                    }
-
+                    this.updateLightTransformData(tmp_mat);
                 }
             }
         })(),
 
         getWorldToLightMatrix: function (mat4) {
             this.getWorldMatrix(mat4);
+
+            //calculate parameters for corresp. light type
+            if (this.light.type == "directional")
+            {
+                var bb = new XML3D.math.bbox.create();
+                this.scene.getBoundingBox(bb);
+                var bbSize = XML3D.math.vec3.create();
+                var bbCenter = XML3D.math.vec3.create();
+                var off = XML3D.math.vec3.create();
+                XML3D.math.bbox.center(bbCenter, bb);
+                XML3D.math.bbox.size(bbSize,bb);
+                var d = XML3D.math.vec3.len(bbSize); //diameter of bounding sphere of the scene
+                XML3D.math.vec3.scale(off, this.direction, -0.55*d); //enlarge a bit on the radius of the scene
+                this.position = XML3D.math.vec3.add(this.position, bbCenter, off);
+                this.fallOffAngle = 1.568;// set to a default of PI/2, recalculated later
+
+            } else if (this.light.type == "spot") {
+                //nothing to do
+            } else if (this.light.type == "point"){
+                //this.fallOffAngle = Math.PI/4.0;  //calculated on initialization of renderlight
+            } else {
+                XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type);
+            }
+
+            //create new transformation matrix depending on the updated parameters
+            XML3D.math.mat4.identity(mat4);
+            var lookat_mat = XML3D.math.mat4.create();
+            var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
+            if((this.direction[0] == 0.0) && (this.direction[2] == 0.0)) //check if top_vec colinear with direction
+                top_vec = XML3D.math.vec3.fromValues(0.0, 0.0, 1.0);
+            var up_vec  = XML3D.math.vec3.create();
+            var dir_len = XML3D.math.vec3.len(this.direction);
+            XML3D.math.vec3.scale(up_vec, this.direction, -XML3D.math.vec3.dot(top_vec, this.direction) / (dir_len * dir_len));
+            XML3D.math.vec3.add(up_vec, up_vec, top_vec);
+            XML3D.math.vec3.normalize(up_vec, up_vec);
+            XML3D.math.mat4.lookAt(lookat_mat, XML3D.math.vec3.fromValues(0.0, 0.0, 0.0), this.direction, up_vec);
+            XML3D.math.mat4.invert(lookat_mat, lookat_mat);
+            XML3D.math.mat4.translate(mat4, mat4, this.position);
+            XML3D.math.mat4.multiply(mat4, mat4, lookat_mat);
+           // this.setWorldMatrix(mat4);
+
+
+            if (this.light.type == "directional"){ //adjust foa for directional light - needs world Matrix
+                var bb = new XML3D.math.bbox.create();
+                this.scene.getBoundingBox(bb);
+                XML3D.math.bbox.transform(bb, mat4, bb);
+                var bbSize = XML3D.math.vec3.create();
+                XML3D.math.bbox.size(bbSize,bb);
+                var max = (bbSize[0]>bbSize[1])?bbSize[0]:bbSize[1];
+                max = 0.55*(max);//enlarge 10percent to make sure nothing gets cut off
+                this.fallOffAngle = Math.atan(max);
+            }
+
             XML3D.math.mat4.invert(mat4, mat4);
         },
 

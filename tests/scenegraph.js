@@ -349,6 +349,7 @@ test("mesh's getWorldMatrix()", function() {
 });
 
 test("light's getWorldMatrix()", function() {
+    //(Rotation of PointLight might be ignored, resulting in wrong result)
     this.simpleMatrixTest(this.doc.getElementById("myLight"));
 });
 

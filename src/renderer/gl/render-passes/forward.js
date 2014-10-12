@@ -42,6 +42,8 @@
                     reassignShadowNames.push(name);
                     var lightPasses = this.lightPasses[name];
                     scene.systemUniforms[name] = [];
+                    if(typeof lightPasses == 'undefined')
+                        continue;
                     for(var i = 0; i < lightPasses.length; ++i){
                         var output = lightPasses[i].output;
                         var handle = output && output.colorTarget && output.colorTarget.handle;

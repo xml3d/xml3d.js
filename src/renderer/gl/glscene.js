@@ -47,8 +47,8 @@
 
     XML3D.createClass(GLScene, webgl.Scene);
 
-    GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn",
-         "directionalLightDirection", "directionalLightIntensity", "directionalLightOn",
+    GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn", "pointLightCastShadow", "pointLightMatrix", "pointLightShadowBias", "pointLightNearFar",
+         "directionalLightDirection", "directionalLightIntensity", "directionalLightOn", "directionalLightCastShadow", "directionalLightMatrix", "directionalLightShadowBias",
          "spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection",
          "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias"];
 
@@ -107,7 +107,7 @@
         updateLightParameters: function(){
             var parameters = this.systemUniforms, lights = this.lights;
 
-            var pointLightData = { position: [], attenuation: [], intensity: [], on: [] };
+            var pointLightData = { position: [], attenuation: [], intensity: [], on: [], castShadow: [], lightMatrix: [], shadowBias: [], lightNearFar: [] };
             lights.point.forEach(function (light, index) {
                 light.getLightData(pointLightData, index);
             });
@@ -115,14 +115,21 @@
             parameters["pointLightAttenuation"] = pointLightData.attenuation;
             parameters["pointLightIntensity"] = pointLightData.intensity;
             parameters["pointLightOn"] = pointLightData.on;
+            parameters["pointLightCastShadow"] = pointLightData.castShadow;
+            parameters["pointLightMatrix"] = pointLightData.lightMatrix;
+            parameters["pointLightShadowBias"] = pointLightData.shadowBias;
+            parameters["pointLightNearFar"] = pointLightData.lightNearFar;
 
-            var directionalLightData = { direction: [], intensity: [], on: [] };
+            var directionalLightData = { direction: [], intensity: [], on: [], castShadow: [], lightMatrix: [], shadowBias: []  };
             lights.directional.forEach(function (light, index) {
                 light.getLightData(directionalLightData, index);
             });
             parameters["directionalLightDirection"] = directionalLightData.direction;
             parameters["directionalLightIntensity"] = directionalLightData.intensity;
             parameters["directionalLightOn"] = directionalLightData.on;
+            parameters["directionalLightCastShadow"] = directionalLightData.castShadow;
+            parameters["directionalLightMatrix"] = directionalLightData.lightMatrix;
+            parameters["directionalLightShadowBias"] = directionalLightData.shadowBias;
 
             var spotLightData = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [], castShadow: [], lightMatrix: [], shadowBias: [] };
             lights.spot.forEach(function (light, index) {

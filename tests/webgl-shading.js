@@ -33,7 +33,7 @@ test("Phong fragment shader", function() {
     equal(typeof phong.addDirectives, "function", "Function 'addDirectives' exists");
     var directives = [];
     phong.addDirectives.call(phong, directives, {}, {});
-    equal(directives.length, 8, "8 directives from phong shader");
+    equal(directives.length, 10, "10 directives from phong shader");
 
     var fragment1 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment1, "Phong fragment without globals compiles.");
@@ -44,11 +44,9 @@ test("Phong fragment shader", function() {
 
     directives = [];
     phong.addDirectives.call(phong, directives, {
-        point : {
-            length : 2
-        }
+        point : [{castShadow : false},{castShadow : false}]
     }, {});
-    equal(directives.length, 8, "8 directives from phong shader");
+    equal(directives.length, 10, "10 directives from phong shader");
     var fragment2 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment2, "Phong fragment with 2 point lights compiles.");
     notEqual(fragment2.indexOf("MAX_POINTLIGHTS 2"), -1, "MAX_POINTLIGHTS set");
@@ -58,9 +56,7 @@ test("Phong fragment shader", function() {
 
     directives = [];
     phong.addDirectives.call(phong, directives, {
-        directional : {
-            length : 1
-        }
+        directional : [{castShadow : false}]
     }, {});
     var fragment3 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment3, "Phong fragment with 1 directional light compiles.");
@@ -71,9 +67,7 @@ test("Phong fragment shader", function() {
 
     directives = [];
     phong.addDirectives.call(phong, directives, {
-        directional : {
-            length : 1
-        }
+        directional : [{castShadow : false}]
     }, {
         diffuseTexture : {}
     });
@@ -86,12 +80,11 @@ test("Phong fragment shader", function() {
 
     directives = [];
     phong.addDirectives.call(phong, directives, {
-        directional : {
-            length : 0
-        },
-        point : {
-            length : 20
-        }
+        directional : [],
+        point : [{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},
+            {castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},
+            {castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},
+            {castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false}]
     }, {
         specularTexture : {}
     });
@@ -107,12 +100,8 @@ test("Phong fragment shader", function() {
 
     directives = [];
     phong.addDirectives.call(phong, directives, {
-        directional : {
-            length : 3
-        },
-        point : {
-            length : 5
-        }
+        directional : [{castShadow : false},{castShadow : false},{castShadow : false}],
+        point : [{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false}]
     }, {
         diffuseTexture : {},
         specularTexture : {},

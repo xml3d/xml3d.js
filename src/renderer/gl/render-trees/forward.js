@@ -29,7 +29,12 @@
             }
             else{
                 if(light.light.type == "spot")
-                    light.userData = this.createLightPass(light)
+                    light.userData = this.createLightPass(light);
+                else if(light.light.type == "directional")
+                    light.userData = this.createLightPass(light);
+                else if(light.light.type == "point") {
+                    light.userData = this.createPointLightPass(light);
+                }
             }
             this.reassignLightPasses(evt.target);
         },
@@ -47,23 +52,49 @@
                 if(spotLight.castShadow)
                     spotLight.userData && spotLight.userData.setProcessed(false);
             }
+            for (var i = 0; i < scene.lights.directional.length; i++) {
+                var directionalLight = scene.lights.directional[i];
+                if(directionalLight.castShadow)
+                    directionalLight.userData && directionalLight.userData.setProcessed(false);
+            }
+            for (var i = 0; i < scene.lights.point.length; i++) {
+                var pointLight = scene.lights.point[i];
+                if(pointLight.castShadow)
+                    pointLight.userData && pointLight.userData.setProcessed(false);
+            }
         },
         onShaderChange: function(evt) {
             this.reassignLightPasses(evt.target);
         },
 
         createLightPass: function(light){
-            var context = this.renderInterface.context
-			var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
-			var lightFramebuffer  = new webgl.GLRenderTarget(context, {
-				width: dimension,
-				height: dimension,
-				colorFormat: context.gl.RGBA,
-				depthFormat: context.gl.DEPTH_COMPONENT16,
-				stencilFormat: null,
-				depthAsRenderbuffer: true
-			});
+            var context = this.renderInterface.context;
+            var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
+            var lightFramebuffer  = new webgl.GLRenderTarget(context, {
+                width: dimension,
+                height: dimension,
+                colorFormat: context.gl.RGBA,
+                depthFormat: context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
             var lightPass = new webgl.LightPass(this.renderInterface, lightFramebuffer, light);
+            lightPass.init(context);
+            return lightPass;
+        },
+
+        createPointLightPass: function(light){
+            var context = this.renderInterface.context;
+            var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
+            var lightFramebuffer  = new webgl.GLCubeMapRenderTarget(context, {
+                    width: dimension,
+                    height: dimension,
+                    colorFormat: context.gl.RGBA,
+                    depthFormat: context.gl.DEPTH_COMPONENT16,
+                    stencilFormat: null,
+                    depthAsRenderbuffer: true
+                });
+            var lightPass = new webgl.PointLightPass(this.renderInterface, lightFramebuffer, light);
             lightPass.init(context);
             return lightPass;
         },
@@ -75,6 +106,14 @@
             for (var i = 0; i < scene.lights.spot.length; i++) {
                 var spotLight = scene.lights.spot[i];
                 this.mainPass.addLightPass("spotLightShadowMap", spotLight.userData);
+            }
+            for (var i = 0; i < scene.lights.directional.length; i++) {
+                var directionalLight = scene.lights.directional[i];
+                this.mainPass.addLightPass("directionalLightShadowMap", directionalLight.userData);
+            }
+            for (var i = 0; i < scene.lights.point.length; i++) {
+                var pointLight = scene.lights.point[i];
+                this.mainPass.addLightPass("pointLightShadowMap", pointLight.userData);
             }
         },
 

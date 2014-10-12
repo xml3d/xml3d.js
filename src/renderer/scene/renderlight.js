@@ -10,7 +10,9 @@
     /** @const */
     var LIGHT_DEFAULT_ATTENUATION = XML3D.math.vec3.fromValues(0,0,1);
     /** @const */
-    var LIGHT_DEFAULT_SHADOW_BIAS = 0.001;
+    var POINT_LIGHT_DEFAULT_SHADOW_BIAS = 0.0001;
+    var SPOT_LIGHT_DEFAULT_SHADOW_BIAS = 0.001;
+    var DIRECTIONAL_LIGHT_DEFAULT_SHADOW_BIAS = 0.0045;
     /** @const */
     var SPOTLIGHT_DEFAULT_FALLOFFANGLE = Math.PI / 4.0;
     /** @const */
@@ -47,6 +49,7 @@
             type : light.type || "directional",
             data : light.data
         }
+
         this.intensity   = XML3D.math.vec3.clone(LIGHT_DEFAULT_INTENSITY);
         this.srcPosition    = XML3D.math.vec3.fromValues(0,0,0);
         this.srcDirection   = XML3D.math.vec3.clone(XML3D_DIRECTIONALLIGHT_DEFAULT_DIRECTION);
@@ -75,26 +78,34 @@
     XML3D.extend(RenderLight.prototype, {
 
         getFrustum: function(aspect) {
-            return new XML3D.webgl.Frustum(1.0, 200.0, 0, this.fallOffAngle*2, aspect)
+            var orthogonal = this.light.type == "directional";
             var t_mat = XML3D.math.mat4.create();
             var bb = new XML3D.math.bbox.create();
             this.scene.getBoundingBox(bb);
 
             if (XML3D.math.bbox.isEmpty(bb)) {
-                return new XML3D.webgl.Frustum(1.0, 110.0, 0, this.fallOffAngle*2, aspect)
+                return new XML3D.webgl.Frustum(1.0, 110.0, 0, this.fallOffAngle*2, aspect, orthogonal)
             }
             this.getWorldToLightMatrix(t_mat);
 
             XML3D.math.bbox.transform(bb, t_mat, bb);
 
-            var near = -bb[5],
-                far = -bb[2],
-                expand = Math.max((far - near) * 0.30, 0.05);
+            var near = 1.0,
+                far  = 2.0;
+            if(this.light.type == "point") {
+                //TODO optimise near ?
+                near = 1.0;
+                far = Math.max(Math.abs(bb[0]),Math.abs(bb[1]), Math.abs(bb[2]), Math.abs(bb[3]), Math.abs(bb[4]), Math.abs(bb[5]));
+            }else {
+                near = -bb[5];
+                far = -bb[2];
+            }
+            var expand = Math.max((far - near) * 0.30, 0.05);
 
             // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
             far += expand;
             near -= expand;
-            return new XML3D.webgl.Frustum(1.0, far, 0, this.fallOffAngle*2, aspect);
+            return new XML3D.webgl.Frustum(1.0, far, 0, this.fallOffAngle*2, aspect, orthogonal);
         },
 
         addLightToScene : function() {
@@ -185,7 +196,12 @@
                     if(target["shadowBias"]) {
                         result = this.lightParameterRequest.getResult();
                         data = result.getOutputData("shadowBias");
-                        target["shadowBias"][offset] = data ? data.getValue()[0] : LIGHT_DEFAULT_SHADOW_BIAS;
+                        if(this.light.type == "point")
+                            target["shadowBias"][offset] = data ? data.getValue()[0] : POINT_LIGHT_DEFAULT_SHADOW_BIAS;
+                        else if(this.light.type == "spot")
+                            target["shadowBias"][offset] = data ? data.getValue()[0] : SPOT_LIGHT_DEFAULT_SHADOW_BIAS;
+                        else if(this.light.type == "directional")
+                            target["shadowBias"][offset] = data ? data.getValue()[0] : DIRECTIONAL_LIGHT_DEFAULT_SHADOW_BIAS;
                     }
                     if(target["lightMatrix"]) {
                         var tmp = XML3D.math.mat4.create();
@@ -193,6 +209,14 @@
                         var off16 = offset*16;
                         for(var i = 0; i < 16; i++) {
                             target["lightMatrix"][off16+i] = tmp[i];
+                        }
+                    }
+                    if(target["lightNearFar"]){
+                        var tmpFrustum = this.getFrustum(1);
+                        var tmp = XML3D.math.vec2.fromValues(tmpFrustum.nearPlane, tmpFrustum.farPlane);
+                        var off2 = offset*2;
+                        for(var i = 0; i < 2; i++) {
+                            target["lightNearFar"][off2+i] = tmp[i];
                         }
                     }
                 }
@@ -231,6 +255,59 @@
 
         getWorldToLightMatrix: function (mat4) {
             this.getWorldMatrix(mat4);
+
+            //calculate parameters for corresp. light type
+            if (this.light.type == "directional")
+            {
+                var bb = new XML3D.math.bbox.create();
+                this.scene.getBoundingBox(bb);
+                var bbSize = XML3D.math.vec3.create();
+                var bbCenter = XML3D.math.vec3.create();
+                var off = XML3D.math.vec3.create();
+                XML3D.math.bbox.center(bbCenter, bb);
+                XML3D.math.bbox.size(bbSize,bb);
+                var d = XML3D.math.vec3.len(bbSize); //diameter of bounding sphere of the scene
+                XML3D.math.vec3.scale(off, this.direction, -0.55*d); //enlarge a bit on the radius of the scene
+                this.position = XML3D.math.vec3.add(this.position, bbCenter, off);
+                this.fallOffAngle = 1.568;// set to a default of PI/2, recalculated later
+
+            } else if (this.light.type == "spot") {
+                //nothing to do
+            } else if (this.light.type == "point"){
+                //this.fallOffAngle = Math.PI/4.0;  //calculated on initialization of renderlight
+            } else {
+                XML3D.debug.logWarning("Light transformation not yet implemented for light type: " + this.light.type);
+            }
+
+            //create new transformation matrix depending on the updated parameters
+            XML3D.math.mat4.identity(mat4);
+            var lookat_mat = XML3D.math.mat4.create();
+            var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
+            if((this.direction[0] == 0.0) && (this.direction[2] == 0.0)) //check if top_vec colinear with direction
+                top_vec = XML3D.math.vec3.fromValues(0.0, 0.0, 1.0);
+            var up_vec  = XML3D.math.vec3.create();
+            var dir_len = XML3D.math.vec3.len(this.direction);
+            XML3D.math.vec3.scale(up_vec, this.direction, -XML3D.math.vec3.dot(top_vec, this.direction) / (dir_len * dir_len));
+            XML3D.math.vec3.add(up_vec, up_vec, top_vec);
+            XML3D.math.vec3.normalize(up_vec, up_vec);
+            XML3D.math.mat4.lookAt(lookat_mat, XML3D.math.vec3.fromValues(0.0, 0.0, 0.0), this.direction, up_vec);
+            XML3D.math.mat4.invert(lookat_mat, lookat_mat);
+            XML3D.math.mat4.translate(mat4, mat4, this.position);
+            XML3D.math.mat4.multiply(mat4, mat4, lookat_mat);
+           // this.setWorldMatrix(mat4);
+
+
+            if (this.light.type == "directional"){ //adjust foa for directional light - needs world Matrix
+                var bb = new XML3D.math.bbox.create();
+                this.scene.getBoundingBox(bb);
+                XML3D.math.bbox.transform(bb, mat4, bb);
+                var bbSize = XML3D.math.vec3.create();
+                XML3D.math.bbox.size(bbSize,bb);
+                var max = (bbSize[0]>bbSize[1])?bbSize[0]:bbSize[1];
+                max = 0.55*(max);//enlarge 10percent to make sure nothing gets cut off
+                this.fallOffAngle = Math.atan(max);
+            }
+
             XML3D.math.mat4.invert(mat4, mat4);
         },
 
@@ -238,10 +315,13 @@
             switch (this.light.type) {
                 case "directional":
                     XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
+                    XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
+
                     break;
                 case "spot":
                     XML3D.math.vec3.copy(this.direction, this.applyTransformDir(this.srcDirection, transform));
                     XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));
+
                     break;
                 case "point":
                     XML3D.math.vec3.copy(this.position, this.applyTransform(this.srcPosition, transform));

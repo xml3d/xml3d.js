@@ -228,6 +228,7 @@
             this.addEventListener( EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function(event){
                 this.lightsNeedUpdate = true;
                 this.shaderFactory.setLightStructureDirty();
+                this.context.requestRedraw("Light structure changed.");
             });
             this.addEventListener( EVENT_TYPE.LIGHT_VALUE_CHANGED, function(event){
                 this.lightsNeedUpdate = true;

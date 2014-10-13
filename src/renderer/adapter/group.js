@@ -37,13 +37,15 @@
     p.handleConnectedAdapterEvent = function(evt) {
         switch(evt.type) {
             case XML3D.events.NODE_INSERTED:
+                // This also initializes the children
                 this.initElement(evt.wrapped.target);
-                this.initChildElements(evt.wrapped.target);
                 break;
             case XML3D.events.THIS_REMOVED:
                 this.dispose();
                 break;
             case XML3D.events.ADAPTER_HANDLE_CHANGED:
+                break;
+            case XML3D.events.NODE_REMOVED:
                 break;
             default:
                 XML3D.debug.logWarning("Unhandled connected adapter event for "+evt.key+" in shader adapter");

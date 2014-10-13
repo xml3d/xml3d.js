@@ -91,7 +91,10 @@
         },
 
         removeChild: function(child) {
-            this.children.splice(this.children.indexOf(child), 1);
+            var index = this.children.indexOf(child);
+            if(index != -1) {
+                this.children.splice(index, 1);
+            }
             this.scene.dispatchEvent({type : webgl.Scene.EVENT_TYPE.SCENE_STRUCTURE_CHANGED, removedChild: child});
         },
 

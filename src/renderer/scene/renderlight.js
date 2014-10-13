@@ -112,7 +112,6 @@
             var lightEntry = this.scene.lights[this.light.type];
             if (Array.isArray(lightEntry)) {
                 lightEntry.push(this);
-                this.updateWorldMatrix(); // Implicitly fills light position/direction
                 this.lightStructureChanged(false);
             } else {
                 XML3D.debug.logError("Unsupported light shader script: urn:xml3d:lightshader:" + this.light.type);

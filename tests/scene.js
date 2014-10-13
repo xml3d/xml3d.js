@@ -87,6 +87,37 @@ test("Light callbacks", 9, function () {
 
 });
 
+test("Light removal: Issue #71", function () {
+    var dataNode = this.xflowGraph.createDataNode(false);
+    var group = this.scene.createRenderGroup();
+    this.scene.createRenderLight({ // SC 3: Add a new light to the scene
+        parent: group,
+        light: {
+            data: dataNode,
+            type: "point"
+        }
+    });
+
+    group = this.scene.createRenderGroup();
+    var light = this.scene.createRenderLight({ // SC 3: Add a new light to the scene
+        parent: group,
+        light: {
+            data: dataNode,
+            type: "point"
+        }
+    });
+    this.scene.createRenderGroup({parent: group});
+    this.scene.createRenderGroup({parent: group});
+    equal(group.children.length, 3, "Three children in group.");
+    equal(this.scene.lights.point.length, 2, "Two point lights.");
+    light.remove();
+    equal(group.children.length, 2, "Two children in group.");
+    equal(this.scene.lights.point.length, 1, "One point light.");
+    light.remove();
+    equal(group.children.length, 2, "Two children in group.");
+    equal(this.scene.lights.point.length, 1, "One point light.");
+
+});
 
 test("Bounding Boxes", 7, function () {
     var group = this.scene.createRenderGroup();

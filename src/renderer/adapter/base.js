@@ -22,10 +22,14 @@
     };
 
     /**
-     * @param element
+     * @param {Element} element
      */
     XML3D.webgl.RenderAdapter.prototype.initChildElements = function(element) {
-        this.traverse(this.factory.getAdapter);
+        var child = element.firstElementChild;
+        while (child) {
+            this.initElement(child);
+            child = child.nextElementSibling;
+        }
     };
 
 

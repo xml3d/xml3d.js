@@ -283,20 +283,20 @@ XML3D.shaders.register("phong", {
         "}"
     ].join("\n"),
 
-    addDirectives: function(directives, lights, params) {
-        var pointLights = lights.point ? lights.point.length : 0;
-        var directionalLights = lights.directional ? lights.directional.length : 0;
-        var spotLights = lights.spot ? lights.spot.length : 0;
-        directives.push("MAX_POINTLIGHTS " + pointLights);
-        directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
-        directives.push("MAX_SPOTLIGHTS " + spotLights);
-        directives.push("HAS_POINTLIGHT_SHADOWMAPS " + (lights.point && !lights.point.every(function(light) { return !light.castShadow; })? "1" : "0"));
-        directives.push("HAS_SPOTLIGHT_SHADOWMAPS " + (lights.spot && !lights.spot.every(function(light) { return !light.castShadow; })? "1" : "0"));
-        directives.push("HAS_DIRECTIONALLIGHT_SHADOWMAPS " + (lights.directional && !lights.directional.every(function(light) { return !light.castShadow; }) ? "1" : "0"));
+    addDirectives: function (directives, lights, params) {
+        ["point", "directional", "spot"].forEach(function (type) {
+            var numLights = lights[type] ? lights[type].length : 0;
+            var castShadows = numLights && lights[type].some(function (light) {
+                return light.castShadow;
+            });
+            directives.push("MAX_" + type.toUpperCase() + "LIGHTS " + numLights);
+            directives.push("HAS_" + type.toUpperCase() + "LIGHT_SHADOWMAPS " + (castShadows ? 1 : 0));
+        });
+
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
         directives.push("HAS_SPECULARTEXTURE " + ('specularTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));
-		directives.push("HAS_SSAOMAP " + (XML3D.options.getValue("renderer-ssao") ? "1" : "0"));
+        directives.push("HAS_SSAOMAP " + (XML3D.options.getValue("renderer-ssao") ? "1" : "0"));
     },
     hasTransparency: function(params) {
         return params.transparency && params.transparency.getValue()[0] > 0.001;

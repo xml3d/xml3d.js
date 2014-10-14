@@ -286,7 +286,7 @@ XML3D.shaders.register("phong", {
     addDirectives: function (directives, lights, params) {
         ["point", "directional", "spot"].forEach(function (type) {
             var numLights = lights[type] ? lights[type].length : 0;
-            var castShadows = numLights && lights[type].some(function (light) {
+            var castShadows = lights[type] && lights[type].some(function (light) {
                 return light.castShadow;
             });
             directives.push("MAX_" + type.toUpperCase() + "LIGHTS " + numLights);

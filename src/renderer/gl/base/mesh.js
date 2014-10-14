@@ -148,7 +148,7 @@
                         offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
                     }
                 } else {
-                    gl.drawElements(this.glType, this.getElementCount(), gl.UNSIGNED_SHORT, 0);
+                    gl.drawElements(this.glType, this.getElementCount(), buffers.index.glType, 0);
                 }
                 triCount = this.getElementCount() / 3;
             } else {

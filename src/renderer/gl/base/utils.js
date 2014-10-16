@@ -112,6 +112,7 @@
                 break;
             case Xflow.DATA_ENTRY_STATE.CHANGED_NEW:
             case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE:
+            case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE:
                 if (elementBuffer) {
                     buffer = createElementBuffer(context, xflowDataEntry.getValue(), webglData.maxIndex);
                 } else {

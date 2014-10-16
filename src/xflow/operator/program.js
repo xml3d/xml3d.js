@@ -150,7 +150,7 @@
 
     var c_sizes = {};
 
-    Xflow.OperatorList.prototype.allocateOutput = function(programData){
+    Xflow.OperatorList.prototype.allocateOutput = function(programData, async){
         for(var i = 0; i < this.entries.length; ++i){
             var entry = this.entries[i];
             var operator = entry.operator;
@@ -164,8 +164,11 @@
             }
             for(var j = 0; j < operator.outputs.length; ++j){
                 var d = operator.outputs[j];
-                var dataEntry = programData.outputs[entry.getOutputIndex(j)].dataEntry;
+                var dataSlot = programData.outputs[entry.getOutputIndex(j)], dataEntry;
+                dataEntry = async ? dataSlot.asyncDataEntry : dataSlot.dataEntry;
 
+                if(d.noAlloc)
+                    continue;
 
                 if (dataEntry.type == Xflow.DATA_TYPE.TEXTURE) {
                     // texture entry
@@ -351,10 +354,12 @@
         this._inlineLoop = null;
     }
 
-    Xflow.SingleProgram.prototype.run = function(programData){
+    Xflow.SingleProgram.prototype.run = function(programData, asyncCallback){
         var operatorData = prepareOperatorData(this.list, 0, programData);
 
-        if(this.operator.evaluate_core){
+        if(asyncCallback)
+            applyAsyncOperator(this.entry, programData, operatorData, asyncCallback);
+        else if(this.operator.evaluate_core){
             applyCoreOperation(this, programData, operatorData);
         }
         else{
@@ -366,6 +371,17 @@
         var args = assembleFunctionArgs(entry, programData);
         args.push(operatorData);
         entry.operator.evaluate.apply(operatorData, args);
+        handlePostProcessOutput(entry, programData, args, false);
+    }
+
+    function applyAsyncOperator(entry, programData, operatorData, asyncCallback){
+        var args = assembleFunctionArgs(entry, programData, true);
+        args.push(operatorData);
+        args.push(function(){
+            handlePostProcessOutput(entry, programData, args, true);
+            asyncCallback();
+        });
+        entry.operator.evaluate_async.apply(operatorData, args);
     }
 
     function applyCoreOperation(program, programData, operatorData){
@@ -460,17 +476,41 @@
         return data;
     }
 
-    function assembleFunctionArgs(entry, programData){
+    function assembleFunctionArgs(entry, programData, async){
         var args = [];
         var outputs = entry.operator.outputs;
         for(var i = 0; i < outputs.length; ++i){
-            var d = outputs[i];
-            var dataEntry = programData.outputs[entry.getOutputIndex(i)].dataEntry;
-            args.push(dataEntry ? dataEntry.getValue() : null);
+            if(outputs[i].noAlloc){
+                args.push({assign: null});
+            }
+            else{
+                var dataSlot = programData.outputs[entry.getOutputIndex(i)];
+                var dataEntry = async ? dataSlot.asyncDataEntry : dataSlot.dataEntry;
+                args.push(dataEntry ? dataEntry.getValue() : null);
+            }
         }
         addInputToArgs(args, entry, programData);
         return args;
     }
+    function handlePostProcessOutput(entry, programData, arguments, async){
+        var outputs = entry.operator.outputs;
+        for(var i = 0; i < outputs.length; ++i){
+            var dataSlot = programData.outputs[entry.getOutputIndex(i)];
+            if(outputs[i].noAlloc){
+                var dataEntry = async ? dataSlot.asyncDataEntry : dataSlot.dataEntry;
+                if(dataEntry.type == Xflow.DATA_TYPE.TEXTURE ){
+                    dataEntry._setImage(arguments[i].assign);
+                }
+                else{
+                    dataEntry._setValue(arguments[i].assign);
+                }
+            }
+            if(async){
+                dataSlot.swapAsync();
+            }
+        }
+    }
+
 
     function addInputToArgs(args, entry, programData){
         var mapping = entry.operator.mapping;

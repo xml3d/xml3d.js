@@ -130,10 +130,28 @@ BufferEntry.prototype.setValue = function(v){
     Xflow._callListedCallback();
 }
 
+function getSizeType(size, tupleSize){
+    if(size >= tupleSize*2)
+        return 2;
+    else if(size >= tupleSize)
+        return 1;
+    else
+        return 0;
+}
+
 BufferEntry.prototype._setValue = function(v){
-    var newSize = (this._value ? this._value.length : 0) != (v ? v.length : 0);
+    var oldSize = (this._value ? this._value.length : 0), newSize = (v ? v.length : 0), tupleSize = this.getTupleSize();
+    var notification;
+    if(getSizeType(oldSize, tupleSize) != getSizeType(newSize, tupleSize))
+        notification = Xflow.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE;
+    else if(oldSize != newSize){
+        notification = Xflow.DATA_ENTRY_STATE.CHANGED_SIZE;
+    }
+    else{
+        notification = Xflow.DATA_ENTRY_STATE.CHANGED_VALUE;
+    }
     this._value = v;
-    notifyListeners(this, newSize ? Xflow.DATA_ENTRY_STATE.CHANGED_SIZE : Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+    notifyListeners(this, notification);
 }
 
 /** @return {Object} */
@@ -433,7 +451,7 @@ TextureEntry.prototype.getLength = function(){
     return 1;
 };
 TextureEntry.prototype.isEmpty = function(){
-    return !this._image
+    return false;
 };
 
 /** @return {number} */
@@ -547,7 +565,7 @@ ImageDataTextureEntry.prototype.getLength = function(){
     return 1;
 };
 ImageDataTextureEntry.prototype.isEmpty = function(){
-    return !this._imageData
+    return false;
 };
 
 ImageDataTextureEntry.prototype.getFormatType = function() {

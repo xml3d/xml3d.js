@@ -31,6 +31,30 @@ Xflow.registerOperator("xflow.lerpSeq", {
     }
 });
 
+
+Xflow.registerOperator("xflow.lerpSeqAsync", {
+    outputs: [  {type: 'float3', name: 'result'}],
+    params:  [  {type: 'float3', source: 'sequence'},
+        {type: 'float', source: 'key'}],
+    mapping: [  { name: 'value1', source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
+        { name: 'value2', source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
+        { name: 'weight', source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
+    evaluate_async: function(result, value1, value2, weight, info, callback){
+        var i = info.iterateCount, off0, off1, off2;
+        while(i--){
+            off0 = (info.iterFlag[0] ? i : 0)*3;
+            off1 = (info.iterFlag[1] ? i : 0)*3;
+            off2 = info.iterFlag[2] ? i : 0;
+            var invWeight = 1 - weight[off2];
+            result[i*3] = invWeight*value1[off0] + weight[off2]*value2[off1];
+            result[i*3+1] = invWeight*value1[off0+1] + weight[off2]*value2[off1+1];
+            result[i*3+2] = invWeight*value1[off0+2] + weight[off2]*value2[off1+2];
+        }
+        window.setTimeout(callback, 200);
+    }
+});
+
+
 Xflow.registerOperator("xflow.lerpKeys", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float', source: 'keys', array: true},

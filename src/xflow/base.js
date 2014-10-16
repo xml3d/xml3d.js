@@ -143,7 +143,8 @@ var Xflow = {};
         LOAD_START: 3,
         LOAD_END: 4,
         CHANGED_SIZE: 5,
-        CHANGED_REMOVED: 6
+        CHANGED_REMOVED: 6,
+        CHANGED_SIZE_TYPE: 7
     };
 
     Xflow.RESULT_TYPE = {
@@ -212,7 +213,8 @@ var Xflow = {};
     Xflow.PLATFORM = {
         JAVASCRIPT: 0,
         GLSL: 1,
-        CL: 2
+        CL: 2,
+        ASYNC: 3
     };
 
     Xflow.PROCESS_STATE = {

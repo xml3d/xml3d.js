@@ -30,9 +30,8 @@ XML3D.base.Asset.prototype.checkValidity = function(){
     checkRecursive(this);
 }
 function checkRecursive(asset){
-    var parentNames;
     if(asset.srcAsset){
-        parentNames = checkRecursive(asset.srcAsset);
+        checkRecursive(asset.srcAsset);
     }
     var localNames = [];
     for(var i = 0; i < asset.children.length; ++i){
@@ -42,25 +41,8 @@ function checkRecursive(asset){
         }
         if(name) localNames.push(name);
     }
-    var totalNames = localNames.slice();
-    if(parentNames){
-        Xflow.utils.set.add(totalNames, parentNames);
-    }
-    for(var i = 0; i < asset.children.length; ++i){
-        checkIncludes(asset.children[i], totalNames);
-    }
-
-    return totalNames;
-}
-function checkIncludes(subData, totalNames){
-    if(!subData.includes)
-        return;
-    for(var i = 0; i < subData.includes.length; ++i){
-        var inclName = subData.includes[i];
-        if(totalNames.indexOf(inclName) == -1){
-            throw new AssetError("Subdata '" + subData.name +
-                 "' includes non existing subdata of name '" + inclName + "'", subData.refNode);
-        }
+    for(var i = 0; i < asset.subAssets.length; ++i){
+        checkRecursive(asset.subAssets[i]);
     }
 }
 
@@ -528,6 +510,10 @@ function updateAccumulatedNode(table, entry){
     entry.outOfSync = false;
 }
 
+
+var c_accum_entries = [],
+    c_accum_names = [];
+
 function getIncludeEntry(table, includeString){
     var segments = includeString.split(".");
     for(var i = 0; i < segments.length -1; ++i){
@@ -549,7 +535,16 @@ function getIncludeEntry(table, includeString){
         throw new Error("Includes entry '" + includeString + "' accesses non existent asset entry '" + entryKey + "'" );
     }
 
+    c_accum_names.push(includeString);
+    if(c_accum_entries.indexOf(entry) != -1){
+        var path = c_accum_names.join(" > ");
+        throw new Error("Recursive include dependencies detected: " + path);
+    }
+    c_accum_entries.push(entry);
+
     updateAccumulatedNode(table, entry);
+    c_accum_entries.pop();
+    c_accum_names.pop();
     return entry;
 }
 

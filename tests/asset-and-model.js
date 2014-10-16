@@ -298,5 +298,70 @@ test("Modification of classNamePickFilter", 47   , function() {
     stop();
 });
 
+module("Asset and Model", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/asset-nested.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
 
+var NESTED_TESTS = [
+    {id: "#mm1", pos: "center", desc: "Basic Instance of nested assets", checks:
+        [{x: 251, y: 150, color: [127,127,127,255] },
+         {x: 305, y: 150, color: [127,127,127,255] },
+         {x: 296, y: 124, color: [0,0,0,0] }]
+    },
+    {id: "#mm2", pos: "top center", desc: "Overriding root data", checks:
+        [{x: 251, y: 220, color: [255,127,0,255] },
+        {x: 305, y: 220, color: [255,127,0,255] }]
+    },
+    {id: "#mm3", pos: "bottom center", desc: "Overriding root and sub asset data", checks:
+        [{x: 251, y: 75, color: [127,127,255,255] },
+        {x: 305, y: 75, color: [127,127,255,255] }]
+    },
+    {id: "#mm4", pos: "center left", desc: "Extending from #mm2, overriding root data", checks:
+        [{x: 141, y: 150, color: [127,255,127,255] },
+        {x: 194, y: 150, color: [127,255,127,255]}]
+    },
+    {id: "#mm5", pos: "top left", desc: "Extending from #mm3, added new asset", checks:
+        [{x: 141, y: 220, color: [127,127,255,255] },
+        {x: 194, y: 220, color: [127,127,255,255]},
+        {x: 183, y: 247, color: [255,127,0,255]},
+        {x: 188, y: 254, color: [0,0,0,0]}]
+    },
+    {id: "#mm6", pos: "bottom left", desc: "Extending from #mm2,adding new asset mesh within sub asset", checks:
+        [{x: 141, y: 75, color: [255,127,0,255] },
+        {x: 194, y: 75, color: [255,127,0,255] },
+        {x: 181, y: 102, color: [255,127,0,255] },
+        {x: 190, y: 107, color: [0,0,0,0] }]
+    },
+    {id: "#mm7", pos: "center right", desc: "Extending from #mm4, adding weird asset linking right into main sub asset via parent", checks:
+        [{x: 360, y: 150, color: [127,255,127,255] },
+        {x: 410, y: 150, color: [127,255,127,255]},
+        {x: 401, y: 175, color: [127,255,127,255]},
+        {x: 411, y: 183, color: [127,255,127,255]}]
+    },
+    {id: "#mm8", pos: "top right", desc: "Extending from #mm4, adding weird asset and extending main sub asset base entry", checks:
+        [{x: 360, y: 220, color: [255,255,0,255] },
+        {x: 410, y: 220, color: [255,255,0,255]},
+        {x: 401, y: 246, color: [255,255,0,255]},
+        {x: 411, y: 257, color: [255,255,0,255]}]
+    },
+    {id: "#mm9", pos: "bottom right", desc: "Extending from #mm3, adding a three level asset hierarchy with linking", checks:
+        [{x: 360, y: 75, color: [127,127,255,255] },
+        {x: 410, y: 75, color: [127,127,255,255]},
+        {x: 401, y: 101, color: [127,127,255,255]},
+        {x: 408, y: 108, color: [0,0,0,0]}]
+    }
+]
 

@@ -67,6 +67,8 @@
             return function(aspect) {
                 if (this.projectionOverride) {
                     this.setProjectionMatrix(this.projectionOverride);
+                    // TODO: Correctly compute frustrum from projection matrix (if possible)
+                    this.frustum.setFrustum(1, 100000, 0, this.fieldOfView, 1);
                     return;
                 }
 

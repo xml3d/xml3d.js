@@ -494,17 +494,17 @@
         addInputToArgs(args, entry, programData);
         return args;
     }
-    function handlePostProcessOutput(entry, programData, arguments, async){
+    function handlePostProcessOutput(entry, programData, parameters, async){
         var outputs = entry.operator.outputs;
         for(var i = 0; i < outputs.length; ++i){
             var dataSlot = programData.outputs[entry.getOutputIndex(i)];
             if(outputs[i].noAlloc){
                 var dataEntry = async ? dataSlot.asyncDataEntry : dataSlot.dataEntry;
                 if(dataEntry.type == Xflow.DATA_TYPE.TEXTURE ){
-                    dataEntry._setImage(arguments[i].assign);
+                    dataEntry._setImage(parameters[i].assign);
                 }
                 else{
-                    dataEntry._setValue(arguments[i].assign);
+                    dataEntry._setValue(parameters[i].assign);
                 }
             }
             if(async){

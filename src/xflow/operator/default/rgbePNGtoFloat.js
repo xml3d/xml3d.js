@@ -1,7 +1,7 @@
 Xflow.registerOperator("xflow.rgbePNGtoFloat", {
     outputs: [ {type: 'texture', name : 'result', customAlloc: true } ],
     params:  [
-        {type: 'texture', source : 'image'},
+        {type: 'texture', source : 'image'}
     ],
     alloc: function (sizes, image) {
         var samplerConfig = new Xflow.SamplerConfig;

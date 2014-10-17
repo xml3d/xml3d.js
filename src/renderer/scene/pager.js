@@ -20,7 +20,7 @@
             var page = new Float32Array(Pager.PAGE_SIZE);
             this.pages.push(page);
             this.nextOffset = 0;
-            XML3D.debug.logInfo("adding page", this.pages.length);
+            XML3D.debug.logInfo("Adding page", this.pages.length, "(", Pager.PAGE_SIZE * Float32Array.BYTES_PER_ELEMENT * this.pages.length / 1024 ,"kB)");
         },
 
         getPageEntry : function(size) {

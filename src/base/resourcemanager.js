@@ -1,6 +1,9 @@
 (function() {
     "use strict";
 
+    var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
+    XML3D.options.register(OPTION_RESOURCE_CORS, "anonymous");
+
     var c_cachedDocuments = {};
     var c_factories = {};
     var c_cachedAdapterHandles = {};
@@ -426,6 +429,25 @@
     }
 
     /**
+     * This methods returns an absolute URI compatible with the resource manager.
+     * This means: Any reference from an external document will be absolute and any id reference from the current
+     * document will remain an id reference.
+     * @param {Document} baseDocument - the document from which to look up the reference
+     * @param {XML3D.URI} uri - The URI used to find the referred AdapterHandle. Can be relative
+     * @returns {XML3D.URI} The (sometimes) absolute URI
+     */
+    ResourceManager.prototype.getAbsoluteURI = function(baseDocument, uri){
+        if (!uri)
+            return null;
+
+        if (typeof uri == "string") uri = new XML3D.URI(uri);
+        if (baseDocument != document || !uri.isLocal()) {
+            uri = uri.getAbsoluteURI(baseDocument.documentURI);
+        }
+        return uri;
+    }
+
+    /**
      * Get any adapter, internal or external.
      * This function will trigger the loading of documents, if required.
      * An AdapterHandle will be always be returned, expect when an invalid (empty) uri is passed.
@@ -437,15 +459,11 @@
      * @returns {?XML3D.base.AdapterHandle} The requested AdapterHandler. Note: might be null
      */
     ResourceManager.prototype.getAdapterHandle = function(baseDocument, uri, adapterType, canvasId) {
+        canvasId = canvasId || 0;
+        uri = this.getAbsoluteURI(baseDocument, uri);
+
         if (!uri)
             return null;
-
-        if (typeof uri == "string") uri = new XML3D.URI(uri);
-
-        canvasId = canvasId || 0;
-        if (baseDocument != document || !uri.isLocal()) {
-            uri = uri.getAbsoluteURI(baseDocument.documentURI);
-        }
 
         if (!c_cachedAdapterHandles[uri])
             c_cachedAdapterHandles[uri] = {};
@@ -643,7 +661,7 @@
     /**
      * This function is called to load an Image.
      *
-     * @param {string} uri Image URI
+     * @param {XML3D.URI} uri Image URI
      * @param {function(Event, HTMLImageElement)} loadListener Function called when image was successfully loaded.
      *                                It will be called with event as the first and image as the second parameter.
      * @param {function(Event, HTMLImageElement)} errorListener Function called when image could not be loaded.
@@ -663,17 +681,20 @@
             loadComplete(0, uri);
             errorListener(e, image);
         };
-        image.crossOrigin = "anonymous";
+        if(!uri.hasSameOrigin(document.location.href)) {
+            image.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
+            XML3D.debug.logWarning("You are using an cross-origin image as texture. This might cause troubles cause the canvas is 'tainted'.")
+        }
 
-        image.src = uri; // here loading starts
+        image.src = uri.toString(); // here loading starts
         return image;
-    }
+    };
 
 
     /**
      * This function is called to load a Video.
      *
-     * @param {string} uri Video URI
+     * @param {XML3D.URI} uri Video URI
      * @param {boolean} autoplay
      * @param {Object} listeners  Dictionary of all listeners to register with video element.
      *                            Listeners will be called with event as the first and video as the second parameter.
@@ -691,7 +712,12 @@
 
         video.addEventListener("canplay", loadCompleteCallback, true);
         video.addEventListener("error", loadCompleteCallback, true);
-        video.crossorigin = "anonymous";
+
+        if (!uri.hasSameOrigin(document.location.href)) {
+            video.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
+            XML3D.debug.logWarning("You are using an cross-origin video as texture. This might cause troubles cause the canvas is 'tainted'.", uri)
+        }
+
         video.autoplay = autoplay;
 
         function createCallback(listener) {
@@ -704,7 +730,7 @@
             video.addEventListener(eventName, createCallback(listeners[eventName]), true);
         }
 
-        video.src = uri; // here loading starts
+        video.src = uri.toString(); // here loading starts
         return video;
     }
 

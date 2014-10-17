@@ -2,7 +2,7 @@
 (function() {
     var ViewRenderAdapter = function(factory, node) {
         XML3D.webgl.TransformableAdapter.call(this, factory, node);
-        connectProjectionAdapter(this);
+        this.perspectiveFetcher = new XML3D.data.DOMTransformFetcher(this, "perspective", "perspective", true);
         this.createRenderNode();
     };
     XML3D.createClass(ViewRenderAdapter, XML3D.webgl.TransformableAdapter);
@@ -16,9 +16,9 @@
             position : this.node.position._data,
             orientation : this.node.orientation.toMatrix()._data,
             fieldOfView : this.node.fieldOfView,
-            parent : parentNode,
-            projectionAdapter : this.getConnectedAdapter("perspective")
+            parent : parentNode
         });
+        this.perspectiveFetcher.update();
     };
 
     /* Interface method */
@@ -53,6 +53,9 @@
                     case "position":
                         this.renderNode.updatePosition(this.node.position._data);
                         break;
+                    case "perspective":
+                        this.perspectiveFetcher.update();
+                        break;
                     case "fieldOfView":
                         this.renderNode.updateFieldOfView(this.node.fieldOfView);
                         break;
@@ -60,31 +63,19 @@
                         XML3D.debug.logWarning("Unhandled value changed event in view adapter for attribute:" + target);
                 }
                 break;
-            case XML3D.events.ADAPTER_HANDLE_CHANGED:
-                switch (evt.key) {
-                    case "perspective":
-                        connectProjectionAdapter(this);
-                        this.renderNode.setProjectionAdapter(this.getConnectedAdapter("perspective"));
-                        break;
-
-                    default:
-                        XML3D.debug.logWarning("Unhandled adapter handle changed event in view adapter for parameter " + target);
-                        break;
-                }
         }
         this.factory.getRenderer().requestRedraw("View changed");
     };
 
-    function connectProjectionAdapter(adapter){
-        var href = adapter.node.getAttribute("perspective");
-        if(href) {
-            adapter.connectAdapterHandle("perspective", adapter.getAdapterHandle(href));
-        } else {
-            adapter.disconnectAdapterHandle("perspective");
+    p.onTransformChange = function(attrName, matrix){
+        XML3D.webgl.TransformableAdapter.prototype.onTransformChange.call(this, attrName, matrix);
+        if(attrName == "perspective"){
+            this.renderNode.setProjectionOverride(matrix);
         }
     }
 
     p.dispose = function() {
+        this.perspectiveFetcher.clear();
         this.getRenderNode().remove();
         this.clearAdapterHandles();
     }

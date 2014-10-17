@@ -8,6 +8,7 @@
 
         this.platform = platform;
         this.mergedNodes = [];
+        this.mergedOutputNodes = [];
         this.subNodes = [];
         this.unprocessedDataNames = [];
 
@@ -25,16 +26,34 @@
         constructExecuter(this, ownerNode);
     }
 
-    Xflow.Executer.prototype.run = function(){
+    Xflow.Executer.prototype.isProcessed = function(){
+        var i = this.mergedOutputNodes.length;
+        while(i--){
+            if(this.mergedOutputNodes[i].status != Xflow.PROCESS_STATE.PROCESSED)
+                return false;
+        }
+        return true;
+    }
+
+
+    Xflow.Executer.prototype.run = function(asyncCallback){
         runSubNodes(this);
         updateIterateState(this);
 
         this.program = Xflow.createProgram(this.operatorList);
 
         if(this.program){
-            this.operatorList.allocateOutput(this.programData);
-            this.program.run(this.programData);
+            this.operatorList.allocateOutput(this.programData, !!asyncCallback);
+            this.program.run(this.programData, asyncCallback);
         }
+        if(this.platform != Xflow.PLATFORM.ASYNC){
+            var i = this.mergedOutputNodes.length;
+            while(i--){
+                this.mergedOutputNodes[i].status = Xflow.PROCESS_STATE.PROCESSED;
+            }
+        }
+
+
     }
 
     Xflow.Executer.prototype.getVertexShader = function(){
@@ -56,9 +75,10 @@
             finalOutput: null,
             firstOperator: null
         }
-        initRequestNode(cData, executer, ownerNode);
+        var requestNode = initRequestNode(cData, executer, ownerNode);
 
-        constructPreScan(cData, ownerNode, executer.platform);
+        var noOperators = false;
+        constructPreScan(cData, ownerNode, executer.platform, noOperators);
 
         setConstructionOrderAndSubNodes(cData, executer, ownerNode);
 
@@ -76,15 +96,17 @@
                     cData.finalOutput[name] = channel.getDataEntry();
             }
             Xflow.nameset.add(executer.unprocessedDataNames, filter);
+            return true;
         }
+        return false;
     }
 
-    function constructPreScan(cData, node, platform){
+    function constructPreScan(cData, node, platform, noOperators){
         if(cData.blockedNodes.indexOf(node) != -1)
             return;
 
         if(node.operator){
-            if(!canOperatorMerge(cData, node.operator, platform)){
+            if(noOperators || !canOperatorMerge(cData, node.operator, platform)){
                 blockSubtree(cData, node);
                 return;
             }
@@ -104,14 +126,15 @@
             }
         }
         for(var i = 0; i < node.children.length; ++i){
-            constructPreScan(cData, node.children[i], platform);
+            constructPreScan(cData, node.children[i], platform, noOperators);
         }
     }
 
     function canOperatorMerge(cData, operator, platform){
         // TODO: Detect merge support
-        return !cData.firstOperator ||
-            (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl);
+        return (platform == Xflow.PLATFORM.ASYNC || !Xflow.isOperatorAsync(operator)) &&
+            (!cData.firstOperator ||
+            (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl));
     }
 
     function blockSubtree(cData, node){
@@ -155,17 +178,18 @@
 
         for(var i = 0; i < cData.constructionOrder.length; ++i){
             var node = cData.constructionOrder[i];
-            var currentIdx = i;
 
             var entry = new Xflow.OperatorEntry(node.operator);
 
             constructInputConnection(executer, entry, cData, node);
 
-            constructOutputConnection(executer, entry, cData, node);
+            var isOutputNode = constructOutputConnection(executer, entry, cData, node);
 
             executer.programData.operatorData.push({});
             executer.operatorList.addEntry(entry);
             executer.mergedNodes.push(node);
+            if(isOutputNode || (i == cData.constructionOrder.length-1))
+                executer.mergedOutputNodes.push(node)
 
         }
 
@@ -217,6 +241,7 @@
 
     function constructOutputConnection(executer, entry, cData, node){
         var outputs = node.operator.outputs;
+        var isOutputNode = true;
         for(var i = 0; i < outputs.length; ++i){
             var slot = node.outputDataSlots[outputs[i].name];
             var finalOutputName = getFinalOutputName(slot, cData);
@@ -228,7 +253,11 @@
                     Xflow.nameset.remove(executer.unprocessedDataNames, finalOutputName);
                 }
             }
+            else{
+                isOutputNode = false;
+            }
         }
+        return isOutputNode;
     }
 
 

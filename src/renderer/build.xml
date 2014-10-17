@@ -23,8 +23,10 @@
         <file name="scene/shaderinfo.js" />
         <file name="gl/base/context.js" />
         <file name="gl/base/texture.js" />
+        <file name="gl/base/cubemap.js" />
         <file name="gl/base/program.js" />
         <file name="gl/base/rendertarget.js" />
+        <file name="gl/base/cubemaprendertarget.js" />
         <file name="gl/base/frustum.js" />
         <file name="gl/base/mesh.js" />
         <file name="gl/base/utils.js" />
@@ -37,6 +39,7 @@
         <file name="gl/render-passes/base.js" />
         <file name="gl/render-passes/scene-render.js" />
         <file name="gl/render-passes/lightpass.js" />
+        <file name="gl/render-passes/pointlightpass.js" />
         <file name="gl/render-passes/forward.js" />
         <file name="gl/render-passes/pickObject.js" />
         <file name="gl/render-passes/pickPosition.js" />
@@ -61,11 +64,11 @@
         <file name="adapter/transformable.js" />
         <file name="adapter/defs.js" />
         <file name="adapter/xml3d.js" />
-        <file name="adapter/transform.js" />
         <file name="adapter/view.js" />
         <file name="adapter/shader.js" />
         <file name="adapter/img.js" />
         <file name="adapter/mesh.js" />
+        <file name="adapter/model.js" />
         <file name="adapter/group.js" />
         <file name="adapter/lightshader.js" />
         <file name="adapter/light.js" />

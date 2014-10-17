@@ -48,7 +48,7 @@
                         var Constructor = ComposerConstructors[shaderInfo.getScriptType()];
                         result = new Constructor(this.context, shaderInfo);
                     } catch(e) {
-                        XML3D.debug.logError("No shader found for : " + shaderInfo.getScriptType());
+                        XML3D.debug.logError("No shader could be created for " + scriptURI + ":", e.message);
                         return this.defaultComposer;
                     }
                                     }
@@ -73,7 +73,6 @@
             this.lightValuesDirty = false;
         },
         setLightStructureDirty: function() {
-            XML3D.debug.logWarning("Light structure changes not yet supported.");
             this.setShaderRecompile();
         },
         setShaderRecompile: function(){

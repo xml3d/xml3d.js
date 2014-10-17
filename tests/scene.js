@@ -87,11 +87,43 @@ test("Light callbacks", 9, function () {
 
 });
 
+test("Light removal: Issue #71", function () {
+    var dataNode = this.xflowGraph.createDataNode(false);
+    var group = this.scene.createRenderGroup();
+    this.scene.createRenderLight({ // SC 3: Add a new light to the scene
+        parent: group,
+        light: {
+            data: dataNode,
+            type: "point"
+        }
+    });
+
+    group = this.scene.createRenderGroup();
+    var light = this.scene.createRenderLight({ // SC 3: Add a new light to the scene
+        parent: group,
+        light: {
+            data: dataNode,
+            type: "point"
+        }
+    });
+    this.scene.createRenderGroup({parent: group});
+    this.scene.createRenderGroup({parent: group});
+    equal(group.children.length, 3, "Three children in group.");
+    equal(this.scene.lights.point.length, 2, "Two point lights.");
+    light.remove();
+    equal(group.children.length, 2, "Two children in group.");
+    equal(this.scene.lights.point.length, 1, "One point light.");
+    light.remove();
+    equal(group.children.length, 2, "Two children in group.");
+    equal(this.scene.lights.point.length, 1, "One point light.");
+
+});
 
 test("Bounding Boxes", 7, function () {
     var group = this.scene.createRenderGroup();
     group.setLocalMatrix(XML3D.math.mat4.create());
     var obj = this.scene.createRenderObject();
+    obj.setLocalMatrix(XML3D.math.mat4.create());
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
     obj.setParent(group);
 
@@ -111,6 +143,7 @@ test("Bounding Boxes", 7, function () {
     group2.setLocalMatrix(trans2);
 
     var obj2 = this.scene.createRenderObject();
+    obj2.setLocalMatrix(XML3D.math.mat4.create());
     obj2.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
     obj2.setParent(group2);
     group2.setParent(group);
@@ -140,11 +173,13 @@ test("Clipping Planes", function() {
     deepEqual(view.getClippingPlanes(), { near: 1, far: 10 }, "Default values");
 
     var obj = this.scene.createRenderObject();
+    obj.setLocalMatrix(XML3D.math.mat4.create());
     obj.setObjectSpaceBoundingBox([-1, -1, -1, 1, 1, 1]);
     deepEqual(view.getClippingPlanes(), { near: 0.05, far: 1.05 }, "Unit box");
     obj.remove();
 
     var obj = this.scene.createRenderObject();
+    obj.setLocalMatrix(XML3D.math.mat4.create());
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
     deepEqual(view.getClippingPlanes(), { near: 0.05, far: 2.05 }, "Larger values");
 
@@ -167,6 +202,7 @@ test("Clipping Planes", function() {
     obj.remove();
 
     obj = this.scene.createRenderObject({parent: group2});
+    obj.setLocalMatrix(XML3D.math.mat4.create());
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
 
     view.updateOrientation(XML3D.math.mat4.create());

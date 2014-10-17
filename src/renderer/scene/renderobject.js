@@ -19,7 +19,9 @@
     /** @const */
     var WORLD_MATRIX_OFFSET = 0;
     /** @const */
-    var OBJECT_BB_OFFSET = WORLD_MATRIX_OFFSET + 16;
+    var LOCAL_MATRIX_OFFSET = WORLD_MATRIX_OFFSET + 16;
+    /** @const */
+    var OBJECT_BB_OFFSET = LOCAL_MATRIX_OFFSET + 16;
     /** @const */
     var WORLD_BB_OFFSET = OBJECT_BB_OFFSET + 6;
     /** @const */
@@ -80,6 +82,8 @@
          */
         this.boundingBoxDirty = true;
 
+        this.transformDataRequest = this.createTransformRequest();
+
         /**
          * The drawable closure transforms object data and type into
          * a drawable entity
@@ -87,10 +91,12 @@
          */
         this.drawable = this.createDrawable();
 
-        this.shaderHandle = opt.shaderHandle || null;
+        this.localShaderHandle = opt.shaderHandle || null;
+        this.shaderHandle = null;
 
         /** {Object?} **/
         this.override = null;
+
 
     };
     RenderObject.ENTRY_SIZE = ENTRY_SIZE;
@@ -98,6 +104,12 @@
     RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
 
     XML3D.createClass(RenderObject, XML3D.webgl.RenderNode, {
+        createTransformRequest: function(){
+            if(!this.object.data)
+                return null;
+            var request = new Xflow.ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this) );
+            return request;
+        },
         createDrawable: function () {
             var result = this.scene.createDrawable(this);
             if (result) {
@@ -119,6 +131,7 @@
             }
             return result;
         },
+
         setType: function(type) {
             this.object.type = type;
             // TODO: this.typeChangedEvent
@@ -130,8 +143,28 @@
             return this.object ? this.object.data : null;
         },
 
+        getLocalMatrix: function(dest) {
+            var o = this.offset + LOCAL_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                dest[i] = this.page[o];
+            }
+        },
+
+        setLocalMatrix: function(source) {
+            var o = this.offset + LOCAL_MATRIX_OFFSET;
+            for(var i = 0; i < 16; i++, o++) {
+                this.page[o] = source[i];
+            }
+            this.setTransformDirty();
+            this.setBoundingBoxDirty();
+        },
+
         dispose :function () {
+            this.transformDataRequest && this.transformDataRequest.clear();
             this.scene.remove(this);
+        },
+        onTransformDataChange: function(){
+            this.setTransformDirty();
         },
 
         getModelViewMatrix: function(target) {
@@ -187,8 +220,18 @@
             var tmp_mat = XML3D.math.mat4.create();
             return function() {
                 this.parent.getWorldMatrix(tmp_mat);
+                var page = this.page;
+                var offset = this.offset;
+                XML3D.math.mat4.multiplyOffset(tmp_mat, 0, page, offset+LOCAL_MATRIX_OFFSET,  tmp_mat, 0);
+                if(this.transformDataRequest){
+                    var result = this.transformDataRequest.getResult();
+                    var transformData = result.getOutputData("meshTransform");
+                    if(transformData && transformData.getValue()){
+                        XML3D.math.mat4.multiply(tmp_mat, tmp_mat, transformData.getValue());
+                    }
+                }
                 this.setWorldMatrix(tmp_mat);
-                this.updateWorldSpaceBoundingBox();
+                this.boundingBoxDirty = true;
                 this.transformDirty = false;
             }
         })(),
@@ -253,6 +296,17 @@
             this.updateShaderFromHandle(notification.adapterHandle);
         },
 
+        setLocalShaderHandle: function(newHandle) {
+            this.localShaderHandle = newHandle;
+            if (newHandle === undefined) {
+                // Shader was removed, we need to propagate the parent shader down
+                this.setShader(this.parent.getShaderHandle());
+            } else {
+                this.setShader(newHandle);
+            }
+
+        },
+
         setShader: function(newHandle) {
 
             // If we don't have a drawable, we don't need a shader
@@ -260,6 +314,9 @@
             // run
             if(!this.drawable)
                 return;
+
+            if(this.localShaderHandle)
+                newHandle = this.localShaderHandle;
 
             var oldHandle = this.shaderHandle;
 
@@ -276,7 +333,6 @@
             }
             this.shaderHandle = newHandle;
             this.updateShaderFromHandle(newHandle);
-
 
             // TODO this.materialChanged();
         },
@@ -360,7 +416,7 @@
 
             return function() {
                 this.getObjectSpaceBoundingBox(c_box);
-                this.parent.getWorldMatrix(c_trans);
+                this.getWorldMatrix(c_trans);
                 XML3D.math.bbox.transform(c_box, c_trans, c_box);
                 this.setWorldSpaceBoundingBox(c_box);
                 this.boundingBoxDirty = false;
@@ -369,11 +425,8 @@
 
         setLocalVisible: function(newVal) {
             this.localVisible = newVal;
-            if (this.parent.isVisible()) {
-                // if parent is not visible this group is also invisible
-                this.setVisible(newVal);
-                this.setBoundingBoxDirty();
-            }
+            this.setVisible(this.parent && this.parent.isVisible() && newVal);
+            this.setBoundingBoxDirty();
         },
 
         getProgram: function() {

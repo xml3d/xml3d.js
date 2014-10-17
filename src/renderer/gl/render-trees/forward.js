@@ -13,9 +13,9 @@
         scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChange.bind(this));
         scene.addEventListener(webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChange.bind(this));
         scene.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_INITIALIZED, this.onShaderChange.bind(this));
-		this._enableSSAO = enableSSAO;
+        this._enableSSAO = enableSSAO;
         this.mainPass = null;
-		this.createMainPass();
+        this.createMainPass();
     };
 
     XML3D.createClass(ForwardRenderTree, webgl.BaseRenderTree);
@@ -29,14 +29,19 @@
             }
             else{
                 if(light.light.type == "spot")
-                    light.userData = this.createLightPass(light)
+                    light.userData = this.createLightPass(light);
+                else if(light.light.type == "directional")
+                    light.userData = this.createLightPass(light);
+                else if(light.light.type == "point") {
+                    light.userData = this.createPointLightPass(light);
+                }
             }
             this.reassignLightPasses(evt.target);
         },
         onLightValueChange: function(evt){
             // TODO: Would be great to check of the light position or orientation specifically changed
             // We don't need to invalidate the lightPass otherwise
-            if(evt.light.castShadow){
+            if(evt.light.castShadow && evt.light.visible){
                 evt.light.userData && evt.light.userData.setProcessed(false);
             }
         },
@@ -44,8 +49,18 @@
             var scene = evt.target;
             for (var i = 0; i < scene.lights.spot.length; i++) {
                 var spotLight = scene.lights.spot[i];
-                if(spotLight.castShadow)
+                if(spotLight.castShadow && spotLight.visible)
                     spotLight.userData && spotLight.userData.setProcessed(false);
+            }
+            for (var i = 0; i < scene.lights.directional.length; i++) {
+                var directionalLight = scene.lights.directional[i];
+                if(directionalLight.castShadow && directionalLight.visible)
+                    directionalLight.userData && directionalLight.userData.setProcessed(false);
+            }
+            for (var i = 0; i < scene.lights.point.length; i++) {
+                var pointLight = scene.lights.point[i];
+                if(pointLight.castShadow && pointLight.visible)
+                    pointLight.userData && pointLight.userData.setProcessed(false);
             }
         },
         onShaderChange: function(evt) {
@@ -53,17 +68,33 @@
         },
 
         createLightPass: function(light){
-            var context = this.renderInterface.context
-			var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
-			var lightFramebuffer  = new webgl.GLRenderTarget(context, {
-				width: dimension,
-				height: dimension,
-				colorFormat: context.gl.RGBA,
-				depthFormat: context.gl.DEPTH_COMPONENT16,
-				stencilFormat: null,
-				depthAsRenderbuffer: true
-			});
+            var context = this.renderInterface.context;
+            var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
+            var lightFramebuffer  = new webgl.GLRenderTarget(context, {
+                width: dimension,
+                height: dimension,
+                colorFormat: context.gl.RGBA,
+                depthFormat: context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
             var lightPass = new webgl.LightPass(this.renderInterface, lightFramebuffer, light);
+            lightPass.init(context);
+            return lightPass;
+        },
+
+        createPointLightPass: function(light){
+            var context = this.renderInterface.context;
+            var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
+            var lightFramebuffer  = new webgl.GLCubeMapRenderTarget(context, {
+                width: dimension,
+                height: dimension,
+                colorFormat: context.gl.RGBA,
+                depthFormat: context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
+            var lightPass = new webgl.PointLightPass(this.renderInterface, lightFramebuffer, light);
             lightPass.init(context);
             return lightPass;
         },
@@ -75,97 +106,111 @@
             for (var i = 0; i < scene.lights.spot.length; i++) {
                 var spotLight = scene.lights.spot[i];
                 this.mainPass.addLightPass("spotLightShadowMap", spotLight.userData);
+                if(!spotLight.castShadow || !spotLight.visible)
+                    spotLight.userData.setProcessed(true);
+            }
+            for (var i = 0; i < scene.lights.directional.length; i++) {
+                var directionalLight = scene.lights.directional[i];
+                this.mainPass.addLightPass("directionalLightShadowMap", directionalLight.userData);
+                if(!directionalLight.castShadow || !directionalLight.visible)
+                    directionalLight.userData.setProcessed(true);
+            }
+            for (var i = 0; i < scene.lights.point.length; i++) {
+                var pointLight = scene.lights.point[i];
+                this.mainPass.addLightPass("pointLightShadowMap", pointLight.userData);
+                if(!pointLight.castShadow || !pointLight.visible)
+                    pointLight.userData.setProcessed(true);
             }
         },
 
         createMainPass: function() {
             var outputTarget = this.renderInterface.context.canvasTarget;
-			if (this._enableSSAO) {
-				var positionPass = this.createVertexAttributePass("render-position");
-				var normalPass = this.createVertexAttributePass("render-normal");
-				var ssaoPass = this.createSSAOPass(positionPass.output, normalPass.output);
-				ssaoPass.addPrePass(positionPass);
-				ssaoPass.addPrePass(normalPass);
-				var blurPass = this.createBlurPass(ssaoPass.output);
-				blurPass.addPrePass(ssaoPass);
-				this._blurPass = blurPass;
-				this._ssaoPass = ssaoPass;
-				this._positionPass = positionPass;
-				this._normalPass = normalPass;
-				this.mainPass = new webgl.ForwardRenderPass(this.renderInterface, outputTarget, {
-					inputs: {
-						ssaoMap: blurPass.output
-					}
-				});
-				this.mainPass.addPrePass(blurPass);
-			} else {
-				this.mainPass = new webgl.ForwardRenderPass(this.renderInterface, outputTarget);
-			}
+            if (this._enableSSAO) {
+                var positionPass = this.createVertexAttributePass("render-position");
+                var normalPass = this.createVertexAttributePass("render-normal");
+                var ssaoPass = this.createSSAOPass(positionPass.output, normalPass.output);
+                ssaoPass.addPrePass(positionPass);
+                ssaoPass.addPrePass(normalPass);
+                var blurPass = this.createBlurPass(ssaoPass.output);
+                blurPass.addPrePass(ssaoPass);
+                this._blurPass = blurPass;
+                this._ssaoPass = ssaoPass;
+                this._positionPass = positionPass;
+                this._normalPass = normalPass;
+                this.mainPass = new webgl.ForwardRenderPass(this.renderInterface, outputTarget, {
+                    inputs: {
+                        ssaoMap: blurPass.output
+                    }
+                });
+                this.mainPass.addPrePass(blurPass);
+            } else {
+                this.mainPass = new webgl.ForwardRenderPass(this.renderInterface, outputTarget);
+            }
             this.mainRenderPass = this.mainPass;
         },
 
-		createVertexAttributePass: function (programName) {
-			var context = this.renderInterface.context;
-			var buffer= new webgl.GLRenderTarget(context, {
-				width: context.canvasTarget.width,
-				height: context.canvasTarget.height,
-				colorFormat: context.gl.RGBA,
-				colorType: context.gl.FLOAT,
-				depthFormat: context.gl.DEPTH_COMPONENT16,
-				stencilFormat: null,
-				depthAsRenderbuffer: true
-			});
-			return new webgl.VertexAttributePass(this.renderInterface, buffer, {
-				programName: programName
-			});
-		},
+        createVertexAttributePass: function (programName) {
+            var context = this.renderInterface.context;
+            var buffer= new webgl.GLRenderTarget(context, {
+                width: context.canvasTarget.width,
+                height: context.canvasTarget.height,
+                colorFormat: context.gl.RGBA,
+                colorType: context.gl.FLOAT,
+                depthFormat: context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
+            return new webgl.VertexAttributePass(this.renderInterface, buffer, {
+                programName: programName
+            });
+        },
 
-		createSSAOPass: function (positionBuffer, normalBuffer) {
-			var context = this.renderInterface.context;
-			var ssaoBuffer = new webgl.GLRenderTarget(context, {
-				width: context.canvasTarget.width,
-				height: context.canvasTarget.height,
-				colorFormat: context.gl.RGBA,
-				depthFormat: context.gl.DEPTH_COMPONENT16,
-				stencilFormat: null,
-				depthAsRenderbuffer: true
-			});
+        createSSAOPass: function (positionBuffer, normalBuffer) {
+            var context = this.renderInterface.context;
+            var ssaoBuffer = new webgl.GLRenderTarget(context, {
+                width: context.canvasTarget.width,
+                height: context.canvasTarget.height,
+                colorFormat: context.gl.RGBA,
+                depthFormat: context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
 
-			return new webgl.SSAOPass(this.renderInterface, ssaoBuffer, {
-				inputs: {
-					positionBuffer: positionBuffer,
-					normalBuffer: normalBuffer
-				}
-			});
-		},
+            return new webgl.SSAOPass(this.renderInterface, ssaoBuffer, {
+                inputs: {
+                    positionBuffer: positionBuffer,
+                    normalBuffer: normalBuffer
+                }
+            });
+        },
 
-		createBlurPass: function (inputBuffer) {
-			var context = this.renderInterface.context;
-			var blurBuffer = new webgl.GLRenderTarget(context, {
-				width: inputBuffer.width,
-				height: inputBuffer.height,
-				colorFormat: context.gl.RGBA,
-				depthFormat: context.gl.DEPTH_COMPONENT16,
-				stencilFormat: null,
-				depthAsRenderbuffer: true
-			});
+        createBlurPass: function (inputBuffer) {
+            var context = this.renderInterface.context;
+            var blurBuffer = new webgl.GLRenderTarget(context, {
+                width: inputBuffer.width,
+                height: inputBuffer.height,
+                colorFormat: context.gl.RGBA,
+                depthFormat: context.gl.DEPTH_COMPONENT16,
+                stencilFormat: null,
+                depthAsRenderbuffer: true
+            });
 
-			return new webgl.BoxBlurPass(this.renderInterface, blurBuffer, {
-				inputs: {
-					buffer: inputBuffer
-				}
-			});
-		},
+            return new webgl.BoxBlurPass(this.renderInterface, blurBuffer, {
+                inputs: {
+                    buffer: inputBuffer
+                }
+            });
+        },
 
         render: function(scene){
-			if (this._enableSSAO) {
-				this._positionPass.setProcessed(false);
-				this._normalPass.setProcessed(false);
-				this._ssaoPass.setProcessed(false);
-				this._blurPass.setProcessed(false);
-			}
-			this.mainRenderPass.setProcessed(false);
-			webgl.BaseRenderTree.prototype.render.call(this, scene);
+            if (this._enableSSAO) {
+                this._positionPass.setProcessed(false);
+                this._normalPass.setProcessed(false);
+                this._ssaoPass.setProcessed(false);
+                this._blurPass.setProcessed(false);
+            }
+            this.mainRenderPass.setProcessed(false);
+            webgl.BaseRenderTree.prototype.render.call(this, scene);
         },
 
         getRenderStats: function(){

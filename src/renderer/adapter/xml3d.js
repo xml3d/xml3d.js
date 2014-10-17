@@ -35,8 +35,8 @@
                 this.setViewAdapter(evt.adapter);
                 return;
             case XML3D.events.NODE_INSERTED:
+                // This also initializes the children
                 this.initElement(evt.wrapped.target);
-                this.initChildElements(evt.wrapped.target);
                 return;
             case XML3D.events.NODE_REMOVED:
                 // Handled in removed node

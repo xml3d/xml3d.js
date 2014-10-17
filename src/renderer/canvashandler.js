@@ -178,6 +178,7 @@ XML3D.webgl.MAXFPS = 30;
             this.lastKnownDimensions.width = canvas.width = canvas.clientWidth;
             this.lastKnownDimensions.height = canvas.height = canvas.clientHeight;
             this.renderer.handleResizeEvent(canvas.width, canvas.height);
+            this.dispatchResizeEvent();
             return true;
         }
         return false;
@@ -190,6 +191,16 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.dispatchUpdateEvent = function() {
         var event = document.createEvent('CustomEvent');
         event.initCustomEvent('update', true, true, null);
+        this.xml3dElem.dispatchEvent(event);
+    };
+
+    CanvasHandler.prototype.dispatchResizeEvent = function() {
+        var data = {
+            width: this.canvas.width,
+            height: this.canvas.height
+        };
+        var event = document.createEvent('CustomEvent');
+        event.initCustomEvent('resize', true, true, data);
         this.xml3dElem.dispatchEvent(event);
     };
 

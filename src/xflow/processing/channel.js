@@ -12,6 +12,7 @@
     Xflow.DataSlot = function(dataEntry, key){
         this.key = key || 0;
         this.dataEntry = dataEntry;
+        this.asyncDataEntry = null;
         this.parentChannels = [];
 
     }
@@ -21,6 +22,11 @@
     Xflow.DataSlot.prototype.removeChannel = function(channel){
         var idx = this.parentChannels.indexOf(channel);
         if(idx != -1) this.parentChannels.splice(idx, 1);
+    }
+    Xflow.DataSlot.prototype.swapAsync = function(){
+        var tmp = this.dataEntry;
+        this.dataEntry = this.asyncDataEntry;
+        this.asyncDataEntry = tmp;
     }
 
     Xflow.DataSlot.prototype.setDataEntry = function(dataEntry, changeType){
@@ -232,6 +238,8 @@
             var slot = otherChannel.entries[i];
             this.addDataSlot(slot);
         }
+        if(otherChannel.creatorProcessNode)
+            this.creatorProcessNode = otherChannel.creatorProcessNode;
     }
 
     Channel.prototype.getDataEntry = function(sequenceAccessType, sequenceKey){
@@ -303,43 +311,6 @@
         return ++c_channelKeyIdx;
     }
 
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// Xflow.Substitution
-//----------------------------------------------------------------------------------------------------------------------
-
-    Xflow.Substitution = function(channelMap, substitution, subtreeProtoNames){
-        this.map = {};
-        if(substitution && subtreeProtoNames){
-            for(var i = 0; i < subtreeProtoNames.length; ++i){
-                var name = subtreeProtoNames[i];
-                this.map[name] = substitution.map[name];
-            }
-        }
-        for(var name in channelMap.map){
-            this.map[name] = channelMap.getChannel(name, substitution);
-        }
-    }
-    var Substitution = Xflow.Substitution;
-
-    Substitution.prototype.getKey = function(nameFilter){
-        var result = [];
-        if(nameFilter){
-            for(var i = 0; i < nameFilter.length; ++i){
-                var channel = this.map[nameFilter[i]];
-                result[i] = nameFilter[i] + ">" + (channel && channel.id || "X" );
-            }
-        }
-        else{
-            var i = 0;
-            for(var name in this.map){
-                var channel = this.map[name];
-                result[i++] = name + ">" + (channel && channel.id || "X" );
-            }
-        }
-        return result.length > 0 ? result.join(";") : 0;
-    }
 
 })();
 

@@ -11,7 +11,6 @@
             var n = new events.NotificationWrapper(e);
             n.type = events.VALUE_MODIFIED;
             eh.notify(n);
-            return;
         }
 
         var handler = eh && eh.handlers[e.attrName];

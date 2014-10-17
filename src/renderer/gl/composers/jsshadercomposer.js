@@ -12,7 +12,7 @@
         webgl.AbstractShaderComposer.call(this, context, shaderInfo);
 
         if (!window.Shade)
-            throw new Error("Shade.js not found");
+            throw new Error("shade.js library not found");
 
         this.context = context;
 

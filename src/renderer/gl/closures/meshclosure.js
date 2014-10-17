@@ -209,7 +209,7 @@
             this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
             this.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED });
             this.context.requestRedraw("Mesh Type Data Change");
-            XML3D.debug.logInfo("MeshClosure: Type data changed", request, state, this.changeState);
+            XML3D.debug.logDebug("MeshClosure: Type data changed", request, state, this.changeState);
         },
         getMesh: function () {
             return this.mesh;
@@ -234,7 +234,9 @@
                 //XML3D.debug.logError("Mesh does not have 'position' attribute.", this.mesh, this.getMeshType());
             }
             else if(!this.dataNode.isSubtreeLoading()){
-                this.shaderClosure = this.shaderComposer.getShaderClosure(scene, this.objectShaderRequest);
+                var objectShaderResult = this.objectShaderRequest.getResult();
+                if(!objectShaderResult.loading)
+                    this.shaderClosure = this.shaderComposer.getShaderClosure(scene, this.objectShaderRequest);
             }
         },
 
@@ -383,7 +385,7 @@
             // TODO: We don't know if the change of data only influences the surface shading or the actual mesh shape
             this.dispatchEvent({ type: webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED });
             this.context.requestRedraw("Mesh Attribute Data Changed");
-            XML3D.debug.logInfo("MeshClosure: Attribute data changed", request, state, this.changeState);
+            XML3D.debug.logDebug("MeshClosure: Attribute data changed", request, state, this.changeState);
         },
 
         shaderChanged: function(){

@@ -68,29 +68,72 @@
         canvas.height = nextHighestPowerOfTwo(height);
 
         var context = canvas.getContext("2d");
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        if (image instanceof HTMLElement) {
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        }
+        else {
+            var tmpCanvas = document.createElement("canvas");
+            tmpCanvas.width = width;
+            tmpCanvas.height = height;
+            var tmpContext = tmpCanvas.getContext("2d");
+            var imageData = tmpContext.createImageData(width, height);
+            imageData.data.set(image.data);
+            tmpContext.putImageData(imageData, 0, 0);
+
+            context.drawImage(tmpCanvas, 0, 0, canvas.width, canvas.height);
+        }
+
         return canvas;
     };
 
+    var glTextureFormatFromXflow = function (format, gl) {
+        switch (format) {
+            case Xflow.TEXTURE_FORMAT.ALPHA:
+                return gl.ALPHA;
+            case Xflow.TEXTURE_FORMAT.RGB:
+                return gl.RGB;
+            case Xflow.TEXTURE_FORMAT.RGBA:
+                return gl.RGBA;
+            case Xflow.TEXTURE_FORMAT.LUMINANCE:
+                return gl.LUMINANCE;
+            case Xflow.TEXTURE_FORMAT.LUMINANCE_ALPHA:
+                return gl.LUMINANCE_ALPHA;
+            default:
+                throw new Error("Unsupported Texture Format!");
+        }
+    };
+
+    var glTextureTypeFromXflow = function (type, gl) {
+        switch (type) {
+            case Xflow.TEXTURE_TYPE.FLOAT:
+                return gl.FLOAT;
+            case Xflow.TEXTURE_TYPE.UBYTE:
+                return gl.UNSIGNED_BYTE;
+            case Xflow.TEXTURE_TYPE.USHORT_4_4_4_4:
+                return gl.UNSIGNED_SHORT_4_4_4_4;
+            case Xflow.TEXTURE_TYPE.USHORT_5_5_5_1:
+                return gl.UNSIGNED_SHORT_5_5_5_1;
+            case Xflow.TEXTURE_TYPE.USHORT_5_6_5:
+                return gl.GL_UNSIGNED_SHORT_5_6_5;
+            default:
+                throw new Error("Unsupported Texture Type!");
+        }
+    };
 
     XML3D.extend(GLTexture.prototype, {
         /**
          * @param {Xflow.TextureEntry} textureEntry
          */
         updateFromTextureEntry : function(textureEntry) {
-            var img = textureEntry.getImage();
-            if(img) {
-                if(!this.handle) {
-                    this.handle = this.gl.createTexture();
-                }
+            if (!textureEntry.isLoading()) {
+                var gl = this.gl;
                 this.set(textureEntry.getSamplerConfig());
-                if(!textureEntry.isLoading()) {
-                    this.updateTex2DFromImage(img);
-                } else {
-                    this.loads();
-                }
+                var img = textureEntry.asGLTextureValue();
+                if (!img)
+                    return this.failed();
+                this.createOrUpdateTexture(img);
             } else {
-                this.failed();
+                this.loads();
             }
         },
         /**
@@ -106,33 +149,6 @@
             (!isPowerOfTwo(width) || !isPowerOfTwo(height))
         },
 
-        /**
-         * @param {Image|HTMLVideoElement} image
-         */
-        updateTex2DFromImage : function(image) {
-            var gl = this.gl,
-            width = this.width = image.videoWidth || image.width,
-            height = this.height = image.videoHeight || image.height;
-            
-            gl.bindTexture(gl.TEXTURE_2D, this.handle);
-
-            if(this.needsScale(width, height)) {
-                image = scaleImage(image, width, height);
-            }
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrapS);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrapT);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.minFilter);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.magFilter);
-
-            if (this.generateMipMap) {
-                gl.generateMipmap(gl.TEXTURE_2D);
-            }
-            gl.bindTexture(gl.TEXTURE_2D, null);
-
-            this.created();
-        },
         bind : function(unit) {
             if (this.canBind()) {
                 this.gl.activeTexture(this.gl.TEXTURE0 + unit);
@@ -151,6 +167,52 @@
         canBind : function() {
             return this.current == GLTexture.State.READY;
         },
+        createOrUpdateTexture: function (texelSource) {
+            var gl = this.gl;
+
+            if (!this.handle)
+                this.handle = gl.createTexture();
+
+            this.updateTextureFromData(texelSource);
+        },
+        updateTextureFromData: function (texelSource) {
+            var gl = this.gl;
+            this.textureType = gl.TEXTURE_2D;
+
+            gl.bindTexture(gl.TEXTURE_2D, this.handle);
+
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrapS);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrapT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.minFilter);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.magFilter);
+
+            var type = glTextureTypeFromXflow(texelSource.texelType, gl);
+            var format = glTextureFormatFromXflow(texelSource.texelFormat, gl);
+
+            var width = texelSource.width;
+            this.width = width;
+            var height = texelSource.height;
+            this.height = height;
+
+            if (this.generateMipMap && this.needsScale(width, height)) {
+                if (type === gl.FLOAT)
+                    throw new Error("Should generate MipMaps but texture data is float and not power of two in size!");
+                else
+                    texelSource = scaleImage(texelSource, width, height);
+            }
+
+            if (texelSource instanceof HTMLElement)
+                gl.texImage2D(gl.TEXTURE_2D, 0, format, format, type, texelSource);
+            else
+                gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, type, texelSource.data);
+
+            if (this.generateMipMap)
+                gl.generateMipmap(gl.TEXTURE_2D);
+
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            this.created();
+        },
+
         createTex2DFromData: function(internalFormat, width, height, sourceFormat, sourceType, opt) {
             var gl = this.gl;
 

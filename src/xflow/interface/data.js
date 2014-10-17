@@ -426,7 +426,7 @@ TextureEntry.prototype.getLength = function(){
     return 1;
 };
 TextureEntry.prototype.isEmpty = function(){
-    return !this._source;
+    return false;
 };
 
 /** @return {number} */
@@ -448,20 +448,50 @@ Xflow.ImageDataTextureEntry = function(imageData){
     Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
     this._imageData = null;
-    this._formatType = null;
+    this._texelFormat = Xflow.TEXTURE_FORMAT.RGBA;
+    this._texelType = Xflow.TEXTURE_TYPE.UBYTE;
+
     this._updateImageData(imageData);
 
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
+
 Xflow.createClass(Xflow.ImageDataTextureEntry, Xflow.DataEntry);
 var ImageDataTextureEntry = Xflow.ImageDataTextureEntry;
+
+
+Object.defineProperties(Xflow.ImageDataTextureEntry.prototype, {
+    width: {
+        get: function () {
+            return this._imageData ? this._imageData.width : -1;
+        }
+    },
+    height: {
+        get: function () {
+            return this._imageData ? this._imageData.height : -1;
+        }
+    },
+    texelFormat: {
+        get: function () {
+            return this._texelFormat;
+        }
+    },
+    texelType: {
+        get: function () {
+            return this._texelType;
+        }
+    }
+});
+
+
 
 ImageDataTextureEntry.prototype.isLoading = function() {
     return !this._imageData;
 };
 
 ImageDataTextureEntry.prototype._updateImageData = function(imageData) {
-    this._formatType = null;
+    this._texelFormat = Xflow.TEXTURE_FORMAT.RGBA;
+    this._texelType = Xflow.TEXTURE_TYPE.UBYTE;
     this._imageData = imageData;
 };
 
@@ -473,11 +503,12 @@ ImageDataTextureEntry.prototype._updateImageData = function(imageData) {
  * @param samplerConfig
  * @return {Image|Canvas}
  */
-ImageDataTextureEntry.prototype._createImage = ImageDataTextureEntry.prototype._createSource = function(width, height, formatType, samplerConfig) {
-    if (!this._image || this.getWidth() != width || this.getHeight() != height || this._formatType != formatType) {
+ImageDataTextureEntry.prototype._createImage = function(width, height, format, type, samplerConfig) {
+    if (!this._image || this.getWidth() != width || this.getHeight() != height || this._format != format || this._type != type) {
         if (!width || !height)
             throw new Error("Width or height is not specified");
-        this._formatType = formatType;
+        this._texelFormat = format;
+        this._texelType = type;
         if (!samplerConfig) {
             samplerConfig = new Xflow.SamplerConfig();
             samplerConfig.setDefaults();
@@ -489,10 +520,7 @@ ImageDataTextureEntry.prototype._createImage = ImageDataTextureEntry.prototype._
             height: height,
             data: null
         };
-        if(formatType == 'float64'){
-            imageData.data = new Float64Array(width*height*4);
-        }
-        else if(formatType == 'float32'){
+        if(type == Xflow.TEXTURE_TYPE.FLOAT){
             imageData.data = new Float32Array(width*height*4);
         }
         else {
@@ -541,10 +569,6 @@ ImageDataTextureEntry.prototype.getLength = function(){
 };
 ImageDataTextureEntry.prototype.isEmpty = function(){
     return false;
-};
-
-ImageDataTextureEntry.prototype.getFormatType = function() {
-    return this._formatType;
 };
 
 

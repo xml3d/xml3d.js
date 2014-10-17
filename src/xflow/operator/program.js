@@ -177,9 +177,10 @@
                         var texParams = c_sizes[d.name];
                         var newWidth = texParams.imageFormat.width;
                         var newHeight = texParams.imageFormat.height;
-                        var newFormatType = texParams.imageFormat.type;
+                        var newType = texParams.imageFormat.texelType;
+                        var newFormat = texParams.imageFormat.texelFormat;
                         var newSamplerConfig = texParams.samplerConfig;
-                        dataEntry._createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                        dataEntry._createImage(newWidth, newHeight, newFormat, newType, newSamplerConfig);
                     } else if (d.sizeof) {
                         var srcEntry = null;
                         for(var k = 0; k < operator.mapping.length; ++k){
@@ -189,14 +190,15 @@
                             }
                         }
                         if (srcEntry) {
-                            var newWidth = Math.max(srcEntry.getWidth(), 1);
-                            var newHeight = Math.max(srcEntry.getHeight(), 1);
-                            var newFormatType = d.formatType || srcEntry.getFormatType();
+                            var newWidth = Math.max(srcEntry.width, 1);
+                            var newHeight = Math.max(srcEntry.height, 1);
+                            var newFormat = d.texelFormat || srcEntry.texelFormat;
+                            var newType = d.texelType || srcEntry.texelType;
                             var newSamplerConfig = d.samplerConfig || srcEntry.getSamplerConfig();
-                            dataEntry._createImage(newWidth, newHeight, newFormatType, newSamplerConfig);
+                            dataEntry._createImage(newWidth, newHeight, newFormat, newType, newSamplerConfig);
                         }
                         else
-                            throw new Error("Unknown texture input parameter '" + d.sizeof+"' in operator '"+operator.name+"'");
+                            throw new Error("Unknown texture input parameter '" + d.sizeof + "' in operator '"+operator.name+"'");
                     } else
                         throw new Error("Cannot create texture. Use customAlloc or sizeof parameter attribute");
                 } else {

@@ -21,12 +21,18 @@ XML3D.TextureTypes["3d"] = 2;
 XML3D.TextureTypes[2] = "3d";
 // FilterTypes
 XML3D.FilterTypes = {};
-XML3D.FilterTypes["none"] = 0;
-XML3D.FilterTypes[0] = "none";
 XML3D.FilterTypes["nearest"] = 1;
 XML3D.FilterTypes[1] = "nearest";
 XML3D.FilterTypes["linear"] = 2;
 XML3D.FilterTypes[2] = "linear";
+XML3D.FilterTypes["nearest-mipmap-nearest"] = 3;
+XML3D.FilterTypes[3] = "nearest-mipmap-nearest";
+XML3D.FilterTypes["linear-mipmap-nearest"] = 4;
+XML3D.FilterTypes[4] = "linear-mipmap-nearest";
+XML3D.FilterTypes["nearest-mipmap-linear"] = 5;
+XML3D.FilterTypes[5] = "nearest-mipmap-linear";
+XML3D.FilterTypes["linear-mipmap-linear"] = 6;
+XML3D.FilterTypes[6] = "linear-mipmap-linear";
 // WrapTypes
 XML3D.WrapTypes = {};
 XML3D.WrapTypes["clamp"] = 0;
@@ -512,7 +518,7 @@ XML3D.classInfo['texture'] = {
     param: {a: XML3D.BoolAttributeHandler, params: false},
     key: {a: XML3D.FloatAttributeHandler, params: 0.0},
     type: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.TextureTypes, d: 0}},
-    filterMin: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.FilterTypes, d: 2}},
+    filterMin: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.FilterTypes, d: 6}},
     filterMag: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.FilterTypes, d: 2}},
     filterMip: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.FilterTypes, d: 1}},
     wrapS: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.WrapTypes, d: 0}},

@@ -141,14 +141,16 @@
             parameters["spotLightDirection"] = spotLightData.direction;
             parameters["spotLightOn"] = spotLightData.on;
             parameters["spotLightSoftness"] = spotLightData.softness;
-            parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
             parameters["spotLightCastShadow"] = spotLightData.castShadow;
             parameters["spotLightMatrix"] = spotLightData.lightMatrix;
             parameters["spotLightShadowBias"] = spotLightData.shadowBias;
 
-            var softFalloffAngle = spotLightData.softness.slice();
-            for (var i = 0; i < softFalloffAngle.length; i++)
-                softFalloffAngle[i] = softFalloffAngle[i] * (1.0 - spotLightData.softness[i]);
+            var softFalloffAngle = [];
+            for (var i = 0; i < lights.spot.length; i++) {
+                softFalloffAngle[i] = spotLightData.falloffAngle[i] * (1.0 - spotLightData.softness[i]);
+            }
+            // Map both parameters into cosinus space
+            parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
             parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
         },
 

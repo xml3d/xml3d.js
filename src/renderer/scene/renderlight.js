@@ -169,31 +169,22 @@
             if (target["on"]) {
                 target["on"][offset] = this.visible;
             }
-            var result;
+            var result  = this.light.data ? this.lightParameterRequest.getResult() : null;
             var data;
             if (target["softness"]) {
-                target["softness"][offset] = SPOTLIGHT_DEFAULT_SOFTNESS;
-                if (this.light.data) {
-                    result = this.lightParameterRequest.getResult();
-                    data = result.getOutputData("softness");
-                    target["softness"][offset] = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_SOFTNESS;
-                }
+                data = result ? result.getOutputData("softness") : null;
+                target["softness"][offset] = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_SOFTNESS;
             }
             if (target["falloffAngle"]) {
-                target["falloffAngle"][offset] = SPOTLIGHT_DEFAULT_FALLOFFANGLE;
-                if (this.light.data) {
-                    result = this.lightParameterRequest.getResult();
-                    data = result.getOutputData("falloffAngle");
+                    data = result ? result.getOutputData("falloffAngle") : null;
                     var fallOffAngle = data ? data.getValue()[0] : SPOTLIGHT_DEFAULT_FALLOFFANGLE;
                     target["falloffAngle"][offset] = fallOffAngle;
                     this.fallOffAngle = fallOffAngle;
-                }
             }
             if (target["castShadow"]) {
                 target["castShadow"][offset] = this.castShadow;
                 if(this.castShadow) {
                     if(target["shadowBias"]) {
-                        result = this.lightParameterRequest.getResult();
                         data = result.getOutputData("shadowBias");
                         if(this.light.type == "point")
                             target["shadowBias"][offset] = data ? data.getValue()[0] : POINT_LIGHT_DEFAULT_SHADOW_BIAS;

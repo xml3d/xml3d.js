@@ -14,8 +14,8 @@ XML3D is also an evaluation platform of the W3C Community Group [Declarative 3D 
 <a href="http://www.xml3d.org/xml3d/demos/12_MarsCity/marscity.xhtml"><img src="http://www.xml3d.org/xml3d/demos/thumbs/marscity.jpg?s"/></a>
 <a href="http://www.xml3d.org/xml3d/demos/32_WorldBank/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/worldbank.jpg"/></a>
 <a href="http://xml3d.github.com/xml3d-museum/"><img src="http://www.xml3d.org/xml3d/demos/thumbs/museum.jpg"/></a>
-<a href="http://xml3d.github.com/xml3d-examples/examples/gangnam/style.xhtml"><img src="http://www.xml3d.org/xml3d/demos/thumbs/gangnam.jpg"/></a>
-<a href="http://xml3d.github.io/xml3d-examples/examples/xflowAR/ar_flying_teapot.xhtml"><img src="http://www.xml3d.org/xml3d/demos/thumbs/ar.jpg"/></a>
+<a href="http://xml3d.github.com/xml3d-examples/examples/gangnam/style.html"><img src="http://www.xml3d.org/xml3d/demos/thumbs/gangnam.jpg"/></a>
+<a href="http://xml3d.github.io/xml3d-examples/examples/xflowAR/ar_flying_teapot.html"><img src="http://www.xml3d.org/xml3d/demos/thumbs/ar.jpg"/></a>
 
 #### Usage ####
 
@@ -50,7 +50,7 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
-4.6 - 15.04.2013
+4.6 - 15.04.2014
 * [Custom RenderTrees and the RenderInterface](https://github.com/xml3d/xml3d.js/wiki/Custom-RenderTrees-and-the-RenderInterface)
 * Added Screen-space Ambient Occlusion to standard render pipeline
 * Added system to set renderer-specific [options](https://github.com/xml3d/xml3d.js/wiki/Options)

@@ -58,6 +58,13 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
+4.7 - 17.10.2014
+* Assets / Configurable Instances - [demo](http://xml3d.github.io/xml3d-examples/examples/assets/assets.html), [slides](http://xml3d.org/xml3d/slides/web3d-instancing/)
+* [shade.js](http://xml3d.org/xml3d/papers/shade.js/) integration (beta) - [demo](http://xml3d.github.io/xml3d-examples/examples/shade-tv/index.html), [slides](http://xml3d.org/xml3d/slides/pg-shade.js/)
+* Shadow Maps - [demo](http://xml3d.github.io/xml3d-examples/examples/meshlab/meshlab.html)
+* More options for texture filtering
+* Bugfixes: [#69](https://github.com/xml3d/xml3d.js/issues/69), [#71](https://github.com/xml3d/xml3d.js/issues/71)
+
 4.6 - 15.04.2014
 * [Custom RenderTrees and the RenderInterface](https://github.com/xml3d/xml3d.js/wiki/Custom-RenderTrees-and-the-RenderInterface)
 * Added Screen-space Ambient Occlusion to standard render pipeline

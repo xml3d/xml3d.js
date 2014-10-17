@@ -188,6 +188,33 @@ BufferEntry.prototype.isEmpty = function(){
 // Xflow.TextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
+var tmpCanvas, tmpContext;
+
+Xflow.toImageData = function(imageData) {
+    if(imageData instanceof ImageData)
+        return imageData;
+    if(!imageData.data)
+        throw new Error("no data property");
+    if(!imageData.width)
+        throw new Error("no width property");
+    if(!imageData.height)
+        throw new Error("no height property");
+    if(!tmpContext) {
+        tmpCanvas = document.createElement('canvas');
+        tmpContext = tmpCanvas.getContext('2d');
+    }
+    var newImageData = tmpContext.createImageData(imageData.width, imageData.height);
+    for(var i = 0; i < imageData.data.length; ++i) {
+        var v = imageData.data[i];
+        if(v > 255)
+            v = 255;
+        if(v < 0)
+            v = 0;
+        newImageData.data[i] = v;
+    }
+    return newImageData;
+}
+
 function TexelSource(sourceOrWidth, height, format, type) {
     if (typeof sourceOrWidth === "object") {
         if (sourceOrWidth.nodeName) {
@@ -240,13 +267,9 @@ Object.defineProperties(TexelSource.prototype, {
                 var ctx = canvas.getContext("2d");
                 ctx.drawImage(this._source, 0, 0);
                 var source = ctx.getImageData(0, 0, this._source.width, this._source.height);
-                this._source = {
-                    data: new Uint8Array(source.data),
-                    width: source.width,
-                    height: source.height,
-                    texelFormat: this._source.texelFormat,
-                    texelType: this._source.texelType
-                }
+                source.texelFormat = this._source.texelFormat;
+                source.texelType = this._source.texelType;
+                this._source = source;
             }
             return this._source;
         }
@@ -342,7 +365,7 @@ TextureEntry.prototype._createImage = function(width, height, format, type, samp
         }
 
         this._samplerConfig.set(samplerConfig);
-        this.setImage(source);
+        this._setImage(source);
     } else {
         this._notifyChanged();
     }
@@ -351,13 +374,17 @@ TextureEntry.prototype._createImage = function(width, height, format, type, samp
 };
 
 TextureEntry.prototype.setImage = function (s) {
+    this._setImage(s);
+    Xflow._callListedCallback();
+};
+
+TextureEntry.prototype._setImage = function (s) {
     if (!s)
         this._setSource(null);
     else if (s instanceof TexelSource)
         this._setSource(s);
     else
         this._setSource(new TexelSource(s));
-    Xflow._callListedCallback();
 };
 
 TextureEntry.prototype._setSource = function(s) {

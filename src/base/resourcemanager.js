@@ -1,6 +1,9 @@
 (function() {
     "use strict";
 
+    var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
+    XML3D.options.register(OPTION_RESOURCE_CORS, "anonymous");
+
     var c_cachedDocuments = {};
     var c_factories = {};
     var c_cachedAdapterHandles = {};
@@ -658,7 +661,7 @@
     /**
      * This function is called to load an Image.
      *
-     * @param {string} uri Image URI
+     * @param {XML3D.URI} uri Image URI
      * @param {function(Event, HTMLImageElement)} loadListener Function called when image was successfully loaded.
      *                                It will be called with event as the first and image as the second parameter.
      * @param {function(Event, HTMLImageElement)} errorListener Function called when image could not be loaded.
@@ -678,17 +681,20 @@
             loadComplete(0, uri);
             errorListener(e, image);
         };
-        image.crossOrigin = "anonymous";
+        if(!uri.hasSameOrigin(document.location.href)) {
+            image.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
+            XML3D.debug.logWarning("You are using an cross-origin image as texture. This might cause troubles cause the canvas is 'tainted'.")
+        }
 
-        image.src = uri; // here loading starts
+        image.src = uri.toString(); // here loading starts
         return image;
-    }
+    };
 
 
     /**
      * This function is called to load a Video.
      *
-     * @param {string} uri Video URI
+     * @param {XML3D.URI} uri Video URI
      * @param {boolean} autoplay
      * @param {Object} listeners  Dictionary of all listeners to register with video element.
      *                            Listeners will be called with event as the first and video as the second parameter.
@@ -706,7 +712,12 @@
 
         video.addEventListener("canplay", loadCompleteCallback, true);
         video.addEventListener("error", loadCompleteCallback, true);
-        video.crossorigin = "anonymous";
+
+        if (!uri.hasSameOrigin(document.location.href)) {
+            video.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
+            XML3D.debug.logWarning("You are using an cross-origin video as texture. This might cause troubles cause the canvas is 'tainted'.", uri)
+        }
+
         video.autoplay = autoplay;
 
         function createCallback(listener) {
@@ -719,7 +730,7 @@
             video.addEventListener(eventName, createCallback(listeners[eventName]), true);
         }
 
-        video.src = uri; // here loading starts
+        video.src = uri.toString(); // here loading starts
         return video;
     }
 

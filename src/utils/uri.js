@@ -87,6 +87,23 @@ XML3D.URI.prototype.getAbsoluteURI = function(docUri){
     return docUriObj;
 }
 
+/**
+ * Returns if this URI has the same origin as the provided reference
+ * @param {XML3D.URI|string} other
+ * @returns {boolean}
+ */
+XML3D.URI.prototype.hasSameOrigin = function(other) {
+    if (typeof other == 'string')
+        other = new XML3D.URI(other);
+
+    if(this.scheme == "blob") {
+        return true;
+    }
+
+    return this.scheme == other.scheme && this.authority == other.authority;
+};
+
+
 // Restore the URI to it's stringy glory.
 XML3D.URI.prototype.toString = function() {
     var str = "";

@@ -152,43 +152,75 @@
     handler.ElementHandler.prototype.registerAttributes = function(config) {
         var elem = this.element;
 
+        var canProto = !!elem.__proto__;
+
         if(!config._handlers){
-            // Create handlers only once per configuration
+            // Create handlers and prototype only once per configuration
+            var proto;
+            if(canProto){
+                var F = function () {
+                };
+                F.prototype = elem.__proto__;
+                proto = new F();
+            }
+
+
             var handlers = {};
             for ( var prop in config) {
                 if (config[prop] === undefined) {
-                    delete elem[prop];
+                    if(proto) delete proto[prop];
                 } else {
                     if (config[prop].a !== undefined) {
                         var attrName = config[prop].id || prop;
                         var handler = new config[prop].a(attrName, config[prop].params);
                         handlers[attrName] = handler;
+                        if(proto) {
+                            try {
+                                Object.defineProperty(proto, prop, handler.desc);
+                            } catch (e) {
+                                XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
+                            }
+                        }
+
                     } else if (config[prop].m !== undefined) {
-                        // nothing to do here, yet
+                        if(proto) proto[prop] = config[prop].m;
                     } else
                         XML3D.debug.logError("Can't configure " + elem.nodeName + "::" + prop);
                 }
             }
             config._handlers = handlers;
+            config._proto = proto;
         }
         // Set and initialize handlers for element
         this.handlers = config._handlers;
-        for ( var prop in config) {
-
-            if (config[prop] === undefined) {
-                delete elem[prop];
-            }
-            else if (config[prop].a !== undefined){
-                var attrName = config[prop].id || prop;
-                var handler = this.handlers[attrName];
-                handler.init && handler.init(elem, this.storage);
-                try {
-                    Object.defineProperty(elem, prop, handler.desc);
-                } catch (e) {
-                    XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
+        if(canProto){
+            elem.__proto__ = config._proto;
+            for ( var prop in config) {
+                if(config[prop] && config[prop].a !== undefined){
+                    var attrName = config[prop].id || prop;
+                    var handler = this.handlers[attrName];
+                    handler.init && handler.init(elem, this.storage);
+                    delete elem[prop];
                 }
-            }else if (config[prop].m !== undefined) {
-                elem[prop] = config[prop].m;
+            }
+        }
+        else{
+            for ( var prop in config) {
+                if (config[prop] === undefined) {
+                    delete elem[prop];
+                }
+                else if (config[prop].a !== undefined){
+                    var attrName = config[prop].id || prop;
+                    var handler = this.handlers[attrName];
+                    handler.init && handler.init(elem, this.storage);
+                    try {
+                        Object.defineProperty(elem, prop, handler.desc);
+                    } catch (e) {
+                        XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
+                    }
+                }else if (config[prop].m !== undefined) {
+                    elem[prop] = config[prop].m;
+                }
             }
         }
 

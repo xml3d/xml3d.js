@@ -403,7 +403,7 @@ TextureEntry.prototype._setSource = function(s) {
 };
 
 TextureEntry.prototype.asGLTextureValue = function () {
-    return this._source.glTextureData;
+    return this._source && this._source.glTextureData;
 };
 
 /** @return {ImageData} */

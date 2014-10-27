@@ -37,7 +37,7 @@ var ProcessNode = Xflow.ProcessNode;
 
 ProcessNode.prototype.onXflowChannelChange = function(channel, state){
     if(Xflow.isOperatorAsync(this.operator)){
-        if(this.asyncProcessState != ASYNC_PROCESS_STATE.INIT){
+        if(this.status == Xflow.PROCESS_STATE.LOADING || this.asyncProcessState != ASYNC_PROCESS_STATE.INIT){
             this.status = Xflow.PROCESS_STATE.MODIFIED;
             this.updateState();
         }

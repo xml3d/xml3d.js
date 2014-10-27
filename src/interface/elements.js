@@ -19,7 +19,7 @@
 
         var notified = false;
         if (handler.setFromAttribute) {
-            notified = handler.setFromAttribute(e.newValue, e.prevValue);
+            notified = handler.setFromAttribute(e.newValue, e.prevValue, e.target, eh.storage);
         }
         if (!notified) {
             var n = new events.NotificationWrapper(e);
@@ -40,7 +40,7 @@
 
         if (removedChild.nodeType == Node.TEXT_NODE && parentHandler.handlers.value) {
             n.type = events.VALUE_MODIFIED;
-            parentHandler.handlers.value.resetValue();
+            parentHandler.handlers.value.resetValue(parentHandler.storage);
         } else {
             n.type = events.NODE_REMOVED;
             parentHandler.notify(n);
@@ -98,7 +98,7 @@
 
         if (insertedChild.nodeType == Node.TEXT_NODE && parentHandler.handlers.value) {
             n.type = events.VALUE_MODIFIED;
-            parentHandler.handlers.value.resetValue();
+            parentHandler.handlers.value.resetValue(parentHandler.storage);
         } else {
             XML3D.config.element(insertedChild);
             n.type = events.NODE_INSERTED;
@@ -134,7 +134,8 @@
     handler.ElementHandler = function(elem, monitor) {
         if (elem) {
             this.element = elem;
-            this.handlers = {};
+            this.handlers = null;
+            this.storage = {};
             this.adapters = {};
 
             if(monitor) {
@@ -148,28 +149,50 @@
         }
     };
 
-    handler.ElementHandler.prototype.registerAttributes = function(b) {
-        var a = this.element;
-        for ( var prop in b) {
-            if (b[prop] === undefined) {
-                delete a[prop];
-            } else {
-                if (b[prop].a !== undefined) {
-                    var attrName = b[prop].id || prop;
-                    var v = new b[prop].a(a, attrName, b[prop].params);
-                    this.handlers[attrName] = v;
-                    try {
-                        Object.defineProperty(a, prop, v.desc);
-                    } catch (e) {
-                        XML3D.debug.logWarning("Can't configure " + a.nodeName + "::" + prop);
-                    }
-                } else if (b[prop].m !== undefined) {
-                    a[prop] = b[prop].m;
-                } else
-                    XML3D.debug.logError("Can't configure " + a.nodeName + "::" + prop);
+    handler.ElementHandler.prototype.registerAttributes = function(config) {
+        var elem = this.element;
+
+        if(!config._handlers){
+            // Create handlers only once per configuration
+            var handlers = {};
+            for ( var prop in config) {
+                if (config[prop] === undefined) {
+                    delete elem[prop];
+                } else {
+                    if (config[prop].a !== undefined) {
+                        var attrName = config[prop].id || prop;
+                        var handler = new config[prop].a(attrName, config[prop].params);
+                        handlers[attrName] = handler;
+                    } else if (config[prop].m !== undefined) {
+                        // nothing to do here, yet
+                    } else
+                        XML3D.debug.logError("Can't configure " + elem.nodeName + "::" + prop);
+                }
+            }
+            config._handlers = handlers;
+        }
+        // Set and initialize handlers for element
+        this.handlers = config._handlers;
+        for ( var prop in config) {
+
+            if (config[prop] === undefined) {
+                delete elem[prop];
+            }
+            else if (config[prop].a !== undefined){
+                var attrName = config[prop].id || prop;
+                var handler = this.handlers[attrName];
+                handler.init && handler.init(elem, this.storage);
+                try {
+                    Object.defineProperty(elem, prop, handler.desc);
+                } catch (e) {
+                    XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
+                }
+            }else if (config[prop].m !== undefined) {
+                elem[prop] = config[prop].m;
             }
         }
-        return a;
+
+        return elem;
     };
 
 
@@ -185,7 +208,7 @@
         switch (e.type) {
             case "DOMCharacterDataModified":
                 n.type = events.VALUE_MODIFIED;
-                this.handlers.value.resetValue();
+                this.handlers.value.resetValue(this.storage);
                 this.notify(n);
                 break;
         };

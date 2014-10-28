@@ -113,8 +113,8 @@ XML3D.createClass = function(ctor, parent, methods) {
         var pElement = document.createElement("p");
         pElement.appendChild(document.createTextNode("Please visit "));
         var link = document.createElement("a");
-        link.setAttribute("href", "http://www.xml3d.org");
-        link.appendChild(document.createTextNode("http://www.xml3d.org"));
+        link.setAttribute("href", "https://github.com/xml3d/xml3d.js/wiki/Browsers-that-support-XML3D");
+        link.appendChild(document.createTextNode("https://github.com/xml3d/xml3d.js/wiki/Browsers-that-support-XML3D"));
         pElement.appendChild(link);
         pElement.appendChild(document.createTextNode(" to get information about browsers supporting XML3D."));
         infoDiv.appendChild(hElement);

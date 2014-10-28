@@ -3,6 +3,65 @@
 
     var handler = {}, events = XML3D.events;
 
+    var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver),
+        mutObserver;
+
+    function handleMutations(mutations){
+        for(var i = 0; i < mutations.length; ++i){
+            var mutation = mutations[i];
+            var target = mutation.target;
+            if(mutation.type == 'attributes'){
+                var newValue = target.getAttribute(mutation.attributeName);
+                if(newValue === null) newValue = "";
+                attrModified({
+                    target: target,
+                    attrName: mutation.attributeName,
+                    newValue: newValue,
+                    prevValue: mutation.oldValue,
+                    relatedNode: target});
+            }
+            else if(mutation.type == 'childList'){
+                var addedNodes = mutation.addedNodes;
+                var j = addedNodes.length;
+                while(j--){
+                    nodeInserted({
+                        target: addedNodes[j],
+                        relatedNode: target,
+                        currentTarget: target
+                    });
+                }
+                var removedNodes = mutation.removedNodes;
+                var j = removedNodes.length;
+                while(j--){
+                    nodeRemoved({
+                        target: removedNodes[j],
+                        relatedNode: target,
+                        currentTarget: target
+                    });
+                }
+            }
+            else if(mutation.type == 'characterData'){
+                characterDataChanged({ target: target});
+            }
+        }
+    }
+
+    if(MutationObserver){
+        mutObserver = new MutationObserver(handleMutations);
+    }
+
+    XML3D._flushDOMChanges = function(){
+        if(mutObserver){
+            var records = mutObserver.takeRecords();
+            handleMutations(records);
+        }
+    };
+    XML3D._discardDomChanges = function(){
+        mutObserver.takeRecords();
+    };
+
+
+
     function attrModified(e) {
 
         var eh = e.target._configured;
@@ -26,7 +85,7 @@
             n.type = events.VALUE_MODIFIED;
             eh.notify(n);
         }
-    };
+    }
 
     function nodeRemoved(e) {
         var parent = e.relatedNode,
@@ -58,7 +117,7 @@
         // i.e. to multiple draw objects per mesh.
         // Now the first event handler stops propagation of the event, but this can have strange side-FX,
         // if i.e. nodes are monitored from outside.
-        e.stopPropagation();
+        e.stopPropagation && e.stopPropagation();
     }
 
     function removeRecursive(element, evt) {
@@ -106,7 +165,7 @@
         }
         parentHandler.notify(n);
         // TODO: Quick fix, solve issue of self monitoring elements better
-        e.stopPropagation();
+        e.stopPropagation && e.stopPropagation();
     }
 
     // TODO: Remove this function once DOMNodeInsertedIntoDocument is supported by all major browsers
@@ -119,6 +178,18 @@
         // We call this here in addition to nodeInsertedIntoDocument, since the later is not supported by Firefox
 
         XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.id);
+    }
+
+    function characterDataChanged(e){
+        var target = e.target;
+        while(!target._configured && target.parentElement)
+            target = target.parentElement;
+        var eh = target._configured;
+        if(!eh) return;
+        var n = new events.NotificationWrapper(e);
+        n.type = events.VALUE_MODIFIED;
+        eh.handlers.value.resetValue(eh.storage);
+        eh.notify(n);
     }
 
     function nodeInsertedIntoDocument(e){
@@ -138,14 +209,21 @@
             this.storage = {};
             this.adapters = {};
 
-            if(monitor) {
-                elem.addEventListener('DOMNodeRemoved', nodeRemoved, true);
-                elem.addEventListener('DOMNodeInserted', nodeInserted, true);
-                elem.addEventListener('DOMNodeInsertedIntoDocument', nodeInsertedIntoDocument, true);
-                elem.addEventListener('DOMNodeRemovedFromDocument', nodeRemovedFromDocument, true);
-                elem.addEventListener('DOMAttrModified', attrModified, true);
-                this.monitoring = true;
+            if(mutObserver){
+                mutObserver.observe(elem, { childList: true,  attributes: true, attributeOldValue: true} );
             }
+            else{
+                if(monitor) {
+                    elem.addEventListener('DOMNodeRemoved', nodeRemoved, true);
+                    elem.addEventListener('DOMNodeInserted', nodeInserted, true);
+                    //elem.addEventListener('DOMNodeInsertedIntoDocument', nodeInsertedIntoDocument, true);
+                    //elem.addEventListener('DOMNodeRemovedFromDocument', nodeRemovedFromDocument, true);
+                    elem.addEventListener('DOMAttrModified', attrModified, true);
+                    this.monitoring = true;
+                }
+            }
+
+
         }
     };
 
@@ -229,9 +307,15 @@
 
 
     handler.ElementHandler.prototype.registerMixed = function() {
-        this.element.addEventListener('DOMCharacterDataModified', this, false);
+        if(mutObserver){
+            mutObserver.observe(this.element, { childList: true,  attributes: true, attributeOldValue: true, characterData: true, subtree: true} );
+        }
+        else{
+            this.element.addEventListener('DOMCharacterDataModified', characterDataChanged, false);
+        }
     };
 
+    /*
     handler.ElementHandler.prototype.handleEvent = function(e) {
 
         XML3D.debug.logDebug(e.type + " at " + e.currentTarget.localName + "/" + e.target);
@@ -245,6 +329,7 @@
                 break;
         };
     };
+    */
 
 
     /**

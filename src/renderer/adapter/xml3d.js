@@ -43,7 +43,7 @@
                 return;
         }
 
-        var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+        var target = evt.attrName || evt.wrapped.attrName;
 
         if (target == "activeView") {
             this.updateActiveViewAdapter();

@@ -64,6 +64,7 @@
         };
         this.desc = {
             get : function() {
+                XML3D._flushDOMChanges();
                 var storage = getStorage(this);
                 return p.e[storage[id]];
             },
@@ -95,6 +96,7 @@
         };
         this.desc = {
             get : function() {
+                XML3D._flushDOMChanges();
                 var storage = getStorage(this);
                 if (storage[id])
                     return storage[id];
@@ -133,6 +135,7 @@
 
         this.desc = {
             get : function(){
+                XML3D._flushDOMChanges();
                 var storage = getStorage(this);
                 return storage[id];
             },
@@ -163,6 +166,7 @@
 
         this.desc = {
             get : function() {
+                XML3D._flushDOMChanges();
                 var storage = getStorage(this);
                 return storage[id];
             },
@@ -188,6 +192,7 @@
 
         this.desc = {
             get : function() {
+                XML3D._flushDOMChanges();
                 var storage = getStorage(this);
                 return storage[id];
             },
@@ -231,6 +236,7 @@
 
         this.desc = {
             get : function() {
+                XML3D._flushDOMChanges();
                 var storage = getStorage(this);
                 if (!storage[id]) {
                     that.setFromAttribute(this.getAttribute(id), null, this, storage);
@@ -281,6 +287,7 @@
 
         this.desc = {
             get : function() {
+                XML3D._flushDOMChanges();
                 var storage = getStorage(this);
                 if (!storage[id]) {
                     that.setFromAttribute(this.getAttribute(id), null, this, storage);
@@ -299,6 +306,7 @@
         }
         handler.desc = {
             get : function() {
+                XML3D._flushDOMChanges();
                 var storage = getStorage(this);
                 if (!storage.value) {
                     storage.value = handler.parse(this);

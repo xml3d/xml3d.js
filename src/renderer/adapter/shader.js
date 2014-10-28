@@ -55,7 +55,7 @@
         notifyChanged: function (evt) {
             switch (evt.type) {
                 case XML3D.events.VALUE_MODIFIED:
-                    var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+                    var target = evt.attrName || evt.wrapped.attrName;
                     switch (target) {
                         case "script":
                             this.updateScript();

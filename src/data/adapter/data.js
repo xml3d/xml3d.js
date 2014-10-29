@@ -106,6 +106,7 @@ XML3D.createClass(XML3D.data.DataAdapter, XML3D.data.BaseDataAdapter);
 
 XML3D.data.DataAdapter.prototype.init = function () {
     this.xflowDataNode = XML3D.data.xflowGraph.createDataNode();
+    this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
 
     // Setting platform and node type information for a data sequence
@@ -118,6 +119,21 @@ XML3D.data.DataAdapter.prototype.init = function () {
     }
     recursiveDataAdapterConstruction(this);
 };
+
+XML3D.data.DataAdapter.prototype.onXflowLoadEvent = function(node, type){
+    if(type == Xflow.LOAD_TYPE.SUBTREE_LOADED){
+        XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
+    }
+    else if(type == Xflow.LOAD_TYPE.TEXTURES_LOADED){
+        XML3D.util.dispatchCustomEvent(this.node, 'textureload', false, true, null);
+    }
+}
+XML3D.data.DataAdapter.prototype.getDataComplete = function(){
+    return !this.xflowDataNode.isSubtreeLoading();
+}
+XML3D.data.DataAdapter.prototype.getDataTexComplete = function(){
+    return !this.xflowDataNode.isImageLoading();
+}
 
     /** Recursively passing platform information to children of a data node
      *  Requires that the children and the parents of data nodes are defined
@@ -220,6 +236,8 @@ XML3D.data.DataAdapter.prototype.notifyChanged = function (evt) {
 };
 
 XML3D.data.DataAdapter.prototype.connectedAdapterChanged = function (key, adapter, status) {
+    // we first set loading to true, to force a load event when a new, but cached xflow node is attached
+    this.xflowDataNode.setLoading(true);
     if (key === "src") {
         this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
     }
@@ -272,9 +290,13 @@ function updateLoadState(dataAdpater) {
 }
 
 function updateAdapterHandle(adapter, key, url) {
+    var oldAdapterHandle = adapter.getConnectedAdapterHandle(key);
+
     var adapterHandle = adapter.getAdapterHandle(url),
         status = (adapterHandle && adapterHandle.status);
 
+    if(oldAdapterHandle == adapterHandle)
+        return;
     if (status === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
         XML3D.debug.logError("Could not find element of url '" + adapterHandle.url + "' for " + key, adapter.node);
     }

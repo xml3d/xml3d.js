@@ -262,7 +262,15 @@
 
                     } else if (config[prop].m !== undefined) {
                         if(proto) proto[prop] = config[prop].m;
-                    } else
+                    } else if (config[prop].p !== undefined) {
+                        if(proto){
+                            try {
+                                Object.defineProperty(proto, prop, config[prop].p);
+                            } catch (e) {
+                                XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
+                            }
+                        }
+                    }else
                         XML3D.debug.logError("Can't configure " + elem.nodeName + "::" + prop);
                 }
             }
@@ -298,6 +306,12 @@
                     }
                 }else if (config[prop].m !== undefined) {
                     elem[prop] = config[prop].m;
+                } else if (config[prop].p !== undefined) {
+                    try {
+                        Object.defineProperty(elem, prop, config[prop].p);
+                    } catch (e) {
+                        XML3D.debug.logWarning("Can't configure " + elem.nodeName + "::" + prop);
+                    }
                 }
             }
         }

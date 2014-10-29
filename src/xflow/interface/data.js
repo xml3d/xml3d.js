@@ -373,24 +373,29 @@ TextureEntry.prototype._createImage = function(width, height, format, type, samp
     return this._source;
 };
 
-TextureEntry.prototype.setImage = function (s) {
-    this._setImage(s);
+TextureEntry.prototype.setImage = function (s, forceLoadCallback) {
+    this._setImage(s, forceLoadCallback);
     Xflow._callListedCallback();
 };
 
-TextureEntry.prototype._setImage = function (s) {
+TextureEntry.prototype._setImage = function (s, forceLoadCallback) {
     if (!s)
-        this._setSource(null);
+        this._setSource(null, forceLoadCallback);
     else if (s instanceof TexelSource)
-        this._setSource(s);
+        this._setSource(s, forceLoadCallback);
     else
-        this._setSource(new TexelSource(s));
+        this._setSource(new TexelSource(s), forceLoadCallback);
 };
 
-TextureEntry.prototype._setSource = function(s) {
+TextureEntry.prototype._setSource = function(s, forceLoadCallback) {
+    var prevLoading = this.isLoading();
     this._source = s;
     var loading = this.isLoading();
-    if(loading){
+    if(forceLoadCallback && !loading && !prevLoading){
+        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_START);
+        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_END);
+    }
+    else if(loading){
         this._loading = true;
         notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_START);
     }

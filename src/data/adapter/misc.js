@@ -78,13 +78,16 @@
         var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
         var onload = function (e, image) {
             if (that.textureEntry) {
-                that.textureEntry.setImage(image);
+                that.textureEntry.setImage(image, true);
             }
         };
         var onerror = function (e, image) {
             XML3D.debug.logError("Could not load image URI="+image.src);
         };
         this.image = XML3D.base.resourceManager.getImage(uri, onload, onerror);
+        if (that.textureEntry) {
+            that.textureEntry.setImage(this.image, true);
+        }
     };
 
     /**
@@ -93,7 +96,7 @@
     ImgDataAdapter.prototype.setTextureEntry = function(entry) {
         this.textureEntry = entry;
         if (this.image) {
-            this.textureEntry.setImage(this.image);
+            this.textureEntry.setImage(this.image, true);
         }
     };
 
@@ -158,7 +161,7 @@
             }
         );
         if (this.textureEntry)
-            this.textureEntry.setImage(this.video);
+            this.textureEntry.setImage(this.video, true);
     };
 
     VideoDataAdapter.prototype.play = function() {
@@ -191,7 +194,7 @@
     VideoDataAdapter.prototype.setTextureEntry = function(entry) {
         this.textureEntry = entry;
         if (this.video) {
-            this.textureEntry.setImage(this.video);
+            this.textureEntry.setImage(this.video, true);
         }
     };
 
@@ -265,7 +268,7 @@
 
             data._canvas.complete = true;
             if (that.textureEntry) {
-                that.textureEntry.setImage(canvas);
+                that.textureEntry.setImage(canvas, true);
             }
         }
         ;
@@ -287,7 +290,7 @@
     IFrameDataAdapter.prototype.setTextureEntry = function(entry) {
         this.textureEntry = entry;
         if (this.image) {
-            this.textureEntry.setImage(this.image);
+            this.textureEntry.setImage(this.image, true);
         }
     };
 

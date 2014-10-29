@@ -198,6 +198,12 @@ var Xflow = {};
         IMAGE_LOAD_END: 7
     };
 
+    Xflow.LOAD_TYPE = {
+        NONE: 0,
+        TEXTURES_LOADED: 1,
+        SUBTREE_LOADED: 2
+    };
+
 
     /**
      * Type of Sequence access - used by operators

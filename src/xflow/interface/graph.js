@@ -279,6 +279,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._subTreeLoading = false;
     this._imageLoading = false;
 
+
     this.id = getXflowNodeId();
     this._isProtoNode = protoNode;
     this._children = [];
@@ -302,6 +303,7 @@ Xflow.DataNode = function(graph, protoNode){
     this._platform = null;
 
     this._listeners = [];
+    this._loadListeners = [];
 
 };
 Xflow.createClass(Xflow.DataNode, Xflow.GraphNode);
@@ -415,7 +417,7 @@ DataNode.prototype.isSubtreeLoading = function(){
     return this._subTreeLoading;
 }
 
-DataNode.prototype.isImageLoading = function(){
+DataNode.prototype.isImageLoading = function() {
     return this._imageLoading;
 }
 
@@ -727,8 +729,23 @@ DataNode.prototype.notify = function(changeType, senderNode){
 DataNode.prototype.addListener = function(listener){
     this._listeners.push(listener)
 }
-DataNode.prototype.removeListener = function(listener){
+
+DataNode.prototype.removeListener = function(listener) {
     Array.erase(this._listeners, listener);
+}
+
+DataNode.prototype.addLoadListener = function(listener){
+    this._loadListeners.push(listener);
+}
+DataNode.prototype.removeLoadListener = function(listener){
+    Array.erase(this._loadListeners, listener);
+}
+
+DataNode.prototype._callLoadListeners = function(loadType){
+    var len = this._loadListeners.length;
+    for(var i = 0; i < len; ++i){
+        this._loadListeners[i](this, loadType);
+    }
 }
 
 DataNode.prototype.getOutputNames = function(){
@@ -845,6 +862,9 @@ function updateImageLoading(node){
     imageLoading = imageLoading || false;
     if(imageLoading != node._imageLoading){
         node._imageLoading = imageLoading;
+        if(!imageLoading){
+            node._callLoadListeners(Xflow.LOAD_TYPE.TEXTURES_LOADED);
+        }
         for(var i = 0; i < node._parents.length; ++i)
             node._parents[i].notify(imageLoading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
             Xflow.RESULT_STATE.IMAGE_LOAD_END);
@@ -861,6 +881,9 @@ function updateSubtreeLoading(node){
 
     if(subtreeLoading != node._subTreeLoading){
         node._subTreeLoading = subtreeLoading;
+        if(!subtreeLoading){
+            node._callLoadListeners(Xflow.LOAD_TYPE.SUBTREE_LOADED);
+        }
         for(var i = 0; i < node._parents.length; ++i)
             node._parents[i].notify(subtreeLoading ? Xflow.RESULT_STATE.LOAD_START :
                 Xflow.RESULT_STATE.LOAD_END);

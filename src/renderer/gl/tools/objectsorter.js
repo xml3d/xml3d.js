@@ -15,7 +15,7 @@
         sortScene: function (scene, viewMatrix) {
             var sourceObjectArray = scene.ready,
                 firstOpaque = scene.firstOpaqueIndex,
-                opaque = [],
+                opaque = {},
                 transparent = [];
 
             var tempArray = [], obj;

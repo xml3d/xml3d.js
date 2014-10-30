@@ -6,18 +6,18 @@ XML3D.data.AssetAdapter = function(factory, node) {
 
     // Node handles for src and proto
     this.asset = null;
+    this.transformFetcher = new XML3D.data.DOMTransformFetcher(this, "transform", "transform");
 };
 XML3D.createClass(XML3D.data.AssetAdapter, XML3D.base.NodeAdapter);
 
 XML3D.data.AssetAdapter.prototype.init = function() {
-    //var xflow = this.resolveScript();
-    //if (xflow)
-    //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
-
     this.asset = new XML3D.base.Asset(this.node);
+    this.asset.setName(this.node.getAttribute("name"));
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     updatePickFilter(this);
     updateChildren(this);
+    setShaderUrl(this, this.asset);
+    this.transformFetcher.update();
 };
 
 XML3D.data.AssetAdapter.prototype.getAsset = function(){
@@ -26,8 +26,12 @@ XML3D.data.AssetAdapter.prototype.getAsset = function(){
 
 function updateChildren(adapter){
     adapter.asset.clearChildren();
+    adapter.asset.clearSubAssets();
     for ( var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
         var subadapter = adapter.factory.getAdapter(child);
+        if(subadapter && subadapter.getAsset){
+            adapter.asset.appendSubAsset(subadapter.getAsset());
+        }
         if(subadapter && subadapter.assetEntry){
             adapter.asset.appendChild(subadapter.assetEntry);
         }
@@ -60,7 +64,7 @@ function updatePickFilter(adapter){
         adapter.asset.setPickFilter(null);
     else{
         var value = adapter.node.getAttribute("pick");
-        adapter.asset.setPickFilter(value.split(/\s+/))
+        adapter.asset.setPickFilter(value);
     }
 }
 
@@ -68,6 +72,10 @@ XML3D.data.AssetAdapter.prototype.connectedAdapterChanged = function(attributeNa
     if(attributeName == "src")
         this.asset.setSrcAsset(adapter && adapter.getAsset() || null);
     updateAssetLoadState(this);
+}
+
+XML3D.data.AssetAdapter.prototype.onTransformChange = function(attrName, matrix){
+    this.asset.setTransform(matrix);
 }
 
 
@@ -88,10 +96,14 @@ XML3D.data.AssetAdapter.prototype.notifyChanged = function(evt) {
         return;
     } else if (evt.type == XML3D.events.VALUE_MODIFIED) {
         var attr = evt.wrapped.attrName;
-        if(attr == "src" )
-            updateAdapterHandle(this, "src", this.node.getAttribute("src"));
-        if(attr == "pick" )
-            updatePickFilter(this);
+        switch(attr){
+            case "name": this.asset.setName(this.node.getAttribute("name")); break;
+            case "shader": setShaderUrl(this, this.asset); break;
+            case "style":
+            case "transform": this.transformFetcher.update(); break;
+            case "src": updateAdapterHandle(this, "src", this.node.getAttribute("src"));
+            case "pick": updatePickFilter(this); break;
+        }
         return;
     } else if (evt.type == XML3D.events.THIS_REMOVED) {
         this.clearAdapterHandles();
@@ -116,6 +128,7 @@ XML3D.data.AssetDataAdapter.prototype.init = function() {
     this.outputXflowNode = XML3D.data.xflowGraph.createDataNode(false);
     this.assetEntry = new XML3D.base.SubData(this.outputXflowNode, this.getXflowNode(), this.node);
     this.assetEntry.setName(this.node.getAttribute("name"));
+    updateClassNames(this);
     updatePostCompute(this);
     this.assetEntry.setPostFilter(this.node.getAttribute("filter"));
     updateIncludes(this.assetEntry, this.node.getAttribute("includes"));
@@ -138,6 +151,7 @@ XML3D.data.AssetDataAdapter.prototype.notifyChanged = function(evt) {
         switch(attr){
             case "name": this.assetEntry.setName(this.node.getAttribute("name")); break;
             case "compute": updatePostCompute(this); break;
+            case "class": updateClassNames(this); break;
             case "filter": this.assetEntry.setPostFilter(this.node.getAttribute("filter")); break;
             case "includes": updateIncludes(this.node.getAttribute("includes")); break;
         }
@@ -153,7 +167,12 @@ function updateIncludes(assetEntry, includeString){
     if(!includeString)
         assetEntry.setIncludes([]);
     else
-        assetEntry.setIncludes(includeString.split(/\s+/));
+        assetEntry.setIncludes(includeString.trim().split(/\s*,\s*/));
+}
+
+function updateClassNames(adapter){
+    var classNames = adapter.node.getAttribute("class");
+    adapter.assetEntry.setClassNamesString(classNames)
 }
 
 function updatePostCompute(adapter){
@@ -180,15 +199,15 @@ function updateSubDataLoadState(dataAdapter) {
 }
 
 
-function setShaderUrl(adapter){
+function setShaderUrl(adapter, dest){
     var node = adapter.node;
     var shaderUrl = node.getAttribute("shader");
     if(shaderUrl){
         var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument, shaderUrl);
-        adapter.assetEntry.setShader(shaderId.toString());
+        dest.setShader(shaderId.toString());
     }
     else{
-        adapter.assetEntry.setShader(null);
+        dest.setShader(null);
     }
 }
 
@@ -200,8 +219,9 @@ XML3D.createClass(XML3D.data.AssetMeshAdapter, XML3D.data.AssetDataAdapter);
 
 XML3D.data.AssetMeshAdapter.prototype.init = function() {
     XML3D.data.AssetDataAdapter.prototype.init.call(this);
-    setShaderUrl(this);
+    setShaderUrl(this, this.assetEntry);
     this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles");
+    this.assetEntry.setMatchFilter(this.node.getAttribute("match"));
     this.transformFetcher.update();
 };
 XML3D.data.AssetMeshAdapter.prototype.notifyChanged = function(evt) {
@@ -209,7 +229,8 @@ XML3D.data.AssetMeshAdapter.prototype.notifyChanged = function(evt) {
     if (evt.type == XML3D.events.VALUE_MODIFIED) {
         var attr = evt.wrapped.attrName;
         switch(attr){
-            case "shader": setShaderUrl(this); break;
+            case "shader": setShaderUrl(this, this.assetEntry); break;
+            case "match": this.assetEntry.setMatchFilter(this.node.getAttribute("match")); break;
             case "style":
             case "transform": this.transformFetcher.update(); break;
             case "type": this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles")

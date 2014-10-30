@@ -5,8 +5,11 @@
 Xflow.utils = {};
 
 
-Xflow.utils.setAdd = function(setArray, setToAdd){
-    if(setToAdd.length !== undefined){
+Xflow.utils.set = {};
+
+
+Xflow.utils.set.add = function(setArray, setToAdd){
+    if(Array.isArray(setToAdd)){
         for(var i = 0; i < setToAdd.length; ++i){
             if(setArray.indexOf(setToAdd[i]) == -1)
                 setArray.push(setToAdd[i]);
@@ -17,9 +20,9 @@ Xflow.utils.setAdd = function(setArray, setToAdd){
             setArray.push(setToAdd);
     }
 }
-Xflow.utils.setRemove = function(setArray, setToRemove){
+Xflow.utils.set.remove = function(setArray, setToRemove){
     var idx;
-    if(setToRemove.length !== undefined){
+    if(Array.isArray(setToRemove)){
         for(var i = 0; i < setToRemove.length; ++i){
             if( (idx = setArray.indexOf(setToRemove[i])) != -1)
                 setArray.splice(idx,1);
@@ -29,6 +32,32 @@ Xflow.utils.setRemove = function(setArray, setToRemove){
         if( (idx = setArray.indexOf(setToRemove)) != -1)
             setArray.splice(idx,1);
     }
+}
+
+Xflow.utils.set.intersection = function(dest, setA, setB){
+    var size = setA.length;
+    for(var i = 0; i < size; ++i){
+        if(setB.indexOf(setA[i]) != -1)
+            dest.push(setA[i]);
+    }
+}
+
+Xflow.utils.set.isIntersecting = function(setA, setB){
+    var i = setA.length;
+    while(i--){
+        if(setB.indexOf(setA[i]) != -1)
+            return true;
+    }
+    return false;
+}
+
+Xflow.utils.set.isSubset = function(smallerSet, largerSet){
+    var i = smallerSet.length;
+    while(i--){
+        if(largerSet.indexOf(smallerSet[i]) == -1)
+            return false;
+    }
+    return true;
 }
 
 /**
@@ -67,7 +96,6 @@ Xflow.nameset.remove = function(nameSet, toRemove){
 }
 
 Xflow.nameset.intersection = function(nameSetA, nameSetB){
-    var result = [];
     var i = nameSetA.length;
     while(i--){
         if(nameSetB.indexOf(nameSetA[i]) == -1){

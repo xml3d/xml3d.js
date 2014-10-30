@@ -170,7 +170,10 @@ XML3D.classInfo['asset'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     src: {a: XML3D.ReferenceHandler},
+    name: {a: XML3D.StringAttributeHandler},
     pick: {a: XML3D.StringAttributeHandler},
+    transform: {a: XML3D.ReferenceHandler},
+    shader: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
@@ -262,6 +265,8 @@ XML3D.classInfo['model'] = {
     getBoundingBox: {m: XML3D.methods.meshGetBoundingBox},
     src: {a: XML3D.ReferenceHandler},
     pick: {a: XML3D.StringAttributeHandler},
+    transform: {a: XML3D.ReferenceHandler},
+    shader: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
@@ -358,6 +363,7 @@ XML3D.classInfo['assetmesh'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     name: {a: XML3D.StringAttributeHandler},
+    match: {a: XML3D.StringAttributeHandler},
     type: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.MeshTypes, d: 0}},
     compute: {a: XML3D.StringAttributeHandler},
     filter: {a: XML3D.StringAttributeHandler},

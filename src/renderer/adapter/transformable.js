@@ -1,16 +1,19 @@
 (function(webgl) {
 
-    var TransformableAdapter = function(factory, node, handleShader) {
+    var TransformableAdapter = function(factory, node, handleShader, handleTransform) {
         webgl.RenderAdapter.call(this, factory, node);
         this.renderNode = null;
         this.handleShader = handleShader || false;
-        this.transformFetcher = new XML3D.data.DOMTransformFetcher(this, "transform", "transform");
+        if(handleTransform){
+            this.transformFetcher = new XML3D.data.DOMTransformFetcher(this, "transform", "transform");
+        }
+
     };
     XML3D.createClass(TransformableAdapter, webgl.RenderAdapter);
 
     XML3D.extend(TransformableAdapter.prototype, {
         onDispose: function(){
-            this.transformFetcher.clear();
+            this.transformFetcher && this.transformFetcher.clear();
         },
         onConfigured : function() {},
         getRenderNode : function() {
@@ -21,7 +24,7 @@
             return this.renderNode;
         },
         updateLocalMatrix: function(){
-            this.transformFetcher.update();
+            this.transformFetcher && this.transformFetcher.update();
         },
         onTransformChange: function (attrName, matrix) {
             if(attrName == "transform"){
@@ -43,8 +46,6 @@
                 }
             }
             if(shaderHref) {
-                //this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
-                //return this.getConnectedAdapterHandle("shader");
                 return this.getAdapterHandle(shaderHref);
             }
         },
@@ -52,10 +53,10 @@
             if(evt.type == XML3D.events.VALUE_MODIFIED){
                 var target = evt.attrName || evt.wrapped.attrName;
                 if(target == "transform"){
-                    this.transformFetcher.update();
+                    this.transformFetcher && this.transformFetcher.update();
                 }
                 else if(target == "style"){
-                    this.transformFetcher.updateMatrix();
+                    this.transformFetcher && this.transformFetcher.updateMatrix();
                 }
                 else if(target == "visible"){
                     this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");

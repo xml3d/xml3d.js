@@ -1,7 +1,7 @@
 // Adapter for <view>
 (function() {
     var ViewRenderAdapter = function(factory, node) {
-        XML3D.webgl.TransformableAdapter.call(this, factory, node);
+        XML3D.webgl.TransformableAdapter.call(this, factory, node, false, false);
         this.perspectiveFetcher = new XML3D.data.DOMTransformFetcher(this, "perspective", "perspective", true);
         this.createRenderNode();
     };

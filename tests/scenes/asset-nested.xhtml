@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+
+ <xml3d id="xml3dTest" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
+    <defs>
+        <shader id="normShader" script="urn:xml3d:shader:flat">
+            <float3 name="diffuseColor">1 1 1</float3>
+            <float name="ambientIntensity">1.0</float>
+        </shader>
+
+        <view position="0 0 10" />
+
+        <data id="rectBase" >
+            <int name="index">0 1 2 1 2 3</int>
+
+            <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        </data>
+        <data id="shortIndex" >
+            <int name="index">0 1 2</int>
+        </data>
+        <data id="position1" >
+            <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+        </data>
+        <data id="position2" >
+           <float3 name="position">1.0 -1.0 0.0  3.0 -1.0 0.0  1.0 1.0 0.0  3.0 1.0 0.0</float3>
+        </data>
+        <data id="colorOrange" >
+            <float3 name="diffuseColor">1 0.5 0</float3>
+        </data>
+        <data id="colorBlue" >
+            <float3 name="diffuseColor">0.5 0.5 1.0</float3>
+        </data>
+        <data id="colorGreen" >
+            <float3 name="diffuseColor">0.5 1.0 0.5</float3>
+        </data>
+        <data id="position3" >
+           <data src="#position1" />
+           <float4x4 name="meshTransform" >
+                0.5 0 0 0
+                0 0.5 0 0
+                0 0 1 0
+                0 0 0 1
+            </float4x4>
+        </data>
+
+
+        <asset id="template1" >
+            <assetdata name="color" >
+                <float3 name="diffuseColor">0.5 0.5 0.5</float3>
+            </assetdata>
+            <asset name="main" >
+                <assetdata name="base" includes="parent.color">
+
+                </assetdata>
+            </asset>
+        </asset>
+
+        <asset id="mainAsset" >
+            <assetdata name="base" >
+                <data src="#rectBase" ></data>
+            </assetdata>
+
+            <assetmesh name="mesh1" type="triangles" includes="base" shader="#normShader"  >
+                <data src="#position1" ></data>
+            </assetmesh>
+
+            <assetmesh name="mesh2" includes="base" shader="#normShader" style="transform: translateX(0.51px) scale3d(0.5,0.5,1)" >
+                <data src="#position2" ></data>
+            </assetmesh>
+        </asset>
+
+        <asset id="addAsset" >
+            <assetmesh shader="#normShader" includes="parent.color" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
+                <data src="#rectBase" ></data>
+                <data src="#position1" ></data>
+                <data src="#shortIndex" ></data>
+            </assetmesh>
+        </asset>
+        <asset id="weirdAsset" >
+            <assetmesh shader="#normShader" includes="parent.main.base" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
+                <data src="#position1" ></data>
+            </assetmesh>
+        </asset>
+
+    </defs>
+
+
+    <group>
+        <model id="mm1" src="#template1" >
+            <asset name="main" src="#mainAsset" ></asset>
+        </model>
+    </group>
+
+    <group style="transform: translateY(2.01px)">
+        <model id="mm2" src="#template1" >
+            <assetdata name="color" >
+                <data src="#colorOrange" ></data>
+            </assetdata>
+            <asset name="main" src="#mainAsset" ></asset>
+        </model>
+    </group>
+
+    <group style="transform: translateY(-2.01px)">
+        <model id="mm3" src="#template1" >
+            <assetdata name="color" >
+                <data src="#colorOrange" ></data>
+            </assetdata>
+            <asset name="main" src="#mainAsset" >
+                <assetdata name="base" >
+                    <data src="#colorBlue" ></data>
+                </assetdata>
+            </asset>
+        </model>
+    </group>
+
+    <group style="transform: translateX(-3.02px)" >
+        <model id="mm4" src="#mm2" >
+            <assetdata name="color" >
+                <data src="#colorGreen" ></data>
+            </assetdata>
+        </model>
+    </group>
+
+    <group style="transform: translate3d(-3.02px, 2.01px)" >
+        <model id="mm5" src="#mm3" >
+            <asset src="#addAsset" ></asset>
+        </model>
+    </group>
+
+    <group style="transform: translate3d(-3.02px, -2.01px)" >
+        <model id="mm6" src="#mm2" >
+            <asset name="main" >
+                <assetmesh shader="#normShader" includes="base" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
+                    <data src="#position1" ></data>
+                    <data src="#shortIndex" ></data>
+                </assetmesh>
+            </asset>
+        </model>
+    </group>
+
+
+
+
+    <group style="transform: translate3d(3.02px, 0)" >
+        <model id="mm7" src="#mm4" >
+            <asset src="#weirdAsset" ></asset>
+        </model>
+    </group>
+    <group style="transform: translate3d(3.02px, 2.01px)" >
+        <model id="mm8" src="#mm4" >
+            <asset name="main" >
+                <assetdata name="base" >
+                    <float3 name="diffuseColor" >1 1 0</float3>
+                </assetdata>
+            </asset>
+            <asset src="#weirdAsset" ></asset>
+        </model>
+    </group>
+
+    <group style="transform: translate3d(3.02px, -2.01px)" >
+        <model id="mm9" src="#mm3" >
+            <asset>
+                <assetdata name="color" includes="parent.main.base" >
+
+                </assetdata>
+                <asset src="#addAsset" ></asset>
+            </asset>
+        </model>
+    </group>
+
+  </xml3d>
+
+
+</body>
+</html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+
+ <xml3d id="xml3dTest" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
+    <defs>
+        <shader id="redShader" script="urn:xml3d:shader:flat">
+            <float3 name="diffuseColor">1 0.5 0.5</float3>
+            <float name="ambientIntensity">1.0</float>
+        </shader>
+        <shader id="pinkShader" script="urn:xml3d:shader:flat">
+            <float3 name="diffuseColor">1 0.5 1</float3>
+            <float name="ambientIntensity">1.0</float>
+        </shader>
+        <shader id="blueShader" script="urn:xml3d:shader:flat">
+            <float3 name="diffuseColor">0 0 1</float3>
+            <float name="ambientIntensity">1.0</float>
+        </shader>
+        <shader id="greenShader" script="urn:xml3d:shader:flat">
+            <float3 name="diffuseColor">0 1 0</float3>
+            <float name="ambientIntensity">1.0</float>
+        </shader>
+
+        <data id="rectBase" >
+            <int name="index">0 1 2 1 2 3</int>
+
+            <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+        </data>
+        <data id="shortIndex" >
+            <int name="index">0 1 2</int>
+        </data>
+        <data id="position1" >
+            <float3 name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+        </data>
+        <data id="position2" >
+           <float3 name="position">1.0 -1.0 -10.0  3.0 -1.0 -10.0  1.0 1.0 -10.0  3.0 1.0 -10.0</float3>
+        </data>
+        <data id="position3" >
+           <data src="#position1" />
+           <float4x4 name="meshTransform" >
+                0.5 0 0 0
+                0 0.5 0 0
+                0 0 1 0
+                0 0 0 1
+            </float4x4>
+        </data>
+
+        <asset id="bigAsset" >
+            <assetmesh class="bottom left" name="upperLeft" type="triangles" shader="#redShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+            </assetmesh>
+            <assetmesh class="bottom" type="triangles" shader="#redShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   2 0 0 1</float4x4>
+            </assetmesh>
+            <assetmesh class="bottom right" type="triangles" shader="#redShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   4 0 0 1</float4x4>
+            </assetmesh>
+            <assetmesh class="left" type="triangles" shader="#blueShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   0 2 0 1</float4x4>
+            </assetmesh>
+            <assetmesh name="center" type="triangles" shader="#blueShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   2 2 0 1</float4x4>
+            </assetmesh>
+            <assetmesh class="right" type="triangles" shader="#blueShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   4 2 0 1</float4x4>
+            </assetmesh>
+            <assetmesh class="top left" type="triangles" shader="#pinkShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   0 4 0 1</float4x4>
+            </assetmesh>
+            <assetmesh class="top" type="triangles" shader="#pinkShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   2 4 0 1</float4x4>
+            </assetmesh>
+            <assetmesh class="top right" name="lowerRight" type="triangles" shader="#pinkShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   4 4 0 1</float4x4>
+            </assetmesh>
+        </asset>
+
+    </defs>
+        <group id="meshGroup" >
+            <model id="mm1" src="#bigAsset" style="transform: translate3d(-2px, -2px, 0)" pick=".left.top, .bottom, center"></model>
+        </group>
+  </xml3d>
+  <xml3d id="xml3dReference" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
+        <group style="transform: translate3d(-2px, -2px, 0)">
+            <mesh id="bottomLeft" type="triangles" shader="#redShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+            </mesh>
+            <mesh id="bottomCenter" type="triangles" shader="#redShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   2 0 0 1</float4x4>
+            </mesh>
+            <mesh id="bottomRight" type="triangles" shader="#redShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   4 0 0 1</float4x4>
+            </mesh>
+            <mesh id="centerLeft" type="triangles" shader="#blueShader" visible="false">
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   0 2 0 1</float4x4>
+            </mesh>
+            <mesh id="center" type="triangles" shader="#blueShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   2 2 0 1</float4x4>
+            </mesh>
+            <mesh id="centerRight" type="triangles" shader="#blueShader" visible="false">
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   4 2 0 1</float4x4>
+            </mesh>
+            <mesh id="topLeft" type="triangles" shader="#pinkShader" >
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   0 4 0 1</float4x4>
+            </mesh>
+            <mesh id="topCenter" type="triangles" shader="#pinkShader" visible="false">
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   2 4 0 1</float4x4>
+            </mesh>
+            <mesh id="topRight" name="lowerRight" type="triangles" shader="#pinkShader" visible="false">
+                <data src="#rectBase" />
+                <data src="#position1" />
+                <float4x4 name="meshTransform" >1 0 0 0   0 1 0 0   0 0 1 0   4 4 0 1</float4x4>
+            </mesh>
+        </group>
+
+  </xml3d>
+
+</body>
+</html>

@@ -408,7 +408,7 @@ Object.defineProperty(DataNode.prototype, "userData", {
 DataNode.prototype.setLoading = function(loading){
     if(this._loading != loading){
         this._loading = loading;
-        updateSubtreeLoading(this);
+        updateLoadingState(this);
         Xflow._callListedCallback();
     }
 }
@@ -418,7 +418,7 @@ DataNode.prototype.isSubtreeLoading = function(){
 }
 
 DataNode.prototype.isImageLoading = function() {
-    return this._imageLoading;
+    return this._imageLoading || this._subTreeLoading;
 }
 
 
@@ -708,7 +708,7 @@ DataNode.prototype.notify = function(changeType, senderNode){
         if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
             notifyParentsOnChanged(this, changeType);
         else
-            updateSubtreeLoading(this);
+            updateLoadingState(this);
     }
     else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ||
         changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE ||
@@ -717,7 +717,7 @@ DataNode.prototype.notify = function(changeType, senderNode){
     {
         if(changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
            changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END )
-            updateImageLoading(this);
+            updateLoadingState(this);
         if(senderNode){
             this._channelNode.notifyDataChange(senderNode, changeType);
         }
@@ -845,51 +845,54 @@ function getForwardNode(dataNode, filter){
 }
 
 function updateNodeLoading(node){
-    updateImageLoading(node);
-    return updateSubtreeLoading(node);
+    return updateLoadingState(node);
 }
 
-function updateImageLoading(node){
-    var imageLoading = false;
-    for(var i = 0; !imageLoading && i < node._children.length; ++i){
-        var child = node._children[i];
-        imageLoading = child instanceof Xflow.DataNode ? child._imageLoading :
-                child._data && child._data.isLoading && child._data.isLoading();
-    }
-    if(!imageLoading && node._sourceNode) imageLoading = node._sourceNode._imageLoading;
-    if(!imageLoading && node._dataflowNode) imageLoading = node._dataflowNode._imageLoading;
 
-    imageLoading = imageLoading || false;
-    if(imageLoading != node._imageLoading){
-        node._imageLoading = imageLoading;
-        if(!imageLoading){
-            node._callLoadListeners(Xflow.LOAD_TYPE.TEXTURES_LOADED);
-        }
-        for(var i = 0; i < node._parents.length; ++i)
-            node._parents[i].notify(imageLoading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
-            Xflow.RESULT_STATE.IMAGE_LOAD_END);
-    }
-}
-function updateSubtreeLoading(node){
-    var subtreeLoading = node._loading;
+function updateLoadingState(node){
+    var imageLoading = false, subtreeLoading = node._loading;
+
     for(var i = 0; !subtreeLoading && i < node._children.length; ++i){
         var child = node._children[i];
-        subtreeLoading = child instanceof Xflow.DataNode ? child._subTreeLoading : false;
-    }
-    if(!subtreeLoading && node._sourceNode) subtreeLoading = node._sourceNode._subTreeLoading;
-    if(!subtreeLoading && node._dataflowNode) subtreeLoading = node._dataflowNode._subTreeLoading;
-
-    if(subtreeLoading != node._subTreeLoading){
-        node._subTreeLoading = subtreeLoading;
-        if(!subtreeLoading){
-            node._callLoadListeners(Xflow.LOAD_TYPE.SUBTREE_LOADED);
+        if(child instanceof Xflow.DataNode ? child._subTreeLoading : false){
+            subtreeLoading = imageLoading = true;
         }
-        for(var i = 0; i < node._parents.length; ++i)
-            node._parents[i].notify(subtreeLoading ? Xflow.RESULT_STATE.LOAD_START :
-                Xflow.RESULT_STATE.LOAD_END);
-        return true;
+        else if(child instanceof Xflow.DataNode ? child._imageLoading :
+                child._data && child._data.isLoading && child._data.isLoading()){
+            imageLoading = imageLoading || true;
+        }
     }
-    return false;
+    if(!subtreeLoading && node._sourceNode){
+        if(node._sourceNode._subTreeLoading)
+            subtreeLoading = imageLoading = true;
+        else if(node._sourceNode._imageLoading)
+            imageLoading = true;
+    }
+    if(!subtreeLoading && node._dataflowNode){
+        if(node._dataflowNode._subTreeLoading)
+            subtreeLoading = imageLoading = true;
+        else if(node._dataflowNode._imageLoading)
+            imageLoading = true;
+    }
+
+    var subtreeChanged = (subtreeLoading != node._subTreeLoading),
+        imageChanged = (imageLoading != node._imageLoading);
+    node._subTreeLoading = subtreeLoading;
+    node._imageLoading = imageLoading;
+
+    if(subtreeChanged && !node._subTreeLoading) node._callLoadListeners(Xflow.LOAD_TYPE.SUBTREE_LOADED);
+    if(imageChanged && !node._imageLoading) node._callLoadListeners(Xflow.LOAD_TYPE.TEXTURES_LOADED);
+
+    if(subtreeChanged){
+        for(var i = 0; i < node._parents.length; ++i)
+            node._parents[i].notify(subtreeLoading ? Xflow.RESULT_STATE.LOAD_START : Xflow.RESULT_STATE.LOAD_END);
+    }
+    else if(imageChanged){
+        for(var i = 0; i < node._parents.length; ++i)
+            node._parents[i].notify(imageLoading ? Xflow.RESULT_STATE.IMAGE_LOAD_START : Xflow.RESULT_STATE.IMAGE_LOAD_END);
+    }
+
+    return subtreeChanged;
 }
 
 

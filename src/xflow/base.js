@@ -192,16 +192,8 @@ var Xflow = {};
         CHANGED_DATA_VALUE: 1,
         CHANGED_DATA_SIZE: 2,
         CHANGED_STRUCTURE: 3,
-        LOAD_START: 4,
-        LOAD_END: 5,
-        IMAGE_LOAD_START: 6,
-        IMAGE_LOAD_END: 7
-    };
-
-    Xflow.LOAD_TYPE = {
-        NONE: 0,
-        TEXTURES_LOADED: 1,
-        SUBTREE_LOADED: 2
+        IMAGE_LOAD_START: 4,
+        IMAGE_LOAD_END: 5
     };
 
 

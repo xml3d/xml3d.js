@@ -277,7 +277,7 @@ Xflow.DataNode = function(graph, protoNode){
 
     this._loading = false;
     this._loadLevel = 0;
-    this._progressLevel = 0;
+    this._progressLevel = Infinity;
 
 
 
@@ -697,9 +697,7 @@ DataNode.prototype.setCompute = function(computeString){
  * @param {GraphNode} senderNode
  */
 DataNode.prototype.notify = function(changeType, senderNode){
-    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE ||
-       changeType == Xflow.RESULT_STATE.LOAD_START ||
-       changeType == Xflow.RESULT_STATE.LOAD_END )
+    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE )
     {
         this._paramNames = null;
         this._globalParamNames = null;

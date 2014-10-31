@@ -120,19 +120,19 @@ XML3D.data.DataAdapter.prototype.init = function () {
     recursiveDataAdapterConstruction(this);
 };
 
-XML3D.data.DataAdapter.prototype.onXflowLoadEvent = function(node, type){
-    if(type == Xflow.LOAD_TYPE.SUBTREE_LOADED){
+XML3D.data.DataAdapter.prototype.onXflowLoadEvent = function(node, newLevel, oldLevel){
+    if(newLevel == Infinity){
         XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
     }
-    else if(type == Xflow.LOAD_TYPE.TEXTURES_LOADED){
-        XML3D.util.dispatchCustomEvent(this.node, 'textureload', false, true, null);
+    else if(newLevel > oldLevel){
+        XML3D.util.dispatchCustomEvent(this.node, 'progress', false, true, null);
     }
 }
 XML3D.data.DataAdapter.prototype.getDataComplete = function(){
-    return !this.xflowDataNode.isSubtreeLoading();
+    return this.xflowDataNode.getProgressLevel() == Infinity;
 }
-XML3D.data.DataAdapter.prototype.getDataTexComplete = function(){
-    return !this.xflowDataNode.isImageLoading();
+XML3D.data.DataAdapter.prototype.getDataProgressLevel = function(){
+    return this.xflowDataNode.getProgressLevel();
 }
 
     /** Recursively passing platform information to children of a data node

@@ -276,8 +276,9 @@ Xflow.DataNode = function(graph, protoNode){
     Xflow.GraphNode.call(this, graph);
 
     this._loading = false;
-    this._subTreeLoading = false;
-    this._imageLoading = false;
+    this._loadLevel = 0;
+    this._progressLevel = 0;
+
 
 
     this.id = getXflowNodeId();
@@ -359,8 +360,8 @@ Object.defineProperty(DataNode.prototype, "sourceNode", {
         if(this._sourceNode) removeParent(this, this._sourceNode);
         this._sourceNode = v;
         if(this._sourceNode) addParent(this, this._sourceNode);
-        if(!updateNodeLoading(this))
-            this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        updateLoadingState(this);
+        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         Xflow._callListedCallback();
     },
     /** @return {?Xflow.DataNode} */
@@ -386,8 +387,8 @@ Object.defineProperty(DataNode.prototype, "dataflowNode", {
         if(this._dataflowNode) removeParent(this, this._dataflowNode);
         this._dataflowNode = v;
         if(this._dataflowNode) addParent(this, this._dataflowNode);
-        if(!updateNodeLoading(this))
-            this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        updateLoadingState(this);
+        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         Xflow._callListedCallback();
     },
     /** @return {?Xflow.DataNode} */
@@ -414,11 +415,11 @@ DataNode.prototype.setLoading = function(loading){
 }
 
 DataNode.prototype.isSubtreeLoading = function(){
-    return this._subTreeLoading;
+    return this._progressLevel == 0;
 }
 
-DataNode.prototype.isImageLoading = function() {
-    return this._imageLoading || this._subTreeLoading;
+DataNode.prototype.getProgressLevel = function(){
+    return this._progressLevel;
 }
 
 
@@ -499,8 +500,8 @@ DataNode.prototype.isProtoNode = function(){
 DataNode.prototype.appendChild = function(child){
     this._children.push(child);
     addParent(this, child);
-    if(!updateNodeLoading(this))
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    updateLoadingState(this);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 };
 /**
@@ -509,8 +510,8 @@ DataNode.prototype.appendChild = function(child){
 DataNode.prototype.removeChild = function(child){
     Array.erase(this._children, child);
     removeParent(this, child);
-    if(!updateNodeLoading(this))
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    updateLoadingState(this)
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 };
 /**
@@ -524,8 +525,8 @@ DataNode.prototype.insertBefore = function(child, beforeNode){
     else
         this._children.splice(idx, 0, child);
     addParent(this, child);
-    if(!updateNodeLoading(this))
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    updateLoadingState(this);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 };
 /**
@@ -536,8 +537,8 @@ DataNode.prototype.clearChildren = function(){
         removeParent(this, this._children[i]);
     }
     this._children = [];
-    if(!updateNodeLoading(this))
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+    updateLoadingState(this);
+    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Xflow._callListedCallback();
 };
 
@@ -704,11 +705,9 @@ DataNode.prototype.notify = function(changeType, senderNode){
         this._globalParamNames = null;
         this._channelNode.setStructureOutOfSync();
         clearSubstitutionNodes(this);
-
         if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
             notifyParentsOnChanged(this, changeType);
-        else
-            updateLoadingState(this);
+
     }
     else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ||
         changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE ||
@@ -741,10 +740,10 @@ DataNode.prototype.removeLoadListener = function(listener){
     Array.erase(this._loadListeners, listener);
 }
 
-DataNode.prototype._callLoadListeners = function(loadType){
+DataNode.prototype._callLoadListeners = function(newLevel, oldLevel){
     var len = this._loadListeners.length;
     for(var i = 0; i < len; ++i){
-        this._loadListeners[i](this, loadType);
+        this._loadListeners[i](this, newLevel, oldLevel);
     }
 }
 
@@ -844,55 +843,34 @@ function getForwardNode(dataNode, filter){
     return dataNode;
 }
 
-function updateNodeLoading(node){
-    return updateLoadingState(node);
-}
 
 
 function updateLoadingState(node){
-    var imageLoading = false, subtreeLoading = node._loading;
+    var progressLevel = node._loading ? node._loadLevel : Infinity;
 
-    for(var i = 0; !subtreeLoading && i < node._children.length; ++i){
+    for(var i = 0; progressLevel && i < node._children.length; ++i){
         var child = node._children[i];
-        if(child instanceof Xflow.DataNode ? child._subTreeLoading : false){
-            subtreeLoading = imageLoading = true;
+        if(child instanceof Xflow.DataNode){
+            progressLevel = Math.min(progressLevel, Math.max(child._loadLevel, child._progressLevel) );
         }
-        else if(child instanceof Xflow.DataNode ? child._imageLoading :
-                child._data && child._data.isLoading && child._data.isLoading()){
-            imageLoading = imageLoading || true;
+        else if(child._data && child._data.isLoading && child._data.isLoading()){
+            progressLevel = Math.min(progressLevel, 1);
         }
     }
-    if(!subtreeLoading && node._sourceNode){
-        if(node._sourceNode._subTreeLoading)
-            subtreeLoading = imageLoading = true;
-        else if(node._sourceNode._imageLoading)
-            imageLoading = true;
+    if(progressLevel && node._sourceNode){
+        progressLevel = Math.min(progressLevel, Math.max(node._sourceNode._loadLevel, node._sourceNode._progressLevel));
     }
-    if(!subtreeLoading && node._dataflowNode){
-        if(node._dataflowNode._subTreeLoading)
-            subtreeLoading = imageLoading = true;
-        else if(node._dataflowNode._imageLoading)
-            imageLoading = true;
+    if(progressLevel && node._dataflowNode){
+        progressLevel = Math.min(progressLevel, Math.max(node._dataflowNode._loadLevel, node._dataflowNode._progressLevel));
     }
+    var oldLevel = node._progressLevel;
+    node._progressLevel = progressLevel;
 
-    var subtreeChanged = (subtreeLoading != node._subTreeLoading),
-        imageChanged = (imageLoading != node._imageLoading);
-    node._subTreeLoading = subtreeLoading;
-    node._imageLoading = imageLoading;
-
-    if(subtreeChanged && !node._subTreeLoading) node._callLoadListeners(Xflow.LOAD_TYPE.SUBTREE_LOADED);
-    if(imageChanged && !node._imageLoading) node._callLoadListeners(Xflow.LOAD_TYPE.TEXTURES_LOADED);
-
-    if(subtreeChanged){
+    if(oldLevel != node._progressLevel){
+        node._callLoadListeners(node._progressLevel, oldLevel);
         for(var i = 0; i < node._parents.length; ++i)
-            node._parents[i].notify(subtreeLoading ? Xflow.RESULT_STATE.LOAD_START : Xflow.RESULT_STATE.LOAD_END);
+            updateLoadingState(node._parents[i]);
     }
-    else if(imageChanged){
-        for(var i = 0; i < node._parents.length; ++i)
-            node._parents[i].notify(imageLoading ? Xflow.RESULT_STATE.IMAGE_LOAD_START : Xflow.RESULT_STATE.IMAGE_LOAD_END);
-    }
-
-    return subtreeChanged;
 }
 
 

@@ -19,13 +19,13 @@ new (function() {
         set: function(){}
     };
 
-    properties.XML3DNestedDataContainerTypeTexComplete = {
+    properties.XML3DNestedDataContainerTypeProgressLevel = {
         get: function(){
             XML3D._flushDOMChanges();
             var adapters = this._configured.adapters || {};
             for (var adapter in adapters) {
-                if (adapters[adapter].getDataTexComplete) {
-                    return adapters[adapter].getDataTexComplete();
+                if (adapters[adapter].getDataProgressLevel) {
+                    return adapters[adapter].getDataProgressLevel();
                 }
             }
             return false;
@@ -48,13 +48,13 @@ new (function() {
     };
 
 
-    properties.AssetTexComplete = {
+    properties.AssetProgressLevel = {
         get: function(){
             XML3D._flushDOMChanges();
             var adapters = this._configured.adapters || {};
             for (var adapter in adapters) {
-                if (adapters[adapter].getDataTexComplete) {
-                    return adapters[adapter].getDataTexComplete();
+                if (adapters[adapter].getDataProgressLevel) {
+                    return adapters[adapter].getDataProgressLevel();
                 }
             }
             return false;

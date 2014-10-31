@@ -38,8 +38,8 @@ new (function() {
             XML3D._flushDOMChanges();
             var adapters = this._configured.adapters || {};
             for (var adapter in adapters) {
-                if (adapters[adapter].getDataComplete) {
-                    return adapters[adapter].getDataComplete();
+                if (adapters[adapter].getAssetComplete) {
+                    return adapters[adapter].getAssetComplete();
                 }
             }
             return false;
@@ -53,8 +53,8 @@ new (function() {
             XML3D._flushDOMChanges();
             var adapters = this._configured.adapters || {};
             for (var adapter in adapters) {
-                if (adapters[adapter].getDataProgressLevel) {
-                    return adapters[adapter].getDataProgressLevel();
+                if (adapters[adapter].getAssetProgressLevel) {
+                    return adapters[adapter].getAssetProgressLevel();
                 }
             }
             return false;

@@ -8,7 +8,7 @@ module("Loading tests", {
             that.win = document.getElementById("xml3dframe").contentWindow;
             start();
         };
-        loadDocument("scenes/data-loading.html"+window.location.search, this.cb);
+        loadDocument("scenes/loading-data.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -74,7 +74,73 @@ test("Data Loading", function() {
     }
     loadTestStep();
     stop();
+});
+
+module("Loading tests", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            that.win = document.getElementById("xml3dframe").contentWindow;
+            start();
+        };
+        loadDocument("scenes/loading-asset.html"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
 
 
+test("Asset Loading", function() {
+
+    var model = this.doc.querySelector("model"),
+        asset = this.doc.querySelector("#inlineAsset"),
+        img = this.doc.querySelector("#testImg");
+
+    var startAssetTest = function(){
+        equal(model.complete, true, "Model is complete");
+        equal(asset.complete, true, "Asset is complete");
+        var randKey = "?rand=" + Math.random();
+
+        var step = 0;
+        var loadTestStep = function(e){
+            step++;
+            if(step == 1){
+                model.addEventListener('load', loadTestStep);
+                asset.addEventListener('load', loadTestStep);
+                img.src = "textures/magenta.png" + randKey;
+                equal(model.complete, false, "After img.src change, model.complete is false");
+                equal(asset.complete, false, "After img.src change, asset.complete is also false");
+            }
+            if(step == 2){
+                equal(e.target, asset, "Asset dispatched a load event");
+                equal(asset.complete, true, "asset.complete is now true");
+            }
+            if(step == 3){
+                equal(e.target, model, "Model also dispatched a load event");
+                equal(model.complete, true, "model.complete is now true");
+                model.src = "xml/assets.xml" + randKey + "#asset1";
+                equal(model.complete, false, "After model.src change, model.complete is false");
+            }
+            if(step == 4){
+                equal(e.target, model, "Model dispatched a load event");
+                equal(model.complete, true, "model.complete is now true");
+                start();
+            }
+        }
+        loadTestStep();
+
+    }
+
+    stop();
+    if(img.complete){
+        startAssetTest();
+    }else{
+        img.addEventListener('load', startAssetTest);
+    }
 });
 

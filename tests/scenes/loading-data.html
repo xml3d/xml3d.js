@@ -14,13 +14,15 @@
                 <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
            </data>
 
-           <shader id="testShader" script="urn:xml3d:shader:phong">
+           <shader id="testShader" script="urn:xml3d:shader:phong" src="#originalShaderData"></shader>
+
+           <data id="originalShaderData" >
                <float3 name="diffuseColor"      >1.0 0.5 0.5</float3>
                <float  name="ambientIntensity"  >0.5</float>
                <texture name="diffuseTexture" id="testTex" >
                    <img id="testImg" src="textures/blue.png" />
                </texture>
-           </shader>
+           </data>
 
           <data id="swapData" >
                <texture name="diffuseTexture" id="testTex" >

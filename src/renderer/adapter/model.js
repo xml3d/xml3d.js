@@ -8,7 +8,6 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         this.asset = null;
         this.postTransformXflowRequests = [];
         this.postTransformRenderGroups = [];
-        this.initializeEventAttributes();
         this.createRenderNode();
         this._bindedRequestCallback = this.onXflowRequestChange.bind(this);
     };

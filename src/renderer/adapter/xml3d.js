@@ -2,7 +2,6 @@
 (function() {
     var XML3DRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.initializeEventAttributes(["load"]);
     };
     XML3D.createClass(XML3DRenderAdapter, XML3D.webgl.RenderAdapter);
 

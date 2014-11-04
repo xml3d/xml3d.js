@@ -26,7 +26,7 @@ test("Factory test", 2, function() {
     this.factory.createAdapter().notifyChanged({});
 });
 
-test("Event attribute notification tests", 9, function() {
+test("Event attribute notification tests", 8, function() {
     var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created"); // 1
@@ -39,9 +39,9 @@ test("Event attribute notification tests", 9, function() {
     ok(evt.wrapped, "DOM notification is wrapped"); // 5
     equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName set"); // 6
     notEqual(evt.wrapped.relatedNode, null, "MutationEvent::relatedNode set"); // 7
-    e.onclick = function() {}; // 8 Adapter Notified
+    e.onclick = function() {}; // Adapter Notified (Not anymore!)
     XML3D._flushDOMChanges();
-    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName"); // 9
+    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName"); // 8
 });
 
 test("Int attribute notifcation tests", 2, function() {

@@ -103,6 +103,7 @@ XML3D.classInfo['xml3d'] = {
     onkeypress : {a: XML3D.EventAttributeHandler},
     onkeydown : {a: XML3D.EventAttributeHandler},
     onkeyup : {a: XML3D.EventAttributeHandler},
+    onload: {a: XML3D.EventAttributeHandler},
     height : {a: XML3D.IntAttributeHandler, params: 600},
     width : {a: XML3D.IntAttributeHandler, params: 800},
     createXML3DVec3 : {m: XML3D.methods.xml3dCreateXML3DVec3},

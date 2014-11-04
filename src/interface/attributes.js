@@ -85,32 +85,38 @@
 
     handler.EventAttributeHandler = function(id) {
         AttributeHandler.call(this);
+        var eventType = id.substring(2);
 
         this.init = function(elem, storage){
             storage[id] = null;
+            if (elem.hasAttribute(id))
+                this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
         }
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
-            storage[id] = null;
+            if(storage[id] != null)
+                elem.removeEventListener(eventType, storage[id]);
+            if(!value){
+                storage[id] = null;
+            }
+            else{
+                storage[id] = eval("crx = function " + id + "(event){\n  " + value + "\n}");
+                elem.addEventListener(eventType, storage[id], false);
+            }
             return false;
         };
         this.desc = {
             get : function() {
                 XML3D._flushDOMChanges();
                 var storage = getStorage(this);
-                if (storage[id])
-                    return storage[id];
-                if (!this.hasAttribute(id) || storage[id] === undefined)
-                    return null;
-                return eval("crx = function onclick(event){\n  " + this.getAttribute(id) + "\n}");
+                return storage[id];
             },
             set : function(value) {
                 var storage = getStorage(this);
+                if(storage[id]) this.removeEventListener(eventType, storage[id]);
                 storage[id] = (typeof value == 'function') ? value : undefined;
-                this._configured.notify( {
-                    attrName : id,
-                    relatedNode : this
-                });
+                if(storage[id]) this.addEventListener(eventType, storage[id], false);
+                return false;
             }
         };
     };

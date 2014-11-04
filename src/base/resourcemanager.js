@@ -60,7 +60,7 @@
 
     function notifyLoadCompleteListeners(counterObject) {
         var listeners = counterObject.listeners;
-        counterObject.listeners = new Array();
+        //counterObject.listeners = new Array();
         var i = listeners.length;
         while (i--) {
             listeners[i](this);
@@ -79,6 +79,11 @@
         }
     }
 
+    ResourceManager.prototype.isLoadComplete = function(canvasId) {
+        var counterObject = getCounterObject(canvasId);
+        return !counterObject || counterObject.counter == 0;
+    }
+
     /*
      * Register listener that will be fired when all resources for specified canvasId are loaded.
      * Listener is fired only once.
@@ -87,13 +92,14 @@
      * @param {EventListener} listener
      */
     ResourceManager.prototype.addLoadCompleteListener = function(canvasId, listener) {
-        var counterObject = getCounterObject(canvasId);
+        var counterObject = getOrCreateCounterObject(canvasId);
 
-        // when counter is 0 we can fire event immediately
+        /*
         if (counterObject === undefined || counterObject.counter == 0) {
             listener(canvasId);
             return;
         }
+        */
 
         var idx = counterObject.listeners.indexOf(listener);
         if (idx == -1) {
@@ -674,12 +680,12 @@
 
         var image = new Image();
         image.onload = function(e) {
-            loadComplete(0, uri);
             loadListener(e, image);
+            loadComplete(0, uri);
         };
         image.onerror = function(e) {
-            loadComplete(0, uri);
             errorListener(e, image);
+            loadComplete(0, uri);
         };
         if(!uri.hasSameOrigin(document.location.href)) {
             image.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
@@ -710,9 +716,6 @@
             loadComplete(0, uri);
         }
 
-        video.addEventListener("canplay", loadCompleteCallback, true);
-        video.addEventListener("error", loadCompleteCallback, true);
-
         if (!uri.hasSameOrigin(document.location.href)) {
             video.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
             XML3D.debug.logWarning("You are using an cross-origin video as texture. This might cause troubles cause the canvas is 'tainted'.", uri)
@@ -729,6 +732,9 @@
         for (var eventName in listeners) {
             video.addEventListener(eventName, createCallback(listeners[eventName]), true);
         }
+
+        video.addEventListener("canplay", loadCompleteCallback, true);
+        video.addEventListener("error", loadCompleteCallback, true);
 
         video.src = uri.toString(); // here loading starts
         return video;

@@ -36,10 +36,18 @@ include the camera controller that comes with xml3d.js:
 #### Testing ####
 We have an extensive [test suite](http://xml3d.github.com/xml3d.js/tests/) and some [known issues](https://github.com/xml3d/xml3d.js/wiki/Known-issues).
 
-#### Build ####
-The xml3d.js is separated into several files. To build, run the ant script
-'build.xml' located in the 'build' folder. From Eclipse IDE the build can also
-be started by running 'Run As->Ant build' from the files context menu.
+#### How to build ####
+Clone a copy of the main xml3d.js git repo by running:
+
+```bash
+git clone git://github.com/xml3d/xml3d.git
+```
+
+Enter the xml3d.js directory and run the build script:
+```bash
+cd xml3d.js && npm run build
+```
+The built version of xml3d.js will be put in the `build/output/` subdirectory
 
 ### Documentation ###
 We have an overview documentation in each subfolder of the project:

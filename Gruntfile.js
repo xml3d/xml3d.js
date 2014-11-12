@@ -109,6 +109,7 @@ exports = module.exports = function (grunt) {
     grunt.registerTask("merge", builds);
     grunt.registerTask("dev", ["merge"]);
     grunt.registerTask("min", ["merge", "closure-compiler"]);
+    grunt.registerTask("default", ["dev"]);
 
     //grunt.registerTask("dev", ["browserify:debug"]);
     //grunt.registerTask("test", ["mochaTest:test"]);

@@ -3,3 +3,4 @@ test
 .metadata/
 .settings/
 .DS_Store
+node_modules/

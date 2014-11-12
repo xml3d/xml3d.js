@@ -140,7 +140,7 @@
         <property name="git.cmd" value="git" />
     </target>
 
-    <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask" classpath="${master.basedir}/closure/compiler.jar" />
+    <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask" classpath="${master.basedir}/closure/build/compiler.jar" />
 
     <target name="init" depends="init-properties, time" />
 

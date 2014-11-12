@@ -30,7 +30,6 @@ exports = module.exports = function (grunt) {
 
         concat: {
             options: {
-                //banner: '/**\n<%= license %>\n@version: <%= version.dev %>\n**/\n<%= grunt.template.process(main) %>\n'
                 process: function(src, filepath) {
                     switch (filepath) {
                         case "src/xml3d.js": return src.replace('%VERSION%', grunt.config.get("version.dev") );
@@ -59,7 +58,17 @@ exports = module.exports = function (grunt) {
             }
 
         },
-
+        "closure-compiler": {
+            frontend: {
+                closurePath: './build/closure',
+                js: '<%= releaseName %>',
+                jsOutputFile: "<%= buildDir %>/xml3d-min.js",
+                maxBuffer: 500,
+                options: {
+                    //compilation_level: 'ADVANCED_OPTIMIZATIONS', language_in: 'ECMASCRIPT5_STRICT'
+                }
+            }
+        },
         uglify: {
             "<%= releaseName %>": "<%= releaseName %>"
         }
@@ -92,11 +101,15 @@ exports = module.exports = function (grunt) {
 
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-contrib-concat");
+    grunt.loadNpmTasks('grunt-closure-compiler');
 
     var builds = moduleBuilds.map(function(f) { return f.task });
     builds.push("concat:dist");
 
-    grunt.registerTask("build", builds);
+    grunt.registerTask("merge", builds);
+    grunt.registerTask("dev", ["merge"]);
+    grunt.registerTask("min", ["merge", "closure-compiler"]);
+
     //grunt.registerTask("dev", ["browserify:debug"]);
     //grunt.registerTask("test", ["mochaTest:test"]);
 

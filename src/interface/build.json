@@ -1,0 +1,12 @@
+{
+  "module": "interface",
+  "files": [
+    "./notification.js",
+    "./factory.js",
+    "./dom.js",
+    "./elements.js",
+    "./attributes.js",
+    "./methods.js",
+    "./configuration.js"
+  ]
+}

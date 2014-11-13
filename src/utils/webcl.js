@@ -819,4 +819,4 @@
     };
 
 
-}(XML3D = XML3D || {}));
+}(module.exports));

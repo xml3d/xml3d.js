@@ -83,17 +83,28 @@ exports = module.exports = function (grunt) {
         var modulePath = path.dirname(configFile);
         var moduleConfig = grunt.file.readJSON(configFile);
         var destFile = grunt.config.get("dirs.modules") + "/xml3d-" + moduleConfig.module + "-module.js";
+        var taskName = moduleConfig.task || "concat";
 
-        var config = {concat: {}};
-        config.concat[moduleConfig.module] = {
-            src: moduleConfig.files.map(function(name) { return modulePath + "/" + name; }),
+        var srcFiles = taskName == "concat" ? moduleConfig.files.map(function(name) { return modulePath + "/" + name; }) : modulePath + "/index.js";
+
+
+        var config = {}, options = {}, task = config[taskName] = {};
+
+        if (taskName == "browserify") {
+            options["browserifyOptions"] = {
+                debug: true, standalone: "XML3D"
+            }
+        }
+
+        task[moduleConfig.module] = {
+            src: srcFiles,
             dest: destFile,
             nonull: true
         };
 
         grunt.config.merge(config);
         moduleBuilds.push({
-            task: "concat:" + moduleConfig.module,
+            task: taskName + ":" + moduleConfig.module,
             dest: destFile
         });
     });
@@ -102,6 +113,7 @@ exports = module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-contrib-concat");
     grunt.loadNpmTasks('grunt-closure-compiler');
+    grunt.loadNpmTasks('grunt-browserify');
 
     var builds = moduleBuilds.map(function(f) { return f.task });
     builds.push("concat:dist");

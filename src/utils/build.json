@@ -1,13 +1,4 @@
 {
   "module": "utils",
-  "files": [
-    "./webcl.js",
-    "./misc.js",
-    "./array.js",
-    "./options.js",
-    "./debug.js",
-    "./uri.js",
-    "./css.js",
-    "./cssMatrix.js"
-  ]
+  "task": "browserify"
 }

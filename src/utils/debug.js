@@ -3,7 +3,7 @@
     var OPTION_LOGLEVEL = "loglevel";
     XML3D.options.register(OPTION_LOGLEVEL, "warning");
 
-    ns.debug = {
+    ns.exports = {
         ALL: 0,
         DEBUG: 1,
         INFO: 2,
@@ -123,4 +123,4 @@
         }
     };
 
-}(XML3D))
+}(module))

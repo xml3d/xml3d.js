@@ -1,6 +1,4 @@
 {
   "module": "math",
-  "files": [
-    "./bbox.js"
-  ]
+  "task": "browserify"
 }

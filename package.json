@@ -5,7 +5,7 @@
   "version": "4.7.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xml3d/shade.js"
+    "url": "https://github.com/xml3d/xml3d.js"
   },
   "license": "MIT",
   "devDependencies": {
@@ -17,5 +17,8 @@
   },
   "scripts": {
     "build": "npm install && grunt"
+  },
+  "dependencies": {
+    "gl-matrix": "http://github.com/toji/gl-matrix/tarball/master"
   }
 }

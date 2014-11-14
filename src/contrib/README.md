@@ -1,16 +1,7 @@
 Folder: src/contrib/
 ========
 
-Here you find a collection of external libraries used by xml3d.js
-
-#### glMatrix.js ####
-
-High performance matrix and vector operations for WebGL
-
-Version: 2.0.1
-Author: Brandon Jones, Colin MacKenzie IV
-URL: https://github.com/toji/gl-matrix
-License: zlib License
+Here you find a collection of external libraries manually included into xml3d.js. Other dependecies can be found in package.json.
 
 #### glu.js ####
 

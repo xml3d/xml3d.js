@@ -13,6 +13,15 @@ XML3D._xml3d = document.createElementNS(XML3D.xml3dNS, "xml3d");
 XML3D._native = !!XML3D._xml3d.style;
 XML3D._parallel = XML3D._parallel != undefined ? XML3D._parallel : false;
 
+(function () {
+    if (navigator.userAgent.match(/(iPad|iPhone|iPod touch)/i)) {
+        var m = document.createElement("meta");
+        m.name = "format-detection";
+        m.content = "telephone=no";
+        document.head.appendChild(m)
+    }
+}());
+
 XML3D.createElement = function(tagName) {
     return document.createElementNS(XML3D.xml3dNS, tagName);
 };

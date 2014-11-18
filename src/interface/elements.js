@@ -227,12 +227,20 @@
         }
     };
 
+
     handler.ElementHandler.prototype.registerAttributes = function(config) {
         var elem = this.element;
 
+        var isHTML = (elem instanceof HTMLElement);
+        var keyPrefix = (isHTML ? "_html" : "_xml");
+        var handlerKey = keyPrefix + "handlers",
+            protoKey = keyPrefix + "proto";
+
         var canProto = !!elem.__proto__;
 
-        if(!config._handlers){
+        if(!config._cache) config._cache = {};
+
+        if(!config._cache[handlerKey]){
             // Create handlers and prototype only once per configuration
             var proto;
             if(canProto){
@@ -245,6 +253,7 @@
 
             var handlers = {};
             for ( var prop in config) {
+                if(prop =="_cache") continue;
                 if (config[prop] === undefined) {
                     if(proto) delete proto[prop];
                 } else {
@@ -274,14 +283,15 @@
                         XML3D.debug.logError("Can't configure " + elem.nodeName + "::" + prop);
                 }
             }
-            config._handlers = handlers;
-            config._proto = proto;
+            config._cache[handlerKey] = handlers;
+            config._cache[protoKey] = proto;
         }
         // Set and initialize handlers for element
-        this.handlers = config._handlers;
+        this.handlers = config._cache[handlerKey];
         if(canProto){
-            elem.__proto__ = config._proto;
+            elem.__proto__ = config._cache[protoKey];
             for ( var prop in config) {
+                if(prop =="_cache") continue;
                 if(config[prop] && config[prop].a !== undefined){
                     var attrName = config[prop].id || prop;
                     var handler = this.handlers[attrName];
@@ -292,6 +302,7 @@
         }
         else{
             for ( var prop in config) {
+                if(prop =="_cache") continue;
                 if (config[prop] === undefined) {
                     delete elem[prop];
                 }

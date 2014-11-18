@@ -364,14 +364,15 @@
      * @param {string} url The complete url + fragment
      * @param {FormatHandler} formatHandler Format handler
      * @param {Object} data Data of the document corresponding to the url. Possibily a DOM element
+     * @param {boolean} localChange If true, then this is about a local id change. do not call loadComplete
      */
-    function updateMissingHandles(url, formatHandler, data) {
+    function updateMissingHandles(url, formatHandler, data, localChange) {
         for (var adapterType in c_cachedAdapterHandles[url]) {
             for (var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (!handle.hasAdapter()) {
                     updateHandle(handle, adapterType, canvasId, formatHandler, data);
-                    loadComplete(canvasId, url);
+                    if(!localChange) loadComplete(canvasId, url);
                 }
             }
         }
@@ -547,7 +548,7 @@
             clearHandles("#" + previousId);
         }
         if (newId) {
-            updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node);
+            updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node, true);
         }
     }
 

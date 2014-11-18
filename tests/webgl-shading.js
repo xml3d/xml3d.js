@@ -379,7 +379,7 @@ test("Switching to previously unused shader", 3, function() {
         var actual = XML3DUnit.getPixelValue(gl, 40, 40);
         if (actual[4] == 0)
             return;
-        deepEqual(actual, [76,222,255,255], "Shading is correct");
+        QUnit.closeArray(actual, [76,222,255,255], PIXEL_EPSILON, "Shading is correct");
         start();
     };
     stop();

@@ -53,9 +53,9 @@ test("Modify shader assignment", 6, function() {
         else if(testStep == 1){
             if( XML3DUnit.getPixelValue(glTest, 324, 40)[0] != 255)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 324, 40), [255,127,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 324, 40), [255,127,255,255], PIXEL_EPSILON,
                 "One instance has shader color replaced" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,255,0,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,255,0,255], PIXEL_EPSILON,
                 "Other instance with overridden shader has color NOT replaced" );
             testStep++;
             self.doc.getElementById("outerSubData").shader = "";
@@ -63,7 +63,7 @@ test("Modify shader assignment", 6, function() {
         else if(testStep == 2){
             if( XML3DUnit.getPixelValue(glTest, 124, 134)[0] != 255)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [255,127,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [255,127,255,255], PIXEL_EPSILON,
                 "Other instance has overriden shader removed and therefore updated color" );
             testStep++;
             self.doc.getElementById("outerSubData").shader = "#blueShader";
@@ -71,7 +71,7 @@ test("Modify shader assignment", 6, function() {
         else if(testStep == 3){
             if( XML3DUnit.getPixelValue(glTest, 124, 134)[0] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,0,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,0,255,255], PIXEL_EPSILON,
                 "Other instance now has blue color due to newly added shader" );
             start();
         }
@@ -97,9 +97,9 @@ test("Modify asset src", 4, function() {
         else if(testStep == 1){
             if( XML3DUnit.getPixelValue(glTest, 69, 121)[3] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 121), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 121), [0,0,0,0], PIXEL_EPSILON,
                 "Old Rectangle removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 150), [255,127,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 150), [255,127,255,255], PIXEL_EPSILON,
                 "New Rectangle added" );
             start();
         }
@@ -125,9 +125,9 @@ test("Modify asset pick", 6, function() {
         else if(testStep == 1){
             if( XML3DUnit.getPixelValue(glTest, 434, 150)[3] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], PIXEL_EPSILON,
                 "mesh2 Rectangle removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [255,127,127,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [255,127,127,255], PIXEL_EPSILON,
                 "mesh1 Rectangle added" );
             testStep++;
             self.doc.getElementById("mm4").pick = "";
@@ -135,9 +135,9 @@ test("Modify asset pick", 6, function() {
         else if(testStep == 2){
             if( XML3DUnit.getPixelValue(glTest, 360, 150)[3] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], PIXEL_EPSILON,
                 "mesh2 Rectangle still removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [0,0,0,0], PIXEL_EPSILON,
                 "mesh1 Rectangle also removed" );
             start();
         }

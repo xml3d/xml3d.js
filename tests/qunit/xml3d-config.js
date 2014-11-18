@@ -147,6 +147,8 @@ var loadDocument = function(url, f) {
 };
 
 var EPSILON = 0.0001;
+var PIXEL_EPSILON = 1;
+
 QUnit.config.testTimeout = 5000;
 XML3DUnit = {};
 

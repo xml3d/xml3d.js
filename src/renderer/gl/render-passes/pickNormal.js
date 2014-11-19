@@ -30,12 +30,9 @@
                 object.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
                 object.getWorldMatrix(c_worldMatrix);
-                if (XML3D.math.mat4.invert(c_worldMatrix, c_worldMatrix)) {
-                    XML3D.math.mat3.fromMat4(c_normalMatrix3, c_worldMatrix);
-                    XML3D.math.mat3.transpose(c_normalMatrix3, c_normalMatrix3);
-                } else {
+                if (!XML3D.math.mat3.normalFromMat4(c_normalMatrix3, c_worldMatrix)) {
                     XML3D.math.mat3.identity(c_normalMatrix3);
-                }
+                };
 
                 var program = this.renderInterface.context.programFactory.getPickingNormalProgram();
                 program.bind();

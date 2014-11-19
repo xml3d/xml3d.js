@@ -1,0 +1,11 @@
+{
+  "module": "contrib",
+  "files": [
+    "./base.js",
+    "./glu.js",
+    "./stacktrace-0.4.js",
+    "./EventDispatcher.js",
+    "./state-machine.js",
+    "./perlin-noise-simplex.js"
+  ]
+}

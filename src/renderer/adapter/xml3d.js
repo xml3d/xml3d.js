@@ -2,6 +2,7 @@
 (function() {
     var XML3DRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
+        this.fireLoadEventAfterDraw = false;
         this.firstLoadFired = false;
     };
     XML3D.createClass(XML3DRenderAdapter, XML3D.webgl.RenderAdapter);
@@ -71,11 +72,22 @@
 
     XML3DRenderAdapter.prototype.onLoadComplete = function(canvasId){
         if(XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId)){
+            this.fireLoadEventAfterDraw = true;
+        }
+    }
+
+    XML3DRenderAdapter.prototype.onFrameDrawn = function(){
+        if(this.fireLoadEventAfterDraw)
+        {
+            this.fireLoadEventAfterDraw = false;
             this.firstLoadFired = true;
             XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
         }
     }
+
+
     XML3DRenderAdapter.prototype.getComplete = function(){
+        if(this.fireLoadEventAfterDraw) return false;
         if(!this.firstLoadFired) return false;
         return XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId);
     }

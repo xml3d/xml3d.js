@@ -215,6 +215,11 @@ XML3D.webgl.MAXFPS = 30;
 
             var stats = this.renderer.renderToCanvas();
             var end = Date.now();
+
+
+            var factory = XML3D.base.xml3dFormatHandler.getFactory(XML3D.webgl, this.id);
+            var xml3dAdapter = factory.getAdapter(this.xml3dElem);
+            xml3dAdapter.onFrameDrawn();
             this.dispatchFrameDrawnEvent(start, end, stats);
 
         } catch (e) {

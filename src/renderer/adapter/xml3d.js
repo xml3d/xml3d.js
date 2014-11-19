@@ -2,6 +2,7 @@
 (function() {
     var XML3DRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
+        this.firstLoadFired = false;
     };
     XML3D.createClass(XML3DRenderAdapter, XML3D.webgl.RenderAdapter);
 
@@ -70,8 +71,13 @@
 
     XML3DRenderAdapter.prototype.onLoadComplete = function(canvasId){
         if(XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId)){
+            this.firstLoadFired = true;
             XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
         }
+    }
+    XML3DRenderAdapter.prototype.getComplete = function(){
+        if(!this.firstLoadFired) return false;
+        return XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId);
     }
 
     XML3DRenderAdapter.prototype.getBoundingBox = function() {

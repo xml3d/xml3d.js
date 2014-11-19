@@ -62,6 +62,20 @@ new (function() {
         set: function(){}
     };
 
+    properties.xml3dComplete = {
+        get: function(){
+            XML3D._flushDOMChanges();
+            var adapters = this._configured.adapters || {};
+            for (var adapter in adapters) {
+                if (adapters[adapter].getComplete) {
+                    return adapters[adapter].getComplete();
+                }
+            }
+            return false;
+        },
+        set: function(){}
+    };
+
     // Export to xml3d namespace
     XML3D.extend(XML3D.properties, properties);
 });

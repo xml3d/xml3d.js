@@ -53,7 +53,7 @@ test("Phong specular texture", 3, function() {
     var docu = this.doc;
     testFunc = function(n) {
         XML3DUnit.loadSceneTestImages(docu, "xml3dReference", "xml3dTest", function(refImage, testImage){
-            QUnit.imageEqual(refImage, testImage, "Specular texture matches");
+            QUnit.imageClose(refImage, testImage, 1, "Specular texture matches");
 
             start();
         });

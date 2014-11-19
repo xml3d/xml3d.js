@@ -158,7 +158,6 @@ XML3D.createClass = function(ctor, parent, methods) {
      * @param {Element} xml3dElement
      */
     function initXML3DElement(xml3dElement) {
-
         if (XML3D._native)
             return;
 
@@ -197,6 +196,7 @@ XML3D.createClass = function(ctor, parent, methods) {
         XML3D.base.sendAdapterEvent(xml3dElement, {onConfigured : []});
 
         curXML3DInitElements.splice(curXML3DInitElements.indexOf(xml3dElement), 1);
+        clearObserver();
     };
 
     /**
@@ -272,6 +272,15 @@ XML3D.createClass = function(ctor, parent, methods) {
         for(var i = 0; i < xml3ds.length; i++) {
             initXML3DElement(xml3ds[i]);
         }
+
+        if(!MutationObserver){
+            document.addEventListener('DOMNodeInserted', onNodeInserted, false);
+            document.addEventListener('DOMNodeRemoved', onNodeRemoved, false);
+        }
+        else{
+            observer = new MutationObserver(resolveMutations);
+            observer.observe(document.documentElement, { childList: true, subtree: true} );
+        }
     };
 
     function onUnload() {
@@ -279,10 +288,49 @@ XML3D.createClass = function(ctor, parent, methods) {
             XML3D.document.onunload();
     };
 
+    var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver),
+        observer = null;
+
+    function resolveMutations(mutations){
+        for(var i = 0; i < mutations.length; ++i){
+            var mutation = mutations[i];
+            if(mutation.type == 'childList'){
+                var addedNodes = mutation.addedNodes;
+                var j = addedNodes.length;
+                while(j--){
+                    if(addedNodes[j].tagName == "xml3d")
+                        initXML3DElement(addedNodes[j]);
+                }
+                var removedNodes = mutation.removedNodes;
+                var j = removedNodes.length;
+                while(j--) {
+                    if(removedNodes[j].tagName == "xml3d")
+                        destroyXML3DElement(removedNodes[j]);
+                }
+
+            }
+        }
+    }
+
+    function flushObserver(){
+        if(observer){
+            resolveMutations(observer.takeRecords());
+        }
+    }
+    function clearObserver(){
+        if(observer){
+            observer.takeRecords();
+        }
+    }
+
+
     document.addEventListener('DOMContentLoaded', onLoad, false);
     window.addEventListener('unload', onUnload, false);
     window.addEventListener('reload', onUnload, false);
-    document.addEventListener('DOMNodeInserted', onNodeInserted, false);
-    document.addEventListener('DOMNodeRemoved', onNodeRemoved, false);
+
+
+
+
+
 
 })();

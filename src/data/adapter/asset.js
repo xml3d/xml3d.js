@@ -12,6 +12,7 @@ XML3D.createClass(XML3D.data.AssetAdapter, XML3D.base.NodeAdapter);
 
 XML3D.data.AssetAdapter.prototype.init = function() {
     this.asset = new XML3D.base.Asset(this.node);
+    this.asset.addChangeListener(this);
     this.asset.setName(this.node.getAttribute("name"));
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     updatePickFilter(this);
@@ -20,9 +21,25 @@ XML3D.data.AssetAdapter.prototype.init = function() {
     this.transformFetcher.update();
 };
 
+XML3D.data.AssetAdapter.prototype.onAssetLoadChange = function(asset, newLevel, oldLevel){
+    if(newLevel == Infinity){
+        XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
+    }
+    else if(newLevel > oldLevel){
+        XML3D.util.dispatchCustomEvent(this.node, 'progress', false, true, null);
+    }
+};
+
+XML3D.data.AssetAdapter.prototype.getAssetComplete = function(){
+    return this.asset.getProgressLevel() == Infinity;
+}
+XML3D.data.AssetAdapter.prototype.getAssetProgressLevel = function(){
+    return this.asset.getProgressLevel();
+}
+
 XML3D.data.AssetAdapter.prototype.getAsset = function(){
     return this.asset;
-}
+};
 
 function updateChildren(adapter){
     adapter.asset.clearChildren();

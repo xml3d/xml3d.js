@@ -79,48 +79,59 @@ XML3D.createClass = function(ctor, parent, methods) {
 };
 
 (function() {
-    function displayWebGLNotSupportedInfo(xml3dElement) {
+    function displayWebGLNotSupportedInfo(xml3dElement){
 
-        // Place xml3dElement inside an invisible div
-        var hideDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
+        if(xml3dElement.hasAttribute("onunsupported")){
+            var callback = new Function("event", xml3dElement.getAttribute("onunsupported"));
+            xml3dElement.addEventListener('unsupported', callback, false);
+        }
+        var doDefault = XML3D.util.dispatchCustomEvent(xml3dElement, 'unsupported', false, true, null);
+        if(doDefault){
+            // Place xml3dElement inside an invisible div
+            var hideDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
 
-        xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
-        hideDiv.appendChild(xml3dElement);
-        hideDiv.style.display = "none";
+            xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
+            hideDiv.appendChild(xml3dElement);
+            hideDiv.style.display = "none";
 
-        var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
-        infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
-        infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
-        infoDiv.style.border = "2px solid red";
-        infoDiv.style.color = "red";
-        infoDiv.style.padding = "10px";
-        infoDiv.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+            var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
+            if(xml3dElement.hasAttribute("class")){
+                infoDiv.setAttribute("class", xml3dElement.getAttribute("class"));
+            }
 
-        var width = xml3dElement.getAttribute("width");
-        if (width !== null) {
-            infoDiv.style.width = width;
+            infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
+            infoDiv.style.border = "2px solid red";
+            infoDiv.style.color = "red";
+            infoDiv.style.padding = "10px";
+            infoDiv.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+
+            var width = xml3dElement.getAttribute("width");
+            if (width !== null) {
+                infoDiv.style.width = width;
+            }
+
+            var height = xml3dElement.getAttribute("height");
+            if (height !== null) {
+                infoDiv.style.height = height;
+            }
+
+            var hElement = document.createElement("h3");
+            var hTxt = document.createTextNode("Your browser doesn't appear to support XML3D.");
+            hElement.appendChild(hTxt);
+
+            var pElement = document.createElement("p");
+            pElement.appendChild(document.createTextNode("Please visit "));
+            var link = document.createElement("a");
+            link.setAttribute("href", "http://www.xml3d.org");
+            link.appendChild(document.createTextNode("http://www.xml3d.org"));
+            pElement.appendChild(link);
+            pElement.appendChild(document.createTextNode(" to get information about browsers supporting XML3D."));
+            infoDiv.appendChild(hElement);
+            infoDiv.appendChild(pElement);
+
+            hideDiv.parentNode.insertBefore(infoDiv, hideDiv);
         }
 
-        var height = xml3dElement.getAttribute("height");
-        if (height !== null) {
-            infoDiv.style.height = height;
-        }
-
-        var hElement = document.createElement("h3");
-        var hTxt = document.createTextNode("Your browser doesn't appear to support XML3D.");
-        hElement.appendChild(hTxt);
-
-        var pElement = document.createElement("p");
-        pElement.appendChild(document.createTextNode("Please visit "));
-        var link = document.createElement("a");
-        link.setAttribute("href", "http://www.xml3d.org");
-        link.appendChild(document.createTextNode("http://www.xml3d.org"));
-        pElement.appendChild(link);
-        pElement.appendChild(document.createTextNode(" to get information about browsers supporting XML3D."));
-        infoDiv.appendChild(hElement);
-        infoDiv.appendChild(pElement);
-
-        hideDiv.parentNode.insertBefore(infoDiv, hideDiv);
     };
 
     /*  a list of elements that are currently initialized. More specifically,

@@ -48,10 +48,10 @@ window.requestAnimFrame = (function(){
         if (document.createEvent) {
             evt = document.createEvent("Events");
             evt.initEvent(eventType, true, true);
-            target.dispatchEvent(evt);
+            return target.dispatchEvent(evt);
         } else if (document.createEventObject) {
             evt = document.createEventObject();
-            target.fireEvent('on' + eventType, evt);
+            return target.fireEvent('on' + eventType, evt);
         }
     };
 
@@ -70,7 +70,7 @@ window.requestAnimFrame = (function(){
     u.dispatchCustomEvent = function(target, eventType, canBubble, cancelable, detail) {
         var event = document.createEvent('CustomEvent');
         event.initCustomEvent(eventType, canBubble, cancelable, detail);
-        target.dispatchEvent(event);
+        return target.dispatchEvent(event);
     };
 
     u.getStyle = function(oElm, strCssRule) {

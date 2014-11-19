@@ -99,6 +99,7 @@ XML3D.webgl.MAXFPS = 30;
         this.tick = function() {
 
             XML3D.updateXflowObserver();
+            XML3D._flushDOMChanges();
 
             if (that.canvasSizeChanged() || that.renderer.needsRedraw()) {
                 that.dispatchUpdateEvent();
@@ -208,6 +209,7 @@ XML3D.webgl.MAXFPS = 30;
      * Called by tick() to redraw the scene if needed
      */
     CanvasHandler.prototype.draw = function() {
+        XML3D._flushDOMChanges();
         try {
             var start = Date.now();
 

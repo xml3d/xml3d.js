@@ -122,18 +122,22 @@ test("Change of light shader parameters check against lights.spot", 6, function(
 
 
     getChildNodeByName(ls_Spot, "softness").textContent = "0.2";
+    win.XML3D._flushDOMChanges();
     sl[0].getLightData(sld, 0);
     deepEqual(sld.softness, array2floatArray2array([0.2]), "Test beamWidth entry change");
 
     getChildNodeByName(ls_Spot, "falloffAngle").textContent = "0.6";
+    win.XML3D._flushDOMChanges();
     sl[0].getLightData(sld, 0);
     deepEqual(sld.falloffAngle, array2floatArray2array([0.6]), "Test cutOffAngle entry change");
 
     getChildNodeByName(ls_Spot, "intensity").textContent = "1 0 1";
+    win.XML3D._flushDOMChanges();
     sl[0].getLightData(sld, 0);
     deepEqual(sld.intensity, array2floatArray2array([1, 0, 1]), "Test intensity entry change");
 
     getChildNodeByName(ls_Spot, "attenuation").textContent = "1 0 0";
+    win.XML3D._flushDOMChanges();
     sl[0].getLightData(sld, 0);
     deepEqual(sld.attenuation, array2floatArray2array([1, 0, 0]), "Test attenuation entry change");
 });
@@ -150,10 +154,12 @@ test("Change in transformation hierarchy check against lights.spot", 4, function
     var sld = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
 
     t_Lamp.setAttribute("translation", "0 0 3");
+    win.XML3D._flushDOMChanges();
     sl[0].getLightData(sld, 0);
     deepEqual(sld.position, array2floatArray2array([0, 0, 3]), "Test position entry change");
 
     t_Lamp.setAttribute("rotation", "0 1 0 1.57079632679");
+    win.XML3D._flushDOMChanges();
     sl[0].getLightData(sld, 0);
     ok(equarr(sld.direction, [-1, 0, 0], 0.0001), "Test direction entry change");
 

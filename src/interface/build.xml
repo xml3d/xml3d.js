@@ -12,6 +12,7 @@
         <file name="./elements.js" />
         <file name="./attributes.js" />
         <file name="./methods.js" />
+        <file name="./properties.js" />
         <file name="./configuration.js" />
     </filelist>
 

@@ -14,6 +14,7 @@ new (function() {
     };
 
     methods.xml3dGetElementByRay = function(ray, hitPoint, hitNormal) {
+        XML3D._flushDOMChanges();
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {
             if (adapters[adapter].getElementByRay) {
@@ -129,6 +130,7 @@ new (function() {
     };
 
     methods.viewGetViewMatrix = function() {
+        XML3D._flushDOMChanges();
         var adapters = this._configured.adapters || {};
         for ( var adapter in adapters) {
             if (adapters[adapter].getViewMatrix) {
@@ -143,6 +145,7 @@ new (function() {
     };
 
     methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
+        XML3D._flushDOMChanges();
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {
             if (adapters[adapter].getElementByPoint) {
@@ -163,6 +166,7 @@ new (function() {
     };
 
     methods.groupGetLocalMatrix = function() {
+        XML3D._flushDOMChanges();
         var adapters = this._configured.adapters || {};
         for ( var adapter in adapters) {
             if (adapters[adapter].getLocalMatrix) {
@@ -176,6 +180,7 @@ new (function() {
      * return the bounding box that is the bounding box of all children.
      */
     methods.groupGetBoundingBox = function() {
+        XML3D._flushDOMChanges();
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {
             if (adapters[adapter].getBoundingBox) {
@@ -190,6 +195,7 @@ new (function() {
      * returns the bounding box of this mesh in world space.
      */
     methods.meshGetBoundingBox = function() {
+        XML3D._flushDOMChanges();
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {
             if (adapters[adapter].getBoundingBox) {
@@ -200,6 +206,7 @@ new (function() {
     };
 
     methods.xml3dGetRenderInterface = function() {
+        XML3D._flushDOMChanges();
         var adapters = this._configured.adapters || {};
         for ( var adapter in adapters) {
             if (adapters[adapter].getRenderInterface) {
@@ -211,6 +218,7 @@ new (function() {
 
 
     methods.XML3DGraphTypeGetWorldMatrix = function() {
+        XML3D._flushDOMChanges();
         var adapters = this._configured.adapters || {};
         for (var adapter in adapters) {
             if (adapters[adapter].getWorldMatrix) {
@@ -231,6 +239,7 @@ new (function() {
     methods.XML3DNestedDataContainerTypeGetOutputNames =
     methods.XML3DShaderProviderTypeGetOutputNames =
     methods.meshGetOutputNames = function() {
+        XML3D._flushDOMChanges();
         var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter){
             return dataAdapter.getOutputNames();
@@ -241,7 +250,7 @@ new (function() {
     methods.XML3DNestedDataContainerTypeGetResult =
     methods.XML3DShaderProviderTypeGetResult =
     methods.meshGetResult = function(filter) {
-
+        XML3D._flushDOMChanges();
         var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter){
             var result = dataAdapter.getComputeResult(filter);
@@ -254,6 +263,7 @@ new (function() {
     methods.XML3DNestedDataContainerTypeGetOutputChannelInfo =
     methods.XML3DShaderProviderTypeGetOutputChannelInfo =
     methods.meshGetOutputChannelInfo = function(name){
+        XML3D._flushDOMChanges();
         var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter){
             var result = dataAdapter.getOutputChannelInfo(name);
@@ -267,6 +277,7 @@ new (function() {
     methods.XML3DNestedDataContainerTypeGetComputeInfo =
     methods.XML3DShaderProviderTypeGetComputeInfo =
     methods.meshGetComputeInfo = function(){
+        XML3D._flushDOMChanges();
         XML3D.debug.logError(this.nodeName + "::getComputeInfo is not implemeted yet.");
         return null;
     }
@@ -274,6 +285,7 @@ new (function() {
     methods.XML3DNestedDataContainerTypeGetProtoInfo =
     methods.XML3DShaderProviderTypeGetProtoInfo =
     methods.meshGetProtoInfo = function(){
+        XML3D._flushDOMChanges();
         XML3D.debug.logError(this.nodeName + "::getProtoInfo is not implemeted yet.");
         return null;
     }
@@ -281,6 +293,7 @@ new (function() {
     methods.XML3DNestedDataContainerTypeIsOutputConnected =
     methods.XML3DShaderProviderTypeIsOutputConnected =
     methods.meshIsOutputConnected = function(){
+        XML3D._flushDOMChanges();
         XML3D.debug.logError(this.nodeName + "::isOutputConnected is not implemeted yet.");
         return false;
     }
@@ -304,6 +317,7 @@ new (function() {
      * @return {Boolean}
      */
     methods.dataAddOutputFieldListener = function(names, callback) {
+        XML3D._flushDOMChanges();
         if (!names)
             return false;
 
@@ -340,12 +354,13 @@ new (function() {
 
         if(this.textContent != XML3D.scriptValueLabel)
             this.textContent = XML3D.scriptValueLabel;
+        XML3D._flushDOMChanges();
+        //XML3D._discardDomChanges();
         configData.scriptValue = data;
 
         var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
         if(dataAdapter)
             dataAdapter.setScriptValue(data);
-
 
     };
 

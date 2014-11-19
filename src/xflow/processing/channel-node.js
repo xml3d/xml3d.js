@@ -163,7 +163,7 @@
 
 
         var dataNode = channelNode.owner;
-        channelNode.loading = dataNode._subTreeLoading;
+        channelNode.loading = dataNode.isSubtreeLoading();
 
         if(channelNode.substitution)
             dataNode._channelNode.synchronize();

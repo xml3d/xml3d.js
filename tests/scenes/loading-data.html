@@ -1,0 +1,37 @@
+<!DOCTYPE>
+<head>
+<title>XML3D Data Adapter Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="xml3DElem" width="500px" height="300px" >
+      <defs>
+
+           <data id="inlineData" >
+                <int name="index">0 1 2 1 2 3</int>
+                <float3 name="position">-1.0 -1.0 -10.0  1.0 -1.0 -10.0  -1.0 1.0 -10.0  1.0 1.0 -10.0</float3>
+                <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+           </data>
+
+           <shader id="testShader" script="urn:xml3d:shader:phong" src="#originalShaderData"></shader>
+
+           <data id="originalShaderData" >
+               <float3 name="diffuseColor"      >1.0 0.5 0.5</float3>
+               <float  name="ambientIntensity"  >0.5</float>
+               <texture name="diffuseTexture" id="testTex" >
+                   <img id="testImg" src="textures/blue.png" />
+               </texture>
+           </data>
+
+          <data id="swapData" >
+               <texture name="diffuseTexture" id="testTex" >
+                   <img id="swapImg" src="textures/blue.png" />
+               </texture>
+           </data>
+
+       </defs>
+        <mesh type="triangles" id="testMesh" shader="#textShader" src="#inlineData"></mesh>
+    </xml3d>
+</body>
+</html>

@@ -51,7 +51,7 @@ test("Check video", function() {
             image.onload = function (e) {
                 // finally compare
                 // FIXME: Currently encoded video is not fully equal with the image
-                QUnit.imageClose(image, expected, 2, "Correct video frame");
+                QUnit.imageClose(image, expected, 17, "Correct video frame");
                 start();
             }
             image.src = canvas.toDataURL("image/png");

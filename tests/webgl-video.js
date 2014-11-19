@@ -61,9 +61,17 @@ test("Check video", function() {
         stop();
     }
 
+    var firstError = true;
     video.addEventListener('canplay', waitForPlayingVideo);
-    video.addEventListener('error', function(event) { ok(false, "HTML Video loading failed"); });
+    video.addEventListener('error', function(event) {
+        if (firstError) {
+            video.src = "textures/green.ogv";
+            firstError = false;
+        } else {
+            ok(false, "HTML Video loading failed");
+        }
+    });
 
-    video.src="textures/green.ogv";
+    video.src="textures/green.mp4";
     stop();
 });

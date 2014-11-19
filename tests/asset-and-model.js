@@ -229,11 +229,11 @@ function test9Patch(glTest, patches, pickFilter){
     while(i--){
         var coords = NINE_PATCH_COORDS[i];
         if(patches[i]){
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, coords.x, coords.y), coords.color, EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, coords.x, coords.y), coords.color, PIXEL_EPSILON,
                 coords.name + " rectangle is visible for '" + pickFilter + "'" );
         }
         else{
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, coords.x, coords.y), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, coords.x, coords.y), [0,0,0,0], PIXEL_EPSILON,
                 coords.name + " rectangle is invisible for '" + pickFilter + "'" );
         }
     }

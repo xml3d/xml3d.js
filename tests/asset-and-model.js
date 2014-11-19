@@ -403,15 +403,23 @@ test("Nested Assets" , function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
-    for(var i = 0; i < NESTED_TESTS.length; ++i){
-        var test = NESTED_TESTS[i];
-        var checks= test.checks;
-        for(var j = 0; j < checks.length; ++j){
-            var check = checks[j];
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, check.x, check.y), check.color, PIXEL_EPSILON,
-                test.id + " (" + test.pos + "): " + test.desc + " - check #" + (j+1)  );
+    var frameRendererd = function(){
+        var pixelAlpha = XML3DUnit.getPixelValue(glTest, 250, 150)[0];
+        if( pixelAlpha == 0)
+            return;
+        for(var i = 0; i < NESTED_TESTS.length; ++i){
+            var test = NESTED_TESTS[i];
+            var checks= test.checks;
+            for(var j = 0; j < checks.length; ++j){
+                var check = checks[j];
+                QUnit.closeArray(XML3DUnit.getPixelValue(glTest, check.x, check.y), check.color, PIXEL_EPSILON,
+                    test.id + " (" + test.pos + "): " + test.desc + " - check #" + (j+1)  );
+            }
         }
+        start();
     }
-
+    stop();
+    xTest.addEventListener("framedrawn", frameRendererd);
+    frameRendererd();
 });
 

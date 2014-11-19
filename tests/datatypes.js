@@ -598,11 +598,17 @@ test("XML3DMatrix::CSSMatrix conformance", function() {
         QUnit.closeMatrix(xml3d, css, EPSILON, "Same identity");
         QUnit.closeMatrix(xml3d.translate(1, 2, 3), css.translate(1, 2, 3), EPSILON, "CSSMatrix::translate");
         QUnit.closeMatrix(xml3d.scale(1, 2, 3), css.scale(1, 2, 3), EPSILON, "CSSMatrix::scale");
-        QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, 0, 0), css.rotate(90, 0, 0), EPSILON, "CSSMatrix::rotate 1");
-        QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, Math.PI / 2, 0), css.rotate(90, 90, 0), EPSILON, "CSSMatrix::rotate 2");
-        QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4, Math.PI / 4, Math.PI / 2), css.rotate(-45, 45, 90), EPSILON, "CSSMatrix::rotate 3");
-        // temporarily disabled: QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4), css.rotate(-45), EPSILON, "CSSMatrix::rotate 4");
-        QUnit.closeMatrix(xml3d.rotate(0,0,-Math.PI / 4), css.rotate(0,0,-45), EPSILON, "CSSMatrix::rotate 4");
+        QUnit.closeMatrix(xml3d.rotate(Math.PI / 2, 0, 0), css.rotateAxisAngle(1, 0, 0, 90), EPSILON, "CSSMatrix::rotate 1");
+        QUnit.closeMatrix(new XML3DRotation(new XML3DVec3(1,1,0), Math.PI / 2).toMatrix(), css.rotateAxisAngle(1, 1, 0, 90), EPSILON, "CSSMatrix::rotate 2");
+        QUnit.closeMatrix(new XML3DRotation(new XML3DVec3(1,1,1), Math.PI / 4).toMatrix(), css.rotateAxisAngle(1, 1, 1, 45), EPSILON, "CSSMatrix::rotate 3");
+        //This fails on iPhone4 and iPad2
+        //var cssm = css.rotateAxisAngle(1, 0, 0, 90);
+        //var cssm2 = css.rotate(90, 0.0, 0.0);
+        //
+        //QUnit.closeMatrix(cssm, cssm2, EPSILON, "CSSMatrix::rotate stupid");
+
+        //temporarily disabled: QUnit.closeMatrix(xml3d.rotate(-Math.PI / 4), css.rotate(-45), EPSILON, "CSSMatrix::rotate 4");
+        QUnit.closeMatrix(xml3d.rotate(0,0,-Math.PI / 4), css.rotateAxisAngle(0,0,1,-45), EPSILON, "CSSMatrix::rotate 4");
         QUnit.closeMatrix(xml3d.rotateAxisAngle(1, 0, 0, Math.PI / 4), css.rotateAxisAngle(1, 0, 0, 45), EPSILON,
                 "CSSMatrix::rotateAxisAngle");
         QUnit.closeMatrix(xml3d.translate(1, 2, 3).inverse(), css.translate(1, 2, 3).inverse(), EPSILON,
@@ -612,7 +618,7 @@ test("XML3DMatrix::CSSMatrix conformance", function() {
         // QUnit.closeMatrix(css.rotate(45,0,0),
         // css.rotateAxisAngle(1,0,0,45), EPSILON);
         var rotmat = new WebKitCSSMatrix();
-        rotmat = rotmat.rotate(45, 0, 0);
+        rotmat = rotmat.rotateAxisAngle(1, 0, 0, 45);
         var xrot = new XML3DRotation(new XML3DVec3(1,0,0), Math.PI / 4).toMatrix();
         QUnit.closeMatrix(rotmat, xrot, EPSILON, "CSSMatrix:rotate matches XML3DRotation.toMatrix()");
     }

@@ -68,6 +68,13 @@ exports = module.exports = function (grunt) {
                     //compilation_level: 'ADVANCED_OPTIMIZATIONS', language_in: 'ECMASCRIPT5_STRICT'
                 }
             }
+        }, connect: {
+            server: {
+                options: {
+                    port: 9001,
+                    open: "http://localhost:9001/tests/all.html"
+                }
+            }
         },
         uglify: {
             "<%= releaseName %>": "<%= releaseName %>"
@@ -114,6 +121,7 @@ exports = module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-concat");
     grunt.loadNpmTasks('grunt-closure-compiler');
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-connect');
 
     var builds = moduleBuilds.map(function(f) { return f.task });
     builds.push("concat:dist");
@@ -122,6 +130,7 @@ exports = module.exports = function (grunt) {
     grunt.registerTask("dev", ["merge"]);
     grunt.registerTask("min", ["merge", "closure-compiler"]);
     grunt.registerTask("default", ["dev"]);
+    grunt.registerTask("testserver", ["connect:server:keepalive"]);
 
     //grunt.registerTask("dev", ["browserify:debug"]);
     //grunt.registerTask("test", ["mochaTest:test"]);

@@ -408,7 +408,7 @@ test("Nested Assets" , function() {
         var checks= test.checks;
         for(var j = 0; j < checks.length; ++j){
             var check = checks[j];
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, check.x, check.y), check.color, EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, check.x, check.y), check.color, PIXEL_EPSILON,
                 test.id + " (" + test.pos + "): " + test.desc + " - check #" + (j+1)  );
         }
     }

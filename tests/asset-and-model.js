@@ -158,7 +158,7 @@ test("External assets", 3, function() {
             if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
                 return;
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-                QUnit.imageClose(refImage, testImage, 1, "Asset render matches");
+                QUnit.imageClose(refImage, testImage, PIXEL_EPSILON, "Asset render matches");
                 start();
             });
         }
@@ -235,7 +235,7 @@ test("Static asset with classname pick filter", 3   , function() {
             if( XML3DUnit.getPixelValue(glTest, 178, 78)[0] == 0)
                 return;
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-                QUnit.imageEqual(refImage, testImage, "Asset render matches");
+                QUnit.imageClose(refImage, testImage, PIXEL_EPSILON, "Asset render matches");
                 start();
             });
         }

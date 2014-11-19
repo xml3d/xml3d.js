@@ -44,7 +44,7 @@ test("Mesh JSON reference", 6, function() {
                 return;
 
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference2", "xml3dTest", function(refImage, testImage){
-                QUnit.imageEqual(refImage, testImage, "JSON render matches after change");
+                QUnit.imageClose(refImage, testImage, PIXEL_EPSILON, "JSON render matches after change");
 
                 var box = self.doc.getElementById("myMesh02").getBoundingBox();
                 QUnit.closeBox(box, new XML3DBox(new XML3DVec3(1,-3,-10),new XML3DVec3(3,-1,-10)), EPSILON,

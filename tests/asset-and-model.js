@@ -183,6 +183,39 @@ module("Asset and Model", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
+        loadDocument("scenes/asset-recursive.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Recursive external assets and data", 3, function() {
+    var xTest = this.doc.getElementById("xml3dTest"),
+        glTest = getContextForXml3DElement(xTest);
+
+    function onFrameDrawn(){
+        if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
+            return;
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [255,0,0,255], PIXEL_EPSILON, "Recursive external asset is rendered" );
+        start();
+    }
+    stop();
+    xTest.addEventListener("framedrawn", onFrameDrawn);
+    onFrameDrawn();
+});
+
+
+module("Asset and Model", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
         loadDocument("scenes/asset-classnames.xhtml"+window.location.search, this.cb);
     },
     teardown : function() {

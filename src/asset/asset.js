@@ -253,6 +253,7 @@ XML3D.base.SubData.prototype._updateLoadingState = function(){
 
     if(oldLevel != this.progressLevel){
         this.assetParent && updateLoadingState(this.assetParent);
+        invalidateParent(this);
     }
 }
 XML3D.base.SubData.prototype.onXflowLoadEvent = function(){

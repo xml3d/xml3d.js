@@ -99,7 +99,7 @@ test("Programs and Kernels", function () {
     kernel = this.webcl.createKernel(program, "clThresholdImage2");
     ok(kernel, "Create kernel from the program (kernel: 'clThresholdImage2')");
 
-    raises(function () {
+    throws(function () {
             self.webcl.createKernel(program, "dontHaveIt");
         },
         function (e) {
@@ -149,7 +149,7 @@ test("Buffers", function () {
     invalidBufferSize = this.webcl.createBuffer(-10, "r");
     equal(invalidBufferSize, false, "Invalid buffer size: -10");
 
-    raises(function () {
+    throws(function () {
             self.webcl.createBuffer(500000000000000000000000000 * 500000000000000000000000000, "r");
         },
         function (e) {
@@ -176,7 +176,7 @@ test("Processing", function () {
     var commandQueue = this.webcl.createCommandQueue();
     ok(commandQueue, "Create command queue");
 
-    raises(function () {
+    throws(function () {
             self.webcl.createCommandQueue({nope: true});
         },
         function (e) {
@@ -202,7 +202,7 @@ test("Processing", function () {
     assert = this.webcl.kernels.setArgs(undefined, buffIn, buffOut, new Uint32Array([3]), new Uint32Array([1]));
     equal(assert, false, "Set kernel arguments: Undefined kernel");
 
-    raises(function () {
+    throws(function () {
             self.webcl.kernels.setArgs(kernel2, buffIn, buffOut, new Uint32Array(), new Uint32Array([1]));
         },
         function (e) {
@@ -211,7 +211,7 @@ test("Processing", function () {
         "Set kernel arguments: Invalid kernel argument size"
     );
 
-    raises(function () {
+    throws(function () {
             self.webcl.kernels.setArgs(kernel2, undefined, buffOut, new Uint32Array([3]), new Uint32Array([1]));
         },
         // Nokia's WebCL plugin returns this error message only.

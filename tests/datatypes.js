@@ -518,7 +518,7 @@ test("XML3DMatrix::inverse: noninvertible matrix", function() {
 
     var m = this.mat2_noninv;
 
-    raises(function(){m.inverse();}, "inverting non-invertible matrix");
+    throws(function(){m.inverse();}, "inverting non-invertible matrix");
 });
 
 test("XML3DMatrix::multiply", function() {
@@ -585,7 +585,7 @@ test("XML3DMatrix::setMatrixValue: invalid value", function() {
     // test for assigning wrongly formatted matrix value
     var m = new XML3DMatrix();
 
-    raises(function() {m.setMatrixValue("wrong-matrix-format");}, "set an invalid value");
+    throws(function() {m.setMatrixValue("wrong-matrix-format");}, "set an invalid value");
 });
 
 test("XML3DMatrix::CSSMatrix conformance", function() {

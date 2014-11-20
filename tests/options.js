@@ -18,7 +18,7 @@ module("Options", {
 test("get global value", 5, function() {
     notEqual(XML3D.options.getKeys().length, 0, "There should be some registered options");
     notStrictEqual(XML3D.options.getValue(XML3D.options.getKeys()[0]), null, "Get a valid key");
-    raises(function() {
+    throws(function() {
         XML3D.options.getValue("unknown value");
     }, "Error if querying option that has not been registered.");
 });
@@ -28,7 +28,7 @@ test("registering", 5, function() {
     XML3D.options.register("option.regnew", "mydefaultValue");
     equal(XML3D.options.getKeys().length, optionCount + 1, "One option more");
     equal(XML3D.options.getValue("option.regnew"), "mydefaultValue");
-    raises(function() {
+    throws(function() {
         XML3D.options.register("option.regnew", "mydefaultValue");
     }, "Registering twice throws error");
 });

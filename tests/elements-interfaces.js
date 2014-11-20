@@ -198,7 +198,7 @@ test("XML3DVec interface tests", function() {
 
     // Set via interface
         QUnit.closeVector(e.scale, new XML3DVec3(1, 1, 1), EPSILON, "transform.scale is '1 1 1' initially.");
-        raises(function() {
+        throws(function() {
             e.scale = new XML3DVec3();
         }, "XML3DVec properties are readonly");
         QUnit.closeVector(e.scale, new XML3DVec3(1, 1, 1), EPSILON, "transform.scale not changed after set");
@@ -224,7 +224,7 @@ test("XML3DRotation interface tests", function() {
     // Set via interface
         QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1), 0), EPSILON,
                 "texture.type is '0 0 1 0' initially.");
-        raises(function() {
+        throws(function() {
             e.rotation = new XML3DRotation();
         }, "XML3DRotation properties are readonly");
         QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1), 0), EPSILON,

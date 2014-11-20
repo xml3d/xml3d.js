@@ -83,15 +83,14 @@ test("Phong fragment shader", function() {
         directional : [],
         point : [{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},
             {castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},
-            {castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},
             {castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false}]
     }, {
         specularTexture : {}
     });
     var fragment5 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     //console.log(fragment5);
-    this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with 20 point lights and a specular texture compiles.");
-    notEqual(fragment5.indexOf("MAX_POINTLIGHTS 20"), -1, "MAX_POINTLIGHTS set");
+    this.compiles(this.gl.FRAGMENT_SHADER, fragment5, "Phong fragment with 15 point lights and a specular texture compiles.");
+    notEqual(fragment5.indexOf("MAX_POINTLIGHTS 15"), -1, "MAX_POINTLIGHTS set");
     notEqual(fragment5.indexOf("MAX_DIRECTIONALLIGHTS 0"), -1, "MAX_DIRECTIONALLIGHTS set");
     notEqual(fragment5.indexOf("MAX_SPOTLIGHTS 0"), -1, "MAX_SPOTLIGHTS set");
     notEqual(fragment5.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
@@ -379,7 +378,7 @@ test("Switching to previously unused shader", 3, function() {
         var actual = XML3DUnit.getPixelValue(gl, 40, 40);
         if (actual[4] == 0)
             return;
-        deepEqual(actual, [76,222,255,255], "Shading is correct");
+        QUnit.closeArray(actual, [76,222,255,255], PIXEL_EPSILON, "Shading is correct");
         start();
     };
     stop();

@@ -133,7 +133,13 @@
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             var v = value.match(/^\d+/);
-            storage[id] = v ? +v[0] : defaultValue;
+            if (!v || isNaN(+v[0])) {
+                XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
+                elem.setAttribute(id, prevValue);
+                storage[id] = defaultValue;
+            } else {
+                storage[id] =  +v[0];
+            }
             if(elem._configured.canvas)
                 elem._configured.canvas[id] = storage[id];
             return false;
@@ -148,7 +154,12 @@
             set : function(value) {
                 var storage = getStorage(this);
                 var v = +value;
-                storage[id] = isNaN(v) ? defaultValue : Math.floor(v);
+                if (isNaN(v)) {
+                    XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
+                    storage[id] = defaultValue;
+                } else {
+                    storage[id] =  Math.floor(v);
+                }
                 this.setAttribute(id, storage[id] + '');
             }
         };
@@ -166,7 +177,13 @@
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             var v = +value;
-            storage[id] = isNaN(v) ? defaultValue : v;
+            if (isNaN(v)) {
+                XML3D.debug.logWarning("Invalid attribute value: " + value, elem);
+                elem.setAttribute(id, prevValue);
+                storage[id] = defaultValue;
+            } else {
+                storage[id] =  v;
+            }
             return false;
         };
 
@@ -179,7 +196,12 @@
             set : function(value) {
                 var storage = getStorage(this);
                 var v = +value;
-                storage[id] = isNaN(v) ? defaultValue : v;
+                if (isNaN(v)) {
+                    XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
+                    storage[id] = defaultValue;
+                } else {
+                    storage[id] =  v;
+                }
                 this.setAttribute(id, storage[id] + '');
             }
         };
@@ -226,16 +248,19 @@
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             if (!storage[id]) {
+                var initializing = true;
                 this.initVec3(elem, storage, 0, 0, 0);
             }
             var v = storage[id];
             var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
-            if (!m) {
+            if (!m || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3])) {
                 v._data.set(d);
+                !initializing && elem.setAttribute(id, prevValue);
+                !initializing && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
             } else {
-                v._data[0] = m[1];
-                v._data[1] = m[2];
-                v._data[2] = m[3];
+                v._data[0] = +m[1];
+                v._data[1] = +m[2];
+                v._data[2] = +m[3];
             }
             return false;
         };
@@ -271,16 +296,19 @@
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             if (!storage[id]) {
+                var initializing = true;
                 this.initRotation(elem, storage);
             }
             var v = storage[id];
             var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
-            if (!m) {
+            if (!m  || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3]) || isNaN(+m[4])) {
                 v._axis._data[0] = d[0];
                 v._axis._data[1] = d[1];
                 v._axis._data[2] = d[2];
                 v._angle = d[3];
                 v._updateQuaternion();
+                !initializing && elem.setAttribute(id, prevValue);
+                !initializing && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
             } else {
                 v._axis._data[0] = +m[1];
                 v._axis._data[1] = +m[2];

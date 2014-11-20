@@ -53,9 +53,9 @@ test("Modify shader assignment", 6, function() {
         else if(testStep == 1){
             if( XML3DUnit.getPixelValue(glTest, 324, 40)[0] != 255)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 324, 40), [255,127,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 324, 40), [255,127,255,255], PIXEL_EPSILON,
                 "One instance has shader color replaced" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,255,0,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,255,0,255], PIXEL_EPSILON,
                 "Other instance with overridden shader has color NOT replaced" );
             testStep++;
             self.doc.getElementById("outerSubData").shader = "";
@@ -63,7 +63,7 @@ test("Modify shader assignment", 6, function() {
         else if(testStep == 2){
             if( XML3DUnit.getPixelValue(glTest, 124, 134)[0] != 255)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [255,127,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [255,127,255,255], PIXEL_EPSILON,
                 "Other instance has overriden shader removed and therefore updated color" );
             testStep++;
             self.doc.getElementById("outerSubData").shader = "#blueShader";
@@ -71,7 +71,7 @@ test("Modify shader assignment", 6, function() {
         else if(testStep == 3){
             if( XML3DUnit.getPixelValue(glTest, 124, 134)[0] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,0,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,0,255,255], PIXEL_EPSILON,
                 "Other instance now has blue color due to newly added shader" );
             start();
         }
@@ -97,9 +97,9 @@ test("Modify asset src", 4, function() {
         else if(testStep == 1){
             if( XML3DUnit.getPixelValue(glTest, 69, 121)[3] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 121), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 121), [0,0,0,0], PIXEL_EPSILON,
                 "Old Rectangle removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 150), [255,127,255,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 150), [255,127,255,255], PIXEL_EPSILON,
                 "New Rectangle added" );
             start();
         }
@@ -125,9 +125,9 @@ test("Modify asset pick", 6, function() {
         else if(testStep == 1){
             if( XML3DUnit.getPixelValue(glTest, 434, 150)[3] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], PIXEL_EPSILON,
                 "mesh2 Rectangle removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [255,127,127,255], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [255,127,127,255], PIXEL_EPSILON,
                 "mesh1 Rectangle added" );
             testStep++;
             self.doc.getElementById("mm4").pick = "";
@@ -135,9 +135,9 @@ test("Modify asset pick", 6, function() {
         else if(testStep == 2){
             if( XML3DUnit.getPixelValue(glTest, 360, 150)[3] != 0)
                 return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 434, 150), [0,0,0,0], PIXEL_EPSILON,
                 "mesh2 Rectangle still removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 360, 150), [0,0,0,0], PIXEL_EPSILON,
                 "mesh1 Rectangle also removed" );
             start();
         }
@@ -158,7 +158,7 @@ test("External assets", 3, function() {
             if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
                 return;
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-                QUnit.imageClose(refImage, testImage, 1, "Asset render matches");
+                QUnit.imageClose(refImage, testImage, PIXEL_EPSILON, "Asset render matches");
                 start();
             });
         }
@@ -173,6 +173,39 @@ test("External assets", 3, function() {
 
     stop();
 });
+
+module("Asset and Model", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/asset-recursive.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Recursive external assets and data", 3, function() {
+    var xTest = this.doc.getElementById("xml3dTest"),
+        glTest = getContextForXml3DElement(xTest);
+
+    function onFrameDrawn(){
+        if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
+            return;
+        QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [255,0,0,255], PIXEL_EPSILON, "Recursive external asset is rendered" );
+        start();
+    }
+    stop();
+    xTest.addEventListener("framedrawn", onFrameDrawn);
+    onFrameDrawn();
+});
+
 
 module("Asset and Model", {
     setup : function() {
@@ -202,7 +235,7 @@ test("Static asset with classname pick filter", 3   , function() {
             if( XML3DUnit.getPixelValue(glTest, 178, 78)[0] == 0)
                 return;
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-                QUnit.imageEqual(refImage, testImage, "Asset render matches");
+                QUnit.imageClose(refImage, testImage, PIXEL_EPSILON, "Asset render matches");
                 start();
             });
         }
@@ -229,11 +262,11 @@ function test9Patch(glTest, patches, pickFilter){
     while(i--){
         var coords = NINE_PATCH_COORDS[i];
         if(patches[i]){
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, coords.x, coords.y), coords.color, EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, coords.x, coords.y), coords.color, PIXEL_EPSILON,
                 coords.name + " rectangle is visible for '" + pickFilter + "'" );
         }
         else{
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, coords.x, coords.y), [0,0,0,0], EPSILON,
+            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, coords.x, coords.y), [0,0,0,0], PIXEL_EPSILON,
                 coords.name + " rectangle is invisible for '" + pickFilter + "'" );
         }
     }
@@ -370,15 +403,23 @@ test("Nested Assets" , function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
-    for(var i = 0; i < NESTED_TESTS.length; ++i){
-        var test = NESTED_TESTS[i];
-        var checks= test.checks;
-        for(var j = 0; j < checks.length; ++j){
-            var check = checks[j];
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, check.x, check.y), check.color, EPSILON,
-                test.id + " (" + test.pos + "): " + test.desc + " - check #" + (j+1)  );
+    var frameRendererd = function(){
+        var pixelAlpha = XML3DUnit.getPixelValue(glTest, 250, 150)[0];
+        if( pixelAlpha == 0)
+            return;
+        for(var i = 0; i < NESTED_TESTS.length; ++i){
+            var test = NESTED_TESTS[i];
+            var checks= test.checks;
+            for(var j = 0; j < checks.length; ++j){
+                var check = checks[j];
+                QUnit.closeArray(XML3DUnit.getPixelValue(glTest, check.x, check.y), check.color, PIXEL_EPSILON,
+                    test.id + " (" + test.pos + "): " + test.desc + " - check #" + (j+1)  );
+            }
         }
+        start();
     }
-
+    stop();
+    xTest.addEventListener("framedrawn", frameRendererd);
+    frameRendererd();
 });
 

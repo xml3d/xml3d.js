@@ -1,66 +1,109 @@
 module("External References", {
     setup : function() {
-        stop();
         var that = this;
-        this.cb = function(e) {
+        stop();
+        Q.fcall(promiseIFrameLoaded, "scenes/extref-combined.xhtml?xml3d-loglevel=debug").then(function (doc) {
+            that.doc = doc;
             ok(true, "Scene loaded");
-            that.doc = document.getElementById("xml3dframe").contentDocument;
-            start();
-        };
-        loadDocument("scenes/extref-combined.xhtml"+window.location.search, this.cb);
+        }).fin(QUnit.start).done();
     },
     teardown : function() {
-        var v = document.getElementById("xml3dframe");
-        v.removeEventListener("load", this.cb, true);
+        //var v = document.getElementById("xml3dframe");
+        //v.removeEventListener("load", this.cb, true);
     }
 });
 
-test("Mesh JSON reference", 6, function() {
-    var xTest = this.doc.getElementById("xml3dTest"),
-        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
-    var self = this;
+function promiseIFrameLoaded(url) {
+    var v = document.getElementById("xml3dframe");
 
-    var testStep = 0;
-    function onFrameDrawn(){
-        if(testStep == 0){
-            if( XML3DUnit.getPixelValue(glTest, 64, 200)[0] == 0)
-                return;
+    ok(v, "Found iframe.");
+    var deferred = Q.defer();
 
-            XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
-                QUnit.imageEqual(refImage, testImage, "JSON render matches");
+    var f = function(e) {
+        deferred.resolve(v.contentDocument);
+        v.removeEventListener("load", f, true);
+    };
+    // TODO: Loading failed
+    v.addEventListener("load", f, true);
+    v.src = url;
+    return deferred.promise;
+};
 
-                var box = self.doc.getElementById("myMesh02").getBoundingBox();
-                QUnit.closeBox(box, new XML3DBox(new XML3DVec3(-1,-1,-10),new XML3DVec3(1,1,-10)), EPSILON,
-                    "Bounding box of external mesh is: (-1 -1 -10) to (1 1 -10)");
-
-                var meshElement = self.doc.getElementById("myMesh02");
-                meshElement.setAttribute("src", "json/simpleMesh2.json");
-
-                testStep++;
-            });
-        }
-        if(testStep == 1){
-            if( XML3DUnit.getPixelValue(glTest, 128, 128)[0] == 0)
-                return;
-
-            XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference2", "xml3dTest", function(refImage, testImage){
-                QUnit.imageEqual(refImage, testImage, "JSON render matches after change");
-
-                var box = self.doc.getElementById("myMesh02").getBoundingBox();
-                QUnit.closeBox(box, new XML3DBox(new XML3DVec3(1,-3,-10),new XML3DVec3(3,-1,-10)), EPSILON,
-                    "Bounding box of external mesh is: (1 -3 -10) to (3 -1 -10)");
-
-                start();
-            });
-        }
+function promiseOneSceneCompleteAndRendered(xml3dElement) {
+    console.log("scne promise")
+    if(xml3dElement.complete) {
+        console.log("scene already finished");
+        return Q(xml3dElement);
     }
+    var deferred = Q.defer();
+    var f = function(e) {
+        // Child elements dispact load events as well
+        if(e.target != xml3dElement) {
+            return;
+        }
+        console.log("scene loaded")
+        xml3dElement.removeEventListener("load", f, true);
+        deferred.resolve(xml3dElement);
+    };
+    xml3dElement.addEventListener("load", f, true);
+    return deferred.promise;
+};
 
-    xTest.addEventListener("framedrawn", onFrameDrawn);
+function promiseSceneRendered(xml3dElement) {
+    var renderer = getRenderer(xml3dElement);
+    var glContext = getContextForXml3DElement(xml3dElement);
+    var deferred = Q.defer();
+    console.log("Scene", renderer, xml3dElement.id)
 
-    this.doc.getElementById("jsonGroup").visible = true;
-    hTest.draw();
 
+    var first = true;
+    var f = function() {
+        if(first) {
+            first = false;
+            renderer.requestRedraw("test-triggered");
+            return;
+        }
+        xml3dElement.removeEventListener("framedrawn", f, true);
+        XML3DUnit.getPixelValue(glContext, 1, 1);
+        window.setTimeout(function() {
+            deferred.resolve(xml3dElement);
+        }, 100);
+
+    };
+
+    xml3dElement.addEventListener("framedrawn",f,false);
+    renderer.requestRedraw("test-triggered");
+    return deferred.promise;
+};
+
+
+test("Mesh JSON reference", 6, function () {
+    var self = this;
+    var xml3dTest = self.doc.getElementById("xml3dTest");
+    var xml3dReference = self.doc.getElementById("xml3dReference");
+    var xml3dReference2 = self.doc.getElementById("xml3dReference2");
     stop();
+    var test1 = promiseSceneRendered(xml3dReference).then(promiseOneSceneCompleteAndRendered, xml3dTest).then(function () {
+        self.doc.getElementById("jsonGroup").visible = true;
+        return Q(xml3dTest);
+    }).then(promiseSceneRendered).then(function () {
+        QUnit.closeArray(XML3DUnit.readScenePixels(xml3dTest),XML3DUnit.readScenePixels(xml3dReference), PIXEL_EPSILON, "JSON render matches", true);
+        var box = self.doc.getElementById("myMesh02").getBoundingBox();
+        QUnit.closeBox(box, new XML3DBox(new XML3DVec3(-1, -1, -10), new XML3DVec3(1, 1, -10)), EPSILON, "Bounding box of external mesh is: (-1 -1 -10) to (1 1 -10)");
+    });
+
+    test1.then(promiseSceneRendered.bind(null, xml3dReference2)).then(function () {
+        var meshElement = self.doc.getElementById("myMesh02");
+        meshElement.setAttribute("src", "json/simpleMesh2.json");
+        return Q(xml3dTest);
+    }).then(promiseOneSceneCompleteAndRendered).then(function () {
+        QUnit.closeArray(XML3DUnit.readScenePixels(xml3dTest),XML3DUnit.readScenePixels(xml3dReference2), PIXEL_EPSILON, "JSON render matches after change", true);
+
+        var box = self.doc.getElementById("myMesh02").getBoundingBox();
+        QUnit.closeBox(box, new XML3DBox(new XML3DVec3(1, -3, -10), new XML3DVec3(3, -1, -10)), EPSILON, "Bounding box of external mesh is: (1 -3 -10) to (3 -1 -10)");
+
+
+    }).fin(QUnit.start);
 });
 
 

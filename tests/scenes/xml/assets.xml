@@ -76,4 +76,10 @@
         </assetmesh>
     </asset>
 
+    <asset id="indirectData">
+        <assetmesh name="mesh3" >
+            <data src="../json/simpleMesh.json" />
+        </assetmesh>
+    </asset>
+
 </xml3d>

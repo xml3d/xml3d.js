@@ -88,6 +88,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
         onAssetChange: function(){
             this.createModelRenderNodes();
         },
+
         onXflowRequestChange: function(request){
             var index = this.postTransformXflowRequests.indexOf(request);
             if(index != -1){

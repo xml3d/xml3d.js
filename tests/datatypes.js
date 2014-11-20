@@ -621,6 +621,8 @@ test("XML3DMatrix::CSSMatrix conformance", function() {
         rotmat = rotmat.rotateAxisAngle(1, 0, 0, 45);
         var xrot = new XML3DRotation(new XML3DVec3(1,0,0), Math.PI / 4).toMatrix();
         QUnit.closeMatrix(rotmat, xrot, EPSILON, "CSSMatrix:rotate matches XML3DRotation.toMatrix()");
+    } else {
+        ok(true, "No CSSMatrix available: Skipping test.")
     }
 });
 

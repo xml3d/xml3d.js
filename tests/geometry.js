@@ -138,16 +138,16 @@ test("Color Lines", 8, function() {
         var sum = [0,0,0,0];
         var samp = XML3DUnit.getPixelValue(glTest, x, y);
         sum[0] += samp[0]; sum[1] += samp[1]; sum[2] += samp[2]; sum[3] += samp[3];
-        var samp = XML3DUnit.getPixelValue(glTest, x+1, y);
+        samp = XML3DUnit.getPixelValue(glTest, x+1, y);
         sum[0] += samp[0]; sum[1] += samp[1]; sum[2] += samp[2]; sum[3] += samp[3];
-        var samp = XML3DUnit.getPixelValue(glTest, x-1, y);
+        samp = XML3DUnit.getPixelValue(glTest, x-1, y);
         sum[0] += samp[0]; sum[1] += samp[1]; sum[2] += samp[2]; sum[3] += samp[3];
-        var samp = XML3DUnit.getPixelValue(glTest, x, y+1);
+        samp = XML3DUnit.getPixelValue(glTest, x, y+1);
         sum[0] += samp[0]; sum[1] += samp[1]; sum[2] += samp[2]; sum[3] += samp[3];
-        var samp = XML3DUnit.getPixelValue(glTest, x, y-1);
+        samp = XML3DUnit.getPixelValue(glTest, x, y-1);
         sum[0] += samp[0]; sum[1] += samp[1]; sum[2] += samp[2]; sum[3] += samp[3];
        return sum;
-    }
+    };
 
     var testStep = 0;
     function onFrameDrawn(){

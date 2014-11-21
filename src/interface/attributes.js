@@ -23,7 +23,7 @@
     handler.IDHandler = function(id) {
         this.setFromAttribute = function(value, prevValue, elem) {
             XML3D.base.resourceManager.notifyNodeIdChange(elem, prevValue, value);
-        }
+        };
         this.desc = {
             get : function() {
                 return this.getAttribute(id) || "";
@@ -91,7 +91,7 @@
             storage[id] = null;
             if (elem.hasAttribute(id))
                 this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
-        }
+        };
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             if(storage[id] != null)
@@ -129,7 +129,7 @@
             storage[id] = defaultValue;
             if (elem.hasAttribute(id))
                 this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
-        }
+        };
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             var v = value.match(/^\d+/);
@@ -173,7 +173,7 @@
             storage[id] = defaultValue;
             if (elem.hasAttribute(id))
                 this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
-        }
+        };
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             var v = +value;
@@ -212,7 +212,7 @@
             storage[id] = defaultValue;
             if (elem.hasAttribute(id))
                 this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
-        }
+        };
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             storage[id] = string2bool(value + '');
             return false;
@@ -237,7 +237,7 @@
 
         this.init = function(elem, storage){
             storage[id] = null;
-        }
+        };
 
         this.initVec3 = function(elem, storage, x, y, z){
             var changed = function(value) {
@@ -255,7 +255,6 @@
             var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
             if (!m || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3])) {
                 v._data.set(d);
-                !initializing && elem.setAttribute(id, prevValue);
                 !initializing && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
             } else {
                 v._data[0] = +m[1];
@@ -285,7 +284,7 @@
 
         this.init = function(elem, storage){
             storage[id] = null;
-        }
+        };
 
         this.initRotation = function(elem, storage){
             var changed = function(v) {
@@ -307,7 +306,6 @@
                 v._axis._data[2] = d[2];
                 v._angle = d[3];
                 v._updateQuaternion();
-                !initializing && elem.setAttribute(id, prevValue);
                 !initializing && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
             } else {
                 v._axis._data[0] = +m[1];
@@ -337,7 +335,7 @@
     var mixedContent = function(handler) {
         handler.init = function(elem, storage){
             elem._configured.registerMixed();
-        }
+        };
         handler.desc = {
             get : function() {
                 XML3D._flushDOMChanges();
@@ -416,7 +414,7 @@
         this.init = function(elem, storage){
             if (elem.hasAttribute(id))
                 this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
-        }
+        };
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             elem._configured.canvas.setAttribute(id, value);
@@ -436,7 +434,7 @@
             canvas.className = "_xml3d"; // Class name always defined for xml3d canvas
             if (elem.hasAttribute(id))
                 this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
-        }
+        };
 
         this.setFromAttribute = function(value, prevValue, elem, storage) {
             var canvas = elem._configured.canvas;

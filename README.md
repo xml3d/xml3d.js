@@ -1,6 +1,8 @@
 xml3d.js
 ========
 
+[![Build Status](https://travis-ci.org/xml3d/xml3d.js.svg?branch=develop)](https://travis-ci.org/xml3d/xml3d.js)
+
 #### XML3D ####
 
 xml3d.js is a [XML3D](http://www.xml3d.org) implementation based on WebGL and JavaScript. The aim of XML3D is to make the development of 3D-Web applications as easy

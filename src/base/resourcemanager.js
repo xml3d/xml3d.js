@@ -707,10 +707,11 @@
      *                            Listeners will be called with event as the first and video as the second parameter.
      * @return {HTMLVideoElement}
      */
-    ResourceManager.prototype.getVideo = function(uri, autoplay, listeners) {
+    ResourceManager.prototype.getVideo = function(uri, autoplay, loop, listeners) {
         // we use canvasId 0 to represent videos loaded in a document
         getOrCreateCounterObject(0).counter++;
 
+        // FIXME: Creating configured video, play/pause won't work
         var video = document.createElement("video");
 
         function loadCompleteCallback(event) {
@@ -723,6 +724,7 @@
         }
 
         video.autoplay = autoplay;
+        video.loop = loop;
 
         function createCallback(listener) {
             return function(event) {
@@ -739,7 +741,7 @@
 
         video.src = uri.toString(); // here loading starts
         return video;
-    }
+    };
 
     XML3D.base.resourceManager = new ResourceManager();
 

@@ -142,7 +142,7 @@
     VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
         var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.documentURI);
-        this.video = XML3D.base.resourceManager.getVideo(uri, this.node.autoplay,
+        this.video = XML3D.base.resourceManager.getVideo(uri, this.node.autoplay, this.node.loop,
             {
                 canplay : function(event, video) {
                     XML3D.util.dispatchCustomEvent(that.node, 'canplay', true, true, null);

@@ -3,6 +3,7 @@
   <head>
     <link rel="stylesheet" type="text/css" media="all" href="frame.css" />
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+
     <title>
         XML3D
     </title>
@@ -14,5 +15,54 @@
         </defs>
         <view></view>
    </xml3d>
+   <script type="text/javascript">
+       Xflow.registerOperator("xflow.thresholdImage", {
+           outputs: [
+               {type: 'texture', name: 'result', sizeof: 'image'}
+           ],
+           params: [
+               {type: 'texture', source: 'image'},
+               {type: 'int', source: 'threshold'}
+           ],
+
+           platform: Xflow.PLATFORM.CL,
+
+           evaluate: [
+               "int color = image[image_i].x;",
+               "if (color > threshold)",
+               "{",
+               "color=0;",
+               "}else{",
+               "color=255;",
+               "}",
+               "result[image_i] = (uchar4)(color, color, color, 255);"
+           ]
+       });
+
+       Xflow.registerOperator("xflow.thresholdImage", {
+        outputs: [
+            {type: 'texture', name: 'output', sizeof: 'input'}
+        ],
+        params: [
+            {type: 'texture', source: 'input'},
+            {type: 'int', source: 'threshold'}
+        ],
+
+        platform: Xflow.PLATFORM.JAVASCRIPT,
+
+        evaluate: function (output, input, threshold) {
+            var s = input.data,
+                d = output.data;
+
+            for (var i = 0; i < s.length; i += 4) {
+                d[i] = d[i + 1] = d[i + 2] = ((s[i] < threshold[0]) ? 0 : 255);
+                d[i + 3] = s[i + 3];
+            }
+
+            return true;
+        }
+    });
+   </script>
   </body>
+
  </html>

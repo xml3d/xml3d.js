@@ -1,0 +1,53 @@
+<XflowTest>
+    <Input>
+        <data id="texturesJS">
+            <texture name="input">
+                <img src="textures/white.png" style="display:none;"/>
+            </texture>
+            <texture name="ref" id="reference_JS">
+                <img src="textures/white.png" style="display:none;"/>
+            </texture>
+        </data>
+
+        <dataflow id="emptyPlatform1_JS" out="output">
+            <int name="threshold">0</int>
+            <data src="#texturesJS" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+
+        <dataflow id="emptyPlatform2_JS" out="output" platform="">
+            <int name="threshold">0</int>
+            <data src="#texturesJS" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+
+        <dataflow id="illegalPlatform_JS" out="output" platform="thePlatform">
+            <int name="threshold">0</int>
+            <data src="#texturesJS" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+    </Input>
+
+    <TestProcess>
+        <Check title="Check empty platform attribute 1" data="#emptyPlatform1_JS">
+            <MatchTexture name="output" reference="#reference_JS"/>
+        </Check>
+
+        <Check title="Check empty platform attribute 2" data="#emptyPlatform2_JS">
+            <MatchTexture name="output" reference="#reference_JS"/>
+        </Check>
+
+        <Check title="Check illegal platform attribute" data="#illegalPlatform_JS">
+            <MatchTexture name="output" reference="#reference_JS"/>
+        </Check>
+    </TestProcess>
+</XflowTest>

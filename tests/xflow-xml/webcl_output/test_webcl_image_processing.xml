@@ -1,0 +1,19 @@
+<XflowTest>
+    <Input>
+        <data id="testData" compute="output = xflow.thresholdImage(input, threshold)" platform="cl">
+            <int name="threshold">0</int>
+            <texture name="input">
+                <img src="./textures/white.png" style="display:none;"/>
+            </texture>
+            <texture name="tex" id="reference">
+                <img src="./textures/black.png" style="display:none;"/>
+            </texture>
+        </data>
+    </Input>
+
+    <TestProcess>
+        <Check title="Check Image Processing" data="#testData">
+            <MatchTexture name="output" reference="#reference"/>
+        </Check>
+    </TestProcess>
+</XflowTest>

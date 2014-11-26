@@ -1,0 +1,28 @@
+<XflowTest>
+    <Input>
+        <data id="texturesCL">
+            <texture name="input">
+                <img src="textures/white.png" style="display:none;"/>
+            </texture>
+            <texture name="ref" id="reference_CL">
+                <img src="textures/black.png" style="display:none;"/>
+            </texture>
+        </data>
+
+        <dataflow id="validPlatform_CL" out="output" platform="cl">
+            <int name="threshold">0</int>
+
+            <data src="#texturesCL" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+    </Input>
+
+    <TestProcess>
+        <Check title="Check valid platform output" data="#validPlatform_CL">
+            <MatchTexture name="output" reference="#reference_CL"/>
+        </Check>
+    </TestProcess>
+</XflowTest>

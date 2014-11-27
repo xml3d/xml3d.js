@@ -71,7 +71,7 @@ test("Init", function () {
     ok(devices.length !== 0, 'Finding devices by type: "ALL"');
 
     var devices = this.webcl.getDevicesByType("CPU");
-    var ctx = this.webcl.createContext({devices: devices});
+    var ctx = this.webcl.createContext(devices);
     ok(ctx, "Creating WebCL context");
 
 });
@@ -153,7 +153,7 @@ test("Buffers", function () {
             self.webcl.createBuffer(500000000000000000000000000 * 500000000000000000000000000, "r");
         },
         function (e) {
-            return e.name === "INVALID_BUFFER_SIZE";
+            return e.name === "INVALID_VALUE";
         },
         "Invalid buffer size: Too large buffer size"
     );
@@ -215,7 +215,10 @@ test("Processing", function () {
             self.webcl.kernels.setArgs(kernel2, undefined, buffOut, new Uint32Array([3]), new Uint32Array([1]));
         },
         // Nokia's WebCL plugin returns this error message only.
-        /arg is undefined/,
+        {
+        	  "message": "'value' must be a Buffer, Image, Sampler or ArrayBufferView; was undefined [typeof undefined]",
+        	  "name": "TypeError"
+        	},
         "Set kernel arguments: Argument is undefined"
     );
 
@@ -233,7 +236,7 @@ test("Processing", function () {
             Math.ceil(1 / localWS[1]) * localWS[1]];
 
     // Execute (enqueue) kernel
-    commandQueue.enqueueNDRangeKernel(kernel1, globalWS.length, [], globalWS, localWS, []);
+    commandQueue.enqueueNDRangeKernel(kernel1, globalWS.length, null, globalWS, localWS);
 
     // Read the result buffer from OpenCL device
     commandQueue.enqueueReadBuffer(buffOut, false, 0, buffSize, result, []);

@@ -61,7 +61,7 @@ function initWebCLPlatform(graph) {
 
         // Creating a new WebCL context
         try {
-            clCtx = webcl.createContext({devices: clDevices});
+            clCtx = webcl.createContext(clDevices);
         } catch (e) {
             return false;
         }

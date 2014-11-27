@@ -539,7 +539,7 @@
                 }
 
                 // Execute (enqueue) kernel
-                cmdQueue.enqueueNDRangeKernel(kernel, WSSizes[1].length, [], WSSizes[1], WSSizes[0], []);
+                cmdQueue.enqueueNDRangeKernel(kernel, WSSizes[1].length, null, WSSizes[1], WSSizes[0]);
 
                 // Read the result buffer from OpenCL device
                 len = outputMemObjs.length;

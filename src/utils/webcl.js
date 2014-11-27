@@ -169,7 +169,7 @@
      */
 
     function hasWebCLNamespace() {
-        WebCLNamespaceAvailable = window.WebCL && WebCL.getPlatforms;
+        WebCLNamespaceAvailable = window.webcl && webcl.getPlatforms;
 
         return WebCLNamespaceAvailable;
 
@@ -187,7 +187,7 @@
         OpenCLDriversAvailable = true;
 
         try {
-            platArr = WebCL.getPlatforms();
+            platArr = webcl.getPlatforms();
         } catch (e) {
             OpenCLDriversAvailable = false;
         }
@@ -239,7 +239,7 @@
         devices = getDevicesByType(type || DEFAULT_DEVICE);
 
         // Creating default context
-        ctx = createContext({devices: devices});
+        ctx = createContext(devices);
 
         return true;
     }
@@ -253,7 +253,7 @@
 
     function getPlatforms() {
         if(platforms.length === 0) {
-            platforms = WebCL.getPlatforms();
+            platforms = webcl.getPlatforms();
         }
 
         return platforms;
@@ -397,14 +397,14 @@
      */
 
     function createContext(properties) {
-        var props = {
+      /*  var props = {
             devices: getDevicesByType(DEFAULT_DEVICE)
             }, context;
 
-        XML3D.extend(props, properties);
+        XML3D.extend(props, properties);*/
 
         try {
-            context = WebCL.createContext(props);
+            var context = webcl.createContext(properties);
         } catch (e) {
             var errCode = getErrorCodeFromCLError(e);
 
@@ -602,11 +602,11 @@
 
         try {
             if (type === "r") {
-                return clCtx.createBuffer(WebCL.CL_MEM_READ_ONLY, size);
+                return clCtx.createBuffer(WebCL.MEM_READ_ONLY, size);
             } else if (type === "w") {
-                return clCtx.createBuffer(WebCL.CL_MEM_WRITE_ONLY, size);
+                return clCtx.createBuffer(WebCL.MEM_WRITE_ONLY, size);
             } else if (type === "rw") {
-                return clCtx.createBuffer(WebCL.CL_MEM_READ_WRITE, size);
+                return clCtx.createBuffer(WebCL.MEM_READ_WRITE, size);
             } else {
                 XML3D.debug.logError("WebCL API: createBuffer(): Unknown buffer type:", type);
                 return false;
@@ -752,7 +752,7 @@
                     return false;
                 }
 
-                nKernelArgs = kernel.getInfo(WebCL.CL_KERNEL_NUM_ARGS);
+                nKernelArgs = kernel.getInfo(WebCL.KERNEL_NUM_ARGS);
 
                 if (inputArgs.length > nKernelArgs) {
                     XML3D.debug.logWarning("WebCL: setArgs: Input args amount > kernel program args amount! Ignoring extra arguments.");

@@ -15,7 +15,6 @@
         "scene/renderview.js",
         "scene/scene.js",
         "scene/shaderinfo.js",
-        "gl/base/context.js",
         "gl/base/texture.js",
         "gl/base/cubemap.js",
         "gl/base/rendertarget.js",

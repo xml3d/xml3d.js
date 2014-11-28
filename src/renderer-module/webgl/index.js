@@ -15,6 +15,6 @@ module.exports = {
     }()),
     MAX_PICK_BUFFER_DIMENSION : 512,
     GLProgramObject: require("./base/program.js"),
-    GLTexture: require("./base/texture.js")
-    //GLContext: require("./base/context.js")
+    GLTexture: require("./base/texture.js"),
+    GLContext: require("./base/context.js")
 };

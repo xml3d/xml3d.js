@@ -113,7 +113,7 @@
                 };
             } else {
                 //opt.generateMipmap = opt.generateColorsMipmap;
-                var ctex = new XML3D.webgl.GLTexture(gl);
+                var ctex = new XML3D.webgl.GLTexture(this.context);
                 ctex.createTex2DFromData(colorFormat, this.width, this.height, gl.RGBA, this.opt.colorType || gl.UNSIGNED_BYTE, this.opt);
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
                 this.colorTarget = {
@@ -139,7 +139,7 @@
                 }
             } else {
                 //opt.generateMipmap = opt.generateDepthMipmap;
-                var dtex = new XML3D.webgl.GLTexture(gl);
+                var dtex = new XML3D.webgl.GLTexture(this.context);
                 dtex.createTex2DFromData(depthFormat, this.width, this.height, gl.DEPTH_COMPONENT, gl.FLOAT, this.opt);
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, dtex.handle, 0);
 
@@ -166,7 +166,7 @@
             }
             else {
                 //opt.generateMipmap = opt.generateStencilMipmap;
-                var stex = new XML3D.webgl.GLTexture(gl);
+                var stex = new XML3D.webgl.GLTexture(this.context);
                 stex.createTex2DFromData(stencilFormat, this.width, this.height, gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, this.opt);
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);
 

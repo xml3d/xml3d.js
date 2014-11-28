@@ -159,9 +159,8 @@
         if(!xflowDataEntry)
             return null;
         if(xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE){
-            var gl = context.gl;
             var webglData = context.getXflowEntryWebGlData(xflowDataEntry);
-            var texture = webglData.texture || new XML3D.webgl.GLTexture(gl);
+            var texture = webglData.texture || new XML3D.webgl.GLTexture(context);
             if(webglData.changed)
                 texture.updateFromTextureEntry(xflowDataEntry);
 

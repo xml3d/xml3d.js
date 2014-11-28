@@ -65,6 +65,41 @@ module.exports = {
                 XML3D.debug.logError("Unknown uniform type " + u.glType);
                 break;
         }
+    },
+
+    setUniformSampler: function (gl, sampler, value) {
+        if(!value || !sampler) {
+            return;
+        }
+        if(!Array.isArray(value)) {
+            // Textures are always an array value
+            XML3D.debug.logError("Unexpected value in setUniformSampler");
+            return;
+        }
+
+        sampler.texture = value;
+
+        var textureUnitsChanged = false;
+        for (var i = 0; i < sampler.texture.length; i++) {
+            var texture = sampler.texture[i];
+            if(texture) {
+                var unit = texture.getTextureUnit();
+                if(unit != sampler.unit[i]) {
+                    sampler.unit[i] = unit;
+                    textureUnitsChanged = true;
+                }
+            }
+        }
+        if (textureUnitsChanged) {
+            this.setUniform(gl, sampler, sampler.unit);
+        }
+    },
+    getUniqueCounter: function() {
+        var c_counter = 0;
+        return function () {
+            return c_counter++;
+        }
     }
+
 };
 

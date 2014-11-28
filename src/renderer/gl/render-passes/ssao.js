@@ -35,7 +35,7 @@
 	XML3D.extend(SSAOPass.prototype, {
 		createRandomVectorTexture: function(context) {
 			var gl = context.gl;
-			var tex = new XML3D.webgl.GLTexture(gl);
+			var tex = new XML3D.webgl.GLTexture(context);
 			tex.createTex2DFromData(gl.RGBA, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, {
 				wrapS : gl.REPEAT,
 				wrapT : gl.REPEAT,

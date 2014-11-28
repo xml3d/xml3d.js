@@ -135,12 +135,7 @@ var tally = function (gl, handle, programObject) {
 
 };
 
-var uniqueObjectId = (function () {
-    var c_counter = 0;
-    return function () {
-        return c_counter++;
-    }
-}());
+var uniqueObjectId = utils.getUniqueCounter();
 
 /**
  * @constructor
@@ -182,11 +177,7 @@ XML3D.extend(ProgramObject.prototype, {
         this.gl.useProgram(this.handle);
         for (var s in this.samplers) {
             var sampler = this.samplers[s];
-            if (sampler.texture) {
-                for (var i = 0; i < sampler.texture.length; i++) {
-                    sampler.texture[i] && sampler.texture[i].bind(sampler.unit[i]);
-                }
-            }
+            utils.setUniformSampler(this.gl, sampler, sampler.texture);
         }
     }, unbind: function () {
     }, isValid: function () {
@@ -215,14 +206,7 @@ XML3D.extend(ProgramObject.prototype, {
         if (this.uniforms[name]) {
             utils.setUniform(this.gl, this.uniforms[name], value);
         } else if (this.samplers[name]) {
-            var sampler = this.samplers[name];
-
-            if (value && sampler.texture !== value && value instanceof Array) {
-                sampler.texture = value;
-                for (var i = 0; i < sampler.texture.length; i++) {
-                    sampler.texture[i] && sampler.texture[i].bind(sampler.unit[i]);
-                }
-            }
+            utils.setUniformSampler(this.gl, this.samplers[name], value);
         }
     }
 });

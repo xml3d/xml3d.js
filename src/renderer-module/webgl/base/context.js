@@ -1,5 +1,5 @@
 
-//var TextureManager = require("texture-manager").SimpleTextureManager;
+var TextureManager = require("texture-manager").SimpleTextureManager;
 
 /**
  * Contex that includes all GL related resources / handlers
@@ -14,8 +14,7 @@ var GLContext = function (gl, id, width, height) {
     this.id = id;
     this.canvasTarget = new XML3D.webgl.GLCanvasTarget(this, width, height);
     this.programFactory = new XML3D.webgl.ProgramFactory(this);
-    //this.textureManager = new TextureManager({ units: gl.getParameter(WebGLRenderingContext.MAX_COMBINED_TEXTURE_IMAGE_UNITS )});
-    //console.log(this.textureManager);
+    this.textureManager = new TextureManager({ units: gl.getParameter(WebGLRenderingContext.MAX_COMBINED_TEXTURE_IMAGE_UNITS )});
     this.stats = {
         materials: 0, meshes: 0
     };

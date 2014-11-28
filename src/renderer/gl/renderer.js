@@ -6,6 +6,19 @@
 	for(var flag in FLAGS){
 		XML3D.options.register(flag, FLAGS[flag].defaultValue);
 	}
+
+    /**
+     * Convert the given y-coordinate on the canvas to a y-coordinate appropriate in
+     * the GL context. The y-coordinate gets turned upside-down. The lowest possible
+     * canvas coordinate is 0, so we need to subtract 1 from the height, too.
+     *
+     * @param {HTMLCanvasElement} canvas
+     * @param {number} y
+     * @return {number} the converted y-coordinate
+     */
+    var canvasToGlY = function (canvas, y) {
+        return canvas.height - y - 1;
+    };
     /**
      * @interface
      */
@@ -129,7 +142,7 @@
             var obj = object || this.pickedObject;
             if (!obj)
                 return null;
-            y = webgl.canvasToGlY(this.canvas, y);
+            y = canvasToGlY(this.canvas, y);
             this.pickNormalPass.render(obj);
             this.needsPickingDraw = true;
             return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
@@ -138,7 +151,7 @@
             var obj = object || this.pickedObject;
             if (!obj)
                 return null;
-            y = webgl.canvasToGlY(this.canvas, y);
+            y = canvasToGlY(this.canvas, y);
             this.pickPositionPass.render(obj);
             this.needsPickingDraw = true;
             return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
@@ -216,7 +229,7 @@
             return stats;
         },
         getRenderObjectFromPickingBuffer: function (x, y) {
-            y = webgl.canvasToGlY(this.canvas, y);
+            y = canvasToGlY(this.canvas, y);
             if(this.needsPickingDraw) {
                 this.prepareRendering();
                 this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight());
@@ -244,7 +257,7 @@
 
             return function (canvasX, canvasY) {
 
-                var glY = XML3D.webgl.canvasToGlY(this.canvas, canvasY);
+                var glY = canvasToGlY(this.canvas, canvasY);
 
                 // setup input to unproject
                 var viewport = new Array();

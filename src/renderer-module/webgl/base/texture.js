@@ -1,5 +1,6 @@
-(function(webgl) {
 
+    var textures = 0;
+    var c_calls = 0;
     //noinspection JSValidateJSDoc
     /**
      * @param {WebGLRenderingContext} gl
@@ -12,6 +13,7 @@
         this.height = 0;
         this.gl = gl;
         this.handle = null;
+        textures++;
     };
     XML3D.createClass(GLTexture, Xflow.SamplerConfig);
 
@@ -63,6 +65,9 @@
      * @returns {HTMLCanvasElement}
      */
     var scaleImage = function (image, width, height) {
+        /**
+         * @type {HTMLCanvasElement}
+         */
         var canvas = document.createElement("canvas");
         canvas.width = nextHighestPowerOfTwo(width);
         canvas.height = nextHighestPowerOfTwo(height);
@@ -145,13 +150,14 @@
          * @returns {boolean}
          */
         needsScale: function(width, height) {
-            return (this.generateMipMap || this.wrapS != this.gl.CLAMP_TO_EDGE || this.wrapT != this.gl.CLAMP_TO_EDGE) &&
+            return (this.generateMipMap || this.wrapS != WebGLRenderingContext.CLAMP_TO_EDGE || this.wrapT != WebGLRenderingContext.CLAMP_TO_EDGE) &&
             (!isPowerOfTwo(width) || !isPowerOfTwo(height))
         },
 
         bind : function(unit) {
             if (this.canBind()) {
-                this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+                console.log("activeTexture", unit, this.handle, textures, c_calls++);
+                this.gl.activeTexture(WebGLRenderingContext.TEXTURE0 + unit);
                 this.gl.bindTexture(this.textureType, this.handle);
             } else {
                 getOrCreateFallbackTexture(this.gl).bind(unit);
@@ -264,6 +270,6 @@
     });
 
 
-    webgl.GLTexture = GLTexture;
+    module.exports = GLTexture;
 
-}(XML3D.webgl));
+

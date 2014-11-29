@@ -33,7 +33,7 @@ EXTENSIONS.UINT32_INDICES = 'OES_element_index_uint';
 
 XML3D.extend(GLContext.prototype, {
     getXflowEntryWebGlData: function (entry) {
-        return XML3D.webgl.getXflowEntryWebGlData(entry, this.id);
+        return getXflowEntryWebGlData(entry, this.id);
     },
 
     requestRedraw: function (reason) {
@@ -56,6 +56,18 @@ XML3D.extend(GLContext.prototype, {
         return new GLTexture(this);
     }
 });
+
+
+function getXflowEntryWebGlData(entry, canvasId){
+    if(!entry) return null;
+    if(!entry.userData.webglData)
+        entry.userData.webglData = {};
+    if(!entry.userData.webglData[canvasId])
+        entry.userData.webglData[canvasId] = {
+            changed : Xflow.DATA_ENTRY_STATE.CHANGED_NEW
+        };
+    return entry.userData.webglData[canvasId];
+}
 
 /**
  * @param {WebGLRenderingContext} gl

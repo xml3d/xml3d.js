@@ -317,7 +317,7 @@
         },
 
         updateIndexRange: function(xflowDataEntry){
-            var webglData = XML3D.webgl.getXflowEntryWebGlData(xflowDataEntry, this.context.id);
+            var webglData = this.context.getXflowEntryWebGlData(xflowDataEntry);
             this.mesh.setIndexRange(webglData.minIndex, webglData.maxIndex);
         },
 

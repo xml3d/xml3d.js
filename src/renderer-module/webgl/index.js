@@ -1,4 +1,5 @@
 var RenderTarget = require("./base/rendertarget");
+var XflowUtils = require("./xflow/utils.js");
 
 module.exports = {
     toString: function () {
@@ -20,5 +21,6 @@ module.exports = {
     GLContext: require("./base/context.js"),
     GLRenderTarget: RenderTarget.GLRenderTarget,
     GLScaledRenderTarget: RenderTarget.GLScaledRenderTarget,
-    getGLUniformValueFromXflowDataEntry: require("./xflow/utils.js").getGLUniformValueFromXflowDataEntry
+    getGLUniformValueFromXflowDataEntry: XflowUtils.getGLUniformValueFromXflowDataEntry,
+    getGLBufferFromXflowDataEntry: XflowUtils.getGLBufferFromXflowDataEntry
 };

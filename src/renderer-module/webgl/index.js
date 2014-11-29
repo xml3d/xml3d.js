@@ -1,8 +1,10 @@
+var RenderTarget = require("./base/rendertarget");
+
 module.exports = {
     toString: function () {
         return "webgl";
     },
-    supported: (function() {
+    supported: (function () {
         var canvas = document.createElement("canvas");
 
         return function () {
@@ -13,8 +15,10 @@ module.exports = {
             }
         };
     }()),
-    MAX_PICK_BUFFER_DIMENSION : 512,
+    MAX_PICK_BUFFER_DIMENSION: 512,
     GLProgramObject: require("./base/program.js"),
-    GLTexture: require("./base/texture.js"),
-    GLContext: require("./base/context.js")
+    GLContext: require("./base/context.js"),
+    GLRenderTarget: RenderTarget.GLRenderTarget,
+    GLScaledRenderTarget: RenderTarget.GLScaledRenderTarget,
+    getGLUniformValueFromXflowDataEntry: require("./xflow/utils.js").getGLUniformValueFromXflowDataEntry
 };

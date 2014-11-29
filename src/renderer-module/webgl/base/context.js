@@ -1,5 +1,6 @@
-
 var TextureManager = require("texture-manager").SimpleTextureManager;
+var GLTexture = require("./texture.js");
+var GLCanvasTarget = require("./rendertarget.js").GLCanvasTarget;
 
 /**
  * Contex that includes all GL related resources / handlers
@@ -12,7 +13,7 @@ var TextureManager = require("texture-manager").SimpleTextureManager;
 var GLContext = function (gl, id, width, height) {
     this.gl = gl;
     this.id = id;
-    this.canvasTarget = new XML3D.webgl.GLCanvasTarget(this, width, height);
+    this.canvasTarget = new GLCanvasTarget(this, width, height);
     this.programFactory = new XML3D.webgl.ProgramFactory(this);
     this.textureManager = new TextureManager({ units: gl.getParameter(WebGLRenderingContext.MAX_COMBINED_TEXTURE_IMAGE_UNITS )});
     this.stats = {
@@ -33,14 +34,26 @@ EXTENSIONS.UINT32_INDICES = 'OES_element_index_uint';
 XML3D.extend(GLContext.prototype, {
     getXflowEntryWebGlData: function (entry) {
         return XML3D.webgl.getXflowEntryWebGlData(entry, this.id);
-    }, requestRedraw: function (reason) {
+    },
+
+    requestRedraw: function (reason) {
         //handler.redraw(reason, forcePicking);
-    }, handleResizeEvent: function (width, height) {
-        this.canvasTarget = new XML3D.webgl.GLCanvasTarget(this, width, height);
-    }, getStatistics: function () {
+    },
+
+    handleResizeEvent: function (width, height) {
+        this.canvasTarget = new GLCanvasTarget(this, width, height);
+    },
+
+    getStatistics: function () {
         return this.stats;
-    }, getExtensionByName: function (name) {
+    },
+
+    getExtensionByName: function (name) {
         return this.extensions[name];
+    } ,
+
+    createTexture: function() {
+        return new GLTexture(this);
     }
 });
 

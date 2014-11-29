@@ -1,6 +1,7 @@
 var TextureManager = require("texture-manager").SimpleTextureManager;
 var GLTexture = require("./texture.js");
 var GLCanvasTarget = require("./rendertarget.js").GLCanvasTarget;
+var ProgramFactory = require("./programfactory.js");
 
 /**
  * Contex that includes all GL related resources / handlers
@@ -14,7 +15,7 @@ var GLContext = function (gl, id, width, height) {
     this.gl = gl;
     this.id = id;
     this.canvasTarget = new GLCanvasTarget(this, width, height);
-    this.programFactory = new XML3D.webgl.ProgramFactory(this);
+    this.programFactory = new ProgramFactory(this);
     this.textureManager = new TextureManager({ units: gl.getParameter(WebGLRenderingContext.MAX_COMBINED_TEXTURE_IMAGE_UNITS )});
     this.stats = {
         materials: 0, meshes: 0

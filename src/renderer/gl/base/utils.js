@@ -24,23 +24,4 @@
 
 
 
-
-
-
-
-
-    webgl.FRAGMENT_HEADER = [
-        "#ifdef GL_FRAGMENT_PRECISION_HIGH",
-        "precision highp float;",
-        "#else",
-        "precision mediump float;",
-        "#endif // GL_FRAGMENT_PRECISION_HIGH",
-        "\n"
-    ].join("\n");
-
-    webgl.addFragmentShaderHeader = function(fragmentShaderSource) {
-        return webgl.FRAGMENT_HEADER + fragmentShaderSource;
-    };
-
-
 })(XML3D.webgl);

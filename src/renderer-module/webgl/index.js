@@ -1,5 +1,6 @@
 var RenderTarget = require("./base/rendertarget");
 var XflowUtils = require("./xflow/utils.js");
+var ShaderUtils = require("./base/shader-utils.js");
 
 module.exports = {
     toString: function () {
@@ -22,5 +23,6 @@ module.exports = {
     GLRenderTarget: RenderTarget.GLRenderTarget,
     GLScaledRenderTarget: RenderTarget.GLScaledRenderTarget,
     getGLUniformValueFromXflowDataEntry: XflowUtils.getGLUniformValueFromXflowDataEntry,
-    getGLBufferFromXflowDataEntry: XflowUtils.getGLBufferFromXflowDataEntry
+    getGLBufferFromXflowDataEntry: XflowUtils.getGLBufferFromXflowDataEntry,
+    addFragmentShaderHeader: ShaderUtils.addFragmentShaderHeader
 };

@@ -37,7 +37,6 @@
         "gl/render-passes/vertexattribute.js",
         "gl/render-passes/ssao.js",
         "gl/render-passes/boxblur.js",
-        "gl/programfactory.js",
         "gl/drawablefactory.js",
         "gl/composers/abstractshadercomposer.js",
         "gl/composers/urnshadercomposer.js",

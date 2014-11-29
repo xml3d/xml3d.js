@@ -44,7 +44,7 @@
 
             if (this.descriptor) {
                 this.updateRequest(shaderInfo.getData());
-                //TODO Build this into the XML3D.webgl.getScript function? It's needed everywhere anyway...
+
                 this.descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(this.descriptor.fragment);
             }
         },

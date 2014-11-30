@@ -68,10 +68,10 @@ module.exports = {
     },
 
     setUniformSampler: function (gl, sampler, value) {
-        if(!value || !sampler) {
+        if (!value || !sampler) {
             return;
         }
-        if(!Array.isArray(value)) {
+        if (!Array.isArray(value)) {
             // Textures are always an array value
             XML3D.debug.logError("Unexpected value in setUniformSampler");
             return;
@@ -82,9 +82,9 @@ module.exports = {
         var textureUnitsChanged = false;
         for (var i = 0; i < sampler.texture.length; i++) {
             var texture = sampler.texture[i];
-            if(texture) {
+            if (texture) {
                 var unit = texture.getTextureUnit();
-                if(unit != sampler.unit[i]) {
+                if (unit != sampler.unit[i]) {
                     sampler.unit[i] = unit;
                     textureUnitsChanged = true;
                 }
@@ -93,11 +93,41 @@ module.exports = {
         if (textureUnitsChanged) {
             this.setUniform(gl, sampler, sampler.unit);
         }
-    },
-    getUniqueCounter: function() {
+    }, getUniqueCounter: function () {
         var c_counter = 0;
         return function () {
             return c_counter++;
+        }
+    },
+
+    checkError: function (gl, text) {
+        var error = gl.getError();
+        if (error !== gl.NO_ERROR) {
+            var textErr = "" + error;
+            switch (error) {
+                case 1280:
+                    textErr = "1280 ( GL_INVALID_ENUM )";
+                    break;
+                case 1281:
+                    textErr = "1281 ( GL_INVALID_VALUE )";
+                    break;
+                case 1282:
+                    textErr = "1282 ( GL_INVALID_OPERATION )";
+                    break;
+                case 1283:
+                    textErr = "1283 ( GL_STACK_OVERFLOW )";
+                    break;
+                case 1284:
+                    textErr = "1284 ( GL_STACK_UNDERFLOW )";
+                    break;
+                case 1285:
+                    textErr = "1285 ( GL_OUT_OF_MEMORY )";
+                    break;
+            }
+            var msg = "GL error " + textErr + " occured.";
+            if (text !== undefined)
+                msg += " " + text;
+            XML3D.debug.trace(msg);
         }
     }
 

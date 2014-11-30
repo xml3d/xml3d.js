@@ -1,5 +1,6 @@
 
 var utils = require("./utils.js");
+var SystemNotifier = require("../system/system-notifier");
 
 //noinspection JSValidateJSDoc
 /**
@@ -24,7 +25,7 @@ var createWebGLShaderFromSource = function (gl, type, shaderSource) {
         errorString += "Shader Source:\n--------\n";
         errorString += XML3D.debug.formatSourceCode(shaderSource);
         gl.getError();
-        XML3D.webgl.SystemNotifier.sendEvent('glsl', {
+        SystemNotifier.sendEvent('glsl', {
                 glslType: "compile_error",
                 shaderType: type == WebGLRenderingContext.VERTEX_SHADER ? "vertex" : "fragment",
                 code: shaderSource,
@@ -78,7 +79,7 @@ var createProgramFromShaders = function (gl, shaders) {
         errorString += message;
         errorString += "\n--------\n";
         gl.getError();
-        XML3D.webgl.SystemNotifier.sendEvent('glsl', {glslType: "link_error", message: message});
+        SystemNotifier.sendEvent('glsl', {glslType: "link_error", message: message});
         throw new Error(errorString);
     }
     return program;
@@ -167,7 +168,7 @@ XML3D.extend(ProgramObject.prototype, {
         this.handle = createProgramFromSources(this.gl, [this.sources.vertex], [this.sources.fragment]);
         if (!this.handle)
             return;
-        XML3D.webgl.SystemNotifier.sendEvent('glsl', {glslType: "success"});
+        SystemNotifier.sendEvent('glsl', {glslType: "success"});
         this.bind();
         tally(this.gl, this.handle, this);
     }, bind: function () {

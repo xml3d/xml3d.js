@@ -5,7 +5,6 @@
         "canvashandler.js",
         "events/touch.js",
         "events/mouse.js",
-        "utils.js",
         "renderinterface.js",
         "scene/pager.js",
         "scene/rendernode.js",

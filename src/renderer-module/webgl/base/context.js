@@ -1,7 +1,7 @@
 var TextureManager = require("texture-manager").SimpleTextureManager;
 var GLTexture = require("./texture.js");
 var GLCanvasTarget = require("./rendertarget.js").GLCanvasTarget;
-var ProgramFactory = require("./programfactory.js");
+var ProgramFactory = require("./../shader/programfactory.js");
 
 /**
  * Contex that includes all GL related resources / handlers

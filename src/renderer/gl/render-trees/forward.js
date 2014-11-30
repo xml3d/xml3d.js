@@ -9,9 +9,9 @@
     var ForwardRenderTree = function (renderInterface, enableSSAO) {
         webgl.BaseRenderTree.call(this, renderInterface);
         var scene = renderInterface.scene;
-        scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChange.bind(this));
-        scene.addEventListener(webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChange.bind(this));
-        scene.addEventListener(webgl.Scene.EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChange.bind(this));
+        scene.addEventListener(XML3D.renderer.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChange.bind(this));
+        scene.addEventListener(XML3D.renderer.EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChange.bind(this));
+        scene.addEventListener(XML3D.renderer.EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChange.bind(this));
         scene.addEventListener(webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_INITIALIZED, this.onShaderChange.bind(this));
         this._enableSSAO = enableSSAO;
         this.mainPass = null;

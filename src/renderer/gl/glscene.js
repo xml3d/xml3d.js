@@ -25,7 +25,7 @@
      * @constructor
      */
     var GLScene = function (context) {
-        webgl.Scene.call(this);
+        XML3D.renderer.Scene.call(this);
         this.context = context;
         this.shaderFactory = new webgl.ShaderComposerFactory(context);
         this.drawableFactory = new webgl.DrawableFactory(context);
@@ -43,9 +43,10 @@
         this.doFrustumCulling = !!XML3D.options.getValue(OPTION_FRUSTUM_CULLING);
         this.addListeners();
     };
-    var EVENT_TYPE = webgl.Scene.EVENT_TYPE;
+    var EVENT_TYPE = XML3D.renderer.EVENT_TYPE;
+    var NODE_TYPE = XML3D.renderer.NODE_TYPE;
 
-    XML3D.createClass(GLScene, webgl.Scene);
+    XML3D.createClass(GLScene, XML3D.renderer.Scene);
 
     GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn", "pointLightCastShadow", "pointLightMatrix", "pointLightShadowBias", "pointLightNearFar",
          "directionalLightDirection", "directionalLightIntensity", "directionalLightOn", "directionalLightCastShadow", "directionalLightMatrix", "directionalLightShadowBias",
@@ -240,13 +241,13 @@
             XML3D.options.addObserver(this.onFlagsChange.bind(this));
         },
         addChildEvent: function(child) {
-            if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
+            if(child.type == NODE_TYPE.OBJECT) {
                 this.queue.push(child);
                 this.context.requestRedraw("Object was added to scene.");
             }
         },
         removeChildEvent: function(child) {
-            if(child.type == webgl.Scene.NODE_TYPE.OBJECT) {
+            if(child.type == NODE_TYPE.OBJECT) {
                 this.remove(child);
                 child.dispose();
                 this.context.requestRedraw("Object was removed from scene.");

@@ -1,4 +1,9 @@
-(function(webgl) {
+var RenderNode = require("./rendernode.js");
+var Constants = require("./constants.js");
+
+var NODE_TYPE = Constants.NODE_TYPE;
+var EVENT_TYPE = Constants.EVENT_TYPE;
+
     /** @const */
     var VIEW_TO_WORLD_MATRIX_OFFSET = 0;
     /** @const */
@@ -20,7 +25,7 @@
      * @extends {RenderNode}
      */
     var RenderView = function(scene, pageEntry, opt) {
-        XML3D.webgl.RenderNode.call(this, webgl.Scene.NODE_TYPE.VIEW, scene, pageEntry, opt);
+        RenderNode.call(this, NODE_TYPE.VIEW, scene, pageEntry, opt);
         opt = opt || {};
         this.position = opt.position || XML3D.math.vec3.create();
         this.orientation = opt.orientation || XML3D.math.mat4.create();
@@ -34,7 +39,8 @@
     };
     RenderView.ENTRY_SIZE = ENTRY_SIZE;
 
-    XML3D.createClass(RenderView, XML3D.webgl.RenderNode);
+    XML3D.createClass(RenderView, RenderNode);
+
     XML3D.extend(RenderView.prototype, {
         getFrustum: function() {
             return this.frustum;
@@ -96,8 +102,7 @@
                 this.scene.getBoundingBox(bb);
                 if (XML3D.math.bbox.isEmpty(bb)) {
                     return { near: 1, far: 10 };
-                };
-
+                }
                 this.getWorldToViewMatrix(t_mat);
                 XML3D.math.bbox.transform(bb, t_mat, bb);
 
@@ -210,6 +215,5 @@
     });
 
     // Export
-    webgl.RenderView = RenderView;
+    module.exports = RenderView;
 
-})(XML3D.webgl);

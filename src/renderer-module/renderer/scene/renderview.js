@@ -1,5 +1,6 @@
 var RenderNode = require("./rendernode.js");
 var Constants = require("./constants.js");
+var Frustum = require("../tools/frustum.js").Frustum;
 
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
@@ -34,7 +35,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         this.projectionOverride = opt.projectionOverride;
         this.viewDirty = true;
         this.projectionDirty = true;
-        this.frustum = new XML3D.webgl.Frustum(1, 100000, 0, this.fieldOfView, 1);
+        this.frustum = new Frustum(1, 100000, 0, this.fieldOfView, 1);
         this.lastAspectRatio = 1;
     };
     RenderView.ENTRY_SIZE = ENTRY_SIZE;

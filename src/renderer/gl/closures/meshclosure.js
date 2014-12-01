@@ -40,6 +40,7 @@
      * @param {webgl.GLContext} context
      * @param {string} type
      * @param {Xflow.DataNode} dataNode
+     * @param {object} opt
      * @extends {DrawableClosure}
      * @constructor
      */
@@ -89,7 +90,7 @@
          * @private
          * @type {number}
          */
-        this.changeState = CHANGE_STATE.STRUCTURE_CHANGE;
+        this.changeState = CHANGE_STATE.STRUCTURE_CHANGED;
 
         /**
          * Callback if bounding box has changed. Gets only called if
@@ -282,7 +283,6 @@
         },
         /**
          * @param {string} name
-         * @param {Object} attr
          * @param {Xflow.BufferEntry} xflowDataEntry
          * @param {boolean=} isIndex
          */
@@ -321,14 +321,14 @@
             this.mesh.setIndexRange(webglData.minIndex, webglData.maxIndex);
         },
 
-        checkBufferSize: function(name, xflowDataEntry){
+        /*checkBufferSize: function(name, xflowDataEntry){
             if(xflowDataEntry.getIterateCount){
                 var cnt = xflowDataEntry.getIterateCount();
                 if(cnt >= this.mesh.maxIndex)
                     throw new Error("Index range of [" + this.mesh.minIndex + ", " + this.mesh.maxIndex + "] " +
                         " goes beyond element count " + cnt + " of attribute '" + name + "'");
             }
-        },
+        },*/
 
         handleUniform: function(name, xflowDataEntry){
             var value = webgl.getGLUniformValueFromXflowDataEntry(xflowDataEntry, this.context);

@@ -115,7 +115,7 @@ XML3D.webgl.MAXFPS = 30;
         factory.setScene(scene);
         // Create renderer
         /** @type XML3D.webgl.IRenderer */
-        this.renderer = XML3D.webgl.rendererFactory.createRenderer(context, scene, this.canvas);
+        this.renderer = XML3D.renderer.factory.createRenderer(context, scene, this.canvas);
         this.renderOptions = this.renderer.renderInterface.options;
         factory.setRenderer(this.renderer);
 

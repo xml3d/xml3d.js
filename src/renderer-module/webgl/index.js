@@ -26,5 +26,7 @@ module.exports = {
     getGLBufferFromXflowDataEntry: XflowUtils.getGLBufferFromXflowDataEntry,
     addFragmentShaderHeader: ShaderUtils.addFragmentShaderHeader,
     SystemNotifier: require("./system/system-notifier.js"),
-    checkError: require("./base/utils.js").checkError
+    checkError: require("./base/utils.js").checkError,
+    GLScene: require("./scene/glscene.js"),
+    GLMesh: require("./base/mesh.js")
 };

@@ -4,8 +4,8 @@ module.exports = {
     toString: function () {
         return "renderer";
     },
-    Scene: require("./scene/scene.js"),
     EVENT_TYPE: Constants.EVENT_TYPE,
-    NODE_TYPE: Constants.NODE_TYPE
+    NODE_TYPE: Constants.NODE_TYPE,
+    factory : require("./renderer-factory.js")
 
 };

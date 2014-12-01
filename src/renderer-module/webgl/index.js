@@ -23,7 +23,6 @@ module.exports = {
     GLRenderTarget: RenderTarget.GLRenderTarget,
     GLScaledRenderTarget: RenderTarget.GLScaledRenderTarget,
     getGLUniformValueFromXflowDataEntry: XflowUtils.getGLUniformValueFromXflowDataEntry,
-    getGLBufferFromXflowDataEntry: XflowUtils.getGLBufferFromXflowDataEntry,
     addFragmentShaderHeader: ShaderUtils.addFragmentShaderHeader,
     SystemNotifier: require("./system/system-notifier.js"),
     checkError: require("./base/utils.js").checkError,

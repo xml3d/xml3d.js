@@ -1,5 +1,6 @@
 var SystemNotifier = require("../../webgl/system/system-notifier.js");
 var RenderNode = require("./rendernode.js");
+var DrawableClosure= require("./drawableclosure.js");
 var C = require("./constants.js");
 var Scene= require("./scene.js");
 
@@ -132,9 +133,9 @@ XML3D.createClass(RenderObject, RenderNode, {
         if (result) {
             var that = this;
             result.addEventListener(C.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function (evt) {
-                if (evt.newState === XML3D.webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                if (evt.newState === DrawableClosure.READY_STATE.COMPLETE) {
                     that.scene.moveFromQueueToReady(that);
-                } else if (evt.newState === XML3D.webgl.DrawableClosure.READY_STATE.INCOMPLETE && evt.oldState === XML3D.webgl.DrawableClosure.READY_STATE.COMPLETE) {
+                } else if (evt.newState === DrawableClosure.READY_STATE.INCOMPLETE && evt.oldState === DrawableClosure.READY_STATE.COMPLETE) {
                     that.scene.moveFromReadyToQueue(that);
                 }
             });

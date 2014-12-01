@@ -23,7 +23,6 @@
         "gl/render-passes/vertexattribute.js",
         "gl/render-passes/ssao.js",
         "gl/render-passes/boxblur.js",
-        "gl/drawablefactory.js",
         "gl/composers/abstractshadercomposer.js",
         "gl/composers/urnshadercomposer.js",
         "gl/composers/jsshadercomposer.js",
@@ -31,8 +30,6 @@
         "gl/closures/jssystemconfiguration.js",
         "gl/closures/abstractshaderclosure.js",
         "gl/closures/urnshaderclosure.js",
-        "gl/closures/jsshaderclosure.js",
-        "gl/closures/drawableclosure.js",
-        "gl/closures/meshclosure.js"
+        "gl/closures/jsshaderclosure.js"
   ]
 }

@@ -1,4 +1,5 @@
 var Scene = require("./../../renderer/scene/scene.js");
+var DrawableFactory = require("./drawable-factory.js");
 var C = require("./../../renderer/scene/constants.js");
 var FrustumTest = require("./../../renderer/tools/frustum").FrustumTest;
 
@@ -30,7 +31,7 @@ var GLScene = function (context) {
     Scene.call(this);
     this.context = context;
     this.shaderFactory = new XML3D.webgl.ShaderComposerFactory(context);
-    this.drawableFactory = new XML3D.webgl.DrawableFactory(context);
+    this.drawableFactory = new DrawableFactory();
     this.firstOpaqueIndex = 0;
 
     /**
@@ -284,7 +285,7 @@ XML3D.extend(GLScene.prototype, {
     },
 
     createDrawable: function (obj) {
-        return this.drawableFactory.createDrawable(obj);
+        return this.drawableFactory.createDrawable(obj, this.context);
     },
 
     requestRedraw: function (reason) {

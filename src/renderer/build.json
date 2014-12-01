@@ -7,7 +7,6 @@
         "gl/base/cubemap.js",
         "gl/base/cubemaprendertarget.js",
         "utils.js",
-        "gl/base/fullscreenquad.js",
         "gl/composers/abstractshadercomposer.js",
         "gl/composers/urnshadercomposer.js",
         "gl/composers/jsshadercomposer.js",

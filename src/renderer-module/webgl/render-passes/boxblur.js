@@ -1,9 +1,10 @@
 var BaseRenderPass = require("./base.js");
+var FullscreenQuad = require("../base/fullscreenquad.js");
 
 var BoxBlurPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
     this._program = this.renderInterface.context.programFactory.getProgramByName("boxblur");
-    this._screenQuad = new XML3D.webgl.FullscreenQuad(this.renderInterface.context);
+    this._screenQuad = new FullscreenQuad(this.renderInterface.context);
     this._uniformsDirty = true;
 };
 

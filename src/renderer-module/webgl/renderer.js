@@ -1,5 +1,6 @@
 var GLScaledRenderTarget = require("./base/rendertarget.js").GLScaledRenderTarget;
 var DataChangeListener = require("../renderer/tools/datachangelistener.js");
+var RenderInterface = require("./render-interface");
 
 var OPTION_SSAO = "renderer-ssao";
 var FLAGS = {};
@@ -56,7 +57,7 @@ var GLRenderer = function (context, scene, canvas) {
     this.width = canvas.clientWidth;
     this.height = canvas.clientHeight;
 
-    /** @type {XML3D.webgl.RenderObject} */
+    /** @type {RenderObject} */
     this.pickedObject = null;
 
     this.needsDraw = true;
@@ -129,7 +130,7 @@ XML3D.extend(GLRenderer.prototype, {
         this.pickPositionPass = new XML3D.webgl.PickPositionRenderPass(this.renderInterface, pickTarget);
         this.pickNormalPass = new XML3D.webgl.PickNormalRenderPass(this.renderInterface, pickTarget);
     }, createRenderInterface: function () {
-        return new XML3D.webgl.RenderInterface(this.context, this.scene);
+        return new GLRenderInterface(this.context, this.scene);
         //TODO need to provide an interface for creating shaders, buffers and so on
     }, requestRedraw: function (reason) {
         XML3D.debug.logDebug("Request redraw because:", reason);

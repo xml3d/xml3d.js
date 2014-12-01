@@ -4,7 +4,6 @@
         "canvashandler.js",
         "events/touch.js",
         "events/mouse.js",
-        "renderinterface.js",
         "gl/base/cubemap.js",
         "gl/base/cubemaprendertarget.js",
         "utils.js",

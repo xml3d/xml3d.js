@@ -1,5 +1,8 @@
 var Constants = require("./scene/constants.js");
 
+var RenderAdapterFactory = require("./adapter/factory.js");
+XML3D.base.xml3dFormatHandler.registerFactoryClass(RenderAdapterFactory);
+
 module.exports = {
     toString: function () {
         return "renderer";

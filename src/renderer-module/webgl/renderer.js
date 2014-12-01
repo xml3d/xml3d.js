@@ -1,6 +1,10 @@
 var GLScaledRenderTarget = require("./base/rendertarget.js").GLScaledRenderTarget;
 var DataChangeListener = require("../renderer/tools/datachangelistener.js");
 var RenderInterface = require("./render-interface");
+var PickObjectRenderPass= require("./render-passes/pick-object.js");
+var PickPositionRenderPass = require("./render-passes/pick-position.js");
+var PickNormalRenderPass = require("./render-passes/pick-position.js");
+var ForwardRenderTree = require("./render-trees/forward.js");
 
 var OPTION_SSAO = "renderer-ssao";
 var FLAGS = {};
@@ -114,8 +118,10 @@ XML3D.extend(GLRenderer.prototype, {
         this.createDefaultPipelines();
         this.scene.handleResizeEvent(width, height);
         this.needsDraw = this.needsPickingDraw = true;
-    }, createDefaultPipelines: function () {
-        var pipeline = new XML3D.webgl.ForwardRenderTree(this.renderInterface, XML3D.options.getValue(OPTION_SSAO));
+    },
+
+    createDefaultPipelines: function () {
+        var pipeline = new ForwardRenderTree(this.renderInterface, XML3D.options.getValue(OPTION_SSAO));
         this.renderInterface.setRenderPipeline(pipeline);
 
         var pickTarget = new GLScaledRenderTarget(this.context, XML3D.webgl.MAX_PICK_BUFFER_DIMENSION, {
@@ -126,17 +132,23 @@ XML3D.extend(GLRenderer.prototype, {
             stencilFormat: null,
             depthAsRenderbuffer: true
         });
-        this.pickObjectPass = new XML3D.webgl.PickObjectRenderPass(this.renderInterface, pickTarget);
-        this.pickPositionPass = new XML3D.webgl.PickPositionRenderPass(this.renderInterface, pickTarget);
-        this.pickNormalPass = new XML3D.webgl.PickNormalRenderPass(this.renderInterface, pickTarget);
-    }, createRenderInterface: function () {
-        return new GLRenderInterface(this.context, this.scene);
+        this.pickObjectPass = new PickObjectRenderPass(this.renderInterface, pickTarget);
+        this.pickPositionPass = new PickPositionRenderPass(this.renderInterface, pickTarget);
+        this.pickNormalPass = new PickNormalRenderPass(this.renderInterface, pickTarget);
+    },
+
+    createRenderInterface: function () {
+        return new RenderInterface(this.context, this.scene);
         //TODO need to provide an interface for creating shaders, buffers and so on
-    }, requestRedraw: function (reason) {
+    },
+
+    requestRedraw: function (reason) {
         XML3D.debug.logDebug("Request redraw because:", reason);
         this.needsDraw = true;
         this.needsPickingDraw = true;
-    }, getWorldSpaceNormalByPoint: function (x, y, object) {
+    },
+
+    getWorldSpaceNormalByPoint: function (x, y, object) {
         var obj = object || this.pickedObject;
         if (!obj)
             return null;
@@ -144,7 +156,9 @@ XML3D.extend(GLRenderer.prototype, {
         this.pickNormalPass.render(obj);
         this.needsPickingDraw = true;
         return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
-    }, getWorldSpacePositionByPoint: function (x, y, object) {
+    },
+
+    getWorldSpacePositionByPoint: function (x, y, object) {
         var obj = object || this.pickedObject;
         if (!obj)
             return null;

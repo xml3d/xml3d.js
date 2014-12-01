@@ -4,8 +4,6 @@
         "canvashandler.js",
         "events/touch.js",
         "events/mouse.js",
-        "gl/base/cubemap.js",
-        "gl/base/cubemaprendertarget.js",
         "utils.js",
         "gl/composers/abstractshadercomposer.js",
         "gl/composers/urnshadercomposer.js",

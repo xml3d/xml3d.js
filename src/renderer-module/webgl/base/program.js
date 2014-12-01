@@ -126,7 +126,7 @@ var tally = function (gl, handle, programObject) {
             uniInfo.texture = [];
             for (var j = 0; j < uniInfo.size; j++) {
                 uniInfo.unit[j] = programObject.nextTextureUnit();
-                uniInfo.texture[j] = null;//new XML3D.webgl.GLTexture(gl);
+                uniInfo.texture[j] = null;
             }
             utils.setUniform(gl, uniInfo, uniInfo.unit);
             programObject.samplers[name] = uniInfo;

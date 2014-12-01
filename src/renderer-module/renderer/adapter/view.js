@@ -80,6 +80,6 @@ p.dispose = function () {
     this.clearAdapterHandles();
 }
 
-// Export to XML3D.webgl namespace
+// Export
 module.exports = ViewRenderAdapter;
 

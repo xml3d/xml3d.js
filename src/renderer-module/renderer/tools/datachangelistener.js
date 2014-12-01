@@ -1,9 +1,8 @@
 /**
  *
  * @constructor
- * @param {XML3D.webgl.Renderer} renderer
  */
-var DataChangeListener = function (renderer) {
+var DataChangeListener = function () {
     Xflow.DataChangeNotifier.addListener(this.dataEntryChanged);
 };
 

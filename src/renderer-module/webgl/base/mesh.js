@@ -91,7 +91,7 @@ XML3D.extend(GLMesh.prototype, {
             return 0;
         }
     }, /**
-     * @param {XML3D.webgl.AbstractShaderClosure} program
+     * @param {AbstractShaderClosure} program
      * @returns {number}
      */
     draw: function (program) {

@@ -6,6 +6,8 @@ var PickPositionRenderPass = require("./render-passes/pick-position.js");
 var PickNormalRenderPass = require("./render-passes/pick-position.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
 
+var MAX_PICK_BUFFER_DIMENSION = 512;
+
 var OPTION_SSAO = "renderer-ssao";
 var FLAGS = {};
 FLAGS[OPTION_SSAO] = {defaultValue: false, recompileOnChange: true};
@@ -124,7 +126,7 @@ XML3D.extend(GLRenderer.prototype, {
         var pipeline = new ForwardRenderTree(this.renderInterface, XML3D.options.getValue(OPTION_SSAO));
         this.renderInterface.setRenderPipeline(pipeline);
 
-        var pickTarget = new GLScaledRenderTarget(this.context, XML3D.webgl.MAX_PICK_BUFFER_DIMENSION, {
+        var pickTarget = new GLScaledRenderTarget(this.context, MAX_PICK_BUFFER_DIMENSION, {
             width: this.context.canvasTarget.width,
             height: this.context.canvasTarget.height,
             colorFormat: this.context.gl.RGBA,

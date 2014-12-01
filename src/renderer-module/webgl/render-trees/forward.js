@@ -1,5 +1,6 @@
 var BaseRenderTree = require("./base.js");
 var GLRenderTarget = require("../base/rendertarget.js").GLRenderTarget;
+var GLCubeMapRenderTarget = require("../base/rendertarget.js").GLCubeMapRenderTarget;
 var ForwardRenderPass = require("../render-passes/forward.js");
 var BoxBlurPass= require("../render-passes/boxblur.js");
 var LightPass= require("../render-passes/light-pass");
@@ -102,7 +103,7 @@ XML3D.extend(ForwardRenderTree.prototype, {
     createPointLightPass: function (light) {
         var context = this.renderInterface.context;
         var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
-        var lightFramebuffer = new XML3D.webgl.GLCubeMapRenderTarget(context, {
+        var lightFramebuffer = new GLCubeMapRenderTarget(context, {
             width: dimension,
             height: dimension,
             colorFormat: context.gl.RGBA,

@@ -12,7 +12,7 @@ XML3D.createClass(RenderAdapterFactory, XML3D.base.NodeAdapterFactory);
 RenderAdapterFactory.prototype.aspect = XML3D.webgl;
 
 
-var ns = XML3D.webgl, registry = {
+var registry = {
         xml3d: require("./xml3d.js"),
         view: require("./view.js"),
         defs: require("./defs.js"),

@@ -63,7 +63,7 @@ XML3D.extend(PickObjectRenderPass.prototype, {
      * @param {number} x Screen Coordinate of color buffer
      * @param {number} y Screen Coordinate of color buffer
      * @param {Array} objects List of objects that were rendered in the previous picking pass
-     * @returns {XML3D.webgl.RenderObject|null} Picked Object
+     * @returns {RenderObject|null} Picked Object
      */
     getRenderObjectFromPickingBuffer: function (x, y, objects) {
         var data = this.readPixelDataFromBuffer(x, y, this.output);

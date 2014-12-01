@@ -11,4 +11,4 @@ ImgRenderAdapter.prototype.notifyChanged = function (evt) {
     this.textureAdapter.notifyChanged(evt);
 };
 
-module.export = ImgRenderAdapter;
+module.exports = ImgRenderAdapter;

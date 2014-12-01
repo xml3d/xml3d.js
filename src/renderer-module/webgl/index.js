@@ -30,3 +30,10 @@ module.exports = {
     GLScene: require("./scene/glscene.js"),
     GLMesh: require("./base/mesh.js")
 };
+
+// These material models register themselves
+require("./materials/diffuse.js");
+require("./materials/phong.js");
+require("./materials/matte.js");
+require("./materials/point.js");
+require("./materials/utility.js");

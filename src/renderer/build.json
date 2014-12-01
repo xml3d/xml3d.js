@@ -33,12 +33,6 @@
         "gl/closures/urnshaderclosure.js",
         "gl/closures/jsshaderclosure.js",
         "gl/closures/drawableclosure.js",
-        "gl/closures/meshclosure.js",
-        "gl/shaders/base.js",
-        "gl/shaders/matte.js",
-        "gl/shaders/diffuse.js",
-        "gl/shaders/phong.js",
-        "gl/shaders/point.js",
-        "gl/shaders/utility.js"
+        "gl/closures/meshclosure.js"
   ]
 }

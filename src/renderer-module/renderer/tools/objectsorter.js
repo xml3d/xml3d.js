@@ -32,6 +32,26 @@ XML3D.extend(ObjectSorter.prototype, {
             }
         }
 
+        // Sort opaque objects from front to back in order
+        // to have earlier z-fails
+        for (var progId in opaque) {
+            var withinShader = opaque[progId];
+            var sortedArray = new Array(withinShader.length);
+            for (i = 0; i < withinShader.length; i++) {
+                obj = withinShader[i];
+                obj.getWorldSpaceBoundingBox(c_bbox);
+                XML3D.math.bbox.center(c_center, c_bbox);
+                viewMatrix && XML3D.math.vec3.transformMat4(c_center, c_center, viewMatrix);
+                sortedArray[i] = {
+                    obj: obj, depth: c_center[2]
+                };
+            }
+            sortedArray.sort(function (a, b) {
+                return b.depth - a.depth;
+            });
+            opaque[progId] = sortedArray.map(function(e) { return e.obj; });
+        }
+
         //Sort transparent objects from back to front
         var tlength = tempArray.length;
         if (tlength > 1) {

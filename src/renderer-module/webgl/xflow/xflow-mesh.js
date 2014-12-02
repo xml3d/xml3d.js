@@ -37,13 +37,13 @@ MESH_PARAMETERS[WebGLRenderingContext.POINTS] = MESH_PARAMETERS[WebGLRenderingCo
  * Class that synchronizes data changes from Xflow with a GLMesh instance
  *
  * @param {GLContext} context
- * @param {string} type
  * @param {Xflow.DataNode} dataNode
+ * @param {string} type
  * @param {object} opt
  * @extends {DrawableClosure}
  * @constructor
  */
-var MeshClosure = function (context, type, dataNode, opt) {
+var XflowMesh = function (context, dataNode, type, opt) {
     DrawableClosure.call(this, context, DrawableClosure.TYPES.MESH);
     opt = opt || {};
     this.mesh = new GLMesh(context, type);
@@ -102,7 +102,7 @@ var MeshClosure = function (context, type, dataNode, opt) {
     this.initialize();
 };
 
-XML3D.createClass(MeshClosure, DrawableClosure, {
+XML3D.createClass(XflowMesh, DrawableClosure, {
     initialize: function () {
         this.typeDataChanged(this.typeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         this.shaderChanged();
@@ -130,8 +130,9 @@ XML3D.createClass(MeshClosure, DrawableClosure, {
         var oldValid = !!this.shaderClosure && this.typeDataValid, someError = null, typeDataResolved = false;
 
         try {
-            if (this.changeState & SHADER_CLOSURE_NEEDS_UPDATE)
+            if (this.changeState & SHADER_CLOSURE_NEEDS_UPDATE) {
                 this.mesh.clear();
+            }
 
             if (this.changeState & CHANGE_STATE.TYPE_CHANGED) {
                 this.updateTypeData();
@@ -205,10 +206,14 @@ XML3D.createClass(MeshClosure, DrawableClosure, {
         this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
         this.dispatchEvent({type: EVENT_TYPE.SCENE_SHAPE_CHANGED});
         this.context.requestRedraw("Mesh Type Data Change");
-        XML3D.debug.logDebug("MeshClosure: Type data changed", request, state, this.changeState);
-    }, getMesh: function () {
+        XML3D.debug.logDebug("XflowMesh: Type data changed", request, state, this.changeState);
+    },
+
+    getMesh: function () {
         return this.mesh;
-    }, getMeshType: function () {
+    },
+
+    getMeshType: function () {
         return this.mesh.glType;
     },
 
@@ -219,7 +224,9 @@ XML3D.createClass(MeshClosure, DrawableClosure, {
             return;
 
         this.objectShaderRequest = this.shaderComposer.createObjectDataRequest(this.dataNode, this.shaderInputDataChanged.bind(this));
-    }, updateShaderClosure: function (scene) {
+    },
+
+    updateShaderClosure: function (scene) {
         this.shaderClosure = null;
         if (!this.dataNode.isSubtreeLoading() && !this.dataNode.getOutputChannelInfo("position")) {
             throw new Error("Mesh does not have 'position' attribute.");
@@ -268,7 +275,9 @@ XML3D.createClass(MeshClosure, DrawableClosure, {
         var entry = dataResult.getOutputData("vertexCount");
         this.mesh.setVertexCount(entry && entry.getValue() ? entry.getValue()[0] : null);
         this.typeDataValid = true;
-    }, /**
+    },
+
+    /**
      * @param {string} name
      * @param {Xflow.BufferEntry} xflowDataEntry
      * @param {boolean=} isIndex
@@ -299,6 +308,7 @@ XML3D.createClass(MeshClosure, DrawableClosure, {
         }
         // In every case, set the buffer, because other meshes might have already
         // performed one or more of the tasks above
+        //console.log("Set buffer", name, buffer.id);
         mesh.setBuffer(name, buffer);
     },
 
@@ -351,7 +361,9 @@ XML3D.createClass(MeshClosure, DrawableClosure, {
             requestNames.push.apply(requestNames, Object.keys(meshConfig.bboxCompute));
         }
         return requestNames;
-    }, checkXflowTypes: function (dataNode, requirements) {
+    },
+
+    checkXflowTypes: function (dataNode, requirements) {
         for (var name in requirements) {
             var info = dataNode.getOutputChannelInfo(name);
             if (!info) return false;
@@ -370,7 +382,7 @@ XML3D.createClass(MeshClosure, DrawableClosure, {
         // TODO: We don't know if the change of data only influences the surface shading or the actual mesh shape
         this.dispatchEvent({type: EVENT_TYPE.SCENE_SHAPE_CHANGED});
         this.context.requestRedraw("Mesh Attribute Data Changed");
-        XML3D.debug.logDebug("MeshClosure: Attribute data changed", request, state, this.changeState);
+        XML3D.debug.logDebug("XflowMesh: Attribute data changed", request, state, this.changeState);
     },
 
     shaderChanged: function () {
@@ -383,5 +395,5 @@ XML3D.createClass(MeshClosure, DrawableClosure, {
 
 });
 
-module.exports = MeshClosure;
+module.exports = XflowMesh;
 

@@ -1,4 +1,4 @@
-var MeshClosure = require("../xflow/meshclosure.js");
+var XflowMesh = require("../xflow/xflow-mesh.js");
 
 /**
  * @constructor
@@ -9,7 +9,7 @@ XML3D.extend(DrawableFactory.prototype, {
     createDrawable: function (obj, context) {
         XML3D.debug.logDebug("DrawableFactory::createDrawable", obj);
         try {
-            var result = new MeshClosure(context, obj.getType(), obj.getDataNode(), {boundingBoxChanged: obj.setObjectSpaceBoundingBox.bind(obj)});
+            var result = new XflowMesh(context, obj.getDataNode(), obj.getType(), {boundingBoxChanged: obj.setObjectSpaceBoundingBox.bind(obj)});
             obj.mesh = result.getMesh();
             return result;
         } catch (e) {

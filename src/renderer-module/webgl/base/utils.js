@@ -93,7 +93,9 @@ module.exports = {
         if (textureUnitsChanged) {
             this.setUniform(gl, sampler, sampler.unit);
         }
-    }, getUniqueCounter: function () {
+    },
+
+    getUniqueCounter: function () {
         var c_counter = 0;
         return function () {
             return c_counter++;

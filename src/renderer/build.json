@@ -4,7 +4,6 @@
         "canvashandler.js",
         "events/touch.js",
         "events/mouse.js",
-        "utils.js",
         "gl/composers/abstractshadercomposer.js",
         "gl/composers/urnshadercomposer.js",
         "gl/composers/jsshadercomposer.js",

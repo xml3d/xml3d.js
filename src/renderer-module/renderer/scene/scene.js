@@ -28,11 +28,6 @@ var Scene = function () {
 XML3D.createClass(Scene, Pager);
 
 
-
-
-var empty = function () {
-};
-
 XML3D.extend(Scene.prototype, {
     /**
      * @returns {RenderView}
@@ -49,9 +44,10 @@ XML3D.extend(Scene.prototype, {
             this.activeView = view;
             this.dispatchEvent({type: C.EVENT_TYPE.VIEW_CHANGED, newView: this.activeView});
         }
-    }, /**
+    },
+    /**
      * @param opt
-     * @returns {webgl.RenderObject}
+     * @returns {RenderObject}
      */
     createRenderObject: function (opt) {
         var pageEntry = this.getPageEntry(RenderObject.ENTRY_SIZE);
@@ -103,11 +99,11 @@ XML3D.extend(Scene.prototype, {
         XML3D.math.bbox.copy(bb, this.boundingBox);
     },
 
-    createDrawable: function (obj) {
+    createDrawable: function (/*obj*/) {
         throw new Error("Scene::createDrawable not implemented");
     },
 
-    requestRedraw: function (reason) {
+    requestRedraw: function (/*reason*/) {
         throw new Error("Scene::requestRedraw not implemented");
     },
 

@@ -90,24 +90,51 @@ XML3D.extend(GLMesh.prototype, {
             //XML3D.debug.logError("Could not calculate vertex count.", e);
             return 0;
         }
-    }, /**
+    },
+
+    /**
+     * @param {AbstractShaderClosure} program
+     * @private
+     */
+    _bindVertexBuffers: function(program) {
+        var gl = this.context.gl, sAttributes = program.attributes, buffers = this.buffers, i, name;
+
+        var keys = Object.keys(sAttributes);
+        var keyLength = keys.length;
+
+        for (i = 0; i < keyLength; i++) {
+            name = keys[i];
+            var buffer = buffers[name];
+            var location = sAttributes[name].location;
+
+            if (!buffer) {
+                continue;
+            }
+            gl.enableVertexAttribArray(location);
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.vertexAttribPointer(location, buffer.tupleSize, buffer.glType, false, 0, 0);
+        }
+    },
+
+    _unbindVertexBuffers: function (program) {
+        var gl = this.context.gl, sAttributes = program.attributes;
+        for (var name in sAttributes) {
+            var shaderAttribute = sAttributes[name];
+            gl.disableVertexAttribArray(shaderAttribute.location);
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    },
+
+    /**
      * @param {AbstractShaderClosure} program
      * @returns {number}
      */
     draw: function (program) {
-        var gl = this.context.gl, sAttributes = program.attributes, buffers = this.buffers, triCount = 0;
+        var gl = this.context.gl, sAttributes = program.attributes, buffers = this.buffers, triCount = 0, offset, sd, j;
 
         //Bind vertex buffers
-        for (var name in sAttributes) {
-            var shaderAttribute = sAttributes[name];
-            var buffer = buffers[name];
-            if (!buffer) {
-                continue;
-            }
-            gl.enableVertexAttribArray(shaderAttribute.location);
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl.vertexAttribPointer(shaderAttribute.location, buffer.tupleSize, buffer.glType, false, 0, 0);
-        }
+        this._bindVertexBuffers(program);
 
         //Draw the object
         if (this.isIndexed) {
@@ -115,9 +142,9 @@ XML3D.extend(GLMesh.prototype, {
 
             if (this.segments) {
                 //This is a segmented mesh (eg. a collection of disjunct line strips)
-                var offset = 0;
-                var sd = this.segments.value;
-                for (var j = 0; j < sd.length; j++) {
+                offset = 0;
+                sd = this.segments.value;
+                for (j = 0; j < sd.length; j++) {
                     gl.drawElements(this.glType, sd[j], gl.UNSIGNED_SHORT, offset);
                     offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
                 }
@@ -127,9 +154,9 @@ XML3D.extend(GLMesh.prototype, {
             triCount = this.getElementCount() / 3;
         } else {
             if (this.size) {
-                var offset = 0;
-                var sd = this.size.data;
-                for (var j = 0; j < sd.length; j++) {
+                offset = 0;
+                sd = this.size.data;
+                for (j = 0; j < sd.length; j++) {
                     gl.drawArrays(this.glType, offset, sd[j]);
                     offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
                 }
@@ -141,12 +168,8 @@ XML3D.extend(GLMesh.prototype, {
         }
 
         //Unbind vertex buffers
-        for (var name in sAttributes) {
-            var shaderAttribute = sAttributes[name];
-            gl.disableVertexAttribArray(shaderAttribute.location);
-        }
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        this._unbindVertexBuffers(program);
+
 
         if (program.undoUniformVariableOverride)
             program.undoUniformVariableOverride(this.uniformOverride);

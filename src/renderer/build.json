@@ -3,14 +3,6 @@
   "files": [
         "canvashandler.js",
         "events/touch.js",
-        "events/mouse.js",
-        "gl/composers/abstractshadercomposer.js",
-        "gl/composers/urnshadercomposer.js",
-        "gl/composers/jsshadercomposer.js",
-        "gl/composers/shadercomposerfactory.js",
-        "gl/closures/jssystemconfiguration.js",
-        "gl/closures/abstractshaderclosure.js",
-        "gl/closures/urnshaderclosure.js",
-        "gl/closures/jsshaderclosure.js"
+        "events/mouse.js"
   ]
 }

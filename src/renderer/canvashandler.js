@@ -3,6 +3,9 @@ XML3D.webgl.MAXFPS = 30;
 
 (function() {
 
+    var OPTION_CONTINUOUS = "renderer-continuous";
+    XML3D.options.register(OPTION_CONTINUOUS, false);
+
     var CONTEXT_OPTIONS = {
         alpha: true,
         premultipliedAlpha: false,
@@ -65,6 +68,7 @@ XML3D.webgl.MAXFPS = 30;
 
         this.lastKnownDimensions = {width : canvas.width, height : canvas.height};
 
+
         var context = this.getContextForCanvas(canvas);
         if (context) {
             this.initialize(context);
@@ -91,6 +95,8 @@ XML3D.webgl.MAXFPS = 30;
     CanvasHandler.prototype.initialize = function(renderingContext) {
         // Register listeners on canvas
         this.registerCanvasListeners();
+        this.start = performance.now();
+        this.renderCount = 0;
 
         // This function is called at regular intervals by requestAnimFrame to
         // determine if a redraw
@@ -101,9 +107,14 @@ XML3D.webgl.MAXFPS = 30;
             XML3D.updateXflowObserver();
             XML3D._flushDOMChanges();
 
-            if (that.canvasSizeChanged() || that.renderer.needsRedraw()) {
+            if (that.canvasSizeChanged() || that.renderer.needsRedraw() || XML3D.options.getValue(OPTION_CONTINUOUS)) {
                 that.dispatchUpdateEvent();
                 that.draw();
+                that.renderCount++;
+                if(that.renderCount == 1000) {
+                    var end = performance.now();
+                    console.log("1000 renderings: ", end - that.start);
+                }
             }
 
             window.requestAnimFrame(that.tick, XML3D.webgl.MAXFPS);

@@ -1,4 +1,3 @@
-(function (ns) {
 
     var singleton = null;
 
@@ -123,7 +122,7 @@
     }
 
 
-    ns.getJSSystemConfiguration = function (context) {
+    module.exports = function (context) {
         if (!singleton) {
             singleton = createSystemConfiguration(context);
         }
@@ -131,5 +130,4 @@
     };
 
 
-}(XML3D.webgl));
 

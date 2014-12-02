@@ -1,4 +1,6 @@
 var ShaderUtils = require("./shader-utils.js");
+var ShaderDescriptor = require("../materials/urn/descriptor.js");
+var URNShaderClosure = require("../materials/urn/urnshaderclosure.js");
 
 var ProgramFactory = function (context) {
     this.context = context;
@@ -19,10 +21,10 @@ XML3D.extend(ProgramFactory.prototype, {
             XML3D.debug.logError("Unknown shader: ", name);
             return null;
         }
-        var descriptor = new XML3D.webgl.ShaderDescriptor();
+        var descriptor = new ShaderDescriptor();
         XML3D.extend(descriptor, scriptDescriptor);
         descriptor.fragment = ShaderUtils.addFragmentShaderHeader(descriptor.fragment);
-        var shader = new XML3D.webgl.ShaderClosure(this.context, descriptor);
+        var shader = new URNShaderClosure(this.context, descriptor);
         shader.createSources({}, null, null);
         shader.compile();
         return shader;
@@ -30,10 +32,10 @@ XML3D.extend(ProgramFactory.prototype, {
 
     getFallbackProgram: function () {
         if (!this.programs.fallback) {
-            var descriptor = new XML3D.webgl.ShaderDescriptor();
+            var descriptor = new ShaderDescriptor();
             XML3D.extend(descriptor, XML3D.shaders.getScript("matte"));
             descriptor.fragment = ShaderUtils.addFragmentShaderHeader(descriptor.fragment);
-            var shader = new XML3D.webgl.ShaderClosure(this.context, descriptor);
+            var shader = new URNShaderClosure(this.context, descriptor);
             shader.uniformCollection.envBase.diffuseColor = [1, 0, 0];
             shader.createSources({}, null, null);
             shader.compile();

@@ -2,6 +2,7 @@ var Scene = require("./../../renderer/scene/scene.js");
 var DrawableFactory = require("./drawable-factory.js");
 var C = require("./../../renderer/scene/constants.js");
 var FrustumTest = require("./../../renderer/tools/frustum").FrustumTest;
+var ShaderComposerFactory = require("../materials/shadercomposerfactory");
 
 var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
 var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
@@ -30,7 +31,7 @@ for (var flag in FLAGS) {
 var GLScene = function (context) {
     Scene.call(this);
     this.context = context;
-    this.shaderFactory = new XML3D.webgl.ShaderComposerFactory(context);
+    this.shaderFactory = new ShaderComposerFactory(context);
     this.drawableFactory = new DrawableFactory();
     this.firstOpaqueIndex = 0;
 
@@ -49,9 +50,6 @@ var GLScene = function (context) {
 
 XML3D.createClass(GLScene, Scene);
 
-GLScene.LIGHT_PARAMETERS = ["pointLightPosition", "pointLightAttenuation", "pointLightIntensity", "pointLightOn", "pointLightCastShadow", "pointLightMatrix", "pointLightShadowBias", "pointLightNearFar",
-    "directionalLightDirection", "directionalLightIntensity", "directionalLightOn", "directionalLightCastShadow", "directionalLightMatrix", "directionalLightShadowBias",
-    "spotLightAttenuation", "spotLightPosition", "spotLightIntensity", "spotLightDirection", "spotLightOn", "spotLightSoftness", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightMatrix", "spotLightShadowBias"];
 
 
 XML3D.extend(GLScene.prototype, {

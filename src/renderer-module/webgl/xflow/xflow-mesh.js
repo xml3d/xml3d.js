@@ -2,6 +2,7 @@ var DrawableClosure = require("../../renderer/scene/drawableclosure.js");
 var GLMesh = require("../base/mesh");
 var XflowUtils = require("./utils.js");
 var EVENT_TYPE = require("../../renderer/scene/constants.js").EVENT_TYPE;
+var MaterialEvents = require("../materials/events");
 
 var CHANGE_STATE = {
     NOTHING_CHANGED: 0,
@@ -56,13 +57,13 @@ var XflowMesh = function (context, dataNode, type, opt) {
 
     /**
      * Shader Composer that will provide ShaderClosure and Program
-     * @type {webgl.AbstractShaderComposer}
+     * @type {AbstractShaderComposer}
      */
     this.shaderComposer = null;
 
     /**
      * Shader Closure used by this mesh
-     * @type {webgl.AbstractShaderClosure}
+     * @type {AbstractShaderClosure}
      */
     this.shaderClosure = null;
 
@@ -112,11 +113,11 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         if (!this.bindedShaderChanged) this.bindedShaderChanged = this.shaderChanged.bind(this);
 
         if (this.shaderComposer)
-            this.shaderComposer.removeEventListener(XML3D.webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.bindedShaderChanged);
+            this.shaderComposer.removeEventListener(MaterialEvents.MATERIAL_STRUCTURE_CHANGED, this.bindedShaderChanged);
 
         this.shaderComposer = shaderComposer;
         if (this.shaderComposer)
-            this.shaderComposer.addEventListener(XML3D.webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_STRUCTURE_CHANGED, this.bindedShaderChanged);
+            this.shaderComposer.addEventListener(MaterialEvents.MATERIAL_STRUCTURE_CHANGED, this.bindedShaderChanged);
 
         this.changeState |= CHANGE_STATE.SHADER_CHANGED;
     },

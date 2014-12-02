@@ -9,7 +9,7 @@ var RenderAdapter = require("./base.js");
 var ShaderRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
     this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
-    /** @type webgl.ShaderInfo **/
+    /** @type ShaderInfo **/
     this.shaderInfo = this.createShaderInfo();
     this.templateId = this.shaderInfo.id;
     this.updateScript();

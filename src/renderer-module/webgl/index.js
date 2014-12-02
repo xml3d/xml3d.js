@@ -1,5 +1,4 @@
 var RenderTarget = require("./base/rendertarget");
-var XflowUtils = require("./xflow/utils.js");
 var ShaderUtils = require("./shader/shader-utils.js");
 
 module.exports = {
@@ -17,11 +16,9 @@ module.exports = {
             }
         };
     }()),
-    GLProgramObject: require("./base/program.js"),
     GLContext: require("./base/context.js"),
     GLRenderTarget: RenderTarget.GLRenderTarget,
     GLScaledRenderTarget: RenderTarget.GLScaledRenderTarget,
-    getGLUniformValueFromXflowDataEntry: XflowUtils.getGLUniformValueFromXflowDataEntry,
     addFragmentShaderHeader: ShaderUtils.addFragmentShaderHeader,
     SystemNotifier: require("./system/system-notifier.js"),
     checkError: require("./base/utils.js").checkError,
@@ -30,8 +27,8 @@ module.exports = {
 };
 
 // These material models register themselves
-require("./materials/diffuse.js");
-require("./materials/phong.js");
-require("./materials/matte.js");
-require("./materials/point.js");
-require("./materials/utility.js");
+require("./materials/urn/diffuse.js");
+require("./materials/urn/phong.js");
+require("./materials/urn/matte.js");
+require("./materials/urn/point.js");
+require("./materials/urn/utility.js");

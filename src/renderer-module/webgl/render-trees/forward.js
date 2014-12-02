@@ -8,7 +8,7 @@ var PointLightPass= require("../render-passes/pointlight-pass");
 var VertexAttributePass = require("../render-passes/vertexattribute-pass.js");
 var SSAOPass = require("../render-passes/ssao-pass");
 var EVENT_TYPE = require("../../renderer/scene/constants.js").EVENT_TYPE;
-
+var MaterialEvents = require("../materials/events");
 /**
  *
  * @param {GLRenderInterface} renderInterface
@@ -21,7 +21,7 @@ var ForwardRenderTree = function (renderInterface, enableSSAO) {
     scene.addEventListener(EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChange.bind(this));
     scene.addEventListener(EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChange.bind(this));
     scene.addEventListener(EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChange.bind(this));
-    scene.addEventListener(XML3D.webgl.ShaderComposerFactory.EVENT_TYPE.MATERIAL_INITIALIZED, this.onShaderChange.bind(this));
+    scene.addEventListener(MaterialEvents.MATERIAL_INITIALIZED, this.onShaderChange.bind(this));
     this._enableSSAO = enableSSAO;
     this.mainPass = null;
     this.createMainPass();

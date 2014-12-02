@@ -1,4 +1,5 @@
 var SceneRenderPass = require("./base.js");
+var ObjectSorter = require("../../renderer/tools/objectsorter.js");
 
 /**
  * @param {RenderPipeline} pipeline
@@ -17,7 +18,7 @@ var PointLightPass = function (renderInterface, output, light, opt) {
 XML3D.createClass(PointLightPass, SceneRenderPass, {
 
     init: function (context) {
-        this.sorter = new webgl.ObjectSorter();
+        this.sorter = new ObjectSorter();
         this.program = context.programFactory.getProgramByName("light-depth");
     },
 

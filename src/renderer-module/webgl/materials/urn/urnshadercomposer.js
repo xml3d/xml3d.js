@@ -1,6 +1,6 @@
 var AbstractShaderComposer = require("../abstractshadercomposer").AbstractShaderComposer;
 var URNShaderClosure= require("./urnshaderclosure");
-var ShaderDescriptor = require("./descriptor");
+var ShaderDescriptor = require("./shader-descriptor");
 
 /**
  * @param {string} path

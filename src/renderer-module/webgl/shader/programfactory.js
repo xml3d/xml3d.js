@@ -1,5 +1,5 @@
 var ShaderUtils = require("./shader-utils.js");
-var ShaderDescriptor = require("../materials/urn/descriptor.js");
+var ShaderDescriptor = require("../materials/urn/shader-descriptor.js");
 var URNShaderClosure = require("../materials/urn/urnshaderclosure.js");
 
 var ProgramFactory = function (context) {

@@ -32,6 +32,7 @@
     MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
     MESH_PARAMETERS[WebGLRenderingContext.LINES] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
     MESH_PARAMETERS[WebGLRenderingContext.POINTS] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
+    MESH_PARAMETERS[WebGLRenderingContext.TRIANGLE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
 
 
     /**

@@ -13,6 +13,19 @@
         return mimetype === "application/json" && response.metadata && response.metadata.formatVersion == "3.1";
     };
 
+
+    function getMaterialName(name, usedNames){
+        name = name.replace(/[. ]/, "_");
+        var result = name;
+        var i = 1;
+        while(usedNames.indexOf(result) != -1){
+            i++
+            result = name + "_" + i;
+        }
+        usedNames.push(result);
+        return result;
+    }
+
     ThreeJsFormatHandler.prototype.getFormatData = function (response, url, responseType, mimetype, callback) {
          try {
             var parsed = parse(response);
@@ -28,13 +41,9 @@
             var materials = response.materials;
 
             // Fix potential material name conflicts:
-            var usedMaterialNames = {};
+            var usedMaterialNames = [];
             for(var i = 0; i < materials.length; ++i){
-                materials[i].name = materials[i]["DbgName"];
-                var idx = 2;
-                while(usedMaterialNames[materials[i].name]){
-                    materials[i].name = materials[i]["DbgName"] + "_" + idx++;
-                }
+                materials[i].name = getMaterialName(materials[i]["DbgName"], usedMaterialNames);
             }
 
             var result = {};
@@ -745,6 +754,7 @@
             meshXflowNode.appendChild(xflowData.indices[matName]);
             var meshEntry = new XML3D.base.SubData(XML3D.data.xflowGraph.createDataNode(), meshXflowNode);
             meshEntry.setMeshType("triangles");
+            meshEntry.setName("mesh_" + matName);
             meshEntry.setIncludes(["shader_" + matName, "base"]);
             result.appendChild(meshEntry);
         }

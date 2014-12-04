@@ -30,7 +30,6 @@ XML3D.createClass(URNShaderComposer, AbstractShaderComposer, {
      */
     setShaderInfo: function (shaderInfo) {
         var shaderScriptURI = shaderInfo.getScriptUri();
-        console.log(shaderScriptURI);
         this.setShaderScript(shaderScriptURI);
 
         if (this.descriptor) {

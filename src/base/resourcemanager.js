@@ -27,7 +27,7 @@
     XML3D.base.registerFormat = function(formatHandler) {
         if (formatHandler)
             c_formatHandlers.push(formatHandler);
-    }
+    };
 
     XML3D.base.findFormat = function(response, responseType, mimetype) {
         for (var i = 0; i < c_formatHandlers.length; ++i) {
@@ -37,7 +37,7 @@
             }
         }
         return null;
-    }
+    };
 
     /**
      * @constructor
@@ -52,7 +52,7 @@
     function getOrCreateCounterObject(canvasId) {
         var counterObject = c_canvasIdCounters[canvasId];
         if (!counterObject) {
-            counterObject = {counter: 0, listeners: new Array()};
+            counterObject = {counter: 0, listeners: []};
             c_canvasIdCounters[canvasId] = counterObject;
         }
         return counterObject;
@@ -67,7 +67,7 @@
         }
     }
 
-    function loadComplete(canvasId, url) {
+    function loadComplete(canvasId) {
         // notify all load complete listeners
         var counterObject = getCounterObject(canvasId);
         if (counterObject) {
@@ -82,7 +82,7 @@
     ResourceManager.prototype.isLoadComplete = function(canvasId) {
         var counterObject = getCounterObject(canvasId);
         return !counterObject || counterObject.counter == 0;
-    }
+    };
 
     /*
      * Register listener that will be fired when all resources for specified canvasId are loaded.
@@ -107,6 +107,12 @@
         }
     };
 
+    //noinspection JSUnusedGlobalSymbols
+    /**
+     *
+     * @param {number} canvasId
+     * @param {function} listener
+     */
     ResourceManager.prototype.removeLoadCompleteListener = function(canvasId, listener) {
         var counterObject = getCounterObject(canvasId);
         if (counterObject) {
@@ -121,11 +127,13 @@
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
+    //noinspection JSUnusedGlobalSymbols
     ResourceManager.prototype.addBinaryContentType = function(type) {
         if (c_binaryContentTypes.indexOf(type) == -1)
             c_binaryContentTypes.push(type);
     };
 
+    //noinspection JSUnusedGlobalSymbols
     ResourceManager.prototype.removeBinaryContentType = function(type) {
         var idx = c_binaryContentTypes.indexOf(type);
         if (idx != -1)
@@ -146,6 +154,7 @@
             c_binaryExtensions.push(extension);
     };
 
+    //noinspection JSUnusedGlobalSymbols
     ResourceManager.prototype.removeBinaryExtension = function(extension) {
         var idx = c_binaryExtensions.indexOf(extension);
         if (idx != -1)
@@ -236,8 +245,7 @@
             };
             xmlHttp.send(null);
         }
-    };
-
+    }
     /**
      * Process response of ajax request from loadDocument()
      * @private
@@ -246,8 +254,7 @@
     function processResponse(httpRequest) {
         var mimetype = httpRequest.getResponseHeader("content-type");
         setDocumentData(httpRequest, httpRequest._url, mimetype);
-    };
-
+    }
     /**
      * Initialize data of a received document
      * @private
@@ -363,15 +370,15 @@
      * Update all AdapterHandles without adapters of a certain url
      * @param {string} url The complete url + fragment
      * @param {FormatHandler} formatHandler Format handler
-     * @param {Object} data Data of the document corresponding to the url. Possibily a DOM element
-     * @param {boolean} localChange If true, then this is about a local id change. do not call loadComplete
+     * @param {Object} data Data of the document corresponding to the url. Possibly a DOM element
+     * @param {boolean?} localChange If true, then this is about a local id change. do not call loadComplete
      */
     function updateMissingHandles(url, formatHandler, data, localChange) {
         for (var adapterType in c_cachedAdapterHandles[url]) {
             for (var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (!handle.hasAdapter()) {
-                    updateHandle(handle, adapterType, canvasId, formatHandler, data);
+                    updateHandle(handle, adapterType, +canvasId, formatHandler, data);
                     if(!localChange) loadComplete(canvasId, url);
                 }
             }
@@ -395,12 +402,12 @@
     /**
      * Update a specific AdapterHandle with the provided data.
      * Internally an adapter will be created with 'data' and added to 'handle'
-     * All other argument are required to finde the correct factory
+     * All other argument are required to find the correct factory
      * @param {XML3D.base.AdapterHandle} handle The AdapterHandle to be updated
      * @param {Object} adapterType The type / aspect of the adapter (e.g. XML3D.data or XML3D.webgl)
      * @param {number} canvasId Id of corresponding canvas handler. 0 if not dependent of canvas handler
      * @param {FormatHandler} format Format handler of the corresponding document
-     * @param {Object} data Data for this handle. Possibily a DOM element
+     * @param {Object} data Data for this handle. Possibly a DOM element
      */
     function updateHandle(handle, adapterType, canvasId, format, data) {
 
@@ -440,8 +447,8 @@
      * This means: Any reference from an external document will be absolute and any id reference from the current
      * document will remain an id reference.
      * @param {Document} baseDocument - the document from which to look up the reference
-     * @param {XML3D.URI} uri - The URI used to find the referred AdapterHandle. Can be relative
-     * @returns {XML3D.URI} The (sometimes) absolute URI
+     * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
+     * @returns {URI} The (sometimes) absolute URI
      */
     ResourceManager.prototype.getAbsoluteURI = function(baseDocument, uri){
         if (!uri)
@@ -452,7 +459,7 @@
             uri = uri.getAbsoluteURI(baseDocument.documentURI);
         }
         return uri;
-    }
+    };
 
     /**
      * Get any adapter, internal or external.
@@ -460,9 +467,9 @@
      * An AdapterHandle will be always be returned, expect when an invalid (empty) uri is passed.
      *
      * @param {Document} baseDocument - the document from which to look up the reference
-     * @param {XML3D.URI} uri - The URI used to find the referred AdapterHandle. Can be relative
+     * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
      * @param {Object} adapterType The type of adapter required (e.g. XML3D.data or XML3D.webgl)
-     * @param {number=} canvasId Id of canvashandle this adapter depends on, 0 if not depending on any canvashandler
+     * @param {number=} canvasId Id of CanvasHandler handler this adapter depends on, 0 if not depending on any CanvasHandler
      * @returns {?XML3D.base.AdapterHandle} The requested AdapterHandler. Note: might be null
      */
     ResourceManager.prototype.getAdapterHandle = function(baseDocument, uri, adapterType, canvasId) {
@@ -483,7 +490,7 @@
         if (handle)
             return handle;
 
-        var handle = new XML3D.base.AdapterHandle(uri);
+        handle = new XML3D.base.AdapterHandle(uri);
         c_cachedAdapterHandles[uri][adapterType][canvasId] = handle;
 
         if (uri.isLocal()) {
@@ -528,7 +535,7 @@
             return factory.getAdapter(node);
         }
         return null;
-    }
+    };
 
     /**
      * This function is called when an id of an element changes or if that element is now reachable
@@ -550,7 +557,7 @@
         if (newId) {
             updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node, true);
         }
-    }
+    };
 
     /**
      * This function is called to notify an AdapterHandler about a change (can be triggered through adapters)
@@ -567,7 +574,7 @@
             c_cachedAdapterHandles[uri][adapterType][canvasId]) {
             c_cachedAdapterHandles[uri][adapterType][canvasId].notifyListeners(type);
         }
-    }
+    };
 
 
     /**
@@ -575,7 +582,7 @@
      * @private
      * @param {string} url URL of the document
      * @param {function(object)} loadListener Gets the response of the XHR
-     * @param {function(XMLHttpRequest)} errorListener Get the XHR object for further analyzis
+     * @param {function(XMLHttpRequest)} errorListener Get the XHR object for further analysis
      */
     ResourceManager.prototype.loadData = function(url, loadListener, errorListener) {
         var xmlHttp = null;
@@ -711,12 +718,14 @@
         // we use canvasId 0 to represent videos loaded in a document
         getOrCreateCounterObject(0).counter++;
 
-        // FIXME: Creating configured video, play/pause won't work
+        // FIXME: In HTML, we create a configured video, play/pause won't work
         var video = document.createElement("video");
 
-        function loadCompleteCallback(event) {
+        var loadCompleteCallback = function(event) {
             loadComplete(0, uri);
-        }
+            video.removeEventListener("canplay", loadCompleteCallback, true);
+            video.removeEventListener("error", loadCompleteCallback, true);
+        };
 
         if (!uri.hasSameOrigin(document.location.href)) {
             video.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);

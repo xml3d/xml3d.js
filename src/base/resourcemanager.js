@@ -469,7 +469,7 @@
      * @param {Document} baseDocument - the document from which to look up the reference
      * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
      * @param {Object} adapterType The type of adapter required (e.g. XML3D.data or XML3D.webgl)
-     * @param {number=} canvasId Id of CanvasHandler handler this adapter depends on, 0 if not depending on any CanvasHandler
+     * @param {number=} canvasId Id of WebGLCanvasHandler handler this adapter depends on, 0 if not depending on any WebGLCanvasHandler
      * @returns {?XML3D.base.AdapterHandle} The requested AdapterHandler. Note: might be null
      */
     ResourceManager.prototype.getAdapterHandle = function(baseDocument, uri, adapterType, canvasId) {
@@ -564,7 +564,7 @@
      * Note that this function only works with nodes inside window.document
      * @param {Element} element Element of AdapterHandler. Must be from window.document
      * @param {Object} adapterType Type/Aspect of AdapterHandler (e.g. XML3D.data or XML3D.webgl)
-     * @param {number} canvasId CanvasHandler id of AdapterHandler, 0 if not depending on CanvasHandler
+     * @param {number} canvasId WebGLCanvasHandler id of AdapterHandler, 0 if not depending on WebGLCanvasHandler
      * @param {number} type Type of Notification. Usually XML3D.events.ADAPTER_HANDLE_CHANGED
      */
     ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterType, canvasId, type) {

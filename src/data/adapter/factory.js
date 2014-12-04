@@ -37,7 +37,7 @@
      * @implements {XML3D.base.IFactory}
      * @extends XML3D.base.AdapterFactory
      *
-     * @param {XML3D.webgl.CanvasHandler} handler
+     * @param {XML3D.webgl.WebGLCanvasHandler} handler
      */
     var XML3DDataAdapterFactory = function()
     {

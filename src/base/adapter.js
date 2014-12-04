@@ -186,7 +186,7 @@
      * @implements {XML3D.base.IFactory}
      * @param {Object} aspect The aspect this factory serves (e.g. XML3D.data or XML3D.webgl)
      * @param {string|Array.<string>} mimetypes The mimetype this factory is compatible to
-     * @param {number} canvasId The id of the corresponding canvas handler. 0, if not dependent on any CanvasHandler
+     * @param {number} canvasId The id of the corresponding canvas handler. 0, if not dependent on any WebGLCanvasHandler
      */
     XML3D.base.AdapterFactory = function(aspect, mimetypes, canvasId) {
         this.aspect = aspect;
@@ -220,7 +220,7 @@
      * @constructor
      * @implements {XML3D.base.AdapterFactory}
      * @param {Object} aspect The aspect this factory serves (e.g. XML3D.data or XML3D.webgl)
-     * @param {number} canvasId The id of the corresponding canvas handler. 0, if not dependent on any CanvasHandler
+     * @param {number} canvasId The id of the corresponding canvas handler. 0, if not dependent on any WebGLCanvasHandler
      */
     XML3D.base.NodeAdapterFactory = function(aspect, canvasId) {
         XML3D.base.AdapterFactory.call(this, aspect, ["text/xml", "application/xml"], canvasId);

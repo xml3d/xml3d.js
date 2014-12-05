@@ -34,10 +34,6 @@ var JSShaderComposer = function (context, shaderInfo) {
     this.setShaderInfo(shaderInfo);
 };
 
-JSShaderComposer.convertEnvName = function (name) {
-    return ("_env_" + name).replace(/_+/g, "_");
-};
-
 JSShaderComposer.convertSysName = function (name) {
     return name;
 };

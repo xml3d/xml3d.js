@@ -18,8 +18,13 @@ var c_SystemUpdate = {
 
 var c_jsShaderCache = {};
 
+
+function convertEnvName(name) {
+    return ("_env_" + name).replace(/_+/g, "_");
+}
+
 function addDefaultChanneling(vsConfig, inputName) {
-    var outputName = JSShaderComposer.convertEnvName(inputName);
+    var outputName = convertEnvName(inputName);
     vsConfig.channelAttribute(inputName, outputName, null);
 }
 
@@ -33,7 +38,7 @@ function channelVsAttribute(vsConfig, inputName, spaceInfo) {
     var i = spaceInfo[inputName].length;
     while (i--) {
         var entry = spaceInfo[inputName][i];
-        var outputName = JSShaderComposer.convertEnvName(entry.name), code = null;
+        var outputName = convertEnvName(entry.name), code = null;
         switch (entry.space) {
             case Shade.SPACE_VECTOR_TYPES.OBJECT:
                 break;

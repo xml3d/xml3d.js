@@ -317,11 +317,13 @@ module("Xflow tests", {
         }
 
         if (shouldMatchData.isLoading()) {
-            shouldMatchData.addListener(function (handle, notfication) {
+            var loadCheck = function (handle, notfication) {
                 if (notfication === Xflow.DATA_ENTRY_STATE.LOAD_END || !shouldMatchData.isLoading()) {
+                    shouldMatchData.removeListener(loadCheck);
                     executeTest();
                 }
-            });
+            }
+            shouldMatchData.addListener(loadCheck);
         } else {
             executeTest();
         }
@@ -546,7 +548,7 @@ test("Operator - Later Input", function() {
 });
 
 test("Operator - Platform fallback - JS", function() {
-        var xflowGraph = XML3D.data.xflowGraph;
+    var xflowGraph = XML3D.data.xflowGraph;
 
     if (xflowGraph.platform !== Xflow.PLATFORM.JAVASCRIPT) {
         console.log("Operator - Platform fallback - JS tests were not executed because Xflow platform is not JavaScript.");

@@ -1,3 +1,5 @@
+var GLContext = require("./base/context");
+var GLScene = require("./scene/glscene");
 var GLScaledRenderTarget = require("./base/rendertarget.js").GLScaledRenderTarget;
 var DataChangeListener = require("../renderer/tools/datachangelistener.js");
 var RenderInterface = require("./render-interface");
@@ -5,7 +7,6 @@ var PickObjectRenderPass= require("./render-passes/pick-object.js");
 var PickPositionRenderPass = require("./render-passes/pick-position.js");
 var PickNormalRenderPass = require("./render-passes/pick-position.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
-
 var MAX_PICK_BUFFER_DIMENSION = 512;
 
 var OPTION_SSAO = "renderer-ssao";
@@ -53,15 +54,30 @@ IRenderer.prototype.dispose = function () {
 };
 
 /**
+ * @param {Element} element The <xml3d> Element
  * @implements {IRenderer}
  * @constructor
  */
-var GLRenderer = function (context, scene, canvas) {
-    this.context = context;
-    this.scene = scene;
-    this.canvas = canvas;
+var GLRenderer = function (element, canvasHandler) {
+
+    this.canvasHandler = canvasHandler;
+    var canvas = this.canvasHandler.getCanvas();
     this.width = canvas.clientWidth;
     this.height = canvas.clientHeight;
+
+    this.context = new GLContext(canvas, this.canvasHandler.id);
+    this.scene = new GLScene(this.context);
+
+    var factory = XML3D.base.xml3dFormatHandler.getFactory(XML3D.webgl, this.canvasHandler.id);
+    factory.setScene(this.scene);
+    factory.setRenderer(this);
+
+    var xml3dAdapter = factory.getAdapter(element);
+    xml3dAdapter.traverse(function () {
+    });
+
+    this.scene.rootNode.setVisible(true);
+
 
     /** @type {RenderObject} */
     this.pickedObject = null;
@@ -113,7 +129,9 @@ XML3D.extend(GLRenderer.prototype, {
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
         gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
 
-    }, handleResizeEvent: function (width, height) {
+    },
+
+    handleResizeEvent: function (width, height) {
         this.width = width;
         this.height = height;
         this.context.handleResizeEvent(width, height);
@@ -154,7 +172,7 @@ XML3D.extend(GLRenderer.prototype, {
         var obj = object || this.pickedObject;
         if (!obj)
             return null;
-        y = canvasToGlY(this.canvas, y);
+        y = canvasToGlY(this.canvasHandler.getCanvas(), y);
         this.pickNormalPass.render(obj);
         this.needsPickingDraw = true;
         return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
@@ -164,7 +182,7 @@ XML3D.extend(GLRenderer.prototype, {
         var obj = object || this.pickedObject;
         if (!obj)
             return null;
-        y = canvasToGlY(this.canvas, y);
+        y = canvasToGlY(this.canvasHandler.getCanvas(), y);
         this.pickPositionPass.render(obj);
         this.needsPickingDraw = true;
         return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
@@ -231,15 +249,19 @@ XML3D.extend(GLRenderer.prototype, {
 
     needsRedraw: function () {
         return this.needsDraw;
-    }, renderToCanvas: function () {
+    },
+
+    renderToCanvas: function () {
         this.prepareRendering();
         this.renderInterface.getRenderPipeline().render(this.scene);
         var stats = this.renderInterface.getRenderPipeline().getRenderStats();
         XML3D.debug.logDebug("Rendered to Canvas");
         this.needsDraw = false;
         return stats;
-    }, getRenderObjectFromPickingBuffer: function (x, y) {
-        y = canvasToGlY(this.canvas, y);
+    },
+
+    getRenderObjectFromPickingBuffer: function (x, y) {
+        y = canvasToGlY(this.canvasHandler.getCanvas(), y);
         if (this.needsPickingDraw) {
             this.prepareRendering();
             this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight());
@@ -249,9 +271,13 @@ XML3D.extend(GLRenderer.prototype, {
         }
         this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene.ready);
         return this.pickedObject;
-    }, prepareRendering: function () {
+    },
+
+    prepareRendering: function () {
         this.scene.update();
-    }, /**
+    },
+
+    /**
      * Uses gluUnProject() to transform the 2D screen point to a 3D ray.
      * Not tested!!
      *
@@ -265,7 +291,7 @@ XML3D.extend(GLRenderer.prototype, {
 
         return function (canvasX, canvasY) {
 
-            var glY = canvasToGlY(this.canvas, canvasY);
+            var glY = canvasToGlY(this.canvasHandler.getCanvas(), canvasY);
 
             // setup input to unproject
             var viewport = new Array();
@@ -303,7 +329,9 @@ XML3D.extend(GLRenderer.prototype, {
 
             return ray;
         }
-    }()), dispose: function () {
+    }()),
+
+    dispose: function () {
         this.scene.clear();
     },
 

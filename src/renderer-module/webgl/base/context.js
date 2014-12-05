@@ -3,24 +3,37 @@ var GLTexture = require("./texture.js");
 var GLCanvasTarget = require("./rendertarget.js").GLCanvasTarget;
 var ProgramFactory = require("./../shader/programfactory.js");
 
+var CONTEXT_OPTIONS = {
+    alpha: true, premultipliedAlpha: false, antialias: true, stencil: true, preserveDrawingBuffer: true
+};
+
 /**
- * Contex that includes all GL related resources / handlers
- * @param {WebGLRenderingContext} gl
+ * @param {HTMLCanvasElement!} canvas
+ */
+function getContextForCanvas(canvas) {
+    try {
+        return canvas.getContext('experimental-webgl', CONTEXT_OPTIONS);
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * Context that includes all GL related resources / handlers
+ * @param {HTMLCanvasElement!} canvas
  * @param {number} id
- * @param {number} width
- * @param {number} height
  * @constructor
  */
-var GLContext = function (gl, id, width, height) {
-    this.gl = gl;
+var GLContext = function (canvas, id) {
+    this.gl = getContextForCanvas(canvas);
     this.id = id;
-    this.canvasTarget = new GLCanvasTarget(this, width, height);
+    this.canvasTarget = new GLCanvasTarget(this, canvas.clientWidth, canvas.clientHeight);
     this.programFactory = new ProgramFactory(this);
-    this.textureManager = new TextureManager({ units: gl.getParameter(WebGLRenderingContext.MAX_COMBINED_TEXTURE_IMAGE_UNITS )});
+    this.textureManager = new TextureManager({ units: this.gl.getParameter(WebGLRenderingContext.MAX_COMBINED_TEXTURE_IMAGE_UNITS )});
     this.stats = {
         materials: 0, meshes: 0
     };
-    this.extensions = populateExtensions(gl);
+    this.extensions = populateExtensions(this.gl);
 
 };
 

@@ -185,7 +185,7 @@ XML3D.createClass = function(ctor, parent, methods) {
             return;
         }
         try {
-            XML3D.webgl.configure(xml3dElement);
+            XML3D.renderer.configure(xml3dElement);
         } catch (e) {
             debug && XML3D.debug.logException(e);
             curXML3DInitElements.splice(curXML3DInitElements.indexOf(xml3dElement), 1);

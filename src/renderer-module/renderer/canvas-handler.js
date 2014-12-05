@@ -5,7 +5,6 @@ var c_globalCanvasId = 0;
 
 /**
  * @param {Element} xml3dElement
- * @param {Element} canvas
  * @constructor
  */
 function AbstractCanvasHandler(xml3dElement, canvas) {
@@ -26,6 +25,10 @@ function AbstractCanvasHandler(xml3dElement, canvas) {
  */
 AbstractCanvasHandler.prototype.hasTouchEvents = function() {
     return 'ontouchstart' in window;
+};
+
+AbstractCanvasHandler.prototype.getCanvas = function() {
+   return this._canvas;
 };
 
 AbstractCanvasHandler.prototype.dispatchEvent = function(event) {

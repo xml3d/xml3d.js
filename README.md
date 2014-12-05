@@ -61,6 +61,14 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
+4.8 -
+* Recursive Assets - [demo](), [doc](), [issue](https://github.com/xml3d/xml3d.js/issues/76)
+* Load Events - [doc]()
+* [iOS 8 Support](https://github.com/xml3d/xml3d.js/issues/75)
+* New build system based on [grunt](http://gruntjs.com/)
+* Improved texture filtering - [doc]()
+* Issues: #9, #46, #56, #74, #75, #76, #77, #79
+
 4.7 - 17.10.2014
 * Assets / Configurable Instances - [demo](http://xml3d.github.io/xml3d-examples/examples/assets/assets.html), [slides](http://xml3d.org/xml3d/slides/web3d-instancing/)
 * [shade.js](http://xml3d.org/xml3d/papers/shade.js/) integration (beta) - [demo](http://xml3d.github.io/xml3d-examples/examples/shade-tv/index.html), [slides](http://xml3d.org/xml3d/slides/pg-shade.js/)

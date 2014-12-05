@@ -75,7 +75,7 @@ MouseEventHandler.prototype =  {
      * @return {XML3DVec3}
      */
     initExtendedMouseEvent: function (event, x, y) {
-        var handler = this._handler;
+        var handler = this._canvasHandler;
 
         (function () {
             var cachedPosition = undefined;

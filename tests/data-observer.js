@@ -26,8 +26,6 @@ test("Observe data disconnected from scene graph", function() {
     ok(this.window.XML3DDataObserver, "XML3DDataObserver is defined");
 
 
-    var xTest = this.doc.getElementById("myXml3d"),
-        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
 
     var testNumber = 0;
@@ -77,7 +75,7 @@ test("Observe data disconnected from scene graph", function() {
 
 test("Observe data connected to scene graph", function() {
     var xTest = this.doc.getElementById("myXml3d"),
-        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+        glTest = getContextForXml3DElement(xTest);
     var self = this;
 
     var testNumber = 0;

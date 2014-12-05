@@ -60,6 +60,18 @@ exports = module.exports = function (grunt) {
             }
 
         },
+        "browserify": {
+            "testlib": {
+                src: "./tests/build/index.js",
+                dest: "./tests/xml3d-testlib.js",
+                options: {
+                    browserifyOptions: {
+                        debug: true,
+                        standalone: "XML3DTestLib"
+                    }
+                }
+            }
+    }   ,
         "closure-compiler": {
             frontend: {
                 closurePath: './build/closure',
@@ -138,10 +150,11 @@ exports = module.exports = function (grunt) {
     var builds = moduleBuilds.map(function(f) { return f.task });
     builds.push("concat:dist");
 
+    grunt.registerTask("testlib", "browserify:testlib");
     grunt.registerTask("merge", builds);
     grunt.registerTask("dev", ["merge"]);
     grunt.registerTask("min", ["merge", "closure-compiler"]);
-    grunt.registerTask("default", ["dev"]);
+    grunt.registerTask("default", ["dev", "testlib"]);
     grunt.registerTask("testserver", ["connect:server:keepalive"]);
 
     grunt.registerTask('prepublish', 'Run all my build tasks.', function(n) {

@@ -12,11 +12,11 @@ function AbstractCanvasHandler(xml3dElement, canvas) {
     this._canvas = canvas;
     this.id = ++c_globalCanvasId; // global canvas id starts at 1
 
-    var handler = new MouseEvents.MouseEventHandler(xml3dElement, this);
-    this._registerCanvasListeners(handler, MouseEvents.EVENTS);
+    this._mouseHandler = new MouseEvents.MouseEventHandler(xml3dElement, this);
+    this._registerCanvasListeners(this._mouseHandler, MouseEvents.EVENTS);
     if(this.hasTouchEvents()) {
-        handler = new TouchEvents.TouchEventHandler(xml3dElement, this);
-        this._registerCanvasListeners(handler, TouchEvents.EVENTS);
+        this._touchHandler = new TouchEvents.TouchEventHandler(xml3dElement, this);
+        this._registerCanvasListeners(this._touchHandler, TouchEvents.EVENTS);
     }
 }
 

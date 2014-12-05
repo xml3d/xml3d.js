@@ -46,7 +46,7 @@ XML3D.extend(Scene.prototype, {
         }
     },
     /**
-     * @param opt
+     * @param {object?} opt
      * @returns {RenderObject}
      */
     createRenderObject: function (opt) {

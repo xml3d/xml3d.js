@@ -1,10 +1,12 @@
 module("Frustum", {
-
+    setup: function() {
+    }
 });
 
 
+
 test("Projection Matrix", 1, function() {
-    var frustum = new XML3D.webgl.Frustum(1, 10, 0, 0.78, 3/4);
+    var frustum = new XML3DTestLib.Frustum.Frustum(1, 10, 0, 0.78, 3/4);
     var mat = XML3D.math.mat4.create();
     frustum.getProjectionMatrix(mat);
     QUnit.closeArray(mat, XML3D.math.mat4.perspective(XML3D.math.mat4.create(), 0.78, 3/4, 1, 10), EPSILON, "Perspective matrix is correct." )
@@ -12,8 +14,8 @@ test("Projection Matrix", 1, function() {
 
 test("Planes", function() {
     var near = 1, far = 12;
-    var frustum = new XML3D.webgl.Frustum(near, far, 0, 0.78, 1);
-    var test = new XML3D.webgl.FrustumTest(frustum, XML3D.math.mat4.create());
+    var frustum = new XML3DTestLib.Frustum.Frustum(near, far, 0, 0.78, 1);
+    var test = new XML3DTestLib.Frustum.FrustumTest(frustum, XML3D.math.mat4.create());
 
     var planes = test.frustumPlanes;
 
@@ -44,8 +46,8 @@ test("Planes", function() {
 });
 
 test("Culling", function() {
-    var frustum = new XML3D.webgl.Frustum(1, 12, 0, 0.78, 1);
-    var test = new XML3D.webgl.FrustumTest(frustum, XML3D.math.mat4.create());
+    var frustum = new XML3DTestLib.Frustum.Frustum(1, 12, 0, 0.78, 1);
+    var test = new XML3DTestLib.Frustum.FrustumTest(frustum, XML3D.math.mat4.create());
     var bbox = XML3D.math.bbox.create();
     ok(!test.isBoxVisible(bbox), "Empty box is not visible.");
 

@@ -43,26 +43,26 @@ test("Get Local Adapters", function() {
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#shader1", XML3D.webgl, canvasId);
     ok(handle.hasAdapter(), "Handle of #shader1 has XML3D.webgl adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.webgl.ShaderRenderAdapter,
-        "Adapter is instanceof XML3D.webgl.ShaderRenderAdapter");
+    equal(handle.getAdapter().factory.aspect, XML3D.webgl, "Adapter has right aspect");
 
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#group1", XML3D.webgl, canvasId);
     ok(handle.hasAdapter(), "Handle of #group1 has XML3D.webgl adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.webgl.GroupRenderAdapter,
-        "Adapter is instanceof XML3D.webgl.GroupRenderAdapter");
+    // TODO: No access to adapters
+    //ok(handle.getAdapter() instanceof XML3D.webgl.GroupRenderAdapter,"Adapter is instanceof XML3D.webgl.GroupRenderAdapter");
 
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.data);
     ok(handle.hasAdapter(), "Handle of #mesh1 has XML3D.data adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,
-        "Adapter is instanceof XML3D.data.DataAdapter");
+    ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,  "Adapter is instanceof XML3D.data.DataAdapter");
 
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.webgl, canvasId);
     ok(handle.hasAdapter(), "Handle of #mesh1 has XML3D.webgl adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.webgl.MeshRenderAdapter,
-        "Adapter is instanceof XML3D.webgl.MeshRenderAdapter");
+    // TODO: No access to adapters
+    //ok(handle.getAdapter() instanceof XML3D.webgl.MeshRenderAdapter, "Adapter is instanceof XML3D.webgl.MeshRenderAdapter");
+    equal(handle.getAdapter().factory.aspect, XML3D.webgl, "Adapter has right aspect");
+
 });
 
 test("Get External Adapters", function() {
@@ -104,8 +104,9 @@ test("Get External Adapters", function() {
             ok(handle2 == e.adapterHandle, "Event has correct AdapterHandle");
             ok(handle2.hasAdapter(), "Handle has XML3D.webgl adapter now");
             ok(handle2.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-            ok(handle2.getAdapter() instanceof XML3D.webgl.ShaderRenderAdapter,
-                "Adapter is instanceof XML3D.webgl.ShaderRenderAdapter");
+            equal(handle2.getAdapter().factory.aspect, XML3D.webgl, "Adapter has right aspect");
+            // TODO: No access to RenderAdapter
+            //ok(handle2.getAdapter() instanceof XML3D.webgl.ShaderRenderAdapter, "Adapter is instanceof XML3D.webgl.ShaderRenderAdapter");
 
             start();
         });

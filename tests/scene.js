@@ -1,6 +1,6 @@
 module("RenderScene", {
     setup: function () {
-        this.scene = new XML3D.webgl.Scene();
+        this.scene = new XML3DTestLib.Scene();
         this.scene.createDrawable = function() {
             return null;
         };
@@ -10,6 +10,8 @@ module("RenderScene", {
 
     }
 });
+
+var SceneConstants = XML3DTestLib.SceneConstants;
 
 test("Light attributes", 10, function () {
 
@@ -53,7 +55,7 @@ test("Light callbacks", 9, function () {
         }
     });
 
-    this.scene.addEventListener(XML3D.webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (event) {
+    this.scene.addEventListener(SceneConstants.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (event) {
         ok(event.light, "Got a structure changed callback");
         start();
     });
@@ -70,7 +72,7 @@ test("Light callbacks", 9, function () {
         }
     });
 
-    this.scene.addEventListener(XML3D.webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (event) {
+    this.scene.addEventListener(SceneConstants.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (event) {
         ok(true, "Got a value changed callback");
         start();
     });

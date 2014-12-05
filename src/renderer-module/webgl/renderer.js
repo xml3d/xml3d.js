@@ -5,7 +5,7 @@ var DataChangeListener = require("../renderer/tools/datachangelistener.js");
 var RenderInterface = require("./render-interface");
 var PickObjectRenderPass= require("./render-passes/pick-object.js");
 var PickPositionRenderPass = require("./render-passes/pick-position.js");
-var PickNormalRenderPass = require("./render-passes/pick-position.js");
+var PickNormalRenderPass = require("./render-passes/pick-normal.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
 var MAX_PICK_BUFFER_DIMENSION = 512;
 
@@ -60,15 +60,15 @@ IRenderer.prototype.dispose = function () {
  */
 var GLRenderer = function (element, canvasHandler) {
 
-    this.canvasHandler = canvasHandler;
-    var canvas = this.canvasHandler.getCanvas();
+    this._canvasHandler = canvasHandler;
+    var canvas = this._canvasHandler.getCanvas();
     this.width = canvas.clientWidth;
     this.height = canvas.clientHeight;
 
-    this.context = new GLContext(canvas, this.canvasHandler.id);
+    this.context = new GLContext(canvas, this._canvasHandler.id);
     this.scene = new GLScene(this.context);
 
-    var factory = XML3D.base.xml3dFormatHandler.getFactory(XML3D.webgl, this.canvasHandler.id);
+    var factory = XML3D.base.xml3dFormatHandler.getFactory(XML3D.webgl, this._canvasHandler.id);
     factory.setScene(this.scene);
     factory.setRenderer(this);
 
@@ -172,7 +172,7 @@ XML3D.extend(GLRenderer.prototype, {
         var obj = object || this.pickedObject;
         if (!obj)
             return null;
-        y = canvasToGlY(this.canvasHandler.getCanvas(), y);
+        y = canvasToGlY(this._canvasHandler.getCanvas(), y);
         this.pickNormalPass.render(obj);
         this.needsPickingDraw = true;
         return this.pickNormalPass.readNormalFromPickingBuffer(x, y);
@@ -182,7 +182,7 @@ XML3D.extend(GLRenderer.prototype, {
         var obj = object || this.pickedObject;
         if (!obj)
             return null;
-        y = canvasToGlY(this.canvasHandler.getCanvas(), y);
+        y = canvasToGlY(this._canvasHandler.getCanvas(), y);
         this.pickPositionPass.render(obj);
         this.needsPickingDraw = true;
         return this.pickPositionPass.readPositionFromPickingBuffer(x, y);
@@ -261,7 +261,7 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     getRenderObjectFromPickingBuffer: function (x, y) {
-        y = canvasToGlY(this.canvasHandler.getCanvas(), y);
+        y = canvasToGlY(this._canvasHandler.getCanvas(), y);
         if (this.needsPickingDraw) {
             this.prepareRendering();
             this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight());
@@ -291,7 +291,7 @@ XML3D.extend(GLRenderer.prototype, {
 
         return function (canvasX, canvasY) {
 
-            var glY = canvasToGlY(this.canvasHandler.getCanvas(), canvasY);
+            var glY = canvasToGlY(this._canvasHandler.getCanvas(), canvasY);
 
             // setup input to unproject
             var viewport = new Array();

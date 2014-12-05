@@ -23,4 +23,5 @@ module.exports = {
         return "renderer";
     },
     configure: configure
+
 };

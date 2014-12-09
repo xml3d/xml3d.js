@@ -103,9 +103,49 @@
                         this.type = "int";
                     }
                         break;
+                    case xflowDataTypes.INT4:
+                    {
+                        helperMap = helperParamMap.buffer;
+                        this.type = "int4*";
+                        addressSpace = "__global";
+                        this.needsMemObject = true;
+                    }
+                        break;
                     case xflowDataTypes.FLOAT:
                     {
                         this.type = "float";
+                    }
+                        break;
+                    case xflowDataTypes.FLOAT2:
+                    {
+                        helperMap = helperParamMap.buffer;
+                        this.type = "float2*";
+                        addressSpace = "__global";
+                        this.needsMemObject = true;
+                    }
+                        break;
+                    case xflowDataTypes.FLOAT3:
+                    {
+                        helperMap = helperParamMap.buffer;
+                        this.type = "float*";
+                        addressSpace = "__global";
+                        this.needsMemObject = true;
+                    }
+                        break;
+                    case xflowDataTypes.FLOAT4:
+                    {
+                        helperMap = helperParamMap.buffer;
+                        this.type = "float4*";
+                        addressSpace = "__global";
+                        this.needsMemObject = true;
+                    }
+                        break;
+                    case xflowDataTypes.FLOAT4X4:
+                    {
+                        helperMap = helperParamMap.buffer;
+                        this.type = "float16*";
+                        addressSpace = "__global";
+                        this.needsMemObject = true;
                     }
                         break;
                     default:
@@ -152,6 +192,32 @@
                         helperVal = self.entryValue.height;
                     } else if (p === "length") {
                         helperVal = self.entryValue.length;
+                        var type = self.xflowType;
+                        switch (type) {
+                        case Xflow.DATA_TYPE.FLOAT2:
+                        {
+                            helperVal = helperVal / 2;
+                        }
+                            break;
+                        case Xflow.DATA_TYPE.FLOAT3:
+                        {
+                            helperVal = helperVal / 3;
+                        }
+                            break;
+                        case Xflow.DATA_TYPE.FLOAT4:
+                        case Xflow.DATA_TYPE.INT4:
+                        {
+                            helperVal = helperVal / 4;
+                        }
+                            break;
+                        case Xflow.DATA_TYPE.FLOAT4X4:
+                        {
+                            helperVal = helperVal / 16;
+                        }
+                            break;
+                        default:
+                            break;
+                        }
                     }
                     self.helpers.push(new KernelParam(self.program, pName, null, helperMap.type, new Uint32Array([helperVal])));
                 });
@@ -184,12 +250,30 @@
                 this.arg.release();
             }
 
-            this.byteSize = byteSize;
+            this.byteSize = isNaN(byteSize) ? 1 : byteSize;
 
             if (this.xflowType === Xflow.DATA_TYPE.TEXTURE) { // Texture is a special case
                 memObjectSize = entryValue.width * entryValue.height * byteSize;
+                this.byteSize = 4;
             } else {
-                memObjectSize = entryValue.length * byteSize;
+                switch (this.xflowType) {
+                case Xflow.DATA_TYPE.INT4:
+                {
+                    memObjectSize = entryValue.length * Int32Array.BYTES_PER_ELEMENT;
+                }
+                    break;
+                case Xflow.DATA_TYPE.FLOAT2:
+                case Xflow.DATA_TYPE.FLOAT3:
+                case Xflow.DATA_TYPE.FLOAT4:
+                case Xflow.DATA_TYPE.FLOAT4x4:
+                {
+                    memObjectSize = entryValue.length * Float32Array.BYTES_PER_ELEMENT;
+                }
+                    break;
+                default:
+                    memObjectSize = entryValue.length * 4;
+                    break;
+                }
             }
 
             memObject = clAPI.createBuffer(memObjectSize, memObjectMode, clCtx);
@@ -204,7 +288,7 @@
 
         updateValue: function (entry) {
             if (this.hasMemObject) {
-                this.val = entry.data;
+                this.val = entry.data === undefined ? entry : entry.data;
                 this.entryValue = entry;
                 this.checkEntrySize();
             } else {
@@ -222,7 +306,14 @@
                     } else if (name.indexOf("height") !== -1) {
                         p.updateValue(new Uint32Array([self.entryValue.height]));
                     } else if (name.indexOf("length") !== -1) {
-                        p.updateValue(new Uint32Array([self.entryValue.length]));
+                        var len = self.entryValue.length;
+                        if (self.xflowType === Xflow.DATA_TYPE.FLOAT4 ||
+                            self.xflowType === Xflow.DATA_TYPE.INT4) {
+                            len = len / 4;
+                        } else if (self.xflowType === Xflow.DATA_TYPE.FLOAT4X4) {
+                            len = len / 16;
+                        }
+                        p.updateValue(new Uint32Array([len]));
                     }
                 });
         },
@@ -232,6 +323,13 @@
 
             if(this.xflowType === Xflow.DATA_TYPE.TEXTURE) {
                 newSize = entryVal.width * entryVal.height * this.byteSize;
+            } else if (this.xflowType === Xflow.DATA_TYPE.FLOAT2 ||
+                       this.xflowType === Xflow.DATA_TYPE.FLOAT3 ||
+                       this.xflowType === Xflow.DATA_TYPE.FLOAT4 ||
+                       this.xflowType === Xflow.DATA_TYPE.FLOAT4X4) {
+                newSize = entryVal.length * Float32Array.BYTES_PER_ELEMENT;  
+            } else if (this.xflowType === Xflow.DATA_TYPE.INT4) {
+                newSize = entryVal.length * Int32Array.BYTES_PER_ELEMENT;
             } else {
                 newSize = entryVal.length * this.byteSize;
             }
@@ -488,7 +586,7 @@
 
             codeLines.push("int " + firstInput.name + "_i = get_global_id(0);");
 
-            codeLines.push("if (int " + firstInput.name + "_i >= " + firstInput.name + "_length) return;");
+            codeLines.push("if (" + firstInput.name + "_i >= " + firstInput.name + "_length) return;");
         }
 
         return codeLines.join('\n');
@@ -535,17 +633,17 @@
                 len = inputMemObjs.length;
                 for (i = 0; i < len; i++) {
                     memObj = inputMemObjs[i];
-                    cmdQueue.enqueueWriteBuffer(memObj.arg, false, 0, memObj.arg.getInfo(WebCL.MEM_SIZE), memObj.val, []);
+                    cmdQueue.enqueueWriteBuffer(memObj.arg, false, 0, /*memObj.arg.getInfo(WebCL.MEM_SIZE)*/memObj.memObjectSize, memObj.val, []);
                 }
 
                 // Execute (enqueue) kernel
-                cmdQueue.enqueueNDRangeKernel(kernel, WSSizes[1].length, [], WSSizes[1], WSSizes[0], []);
+                cmdQueue.enqueueNDRangeKernel(kernel, WSSizes[1].length, [], WSSizes[1], WSSizes[0]);
 
                 // Read the result buffer from OpenCL device
                 len = outputMemObjs.length;
                 for (i = 0; i < len; i++) {
                     memObj = outputMemObjs[i];
-                    cmdQueue.enqueueReadBuffer(memObj.arg, false, 0, memObj.arg.getInfo(WebCL.MEM_SIZE), memObj.val, []);
+                    cmdQueue.enqueueReadBuffer(memObj.arg, false, 0, /*memObj.arg.getInfo(WebCL.MEM_SIZE)*/memObj.memObjectSize, memObj.val, []);
                 }
 
                 cmdQueue.finish(); //Finish all the operations
@@ -613,8 +711,27 @@
             globalWS = [Math.ceil(entryVal.width / localWS[0]) * localWS[0],
                 Math.ceil(entryVal.height / localWS[1]) * localWS[1]];
         } else {
+            var k = 1;
+            switch (targetInput.xflowType) {
+            case Xflow.DATA_TYPE.INT4:
+            case Xflow.DATA_TYPE.FLOAT4:
+            {
+                k = 4;
+            }
+                break;
+            case Xflow.DATA_TYPE.FLOAT3:
+            {
+                k = 3;
+            }
+                break;
+            case Xflow.DATA_TYPE.FLOAT4X4:
+            {
+                k = 16;
+            }
+                break;
+            }
             localWS = [16];
-            globalWS = [Math.ceil(entryVal.length / localWS[0]) * localWS[0]];
+            globalWS = [Math.ceil(entryVal.length / (localWS[0] * k)) * localWS[0]];
         }
 
         return [localWS, globalWS];

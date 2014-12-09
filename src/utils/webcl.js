@@ -169,7 +169,7 @@
      */
 
     function hasWebCLNamespace() {
-        WebCLNamespaceAvailable = window.WebCL && WebCL.getPlatforms;
+        WebCLNamespaceAvailable = window.webcl && webcl.getPlatforms;
 
         return WebCLNamespaceAvailable;
 
@@ -187,7 +187,7 @@
         OpenCLDriversAvailable = true;
 
         try {
-            platArr = WebCL.getPlatforms();
+            platArr = webcl.getPlatforms();
         } catch (e) {
             OpenCLDriversAvailable = false;
         }
@@ -239,7 +239,7 @@
         devices = getDevicesByType(type || DEFAULT_DEVICE);
 
         // Creating default context
-        ctx = createContext({devices: devices});
+        ctx = createContext(devices);
 
         return true;
     }
@@ -253,7 +253,7 @@
 
     function getPlatforms() {
         if(platforms.length === 0) {
-            platforms = WebCL.getPlatforms();
+            platforms = webcl.getPlatforms();
         }
 
         return platforms;
@@ -279,11 +279,11 @@
 
         try {
             if (type === "CPU") {
-                deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_CPU);
+                deviceArr = platform.getDevices(webcl.DEVICE_TYPE_CPU);
             } else if (type === "GPU") {
-                deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_GPU);
+                deviceArr = platform.getDevices(webcl.DEVICE_TYPE_GPU);
             } else if (type === "ALL") {
-                deviceArr = platform.getDevices(WebCL.DEVICE_TYPE_ALL);
+                deviceArr = platform.getDevices(webcl.DEVICE_TYPE_ALL);
             }
 
         } catch (e) {
@@ -344,7 +344,7 @@
         }
 
         try {
-            platform = device.getInfo(WebCL.DEVICE_PLATFORM);
+            platform = device.getInfo(webcl.DEVICE_PLATFORM);
         } catch (e) {
             var errCode = getErrorCodeFromCLError(e);
 
@@ -373,7 +373,7 @@
         }
 
         try {
-            deviceArr = clCtx.getInfo(WebCL.CONTEXT_DEVICES);
+            deviceArr = clCtx.getInfo(webcl.CONTEXT_DEVICES);
         }catch(e) {
             errCode = getErrorCodeFromCLError(e);
 
@@ -397,14 +397,15 @@
      */
 
     function createContext(properties) {
+      /*
         var props = {
             devices: getDevicesByType(DEFAULT_DEVICE)
             }, context;
 
-        XML3D.extend(props, properties);
+        XML3D.extend(props, properties);*/
 
         try {
-            context = WebCL.createContext(props);
+            var context = webcl.createContext(properties);
         } catch (e) {
             var errCode = getErrorCodeFromCLError(e);
 
@@ -494,7 +495,7 @@
                 throw e;
             }
             throw new WebCLError(getCLErrorName(errCode),
-                program.getBuildInfo(deviceArr[0], WebCL.CL_PROGRAM_BUILD_LOG));
+                program.getBuildInfo(deviceArr[0], WebCL.PROGRAM_BUILD_LOG));
         }
 
         return program;
@@ -602,11 +603,11 @@
 
         try {
             if (type === "r") {
-                return clCtx.createBuffer(WebCL.CL_MEM_READ_ONLY, size);
+                return clCtx.createBuffer(webcl.MEM_READ_ONLY, size);
             } else if (type === "w") {
-                return clCtx.createBuffer(WebCL.CL_MEM_WRITE_ONLY, size);
+                return clCtx.createBuffer(webcl.MEM_WRITE_ONLY, size);
             } else if (type === "rw") {
-                return clCtx.createBuffer(WebCL.CL_MEM_READ_WRITE, size);
+                return clCtx.createBuffer(webcl.MEM_READ_WRITE, size);
             } else {
                 XML3D.debug.logError("WebCL API: createBuffer(): Unknown buffer type:", type);
                 return false;
@@ -752,7 +753,7 @@
                     return false;
                 }
 
-                nKernelArgs = kernel.getInfo(WebCL.CL_KERNEL_NUM_ARGS);
+                nKernelArgs = kernel.getInfo(webcl.KERNEL_NUM_ARGS);
 
                 if (inputArgs.length > nKernelArgs) {
                     XML3D.debug.logWarning("WebCL: setArgs: Input args amount > kernel program args amount! Ignoring extra arguments.");
@@ -761,7 +762,7 @@
                     return false;
                 }
 
-                XML3D.debug.logDebug("Args for kernel:", kernel.getInfo(WebCL.KERNEL_FUNCTION_NAME));
+                XML3D.debug.logDebug("Args for kernel:", kernel.getInfo(webcl.KERNEL_FUNCTION_NAME));
 
                 i = nKernelArgs;
 

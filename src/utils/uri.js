@@ -95,7 +95,7 @@
         if (typeof other == 'string')
             other = new URI(other);
 
-        if (this.scheme == "blob") {
+        if (this.scheme == "blob" || this.scheme == "data") {
             return true;
         }
 

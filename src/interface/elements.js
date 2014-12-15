@@ -72,7 +72,8 @@
             eh.notify(n);
         }
 
-        var handler = eh && eh.handlers[e.attrName];
+        var isHTML = e.target instanceof HTMLElement;
+        var handler = eh && eh.handlers[isHTML ? e.attrName.toLowerCase() : e.attrName];
         if(!handler)
             return;
 
@@ -260,7 +261,7 @@
                     if (config[prop].a !== undefined) {
                         var attrName = config[prop].id || prop;
                         var handler = new config[prop].a(attrName, config[prop].params);
-                        handlers[attrName] = handler;
+                        handlers[isHTML ? attrName.toLowerCase() : attrName] = handler;
                         if(proto) {
                             try {
                                 Object.defineProperty(proto, prop, handler.desc);
@@ -294,7 +295,7 @@
                 if(prop =="_cache") continue;
                 if(config[prop] && config[prop].a !== undefined){
                     var attrName = config[prop].id || prop;
-                    var handler = this.handlers[attrName];
+                    var handler = this.handlers[isHTML ? attrName.toLowerCase() : attrName];
                     handler.init && handler.init(elem, this.storage);
                     delete elem[prop];
                 }
@@ -308,7 +309,7 @@
                 }
                 else if (config[prop].a !== undefined){
                     var attrName = config[prop].id || prop;
-                    var handler = this.handlers[attrName];
+                    var handler = this.handlers[isHTML ? attrName.toLowerCase() : attrName];
                     handler.init && handler.init(elem, this.storage);
                     try {
                         Object.defineProperty(elem, prop, handler.desc);

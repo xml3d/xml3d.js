@@ -98,7 +98,7 @@
     }
 
     XMLFormatHandler.prototype.getFragmentData = function(documentData, fragment) {
-        return documentData.querySelectorAll("*[id=" + fragment + "]")[0];
+        return documentData.querySelectorAll("*[id='" + fragment + "']")[0];
     }
 
 

@@ -1,4 +1,4 @@
-var SceneRenderPass = require("./base.js");
+var SceneRenderPass = require("./scene-pass.js");
 
 var VertexAttributePass = function (renderInterface, output, opt) {
     SceneRenderPass.call(this, renderInterface, output, opt);

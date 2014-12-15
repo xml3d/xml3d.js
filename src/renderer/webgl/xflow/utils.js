@@ -1,4 +1,3 @@
-var GLTexture = require("../base/texture.js");
 var GLContext = require("../base/context.js");
 
 function convertToJSArray(value) {
@@ -81,7 +80,7 @@ module.exports = {
             return null;
         if (xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE) {
             var webglData = context.getXflowEntryWebGlData(xflowDataEntry);
-            var texture = webglData.texture || new GLTexture(context);
+            var texture = webglData.texture || context.createTexture();
             if (webglData.changed)
                 texture.updateFromTextureEntry(xflowDataEntry);
 

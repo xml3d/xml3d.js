@@ -1,5 +1,3 @@
-
-var GLTexture = require("./texture");
 var GLCubeMap = require("./cubemap");
 
 /**
@@ -117,7 +115,7 @@ XML3D.extend(GLRenderTarget.prototype, {
             };
         } else {
             //opt.generateMipmap = opt.generateColorsMipmap;
-            var ctex = new GLTexture(this.context);
+            var ctex = this.context.createTexture();
             ctex.createTex2DFromData(colorFormat, this.width, this.height, gl.RGBA, this.opt.colorType || gl.UNSIGNED_BYTE, this.opt);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, ctex.handle, 0);
             this.colorTarget = {
@@ -140,7 +138,7 @@ XML3D.extend(GLRenderTarget.prototype, {
             }
         } else {
             //opt.generateMipmap = opt.generateDepthMipmap;
-            var dtex = new GLTexture(this.context);
+            var dtex = this.context.createTexture();
             dtex.createTex2DFromData(depthFormat, this.width, this.height, gl.DEPTH_COMPONENT, gl.FLOAT, this.opt);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, dtex.handle, 0);
 
@@ -163,7 +161,7 @@ XML3D.extend(GLRenderTarget.prototype, {
             }
         } else {
             //opt.generateMipmap = opt.generateStencilMipmap;
-            var stex = new GLTexture(this.context);
+            var stex = this.context.createTexture();
             stex.createTex2DFromData(stencilFormat, this.width, this.height, gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, this.opt);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.TEXTURE_2D, stex.handle, 0);
 

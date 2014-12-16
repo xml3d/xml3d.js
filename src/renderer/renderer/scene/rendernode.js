@@ -19,11 +19,13 @@ var RenderNode = function (type, scene, pageEntry, opt) {
     this.page = pageEntry.page;
     this.offset = pageEntry.offset;
     this.entrySize = pageEntry.size;
-    this.localVisible = visible;
-    this.visible = visible;
     this.transformDirty = true;
     this.children = [];
     this.setParent(opt.parent || scene.rootNode);
+    // The global visibility depends on visibility of parents
+    this.visible = undefined;
+    // and will be evaluated by setLocalVisible
+    this.setLocalVisible(visible);
 };
 
 XML3D.extend(RenderNode.prototype, {
@@ -38,11 +40,15 @@ XML3D.extend(RenderNode.prototype, {
 
     setParent: function (parent) {
         this.parent = parent;
-        this.setLocalVisible(this.localVisible);
         if (parent && parent.addChild) {
             parent.addChild(this);
         }
-    }, traverse: function (callback) {
+        // Reevaluate visibility, which might change due to
+        // invisibility of parent
+        this.setLocalVisible(this.localVisible);
+    },
+
+    traverse: function (callback) {
         callback(this);
         this.children.forEach(function (child) {
             child.traverse(callback);
@@ -89,8 +95,9 @@ XML3D.extend(RenderNode.prototype, {
         if (this.localVisible === false) {
             downstream = false;
         }
-        if (this.visible == downstream)
-            return;
+        if (this.visible === downstream) {
+            return
+        }
         this.visible = downstream;
         this.children.forEach(function (obj) {
             obj.setVisible(downstream);

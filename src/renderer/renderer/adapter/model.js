@@ -27,7 +27,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         });
         this.renderNode.setLocalMatrix(c_IDENTITY);
         this.createModelRenderNodes();
-    }, clearModelRenderNodes: function () {
+    },
+
+    clearModelRenderNodes: function () {
         var i = this.postTransformXflowRequests.length;
         while (i--) {
             this.postTransformXflowRequests[i].clear();
@@ -115,7 +117,7 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
     if (dataTreeNode.postTransformXflowNode) {
         var request = new Xflow.ComputeRequest(dataTreeNode.postTransformXflowNode, ["transform"], adapter._bindedRequestCallback);
         parentNode = adapter.getScene().createRenderGroup({
-            parent: parentNode, shaderHandle: undefined, visible: undefined, name: undefined
+            parent: parentNode, shaderHandle: undefined, visible: true, name: undefined
         });
         adapter.postTransformXflowRequests.push(request);
         adapter.postTransformRenderGroups.push(parentNode);
@@ -125,7 +127,7 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
     var groupNode = adapter.getScene().createRenderGroup({
         parent: parentNode,
         shaderHandle: adapter.getSubShaderHandle(dataTreeNode.shader),
-        visible: undefined,
+        visible: true,
         name: adapter.node.id
     });
     groupNode.setLocalMatrix(dataTreeNode.transform || c_IDENTITY);
@@ -141,7 +143,7 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
             },
             shaderHandle: adapter.getSubShaderHandle(meshSets[i].shader),
             name: adapter.node.id,
-            visible: !adapter.node.visible ? false : undefined
+            visible: true
         });
         renderNode.setLocalMatrix(meshSets[i].transform || c_IDENTITY);
     }
@@ -169,7 +171,7 @@ XML3D.extend(ModelRenderAdapter.prototype, {
     },
 
     /**
-     * @return {window.XML3DMatrix}
+     * @return {Window.XML3DMatrix}
      */
     getWorldMatrix: function () {
         var m = new window.XML3DMatrix(), obj = this.renderNode;

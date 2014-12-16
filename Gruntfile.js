@@ -7,7 +7,7 @@ exports = module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
         version: {
-            number: "<%= pkg.version %>",
+            number: "", // not defined for development snapshots
             dev: 'DEVELOPMENT SNAPSHOT (<%= grunt.template.today("dd.mm.yyyy HH:MM:ss Z") %>)'
         },
          dirs: {
@@ -20,10 +20,25 @@ exports = module.exports = function (grunt) {
         docDir: "doc/",
         buildDir: "build/output",
 
-        releaseName: "<%= buildDir %>/<%= pkg.name %>",
+        moduleFiles: [
+                    "LICENSE",
+                    "src/xml3d.js",
+                    "<%= dirs.modules %>/xml3d-utils-module.js",
+                    "<%= dirs.modules %>/xml3d-contrib-module.js",
+                    "<%= dirs.modules %>/xml3d-math-module.js",
+                    "<%= dirs.modules %>/xml3d-types-module.js",
+                    "<%= dirs.modules %>/xml3d-base-module.js",
+                    "<%= dirs.modules %>/xml3d-interface-module.js",
+                    "<%= dirs.modules %>/xml3d-xflow-module.js",
+                    "<%= dirs.modules %>/xml3d-asset-module.js",
+                    "<%= dirs.modules %>/xml3d-data-module.js",
+                    "<%= dirs.modules %>/xml3d-renderer-module.js"
+                ],
+
+        releaseName: "<%= buildDir %>/xml3d<%= version.number %>.js",
 
         clean: {
-            release: ["<%= releaseName %>"],
+            output: ["<%= buildDir %>"],
             debug: ["<%= pkg.name %>"],
             doc: ["<%= docDir %>"]
         },
@@ -39,20 +54,7 @@ exports = module.exports = function (grunt) {
                 }
             },
             dist: {
-                src: [
-                    "LICENSE",
-                    "src/xml3d.js",
-                    "<%= dirs.modules %>/xml3d-utils-module.js",
-                    "<%= dirs.modules %>/xml3d-contrib-module.js",
-                    "<%= dirs.modules %>/xml3d-math-module.js",
-                    "<%= dirs.modules %>/xml3d-types-module.js",
-                    "<%= dirs.modules %>/xml3d-base-module.js",
-                    "<%= dirs.modules %>/xml3d-interface-module.js",
-                    "<%= dirs.modules %>/xml3d-xflow-module.js",
-                    "<%= dirs.modules %>/xml3d-asset-module.js",
-                    "<%= dirs.modules %>/xml3d-data-module.js",
-                    "<%= dirs.modules %>/xml3d-renderer-module.js"
-                ],
+                src: '<%= moduleFiles %>',
                 dest: '<%= releaseName %>',
                 nonull: true
             }
@@ -62,7 +64,7 @@ exports = module.exports = function (grunt) {
             frontend: {
                 closurePath: './build/closure',
                 js: '<%= releaseName %>',
-                jsOutputFile: "<%= buildDir %>/xml3d-min.js",
+                jsOutputFile: "<%= buildDir %>/xml3d<%= version.number %>-min.js",
                 maxBuffer: 500,
                 options: {
                     //compilation_level: 'ADVANCED_OPTIMIZATIONS', language_in: 'ECMASCRIPT5_STRICT'
@@ -116,6 +118,16 @@ exports = module.exports = function (grunt) {
         });
     });
 
+    var shouldPublish = grunt.option('publish');
+    if (shouldPublish) {
+        console.log("Here")
+        grunt.config.merge({
+            version: {
+                number: "-<%= pkg.version %>",
+                dev: "<%= pkg.version %>"
+            }
+        })
+    }
 
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-contrib-concat");
@@ -132,8 +144,10 @@ exports = module.exports = function (grunt) {
     grunt.registerTask("default", ["dev"]);
     grunt.registerTask("testserver", ["connect:server:keepalive"]);
 
-    //grunt.registerTask("dev", ["browserify:debug"]);
-    //grunt.registerTask("test", ["mochaTest:test"]);
-
-    //grunt.registerTask("prepublish", ["clean", "test", "build"]);
+    grunt.registerTask('prepublish', 'Run all my build tasks.', function(n) {
+        if (!grunt.option('publish')) { // Be sure to specify the target
+            grunt.warn('Set publish flag to continue.');
+        }
+        grunt.task.run("clean:output", "merge", "closure-compiler");
+    });
 };

@@ -4,6 +4,7 @@ var RenderView = require("./renderview.js");
 var RenderGroup = require("./rendergroup.js");
 var RenderLight = require("./renderlight.js");
 var MaterialConfiguration = require("./material-configuration");
+var LightManager = require("../lights/light-manager.js")
 var C = require("./constants.js");
 
 /**
@@ -15,11 +16,7 @@ var Scene = function () {
     Pager.call(this);
 
     this.boundingBox = new XML3D.math.bbox.create();
-    this.lights = {
-        queue: [], point: [], directional: [], spot: [], length: function () {
-            return this.point.length + this.directional.length + this.spot.length;
-        }
-    };
+    this.lights = new LightManager();
 
     /** @type RenderView */
     this.activeView = null;

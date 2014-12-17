@@ -145,12 +145,10 @@ XML3D.shaders.register("diffuse", {
     ].join("\n"),
 
     addDirectives: function(directives, lights, params) {
-        var pointLights = lights.point ? lights.point.length : 0;
-        var directionalLights = lights.directional ? lights.directional.length : 0;
-        var spotLights = lights.spot ? lights.spot.length : 0;
-        directives.push("MAX_POINTLIGHTS " + pointLights);
-        directives.push("MAX_DIRECTIONALLIGHTS " + directionalLights);
-        directives.push("MAX_SPOTLIGHTS " + spotLights);
+        ["point", "directional", "spot"].forEach(function (type) {
+            var numLights = lights.getModelCount(type);
+            directives.push("MAX_" + type.toUpperCase() + "LIGHTS " + numLights);
+        });
         directives.push("HAS_DIFFUSETEXTURE " + ('diffuseTexture' in params ? "1" : "0"));
         directives.push("HAS_EMISSIVETEXTURE " + ('emissiveTexture' in params ? "1" : "0"));
     },

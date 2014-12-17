@@ -45,7 +45,7 @@ LightRenderAdapter.prototype.notifyChanged = function (evt) {
             this.valueModified(evt.mutation);
             break;
         case XML3D.events.ADAPTER_VALUE_CHANGED:
-            this.renderNode.setLightType(evt.adapter.getLightType());
+            this.renderNode.setLightType(evt.adapter.getLightType(), evt.adapter.getDataNode());
     }
 };
 

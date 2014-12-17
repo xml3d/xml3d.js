@@ -43,7 +43,9 @@ XML3D.extend(ForwardRenderTree.prototype, {
             }
         }
         this.reassignLightPasses(evt.target);
-    }, onLightValueChange: function (evt) {
+    },
+
+    onLightValueChange: function (evt) {
         var renderLight = evt.light;
         // TODO: Would be great to check of the light position or orientation specifically changed
         // We don't need to invalidate the lightPass otherwise
@@ -64,7 +66,8 @@ XML3D.extend(ForwardRenderTree.prototype, {
             }
         }
     }, onSceneShapeChange: function (evt) {
-        var scene = evt.target, i;
+
+        /*var scene = evt.target, i;
         for (i = 0; i < scene.lights.spot.length; i++) {
             var spotLight = scene.lights.spot[i];
             if (spotLight.castShadow && spotLight.visible)
@@ -79,7 +82,7 @@ XML3D.extend(ForwardRenderTree.prototype, {
             var pointLight = scene.lights.point[i];
             if (pointLight.castShadow && pointLight.visible)
                 pointLight.userData && pointLight.userData.setProcessed(false);
-        }
+        } */
     }, onShaderChange: function (evt) {
         this.reassignLightPasses(evt.target);
     },
@@ -119,7 +122,7 @@ XML3D.extend(ForwardRenderTree.prototype, {
     reassignLightPasses: function (scene) {
         var i;
 
-        this.mainPass.clearLightPasses();
+       /* this.mainPass.clearLightPasses();
         for (i = 0; i < scene.lights.spot.length; i++) {
             var spotLight = scene.lights.spot[i];
             if (spotLight.userData) {
@@ -143,7 +146,8 @@ XML3D.extend(ForwardRenderTree.prototype, {
                 if (!pointLight.castShadow || !pointLight.visible)
                     pointLight.userData.setProcessed(true);
             }
-        }
+        }*/
+
     },
 
     createMainPass: function () {

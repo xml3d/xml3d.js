@@ -61,6 +61,14 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
+4.8 -
+* Recursive Assets - [demo](http://xml3d.github.io/xml3d-examples/examples/recursiveAsset/recursive.html), [doc](https://github.com/xml3d/xml3d.js/wiki/Assets-and-Model), [issue](https://github.com/xml3d/xml3d.js/issues/76)
+* Load Events - [doc](https://github.com/xml3d/xml3d.js/wiki/Events#load)
+* [iOS 8 Support](https://github.com/xml3d/xml3d.js/issues/75)
+* New build system based on [grunt](http://gruntjs.com/)
+* Improved texture filtering - [doc](https://github.com/xml3d/xml3d.js/wiki/Textures)
+* Issues: [9](https://github.com/xml3d/xml3d.js/issues/9), [46](https://github.com/xml3d/xml3d.js/issues/46), [56](https://github.com/xml3d/xml3d.js/issues/56), [74](https://github.com/xml3d/xml3d.js/issues/74), [75](https://github.com/xml3d/xml3d.js/issues/75), [76](https://github.com/xml3d/xml3d.js/issues/76), [77](https://github.com/xml3d/xml3d.js/issues/77), [79](https://github.com/xml3d/xml3d.js/issues/79), [82](https://github.com/xml3d/xml3d.js/issues/82)
+
 4.7 - 17.10.2014
 * Assets / Configurable Instances - [demo](http://xml3d.github.io/xml3d-examples/examples/assets/assets.html), [slides](http://xml3d.org/xml3d/slides/web3d-instancing/)
 * [shade.js](http://xml3d.org/xml3d/papers/shade.js/) integration (beta) - [demo](http://xml3d.github.io/xml3d-examples/examples/shade-tv/index.html), [slides](http://xml3d.org/xml3d/slides/pg-shade.js/)

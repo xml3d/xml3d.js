@@ -277,7 +277,7 @@
             var dataResult = this.typeRequest.getResult();
 
             var entry = dataResult.getOutputData("vertexCount");
-            this.mesh.setVertexCount(entry && entry.getValue() ? entry.getValue()[0] : null);
+            this.mesh.setVertexCount(entry ? entry.getValue() :  null);
             this.typeDataValid = true;
         },
         /**

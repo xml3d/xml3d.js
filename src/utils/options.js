@@ -100,6 +100,6 @@
         });
     }
 
-    ns.options = GlobalOptions;
+    ns.exports = GlobalOptions;
 
-}(XML3D));
+}(module));

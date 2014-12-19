@@ -1,0 +1,53 @@
+<XflowTest>
+    <Input>
+        <data id="texturesCL">
+            <texture name="input">
+                <img src="textures/white.png" style="display:none;"/>
+            </texture>
+            <texture name="ref" id="reference_CL">
+                <img src="textures/black.png" style="display:none;"/>
+            </texture>
+        </data>
+
+        <dataflow id="emptyPlatform1_CL" out="output">
+            <int name="threshold">0</int>
+            <data src="#texturesCL" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+
+        <dataflow id="emptyPlatform2_CL" out="output" platform="">
+            <int name="threshold">0</int>
+            <data src="#texturesCL" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+
+        <dataflow id="illegalPlatform_CL" out="output" platform="thePlatform">
+            <int name="threshold">0</int>
+            <data src="#texturesCL" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+    </Input>
+
+    <TestProcess>
+        <Check title="Check empty platform attribute 1" data="#emptyPlatform1_CL">
+            <MatchTexture name="output" reference="#reference_CL"/>
+        </Check>
+
+        <Check title="Check empty platform attribute 2" data="#emptyPlatform2_CL">
+            <MatchTexture name="output" reference="#reference_CL"/>
+        </Check>
+
+        <Check title="Check illegal platform attribute" data="#illegalPlatform_CL">
+            <MatchTexture name="output" reference="#reference_CL"/>
+        </Check>
+    </TestProcess>
+</XflowTest>

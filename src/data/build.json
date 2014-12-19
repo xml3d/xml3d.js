@@ -1,0 +1,15 @@
+{
+  "module": "data",
+  "files": [
+    "./base.js",
+    "./adapter/data.js",
+    "./adapter/asset.js",
+    "./adapter/values.js",
+    "./adapter/texture.js",
+    "./adapter/transform.js",
+    "./adapter/misc.js",
+    "./adapter/factory.js",
+    "./adapter/json/factory.js",
+    "./adapter/binary/factory.js"
+  ]
+}

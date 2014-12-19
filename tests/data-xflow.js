@@ -15,6 +15,7 @@ module("Xflow tests", {
             that.win = document.getElementById("xml3dframe").contentWindow;
             start();
         };
+
         loadDocument("scenes/data-xflow.html", this.cb);
     },
     teardown : function() {
@@ -49,6 +50,7 @@ module("Xflow tests", {
         var resManager = win.XML3D.base.resourceManager;
         var resType = win.XML3D.data;
         this.getDataAdapter = function(node){
+            win.XML3D._flushDOMChanges();
             return resManager.getAdapter(node, resType);
         }
 
@@ -246,6 +248,7 @@ module("Xflow tests", {
     },
 
     Check : function(testNode) {
+        this.win.XML3D._flushDOMChanges();
         var dataNodeId = testNode.getAttribute("data").substring(1);
         var dataElement = this.doc.getElementById(dataNodeId);
         var title =  testNode.getAttribute("title") || "No Title";
@@ -281,6 +284,49 @@ module("Xflow tests", {
         }
 
         equal(actualData, shouldMatchData, title + "=> " + shouldMatchName+" in "+have.id+" matches reference data");
+    },
+
+    MatchTexture: function (have, action, title) {
+        stop();
+
+        var shouldMatchName = action.getAttribute("reference").substring(1);
+        var shouldMatchElement = this.doc.getElementById(shouldMatchName);
+        var shouldMatchData = this.getXflowData(shouldMatchElement);
+        var property = action.getAttribute("name");
+
+        var dataAdapter = have._configured.adapters;
+        dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
+
+        function executeTest() {
+            var shouldMatchTexture = shouldMatchData.getValue().data;
+            var adapterOutputs = dataAdapter.getComputeRequest().getResult();
+            var dataOutput = adapterOutputs.getOutputData(property);
+            var actualData;
+
+            if (!dataOutput) {
+                ok(false, title + "=> " + shouldMatchName + " in " + have.id + " matches reference data");
+                start();
+                return;
+            }
+
+            actualData = dataOutput.getValue().data;
+            dataAdapter.xflowDataNode._getChannelNode().clear();
+
+            QUnit.closeArray(actualData, shouldMatchTexture, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
+            start();
+        }
+
+        if (shouldMatchData.isLoading()) {
+            var loadCheck = function (handle, notfication) {
+                if (notfication === Xflow.DATA_ENTRY_STATE.LOAD_END || !shouldMatchData.isLoading()) {
+                    shouldMatchData.removeListener(loadCheck);
+                    executeTest();
+                }
+            }
+            shouldMatchData.addListener(loadCheck);
+        } else {
+            executeTest();
+        }
     },
 
     MatchNull : function (have, action, title) {
@@ -501,6 +547,51 @@ test("Operator - Later Input", function() {
     this.executeTests(response);
 });
 
+test("Operator - Platform fallback - JS", function() {
+    var xflowGraph = XML3D.data.xflowGraph;
+
+    if (xflowGraph.platform !== Xflow.PLATFORM.JAVASCRIPT) {
+        console.log("Operator - Platform fallback - JS tests were not executed because Xflow platform is not JavaScript.");
+        return true;
+    }
+
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_js.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operator - Platform fallback - WebCL", function () {
+    var xflowGraph = XML3D.data.xflowGraph;
+
+    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+        console.log("Operator - Platform fallback - WebCL tests were not executed because WebCL platform is not available.");
+        return true;
+    }
+
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_cl.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operator - Platform attribute - JS", function () {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_platform_js.xml", handler);
+    this.executeTests(response);
+});
+
+test("Operator - Platform attribute - WebCL", function () {
+    var xflowGraph = XML3D.data.xflowGraph;
+
+    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+        console.log("Operator - Platform - WebCL tests were not executed because WebCL platform is not available.");
+        return true;
+    }
+
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/basic/test_platform_cl.xml", handler);
+    this.executeTests(response);
+});
+
 test("Operators - Simple", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/simple_script/test_script_simple.xml", handler);
@@ -624,6 +715,18 @@ test("GLSL with Uniforms", function() {
 test("GLSL with Processing on Uniforms", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_uniform_processing.xml", handler);
+    this.executeTests(response);
+});
+
+test("WebCL Image Processing", function () {
+    var xflowGraph = XML3D.data.xflowGraph;
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var response = this.loadTestXML("./xflow-xml/webcl_output/test_webcl_image_processing.xml", handler);
+
+    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+        console.log("WebCL Image Processing tests could not be executed because WebCL platform is not available");
+        return true;
+    }
     this.executeTests(response);
 });
 

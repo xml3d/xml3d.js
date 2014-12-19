@@ -22,8 +22,14 @@ XML3D.config.element = function(element, selfmonitoring) {
                     : new XML3D.ElementHandler(element,selfmonitoring);
             element._configured.registerAttributes(classInfo);
             // Fix difference in Firefox (undefined) and Chrome (null)
-            if (element.style == undefined)
-                element.style = null;
+            try{
+                if (element.style == undefined)
+                    element.style = null;
+            }
+            catch(e){
+                // Firefox throws exception here...
+            }
+
             var n = element.firstElementChild;
 
             XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.getAttribute("id"));

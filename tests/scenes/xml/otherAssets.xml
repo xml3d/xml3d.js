@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
+    <asset id="indirect" src="assets.xml#indirectData" />
+</xml3d>

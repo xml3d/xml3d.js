@@ -10,9 +10,7 @@ XML3D.webgl.MAX_MESH_INDEX_COUNT = 65535;
      * @constructor
      */
     var MeshRenderAdapter = function (factory, node) {
-        webgl.TransformableAdapter.call(this, factory, node, true);
-
-        this.initializeEventAttributes();
+        webgl.TransformableAdapter.call(this, factory, node, true, true);
         this.createRenderNode();
     };
 

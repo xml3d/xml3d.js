@@ -114,7 +114,7 @@ test("Reference interface tests", function() {
     equal(e.activeView, "#myView", "Value set via setAttribute to 123.");
 });
 
-test("Float interface tests", function() {
+test("Float interface tests (XHTML: Case sensitive)", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "view");
 
     // Set via interface
@@ -138,6 +138,32 @@ test("Float interface tests", function() {
         equal(e.getAttribute("fieldOfView"), "asdf", "attribute value invalid");
         QUnit.close(e.fieldOfView, 0.785398, EPSILON, "Invalid value set via setAttribute. Back to default: 0.785398.");
     });
+
+test("Float interface tests (HTML: Case insensitive)", function() {
+        var e = document.createElement("view");
+
+        // Set via interface
+        QUnit.close(e.fieldOfView, 0.785398, EPSILON, "view.fieldOfView is 0.785398 initially.");
+        e.fieldOfView = 0.87;
+        QUnit.close(e.fieldOfView, 0.87, EPSILON, "view.fieldOfView = 0.87.");
+        equal(e.getAttribute("fieldOfView"), "0.87", "getAttribute = '0.87'.");
+        e.fieldOfView = true;
+        QUnit.close(e.fieldOfView, 1, EPSILON, "view.fieldOfView = 1.");
+
+        // Set via attribute
+        e.setAttribute("fieldOfView", "0.5");
+        QUnit.close(e.fieldOfView, 0.5, EPSILON, "Value set via setAttribute to 0.5.");
+        equal(e.getAttribute("fieldOfView"), "0.5", "Value set via setAttribute to 0.5.");
+
+        e.setAttribute("fieldofview", 0.6);
+        QUnit.close(e.fieldOfView, 0.6, EPSILON, "Value set via setAttribute to 0.6.");
+        equal(e.getAttribute("fieldOfView"), "0.6", "Value set via setAttribute to 0.6.");
+
+        e.setAttribute("fieldOfView", "asdf");
+        equal(e.getAttribute("fieldOfView"), "asdf", "attribute value invalid");
+        QUnit.close(e.fieldOfView, 0.785398, EPSILON, "Invalid value set via setAttribute. Back to default: 0.785398.");
+    });
+
 
 test("Boolean interface tests", function() {
     // Close to behavior of HTMLInputElement::disabled
@@ -198,7 +224,7 @@ test("XML3DVec interface tests", function() {
 
     // Set via interface
         QUnit.closeVector(e.scale, new XML3DVec3(1, 1, 1), EPSILON, "transform.scale is '1 1 1' initially.");
-        raises(function() {
+        throws(function() {
             e.scale = new XML3DVec3();
         }, "XML3DVec properties are readonly");
         QUnit.closeVector(e.scale, new XML3DVec3(1, 1, 1), EPSILON, "transform.scale not changed after set");
@@ -224,7 +250,7 @@ test("XML3DRotation interface tests", function() {
     // Set via interface
         QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1), 0), EPSILON,
                 "texture.type is '0 0 1 0' initially.");
-        raises(function() {
+        throws(function() {
             e.rotation = new XML3DRotation();
         }, "XML3DRotation properties are readonly");
         QUnit.closeRotation(e.rotation, new XML3DRotation(new XML3DVec3(0, 0, 1), 0), EPSILON,

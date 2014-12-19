@@ -72,7 +72,9 @@ QUnit.extend( QUnit, {
         QUnit.push(passes, actual, expected, message);
     },
 
-    closeArray : function(actual, expected, maxDifference, message) {
+    closeArray : function(actual, expected, maxDifference, message, isImage) {
+
+        isImage = isImage == undefined ? false : true;
 
         if(!actual || actual.length != expected.length){
             QUnit.push(false, actual, expected, message);
@@ -82,7 +84,11 @@ QUnit.extend( QUnit, {
         for (var i=0; i<actual.length; i++) {
             var diff = Math.abs(actual[i] - expected[i]);
             if (isNaN(diff)  || diff > maxDifference) {
-                QUnit.push(false, actual, expected, message);
+                if(isImage) {
+                    QUnit.push(false, actual.length, expected.length, message);
+                } else {
+                    QUnit.push(false, actual, expected, message);
+                }
                 return;
             }
         }
@@ -147,6 +153,8 @@ var loadDocument = function(url, f) {
 };
 
 var EPSILON = 0.0001;
+var PIXEL_EPSILON = 1;
+
 QUnit.config.testTimeout = 5000;
 XML3DUnit = {};
 
@@ -182,6 +190,15 @@ XML3DUnit.getRendererString = function() {
     }
     return result;
 };
+
+XML3DUnit.readScenePixels = function(xml3dElement) {
+    var context = getContextForXml3DElement(xml3dElement);
+    var canvas = context.canvas;
+
+    var scenePixels = new Uint8Array(canvas.width*canvas.height*4);
+    context.readPixels(0, 0, canvas.width, canvas.height, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, scenePixels);
+    return scenePixels;
+}
 
 XML3DUnit.loadSceneTestImages = function(doc, refSceneId, testSceneId, callback){
     var xRef = doc.getElementById(refSceneId),

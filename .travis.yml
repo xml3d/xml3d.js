@@ -1,0 +1,12 @@
+language: node_js
+branches:
+  - grunt-build
+node_js:
+  - 0.10
+notifications:
+  email:
+    - xml3d-dev@graphics.cs.uni-sb.de
+
+before_install: npm install -g grunt-cli
+install: npm install
+before_script: grunt

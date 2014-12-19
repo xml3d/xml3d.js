@@ -136,6 +136,7 @@ module("Bounding Boxes", {
         var that = this;
         this.cb = function(e) {
             ok(true, "Scene loaded");
+            that.win = document.getElementById("xml3dframe").contentWindow;
             that.doc = document.getElementById("xml3dframe").contentDocument;
             that.xml3dElement = that.doc.getElementById("myXml3d");
             start();
@@ -202,7 +203,7 @@ test("Hidden groups", 5, function() {
 
 test("Dynamically added mesh", function() {
 
-    var mesh = XML3D.createElement("mesh");
+    var mesh = this.win.XML3D.createElement("mesh");
 
     ok(mesh.getBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
 
@@ -226,14 +227,14 @@ test("Dynamically added mesh", function() {
 
 test("Dynamically added group", function() {
 
-    var mesh = XML3D.createElement("mesh");
+    var mesh = this.win.XML3D.createElement("mesh");
 
     ok(mesh.getBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
 
     mesh.setAttribute("type", "triangles");
     mesh.setAttribute("src", "#mySimpleMesh");
 
-    var group = XML3D.createElement("group");
+    var group = this.win.XML3D.createElement("group");
     group.appendChild(mesh);
     this.xml3dElement.appendChild(group);
 

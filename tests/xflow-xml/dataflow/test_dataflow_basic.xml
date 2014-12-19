@@ -20,6 +20,7 @@
     </Input>
     <TestProcess>
 
+        <!--
 
         <Check title="Check template output" data="#template1">
             <MatchData name="A" type="float" >0.1</MatchData>
@@ -33,6 +34,7 @@
             <MatchData name="B" type="float" >1.2</MatchData>
             <MatchData name="C" type="float" >1.3</MatchData>
         </Check>
+        -->
 
         <Modification title="rename stuff" >
             <ChangeAttribute node="#tC1" attrName="param" remove="true" />

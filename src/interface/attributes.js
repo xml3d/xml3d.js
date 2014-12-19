@@ -13,15 +13,17 @@
         }
     }, handler = {}, events = XML3D.events;
 
+    function getStorage(elem){
+        return elem._configured.storage;
+    }
+
     var AttributeHandler = function(elem) {
-        this.setter = function(e) {
-        };
     };
 
-    handler.IDHandler = function(elem, id) {
-        this.setFromAttribute = function(value, prevValue) {
+    handler.IDHandler = function(id) {
+        this.setFromAttribute = function(value, prevValue, elem) {
             XML3D.base.resourceManager.notifyNodeIdChange(elem, prevValue, value);
-        }
+        };
         this.desc = {
             get : function() {
                 return this.getAttribute(id) || "";
@@ -32,7 +34,7 @@
         };
     };
 
-    handler.StringAttributeHandler = function(elem, id) {
+    handler.StringAttributeHandler = function(id) {
         this.desc = {
             get : function() {
                 return this.getAttribute(id) || "";
@@ -47,190 +49,264 @@
     handler.ReferenceHandler = handler.StringAttributeHandler;
 
 
-    handler.EnumAttributeHandler = function(elem, id, p) {
-        AttributeHandler.call(this, elem);
-        var current = p.d;
+    handler.EnumAttributeHandler = function(id, p) {
+        AttributeHandler.call(this);
 
-        this.setFromAttribute = function(v) {
+        this.init = function(elem, storage){
+            storage[id] = p.d;
+            if (elem.hasAttribute(id))
+                this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
+        };
+        this.setFromAttribute = function(v, prevValue, elem, storage) {
             var value = v.toLowerCase();
-            current = (value && p.e[value] !== undefined) ? p.e[value] : p.d;
+            storage[id] = (value && p.e[value] !== undefined) ? p.e[value] : p.d;
             return false;
         };
-        if (elem.hasAttribute(id))
-            this.setFromAttribute(elem.getAttribute(id));
-
         this.desc = {
             get : function() {
-                return p.e[current];
+                XML3D._flushDOMChanges();
+                var storage = getStorage(this);
+                return p.e[storage[id]];
             },
             set : function(v) {
                     // Attribute is set to whatever comes in
                 this.setAttribute(id, v);
+                var storage = getStorage(this);
                 var value = typeof v == 'string' ? v.toLowerCase() : undefined;
                 if (value && p.e[value] !== undefined)
-                    current = p.e[value];
+                    storage[id] = p.e[value];
                 else
-                    current = p.d;
+                    storage[id] = p.d;
             }
         };
     };
     handler.EnumAttributeHandler.prototype = new AttributeHandler();
     handler.EnumAttributeHandler.prototype.constructor = handler.EnumAttributeHandler;
 
-    handler.EventAttributeHandler = function(elem, id) {
-        AttributeHandler.call(this, elem);
-        var f = null;
-        this.setFromAttribute = function(value) {
-            f = null;
+    handler.EventAttributeHandler = function(id) {
+        AttributeHandler.call(this);
+        var eventType = id.substring(2);
+
+        this.init = function(elem, storage){
+            storage[id] = null;
+            if (elem.hasAttribute(id))
+                this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
+        };
+
+        this.setFromAttribute = function(value, prevValue, elem, storage) {
+            if(storage[id] != null)
+                elem.removeEventListener(eventType, storage[id]);
+            if(!value){
+                storage[id] = null;
+            }
+            else{
+                storage[id] = eval("crx = function " + id + "(event){\n  " + value + "\n}");
+                elem.addEventListener(eventType, storage[id], false);
+            }
             return false;
         };
         this.desc = {
             get : function() {
-                if (f)
-                    return f;
-                if (!this.hasAttribute(id) || f === undefined)
-                    return null;
-                return eval("crx = function onclick(event){\n  " + this.getAttribute(id) + "\n}");
+                XML3D._flushDOMChanges();
+                var storage = getStorage(this);
+                return storage[id];
             },
             set : function(value) {
-                f = (typeof value == 'function') ? value : undefined;
-                this._configured.notify( {
-                    attrName : id,
-                    relatedNode : elem
-                });
+                var storage = getStorage(this);
+                if(storage[id]) this.removeEventListener(eventType, storage[id]);
+                storage[id] = (typeof value == 'function') ? value : undefined;
+                if(storage[id]) this.addEventListener(eventType, storage[id], false);
+                return false;
             }
         };
     };
     handler.EventAttributeHandler.prototype = new AttributeHandler();
     handler.EventAttributeHandler.prototype.constructor = handler.EventAttributeHandler;
 
-    handler.IntAttributeHandler = function(elem, id, defaultValue) {
-        var current = defaultValue;
+    handler.IntAttributeHandler = function(id, defaultValue) {
 
-        this.setFromAttribute = function(value) {
+        this.init = function(elem, storage){
+            storage[id] = defaultValue;
+            if (elem.hasAttribute(id))
+                this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
+        };
+
+        this.setFromAttribute = function(value, prevValue, elem, storage) {
             var v = value.match(/^\d+/);
-            current = v ? +v[0] : defaultValue;
+            if (!v || isNaN(+v[0])) {
+                XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
+                elem.setAttribute(id, prevValue);
+                storage[id] = defaultValue;
+            } else {
+                storage[id] =  +v[0];
+            }
             if(elem._configured.canvas)
-                elem._configured.canvas[id] = current;
+                elem._configured.canvas[id] = storage[id];
             return false;
         };
-        if (elem.hasAttribute(id))
-            this.setFromAttribute(elem.getAttribute(id));
 
         this.desc = {
-            get : function() {
-                return current;
+            get : function(){
+                XML3D._flushDOMChanges();
+                var storage = getStorage(this);
+                return storage[id];
             },
             set : function(value) {
+                var storage = getStorage(this);
                 var v = +value;
-                current = isNaN(v) ? defaultValue : Math.floor(v);
-                this.setAttribute(id, current + '');
+                if (isNaN(v)) {
+                    XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
+                    storage[id] = defaultValue;
+                } else {
+                    storage[id] =  Math.floor(v);
+                }
+                this.setAttribute(id, storage[id] + '');
             }
         };
     };
     handler.IntAttributeHandler.prototype = new AttributeHandler();
     handler.IntAttributeHandler.prototype.constructor = handler.IntAttributeHandler;
 
-    handler.FloatAttributeHandler = function(elem, id, defaultValue) {
-        var current = defaultValue;
+    handler.FloatAttributeHandler = function(id, defaultValue) {
 
-        this.setFromAttribute = function(value) {
+        this.init = function(elem, storage){
+            storage[id] = defaultValue;
+            if (elem.hasAttribute(id))
+                this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
+        };
+
+        this.setFromAttribute = function(value, prevValue, elem, storage) {
             var v = +value;
-            current = isNaN(v) ? defaultValue : v;
-            return false;
-        };
-        if (elem.hasAttribute(id))
-            this.setFromAttribute(elem.getAttribute(id));
-
-        this.desc = {
-            get : function() {
-                return current;
-            },
-            set : function(value) {
-                var v = +value;
-                current = isNaN(v) ? defaultValue : v;
-                this.setAttribute(id, current + '');
-            }
-        };
-    };
-
-    handler.BoolAttributeHandler = function(elem, id, defaultValue) {
-        var current = defaultValue;
-
-        this.setFromAttribute = function(value) {
-            current = string2bool(value + '');
-            return false;
-        };
-        if (elem.hasAttribute(id))
-            this.setFromAttribute(elem.getAttribute(id));
-
-        this.desc = {
-            get : function() {
-                return current;
-            },
-            set : function(value) {
-                current = Boolean(value);
-                this.setAttribute(id, current + '');
-            }
-        };
-    };
-
-    handler.XML3DVec3AttributeHandler = function(elem, id, d) {
-        var v = null;
-        var that = this;
-        var changed = function(value) {
-            elem.setAttribute(id, value.x + " " + value.y + " " + value.z);
-        };
-
-        this.setFromAttribute = function(value) {
-            if (!v) {
-                v = new window.XML3DVec3(0, 0, 0, changed);
-            }
-            var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
-            if (!m) {
-                v._data.set(d);
+            if (isNaN(v)) {
+                XML3D.debug.logWarning("Invalid attribute value: " + value, elem);
+                elem.setAttribute(id, prevValue);
+                storage[id] = defaultValue;
             } else {
-                v._data[0] = m[1];
-                v._data[1] = m[2];
-                v._data[2] = m[3];
+                storage[id] =  v;
             }
             return false;
         };
 
         this.desc = {
             get : function() {
-                if (!v) {
-                    if (this.hasAttribute(id))
-                        that.setFromAttribute(this.getAttribute(id));
-                    else
-                        v = new window.XML3DVec3(d[0], d[1], d[2], changed);
-                }
-                return v;
+                XML3D._flushDOMChanges();
+                var storage = getStorage(this);
+                return storage[id];
             },
             set : function(value) {
-                throw Error("Can't set " + elem.nodeName + "::" + id + ": it's readonly");
+                var storage = getStorage(this);
+                var v = +value;
+                if (isNaN(v)) {
+                    XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
+                    storage[id] = defaultValue;
+                } else {
+                    storage[id] =  v;
+                }
+                this.setAttribute(id, storage[id] + '');
             }
         };
     };
 
-    handler.XML3DRotationAttributeHandler = function(elem, id, d) {
-        var v = null;
-        var that = this;
-        var changed = function(v) {
-            elem.setAttribute(id, v.axis.x + " " + v.axis.y + " " + v.axis.z + " " + v.angle);
+    handler.BoolAttributeHandler = function(id, defaultValue) {
+        this.init = function(elem, storage){
+            storage[id] = defaultValue;
+            if (elem.hasAttribute(id))
+                this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
+        };
+        this.setFromAttribute = function(value, prevValue, elem, storage) {
+            storage[id] = string2bool(value + '');
+            return false;
         };
 
-        this.setFromAttribute = function(value) {
-            if (!v) {
-                v = new window.XML3DRotation(null, null, changed);
+        this.desc = {
+            get : function() {
+                XML3D._flushDOMChanges();
+                var storage = getStorage(this);
+                return storage[id];
+            },
+            set : function(value) {
+                var storage = getStorage(this);
+                storage[id] = Boolean(value);
+                this.setAttribute(id, storage[id] + '');
             }
+        };
+    };
+
+    handler.XML3DVec3AttributeHandler = function(id, d) {
+        var that = this;
+
+        this.init = function(elem, storage){
+            storage[id] = null;
+        };
+
+        this.initVec3 = function(elem, storage, x, y, z){
+            var changed = function(value) {
+                elem.setAttribute(id, value.x + " " + value.y + " " + value.z);
+            };
+            storage[id] = new window.XML3DVec3(x, y, z, changed);
+        };
+
+        this.setFromAttribute = function(value, prevValue, elem, storage) {
+            if (!storage[id]) {
+                var initializing = true;
+                this.initVec3(elem, storage, 0, 0, 0);
+            }
+            var v = storage[id];
+            var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
+            if (!m || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3])) {
+                v._data.set(d);
+                !initializing && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
+            } else {
+                v._data[0] = +m[1];
+                v._data[1] = +m[2];
+                v._data[2] = +m[3];
+            }
+            return false;
+        };
+
+        this.desc = {
+            get : function() {
+                XML3D._flushDOMChanges();
+                var storage = getStorage(this);
+                if (!storage[id]) {
+                    that.setFromAttribute(this.getAttribute(id), null, this, storage);
+                }
+                return storage[id];
+            },
+            set : function(value) {
+                throw Error("Can't set " + this.nodeName + "::" + id + ": it's readonly");
+            }
+        };
+    };
+
+    handler.XML3DRotationAttributeHandler = function(id, d) {
+        var that = this;
+
+        this.init = function(elem, storage){
+            storage[id] = null;
+        };
+
+        this.initRotation = function(elem, storage){
+            var changed = function(v) {
+                elem.setAttribute(id, v.axis.x + " " + v.axis.y + " " + v.axis.z + " " + v.angle);
+            };
+            storage[id] = new window.XML3DRotation(null, null, changed);
+        };
+
+        this.setFromAttribute = function(value, prevValue, elem, storage) {
+            if (!storage[id]) {
+                var initializing = true;
+                this.initRotation(elem, storage);
+            }
+            var v = storage[id];
             var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
-            if (!m) {
+            if (!m  || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3]) || isNaN(+m[4])) {
                 v._axis._data[0] = d[0];
                 v._axis._data[1] = d[1];
                 v._axis._data[2] = d[2];
                 v._angle = d[3];
                 v._updateQuaternion();
+                !initializing && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
             } else {
                 v._axis._data[0] = +m[1];
                 v._axis._data[1] = +m[2];
@@ -243,34 +319,38 @@
 
         this.desc = {
             get : function() {
-                if (!v) {
-                    if (this.hasAttribute(id))
-                        that.setFromAttribute(this.getAttribute(id));
-                    else
-                        v = new window.XML3DRotation(new window.XML3DVec3(d[0], d[1], d[2]), d[3], changed);
+                XML3D._flushDOMChanges();
+                var storage = getStorage(this);
+                if (!storage[id]) {
+                    that.setFromAttribute(this.getAttribute(id), null, this, storage);
                 }
-                return v;
+                return storage[id];
             },
             set : function(value) {
-                throw Error("Can't set " + elem.nodeName + "::" + id + ": it's readonly");
+                throw Error("Can't set " + this.nodeName + "::" + id + ": it's readonly");
             }
         };
     };
 
-    var mixedContent = function(elem, ta, handler) {
-        elem._configured.registerMixed();
-        return {
+    var mixedContent = function(handler) {
+        handler.init = function(elem, storage){
+            elem._configured.registerMixed();
+        };
+        handler.desc = {
             get : function() {
-                if (!ta.value) {
-                    ta.value = handler.parse(elem);
+                XML3D._flushDOMChanges();
+                var storage = getStorage(this);
+                if (!storage.value) {
+                    storage.value = handler.parse(this);
                 }
-                return ta.value;
+                return storage.value;
             },
             set : function(value) {
                 // Throw error?
-            throw Error("Can't set " + elem.nodeName + "::value: it's readonly");
-        }
+                throw Error("Can't set " + this.nodeName + "::value: it's readonly");
+            }
         };
+        handler.resetValue = function(storage) { storage.value = null; };
     };
 
     var getContent = function(elem) {
@@ -283,10 +363,8 @@
         return str;
     };
 
-    handler.FloatArrayValueHandler = function(elem, id) {
-        var ta = {};
-        this.desc = mixedContent(elem, ta, this);
-        this.resetValue = function() { ta.value = null; };
+    handler.FloatArrayValueHandler = function(id) {
+        mixedContent(this);
     };
 
     handler.FloatArrayValueHandler.prototype.parse = function(elem) {
@@ -301,10 +379,8 @@
     handler.Float4ArrayValueHandler = handler.FloatArrayValueHandler;
     handler.Float4x4ArrayValueHandler = handler.FloatArrayValueHandler;
 
-    handler.IntArrayValueHandler = function(elem, id) {
-        var ta = {};
-        this.desc = mixedContent(elem, ta, this);
-        this.resetValue = function() { ta.value = null; };
+    handler.IntArrayValueHandler = function(id) {
+        mixedContent(this);
     };
     handler.IntArrayValueHandler.prototype.parse = function(elem) {
         var exp = /([+\-0-9]+)/g;
@@ -313,10 +389,8 @@
         return m ? new Int32Array(m) : new Int32Array();
     };
 
-    handler.BoolArrayValueHandler = function(elem, id) {
-        var ta = {};
-        this.desc = mixedContent(elem, ta, this);
-        this.resetValue = function() { ta.value = null; };
+    handler.BoolArrayValueHandler = function(id) {
+        mixedContent(this);
     };
     handler.BoolArrayValueHandler.prototype.parse = function(elem) {
         var exp = /(true|false|0|1)/ig;
@@ -328,38 +402,50 @@
         return m ? new Uint8Array(m) : new Uint8Array();
     };
 
-    handler.StringValueHandler = function(elem, id) {
-        var ta = {};
-        this.desc = mixedContent(elem, ta, this);
-        this.resetValue = function() { ta.value = null; };
+    handler.StringValueHandler = function(id) {
+        mixedContent(this);
     };
     handler.StringValueHandler.prototype.parse = function(elem) {
         return elem.textContent;
     };
 
-    handler.CanvasStyleHandler = function(e, id, d) {
-        var canvas = e._configured.canvas;
-        this.desc = {};
-        this.desc.get = function() { return canvas.style; };
-        this.desc.set = function(value) {};
-        this.setFromAttribute = function(value) {
-            canvas.setAttribute(id, value);
+    handler.CanvasStyleHandler = function(id, d) {
+
+        this.init = function(elem, storage){
+            if (elem.hasAttribute(id))
+                this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
         };
-        if (e.hasAttribute(id))
-            this.setFromAttribute(e.getAttribute(id));
+
+        this.setFromAttribute = function(value, prevValue, elem, storage) {
+            elem._configured.canvas.setAttribute(id, value);
+        };
+
+        this.desc = {
+            get: function() { return this._configured.canvas.style; },
+            set: function(value) {}
+        };
+
     };
 
-    handler.CanvasClassHandler = function(e, id) {
-        var canvas = e._configured.canvas;
-        canvas.className = "_xml3d"; // Class name always defined for xml3d canvas
-        this.desc = {};
-        this.desc.get = function() { return canvas.className; };
-        this.desc.set = function(value) { canvas.className = value; };
-        this.setFromAttribute = function(value) {
+    handler.CanvasClassHandler = function(id) {
+
+        this.init = function(elem, storage){
+            var canvas = elem._configured.canvas;
+            canvas.className = "_xml3d"; // Class name always defined for xml3d canvas
+            if (elem.hasAttribute(id))
+                this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
+        };
+
+        this.setFromAttribute = function(value, prevValue, elem, storage) {
+            var canvas = elem._configured.canvas;
             canvas.setAttribute(id, value + " _xml3d");
         };
-        if (e.hasAttribute(id))
-            this.setFromAttribute(e.getAttribute(id));
+
+        this.desc = {
+            // TODO: Should we not strip the _xml3d class here?
+            get: function() { return this._configured.canvas.className; },
+            set: function(value) { this._configured.canvas.className = value; }
+        };
     };
 
     // Export to xml3d namespace

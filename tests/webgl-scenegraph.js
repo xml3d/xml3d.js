@@ -4,6 +4,7 @@ module("WebGL Scenegraph", {
         var that = this;
         this.cb = function(e) {
             ok(true, "Scene loaded");
+            that.win = document.getElementById("xml3dframe").contentWindow;
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
@@ -24,6 +25,8 @@ module("WebGL Scenegraph", {
 });
 
 function getWebGLAdapter(x) {
+    var window = x.ownerDocument.defaultView ?x.ownerDocument.defaultView : x.ownerDocument.parentWindow;
+    window.XML3D._flushDOMChanges();
     if(x._configured){
         for(var i in x._configured.adapters){
             if(i.indexOf("webgl") == 0){
@@ -97,6 +100,7 @@ test("Change visibility via script", 9, function() {
     };
     stop();
     this.doc.getElementById("myGroup").visible = true;
+    this.win.XML3D._flushDOMChanges();
     ok(renderer.needsRedraw(), "Redraw required");
 });
 
@@ -121,10 +125,11 @@ test("Add children in invisible group", 8, function() {
         deepEqual(actual, [0,0,0,0], "Transparent at 40,40");
     };
     stop();
-    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
     mesh.setAttribute("src", "#meshdata");
 
     this.doc.getElementById("myEmptyGroup").appendChild(mesh);
+    this.win.XML3D._flushDOMChanges();
     ok(h.renderer.needsDraw, "Redraw required");
 });
 
@@ -145,6 +150,7 @@ test("Change active view via script", 8, function() {
     QUnit.closeMatrix(v.getViewMatrix(), new XML3DMatrix().translate(0,0,-3), EPSILON, "Check view matrix"); // 4
 
     x.activeView = "#viewOrientationTest";
+    this.win.XML3D._flushDOMChanges();
     equal(x.activeView, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
     ok(h.renderer.needsDraw, "Redraw required"); // 6, fails in < 920181
 });
@@ -246,7 +252,7 @@ test("Simple add/remove mesh", 12, function() {
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
 
-    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
     mesh.setAttribute("src", "#meshdata");
 
     // Add a mesh
@@ -277,6 +283,7 @@ test("Simple add/remove mesh", 12, function() {
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [re-add mesh]");
 
+
 });
 
 test("Simple add/remove group with mesh", 10, function() {
@@ -284,9 +291,9 @@ test("Simple add/remove group with mesh", 10, function() {
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
 
-    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
     mesh.setAttribute("src", "#meshdata");
-    var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
+    var group = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
     group.appendChild(mesh);
     //console.log(getWebGLAdapter(mesh).renderNode.is("NoLights"));
 
@@ -322,10 +329,10 @@ test("Simple add/remove transformed group with mesh", 17, function() {
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
     x.setAttribute("activeView", "#identView");
-    var mesh = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
     mesh.setAttribute("id", "addedMesh");
     mesh.setAttribute("src", "#meshdata");
-    var group = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
+    var group = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
     group.setAttribute("id", "addedGroup");
     group.setAttribute("transform", "#t_grouptransformed");
 
@@ -350,6 +357,7 @@ test("Simple add/remove transformed group with mesh", 17, function() {
     // Remove group
     var adapter = getWebGLAdapter(mesh);
     x.removeChild(group);
+    this.win.XML3D._flushDOMChanges();
     ok(!this.isRenderNodeInScene("addedMesh", scene), "Mesh not in scene");
     ok(!this.isRenderNodeInScene("addedGroup", scene), "Group not in scene");
 
@@ -363,6 +371,7 @@ test("Simple add/remove transformed group with mesh", 17, function() {
 
     // Re-add group
     x.appendChild(group);
+    this.win.XML3D._flushDOMChanges();
     ok(this.isRenderNodeInScene("addedMesh", scene), "Render node in scene");
     ok(this.isRenderNodeInScene("addedGroup", scene), "Group in scene");
     var renderNode = getWebGLAdapter(mesh).renderNode;
@@ -491,12 +500,13 @@ test("Add a mesh dynamically", 4, function() {
     var x = this.doc.getElementById("xml3DElem");
     var g = this.doc.getElementById("myGroup");
     var count = 0;
+    var doc = this.doc;
 
     x.addEventListener("framedrawn", function(n) {
             if (count == 0) {
                 equal(n.detail.count.objects, 1, "Initially one drawable object");
-                var group = document.createElementNS(XML3D.xml3dNS,"group");
-                var mesh = document.createElementNS(XML3D.xml3dNS,"mesh");
+                var group = doc.createElementNS(XML3D.xml3dNS,"group");
+                var mesh = doc.createElementNS(XML3D.xml3dNS,"mesh");
                 mesh.setAttribute('id',"new_mesh");
                 mesh.setAttribute('src',"#meshdata");
                 g.appendChild(group);

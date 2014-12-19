@@ -103,6 +103,8 @@ XML3D.classInfo['xml3d'] = {
     onkeypress : {a: XML3D.EventAttributeHandler},
     onkeydown : {a: XML3D.EventAttributeHandler},
     onkeyup : {a: XML3D.EventAttributeHandler},
+    onload: {a: XML3D.EventAttributeHandler},
+    complete: {p: XML3D.properties.xml3dComplete},
     height : {a: XML3D.IntAttributeHandler, params: 600},
     width : {a: XML3D.IntAttributeHandler, params: 800},
     createXML3DVec3 : {m: XML3D.methods.xml3dCreateXML3DVec3},
@@ -136,6 +138,10 @@ XML3D.classInfo['data'] = {
     compute: {a: XML3D.StringAttributeHandler},
     platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     filter: {a: XML3D.StringAttributeHandler},
+    onload: {a: XML3D.EventAttributeHandler},
+    onprogress: {a: XML3D.EventAttributeHandler},
+    complete: {p: XML3D.properties.XML3DNestedDataContainerTypeComplete},
+    progressLevel: {p: XML3D.properties.XML3DNestedDataContainerTypeProgressLevel},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
     getComputeInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetComputeInfo},
@@ -154,6 +160,10 @@ XML3D.classInfo['dataflow'] = {
     // TODO: Handle style for dataflow
     platform: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.PlatformTypes, d: 1}},
     out: {a: XML3D.StringAttributeHandler},
+    onload: {a: XML3D.EventAttributeHandler},
+    onprogress: {a: XML3D.EventAttributeHandler},
+    complete: {p: XML3D.properties.XML3DNestedDataContainerTypeComplete},
+    progressLevel: {p: XML3D.properties.XML3DNestedDataContainerTypeProgressLevel},
     getOutputNames: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
     getComputeInfo: {m: XML3D.methods.XML3DNestedDataContainerTypeGetComputeInfo},
@@ -168,9 +178,16 @@ XML3D.classInfo['dataflow'] = {
 XML3D.classInfo['asset'] = {
     id: {a: XML3D.IDHandler},
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    onload: {a: XML3D.EventAttributeHandler},
+    onprogress: {a: XML3D.EventAttributeHandler},
+    complete: {p: XML3D.properties.AssetComplete},
+    progressLevel: {p: XML3D.properties.AssetProgressLevel},
     // TODO: Handle style for data
     src: {a: XML3D.ReferenceHandler},
+    name: {a: XML3D.StringAttributeHandler},
     pick: {a: XML3D.StringAttributeHandler},
+    transform: {a: XML3D.ReferenceHandler},
+    shader: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
@@ -224,6 +241,10 @@ XML3D.classInfo['mesh'] = {
     onkeypress: {a: XML3D.EventAttributeHandler},
     onkeydown: {a: XML3D.EventAttributeHandler},
     onkeyup: {a: XML3D.EventAttributeHandler},
+    onload: {a: XML3D.EventAttributeHandler},
+    onprogress: {a: XML3D.EventAttributeHandler},
+    complete: {p: XML3D.properties.XML3DNestedDataContainerTypeComplete},
+    progressLevel: {p: XML3D.properties.XML3DNestedDataContainerTypeProgressLevel},
     visible: {a: XML3D.BoolAttributeHandler, params: true},
     type: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.MeshTypes, d: 0}},
     compute: {a: XML3D.StringAttributeHandler},
@@ -257,11 +278,17 @@ XML3D.classInfo['model'] = {
     onkeypress: {a: XML3D.EventAttributeHandler},
     onkeydown: {a: XML3D.EventAttributeHandler},
     onkeyup: {a: XML3D.EventAttributeHandler},
+    onload: {a: XML3D.EventAttributeHandler},
+    onprogress: {a: XML3D.EventAttributeHandler},onload: {a: XML3D.EventAttributeHandler},
+    complete: {p: XML3D.properties.AssetComplete},
+    progressLevel: {p: XML3D.properties.AssetProgressLevel},
     visible: {a: XML3D.BoolAttributeHandler, params: true},
     getWorldMatrix: {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
     getBoundingBox: {m: XML3D.methods.meshGetBoundingBox},
     src: {a: XML3D.ReferenceHandler},
     pick: {a: XML3D.StringAttributeHandler},
+    transform: {a: XML3D.ReferenceHandler},
+    shader: {a: XML3D.ReferenceHandler},
     _term: undefined
 };
 /**
@@ -285,6 +312,10 @@ XML3D.classInfo['shader'] = {
     id: {a: XML3D.IDHandler},
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for shader
+    onload: {a: XML3D.EventAttributeHandler},
+    onprogress: {a: XML3D.EventAttributeHandler},
+    complete: {p: XML3D.properties.XML3DNestedDataContainerTypeComplete},
+    progressLevel: {p: XML3D.properties.XML3DNestedDataContainerTypeProgressLevel},
     compute: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DShaderProviderTypeGetOutputNames},
     getOutputChannelInfo: {m: XML3D.methods.XML3DShaderProviderTypeGetOutputChannelInfo},
@@ -326,6 +357,10 @@ XML3D.classInfo['light'] = {
 XML3D.classInfo['lightshader'] = {
     id: {a: XML3D.IDHandler},
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    onload: {a: XML3D.EventAttributeHandler},
+    onprogress: {a: XML3D.EventAttributeHandler},
+    complete: {p: XML3D.properties.XML3DNestedDataContainerTypeComplete},
+    progressLevel: {p: XML3D.properties.XML3DNestedDataContainerTypeProgressLevel},
     // TODO: Handle style for lightshader
     compute: {a: XML3D.StringAttributeHandler},
     getOutputNames: {m: XML3D.methods.XML3DShaderProviderTypeGetOutputNames},
@@ -358,6 +393,7 @@ XML3D.classInfo['assetmesh'] = {
     className: {a: XML3D.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for data
     name: {a: XML3D.StringAttributeHandler},
+    match: {a: XML3D.StringAttributeHandler},
     type: {a: XML3D.EnumAttributeHandler, params: {e: XML3D.MeshTypes, d: 0}},
     compute: {a: XML3D.StringAttributeHandler},
     filter: {a: XML3D.StringAttributeHandler},

@@ -336,6 +336,10 @@ XML3D.Xml3dSceneController.prototype.mousePressEvent = function(event) {
     this.prevPos.x = ev.pageX;
     this.prevPos.y = ev.pageY;
 
+    if (this.action !== this.NO_MOUSE_ACTION) {
+        XML3D.options.setValue("renderer-mousemove-picking", false);
+    }
+
     this.stopEvent(event);
     return false;
 };
@@ -343,8 +347,9 @@ XML3D.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 XML3D.Xml3dSceneController.prototype.mouseReleaseEvent = function(event) {
     this.stopEvent(event);
 
-    //if (this.action == this.ROTATE && this.mouseSpeed > this.spinningSensitivity)
-    //    this.startSpinning();
+    if (this.action !== this.NO_MOUSE_ACTION) {
+        XML3D.options.setValue("renderer-mousemove-picking", true);
+    }
 
     this.action = this.NO_MOUSE_ACTION;
     return false;

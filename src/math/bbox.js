@@ -1,4 +1,4 @@
-(function (math) {
+(function (module) {
 
     /**
      * @class An axis aligned bounding box in the style of glMatrix
@@ -84,7 +84,7 @@
         target[1] = (b[1] + b[4]) * 0.5;
         target[2] = (b[2] + b[5]) * 0.5;
         return target;
-    }
+    };
 
     bbox.size = function (target, b) {
         target[0] = b[3] - b[0];
@@ -231,18 +231,17 @@
         out[4] = bb.max._data[1];
         out[5] = bb.max._data[2];
         return out;
-    }
+    };
 
     bbox.str = function (a) {
         return 'bbox(' + a[0] + ', ' + a[1] + ', ' + a[2] + ', ' + a[3] + ', ' +
             a[4] + ', ' + a[5] + ')';
     };
 
+    bbox.EMPTY_BOX = bbox.create();
 
-    math.bbox = bbox;
-    math.EMPTY_BOX = bbox.create();
+    module.exports = bbox;
 
 
-}(XML3D.math)
-    )
-;
+}(module));
+

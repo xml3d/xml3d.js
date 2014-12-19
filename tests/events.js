@@ -118,4 +118,31 @@ test("Mouseup Event", function() {
     trippleMouseEventCheck.call(this, 'mouseup');
 });
 
+module("Event tests", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.win = document.getElementById("xml3dframe").contentWindow;
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/unsupported-event.html", this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Unsupported Event", function() {
+    equal(this.win.callBackCounter, 2, "Unsupported event was received for 2 handlers");
+
+    var links = this.doc.querySelectorAll("a[href='http://www.xml3d.org']");
+    equal(links.length, 2, "There are two default error messages (with xml3d.org link)");
+    var customMessage = this.doc.querySelectorAll("div.darkness");
+    equal(customMessage.length, 1, "There is one custom error message");
+});
+
 }());

@@ -45,7 +45,9 @@
  * Workaround for DOMAttrModified issues in WebKit based browsers:
  * https://bugs.webkit.org/show_bug.cgi?id=8191
  */
-if (navigator.userAgent.indexOf("WebKit") != -1) {
+var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver);
+
+if (!MutationObserver && navigator.userAgent.indexOf("WebKit") != -1) {
     var attrModifiedWorks = false;
     var listener = function() {
         attrModifiedWorks = true;

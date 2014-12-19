@@ -1,0 +1,4 @@
+{
+  "module": "math",
+  "task": "browserify"
+}

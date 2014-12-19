@@ -30,12 +30,7 @@ window.requestAnimFrame = (function(){
             };
   })();
 
-(function() {
-
-    if(!XML3D.util)
-        XML3D.util = {};
-
-    var u = XML3D.util;
+(function(exports) {
 
     /**
      * Dispatch HTML event
@@ -43,15 +38,15 @@ window.requestAnimFrame = (function(){
      * @param {Object} target    element or document
      * @param {string} eventType standard event type e.g. load, click
      */
-    u.dispatchEvent = function(target, eventType) {
+    exports.dispatchEvent = function(target, eventType) {
         var evt = null;
         if (document.createEvent) {
             evt = document.createEvent("Events");
             evt.initEvent(eventType, true, true);
-            target.dispatchEvent(evt);
+            return target.dispatchEvent(evt);
         } else if (document.createEventObject) {
             evt = document.createEventObject();
-            target.fireEvent('on' + eventType, evt);
+            return target.fireEvent('on' + eventType, evt);
         }
     };
 
@@ -67,13 +62,13 @@ window.requestAnimFrame = (function(){
      * @param {Object} detail A user-defined object that can contain additional information about the event.
      *                        This parameter can be of any type, or null. This value is returned in the detail property of the event.
      */
-    u.dispatchCustomEvent = function(target, eventType, canBubble, cancelable, detail) {
+    exports.dispatchCustomEvent = function(target, eventType, canBubble, cancelable, detail) {
         var event = document.createEvent('CustomEvent');
         event.initCustomEvent(eventType, canBubble, cancelable, detail);
-        target.dispatchEvent(event);
+        return target.dispatchEvent(event);
     };
 
-    u.getStyle = function(oElm, strCssRule) {
+    exports.getStyle = function(oElm, strCssRule) {
         var strValue = "";
         if (document.defaultView && document.defaultView.getComputedStyle) {
             strValue = document.defaultView.getComputedStyle(oElm, "")
@@ -96,7 +91,7 @@ window.requestAnimFrame = (function(){
      *
      * @return {XPathResult} the result of the evaluation
      */
-    u.evaluateXPathExpr = function(xml3d, xpathExpr)
+    exports.evaluateXPathExpr = function(xml3d, xpathExpr)
     {
         return document.evaluate(
             xpathExpr, xml3d,
@@ -111,7 +106,7 @@ window.requestAnimFrame = (function(){
      * @param {!Object} xml3d
      * @return {Object} the active view element
      */
-    u.getOrCreateActiveView = function(xml3d)
+    exports.getOrCreateActiveView = function(xml3d)
     {
         // try to resolve reference
         var ref = xml3d.activeView;
@@ -156,4 +151,4 @@ window.requestAnimFrame = (function(){
 
         return v;
     };
-}());
+}(module.exports));

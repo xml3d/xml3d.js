@@ -1,0 +1,28 @@
+<XflowTest>
+    <Input>
+        <data id="texturesJS">
+            <texture name="input">
+                <img src="textures/white.png" style="display:none;"/>
+            </texture>
+            <texture name="ref" id="reference_JS">
+                <img src="textures/white.png" style="display:none;"/>
+            </texture>
+        </data>
+
+        <dataflow id="validPlatform_JS" out="output" platform="js">
+            <int name="threshold">0</int>
+
+            <data src="#texturesJS" />
+
+            <compute>
+                output = xflow.thresholdImage(input, threshold);
+            </compute>
+        </dataflow>
+    </Input>
+
+    <TestProcess>
+        <Check title="Check valid platform output" data="#validPlatform_JS">
+            <MatchTexture name="output" reference="#reference_JS"/>
+        </Check>
+    </TestProcess>
+</XflowTest>

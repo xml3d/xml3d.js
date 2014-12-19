@@ -32,6 +32,7 @@
     MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
     MESH_PARAMETERS[WebGLRenderingContext.LINES] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
     MESH_PARAMETERS[WebGLRenderingContext.POINTS] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
+    MESH_PARAMETERS[WebGLRenderingContext.TRIANGLE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
 
 
     /**
@@ -276,7 +277,7 @@
             var dataResult = this.typeRequest.getResult();
 
             var entry = dataResult.getOutputData("vertexCount");
-            this.mesh.setVertexCount(entry && entry.getValue() ? entry.getValue()[0] : null);
+            this.mesh.setVertexCount(entry ? entry.getValue() :  null);
             this.typeDataValid = true;
         },
         /**

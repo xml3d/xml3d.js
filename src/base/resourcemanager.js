@@ -60,7 +60,7 @@
 
     function notifyLoadCompleteListeners(counterObject) {
         var listeners = counterObject.listeners;
-        counterObject.listeners = new Array();
+        //counterObject.listeners = new Array();
         var i = listeners.length;
         while (i--) {
             listeners[i](this);
@@ -79,6 +79,11 @@
         }
     }
 
+    ResourceManager.prototype.isLoadComplete = function(canvasId) {
+        var counterObject = getCounterObject(canvasId);
+        return !counterObject || counterObject.counter == 0;
+    }
+
     /*
      * Register listener that will be fired when all resources for specified canvasId are loaded.
      * Listener is fired only once.
@@ -87,13 +92,14 @@
      * @param {EventListener} listener
      */
     ResourceManager.prototype.addLoadCompleteListener = function(canvasId, listener) {
-        var counterObject = getCounterObject(canvasId);
+        var counterObject = getOrCreateCounterObject(canvasId);
 
-        // when counter is 0 we can fire event immediately
+        /*
         if (counterObject === undefined || counterObject.counter == 0) {
             listener(canvasId);
             return;
         }
+        */
 
         var idx = counterObject.listeners.indexOf(listener);
         if (idx == -1) {
@@ -358,14 +364,15 @@
      * @param {string} url The complete url + fragment
      * @param {FormatHandler} formatHandler Format handler
      * @param {Object} data Data of the document corresponding to the url. Possibily a DOM element
+     * @param {boolean} localChange If true, then this is about a local id change. do not call loadComplete
      */
-    function updateMissingHandles(url, formatHandler, data) {
+    function updateMissingHandles(url, formatHandler, data, localChange) {
         for (var adapterType in c_cachedAdapterHandles[url]) {
             for (var canvasId in c_cachedAdapterHandles[url][adapterType]) {
                 var handle = c_cachedAdapterHandles[url][adapterType][canvasId];
                 if (!handle.hasAdapter()) {
                     updateHandle(handle, adapterType, canvasId, formatHandler, data);
-                    loadComplete(canvasId, url);
+                    if(!localChange) loadComplete(canvasId, url);
                 }
             }
         }
@@ -541,7 +548,7 @@
             clearHandles("#" + previousId);
         }
         if (newId) {
-            updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node);
+            updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node, true);
         }
     }
 
@@ -674,12 +681,12 @@
 
         var image = new Image();
         image.onload = function(e) {
-            loadComplete(0, uri);
             loadListener(e, image);
+            loadComplete(0, uri);
         };
         image.onerror = function(e) {
-            loadComplete(0, uri);
             errorListener(e, image);
+            loadComplete(0, uri);
         };
         if(!uri.hasSameOrigin(document.location.href)) {
             image.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
@@ -700,18 +707,16 @@
      *                            Listeners will be called with event as the first and video as the second parameter.
      * @return {HTMLVideoElement}
      */
-    ResourceManager.prototype.getVideo = function(uri, autoplay, listeners) {
+    ResourceManager.prototype.getVideo = function(uri, autoplay, loop, listeners) {
         // we use canvasId 0 to represent videos loaded in a document
         getOrCreateCounterObject(0).counter++;
 
+        // FIXME: Creating configured video, play/pause won't work
         var video = document.createElement("video");
 
         function loadCompleteCallback(event) {
             loadComplete(0, uri);
         }
-
-        video.addEventListener("canplay", loadCompleteCallback, true);
-        video.addEventListener("error", loadCompleteCallback, true);
 
         if (!uri.hasSameOrigin(document.location.href)) {
             video.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
@@ -719,6 +724,7 @@
         }
 
         video.autoplay = autoplay;
+        video.loop = loop;
 
         function createCallback(listener) {
             return function(event) {
@@ -730,9 +736,12 @@
             video.addEventListener(eventName, createCallback(listeners[eventName]), true);
         }
 
+        video.addEventListener("canplay", loadCompleteCallback, true);
+        video.addEventListener("error", loadCompleteCallback, true);
+
         video.src = uri.toString(); // here loading starts
         return video;
-    }
+    };
 
     XML3D.base.resourceManager = new ResourceManager();
 

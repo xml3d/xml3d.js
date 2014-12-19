@@ -1,0 +1,42 @@
+<!DOCTYPE html >
+<html>
+<head>
+<title>XML3D Basic Scene</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+<script>
+    var callBackCounter = 0;
+    // EVIL HACK:
+    XML3D.webgl.supported = function(){return false;}
+
+    function noSupportCallback1(){
+        callBackCounter++;
+    }
+
+    function noSupportCallback2(e){
+        callBackCounter++;
+        var replace = document.createElement("div");
+        replace.className = "darkness noparents";
+        replace.style.width = "400px";
+        replace.style.height = "200px";
+        replace.style.color = "#555";
+        replace.style.padding = "32px";
+        replace.style.backgroundColor = "black";
+        replace.innerHTML = "I only make error messages in black and maybe sometimes in very dark gray.";
+        e.target.parentNode.insertBefore(replace, e.target);
+        e.target.style.display = 'none';
+        e.preventDefault();
+    }
+</script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d1" width="400px" height="200px"></xml3d>
+
+  <xml3d id="myXml3d2" width="400px" height="200px" onunsupported="noSupportCallback1()"></xml3d>
+
+  <xml3d id="myXml3d3" width="400px" height="200px"></xml3d>
+  <script>
+      document.getElementById("myXml3d3").addEventListener('unsupported', noSupportCallback2);
+  </script>
+</body>
+</html>

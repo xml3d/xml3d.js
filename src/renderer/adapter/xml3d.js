@@ -2,7 +2,8 @@
 (function() {
     var XML3DRenderAdapter = function(factory, node) {
         XML3D.webgl.RenderAdapter.call(this, factory, node);
-        this.initializeEventAttributes(["load"]);
+        this.fireLoadEventAfterDraw = false;
+        this.firstLoadFired = false;
     };
     XML3D.createClass(XML3DRenderAdapter, XML3D.webgl.RenderAdapter);
 
@@ -43,7 +44,7 @@
                 return;
         }
 
-        var target = evt.internalType || evt.attrName || evt.wrapped.attrName;
+        var target = evt.attrName || evt.wrapped.attrName;
 
         if (target == "activeView") {
             this.updateActiveViewAdapter();
@@ -61,23 +62,34 @@
         this.setViewAdapter();
 
         // emit load event when all resources currently loading are completed
-        var callback = (function (node, nodeCanvasId) {
-            var counter = 2; // we fire load event when callback is called twice
-
-            function handler(canvasId) {
-                counter--;
-                if (counter == 0) {
-                    XML3D.util.dispatchEvent(node, 'load');
-                }
-            }
-
-            return handler;
-        })(this.node, this.factory.canvasId);
-
+        var callback = this.onLoadComplete.bind(this);
         // register callback for canvasId == 0 i.e. global resources
         XML3D.base.resourceManager.addLoadCompleteListener(0, callback);
         // register callback for canvasId of this node
         XML3D.base.resourceManager.addLoadCompleteListener(this.factory.canvasId, callback);
+        this.onLoadComplete();
+    }
+
+    XML3DRenderAdapter.prototype.onLoadComplete = function(canvasId){
+        if(XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId)){
+            this.fireLoadEventAfterDraw = true;
+        }
+    }
+
+    XML3DRenderAdapter.prototype.onFrameDrawn = function(){
+        if(this.fireLoadEventAfterDraw)
+        {
+            this.fireLoadEventAfterDraw = false;
+            this.firstLoadFired = true;
+            XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
+        }
+    }
+
+
+    XML3DRenderAdapter.prototype.getComplete = function(){
+        if(this.fireLoadEventAfterDraw) return false;
+        if(!this.firstLoadFired) return false;
+        return XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId);
     }
 
     XML3DRenderAdapter.prototype.getBoundingBox = function() {

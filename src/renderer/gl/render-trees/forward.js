@@ -27,22 +27,39 @@
                 // TODO: Proper clean up ShadowPass
                 light.userData = null;
             }
-            else{
-                if(light.light.type == "spot")
+            else {
+                if(light.light.type == "spot" && light.castShadow && light.visible)
                     light.userData = this.createLightPass(light);
-                else if(light.light.type == "directional")
+                else if(light.light.type == "directional" && light.castShadow && light.visible)
                     light.userData = this.createLightPass(light);
-                else if(light.light.type == "point") {
+                else if(light.light.type == "point" && light.castShadow && light.visible) {
                     light.userData = this.createPointLightPass(light);
                 }
             }
             this.reassignLightPasses(evt.target);
         },
         onLightValueChange: function(evt){
+            var renderLight = evt.light;
             // TODO: Would be great to check of the light position or orientation specifically changed
             // We don't need to invalidate the lightPass otherwise
-            if(evt.light.castShadow && evt.light.visible){
-                evt.light.userData && evt.light.userData.setProcessed(false);
+            if (renderLight.castShadow && renderLight.visible) {
+                if (renderLight.userData) {
+                    renderLight.userData.setProcessed(false);
+                }
+                else {
+                    if (renderLight.light.type === "spot") {
+                        renderLight.userData = this.createLightPass(renderLight);
+                        this.mainPass.addLightPass("spotLightShadowMap", renderLight.userData);
+                    }
+                    else if (renderLight.light.type === "directional") {
+                        renderLight.userData = this.createLightPass(renderLight);
+                        this.mainPass.addLightPass("directionalLightShadowMap", renderLight.userData);
+                    }
+                    else if (renderLight.light.type === "point") {
+                        renderLight.userData = this.createPointLightPass(renderLight);
+                        this.mainPass.addLightPass("pointLightShadowMap", renderLight.userData);
+                    }
+                }
             }
         },
         onSceneShapeChange: function(evt){
@@ -105,21 +122,27 @@
             this.mainPass.clearLightPasses();
             for (var i = 0; i < scene.lights.spot.length; i++) {
                 var spotLight = scene.lights.spot[i];
-                this.mainPass.addLightPass("spotLightShadowMap", spotLight.userData);
-                if(!spotLight.castShadow || !spotLight.visible)
-                    spotLight.userData.setProcessed(true);
+                if (spotLight.userData) {
+                    this.mainPass.addLightPass("spotLightShadowMap", spotLight.userData);
+                    if (!spotLight.castShadow || !spotLight.visible)
+                        spotLight.userData.setProcessed(true);
+                }
             }
             for (var i = 0; i < scene.lights.directional.length; i++) {
                 var directionalLight = scene.lights.directional[i];
-                this.mainPass.addLightPass("directionalLightShadowMap", directionalLight.userData);
-                if(!directionalLight.castShadow || !directionalLight.visible)
-                    directionalLight.userData.setProcessed(true);
+                if (directionalLight.userData) {
+                    this.mainPass.addLightPass("directionalLightShadowMap", directionalLight.userData);
+                    if (!directionalLight.castShadow || !directionalLight.visible)
+                        directionalLight.userData.setProcessed(true);
+                }
             }
             for (var i = 0; i < scene.lights.point.length; i++) {
                 var pointLight = scene.lights.point[i];
-                this.mainPass.addLightPass("pointLightShadowMap", pointLight.userData);
-                if(!pointLight.castShadow || !pointLight.visible)
-                    pointLight.userData.setProcessed(true);
+                if (pointLight.userData) {
+                    this.mainPass.addLightPass("pointLightShadowMap", pointLight.userData);
+                    if (!pointLight.castShadow || !pointLight.visible)
+                        pointLight.userData.setProcessed(true);
+                }
             }
         },
 

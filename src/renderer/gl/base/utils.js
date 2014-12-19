@@ -31,6 +31,7 @@
         var bufferData = data;
         var glType = gl.UNSIGNED_INT;
 
+        // Downgrade buffer if possible or required
         if(maxIndex < (1 << 8)) {
             glType = gl.UNSIGNED_BYTE;
             bufferData = new Uint8Array(data);
@@ -48,6 +49,7 @@
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
         buffer.length = data.length;
         buffer.glType = glType;
+        buffer.bytesPerElement = bufferData.BYTES_PER_ELEMENT;
         return buffer;
     };
 

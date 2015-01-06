@@ -20,6 +20,7 @@
     "build": "npm install && grunt"
   },
   "dependencies": {
-    "gl-matrix": "http://github.com/toji/gl-matrix/tarball/master"
+    "gl-matrix": "http://github.com/toji/gl-matrix/tarball/master",
+    "texture-manager": "http://github.com/ksons/texture-manager/tarball/master"
   }
 }

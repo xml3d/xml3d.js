@@ -55,8 +55,8 @@ function getRenderer(x) {
 
 function getHandler(x) {
     //console.dir(x);
-    var id = getCanvasId(x);
-    return id ? x.ownerDocument.defaultView.XML3D.webgl.handlers[id] : null;
+    var renderer = getRenderer(x);
+    return renderer ? renderer._canvasHandler : null;
 };
 
 function getContextForXml3DElement(x) {

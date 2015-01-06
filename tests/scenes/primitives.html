@@ -1,0 +1,38 @@
+<html>
+<head>
+<title>XML3D External References</title>
+<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+
+    <xml3d id="xml3d-triangles" width="320px" height="240px" style="background-color: #ccc">
+      <defs>
+        <data id="triangles">
+          <int id="indices" name="index">0 1 2 1 2 3</int>
+          <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+        </data>
+        <shader id="mat" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">0.2 0.4 0.2</float3>
+        </shader>
+      </defs>
+    <view id="myView" ></view>
+    <mesh id="mesh-triangles" type="triangles" shader="#mat" src="#triangles"></mesh>
+  </xml3d>
+
+  <xml3d id="xml3d-triangle-strips" width="320px" height="240px" style="background-color: #ccc">
+       <defs>
+        <data id="triangles2">
+          <int id="indices" name="index">0 1 2 3</int>
+          <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+        </data>
+        <shader id="mat2" script="urn:xml3d:shader:flat">
+          <float3 name="diffuseColor">0.2 0.4 0.2</float3>
+        </shader>
+      </defs>
+    <view id="myView" ></view>
+    <mesh id="mesh-triangle-strips" type="tristrips" shader="#mat2" src="#triangles2"></mesh>
+  </xml3d>
+
+</body>
+</html>

@@ -155,6 +155,7 @@ exports = module.exports = function (grunt) {
     grunt.registerTask("dev", ["merge"]);
     grunt.registerTask("min", ["merge", "closure-compiler"]);
     grunt.registerTask("default", ["dev", "testlib"]);
+    grunt.registerTask("continuous", ["dev", "min", "testlib"]);
     grunt.registerTask("testserver", ["connect:server:keepalive"]);
 
     grunt.registerTask('prepublish', 'Run all my build tasks.', function(n) {

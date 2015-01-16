@@ -3,7 +3,7 @@ var OPTION_MOVEMENT_AWARE_CLICK_HANDLER = "renderer-movement-aware-click-handler
 XML3D.options.register(OPTION_MOUSEMOVE_PICKING, true);
 XML3D.options.register(OPTION_MOVEMENT_AWARE_CLICK_HANDLER, false);
 
-var EVENTS = ["click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "mousewheel"];
+var EVENTS = ["click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "wheel"];
 
 /**
  *
@@ -32,17 +32,32 @@ MouseEventHandler.prototype =  {
         var noCopy = opt.noCopy || false;
         // Copy event to avoid DOM dispatch errors (cannot dispatch event more
         // than once)
-        event = noCopy ? event : this.copyMouseEvent(event);
+        if (!noCopy) {
+            event = this.copyMouseEvent(event);
+        }
         this.initExtendedMouseEvent(event, x, y);
 
         target.dispatchEvent(event);
     },
 
     /**
-     * @param {MouseEvent} event the event to copy
+     * @param {MouseEvent|WheelEvent} event the event to copy
      * @return {MouseEvent} the new event
      */
     copyMouseEvent: function (event) {
+        var isWheel = event instanceof WheelEvent;
+        event = isWheel = new WheelEvent(dict)
+        var mouseEventInit = {
+                screenX : event.screenX,
+               screenY : event.screenY,
+               clientX : event.clientX,
+               clientY : event.clientY,
+              button = button.;
+      buttons = 0;
+       relatedTarget = null;
+        }
+        console.log("MouseEvent:", event instanceof MouseEvent)
+        console.log("WheelEvent:", event instanceof WheelEvent, event)
         var evt = document.createEvent("MouseEvents");
         evt.initMouseEvent(event.type, // canBubble, cancelable, view, detail
             event.bubbles, event.cancelable, event.view, event.detail, // screenX, screenY, clientX, clientY
@@ -221,11 +236,10 @@ MouseEventHandler.prototype =  {
     },
 
     /**
-     * @param {MouseEvent} evt
+     * @param {WheelEvent} evt
      */
-    mousewheel: function (evt) {
-        // note: mousewheel type is not W3C standard, used in WebKit!
-        this.dispatchMouseEventOnPickedObject(evt);
+    wheel: function (evt) {
+        this.dispatchMouseEventOnPickedObject(evt, { type: "wheel" });
     }
 
 

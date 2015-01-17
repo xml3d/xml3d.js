@@ -41,17 +41,26 @@ include the camera controller that comes with xml3d.js:
 We have an extensive [test suite](http://xml3d.github.com/xml3d.js/tests/) and some [known issues](https://github.com/xml3d/xml3d.js/wiki/Known-issues).
 
 #### How to build ####
+
+##### Dependencies #####
+You will need [node.js](http://nodejs.org/). Then install grunt:
+```bash
+npm install -g grunt-cli
+```
+
+##### Clone #####
 Clone a copy of the main xml3d.js git repo by running:
 
 ```bash
 git clone git://github.com/xml3d/xml3d.git
 ```
 
+##### Build #####
 Enter the xml3d.js directory and run the build script:
 ```bash
 cd xml3d.js && npm run build
 ```
-The built version of xml3d.js will be put in the `build/output/` subdirectory
+The built version of xml3d.js will be put in the `build/output/` subdirectory. Alternatively you have several grunt tasks that you can run directly (e.g. ```grunt min```). Run ```grunt --help``` to get a list of available grunt tasks.
 
 ### Documentation ###
 We have an overview documentation in each subfolder of the project:

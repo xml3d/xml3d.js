@@ -1,4 +1,5 @@
 var data = require("data");
+var graph = require("graph");
 
 module.exports = {
     DataEntry: data.DataEntry,
@@ -7,5 +8,9 @@ module.exports = {
     ImageDataTextureEntry: data.ImageDataTextureEntry,
     SamplerConfig: data.SamplerConfig,
     DataChangeNotifier: data.DataChangeNotifier,
+    Graph : graph.Graph,
+    InputNode: graph.InputNode,
+    DataNode: graph.DataNode,
+
     Result: require("./result")
 };

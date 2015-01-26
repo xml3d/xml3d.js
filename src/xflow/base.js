@@ -157,9 +157,10 @@ var Xflow = {};
      * @enum
      */
     Xflow.DATA_FILTER_TYPE = {
-        RENAME: 0,
-        KEEP: 1,
-        REMOVE: 2
+        NONE: 0,
+        RENAME: 1,
+        KEEP: 2,
+        REMOVE: 3
     };
 
 
@@ -187,7 +188,6 @@ var Xflow = {};
     /**
      * Type of Modification, used internally only
      * Ordered by importance.
-     * @private
      * @enum
      */
     Xflow.RESULT_STATE = {

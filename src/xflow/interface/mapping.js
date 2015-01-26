@@ -1,5 +1,47 @@
 (function(){
 
+/**
+ * A mapping used for a filter or a compute properties of a DataNode
+ * @abstract
+ */
+var Mapping = function(){
+    this._owners = [];
+};
+
+
+/**
+ * An OrderMapping used for a filter or compute properties of a DataNode
+ * It describes a mapping of names referring to the order of arguments / output values.
+ * OrderMapping syntax examples in compute:
+ * position = xflow.morph(position, posAdd, weight)
+ * @constructor
+ * @extends {Xflow.Mapping}
+ * @param {Xflow.DataNode} owner
+ */
+Xflow.OrderMapping = function(){
+    Xflow.Mapping.call(this);
+    this._names = [];
+};
+Xflow.createClass(Xflow.OrderMapping, Xflow.Mapping);
+
+/**
+ * An NameMapping used for a filter or compute properties of a DataNode
+ * It describes a mapping of names referring to the original names of the arguments / output values.
+ * NameMapping syntax examples in compute:
+ * {position: result} = xflow.morph({value: position, valueAdd: posAdd, weight: weight})
+ * @constructor
+ * @extends {Xflow.Mapping}
+ * @param {Xflow.DataNode} owner
+ */
+Xflow.NameMapping = function(){
+    Xflow.Mapping.call(this);
+    this._destNames = [];
+    this._srcNames = [];
+
+};
+Xflow.createClass(Xflow.NameMapping, Xflow.Mapping);
+
+
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.Mapping
 //----------------------------------------------------------------------------------------------------------------------

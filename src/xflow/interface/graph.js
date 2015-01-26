@@ -892,6 +892,14 @@ DataNode.prototype.getParamNames = function(){
     return this._getParamNames();
 };
 
+/**
+ * Delegate computation of the result to the channel node
+ * of the first contributing DataNode.
+ * @param type
+ * @param filter
+ * @returns {Result}
+ * @private
+ */
 DataNode.prototype._getResult = function(type, filter){
     return getForwardNode(this, filter)._channelNode.getResult(type, filter);
 };

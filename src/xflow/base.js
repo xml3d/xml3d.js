@@ -330,7 +330,7 @@ var Xflow = {};
         if (c_listedCallbacks.length) {
             var i;
             for (i = 0; i < c_listedCallbacks.length; ++i) {
-                c_listedCallbacks[i]._onListedCallback(c_listedCallbacksData[i]);
+                c_listedCallbacks[i]._onResultChanged(c_listedCallbacksData[i]);
             }
             c_listedCallbacks = [];
             c_listedCallbacksData = [];

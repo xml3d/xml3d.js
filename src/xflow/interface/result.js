@@ -55,7 +55,7 @@ Result.prototype._notifyChanged = function(state){
     Xflow._queueResultCallback(this, state);
 }
 
-Result.prototype._onListedCallback = function(state){
+Result.prototype._onResultChanged = function(state){
     for(var i = 0; i < this._listeners.length; ++i){
         this._listeners[i](this, state);
     }

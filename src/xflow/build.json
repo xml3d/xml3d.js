@@ -1,5 +1,6 @@
 {
   "module": "xflow",
+  "task": "browserify",
   "files": [
     "./base.js",
     "./interface/data.js",

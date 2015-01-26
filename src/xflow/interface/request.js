@@ -63,7 +63,7 @@ function swapResultRequest(request, newResult){
  * @param {Xflow.RESULT_STATE} notification
  */
 function notifyListeners(request, notification){
-    Xflow._listCallback(request, notification);
+    Xflow._queueResultCallback(request, notification);
 };
 
 /**

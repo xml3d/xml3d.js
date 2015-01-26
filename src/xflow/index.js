@@ -1,2 +1,2 @@
 
-Xflow = require("./base.js");
+Xflow = require("./interface/");

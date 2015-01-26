@@ -296,7 +296,7 @@ NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
 function mappingNotifyOwner(mapping){
     for(var i = 0; i < mapping._owners.length; ++i)
         mapping._owners[i].notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
+    Xflow._flushResultCallbacks();
 };
 
 })();

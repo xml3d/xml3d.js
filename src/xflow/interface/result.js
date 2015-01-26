@@ -52,7 +52,7 @@ Result.prototype._notifyChanged = function(state){
     for(var i = 0; i < this._requests.length; ++i){
         this._requests[i]._onResultChanged(state);
     }
-    Xflow._listCallback(this, state);
+    Xflow._queueResultCallback(this, state);
 }
 
 Result.prototype._onListedCallback = function(state){

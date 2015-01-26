@@ -173,6 +173,8 @@ var Xflow = {};
         LOAD_END: 4,
         CHANGED_SIZE: 5,
         CHANGED_REMOVED: 6,
+        // Not just the size changed, but also qualifier
+        // if we have 0, 1 or many tuples in value
         CHANGED_SIZE_TYPE: 7
     };
 
@@ -184,6 +186,7 @@ var Xflow = {};
 
     /**
      * Type of Modification, used internally only
+     * Ordered by importance.
      * @private
      * @enum
      */
@@ -192,6 +195,7 @@ var Xflow = {};
         CHANGED_DATA_VALUE: 1,
         CHANGED_DATA_SIZE: 2,
         CHANGED_STRUCTURE: 3,
+        // TODO: Felix: Still required?
         IMAGE_LOAD_START: 4,
         IMAGE_LOAD_END: 5
     };
@@ -300,19 +304,29 @@ var Xflow = {};
 
     var c_listedCallbacks = [];
     var c_listedCallbacksData = [];
-    Xflow._listCallback = function (object, data) {
+
+    /**
+     * Cluster internal notifications to avoid multiple notifications
+     * of same type. Mainly for Requests and Results
+     *
+     * @param requestOrResult Request or Result
+     * @param {Xflow.RESULT_STATE} Custom callback resultState
+     * @private
+     */
+    Xflow._queueResultCallback = function (requestOrResult, resultState) {
         var index;
-        if (( index = c_listedCallbacks.indexOf(object)) == -1) {
+        if (( index = c_listedCallbacks.indexOf(requestOrResult)) == -1) {
             index = c_listedCallbacks.length;
-            c_listedCallbacks.push(object);
+            c_listedCallbacks.push(requestOrResult);
         }
         var prevData = c_listedCallbacksData[index];
-        if (!prevData || prevData < data) {
-            c_listedCallbacksData[index] = data;
+
+        if (!prevData || prevData < resultState) {
+            c_listedCallbacksData[index] = resultState;
         }
     };
 
-    Xflow._callListedCallback = function () {
+    Xflow._flushResultCallbacks = function () {
         if (c_listedCallbacks.length) {
             var i;
             for (i = 0; i < c_listedCallbacks.length; ++i) {

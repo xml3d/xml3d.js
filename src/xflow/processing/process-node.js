@@ -73,7 +73,7 @@ ProcessNode.prototype.receiveAsyncProcessing = function(){
     else{
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
     }
-    Xflow._callListedCallback();
+    Xflow._flushResultCallbacks();
 }
 
 

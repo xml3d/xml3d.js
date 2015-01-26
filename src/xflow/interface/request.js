@@ -1,3 +1,7 @@
+var Base = require("../base.js");
+
+var Xflow = Base.Xflow;
+
 /**
  * Content of this file:
  * Classes to request results from an Xflow graph.
@@ -21,13 +25,11 @@ var Request = function(dataNode, filter, callback){
     /**
      * Cached result of this request
      * @type {Result}
-     * @private
      */
     this._result = null;
 
     /**
      * Cached callback function attached to data node
-     * @type {function(this:Request)}
      * @private
      */
     this._dataNodeListener = this._onDataNodeChange.bind(this);
@@ -64,7 +66,7 @@ Request.prototype.clear = function(){
  * @private
  */
 Request.prototype._onResultChanged = function(data){
-    this._listener && this._listener(this, data)
+    this._listener && this._listener(this, data);
 };
 
 /**
@@ -88,7 +90,7 @@ function swapResultRequest(request, newResult){
  * @private
  */
 function notifyListeners(request, notification){
-    Xflow._queueResultCallback(request, notification);
+    Base._queueResultCallback(request, notification);
 }
 
 /**
@@ -109,7 +111,7 @@ Request.prototype._onDataNodeChange = function(notification){
 var ComputeRequest = function(dataNode, filter, callback){
     Request.call(this, dataNode, filter, callback);
 };
-Xflow.createClass(ComputeRequest, Request);
+Base.createClass(ComputeRequest, Request);
 
 /**
  * @returns {Result}
@@ -130,7 +132,7 @@ var c_vsConnectNodeCount = {},
     c_vsConnectNodeCache = {};
 
 /**
- * A VertexShaderRequest is a Request for a VSDataResult, used to generate a Xflow.VertexShader that includes
+ * A VertexShaderRequest is a Request for a VSDataResult, used to generate a VertexShader that includes
  * dataflow processing.
  * @constructor
  * @extends {Request}
@@ -146,7 +148,7 @@ var VertexShaderRequest = function(dataNode, vsConfig, callback){
     this._vsConfig = vsConfig;
     this._vsConnectNode = getVsConnectNode(dataNode, vsConfig);
 };
-Xflow.createClass(VertexShaderRequest, Request);
+Base.createClass(VertexShaderRequest, Request);
 
 VertexShaderRequest.prototype.getConfig = function(){
     return this._vsConfig;

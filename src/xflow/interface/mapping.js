@@ -1,6 +1,9 @@
+var Base = require("../base.js");
+var Xflow = Base.Xflow;
+
 
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
-var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)\}$/;
+var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)}$/;
 
 /**
  * A mapping used for a filter or a compute properties of a DataNode
@@ -9,7 +12,6 @@ var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)\}$/;
 var Mapping = function(){
     /**
      * @type {Array<DataNode>}
-     * @private
      */
     this._owners = [];
 };
@@ -28,7 +30,7 @@ Mapping.parse = function(string, dataNode){
     results = string.trim().match(nameMappingParser);
     if(results)
         return NameMapping.parse(results[1], dataNode);
-    Xflow.notifyError("Cannot parse name mapping '" + string + "'", dataNode);
+    Base.notifyError("Cannot parse name mapping '" + string + "'", dataNode);
     return null;
 };
 
@@ -56,7 +58,7 @@ Mapping.prototype._removeOwner = function(owner){
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.OrderMapping
+// OrderMapping
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -71,7 +73,7 @@ var OrderMapping = function(){
     Mapping.call(this);
     this._names = [];
 };
-Xflow.createClass(OrderMapping, Mapping);
+Base.createClass(OrderMapping, Mapping);
 
 OrderMapping.parse = function(string, dataNode){
     var mapping = new OrderMapping(dataNode);
@@ -103,6 +105,8 @@ OrderMapping.prototype.setName = function(index, name){
     mappingNotifyOwner(this);
 };
 
+
+//noinspection JSUnusedGlobalSymbols
 OrderMapping.prototype.removeName = function(index){
     this._names.splice(index);
     mappingNotifyOwner(this);
@@ -116,7 +120,7 @@ OrderMapping.prototype.isEmpty = function(){
  *
  * @param {ChannelMap} destMap
  * @param {ChannelMap} sourceMap
- * @param {Xflow.DATA_FILTER_TYPE} filterType
+ * @param {exports.Xflow.DATA_FILTER_TYPE} filterType
  * @param {function(ChannelMap, string, ChannelMap, string)} callback
  */
 OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback){
@@ -190,7 +194,7 @@ OrderMapping.prototype.getRenameSrcName = function(name){
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.NameMapping
+// NameMapping
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -207,7 +211,7 @@ var NameMapping = function(){
     this._srcNames = [];
 
 };
-Xflow.createClass(NameMapping, Mapping);
+Base.createClass(NameMapping, Mapping);
 
 NameMapping.parse = function(string, dataNode)  {
     var mapping = new NameMapping(dataNode);
@@ -259,6 +263,7 @@ NameMapping.prototype.setNamePair = function(destName, srcName){
     mappingNotifyOwner(this);
 };
 
+//noinspection JSUnusedGlobalSymbols
 NameMapping.prototype.removeNamePair = function(destName){
     var idx = this._destNames.indexOf(destName);
     if(idx != -1){
@@ -339,11 +344,11 @@ NameMapping.prototype.getScriptOutputNameInv = function(destName /*, operatorOut
  * @param {Mapping} mapping
  */
 function mappingNotifyOwner(mapping){
-    for(var i = 0; i < mapping._owners.length; ++i)
+    for(var i = 0; i < mapping._owners.length; ++i) {
         mapping._owners[i].notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._flushResultCallbacks();
-};
-
+    }
+    Base._flushResultCallbacks();
+}
 module.exports = {
     NameMapping: NameMapping,
     OrderMapping: OrderMapping,

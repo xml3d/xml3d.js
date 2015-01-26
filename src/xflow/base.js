@@ -1,7 +1,9 @@
-window = this;
-var Xflow = {};
+module.exports = {};
 
-(function () {
+(function (exports) {
+
+    var Xflow = exports.Xflow = {};
+
     Xflow.EPSILON = 0.000001;
 
     /**
@@ -259,11 +261,11 @@ var Xflow = {};
 
     // Error Callbacks:
     var c_errorCallbacks = [];
-    Xflow.registerErrorCallback = function (callback) {
+    exports.registerErrorCallback = function (callback) {
         c_errorCallbacks.push(callback);
     };
 
-    Xflow.notifyError = function (message, node) {
+    exports.notifyError = function (message, node) {
         if (c_errorCallbacks.length > 0) {
             var i;
             for (i = 0; i < c_errorCallbacks.length; ++i) {
@@ -284,7 +286,7 @@ var Xflow = {};
      * @param {Object=} methods Methods to add to the class
      * @returns {Object}
      */
-    Xflow.createClass = function (ctor, parent, methods) {
+    exports.createClass = function (ctor, parent, methods) {
         methods = methods || {};
         if (parent) {
             /** @constructor */
@@ -313,7 +315,7 @@ var Xflow = {};
      * @param {Xflow.RESULT_STATE} Custom callback resultState
      * @private
      */
-    Xflow._queueResultCallback = function (requestOrResult, resultState) {
+    exports._queueResultCallback = function (requestOrResult, resultState) {
         var index;
         if (( index = c_listedCallbacks.indexOf(requestOrResult)) == -1) {
             index = c_listedCallbacks.length;
@@ -326,7 +328,7 @@ var Xflow = {};
         }
     };
 
-    Xflow._flushResultCallbacks = function () {
+    exports._flushResultCallbacks = function () {
         if (c_listedCallbacks.length) {
             var i;
             for (i = 0; i < c_listedCallbacks.length; ++i) {
@@ -336,7 +338,8 @@ var Xflow = {};
             c_listedCallbacksData = [];
         }
     };
-}());
+
+}(module.exports));
 
 
 

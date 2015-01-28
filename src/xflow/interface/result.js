@@ -1,4 +1,7 @@
-(function(){
+var Base = require("../base.js");
+
+var Xflow = Base.Xflow;
+
 /**
  * Content of this file:
  * Result classes of an Xflow graph which are received through Requests.
@@ -7,16 +10,14 @@
 /**
  * Abstract Result structure containing a (processed) result of the Xflow graph.
  * @abstract
- * @param {Xflow.DataNode} dataNode
- * @param {Array.<string>} filter
  */
-Xflow.Result = function(){
+var Result = function(){
     this.loading = false;
+    /** Valid is false if an error occurred during the processing of the result */
     this.valid = false;
     this._listeners = [];
     this._requests = [];
 };
-var Result = Xflow.Result;
 
 /**
  * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
@@ -68,14 +69,13 @@ Result.prototype._onResultChanged = function(state){
  * @constructor
  * @extends {Xflow.Result}
  */
-Xflow.ComputeResult = function(){
+var ComputeResult = function(){
     Xflow.Result.call(this);
     this._outputNames = [];
     /** @type {Object.<string,DataEntry>} */
     this._dataEntries = {};
 };
-Xflow.createClass(Xflow.ComputeResult, Xflow.Result);
-var ComputeResult = Xflow.ComputeResult;
+Base.createClass(ComputeResult, Result);
 
 Object.defineProperty(ComputeResult.prototype, "outputNames", {
     set: function(v){
@@ -104,13 +104,12 @@ ComputeResult.prototype.getOutputMap = function() {
  * @constructor
  * @extends {Xflow.Result}
  */
-Xflow.VSDataResult = function(){
+var VSDataResult = function(){
     Xflow.Result.call(this);
     this._program = null;
     this._programData = null;
 };
-Xflow.createClass(Xflow.VSDataResult, Xflow.Result);
-var VSDataResult = Xflow.VSDataResult;
+Base.createClass(VSDataResult, Result);
 
 Object.defineProperty(VSDataResult.prototype, "outputNames", {
     set: function(v){
@@ -132,5 +131,7 @@ VSDataResult.prototype.getVertexShader = function(vsConfig){
     return this._program.createVertexShader(this._programData, vsConfig);
 }
 
-
-})();
+module.exports = {
+    ComputeResult:  ComputeResult,
+    VSDataResult: VSDataResult
+};

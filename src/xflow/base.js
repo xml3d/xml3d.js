@@ -167,6 +167,7 @@ module.exports = {};
 
 
     /**
+     * TODO: Maybe merge this structure with RESULT_STATE to avoid back and forth conversion within notification chain
      * @enum {number}
      */
     Xflow.DATA_ENTRY_STATE = {
@@ -205,7 +206,6 @@ module.exports = {};
 
     /**
      * Type of Sequence access - used by operators
-     * @private
      * @enum
      */
     Xflow.SEQUENCE = {

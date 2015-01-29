@@ -32,7 +32,6 @@ Graph.prototype.initPlatform = function () {
     if(initWebCLPlatform(this)) {
         this.platform = Xflow.PLATFORM.CL;
     }
-
 };
 
 /**
@@ -41,43 +40,24 @@ Graph.prototype.initPlatform = function () {
  * @returns {boolean}
  */
 function initWebCLPlatform(graph) {
-    var clPlatforms, clDevices, clCtx, cmdQueue;
     var webcl = XML3D.webcl;
+    if (!webcl || !webcl.isAvailable()) {
+        return false;
+    }
 
-    if (webcl && webcl.isAvailable()) {
+    var clPlatforms = webcl.getPlatforms();
+    if (!clPlatforms || clPlatforms.length <= 0) {
+        return false;
+    }
 
-        // Fetching WebCL device platforms
-        clPlatforms = webcl.getPlatforms();
-
-        if (!clPlatforms || typeof clPlatforms === 'array' && clPlatforms.length === 0) {
-            return false;
-        }
-
-        // Fetching WebCL devices
-        try {
-            // Trying initially to use GPU (for the best performance). Using CPU as a fallback.
-            clDevices = webcl.getDevicesByType("GPU") || webcl.getDevicesByType("CPU");
-        } catch (e) {
-            return false;
-        }
-
+    try {
+        // Trying initially to use GPU (for the best performance). Using CPU as a fallback.
+        var clDevices = webcl.getDevicesByType("GPU") || webcl.getDevicesByType("CPU");
         if (!clDevices) {
             return false;
         }
-
-        // Creating a new WebCL context
-        try {
-            clCtx = webcl.createContext(clDevices);
-        } catch (e) {
-            return false;
-        }
-
-        // Creating a command queue for WebCL processing
-        try {
-            cmdQueue = webcl.createCommandQueue(clDevices[0], clCtx);
-        } catch (e) {
-            return false;
-        }
+        var clCtx = webcl.createContext(clDevices);
+        var cmdQueue = webcl.createCommandQueue(clDevices[0], clCtx);
 
         /**
          *  TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available and
@@ -92,11 +72,11 @@ function initWebCLPlatform(graph) {
             ctx: clCtx,
             cmdQueue: cmdQueue
         };
-
+        XML3D.debug.logDebug("Successfully initialized WebCL platform.");
         return true;
+    } catch (e) {
+        return false;
     }
-
-    return false;
 }
 
  /**
@@ -467,12 +447,10 @@ Base.createClass(DataNode, GraphNode);
 
 
 Object.defineProperty(DataNode.prototype, "sourceNode", {
-    /** @param {?DataNode} v */
-    set: function(v){
-        if(this._sourceNode) removeParent(this, this._sourceNode);
-        this._sourceNode = v;
-        if(this._sourceNode) addParent(this, this._sourceNode);
-        updateProgressLevelAndUpdateListeners(this);
+    /** @param {?DataNode} newSourceNode */
+    set: function(newSourceNode){
+        replaceNodeInHierarchy(this._sourceNode, newSourceNode);
+        updateProgressLevel(this);
         this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         Base._flushResultCallbacks();
     },
@@ -481,14 +459,13 @@ Object.defineProperty(DataNode.prototype, "sourceNode", {
 });
 
 Object.defineProperty(DataNode.prototype, "dataflowNode", {
-    /** @param {?DataNode} v */
-    set: function(v){
-        if(v && !this._computeUsesDataflow)
+    /** @param {?DataNode} newDataflowNode */
+    set: function(newDataflowNode){
+        if(newDataflowNode && !this._computeUsesDataflow) {
             throw new Error("Cannot set dataflowNode when compute doesn't use dataflow.");
-        if(this._dataflowNode) removeParent(this, this._dataflowNode);
-        this._dataflowNode = v;
-        if(this._dataflowNode) addParent(this, this._dataflowNode);
-        updateProgressLevelAndUpdateListeners(this);
+        }
+        replaceNodeInHierarchy(this._dataflowNode, newDataflowNode);
+        updateProgressLevel(this);
         this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         Base._flushResultCallbacks();
     },
@@ -513,7 +490,7 @@ Object.defineProperty(DataNode.prototype, "userData", {
 DataNode.prototype.setLoading = function(loading){
     if(this._loading != loading){
         this._loading = loading;
-        updateProgressLevelAndUpdateListeners(this);
+        updateProgressLevel(this);
         Base._flushResultCallbacks();
     }
 };
@@ -612,7 +589,7 @@ DataNode.prototype.isProtoNode = function(){
 DataNode.prototype.appendChild = function(child){
     this._children.push(child);
     addParent(this, child);
-    updateProgressLevelAndUpdateListeners(this);
+    updateProgressLevel(this);
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Base._flushResultCallbacks();
 };
@@ -622,7 +599,7 @@ DataNode.prototype.appendChild = function(child){
 DataNode.prototype.removeChild = function(child){
     Array.erase(this._children, child);
     removeParent(this, child);
-    updateProgressLevelAndUpdateListeners(this);
+    updateProgressLevel(this);
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Base._flushResultCallbacks();
 };
@@ -639,7 +616,7 @@ DataNode.prototype.insertBefore = function(child, beforeNode){
         this._children.splice(idx, 0, child);
     addParent(this, child);
     // TODO: Next three calls on all structural changes. Add Method
-    updateProgressLevelAndUpdateListeners(this);
+    updateProgressLevel(this);
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Base._flushResultCallbacks();
 };
@@ -652,7 +629,7 @@ DataNode.prototype.clearChildren = function(){
         removeParent(this, this._children[i]);
     }
     this._children = [];
-    updateProgressLevelAndUpdateListeners(this);
+    updateProgressLevel(this);
     this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     Base._flushResultCallbacks();
 };
@@ -756,17 +733,14 @@ var dataflowParser = /^dataflow\['([^']+)'\]$/;
  */
 var getComputeDataflowUrl = function(computeString){
     computeString = computeString || "";
-    var newOperator = "";
     var result = computeString.trim().match(computeParser);
     if(result){
-        newOperator = result[3].trim();
-        if(result = newOperator.match(dataflowParser)){
+        if(result = result[3].trim().match(dataflowParser)){
             return result[1];
         }
     }
     return null;
 };
-
 
 /**
  * Set compute by string
@@ -808,34 +782,36 @@ DataNode.prototype.setCompute = function(computeString){
     Base._flushResultCallbacks();
 };
 
-
-
-
 /**
  * Notifies DataNode about a change. Notification will be forwarded to parents, if necessary
  * @param {exports.Xflow.RESULT_STATE} changeType
  * @param {GraphNode?} senderNode
  */
 DataNode.prototype.notify = function(changeType, senderNode){
-    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE )
-    {
-        this._paramNames = null;
-        this._globalParamNames = null;
-        this._channelNode.setStructureOutOfSync();
-        clearSubstitutionNodes(this);
-        notifyParentsOnChanged(this, changeType);
-    }
-    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ||
-        changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE ||
-        changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
-        changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END)
-    {
-        if(changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
-           changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END )
-            updateProgressLevelAndUpdateListeners(this);
-        if(senderNode){
-            this._channelNode.notifyDataChange(senderNode, changeType);
-        }
+    //noinspection FallthroughInSwitchStatementJS
+    switch(changeType) {
+        case Xflow.RESULT_STATE.CHANGED_STRUCTURE:
+            this._paramNames = null;
+            this._globalParamNames = null;
+            this._channelNode.setStructureOutOfSync();
+            clearSubstitutionNodes(this);
+            notifyParentsOnChanged(this, changeType);
+            break;
+
+        case Xflow.RESULT_STATE.IMAGE_LOAD_START:
+        case Xflow.RESULT_STATE.IMAGE_LOAD_END:
+            updateProgressLevel(this);
+            if(senderNode){
+                this._channelNode.notifyDataChange(senderNode, changeType);
+            }
+            break;
+
+        case Xflow.RESULT_STATE.CHANGED_DATA_VALUE:
+        case Xflow.RESULT_STATE.CHANGED_DATA_SIZE:
+            if(senderNode){
+                this._channelNode.notifyDataChange(senderNode, changeType);
+            }
+            break;
     }
     // Inform listeners (e.g. Requests)
     for(var i = 0; i < this._listeners.length; ++i) {
@@ -976,8 +952,8 @@ function clearSubstitutionNodes(dataNode){
  * @returns {DataNode}
  */
 function getForwardNode(dataNode, filter){
-    var isFiltered = (dataNode._filterMapping && !dataNode._filterMapping.isEmpty());
-    if(isFiltered)
+    var hasFilter = (dataNode._filterMapping && !dataNode._filterMapping.isEmpty());
+    if(hasFilter)
         return dataNode;
 
     if(!dataNode._computeOperator ){
@@ -1003,7 +979,7 @@ function getForwardNode(dataNode, filter){
  * @private
  * @param {DataNode} node
  */
-function updateProgressLevelAndUpdateListeners(node){
+function updateProgressLevel(node){
     var progressLevel = node._loading ? node._loadLevel : Infinity;
     var i;
 
@@ -1028,10 +1004,9 @@ function updateProgressLevelAndUpdateListeners(node){
     if(oldLevel != node._progressLevel){
         node._callLoadListeners(node._progressLevel, oldLevel);
         for(i = 0; i < node._parents.length; ++i)
-            updateProgressLevelAndUpdateListeners(node._parents[i]);
+            updateProgressLevel(node._parents[i]);
     }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 // Helpers
@@ -1078,6 +1053,16 @@ function swapMapping(dataNode, key, mapping){
     dataNode[key] && dataNode[key]._removeOwner(dataNode);
     dataNode[key] = mapping;
     dataNode[key] && dataNode[key]._addOwner(dataNode);
+}
+
+function replaceNodeInHierarchy(sourceNode, newNode) {
+    if(sourceNode) {
+        removeParent(this, sourceNode);
+    }
+    sourceNode = newNode;
+    if(sourceNode) {
+        addParent(this, sourceNode);
+    }
 }
 
 module.exports = {

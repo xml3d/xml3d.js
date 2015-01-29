@@ -182,6 +182,7 @@ module.exports = {};
         CHANGED_SIZE_TYPE: 7
     };
 
+    /** TODO: Merge with Xflow.PLATFORM? **/
     Xflow.RESULT_TYPE = {
         COMPUTE: 0,
         VS: 1
@@ -241,7 +242,7 @@ module.exports = {};
 
     /**
      * Types of platforms to perform computation on
-     * @type {Object}
+     * @type {enum}
      */
     Xflow.PLATFORM = {
         JAVASCRIPT: 0,
@@ -250,13 +251,15 @@ module.exports = {};
         ASYNC: 3
     };
 
+    /**
+     * Possible states of a ProcessNode
+     * @type {enum}
+     */
     Xflow.PROCESS_STATE = {
-        MODIFIED: 0,
-        LOADING: 1,
-        NEEDS_VALIDATION: 2,
-        INVALID: 3,
-        UNPROCESSED: 4,
-        PROCESSED: 5
+        MODIFIED: 0, // We don't know (TODO Felix: Find out!)
+        LOADING: 1, // Something still loading (blocked)
+        UNPROCESSED: 4, // Process node is dirty
+        PROCESSED: 5 // All data is up-to-date
     };
 
     // Error Callbacks:
@@ -312,7 +315,7 @@ module.exports = {};
      * of same type. Mainly for Requests and Results
      *
      * @param requestOrResult Request or Result
-     * @param {Xflow.RESULT_STATE} Custom callback resultState
+     * @param {Xflow.RESULT_STATE} resultState
      * @private
      */
     exports._queueResultCallback = function (requestOrResult, resultState) {

@@ -1,32 +1,44 @@
-(function(){
+var Base = require("../base.js");
 
+var Xflow = Base.Xflow;
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.Executer
+// Executor
 //----------------------------------------------------------------------------------------------------------------------
 
-    Xflow.Executer = function(ownerNode, platform){
+/**
+ * Tries to combine multiple ProcessNodes into a Program. Currently only used for vertex shaders.
+ *
+ * @param {RequestNode|ProcessNode} ownerNode
+ * @param {Xflow.PLATFORM} platform
+ * @constructor
+ */
+var Executor = function(ownerNode, platform){
+    this.platform = platform;
 
-        this.platform = platform;
-        this.mergedNodes = [];
-        this.mergedOutputNodes = [];
-        this.subNodes = [];
-        this.unprocessedDataNames = [];
+    /**
+     *
+     * @type {Array}
+     */
+    this.mergedNodes = [];
+    this.mergedOutputNodes = [];
+    this.subNodes = [];
+    this.unprocessedDataNames = [];
 
-        /**
-         *  TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available and
-         *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
-         *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
-         *  e.g. passing graph information here requires a long prototype chain
-         */
-        this.operatorList =  new Xflow.OperatorList(platform, ownerNode.owner.owner._graph);
-        this.programData =  new Xflow.ProgramData();
+    /**
+     *  TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available and
+     *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
+     *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
+     *  e.g. passing graph information here requires a long prototype chain
+     */
+    this.operatorList =  new Xflow.OperatorList(platform, ownerNode.owner.owner._graph);
+    this.programData =  new Xflow.ProgramData();
 
-        this.program = null;
+    this.program = null;
 
-        constructExecuter(this, ownerNode);
-    }
+    constructExecutor(this, ownerNode);
+}
 
-    Xflow.Executer.prototype.isProcessed = function(){
+    Executor.prototype.isProcessed = function(){
         var i = this.mergedOutputNodes.length;
         while(i--){
             if(this.mergedOutputNodes[i].status != Xflow.PROCESS_STATE.PROCESSED)
@@ -36,7 +48,7 @@
     }
 
 
-    Xflow.Executer.prototype.run = function(asyncCallback){
+    Executor.prototype.run = function(asyncCallback){
         runSubNodes(this);
         updateIterateState(this);
 
@@ -56,7 +68,7 @@
 
     }
 
-    Xflow.Executer.prototype.getVertexShader = function(){
+    Executor.prototype.getVertexShader = function(){
         runSubNodes(this);
         updateIterateState(this);
 
@@ -66,7 +78,7 @@
     }
 
 
-    function constructExecuter(executer, ownerNode){
+    function constructExecutor(executer, ownerNode){
         var cData = {
             blockedNodes: [],
             doneNodes: [],
@@ -282,16 +294,16 @@
         return false;
     }
 
-    function constructLostOutput(executor, cData){
+    function constructLostOutput(executer, cData){
         for(var i = 0; i < cData.constructionOrder.length; ++i){
             var node = cData.constructionOrder[i];
-            var entry = executor.operatorList.entries[i];
+            var entry = executer.operatorList.entries[i];
 
             var outputs = node.operator.outputs;
             for(var j = 0; j < outputs.length; ++j){
                 if(!entry.isFinalOutput(j) && ! entry.isTransferOutput(j)){
-                    var index = executor.programData.outputs.length;
-                    executor.programData.outputs.push(node.outputDataSlots[outputs[j].name]);
+                    var index = executer.programData.outputs.length;
+                    executer.programData.outputs.push(node.outputDataSlots[outputs[j].name]);
                     entry.setLostOutput(j, index);
                 }
             }
@@ -328,4 +340,4 @@
         }
     }
 
-})();
+module.exports = Executor;

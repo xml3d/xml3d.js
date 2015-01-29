@@ -7,7 +7,7 @@ Xflow.registerOperator("xflow.mul", {
         {
             XML3D.math.mat4.multiplyOffset(result, i*16,
                 value1,  info.iterFlag[0] ? i*16 : 0,
-                value2, info.iterFlag[0] ? i*16 : 0);
+                value2, info.iterFlag[1] ? i*16 : 0);
         }
     },
 

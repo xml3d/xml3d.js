@@ -903,11 +903,10 @@ DataNode.prototype._getGlobalParamNames = function(){
 };
 
 /**
- * @param {ChannelNode} substitution
+ * @param {Substitution} substitution
  * @returns {ChannelNode}
- * @private
  */
-DataNode.prototype._getChannelNode = function(substitution){
+DataNode.prototype._getOrCreateChannelNode = function(substitution){
     if(!substitution)
         return this._channelNode;
     else{
@@ -926,7 +925,6 @@ DataNode.prototype._getChannelNode = function(substitution){
  * Decreases reference counter of substitution node and deletes it if not
  * used by any other node.
  * @param {ChannelNode} substitutionNode
- * @private
  */
 DataNode.prototype._removeSubstitutionNode = function(substitutionNode){
     var key = substitutionNode.substitution.getKey(this);

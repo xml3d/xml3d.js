@@ -7,54 +7,6 @@ var Xflow = Base.Xflow;
 // DataSlot
 //----------------------------------------------------------------------------------------------------------------------
 
-/**
- * A DataSlot wraps a dataEntry and adds a key value for sequences.
- * This structure is used internally within channels and process nodes
- * @constructor
- * @param {DataEntry} dataEntry
- * @param {number=} key
- */
-var DataSlot = function(dataEntry, key){
-    this.key = key || 0;            // sequence key
-    this.dataEntry = dataEntry;     // dataEntry of the slot
-    /**
-     * alternative dataEntry for asynchronous processing
-     * only used for output DataSlots of asynchronous operators
-     * @type {DataEntry}
-     */
-    this.asyncDataEntry = null;
-    /**
-     * list of all channels that contain this DataSlot
-     * @type {Array.<Channel>}
-     */
-    this.parentChannels = [];
-
-};
-DataSlot.prototype.addChannel = function(channel){
-    this.parentChannels.push(channel);
-};
-DataSlot.prototype.removeChannel = function(channel){
-    var idx = this.parentChannels.indexOf(channel);
-    if(idx != -1) this.parentChannels.splice(idx, 1);
-};
-DataSlot.prototype.swapAsync = function(){
-    var tmp = this.dataEntry;
-    this.dataEntry = this.asyncDataEntry;
-    this.asyncDataEntry = tmp;
-};
-
-DataSlot.prototype.setDataEntry = function(dataEntry, changeType){
-    this.dataEntry = dataEntry;
-    var state = changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ? Xflow.DATA_ENTRY_STATE.CHANGED_VALUE :
-        Xflow.DATA_ENTRY_STATE.CHANGED_SIZE;
-    this.notifyOnChange(state);
-};
-
-DataSlot.prototype.notifyOnChange = function(state){
-    for(var i = 0; i < this.parentChannels.length; ++i){
-        this.parentChannels[i].notifyOnChange(state);
-    }
-};
 
 //----------------------------------------------------------------------------------------------------------------------
 // ChannelMap
@@ -82,6 +34,11 @@ ChannelMap.prototype.getNames = function()
     return Object.keys(this.map);
 };
 
+/**
+ *
+ * @param name
+ * @returns {Channel}
+ */
 ChannelMap.prototype.getChannel = function(name)
 {
     if(!this.map[name])
@@ -109,8 +66,17 @@ ChannelMap.prototype.getChildDataIndexForFilter = function(filter){
     return result;
 };
 
+/**
+ * TODO: Add a mergeWithChildIndex method?
+ * @param {ChannelMap} otherChannelMap
+ * @param {number?} childDataIndex Index relative to DataNode. Used to mark if channel comes
+ * from a specific child DataNode, undefined if ChannelMap should take over child index from otherChannelMap
+ */
 ChannelMap.prototype.merge = function(otherChannelMap, childDataIndex){
     for(var name in otherChannelMap.map){
+        // Either use provided child index, otherwise use child index from ChannelMap to merge
+        // For input channel map we define the childDataIndex directly, for applied filters we use the
+        // childDataIndex of the provided ChannelMap (it's just a renaming)
         var index = childDataIndex == undefined ? otherChannelMap.getChildDataIndex(name) : childDataIndex;
         this.addChannel(name, otherChannelMap.getChannel(name), index);
     }
@@ -324,8 +290,8 @@ Channel.prototype.addChannelEntries = function(otherChannel){
 };
 /**
  * Return a DataEntry from this channel depending on sequenceKey.
- * @param sequenceAccessType
- * @param sequenceKey
+ * @param {Xflow.SEQUENCE?} sequenceAccessType
+ * @param {number?} sequenceKey
  * @returns {DataEntry}
  */
 Channel.prototype.getDataEntry = function(sequenceAccessType, sequenceKey){
@@ -407,3 +373,8 @@ var c_channelKeyIdx = 0;
 function generateChannelId(){
     return ++c_channelKeyIdx;
 }
+
+module.exports = {
+    Channel: Channel,
+    ChannelMap: ChannelMap
+};

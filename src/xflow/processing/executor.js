@@ -1,5 +1,6 @@
 var Base = require("../base.js");
-
+var OperatorList = require("../operator/operator-list");
+var Program = require("../operator/program");
 var Xflow = Base.Xflow;
 //----------------------------------------------------------------------------------------------------------------------
 // Executor
@@ -16,12 +17,28 @@ var Executor = function(ownerNode, platform){
     this.platform = platform;
 
     /**
-     *
-     * @type {Array}
+     * Nodes that are merged by this executor
+     * @type {Array.<ProcessNode|RequestNode>}
      */
     this.mergedNodes = [];
+
+    /**
+     * Subset of this.mergedNodes that directly provide results of the executor
+     * @type {Array.<ProcessNode>}
+     */
     this.mergedOutputNodes = [];
+
+    /**
+     * ProcessNodes to be executed before this executor can be
+     * executed
+     * @type {Array.<ProcessNode>}
+     */
     this.subNodes = [];
+
+    /**
+     * TODO: Unused. Remove?
+     * @type {Array}
+     */
     this.unprocessedDataNames = [];
 
     /**
@@ -30,13 +47,17 @@ var Executor = function(ownerNode, platform){
      *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
      *  e.g. passing graph information here requires a long prototype chain
      */
-    this.operatorList =  new Xflow.OperatorList(platform, ownerNode.owner.owner._graph);
-    this.programData =  new Xflow.ProgramData();
+    this.operatorList =  new OperatorList(platform, ownerNode.owner.owner._graph);
+    this.programData =  new Program.ProgramData();
 
+    /**
+     *
+     * @type {Program}
+     */
     this.program = null;
 
     constructExecutor(this, ownerNode);
-}
+};
 
     Executor.prototype.isProcessed = function(){
         var i = this.mergedOutputNodes.length;
@@ -45,7 +66,7 @@ var Executor = function(ownerNode, platform){
                 return false;
         }
         return true;
-    }
+    };
 
 
     Executor.prototype.run = function(asyncCallback){
@@ -66,7 +87,7 @@ var Executor = function(ownerNode, platform){
         }
 
 
-    }
+    };
 
     Executor.prototype.getVertexShader = function(){
         runSubNodes(this);
@@ -75,7 +96,7 @@ var Executor = function(ownerNode, platform){
         this.program = Xflow.createProgram(this.operatorList);
 
         return this.program;
-    }
+    };
 
 
     function constructExecutor(executer, ownerNode){
@@ -86,7 +107,7 @@ var Executor = function(ownerNode, platform){
             inputSlots: {},
             finalOutput: null,
             firstOperator: null
-        }
+        };
         var requestNode = initRequestNode(cData, executer, ownerNode);
 
         var noOperators = false;

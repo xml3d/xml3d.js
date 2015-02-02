@@ -3,7 +3,9 @@ var Base = require("../base.js");
 var Xflow = Base.Xflow;
 
 /**
- * Ordered list of platform-specific operators
+ * List of platform-specific operators, ordered by execution (last entry is last operator
+ * executed).
+ *
  * @param {Xflow.PLATFORM} platform
  * @param {Graph} graph
  * @constructor
@@ -17,7 +19,9 @@ var OperatorList = function (platform, graph) {
     this.entries = [];
 
     /**
-     * Size and iterator type of operator
+     * Map from position of input parameter to size and iterator type of parameters.
+     * Size is only specified for uniform array input, required for programs that
+     * have the array size specified.
      * @type {Object.<number,{size: number, iterate: Xflow.ITERATION_TYPE}>}
      */
     this.inputInfo = {};

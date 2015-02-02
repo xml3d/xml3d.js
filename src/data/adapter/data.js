@@ -19,11 +19,11 @@ Xflow.registerErrorCallback(function(message, xflowNode){
         }
         else if (userData.id) {
             var uri = new XML3D.URI("#" + userData.id);
-            uri = uri.getAbsoluteURI(userData.ownerDocument.documentURI);
+            uri = uri.getAbsoluteURI(userData.ownerDocument.URL);
             XML3D.debug.logError(message, "External Node: " + uri);
         }
         else {
-            XML3D.debug.logError(message, "External Document: " + userData.ownerDocument.documentURI);
+            XML3D.debug.logError(message, "External Document: " + userData.ownerDocument.URL);
         }
     }
     else if (typeof userData == "string") {

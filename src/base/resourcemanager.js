@@ -456,7 +456,7 @@
 
         if (typeof uri == "string") uri = new XML3D.URI(uri);
         if (baseDocument != document || !uri.isLocal()) {
-            uri = uri.getAbsoluteURI(baseDocument.documentURI);
+            uri = uri.getAbsoluteURI(baseDocument.URL);
         }
         return uri;
     };

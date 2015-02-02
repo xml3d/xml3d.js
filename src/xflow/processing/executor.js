@@ -1,7 +1,9 @@
 var Base = require("../base.js");
+var Xflow = Base.Xflow;
 var OperatorList = require("../operator/operator-list");
 var Program = require("../operator/program");
-var Xflow = Base.Xflow;
+var Utils = require("../utils/utils.js");
+
 //----------------------------------------------------------------------------------------------------------------------
 // Executor
 //----------------------------------------------------------------------------------------------------------------------
@@ -139,7 +141,7 @@ function initRequestNode(cData, executer, ownerNode){
             if(channel && channel.creatorProcessNode)
                 cData.finalOutput[name] = channel.getDataEntry();
         }
-        Xflow.nameset.add(executer.unprocessedDataNames, filter);
+        Utils.nameset.add(executer.unprocessedDataNames, filter);
         return true;
     }
     return false;
@@ -334,7 +336,7 @@ function blockSubtree(cData, node){
                 executer.programData.outputs.push(slot);
                 entry.setFinalOutput(i, index);
                 if(finalOutputName !== true){
-                    Xflow.nameset.remove(executer.unprocessedDataNames, finalOutputName);
+                    Utils.nameset.remove(executer.unprocessedDataNames, finalOutputName);
                 }
             }
             else{

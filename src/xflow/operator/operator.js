@@ -1,4 +1,5 @@
-(function(){
+var Base = require("../base.js");
+var Xflow = Base.Xflow;
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.registerOperator && Xflow.getOperator
@@ -15,7 +16,7 @@ var operators = {};
      * @param data
      */
 
-Xflow.registerOperator = function(name, data){
+var registerOperator = function(name, data){
     var opCollection, platform;
 
     initOperator(data);
@@ -44,17 +45,17 @@ Xflow.registerOperator = function(name, data){
     opCollection[platform].push(data);
 };
 
-Xflow.initAnonymousOperator = function(name, data){
+var initAnonymousOperator = function(name, data){
     initOperator(data);
     data.name = name;
     return data;
 }
 
-Xflow.isOperatorAsync = function(operator){
+var isOperatorAsync = function(operator){
     return !!operator.evaluate_async;
 }
 
-Xflow.getOperators = function(name, platform){
+var getOperators = function(name, platform){
     platform = platform || Xflow.PLATFORM.JAVASCRIPT;
 
     if (name && !operators[name]) {
@@ -99,4 +100,9 @@ function initOperator(operator){
     operator.platform = operator.platform || Xflow.PLATFORM.JAVASCRIPT;
 }
 
-})();
+module.exports = {
+    registerOperator: registerOperator,
+    initAnonymousOperator: initAnonymousOperator,
+    isOperatorAsync: isOperatorAsync,
+    getOperators: getOperators
+}

@@ -1,6 +1,6 @@
 var Base = require("../base.js");
 var Mapping = require("./mapping");
-
+var Utils = require("../utils/utils.js");
 var Xflow = Base.Xflow;
 
 /**
@@ -875,10 +875,10 @@ DataNode.prototype._getParamNames = function(){
     if(!this._paramNames){
         this._paramNames = [];
         if(this._sourceNode)
-            Xflow.nameset.add(this._paramNames, this._sourceNode._getParamNames());
+            Utils.nameset.add(this._paramNames, this._sourceNode._getParamNames());
         else{
             for(var i = 0; i < this._children.length; ++i){
-                Xflow.nameset.add(this._paramNames, this._children[i]._getParamNames());
+                Utils.nameset.add(this._paramNames, this._children[i]._getParamNames());
             }
         }
     }
@@ -889,13 +889,13 @@ DataNode.prototype._getGlobalParamNames = function(){
     if(!this._globalParamNames){
         this._globalParamNames = [];
         if(this._dataflowNode)
-            Xflow.nameset.add(this._globalParamNames, this._dataflowNode._getGlobalParamNames());
+            Utils.nameset.add(this._globalParamNames, this._dataflowNode._getGlobalParamNames());
 
         if(this._sourceNode)
-            Xflow.nameset.add(this._globalParamNames, this._sourceNode._getGlobalParamNames());
+            Utils.nameset.add(this._globalParamNames, this._sourceNode._getGlobalParamNames());
         else{
             for(var i = 0; i < this._children.length; ++i){
-                Xflow.nameset.add(this._globalParamNames, this._children[i]._getGlobalParamNames());
+                Utils.nameset.add(this._globalParamNames, this._children[i]._getGlobalParamNames());
             }
         }
     }

@@ -1,3 +1,5 @@
+var Xflow = require("../operator.js");
+
 // Code portions from http://www.html5rocks.com/en/tutorials/canvas/imagefilters/
 
 (function() {

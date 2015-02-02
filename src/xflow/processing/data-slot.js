@@ -1,3 +1,6 @@
+var Base = require("../base.js");
+var Xflow = Base.Xflow;
+
 /**
  * A DataSlot wraps a dataEntry and adds a key value for sequences.
  * This structure is used internally within channels and process nodes

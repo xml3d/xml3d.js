@@ -1,3 +1,5 @@
+var Xflow = require("../operator.js");
+
 Xflow.registerOperator("xflow.bufferSelect", {
     outputs: [  {type: 'float3', name: 'result', noAlloc: true}],
     params:  [  {type: 'float3', source: 'trueOption', array: true},

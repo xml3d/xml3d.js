@@ -1,14 +1,8 @@
-(function(){
+
+var set = {};
 
 
-
-Xflow.utils = {};
-
-
-Xflow.utils.set = {};
-
-
-Xflow.utils.set.add = function(setArray, setToAdd){
+set.add = function(setArray, setToAdd){
     if(Array.isArray(setToAdd)){
         for(var i = 0; i < setToAdd.length; ++i){
             if(setArray.indexOf(setToAdd[i]) == -1)
@@ -20,7 +14,7 @@ Xflow.utils.set.add = function(setArray, setToAdd){
             setArray.push(setToAdd);
     }
 }
-Xflow.utils.set.remove = function(setArray, setToRemove){
+set.remove = function(setArray, setToRemove){
     var idx;
     if(Array.isArray(setToRemove)){
         for(var i = 0; i < setToRemove.length; ++i){
@@ -34,7 +28,7 @@ Xflow.utils.set.remove = function(setArray, setToRemove){
     }
 }
 
-Xflow.utils.set.intersection = function(dest, setA, setB){
+set.intersection = function(dest, setA, setB){
     var size = setA.length;
     for(var i = 0; i < size; ++i){
         if(setB.indexOf(setA[i]) != -1)
@@ -42,7 +36,7 @@ Xflow.utils.set.intersection = function(dest, setA, setB){
     }
 }
 
-Xflow.utils.set.isIntersecting = function(setA, setB){
+set.isIntersecting = function(setA, setB){
     var i = setA.length;
     while(i--){
         if(setB.indexOf(setA[i]) != -1)
@@ -51,7 +45,7 @@ Xflow.utils.set.isIntersecting = function(setA, setB){
     return false;
 }
 
-Xflow.utils.set.isSubset = function(smallerSet, largerSet){
+set.isSubset = function(smallerSet, largerSet){
     var i = smallerSet.length;
     while(i--){
         if(largerSet.indexOf(smallerSet[i]) == -1)
@@ -63,9 +57,9 @@ Xflow.utils.set.isSubset = function(smallerSet, largerSet){
 /**
  * Nameset Utilities for Xflow
  */
-Xflow.nameset = {};
+var nameset = {};
 
-Xflow.nameset.add = function(nameSet, toAdd){
+nameset.add = function(nameSet, toAdd){
     if(!toAdd) return;
     if(typeof toAdd == "string"){
         if(nameSet.indexOf(toAdd) == -1)
@@ -79,7 +73,7 @@ Xflow.nameset.add = function(nameSet, toAdd){
     }
 }
 
-Xflow.nameset.remove = function(nameSet, toRemove){
+nameset.remove = function(nameSet, toRemove){
     if(!toRemove) return;
     if(typeof toRemove == "string"){
         var removeIdx = nameSet.indexOf(toRemove);
@@ -95,7 +89,7 @@ Xflow.nameset.remove = function(nameSet, toRemove){
     }
 }
 
-Xflow.nameset.intersection = function(nameSetA, nameSetB){
+nameset.intersection = function(nameSetA, nameSetB){
     var i = nameSetA.length;
     while(i--){
         if(nameSetB.indexOf(nameSetA[i]) == -1){
@@ -105,7 +99,7 @@ Xflow.nameset.intersection = function(nameSetA, nameSetB){
 }
 
 
-Xflow.utils.binarySearch = function(keys, key, maxIndex){
+var binarySearch = function(keys, key, maxIndex){
     var min = 0, max = maxIndex - 1;
     while(min <= max){
         var i = Math.floor((min + max) / 2);
@@ -120,5 +114,8 @@ Xflow.utils.binarySearch = function(keys, key, maxIndex){
     return max;
 }
 
-
-})();
+module.exports = {
+    set: set,
+    nameset: nameset,
+    binarySearch: binarySearch
+}

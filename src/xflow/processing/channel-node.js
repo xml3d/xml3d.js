@@ -1,7 +1,8 @@
 var Base = require("../base.js");
-var Channels = require("./channel");
-var RequestNode = require("./process-node").RequestNode;
-var DataSlot = require("./data-slot");
+var Channels = require("./channel.js");
+var RequestNode = require("./process-node.js").RequestNode;
+var ProcessNode = require("./process-node.js").ProcessNode;
+var DataSlot = require("./data-slot.js");
 
 var Xflow = Base.Xflow;
 var ChannelMap = Channels.ChannelMap;

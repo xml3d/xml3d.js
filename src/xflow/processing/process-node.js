@@ -1,3 +1,6 @@
+var Base = require("../base.js");
+var Xflow = Base.Xflow;
+
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.ProcessNode
 //----------------------------------------------------------------------------------------------------------------------
@@ -475,5 +478,8 @@ function getRequestVSResult(requestNode)
 }
 
 
-
+module.exports = {
+    RequestNode: RequestNode,
+    ProcessNode: ProcessNode
+}
 

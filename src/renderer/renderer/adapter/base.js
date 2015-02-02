@@ -8,7 +8,7 @@ RenderAdapter.prototype.getShader = function () {
 };
 
 RenderAdapter.prototype.getParentRenderAdapter = function () {
-    return this.factory.getAdapter(this.node.parentElement, RenderAdapter);
+    return this.factory.getAdapter(this.node.parentNode, RenderAdapter);
 };
 
 /**

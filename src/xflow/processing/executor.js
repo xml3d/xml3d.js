@@ -71,7 +71,7 @@ var Executor = function(ownerNode, platform){
 
     Executor.prototype.run = function(asyncCallback){
         runSubNodes(this);
-        updateIterateState(this);
+        updateIterateState(this); // TODO check if iterate State has changes in any way and only refetch program in that case
 
         this.program = Xflow.createProgram(this.operatorList);
 
@@ -98,95 +98,124 @@ var Executor = function(ownerNode, platform){
         return this.program;
     };
 
+/**
+ * Construct Executor
+ * @param executer
+ * @param ownerNode
+ */
+function constructExecutor(executer, ownerNode){
+    var cData = {
+        blockedNodes: [],   // Bad Nodes that cannot be merge. Filled during pre scan
+        doneNodes: [],      // Nodes that have been signed up for merging. TODO: Redundant with constructionOrder and subNodes? - maybe yes!
+        constructionOrder: [], // Store nodes in order of construction of OperatorEntries.
+        inputSlots: {},     // Collected input channels of all merged nodes. Used to avoid assigning same input buffer twice
+        finalOutput: null,  // finalOutput channes in case we have a RequestNode
+        firstOperator: null // Set to first operator that has been merged (will be executed last)
+    };
+    var requestNode = initRequestNode(cData, executer, ownerNode);
 
-    function constructExecutor(executer, ownerNode){
-        var cData = {
-            blockedNodes: [],
-            doneNodes: [],
-            constructionOrder: [],
-            inputSlots: {},
-            finalOutput: null,
-            firstOperator: null
-        };
-        var requestNode = initRequestNode(cData, executer, ownerNode);
+    var noOperators = false; // TODO: Remove this?
+    constructPreScan(cData, ownerNode, executer.platform, noOperators);
 
-        var noOperators = false;
-        constructPreScan(cData, ownerNode, executer.platform, noOperators);
+    setConstructionOrderAndSubNodes(cData, executer, ownerNode);
 
-        setConstructionOrderAndSubNodes(cData, executer, ownerNode);
-
-        constructFromData(executer, cData);
-    }
-
-    function initRequestNode(cData, executer, ownerNode){
-        if(ownerNode instanceof Xflow.RequestNode){
-            cData.finalOutput = {};
-            var filter = ownerNode.filter || ownerNode.owner.outputChannels.getNames();
-            for(var i = 0; i < filter.length; ++i){
-                var name = filter[i];
-                var channel = ownerNode.owner.outputChannels.getChannel(name);
-                if(channel && channel.creatorProcessNode)
-                    cData.finalOutput[name] = channel.getDataEntry();
-            }
-            Xflow.nameset.add(executer.unprocessedDataNames, filter);
-            return true;
+    constructFromData(executer, cData);
+}
+/**
+ * Only relevant if ownerNodes is a RequestNode
+ * Sets finalOutput of construction data and unprocessedDataNames
+ * @param cData
+ * @param executer
+ * @param ownerNode
+ * @returns {boolean}
+ */
+function initRequestNode(cData, executer, ownerNode){
+    if(ownerNode instanceof Xflow.RequestNode){
+        cData.finalOutput = {};
+        var filter = ownerNode.filter || ownerNode.owner.outputChannels.getNames();
+        for(var i = 0; i < filter.length; ++i){
+            var name = filter[i];
+            var channel = ownerNode.owner.outputChannels.getChannel(name);
+            if(channel && channel.creatorProcessNode)
+                cData.finalOutput[name] = channel.getDataEntry();
         }
-        return false;
+        Xflow.nameset.add(executer.unprocessedDataNames, filter);
+        return true;
     }
+    return false;
+}
+/**
+ * Goes to processing subtree at filled blockedNodes array in construction data.
+ * All nodes that cannot be merged or have parents that can't be merged will be blocked
+ * @param cData
+ * @param node
+ * @param platform
+ * @param noOperators
+ */
+function constructPreScan(cData, node, platform, noOperators){
+    if(cData.blockedNodes.indexOf(node) != -1)
+        return;
 
-    function constructPreScan(cData, node, platform, noOperators){
-        if(cData.blockedNodes.indexOf(node) != -1)
+    if(node.operator){
+        if(noOperators || !canOperatorMerge(cData, node.operator, platform)){
+            blockSubtree(cData, node);
             return;
-
-        if(node.operator){
-            if(noOperators || !canOperatorMerge(cData, node.operator, platform)){
-                blockSubtree(cData, node);
-                return;
-            }
-            else{
-                if(!cData.firstOperator) cData.firstOperator = node.operator;
-                var mapping = node.operator.mapping;
-                for(var i = 0; i < mapping.length; ++i){
-                    if(mapping[i].sequence){
-                        blockInput(cData, node, mapping[i].source);
-                        blockInput(cData, node, mapping[i].keySource);
-                    }
-                    else if(mapping[i].array){
-                        // TODO: Check for other things that cancel merging
-                        blockInput(cData, node, mapping[i].source);
-                    }
+        }
+        else{
+            if(!cData.firstOperator) cData.firstOperator = node.operator;
+            var mapping = node.operator.mapping;
+            for(var i = 0; i < mapping.length; ++i){
+                if(mapping[i].sequence){
+                    blockInput(cData, node, mapping[i].source);
+                    blockInput(cData, node, mapping[i].keySource);
+                }
+                else if(mapping[i].array){
+                    // TODO: Rename .array to .randomAccess
+                    blockInput(cData, node, mapping[i].source);
                 }
             }
         }
-        for(var i = 0; i < node.children.length; ++i){
-            constructPreScan(cData, node.children[i], platform, noOperators);
-        }
     }
-
-    function canOperatorMerge(cData, operator, platform){
-        // TODO: Detect merge support
-        return (platform == Xflow.PLATFORM.ASYNC || !Xflow.isOperatorAsync(operator)) &&
-            (!cData.firstOperator ||
-            (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl));
+    for(var i = 0; i < node.children.length; ++i){
+        constructPreScan(cData, node.children[i], platform, noOperators);
     }
+}
 
-    function blockSubtree(cData, node){
-        if(cData.blockedNodes.indexOf(node) != -1)
-            return;
+function canOperatorMerge(cData, operator, platform){
+    // TODO: Detect merge support
+    return (platform == Xflow.PLATFORM.ASYNC || !Xflow.isOperatorAsync(operator)) &&
+        (!cData.firstOperator ||
+        (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl));
+}
 
-        cData.blockedNodes.push(node);
-        for(var i = 0; i < node.children.length; ++i){
-            blockSubtree(cData, node.children[i]);
-        }
+function blockSubtree(cData, node){
+    if(cData.blockedNodes.indexOf(node) != -1)
+        return;
+
+    cData.blockedNodes.push(node);
+    for(var i = 0; i < node.children.length; ++i){
+        blockSubtree(cData, node.children[i]);
     }
-
+}
+/**
+ * Block all processNodes assigned to an input channel
+ * @param cData
+ * @param node
+ * @param inputName
+ */
     function blockInput(cData, node, inputName){
         var channel = node.inputChannels[inputName];
         if(channel && channel.creatorProcessNode){
             blockSubtree(cData, channel.creatorProcessNode);
         }
     }
-
+/**
+ * Fill doneNodes and constructionOrder arrays of construction data.
+ * It also fills the subNodes array of the executer
+ * @param cData construction data
+ * @param executer
+ * @param node
+ */
     function setConstructionOrderAndSubNodes(cData, executer, node){
         if(cData.doneNodes.indexOf(node) != -1)
             return;
@@ -201,12 +230,17 @@ var Executor = function(ownerNode, platform){
                 setConstructionOrderAndSubNodes(cData, executer, node.children[i]);
             }
 
-            if(node.operator){
+            if(node.operator){ // RequestNodes don't have an operator. Consider this case.
                 cData.constructionOrder.push(node);
             }
         }
     }
-
+/**
+ * Last step of construction: create OperatorList from constructionOrder array
+ * Also fill mergedNodes and programData
+ * @param executer
+ * @param cData
+ */
     function constructFromData(executer, cData){
 
         for(var i = 0; i < cData.constructionOrder.length; ++i){
@@ -228,7 +262,14 @@ var Executor = function(ownerNode, platform){
 
         constructLostOutput(executer, cData);
     }
-
+/**
+ * Construct input info for OperatorEntry.
+ * Will implicitly create ProgramInputConnections for ProgramData
+ * @param {Executor} executer
+ * @param {OperatorEntry} entry
+ * @param {{}} cData
+ * @param {ProcessNode} node
+ */
     function constructInputConnection(executer, entry, cData, node){
         var mapping = node.operator.mapping;
         for(var j = 0; j < mapping.length; ++j){
@@ -240,10 +281,13 @@ var Executor = function(ownerNode, platform){
                 // it's transfer input
                 var outputIndex = getOperatorOutputIndex(channel.creatorProcessNode, channel);
                 entry.setTransferInput(j, operatorIndex, outputIndex);
-                if(!executer.operatorList.entries[operatorIndex].isFinalOutput(outputIndex))
-                    executer.operatorList.entries[operatorIndex].setTransferOutput(outputIndex);
+                var prevOperator = executer.operatorList.entries[operatorIndex];
+                if(!prevOperator.isFinalOutput(outputIndex)){
+                    prevOperator.setTransferOutput(outputIndex);
+                }
                 continue;
             }
+            // Handle direct input
 
             var mappedInputName = mapping[j].source;
             if(node.owner.owner._computeInputMapping)
@@ -251,7 +295,7 @@ var Executor = function(ownerNode, platform){
 
             var connection = new Xflow.ProgramInputConnection();
             connection.channel = channel;
-            connection.arrayAccess = mapping[j].array || false;
+            connection.arrayAccess = mapping[j].array || false; // TODO: rename to randomAccess
             connection.sequenceAccessType = mapping[j].sequence || 0;
             if(connection.sequenceAccessType)
                 connection.sequenceKeySourceChannel = node.inputChannels[mapping[j].keySource];
@@ -272,6 +316,13 @@ var Executor = function(ownerNode, platform){
         }
     }
 
+/**
+ * Construct output info of OperatorEntry
+ * @param {Executor} executer
+ * @param {OperatorEntry} entry
+ * @param {{}} cData
+ * @param {ProcessNode} node
+ */
     function constructOutputConnection(executer, entry, cData, node){
         var outputs = node.operator.outputs;
         var isOutputNode = true;
@@ -290,7 +341,7 @@ var Executor = function(ownerNode, platform){
                 isOutputNode = false;
             }
         }
-        return isOutputNode;
+        return isOutputNode; // TODO: Check if computation of isOutputNode is really correct?
     }
 
 
@@ -305,7 +356,7 @@ var Executor = function(ownerNode, platform){
     }
 
     function getFinalOutputName(dataSlot, cData){
-        if(!cData.finalOutput)
+        if(!cData.finalOutput) // If root of Executor is a ProcessNode we don't have finalOutput defined and all outputs are final.
             return true;
         for(var name in cData.finalOutput){
             if(cData.finalOutput[name] == dataSlot.dataEntry){
@@ -349,7 +400,11 @@ var Executor = function(ownerNode, platform){
             }
         }
     }
-
+/**
+ * Determine if the platform needs to declare uniform array sizes in the source code.
+ * @param platform
+ * @returns {boolean}
+ */
     function platformRequiresArraySize(platform){
         return platform == Xflow.PLATFORM.GLSL;
     }

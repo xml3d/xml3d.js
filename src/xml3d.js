@@ -12,6 +12,7 @@ XML3D.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
 XML3D._xml3d = document.createElementNS(XML3D.xml3dNS, "xml3d");
 XML3D._native = !!XML3D._xml3d.style;
 XML3D._parallel = XML3D._parallel != undefined ? XML3D._parallel : false;
+XML3D.xhtml = !!document.xmlEncoding;
 
 (function () {
     if (navigator.userAgent.match(/(iPad|iPhone|iPod touch)/i)) {
@@ -266,8 +267,6 @@ XML3D.createClass = function(ctor, parent, methods) {
             debug && XML3D.debug.logInfo("Using native implementation.");
             return;
         }
-
-        XML3D.xhtml = (document.xmlEncoding != null);
 
         for(var i = 0; i < xml3ds.length; i++) {
             initXML3DElement(xml3ds[i]);

@@ -168,7 +168,7 @@ test("DOMCharacterDataModified notification", 6, function() {
     var pos = this.doc.getElementById("positions");
     this.factory.getAdapter(pos);
     equal(pos.value.length, 12);
-    pos.firstChild.deleteData (0,5);
+    pos.textContent = pos.textContent.substr(5);
     equal(pos.value.length, 11);
     equal(this.factory.event.type, XML3D.events.VALUE_MODIFIED);
 

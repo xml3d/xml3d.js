@@ -120,16 +120,7 @@ window.requestAnimFrame = (function(){
         }
 
         // didn't succeed, so now try to just take the first view
-        var firstView;
-        if(XML3D.xhtml){
-            firstView = XML3D.util.evaluateXPathExpr(
-                xml3d, './/xml3d:view[1]').singleNodeValue;
-        }
-        else{
-            firstView = xml3d.getElementsByTagName("view")[0];
-        }
-
-
+        var firstView = xml3d.querySelector("view");
         if(firstView)
         {
             // if it has an id, set it as active

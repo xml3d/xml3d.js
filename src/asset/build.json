@@ -1,6 +1,4 @@
 {
   "module": "asset",
-  "files": [
-    "asset.js"
-  ]
+  "task": "browserify"
 }

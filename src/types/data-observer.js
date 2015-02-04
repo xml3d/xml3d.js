@@ -168,7 +168,7 @@ XML3DDataChannelInfo.ORIGIN_CHILD = 1;
 XML3DDataChannelInfo.ORIGIN_COMPUTE = 2;
 XML3DDataChannelInfo.ORIGIN_PROTO = 3;
 
-module.export = {
+module.exports = {
     XML3DDataChannelInfo: XML3DDataChannelInfo,
     XML3DDataResult: XML3DDataResult,
     XML3DDataObserver: XML3DDataObserver

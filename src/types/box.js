@@ -165,6 +165,6 @@ XML3DBox.prototype.extend = function(that)
 
 window.XML3DBox = XML3DBox;
 
-module.export = {
+module.exports = {
     XML3DBox: XML3DBox
 };

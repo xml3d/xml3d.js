@@ -283,7 +283,7 @@ p.translate = function(x, y, z) {
 
 window.XML3DMatrix = XML3DMatrix;
 
-module.export = {
+module.exports = {
     XML3DMatrix: XML3DMatrix
 };
 

@@ -76,6 +76,6 @@ p.toString = function() {
 
 window.XML3DRay = XML3DRay;
 
-module.export = {
+module.exports = {
     XML3DRay: XML3DRay
 };

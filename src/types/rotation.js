@@ -289,6 +289,6 @@ p.setFromBasis = function(xAxis, yAxis, zAxis) {
 
 window.XML3DRotation = XML3DRotation;
 
-module.export = {
+module.exports = {
     XML3DRotation: XML3DRotation
 };

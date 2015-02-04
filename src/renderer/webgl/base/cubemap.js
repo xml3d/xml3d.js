@@ -1,3 +1,5 @@
+var StateMachine = require("../../../contrib/state-machine.js");
+
 /**
  * @param {WebGLRenderingContext} gl
  * @constructor
@@ -180,7 +182,7 @@ XML3D.extend(GLCubeMap.prototype, {
 
 });
 
-window.StateMachine.create({
+StateMachine.create({
     target: GLCubeMap.prototype,
     initial: GLCubeMap.State.NONE,
     events: [{name: 'created', from: '*', to: GLCubeMap.State.READY}, {

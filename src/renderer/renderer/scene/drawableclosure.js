@@ -1,3 +1,5 @@
+var EventDispatcher = require("../../../contrib/EventDispatcher.js");
+
 var DrawableClosure = function (context, type) {
     this.context = context;
     this._type = type;
@@ -12,7 +14,7 @@ DrawableClosure.READY_STATE = {
     COMPLETE: "complete", INCOMPLETE: "incomplete"
 };
 
-XML3D.createClass(DrawableClosure, XML3D.util.EventDispatcher, {
+XML3D.createClass(DrawableClosure, EventDispatcher, {
     getType: function () {
         return this._type;
     }, isValid: function () {

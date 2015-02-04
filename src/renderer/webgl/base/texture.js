@@ -1,4 +1,5 @@
 var utils = require("./utils");
+var StateMachine = require("../../../contrib/state-machine.js");
 var uniqueObjectId = utils.getUniqueCounter();
 
 var textures = 0;
@@ -275,7 +276,7 @@ XML3D.extend(GLTexture.prototype, {
 
 });
 
-window.StateMachine.create({
+StateMachine.create({
     target: GLTexture.prototype,
     initial: GLTexture.State.NONE,
     events: [{name: 'created', from: '*', to: GLTexture.State.READY}, {

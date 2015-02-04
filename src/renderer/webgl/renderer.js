@@ -7,6 +7,7 @@ var PickObjectRenderPass= require("./render-passes/pick-object.js");
 var PickPositionRenderPass = require("./render-passes/pick-position.js");
 var PickNormalRenderPass = require("./render-passes/pick-normal.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
+var GLU = require("../../contrib/glu.js");
 var MAX_PICK_BUFFER_DIMENSION = 512;
 
 var OPTION_SSAO = "renderer-ssao";

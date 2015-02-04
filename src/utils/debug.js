@@ -1,3 +1,5 @@
+var printStackTrace = require("../contrib/stacktrace-0.4.js");
+
 (function (ns) {
 
     var OPTION_LOGLEVEL = "loglevel";
@@ -55,7 +57,7 @@
                         window.console.error.apply(window.console, args);
                         break;
                     case XML3D.debug.EXCEPTION:
-                        window.console.error(XML3D.debug.printStackTrace({e: args[0], guess: true}).join('\n'));
+                        window.console.error(printStackTrace({e: args[0], guess: true}).join('\n'));
                         break;
                     case XML3D.debug.DEBUG:
                         window.console.debug.apply(window.console, args);
@@ -103,7 +105,7 @@
                 }
                 window.console.trace();
             } else {
-                var stack = XML3D.debug.printStackTrace();
+                var stack = printStackTrace();
                 msg && stack.splice(0, 0, msg);
                 XML3D.debug.doLog(logType, stack);
             }

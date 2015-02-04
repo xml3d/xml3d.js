@@ -1,3 +1,5 @@
+var EventDispatcher = require("../../../contrib/EventDispatcher.js");
+
 /**
  * @extends {EventDispatcher}
  * @constructor
@@ -13,7 +15,7 @@ var Pager = function () {
     this.addPage();
 };
 
-XML3D.createClass(Pager, XML3D.util.EventDispatcher, {
+XML3D.createClass(Pager, EventDispatcher, {
     addPage: function () {
         var page = new Float32Array(Pager.PAGE_SIZE);
         this.pages.push(page);

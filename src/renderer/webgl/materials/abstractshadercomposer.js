@@ -1,6 +1,7 @@
 var GLScene = require("../scene/glscene");
 var GLLights = require("../scene/gllights");
 var MaterialEvents = require("../materials/events");
+var EventDispatcher = require("../../../contrib/EventDispatcher.js");
 
 /**
  * @interface
@@ -62,7 +63,7 @@ var AbstractShaderComposer = function (context, shaderInfo) {
     shaderInfo.addChangeListener(this.onShaderInfoChanged.bind(this));
 };
 
-XML3D.createClass(AbstractShaderComposer, XML3D.util.EventDispatcher, {
+XML3D.createClass(AbstractShaderComposer, EventDispatcher, {
 
     // Implemented by subclass
     setShaderInfo: null,

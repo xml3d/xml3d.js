@@ -1,11 +1,4 @@
 {
   "module": "types",
-  "files": [
-    "vec3.js",
-    "rotation.js",
-    "box.js",
-    "matrix.js",
-    "ray.js",
-    "data-observer.js"
-  ]
+  "task": "browserify"
 }

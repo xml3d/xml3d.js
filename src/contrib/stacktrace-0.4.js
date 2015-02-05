@@ -446,6 +446,4 @@ printStackTrace.implementation.prototype = {
     }
 };
 
-module.exports = {
-    printStackTrace: printStackTrace
-};
+module.exports = printStackTrace;

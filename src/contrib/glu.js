@@ -59,8 +59,8 @@ GLU.unProject = function(winX, winY, winZ, model, proj, view, objPos) {
     /** @type {Array.<number>} */
     var finalMatrix = [];
 
-    $.multMatrices(model, proj, finalMatrix);
-    if (!$.invertMatrix(finalMatrix, finalMatrix)) {
+    GLU.multMatrices(model, proj, finalMatrix);
+    if (!GLU.invertMatrix(finalMatrix, finalMatrix)) {
         return (false);
     }
 
@@ -76,7 +76,7 @@ GLU.unProject = function(winX, winY, winZ, model, proj, view, objPos) {
     /** @type {Array.<number>} */
     var out = [];
 
-    $.multMatrixVec(finalMatrix, inp, out);
+    GLU.multMatrixVec(finalMatrix, inp, out);
 
     if (out[3] === 0.0) {
         return false;
@@ -189,6 +189,4 @@ GLU.invertMatrix = function(m, invOut) {
     return true;
 };
 
-module.exports = {
-    GLU: GLU
-};
+module.exports = GLU;

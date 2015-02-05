@@ -178,6 +178,4 @@ SimplexNoise.prototype.noise3d = function(xin, yin, zin) {
   return 32.0*(n0 + n1 + n2 + n3);
 };
 
-module.exports = {
-    SimplexNoise: SimplexNoise
-};
+module.exports = SimplexNoise;

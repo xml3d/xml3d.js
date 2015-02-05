@@ -84,6 +84,4 @@ EventDispatcher.prototype = {
 
 };
 
-module.exports = {
-    EventDispatcher: EventDispatcher
-};
+module.exports = EventDispatcher;

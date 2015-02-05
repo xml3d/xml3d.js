@@ -1,19 +1,17 @@
-// data/sink.js
-(function() {
-    "use strict";
-
+var DataAdapter = require("./data");
+var createClass = XML3D.createClass;
+var NodeAdapter = XML3D.base.NodeAdapter;
     /**
      * SinkDataAdapter represents the sink in the data hierarchy (no parents).
-     * Class XML3D.data.SinkDataAdapter
      * @constructor
-     * @extends {XML3D.data.DataAdapter}
+     * @extends {DataAdapter}
      * @param factory
      * @param node
      */
     var SinkDataAdapter = function(factory, node) {
-        XML3D.data.DataAdapter.call(this, factory, node);
+        DataAdapter.call(this, factory, node);
     };
-    XML3D.createClass(SinkDataAdapter, XML3D.data.DataAdapter);
+    createClass(SinkDataAdapter, DataAdapter);
 
     /**
      * Indicates whether this DataAdapter is a SinkAdapter (has no parent
@@ -32,16 +30,11 @@
         return "XML3D.data.SinkDataAdapter";
     };
 
-    // Export
-    XML3D.data.SinkDataAdapter = SinkDataAdapter;
-
-
 
     var ScriptDataAdapter = function(factory, node) {
-        XML3D.base.NodeAdapter.call(this, factory, node);
+        NodeAdapter.call(this, factory, node);
     };
-    XML3D.createClass(ScriptDataAdapter, XML3D.base.NodeAdapter);
-    XML3D.data.ScriptDataAdapter = ScriptDataAdapter;
+    createClass(ScriptDataAdapter, NodeAdapter);
 
     ScriptDataAdapter.prototype.getScriptType = function(){
         return this.node.type;
@@ -60,13 +53,13 @@
     };
 
     var ImgDataAdapter = function(factory, node) {
-        XML3D.base.NodeAdapter.call(this, factory, node);
+        NodeAdapter.call(this, factory, node);
         this.textureEntry = null;
         this.image = null;
         if (node.src)
             this.createImageFromURL(node.src);
     };
-    XML3D.createClass(ImgDataAdapter, XML3D.base.NodeAdapter);
+    createClass(ImgDataAdapter, NodeAdapter);
 
     /**
      * Creates a new image object
@@ -124,7 +117,7 @@
     };
 
     var VideoDataAdapter = function(factory, node) {
-        XML3D.data.DataAdapter.call(this, factory, node);
+        DataAdapter.call(this, factory, node);
         this.textureEntry = null;
         this.video = null;
         this._ticking = false;
@@ -132,7 +125,7 @@
         if (node.src)
             this.createVideoFromURL(node.src);
     };
-    XML3D.createClass(VideoDataAdapter, XML3D.base.NodeAdapter);
+    createClass(VideoDataAdapter, NodeAdapter);
 
     /**
      * Creates a new video object
@@ -220,12 +213,12 @@
     /** IFrameDataAdapter **/
 
      var IFrameDataAdapter = function(factory, node) {
-        XML3D.base.NodeAdapter.call(this, factory, node);
+        NodeAdapter.call(this, factory, node);
         this.textureEntry = null;
         this.image = null;
         this.createImageFromIFrame(node);
     };
-    XML3D.createClass(IFrameDataAdapter, XML3D.base.NodeAdapter);
+    createClass(IFrameDataAdapter, NodeAdapter);
 
     /**
      * Creates a new iframe object
@@ -295,8 +288,11 @@
     };
 
     // Export
-    XML3D.data.IFrameDataAdapter = IFrameDataAdapter;
-    XML3D.data.ImgDataAdapter = ImgDataAdapter;
-    XML3D.data.VideoDataAdapter = VideoDataAdapter;
+    module.exports = {
+        IFrameDataAdapter: IFrameDataAdapter,
+        ImgDataAdapter: ImgDataAdapter,
+        VideoDataAdapter: VideoDataAdapter,
+        SinkDataAdapter: SinkDataAdapter,
+        ScriptDataAdapter: ScriptDataAdapter
+    };
 
-}());

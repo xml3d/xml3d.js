@@ -1,14 +1,12 @@
-// data/adapter/json/factory.js
-(function() {
 
     var XML3DJSONFormatHandler = function() {
         XML3D.base.JSONFormatHandler.call(this);
-    }
+    };
     XML3D.createClass(XML3DJSONFormatHandler, XML3D.base.JSONFormatHandler);
 
     XML3DJSONFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
         return mimetype === "application/json" && response.format == "xml3d-json" && response.version == "0.4.0";
-    }
+    };
 
 
     XML3DJSONFormatHandler.prototype.getFormatData = function(response, responseType, mimetype, callback) {
@@ -20,7 +18,7 @@
             callback(false);
         }
 
-    }
+    };
 
     var xml3dJsonFormatHandler = new XML3DJSONFormatHandler();
     XML3D.base.registerFormat(xml3dJsonFormatHandler);
@@ -129,7 +127,7 @@
 
     JSONDataAdapter.prototype.getXflowNode = function(){
         return this.xflowDataNode;
-    }
+    };
 
     /**
      * @constructor
@@ -142,11 +140,10 @@
     XML3D.createClass(JSONFactory, XML3D.base.AdapterFactory);
 
 
-    JSONFactory.prototype.aspect = XML3D.data;
+    JSONFactory.prototype.aspect = "data";
 
     JSONFactory.prototype.createAdapter = function(xflowNode) {
         return new JSONDataAdapter(xflowNode);
-    }
+    };
 
     xml3dJsonFormatHandler.registerFactoryClass(JSONFactory);
-}());

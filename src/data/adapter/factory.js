@@ -1,101 +1,76 @@
-// data/factory.js
-(function() {
-    "use strict";
+var NodeAdapterFactory = XML3D.base.NodeAdapterFactory;
+var Asset = require("./asset");
+var Misc = require("./misc");
+var TextureDataAdapter = require("./texture");
+var TransformDataAdapter = require("./transform");
+var ValueDataAdapter = require("./values");
+var DataAdapter = require("./data");
+var ComputeDataAdapter = require("./compute");
+var DataflowDataAdapter = require("./dataflow");
 
-    /**
-     * Class XML3D.webgl.XML3DDataAdapterFactory
-     * extends: XML3D.base.AdapterFactory
-     *
-     * XML3DDataAdapterFactory creates DataAdapter instances for elements using generic data (<mesh>, <data>, <float>,...).
-     * Additionally, it manages all DataAdapter instances so that for each node there is always just one DataAdapter. When
-     * it creates a DataAdapter, it calls its init method. Currently, the following elements are supported:
-     *
-     * <ul>
-     *      <li>mesh</li>
-     *      <li>shader</li>
-     *      <li>lightshader</li>
-     *      <li>float</li>
-     *      <li>float2</li>
-     *      <li>float3</li>
-     *      <li>float4</li>
-     *      <li>int</li>
-     *      <li>bool</li>
-     *      <li>texture</li>
-     *      <li>data</li>
-     * </ul>
-     *
-     * @author Kristian Sons
-     * @author Benjamin Friedrich
-     *
-     * @version  10/2010  1.0
-     */
+/**
+ * Constructor of XML3DDataAdapterFactory
+ * XML3DDataAdapterFactory creates DataAdapter instances for elements using generic data (<mesh>, <data>, <float>,...).
+ * Additionally, it manages all DataAdapter instances so that for each node there is always just one DataAdapter. When
+ * it creates a DataAdapter, it calls its init method.
+ *
+ * @constructor
+ * @extends AdapterFactory
+ */
 
-    /**
-     * Constructor of XML3DDataAdapterFactory
-     *
-     * @constructor
-     * @implements {XML3D.base.IFactory}
-     * @extends XML3D.base.AdapterFactory
-     *
-     * @param {XML3D.webgl.GLCanvasHandler} handler
-     */
-    var XML3DDataAdapterFactory = function()
-    {
-        XML3D.base.NodeAdapterFactory.call(this, XML3D.data);
-    };
-    XML3D.createClass(XML3DDataAdapterFactory, XML3D.base.NodeAdapterFactory);
-    XML3DDataAdapterFactory.prototype.aspect = XML3D.data;
+var XML3DDataAdapterFactory = function () {
+    NodeAdapterFactory.call(this, "data");
+    this.graph = new Xflow.Graph();
+};
+XML3D.createClass(XML3DDataAdapterFactory, NodeAdapterFactory);
+XML3DDataAdapterFactory.prototype.aspect = "data";
 
-    var data = XML3D.data, reg = {};
+var reg = {
+    mesh: Misc.SinkDataAdapter,
+    shader: Misc.SinkDataAdapter,
+    lightshader: Misc.SinkDataAdapter,
+    float: ValueDataAdapter,
+    float2: ValueDataAdapter,
+    float3: ValueDataAdapter,
+    float4: ValueDataAdapter,
+    float4x4: ValueDataAdapter,
+    int: ValueDataAdapter,
+    int4: ValueDataAdapter,
+    bool: ValueDataAdapter,
+    byte: ValueDataAdapter,
+    ubyte: ValueDataAdapter,
+    img: Misc.ImgDataAdapter,
+    texture: TextureDataAdapter,
+    data: DataAdapter,
+    proto: DataAdapter,
+    dataflow: DataflowDataAdapter,
+    compute: ComputeDataAdapter,
+    iframe: Misc.IFrameDataAdapter,
+    video: Misc.VideoDataAdapter,
+    script: Misc.ScriptDataAdapter,
+    transform: TransformDataAdapter,
+    asset: Asset.AssetAdapter,
+    assetdata: Asset.AssetDataAdapter,
+    assetmesh: Asset.AssetMeshAdapter,
+    model: Asset.AssetAdapter
+};
 
-    reg['mesh']        = data.SinkDataAdapter;
-    reg['shader']      = data.SinkDataAdapter;
-    reg['lightshader'] = data.SinkDataAdapter;
-    reg['float']       = data.ValueDataAdapter;
-    reg['float2']      = data.ValueDataAdapter;
-    reg['float3']      = data.ValueDataAdapter;
-    reg['float4']      = data.ValueDataAdapter;
-    reg['float4x4']    = data.ValueDataAdapter;
-    reg['int']         = data.ValueDataAdapter;
-    reg['int4']        = data.ValueDataAdapter;
-    reg['bool']        = data.ValueDataAdapter;
-    reg['byte']        = data.ValueDataAdapter;
-    reg['ubyte']        = data.ValueDataAdapter;
-    reg['img']         = data.ImgDataAdapter;
-    reg['texture']     = data.TextureDataAdapter;
-    reg['data']        = data.DataAdapter;
-    reg['proto']       = data.DataAdapter;
-    reg['dataflow']    = data.DataflowDataAdapter;
-    reg['compute']     = data.ComputeDataAdapter;
-    reg['iframe']      = data.IFrameDataAdapter;
-    reg['video']       = data.VideoDataAdapter;
-    reg['script']      = data.ScriptDataAdapter;
-    reg['transform']   = data.TransformDataAdapter;
-    reg['asset']       = data.AssetAdapter;
-    reg['assetdata']   = data.AssetDataAdapter;
-    reg['assetmesh']   = data.AssetMeshAdapter;
-    reg['model']       = data.AssetAdapter;
+/**
+ * Creates a DataAdapter associated with the given node.
+ *
+ * @param node
+ *            element node which uses generic data. The supported elements
+ *            are listed in the class description above.
+ * @returns DataAdapter instance
+ */
+XML3DDataAdapterFactory.prototype.createAdapter = function (node) {
+    //XML3D.debug.logDebug("Creating adapter: " + node.localName);
+    var adapterContructor = reg[node.localName];
+    if (adapterContructor !== undefined) {
+        return new adapterContructor(this, node);
+    }
+    XML3D.debug.logWarning("Not supported as data element: " + node.localName);
+    return null;
+};
 
-   /**
-     * Creates a DataAdapter associated with the given node.
-     *
-     * @param node
-     *            element node which uses generic data. The supported elements
-     *            are listed in the class description above.
-     * @returns DataAdapter instance
-     */
-    XML3DDataAdapterFactory.prototype.createAdapter = function(node)
-    {
-        //XML3D.debug.logDebug("Creating adapter: " + node.localName);
-        var adapterContructor = reg[node.localName];
-        if(adapterContructor !== undefined) {
-            return new adapterContructor(this, node);
-        }
-        XML3D.debug.logWarning("Not supported as data element: " + node.localName);
-        return null;
-    };
-
-    // Export
-    XML3D.data.XML3DDataAdapterFactory = XML3DDataAdapterFactory;
-    XML3D.base.xml3dFormatHandler.registerFactoryClass(XML3DDataAdapterFactory);
-}());
+module.exports =  XML3DDataAdapterFactory;

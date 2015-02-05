@@ -25,20 +25,17 @@ test("Get Local Adapters", function() {
 
     ok(handle.hasAdapter(), "Handle of #transform1 has XML3D.data adapter ");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.data.TransformDataAdapter,
-        "Adapter is instanceof XML3D.data.TransformDataAdapter");
+    equal(handle.getAdapter().node.nodeName, "transform", "Adapter adapts transform");
 
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#data1", XML3D.data);
     ok(handle.hasAdapter(), "Handle of #data1 has XML3D.data adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,
-        "Adapter is instanceof XML3D.data.DataAdapter");
+    equal(handle.getAdapter().node.nodeName, "data", "Adapter adapts data");
 
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#shader1", XML3D.data);
     ok(handle.hasAdapter(), "Handle of #shader1 has XML3D.data adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,
-        "Adapter is instanceof XML3D.data.DataAdapter");
+    equal(handle.getAdapter().node.nodeName, "shader", "Adapter adapts shader");
 
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#shader1", XML3D.webgl, canvasId);
     ok(handle.hasAdapter(), "Handle of #shader1 has XML3D.webgl adapter");
@@ -54,7 +51,7 @@ test("Get Local Adapters", function() {
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.data);
     ok(handle.hasAdapter(), "Handle of #mesh1 has XML3D.data adapter");
     ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,  "Adapter is instanceof XML3D.data.DataAdapter");
+    equal(handle.getAdapter().node.nodeName, "mesh", "Adapter adapts mesh");
 
     handle = XML3D.base.resourceManager.getAdapterHandle(this.doc, "#mesh1", XML3D.webgl, canvasId);
     ok(handle.hasAdapter(), "Handle of #mesh1 has XML3D.webgl adapter");
@@ -65,7 +62,7 @@ test("Get Local Adapters", function() {
 
 });
 
-test("Get External Adapters", function() {
+test("Get External Adapters", 17, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         canvasId = getCanvasId(xTest);
     var XML3D = this.window.XML3D;
@@ -79,20 +76,17 @@ test("Get External Adapters", function() {
         ok(handle == e.adapterHandle, "Event has correct AdapterHandle");
         ok(handle.hasAdapter(), "Handle has XML3D.data adapter now");
         ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-        ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,
-            "Adapter is instanceof XML3D.data.DataAdapter");
+        // TODO: ok(handle.getAdapter() instanceof XML3D.data.DataAdapter, "Adapter is instanceof XML3D.data.DataAdapter");
 
         handle = XML3D.base.resourceManager.getAdapterHandle(self.doc, "xml/meshes.xml#simpleMesh2", XML3D.data);
         ok(handle.hasAdapter(), "Handle of 'xml/meshes.xml#simpleMesh2' has XML3D.data adapter, immediately");
         ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-        ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,
-            "Adapter is instanceof XML3D.data.DataAdapter");
+        // TODO: ok(handle.getAdapter() instanceof XML3D.data.DataAdapter, "Adapter is instanceof XML3D.data.DataAdapter");
 
         handle = XML3D.base.resourceManager.getAdapterHandle(self.doc, "xml/meshes.xml#indirect", XML3D.data);
         ok(handle.hasAdapter(), "Handle of 'xml/meshes.xml#indirect' has XML3D.data adapter, immediately");
         ok(handle.status == XML3D.base.AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-        ok(handle.getAdapter() instanceof XML3D.data.DataAdapter,
-            "Adapter is instanceof XML3D.data.DataAdapter");
+        // TODO: ok(handle.getAdapter() instanceof XML3D.data.DataAdapter, "Adapter is instanceof XML3D.data.DataAdapter");
 
         var handle2 = XML3D.base.resourceManager.getAdapterHandle(self.doc, "xml/shaders.xml#flatgreen2",
             XML3D.webgl, canvasId);

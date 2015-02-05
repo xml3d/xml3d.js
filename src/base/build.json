@@ -1,9 +1,4 @@
 {
   "module": "base",
-  "files": [
-    "./adapter.js",
-    "./adapterhandle.js",
-    "./resourcemanager.js",
-    "./formathandler.js"
-  ]
+  "task" : "browserify"
 }

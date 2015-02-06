@@ -21,10 +21,6 @@ test("&lt;xml3d&gt; interface test", function() {
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
     equal(typeof e.height, "number", "height is of type 'number'");
     equal(typeof e.width, "number", "width is of type 'number'");
-    equal(typeof e.createXML3DVec3, "function", "createXML3DVec3 is of type 'function'");
-    equal(typeof e.createXML3DRotation, "function", "createXML3DRotation is of type 'function'");
-    equal(typeof e.createXML3DMatrix, "function", "createXML3DMatrix is of type 'function'");
-    equal(typeof e.createXML3DRay, "function", "createXML3DRay is of type 'function'");
     equal(typeof e.getElementByPoint, "function", "getElementByPoint is of type 'function'");
     equal(typeof e.generateRay, "function", "generateRay is of type 'function'");
     equal(typeof e.getElementByRay, "function", "getElementByRay is of type 'function'");

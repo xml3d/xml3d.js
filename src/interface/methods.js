@@ -1,13 +1,5 @@
 var methods = {};
 
-methods.xml3dCreateXML3DVec3 = function() {
-    return new window.XML3DVec3();
-};
-
-methods.xml3dCreateXML3DRay = function() {
-    return new window.XML3DRay();
-};
-
 methods.xml3dGetElementByRay = function(ray, hitPoint, hitNormal) {
     XML3D.flushDOMChanges();
     var adapters = this._configured.adapters || {};
@@ -17,14 +9,6 @@ methods.xml3dGetElementByRay = function(ray, hitPoint, hitNormal) {
         }
     }
     return null;
-};
-
-methods.xml3dCreateXML3DMatrix = function() {
-    return new window.XML3DMatrix();
-};
-
-methods.xml3dCreateXML3DRotation = function() {
-    return new window.XML3DRotation();
 };
 
 methods.viewGetDirection = function() {

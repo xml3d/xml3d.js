@@ -50,7 +50,7 @@ module("Xflow tests", {
         var resManager = win.XML3D.base.resourceManager;
         var resType = win.XML3D.data;
         this.getDataAdapter = function(node){
-            win.XML3D._flushDOMChanges();
+            win.XML3D.flushDOMChanges();
             return resManager.getAdapter(node, resType);
         }
 
@@ -248,7 +248,7 @@ module("Xflow tests", {
     },
 
     Check : function(testNode) {
-        this.win.XML3D._flushDOMChanges();
+        this.win.XML3D.flushDOMChanges();
         var dataNodeId = testNode.getAttribute("data").substring(1);
         var dataElement = this.doc.getElementById(dataNodeId);
         var title =  testNode.getAttribute("title") || "No Title";

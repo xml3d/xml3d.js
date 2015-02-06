@@ -14,11 +14,13 @@ var ValueDataAdapter = function (factory, node) {
 };
 XML3D.createClass(ValueDataAdapter, NodeAdapter);
 
-ValueDataAdapter.prototype.init = function () {
+ValueDataAdapter.prototype.init = function()
+{
     var config = this.node._configured, value;
-    if (this.node.textContent == XML3D.scriptValueLabel) {
+    if(this.node.textContent == "[value set by script]"){
         value = config.scriptValue;
-    } else {
+    }
+    else{
         delete config.scriptValue;
         value = this.node.value;
     }

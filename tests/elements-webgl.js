@@ -45,7 +45,7 @@ test("Auto-configuration on insertion", 6, function() {
     // FIXME: This test doesn't run with MutationObservers
     // Elements will only be configured after DOM changes have been flushed
     // This seems difficult to fix but it also isn't the most important use case, probably?
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
 
     var g1 = this.doc.getElementById("g1");
     var m1 = this.doc.getElementById("m1");
@@ -151,7 +151,7 @@ test("DOMNodeInserted on xml3d", 5, function() {
     var g = this.doc.createElementNS(XML3D.xml3dNS, "group");
     this.factory.getAdapter(x); // 3: Init adapter
     x.appendChild(g); // 4: Adapter for myXml3d has been notified: Notification (type:0)
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     equal(this.factory.event.type, XML3D.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5
 });
 
@@ -165,7 +165,7 @@ test("DOMNodeRemoved on xml3d", 7, function() {
     // 5: Adapter for myXml3d has been notified: Notification (type:2)
     // 6: Adapter for myGroup has been notified: Notification (type:2)
     x.removeChild(g);
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
@@ -178,7 +178,7 @@ test("DOMNodeInserted on arbritary", 6, function() {
     this.factory.getAdapter(g); // 4: Init adapter
     // 5: Adapter for myGroup has been notified: Notification (type:0)
     x.appendChild(g);
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     equal(this.factory.event.type, XML3D.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 6
 });
 
@@ -192,7 +192,7 @@ test("DOMNodeRemoved on arbritary", 7, function() {
     // 5: Adapter for myGroup has been notified: Notification (type:2)
     // 6: Adapter for myMesh01 has been notified: Notification (type:2)
     x.removeChild(g);
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
@@ -209,6 +209,6 @@ test("DOMNodeRemoved recursively", 9, function() {
     // 6: Adapter for parentGroup has been notified: Notification (type:5)
     // 7: Adapter for child01 has been notified: Notification (type:5)
     // 8: Adapter for child01 has been notified: Notification (type:5)
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 9
 });

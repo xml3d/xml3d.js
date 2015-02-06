@@ -43,7 +43,7 @@ GLCanvasHandler.prototype.initialize = function () {
             return;
 
         XML3D.updateXflowObserver();
-        XML3D._flushDOMChanges();
+        XML3D.flushDOMChanges();
 
         if (that.canvasSizeChanged() || that.renderer.needsRedraw() || XML3D.options.getValue(OPTION_CONTINUOUS)) {
             that.dispatchUpdateEvent();
@@ -150,7 +150,7 @@ var c_timer = window.performance || Date;
  * Called by tick() to redraw the scene if needed
  */
 GLCanvasHandler.prototype.draw = function () {
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
     try {
         var start = c_timer.now();
         var stats = this.renderer.renderToCanvas();

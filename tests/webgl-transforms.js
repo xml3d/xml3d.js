@@ -67,13 +67,13 @@ test("Redraw triggers", 5, function() {
     renderer.needsDraw = false;
     renderer.needsPickingDraw = false;
     camtrans.setAttribute("translation", "0 0 -9");
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     ok(renderer.needsDraw && renderer.needsPickingDraw, "Camera transformation change needs full redraw");
     hTest.draw();
     ok(!renderer.needsDraw, "Redraw flag was set back after draw");
     renderer.needsPickingDraw = false;
 
     grouptrans.setAttribute("translation", "-3 0 -9");
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     ok(renderer.needsDraw && renderer.needsPickingDraw, "Group transformation change needs full redraw");
 });

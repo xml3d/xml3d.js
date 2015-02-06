@@ -4,7 +4,7 @@ function NotifyingAdapterFactory() {
     var that = this;
     this.name = "test";
     this.event = null;
-    this.type = "NotifyingAdapterFactory"; 
+    this.type = "NotifyingAdapterFactory";
     this.createAdapter = function() {
         return {
             init : function() {},
@@ -31,7 +31,7 @@ test("Event attribute notification tests", 8, function() {
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created"); // 1
     e.setAttribute("onclick", "alert('Hallo');"); // 2. Adapter notified
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
     var evt = this.factory.event;
     //console.dir(evt);
     ok(evt, "Event has been thrown"); // 3
@@ -40,7 +40,7 @@ test("Event attribute notification tests", 8, function() {
     equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName set"); // 6
     notEqual(evt.wrapped.relatedNode, null, "MutationEvent::relatedNode set"); // 7
     e.onclick = function() {}; // Adapter Notified (Not anymore!)
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
     equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName"); // 8
 });
 
@@ -49,7 +49,7 @@ test("Int attribute notifcation tests", 2, function() {
     var a = this.factory.getAdapter(e);
     e.setAttribute("width", "123");
     e.width = 300;
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("Float attribute notification tests", 2, function() {
@@ -57,7 +57,7 @@ test("Float attribute notification tests", 2, function() {
     var a = this.factory.getAdapter(e);
     e.setAttribute("fieldOfView", "0.5");
     e.fieldOfView = 0.87;
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("Boolean attribute notification tests", 2, function() {
@@ -65,7 +65,7 @@ test("Boolean attribute notification tests", 2, function() {
     var a = this.factory.getAdapter(e);
     e.setAttribute("visible", "false");
     e.visible = true;
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("XML3DVec attribute notification tests", 3, function() {
@@ -74,7 +74,7 @@ test("XML3DVec attribute notification tests", 3, function() {
     e.setAttribute("scale", "1 2 3");
     e.scale.x = 4.0;
     e.scale.setVec3Value("4 5 6");
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("XML3DRotation attribute notification tests", 5, function() {
@@ -85,7 +85,7 @@ test("XML3DRotation attribute notification tests", 5, function() {
     e.rotation.axis.y = 1.0;
     e.rotation.axis.setVec3Value("1 0 0");
     e.rotation.setAxisAngleValue("1 4 5 6");
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("Enumeration attribute notification tests", 5, function() {
@@ -98,7 +98,7 @@ test("Enumeration attribute notification tests", 5, function() {
     e.setAttribute("type", "3D"); // case insensitive
     e.setAttribute("type", "1d");
     e.setAttribute("type", "asdf"); // invalid
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 module("Composed Element notification tests", {
@@ -136,7 +136,7 @@ test("Only one element gets notified", 3, function() {
     addAdapters(x, this.factory);
     var img = this.doc.getElementById("tex1img");
     img.setAttribute("src", "textures/magenta.png");
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
 });
 
 module("Typed array notification tests", {

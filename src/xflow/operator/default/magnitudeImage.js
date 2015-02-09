@@ -1,3 +1,5 @@
+var Xflow = require("../operator.js");
+
 Xflow.registerOperator("xflow.magnitudeImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image1'} ],
     params:  [

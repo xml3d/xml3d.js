@@ -1,3 +1,5 @@
+var Xflow = require("../operator.js");
+
 Xflow.registerOperator("xflow.slerpSeq", {
     outputs: [  {type: 'float4', name: 'result'}],
     params:  [  {type: 'float4', source: 'sequence'},

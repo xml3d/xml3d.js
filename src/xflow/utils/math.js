@@ -1,7 +1,10 @@
+var math = {};
+
 // Additional methods in glMatrix style
 
+math.vec3 = {};
 
-XML3D.math.vec3.reciprocal = function(vec, dest) {
+math.vec3.reciprocal = function(vec, dest) {
     if(!dest) { dest = vec; }
 
     dest[0] = 1 / vec[0];
@@ -10,7 +13,7 @@ XML3D.math.vec3.reciprocal = function(vec, dest) {
     return dest;
 };
 
-XML3D.math.mat4.multiplyOffsetVec3 = function(mat, matOffset, vec, vecOffset, dest) {
+math.mat4.multiplyOffsetVec3 = function(mat, matOffset, vec, vecOffset, dest) {
     if(!dest) { dest = vec; }
     if(!vecOffset) { vecOffset = 0; }
 
@@ -25,7 +28,7 @@ XML3D.math.mat4.multiplyOffsetVec3 = function(mat, matOffset, vec, vecOffset, de
 
 
 
-XML3D.math.mat4.multiplyOffsetDirection = function(mat, matOffset, vec, vecOffset, dest) {
+math.mat4.multiplyOffsetDirection = function(mat, matOffset, vec, vecOffset, dest) {
     if(!dest) { dest = vec; }
     if(!vecOffset) { vecOffset = 0; }
 
@@ -42,7 +45,7 @@ var IDENT_MAT = XML3D.math.mat4.identity(XML3D.math.mat4.create());
 var TMP_MATRIX = XML3D.math.mat4.create();
 var TMP_VEC = XML3D.math.vec3.create();
 
-XML3D.math.mat4.makeTransformXflow = function(translation,rotation,scale,center,scaleOrientation,dest){
+math.mat4.makeTransformXflow = function(translation,rotation,scale,center,scaleOrientation,dest){
     XML3D.math.mat4.identity(dest);
     if(translation) XML3D.math.mat4.translate(dest, dest, translation);
     if(center) XML3D.math.mat4.translate(dest, dest, center);
@@ -64,7 +67,7 @@ XML3D.math.mat4.makeTransformXflow = function(translation,rotation,scale,center,
     }
 };
 
-XML3D.math.mat4.makeTransformInvXflow = function(translation,rotation,scale,center,scaleOrientation,dest){
+math.mat4.makeTransformInvXflow = function(translation,rotation,scale,center,scaleOrientation,dest){
     XML3D.math.mat4.identity(dest);
     if(center){
         XML3D.math.mat4.translate(dest, dest, center);
@@ -86,64 +89,7 @@ XML3D.math.mat4.makeTransformInvXflow = function(translation,rotation,scale,cent
     if(translation) XML3D.math.mat4.translate(dest, dest, XML3D.math.vec3.negate(TMP_VEC, translation) );
 };
 
-/*
-mat4.makeTransformInvOffset = function(translation,rotation,scale,center,scaleOrientation,offset,dest) {
-    var mo = offset*16;
-    var vo = offset*3;
-    var qo = offset*4;
-
-    dest[mo+0] = 1;
-    dest[mo+1] = 0;
-    dest[mo+2] = 0;
-    dest[mo+3] = 0;
-    dest[mo+4] = 0;
-    dest[mo+5] = 1;
-    dest[mo+6] = 0;
-    dest[mo+7] = 0;
-    dest[mo+8] = 0;
-    dest[mo+9] = 0;
-    dest[mo+10] = 1;
-    dest[mo+11] = 0;
-    dest[mo+12] = -translation[vo];
-    dest[mo+13] = -translation[vo+1];
-    dest[mo+14] = -translation[vo+2];
-    dest[mo+15] = 1;
-
-    if (rotation) {
-        var rotM = XML3D.math.quat.toMat4([rotation[qo+1],rotation[qo+2],rotation[qo+3],rotation[qo]]);
-        XML3D.math.mat4.multiplyOffset(dest, mo,  rotM, 0,  dest, mo);
-    }
-};
-
-XML3D.math.mat4.makeTransformOffset = function(translation,rotation,scale,center,scaleOrientation,offset,dest) {
-    var mo = offset*16;
-    var vo = offset*3;
-    var qo = offset*4;
-
-    dest[mo+0] = 1;
-    dest[mo+1] = 0;
-    dest[mo+2] = 0;
-    dest[mo+3] = 0;
-    dest[mo+4] = 0;
-    dest[mo+5] = 1;
-    dest[mo+6] = 0;
-    dest[mo+7] = 0;
-    dest[mo+8] = 0;
-    dest[mo+9] = 0;
-    dest[mo+10] = 1;
-    dest[mo+11] = 0;
-    dest[mo+12] = translation[vo];
-    dest[mo+13] = translation[vo+1];
-    dest[mo+14] = translation[vo+2];
-    dest[mo+15] = 1;
-
-    if (rotation) {
-        var rotM = XML3D.math.quat.toMat4([rotation[qo+1],rotation[qo+2],rotation[qo+3],-rotation[qo]]);
-        XML3D.math.mat4.multiplyOffset(dest, mo,  rotM, 0,  dest, mo);
-    }
-};
-*/
-XML3D.math.mat4.multiplyOffset = function(dest, destOffset, mat, offset1, mat2, offset2) {
+math.mat4.multiplyOffset = function(dest, destOffset, mat, offset1, mat2, offset2) {
     var a00 = mat2[offset2+0], a01 = mat2[offset2+1], a02 = mat2[offset2+2], a03 = mat2[offset2+3];
     var a10 = mat2[offset2+4], a11 = mat2[offset2+5], a12 = mat2[offset2+6], a13 = mat2[offset2+7];
     var a20 = mat2[offset2+8], a21 = mat2[offset2+9], a22 = mat2[offset2+10], a23 = mat2[offset2+11];
@@ -172,7 +118,7 @@ XML3D.math.mat4.multiplyOffset = function(dest, destOffset, mat, offset1, mat2, 
     dest[destOffset+15] = b30*a03 + b31*a13 + b32*a23 + b33*a33;
 };
 
-XML3D.math.quat.slerpOffset = function(quat, offset1, quat2, offset2, t, dest, destOffset, shortest) {
+math.quat.slerpOffset = function(quat, offset1, quat2, offset2, t, dest, destOffset, shortest) {
     if(!dest) { dest = quat; }
 
     var ix1 = offset1, iy1 = offset1+1, iz1 = offset1+2, iw1 = offset1+3;
@@ -207,3 +153,5 @@ XML3D.math.quat.slerpOffset = function(quat, offset1, quat2, offset2, t, dest, d
     dest[izd] = c1*quat[iz1] + c2*quat2[iz2];
     dest[iwd] = c1*quat[iw1] + c2*quat2[iw2];
 };
+
+module.exports = math;

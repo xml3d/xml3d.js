@@ -1,3 +1,5 @@
+var Xflow = require("../operator.js");
+
 Xflow.registerOperator("xflow.selectBool", {
     outputs: [ {type: 'bool', name : 'result', customAlloc: true} ],
     params:  [ {type: 'int', source : 'index'},

@@ -1,3 +1,5 @@
+var Xflow = require("../operator.js");
+
 Xflow.registerOperator("xflow.merge3", {
     outputs: [{name: 'result', tupleSize: '16'}],
     params:  ['value1','value2','value3'],

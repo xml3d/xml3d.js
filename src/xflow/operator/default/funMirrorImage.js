@@ -1,3 +1,4 @@
+var Xflow = require("../operator.js");
 // Based on: http://web.archive.org/web/20100310063925/http://dem.ocracy.org/libero/photobooth/
 
 Xflow.registerOperator("xflow.funMirrorImage", {

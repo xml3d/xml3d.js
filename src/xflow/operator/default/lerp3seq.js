@@ -1,3 +1,4 @@
+var Xflow = require("../operator.js");
 
 Xflow.registerOperator("xflow.lerpSeq", {
     outputs: [  {type: 'float3', name: 'result'}],

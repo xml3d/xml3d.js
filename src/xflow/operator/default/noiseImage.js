@@ -1,3 +1,5 @@
+var Xflow = require("../operator.js");
+
 Xflow.registerOperator("xflow.noiseImage", {
     outputs: [ {type: 'texture', name : 'image', customAlloc: true} ],
     params:  [ {type: 'int', source: 'width'},

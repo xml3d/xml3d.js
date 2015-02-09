@@ -33,7 +33,7 @@ p.handleConnectedAdapterEvent = function (evt) {
     switch (evt.type) {
         case XML3D.events.NODE_INSERTED:
             // This also initializes the children
-            this.initElement(evt.wrapped.target);
+            this.initElement(evt.mutation.target);
             break;
         case XML3D.events.THIS_REMOVED:
             this.dispose();

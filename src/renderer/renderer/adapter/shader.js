@@ -59,7 +59,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
     notifyChanged: function (evt) {
         switch (evt.type) {
             case XML3D.events.VALUE_MODIFIED:
-                var target = evt.attrName || evt.wrapped.attrName;
+                var target = evt.mutation.attributeName;
                 switch (target) {
                     case "script":
                         this.updateScript();

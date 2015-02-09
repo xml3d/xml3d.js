@@ -44,13 +44,14 @@ XML3D.extend(TransformableAdapter.prototype, {
         }
     }, notifyChanged: function (evt) {
         if (evt.type == XML3D.events.VALUE_MODIFIED) {
-            var target = evt.attrName || evt.wrapped.attrName;
+            var target = evt.mutation.attributeName;
             if (target == "transform") {
                 this.transformFetcher && this.transformFetcher.update();
             } else if (target == "style") {
                 this.transformFetcher && this.transformFetcher.updateMatrix();
             } else if (target == "visible") {
-                this.renderNode.setLocalVisible(evt.wrapped.newValue === "true");
+                var newValue = evt.mutation.target.getAttribute("visible");
+                this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
                 this.factory.renderer.requestRedraw("Transformable visibility changed.");
             } else if (target == "shader" && this.handleShader) {
                 //this.disconnectAdapterHandle("shader");

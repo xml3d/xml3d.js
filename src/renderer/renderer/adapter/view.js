@@ -44,7 +44,7 @@ p.notifyChanged = function (evt) {
             this.dispose();
             break;
         case XML3D.events.VALUE_MODIFIED:
-            var target = evt.wrapped.attrName;
+            var target = evt.mutation.attributeName;
 
             switch (target) {
                 case "orientation":

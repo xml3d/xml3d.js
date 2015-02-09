@@ -36,16 +36,15 @@ XML3DRenderAdapter.prototype.notifyChanged = function (evt) {
             return;
         case XML3D.events.NODE_INSERTED:
             // This also initializes the children
-            this.initElement(evt.wrapped.target);
+            this.initElement(evt.mutation.target);
             return;
         case XML3D.events.NODE_REMOVED:
             // Handled in removed node
             return;
     }
 
-    var target = evt.attrName || evt.wrapped.attrName;
-
-    if (target == "activeView") {
+    var target = evt.mutation.attributeName;
+    if (target && (target.toLowerCase() === "activeview")) {
         this.updateActiveViewAdapter();
         this.setViewAdapter();
     }

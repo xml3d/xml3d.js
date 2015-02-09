@@ -6,130 +6,96 @@ var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver
 
 if(MutationObserver){
     mutObserver = new MutationObserver(handleMutations);
+} else {
+    XML3D.debug.logError("XML3D requires MutationObservers, which your browser does not support. Please consider upgrading to a newer version.");
+    mutObserver = {
+        takeRecords:function(){return []},
+        observe: function(a,b) {}
+    }
 }
 
 XML3D.flushDOMChanges = function(){
-    if(mutObserver){
-        var records = mutObserver.takeRecords();
-        handleMutations(records);
-    }
+    var records = mutObserver.takeRecords();
+    records.length && handleMutations(records);
 };
 
-function handleMutations(mutations){
+function handleMutations(mutations) {
     for(var i = 0; i < mutations.length; ++i){
-        var mutation = mutations[i];
-        var target = mutation.target;
-        if(mutation.type == 'attributes'){
-            var newValue = target.getAttribute(mutation.attributeName);
-            if(newValue === null) newValue = "";
-            attrModified({
-                target: target,
-                attrName: mutation.attributeName,
-                newValue: newValue,
-                prevValue: mutation.oldValue,
-                relatedNode: target});
-        }
-        else if(mutation.type == 'childList'){
-            var addedNodes = mutation.addedNodes;
-            var j = addedNodes.length;
-            while(j--){
-                nodeInserted({
-                    target: addedNodes[j],
-                    relatedNode: target,
-                    currentTarget: target
-                });
-            }
-            var removedNodes = mutation.removedNodes;
-            var j = removedNodes.length;
-            while(j--){
-                nodeRemoved({
-                    target: removedNodes[j],
-                    relatedNode: target,
-                    currentTarget: target
-                });
-            }
-        }
-        else if(mutation.type == 'characterData'){
-            characterDataChanged({ target: target});
+        var mutationRecord = mutations[i];
+        if (mutationRecord.type === 'attributes') {
+            handleAttributeChanged(mutationRecord);
+        } else if (mutationRecord.type === 'childList') {
+            handleChildListChanged(mutationRecord);
+        } else if(mutationRecord.type == 'characterData'){
+            handleCharacterDataChanged(mutationRecord);
         }
     }
 }
 
-function attrModified(e) {
-    var eh = e.target._configured;
-
-    if(e.attrName == "style"){
-        var n = new events.NotificationWrapper(e);
-        n.type = events.VALUE_MODIFIED;
-        eh.notify(n);
+function handleCharacterDataChanged(mutation) {
+    var target = mutation.target;
+    while(!target._configured && target.parentElement) {
+        target = target.parentElement;
     }
-
-    var isHTML = e.target instanceof HTMLElement;
-    var handler = eh && eh.handlers[isHTML ? e.attrName.toLowerCase() : e.attrName];
-    if(!handler)
+    var elementHandler = target._configured;
+    if (!elementHandler) {
         return;
-
-    var notified = false;
-    if (handler.setFromAttribute) {
-        notified = handler.setFromAttribute(e.newValue, e.prevValue, e.target, eh.storage);
     }
-    if (!notified) {
-        var n = new events.NotificationWrapper(e);
-        n.type = events.VALUE_MODIFIED;
-        eh.notify(n);
-    }
+    var n = new events.NotificationWrapper(mutation, events.VALUE_MODIFIED, target);
+    elementHandler.handlers.value.resetValue(elementHandler.storage);
+    elementHandler.notify(n);
 }
 
-function nodeRemoved(e) {
-    var parent = e.relatedNode,
-    removedChild = e.target,
-    parentHandler = parent._configured;
-
-    if(!parentHandler)
-        return;
-
-    var n = new events.NotificationWrapper(e);
-
-    if (removedChild.nodeType == Node.TEXT_NODE && parentHandler.handlers.value) {
-        n.type = events.VALUE_MODIFIED;
-        parentHandler.handlers.value.resetValue(parentHandler.storage);
-    } else {
-        n.type = events.NODE_REMOVED;
-        parentHandler.notify(n);
-        if(removedChild._configured) {
-            n.type = events.THIS_REMOVED;
-            removeRecursive(removedChild,n);
-            notifyNodeIdChangeRecursive(removedChild);
+function handleChildListChanged(mutation) {
+    var addedNodes = mutation.addedNodes;
+    for (var i = 0; i < addedNodes.length; i++) {
+        if (addedNodes[i].nodeType === Node.TEXT_NODE){
+            // This may have been the value of eg. a float3 element, we should treat it as a characterDataChanged event
+            handleCharacterDataChanged(mutation);
+            continue;
         }
+        handleNodeInserted(addedNodes[i], mutation);
     }
-    // TODO: Quick fix, solve issue of self monitoring elements better
-    //Quick fix for ghost element bug
 
-    // Dynamically generated objects are self-monitoring, means listening for their own changes.
-    // Once added to the scene, they should stop, otherwise multiple events are received that lead
-    // i.e. to multiple draw objects per mesh.
-    // Now the first event handler stops propagation of the event, but this can have strange side-FX,
-    // if i.e. nodes are monitored from outside.
-    e.stopPropagation && e.stopPropagation();
+    var removedNodes = mutation.removedNodes;
+    for (var i=0; i < removedNodes.length; i++) {
+        if (removedNodes[i].nodeType === Node.TEXT_NODE){
+            continue; // characterDataChanged events were already handled in addedNodes
+        }
+        handleNodeRemoved(removedNodes[i], mutation);
+    }
 }
 
-function removeRecursive(element, evt) {
-    if(element._configured) {
-        element._configured.notify(evt);
-        element._configured.remove(evt);
+function handleNodeInserted(node, mutation) {
+    var targetHandler = mutation.target._configured;
+    if (!targetHandler) {
+        return;
     }
-    var n = element.firstElementChild;
-    while(n) {
-        removeRecursive(n,evt);
-        n = n.nextElementSibling;
+    config.element(node);
+    addRecursive(node);
+    var n = new events.NotificationWrapper(mutation, events.NODE_INSERTED, node);
+    targetHandler.notify(n);
+}
+
+function handleNodeRemoved(node, mutation) {
+    var targetHandler = mutation.target._configured;
+    if (!targetHandler) {
+        return;
+    }
+    var n = new events.NotificationWrapper(mutation, events.NODE_REMOVED, node);
+    targetHandler.notify(n);
+    if(node._configured) {
+        n.type = events.THIS_REMOVED;
+        removeRecursive(node, n);
+        notifyNodeIdChangeRecursive(node);
+    } else if (node.nodeType === Node.TEXT_NODE){
+        // This may have been the value of eg. a float3 element, we should also treat it as a characterDataChanged event
+        handleCharacterDataChanged(mutation);
     }
 }
 
 function notifyNodeIdChangeRecursive(element){
-    // We call this here in addition to nodeRemovedFromDocument, since the later is not supported by Firefox
-    // TODO: Remove this function call once DOMNodeRemoveFromDocument is supported by all major browsers
     XML3D.base.resourceManager.notifyNodeIdChange(element, element.id, null);
-
     var n = element.firstElementChild;
     while(n) {
         notifyNodeIdChangeRecursive(n);
@@ -137,31 +103,18 @@ function notifyNodeIdChangeRecursive(element){
     }
 }
 
-
-function nodeInserted(e) {
-    var parent = e.relatedNode,
-    insertedChild = e.target,
-    parentHandler = parent._configured;
-
-    if(!parentHandler || e.currentTarget === insertedChild)
-        return;
-
-    var n = new events.NotificationWrapper(e);
-
-    if (insertedChild.nodeType == Node.TEXT_NODE && parentHandler.handlers.value) {
-        n.type = events.VALUE_MODIFIED;
-        parentHandler.handlers.value.resetValue(parentHandler.storage);
-    } else {
-        config.element(insertedChild);
-        n.type = events.NODE_INSERTED;
-        addRecursive(insertedChild);
+function removeRecursive(element, evt) {
+    if(element._configured) {
+        element._configured.notify(evt);
+        element._configured.remove(evt);
     }
-    parentHandler.notify(n);
-    // TODO: Quick fix, solve issue of self monitoring elements better
-    e.stopPropagation && e.stopPropagation();
+    var child = element.firstElementChild;
+    while(child) {
+        removeRecursive(child, evt);
+        child = child.nextElementSibling;
+    }
 }
 
-// TODO: Remove this function once DOMNodeInsertedIntoDocument is supported by all major browsers
 function addRecursive(element){
     var n = element.firstElementChild;
     while(n) {
@@ -169,47 +122,42 @@ function addRecursive(element){
         n = n.nextElementSibling;
     }
     // We call this here in addition to nodeInsertedIntoDocument, since the later is not supported by Firefox
-
     XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.id);
 }
 
-function characterDataChanged(e){
-    var target = e.target;
-    while(!target._configured && target.parentElement)
-        target = target.parentElement;
-    var eh = target._configured;
-    if(!eh) return;
-    var n = new events.NotificationWrapper(e);
-    n.type = events.VALUE_MODIFIED;
-    eh.handlers.value.resetValue(eh.storage);
-    eh.notify(n);
+function handleAttributeChanged(mutation) {
+    var target = mutation.target;
+    var elementHandler = target._configured;
+    if (!elementHandler) {
+        return;
+    }
+    var attributeHandler = elementHandler.handlers[mutation.attributeName];
+    if (!attributeHandler) {
+        return;
+    }
+    var notified = false;
+    if (attributeHandler.setFromAttribute) {
+        var newValue = target.getAttribute(mutation.attributeName);
+        notified = attributeHandler.setFromAttribute(newValue, mutation.oldValue, target, elementHandler.storage);
+    }
+    if (!notified) {
+        var n = new events.NotificationWrapper(mutation, events.VALUE_MODIFIED, mutation.target);
+        elementHandler.notify(n);
+    }
 }
 
-var ElementHandler = function(elem, monitor) {
-    if (elem) {
-        this.element = elem;
-        this.handlers = null;
-        this.storage = {};
-        this.adapters = {};
 
-        if(mutObserver){
-            mutObserver.observe(elem, { childList: true,  attributes: true, attributeOldValue: true} );
-        }
-        else{
-            if(monitor) {
-                elem.addEventListener('DOMNodeRemoved', nodeRemoved, true);
-                elem.addEventListener('DOMNodeInserted', nodeInserted, true);
-                //elem.addEventListener('DOMNodeInsertedIntoDocument', nodeInsertedIntoDocument, true);
-                //elem.addEventListener('DOMNodeRemovedFromDocument', nodeRemovedFromDocument, true);
-                elem.addEventListener('DOMAttrModified', attrModified, true);
-                this.monitoring = true;
-            }
-        }
-
-
+var ElementHandler = function(elem) {
+    if (!elem) {
+        return;
     }
-};
+    this.element = elem;
+    this.handlers = null;
+    this.storage = {};
+    this.adapters = {};
+    mutObserver.observe(elem, { childList: true,  attributes: true, attributeOldValue: true} );
 
+};
 
 ElementHandler.prototype.registerAttributes = function(config) {
     var elem = this.element;
@@ -314,12 +262,7 @@ ElementHandler.prototype.registerAttributes = function(config) {
 
 
 ElementHandler.prototype.registerMixed = function() {
-    if(mutObserver){
-        mutObserver.observe(this.element, { childList: true,  attributes: true, attributeOldValue: true, characterData: true, subtree: true} );
-    }
-    else{
-        this.element.addEventListener('DOMCharacterDataModified', characterDataChanged, false);
-    }
+    mutObserver.observe(this.element, { childList: true,  attributes: true, attributeOldValue: true, characterData: true, subtree: true} );
 };
 
 /**
@@ -376,7 +319,7 @@ function delegateProp(name, elem, canvas) {
 }
 
 var XML3DHandler = function(elem) {
-    ElementHandler.call(this, elem, true);
+    ElementHandler.call(this, elem);
     var c = document.createElement("canvas");
     c.width = 800;
     c.height = 600;
@@ -398,12 +341,9 @@ var config = {};
 
 /**
  * @param {Element} element
- * @param {boolean=} selfmonitoring: whether to register listeners on element for node
- *                  addition/removal and attribute modification. This property is propagated
- *                  to children.
  * @return {undefined}
  */
-config.element = function(element, selfmonitoring) {
+config.element = function(element) {
     if (element._configured === undefined ) {
         var classInfo = ClassInfo[element.localName];
         if (classInfo === undefined) {
@@ -411,7 +351,7 @@ config.element = function(element, selfmonitoring) {
         } else {
             element._configured = element.localName == "xml3d" ?
                 new XML3DHandler(element)
-                : new ElementHandler(element,selfmonitoring);
+                : new ElementHandler(element);
             element._configured.registerAttributes(classInfo);
             // Fix difference in Firefox (undefined) and Chrome (null)
             try{
@@ -427,7 +367,7 @@ config.element = function(element, selfmonitoring) {
             XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.getAttribute("id"));
 
             while(n) {
-                config.element(n, selfmonitoring);
+                config.element(n);
                 n = n.nextElementSibling;
             }
         }
@@ -436,18 +376,15 @@ config.element = function(element, selfmonitoring) {
 
 /**
  * @param {Element} element
- * @param {boolean=} selfmonitoring: whether to register listeners on element for node
- *                  addition/removal and attribute modification. This property is propagated
- *                  to children.
  * @return {undefined}
  */
-config.configure = function(element, selfmonitoring) {
+config.configure = function(element) {
     if (Array.isArray(element)) {
         Array.forEach(element, function(el) {
-            config.element(el, selfmonitoring);
+            config.element(el);
         });
     } else {
-        config.element(element, selfmonitoring);
+        config.element(element);
     }
 };
 

@@ -224,7 +224,7 @@ XML3D.createClass(NodeAdapterFactory, AdapterFactory);
  */
 NodeAdapterFactory.prototype.getAdapter = function(node) {
     if(node && node._configured === undefined)
-        XML3D.config.element(node, true);
+        XML3D.config.element(node);
     if (!node || node._configured === undefined)
         return null;
 

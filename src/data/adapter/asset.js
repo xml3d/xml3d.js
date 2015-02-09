@@ -115,7 +115,7 @@ AssetAdapter.prototype.notifyChanged = function (evt) {
         updateChildren(this);
 
     } else if (evt.type == XML3D.events.VALUE_MODIFIED) {
-        var attr = evt.wrapped.attrName;
+        var attr = evt.mutation.attributeName;
         switch (attr) {
             case "name":
                 this.asset.setName(this.node.getAttribute("name"));
@@ -176,7 +176,7 @@ AssetDataAdapter.prototype.connectedAdapterChanged = function (attributeName, ad
 AssetDataAdapter.prototype.notifyChanged = function (evt) {
     DataAdapter.prototype.notifyChanged.call(this, evt);
     if (evt.type == XML3D.events.VALUE_MODIFIED) {
-        var attr = evt.wrapped.attrName;
+        var attr = evt.mutation.attributeName;
         switch (attr) {
             case "name":
                 this.assetEntry.setName(this.node.getAttribute("name"));
@@ -263,7 +263,7 @@ AssetMeshAdapter.prototype.init = function () {
 AssetMeshAdapter.prototype.notifyChanged = function (evt) {
     AssetDataAdapter.prototype.notifyChanged.call(this, evt);
     if (evt.type == XML3D.events.VALUE_MODIFIED) {
-        var attr = evt.wrapped.attrName;
+        var attr = evt.mutation.attributeName;
         switch (attr) {
             case "shader":
                 setShaderUrl(this, this.assetEntry);

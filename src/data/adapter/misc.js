@@ -95,7 +95,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
 
     ImgDataAdapter.prototype.notifyChanged = function(evt) {
         if (evt.type == XML3D.events.VALUE_MODIFIED) {
-            var attr = evt.wrapped.attrName;
+            var attr = evt.mutation.attributeName;
             if(attr == "src"){
                 this.createImageFromURL(this.node.src);
             }
@@ -193,7 +193,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
 
     VideoDataAdapter.prototype.notifyChanged = function(evt) {
         if (evt.type == XML3D.events.VALUE_MODIFIED) {
-            var attr = evt.wrapped.attrName;
+            var attr = evt.mutation.attributeName;
             if(attr == "src"){
                 this.createVideoFromURL(this.node.src);
             }

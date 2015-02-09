@@ -42,17 +42,18 @@ LightRenderAdapter.prototype.notifyChanged = function (evt) {
             }
             break;
         case XML3D.events.VALUE_MODIFIED:
-            this.valueModified(evt.wrapped.attrName, evt.wrapped.newValue);
+            this.valueModified(evt.mutation);
             break;
         case XML3D.events.ADAPTER_VALUE_CHANGED:
             this.renderNode.setLightType(evt.adapter.getLightType());
     }
 };
 
-LightRenderAdapter.prototype.valueModified = function (name, newValue) {
-    switch (name) {
+LightRenderAdapter.prototype.valueModified = function (mutation) {
+    var newValue = mutation.target.getAttribute(mutation.attributeName);
+    switch (mutation.attributeName) {
         case "visible":
-            this.renderNode.setLocalVisible(newValue === "true");
+            this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
             break;
         case "intensity":
             this.renderNode.setLocalIntensity(newValue);

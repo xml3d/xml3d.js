@@ -44,7 +44,7 @@ ValueDataAdapter.prototype.getXflowNode = function () {
  */
 ValueDataAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type == XML3D.events.VALUE_MODIFIED) {
-        var attr = evt.wrapped.attrName;
+        var attr = evt.mutation.attributeName;
         if (!attr) {
             delete this.node._configured.scriptValue;
             this.xflowInputNode.data.setValue(this.node.value);

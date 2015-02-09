@@ -78,7 +78,7 @@ TextureDataAdapter.prototype.getValue = function () {
 
 TextureDataAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type == XML3D.events.VALUE_MODIFIED) {
-        var attr = evt.wrapped.attrName;
+        var attr = evt.mutation.attributeName;
         if (attr == "name") {
             this.xflowInputNode.name = this.node.name;
         } else if (attr == "key") {

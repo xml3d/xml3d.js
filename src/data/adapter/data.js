@@ -121,7 +121,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
         }
 
     } else if (evt.type === XML3D.events.NODE_INSERTED) {
-        var insertedNode = evt.wrapped.target;
+        var insertedNode = evt.affectedNode;
         var adapter = this.factory.getAdapter(insertedNode);
         if (!adapter) {
             return;
@@ -141,7 +141,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
         }
 
     } else if (evt.type === XML3D.events.NODE_REMOVED) {
-        adapter = this.factory.getAdapter(evt.wrapped.target);
+        var adapter = this.factory.getAdapter(evt.affectedNode);
         if (!adapter) {
             return;
         }
@@ -150,7 +150,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
         this.xflowDataNode.removeChild(removedXflowNode);
 
     } else if (evt.type === XML3D.events.VALUE_MODIFIED) {
-        var attr = evt.wrapped.attrName;
+        var attr = evt.mutation.attributeName;
 
         if (attr === "filter" && !this.assetData) {
             this.xflowDataNode.setFilter(this.node.getAttribute(attr));

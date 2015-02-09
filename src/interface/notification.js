@@ -22,13 +22,14 @@ events.Notification.prototype.toString = function() {
     return "Notification (type:" + this.type + ")";
 };
 //-----------------------------------------------------------------------------
-events.NotificationWrapper = function(evt, type) {
-  this.wrapped = evt;
-  this.type = type;
+events.NotificationWrapper = function(mutation, type, affectedNode) {
+    this.mutation = mutation;
+    this.type = type;
+    this.affectedNode = affectedNode;
 };
 XML3D.createClass(events.NotificationWrapper, events.Notification);
 events.NotificationWrapper.prototype.toString = function() {
-    return "NotificationWrapper (type:" + this.type + ", wrapped: "+ this.wrapped +")";
+    return "NotificationWrapper (type:" + this.type + ", wrapped: "+ this.mutation +")";
 };
 
 //-----------------------------------------------------------------------------

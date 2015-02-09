@@ -1,5 +1,8 @@
 
 var string2bool = function(string) {
+    if (!string) {
+        return false;
+    }
     switch (string.toLowerCase()) {
     case "true":
     case "1":
@@ -214,7 +217,7 @@ handlers.BoolAttributeHandler = function(id, defaultValue) {
             this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
     };
     this.setFromAttribute = function(value, prevValue, elem, storage) {
-        storage[id] = string2bool(value + '');
+        storage[id] = string2bool(value);
         return false;
     };
 

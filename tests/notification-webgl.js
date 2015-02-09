@@ -26,7 +26,7 @@ test("Factory test", 2, function() {
     this.factory.createAdapter().notifyChanged({});
 });
 
-test("Event attribute notification tests", 8, function() {
+test("Event attribute notification tests", 7, function() {
     var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created"); // 1
@@ -36,12 +36,11 @@ test("Event attribute notification tests", 8, function() {
     //console.dir(evt);
     ok(evt, "Event has been thrown"); // 3
     ok(evt instanceof XML3D.events.NotificationWrapper, "Type is NotificationWrapper"); // 4
-    ok(evt.wrapped, "DOM notification is wrapped"); // 5
-    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName set"); // 6
-    notEqual(evt.wrapped.relatedNode, null, "MutationEvent::relatedNode set"); // 7
+    ok(evt.mutation, "DOM notification is wrapped"); // 5
+    equal(evt.mutation.attributeName, "onclick", "MutationEvent::attrName set"); // 6
     e.onclick = function() {}; // Adapter Notified (Not anymore!)
     XML3D.flushDOMChanges();
-    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName"); // 8
+    equal(evt.mutation.attributeName, "onclick", "MutationEvent::attrName"); // 8
 });
 
 test("Int attribute notifcation tests", 2, function() {
@@ -181,7 +180,7 @@ test("Text DOMNodeInserted notification", 8, function() {
     this.factory.getAdapter(index);
     index.appendChild(this.doc.createTextNode(" 0 1 2")); // 3: Adapter notified: Notification (type:1)
     equal(index.value.length, 9, "Length of typed array after text node has been inserted"); // 4
-    equal(this.factory.event.type, XML3D.events.VALUE_MODIFIED, "Notfication of type VALUE_MODIFIED"); // 5
+    equal(this.factory.event.type, XML3D.events.VALUE_MODIFIED, "Notification of type VALUE_MODIFIED"); // 5
 
     var pos = this.doc.getElementById("positions");
     this.factory.getAdapter(pos);

@@ -43,22 +43,20 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
                 // this.createPerObjectData();
                 return;
             case XML3D.events.VALUE_MODIFIED:
-                this.valueChanged(evt.wrapped);
+                this.valueChanged(evt.mutation);
         }
     }, /**
      * @param {MutationEvent} evt
      */
-    valueChanged: function (evt) {
-        var target = evt.attrName;
-
+    valueChanged: function (mutation) {
+        var target = evt.attributeName;
         switch (target) {
-
             case "src":
                 // Handled by data component
                 break;
 
             case "type":
-                this.renderNode.setType(evt.newValue);
+                this.renderNode.setType(mutation.target.getAttribute("type"));
                 break;
         }
 

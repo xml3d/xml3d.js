@@ -1,3 +1,6 @@
+if (XML3D !== undefined) {
+    throw new Error("Tried to define the XML3D namespace a second time. Please ensure xml3d.js is only loaded once!");
+}
 /** @namespace * */
 var XML3D = XML3D || {};
 

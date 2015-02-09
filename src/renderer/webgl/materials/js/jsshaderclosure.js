@@ -18,45 +18,39 @@ var c_SystemUpdate = {
 
 var c_jsShaderCache = {};
 
-
-function convertEnvName(name) {
-    return ("_env_" + name).replace(/_+/g, "_");
-}
-
-function addDefaultChanneling(vsConfig, inputName) {
-    var outputName = convertEnvName(inputName);
+function addDefaultChanneling(vsConfig, inputName){
+    var outputName = inputName;
     vsConfig.channelAttribute(inputName, outputName, null);
 }
 
 
-function channelVsAttribute(vsConfig, inputName, spaceInfo) {
-    if (!spaceInfo || !spaceInfo[inputName]) {
+function channelVsAttribute(vsConfig, inputName, spaceInfo){
+    if(!spaceInfo || !spaceInfo[inputName]){
         addDefaultChanneling(vsConfig, inputName);
         return;
     }
 
     var i = spaceInfo[inputName].length;
-    while (i--) {
+    while(i--){
         var entry = spaceInfo[inputName][i];
-        var outputName = convertEnvName(entry.name), code = null;
-        switch (entry.space) {
-            case Shade.SPACE_VECTOR_TYPES.OBJECT:
-                break;
+        var outputName = entry.name, code = null;
+        switch(entry.space){
+            case Shade.SPACE_VECTOR_TYPES.OBJECT: break;
             case Shade.SPACE_VECTOR_TYPES.VIEW_POINT:
                 vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
-                code = outputName + " = ( modelViewMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
+                code = "this.modelViewMatrix.mulVec(" + inputName + ", 1.0).xyz()";
                 break;
             case Shade.SPACE_VECTOR_TYPES.VIEW_NORMAL:
                 vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelViewMatrixN", true);
-                code = outputName + " = normalize( modelViewMatrixN * #I{" + inputName + "} );";
+                code = "this.modelViewMatrixN.mulVec(" + inputName + ").normalize()";
                 break;
             case Shade.SPACE_VECTOR_TYPES.WORLD_POINT:
                 vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelMatrix", true);
-                code = outputName + " = ( modelMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
+                code = "this.modelMatrix.mulVec(" + inputName + ", 1.0).xyz()";
                 break;
             case Shade.SPACE_VECTOR_TYPES.WORLD_NORMAL:
                 vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelMatrixN", true);
-                code = outputName + " = normalize( modelMatrixN * #I{" + inputName + "} );";
+                code = "this.modelMatrixN.mulVec(" + inputName + ").normalize()";
                 break;
             default:
                 throw new Error("Can't handle Space Type: " + entry.space);
@@ -65,66 +59,18 @@ function channelVsAttribute(vsConfig, inputName, spaceInfo) {
     }
 }
 
-
-/**
- * @param {Xflow.DATA_TYPE} xflowType
- */
-var convertXflow2ShadeType = function (xflowType, source) {
-    var result = {}
-    switch (xflowType) {
-        case Xflow.DATA_TYPE.BOOL:
-            result.type = Shade.TYPES.BOOLEAN;
-            break;
-        case Xflow.DATA_TYPE.INT:
-            result.type = Shade.TYPES.INT;
-            break;
-        case Xflow.DATA_TYPE.FLOAT:
-            result.type = Shade.TYPES.NUMBER;
-            break;
-        case Xflow.DATA_TYPE.FLOAT2:
-            result.type = Shade.TYPES.OBJECT;
-            result.kind = Shade.OBJECT_KINDS.FLOAT2;
-            break;
-        case Xflow.DATA_TYPE.FLOAT3:
-            result.type = Shade.TYPES.OBJECT;
-            result.kind = Shade.OBJECT_KINDS.FLOAT3;
-            break;
-        case Xflow.DATA_TYPE.FLOAT4:
-            result.type = Shade.TYPES.OBJECT;
-            result.kind = Shade.OBJECT_KINDS.FLOAT4;
-            break;
-        case Xflow.DATA_TYPE.FLOAT3X3:
-            result.type = Shade.TYPES.OBJECT;
-            result.kind = Shade.OBJECT_KINDS.MATRIX3;
-            break;
-        case Xflow.DATA_TYPE.FLOAT4X4:
-            result.type = Shade.TYPES.OBJECT;
-            result.kind = Shade.OBJECT_KINDS.MATRIX4;
-            break;
-        case Xflow.DATA_TYPE.TEXTURE:
-            result.type = Shade.TYPES.OBJECT;
-            result.kind = Shade.OBJECT_KINDS.TEXTURE;
-            break;
-        case Xflow.DATA_TYPE.UNKNOWN:
-        default:
-            throw new Error("Unknown Xflow DataType: " + xflowType);
-    }
-    result.source = source;
-    return result;
-}
-
 /**
  * @param context
  * @param sourceTemplate
  * @param dataCallback
  * @constructor
  */
-var JSShaderClosure = function (context, sourceTemplate, extractedParams) {
+var JSShaderClosure = function(context, sourceTemplate, extractedParams) {
     AbstractShaderClosure.call(this, context);
     this.sourceTemplate = sourceTemplate;
     this.extractedParams = extractedParams;
-    this.uniformSetter = function () {
-    };
+    this.vertexUniforms = [];
+    this.uniformSetter = function() {};
     this.uniformConverter = [];
 };
 
@@ -140,29 +86,33 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         var vsDataResult = vsRequest.getResult();
 
         var contextData = {
-            "this": getJSSystemConfiguration(this.context),
-            "global.shade": [{"extra": {"type": "object", "kind": "any", "global": true, "info": {}}}]
+            "this" : getJSSystemConfiguration(this.context),
+            "global.shade" :[{"extra": {"type": "object","kind": "any","global" : true,"info" : {}}}]
         };
 
         var systemUniforms = scene.systemUniforms, systemInfo = contextData["this"].info;
-        for (var systemSource in c_SystemUpdate) {
+        for(var systemSource in c_SystemUpdate){
             var entry = c_SystemUpdate[systemSource];
             var length = systemUniforms[systemSource] && systemUniforms[systemSource].length;
             systemInfo[entry.staticValue].staticValue = length;
-            for (var i = 0; i < entry.staticSize.length; ++i)
+            for(var i = 0; i < entry.staticSize.length; ++i)
                 systemInfo[entry.staticSize[i]].staticSize = length;
         }
 
         var contextInfo = contextData["global.shade"][0].extra.info;
 
-        var shaderEntries = shaderResult && shaderResult.getOutputMap(), vsShaderOutput = vsDataResult && vsDataResult.outputNames;
+        var shaderEntries = shaderResult && shaderResult.getOutputMap(),
+            vsShaderOutput = vsDataResult && vsDataResult.outputNames;
 
-        for (var i = 0; i < this.extractedParams.length; ++i) {
+        for(var i = 0; i < this.extractedParams.length; ++i){
             var paramName = this.extractedParams[i];
-            if (vsShaderOutput && vsShaderOutput.indexOf(paramName) != -1) {
-                contextInfo[paramName] = convertXflow2ShadeType(vsDataResult.getOutputType(paramName), vsDataResult.isOutputUniform(paramName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
-            } else if (shaderEntries && shaderEntries[paramName]) {
-                contextInfo[paramName] = convertXflow2ShadeType(shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
+            if(vsShaderOutput && vsShaderOutput.indexOf(paramName) != -1){
+                contextInfo[paramName] = Xflow.shadejs.convertFromXflow(vsDataResult.getOutputType(paramName),
+                    vsDataResult.isOutputUniform(paramName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
+            }
+            else if(shaderEntries && shaderEntries[paramName]){
+                contextInfo[paramName] = Xflow.shadejs.convertFromXflow(
+                    shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
             }
         }
         XML3D.debug.logDebug("CONTEXT:", contextData);
@@ -175,11 +125,13 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
             extractUniformExpressions: XML3D.options.getValue("shadejs-extractUniformExpressions")
         };
         var compileOptions = {
-            useStatic: true, uniformExpressions: options.uniformExpressions
+            useStatic: true,
+            uniformExpressions: options.uniformExpressions
         };
         var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
 
-        var jsShaderKey = implementation + ";" + JSON.stringify(options) + ";" + JSON.stringify(contextInfo) + ";" + this.sourceTemplate;
+        var jsShaderKey = implementation + ";" + JSON.stringify(options) + ";" + JSON.stringify(contextInfo) + ";"
+               + this.sourceTemplate;
 
         var cacheEntry;
         if (!(cacheEntry = c_jsShaderCache[jsShaderKey])) {
@@ -191,12 +143,15 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
                 var glslShader = workSet.compileFragmentShader(compileOptions);
 
                 cacheEntry = {
-                    source: glslShader.source, uniformSetter: glslShader.uniformSetter, spaceInfo: spaceInfo
+                    source: glslShader.source,
+                    uniformSetter: glslShader.uniformSetter,
+                    spaceInfo: spaceInfo
                 }
 
                 this.uniformSetter = glslShader.uniformSetter;
                 this.source = {
-                    fragment: glslShader.source, vertex: this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
+                    fragment: glslShader.source,
+                    vertex: this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
                 }
                 if (scene.deferred) {
                     cacheEntry.signatures = workSet.getProcessingData("colorClosureSignatures");
@@ -205,15 +160,19 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
                     c_jsShaderCache[jsShaderKey] = cacheEntry;
             } catch (e) {
                 SystemNotifier.sendEvent('shadejs', {
-                    shadejsType: "error", event: e, code: this.sourceTemplate
+                    shadejsType: "error",
+                    event: e,
+                    code: this.sourceTemplate
                 });
 
-                var errorMessage = "Shade.js Compile Error:\n" + e.message + "\n------------\n" + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
+                var errorMessage = "Shade.js Compile Error:\n" + e.message + "\n------------\n"
+                  + "Shader Source:" + "\n------------\n" + XML3D.debug.formatSourceCode(this.sourceTemplate);
                 throw new Error(errorMessage);
             }
         }
         this.source = {
-            fragment: cacheEntry.source, vertex: this.createVertexShader(vsRequest, vsDataResult, cacheEntry.spaceInfo)
+            fragment: cacheEntry.source,
+            vertex: this.createVertexShader(vsRequest, vsDataResult, cacheEntry.spaceInfo)
         }
         this.uniformSetter = cacheEntry.uniformSetter;
         if (scene.deferred) {
@@ -225,24 +184,44 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         XML3D.debug.logDebug(this.source.fragment);
 
         SystemNotifier.sendEvent('shadejs', {
-            shadejsType: "success", vertexShader: this.source.vertex, fragmentShader: this.source.fragment
+            shadejsType: "success",
+            vertexShader: this.source.vertex,
+            fragmentShader: this.source.fragment
         });
 
         return true;
     },
 
-    createVertexShader: function (vsRequest, vsDataResult, spaceInfo) {
+    createVertexShader: function(vsRequest, vsDataResult, spaceInfo){
         var vsConfig = vsRequest.getConfig();
         var names = vsDataResult.outputNames;
-        for (var i = 0; i < names.length; ++i) {
+        for(var i = 0; i < names.length; ++i){
             channelVsAttribute(vsConfig, names[i], spaceInfo);
         }
         vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
-        vsConfig.addCodeFragment("gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");
-        return vsRequest.getVertexShader().getGLSLCode();
+        vsConfig.channelAttribute("position", "_glPosition", "this.modelViewProjectionMatrix.mulVec(position, 1.0)");
+        //vsConfig.addCodeFragment( "gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");
+        var vertexShader =  vsRequest.getVertexShader();
+        this.vertexUniforms.length = 0;
+        var inputNames = vertexShader.inputNames;
+        for(var i = 0; i < inputNames.length; ++i){
+            var name = inputNames[i];
+            if(vertexShader.isInputUniform(name))
+                this.vertexUniforms.push(name);
+        }
+        return vertexShader.getGLSLCode();
     },
 
-    setUniformVariables: function (envNames, sysNames, inputCollection) {
+    setUniformVariables: function(envNames, sysNames, inputCollection){
+        var i = envNames && envNames.length;
+        var override = inputCollection.envOverride, base = inputCollection.envBase;
+        while(i--){
+            var name = envNames[i];
+            if(this.vertexUniforms.indexOf(name) != -1){
+                this.program.setUniformVariable(name, override && override[name] !== undefined ? override[name] : base[name]);
+            }
+        }
+
         this.uniformSetter(envNames, sysNames, inputCollection, this.program.setUniformVariable.bind(this.program));
     },
 

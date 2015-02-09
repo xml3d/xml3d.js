@@ -49,7 +49,7 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
      * @param {MutationEvent} evt
      */
     valueChanged: function (mutation) {
-        var target = evt.attributeName;
+        var target = mutation.attributeName;
         switch (target) {
             case "src":
                 // Handled by data component

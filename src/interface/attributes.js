@@ -89,7 +89,8 @@ handlers.EnumAttributeHandler.prototype.constructor = handlers.EnumAttributeHand
 handlers.EventAttributeHandler = function(id) {
     AttributeHandler.call(this);
     var eventType = id.substring(2);
-    var isXHTML = document.URL.match(/\.xhtml/i) !== null;
+    var isXHTML = (document.URL.match(/\.xhtml/i) !== null) ||
+        (document.doctype && document.doctype.publicId && document.doctype.publicId.match(/\.xhtml/i) !== null);
 
     this.init = function(elem, storage){
         storage[id] = null;

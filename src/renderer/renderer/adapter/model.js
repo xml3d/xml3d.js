@@ -24,7 +24,7 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         var parentNode = parent.getRenderNode && parent.getRenderNode();
 
         this.renderNode = this.getScene().createRenderGroup({
-            parent: parentNode, shaderHandle: null, visible: this.node.visible, name: this.node.id
+            parent: parentNode, visible: this.node.visible, name: this.node.id
         });
         this.renderNode.setLocalMatrix(c_IDENTITY);
         this.createModelRenderNodes();
@@ -126,7 +126,7 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
     if (dataTreeNode.postTransformXflowNode) {
         var request = new Xflow.ComputeRequest(dataTreeNode.postTransformXflowNode, ["transform"], adapter._bindedRequestCallback);
         parentNode = adapter.getScene().createRenderGroup({
-            parent: parentNode, shaderHandle: undefined, visible: true, name: undefined
+            parent: parentNode, visible: true, name: undefined
         });
         adapter.postTransformXflowRequests.push(request);
         adapter.postTransformRenderGroups.push(parentNode);

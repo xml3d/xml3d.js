@@ -108,8 +108,9 @@ var RenderObject = function (scene, pageEntry, opt) {
      */
     this.drawable = this.createDrawable();
 
-    this.localShaderHandle = opt.shaderHandle || null;
-    this.shaderHandle = null;
+    this._material = opt.material || null;
+    this._actualMaterial = null;
+    this.initMaterial();
 
     /** {Object?} **/
     this.override = null;
@@ -305,77 +306,31 @@ XML3D.createClass(RenderObject, RenderNode, {
         this.setBoundingBoxDirty();
         this.scene.dispatchEvent({type: C.EVENT_TYPE.SCENE_SHAPE_CHANGED});
         this.scene.requestRedraw("Transformation changed");
-    }, /**
-     * @param {AdapterHandleNotification} notification
-     */
-    shaderHandleCallback: function (notification) {
-        XML3D.debug.assert(notification.type == XML3D.events.ADAPTER_HANDLE_CHANGED);
-        this.updateShaderFromHandle(notification.adapterHandle);
     },
 
-    setLocalShaderHandle: function (newHandle) {
-        this.localShaderHandle = newHandle;
-        if (newHandle === undefined) {
-            // Shader was removed, we need to propagate the parent shader down
-            this.setShader(this.parent.getShaderHandle());
-        } else {
-            this.setShader(newHandle);
-        }
-
-    },
-
-    setShader: function (newHandle) {
-
-        // If we don't have a drawable, we don't need a shader
-        // This is for testing purposes and won't occur during normal
-        // run
-        if (!this.drawable)
-            return;
-
-        if (this.localShaderHandle)
-            newHandle = this.localShaderHandle;
-
-        var oldHandle = this.shaderHandle;
-
-        if (oldHandle == newHandle)
-            return;
-
-        if (!this.bindedShaderHandleCallback) this.bindedShaderHandleCallback = this.shaderHandleCallback.bind(this);
-
-        if (oldHandle) {
-            oldHandle.removeListener(this.bindedShaderHandleCallback);
-        }
-        if (newHandle) {
-            newHandle.addListener(this.bindedShaderHandleCallback);
-        }
-        this.shaderHandle = newHandle;
-        this.updateShaderFromHandle(newHandle);
-
-        // TODO this.materialChanged();
-    },
 
     /**
      *
      * @param {AdapterHandle|null} handle
      */
-    updateShaderFromHandle: function (handle) {
-        var shaderInfo = null;
-
-        if (handle) {
-            switch (handle.status) {
-                case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
-                    XML3D.debug.logWarning("Shader not found.", handle.url, this.name);
-                    break;
-                case XML3D.base.AdapterHandle.STATUS.LOADING:
-                    break;
-                case XML3D.base.AdapterHandle.STATUS.READY:
-                    shaderInfo = handle.getAdapter().getShaderInfo();
-            }
-        }
-
-        var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
-        this.drawable.setShaderComposer(composer);
-    },
+    //updateShaderFromHandle: function (handle) {
+    //    var shaderInfo = null;
+    //
+    //    if (handle) {
+    //        switch (handle.status) {
+    //            case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
+    //                XML3D.debug.logWarning("Shader not found.", handle.url, this.name);
+    //                break;
+    //            case XML3D.base.AdapterHandle.STATUS.LOADING:
+    //                break;
+    //            case XML3D.base.AdapterHandle.STATUS.READY:
+    //                shaderInfo = handle.getAdapter().getShaderInfo();
+    //        }
+    //    }
+    //
+    //    var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
+    //    this.drawable.setShaderComposer(composer);
+    //},
 
     setObjectSpaceBoundingBox: function (box) {
         var o = this.offset + OBJECT_BB_OFFSET;
@@ -457,7 +412,6 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     updateForRendering: function () {
         SystemNotifier.setNode(this.node);
-        this.setShader(this.parent.getShaderHandle());
         try {
             this.drawable && this.drawable.update(this.scene);
         } catch (e) {
@@ -476,7 +430,48 @@ XML3D.createClass(RenderObject, RenderNode, {
                 intersections.push(this);
             }
         }
-    })()
+    })(),
+
+        /**
+     * @param {MaterialConfiguration|null} material
+     */
+    setMaterial: function (material) {
+        if(this._material === material) {
+            return;
+        }
+        this._material = material;
+        if (material) {
+            this._actualMaterial = material;
+        } else {
+            this._actualMaterial = this.parent.getMaterial();
+        }
+        this.materialChanged();
+    },
+
+    parentMaterialChanged: function () {
+        if (this._material) {
+            // Local material overrides the change from above
+            return;
+        }
+        this.initMaterial();
+    },
+
+    initMaterial: function () {
+        if (this._material) {
+            this._actualMaterial = this._material;
+        } else {
+            this._actualMaterial = this.parent.getMaterial();
+        }
+        this.materialChanged();
+    },
+
+    materialChanged: function() {
+        console.log("material changed", this._actualMaterial);
+        if (this.drawable) {
+            var composer = this.scene.shaderFactory.createComposerFromMaterialConfiguration(this._actualMaterial);
+            this.drawable.setShaderComposer(composer);
+        }
+    }
 
 });
 

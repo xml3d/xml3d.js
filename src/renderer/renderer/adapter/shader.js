@@ -8,52 +8,50 @@ var RenderAdapter = require("./base.js");
  */
 var ShaderRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
-    this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
-    /** @type ShaderInfo **/
-    this.shaderInfo = this.createShaderInfo();
-    this.templateId = this.shaderInfo.id;
-    this.updateScript();
+    this._dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
+    /** @type MaterialConfiguration | null **/
+    this._materialConfiguration = null;
+    this._materialModel = null;
+
+    this.updateMaterialConfiguration();
 };
 
 XML3D.createClass(ShaderRenderAdapter, RenderAdapter);
 XML3D.extend(ShaderRenderAdapter.prototype, {
-    createShaderInfo: function () {
-        return this.getScene().createShaderInfo({
-            data: this.getDataAdapter().getXflowNode()
-        });
+
+    getMaterialConfiguration: function() {
+        return this._materialConfiguration;
     },
 
-    updateScript: function () {
-        var uri = this.getShaderScriptURI();
-        if (uri.scheme != "urn") {
-            var adapterHandle = this.getAdapterHandle(uri, XML3D.data, 0);
-            this.connectAdapterHandle('script', adapterHandle);
-        } else {
-            this.disconnectAdapterHandle('script');
+    updateMaterialConfiguration: function () {
+        // First find the model
+        this.updateMaterialModel();
+        if (!this._materialModel) {
+            this._materialConfiguration = null;
+            return;
         }
-        this.updateShaderInfoDetails();
+
+        this._materialConfiguration = this.getScene().createMaterialConfiguration(this._materialModel, this._dataAdapter.getXflowNode(), {name: this.node.id});
+        this.notifyOppositeAdapters();
     },
 
-    updateShaderInfoDetails: function () {
-        var scriptType = null, scriptCode = null;
+    updateMaterialModel: function () {
+        var uri = this.getShaderScriptURI();
+        if (uri.scheme == "urn") {
+            this.disconnectAdapterHandle("script");
+            this._materialModel = { "type": "urn", "urn": uri };
+            return;
+        }
+
+        this.connectAdapterHandle("script", this.getAdapterHandle(uri, XML3D.data, 0));
         var adapter = this.getConnectedAdapter('script');
         if (adapter && adapter.getScriptType) {
-            scriptType = adapter.getScriptType();
-            scriptCode = adapter.getScriptCode();
+            this._materialModel = { type: adapter.getScriptType(), script: adapter.getScriptCode() };
         }
-        this.shaderInfo.setScript(this.getShaderScriptURI(), scriptType, scriptCode);
-    },
-
-    getShaderInfo: function () {
-        return this.shaderInfo;
     },
 
     getShaderScriptURI: function () {
         return new XML3D.URI(this.node.getAttribute("script"));
-    },
-
-    getDataAdapter: function () {
-        return this.dataAdapter;
     },
 
     notifyChanged: function (evt) {
@@ -62,7 +60,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
                 var target = evt.mutation.attributeName;
                 switch (target) {
                     case "script":
-                        this.updateScript();
+                        this.updateMaterialConfiguration();
                         break;
                     default:
                         XML3D.debug.logWarning("Unhandled mutation event in shader adapter for parameter '" + target + "'");
@@ -74,7 +72,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
                 if (evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
                     XML3D.debug.logError("Could not find script of url '" + evt.url + "'");
                 }
-                this.updateShaderInfoDetails();
+                this.updateMaterialConfiguration();
                 break;
         }
 

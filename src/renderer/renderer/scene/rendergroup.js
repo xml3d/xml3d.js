@@ -21,7 +21,12 @@ var ENTRY_SIZE = WORLD_BB_OFFSET + 6;
 var RenderGroup = function (scene, pageEntry, opt) {
     RenderNode.call(this, NODE_TYPE.GROUP, scene, pageEntry, opt);
     opt = opt || {};
-    this.shaderHandle = opt.shaderHandle || null;
+
+    /**
+     * The material attached to this group
+     * @type {MaterialConfiguration|null}
+     */
+    this._material = opt.material || null;
     this.boundingBoxDirty = false;
     this.setWorldSpaceBoundingBox(XML3D.math.bbox.EMPTY_BOX);
 };
@@ -124,32 +129,33 @@ XML3D.extend(RenderGroup.prototype, {
         });
     },
 
-    setLocalShaderHandle: function (newHandle) {
-        this.shaderHandle = undefined;
-        if (newHandle === undefined) {
-            // Shader was removed, we need to propagate the parent shader down
-            this.setShader(this.parent.getShaderHandle());
-        } else {
-            this.setShader(newHandle);
-        }
-        this.shaderHandle = newHandle;
-    },
-
-    setShader: function (newHandle) {
-        if (this.shaderHandle !== undefined) {
-            // Local shader overrides anything coming from upstream
+    /**
+     * @param {MaterialConfiguration|null} material
+     */
+    setMaterial: function (material) {
+        if(this._material === material)
             return;
-        }
+        this._material = material;
         this.children.forEach(function (obj) {
-            obj.setShader && obj.setShader(newHandle);
+            obj.parentMaterialChanged && obj.parentMaterialChanged();
         });
     },
 
-    getShaderHandle: function () {
-        if (!this.shaderHandle) {
-            return this.parent.getShaderHandle();
+    parentMaterialChanged: function () {
+        if (this._material) {
+            // Local material overrides anything coming from upstream
+            return;
         }
-        return this.shaderHandle;
+        this.children.forEach(function (obj) {
+            obj.parentMaterialChanged && obj.parentMaterialChanged();
+        });
+    },
+
+    /**
+     * @returns {MaterialConfiguration}
+     */
+    getMaterial: function () {
+        return this._material || this.parent.getMaterial();
     },
 
     setBoundingBoxDirty: function () {

@@ -1,8 +1,10 @@
 var RenderAdapter = require("./base.js");
+var AdapterHandle = XML3D.base.AdapterHandle;
 
 var TransformableAdapter = function (factory, node, handleShader, handleTransform) {
     RenderAdapter.call(this, factory, node);
     this.renderNode = null;
+    this.shaderHandler = null;
     this.handleShader = handleShader || false;
     if (handleTransform) {
         this.transformFetcher = new XML3D.data.DOMTransformFetcher(this, "transform", "transform");
@@ -12,6 +14,37 @@ var TransformableAdapter = function (factory, node, handleShader, handleTransfor
 XML3D.createClass(TransformableAdapter, RenderAdapter);
 
 XML3D.extend(TransformableAdapter.prototype, {
+    updateShaderHandler: function () {
+        var shaderURI = getShaderURI(this.node);
+        if (!shaderURI) {
+            this.disconnectAdapterHandle("shader");
+            this.shaderHandler = null;
+        } else {
+            this.shaderHandler = this.getAdapterHandle(shaderURI);
+            this.connectAdapterHandle("shader", this.shaderHandler);
+        }
+        this.referencedShaderChanged();
+    },
+
+    referencedShaderChanged: function () {
+        if (!this.shaderHandler) {
+            this.getRenderNode().setMaterial(null);
+            return;
+        }
+        var status = this.shaderHandler.status;
+        if (status === AdapterHandle.STATUS.NOT_FOUND) {
+            XML3D.debug.logError("Could not find element of url '" + this.shaderHandler.url + "' for shader", this.node);
+            this.getRenderNode().setMaterial(null);
+            return;
+        }
+        var adapter = this.shaderHandler.getAdapter();
+        if (adapter && adapter.getMaterialConfiguration) {
+            this.getRenderNode().setMaterial(adapter.getMaterialConfiguration());
+        } else {
+            this.getRenderNode().setMaterial(null);
+        }
+    },
+
     onDispose: function () {
         this.transformFetcher && this.transformFetcher.clear();
     }, onConfigured: function () {
@@ -28,21 +61,10 @@ XML3D.extend(TransformableAdapter.prototype, {
             this.renderNode.setLocalMatrix(matrix);
         }
 
-    }, getShaderHandle: function () {
-        var shaderHref = this.node.shader;
-        if (shaderHref == "") {
-            var styleValue = this.node.getAttribute('style');
-            if (styleValue) {
-                var pattern = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
-                var result = pattern.exec(styleValue);
-                if (result)
-                    shaderHref = result[1];
-            }
-        }
-        if (shaderHref) {
-            return this.getAdapterHandle(shaderHref);
-        }
-    }, notifyChanged: function (evt) {
+    },
+
+
+    notifyChanged: function (evt) {
         if (evt.type == XML3D.events.VALUE_MODIFIED) {
             var target = evt.mutation.attributeName;
             if (target == "transform") {
@@ -54,12 +76,31 @@ XML3D.extend(TransformableAdapter.prototype, {
                 this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
                 this.factory.renderer.requestRedraw("Transformable visibility changed.");
             } else if (target == "shader" && this.handleShader) {
-                //this.disconnectAdapterHandle("shader");
-                this.renderNode.setLocalShaderHandle(this.getShaderHandle());
+                this.updateShaderHandler();
                 this.factory.renderer.requestRedraw("Transformable shader changed.");
+            }
+        } else if (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) {
+            var key = evt.key;
+            if (key == "shader") {
+                this.updateShaderHandler();
+                this.factory.renderer.requestRedraw("Shader reference changed.");
             }
         }
     }
 });
+
+function getShaderURI(node) {
+    var shaderHref = node.shader;
+    if (shaderHref == "") {
+        var styleValue = node.getAttribute('style');
+        if (styleValue) {
+            var pattern = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
+            var result = pattern.exec(styleValue);
+            if (result)
+                shaderHref = result[1];
+        }
+    }
+    return shaderHref;
+}
 
 module.exports = TransformableAdapter;

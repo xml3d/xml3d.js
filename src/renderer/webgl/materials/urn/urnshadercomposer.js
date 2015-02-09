@@ -17,23 +17,23 @@ var getShaderDescriptor = function (path) {
  * @extends AbstractShaderComposer
  * @constructor
  */
-var URNShaderComposer = function (context, shaderInfo) {
-    AbstractShaderComposer.call(this, context, shaderInfo);
+var URNShaderComposer = function (context, materialConfiguration) {
+    AbstractShaderComposer.call(this, context, materialConfiguration);
     this.descriptor = null;
-    this.setShaderInfo(shaderInfo);
+    this.setMaterialConfiguration(materialConfiguration);
 };
 
 XML3D.createClass(URNShaderComposer, AbstractShaderComposer, {
     /**
      *
-     * @param {ShaderInfo} shaderInfo
+     * @param {MaterialConfiguration} materialConfiguration
      */
-    setShaderInfo: function (shaderInfo) {
-        var shaderScriptURI = shaderInfo.getScriptUri();
+    setMaterialConfiguration: function (materialConfiguration) {
+        var shaderScriptURI = materialConfiguration.model.urn;
         this.setShaderScript(shaderScriptURI);
 
         if (this.descriptor) {
-            this.updateRequest(shaderInfo.getData());
+            materialConfiguration.dataNode && this.updateRequest(materialConfiguration.dataNode);
 
             this.descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(this.descriptor.fragment);
         }

@@ -3,7 +3,7 @@ var RenderObject = require("./renderobject.js");
 var RenderView = require("./renderview.js");
 var RenderGroup = require("./rendergroup.js");
 var RenderLight = require("./renderlight.js");
-var ShaderInfo = require("./shaderinfo.js");
+var MaterialConfiguration = require("./material-configuration");
 var C = require("./constants.js");
 
 /**
@@ -20,7 +20,7 @@ var Scene = function () {
             return this.point.length + this.directional.length + this.spot.length;
         }
     };
-    this.shaderInfos = [];
+
     /** @type RenderView */
     this.activeView = null;
     this.rootNode = this.createRootNode();
@@ -69,20 +69,23 @@ XML3D.extend(Scene.prototype, {
         return new RenderLight(this, pageEntry, opt);
     },
 
-    createShaderInfo: function (opt) {
-        return new ShaderInfo(this, opt);
+    createMaterialConfiguration: function(model, data, opt) {
+        return new MaterialConfiguration(model, data, opt);
     },
 
     createRootNode: function () {
         var pageEntry = this.getPageEntry(RenderGroup.ENTRY_SIZE);
-        var root = new RenderGroup(this, pageEntry, {});
+        var root = new RenderGroup(this, pageEntry, {
+            material: new MaterialConfiguration(
+                {"type": "urn", "urn": new XML3D.URI("urn:xml3d:shader:matte")},
+                null,
+                {name: "default"}
+            )
+        });
         root.setWorldMatrix(XML3D.math.mat4.create());
         root.setLocalMatrix(XML3D.math.mat4.create());
         root.transformDirty = false;
-        root.shaderDirty = false;
         root.visible = true;
-        root.shaderHandle = new XML3D.base.AdapterHandle("not_found");
-        root.shaderHandle.status = XML3D.base.AdapterHandle.STATUS.NOT_FOUND;
         return root;
     },
 

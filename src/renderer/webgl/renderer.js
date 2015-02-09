@@ -253,21 +253,21 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     renderToCanvas: function () {
+        this.needsDraw = false; //Set this early to avoid endless rendering if an exception is thrown during rendering
         this.prepareRendering();
         this.renderInterface.getRenderPipeline().render(this.scene);
         var stats = this.renderInterface.getRenderPipeline().getRenderStats();
         XML3D.debug.logDebug("Rendered to Canvas");
-        this.needsDraw = false;
         return stats;
     },
 
     getRenderObjectFromPickingBuffer: function (x, y) {
         y = canvasToGlY(this._canvasHandler.getCanvas(), y);
         if (this.needsPickingDraw) {
+            this.needsPickingDraw = false;
             this.prepareRendering();
             this.scene.updateReadyObjectsFromActiveView(this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight());
             this.pickObjectPass.render(this.scene.ready);
-            this.needsPickingDraw = false;
             XML3D.debug.logDebug("Rendered Picking Buffer");
         }
         this.pickedObject = this.pickObjectPass.getRenderObjectFromPickingBuffer(x, y, this.scene.ready);

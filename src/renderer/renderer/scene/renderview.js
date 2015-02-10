@@ -163,12 +163,16 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
 
         updatePosition: function(newPos) {
             this.setTransformDirty();
-            this.position = newPos;
+            this.position[0] = newPos[0];
+            this.position[1] = newPos[1];
+            this.position[2] = newPos[2];
         },
 
         updateOrientation: function(newOrientation) {
             this.setTransformDirty();
-            this.orientation = newOrientation;
+            for (var i = 0; i < 16; i++) {
+                this.orientation[i] = newOrientation[i];
+            }
         },
 
         updateFieldOfView: function(newFov) {

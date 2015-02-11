@@ -127,8 +127,13 @@
 
 
        <group id="hierarchy" shader="#red" transform="#t_Rotated" visible="true">
-            <group transform="#t_Scaled" visible="true">
-                <mesh type="triangles" src="#cube_data" />
+            <group id="hierarchy-scaled" transform="#t_Scaled" visible="true">
+                <mesh id="hierarchy-mesh" type="triangles" src="#cube_data" />
+            </group>
+       </group>
+        <group id="hierarchy2" shader="#red" transform="#t_Translated" visible="true">
+            <group id="hierarchy2-scaled" transform="#t_Scaled" visible="true">
+                <mesh id="hierarchy2-mesh" type="triangles" src="#cube_data" />
             </group>
         </group>
        <group>

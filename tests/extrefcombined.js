@@ -24,7 +24,7 @@ test("Mesh JSON reference", 6, function () {
         return Q(xml3dTest);
     }).then(promiseSceneRendered).then(function () {
         QUnit.closeArray(XML3DUnit.readScenePixels(xml3dTest),XML3DUnit.readScenePixels(xml3dReference), PIXEL_EPSILON, "JSON render matches", true);
-        var box = self.doc.getElementById("myMesh02").getBoundingBox();
+        var box = self.doc.getElementById("myMesh02").getLocalBoundingBox();
         QUnit.closeBox(box, new XML3DBox(new XML3DVec3(-1, -1, -10), new XML3DVec3(1, 1, -10)), EPSILON, "Bounding box of external mesh is: (-1 -1 -10) to (1 1 -10)");
     });
 
@@ -35,7 +35,7 @@ test("Mesh JSON reference", 6, function () {
     }).then(promiseOneSceneCompleteAndRendered).then(function () {
         QUnit.closeArray(XML3DUnit.readScenePixels(xml3dTest),XML3DUnit.readScenePixels(xml3dReference2), PIXEL_EPSILON, "JSON render matches after change", true);
 
-        var box = self.doc.getElementById("myMesh02").getBoundingBox();
+        var box = self.doc.getElementById("myMesh02").getLocalBoundingBox();
         QUnit.closeBox(box, new XML3DBox(new XML3DVec3(1, -3, -10), new XML3DVec3(3, -1, -10)), EPSILON, "Bounding box of external mesh is: (1 -3 -10) to (3 -1 -10)");
 
 

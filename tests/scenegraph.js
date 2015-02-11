@@ -151,21 +151,23 @@ module("Bounding Boxes", {
 
 
 
-test("Groups and Meshes", 16, function() {
-    var frontTopMeshBox = this.doc.getElementById("m_TopFront").getBoundingBox();
-    var frontBotMeshBox = this.doc.getElementById("m_BotFront").getBoundingBox();
-    var emptyBox = this.doc.getElementById("empty_group").getBoundingBox();
-    var rootBox = this.doc.getElementById("g_Root").getBoundingBox();
-    var topCubeBox = this.doc.getElementById("g_TopCube").getBoundingBox();
-    var botCubeBox = this.doc.getElementById("g_BotCube").getBoundingBox();
-    var cubeMeshBox = this.doc.getElementById("cube_mesh").getBoundingBox();
-    var cubeGroupBox = this.doc.getElementById("cube_group").getBoundingBox();
-    var splitCubeBox1 = this.doc.getElementById("split_cube_mesh1").getBoundingBox();
-    var splitCubeBox2 = this.doc.getElementById("split_cube_mesh2").getBoundingBox();
-    var scaled_group = this.doc.getElementById("scaled_group").getBoundingBox();
-    var translated_group = this.doc.getElementById("translated_group").getBoundingBox();
-    var rotated_group = this.doc.getElementById("rotated_group").getBoundingBox();
-    var hierarchy = this.doc.getElementById("hierarchy").getBoundingBox();
+test("Groups and Meshes, Local space", 18, function() {
+    var frontTopMeshBox = this.doc.getElementById("m_TopFront").getLocalBoundingBox();
+    var frontBotMeshBox = this.doc.getElementById("m_BotFront").getLocalBoundingBox();
+    var emptyBox = this.doc.getElementById("empty_group").getLocalBoundingBox();
+    var rootBox = this.doc.getElementById("g_Root").getLocalBoundingBox();
+    var topCubeBox = this.doc.getElementById("g_TopCube").getLocalBoundingBox();
+    var botCubeBox = this.doc.getElementById("g_BotCube").getLocalBoundingBox();
+    var cubeMeshBox = this.doc.getElementById("cube_mesh").getLocalBoundingBox();
+    var cubeGroupBox = this.doc.getElementById("cube_group").getLocalBoundingBox();
+    var splitCubeBox1 = this.doc.getElementById("split_cube_mesh1").getLocalBoundingBox();
+    var splitCubeBox2 = this.doc.getElementById("split_cube_mesh2").getLocalBoundingBox();
+    var scaled_group = this.doc.getElementById("scaled_group").getLocalBoundingBox();
+    var translated_group = this.doc.getElementById("translated_group").getLocalBoundingBox();
+    var rotated_group = this.doc.getElementById("rotated_group").getLocalBoundingBox();
+    var hierarchy = this.doc.getElementById("hierarchy").getLocalBoundingBox();
+    var hierarchyScaled = this.doc.getElementById("hierarchy-scaled").getLocalBoundingBox();
+    var hierarchy2Scaled = this.doc.getElementById("hierarchy2-scaled").getLocalBoundingBox();
     ok(emptyBox.isEmpty(), "Empty group delivers empty BoundingBox");
 
     QUnit.closeBox(frontTopMeshBox, new XML3DBox(new XML3DVec3(-1,-1,0),new XML3DVec3(1,1,0)), EPSILON, "Front rectangle of top cube: (-1 -1 0) to (1 1 0)");
@@ -179,25 +181,48 @@ test("Groups and Meshes", 16, function() {
     var sq2 = 1.4098814725875854;
     QUnit.closeBox(rotated_group, new XML3DBox(new XML3DVec3(-1, -sq2, -sq2),new XML3DVec3(1, sq2, sq2)), EPSILON, "Rotated group.");
     QUnit.closeBox(hierarchy, new XML3DBox(new XML3DVec3(-20, -16.79395294189453, -18.45308494567871),new XML3DVec3(20, 16.79395294189453, 18.45308494567871)), EPSILON, "Hierarchy.");
+    QUnit.closeBox(hierarchyScaled, new XML3DBox(new XML3DVec3(-20, -5, -20),new XML3DVec3(20, 5, 20)), EPSILON, "Hierarchy scale only");
+    QUnit.closeBox(hierarchy2Scaled, new XML3DBox(new XML3DVec3(-20, -5, -20),new XML3DVec3(20, 5, 20)), EPSILON, "Hierarchy2 scale only");
     QUnit.closeBox(rootBox, scaled_group, EPSILON, "Overall");
     QUnit.closeBox(splitCubeBox1, new XML3DBox(new XML3DVec3(0, -1, -1),new XML3DVec3(1, 1, 1)), EPSILON, "Split part 1");
     QUnit.closeBox(splitCubeBox2, new XML3DBox(new XML3DVec3(-1, -1, -1),new XML3DVec3(0, 1, 1)), EPSILON, "Split part 2");
+});
 
+test("Groups and Meshes, World space", 11, function() {
+    var frontTopMeshBox = this.doc.getElementById("m_TopFront").getWorldBoundingBox();
+    var frontBotMeshBox = this.doc.getElementById("m_BotFront").getWorldBoundingBox();
+    var topCubeBox = this.doc.getElementById("g_TopCube").getWorldBoundingBox();
+    var botCubeBox = this.doc.getElementById("g_BotCube").getWorldBoundingBox();
+    var cubeMeshBox = this.doc.getElementById("cube_mesh").getWorldBoundingBox();
+    var cubeGroupBox = this.doc.getElementById("cube_group").getWorldBoundingBox();
+    var hierarchyScaled = this.doc.getElementById("hierarchy-scaled").getWorldBoundingBox();
+    var hierarchyMesh = this.doc.getElementById("hierarchy-mesh").getWorldBoundingBox();
+    var wholeScene = this.doc.getElementById("myXml3d").getWorldBoundingBox();
+
+    QUnit.closeBox(frontTopMeshBox, new XML3DBox(new XML3DVec3(-1,1.5,1),new XML3DVec3(1,3.5,1)), EPSILON, "Front rectangle of top cube: (-1 1.5 1) to (1 3.5 1)");
+    QUnit.closeBox(frontBotMeshBox, new XML3DBox(new XML3DVec3(-1,-3.5,1),new XML3DVec3(1,-1.5,1)), EPSILON, "Front rectangle of bottom cube: (-1 -3.5 1) to (1 -1.5 1)");
+    QUnit.closeBox(topCubeBox, new XML3DBox(new XML3DVec3(-1,1.5,-1),new XML3DVec3(1,3.5,1)), EPSILON, "Top cube: (-1 1.5 -1) to (1 3.5 1)");
+    QUnit.closeBox(botCubeBox, new XML3DBox(new XML3DVec3(-1,-3.5,-1),new XML3DVec3(1,-1.5,1)), EPSILON, "Bottom cube: (-1 -3.5 -1) to (1 -1.5 1)");
+    QUnit.closeBox(cubeMeshBox, new XML3DBox(new XML3DVec3(-1,-1,-1),new XML3DVec3(1,1,1)), EPSILON, "Unity cube mesh: (-1 -1 -1) to (1 1 1)");
+    QUnit.closeBox(cubeGroupBox, cubeMeshBox, EPSILON, "No transformation: mesh and group equal.");
+    QUnit.closeBox(hierarchyScaled, new XML3DBox(new XML3DVec3(-20, -16.79395294189453, -18.45308494567871),new XML3DVec3(20, 16.79395294189453, 18.45308494567871)), EPSILON, "Hierarchy 2nd level");
+    QUnit.closeBox(hierarchyMesh, new XML3DBox(new XML3DVec3(-20, -16.79395294189453, -18.45308494567871),new XML3DVec3(20, 16.79395294189453, 18.45308494567871)), EPSILON, "Hierarchy mesh");
+    QUnit.closeBox(wholeScene, new XML3DBox(new XML3DVec3(-20, -16.79395294189453, -20),new XML3DVec3(21, 16.79395294189453, 25)), EPSILON, "Whole scene");
 });
 
 test("Hidden groups", 5, function() {
-    var root = this.doc.getElementById("g_Root").getBoundingBox();
+    var root = this.doc.getElementById("g_Root");
     root.visible = false;
     var group = this.doc.getElementById("g_PartiallyHidden");
     group.visible = true;
 
-    var boundingBox = group.getBoundingBox();
+    var boundingBox = group.getWorldBoundingBox();
     QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(2,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Hidden child group: (2 1.5 -1) to (4 3.5 1)");
     this.doc.getElementById("invisible_cube").visible = true;
-    boundingBox = group.getBoundingBox();
+    boundingBox = group.getWorldBoundingBox();
     QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(-4,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Visible child group: (-4 1.5 -1) to (4 3.5 1)");
     this.doc.getElementById("invisible_mesh").visible = false;
-    boundingBox = group.getBoundingBox();
+    boundingBox = group.getWorldBoundingBox();
     QUnit.closeBox(boundingBox, new XML3DBox(new XML3DVec3(2,1.5,-1),new XML3DVec3(4,3.5,1)), EPSILON, "Hidden child mesh: (2 1.5 -1) to (4 3.5 1)");
 });
 
@@ -205,7 +230,7 @@ test("Dynamically added mesh", function() {
 
     var mesh = this.win.XML3D.createElement("mesh");
 
-    ok(mesh.getBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
+    ok(mesh.getLocalBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
 
     mesh.setAttribute("type", "triangles");
     mesh.setAttribute("src", "#mySimpleMesh");
@@ -214,14 +239,14 @@ test("Dynamically added mesh", function() {
 
     // renderadapter is initialized but mesh data is still not initialized
     //ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
-    QUnit.closeBox(mesh.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
+    QUnit.closeBox(mesh.getLocalBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
         "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
 
     //Mesh changes are not applied until frame renders
     var h = getHandler(this.xml3dElement);
     h.draw();
 
-    QUnit.closeBox(mesh.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
+    QUnit.closeBox(mesh.getLocalBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
             "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
 });
 
@@ -229,7 +254,7 @@ test("Dynamically added group", function() {
 
     var mesh = this.win.XML3D.createElement("mesh");
 
-    ok(mesh.getBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
+    ok(mesh.getLocalBoundingBox().isEmpty(), "Newly created mesh delivers empty bounding box");
 
     mesh.setAttribute("type", "triangles");
     mesh.setAttribute("src", "#mySimpleMesh");
@@ -240,10 +265,10 @@ test("Dynamically added group", function() {
 
     // renderadapter is initialized but mesh data is still not initialized
     //ok(mesh.getBoundingBox().isEmpty(), "Appended mesh delivers empty bounding box");
-    QUnit.closeBox(mesh.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
+    QUnit.closeBox(mesh.getLocalBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
         "simple mesh bounding box: (-1 -1 0) to (1 1 0)");
 
-    QUnit.closeBox(group.getBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
+    QUnit.closeBox(group.getLocalBoundingBox(), new XML3DBox(new XML3DVec3(-1, -1, 0), new XML3DVec3(1,1,0)), EPSILON,
         "simple group bounding box: (-1 -1 0) to (1 1 0)");
 
 });

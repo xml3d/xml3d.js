@@ -89,14 +89,16 @@ XML3DRenderAdapter.prototype.getComplete = function () {
     return XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId);
 }
 
-XML3DRenderAdapter.prototype.getBoundingBox = function () {
+XML3DRenderAdapter.prototype.getWorldBoundingBox = function () {
     var bbox = new window.XML3DBox();
     Array.prototype.forEach.call(this.node.childNodes, function (c) {
-        if (c.getBoundingBox)
-            bbox.extend(c.getBoundingBox());
+        if (c.getWorldBoundingBox)
+            bbox.extend(c.getWorldBoundingBox());
     });
     return bbox;
 };
+//XML3D element is the root with no transform of its own so by definition it's always in world space
+XML3DRenderAdapter.prototype.getLocalBoundingBox = XML3DRenderAdapter.prototype.getWorldBoundingBox;
 
 XML3DRenderAdapter.prototype.getElementByPoint = function (x, y, hitPoint, hitNormal) {
     var relativeMousePos = Utils.convertPageCoords(this.node, x, y);

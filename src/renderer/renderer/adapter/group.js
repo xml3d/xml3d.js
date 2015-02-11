@@ -58,11 +58,31 @@ p.dispose = function () {
 };
 
 /* Interface methods */
-p.getBoundingBox = function () {
+p.getWorldBoundingBox = function () {
     var bbox = XML3D.math.bbox.create();
     this.renderNode.getWorldSpaceBoundingBox(bbox);
     return XML3D.math.bbox.asXML3DBox(bbox);
 };
+
+//TODO: improve efficiency of this function once XML3D types are overhauled
+p.getLocalBoundingBox = (function () {
+    var localMat = XML3D.math.mat4.create();
+
+    return function() {
+        var bbox = new window.XML3DBox();
+        if (!this.renderNode.visible) {
+            return bbox;
+        }
+        Array.prototype.forEach.call(this.node.childNodes, function (c) {
+            if (c.getLocalBoundingBox && c.visible)
+                bbox.extend(c.getLocalBoundingBox());
+        });
+        this.renderNode.getLocalMatrix(localMat);
+        var localBB = XML3D.math.bbox.fromXML3DBox(bbox);
+        XML3D.math.bbox.transform(localBB, localMat, localBB);
+        return XML3D.math.bbox.asXML3DBox(localBB);
+    }
+})();
 
 p.getLocalMatrix = function () {
     var m = new window.XML3DMatrix();

@@ -9,6 +9,12 @@ test("xml3d methods test", function() {
 
     ok(node.getBoundingBox() instanceof XML3DBox, "xml3d::getBoundingBox returns ");
     ok(node.getBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
+
+    ok(node.getLocalBoundingBox() instanceof XML3DBox, "xml3d::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
+
+    ok(node.getWorldBoundingBox() instanceof XML3DBox, "xml3d::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
 });
 test("group interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
@@ -24,6 +30,12 @@ test("group interface test", function() {
 
     ok(node.getBoundingBox() instanceof XML3DBox, "group::getBoundingBox returns XML3DBox");
     ok(node.getBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
+
+    ok(node.getLocalBoundingBox() instanceof XML3DBox, "group::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
+
+    ok(node.getWorldBoundingBox() instanceof XML3DBox, "group::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
 });
 test("mesh interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
@@ -35,6 +47,12 @@ test("mesh interface test", function() {
 
     ok(node.getBoundingBox() instanceof XML3DBox, "mesh::getBoundingBox returns XML3DBox");
     ok(node.getBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
+
+    ok(node.getLocalBoundingBox() instanceof XML3DBox, "mesh::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
+
+    ok(node.getWorldBoundingBox() instanceof XML3DBox, "mesh::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
 });
 test("light interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "light");

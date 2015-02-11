@@ -156,20 +156,41 @@ test("Change active view via script", 8, function() {
 });
 
 
-test("Test mesh.getBoundingBox", 4, function() {
+test("Test mesh.getLocalBoundingBox", 4, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("xml3DElem");
     var h = getHandler(x);
-    var group = this.doc.getElementById("myGroup");
-    var mesh = this.doc.getElementById("mySimpleMesh");
+    var group = this.doc.getElementById("myTransformedGroup");
+    var mesh = this.doc.getElementById("myTransformedMesh");
     x.addEventListener("framedrawn", function(n) {
-        var bb = mesh.getBoundingBox();
+        var bb = mesh.getLocalBoundingBox();
         var max = bb._max._data;
         var min = bb._min._data;
 
         deepEqual([max[0], max[1], max[2]], [1,1,0], "BBox max is (1,1,0)");
         deepEqual([min[0], min[1], min[2]], [-1,-1,0], "BBox min is (-1,-1,0)");
+        start();
+    });
+    stop();
+    group.visible = true;
+
+});
+
+test("Test mesh.getWorldBoundingBox", 4, function() {
+    // 1: Found frame
+    // 2: Scene loaded
+    var x = this.doc.getElementById("xml3DElem");
+    var h = getHandler(x);
+    var group = this.doc.getElementById("myTransformedGroup");
+    var mesh = this.doc.getElementById("myTransformedMesh");
+    x.addEventListener("framedrawn", function(n) {
+        var bb = mesh.getWorldBoundingBox();
+        var max = bb._max._data;
+        var min = bb._min._data;
+
+        deepEqual([max[0], max[1], max[2]], [1,1,-3], "BBox max is (1,1,-3)");
+        deepEqual([min[0], min[1], min[2]], [-1,-1,-3], "BBox min is (-1,-1,-3)");
         start();
     });
     stop();

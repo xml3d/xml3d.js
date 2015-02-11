@@ -144,6 +144,11 @@ methods.xml3dGenerateRay = function(x, y) {
     return new window.XML3DRay();
 };
 
+methods.getBoundingBox = function() {
+    XML3D.debug.logWarning("getBoundingBox is deprecated and will be removed in a future version! Please use getLocalBoundingBox or getWorldBoundingBox instead.");
+    return methods.getWorldBoundingBox.call(this);
+};
+
 methods.groupGetLocalMatrix = function() {
     XML3D.flushDOMChanges();
     var adapters = this._configured.adapters || {};
@@ -156,29 +161,28 @@ methods.groupGetLocalMatrix = function() {
 };
 
 /**
- * return the bounding box that is the bounding box of all children.
+ * return the bounding box of the owning space in world space
  */
-methods.groupGetBoundingBox = function() {
+methods.getWorldBoundingBox = function() {
     XML3D.flushDOMChanges();
     var adapters = this._configured.adapters || {};
     for (var adapter in adapters) {
-        if (adapters[adapter].getBoundingBox) {
-            return adapters[adapter].getBoundingBox();
+        if (adapters[adapter].getWorldBoundingBox) {
+            return adapters[adapter].getWorldBoundingBox();
         }
     }
     return new window.XML3DBox();
 };
-methods.xml3dGetBoundingBox = methods.groupGetBoundingBox;
 
 /**
- * returns the bounding box of this mesh in world space.
+ * return the bounding box of the owning space in local space (object BB)
  */
-methods.meshGetBoundingBox = function() {
+methods.getLocalBoundingBox = function() {
     XML3D.flushDOMChanges();
     var adapters = this._configured.adapters || {};
     for (var adapter in adapters) {
-        if (adapters[adapter].getBoundingBox) {
-            return adapters[adapter].getBoundingBox();
+        if (adapters[adapter].getLocalBoundingBox) {
+            return adapters[adapter].getLocalBoundingBox();
         }
     }
     return new window.XML3DBox();

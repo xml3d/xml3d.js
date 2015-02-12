@@ -543,27 +543,45 @@ test("Add a mesh dynamically", 4, function() {
     g.visible = true;
 });
 
-/*
-Felix: Disabled this test as it checks for fairly internal stuff - that has changed
+test("Add invisible groups and meshes", 7, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
 
-test("Remove group with references to transform", 6, function() {
-    var outerGroup = this.doc.getElementById("group3");
-    var innerGroup = this.doc.getElementById("group4");
+    var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("src", "#meshdata");
+    mesh.setAttribute("visible", "false");
 
-    outerGroup.visible = true;
+    // Add a mesh
+    x.appendChild(mesh);
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,0], "Mesh is invisible");
 
-    var outerHandles = outerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
-    var innerHandles = innerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
-    ok(outerHandles.transform !== undefined, "Outer transform reference is intact");
-    ok(innerHandles.transform !== undefined, "Inner transform reference is intact");
+    mesh.setAttribute("visible", "true");
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Mesh is now visible");
+    x.removeChild(mesh);
 
+    var group = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
+    group.setAttribute("visible", "false");
+    group.appendChild(mesh);
+    x.appendChild(group);
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,0], "Group is invisible");
 
-    var adapter = outerGroup._configured.adapters.webgl_1;
-    outerGroup.parentNode.removeChild(outerGroup);
+    group.setAttribute("visible", "true");
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Group is visible");
+    x.removeChild(group);
 
-    outerHandles = adapter.connectedAdapterHandles;
-    innerHandles = adapter.connectedAdapterHandles;
-    ok(outerHandles.transform === undefined, "Outer transform reference has been removed");
-    ok(innerHandles.transform === undefined, "Inner transform reference has been removed");
+    mesh.setAttribute("visible", "false");
+    h.draw();
+    x.appendChild(group);
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,0], "Mesh inside group is invisible");
+
 });
-*/

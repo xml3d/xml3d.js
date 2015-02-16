@@ -225,13 +225,22 @@ XML3D.extend(GLTexture.prototype, {
 
         if (this.generateMipMap && this.needsScale(width, height)) {
             if (type === gl.FLOAT)
-                throw new Error("Should generate MipMaps but texture data is float and not power of two in size!"); else
+                throw new Error("Should generate MipMaps but texture data is float and not power of two in size!");
+            else
                 texelSource = scaleImage(texelSource, width, height);
         }
 
-        if (texelSource instanceof HTMLElement)
-            gl.texImage2D(gl.TEXTURE_2D, 0, format, format, type, texelSource); else
-            gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, type, texelSource.data);
+        if (texelSource instanceof HTMLElement) {
+            gl.texImage2D(gl.TEXTURE_2D, 0, format, format, type, texelSource);
+        } else {
+            if (texelSource.data instanceof Uint8ClampedArray) {
+                // WebGL does not support Uint8ClampedArray, which is (correctly) used by async. Xflow. We just build a new view
+                // on top of the underlying array buffer which should be relatively fast
+                gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, type, new Uint8Array(texelSource.data.buffer));
+            } else {
+                gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, type, texelSource.data);
+            }
+        }
 
         if (this.generateMipMap)
             gl.generateMipmap(gl.TEXTURE_2D);
@@ -264,9 +273,15 @@ XML3D.extend(GLTexture.prototype, {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 
-        if (!opt.isDepth)
-            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels); else
+        if (!opt.isDepth) {
+            if (texels instanceof Uint8ClampedArray) {
+                gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, new Uint8Array(texels.buffer));
+            } else {
+                gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels);
+            }
+        } else {
             gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, sourceFormat, sourceType, null);
+        }
 
         if (opt.generateMipmap) {
             gl.generateMipmap(gl.TEXTURE_2D);

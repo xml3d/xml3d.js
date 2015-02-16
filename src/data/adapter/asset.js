@@ -14,7 +14,9 @@ var AssetAdapter = function (factory, node) {
 
     // Node handles for src and proto
     this.asset = null;
-    this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
+    if (node.localName.toLowerCase() !== "model") {
+        this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
+    }
 };
 
 createClass(AssetAdapter, NodeAdapter);
@@ -27,7 +29,7 @@ AssetAdapter.prototype.init = function () {
     updatePickFilter(this);
     updateChildren(this);
     setShaderUrl(this, this.asset);
-    this.transformFetcher.update();
+    this.transformFetcher && this.transformFetcher.update();
 };
 
 AssetAdapter.prototype.onAssetLoadChange = function (asset, newLevel, oldLevel) {
@@ -125,7 +127,7 @@ AssetAdapter.prototype.notifyChanged = function (evt) {
                 break;
             case "style":
             case "transform":
-                this.transformFetcher.update();
+                this.transformFetcher && this.transformFetcher.update();
                 break;
             case "src":
                 updateAdapterHandle(this, "src", this.node.getAttribute("src"));
@@ -151,9 +153,6 @@ var AssetDataAdapter = function (factory, node) {
 createClass(AssetDataAdapter, DataAdapter);
 
 AssetDataAdapter.prototype.init = function () {
-    //var xflow = this.resolveScript();
-    //if (xflow)
-    //    this.scriptInstance = new XML3D.data.ScriptInstance(this, xflow);
     DataAdapter.prototype.init.call(this);
     this.outputXflowNode = this.factory.graph.createDataNode(false);
     this.assetEntry = new SubData(this.outputXflowNode, this.getXflowNode(), this.node);

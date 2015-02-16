@@ -1,12 +1,13 @@
 var TransformableAdapter = require("./transformable.js");
 
 var ModelRenderAdapter = function (factory, node) {
-    TransformableAdapter.call(this, factory, node, false, false);
+    TransformableAdapter.call(this, factory, node, false, true);
     this.asset = null;
     this.postTransformXflowRequests = [];
     this.postTransformRenderGroups = [];
     this.createRenderNode();
     this._bindedRequestCallback = this.onXflowRequestChange.bind(this);
+    this.transformFetcher.update();
 };
 
 var c_IDENTITY = XML3D.math.mat4.create();

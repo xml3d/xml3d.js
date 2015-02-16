@@ -76,7 +76,9 @@ Asset.prototype.setShader = function(shader){
 
 Asset.prototype.setTransform = function(transform){
     this.transform = transform;
-    invalidateAsset(this);
+    if (this.refNode.localName.toLowerCase() !== "model") {
+        invalidateAsset(this);
+    }
 };
 
 Asset.prototype.appendChild = function(child){

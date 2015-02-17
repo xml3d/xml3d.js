@@ -175,6 +175,7 @@ function checkInput(processNode, operator, inputMapping, inputChannels){
         if(dataName){
             var channel = inputChannels[entry.source];
             if(!channel){
+                if(!inputMapping) continue;
                 Xflow.notifyError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
                     "' not found. Used for parameter " + entry.source, dataNode);
                 return false;

@@ -92,7 +92,7 @@ var XMLFormatHandler = function () {
 XML3D.createClass(XMLFormatHandler, FormatHandler);
 
 XMLFormatHandler.prototype.isFormatSupported = function (response, responseType, mimetype) {
-    return response && response.nodeType === 9 && (mimetype === "application/xml" || mimetype === "text/xml");
+    return response && response.nodeType === 9 && (mimetype.match(/xml/));
 };
 
 XMLFormatHandler.prototype.getFormatData = function (response, responseType, mimetype, callback) {
@@ -115,8 +115,11 @@ var XML3DFormatHandler = function () {
 XML3D.createClass(XML3DFormatHandler, XMLFormatHandler);
 
 XML3DFormatHandler.prototype.isFormatSupported = function (response, responseType, mimetype) {
-    // FIXME add check by searching for 'xml3d' tags in the document
-    return XMLFormatHandler.prototype.isFormatSupported.call(this, response, responseType, mimetype);
+    var xml3ds = [];
+    if (response instanceof XMLDocument) {
+        xml3ds = response.getElementsByTagName("xml3d");
+    }
+    return xml3ds.length !== 0;
 };
 
 XML3DFormatHandler.prototype.getFormatData = function (response, responseType, mimetype, callback) {

@@ -277,7 +277,7 @@ function setDocumentData(httpRequest, url, mimetype) {
         response = httpRequest.response;
     } else if (cleanedMimetype == "application/json") {
         response = JSON.parse(httpRequest.responseText);
-    } else if (cleanedMimetype == "application/xml" || cleanedMimetype == "text/xml") {
+    } else if (cleanedMimetype.match(/xml/)) {
         response = httpRequest.responseXML;
         if (!response) {
             XML3D.debug.logError("Invalid external XML document '" + httpRequest._url +

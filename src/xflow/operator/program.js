@@ -414,7 +414,7 @@
         return inlineFunc;
     }
 
-    var c_FunctionPattern = /function\s+([^(]*)\(([^)]*)\)\s*\{([\s\S]*)\}/;
+    var c_FunctionPattern = /function\s*([^(]*)\(([^)]*)\)\s*\{([\s\S]*)\}/;
 
     function parseFunction(func){
         var result = {};

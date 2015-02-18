@@ -198,7 +198,7 @@ test("Removing lights", 6, function() {
     deepEqual(actual, [255,0,255,255], "Phong object is lit by both lights");
 
     var dirLight = this.doc.getElementById("dirlight");
-    dirLight.parentElement.removeChild(dirLight);
+    dirLight.parentNode.removeChild(dirLight);
 
     this.win.XML3D.flushDOMChanges();
     equal(lightsArray.directional.length, 0, "Light was removed from the lights array");
@@ -248,7 +248,7 @@ test("Remove light shader", 4, function() {
     deepEqual(actual, [255,0,255,255], "Phong object is lit by both lights");
 
     var pointLight = this.doc.getElementById("ls_Point");
-    pointLight.parentElement.removeChild(pointLight);
+    pointLight.parentNode.removeChild(pointLight);
 
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);

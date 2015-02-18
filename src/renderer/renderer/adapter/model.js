@@ -78,6 +78,11 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
                 return;
         }
     }, onAssetChange: function () {
+        if (!this.renderNode) {
+            //This model hasn't even been initialized yet so we defer building the render nodes to that step
+            //This can happen for ex. when changing the "src" attribute before the model is appended into the DOM
+            return;
+        }
         this.createModelRenderNodes();
     },
 
@@ -104,6 +109,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 });
 
 function rec_removeRenderNodes(node, keepCurrentNode) {
+    if (!node) {
+        return;
+    }
     if (!keepCurrentNode)
         node.remove();
     var children = node.getChildren();

@@ -9,7 +9,7 @@ module("Materials", {
     }
 });
 
-test("Change material model of mesh", 6, function () {
+test("Change material model of mesh", 8, function () {
     var doc = this.doc;
     var scene = doc.querySelector("xml3d");
     console.log(scene);
@@ -26,7 +26,11 @@ test("Change material model of mesh", 6, function () {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
         QUnit.closeArray(pick, [0, 255, 255, 255], PIXEL_EPSILON, "Changed script to internal shade.js shader. Should be cyan now.");
     });
-    var checkShadeExternal = checkShadeInternal.then(doc.defaultView.setShadeExternal).then(promiseSceneRendered.bind(null, scene)).then(function(s) {
+    var changeShadeInternal = checkShadeInternal.then(doc.defaultView.changeInternalShadeJS).then(promiseSceneRendered.bind(null, scene)).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Changed script content of shade.js shader. Should be magenta now.");
+    });
+    var checkShadeExternal = changeShadeInternal.then(doc.defaultView.setShadeExternal).then(promiseSceneRendered.bind(null, scene)).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
         QUnit.closeArray(pick, [51, 51, 51, 255], PIXEL_EPSILON, "Changed script to internal shade.js shader. Should be grey now.");
     });

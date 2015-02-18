@@ -51,11 +51,16 @@
 
   var setShadeExternal = function () {
     material.setAttribute("script", "assets/plane.xml#customMaterial");
-  }
+  };
 
   var setShadeExternalJS = function () {
     material.setAttribute("script", "assets/materials/yellow.js");
-  }
+  };
+
+  var changeInternalShadeJS = function () {
+    var script = document.querySelector("#customMaterial");
+    script.textContent = "function shade(env) { return new Vec3(1,0,1); }"
+  };
 
 </script>
 <div>
@@ -65,6 +70,7 @@
   <a href="#" onclick="setShadeInternal()">internal shade.js</a><br>
   <a href="#" onclick="setShadeExternal()">external shade.js script element</a><br>
   <a href="#" onclick="setShadeExternalJS()">external shade.js javascript</a><br>
+  <a href="#" onclick="changeInternalShadeJS()">change internal shade.js script</a><br>
 
 </div>
 

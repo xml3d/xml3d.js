@@ -28,14 +28,15 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
         this.updateMaterialModel();
         if (!this._materialModel) {
             this._materialConfiguration = null;
-            return;
+        } else {
+            this._materialConfiguration = this.getScene().createMaterialConfiguration(this._materialModel, this._dataAdapter.getXflowNode(), {name: this.node.id});
         }
-
-        this._materialConfiguration = this.getScene().createMaterialConfiguration(this._materialModel, this._dataAdapter.getXflowNode(), {name: this.node.id});
         this.notifyOppositeAdapters();
     },
 
     updateMaterialModel: function () {
+        this._materialModel = null;
+
         var uri = this.getShaderScriptURI();
         if (uri.scheme == "urn") {
             this.disconnectAdapterHandle("script");
@@ -46,7 +47,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
         this.connectAdapterHandle("script", this.getAdapterHandle(uri, XML3D.data, 0));
         var adapter = this.getConnectedAdapter('script');
         if (adapter && adapter.getScriptType) {
-            this._materialModel = { type: adapter.getScriptType(), script: adapter.getScriptCode() };
+            this._materialModel = { type: adapter.getScriptType(), script: adapter.getScript() };
         }
     },
 
@@ -70,7 +71,8 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
                 break;
             case XML3D.events.ADAPTER_HANDLE_CHANGED:
                 if (evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
-                    XML3D.debug.logError("Could not find script of url '" + evt.url + "'");
+                    XML3D.debug.logError("Could not find material for url '" + evt.url + "'");
+
                 }
                 this.updateMaterialConfiguration();
                 break;

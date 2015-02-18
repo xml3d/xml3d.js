@@ -287,7 +287,9 @@ function setDocumentData(httpRequest, url, mimetype) {
     } else if (cleanedMimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
         XML3D.debug.logError("Possibly wrong loading of resource " + url + ". Mimetype is " + mimetype + " but response is not an ArrayBuffer");
         response = httpRequest.response;
-    } else {
+    } else if (cleanedMimetype == "application/javascript" || mimetype == "text/javascript") {
+        response = httpRequest.response;
+    }else {
         XML3D.debug.logError("Unidentified response type (response = '" + httpRequest.response + "', responseType = '" + httpRequest.responseType + "')");
         response = httpRequest.response;
     }
@@ -295,6 +297,7 @@ function setDocumentData(httpRequest, url, mimetype) {
     var formatHandler = findFormat(response, httpRequest.responseType, cleanedMimetype);
     if (!formatHandler) {
         XML3D.debug.logError("No format handler for resource (response = '" + response + "', responseType = '" + httpRequest.responseType + "')");
+        invalidateDocumentHandles(url);
         return;
     }
     docCache.format = formatHandler;

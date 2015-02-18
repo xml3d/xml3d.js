@@ -4,12 +4,12 @@ var JSShaderClosure = require("./jsshaderclosure");
 /**
  *
  * @param {GLContext} context
- * @param shaderInfo
+ * @param {MaterialConfiguration} config
  * @extends AbstractShaderComposer
  * @constructor
  */
-var JSShaderComposer = function (context, shaderInfo) {
-    AbstractShaderComposer.call(this, context, shaderInfo);
+var JSShaderComposer = function (context, config) {
+    AbstractShaderComposer.call(this, context, config);
 
     if (!window.Shade)
         throw new Error("shade.js library not found");
@@ -17,7 +17,7 @@ var JSShaderComposer = function (context, shaderInfo) {
     this.context = context;
 
     /** @type string*/
-    this.sourceTemplate = null;
+    this.sourceTemplate = config.model.script;
 
     /**
      * @private
@@ -31,7 +31,7 @@ var JSShaderComposer = function (context, shaderInfo) {
      */
     this.request = null;
 
-    this.setShaderInfo(shaderInfo);
+    this.setShaderInfo(config);
 };
 
 JSShaderComposer.convertSysName = function (name) {
@@ -39,8 +39,7 @@ JSShaderComposer.convertSysName = function (name) {
 };
 
 XML3D.createClass(JSShaderComposer, AbstractShaderComposer, {
-    setShaderInfo: function (shaderInfo) {
-        this.sourceTemplate = shaderInfo.getScriptCode();
+    setShaderInfo: function (config) {
         try {
             this.extractedParams = Shade.extractParameters(this.sourceTemplate, {implementation: "xml3d-glsl-forward"}).shaderParameters;
             // FIXME: Shader.js should always request position (in case
@@ -53,7 +52,7 @@ XML3D.createClass(JSShaderComposer, AbstractShaderComposer, {
         // The composer is interested in changes of all possible shader parameters (extracted)
         // the instances (closures) will only set those, that occur in the instance
         if (this.extractedParams.length) {
-            this.updateRequest(shaderInfo.getData());
+            this.updateRequest(config.dataNode);
         }
     },
 

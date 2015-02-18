@@ -51,8 +51,7 @@ XML3D.createClass(URNShaderComposer, AbstractShaderComposer, {
         }
         var descriptor = getShaderDescriptor(uri.path);
         if (!descriptor) {
-            XML3D.debug.logError("No Shader registered for urn:", uri);
-            return;
+            throw new Error("Unknown URN: " + uri);
         }
 
         this.descriptor = new ShaderDescriptor();

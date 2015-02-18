@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml3d>
+  <asset id="Plane">
+    <assetdata name="Mesh-001">
+      <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 1.0 1.0 0.0 -1.0 1.0 0.0</float3>
+      <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+    </assetdata>
+    <assetmesh includes="Mesh-001" name="Mesh-001_Material.001">
+      <int name="index">0 1 2 2 3 0 </int>
+    </assetmesh>
+  </asset>
+    <script id="customMaterial" type="text/javascript">
+        function shade(env) {
+            return new Vec3(0.2, 0.2, 0.2);
+        }
+    </script>
+</xml3d>

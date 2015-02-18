@@ -2,10 +2,6 @@ var JSShaderComposer = require("./js/jsshadercomposer");
 var URNShaderComposer = require("./urn/urnshadercomposer");
 var DefaultComposer = require("./abstractshadercomposer").DefaultComposer;
 
-var ComposerConstructors = {
-    "text/shade-javascript": JSShaderComposer
-};
-
 /**
  * @param {GLContext} context
  * @constructor
@@ -31,10 +27,24 @@ XML3D.extend(ShaderComposerFactory.prototype, {
         }
         var result = this.composers[materialConfiguration.id];
         if (!result) {
-            switch (materialConfiguration.model.type) {
-                case "urn":
-                    result = new URNShaderComposer(this.context, materialConfiguration);
-                    break;
+            try {
+                var modelType = materialConfiguration.model.type;
+                switch (modelType) {
+                    case "urn":
+                        result = new URNShaderComposer(this.context, materialConfiguration);
+                        break;
+                    case "text/javascript":
+                    case "application/javascript":
+                    case "text/shade-javascript":
+                        result = new JSShaderComposer(this.context, materialConfiguration);
+                        break;
+                    default:
+                        XML3D.debug.logError("Can not create shader of type:", modelType, materialConfiguration.model)
+                }
+
+            } catch (e) {
+                XML3D.debug.logError("No shader could be created for '" + materialConfiguration.name + "':", e.message);
+                result = this.defaultComposer;
             }
             //} else {
             //    // TODO: This should be done via resourceManager, but script node is not yet

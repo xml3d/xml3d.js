@@ -70,7 +70,7 @@ Result.prototype._onResultChanged = function(state){
  * @extends {Xflow.Result}
  */
 var ComputeResult = function(){
-    Xflow.Result.call(this);
+    Result.call(this);
     this._outputNames = [];
     /** @type {Object.<string,DataEntry>} */
     this._dataEntries = {};
@@ -102,10 +102,10 @@ ComputeResult.prototype.getOutputMap = function() {
  * Note that the VSDataResult is not used to generate the VertexShader directly.
  * For that, the Xflow.VertexShader structure must be created from Xflow.VertexShaderRequest
  * @constructor
- * @extends {Xflow.Result}
+ * @extends {Result}
  */
 var VSDataResult = function(){
-    Xflow.Result.call(this);
+    Result.call(this);
     this._program = null;
     this._programData = null;
 };

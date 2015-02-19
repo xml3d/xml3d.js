@@ -1,4 +1,5 @@
 var Base = require("../base.js");
+var initAnonymousOperator = require("../operator/operator").initAnonymousOperator;
 var Xflow = Base.Xflow;
 
 var shaderConstant = {}
@@ -94,7 +95,7 @@ VSConfig.prototype.getOperator = function(){
         params.push( { type: type, source: name, optional: attr.optional} );
         name += "T" + type + "N" + name + "O" + attr.optional + ".";
     }
-    var operator = Xflow.initAnonymousOperator(name,
+    var operator = initAnonymousOperator(name,
     {
         outputs: outputs,
         params:  params,

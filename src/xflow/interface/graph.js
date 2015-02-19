@@ -1,5 +1,6 @@
 var Base = require("../base.js");
 var Mapping = require("./mapping");
+var ChannelNode = require("../processing/channel-node").ChannelNode;
 var Utils = require("../utils/utils.js");
 var Xflow = Base.Xflow;
 
@@ -1066,5 +1067,6 @@ function replaceNodeInHierarchy(sourceNode, newNode) {
 module.exports = {
     Graph : Graph,
     InputNode: InputNode,
-    DataNode: DataNode
+    DataNode: DataNode,
+    getComputeDataflowUrl: getComputeDataflowUrl
 };

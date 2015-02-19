@@ -3,6 +3,9 @@ var Xflow = Base.Xflow;
 var OperatorList = require("../operator/operator-list");
 var Program = require("../operator/program");
 var Utils = require("../utils/utils.js");
+var Operator = require("../operator/operator");
+var OperatorEntry = require("../operator/operator-entry");
+var Program = require("../operator/program");
 
 //----------------------------------------------------------------------------------------------------------------------
 // Executor
@@ -75,7 +78,7 @@ var Executor = function(ownerNode, platform){
         runSubNodes(this);
         updateIterateState(this); // TODO check if iterate State has changes in any way and only refetch program in that case
 
-        this.program = Xflow.createProgram(this.operatorList);
+        this.program = Program.createProgram(this.operatorList);
 
         if(this.program){
             this.operatorList.allocateOutput(this.programData, !!asyncCallback);
@@ -95,7 +98,7 @@ var Executor = function(ownerNode, platform){
         runSubNodes(this);
         updateIterateState(this);
 
-        this.program = Xflow.createProgram(this.operatorList);
+        this.program = Program.createProgram(this.operatorList);
 
         return this.program;
     };
@@ -132,7 +135,7 @@ function constructExecutor(executer, ownerNode){
  * @returns {boolean}
  */
 function initRequestNode(cData, executer, ownerNode){
-    if(ownerNode instanceof Xflow.RequestNode){
+    if(true) { // FIXME: ownerNode instanceof RequestNode){
         cData.finalOutput = {};
         var filter = ownerNode.filter || ownerNode.owner.outputChannels.getNames();
         for(var i = 0; i < filter.length; ++i){
@@ -185,7 +188,7 @@ function constructPreScan(cData, node, platform, noOperators){
 
 function canOperatorMerge(cData, operator, platform){
     // TODO: Detect merge support
-    return (platform == Xflow.PLATFORM.ASYNC || !Xflow.isOperatorAsync(operator)) &&
+    return (platform == Xflow.PLATFORM.ASYNC || !Operator.isOperatorAsync(operator)) &&
         (!cData.firstOperator ||
         (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl));
 }
@@ -248,7 +251,7 @@ function blockSubtree(cData, node){
         for(var i = 0; i < cData.constructionOrder.length; ++i){
             var node = cData.constructionOrder[i];
 
-            var entry = new Xflow.OperatorEntry(node.operator);
+            var entry = new OperatorEntry(node.operator);
 
             constructInputConnection(executer, entry, cData, node);
 
@@ -295,7 +298,7 @@ function blockSubtree(cData, node){
             if(node.owner.owner._computeInputMapping)
                 mappedInputName = node.owner.owner._computeInputMapping.getScriptInputName(mapping[j].paramIdx, mapping[j].source);
 
-            var connection = new Xflow.ProgramInputConnection();
+            var connection = new Program.ProgramInputConnection();
             connection.channel = channel;
             connection.arrayAccess = mapping[j].array || false; // TODO: rename to randomAccess
             connection.sequenceAccessType = mapping[j].sequence || 0;

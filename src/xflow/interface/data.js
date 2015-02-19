@@ -494,7 +494,7 @@ var ImageDataTextureEntry = function(imageData){
     notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
 };
 
-Xflow.createClass(ImageDataTextureEntry, DataEntry);
+Base.createClass(ImageDataTextureEntry, DataEntry);
 
 Object.defineProperties(ImageDataTextureEntry.prototype, {
     width: {

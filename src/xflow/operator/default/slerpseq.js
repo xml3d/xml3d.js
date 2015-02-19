@@ -1,4 +1,5 @@
 var Xflow = require("../operator.js");
+var utils = require("../../utils/utils");
 
 Xflow.registerOperator("xflow.slerpSeq", {
     outputs: [  {type: 'float4', name: 'result'}],
@@ -47,7 +48,7 @@ Xflow.registerOperator("xflow.slerpKeys", {
     },
     evaluate: function(result, keys, values, key) {
         var maxIdx = Math.min(keys.length, Math.floor(values.length / 4));
-        var idx = Xflow.utils.binarySearch(keys, key[0], maxIdx);
+        var idx = utils.binarySearch(keys, key[0], maxIdx);
 
         if(idx < 0 || idx == maxIdx - 1){
             idx = Math.max(0,idx);

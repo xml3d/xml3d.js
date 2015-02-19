@@ -1,5 +1,11 @@
 var Base = require("../base.js");
 var Xflow = Base.Xflow;
+var utils = require("../utils/utils");
+var Executor = require("./executor");
+var Result = require("../interface/result");
+var Operator = require("../operator/operator");
+var BufferEntry = require("../interface/data").BufferEntry;
+var DataSlot = require("../processing/data-slot");
 
 //----------------------------------------------------------------------------------------------------------------------
 // Xflow.ProcessNode
@@ -75,13 +81,13 @@ var ProcessNode = function(channelNode){
 
     constructProcessNode(this, channelNode);
 
-    if(Xflow.isOperatorAsync(this.operator)){
+    if(Operator.isOperatorAsync(this.operator)){
         this._bindedAsyncCallback = this.receiveAsyncProcessing.bind(this);
     }
 };
 
 ProcessNode.prototype.onXflowChannelChange = function(channel, state){
-    if (Xflow.isOperatorAsync(this.operator)) {
+    if (Operator.isOperatorAsync(this.operator)) {
         if (this.status == Xflow.PROCESS_STATE.LOADING || this.asyncProcessState != ASYNC_PROCESS_STATE.INIT) {
             this.status = Xflow.PROCESS_STATE.MODIFIED;
             this.updateState();
@@ -156,7 +162,7 @@ ProcessNode.prototype.updateState = function(){
                 XML3D.debug.assert(checkInput(this, this.operator, this.owner.owner._computeInputMapping, this.inputChannels));
             }
 
-            if(this.status == Xflow.PROCESS_STATE.UNPROCESSED && Xflow.isOperatorAsync(this.operator)){
+            if(this.status == Xflow.PROCESS_STATE.UNPROCESSED && Operator.isOperatorAsync(this.operator)){
                 this.status = this.asyncProcessState == ASYNC_PROCESS_STATE.INIT ? Xflow.PROCESS_STATE.LOADING
                     : Xflow.PROCESS_STATE.PROCESSED;
                 this.startAsyncProcessing();
@@ -261,37 +267,37 @@ function synchronizeChildrenAndDescendants(children, descendants, inputChannels)
     for(var name in inputChannels){
         channel = inputChannels[name];
         if(channel && channel.creatorProcessNode){
-            Xflow.utils.set.add(children, channel.creatorProcessNode);
-            Xflow.utils.set.add(descendants, channel.creatorProcessNode.descendants);
+            utils.set.add(children, channel.creatorProcessNode);
+            utils.set.add(descendants, channel.creatorProcessNode.descendants);
         }
     }
-    Xflow.utils.set.remove(children, descendants);
-    Xflow.utils.set.add(descendants, children);
+    utils.set.remove(children, descendants);
+    utils.set.add(descendants, children);
 }
 
 function synchronizeOutput(operator, outputs){
-    var async = Xflow.isOperatorAsync(operator);
+    var async = Operator.isOperatorAsync(operator);
     for(var i in operator.outputs){
         var dataEntry = operator.outputs[i];
 
         var entry, asyncEntry;
         var type = dataEntry.type;
         if(type != Xflow.DATA_TYPE.TEXTURE){
-            entry = new Xflow.BufferEntry(type, null);
-            if(async) asyncEntry = new Xflow.BufferEntry(type, null);
+            entry = new BufferEntry(type, null);
+            if(async) asyncEntry = new BufferEntry(type, null);
         }
         else{
             entry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
             if(async) asyncEntry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
         }
-        outputs[dataEntry.name] = new Xflow.DataSlot(entry, 0);
+        outputs[dataEntry.name] = new DataSlot(entry, 0);
         if(async) outputs[dataEntry.name].asyncDataEntry = asyncEntry;
     }
 }
 
 function getOrCreateExecuter(node, platform){
     if(!node.executers[platform]){
-        node.executers[platform] = new Xflow.Executer(node, platform);
+        node.executers[platform] = new Executor(node, platform);
     }
     return node.executers[platform];
 }
@@ -313,7 +319,7 @@ var RequestNode = function(channelNode, filter){
 
     /**
      *
-     * @type {Object<Xflow.PLATFORM, Result>}
+     * @type {Object<Xflow.PLATFORM, exports.Result>}
      */
     this.results = {};
 
@@ -446,7 +452,7 @@ function synchronizeRequestChannels(requestNode, channelNode){
 function getRequestComputeResult(requestNode)
 {
     if(!requestNode.results[Xflow.RESULT_TYPE.COMPUTE])
-        requestNode.results[Xflow.RESULT_TYPE.COMPUTE] = new Xflow.ComputeResult();
+        requestNode.results[Xflow.RESULT_TYPE.COMPUTE] = new Result.ComputeResult();
 
     var result = requestNode.results[Xflow.RESULT_TYPE.COMPUTE];
     result._dataEntries = {}; result._outputNames = [];
@@ -462,13 +468,13 @@ function getRequestComputeResult(requestNode)
 /**
  *
  * @param requestNode
- * @returns {VSDataResult}
+ * @returns {exports.VSDataResult}
  */
 function getRequestVSResult(requestNode)
 {
     var executer = getOrCreateExecuter(requestNode, Xflow.PLATFORM.GLSL);
     if(!requestNode.results[Xflow.RESULT_TYPE.VS])
-        requestNode.results[Xflow.RESULT_TYPE.VS] = new Xflow.VSDataResult();
+        requestNode.results[Xflow.RESULT_TYPE.VS] = new Result.VSDataResult();
     var result = requestNode.results[Xflow.RESULT_TYPE.VS];
 
     var program = executer.getVertexShader();
@@ -481,5 +487,5 @@ function getRequestVSResult(requestNode)
 module.exports = {
     RequestNode: RequestNode,
     ProcessNode: ProcessNode
-}
+};
 

@@ -37,10 +37,8 @@ test("Int interface tests", function() {
         equal(e.width, 300, "canvas.width is 300 by default.");
         e.setAttribute("width", "509.5");
         equal(e.width, 509, "canvas.width ='509.5' // 509;");
-        equal(e.getAttribute("width"), "509.5", "getAttribute = '509.5'");
         e.setAttribute("width", 509.5);
         equal(e.width, 509, "canvas.width = 509.5 // 509;");
-        equal(e.getAttribute("width"), "509.5", "getAttribute = '509.5'");
         e.setAttribute("width", "asdf");
         equal(e.width, 300, "canvas.width set back to default, if invalid value.");
 
@@ -52,18 +50,15 @@ test("Int interface tests", function() {
         equal(e.width, 800, "xml3d.width is 800 by default.");
         e.width = 300;
         equal(e.width, 300, "xml3d.width = 300.");
-        equal(e.getAttribute("width"), "300", "getAttribute = '300'.");
         e.width = true;
         equal(e.width, 1, "xml3d.width = 1.");
-        equal(e.getAttribute("width"), "1", "getAttribute = '1'.");
         e.width = 500.9;
         equal(e.width, 500, "xml3d.width = 500.9.");
-        equal(e.getAttribute("width"), "500", "getAttribute = '500'.");
 
         // Set via attribute
         e.setAttribute("width", "123");
         equal(e.width, 123, "Value set via setAttribute to 123.");
-        equal(e.getAttribute("width"), "123", "Value set via setAttribute to 123. getAttribute = '509.5'");
+        equal(e.getAttribute("width"), "123", "Value set via setAttribute to 123. getAttribute = '123'");
 
         e.setAttribute("width", "509.5");
         equal(e.width, 509, "xml3d.width ='509.5' // 509;");
@@ -71,7 +66,6 @@ test("Int interface tests", function() {
 
         e.setAttribute("width", 509.5);
         equal(e.width, 509, "setAttribute(509.5) => xml3d.width == 509;");
-        equal(e.getAttribute("width"), "509.5", "setAttribute(509.5) => getAttribute == '509.5'");
 
         e.setAttribute("width", "asdf");
         equal(e.getAttribute("width"), "asdf", "Invalid value is set to attribute");

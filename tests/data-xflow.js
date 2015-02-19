@@ -109,9 +109,8 @@ module("Xflow tests", {
                 this.VSConnection(connect, vsConfig);
             connect = connect.nextElementSibling;
         };
-
-        vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "screenTransform", true);
-        vsConfig.addCodeFragment("gl_Position = screenTransform * vec4(#I{position}, 1.0);");
+        vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
+        vsConfig.channelAttribute("position", "_glPosition", "this.modelViewProjectionMatrix.mulVec(position, 1.0)");
 
         var dataAdapter = dataElement._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];

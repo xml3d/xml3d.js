@@ -33,7 +33,7 @@
             <VSHasInputBuffer input="#normal_1" uniform="true" />
             <VSHasInputBuffer input="#texcoord_1" uniform="false" />
 
-            <VSCodeMatchesRegexp regexp="gl_Position ?= ?.+\*.*vec4\(.+, 1.0\);" />
+            <VSCodeMatchesRegexp regexp="gl_Position ?= ?.+\*.*vec4\(.+, 1.0\)" />
         </VSCheck>
     </TestProcess>
 </XflowTest>

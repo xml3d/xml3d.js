@@ -30,7 +30,7 @@
 
             <VSHasInputBuffer input="#position_1" uniform="false" />
 
-            <VSCodeMatchesRegexp regexp="gl_Position ?= ?.+\*.*vec4\(.+, 1.0\);" />
+            <VSCodeMatchesRegexp regexp="gl_Position ?= ?.+\*.*vec4\(.+, 1.0\)" />
         </VSCheck>
     </TestProcess>
 </XflowTest>

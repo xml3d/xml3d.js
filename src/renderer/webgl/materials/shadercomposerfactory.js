@@ -46,19 +46,6 @@ XML3D.extend(ShaderComposerFactory.prototype, {
                 XML3D.debug.logError("No shader could be created for '" + materialConfiguration.name + "':", e.message);
                 result = this.defaultComposer;
             }
-            //} else {
-            //    // TODO: This should be done via resourceManager, but script node is not yet
-            //    // configure
-            //    if (!shaderInfo.getScriptType())
-            //        return this.defaultComposer;
-            //    try {
-            //        var Constructor = ComposerConstructors[shaderInfo.getScriptType()];
-            //        result = new Constructor(this.context, shaderInfo);
-            //    } catch (e) {
-            //        XML3D.debug.logError("No shader could be created for " + scriptURI + ":", e.message);
-            //        return this.defaultComposer;
-            //    }
-            //}
             if (result) {
                 this.composers[materialConfiguration.id] = result;
                 this.context.getStatistics().materials++;

@@ -32,6 +32,7 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
     },
 
     clearModelRenderNodes: function () {
+        this.clearAdapterHandles();
         this._subRenderNodes = [];
         var i = this.postTransformXflowRequests.length;
         while (i--) {
@@ -98,6 +99,7 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
                 if (splits[0] == "shader") {
                     var renderNodeId = +splits[1];
                     var renderNode = this._subRenderNodes[renderNodeId];
+                    XML3D.debug.assert(renderNode);
                     if (evt.handleStatus == AdapterHandle.STATUS.NOT_FOUND) {
                         renderNode.setMaterial(null);
                     } else {

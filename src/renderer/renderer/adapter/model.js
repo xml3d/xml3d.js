@@ -98,6 +98,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
                 var splits = evt.key.split("_");
                 if (splits[0] == "shader") {
                     var renderNodeId = +splits[1];
+                    // We identify the corresponding rendernode by the handler key
+                    // This is a workaround that should be removed if there are
+                    // custom callbacks for
                     var renderNode = this._subRenderNodes[renderNodeId];
                     XML3D.debug.assert(renderNode);
                     if (evt.handleStatus == AdapterHandle.STATUS.NOT_FOUND) {

@@ -308,30 +308,6 @@ XML3D.createClass(RenderObject, RenderNode, {
         this.scene.requestRedraw("Transformation changed");
     },
 
-
-    /**
-     *
-     * @param {AdapterHandle|null} handle
-     */
-    //updateShaderFromHandle: function (handle) {
-    //    var shaderInfo = null;
-    //
-    //    if (handle) {
-    //        switch (handle.status) {
-    //            case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
-    //                XML3D.debug.logWarning("Shader not found.", handle.url, this.name);
-    //                break;
-    //            case XML3D.base.AdapterHandle.STATUS.LOADING:
-    //                break;
-    //            case XML3D.base.AdapterHandle.STATUS.READY:
-    //                shaderInfo = handle.getAdapter().getShaderInfo();
-    //        }
-    //    }
-    //
-    //    var composer = this.scene.shaderFactory.createComposerForShaderInfo(shaderInfo);
-    //    this.drawable.setShaderComposer(composer);
-    //},
-
     setObjectSpaceBoundingBox: function (box) {
         var o = this.offset + OBJECT_BB_OFFSET;
         this.page[o] = box[0];

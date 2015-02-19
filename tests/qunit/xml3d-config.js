@@ -283,10 +283,7 @@ function promiseSceneRendered(xml3dElement) {
         }
         xml3dElement.removeEventListener("framedrawn", f, true);
         XML3DUnit.getPixelValue(glContext, 1, 1);
-        window.setTimeout(function() {
-            deferred.resolve(xml3dElement);
-        }, 100);
-
+        deferred.resolve(xml3dElement);
     };
 
     xml3dElement.addEventListener("framedrawn",f,false);

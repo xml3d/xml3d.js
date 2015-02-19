@@ -13,7 +13,11 @@ var MaterialConfiguration = function(model, dataNode, opt) {
 
     this.id = uniqueObjectId();
 
+    /**
+     * @type {{type: string}}
+     */
     this.model = model;
+
     /**
      * Data Node of the renderObject
      * @type {Xflow.DataNode}

@@ -1,43 +1,97 @@
 module("Materials", {
-    setup : function() {
-        var that = this;
-        stop();
-        Q.fcall(promiseIFrameLoaded, "scenes/materials.html").then(function (doc) {
-            that.doc = doc;
-            ok(true, "Scene loaded");
-        }).fin(QUnit.start).done();
-    }
+
 });
 
-test("Change material model of mesh", 8, function () {
-    var doc = this.doc;
-    var scene = doc.querySelector("xml3d");
-    console.log(scene);
+test("Change material model of mesh", 7, function () {
     stop();
-    var checkInit = promiseSceneRendered(scene).then(function (s) {
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/materials.html");
+
+    var changeFunction = function(f) {
+        return function(scene) {
+            scene.ownerDocument.defaultView[f]();
+            return scene;
+        }
+    };
+
+    var checkInit = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
         QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Blue phong");
+        return s;
     });
-    var checkURNChange = checkInit.then(doc.defaultView.setMatte).then(promiseSceneRendered.bind(null, scene)).then(function(s) {
-        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
+    var checkURNChange = checkInit.then(changeFunction("setMatte")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 256, 256);
         QUnit.closeArray(pick, [0, 255, 0, 255], PIXEL_EPSILON, "Changed urn script to matte. Should be green now.");
+        return s;
     });
-    var checkShadeInternal = checkURNChange.then(doc.defaultView.setShadeInternal).then(promiseSceneRendered.bind(null, scene)).then(function(s) {
+
+    var checkShadeInternal = checkURNChange.then(changeFunction("setShadeInternal")).then(promiseSceneRendered).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
         QUnit.closeArray(pick, [0, 255, 255, 255], PIXEL_EPSILON, "Changed script to internal shade.js shader. Should be cyan now.");
+        return s;
     });
-    var changeShadeInternal = checkShadeInternal.then(doc.defaultView.changeInternalShadeJS).then(promiseSceneRendered.bind(null, scene)).then(function(s) {
+
+    var changeShadeInternal = checkShadeInternal.then(changeFunction("changeInternalShadeJS")).then(promiseSceneRendered).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
         QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Changed script content of internal shade.js shader. Should be magenta now.");
+        return s;
     });
-    var checkShadeExternal = changeShadeInternal.then(doc.defaultView.setShadeExternal).then(promiseSceneRendered.bind(null, scene)).then(function(s) {
+    var checkShadeExternal = changeShadeInternal.then(changeFunction("setShadeExternal")).then(promiseSceneRendered).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
         QUnit.closeArray(pick, [51, 51, 51, 255], PIXEL_EPSILON, "Changed script to external shade.js shader in XML document. Should be grey now.");
+        return s;
     });
-    var checkShadeExternalJS = checkShadeExternal.then(doc.defaultView.setShadeExternalJS).then(promiseSceneRendered.bind(null, scene)).then(function(s) {
+    var checkShadeExternalJS = checkShadeExternal.then(changeFunction("setShadeExternalJS")).then(promiseSceneRendered).then(function(s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
         QUnit.closeArray(pick, [255, 255, 0, 255], PIXEL_EPSILON, "Changed script to external shade.js shader in Javascript document. Should be yellow now.");
+        return s;
     });
     checkShadeExternalJS.fin(QUnit.start).done();
 });
 
+test("Change material model of asset", 7, function () {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-materials.html");
+
+    var changeFunction = function(f) {
+        return function(scene) {
+            scene.ownerDocument.defaultView[f]();
+            return scene;
+        }
+    };
+
+    var checkInit = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
+        QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Blue phong");
+        return s;
+    });
+    var checkURNChange = checkInit.then(changeFunction("setMatte")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 256, 256);
+        QUnit.closeArray(pick, [0, 255, 0, 255], PIXEL_EPSILON, "Changed urn script to matte. Should be green now.");
+        return s;
+    });
+
+    var checkShadeInternal = checkURNChange.then(changeFunction("setShadeInternal")).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
+        QUnit.closeArray(pick, [0, 255, 255, 255], PIXEL_EPSILON, "Changed script to internal shade.js shader. Should be cyan now.");
+        return s;
+    });
+
+    var changeShadeInternal = checkShadeInternal.then(changeFunction("changeInternalShadeJS")).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
+        QUnit.closeArray(pick, [255, 0, 255, 255], PIXEL_EPSILON, "Changed script content of internal shade.js shader. Should be magenta now.");
+        return s;
+    });
+    var checkShadeExternal = changeShadeInternal.then(changeFunction("setShadeExternal")).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
+        QUnit.closeArray(pick, [51, 51, 51, 255], PIXEL_EPSILON, "Changed script to external shade.js shader in XML document. Should be grey now.");
+        return s;
+    });
+    var checkShadeExternalJS = checkShadeExternal.then(changeFunction("setShadeExternalJS")).then(promiseSceneRendered).then(function(s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
+        QUnit.closeArray(pick, [255, 255, 0, 255], PIXEL_EPSILON, "Changed script to external shade.js shader in Javascript document. Should be yellow now.");
+        return s;
+    });
+    checkShadeExternalJS.fin(QUnit.start).done();
+});

@@ -466,7 +466,6 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     materialChanged: function() {
-        console.log("material changed", this._actualMaterial);
         if (this.drawable) {
             var composer = this.scene.shaderFactory.createComposerFromMaterialConfiguration(this._actualMaterial);
             this.drawable.setShaderComposer(composer);

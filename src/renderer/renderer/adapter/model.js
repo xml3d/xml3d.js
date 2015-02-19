@@ -1,4 +1,5 @@
 var TransformableAdapter = require("./transformable.js");
+var AdapterHandle = XML3D.base.AdapterHandle;
 
 var ModelRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, true);
@@ -31,6 +32,7 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
     },
 
     clearModelRenderNodes: function () {
+        this._subRenderNodes = [];
         var i = this.postTransformXflowRequests.length;
         while (i--) {
             this.postTransformXflowRequests[i].clear();
@@ -53,16 +55,31 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
                 this.clearModelRenderNodes();
             }
         }
-    }, getSubShaderHandle: function (shaderHref) {
+    },
+
+    getMaterialConfiguration: function (shaderHref, index) {
+        var result = null;
         if (shaderHref) {
             var adapterHandle = this.getAdapterHandle(shaderHref);
-            if (adapterHandle && adapterHandle.status == XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
-                XML3D.debug.logError("Could not find <shader> of url '" + adapterHandle.url + "' ", this.node);
+            this.connectAdapterHandle("shader_" + index, adapterHandle);
+
+            switch (adapterHandle.status) {
+
+                case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
+                    XML3D.debug.logError("Could not find <shader> of url '" + adapterHandle.url + "' ", this.node);
+                    break;
+                case XML3D.base.AdapterHandle.STATUS.READY:
+                    var adapter = adapterHandle.getAdapter();
+                    if (adapter && adapter.getMaterialConfiguration) {
+                        result = adapter.getMaterialConfiguration();
+                    }
+                    break;
+                case XML3D.base.AdapterHandle.STATUS.LOADING:
+                    break;
             }
-            //this.connectAdapterHandle("shader_" + index, adapterHandle);
-            return adapterHandle;
+
         }
-        return null;
+        return result;
     },
 
     /**
@@ -76,13 +93,31 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
             case XML3D.events.THIS_REMOVED:
                 this.dispose();
                 return;
+            case XML3D.events.ADAPTER_HANDLE_CHANGED:
+                var splits = evt.key.split("_");
+                if (splits[0] == "shader") {
+                    var renderNodeId = +splits[1];
+                    var renderNode = this._subRenderNodes[renderNodeId];
+                    if (evt.handleStatus == AdapterHandle.STATUS.NOT_FOUND) {
+                        renderNode.setMaterial(null);
+                    } else {
+                        var adapter = evt.adapter;
+                        if (adapter && adapter.getMaterialConfiguration) {
+                            renderNode.setMaterial(adapter.getMaterialConfiguration());
+                        }
+                    }
+                    this.factory.renderer.requestRedraw("Material model changed.");
+                }
         }
-    }, onAssetChange: function () {
-        if (!this.renderNode) {
+    },
+
+    onAssetChange: function () {
+         if (!this.renderNode) {
             //This model hasn't even been initialized yet so we defer building the render nodes to that step
             //This can happen for ex. when changing the "src" attribute before the model is appended into the DOM
             return;
         }
+
         this.createModelRenderNodes();
     },
 
@@ -135,12 +170,12 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
 
     var groupNode = adapter.getScene().createRenderGroup({
         parent: parentNode,
-        shaderHandle: adapter.getSubShaderHandle(dataTreeNode.shader),
         visible: true,
         name: adapter.node.id
     });
     groupNode.setLocalMatrix(dataTreeNode.transform || c_IDENTITY);
-
+    groupNode.setMaterial(adapter.getMaterialConfiguration(dataTreeNode.shader, adapter._subRenderNodes.length));
+    adapter._subRenderNodes.push(groupNode);
 
     var meshSets = dataTreeNode.meshes, i;
     for (i = 0; i < meshSets.length; ++i) {
@@ -150,11 +185,12 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
             object: {
                 data: meshSets[i].xflowNode, type: meshSets[i].type
             },
-            shaderHandle: adapter.getSubShaderHandle(meshSets[i].shader),
             name: adapter.node.id,
             visible: true
         });
         renderNode.setLocalMatrix(meshSets[i].transform || c_IDENTITY);
+        renderNode.setMaterial(adapter.getMaterialConfiguration(meshSets[i].shader, adapter._subRenderNodes.length));
+        adapter._subRenderNodes.push(renderNode);
     }
     var groups = dataTreeNode.groups;
     for (i = 0; i < groups.length; ++i) {

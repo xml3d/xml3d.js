@@ -19,9 +19,10 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
         this.renderNode = this.getScene().createRenderObject({
             parent: parentNode, node: this.node, object: {
                 data: dataAdapter.getXflowNode(), type: this.getMeshType()
-            }, name: this.node.id, shaderHandle: this.getShaderHandle(), visible: !this.node.visible ? false : undefined
+            }, name: this.node.id, visible: !this.node.visible ? false : undefined
         });
         this.updateLocalMatrix();
+        this.updateShaderHandler();
     },
 
     getMeshType: function () {

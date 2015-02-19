@@ -2,7 +2,6 @@ var TransformableAdapter = require("./transformable.js");
 
 var GroupRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, true, true);
-    this.factory = factory;
     this.createRenderNode();
 };
 
@@ -15,9 +14,10 @@ p.createRenderNode = function () {
     var parent = this.getParentRenderAdapter();
     var parentNode = parent.getRenderNode && parent.getRenderNode();
     this.renderNode = this.getScene().createRenderGroup({
-        parent: parentNode, shaderHandle: this.getShaderHandle(), visible: this.node.visible, name: this.node.id
+        parent: parentNode, visible: this.node.visible, name: this.node.id
     });
     this.updateLocalMatrix();
+    this.updateShaderHandler();
     var bbox = XML3D.math.bbox.create();
     this.renderNode.setWorldSpaceBoundingBox(bbox);
 };

@@ -3,7 +3,7 @@ var RenderObject = require("./renderobject.js");
 var RenderView = require("./renderview.js");
 var RenderGroup = require("./rendergroup.js");
 var RenderLight = require("./renderlight.js");
-var ShaderInfo = require("./shaderinfo.js");
+var MaterialConfiguration = require("./material-configuration");
 var C = require("./constants.js");
 
 /**
@@ -20,9 +20,13 @@ var Scene = function () {
             return this.point.length + this.directional.length + this.spot.length;
         }
     };
-    this.shaderInfos = [];
+
     /** @type RenderView */
     this.activeView = null;
+
+    /** @type MaterialConfiguration */
+    this._defaultMaterial = null;
+
     this.rootNode = this.createRootNode();
 };
 XML3D.createClass(Scene, Pager);
@@ -69,20 +73,19 @@ XML3D.extend(Scene.prototype, {
         return new RenderLight(this, pageEntry, opt);
     },
 
-    createShaderInfo: function (opt) {
-        return new ShaderInfo(this, opt);
+    createMaterialConfiguration: function(model, data, opt) {
+        return new MaterialConfiguration(model, data, opt);
     },
 
     createRootNode: function () {
         var pageEntry = this.getPageEntry(RenderGroup.ENTRY_SIZE);
-        var root = new RenderGroup(this, pageEntry, {});
+        var root = new RenderGroup(this, pageEntry, {
+            material: this.getDefaultMaterial()
+        });
         root.setWorldMatrix(XML3D.math.mat4.create());
         root.setLocalMatrix(XML3D.math.mat4.create());
         root.transformDirty = false;
-        root.shaderDirty = false;
         root.visible = true;
-        root.shaderHandle = new XML3D.base.AdapterHandle("not_found");
-        root.shaderHandle.status = XML3D.base.AdapterHandle.STATUS.NOT_FOUND;
         return root;
     },
 
@@ -120,7 +123,26 @@ XML3D.extend(Scene.prototype, {
         var intersections = [];
         this.rootNode.findRayIntersections(ray, intersections);
         return intersections;
+    },
+
+    getDefaultMaterial: function() {
+        if(!this._defaultMaterial) {
+            var inputNode = XML3D.data.xflowGraph.createInputNode();
+            inputNode.data = new Xflow.BufferEntry(Xflow.DATA_TYPE.FLOAT3, new Float32Array([1, 0, 0]));
+            inputNode.name = "diffuseColor";
+
+            var data = XML3D.data.xflowGraph.createDataNode();
+            data.appendChild(inputNode);
+
+            this._defaultMaterial = this.createMaterialConfiguration(
+                {"type": "urn", "urn": new XML3D.URI("urn:xml3d:shader:matte")},
+                data,
+                {name: "default"}
+            );
+        }
+        return this._defaultMaterial;
     }
+
 });
 
 module.exports = Scene;

@@ -51,7 +51,7 @@ Adapter.prototype.clearAdapterHandles = function() {
         this.connectedAdapterHandles[i].removeListener(this._bindedAdapterHandleCallback);
     }
 
-    this.connectedAdapterHandles = {};
+    this.connectedAdapterHandles = null;
 };
 
 /**

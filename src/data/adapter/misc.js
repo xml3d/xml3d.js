@@ -40,7 +40,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
         return this.node.type;
     }
 
-    ScriptDataAdapter.prototype.getScriptCode = function(){
+    ScriptDataAdapter.prototype.getScript = function(){
         return this.node.value;
     }
 

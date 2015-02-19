@@ -33,7 +33,8 @@ XML3D.shaders.register("matte", {
         useVertexColor: false
     },
     attributes: {
-        color: null
+        color: null,
+        normal: null // For picking
     }
 });
 

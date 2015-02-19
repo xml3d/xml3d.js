@@ -26,6 +26,7 @@ Xflow.VSConfig = function(){
     this._addOutput = {};
     this._codeFragments = [];
     this._outputChanneling = {};
+    this._systemParams = null;
 };
 
 Xflow.VSConfig.prototype.addAttribute = function(type, name, optional){
@@ -65,6 +66,14 @@ Xflow.VSConfig.prototype.addBlockedName = function(name){
 Xflow.VSConfig.prototype.getBlockedNames = function(){
     return this._blockedNames;
 }
+
+Xflow.VSConfig.prototype.setSystemParams = function(systemParams){
+    this._systemParams = systemParams;
+}
+Xflow.VSConfig.prototype.getSystemParams = function(){
+    return this._systemParams;
+}
+
 
 Xflow.VSConfig.prototype.getFilter = function(){
     return Object.keys(this._attributes);

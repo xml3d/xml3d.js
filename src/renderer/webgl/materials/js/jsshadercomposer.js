@@ -1,6 +1,6 @@
 var AbstractShaderComposer = require("./../abstractshadercomposer").AbstractShaderComposer;
 var JSShaderClosure = require("./jsshaderclosure");
-
+var getJSSystemConfiguration = require("./jssystemconfiguration");
 /**
  *
  * @param {GLContext} context
@@ -72,7 +72,9 @@ XML3D.createClass(JSShaderComposer, AbstractShaderComposer, {
 
         var vsConfig = new Xflow.VSConfig();
         var names = this.extractedParams.slice();
+        var systemParams = getJSSystemConfiguration(this.context);
         //if(names.indexOf("position") == -1) names.push("position");
+        vsConfig.setSystemParams(systemParams);
         vsConfig.addAttribute(Xflow.DATA_TYPE.FLOAT3, "position", true);
         for (var i = 0; i < names.length; ++i) {
             var name = names[i];

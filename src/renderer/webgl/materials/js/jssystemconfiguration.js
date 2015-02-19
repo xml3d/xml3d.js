@@ -118,7 +118,7 @@ var SYSTEM_CONTEXT_TEMPLATE = {
 
 function createSystemConfiguration(context) {
     var result = SYSTEM_CONTEXT_TEMPLATE;
-    var ext = context.getExtensionByName(GLContext.EXTENSIONS.STANDARD_DERIVATES);
+    var ext = context && context.getExtensionByName(GLContext.EXTENSIONS.STANDARD_DERIVATES);
     if (ext) {
         result.info.fwidth = {type: Shade.TYPES.FUNCTION};
         result.info.dx = {type: Shade.TYPES.FUNCTION};

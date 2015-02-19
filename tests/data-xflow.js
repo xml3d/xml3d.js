@@ -101,6 +101,7 @@ module("Xflow tests", {
         var title = testNode.getAttribute("title");
 
         var vsConfig = new this.win.Xflow.VSConfig();
+        vsConfig.setSystemParams(XML3D.webgl.getJSSystemConfiguration(null));
 
         var connect = testNode.getElementsByTagName("VSConfig")[0].firstElementChild;
         while (connect) {
@@ -118,11 +119,6 @@ module("Xflow tests", {
         var request = new this.win.Xflow.VertexShaderRequest(xflowNode, vsConfig);
         var result = request.getVertexShader();
         var code = result.getGLSLCode();
-        var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE"),
-            outputIdx = code.indexOf("// OUTPUT");
-
-        ok(inputIdx != -1 && codeIdx != -1 && outputIdx != -1,
-            title + "=> Shader has expected structure");
 
         var action = testNode.firstElementChild;
         while (action) {
@@ -144,17 +140,17 @@ module("Xflow tests", {
         var code = null;
         switch(transform){
             case Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "viewTransformNormal", true);
-                code = outName + " = normalize( viewTransformNormal * #I{" + name + "} );"; break;
+                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelViewMatrixN", true);
+                code = "this.modelViewMatrixN.mulVec(" + name + ").normalize()"; break;
             case Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "viewTransform", true);
-                code = outName + " = ( viewTransform * vec4( #I{" + name + "} , 1.0)).xyz;"; break;
+                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
+                code = "this.modelViewMatrix.mulVec(" + name + ", 1.0).xyz()"; break;
             case Xflow.VS_ATTRIB_TRANSFORM.WORLD_NORMAL:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "worldTransformNormal", true);
-                code = outName + " = normalize( worldTransformNormal * vec4( #I{" + name + "} );"; break;
+                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelMatrixN", true);
+                code = "this.modelMatrixN.mulVec(" + name + ").normalize()"; break;
             case Xflow.VS_ATTRIB_TRANSFORM.WORLD_POINT:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "worldTransform", true);
-                code = outName + " = ( worldTransform * vec4( #I{" + name + "} , 1.0)).xyz;"; break;
+                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelMatrix", true);
+                code = "this.modelMatrix.mulVec(" + name + ", 1.0).xyz()"; break;
         }
         vsConfig.channelAttribute(name, outName, code);
     },
@@ -167,8 +163,7 @@ module("Xflow tests", {
     VSOutAttribCount: function(result, action, title){
         var count = action.getAttribute("count")*1;
         var code = result.getGLSLCode();
-        var outputIdx = code.indexOf("// OUTPUT"), inputIdx = code.indexOf("// INPUT");
-        var fragment = code.substring(outputIdx, inputIdx);
+        var fragment = code;
 
         var matches = fragment.match(/varying /g), actualCount = matches && matches.length || 0;
         equal(actualCount, count, title + "=> Vertex Shader has " +
@@ -177,8 +172,7 @@ module("Xflow tests", {
     VSInAttribCount: function(result, action, title){
         var count = action.getAttribute("count")*1;
         var code = result.getGLSLCode();
-        var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE");
-        var fragment = code.substring(inputIdx, codeIdx);
+        var fragment = code;
 
         var matches = fragment.match(/attribute /g), actualCount = matches && matches.length || 0;
         equal(actualCount, count, title + "=> Vertex Shader has " +
@@ -187,8 +181,7 @@ module("Xflow tests", {
     VSUniformAttribCount: function(result, action, title){
         var count = action.getAttribute("count")*1;
         var code = result.getGLSLCode();
-        var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE");
-        var fragment = code.substring(inputIdx, codeIdx);
+        var fragment = code;
 
         var matches = fragment.match(/uniform /g), actualCount = matches && matches.length || 0;
         equal(actualCount, count, title + "=> Vertex Shader has " +

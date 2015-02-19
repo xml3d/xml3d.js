@@ -24,7 +24,8 @@ module.exports = {
     checkError: require("./base/utils.js").checkError,
     GLScene: require("./scene/glscene.js"),
     GLMesh: require("./base/mesh.js"),
-    configure: require("./canvas-handler").configure
+    configure: require("./canvas-handler").configure,
+    getJSSystemConfiguration: require("./materials/js/jssystemconfiguration.js")
 };
 
 // These material models register themselves

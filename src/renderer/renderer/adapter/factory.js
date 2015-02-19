@@ -22,10 +22,8 @@ var registry = {
         model: require("./model.js"),
         shader: require("./shader.js"),
         group: require("./group.js"),
-        img: require("./img.js"),
         light: require("./light.js"),
         lightshader: require("./lightshader.js")
-
     };
 
 /**

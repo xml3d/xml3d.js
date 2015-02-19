@@ -23,6 +23,10 @@ var Scene = function () {
 
     /** @type RenderView */
     this.activeView = null;
+
+    /** @type MaterialConfiguration */
+    this._defaultMaterial = null;
+
     this.rootNode = this.createRootNode();
 };
 XML3D.createClass(Scene, Pager);
@@ -76,11 +80,7 @@ XML3D.extend(Scene.prototype, {
     createRootNode: function () {
         var pageEntry = this.getPageEntry(RenderGroup.ENTRY_SIZE);
         var root = new RenderGroup(this, pageEntry, {
-            material: new MaterialConfiguration(
-                {"type": "urn", "urn": new XML3D.URI("urn:xml3d:shader:matte")},
-                null,
-                {name: "default"}
-            )
+            material: this.getDefaultMaterial()
         });
         root.setWorldMatrix(XML3D.math.mat4.create());
         root.setLocalMatrix(XML3D.math.mat4.create());
@@ -123,7 +123,26 @@ XML3D.extend(Scene.prototype, {
         var intersections = [];
         this.rootNode.findRayIntersections(ray, intersections);
         return intersections;
+    },
+
+    getDefaultMaterial: function() {
+        if(!this._defaultMaterial) {
+            var inputNode = XML3D.data.xflowGraph.createInputNode();
+            inputNode.data = new Xflow.BufferEntry(Xflow.DATA_TYPE.FLOAT3, new Float32Array([1, 0, 0]));
+            inputNode.name = "diffuseColor";
+
+            var data = XML3D.data.xflowGraph.createDataNode();
+            data.appendChild(inputNode);
+
+            this._defaultMaterial = this.createMaterialConfiguration(
+                {"type": "urn", "urn": new XML3D.URI("urn:xml3d:shader:matte")},
+                data,
+                {name: "default"}
+            );
+        }
+        return this._defaultMaterial;
     }
+
 });
 
 module.exports = Scene;

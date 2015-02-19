@@ -131,7 +131,7 @@ function handleAttributeChanged(mutation) {
     if (!elementHandler) {
         return;
     }
-    var attributeHandler = elementHandler.handlers[mutation.attributeName];
+    var attributeHandler = elementHandler.handlers[mutation.attributeName] || elementHandler.handlers[mutation.attributeName.toLowerCase()];
     if (!attributeHandler) {
         return;
     }

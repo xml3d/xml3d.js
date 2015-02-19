@@ -411,7 +411,7 @@ module("Xflow tests", {
         var input = this.doc.getElementById(inputId);
 
         var newText = action.textContent;
-        input.firstChild.nodeValue = newText;
+        input.textContent = newText;
     }
 
 

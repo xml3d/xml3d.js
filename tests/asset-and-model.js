@@ -447,10 +447,11 @@ test("Model visibility", 6, function() {
         hTest = getHandler(xTest);
 
     var group = this.doc.getElementById("visibilityGroup");
-    var model = XML3D.createElement("model");
+    var model = this.doc.createElement("model");
     model.setAttribute("src", "#asset2");
     model.setAttribute("visible", "false");
     group.appendChild(model);
+
     hTest.draw();
     QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [0,0,0,0], PIXEL_EPSILON,
         "Model was added invisible" );

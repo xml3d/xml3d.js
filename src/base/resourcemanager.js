@@ -452,17 +452,17 @@ function clearHandles(url) {
  * This methods returns an absolute URI compatible with the resource manager.
  * This means: Any reference from an external document will be absolute and any id reference from the current
  * document will remain an id reference.
- * @param {Document} baseDocument - the document from which to look up the reference
+ * @param {String} baseURI - the base URI that the uri is relative to
  * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
  * @returns {URI} The (sometimes) absolute URI
  */
-ResourceManager.prototype.getAbsoluteURI = function(baseDocument, uri){
+ResourceManager.prototype.getAbsoluteURI = function(baseURI, uri){
     if (!uri)
         return null;
 
     if (typeof uri == "string") uri = new XML3D.URI(uri);
-    if (baseDocument != document || !uri.isLocal()) {
-        uri = uri.getAbsoluteURI(baseDocument._documentURL || baseDocument.URL);
+    if (baseURI != document.URL || !uri.isLocal()) {
+        uri = uri.getAbsoluteURI(baseURI);
     }
     return uri;
 };
@@ -472,15 +472,15 @@ ResourceManager.prototype.getAbsoluteURI = function(baseDocument, uri){
  * This function will trigger the loading of documents, if required.
  * An AdapterHandle will be always be returned, expect when an invalid (empty) uri is passed.
  *
- * @param {Document} baseDocument - the document from which to look up the reference
+ * @param {String} baseURI - the base URI from which to look up the reference
  * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
  * @param {Object} adapterType The type of adapter required (e.g. XML3D.data or XML3D.webgl)
  * @param {number=} canvasId Id of GLCanvasHandler handler this adapter depends on, 0 if not depending on any GLCanvasHandler
  * @returns {?AdapterHandle} The requested AdapterHandler. Note: might be null
  */
-ResourceManager.prototype.getAdapterHandle = function(baseDocument, uri, adapterType, canvasId) {
+ResourceManager.prototype.getAdapterHandle = function(baseURI, uri, adapterType, canvasId) {
     canvasId = canvasId || 0;
-    uri = this.getAbsoluteURI(baseDocument, uri);
+    uri = this.getAbsoluteURI(baseURI, uri);
 
     if (!uri)
         return null;

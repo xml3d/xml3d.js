@@ -239,7 +239,8 @@ function setShaderUrl(adapter, dest) {
     var node = adapter.node;
     var shaderUrl = node.getAttribute("shader");
     if (shaderUrl) {
-        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument, shaderUrl);
+        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument._documentURL ||
+            node.ownerDocument.URL, shaderUrl);
         dest.setShader(shaderId.toString());
     } else {
         dest.setShader(null);

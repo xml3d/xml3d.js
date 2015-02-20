@@ -68,7 +68,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
      */
     ImgDataAdapter.prototype.createImageFromURL = function(url) {
         var that = this;
-        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.URL);
+        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
         var onload = function (e, image) {
             if (that.textureEntry) {
                 that.textureEntry.setImage(image, true);
@@ -134,7 +134,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
      */
     VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
-        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument.URL);
+        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
         this.video = XML3D.base.resourceManager.getVideo(uri, this.node.autoplay, this.node.loop,
             {
                 canplay : function(event, video) {

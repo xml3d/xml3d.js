@@ -50,7 +50,7 @@ Xflow.registerErrorCallback(function(message, xflowNode){
         }
         else if (userData.id) {
             var uri = new XML3D.URI("#" + userData.id);
-            uri = uri.getAbsoluteURI(userData.ownerDocument.URL);
+            uri = uri.getAbsoluteURI(userData.ownerDocument._documentURL || userData.ownerDocument.URL);
             XML3D.debug.logError(message, "External Node: " + uri);
         }
         else {

@@ -279,6 +279,8 @@ function setDocumentData(httpRequest, url, mimetype) {
         response = JSON.parse(httpRequest.responseText);
     } else if (cleanedMimetype.match(/xml/)) {
         response = httpRequest.responseXML;
+        //Workaround for IE "bug" where external documents always report their document.URL as being identical to window.location.href
+        response._documentURL = url;
         if (!response) {
             XML3D.debug.logError("Invalid external XML document '" + httpRequest._url +
                 "': XML Syntax error");
@@ -460,7 +462,7 @@ ResourceManager.prototype.getAbsoluteURI = function(baseDocument, uri){
 
     if (typeof uri == "string") uri = new XML3D.URI(uri);
     if (baseDocument != document || !uri.isLocal()) {
-        uri = uri.getAbsoluteURI(baseDocument.URL);
+        uri = uri.getAbsoluteURI(baseDocument._documentURL || baseDocument.URL);
     }
     return uri;
 };

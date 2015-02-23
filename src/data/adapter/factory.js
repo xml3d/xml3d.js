@@ -45,7 +45,6 @@ var reg = {
     proto: DataAdapter,
     dataflow: DataflowDataAdapter,
     compute: ComputeDataAdapter,
-    iframe: Misc.IFrameDataAdapter,
     video: Misc.VideoDataAdapter,
     script: Misc.ScriptDataAdapter,
     transform: TransformDataAdapter,

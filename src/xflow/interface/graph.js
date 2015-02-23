@@ -451,7 +451,7 @@ Base.createClass(DataNode, GraphNode);
 Object.defineProperty(DataNode.prototype, "sourceNode", {
     /** @param {?DataNode} newSourceNode */
     set: function(newSourceNode){
-        replaceNodeInHierarchy(this._sourceNode, newSourceNode);
+        replaceNodeInHierarchy(this, "_sourceNode", newSourceNode);
         updateProgressLevel(this);
         this.notify(C.RESULT_STATE.CHANGED_STRUCTURE);
         Base._flushResultCallbacks();
@@ -466,7 +466,7 @@ Object.defineProperty(DataNode.prototype, "dataflowNode", {
         if(newDataflowNode && !this._computeUsesDataflow) {
             throw new Error("Cannot set dataflowNode when compute doesn't use dataflow.");
         }
-        replaceNodeInHierarchy(this._dataflowNode, newDataflowNode);
+        replaceNodeInHierarchy(this, "_dataflowNode", newDataflowNode);
         updateProgressLevel(this);
         this.notify(C.RESULT_STATE.CHANGED_STRUCTURE);
         Base._flushResultCallbacks();
@@ -786,7 +786,7 @@ DataNode.prototype.setCompute = function(computeString){
 
 /**
  * Notifies DataNode about a change. Notification will be forwarded to parents, if necessary
- * @param {exports.C.RESULT_STATE} changeType
+ * @param {C.RESULT_STATE} changeType
  * @param {GraphNode?} senderNode
  */
 DataNode.prototype.notify = function(changeType, senderNode){
@@ -1055,13 +1055,14 @@ function swapMapping(dataNode, key, mapping){
     dataNode[key] && dataNode[key]._addOwner(dataNode);
 }
 
-function replaceNodeInHierarchy(sourceNode, newNode) {
-    if(sourceNode) {
-        removeParent(this, sourceNode);
+function replaceNodeInHierarchy(node, field, newChild) {
+    var oldChild = node[field];
+    if(oldChild) {
+        removeParent(node, oldChild);
     }
-    sourceNode = newNode;
-    if(sourceNode) {
-        addParent(this, sourceNode);
+    node[field] = newChild;
+    if(newChild) {
+        addParent(node, newChild);
     }
 }
 

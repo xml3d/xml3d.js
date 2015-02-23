@@ -310,7 +310,7 @@ module("Xflow tests", {
             }
 
             actualData = dataOutput.getValue().data;
-            dataAdapter.xflowDataNode._getChannelNode().clear();
+            dataAdapter.xflowDataNode._getOrCreateChannelNode().clear();
 
             QUnit.closeArray(actualData, shouldMatchTexture, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
             start();

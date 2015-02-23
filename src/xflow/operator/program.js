@@ -293,4 +293,4 @@ module.exports = {
     createProgram: createProgram,
     ProgramData: ProgramData,
     ProgramInputConnection: ProgramInputConnection
-}
+};

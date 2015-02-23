@@ -220,5 +220,14 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
  }
  */
 
+    // TODO: This function appears in multiple units
+    function addInputToArgs(args, entry, programData){
+        var mapping = entry.operator.mapping;
+        for(var i = 0; i < mapping.length; ++i){
+            var mapEntry = mapping[i];
+            var dataEntry = programData.getDataEntry(entry.getDirectInputIndex(i));
+            args.push(dataEntry ? dataEntry.getValue() : null);
+        }
+    };
 
 module.exports = OperatorList;

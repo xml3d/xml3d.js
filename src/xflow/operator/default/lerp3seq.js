@@ -1,3 +1,5 @@
+var binarySearch = require("../../utils/utils").binarySearch;
+
 Xflow.registerOperator("xflow.lerpSeq", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'sequence'},
@@ -65,7 +67,7 @@ Xflow.registerOperator("xflow.lerpKeys", {
     },
     evaluate: function(result, keys, values, key) {
         var maxIdx = Math.min(keys.length, Math.floor(values.length / 3));
-        var idx = utils.binarySearch(keys, key[0], maxIdx);
+        var idx = binarySearch(keys, key[0], maxIdx);
 
         if(idx < 0 || idx == maxIdx - 1){
             idx = Math.max(0,idx);

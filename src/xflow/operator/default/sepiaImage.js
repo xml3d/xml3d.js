@@ -1,4 +1,3 @@
-var Xflow = require("../operator.js");
 
 Xflow.registerOperator("xflow.sepiaImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],

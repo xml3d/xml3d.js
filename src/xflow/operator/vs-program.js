@@ -1,48 +1,48 @@
 var Base = require("../base.js");
+var C = require("../interface/constants");
 var Utils = require("../utils/utils.js");
-var Xflow = Base.Xflow;
 var VertexShader = require("../interface/vs-connect.js").VertexShader;
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.OperatorList
+// OperatorList
 //----------------------------------------------------------------------------------------------------------------------
 
-var c_SHADER_CONSTANT_TYPES = {}
-c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.OBJECT_ID] = 'int';
-c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM] = 'mat4';
-c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM_NORMAL] = 'mat3';
-c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM] = 'mat4';
-c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] = 'mat3';
-c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM] = 'mat4';
-c_SHADER_CONSTANT_TYPES[Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] = 'mat3';
+var c_SHADER_CONSTANT_TYPES = {};
+c_SHADER_CONSTANT_TYPES[C.SHADER_CONSTANT_KEY.OBJECT_ID] = 'int';
+c_SHADER_CONSTANT_TYPES[C.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM] = 'mat4';
+c_SHADER_CONSTANT_TYPES[C.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM_NORMAL] = 'mat3';
+c_SHADER_CONSTANT_TYPES[C.SHADER_CONSTANT_KEY.VIEW_TRANSFORM] = 'mat4';
+c_SHADER_CONSTANT_TYPES[C.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL] = 'mat3';
+c_SHADER_CONSTANT_TYPES[C.SHADER_CONSTANT_KEY.WORLD_TRANSFORM] = 'mat4';
+c_SHADER_CONSTANT_TYPES[C.SHADER_CONSTANT_KEY.WORLD_TRANSFORM_NORMAL] = 'mat3';
 
 var VSProgram = function(operatorList){
     this.list = operatorList;
     this._outputInfo = {};
     setOutputIterate(this);
-}
+};
 
 VSProgram.prototype.getOutputNames = function(){
     return Object.keys(this._outputInfo);
-}
+};
 
 VSProgram.prototype.getOutputType = function(name){
     return this._outputInfo[name].type;
-}
+};
 
 VSProgram.prototype.isOutputUniform = function(name){
-    return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.ONE;
-}
+    return this._outputInfo[name].iteration == C.ITERATION_TYPE.ONE;
+};
 
 VSProgram.prototype.isOutputNull = function(name){
-    return this._outputInfo[name].iteration == Xflow.ITERATION_TYPE.NULL;
-}
+    return this._outputInfo[name].iteration == C.ITERATION_TYPE.NULL;
+};
 
 VSProgram.prototype.createVertexShader = function(programData, vsConfig){
     var result = new VertexShader(programData);
-    constructVS(result, this, vsConfig)
+    constructVS(result, this, vsConfig);
     return result;
-}
+};
 
 function setOutputIterate(program){
     var operatorList = program.list, entries = operatorList.entries;
@@ -58,13 +58,13 @@ function setOutputIterate(program){
         if( baseEntry.isTransferInput(inputIndex) ||
             operatorList.isInputIterate(directInputIndex))
         {
-            program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.MANY;
+            program._outputInfo[name].iteration = C.ITERATION_TYPE.MANY;
         }
         else if(operatorList.isInputUniform(directInputIndex)){
-            program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.ONE;
+            program._outputInfo[name].iteration = C.ITERATION_TYPE.ONE;
         }
         else{
-            program._outputInfo[name].iteration = Xflow.ITERATION_TYPE.NULL;
+            program._outputInfo[name].iteration = C.ITERATION_TYPE.NULL;
         }
     }
 }
@@ -84,7 +84,7 @@ function constructVS(vs, program, vsConfig){
     Utils.nameset.add(usedNames, vsConfig.getBlockedNames());
 
     var code = "";
-    code += "// OUTPUT\n"
+    code += "// OUTPUT\n";
     // First: collect output names
     for(var name in vsConfig._addOutput){
         var entry = vsConfig._addOutput[name];
@@ -104,18 +104,18 @@ function constructVS(vs, program, vsConfig){
                 operatorList.isInputIterate(directInputIndex))
             {
                 acceptedBaseShaderInput[inputIndex] = true;
-                outputInfo.iteration = Xflow.ITERATION_TYPE.MANY;
+                outputInfo.iteration = C.ITERATION_TYPE.MANY;
                 var type = baseOperator.outputs[inputIndex].type;
                 code += "varying " + getGLSLType(type) + " " + outputName + ";\n";
                 Utils.nameset.add(usedNames, outputName);
                 transferNames[baseEntry.getTransferOutputId(i)] = outputName;
             }
             else if(operatorList.isInputUniform(directInputIndex)){
-                outputInfo.iteration = Xflow.ITERATION_TYPE.ONE;
+                outputInfo.iteration = C.ITERATION_TYPE.ONE;
                 outputInfo.index = directInputIndex;
             }
             else{
-                outputInfo.iteration = Xflow.ITERATION_TYPE.NULL;
+                outputInfo.iteration = C.ITERATION_TYPE.NULL;
             }
             Utils.nameset.add(vs._outputNames, outputName);
             vs._outputInfo[outputName] = outputInfo;
@@ -123,7 +123,7 @@ function constructVS(vs, program, vsConfig){
         inputIndex++;
     }
     code += "\n";
-    code += "// INPUT\n"
+    code += "// INPUT\n";
     // Add additional input
     for(var name in vsConfig._addInput){
         var entry = vsConfig._addInput[name];
@@ -152,7 +152,7 @@ function constructVS(vs, program, vsConfig){
     }
 
     // Start main
-    code += "\n// CODE\n"
+    code += "\n// CODE\n";
     code += "void main(void){\n";
 
     // Create Code
@@ -178,7 +178,7 @@ function constructVS(vs, program, vsConfig){
         var entry = vsConfig._attributes[name];
         for(var i = 0; i < entry.channeling.length; ++i){
             var channeling = entry.channeling[i], outputName = channeling.outputName;
-            if(vs._outputInfo[outputName].iteration == Xflow.ITERATION_TYPE.MANY){
+            if(vs._outputInfo[outputName].iteration == C.ITERATION_TYPE.MANY){
                 if(channeling.code)
                     conversionCode += "\t" + channeling.code + "\n";
                 else
@@ -256,18 +256,18 @@ function getOutputIndex(operator, name){
 
 function getGLSLType(xflowType){
     switch(xflowType){
-        case Xflow.DATA_TYPE.BOOL : return 'bool';
-        case Xflow.DATA_TYPE.BYTE : return 'uint';
-        case Xflow.DATA_TYPE.FLOAT : return 'float';
-        case Xflow.DATA_TYPE.FLOAT2 : return 'vec2';
-        case Xflow.DATA_TYPE.FLOAT3 : return 'vec3';
-        case Xflow.DATA_TYPE.FLOAT4 : return 'vec4';
-        case Xflow.DATA_TYPE.FLOAT3X3 : return 'mat3';
-        case Xflow.DATA_TYPE.FLOAT4X4 : return 'mat4';
-        case Xflow.DATA_TYPE.INT : return 'int';
-        case Xflow.DATA_TYPE.INT4 : return 'ivec4';
+        case C.DATA_TYPE.BOOL : return 'bool';
+        case C.DATA_TYPE.BYTE : return 'uint';
+        case C.DATA_TYPE.FLOAT : return 'float';
+        case C.DATA_TYPE.FLOAT2 : return 'vec2';
+        case C.DATA_TYPE.FLOAT3 : return 'vec3';
+        case C.DATA_TYPE.FLOAT4 : return 'vec4';
+        case C.DATA_TYPE.FLOAT3X3 : return 'mat3';
+        case C.DATA_TYPE.FLOAT4X4 : return 'mat4';
+        case C.DATA_TYPE.INT : return 'int';
+        case C.DATA_TYPE.INT4 : return 'ivec4';
     }
-    throw new Error("Type not supported for GLSL " + Xflow.getTypeName(xflowType) );
+    throw new Error("Type not supported for GLSL " + C.getTypeName(xflowType) );
 }
 
 module.exports = VSProgram;

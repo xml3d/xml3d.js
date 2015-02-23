@@ -1,6 +1,3 @@
-var Xflow = require("../operator.js");
-var utils = require("../../utils/utils");
-
 Xflow.registerOperator("xflow.lerpSeq", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'sequence'},

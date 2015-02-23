@@ -1,4 +1,3 @@
-var Xflow = require("../operator.js");
 
 Xflow.registerOperator("xflow.sub", {
     outputs: [  {type: 'float3', name: 'result'}],

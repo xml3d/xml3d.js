@@ -1,8 +1,8 @@
 var Base = require("../base.js");
-var Xflow = Base.Xflow;
+var C = require("../interface/constants");
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.registerOperator && Xflow.getOperator
+// registerOperator && getOperator
 //----------------------------------------------------------------------------------------------------------------------
 
 var operators = {};
@@ -24,17 +24,17 @@ var registerOperator = function(name, data){
         operators[name] = {};
     }
 
-    platform = data['platform'] || Xflow.PLATFORM.JAVASCRIPT;
+    platform = data['platform'] || C.PLATFORM.JAVASCRIPT;
 
     opCollection = operators[name];
 
     if (!name) {
-        XML3D.logWarning("Xflow.registerOperator: Operator name undefined.");
+        XML3D.logWarning("C.registerOperator: Operator name undefined.");
         return;
     }
 
     if (!data) {
-        XML3D.logWarning("Xflow.registerOperator: Operator data undefined.");
+        XML3D.logWarning("C.registerOperator: Operator data undefined.");
         return;
     }
 
@@ -56,7 +56,7 @@ var isOperatorAsync = function(operator){
 }
 
 var getOperators = function(name, platform){
-    platform = platform || Xflow.PLATFORM.JAVASCRIPT;
+    platform = platform || C.PLATFORM.JAVASCRIPT;
 
     if (name && !operators[name]) {
         return null;
@@ -73,10 +73,10 @@ function initOperator(operator){
     var indexMap = {};
     // Init types of outputs and params
     for(var i= 0; i < operator.outputs.length; ++i){
-        operator.outputs[i].type = Xflow.DATA_TYPE_MAP[operator.outputs[i].type];
+        operator.outputs[i].type = C.DATA_TYPE_MAP[operator.outputs[i].type];
     }
     for(var i= 0; i < operator.params.length; ++i){
-        operator.params[i].type = Xflow.DATA_TYPE_MAP[operator.params[i].type];
+        operator.params[i].type = C.DATA_TYPE_MAP[operator.params[i].type];
         indexMap[operator.params[i].source] = i;
     }
     if(!operator.mapping)
@@ -90,14 +90,14 @@ function initOperator(operator){
         var type = operator.params[paramIdx].type;
         if(mapping.sequence)
             mapping.keyParamIdx = indexMap[mapping.keySource];
-        if(mapping.sequence == Xflow.SEQUENCE.LINEAR_WEIGHT)
-            type = Xflow.DATA_TYPE.FLOAT;
+        if(mapping.sequence == C.SEQUENCE.LINEAR_WEIGHT)
+            type = C.DATA_TYPE.FLOAT;
         mapping.internalType = type;
         mapping.name = mapping.name || mapping.source;
     }
 
     //Check/init platform
-    operator.platform = operator.platform || Xflow.PLATFORM.JAVASCRIPT;
+    operator.platform = operator.platform || C.PLATFORM.JAVASCRIPT;
 }
 
 module.exports = {
@@ -105,4 +105,4 @@ module.exports = {
     initAnonymousOperator: initAnonymousOperator,
     isOperatorAsync: isOperatorAsync,
     getOperators: getOperators
-}
+};

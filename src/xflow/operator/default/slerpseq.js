@@ -1,4 +1,3 @@
-var Xflow = require("../operator.js");
 var utils = require("../../utils/utils");
 
 Xflow.registerOperator("xflow.slerpSeq", {

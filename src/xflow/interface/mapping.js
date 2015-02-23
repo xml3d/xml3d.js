@@ -1,5 +1,5 @@
 var Base = require("../base.js");
-var Xflow = Base.Xflow;
+var C = require("./constants");
 
 
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
@@ -17,10 +17,10 @@ var Mapping = function(){
 };
 
 /**
- * Parse a Mapping (both Xflow.OrderMapping or Xflow.ComputeMapping) from a syntax string.
+ * Parse a Mapping (both C.OrderMapping or C.ComputeMapping) from a syntax string.
  * @param {string} string The syntax string.
- * @param {Xflow.DataNode} dataNode DataNode of the Mapping
- * @returns {?Xflow.Mapping}
+ * @param {C.DataNode} dataNode DataNode of the Mapping
+ * @returns {?C.Mapping}
  */
 Mapping.parse = function(string, dataNode){
     string = string.trim();
@@ -65,7 +65,7 @@ Mapping.prototype._removeOwner = function(owner){
  * An OrderMapping used for a filter or compute properties of a DataNode
  * It describes a mapping of names referring to the order of arguments / output values.
  * OrderMapping syntax examples in compute:
- * position = xflow.morph(position, posAdd, weight)
+ * position = C.morph(position, posAdd, weight)
  * @constructor
  * @extends {Mapping}
  */
@@ -120,12 +120,12 @@ OrderMapping.prototype.isEmpty = function(){
  *
  * @param {ChannelMap} destMap
  * @param {ChannelMap} sourceMap
- * @param {exports.Xflow.DATA_FILTER_TYPE} filterType
+ * @param {exports.C.DATA_FILTER_TYPE} filterType
  * @param {function(ChannelMap, string, ChannelMap, string)} callback
  */
 OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback){
     var i;
-    if(filterType == Xflow.DATA_FILTER_TYPE.KEEP){
+    if(filterType == C.DATA_FILTER_TYPE.KEEP){
         for(i = 0; i < this._names.length; ++i){
             var name = this._names[i];
             if(sourceMap.map[name]) {
@@ -136,8 +136,8 @@ OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, fi
     else{
         for(i in sourceMap.map){
             var idx = this._names.indexOf(i);
-            if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
-                (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
+            if(filterType == C.DATA_FILTER_TYPE.RENAME ||
+                (filterType == C.DATA_FILTER_TYPE.REMOVE && idx == -1))
                 callback(destMap, i, sourceMap, i);
         }
     }
@@ -201,7 +201,7 @@ OrderMapping.prototype.getRenameSrcName = function(name){
  * An NameMapping used for a filter or compute properties of a DataNode
  * It describes a mapping of names referring to the original names of the arguments / output values.
  * NameMapping syntax examples in compute:
- * {position: result} = xflow.morph({value: position, valueAdd: posAdd, weight: weight})
+ * {position: result} = C.morph({value: position, valueAdd: posAdd, weight: weight})
  * @constructor
  * @extends {Mapping}
  */
@@ -281,18 +281,18 @@ NameMapping.prototype.isEmpty = function(){
  * @see OrderMapping.applyFilterOnChannelMap
  * @param {ChannelMap} destMap
  * @param {ChannelMap} sourceMap
- * @param {Xflow.DATA_FILTER_TYPE} filterType
+ * @param {C.DATA_FILTER_TYPE} filterType
  * @param {function} callback
  */
 NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback) {
     var i;
-    if(filterType == Xflow.DATA_FILTER_TYPE.REMOVE){
+    if(filterType == C.DATA_FILTER_TYPE.REMOVE){
         for(i in sourceMap.map)
             if(this._srcNames.indexOf(i) == -1)
                 callback(destMap, i, sourceMap, i);
     }
     else{
-        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME){
+        if(filterType == C.DATA_FILTER_TYPE.RENAME){
             for(i in sourceMap.map)
                 if(this._srcNames.indexOf(i) == -1)
                     callback(destMap, i, sourceMap, i);
@@ -345,7 +345,7 @@ NameMapping.prototype.getScriptOutputNameInv = function(destName /*, operatorOut
  */
 function mappingNotifyOwner(mapping){
     for(var i = 0; i < mapping._owners.length; ++i) {
-        mapping._owners[i].notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        mapping._owners[i].notify(C.RESULT_STATE.CHANGED_STRUCTURE);
     }
     Base._flushResultCallbacks();
 }

@@ -1,14 +1,18 @@
 var Base = require("../base.js");
-var Xflow = Base.Xflow;
+var C = require("../interface/constants");
 var utils = require("../utils/utils");
 var Executor = require("./executor");
 var Result = require("../interface/result");
 var Operator = require("../operator/operator");
-var BufferEntry = require("../interface/data").BufferEntry;
+var Data = require("../interface/data");
 var DataSlot = require("../processing/data-slot");
 
+var BufferEntry = Data.BufferEntry;
+var TextureEntry = Data.TextureEntry;
+var ImageDataTextureEntry = Data.ImageDataTextureEntry;
+
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.ProcessNode
+// C.ProcessNode
 //----------------------------------------------------------------------------------------------------------------------
 
 var ASYNC_PROCESS_STATE = {
@@ -43,9 +47,9 @@ var ProcessNode = function(channelNode){
     this.outputDataSlots = {};
 
     /**
-     * @type {exports.Xflow.PROCESS_STATE}
+     * @type {exports.C.PROCESS_STATE}
      */
-    this.status = Xflow.PROCESS_STATE.MODIFIED;
+    this.status = C.PROCESS_STATE.MODIFIED;
 
     /**
      * @type {ASYNC_PROCESS_STATE}
@@ -74,7 +78,7 @@ var ProcessNode = function(channelNode){
     this._bindedAsyncCallback = null;
 
     /**
-     * Index of array matches platform id (Xflow.PLATFORM)
+     * Index of array matches platform id (C.PLATFORM)
      * @type {Array.<Executor>}
      */
     this.executers = [];
@@ -88,17 +92,17 @@ var ProcessNode = function(channelNode){
 
 ProcessNode.prototype.onXflowChannelChange = function(channel, state){
     if (Operator.isOperatorAsync(this.operator)) {
-        if (this.status == Xflow.PROCESS_STATE.LOADING || this.asyncProcessState != ASYNC_PROCESS_STATE.INIT) {
-            this.status = Xflow.PROCESS_STATE.MODIFIED;
+        if (this.status == C.PROCESS_STATE.LOADING || this.asyncProcessState != ASYNC_PROCESS_STATE.INIT) {
+            this.status = C.PROCESS_STATE.MODIFIED;
             this.updateState();
         }
     }
     else {
 
-        if (state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE && this.status > Xflow.PROCESS_STATE.UNPROCESSED) {
-            this.status = Xflow.PROCESS_STATE.UNPROCESSED;
+        if (state == C.DATA_ENTRY_STATE.CHANGED_VALUE && this.status > C.PROCESS_STATE.UNPROCESSED) {
+            this.status = C.PROCESS_STATE.UNPROCESSED;
         } else {
-            this.status = Xflow.PROCESS_STATE.MODIFIED;
+            this.status = C.PROCESS_STATE.MODIFIED;
         }
         this.notifyOutputChanged(state);
     }
@@ -107,7 +111,7 @@ ProcessNode.prototype.onXflowChannelChange = function(channel, state){
 ProcessNode.prototype.startAsyncProcessing = function(){
     if(this.asyncProcessState == ASYNC_PROCESS_STATE.IDLE || this.asyncProcessState == ASYNC_PROCESS_STATE.INIT){
         this.asyncProcessState = ASYNC_PROCESS_STATE.RUNNING;
-        var executer = getOrCreateExecuter(this, Xflow.PLATFORM.ASYNC);
+        var executer = getOrCreateExecuter(this, C.PLATFORM.ASYNC);
         executer.run(this._bindedAsyncCallback);
     }
     else{
@@ -115,17 +119,17 @@ ProcessNode.prototype.startAsyncProcessing = function(){
     }
 };
 ProcessNode.prototype.receiveAsyncProcessing = function(){
-    this.status = Xflow.PROCESS_STATE.PROCESSED;
-    this.notifyOutputChanged(Xflow.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE);
+    this.status = C.PROCESS_STATE.PROCESSED;
+    this.notifyOutputChanged(C.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE);
     if(this.asyncProcessState == ASYNC_PROCESS_STATE.RESCHEDULED){
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
-        this.status = Xflow.PROCESS_STATE.MODIFIED;
+        this.status = C.PROCESS_STATE.MODIFIED;
         this.updateState();
     }
     else{
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
     }
-    Xflow._flushResultCallbacks();
+    C._flushResultCallbacks();
 };
 
 
@@ -144,27 +148,27 @@ ProcessNode.prototype.clear = function(){
 };
 
 ProcessNode.prototype.updateState = function(){
-    if(this.status == Xflow.PROCESS_STATE.MODIFIED){
-        this.status = Xflow.PROCESS_STATE.UNPROCESSED;
+    if(this.status == C.PROCESS_STATE.MODIFIED){
+        this.status = C.PROCESS_STATE.UNPROCESSED;
 
         XML3D.debug.assert(!this.owner.loading, "This should never happen");
 
         if(this.owner.loading)
-            this.status = Xflow.PROCESS_STATE.LOADING;
+            this.status = C.PROCESS_STATE.LOADING;
         else{
             for(var i = 0; i < this.children.length; ++i){
                 this.status = Math.min(this.status, this.children[i].updateState());
             }
-            if(this.status > Xflow.PROCESS_STATE.LOADING && isInputLoading(this.operator, this.inputChannels))
-                this.status = Xflow.PROCESS_STATE.LOADING;
+            if(this.status > C.PROCESS_STATE.LOADING && isInputLoading(this.operator, this.inputChannels))
+                this.status = C.PROCESS_STATE.LOADING;
 
-            if(this.status >= Xflow.PROCESS_STATE.UNPROCESSED) {
+            if(this.status >= C.PROCESS_STATE.UNPROCESSED) {
                 XML3D.debug.assert(checkInput(this, this.operator, this.owner.owner._computeInputMapping, this.inputChannels));
             }
 
-            if(this.status == Xflow.PROCESS_STATE.UNPROCESSED && Operator.isOperatorAsync(this.operator)){
-                this.status = this.asyncProcessState == ASYNC_PROCESS_STATE.INIT ? Xflow.PROCESS_STATE.LOADING
-                    : Xflow.PROCESS_STATE.PROCESSED;
+            if(this.status == C.PROCESS_STATE.UNPROCESSED && Operator.isOperatorAsync(this.operator)){
+                this.status = this.asyncProcessState == ASYNC_PROCESS_STATE.INIT ? C.PROCESS_STATE.LOADING
+                    : C.PROCESS_STATE.PROCESSED;
                 this.startAsyncProcessing();
             }
 
@@ -175,10 +179,10 @@ ProcessNode.prototype.updateState = function(){
 
 ProcessNode.prototype.process = function(){
 
-    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
+    if(this.status == C.PROCESS_STATE.UNPROCESSED){
         var executer = getOrCreateExecuter(this, this.owner.platform);
         executer.run();
-        this.status = Xflow.PROCESS_STATE.PROCESSED;
+        this.status = C.PROCESS_STATE.PROCESSED;
     }
 };
 
@@ -231,14 +235,14 @@ function checkInput(processNode, operator, inputMapping, inputChannels){
         var entry = operator.params[i];
         var dataName = inputMapping ? inputMapping.getScriptInputName(i, entry.source) : entry.source;
         if(!entry.optional && !dataName){
-            Xflow.notifyError("Xflow: operator " + operator.name + ": Missing input argument for "
+            Base.notifyError("Xflow: operator " + operator.name + ": Missing input argument for "
                 + entry.source, dataNode);
             return false;
         }
         if(dataName){
             var channel = inputChannels[entry.source];
             if(!channel){
-                Xflow.notifyError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
+                Base.notifyError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
                     "' not found. Used for parameter " + entry.source, dataNode);
                 return false;
             }
@@ -246,15 +250,15 @@ function checkInput(processNode, operator, inputMapping, inputChannels){
 
             if(!channel.creatorProcessNode){
                 if(!entry.optional && (!dataEntry || dataEntry.isEmpty())){
-                    Xflow.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                    Base.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
                         ' contains no data.', dataNode);
                     return false;
                 }
             }
             if(dataEntry && dataEntry.type != entry.type){
-                Xflow.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
-                    " has wrong type. Expected: " + Xflow.getTypeName(entry.type)
-                    + ", but got: " +  Xflow.getTypeName(dataEntry.type), dataNode);
+                Base.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                    " has wrong type. Expected: " + C.getTypeName(entry.type)
+                    + ", but got: " +  C.getTypeName(dataEntry.type), dataNode);
                 return false;
             }
         }
@@ -282,13 +286,13 @@ function synchronizeOutput(operator, outputs){
 
         var entry, asyncEntry;
         var type = dataEntry.type;
-        if(type != Xflow.DATA_TYPE.TEXTURE){
+        if(type != C.DATA_TYPE.TEXTURE){
             entry = new BufferEntry(type, null);
             if(async) asyncEntry = new BufferEntry(type, null);
         }
         else{
-            entry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
-            if(async) asyncEntry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
+            entry = window.document ? new TextureEntry(null) : new ImageDataTextureEntry(null);
+            if(async) asyncEntry = window.document ? new TextureEntry(null) : new ImageDataTextureEntry(null);
         }
         outputs[dataEntry.name] = new DataSlot(entry, 0);
         if(async) outputs[dataEntry.name].asyncDataEntry = asyncEntry;
@@ -319,14 +323,14 @@ var RequestNode = function(channelNode, filter){
 
     /**
      *
-     * @type {Object<Xflow.PLATFORM, exports.Result>}
+     * @type {Object<C.PLATFORM, exports.Result>}
      */
     this.results = {};
 
     /**
-     * @type {exports.Xflow.PROCESS_STATE}
+     * @type {exports.C.PROCESS_STATE}
      */
-    this.status = Xflow.PROCESS_STATE.MODIFIED;
+    this.status = C.PROCESS_STATE.MODIFIED;
 
     /**
      * @type {Object.<string, Channel>}
@@ -362,11 +366,11 @@ RequestNode.prototype.synchronize = function(){
 
 RequestNode.prototype.updateState = function(){
     this.synchronize();
-    if(this.status == Xflow.PROCESS_STATE.MODIFIED){
-        this.status = Xflow.PROCESS_STATE.UNPROCESSED;
+    if(this.status == C.PROCESS_STATE.MODIFIED){
+        this.status = C.PROCESS_STATE.UNPROCESSED;
 
         if(this.owner.loading) {
-            this.status = Xflow.PROCESS_STATE.LOADING;
+            this.status = C.PROCESS_STATE.LOADING;
         } else {
             for(var i = 0; i < this.children.length; ++i){
                 this.status = Math.min(this.status, this.children[i].updateState());
@@ -380,29 +384,29 @@ RequestNode.prototype.getResult = function(resultType){
     this.updateState();
 
     // TODO: This could be in getRequestComputeResult
-    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
-        if(resultType == Xflow.RESULT_TYPE.COMPUTE){
+    if(this.status == C.PROCESS_STATE.UNPROCESSED){
+        if(resultType == C.RESULT_TYPE.COMPUTE){
             var executer = getOrCreateExecuter(this, this.owner.platform);
             if(!executer.isProcessed())
                 executer.run();
         }
-        this.status = Xflow.PROCESS_STATE.PROCESSED;
+        this.status = C.PROCESS_STATE.PROCESSED;
     }
     var result = null;
-    if (resultType == Xflow.RESULT_TYPE.COMPUTE) {
+    if (resultType == C.RESULT_TYPE.COMPUTE) {
         result = getRequestComputeResult(this);
-    } else if (resultType == Xflow.RESULT_TYPE.VS) {
+    } else if (resultType == C.RESULT_TYPE.VS) {
         result = getRequestVSResult(this);
     }
-    result.loading = (this.status == Xflow.PROCESS_STATE.LOADING);
+    result.loading = (this.status == C.PROCESS_STATE.LOADING);
     return result;
 };
 
 RequestNode.prototype.setStructureOutOfSync = function(){
     this.outOfSync = true;
-    this.status = Xflow.PROCESS_STATE.MODIFIED;
+    this.status = C.PROCESS_STATE.MODIFIED;
     for(var type in this.results){
-        this.results[type]._notifyChanged(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        this.results[type]._notifyChanged(C.RESULT_STATE.CHANGED_STRUCTURE);
     }
     for(var name in this.channels){
         this.channels[name].removeListener(this);
@@ -414,9 +418,9 @@ RequestNode.prototype.setStructureOutOfSync = function(){
 
 RequestNode.prototype.onXflowChannelChange = function(channel, state){
     if(channel.creatorProcessNode)
-        this.status = Xflow.PROCESS_STATE.MODIFIED;
-    var notifyState = (state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA_VALUE
-            : Xflow.RESULT_STATE.CHANGED_DATA_SIZE);
+        this.status = C.PROCESS_STATE.MODIFIED;
+    var notifyState = (state == C.DATA_ENTRY_STATE.CHANGED_VALUE ? C.RESULT_STATE.CHANGED_DATA_VALUE
+            : C.RESULT_STATE.CHANGED_DATA_SIZE);
 
     for(var type in this.results){
         this.results[type]._notifyChanged(notifyState);
@@ -451,10 +455,10 @@ function synchronizeRequestChannels(requestNode, channelNode){
  */
 function getRequestComputeResult(requestNode)
 {
-    if(!requestNode.results[Xflow.RESULT_TYPE.COMPUTE])
-        requestNode.results[Xflow.RESULT_TYPE.COMPUTE] = new Result.ComputeResult();
+    if(!requestNode.results[C.RESULT_TYPE.COMPUTE])
+        requestNode.results[C.RESULT_TYPE.COMPUTE] = new Result.ComputeResult();
 
-    var result = requestNode.results[Xflow.RESULT_TYPE.COMPUTE];
+    var result = requestNode.results[C.RESULT_TYPE.COMPUTE];
     result._dataEntries = {}; result._outputNames = [];
 
     for(var name in requestNode.channels){
@@ -472,10 +476,10 @@ function getRequestComputeResult(requestNode)
  */
 function getRequestVSResult(requestNode)
 {
-    var executer = getOrCreateExecuter(requestNode, Xflow.PLATFORM.GLSL);
-    if(!requestNode.results[Xflow.RESULT_TYPE.VS])
-        requestNode.results[Xflow.RESULT_TYPE.VS] = new Result.VSDataResult();
-    var result = requestNode.results[Xflow.RESULT_TYPE.VS];
+    var executer = getOrCreateExecuter(requestNode, C.PLATFORM.GLSL);
+    if(!requestNode.results[C.RESULT_TYPE.VS])
+        requestNode.results[C.RESULT_TYPE.VS] = new Result.VSDataResult();
+    var result = requestNode.results[C.RESULT_TYPE.VS];
 
     var program = executer.getVertexShader();
     result._program = program;

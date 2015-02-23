@@ -1,5 +1,5 @@
 var Base = require("../base.js");
-var Xflow = Base.Xflow;
+var C = require("../interface/constants");
 
 /**
  * A DataSlot wraps a dataEntry and adds a key value for sequences.
@@ -39,8 +39,8 @@ DataSlot.prototype.swapAsync = function(){
 
 DataSlot.prototype.setDataEntry = function(dataEntry, changeType){
     this.dataEntry = dataEntry;
-    var state = changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ? Xflow.DATA_ENTRY_STATE.CHANGED_VALUE :
-        Xflow.DATA_ENTRY_STATE.CHANGED_SIZE;
+    var state = changeType == C.RESULT_STATE.CHANGED_DATA_VALUE ? C.DATA_ENTRY_STATE.CHANGED_VALUE :
+        C.DATA_ENTRY_STATE.CHANGED_SIZE;
     this.notifyOnChange(state);
 };
 

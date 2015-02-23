@@ -1,5 +1,3 @@
-var Xflow = require("../operator.js");
-
 Xflow.registerOperator("xflow.forwardKinematicsInv", {
     outputs: [  {type: 'float4x4',  name: 'result', customAlloc: true}],
     params:  [  {type: 'int',       source: 'parent', array: true },

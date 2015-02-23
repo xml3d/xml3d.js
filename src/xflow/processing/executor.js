@@ -1,7 +1,6 @@
 var Base = require("../base.js");
-var Xflow = Base.Xflow;
+var C = require("../interface/constants");
 var OperatorList = require("../operator/operator-list");
-var Program = require("../operator/program");
 var Utils = require("../utils/utils.js");
 var Operator = require("../operator/operator");
 var OperatorEntry = require("../operator/operator-entry");
@@ -15,7 +14,7 @@ var Program = require("../operator/program");
  * Tries to combine multiple ProcessNodes into a Program. Currently only used for vertex shaders.
  *
  * @param {RequestNode|ProcessNode} ownerNode
- * @param {Xflow.PLATFORM} platform
+ * @param {C.PLATFORM} platform
  * @constructor
  */
 var Executor = function(ownerNode, platform){
@@ -47,7 +46,7 @@ var Executor = function(ownerNode, platform){
     this.unprocessedDataNames = [];
 
     /**
-     *  TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available and
+     *  TODO: Maybe we should just store the cl-platform objects in global object so they are more easily available and
      *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
      *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
      *  e.g. passing graph information here requires a long prototype chain
@@ -67,7 +66,7 @@ var Executor = function(ownerNode, platform){
     Executor.prototype.isProcessed = function(){
         var i = this.mergedOutputNodes.length;
         while(i--){
-            if(this.mergedOutputNodes[i].status != Xflow.PROCESS_STATE.PROCESSED)
+            if(this.mergedOutputNodes[i].status != C.PROCESS_STATE.PROCESSED)
                 return false;
         }
         return true;
@@ -84,10 +83,10 @@ var Executor = function(ownerNode, platform){
             this.operatorList.allocateOutput(this.programData, !!asyncCallback);
             this.program.run(this.programData, asyncCallback);
         }
-        if(this.platform != Xflow.PLATFORM.ASYNC){
+        if(this.platform != C.PLATFORM.ASYNC){
             var i = this.mergedOutputNodes.length;
             while(i--){
-                this.mergedOutputNodes[i].status = Xflow.PROCESS_STATE.PROCESSED;
+                this.mergedOutputNodes[i].status = C.PROCESS_STATE.PROCESSED;
             }
         }
 
@@ -188,9 +187,9 @@ function constructPreScan(cData, node, platform, noOperators){
 
 function canOperatorMerge(cData, operator, platform){
     // TODO: Detect merge support
-    return (platform == Xflow.PLATFORM.ASYNC || !Operator.isOperatorAsync(operator)) &&
+    return (platform == C.PLATFORM.ASYNC || !Operator.isOperatorAsync(operator)) &&
         (!cData.firstOperator ||
-        (platform == Xflow.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl));
+        (platform == C.PLATFORM.GLSL && cData.firstOperator.evaluate_glsl && operator.evaluate_glsl));
 }
 
 function blockSubtree(cData, node){
@@ -394,11 +393,11 @@ function blockSubtree(cData, node){
             var entry = executer.programData.getDataEntry(i);
             var iterateCount = entry ? entry.getIterateCount ? entry.getIterateCount() : 1 : 0;
             if(!iterateCount)
-                executer.operatorList.setInputIterateType(i, Xflow.ITERATION_TYPE.NULL);
+                executer.operatorList.setInputIterateType(i, C.ITERATION_TYPE.NULL);
             else if(!inputs[i].arrayAccess && iterateCount > 1)
-                executer.operatorList.setInputIterateType(i, Xflow.ITERATION_TYPE.MANY);
+                executer.operatorList.setInputIterateType(i, C.ITERATION_TYPE.MANY);
             else
-                executer.operatorList.setInputIterateType(i, Xflow.ITERATION_TYPE.ONE);
+                executer.operatorList.setInputIterateType(i, C.ITERATION_TYPE.ONE);
 
             if(inputs[i].arrayAccess && platformRequiresArraySize(executer. platform)){
                 executer.operatorList.setInputSize(i, iterateCount);
@@ -411,7 +410,7 @@ function blockSubtree(cData, node){
  * @returns {boolean}
  */
     function platformRequiresArraySize(platform){
-        return platform == Xflow.PLATFORM.GLSL;
+        return platform == C.PLATFORM.GLSL;
     }
 
 

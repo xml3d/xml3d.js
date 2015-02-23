@@ -1,6 +1,5 @@
 var Base = require("../base.js");
-
-var Xflow = Base.Xflow;
+var C = require("./constants");
 
 /**
  * Content of this file:
@@ -62,7 +61,7 @@ Request.prototype.clear = function(){
 };
 
 /**
- * @param {Xflow.RESULT_STATE} data
+ * @param {C.RESULT_STATE} data
  * @private
  */
 Request.prototype._onResultChanged = function(data){
@@ -86,7 +85,7 @@ function swapResultRequest(request, newResult){
 
 /**
  * @param {Request} request
- * @param {Xflow.RESULT_STATE} notification
+ * @param {C.RESULT_STATE} notification
  * @private
  */
 function notifyListeners(request, notification){
@@ -94,7 +93,7 @@ function notifyListeners(request, notification){
 }
 
 /**
- * @param {Xflow.RESULT_STATE} notification
+ * @param {C.RESULT_STATE} notification
  */
 Request.prototype._onDataNodeChange = function(notification){
     notifyListeners(this, notification);
@@ -119,7 +118,7 @@ Base.createClass(ComputeRequest, Request);
 ComputeRequest.prototype.getResult = function(){
     // swapResultRequest is called here because the result object of the request may change, e.g.
     // different forward node.
-    return swapResultRequest(this, this._dataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, this._filter));
+    return swapResultRequest(this, this._dataNode._getResult(C.RESULT_TYPE.COMPUTE, this._filter));
 };
 
 ComputeRequest.prototype._onResultChanged = function(notification){
@@ -159,11 +158,11 @@ VertexShaderRequest.prototype.getConfig = function(){
  * @returns {Result}
  */
 VertexShaderRequest.prototype.getResult = function(){
-    return swapResultRequest(this, this._vsConnectNode._getResult(Xflow.RESULT_TYPE.VS, this._filter));
+    return swapResultRequest(this, this._vsConnectNode._getResult(C.RESULT_TYPE.VS, this._filter));
 };
 
 VertexShaderRequest.prototype._onDataNodeChange = function(notification){
-    if(notification == Xflow.RESULT_STATE.CHANGED_STRUCTURE){
+    if(notification == C.RESULT_STATE.CHANGED_STRUCTURE){
         var newVSConnectedNode = getVsConnectNode(this._dataNode, this._vsConfig, this._filter);
         if(newVSConnectedNode != this._vsConnectNode){
             clearVsConnectNode(this._vsConnectNode);

@@ -1,4 +1,3 @@
-var Xflow = require("../operator.js");
 
 Xflow.registerOperator("xflow.skinPosition", {
     outputs: [  {type: 'float3', name: 'result' }],

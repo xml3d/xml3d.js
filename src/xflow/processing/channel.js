@@ -1,7 +1,7 @@
-var Base = require("../base.js"),
-    BufferEntry = require("../interface/data.js").BufferEntry;
+var Base = require("../base.js");
+var C = require("../interface/constants");
+var BufferEntry = require("../interface/data.js").BufferEntry;
 
-var Xflow = Base.Xflow;
 
 //----------------------------------------------------------------------------------------------------------------------
 // DataSlot
@@ -239,8 +239,8 @@ Channel.prototype.addDataSlot = function(dataSlot){
     for(var i = 0; i < this.entries.length; ++i){
         var entry = this.entries[i];
         // We use epsilon here to detect data entries with "equal" key
-        if(entry.key >= dataSlot.key - Xflow.EPSILON ){
-            if(Math.abs(entry.key - dataSlot.key) <= Xflow.EPSILON){
+        if(entry.key >= dataSlot.key - C.EPSILON ){
+            if(Math.abs(entry.key - dataSlot.key) <= C.EPSILON){
                 entry.removeChannel(this);
                 this.entries.splice(i, 1, dataSlot);
             }
@@ -269,7 +269,7 @@ Channel.prototype.getSequenceMaxKey = function(){
  */
 Channel.prototype.getType = function(){
     if(this.entries.length == 0)
-        return Xflow.DATA_TYPE.UNKNOWN;
+        return C.DATA_TYPE.UNKNOWN;
     else
         return this.entries[0].dataEntry._type;
 };
@@ -290,7 +290,7 @@ Channel.prototype.addChannelEntries = function(otherChannel){
 };
 /**
  * Return a DataEntry from this channel depending on sequenceKey.
- * @param {Xflow.SEQUENCE?} sequenceAccessType
+ * @param {C.SEQUENCE?} sequenceAccessType
  * @param {number?} sequenceKey
  * @returns {DataEntry}
  */
@@ -305,19 +305,19 @@ Channel.prototype.getDataEntry = function(sequenceAccessType, sequenceKey){
     var i = 0, max = this.entries.length;
     // TODO: Do binary search here?
     while(i < max && this.entries[i].key < sequenceKey) ++i;
-    if(sequenceAccessType == Xflow.SEQUENCE.PREV_BUFFER){
+    if(sequenceAccessType == C.SEQUENCE.PREV_BUFFER){
         return this.entries[i ? i -1 : 0].dataEntry;
     }
-    else if(sequenceAccessType == Xflow.SEQUENCE.NEXT_BUFFER){
+    else if(sequenceAccessType == C.SEQUENCE.NEXT_BUFFER){
         return this.entries[i < max ? i : max - 1].dataEntry;
     }
-    else if(sequenceAccessType == Xflow.SEQUENCE.LINEAR_WEIGHT){
+    else if(sequenceAccessType == C.SEQUENCE.LINEAR_WEIGHT){
         var weight1 = this.entries[i ? i - 1 : 0].key;
         var weight2 = this.entries[i < max ? i : max - 1].key;
         var value = new Float32Array(1);
         value[0] = weight2 == weight1 ? 0 : (sequenceKey - weight1) / (weight2 - weight1);
         // TODO: Check if repeated BufferEntry and Float32Array allocation is a serious bottleneck
-        return new BufferEntry(Xflow.DATA_TYPE.FLOAT, value);
+        return new BufferEntry(C.DATA_TYPE.FLOAT, value);
     }
     return null;
 };
@@ -332,7 +332,7 @@ Channel.prototype.willMergeWithChannel = function(otherChannel){
     if(this.getType() != otherChannel.getType())
         return false;
     for(var i = 0; i < this.entries.length; i++){
-        if(Math.abs(this.entries[i].key - otherChannel.entries[i].key) > Xflow.EPSILON)
+        if(Math.abs(this.entries[i].key - otherChannel.entries[i].key) > C.EPSILON)
             return true;
     }
     return false;
@@ -346,7 +346,7 @@ Channel.prototype.willMergeWithChannel = function(otherChannel){
 Channel.prototype.willMergeWithDataSlot = function(dataSlot){
     if(this.entries.length > 1) return true;
     if(this.getType() != dataSlot.dataEntry._type) return false;
-    return (Math.abs(this.entries[0].key - dataSlot.key) > Xflow.EPSILON);
+    return (Math.abs(this.entries[0].key - dataSlot.key) > C.EPSILON);
 };
 
 Channel.prototype.notifyOnChange = function(state){

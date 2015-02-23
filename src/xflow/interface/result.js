@@ -1,6 +1,6 @@
 var Base = require("../base.js");
 
-var Xflow = Base.Xflow;
+var queueResultCallback = Base._queueResultCallback;
 
 /**
  * Content of this file:
@@ -20,28 +20,28 @@ var Result = function(){
 };
 
 /**
- * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ * @param {function(Result, C.RESULT_STATE)} callback
  */
 Result.prototype.addListener = function(callback){
     this._listeners.push(callback);
 };
 
 /**
- * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ * @param {function(Result, C.RESULT_STATE)} callback
  */
 Result.prototype.removeListener = function(callback){
     Array.erase(this._listeners, callback);
 };
 
 /**
- * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ * @param {function(Result, C.RESULT_STATE)} callback
  */
 Result.prototype._addRequest = function(request){
     this._requests.push(request);
 };
 
 /**
- * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ * @param {function(Result, C.RESULT_STATE)} callback
  */
 Result.prototype._removeRequest = function(request){
     Array.erase(this._requests, request);
@@ -53,7 +53,7 @@ Result.prototype._notifyChanged = function(state){
     for(var i = 0; i < this._requests.length; ++i){
         this._requests[i]._onResultChanged(state);
     }
-    Xflow._queueResultCallback(this, state);
+    queueResultCallback(this, state);
 }
 
 Result.prototype._onResultChanged = function(state){
@@ -67,7 +67,7 @@ Result.prototype._onResultChanged = function(state){
 /**
  * ComputeResult contains a named map of typed values.
  * @constructor
- * @extends {Xflow.Result}
+ * @extends {Result}
  */
 var ComputeResult = function(){
     Result.call(this);
@@ -100,7 +100,7 @@ ComputeResult.prototype.getOutputMap = function() {
 /**
  * VSDataResult is used to analyse the output of a VertexShader
  * Note that the VSDataResult is not used to generate the VertexShader directly.
- * For that, the Xflow.VertexShader structure must be created from Xflow.VertexShaderRequest
+ * For that, the VertexShader structure must be created from VertexShaderRequest
  * @constructor
  * @extends {Result}
  */

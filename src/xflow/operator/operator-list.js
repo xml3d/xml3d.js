@@ -1,12 +1,12 @@
+var C = require("../interface/constants");
 var Base = require("../base.js");
 
-var Xflow = Base.Xflow;
 
 /**
  * List of platform-specific operators, ordered by execution (last entry is last operator
  * executed).
  *
- * @param {Xflow.PLATFORM} platform
+ * @param {C.PLATFORM} platform
  * @param {Graph} graph
  * @constructor
  */
@@ -22,7 +22,7 @@ var OperatorList = function (platform, graph) {
      * Map from position of input parameter to size and iterator type of parameters.
      * Size is only specified for uniform array input, required for programs that
      * have the array size specified.
-     * @type {Object.<number,{size: number, iterate: Xflow.ITERATION_TYPE}>}
+     * @type {Object.<number,{size: number, iterate: C.ITERATION_TYPE}>}
      */
     this.inputInfo = {};
 };
@@ -59,13 +59,13 @@ OperatorList.prototype.setInputSize = function (inputIndex, size) {
 
 
 OperatorList.prototype.isInputIterate = function (inputIndex) {
-    return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == Xflow.ITERATION_TYPE.MANY;
+    return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == C.ITERATION_TYPE.MANY;
 };
 OperatorList.prototype.isInputUniform = function (inputIndex) {
-    return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == Xflow.ITERATION_TYPE.ONE;
+    return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == C.ITERATION_TYPE.ONE;
 };
 OperatorList.prototype.isInputNull = function (inputIndex) {
-    return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == Xflow.ITERATION_TYPE.NULL;
+    return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate == C.ITERATION_TYPE.NULL;
 };
 OperatorList.prototype.getInputIterateType = function (inputIndex) {
     return this.inputInfo[inputIndex] && this.inputInfo[inputIndex].iterate;
@@ -111,7 +111,7 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
             if (d.noAlloc)
                 continue;
 
-            if (dataEntry.type == Xflow.DATA_TYPE.TEXTURE) {
+            if (dataEntry.type == C.DATA_TYPE.TEXTURE) {
                 // texture entry
                 if (d.customAlloc) {
                     var texParams = c_sizes[d.name];
@@ -146,16 +146,16 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
 
                 if (!dataEntry._value || dataEntry._value.length != size) {
                     switch (dataEntry.type) {
-                        case Xflow.DATA_TYPE.FLOAT:
-                        case Xflow.DATA_TYPE.FLOAT2:
-                        case Xflow.DATA_TYPE.FLOAT3:
-                        case Xflow.DATA_TYPE.FLOAT4:
-                        case Xflow.DATA_TYPE.FLOAT4X4:
+                        case C.DATA_TYPE.FLOAT:
+                        case C.DATA_TYPE.FLOAT2:
+                        case C.DATA_TYPE.FLOAT3:
+                        case C.DATA_TYPE.FLOAT4:
+                        case C.DATA_TYPE.FLOAT4X4:
                             dataEntry._setValue(new Float32Array(size));
                             break;
-                        case Xflow.DATA_TYPE.INT:
-                        case Xflow.DATA_TYPE.INT4:
-                        case Xflow.DATA_TYPE.BOOL:
+                        case C.DATA_TYPE.INT:
+                        case C.DATA_TYPE.INT4:
+                        case C.DATA_TYPE.BOOL:
                             dataEntry._setValue(new Int32Array(size));
                             break;
                         default:
@@ -181,8 +181,8 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
 
  if(outputType != entry.type){
  XML3D.debug.logError("Xflow: operator " + entry.operator.name + ": Input for " + entry.source +
- " has wrong type. Expected: " + Xflow.getTypeName(entry.type)
- + ", but got: " +  Xflow.getTypeName(outputType) );
+ " has wrong type. Expected: " + C.getTypeName(entry.type)
+ + ", but got: " +  C.getTypeName(outputType) );
  return false;
  }
 
@@ -209,8 +209,8 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
  }
  if(dataEntry && dataEntry.type != entry.type){
  XML3D.debug.logError("Xflow: operator " + entry.operator.name + ": Input for " + entry.source +
- " has wrong type. Expected: " + Xflow.getTypeName(entry.type)
- + ", but got: " +  Xflow.getTypeName(dataEntry.type) );
+ " has wrong type. Expected: " + C.getTypeName(entry.type)
+ + ", but got: " +  C.getTypeName(dataEntry.type) );
  return false;
  }
  }

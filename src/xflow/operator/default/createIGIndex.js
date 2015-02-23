@@ -1,5 +1,3 @@
-var Xflow = require("../operator.js");
-
 Xflow.registerOperator("xflow.createIGIndex", {
     outputs:[
         //{type:'int', name:'index', customAlloc:true },

@@ -1,5 +1,3 @@
-var Xflow = require("../operator.js");
-
 
 function fetch(result, value, index, components){
     for(var i = 0; i < index.length; ++i) {

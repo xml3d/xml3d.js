@@ -1,5 +1,3 @@
-var Xflow = require("../operator.js");
-
 (function(){
 
 var c_CubePositions =  [

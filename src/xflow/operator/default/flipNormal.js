@@ -1,5 +1,3 @@
-var Xflow = require("../operator.js");
-
 Xflow.registerOperator("xflow.flipNormal", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'value'}],

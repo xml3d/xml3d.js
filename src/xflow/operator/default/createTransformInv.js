@@ -1,5 +1,3 @@
-var Xflow = require("../operator.js");
-
 Xflow.registerOperator("xflow.createTransformInv", {
     outputs: [  {type: 'float4x4', name: 'result'}],
     params:  [  {type: 'float3', source: 'translation', optional: true},

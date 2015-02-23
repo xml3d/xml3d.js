@@ -1,5 +1,3 @@
-var Xflow = require("../operator.js");
-
 Xflow.registerOperator("xflow.clampImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image', formatType: 'ImageData'} ],
     params:  [ {type: 'texture', source : 'image'},

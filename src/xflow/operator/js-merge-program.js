@@ -1,18 +1,19 @@
-(function(){
+var Base = require("../base.js");
+var C = require("../interface/constants");
 
-//----------------------------------------------------------------------------------------------------------------------
-// Xflow.OperatorList
-//----------------------------------------------------------------------------------------------------------------------
-
-
-    Xflow.JSMergeProgram = function(operatorList){
+/**
+ *
+ * @param  {OperatorList} operatorList
+ * @constructor
+ */
+    var JSMergeProgram = function(operatorList){
         this.list = operatorList;
         this.entry = operatorList.entries[0];
         this.operator = this.entry.operator;
         this._inlineLoop = null;
-    }
+    };
 
-    Xflow.JSMergeProgram.prototype.run = function(programData){
+    JSMergeProgram.prototype.run = function(programData){
         var operatorData = prepareOperatorData(this.list, 0, programData);
 
         if(this.operator.evaluate_core){
@@ -21,7 +22,7 @@
         else{
             applyDefaultOperation(this.entry, programData, operatorData);
         }
-    }
+    };
 
     function applyDefaultOperation(entry, programData, operatorData){
         var args = assembleFunctionArgs(entry, programData);
@@ -63,7 +64,7 @@
         var result = {};
         var matches = func.toString().match(c_FunctionPattern);
         if(!matches){
-            Xflow.notifyError("Xflow Internal: Could not parse function: " + func);
+            Base.notifyError("Xflow Internal: Could not parse function: " + func);
             return null;
         }
         result.args = matches[2].split(",");
@@ -85,16 +86,16 @@
             if(argIdx != -1){
                 if(argIdx < operator.outputs.length){
                     addIndex = true;
-                    tupleCnt = Xflow.DATA_TYPE_TUPLE_SIZE[[operator.outputs[argIdx].type]];
+                    tupleCnt = C.DATA_TYPE_TUPLE_SIZE[[operator.outputs[argIdx].type]];
                 }
                 else{
                     var i = argIdx - operator.outputs.length;
                     addIndex = operatorData.iterFlag[i];
-                    tupleCnt = Xflow.DATA_TYPE_TUPLE_SIZE[operator.mapping[i].internalType];
+                    tupleCnt = C.DATA_TYPE_TUPLE_SIZE[operator.mapping[i].internalType];
                 }
             }
 
-            result += code.substring(index, bracketIndex) + "["
+            result += code.substring(index, bracketIndex) + "[";
             if(addIndex){
                 result += tupleCnt + "*__xflowI + ";
             }
@@ -141,4 +142,4 @@
     }
 
 
-}());
+module.exports = JSMergeProgram;

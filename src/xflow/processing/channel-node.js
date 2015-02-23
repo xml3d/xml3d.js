@@ -1,10 +1,11 @@
 var Base = require("../base.js");
+var C = require("../interface/constants");
 var Channels = require("./channel.js");
 var RequestNode = require("./process-node.js").RequestNode;
 var ProcessNode = require("./process-node.js").ProcessNode;
 var DataSlot = require("./data-slot.js");
+var Operator = require("../operator/operator");
 
-var Xflow = Base.Xflow;
 var ChannelMap = Channels.ChannelMap;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -23,7 +24,7 @@ var ChannelMap = Channels.ChannelMap;
  */
 var ChannelNode = function(dataNode, substitution){
     this.owner = dataNode;
-    this.platform = Xflow.PLATFORM.JAVASCRIPT;
+    this.platform = C.PLATFORM.JAVASCRIPT;
     this.substitution = substitution;   // Substitution is defined by the dataflow instance
     this.loading = false;   // is true if any value in the sub tree is loading and the result can't be calculated
     this.inputSlots = {};   // DataEntries from direct InputNode children of the DataNode
@@ -160,7 +161,7 @@ ChannelNode.prototype.getOutputChannelInfo = function(name){
     if(this.dataflowChannelNode){
         var protoInputChannel = this.inputChannels.getChannel(preFilterName);
         if(!protoInputChannel || dataEntry != protoInputChannel.getDataEntry()){
-            result.origin = Xflow.ORIGIN.PROTO;
+            result.origin = C.ORIGIN.PROTO;
             result.originalName = preFilterName;
             return result;
         }
@@ -168,12 +169,12 @@ ChannelNode.prototype.getOutputChannelInfo = function(name){
     if(this.operator){
         var inputChannel = this.inputChannels.getChannel(preFilterName);
         if(!inputChannel || dataEntry != inputChannel.getDataEntry()){
-            result.origin = Xflow.ORIGIN.COMPUTE;
+            result.origin = C.ORIGIN.COMPUTE;
             result.originalName = this.owner._computeOutputMapping.getScriptOutputNameInv(preFilterName, this.operator.outputs);
             return result;
         }
     }
-    result.origin = Xflow.ORIGIN.CHILD;
+    result.origin = C.ORIGIN.CHILD;
     result.originalName = preFilterName;
     return result;
 };
@@ -196,7 +197,7 @@ function updatePlatform(channelNode) {
     // Currently we use forced platform if graph platform is something other than JavaScript
     // and forced platform (owner._platform) is defined
 
-    platform = owner._platform !== null && graph.platform !== Xflow.PLATFORM.JAVASCRIPT ? owner._platform : graph.platform;
+    platform = owner._platform !== null && graph.platform !== C.PLATFORM.JAVASCRIPT ? owner._platform : graph.platform;
 
     channelNode.platform = platform;
 }
@@ -350,8 +351,8 @@ function findOperatorByName(channelNode, dataNode){
         inputMapping = dataNode._computeInputMapping,
         inputChannels = channelNode.inputChannels;
 
-    var operators = Xflow.getOperators(operatorName, channelNode.platform) ||
-                Xflow.getOperators(operatorName, Xflow.PLATFORM.JAVASCRIPT);
+    var operators = Operator.getOperators(operatorName, channelNode.platform) ||
+                Operator.getOperators(operatorName, C.PLATFORM.JAVASCRIPT);
     if(!operators){
         Base.notifyError("No operator with name '" + operatorName+"' found", channelNode.owner);
     }
@@ -392,7 +393,7 @@ function checkOperator(operator, inputMapping, inputChannels, typeComparisonsOut
         var errorHeader;
         if(typeComparisonsOutput){
             errorHeader = "For " + (i+1) + ". argument '" + sourceName + "': ";
-            inputs.push( Xflow.getTypeName(inputEntry.type) + " " + sourceName + (inputEntry.optional ? " [optional]" : ""));
+            inputs.push( C.getTypeName(inputEntry.type) + " " + sourceName + (inputEntry.optional ? " [optional]" : ""));
         }
         if(dataName){
             var channel = inputChannels.getChannel(dataName);
@@ -407,7 +408,7 @@ function checkOperator(operator, inputMapping, inputChannels, typeComparisonsOut
                 if(!typeComparisonsOutput)
                     return false;
                 else{
-                    errors.push(errorHeader + "DataEntry '" + dataName + "' has wrong type '" + Xflow.getTypeName(channel.getType()) + "'");
+                    errors.push(errorHeader + "DataEntry '" + dataName + "' has wrong type '" + C.getTypeName(channel.getType()) + "'");
                 }
             }
         }

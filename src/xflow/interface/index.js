@@ -1,3 +1,5 @@
+var Base = require("../base.js");
+
 var data = require("./data");
 var graph = require("./graph");
 var mapping = require("./mapping");
@@ -22,5 +24,9 @@ module.exports = {
     setShaderConstant: vsconnect.setShaderConstant,
     VSConfig: vsconnect.VSConfig,
     utils : require("../utils/utils"),
-    Result: require("./result")
+    Result: require("./result"),
+    registerOperator: require("../operator/operator").registerOperator
 };
+
+// Load constants into interface object
+Base.extend(module.exports, require("./constants"));

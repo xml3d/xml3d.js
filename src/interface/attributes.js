@@ -89,8 +89,6 @@ handlers.EnumAttributeHandler.prototype.constructor = handlers.EnumAttributeHand
 handlers.EventAttributeHandler = function(id) {
     AttributeHandler.call(this);
     var eventType = id.substring(2);
-    var isXHTML = (document.URL.match(/\.xhtml/i) !== null) ||
-        (document.doctype && document.doctype.publicId && document.doctype.publicId.match(/\.xhtml/i) !== null);
 
     this.init = function(elem, storage){
         storage[id] = null;
@@ -106,7 +104,7 @@ handlers.EventAttributeHandler = function(id) {
         }
         else{
             storage[id] = eval("crx = function " + id + "(event){\n  " + value + "\n}");
-            if (isXHTML) {
+            if (XML3D.xhtml) {
                 // only XHTML documents require this polyfill for mouse event attributes
                 elem.addEventListener(eventType, storage[id], false);
             }
@@ -121,9 +119,9 @@ handlers.EventAttributeHandler = function(id) {
         },
         set : function(value) {
             var storage = getStorage(this);
-            if(isXHTML && storage[id]) this.removeEventListener(eventType, storage[id]);
+            if(XML3D.xhtml && storage[id]) this.removeEventListener(eventType, storage[id]);
             storage[id] = (typeof value == 'function') ? value : undefined;
-            if(isXHTML && storage[id]) this.addEventListener(eventType, storage[id], false);
+            if(XML3D.xhtml && storage[id]) this.addEventListener(eventType, storage[id], false);
             return false;
         }
     };

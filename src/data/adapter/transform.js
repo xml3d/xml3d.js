@@ -22,6 +22,7 @@ TransformDataAdapter.prototype.init = function () {
         //rotation               : XML3D.math.mat4.create()
     };
     this.needsUpdate = true;
+    this.checkForImproperNesting();
 };
 
 TransformDataAdapter.prototype.updateMatrix = function () {
@@ -65,6 +66,15 @@ TransformDataAdapter.prototype.notifyChanged = function (e) {
 };
 TransformDataAdapter.prototype.dispose = function () {
     this.isValid = false;
+};
+
+TransformDataAdapter.prototype.checkForImproperNesting = function() {
+    var child = this.node.childNodes.length;
+    while(--child) {
+        if (this.node.childNodes[child].localName === "transform") {
+            XML3D.debug.logError("Parsing error: Transform elements cannot be nested!", this.node);
+        }
+    }
 };
 
 // Export to XML3D.data namespace

@@ -72,9 +72,8 @@ ValueDataAdapter.prototype.toString = function () {
 };
 
 ValueDataAdapter.prototype.checkForImproperNesting = function() {
-    var child = this.node.childNodes.length;
-    while(--child) {
-        if (XML3D.data.BUFFER_TYPE_TABLE[this.node.childNodes[child].localName]) {
+    for (var i=0; i < this.node.childNodes.length; i++) {
+        if (XML3D.data.BUFFER_TYPE_TABLE[this.node.childNodes[i].localName]) {
             XML3D.debug.logError("Parsing error: Value elements cannot be nested!", this.node);
         }
     }

@@ -69,9 +69,8 @@ TransformDataAdapter.prototype.dispose = function () {
 };
 
 TransformDataAdapter.prototype.checkForImproperNesting = function() {
-    var child = this.node.childNodes.length;
-    while(--child) {
-        if (this.node.childNodes[child].localName === "transform") {
+    for (var i=0; i < this.node.childNodes.length; i++) {
+        if (this.node.childNodes[i].localName === "transform") {
             XML3D.debug.logError("Parsing error: Transform elements cannot be nested!", this.node);
         }
     }

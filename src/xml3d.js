@@ -114,7 +114,7 @@ XML3D.createClass = function(ctor, parent, methods) {
 
             infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
             infoDiv.style.border = "2px solid red";
-            infoDiv.style.fontFamily = "verdana";
+            infoDiv.style.fontFamily = "verdana,sans-serif";
             infoDiv.style.color = "red";
             infoDiv.style.padding = "10px";
             infoDiv.style.backgroundColor = "rgba(255, 0, 0, 0.3)";

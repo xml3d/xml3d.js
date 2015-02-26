@@ -30,7 +30,6 @@ MouseEventHandler.prototype =  {
         var x = opt.x !== undefined ? opt.x : event.clientX;
         var y = opt.y !== undefined ? opt.y : event.clientY;
         var noCopy = opt.noCopy || false;
-
         // Copy event to avoid DOM dispatch errors (cannot dispatch event more
         // than once)
         event = noCopy ? event : this.copyMouseEvent(event);
@@ -145,18 +144,14 @@ MouseEventHandler.prototype =  {
             if (Math.abs(pos.x - this._lastMousePosition.x) > 4 || Math.abs(pos.y - this._lastMousePosition.y) > 4)
                 return;
         }
-        // Click follows always 'mouseup' => no update of pick object needed
-        // Felix: Removed optimization, as this resulted in passing 'null' as event target.
-        this.dispatchMouseEventOnPickedObject(evt /*, { omitUpdate:true } */);
+        this.dispatchMouseEventOnPickedObject(evt);
     },
 
     /**
      * @param {MouseEvent} evt
      */
     dblclick: function (evt) {
-        // Click follows always 'mouseup' => no update of pick object needed
-        // Felix: Removed optimization, as this resulted in passing 'null' as event target.
-        this.dispatchMouseEventOnPickedObject(evt /*, { omitUpdate:true } */);
+        this.dispatchMouseEventOnPickedObject(evt);
     },
 
     /**

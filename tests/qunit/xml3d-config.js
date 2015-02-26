@@ -163,10 +163,6 @@ XML3DUnit.getRendererString = function() {
     var context = null;
 
     result = "Renderer: ";
-    if(XML3D._native)
-    {
-        return result + "Native";
-    }
 
     try {
       context = canvas.getContext("webgl");

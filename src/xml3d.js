@@ -13,7 +13,6 @@ XML3D.xhtmlNS = 'http://www.w3.org/1999/xhtml';
 /** @const */
 XML3D.webglNS = 'http://www.xml3d.org/2009/xml3d/webgl';
 XML3D._xml3d = document.createElementNS(XML3D.xml3dNS, "xml3d");
-XML3D._native = !!XML3D._xml3d.style;
 XML3D._parallel = XML3D._parallel != undefined ? XML3D._parallel : false;
 XML3D.xhtml = !!document.xmlEncoding;
 
@@ -163,9 +162,6 @@ XML3D.createClass = function(ctor, parent, methods) {
      * @param {Element} xml3dElement
      */
     function initXML3DElement(xml3dElement) {
-        if (XML3D._native)
-            return;
-
         if(-1 < curXML3DInitElements.indexOf(xml3dElement))
             return;
 
@@ -266,11 +262,6 @@ XML3D.createClass = function(ctor, parent, methods) {
         var xml3ds = document.querySelectorAll("xml3d");
 
         debug && XML3D.debug.logInfo("Found " + xml3ds.length + " xml3d node(s)");
-
-        if (xml3ds.length && XML3D._native) {
-            debug && XML3D.debug.logInfo("Using native implementation.");
-            return;
-        }
 
         for(var i = 0; i < xml3ds.length; i++) {
             initXML3DElement(xml3ds[i]);

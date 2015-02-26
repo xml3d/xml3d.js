@@ -214,6 +214,7 @@ C.PLATFORM = {
 C.PROCESS_STATE = {
     MODIFIED: 0, // We don't know (TODO Felix: Find out!)
     LOADING: 1, // Something still loading (blocked)
+    INVALID: 3, // Input is invalid (might happen even after operator selection - e.g. because of empty array output etc.)
     UNPROCESSED: 4, // Process node is dirty
     PROCESSED: 5 // All data is up-to-date
 };

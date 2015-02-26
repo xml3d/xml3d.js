@@ -162,9 +162,9 @@ ProcessNode.prototype.updateState = function(){
             if(this.status > C.PROCESS_STATE.LOADING && isInputLoading(this.operator, this.inputChannels))
                 this.status = C.PROCESS_STATE.LOADING;
 
-            if(this.status >= C.PROCESS_STATE.UNPROCESSED) {
-                XML3D.debug.assert(checkInput(this, this.operator, this.owner.owner._computeInputMapping, this.inputChannels));
-            }
+            if(this.status > Xflow.PROCESS_STATE.INVALID &&
+                !checkInput(this, this.operator, this.owner.owner._computeInputMapping, this.inputChannels))
+                this.status = Xflow.PROCESS_STATE.INVALID;
 
             if(this.status == C.PROCESS_STATE.UNPROCESSED && Operator.isOperatorAsync(this.operator)){
                 this.status = this.asyncProcessState == ASYNC_PROCESS_STATE.INIT ? C.PROCESS_STATE.LOADING

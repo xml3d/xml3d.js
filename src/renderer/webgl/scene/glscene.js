@@ -33,7 +33,6 @@ var GLScene = function (context) {
     this.context = context;
     this.shaderFactory = new ShaderComposerFactory(context);
     this.drawableFactory = new DrawableFactory();
-    this.firstOpaqueIndex = 0;
 
     /**
      * @type {Array.<RenderObject>}
@@ -50,20 +49,19 @@ var GLScene = function (context) {
 
 XML3D.createClass(GLScene, Scene);
 
-
+function removeSafe(arr, obj) {
+    var index = arr.indexOf(obj);
+    if (index != -1) {
+        arr.splice(index, 1);
+        return true;
+    }
+    return false;
+}
 
 XML3D.extend(GLScene.prototype, {
     remove: function (obj) {
-        var index = this.queue.indexOf(obj);
-        if (index != -1) {
-            this.queue.splice(index, 1);
-        }
-        index = this.ready.indexOf(obj);
-        if (index != -1) {
-            this.ready.splice(index, 1);
-            if (index < this.firstOpaqueIndex)
-                this.firstOpaqueIndex--;
-        }
+        removeSafe(this.queue, obj);
+        removeSafe(this.ready, obj);
     },
 
     clear: function () {
@@ -72,24 +70,13 @@ XML3D.extend(GLScene.prototype, {
     },
 
     moveFromQueueToReady: function (obj) {
-        var index = this.queue.indexOf(obj);
-        if (index != -1) {
-            this.queue.splice(index, 1);
-            if (obj.hasTransparency()) {
-                this.ready.unshift(obj);
-                this.firstOpaqueIndex++;
-            } else {
-                this.ready.push(obj);
-            }
+        if (removeSafe(this.queue, obj)) {
+            this.ready.push(obj);
         }
     },
 
     moveFromReadyToQueue: function (obj) {
-        var index = this.ready.indexOf(obj);
-        if (index != -1) {
-            this.ready.splice(index, 1);
-            if (index < this.firstOpaqueIndex)
-                this.firstOpaqueIndex--;
+        if (removeSafe(this.ready, obj)) {
             this.queue.push(obj);
         }
     },

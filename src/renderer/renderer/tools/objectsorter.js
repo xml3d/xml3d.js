@@ -15,16 +15,16 @@ XML3D.extend(ObjectSorter.prototype, {
      * @param {Float32Array?} viewMatrix Matrix to apply to objects world space extend before sorting
      */
     sortScene: function (scene, viewMatrix) {
-        var sourceObjectArray = scene.ready, firstOpaque = scene.firstOpaqueIndex, opaque = {}, transparent = [];
+        var sourceObjectArray = scene.ready, opaque = {}, transparent = [];
 
-        var tempArray = [], obj;
+        var transparentArray = [], obj;
         for (var i = 0, l = sourceObjectArray.length; i < l; i++) {
             obj = sourceObjectArray[i];
             if (obj.inFrustum === false) {
                 continue;
             }
-            if (i < firstOpaque) {
-                tempArray.push(obj);
+            if (obj.hasTransparency()) {
+                transparentArray.push(obj);
             } else {
                 var program = obj.getProgram();
                 opaque[program.id] = opaque[program.id] || [];
@@ -53,25 +53,25 @@ XML3D.extend(ObjectSorter.prototype, {
         }
 
         //Sort transparent objects from back to front
-        var tlength = tempArray.length;
+        var tlength = transparentArray.length;
         if (tlength > 1) {
             for (i = 0; i < tlength; i++) {
-                obj = tempArray[i];
+                obj = transparentArray[i];
                 obj.getWorldSpaceBoundingBox(c_bbox);
                 XML3D.math.bbox.center(c_center, c_bbox);
                 viewMatrix && XML3D.math.vec3.transformMat4(c_center, c_center, viewMatrix);
-                tempArray[i] = [obj, c_center[2]];
+                transparentArray[i] = [obj, c_center[2]];
             }
 
-            tempArray.sort(function (a, b) {
+            transparentArray.sort(function (a, b) {
                 return a[1] - b[1];
             });
 
             for (i = 0; i < tlength; i++) {
-                transparent[i] = tempArray[i][0];
+                transparent[i] = transparentArray[i][0];
             }
         } else if (tlength == 1) {
-            transparent[0] = tempArray[0];
+            transparent[0] = transparentArray[0];
         }
         return {
             opaque: opaque, transparent: transparent

@@ -95,3 +95,44 @@ test("Change material model of asset", 7, function () {
     });
     checkShadeExternalJS.fin(QUnit.start).done();
 });
+
+
+
+
+test("Change transparency", 5, function () {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/materials-transparency.html");
+
+    var changeFunction = function(f) {
+        return function(scene) {
+            scene.ownerDocument.defaultView[f]();
+            return scene;
+        }
+    };
+
+    var checkInit = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),256,256);
+        QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Initially Opaque");
+        return s;
+    });
+    var checkTransparentShaderChange = checkInit.then(changeFunction("setSemiTransparent")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 256, 256);
+        QUnit.closeArray(pick, [127.5, 127.5, 0, 255], PIXEL_EPSILON, "Changed to semi-transparent shader. Should be half green, half red now.");
+        return s;
+    });
+
+    var checkOpaqueShaderChange = checkTransparentShaderChange.then(changeFunction("setOpaque")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 256, 256);
+        QUnit.closeArray(pick, [0, 0, 255, 255], PIXEL_EPSILON, "Changed back to opaque. Should be blue now.");
+        return s;
+    });
+
+    var checkTransparencyChange = checkOpaqueShaderChange.then(changeFunction("makeOpaqueTransparent")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 256, 256);
+        QUnit.closeArray(pick, [127.5, 0, 127.5, 255], PIXEL_EPSILON, "Make the opaque object transparent by changing its transparency value. Should be half blue, half red now.");
+        return s;
+    });
+
+    checkTransparencyChange.fin(QUnit.start).done();
+});

@@ -1,67 +1,94 @@
-(function(){
+var Base = require("../base.js");
+var C = require("./constants");
 
-//----------------------------------------------------------------------------------------------------------------------
-// Xflow.Mapping
-//----------------------------------------------------------------------------------------------------------------------
 
-var Mapping = Xflow.Mapping;
+var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
+var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)}$/;
 
 /**
- * Parse a Mapping (both Xflow.OrderMapping or Xflow.ComputeMapping) from a syntax string.
+ * A mapping used for a filter or a compute properties of a DataNode
+ * @abstract
+ */
+var Mapping = function(){
+    /**
+     * @type {Array<DataNode>}
+     */
+    this._owners = [];
+};
+
+/**
+ * Parse a Mapping (both C.OrderMapping or C.ComputeMapping) from a syntax string.
  * @param {string} string The syntax string.
- * @param {Xflow.DataNode} dataNode DataNode of the Mapping
- * @returns {?Xflow.Mapping}
+ * @param {C.DataNode} dataNode DataNode of the Mapping
+ * @returns {?C.Mapping}
  */
 Mapping.parse = function(string, dataNode){
-    string = string.trim()
+    string = string.trim();
     var results = string.trim().match(orderMappingParser);
     if(results)
         return OrderMapping.parse(string, dataNode);
     results = string.trim().match(nameMappingParser);
     if(results)
         return NameMapping.parse(results[1], dataNode);
-    Xflow.notifyError("Cannot parse name mapping '" + string + "'", dataNode);
+    Base.notifyError("Cannot parse name mapping '" + string + "'", dataNode);
     return null;
-}
+};
 
-Xflow.Mapping.prototype._addOwner = function(owner){
+/**
+ *
+ * @param {DataNode} owner
+ * @private
+ */
+Mapping.prototype._addOwner = function(owner){
     var idx = this._owners.indexOf(owner);
     if(idx == -1)
         this._owners.push(owner);
-}
+};
 
-Xflow.Mapping.prototype._removeOwner = function(owner){
+/**
+ *
+ * @param {DataNode} owner
+ * @private
+ */
+Mapping.prototype._removeOwner = function(owner){
     var idx = this._owners.indexOf(owner);
     if(idx != -1)
         this._owners.splice(idx, -1);
-}
+};
+
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.OrderMapping
+// OrderMapping
 //----------------------------------------------------------------------------------------------------------------------
-
 
 /**
- * OrderMapping implementation
+ * An OrderMapping used for a filter or compute properties of a DataNode
+ * It describes a mapping of names referring to the order of arguments / output values.
+ * OrderMapping syntax examples in compute:
+ * position = C.morph(position, posAdd, weight)
+ * @constructor
+ * @extends {Mapping}
  */
-
-var OrderMapping = Xflow.OrderMapping;
-
+var OrderMapping = function(){
+    Mapping.call(this);
+    this._names = [];
+};
+Base.createClass(OrderMapping, Mapping);
 
 OrderMapping.parse = function(string, dataNode){
-    var mapping = new Xflow.OrderMapping(dataNode)
+    var mapping = new OrderMapping(dataNode);
     var token = string.split(",");
     for(var i = 0; i < token.length; i++){
         mapping._names.push(token[i].trim());
     }
     return mapping;
-}
+};
 
 
 Object.defineProperty(OrderMapping.prototype, "length", {
-    set: function(v){ throw new Error("length is read-only");
+    set: function(){ throw new Error("length is read-only");
     },
-    get: function(){ return this._name.length; }
+    get: function(){ return this._names.length; }
 });
 
 OrderMapping.prototype.getName = function(idx){
@@ -78,6 +105,8 @@ OrderMapping.prototype.setName = function(index, name){
     mappingNotifyOwner(this);
 };
 
+
+//noinspection JSUnusedGlobalSymbols
 OrderMapping.prototype.removeName = function(index){
     this._names.splice(index);
     mappingNotifyOwner(this);
@@ -85,40 +114,68 @@ OrderMapping.prototype.removeName = function(index){
 
 OrderMapping.prototype.isEmpty = function(){
     return this._names.length == 0;
-}
+};
 
-var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;
-
+/**
+ *
+ * @param {ChannelMap} destMap
+ * @param {ChannelMap} sourceMap
+ * @param {exports.C.DATA_FILTER_TYPE} filterType
+ * @param {function(ChannelMap, string, ChannelMap, string)} callback
+ */
 OrderMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback){
-    if(filterType == Xflow.DATA_FILTER_TYPE.KEEP){
-        for(var i = 0; i < this._names.length; ++i){
+    var i;
+    if(filterType == C.DATA_FILTER_TYPE.KEEP){
+        for(i = 0; i < this._names.length; ++i){
             var name = this._names[i];
-            if(sourceMap.map[name])
+            if(sourceMap.map[name]) {
                 callback(destMap, name, sourceMap, name);
+            }
         }
     }
     else{
-        for(var i in sourceMap.map){
+        for(i in sourceMap.map){
             var idx = this._names.indexOf(i);
-            if(filterType == Xflow.DATA_FILTER_TYPE.RENAME ||
-                (filterType == Xflow.DATA_FILTER_TYPE.REMOVE && idx == -1))
+            if(filterType == C.DATA_FILTER_TYPE.RENAME ||
+                (filterType == C.DATA_FILTER_TYPE.REMOVE && idx == -1))
                 callback(destMap, i, sourceMap, i);
         }
     }
+};
 
-};
-OrderMapping.prototype.getScriptInputName = function(index, destName){
+/**
+ * Return the name of the input value assigned to operator argument.
+ * Returns null, if no mapping is defined.
+ * @param {number} index Position of the operator argument
+ * @returns {string|null}
+ */
+OrderMapping.prototype.getScriptInputName = function(index /*, destName */){
     if(this._names[index])
         return this._names[index];
     else
         return null;
 };
-OrderMapping.prototype.getScriptOutputName = function(index, srcName){
+
+/**
+ * Returns the name of the output parameter as it should be used for the
+ * following dataflow. Returns null, if no mapping is defined.
+ * @param index
+ * @returns {string|null}
+ */
+OrderMapping.prototype.getScriptOutputName = function(index /*, srcName */){
     if(this._names[index])
         return this._names[index];
     else
         return null;
 };
+
+/**
+ * Returns the inverse name of the output parameter as it should be used for the
+ * following dataflow. Returns null, if no mapping is defined.
+ * @param {string} destName
+ * @param {array<object>} operatorOutputs
+ * @returns {string|null}
+ */
 OrderMapping.prototype.getScriptOutputNameInv = function(destName, operatorOutputs){
     var index = this._names.indexOf(destName);
     if(index == -1)
@@ -126,53 +183,38 @@ OrderMapping.prototype.getScriptOutputNameInv = function(destName, operatorOutpu
     return operatorOutputs[index].name;
 };
 
-OrderMapping.prototype.applyScriptOutputOnMap = function(destMap, sourceMap){
-    var index = 0;
-    for(var i in sourceMap){
-        if(index < this._names.length){
-            destMap[this._names[index]] = sourceMap[i];
-            ++index;
-        }
-        else
-            break;
-    }
-};
+/**
+ * Identity function. Used to implement interface. Usually you don't rename with order
+ * mapping.
+ * @param name
+ * @returns {string}
+ */
 OrderMapping.prototype.getRenameSrcName = function(name){
     return name;
-}
-
-
-OrderMapping.prototype.filterNameset = function(nameset, filterType)
-{
-    if(filterType == Xflow.DATA_FILTER_TYPE.RENAME)
-        return nameset.splice();
-    else {
-        var keep = (filterType == Xflow.DATA_FILTER_TYPE.KEEP);
-        var result = [];
-        for(var i in nameset){
-            var idx = this._names.indexOf(nameset[i]);
-            if( (keep && idx!= -1) || (!keep && idx == -1) )
-                result.push(nameset[i]);
-        }
-        return result;
-    }
-}
+};
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.NameMapping
+// NameMapping
 //----------------------------------------------------------------------------------------------------------------------
-
 
 /**
- * NameMapping implementation
+ * An NameMapping used for a filter or compute properties of a DataNode
+ * It describes a mapping of names referring to the original names of the arguments / output values.
+ * NameMapping syntax examples in compute:
+ * {position: result} = C.morph({value: position, valueAdd: posAdd, weight: weight})
+ * @constructor
+ * @extends {Mapping}
  */
+var NameMapping = function(){
+    Mapping.call(this);
+    this._destNames = [];
+    this._srcNames = [];
 
-var NameMapping = Xflow.NameMapping;
+};
+Base.createClass(NameMapping, Mapping);
 
-
-NameMapping.parse = function(string, dataNode)
-{
-    var mapping = new Xflow.NameMapping(dataNode)
+NameMapping.parse = function(string, dataNode)  {
+    var mapping = new NameMapping(dataNode);
     var token = string.split(",");
     for(var i = 0; i < token.length; i++){
         var pair = token[i].split(":");
@@ -180,10 +222,10 @@ NameMapping.parse = function(string, dataNode)
         mapping.setNamePair(dest, src);
     }
     return mapping;
-}
+};
 
 Object.defineProperty(NameMapping.prototype, "length", {
-    set: function(v){ throw new Error("length is read-only");
+    set: function(){ throw new Error("length is read-only");
     },
     get: function(){ return this._srcNames.length; }
 });
@@ -221,6 +263,7 @@ NameMapping.prototype.setNamePair = function(destName, srcName){
     mappingNotifyOwner(this);
 };
 
+//noinspection JSUnusedGlobalSymbols
 NameMapping.prototype.removeNamePair = function(destName){
     var idx = this._destNames.indexOf(destName);
     if(idx != -1){
@@ -232,71 +275,82 @@ NameMapping.prototype.removeNamePair = function(destName){
 
 NameMapping.prototype.isEmpty = function(){
     return this._destNames.length == 0;
-}
+};
 
-
-var nameMappingParser = /^\{(([^:,{}]+:[^:{},]+)(,[^:{},]+:[^:},]+)*)\}$/;
-
-
-NameMapping.prototype.filterNameset = function(nameset, filterType)
-{
-
-}
-
-NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback)
-{
-    if(filterType == Xflow.DATA_FILTER_TYPE.REMOVE){
-        for(var i in sourceMap.map)
+/**
+ * @see OrderMapping.applyFilterOnChannelMap
+ * @param {ChannelMap} destMap
+ * @param {ChannelMap} sourceMap
+ * @param {C.DATA_FILTER_TYPE} filterType
+ * @param {function} callback
+ */
+NameMapping.prototype.applyFilterOnChannelMap = function(destMap, sourceMap, filterType, callback) {
+    var i;
+    if(filterType == C.DATA_FILTER_TYPE.REMOVE){
+        for(i in sourceMap.map)
             if(this._srcNames.indexOf(i) == -1)
                 callback(destMap, i, sourceMap, i);
     }
     else{
-        if(filterType == Xflow.DATA_FILTER_TYPE.RENAME){
-            for(var i in sourceMap.map)
+        if(filterType == C.DATA_FILTER_TYPE.RENAME){
+            for(i in sourceMap.map)
                 if(this._srcNames.indexOf(i) == -1)
                     callback(destMap, i, sourceMap, i);
         }
-        for(var i in this._destNames){
+        for(i in this._destNames){
             callback(destMap, this._destNames[i], sourceMap, this._srcNames[i]);
         }
     }
 };
 
+/**
+ * Renames: Look-up the destination name and return the source name
+ * @param {string} name
+ * @returns {string}
+ */
 NameMapping.prototype.getRenameSrcName = function(name){
     return this.getSrcNameFromDestName(name) || name;
-}
+};
 
-NameMapping.prototype.getScriptInputName= function(index, destName){
-    return this.getSrcNameFromDestName(destName);
-}
+/**
+ * Return the name of the input value assigned to operator argument
+ * @param {number} index Position of the operator argument
+ * @param {string} destinationName Name of the operator argument
+ * @returns {string|null}
+ */
+NameMapping.prototype.getScriptInputName= function(index, destinationName){
+    return this.getSrcNameFromDestName(destinationName);
+};
+
+/**
+ * @see OrderMapping.getScriptOutputName
+ */
 NameMapping.prototype.getScriptOutputName = function(index, srcName){
     return this.getDestNameFromSrcName(srcName);
-}
+};
 
-NameMapping.prototype.getScriptOutputNameInv = function(destName, operatorOutputs){
+/**
+ * @see OrderMapping.getScriptOutputNameInv
+ */
+NameMapping.prototype.getScriptOutputNameInv = function(destName /*, operatorOutputs */){
     var index = this._destNames.indexOf(destName);
     if(index == -1)
         return null;
     return this._srcNames[index];
 };
 
-NameMapping.prototype.applyScriptOutputOnMap= function(destMap, sourceMap){
-    for(var i in this._destNames){
-        var destName = this._destNames[i], srcName = this._srcNames[i];
-        destMap[destName] = sourceMap[srcName];
-    }
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// Helpers
-//----------------------------------------------------------------------------------------------------------------------
-
-
+/**
+ * Notify all DataNodes that use the mapping passed to the function
+ * @param {Mapping} mapping
+ */
 function mappingNotifyOwner(mapping){
-    for(var i = 0; i < mapping._owners.length; ++i)
-        mapping._owners[i].notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
+    for(var i = 0; i < mapping._owners.length; ++i) {
+        mapping._owners[i].notify(C.RESULT_STATE.CHANGED_STRUCTURE);
+    }
+    Base._flushResultCallbacks();
+}
+module.exports = {
+    NameMapping: NameMapping,
+    OrderMapping: OrderMapping,
+    Mapping: Mapping
 };
-
-})();

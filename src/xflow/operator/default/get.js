@@ -1,4 +1,3 @@
-(function(){
 
 function fetch(result, value, index, components){
     for(var i = 0; i < index.length; ++i) {
@@ -94,8 +93,3 @@ Xflow.registerOperator("xflow.get", {
         fetch(result, value, index, 1);
     }
 });
-
-
-
-})()
-

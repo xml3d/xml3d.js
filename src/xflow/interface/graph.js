@@ -1,80 +1,68 @@
-(function(){
+var C = require("./constants");
+var Mapping = require("./mapping");
+
+var Base = require("../base.js");
+var ChannelNode = require("../processing/channel-node").ChannelNode;
+var Utils = require("../utils/utils.js");
+
 /**
  * Content of this file:
  * Classes to construct an Xflow graph.
  */
 
-
-
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.Graph
+// Graph
 //----------------------------------------------------------------------------------------------------------------------
 
+// TODO: Do we still require Graph?
 /**
  * The Xflow graph includes the whole dataflow graph
- * It is recommended to use one Xflow.Graph per web document.
+ * It is recommended to use one Graph per web document.
  * @constructor
  */
-Xflow.Graph = function(){
+var Graph = function(){
     this.initPlatform();
 };
 
-var Graph = Xflow.Graph;
 
-    /**
-     *
-     */
-
+/**
+ *  Decides which platform to use
+ */
 Graph.prototype.initPlatform = function () {
-    this.platform = Xflow.PLATFORM.JAVASCRIPT; // Setting default platform for the graph
+    this.platform = C.PLATFORM.JAVASCRIPT; // Setting default platform for the graph
 
     if(initWebCLPlatform(this)) {
-        this.platform = Xflow.PLATFORM.CL;
+        this.platform = C.PLATFORM.CL;
     }
-
 };
 
+/**
+ * Checks if WebCL is available and attaches a context to the graph
+ * @param graph Graph the context will be attached to
+ * @returns {boolean}
+ */
 function initWebCLPlatform(graph) {
-    var clPlatforms, clDevices, clCtx, cmdQueue;
     var webcl = XML3D.webcl;
+    if (!webcl || !webcl.isAvailable()) {
+        return false;
+    }
 
-    if (webcl && webcl.isAvailable()) {
+    var clPlatforms = webcl.getPlatforms();
+    if (!clPlatforms || clPlatforms.length <= 0) {
+        return false;
+    }
 
-        // Fetching WebCL device platforms
-        clPlatforms = webcl.getPlatforms();
-
-        if (!clPlatforms || typeof clPlatforms === 'array' && clPlatforms.length === 0) {
-            return false;
-        }
-
-        // Fetching WebCL devices
-        try {
-            // Trying initially to use GPU (for the best performance). Using CPU as a fallback.
-            clDevices = webcl.getDevicesByType("GPU") || webcl.getDevicesByType("CPU");
-        } catch (e) {
-            return false;
-        }
-
+    try {
+        // Trying initially to use GPU (for the best performance). Using CPU as a fallback.
+        var clDevices = webcl.getDevicesByType("GPU") || webcl.getDevicesByType("CPU");
         if (!clDevices) {
             return false;
         }
-
-        // Creating a new WebCL context
-        try {
-            clCtx = webcl.createContext(clDevices);
-        } catch (e) {
-            return false;
-        }
-
-        // Creating a command queue for WebCL processing
-        try {
-            cmdQueue = webcl.createCommandQueue(clDevices[0], clCtx);
-        } catch (e) {
-            return false;
-        }
+        var clCtx = webcl.createContext(clDevices);
+        var cmdQueue = webcl.createCommandQueue(clDevices[0], clCtx);
 
         /**
-         *  TODO: Maybe we should just store the cl-platform objects in XFlow.cl so they are more easily available and
+         *  TODO: Maybe we should just store the cl-platform objects in C.cl so they are more easily available and
          *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
          *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
          */
@@ -86,79 +74,119 @@ function initWebCLPlatform(graph) {
             ctx: clCtx,
             cmdQueue: cmdQueue
         };
-
+        XML3D.debug.logDebug("Successfully initialized WebCL platform.");
         return true;
+    } catch (e) {
+        return false;
     }
-
-    return false;
 }
 
  /**
- * @return {Xflow.InputNode}
+ * @return {InputNode}
  */
 Graph.prototype.createInputNode = function(){
-    var node = new Xflow.InputNode(this);
-    return node;
+    return new InputNode(this);
 };
 
 /**
- * @return {Xflow.DataNode}
+ * @return {DataNode}
  */
 Graph.prototype.createDataNode = function(protoNode){
-    var node = new Xflow.DataNode(this, protoNode);
-    return node;
+    return new DataNode(this, protoNode);
 };
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.GraphNode
+// GraphNode
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
+ * Base class for other graph nodes
  * @constructor
- * @param {Xflow.Graph} graph
+ * @abstract
+ * @param {Graph} graph Reference to parent graph
  */
-Xflow.GraphNode = function(graph){
+var GraphNode = function(graph){
     this._graph = graph;
+    /**
+     * All nodes that add a dependency to this node
+     * @type array<GraphNode>
+     **/
     this._parents = [];
 };
-var GraphNode = Xflow.GraphNode;
-
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.InputNode
+// InputNode
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
- * An InputNode include an Xflow.DataEntry, a name and other information
+ * An InputNode include an DataEntry, a name and other information
  * This class mirrors XML3D elements such as <float3>, <int> or <texture>
  *
  * @constructor
- * @param {Xflow.Graph} graph
- * @extends {Xflow.GraphNode}
+ * @param {Graph} graph
+ * @extends {GraphNode}
  */
-Xflow.InputNode = function(graph){
-    Xflow.GraphNode.call(this, graph);
+var InputNode = function(graph){
+    GraphNode.call(this, graph);
+    /**
+     * Name of the input node
+     * @type {string}
+     * @private
+     */
     this._name = "";
+    /**
+     * Sequence key
+     * @type {number}
+     * @private
+     */
     this._key = 0;
+    /**
+     * DataEntry node that holds the value
+     * @type {DataEntry}
+     */
     this._data = null;
+    /**
+     * If this nodes is a parameter within a <dataflow>
+     * this is set to the name of the parameter, otherwise null
+     * @type {null|String}
+     * @private
+     */
     this._paramName = null;
+
+    /**
+     * Experimental! Apply different override logic in order
+     * to propagate global parameters to the source of the graph
+     * Could be used for instance for LOD concepts, where the
+     * renderer propagates the distance along the graph
+     * @type {boolean}
+     * @private
+     */
     this._paramGlobal = false;
+
+    /**
+     *  Cache listener for DataEntry
+     *  @see {InputNode.onDataChange}
+     */
     this._dataListener = this.onDataChange.bind(this);
 };
-Xflow.createClass(Xflow.InputNode, Xflow.GraphNode);
-var InputNode = Xflow.InputNode;
+Base.createClass(InputNode, GraphNode);
 
+/**
+ * Propagate events from DataEntry to parent nodes
+ * @param {Object} newValue
+ * @param {C.DATA_ENTRY_STATE} notification
+ */
 InputNode.prototype.onDataChange = function(newValue, notification) {
     var downNote;
     switch(notification){
-        case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE: downNote = Xflow.RESULT_STATE.CHANGED_DATA_VALUE; break;
-        case Xflow.DATA_ENTRY_STATE.LOAD_START: downNote = Xflow.RESULT_STATE.IMAGE_LOAD_START; break;
-        case Xflow.DATA_ENTRY_STATE.LOAD_END: downNote = Xflow.RESULT_STATE.IMAGE_LOAD_END; break;
-        case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE: downNote = Xflow.RESULT_STATE.CHANGED_STRUCTURE; break;
-        case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE: downNote = Xflow.RESULT_STATE.CHANGED_DATA_SIZE; break;
-        default: downNote = Xflow.RESULT_STATE.CHANGED_DATA_SIZE; break;
+        case C.DATA_ENTRY_STATE.CHANGED_VALUE: downNote = C.RESULT_STATE.CHANGED_DATA_VALUE; break;
+        case C.DATA_ENTRY_STATE.LOAD_START: downNote = C.RESULT_STATE.IMAGE_LOAD_START; break;
+        case C.DATA_ENTRY_STATE.LOAD_END: downNote = C.RESULT_STATE.IMAGE_LOAD_END; break;
+        case C.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE: downNote = C.RESULT_STATE.CHANGED_STRUCTURE; break;
+        case C.DATA_ENTRY_STATE.CHANGED_SIZE: downNote = C.RESULT_STATE.CHANGED_DATA_SIZE; break;
+        default: downNote = C.RESULT_STATE.CHANGED_DATA_SIZE; break;
     }
     notifyParentsOnChanged(this,downNote);
 };
@@ -167,98 +195,93 @@ Object.defineProperty(InputNode.prototype, "name", {
     /** @param {string} v */
     set: function(v){
         this._name = v;
-        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        notifyParentsOnChanged(this, C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
     /** @return {string} */
     get: function(){ return this._name; }
 });
+
 Object.defineProperty(InputNode.prototype, "key", {
     /** @param {number} v */
     set: function(v){
         this._key = v;
-        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        notifyParentsOnChanged(this, C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
     /** @return {number} */
     get: function(){ return this._key; }
 });
+
 Object.defineProperty(InputNode.prototype, "paramName", {
     /** @param {string} v */
     set: function(v){
         this._paramName = v;
-        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        notifyParentsOnChanged(this, C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
     /** @return {string} */
     get: function(){ return this._paramName; }
 });
+
 Object.defineProperty(InputNode.prototype, "paramGlobal", {
     /** @param {boolean} v */
     set: function(v){
         this._paramGlobal = v;
-        notifyParentsOnChanged(this, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        notifyParentsOnChanged(this, C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
     /** @return {boolean} */
     get: function(){ return this._paramGlobal; }
 });
+
 Object.defineProperty(InputNode.prototype, "data", {
-    /** @param {Object} v */
-    set: function(v){
+    /** @param {DataEntry} dataEntry */
+    set: function(dataEntry){
         var prevDataLoading = false;
         if(this._data) {
             prevDataLoading = this._data._loading;
             this._data.removeListener(this._dataListener);
         }
-        this._data = v;
-        if(this._data)
+        this._data = dataEntry;
+        if(this._data) {
             this._data.addListener(this._dataListener);
-        if(prevDataLoading != this._data._loading){
-            notifyParentsOnChanged(this, this._data._loading ? Xflow.RESULT_STATE.IMAGE_LOAD_START :
-                Xflow.RESULT_STATE.IMAGE_LOAD_END);
         }
-        Xflow._callListedCallback();
+        if(prevDataLoading != this._data._loading){
+            notifyParentsOnChanged(this, this._data._loading ? C.RESULT_STATE.IMAGE_LOAD_START :
+                C.RESULT_STATE.IMAGE_LOAD_END);
+        }
+        Base._flushResultCallbacks();
     },
-    /** @return {Object} */
+    /** @return {DataEntry} */
     get: function(){ return this._data; }
 });
 
+/**
+ * Getter for local parameter name, returns null if this is a global
+ * parameter
+ *
+ * @returns {null|String}
+ * @private
+ */
 InputNode.prototype._getParamNames = function(){
     return this._paramGlobal ? null : this._paramName;
-}
-InputNode.prototype._getGlobalParamNames = function(){
-    return this._paramGlobal ? this._paramName : null;
-}
-
+};
 
 /**
- * Helper class to create a InputNode with a newly created BufferDataEntry.
- * @param {string} type Type of the DataEntry A string key from Xflow.DATA_TYPE_MAP
- * @param {string} name Name of the InputNode
- * @param {number} size Size of the DataEntry in number of typed values, NOT bytes.
- * @returns {Xflow.InputNode}
+ * Getter for global parameter name, returns null if this is not a global
+ * parameter
+ *
+ * @returns {null|String}
+ * @private
  */
-Xflow.createBufferInputNode = function(type, name, size){
-    if (size == 0)
-        return null;
-    var typeId = Xflow.DATA_TYPE_MAP[type];
-    var tupleSize = Xflow.DATA_TYPE_TUPLE_SIZE[typeId];
-    var arrayType = Xflow.TYPED_ARRAY_MAP[typeId];
-
-    var v = new (arrayType)(size * tupleSize);
-    var buffer = new Xflow.BufferEntry(typeId, v);
-
-    var inputNode = XML3D.data.xflowGraph.createInputNode();
-    inputNode.data = buffer;
-    inputNode.name = name;
-    return inputNode;
+InputNode.prototype._getGlobalParamNames = function(){
+    return this._paramGlobal ? this._paramName : null;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.DataNode
+// DataNode
 //----------------------------------------------------------------------------------------------------------------------
-
 var c_xflowNodeId = 0;
 function getXflowNodeId(){
     return ++c_xflowNodeId;
@@ -270,178 +293,245 @@ function getXflowNodeId(){
  * It mirror the <data> element of XML3D
  *
  * @constructor
- * @extends {Xflow.GraphNode}
+ * @param {Graph} graph Context graph
+ * @param {boolean} isDataFlow is this node a dataflow
+ * @extends {GraphNode}
  */
-Xflow.DataNode = function(graph, protoNode){
-    Xflow.GraphNode.call(this, graph);
+var DataNode = function(graph, isDataFlow){
+    GraphNode.call(this, graph);
 
+    /**
+     * Marker, if this data node is expecting data. Xflow
+     * is not monitoring any load events. This must be set
+     * from external
+     * @type {boolean}
+     */
     this._loading = false;
+
+    /**
+     * Experimental! Priority. How important is this data?
+     * 0: Very important
+     * @type {number}
+     */
     this._loadLevel = 0;
+
+    /**
+     * Used for loading events: If progress level
+     * reaches infinity, loading events are triggered
+     * @type {Number}
+     */
     this._progressLevel = Infinity;
 
-
-
+    /**
+     * Globally unique id
+     */
     this.id = getXflowNodeId();
-    this._isProtoNode = protoNode;
+
+    /**
+     * Is this node a proto node
+     * @type {boolean}
+     */
+    this._isProtoNode = isDataFlow;
+
+    /**
+     * Children. InputNodes and DataNodes (as found in DOM)
+     * @type {Array}
+     */
     this._children = [];
+
+    /**
+     * The DataNode that has been reference via src
+     * @type {DataNode}
+     */
     this._sourceNode = null;
+
+    /**
+     * Field to attach custom data
+     * @type {null|Object}
+     */
     this._userData = null;
 
-    this._filterType = 0;
+    /**
+     * The filter type of this node (keep, rename, remove ...)
+     * @type {DATA_FILTER_TYPE}
+     */
+    this._filterType = C.DATA_FILTER_TYPE.NONE;
+
+    /**
+     * Define the mapping
+     * @type {Mapping.Mapping}
+     */
     this._filterMapping = null;
 
+    /**
+     * String identifier for operator
+     * TODO: Operator class
+     * @type {string|Object}
+     */
     this._computeOperator = "";
+
+    /**
+     * True, if compute is a dataflow reference
+     * @type {boolean}
+     */
     this._computeUsesDataflow = false;
+
+    /**
+     * Mapping for input of operator,
+     * e.g. (position, texcoord) or ({position: pos, texcoord: uv})
+     * @type {Mapping}
+     */
     this._computeInputMapping = null;
+
+    /**
+     * Mapping for output of operator,
+     * e.g. (position, texcoord) = ... or {position: pos, texcoord: uv} = ...
+     * @type {Mapping}
+     */
     this._computeOutputMapping = null;
+
+    /**
+     * If dataflow node has been resolved, this
+     * entry is set
+     * @type {DataNode}
+     */
     this._dataflowNode = null;
 
-    this._channelNode = new Xflow.ChannelNode(this);
+    /**
+     * Internal (optimized) version of this data node
+     * @type {ChannelNode}
+     */
+    this._channelNode = new ChannelNode(this);
+
+    /**
+     * Map of cached channel nodes for dataflow instances with varying
+     * input arguments (specialized nodes)
+     * TODO: Use WeakMap?
+     * @type {Object.<string, ChannelNode>}
+     */
     this._substitutionNodes = {};
+
+    /**
+     * Cached version of local param names collected from
+     * children
+     * @type {Array.<string>}
+     */
     this._paramNames = null;
+
+    /**
+     * Cached version of global param names collected from
+     * children
+     * @type {Array.<string>}
+     */
     this._globalParamNames = null;
 
+    /**
+     * Platform, this data node should be executed on
+     * TODO: This should be implicit, not explicit
+     * @type {null}
+     */
     this._platform = null;
 
+    /**
+     * Observers of the node's C.RESULT_STATE
+     * @type {Array}
+     */
     this._listeners = [];
+
+    /**
+     * Observers of the node's progress level
+     * @type {Array}
+     */
     this._loadListeners = [];
 
 };
-Xflow.createClass(Xflow.DataNode, Xflow.GraphNode);
-var DataNode = Xflow.DataNode;
-
-
-/**
- * A mapping used for a filter or a compute properties of a DataNode
- * @abstract
- * @param {Xflow.DataNode} owner
- */
-Xflow.Mapping = function(){
-    this._owners = [];
-};
-
-
-/**
- * An OrderMapping used for a filter or compute properties of a DataNode
- * It describes a mapping of names referring to the order of arguments / output values.
- * OrderMapping syntax examples in compute:
- * position = xflow.morph(position, posAdd, weight)
- * @constructor
- * @extends {Xflow.Mapping}
- * @param {Xflow.DataNode} owner
- */
-Xflow.OrderMapping = function(){
-    Xflow.Mapping.call(this);
-    this._names = [];
-};
-Xflow.createClass(Xflow.OrderMapping, Xflow.Mapping);
-
-/**
- * An NameMapping used for a filter or compute properties of a DataNode
- * It describes a mapping of names referring to the original names of the arguments / output values.
- * NameMapping syntax examples in compute:
- * {position: result} = xflow.morph({value: position, valueAdd: posAdd, weight: weight})
- * @constructor
- * @extends {Xflow.Mapping}
- * @param {Xflow.DataNode} owner
- */
-Xflow.NameMapping = function(){
-    Xflow.Mapping.call(this);
-    this._destNames = [];
-    this._srcNames = [];
-
-};
-Xflow.createClass(Xflow.NameMapping, Xflow.Mapping);
+Base.createClass(DataNode, GraphNode);
 
 
 Object.defineProperty(DataNode.prototype, "sourceNode", {
-    /** @param {?Xflow.DataNode} v */
-    set: function(v){
-        if(this._sourceNode) removeParent(this, this._sourceNode);
-        this._sourceNode = v;
-        if(this._sourceNode) addParent(this, this._sourceNode);
-        updateLoadingState(this);
-        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+    /** @param {?DataNode} newSourceNode */
+    set: function(newSourceNode){
+        replaceNodeInHierarchy(this, "_sourceNode", newSourceNode);
+        updateProgressLevel(this);
+        this.notify(C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
-    /** @return {?Xflow.DataNode} */
+    /** @return {?DataNode} */
     get: function(){ return this._sourceNode; }
 });
-// TODO: Remove this property once the XML3D part is adapted
-Object.defineProperty(DataNode.prototype, "protoNode", {
-    /** @param {?Xflow.DataNode} v */
-    set: function(v){
-        this._computeUsesDataflow = !!v;
-        this._computeInputMapping = null;
-        this._computeOutputMapping = null;
-        this.dataflowNode = v;
-    },
-    /** @return {?Xflow.DataNode} */
-    get: function(){ return this._dataflowNode; }
-});
+
 Object.defineProperty(DataNode.prototype, "dataflowNode", {
-    /** @param {?Xflow.DataNode} v */
-    set: function(v){
-        if(v && !this._computeUsesDataflow)
+    /** @param {?DataNode} newDataflowNode */
+    set: function(newDataflowNode){
+        if(newDataflowNode && !this._computeUsesDataflow) {
             throw new Error("Cannot set dataflowNode when compute doesn't use dataflow.");
-        if(this._dataflowNode) removeParent(this, this._dataflowNode);
-        this._dataflowNode = v;
-        if(this._dataflowNode) addParent(this, this._dataflowNode);
-        updateLoadingState(this);
-        this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        }
+        replaceNodeInHierarchy(this, "_dataflowNode", newDataflowNode);
+        updateProgressLevel(this);
+        this.notify(C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
-    /** @return {?Xflow.DataNode} */
+    /** @return {?DataNode} */
     get: function(){ return this._dataflowNode; }
 });
 
 
 Object.defineProperty(DataNode.prototype, "userData", {
-    /** @param {?Xflow.DataNode} v */
+    /** @param {?DataNode} v */
     set: function(v){
         this._userData = v;
     },
-    /** @return {?Xflow.DataNode} */
+    /** @return {?DataNode} */
     get: function(){ return this._userData; }
 });
 
-
+/**
+ * Set (from external) if more data is expected.
+ * @param {boolean} loading
+ */
 DataNode.prototype.setLoading = function(loading){
     if(this._loading != loading){
         this._loading = loading;
-        updateLoadingState(this);
-        Xflow._callListedCallback();
+        updateProgressLevel(this);
+        Base._flushResultCallbacks();
     }
-}
+};
 
+/**
+ * Returns if this or any child node is loading
+ * @returns {boolean}
+ */
 DataNode.prototype.isSubtreeLoading = function(){
     return this._progressLevel == 0;
-}
+};
 
+/**
+ * @returns {Number}
+ */
 DataNode.prototype.getProgressLevel = function(){
     return this._progressLevel;
-}
+};
 
 
 Object.defineProperty(DataNode.prototype, "filterType", {
-    /** @param {Xflow.DATA_FILTER_TYPE} v */
+    /** @param {C.DATA_FILTER_TYPE} v */
     set: function(v){
         this._filterType = v;
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
-    /** @return {Xflow.DATA_FILTER_TYPE} */
+    /** @return {C.DATA_FILTER_TYPE} */
     get: function(){ return this._filterType; }
 });
 
 Object.defineProperty(DataNode.prototype, "filterMapping", {
-    /** @param {Xflow.Mapping} v */
+    /** @param {Mapping} v */
     set: function(v){
         swapMapping(this, "_filterMapping", v);
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
-    /** @return {Xflow.Mapping} */
+    /** @return {Mapping} */
     get: function(){ return this._filterMapping; }
 });
 
@@ -450,8 +540,8 @@ Object.defineProperty(DataNode.prototype, "computeOperator", {
     set: function(v){
         this._computeOperator = v;
         this._computeUsesDataflow = false;
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
     /** @return {string} */
     get: function(){ return this._computeUsesDataflow ? null : this._computeOperator; }
@@ -462,61 +552,63 @@ Object.defineProperty(DataNode.prototype, "computeDataflowUrl", {
     set: function(v){
         this._computeOperator = v;
         this._computeUsesDataflow = true;
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
     /** @return {string} */
     get: function(){ return this._computeUsesDataflow ? this._computeOperator : null; }
 });
 
 Object.defineProperty(DataNode.prototype, "computeInputMapping", {
-    /** @param {Xflow.Mapping} v */
+    /** @param {Mapping} v */
     set: function(v){
         swapMapping(this, "_computeInputMapping", v);
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
-    /** @return {Xflow.Mapping} */
+    /** @return {Mapping} */
     get: function(){ return this._computeInputMapping; }
 });
 Object.defineProperty(DataNode.prototype, "computeOutputMapping", {
-    /** @param {Xflow.Mapping} v */
+    /** @param {Mapping} v */
     set: function(v){
         swapMapping(this, "_computeOutputMapping", v);
-        this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-        Xflow._callListedCallback();
+        this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+        Base._flushResultCallbacks();
     },
-    /** @return {Xflow.Mapping} */
+    /** @return {Mapping} */
     get: function(){ return this._computeOutputMapping; }
 });
 
+//noinspection JSUnusedGlobalSymbols
 DataNode.prototype.isProtoNode = function(){
     return this._isProtoNode;
-}
+};
 
 /**
- * @param {Xflow.GraphNode} child
+ * @param {GraphNode} child
  */
 DataNode.prototype.appendChild = function(child){
     this._children.push(child);
     addParent(this, child);
-    updateLoadingState(this);
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
+    updateProgressLevel(this);
+    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
 };
 /**
- * @param {Xflow.GraphNode} child
+ * @param {GraphNode} child
  */
 DataNode.prototype.removeChild = function(child){
     Array.erase(this._children, child);
     removeParent(this, child);
-    updateLoadingState(this)
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
+    updateProgressLevel(this);
+    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
 };
+
 /**
- * @param {Xflow.GraphNode} child
- * @param {Xflow.GraphNode} beforeNode
+ * @param {GraphNode} child
+ * @param {GraphNode} beforeNode
  */
 DataNode.prototype.insertBefore = function(child, beforeNode){
     var idx = this._children.indexOf(beforeNode);
@@ -525,10 +617,12 @@ DataNode.prototype.insertBefore = function(child, beforeNode){
     else
         this._children.splice(idx, 0, child);
     addParent(this, child);
-    updateLoadingState(this);
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
+    // TODO: Next three calls on all structural changes. Add Method
+    updateProgressLevel(this);
+    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
 };
+
 /**
  * remove all children of the DataNode
  */
@@ -537,11 +631,12 @@ DataNode.prototype.clearChildren = function(){
         removeParent(this, this._children[i]);
     }
     this._children = [];
-    updateLoadingState(this);
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
+    updateProgressLevel(this);
+    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
 };
 
+//noinspection JSUnusedGlobalSymbols
 /**
  * Detach this DataNode from all connections, including source- and proto-node references
  */
@@ -560,23 +655,22 @@ DataNode.prototype.detachFromParents = function(){
     this._children = [];
 };
 
-    /**
-     * Sets platform of a DataNode. If _platform is defined, it will override the default platform setting of
-     * an Xflow graph.
-     *
-     * @param {String|Xflow.PLATFORM|null} platformSrc
-     */
-
+/**
+ * Sets platform of a DataNode. If _platform is defined, it will override the default platform setting of
+ * an Xflow graph.
+ *
+ * @param {String|C.PLATFORM|null} platformSrc
+ */
 DataNode.prototype.setPlatform = function(platformSrc) {
     if (typeof platformSrc === 'string') {
         if (platformSrc === "cl") {
-            this._platform = Xflow.PLATFORM.CL;
+            this._platform = C.PLATFORM.CL;
         }
         else if (platformSrc === "gl") {
-            this._platform = Xflow.PLATFORM.GLSL;
+            this._platform = C.PLATFORM.GLSL;
         }
         else if (platformSrc === "js") {
-            this._platform = Xflow.PLATFORM.JAVASCRIPT;
+            this._platform = C.PLATFORM.JAVASCRIPT;
         }
     } else if (!isNaN(parseFloat(platformSrc)) && isFinite(platformSrc)) {
         this._platform = platformSrc;
@@ -584,8 +678,8 @@ DataNode.prototype.setPlatform = function(platformSrc) {
         this._platform = null;
     }
 
-    this.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
+    this.notify(C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
 };
 
 /**
@@ -599,54 +693,56 @@ var filterParser = /^([A-Za-z\s]*)\(([^()]+)\)$/;
  */
 DataNode.prototype.setFilter = function(filterString){
     filterString = filterString || "";
-    var newType = Xflow.DATA_FILTER_TYPE.RENAME;
+    var newType = C.DATA_FILTER_TYPE.RENAME;
     var newMapping = null;
     if(filterString){
         var result = filterString.trim().match(filterParser);
         if(result){
             var type = result[1].trim();
             switch(type){
-                case "keep": newType = Xflow.DATA_FILTER_TYPE.KEEP; break;
-                case "remove": newType = Xflow.DATA_FILTER_TYPE.REMOVE; break;
-                case "rename": newType = Xflow.DATA_FILTER_TYPE.RENAME; break;
+                case "keep": newType = C.DATA_FILTER_TYPE.KEEP; break;
+                case "remove": newType = C.DATA_FILTER_TYPE.REMOVE; break;
+                case "rename": newType = C.DATA_FILTER_TYPE.RENAME; break;
                 default:
-                    Xflow.notifyError("Unknown filter type:" + type, this);
+                    Base.notifyError("Unknown filter type:" + type, this);
             }
-            newMapping = Xflow.Mapping.parse(result[2], this);
+            newMapping = Mapping.Mapping.parse(result[2], this);
         }
         else{
-            Xflow.notifyError("Could not parse filter '" + filterString + "'", this);
+            Base.notifyError("Could not parse filter '" + filterString + "'", this);
         }
     }
     if(!newMapping){
         // TODO Remove this? (Mapping can be null from now on)
-        newMapping = new Xflow.OrderMapping();
+        newMapping = new Mapping.OrderMapping();
     }
     swapMapping(this, "_filterMapping", newMapping);
     this._filterType = newType;
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
+    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
 };
 
 var computeParser = /^(([^=]+)\=)?([^'(]+('[^']+')?[^'(]+)(\(([^()]*)?\))?$/;
 var bracketsParser = /^\(([^()]*)\)$/;
 var dataflowParser = /^dataflow\['([^']+)'\]$/;
 
-Xflow.getComputeDataflowUrl = function(computeString){
+//noinspection JSUnusedGlobalSymbols
+/**
+ * If the compute string contains a reference to an external dataflow,
+ * the parser returns its URL. Null, otherwise
+ * @param computeString
+ * @returns {string|null}
+ */
+var getComputeDataflowUrl = function(computeString){
     computeString = computeString || "";
-    var newOperator = "";
     var result = computeString.trim().match(computeParser);
     if(result){
-        newOperator = result[3].trim();
-        if(result = newOperator.match(dataflowParser)){
+        if(result = result[3].trim().match(dataflowParser)){
             return result[1];
         }
-        else{
-            return null;
-        }
     }
-}
-
+    return null;
+};
 
 /**
  * Set compute by string
@@ -665,9 +761,9 @@ DataNode.prototype.setCompute = function(computeString){
             output = result[1];
         }
         if(input)
-            inputMapping = Xflow.Mapping.parse(input, this);
+            inputMapping = Mapping.Mapping.parse(input, this);
         if(output)
-            outputMapping = Xflow.Mapping.parse(output, this);
+            outputMapping = Mapping.Mapping.parse(output, this);
 
         if(result = newOperator.match(dataflowParser)){
             this._computeUsesDataflow = true;
@@ -679,140 +775,169 @@ DataNode.prototype.setCompute = function(computeString){
         this._dataflowNode = null;
     }
     else if(computeString){
-        Xflow.notifyError("Error parsing Compute value '" + computeString + "'", this);
+        Base.notifyError("Error parsing Compute value '" + computeString + "'", this);
     }
     swapMapping(this, "_computeInputMapping", inputMapping);
     swapMapping(this, "_computeOutputMapping", outputMapping);
     this._computeOperator = newOperator;
-    this.notify( Xflow.RESULT_STATE.CHANGED_STRUCTURE);
-    Xflow._callListedCallback();
-}
-
-
-
+    this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
+    Base._flushResultCallbacks();
+};
 
 /**
  * Notifies DataNode about a change. Notification will be forwarded to parents, if necessary
- * @param {Xflow.RESULT_STATE} changeType
- * @param {GraphNode} senderNode
+ * @param {C.RESULT_STATE} changeType
+ * @param {GraphNode?} senderNode
  */
 DataNode.prototype.notify = function(changeType, senderNode){
-    if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE )
-    {
-        this._paramNames = null;
-        this._globalParamNames = null;
-        this._channelNode.setStructureOutOfSync();
-        clearSubstitutionNodes(this);
-        if(changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
+    //noinspection FallthroughInSwitchStatementJS
+    switch(changeType) {
+        case C.RESULT_STATE.CHANGED_STRUCTURE:
+            this._paramNames = null;
+            this._globalParamNames = null;
+            this._channelNode.setStructureOutOfSync();
+            clearSubstitutionNodes(this);
             notifyParentsOnChanged(this, changeType);
+            break;
 
+        case C.RESULT_STATE.IMAGE_LOAD_START:
+        case C.RESULT_STATE.IMAGE_LOAD_END:
+            updateProgressLevel(this);
+            if(senderNode){
+                this._channelNode.notifyDataChange(senderNode, changeType);
+            }
+            break;
+
+        case C.RESULT_STATE.CHANGED_DATA_VALUE:
+        case C.RESULT_STATE.CHANGED_DATA_SIZE:
+            if(senderNode){
+                this._channelNode.notifyDataChange(senderNode, changeType);
+            }
+            break;
     }
-    else if(changeType == Xflow.RESULT_STATE.CHANGED_DATA_VALUE ||
-        changeType == Xflow.RESULT_STATE.CHANGED_DATA_SIZE ||
-        changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
-        changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END)
-    {
-        if(changeType == Xflow.RESULT_STATE.IMAGE_LOAD_START ||
-           changeType == Xflow.RESULT_STATE.IMAGE_LOAD_END )
-            updateLoadingState(this);
-        if(senderNode){
-            this._channelNode.notifyDataChange(senderNode, changeType);
-        }
-    }
-    for(var i = 0; i < this._listeners.length; ++i)
+    // Inform listeners (e.g. Requests)
+    for(var i = 0; i < this._listeners.length; ++i) {
         this._listeners[i](changeType);
+    }
 };
 
 DataNode.prototype.addListener = function(listener){
     this._listeners.push(listener)
-}
+};
 
 DataNode.prototype.removeListener = function(listener) {
     Array.erase(this._listeners, listener);
-}
+};
 
 DataNode.prototype.addLoadListener = function(listener){
     this._loadListeners.push(listener);
-}
+};
+
+//noinspection JSUnusedGlobalSymbols
 DataNode.prototype.removeLoadListener = function(listener){
     Array.erase(this._loadListeners, listener);
-}
+};
 
 DataNode.prototype._callLoadListeners = function(newLevel, oldLevel){
     var len = this._loadListeners.length;
     for(var i = 0; i < len; ++i){
         this._loadListeners[i](this, newLevel, oldLevel);
     }
-}
+};
 
 DataNode.prototype.getOutputNames = function(){
     return getForwardNode(this)._channelNode.getOutputNames();
-}
+};
 
 DataNode.prototype.getOutputChannelInfo = function(name){
     return getForwardNode(this)._channelNode.getOutputChannelInfo(name);
-}
+};
+
+//noinspection JSUnusedGlobalSymbols
 DataNode.prototype.getParamNames = function(){
     return this._getParamNames();
-}
+};
 
+/**
+ * Delegate computation of the result to the channel node
+ * of the first contributing DataNode.
+ * @param type
+ * @param filter
+ * @returns {Result}
+ */
 DataNode.prototype._getResult = function(type, filter){
     return getForwardNode(this, filter)._channelNode.getResult(type, filter);
-}
+};
 
 DataNode.prototype._getForwardNode = function(filter){
     return getForwardNode(this, filter);
-}
+};
 
 DataNode.prototype._getParamNames = function(){
     if(!this._paramNames){
         this._paramNames = [];
         if(this._sourceNode)
-            Xflow.nameset.add(this._paramNames, this._sourceNode._getParamNames());
+            Utils.nameset.add(this._paramNames, this._sourceNode._getParamNames());
         else{
             for(var i = 0; i < this._children.length; ++i){
-                Xflow.nameset.add(this._paramNames, this._children[i]._getParamNames());
+                Utils.nameset.add(this._paramNames, this._children[i]._getParamNames());
             }
         }
     }
     return this._paramNames;
 };
+
 DataNode.prototype._getGlobalParamNames = function(){
     if(!this._globalParamNames){
         this._globalParamNames = [];
         if(this._dataflowNode)
-            Xflow.nameset.add(this._globalParamNames, this._dataflowNode._getGlobalParamNames());
+            Utils.nameset.add(this._globalParamNames, this._dataflowNode._getGlobalParamNames());
 
         if(this._sourceNode)
-            Xflow.nameset.add(this._globalParamNames, this._sourceNode._getGlobalParamNames());
+            Utils.nameset.add(this._globalParamNames, this._sourceNode._getGlobalParamNames());
         else{
             for(var i = 0; i < this._children.length; ++i){
-                Xflow.nameset.add(this._globalParamNames, this._children[i]._getGlobalParamNames());
+                Utils.nameset.add(this._globalParamNames, this._children[i]._getGlobalParamNames());
             }
         }
     }
     return this._globalParamNames;
 };
 
-DataNode.prototype._getChannelNode = function(substitution){
+/**
+ * @param {Substitution} substitution
+ * @returns {ChannelNode}
+ */
+DataNode.prototype._getOrCreateChannelNode = function(substitution){
     if(!substitution)
-        return this._channelNode
+        return this._channelNode;
     else{
         var key = substitution.getKey(this);
-        if(!this._substitutionNodes[key])
-            this._substitutionNodes[key] = new Xflow.ChannelNode(this, substitution);
-        else
+        if(!this._substitutionNodes[key]) {
+            this._substitutionNodes[key] = new ChannelNode(this, substitution);
+        } else {
             this._substitutionNodes[key].increaseRef();
+        }
         return this._substitutionNodes[key];
     }
-}
+};
 
+/**
+ * Remove ChannelNode passed as argument from internal substitution nodes
+ * Decreases reference counter of substitution node and deletes it if not
+ * used by any other node.
+ * @param {ChannelNode} substitutionNode
+ */
 DataNode.prototype._removeSubstitutionNode = function(substitutionNode){
     var key = substitutionNode.substitution.getKey(this);
     if(this._substitutionNodes[key] && this._substitutionNodes[key].decreaseRef())
         delete this._substitutionNodes[key];
-}
+};
 
+/**
+ * Calls clear of all substitutionNodes and clears the map
+ * @param {DataNode} dataNode
+ */
 function clearSubstitutionNodes(dataNode){
     for(var name in dataNode._substitutionNodes){
         dataNode._substitutionNodes[name].clear();
@@ -820,35 +945,47 @@ function clearSubstitutionNodes(dataNode){
     dataNode._substitutionNodes = {};
 }
 
-
+/**
+ * Skips nodes, if it does not contribute to the result (optimization)
+ * @param {DataNode} dataNode
+ * @param {array.<string>?} filter
+ * @returns {DataNode}
+ */
 function getForwardNode(dataNode, filter){
-    var filteredBadly = (dataNode._filterMapping && !dataNode._filterMapping.isEmpty());
-    if(!filteredBadly){
-        if(!dataNode._computeOperator ){
-            if(dataNode._sourceNode && dataNode._children.length == 0)
-                return getForwardNode(dataNode._sourceNode);
-            if(dataNode._children.length == 1 && dataNode._children[0] instanceof DataNode)
-                return getForwardNode(dataNode._children[0]);
-        }
-        var idx = dataNode._channelNode.getChildDataIndex(filter);
-        if(idx != -1 && idx != undefined){
-            if(dataNode._sourceNode)
-                return getForwardNode(dataNode._sourceNode);
-            else
-                return getForwardNode(dataNode._children[idx]);
-        }
+    var hasFilter = (dataNode._filterMapping && !dataNode._filterMapping.isEmpty());
+    if(hasFilter)
+        return dataNode;
+
+    if(!dataNode._computeOperator ){
+        if(dataNode._sourceNode && dataNode._children.length == 0)
+            return getForwardNode(dataNode._sourceNode);
+        if(dataNode._children.length == 1 && dataNode._children[0] instanceof DataNode)
+            return getForwardNode(dataNode._children[0]);
+    }
+
+    var idx = dataNode._channelNode.getChildDataIndex(filter);
+    if(idx != -1 && idx != undefined){
+        if(dataNode._sourceNode)
+            return getForwardNode(dataNode._sourceNode);
+        else
+            return getForwardNode(dataNode._children[idx]);
     }
     return dataNode;
 }
 
 
-
-function updateLoadingState(node){
+/**
+ * Computes the progress level
+ * @private
+ * @param {DataNode} node
+ */
+function updateProgressLevel(node){
     var progressLevel = node._loading ? node._loadLevel : Infinity;
+    var i;
 
-    for(var i = 0; progressLevel && i < node._children.length; ++i){
+    for(i = 0; progressLevel && i < node._children.length; ++i){
         var child = node._children[i];
-        if(child instanceof Xflow.DataNode){
+        if(child instanceof DataNode){
             progressLevel = Math.min(progressLevel, Math.max(child._loadLevel, child._progressLevel) );
         }
         else if(child._data && child._data.isLoading && child._data.isLoading()){
@@ -866,11 +1003,10 @@ function updateLoadingState(node){
 
     if(oldLevel != node._progressLevel){
         node._callLoadListeners(node._progressLevel, oldLevel);
-        for(var i = 0; i < node._parents.length; ++i)
-            updateLoadingState(node._parents[i]);
+        for(i = 0; i < node._parents.length; ++i)
+            updateProgressLevel(node._parents[i]);
     }
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------
 // Helpers
@@ -879,8 +1015,8 @@ function updateLoadingState(node){
 
 /**
  * @private
- * @param {Xflow.DataNode} parent
- * @param {Xflow.GraphNode} child
+ * @param {DataNode} parent
+ * @param {GraphNode} child
  */
 function addParent(parent, child){
     child._parents.push(parent);
@@ -888,8 +1024,8 @@ function addParent(parent, child){
 
 /**
  * @private
- * @param {Xflow.DataNode} parent
- * @param {Xflow.GraphNode} child
+ * @param {DataNode} parent
+ * @param {GraphNode} child
  */
 function removeParent(parent, child){
     Array.erase(child._parents, parent);
@@ -897,21 +1033,42 @@ function removeParent(parent, child){
 
 /**
  * Notify all parent nodes about a change
- * @param {Xflow.GraphNode} node
- * @param {number|Xflow.RESULT_STATE} changeType
+ * @param {GraphNode} node
+ * @param {exports.C.RESULT_STATE} changeType
  * @private
  */
 function notifyParentsOnChanged(node, changeType){
     for(var i = 0; i < node._parents.length; ++i){
         node._parents[i].notify(changeType, node);
     }
-};
+}
 
+/**
+ * Update the owners of the mappings
+ * @param {DataNode} dataNode
+ * @param {string} key
+ * @param {Mapping} mapping
+ */
 function swapMapping(dataNode, key, mapping){
     dataNode[key] && dataNode[key]._removeOwner(dataNode);
     dataNode[key] = mapping;
     dataNode[key] && dataNode[key]._addOwner(dataNode);
 }
 
+function replaceNodeInHierarchy(node, field, newChild) {
+    var oldChild = node[field];
+    if(oldChild) {
+        removeParent(node, oldChild);
+    }
+    node[field] = newChild;
+    if(newChild) {
+        addParent(node, newChild);
+    }
+}
 
-})();
+module.exports = {
+    Graph : Graph,
+    InputNode: InputNode,
+    DataNode: DataNode,
+    getComputeDataflowUrl: getComputeDataflowUrl
+};

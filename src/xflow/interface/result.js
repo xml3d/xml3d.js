@@ -1,4 +1,7 @@
-(function(){
+var Base = require("../base.js");
+
+var queueResultCallback = Base._queueResultCallback;
+
 /**
  * Content of this file:
  * Result classes of an Xflow graph which are received through Requests.
@@ -7,40 +10,38 @@
 /**
  * Abstract Result structure containing a (processed) result of the Xflow graph.
  * @abstract
- * @param {Xflow.DataNode} dataNode
- * @param {Array.<string>} filter
  */
-Xflow.Result = function(){
+var Result = function(){
     this.loading = false;
+    /** Valid is false if an error occurred during the processing of the result */
     this.valid = false;
     this._listeners = [];
     this._requests = [];
 };
-var Result = Xflow.Result;
 
 /**
- * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ * @param {function(Result, C.RESULT_STATE)} callback
  */
 Result.prototype.addListener = function(callback){
     this._listeners.push(callback);
 };
 
 /**
- * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ * @param {function(Result, C.RESULT_STATE)} callback
  */
 Result.prototype.removeListener = function(callback){
     Array.erase(this._listeners, callback);
 };
 
 /**
- * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ * @param {function(Result, C.RESULT_STATE)} callback
  */
 Result.prototype._addRequest = function(request){
     this._requests.push(request);
 };
 
 /**
- * @param {function(Xflow.Result, Xflow.RESULT_STATE)} callback
+ * @param {function(Result, C.RESULT_STATE)} callback
  */
 Result.prototype._removeRequest = function(request){
     Array.erase(this._requests, request);
@@ -52,10 +53,10 @@ Result.prototype._notifyChanged = function(state){
     for(var i = 0; i < this._requests.length; ++i){
         this._requests[i]._onResultChanged(state);
     }
-    Xflow._listCallback(this, state);
+    queueResultCallback(this, state);
 }
 
-Result.prototype._onListedCallback = function(state){
+Result.prototype._onPostponedResultChanged = function(state){
     for(var i = 0; i < this._listeners.length; ++i){
         this._listeners[i](this, state);
     }
@@ -66,16 +67,15 @@ Result.prototype._onListedCallback = function(state){
 /**
  * ComputeResult contains a named map of typed values.
  * @constructor
- * @extends {Xflow.Result}
+ * @extends {Result}
  */
-Xflow.ComputeResult = function(){
-    Xflow.Result.call(this);
+var ComputeResult = function(){
+    Result.call(this);
     this._outputNames = [];
     /** @type {Object.<string,DataEntry>} */
     this._dataEntries = {};
 };
-Xflow.createClass(Xflow.ComputeResult, Xflow.Result);
-var ComputeResult = Xflow.ComputeResult;
+Base.createClass(ComputeResult, Result);
 
 Object.defineProperty(ComputeResult.prototype, "outputNames", {
     set: function(v){
@@ -100,17 +100,16 @@ ComputeResult.prototype.getOutputMap = function() {
 /**
  * VSDataResult is used to analyse the output of a VertexShader
  * Note that the VSDataResult is not used to generate the VertexShader directly.
- * For that, the Xflow.VertexShader structure must be created from Xflow.VertexShaderRequest
+ * For that, the VertexShader structure must be created from VertexShaderRequest
  * @constructor
- * @extends {Xflow.Result}
+ * @extends {Result}
  */
-Xflow.VSDataResult = function(){
-    Xflow.Result.call(this);
+var VSDataResult = function(){
+    Result.call(this);
     this._program = null;
     this._programData = null;
 };
-Xflow.createClass(Xflow.VSDataResult, Xflow.Result);
-var VSDataResult = Xflow.VSDataResult;
+Base.createClass(VSDataResult, Result);
 
 Object.defineProperty(VSDataResult.prototype, "outputNames", {
     set: function(v){
@@ -132,5 +131,7 @@ VSDataResult.prototype.getVertexShader = function(vsConfig){
     return this._program.createVertexShader(this._programData, vsConfig);
 }
 
-
-})();
+module.exports = {
+    ComputeResult:  ComputeResult,
+    VSDataResult: VSDataResult
+};

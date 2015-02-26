@@ -1,3 +1,4 @@
+
 Xflow.registerOperator("xflow.rgbePNGtoFloat", {
     outputs: [ {type: 'texture', name : 'result', customAlloc: true } ],
     params:  [

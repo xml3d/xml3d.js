@@ -1,23 +1,25 @@
-(function(){
+var Base = require("../base");
+var C = require("./constants");
+
 /**
  * Content of this file:
- * All Code for handling data structures connected to Xflow including:
- *  - Typed value buffers (e.g float3 buffer)
- *  - Images
+ * All Code for handling data entries connected to Xflow including:
+ *  - BufferEntries: Typed value buffers (e.g float3 buffer, without name)
+ *  - TextureEntries: e.g. images
  *
- * This file also includes the Xflow.DataChangeNotifier used to react to changes on Xflow data structures
+ *  This file also includes the DataChangeNotifier used to react to changes on Xflow data structures
  */
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.SamplerConfig
+// SamplerConfig
 //----------------------------------------------------------------------------------------------------------------------
 
 
 /**
- * SamplerConfig is used to define sampler properties of an Xflow.TextureEntry or Xflow.ImageDataTextureEntry
+ * SamplerConfig is used to define sampler properties of a TextureEntry or ImageDataTextureEntry
  * @constructor
  */
-Xflow.SamplerConfig = function(){
+var SamplerConfig = function(){
     this.minFilter = 0;
     this.magFilter = 0;
     this.mipFilter = 0;
@@ -30,21 +32,22 @@ Xflow.SamplerConfig = function(){
     this.colorB = 0;
     this.generateMipMap = 0;
 };
-Xflow.SamplerConfig.prototype.setDefaults = function() {
-    // FIXME Generate this from the spec ?
-    this.minFilter = Xflow.TEX_FILTER_TYPE.LINEAR;
-    this.magFilter = Xflow.TEX_FILTER_TYPE.LINEAR;
-    this.mipFilter = Xflow.TEX_FILTER_TYPE.NEAREST;
-    this.wrapS = Xflow.TEX_WRAP_TYPE.CLAMP;
-    this.wrapT = Xflow.TEX_WRAP_TYPE.CLAMP;
-    this.wrapU = Xflow.TEX_WRAP_TYPE.CLAMP;
-    this.textureType = Xflow.TEX_TYPE.TEXTURE_2D;
+
+SamplerConfig.prototype.setDefaults = function() {
+    this.minFilter = C.TEX_FILTER_TYPE.LINEAR;
+    this.magFilter = C.TEX_FILTER_TYPE.LINEAR;
+    this.mipFilter = C.TEX_FILTER_TYPE.NEAREST;
+    this.wrapS = C.TEX_WRAP_TYPE.CLAMP;
+    this.wrapT = C.TEX_WRAP_TYPE.CLAMP;
+    this.wrapU = C.TEX_WRAP_TYPE.CLAMP;
+    this.textureType = C.TEX_TYPE.TEXTURE_2D;
     this.colorR = 0;
     this.colorG = 0;
     this.colorB = 0;
     this.generateMipMap = 0;
 };
-Xflow.SamplerConfig.prototype.set = function(other) {
+
+SamplerConfig.prototype.set = function(other) {
     this.minFilter = other.minFilter;
     this.magFilter = other.magFilter;
     this.mipFilter = other.mipFilter;
@@ -57,79 +60,88 @@ Xflow.SamplerConfig.prototype.set = function(other) {
     this.colorB = other.colorB;
     this.generateMipMap = other.generateMipMap;
 };
-var SamplerConfig = Xflow.SamplerConfig;
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.DataEntry
+// DataEntry
 //----------------------------------------------------------------------------------------------------------------------
 
 
 /**
  * The abstract base class for all DataEntries connected to an xflow graph.
  * @abstract
- * @param {Xflow.DATA_TYPE} type Type of DataEntry
+ * @param {C.DATA_TYPE} type Type of DataEntry
  */
-Xflow.DataEntry = function(type){
+var DataEntry = function(type){
     this._type = type;
+    /** @type {Array.<Function(DataEntry, C.DATA_ENTRY_STATE)>} **/
     this._listeners = [];
+    /** Add related custom data (e.g. WebGL buffers) **/
     this.userData = {};
 };
-var DataEntry = Xflow.DataEntry;
 
 Object.defineProperty(DataEntry.prototype, "type", {
-    /** @param {Xflow.DATA_TYPE} v */
-    set: function(v){
+    set: function(){
         throw new Error("type is read-only");
     },
-    /** @return {Xflow.DATA_TYPE} */
+    /** @return {C.DATA_TYPE} */
     get: function(){ return this._type; }
 });
 
 /**
- * @param {function(Xflow.DataEntry, Xflow.DATA_ENTRY_STATE)} callback
+ * @param {function(DataEntry, C.DATA_ENTRY_STATE)} callback
  */
 DataEntry.prototype.addListener = function(callback){
     this._listeners.push(callback);
 };
 
 /**
- * @param {function(Xflow.DataEntry, Xflow.DATA_ENTRY_STATE)} callback
+ * @param {function(DataEntry, C.DATA_ENTRY_STATE)} callback
  */
 DataEntry.prototype.removeListener = function(callback){
     Array.erase(this._listeners, callback);
 };
 
+/**
+ */
 DataEntry.prototype._notifyChanged = function(){
-    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
-}
+    notifyListeners(this, C.DATA_ENTRY_STATE.CHANGED_VALUE);
+};
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.BufferEntry
+// BufferEntry
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
  * A typed value buffer basically linking to a typed array.
  * @constructor
- * @extends {Xflow.DataEntry}
- * @param {Xflow.DATA_TYPE} type
+ * @extends {DataEntry}
+ * @param {C.DATA_TYPE} type
  * @param {Object} value A typed array
  */
-Xflow.BufferEntry = function(type, value){
-    Xflow.DataEntry.call(this, type);
+var BufferEntry = function(type, value){
+    DataEntry.call(this, type);
     this._value = value;
-    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
+    notifyListeners(this, C.DATA_ENTRY_STATE.CHANGED_NEW);
 };
-Xflow.createClass(Xflow.BufferEntry, Xflow.DataEntry);
-var BufferEntry = Xflow.BufferEntry;
+Base.createClass(BufferEntry, DataEntry);
 
 
-/** @param {Object} v */
+/**
+ *  Set value of entry. Triggers notification chain
+ *  @param {Object} v Value to set (has to be a TypedArray)
+ */
 BufferEntry.prototype.setValue = function(v){
     this._setValue(v);
-    Xflow._callListedCallback();
-}
+    Base._flushResultCallbacks();
+};
 
+/**
+ * Are there no, one or many values?
+ * @param size
+ * @param tupleSize
+ * @returns {number}
+ */
 function getSizeType(size, tupleSize){
     if(size >= tupleSize*2)
         return 2;
@@ -143,54 +155,62 @@ BufferEntry.prototype._setValue = function(v){
     var oldSize = (this._value ? this._value.length : 0), newSize = (v ? v.length : 0), tupleSize = this.getTupleSize();
     var notification;
     if(getSizeType(oldSize, tupleSize) != getSizeType(newSize, tupleSize))
-        notification = Xflow.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE;
+        notification = C.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE;
     else if(oldSize != newSize){
-        notification = Xflow.DATA_ENTRY_STATE.CHANGED_SIZE;
+        notification = C.DATA_ENTRY_STATE.CHANGED_SIZE;
     }
     else{
-        notification = Xflow.DATA_ENTRY_STATE.CHANGED_VALUE;
+        notification = C.DATA_ENTRY_STATE.CHANGED_VALUE;
     }
     this._value = v;
     notifyListeners(this, notification);
-}
+};
 
 /** @return {Object} */
 BufferEntry.prototype.getValue = function(){
     return this._value;
 };
 
-/** @return {Object} */
+/**
+ * Returns the buffer length
+ * @return {Object}
+ */
 BufferEntry.prototype.getLength = function(){
     return this._value ? this._value.length : 0;
 };
 
-
+/**
+ * Returns tuple size (e.g 1, 2, 3, 4, 16)
+ * @returns {number}
+ */
 BufferEntry.prototype.getTupleSize = function() {
-    if (!this._tupleSize) {
-        this._tupleSize = Xflow.DATA_TYPE_TUPLE_SIZE[this._type];
-    }
-    return this._tupleSize;
+    return C.DATA_TYPE_TUPLE_SIZE[this._type];
 };
 
 /**
+ * Return tuple count
  * @return {number}
  */
 BufferEntry.prototype.getIterateCount = function(){
     return this.getLength() / this.getTupleSize();
 };
 
+/**
+ * Is value not set or the length of the buffer 0
+ * @returns {boolean}
+ */
 BufferEntry.prototype.isEmpty = function(){
     return !this._value || !this.getLength();
 };
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.TextureEntry
+// TextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
 var tmpCanvas, tmpContext;
 
-Xflow.toImageData = function(imageData) {
+C.toImageData = function(imageData) {
     if(imageData instanceof ImageData)
         return imageData;
     if(!imageData.data)
@@ -213,7 +233,7 @@ Xflow.toImageData = function(imageData) {
         newImageData.data[i] = v;
     }
     return newImageData;
-}
+};
 
 function TexelSource(sourceOrWidth, height, format, type) {
     if (typeof sourceOrWidth === "object") {
@@ -238,21 +258,21 @@ function TexelSource(sourceOrWidth, height, format, type) {
                     }
                 });
             }
-            sourceOrWidth.texelFormat = Xflow.TEXTURE_FORMAT.RGBA;
-            sourceOrWidth.texelType = Xflow.TEXTURE_TYPE.UBYTE;
+            sourceOrWidth.texelFormat = C.TEXTURE_FORMAT.RGBA;
+            sourceOrWidth.texelType = C.TEXTURE_TYPE.UBYTE;
         }
         //assume source is a image data like object
         this._source = sourceOrWidth;
     } else {
-        format = format || Xflow.TEXTURE_FORMAT.RGBA;
-        type =  type || Xflow.TEXTURE_TYPE.UBYTE;
+        format = format || C.TEXTURE_FORMAT.RGBA;
+        type =  type || C.TEXTURE_TYPE.UBYTE;
         //create a new texel source backed by type array
         this._source = {
             width: sourceOrWidth,
             height: height,
             texelFormat: format,
             texelType: type,
-            data: new Xflow.TYPED_ARRAY_MAP[type](sourceOrWidth * height * Xflow.TEXTURE_FORMAT_TUPLE_SIZE[format])
+            data: new C.TYPED_ARRAY_MAP[type](sourceOrWidth * height * C.TEXTURE_FORMAT_TUPLE_SIZE[format])
         }
     }
 }
@@ -274,6 +294,7 @@ Object.defineProperties(TexelSource.prototype, {
             return this._source;
         }
     },
+    // TODO this is very confusing. asGLTextureData is texelsource.source
     glTextureData: {
         get: function () {
             return this._source;
@@ -296,12 +317,12 @@ Object.defineProperties(TexelSource.prototype, {
     },
     texelFormat: {
         get: function () {
-            return this._source ? this._source.texelFormat: Xflow.TEXTURE_FORMAT.UNKNOWN;
+            return this._source ? this._source.texelFormat: C.TEXTURE_FORMAT.UNKNOWN;
         }
     },
     texelType: {
         get: function () {
-            return this._source ? this._source.texelType: Xflow.TEXTURE_TYPE.UNKNOWN;
+            return this._source ? this._source.texelType: C.TEXTURE_TYPE.UNKNOWN;
         }
     }
 });
@@ -310,22 +331,21 @@ Object.defineProperties(TexelSource.prototype, {
  * A data entry for a texture.
  * Note: each TextureEntry includes a samplerConfig.
  * @constructor
- * @extends {Xflow.DataEntry}
- * @param {Object} image
+ * @extends {DataEntry}
+ * @param {HTMLImageElement|HTMLVideoElement|HTMLCanvasElement} source //TODO: Which kinds are supported?
  */
-Xflow.TextureEntry = function(source){
-    Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
+TextureEntry = function(source){
+    DataEntry.call(this, C.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
     this._loading = false;
     this.setImage(source);
 
-    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
+    notifyListeners(this, C.DATA_ENTRY_STATE.CHANGED_NEW);
 };
 
-Xflow.createClass(Xflow.TextureEntry, Xflow.DataEntry);
-var TextureEntry = Xflow.TextureEntry;
+Base.createClass(TextureEntry, DataEntry);
 
-Object.defineProperties(Xflow.TextureEntry.prototype, {
+Object.defineProperties(TextureEntry.prototype, {
     width: {
         get: function () {
             return this._source ? this._source.width : -1;
@@ -338,12 +358,12 @@ Object.defineProperties(Xflow.TextureEntry.prototype, {
     },
     texelFormat: {
         get: function () {
-            return this._source ? this._source.texelFormat: Xflow.TEXTURE_FORMAT.UNKNOWN;
+            return this._source ? this._source.texelFormat: C.TEXTURE_FORMAT.UNKNOWN;
         }
     },
     texelType: {
         get: function () {
-            return this._source ? this._source.texelType: Xflow.TEXTURE_TYPE.UNKNOWN;
+            return this._source ? this._source.texelType: C.TEXTURE_TYPE.UNKNOWN;
         }
     }
 });
@@ -355,12 +375,15 @@ TextureEntry.prototype.isLoading = function() {
     return !this._source.complete;
 };
 
+/**
+ * @private
+ */
 TextureEntry.prototype._createImage = function(width, height, format, type, samplerConfig) {
     if (!this._source || this.width != width || this.height != height || this.format != format || this.type != type) {
         var source = new TexelSource(width, height, format, type);
 
         if (!samplerConfig) {
-            samplerConfig = new Xflow.SamplerConfig();
+            samplerConfig = new SamplerConfig();
             samplerConfig.setDefaults();
         }
 
@@ -373,18 +396,26 @@ TextureEntry.prototype._createImage = function(width, height, format, type, samp
     return this._source;
 };
 
-TextureEntry.prototype.setImage = function (s, forceLoadCallback) {
-    this._setImage(s, forceLoadCallback);
-    Xflow._callListedCallback();
+/**
+ * Set image source of a Texture Entry
+ * TODO: This is called even if image is just loaded (on XML3D side). Add a notifyImageLoaded method could
+ * be helpful
+ *
+ * @param {HTMLImageElement|HTMLVideoElement|TexelSource|null} element
+ * @param {boolean?} forceLoadCallback trigger load callback if data changes
+ */
+TextureEntry.prototype.setImage = function (element, forceLoadCallback) {
+    this._setImage(element, forceLoadCallback);
+    Base._flushResultCallbacks();
 };
 
-TextureEntry.prototype._setImage = function (s, forceLoadCallback) {
-    if (!s)
+TextureEntry.prototype._setImage = function (element, forceLoadCallback) {
+    if (!element)
         this._setSource(null, forceLoadCallback);
-    else if (s instanceof TexelSource)
-        this._setSource(s, forceLoadCallback);
+    else if (element instanceof TexelSource)
+        this._setSource(element, forceLoadCallback);
     else
-        this._setSource(new TexelSource(s), forceLoadCallback);
+        this._setSource(new TexelSource(element), forceLoadCallback);
 };
 
 TextureEntry.prototype._setSource = function(s, forceLoadCallback) {
@@ -392,19 +423,19 @@ TextureEntry.prototype._setSource = function(s, forceLoadCallback) {
     this._source = s;
     var loading = this.isLoading();
     if(forceLoadCallback && !loading && !prevLoading){
-        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_START);
-        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_END);
+        notifyListeners(this, C.DATA_ENTRY_STATE.LOAD_START);
+        notifyListeners(this, C.DATA_ENTRY_STATE.LOAD_END);
     }
     else if(loading){
         this._loading = true;
-        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_START);
+        notifyListeners(this, C.DATA_ENTRY_STATE.LOAD_START);
     }
     else if(this._loading){
         this._loading = false;
-        notifyListeners(this, Xflow.DATA_ENTRY_STATE.LOAD_END);
+        notifyListeners(this, C.DATA_ENTRY_STATE.LOAD_END);
     }
     else
-        notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
+        notifyListeners(this, C.DATA_ENTRY_STATE.CHANGED_VALUE);
 };
 
 TextureEntry.prototype.asGLTextureValue = function () {
@@ -440,32 +471,31 @@ TextureEntry.prototype.getIterateCount = function() {
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.ImageDataTextureEntry
+// ImageDataTextureEntry
 //----------------------------------------------------------------------------------------------------------------------
 
 /**
- * Same as Xflow.TextureEntry, only based on imageData.
+ * Same as TextureEntry, only based on imageData.
  * This class is used for xflow running inside Web Workers (which don't support HTML images)
  * @param imageData
+ * @extends{DataEntry}
  * @constructor
  */
-Xflow.ImageDataTextureEntry = function(imageData){
-    Xflow.DataEntry.call(this, Xflow.DATA_TYPE.TEXTURE);
+var ImageDataTextureEntry = function(imageData){
+    DataEntry.call(this, C.DATA_TYPE.TEXTURE);
     this._samplerConfig = new SamplerConfig();
     this._imageData = null;
-    this._texelFormat = Xflow.TEXTURE_FORMAT.RGBA;
-    this._texelType = Xflow.TEXTURE_TYPE.UBYTE;
+    this._texelFormat = C.TEXTURE_FORMAT.RGBA;
+    this._texelType = C.TEXTURE_TYPE.UBYTE;
 
     this._updateImageData(imageData);
 
-    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_NEW);
+    notifyListeners(this, C.DATA_ENTRY_STATE.CHANGED_NEW);
 };
 
-Xflow.createClass(Xflow.ImageDataTextureEntry, Xflow.DataEntry);
-var ImageDataTextureEntry = Xflow.ImageDataTextureEntry;
+Base.createClass(ImageDataTextureEntry, DataEntry);
 
-
-Object.defineProperties(Xflow.ImageDataTextureEntry.prototype, {
+Object.defineProperties(ImageDataTextureEntry.prototype, {
     width: {
         get: function () {
             return this._imageData ? this._imageData.width : -1;
@@ -495,37 +525,41 @@ ImageDataTextureEntry.prototype.isLoading = function() {
 };
 
 ImageDataTextureEntry.prototype._updateImageData = function(imageData) {
-    this._texelFormat = Xflow.TEXTURE_FORMAT.RGBA;
-    this._texelType = Xflow.TEXTURE_TYPE.UBYTE;
+    this._texelFormat = C.TEXTURE_FORMAT.RGBA;
+    this._texelType = C.TEXTURE_TYPE.UBYTE;
     this._imageData = imageData;
 };
 
 /** Create new image
- *
+ * TODO: Jan: Write source documentation
  * @param width
  * @param height
- * @param formatType
+ * @param format
+ * @param type
  * @param samplerConfig
- * @return {Image|Canvas}
+ * @return {HTMLImageElement|HTMLCanvasElement}
  */
 ImageDataTextureEntry.prototype._createImage = function(width, height, format, type, samplerConfig) {
-    if (!this._image || this.getWidth() != width || this.getHeight() != height || this._format != format || this._type != type) {
+    if (!this._imageData || this.getWidth() != width || this.getHeight() != height || this._format != format || this._type != type) {
         if (!width || !height)
             throw new Error("Width or height is not specified");
         this._texelFormat = format;
         this._texelType = type;
         if (!samplerConfig) {
-            samplerConfig = new Xflow.SamplerConfig();
+            samplerConfig = new SamplerConfig();
             samplerConfig.setDefaults();
         }
         this._samplerConfig.set(samplerConfig);
 
+        /**
+         * @type {{width: *, height: *, data: null|ArrayBufferView}}
+         */
         var imageData = {
             width: width,
             height: height,
             data: null
         };
-        if(type == Xflow.TEXTURE_TYPE.FLOAT){
+        if(type == C.TEXTURE_TYPE.FLOAT){
             imageData.data = new Float32Array(width*height*4);
         }
         else {
@@ -546,8 +580,8 @@ ImageDataTextureEntry.prototype._createImage = function(width, height, format, t
 /** @param {Object} v */
 ImageDataTextureEntry.prototype.setImageData = function(v) {
     this._updateImageData(v);
-    notifyListeners(this, Xflow.DATA_ENTRY_STATE.CHANGED_VALUE);
-    Xflow._callListedCallback();
+    notifyListeners(this, C.DATA_ENTRY_STATE.CHANGED_VALUE);
+    C._flushResultCallbacks();
 };
 
 ImageDataTextureEntry.prototype.getWidth = function() {
@@ -583,44 +617,53 @@ ImageDataTextureEntry.prototype.getIterateCount = function() {
 };
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.DataChangeNotifier
+// DataChangeNotifier
 //----------------------------------------------------------------------------------------------------------------------
 
 
 /**
  * Used to listen to modifications of any DataEntry connected to an Xflow graph.
- * @global
+ * @constructor
  */
-Xflow.DataChangeNotifier = {
+var DataChangeNotifier = {
     _listeners: []
-}
-var DataChangeNotifier = Xflow.DataChangeNotifier;
+};
 
 /**
- * @param {function(Xflow.DataEntry, Xflow.DATA_ENTRY_STATE)} callback
+ * @param {function(DataEntry, C.DATA_ENTRY_STATE)} callback
  */
 DataChangeNotifier.addListener = function(callback){
     this._listeners.push(callback);
 };
 
 /**
- * @param {function(Xflow.DataEntry, Xflow.DATA_ENTRY_STATE)} callback
+ * @param {function(DataEntry, C.DATA_ENTRY_STATE)} callback
  */
 DataChangeNotifier.removeListener = function(callback){
     Array.erase(this._listeners, callback);
 };
 
 /**
- * @param {Xflow.DataEntry} dataEntry
- * @param {Xflow.DATA_ENTRY_STATE} notification
+ * @param {DataEntry} dataEntry
+ * @param {C.DATA_ENTRY_STATE} notification
  */
 function notifyListeners(dataEntry, notification){
-    for(var i = 0; i < DataChangeNotifier._listeners.length; ++i){
+    var i;
+    // Global notifications
+    for(i = 0; i < DataChangeNotifier._listeners.length; ++i){
         DataChangeNotifier._listeners[i](dataEntry, notification);
     }
-    for(var i = 0; i < dataEntry._listeners.length; ++i){
+    // Internal and external listeners
+    for(i = 0; i < dataEntry._listeners.length; ++i){
         dataEntry._listeners[i](dataEntry, notification);
     }
 }
 
-}());
+module.exports = {
+    DataEntry: DataEntry,
+    BufferEntry: BufferEntry,
+    TextureEntry: TextureEntry,
+    ImageDataTextureEntry: ImageDataTextureEntry,
+    SamplerConfig: SamplerConfig,
+    DataChangeNotifier: DataChangeNotifier
+};

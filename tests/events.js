@@ -139,7 +139,7 @@ module("Event tests", {
 test("Unsupported Event", function() {
     equal(this.win.callBackCounter, 2, "Unsupported event was received for 2 handlers");
 
-    var links = this.doc.querySelectorAll("a[href='http://www.xml3d.org']");
+    var links = this.doc.querySelectorAll("a[href='http://www.xml3d.org/help']");
     equal(links.length, 2, "There are two default error messages (with xml3d.org link)");
     var customMessage = this.doc.querySelectorAll("div.darkness");
     equal(customMessage.length, 1, "There is one custom error message");

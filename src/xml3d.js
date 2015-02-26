@@ -114,6 +114,7 @@ XML3D.createClass = function(ctor, parent, methods) {
 
             infoDiv.setAttribute("style", xml3dElement.getAttribute("style"));
             infoDiv.style.border = "2px solid red";
+            infoDiv.style.fontFamily = "verdana";
             infoDiv.style.color = "red";
             infoDiv.style.padding = "10px";
             infoDiv.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
@@ -129,16 +130,16 @@ XML3D.createClass = function(ctor, parent, methods) {
             }
 
             var hElement = document.createElement("h3");
-            var hTxt = document.createTextNode("Your browser doesn't appear to support XML3D.");
+            var hTxt = document.createTextNode("Sorry, your browser doesn't appear to support XML3D.");
             hElement.appendChild(hTxt);
 
             var pElement = document.createElement("p");
             pElement.appendChild(document.createTextNode("Please visit "));
             var link = document.createElement("a");
-            link.setAttribute("href", "http://www.xml3d.org");
-            link.appendChild(document.createTextNode("http://www.xml3d.org"));
+            link.setAttribute("href", "http://www.xml3d.org/help");
+            link.appendChild(document.createTextNode("http://www.xml3d.org/help"));
             pElement.appendChild(link);
-            pElement.appendChild(document.createTextNode(" to get information about browsers supporting XML3D."));
+            pElement.appendChild(document.createTextNode(" for more information."));
             infoDiv.appendChild(hElement);
             infoDiv.appendChild(pElement);
 

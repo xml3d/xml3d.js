@@ -78,7 +78,7 @@ module.exports = {
         if (c_listedCallbacks.length) {
             var i;
             for (i = 0; i < c_listedCallbacks.length; ++i) {
-                c_listedCallbacks[i]._onResultChanged(c_listedCallbacksData[i]);
+                c_listedCallbacks[i]._onPostponedResultChanged(c_listedCallbacksData[i]);
             }
             c_listedCallbacks = [];
             c_listedCallbacksData = [];

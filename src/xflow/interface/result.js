@@ -56,7 +56,7 @@ Result.prototype._notifyChanged = function(state){
     queueResultCallback(this, state);
 }
 
-Result.prototype._onResultChanged = function(state){
+Result.prototype._onPostponedResultChanged = function(state){
     for(var i = 0; i < this._listeners.length; ++i){
         this._listeners[i](this, state);
     }

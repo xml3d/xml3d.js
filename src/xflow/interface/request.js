@@ -64,7 +64,7 @@ Request.prototype.clear = function(){
  * @param {C.RESULT_STATE} data
  * @private
  */
-Request.prototype._onResultChanged = function(data){
+Request.prototype._onPostponedResultChanged = function(data){
     this._listener && this._listener(this, data);
 };
 

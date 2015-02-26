@@ -700,11 +700,14 @@ test("GLSL basic", function() {
 });
 
 
+/*
+TODO: Feature not used currently, will be reintegrated with proper shade.js integration in VS generation
 test("GLSL with 3x Morph", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_morphing.xml", handler);
     this.executeTests(response);
 });
+*/
 
 test("GLSL with Uniforms", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
@@ -712,11 +715,14 @@ test("GLSL with Uniforms", function() {
     this.executeTests(response);
 });
 
+/*
+TODO: Feature not used currently, will be reintegrated with proper shade.js integration in VS generation
 test("GLSL with Processing on Uniforms", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_uniform_processing.xml", handler);
     this.executeTests(response);
 });
+*/
 
 test("WebCL Image Processing", function () {
     var xflowGraph = XML3D.data.xflowGraph;

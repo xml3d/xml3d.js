@@ -31,9 +31,9 @@ var c_CubeIndex = [
 Xflow.registerOperator("xflow.debug.createSkinCubes", {
     outputs: [	{type: 'int', name: 'index', customAlloc: true},
                 {type: 'float3', name: 'position', customAlloc: true},
-				{type: 'float3', name: 'normal', customAlloc: true},
-				{type: 'int4', name: 'boneIndices', customAlloc: true},
-				{type: 'float4', name: 'boneWeights', customAlloc: true}],
+                {type: 'float3', name: 'normal', customAlloc: true},
+                {type: 'int4', name: 'boneIndices', customAlloc: true},
+                {type: 'float4', name: 'boneWeights', customAlloc: true}],
     params:  [{type: 'float4x4', source: 'bindTransforms', array: true},
               {type: 'float', source: 'size', array: true, optional: true}],
     alloc: function(sizes, bindTransforms)
@@ -46,13 +46,13 @@ Xflow.registerOperator("xflow.debug.createSkinCubes", {
         sizes['index'] = s * 6 * 6;
     },
     evaluate: function(index, position, normal, boneIdx, boneWeight, bindTransforms, size) {
-		var cubeCount = bindTransforms.length / 16;
-		var size = (size && size[0] || 1) / 2;
+        var cubeCount = bindTransforms.length / 16;
+        var size = (size && size[0] || 1) / 2;
 
         var tmpPosition = XML3D.math.vec3.create(),
             tmpNormal = XML3D.math.vec3.create();
 
-		for(var i = 0; i < cubeCount; ++i){
+        for(var i = 0; i < cubeCount; ++i){
             for(var j = 0; j < 6; ++j){
                 for(var k = 0; k < 4; k++){
                     var localIdx = j*4+ k, globalIdx = i*6*4 + localIdx;
@@ -79,10 +79,10 @@ Xflow.registerOperator("xflow.debug.createSkinCubes", {
                     index[globalIndexIdx+k] = i*6*4 + c_CubeIndex[j][k];
                 }
             }
-		}
-		// We are done!
-		position = position;
-	}
+        }
+        // We are done!
+        position = position;
+    }
 });
 
 }());

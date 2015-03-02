@@ -9,7 +9,7 @@ var RenderAdapter = require("./base.js");
  */
 var LightShaderRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
-    this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
+    this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
 };
 XML3D.createClass(LightShaderRenderAdapter, RenderAdapter, {
     getDataNode: function () {

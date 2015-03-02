@@ -1,4 +1,5 @@
 var RenderAdapter = require("./base.js");
+var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
 var AdapterHandle = XML3D.base.AdapterHandle;
 
 var TransformableAdapter = function (factory, node, handleShader, handleTransform) {
@@ -7,7 +8,7 @@ var TransformableAdapter = function (factory, node, handleShader, handleTransfor
     this.shaderHandler = null;
     this.handleShader = handleShader || false;
     if (handleTransform) {
-        this.transformFetcher = new XML3D.data.DOMTransformFetcher(this, "transform", "transform");
+        this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
     }
 
 };

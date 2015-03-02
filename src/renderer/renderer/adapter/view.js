@@ -1,8 +1,9 @@
 var TransformableAdapter = require("./transformable.js");
+var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
 
 var ViewRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, false);
-    this.perspectiveFetcher = new XML3D.data.DOMTransformFetcher(this, "perspective", "perspective", true);
+    this.perspectiveFetcher = new DOMTransformFetcher(this, "perspective", "perspective", true);
     this.createRenderNode();
 };
 XML3D.createClass(ViewRenderAdapter, TransformableAdapter);

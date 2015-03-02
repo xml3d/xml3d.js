@@ -54,10 +54,10 @@
 
     function createXflowValue(dataNode, dataType, name, key, value) {
         var v = new (TYPED_ARRAY_MAP[dataType])(value);
-        var type = XML3D.data.BUFFER_TYPE_TABLE[dataType];
+        var type = Xflow.DATA_TYPE.fromString(dataType);
         var buffer = new Xflow.BufferEntry(type, v);
 
-        var inputNode = XML3D.data.xflowGraph.createInputNode();
+        var inputNode = new Xflow.InputNode(null);
         inputNode.data = buffer;
         inputNode.name = name;
         inputNode.key = key;
@@ -67,10 +67,10 @@
     function createXflowValueFromBuffer(dataNode, dataType, name, key, arrayBuffer, byteOffset, byteLength) {
         var ArrayType = TYPED_ARRAY_MAP[dataType];
         var v = new (ArrayType)(arrayBuffer, byteOffset, byteLength/ArrayType.BYTES_PER_ELEMENT);
-        var type = XML3D.data.BUFFER_TYPE_TABLE[dataType];
+        var type = Xflow.DATA_TYPE.fromString(dataType);
         var buffer = new Xflow.BufferEntry(type, v);
 
-        var inputNode = XML3D.data.xflowGraph.createInputNode();
+        var inputNode = new Xflow.InputNode(null);
         inputNode.data = buffer;
         inputNode.name = name;
         inputNode.key = key;
@@ -108,7 +108,7 @@
         if (jsonData.version != "0.4.0")
             throw new Error("Unknown JSON version: " + jsonData.version);
 
-        var node = XML3D.data.xflowGraph.createDataNode();
+        var node = new Xflow.DataNode(null, false);
         node.userData = "External Json"; // TODO: Try to add document URL here (how to get it?)
 
         var entries = jsonData.data;
@@ -135,7 +135,7 @@
      */
     var JSONFactory = function()
     {
-        XML3D.base.AdapterFactory.call(this, XML3D.data);
+        XML3D.base.AdapterFactory.call(this, "data");
     };
     XML3D.createClass(JSONFactory, XML3D.base.AdapterFactory);
 

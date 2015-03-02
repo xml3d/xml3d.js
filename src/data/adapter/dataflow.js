@@ -13,7 +13,7 @@ var DataflowDataAdapter = function (factory, node) {
 XML3D.createClass(DataflowDataAdapter, BaseDataAdapter);
 
 DataflowDataAdapter.prototype.init = function () {
-    this.xflowDataNode = this.factory.graph.createDataNode();
+    this.xflowDataNode = new Xflow.DataNode(null, false);
     this.dataflowRefs = [];
     updateDataflowXflowNode(this, this.node);
 };
@@ -127,7 +127,7 @@ function updateDataflowXflowNode(adapter, node) {
                 if (firstNode) {
                     firstNode = false;
                 } else {
-                    xflowNode = adapter.factory.graph.createDataNode();
+                    xflowNode = new Xflow.DataNode(null, false);
                     if (prevNode) {
                         currentNode.insertBefore(xflowNode, prevNode);
                     } else {

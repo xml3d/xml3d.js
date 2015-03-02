@@ -15,7 +15,7 @@ DOMTransformFetcher.prototype.clear = function () {
 };
 
 DOMTransformFetcher.prototype.update = function () {
-    var newHandle = this.owner.getAdapterHandle(this.node.getAttribute(this.attrName), XML3D.data, 0);
+    var newHandle = this.owner.getAdapterHandle(this.node.getAttribute(this.attrName), "data", 0);
     if (newHandle != this.adapterHandle) {
         this.clear();
         this.adapterHandle = newHandle;

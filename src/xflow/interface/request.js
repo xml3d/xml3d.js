@@ -190,8 +190,7 @@ function getVsConnectNode(dataNode, vsConfig, filter){
     var key = getDataNodeShaderKey(forwardNode, vsConfig);
     var connectNode;
     if(!(connectNode = c_vsConnectNodeCache[key])){
-        var graph = forwardNode._graph;
-        connectNode = graph.createDataNode(false);
+        connectNode = new Xflow.DataNode(null, false);
         connectNode.appendChild(forwardNode);
 
         connectNode.computeOperator = vsConfig.getOperator();

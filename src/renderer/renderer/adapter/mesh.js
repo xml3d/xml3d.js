@@ -11,7 +11,7 @@ var MeshRenderAdapter = function (factory, node) {
 XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
 
     createRenderNode: function () {
-        var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
 
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();

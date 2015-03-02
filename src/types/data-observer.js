@@ -18,7 +18,7 @@ XML3DDataObserver.prototype.observe = function(node, options){
             "this function after XML3D has been configured e.g. inside a DOMContentLoaded listener.");
 
 
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(node, XML3D.data);
+    var dataAdapter = XML3D.base.resourceManager.getAdapter(node, "data");
     if(!dataAdapter)
         throw new Error("Can't observe node. XML3DataObserver can only observe data containers such as <data>, <mesh> or <shader>");
 

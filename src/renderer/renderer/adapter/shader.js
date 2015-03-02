@@ -8,7 +8,7 @@ var RenderAdapter = require("./base.js");
  */
 var ShaderRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
-    this._dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
+    this._dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
     /** @type MaterialConfiguration | null **/
     this._materialConfiguration = null;
     this._materialModel = null;
@@ -44,7 +44,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
             return;
         }
 
-        this.connectAdapterHandle("script", this.getAdapterHandle(uri, XML3D.data, 0));
+        this.connectAdapterHandle("script", this.getAdapterHandle(uri, "data", 0));
         var adapter = this.getConnectedAdapter('script');
         if (adapter && adapter.getScriptType) {
             this._materialModel = { type: adapter.getScriptType(), script: adapter.getScript() };

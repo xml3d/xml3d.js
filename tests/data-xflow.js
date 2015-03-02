@@ -48,7 +48,7 @@ module("Xflow tests", {
     loadTestXML : function(url, handler) {
         var win = document.getElementById("xml3dframe").contentWindow;
         var resManager = win.XML3D.base.resourceManager;
-        var resType = win.XML3D.data;
+        var resType = "data";
         this.getDataAdapter = function(node){
             win.XML3D.flushDOMChanges();
             return resManager.getAdapter(node, resType);
@@ -546,51 +546,51 @@ test("Operator - Later Input", function() {
     var response = this.loadTestXML("./xflow-xml/basic/test_operator_later_input.xml", handler);
     this.executeTests(response);
 });
-
-test("Operator - Platform fallback - JS", function() {
-    var xflowGraph = XML3D.data.xflowGraph;
-
-    if (xflowGraph.platform !== Xflow.PLATFORM.JAVASCRIPT) {
-        console.log("Operator - Platform fallback - JS tests were not executed because Xflow platform is not JavaScript.");
-        return true;
-    }
-
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_js.xml", handler);
-    this.executeTests(response);
-});
-
-test("Operator - Platform fallback - WebCL", function () {
-    var xflowGraph = XML3D.data.xflowGraph;
-
-    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
-        console.log("Operator - Platform fallback - WebCL tests were not executed because WebCL platform is not available.");
-        return true;
-    }
-
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_cl.xml", handler);
-    this.executeTests(response);
-});
+//
+//test("Operator - Platform fallback - JS", function() {
+//	var xflowGraph = XML3D.data.xflowGraph;
+//
+//	if (xflowGraph.platform !== Xflow.PLATFORM.JAVASCRIPT) {
+//		console.log("Operator - Platform fallback - JS tests were not executed because Xflow platform is not JavaScript.");
+//		return true;
+//	}
+//
+//	var handler = getHandler(this.doc.getElementById("xml3dElem"));
+//	var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_js.xml", handler);
+//	this.executeTests(response);
+//});
+//
+//test("Operator - Platform fallback - WebCL", function () {
+//	var xflowGraph = XML3D.data.xflowGraph;
+//
+//	if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+//		console.log("Operator - Platform fallback - WebCL tests were not executed because WebCL platform is not available.");
+//		return true;
+//	}
+//
+//	var handler = getHandler(this.doc.getElementById("xml3dElem"));
+//	var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_cl.xml", handler);
+//	this.executeTests(response);
+//});
 
 test("Operator - Platform attribute - JS", function () {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_platform_js.xml", handler);
     this.executeTests(response);
 });
-
-test("Operator - Platform attribute - WebCL", function () {
-    var xflowGraph = XML3D.data.xflowGraph;
-
-    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
-        console.log("Operator - Platform - WebCL tests were not executed because WebCL platform is not available.");
-        return true;
-    }
-
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/basic/test_platform_cl.xml", handler);
-    this.executeTests(response);
-});
+//
+//test("Operator - Platform attribute - WebCL", function () {
+//	var xflowGraph = XML3D.data.xflowGraph;
+//
+//	if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+//		console.log("Operator - Platform - WebCL tests were not executed because WebCL platform is not available.");
+//		return true;
+//	}
+//
+//	var handler = getHandler(this.doc.getElementById("xml3dElem"));
+//	var response = this.loadTestXML("./xflow-xml/basic/test_platform_cl.xml", handler);
+//	this.executeTests(response);
+//});
 
 test("Operators - Simple", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
@@ -724,17 +724,17 @@ test("GLSL with Processing on Uniforms", function() {
 });
 */
 
-test("WebCL Image Processing", function () {
-    var xflowGraph = XML3D.data.xflowGraph;
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/webcl_output/test_webcl_image_processing.xml", handler);
-
-    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
-        console.log("WebCL Image Processing tests could not be executed because WebCL platform is not available");
-        return true;
-    }
-    this.executeTests(response);
-});
+//test("WebCL Image Processing", function () {
+//	var xflowGraph = XML3D.data.xflowGraph;
+//	var handler = getHandler(this.doc.getElementById("xml3dElem"));
+//	var response = this.loadTestXML("./xflow-xml/webcl_output/test_webcl_image_processing.xml", handler);
+//
+//	if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+//		console.log("WebCL Image Processing tests could not be executed because WebCL platform is not available");
+//		return true;
+//	}
+//	this.executeTests(response);
+//});
 
 
 test("Errors with empty arguments", function() {

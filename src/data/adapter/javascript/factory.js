@@ -30,7 +30,7 @@ ScriptDataAdapter.prototype.getScript= function () {
 
 
 var ScriptFactory = function () {
-    XML3D.base.AdapterFactory.call(this, XML3D.data);
+    XML3D.base.AdapterFactory.call(this, "data");
 };
 XML3D.createClass(ScriptFactory, XML3D.base.AdapterFactory);
 

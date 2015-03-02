@@ -25,10 +25,10 @@ ValueDataAdapter.prototype.init = function()
         value = this.node.value;
     }
 
-    var type = XML3D.data.BUFFER_TYPE_TABLE[this.node.localName];
+    var type = Xflow.DATA_TYPE.fromString(this.node.localName);
     var buffer = new Xflow.BufferEntry(type, value);
 
-    this.xflowInputNode = this.factory.graph.createInputNode();
+    this.xflowInputNode = new Xflow.InputNode(null);
     this.xflowInputNode.name = this.node.name;
     this.xflowInputNode.data = buffer;
     this.xflowInputNode.key = this.node.key;
@@ -73,7 +73,7 @@ ValueDataAdapter.prototype.toString = function () {
 
 ValueDataAdapter.prototype.checkForImproperNesting = function() {
     for (var i=0; i < this.node.childNodes.length; i++) {
-        if (XML3D.data.BUFFER_TYPE_TABLE[this.node.childNodes[i].localName]) {
+        if (Xflow.DATA_TYPE.fromString(this.node.childNodes[i].localName)) {
             XML3D.debug.logError("Parsing error: Value elements cannot be nested!", this.node);
         }
     }

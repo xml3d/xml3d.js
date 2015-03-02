@@ -228,7 +228,7 @@ methods.XML3DNestedDataContainerTypeGetOutputNames =
 methods.XML3DShaderProviderTypeGetOutputNames =
 methods.meshGetOutputNames = function() {
     XML3D.flushDOMChanges();
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, "data");
     if(dataAdapter){
         return dataAdapter.getOutputNames();
     }
@@ -239,7 +239,7 @@ methods.XML3DNestedDataContainerTypeGetResult =
 methods.XML3DShaderProviderTypeGetResult =
 methods.meshGetResult = function(filter) {
     XML3D.flushDOMChanges();
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, "data");
     if(dataAdapter){
         var result = dataAdapter.getComputeResult(filter);
         if(!result) return null;
@@ -252,7 +252,7 @@ methods.XML3DNestedDataContainerTypeGetOutputChannelInfo =
     methods.XML3DShaderProviderTypeGetOutputChannelInfo =
         methods.meshGetOutputChannelInfo = function (name) {
             XML3D.flushDOMChanges();
-            var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+            var dataAdapter = XML3D.base.resourceManager.getAdapter(this, "data");
             if (dataAdapter) {
                 var result = dataAdapter.getOutputChannelInfo(name);
                 if (!result) return null;
@@ -342,7 +342,7 @@ methods.XML3DDataSourceTypeSetScriptValue = function(data){
     XML3D.flushDOMChanges();
     configData.scriptValue = data;
 
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, XML3D.data);
+    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, "data");
     if(dataAdapter)
         dataAdapter.setScriptValue(data);
 

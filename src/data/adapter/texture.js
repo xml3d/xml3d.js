@@ -55,7 +55,7 @@ TextureDataAdapter.prototype.shouldGenerateMipMaps = function (minFilter, magFil
 };
 
 TextureDataAdapter.prototype.createXflowNode = function () {
-    var xnode = this.factory.graph.createInputNode();
+    var xnode = new Xflow.InputNode(null);
     xnode.name = this.node.name;
     xnode.paramName = this.node.param ? this.node.name : null;
     xnode.key = this.node.key;

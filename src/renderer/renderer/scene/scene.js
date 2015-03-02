@@ -127,11 +127,11 @@ XML3D.extend(Scene.prototype, {
 
     getDefaultMaterial: function() {
         if(!this._defaultMaterial) {
-            var inputNode = XML3D.data.xflowGraph.createInputNode();
+            var inputNode = new Xflow.InputNode(null);
             inputNode.data = new Xflow.BufferEntry(Xflow.DATA_TYPE.FLOAT3, new Float32Array([1, 0, 0]));
             inputNode.name = "diffuseColor";
 
-            var data = XML3D.data.xflowGraph.createDataNode();
+            var data = new Xflow.DataNode(null, false);
             data.appendChild(inputNode);
 
             this._defaultMaterial = this.createMaterialConfiguration(

@@ -19,7 +19,13 @@ C.DATA_TYPE = {
     BOOL: 30,
     TEXTURE: 40,
     BYTE: 50,
-    UBYTE: 60
+    UBYTE: 60,
+    fromString: function(str) {
+        if (!str || !str.toUpperCase) {
+            return;
+        }
+        return this[str.toUpperCase()];
+    }
 };
 
 C.DATA_TYPE_MAP = {

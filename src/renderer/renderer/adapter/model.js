@@ -16,7 +16,7 @@ var c_IDENTITY = XML3D.math.mat4.create();
 XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 
     createRenderNode: function () {
-        var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, XML3D.data);
+        var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
         this.asset = dataAdapter.getAsset();
 
         this.asset.addChangeListener(this);

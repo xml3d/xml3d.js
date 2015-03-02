@@ -1,5 +1,8 @@
 //var NodeAdapterFactory = require("../../../base/adapter.js").NodeAdapterFactory;
 var NodeAdapterFactory = XML3D.base.NodeAdapterFactory;
+var DataAdapterFactory = require("../../../data/adapter/factory.js");
+XML3D.base.xml3dFormatHandler.registerFactoryClass(DataAdapterFactory);
+
 /**
  * @constructor
  * @implements {XML3D.base.IFactory}

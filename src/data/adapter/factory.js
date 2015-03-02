@@ -7,6 +7,10 @@ var ValueDataAdapter = require("./values");
 var DataAdapter = require("./data");
 var ComputeDataAdapter = require("./compute");
 var DataflowDataAdapter = require("./dataflow");
+// Register JSON Handler
+require("./json/factory");
+// Register JavaScript Handler (required for external shade.js Javascript resources)
+require("./javascript/factory");
 
 /**
  * Constructor of XML3DDataAdapterFactory

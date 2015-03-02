@@ -1,6 +1,14 @@
 function LightManager() {
     this._lights = [];
     this._models = {};
+
+    /**
+     * Updating light parameters can lead to updating the (lazy) scene structure, which
+     * in turn updates the lights. If we are in updateing the lights, flag is set to true.
+     * @type {boolean}
+     * @private
+     */
+    this._inUpdate = false;
 }
 
 LightManager.prototype = {
@@ -33,12 +41,18 @@ LightManager.prototype = {
     },
 
     lightValueChanged: function (light) {
+        if (this._inUpdate)
+            return;
+
+
+        this._inUpdate = true;
         var model = light.model;
         var entry = this.getModelEntry(model.id);
         var offset = entry.lightModels.indexOf(model);
         XML3D.debug.assert(offset != -1, "Light values changed for a light that is not managed by this LightManager");
         model.fillLightParameters(entry.parameters, offset);
         entry.changed = true;
+        this._inUpdate = false;
     },
 
     getModelEntry: function (id) {
@@ -73,6 +87,7 @@ LightManager.prototype = {
     },
 
     _updateParameters: function (entry) {
+        this._inUpdate = true;
         var length = entry.lightModels.length;
         if (!length) {
             entry.parameters = {};
@@ -84,6 +99,8 @@ LightManager.prototype = {
             lightModel.fillLightParameters(entry.parameters, offset)
         });
         entry.changed = true;
+        this._inUpdate = false;
+
     }
 };
 

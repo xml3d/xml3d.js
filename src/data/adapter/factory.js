@@ -24,7 +24,6 @@ require("./javascript/factory");
 
 var XML3DDataAdapterFactory = function () {
     NodeAdapterFactory.call(this, "data");
-    this.graph = new Xflow.Graph();
 };
 XML3D.createClass(XML3DDataAdapterFactory, NodeAdapterFactory);
 XML3DDataAdapterFactory.prototype.aspect = "data";

@@ -8,7 +8,7 @@ var C =require("../interface/constants");
  */
 
 var CLProgram = function (operatorList) {
-    this.cl = operatorList.graph.cl; // CL wrapper
+    this.cl = XML3D.webcl.cl; // CL wrapper
 
     if (!this.cl) {
         return;

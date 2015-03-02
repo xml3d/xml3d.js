@@ -786,6 +786,49 @@
         };
     };
 
+    /**
+     * Checks if WebCL is available and attaches a context to the given object
+     * @param webclObject the object that the context will be attached to
+     * @returns {boolean}
+     */
+    function initWebCLPlatform(webclObject) {
+        if (!isAvailable()) {
+            return false;
+        }
+
+        var clPlatforms = getPlatforms();
+        if (!clPlatforms || clPlatforms.length <= 0) {
+            return false;
+        }
+
+        try {
+            // Trying initially to use GPU (for the best performance). Using CPU as a fallback.
+            var clDevices = getDevicesByType("GPU") || getDevicesByType("CPU");
+            if (!clDevices) {
+                return false;
+            }
+            var clCtx = createContext(clDevices);
+            var cmdQueue = createCommandQueue(clDevices[0], clCtx);
+
+            /**
+             *  TODO: Maybe we should just store the cl-platform objects in C.cl so they are more easily available and
+             *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
+             *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
+             */
+            webclObject.cl = {
+                API: webcl,
+                kernelManager: new KernelManager(clCtx, clDevices),
+                platforms: clPlatforms,
+                devices: clDevices,
+                ctx: clCtx,
+                cmdQueue: cmdQueue
+            };
+            XML3D.debug.logDebug("Successfully initialized WebCL platform.");
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
 
     /**
      * API
@@ -818,6 +861,8 @@
         "WebCLError": WebCLError,
         "getCLErrorName": getCLErrorName
     };
+
+    initWebCLPlatform(namespace.webcl);
 
 
 }(module.exports));

@@ -13,7 +13,6 @@ module.exports = {
     ImageDataTextureEntry: data.ImageDataTextureEntry,
     SamplerConfig: data.SamplerConfig,
     DataChangeNotifier: data.DataChangeNotifier,
-    Graph : graph.Graph,
     InputNode: graph.InputNode,
     DataNode: graph.DataNode,
     getComputeDataflowUrl: graph.getComputeDataflowUrl,

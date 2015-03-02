@@ -419,8 +419,7 @@ module("Xflow tests", {
 
 
 test("Test filter parsing", function() {
-    var graph = new Xflow.Graph();
-    var dataNode = graph.createDataNode();
+    var dataNode = new Xflow.DataNode(false);
     var mapping;
 
     dataNode.setFilter("keep(position, normal, tangent)");
@@ -457,8 +456,7 @@ test("Test filter parsing", function() {
 
 
 test("Test compute parsing", function() {
-    var graph = new Xflow.Graph();
-    var dataNode = graph.createDataNode();
+    var dataNode = new Xflow.DataNode(false);
     var mapping;
 
     dataNode.setCompute("position = xflow.morph(position, posAdd, weight)");

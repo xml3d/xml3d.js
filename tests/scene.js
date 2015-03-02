@@ -6,7 +6,6 @@ module("RenderScene", {
         };
         this.scene.requestRedraw = function() {
         };
-        this.xflowGraph = new Xflow.Graph();
 
     }
 });
@@ -15,7 +14,7 @@ var SceneConstants = XML3DTestLib.SceneConstants;
 
 test("Light attributes", 10, function () {
 
-    var dataNode = this.xflowGraph.createDataNode(false);
+    var dataNode = new Xflow.DataNode(false);
 
     var light = this.scene.createRenderLight({
         light: {
@@ -47,7 +46,7 @@ test("Light attributes", 10, function () {
 
 test("Light callbacks", 9, function () {
 
-    var dataNode = this.xflowGraph.createDataNode(false);
+    var dataNode = new Xflow.DataNode(false);
 
     var light = this.scene.createRenderLight({
         light: {
@@ -90,7 +89,7 @@ test("Light callbacks", 9, function () {
 });
 
 test("Light removal: Issue #71", function () {
-    var dataNode = this.xflowGraph.createDataNode(false);
+    var dataNode = new Xflow.DataNode(false);
     var group = this.scene.createRenderGroup();
     this.scene.createRenderLight({ // SC 3: Add a new light to the scene
         parent: group,

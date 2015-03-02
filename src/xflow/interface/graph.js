@@ -5,96 +5,6 @@ var Base = require("../base.js");
 var ChannelNode = require("../processing/channel-node").ChannelNode;
 var Utils = require("../utils/utils.js");
 
-/**
- * Content of this file:
- * Classes to construct an Xflow graph.
- */
-//----------------------------------------------------------------------------------------------------------------------
-// Graph
-//----------------------------------------------------------------------------------------------------------------------
-
-// TODO: Do we still require Graph?
-/**
- * The Xflow graph includes the whole dataflow graph
- * It is recommended to use one Graph per web document.
- * @constructor
- */
-var Graph = function(){
-    this.initPlatform();
-};
-
-
-/**
- *  Decides which platform to use
- */
-Graph.prototype.initPlatform = function () {
-    this.platform = C.PLATFORM.JAVASCRIPT; // Setting default platform for the graph
-
-    if(initWebCLPlatform(this)) {
-        this.platform = C.PLATFORM.CL;
-    }
-};
-
-/**
- * Checks if WebCL is available and attaches a context to the graph
- * @param graph Graph the context will be attached to
- * @returns {boolean}
- */
-function initWebCLPlatform(graph) {
-    var webcl = XML3D.webcl;
-    if (!webcl || !webcl.isAvailable()) {
-        return false;
-    }
-
-    var clPlatforms = webcl.getPlatforms();
-    if (!clPlatforms || clPlatforms.length <= 0) {
-        return false;
-    }
-
-    try {
-        // Trying initially to use GPU (for the best performance). Using CPU as a fallback.
-        var clDevices = webcl.getDevicesByType("GPU") || webcl.getDevicesByType("CPU");
-        if (!clDevices) {
-            return false;
-        }
-        var clCtx = webcl.createContext(clDevices);
-        var cmdQueue = webcl.createCommandQueue(clDevices[0], clCtx);
-
-        /**
-         *  TODO: Maybe we should just store the cl-platform objects in C.cl so they are more easily available and
-         *  to avoid long prototype chains. Or we could pass the graph context to each node of the graph.
-         *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
-         */
-        graph.cl = {
-            API: webcl,
-            kernelManager: new webcl.KernelManager(clCtx, clDevices),
-            platforms: clPlatforms,
-            devices: clDevices,
-            ctx: clCtx,
-            cmdQueue: cmdQueue
-        };
-        XML3D.debug.logDebug("Successfully initialized WebCL platform.");
-        return true;
-    } catch (e) {
-        return false;
-    }
-}
-
- /**
- * @return {InputNode}
- */
-Graph.prototype.createInputNode = function(){
-    return new InputNode(this);
-};
-
-/**
- * @return {DataNode}
- */
-Graph.prototype.createDataNode = function(protoNode){
-    return new DataNode(this, protoNode);
-};
-
-
 //----------------------------------------------------------------------------------------------------------------------
 // GraphNode
 //----------------------------------------------------------------------------------------------------------------------
@@ -105,8 +15,7 @@ Graph.prototype.createDataNode = function(protoNode){
  * @abstract
  * @param {Graph} graph Reference to parent graph
  */
-var GraphNode = function(graph){
-    this._graph = graph;
+var GraphNode = function(){
     /**
      * All nodes that add a dependency to this node
      * @type array<GraphNode>
@@ -127,8 +36,8 @@ var GraphNode = function(graph){
  * @param {Graph} graph
  * @extends {GraphNode}
  */
-var InputNode = function(graph){
-    GraphNode.call(this, graph);
+var InputNode = function(){
+    GraphNode.call(this);
     /**
      * Name of the input node
      * @type {string}
@@ -296,8 +205,8 @@ function getXflowNodeId(){
  * @param {boolean} isDataFlow is this node a dataflow
  * @extends {GraphNode}
  */
-var DataNode = function(graph, isDataFlow){
-    GraphNode.call(this, graph);
+var DataNode = function(isDataFlow){
+    GraphNode.call(this);
 
     /**
      * Marker, if this data node is expecting data. Xflow
@@ -1066,7 +975,6 @@ function replaceNodeInHierarchy(node, field, newChild) {
 }
 
 module.exports = {
-    Graph : Graph,
     InputNode: InputNode,
     DataNode: DataNode,
     getComputeDataflowUrl: getComputeDataflowUrl

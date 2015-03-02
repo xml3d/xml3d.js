@@ -7,11 +7,9 @@ var Base = require("../base.js");
  * executed).
  *
  * @param {C.PLATFORM} platform
- * @param {Graph} graph
  * @constructor
  */
-var OperatorList = function (platform, graph) {
-    this.graph = graph;
+var OperatorList = function (platform) {
     this.platform = platform;
     /**
      * @type {Array.<OperatorEntry>}

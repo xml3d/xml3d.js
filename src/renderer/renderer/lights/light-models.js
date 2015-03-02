@@ -61,7 +61,14 @@ var LightModel = function (id, light, dataNode, config) {
     this.dataNode = dataNode;
     this.configuration = config;
     this.parameters = Object.keys(config);
-    dataNode.insertBefore(createXflowData(config), null);
+    /**
+     * If the light has not data, just use the default parameters
+     */
+    if (dataNode) {
+        dataNode.insertBefore(createXflowData(config), null);
+    } else {
+        dataNode = createXflowData(config);
+    }
     this.lightParameterRequest = new Xflow.ComputeRequest(dataNode, this.parameters, this.lightParametersChanged.bind(this));
     this.lightParametersChanged(this.lightParameterRequest, null);
 };
@@ -95,7 +102,6 @@ LightModel.prototype = {
     },
 
     lightParametersChanged: function (request, changeType) {
-        console.log("LightModel", this.id);
         if (changeType) {
             this.light.lightValueChanged();
         }
@@ -144,7 +150,11 @@ function transformPose(light, position, direction) {
     }
 }
 
-
+function transformDefault(target, offset, light) {
+    var color = target["intensity"].subarray(offset * 3, offset * 3 + 3);
+    XML3D.math.vec3.scale(color, color, light.localIntensity);
+    target["on"][offset] = light.visible;
+}
 
 
 /**
@@ -158,17 +168,15 @@ var PointLightModel = function (dataNode, light) {
     LightModel.call(this, "point", light, dataNode, PointLightData);
 };
 
-XML3D.createClass(PointLightModel, LightModel);
-XML3D.extend(PointLightModel.prototype, {
+XML3D.createClass(PointLightModel, LightModel, {
 
     transformParameters: function (target, offset) {
         var position = target["position"].subarray(offset * 3, offset * 3 + 3);
         transformPose(this.light, position, null);
-
-        target["on"][offset] = this.light.visible;
+        transformDefault(target, offset, this.light);
     },
 
-    getFrustum: function () {
+    getFrustum: function (aspect) {
         var orthogonal = this.light.type == "directional";
         var t_mat = XML3D.math.mat4.create();
         var bb = new XML3D.math.bbox.create();
@@ -216,20 +224,13 @@ var SpotLightModel = function (dataNode, light) {
 };
 
 
-XML3D.createClass(SpotLightModel, LightModel);
-XML3D.extend(SpotLightModel.prototype, {
-
-
-    lightParametersChanged: function (request, changeType) {
-        console.log("LightModel")
-    },
+XML3D.createClass(SpotLightModel, LightModel, {
 
     transformParameters: function (target, offset) {
         var position = target["position"].subarray(offset * 3, offset * 3 + 3);
         var direction = target["direction"].subarray(offset * 3, offset * 3 + 3);
         transformPose(this.light, position, direction);
-
-        target["on"][offset] = this.light.visible;
+        transformDefault(target, offset, this.light);
     }
     
 });
@@ -248,16 +249,14 @@ var DirectionalLightModel = function (dataNode, light) {
     LightModel.call(this, "directional", light, dataNode, DirectionalLightData);
 };
 
-XML3D.createClass(DirectionalLightModel, LightModel);
-XML3D.extend(DirectionalLightModel.prototype, {
+XML3D.createClass(DirectionalLightModel, LightModel, {
 
     transformParameters: function (target, offset) {
         var direction = target["direction"].subarray(offset * 3, offset * 3 + 3);
         transformPose(this.light, null, direction);
 
-        target["on"][offset] = this.light.visible;
+        transformDefault(target, offset, this.light);
     }
-
 
 });
 

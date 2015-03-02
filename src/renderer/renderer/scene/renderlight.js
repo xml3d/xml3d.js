@@ -25,7 +25,9 @@ function createLightModel(type, data, light) {
         case "spot":
             return new LightModels.SpotLightModel(data, light);
         case "directional":
+            return new LightModels.DirectionalLightModel(data, light);
         default:
+            XML3D.debug.logWarning("Unknown light model: ", type, ". Using directional instead.");
             return new LightModels.DirectionalLightModel(data, light);
     }
 }

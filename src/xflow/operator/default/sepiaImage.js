@@ -22,18 +22,5 @@ Xflow.registerOperator("xflow.sepiaImage", {
             d[i+3] = 255;
         }
         return true;
-    },
-    evaluate_parallel: function(index, image){
-        var x = index[0], y = index[1];
-        var r = (image[x][y][0] * 0.393 + image[x][y][1] * 0.769 + image[x][y][2] * 0.189);
-        var g = (image[x][y][0] * 0.349 + image[x][y][1] * 0.686 + image[x][y][2] * 0.168);
-        var b = (image[x][y][0] * 0.272 + image[x][y][1] * 0.534 + image[x][y][2] * 0.131);
-        if (r>255) r = 255;
-        if (g>255) g = 255;
-        if (b>255) b = 255;
-        if (r<0) r = 0;
-        if (g<0) g = 0;
-        if (b<0) b = 0;
-        return [r,g,b,255];
     }
 });

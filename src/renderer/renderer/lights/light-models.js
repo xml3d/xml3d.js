@@ -31,7 +31,7 @@ var DirectionalLightData = {
 
 
 function createXflowData(config) {
-    var data = XML3D.data.xflowGraph.createDataNode();
+    var data = new Xflow.DataNode();
     for (var name in config) {
         var entry = config[name];
         createXflowValue(data, name, entry.type, entry.default);
@@ -41,7 +41,7 @@ function createXflowData(config) {
 
 function createXflowValue(dataNode, name, type, value) {
     var buffer = new Xflow.BufferEntry(type, new Xflow.TYPED_ARRAY_MAP[type](value));
-    var inputNode = XML3D.data.xflowGraph.createInputNode();
+    var inputNode = new Xflow.InputNode();
     inputNode.data = buffer;
     inputNode.name = name;
     dataNode.appendChild(inputNode);

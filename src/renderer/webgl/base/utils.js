@@ -11,6 +11,13 @@ module.exports = {
         //noinspection FallthroughInSwitchStatementJS
         switch (u.glType) {
             case 35670: //gl.BOOL
+                if (value && value.length !== undefined) {
+                    // Transform a Unit8Array into a JS Array
+                    gl.uniform1iv(u.location, Array.prototype.map.call(value, function(v) { return v; }));
+                } else {
+                    gl.uniform1i(u.location, value || 0);
+                }
+                break;
             case 5124:  //gl.INT
             case 35678: //gl.SAMPLER_2D
             case 35680: //gl.SAMPLER_CUBE

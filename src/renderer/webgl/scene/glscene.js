@@ -93,74 +93,25 @@ XML3D.extend(GLScene.prototype, {
         this.updateShaders();
     }, updateLightParameters: function () {
         var parameters = this.systemUniforms, lights = this.lights;
+        lights.fillGlobalParameters(parameters);
 
-        var pointLightData = {
-            position: [],
-            attenuation: [],
-            intensity: [],
-            on: [],
-            castShadow: [],
-            lightMatrix: [],
-            shadowBias: [],
-            lightNearFar: []
-        };
-        lights.point.forEach(function (light, index) {
-            light.getLightData(pointLightData, index);
-        });
-        parameters["pointLightPosition"] = pointLightData.position;
-        parameters["pointLightAttenuation"] = pointLightData.attenuation;
-        parameters["pointLightIntensity"] = pointLightData.intensity;
-        parameters["pointLightOn"] = pointLightData.on;
-        parameters["pointLightCastShadow"] = pointLightData.castShadow;
-        parameters["pointLightMatrix"] = pointLightData.lightMatrix;
-        parameters["pointLightShadowBias"] = pointLightData.shadowBias;
-        parameters["pointLightNearFar"] = pointLightData.lightNearFar;
-
-        var directionalLightData = {
-            direction: [], intensity: [], on: [], castShadow: [], lightMatrix: [], shadowBias: []
-        };
-        lights.directional.forEach(function (light, index) {
-            light.getLightData(directionalLightData, index);
-        });
-        parameters["directionalLightDirection"] = directionalLightData.direction;
-        parameters["directionalLightIntensity"] = directionalLightData.intensity;
-        parameters["directionalLightOn"] = directionalLightData.on;
-        parameters["directionalLightCastShadow"] = directionalLightData.castShadow;
-        parameters["directionalLightMatrix"] = directionalLightData.lightMatrix;
-        parameters["directionalLightShadowBias"] = directionalLightData.shadowBias;
-
-        var spotLightData = {
-            position: [],
-            attenuation: [],
-            direction: [],
-            intensity: [],
-            on: [],
-            softness: [],
-            falloffAngle: [],
-            castShadow: [],
-            lightMatrix: [],
-            shadowBias: []
-        };
-        lights.spot.forEach(function (light, index) {
-            light.getLightData(spotLightData, index);
-        });
-        parameters["spotLightAttenuation"] = spotLightData.attenuation;
-        parameters["spotLightPosition"] = spotLightData.position;
-        parameters["spotLightIntensity"] = spotLightData.intensity;
-        parameters["spotLightDirection"] = spotLightData.direction;
-        parameters["spotLightOn"] = spotLightData.on;
-        parameters["spotLightSoftness"] = spotLightData.softness;
-        parameters["spotLightCastShadow"] = spotLightData.castShadow;
-        parameters["spotLightMatrix"] = spotLightData.lightMatrix;
-        parameters["spotLightShadowBias"] = spotLightData.shadowBias;
-
-        var softFalloffAngle = [];
-        for (var i = 0; i < lights.spot.length; i++) {
-            softFalloffAngle[i] = spotLightData.falloffAngle[i] * (1.0 - spotLightData.softness[i]);
+        // Derived parameters that are implementation specific.
+        // TODO: Put those to an appropriate place
+        var spotLightFalloffAngle = parameters["spotLightFalloffAngle"];
+        var spotLightSoftness = parameters["spotLightSoftness"];
+        if(spotLightFalloffAngle) {
+            // Map both parameters into cosinus space
+            var spotLightCosSoftFalloffAngle = [];
+            var spotLightCosFalloffAngle = [];
+            for (var i = 0; i < spotLightFalloffAngle.length; i++) {
+                spotLightCosFalloffAngle[i] = Math.cos(spotLightFalloffAngle[i]);
+                spotLightCosSoftFalloffAngle[i] = Math.cos(spotLightFalloffAngle[i] * (1.0 - spotLightSoftness[i]));
+            }
+            parameters["spotLightCosFalloffAngle"] = spotLightCosFalloffAngle;
+            parameters["spotLightCosSoftFalloffAngle"] = spotLightCosSoftFalloffAngle;
         }
-        // Map both parameters into cosinus space
-        parameters["spotLightCosFalloffAngle"] = spotLightData.falloffAngle.map(Math.cos);
-        parameters["spotLightCosSoftFalloffAngle"] = softFalloffAngle.map(Math.cos);
+
+
     },
 
     updateSystemUniforms: function (names) {
@@ -242,9 +193,10 @@ XML3D.extend(GLScene.prototype, {
             this.shaderFactory.setLightStructureDirty();
             this.context.requestRedraw("Light structure changed.");
         });
-        this.addEventListener(C.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (/*event*/) {
+        this.addEventListener(C.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (event) {
             this.lightsNeedUpdate = true;
             this.shaderFactory.setLightValueChanged();
+            this.lights.lightValueChanged(event.light);
             this.context.requestRedraw("Light value changed.");
         });
         XML3D.options.addObserver(this.onFlagsChange.bind(this));

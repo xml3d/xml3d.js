@@ -285,10 +285,13 @@ XML3D.shaders.register("phong", {
 
     addDirectives: function (directives, lights, params) {
         ["point", "directional", "spot"].forEach(function (type) {
-            var numLights = lights[type] ? lights[type].length : 0;
-            var castShadows = lights[type] && lights[type].some(function (light) {
-                return light.castShadow;
-            });
+            var numLights = lights.getModelCount(type);
+            var castShadows = false;
+            if(numLights) {
+                castShadows = Array.prototype.some.call(lights.getModelEntry(type).parameters["castShadow"], function (value) {
+                    return value;
+                });
+            }
             directives.push("MAX_" + type.toUpperCase() + "LIGHTS " + numLights);
             directives.push("HAS_" + type.toUpperCase() + "LIGHT_SHADOWMAPS " + (castShadows ? 1 : 0));
         });

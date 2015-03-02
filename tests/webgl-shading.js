@@ -28,11 +28,16 @@ module("WebGL shaders internal", {
 });
 
 test("Phong fragment shader", function() {
+
+    var scene = new XML3DTestLib.Scene();
+
+    var materialParameters = {}
+
     var phong = XML3D.shaders.getScript("phong");
     ok(phong, "Phong shader exists");
     equal(typeof phong.addDirectives, "function", "Function 'addDirectives' exists");
     var directives = [];
-    phong.addDirectives.call(phong, directives, {}, {});
+    phong.addDirectives.call(phong, directives, scene.lights, {});
     equal(directives.length, 10, "10 directives from phong shader");
 
     var fragment1 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
@@ -43,9 +48,10 @@ test("Phong fragment shader", function() {
     notEqual(fragment1.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
-    phong.addDirectives.call(phong, directives, {
-        point : [{castShadow : false},{castShadow : false}]
-    }, {});
+    var point1 = scene.createRenderLight({light: { type: "point"}});
+    var point2 = scene.createRenderLight({light: { type: "point"}});
+
+    phong.addDirectives.call(phong, directives, scene.lights, materialParameters);
     equal(directives.length, 10, "10 directives from phong shader");
     var fragment2 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment2, "Phong fragment with 2 point lights compiles.");
@@ -55,9 +61,12 @@ test("Phong fragment shader", function() {
     notEqual(fragment2.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
-    phong.addDirectives.call(phong, directives, {
-        directional : [{castShadow : false}]
-    }, {});
+    // Remove the two point lights and add a directional light instead
+    point1.remove();
+    point2.remove();
+    var dir1 = scene.createRenderLight({light: { type: "directional"}});
+
+    phong.addDirectives.call(phong, directives, scene.lights, materialParameters);
     var fragment3 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment3, "Phong fragment with 1 directional light compiles.");
     notEqual(fragment3.indexOf("MAX_POINTLIGHTS 0"), -1, "MAX_POINTLIGHTS set");
@@ -66,9 +75,7 @@ test("Phong fragment shader", function() {
     notEqual(fragment3.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
-    phong.addDirectives.call(phong, directives, {
-        directional : [{castShadow : false}]
-    }, {
+    phong.addDirectives.call(phong, directives, scene.lights, {
         diffuseTexture : {}
     });
     var fragment4 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
@@ -79,12 +86,11 @@ test("Phong fragment shader", function() {
     notEqual(fragment4.indexOf("HAS_DIFFUSETEXTURE 1"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
-    phong.addDirectives.call(phong, directives, {
-        directional : [],
-        point : [{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},
-            {castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},
-            {castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false}]
-    }, {
+    dir1.remove();
+    // Create 15 point lights
+    var pointLights = Array.apply(null, Array(15)).map(function() { return  scene.createRenderLight({light: { type: "point"}}); });
+
+    phong.addDirectives.call(phong, directives, scene.lights, {
         specularTexture : {}
     });
     var fragment5 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
@@ -97,11 +103,13 @@ test("Phong fragment shader", function() {
     notEqual(fragment5.indexOf("HAS_SPECULARTEXTURE 1"), -1, "HAS_SPECULARTEXTURE set");
     notEqual(fragment5.indexOf("HAS_EMISSIVETEXTURE 0"), -1, "HAS_EMISSIVETEXTURE set");
 
+    pointLights.forEach(function(light, idx) { if (idx > 4) light.remove(); });
+    var dir1 = scene.createRenderLight({light: { type: "directional"}});
+    var dir2 = scene.createRenderLight({light: { type: "directional"}});
+    var dir3 = scene.createRenderLight({light: { type: "directional"}});
+
     directives = [];
-    phong.addDirectives.call(phong, directives, {
-        directional : [{castShadow : false},{castShadow : false},{castShadow : false}],
-        point : [{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false},{castShadow : false}]
-    }, {
+    phong.addDirectives.call(phong, directives, scene.lights, {
         diffuseTexture : {},
         specularTexture : {},
         emissiveTexture : {}

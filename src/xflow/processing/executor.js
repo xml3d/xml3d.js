@@ -51,7 +51,7 @@ var Executor = function(ownerNode, platform){
      *  However, it would be good to allow each Graph object to have at least own context, cmdQueue and kernelManager.
      *  e.g. passing graph information here requires a long prototype chain
      */
-    this.operatorList =  new OperatorList(platform, ownerNode.owner.owner._graph);
+    this.operatorList =  new OperatorList(platform);
     this.programData =  new Program.ProgramData();
 
     /**

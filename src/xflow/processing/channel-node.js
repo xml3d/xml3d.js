@@ -196,10 +196,9 @@ function updatePlatform(channelNode) {
     //TODO: Improve platform selection logic.
     // Currently we use forced platform if graph platform is something other than JavaScript
     // and forced platform (owner._platform) is defined
+    platform = owner._platform !== null ? owner._platform : C.PLATFORM.JAVASCRIPT;
 
-    //platform = owner._platform !== null && graph.platform !== C.PLATFORM.JAVASCRIPT ? owner._platform : graph.platform;
-
-    channelNode.platform = owner.platform;
+    channelNode.platform = platform;
 }
 
 /**

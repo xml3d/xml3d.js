@@ -29,12 +29,12 @@ var registerOperator = function(name, data){
     opCollection = operators[name];
 
     if (!name) {
-        XML3D.logWarning("C.registerOperator: Operator name undefined.");
+        XML3D.logWarning("Xflow.registerOperator: Operator name undefined.");
         return;
     }
 
     if (!data) {
-        XML3D.logWarning("C.registerOperator: Operator data undefined.");
+        XML3D.logWarning("Xflow.registerOperator: Operator data undefined.");
         return;
     }
 

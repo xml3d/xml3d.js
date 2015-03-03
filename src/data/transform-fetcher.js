@@ -56,8 +56,12 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
     };
 }());
 
-DOMTransformFetcher.prototype._onChange = function () {
-    this.updateMatrix();
+DOMTransformFetcher.prototype._onChange = function (evt) {
+    if (evt.type == XML3D.events.ADAPTER_VALUE_CHANGED) {
+        this.owner.onTransformChange(this.attrName, evt.adapterHandle.getAdapter().getMatrix());
+    } else { // If the adapter changed, we need to re-evaluate the matrix
+        this.updateMatrix();
+    }
 };
 
 module.exports = DOMTransformFetcher;

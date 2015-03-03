@@ -16,39 +16,48 @@ TransformDataAdapter.prototype.init = function () {
     this.transform = {
         translate: XML3D.math.mat4.create(),
         scale: XML3D.math.mat4.create(),
+        scaleOrientation: XML3D.math.mat4.create(),
         scaleOrientationInv: XML3D.math.mat4.create(),
         center: XML3D.math.mat4.create(),
-        centerInverse: XML3D.math.mat4.create()
-        //rotation               : XML3D.math.mat4.create()
+        centerInverse: XML3D.math.mat4.create(),
+        rotation: XML3D.math.mat4.create()
     };
     this.needsUpdate = true;
     this.checkForImproperNesting();
 };
 
 TransformDataAdapter.prototype.updateMatrix = function () {
-    var n = this.node, transform = this.transform, transVec = n.translation._data, centerVec = n.center._data, s = n.scale._data, so = n.scaleOrientation.toMatrix()._data, rot = n.rotation.toMatrix()._data;
+    var n = this.node;
+    var transform = this.transform;
+    var centerVec = n.center._data;
 
-    XML3D.math.mat4.translate(transform.translate, IDENT_MAT, transVec);
+    XML3D.math.mat4.fromQuat(transform.scaleOrientation, n.scaleOrientation._data);
+    XML3D.math.mat4.fromQuat(transform.rotation, n.rotation._data);
+
+    XML3D.math.mat4.translate(transform.translate, IDENT_MAT, n.translation._data);
     XML3D.math.mat4.translate(transform.center, IDENT_MAT, centerVec);
     XML3D.math.mat4.translate(transform.centerInverse, IDENT_MAT, XML3D.math.vec3.negate(centerVec, centerVec));
-    XML3D.math.mat4.scale(transform.scale, IDENT_MAT, s);
-    XML3D.math.mat4.invert(transform.scaleOrientationInv, so);
+    XML3D.math.mat4.scale(transform.scale, IDENT_MAT, n.scale._data);
+    XML3D.math.mat4.invert(transform.scaleOrientationInv, transform.scaleOrientation);
 
-    // M = T * C
-    XML3D.math.mat4.multiply(this.matrix, transform.translate, transform.center);
-    // M = T * C * R
-    XML3D.math.mat4.multiply(this.matrix, this.matrix, rot);
-    // M = T * C * R * SO
-    XML3D.math.mat4.multiply(this.matrix, this.matrix, so);
-    // M = T * C * R * SO * S
-    XML3D.math.mat4.multiply(this.matrix, this.matrix, transform.scale);
-    // M = T * C * R * SO * S * -SO
-    XML3D.math.mat4.multiply(this.matrix, this.matrix, transform.scaleOrientationInv);
-    // M = T * C * R * SO * S * -SO * -C
-    XML3D.math.mat4.multiply(this.matrix, this.matrix, transform.centerInverse);
-
+    multiplyComponents(transform, this.matrix);
     this.needsUpdate = false;
 };
+
+function multiplyComponents(transform, matrix) {
+    // M = T * C
+    XML3D.math.mat4.multiply(matrix, transform.translate, transform.center);
+    // M = T * C * R
+    XML3D.math.mat4.multiply(matrix, matrix, transform.rotation);
+    // M = T * C * R * SO
+    XML3D.math.mat4.multiply(matrix, matrix, transform.scaleOrientation);
+    // M = T * C * R * SO * S
+    XML3D.math.mat4.multiply(matrix, matrix, transform.scale);
+    // M = T * C * R * SO * S * -SO
+    XML3D.math.mat4.multiply(matrix, matrix, transform.scaleOrientationInv);
+    // M = T * C * R * SO * S * -SO * -C
+    XML3D.math.mat4.multiply(matrix, matrix, transform.centerInverse);
+}
 
 TransformDataAdapter.prototype.getMatrix = function () {
     this.needsUpdate && this.updateMatrix();
@@ -57,19 +66,20 @@ TransformDataAdapter.prototype.getMatrix = function () {
 
 
 TransformDataAdapter.prototype.notifyChanged = function (e) {
-    if (e.type == 1) {
+    if (e.type == XML3D.events.VALUE_MODIFIED) {
         this.needsUpdate = true;
-    } else if (e.type == 2) {
+        this.notifyOppositeAdapters(XML3D.events.ADAPTER_VALUE_CHANGED);
+    } else if (e.type == XML3D.events.NODE_REMOVED) {
         this.dispose();
+        this.notifyOppositeAdapters(XML3D.events.ADAPTER_HANDLE_CHANGED);
     }
-    this.notifyOppositeAdapters();
 };
 TransformDataAdapter.prototype.dispose = function () {
     this.isValid = false;
 };
 
-TransformDataAdapter.prototype.checkForImproperNesting = function() {
-    for (var i=0; i < this.node.childNodes.length; i++) {
+TransformDataAdapter.prototype.checkForImproperNesting = function () {
+    for (var i = 0; i < this.node.childNodes.length; i++) {
         if (this.node.childNodes[i].localName === "transform") {
             XML3D.debug.logError("Parsing error: Transform elements cannot be nested!", this.node);
         }

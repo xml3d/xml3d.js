@@ -553,10 +553,10 @@ function updateAccumulatedNode(table, entry){
         entry.accumulatedXflowNode.setLoading(false);
     }
     else{
-        entry.accumulatedXflowNode = new Xflow.DataNode(null, false);
+        entry.accumulatedXflowNode = new Xflow.DataNode(false);
     }
 
-    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : new Xflow.DataNode(null, false);
+    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : new Xflow.DataNode(false);
     for(var i = 0; i < entry.postQueue.length; ++i){
         var includes = entry.postQueue[i].includes;
         for(var j = 0; j < includes.length; ++j){
@@ -569,7 +569,7 @@ function updateAccumulatedNode(table, entry){
     var node = dataNode, parentNode = null;
     for(var i = 0; i < entry.postQueue.length; ++i){
         var postEntry = entry.postQueue[i];
-        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : new Xflow.DataNode(null, false));
+        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : new Xflow.DataNode(false));
         node.setCompute(postEntry.compute);
         node.setFilter(postEntry.filter);
         node.dataflowNode = postEntry.dataflow;

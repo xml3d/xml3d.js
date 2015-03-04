@@ -581,7 +581,7 @@ ImageDataTextureEntry.prototype._createImage = function(width, height, format, t
 ImageDataTextureEntry.prototype.setImageData = function(v) {
     this._updateImageData(v);
     notifyListeners(this, C.DATA_ENTRY_STATE.CHANGED_VALUE);
-    C._flushResultCallbacks();
+    Base._flushResultCallbacks();
 };
 
 ImageDataTextureEntry.prototype.getWidth = function() {

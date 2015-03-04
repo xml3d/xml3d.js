@@ -154,7 +154,7 @@ createClass(AssetDataAdapter, DataAdapter);
 
 AssetDataAdapter.prototype.init = function () {
     DataAdapter.prototype.init.call(this);
-    this.outputXflowNode = new Xflow.DataNode(null, false);
+    this.outputXflowNode = new Xflow.DataNode(false);
     this.assetEntry = new SubData(this.outputXflowNode, this.getXflowNode(), this.node);
     this.assetEntry.setName(this.node.getAttribute("name"));
     updateClassNames(this);

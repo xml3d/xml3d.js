@@ -108,7 +108,7 @@
         if (jsonData.version != "0.4.0")
             throw new Error("Unknown JSON version: " + jsonData.version);
 
-        var node = new Xflow.DataNode(null, false);
+        var node = new Xflow.DataNode(false);
         node.userData = "External Json"; // TODO: Try to add document URL here (how to get it?)
 
         var entries = jsonData.data;

@@ -13,7 +13,7 @@ var DataflowDataAdapter = function (factory, node) {
 XML3D.createClass(DataflowDataAdapter, BaseDataAdapter);
 
 DataflowDataAdapter.prototype.init = function () {
-    this.xflowDataNode = new Xflow.DataNode(null, false);
+    this.xflowDataNode = new Xflow.DataNode(false);
     this.dataflowRefs = [];
     updateDataflowXflowNode(this, this.node);
 };

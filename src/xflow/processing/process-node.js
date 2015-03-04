@@ -129,7 +129,7 @@ ProcessNode.prototype.receiveAsyncProcessing = function(){
     else{
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
     }
-    C._flushResultCallbacks();
+    Base._flushResultCallbacks();
 };
 
 

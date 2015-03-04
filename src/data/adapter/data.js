@@ -21,7 +21,7 @@ var DataAdapter = function (factory, node) {
 XML3D.createClass(DataAdapter, BaseDataAdapter);
 
 DataAdapter.prototype.init = function () {
-    this.xflowDataNode = new Xflow.DataNode(null, false);
+    this.xflowDataNode = new Xflow.DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
 

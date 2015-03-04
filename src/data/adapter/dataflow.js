@@ -42,7 +42,7 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type === XML3D.events.ADAPTER_HANDLE_CHANGED) {
         //TODO: Handle ADAPTER_HANDLE_CHANGED
         if (this.externalScripts[evt.key]) {
-            setLoadingStateForMatchingXflowNode(this.xflowDataNode, evt.key, false);
+            setLoadingStateForMatchingXflowNodes(this.xflowDataNode, evt.key, false);
             this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         }
     }
@@ -71,13 +71,23 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
     }
 };
 
-function setLoadingStateForMatchingXflowNode(node, name, loading) {
+/**
+ * Traverse all subnodes of a dataflow and set the loading state of
+ * all nodes with a compute operator that relies on the matching external script name.
+ * A compute node will only be executed if its loading state is 'false' and none of its children are 'loading', so
+ * this ensures we don't do the compute operations until the external operators have been loaded.
+ * @param {Xflow.DataNode} node the current node to check for instances of the given operator
+ * @param {string} name the name of the external operator to check for
+ * @param {boolean} loading whether the operator has finished loading or not
+ */
+function setLoadingStateForMatchingXflowNodes(node, name, loading) {
     if (node._computeOperator === name) {
         node.setLoading(loading);
-    } else {
+    }
+    if (node._children) {
         var i = node._children.length;
         while (i--) {
-            setLoadingStateForMatchingXflowNode(node._children[i], name, loading);
+            setLoadingStateForMatchingXflowNodes(node._children[i], name, loading);
         }
     }
 }
@@ -181,7 +191,7 @@ function updateDataflowXflowNode(adapter, node) {
 
     for (var name in adapter.externalScripts) {
         // Ensure XFlow doesn't execute any compute nodes that depend on external scripts until they're loaded
-        setLoadingStateForMatchingXflowNode(adapter.xflowDataNode, name, true);
+        setLoadingStateForMatchingXflowNodes(adapter.xflowDataNode, name, true);
     }
 }
 

@@ -762,16 +762,34 @@ module("Xflow External Operators", {
 
 test("Dataflows - External Operators", function() {
     var xml3dElem = this.doc.getElementById("xml3dElem");
-    var handler = getHandler(xml3dElem);
     var mesh = this.doc.getElementById("mesh1");
-    var positions = mesh.getResult()._entries.position;
-    QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Dataflow positions were correctly computed");
+    xml3dElem.addEventListener("load", function() {
+        start();
+        var positions = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Dataflow positions were correctly computed");
+    });
+    stop();
 });
 
+test("Dataflows - External Operators with multiple uses", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh3");
+
+    xml3dElem.addEventListener("load", function() {
+        start();
+        var positions2 = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions2.value, [5,3,3,2,0,2], EPSILON, "Multiple uses of the same external operator");
+    });
+    stop();
+});
 
 test("Data - External Operators", function() {
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var xml3dElem = this.doc.getElementById("xml3dElem");
     var mesh = this.doc.getElementById("mesh2");
-    var positions = mesh.getResult()._entries.position;
-    QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Data positions were correctly computed");
+    xml3dElem.addEventListener("load", function() {
+        start();
+        var positions = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Data positions were correctly computed");
+    });
+    stop();
 });

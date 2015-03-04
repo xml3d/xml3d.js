@@ -740,3 +740,38 @@ test("Errors with empty arguments", function() {
     var response = this.loadTestXML("./xflow-xml/error/test_empty_argument.xml", handler);
     this.executeTests(response);
 });
+
+
+module("Xflow External Operators", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.win = document.getElementById("xml3dframe").contentWindow;
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/data-xflow-external-operators.html"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Dataflows - External Operators", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var handler = getHandler(xml3dElem);
+    var mesh = this.doc.getElementById("mesh1");
+    var positions = mesh.getResult()._entries.position;
+    QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Dataflow positions were correctly computed");
+});
+
+
+test("Data - External Operators", function() {
+    var handler = getHandler(this.doc.getElementById("xml3dElem"));
+    var mesh = this.doc.getElementById("mesh2");
+    var positions = mesh.getResult()._entries.position;
+    QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Data positions were correctly computed");
+});

@@ -17,6 +17,7 @@ var DataAdapter = function (factory, node) {
     BaseDataAdapter.call(this, factory, node);
     // Node handles for src and proto
     this.xflowDataNode = null;
+    this.externalScripts = {};
 };
 XML3D.createClass(DataAdapter, BaseDataAdapter);
 
@@ -50,9 +51,6 @@ DataAdapter.prototype.updateAdapterHandle = function(key, url) {
     this.connectAdapterHandle(key, adapterHandle);
     this.connectedAdapterChanged(key, adapterHandle ? adapterHandle.getAdapter() : null, status);
 };
-
-
-
 
 DataAdapter.prototype.onXflowLoadEvent = function(node, newLevel, oldLevel){
     if(newLevel == Infinity){
@@ -93,8 +91,20 @@ function recursiveDataAdapterConstruction(adapter) {
     for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
         var subadapter = adapter.factory.getAdapter(child);
         if (subadapter) {
-            adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
-
+            if (subadapter.getXflowNode) {
+                adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
+            } else if (subadapter.getScriptType) {
+                var scriptId = subadapter.node.name;
+                if (!scriptId) {
+                    XML3D.debug.logError("Parsing error: Externally referenced operators must have a 'name' attribute matching the name they were registered with. ", subadapter.node);
+                    scriptId = "unknown_operator";
+                }
+                adapter.externalScripts[scriptId] = subadapter;
+                if (subadapter.connectedAdapterHandle) {
+                    adapter.connectAdapterHandle(scriptId, subadapter.connectedAdapterHandle);
+                }
+                adapter.xflowDataNode.setLoading(true);
+            }
             // Passes _platform values to children nodes starting from the node
             // where these attributes are first defined
             if (adapter.xflowDataNode._platform !== null) {
@@ -174,10 +184,12 @@ DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, statu
     this.xflowDataNode.setLoading(true);
     if (key === "src") {
         this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
-    }
-    if (key === "dataflow") {
+    } else if (key === "dataflow") {
         this.xflowDataNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
+    } else if (this.externalScripts[key]) {
+        this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     }
+
     updateLoadState(this);
 };
 
@@ -218,6 +230,13 @@ function updateLoadState(dataAdpater) {
     handle = dataAdpater.getConnectedAdapterHandle("dataflow");
     if (handle && handle.status === XML3D.base.AdapterHandle.STATUS.LOADING) {
         loading = true;
+    }
+
+    for (var name in dataAdpater.externalScripts) {
+        handle = dataAdpater.getConnectedAdapterHandle(name);
+        if (handle && handle.status === XML3D.base.AdapterHandle.STATUS.LOADING) {
+            loading = true;
+        }
     }
 
     dataAdpater.xflowDataNode.setLoading(loading);

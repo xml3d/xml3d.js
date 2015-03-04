@@ -7,8 +7,6 @@ var ScriptDataAdapter = function(factory, node) {
     if (node.src) {
         this.connectedAdapterHandle = this.getAdapterHandle(node.src);
         this.connectAdapterHandle(node.name, this.connectedAdapterHandle);
-    } else if (this.node.value) {
-        window.eval(this.node.value);
     }
 };
 createClass(ScriptDataAdapter, NodeAdapter);
@@ -18,7 +16,11 @@ ScriptDataAdapter.prototype.getScriptType = function(){
 };
 
 ScriptDataAdapter.prototype.getScript = function(){
-    return this.node.value;
+    if (this.node.src) {
+        return this.externalScript;
+    } else {
+        return this.node.value;
+    }
 };
 
 ScriptDataAdapter.prototype.notifyChanged = function(evt) {
@@ -30,9 +32,7 @@ ScriptDataAdapter.prototype.notifyChanged = function(evt) {
             break;
 
         case XML3D.events.ADAPTER_HANDLE_CHANGED:
-            if (evt.adapter.script) {
-                window.eval(evt.adapter.script);
-            }
+            this.externalScript = evt.adapter.script;
             this.notifyOppositeAdapters();
             break;
     }

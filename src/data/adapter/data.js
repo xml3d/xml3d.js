@@ -187,6 +187,7 @@ DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, statu
     } else if (key === "dataflow") {
         this.xflowDataNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
     } else if (this.externalScripts[key]) {
+        window.eval(adapter.script);
         this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
     }
 

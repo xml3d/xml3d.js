@@ -42,6 +42,7 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type === XML3D.events.ADAPTER_HANDLE_CHANGED) {
         //TODO: Handle ADAPTER_HANDLE_CHANGED
         if (this.externalScripts[evt.key]) {
+            window.eval(evt.adapter.script);
             setLoadingStateForMatchingXflowNodes(this.xflowDataNode, evt.key, false);
             this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
         }

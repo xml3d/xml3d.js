@@ -1,32 +1,32 @@
 var Frustum = require("../tools/frustum.js").Frustum;
 
 var PointLightData = {
-    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, default: [1, 1, 1]},
-    "attenuation": {type: Xflow.DATA_TYPE.FLOAT3, default: [0, 0, 1]},
-    "position": {type: Xflow.DATA_TYPE.FLOAT3, default: [0, 0, 0]},
-    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, default: [0.0001]},
-    "castShadow": {type: Xflow.DATA_TYPE.BOOL, default: [false]},
-    "on": {type: Xflow.DATA_TYPE.BOOL, default: [true]}
+    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
+    "attenuation": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
+    "position": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
+    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, 'default': [0.0001]},
+    "castShadow": {type: Xflow.DATA_TYPE.BOOL, 'default': [false]},
+    "on": {type: Xflow.DATA_TYPE.BOOL, 'default': [true]}
 };
 
 var SpotLightData = {
-    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, default: [1, 1, 1]},
-    "attenuation": {type: Xflow.DATA_TYPE.FLOAT3, default: [0, 0, 1]},
-    "position": {type: Xflow.DATA_TYPE.FLOAT3, default: [0, 0, 0]},
-    "direction": {type: Xflow.DATA_TYPE.FLOAT3, default: [0, 0, -1]},
-    "falloffAngle": {type: Xflow.DATA_TYPE.FLOAT, default: [Math.PI / 4]},
-    "softness": {type: Xflow.DATA_TYPE.FLOAT, default: [0.0]},
-    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, default: [0.0001]},
-    "castShadow": {type: Xflow.DATA_TYPE.BOOL, default: [false]},
-    "on": {type: Xflow.DATA_TYPE.BOOL, default: [true]}
+    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
+    "attenuation": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
+    "position": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
+    "direction": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
+    "falloffAngle": {type: Xflow.DATA_TYPE.FLOAT, 'default': [Math.PI / 4]},
+    "softness": {type: Xflow.DATA_TYPE.FLOAT, 'default': [0.0]},
+    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, 'default': [0.0001]},
+    "castShadow": {type: Xflow.DATA_TYPE.BOOL, 'default': [false]},
+    "on": {type: Xflow.DATA_TYPE.BOOL, 'default': [true]}
 };
 
 var DirectionalLightData = {
-    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, default: [1, 1, 1]},
-    "direction": {type: Xflow.DATA_TYPE.FLOAT3, default: [0, 0, -1]},
-    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, default: [0.0001]},
-    "castShadow": {type: Xflow.DATA_TYPE.BOOL, default: [false]},
-    "on": {type: Xflow.DATA_TYPE.BOOL, default: [true]}
+    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
+    "direction": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
+    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, 'default': [0.0001]},
+    "castShadow": {type: Xflow.DATA_TYPE.BOOL, 'default': [false]},
+    "on": {type: Xflow.DATA_TYPE.BOOL, 'default': [true]}
 };
 
 
@@ -34,7 +34,7 @@ function createXflowData(config) {
     var data = new Xflow.DataNode();
     for (var name in config) {
         var entry = config[name];
-        createXflowValue(data, name, entry.type, entry.default);
+        createXflowValue(data, name, entry.type, entry['default']);
     }
     return data;
 }
@@ -232,7 +232,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
         transformPose(this.light, position, direction);
         transformDefault(target, offset, this.light);
     }
-    
+
 });
 
 

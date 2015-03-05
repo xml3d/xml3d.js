@@ -740,3 +740,56 @@ test("Errors with empty arguments", function() {
     var response = this.loadTestXML("./xflow-xml/error/test_empty_argument.xml", handler);
     this.executeTests(response);
 });
+
+
+module("Xflow External Operators", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.win = document.getElementById("xml3dframe").contentWindow;
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/data-xflow-external-operators.html"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Dataflows - External Operators", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh1");
+    xml3dElem.addEventListener("load", function() {
+        start();
+        var positions = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Dataflow positions were correctly computed");
+    });
+    stop();
+});
+
+test("Dataflows - External Operators with multiple uses", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh3");
+
+    xml3dElem.addEventListener("load", function() {
+        start();
+        var positions2 = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions2.value, [5,3,3,2,0,2], EPSILON, "Multiple uses of the same external operator");
+    });
+    stop();
+});
+
+test("Data - External Operators", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh2");
+    xml3dElem.addEventListener("load", function() {
+        start();
+        var positions = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Data positions were correctly computed");
+    });
+    stop();
+});

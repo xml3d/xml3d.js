@@ -1,6 +1,7 @@
 var NodeAdapterFactory = XML3D.base.NodeAdapterFactory;
 var Asset = require("./asset");
 var Misc = require("./misc");
+var ScriptDataAdapter = require("./script");
 var TextureDataAdapter = require("./texture");
 var TransformDataAdapter = require("./transform");
 var ValueDataAdapter = require("./values");
@@ -49,7 +50,7 @@ var reg = {
     dataflow: DataflowDataAdapter,
     compute: ComputeDataAdapter,
     video: Misc.VideoDataAdapter,
-    script: Misc.ScriptDataAdapter,
+    script: ScriptDataAdapter,
     transform: TransformDataAdapter,
     asset: Asset.AssetAdapter,
     assetdata: Asset.AssetDataAdapter,

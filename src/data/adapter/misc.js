@@ -31,27 +31,6 @@ var NodeAdapter = XML3D.base.NodeAdapter;
     };
 
 
-    var ScriptDataAdapter = function(factory, node) {
-        NodeAdapter.call(this, factory, node);
-    };
-    createClass(ScriptDataAdapter, NodeAdapter);
-
-    ScriptDataAdapter.prototype.getScriptType = function(){
-        return this.node.type;
-    }
-
-    ScriptDataAdapter.prototype.getScript = function(){
-        return this.node.value;
-    }
-
-    ScriptDataAdapter.prototype.notifyChanged = function(evt) {
-        switch(evt.type){
-            case XML3D.events.VALUE_MODIFIED:
-            case XML3D.events.NODE_INSERTED:
-            case XML3D.events.NODE_REMOVED: this.notifyOppositeAdapters();
-        }
-    };
-
     var ImgDataAdapter = function(factory, node) {
         NodeAdapter.call(this, factory, node);
         this.textureEntry = null;
@@ -214,7 +193,6 @@ var NodeAdapter = XML3D.base.NodeAdapter;
     module.exports = {
         ImgDataAdapter: ImgDataAdapter,
         VideoDataAdapter: VideoDataAdapter,
-        SinkDataAdapter: SinkDataAdapter,
-        ScriptDataAdapter: ScriptDataAdapter
+        SinkDataAdapter: SinkDataAdapter
     };
 

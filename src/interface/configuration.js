@@ -389,6 +389,7 @@ classInfo['script'] = {
     // TODO: Handle style for script
     value: {a: handlers.StringValueHandler},
     src: {a: handlers.StringAttributeHandler},
+    name: {a: handlers.StringAttributeHandler},
     type: {a: handlers.StringAttributeHandler},
     _term: undefined
 };

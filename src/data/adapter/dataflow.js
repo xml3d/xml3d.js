@@ -9,6 +9,7 @@ var BaseDataAdapter = require("./base");
 var DataflowDataAdapter = function (factory, node) {
     BaseDataAdapter.call(this, factory, node);
     this.xflowDataNode = null;
+    this.externalScripts = {};
 };
 XML3D.createClass(DataflowDataAdapter, BaseDataAdapter);
 
@@ -40,6 +41,11 @@ DataflowDataAdapter.prototype.updateAdapterHandle = function(key, url) {
 DataflowDataAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type === XML3D.events.ADAPTER_HANDLE_CHANGED) {
         //TODO: Handle ADAPTER_HANDLE_CHANGED
+        if (this.externalScripts[evt.key]) {
+            window.eval(evt.adapter.script);
+            setLoadingStateForMatchingXflowNodes(this.xflowDataNode, evt.key, false);
+            this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        }
     }
 
     switch (evt.type) {
@@ -65,6 +71,27 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
             break;
     }
 };
+
+/**
+ * Traverse all subnodes of a dataflow and set the loading state of
+ * all nodes with a compute operator that relies on the matching external script name.
+ * A compute node will only be executed if its loading state is 'false' and none of its children are 'loading', so
+ * this ensures we don't do the compute operations until the external operators have been loaded.
+ * @param {Xflow.DataNode} node the current node to check for instances of the given operator
+ * @param {string} name the name of the external operator to check for
+ * @param {boolean} loading whether the operator has finished loading or not
+ */
+function setLoadingStateForMatchingXflowNodes(node, name, loading) {
+    if (node._computeOperator === name) {
+        node.setLoading(loading);
+    }
+    if (node._children) {
+        var i = node._children.length;
+        while (i--) {
+            setLoadingStateForMatchingXflowNodes(node._children[i], name, loading);
+        }
+    }
+}
 
 DataflowDataAdapter.prototype.updateXflowNode = function () {
     updateDataflowXflowNode(this, this.node);
@@ -95,6 +122,7 @@ function updateDataflowXflowNode(adapter, node) {
     adapter.xflowDataNode.setCompute("");
     adapter.clearAdapterHandles();
     adapter.dataflowRefs = [];
+    adapter.externalScripts = {};
     updateDataflowOut(adapter);
 
     var child = node.lastElementChild, firstNode = true, prevNode = null, currentNode = adapter.xflowDataNode, subAdapter, xflowNode;
@@ -127,7 +155,7 @@ function updateDataflowXflowNode(adapter, node) {
                 if (firstNode) {
                     firstNode = false;
                 } else {
-                    xflowNode = new Xflow.DataNode(null, false);
+                    xflowNode = new Xflow.DataNode(false);
                     if (prevNode) {
                         currentNode.insertBefore(xflowNode, prevNode);
                     } else {
@@ -148,9 +176,24 @@ function updateDataflowXflowNode(adapter, node) {
                     adapter.updateAdapterHandle(idx, currentNode.computeDataflowUrl);
                 }
             }
+        } else if (subAdapter.getScriptType) {
+            var scriptId = subAdapter.node.name;
+            if (!scriptId) {
+                XML3D.debug.logError("Parsing error: Externally referenced operators must have a 'name' attribute matching the name they were registered with. ", subAdapter.node);
+                scriptId = "unknown_operator";
+            }
+            adapter.externalScripts[scriptId] = subAdapter;
+            if (subAdapter.connectedAdapterHandle) {
+                adapter.connectAdapterHandle(scriptId, subAdapter.connectedAdapterHandle);
+            }
         }
 
     } while (child = child.previousElementSibling);
+
+    for (var name in adapter.externalScripts) {
+        // Ensure XFlow doesn't execute any compute nodes that depend on external scripts until they're loaded
+        setLoadingStateForMatchingXflowNodes(adapter.xflowDataNode, name, true);
+    }
 }
 
 

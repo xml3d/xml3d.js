@@ -117,7 +117,7 @@ classInfo['xml3d'] = {
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     getRenderInterface : {m: methods.xml3dGetRenderInterface},
-    activeView : {a: handlers.ReferenceHandler},
+    activeView : {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 
@@ -149,7 +149,7 @@ classInfo['data'] = {
     getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
-    src: {a: handlers.ReferenceHandler},
+    src: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -184,11 +184,11 @@ classInfo['asset'] = {
     complete: {p: properties.AssetComplete},
     progressLevel: {p: properties.AssetProgressLevel},
     // TODO: Handle style for data
-    src: {a: handlers.ReferenceHandler},
+    src: {a: handlers.StringAttributeHandler},
     name: {a: handlers.StringAttributeHandler},
     pick: {a: handlers.StringAttributeHandler},
-    transform: {a: handlers.ReferenceHandler},
-    shader: {a: handlers.ReferenceHandler},
+    transform: {a: handlers.StringAttributeHandler},
+    shader: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -223,8 +223,8 @@ classInfo['group'] = {
     getBoundingBox : {m: methods.deprecatedGetBoundingBoxWorld},
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
-    transform: {a: handlers.ReferenceHandler},
-    shader: {a: handlers.ReferenceHandler},
+    transform: {a: handlers.StringAttributeHandler},
+    shader: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -251,8 +251,8 @@ classInfo['mesh'] = {
     visible: {a: handlers.BoolAttributeHandler, params: true},
     type: {a: handlers.EnumAttributeHandler, params: {e: MeshTypes, d: 0}},
     compute: {a: handlers.StringAttributeHandler},
-    transform: {a: handlers.ReferenceHandler},
-    shader: {a: handlers.ReferenceHandler},
+    transform: {a: handlers.StringAttributeHandler},
+    shader: {a: handlers.StringAttributeHandler},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
     getBoundingBox : {m: methods.deprecatedGetBoundingBoxLocal},
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
@@ -263,7 +263,7 @@ classInfo['mesh'] = {
     getProtoInfo: {m: methods.meshGetProtoInfo},
     isOutputConnected: {m: methods.meshIsOutputConnected},
     getResult: {m: methods.meshGetResult},
-    src: {a: handlers.ReferenceHandler},
+    src: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -292,10 +292,10 @@ classInfo['model'] = {
     getBoundingBox : {m: methods.deprecatedGetBoundingBoxLocal},
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
-    src: {a: handlers.ReferenceHandler},
+    src: {a: handlers.StringAttributeHandler},
     pick: {a: handlers.StringAttributeHandler},
-    transform: {a: handlers.ReferenceHandler},
-    shader: {a: handlers.ReferenceHandler},
+    transform: {a: handlers.StringAttributeHandler},
+    shader: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -330,8 +330,8 @@ classInfo['shader'] = {
     getProtoInfo: {m: methods.XML3DShaderProviderTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
     getResult: {m: methods.XML3DShaderProviderTypeGetResult},
-    script: {a: handlers.ReferenceHandler},
-    src: {a: handlers.ReferenceHandler},
+    script: {a: handlers.StringAttributeHandler},
+    src: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -355,7 +355,7 @@ classInfo['light'] = {
     global: {a: handlers.BoolAttributeHandler, params: false},
     intensity: {a: handlers.FloatAttributeHandler, params: 1},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
-    shader: {a: handlers.ReferenceHandler},
+    shader: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -376,8 +376,8 @@ classInfo['lightshader'] = {
     getProtoInfo: {m: methods.XML3DShaderProviderTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
     getResult: {m: methods.XML3DShaderProviderTypeGetResult},
-    script: {a: handlers.ReferenceHandler},
-    src: {a: handlers.ReferenceHandler},
+    script: {a: handlers.StringAttributeHandler},
+    src: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -406,8 +406,8 @@ classInfo['assetmesh'] = {
     compute: {a: handlers.StringAttributeHandler},
     filter: {a: handlers.StringAttributeHandler},
     includes: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.ReferenceHandler},
-    transform: {a: handlers.ReferenceHandler},
+    shader: {a: handlers.StringAttributeHandler},
+    transform: {a: handlers.StringAttributeHandler},
     platform: {a: handlers.EnumAttributeHandler, params: {e: PlatformTypes, d: 1}},
     getOutputNames: {m: methods.XML3DNestedDataContainerTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DNestedDataContainerTypeGetOutputChannelInfo},
@@ -415,7 +415,7 @@ classInfo['assetmesh'] = {
     getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
-    src: {a: handlers.ReferenceHandler},
+    src: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -436,7 +436,7 @@ classInfo['assetdata'] = {
     getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
-    src: {a: handlers.ReferenceHandler},
+    src: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 /**
@@ -623,7 +623,7 @@ classInfo['view'] = {
     getDirection: {m: methods.viewGetDirection},
     getUpVector: {m: methods.viewGetUpVector},
     getViewMatrix: {m: methods.viewGetViewMatrix},
-    perspective: {a: handlers.ReferenceHandler},
+    perspective: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
 

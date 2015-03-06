@@ -48,10 +48,6 @@ handlers.StringAttributeHandler = function(id) {
     };
 };
 
-// TODO: remove reference handler in webgl generator and remove this line
-handlers.ReferenceHandler = handlers.StringAttributeHandler;
-
-
 handlers.EnumAttributeHandler = function(id, p) {
     AttributeHandler.call(this);
 

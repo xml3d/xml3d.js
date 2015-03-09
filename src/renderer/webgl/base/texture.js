@@ -20,8 +20,12 @@ var GLTexture = function (context) {
     this.height = 0;
     this.context = context;
     this.handle = null;
+
+    this.textureType = context.gl.TEXTURE_2D;
+
     textures++;
 };
+
 XML3D.createClass(GLTexture, SamplerConfig);
 
 GLTexture.State = {
@@ -209,13 +213,12 @@ XML3D.extend(GLTexture.prototype, {
 
     updateTextureFromData: function (texelSource) {
         var gl = this.context.gl;
-        this.textureType = gl.TEXTURE_2D;
         this._bind();
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrapS);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrapT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.minFilter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.magFilter);
+        gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_S, this.wrapS);
+        gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_T, this.wrapT);
+        gl.texParameteri(this.textureType, gl.TEXTURE_MIN_FILTER, this.minFilter);
+        gl.texParameteri(this.textureType, gl.TEXTURE_MAG_FILTER, this.magFilter);
 
         var type = glTextureTypeFromXflow(texelSource.texelType, gl);
         var format = glTextureFormatFromXflow(texelSource.texelFormat, gl);
@@ -245,7 +248,7 @@ XML3D.extend(GLTexture.prototype, {
         }
 
         if (this.generateMipMap)
-            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.generateMipmap(this.textureType);
 
         this.created();
     },
@@ -266,14 +269,13 @@ XML3D.extend(GLTexture.prototype, {
         this.width = width;
         this.height = height;
         this.handle = gl.createTexture();
-        this.textureType = gl.TEXTURE_2D;
         this._bind();
 
         // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, opt.wrapS);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, opt.wrapT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, opt.minFilter);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, opt.magFilter);
+        gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_S, opt.wrapS);
+        gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_T, opt.wrapT);
+        gl.texParameteri(this.textureType, gl.TEXTURE_MIN_FILTER, opt.minFilter);
+        gl.texParameteri(this.textureType, gl.TEXTURE_MAG_FILTER, opt.magFilter);
 
         if (!opt.isDepth) {
             if (texels instanceof Uint8ClampedArray) {
@@ -286,7 +288,7 @@ XML3D.extend(GLTexture.prototype, {
         }
 
         if (opt.generateMipmap) {
-            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.generateMipmap(this.textureType);
         }
         this.created();
     }
@@ -301,7 +303,82 @@ StateMachine.create({
     }, {name: 'loads', from: '*', to: GLTexture.State.LOADING}]
 });
 
+//noinspection JSValidateJSDoc
+/**
+ * @param {GLContext} context
+ * @constructor
+ */
+var GLCubeMap = function (context) {
+    GLTexture.call(this, context, context.gl.TEXTURE_CUBE_MAP);
+    var gl = context.gl;
+    this.textureType = context.gl.TEXTURE_CUBE_MAP;
+    this.glSides = [gl.TEXTURE_CUBE_MAP_POSITIVE_X, gl.TEXTURE_CUBE_MAP_NEGATIVE_X, gl.TEXTURE_CUBE_MAP_POSITIVE_Y, gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z];
 
-module.exports = GLTexture;
+};
+XML3D.createClass(GLCubeMap, GLTexture, {
+    updateTextureFromData: function (texelSource) {
+        debug.log("updateTextureFromData not implemented for CubeMapping!");
+    },
+
+    createTex2DFromData: function (internalFormat, width, height, sourceFormat, sourceType, opt) {
+        var gl = this.context.gl;
+
+        var opt = opt || {};
+        var texels = opt.texels;
+
+        if (!texels) {
+            if (sourceType == gl.FLOAT) {
+                texels = new Float32Array(width * height * 4);
+            } else {
+                texels = new Uint8Array(width * height * 4);
+            }
+        }
+        this.width = width;
+        this.height = height;
+        this.handle = gl.createTexture();
+        this._bind();
+
+        // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_S, opt.wrapS);
+        gl.texParameteri(this.textureType, gl.TEXTURE_WRAP_T, opt.wrapT);
+        gl.texParameteri(this.textureType, gl.TEXTURE_MIN_FILTER, opt.minFilter);
+        gl.texParameteri(this.textureType, gl.TEXTURE_MAG_FILTER, opt.magFilter);
+
+        for(var i = 0; i < this.glSides.length; ++i) {
+            if (!opt.isDepth) {
+                if (texels instanceof Uint8ClampedArray) {
+                    gl.texImage2D(this.glSides[i], 0, internalFormat, width, height, 0, sourceFormat, sourceType, new Uint8Array(texels.buffer));
+                } else {
+                    gl.texImage2D(this.glSides[i], 0, internalFormat, width, height, 0, sourceFormat, sourceType, texels);
+                }
+            } else {
+                gl.texImage2D(this.glSides[i], 0, internalFormat, width, height, 0, sourceFormat, sourceType, null);
+            }
+        }
+
+        if (opt.generateMipmap) {
+            gl.generateMipmap(this.textureType);
+        }
+        this.created();
+    }
+});
+
+GLCubeMap.State = {
+    NONE: "none", LOADING: "loading", READY: "ready", ERROR: "error"
+};
+
+StateMachine.create({
+    target: GLCubeMap.prototype,
+    initial: GLCubeMap.State.NONE,
+    events: [{name: 'created', from: '*', to: GLCubeMap.State.READY}, {
+        name: 'failed', from: '*', to: GLCubeMap.State.ERROR
+    }, {name: 'loads', from: '*', to: GLCubeMap.State.LOADING}]
+});
+
+
+module.exports = {
+    GLTexture: GLTexture,
+    GLCubeMap: GLCubeMap
+};
 
 

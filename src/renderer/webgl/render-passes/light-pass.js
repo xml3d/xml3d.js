@@ -37,7 +37,7 @@ XML3D.createClass(LightPass, SceneRenderPass, {
 
             var count = {objects: 0, primitives: 0};
 
-            this.light.getWorldToLightMatrix(c_viewMat_tmp);
+            this.light.model.getWorldToLightMatrix(c_viewMat_tmp);
             frustum.getProjectionMatrix(c_projMat_tmp, aspect);
 
             scene.updateReadyObjectsFromMatrices(c_viewMat_tmp, c_projMat_tmp);

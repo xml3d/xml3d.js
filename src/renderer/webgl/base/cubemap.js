@@ -1,11 +1,11 @@
-var StateMachine = require("../../../contrib/state-machine.js");
+//moved to texture.js
 var SamplerConfig = require("../../../xflow/interface/data.js").SamplerConfig;
 
 /**
  * @param {WebGLRenderingContext} gl
  * @constructor
  */
-var GLCubeMap = function (gl) {
+/*var GLCubeMap = function (gl) {
     SamplerConfig.call(this);
     this.setDefaults();
     this.width = 0;
@@ -59,7 +59,7 @@ var nextHighestPowerOfTwo = function (x) {
 /**
  * Scale up the texture to the next highest power of two dimensions.
  * @returns {HTMLCanvasElement}
- */
+ *//*
 var scaleImage = function (image, width, height) {
     var canvas = document.createElement("canvas");
     canvas.width = nextHighestPowerOfTwo(width);
@@ -74,7 +74,7 @@ var scaleImage = function (image, width, height) {
 XML3D.extend(GLCubeMap.prototype, {
     /**
      * @param {Xflow.TextureEntry} textureEntry
-     */
+     *//*
     updateFromTextureEntry: function (textureEntry) {
         var img = textureEntry.getImage();
         if (img) {
@@ -97,14 +97,14 @@ XML3D.extend(GLCubeMap.prototype, {
      * @param {number} width
      * @param {number} height
      * @returns {boolean}
-     */
+     *//*
     needsScale: function (width, height) {
         return (this.generateMipMap || this.wrapS != this.gl.CLAMP_TO_EDGE || this.wrapT != this.gl.CLAMP_TO_EDGE) && (!isPowerOfTwo(width) || !isPowerOfTwo(height))
     },
 
     /**
      * @param {Image|HTMLVideoElement} image
-     */
+     *//*
     updateTex2DFromImage: function (image, side) {
         var gl = this.gl, width = this.width = image.videoWidth || image.width, height = this.height = image.videoHeight || image.height;
 

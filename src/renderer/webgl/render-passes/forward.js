@@ -43,7 +43,7 @@ XML3D.extend(ForwardRenderPass.prototype, {
                 reassignShadowNames.push(name);
                 var lightPasses = this.lightPasses[name];
                 scene.systemUniforms[name] = [];
-                if (typeof lightPasses == 'undefined')
+                if (typeof lightPasses == 'undefined' || !lightPasses) //TODO
                     continue;
                 for (var i = 0; i < lightPasses.length; ++i) {
                     var output = lightPasses[i].output;

@@ -1,5 +1,3 @@
-var GLCubeMap = require("./cubemap.js");
-
 /**
  * @interface
  */
@@ -333,39 +331,26 @@ XML3D.extend(GLScaledRenderTarget.prototype, {
         createFrameBuffers: function (colorFormat, depthFormat, stencilFormat) {
             var gl = this.context.gl;
 
-            if(colorFormat) {
-                this.ctex = new GLCubeMap(gl);
+            if(colorFormat) { //TODO check if renderbuffers instead of textures...
+                this.ctex = this.context.createCubeMap();
                 this.ctex.createTex2DFromData(colorFormat, this.width, this.height, gl.RGBA, this.opt.colorType || gl.UNSIGNED_BYTE, this.opt);
-                this.colorTarget = {
-                    handle: this.ctex,
-                    isTexture: true
-                };
+                this.colorTarget = { handle: this.ctex,  isTexture: true};
             }
             if(depthFormat) {
                 this.opt.isDepth = true;
 
-
                 if (this.opt.depthAsRenderbuffer) {
-
                 } else {
-
-                    this.dtex = new GLCubeMap(gl);
+                    this.dtex = this.context.createCubeMap();
                     this.dtex.createTex2DFromData(depthFormat, this.width, this.height, gl.DEPTH_COMPONENT, gl.FLOAT, this.opt);
-                    this.depthTarget = {
-                        handle: this.dtex,
-                        isTexture: true
-                    }
+                    this.depthTarget = { handle: this.dtex,  isTexture: true};
                 }
             }
             if(stencilFormat) {
-                this.stex = new GLCubeMap(gl);
+                this.stex = this.context.createCubeMap();
                 this.stex.createTex2DFromData(stencilFormat, this.width, this.height, gl.STENCIL_COMPONENT, gl.UNSIGNED_BYTE, this.opt);
-                this.stencilTarget = {
-                    handle: this.stex,
-                    isTexture: true
-                }
+                this.stencilTarget = { handle: this.stex, isTexture: true};
             }
-
 
             for(var i = 0; i < this.glSides.length; ++i) {
                 this.framebuffers[i] = gl.createFramebuffer();
@@ -373,12 +358,11 @@ XML3D.extend(GLScaledRenderTarget.prototype, {
                 colorFormat && this.createColorTarget(colorFormat, i);
                 depthFormat && this.createDepthTarget(depthFormat, i);
                 stencilFormat && this.createStencilTarget(stencilFormat, i);
-                this.checkStatus();
+                this.checkStatus(i);
             }
         },
         createColorTarget: function (colorFormat, side) {
             var gl = this.context.gl;
-
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, this.glSides[side], this.ctex.handle, 0);
         },
         createDepthTarget: function (depthFormat, side) {
@@ -398,13 +382,13 @@ XML3D.extend(GLScaledRenderTarget.prototype, {
                     isTexture: false
                 }
             }
-
+            else
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT0, this.glSides[side], this.dtex.handle, 0);
         },
         createStencilTarget: function (stencilFormat, side) {
             var gl = this.context.gl;
 
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, this.glSides[side], this.stex.handle, 0);
-
         },
         checkStatus: function (side) {
             var gl = this.context.gl;

@@ -51,6 +51,7 @@ LightManager.prototype = {
         var offset = entry.lightModels.indexOf(model);
         XML3D.debug.assert(offset != -1, "Light values changed for a light that is not managed by this LightManager");
         model.fillLightParameters(entry.parameters, offset);
+        model.getLightData(entry.parameters, offset);
         entry.changed = true;
         this._inUpdate = false;
     },
@@ -97,6 +98,7 @@ LightManager.prototype = {
         entry.parameters = model.allocateParameterArray(length);
         entry.lightModels.forEach(function (lightModel, offset) {
             lightModel.fillLightParameters(entry.parameters, offset)
+            lightModel.getLightData(entry.parameters, offset);
         });
         entry.changed = true;
         this._inUpdate = false;

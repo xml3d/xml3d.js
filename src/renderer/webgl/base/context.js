@@ -1,5 +1,6 @@
 var TextureManager = require("texture-manager").SimpleTextureManager;
-var GLTexture = require("./texture.js");
+var GLTexture = require("./texture.js").GLTexture;
+var GLCubeMap = require("./texture.js").GLCubeMap;
 var GLCanvasTarget = require("./rendertarget.js").GLCanvasTarget;
 var ProgramFactory = require("./../shader/programfactory.js");
 var XC = require("../../../xflow/interface/constants.js");
@@ -69,6 +70,9 @@ XML3D.extend(GLContext.prototype, {
 
     createTexture: function() {
         return new GLTexture(this);
+    } ,
+    createCubeMap: function() {
+        return new GLCubeMap(this);
     }
 });
 

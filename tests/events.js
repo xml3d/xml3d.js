@@ -121,6 +121,7 @@ test("Wheel Event", function() {
     var mesh01 = this.doc.getElementById("myMesh01");
     mesh01.addEventListener("wheel", function(evt){
         ok(true, "#myMesh01 mesh event received");
+        ok(evt.toString() === "[object WheelEvent]", "Event was of the WheelEvent class");
         ok(evt.deltaX === 5 && evt.deltaMode === 1 && event.type === "wheel", "Event was the right WheelEvent");
         equal(evt.target, mesh01, "Event target is #myMesh01");
         start();

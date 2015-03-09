@@ -17,6 +17,15 @@ var MouseEventHandler = function(defaultTarget, canvasHandler) {
     this._lastMousePosition =  {x: 0, y: 0};
 };
 
+var supportsEventConstructors = (function() {
+    try {
+        new MouseEvent("click", {});
+        return true;
+    } catch (e){
+        return false;
+    }
+})();
+
 MouseEventHandler.prototype =  {
 
     /**
@@ -45,25 +54,27 @@ MouseEventHandler.prototype =  {
      * @return {MouseEvent} the new event
      */
     copyMouseEvent: function (event) {
-        var isWheel = event instanceof WheelEvent;
-        event = isWheel = new WheelEvent(dict)
-        var mouseEventInit = {
-                screenX : event.screenX,
-               screenY : event.screenY,
-               clientX : event.clientX,
-               clientY : event.clientY,
-              button = button.;
-      buttons = 0;
-       relatedTarget = null;
+        var evt;
+        if (supportsEventConstructors) {
+            if (event.toString() === "[object WheelEvent]") {
+                evt = new WheelEvent(event.type, event);
+            } else {
+                evt = new MouseEvent(event.type, event);
+            }
+        } else {
+            //These event APIs are deprecated but still required by IE, which doesn't support event constructors yet
+            if (event.toString() === "[object WheelEvent]") {
+                evt = document.createEvent("WheelEvent");
+                evt.initWheelEvent(event.type, event.canBubble, event.cancelable, event.view, event.detail,
+                    event.screenX, event.screenY, event.clientX, event.clientY, event.button, event.relatedTarget, "",
+                    event.deltaX, event.deltaY, event.deltaZ, event.deltaMode);
+            } else {
+                evt = document.createEvent("MouseEvent");
+                evt.initMouseEvent(event.type, event.canBubble, event.cancelable, event.view, event.detail,
+                    event.screenX, event.screenY, event.clientX, event.clientY, event.ctrlKey, event.altKey,
+                    event.shiftKey, event.metaKey, event.button, event.relatedTarget);
+            }
         }
-        console.log("MouseEvent:", event instanceof MouseEvent)
-        console.log("WheelEvent:", event instanceof WheelEvent, event)
-        var evt = document.createEvent("MouseEvents");
-        evt.initMouseEvent(event.type, // canBubble, cancelable, view, detail
-            event.bubbles, event.cancelable, event.view, event.detail, // screenX, screenY, clientX, clientY
-            event.screenX, event.screenY, event.clientX, event.clientY, // ctrl, alt, shift, meta, button
-            event.ctrlKey, event.altKey, event.shiftKey, event.metaKey, event.button, // relatedTarget
-            event.relatedTarget);
         if (event.dataTransfer)
             evt.data = {url: event.dataTransfer.getData("URL"), text: event.dataTransfer.getData("Text")};
         // override preventDefault to actually prevent the default of the original event
@@ -75,9 +86,31 @@ MouseEventHandler.prototype =  {
 
     createMouseEvent: function (type, opts) {
         opts = opts || {};
-        var event = document.createEvent("MouseEvents");
-        event.initMouseEvent(type, opts.canBubble !== undefined ? opts.canBubble : true, opts.cancelable !== undefined ? opts.cancelable : true, opts.view || window, opts.detail != undefined ? opts.detail : 0, opts.screenX != undefined ? opts.screenX : 0, opts.screenY != undefined ? opts.screenY : 0, opts.clientX != undefined ? opts.clientX : 0, opts.clientY != undefined ? opts.clientY : 0, opts.ctrl != undefined ? opts.ctrl : false, opts.alt != undefined ? opts.alt : false, opts.shift != undefined ? opts.shift : false, opts.meta != undefined ? opts.meta : false, opts.button != undefined ? opts.button : 0, opts.relatedTarget);
-        return event;
+        var dict = {
+            bubbles		: opts.bubbles !== undefined ? opts.bubbles : true,
+            cancelable 	: opts.cancelable !== undefined ? opts.cancelable : true,
+            view 		: opts.view || window,
+            detail 		: opts.detail !== undefined ? opts.detail : 0,
+            screenX		: opts.screenX !== undefined ? opts.screenX : 0,
+            screenY		: opts.screenY !== undefined ? opts.screenY : 0,
+            clientX		: opts.clientX !== undefined ? opts.clientX : 0,
+            clientY		: opts.clientY !== undefined ? opts.clientY : 0,
+            ctrl 		: opts.ctrl !== undefined ? opts.ctrl : false,
+            alt 		: opts.alt !== undefined ? opts.alt : false,
+            shift 		: opts.shift !== undefined ? opts.shift : false,
+            meta 		: opts.meta !== undefined ? opts.meta : false,
+            button 		: opts.button !== undefined ? opts.button : 0,
+            relatedTarget : opts.relatedTarget
+        };
+        if (supportsEventConstructors) {
+            return new MouseEvent(type, dict);
+        } else {
+            var evt = document.createEvent("MouseEvent");
+            evt.initMouseEvent(type, dict.bubbles, dict.cancelable, dict.view, dict.detail,
+                dict.screenX, dict.screenY, dict.clientX, dict.clientY, dict.ctrlKey, dict.altKey,
+                dict.shiftKey, dict.metaKey, dict.button, dict.relatedTarget);
+            return evt;
+        }
     },
 
     /**
@@ -108,10 +141,7 @@ MouseEventHandler.prototype =  {
                 }
                 return cachedPosition;
             });
-
         })();
-
-
     },
 
     /**

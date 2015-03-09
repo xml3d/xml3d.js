@@ -117,6 +117,50 @@ test("Mousedown Event", function() {
 test("Mouseup Event", function() {
     trippleMouseEventCheck.call(this, 'mouseup');
 });
+test("Wheel Event", function() {
+    var mesh01 = this.doc.getElementById("myMesh01");
+    mesh01.addEventListener("wheel", function(evt){
+        ok(true, "#myMesh01 mesh event received");
+        ok(evt.deltaX === 5 && evt.deltaMode === 1 && event.type === "wheel", "Event was the right WheelEvent");
+        equal(evt.target, mesh01, "Event target is #myMesh01");
+        start();
+    });
+    var opts = {
+        canBubble: true,
+        cancelable: true,
+        view: this.xml3dEl.ownerDocument.defaultView,
+        detail: 1,
+        deltaX: 5,
+        deltaY: 0,
+        deltaZ: 0,
+        deltaMode: 1,
+        screenX: 0,
+        screenY: 0,
+        clientX: 157,
+        clientY: 104,
+        relatedTarget: null
+    };
+    var eventConstructorsSupported = (function() {
+        try {
+            new WheelEvent("wheel", {});
+            return true;
+        } catch(e) {
+            return false;
+        }
+    })();
+    stop();
+    var event;
+    if (eventConstructorsSupported) {
+        event = new WheelEvent("wheel", opts);
+    } else {
+        // IE 11...
+        event = this.doc.createEvent("WheelEvent");
+        event.initWheelEvent("wheel", opts.canBubble, opts.cancelable, opts.view, opts.detail,
+            opts.screenX, opts.screenY, opts.clientX, opts.clientY, opts.button, opts.relatedTarget, "", opts.deltaX,
+            opts.deltaY, opts.deltaZ, opts.deltaMode);
+    }
+    this.xml3dEl._configured.canvas.dispatchEvent(event);
+});
 
 module("Event tests", {
     setup : function() {

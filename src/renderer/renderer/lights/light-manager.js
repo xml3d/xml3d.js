@@ -4,7 +4,7 @@ function LightManager() {
 
     /**
      * Updating light parameters can lead to updating the (lazy) scene structure, which
-     * in turn updates the lights. If we are in updateing the lights, flag is set to true.
+     * in turn updates the lights. If we are in updating the lights, flag is set to true.
      * @type {boolean}
      * @private
      */
@@ -14,7 +14,7 @@ function LightManager() {
 LightManager.prototype = {
     add: function (light) {
         this._lights.push(light);
-        this._addModel(light.model)
+        this._addModel(light.model);
     },
 
     remove: function (light) {
@@ -75,7 +75,7 @@ LightManager.prototype = {
             entry = this._models[model.id] = {lightModels: [], parameters: {}};
         }
         entry.lightModels.push(model);
-        this._updateParameters(entry);
+        this._lightStructureChanged(entry);
     },
 
     _removeModel: function (model) {
@@ -84,10 +84,10 @@ LightManager.prototype = {
         if (index != -1) {
             entry.lightModels.splice(index, 1);
         }
-        this._updateParameters(entry);
+        this._lightStructureChanged(entry);
     },
 
-    _updateParameters: function (entry) {
+    _lightStructureChanged: function (entry) {
         this._inUpdate = true;
         var length = entry.lightModels.length;
         if (!length) {

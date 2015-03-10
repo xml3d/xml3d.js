@@ -102,7 +102,10 @@ handlers.EventAttributeHandler = function(id) {
         }
         else{
             storage[id] = eval("crx = function " + id + "(event){\n  " + value + "\n}");
-            elem.addEventListener(eventType, storage[id], false);
+            if (XML3D.xhtml) {
+                // only XHTML documents require this polyfill for mouse event attributes
+                elem.addEventListener(eventType, storage[id], false);
+            }
         }
         return false;
     };
@@ -114,9 +117,9 @@ handlers.EventAttributeHandler = function(id) {
         },
         set : function(value) {
             var storage = getStorage(this);
-            if(storage[id]) this.removeEventListener(eventType, storage[id]);
+            if(XML3D.xhtml && storage[id]) this.removeEventListener(eventType, storage[id]);
             storage[id] = (typeof value == 'function') ? value : undefined;
-            if(storage[id]) this.addEventListener(eventType, storage[id], false);
+            if(XML3D.xhtml && storage[id]) this.addEventListener(eventType, storage[id], false);
             return false;
         }
     };

@@ -1,5 +1,5 @@
 var Base = require("../base.js");
-var C = require("./constants");
+var C = require("./constants.js");
 
 
 var orderMappingParser = /^([^:,{}]+)(,[^:{},]+)*$/;

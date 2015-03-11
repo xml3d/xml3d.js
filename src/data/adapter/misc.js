@@ -1,4 +1,4 @@
-var DataAdapter = require("./data");
+var DataAdapter = require("./data.js");
 var createClass = XML3D.createClass;
 var NodeAdapter = XML3D.base.NodeAdapter;
     /**

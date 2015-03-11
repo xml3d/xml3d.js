@@ -3,9 +3,13 @@ var RenderObject = require("./renderobject.js");
 var RenderView = require("./renderview.js");
 var RenderGroup = require("./rendergroup.js");
 var RenderLight = require("./renderlight.js");
-var MaterialConfiguration = require("./material-configuration");
-var LightManager = require("../lights/light-manager.js")
+var MaterialConfiguration = require("./material-configuration.js");
+var LightManager = require("../lights/light-manager.js");
 var C = require("./constants.js");
+var InputNode = require("../../../xflow/interface/graph.js").InputNode;
+var DataNode = require("../../../xflow/interface/graph.js").DataNode;
+var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
+var XC = require("../../../xflow/interface/constants.js");
 
 /**
  *
@@ -124,11 +128,11 @@ XML3D.extend(Scene.prototype, {
 
     getDefaultMaterial: function() {
         if(!this._defaultMaterial) {
-            var inputNode = new Xflow.InputNode(null);
-            inputNode.data = new Xflow.BufferEntry(Xflow.DATA_TYPE.FLOAT3, new Float32Array([1, 0, 0]));
+            var inputNode = new InputNode();
+            inputNode.data = new BufferEntry(XC.DATA_TYPE.FLOAT3, new Float32Array([1, 0, 0]));
             inputNode.name = "diffuseColor";
 
-            var data = new Xflow.DataNode(false);
+            var data = new DataNode(false);
             data.appendChild(inputNode);
 
             this._defaultMaterial = this.createMaterialConfiguration(

@@ -1,4 +1,6 @@
-var BaseDataAdapter = require("./base");
+var BaseDataAdapter = require("./base.js");
+var DataNode = require("../../xflow/interface/graph.js").DataNode;
+var XC = require("../../xflow/interface/constants.js");
 
 /**
  * DataAdapter handling a <dataflow> element
@@ -14,7 +16,7 @@ var DataflowDataAdapter = function (factory, node) {
 XML3D.createClass(DataflowDataAdapter, BaseDataAdapter);
 
 DataflowDataAdapter.prototype.init = function () {
-    this.xflowDataNode = new Xflow.DataNode(false);
+    this.xflowDataNode = new DataNode(false);
     this.dataflowRefs = [];
     updateDataflowXflowNode(this, this.node);
 };
@@ -44,7 +46,7 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
         if (this.externalScripts[evt.key]) {
             window.eval(evt.adapter.script);
             setLoadingStateForMatchingXflowNodes(this.xflowDataNode, evt.key, false);
-            this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+            this.xflowDataNode.notify(XC.RESULT_STATE.CHANGED_STRUCTURE);
         }
     }
 
@@ -77,7 +79,7 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
  * all nodes with a compute operator that relies on the matching external script name.
  * A compute node will only be executed if its loading state is 'false' and none of its children are 'loading', so
  * this ensures we don't do the compute operations until the external operators have been loaded.
- * @param {Xflow.DataNode} node the current node to check for instances of the given operator
+ * @param {DataNode} node the current node to check for instances of the given operator
  * @param {string} name the name of the external operator to check for
  * @param {boolean} loading whether the operator has finished loading or not
  */
@@ -155,7 +157,7 @@ function updateDataflowXflowNode(adapter, node) {
                 if (firstNode) {
                     firstNode = false;
                 } else {
-                    xflowNode = new Xflow.DataNode(false);
+                    xflowNode = new DataNode(false);
                     if (prevNode) {
                         currentNode.insertBefore(xflowNode, prevNode);
                     } else {

@@ -1,5 +1,8 @@
-var AbstractShaderComposer = require("./../abstractshadercomposer").AbstractShaderComposer;
-var JSShaderClosure = require("./jsshaderclosure");
+var AbstractShaderComposer = require("./../abstractshadercomposer.js").AbstractShaderComposer;
+var JSShaderClosure = require("./jsshaderclosure.js");
+var VSConfig = require("../../../../xflow/interface/vs-connect.js").VSConfig;
+var VertexShaderRequest = require("../../../../xflow/interface/request.js").VertexShaderRequest;
+var XC = require("../../../../xflow/interface/constants.js");
 
 /**
  *
@@ -70,10 +73,10 @@ XML3D.createClass(JSShaderComposer, AbstractShaderComposer, {
 
     createObjectDataRequest: function (objectDataNode, callback) {
 
-        var vsConfig = new Xflow.VSConfig();
+        var vsConfig = new VSConfig();
         var names = this.extractedParams.slice();
         //if(names.indexOf("position") == -1) names.push("position");
-        vsConfig.addAttribute(Xflow.DATA_TYPE.FLOAT3, "position", true);
+        vsConfig.addAttribute(XC.DATA_TYPE.FLOAT3, "position", true);
         for (var i = 0; i < names.length; ++i) {
             var name = names[i];
             if (name == "position") continue;
@@ -82,7 +85,7 @@ XML3D.createClass(JSShaderComposer, AbstractShaderComposer, {
                 vsConfig.addAttribute(xflowInfo.type, name, true);
             }
         }
-        return new Xflow.VertexShaderRequest(objectDataNode, vsConfig, callback);
+        return new VertexShaderRequest(objectDataNode, vsConfig, callback);
     },
 
     distributeObjectShaderData: function (objectRequest, attributeCallback, uniformCallback) {

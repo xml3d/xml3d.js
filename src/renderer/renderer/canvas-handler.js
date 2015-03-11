@@ -1,5 +1,5 @@
-var MouseEvents = require("./events/mouse");
-var TouchEvents = require("./events/touch");
+var MouseEvents = require("./events/mouse.js");
+var TouchEvents = require("./events/touch.js");
 
 var c_globalCanvasId = 0;
 

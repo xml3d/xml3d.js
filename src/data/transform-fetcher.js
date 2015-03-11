@@ -1,3 +1,5 @@
+var ComputeRequest = require("../xflow/interface/request.js").ComputeRequest;
+
 var DOMTransformFetcher = function (owner, attrName, dataName, onlyDataTransform) {
     this.owner = owner;
     this.node = owner.node;
@@ -42,7 +44,7 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
         if (this.adapterHandle && (adapter = this.adapterHandle.getAdapter())) {
             if (adapter.getXflowNode) {
                 if (!this.xflowRequest)
-                    this.xflowRequest = new Xflow.ComputeRequest(adapter.getXflowNode(), [this.dataName], this._bindedCallback);
+                    this.xflowRequest = new ComputeRequest(adapter.getXflowNode(), [this.dataName], this._bindedCallback);
                 var dataResult = this.xflowRequest.getResult();
                 var transformData = (dataResult.getOutputData(this.dataName) && dataResult.getOutputData(this.dataName).getValue());
                 if (transformData)

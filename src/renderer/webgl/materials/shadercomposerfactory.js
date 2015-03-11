@@ -1,6 +1,6 @@
-var JSShaderComposer = require("./js/jsshadercomposer");
-var URNShaderComposer = require("./urn/urnshadercomposer");
-var DefaultComposer = require("./abstractshadercomposer").DefaultComposer;
+var JSShaderComposer = require("./js/jsshadercomposer.js");
+var URNShaderComposer = require("./urn/urnshadercomposer.js");
+var DefaultComposer = require("./abstractshadercomposer.js").DefaultComposer;
 
 /**
  * @param {GLContext} context

@@ -1,8 +1,10 @@
 var DrawableClosure = require("../../renderer/scene/drawableclosure.js");
-var GLMesh = require("../base/mesh");
+var GLMesh = require("../base/mesh.js");
 var XflowUtils = require("./utils.js");
 var EVENT_TYPE = require("../../renderer/scene/constants.js").EVENT_TYPE;
-var MaterialEvents = require("../materials/events");
+var MaterialEvents = require("../materials/events.js");
+var XC = require("../../../xflow/interface/constants.js");
+var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 
 var CHANGE_STATE = {
     NOTHING_CHANGED: 0,
@@ -21,12 +23,12 @@ var READY_STATE = DrawableClosure.READY_STATE;
 var MESH_PARAMETERS = {};
 
 MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES] = {
-    attributeData: {"position": Xflow.DATA_TYPE.FLOAT3}, typeData: {
-        "index": Xflow.DATA_TYPE.INT, "solid": Xflow.DATA_TYPE.BOOL, "vertexCount": Xflow.DATA_TYPE.INT
+    attributeData: {"position": XC.DATA_TYPE.FLOAT3}, typeData: {
+        "index": XC.DATA_TYPE.INT, "solid": XC.DATA_TYPE.BOOL, "vertexCount": XC.DATA_TYPE.INT
     }, bboxFix: {
-        "boundingBox": Xflow.DATA_TYPE.FLOAT3
+        "boundingBox": XC.DATA_TYPE.FLOAT3
     }, bboxCompute: {
-        "position": Xflow.DATA_TYPE.FLOAT3
+        "position": XC.DATA_TYPE.FLOAT3
     }
 };
 MESH_PARAMETERS[WebGLRenderingContext.LINE_STRIP] = MESH_PARAMETERS[WebGLRenderingContext.TRIANGLES];
@@ -70,7 +72,7 @@ var XflowMesh = function (context, dataNode, type, opt) {
 
     /**
      * Attributes required to create the GLMesh
-     * @type {Xflow.ComputeRequest}
+     * @type {ComputeRequest}
      */
     this.typeRequest = null;
 
@@ -106,7 +108,7 @@ var XflowMesh = function (context, dataNode, type, opt) {
 
 XML3D.createClass(XflowMesh, DrawableClosure, {
     initialize: function () {
-        this.typeDataChanged(this.typeRequest, Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        this.typeDataChanged(this.typeRequest, XC.RESULT_STATE.CHANGED_STRUCTURE);
         this.shaderChanged();
     },
 
@@ -201,11 +203,11 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         }
     }()), /**
      *
-     * @param {Xflow.ComputeRequest} request
-     * @param {Xflow.RESULT_STATE} state
+     * @param {ComputeRequest} request
+     * @param {XC.RESULT_STATE} state
      */
     typeDataChanged: function (request, state) {
-        this.changeState |= state == Xflow.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
+        this.changeState |= state == XC.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
         this.dispatchEvent({type: EVENT_TYPE.SCENE_SHAPE_CHANGED});
         this.context.requestRedraw("Mesh Type Data Change");
         XML3D.debug.logDebug("XflowMesh: Type data changed", request, state, this.changeState);
@@ -297,7 +299,7 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
             return;
         }
 
-        if (xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE) {
+        if (xflowDataEntry.type == XC.DATA_TYPE.TEXTURE) {
             XML3D.debug.logError("Texture as mesh parameter is not yet supported");
             return;
         }
@@ -345,7 +347,7 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
 
         if (!this.typeRequest || this.typeRequest.filter != requestNames) {
             if (this.typeRequest) this.typeRequest.clear();
-            this.typeRequest = new Xflow.ComputeRequest(this.dataNode, requestNames, this.typeDataChanged.bind(this));
+            this.typeRequest = new ComputeRequest(this.dataNode, requestNames, this.typeDataChanged.bind(this));
         }
     },
 
@@ -376,11 +378,11 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
     },
 
     /**
-     * @param {Xflow.ComputeRequest} request
-     * @param {Xflow.RESULT_STATE} state
+     * @param {ComputeRequest} request
+     * @param {XC.RESULT_STATE} state
      */
     shaderInputDataChanged: function (request, state) {
-        this.changeState |= state != Xflow.RESULT_STATE.CHANGED_DATA_VALUE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
+        this.changeState |= state != XC.RESULT_STATE.CHANGED_DATA_VALUE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
         // TODO: We don't know if the change of data only influences the surface shading or the actual mesh shape
         this.dispatchEvent({type: EVENT_TYPE.SCENE_SHAPE_CHANGED});
         this.context.requestRedraw("Mesh Attribute Data Changed");

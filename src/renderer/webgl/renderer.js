@@ -1,8 +1,8 @@
-var GLContext = require("./base/context");
-var GLScene = require("./scene/glscene");
+var GLContext = require("./base/context.js");
+var GLScene = require("./scene/glscene.js");
 var GLScaledRenderTarget = require("./base/rendertarget.js").GLScaledRenderTarget;
 var DataChangeListener = require("../renderer/tools/datachangelistener.js");
-var RenderInterface = require("./render-interface");
+var RenderInterface = require("./render-interface.js");
 var PickObjectRenderPass= require("./render-passes/pick-object.js");
 var PickPositionRenderPass = require("./render-passes/pick-position.js");
 var PickNormalRenderPass = require("./render-passes/pick-normal.js");

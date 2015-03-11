@@ -1,3 +1,7 @@
+var BufferEntry = require("../../xflow/interface/data.js").BufferEntry;
+var InputNode = require("../../xflow/interface/graph.js").InputNode;
+var XC = require("../../xflow/interface/constants.js");
+
 var NodeAdapter = XML3D.base.NodeAdapter;
 /**
  * Constructor of XML3D.data.ValueDataAdapter
@@ -25,10 +29,10 @@ ValueDataAdapter.prototype.init = function()
         value = this.node.value;
     }
 
-    var type = Xflow.DATA_TYPE.fromString(this.node.localName);
-    var buffer = new Xflow.BufferEntry(type, value);
+    var type = XC.DATA_TYPE.fromString(this.node.localName);
+    var buffer = new BufferEntry(type, value);
 
-    this.xflowInputNode = new Xflow.InputNode(null);
+    this.xflowInputNode = new InputNode(null);
     this.xflowInputNode.name = this.node.name;
     this.xflowInputNode.data = buffer;
     this.xflowInputNode.key = this.node.key;
@@ -73,7 +77,7 @@ ValueDataAdapter.prototype.toString = function () {
 
 ValueDataAdapter.prototype.checkForImproperNesting = function() {
     for (var i=0; i < this.node.childNodes.length; i++) {
-        if (Xflow.DATA_TYPE.fromString(this.node.childNodes[i].localName)) {
+        if (XC.DATA_TYPE.fromString(this.node.childNodes[i].localName)) {
             XML3D.debug.logError("Parsing error: Value elements cannot be nested!", this.node);
         }
     }

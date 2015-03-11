@@ -1,10 +1,10 @@
 var Base = require("../base.js");
-var C = require("../interface/constants");
-var OperatorList = require("../operator/operator-list");
+var C = require("../interface/constants.js");
+var OperatorList = require("../operator/operator-list.js");
 var Utils = require("../utils/utils.js");
-var Operator = require("../operator/operator");
-var OperatorEntry = require("../operator/operator-entry");
-var Program = require("../operator/program");
+var Operator = require("../operator/operator.js");
+var OperatorEntry = require("../operator/operator-entry.js");
+var Program = require("../operator/program.js");
 
 //----------------------------------------------------------------------------------------------------------------------
 // Executor

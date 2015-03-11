@@ -1,6 +1,7 @@
-var AbstractShaderComposer = require("../abstractshadercomposer").AbstractShaderComposer;
-var URNShaderClosure= require("./urnshaderclosure");
-var ShaderDescriptor = require("./shader-descriptor");
+var AbstractShaderComposer = require("../abstractshadercomposer.js").AbstractShaderComposer;
+var URNShaderClosure= require("./urnshaderclosure.js");
+var ShaderDescriptor = require("./shader-descriptor.js");
+var ComputeRequest = require("../../../../xflow/interface/request.js").ComputeRequest;
 
 /**
  * @param {string} path
@@ -79,7 +80,7 @@ XML3D.createClass(URNShaderComposer, AbstractShaderComposer, {
         requestNames.push.apply(requestNames, Object.keys(this.descriptor.attributes));
         requestNames.push.apply(requestNames, Object.keys(this.descriptor.uniforms));
         requestNames.push.apply(requestNames, Object.keys(this.descriptor.samplers));
-        return new Xflow.ComputeRequest(objectDataNode, requestNames, callback);
+        return new ComputeRequest(objectDataNode, requestNames, callback);
     },
 
     distributeObjectShaderData: function (objectRequest, attributeCallback, uniformCallback) {

@@ -1,17 +1,17 @@
 var NodeAdapterFactory = XML3D.base.NodeAdapterFactory;
-var Asset = require("./asset");
-var Misc = require("./misc");
-var ScriptDataAdapter = require("./script");
-var TextureDataAdapter = require("./texture");
-var TransformDataAdapter = require("./transform");
-var ValueDataAdapter = require("./values");
-var DataAdapter = require("./data");
-var ComputeDataAdapter = require("./compute");
-var DataflowDataAdapter = require("./dataflow");
+var Asset = require("./asset.js");
+var Misc = require("./misc.js");
+var ScriptDataAdapter = require("./script.js");
+var TextureDataAdapter = require("./texture.js");
+var TransformDataAdapter = require("./transform.js");
+var ValueDataAdapter = require("./values.js");
+var DataAdapter = require("./data.js");
+var ComputeDataAdapter = require("./compute.js");
+var DataflowDataAdapter = require("./dataflow.js");
 // Register JSON Handler
-require("./json/factory");
+require("./json/factory.js");
 // Register JavaScript Handler (required for external shade.js Javascript resources)
-require("./javascript/factory");
+require("./javascript/factory.js");
 
 /**
  * Constructor of XML3DDataAdapterFactory

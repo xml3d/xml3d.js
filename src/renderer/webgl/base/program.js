@@ -1,6 +1,6 @@
 
 var utils = require("./utils.js");
-var SystemNotifier = require("../system/system-notifier");
+var SystemNotifier = require("../system/system-notifier.js");
 
 //noinspection JSValidateJSDoc
 /**

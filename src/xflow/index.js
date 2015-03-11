@@ -1,9 +1,8 @@
 
-require("./utils/math")(XML3D.math);
-window.Xflow = require("./interface/");
-XML3D.extend(Xflow, require("./base.js").Xflow);
+//Public Xflow API
 
-window.Xflow.registerErrorCallback = require("./base.js").registerErrorCallback;
+//window.Xflow = window.Xflow || {};
+//var Xflow = window.Xflow;
 
-// Load all default operators
-require("./operator/default/")
+//Xflow.registerOperator = require("./operator/operator.js").registerOperator;
+//Xflow.ComputeRequest = require("./interface/request.js").ComputeRequest;

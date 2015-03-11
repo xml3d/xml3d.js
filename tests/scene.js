@@ -11,10 +11,12 @@ module("RenderScene", {
 });
 
 var SceneConstants = XML3DTestLib.SceneConstants;
+var DataNode = XML3DTestLib.DataNode;
+var ComputeRequest = XML3DTestLib.ComputeRequest;
 
 test("Light attributes", 10, function () {
 
-    var dataNode = new Xflow.DataNode(false);
+    var dataNode = new DataNode(false);
     var lightModels = this.scene.lights._models;
 
     var light = this.scene.createRenderLight({
@@ -24,7 +26,7 @@ test("Light attributes", 10, function () {
     });
 
     equal(light.localIntensity, 1.0, "Local intensity default");
-    var result = new Xflow.ComputeRequest(light.model.dataNode, ["intensity"]).getResult();
+    var result = new ComputeRequest(light.model.dataNode, ["intensity"]).getResult();
     var actualVector = new XML3DVec3();
     actualVector.set(result.getOutputData("intensity").getValue());
     QUnit.closeVector(actualVector, new XML3DVec3(1, 1, 1), EPSILON, "Intensity default");
@@ -48,7 +50,7 @@ test("Light attributes", 10, function () {
 
 test("Light callbacks", 9, function () {
 
-    var dataNode = new Xflow.DataNode(false);
+    var dataNode = new DataNode(false);
 
     var light = this.scene.createRenderLight({
         light: {
@@ -91,7 +93,7 @@ test("Light callbacks", 9, function () {
 });
 
 test("Light removal: Issue #71", function () {
-    var dataNode = new Xflow.DataNode(false);
+    var dataNode = new DataNode(false);
     var group = this.scene.createRenderGroup();
     this.scene.createRenderLight({ // SC 3: Add a new light to the scene
         parent: group,

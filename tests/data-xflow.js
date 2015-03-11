@@ -5,6 +5,11 @@ function lameParse(text, constructor) {
     return m ? new constructor(m) : new constructor();
 }
 
+var XflowConstants = XML3DTestLib.XflowConstants;
+var DataNode = XML3DTestLib.DataNode;
+var VSConfig = XML3DTestLib.VSConfig;
+var VertexShaderRequest = XML3DTestLib.VertexShaderRequest;
+
 module("Xflow tests", {
     setup : function() {
         stop();
@@ -100,7 +105,7 @@ module("Xflow tests", {
         var dataElement = this.doc.getElementById(dataNodeId);
         var title = testNode.getAttribute("title");
 
-        var vsConfig = new this.win.Xflow.VSConfig();
+        var vsConfig = new VSConfig();
 
         var connect = testNode.getElementsByTagName("VSConfig")[0].firstElementChild;
         while (connect) {
@@ -109,13 +114,13 @@ module("Xflow tests", {
             connect = connect.nextElementSibling;
         };
 
-        vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "screenTransform", true);
+        vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT4X4, "screenTransform", true);
         vsConfig.addCodeFragment("gl_Position = screenTransform * vec4(#I{position}, 1.0);");
 
         var dataAdapter = dataElement._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
         var xflowNode = dataAdapter.getXflowNode();
-        var request = new this.win.Xflow.VertexShaderRequest(xflowNode, vsConfig);
+        var request = new VertexShaderRequest(xflowNode, vsConfig);
         var result = request.getVertexShader();
         var code = result.getGLSLCode();
         var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE"),
@@ -135,25 +140,25 @@ module("Xflow tests", {
 
     VSConnection: function(node, vsConfig){
         var typeString = node.getAttribute("type"), transformString = node.getAttribute("transform");
-        var type = Xflow.DATA_TYPE[typeString];
+        var type = XflowConstants.DATA_TYPE[typeString];
         if(!type)
             throw new Error("Unknown VS connection Type: " + typeString);
-        var transform = Xflow.VS_ATTRIB_TRANSFORM[transformString] || Xflow.VS_ATTRIB_TRANSFORM.NONE;
+        var transform = XflowConstants.VS_ATTRIB_TRANSFORM[transformString] || XflowConstants.VS_ATTRIB_TRANSFORM.NONE;
         var name = node.getAttribute("in"), outName = node.getAttribute("out");
         vsConfig.addAttribute( type, node.getAttribute("in"), node.getAttribute("optional") == "true");
         var code = null;
         switch(transform){
-            case Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "viewTransformNormal", true);
+            case XflowConstants.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
+                vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT3X3, "viewTransformNormal", true);
                 code = outName + " = normalize( viewTransformNormal * #I{" + name + "} );"; break;
-            case Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "viewTransform", true);
+            case XflowConstants.VS_ATTRIB_TRANSFORM.VIEW_POINT:
+                vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT4X4, "viewTransform", true);
                 code = outName + " = ( viewTransform * vec4( #I{" + name + "} , 1.0)).xyz;"; break;
-            case Xflow.VS_ATTRIB_TRANSFORM.WORLD_NORMAL:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "worldTransformNormal", true);
+            case XflowConstants.VS_ATTRIB_TRANSFORM.WORLD_NORMAL:
+                vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT3X3, "worldTransformNormal", true);
                 code = outName + " = normalize( worldTransformNormal * vec4( #I{" + name + "} );"; break;
-            case Xflow.VS_ATTRIB_TRANSFORM.WORLD_POINT:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "worldTransform", true);
+            case XflowConstants.VS_ATTRIB_TRANSFORM.WORLD_POINT:
+                vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT4X4, "worldTransform", true);
                 code = outName + " = ( worldTransform * vec4( #I{" + name + "} , 1.0)).xyz;"; break;
         }
         vsConfig.channelAttribute(name, outName, code);
@@ -318,7 +323,7 @@ module("Xflow tests", {
 
         if (shouldMatchData.isLoading()) {
             var loadCheck = function (handle, notfication) {
-                if (notfication === Xflow.DATA_ENTRY_STATE.LOAD_END || !shouldMatchData.isLoading()) {
+                if (notfication === XflowConstants.DATA_ENTRY_STATE.LOAD_END || !shouldMatchData.isLoading()) {
                     shouldMatchData.removeListener(loadCheck);
                     executeTest();
                 }
@@ -419,24 +424,24 @@ module("Xflow tests", {
 
 
 test("Test filter parsing", function() {
-    var dataNode = new Xflow.DataNode(false);
+    var dataNode = new DataNode(false);
     var mapping;
 
     dataNode.setFilter("keep(position, normal, tangent)");
-    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.KEEP, "Filter Type is 'keep'");
+    strictEqual(dataNode.filterType, XflowConstants.DATA_FILTER_TYPE.KEEP, "Filter Type is 'keep'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getName(0), "position", "First mapping name is 'position'");
     strictEqual(mapping.getName(1), "normal", "Second mapping name is 'normal'");
     strictEqual(mapping.getName(2), "tangent", "Third mapping name is 'tangent'");
 
     dataNode.setFilter("remove ( A , B )   ");
-    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.REMOVE, "Filter Type is 'remove'");
+    strictEqual(dataNode.filterType, XflowConstants.DATA_FILTER_TYPE.REMOVE, "Filter Type is 'remove'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getName(0), "A", "First mapping name is 'A'");
     strictEqual(mapping.getName(1), "B", "Second mapping name is 'B'");
 
     dataNode.setFilter("rename ({newA : oldA , newB:oldB, newC: oldB})  ");
-    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.RENAME , "Filter Type is 'rename'");
+    strictEqual(dataNode.filterType, XflowConstants.DATA_FILTER_TYPE.RENAME , "Filter Type is 'rename'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getDestName(0), "newA", "First destination name is 'newA'");
     strictEqual(mapping.getDestName(1), "newB", "Second destination name is 'newB'");
@@ -446,7 +451,7 @@ test("Test filter parsing", function() {
     strictEqual(mapping.getSrcName(2), "oldB", "Third source name is 'oldB'");
 
     dataNode.setFilter("keep( {DEST : A, DEST :B , DEST: C , C2: A } ) ");
-    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.KEEP , "Filter Type is 'keep'");
+    strictEqual(dataNode.filterType, XflowConstants.DATA_FILTER_TYPE.KEEP , "Filter Type is 'keep'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getDestName(0), "DEST", "First destination name is 'DEST'");
     strictEqual(mapping.getDestName(1), "C2", "Second destination name is 'C2'");
@@ -456,7 +461,7 @@ test("Test filter parsing", function() {
 
 
 test("Test compute parsing", function() {
-    var dataNode = new Xflow.DataNode(false);
+    var dataNode = new DataNode(false);
     var mapping;
 
     dataNode.setCompute("position = xflow.morph(position, posAdd, weight)");

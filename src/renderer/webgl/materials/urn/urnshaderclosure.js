@@ -1,5 +1,5 @@
 var AbstractShaderClosure = require("./../abstractshaderclosure.js");
-var SystemNotifier = require("../../system/system-notifier");
+var SystemNotifier = require("../../system/system-notifier.js");
 
 /**
  * A ShaderClosure connects a mesh-specific GLProgram with it's Xflow data

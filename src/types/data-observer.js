@@ -1,4 +1,4 @@
-
+var XC = require("../xflow/interface/constants.js");
 
 var c_XflowObserverList = [];
 
@@ -139,17 +139,17 @@ function constructDataResult(dataResult, result){
 
 function getXML3DDataType(type){
     switch(type){
-        case Xflow.DATA_TYPE.FLOAT : return XML3DDataResult.FLOAT;
-        case Xflow.DATA_TYPE.FLOAT2 : return XML3DDataResult.FLOAT2;
-        case Xflow.DATA_TYPE.FLOAT3 : return XML3DDataResult.FLOAT3;
-        case Xflow.DATA_TYPE.FLOAT4 : return XML3DDataResult.FLOAT4;
-        case Xflow.DATA_TYPE.FLOAT4X4 : return XML3DDataResult.FLOAT4X4;
-        case Xflow.DATA_TYPE.INT : return XML3DDataResult.INT;
-        case Xflow.DATA_TYPE.INT4 : return XML3DDataResult.INT4;
-        case Xflow.DATA_TYPE.BOOL : return XML3DDataResult.BOOL;
-        case Xflow.DATA_TYPE.TEXTURE : return XML3DDataResult.TEXTURE;
-        case Xflow.DATA_TYPE.BYTE : return XML3DDataResult.BYTE;
-        case Xflow.DATA_TYPE.UBYTE : return XML3DDataResult.UBYTE;
+        case XC.DATA_TYPE.FLOAT : return XML3DDataResult.FLOAT;
+        case XC.DATA_TYPE.FLOAT2 : return XML3DDataResult.FLOAT2;
+        case XC.DATA_TYPE.FLOAT3 : return XML3DDataResult.FLOAT3;
+        case XC.DATA_TYPE.FLOAT4 : return XML3DDataResult.FLOAT4;
+        case XC.DATA_TYPE.FLOAT4X4 : return XML3DDataResult.FLOAT4X4;
+        case XC.DATA_TYPE.INT : return XML3DDataResult.INT;
+        case XC.DATA_TYPE.INT4 : return XML3DDataResult.INT4;
+        case XC.DATA_TYPE.BOOL : return XML3DDataResult.BOOL;
+        case XC.DATA_TYPE.TEXTURE : return XML3DDataResult.TEXTURE;
+        case XC.DATA_TYPE.BYTE : return XML3DDataResult.BYTE;
+        case XC.DATA_TYPE.UBYTE : return XML3DDataResult.UBYTE;
         default: throw new Error("WHAT IS THIS I DON'T EVEN...");
     }
 }

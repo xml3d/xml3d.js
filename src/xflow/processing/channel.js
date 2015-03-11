@@ -1,5 +1,5 @@
 var Base = require("../base.js");
-var C = require("../interface/constants");
+var C = require("../interface/constants.js");
 var BufferEntry = require("../interface/data.js").BufferEntry;
 
 

@@ -1,11 +1,12 @@
 var StateMachine = require("../../../contrib/state-machine.js");
+var SamplerConfig = require("../../../xflow/interface/data.js").SamplerConfig;
 
 /**
  * @param {WebGLRenderingContext} gl
  * @constructor
  */
 var GLCubeMap = function (gl) {
-    Xflow.SamplerConfig.call(this);
+    SamplerConfig.call(this);
     this.setDefaults();
     this.width = 0;
     this.height = 0;
@@ -13,7 +14,7 @@ var GLCubeMap = function (gl) {
     this.handle = null;
     this.glSides = [gl.TEXTURE_CUBE_MAP_POSITIVE_X, gl.TEXTURE_CUBE_MAP_NEGATIVE_X, gl.TEXTURE_CUBE_MAP_POSITIVE_Y, gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z];
 };
-XML3D.createClass(GLCubeMap, Xflow.SamplerConfig);
+XML3D.createClass(GLCubeMap, SamplerConfig);
 
 GLCubeMap.State = {
     NONE: "none", LOADING: "loading", READY: "ready", ERROR: "error"

@@ -1,4 +1,5 @@
 var TransformableAdapter = require("./transformable.js");
+var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var AdapterHandle = XML3D.base.AdapterHandle;
 
 var ModelRenderAdapter = function (factory, node) {
@@ -164,7 +165,7 @@ function rec_removeRenderNodes(node, keepCurrentNode) {
 function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
 
     if (dataTreeNode.postTransformXflowNode) {
-        var request = new Xflow.ComputeRequest(dataTreeNode.postTransformXflowNode, ["transform"], adapter._bindedRequestCallback);
+        var request = new ComputeRequest(dataTreeNode.postTransformXflowNode, ["transform"], adapter._bindedRequestCallback);
         parentNode = adapter.getScene().createRenderGroup({
             parent: parentNode, visible: true, name: undefined
         });

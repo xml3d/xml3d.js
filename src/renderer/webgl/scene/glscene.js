@@ -1,8 +1,8 @@
 var Scene = require("./../../renderer/scene/scene.js");
 var DrawableFactory = require("./drawable-factory.js");
 var C = require("./../../renderer/scene/constants.js");
-var FrustumTest = require("./../../renderer/tools/frustum").FrustumTest;
-var ShaderComposerFactory = require("../materials/shadercomposerfactory");
+var FrustumTest = require("./../../renderer/tools/frustum.js").FrustumTest;
+var ShaderComposerFactory = require("../materials/shadercomposerfactory.js");
 
 var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
 var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";

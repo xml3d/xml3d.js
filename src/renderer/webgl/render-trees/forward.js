@@ -3,12 +3,12 @@ var GLRenderTarget = require("../base/rendertarget.js").GLRenderTarget;
 var GLCubeMapRenderTarget = require("../base/rendertarget.js").GLCubeMapRenderTarget;
 var ForwardRenderPass = require("../render-passes/forward.js");
 var BoxBlurPass= require("../render-passes/boxblur.js");
-var LightPass= require("../render-passes/light-pass");
-var PointLightPass= require("../render-passes/pointlight-pass");
+var LightPass= require("../render-passes/light-pass.js");
+var PointLightPass= require("../render-passes/pointlight-pass.js");
 var VertexAttributePass = require("../render-passes/vertexattribute-pass.js");
-var SSAOPass = require("../render-passes/ssao-pass");
+var SSAOPass = require("../render-passes/ssao-pass.js");
 var EVENT_TYPE = require("../../renderer/scene/constants.js").EVENT_TYPE;
-var MaterialEvents = require("../materials/events");
+var MaterialEvents = require("../materials/events.js");
 /**
  *
  * @param {GLRenderInterface} renderInterface

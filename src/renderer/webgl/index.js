@@ -1,4 +1,4 @@
-var RenderTarget = require("./base/rendertarget");
+var RenderTarget = require("./base/rendertarget.js");
 var ShaderUtils = require("./shader/shader-utils.js");
 
 module.exports = {

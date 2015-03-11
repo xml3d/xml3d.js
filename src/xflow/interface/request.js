@@ -1,5 +1,6 @@
 var Base = require("../base.js");
-var C = require("./constants");
+var C = require("./constants.js");
+var DataNode = require("./graph.js").DataNode;
 
 /**
  * Content of this file:
@@ -190,7 +191,7 @@ function getVsConnectNode(dataNode, vsConfig, filter){
     var key = getDataNodeShaderKey(forwardNode, vsConfig);
     var connectNode;
     if(!(connectNode = c_vsConnectNodeCache[key])){
-        connectNode = new Xflow.DataNode(false);
+        connectNode = new DataNode(false);
         connectNode.appendChild(forwardNode);
 
         connectNode.computeOperator = vsConfig.getOperator();

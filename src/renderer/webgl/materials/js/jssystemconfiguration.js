@@ -1,4 +1,4 @@
-var GLContext = require("../../base/context");
+var GLContext = require("../../base/context.js");
 var singleton = null;
 
 var SYSTEM_CONTEXT_TEMPLATE = {

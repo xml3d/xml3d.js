@@ -1,10 +1,10 @@
 var Base = require("../base.js");
-var C = require("../interface/constants");
+var C = require("../interface/constants.js");
 var Channels = require("./channel.js");
 var RequestNode = require("./process-node.js").RequestNode;
 var ProcessNode = require("./process-node.js").ProcessNode;
 var DataSlot = require("./data-slot.js");
-var Operator = require("../operator/operator");
+var Operator = require("../operator/operator.js");
 
 var ChannelMap = Channels.ChannelMap;
 

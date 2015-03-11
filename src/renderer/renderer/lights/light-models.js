@@ -1,37 +1,42 @@
 var Frustum = require("../tools/frustum.js").Frustum;
+var XC = require("../../../xflow/interface/constants.js");
+var DataNode = require("../../../xflow/interface/graph.js").DataNode;
+var InputNode = require("../../../xflow/interface/graph.js").InputNode;
+var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
+var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 
 var PointLightData = {
-    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
-    "attenuation": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
-    "position": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
-    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, 'default': [0.0001]},
-    "castShadow": {type: Xflow.DATA_TYPE.BOOL, 'default': [false]},
-    "on": {type: Xflow.DATA_TYPE.BOOL, 'default': [true]}
+    "intensity": {type: XC.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
+    "attenuation": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
+    "position": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
+    "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
+    "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
+    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]}
 };
 
 var SpotLightData = {
-    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
-    "attenuation": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
-    "position": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
-    "direction": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
-    "falloffAngle": {type: Xflow.DATA_TYPE.FLOAT, 'default': [Math.PI / 4]},
-    "softness": {type: Xflow.DATA_TYPE.FLOAT, 'default': [0.0]},
-    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, 'default': [0.0001]},
-    "castShadow": {type: Xflow.DATA_TYPE.BOOL, 'default': [false]},
-    "on": {type: Xflow.DATA_TYPE.BOOL, 'default': [true]}
+    "intensity": {type: XC.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
+    "attenuation": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
+    "position": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
+    "direction": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
+    "falloffAngle": {type: XC.DATA_TYPE.FLOAT, 'default': [Math.PI / 4]},
+    "softness": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0]},
+    "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
+    "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
+    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]}
 };
 
 var DirectionalLightData = {
-    "intensity": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
-    "direction": {type: Xflow.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
-    "shadowBias": {type: Xflow.DATA_TYPE.FLOAT, 'default': [0.0001]},
-    "castShadow": {type: Xflow.DATA_TYPE.BOOL, 'default': [false]},
-    "on": {type: Xflow.DATA_TYPE.BOOL, 'default': [true]}
+    "intensity": {type: XC.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
+    "direction": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
+    "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
+    "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
+    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]}
 };
 
 
 function createXflowData(config) {
-    var data = new Xflow.DataNode();
+    var data = new DataNode();
     for (var name in config) {
         var entry = config[name];
         createXflowValue(data, name, entry.type, entry['default']);
@@ -40,8 +45,8 @@ function createXflowData(config) {
 }
 
 function createXflowValue(dataNode, name, type, value) {
-    var buffer = new Xflow.BufferEntry(type, new Xflow.TYPED_ARRAY_MAP[type](value));
-    var inputNode = new Xflow.InputNode();
+    var buffer = new BufferEntry(type, new XC.TYPED_ARRAY_MAP[type](value));
+    var inputNode = new InputNode();
     inputNode.data = buffer;
     inputNode.name = name;
     dataNode.appendChild(inputNode);
@@ -51,7 +56,7 @@ function createXflowValue(dataNode, name, type, value) {
  * Base class for light models
  * @param {string} id Unique id that identifies the light model
  * @param {RenderLight} light
- * @param {Xflow.DataNode} dataNode
+ * @param {DataNode} dataNode
  * @param {Object} config Configuration that contains the light model's parameters and default values
  * @constructor
  */
@@ -69,7 +74,7 @@ var LightModel = function (id, light, dataNode, config) {
     } else {
         dataNode = createXflowData(config);
     }
-    this.lightParameterRequest = new Xflow.ComputeRequest(dataNode, this.parameters, this.lightParametersChanged.bind(this));
+    this.lightParameterRequest = new ComputeRequest(dataNode, this.parameters, this.lightParametersChanged.bind(this));
     this.lightParametersChanged(this.lightParameterRequest, null);
 };
 
@@ -83,7 +88,7 @@ LightModel.prototype = {
         var result = this.lightParameterRequest.getResult();
         this.parameters.forEach(function (name) {
             var entry = result.getOutputData(name);
-            var size = Xflow.DATA_TYPE_TUPLE_SIZE[entry.type];
+            var size = XC.DATA_TYPE_TUPLE_SIZE[entry.type];
             var value = entry.getValue();
             target[name].set(value.subarray(0, size), offset * size);
         });
@@ -95,8 +100,8 @@ LightModel.prototype = {
         var config = this.configuration;
         this.parameters.forEach(function (name) {
             var type = config[name].type;
-            var tupleSize = Xflow.DATA_TYPE_TUPLE_SIZE[type];
-            parameterArrays[name] = new Xflow.TYPED_ARRAY_MAP[type](tupleSize * size);
+            var tupleSize = XC.DATA_TYPE_TUPLE_SIZE[type];
+            parameterArrays[name] = new XC.TYPED_ARRAY_MAP[type](tupleSize * size);
         });
         return parameterArrays;
     },
@@ -159,7 +164,7 @@ function transformDefault(target, offset, light) {
 
 /**
  * Implement XML3D's predefined point light model urn:xml3d:lightshader:point
- * @param {Xflow.DataNode} dataNode
+ * @param {DataNode} dataNode
  * @param {RenderLight} light
  * @extends LightModel
  * @constructor
@@ -214,7 +219,7 @@ XML3D.createClass(PointLightModel, LightModel, {
 
 /**
  * Implement XML3D's predefined spot light model urn:xml3d:lightshader:spot
- * @param {Xflow.DataNode} dataNode
+ * @param {DataNode} dataNode
  * @param {RenderLight} light
  * @extends LightModel
  * @constructor
@@ -240,7 +245,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
 
 /**
  * Implement XML3D's predefined spot light model urn:xml3d:lightshader:directional
- * @param {Xflow.DataNode} dataNode
+ * @param {DataNode} dataNode
  * @param {RenderLight} light
  * @extends LightModel
  * @constructor

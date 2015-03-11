@@ -1,7 +1,9 @@
-var GLScene = require("../scene/glscene");
-var GLLights = require("../scene/gllights");
-var MaterialEvents = require("../materials/events");
+var GLScene = require("../scene/glscene.js");
+var GLLights = require("../scene/gllights.js");
+var MaterialEvents = require("../materials/events.js");
 var EventDispatcher = require("../../../contrib/EventDispatcher.js");
+var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
+var XC = require("../../../xflow/interface/constants.js");
 
 /**
  * @interface
@@ -69,7 +71,7 @@ XML3D.createClass(AbstractShaderComposer, EventDispatcher, {
     updateRequest: function (xflowDataNode) {
         if (this.request) this.request.clear();
 
-        this.request = new Xflow.ComputeRequest(xflowDataNode, this.getRequestFields(), this.onShaderRequestChange.bind(this));
+        this.request = new ComputeRequest(xflowDataNode, this.getRequestFields(), this.onShaderRequestChange.bind(this));
         this.setShaderRecompile();
     },
 
@@ -81,7 +83,7 @@ XML3D.createClass(AbstractShaderComposer, EventDispatcher, {
 
     onShaderRequestChange: function (request, changeType) {
         this.dataChanged = true;
-        if (changeType == Xflow.RESULT_STATE.CHANGED_STRUCTURE)
+        if (changeType == XC.RESULT_STATE.CHANGED_STRUCTURE)
             this.setShaderRecompile();
         this.context.requestRedraw("Shader data changed");
     },
@@ -230,7 +232,7 @@ XML3D.createClass(DefaultComposer, AbstractShaderComposer, {
     },
 
     createObjectDataRequest: function (objectDataNode, callback) {
-        return new Xflow.ComputeRequest(objectDataNode, ["position", "color", "normal", "diffuseColor", "useVertexColor"], callback);
+        return new ComputeRequest(objectDataNode, ["position", "color", "normal", "diffuseColor", "useVertexColor"], callback);
     },
 
     distributeObjectShaderData: function (objectRequest, attributeCallback, uniformCallback) {

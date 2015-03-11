@@ -1,6 +1,5 @@
-//----------------------------------------------------------------------------------------------------------------------
-// Asset
-//----------------------------------------------------------------------------------------------------------------------
+var Set = require("../xflow/utils/utils.js").set;
+var DataNode = require("../xflow/interface/graph.js").DataNode;
 
 function AssetError(message, node){
     this.message = message;
@@ -157,10 +156,10 @@ Asset.prototype._callLoadListeners = function(newLevel, oldLevel){
 
 
 Asset.prototype.addChangeListener = function(listener){
-    Xflow.utils.set.add(this.listener, listener);
+    Set.add(this.listener, listener);
 };
 Asset.prototype.removeChangeListener = function(listener){
-    Xflow.utils.set.remove(this.listener, listener);
+    Set.remove(this.listener, listener);
 };
 
 Asset.prototype.getResult = function(){
@@ -553,10 +552,10 @@ function updateAccumulatedNode(table, entry){
         entry.accumulatedXflowNode.setLoading(false);
     }
     else{
-        entry.accumulatedXflowNode = new Xflow.DataNode(false);
+        entry.accumulatedXflowNode = new DataNode(false);
     }
 
-    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : new Xflow.DataNode(false);
+    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : new DataNode(false);
     for(var i = 0; i < entry.postQueue.length; ++i){
         var includes = entry.postQueue[i].includes;
         for(var j = 0; j < includes.length; ++j){
@@ -569,7 +568,7 @@ function updateAccumulatedNode(table, entry){
     var node = dataNode, parentNode = null;
     for(var i = 0; i < entry.postQueue.length; ++i){
         var postEntry = entry.postQueue[i];
-        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : new Xflow.DataNode(false));
+        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : new DataNode(false));
         node.setCompute(postEntry.compute);
         node.setFilter(postEntry.filter);
         node.dataflowNode = postEntry.dataflow;
@@ -636,7 +635,7 @@ function AssetTableEntry (subData){
     this.refNode = null;
     if(subData){
         this.name = subData.name;
-        Xflow.utils.set.add(this.classNames, subData.classNames);
+        Set.add(this.classNames, subData.classNames);
     }
 }
 
@@ -646,7 +645,7 @@ AssetTableEntry.prototype.isMesh = function(){
 
 AssetTableEntry.prototype.pushTableEntry = function(srcEntry){
     this.name = srcEntry.name;
-    Xflow.utils.set.add(this.classNames, srcEntry.classNames);
+    Set.add(this.classNames, srcEntry.classNames);
     if(srcEntry.meshType) this.meshType = srcEntry.meshType;
 
     if(srcEntry.transform) this.transform = combineTransform(this.transform, srcEntry.transform);
@@ -668,7 +667,7 @@ AssetTableEntry.prototype.pushPostEntry = function(subData){
     });
     this.refNode = subData.refNode;
     this.accumulatedXflowNode = subData.xflowNodeOut;
-    Xflow.utils.set.add(this.classNames, subData.classNames);
+    Set.add(this.classNames, subData.classNames);
     if(subData.meshType) this.meshType = subData.meshType;
     if(subData.shader) this.shader = subData.shader;
     if(subData.transform) this.transform = combineTransform(this.transform, subData.transform);
@@ -705,14 +704,14 @@ AssetPickFilter.prototype.parse = function(string){
             this.classNames.push(classNames);
         }
         else{
-            Xflow.utils.set.add(this.names, entry);
+            Set.add(this.names, entry);
         }
     }
 };
 
 AssetPickFilter.prototype.intersection = function(setA, setB){
-    Xflow.utils.set.intersection(this.names, setA.names, setB.names);
-    Xflow.utils.set.intersection(this.classNames, setA.classNames, setB.classNames);
+    Set.intersection(this.names, setA.names, setB.names);
+    Set.intersection(this.classNames, setA.classNames, setB.classNames);
 };
 
 AssetPickFilter.prototype.check = function(entry){
@@ -721,7 +720,7 @@ AssetPickFilter.prototype.check = function(entry){
     if(entry.classNames.length > 0){
         var i = this.classNames.length;
         while(i--){
-            if(Xflow.utils.set.isSubset(this.classNames[i], entry.classNames))
+            if(Set.isSubset(this.classNames[i], entry.classNames))
                 return true;
         }
     }

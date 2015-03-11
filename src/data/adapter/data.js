@@ -1,4 +1,6 @@
-var BaseDataAdapter = require("./base");
+var BaseDataAdapter = require("./base.js");
+var DataNode = require("../../xflow/interface/graph.js").DataNode;
+var XC = require("../../xflow/interface/constants.js");
 
 /**
  * The DataAdapter implements the
@@ -22,7 +24,7 @@ var DataAdapter = function (factory, node) {
 XML3D.createClass(DataAdapter, BaseDataAdapter);
 
 DataAdapter.prototype.init = function () {
-    this.xflowDataNode = new Xflow.DataNode(false);
+    this.xflowDataNode = new DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
 
@@ -70,7 +72,7 @@ DataAdapter.prototype.getDataProgressLevel = function(){
     /** Recursively passing platform information to children of a data node
      *  Requires that the children and the parents of data nodes are defined
      *
-     * @param {Xflow.DataNode} parentNode
+     * @param {DataNode} parentNode
      */
 function recursiveDataNodeAttrInit(parentNode) {
     var children = parentNode._children, NChildren, i;
@@ -79,7 +81,7 @@ function recursiveDataNodeAttrInit(parentNode) {
         NChildren = children.length;
 
         for (i = NChildren; i--;) {
-            if (children[i] instanceof Xflow.DataNode) {
+            if (children[i] instanceof DataNode) {
                 children[i].setPlatform(parentNode._platform);
                 recursiveDataNodeAttrInit(children[i]);
             }
@@ -188,7 +190,7 @@ DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, statu
         this.xflowDataNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
     } else if (this.externalScripts[key]) {
         window.eval(adapter.script);
-        this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        this.xflowDataNode.notify(XC.RESULT_STATE.CHANGED_STRUCTURE);
     }
 
     updateLoadState(this);

@@ -1,5 +1,7 @@
-var DOMTransformFetcher = require("../transform-fetcher");
-var DataAdapter = require("./data");
+var DOMTransformFetcher = require("../transform-fetcher.js");
+var DataAdapter = require("./data.js");
+var DataNode = require("../../xflow/interface/graph.js").DataNode;
+var getComputeDataflowUrl = require("../../xflow/interface/graph.js").getComputeDataflowUrl;
 
 var NodeAdapter = XML3D.base.NodeAdapter;
 var Asset = XML3D.base.Asset;
@@ -154,7 +156,7 @@ createClass(AssetDataAdapter, DataAdapter);
 
 AssetDataAdapter.prototype.init = function () {
     DataAdapter.prototype.init.call(this);
-    this.outputXflowNode = new Xflow.DataNode(false);
+    this.outputXflowNode = new DataNode(false);
     this.assetEntry = new SubData(this.outputXflowNode, this.getXflowNode(), this.node);
     this.assetEntry.setName(this.node.getAttribute("name"));
     updateClassNames(this);
@@ -214,7 +216,7 @@ function updateClassNames(adapter) {
 
 function updatePostCompute(adapter) {
     var computeString = adapter.node.getAttribute("compute");
-    var dataflowUrl = Xflow.getComputeDataflowUrl(computeString);
+    var dataflowUrl = getComputeDataflowUrl(computeString);
     if (dataflowUrl) {
         updateAdapterHandle(adapter, "postDataflow", dataflowUrl);
     } else {

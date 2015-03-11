@@ -24,7 +24,6 @@ exports = module.exports = function (grunt) {
                     "LICENSE",
                     "src/xml3d.js",
                     "<%= dirs.modules %>/xml3d-utils-module.js",
-                    "<%= dirs.modules %>/xml3d-math-module.js",
                     "<%= dirs.modules %>/xml3d-types-module.js",
                     "<%= dirs.modules %>/xml3d-base-module.js",
                     "<%= dirs.modules %>/xml3d-renderer-module.js"

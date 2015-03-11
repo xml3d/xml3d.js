@@ -1,4 +1,5 @@
 var RenderAdapter = require("./base.js");
+var Events = require("../../../interface/notification.js");
 
 /**
  * Adapter for <lightshader>
@@ -24,11 +25,11 @@ XML3D.createClass(LightShaderRenderAdapter, RenderAdapter, {
         }
     }, notifyChanged: function (evt) {
         switch (evt.type) {
-            case XML3D.events.THIS_REMOVED:
+            case Events.THIS_REMOVED:
                 this.notifyOppositeAdapters();
                 break;
-            case XML3D.events.VALUE_MODIFIED:
-                this.notifyOppositeAdapters(XML3D.events.ADAPTER_VALUE_CHANGED);
+            case Events.VALUE_MODIFIED:
+                this.notifyOppositeAdapters(Events.ADAPTER_VALUE_CHANGED);
                 break;
         }
     }

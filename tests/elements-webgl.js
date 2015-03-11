@@ -17,6 +17,8 @@ module("Element configuration tests", {
     }
 });
 
+var Events = XML3DTestLib.Events;
+
 test("IFrame loaded", 3, function() {
    ok(this.doc, "Document set");
 });
@@ -152,7 +154,7 @@ test("DOMNodeInserted on xml3d", 5, function() {
     this.factory.getAdapter(x); // 3: Init adapter
     x.appendChild(g); // 4: Adapter for myXml3d has been notified: Notification (type:0)
     this.win.XML3D.flushDOMChanges();
-    equal(this.factory.event.type, XML3D.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5
+    equal(this.factory.event.type, Events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 5
 });
 
 test("DOMNodeRemoved on xml3d", 7, function() {
@@ -166,7 +168,7 @@ test("DOMNodeRemoved on xml3d", 7, function() {
     // 6: Adapter for myGroup has been notified: Notification (type:2)
     x.removeChild(g);
     this.win.XML3D.flushDOMChanges();
-    equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
+    equal(this.factory.event.type, Events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
 test("DOMNodeInserted on arbritary", 6, function() {
@@ -179,7 +181,7 @@ test("DOMNodeInserted on arbritary", 6, function() {
     // 5: Adapter for myGroup has been notified: Notification (type:0)
     x.appendChild(g);
     this.win.XML3D.flushDOMChanges();
-    equal(this.factory.event.type, XML3D.events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 6
+    equal(this.factory.event.type, Events.NODE_INSERTED, "Notification of type NODE_INSERTED"); // 6
 });
 
 test("DOMNodeRemoved on arbritary", 7, function() {
@@ -193,7 +195,7 @@ test("DOMNodeRemoved on arbritary", 7, function() {
     // 6: Adapter for myMesh01 has been notified: Notification (type:2)
     x.removeChild(g);
     this.win.XML3D.flushDOMChanges();
-    equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
+    equal(this.factory.event.type, Events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 7
 });
 
 test("DOMNodeRemoved recursively", 9, function() {
@@ -210,5 +212,5 @@ test("DOMNodeRemoved recursively", 9, function() {
     // 7: Adapter for child01 has been notified: Notification (type:5)
     // 8: Adapter for child01 has been notified: Notification (type:5)
     this.win.XML3D.flushDOMChanges();
-    equal(this.factory.event.type, XML3D.events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 9
+    equal(this.factory.event.type, Events.THIS_REMOVED, "Notification of type THIS_REMOVED"); // 9
 });

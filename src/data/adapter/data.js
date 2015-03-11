@@ -1,6 +1,7 @@
 var BaseDataAdapter = require("./base.js");
 var DataNode = require("../../xflow/interface/graph.js").DataNode;
 var XC = require("../../xflow/interface/constants.js");
+var Events = require("../../interface/notification.js");
 
 /**
  * The DataAdapter implements the
@@ -126,13 +127,13 @@ function recursiveDataAdapterConstruction(adapter) {
  * @param evt notification of type XML3D.Notification
  */
 DataAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type === XML3D.events.ADAPTER_HANDLE_CHANGED) {
+    if (evt.type === Events.ADAPTER_HANDLE_CHANGED) {
         this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
         if (evt.handleStatus === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
             XML3D.debug.logError("Could not find <data> element of url '" + evt.url + "' for " + evt.key, this.node);
         }
 
-    } else if (evt.type === XML3D.events.NODE_INSERTED) {
+    } else if (evt.type === Events.NODE_INSERTED) {
         var insertedNode = evt.affectedNode;
         var adapter = this.factory.getAdapter(insertedNode);
         if (!adapter) {
@@ -152,7 +153,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
             this.xflowDataNode.appendChild(insertedXflowNode);
         }
 
-    } else if (evt.type === XML3D.events.NODE_REMOVED) {
+    } else if (evt.type === Events.NODE_REMOVED) {
         var adapter = this.factory.getAdapter(evt.affectedNode);
         if (!adapter) {
             return;
@@ -161,7 +162,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
         var removedXflowNode = adapter.getXflowNode();
         this.xflowDataNode.removeChild(removedXflowNode);
 
-    } else if (evt.type === XML3D.events.VALUE_MODIFIED) {
+    } else if (evt.type === Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
 
         if (attr === "filter" && !this.assetData) {
@@ -176,7 +177,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
             updatePlatform(this);
         }
 
-    } else if (evt.type === XML3D.events.THIS_REMOVED) {
+    } else if (evt.type === Events.THIS_REMOVED) {
         this.clearAdapterHandles();
     }
 };

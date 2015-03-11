@@ -1,5 +1,6 @@
 var TransformableAdapter = require("./transformable.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
+var Events = require("../../../interface/notification.js");
 var AdapterHandle = XML3D.base.AdapterHandle;
 
 var ModelRenderAdapter = function (factory, node) {
@@ -90,12 +91,12 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
     notifyChanged: function (evt) {
         TransformableAdapter.prototype.notifyChanged.call(this, evt);
         switch (evt.type) {
-            case  XML3D.events.NODE_INSERTED:
+            case  Events.NODE_INSERTED:
                 return;
-            case XML3D.events.THIS_REMOVED:
+            case Events.THIS_REMOVED:
                 this.dispose();
                 return;
-            case XML3D.events.ADAPTER_HANDLE_CHANGED:
+            case Events.ADAPTER_HANDLE_CHANGED:
                 var splits = evt.key.split("_");
                 if (splits[0] == "shader") {
                     var renderNodeId = +splits[1];

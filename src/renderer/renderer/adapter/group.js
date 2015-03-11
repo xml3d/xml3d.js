@@ -1,4 +1,5 @@
 var TransformableAdapter = require("./transformable.js");
+var Events = require("../../../interface/notification.js");
 
 var GroupRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, true, true);
@@ -24,23 +25,23 @@ p.createRenderNode = function () {
 
 p.notifyChanged = function (evt) {
     TransformableAdapter.prototype.notifyChanged.call(this, evt);
-    if (evt.type !== XML3D.events.VALUE_MODIFIED) {
+    if (evt.type !== Events.VALUE_MODIFIED) {
         return this.handleConnectedAdapterEvent(evt);
     }
 };
 
 p.handleConnectedAdapterEvent = function (evt) {
     switch (evt.type) {
-        case XML3D.events.NODE_INSERTED:
+        case Events.NODE_INSERTED:
             // This also initializes the children
             this.initElement(evt.mutation.target);
             break;
-        case XML3D.events.THIS_REMOVED:
+        case Events.THIS_REMOVED:
             this.dispose();
             break;
-        case XML3D.events.ADAPTER_HANDLE_CHANGED:
+        case Events.ADAPTER_HANDLE_CHANGED:
             break;
-        case XML3D.events.NODE_REMOVED:
+        case Events.NODE_REMOVED:
             break;
         default:
             XML3D.debug.logWarning("Unhandled connected adapter event for " + evt.key + " in shader adapter");

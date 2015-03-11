@@ -1,4 +1,5 @@
 var ComputeRequest = require("../xflow/interface/request.js").ComputeRequest;
+var Events = require("../interface/notification.js");
 
 var DOMTransformFetcher = function (owner, attrName, dataName, onlyDataTransform) {
     this.owner = owner;
@@ -59,7 +60,7 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
 }());
 
 DOMTransformFetcher.prototype._onChange = function (evt) {
-    if (evt.type == XML3D.events.ADAPTER_VALUE_CHANGED) {
+    if (evt.type == Events.ADAPTER_VALUE_CHANGED) {
         this.owner.onTransformChange(this.attrName, evt.adapterHandle.getAdapter().getMatrix());
     } else { // If the adapter changed, we need to re-evaluate the matrix
         this.updateMatrix();

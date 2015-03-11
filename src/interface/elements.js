@@ -388,6 +388,8 @@ config.configure = function(element) {
     }
 };
 
+window.XML3D.config = config;
+
 
 module.exports = {
     ElementHandler : ElementHandler,

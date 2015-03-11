@@ -1,6 +1,7 @@
 var TextureEntry = require("../../xflow/interface/data.js").TextureEntry;
 var InputNode = require("../../xflow/interface/graph.js").InputNode;
 var XC = require("../../xflow/interface/constants.js");
+var Events = require("../../interface/notification.js");
 var NodeAdapter = XML3D.base.NodeAdapter;
 
 var clampToGL = function (modeStr) {
@@ -80,7 +81,7 @@ TextureDataAdapter.prototype.getValue = function () {
 };
 
 TextureDataAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type == XML3D.events.VALUE_MODIFIED) {
+    if (evt.type == Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
         if (attr == "name") {
             this.xflowInputNode.name = this.node.name;

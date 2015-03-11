@@ -6,5 +6,6 @@ module.exports = {
     DataNode: require("../../src/xflow/interface/graph.js").DataNode,
     VSConfig: require("../../src/xflow/interface/vs-connect.js").VSConfig,
     VertexShaderRequest: require("../../src/xflow/interface/request.js").VertexShaderRequest,
-    ComputeRequest: require("../../src/xflow/interface/request.js").ComputeRequest
+    ComputeRequest: require("../../src/xflow/interface/request.js").ComputeRequest,
+    Events: require("../../src/interface/notification.js")
 };

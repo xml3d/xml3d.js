@@ -1,6 +1,7 @@
 var BaseDataAdapter = require("./base.js");
 var DataNode = require("../../xflow/interface/graph.js").DataNode;
 var XC = require("../../xflow/interface/constants.js");
+var Events = require("../../interface/notification.js");
 
 /**
  * DataAdapter handling a <dataflow> element
@@ -41,7 +42,7 @@ DataflowDataAdapter.prototype.updateAdapterHandle = function(key, url) {
  * @param evt notification of type XML3D.Notification
  */
 DataflowDataAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type === XML3D.events.ADAPTER_HANDLE_CHANGED) {
+    if (evt.type === Events.ADAPTER_HANDLE_CHANGED) {
         //TODO: Handle ADAPTER_HANDLE_CHANGED
         if (this.externalScripts[evt.key]) {
             window.eval(evt.adapter.script);
@@ -51,19 +52,19 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
     }
 
     switch (evt.type) {
-        case XML3D.events.ADAPTER_HANDLE_CHANGED:
+        case Events.ADAPTER_HANDLE_CHANGED:
             this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
             if (evt.handleStatus === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
                 XML3D.debug.logError("Could not find dataflow of url '" + evt.url, this.node);
             }
             break;
 
-        case XML3D.events.NODE_INSERTED:
-        case XML3D.events.NODE_REMOVED:
+        case Events.NODE_INSERTED:
+        case Events.NODE_REMOVED:
             updateDataflowXflowNode(this);
             break;
 
-        case XML3D.events.VALUE_MODIFIED:
+        case Events.VALUE_MODIFIED:
             var attr = evt.mutation.attributeName;
             if (attr === "out") {
                 updateDataflowOut(this);

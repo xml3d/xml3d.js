@@ -1,4 +1,5 @@
 var registerFactory = require("./resourcemanager.js").registerFactory;
+var Events = require("../interface/notification.js");
 
 /**
  * A normal adapter that doesn't need to be connected to a DOM node
@@ -86,12 +87,12 @@ Adapter.prototype.onDispose = function() {
 /**
  * Internal function that converts an AdapterHandleNotification to a ConnectedAdapterNotification
  * @private
- * @param {XML3D.events.AdapterHandleNotification} evt
+ * @param {Events.AdapterHandleNotification} evt
  */
 function adapterHandleCallback(evt) {
     for (var key in this.connectedAdapterHandles) {
         if (this.connectedAdapterHandles[key] == evt.adapterHandle) {
-            var subEvent = new XML3D.events.ConnectedAdapterNotification(evt, key);
+            var subEvent = new Events.ConnectedAdapterNotification(evt, key);
             this.notifyChanged(subEvent);
         }
     }
@@ -118,7 +119,7 @@ NodeAdapter.prototype.init = function() {
 
 /**
  * Notifiction due to a change in DOM, related adapters and so on.
- * @param {XML3D.events.Notification} e
+ * @param {Events.Notification} e
  */
 NodeAdapter.prototype.notifyChanged = function(e) {
 
@@ -140,7 +141,7 @@ NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
  * @param {number?} type The type of change
  */
 NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
-    type = type || XML3D.events.ADAPTER_HANDLE_CHANGED;
+    type = type || Events.ADAPTER_HANDLE_CHANGED;
     return XML3D.base.resourceManager.notifyNodeAdapterChange(this.node,
         this.factory.aspect, this.factory.canvasId, type);
 };

@@ -571,7 +571,7 @@ ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId)
  * @param {Element} element Element of AdapterHandler. Must be from window.document
  * @param {Object} adapterType Type/Aspect of AdapterHandler (e.g. XML3D.data or XML3D.webgl)
  * @param {number} canvasId GLCanvasHandler id of AdapterHandler, 0 if not depending on GLCanvasHandler
- * @param {number} type Type of Notification. Usually XML3D.events.ADAPTER_HANDLE_CHANGED
+ * @param {number} type Type of Notification. Usually Events.ADAPTER_HANDLE_CHANGED
  */
 ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterType, canvasId, type) {
     canvasId = canvasId || 0;

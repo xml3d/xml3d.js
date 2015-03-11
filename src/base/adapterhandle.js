@@ -1,3 +1,5 @@
+var Events = require("../interface/notification.js");
+
 "use strict";
 /**
  * An adapter handle is a connection piece for an adapter that is referred through a uri (e.g. id reference)
@@ -43,15 +45,15 @@ AdapterHandle.prototype.getAdapter = function() {
 AdapterHandle.prototype.setAdapter = function(adapter, status) {
     this.adapter = adapter;
     this.status = status;
-    this.notifyListeners(XML3D.events.ADAPTER_HANDLE_CHANGED);
+    this.notifyListeners(Events.ADAPTER_HANDLE_CHANGED);
 };
 
 /**
  * This function is called to notify all listeners of this AdapterHandle about some change.
- * @param {number} type A type number with the type of change (usually XML3D.events.ADAPTER_HANDLE_CHANGED)
+ * @param {number} type A type number with the type of change (usually Events.ADAPTER_HANDLE_CHANGED)
  */
 AdapterHandle.prototype.notifyListeners = function(type) {
-    var event = new XML3D.events.AdapterHandleNotification(this, type);
+    var event = new Events.AdapterHandleNotification(this, type);
     var i = this.listeners.length;
     while (i--) {
         this.listeners[i](event);

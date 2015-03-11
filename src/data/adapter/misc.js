@@ -1,4 +1,5 @@
 var DataAdapter = require("./data.js");
+var Events = require("../../interface/notification.js");
 var createClass = XML3D.createClass;
 var NodeAdapter = XML3D.base.NodeAdapter;
     /**
@@ -73,7 +74,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
     };
 
     ImgDataAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.VALUE_MODIFIED) {
+        if (evt.type == Events.VALUE_MODIFIED) {
             var attr = evt.mutation.attributeName;
             if(attr == "src"){
                 this.createImageFromURL(this.node.src);
@@ -171,7 +172,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
     };
 
     VideoDataAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.VALUE_MODIFIED) {
+        if (evt.type == Events.VALUE_MODIFIED) {
             var attr = evt.mutation.attributeName;
             if(attr == "src"){
                 this.createVideoFromURL(this.node.src);

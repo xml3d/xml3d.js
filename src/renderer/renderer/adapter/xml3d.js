@@ -1,5 +1,6 @@
 var RenderAdapter = require("./base.js");
 var Utils = require("../utils.js");
+var Events = require("../../../interface/notification.js");
 
 var XML3DRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
@@ -31,14 +32,14 @@ XML3D.extend(XML3DRenderAdapter.prototype, {
 XML3DRenderAdapter.prototype.notifyChanged = function (evt) {
 
     switch (evt.type) {
-        case XML3D.events.ADAPTER_HANDLE_CHANGED:
+        case Events.ADAPTER_HANDLE_CHANGED:
             this.setViewAdapter(evt.adapter);
             return;
-        case XML3D.events.NODE_INSERTED:
+        case Events.NODE_INSERTED:
             // This also initializes the children
             this.initElement(evt.mutation.target);
             return;
-        case XML3D.events.NODE_REMOVED:
+        case Events.NODE_REMOVED:
             // Handled in removed node
             return;
     }

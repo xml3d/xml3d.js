@@ -16,6 +16,8 @@ module("Adapter Handles", {
     }
 });
 
+var Events = XML3DTestLib.Events;
+
 test("Get Local Adapters", function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         canvasId = getCanvasId(xTest);
@@ -128,7 +130,7 @@ test("Get Missing Handles", function() {
     var self = this;
     handle.addListener(function(e){
         ok(handle == e.adapterHandle, "Event has correct AdapterHandle");
-        ok(e.type = XML3D.events.ADAPTER_HANDLE_CHANGED, "Event type is 'ADAPTER_HANDLE_CHANGED'");
+        ok(e.type = Events.ADAPTER_HANDLE_CHANGED, "Event type is 'ADAPTER_HANDLE_CHANGED'");
         ok(e.handleStatus = XML3D.base.AdapterHandle.STATUS.NOT_FOUND, "Event handleStatus is 'NOT_FOUND'");
         ok(!handle.hasAdapter(), "Handle still doesn't have any adapter");
 
@@ -138,7 +140,7 @@ test("Get Missing Handles", function() {
 
         handle2.addListener(function(e){
             ok(handle2 == e.adapterHandle, "Event has correct AdapterHandle");
-            ok(e.type = XML3D.events.ADAPTER_HANDLE_CHANGED, "Event type is 'ADAPTER_HANDLE_CHANGED'");
+            ok(e.type = Events.ADAPTER_HANDLE_CHANGED, "Event type is 'ADAPTER_HANDLE_CHANGED'");
             ok(e.handleStatus = XML3D.base.AdapterHandle.STATUS.NOT_FOUND, "Event type is 'NOT_FOUND'");
             ok(!handle2.hasAdapter(), "Handle still doesn't have any adapter");
 
@@ -150,7 +152,7 @@ test("Get Missing Handles", function() {
             ok(handle3.status == XML3D.base.AdapterHandle.STATUS.NOT_FOUND, "Handle of '#mesh2' has still status is 'NOT_FOUND'" );
             handle3.addListener(function(e){
                 ok(handle3 == e.adapterHandle, "Event has correct AdapterHandle");
-                ok(e.type = XML3D.events.ADAPTER_HANDLE_CHANGED, "Event type is 'ADAPTER_HANDLE_CHANGED'");
+                ok(e.type = Events.ADAPTER_HANDLE_CHANGED, "Event type is 'ADAPTER_HANDLE_CHANGED'");
                 ok(handle3.hasAdapter(), "Handle of '#mesh2' has adapter now!");
 
             });
@@ -176,17 +178,17 @@ test("Notify Adapters", 8, function() {
     var webglHandle = XML3D.base.resourceManager.getAdapterHandle(this.doc.URL, "#mesh1", "webgl", canvasId);
     dataHandle1.addListener(function(e){
         ok(true, "First Data Adapter got notified");
-        ok(e.type == XML3D.events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
+        ok(e.type == Events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
     });
     dataHandle2.addListener(function(e){
         ok(true, "Second Data Adapter got notified");
-        ok(e.type == XML3D.events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
+        ok(e.type == Events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
     });
     webglHandle.addListener(function(e){
         ok(true, "WebGL Adapter got notified");
-        ok(e.type == XML3D.events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
+        ok(e.type == Events.ADAPTER_HANDLE_CHANGED, "Event has correct type");
     });
-    XML3D.base.resourceManager.notifyNodeAdapterChange(node, XML3D.webgl, canvasId, XML3D.events.ADAPTER_HANDLE_CHANGED);
-    XML3D.base.resourceManager.notifyNodeAdapterChange(node, "data", 0, XML3D.events.ADAPTER_HANDLE_CHANGED);
+    XML3D.base.resourceManager.notifyNodeAdapterChange(node, XML3D.webgl, canvasId, Events.ADAPTER_HANDLE_CHANGED);
+    XML3D.base.resourceManager.notifyNodeAdapterChange(node, "data", 0, Events.ADAPTER_HANDLE_CHANGED);
 });
 

@@ -1,6 +1,7 @@
 var BufferEntry = require("../../xflow/interface/data.js").BufferEntry;
 var InputNode = require("../../xflow/interface/graph.js").InputNode;
 var XC = require("../../xflow/interface/constants.js");
+var Events = require("../../interface/notification.js");
 
 var NodeAdapter = XML3D.base.NodeAdapter;
 /**
@@ -48,7 +49,7 @@ ValueDataAdapter.prototype.getXflowNode = function () {
  *
  */
 ValueDataAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type == XML3D.events.VALUE_MODIFIED) {
+    if (evt.type == Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
         if (!attr) {
             delete this.node._configured.scriptValue;

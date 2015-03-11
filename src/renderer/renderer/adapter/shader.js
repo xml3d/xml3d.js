@@ -1,4 +1,5 @@
 var RenderAdapter = require("./base.js");
+var Events = require("../../../interface/notification.js");
 
 /**
  * @param factory
@@ -57,7 +58,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
 
     notifyChanged: function (evt) {
         switch (evt.type) {
-            case XML3D.events.VALUE_MODIFIED:
+            case Events.VALUE_MODIFIED:
                 var target = evt.mutation.attributeName;
                 switch (target) {
                     case "script":
@@ -69,7 +70,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
 
                 }
                 break;
-            case XML3D.events.ADAPTER_HANDLE_CHANGED:
+            case Events.ADAPTER_HANDLE_CHANGED:
                 if (evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
                     XML3D.debug.logError("Could not find material for url '" + evt.url + "'");
 

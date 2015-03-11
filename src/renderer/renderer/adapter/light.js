@@ -1,4 +1,5 @@
 var TransformableAdapter = require("./transformable.js");
+var Events = require("../../../interface/notification.js");
 /**
  * Adapter for <light>
  * @constructor
@@ -29,22 +30,22 @@ LightRenderAdapter.prototype.createRenderNode = function () {
 
 LightRenderAdapter.prototype.notifyChanged = function (evt) {
     switch (evt.type) {
-        case XML3D.events.NODE_REMOVED:
+            case Events.NODE_REMOVED:
             return;
-        case XML3D.events.THIS_REMOVED:
+        case Events.THIS_REMOVED:
             this.dispose();
             return;
-        case XML3D.events.ADAPTER_HANDLE_CHANGED:
+        case Events.ADAPTER_HANDLE_CHANGED:
             if (evt.key == "shader") {
                 //The lightshader was destroyed, so this light is now invalid
                 this.renderNode.remove();
                 return;
             }
             break;
-        case XML3D.events.VALUE_MODIFIED:
+        case Events.VALUE_MODIFIED:
             this.valueModified(evt.mutation);
             break;
-        case XML3D.events.ADAPTER_VALUE_CHANGED:
+        case Events.ADAPTER_VALUE_CHANGED:
             this.renderNode.setLightType(evt.adapter.getLightType(), evt.adapter.getDataNode());
     }
 };

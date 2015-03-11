@@ -2,10 +2,10 @@ var DOMTransformFetcher = require("../transform-fetcher.js");
 var DataAdapter = require("./data.js");
 var DataNode = require("../../xflow/interface/graph.js").DataNode;
 var getComputeDataflowUrl = require("../../xflow/interface/graph.js").getComputeDataflowUrl;
+var Asset = require("../../asset/asset.js").Asset;
+var SubData = require("../../asset/asset.js").SubData;
 
 var NodeAdapter = XML3D.base.NodeAdapter;
-var Asset = XML3D.base.Asset;
-var SubData = XML3D.base.SubData;
 var createClass = XML3D.createClass;
 var dispatchCustomEvent = XML3D.util.dispatchCustomEvent;
 var AdapterHandle = XML3D.base.AdapterHandle;

@@ -29,7 +29,6 @@ exports = module.exports = function (grunt) {
                     "<%= dirs.modules %>/xml3d-types-module.js",
                     "<%= dirs.modules %>/xml3d-base-module.js",
                     "<%= dirs.modules %>/xml3d-interface-module.js",
-                    "<%= dirs.modules %>/xml3d-asset-module.js",
                     "<%= dirs.modules %>/xml3d-renderer-module.js"
                 ],
 

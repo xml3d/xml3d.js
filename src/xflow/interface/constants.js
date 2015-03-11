@@ -197,6 +197,7 @@ C.ITERATION_TYPE = {
  * @private
  * @enum
  */
+//TODO: This seems to be unused, is it still needed?
 C.EXTRACT = {
     NO_EXTRAC: 0, TEX_WIDTH: 1, TEX_HEIGHT: 2
 };
@@ -224,5 +225,7 @@ C.PROCESS_STATE = {
     UNPROCESSED: 4, // Process node is dirty
     PROCESSED: 5 // All data is up-to-date
 };
+
+window.Xflow.PLATFORM = C.PLATFORM;
 
 module.exports = C;

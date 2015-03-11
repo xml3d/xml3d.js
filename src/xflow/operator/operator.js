@@ -49,11 +49,11 @@ var initAnonymousOperator = function(name, data){
     initOperator(data);
     data.name = name;
     return data;
-}
+};
 
 var isOperatorAsync = function(operator){
     return !!operator.evaluate_async;
-}
+};
 
 var getOperators = function(name, platform){
     platform = platform || C.PLATFORM.JAVASCRIPT;
@@ -99,6 +99,8 @@ function initOperator(operator){
     //Check/init platform
     operator.platform = operator.platform || C.PLATFORM.JAVASCRIPT;
 }
+
+window.Xflow.registerOperator = registerOperator;
 
 module.exports = {
     registerOperator: registerOperator,

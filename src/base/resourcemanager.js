@@ -1,9 +1,12 @@
 "use strict";
 
 var AdapterHandle = require("./adapterhandle.js");
+var URIResolver = require("../utils/uri.js").URIResolver;
+var URI = require("../utils/uri.js").URI;
+var Options = require("../utils/options.js");
 
 var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
-XML3D.options.register(OPTION_RESOURCE_CORS, "anonymous");
+Options.register(OPTION_RESOURCE_CORS, "anonymous");
 
 var c_cachedDocuments = {};
 var c_factories = {};
@@ -460,7 +463,7 @@ ResourceManager.prototype.getAbsoluteURI = function(baseURI, uri){
     if (!uri)
         return null;
 
-    if (typeof uri == "string") uri = new XML3D.URI(uri);
+    if (typeof uri == "string") uri = new URI(uri);
     if (baseURI != document.URL || !uri.isLocal()) {
         uri = uri.getAbsoluteURI(baseURI);
     }
@@ -500,7 +503,7 @@ ResourceManager.prototype.getAdapterHandle = function(baseURI, uri, adapterType,
     c_cachedAdapterHandles[uri][adapterType][canvasId] = handle;
 
     if (uri.isLocal()) {
-        var node = XML3D.URIResolver.resolveLocal(uri);
+        var node = URIResolver.resolveLocal(uri);
         if (node)
             updateHandle(handle, adapterType, canvasId, XML3D.base.xml3dFormatHandler, node);
         else
@@ -681,7 +684,7 @@ ResourceManager.prototype.loadData = function(url, loadListener, errorListener) 
 /**
  * This function is called to load an Image.
  *
- * @param {XML3D.URI} uri Image URI
+ * @param {URI} uri Image URI
  * @param {function(Event, HTMLImageElement)} loadListener Function called when image was successfully loaded.
  *                                It will be called with event as the first and image as the second parameter.
  * @param {function(Event, HTMLImageElement)} errorListener Function called when image could not be loaded.
@@ -702,7 +705,7 @@ ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) 
         loadComplete(0);
     };
     if(!uri.hasSameOrigin(document.location.href)) {
-        image.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
+        image.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
         XML3D.debug.logWarning("You are using an cross-origin image as texture. This might cause troubles cause the canvas is 'tainted'.")
     }
 
@@ -714,7 +717,7 @@ ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) 
 /**
  * This function is called to load a Video.
  *
- * @param {XML3D.URI} uri Video URI
+ * @param {URI} uri Video URI
  * @param {boolean} autoplay
  * @param {boolean} loop
  * @param {Object} listeners  Dictionary of all listeners to register with video element.
@@ -735,7 +738,7 @@ ResourceManager.prototype.getVideo = function(uri, autoplay, loop, listeners) {
     };
 
     if (!uri.hasSameOrigin(document.location.href)) {
-        video.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
+        video.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
         XML3D.debug.logWarning("You are using an cross-origin video as texture. This might cause troubles cause the canvas is 'tainted'.", uri)
     }
 

@@ -3,6 +3,7 @@ var JSShaderComposer = require("./jsshadercomposer.js");
 var SystemNotifier = require("../../system/system-notifier.js");
 var getJSSystemConfiguration = require("./jssystemconfiguration.js");
 var XC = require("../../../../xflow/interface/constants.js");
+var Options = require("../../../../utils/options.js");
 
 var c_SystemUpdate = {
     "pointLightOn": {
@@ -172,8 +173,8 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
             propagateConstants: true,
             validate: true,
             sanitize: true,
-            transformSpaces: XML3D.options.getValue("shadejs-transformSpaces"),
-            extractUniformExpressions: XML3D.options.getValue("shadejs-extractUniformExpressions")
+            transformSpaces: Options.getValue("shadejs-transformSpaces"),
+            extractUniformExpressions: Options.getValue("shadejs-extractUniformExpressions")
         };
         var compileOptions = {
             useStatic: true, uniformExpressions: options.uniformExpressions
@@ -202,7 +203,7 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
                 if (scene.deferred) {
                     cacheEntry.signatures = workSet.getProcessingData("colorClosureSignatures");
                 }
-                if (XML3D.options.getValue("shadejs-cache"))
+                if (Options.getValue("shadejs-cache"))
                     c_jsShaderCache[jsShaderKey] = cacheEntry;
             } catch (e) {
                 SystemNotifier.sendEvent('shadejs', {

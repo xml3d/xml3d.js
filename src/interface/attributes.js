@@ -1,3 +1,4 @@
+require("../utils/array.js");
 
 var string2bool = function(string) {
     if (!string) {

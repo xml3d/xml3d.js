@@ -2,6 +2,7 @@ var ComputeRequest = require("../../xflow/interface/request.js").ComputeRequest;
 var setShaderConstant = require("../../xflow/interface/vs-connect.js").setShaderConstant;
 var registerErrorCallback = require("../../xflow/base.js").registerErrorCallback;
 var XC = require("../../xflow/interface/constants.js");
+var URI = require("../../utils/uri.js").URI;
 
 var NodeAdapter = XML3D.base.NodeAdapter;
 var createClass = XML3D.createClass;
@@ -54,7 +55,7 @@ registerErrorCallback(function(message, xflowNode){
             XML3D.debug.logError(message, userData);
         }
         else if (userData.id) {
-            var uri = new XML3D.URI("#" + userData.id);
+            var uri = new URI("#" + userData.id);
             uri = uri.getAbsoluteURI(userData.ownerDocument._documentURL || userData.ownerDocument.URL);
             XML3D.debug.logError(message, "External Node: " + uri);
         }

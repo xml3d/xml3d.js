@@ -10,6 +10,7 @@ var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var XC = require("../../../xflow/interface/constants.js");
+var URI = require("../../../utils/uri.js").URI;
 
 /**
  *
@@ -136,7 +137,7 @@ XML3D.extend(Scene.prototype, {
             data.appendChild(inputNode);
 
             this._defaultMaterial = this.createMaterialConfiguration(
-                {"type": "urn", "urn": new XML3D.URI("urn:xml3d:shader:matte")},
+                {"type": "urn", "urn": new URI("urn:xml3d:shader:matte")},
                 data,
                 {name: "default"}
             );

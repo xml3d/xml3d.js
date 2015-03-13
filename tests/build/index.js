@@ -7,5 +7,6 @@ module.exports = {
     VSConfig: require("../../src/xflow/interface/vs-connect.js").VSConfig,
     VertexShaderRequest: require("../../src/xflow/interface/request.js").VertexShaderRequest,
     ComputeRequest: require("../../src/xflow/interface/request.js").ComputeRequest,
-    Events: require("../../src/interface/notification.js")
+    Events: require("../../src/interface/notification.js"),
+    URI: require("../../src/utils/uri.js")
 };

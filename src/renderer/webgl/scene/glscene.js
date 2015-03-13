@@ -3,6 +3,7 @@ var DrawableFactory = require("./drawable-factory.js");
 var C = require("./../../renderer/scene/constants.js");
 var FrustumTest = require("./../../renderer/tools/frustum.js").FrustumTest;
 var ShaderComposerFactory = require("../materials/shadercomposerfactory.js");
+var Options = require("../../../utils/options.js");
 
 var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
 var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
@@ -18,7 +19,7 @@ FLAGS[OPTION_FRUSTUM_CULLING] = {defaultValue: true, recompileOnChange: false};
 FLAGS[OPTION_SHADEJS_CACHE] = {defaultValue: true, recompileOnChange: false};
 
 for (var flag in FLAGS) {
-    XML3D.options.register(flag, FLAGS[flag].defaultValue);
+    Options.register(flag, FLAGS[flag].defaultValue);
 }
 
 
@@ -43,7 +44,7 @@ var GLScene = function (context) {
     this.systemUniforms = {};
     this.deferred = window['XML3D_DEFERRED'] || false;
     this.colorClosureSignatures = [];
-    this.doFrustumCulling = !!XML3D.options.getValue(OPTION_FRUSTUM_CULLING);
+    this.doFrustumCulling = !!Options.getValue(OPTION_FRUSTUM_CULLING);
     this.addListeners();
 };
 
@@ -199,7 +200,7 @@ XML3D.extend(GLScene.prototype, {
             this.lights.lightValueChanged(event.light);
             this.context.requestRedraw("Light value changed.");
         });
-        XML3D.options.addObserver(this.onFlagsChange.bind(this));
+        Options.addObserver(this.onFlagsChange.bind(this));
     },
 
     addChildEvent: function (child) {

@@ -8,13 +8,14 @@ var PickPositionRenderPass = require("./render-passes/pick-position.js");
 var PickNormalRenderPass = require("./render-passes/pick-normal.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
 var GLU = require("../../contrib/glu.js");
+var Options = require("../../utils/options.js");
 var MAX_PICK_BUFFER_DIMENSION = 512;
 
 var OPTION_SSAO = "renderer-ssao";
 var FLAGS = {};
 FLAGS[OPTION_SSAO] = {defaultValue: false, recompileOnChange: true};
 for (var flag in FLAGS) {
-    XML3D.options.register(flag, FLAGS[flag].defaultValue);
+    Options.register(flag, FLAGS[flag].defaultValue);
 }
 
 /**
@@ -96,7 +97,7 @@ var GLRenderer = function (element, canvasHandler) {
 
     this.renderInterface = this.createRenderInterface();
     this.createDefaultPipelines();
-    XML3D.options.addObserver(this.onFlagsChange.bind(this));
+    Options.addObserver(this.onFlagsChange.bind(this));
 };
 
 // Just to satisfy jslint
@@ -142,7 +143,7 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     createDefaultPipelines: function () {
-        var pipeline = new ForwardRenderTree(this.renderInterface, XML3D.options.getValue(OPTION_SSAO));
+        var pipeline = new ForwardRenderTree(this.renderInterface, Options.getValue(OPTION_SSAO));
         this.renderInterface.setRenderPipeline(pipeline);
 
         var pickTarget = new GLScaledRenderTarget(this.context, MAX_PICK_BUFFER_DIMENSION, {

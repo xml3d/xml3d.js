@@ -1,5 +1,6 @@
 var RenderAdapter = require("./base.js");
 var Events = require("../../../interface/notification.js");
+var URI = require("../../../utils/uri.js").URI;
 
 /**
  * @param factory
@@ -53,7 +54,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
     },
 
     getShaderScriptURI: function () {
-        return new XML3D.URI(this.node.getAttribute("script"));
+        return new URI(this.node.getAttribute("script"));
     },
 
     notifyChanged: function (evt) {

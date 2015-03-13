@@ -1,9 +1,10 @@
 var AbstractCanvasHandler = require("../renderer/canvas-handler.js");
+var Options = require("../../utils/options.js");
 
 var MAXFPS = 30;
 
 var OPTION_CONTINUOUS = "renderer-continuous";
-XML3D.options.register(OPTION_CONTINUOUS, false);
+Options.register(OPTION_CONTINUOUS, false);
 
 /**
  * GLCanvasHandler class.
@@ -45,7 +46,7 @@ GLCanvasHandler.prototype.initialize = function () {
         XML3D.updateXflowObserver();
         XML3D.flushDOMChanges();
 
-        if (that.canvasSizeChanged() || that.renderer.needsRedraw() || XML3D.options.getValue(OPTION_CONTINUOUS)) {
+        if (that.canvasSizeChanged() || that.renderer.needsRedraw() || Options.getValue(OPTION_CONTINUOUS)) {
             that.dispatchUpdateEvent();
             that.draw();
         }

@@ -2,6 +2,7 @@ var BaseDataAdapter = require("./base.js");
 var DataNode = require("../../xflow/interface/graph.js").DataNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
+var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
 
 /**
  * The DataAdapter implements the
@@ -57,10 +58,10 @@ DataAdapter.prototype.updateAdapterHandle = function(key, url) {
 
 DataAdapter.prototype.onXflowLoadEvent = function(node, newLevel, oldLevel){
     if(newLevel == Infinity){
-        XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
+        dispatchCustomEvent(this.node, 'load', false, true, null);
     }
     else if(newLevel > oldLevel){
-        XML3D.util.dispatchCustomEvent(this.node, 'progress', false, true, null);
+        dispatchCustomEvent(this.node, 'progress', false, true, null);
     }
 };
 DataAdapter.prototype.getDataComplete = function(){

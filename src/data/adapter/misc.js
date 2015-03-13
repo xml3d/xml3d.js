@@ -1,5 +1,8 @@
 var DataAdapter = require("./data.js");
 var Events = require("../../interface/notification.js");
+var URI = require("../../utils/uri.js").URI;
+var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
+
 var createClass = XML3D.createClass;
 var NodeAdapter = XML3D.base.NodeAdapter;
     /**
@@ -48,7 +51,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
      */
     ImgDataAdapter.prototype.createImageFromURL = function(url) {
         var that = this;
-        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
+        var uri = new URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
         var onload = function (e, image) {
             if (that.textureEntry) {
                 that.textureEntry.setImage(image, true);
@@ -114,21 +117,21 @@ var NodeAdapter = XML3D.base.NodeAdapter;
      */
     VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
-        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
+        var uri = new URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
         this.video = XML3D.base.resourceManager.getVideo(uri, this.node.autoplay, this.node.loop,
             {
                 canplay : function(event, video) {
-                    XML3D.util.dispatchCustomEvent(that.node, 'canplay', true, true, null);
+                    dispatchCustomEvent(that.node, 'canplay', true, true, null);
                     that._startVideoRefresh();
                 },
                 ended : function(event, video) {
-                    XML3D.util.dispatchCustomEvent(that.node, 'ended', true, true, null);
+                    dispatchCustomEvent(that.node, 'ended', true, true, null);
                 },
                 load : function(event, video) {
-                    XML3D.util.dispatchEvent(that.node, 'load');
+                    dispatchEvent(that.node, 'load');
                 },
                 error : function(event, video) {
-                    XML3D.util.dispatchCustomEvent(that.node, 'error', true, true, null);
+                    dispatchCustomEvent(that.node, 'error', true, true, null);
                     XML3D.debug.logError("Could not load video URI="+video.src);
                 }
             }

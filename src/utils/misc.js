@@ -44,7 +44,7 @@ window.requestAnimFrame = (function(){
         var ref = xml3d.activeView;
         if(ref)
         {
-            var v = XML3D.URIResolver.resolveLocal(ref);
+            var v = window.XML3D.URIResolver.resolveLocal(ref);
             if(!v)
                 throw "XML3D Error: xml3d references view that is not defined: '" + ref + "'.";
 

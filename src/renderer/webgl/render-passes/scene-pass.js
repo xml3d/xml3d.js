@@ -1,10 +1,11 @@
 var BaseRenderPass = require("./base.js");
+var Options = require("../../../utils/options.js");
 
 var OPTION_FACECULLING = "renderer-faceculling";
 var OPTION_FRONTFACE = "renderer-frontface";
 
-XML3D.options.register(OPTION_FACECULLING, "none");
-XML3D.options.register(OPTION_FRONTFACE, "ccw");
+Options.register(OPTION_FACECULLING, "none");
+Options.register(OPTION_FRONTFACE, "ccw");
 
 /**
  * @constructor
@@ -14,17 +15,17 @@ var SceneRenderPass = function (renderInterface, output, opt) {
     /**
      * @type {function}
      */
-    this.setFaceCulling = getGlobalFaceCullingSetter(XML3D.options.getValue(OPTION_FACECULLING));
+    this.setFaceCulling = getGlobalFaceCullingSetter(Options.getValue(OPTION_FACECULLING));
     /**
      * @type {function}
      */
-    this.setFrontFace = getGlobalFrontFaceSetter(XML3D.options.getValue(OPTION_FRONTFACE));
+    this.setFrontFace = getGlobalFrontFaceSetter(Options.getValue(OPTION_FRONTFACE));
 
     var that = this;
-    XML3D.options.addObserver(OPTION_FACECULLING, function (key, value) {
+    Options.addObserver(OPTION_FACECULLING, function (key, value) {
         that.setFaceCulling = getGlobalFaceCullingSetter(value);
     });
-    XML3D.options.addObserver(OPTION_FRONTFACE, function (key, value) {
+    Options.addObserver(OPTION_FRONTFACE, function (key, value) {
         that.setFrontFace = getGlobalFrontFaceSetter(value);
     });
 };

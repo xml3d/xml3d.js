@@ -5,10 +5,10 @@ var getComputeDataflowUrl = require("../../xflow/interface/graph.js").getCompute
 var Asset = require("../../asset/asset.js").Asset;
 var SubData = require("../../asset/asset.js").SubData;
 var Events = require("../../interface/notification.js");
+var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
 
 var NodeAdapter = XML3D.base.NodeAdapter;
 var createClass = XML3D.createClass;
-var dispatchCustomEvent = XML3D.util.dispatchCustomEvent;
 var AdapterHandle = XML3D.base.AdapterHandle;
 
 

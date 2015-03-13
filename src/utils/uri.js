@@ -195,4 +195,6 @@ require("../interface/dom.js");
     exports.URI = URI;
     exports.URIResolver = URIResolver;
 
+    window.XML3D.URIResolver = URIResolver;
+
 }(module.exports));

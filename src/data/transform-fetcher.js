@@ -1,5 +1,6 @@
 var ComputeRequest = require("../xflow/interface/request.js").ComputeRequest;
 var Events = require("../interface/notification.js");
+var CSS = require("../utils/css.js");
 
 var DOMTransformFetcher = function (owner, attrName, dataName, onlyDataTransform) {
     this.owner = owner;
@@ -36,9 +37,9 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
     var IDENTITY = XML3D.math.mat4.create();
     return function () {
         if (!this.onlyDataTransform) {
-            var cssMatrix = XML3D.css.getCSSMatrix(this.node);
+            var cssMatrix = CSS.getCSSMatrix(this.node);
             if (cssMatrix) {
-                return XML3D.css.convertCssToMat4(cssMatrix);
+                return CSS.convertCssToMat4(cssMatrix);
             }
         }
         var adapter;

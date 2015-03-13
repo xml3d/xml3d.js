@@ -97,6 +97,7 @@ ChannelNode.prototype.decreaseRef = function(){
     this.useCount--;
     if(this.useCount == 0){
         this.clear();
+        return true;
     }
     return false;
 };

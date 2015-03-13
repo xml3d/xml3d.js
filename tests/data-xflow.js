@@ -793,3 +793,37 @@ test("Data - External Operators", function() {
     });
     stop();
 });
+
+test("Dataflow - Swap external input back and forth", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh4");
+    var offsetInput = this.doc.getElementById("offsetInput");
+
+    var testStep = 0;
+    xml3dElem.addEventListener("framedrawn", function() {
+        start();
+        var positions;
+        if (testStep === 0) {
+            positions = mesh.getResult()._entries.position;
+            QUnit.closeArray(positions.value, [-1.0,1.0,-10.0,1.0,1.0,-10.0,-1.0,3.0,-10.0,1.0,3.0,-10.0], EPSILON, "Offset positions were correctly computed");
+            offsetInput.setAttribute("src", "json/offsets1.json");
+            testStep++;
+            stop();
+        } else if(testStep === 1) {
+            positions = mesh.getResult()._entries.position;
+            if (!positions) {
+                stop();
+                return;
+            }
+            QUnit.closeArray(positions.value, [-1.0,-3.0,-10.0,1.0,-3.0,-10.0,-1.0,-1.0,-10.0,1.0,-1.0,-10.0], EPSILON, "Offset1 positions were correctly computed");
+            offsetInput.setAttribute("src", "json/offsets.json");
+            testStep++;
+            stop();
+        } else if(testStep === 2) {
+            positions = mesh.getResult()._entries.position;
+            QUnit.closeArray(positions.value, [-1.0,1.0,-10.0,1.0,1.0,-10.0,-1.0,3.0,-10.0,1.0,3.0,-10.0], EPSILON, "Offset positions were correctly computed");
+            testStep++;
+        }
+    });
+    stop();
+});

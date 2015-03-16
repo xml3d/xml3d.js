@@ -69,6 +69,15 @@ exports = module.exports = function (grunt) {
                         debug: true
                     }
                 }
+            },
+            release: {
+                src: "./src/xml3d.js",
+                dest: "./build/output/xml3d.js",
+                options: {
+                    browserifyOptions: {
+                        debug: false
+                    }
+                }
             }
     }   ,
         "closure-compiler": {
@@ -150,9 +159,11 @@ exports = module.exports = function (grunt) {
 
     grunt.registerTask("testlib", "browserify:testlib");
     grunt.registerTask("xml3ddev", "browserify:dev");
+    grunt.registerTask("xml3drelease", "browserify:release");
     grunt.registerTask("merge", builds);
-    grunt.registerTask("dev", ["xml3ddev", "merge"]);
-    grunt.registerTask("min", ["xml3ddev", "merge", "closure-compiler"]);
+    grunt.registerTask("dev", ["xml3ddev"]);
+    grunt.registerTask("release", ["xml3drelease", "merge"]);
+    grunt.registerTask("min", ["release", "closure-compiler"]);
     grunt.registerTask("default", ["dev", "testlib"]);
     grunt.registerTask("continuous", ["dev", "min", "testlib"]);
     grunt.registerTask("testserver", ["connect:server:keepalive"]);

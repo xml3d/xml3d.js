@@ -1,4 +1,3 @@
-require("../math");
 var Resource = require("../base/resourcemanager.js").Resource;
 var sendAdapterEvent = require("../base/adapter.js").sendAdapterEvent;
 var callAdapterFunc = require("../base/adapter.js").callAdapterFunc;

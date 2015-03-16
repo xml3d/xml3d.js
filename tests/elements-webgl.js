@@ -70,7 +70,7 @@ test("Configuration of new elements", 4, function() {
 });
 
 function TestAdapterFactory() {
-    XML3D.base.NodeAdapterFactory.call(this, "test");
+    XML3DTestLib.Adapter.NodeAdapterFactory.call(this, "test");
     var that = this;
     this.createAdapter = function(node) {
         var name = node ? (node.id || "<"+node.nodeName+">") : "unknown";
@@ -86,7 +86,7 @@ function TestAdapterFactory() {
     };
 };
 
-XML3D.createClass(TestAdapterFactory, XML3D.base.NodeAdapterFactory);
+XML3D.createClass(TestAdapterFactory, XML3DTestLib.Adapter.NodeAdapterFactory);
 
 module("Adapter tests", {
     setup : function() {

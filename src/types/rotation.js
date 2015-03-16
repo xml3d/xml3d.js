@@ -287,8 +287,4 @@ p.setFromBasis = function(xAxis, yAxis, zAxis) {
     this._setQuaternion(q);
 };
 
-window.XML3DRotation = XML3DRotation;
-
-module.exports = {
-    XML3DRotation: XML3DRotation
-};
+module.exports = XML3DRotation;

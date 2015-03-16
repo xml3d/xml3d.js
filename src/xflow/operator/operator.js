@@ -100,7 +100,7 @@ function initOperator(operator){
     operator.platform = operator.platform || C.PLATFORM.JAVASCRIPT;
 }
 
-window.Xflow.registerOperator = registerOperator;
+//window.Xflow.registerOperator = registerOperator;
 
 module.exports = {
     registerOperator: registerOperator,

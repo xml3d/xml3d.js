@@ -1,4 +1,7 @@
 require("../math");
+var Resource = require("../base/resourcemanager.js").Resource;
+var sendAdapterEvent = require("../base/adapter.js").sendAdapterEvent;
+var callAdapterFunc = require("../base/adapter.js").callAdapterFunc;
 
 var methods = {};
 
@@ -172,18 +175,18 @@ methods.XML3DGraphTypeGetWorldMatrix = function() {
 };
 
 methods.videoPlay = function() {
-    XML3D.base.sendAdapterEvent(this, {play: []});
+    sendAdapterEvent(this, {play: []});
 };
 
 methods.videoPause = function() {
-    XML3D.base.sendAdapterEvent(this, {pause: []});
+    sendAdapterEvent(this, {pause: []});
 };
 
 methods.XML3DNestedDataContainerTypeGetOutputNames =
 methods.XML3DShaderProviderTypeGetOutputNames =
 methods.meshGetOutputNames = function() {
     XML3D.flushDOMChanges();
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, "data");
+    var dataAdapter = Resource.getAdapter(this, "data");
     if(dataAdapter){
         return dataAdapter.getOutputNames();
     }
@@ -194,7 +197,7 @@ methods.XML3DNestedDataContainerTypeGetResult =
 methods.XML3DShaderProviderTypeGetResult =
 methods.meshGetResult = function(filter) {
     XML3D.flushDOMChanges();
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, "data");
+    var dataAdapter = Resource.getAdapter(this, "data");
     if(dataAdapter){
         var result = dataAdapter.getComputeResult(filter);
         if(!result) return null;
@@ -207,7 +210,7 @@ methods.XML3DNestedDataContainerTypeGetOutputChannelInfo =
     methods.XML3DShaderProviderTypeGetOutputChannelInfo =
         methods.meshGetOutputChannelInfo = function (name) {
             XML3D.flushDOMChanges();
-            var dataAdapter = XML3D.base.resourceManager.getAdapter(this, "data");
+            var dataAdapter = Resource.getAdapter(this, "data");
             if (dataAdapter) {
                 var result = dataAdapter.getOutputChannelInfo(name);
                 if (!result) return null;
@@ -272,7 +275,7 @@ methods.dataAddOutputFieldListener = function(names, callback) {
     if (names.length == 0)
         return false;
 
-    var request = XML3D.base.callAdapterFunc(this, {
+    var request = callAdapterFunc(this, {
         getComputeRequest : [names, function(request, changeType) {
             callback(createValues(request.getResult(), names));
         }
@@ -297,7 +300,7 @@ methods.XML3DDataSourceTypeSetScriptValue = function(data){
     XML3D.flushDOMChanges();
     configData.scriptValue = data;
 
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(this, "data");
+    var dataAdapter = Resource.getAdapter(this, "data");
     if(dataAdapter)
         dataAdapter.setScriptValue(data);
 

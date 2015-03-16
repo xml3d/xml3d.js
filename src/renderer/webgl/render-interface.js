@@ -1,5 +1,6 @@
 // Note: This context should only be used to access GL constants
 var GL = window.WebGLRenderingContext;
+var ForwardRenderTree = require("./render-trees/forward.js");
 
 /**
  *
@@ -20,7 +21,7 @@ var GLRenderInterface = function (context, scene) {
 
 XML3D.extend(GLRenderInterface.prototype, {
     getRenderPipeline: function () {
-        return (this.renderPipeline = this.renderPipeline || new XML3D.webgl.RenderPipeline(this.context));
+        return (this.renderPipeline = this.renderPipeline || new ForwardRenderTree(this.context));
     },
 
     setRenderPipeline: function (pipeline) {

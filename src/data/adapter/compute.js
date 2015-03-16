@@ -1,4 +1,5 @@
 var Events = require("../../interface/notification.js");
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
 /**
  * DataAdapter handling a <compute> element
@@ -7,9 +8,9 @@ var Events = require("../../interface/notification.js");
  * @constructor
  */
 var ComputeDataAdapter = function (factory, node) {
-    XML3D.base.NodeAdapter.call(this, factory, node);
+    NodeAdapter.call(this, factory, node);
 };
-XML3D.createClass(ComputeDataAdapter, XML3D.base.NodeAdapter);
+XML3D.createClass(ComputeDataAdapter, NodeAdapter);
 
 ComputeDataAdapter.prototype.getComputeCode = function () {
     return this.node.value;

@@ -140,6 +140,15 @@ module.exports = {
                 msg += " " + text;
             XML3D.debug.trace(msg);
         }
+    },
+
+    supported: function () {
+        var canvas = document.createElement("canvas");
+        try {
+            return !!(window.WebGLRenderingContext && (canvas.getContext('experimental-webgl')));
+        } catch (e) {
+            return false;
+        }
     }
 
 };

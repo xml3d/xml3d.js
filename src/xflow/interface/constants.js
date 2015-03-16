@@ -226,6 +226,6 @@ C.PROCESS_STATE = {
     PROCESSED: 5 // All data is up-to-date
 };
 
-window.Xflow.PLATFORM = C.PLATFORM;
+//window.Xflow.PLATFORM = C.PLATFORM;
 
 module.exports = C;

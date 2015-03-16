@@ -281,9 +281,5 @@ p.translate = function(x, y, z) {
     return result;
 };
 
-window.XML3DMatrix = XML3DMatrix;
-
-module.exports = {
-    XML3DMatrix: XML3DMatrix
-};
+module.exports = XML3DMatrix;
 

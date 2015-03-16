@@ -6,10 +6,11 @@ var Asset = require("../../asset/asset.js").Asset;
 var SubData = require("../../asset/asset.js").SubData;
 var Events = require("../../interface/notification.js");
 var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
+var Resource = require("../../base/resourcemanager.js").Resource;
 
-var NodeAdapter = XML3D.base.NodeAdapter;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;
-var AdapterHandle = XML3D.base.AdapterHandle;
+var AdapterHandle = require("../../base/adapterhandle.js");
 
 
 var AssetAdapter = function (factory, node) {
@@ -242,8 +243,7 @@ function setShaderUrl(adapter, dest) {
     var node = adapter.node;
     var shaderUrl = node.getAttribute("shader");
     if (shaderUrl) {
-        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument._documentURL ||
-            node.ownerDocument.URL, shaderUrl);
+        var shaderId = Resource.getAbsoluteURI(node.ownerDocument._documentURL || node.ownerDocument.URL, shaderUrl);
         dest.setShader(shaderId.toString());
     } else {
         dest.setShader(null);

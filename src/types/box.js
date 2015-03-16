@@ -163,8 +163,4 @@ XML3DBox.prototype.extend = function(that)
         this._max.z = max.z;
 };
 
-window.XML3DBox = XML3DBox;
-
-module.exports = {
-    XML3DBox: XML3DBox
-};
+module.exports = XML3DBox;

@@ -1,4 +1,4 @@
-var NodeAdapterFactory = XML3D.base.NodeAdapterFactory;
+var NodeAdapterFactory = require("../../base/adapter.js").NodeAdapterFactory;
 var Asset = require("./asset.js");
 var Misc = require("./misc.js");
 var ScriptDataAdapter = require("./script.js");

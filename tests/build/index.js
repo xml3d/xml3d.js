@@ -8,5 +8,8 @@ module.exports = {
     VertexShaderRequest: require("../../src/xflow/interface/request.js").VertexShaderRequest,
     ComputeRequest: require("../../src/xflow/interface/request.js").ComputeRequest,
     Events: require("../../src/interface/notification.js"),
-    URI: require("../../src/utils/uri.js")
+    URI: require("../../src/utils/uri.js"),
+    AdapterHandle: require("../../src/base/adapterhandle.js"),
+    Adapter: require("../../src/base/adapter.js"),
+    addFragmentShaderHeader: require("../../src/renderer/webgl/shader/shader-utils.js").addFragmentShaderHeader
 };

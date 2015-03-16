@@ -52,12 +52,11 @@ module("Xflow tests", {
 
     loadTestXML : function(url, handler) {
         var win = document.getElementById("xml3dframe").contentWindow;
-        var resManager = win.XML3D.base.resourceManager;
         var resType = "data";
         this.getDataAdapter = function(node){
             win.XML3D.flushDOMChanges();
-            return resManager.getAdapter(node, resType);
-        }
+            return win.XML3D.resource.getAdapter(node, resType);
+        };
 
         var defsElem = this.doc.getElementById("defsElem");
         var xmlhttp = new XMLHttpRequest();

@@ -1,4 +1,5 @@
 var AdapterFactory = require("./adapter.js").AdapterFactory;
+var registerFormat = require("./resourcemanager.js").registerFormat;
 
 /**
  * A format handler is provide functionality for detecting format of resources
@@ -153,10 +154,15 @@ var BinaryFormatHandler = function () {
 };
 XML3D.createClass(BinaryFormatHandler, FormatHandler);
 
+var xml3dFormatHandler = new XML3DFormatHandler();
+registerFormat(xml3dFormatHandler);
+XML3D.xml3dFormatHandler = xml3dFormatHandler;
+
 module.exports = {
     JSONFormatHandler: JSONFormatHandler,
     BinaryFormatHandler: BinaryFormatHandler,
     XMLFormatHandler: XMLFormatHandler,
     XML3DFormatHandler: XML3DFormatHandler,
-    FormatHandler: FormatHandler
+    FormatHandler: FormatHandler,
+    xml3dFormatHandler: xml3dFormatHandler
 };

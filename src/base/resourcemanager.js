@@ -46,8 +46,7 @@ var findFormat = function(response, responseType, mimetype) {
 /**
  * @constructor
  */
-var ResourceManager = function() {
-};
+var Resource = {};
 
 function getCounterObject(canvasId) {
     return c_canvasIdCounters[canvasId];
@@ -83,7 +82,7 @@ function loadComplete(canvasId) {
     }
 }
 
-ResourceManager.prototype.isLoadComplete = function(canvasId) {
+Resource.isLoadComplete = function(canvasId) {
     var counterObject = getCounterObject(canvasId);
     return !counterObject || counterObject.counter == 0;
 };
@@ -95,7 +94,7 @@ ResourceManager.prototype.isLoadComplete = function(canvasId) {
  * @param {number} canvasId
  * @param {EventListener} listener
  */
-ResourceManager.prototype.addLoadCompleteListener = function(canvasId, listener) {
+Resource.addLoadCompleteListener = function(canvasId, listener) {
     var counterObject = getOrCreateCounterObject(canvasId);
 
     /*
@@ -117,7 +116,7 @@ ResourceManager.prototype.addLoadCompleteListener = function(canvasId, listener)
  * @param {number} canvasId
  * @param {function} listener
  */
-ResourceManager.prototype.removeLoadCompleteListener = function(canvasId, listener) {
+Resource.removeLoadCompleteListener = function(canvasId, listener) {
     var counterObject = getCounterObject(canvasId);
     if (counterObject) {
         var idx = counterObject.listeners.indexOf(listener);
@@ -132,13 +131,13 @@ function stringEndsWithSuffix(str, suffix) {
 }
 
 //noinspection JSUnusedGlobalSymbols
-ResourceManager.prototype.addBinaryContentType = function(type) {
+Resource.addBinaryContentType = function(type) {
     if (c_binaryContentTypes.indexOf(type) == -1)
         c_binaryContentTypes.push(type);
 };
 
 //noinspection JSUnusedGlobalSymbols
-ResourceManager.prototype.removeBinaryContentType = function(type) {
+Resource.removeBinaryContentType = function(type) {
     var idx = c_binaryContentTypes.indexOf(type);
     if (idx != -1)
         c_binaryContentTypes.splice(idx, 1);
@@ -153,13 +152,13 @@ function isBinaryContentType(contentType) {
     return false;
 }
 
-ResourceManager.prototype.addBinaryExtension = function(extension) {
+Resource.addBinaryExtension = function(extension) {
     if (c_binaryExtensions.indexOf(extension) == -1)
         c_binaryExtensions.push(extension);
 };
 
 //noinspection JSUnusedGlobalSymbols
-ResourceManager.prototype.removeBinaryExtension = function(extension) {
+Resource.removeBinaryExtension = function(extension) {
     var idx = c_binaryExtensions.indexOf(extension);
     if (idx != -1)
         c_binaryExtensions.splice(idx, 1);
@@ -459,7 +458,7 @@ function clearHandles(url) {
  * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
  * @returns {URI} The (sometimes) absolute URI
  */
-ResourceManager.prototype.getAbsoluteURI = function(baseURI, uri){
+Resource.getAbsoluteURI = function(baseURI, uri){
     if (!uri)
         return null;
 
@@ -481,9 +480,9 @@ ResourceManager.prototype.getAbsoluteURI = function(baseURI, uri){
  * @param {number=} canvasId Id of GLCanvasHandler handler this adapter depends on, 0 if not depending on any GLCanvasHandler
  * @returns {?AdapterHandle} The requested AdapterHandler. Note: might be null
  */
-ResourceManager.prototype.getAdapterHandle = function(baseURI, uri, adapterType, canvasId) {
+Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId) {
     canvasId = canvasId || 0;
-    uri = this.getAbsoluteURI(baseURI, uri);
+    uri = Resource.getAbsoluteURI(baseURI, uri);
 
     if (!uri)
         return null;
@@ -505,7 +504,7 @@ ResourceManager.prototype.getAdapterHandle = function(baseURI, uri, adapterType,
     if (uri.isLocal()) {
         var node = URIResolver.resolveLocal(uri);
         if (node)
-            updateHandle(handle, adapterType, canvasId, XML3D.base.xml3dFormatHandler, node);
+            updateHandle(handle, adapterType, canvasId, XML3D.xml3dFormatHandler, node);
         else
             handle.setAdapter(null, AdapterHandle.STATUS.NOT_FOUND);
     }
@@ -538,8 +537,8 @@ ResourceManager.prototype.getAdapterHandle = function(baseURI, uri, adapterType,
  * @param canvasId
  * @return {XML3D.base.Adapter?}
  */
-ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId) {
-    var factory = XML3D.base.xml3dFormatHandler.getFactory(adapterType, canvasId);
+Resource.getAdapter = function(node, adapterType, canvasId) {
+    var factory = XML3D.xml3dFormatHandler.getFactory(adapterType, canvasId);
     if (factory) {
         return factory.getAdapter(node);
     }
@@ -553,7 +552,7 @@ ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId) {
  * @param {string} previousId Previous id of element
  * @param {string} newId New id of element
  */
-ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId) {
+Resource.notifyNodeIdChange = function(node, previousId, newId) {
     var parent = node;
     while (parent.parentNode) parent = parent.parentNode;
     if (parent != window.document)
@@ -564,7 +563,7 @@ ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId)
         clearHandles("#" + previousId);
     }
     if (newId) {
-        updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node, true);
+        updateMissingHandles("#" + newId, XML3D.xml3dFormatHandler, node, true);
     }
 };
 
@@ -576,7 +575,7 @@ ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId)
  * @param {number} canvasId GLCanvasHandler id of AdapterHandler, 0 if not depending on GLCanvasHandler
  * @param {number} type Type of Notification. Usually Events.ADAPTER_HANDLE_CHANGED
  */
-ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterType, canvasId, type) {
+Resource.notifyNodeAdapterChange = function(element, adapterType, canvasId, type) {
     canvasId = canvasId || 0;
     var uri = "#" + element.id;
     if (c_cachedAdapterHandles[uri] && c_cachedAdapterHandles[uri][adapterType] &&
@@ -593,7 +592,7 @@ ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterTyp
  * @param {function(object)} loadListener Gets the response of the XHR
  * @param {function(XMLHttpRequest)} errorListener Get the XHR object for further analysis
  */
-ResourceManager.prototype.loadData = function(url, loadListener, errorListener) {
+Resource.loadData = function(url, loadListener, errorListener) {
     var xmlHttp = null;
     try {
         xmlHttp = new XMLHttpRequest();
@@ -691,7 +690,7 @@ ResourceManager.prototype.loadData = function(url, loadListener, errorListener) 
  *                                 It will be called with event as the first and image as the second parameter.
  * @return {HTMLImageElement}
  */
-ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) {
+Resource.getImage = function(uri, loadListener, errorListener) {
     // we use canvasId 0 to represent images loaded in a document
     getOrCreateCounterObject(0).counter++;
 
@@ -724,7 +723,7 @@ ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) 
  *                            Listeners will be called with event as the first and video as the second parameter.
  * @return {HTMLVideoElement}
  */
-ResourceManager.prototype.getVideo = function(uri, autoplay, loop, listeners) {
+Resource.getVideo = function(uri, autoplay, loop, listeners) {
     // we use canvasId 0 to represent videos loaded in a document
     getOrCreateCounterObject(0).counter++;
 
@@ -766,5 +765,5 @@ module.exports = {
     registerFactory: registerFactory,
     registerFormat: registerFormat,
     findFormat: findFormat,
-    ResourceManager: ResourceManager
+    Resource: Resource
 };

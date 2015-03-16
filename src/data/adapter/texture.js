@@ -2,7 +2,7 @@ var TextureEntry = require("../../xflow/interface/data.js").TextureEntry;
 var InputNode = require("../../xflow/interface/graph.js").InputNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
-var NodeAdapter = XML3D.base.NodeAdapter;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
 var clampToGL = function (modeStr) {
     if (modeStr == "clamp")

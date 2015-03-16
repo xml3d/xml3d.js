@@ -1,5 +1,6 @@
 var TransformableAdapter = require("./transformable.js");
 var Events = require("../../../interface/notification.js");
+var Resource = require("../../../base/resourcemanager.js").Resource;
 
 /**
  * @constructor
@@ -12,7 +13,7 @@ var MeshRenderAdapter = function (factory, node) {
 XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
 
     createRenderNode: function () {
-        var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
+        var dataAdapter = Resource.getAdapter(this.node, "data");
 
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();

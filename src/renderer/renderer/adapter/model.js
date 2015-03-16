@@ -1,7 +1,8 @@
 var TransformableAdapter = require("./transformable.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var Events = require("../../../interface/notification.js");
-var AdapterHandle = XML3D.base.AdapterHandle;
+var Resource = require("../../../base/resourcemanager.js").Resource;
+var AdapterHandle = require("../../../base/adapterhandle.js");
 
 var ModelRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, true);
@@ -18,7 +19,7 @@ var c_IDENTITY = XML3D.math.mat4.create();
 XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 
     createRenderNode: function () {
-        var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
+        var dataAdapter = Resource.getAdapter(this.node, "data");
         this.asset = dataAdapter.getAsset();
 
         this.asset.addChangeListener(this);
@@ -68,16 +69,16 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 
             switch (adapterHandle.status) {
 
-                case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
+                case AdapterHandle.STATUS.NOT_FOUND:
                     XML3D.debug.logError("Could not find <shader> of url '" + adapterHandle.url + "' ", this.node);
                     break;
-                case XML3D.base.AdapterHandle.STATUS.READY:
+                case AdapterHandle.STATUS.READY:
                     var adapter = adapterHandle.getAdapter();
                     if (adapter && adapter.getMaterialConfiguration) {
                         result = adapter.getMaterialConfiguration();
                     }
                     break;
-                case XML3D.base.AdapterHandle.STATUS.LOADING:
+                case AdapterHandle.STATUS.LOADING:
                     break;
             }
 

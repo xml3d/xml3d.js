@@ -225,8 +225,4 @@ p.normalize = function() {
             this._data[2] * n);
 };
 
-window.XML3DVec3 = XML3DVec3;
-
-module.exports = {
-    XML3DVec3: XML3DVec3
-};
+module.exports = XML3DVec3;

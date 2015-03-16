@@ -102,6 +102,4 @@
 
     ns.exports = GlobalOptions;
 
-    window.XML3D.options = GlobalOptions;
-
 }(module));

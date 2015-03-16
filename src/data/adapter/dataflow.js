@@ -2,6 +2,7 @@ var BaseDataAdapter = require("./base.js");
 var DataNode = require("../../xflow/interface/graph.js").DataNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
+var AdapterHandle = require("../../base/adapterhandle.js");
 
 /**
  * DataAdapter handling a <dataflow> element
@@ -30,7 +31,7 @@ DataflowDataAdapter.prototype.updateAdapterHandle = function(key, url) {
 
     if(oldAdapterHandle == adapterHandle)
         return;
-    if (status === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+    if (status === AdapterHandle.STATUS.NOT_FOUND) {
         XML3D.debug.logError("Could not find element of url '" + adapterHandle.url + "' for " + key, this.node);
     }
     this.connectAdapterHandle(key, adapterHandle);
@@ -54,7 +55,7 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
     switch (evt.type) {
         case Events.ADAPTER_HANDLE_CHANGED:
             this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
-            if (evt.handleStatus === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+            if (evt.handleStatus === AdapterHandle.STATUS.NOT_FOUND) {
                 XML3D.debug.logError("Could not find dataflow of url '" + evt.url, this.node);
             }
             break;
@@ -104,7 +105,7 @@ DataflowDataAdapter.prototype.connectedAdapterChanged = function (key, adapter, 
     var xflowNode = this.dataflowRefs[key];
     if (xflowNode) {
         xflowNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
-        xflowNode.setLoading(status === XML3D.base.AdapterHandle.STATUS.LOADING);
+        xflowNode.setLoading(status === AdapterHandle.STATUS.LOADING);
     }
 };
 

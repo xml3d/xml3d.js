@@ -4,7 +4,7 @@ var registerErrorCallback = require("../../xflow/base.js").registerErrorCallback
 var XC = require("../../xflow/interface/constants.js");
 var URI = require("../../utils/uri.js").URI;
 
-var NodeAdapter = XML3D.base.NodeAdapter;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;
 
 /**

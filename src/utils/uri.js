@@ -1,5 +1,3 @@
-require("../interface/dom.js");
-
 (function(exports) {
     /**
      * Class URI

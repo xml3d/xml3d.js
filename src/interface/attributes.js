@@ -1,4 +1,5 @@
 require("../utils/array.js");
+var Resource = require("../base/resourcemanager.js").Resource;
 
 var string2bool = function(string) {
     if (!string) {
@@ -26,7 +27,7 @@ var AttributeHandler = function(elem) {
 
 handlers.IDHandler = function(id) {
     this.setFromAttribute = function(value, prevValue, elem) {
-        XML3D.base.resourceManager.notifyNodeIdChange(elem, prevValue, value);
+        Resource.notifyNodeIdChange(elem, prevValue, value);
     };
     this.desc = {
         get : function() {

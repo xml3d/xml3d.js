@@ -1,4 +1,5 @@
 var registerFactory = require("./resourcemanager.js").registerFactory;
+var Resource = require("./resourcemanager.js").Resource;
 var Events = require("../interface/notification.js");
 
 /**
@@ -133,7 +134,7 @@ NodeAdapter.prototype.notifyChanged = function(e) {
  */
 NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
     canvasId = canvasId === undefined ? this.factory.canvasId : canvasId;
-    return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
+    return Resource.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
         uri, aspectType || this.factory.aspect, canvasId);
 };
 /**
@@ -142,7 +143,7 @@ NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
  */
 NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
     type = type || Events.ADAPTER_HANDLE_CHANGED;
-    return XML3D.base.resourceManager.notifyNodeAdapterChange(this.node,
+    return Resource.notifyNodeAdapterChange(this.node,
         this.factory.aspect, this.factory.canvasId, type);
 };
 
@@ -173,7 +174,7 @@ IFactory.prototype.aspect;
 
 /**
  * An adapter factory is responsible for creating adapter from a certain data source.
- * Note that any AdapterFactory is registered with XML3D.base.resourceManager
+ * Note that any AdapterFactory is registered with Resource
  * @constructor
  * @implements {IFactory}
  * @param {Object} aspect The aspect this factory serves (e.g. XML3D.data or XML3D.webgl)

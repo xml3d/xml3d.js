@@ -2,11 +2,15 @@ var XC = require("../../../xflow/interface/constants.js");
 var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
+var Resource = require("../../../base/resourcemanager.js").Resource;
+var registerFormat = require("../../../base/resourcemanager.js").registerFormat;
+var JSONFormatHandler = require("../../../base/formathandler.js").JSONFormatHandler;
+var AdapterFactory = require("../../../base/adapter.js").AdapterFactory;
 
 var XML3DJSONFormatHandler = function() {
-    XML3D.base.JSONFormatHandler.call(this);
+    JSONFormatHandler.call(this);
 };
-XML3D.createClass(XML3DJSONFormatHandler, XML3D.base.JSONFormatHandler);
+XML3D.createClass(XML3DJSONFormatHandler, JSONFormatHandler);
 
 XML3DJSONFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
     return mimetype === "application/json" && response.format == "xml3d-json" && response.version == "0.4.0";
@@ -24,8 +28,8 @@ XML3DJSONFormatHandler.prototype.getFormatData = function(response, responseType
 
 };
 
-var xml3dJsonFormatHandler = new XML3DJSONFormatHandler();
-XML3D.base.registerFormat(xml3dJsonFormatHandler);
+var xml3dJSonFormatHandler = new XML3DJSONFormatHandler();
+registerFormat(xml3dJSonFormatHandler);
 
 
 var empty = function() {};
@@ -97,7 +101,7 @@ function createXflowInputs(dataNode, name, jsonData){
                 // FIXME add big-endian -> little-endian conversion
                 throw new Error("Big-endian binary data are not supported yet");
             }
-            XML3D.base.resourceManager.loadData(value.url, function (arrayBuffer) {
+            Resource.loadData(value.url, function (arrayBuffer) {
                 createXflowValueFromBuffer(dataNode, jsonData.type, name, key, arrayBuffer, value.byteOffset, value.byteLength);
             }, null);
         } else {
@@ -139,9 +143,9 @@ JSONDataAdapter.prototype.getXflowNode = function(){
  */
 var JSONFactory = function()
 {
-    XML3D.base.AdapterFactory.call(this, "data");
+    AdapterFactory.call(this, "data");
 };
-XML3D.createClass(JSONFactory, XML3D.base.AdapterFactory);
+XML3D.createClass(JSONFactory, AdapterFactory);
 
 
 JSONFactory.prototype.aspect = "data";
@@ -150,4 +154,4 @@ JSONFactory.prototype.createAdapter = function(xflowNode) {
     return new JSONDataAdapter(xflowNode);
 };
 
-xml3dJsonFormatHandler.registerFactoryClass(JSONFactory);
+xml3dJSonFormatHandler.registerFactoryClass(JSONFactory);

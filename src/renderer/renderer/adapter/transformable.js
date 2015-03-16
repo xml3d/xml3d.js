@@ -1,7 +1,7 @@
 var RenderAdapter = require("./base.js");
 var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
 var Events = require("../../../interface/notification.js");
-var AdapterHandle = XML3D.base.AdapterHandle;
+var AdapterHandle = require("../../../base/adapterhandle.js");
 
 var TransformableAdapter = function (factory, node, handleShader, handleTransform) {
     RenderAdapter.call(this, factory, node);

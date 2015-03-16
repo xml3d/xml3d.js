@@ -3,7 +3,7 @@ var Events = require("../interface/notification.js");
 "use strict";
 /**
  * An adapter handle is a connection piece for an adapter that is referred through a uri (e.g. id reference)
- * AdapterHandles are always fetched from the XML3D.base.resourceManager
+ * AdapterHandles are always fetched from the Resource object
  * @constructor
  */
 var AdapterHandle = function(url) {
@@ -38,7 +38,7 @@ AdapterHandle.prototype.getAdapter = function() {
 };
 
 /**
- * Note: this function should only be called by XML3D.base.resourceManager
+ * Note: this function should only be called by Resource
  * @param {XML3D.base.Adapter} adapter The adapter connected to the AdapterHandler
  * @param {AdapterHandle.STATUS} status
  */

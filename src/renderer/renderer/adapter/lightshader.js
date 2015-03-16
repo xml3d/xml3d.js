@@ -1,5 +1,6 @@
 var RenderAdapter = require("./base.js");
 var Events = require("../../../interface/notification.js");
+var Resource = require("../../../base/resourcemanager.js").Resource;
 
 /**
  * Adapter for <lightshader>
@@ -10,7 +11,7 @@ var Events = require("../../../interface/notification.js");
  */
 var LightShaderRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
-    this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
+    this.dataAdapter = Resource.getAdapter(this.node, "data");
 };
 XML3D.createClass(LightShaderRenderAdapter, RenderAdapter, {
     getDataNode: function () {

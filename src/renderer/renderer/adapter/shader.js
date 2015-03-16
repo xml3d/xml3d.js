@@ -1,6 +1,8 @@
 var RenderAdapter = require("./base.js");
 var Events = require("../../../interface/notification.js");
 var URI = require("../../../utils/uri.js").URI;
+var Resource = require("../../../base/resourcemanager.js").Resource;
+var AdapterHandle = require("../../../base/adapterhandle.js");
 
 /**
  * @param factory
@@ -10,7 +12,7 @@ var URI = require("../../../utils/uri.js").URI;
  */
 var ShaderRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
-    this._dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
+    this._dataAdapter = Resource.getAdapter(this.node, "data");
     /** @type MaterialConfiguration | null **/
     this._materialConfiguration = null;
     this._materialModel = null;
@@ -72,7 +74,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
                 }
                 break;
             case Events.ADAPTER_HANDLE_CHANGED:
-                if (evt.handleStatus == XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+                if (evt.handleStatus == AdapterHandle.STATUS.NOT_FOUND) {
                     XML3D.debug.logError("Could not find material for url '" + evt.url + "'");
 
                 }

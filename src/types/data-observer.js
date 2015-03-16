@@ -1,4 +1,5 @@
 var XC = require("../xflow/interface/constants.js");
+var Resource = require("../base/resourcemanager.js").Resource;
 
 var c_XflowObserverList = [];
 
@@ -6,7 +7,6 @@ var XML3DDataObserver = function(callback){
     this.callback = callback;
     this.observed = [];
 };
-window.XML3DDataObserver = XML3DDataObserver;
 
 XML3DDataObserver.prototype.observe = function(node, options){
     if(!node)
@@ -18,7 +18,7 @@ XML3DDataObserver.prototype.observe = function(node, options){
             "this function after XML3D has been configured e.g. inside a DOMContentLoaded listener.");
 
 
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(node, "data");
+    var dataAdapter = Resource.getAdapter(node, "data");
     if(!dataAdapter)
         throw new Error("Can't observe node. XML3DataObserver can only observe data containers such as <data>, <mesh> or <shader>");
 
@@ -83,14 +83,12 @@ var XML3DDataRecord = function(target, result){
     this.target = target;
     this.result = result;
 };
-window.XML3DDataRecord = XML3DDataRecord;
 
 
 var XML3DDataResult = function(result){
     this._entries = {};
     constructDataResult(this, result);
 };
-window.XML3DDataResult = XML3DDataResult;
 
 XML3DDataResult.prototype.getValue = function(name) {
     if (this._entries[name])
@@ -162,7 +160,6 @@ var XML3DDataChannelInfo = function(type, origin, originalName, seqLength, seqMi
     this.seqMinKey = seqMinKey;
     this.seqMaxKey = seqMaxKey;
 };
-window.XML3DDataChannelInfo = XML3DDataChannelInfo;
 
 XML3DDataChannelInfo.ORIGIN_CHILD = 1;
 XML3DDataChannelInfo.ORIGIN_COMPUTE = 2;

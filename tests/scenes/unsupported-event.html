@@ -6,8 +6,8 @@
 <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 <script>
     var callBackCounter = 0;
-    // EVIL HACK:
-    XML3D.webgl.supported = function(){return false;}
+	// EVIL HACK:
+	window.WebGLRenderingContext = null;
 
     function noSupportCallback1(){
         callBackCounter++;

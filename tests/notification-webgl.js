@@ -1,6 +1,6 @@
 
 function NotifyingAdapterFactory() {
-    XML3D.base.NodeAdapterFactory.call(this, "test");
+    XML3DTestLib.Adapter.NodeAdapterFactory.call(this, "test");
     var that = this;
     this.name = "test";
     this.event = null;
@@ -15,7 +15,7 @@ function NotifyingAdapterFactory() {
         };
     };
 };
-XML3D.createClass(NotifyingAdapterFactory, XML3D.base.NodeAdapterFactory);
+XML3D.createClass(NotifyingAdapterFactory, XML3DTestLib.Adapter.NodeAdapterFactory);
 var Events = XML3DTestLib.Events;
 
 module("Element notification tests", {

@@ -3,8 +3,9 @@ var Events = require("../../interface/notification.js");
 var URI = require("../../utils/uri.js").URI;
 var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
 
+var Resource = require("../../base/resourcemanager.js").Resource;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;
-var NodeAdapter = XML3D.base.NodeAdapter;
     /**
      * SinkDataAdapter represents the sink in the data hierarchy (no parents).
      * @constructor
@@ -60,7 +61,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
         var onerror = function (e, image) {
             XML3D.debug.logError("Could not load image URI="+image.src);
         };
-        this.image = XML3D.base.resourceManager.getImage(uri, onload, onerror);
+        this.image = Resource.getImage(uri, onload, onerror);
         if (that.textureEntry) {
             that.textureEntry.setImage(this.image, true);
         }
@@ -118,7 +119,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
     VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
         var uri = new URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
-        this.video = XML3D.base.resourceManager.getVideo(uri, this.node.autoplay, this.node.loop,
+        this.video = Resource.getVideo(uri, this.node.autoplay, this.node.loop,
             {
                 canplay : function(event, video) {
                     dispatchCustomEvent(that.node, 'canplay', true, true, null);
@@ -157,7 +158,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
 
     VideoDataAdapter.prototype._tick = function() {
         this._ticking = true;
-        window.requestAnimFrame(this._boundTick, XML3D.webgl.MAXFPS);
+        window.requestAnimFrame(this._boundTick, 30);
         // FIXME Do this only when currentTime is changed (what about webcam ?)
         if (this.textureEntry) {
             this.textureEntry.setImage(this.video);

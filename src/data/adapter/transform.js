@@ -1,5 +1,5 @@
 var Events = require("../../interface/notification.js");
-var NodeAdapter = XML3D.base.NodeAdapter;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
 var TransformDataAdapter = function (factory, node) {
     NodeAdapter.call(this, factory, node);

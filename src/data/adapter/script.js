@@ -1,6 +1,6 @@
 var Events = require("../../interface/notification.js");
 var createClass = XML3D.createClass;
-var NodeAdapter = XML3D.base.NodeAdapter;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
 var ScriptDataAdapter = function(factory, node) {
     NodeAdapter.call(this, factory, node);

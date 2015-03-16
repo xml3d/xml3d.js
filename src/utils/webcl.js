@@ -863,6 +863,6 @@
     };
 
     initWebCLPlatform(namespace.webcl);
-
+    window.XML3D.webcl = namespace.webcl;
 
 }(module.exports));

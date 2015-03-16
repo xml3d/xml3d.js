@@ -2,8 +2,8 @@ var BufferEntry = require("../../xflow/interface/data.js").BufferEntry;
 var InputNode = require("../../xflow/interface/graph.js").InputNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
-var NodeAdapter = XML3D.base.NodeAdapter;
 /**
  * Constructor of XML3D.data.ValueDataAdapter
  *

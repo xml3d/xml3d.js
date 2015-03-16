@@ -3,6 +3,7 @@ var DataNode = require("../../xflow/interface/graph.js").DataNode;
 var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
 var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
+var AdapterHandle = require("../../base/adapterhandle.js");
 
 /**
  * The DataAdapter implements the
@@ -49,7 +50,7 @@ DataAdapter.prototype.updateAdapterHandle = function(key, url) {
 
     if(oldAdapterHandle == adapterHandle)
         return;
-    if (status === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+    if (status === AdapterHandle.STATUS.NOT_FOUND) {
         XML3D.debug.logError("Could not find element of url '" + adapterHandle.url + "' for " + key, this.node);
     }
     this.connectAdapterHandle(key, adapterHandle);
@@ -130,7 +131,7 @@ function recursiveDataAdapterConstruction(adapter) {
 DataAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type === Events.ADAPTER_HANDLE_CHANGED) {
         this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
-        if (evt.handleStatus === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+        if (evt.handleStatus === AdapterHandle.STATUS.NOT_FOUND) {
             XML3D.debug.logError("Could not find <data> element of url '" + evt.url + "' for " + evt.key, this.node);
         }
 
@@ -228,18 +229,18 @@ function updateLoadState(dataAdpater) {
     var loading = false, handle;
 
     handle = dataAdpater.getConnectedAdapterHandle("src");
-    if (handle && handle.status === XML3D.base.AdapterHandle.STATUS.LOADING) {
+    if (handle && handle.status === AdapterHandle.STATUS.LOADING) {
         loading = true;
     }
 
     handle = dataAdpater.getConnectedAdapterHandle("dataflow");
-    if (handle && handle.status === XML3D.base.AdapterHandle.STATUS.LOADING) {
+    if (handle && handle.status === AdapterHandle.STATUS.LOADING) {
         loading = true;
     }
 
     for (var name in dataAdpater.externalScripts) {
         handle = dataAdpater.getConnectedAdapterHandle(name);
-        if (handle && handle.status === XML3D.base.AdapterHandle.STATUS.LOADING) {
+        if (handle && handle.status === AdapterHandle.STATUS.LOADING) {
             loading = true;
         }
     }

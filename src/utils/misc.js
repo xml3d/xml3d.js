@@ -31,6 +31,23 @@ window.requestAnimFrame = (function(){
         return target.dispatchEvent(event);
     };
 
+    /** Dispatch HTML event
+     *
+     * @param {Object} target    element or document
+     * @param {string} eventType standard event type e.g. load, click
+     */
+    exports.dispatchEvent = function(target, eventType) {
+        var evt = null;
+        if (document.createEvent) {
+                evt = document.createEvent("Events");
+                evt.initEvent(eventType, true, true);
+                return target.dispatchEvent(evt);
+            } else if (document.createEventObject) {
+                evt = document.createEventObject();
+                return target.fireEvent('on' + eventType, evt);
+            }
+        };
+
     var __autoCreatedViewId = 0;
     /**
      * Returns the active view element corresponding to the given xml3d element.

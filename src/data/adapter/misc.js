@@ -1,7 +1,7 @@
 var DataAdapter = require("./data.js");
 var Events = require("../../interface/notification.js");
 var URI = require("../../utils/uri.js").URI;
-var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
+var Util = require("../../utils/misc.js");
 
 var Resource = require("../../base/resourcemanager.js").Resource;
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
@@ -122,17 +122,17 @@ var createClass = XML3D.createClass;
         this.video = Resource.getVideo(uri, this.node.autoplay, this.node.loop,
             {
                 canplay : function(event, video) {
-                    dispatchCustomEvent(that.node, 'canplay', true, true, null);
+                    Util.dispatchCustomEvent(that.node, 'canplay', true, true, null);
                     that._startVideoRefresh();
                 },
                 ended : function(event, video) {
-                    dispatchCustomEvent(that.node, 'ended', true, true, null);
+                    Util.dispatchCustomEvent(that.node, 'ended', true, true, null);
                 },
                 load : function(event, video) {
-                    dispatchEvent(that.node, 'load');
+                    Util.dispatchEvent(that.node, 'load');
                 },
                 error : function(event, video) {
-                    dispatchCustomEvent(that.node, 'error', true, true, null);
+                    Util.dispatchCustomEvent(that.node, 'error', true, true, null);
                     XML3D.debug.logError("Could not load video URI="+video.src);
                 }
             }

@@ -1,9 +1,11 @@
 var AbstractCanvasHandler = require("../renderer/canvas-handler.js");
+var Options = require("../../utils/options.js");
+var xml3dFormatHandler = require("../../base/formathandler.js").xml3dFormatHandler;
 
 var MAXFPS = 30;
 
 var OPTION_CONTINUOUS = "renderer-continuous";
-XML3D.options.register(OPTION_CONTINUOUS, false);
+Options.register(OPTION_CONTINUOUS, false);
 
 /**
  * GLCanvasHandler class.
@@ -45,7 +47,7 @@ GLCanvasHandler.prototype.initialize = function () {
         XML3D.updateXflowObserver();
         XML3D.flushDOMChanges();
 
-        if (that.canvasSizeChanged() || that.renderer.needsRedraw() || XML3D.options.getValue(OPTION_CONTINUOUS)) {
+        if (that.canvasSizeChanged() || that.renderer.needsRedraw() || Options.getValue(OPTION_CONTINUOUS)) {
             that.dispatchUpdateEvent();
             that.draw();
         }
@@ -157,7 +159,7 @@ GLCanvasHandler.prototype.draw = function () {
         var end = c_timer.now();
 
 
-        var factory = XML3D.base.xml3dFormatHandler.getFactory(XML3D.webgl, this.id);
+        var factory = xml3dFormatHandler.getFactory("webgl", this.id);
         var xml3dAdapter = factory.getAdapter(this._xml3dElement);
         xml3dAdapter.onFrameDrawn();
         this.dispatchFrameDrawnEvent(start, end, stats);

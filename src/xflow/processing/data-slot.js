@@ -1,5 +1,5 @@
 var Base = require("../base.js");
-var C = require("../interface/constants");
+var C = require("../interface/constants.js");
 
 /**
  * A DataSlot wraps a dataEntry and adds a key value for sequences.

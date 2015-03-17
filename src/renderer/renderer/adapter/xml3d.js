@@ -1,5 +1,9 @@
 var RenderAdapter = require("./base.js");
 var Utils = require("../utils.js");
+var Events = require("../../../interface/notification.js");
+var dispatchCustomEvent = require("../../../utils/misc.js").dispatchCustomEvent;
+var getOrCreateActiveView = require("../../../utils/misc.js").getOrCreateActiveView;
+var Resource = require("../../../base/resourcemanager.js").Resource;
 
 var XML3DRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
@@ -19,26 +23,26 @@ XML3D.extend(XML3DRenderAdapter.prototype, {
     }, setViewAdapter: function (adapter) {
         adapter = adapter || this.getConnectedAdapter("activeView");
         if (!(adapter && adapter.getRenderNode)) {
-            var viewElement = XML3D.util.getOrCreateActiveView(this.node);
+            var viewElement = getOrCreateActiveView(this.node);
             adapter = this.factory.getAdapter(viewElement);
         }
         this.factory.getScene().setActiveView(adapter.getRenderNode());
     }, dispose: function () {
         this.clearAdapterHandles();
     }
-})
+});
 
 XML3DRenderAdapter.prototype.notifyChanged = function (evt) {
 
     switch (evt.type) {
-        case XML3D.events.ADAPTER_HANDLE_CHANGED:
+        case Events.ADAPTER_HANDLE_CHANGED:
             this.setViewAdapter(evt.adapter);
             return;
-        case XML3D.events.NODE_INSERTED:
+        case Events.NODE_INSERTED:
             // This also initializes the children
             this.initElement(evt.mutation.target);
             return;
-        case XML3D.events.NODE_REMOVED:
+        case Events.NODE_REMOVED:
             // Handled in removed node
             return;
     }
@@ -62,32 +66,32 @@ XML3DRenderAdapter.prototype.onConfigured = function () {
     // emit load event when all resources currently loading are completed
     var callback = this.onLoadComplete.bind(this);
     // register callback for canvasId == 0 i.e. global resources
-    XML3D.base.resourceManager.addLoadCompleteListener(0, callback);
+    Resource.addLoadCompleteListener(0, callback);
     // register callback for canvasId of this node
-    XML3D.base.resourceManager.addLoadCompleteListener(this.factory.canvasId, callback);
+    Resource.addLoadCompleteListener(this.factory.canvasId, callback);
     this.onLoadComplete();
-}
+};
 
 XML3DRenderAdapter.prototype.onLoadComplete = function (canvasId) {
-    if (XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId)) {
+    if (Resource.isLoadComplete(0) && Resource.isLoadComplete(this.factory.canvasId)) {
         this.fireLoadEventAfterDraw = true;
     }
-}
+};
 
 XML3DRenderAdapter.prototype.onFrameDrawn = function () {
     if (this.fireLoadEventAfterDraw) {
         this.fireLoadEventAfterDraw = false;
         this.firstLoadFired = true;
-        XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
+        dispatchCustomEvent(this.node, 'load', false, true, null);
     }
-}
+};
 
 
 XML3DRenderAdapter.prototype.getComplete = function () {
     if (this.fireLoadEventAfterDraw) return false;
     if (!this.firstLoadFired) return false;
-    return XML3D.base.resourceManager.isLoadComplete(0) && XML3D.base.resourceManager.isLoadComplete(this.factory.canvasId);
-}
+    return Resource.isLoadComplete(0) && Resource.isLoadComplete(this.factory.canvasId);
+};
 
 XML3DRenderAdapter.prototype.getWorldBoundingBox = function () {
     var bbox = new window.XML3DBox();

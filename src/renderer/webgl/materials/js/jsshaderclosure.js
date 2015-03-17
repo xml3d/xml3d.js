@@ -1,7 +1,9 @@
 var AbstractShaderClosure = require("./../abstractshaderclosure.js");
 var JSShaderComposer = require("./jsshadercomposer.js");
-var SystemNotifier = require("../../system/system-notifier");
-var getJSSystemConfiguration = require("./jssystemconfiguration");
+var SystemNotifier = require("../../system/system-notifier.js");
+var getJSSystemConfiguration = require("./jssystemconfiguration.js");
+var XC = require("../../../../xflow/interface/constants.js");
+var Options = require("../../../../utils/options.js");
 
 var c_SystemUpdate = {
     "pointLightOn": {
@@ -43,19 +45,19 @@ function channelVsAttribute(vsConfig, inputName, spaceInfo) {
             case Shade.SPACE_VECTOR_TYPES.OBJECT:
                 break;
             case Shade.SPACE_VECTOR_TYPES.VIEW_POINT:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
+                vsConfig.addInputParameter(XC.DATA_TYPE.FLOAT4X4, "modelViewMatrix", true);
                 code = outputName + " = ( modelViewMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
                 break;
             case Shade.SPACE_VECTOR_TYPES.VIEW_NORMAL:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelViewMatrixN", true);
+                vsConfig.addInputParameter(XC.DATA_TYPE.FLOAT3X3, "modelViewMatrixN", true);
                 code = outputName + " = normalize( modelViewMatrixN * #I{" + inputName + "} );";
                 break;
             case Shade.SPACE_VECTOR_TYPES.WORLD_POINT:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelMatrix", true);
+                vsConfig.addInputParameter(XC.DATA_TYPE.FLOAT4X4, "modelMatrix", true);
                 code = outputName + " = ( modelMatrix * vec4(#I{" + inputName + "}, 1.0) ).xyz;";
                 break;
             case Shade.SPACE_VECTOR_TYPES.WORLD_NORMAL:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "modelMatrixN", true);
+                vsConfig.addInputParameter(XC.DATA_TYPE.FLOAT3X3, "modelMatrixN", true);
                 code = outputName + " = normalize( modelMatrixN * #I{" + inputName + "} );";
                 break;
             default:
@@ -67,45 +69,45 @@ function channelVsAttribute(vsConfig, inputName, spaceInfo) {
 
 
 /**
- * @param {Xflow.DATA_TYPE} xflowType
+ * @param {XC.DATA_TYPE} xflowType
  */
 var convertXflow2ShadeType = function (xflowType, source) {
     var result = {}
     switch (xflowType) {
-        case Xflow.DATA_TYPE.BOOL:
+        case XC.DATA_TYPE.BOOL:
             result.type = Shade.TYPES.BOOLEAN;
             break;
-        case Xflow.DATA_TYPE.INT:
+        case XC.DATA_TYPE.INT:
             result.type = Shade.TYPES.INT;
             break;
-        case Xflow.DATA_TYPE.FLOAT:
+        case XC.DATA_TYPE.FLOAT:
             result.type = Shade.TYPES.NUMBER;
             break;
-        case Xflow.DATA_TYPE.FLOAT2:
+        case XC.DATA_TYPE.FLOAT2:
             result.type = Shade.TYPES.OBJECT;
             result.kind = Shade.OBJECT_KINDS.FLOAT2;
             break;
-        case Xflow.DATA_TYPE.FLOAT3:
+        case XC.DATA_TYPE.FLOAT3:
             result.type = Shade.TYPES.OBJECT;
             result.kind = Shade.OBJECT_KINDS.FLOAT3;
             break;
-        case Xflow.DATA_TYPE.FLOAT4:
+        case XC.DATA_TYPE.FLOAT4:
             result.type = Shade.TYPES.OBJECT;
             result.kind = Shade.OBJECT_KINDS.FLOAT4;
             break;
-        case Xflow.DATA_TYPE.FLOAT3X3:
+        case XC.DATA_TYPE.FLOAT3X3:
             result.type = Shade.TYPES.OBJECT;
             result.kind = Shade.OBJECT_KINDS.MATRIX3;
             break;
-        case Xflow.DATA_TYPE.FLOAT4X4:
+        case XC.DATA_TYPE.FLOAT4X4:
             result.type = Shade.TYPES.OBJECT;
             result.kind = Shade.OBJECT_KINDS.MATRIX4;
             break;
-        case Xflow.DATA_TYPE.TEXTURE:
+        case XC.DATA_TYPE.TEXTURE:
             result.type = Shade.TYPES.OBJECT;
             result.kind = Shade.OBJECT_KINDS.TEXTURE;
             break;
-        case Xflow.DATA_TYPE.UNKNOWN:
+        case XC.DATA_TYPE.UNKNOWN:
         default:
             throw new Error("Unknown Xflow DataType: " + xflowType);
     }
@@ -171,8 +173,8 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
             propagateConstants: true,
             validate: true,
             sanitize: true,
-            transformSpaces: XML3D.options.getValue("shadejs-transformSpaces"),
-            extractUniformExpressions: XML3D.options.getValue("shadejs-extractUniformExpressions")
+            transformSpaces: Options.getValue("shadejs-transformSpaces"),
+            extractUniformExpressions: Options.getValue("shadejs-extractUniformExpressions")
         };
         var compileOptions = {
             useStatic: true, uniformExpressions: options.uniformExpressions
@@ -201,7 +203,7 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
                 if (scene.deferred) {
                     cacheEntry.signatures = workSet.getProcessingData("colorClosureSignatures");
                 }
-                if (XML3D.options.getValue("shadejs-cache"))
+                if (Options.getValue("shadejs-cache"))
                     c_jsShaderCache[jsShaderKey] = cacheEntry;
             } catch (e) {
                 SystemNotifier.sendEvent('shadejs', {
@@ -237,7 +239,7 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         for (var i = 0; i < names.length; ++i) {
             channelVsAttribute(vsConfig, names[i], spaceInfo);
         }
-        vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
+        vsConfig.addInputParameter(XC.DATA_TYPE.FLOAT4X4, "modelViewProjectionMatrix", true);
         vsConfig.addCodeFragment("gl_Position = modelViewProjectionMatrix * vec4(#I{position}, 1.0);");
         return vsRequest.getVertexShader().getGLSLCode();
     },

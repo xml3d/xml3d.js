@@ -1,12 +1,13 @@
 var binarySearch = require("../../utils/utils").binarySearch;
+var XC = require("../../interface/constants.js");
 
 Xflow.registerOperator("xflow.lerpSeq", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'sequence'},
         {type: 'float', source: 'key'}],
-    mapping: [  { name: 'value1', source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
-        { name: 'value2', source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
-        { name: 'weight', source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
+    mapping: [  { name: 'value1', source: 'sequence', sequence: XC.SEQUENCE.PREV_BUFFER, keySource: 'key'},
+        { name: 'value2', source: 'sequence', sequence: XC.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
+        { name: 'weight', source: 'sequence', sequence: XC.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
     evaluate_core: function(result, value1, value2, weight){
         var invWeight = 1 - weight[0];
         result[0] = invWeight*value1[0] + weight[0]*value2[0];
@@ -20,9 +21,9 @@ Xflow.registerOperator("xflow.lerpSeqAsync", {
     outputs: [  {type: 'float3', name: 'result'}],
     params:  [  {type: 'float3', source: 'sequence'},
         {type: 'float', source: 'key'}],
-    mapping: [  { name: 'value1', source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
-        { name: 'value2', source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
-        { name: 'weight', source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
+    mapping: [  { name: 'value1', source: 'sequence', sequence: XC.SEQUENCE.PREV_BUFFER, keySource: 'key'},
+        { name: 'value2', source: 'sequence', sequence: XC.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
+        { name: 'weight', source: 'sequence', sequence: XC.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
     evaluate_async: function(result, value1, value2, weight, info, callback){
         var i = info.iterateCount, off0, off1, off2;
         while(i--){

@@ -1,11 +1,11 @@
 var Base = require("../base.js");
-var C = require("../interface/constants");
-var utils = require("../utils/utils");
-var Executor = require("./executor");
-var Result = require("../interface/result");
-var Operator = require("../operator/operator");
-var Data = require("../interface/data");
-var DataSlot = require("../processing/data-slot");
+var C = require("../interface/constants.js");
+var utils = require("../utils/utils.js");
+var Executor = require("./executor.js");
+var Result = require("../interface/result.js");
+var Operator = require("../operator/operator.js");
+var Data = require("../interface/data.js");
+var DataSlot = require("../processing/data-slot.js");
 
 var BufferEntry = Data.BufferEntry;
 var TextureEntry = Data.TextureEntry;
@@ -162,9 +162,9 @@ ProcessNode.prototype.updateState = function(){
             if(this.status > C.PROCESS_STATE.LOADING && isInputLoading(this.operator, this.inputChannels))
                 this.status = C.PROCESS_STATE.LOADING;
 
-            if(this.status > Xflow.PROCESS_STATE.INVALID &&
+            if(this.status > C.PROCESS_STATE.INVALID &&
                 !checkInput(this, this.operator, this.owner.owner._computeInputMapping, this.inputChannels))
-                this.status = Xflow.PROCESS_STATE.INVALID;
+                this.status = C.PROCESS_STATE.INVALID;
 
             if(this.status == C.PROCESS_STATE.UNPROCESSED && Operator.isOperatorAsync(this.operator)){
                 this.status = this.asyncProcessState == ASYNC_PROCESS_STATE.INIT ? C.PROCESS_STATE.LOADING

@@ -1,12 +1,16 @@
-var DOMTransformFetcher = require("../transform-fetcher");
-var DataAdapter = require("./data");
+var DOMTransformFetcher = require("../transform-fetcher.js");
+var DataAdapter = require("./data.js");
+var DataNode = require("../../xflow/interface/graph.js").DataNode;
+var getComputeDataflowUrl = require("../../xflow/interface/graph.js").getComputeDataflowUrl;
+var Asset = require("../../asset/asset.js").Asset;
+var SubData = require("../../asset/asset.js").SubData;
+var Events = require("../../interface/notification.js");
+var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
+var Resource = require("../../base/resourcemanager.js").Resource;
 
-var NodeAdapter = XML3D.base.NodeAdapter;
-var Asset = XML3D.base.Asset;
-var SubData = XML3D.base.SubData;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;
-var dispatchCustomEvent = XML3D.util.dispatchCustomEvent;
-var AdapterHandle = XML3D.base.AdapterHandle;
+var AdapterHandle = require("../../base/adapterhandle.js");
 
 
 var AssetAdapter = function (factory, node) {
@@ -105,18 +109,18 @@ AssetAdapter.prototype.onTransformChange = function (attrName, matrix) {
 
 
 AssetAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) {
+    if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
         this.connectedAdapterChanged(evt.key, evt.adapter);
         if (evt.handleStatus == AdapterHandle.STATUS.NOT_FOUND) {
             XML3D.debug.logError("Could not find <asset> element of url '" + evt.url + "' for " + evt.key);
         }
-    } else if (evt.type == XML3D.events.NODE_INSERTED) {
+    } else if (evt.type == Events.NODE_INSERTED) {
         updateChildren(this);
 
-    } else if (evt.type == XML3D.events.NODE_REMOVED) {
+    } else if (evt.type == Events.NODE_REMOVED) {
         updateChildren(this);
 
-    } else if (evt.type == XML3D.events.VALUE_MODIFIED) {
+    } else if (evt.type == Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
         switch (attr) {
             case "name":
@@ -137,7 +141,7 @@ AssetAdapter.prototype.notifyChanged = function (evt) {
                 break;
         }
 
-    } else if (evt.type == XML3D.events.THIS_REMOVED) {
+    } else if (evt.type == Events.THIS_REMOVED) {
         this.clearAdapterHandles();
     }
 };
@@ -154,7 +158,7 @@ createClass(AssetDataAdapter, DataAdapter);
 
 AssetDataAdapter.prototype.init = function () {
     DataAdapter.prototype.init.call(this);
-    this.outputXflowNode = new Xflow.DataNode(false);
+    this.outputXflowNode = new DataNode(false);
     this.assetEntry = new SubData(this.outputXflowNode, this.getXflowNode(), this.node);
     this.assetEntry.setName(this.node.getAttribute("name"));
     updateClassNames(this);
@@ -174,7 +178,7 @@ AssetDataAdapter.prototype.connectedAdapterChanged = function (attributeName, ad
 
 AssetDataAdapter.prototype.notifyChanged = function (evt) {
     DataAdapter.prototype.notifyChanged.call(this, evt);
-    if (evt.type == XML3D.events.VALUE_MODIFIED) {
+    if (evt.type == Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
         switch (attr) {
             case "name":
@@ -214,7 +218,7 @@ function updateClassNames(adapter) {
 
 function updatePostCompute(adapter) {
     var computeString = adapter.node.getAttribute("compute");
-    var dataflowUrl = Xflow.getComputeDataflowUrl(computeString);
+    var dataflowUrl = getComputeDataflowUrl(computeString);
     if (dataflowUrl) {
         updateAdapterHandle(adapter, "postDataflow", dataflowUrl);
     } else {
@@ -239,8 +243,7 @@ function setShaderUrl(adapter, dest) {
     var node = adapter.node;
     var shaderUrl = node.getAttribute("shader");
     if (shaderUrl) {
-        var shaderId = XML3D.base.resourceManager.getAbsoluteURI(node.ownerDocument._documentURL ||
-            node.ownerDocument.URL, shaderUrl);
+        var shaderId = Resource.getAbsoluteURI(node.ownerDocument._documentURL || node.ownerDocument.URL, shaderUrl);
         dest.setShader(shaderId.toString());
     } else {
         dest.setShader(null);
@@ -262,7 +265,7 @@ AssetMeshAdapter.prototype.init = function () {
 };
 AssetMeshAdapter.prototype.notifyChanged = function (evt) {
     AssetDataAdapter.prototype.notifyChanged.call(this, evt);
-    if (evt.type == XML3D.events.VALUE_MODIFIED) {
+    if (evt.type == Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
         switch (attr) {
             case "shader":

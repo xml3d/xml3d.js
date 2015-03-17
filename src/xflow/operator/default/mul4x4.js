@@ -1,5 +1,3 @@
-var  Math = require("../../utils/math.js");
-
 Xflow.registerOperator("xflow.mul", {
     outputs: [  {type: 'float4x4', name: 'result'}],
     params:  [  {type: 'float4x4', source: 'value1'},

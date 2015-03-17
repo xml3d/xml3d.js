@@ -3,6 +3,7 @@ var RenderNode = require("./rendernode.js");
 var DrawableClosure= require("./drawableclosure.js");
 var C = require("./constants.js");
 var Scene= require("./scene.js");
+var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 
 /**
  * @interface
@@ -83,7 +84,7 @@ var RenderObject = function (scene, pageEntry, opt) {
 
     /**
      * Object related data
-     * @type {{data: Xflow.DataNode|null, type: string}}
+     * @type {{data: DataNode|null, type: string}}
      */
     this.object = opt.object || {data: null, type: "triangles"};
 
@@ -125,7 +126,7 @@ XML3D.createClass(RenderObject, RenderNode, {
     createTransformRequest: function () {
         if (!this.object.data)
             return null;
-        var request = new Xflow.ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this));
+        var request = new ComputeRequest(this.object.data, ["meshTransform"], this.onTransformDataChange.bind(this));
         return request;
     },
 

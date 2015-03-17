@@ -1,5 +1,8 @@
 var TransformableAdapter = require("./transformable.js");
-var AdapterHandle = XML3D.base.AdapterHandle;
+var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
+var Events = require("../../../interface/notification.js");
+var Resource = require("../../../base/resourcemanager.js").Resource;
+var AdapterHandle = require("../../../base/adapterhandle.js");
 
 var ModelRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, true);
@@ -16,7 +19,7 @@ var c_IDENTITY = XML3D.math.mat4.create();
 XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 
     createRenderNode: function () {
-        var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
+        var dataAdapter = Resource.getAdapter(this.node, "data");
         this.asset = dataAdapter.getAsset();
 
         this.asset.addChangeListener(this);
@@ -66,16 +69,16 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 
             switch (adapterHandle.status) {
 
-                case XML3D.base.AdapterHandle.STATUS.NOT_FOUND:
+                case AdapterHandle.STATUS.NOT_FOUND:
                     XML3D.debug.logError("Could not find <shader> of url '" + adapterHandle.url + "' ", this.node);
                     break;
-                case XML3D.base.AdapterHandle.STATUS.READY:
+                case AdapterHandle.STATUS.READY:
                     var adapter = adapterHandle.getAdapter();
                     if (adapter && adapter.getMaterialConfiguration) {
                         result = adapter.getMaterialConfiguration();
                     }
                     break;
-                case XML3D.base.AdapterHandle.STATUS.LOADING:
+                case AdapterHandle.STATUS.LOADING:
                     break;
             }
 
@@ -89,12 +92,12 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
     notifyChanged: function (evt) {
         TransformableAdapter.prototype.notifyChanged.call(this, evt);
         switch (evt.type) {
-            case  XML3D.events.NODE_INSERTED:
+            case  Events.NODE_INSERTED:
                 return;
-            case XML3D.events.THIS_REMOVED:
+            case Events.THIS_REMOVED:
                 this.dispose();
                 return;
-            case XML3D.events.ADAPTER_HANDLE_CHANGED:
+            case Events.ADAPTER_HANDLE_CHANGED:
                 var splits = evt.key.split("_");
                 if (splits[0] == "shader") {
                     var renderNodeId = +splits[1];
@@ -164,7 +167,7 @@ function rec_removeRenderNodes(node, keepCurrentNode) {
 function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
 
     if (dataTreeNode.postTransformXflowNode) {
-        var request = new Xflow.ComputeRequest(dataTreeNode.postTransformXflowNode, ["transform"], adapter._bindedRequestCallback);
+        var request = new ComputeRequest(dataTreeNode.postTransformXflowNode, ["transform"], adapter._bindedRequestCallback);
         parentNode = adapter.getScene().createRenderGroup({
             parent: parentNode, visible: true, name: undefined
         });

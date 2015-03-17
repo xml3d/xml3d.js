@@ -1,4 +1,0 @@
-{
-  "module": "renderer",
-  "task": "browserify"
-}

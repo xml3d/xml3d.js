@@ -2,6 +2,7 @@ var TextureManager = require("texture-manager").SimpleTextureManager;
 var GLTexture = require("./texture.js");
 var GLCanvasTarget = require("./rendertarget.js").GLCanvasTarget;
 var ProgramFactory = require("./../shader/programfactory.js");
+var XC = require("../../../xflow/interface/constants.js");
 
 var CONTEXT_OPTIONS = {
     alpha: true, premultipliedAlpha: false, antialias: true, stencil: true, preserveDrawingBuffer: true
@@ -78,7 +79,7 @@ function getXflowEntryWebGlData(entry, canvasId){
         entry.userData.webglData = {};
     if(!entry.userData.webglData[canvasId])
         entry.userData.webglData[canvasId] = {
-            changed : Xflow.DATA_ENTRY_STATE.CHANGED_NEW
+            changed : XC.DATA_ENTRY_STATE.CHANGED_NEW
         };
     return entry.userData.webglData[canvasId];
 }

@@ -1,7 +1,9 @@
+var NodeAdapter = require("../../../base/adapter.js").NodeAdapter;
+
 var RenderAdapter = function (factory, node) {
-    XML3D.base.NodeAdapter.call(this, factory, node);
+    NodeAdapter.call(this, factory, node);
 };
-XML3D.createClass(RenderAdapter, XML3D.base.NodeAdapter);
+XML3D.createClass(RenderAdapter, NodeAdapter);
 
 RenderAdapter.prototype.getShader = function () {
     return null;

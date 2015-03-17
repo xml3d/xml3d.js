@@ -1,3 +1,6 @@
+var Events = require("../../interface/notification.js");
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
+
 /**
  * DataAdapter handling a <compute> element
  * @param {AdapterFactory} factory
@@ -5,9 +8,9 @@
  * @constructor
  */
 var ComputeDataAdapter = function (factory, node) {
-    XML3D.base.NodeAdapter.call(this, factory, node);
+    NodeAdapter.call(this, factory, node);
 };
-XML3D.createClass(ComputeDataAdapter, XML3D.base.NodeAdapter);
+XML3D.createClass(ComputeDataAdapter, NodeAdapter);
 
 ComputeDataAdapter.prototype.getComputeCode = function () {
     return this.node.value;
@@ -18,9 +21,9 @@ ComputeDataAdapter.prototype.getComputeCode = function () {
  */
 ComputeDataAdapter.prototype.notifyChanged = function (evt) {
     switch (evt.type) {
-        case XML3D.events.VALUE_MODIFIED:
-        case XML3D.events.NODE_INSERTED:
-        case XML3D.events.NODE_REMOVED:
+        case Events.VALUE_MODIFIED:
+        case Events.NODE_INSERTED:
+        case Events.NODE_REMOVED:
             var parent = this.node.parentNode;
             if (parent) {
                 var parentAdapter = this.factory.getAdapter(parent);

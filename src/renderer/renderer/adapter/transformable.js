@@ -1,6 +1,7 @@
 var RenderAdapter = require("./base.js");
 var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
-var AdapterHandle = XML3D.base.AdapterHandle;
+var Events = require("../../../interface/notification.js");
+var AdapterHandle = require("../../../base/adapterhandle.js");
 
 var TransformableAdapter = function (factory, node, handleShader, handleTransform) {
     RenderAdapter.call(this, factory, node);
@@ -66,7 +67,7 @@ XML3D.extend(TransformableAdapter.prototype, {
 
 
     notifyChanged: function (evt) {
-        if (evt.type == XML3D.events.VALUE_MODIFIED) {
+        if (evt.type == Events.VALUE_MODIFIED) {
             var target = evt.mutation.attributeName;
             if (target == "transform") {
                 this.transformFetcher && this.transformFetcher.update();
@@ -80,7 +81,7 @@ XML3D.extend(TransformableAdapter.prototype, {
                 this.updateShaderHandler();
                 this.factory.renderer.requestRedraw("Transformable shader changed.");
             }
-        } else if (evt.type == XML3D.events.ADAPTER_HANDLE_CHANGED) {
+        } else if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
             var key = evt.key;
             if (key == "shader") {
                 this.updateShaderHandler();

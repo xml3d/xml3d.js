@@ -1,4 +1,5 @@
-var NodeAdapter = XML3D.base.NodeAdapter;
+var Events = require("../../interface/notification.js");
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
 var TransformDataAdapter = function (factory, node) {
     NodeAdapter.call(this, factory, node);
@@ -66,12 +67,12 @@ TransformDataAdapter.prototype.getMatrix = function () {
 
 
 TransformDataAdapter.prototype.notifyChanged = function (e) {
-    if (e.type == XML3D.events.VALUE_MODIFIED) {
+    if (e.type == Events.VALUE_MODIFIED) {
         this.needsUpdate = true;
-        this.notifyOppositeAdapters(XML3D.events.ADAPTER_VALUE_CHANGED);
-    } else if (e.type == XML3D.events.NODE_REMOVED) {
+        this.notifyOppositeAdapters(Events.ADAPTER_VALUE_CHANGED);
+    } else if (e.type == Events.NODE_REMOVED) {
         this.dispose();
-        this.notifyOppositeAdapters(XML3D.events.ADAPTER_HANDLE_CHANGED);
+        this.notifyOppositeAdapters(Events.ADAPTER_HANDLE_CHANGED);
     }
 };
 TransformDataAdapter.prototype.dispose = function () {

@@ -1,9 +1,11 @@
+var DataChangeNotifier = require("../../../xflow/interface/data.js").DataChangeNotifier;
+
 /**
  *
  * @constructor
  */
 var DataChangeListener = function () {
-    Xflow.DataChangeNotifier.addListener(this.dataEntryChanged);
+    DataChangeNotifier.addListener(this.dataEntryChanged);
 };
 
 /**

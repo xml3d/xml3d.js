@@ -1,4 +1,9 @@
-var BaseDataAdapter = require("./base");
+var BaseDataAdapter = require("./base.js");
+var DataNode = require("../../xflow/interface/graph.js").DataNode;
+var XC = require("../../xflow/interface/constants.js");
+var Events = require("../../interface/notification.js");
+var dispatchCustomEvent = require("../../utils/misc.js").dispatchCustomEvent;
+var AdapterHandle = require("../../base/adapterhandle.js");
 
 /**
  * The DataAdapter implements the
@@ -22,7 +27,7 @@ var DataAdapter = function (factory, node) {
 XML3D.createClass(DataAdapter, BaseDataAdapter);
 
 DataAdapter.prototype.init = function () {
-    this.xflowDataNode = new Xflow.DataNode(false);
+    this.xflowDataNode = new DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
 
@@ -45,7 +50,7 @@ DataAdapter.prototype.updateAdapterHandle = function(key, url) {
 
     if(oldAdapterHandle == adapterHandle)
         return;
-    if (status === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+    if (status === AdapterHandle.STATUS.NOT_FOUND) {
         XML3D.debug.logError("Could not find element of url '" + adapterHandle.url + "' for " + key, this.node);
     }
     this.connectAdapterHandle(key, adapterHandle);
@@ -54,10 +59,10 @@ DataAdapter.prototype.updateAdapterHandle = function(key, url) {
 
 DataAdapter.prototype.onXflowLoadEvent = function(node, newLevel, oldLevel){
     if(newLevel == Infinity){
-        XML3D.util.dispatchCustomEvent(this.node, 'load', false, true, null);
+        dispatchCustomEvent(this.node, 'load', false, true, null);
     }
     else if(newLevel > oldLevel){
-        XML3D.util.dispatchCustomEvent(this.node, 'progress', false, true, null);
+        dispatchCustomEvent(this.node, 'progress', false, true, null);
     }
 };
 DataAdapter.prototype.getDataComplete = function(){
@@ -70,7 +75,7 @@ DataAdapter.prototype.getDataProgressLevel = function(){
     /** Recursively passing platform information to children of a data node
      *  Requires that the children and the parents of data nodes are defined
      *
-     * @param {Xflow.DataNode} parentNode
+     * @param {DataNode} parentNode
      */
 function recursiveDataNodeAttrInit(parentNode) {
     var children = parentNode._children, NChildren, i;
@@ -79,7 +84,7 @@ function recursiveDataNodeAttrInit(parentNode) {
         NChildren = children.length;
 
         for (i = NChildren; i--;) {
-            if (children[i] instanceof Xflow.DataNode) {
+            if (children[i] instanceof DataNode) {
                 children[i].setPlatform(parentNode._platform);
                 recursiveDataNodeAttrInit(children[i]);
             }
@@ -124,13 +129,13 @@ function recursiveDataAdapterConstruction(adapter) {
  * @param evt notification of type XML3D.Notification
  */
 DataAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type === XML3D.events.ADAPTER_HANDLE_CHANGED) {
+    if (evt.type === Events.ADAPTER_HANDLE_CHANGED) {
         this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
-        if (evt.handleStatus === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+        if (evt.handleStatus === AdapterHandle.STATUS.NOT_FOUND) {
             XML3D.debug.logError("Could not find <data> element of url '" + evt.url + "' for " + evt.key, this.node);
         }
 
-    } else if (evt.type === XML3D.events.NODE_INSERTED) {
+    } else if (evt.type === Events.NODE_INSERTED) {
         var insertedNode = evt.affectedNode;
         var adapter = this.factory.getAdapter(insertedNode);
         if (!adapter) {
@@ -150,7 +155,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
             this.xflowDataNode.appendChild(insertedXflowNode);
         }
 
-    } else if (evt.type === XML3D.events.NODE_REMOVED) {
+    } else if (evt.type === Events.NODE_REMOVED) {
         var adapter = this.factory.getAdapter(evt.affectedNode);
         if (!adapter) {
             return;
@@ -159,7 +164,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
         var removedXflowNode = adapter.getXflowNode();
         this.xflowDataNode.removeChild(removedXflowNode);
 
-    } else if (evt.type === XML3D.events.VALUE_MODIFIED) {
+    } else if (evt.type === Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
 
         if (attr === "filter" && !this.assetData) {
@@ -174,7 +179,7 @@ DataAdapter.prototype.notifyChanged = function (evt) {
             updatePlatform(this);
         }
 
-    } else if (evt.type === XML3D.events.THIS_REMOVED) {
+    } else if (evt.type === Events.THIS_REMOVED) {
         this.clearAdapterHandles();
     }
 };
@@ -188,7 +193,7 @@ DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, statu
         this.xflowDataNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
     } else if (this.externalScripts[key]) {
         window.eval(adapter.script);
-        this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        this.xflowDataNode.notify(XC.RESULT_STATE.CHANGED_STRUCTURE);
     }
 
     updateLoadState(this);
@@ -224,18 +229,18 @@ function updateLoadState(dataAdpater) {
     var loading = false, handle;
 
     handle = dataAdpater.getConnectedAdapterHandle("src");
-    if (handle && handle.status === XML3D.base.AdapterHandle.STATUS.LOADING) {
+    if (handle && handle.status === AdapterHandle.STATUS.LOADING) {
         loading = true;
     }
 
     handle = dataAdpater.getConnectedAdapterHandle("dataflow");
-    if (handle && handle.status === XML3D.base.AdapterHandle.STATUS.LOADING) {
+    if (handle && handle.status === AdapterHandle.STATUS.LOADING) {
         loading = true;
     }
 
     for (var name in dataAdpater.externalScripts) {
         handle = dataAdpater.getConnectedAdapterHandle(name);
-        if (handle && handle.status === XML3D.base.AdapterHandle.STATUS.LOADING) {
+        if (handle && handle.status === AdapterHandle.STATUS.LOADING) {
             loading = true;
         }
     }

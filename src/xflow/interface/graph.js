@@ -1,8 +1,9 @@
-var C = require("./constants");
-var Mapping = require("./mapping");
+var C = require("./constants.js");
+var Mapping = require("./mapping.js");
+require("../../utils/array.js");
 
 var Base = require("../base.js");
-var ChannelNode = require("../processing/channel-node").ChannelNode;
+var ChannelNode = require("../processing/channel-node.js").ChannelNode;
 var Utils = require("../utils/utils.js");
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -1,24 +1,5 @@
 // utils/misc.js
 
-XML3D.setParameter = function(elementId, fieldName, value) {
-    var e = document.getElementById(elementId);
-    if (e) {
-        var fields = e.childNodes;
-        for (var i = 0; i < fields.length; i++) {
-              var field = fields[i];
-              if (field.nodeType === Node.ELEMENT_NODE && (field.name == fieldName)) {
-                  if (typeof value === 'string')
-                      {
-                          while ( field.hasChildNodes() ) field.removeChild( field.lastChild );
-                          field.appendChild(document.createTextNode(value));
-                          return true;
-                      }
-              }
-            }
-    }
-    return false;
-};
-
 window.requestAnimFrame = (function(){
     return  window.requestAnimationFrame       ||
             window.webkitRequestAnimationFrame ||
@@ -31,24 +12,6 @@ window.requestAnimFrame = (function(){
   })();
 
 (function(exports) {
-
-    /**
-     * Dispatch HTML event
-     *
-     * @param {Object} target    element or document
-     * @param {string} eventType standard event type e.g. load, click
-     */
-    exports.dispatchEvent = function(target, eventType) {
-        var evt = null;
-        if (document.createEvent) {
-            evt = document.createEvent("Events");
-            evt.initEvent(eventType, true, true);
-            return target.dispatchEvent(evt);
-        } else if (document.createEventObject) {
-            evt = document.createEventObject();
-            return target.fireEvent('on' + eventType, evt);
-        }
-    };
 
     /**
      *
@@ -68,36 +31,22 @@ window.requestAnimFrame = (function(){
         return target.dispatchEvent(event);
     };
 
-    exports.getStyle = function(oElm, strCssRule) {
-        var strValue = "";
-        if (document.defaultView && document.defaultView.getComputedStyle) {
-            strValue = document.defaultView.getComputedStyle(oElm, "")
-                    .getPropertyValue(strCssRule);
-        } else if (oElm.currentStyle) {
-            strCssRule = strCssRule.replace(/\-(\w)/g, function(strMatch, p1) {
-                return p1.toUpperCase();
-            });
-            strValue = oElm.currentStyle[strCssRule];
-        }
-
-        return strValue;
-    };
-
-    /** Evaluates the given XPath expression in the given xml3d element on
-     *  xml3d elements and returns the result.
+    /** Dispatch HTML event
      *
-     * @param {!Object} xml3d the xml3d element on which to evaluate the expression
-     * @param {!Object} xpathExpr the XPath expression to be evaluated
-     *
-     * @return {XPathResult} the result of the evaluation
+     * @param {Object} target    element or document
+     * @param {string} eventType standard event type e.g. load, click
      */
-    exports.evaluateXPathExpr = function(xml3d, xpathExpr)
-    {
-        return document.evaluate(
-            xpathExpr, xml3d,
-            function() {return XML3D.xml3dNS;},
-            XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    };
+    exports.dispatchEvent = function(target, eventType) {
+        var evt = null;
+        if (document.createEvent) {
+                evt = document.createEvent("Events");
+                evt.initEvent(eventType, true, true);
+                return target.dispatchEvent(evt);
+            } else if (document.createEventObject) {
+                evt = document.createEventObject();
+                return target.fireEvent('on' + eventType, evt);
+            }
+        };
 
     var __autoCreatedViewId = 0;
     /**
@@ -112,7 +61,7 @@ window.requestAnimFrame = (function(){
         var ref = xml3d.activeView;
         if(ref)
         {
-            var v = XML3D.URIResolver.resolveLocal(ref);
+            var v = window.XML3D.URIResolver.resolveLocal(ref);
             if(!v)
                 throw "XML3D Error: xml3d references view that is not defined: '" + ref + "'.";
 

@@ -1,4 +1,6 @@
 var registerFactory = require("./resourcemanager.js").registerFactory;
+var Resource = require("./resourcemanager.js").Resource;
+var Events = require("../interface/notification.js");
 
 /**
  * A normal adapter that doesn't need to be connected to a DOM node
@@ -86,12 +88,12 @@ Adapter.prototype.onDispose = function() {
 /**
  * Internal function that converts an AdapterHandleNotification to a ConnectedAdapterNotification
  * @private
- * @param {XML3D.events.AdapterHandleNotification} evt
+ * @param {Events.AdapterHandleNotification} evt
  */
 function adapterHandleCallback(evt) {
     for (var key in this.connectedAdapterHandles) {
         if (this.connectedAdapterHandles[key] == evt.adapterHandle) {
-            var subEvent = new XML3D.events.ConnectedAdapterNotification(evt, key);
+            var subEvent = new Events.ConnectedAdapterNotification(evt, key);
             this.notifyChanged(subEvent);
         }
     }
@@ -118,7 +120,7 @@ NodeAdapter.prototype.init = function() {
 
 /**
  * Notifiction due to a change in DOM, related adapters and so on.
- * @param {XML3D.events.Notification} e
+ * @param {Events.Notification} e
  */
 NodeAdapter.prototype.notifyChanged = function(e) {
 
@@ -132,7 +134,7 @@ NodeAdapter.prototype.notifyChanged = function(e) {
  */
 NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
     canvasId = canvasId === undefined ? this.factory.canvasId : canvasId;
-    return XML3D.base.resourceManager.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
+    return Resource.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
         uri, aspectType || this.factory.aspect, canvasId);
 };
 /**
@@ -140,8 +142,8 @@ NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
  * @param {number?} type The type of change
  */
 NodeAdapter.prototype.notifyOppositeAdapters = function(type) {
-    type = type || XML3D.events.ADAPTER_HANDLE_CHANGED;
-    return XML3D.base.resourceManager.notifyNodeAdapterChange(this.node,
+    type = type || Events.ADAPTER_HANDLE_CHANGED;
+    return Resource.notifyNodeAdapterChange(this.node,
         this.factory.aspect, this.factory.canvasId, type);
 };
 
@@ -172,7 +174,7 @@ IFactory.prototype.aspect;
 
 /**
  * An adapter factory is responsible for creating adapter from a certain data source.
- * Note that any AdapterFactory is registered with XML3D.base.resourceManager
+ * Note that any AdapterFactory is registered with Resource
  * @constructor
  * @implements {IFactory}
  * @param {Object} aspect The aspect this factory serves (e.g. XML3D.data or XML3D.webgl)

@@ -1,20 +1,22 @@
-var GLContext = require("./base/context");
-var GLScene = require("./scene/glscene");
+var GLContext = require("./base/context.js");
+var GLScene = require("./scene/glscene.js");
 var GLScaledRenderTarget = require("./base/rendertarget.js").GLScaledRenderTarget;
 var DataChangeListener = require("../renderer/tools/datachangelistener.js");
-var RenderInterface = require("./render-interface");
+var RenderInterface = require("./render-interface.js");
 var PickObjectRenderPass= require("./render-passes/pick-object.js");
 var PickPositionRenderPass = require("./render-passes/pick-position.js");
 var PickNormalRenderPass = require("./render-passes/pick-normal.js");
 var ForwardRenderTree = require("./render-trees/forward.js");
 var GLU = require("../../contrib/glu.js");
+var Options = require("../../utils/options.js");
+var xml3dFormatHandler = require("../../base/formathandler.js").xml3dFormatHandler;
 var MAX_PICK_BUFFER_DIMENSION = 512;
 
 var OPTION_SSAO = "renderer-ssao";
 var FLAGS = {};
 FLAGS[OPTION_SSAO] = {defaultValue: false, recompileOnChange: true};
 for (var flag in FLAGS) {
-    XML3D.options.register(flag, FLAGS[flag].defaultValue);
+    Options.register(flag, FLAGS[flag].defaultValue);
 }
 
 /**
@@ -69,7 +71,7 @@ var GLRenderer = function (element, canvasHandler) {
     this.context = new GLContext(canvas, this._canvasHandler.id);
     this.scene = new GLScene(this.context);
 
-    var factory = XML3D.base.xml3dFormatHandler.getFactory(XML3D.webgl, this._canvasHandler.id);
+    var factory = xml3dFormatHandler.getFactory("webgl", this._canvasHandler.id);
     factory.setScene(this.scene);
     factory.setRenderer(this);
 
@@ -96,7 +98,7 @@ var GLRenderer = function (element, canvasHandler) {
 
     this.renderInterface = this.createRenderInterface();
     this.createDefaultPipelines();
-    XML3D.options.addObserver(this.onFlagsChange.bind(this));
+    Options.addObserver(this.onFlagsChange.bind(this));
 };
 
 // Just to satisfy jslint
@@ -142,7 +144,7 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     createDefaultPipelines: function () {
-        var pipeline = new ForwardRenderTree(this.renderInterface, XML3D.options.getValue(OPTION_SSAO));
+        var pipeline = new ForwardRenderTree(this.renderInterface, Options.getValue(OPTION_SSAO));
         this.renderInterface.setRenderPipeline(pipeline);
 
         var pickTarget = new GLScaledRenderTarget(this.context, MAX_PICK_BUFFER_DIMENSION, {

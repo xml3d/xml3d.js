@@ -1,4 +1,10 @@
-var NodeAdapter = XML3D.base.NodeAdapter;
+var ComputeRequest = require("../../xflow/interface/request.js").ComputeRequest;
+var setShaderConstant = require("../../xflow/interface/vs-connect.js").setShaderConstant;
+var registerErrorCallback = require("../../xflow/base.js").registerErrorCallback;
+var XC = require("../../xflow/interface/constants.js");
+var URI = require("../../utils/uri.js").URI;
+
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;
 
 /**
@@ -20,11 +26,11 @@ BaseDataAdapter.prototype.getXflowNode = function () {
 };
 
 BaseDataAdapter.prototype.getComputeRequest = function (filter, callback) {
-    return new Xflow.ComputeRequest(this.xflowDataNode, filter, callback);
+    return new ComputeRequest(this.xflowDataNode, filter, callback);
 };
 
 BaseDataAdapter.prototype.getComputeResult = function (filter) {
-    return this.xflowDataNode._getResult(Xflow.RESULT_TYPE.COMPUTE, filter);
+    return this.xflowDataNode._getResult(XC.RESULT_TYPE.COMPUTE, filter);
 };
 
 BaseDataAdapter.prototype.getOutputNames = function () {
@@ -35,13 +41,13 @@ BaseDataAdapter.prototype.getOutputChannelInfo = function (name) {
     return this.xflowDataNode.getOutputChannelInfo(name);
 };
 
-Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.OBJECT_ID, "objectID");
-Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM, "modelViewProjectionMatrix");
-Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM_NORMAL, "modelViewProjectionNormalMatrix");
-Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM, "modelViewMatrix");
-Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL, "modelViewMatrixN");
-Xflow.setShaderConstant(Xflow.SHADER_CONSTANT_KEY.WORLD_TRANSFORM, "modelMatrix");
-Xflow.registerErrorCallback(function(message, xflowNode){
+setShaderConstant(XC.SHADER_CONSTANT_KEY.OBJECT_ID, "objectID");
+setShaderConstant(XC.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM, "modelViewProjectionMatrix");
+setShaderConstant(XC.SHADER_CONSTANT_KEY.SCREEN_TRANSFORM_NORMAL, "modelViewProjectionNormalMatrix");
+setShaderConstant(XC.SHADER_CONSTANT_KEY.VIEW_TRANSFORM, "modelViewMatrix");
+setShaderConstant(XC.SHADER_CONSTANT_KEY.VIEW_TRANSFORM_NORMAL, "modelViewMatrixN");
+setShaderConstant(XC.SHADER_CONSTANT_KEY.WORLD_TRANSFORM, "modelMatrix");
+registerErrorCallback(function(message, xflowNode){
     message = "Xflow: " + message;
     var userData = xflowNode ? xflowNode.userData : null;
     if (userData && userData.ownerDocument) {
@@ -49,7 +55,7 @@ Xflow.registerErrorCallback(function(message, xflowNode){
             XML3D.debug.logError(message, userData);
         }
         else if (userData.id) {
-            var uri = new XML3D.URI("#" + userData.id);
+            var uri = new URI("#" + userData.id);
             uri = uri.getAbsoluteURI(userData.ownerDocument._documentURL || userData.ownerDocument.URL);
             XML3D.debug.logError(message, "External Node: " + uri);
         }

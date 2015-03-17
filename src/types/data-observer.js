@@ -1,4 +1,5 @@
-
+var XC = require("../xflow/interface/constants.js");
+var Resource = require("../base/resourcemanager.js").Resource;
 
 var c_XflowObserverList = [];
 
@@ -6,7 +7,6 @@ var XML3DDataObserver = function(callback){
     this.callback = callback;
     this.observed = [];
 };
-window.XML3DDataObserver = XML3DDataObserver;
 
 XML3DDataObserver.prototype.observe = function(node, options){
     if(!node)
@@ -18,7 +18,7 @@ XML3DDataObserver.prototype.observe = function(node, options){
             "this function after XML3D has been configured e.g. inside a DOMContentLoaded listener.");
 
 
-    var dataAdapter = XML3D.base.resourceManager.getAdapter(node, "data");
+    var dataAdapter = Resource.getAdapter(node, "data");
     if(!dataAdapter)
         throw new Error("Can't observe node. XML3DataObserver can only observe data containers such as <data>, <mesh> or <shader>");
 
@@ -83,14 +83,12 @@ var XML3DDataRecord = function(target, result){
     this.target = target;
     this.result = result;
 };
-window.XML3DDataRecord = XML3DDataRecord;
 
 
 var XML3DDataResult = function(result){
     this._entries = {};
     constructDataResult(this, result);
 };
-window.XML3DDataResult = XML3DDataResult;
 
 XML3DDataResult.prototype.getValue = function(name) {
     if (this._entries[name])
@@ -139,17 +137,17 @@ function constructDataResult(dataResult, result){
 
 function getXML3DDataType(type){
     switch(type){
-        case Xflow.DATA_TYPE.FLOAT : return XML3DDataResult.FLOAT;
-        case Xflow.DATA_TYPE.FLOAT2 : return XML3DDataResult.FLOAT2;
-        case Xflow.DATA_TYPE.FLOAT3 : return XML3DDataResult.FLOAT3;
-        case Xflow.DATA_TYPE.FLOAT4 : return XML3DDataResult.FLOAT4;
-        case Xflow.DATA_TYPE.FLOAT4X4 : return XML3DDataResult.FLOAT4X4;
-        case Xflow.DATA_TYPE.INT : return XML3DDataResult.INT;
-        case Xflow.DATA_TYPE.INT4 : return XML3DDataResult.INT4;
-        case Xflow.DATA_TYPE.BOOL : return XML3DDataResult.BOOL;
-        case Xflow.DATA_TYPE.TEXTURE : return XML3DDataResult.TEXTURE;
-        case Xflow.DATA_TYPE.BYTE : return XML3DDataResult.BYTE;
-        case Xflow.DATA_TYPE.UBYTE : return XML3DDataResult.UBYTE;
+        case XC.DATA_TYPE.FLOAT : return XML3DDataResult.FLOAT;
+        case XC.DATA_TYPE.FLOAT2 : return XML3DDataResult.FLOAT2;
+        case XC.DATA_TYPE.FLOAT3 : return XML3DDataResult.FLOAT3;
+        case XC.DATA_TYPE.FLOAT4 : return XML3DDataResult.FLOAT4;
+        case XC.DATA_TYPE.FLOAT4X4 : return XML3DDataResult.FLOAT4X4;
+        case XC.DATA_TYPE.INT : return XML3DDataResult.INT;
+        case XC.DATA_TYPE.INT4 : return XML3DDataResult.INT4;
+        case XC.DATA_TYPE.BOOL : return XML3DDataResult.BOOL;
+        case XC.DATA_TYPE.TEXTURE : return XML3DDataResult.TEXTURE;
+        case XC.DATA_TYPE.BYTE : return XML3DDataResult.BYTE;
+        case XC.DATA_TYPE.UBYTE : return XML3DDataResult.UBYTE;
         default: throw new Error("WHAT IS THIS I DON'T EVEN...");
     }
 }
@@ -162,7 +160,6 @@ var XML3DDataChannelInfo = function(type, origin, originalName, seqLength, seqMi
     this.seqMinKey = seqMinKey;
     this.seqMaxKey = seqMaxKey;
 };
-window.XML3DDataChannelInfo = XML3DDataChannelInfo;
 
 XML3DDataChannelInfo.ORIGIN_CHILD = 1;
 XML3DDataChannelInfo.ORIGIN_COMPUTE = 2;

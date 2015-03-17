@@ -1,12 +1,10 @@
 var RenderAdapterFactory = require("./adapter/factory.js");
-XML3D.base.xml3dFormatHandler.registerFactoryClass(RenderAdapterFactory);
+var xml3dFormatHandler = require("../../base/formathandler.js").xml3dFormatHandler;
 
-var factory = require("./renderer-factory");
+xml3dFormatHandler.registerFactoryClass(RenderAdapterFactory);
 
-/**
- *
- * @param {Element|Array.<Element>} xml3ds
- */
+var factory = require("./renderer-factory.js");
+
 var configure = function(xml3ds) {
     if (!(xml3ds instanceof Array))
         xml3ds = [xml3ds];
@@ -18,10 +16,4 @@ var configure = function(xml3ds) {
     });
 };
 
-module.exports = {
-    toString: function () {
-        return "renderer";
-    },
-    configure: configure
-
-};
+module.exports = configure;

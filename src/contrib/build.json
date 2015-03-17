@@ -1,4 +1,0 @@
-{
-  "module": "contrib",
-  "task" : "browserify"
-}

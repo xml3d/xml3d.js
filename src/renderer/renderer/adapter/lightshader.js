@@ -1,4 +1,6 @@
 var RenderAdapter = require("./base.js");
+var Events = require("../../../interface/notification.js");
+var Resource = require("../../../base/resourcemanager.js").Resource;
 
 /**
  * Adapter for <lightshader>
@@ -9,7 +11,7 @@ var RenderAdapter = require("./base.js");
  */
 var LightShaderRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
-    this.dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
+    this.dataAdapter = Resource.getAdapter(this.node, "data");
 };
 XML3D.createClass(LightShaderRenderAdapter, RenderAdapter, {
     getDataNode: function () {
@@ -24,11 +26,11 @@ XML3D.createClass(LightShaderRenderAdapter, RenderAdapter, {
         }
     }, notifyChanged: function (evt) {
         switch (evt.type) {
-            case XML3D.events.THIS_REMOVED:
+            case Events.THIS_REMOVED:
                 this.notifyOppositeAdapters();
                 break;
-            case XML3D.events.VALUE_MODIFIED:
-                this.notifyOppositeAdapters(XML3D.events.ADAPTER_VALUE_CHANGED);
+            case Events.VALUE_MODIFIED:
+                this.notifyOppositeAdapters(Events.ADAPTER_VALUE_CHANGED);
                 break;
         }
     }

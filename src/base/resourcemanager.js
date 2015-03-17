@@ -1,9 +1,12 @@
 "use strict";
 
 var AdapterHandle = require("./adapterhandle.js");
+var URIResolver = require("../utils/uri.js").URIResolver;
+var URI = require("../utils/uri.js").URI;
+var Options = require("../utils/options.js");
 
 var OPTION_RESOURCE_CORS = "resource-crossorigin-attribute";
-XML3D.options.register(OPTION_RESOURCE_CORS, "anonymous");
+Options.register(OPTION_RESOURCE_CORS, "anonymous");
 
 var c_cachedDocuments = {};
 var c_factories = {};
@@ -43,8 +46,7 @@ var findFormat = function(response, responseType, mimetype) {
 /**
  * @constructor
  */
-var ResourceManager = function() {
-};
+var Resource = {};
 
 function getCounterObject(canvasId) {
     return c_canvasIdCounters[canvasId];
@@ -80,7 +82,7 @@ function loadComplete(canvasId) {
     }
 }
 
-ResourceManager.prototype.isLoadComplete = function(canvasId) {
+Resource.isLoadComplete = function(canvasId) {
     var counterObject = getCounterObject(canvasId);
     return !counterObject || counterObject.counter == 0;
 };
@@ -92,7 +94,7 @@ ResourceManager.prototype.isLoadComplete = function(canvasId) {
  * @param {number} canvasId
  * @param {EventListener} listener
  */
-ResourceManager.prototype.addLoadCompleteListener = function(canvasId, listener) {
+Resource.addLoadCompleteListener = function(canvasId, listener) {
     var counterObject = getOrCreateCounterObject(canvasId);
 
     /*
@@ -114,7 +116,7 @@ ResourceManager.prototype.addLoadCompleteListener = function(canvasId, listener)
  * @param {number} canvasId
  * @param {function} listener
  */
-ResourceManager.prototype.removeLoadCompleteListener = function(canvasId, listener) {
+Resource.removeLoadCompleteListener = function(canvasId, listener) {
     var counterObject = getCounterObject(canvasId);
     if (counterObject) {
         var idx = counterObject.listeners.indexOf(listener);
@@ -129,13 +131,13 @@ function stringEndsWithSuffix(str, suffix) {
 }
 
 //noinspection JSUnusedGlobalSymbols
-ResourceManager.prototype.addBinaryContentType = function(type) {
+Resource.addBinaryContentType = function(type) {
     if (c_binaryContentTypes.indexOf(type) == -1)
         c_binaryContentTypes.push(type);
 };
 
 //noinspection JSUnusedGlobalSymbols
-ResourceManager.prototype.removeBinaryContentType = function(type) {
+Resource.removeBinaryContentType = function(type) {
     var idx = c_binaryContentTypes.indexOf(type);
     if (idx != -1)
         c_binaryContentTypes.splice(idx, 1);
@@ -150,13 +152,13 @@ function isBinaryContentType(contentType) {
     return false;
 }
 
-ResourceManager.prototype.addBinaryExtension = function(extension) {
+Resource.addBinaryExtension = function(extension) {
     if (c_binaryExtensions.indexOf(extension) == -1)
         c_binaryExtensions.push(extension);
 };
 
 //noinspection JSUnusedGlobalSymbols
-ResourceManager.prototype.removeBinaryExtension = function(extension) {
+Resource.removeBinaryExtension = function(extension) {
     var idx = c_binaryExtensions.indexOf(extension);
     if (idx != -1)
         c_binaryExtensions.splice(idx, 1);
@@ -456,11 +458,11 @@ function clearHandles(url) {
  * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
  * @returns {URI} The (sometimes) absolute URI
  */
-ResourceManager.prototype.getAbsoluteURI = function(baseURI, uri){
+Resource.getAbsoluteURI = function(baseURI, uri){
     if (!uri)
         return null;
 
-    if (typeof uri == "string") uri = new XML3D.URI(uri);
+    if (typeof uri == "string") uri = new URI(uri);
     if (baseURI != document.URL || !uri.isLocal()) {
         uri = uri.getAbsoluteURI(baseURI);
     }
@@ -478,9 +480,9 @@ ResourceManager.prototype.getAbsoluteURI = function(baseURI, uri){
  * @param {number=} canvasId Id of GLCanvasHandler handler this adapter depends on, 0 if not depending on any GLCanvasHandler
  * @returns {?AdapterHandle} The requested AdapterHandler. Note: might be null
  */
-ResourceManager.prototype.getAdapterHandle = function(baseURI, uri, adapterType, canvasId) {
+Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId) {
     canvasId = canvasId || 0;
-    uri = this.getAbsoluteURI(baseURI, uri);
+    uri = Resource.getAbsoluteURI(baseURI, uri);
 
     if (!uri)
         return null;
@@ -500,9 +502,9 @@ ResourceManager.prototype.getAdapterHandle = function(baseURI, uri, adapterType,
     c_cachedAdapterHandles[uri][adapterType][canvasId] = handle;
 
     if (uri.isLocal()) {
-        var node = XML3D.URIResolver.resolveLocal(uri);
+        var node = URIResolver.resolveLocal(uri);
         if (node)
-            updateHandle(handle, adapterType, canvasId, XML3D.base.xml3dFormatHandler, node);
+            updateHandle(handle, adapterType, canvasId, XML3D.xml3dFormatHandler, node);
         else
             handle.setAdapter(null, AdapterHandle.STATUS.NOT_FOUND);
     }
@@ -535,8 +537,8 @@ ResourceManager.prototype.getAdapterHandle = function(baseURI, uri, adapterType,
  * @param canvasId
  * @return {XML3D.base.Adapter?}
  */
-ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId) {
-    var factory = XML3D.base.xml3dFormatHandler.getFactory(adapterType, canvasId);
+Resource.getAdapter = function(node, adapterType, canvasId) {
+    var factory = XML3D.xml3dFormatHandler.getFactory(adapterType, canvasId);
     if (factory) {
         return factory.getAdapter(node);
     }
@@ -550,7 +552,7 @@ ResourceManager.prototype.getAdapter = function(node, adapterType, canvasId) {
  * @param {string} previousId Previous id of element
  * @param {string} newId New id of element
  */
-ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId) {
+Resource.notifyNodeIdChange = function(node, previousId, newId) {
     var parent = node;
     while (parent.parentNode) parent = parent.parentNode;
     if (parent != window.document)
@@ -561,7 +563,7 @@ ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId)
         clearHandles("#" + previousId);
     }
     if (newId) {
-        updateMissingHandles("#" + newId, XML3D.base.xml3dFormatHandler, node, true);
+        updateMissingHandles("#" + newId, XML3D.xml3dFormatHandler, node, true);
     }
 };
 
@@ -571,9 +573,9 @@ ResourceManager.prototype.notifyNodeIdChange = function(node, previousId, newId)
  * @param {Element} element Element of AdapterHandler. Must be from window.document
  * @param {Object} adapterType Type/Aspect of AdapterHandler (e.g. XML3D.data or XML3D.webgl)
  * @param {number} canvasId GLCanvasHandler id of AdapterHandler, 0 if not depending on GLCanvasHandler
- * @param {number} type Type of Notification. Usually XML3D.events.ADAPTER_HANDLE_CHANGED
+ * @param {number} type Type of Notification. Usually Events.ADAPTER_HANDLE_CHANGED
  */
-ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterType, canvasId, type) {
+Resource.notifyNodeAdapterChange = function(element, adapterType, canvasId, type) {
     canvasId = canvasId || 0;
     var uri = "#" + element.id;
     if (c_cachedAdapterHandles[uri] && c_cachedAdapterHandles[uri][adapterType] &&
@@ -590,7 +592,7 @@ ResourceManager.prototype.notifyNodeAdapterChange = function(element, adapterTyp
  * @param {function(object)} loadListener Gets the response of the XHR
  * @param {function(XMLHttpRequest)} errorListener Get the XHR object for further analysis
  */
-ResourceManager.prototype.loadData = function(url, loadListener, errorListener) {
+Resource.loadData = function(url, loadListener, errorListener) {
     var xmlHttp = null;
     try {
         xmlHttp = new XMLHttpRequest();
@@ -681,14 +683,14 @@ ResourceManager.prototype.loadData = function(url, loadListener, errorListener) 
 /**
  * This function is called to load an Image.
  *
- * @param {XML3D.URI} uri Image URI
+ * @param {URI} uri Image URI
  * @param {function(Event, HTMLImageElement)} loadListener Function called when image was successfully loaded.
  *                                It will be called with event as the first and image as the second parameter.
  * @param {function(Event, HTMLImageElement)} errorListener Function called when image could not be loaded.
  *                                 It will be called with event as the first and image as the second parameter.
  * @return {HTMLImageElement}
  */
-ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) {
+Resource.getImage = function(uri, loadListener, errorListener) {
     // we use canvasId 0 to represent images loaded in a document
     getOrCreateCounterObject(0).counter++;
 
@@ -702,7 +704,7 @@ ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) 
         loadComplete(0);
     };
     if(!uri.hasSameOrigin(document.location.href)) {
-        image.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
+        image.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
         XML3D.debug.logWarning("You are using an cross-origin image as texture. This might cause troubles cause the canvas is 'tainted'.")
     }
 
@@ -714,14 +716,14 @@ ResourceManager.prototype.getImage = function(uri, loadListener, errorListener) 
 /**
  * This function is called to load a Video.
  *
- * @param {XML3D.URI} uri Video URI
+ * @param {URI} uri Video URI
  * @param {boolean} autoplay
  * @param {boolean} loop
  * @param {Object} listeners  Dictionary of all listeners to register with video element.
  *                            Listeners will be called with event as the first and video as the second parameter.
  * @return {HTMLVideoElement}
  */
-ResourceManager.prototype.getVideo = function(uri, autoplay, loop, listeners) {
+Resource.getVideo = function(uri, autoplay, loop, listeners) {
     // we use canvasId 0 to represent videos loaded in a document
     getOrCreateCounterObject(0).counter++;
 
@@ -735,7 +737,7 @@ ResourceManager.prototype.getVideo = function(uri, autoplay, loop, listeners) {
     };
 
     if (!uri.hasSameOrigin(document.location.href)) {
-        video.crossOrigin = XML3D.options.getValue(OPTION_RESOURCE_CORS);
+        video.crossOrigin = Options.getValue(OPTION_RESOURCE_CORS);
         XML3D.debug.logWarning("You are using an cross-origin video as texture. This might cause troubles cause the canvas is 'tainted'.", uri)
     }
 
@@ -763,5 +765,5 @@ module.exports = {
     registerFactory: registerFactory,
     registerFormat: registerFormat,
     findFormat: findFormat,
-    ResourceManager: ResourceManager
+    Resource: Resource
 };

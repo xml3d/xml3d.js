@@ -1,6 +1,13 @@
-var AbstractShaderComposer = require("../abstractshadercomposer").AbstractShaderComposer;
-var URNShaderClosure= require("./urnshaderclosure");
-var ShaderDescriptor = require("./shader-descriptor");
+var AbstractShaderComposer = require("../abstractshadercomposer.js").AbstractShaderComposer;
+var URNShaderClosure= require("./urnshaderclosure.js");
+var ShaderDescriptor = require("./shader-descriptor.js");
+var ComputeRequest = require("../../../../xflow/interface/request.js").ComputeRequest;
+var addFragmentShaderHeader = require("../../shader/shader-utils.js").addFragmentShaderHeader;
+require("./diffuse.js");
+require("./phong.js");
+require("./matte.js");
+require("./point.js");
+require("./utility.js");
 
 /**
  * @param {string} path
@@ -35,7 +42,7 @@ XML3D.createClass(URNShaderComposer, AbstractShaderComposer, {
         if (this.descriptor) {
             materialConfiguration.dataNode && this.updateRequest(materialConfiguration.dataNode);
 
-            this.descriptor.fragment = XML3D.webgl.addFragmentShaderHeader(this.descriptor.fragment);
+            this.descriptor.fragment = addFragmentShaderHeader(this.descriptor.fragment);
         }
     },
 
@@ -79,7 +86,7 @@ XML3D.createClass(URNShaderComposer, AbstractShaderComposer, {
         requestNames.push.apply(requestNames, Object.keys(this.descriptor.attributes));
         requestNames.push.apply(requestNames, Object.keys(this.descriptor.uniforms));
         requestNames.push.apply(requestNames, Object.keys(this.descriptor.samplers));
-        return new Xflow.ComputeRequest(objectDataNode, requestNames, callback);
+        return new ComputeRequest(objectDataNode, requestNames, callback);
     },
 
     distributeObjectShaderData: function (objectRequest, attributeCallback, uniformCallback) {

@@ -1,5 +1,6 @@
 var TransformableAdapter = require("./transformable.js");
 var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
+var Events = require("../../../interface/notification.js");
 
 var ViewRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, false);
@@ -41,10 +42,10 @@ p.getWorldMatrix = function () {
 
 p.notifyChanged = function (evt) {
     switch (evt.type) {
-        case XML3D.events.THIS_REMOVED:
+        case Events.THIS_REMOVED:
             this.dispose();
             break;
-        case XML3D.events.VALUE_MODIFIED:
+        case Events.VALUE_MODIFIED:
             var target = evt.mutation.attributeName;
 
             switch (target) {

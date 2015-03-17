@@ -1,4 +1,4 @@
-var GLCubeMap = require("./cubemap");
+var GLCubeMap = require("./cubemap.js");
 
 /**
  * @interface

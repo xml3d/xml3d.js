@@ -1,6 +1,11 @@
-var DataAdapter = require("./data");
+var DataAdapter = require("./data.js");
+var Events = require("../../interface/notification.js");
+var URI = require("../../utils/uri.js").URI;
+var Util = require("../../utils/misc.js");
+
+var Resource = require("../../base/resourcemanager.js").Resource;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;
-var NodeAdapter = XML3D.base.NodeAdapter;
     /**
      * SinkDataAdapter represents the sink in the data hierarchy (no parents).
      * @constructor
@@ -47,7 +52,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
      */
     ImgDataAdapter.prototype.createImageFromURL = function(url) {
         var that = this;
-        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
+        var uri = new URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
         var onload = function (e, image) {
             if (that.textureEntry) {
                 that.textureEntry.setImage(image, true);
@@ -56,7 +61,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
         var onerror = function (e, image) {
             XML3D.debug.logError("Could not load image URI="+image.src);
         };
-        this.image = XML3D.base.resourceManager.getImage(uri, onload, onerror);
+        this.image = Resource.getImage(uri, onload, onerror);
         if (that.textureEntry) {
             that.textureEntry.setImage(this.image, true);
         }
@@ -73,7 +78,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
     };
 
     ImgDataAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.VALUE_MODIFIED) {
+        if (evt.type == Events.VALUE_MODIFIED) {
             var attr = evt.mutation.attributeName;
             if(attr == "src"){
                 this.createImageFromURL(this.node.src);
@@ -113,21 +118,21 @@ var NodeAdapter = XML3D.base.NodeAdapter;
      */
     VideoDataAdapter.prototype.createVideoFromURL = function(url) {
         var that = this;
-        var uri = new XML3D.URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
-        this.video = XML3D.base.resourceManager.getVideo(uri, this.node.autoplay, this.node.loop,
+        var uri = new URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
+        this.video = Resource.getVideo(uri, this.node.autoplay, this.node.loop,
             {
                 canplay : function(event, video) {
-                    XML3D.util.dispatchCustomEvent(that.node, 'canplay', true, true, null);
+                    Util.dispatchCustomEvent(that.node, 'canplay', true, true, null);
                     that._startVideoRefresh();
                 },
                 ended : function(event, video) {
-                    XML3D.util.dispatchCustomEvent(that.node, 'ended', true, true, null);
+                    Util.dispatchCustomEvent(that.node, 'ended', true, true, null);
                 },
                 load : function(event, video) {
-                    XML3D.util.dispatchEvent(that.node, 'load');
+                    Util.dispatchEvent(that.node, 'load');
                 },
                 error : function(event, video) {
-                    XML3D.util.dispatchCustomEvent(that.node, 'error', true, true, null);
+                    Util.dispatchCustomEvent(that.node, 'error', true, true, null);
                     XML3D.debug.logError("Could not load video URI="+video.src);
                 }
             }
@@ -153,7 +158,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
 
     VideoDataAdapter.prototype._tick = function() {
         this._ticking = true;
-        window.requestAnimFrame(this._boundTick, XML3D.webgl.MAXFPS);
+        window.requestAnimFrame(this._boundTick, 30);
         // FIXME Do this only when currentTime is changed (what about webcam ?)
         if (this.textureEntry) {
             this.textureEntry.setImage(this.video);
@@ -171,7 +176,7 @@ var NodeAdapter = XML3D.base.NodeAdapter;
     };
 
     VideoDataAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == XML3D.events.VALUE_MODIFIED) {
+        if (evt.type == Events.VALUE_MODIFIED) {
             var attr = evt.mutation.attributeName;
             if(attr == "src"){
                 this.createVideoFromURL(this.node.src);

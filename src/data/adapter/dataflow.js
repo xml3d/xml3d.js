@@ -1,4 +1,8 @@
-var BaseDataAdapter = require("./base");
+var BaseDataAdapter = require("./base.js");
+var DataNode = require("../../xflow/interface/graph.js").DataNode;
+var XC = require("../../xflow/interface/constants.js");
+var Events = require("../../interface/notification.js");
+var AdapterHandle = require("../../base/adapterhandle.js");
 
 /**
  * DataAdapter handling a <dataflow> element
@@ -14,7 +18,7 @@ var DataflowDataAdapter = function (factory, node) {
 XML3D.createClass(DataflowDataAdapter, BaseDataAdapter);
 
 DataflowDataAdapter.prototype.init = function () {
-    this.xflowDataNode = new Xflow.DataNode(false);
+    this.xflowDataNode = new DataNode(false);
     this.dataflowRefs = [];
     updateDataflowXflowNode(this, this.node);
 };
@@ -27,7 +31,7 @@ DataflowDataAdapter.prototype.updateAdapterHandle = function(key, url) {
 
     if(oldAdapterHandle == adapterHandle)
         return;
-    if (status === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+    if (status === AdapterHandle.STATUS.NOT_FOUND) {
         XML3D.debug.logError("Could not find element of url '" + adapterHandle.url + "' for " + key, this.node);
     }
     this.connectAdapterHandle(key, adapterHandle);
@@ -39,29 +43,29 @@ DataflowDataAdapter.prototype.updateAdapterHandle = function(key, url) {
  * @param evt notification of type XML3D.Notification
  */
 DataflowDataAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type === XML3D.events.ADAPTER_HANDLE_CHANGED) {
+    if (evt.type === Events.ADAPTER_HANDLE_CHANGED) {
         //TODO: Handle ADAPTER_HANDLE_CHANGED
         if (this.externalScripts[evt.key]) {
             window.eval(evt.adapter.script);
             setLoadingStateForMatchingXflowNodes(this.xflowDataNode, evt.key, false);
-            this.xflowDataNode.notify(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+            this.xflowDataNode.notify(XC.RESULT_STATE.CHANGED_STRUCTURE);
         }
     }
 
     switch (evt.type) {
-        case XML3D.events.ADAPTER_HANDLE_CHANGED:
+        case Events.ADAPTER_HANDLE_CHANGED:
             this.connectedAdapterChanged(evt.key, evt.adapter, evt.handleStatus);
-            if (evt.handleStatus === XML3D.base.AdapterHandle.STATUS.NOT_FOUND) {
+            if (evt.handleStatus === AdapterHandle.STATUS.NOT_FOUND) {
                 XML3D.debug.logError("Could not find dataflow of url '" + evt.url, this.node);
             }
             break;
 
-        case XML3D.events.NODE_INSERTED:
-        case XML3D.events.NODE_REMOVED:
+        case Events.NODE_INSERTED:
+        case Events.NODE_REMOVED:
             updateDataflowXflowNode(this);
             break;
 
-        case XML3D.events.VALUE_MODIFIED:
+        case Events.VALUE_MODIFIED:
             var attr = evt.mutation.attributeName;
             if (attr === "out") {
                 updateDataflowOut(this);
@@ -77,7 +81,7 @@ DataflowDataAdapter.prototype.notifyChanged = function (evt) {
  * all nodes with a compute operator that relies on the matching external script name.
  * A compute node will only be executed if its loading state is 'false' and none of its children are 'loading', so
  * this ensures we don't do the compute operations until the external operators have been loaded.
- * @param {Xflow.DataNode} node the current node to check for instances of the given operator
+ * @param {DataNode} node the current node to check for instances of the given operator
  * @param {string} name the name of the external operator to check for
  * @param {boolean} loading whether the operator has finished loading or not
  */
@@ -101,7 +105,7 @@ DataflowDataAdapter.prototype.connectedAdapterChanged = function (key, adapter, 
     var xflowNode = this.dataflowRefs[key];
     if (xflowNode) {
         xflowNode.dataflowNode = adapter ? adapter.getXflowNode() : null;
-        xflowNode.setLoading(status === XML3D.base.AdapterHandle.STATUS.LOADING);
+        xflowNode.setLoading(status === AdapterHandle.STATUS.LOADING);
     }
 };
 
@@ -155,7 +159,7 @@ function updateDataflowXflowNode(adapter, node) {
                 if (firstNode) {
                     firstNode = false;
                 } else {
-                    xflowNode = new Xflow.DataNode(false);
+                    xflowNode = new DataNode(false);
                     if (prevNode) {
                         currentNode.insertBefore(xflowNode, prevNode);
                     } else {

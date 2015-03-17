@@ -1,4 +1,5 @@
 var GLContext = require("../base/context.js");
+var XC = require("../../../xflow/interface/constants.js");
 
 function convertToJSArray(value) {
     var jsArray = [value.length];
@@ -78,7 +79,7 @@ module.exports = {
         var value;
         if (!xflowDataEntry)
             return null;
-        if (xflowDataEntry.type == Xflow.DATA_TYPE.TEXTURE) {
+        if (xflowDataEntry.type == XC.DATA_TYPE.TEXTURE) {
             var webglData = context.getXflowEntryWebGlData(xflowDataEntry);
             var texture = webglData.texture || context.createTexture();
             if (webglData.changed)
@@ -87,7 +88,7 @@ module.exports = {
             webglData.texture = texture;
             webglData.changed = 0;
             value = [texture];
-        } else if (xflowDataEntry.type == Xflow.DATA_TYPE.BOOL) {
+        } else if (xflowDataEntry.type == XC.DATA_TYPE.BOOL) {
             //TODO Can we get Xflow to return boolean arrays as normal JS arrays? WebGL doesn't accept Uint8Arrays here...
             //TODO Alternatively we could set boolean uniforms using uniform1fv together with Float32Arrays, which apparently works too
             value = convertToJSArray(xflowDataEntry.getValue());
@@ -118,7 +119,7 @@ module.exports = {
 
         //noinspection FallthroughInSwitchStatementJS
         switch (webglData.changed) {
-            case Xflow.DATA_ENTRY_STATE.CHANGED_VALUE:
+            case XC.DATA_ENTRY_STATE.CHANGED_VALUE:
                 if (elementBuffer) {
                     var bufferData = xflowDataEntry.getValue();
                     switch (buffer.glType) {
@@ -142,9 +143,9 @@ module.exports = {
                     gl.bufferSubData(gl.ARRAY_BUFFER, 0, xflowDataEntry.getValue());
                 }
                 break;
-            case Xflow.DATA_ENTRY_STATE.CHANGED_NEW:
-            case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE:
-            case Xflow.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE:
+            case XC.DATA_ENTRY_STATE.CHANGED_NEW:
+            case XC.DATA_ENTRY_STATE.CHANGED_SIZE:
+            case XC.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE:
                 if (elementBuffer) {
                     buffer = createElementBuffer(context, xflowDataEntry.getValue(), webglData.maxIndex);
                 } else {

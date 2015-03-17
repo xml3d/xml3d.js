@@ -1,3 +1,7 @@
+var ComputeRequest = require("../xflow/interface/request.js").ComputeRequest;
+var Events = require("../interface/notification.js");
+var CSS = require("../utils/css.js");
+
 var DOMTransformFetcher = function (owner, attrName, dataName, onlyDataTransform) {
     this.owner = owner;
     this.node = owner.node;
@@ -33,16 +37,16 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
     var IDENTITY = XML3D.math.mat4.create();
     return function () {
         if (!this.onlyDataTransform) {
-            var cssMatrix = XML3D.css.getCSSMatrix(this.node);
+            var cssMatrix = CSS.getCSSMatrix(this.node);
             if (cssMatrix) {
-                return XML3D.css.convertCssToMat4(cssMatrix);
+                return CSS.convertCssToMat4(cssMatrix);
             }
         }
         var adapter;
         if (this.adapterHandle && (adapter = this.adapterHandle.getAdapter())) {
             if (adapter.getXflowNode) {
                 if (!this.xflowRequest)
-                    this.xflowRequest = new Xflow.ComputeRequest(adapter.getXflowNode(), [this.dataName], this._bindedCallback);
+                    this.xflowRequest = new ComputeRequest(adapter.getXflowNode(), [this.dataName], this._bindedCallback);
                 var dataResult = this.xflowRequest.getResult();
                 var transformData = (dataResult.getOutputData(this.dataName) && dataResult.getOutputData(this.dataName).getValue());
                 if (transformData)
@@ -57,7 +61,7 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
 }());
 
 DOMTransformFetcher.prototype._onChange = function (evt) {
-    if (evt.type == XML3D.events.ADAPTER_VALUE_CHANGED) {
+    if (evt.type == Events.ADAPTER_VALUE_CHANGED) {
         this.owner.onTransformChange(this.attrName, evt.adapterHandle.getAdapter().getMatrix());
     } else { // If the adapter changed, we need to re-evaluate the matrix
         this.updateMatrix();

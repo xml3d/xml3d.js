@@ -1,9 +1,10 @@
 var printStackTrace = require("../contrib/stacktrace-0.4.js");
+var Options = require("./options.js");
 
 (function (ns) {
 
     var OPTION_LOGLEVEL = "loglevel";
-    XML3D.options.register(OPTION_LOGLEVEL, "warning");
+    Options.register(OPTION_LOGLEVEL, "warning");
 
     ns.exports = {
         ALL: 0,
@@ -28,8 +29,8 @@ var printStackTrace = require("../contrib/stacktrace-0.4.js");
             var debug = XML3D.debug;
             if (!debug.isSetup) {
                 debug.isSetup = true;
-                debug.loglevel = debug.loglevels[XML3D.options.getValue(OPTION_LOGLEVEL)] || 3;
-                XML3D.options.addObserver(function(key, value) {
+                debug.loglevel = debug.loglevels[Options.getValue(OPTION_LOGLEVEL)] || 3;
+                Options.addObserver(function(key, value) {
                     if(key == OPTION_LOGLEVEL) {
                         debug.loglevel = debug.loglevels[value] || 3;
                     }
@@ -125,4 +126,4 @@ var printStackTrace = require("../contrib/stacktrace-0.4.js");
         }
     };
 
-}(module))
+}(module));

@@ -1,4 +1,5 @@
 var Base = require("../base.js");
+require("../../utils/array.js");
 
 var queueResultCallback = Base._queueResultCallback;
 

@@ -11,4 +11,3 @@ module.exports = {
         return c_globalScripts[script];
     }
 };
-

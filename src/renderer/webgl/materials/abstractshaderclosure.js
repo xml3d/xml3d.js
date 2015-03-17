@@ -1,5 +1,5 @@
-var GLProgramObject = require("../base/program");
-var XflowUtils= require("../xflow/utils");
+var GLProgramObject = require("../base/program.js");
+var XflowUtils= require("../xflow/utils.js");
 
 /**
  * A ShaderClosure connects a mesh-specific GLProgram with it's Xflow data

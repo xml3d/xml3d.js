@@ -1,5 +1,6 @@
-var Base = require("../base");
-var C = require("./constants");
+var Base = require("../base.js");
+var C = require("./constants.js");
+require("../../utils/array.js");
 
 /**
  * Content of this file:

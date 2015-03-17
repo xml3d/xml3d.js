@@ -1,4 +1,4 @@
-var C =require("../interface/constants");
+var C =require("../interface/constants.js");
 
 /**
  * CLProgram implements automatic Xflow input/output adaptive WebCL kernel and application code generation.

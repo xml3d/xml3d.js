@@ -1,5 +1,6 @@
+var Events = require("../../interface/notification.js");
 var createClass = XML3D.createClass;
-var NodeAdapter = XML3D.base.NodeAdapter;
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
 var ScriptDataAdapter = function(factory, node) {
     NodeAdapter.call(this, factory, node);
@@ -25,13 +26,13 @@ ScriptDataAdapter.prototype.getScript = function(){
 
 ScriptDataAdapter.prototype.notifyChanged = function(evt) {
     switch(evt.type){
-        case XML3D.events.VALUE_MODIFIED:
-        case XML3D.events.NODE_INSERTED:
-        case XML3D.events.NODE_REMOVED:
+        case Events.VALUE_MODIFIED:
+        case Events.NODE_INSERTED:
+        case Events.NODE_REMOVED:
             this.notifyOppositeAdapters();
             break;
 
-        case XML3D.events.ADAPTER_HANDLE_CHANGED:
+        case Events.ADAPTER_HANDLE_CHANGED:
             this.externalScript = evt.adapter.script;
             this.notifyOppositeAdapters();
             break;

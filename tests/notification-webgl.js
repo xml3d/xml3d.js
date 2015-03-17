@@ -1,6 +1,6 @@
 
 function NotifyingAdapterFactory() {
-    XML3D.base.NodeAdapterFactory.call(this, "test");
+    XML3DTestLib.Adapter.NodeAdapterFactory.call(this, "test");
     var that = this;
     this.name = "test";
     this.event = null;
@@ -15,7 +15,8 @@ function NotifyingAdapterFactory() {
         };
     };
 };
-XML3D.createClass(NotifyingAdapterFactory, XML3D.base.NodeAdapterFactory);
+XML3D.createClass(NotifyingAdapterFactory, XML3DTestLib.Adapter.NodeAdapterFactory);
+var Events = XML3DTestLib.Events;
 
 module("Element notification tests", {
     factory : new NotifyingAdapterFactory()
@@ -35,7 +36,7 @@ test("Event attribute notification tests", 7, function() {
     var evt = this.factory.event;
     //console.dir(evt);
     ok(evt, "Event has been thrown"); // 3
-    ok(evt instanceof XML3D.events.NotificationWrapper, "Type is NotificationWrapper"); // 4
+    ok(evt.toString().match(/NotificationWrapper/), "Type is NotificationWrapper"); // 4
     ok(evt.mutation, "DOM notification is wrapped"); // 5
     equal(evt.mutation.attributeName, "onclick", "MutationEvent::attrName set"); // 6
     e.onclick = function() {}; // Adapter Notified (Not anymore!)
@@ -169,7 +170,7 @@ test("DOMCharacterDataModified notification", 6, function() {
     equal(pos.value.length, 12);
     pos.textContent = pos.textContent.substr(5);
     equal(pos.value.length, 11);
-    equal(this.factory.event.type, XML3D.events.VALUE_MODIFIED);
+    equal(this.factory.event.type, Events.VALUE_MODIFIED);
 
 });
 
@@ -180,7 +181,7 @@ test("Text DOMNodeInserted notification", 8, function() {
     this.factory.getAdapter(index);
     index.appendChild(this.doc.createTextNode(" 0 1 2")); // 3: Adapter notified: Notification (type:1)
     equal(index.value.length, 9, "Length of typed array after text node has been inserted"); // 4
-    equal(this.factory.event.type, XML3D.events.VALUE_MODIFIED, "Notification of type VALUE_MODIFIED"); // 5
+    equal(this.factory.event.type, Events.VALUE_MODIFIED, "Notification of type VALUE_MODIFIED"); // 5
 
     var pos = this.doc.getElementById("positions");
     this.factory.getAdapter(pos);

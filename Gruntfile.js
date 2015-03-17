@@ -22,16 +22,7 @@ exports = module.exports = function (grunt) {
 
         moduleFiles: [
                     "LICENSE",
-                    "src/xml3d.js",
-                    "<%= dirs.modules %>/xml3d-utils-module.js",
-                    "<%= dirs.modules %>/xml3d-contrib-module.js",
-                    "<%= dirs.modules %>/xml3d-math-module.js",
-                    "<%= dirs.modules %>/xml3d-types-module.js",
-                    "<%= dirs.modules %>/xml3d-base-module.js",
-                    "<%= dirs.modules %>/xml3d-interface-module.js",
-                    "<%= dirs.modules %>/xml3d-xflow-module.js",
-                    "<%= dirs.modules %>/xml3d-asset-module.js",
-                    "<%= dirs.modules %>/xml3d-renderer-module.js"
+                    "<%= buildDir %>/xml3d.js"
                 ],
 
         releaseName: "<%= buildDir %>/xml3d<%= version.number %>.js",
@@ -46,7 +37,7 @@ exports = module.exports = function (grunt) {
             options: {
                 process: function(src, filepath) {
                     switch (filepath) {
-                        case "src/xml3d.js": return src.replace('%VERSION%', grunt.config.get("version.dev") );
+                        case "build/output/xml3d.js": return src.replace('%VERSION%', grunt.config.get("version.dev") );
                         case "LICENSE": return "/**\n" + src + "\n@version: " + grunt.config.get("version.dev") +"\n**/";
                         default: return src;
                     }
@@ -67,6 +58,24 @@ exports = module.exports = function (grunt) {
                     browserifyOptions: {
                         debug: true,
                         standalone: "XML3DTestLib"
+                    }
+                }
+            },
+            "dev": {
+                src: "./src/xml3d.js",
+                dest: "./build/output/xml3d.js",
+                options: {
+                    browserifyOptions: {
+                        debug: true
+                    }
+                }
+            },
+            release: {
+                src: "./src/xml3d.js",
+                dest: "./build/output/xml3d.js",
+                options: {
+                    browserifyOptions: {
+                        debug: false
                     }
                 }
             }
@@ -131,7 +140,6 @@ exports = module.exports = function (grunt) {
 
     var shouldPublish = grunt.option('publish');
     if (shouldPublish) {
-        console.log("Here")
         grunt.config.merge({
             version: {
                 number: "-<%= pkg.version %>",
@@ -150,9 +158,12 @@ exports = module.exports = function (grunt) {
     builds.push("concat:dist");
 
     grunt.registerTask("testlib", "browserify:testlib");
+    grunt.registerTask("xml3ddev", "browserify:dev");
+    grunt.registerTask("xml3drelease", "browserify:release");
     grunt.registerTask("merge", builds);
-    grunt.registerTask("dev", ["merge"]);
-    grunt.registerTask("min", ["merge", "closure-compiler"]);
+    grunt.registerTask("dev", ["xml3ddev"]);
+    grunt.registerTask("release", ["xml3drelease", "merge"]);
+    grunt.registerTask("min", ["release", "closure-compiler"]);
     grunt.registerTask("default", ["dev", "testlib"]);
     grunt.registerTask("continuous", ["dev", "min", "testlib"]);
     grunt.registerTask("testserver", ["connect:server:keepalive"]);
@@ -161,6 +172,6 @@ exports = module.exports = function (grunt) {
         if (!grunt.option('publish')) { // Be sure to specify the target
             grunt.warn('Set publish flag to continue.');
         }
-        grunt.task.run("clean:output", "merge", "closure-compiler");
+        grunt.task.run("clean:output", "dev", "closure-compiler");
     });
 };

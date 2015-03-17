@@ -1,3 +1,5 @@
+require("../../../utils/array.js");
+
 module.exports = {
     /**
      * Set uniforms for active program
@@ -137,6 +139,15 @@ module.exports = {
             if (text !== undefined)
                 msg += " " + text;
             XML3D.debug.trace(msg);
+        }
+    },
+
+    supported: function () {
+        var canvas = document.createElement("canvas");
+        try {
+            return !!(window.WebGLRenderingContext && (canvas.getContext('experimental-webgl')));
+        } catch (e) {
+            return false;
         }
     }
 

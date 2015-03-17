@@ -74,8 +74,4 @@ p.toString = function() {
     return "[object XML3DRay]";
 };
 
-window.XML3DRay = XML3DRay;
-
-module.exports = {
-    XML3DRay: XML3DRay
-};
+module.exports = XML3DRay;

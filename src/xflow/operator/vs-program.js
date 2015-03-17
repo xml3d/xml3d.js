@@ -1,5 +1,5 @@
 var Base = require("../base.js");
-var C = require("../interface/constants");
+var C = require("../interface/constants.js");
 var Utils = require("../utils/utils.js");
 var VertexShader = require("../interface/vs-connect.js").VertexShader;
 

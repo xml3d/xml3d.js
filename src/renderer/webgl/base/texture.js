@@ -1,5 +1,7 @@
-var utils = require("./utils");
+var utils = require("./utils.js");
 var StateMachine = require("../../../contrib/state-machine.js");
+var SamplerConfig = require("../../../xflow/interface/data.js").SamplerConfig;
+var XC = require("../../../xflow/interface/constants.js");
 var uniqueObjectId = utils.getUniqueCounter();
 
 var textures = 0;
@@ -10,7 +12,7 @@ var c_calls = 0;
  * @constructor
  */
 var GLTexture = function (context) {
-    Xflow.SamplerConfig.call(this);
+    SamplerConfig.call(this);
     this.setDefaults();
     this.id = uniqueObjectId();
 
@@ -20,7 +22,7 @@ var GLTexture = function (context) {
     this.handle = null;
     textures++;
 };
-XML3D.createClass(GLTexture, Xflow.SamplerConfig);
+XML3D.createClass(GLTexture, SamplerConfig);
 
 GLTexture.State = {
     NONE: "none", LOADING: "loading", READY: "ready", ERROR: "error"
@@ -90,15 +92,15 @@ var scaleImage = function (image, width, height) {
 
 var glTextureFormatFromXflow = function (format, gl) {
     switch (format) {
-        case Xflow.TEXTURE_FORMAT.ALPHA:
+        case XC.TEXTURE_FORMAT.ALPHA:
             return gl.ALPHA;
-        case Xflow.TEXTURE_FORMAT.RGB:
+        case XC.TEXTURE_FORMAT.RGB:
             return gl.RGB;
-        case Xflow.TEXTURE_FORMAT.RGBA:
+        case XC.TEXTURE_FORMAT.RGBA:
             return gl.RGBA;
-        case Xflow.TEXTURE_FORMAT.LUMINANCE:
+        case XC.TEXTURE_FORMAT.LUMINANCE:
             return gl.LUMINANCE;
-        case Xflow.TEXTURE_FORMAT.LUMINANCE_ALPHA:
+        case XC.TEXTURE_FORMAT.LUMINANCE_ALPHA:
             return gl.LUMINANCE_ALPHA;
         default:
             throw new Error("Unsupported Texture Format!");
@@ -107,15 +109,15 @@ var glTextureFormatFromXflow = function (format, gl) {
 
 var glTextureTypeFromXflow = function (type, gl) {
     switch (type) {
-        case Xflow.TEXTURE_TYPE.FLOAT:
+        case XC.TEXTURE_TYPE.FLOAT:
             return gl.FLOAT;
-        case Xflow.TEXTURE_TYPE.UBYTE:
+        case XC.TEXTURE_TYPE.UBYTE:
             return gl.UNSIGNED_BYTE;
-        case Xflow.TEXTURE_TYPE.USHORT_4_4_4_4:
+        case XC.TEXTURE_TYPE.USHORT_4_4_4_4:
             return gl.UNSIGNED_SHORT_4_4_4_4;
-        case Xflow.TEXTURE_TYPE.USHORT_5_5_5_1:
+        case XC.TEXTURE_TYPE.USHORT_5_5_5_1:
             return gl.UNSIGNED_SHORT_5_5_5_1;
-        case Xflow.TEXTURE_TYPE.USHORT_5_6_5:
+        case XC.TEXTURE_TYPE.USHORT_5_6_5:
             return gl.GL_UNSIGNED_SHORT_5_6_5;
         default:
             throw new Error("Unsupported Texture Type!");

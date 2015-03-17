@@ -1,4 +1,6 @@
 var TransformableAdapter = require("./transformable.js");
+var Events = require("../../../interface/notification.js");
+var Resource = require("../../../base/resourcemanager.js").Resource;
 
 /**
  * @constructor
@@ -11,7 +13,7 @@ var MeshRenderAdapter = function (factory, node) {
 XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
 
     createRenderNode: function () {
-        var dataAdapter = XML3D.base.resourceManager.getAdapter(this.node, "data");
+        var dataAdapter = Resource.getAdapter(this.node, "data");
 
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();
@@ -30,20 +32,20 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     },
 
     /**
-     * @param {XML3D.events.Notification} evt
+     * @param {Events.Notification} evt
      */
     notifyChanged: function (evt) {
         TransformableAdapter.prototype.notifyChanged.call(this, evt);
         switch (evt.type) {
-            case  XML3D.events.NODE_INSERTED:
+            case  Events.NODE_INSERTED:
                 return;
-            case XML3D.events.THIS_REMOVED:
+            case Events.THIS_REMOVED:
                 this.dispose();
                 return;
-            case XML3D.events.NODE_REMOVED:
+            case Events.NODE_REMOVED:
                 // this.createPerObjectData();
                 return;
-            case XML3D.events.VALUE_MODIFIED:
+            case Events.VALUE_MODIFIED:
                 this.valueChanged(evt.mutation);
         }
     }, /**

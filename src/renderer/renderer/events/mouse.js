@@ -1,7 +1,9 @@
+var Options = require("../../../utils/options.js");
+
 var OPTION_MOUSEMOVE_PICKING = "renderer-mousemove-picking";
 var OPTION_MOVEMENT_AWARE_CLICK_HANDLER = "renderer-movement-aware-click-handler";
-XML3D.options.register(OPTION_MOUSEMOVE_PICKING, true);
-XML3D.options.register(OPTION_MOVEMENT_AWARE_CLICK_HANDLER, false);
+Options.register(OPTION_MOUSEMOVE_PICKING, true);
+Options.register(OPTION_MOVEMENT_AWARE_CLICK_HANDLER, false);
 
 var EVENTS = ["click", "dblclick", "mousedown", "mouseup", "mouseover", "mousemove", "mouseout", "wheel"];
 
@@ -184,7 +186,7 @@ MouseEventHandler.prototype =  {
      * @param {MouseEvent} evt
      */
     click: function (evt) {
-        if (XML3D.options.getValue("renderer-movement-aware-click-handler") === true) {
+        if (Options.getValue("renderer-movement-aware-click-handler") === true) {
             var pos = this.getMousePosition(evt);
             if (Math.abs(pos.x - this._lastMousePosition.x) > 4 || Math.abs(pos.y - this._lastMousePosition.y) > 4)
                 return;
@@ -211,7 +213,7 @@ MouseEventHandler.prototype =  {
     mousemove: function (evt) {
         var pos = this.getMousePosition(evt);
 
-        var doMouseMovePick = XML3D.options.getValue(OPTION_MOUSEMOVE_PICKING);
+        var doMouseMovePick = Options.getValue(OPTION_MOUSEMOVE_PICKING);
 
         this.dispatchMouseEventOnPickedObject(evt, {omitUpdate: !doMouseMovePick});
         if (!doMouseMovePick)
@@ -261,7 +263,7 @@ MouseEventHandler.prototype =  {
      * @param {MouseEvent} evt
      */
     mouseover: function (evt) {
-        var doMouseMovePick = XML3D.options.getValue(OPTION_MOUSEMOVE_PICKING);
+        var doMouseMovePick = Options.getValue(OPTION_MOUSEMOVE_PICKING);
         this.dispatchMouseEventOnPickedObject(evt, {omitUpdate: !doMouseMovePick});
     },
 

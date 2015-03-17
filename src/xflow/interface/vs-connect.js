@@ -1,7 +1,7 @@
 var Base = require("../base.js");
-var C = require("./constants");
+var C = require("./constants.js");
 
-var initAnonymousOperator = require("../operator/operator").initAnonymousOperator;
+var initAnonymousOperator = require("../operator/operator.js").initAnonymousOperator;
 
 var shaderConstant = {}
 shaderConstant[C.SHADER_CONSTANT_KEY.OBJECT_ID] = "objectID";

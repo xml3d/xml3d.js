@@ -1,4 +1,8 @@
-var NodeAdapter = XML3D.base.NodeAdapter;
+var TextureEntry = require("../../xflow/interface/data.js").TextureEntry;
+var InputNode = require("../../xflow/interface/graph.js").InputNode;
+var XC = require("../../xflow/interface/constants.js");
+var Events = require("../../interface/notification.js");
+var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
 var clampToGL = function (modeStr) {
     if (modeStr == "clamp")
@@ -34,13 +38,13 @@ TextureDataAdapter.prototype.init = function () {
 
 TextureDataAdapter.prototype.createTextureEntry = function () {
     var node = this.node;
-    var entry = new Xflow.TextureEntry(null);
+    var entry = new TextureEntry(null);
     var config = entry.getSamplerConfig();
     config.wrapS = clampToGL(node.wrapS);
     config.wrapT = clampToGL(node.wrapT);
     config.minFilter = filterToGL(node.filterMin);
     config.magFilter = filterToGL(node.filterMag);
-    config.textureType = Xflow.TEX_TYPE.TEXTURE_2D;
+    config.textureType = XC.TEX_TYPE.TEXTURE_2D;
     config.generateMipMap = this.shouldGenerateMipMaps(config.minFilter, config.magFilter);
 
     var imageAdapter = this.factory.getAdapter(this.node.firstElementChild);
@@ -55,7 +59,7 @@ TextureDataAdapter.prototype.shouldGenerateMipMaps = function (minFilter, magFil
 };
 
 TextureDataAdapter.prototype.createXflowNode = function () {
-    var xnode = new Xflow.InputNode(null);
+    var xnode = new InputNode();
     xnode.name = this.node.name;
     xnode.paramName = this.node.param ? this.node.name : null;
     xnode.key = this.node.key;
@@ -77,7 +81,7 @@ TextureDataAdapter.prototype.getValue = function () {
 };
 
 TextureDataAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type == XML3D.events.VALUE_MODIFIED) {
+    if (evt.type == Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
         if (attr == "name") {
             this.xflowInputNode.name = this.node.name;

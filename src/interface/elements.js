@@ -1,5 +1,7 @@
 var events = require("./notification.js");
 var ClassInfo = require("./configuration.js").classInfo;
+require("../utils/array.js");
+var Resource = require("../base/resourcemanager.js").Resource;
 
 var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver),
     mutObserver;
@@ -95,7 +97,7 @@ function handleNodeRemoved(node, mutation) {
 }
 
 function notifyNodeIdChangeRecursive(element){
-    XML3D.base.resourceManager.notifyNodeIdChange(element, element.id, null);
+    Resource.notifyNodeIdChange(element, element.id, null);
     var n = element.firstElementChild;
     while(n) {
         notifyNodeIdChangeRecursive(n);
@@ -122,7 +124,7 @@ function addRecursive(element){
         n = n.nextElementSibling;
     }
     // We call this here in addition to nodeInsertedIntoDocument, since the later is not supported by Firefox
-    XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.id);
+    Resource.notifyNodeIdChange(element, null, element.id);
 }
 
 function handleAttributeChanged(mutation) {
@@ -364,7 +366,7 @@ config.element = function(element) {
 
             var n = element.firstElementChild;
 
-            XML3D.base.resourceManager.notifyNodeIdChange(element, null, element.getAttribute("id"));
+            Resource.notifyNodeIdChange(element, null, element.getAttribute("id"));
 
             while(n) {
                 config.element(n);
@@ -387,6 +389,8 @@ config.configure = function(element) {
         config.element(element);
     }
 };
+
+window.XML3D.config = config;
 
 
 module.exports = {

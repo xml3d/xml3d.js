@@ -1,6 +1,6 @@
 var Resource = require("../base/resourcemanager.js").Resource;
-var sendAdapterEvent = require("../base/adapter.js").sendAdapterEvent;
-var callAdapterFunc = require("../base/adapter.js").callAdapterFunc;
+var sendAdapterEvent = require("../utils/misc.js").sendAdapterEvent;
+var callAdapterFunc = require("../utils/misc.js").callAdapterFunc;
 
 var methods = {};
 

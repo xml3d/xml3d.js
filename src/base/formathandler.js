@@ -1,5 +1,6 @@
 var AdapterFactory = require("./adapter.js").AdapterFactory;
 var registerFormat = require("./resourcemanager.js").registerFormat;
+var config = require("../interface/elements.js").config;
 
 /**
  * A format handler is provide functionality for detecting format of resources
@@ -127,7 +128,7 @@ XML3DFormatHandler.prototype.getFormatData = function (response, responseType, m
     // Configure all xml3d elements:
     var xml3dElements = response.querySelectorAll("xml3d");
     for (var i = 0; i < xml3dElements.length; ++i) {
-        XML3D.config.element(xml3dElements[i]);
+        config.element(xml3dElements[i]);
     }
     callback(true, response);
 };

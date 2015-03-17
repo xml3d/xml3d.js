@@ -1,6 +1,6 @@
 var XML3D = require("./global.js").XML3D;
 var Config = require("./interface/elements.js").config;
-var sendAdapterEvent = require("./base/adapter.js").sendAdapterEvent;
+var sendAdapterEvent = require("./utils/misc.js").sendAdapterEvent;
 var Options = require("./utils/options.js");
 var CSS = require("./utils/css.js");
 var ConfigureRenderer = require("./renderer/renderer/configure.js");

@@ -1,6 +1,7 @@
 var registerFactory = require("./resourcemanager.js").registerFactory;
 var Resource = require("./resourcemanager.js").Resource;
 var Events = require("../interface/notification.js");
+var config = require("../interface/elements.js").config;
 
 /**
  * A normal adapter that doesn't need to be connected to a DOM node
@@ -189,7 +190,7 @@ var AdapterFactory = function(aspect, mimetypes, canvasId) {
     registerFactory(this);
 };
 
- /* Implemented by subclass
+ /** Implemented by subclass
  * Create adapter from an object (node in case of an xml, and object in case of json)
  * @param {object} obj
  * @returns {?Adapter} created adapter or null if no adapter can be created
@@ -226,7 +227,7 @@ XML3D.createClass(NodeAdapterFactory, AdapterFactory);
  */
 NodeAdapterFactory.prototype.getAdapter = function(node) {
     if(node && node._configured === undefined)
-        XML3D.config.element(node);
+        config.element(node);
     if (!node || node._configured === undefined)
         return null;
 
@@ -245,68 +246,9 @@ NodeAdapterFactory.prototype.getAdapter = function(node) {
     return adapter;
 };
 
-/**
- * This function sends single or multiple adapter functions by calling functions
- * specified in funcs parameter for each adapter associated with the node.
- *
- * funcs parameter is used as a dictionary where each key is used as name of a
- * adapter function to call, and corresponding value is a list of arguments
- * (i.e. must be an array). For example sendAdapterEvent(node, {method : [1,2,3]})
- * will call function 'method' with arguments 1,2,3 for each adapter of the node.
- *
- * @param {Object} node
- * @param {Object} funcs
- * @return {Array} array of all returned values
- */
-var callAdapterFunc = function(node, funcs) {
-    var result = [];
-    if (!node || node._configured === undefined)
-        return result;
-    var adapters = node._configured.adapters;
-    for (var adapter in adapters) {
-        for (var func in funcs) {
-            var adapterObject = adapters[adapter];
-            var eventHandler = adapterObject[func];
-            if (eventHandler) {
-                result.push(eventHandler.apply(adapterObject, funcs[func]));
-            }
-        }
-    }
-    return result;
-};
-
-/**
- * This function sends single or multiple adapter events by calling functions
- * specified in events parameter for each adapter associated with the node.
- *
- * events parameter is used as a dictionary where each key is used as name of a
- * adapter function to call, and corresponding value is a list of arguments
- * (i.e. must be an array). For example sendAdapterEvent(node, {method : [1,2,3]})
- * will call function 'method' with arguments 1,2,3 for each adapter of the node.
- *
- * @param {Object} node
- * @param {Object} events
- * @return {Boolean} false if node is not configured.
- */
-var sendAdapterEvent = function(node, events) {
-    if (!node || node._configured === undefined)
-        return false;
-    var adapters = node._configured.adapters;
-    for (var adapter in adapters) {
-        for (var event in events) {
-            var eventHandler = adapters[adapter][event];
-            if (eventHandler) {
-                eventHandler.apply(adapters[adapter], events[event]);
-            }
-        }
-    }
-    return true;
-};
 
 module.exports = {
 NodeAdapter : NodeAdapter,
 AdapterFactory : AdapterFactory,
-NodeAdapterFactory : NodeAdapterFactory,
-callAdapterFunc : callAdapterFunc,
-sendAdapterEvent : sendAdapterEvent
+NodeAdapterFactory : NodeAdapterFactory
 };

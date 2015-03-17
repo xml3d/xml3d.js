@@ -18,10 +18,6 @@ var MaterialEvents = require("../materials/events.js");
 var ForwardRenderTree = function (renderInterface, enableSSAO) {
     BaseRenderTree.call(this, renderInterface);
     var scene = renderInterface.scene;
-    scene.addEventListener(EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChange.bind(this));
-    scene.addEventListener(EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChange.bind(this));
-    scene.addEventListener(EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChange.bind(this));
-    scene.addEventListener(MaterialEvents.MATERIAL_INITIALIZED, this.onShaderChange.bind(this));
     this._enableSSAO = enableSSAO;
     this.mainPass = null;
     this.createMainPass();
@@ -30,118 +26,6 @@ var ForwardRenderTree = function (renderInterface, enableSSAO) {
 XML3D.createClass(ForwardRenderTree, BaseRenderTree);
 
 XML3D.extend(ForwardRenderTree.prototype, {
-    onLightStructureChange: function (evt) {
-        /*var light = evt.light;
-        if (evt.removed) {
-            // TODO: Proper clean up ShadowPass
-            light.userData = null;
-        } else {
-            if (light.light.type == "spot" && light.castShadow && light.visible) { //TODO update parameters
-                light.userData = this.createLightPass(light);
-            }else if (light.light.type == "directional" && light.castShadow && light.visible) {
-                light.userData = this.createLightPass(light);
-            }else if (light.light.type == "point" && light.castShadow && light.visible) {
-                light.userData = this.createPointLightPass(light);
-            }
-        }
-        this.reassignLightPasses(evt.target);*/
-    },
-
-    onLightValueChange: function (evt) {
-        //
-        //var renderLight = evt.light;
-        //// TODO: Would be great to check of the light position or orientation specifically changed
-        //// We don't need to invalidate the lightPass otherwise
-        ////if (renderLight.castShadow && renderLight.visible) {
-        //if (/*renderLight.castShadow &&*/ renderLight.visible) { //TODO update parameters
-        //    if (renderLight.userData) {
-        //        renderLight.userData.setProcessed(false);
-        //    } else {
-        //        if (renderLight.model.id === "spot") {
-        //            renderLight.userData = this.createLightPass(renderLight);
-        //            this.mainPass.addLightPass("spotLightShadowMap", renderLight.userData);
-        //        } else if (renderLight.model.id === "directional") {
-        //            renderLight.userData = this.createLightPass(renderLight);
-        //            this.mainPass.addLightPass("directionalLightShadowMap", renderLight.userData);
-        //        } else if (renderLight.model.id === "point") {
-        //            renderLight.userData = this.createPointLightPass(renderLight);
-        //            this.mainPass.addLightPass("pointLightShadowMap", renderLight.userData);
-        //        }
-        //    }
-        //}
-    },
-    onSceneShapeChange: function (evt) {
-        var scene = evt.target;
-        var modelIds = scene.lights.getModels()
-        for (var id in modelIds) {
-            var modelEntry = scene.lights.getModelEntry(modelIds[id]);
-            for (var model in modelEntry.lightModels) {
-                var light = modelEntry.lightModels[model].light;
-                light.userData && light.userData.setProcessed(false);
-            }
-        }
-        this.reassignLightPasses(evt.target);
-
-    }, onShaderChange: function (evt) {
-        this.reassignLightPasses(evt.target);
-    },
-
-    createLightPass: function (light) {
-        var context = this.renderInterface.context;
-        var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
-        var lightFramebuffer = new GLRenderTarget(context, {
-            width: dimension,
-            height: dimension,
-            colorFormat: context.gl.RGBA,
-            depthFormat: context.gl.DEPTH_COMPONENT16,
-            stencilFormat: null,
-            depthAsRenderbuffer: true
-        });
-        var lightPass = new LightPass(this.renderInterface, lightFramebuffer, light);
-        lightPass.init(context);
-        return lightPass;
-    },
-
-    createPointLightPass: function (light) {
-        var context = this.renderInterface.context;
-        var dimension = Math.max(context.canvasTarget.width, context.canvasTarget.height) * 2;
-        var lightFramebuffer = new GLCubeMapRenderTarget(context, {
-            width: dimension,
-            height: dimension,
-            colorFormat: context.gl.RGBA,
-            depthFormat: context.gl.DEPTH_COMPONENT16,
-            stencilFormat: null,
-            depthAsRenderbuffer: true
-        });
-        var lightPass = new PointLightPass(this.renderInterface, lightFramebuffer, light);
-        lightPass.init(context);
-        return lightPass;
-    },
-
-    reassignLightPasses: function (scene) {
-        this.mainPass.clearLightPasses();
-        var modelIds = scene.lights.getModels();
-        for (var id in modelIds) {
-           var modelEntry = scene.lights.getModelEntry(modelIds[id]);
-            for(var model in modelEntry.lightModels) {
-                var light = modelEntry.lightModels[model].light;
-                    if(light.userData == null)
-                        continue;
-                    if (light.model.id == "spot")
-                        this.mainPass.addLightPass("spotLightShadowMap", light.userData);
-                   else if (light.model.id == "point")
-                        this.mainPass.addLightPass("pointLightShadowMap", light.userData);
-                   else
-                        this.mainPass.addLightPass("directionalLightShadowMap", light.userData);
-            }
-        }
-
-       /*  //TODO update parameters
-                if (!pointLight.castShadow || !pointLight.visible)
-                    pointLight.userData.setProcessed(true);
-        }*/
-
-    },
 
     createMainPass: function () {
         var outputTarget = this.renderInterface.context.canvasTarget;

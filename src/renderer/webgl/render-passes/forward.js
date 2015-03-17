@@ -4,58 +4,13 @@ var ObjectSorter = require("../../renderer/tools/objectsorter.js");
 var ForwardRenderPass = function (renderInterface, output, opt) {
     SceneRenderPass.call(this, renderInterface, output, opt);
     this.sorter = new ObjectSorter();
-    this.reassignShadowMaps = {};
-    this.lightPasses = {};
     this.lastRenderStats = {};
 };
 
 XML3D.createClass(ForwardRenderPass, SceneRenderPass);
 
 XML3D.extend(ForwardRenderPass.prototype, {
-    clearLightPasses: function () {
-        var self = this;
-        Object.keys(this.lightPasses).forEach(function (uniformName) {
-            self.removePrePass(self.lightPasses[uniformName]);
-        });
-        this.lightPasses = {};
-        for (var name in this.reassignShadowMaps)
-            this.reassignShadowMaps[name] = true;
-    },
 
-    addLightPass: function (uniformName, pass) {
-        if (!this.lightPasses[uniformName])
-            this.lightPasses[uniformName] = [];
-        this.lightPasses[uniformName].push(pass);
-        if (pass)
-            this.addPrePass(pass);
-        this.reassignShadowMaps[uniformName] = true;
-    },
-
-    setShadowMapReassign: function (uniformName) {
-        this.reassignShadowMaps[uniformName] = true;
-    },
-
-    updateShadowMapUniforms: function (scene) {
-        var reassignShadowNames = [];
-        for (var name in this.reassignShadowMaps) {
-            if (this.reassignShadowMaps[name]) {
-                this.reassignShadowMaps[name] = false;
-                reassignShadowNames.push(name);
-                var lightPasses = this.lightPasses[name];
-                scene.systemUniforms[name] = [];
-                if (typeof lightPasses == 'undefined' || !lightPasses) //TODO
-                    continue;
-                for (var i = 0; i < lightPasses.length; ++i) {
-                    var output = lightPasses[i].output;
-                    var handle = output && output.colorTarget && output.colorTarget.handle;
-                    scene.systemUniforms[name].push(handle);
-                }
-            }
-        }
-        if (reassignShadowNames.length > 0) {
-            scene.updateSystemUniforms(reassignShadowNames);
-        }
-    },
 
     render: (function () {
         /**
@@ -71,9 +26,6 @@ XML3D.extend(ForwardRenderPass.prototype, {
                     objects: 0,
                     primitives: 0
                 }, target = this.output, systemUniforms = scene.systemUniforms, width = target.getWidth(), height = target.getHeight(), aspect = width / height;
-
-            this.updateShadowMapUniforms(scene);
-
 
             target.bind();
             this.setGLStates();

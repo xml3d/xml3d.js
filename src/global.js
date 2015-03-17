@@ -7,7 +7,6 @@ var Xflow = Xflow || {};
 window.XML3D = XML3D;
 window.Xflow = Xflow;
 
-/** @define {string} */
 XML3D.version = '%VERSION%';
 /** @const */
 XML3D.xml3dNS = 'http://www.xml3d.org/2009/xml3d';

@@ -134,7 +134,13 @@ LightModel.prototype = {
         var expand = Math.max((nfobject.far - nfobject.near) * 0.30, 0.05);
         nfobject.near -= expand;
         nfobject.far  += expand;
+    },
+
+    getLightData: function (target, offset) {
+        var matrix = target["matrix"].subarray(offset * 16, offset * 16 + 16);
+        this.getShadowMapLightMatrix(matrix);
     }
+
 };
 
 var c_tmpWorldMatrix = XML3D.math.mat4.create();
@@ -234,13 +240,8 @@ XML3D.createClass(PointLightModel, LightModel, {
         XML3D.math.mat4.multiply(mat4, mat4, lookat_mat);
 
         XML3D.math.mat4.invert(mat4, mat4);
-    },
-
-    getLightData: function (target, offset) {
-        var manager = this.light.scene.lights;
-        var entry = manager.getModelEntry(this.id);
-        this.getShadowMapLightMatrix(entry.parameters["matrix"]);
     }
+
 });
 
 
@@ -304,12 +305,6 @@ XML3D.createClass(SpotLightModel, LightModel, {
     getWorldToLightMatrix: function (mat4) {
         this.light.getWorldMatrix(mat4);
         XML3D.math.mat4.invert(mat4, mat4);
-    },
-
-    getLightData: function (target, offset) {
-        var manager = this.light.scene.lights;
-        var entry = manager.getModelEntry(this.id);
-        this.getShadowMapLightMatrix(entry.parameters["matrix"]);
     }
 });
 
@@ -411,12 +406,6 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         entry.parameters["position"]  = p_pos;
 
         XML3D.math.mat4.invert(mat4, mat4);
-    },
-
-    getLightData: function (target, offset) {
-        var manager = this.light.scene.lights;
-        var entry = manager.getModelEntry(this.id);
-        this.getShadowMapLightMatrix(entry.parameters["matrix"]);
     }
 
 });

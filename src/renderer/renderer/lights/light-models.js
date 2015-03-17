@@ -221,8 +221,6 @@ XML3D.createClass(PointLightModel, LightModel, {
         var p_dir = entry.parameters["direction"];
         var p_pos = entry.parameters["position"];
 
-        this.light.getWorldMatrix(mat4);
-
         //create new transformation matrix depending on the updated parameters
         XML3D.math.mat4.identity(mat4);
         var lookat_mat = XML3D.math.mat4.create();
@@ -381,8 +379,6 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         var entry = manager.getModelEntry(this.id);
         var p_dir = entry.parameters["direction"];
         var p_pos = entry.parameters["position"];
-
-        this.light.getWorldMatrix(mat4);
 
         var bb = new XML3D.math.bbox.create();
         this.light.scene.getBoundingBox(bb);

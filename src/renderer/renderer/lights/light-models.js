@@ -138,7 +138,7 @@ LightModel.prototype = {
 
     getLightData: function (target, offset) {
         var matrix = target["matrix"].subarray(offset * 16, offset * 16 + 16);
-        this.getLightViewMatrix(matrix);
+        this.getLightViewProjectionMatrix(matrix);
     }
 
 };

@@ -31,7 +31,7 @@ XML3D.createClass(ForwardRenderTree, BaseRenderTree);
 
 XML3D.extend(ForwardRenderTree.prototype, {
     onLightStructureChange: function (evt) {
-        var light = evt.light;
+        /*var light = evt.light;
         if (evt.removed) {
             // TODO: Proper clean up ShadowPass
             light.userData = null;
@@ -44,31 +44,33 @@ XML3D.extend(ForwardRenderTree.prototype, {
                 light.userData = this.createPointLightPass(light);
             }
         }
-        this.reassignLightPasses(evt.target);
+        this.reassignLightPasses(evt.target);*/
     },
 
     onLightValueChange: function (evt) {
-        var renderLight = evt.light;
-        // TODO: Would be great to check of the light position or orientation specifically changed
-        // We don't need to invalidate the lightPass otherwise
-        //if (renderLight.castShadow && renderLight.visible) {
-        if (/*renderLight.castShadow &&*/ renderLight.visible) { //TODO update parameters
-            if (renderLight.userData) {
-                renderLight.userData.setProcessed(false);
-            } else {
-                if (renderLight.model.id === "spot") {
-                    renderLight.userData = this.createLightPass(renderLight);
-                    this.mainPass.addLightPass("spotLightShadowMap", renderLight.userData);
-                } else if (renderLight.model.id === "directional") {
-                    renderLight.userData = this.createLightPass(renderLight);
-                    this.mainPass.addLightPass("directionalLightShadowMap", renderLight.userData);
-                } else if (renderLight.model.id === "point") {
-                    renderLight.userData = this.createPointLightPass(renderLight);
-                    this.mainPass.addLightPass("pointLightShadowMap", renderLight.userData);
-                }
-            }
-        }
-    }, onSceneShapeChange: function (evt) {
+        //
+        //var renderLight = evt.light;
+        //// TODO: Would be great to check of the light position or orientation specifically changed
+        //// We don't need to invalidate the lightPass otherwise
+        ////if (renderLight.castShadow && renderLight.visible) {
+        //if (/*renderLight.castShadow &&*/ renderLight.visible) { //TODO update parameters
+        //    if (renderLight.userData) {
+        //        renderLight.userData.setProcessed(false);
+        //    } else {
+        //        if (renderLight.model.id === "spot") {
+        //            renderLight.userData = this.createLightPass(renderLight);
+        //            this.mainPass.addLightPass("spotLightShadowMap", renderLight.userData);
+        //        } else if (renderLight.model.id === "directional") {
+        //            renderLight.userData = this.createLightPass(renderLight);
+        //            this.mainPass.addLightPass("directionalLightShadowMap", renderLight.userData);
+        //        } else if (renderLight.model.id === "point") {
+        //            renderLight.userData = this.createPointLightPass(renderLight);
+        //            this.mainPass.addLightPass("pointLightShadowMap", renderLight.userData);
+        //        }
+        //    }
+        //}
+    },
+    onSceneShapeChange: function (evt) {
         var scene = evt.target;
         var modelIds = scene.lights.getModels()
         for (var id in modelIds) {

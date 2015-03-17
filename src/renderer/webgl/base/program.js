@@ -122,13 +122,12 @@ var tally = function (gl, handle, programObject) {
         }
 
         if (uni.type == gl.SAMPLER_2D || uni.type == gl.SAMPLER_CUBE) {
-            uniInfo.unit = [];
-            uniInfo.texture = [];
-            for (var j = 0; j < uniInfo.size; j++) {
-                uniInfo.unit[j] = programObject.nextTextureUnit();
-                uniInfo.texture[j] = null;
-            }
-            utils.setUniform(gl, uniInfo, uniInfo.unit);
+            // Set all texture units to 0, needs to be Int32Array
+            uniInfo.cachedUnits = new Int32Array(uniInfo.size);
+            uniInfo.textures = [];
+            // Caches this information
+            utils.setUniform(gl, uniInfo, uniInfo.cachedUnits);
+
             programObject.samplers[name] = uniInfo;
         } else
             programObject.uniforms[name] = uniInfo;
@@ -153,12 +152,6 @@ var ProgramObject = function (gl, sources) {
     this.samplers = {};
     this.handle = null;
 
-
-    var maxTextureUnit = 0;
-    this.nextTextureUnit = function () {
-        return maxTextureUnit++;
-    };
-
     this.create();
 };
 
@@ -176,10 +169,6 @@ XML3D.extend(ProgramObject.prototype, {
             XML3D.debug.logError("Trying to bind invalid GLProgram.");
         }
         this.gl.useProgram(this.handle);
-        for (var s in this.samplers) {
-            var sampler = this.samplers[s];
-            utils.setUniformSampler(this.gl, sampler, sampler.texture);
-        }
     }, unbind: function () {
     }, isValid: function () {
         return !!this.handle;

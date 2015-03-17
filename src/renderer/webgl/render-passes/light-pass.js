@@ -22,6 +22,10 @@ XML3D.createClass(LightPass, SceneRenderPass, {
         this.program = context.programFactory.getProgramByName("light-depth");
     },
 
+    renderScene: function() {
+        this.render(this.light.scene);
+    },
+
     render: (function () {
         var c_viewMat_tmp = XML3D.math.mat4.create();
         var c_projMat_tmp = XML3D.math.mat4.create();

@@ -4,6 +4,7 @@ var C = require("./../../renderer/scene/constants.js");
 var FrustumTest = require("./../../renderer/tools/frustum.js").FrustumTest;
 var ShaderComposerFactory = require("../materials/shadercomposerfactory.js");
 var Options = require("../../../utils/options.js");
+var ShadowMapService = require("../materials/shadowmap-service");
 
 var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
 var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
@@ -35,6 +36,7 @@ var GLScene = function (context) {
     this.shaderFactory = new ShaderComposerFactory(context);
     this.drawableFactory = new DrawableFactory();
 
+    this.shadowMapService = new ShadowMapService(context, this);
     /**
      * @type {Array.<RenderObject>}
      */
@@ -87,6 +89,7 @@ XML3D.extend(GLScene.prototype, {
             this.lightsNeedUpdate = false;
             this.updateLightParameters();
         }
+        this.shadowMapService.updateForRendering();
 
         this.updateObjectsForRendering();
         // Make sure that shaders are updates AFTER objects

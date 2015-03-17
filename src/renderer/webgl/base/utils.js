@@ -77,30 +77,25 @@ module.exports = {
     },
 
     setUniformSampler: function (gl, sampler, value) {
-        if (!value || !sampler) {
-            return;
-        }
-        if (!Array.isArray(value)) {
-            // Textures are always an array value
-            XML3D.debug.logError("Unexpected value in setUniformSampler");
-            return;
-        }
+        XML3D.debug.assert(value && sampler);
+        // Textures are always an array value
+        XML3D.debug.assert(Array.isArray(value), "Unexpected value in setUniformSampler");
 
-        sampler.texture = value;
+        sampler.textures = value;
 
         var textureUnitsChanged = false;
-        for (var i = 0; i < sampler.texture.length; i++) {
-            var texture = sampler.texture[i];
+        for (var i = 0; i < sampler.textures.length; i++) {
+            var texture = sampler.textures[i];
             if (texture) {
                 var unit = texture.getTextureUnit();
-                if (unit != sampler.unit[i]) {
-                    sampler.unit[i] = unit;
+                if (unit !== sampler.cachedUnits[i]) {
+                    sampler.cachedUnits[i] = unit;
                     textureUnitsChanged = true;
                 }
             }
         }
         if (textureUnitsChanged) {
-            this.setUniform(gl, sampler, sampler.unit);
+            this.setUniform(gl, sampler, sampler.cachedUnits);
         }
     },
 

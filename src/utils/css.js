@@ -83,8 +83,6 @@ css.convertCssToMat4 = function (cssMatrix, m) {
     matrix[15] = cssMatrix.m44;
     return matrix;
 };
-window.XML3D.css = {};
-window.XML3D.css.init = css.init;
 
 module.exports = css;
 

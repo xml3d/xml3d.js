@@ -138,7 +138,7 @@ LightModel.prototype = {
 
     getLightData: function (target, offset) {
         var matrix = target["matrix"].subarray(offset * 16, offset * 16 + 16);
-        this.getShadowMapLightMatrix(matrix);
+        this.getLightViewMatrix(matrix);
     }
 
 };
@@ -187,7 +187,7 @@ XML3D.createClass(PointLightModel, LightModel, {
 
 
         var t_mat = XML3D.math.mat4.create();
-        this.getWorldToLightMatrix(t_mat);
+        this.getLightViewMatrix(t_mat);
         XML3D.math.bbox.transform(sceneBoundingBox, t_mat, sceneBoundingBox);
 
         var nf = {  near: -sceneBoundingBox[5],
@@ -207,15 +207,15 @@ XML3D.createClass(PointLightModel, LightModel, {
         transformDefault(target, offset, this.light);
     },
 
-    getShadowMapLightMatrix: function (target) {
+    getLightViewProjectionMatrix: function (target) {
         var L = XML3D.math.mat4.create();
-        this.getWorldToLightMatrix(L);
+        this.getLightViewMatrix(L);
         var lightProjectionMatrix = XML3D.math.mat4.create();
         this.light.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
         XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
     },
 
-    getWorldToLightMatrix: function (mat4) {
+    getLightViewMatrix: function (mat4) {
         var manager = this.light.scene.lights;
         var entry = manager.getModelEntry(this.id);
         var p_dir = entry.parameters["direction"];
@@ -270,7 +270,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
 
 
         var t_mat = XML3D.math.mat4.create();
-        this.getWorldToLightMatrix(t_mat);
+        this.getLightViewMatrix(t_mat);
         XML3D.math.bbox.transform(sceneBoundingBox, t_mat, sceneBoundingBox);
 
         var nf = {  near: -sceneBoundingBox[5],
@@ -294,16 +294,36 @@ XML3D.createClass(SpotLightModel, LightModel, {
     },
 
 
-    getShadowMapLightMatrix: function (target) {
+    getLightViewProjectionMatrix: function (target) {
         var L = XML3D.math.mat4.create();
-        this.getWorldToLightMatrix(L);
+        this.getLightViewMatrix(L);
         var lightProjectionMatrix = XML3D.math.mat4.create();
         this.light.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
         XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
     },
 
-    getWorldToLightMatrix: function (mat4) {
-        this.light.getWorldMatrix(mat4);
+    getLightViewMatrix: function (mat4) {
+        var manager = this.light.scene.lights;
+        var entry = manager.getModelEntry(this.id);
+        var p_dir = entry.parameters["direction"];
+        var p_pos = entry.parameters["position"];
+
+        //create new transformation matrix depending on the updated parameters
+        XML3D.math.mat4.identity(mat4);
+        var lookat_mat = XML3D.math.mat4.create();
+        var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
+        if((p_dir[0] == 0.0) && (p_dir[2] == 0.0)) //check if top_vec colinear with direction
+            top_vec = XML3D.math.vec3.fromValues(0.0, 0.0, 1.0);
+        var up_vec  = XML3D.math.vec3.create();
+        var dir_len = XML3D.math.vec3.len(p_dir);
+        XML3D.math.vec3.scale(up_vec, p_dir, -XML3D.math.vec3.dot(top_vec, p_dir) / (dir_len * dir_len));
+        XML3D.math.vec3.add(up_vec, up_vec, top_vec);
+        XML3D.math.vec3.normalize(up_vec, up_vec);
+        XML3D.math.mat4.lookAt(lookat_mat, XML3D.math.vec3.fromValues(0.0, 0.0, 0.0), p_dir, up_vec);
+        XML3D.math.mat4.invert(lookat_mat, lookat_mat);
+        XML3D.math.mat4.translate(mat4, mat4, p_pos);
+        XML3D.math.mat4.multiply(mat4, mat4, lookat_mat);
+
         XML3D.math.mat4.invert(mat4, mat4);
     }
 });
@@ -331,7 +351,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         }
 
         var t_mat = XML3D.math.mat4.create();
-        this.getWorldToLightMatrix(t_mat);
+        this.getLightViewMatrix(t_mat);
         XML3D.math.bbox.transform(sceneBoundingBox, t_mat, sceneBoundingBox);
 
         var nf = {  near: -sceneBoundingBox[5],
@@ -348,15 +368,15 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         transformDefault(target, offset, this.light);
     },
 
-    getShadowMapLightMatrix: function (target) {
+    getLightViewProjectionMatrix: function (target) {
         var L = XML3D.math.mat4.create();
-        this.getWorldToLightMatrix(L);
+        this.getLightViewMatrix(L);
         var lightProjectionMatrix = XML3D.math.mat4.create();
         this.light.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
         XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
     },
 
-    getWorldToLightMatrix: function (mat4) {
+    getLightViewMatrix: function (mat4) {
         var manager = this.light.scene.lights;
         var entry = manager.getModelEntry(this.id);
         var p_dir = entry.parameters["direction"];
@@ -400,7 +420,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         XML3D.math.bbox.size(bbSize, bb);
         var max = (bbSize[0] > bbSize[1]) ? bbSize[0] : bbSize[1];
         max = 0.55 * (max);//enlarge 10percent to make sure nothing gets cut off
-        this.fov = Math.atan(max)*2.0;
+        this.fovy = Math.atan(max)*2.0;
 
         entry.parameters["direction"] = p_dir;
         entry.parameters["position"]  = p_pos;

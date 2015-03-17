@@ -110,7 +110,7 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
 
                 var count = {objects: 0, primitives: 0};
 
-                this.light.model.getWorldToLightMatrix(c_viewMat_tmp);
+                this.light.model.getLightViewMatrix(c_viewMat_tmp);
                 //rotate for the apropriate side of the cubemap
                 XML3D.math.mat4.mul(c_viewMat_tmp, mat_rot, c_viewMat_tmp);
 

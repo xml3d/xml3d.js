@@ -89,15 +89,19 @@ XML3D.extend(GLScene.prototype, {
             this.lightsNeedUpdate = false;
             this.updateLightParameters();
         }
+        this.updateObjectsForRendering();
+
+        // Render shadow maps if necessary
         this.shadowMapService.updateForRendering();
 
-        this.updateObjectsForRendering();
         // Make sure that shaders are updates AFTER objects
         // Because unused shader closures are cleared on update
         this.updateShaders();
     }, updateLightParameters: function () {
-        var parameters = this.systemUniforms, lights = this.lights;
-        lights.fillGlobalParameters(parameters);
+        var parameters = this.systemUniforms;
+
+        this.lights.fillGlobalParameters(parameters);
+        this.shadowMapService.fillGlobalParameters(parameters);
 
         // Derived parameters that are implementation specific.
         // TODO: Put those to an appropriate place

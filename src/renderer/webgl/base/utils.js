@@ -92,9 +92,13 @@ module.exports = {
                     sampler.cachedUnits[i] = unit;
                     textureUnitsChanged = true;
                 }
+            } else {
+                // Not a texture owned by the program, just set the value
+                this.setUniform(gl, sampler, value);
             }
         }
         if (textureUnitsChanged) {
+            XML3D.debug.logDebug("Setting new texture units:", sampler.cachedUnits, sampler.name);
             this.setUniform(gl, sampler, sampler.cachedUnits);
         }
     },

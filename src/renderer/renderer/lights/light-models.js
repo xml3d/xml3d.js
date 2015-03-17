@@ -12,9 +12,9 @@ var PointLightData = {
     "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
     "direction": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
     "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
-    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]}
+    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]},
     "matrix": {type: XC.DATA_TYPE.FLOAT4X4, 'default': [1, 0, 0, 0,   0, 1, 0, 0,    0, 0, 1, 0,  0, 0, 0, 1]},
-    "nearFar": {type: Xflow.DATA_TYPE.FLOAT2, 'default': [1.0, 100.0]},
+    "nearFar": {type: XC.DATA_TYPE.FLOAT2, 'default': [1.0, 100.0]}
 };
 
 var SpotLightData = {
@@ -36,8 +36,8 @@ var DirectionalLightData = {
     "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
     "position": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
     "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
-    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]}
-    "matrix": {type: XC.DATA_TYPE.FLOAT4X4, 'default': [1, 0, 0, 0,   0, 1, 0, 0,    0, 0, 1, 0,  0, 0, 0, 1]},
+    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]},
+    "matrix": {type: XC.DATA_TYPE.FLOAT4X4, 'default': [1, 0, 0, 0,   0, 1, 0, 0,    0, 0, 1, 0,  0, 0, 0, 1]}
 };
 
 

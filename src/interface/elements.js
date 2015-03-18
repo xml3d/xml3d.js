@@ -44,7 +44,9 @@ function handleCharacterDataChanged(mutation) {
         return;
     }
     var n = new events.NotificationWrapper(mutation, events.VALUE_MODIFIED, target);
-    elementHandler.handlers.value.resetValue(elementHandler.storage);
+    if (elementHandler.handlers.value !== undefined) {
+        elementHandler.handlers.value.resetValue(elementHandler.storage);
+    }
     elementHandler.notify(n);
 }
 

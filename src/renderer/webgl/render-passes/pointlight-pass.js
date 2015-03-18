@@ -1,8 +1,8 @@
-var SceneRenderPass = require("./base.js");
+var SceneRenderPass = require("./scene-pass.js");
 var ObjectSorter = require("../../renderer/tools/objectsorter.js");
 
 /**
- * @param {RenderPipeline} pipeline
+ * @param {GLRenderInterface} renderInterface
  * @param {string} output
  * @param {RenderLight} light
  * @param {*} opt
@@ -110,7 +110,7 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
 
                 var count = {objects: 0, primitives: 0};
 
-                this.light.getWorldToLightMatrix(c_viewMat_tmp);
+                this.light.model.getWorldToLightMatrix(c_viewMat_tmp);
                 //rotate for the apropriate side of the cubemap
                 XML3D.math.mat4.mul(c_viewMat_tmp, mat_rot, c_viewMat_tmp);
 

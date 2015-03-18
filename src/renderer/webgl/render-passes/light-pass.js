@@ -22,6 +22,10 @@ XML3D.createClass(LightPass, SceneRenderPass, {
         this.program = context.programFactory.getProgramByName("light-depth");
     },
 
+    renderScene: function() {
+        this.render(this.light.scene);
+    },
+
     render: (function () {
         var c_viewMat_tmp = XML3D.math.mat4.create();
         var c_projMat_tmp = XML3D.math.mat4.create();
@@ -37,7 +41,7 @@ XML3D.createClass(LightPass, SceneRenderPass, {
 
             var count = {objects: 0, primitives: 0};
 
-            this.light.getWorldToLightMatrix(c_viewMat_tmp);
+            this.light.model.getWorldToLightMatrix(c_viewMat_tmp);
             frustum.getProjectionMatrix(c_projMat_tmp, aspect);
 
             scene.updateReadyObjectsFromMatrices(c_viewMat_tmp, c_projMat_tmp);

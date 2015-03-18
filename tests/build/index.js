@@ -1,4 +1,5 @@
 module.exports = {
+    XML3D: require("../../src/xml3d.js").XML3D,
     Frustum: require("../../src/renderer/renderer/tools/frustum"),
     Scene: require("../../src/renderer/renderer/scene/scene"),
     SceneConstants: require("../../src/renderer/renderer/scene/constants"),

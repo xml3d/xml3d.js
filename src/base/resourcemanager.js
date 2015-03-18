@@ -256,6 +256,11 @@ function loadDocument(url) {
  */
 function processResponse(httpRequest) {
     var mimetype = httpRequest.getResponseHeader("content-type");
+    if (!mimetype) {
+        XML3D.debug.logError("Could not load external document because the server did not provide a content-type header: "+httpRequest._url);
+        invalidateDocumentHandles(httpRequest._url);
+        return;
+    }
     setDocumentData(httpRequest, httpRequest._url, mimetype);
 }
 /**

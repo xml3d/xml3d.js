@@ -1,5 +1,5 @@
 var ComputeRequest = require("../../xflow/interface/request.js").ComputeRequest;
-var setShaderConstant = require("../../xflow/interface/vs-connect.js").setShaderConstant;
+var setShaderConstant = require("../../xflow/processing/vs-connect.js").setShaderConstant;
 var registerErrorCallback = require("../../xflow/base.js").registerErrorCallback;
 var XC = require("../../xflow/interface/constants.js");
 var URI = require("../../utils/uri.js").URI;

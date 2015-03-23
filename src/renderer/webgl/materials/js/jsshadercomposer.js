@@ -1,6 +1,6 @@
 var AbstractShaderComposer = require("./../abstractshadercomposer.js").AbstractShaderComposer;
 var JSShaderClosure = require("./jsshaderclosure.js");
-var VSConfig = require("../../../../xflow/interface/vs-connect.js").VSConfig;
+var VSConfig = require("../../../../xflow/processing/vs-connect.js").VSConfig;
 var VertexShaderRequest = require("../../../../xflow/interface/request.js").VertexShaderRequest;
 var XC = require("../../../../xflow/interface/constants.js");
 

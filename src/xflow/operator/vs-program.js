@@ -1,7 +1,7 @@
 var Base = require("../base.js");
 var C = require("../interface/constants.js");
 var Utils = require("../utils/utils.js");
-var VertexShader = require("../interface/vs-connect.js").VertexShader;
+var VertexShader = require("../processing/vs-connect.js").VertexShader;
 
 //----------------------------------------------------------------------------------------------------------------------
 // OperatorList

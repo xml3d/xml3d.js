@@ -5,7 +5,7 @@ module.exports = {
     SceneConstants: require("../../src/renderer/renderer/scene/constants"),
     XflowConstants: require("../../src/xflow/interface/constants.js"),
     DataNode: require("../../src/xflow/interface/graph.js").DataNode,
-    VSConfig: require("../../src/xflow/interface/vs-connect.js").VSConfig,
+    VSConfig: require("../../src/xflow/processing/vs-connect.js").VSConfig,
     VertexShaderRequest: require("../../src/xflow/interface/request.js").VertexShaderRequest,
     ComputeRequest: require("../../src/xflow/interface/request.js").ComputeRequest,
     Events: require("../../src/interface/notification.js"),

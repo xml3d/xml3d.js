@@ -1,5 +1,5 @@
 var C = require("./constants.js");
-var Mapping = require("./mapping.js");
+var Mapping = require("./../processing/mapping.js");
 require("../../utils/array.js");
 
 var Base = require("../base.js");

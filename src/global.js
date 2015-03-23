@@ -101,7 +101,11 @@ window.XML3DRotation = require("./types/rotation.js");
 window.XML3DVec3 = require("./types/vec3.js");
 
 Xflow.registerOperator = require("./xflow/operator/operator.js").registerOperator;
-Xflow.PLATFORM = require("./xflow/interface/constants.js").PLATFORM;
+Xflow.constants = require("./xflow/interface/constants.js");
+XML3D.extend(Xflow, require("./xflow/interface/graph.js"));
+Xflow.data = require("./xflow/interface/data.js");
+Xflow.ComputeRequest = require("./xflow/interface/request.js").ComputeRequest;
+
 require("./xflow/operator/default");
 
 module.exports = {

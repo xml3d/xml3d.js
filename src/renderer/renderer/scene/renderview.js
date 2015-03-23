@@ -149,6 +149,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         setProjectionOverride: function(projAdapter) {
             this.projectionOverride = projAdapter;
             this.setProjectionDirty();
+            this.scene.requestRedraw("Projection changed");
         },
 
         setTransformDirty: function() {

@@ -12,5 +12,6 @@ module.exports = {
     URI: require("../../src/utils/uri.js"),
     AdapterHandle: require("../../src/base/adapterhandle.js"),
     Adapter: require("../../src/base/adapter.js"),
-    addFragmentShaderHeader: require("../../src/renderer/webgl/shader/shader-utils.js").addFragmentShaderHeader
+    addFragmentShaderHeader: require("../../src/renderer/webgl/shader/shader-utils.js").addFragmentShaderHeader,
+    callAdapterFunc: require("../../src/utils/misc.js").callAdapterFunc
 };

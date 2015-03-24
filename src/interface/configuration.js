@@ -124,7 +124,6 @@ classInfo['xml3d'] = {
 classInfo['compute'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for script
     value: {a: handlers.StringValueHandler},
     _term: undefined
 };
@@ -135,7 +134,6 @@ classInfo['compute'] = {
 classInfo['data'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for data
     compute: {a: handlers.StringAttributeHandler},
     platform: {a: handlers.EnumAttributeHandler, params: {e: PlatformTypes, d: 1}},
     filter: {a: handlers.StringAttributeHandler},
@@ -158,7 +156,6 @@ classInfo['data'] = {
 classInfo['dataflow'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for dataflow
     platform: {a: handlers.EnumAttributeHandler, params: {e: PlatformTypes, d: 1}},
     out: {a: handlers.StringAttributeHandler},
     onload: {a: handlers.EventAttributeHandler},
@@ -183,7 +180,6 @@ classInfo['asset'] = {
     onprogress: {a: handlers.EventAttributeHandler},
     complete: {p: properties.AssetComplete},
     progressLevel: {p: properties.AssetProgressLevel},
-    // TODO: Handle style for data
     src: {a: handlers.StringAttributeHandler},
     name: {a: handlers.StringAttributeHandler},
     pick: {a: handlers.StringAttributeHandler},
@@ -197,7 +193,6 @@ classInfo['asset'] = {
 classInfo['defs'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for defs
     _term: undefined
 };
 /**
@@ -206,7 +201,6 @@ classInfo['defs'] = {
 classInfo['group'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for group
     onclick: {a: handlers.EventAttributeHandler},
     ondblclick: {a: handlers.EventAttributeHandler},
     onmousedown: {a: handlers.EventAttributeHandler},
@@ -233,7 +227,6 @@ classInfo['group'] = {
 classInfo['mesh'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for mesh
     onclick: {a: handlers.EventAttributeHandler},
     ondblclick: {a: handlers.EventAttributeHandler},
     onmousedown: {a: handlers.EventAttributeHandler},
@@ -272,7 +265,6 @@ classInfo['mesh'] = {
 classInfo['model'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for mesh
     onclick: {a: handlers.EventAttributeHandler},
     ondblclick: {a: handlers.EventAttributeHandler},
     onmousedown: {a: handlers.EventAttributeHandler},
@@ -304,7 +296,6 @@ classInfo['model'] = {
 classInfo['transform'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for transform
     translation: {a: handlers.XML3DVec3AttributeHandler, params: [0, 0, 0]},
     scale: {a: handlers.XML3DVec3AttributeHandler, params: [1, 1, 1]},
     rotation: {a: handlers.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
@@ -318,7 +309,6 @@ classInfo['transform'] = {
 classInfo['shader'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for shader
     onload: {a: handlers.EventAttributeHandler},
     onprogress: {a: handlers.EventAttributeHandler},
     complete: {p: properties.XML3DNestedDataContainerTypeComplete},
@@ -340,7 +330,6 @@ classInfo['shader'] = {
 classInfo['light'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for light
     onclick: {a: handlers.EventAttributeHandler},
     ondblclick: {a: handlers.EventAttributeHandler},
     onmousedown: {a: handlers.EventAttributeHandler},
@@ -368,7 +357,6 @@ classInfo['lightshader'] = {
     onprogress: {a: handlers.EventAttributeHandler},
     complete: {p: properties.XML3DNestedDataContainerTypeComplete},
     progressLevel: {p: properties.XML3DNestedDataContainerTypeProgressLevel},
-    // TODO: Handle style for lightshader
     compute: {a: handlers.StringAttributeHandler},
     getOutputNames: {m: methods.XML3DShaderProviderTypeGetOutputNames},
     getOutputChannelInfo: {m: methods.XML3DShaderProviderTypeGetOutputChannelInfo},
@@ -386,7 +374,6 @@ classInfo['lightshader'] = {
 classInfo['script'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for script
     value: {a: handlers.StringValueHandler},
     src: {a: handlers.StringAttributeHandler},
     name: {a: handlers.StringAttributeHandler},
@@ -399,7 +386,6 @@ classInfo['script'] = {
 classInfo['assetmesh'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for data
     name: {a: handlers.StringAttributeHandler},
     match: {a: handlers.StringAttributeHandler},
     type: {a: handlers.EnumAttributeHandler, params: {e: MeshTypes, d: 0}},
@@ -424,7 +410,6 @@ classInfo['assetmesh'] = {
 classInfo['assetdata'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for data
     name: {a: handlers.StringAttributeHandler},
     compute: {a: handlers.StringAttributeHandler},
     filter: {a: handlers.StringAttributeHandler},
@@ -445,7 +430,6 @@ classInfo['assetdata'] = {
 classInfo['float'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for float
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -459,7 +443,6 @@ classInfo['float'] = {
 classInfo['float2'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for float2
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -473,7 +456,6 @@ classInfo['float2'] = {
 classInfo['float3'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for float3
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -487,7 +469,6 @@ classInfo['float3'] = {
 classInfo['float4'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for float4
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -501,7 +482,6 @@ classInfo['float4'] = {
 classInfo['float4x4'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for float4x4
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -515,7 +495,6 @@ classInfo['float4x4'] = {
 classInfo['int'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for int
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -529,7 +508,6 @@ classInfo['int'] = {
 classInfo['int4'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for int4
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -543,7 +521,6 @@ classInfo['int4'] = {
 classInfo['bool'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for bool
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -557,7 +534,6 @@ classInfo['bool'] = {
 classInfo['texture'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for texture
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
@@ -578,7 +554,6 @@ classInfo['texture'] = {
 classInfo['img'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for img
     src: {a: handlers.StringAttributeHandler},
     _term: undefined
 };
@@ -588,7 +563,6 @@ classInfo['img'] = {
 classInfo['video'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for video
     src: {a: handlers.StringAttributeHandler},
     autoplay: {a: handlers.BoolAttributeHandler, params: false},
     play: {m: methods.videoPlay},
@@ -601,7 +575,6 @@ classInfo['video'] = {
 classInfo['view'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    // TODO: Handle style for view
     onclick: {a: handlers.EventAttributeHandler},
     ondblclick: {a: handlers.EventAttributeHandler},
     onmousedown: {a: handlers.EventAttributeHandler},

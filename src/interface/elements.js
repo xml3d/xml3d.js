@@ -135,15 +135,13 @@ function handleAttributeChanged(mutation) {
     if (!elementHandler) {
         return;
     }
-    var attributeHandler = elementHandler.handlers[mutation.attributeName] || elementHandler.handlers[mutation.attributeName.toLowerCase()];
-    if (!attributeHandler) {
-        return;
-    }
     var notified = false;
-    if (attributeHandler.setFromAttribute) {
+    var attributeHandler = elementHandler.handlers[mutation.attributeName] || elementHandler.handlers[mutation.attributeName.toLowerCase()];
+    if (attributeHandler && attributeHandler.setFromAttribute) {
         var newValue = target.getAttribute(mutation.attributeName);
         notified = attributeHandler.setFromAttribute(newValue, mutation.oldValue, target, elementHandler.storage);
     }
+
     if (!notified) {
         var n = new events.NotificationWrapper(mutation, events.VALUE_MODIFIED, mutation.target);
         elementHandler.notify(n);

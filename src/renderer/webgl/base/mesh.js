@@ -17,6 +17,7 @@ var GLMesh = function (context, type) {
     this.vertexCount = null;
     this.minAttributeCount = -1;
     this.context.getStatistics().meshes++;
+    this.multiDraw = (this.glType == WebGLRenderingContext.LINE_STRIP || this.glType == WebGLRenderingContext.TRIANGLE_STRIP);
 };
 
 XML3D.extend(GLMesh.prototype, {
@@ -39,7 +40,7 @@ XML3D.extend(GLMesh.prototype, {
         }
     },
 
-    removeBuffer: function (name, buffer) {
+    removeBuffer: function (name) {
         delete this.buffers[name];
     },
 
@@ -131,40 +132,39 @@ XML3D.extend(GLMesh.prototype, {
      * @returns {number}
      */
     draw: function (program) {
-        var gl = this.context.gl, sAttributes = program.attributes, buffers = this.buffers, triCount = 0, offset, sd, j;
+        var gl = this.context.gl, sAttributes = program.attributes, buffers = this.buffers, triCount = 0, offset, j;
 
         //Bind vertex buffers
         this._bindVertexBuffers(program);
 
         //Draw the object
         if (this.isIndexed) {
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index);
+            var indexBuffer = buffers.index;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);
 
-            if (this.segments) {
-                //This is a segmented mesh (eg. a collection of disjunct line strips)
+            if (this.multiDraw && this.vertexCount) {
                 offset = 0;
-                sd = this.segments.value;
-                for (j = 0; j < sd.length; j++) {
-                    gl.drawElements(this.glType, sd[j], gl.UNSIGNED_SHORT, offset);
-                    offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
+                for (j = 0; j < this.vertexCount.length; j++) {
+                    var count = this.vertexCount[j];
+                    gl.drawElements(this.glType, count, indexBuffer.glType, offset * indexBuffer.bytesPerElement);
+                    offset += count;
                 }
             } else {
-                gl.drawElements(this.glType, this.getElementCount(), buffers.index.glType, 0);
+                gl.drawElements(this.glType, this.getElementCount(), indexBuffer.glType, 0);
             }
             triCount = this.getElementCount() / 3;
-        } else {
-            if (this.size) {
+        } else { // not indexed
+            if (this.multiDraw && this.vertexCount) {
                 offset = 0;
-                sd = this.size.data;
-                for (j = 0; j < sd.length; j++) {
-                    gl.drawArrays(this.glType, offset, sd[j]);
-                    offset += sd[j] * 2; //GL size for UNSIGNED_SHORT is 2 bytes
+                for (j = 0; j < this.vertexCount.length; j++) {
+                    var count = this.vertexCount[j];
+                    gl.drawArrays(this.glType, offset, count);
+                    offset += count;
                 }
             } else {
-                // console.log("drawArrays: " + mesh.getVertexCount());
                 gl.drawArrays(this.glType, 0, this.getVertexCount());
+                triCount = this.getVertexCount();
             }
-            triCount = this.getVertexCount();
         }
 
         //Unbind vertex buffers

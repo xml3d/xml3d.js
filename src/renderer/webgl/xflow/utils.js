@@ -34,6 +34,7 @@ var createElementBuffer = function (context, data, maxIndex) {
     var buffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
+    buffer.bytesPerElement = bufferData.BYTES_PER_ELEMENT;
     buffer.length = data.length;
     buffer.glType = glType;
     return buffer;

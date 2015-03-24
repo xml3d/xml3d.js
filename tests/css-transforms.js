@@ -44,3 +44,25 @@ test("Static Transforms", 3, function() {
 
     stop();
 });
+
+test("Change transform", 5, function() {
+    var xTest = this.doc.getElementById("xml3dTest"),
+        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+    var self = this;
+    var group = this.doc.getElementById("rootGroup");
+    group.visible = true;
+
+    hTest.draw();
+    var actual = XML3DUnit.getPixelValue(glTest, 200, 100);
+    deepEqual(actual, [ 255, 0, 0, 255 ], "Original transform is correct");
+
+    group.setAttribute("style", "transform: translate3d(2px,0px,-10px)");
+    hTest.draw();
+    actual = XML3DUnit.getPixelValue(glTest, 300, 100);
+    deepEqual(actual, [ 255, 0, 0, 255 ], "Group was moved to the right");
+
+    this.doc.getElementById("mesh").setAttribute("style", "transform: translate3d(0, 2, 0)");
+    hTest.draw();
+    actual = XML3DUnit.getPixelValue(glTest, 30, 150);
+    deepEqual(actual, [ 255, 0, 0, 255 ], "Mesh was moved up");
+});

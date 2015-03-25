@@ -139,6 +139,18 @@ LightModel.prototype = {
     getLightData: function (target, offset) {
         var matrix = target["matrix"].subarray(offset * 16, offset * 16 + 16);
         this.getLightViewProjectionMatrix(matrix);
+    },
+
+    getLightViewProjectionMatrix: function (target) {
+        var LVM = XML3D.math.mat4.create();
+        var LPM = XML3D.math.mat4.create();
+        this.getLightViewMatrix(LVM);
+        this.getLightProjectionMatrix(LPM);
+        XML3D.math.mat4.multiply(target, LPM, LVM);
+    },
+
+    getLightProjectionMatrix: function (target) {
+        this.light.getFrustum(1).getProjectionMatrix(target);
     }
 
 };
@@ -207,14 +219,6 @@ XML3D.createClass(PointLightModel, LightModel, {
         transformDefault(target, offset, this.light);
     },
 
-    getLightViewProjectionMatrix: function (target) {
-        var L = XML3D.math.mat4.create();
-        this.getLightViewMatrix(L);
-        var lightProjectionMatrix = XML3D.math.mat4.create();
-        this.light.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
-        XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
-    },
-
     getLightViewMatrix: function (mat4) {
         var manager = this.light.scene.lights;
         var entry = manager.getModelEntry(this.id);
@@ -259,11 +263,9 @@ var SpotLightModel = function (dataNode, light) {
 
 XML3D.createClass(SpotLightModel, LightModel, {
     getFrustum: function(aspect, sceneBoundingBox) {
-        var orthogonal = false;
-        var entry = this.light.scene.lights.getModelEntry(this.id);
 
         if (XML3D.math.bbox.isEmpty(sceneBoundingBox)) {
-            return new Frustum(1.0, 110.0, 0, this.fovy, aspect, orthogonal)
+            return new Frustum(1.0, 110.0, 0, this.fovy, aspect, false)
         }
 
 
@@ -276,7 +278,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
 
-        return new Frustum(1.0, nf.far, 0, this.fovy, aspect, orthogonal);
+        return new Frustum(1.0, nf.far, 0, this.fovy, aspect, false);
     },
 
     transformParameters: function (target, offset) {
@@ -291,14 +293,6 @@ XML3D.createClass(SpotLightModel, LightModel, {
         LightModel.prototype.lightParametersChanged.call(this, request, changeType);
     },
 
-
-    getLightViewProjectionMatrix: function (target) {
-        var L = XML3D.math.mat4.create();
-        this.getLightViewMatrix(L);
-        var lightProjectionMatrix = XML3D.math.mat4.create();
-        this.light.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
-        XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
-    },
 
     getLightViewMatrix: function (mat4) {
         var manager = this.light.scene.lights;
@@ -366,13 +360,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         transformDefault(target, offset, this.light);
     },
 
-    getLightViewProjectionMatrix: function (target) {
-        var L = XML3D.math.mat4.create();
-        this.getLightViewMatrix(L);
-        var lightProjectionMatrix = XML3D.math.mat4.create();
-        this.light.getFrustum(1).getProjectionMatrix(lightProjectionMatrix);
-        XML3D.math.mat4.multiply(target, lightProjectionMatrix, L);
-    },
+
 
     getLightViewMatrix: function (mat4) {
         var manager = this.light.scene.lights;

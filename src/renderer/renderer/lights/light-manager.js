@@ -43,16 +43,20 @@ LightManager.prototype = {
     lightValueChanged: function (light) {
         if (this._inUpdate)
             return;
-
-
         this._inUpdate = true;
-        var model = light.model;
-        var entry = this.getModelEntry(model.id);
-        var offset = entry.lightModels.indexOf(model);
-        XML3D.debug.assert(offset != -1, "Light values changed for a light that is not managed by this LightManager");
-        model.fillLightParameters(entry.parameters, offset);
-        model.getLightData(entry.parameters, offset);
-        entry.changed = true;
+
+        var lights = light ? [light] : this._lights;
+        var that = this;
+
+        lights.forEach(function(light) {
+            var model = light.model;
+            var entry = that.getModelEntry(model.id);
+            var offset = entry.lightModels.indexOf(model);
+            XML3D.debug.assert(offset != -1, "Light values changed for a light that is not managed by this LightManager");
+            model.fillLightParameters(entry.parameters, offset);
+            model.getLightData(entry.parameters, offset);
+            entry.changed = true;
+        });
         this._inUpdate = false;
     },
 

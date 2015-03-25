@@ -207,6 +207,11 @@ XML3D.extend(GLScene.prototype, {
             this.lights.lightValueChanged(event.light);
             this.context.requestRedraw("Light value changed.");
         });
+         this.addEventListener(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (event) {
+            // Need to update light frustum
+            this.lights.lightValueChanged();
+        });
+
         Options.addObserver(this.onFlagsChange.bind(this));
     },
 

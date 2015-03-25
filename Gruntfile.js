@@ -3,12 +3,13 @@
 exports = module.exports = function (grunt) {
 
     var path = require("path");
+    var devVersionString = 'DEVELOPMENT SNAPSHOT (<%= grunt.template.today("dd.mm.yyyy HH:MM:ss Z") %>)';
 
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
         version: {
             number: "", // not defined for development snapshots
-            dev: 'DEVELOPMENT SNAPSHOT (<%= grunt.template.today("dd.mm.yyyy HH:MM:ss Z") %>)'
+            dev: devVersionString
         },
          dirs: {
                 modules: "build/output/modules"
@@ -66,7 +67,15 @@ exports = module.exports = function (grunt) {
                 dest: "./build/output/xml3d.js",
                 options: {
                     browserifyOptions: {
-                        debug: true
+                        debug: true,
+                        transform: [
+                            [   "browserify-replace", {
+                                replace: [
+                                    { from: "%VERSION%", to: devVersionString }
+                                ]
+                                }
+                            ]
+                        ]
                     }
                 }
             },
@@ -161,7 +170,7 @@ exports = module.exports = function (grunt) {
     grunt.registerTask("xml3ddev", "browserify:dev");
     grunt.registerTask("xml3drelease", "browserify:release");
     grunt.registerTask("merge", builds);
-    grunt.registerTask("dev", ["xml3ddev"]);
+    grunt.registerTask("dev", "xml3ddev");
     grunt.registerTask("release", ["xml3drelease", "merge"]);
     grunt.registerTask("min", ["release", "closure-compiler"]);
     grunt.registerTask("default", ["dev", "testlib"]);

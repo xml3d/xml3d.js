@@ -4,8 +4,6 @@ var SamplerConfig = require("../../../xflow/interface/data.js").SamplerConfig;
 var XC = require("../../../xflow/interface/constants.js");
 var uniqueObjectId = utils.getUniqueCounter();
 
-var textures = 0;
-var c_calls = 0;
 //noinspection JSValidateJSDoc
 /**
  * @param {GLContext} context
@@ -13,17 +11,32 @@ var c_calls = 0;
  */
 var GLTexture = function (context) {
     SamplerConfig.call(this);
-    this.setDefaults();
+
+    /**
+     * @type {GLContext}
+     */
+    this.context = context;
+
+    /**
+     * @type {number}
+     */
     this.id = uniqueObjectId();
+
+    /**
+     * Unit the texture is currently bound to (or -1 if bound to no unit)
+     * @type {number}
+     */
+    this.unit = -1;
+
+    this.setDefaults();
 
     this.width = 0;
     this.height = 0;
-    this.context = context;
     this.handle = null;
 
     this.textureType = context.gl.TEXTURE_2D;
 
-    textures++;
+    this.textureUnitCallback = this.lostTextureUnit.bind(this);
 };
 
 XML3D.createClass(GLTexture, SamplerConfig);
@@ -154,30 +167,11 @@ XML3D.extend(GLTexture.prototype, {
         return (this.generateMipMap || this.wrapS != WebGLRenderingContext.CLAMP_TO_EDGE || this.wrapT != WebGLRenderingContext.CLAMP_TO_EDGE) && (!isPowerOfTwo(width) || !isPowerOfTwo(height))
     },
 
-    /**
-     * Binds this texture to an unit if not already bound and returns the
-     * texture unit it was bound to. If this texture is not ready yet
-     * it returns the texture unit of a fallback texture.
-     * @returns {Number}
-     */
-    getTextureUnit: function () {
-        if (this.canBind()) {
-            var textureManager = this.context.textureManager;
-            var unit = textureManager.get(this.id);
-            if (unit == -1) {
-                // Bind this texture to a texture unit
-                unit =  this._bind();
-            }
-            return unit;
-        } else {
-            return getOrCreateFallbackTexture(this.context).getTextureUnit();
-        }
-    },
 
     _bind: function () {
         var gl = this.context.gl;
         var textureManager = this.context.textureManager;
-        var unit = textureManager.bind(this.id, {});
+        var unit = this.unit = textureManager.bind(this.id, { dispose: this.textureUnitCallback });
         if (unit == -2) {
             XML3D.debug.logError("All available texture units are full.");
         } else {
@@ -291,6 +285,10 @@ XML3D.extend(GLTexture.prototype, {
             gl.generateMipmap(this.textureType);
         }
         this.created();
+    },
+
+    lostTextureUnit: function() {
+        this.unit = -1;
     }
 
 });

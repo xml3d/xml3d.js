@@ -164,12 +164,26 @@ XML3D.extend(ProgramObject.prototype, {
         SystemNotifier.sendEvent('glsl', {glslType: "success"});
         this.bind();
         tally(this.gl, this.handle, this);
-    }, bind: function () {
+    },
+
+    bind: function () {
         if (!this.handle) {
             XML3D.debug.logError("Trying to bind invalid GLProgram.");
         }
         this.gl.useProgram(this.handle);
-    }, unbind: function () {
+
+        /**
+         * Some of the dependent textures may have changed their texture units
+         */
+        for (var name in this.samplers) {
+            var sampler = this.samplers[name];
+            if(sampler.textures.length) {
+                this.setSamplerFromTextures(sampler);
+            }
+        }
+    },
+
+    unbind: function () {
     }, isValid: function () {
         return !!this.handle;
     }, setUniformVariables: function (envNames, sysNames, inputCollection) {
@@ -196,7 +210,79 @@ XML3D.extend(ProgramObject.prototype, {
         if (this.uniforms[name]) {
             utils.setUniform(this.gl, this.uniforms[name], value);
         } else if (this.samplers[name]) {
-            utils.setUniformSampler(this.gl, this.samplers[name], value);
+            this.setUniformSampler(this.samplers[name], value);
+        }
+    },
+
+    /**
+     * Sets the texture units from the textures associated with the sampler
+     * @param sampler
+     * @returns {boolean}
+     */
+    setSamplerFromTextures: function (sampler) {
+        var textures = sampler.textures;
+        var cachedUnits = sampler.cachedUnits;
+        var textureUnitsChanged = false;
+
+        for (var i = 0, ii = textures.length; i < ii; i++) {
+            var unit = textures[i].unit;
+
+            // If texture is not bound to a texture unit (-1), bind it now
+            if (unit == -1) {
+                unit = textures[i]._bind();
+            }
+            if (unit != cachedUnits[i]) {
+                cachedUnits[i] = unit;
+                textureUnitsChanged = true;
+            }
+        }
+        if (textureUnitsChanged) {
+            XML3D.debug.logDebug("Setting new texture units:", sampler.name, cachedUnits);
+            utils.setUniform(this.gl, sampler, cachedUnits);
+        }
+    },
+
+    setSamplerFromArray: function(sampler, arr) {
+        var cachedUnits = sampler.cachedUnits;
+        var textureUnitsChanged = false;
+
+       for (var i = 0, ii = arr.length; i < ii; i++) {
+            var unit = arr[i];
+            if (unit != cachedUnits[i]) {
+                cachedUnits[i] = unit;
+                textureUnitsChanged = true;
+            }
+        }
+        if (textureUnitsChanged) {
+            utils.setUniform(this.gl, sampler, cachedUnits);
+            XML3D.debug.logDebug("Setting global texture units:", sampler.name, cachedUnits, this.id);
+        }
+    },
+
+    /**
+     *
+     * @param {Object} sampler
+     * @param {Array.<GLTexture>|Int32Array} value
+     */
+    setUniformSampler: function (sampler, value) {
+        XML3D.debug.assert(value && sampler);
+        // Textures are always an array value
+        XML3D.debug.assert(Array.isArray(value), "Program::setUniformSampler: Unexpected value.");
+        // We have at least one entry
+        XML3D.debug.assert(value.length, "Program::setUniformSampler: No entry in value.");
+
+        /**
+         * Value can either be an array of GLTextures that know their current texture unit,
+         * otherwise a typed array containing the texture units we have to bind.
+         * @type {boolean}
+         */
+        var hasTextures = value[0].unit != undefined;
+
+        if(hasTextures) {
+            sampler.textures = value;
+            this.setSamplerFromTextures(sampler);
+        } else {
+            this.setSamplerFromArray(sampler, value);
         }
     }
 });

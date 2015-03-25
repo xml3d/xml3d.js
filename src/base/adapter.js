@@ -246,6 +246,7 @@ NodeAdapterFactory.prototype.getAdapter = function(node) {
     return adapter;
 };
 
+XML3D.resource.AdapterFactory = AdapterFactory;
 
 module.exports = {
 NodeAdapter : NodeAdapter,

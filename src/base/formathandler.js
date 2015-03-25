@@ -146,22 +146,13 @@ JSONFormatHandler.prototype.isFormatSupported = function (response, responseType
     return mimetype === "application/json";
 };
 
-/**
- * @constructor
- * @extends FormatHandler
- */
-var BinaryFormatHandler = function () {
-    FormatHandler.call(this);
-};
-XML3D.createClass(BinaryFormatHandler, FormatHandler);
-
 var xml3dFormatHandler = new XML3DFormatHandler();
 registerFormat(xml3dFormatHandler);
 XML3D.xml3dFormatHandler = xml3dFormatHandler;
+XML3D.resource.FormatHandler = FormatHandler;
 
 module.exports = {
     JSONFormatHandler: JSONFormatHandler,
-    BinaryFormatHandler: BinaryFormatHandler,
     XMLFormatHandler: XMLFormatHandler,
     XML3DFormatHandler: XML3DFormatHandler,
     FormatHandler: FormatHandler,

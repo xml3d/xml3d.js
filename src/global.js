@@ -88,6 +88,9 @@ XML3D.util = require("./utils/misc.js");
 XML3D.options = require("./utils/options.js");
 XML3D.shaders = require("./renderer/webgl/materials/urn/shaders.js");
 XML3D.resource = require("./base/resourcemanager.js").Resource; //Required for the test library because the RM needs to "belong" to the same document as the XML3D element in order to resolve references correctly
+XML3D.resource.registerFormat = require("./base/resourcemanager.js").registerFormat;
+//XML3D.resource.FormatHandler
+//XML3D.resource.AdapterFactory
 XML3D.webcl = require("./utils/webcl.js").webcl;
 XML3D.math = require("gl-matrix");
 XML3D.math.bbox = require("./math/bbox.js");

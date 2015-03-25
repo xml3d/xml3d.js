@@ -97,10 +97,11 @@ test("Uniform override with default shader", 4, function() {
             deepEqual(actual, [ 0, 255, 0, 255 ], "Green override");
             start();
             testStep++;
-        } else {
+        } else if (testStep === 1) {
             console.log("2");
             actual = win.getPixelValue(gl, 250, 175);
             deepEqual(actual, [ 255, 0, 0, 255 ], "Default shader, override removed");
+            testStep++;
         }
     };
 

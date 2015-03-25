@@ -151,11 +151,32 @@ LightModel.prototype = {
 
     getLightProjectionMatrix: function (target) {
         this.light.getFrustum(1).getProjectionMatrix(target);
+    },
+
+    getLightViewMatrix: function (mat4) {
+        var p_dir = this.getParameter("direction");
+        var p_pos = this.getParameter("position");
+
+        // Get the world matrix from the light in the transformation hierarchy
+        // world => light
+        this.light.getWorldMatrix(mat4);
+
+        // Derive rotation from the direction and standard direction (-z => no rotation)
+        var q_rot = XML3D.math.quat.rotationTo(XML3D.math.quat.create(),c_standardDirection, p_dir);
+        // Create matrix from rotation and translation
+        var trans = XML3D.math.mat4.fromRotationTranslation(XML3D.math.mat4.create(), q_rot, p_pos);
+        // Add to world matrix
+        XML3D.math.mat4.mul(mat4, mat4, trans);
+
+        // Invert:  light => world
+        XML3D.math.mat4.invert(mat4, mat4);
     }
 
 };
 
 var c_tmpWorldMatrix = XML3D.math.mat4.create();
+var c_standardDirection = XML3D.math.vec3.fromValues(0,0,-1);
+
 
 function transformPose(light, position, direction) {
     light.getWorldMatrix(c_tmpWorldMatrix);
@@ -187,9 +208,9 @@ var PointLightModel = function (dataNode, light) {
 };
 
 XML3D.createClass(PointLightModel, LightModel, {
-    getFrustum: function(aspect, sceneBoundingBox) {
+    getFrustum: function (aspect, sceneBoundingBox) {
         var orthogonal = false;
-        var entry   = this.light.scene.lights.getModelEntry(this.id);
+        var entry = this.light.scene.lights.getModelEntry(this.id);
 
         if (XML3D.math.bbox.isEmpty(sceneBoundingBox)) {
             entry.parameters["nearFar"][0] = 1.0;
@@ -202,8 +223,9 @@ XML3D.createClass(PointLightModel, LightModel, {
         this.getLightViewMatrix(t_mat);
         XML3D.math.bbox.transform(sceneBoundingBox, t_mat, sceneBoundingBox);
 
-        var nf = {  near: -sceneBoundingBox[5],
-                    far:  -sceneBoundingBox[2]};
+        var nf = {
+            near: -sceneBoundingBox[5], far: -sceneBoundingBox[2]
+        };
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
 
@@ -217,33 +239,7 @@ XML3D.createClass(PointLightModel, LightModel, {
         var position = target["position"].subarray(offset * 3, offset * 3 + 3);
         transformPose(this.light, position, null);
         transformDefault(target, offset, this.light);
-    },
-
-    getLightViewMatrix: function (mat4) {
-        var manager = this.light.scene.lights;
-        var entry = manager.getModelEntry(this.id);
-        var p_dir = entry.parameters["direction"];
-        var p_pos = entry.parameters["position"];
-
-        //create new transformation matrix depending on the updated parameters
-        XML3D.math.mat4.identity(mat4);
-        var lookat_mat = XML3D.math.mat4.create();
-        var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
-        if ((p_dir[0] == 0.0) && (p_dir[2] == 0.0)) //check if top_vec colinear with direction
-            top_vec = XML3D.math.vec3.fromValues(0.0, 0.0, 1.0);
-        var up_vec = XML3D.math.vec3.create();
-        var dir_len = XML3D.math.vec3.len(p_dir);
-        XML3D.math.vec3.scale(up_vec, p_dir, -XML3D.math.vec3.dot(top_vec, p_dir) / (dir_len * dir_len));
-        XML3D.math.vec3.add(up_vec, up_vec, top_vec);
-        XML3D.math.vec3.normalize(up_vec, up_vec);
-        XML3D.math.mat4.lookAt(lookat_mat, XML3D.math.vec3.fromValues(0.0, 0.0, 0.0), p_dir, up_vec);
-        XML3D.math.mat4.invert(lookat_mat, lookat_mat);
-        XML3D.math.mat4.translate(mat4, mat4, p_pos);
-        XML3D.math.mat4.multiply(mat4, mat4, lookat_mat);
-
-        XML3D.math.mat4.invert(mat4, mat4);
     }
-
 });
 
 
@@ -262,7 +258,7 @@ var SpotLightModel = function (dataNode, light) {
 
 
 XML3D.createClass(SpotLightModel, LightModel, {
-    getFrustum: function(aspect, sceneBoundingBox) {
+    getFrustum: function (aspect, sceneBoundingBox) {
 
         if (XML3D.math.bbox.isEmpty(sceneBoundingBox)) {
             return new Frustum(1.0, 110.0, 0, this.fovy, aspect, false)
@@ -273,8 +269,9 @@ XML3D.createClass(SpotLightModel, LightModel, {
         this.getLightViewMatrix(t_mat);
         XML3D.math.bbox.transform(sceneBoundingBox, t_mat, sceneBoundingBox);
 
-        var nf = {  near: -sceneBoundingBox[5],
-                    far:  -sceneBoundingBox[2]};
+        var nf = {
+            near: -sceneBoundingBox[5], far: -sceneBoundingBox[2]
+        };
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
 
@@ -284,6 +281,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
     transformParameters: function (target, offset) {
         var position = target["position"].subarray(offset * 3, offset * 3 + 3);
         var direction = target["direction"].subarray(offset * 3, offset * 3 + 3);
+        // Transform position and direction from object to world space
         transformPose(this.light, position, direction);
         transformDefault(target, offset, this.light);
     },
@@ -291,32 +289,6 @@ XML3D.createClass(SpotLightModel, LightModel, {
     lightParametersChanged: function (request, changeType) {
         this.fovy = this.getParameter("falloffAngle")[0] * 2;
         LightModel.prototype.lightParametersChanged.call(this, request, changeType);
-    },
-
-
-    getLightViewMatrix: function (mat4) {
-        var manager = this.light.scene.lights;
-        var entry = manager.getModelEntry(this.id);
-        var p_dir = entry.parameters["direction"];
-        var p_pos = entry.parameters["position"];
-
-        //create new transformation matrix depending on the updated parameters
-        XML3D.math.mat4.identity(mat4);
-        var lookat_mat = XML3D.math.mat4.create();
-        var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
-        if((p_dir[0] == 0.0) && (p_dir[2] == 0.0)) //check if top_vec colinear with direction
-            top_vec = XML3D.math.vec3.fromValues(0.0, 0.0, 1.0);
-        var up_vec  = XML3D.math.vec3.create();
-        var dir_len = XML3D.math.vec3.len(p_dir);
-        XML3D.math.vec3.scale(up_vec, p_dir, -XML3D.math.vec3.dot(top_vec, p_dir) / (dir_len * dir_len));
-        XML3D.math.vec3.add(up_vec, up_vec, top_vec);
-        XML3D.math.vec3.normalize(up_vec, up_vec);
-        XML3D.math.mat4.lookAt(lookat_mat, XML3D.math.vec3.fromValues(0.0, 0.0, 0.0), p_dir, up_vec);
-        XML3D.math.mat4.invert(lookat_mat, lookat_mat);
-        XML3D.math.mat4.translate(mat4, mat4, p_pos);
-        XML3D.math.mat4.multiply(mat4, mat4, lookat_mat);
-
-        XML3D.math.mat4.invert(mat4, mat4);
     }
 });
 

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="generator" content="xml3d-blender-exporter v0.4.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <title>Test Spotlight Shadow</title>
+</head>
+<body>
+
+<xml3d id="Scene" activeView="#v_pview" style="width: 512px; height: 512px; background-color:rgb(65,65,65);">
+ <defs>
+ <shader id="Material-001" script="urn:xml3d:shader:phong">
+    <float3 name="diffuseColor">0.8000000715255737 0.013141818344593048 0.02618921920657158</float3>
+  </shader>
+  <shader  id="Material" script="urn:xml3d:shader:phong">
+    <float3 name="diffuseColor">0.800000011920929 0.800000011920929 0.800000011920929</float3>
+  </shader>
+  <lightshader script="urn:xml3d:lightshader:spot" id="ls_Spot">
+   <float name="falloffAngle">0.3927</float>
+   <float name="softness">0.1500</float>
+   <float3 name="attenuation">1.0000 0.0000 0.0016</float3>
+   <float3 name="intensity">1.0000 1.0000 1.0000</float3>
+    <!--<float3 name="position">1.0000 1.0000 1.0000</float3>-->
+   <bool name="castShadow">true</bool>
+   <float name="shadowBias">0.001</float>
+  </lightshader>
+ </defs>
+ <view id="v_pview" position="0 0  31" orientation="0 0 1 1.57"></view>
+ <group id="Spot" class="layer-0" style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,10.000000,1.000000);">
+  <light shader="#ls_Spot"></light>
+ </group>
+ <group id="Cube"  style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.776252,1.000000);" shader="#Material-001">
+  <model src="assets/cube.xml#Cube"></model>
+ </group>
+ <group id="Plane"  shader="#Material">
+  <model src="assets/plane2.xml#Plane"></model>
+ </group>
+</xml3d>
+
+<script>
+  var setPosition = function () {
+    var position = document.createElement("float3");
+    position.setAttribute("name", "position");
+    position.textContent = "1 1 1";
+
+    var ls = document.querySelector("#ls_Spot");
+    ls.appendChild(position);
+  };
+
+    var setDirection = function () {
+    var direction = document.createElement("float3");
+    direction.setAttribute("name", "direction");
+    direction.textContent = "0 -0.10 -0.995";
+
+    var ls = document.querySelector("#ls_Spot");
+    ls.appendChild(direction);
+  };
+
+
+</script>
+<div>
+  <a href="#" onclick="setPosition()">set position as light parameter</a><br>
+  <a href="#" onclick="setDirection()">set direction as light parameter</a><br>
+
+</div>
+</body>
+</html>

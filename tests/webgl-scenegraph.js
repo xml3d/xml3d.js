@@ -24,23 +24,7 @@ module("WebGL Scenegraph", {
 
 });
 
-function getWebGLAdapter(x) {
-    var window = x.ownerDocument.defaultView ?x.ownerDocument.defaultView : x.ownerDocument.parentWindow;
-    window.XML3D.flushDOMChanges();
-    if(x._configured){
-        for(var i in x._configured.adapters){
-            if(i.indexOf("webgl") == 0){
-                return x._configured.adapters[i];
-            }
-        }
-    }
-    return null;
-};
 
-function getWebGLFactory(x) {
-    var adapter = getWebGLAdapter(x);
-    return adapter ? adapter.factory : null;
-};
 
 function getCanvasId(x) {
     var factory = getWebGLFactory(x);

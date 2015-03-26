@@ -181,6 +181,6 @@ exports = module.exports = function (grunt) {
         if (!grunt.option('publish')) { // Be sure to specify the target
             grunt.warn('Set publish flag to continue.');
         }
-        grunt.task.run("clean:output", "dev", "closure-compiler");
+        grunt.task.run("clean:output", "release", "closure-compiler");
     });
 };

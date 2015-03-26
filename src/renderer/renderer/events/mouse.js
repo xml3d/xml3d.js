@@ -67,12 +67,12 @@ MouseEventHandler.prototype =  {
             //These event APIs are deprecated but still required by IE, which doesn't support event constructors yet
             if (event.toString() === "[object WheelEvent]") {
                 evt = document.createEvent("WheelEvent");
-                evt.initWheelEvent(event.type, event.canBubble, event.cancelable, event.view, event.detail,
+                evt.initWheelEvent(event.type, event.bubbles, event.cancelable, event.view, event.detail,
                     event.screenX, event.screenY, event.clientX, event.clientY, event.button, event.relatedTarget, "",
                     event.deltaX, event.deltaY, event.deltaZ, event.deltaMode);
             } else {
                 evt = document.createEvent("MouseEvent");
-                evt.initMouseEvent(event.type, event.canBubble, event.cancelable, event.view, event.detail,
+                evt.initMouseEvent(event.type, event.bubbles, event.cancelable, event.view, event.detail,
                     event.screenX, event.screenY, event.clientX, event.clientY, event.ctrlKey, event.altKey,
                     event.shiftKey, event.metaKey, event.button, event.relatedTarget);
             }

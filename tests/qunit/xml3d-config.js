@@ -160,9 +160,7 @@ XML3DUnit = {};
 
 XML3DUnit.getRendererString = function() {
     var canvas = document.createElement("canvas");
-    var context = null;
-
-    result = "Renderer: ";
+    var context = null, result = "";
 
     try {
       context = canvas.getContext("webgl");
@@ -178,10 +176,9 @@ XML3DUnit.getRendererString = function() {
         result += "none found";
     } else {
         var ext = context.getExtension("WEBGL_debug_renderer_info");
-        result += "WebGL";
         if (ext) {
-            result += context.getParameter(ext.UNMASKED_VENDOR_WEBGL);
-            result += context.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+            result += "WebGL Vendor: " + context.getParameter(ext.UNMASKED_VENDOR_WEBGL);
+            result += "<br>WebGL Renderer: " + context.getParameter(ext.UNMASKED_RENDERER_WEBGL);
         }
     }
     return result;

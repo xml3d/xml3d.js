@@ -2252,6 +2252,13 @@ function storeFixture() {
 	}
 }
 
+function appendRenderString() {
+    var renderer = id( "qunit-renderer" );
+	if ( renderer ) {
+		renderer.innerHTML =  XML3DUnit.getRendererString();
+	}
+}
+
 function appendUserAgent() {
 	var userAgent = id( "qunit-userAgent" );
 	if ( userAgent ) {
@@ -2269,6 +2276,7 @@ QUnit.begin(function() {
 		"<h2 id='qunit-banner'></h2>" +
 		"<div id='qunit-testrunner-toolbar'></div>" +
 		"<h2 id='qunit-userAgent'></h2>" +
+		"<h2 id='qunit-renderer'></h2>" +
 		"<ol id='qunit-tests'></ol>";
 	}
 
@@ -2276,6 +2284,7 @@ QUnit.begin(function() {
 	appendTestResults();
 	appendUserAgent();
 	appendToolbar();
+	appendRenderString();
 	storeFixture();
 });
 

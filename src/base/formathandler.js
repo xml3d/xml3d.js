@@ -120,6 +120,10 @@ XML3DFormatHandler.prototype.isFormatSupported = function (response, responseTyp
     var xml3ds = [];
     if (response instanceof XMLDocument) {
         xml3ds = response.getElementsByTagName("xml3d");
+        if (!xml3ds.length) {
+            // Also check cases where the XML3D element may have been fitted with a NS prefix (eg. ns1:xml3d)
+            xml3ds = response.getElementsByTagNameNS(XML3D.xml3dNS, "xml3d");
+        }
     }
     return xml3ds.length !== 0;
 };

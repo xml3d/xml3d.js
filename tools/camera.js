@@ -279,18 +279,17 @@ XML3D.Xml3dSceneController.prototype.mousePressEvent = function(event) {
 
     var ev = event || window.event;
 
-    var button = (ev.which || ev.button);
-    switch (button) {
-        case 1:
+    switch (ev.button) {
+        case 0:
             if(this.mode == "examine")
                 this.action = this.ROTATE;
             else
                 this.action = this.LOOKAROUND;
             break;
-        case 2:
+        case 1:
             this.action = this.TRANSLATE;
             break;
-        case 3:
+        case 2:
             this.action = this.DOLLY;
             break;
         default:

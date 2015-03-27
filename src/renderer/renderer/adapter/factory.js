@@ -26,7 +26,8 @@ var registry = {
         shader: require("./material.js"), // TODO(ksons): Remove in 5.1
         group: require("./group.js"),
         light: require("./light.js"),
-        lightshader: require("./lightshader.js") // TODO(ksons): Remove in 5.1
+        lightshader: require("./lightshader.js"), // TODO(ksons): Remove in 5.1
+        volume: require("./volume.js")
     };
 
 /**

@@ -156,6 +156,13 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
                         case C.DATA_TYPE.BOOL:
                             dataEntry._setValue(new Int32Array(size));
                             break;
+                        case C.DATA_TYPE.BYTE:
+                            dataEntry._setValue(new Int8Array(size));
+                            break;
+                        case C.DATA_TYPE.UBYTE:
+                            dataEntry._setValue(new Uint8Array(size));
+                            break;
+
                         default:
                             XML3D.debug.logWarning("Could not allocate output buffer of TYPE: " + dataEntry.type);
                     }
@@ -172,6 +179,8 @@ OperatorList.prototype.allocateOutput = function (programData, async) {
         var mapping = entry.operator.mapping;
         for(var i = 0; i < mapping.length; ++i){
             var dataEntry = programData.getDataEntry(entry.getDirectInputIndex(i));
+            // TODO(ksons): Remove if not needed
+            XML3D.debug.assert(dataEntry.getValue, "see xflow refactoring")
             args.push(dataEntry ? dataEntry.getValue() : null);
         }
     };

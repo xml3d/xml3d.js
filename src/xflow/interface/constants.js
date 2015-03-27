@@ -184,7 +184,7 @@ C.RESULT_STATE = {
  * @enum
  */
 C.SEQUENCE = {
-    NO_ACCESS: 0, PREV_BUFFER: 1, NEXT_BUFFER: 2, LINEAR_WEIGHT: 3
+    NO_ACCESS: 0, PREV_BUFFER: 1, NEXT_BUFFER: 2, LINEAR_WEIGHT: 3, ARRAY: 4  /** TODO(ksons): Array required (and supported?) **/
 };
 
 

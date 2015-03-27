@@ -137,6 +137,7 @@ function initChannelSlot(channelMap, name){
     }
 }
 
+// TODO(ksons): Handle SEQUENCE.ARRAY?
 function mergeChannelIntoChannel(channelMap, name, newChannel, childDataIndex){
     initChannelSlot(channelMap, name);
     var currentChannel = channelMap.map[name].channel;

@@ -31,3 +31,5 @@ require("./slerpseq.js");
 require("./sobelImage.js");
 require("./sub3.js");
 require("./div.js");
+require("./calcTFFromColorTable.js");
+require("./volumeDataFromPNG.js");

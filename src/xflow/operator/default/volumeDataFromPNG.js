@@ -1,7 +1,9 @@
+var XC = require("../../interface/constants.js");
+
 Xflow.registerOperator("xflow.volumeDataFromPNG", {
     outputs: [{type: 'ubyte', name: 'volumeNumericData', customAlloc: true}],
     params: [{type: 'texture', source: 'slice'}],
-    mapping: [{source: 'slice', sequence: Xflow.SEQUENCE.ARRAY, array: true}],
+    mapping: [{source: 'slice', sequence: XC.SEQUENCE.ARRAY, array: true}],
 
     alloc: function (sizes, slice) {
 

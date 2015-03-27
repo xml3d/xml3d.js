@@ -84,9 +84,6 @@ var VolumeClosure = function (context, type, dataNode, opt) {
     opt = opt || {};
     this.mesh = new GLMesh(context, type);
 
-    var gl = context.gl;
-    // TODO(ksons) Was exported here: webgl.MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-
     /**
      * Data Node of the renderObject
      * @type {DataNode}

@@ -767,35 +767,52 @@ module("Xflow External Operators", {
 test("Dataflows - External Operators", function() {
     var xml3dElem = this.doc.getElementById("xml3dElem");
     var mesh = this.doc.getElementById("mesh1");
-    xml3dElem.addEventListener("load", function() {
+    var loaded = function() {
         start();
         var positions = mesh.getResult()._entries.position;
         QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Dataflow positions were correctly computed");
-    });
-    stop();
+    };
+    if (!xml3dElem.complete) {
+        xml3dElem.addEventListener("load", loaded);
+        stop();
+    } else {
+        stop();
+        loaded();
+    }
 });
 
 test("Dataflows - External Operators with multiple uses", function() {
     var xml3dElem = this.doc.getElementById("xml3dElem");
     var mesh = this.doc.getElementById("mesh3");
-
-    xml3dElem.addEventListener("load", function() {
+    var loaded = function() {
         start();
         var positions2 = mesh.getResult()._entries.position;
         QUnit.closeArray(positions2.value, [5,3,3,2,0,2], EPSILON, "Multiple uses of the same external operator");
-    });
-    stop();
+    };
+    if (!xml3dElem.complete) {
+        xml3dElem.addEventListener("load", loaded);
+        stop();
+    } else {
+        stop();
+        loaded();
+    }
 });
 
 test("Data - External Operators", function() {
     var xml3dElem = this.doc.getElementById("xml3dElem");
     var mesh = this.doc.getElementById("mesh2");
-    xml3dElem.addEventListener("load", function() {
+    var loaded = function() {
         start();
         var positions = mesh.getResult()._entries.position;
         QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Data positions were correctly computed");
-    });
-    stop();
+    };
+    if (!xml3dElem.complete) {
+        xml3dElem.addEventListener("load", loaded);
+        stop();
+    } else {
+        stop();
+        loaded();
+    }
 });
 
 test("Dataflow - Swap external input back and forth", function() {
@@ -830,4 +847,6 @@ test("Dataflow - Swap external input back and forth", function() {
         }
     });
     stop();
+    var handler = getHandler(xml3dElem);
+    handler.draw();
 });

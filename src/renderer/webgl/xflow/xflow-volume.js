@@ -79,7 +79,7 @@ var createBuffer = function (gl, type, data) {
  * @extends {DrawableClosure}
  * @constructor
  */
-var VolumeClosure = function (context, type, dataNode, opt) {
+var XflowVolume = function (context, dataNode, type, opt) {
     DrawableClosure.call(this, context, DrawableClosure.TYPES.VOLUME);
     opt = opt || {};
     this.mesh = new GLMesh(context, type);
@@ -144,7 +144,7 @@ var VolumeClosure = function (context, type, dataNode, opt) {
     this.initialize();
 };
 
-XML3D.createClass(VolumeClosure, DrawableClosure, {
+XML3D.createClass(XflowVolume, DrawableClosure, {
     initialize: function () {
         this.typeDataChanged(this.typeRequest, XC.RESULT_STATE.CHANGED_STRUCTURE);
         this.shaderChanged();
@@ -176,7 +176,7 @@ XML3D.createClass(VolumeClosure, DrawableClosure, {
     typeDataChanged: function (request, state) {
         this.changeState |= state == XC.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
         this.context.requestRedraw("Volume Type Data Change");
-        XML3D.debug.logInfo("VolumeClosure: Type data changed", request, state, this.changeState);
+        XML3D.debug.logInfo("XflowVolume: Type data changed", request, state, this.changeState);
     },
 
     getMesh: function () {
@@ -202,8 +202,10 @@ XML3D.createClass(VolumeClosure, DrawableClosure, {
         this.shaderClosure = null;
         if (!this.dataNode.isSubtreeLoading() && !this.dataNode.getOutputChannelInfo("size")) {
             throw new Error("Volume does not have 'size' attribute.");
-        } else {
-            this.shaderClosure = this.shaderComposer.getShaderClosure(scene, this.objectShaderRequest);
+        } else if (!this.dataNode.isSubtreeLoading()) {
+            var objectShaderResult = this.objectShaderRequest.getResult();
+            if (!objectShaderResult.loading)
+                this.shaderClosure = this.shaderComposer.getShaderClosure(scene, this.objectShaderRequest);
         }
     },
 
@@ -473,7 +475,7 @@ XML3D.createClass(VolumeClosure, DrawableClosure, {
     attributeDataChanged: function (request, state) {
         this.changeState |= state == XC.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.ATTRIBUTE_STRUCTURE_CHANGED : CHANGE_STATE.ATTRIBUTE_DATA_CHANGED;
         this.context.requestRedraw("Volume Attribute Data Changed");
-        XML3D.debug.logInfo("VolumeClosure: Attribute data changed", request, state, this.changeState);
+        XML3D.debug.logInfo("XflowVolume: Attribute data changed", request, state, this.changeState);
     },
 
     /**
@@ -494,7 +496,7 @@ XML3D.createClass(VolumeClosure, DrawableClosure, {
         // TODO: We don't know if the change of data only influences the surface shading or the actual mesh shape
         this.dispatchEvent({type: EVENT_TYPE.SCENE_SHAPE_CHANGED});
         this.context.requestRedraw("Volume Attribute Data Changed");
-        XML3D.debug.logInfo("VolumeClosure: Attribute data changed", request, state, this.changeState);
+        XML3D.debug.logInfo("XflowVolume: Attribute data changed", request, state, this.changeState);
     },
 
     shaderChanged: function () {
@@ -523,5 +525,5 @@ function createOrGetNoiseTextureData() {
     return c_noiseTextureData;
 }
 
-module.exports = VolumeClosure;
+module.exports = XflowVolume;
 

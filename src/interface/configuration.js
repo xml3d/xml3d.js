@@ -540,8 +540,8 @@ classInfo['view'] = {
  * Properties and methods for <volume>
  **/
 classInfo['volume'] = {
-    id: {a: XML3D.IDHandler},
-    className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    id: {a: handlers.IDHandler},
+    className: {a: handlers.StringAttributeHandler, id: 'class'},
     // TODO: Handle style for volume
     onclick: {a: handlers.EventAttributeHandler},
     ondblclick: {a: handlers.EventAttributeHandler},

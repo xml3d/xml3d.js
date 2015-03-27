@@ -15,7 +15,7 @@ XML3D.extend(DrawableFactory.prototype, {
         try {
             var result;
             if (isVolume) {
-                result = new XflowVolume(context, obj.getDataNode(), obj.getType(), {boundingBoxChanged: obj.setObjectSpaceBoundingBox.bind(obj)});
+                result = new XflowVolume(context, obj.getDataNode(), "triangles", {boundingBoxChanged: obj.setObjectSpaceBoundingBox.bind(obj)});
             } else {
                 result = new XflowMesh(context, obj.getDataNode(), obj.getType(), {boundingBoxChanged: obj.setObjectSpaceBoundingBox.bind(obj)});
             }

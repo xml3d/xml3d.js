@@ -7,7 +7,7 @@ var XflowUtils = require("../xflow/utils.js");
 require("./raycaster.js");
 
 /*  OctreeNode class
- is used by VolumeClosure for recursive subdividing volumes into eight octants
+ is used by XflowVolume for recursive subdividing volumes into eight octants
  subdividing takes place if given node can not be rendered
  this may be because of :
  a) too small step size (<=0.0025)

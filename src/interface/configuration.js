@@ -536,6 +536,43 @@ classInfo['view'] = {
     getViewMatrix: {m: methods.viewGetViewMatrix}
     };
 
+/**
+ * Properties and methods for <volume>
+ **/
+classInfo['volume'] = {
+    id: {a: XML3D.IDHandler},
+    className: {a: XML3D.StringAttributeHandler, id: 'class'},
+    // TODO: Handle style for volume
+    onclick: {a: XML3D.EventAttributeHandler},
+    ondblclick: {a: XML3D.EventAttributeHandler},
+    onmousedown: {a: XML3D.EventAttributeHandler},
+    onmouseup: {a: XML3D.EventAttributeHandler},
+    onmouseover: {a: XML3D.EventAttributeHandler},
+    onmousemove: {a: XML3D.EventAttributeHandler},
+    onmouseout: {a: XML3D.EventAttributeHandler},
+    onkeypress: {a: XML3D.EventAttributeHandler},
+    onkeydown: {a: XML3D.EventAttributeHandler},
+    onkeyup: {a: XML3D.EventAttributeHandler},
+    onload: {a: handlers.EventAttributeHandler},
+    onprogress: {a: handlers.EventAttributeHandler},
+    complete: {p: properties.XML3DNestedDataContainerTypeComplete},
+    progressLevel: {p: properties.XML3DNestedDataContainerTypeProgressLevel},
+    visible: {a: XML3D.BoolAttributeHandler, params: true},
+    compute: {a: XML3D.StringAttributeHandler},
+    getWorldMatrix: {m: XML3D.methods.XML3DGraphTypeGetWorldMatrix},
+    getBoundingBox : {m: methods.deprecatedGetBoundingBoxLocal},
+    getWorldBoundingBox : {m: methods.getWorldBoundingBox},
+    getLocalBoundingBox : {m: methods.getLocalBoundingBox},
+    getOutputNames: {m: XML3D.methods.volumeGetOutputNames},
+    getOutputChannelInfo: {m: XML3D.methods.volumeGetOutputChannelInfo},
+    getComputeInfo: {m: XML3D.methods.volumeGetComputeInfo},
+    getProtoInfo: {m: XML3D.methods.volumeGetProtoInfo},
+    isOutputConnected: {m: XML3D.methods.volumeIsOutputConnected},
+    getResult: {m: XML3D.methods.volumeGetResult},
+    src: {a: handlers.StringAttributeHandler},
+    _term: undefined
+};
+
 module.exports = {
     classInfo : classInfo,
     MeshTypes : MeshTypes,

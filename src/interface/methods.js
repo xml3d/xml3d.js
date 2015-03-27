@@ -271,4 +271,11 @@ methods.XML3DDataSourceTypeSetScriptValue = function(data){
 
 };
 
+methods.volumeGetOutputNames 		= methods.meshGetOutputNames;
+methods.volumeGetOutputChannelInfo	= methods.meshGetOutputChannelInfo;
+methods.volumeGetComputeInfo 		= methods.meshGetComputeInfo;
+methods.volumeGetProtoInfo 			= methods.meshGetProtoInfo;
+methods.volumeIsOutputConnected 	= methods.meshIsOutputConnected;
+methods.volumeGetResult 			= methods.meshGetResult;
+
 module.exports = methods;

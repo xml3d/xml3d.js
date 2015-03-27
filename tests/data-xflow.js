@@ -821,16 +821,17 @@ test("Dataflow - Swap external input back and forth", function() {
     var offsetInput = this.doc.getElementById("offsetInput");
 
     var testStep = 0;
-    xml3dElem.addEventListener("framedrawn", function() {
-        start();
+    var framedrawn = function() {
         var positions;
         if (testStep === 0) {
+            start();
             positions = mesh.getResult()._entries.position;
             QUnit.closeArray(positions.value, [-1.0,1.0,-10.0,1.0,1.0,-10.0,-1.0,3.0,-10.0,1.0,3.0,-10.0], EPSILON, "Offset positions were correctly computed");
             offsetInput.setAttribute("src", "json/offsets1.json");
             testStep++;
             stop();
         } else if(testStep === 1) {
+            start();
             positions = mesh.getResult()._entries.position;
             if (!positions) {
                 stop();
@@ -841,12 +842,22 @@ test("Dataflow - Swap external input back and forth", function() {
             testStep++;
             stop();
         } else if(testStep === 2) {
+            start();
             positions = mesh.getResult()._entries.position;
             QUnit.closeArray(positions.value, [-1.0,1.0,-10.0,1.0,1.0,-10.0,-1.0,3.0,-10.0,1.0,3.0,-10.0], EPSILON, "Offset positions were correctly computed");
             testStep++;
         }
-    });
+    };
+    var loaded = function() {
+        xml3dElem.addEventListener("framedrawn", framedrawn);
+        var handler = getHandler(xml3dElem);
+        handler.draw();
+    };
     stop();
-    var handler = getHandler(xml3dElem);
-    handler.draw();
+    if (!xml3dElem.complete) {
+        xml3dElem.addEventListener("load", loaded);
+    } else {
+        loaded();
+    }
+
 });

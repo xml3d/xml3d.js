@@ -61,7 +61,7 @@ test("Change transform", 5, function() {
     actual = XML3DUnit.getPixelValue(glTest, 300, 100);
     deepEqual(actual, [ 255, 0, 0, 255 ], "Group was moved to the right");
 
-    this.doc.getElementById("mesh").setAttribute("style", "transform: translate3d(0, 2, 0)");
+    this.doc.getElementById("mesh").setAttribute("style", "transform: translate3d(0px, 2px, 0px)");
     hTest.draw();
     actual = XML3DUnit.getPixelValue(glTest, 30, 150);
     deepEqual(actual, [ 255, 0, 0, 255 ], "Mesh was moved up");

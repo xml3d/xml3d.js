@@ -3,6 +3,9 @@ var OctreeComposer = require("./octreecomposer.js");
 var RectangularCuboid = require("./rectangularcuboid.js");
 var XflowUtils = require("../xflow/utils.js");
 
+// Register the raycaster program
+require("./raycaster.js");
+
 /*  OctreeNode class
  is used by VolumeClosure for recursive subdividing volumes into eight octants
  subdividing takes place if given node can not be rendered

@@ -47,6 +47,10 @@ XML3D.extend(ProgramFactory.prototype, {
         return this.programs.fallback;
     },
 
+    getBackfaceProgram: function () {
+        return this.getProgramByName("backface");
+    },
+
     getPickingObjectIdProgram: function () {
         var picking = this.programs.picking;
         if (!picking.id) {

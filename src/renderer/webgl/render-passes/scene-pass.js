@@ -1,5 +1,7 @@
 var BaseRenderPass = require("./base.js");
 var Options = require("../../../utils/options.js");
+var GLBackfaceRenderTarget = require("../base/backfacerendertarget.js");
+var OctreeNode = require("../volume/octreenode.js");
 var mat4 = require("gl-matrix").mat4;
 var mat3 = require("gl-matrix").mat3;
 
@@ -14,6 +16,8 @@ Options.register(OPTION_FRONTFACE, "ccw");
  */
 var SceneRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
+
+    var context = renderInterface.context;
     /**
      * @type {function}
      */
@@ -22,6 +26,15 @@ var SceneRenderPass = function (renderInterface, output, opt) {
      * @type {function}
      */
     this.setFrontFace = getGlobalFrontFaceSetter(Options.getValue(OPTION_FRONTFACE));
+
+    if (!context.backfaceTarget) {
+        context.backfaceTarget = new GLBackfaceRenderTarget(context);
+    }
+    /**
+     * Program for volume rendering
+     * @type {GLProgramObject}
+     */
+    this.backfaceProgram = context.programFactory.getBackfaceProgram();
 
     var that = this;
     Options.addObserver(OPTION_FACECULLING, function (key, value) {
@@ -64,7 +77,13 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
 
             if (transparent) {
                 gl.enable(gl.BLEND);
-                gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+                if (this.isVolume(objectArray[0])) {
+                    // TODO(ksons): Set other blendfunc if not premultiply alpha
+                    // source colour is already pre-multiplied with alpha (XML3D sets gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL in true)
+                    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); // back-to-front
+                } else {
+                    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+                }
             }
 
             // At this point, we guarantee that the RenderObject has a valid shader
@@ -77,8 +96,16 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
 
             for (var i = 0, n = objectArray.length; i < n; i++) {
                 var obj = objectArray[i];
-                if (!obj.visible)
+
+                var octreeNode;
+                if (obj instanceof OctreeNode) {
+                    octreeNode = obj;
+                    obj = obj.renderObject;
+                }
+
+                if (!obj.visible) {
                     continue;
+                }
 
                 var mesh = obj.mesh;
                 XML3D.debug.assert(mesh, "We need a mesh at this point.");
@@ -98,13 +125,24 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 obj.getModelViewMatrixN(tmpModelViewN);
                 systemUniforms["modelViewMatrixN"] = tmpModelViewN;
 
+                systemUniforms["screenWidth"] = target.width; // TODO: Use coord instead?
+
                 program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
 
-                program.changeUniformVariableOverride(prevOverride, mesh.uniformOverride);
+                var override = mesh.uniformOverride;
+                if (this.isVolume(obj)) {
+						this.setVolumeParameters(octreeNode, override, program, gl);
+                }
+
+                program.changeUniformVariableOverride(prevOverride, override);
                 prevOverride = mesh.uniformOverride;
 
                 primitiveCount += mesh.draw(program);
                 objCount++;
+
+                if (this.isVolume(obj)) {
+                    this.resetVolumeParameters(obj);
+                }
 
                 if (transparent) {
                     gl.disable(gl.BLEND);
@@ -118,9 +156,90 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
             stats.primitives += primitiveCount;
             return stats;
         }
-    }())
+    }()),
+
+        isVolume: function (obj) {
+			return obj.drawable.getType() == "volume";
+		},
+
+		setVolumeParameters: function (octreeNode, override, program, gl) {
+			var mesh = octreeNode.renderObject.mesh;
+			mesh.buffers["position"] = octreeNode.positionBuffer;
+
+			if (program.descriptor.name == "raycaster") {
+				override = octreeNode.addVolumeOverrides(override);
+				var actualProgram = program.program;
+
+                if (program.samplers["volumeData"] && program.samplers["backface"]) {
+                    if (octreeNode.volumeDataTexture) {
+                        actualProgram.setUniformVariable("volumeData", [octreeNode.volumeDataTexture]);
+                    }
+                    actualProgram.setUniformVariable("noiseFunction", [mesh.noiseTexture]);
+                    actualProgram.setUniformVariable("backface", [this.renderInterface.context.backfaceTarget.backfaceSamplerTexture]);
+                }
 
 
+
+                // TODO(ksons): Widgets do not belong into xml3d.js => Rewrite
+                // var shaderElemId = octreeNode.renderObject.shaderHandle.adapter.node.attributes.id.value;
+                //if (XML3D.webgl.transferFunctionWidgets) {
+				//	var widget = XML3D.webgl.transferFunctionWidgets[shaderElemId];
+				//	if (widget && program.samplers["transferFunction"]) {
+				//		var tfTexture = program.samplers["transferFunction"].texture[0].handle;
+				//		gl.bindTexture(gl.TEXTURE_2D, tfTexture);
+				//		gl.texImage2D (gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, widget);
+				//		gl.bindTexture(gl.TEXTURE_2D, null);
+				//	}
+				//}
+				program.bind();
+			}
+		},
+
+		resetVolumeParameters: function (obj) {
+			obj.mesh.buffers["position"] = obj.drawable.positionBuffer;
+		},
+
+		renderOpaqueObjectsToBackfaceBuffer: function (opaqueObjects, scene, target, systemUniforms, c_programSystemUniforms,  gl) {
+			var objectArray = [];
+			for (var shaderId in opaqueObjects) {
+				objectArray.push.apply(objectArray, opaqueObjects[shaderId]);
+			}
+			if (objectArray.length > 0) {
+				gl.cullFace( gl.BACK );
+				this.renderObjectsToActiveBuffer(objectArray, scene, target, systemUniforms, c_programSystemUniforms,  { program: this.backfaceProgram });
+			}
+        },
+
+		renderVolumeBackSideToBackfaceBuffer: function (volumeObj, scene, target, systemUniforms, c_programSystemUniforms,  gl) {
+			gl.cullFace( gl.FRONT );
+			this.renderObjectsToActiveBuffer([volumeObj], scene, target, systemUniforms, c_programSystemUniforms, { program: this.backfaceProgram });
+		},
+
+		renderBackfacePass: function (volumeObj, opaqueObjects, scene, target, systemUniforms, c_programSystemUniforms,  gl) {
+			target.unbind();
+			this.renderInterface.context.backfaceTarget.bind();
+			this.renderOpaqueObjectsToBackfaceBuffer(opaqueObjects, scene, target, systemUniforms, c_programSystemUniforms, gl);
+			this.renderVolumeBackSideToBackfaceBuffer(volumeObj, scene, target, systemUniforms, c_programSystemUniforms,gl);
+			this.renderInterface.context.backfaceTarget.unbind();
+			target.bind();
+        },
+
+		renderColorPass: function (volumeObj, scene, target, systemUniforms, c_programSystemUniforms, gl, opts) {
+			gl.cullFace( gl.BACK );
+			this.renderObjectsToActiveBuffer([volumeObj], scene, target, systemUniforms, c_programSystemUniforms, opts);
+		},
+
+		drawVolumeObject: function (volumeObj, opaqueObjects, scene, target, systemUniforms, c_programSystemUniforms, opts) {
+			if (!volumeObj.visible) {
+				return;
+			}
+
+			var gl = this.renderInterface.context.gl;
+			gl.enable( gl.CULL_FACE );
+			this.renderBackfacePass(volumeObj, opaqueObjects, scene, target, systemUniforms, c_programSystemUniforms, gl);
+			this.renderColorPass(volumeObj, scene, target, systemUniforms, c_programSystemUniforms, gl, opts);
+			gl.disable( gl.CULL_FACE );
+		}
 });
 
 function getGlobalFrontFaceSetter(mode) {

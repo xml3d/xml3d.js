@@ -1,4 +1,6 @@
 var XC = require("../../../xflow/interface/constants.js");
+var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
+var InputNode = require("../../../xflow/interface/graph.js").InputNode;
 
 function convertToJSArray(value) {
     var jsArray = [value.length];
@@ -227,5 +229,21 @@ module.exports = {
             }
         }
         return box;
+    },
+
+    createBufferInputNode: function (type, name, size) {
+        if (size == 0)
+            return null;
+        var typeId = XC.DATA_TYPE_MAP[type];
+        var tupleSize = XC.DATA_TYPE_TUPLE_SIZE[typeId];
+        var arrayType = XC.TYPED_ARRAY_MAP[typeId];
+
+        var v = new (arrayType)(size * tupleSize);
+        var buffer = new BufferEntry(typeId, v);
+
+        var inputNode = new InputNode();
+        inputNode.data = buffer;
+        inputNode.name = name;
+        return inputNode;
     }
 };

@@ -185,8 +185,6 @@ DataAdapter.prototype.notifyChanged = function (evt) {
 };
 
 DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, status */) {
-    // we first set loading to true, to force a load event when a new, but cached xflow node is attached
-    this.xflowDataNode.setLoading(true);
     if (key === "src") {
         this.xflowDataNode.sourceNode = adapter ? adapter.getXflowNode() : null;
     } else if (key === "dataflow") {
@@ -195,7 +193,8 @@ DataAdapter.prototype.connectedAdapterChanged = function (key, adapter /*, statu
         window.eval(adapter.script);
         this.xflowDataNode.notify(XC.RESULT_STATE.CHANGED_STRUCTURE);
     }
-
+    // Cycle the load state to force a load event even if the new sourceNode is cached
+    this.xflowDataNode.setLoading(true);
     updateLoadState(this);
 };
 

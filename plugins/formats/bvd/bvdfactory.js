@@ -10,10 +10,10 @@
 	var reservedHeaderSize = 25; // bytes are reserved in the beginning for some extra information about the data (owner, measuring method, etc.)
 	
     var BVDFormatHandler = function() {
-        XML3D.base.BinaryFormatHandler.call(this);
+        XML3D.resource.FormatHandler.call(this);
     };
 	
-    XML3D.createClass(BVDFormatHandler, XML3D.base.BinaryFormatHandler);
+    XML3D.createClass(BVDFormatHandler, XML3D.resource.FormatHandler);
 
     BVDFormatHandler.prototype.isFormatSupported = function(response, responseType, mimetype) {
         if (!(response instanceof ArrayBuffer))
@@ -32,10 +32,7 @@
 	BVDFormatHandler.prototype.verifyFileSize = function(header) {
 		var bytes = (header.bytesForValue == 1) ? 1 : 2;
 		var mustSize = header.dimsX * header.dimsY * header.dimsZ * bytes + headerSize;
-		if (this.stream.length == mustSize)
-			return true;
-		else
-			return false;
+		return this.stream.length == mustSize;
 	};
 	
     BVDFormatHandler.prototype.readFileHeader = function() {
@@ -87,7 +84,7 @@
 	  if (m !== 0){
 		return s * m * TWO_POW_MINUS126;
 	  }
-	  return s * 0;
+	  return 0;
 	};
 
 	BVDFormatHandler.prototype.readUInt32 = function() {
@@ -110,8 +107,6 @@
 	  return b1 | b2;
 	};	
 		
-    var bvdFormatHandler = new BVDFormatHandler();
-    XML3D.base.registerFormat(bvdFormatHandler);
 
     function createXflowBuffer(dataNode, name, type, size, key) {
         var inputNode = Xflow.createBufferInputNode(type, name, size);
@@ -169,10 +164,7 @@
 		return node;
     };
 
-			
-	// Export
-	XML3D.base.BVDFormatHandler = BVDFormatHandler;
-		
+
     /**
      * @implements IDataAdapter
      */
@@ -190,10 +182,10 @@
 
     /**
      * @constructor
-     * @implements {XML3D.base.IFactory}
+     * @extends AdapterFactory
      */
     var BVDFactory = function(){
-        XML3D.base.AdapterFactory.call(this, "data");
+        XML3D.resource.AdapterFactory.call(this, "data");
     };
     XML3D.createClass(BVDFactory, XML3D.resource.AdapterFactory);
 
@@ -202,7 +194,11 @@
         return new BVDDataAdapter(data);
     };
 
-    XML3D.base.resourceManager.addBinaryExtension(".bvd");
+
+    XML3D.resource.addBinaryExtension(".bvd");
+
+    var bvdFormatHandler = new BVDFormatHandler();
     bvdFormatHandler.registerFactoryClass(BVDFactory);
+    XML3D.base.registerFormat(bvdFormatHandler);
 
 }());

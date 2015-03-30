@@ -154,6 +154,7 @@ var xml3dFormatHandler = new XML3DFormatHandler();
 registerFormat(xml3dFormatHandler);
 XML3D.xml3dFormatHandler = xml3dFormatHandler;
 XML3D.resource.FormatHandler = FormatHandler;
+XML3D.resource.JSONFormatHandler = JSONFormatHandler;
 
 module.exports = {
     JSONFormatHandler: JSONFormatHandler,

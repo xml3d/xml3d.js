@@ -109,6 +109,10 @@ exports = module.exports = function (grunt) {
         },
         uglify: {
             "<%= releaseName %>": "<%= releaseName %>"
+        },
+
+        watch: {
+            files: ['src/**'], tasks: ['default']
         }
 
 
@@ -162,6 +166,7 @@ exports = module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-closure-compiler');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     var builds = moduleBuilds.map(function(f) { return f.task });
     builds.push("concat:dist");

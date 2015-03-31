@@ -62,6 +62,13 @@ We have an overview documentation in each subfolder of the project:
 
 
 ### Change log ###
+4.9 - 31.03.2014
+* External Xflow Operators - [demo](http://xml3d.github.io/xml3d-examples/examples/facemorph/facemorph.html), [doc](https://github.com/xml3d/xml3d.js/wiki/External-resources#External_Xflow_Operators)
+* [IE 11 Support](https://github.com/xml3d/xml3d.js/issues/97)
+* Grunt build system now based on [Browserify](http://browserify.org/)
+* Source Mapping for the [xml3d-dev](http://xml3d.org/xml3d/scripts/xml3d-dev.js) build
+* Bugfixes: [37](https://github.com/xml3d/xml3d.js/issues/37), [73](https://github.com/xml3d/xml3d.js/issues/73), [87](https://github.com/xml3d/xml3d.js/issues/87), [88](https://github.com/xml3d/xml3d.js/issues/88), [92](https://github.com/xml3d/xml3d.js/issues/92), [98](https://github.com/xml3d/xml3d.js/issues/98), [100](https://github.com/xml3d/xml3d.js/issues/100), [104](https://github.com/xml3d/xml3d.js/issues/104)
+
 4.8 - 18.12.2014
 * Recursive Assets - [demo](http://xml3d.github.io/xml3d-examples/examples/recursiveAsset/recursive.html), [doc](https://github.com/xml3d/xml3d.js/wiki/Assets-and-Model), [issue](https://github.com/xml3d/xml3d.js/issues/76)
 * Load Events - [doc](https://github.com/xml3d/xml3d.js/wiki/Events#load)

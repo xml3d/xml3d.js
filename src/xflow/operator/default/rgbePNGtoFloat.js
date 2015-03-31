@@ -1,19 +1,22 @@
+var SamplerConfig = require("../../interface/data.js").SamplerConfig;
+var XC = require("../../interface/constants.js");
+
 Xflow.registerOperator("xflow.rgbePNGtoFloat", {
     outputs: [ {type: 'texture', name : 'result', customAlloc: true } ],
     params:  [
         {type: 'texture', source : 'image'}
     ],
     alloc: function (sizes, image) {
-        var samplerConfig = new Xflow.SamplerConfig;
+        var samplerConfig = new SamplerConfig;
         samplerConfig.setDefaults();
-        samplerConfig.minFilter = Xflow.TEX_FILTER_TYPE.NEAREST;
-        samplerConfig.magFilter = Xflow.TEX_FILTER_TYPE.NEAREST;
+        samplerConfig.minFilter = XC.TEX_FILTER_TYPE.NEAREST;
+        samplerConfig.magFilter = XC.TEX_FILTER_TYPE.NEAREST;
         sizes["result"] = {
             imageFormat : {
                 width: image.width,
                 height: image.height,
-                texelType: Xflow.TEXTURE_TYPE.FLOAT,
-                texelFormat: Xflow.TEXTURE_FORMAT.RGB
+                texelType: XC.TEXTURE_TYPE.FLOAT,
+                texelFormat: XC.TEXTURE_FORMAT.RGB
             },
             samplerConfig: samplerConfig
         }

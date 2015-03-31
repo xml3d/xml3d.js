@@ -22,21 +22,21 @@ test("ProgramObject.hastransparency is set correctly", function() {
 
     console.log(getWebGLAdapter(this.doc.getElementById("opaque")));
 
-    var shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("opaque")).templateId).shaderClosures[0];
+    var shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("opaque"))._materialConfiguration.id).shaderClosures[0];
     ok(shader, "Found #opaque shader");
     if(shader) equal(shader.hasTransparency(), false, "Opaque shader has no transparency set");
 
-    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("non-opaque")).templateId).shaderClosures[0];
+    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("non-opaque"))._materialConfiguration.id).shaderClosures[0];
     ok(shader, "Found #non-opaque shader");
     if(shader) equal(shader.hasTransparency(), true, "Non-Opaque shader has transparency set");
 
-    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("matte")).templateId).shaderClosures[0];
+    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("matte"))._materialConfiguration.id).shaderClosures[0];
     ok(shader, "Found #matte shader");
     if(shader) equal(shader.hasTransparency(), false, "Matte shader is always opaque");
 
     var transparencyAttribute = this.doc.getElementById("change_transparencyAttribute");
 
-    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("change")).templateId).shaderClosures[0];
+    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("change"))._materialConfiguration.id).shaderClosures[0];
 
     ok(shader, "Found #change shader");
     if(shader){

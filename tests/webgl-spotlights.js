@@ -44,21 +44,24 @@ test("Initialization: entries in lights.spot check", 11, function() {
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
 
-    ok(h.renderer.scene.lights.spot!=null, "Test for spotlight data existence");
+    var lights = h.renderer.scene.lights;
+    var lightModels = h.renderer.scene.lights._models;
+    var params = {};
 
-    sl = h.renderer.scene.lights.spot;
-    ok(sl.length==1, "Test light count");
+    notEqual(lightModels.spot, undefined, "Test for spotlight data existence");
 
-    var sld = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
-    sl[0].getLightData(sld, 0);
+    ok(lightModels.spot.lightModels.length==1, "Test light count");
 
-    deepEqual(sld.intensity, array2floatArray2array([10, 10, 10]), "Test light intensity entry");
-    deepEqual(sld.attenuation, array2floatArray2array([0, 0, 1]), "Test light attenuation entry");
-    ok(sld.on, "Test light 'on' entry");
-    deepEqual(sld.softness, array2floatArray2array([0.5]), "Test light softness entry");
-    deepEqual(sld.falloffAngle, array2floatArray2array([0.785]), "Test light cutOffAngle entry");
-    deepEqual(sld.position, array2floatArray2array([0, 0, 1]), "Test for default position entry");
-    deepEqual(sld.direction, array2floatArray2array([0, 0, -1]), "Test for default direction entry");
+    lights.fillGlobalParameters(params, /* force = */ true);
+
+    QUnit.closeArray(params.spotLightIntensity, [10, 10, 10], EPSILON, "Test light intensity entry");
+    QUnit.closeArray(params.spotLightAttenuation, [0, 0, 1], EPSILON, "Test light attenuation entry");
+    QUnit.closeArray(params.spotLightOn, [1], EPSILON, "Test light 'on' entry");
+    QUnit.closeArray(params.spotLightSoftness, [0.5], EPSILON, "Test light softness entry");
+    QUnit.closeArray(params.spotLightFalloffAngle, [0.785], EPSILON, "Test light cutOffAngle entry");
+    QUnit.closeArray(params.spotLightPosition, [0, 0, 1], EPSILON, "Test for default position entry");
+    QUnit.closeArray(params.spotLightDirection, [0, 0, -1], EPSILON, "Test for default direction entry");
+
 });
 
 test("All spot lights visibility off", 4, function() {
@@ -109,7 +112,7 @@ test("Light spot geometry test", 6, function() {
 
 });
 
-test("Change of light shader parameters check against lights.spot", 6, function() {
+test("Change of light shader parameters check against lights.spot", 8, function() {
     var x = this.doc.getElementById("xml3DElem"),
     actual,
     win = this.doc.defaultView,
@@ -117,29 +120,33 @@ test("Change of light shader parameters check against lights.spot", 6, function(
     h = getHandler(x);
 
     var ls_Spot = this.doc.getElementById("ls_Spot");
-    var sl = h.renderer.scene.lights.spot;
-    var sld = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
+    var lights = h.renderer.scene.lights;
+    var params = {};
+
+    notEqual(lights._models.spot, undefined, "Test for spotlight data existence");
+    ok(lights._models.spot.lightModels.length==1, "Test light count");
 
 
     getChildNodeByName(ls_Spot, "softness").textContent = "0.2";
-    win.XML3D._flushDOMChanges();
-    sl[0].getLightData(sld, 0);
-    deepEqual(sld.softness, array2floatArray2array([0.2]), "Test beamWidth entry change");
+    win.XML3D.flushDOMChanges();
+    lights.fillGlobalParameters(params, /* force = */ true);
+    QUnit.closeArray(params.spotLightSoftness, [0.2], EPSILON, "Test softness entry change");
+
 
     getChildNodeByName(ls_Spot, "falloffAngle").textContent = "0.6";
-    win.XML3D._flushDOMChanges();
-    sl[0].getLightData(sld, 0);
-    deepEqual(sld.falloffAngle, array2floatArray2array([0.6]), "Test cutOffAngle entry change");
+    win.XML3D.flushDOMChanges();
+    lights.fillGlobalParameters(params, /* force = */ true);
+    QUnit.closeArray(params.spotLightFalloffAngle, [0.6], EPSILON, "Test falloffAngle entry change");
 
     getChildNodeByName(ls_Spot, "intensity").textContent = "1 0 1";
-    win.XML3D._flushDOMChanges();
-    sl[0].getLightData(sld, 0);
-    deepEqual(sld.intensity, array2floatArray2array([1, 0, 1]), "Test intensity entry change");
+    win.XML3D.flushDOMChanges();
+    lights.fillGlobalParameters(params, /* force = */ true);
+    QUnit.closeArray(params.spotLightIntensity, [1, 0, 1], EPSILON, "Test intensity entry change");
 
     getChildNodeByName(ls_Spot, "attenuation").textContent = "1 0 0";
-    win.XML3D._flushDOMChanges();
-    sl[0].getLightData(sld, 0);
-    deepEqual(sld.attenuation, array2floatArray2array([1, 0, 0]), "Test attenuation entry change");
+    win.XML3D.flushDOMChanges();
+    lights.fillGlobalParameters(params, /* force = */ true);
+    QUnit.closeArray(params.spotLightAttenuation, [1, 0, 0], EPSILON, "Test attenuation entry change");
 });
 
 test("Change in transformation hierarchy check against lights.spot", 4, function() {
@@ -149,19 +156,21 @@ test("Change in transformation hierarchy check against lights.spot", 4, function
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
 
+    var lights = h.renderer.scene.lights;
+    var params = {};
+
     var t_Lamp = this.doc.getElementById("t_Lamp");
-    var sl = h.renderer.scene.lights.spot
-    var sld = { position: [], attenuation: [], direction: [], intensity: [], on: [], softness: [], falloffAngle: [] };
 
     t_Lamp.setAttribute("translation", "0 0 3");
-    win.XML3D._flushDOMChanges();
-    sl[0].getLightData(sld, 0);
-    deepEqual(sld.position, array2floatArray2array([0, 0, 3]), "Test position entry change");
+    win.XML3D.flushDOMChanges();
+    lights.fillGlobalParameters(params, /* force = */ true);
+    QUnit.closeArray(params.spotLightPosition, [0, 0, 3], EPSILON, "Test position entry change");
 
     t_Lamp.setAttribute("rotation", "0 1 0 1.57079632679");
-    win.XML3D._flushDOMChanges();
-    sl[0].getLightData(sld, 0);
-    ok(equarr(sld.direction, [-1, 0, 0], 0.0001), "Test direction entry change");
+    win.XML3D.flushDOMChanges();
+    lights.fillGlobalParameters(params, /* force = */ true);
+    QUnit.closeArray(params.spotLightDirection, [-1, 0, 0], EPSILON, "Test position entry change");
+
 
 });
 

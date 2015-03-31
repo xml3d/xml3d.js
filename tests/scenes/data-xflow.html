@@ -25,7 +25,7 @@
                {type: 'int', source: 'threshold'}
            ],
 
-           platform: Xflow.PLATFORM.CL,
+           platform: Xflow.constants.PLATFORM.CL,
 
            evaluate: [
                "int color = image[image_i].x;",
@@ -48,7 +48,7 @@
             {type: 'int', source: 'threshold'}
         ],
 
-        platform: Xflow.PLATFORM.JAVASCRIPT,
+        platform: Xflow.constants.PLATFORM.JAVASCRIPT,
 
         evaluate: function (output, input, threshold) {
             var s = input.data,

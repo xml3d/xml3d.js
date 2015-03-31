@@ -117,6 +117,51 @@ test("Mousedown Event", function() {
 test("Mouseup Event", function() {
     trippleMouseEventCheck.call(this, 'mouseup');
 });
+test("Wheel Event", function() {
+    var mesh01 = this.doc.getElementById("myMesh01");
+    mesh01.addEventListener("wheel", function(evt){
+        ok(true, "#myMesh01 mesh event received");
+        ok(evt.toString() === "[object WheelEvent]", "Event was of the WheelEvent class");
+        ok(evt.deltaX === 5 && evt.deltaMode === 1 && event.type === "wheel", "Event was the right WheelEvent");
+        equal(evt.target, mesh01, "Event target is #myMesh01");
+        start();
+    });
+    var opts = {
+        canBubble: true,
+        cancelable: true,
+        view: this.xml3dEl.ownerDocument.defaultView,
+        detail: 1,
+        deltaX: 5,
+        deltaY: 0,
+        deltaZ: 0,
+        deltaMode: 1,
+        screenX: 0,
+        screenY: 0,
+        clientX: 157,
+        clientY: 104,
+        relatedTarget: null
+    };
+    var eventConstructorsSupported = (function() {
+        try {
+            new WheelEvent("wheel", {});
+            return true;
+        } catch(e) {
+            return false;
+        }
+    })();
+    stop();
+    var event;
+    if (eventConstructorsSupported) {
+        event = new WheelEvent("wheel", opts);
+    } else {
+        // IE 11...
+        event = this.doc.createEvent("WheelEvent");
+        event.initWheelEvent("wheel", opts.canBubble, opts.cancelable, opts.view, opts.detail,
+            opts.screenX, opts.screenY, opts.clientX, opts.clientY, opts.button, opts.relatedTarget, "", opts.deltaX,
+            opts.deltaY, opts.deltaZ, opts.deltaMode);
+    }
+    this.xml3dEl._configured.canvas.dispatchEvent(event);
+});
 
 module("Event tests", {
     setup : function() {
@@ -139,7 +184,7 @@ module("Event tests", {
 test("Unsupported Event", function() {
     equal(this.win.callBackCounter, 2, "Unsupported event was received for 2 handlers");
 
-    var links = this.doc.querySelectorAll("a[href='http://www.xml3d.org']");
+    var links = this.doc.querySelectorAll("a[href='http://www.xml3d.org/help']");
     equal(links.length, 2, "There are two default error messages (with xml3d.org link)");
     var customMessage = this.doc.querySelectorAll("div.darkness");
     equal(customMessage.length, 1, "There is one custom error message");

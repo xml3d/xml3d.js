@@ -26,8 +26,6 @@ test("Observe data disconnected from scene graph", function() {
     ok(this.window.XML3DDataObserver, "XML3DDataObserver is defined");
 
 
-    var xTest = this.doc.getElementById("myXml3d"),
-        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
 
     var testNumber = 0;
@@ -43,14 +41,14 @@ test("Observe data disconnected from scene graph", function() {
                 new Float32Array([-1, -1, -10,    1, -1, -10,   -1, 1, -10,   1, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
-            self.doc.getElementById("singleWeight").firstChild.nodeValue = "0.5";
+            self.doc.getElementById("singleWeight").textContent = "0.5";
         }
         if(testNumber == 2){
             QUnit.closeArray(result.getValue("position"),
                 new Float32Array([-1.25, -1, -10,    1, -1, -10,   -1.5, 1, -10,   1, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
-            self.doc.getElementById("singleWeight").firstChild.nodeValue = "1";
+            self.doc.getElementById("singleWeight").textContent = "1";
         }
         if(testNumber == 3){
             QUnit.closeArray(result.getValue("position"),
@@ -58,7 +56,7 @@ test("Observe data disconnected from scene graph", function() {
                 , EPSILON, "Value of position matches expected data");
 
             observer.disconnect();
-            self.doc.getElementById("singleWeight").firstChild.nodeValue = "0";
+            self.doc.getElementById("singleWeight").textContent= "0";
             window.setTimeout(function(){
                 ok(testNumber == 3, "Callback was not called after observer was disconnected");
                 start();
@@ -70,14 +68,14 @@ test("Observe data disconnected from scene graph", function() {
     observer.observe(this.doc.getElementById("morphSingle"), {names: "position" });
 
 
-    this.doc.getElementById("singleWeight").firstChild.nodeValue = "0";
+    this.doc.getElementById("singleWeight").textContent = "0";
 
     stop();
 });
 
 test("Observe data connected to scene graph", function() {
     var xTest = this.doc.getElementById("myXml3d"),
-        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
+        glTest = getContextForXml3DElement(xTest);
     var self = this;
 
     var testNumber = 0;
@@ -113,6 +111,6 @@ test("Observe data connected to scene graph", function() {
     observer.observe( this.doc.getElementById("morphDouble"), {names: "position" } );
     xTest.addEventListener("framedrawn", onFrameDrawn);
 
-    this.doc.getElementById("doubleWeight1").firstChild.nodeValue = "1";
+    this.doc.getElementById("doubleWeight1").textContent = "1";
     stop();
 });

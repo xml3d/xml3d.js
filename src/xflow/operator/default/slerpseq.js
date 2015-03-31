@@ -1,10 +1,13 @@
+var binarySearch = require("../../utils/utils").binarySearch;
+var XC = require("../../interface/constants.js");
+
 Xflow.registerOperator("xflow.slerpSeq", {
     outputs: [  {type: 'float4', name: 'result'}],
     params:  [  {type: 'float4', source: 'sequence'},
                 {type: 'float', source: 'key'}],
-    mapping: [  {name: 'value1', source: 'sequence', sequence: Xflow.SEQUENCE.PREV_BUFFER, keySource: 'key'},
-                {name: 'value2',  source: 'sequence', sequence: Xflow.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
-                {name: 'weight',  source: 'sequence', sequence: Xflow.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
+    mapping: [  {name: 'value1', source: 'sequence', sequence: XC.SEQUENCE.PREV_BUFFER, keySource: 'key'},
+                {name: 'value2',  source: 'sequence', sequence: XC.SEQUENCE.NEXT_BUFFER, keySource: 'key'},
+                {name: 'weight',  source: 'sequence', sequence: XC.SEQUENCE.LINEAR_WEIGHT, keySource: 'key'}],
     evaluate: function(result, value1, value2, weight, info) {
         for(var i = 0; i < info.iterateCount; ++i){
             XML3D.math.quat.slerpOffset(  value1,info.iterFlag[0] ? i*4 : 0,
@@ -12,24 +15,6 @@ Xflow.registerOperator("xflow.slerpSeq", {
                                           weight[0],
                                           result, i*4, true);
         }
-    },
-
-    evaluate_parallel: function(sequence, weight) {
-        /*
-        var me = this;
-        this.result.result = sequence.interpolate(weight[0], function(v1,v2,t) {
-            var count = v1.length;
-            if (!me.tmp || me.tmp.length != count)
-                me.tmp = new Float32Array(count);
-            var result = me.tmp;
-            for(var i = 0; i < count / 4; i++) {
-                var offset = i*4;
-                XML3D.math.quat.slerpOffset(v1,v2,offset,t,result, true);
-            };
-            return result;
-        });
-        */
-        return true;
     }
 });
 
@@ -45,7 +30,7 @@ Xflow.registerOperator("xflow.slerpKeys", {
     },
     evaluate: function(result, keys, values, key) {
         var maxIdx = Math.min(keys.length, Math.floor(values.length / 4));
-        var idx = Xflow.utils.binarySearch(keys, key[0], maxIdx);
+        var idx = binarySearch(keys, key[0], maxIdx);
 
         if(idx < 0 || idx == maxIdx - 1){
             idx = Math.max(0,idx);

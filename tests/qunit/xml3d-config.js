@@ -160,13 +160,7 @@ XML3DUnit = {};
 
 XML3DUnit.getRendererString = function() {
     var canvas = document.createElement("canvas");
-    var context = null;
-
-    result = "Renderer: ";
-    if(XML3D._native)
-    {
-        return result + "Native";
-    }
+    var context = null, result = "";
 
     try {
       context = canvas.getContext("webgl");
@@ -182,10 +176,9 @@ XML3DUnit.getRendererString = function() {
         result += "none found";
     } else {
         var ext = context.getExtension("WEBGL_debug_renderer_info");
-        result += "WebGL";
         if (ext) {
-            result += context.getParameter(ext.UNMASKED_VENDOR_WEBGL);
-            result += context.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+            result += "WebGL Vendor: " + context.getParameter(ext.UNMASKED_VENDOR_WEBGL);
+            result += "<br>WebGL Renderer: " + context.getParameter(ext.UNMASKED_RENDERER_WEBGL);
         }
     }
     return result;
@@ -234,4 +227,79 @@ XML3DUnit.pixelsAreEqual = function(actual, shouldBe){
             actual[1] == shouldBe[1] &&
             actual[2] == shouldBe[2] &&
             actual[3] == shouldBe[3];
+}
+
+function promiseIFrameLoaded(url) {
+    var v = document.getElementById("xml3dframe");
+
+    ok(v, "Found iframe.");
+    var deferred = Q.defer();
+
+    var f = function(e) {
+        deferred.resolve(v.contentDocument);
+        v.removeEventListener("load", f, true);
+    };
+    // TODO: Loading failed
+    v.addEventListener("load", f, true);
+    v.src = url;
+    return deferred.promise;
+};
+
+function promiseOneSceneCompleteAndRendered(xml3dElement) {
+    if(xml3dElement.complete) {
+        return Q(xml3dElement);
+    }
+    var deferred = Q.defer();
+    var f = function(e) {
+        // Child elements dispact load events as well
+        if(e.target != xml3dElement) {
+            return;
+        }
+        xml3dElement.removeEventListener("load", f, true);
+        deferred.resolve(xml3dElement);
+    };
+    xml3dElement.addEventListener("load", f, true);
+    return deferred.promise;
+}
+
+function promiseSceneRendered(xml3dElement) {
+    var renderer = getRenderer(xml3dElement);
+    var glContext = getContextForXml3DElement(xml3dElement);
+    var deferred = Q.defer();
+
+    var first = true;
+    var f = function() {
+        if(first) {
+            first = false;
+            renderer.requestRedraw("test-triggered");
+            return;
+        }
+        xml3dElement.removeEventListener("framedrawn", f, true);
+        XML3DUnit.getPixelValue(glContext, 1, 1);
+        window.setTimeout(function() {
+            deferred.resolve(xml3dElement);
+        }, 100);
+    };
+
+    xml3dElement.addEventListener("framedrawn",f,false);
+    renderer.requestRedraw("test-triggered");
+    return deferred.promise;
+}
+
+function getWebGLAdapter(x) {
+    var window = x.ownerDocument.defaultView ?x.ownerDocument.defaultView : x.ownerDocument.parentWindow;
+    window.XML3D.flushDOMChanges();
+    if(x._configured){
+        for(var i in x._configured.adapters){
+            if(i.indexOf("webgl") == 0){
+                return x._configured.adapters[i];
+            }
+        }
+    }
+    return null;
+}
+
+function getWebGLFactory(x) {
+    var adapter = getWebGLAdapter(x);
+    return adapter ? adapter.factory : null;
 }

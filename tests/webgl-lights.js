@@ -156,22 +156,22 @@ test("Adding lights", 6, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    var lightsArray = h.renderer.scene.lights;
-    ok(lightsArray.point.length == 1 && lightsArray.directional.length == 1, "Renderer sees 2 lights");
+    var lightModels = h.renderer.scene.lights._models;
+    ok(lightModels.point.lightModels.length == 1 && lightModels.directional.lightModels.length == 1, "Renderer sees 2 lights");
 
     var newLight = this.doc.createElementNS(XML3D.ns, "light");
     newLight.setAttribute("shader", "#ls_Point2");
     this.doc.getElementById("pointlight2").appendChild(newLight);
 
-    this.win.XML3D._flushDOMChanges();
-    equal(lightsArray.point.length, 2, "Light was added to the lights array");
+    this.win.XML3D.flushDOMChanges();
+    equal(lightModels.point.lightModels.length, 2, "Light was added to the lights array");
 
     var newSpot = this.doc.createElementNS(XML3D.ns, "light");
     newSpot.setAttribute("shader", "#ls_Spot");
     this.doc.getElementById("spotlight").appendChild(newSpot);
 
-    this.win.XML3D._flushDOMChanges();
-    equal(lightsArray.spot.length, 1, "Spot light was added to the lights array");
+    this.win.XML3D.flushDOMChanges();
+    equal(lightModels.spot.lightModels.length, 1, "Spot light was added to the lights array");
 
     this.doc.getElementById("dirlight").visible = false;
     this.doc.getElementById("pointlight").visible = false;
@@ -187,8 +187,9 @@ test("Removing lights", 6, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    var lightsArray = h.renderer.scene.lights;
-    ok(lightsArray.point.length == 1 && lightsArray.directional.length == 1, "Renderer sees 2 lights");
+    var lightModels = h.renderer.scene.lights._models;
+    ok(lightModels.point.lightModels.length == 1 && lightModels.directional.lightModels.length == 1, "Renderer sees 2 lights");
+
     this.doc.getElementById("dirlight").visible = true;
     this.doc.getElementById("pointlight").visible = true;
 
@@ -198,10 +199,10 @@ test("Removing lights", 6, function() {
     deepEqual(actual, [255,0,255,255], "Phong object is lit by both lights");
 
     var dirLight = this.doc.getElementById("dirlight");
-    dirLight.parentElement.removeChild(dirLight);
+    dirLight.parentNode.removeChild(dirLight);
 
-    this.win.XML3D._flushDOMChanges();
-    equal(lightsArray.directional.length, 0, "Light was removed from the lights array");
+    this.win.XML3D.flushDOMChanges();
+    equal(lightModels.directional.lightModels.length, 0, "Light was removed from the lights array");
 
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
@@ -248,7 +249,7 @@ test("Remove light shader", 4, function() {
     deepEqual(actual, [255,0,255,255], "Phong object is lit by both lights");
 
     var pointLight = this.doc.getElementById("ls_Point");
-    pointLight.parentElement.removeChild(pointLight);
+    pointLight.parentNode.removeChild(pointLight);
 
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);

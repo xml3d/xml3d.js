@@ -1,0 +1,12 @@
+{
+	"data": {
+		"offset": {
+			"seq": [ {
+				"value": [ 0, -2, 0, 0, -2, 0, 0, -2, 0, 0, -2, 0 ]
+			} ],
+			"type": "float3"
+		}
+	},
+	"format": "xml3d-json",
+	"version": "0.4.0"
+}

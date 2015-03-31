@@ -1,15 +1,12 @@
-(function() {
-
-//----------------------------------------------------------------------------------------------------------------------
-// XML3D.base.Asset
-//----------------------------------------------------------------------------------------------------------------------
+var Set = require("../xflow/utils/utils.js").set;
+var DataNode = require("../xflow/interface/graph.js").DataNode;
 
 function AssetError(message, node){
     this.message = message;
     this.node = node;
 }
 
-XML3D.base.Asset = function(refNode){
+var Asset = function(refNode){
     this.name = null;
     this.srcAsset = null;
     this.children = [];
@@ -27,11 +24,11 @@ XML3D.base.Asset = function(refNode){
     this.progressLevel = Infinity;
 };
 
-XML3D.base.Asset.prototype.checkValidity = function(){
+Asset.prototype.checkValidity = function(){
     if(this.isSubtreeLoading())
         return;
     checkRecursive(this);
-}
+};
 function checkRecursive(asset){
     if(asset.srcAsset){
         checkRecursive(asset.srcAsset);
@@ -50,46 +47,48 @@ function checkRecursive(asset){
 }
 
 
-XML3D.base.Asset.prototype.setLoading = function(loading){
+Asset.prototype.setLoading = function(loading){
     if(loading != this.loading){
         this.loading = loading;
         updateLoadingState(this);
         invalidateAsset(this);
 
     }
-}
+};
 
-XML3D.base.Asset.prototype.isSubtreeLoading = function(){
+Asset.prototype.isSubtreeLoading = function(){
     return this.progressLevel == 0;
-}
-XML3D.base.Asset.prototype.getProgressLevel = function(){
+};
+Asset.prototype.getProgressLevel = function(){
     return this.progressLevel;
-}
+};
 
-XML3D.base.Asset.prototype.setName = function(name){
+Asset.prototype.setName = function(name){
     this.name = name;
     invalidateAsset(this);
-}
+};
 
-XML3D.base.Asset.prototype.setShader = function(shader){
+Asset.prototype.setShader = function(shader){
     this.shader = shader;
     invalidateAsset(this);
-}
+};
 
-XML3D.base.Asset.prototype.setTransform = function(transform){
+Asset.prototype.setTransform = function(transform){
     this.transform = transform;
-    invalidateAsset(this);
-}
+    if (this.refNode.localName.toLowerCase() !== "model") {
+        invalidateAsset(this);
+    }
+};
 
-XML3D.base.Asset.prototype.appendChild = function(child){
+Asset.prototype.appendChild = function(child){
     this.children.push(child);
     child.assetParent = this;
     updateLoadingState(this);
     invalidateAsset(this);
 
-}
+};
 
-XML3D.base.Asset.prototype.setPickFilter = function(pickFilterString){
+Asset.prototype.setPickFilter = function(pickFilterString){
     if(typeof pickFilterString == "string"){
         this.pickFilter = new AssetPickFilter();
         this.pickFilter.parse(pickFilterString);
@@ -97,17 +96,17 @@ XML3D.base.Asset.prototype.setPickFilter = function(pickFilterString){
     else
         this.pickFilter = null;
     invalidateAsset(this);
-}
+};
 
-XML3D.base.Asset.prototype.appendSubAsset = function(subAsset){
+Asset.prototype.appendSubAsset = function(subAsset){
     subAsset._addParent(this);
     this.subAssets.push(subAsset);
     updateLoadingState(this);
     invalidateAsset(this);
 
-}
+};
 
-XML3D.base.Asset.prototype.setSrcAsset = function(asset){
+Asset.prototype.setSrcAsset = function(asset){
     if(this.srcAsset)
         this.srcAsset._removeParent(this);
 
@@ -118,17 +117,17 @@ XML3D.base.Asset.prototype.setSrcAsset = function(asset){
     updateLoadingState(this);
     invalidateAsset(this);
 
-}
+};
 
-XML3D.base.Asset.prototype.clearChildren = function(){
+Asset.prototype.clearChildren = function(){
     var i = this.children.length;
     while(i--) this.children[i].assetParent = null;
     this.children = [];
     updateLoadingState(this);
     invalidateAsset(this);
 
-}
-XML3D.base.Asset.prototype.clearSubAssets = function(){
+};
+Asset.prototype.clearSubAssets = function(){
     var i = this.subAssets.length;
     while(i--) {
         this.subAssets[i]._removeParent(this);
@@ -137,39 +136,39 @@ XML3D.base.Asset.prototype.clearSubAssets = function(){
     updateLoadingState(this);
     invalidateAsset(this);
 
-}
+};
 
-XML3D.base.Asset.prototype._addParent = function(asset){
+Asset.prototype._addParent = function(asset){
     this.parents.push(asset);
-}
-XML3D.base.Asset.prototype._removeParent = function(asset){
+};
+Asset.prototype._removeParent = function(asset){
     var idx = this.parents.indexOf(asset);
     if(idx != -1)
         this.parents.splice(idx, 1);
-}
+};
 
-XML3D.base.Asset.prototype._callLoadListeners = function(newLevel, oldLevel){
+Asset.prototype._callLoadListeners = function(newLevel, oldLevel){
     var listeners = this.listener;
     for(var i = 0; i < listeners.length; ++i){
         listeners[i].onAssetLoadChange && listeners[i].onAssetLoadChange(this, newLevel, oldLevel);
     }
-}
+};
 
 
-XML3D.base.Asset.prototype.addChangeListener = function(listener){
-    Xflow.utils.set.add(this.listener, listener);
-}
-XML3D.base.Asset.prototype.removeChangeListener = function(listener){
-    Xflow.utils.set.remove(this.listener, listener);
-}
+Asset.prototype.addChangeListener = function(listener){
+    Set.add(this.listener, listener);
+};
+Asset.prototype.removeChangeListener = function(listener){
+    Set.remove(this.listener, listener);
+};
 
-XML3D.base.Asset.prototype.getResult = function(){
+Asset.prototype.getResult = function(){
     if(!this.assetResult){
-        this.assetResult = new XML3D.base.AssetResult();
+        this.assetResult = new AssetResult();
         this.assetResult.construct(this);
     }
     return this.assetResult;
-}
+};
 
 function invalidateAsset(asset){
     if(asset.assetResult){
@@ -211,10 +210,10 @@ function updateLoadingState(asset){
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// XML3D.base.SubData
+// SubData
 //----------------------------------------------------------------------------------------------------------------------
 
-XML3D.base.SubData = function(xflowNodeOut, xflowNodeIn, refNode){
+var SubData = function(xflowNodeOut, xflowNodeIn, refNode){
     this.xflowNodeOut = xflowNodeOut;
     this.xflowNodeIn = xflowNodeIn;
     this.refNode = refNode || null;
@@ -236,16 +235,16 @@ XML3D.base.SubData = function(xflowNodeOut, xflowNodeIn, refNode){
     this._updateLoadingState();
 };
 
-XML3D.base.SubData.prototype.setLoading = function(loading){
+SubData.prototype.setLoading = function(loading){
     if(loading != this.loading){
         this.loading = loading;
         this._updateLoadingState();
         invalidateParent(this);
 
     }
-}
+};
 
-XML3D.base.SubData.prototype._updateLoadingState = function(){
+SubData.prototype._updateLoadingState = function(){
     var progressLevel = this.loading ? this.loadLevel : Infinity;
     progressLevel = Math.min(progressLevel, this.xflowNodeIn.getProgressLevel());
     var oldLevel = this.progressLevel;
@@ -255,25 +254,25 @@ XML3D.base.SubData.prototype._updateLoadingState = function(){
         this.assetParent && updateLoadingState(this.assetParent);
         invalidateParent(this);
     }
-}
-XML3D.base.SubData.prototype.onXflowLoadEvent = function(){
+};
+SubData.prototype.onXflowLoadEvent = function(){
     this._updateLoadingState();
-}
+};
 
-XML3D.base.SubData.prototype.isSubtreeLoading = function(){
+SubData.prototype.isSubtreeLoading = function(){
     return this.loading;
-}
+};
 
-XML3D.base.SubData.prototype.isMesh = function(){
+SubData.prototype.isMesh = function(){
     return !!this.meshType;
-}
+};
 
-XML3D.base.SubData.prototype.setName = function(name){
+SubData.prototype.setName = function(name){
     this.name = name;
     invalidateParent(this);
-}
+};
 
-XML3D.base.SubData.prototype.setMatchFilter = function(matchString){
+SubData.prototype.setMatchFilter = function(matchString){
     if(typeof matchString == "string"){
         this.matchFilter = new AssetPickFilter();
         this.matchFilter.parse(matchString);
@@ -281,13 +280,13 @@ XML3D.base.SubData.prototype.setMatchFilter = function(matchString){
     else
         this.matchFilter = null;
     invalidateParent(this);
-}
+};
 
-XML3D.base.SubData.prototype.setClassNames = function(classNames){
+SubData.prototype.setClassNames = function(classNames){
     this.classNames = classNames;
     invalidateParent(this);
-}
-XML3D.base.SubData.prototype.setClassNamesString = function(classNamesString){
+};
+SubData.prototype.setClassNamesString = function(classNamesString){
     if(!classNamesString)
         this.setClassNames([]);
     else{
@@ -296,43 +295,43 @@ XML3D.base.SubData.prototype.setClassNamesString = function(classNamesString){
         while(i--) array[i] = array[i].trim();
         this.setClassNames(array);
     }
-}
+};
 
 
-XML3D.base.SubData.prototype.setPostDataflow = function(postDataflow){
+SubData.prototype.setPostDataflow = function(postDataflow){
     this.postDataflow = postDataflow;
     invalidateParent(this);
-}
+};
 
-XML3D.base.SubData.prototype.setPostCompute = function(postCompute){
+SubData.prototype.setPostCompute = function(postCompute){
     this.postCompute = postCompute;
     invalidateParent(this);
-}
+};
 
-XML3D.base.SubData.prototype.setPostFilter = function(postFilter){
+SubData.prototype.setPostFilter = function(postFilter){
     this.postFilter = postFilter;
     invalidateParent(this);
-}
+};
 
-XML3D.base.SubData.prototype.setIncludes = function(includes){
+SubData.prototype.setIncludes = function(includes){
     this.includes = includes;
     invalidateParent(this);
-}
+};
 
-XML3D.base.SubData.prototype.setShader = function(shader){
+SubData.prototype.setShader = function(shader){
     this.shader = shader;
     invalidateParent(this);
-}
+};
 
-XML3D.base.SubData.prototype.setTransform = function(transform){
+SubData.prototype.setTransform = function(transform){
     this.transform = transform;
     invalidateParent(this);
-}
+};
 
-XML3D.base.SubData.prototype.setMeshType = function(meshType){
+SubData.prototype.setMeshType = function(meshType){
     this.meshType = meshType;
     invalidateParent(this);
-}
+};
 
 function invalidateParent(subData){
     if(subData.assetParent){
@@ -341,10 +340,10 @@ function invalidateParent(subData){
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-// XML3D.base.AssetResult
+// AssetResult
 //----------------------------------------------------------------------------------------------------------------------
 
-XML3D.base.AssetResult = function(){
+var AssetResult = function(){
     this.parentResult = null;
     this.name = null;
     this.namedEntries = {};
@@ -356,15 +355,15 @@ XML3D.base.AssetResult = function(){
     this.shader = null;
     this.transform = null;
     this.pickFilter = null;
-}
+};
 
-XML3D.base.AssetResult.prototype.construct = function(asset){
+AssetResult.prototype.construct = function(asset){
     constructAssetTable(this, asset);
-}
+};
 
-XML3D.base.AssetResult.prototype.getDataTree = function(){
+AssetResult.prototype.getDataTree = function(){
     return rec_getDataTree(this);
-}
+};
 
 
 function constructAssetTable(table, asset){
@@ -498,7 +497,7 @@ function mergeSubAssetResult(table, srcSubTable){
         destSubTable = table.namedSubResults[srcSubTable.name];
     }
     else{
-        destSubTable = new XML3D.base.AssetResult();
+        destSubTable = new AssetResult();
         destSubTable.parentResult = table;
         destSubTable.name = srcSubTable.name;
         table.allSubResults.push(destSubTable);
@@ -553,10 +552,10 @@ function updateAccumulatedNode(table, entry){
         entry.accumulatedXflowNode.setLoading(false);
     }
     else{
-        entry.accumulatedXflowNode = XML3D.data.xflowGraph.createDataNode(false);
+        entry.accumulatedXflowNode = new DataNode(false);
     }
 
-    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : XML3D.data.xflowGraph.createDataNode(false);
+    var dataNode = entry.postQueue.length == 1 ? entry.accumulatedXflowNode : new DataNode(false);
     for(var i = 0; i < entry.postQueue.length; ++i){
         var includes = entry.postQueue[i].includes;
         for(var j = 0; j < includes.length; ++j){
@@ -569,7 +568,7 @@ function updateAccumulatedNode(table, entry){
     var node = dataNode, parentNode = null;
     for(var i = 0; i < entry.postQueue.length; ++i){
         var postEntry = entry.postQueue[i];
-        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : XML3D.data.xflowGraph.createDataNode(false));
+        if(!node) node = (i == entry.postQueue.length - 1 ? entry.accumulatedXflowNode : new DataNode(false));
         node.setCompute(postEntry.compute);
         node.setFilter(postEntry.filter);
         node.dataflowNode = postEntry.dataflow;
@@ -636,24 +635,24 @@ function AssetTableEntry (subData){
     this.refNode = null;
     if(subData){
         this.name = subData.name;
-        Xflow.utils.set.add(this.classNames, subData.classNames);
+        Set.add(this.classNames, subData.classNames);
     }
 }
 
 AssetTableEntry.prototype.isMesh = function(){
     return !!this.meshType;
-}
+};
 
 AssetTableEntry.prototype.pushTableEntry = function(srcEntry){
     this.name = srcEntry.name;
-    Xflow.utils.set.add(this.classNames, srcEntry.classNames);
+    Set.add(this.classNames, srcEntry.classNames);
     if(srcEntry.meshType) this.meshType = srcEntry.meshType;
 
     if(srcEntry.transform) this.transform = combineTransform(this.transform, srcEntry.transform);
     if(srcEntry.shader) this.shader = srcEntry.shader;
 
     this.postQueue.push.apply(this.postQueue, srcEntry.postQueue);
-}
+};
 
 
 AssetTableEntry.prototype.pushPostEntry = function(subData){
@@ -668,11 +667,11 @@ AssetTableEntry.prototype.pushPostEntry = function(subData){
     });
     this.refNode = subData.refNode;
     this.accumulatedXflowNode = subData.xflowNodeOut;
-    Xflow.utils.set.add(this.classNames, subData.classNames);
+    Set.add(this.classNames, subData.classNames);
     if(subData.meshType) this.meshType = subData.meshType;
     if(subData.shader) this.shader = subData.shader;
     if(subData.transform) this.transform = combineTransform(this.transform, subData.transform);
-}
+};
 
 
 function combineTransform(oldTransform, newTransform){
@@ -705,15 +704,15 @@ AssetPickFilter.prototype.parse = function(string){
             this.classNames.push(classNames);
         }
         else{
-            Xflow.utils.set.add(this.names, entry);
+            Set.add(this.names, entry);
         }
     }
-}
+};
 
 AssetPickFilter.prototype.intersection = function(setA, setB){
-    Xflow.utils.set.intersection(this.names, setA.names, setB.names);
-    Xflow.utils.set.intersection(this.classNames, setA.classNames, setB.classNames);
-}
+    Set.intersection(this.names, setA.names, setB.names);
+    Set.intersection(this.classNames, setA.classNames, setB.classNames);
+};
 
 AssetPickFilter.prototype.check = function(entry){
     if(this.all)
@@ -721,13 +720,15 @@ AssetPickFilter.prototype.check = function(entry){
     if(entry.classNames.length > 0){
         var i = this.classNames.length;
         while(i--){
-            if(Xflow.utils.set.isSubset(this.classNames[i], entry.classNames))
+            if(Set.isSubset(this.classNames[i], entry.classNames))
                 return true;
         }
     }
     return (entry.name && this.names.indexOf(entry.name) != -1);
-}
+};
 
-
-
-}());
+module.exports = {
+    Asset: Asset,
+    SubData: SubData,
+    AssetResult: AssetResult
+};

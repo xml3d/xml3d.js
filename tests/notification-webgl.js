@@ -1,10 +1,10 @@
 
 function NotifyingAdapterFactory() {
-    XML3D.base.NodeAdapterFactory.call(this, "test");
+    XML3DTestLib.Adapter.NodeAdapterFactory.call(this, "test");
     var that = this;
     this.name = "test";
     this.event = null;
-    this.type = "NotifyingAdapterFactory"; 
+    this.type = "NotifyingAdapterFactory";
     this.createAdapter = function() {
         return {
             init : function() {},
@@ -15,7 +15,8 @@ function NotifyingAdapterFactory() {
         };
     };
 };
-XML3D.createClass(NotifyingAdapterFactory, XML3D.base.NodeAdapterFactory);
+XML3D.createClass(NotifyingAdapterFactory, XML3DTestLib.Adapter.NodeAdapterFactory);
+var Events = XML3DTestLib.Events;
 
 module("Element notification tests", {
     factory : new NotifyingAdapterFactory()
@@ -26,22 +27,21 @@ test("Factory test", 2, function() {
     this.factory.createAdapter().notifyChanged({});
 });
 
-test("Event attribute notification tests", 8, function() {
+test("Event attribute notification tests", 7, function() {
     var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created"); // 1
     e.setAttribute("onclick", "alert('Hallo');"); // 2. Adapter notified
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
     var evt = this.factory.event;
     //console.dir(evt);
     ok(evt, "Event has been thrown"); // 3
-    ok(evt instanceof XML3D.events.NotificationWrapper, "Type is NotificationWrapper"); // 4
-    ok(evt.wrapped, "DOM notification is wrapped"); // 5
-    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName set"); // 6
-    notEqual(evt.wrapped.relatedNode, null, "MutationEvent::relatedNode set"); // 7
+    ok(evt.toString().match(/NotificationWrapper/), "Type is NotificationWrapper"); // 4
+    ok(evt.mutation, "DOM notification is wrapped"); // 5
+    equal(evt.mutation.attributeName, "onclick", "MutationEvent::attrName set"); // 6
     e.onclick = function() {}; // Adapter Notified (Not anymore!)
-    XML3D._flushDOMChanges();
-    equal(evt.wrapped.attrName, "onclick", "MutationEvent::attrName"); // 8
+    XML3D.flushDOMChanges();
+    equal(evt.mutation.attributeName, "onclick", "MutationEvent::attrName"); // 8
 });
 
 test("Int attribute notifcation tests", 2, function() {
@@ -49,7 +49,7 @@ test("Int attribute notifcation tests", 2, function() {
     var a = this.factory.getAdapter(e);
     e.setAttribute("width", "123");
     e.width = 300;
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("Float attribute notification tests", 2, function() {
@@ -57,7 +57,7 @@ test("Float attribute notification tests", 2, function() {
     var a = this.factory.getAdapter(e);
     e.setAttribute("fieldOfView", "0.5");
     e.fieldOfView = 0.87;
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("Boolean attribute notification tests", 2, function() {
@@ -65,7 +65,7 @@ test("Boolean attribute notification tests", 2, function() {
     var a = this.factory.getAdapter(e);
     e.setAttribute("visible", "false");
     e.visible = true;
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("XML3DVec attribute notification tests", 3, function() {
@@ -74,7 +74,7 @@ test("XML3DVec attribute notification tests", 3, function() {
     e.setAttribute("scale", "1 2 3");
     e.scale.x = 4.0;
     e.scale.setVec3Value("4 5 6");
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("XML3DRotation attribute notification tests", 5, function() {
@@ -85,7 +85,7 @@ test("XML3DRotation attribute notification tests", 5, function() {
     e.rotation.axis.y = 1.0;
     e.rotation.axis.setVec3Value("1 0 0");
     e.rotation.setAxisAngleValue("1 4 5 6");
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 test("Enumeration attribute notification tests", 5, function() {
@@ -98,7 +98,7 @@ test("Enumeration attribute notification tests", 5, function() {
     e.setAttribute("type", "3D"); // case insensitive
     e.setAttribute("type", "1d");
     e.setAttribute("type", "asdf"); // invalid
-    XML3D._flushDOMChanges();
+    XML3D.flushDOMChanges();
 });
 
 module("Composed Element notification tests", {
@@ -136,7 +136,7 @@ test("Only one element gets notified", 3, function() {
     addAdapters(x, this.factory);
     var img = this.doc.getElementById("tex1img");
     img.setAttribute("src", "textures/magenta.png");
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
 });
 
 module("Typed array notification tests", {
@@ -168,9 +168,9 @@ test("DOMCharacterDataModified notification", 6, function() {
     var pos = this.doc.getElementById("positions");
     this.factory.getAdapter(pos);
     equal(pos.value.length, 12);
-    pos.firstChild.deleteData (0,5);
+    pos.textContent = pos.textContent.substr(5);
     equal(pos.value.length, 11);
-    equal(this.factory.event.type, XML3D.events.VALUE_MODIFIED);
+    equal(this.factory.event.type, Events.VALUE_MODIFIED);
 
 });
 
@@ -181,7 +181,7 @@ test("Text DOMNodeInserted notification", 8, function() {
     this.factory.getAdapter(index);
     index.appendChild(this.doc.createTextNode(" 0 1 2")); // 3: Adapter notified: Notification (type:1)
     equal(index.value.length, 9, "Length of typed array after text node has been inserted"); // 4
-    equal(this.factory.event.type, XML3D.events.VALUE_MODIFIED, "Notfication of type VALUE_MODIFIED"); // 5
+    equal(this.factory.event.type, Events.VALUE_MODIFIED, "Notification of type VALUE_MODIFIED"); // 5
 
     var pos = this.doc.getElementById("positions");
     this.factory.getAdapter(pos);

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
+    <dataflow id="template1" out="position" >
+        <float3 param="true" name="posAdd1"  ></float3>
+        <float3 param="true" name="posAdd2"  ></float3>
+        <float3 param="true" name="position" ></float3>
+        <script name="xflow.add2" src="../../scripts/add2.js" type="text/javascript"></script>
+        <script name="xflow.add3" src="../../scripts/add3.js" type="text/javascript"></script>
+        <compute>
+            position = xflow.add2(position, posAdd1);
+            position = xflow.add3(position, posAdd2);
+        </compute>
+    </dataflow>
+
+    <data id="instance1" compute="dataflow['#template1']" >
+        <float3 name="position">1 1 1  2 2 2</float3>
+        <float3 name="posAdd1">1 1 1  0 0 0</float3>
+        <float3 name="posAdd2">1 0 0  0 -1 0</float3>
+    </data>
+
+    <data id="instance2" compute="position = xflow.add4(position, posAdd1)" >
+        <script name="xflow.add4" src="../../scripts/add4.js" type="text/javascript"></script>
+        <float3 name="posAdd1">1 1 1  0 0 0</float3>
+        <data id="instance3" compute="position = xflow.add5(position, posAdd2)">
+            <script name="xflow.add5" src="../../scripts/add5.js" type="text/javascript"></script>
+            <float3 name="position">1 1 1  2 2 2</float3>
+            <float3 name="posAdd2">1 0 0  0 -1 0</float3>
+        </data>
+    </data>
+
+    <dataflow id="template2" out="position" >
+        <float3 param="true" name="posAdd1"  ></float3>
+        <float3 param="true" name="posAdd2"  ></float3>
+        <float3 param="true" name="position" ></float3>
+        <script name="xflow.add6" src="../../scripts/add6.js" type="text/javascript"></script>
+        <compute>
+            position = xflow.add6(position, posAdd1);
+            position = xflow.add6(position, posAdd2);
+            position = xflow.add6(position, posAdd1);
+            position = xflow.add6(position, posAdd2);
+        </compute>
+    </dataflow>
+
+    <data id="instance4" compute="dataflow['#template2']" >
+        <float3 name="position">1 1 1  2 2 2</float3>
+        <float3 name="posAdd1">1 1 1  0 0 0</float3>
+        <float3 name="posAdd2">1 0 0  0 -1 0</float3>
+    </data>
+</xml3d>

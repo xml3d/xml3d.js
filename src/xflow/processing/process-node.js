@@ -1,8 +1,18 @@
-(function(){
+var Base = require("../base.js");
+var C = require("../interface/constants.js");
+var utils = require("../utils/utils.js");
+var Executor = require("./executor.js");
+var Result = require("./result.js");
+var Operator = require("../operator/operator.js");
+var Data = require("../interface/data.js");
+var DataSlot = require("../processing/data-slot.js");
 
+var BufferEntry = Data.BufferEntry;
+var TextureEntry = Data.TextureEntry;
+var ImageDataTextureEntry = Data.ImageDataTextureEntry;
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.ProcessNode
+// C.ProcessNode
 //----------------------------------------------------------------------------------------------------------------------
 
 var ASYNC_PROCESS_STATE = {
@@ -10,71 +20,117 @@ var ASYNC_PROCESS_STATE = {
     RUNNING : 1,
     RESCHEDULED : 2,
     INIT: 3
-}
+};
 
 
 /**
+ * Optimized representation for the processing graph. Only created for ChannelNodes with operators.
+ * Is connected directly to other ProcessNodes, ignoring channels that are not relevant for processing
+ * @param {ChannelNode} channelNode
  * @constructor
- * @extends {Xflow.GraphNode}
+ * @extends {GraphNode}
  */
-Xflow.ProcessNode = function(channelNode){
+var ProcessNode = function(channelNode){
     this.owner = channelNode;
     this.operator = channelNode.operator;
-    this.inputChannels = {};
-    this.outputDataSlots = {};
-    this.status = Xflow.PROCESS_STATE.MODIFIED;
 
-    this.children = [];
-    this.descendants = [];
-    this.executers = [];
+    /**
+     * Input channels for the operator
+     * @type {Object.<string, Channel>}
+     */
+    this.inputChannels = {};
+
+    /**
+     * Outputs of operator
+     * @type {Object.<string, DataSlot>}
+     */
+    this.outputDataSlots = {};
+
+    /**
+     * @type {exports.C.PROCESS_STATE}
+     */
+    this.status = C.PROCESS_STATE.MODIFIED;
+
+    /**
+     * @type {ASYNC_PROCESS_STATE}
+     */
     this.asyncProcessState = ASYNC_PROCESS_STATE.INIT;
+
+    /**
+     * Direct Children without transitive children of children
+     * TODO: Use Set()?
+     * @type {Array.<ProcessNode>}
+     */
+    this.children = [];
+
+    /**
+     * Children with transitive dependencies
+     * TODO: Use Set()?
+     * @type {Array.<ProcessNode>}
+     */
+    this.descendants = [];
+
+    /**
+     * Callback, the executor needs to call when the computation is ready
+     * @type {Function}
+     * @private
+     */
+    this._bindedAsyncCallback = null;
+
+    /**
+     * Index of array matches platform id (C.PLATFORM)
+     * @type {Array.<Executor>}
+     */
+    this.executers = [];
+
     constructProcessNode(this, channelNode);
-    if(Xflow.isOperatorAsync(this.operator)){
+
+    if(Operator.isOperatorAsync(this.operator)){
         this._bindedAsyncCallback = this.receiveAsyncProcessing.bind(this);
     }
 };
-var ProcessNode = Xflow.ProcessNode;
 
 ProcessNode.prototype.onXflowChannelChange = function(channel, state){
-    if(Xflow.isOperatorAsync(this.operator)){
-        if(this.status == Xflow.PROCESS_STATE.LOADING || this.asyncProcessState != ASYNC_PROCESS_STATE.INIT){
-            this.status = Xflow.PROCESS_STATE.MODIFIED;
+    if (Operator.isOperatorAsync(this.operator)) {
+        if (this.status == C.PROCESS_STATE.LOADING || this.asyncProcessState != ASYNC_PROCESS_STATE.INIT) {
+            this.status = C.PROCESS_STATE.MODIFIED;
             this.updateState();
         }
     }
-    else{
-        if(state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE &&
-            this.status > Xflow.PROCESS_STATE.UNPROCESSED)
-            this.status = Xflow.PROCESS_STATE.UNPROCESSED;
-        else
-            this.status = Xflow.PROCESS_STATE.MODIFIED;
+    else {
+
+        if (state == C.DATA_ENTRY_STATE.CHANGED_VALUE && this.status > C.PROCESS_STATE.UNPROCESSED) {
+            this.status = C.PROCESS_STATE.UNPROCESSED;
+        } else {
+            this.status = C.PROCESS_STATE.MODIFIED;
+        }
         this.notifyOutputChanged(state);
     }
-}
+};
 
 ProcessNode.prototype.startAsyncProcessing = function(){
     if(this.asyncProcessState == ASYNC_PROCESS_STATE.IDLE || this.asyncProcessState == ASYNC_PROCESS_STATE.INIT){
         this.asyncProcessState = ASYNC_PROCESS_STATE.RUNNING;
-        var executer = getOrCreateExecuter(this, Xflow.PLATFORM.ASYNC);
+        var executer = getOrCreateExecuter(this, C.PLATFORM.ASYNC);
         executer.run(this._bindedAsyncCallback);
     }
     else{
         this.asyncProcessState = ASYNC_PROCESS_STATE.RESCHEDULED;
     }
-}
+};
 ProcessNode.prototype.receiveAsyncProcessing = function(){
-    this.status = Xflow.PROCESS_STATE.PROCESSED;
-    this.notifyOutputChanged(Xflow.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE);
+    this.status = C.PROCESS_STATE.PROCESSED;
+    this.notifyOutputChanged(C.DATA_ENTRY_STATE.CHANGED_SIZE_TYPE);
     if(this.asyncProcessState == ASYNC_PROCESS_STATE.RESCHEDULED){
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
-        this.status = Xflow.PROCESS_STATE.MODIFIED;
+        this.status = C.PROCESS_STATE.MODIFIED;
         this.updateState();
     }
     else{
         this.asyncProcessState = ASYNC_PROCESS_STATE.IDLE;
     }
-    Xflow._callListedCallback();
-}
+    Base._flushResultCallbacks();
+};
 
 
 
@@ -82,61 +138,72 @@ ProcessNode.prototype.notifyOutputChanged = function(state){
     for(var name in this.outputDataSlots){
         this.outputDataSlots[name].notifyOnChange(state);
     }
-}
+};
 
 
 ProcessNode.prototype.clear = function(){
     for(var name in this.inputChannels){
         this.inputChannels[name] && this.inputChannels[name].removeListener(this);
     }
-}
+};
 
 ProcessNode.prototype.updateState = function(){
-    if(this.status == Xflow.PROCESS_STATE.MODIFIED){
-        this.status = Xflow.PROCESS_STATE.UNPROCESSED;
+    if(this.status == C.PROCESS_STATE.MODIFIED){
+        this.status = C.PROCESS_STATE.UNPROCESSED;
+
+        XML3D.debug.assert(!this.owner.loading, "This should never happen");
 
         if(this.owner.loading)
-            this.status = Xflow.PROCESS_STATE.LOADING;
+            this.status = C.PROCESS_STATE.LOADING;
         else{
             for(var i = 0; i < this.children.length; ++i){
                 this.status = Math.min(this.status, this.children[i].updateState());
             }
-            if(this.status > Xflow.PROCESS_STATE.LOADING && isInputLoading(this.operator, this.inputChannels))
-                this.status = Xflow.PROCESS_STATE.LOADING;
+            if(this.status > C.PROCESS_STATE.LOADING && isInputLoading(this.operator, this.inputChannels))
+                this.status = C.PROCESS_STATE.LOADING;
 
-            if(this.status > Xflow.PROCESS_STATE.INVALID &&
+            if(this.status > C.PROCESS_STATE.INVALID &&
                 !checkInput(this, this.operator, this.owner.owner._computeInputMapping, this.inputChannels))
-                this.status = Xflow.PROCESS_STATE.INVALID;
+                this.status = C.PROCESS_STATE.INVALID;
 
-            if(this.status == Xflow.PROCESS_STATE.UNPROCESSED && Xflow.isOperatorAsync(this.operator)){
-                this.status = this.asyncProcessState == ASYNC_PROCESS_STATE.INIT ? Xflow.PROCESS_STATE.LOADING
-                    : Xflow.PROCESS_STATE.PROCESSED;
+            if(this.status == C.PROCESS_STATE.UNPROCESSED && Operator.isOperatorAsync(this.operator)){
+                this.status = this.asyncProcessState == ASYNC_PROCESS_STATE.INIT ? C.PROCESS_STATE.LOADING
+                    : C.PROCESS_STATE.PROCESSED;
                 this.startAsyncProcessing();
             }
 
         }
     }
     return this.status;
-}
+};
 
 ProcessNode.prototype.process = function(){
-    var executer;
 
-    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
-        executer = getOrCreateExecuter(this, this.owner.platform);
+    if(this.status == C.PROCESS_STATE.UNPROCESSED){
+        var executer = getOrCreateExecuter(this, this.owner.platform);
         executer.run();
-
-        this.status = Xflow.PROCESS_STATE.PROCESSED;
+        this.status = C.PROCESS_STATE.PROCESSED;
     }
-}
+};
 
+/**
+ *
+ * @param {ProcessNode} processNode
+ * @param {ChannelNode} channelNode
+ */
 function constructProcessNode(processNode, channelNode){
     var dataNode = channelNode.owner;
     synchronizeInputChannels(processNode, channelNode, dataNode);
-    synchronizeChildren(processNode.children, processNode.descendants, processNode.inputChannels);
+    synchronizeChildrenAndDescendants(processNode.children, processNode.descendants, processNode.inputChannels);
     synchronizeOutput(processNode.operator, processNode.outputDataSlots);
 }
 
+/**
+ *
+ * @param processNode
+ * @param channelNode
+ * @param dataNode
+ */
 function synchronizeInputChannels(processNode, channelNode, dataNode){
     var operator = processNode.operator, inputMapping = dataNode._computeInputMapping;
     for(var i = 0; i < operator.params.length; ++i){
@@ -168,14 +235,15 @@ function checkInput(processNode, operator, inputMapping, inputChannels){
         var entry = operator.params[i];
         var dataName = inputMapping ? inputMapping.getScriptInputName(i, entry.source) : entry.source;
         if(!entry.optional && !dataName){
-            Xflow.notifyError("Xflow: operator " + operator.name + ": Missing input argument for "
+            Base.notifyError("Xflow: operator " + operator.name + ": Missing input argument for "
                 + entry.source, dataNode);
             return false;
         }
         if(dataName){
             var channel = inputChannels[entry.source];
             if(!channel){
-                Xflow.notifyError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
+                if(!inputMapping) continue;
+                Base.notifyError("Xflow: operator " + operator.name + ": Input of name '" + dataName +
                     "' not found. Used for parameter " + entry.source, dataNode);
                 return false;
             }
@@ -183,15 +251,15 @@ function checkInput(processNode, operator, inputMapping, inputChannels){
 
             if(!channel.creatorProcessNode){
                 if(!entry.optional && (!dataEntry || dataEntry.isEmpty())){
-                    Xflow.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                    Base.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
                         ' contains no data.', dataNode);
                     return false;
                 }
             }
             if(dataEntry && dataEntry.type != entry.type){
-                Xflow.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
-                    " has wrong type. Expected: " + Xflow.getTypeName(entry.type)
-                    + ", but got: " +  Xflow.getTypeName(dataEntry.type), dataNode);
+                Base.notifyError("Xflow: operator " + operator.name + ": Input for " + entry.source +
+                    " has wrong type. Expected: " + C.getTypeName(entry.type)
+                    + ", but got: " +  C.getTypeName(dataEntry.type), dataNode);
                 return false;
             }
         }
@@ -199,126 +267,147 @@ function checkInput(processNode, operator, inputMapping, inputChannels){
     return true;
 }
 
-function synchronizeChildren(children, descendants, inputChannels){
-    var channel, idx;
+function synchronizeChildrenAndDescendants(children, descendants, inputChannels){
+    var channel;
     for(var name in inputChannels){
         channel = inputChannels[name];
         if(channel && channel.creatorProcessNode){
-            Xflow.utils.set.add(children, channel.creatorProcessNode);
-            Xflow.utils.set.add(descendants, channel.creatorProcessNode.descendants);
+            utils.set.add(children, channel.creatorProcessNode);
+            utils.set.add(descendants, channel.creatorProcessNode.descendants);
         }
     }
-    Xflow.utils.set.remove(children, descendants);
-    Xflow.utils.set.add(descendants, children);
+    utils.set.remove(children, descendants);
+    utils.set.add(descendants, children);
 }
 
 function synchronizeOutput(operator, outputs){
-    var async = Xflow.isOperatorAsync(operator);
+    var async = Operator.isOperatorAsync(operator);
     for(var i in operator.outputs){
-        var d = operator.outputs[i];
+        var dataEntry = operator.outputs[i];
 
         var entry, asyncEntry;
-        var type = d.type;
-        if(type != Xflow.DATA_TYPE.TEXTURE){
-            entry = new Xflow.BufferEntry(type, null);
-            if(async) asyncEntry = new Xflow.BufferEntry(type, null);
+        var type = dataEntry.type;
+        if(type != C.DATA_TYPE.TEXTURE){
+            entry = new BufferEntry(type, null);
+            if(async) asyncEntry = new BufferEntry(type, null);
         }
         else{
-            entry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
-            if(async) asyncEntry = window.document ? new Xflow.TextureEntry(null) : new Xflow.ImageDataTextureEntry(null);
+            entry = window.document ? new TextureEntry(null) : new ImageDataTextureEntry(null);
+            if(async) asyncEntry = window.document ? new TextureEntry(null) : new ImageDataTextureEntry(null);
         }
-        outputs[d.name] = new Xflow.DataSlot(entry, 0);
-        if(async) outputs[d.name].asyncDataEntry = asyncEntry;
+        outputs[dataEntry.name] = new DataSlot(entry, 0);
+        if(async) outputs[dataEntry.name].asyncDataEntry = asyncEntry;
     }
 }
 
 function getOrCreateExecuter(node, platform){
     if(!node.executers[platform]){
-        node.executers[platform] = new Xflow.Executer(node, platform);
+        node.executers[platform] = new Executor(node, platform);
     }
     return node.executers[platform];
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Xflow.RequestNode
+// RequestNode
 //----------------------------------------------------------------------------------------------------------------------
 /**
+ *
+ * FIXME: RequestNodes are never deleted.
+ * @param {ChannelNode} channelNode
+ * @param {Array.<string>} filter
  * @constructor
- * @param channelNode
- * @param filter
  */
-Xflow.RequestNode = function(channelNode, filter){
+var RequestNode = function(channelNode, filter){
     this.owner = channelNode;
     this.filter = filter;
+
+    /**
+     *
+     * @type {Object<C.PLATFORM, exports.Result>}
+     */
     this.results = {};
 
-    this.status = Xflow.PROCESS_STATE.MODIFIED;
+    /**
+     * @type {exports.C.PROCESS_STATE}
+     */
+    this.status = C.PROCESS_STATE.MODIFIED;
 
+    /**
+     * @type {Object.<string, Channel>}
+     */
     this.channels = {};
+
+    /**
+     * @see ProcessNode.children
+     * @type {Array}
+     */
     this.children = [];
 
+    /**
+     * @see ProcessNode.executers
+     * @type {Array}
+     */
     this.executers = [];
 
+    /**
+     * @see ProcessNode.outOfSync
+     * @type {boolean}
+     */
     this.outOfSync = true;
-}
-var RequestNode = Xflow.RequestNode;
+};
 
 RequestNode.prototype.synchronize = function(){
     if(this.outOfSync){
         this.outOfSync = false;
         synchronizeRequestChannels(this, this.owner);
-        synchronizeChildren(this.children, [], this.channels);
+        synchronizeChildrenAndDescendants(this.children, [], this.channels);
     }
-}
+};
 
 RequestNode.prototype.updateState = function(){
     this.synchronize();
-    if(this.status == Xflow.PROCESS_STATE.MODIFIED){
-        this.status = Xflow.PROCESS_STATE.UNPROCESSED
+    if(this.status == C.PROCESS_STATE.MODIFIED){
+        this.status = C.PROCESS_STATE.UNPROCESSED;
 
-        if(this.owner.loading)
-            this.status = Xflow.PROCESS_STATE.LOADING;
-        else{
+        if(this.owner.loading) {
+            this.status = C.PROCESS_STATE.LOADING;
+        } else {
             for(var i = 0; i < this.children.length; ++i){
                 this.status = Math.min(this.status, this.children[i].updateState());
             }
         }
     }
     return this.status;
-}
-
-RequestNode.prototype.isReady = function(){
-    this.updateState();
-    return this.status >= Xflow.PROCESS_STATE.UNPROCESSED;
-}
+};
 
 RequestNode.prototype.getResult = function(resultType){
     this.updateState();
 
-    if(this.status == Xflow.PROCESS_STATE.UNPROCESSED){
-        if(resultType == Xflow.RESULT_TYPE.COMPUTE){
+    // TODO: This could be in getRequestComputeResult
+    if(this.status == C.PROCESS_STATE.UNPROCESSED){
+        if(resultType == C.RESULT_TYPE.COMPUTE){
             var executer = getOrCreateExecuter(this, this.owner.platform);
             if(!executer.isProcessed())
                 executer.run();
         }
-        this.status = Xflow.PROCESS_STATE.PROCESSED;
+        this.status = C.PROCESS_STATE.PROCESSED;
     }
     var result = null;
-    if(resultType == Xflow.RESULT_TYPE.COMPUTE){
+    if (resultType == C.RESULT_TYPE.COMPUTE) {
         result = getRequestComputeResult(this);
-    }else if(resultType == Xflow.RESULT_TYPE.VS){
+    } else if (resultType == C.RESULT_TYPE.VS) {
         result = getRequestVSResult(this);
     }
-    result.loading = (this.status == Xflow.PROCESS_STATE.LOADING);
+    result.loading = (this.status == C.PROCESS_STATE.LOADING);
     return result;
-}
+};
 
 RequestNode.prototype.setStructureOutOfSync = function(){
     this.outOfSync = true;
-    this.status = Xflow.PROCESS_STATE.MODIFIED;
+    this.status = C.PROCESS_STATE.MODIFIED;
     for(var type in this.results){
-        this.results[type]._notifyChanged(Xflow.RESULT_STATE.CHANGED_STRUCTURE);
+        this.results[type]._notifyChanged(C.RESULT_STATE.CHANGED_STRUCTURE);
     }
     for(var name in this.channels){
         this.channels[name].removeListener(this);
@@ -326,19 +415,24 @@ RequestNode.prototype.setStructureOutOfSync = function(){
     this.channels = [];
     this.children = [];
     this.executers = [];
-}
+};
 
 RequestNode.prototype.onXflowChannelChange = function(channel, state){
     if(channel.creatorProcessNode)
-        this.status = Xflow.PROCESS_STATE.MODIFIED;
-    var notifyState = (state == Xflow.DATA_ENTRY_STATE.CHANGED_VALUE ? Xflow.RESULT_STATE.CHANGED_DATA_VALUE
-            : Xflow.RESULT_STATE.CHANGED_DATA_SIZE);
+        this.status = C.PROCESS_STATE.MODIFIED;
+    var notifyState = (state == C.DATA_ENTRY_STATE.CHANGED_VALUE ? C.RESULT_STATE.CHANGED_DATA_VALUE
+            : C.RESULT_STATE.CHANGED_DATA_SIZE);
 
     for(var type in this.results){
         this.results[type]._notifyChanged(notifyState);
     }
-}
+};
 
+/**
+ *
+ * @param requestNode
+ * @param channelNode
+ */
 function synchronizeRequestChannels(requestNode, channelNode){
     var names = requestNode.filter;
     if(!names){
@@ -355,12 +449,19 @@ function synchronizeRequestChannels(requestNode, channelNode){
     }
 }
 
+/**
+ *
+ * @param {RequestNode} requestNode
+ * @returns {Result}
+ */
 function getRequestComputeResult(requestNode)
 {
-    if(!requestNode.results[Xflow.RESULT_TYPE.COMPUTE])
-        requestNode.results[Xflow.RESULT_TYPE.COMPUTE] = new Xflow.ComputeResult();
-    var result = requestNode.results[Xflow.RESULT_TYPE.COMPUTE];
+    if(!requestNode.results[C.RESULT_TYPE.COMPUTE])
+        requestNode.results[C.RESULT_TYPE.COMPUTE] = new Result.ComputeResult();
+
+    var result = requestNode.results[C.RESULT_TYPE.COMPUTE];
     result._dataEntries = {}; result._outputNames = [];
+
     for(var name in requestNode.channels){
         var entry = requestNode.channels[name].getDataEntry();
         result._dataEntries[name] = entry && !entry.isEmpty() ? entry : null;
@@ -369,12 +470,17 @@ function getRequestComputeResult(requestNode)
     return result;
 }
 
+/**
+ *
+ * @param requestNode
+ * @returns {exports.VSDataResult}
+ */
 function getRequestVSResult(requestNode)
 {
-    var executer = getOrCreateExecuter(requestNode, Xflow.PLATFORM.GLSL);
-    if(!requestNode.results[Xflow.RESULT_TYPE.VS])
-        requestNode.results[Xflow.RESULT_TYPE.VS] = new Xflow.VSDataResult();
-    var result = requestNode.results[Xflow.RESULT_TYPE.VS];
+    var executer = getOrCreateExecuter(requestNode, C.PLATFORM.GLSL);
+    if(!requestNode.results[C.RESULT_TYPE.VS])
+        requestNode.results[C.RESULT_TYPE.VS] = new Result.VSDataResult();
+    var result = requestNode.results[C.RESULT_TYPE.VS];
 
     var program = executer.getVertexShader();
     result._program = program;
@@ -383,6 +489,8 @@ function getRequestVSResult(requestNode)
 }
 
 
-
-})();
+module.exports = {
+    RequestNode: RequestNode,
+    ProcessNode: ProcessNode
+};
 

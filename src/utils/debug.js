@@ -1,7 +1,10 @@
+var printStackTrace = require("../contrib/stacktrace-0.4.js");
+var Options = require("./options.js");
+
 (function (ns) {
 
     var OPTION_LOGLEVEL = "loglevel";
-    XML3D.options.register(OPTION_LOGLEVEL, "warning");
+    Options.register(OPTION_LOGLEVEL, "warning");
 
     ns.exports = {
         ALL: 0,
@@ -26,8 +29,8 @@
             var debug = XML3D.debug;
             if (!debug.isSetup) {
                 debug.isSetup = true;
-                debug.loglevel = debug.loglevels[XML3D.options.getValue(OPTION_LOGLEVEL)] || 3;
-                XML3D.options.addObserver(function(key, value) {
+                debug.loglevel = debug.loglevels[Options.getValue(OPTION_LOGLEVEL)] || 3;
+                Options.addObserver(function(key, value) {
                     if(key == OPTION_LOGLEVEL) {
                         debug.loglevel = debug.loglevels[value] || 3;
                     }
@@ -55,7 +58,7 @@
                         window.console.error.apply(window.console, args);
                         break;
                     case XML3D.debug.EXCEPTION:
-                        window.console.error(XML3D.debug.printStackTrace({e: args[0], guess: true}).join('\n'));
+                        window.console.error(printStackTrace({e: args[0], guess: true}).join('\n'));
                         break;
                     case XML3D.debug.DEBUG:
                         window.console.debug.apply(window.console, args);
@@ -103,7 +106,7 @@
                 }
                 window.console.trace();
             } else {
-                var stack = XML3D.debug.printStackTrace();
+                var stack = printStackTrace();
                 msg && stack.splice(0, 0, msg);
                 XML3D.debug.doLog(logType, stack);
             }
@@ -123,4 +126,4 @@
         }
     };
 
-}(module))
+}(module));

@@ -31,7 +31,7 @@ test("Check video", function() {
 
 
     function waitForPlayingVideo(event) {
-        var r = doc.XML3D.base.callAdapterFunc(video, {getValue : []});
+        var r = XML3DTestLib.callAdapterFunc(video, {getValue : []});
         ok(r.length == 1, "Access to HTML video element");
         htmlVideo = r[0];
         start();

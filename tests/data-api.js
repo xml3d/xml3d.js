@@ -75,7 +75,7 @@ test("Access Results", function() {
         new Float32Array([-1, -1, -10, 1.5, -1, -10, -1, 1, -10, 2, 1, -10]), EPSILON,
         "'position' field of #morphedData has correct value"  );
 
-    this.doc.getElementById("doubleWeight1").firstChild.nodeValue = "1";
+    this.doc.getElementById("doubleWeight1").textContent = "1";
 
 
     result = this.doc.getElementById("morphedData").getResult(["position"]);
@@ -95,7 +95,7 @@ test("Access Results", function() {
         new Float32Array([-1, -1, -10, 1.5, -1, -10, -1, 1, -10, 2, 1, -10]), EPSILON,
         "'position' field of #unusedMorphedData has correct value"  );
 
-    this.doc.getElementById("doubleWeight1U").firstChild.nodeValue = "1";
+    this.doc.getElementById("doubleWeight1U").textContent = "1";
 
     result = this.doc.getElementById("unusedMorphedData").getResult(["position"]);
     QUnit.closeArray(result.getValue("position"),

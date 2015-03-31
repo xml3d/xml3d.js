@@ -5,6 +5,11 @@ function lameParse(text, constructor) {
     return m ? new constructor(m) : new constructor();
 }
 
+var XflowConstants = XML3DTestLib.XflowConstants;
+var DataNode = XML3DTestLib.DataNode;
+var VSConfig = XML3DTestLib.VSConfig;
+var VertexShaderRequest = XML3DTestLib.VertexShaderRequest;
+
 module("Xflow tests", {
     setup : function() {
         stop();
@@ -47,12 +52,11 @@ module("Xflow tests", {
 
     loadTestXML : function(url, handler) {
         var win = document.getElementById("xml3dframe").contentWindow;
-        var resManager = win.XML3D.base.resourceManager;
-        var resType = win.XML3D.data;
+        var resType = "data";
         this.getDataAdapter = function(node){
-            win.XML3D._flushDOMChanges();
-            return resManager.getAdapter(node, resType);
-        }
+            win.XML3D.flushDOMChanges();
+            return win.XML3D.resource.getAdapter(node, resType);
+        };
 
         var defsElem = this.doc.getElementById("defsElem");
         var xmlhttp = new XMLHttpRequest();
@@ -100,7 +104,7 @@ module("Xflow tests", {
         var dataElement = this.doc.getElementById(dataNodeId);
         var title = testNode.getAttribute("title");
 
-        var vsConfig = new this.win.Xflow.VSConfig();
+        var vsConfig = new VSConfig();
 
         var connect = testNode.getElementsByTagName("VSConfig")[0].firstElementChild;
         while (connect) {
@@ -109,13 +113,13 @@ module("Xflow tests", {
             connect = connect.nextElementSibling;
         };
 
-        vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "screenTransform", true);
+        vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT4X4, "screenTransform", true);
         vsConfig.addCodeFragment("gl_Position = screenTransform * vec4(#I{position}, 1.0);");
 
         var dataAdapter = dataElement._configured.adapters;
         dataAdapter = dataAdapter[Object.keys(dataAdapter)[0]];
         var xflowNode = dataAdapter.getXflowNode();
-        var request = new this.win.Xflow.VertexShaderRequest(xflowNode, vsConfig);
+        var request = new VertexShaderRequest(xflowNode, vsConfig);
         var result = request.getVertexShader();
         var code = result.getGLSLCode();
         var inputIdx = code.indexOf("// INPUT"), codeIdx = code.indexOf("// CODE"),
@@ -135,25 +139,25 @@ module("Xflow tests", {
 
     VSConnection: function(node, vsConfig){
         var typeString = node.getAttribute("type"), transformString = node.getAttribute("transform");
-        var type = Xflow.DATA_TYPE[typeString];
+        var type = XflowConstants.DATA_TYPE[typeString];
         if(!type)
             throw new Error("Unknown VS connection Type: " + typeString);
-        var transform = Xflow.VS_ATTRIB_TRANSFORM[transformString] || Xflow.VS_ATTRIB_TRANSFORM.NONE;
+        var transform = XflowConstants.VS_ATTRIB_TRANSFORM[transformString] || XflowConstants.VS_ATTRIB_TRANSFORM.NONE;
         var name = node.getAttribute("in"), outName = node.getAttribute("out");
         vsConfig.addAttribute( type, node.getAttribute("in"), node.getAttribute("optional") == "true");
         var code = null;
         switch(transform){
-            case Xflow.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "viewTransformNormal", true);
+            case XflowConstants.VS_ATTRIB_TRANSFORM.VIEW_NORMAL:
+                vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT3X3, "viewTransformNormal", true);
                 code = outName + " = normalize( viewTransformNormal * #I{" + name + "} );"; break;
-            case Xflow.VS_ATTRIB_TRANSFORM.VIEW_POINT:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "viewTransform", true);
+            case XflowConstants.VS_ATTRIB_TRANSFORM.VIEW_POINT:
+                vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT4X4, "viewTransform", true);
                 code = outName + " = ( viewTransform * vec4( #I{" + name + "} , 1.0)).xyz;"; break;
-            case Xflow.VS_ATTRIB_TRANSFORM.WORLD_NORMAL:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT3X3, "worldTransformNormal", true);
+            case XflowConstants.VS_ATTRIB_TRANSFORM.WORLD_NORMAL:
+                vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT3X3, "worldTransformNormal", true);
                 code = outName + " = normalize( worldTransformNormal * vec4( #I{" + name + "} );"; break;
-            case Xflow.VS_ATTRIB_TRANSFORM.WORLD_POINT:
-                vsConfig.addInputParameter(Xflow.DATA_TYPE.FLOAT4X4, "worldTransform", true);
+            case XflowConstants.VS_ATTRIB_TRANSFORM.WORLD_POINT:
+                vsConfig.addInputParameter(XflowConstants.DATA_TYPE.FLOAT4X4, "worldTransform", true);
                 code = outName + " = ( worldTransform * vec4( #I{" + name + "} , 1.0)).xyz;"; break;
         }
         vsConfig.channelAttribute(name, outName, code);
@@ -248,7 +252,7 @@ module("Xflow tests", {
     },
 
     Check : function(testNode) {
-        this.win.XML3D._flushDOMChanges();
+        this.win.XML3D.flushDOMChanges();
         var dataNodeId = testNode.getAttribute("data").substring(1);
         var dataElement = this.doc.getElementById(dataNodeId);
         var title =  testNode.getAttribute("title") || "No Title";
@@ -310,7 +314,7 @@ module("Xflow tests", {
             }
 
             actualData = dataOutput.getValue().data;
-            dataAdapter.xflowDataNode._getChannelNode().clear();
+            dataAdapter.xflowDataNode._getOrCreateChannelNode().clear();
 
             QUnit.closeArray(actualData, shouldMatchTexture, EPSILON, title + " => " + property + " in " + have.id + " matches expected data");
             start();
@@ -318,7 +322,7 @@ module("Xflow tests", {
 
         if (shouldMatchData.isLoading()) {
             var loadCheck = function (handle, notfication) {
-                if (notfication === Xflow.DATA_ENTRY_STATE.LOAD_END || !shouldMatchData.isLoading()) {
+                if (notfication === XflowConstants.DATA_ENTRY_STATE.LOAD_END || !shouldMatchData.isLoading()) {
                     shouldMatchData.removeListener(loadCheck);
                     executeTest();
                 }
@@ -411,7 +415,7 @@ module("Xflow tests", {
         var input = this.doc.getElementById(inputId);
 
         var newText = action.textContent;
-        input.firstChild.nodeValue = newText;
+        input.textContent = newText;
     }
 
 
@@ -419,25 +423,24 @@ module("Xflow tests", {
 
 
 test("Test filter parsing", function() {
-    var graph = new Xflow.Graph();
-    var dataNode = graph.createDataNode();
+    var dataNode = new DataNode(false);
     var mapping;
 
     dataNode.setFilter("keep(position, normal, tangent)");
-    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.KEEP, "Filter Type is 'keep'");
+    strictEqual(dataNode.filterType, XflowConstants.DATA_FILTER_TYPE.KEEP, "Filter Type is 'keep'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getName(0), "position", "First mapping name is 'position'");
     strictEqual(mapping.getName(1), "normal", "Second mapping name is 'normal'");
     strictEqual(mapping.getName(2), "tangent", "Third mapping name is 'tangent'");
 
     dataNode.setFilter("remove ( A , B )   ");
-    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.REMOVE, "Filter Type is 'remove'");
+    strictEqual(dataNode.filterType, XflowConstants.DATA_FILTER_TYPE.REMOVE, "Filter Type is 'remove'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getName(0), "A", "First mapping name is 'A'");
     strictEqual(mapping.getName(1), "B", "Second mapping name is 'B'");
 
     dataNode.setFilter("rename ({newA : oldA , newB:oldB, newC: oldB})  ");
-    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.RENAME , "Filter Type is 'rename'");
+    strictEqual(dataNode.filterType, XflowConstants.DATA_FILTER_TYPE.RENAME , "Filter Type is 'rename'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getDestName(0), "newA", "First destination name is 'newA'");
     strictEqual(mapping.getDestName(1), "newB", "Second destination name is 'newB'");
@@ -447,7 +450,7 @@ test("Test filter parsing", function() {
     strictEqual(mapping.getSrcName(2), "oldB", "Third source name is 'oldB'");
 
     dataNode.setFilter("keep( {DEST : A, DEST :B , DEST: C , C2: A } ) ");
-    strictEqual(dataNode.filterType, Xflow.DATA_FILTER_TYPE.KEEP , "Filter Type is 'keep'");
+    strictEqual(dataNode.filterType, XflowConstants.DATA_FILTER_TYPE.KEEP , "Filter Type is 'keep'");
     mapping = dataNode.filterMapping;
     strictEqual(mapping.getDestName(0), "DEST", "First destination name is 'DEST'");
     strictEqual(mapping.getDestName(1), "C2", "Second destination name is 'C2'");
@@ -457,8 +460,7 @@ test("Test filter parsing", function() {
 
 
 test("Test compute parsing", function() {
-    var graph = new Xflow.Graph();
-    var dataNode = graph.createDataNode();
+    var dataNode = new DataNode(false);
     var mapping;
 
     dataNode.setCompute("position = xflow.morph(position, posAdd, weight)");
@@ -546,51 +548,51 @@ test("Operator - Later Input", function() {
     var response = this.loadTestXML("./xflow-xml/basic/test_operator_later_input.xml", handler);
     this.executeTests(response);
 });
-
-test("Operator - Platform fallback - JS", function() {
-    var xflowGraph = XML3D.data.xflowGraph;
-
-    if (xflowGraph.platform !== Xflow.PLATFORM.JAVASCRIPT) {
-        console.log("Operator - Platform fallback - JS tests were not executed because Xflow platform is not JavaScript.");
-        return true;
-    }
-
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_js.xml", handler);
-    this.executeTests(response);
-});
-
-test("Operator - Platform fallback - WebCL", function () {
-    var xflowGraph = XML3D.data.xflowGraph;
-
-    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
-        console.log("Operator - Platform fallback - WebCL tests were not executed because WebCL platform is not available.");
-        return true;
-    }
-
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_cl.xml", handler);
-    this.executeTests(response);
-});
+//
+//test("Operator - Platform fallback - JS", function() {
+//	var xflowGraph = XML3D.data.xflowGraph;
+//
+//	if (xflowGraph.platform !== Xflow.PLATFORM.JAVASCRIPT) {
+//		console.log("Operator - Platform fallback - JS tests were not executed because Xflow platform is not JavaScript.");
+//		return true;
+//	}
+//
+//	var handler = getHandler(this.doc.getElementById("xml3dElem"));
+//	var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_js.xml", handler);
+//	this.executeTests(response);
+//});
+//
+//test("Operator - Platform fallback - WebCL", function () {
+//	var xflowGraph = XML3D.data.xflowGraph;
+//
+//	if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+//		console.log("Operator - Platform fallback - WebCL tests were not executed because WebCL platform is not available.");
+//		return true;
+//	}
+//
+//	var handler = getHandler(this.doc.getElementById("xml3dElem"));
+//	var response = this.loadTestXML("./xflow-xml/basic/test_platform_fallback_cl.xml", handler);
+//	this.executeTests(response);
+//});
 
 test("Operator - Platform attribute - JS", function () {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/basic/test_platform_js.xml", handler);
     this.executeTests(response);
 });
-
-test("Operator - Platform attribute - WebCL", function () {
-    var xflowGraph = XML3D.data.xflowGraph;
-
-    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
-        console.log("Operator - Platform - WebCL tests were not executed because WebCL platform is not available.");
-        return true;
-    }
-
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/basic/test_platform_cl.xml", handler);
-    this.executeTests(response);
-});
+//
+//test("Operator - Platform attribute - WebCL", function () {
+//	var xflowGraph = XML3D.data.xflowGraph;
+//
+//	if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+//		console.log("Operator - Platform - WebCL tests were not executed because WebCL platform is not available.");
+//		return true;
+//	}
+//
+//	var handler = getHandler(this.doc.getElementById("xml3dElem"));
+//	var response = this.loadTestXML("./xflow-xml/basic/test_platform_cl.xml", handler);
+//	this.executeTests(response);
+//});
 
 test("Operators - Simple", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
@@ -700,11 +702,14 @@ test("GLSL basic", function() {
 });
 
 
+/*
+TODO: Feature not used currently, will be reintegrated with proper shade.js integration in VS generation
 test("GLSL with 3x Morph", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_morphing.xml", handler);
     this.executeTests(response);
 });
+*/
 
 test("GLSL with Uniforms", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
@@ -712,27 +717,147 @@ test("GLSL with Uniforms", function() {
     this.executeTests(response);
 });
 
+/*
+TODO: Feature not used currently, will be reintegrated with proper shade.js integration in VS generation
 test("GLSL with Processing on Uniforms", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/glsl_output/test_glsl_uniform_processing.xml", handler);
     this.executeTests(response);
 });
+*/
 
-test("WebCL Image Processing", function () {
-    var xflowGraph = XML3D.data.xflowGraph;
-    var handler = getHandler(this.doc.getElementById("xml3dElem"));
-    var response = this.loadTestXML("./xflow-xml/webcl_output/test_webcl_image_processing.xml", handler);
-
-    if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
-        console.log("WebCL Image Processing tests could not be executed because WebCL platform is not available");
-        return true;
-    }
-    this.executeTests(response);
-});
+//test("WebCL Image Processing", function () {
+//	var xflowGraph = XML3D.data.xflowGraph;
+//	var handler = getHandler(this.doc.getElementById("xml3dElem"));
+//	var response = this.loadTestXML("./xflow-xml/webcl_output/test_webcl_image_processing.xml", handler);
+//
+//	if (xflowGraph.platform !== Xflow.PLATFORM.CL) {
+//		console.log("WebCL Image Processing tests could not be executed because WebCL platform is not available");
+//		return true;
+//	}
+//	this.executeTests(response);
+//});
 
 
 test("Errors with empty arguments", function() {
     var handler = getHandler(this.doc.getElementById("xml3dElem"));
     var response = this.loadTestXML("./xflow-xml/error/test_empty_argument.xml", handler);
     this.executeTests(response);
+});
+
+
+module("Xflow External Operators", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.win = document.getElementById("xml3dframe").contentWindow;
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/data-xflow-external-operators.html"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Dataflows - External Operators", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh1");
+    var loaded = function() {
+        start();
+        var positions = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Dataflow positions were correctly computed");
+    };
+    if (!xml3dElem.complete) {
+        xml3dElem.addEventListener("load", loaded);
+        stop();
+    } else {
+        stop();
+        loaded();
+    }
+});
+
+test("Dataflows - External Operators with multiple uses", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh3");
+    var loaded = function() {
+        start();
+        var positions2 = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions2.value, [5,3,3,2,0,2], EPSILON, "Multiple uses of the same external operator");
+    };
+    if (!xml3dElem.complete) {
+        xml3dElem.addEventListener("load", loaded);
+        stop();
+    } else {
+        stop();
+        loaded();
+    }
+});
+
+test("Data - External Operators", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh2");
+    var loaded = function() {
+        start();
+        var positions = mesh.getResult()._entries.position;
+        QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Data positions were correctly computed");
+    };
+    if (!xml3dElem.complete) {
+        xml3dElem.addEventListener("load", loaded);
+        stop();
+    } else {
+        stop();
+        loaded();
+    }
+});
+
+test("Dataflow - Swap external input back and forth", function() {
+    var xml3dElem = this.doc.getElementById("xml3dElem");
+    var mesh = this.doc.getElementById("mesh4");
+    var offsetInput = this.doc.getElementById("offsetInput");
+
+    var testStep = 0;
+    var framedrawn = function() {
+        var positions;
+        if (testStep === 0) {
+            start();
+            positions = mesh.getResult()._entries.position;
+            QUnit.closeArray(positions.value, [-1.0,1.0,-10.0,1.0,1.0,-10.0,-1.0,3.0,-10.0,1.0,3.0,-10.0], EPSILON, "Offset positions were correctly computed");
+            offsetInput.setAttribute("src", "json/offsets1.json");
+            testStep++;
+            stop();
+        } else if(testStep === 1) {
+            start();
+            positions = mesh.getResult()._entries.position;
+            if (!positions) {
+                stop();
+                return;
+            }
+            QUnit.closeArray(positions.value, [-1.0,-3.0,-10.0,1.0,-3.0,-10.0,-1.0,-1.0,-10.0,1.0,-1.0,-10.0], EPSILON, "Offset1 positions were correctly computed");
+            offsetInput.setAttribute("src", "json/offsets.json");
+            testStep++;
+            stop();
+        } else if(testStep === 2) {
+            start();
+            positions = mesh.getResult()._entries.position;
+            QUnit.closeArray(positions.value, [-1.0,1.0,-10.0,1.0,1.0,-10.0,-1.0,3.0,-10.0,1.0,3.0,-10.0], EPSILON, "Offset positions were correctly computed");
+            testStep++;
+        }
+    };
+    var loaded = function() {
+        xml3dElem.addEventListener("framedrawn", framedrawn);
+        var handler = getHandler(xml3dElem);
+        handler.draw();
+    };
+    stop();
+    if (!xml3dElem.complete) {
+        xml3dElem.addEventListener("load", loaded);
+    } else {
+        loaded();
+    }
+
 });

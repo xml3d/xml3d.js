@@ -1,6 +1,5 @@
-(function (window) {
 
-  var StateMachine = {
+var StateMachine = {
 
     //---------------------------------------------------------------------------
 
@@ -125,7 +124,7 @@
         this.transition.cancel = function() { // provide a way for caller to cancel async transition if desired (issue #22)
           fsm.transition = null;
           StateMachine.afterEvent(fsm, name, from, to, args);
-        }
+        };
 
         var leave = StateMachine.leaveState(this, name, from, to, args);
         if (false === leave) {
@@ -144,16 +143,16 @@
       };
     }
 
-  }; // StateMachine
+}; // StateMachine
 
-  //===========================================================================
+//===========================================================================
 
-  /*if ("function" === typeof define) {
-    define(function(require) { return StateMachine; });
-  }
-  else {*/
-    window.StateMachine = StateMachine;
-  /*}*/
+/*if ("function" === typeof define) {
+define(function(require) { return StateMachine; });
+}
+else {*/
+window.StateMachine = StateMachine;
+/*}*/
 
-}(this));
+module.exports = StateMachine;
 

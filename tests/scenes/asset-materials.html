@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+  <script type="text/javascript" src="../scripts/shade.js"></script>
+  <title>Materials</title>
+</head>
+<body>
+<script id="customMaterial" type="text/javascript">
+  function shade(env) {
+    return env.customColor;
+  }
+</script>
+<xml3d id="Scene" activeView="#v_Camera" style="width: 512px; height: 512px; background-color:rgb(65,65,65);">
+  <defs>
+    <asset id="myAsset">
+      <assetmesh shader="#material">
+        <int name="index">0 1 2 2 3 0 </int>
+        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 1.0 1.0 0.0 -1.0 1.0 0.0</float3>
+        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      </assetmesh>
+    </asset>
+    <shader id="material" script="urn:xml3d:shader:phong">
+      <float3 name="emissiveColor">0 0 1</float3>
+      <float3 name="diffuseColor">0 1 0</float3>
+      <float3 name="customColor">0 1 1</float3>
+    </shader>
+  </defs>
+  <view id="v_view"></view>
+  <group id="Plane" class="layer-0" style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000925,0.000000,0.000000,1.000000);">
+    <model id="Plane" src="#myAsset"></model>
+  </group>
+  <group id="Camera" class="layer-0" style="transform:matrix3d(1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,4.207090,1.000000);">
+    <view id="v_Camera"></view>
+  </group>
+</xml3d>
+<script>
+  var material = document.querySelector("#material");
+  var setMatte = function () {
+    material.setAttribute("script", "urn:xml3d:shader:matte");
+  };
+
+  var setPhong = function () {
+    material.setAttribute("script", "urn:xml3d:shader:phong");
+  };
+
+  var setUnknown = function () {
+    material.setAttribute("script", "urn:xml3d:shader:unknown");
+  };
+
+  var setShadeInternal = function () {
+    material.setAttribute("script", "#customMaterial");
+  };
+
+  var setShadeExternal = function () {
+    material.setAttribute("script", "assets/plane.xml#customMaterial");
+  };
+
+  var setShadeExternalJS = function () {
+    material.setAttribute("script", "assets/materials/yellow.js");
+  };
+
+  var changeInternalShadeJS = function () {
+    var script = document.querySelector("#customMaterial");
+    script.textContent = "function shade(env) { return new Vec3(1,0,1); }"
+  };
+
+</script>
+<div>
+  <a href="#" onclick="setMatte()">set predefined urn:xml3d:shader:matte</a><br>
+  <a href="#" onclick="setPhong()">set predefined urn:xml3d:shader:phong</a><br>
+  <a href="#" onclick="setUnknown()">set unknown predefined</a><br>
+  <a href="#" onclick="setShadeInternal()">internal shade.js</a><br>
+  <a href="#" onclick="setShadeExternal()">external shade.js script element</a><br>
+  <a href="#" onclick="setShadeExternalJS()">external shade.js javascript</a><br>
+  <a href="#" onclick="changeInternalShadeJS()">change internal shade.js script</a><br>
+
+</div>
+
+</body>
+</html>

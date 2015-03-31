@@ -3,24 +3,18 @@ test("xml3d methods test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "xml3d");
     ok(node);
 
-    ok(node.createXML3DVec3() instanceof XML3DVec3, "xml3d::createXML3DVec3() returns XML3DVec3");
-    deepEqual(node.createXML3DVec3(), new XML3DVec3(), "xml3d::createXML3DVec3() == new XML3DVec3()");
-
-    ok(node.createXML3DRotation() instanceof XML3DRotation, "xml3d::createXML3DRotation returns XML3DRotation");
-    deepEqual(node.createXML3DRotation(), new XML3DRotation(), "xml3d::createXML3DRotation() == new XML3DRotation()");
-
-    ok(node.createXML3DMatrix() instanceof XML3DMatrix, "xml3d::createXML3DMatrix returns XML3DMatrix");
-    deepEqual(node.createXML3DMatrix(), new XML3DMatrix(), "xml3d::createXML3DMatrix() == new XML3DMatrix()");
-
-    ok(node.createXML3DRay() instanceof XML3DRay, "xml3d::createXML3DRay returns XML3DRay");
-    deepEqual(node.createXML3DRay(), new XML3DRay(), "xml3d::createXML3DRay() == new XML3DRay()");
-
     equal(node.getElementByPoint(0,0, new XML3DVec3(), new XML3DVec3()), null, "xml3d::getElementByPoint returns ");
     ok(node.generateRay(0,0) instanceof XML3DRay, "xml3d::generateRay returns ");
     equal(node.getElementByRay(new XML3DRay(), new XML3DVec3(), new XML3DVec3()), null, "xml3d::getElementByRay returns ");
 
     ok(node.getBoundingBox() instanceof XML3DBox, "xml3d::getBoundingBox returns ");
     ok(node.getBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
+
+    ok(node.getLocalBoundingBox() instanceof XML3DBox, "xml3d::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
+
+    ok(node.getWorldBoundingBox() instanceof XML3DBox, "xml3d::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
 });
 test("group interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
@@ -36,6 +30,12 @@ test("group interface test", function() {
 
     ok(node.getBoundingBox() instanceof XML3DBox, "group::getBoundingBox returns XML3DBox");
     ok(node.getBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
+
+    ok(node.getLocalBoundingBox() instanceof XML3DBox, "group::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
+
+    ok(node.getWorldBoundingBox() instanceof XML3DBox, "group::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
 });
 test("mesh interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
@@ -47,6 +47,12 @@ test("mesh interface test", function() {
 
     ok(node.getBoundingBox() instanceof XML3DBox, "mesh::getBoundingBox returns XML3DBox");
     ok(node.getBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
+
+    ok(node.getLocalBoundingBox() instanceof XML3DBox, "mesh::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
+
+    ok(node.getWorldBoundingBox() instanceof XML3DBox, "mesh::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
 });
 test("light interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "light");

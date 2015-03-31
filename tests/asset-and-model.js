@@ -37,6 +37,7 @@ test("Static Test", 3, function() {
     stop();
 });
 
+
 test("Modify shader assignment", 6, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
@@ -417,9 +418,60 @@ test("Nested Assets" , function() {
             }
         }
         start();
-    }
+    };
     stop();
     xTest.addEventListener("framedrawn", frameRendererd);
     frameRendererd();
 });
 
+module("Asset and Model", {
+    setup : function() {
+        stop();
+        var that = this;
+        this.cb = function(e) {
+            ok(true, "Scene loaded");
+            that.doc = document.getElementById("xml3dframe").contentDocument;
+            start();
+        };
+        loadDocument("scenes/asset-scenegraph.xhtml"+window.location.search, this.cb);
+    },
+    teardown : function() {
+        var v = document.getElementById("xml3dframe");
+        v.removeEventListener("load", this.cb, true);
+    }
+});
+
+test("Model visibility", 6, function() {
+    var xTest = this.doc.getElementById("xml3dTest"),
+        glTest = getContextForXml3DElement(xTest),
+        hTest = getHandler(xTest);
+
+    var group = this.doc.getElementById("visibilityGroup");
+    var model = this.doc.createElement("model");
+    model.setAttribute("src", "#asset2");
+    model.setAttribute("visible", "false");
+    group.appendChild(model);
+
+    hTest.draw();
+    QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [0,0,0,0], PIXEL_EPSILON,
+        "Model was added invisible" );
+
+    model.setAttribute("visible", "true");
+    XML3D.flushDOMChanges();
+    hTest.draw();
+    QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [255,128,128,255], PIXEL_EPSILON,
+        "Model is now visible" );
+
+    group.setAttribute("visible", "false");
+    XML3D.flushDOMChanges();
+    hTest.draw();
+    QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [0,0,0,0], PIXEL_EPSILON,
+        "Group visibility inherited by model" );
+
+    model.setAttribute("visible", "false");
+    group.setAttribute("visible", "true");
+    XML3D.flushDOMChanges();
+    hTest.draw();
+    QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [0,0,0,0], PIXEL_EPSILON,
+        "Set model invisible, then group visible, model is invisible" );
+});

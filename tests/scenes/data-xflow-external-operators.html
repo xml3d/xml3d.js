@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<link rel="stylesheet" type="text/css" media="all" href="frame.css" />
+	<script type="text/javascript" src="../../build/output/xml3d.js"></script>
+
+	<title>
+		XML3D
+	</title>
+	</head>
+	<body style="background-color: #FFF;width:500px">
+	<xml3d id="xml3dElem" style="background-color: grey; width: 300px; height: 200px;">
+		<defs id="defsElem">
+			<dataflow id="calcPositions" out="position">
+				<float3 param="true" name="position"></float3>
+				<float3 param="true" name="offset"></float3>
+				<compute>
+					position = xflow.add(position, offset);
+				</compute>
+			</dataflow>
+
+			<data id="calculatedPositions" compute="dataflow['#calcPositions']">
+				<data id="posInput" src="json/positions.json"></data>
+				<data id="offsetInput" src="json/offsets.json"></data>
+			</data>
+
+		</defs>
+		<view></view>
+		<group style="transform: translate3d(-2,0,-10);">
+			<mesh id="mesh1" src="xml/external_operators.xml#instance1"></mesh>
+		</group>
+
+		<group style="transform: translate3d(2,0,-10);">
+			<mesh id="mesh2" src="xml/external_operators.xml#instance2"></mesh>
+		</group>
+
+		<group style="transform: translate3d(0,0,-10);">
+			<mesh id="mesh3" src="xml/external_operators.xml#instance4"></mesh>
+		</group>
+
+		<group >
+			<mesh id="mesh4">
+				<int name="index">0 1 2 1 2 3</int>
+				<data src="#calculatedPositions"></data>
+			</mesh>
+		</group>
+	</xml3d>
+
+	</body>
+
+ </html>

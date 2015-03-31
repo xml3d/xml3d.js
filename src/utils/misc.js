@@ -1,24 +1,5 @@
 // utils/misc.js
 
-XML3D.setParameter = function(elementId, fieldName, value) {
-    var e = document.getElementById(elementId);
-    if (e) {
-        var fields = e.childNodes;
-        for (var i = 0; i < fields.length; i++) {
-              var field = fields[i];
-              if (field.nodeType === Node.ELEMENT_NODE && (field.name == fieldName)) {
-                  if (typeof value === 'string')
-                      {
-                          while ( field.hasChildNodes() ) field.removeChild( field.lastChild );
-                          field.appendChild(document.createTextNode(value));
-                          return true;
-                      }
-              }
-            }
-    }
-    return false;
-};
-
 window.requestAnimFrame = (function(){
     return  window.requestAnimationFrame       ||
             window.webkitRequestAnimationFrame ||
@@ -32,22 +13,63 @@ window.requestAnimFrame = (function(){
 
 (function(exports) {
 
+
     /**
-     * Dispatch HTML event
+     * This function sends single or multiple adapter functions by calling functions
+     * specified in funcs parameter for each adapter associated with the node.
      *
-     * @param {Object} target    element or document
-     * @param {string} eventType standard event type e.g. load, click
+     * funcs parameter is used as a dictionary where each key is used as name of a
+     * adapter function to call, and corresponding value is a list of arguments
+     * (i.e. must be an array). For example sendAdapterEvent(node, {method : [1,2,3]})
+     * will call function 'method' with arguments 1,2,3 for each adapter of the node.
+     *
+     * @param {Object} node
+     * @param {Object} funcs
+     * @return {Array} array of all returned values
      */
-    exports.dispatchEvent = function(target, eventType) {
-        var evt = null;
-        if (document.createEvent) {
-            evt = document.createEvent("Events");
-            evt.initEvent(eventType, true, true);
-            return target.dispatchEvent(evt);
-        } else if (document.createEventObject) {
-            evt = document.createEventObject();
-            return target.fireEvent('on' + eventType, evt);
+    exports.callAdapterFunc = function(node, funcs) {
+        var result = [];
+        if (!node || node._configured === undefined)
+            return result;
+        var adapters = node._configured.adapters;
+        for (var adapter in adapters) {
+            for (var func in funcs) {
+                var adapterObject = adapters[adapter];
+                var eventHandler = adapterObject[func];
+                if (eventHandler) {
+                    result.push(eventHandler.apply(adapterObject, funcs[func]));
+                }
+            }
         }
+        return result;
+    };
+
+    /**
+     * This function sends single or multiple adapter events by calling functions
+     * specified in events parameter for each adapter associated with the node.
+     *
+     * events parameter is used as a dictionary where each key is used as name of a
+     * adapter function to call, and corresponding value is a list of arguments
+     * (i.e. must be an array). For example sendAdapterEvent(node, {method : [1,2,3]})
+     * will call function 'method' with arguments 1,2,3 for each adapter of the node.
+     *
+     * @param {Object} node
+     * @param {Object} events
+     * @return {Boolean} false if node is not configured.
+     */
+    exports.sendAdapterEvent = function(node, events) {
+        if (!node || node._configured === undefined)
+            return false;
+        var adapters = node._configured.adapters;
+        for (var adapter in adapters) {
+            for (var event in events) {
+                var eventHandler = adapters[adapter][event];
+                if (eventHandler) {
+                    eventHandler.apply(adapters[adapter], events[event]);
+                }
+            }
+        }
+        return true;
     };
 
     /**
@@ -68,36 +90,22 @@ window.requestAnimFrame = (function(){
         return target.dispatchEvent(event);
     };
 
-    exports.getStyle = function(oElm, strCssRule) {
-        var strValue = "";
-        if (document.defaultView && document.defaultView.getComputedStyle) {
-            strValue = document.defaultView.getComputedStyle(oElm, "")
-                    .getPropertyValue(strCssRule);
-        } else if (oElm.currentStyle) {
-            strCssRule = strCssRule.replace(/\-(\w)/g, function(strMatch, p1) {
-                return p1.toUpperCase();
-            });
-            strValue = oElm.currentStyle[strCssRule];
-        }
-
-        return strValue;
-    };
-
-    /** Evaluates the given XPath expression in the given xml3d element on
-     *  xml3d elements and returns the result.
+    /** Dispatch HTML event
      *
-     * @param {!Object} xml3d the xml3d element on which to evaluate the expression
-     * @param {!Object} xpathExpr the XPath expression to be evaluated
-     *
-     * @return {XPathResult} the result of the evaluation
+     * @param {Object} target    element or document
+     * @param {string} eventType standard event type e.g. load, click
      */
-    exports.evaluateXPathExpr = function(xml3d, xpathExpr)
-    {
-        return document.evaluate(
-            xpathExpr, xml3d,
-            function() {return XML3D.xml3dNS;},
-            XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    };
+    exports.dispatchEvent = function(target, eventType) {
+        var evt = null;
+        if (document.createEvent) {
+                evt = document.createEvent("Events");
+                evt.initEvent(eventType, true, true);
+                return target.dispatchEvent(evt);
+            } else if (document.createEventObject) {
+                evt = document.createEventObject();
+                return target.fireEvent('on' + eventType, evt);
+            }
+        };
 
     var __autoCreatedViewId = 0;
     /**
@@ -112,7 +120,7 @@ window.requestAnimFrame = (function(){
         var ref = xml3d.activeView;
         if(ref)
         {
-            var v = XML3D.URIResolver.resolveLocal(ref);
+            var v = window.XML3D.URIResolver.resolveLocal(ref);
             if(!v)
                 throw "XML3D Error: xml3d references view that is not defined: '" + ref + "'.";
 
@@ -120,16 +128,7 @@ window.requestAnimFrame = (function(){
         }
 
         // didn't succeed, so now try to just take the first view
-        var firstView;
-        if(XML3D.xhtml){
-            firstView = XML3D.util.evaluateXPathExpr(
-                xml3d, './/xml3d:view[1]').singleNodeValue;
-        }
-        else{
-            firstView = xml3d.getElementsByTagName("view")[0];
-        }
-
-
+        var firstView = xml3d.querySelector("view");
         if(firstView)
         {
             // if it has an id, set it as active

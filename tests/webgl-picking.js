@@ -12,7 +12,11 @@ module("WebGL Picking tests", {
     teardown : function() {
         var v = document.getElementById("xml3dframe");
         v.removeEventListener("load", this.cb, true);
+    },
+    dispatchMouseEvent : function(handler, type, data, target) {
+        handler._mouseHandler.dispatchMouseEvent(handler._mouseHandler.createMouseEvent(type, data), target);
     }
+
 });
 
 
@@ -79,6 +83,7 @@ test("xml3d Apadater getElementByPoint test", function() {
 
 });
 
+
 test("Object picking test", 3, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
@@ -91,7 +96,7 @@ test("Object picking test", 3, function() {
 
     h.getPickObjectByPoint(88,60);
     stop();
-    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 88, clientY: 60 }), target);
+    this.dispatchMouseEvent(h, "click", { clientX: 88, clientY: 60 }, target);
 
 });
 
@@ -108,7 +113,7 @@ test("Position picking test", 4, function() {
 
     h.getPickObjectByPoint(89,51);
     stop();
-    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 89, clientY: 51 }), target);
+    this.dispatchMouseEvent(h, "click", { clientX: 89, clientY: 51 }, target);
 });
 
 test("Normal picking test", 4, function() {
@@ -125,7 +130,7 @@ test("Normal picking test", 4, function() {
 
     h.getPickObjectByPoint(88,60);
     stop();
-    h.dispatchMouseEvent(h.createMouseEvent("click", { clientX: 88, clientY: 60 }), target);
+    this.dispatchMouseEvent(h, "click", { clientX: 88, clientY: 60 }, target);
 });
 
 test("Don't pick invisible objects", 3, function() {
@@ -153,17 +158,15 @@ test("Resizing xml3d element reinitializes buffers", 5, function() {
 });
 
 test("Touch", function() {
-    if('ontouchstart' in window) {
-        console.log("Available", XML3D.webgl.events.available.indexOf("touchstart"));
-        notEqual(-1, XML3D.webgl.events.available.indexOf("touchstart"), "touchstart listeners attached");
-        notEqual(-1, XML3D.webgl.events.available.indexOf("touchend"), "touchend listeners attached");
-        notEqual(-1, XML3D.webgl.events.available.indexOf("touchmove"), "touchmove listeners attached");
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
 
+    if('ontouchstart' in window) {
+        ok(h.hasTouchEvents(), "Handler has touch events");
+        notEqual(h._touchHandler, null, "Touch handler set");
     } else {
-        console.log("Not Available");
-        equal(-1, XML3D.webgl.events.available.indexOf("touchstart"), "No touchstart listeners attached");
-        equal(-1, XML3D.webgl.events.available.indexOf("touchend"), "No touchend listeners attached");
-        equal(-1, XML3D.webgl.events.available.indexOf("touchmove"), "No touchmove listeners attached");
+        ok(!h.hasTouchEvents(), "Handler has no touch events");
+        equal(h._touchHandler, null, "Touch handler not set");
     }
 
 
@@ -213,45 +216,45 @@ test("Position and normal with getElementByRay", 6, function() {
 });
 
 test("Overlapping objects with getElementByRay", 6, function() {
-	var xml3dElement = this.doc.getElementById("xml3DElem");
-	var h = getHandler(xml3dElement);
-	var target = this.doc.getElementById("pickingMesh11");
-	var target2 = this.doc.getElementById("pickingMesh10");
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
+    var target = this.doc.getElementById("pickingMesh11");
+    var target2 = this.doc.getElementById("pickingMesh10");
 
-	var ray = new XML3DRay();
-	ray.origin.set(new XML3DVec3(-5, 0, 100));
-	ray.direction.set(new XML3DVec3(0, 0, -1));
+    var ray = new XML3DRay();
+    ray.origin.set(new XML3DVec3(-5, 0, 100));
+    ray.direction.set(new XML3DVec3(0, 0, -1));
 
-	var foundNormal = new XML3DVec3();
-	var foundPosition = new XML3DVec3();
+    var foundNormal = new XML3DVec3();
+    var foundPosition = new XML3DVec3();
 
-	var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
-	equal(obj, target, "Returned the correct object");
-	QUnit.closeVector(foundPosition, new XML3DVec3(-4.77, 0.23, -10), EPSILON, "Found correct position");
-	QUnit.closeVector(foundNormal, new XML3DVec3(0, 0, 1), EPSILON, "Found correct normal");
+    var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
+    equal(obj, target, "Returned the correct object");
+    QUnit.closeVector(foundPosition, new XML3DVec3(-4.77, 0.23, -10), EPSILON, "Found correct position");
+    QUnit.closeVector(foundNormal, new XML3DVec3(0, 0, 1), EPSILON, "Found correct normal");
 
-	ray.origin.set(new XML3DVec3(-4, 0, 100));
-	obj = xml3dElement.getElementByRay(ray);
-	equal(obj, target2, "Returned the square donut object");
+    ray.origin.set(new XML3DVec3(-4, 0, 100));
+    obj = xml3dElement.getElementByRay(ray);
+    equal(obj, target2, "Returned the square donut object");
 });
 
 test("Ray parallel to an object", 4, function() {
-	var xml3dElement = this.doc.getElementById("xml3DElem");
-	var h = getHandler(xml3dElement);
-	var target = this.doc.getElementById("pickingMesh2");
+    var xml3dElement = this.doc.getElementById("xml3DElem");
+    var h = getHandler(xml3dElement);
+    var target = this.doc.getElementById("pickingMesh2");
 
-	var ray = new XML3DRay();
-	ray.origin.set(new XML3DVec3(0, 0, -9));
-	ray.direction.set(new XML3DVec3(0, 1, -0.5));
+    var ray = new XML3DRay();
+    ray.origin.set(new XML3DVec3(0, 0, -9));
+    ray.direction.set(new XML3DVec3(0, 1, -0.5));
 
-	var obj = xml3dElement.getElementByRay(ray);
-	equal(obj, target, "Slightly downward angle returns the plane");
+    var obj = xml3dElement.getElementByRay(ray);
+    equal(obj, target, "Slightly downward angle returns the plane");
 
-	ray.origin.set(new XML3DVec3(0, 0, -10));
-	ray.direction.set(new XML3DVec3(0, 1, 0));
+    ray.origin.set(new XML3DVec3(0, 0, -10));
+    ray.direction.set(new XML3DVec3(0, 1, 0));
 
-	obj = xml3dElement.getElementByRay(ray);
-	equal(obj, null, "Ray parallel to plane returns null");
+    obj = xml3dElement.getElementByRay(ray);
+    equal(obj, null, "Ray parallel to plane returns null");
 
 });
 

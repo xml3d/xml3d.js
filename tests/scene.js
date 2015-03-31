@@ -1,19 +1,23 @@
 module("RenderScene", {
     setup: function () {
-        this.scene = new XML3D.webgl.Scene();
+        this.scene = new XML3DTestLib.Scene();
         this.scene.createDrawable = function() {
             return null;
         };
         this.scene.requestRedraw = function() {
         };
-        this.xflowGraph = new Xflow.Graph();
 
     }
 });
 
+var SceneConstants = XML3DTestLib.SceneConstants;
+var DataNode = XML3DTestLib.DataNode;
+var ComputeRequest = XML3DTestLib.ComputeRequest;
+
 test("Light attributes", 10, function () {
 
-    var dataNode = this.xflowGraph.createDataNode(false);
+    var dataNode = new DataNode(false);
+    var lightModels = this.scene.lights._models;
 
     var light = this.scene.createRenderLight({
         light: {
@@ -22,30 +26,31 @@ test("Light attributes", 10, function () {
     });
 
     equal(light.localIntensity, 1.0, "Local intensity default");
+    var result = new ComputeRequest(light.model.dataNode, ["intensity"]).getResult();
     var actualVector = new XML3DVec3();
-    actualVector.set(light.intensity);
+    actualVector.set(result.getOutputData("intensity").getValue());
     QUnit.closeVector(actualVector, new XML3DVec3(1, 1, 1), EPSILON, "Intensity default");
 
-    equal(this.scene.lights.directional.length, 1, "Light without type is in directional container (default)");
+    equal(lightModels.directional.lightModels.length, 1, "Light without type is in directional container (default)");
     light.setLightType("spot");
-    equal(light.light.type, "spot", "Changed type to 'spot'");
+    equal(light.model.id, "spot", "Changed type to 'spot'");
 
-    equal(this.scene.lights.directional.length, 0, "Light has left directional light container");
-    equal(this.scene.lights.spot.length, 1, "Light is in spot light container");
+    equal(lightModels.directional.lightModels.length, 0, "Light has left directional light container");
+    equal(lightModels.spot.lightModels.length, 1, "Light is in spot light container");
     //strictEqual(this.scene.lights.directional[0], light, "Valid directional light is in 'scene.lights.directional'");
 
     light.setLightType("unknown");
-    equal(light.light.type, "unknown", "Changed type to 'unknwon'");
-    equal(this.scene.lights.spot.length, 0, "Light has left spot light container");
+    equal(light.model.id, "directional", "Changed type to 'unknown' results in directional light");
+    equal(lightModels.spot.lightModels.length, 0, "Light has left spot light container");
 
     light.setLightType("");
-    equal(light.light.type, "directional", "Reset light type (leads to default: directional");
-    equal(this.scene.lights.directional.length, 1, "Light without type is in directional container (default)");
+    equal(light.model.id, "directional", "Reset light type (leads to default: directional");
+    equal(lightModels.directional.lightModels.length, 1, "Light without type is in directional container (default)");
 });
 
 test("Light callbacks", 9, function () {
 
-    var dataNode = this.xflowGraph.createDataNode(false);
+    var dataNode = new DataNode(false);
 
     var light = this.scene.createRenderLight({
         light: {
@@ -53,7 +58,7 @@ test("Light callbacks", 9, function () {
         }
     });
 
-    this.scene.addEventListener(XML3D.webgl.Scene.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (event) {
+    this.scene.addEventListener(SceneConstants.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (event) {
         ok(event.light, "Got a structure changed callback");
         start();
     });
@@ -70,7 +75,7 @@ test("Light callbacks", 9, function () {
         }
     });
 
-    this.scene.addEventListener(XML3D.webgl.Scene.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (event) {
+    this.scene.addEventListener(SceneConstants.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (event) {
         ok(true, "Got a value changed callback");
         start();
     });
@@ -88,7 +93,7 @@ test("Light callbacks", 9, function () {
 });
 
 test("Light removal: Issue #71", function () {
-    var dataNode = this.xflowGraph.createDataNode(false);
+    var dataNode = new DataNode(false);
     var group = this.scene.createRenderGroup();
     this.scene.createRenderLight({ // SC 3: Add a new light to the scene
         parent: group,
@@ -109,13 +114,13 @@ test("Light removal: Issue #71", function () {
     this.scene.createRenderGroup({parent: group});
     this.scene.createRenderGroup({parent: group});
     equal(group.children.length, 3, "Three children in group.");
-    equal(this.scene.lights.point.length, 2, "Two point lights.");
+    equal(this.scene.lights._models.point.lightModels.length, 2, "Two point lights.");
     light.remove();
     equal(group.children.length, 2, "Two children in group.");
-    equal(this.scene.lights.point.length, 1, "One point light.");
+    equal(this.scene.lights._models.point.lightModels.length, 1, "One point light.");
     light.remove();
     equal(group.children.length, 2, "Two children in group.");
-    equal(this.scene.lights.point.length, 1, "One point light.");
+    equal(this.scene.lights._models.point.lightModels.length, 1, "One point light.");
 
 });
 

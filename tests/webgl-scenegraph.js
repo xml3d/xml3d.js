@@ -24,23 +24,7 @@ module("WebGL Scenegraph", {
 
 });
 
-function getWebGLAdapter(x) {
-    var window = x.ownerDocument.defaultView ?x.ownerDocument.defaultView : x.ownerDocument.parentWindow;
-    window.XML3D._flushDOMChanges();
-    if(x._configured){
-        for(var i in x._configured.adapters){
-            if(i.indexOf("webgl") == 0){
-                return x._configured.adapters[i];
-            }
-        }
-    }
-    return null;
-};
 
-function getWebGLFactory(x) {
-    var adapter = getWebGLAdapter(x);
-    return adapter ? adapter.factory : null;
-};
 
 function getCanvasId(x) {
     var factory = getWebGLFactory(x);
@@ -55,8 +39,8 @@ function getRenderer(x) {
 
 function getHandler(x) {
     //console.dir(x);
-    var id = getCanvasId(x);
-    return id ? x.ownerDocument.defaultView.XML3D.webgl.handlers[id] : null;
+    var renderer = getRenderer(x);
+    return renderer ? renderer._canvasHandler : null;
 };
 
 function getContextForXml3DElement(x) {
@@ -100,7 +84,7 @@ test("Change visibility via script", 9, function() {
     };
     stop();
     this.doc.getElementById("myGroup").visible = true;
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     ok(renderer.needsRedraw(), "Redraw required");
 });
 
@@ -129,7 +113,7 @@ test("Add children in invisible group", 8, function() {
     mesh.setAttribute("src", "#meshdata");
 
     this.doc.getElementById("myEmptyGroup").appendChild(mesh);
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     ok(h.renderer.needsDraw, "Redraw required");
 });
 
@@ -150,26 +134,47 @@ test("Change active view via script", 8, function() {
     QUnit.closeMatrix(v.getViewMatrix(), new XML3DMatrix().translate(0,0,-3), EPSILON, "Check view matrix"); // 4
 
     x.activeView = "#viewOrientationTest";
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     equal(x.activeView, "#viewOrientationTest", "New active view is #viewOrientationTest"); // 5
     ok(h.renderer.needsDraw, "Redraw required"); // 6, fails in < 920181
 });
 
 
-test("Test mesh.getBoundingBox", 4, function() {
+test("Test mesh.getLocalBoundingBox", 4, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("xml3DElem");
     var h = getHandler(x);
-    var group = this.doc.getElementById("myGroup");
-    var mesh = this.doc.getElementById("mySimpleMesh");
+    var group = this.doc.getElementById("myTransformedGroup");
+    var mesh = this.doc.getElementById("myTransformedMesh");
     x.addEventListener("framedrawn", function(n) {
-        var bb = mesh.getBoundingBox();
+        var bb = mesh.getLocalBoundingBox();
         var max = bb._max._data;
         var min = bb._min._data;
 
         deepEqual([max[0], max[1], max[2]], [1,1,0], "BBox max is (1,1,0)");
         deepEqual([min[0], min[1], min[2]], [-1,-1,0], "BBox min is (-1,-1,0)");
+        start();
+    });
+    stop();
+    group.visible = true;
+
+});
+
+test("Test mesh.getWorldBoundingBox", 4, function() {
+    // 1: Found frame
+    // 2: Scene loaded
+    var x = this.doc.getElementById("xml3DElem");
+    var h = getHandler(x);
+    var group = this.doc.getElementById("myTransformedGroup");
+    var mesh = this.doc.getElementById("myTransformedMesh");
+    x.addEventListener("framedrawn", function(n) {
+        var bb = mesh.getWorldBoundingBox();
+        var max = bb._max._data;
+        var min = bb._min._data;
+
+        deepEqual([max[0], max[1], max[2]], [1,1,-3], "BBox max is (1,1,-3)");
+        deepEqual([min[0], min[1], min[2]], [-1,-1,-3], "BBox min is (-1,-1,-3)");
         start();
     });
     stop();
@@ -357,7 +362,7 @@ test("Simple add/remove transformed group with mesh", 17, function() {
     // Remove group
     var adapter = getWebGLAdapter(mesh);
     x.removeChild(group);
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     ok(!this.isRenderNodeInScene("addedMesh", scene), "Mesh not in scene");
     ok(!this.isRenderNodeInScene("addedGroup", scene), "Group not in scene");
 
@@ -371,7 +376,7 @@ test("Simple add/remove transformed group with mesh", 17, function() {
 
     // Re-add group
     x.appendChild(group);
-    this.win.XML3D._flushDOMChanges();
+    this.win.XML3D.flushDOMChanges();
     ok(this.isRenderNodeInScene("addedMesh", scene), "Render node in scene");
     ok(this.isRenderNodeInScene("addedGroup", scene), "Group in scene");
     var renderNode = getWebGLAdapter(mesh).renderNode;
@@ -522,27 +527,45 @@ test("Add a mesh dynamically", 4, function() {
     g.visible = true;
 });
 
-/*
-Felix: Disabled this test as it checks for fairly internal stuff - that has changed
+test("Add invisible groups and meshes", 7, function() {
+    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
+    var gl = getContextForXml3DElement(x);
+    var h = getHandler(x);
 
-test("Remove group with references to transform", 6, function() {
-    var outerGroup = this.doc.getElementById("group3");
-    var innerGroup = this.doc.getElementById("group4");
+    var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
+    mesh.setAttribute("src", "#meshdata");
+    mesh.setAttribute("visible", "false");
 
-    outerGroup.visible = true;
+    // Add a mesh
+    x.appendChild(mesh);
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,0], "Mesh is invisible");
 
-    var outerHandles = outerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
-    var innerHandles = innerGroup._configured.adapters.webgl_1.connectedAdapterHandles;
-    ok(outerHandles.transform !== undefined, "Outer transform reference is intact");
-    ok(innerHandles.transform !== undefined, "Inner transform reference is intact");
+    mesh.setAttribute("visible", "true");
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Mesh is now visible");
+    x.removeChild(mesh);
 
+    var group = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
+    group.setAttribute("visible", "false");
+    group.appendChild(mesh);
+    x.appendChild(group);
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,0], "Group is invisible");
 
-    var adapter = outerGroup._configured.adapters.webgl_1;
-    outerGroup.parentNode.removeChild(outerGroup);
+    group.setAttribute("visible", "true");
+    h.draw();
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [255,0,0,255], "Group is visible");
+    x.removeChild(group);
 
-    outerHandles = adapter.connectedAdapterHandles;
-    innerHandles = adapter.connectedAdapterHandles;
-    ok(outerHandles.transform === undefined, "Outer transform reference has been removed");
-    ok(innerHandles.transform === undefined, "Inner transform reference has been removed");
+    mesh.setAttribute("visible", "false");
+    h.draw();
+    x.appendChild(group);
+    actual = win.getPixelValue(gl, 40, 40);
+    deepEqual(actual, [0,0,0,0], "Mesh inside group is invisible");
+
 });
-*/

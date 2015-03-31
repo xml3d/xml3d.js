@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8" />
@@ -11,7 +12,7 @@
 	<script type="text/javascript" src="./qunit/close-enough/qunit-close-enough.js"></script>
 	<script type="text/javascript" src="./qunit/imagediff/imagediff.js"></script>
 	<script type="text/javascript" src="./qunit/imagediff/qunit-imagediff.js"></script>
-	<script type="text/javascript" src="../build/output/xml3d.js"></script>
+	<script type="text/javascript" src="./xml3d-testlib.js"></script>
 	<script type="text/javascript" src="./datatypes.js"></script>
     <script type="text/javascript" src="./data-observer.js"></script>
 	<script type="text/javascript" src="./datatypes-webgl.js"></script>
@@ -36,6 +37,7 @@
     <script type="text/javascript" src="./texturemaps.js"></script>
 	<script type="text/javascript" src="./notification-webgl.js"></script>
 	<script type="text/javascript" src="./xml3d-canvas.js"></script>
+	<script type="text/javascript" src="./primitives.js"></script>
 	<script type="text/javascript" src="./webgl-scenegraph.js"></script>
     <script type="text/javascript" src="./webgl-shading.js"></script>
     <script type="text/javascript" src="./webgl-lights.js"></script>
@@ -47,25 +49,20 @@
     <script type="text/javascript" src="./webgl-perspective.js"></script>
     <script type="text/javascript" src="./viewpoint.js"></script>
     <script type="text/javascript" src="./shader-overrides.js"></script>
-    <script type="text/javascript" src="./xflip.js"></script>
     <script type="text/javascript" src="./scene.js"></script>
     <script type="text/javascript" src="./paging.js"></script>
     <script type="text/javascript" src="./uri.js"></script>
     <script type="text/javascript" src="./frustum.js"></script>
     <script type="text/javascript" src="./webcl.js"></script>
     <script type="text/javascript" src="./options.js"></script>
+  <script type="text/javascript" src="./materials.js"></script>
+  <script type="text/javascript" src="./shadows.js"></script>
     <!-- <script type="text/javascript" src="./data-adapter-webgl.js"></script>  -->
 </head>
 <body>
   <iframe id="xml3dframe" scrolling="no" ></iframe>
   <div id="overall">
-    <h1 id="qunit-header"><a href=".">xml3d.js Test Suite</a> - All</h1>
-    <h2 id="qunit-banner"></h2>
-    <div id="qunit-testrunner-toolbar"></div>
-    <h2 id="qunit-userAgent"></h2>
-    <h2 id="qunit-renderer"></h2>
-    <ol id="qunit-tests"></ol>
-    <div id="qunit-fixture">test markup</div>
+    <div id="qunit"></div>
   </div>
 </body>
 </html>

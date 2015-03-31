@@ -1,3 +1,4 @@
+
 // Based on http://kodemongki.blogspot.de/2011/06/kameraku-custom-shader-effects-example.html
 Xflow.registerOperator("xflow.popartImage", {
     outputs: [ {type: 'texture', name : 'result', sizeof : 'image'} ],

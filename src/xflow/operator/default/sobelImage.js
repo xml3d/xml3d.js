@@ -1,3 +1,4 @@
+
 // Code portions from http://www.html5rocks.com/en/tutorials/canvas/imagefilters/
 (function() {
     Xflow.Filters = {};

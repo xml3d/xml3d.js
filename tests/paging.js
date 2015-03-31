@@ -1,21 +1,30 @@
 module("Paging", {
     setup: function () {
-        this.scene = new XML3D.webgl.Scene();
+        this.scene = new XML3DTestLib.Scene();
         this.scene.createDrawable = function() {
             return null; // Prevents shader creation
         };
     }
 });
 
+var SIZES = {
+ PAGE:  1 << 12,
+    GROUP: 38,
+    OBJECT: 108,
+    VIEW:   48
+
+
+}
+
 test("Init", 4, function() {
     ok(this.scene.rootNode)
     equal(this.scene.pages.length, 1, "Initial page created");
-    equal(this.scene.pages[0].length, XML3D.webgl.Pager.PAGE_SIZE, "Page size");
-    equal(this.scene.nextOffset, XML3D.webgl.RenderGroup.ENTRY_SIZE, "Initial offset of implicit root node");
+    equal(this.scene.pages[0].length, SIZES.PAGE, "Page size");
+    equal(this.scene.nextOffset, SIZES.GROUP, "Initial offset of implicit root node");
 });
 
 test("RenderGroup", 6, function() {
-    var ENTRY_SIZE = XML3D.webgl.RenderGroup.ENTRY_SIZE;
+    var ENTRY_SIZE = SIZES.GROUP;
     var expectedOffset = this.scene.nextOffset;
     var renderGroup = this.scene.createRenderGroup();
     ok(renderGroup);
@@ -31,7 +40,7 @@ test("RenderGroup", 6, function() {
 });
 
 test("RenderView", 2, function() {
-    var ENTRY_SIZE = XML3D.webgl.RenderView.ENTRY_SIZE;
+    var ENTRY_SIZE = SIZES.VIEW;
     var expectedOffset = this.scene.nextOffset;
     var renderView = this.scene.createRenderView();
     ok(renderView);
@@ -40,7 +49,7 @@ test("RenderView", 2, function() {
 });
 
 test("RenderObject", 6, function() {
-    var ENTRY_SIZE = XML3D.webgl.RenderObject.ENTRY_SIZE;
+    var ENTRY_SIZE = SIZES.OBJECT;
     var expectedOffset = this.scene.nextOffset;
     this.scene.createRenderObject();
     equal(this.scene.pages.length, 1, "Page size");
@@ -50,7 +59,7 @@ test("RenderObject", 6, function() {
     equal(this.scene.pages.length, 1, "Page size");
     expectedOffset += ENTRY_SIZE;
     equal(this.scene.nextOffset, expectedOffset, "New offset");
-    for (var i = 0; i < Math.floor(XML3D.webgl.Pager.PAGE_SIZE / ENTRY_SIZE); i++) {
+    for (var i = 0; i < Math.floor(SIZES.PAGE/ ENTRY_SIZE); i++) {
         this.scene.createRenderObject();
     }
     equal(this.scene.pages.length, 2, "New page size");
@@ -61,7 +70,7 @@ test("RenderObject", 6, function() {
 
 test("Delete render objects", 11, function() {
     // Attach to root object
-    var ENTRY_SIZE = XML3D.webgl.RenderObject.ENTRY_SIZE;
+    var ENTRY_SIZE = SIZES.OBJECT;
     var expectedOffset = this.scene.nextOffset;
 
     var children = [];
@@ -85,7 +94,7 @@ test("Delete render objects", 11, function() {
     expectedOffset += ENTRY_SIZE;
     equal(this.scene.nextOffset, expectedOffset, "New page entry created");
 
-    for (var i = 6; i < Math.floor(XML3D.webgl.Pager.PAGE_SIZE / ENTRY_SIZE)+1; i++) {
+    for (var i = 6; i < Math.floor(SIZES.PAGE / ENTRY_SIZE)+1; i++) {
         children[i] = this.scene.createRenderObject();
     }
     expectedOffset = ENTRY_SIZE;

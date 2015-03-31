@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml3d>
+  <asset id="Plane">
+    <assetdata name="Mesh-003">
+      <float3 name="position">-8.0 -8.0 0.0 8.0 -8.0 0.0 8.0 8.0 0.0 -8.0 8.0 0.0</float3>
+      <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+    </assetdata>
+    <assetmesh includes="Mesh-003" name="Mesh-003_Material" >
+      <int name="index">0 1 2 2 3 0 </int>
+    </assetmesh>
+  </asset>
+</xml3d>

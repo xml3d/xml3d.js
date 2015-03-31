@@ -88,6 +88,7 @@ XML3D.extend(GLScene.prototype, {
         if (this.lightsNeedUpdate) {
             this.lightsNeedUpdate = false;
             this.updateLightParameters();
+            this.lights.lightValueChanged();
         }
         this.updateObjectsForRendering();
 
@@ -208,8 +209,8 @@ XML3D.extend(GLScene.prototype, {
             this.context.requestRedraw("Light value changed.");
         });
          this.addEventListener(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (event) {
-            // Need to update light frustum
-            this.lights.lightValueChanged();
+            // Need to update light frustum. Defer this until the next render phase
+             this.lightsNeedUpdate = true;
         });
 
         Options.addObserver(this.onFlagsChange.bind(this));

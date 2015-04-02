@@ -16,7 +16,7 @@ var ProgramFactory = function (context) {
 XML3D.extend(ProgramFactory.prototype, {
 
     getProgramByName: function (name) {
-        var scriptDescriptor = XML3D.shaders.getScript(name);
+        var scriptDescriptor = XML3D.materials.getScript(name);
         if (!scriptDescriptor || !scriptDescriptor.vertex) {
             XML3D.debug.logError("Unknown shader: ", name);
             return null;
@@ -33,7 +33,7 @@ XML3D.extend(ProgramFactory.prototype, {
     getFallbackProgram: function () {
         if (!this.programs.fallback) {
             var descriptor = new ShaderDescriptor();
-            XML3D.extend(descriptor, XML3D.shaders.getScript("matte"));
+            XML3D.extend(descriptor, XML3D.materials.getScript("matte"));
             descriptor.fragment = ShaderUtils.addFragmentShaderHeader(descriptor.fragment);
             var shader = new URNShaderClosure(this.context, descriptor);
             shader.uniformCollection.envBase.diffuseColor = [1, 0, 0];

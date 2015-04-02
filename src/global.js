@@ -86,7 +86,7 @@ XML3D.createClass = function(ctor, parent, methods) {
 XML3D.debug = require("./utils/debug.js");
 XML3D.util = require("./utils/misc.js");
 XML3D.options = require("./utils/options.js");
-XML3D.shaders = require("./renderer/webgl/materials/urn/shaders.js");
+XML3D.materials = require("./renderer/webgl/materials/urn/registery.js");
 XML3D.resource = require("./base/resourcemanager.js").Resource; //Required for the test library because the RM needs to "belong" to the same document as the XML3D element in order to resolve references correctly
 XML3D.resource.registerFormat = require("./base/resourcemanager.js").registerFormat;
 //XML3D.resource.FormatHandler

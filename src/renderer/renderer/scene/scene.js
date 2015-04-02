@@ -137,7 +137,7 @@ XML3D.extend(Scene.prototype, {
             data.appendChild(inputNode);
 
             this._defaultMaterial = this.createMaterialConfiguration(
-                {"type": "urn", "urn": new URI("urn:xml3d:shader:matte")},
+                {"type": "urn", "urn": new URI("urn:xml3d:material:matte")},
                 data,
                 {name: "default"}
             );

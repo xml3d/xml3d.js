@@ -10,7 +10,7 @@ var AdapterHandle = require("../../../base/adapterhandle.js");
  * @extends RenderAdapter
  * @constructor
  */
-var ShaderRenderAdapter = function (factory, node) {
+var MaterialRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
     this._dataAdapter = Resource.getAdapter(this.node, "data");
     /** @type MaterialConfiguration | null **/
@@ -20,8 +20,8 @@ var ShaderRenderAdapter = function (factory, node) {
     this.updateMaterialConfiguration();
 };
 
-XML3D.createClass(ShaderRenderAdapter, RenderAdapter);
-XML3D.extend(ShaderRenderAdapter.prototype, {
+XML3D.createClass(MaterialRenderAdapter, RenderAdapter);
+XML3D.extend(MaterialRenderAdapter.prototype, {
 
     getMaterialConfiguration: function() {
         return this._materialConfiguration;
@@ -41,7 +41,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
     updateMaterialModel: function () {
         this._materialModel = null;
 
-        var uri = this.getShaderScriptURI();
+        var uri = this.getMaterialScript();
         if (uri.scheme == "urn") {
             this.disconnectAdapterHandle("script");
             this._materialModel = { "type": "urn", "urn": uri };
@@ -55,7 +55,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
         }
     },
 
-    getShaderScriptURI: function () {
+    getMaterialScript: function () {
         return new URI(this.node.getAttribute("script"));
     },
 
@@ -68,7 +68,7 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
                         this.updateMaterialConfiguration();
                         break;
                     default:
-                        XML3D.debug.logWarning("Unhandled mutation event in shader adapter for parameter '" + target + "'");
+                        XML3D.debug.logWarning("Unhandled mutation event in material adapter for parameter '" + target + "'");
                         break;
 
                 }
@@ -87,5 +87,5 @@ XML3D.extend(ShaderRenderAdapter.prototype, {
 });
 
 // Export
-module.exports = ShaderRenderAdapter;
+module.exports = MaterialRenderAdapter;
 

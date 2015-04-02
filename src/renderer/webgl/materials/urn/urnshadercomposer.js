@@ -15,7 +15,7 @@ require("./utility.js");
  */
 var getShaderDescriptor = function (path) {
     var shaderName = path.substring(path.lastIndexOf(':') + 1);
-    return XML3D.shaders.getScript(shaderName);
+    return XML3D.materials.getScript(shaderName);
 };
 
 

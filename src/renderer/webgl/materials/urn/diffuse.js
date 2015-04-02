@@ -1,4 +1,4 @@
-XML3D.shaders.register("diffuse", {
+XML3D.materials.register("diffuse", {
 
     vertex : [
         "attribute vec3 position;",

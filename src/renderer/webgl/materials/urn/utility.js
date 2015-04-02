@@ -1,4 +1,4 @@
-XML3D.shaders.register("pickobjectid", {
+XML3D.materials.register("pickobjectid", {
     vertex : [
         "attribute vec3 position;",
         "uniform mat4 modelViewProjectionMatrix;",
@@ -19,7 +19,7 @@ XML3D.shaders.register("pickobjectid", {
     uniforms : {}
 });
 
-XML3D.shaders.register("pickedposition", {
+XML3D.materials.register("pickedposition", {
     vertex : [
         "attribute vec3 position;",
         "uniform mat4 modelMatrix;",
@@ -49,7 +49,7 @@ XML3D.shaders.register("pickedposition", {
 });
 
 
-XML3D.shaders.register("pickedNormals", {
+XML3D.materials.register("pickedNormals", {
     vertex : [
         "attribute vec3 position;",
         "attribute vec3 normal;",
@@ -75,7 +75,7 @@ XML3D.shaders.register("pickedNormals", {
     uniforms : {}
 });
 
-XML3D.shaders.register("light-depth", {
+XML3D.materials.register("light-depth", {
 
     vertex: [
         "attribute vec3 position;",
@@ -110,7 +110,7 @@ XML3D.shaders.register("light-depth", {
     uniforms: {}
 });
 
-XML3D.shaders.register("render-normal", {
+XML3D.materials.register("render-normal", {
     vertex : [
         "attribute vec3 position;",
         "attribute vec3 normal;",
@@ -136,7 +136,7 @@ XML3D.shaders.register("render-normal", {
     uniforms : {}
 });
 
-XML3D.shaders.register("render-position", {
+XML3D.materials.register("render-position", {
     vertex : [
         "attribute vec3 position;",
         "uniform mat4 modelMatrix;",
@@ -161,7 +161,7 @@ XML3D.shaders.register("render-position", {
     uniforms : {}
 });
 
-XML3D.shaders.register("boxblur", {
+XML3D.materials.register("boxblur", {
     vertex: [
         "attribute vec3 position;",
 
@@ -211,7 +211,7 @@ XML3D.shaders.register("boxblur", {
     }
 });
 
-XML3D.shaders.register("ssao", {
+XML3D.materials.register("ssao", {
     vertex : [
         "attribute vec2 position;",
 

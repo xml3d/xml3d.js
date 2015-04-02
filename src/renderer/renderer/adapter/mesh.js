@@ -24,7 +24,7 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
             }, name: this.node.id, visible: !this.node.visible ? false : undefined
         });
         this.updateLocalMatrix();
-        this.updateShaderHandler();
+        this.updateMaterialHandler();
     },
 
     getMeshType: function () {

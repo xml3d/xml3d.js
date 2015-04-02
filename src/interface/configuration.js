@@ -178,7 +178,7 @@ classInfo['asset'] = {
     name: {a: handlers.StringAttributeHandler},
     pick: {a: handlers.StringAttributeHandler},
     transform: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.StringAttributeHandler}
+    material: {a: handlers.StringAttributeHandler}
     };
 /**
  * Properties and methods for <defs>
@@ -209,7 +209,7 @@ classInfo['group'] = {
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     transform: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.StringAttributeHandler}
+    material: {a: handlers.StringAttributeHandler}
     };
 /**
  * Properties and methods for <mesh>
@@ -235,7 +235,7 @@ classInfo['mesh'] = {
     type: {a: handlers.EnumAttributeHandler, params: {e: MeshTypes, d: 0}},
     compute: {a: handlers.StringAttributeHandler},
     transform: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.StringAttributeHandler},
+    material: {a: handlers.StringAttributeHandler},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
@@ -274,7 +274,7 @@ classInfo['model'] = {
     src: {a: handlers.StringAttributeHandler},
     pick: {a: handlers.StringAttributeHandler},
     transform: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.StringAttributeHandler}
+    material: {a: handlers.StringAttributeHandler}
     };
 /**
  * Properties and methods for <transform>
@@ -289,9 +289,9 @@ classInfo['transform'] = {
     scaleOrientation: {a: handlers.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]}
     };
 /**
- * Properties and methods for <shader>
+ * Properties and methods for <material>
  **/
-classInfo['shader'] = {
+classInfo['material'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     onload: {a: handlers.EventAttributeHandler},
@@ -373,7 +373,7 @@ classInfo['assetmesh'] = {
     compute: {a: handlers.StringAttributeHandler},
     filter: {a: handlers.StringAttributeHandler},
     includes: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.StringAttributeHandler},
+    material: {a: handlers.StringAttributeHandler},
     transform: {a: handlers.StringAttributeHandler},
     platform: {a: handlers.EnumAttributeHandler, params: {e: PlatformTypes, d: 1}},
     getOutputNames: {m: methods.XML3DNestedDataContainerTypeGetOutputNames},

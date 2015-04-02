@@ -156,6 +156,8 @@ var EPSILON = 0.0001;
 var PIXEL_EPSILON = 1;
 
 QUnit.config.testTimeout = 5000;
+QUnit.config.hidepassed = true;
+
 XML3DUnit = {};
 
 XML3DUnit.getRendererString = function() {

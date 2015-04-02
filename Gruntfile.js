@@ -51,6 +51,20 @@ exports = module.exports = function (grunt) {
             }
 
         },
+
+        "copy": {
+            "spec": {
+                src: "spec/index.html",
+                dest: "build/output/index.html",
+                nonull: true,
+                options: {
+                    process: function (content, srcpath) {
+                        return content.replace('publishDate:  ""', 'publishDate:  "' +  grunt.template.today("yyyy-mm-dd")  + '"');
+                    }
+                }
+            }
+        },
+
         "browserify": {
             "testlib": {
                 src: "./tests/build/index.js",
@@ -167,6 +181,7 @@ exports = module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     var builds = moduleBuilds.map(function(f) { return f.task });
     builds.push("concat:dist");
@@ -181,6 +196,8 @@ exports = module.exports = function (grunt) {
     grunt.registerTask("default", ["dev", "testlib"]);
     grunt.registerTask("continuous", ["min", "dev", "testlib"]);
     grunt.registerTask("testserver", ["connect:server:keepalive"]);
+
+    grunt.registerTask("spec", "copy:spec");
 
     grunt.registerTask('prepublish', 'Run all my build tasks.', function(n) {
         if (!grunt.option('publish')) { // Be sure to specify the target

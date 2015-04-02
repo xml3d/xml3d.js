@@ -39,7 +39,7 @@
 		</data>        
     </Input>
     <TestProcess>
-        <Show title="Show Vertex Shader" data="#skinned2" what="VertexShader" >
+        <Show title="Show Vertex material" data="#skinned2" what="VertexShader" >
         	<VSConnection in="position" out="position" type="FLOAT3_WORLD_POINT" />
         	<VSConnection in="normal" out="normal" type="FLOAT3_WORLD_NORMAL" />
         	<VSConnection in="color" out="color" type="FLOAT4" optional="true" />

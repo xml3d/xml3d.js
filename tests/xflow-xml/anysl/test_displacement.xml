@@ -2,7 +2,7 @@
     <Input>
 
 
-      <script id="test-script" type="x-shader/anysl.vertex.text">
+      <script id="test-script" type="x-material/anysl.vertex.text">
 <![CDATA[
 
 #define PROGRAM_PARAMS(X)                          \

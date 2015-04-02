@@ -1,4 +1,4 @@
-XML3D.shaders.register("customtest", {
+XML3D.materials.register("customtest", {
 
     vertex : [
         "attribute vec3 position;",

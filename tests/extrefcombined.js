@@ -128,7 +128,7 @@ test("Mesh XML reference", 5, function() {
 });
 
 /*
-test("Shader JSON reference", 3, function() {
+test("material JSON reference", 3, function() {
     var xRef = this.doc.getElementById("xml3dReference"),
     actual,
     win = this.doc.defaultView,
@@ -137,8 +137,8 @@ test("Shader JSON reference", 3, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
     glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
 
-    this.doc.getElementById("jsonShaderGroup").visible = true;
-    this.doc.getElementById("meshGroup").setAttribute("shader", "#flatgreen");
+    this.doc.getElementById("jsonmaterialGroup").visible = true;
+    this.doc.getElementById("meshGroup").setAttribute("material", "#flatgreen");
     hTest.draw();
     hRef.draw();
 
@@ -148,7 +148,7 @@ test("Shader JSON reference", 3, function() {
     img.onload = function(e) {
         var expected = new Image();
         expected.onload = function(e) {
-            QUnit.imageEqual(img, expected, "JSON shader render matches");
+            QUnit.imageEqual(img, expected, "JSON material render matches");
             start();
         };
         expected.src = glTest.canvas.toDataURL();
@@ -161,7 +161,7 @@ test("Shader JSON reference", 3, function() {
 });
  */
 
-test("Shader XML reference", 4, function() {
+test("material XML reference", 4, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest),
         hRef = getHandler(this.doc.getElementById("xml3dReference"));
@@ -177,9 +177,9 @@ test("Shader XML reference", 4, function() {
             XML3DUnit.loadSceneTestImages(self.doc, "xml3dReference", "xml3dTest", function(refImage, testImage){
                 QUnit.imageEqual(refImage, testImage, "XML render matches");
 
-                self.doc.getElementById("groupRef1").setAttribute("shader", "#refWood");
+                self.doc.getElementById("groupRef1").setAttribute("material", "#refWood");
                 hRef.draw();
-                self.doc.getElementById("xmlShaderGroup").setAttribute("shader", "xml/shaders.xml#wood");
+                self.doc.getElementById("xmlmaterialGroup").setAttribute("material", "xml/materials.xml#wood");
 
                 testStep++;
             });
@@ -197,10 +197,10 @@ test("Shader XML reference", 4, function() {
     }
     xTest.addEventListener("framedrawn", onFrameDrawn);
 
-    this.doc.getElementById("groupRef1").setAttribute("shader", "#refFlatGreen");
+    this.doc.getElementById("groupRef1").setAttribute("material", "#refFlatGreen");
     hRef.draw();
 
-    this.doc.getElementById("xmlShaderGroup").visible = true;
+    this.doc.getElementById("xmlmaterialGroup").visible = true;
     hTest.draw();
 
     stop();

@@ -23,40 +23,40 @@
     <transform id="t_camera1" />
     <transform id="t_grouptransformed" translation="0 0 -3" />
 
-    <shader id="flatblue" script="urn:xml3d:shader:flat">
+    <material id="flatblue" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">
             0 0 1
         </float3>
-    </shader>
-    <shader id="flatgreen" script="urn:xml3d:shader:flat">
+    </material>
+    <material id="flatgreen" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">
             0 1 0
         </float3>
-    </shader>
-    <shader id="flatpurple" script="urn:xml3d:shader:flat">
+    </material>
+    <material id="flatpurple" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">
             1 0 1
         </float3>
-    </shader>
-    <shader id="flatyellow" script="urn:xml3d:shader:flat">
+    </material>
+    <material id="flatyellow" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">
             1 1 0
         </float3>
-    </shader>
+    </material>
 
-    <shader id="flatblack" script="urn:xml3d:shader:flat">
+    <material id="flatblack" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">
             0 0 0
         </float3>
-    </shader>
-    <shader id="phonggreen" script="urn:xml3d:shader:phong">
+    </material>
+    <material id="phonggreen" script="urn:xml3d:material:phong">
         <float3 id="phonggreen_color" name="diffuseColor">
             0 1 0
         </float3>
         <float3 id="phonggreen_emissive" name="emissiveColor">
             0 0 0
         </float3>
-    </shader>
+    </material>
 
     <data id="meshdata" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
@@ -85,7 +85,7 @@
 
     <group id="viewTest" visible="false" transform="#t_viewtest">
         <mesh src="#meshdata" type="triangles"/>
-        <group transform="#t_viewtest2" shader="#flatyellow">
+        <group transform="#t_viewtest2" material="#flatyellow">
             <mesh src="#meshdata" type="triangles"/>
         </group>
     </group>
@@ -102,8 +102,8 @@
 
      </group>
 
-    <group id="group1" shader="#flatyellow" visible="false">
-    <group id="group2" shader="#flatblue">
+    <group id="group1" material="#flatyellow" visible="false">
+    <group id="group2" material="#flatblue">
         <mesh id="myNestedMesh" src="#meshdata" type="triangles">
 
         </mesh>
@@ -119,19 +119,19 @@
     </group>
 
     <group id="group5" visible="false">
-        <group transform="#t_cubetop" shader="#flatblue">
+        <group transform="#t_cubetop" material="#flatblue">
             <mesh src="#meshdata" type="triangles"/>
         </group>
-        <group transform="#t_cubeleft" shader="#flatgreen">
+        <group transform="#t_cubeleft" material="#flatgreen">
             <mesh src="#meshdata" type="triangles"/>
         </group>
-        <group transform="#t_cuberight" shader="#flatblack">
+        <group transform="#t_cuberight" material="#flatblack">
             <mesh src="#meshdata" type="triangles"/>
         </group>
-        <group transform="#t_cubebottom" shader="#flatpurple">
+        <group transform="#t_cubebottom" material="#flatpurple">
             <mesh src="#meshdata" type="triangles"/>
         </group>
-        <group transform="#t_cubeback" shader="#flatyellow">
+        <group transform="#t_cubeback" material="#flatyellow">
             <mesh src="#meshdata" type="triangles"/>
         </group>
          <group transform="#t_cubefront" >

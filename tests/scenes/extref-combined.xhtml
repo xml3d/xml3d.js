@@ -18,9 +18,9 @@
           <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
 
-        <shader id="wood" script="urn:xml3d:shader:flat">
+        <material id="wood" script="urn:xml3d:material:flat">
           <float3 name="diffuseColor">0 0 0</float3>
-        </shader>
+        </material>
 
       </defs>
     <view id="myView" />
@@ -34,11 +34,11 @@
         <mesh id="myMesh03" src="xml/meshes.xml#simpleMesh"/>
     </group>
 
-    <group id="jsonShaderGroup" transform="#t_object1" shader="json/flatgreen_shader.json" visible="false">
+    <group id="jsonmaterialGroup" transform="#t_object1" material="json/flatgreen_material.json" visible="false">
         <mesh id="myMesh04" src="#simplePlane1"/>
     </group>
     
-    <group id="xmlShaderGroup" transform="#t_object1" shader="xml/shaders.xml#flatgreen2" visible="false">
+    <group id="xmlmaterialGroup" transform="#t_object1" material="xml/materials.xml#flatgreen2" visible="false">
         <mesh id="myMesh05" src="#simplePlane1"/>
     </group>
 
@@ -61,13 +61,13 @@
           <float2 id="texcoordsRef1" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
 
-        <shader id="refFlatGreen" script="urn:xml3d:shader:flat">
+        <material id="refFlatGreen" script="urn:xml3d:material:flat">
             <float3 name="diffuseColor">0 1 0</float3>
-        </shader>
+        </material>
 
-        <shader id="refWood" script="urn:xml3d:shader:flat">
+        <material id="refWood" script="urn:xml3d:material:flat">
           <float3 name="diffuseColor">1 1 0</float3>
-        </shader>
+        </material>
         
 	  </defs>
 	<view  />

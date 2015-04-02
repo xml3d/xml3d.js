@@ -182,7 +182,7 @@ test("Test mesh.getWorldBoundingBox", 4, function() {
 
 });
 
-test("Change shader via script", 6, function() {
+test("Change material via script", 6, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
@@ -195,25 +195,25 @@ test("Change shader via script", 6, function() {
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [visible true]");
 
-    group.setAttribute("shader", "#flatblue");
+    group.setAttribute("material", "#flatblue");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [flat shader]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [flat material]");
 
-    group.setAttribute("shader", "#phonggreen");
+    group.setAttribute("material", "#phonggreen");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,0,255], "Black at 40,40 [phong shader, no light, no emission]");
+    deepEqual(actual, [0,0,0,255], "Black at 40,40 [phong material, no light, no emission]");
 
-    var shaderColor = this.doc.getElementById("phonggreen_emissive");
-    shaderColor.textContent = "0 0 1";
+    var materialColor = this.doc.getElementById("phonggreen_emissive");
+    materialColor.textContent = "0 0 1";
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [set emissive color]");
 
 });
 
-test("Change visible/shader for nested groups", 8, function() {
+test("Change visible/material for nested groups", 8, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -234,22 +234,22 @@ test("Change visible/shader for nested groups", 8, function() {
     innerGroup.setAttribute("visible", "true");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [both visible, child shader overrides parent]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [both visible, child material overrides parent]");
 
-    innerGroup.setAttribute("shader", "");
+    innerGroup.setAttribute("material", "");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [255,255,0,255], "Yellow at 40,40 [remove child shader, #flatYellow active]");
+    deepEqual(actual, [255,255,0,255], "Yellow at 40,40 [remove child material, #flatYellow active]");
 
-    innerGroup.setAttribute("shader", "#flatblue");
+    innerGroup.setAttribute("material", "#flatblue");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [re-add child shader]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [re-add child material]");
 
-    outerGroup.setAttribute("shader", "#flatblack");
+    outerGroup.setAttribute("material", "#flatblack");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child shader overrides new parent shader]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child material overrides new parent material]");
 });
 
 test("Simple add/remove mesh", 12, function() {

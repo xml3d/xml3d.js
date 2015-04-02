@@ -32,7 +32,7 @@
         
     </Input>
     <TestProcess>
-        <Show title="Show Vertex Shader" data="#morphed3" what="VertexShader" 
+        <Show title="Show Vertex material" data="#morphed3" what="VertexShader"
                 filter="worldPosition worldNormal fragColor index" >
         	<VSConnection in="position" out="worldPosition" type="FLOAT3_WORLD_POINT" />
         	<VSConnection in="normal" out="worldNormal" type="FLOAT3_WORLD_NORMAL" />

@@ -93,7 +93,7 @@ test("Observe data connected to scene graph", function() {
                 new Float32Array([-1.5, -1, -10,    1.5, -1, -10,   -2, 1, -10,   2, 1, -10])
                 , EPSILON, "Value of position matches expected data");
 
-            self.doc.getElementById("meshGroup").shader = "#pink";
+            self.doc.getElementById("meshGroup").material = "#pink";
             checkRendering = true;
         }
     };
@@ -102,7 +102,7 @@ test("Observe data connected to scene graph", function() {
         if(checkRendering){
             checkRendering = false;
             QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 200, 150),
-                [255,0,255,255], EPSILON, "Rendering right after observer callback uses modified shader");
+                [255,0,255,255], EPSILON, "Rendering right after observer callback uses modified material");
             start();
         }
     }

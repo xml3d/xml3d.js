@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
-    <shader id="flatgreen2" script="urn:xml3d:shader:flat">
+    <material id="flatgreen2" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">0 1 0</float3>
-    </shader>
-    <shader id="wood" script="urn:xml3d:shader:flat">
+    </material>
+    <material id="wood" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">1 1 0</float3>
-    </shader>
+    </material>
 </xml3d>

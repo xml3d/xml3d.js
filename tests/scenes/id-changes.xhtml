@@ -21,37 +21,37 @@
           <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
 
-        <shader id="black" script="urn:xml3d:shader:flat">
+        <material id="black" script="urn:xml3d:material:flat">
           <float3 name="diffuseColor">0 0 0</float3>
-        </shader>
+        </material>
 
-        <shader id="green" script="urn:xml3d:shader:flat">
+        <material id="green" script="urn:xml3d:material:flat">
           <float3 name="diffuseColor">0 1 0</float3>
-        </shader>
+        </material>
 
       </defs>
     <view id="myView" />
     <light id="myLight"/>
     
-    <group id="referCorrect" transform="#t_object1" shader="#black" >
+    <group id="referCorrect" transform="#t_object1" material="#black" >
         <mesh type="triangles" src="#simplePlane1" />
     </group>
 
-    <group id="referWrong" transform="#t_object2" shader="#green42" >
+    <group id="referWrong" transform="#t_object2" material="#green42" >
         <mesh type="triangles" src="#simplePlane1" />
     </group>
 
-    <group id="referLater" transform="#t_object3" shader="#blue" >
+    <group id="referLater" transform="#t_object3" material="#blue" >
         <mesh type="triangles" src="#simplePlane1" />
     </group>
 
-    <group id="referNonExisting" transform="#t_object4" shader="#notThere" >
+    <group id="referNonExisting" transform="#t_object4" material="#notThere" >
         <mesh type="triangles" src="#simplePlane1" />
     </group>
 
-    <shader id="blue" script="urn:xml3d:shader:flat" >
+    <material id="blue" script="urn:xml3d:material:flat" >
         <float3 name="diffuseColor">0 0 1</float3>
-    </shader>
+    </material>
     
   </xml3d>
 

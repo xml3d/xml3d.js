@@ -42,8 +42,6 @@ WrapTypes["clamp"] = 0;
 WrapTypes[0] = "clamp";
 WrapTypes["repeat"] = 1;
 WrapTypes[1] = "repeat";
-WrapTypes["border"] = 2;
-WrapTypes[2] = "border";
 // PlatformTypes
 var PlatformTypes = {};
 PlatformTypes["auto"] = 1;
@@ -544,7 +542,6 @@ classInfo['texture'] = {
     wrapS: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
     wrapT: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
     wrapU: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
-    borderColor: {a: handlers.StringAttributeHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };

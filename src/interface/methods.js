@@ -101,16 +101,6 @@ methods.xml3dGenerateRay = function(x, y) {
     return new window.XML3DRay();
 };
 
-methods.deprecatedGetBoundingBoxWorld = function() {
-    XML3D.debug.logWarning("getBoundingBox is deprecated and will be removed in a future version! Please use getLocalBoundingBox or getWorldBoundingBox instead.");
-    return methods.getWorldBoundingBox.call(this);
-};
-
-methods.deprecatedGetBoundingBoxLocal = function() {
-    XML3D.debug.logWarning("getBoundingBox is deprecated and will be removed in a future version! Please use getLocalBoundingBox or getWorldBoundingBox instead.");
-    return methods.getLocalBoundingBox.call(this);
-};
-
 methods.groupGetLocalMatrix = function() {
     XML3D.flushDOMChanges();
     var adapters = this._configured.adapters || {};

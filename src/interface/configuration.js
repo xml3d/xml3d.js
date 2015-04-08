@@ -115,16 +115,14 @@ classInfo['xml3d'] = {
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     getRenderInterface : {m: methods.xml3dGetRenderInterface},
-    activeView : {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    activeView : {a: handlers.StringAttributeHandler}
+    };
 
 classInfo['compute'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    value: {a: handlers.StringValueHandler},
-    _term: undefined
-};
+    value: {a: handlers.StringValueHandler}
+    };
 
 /**
  * Properties and methods for <data>
@@ -145,9 +143,8 @@ classInfo['data'] = {
     getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
-    src: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    src: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <dataflow>
  **/
@@ -165,9 +162,8 @@ classInfo['dataflow'] = {
     getComputeInfo: {m: methods.XML3DNestedDataContainerTypeGetComputeInfo},
     getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
-    getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
-    _term: undefined
-};
+    getResult: {m: methods.XML3DNestedDataContainerTypeGetResult}
+    };
 /**
  * Properties and methods for <data>
  **/
@@ -182,17 +178,15 @@ classInfo['asset'] = {
     name: {a: handlers.StringAttributeHandler},
     pick: {a: handlers.StringAttributeHandler},
     transform: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    shader: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <defs>
  **/
 classInfo['defs'] = {
     id: {a: handlers.IDHandler},
-    className: {a: handlers.StringAttributeHandler, id: 'class'},
-    _term: undefined
-};
+    className: {a: handlers.StringAttributeHandler, id: 'class'}
+    };
 /**
  * Properties and methods for <group>
  **/
@@ -216,9 +210,8 @@ classInfo['group'] = {
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     transform: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    shader: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <mesh>
  **/
@@ -254,9 +247,8 @@ classInfo['mesh'] = {
     getProtoInfo: {m: methods.meshGetProtoInfo},
     isOutputConnected: {m: methods.meshIsOutputConnected},
     getResult: {m: methods.meshGetResult},
-    src: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    src: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <model>
  **/
@@ -285,9 +277,8 @@ classInfo['model'] = {
     src: {a: handlers.StringAttributeHandler},
     pick: {a: handlers.StringAttributeHandler},
     transform: {a: handlers.StringAttributeHandler},
-    shader: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    shader: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <transform>
  **/
@@ -298,9 +289,8 @@ classInfo['transform'] = {
     scale: {a: handlers.XML3DVec3AttributeHandler, params: [1, 1, 1]},
     rotation: {a: handlers.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
     center: {a: handlers.XML3DVec3AttributeHandler, params: [0, 0, 0]},
-    scaleOrientation: {a: handlers.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
-    _term: undefined
-};
+    scaleOrientation: {a: handlers.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]}
+    };
 /**
  * Properties and methods for <shader>
  **/
@@ -319,9 +309,8 @@ classInfo['shader'] = {
     isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
     getResult: {m: methods.XML3DShaderProviderTypeGetResult},
     script: {a: handlers.StringAttributeHandler},
-    src: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    src: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <light>
  **/
@@ -342,9 +331,8 @@ classInfo['light'] = {
     global: {a: handlers.BoolAttributeHandler, params: false},
     intensity: {a: handlers.FloatAttributeHandler, params: 1},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
-    shader: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    shader: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <lightshader>
  **/
@@ -363,9 +351,8 @@ classInfo['lightshader'] = {
     isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
     getResult: {m: methods.XML3DShaderProviderTypeGetResult},
     script: {a: handlers.StringAttributeHandler},
-    src: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    src: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <script>
  **/
@@ -375,9 +362,8 @@ classInfo['script'] = {
     value: {a: handlers.StringValueHandler},
     src: {a: handlers.StringAttributeHandler},
     name: {a: handlers.StringAttributeHandler},
-    type: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    type: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <assetmesh>
  **/
@@ -399,9 +385,8 @@ classInfo['assetmesh'] = {
     getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
-    src: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    src: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <assetdata>
  **/
@@ -419,9 +404,8 @@ classInfo['assetdata'] = {
     getProtoInfo: {m: methods.XML3DNestedDataContainerTypeGetProtoInfo},
     isOutputConnected: {m: methods.XML3DNestedDataContainerTypeIsOutputConnected},
     getResult: {m: methods.XML3DNestedDataContainerTypeGetResult},
-    src: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    src: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <float>
  **/
@@ -432,9 +416,8 @@ classInfo['float'] = {
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.FloatArrayValueHandler},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
-    _term: undefined
-};
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+    };
 /**
  * Properties and methods for <float2>
  **/
@@ -445,9 +428,8 @@ classInfo['float2'] = {
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.Float2ArrayValueHandler},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
-    _term: undefined
-};
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+    };
 /**
  * Properties and methods for <float3>
  **/
@@ -458,9 +440,8 @@ classInfo['float3'] = {
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.Float3ArrayValueHandler},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
-    _term: undefined
-};
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+    };
 /**
  * Properties and methods for <float4>
  **/
@@ -471,9 +452,8 @@ classInfo['float4'] = {
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.Float4ArrayValueHandler},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
-    _term: undefined
-};
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+    };
 /**
  * Properties and methods for <float4x4>
  **/
@@ -484,9 +464,8 @@ classInfo['float4x4'] = {
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.Float4x4ArrayValueHandler},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
-    _term: undefined
-};
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+    };
 /**
  * Properties and methods for <int>
  **/
@@ -497,9 +476,8 @@ classInfo['int'] = {
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.IntArrayValueHandler},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
-    _term: undefined
-};
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+    };
 /**
  * Properties and methods for <int4>
  **/
@@ -510,9 +488,8 @@ classInfo['int4'] = {
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.IntArrayValueHandler},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
-    _term: undefined
-};
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+    };
 /**
  * Properties and methods for <bool>
  **/
@@ -523,9 +500,8 @@ classInfo['bool'] = {
     param: {a: handlers.BoolAttributeHandler, params: false},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.BoolArrayValueHandler},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
-    _term: undefined
-};
+    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
+    };
 /**
  * Properties and methods for <texture>
  **/
@@ -541,18 +517,16 @@ classInfo['texture'] = {
     filterMip: {a: handlers.EnumAttributeHandler, params: {e: FilterTypes, d: 1}},
     wrapS: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
     wrapT: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
-    wrapU: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
-    _term: undefined
-};
+    wrapU: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}}
+    };
 /**
  * Properties and methods for <img>
  **/
 classInfo['img'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    src: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    src: {a: handlers.StringAttributeHandler}
+    };
 /**
  * Properties and methods for <video>
  **/
@@ -562,9 +536,8 @@ classInfo['video'] = {
     src: {a: handlers.StringAttributeHandler},
     autoplay: {a: handlers.BoolAttributeHandler, params: false},
     play: {m: methods.videoPlay},
-    pause: {m: methods.videoPause},
-    _term: undefined
-};
+    pause: {m: methods.videoPause}
+    };
 /**
  * Properties and methods for <view>
  **/
@@ -592,9 +565,8 @@ classInfo['view'] = {
     getDirection: {m: methods.viewGetDirection},
     getUpVector: {m: methods.viewGetUpVector},
     getViewMatrix: {m: methods.viewGetViewMatrix},
-    perspective: {a: handlers.StringAttributeHandler},
-    _term: undefined
-};
+    perspective: {a: handlers.StringAttributeHandler}
+    };
 
 module.exports = {
     classInfo : classInfo,

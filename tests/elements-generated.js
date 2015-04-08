@@ -287,8 +287,6 @@ test("&lt;texture&gt; interface test", function() {
     equal(typeof e.wrapS, "string", "wrapS is of type 'string'");
     equal(typeof e.wrapT, "string", "wrapT is of type 'string'");
     equal(typeof e.wrapU, "string", "wrapU is of type 'string'");
-    equal(typeof e.borderColor, "string", "borderColor is of type 'string'");
-    equal(typeof e.setScriptValue, "function", "setScriptValue is of type 'function'");
 });
 test("&lt;img&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "img");

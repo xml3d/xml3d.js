@@ -146,7 +146,7 @@ window.requestAnimFrame = (function(){
         v.setAttribute("id", vid);
 
         xml3d.appendChild(v);
-        xml3d.setAttribute("activeView", "#" + vid);
+        xml3d.activeView = "#" + vid;
 
         return v;
     };

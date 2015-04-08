@@ -192,7 +192,7 @@ ElementHandler.prototype.registerAttributes = function(config) {
                 if (config[prop].a !== undefined) {
                     var attrName = config[prop].id || prop;
                     var handler = new config[prop].a(attrName, config[prop].params);
-                    handlers[isHTML ? attrName.toLowerCase() : attrName] = handler;
+                    handlers[attrName.toLowerCase()] = handler;
                     if(proto) {
                         try {
                             Object.defineProperty(proto, prop, handler.desc);
@@ -226,7 +226,7 @@ ElementHandler.prototype.registerAttributes = function(config) {
             if(prop =="_cache") continue;
             if(config[prop] && config[prop].a !== undefined){
                 var attrName = config[prop].id || prop;
-                var handler = this.handlers[isHTML ? attrName.toLowerCase() : attrName];
+                var handler = this.handlers[attrName.toLowerCase()];
                 handler.init && handler.init(elem, this.storage);
                 delete elem[prop];
             }
@@ -240,7 +240,7 @@ ElementHandler.prototype.registerAttributes = function(config) {
             }
             else if (config[prop].a !== undefined){
                 var attrName = config[prop].id || prop;
-                var handler = this.handlers[isHTML ? attrName.toLowerCase() : attrName];
+                var handler = this.handlers[attrName.toLowerCase()];
                 handler.init && handler.init(elem, this.storage);
                 try {
                     Object.defineProperty(elem, prop, handler.desc);

@@ -26,6 +26,7 @@ var AttributeHandler = function(elem) {
 };
 
 handlers.IDHandler = function(id) {
+    id = id.toLowerCase();
     this.setFromAttribute = function(value, prevValue, elem) {
         Resource.notifyNodeIdChange(elem, prevValue, value);
     };
@@ -40,6 +41,7 @@ handlers.IDHandler = function(id) {
 };
 
 handlers.StringAttributeHandler = function(id) {
+    id = id.toLowerCase();
     this.desc = {
         get : function() {
             return this.getAttribute(id) || "";
@@ -52,6 +54,7 @@ handlers.StringAttributeHandler = function(id) {
 
 handlers.EnumAttributeHandler = function(id, p) {
     AttributeHandler.call(this);
+    id = id.toLowerCase();
 
     this.init = function(elem, storage){
         storage[id] = p.d;
@@ -86,6 +89,7 @@ handlers.EnumAttributeHandler.prototype.constructor = handlers.EnumAttributeHand
 
 handlers.EventAttributeHandler = function(id) {
     AttributeHandler.call(this);
+    id = id.toLowerCase();
     var eventType = id.substring(2);
 
     this.init = function(elem, storage){
@@ -129,7 +133,7 @@ handlers.EventAttributeHandler.prototype = new AttributeHandler();
 handlers.EventAttributeHandler.prototype.constructor = handlers.EventAttributeHandler;
 
 handlers.IntAttributeHandler = function(id, defaultValue) {
-
+    id = id.toLowerCase();
     this.init = function(elem, storage){
         storage[id] = defaultValue;
         if (elem.hasAttribute(id))
@@ -173,7 +177,7 @@ handlers.IntAttributeHandler.prototype = new AttributeHandler();
 handlers.IntAttributeHandler.prototype.constructor = handlers.IntAttributeHandler;
 
 handlers.FloatAttributeHandler = function(id, defaultValue) {
-
+    id = id.toLowerCase();
     this.init = function(elem, storage){
         storage[id] = defaultValue;
         if (elem.hasAttribute(id))
@@ -213,6 +217,7 @@ handlers.FloatAttributeHandler = function(id, defaultValue) {
 };
 
 handlers.BoolAttributeHandler = function(id, defaultValue) {
+    id = id.toLowerCase();
     this.init = function(elem, storage){
         storage[id] = defaultValue;
         if (elem.hasAttribute(id))
@@ -239,6 +244,7 @@ handlers.BoolAttributeHandler = function(id, defaultValue) {
 
 handlers.XML3DVec3AttributeHandler = function(id, d) {
     var that = this;
+    id = id.toLowerCase();
 
     this.init = function(elem, storage){
         storage[id] = null;
@@ -286,6 +292,7 @@ handlers.XML3DVec3AttributeHandler = function(id, d) {
 
 handlers.XML3DRotationAttributeHandler = function(id, d) {
     var that = this;
+    id = id.toLowerCase();
 
     this.init = function(elem, storage){
         storage[id] = null;
@@ -415,7 +422,7 @@ handlers.StringValueHandler.prototype.parse = function(elem) {
 };
 
 handlers.CanvasStyleHandler = function(id, d) {
-
+    id = id.toLowerCase();
     this.init = function(elem, storage){
         if (elem.hasAttribute(id))
             this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
@@ -433,7 +440,7 @@ handlers.CanvasStyleHandler = function(id, d) {
 };
 
 handlers.CanvasClassHandler = function(id) {
-
+    id = id.toLowerCase();
     this.init = function(elem, storage){
         var canvas = elem._configured.canvas;
         canvas.className = "_xml3d"; // Class name always defined for xml3d canvas

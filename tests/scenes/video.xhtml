@@ -9,18 +9,18 @@
   </head>
   <body>
     <div>
-      <xml3d id="MyXml3d" style="width: 640px; height: 480px; border: 1px solid gray" activeView="#myview"
+      <xml3d id="MyXml3d" style="width: 640px; height: 480px; border: 1px solid gray" activeview="#myview"
              xmlns="http://www.xml3d.org/2009/xml3d">
         <defs>
           <shader id="ex4_2_texShader" script="urn:xml3d:shader:flat">
             <float3 name="diffuseColor">1.0 1.0 1.0</float3>
             <float name="ambientIntensity">1.0</float>
-            <texture name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+            <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
               <video id="myvideo"/>
             </texture>
           </shader>
         </defs>
-        <view id="myview" position="0 0 -8" orientation="0 1 0 3.14159" fieldOfView="0.7854" />
+        <view id="myview" position="0 0 -8" orientation="0 1 0 3.14159" fieldofview="0.7854" />
         <group style="shader: url(#ex4_2_texShader)" >
           <mesh type="triangles">
             <int name="index">0 1 2  1 2 3</int>

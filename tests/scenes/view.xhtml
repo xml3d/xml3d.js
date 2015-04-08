@@ -11,12 +11,12 @@
       <div>
 <xml3d xmlns="http://www.xml3d.org/2009/xml3d" id="myxml3d" renderer="rtpie"
        style="width: 500px; height: 300px; background-color: black;"
-       activeView="#view_right">
+       activeview="#view_right">
    <defs>
       <shader id="shader_front" script="urn:xml3d:shader:phong">
          <float3 name="diffuseColor">0 0 1</float3>
          <float name="ambientIntensity">1</float>
-         <texture name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+         <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/front.png"/>
          </texture>
       </shader>
@@ -29,7 +29,7 @@
       <shader id="shader_right" script="urn:xml3d:shader:phong">
          <float3 name="diffuseColor">1 0 0</float3>
          <float name="ambientIntensity">1</float>
-         <texture name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+         <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/right.png"/>
          </texture>
       </shader>
@@ -42,7 +42,7 @@
       <shader id="shader_rear" script="urn:xml3d:shader:phong">
          <float3 name="diffuseColor">1 1 0</float3>
          <float name="ambientIntensity">1</float>
-         <texture name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+         <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/rear.png"/>
          </texture>
       </shader>
@@ -55,7 +55,7 @@
       <shader id="shader_left" script="urn:xml3d:shader:phong">
          <float3 name="diffuseColor">0 1 1</float3>
          <float name="ambientIntensity">1</float>
-         <texture name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+         <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/left.png"/>
          </texture>
       </shader>
@@ -68,7 +68,7 @@
       <shader id="shader_top" script="urn:xml3d:shader:phong">
          <float3 name="diffuseColor">0 1 0</float3>
          <float name="ambientIntensity">1</float>
-         <texture name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+         <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/top.png"/>
          </texture>
       </shader>
@@ -81,7 +81,7 @@
       <shader id="shader_bottom" script="urn:xml3d:shader:phong">
          <float3 name="diffuseColor">1 0 1</float3>
          <float name="ambientIntensity">1</float>
-         <texture name="diffuseTexture" wrapS="repeat" wrapT="repeat">
+         <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/bottom.png"/>
          </texture>
       </shader>
@@ -93,17 +93,17 @@
       </data>
 	  <transform id="t_cam" translation="0 0 2" rotation="0 1 0 1.5708"/>
    </defs>
-   <view id="view_rear" position="0 0 -10" orientation="0 1 0 3.14159" fieldOfView="0.7854"/>
-   <view id="view_front" position="0 0 10" fieldOfView="0.7854"/>
+   <view id="view_rear" position="0 0 -10" orientation="0 1 0 3.14159" fieldofview="0.7854"/>
+   <view id="view_front" position="0 0 10" fieldofview="0.7854"/>
    <group transform="#t_cam">
    		
    </group>
    <group transform="#t_cam">
    </group>
-   <view id="view_right" position="10 0 0" orientation="0 1 0 1.5708" fieldOfView="0.7854"/>
-   <view id="view_left" position="-10 0 0" orientation="0 1 0 -1.5708" fieldOfView="0.7854"/>
-   <view id="view_top" position="0 10 0" orientation="1 0 0 -1.5708" fieldOfView="0.7854"/>
-   <view id="view_bottom" position="0 -10 0" orientation="1 0 0 1.5708" fieldOfView="0.7854"/>
+   <view id="view_right" position="10 0 0" orientation="0 1 0 1.5708" fieldofview="0.7854"/>
+   <view id="view_left" position="-10 0 0" orientation="0 1 0 -1.5708" fieldofview="0.7854"/>
+   <view id="view_top" position="0 10 0" orientation="1 0 0 -1.5708" fieldofview="0.7854"/>
+   <view id="view_bottom" position="0 -10 0" orientation="1 0 0 1.5708" fieldofview="0.7854"/>
    <group id="root">
       <group>
          <group id="shape_d2e23" shader="#shader_front">

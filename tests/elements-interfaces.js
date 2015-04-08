@@ -92,19 +92,19 @@ test("String interface tests", function() {
 
 test("Reference interface tests", function() {
     e = document.createElementNS(XML3D.xml3dNS, "xml3d");
-    equal(e.getAttribute("activeView"), null, "no Attribute set");
+    equal(e.getAttribute("activeview"), null, "no Attribute set");
     // Set via interface
     equal(e.activeView, "", "No Attribute set.");
 
     e.activeView = "myxml3d";
     equal(e.activeView, "myxml3d", "xml3d.activeView = 'myxml3d'.");
-    equal(e.getAttribute("activeView"), "myxml3d", "getAttribute = 'myxml3d'.");
+    equal(e.getAttribute("activeview"), "myxml3d", "getAttribute = 'myxml3d'.");
     e.activeView = true;
     equal(e.activeView, "true", "xml3d.activeView == 'true'.");
-    equal(e.getAttribute("activeView"), "true", "getAttribute = 'true'.");
+    equal(e.getAttribute("activeview"), "true", "getAttribute = 'true'.");
 
     // Set via attribute
-    e.setAttribute("activeView", "#myView");
+    e.setAttribute("activeview", "#myView");
     equal(e.activeView, "#myView", "Value set via setAttribute to 123.");
 });
 
@@ -115,21 +115,21 @@ test("Float interface tests (XHTML: Case sensitive)", function() {
         QUnit.close(e.fieldOfView, 0.785398, EPSILON, "view.fieldOfView is 0.785398 initially.");
         e.fieldOfView = 0.87;
         QUnit.close(e.fieldOfView, 0.87, EPSILON, "view.fieldOfView = 0.87.");
-        equal(e.getAttribute("fieldOfView"), "0.87", "getAttribute = '0.87'.");
+        equal(e.getAttribute("fieldofview"), "0.87", "getAttribute = '0.87'.");
         e.fieldOfView = true;
         QUnit.close(e.fieldOfView, 1, EPSILON, "view.fieldOfView = 1.");
 
         // Set via attribute
-        e.setAttribute("fieldOfView", "0.5");
+        e.setAttribute("fieldofview", "0.5");
         QUnit.close(e.fieldOfView, 0.5, EPSILON, "Value set via setAttribute to 0.5.");
-        equal(e.getAttribute("fieldOfView"), "0.5", "Value set via setAttribute to 0.5.");
+        equal(e.getAttribute("fieldofview"), "0.5", "Value set via setAttribute to 0.5.");
 
-        e.setAttribute("fieldOfView", 0.6);
+        e.setAttribute("fieldofview", 0.6);
         QUnit.close(e.fieldOfView, 0.6, EPSILON, "Value set via setAttribute to 0.6.");
-        equal(e.getAttribute("fieldOfView"), "0.6", "Value set via setAttribute to 0.6.");
+        equal(e.getAttribute("fieldofview"), "0.6", "Value set via setAttribute to 0.6.");
 
-        e.setAttribute("fieldOfView", "asdf");
-        equal(e.getAttribute("fieldOfView"), "asdf", "attribute value invalid");
+        e.setAttribute("fieldofview", "asdf");
+        equal(e.getAttribute("fieldofview"), "asdf", "attribute value invalid");
         QUnit.close(e.fieldOfView, 0.785398, EPSILON, "Invalid value set via setAttribute. Back to default: 0.785398.");
     });
 
@@ -140,21 +140,21 @@ test("Float interface tests (HTML: Case insensitive)", function() {
         QUnit.close(e.fieldOfView, 0.785398, EPSILON, "view.fieldOfView is 0.785398 initially.");
         e.fieldOfView = 0.87;
         QUnit.close(e.fieldOfView, 0.87, EPSILON, "view.fieldOfView = 0.87.");
-        equal(e.getAttribute("fieldOfView"), "0.87", "getAttribute = '0.87'.");
+        equal(e.getAttribute("fieldofview"), "0.87", "getAttribute = '0.87'.");
         e.fieldOfView = true;
         QUnit.close(e.fieldOfView, 1, EPSILON, "view.fieldOfView = 1.");
 
         // Set via attribute
-        e.setAttribute("fieldOfView", "0.5");
+        e.setAttribute("fieldofview", "0.5");
         QUnit.close(e.fieldOfView, 0.5, EPSILON, "Value set via setAttribute to 0.5.");
-        equal(e.getAttribute("fieldOfView"), "0.5", "Value set via setAttribute to 0.5.");
+        equal(e.getAttribute("fieldofview"), "0.5", "Value set via setAttribute to 0.5.");
 
         e.setAttribute("fieldofview", 0.6);
         QUnit.close(e.fieldOfView, 0.6, EPSILON, "Value set via setAttribute to 0.6.");
-        equal(e.getAttribute("fieldOfView"), "0.6", "Value set via setAttribute to 0.6.");
+        equal(e.getAttribute("fieldofview"), "0.6", "Value set via setAttribute to 0.6.");
 
-        e.setAttribute("fieldOfView", "asdf");
-        equal(e.getAttribute("fieldOfView"), "asdf", "attribute value invalid");
+        e.setAttribute("fieldofview", "asdf");
+        equal(e.getAttribute("fieldofview"), "asdf", "attribute value invalid");
         QUnit.close(e.fieldOfView, 0.785398, EPSILON, "Invalid value set via setAttribute. Back to default: 0.785398.");
     });
 
@@ -341,8 +341,7 @@ test("Interface initialization", function() {
     var m = this.doc.getElementById("myMesh01");
     var g = this.doc.getElementById("myGroup");
 
-    QUnit
-            .closeVector(t.translation, new XML3DVec3(1, 2, 3), EPSILON,
+    QUnit.closeVector(t.translation, new XML3DVec3(1, 2, 3), EPSILON,
                     "XML3DVec3 (transform::translation) initialized.");
     QUnit.closeRotation(t.rotation, new XML3DRotation(new XML3DVec3(1, 0, 0), 1.5708), EPSILON,
             "XML3DRotation (transform::rotation) initialized.");

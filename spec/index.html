@@ -104,8 +104,8 @@
           returns false.
         </dd>
 
-        <dt>attribute DOMString activeView</dt>
-        <dd>The activeView IDL attribute must reflect the respective content attribute of the same name.</dd>
+        <dt>attribute DOMString activeview</dt>
+        <dd>The activeview IDL attribute must reflect the respective content attribute of the same name.</dd>
 
         <dt>HTMLElement? getElementByPoint(unsigned long x, unsigned long y)</dt>
         <dd>Returns the element at the point with coordinates x, y if there is a scene element; otherwise, returns
@@ -134,6 +134,57 @@
     </section>
     <section>
       <h4>The <code>view</code> element</h4>
+        <dl title='interface XML3DViewElement : HTMLElement' class='idl'>
+            <dt>attribute Function onkeypress</dt>
+            <dd>Event listener to be executed when a key is pressed.</dd>
+            <dt>attribute Function onkeydown</dt>
+            <dd>Event listener to be executed when a key is depressed.</dd>
+            <dt>attribute Function onkeyup</dt>
+            <dd>Event listener to be executed when a key is released.</dd>
+
+            <dt>attribute XML3DVec3 position</dt>
+            <dd>The position of the camera in world space</dd>
+
+            <dt>attribute XML3DRotation orientation</dt>
+            <dd>The orientation (rotation) of the camera</dd>
+
+            <dt>attribute float fieldofview</dt>
+            <dd>The <b>vertical</b> field of view of this camera, expressed in radians.
+            </dd>
+
+            <dt>attribute XML3DMatrix perspective</dt>
+            <dd>Overrides the camera's internal projection matrix with the supplied value. This can be used to, for
+            example, create an orthographic camera.</dd>
+
+            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dd>Returns the transformation matrix of this view element in world space.
+            </dd>
+
+            <dt>void setUpVector(XML3DVec3 direction)</dt>
+            <dd>Change the up vector of the camera. This method changes the current orientation. The up vector will be
+                lost if the orientation is explicitly set at a later time.
+            </dd>
+
+            <dt>void setDirection(XML3DVec3 direction)</dt>
+            <dd>Change the orientation of the camera to look along the given direction vector.
+            </dd>
+
+            <dt>XML3DVec3 getDirection()</dt>
+            <dd>Returns the current direction of the camera, which is extracted from the orientation.
+            </dd>
+
+            <dt>XML3DVec3 getUpVector()</dt>
+            <dd>Returns the current up vector of the camera, which is extracted from the orientation.
+            </dd>
+
+            <dt>XML3DMatrix getViewMatrix()</dt>
+            <dd>Returns the view matrix of the camera (the matrix used to transform from world to view space).
+            </dd>
+
+            <dt>void lookAt(XML3DVec3 point)</dt>
+            <dd>Change the orientation of the camera to look at the given point.
+            </dd>
+        </dl>
     </section>
     <section>
       <h4>The <code>light</code> element</h4>
@@ -160,6 +211,10 @@
     </section>
     <section>
       <h4>The <code>transform</code> element</h4>
+        <dl title='interface XML3DTransformElement : HTMLElement' class='idl'>
+            <dt>attribute XML3DRotation scaleorientation</dt>
+            <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>.</dd>
+        </dl>
     </section>
   </section>
 
@@ -180,6 +235,54 @@
     </section>
     <section>
       <h4>The <code>texture</code> element</h4>
+        <section>
+            <dl title="enum WrapMode" class="idl">
+                <dt>clamp</dt>
+                <dd>Corresponds to gl.CLAMP_TO_EDGE. Texture coordinates are clamped to the 0..1 range.</dd>
+                <dt>repeat</dt>
+                <dd>Corresponds to gl.REPEAT. Texture coordinates are wrapped to the 0..1 range.</dd>
+            </dl>
+        </section>
+        <section>
+            <dl title="enum FilterMode" class="idl">
+                <dt>nearest</dt>
+                <dd>Corresponds to gl.NEAREST. </dd>
+                <dt>linear</dt>
+                <dd>Corresponds to gl.LINEAR. </dd>
+                <dt>nearest-mipmap-nearest</dt>
+                <dd>Corresponds to gl.NEAREST_MIPMAP_NEAREST </dd>
+                <dt>nearest-mipmap-linear</dt>
+                <dd>Corresponds to gl.NEAREST_MIPMAP_LINEAR </dd>
+                <dt>linear-mipmap-nearest</dt>
+                <dd>Corresponds to gl.LINEAR_MIPMAP_NEAREST </dd>
+                <dt>linear-mipmap-linear</dt>
+                <dd>Corresponds to gl.LINEAR_MIPMAP_LINEAR </dd>
+            </dl>
+        </section>
+        <dl title='interface XML3DTextureElement : HTMLElement' class='idl'>
+            <dt>attribute WrapMode wraps</dt>
+            <dd>Texture wrapping mode to be used on the x axis</dd>
+            <dt>attribute WrapMode wrapt</dt>
+            <dd>Texture wrapping mode to be used on the y axis</dd>
+            <dt>attribute WrapMode wrapu</dt>
+            <dd>Texture wrapping mode to be used on the z axis</dd>
+            <dt>attribute FilterMode filtermin</dt>
+            <dd>The texture filtering mode to be used for minification.</dd>
+            <dt>attribute FilterMode filtermag</dt>
+            <dd>The texture filtering mode to be used for magnification.</dd>
+            <dt>attribute FilterMode filtermip</dt>
+            <dd>TODO</dd>
+            <dt>attribute string name</dt>
+            <dd>Required. The name of the texture as defined by the material shader. </dd>
+            <dt>attribute boolean param</dt>
+            <dd>If this element appears inside a DataFlow element the param attribute will mark it as a parameter to be supplied by the Data element referencing the DataFlow. </dd>
+            <dt>attribute string type</dt>
+            <dd>TODO </dd>
+        </dl>
+        <p class="note">
+            XML3D will automatically resize textures to the nearest power-of-two dimensions when the texture wrap mode is set to "repeat" or filtermin is set to anything other than "nearest" or
+            "linear". See <a href="https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support">WebGL limitations</a> for more information.
+        </p>
     </section>
     <section>
       <h4>The <code>dataflow</code> element</h4>

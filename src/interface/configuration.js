@@ -542,7 +542,6 @@ classInfo['texture'] = {
     wrapS: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
     wrapT: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
     wrapU: {a: handlers.EnumAttributeHandler, params: {e: WrapTypes, d: 0}},
-    setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue},
     _term: undefined
 };
 /**

@@ -24,7 +24,6 @@ test("&lt;xml3d&gt; interface test", function() {
     equal(typeof e.getElementByPoint, "function", "getElementByPoint is of type 'function'");
     equal(typeof e.generateRay, "function", "generateRay is of type 'function'");
     equal(typeof e.getElementByRay, "function", "getElementByRay is of type 'function'");
-    equal(typeof e.getBoundingBox, "function", "getBoundingBox is of type 'function'");
     equal(typeof e.getLocalBoundingBox, "function", "getLocalBoundingBox is of type 'function'");
     equal(typeof e.getWorldBoundingBox, "function", "getWorldBoundingBox is of type 'function'");
     equal(typeof e.activeView, "string", "activeView is of type 'string'");
@@ -71,7 +70,6 @@ test("&lt;group&gt; interface test", function() {
     equal(typeof e.visible, "boolean", "visible is of type 'boolean'");
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
     equal(typeof e.getLocalMatrix, "function", "getLocalMatrix is of type 'function'");
-    equal(typeof e.getBoundingBox, "function", "getBoundingBox is of type 'function'");
     equal(typeof e.getLocalBoundingBox, "function", "getLocalBoundingBox is of type 'function'");
     equal(typeof e.getWorldBoundingBox, "function", "getWorldBoundingBox is of type 'function'");
     equal(typeof e.transform, "string", "transform is of type 'string'");
@@ -97,7 +95,6 @@ test("&lt;mesh&gt; interface test", function() {
     equal(typeof e.type, "string", "type is of type 'string'");
     equal(typeof e.compute, "string", "compute is of type 'string'");
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
-    equal(typeof e.getBoundingBox, "function", "getBoundingBox is of type 'function'");
     equal(typeof e.getLocalBoundingBox, "function", "getLocalBoundingBox is of type 'function'");
     equal(typeof e.getWorldBoundingBox, "function", "getWorldBoundingBox is of type 'function'");
     equal(typeof e.getOutputNames, "function", "getOutputNames is of type 'function'");

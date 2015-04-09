@@ -27,6 +27,13 @@ test("Event attribute tests", function() {
         e.setAttribute("onclick", "alert('override');");
         notEqual(e.onclick, v, "Valid setAttribute changed function.");
         equal(typeof e.onclick, "function", "onclick is of type function after setAttribute");
+
+    e.setAttribute("onframedrawn", getterText);
+    equal(e.getAttribute("onframedrawn"), getterText, "Framedrawn was set");
+    e.setAttribute("onframedrawn", "alert('test')");
+    equal(typeof e.onframedrawn, "function", "onframedrawn was set to a function through setAttribute");
+    e.onframedrawn = null;
+    equal(e.onframedrawn, null, "onframedrawn was set back to null");
     });
 
 test("Int interface tests", function() {

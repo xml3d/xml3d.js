@@ -19,6 +19,7 @@ test("&lt;xml3d&gt; interface test", function() {
     equal(typeof e.onkeypress, "object", "onkeypress is of type 'object'");
     equal(typeof e.onkeydown, "object", "onkeydown is of type 'object'");
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
+    equal(typeof e.onframedrawn, "object", "onframedrawn is of type 'object'");
     equal(typeof e.height, "number", "height is of type 'number'");
     equal(typeof e.width, "number", "width is of type 'number'");
     equal(typeof e.getElementByPoint, "function", "getElementByPoint is of type 'function'");

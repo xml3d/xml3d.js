@@ -105,6 +105,7 @@ classInfo['xml3d'] = {
     onkeydown : {a: handlers.EventAttributeHandler},
     onkeyup : {a: handlers.EventAttributeHandler},
     onload: {a: handlers.EventAttributeHandler},
+    onframedrawn: {a: handlers.EventAttributeHandler},
     complete: {p: properties.xml3dComplete},
     height : {a: handlers.IntAttributeHandler, params: 600},
     width : {a: handlers.IntAttributeHandler, params: 800},

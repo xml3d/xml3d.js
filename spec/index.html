@@ -231,6 +231,35 @@
     <h3>Property elements</h3>
     <section>
       <h4>The <code>material</code> element</h4>
+      <p>A material describes the surface shading of an object. Materials are defined using a <span class="element-name">material</span>
+      element and then
+      referenced by the <a href="#dfn-material-property" class="internalDFN">material</a> property on a given <a href="#scene-elements">scene
+      element</a> to indicate that the
+      given element shall be shaded using the referenced material. Multiple scene elements can share a material.
+      The material uses the generic data model to define the parameters of the referenced material model.
+      Note that graphics elements can override the parameters defined in the material element. Hence, the parameters in
+      the material element can be considered as default materials.</p>
+
+
+      <p>
+      The material model used by the material is defined by the <dfn id="attr-material-script">script</dfn> attribute.
+      The <code>script</code> attribute must be present, and must contain a valid non-empty URL referencing either a <a href="#predefined-material-models">predefined material model</a> or
+      a scripted material model, e.g. using shade.js.
+      </p>
+      <p>Here is a simple example for a material based on the predefined phong material model:</p>
+       <pre class='example highlight'>
+&lt;material script=&quot;urn:xml3d:shader:phong&quot;&gt;
+  &lt;float3 name=&quot;diffuseColor&quot;&gt;0 0 1&lt;/float3&gt;
+  &lt;texture name=&quot;diffuseTexture&quot;&gt;
+    &lt;img src=&quot;../stone.jpg&quot;/&gt;
+  &lt;/texture&gt;
+&lt;/material&gt;
+</pre>
+
+      <dl title='interface XML3DMaterialElement : XML3DDataElement' class='idl'>
+        <dt>attribute DOMString script</dt>
+        <dd>The <code>script</code> IDL attribute must reflect the <a href="#attr-material-script" class="internalDFN">script</a> content attribute.</dd>
+      </dl>
     </section>
     <section>
       <h4>The <code>transform</code> element</h4>
@@ -245,6 +274,10 @@
     <h3>Data and dataflow elements</h3>
     <section>
       <h4>The <code>data</code> element</h4>
+       <dl title='interface XML3DDataElement : HTMLElement' class='idl'>
+        <dt>attribute DOMString script</dt>
+        <dd>The <code>script</code> IDL attribute must reflect the <a href="#attr-material-script" class="internalDFN">script</a> content attribute.</dd>
+      </dl>
     </section>
     <section>
       <h4>The <code>float</code>, <code>float2</code>, <code>float3</code>, <code>float4</code>, and

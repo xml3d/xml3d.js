@@ -108,7 +108,7 @@
         <dd>The activeview IDL attribute must reflect the respective content attribute of the same name.</dd>
 
         <dt>HTMLElement? getElementByPoint(unsigned long x, unsigned long y)</dt>
-        <dd>Returns the element at the point with coordinates x, y if there is a scene element; otherwise, returns
+        <dd>Returns the element at the point with <b>window</b> coordinates x,y if there is a scene element; otherwise, returns
           null.
         </dd>
 
@@ -117,11 +117,42 @@
           returns null.
         </dd>
 
-        <dt>XML3DBox getBoundingBox()</dt>
-        <dd>TODO</dd>
+        <dt>XML3DBox getLocalBoundingBox()</dt>
+        <dd>Returns the bounding box of the scene. Because the XML3D element is the root element the bounding box will be in world space by definition.</dd>
+
+        <dt>XML3DBox getWorldBoundingBox()</dt>
+        <dd>Returns the bounding box of the scene in world space.</dd>
 
         <dt>XML3DRay generateRay(unsigned int x, unsigned int y)</dt>
         <dd>Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new XML3DRay from the given x,y <b>window</b> coordinates.</dd>
+
+          <dt>attribute Function onkeypress</dt>
+          <dd>Event listener to be executed when a key is pressed.</dd>
+          <dt>attribute Function onkeydown</dt>
+          <dd>Event listener to be executed when a key is depressed.</dd>
+          <dt>attribute Function onkeyup</dt>
+          <dd>Event listener to be executed when a key is released.</dd>
+          <dt>attribute Function onclick</dt>
+          <dd>Event listener to be executed when the canvas is clicked.</dd>
+          <dt>attribute Function onmousedown</dt>
+          <dd>Event listener to be executed when a mouse button is depressed on the canvas.</dd>
+          <dt>attribute Function onmouseup</dt>
+          <dd>Event listener to be executed when a mouse button is released on the canvas.</dd>
+          <dt>attribute Function ondblclick</dt>
+          <dd>Event listener to be executed when the canvas is double clicked.</dd>
+          <dt>attribute Function onmouseover</dt>
+          <dd>Event listener to be executed when the mouse enters the canvas.</dd>
+          <dt>attribute Function onmousemove</dt>
+          <dd>Event listener to be executed when the mouse moves while over the canvas.</dd>
+          <dt>attribute Function onmouseout</dt>
+          <dd>Event listener to be executed when the mouse leaves the canvas.</dd>
+          <dt>attribute Function onload</dt>
+          <dd>Event listener to be executed when the XML3D element and all external resources (ie. textures, mesh data) have been loaded. This event is fired
+          <i>after</i> the fully loaded scene has been drawn to the canvas. </dd>
+          <dt>attribute Function onframedrawn</dt>
+          <dd>Event listener to be executed whenever a new frame has been drawn. Is passed a FrameDrawn event.
+          </dd>
+
 
       </dl>
     </section>

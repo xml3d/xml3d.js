@@ -562,7 +562,7 @@ classInfo['view'] = {
     getDirection: {m: methods.viewGetDirection},
     getUpVector: {m: methods.viewGetUpVector},
     getViewMatrix: {m: methods.viewGetViewMatrix},
-    perspective: {a: handlers.StringAttributeHandler}
+    projection: {a: handlers.StringAttributeHandler}
     };
 
 module.exports = {

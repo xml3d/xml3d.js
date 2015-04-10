@@ -332,5 +332,5 @@ test("&lt;view&gt; interface test", function() {
     equal(typeof e.getDirection, "function", "getDirection is of type 'function'");
     equal(typeof e.getUpVector, "function", "getUpVector is of type 'function'");
     equal(typeof e.getViewMatrix, "function", "getViewMatrix is of type 'function'");
-    equal(typeof e.perspective, "string", "perspective is of type 'string'");
+    equal(typeof e.projection, "string", "projection is of type 'string'");
 });

@@ -4,7 +4,7 @@ var Events = require("../../../interface/notification.js");
 
 var ViewRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, false);
-    this.perspectiveFetcher = new DOMTransformFetcher(this, "perspective", "perspective", true);
+    this.projectionFetcher = new DOMTransformFetcher(this, "projection", "projection", true);
     this.createRenderNode();
 };
 XML3D.createClass(ViewRenderAdapter, TransformableAdapter);
@@ -20,7 +20,7 @@ p.createRenderNode = function () {
         fieldOfView: this.node.fieldOfView,
         parent: parentNode
     });
-    this.perspectiveFetcher.update();
+    this.projectionFetcher.update();
 };
 
 /* Interface method */
@@ -55,8 +55,8 @@ p.notifyChanged = function (evt) {
                 case "position":
                     this.renderNode.updatePosition(this.node.position._data);
                     break;
-                case "perspective":
-                    this.perspectiveFetcher.update();
+                case "projection":
+                    this.projectionFetcher.update();
                     break;
                 case "fieldOfView":
                     this.renderNode.updateFieldOfView(this.node.fieldOfView);
@@ -71,16 +71,16 @@ p.notifyChanged = function (evt) {
 
 p.onTransformChange = function (attrName, matrix) {
     TransformableAdapter.prototype.onTransformChange.call(this, attrName, matrix);
-    if (attrName == "perspective") {
+    if (attrName == "projection") {
         this.renderNode.setProjectionOverride(matrix);
     }
-}
+};
 
 p.dispose = function () {
-    this.perspectiveFetcher.clear();
+    this.projectionFetcher.clear();
     this.getRenderNode().remove();
     this.clearAdapterHandles();
-}
+};
 
 // Export
 module.exports = ViewRenderAdapter;

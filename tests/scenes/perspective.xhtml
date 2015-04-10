@@ -28,7 +28,7 @@
       </group>
     </group>
     <group style="transform: translate3d(-3px, 0px, -10px) translate3d(-1px, -1px, 0)
-            rotate3d(0, 0, 1, 45deg) rotate3d(0, 0, 1, 0.5rad) scale(0.75, 0.5, 1)
+            rotate3d(0, 0, 1, 45deg) rotate3d(0, 0, 1, 0.5rad) scale3d(0.75, 0.5, 1)
             rotate3d(0, 0, 1, -45deg) translate3d(1px, 1px, 0px)">
       <mesh src="#meshData" />
     </group>
@@ -43,14 +43,14 @@
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
       </data>
-      <data id="perspective" >
-        <float4x4 name="perspective">1.5087989568710327 0 0 0
+      <data id="projection" >
+        <float4x4 name="projection">1.5087989568710327 0 0 0
           0 3.0175979137420654 0 0
           0 0 -1.0000020265579224 -1
           0 0 -0.20000019669532776 0</float4x4>
       </data>
     </defs>
-    <view perspective="#perspective" />
+    <view projection="#projection" />
     <group style="transform: translate3d(0px,0px,-10px)" >
       <group style="transform: rotateZ(45deg)"  >
         <group style="transform: scale3d(2,0.5,1)" >
@@ -59,7 +59,7 @@
       </group>
     </group>
     <group style="transform: translate3d(-3px, 0px, -10px) translate3d(-1px, -1px, 0)
-            rotate3d(0, 0, 1, 45deg) rotate3d(0, 0, 1, 0.5rad) scale(0.75, 0.5, 1)
+            rotate3d(0, 0, 1, 45deg) rotate3d(0, 0, 1, 0.5rad) scale3d(0.75, 0.5, 1)
             rotate3d(0, 0, 1, -45deg) translate3d(1px, 1px, 0px)">
       <mesh src="#meshDataRef" />
     </group>

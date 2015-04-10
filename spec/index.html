@@ -153,9 +153,9 @@
             <dd>The <b>vertical</b> field of view of this camera, expressed in radians.
             </dd>
 
-            <dt>attribute XML3DMatrix perspective</dt>
-            <dd>Overrides the camera's internal projection matrix with the supplied value. This can be used to, for
-            example, create an orthographic camera.</dd>
+            <dt>attribute DOMString projection</dt>
+            <dd>Overrides the camera's internal projection matrix. The attribute should contain a URI to a data element
+                supplying a float4x4 matrix named "projection". This can be used to, for example, create an orthographic camera. </dd>
 
             <dt>XML3DMatrix getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this view element in world space.

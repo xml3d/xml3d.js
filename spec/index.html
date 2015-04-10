@@ -127,7 +127,7 @@
         <dd>Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new XML3DRay from the given x,y <b>window</b> coordinates.</dd>
 
           <dt>attribute Function onframedrawn</dt>
-          <dd>Event listener to be executed whenever a new frame has been drawn. Is passed a FrameDrawn event.
+          <dd>Event listener to be executed whenever a new frame has been drawn. Is passed a <a>FrameDrawn</a> event.
           </dd>
 
 
@@ -346,6 +346,21 @@
 
 <section>
   <h2>Events</h2>
+    <section>
+        <h3>FrameDrawn</h3>
+        <dl title='interface FrameDrawn : CustomEvent' class='idl'>
+            <dt>attribute float detail.timeStart</dt>
+            <dd>The system time at the beginning of the frame draw.</dd>
+            <dt>attribute float detail.timeEnd</dt>
+            <dd>The system time at the end of the frame draw.</dd>
+            <dt>attribute float detail.renderTimeInMilliseconds</dt>
+            <dd>The total time taken to render this frame. Includes time spent updating the scene state and any XFlow data processing. </dd>
+            <dt>attribute int detail.count.objects</dt>
+            <dd>The total number of distinct meshes drawn in this frame after applying frustum culling (if enabled).</dd>
+            <dt>attribute int detail.count.primitives</dt>
+            <dd>The total number of primitives drawn in this frame after applying frustum culling (if enabled).</dd>
+        </dl>
+    </section>
 </section>
 
 </body>

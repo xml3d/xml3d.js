@@ -126,29 +126,6 @@
         <dt>XML3DRay generateRay(unsigned int x, unsigned int y)</dt>
         <dd>Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new XML3DRay from the given x,y <b>window</b> coordinates.</dd>
 
-          <dt>attribute Function onkeypress</dt>
-          <dd>Event listener to be executed when a key is pressed.</dd>
-          <dt>attribute Function onkeydown</dt>
-          <dd>Event listener to be executed when a key is depressed.</dd>
-          <dt>attribute Function onkeyup</dt>
-          <dd>Event listener to be executed when a key is released.</dd>
-          <dt>attribute Function onclick</dt>
-          <dd>Event listener to be executed when the canvas is clicked.</dd>
-          <dt>attribute Function onmousedown</dt>
-          <dd>Event listener to be executed when a mouse button is depressed on the canvas.</dd>
-          <dt>attribute Function onmouseup</dt>
-          <dd>Event listener to be executed when a mouse button is released on the canvas.</dd>
-          <dt>attribute Function ondblclick</dt>
-          <dd>Event listener to be executed when the canvas is double clicked.</dd>
-          <dt>attribute Function onmouseover</dt>
-          <dd>Event listener to be executed when the mouse enters the canvas.</dd>
-          <dt>attribute Function onmousemove</dt>
-          <dd>Event listener to be executed when the mouse moves while over the canvas.</dd>
-          <dt>attribute Function onmouseout</dt>
-          <dd>Event listener to be executed when the mouse leaves the canvas.</dd>
-          <dt>attribute Function onload</dt>
-          <dd>Event listener to be executed when the XML3D element and all external resources (ie. textures, mesh data) have been loaded. This event is fired
-          <i>after</i> the fully loaded scene has been drawn to the canvas. </dd>
           <dt>attribute Function onframedrawn</dt>
           <dd>Event listener to be executed whenever a new frame has been drawn. Is passed a FrameDrawn event.
           </dd>
@@ -166,13 +143,6 @@
     <section>
       <h4>The <code>view</code> element</h4>
         <dl title='interface XML3DViewElement : HTMLElement' class='idl'>
-            <dt>attribute Function onkeypress</dt>
-            <dd>Event listener to be executed when a key is pressed.</dd>
-            <dt>attribute Function onkeydown</dt>
-            <dd>Event listener to be executed when a key is depressed.</dd>
-            <dt>attribute Function onkeyup</dt>
-            <dd>Event listener to be executed when a key is released.</dd>
-
             <dt>attribute XML3DVec3 position</dt>
             <dd>The position of the camera in world space</dd>
 
@@ -377,5 +347,6 @@
 <section>
   <h2>Events</h2>
 </section>
+
 </body>
 </html>

@@ -139,6 +139,28 @@
     <h3>Scene elements</h3>
     <section>
       <h4>The <code>group</code> element</h4>
+        <dl title='interface XML3DGroupElement : HTMLElement' class='idl'>
+            <dt>attribute DOMString transform</dt>
+            <dd>Accepts a URI fragment referencing a <a>transform</a> element. Alternatively a transformation may be defined
+            with CSS through the style attribute.</dd>
+            <dt>attribute DOMString material</dt>
+            <dd>Accepts a URI fragment referencing a <a>material</a> element. Material is inherited from the parent group if
+            this attribute is not present.</dd>
+            <dt>attribute boolean visible</dt>
+            <dd>A value of "false" will prevent this group being drawn to the canvas. Visibility is inherited from the parent group
+            if this attribute is not present. </dd>
+            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dd>Returns the transformation matrix of this group element in world space (includes parent transformations).
+            </dd>
+            <dt>XML3DMatrix getLocalMatrix()</dt>
+            <dd>Returns the local transformation matrix of this group element (does not include parent transformations).
+            </dd>
+            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dd>Returns the bounding box of this group in its local transformation space. </dd>
+
+            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dd>Returns the bounding box of this group in world space.</dd>
+        </dl>
     </section>
     <section>
       <h4>The <code>view</code> element</h4>

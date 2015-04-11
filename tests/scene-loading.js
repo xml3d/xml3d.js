@@ -43,14 +43,14 @@ test("Check Data Loading", function() {
 
     var mesh = this.doc.querySelector("mesh"),
         data = this.doc.querySelector("#inlineData"),
-        shader = this.doc.querySelector("shader"),
+        material = this.doc.querySelector("material"),
         img = this.doc.querySelector("#testImg"),
         swapData = this.doc.querySelector("#swapData"),
         swapImg = this.doc.querySelector("#swapImg");
 
     equal(mesh.complete, true, "Mesh is complete");
     equal(data.complete, true, "Data is complete");
-    equal(shader.complete, img.complete, "Shader complete is identical with img.complete");
+    equal(material.complete, img.complete, "material complete is identical with img.complete");
     var randKey = "?rand=" + Math.random();
 
     var step = 0;
@@ -77,21 +77,21 @@ test("Check Data Loading", function() {
         if(step == 4){
             equal(e.target, mesh, "Mesh dispatched another load event");
             equal(mesh.complete, true, "mesh.complete is now true");
-            shader.addEventListener('load', loadTestStep);
+            material.addEventListener('load', loadTestStep);
             img.src = "textures/magenta.png" + randKey;
-            equal(shader.complete, false, "After img.src change, shader.complete is false");
+            equal(material.complete, false, "After img.src change, material.complete is false");
         }
         if(step == 5) {
-            equal(e.target, shader, "Shader dispatched its very first textureload event");
-            equal(shader.complete, true, "shader.complete is now true");
+            equal(e.target, material, "material dispatched its very first textureload event");
+            equal(material.complete, true, "material.complete is now true");
             swapImg.src = "textures/water.jpg" + randKey;
-            shader.src = "#swapData";
+            material.src = "#swapData";
             equal(swapData.complete, false, "After swapImg.src change, swapData.complete is false");
-            equal(shader.complete, false, "After hooking shader with swapData, shader.complete is also false");
+            equal(material.complete, false, "After hooking material with swapData, material.complete is also false");
         }
         if(step == 6){
-            equal(e.target, shader, "Shader dispatched another load event");
-            equal(shader.complete, true, "shader.complete is now true");
+            equal(e.target, material, "material dispatched another load event");
+            equal(material.complete, true, "material.complete is now true");
             start();
         }
     }

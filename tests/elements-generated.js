@@ -74,7 +74,7 @@ test("&lt;group&gt; interface test", function() {
     equal(typeof e.getLocalBoundingBox, "function", "getLocalBoundingBox is of type 'function'");
     equal(typeof e.getWorldBoundingBox, "function", "getWorldBoundingBox is of type 'function'");
     equal(typeof e.transform, "string", "transform is of type 'string'");
-    equal(typeof e.shader, "string", "shader is of type 'string'");
+    equal(typeof e.material, "string", "material is of type 'string'");
 });
 test("&lt;mesh&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "mesh");
@@ -118,9 +118,9 @@ test("&lt;transform&gt; interface test", function() {
     equal(typeof e.center, "object", "center is of type 'object'");
     equal(typeof e.scaleOrientation, "object", "scaleOrientation is of type 'object'");
 });
-test("&lt;shader&gt; interface test", function() {
-    var e = document.createElementNS(XML3D.xml3dNS, "shader");
-    ok(e, "shader exits");
+test("&lt;material&gt; interface test", function() {
+    var e = document.createElementNS(XML3D.xml3dNS, "material");
+    ok(e, "material exits");
     equal(typeof e.className, "string", "className is of type 'string'");
     equal(typeof e.style, "object", "style is of type 'object'");
     equal(typeof e.id, "string", "id is of type 'string'");

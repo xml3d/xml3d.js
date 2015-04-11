@@ -1,4 +1,4 @@
-XML3D.shaders.register("point", {
+XML3D.materials.register("point", {
 
     vertex : [
         "attribute vec3 position;",

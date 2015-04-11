@@ -18,7 +18,7 @@ p.createRenderNode = function () {
         parent: parentNode, visible: this.node.visible, name: this.node.id
     });
     this.updateLocalMatrix();
-    this.updateShaderHandler();
+    this.updateMaterialHandler();
     var bbox = XML3D.math.bbox.create();
     this.renderNode.setWorldSpaceBoundingBox(bbox);
 };
@@ -44,7 +44,7 @@ p.handleConnectedAdapterEvent = function (evt) {
         case Events.NODE_REMOVED:
             break;
         default:
-            XML3D.debug.logWarning("Unhandled connected adapter event for " + evt.key + " in shader adapter");
+            XML3D.debug.logWarning("Unhandled connected adapter event for " + evt.key + " in group adapter");
     }
 };
 

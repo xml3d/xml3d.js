@@ -10,10 +10,10 @@
 
  <xml3d id="xml3dTest" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
     <defs>
-        <shader id="normShader" script="urn:xml3d:shader:flat">
+        <material id="normmaterial" script="urn:xml3d:material:flat">
             <float3 name="diffuseColor">1 1 1</float3>
             <float name="ambientIntensity">1.0</float>
-        </shader>
+        </material>
 
         <view position="0 0 10" />
 
@@ -67,24 +67,24 @@
                 <data src="#rectBase" ></data>
             </assetdata>
 
-            <assetmesh name="mesh1" type="triangles" includes="base" shader="#normShader"  >
+            <assetmesh name="mesh1" type="triangles" includes="base" material="#normmaterial"  >
                 <data src="#position1" ></data>
             </assetmesh>
 
-            <assetmesh name="mesh2" includes="base" shader="#normShader" style="transform: translateX(0.51px) scale3d(0.5,0.5,1)" >
+            <assetmesh name="mesh2" includes="base" material="#normmaterial" style="transform: translateX(0.51px) scale3d(0.5,0.5,1)" >
                 <data src="#position2" ></data>
             </assetmesh>
         </asset>
 
         <asset id="addAsset" >
-            <assetmesh shader="#normShader" includes="parent.color" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
+            <assetmesh material="#normmaterial" includes="parent.color" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
                 <data src="#rectBase" ></data>
                 <data src="#position1" ></data>
                 <data src="#shortIndex" ></data>
             </assetmesh>
         </asset>
         <asset id="weirdAsset" >
-            <assetmesh shader="#normShader" includes="parent.main.base" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
+            <assetmesh material="#normmaterial" includes="parent.main.base" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
                 <data src="#position1" ></data>
             </assetmesh>
         </asset>
@@ -137,7 +137,7 @@
     <group style="transform: translate3d(-3.02px, -2.01px)" >
         <model id="mm6" src="#mm2" >
             <asset name="main" >
-                <assetmesh shader="#normShader" includes="base" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
+                <assetmesh material="#normmaterial" includes="base" style="transform: translate3d(1.28px,0.78px,0) scale3d(0.25, 0.25, 0.25)">
                     <data src="#position1" ></data>
                     <data src="#shortIndex" ></data>
                 </assetmesh>

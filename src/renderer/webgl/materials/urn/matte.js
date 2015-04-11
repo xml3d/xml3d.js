@@ -1,4 +1,4 @@
-XML3D.shaders.register("matte", {
+XML3D.materials.register("matte", {
 
     vertex: [
         "attribute vec3 position;",
@@ -38,4 +38,4 @@ XML3D.shaders.register("matte", {
     }
 });
 
-XML3D.shaders.register("flat", XML3D.shaders.getScript("matte"));
+XML3D.materials.register("flat", XML3D.materials.getScript("matte"));

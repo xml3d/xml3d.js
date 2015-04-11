@@ -32,17 +32,17 @@
                 <float3 name="intensity">1 1 1</float3>
             </lightshader>
 
-            <shader id="mat" script="urn:xml3d:shader:phong">
+            <material id="mat" script="urn:xml3d:material:phong">
                 <float3 name="diffuseColor">0.2 0.2 0.2</float3>
                 <float3 name="specularColor">0.0 0.0 0.0</float3>
                 <float name="ambientIntensity">0.8</float>
-            </shader>
+            </material>
         </defs>
         <view id="Camera" position="0 11 11" orientation="-1 0 0 0.707"/>
         <group transform="#t_light">
             <light shader="#ls_dir"/>
         </group>
-        <group id="test1" shader="#mat">
+        <group id="test1" material="#mat">
             <group transform="#t_1">
                 <mesh id="m_1" type="triangles">
                     <data src="#wave"/>

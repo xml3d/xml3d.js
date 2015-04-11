@@ -29,10 +29,10 @@
         0.705893 0.471664 -0.528367 0.600330 0.600330 -0.528367 0.000000 0.000000 1.000000 0.784356 0.324870 -0.528367 0.832667 0.165624 -0.528367 0.848994 0.000000 -0.528367 0.832667 -0.165624 -0.528367 0.784356 -0.324870 -0.528367 0.705893 -0.471664 -0.528367 0.600330 -0.600330 -0.528367 0.471664 -0.705893 -0.528367 0.324870 -0.784356 -0.528367 0.165624 -0.832667 -0.528367 0.000000 -0.848994 -0.528367 -0.165624 -0.832667 -0.528367 -0.324870 -0.784356 -0.528367 -0.471664 -0.705893 -0.528367 -0.600330 -0.600330 -0.528367 -0.705893 -0.471664 -0.528367 -0.784356 -0.324870 -0.528367 -0.832667 -0.165624 -0.528367 -0.848994 0.000000 -0.528367 -0.832667 0.165624 -0.528367 -0.784356 0.324900 -0.528367 -0.705893 0.471664 -0.528367 -0.600330 0.600330 -0.528367 -0.471664 0.705893 -0.528367 -0.324870 0.784356 -0.528367 -0.165624 0.832667 -0.528367 0.000000 0.848994 -0.528367 0.165624 0.832667 -0.528367 0.324900 0.784356 -0.528367 0.471664 0.705893 -0.528367 0.000000 0.000000 -1.000000
        </float3>
       </data>
-      <shader id="mat" script="urn:xml3d:shader:flat">
+      <material id="mat" script="urn:xml3d:material:flat">
        <float3 name="diffuseColor">0.0 0.0 1</float3>
        <float name="ambientIntensity">1.0</float>
-      </shader>
+      </material>
      </defs>
      <view id="Camera"  position="0 0 15"/>
     <group id="test2" visible="false">
@@ -42,34 +42,34 @@
         </mesh>
     </group>
     <group id="test1">
-     <group shader="#mat" transform="#t_1">
+     <group material="#mat" transform="#t_1">
       <mesh src="#cone" type="triangles"/>
      </group>
-     <group shader="#mat" transform="#t_2">
+     <group material="#mat" transform="#t_2">
       <mesh type="triangles">
 		<data src="#cone"/>
 		<float3 name="diffuseColor">1 0 0</float3>
 	  </mesh>
      </group>
-     <group shader="#mat" transform="#t_3">
+     <group material="#mat" transform="#t_3">
       <mesh type="triangles">
 		<data src="#cone"/>
 	  </mesh>
      </group>
-     <group shader="#mat" transform="#t_4">
+     <group material="#mat" transform="#t_4">
       <mesh type="triangles">
 		<data src="#cone"/>
 		<float3 name="diffuseColor">1 1 0</float3>
         <float name="ambientIntensity">0.1</float>
 	  </mesh>
      </group>
-     <group shader="#mat" transform="#t_5">
+     <group material="#mat" transform="#t_5">
       <mesh id="m_5" type="triangles">
 		<data src="#cone"/>
 		<float3 name="diffuseColor">0 1 0</float3>
 	  </mesh>
      </group>
-     <group shader="#mat" transform="#t_6">
+     <group material="#mat" transform="#t_6">
       <mesh id="m_6" type="triangles">
 		<data src="#cone"/>
 	  </mesh>

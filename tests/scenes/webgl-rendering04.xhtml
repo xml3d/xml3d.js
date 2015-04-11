@@ -11,17 +11,17 @@
    <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
     <defs>
 
-        <shader id="phong1" script="urn:xml3d:shader:phong">
+        <material id="phong1" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">0.0 0.5 0.85</float3>
           <float3 name="emissiveColor">0.0 0.1 0.17</float3>
 		  <float name="ambientIntensity">0.2</float>
-        </shader>
+        </material>
 
-        <shader id="phong2" script="urn:xml3d:shader:phong">
+        <material id="phong2" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">0.0 0.5 0.85</float3>
           <float3 name="emissiveColor">0.3 0.3 0.3</float3>
 		  <float name="ambientIntensity">0.2</float>
-        </shader>
+        </material>
 
     <data id="meshdata" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
@@ -46,7 +46,7 @@
       <light shader="#ls_Spot"/>
     </group>
 
-    <group id="myGroup" shader="#phong1" >
+    <group id="myGroup" material="#phong1" >
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
 	    </mesh>
     </group>

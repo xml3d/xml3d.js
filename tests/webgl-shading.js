@@ -1,4 +1,4 @@
-module("WebGL shaders internal", {
+module("WebGL materials internal", {
     setup : function() {
         var canvas = document.createElement("canvas");
         this.gl = canvas.getContext('experimental-webgl');
@@ -33,12 +33,12 @@ test("Phong fragment shader", function() {
 
     var materialParameters = {}
 
-    var phong = XML3D.shaders.getScript("phong");
-    ok(phong, "Phong shader exists");
+    var phong = XML3D.materials.getScript("phong");
+    ok(phong, "Phong material exists");
     equal(typeof phong.addDirectives, "function", "Function 'addDirectives' exists");
     var directives = [];
     phong.addDirectives.call(phong, directives, scene.lights, {});
-    equal(directives.length, 10, "10 directives from phong shader");
+    equal(directives.length, 10, "10 directives from phong material");
 
     var fragment1 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment1, "Phong fragment without globals compiles.");
@@ -52,7 +52,7 @@ test("Phong fragment shader", function() {
     var point2 = scene.createRenderLight({light: { type: "point"}});
 
     phong.addDirectives.call(phong, directives, scene.lights, materialParameters);
-    equal(directives.length, 10, "10 directives from phong shader");
+    equal(directives.length, 10, "10 directives from phong material");
     var fragment2 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
     this.compiles(this.gl.FRAGMENT_SHADER, fragment2, "Phong fragment with 2 point lights compiles.");
     notEqual(fragment2.indexOf("MAX_POINTLIGHTS 2"), -1, "MAX_POINTLIGHTS set");
@@ -125,7 +125,7 @@ test("Phong fragment shader", function() {
     notEqual(fragment5.indexOf("HAS_EMISSIVETEXTURE 1"), -1, "HAS_EMISSIVETEXTURE set");
 });
 
-module("WebGL Shaders and Textures", {
+module("WebGL materials and Textures", {
     setup : function() {
         stop();
         var that = this;
@@ -202,7 +202,7 @@ test("NPOT texture resizing", 4, function() {
     stop();
 });
 
-test("Textured diffuse shader", 3, function() {
+test("Textured diffuse material", 3, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView, gl = getContextForXml3DElement(x), testFunc = null, h = getHandler(x);
     var group = this.doc.getElementById("diffuseTexGroup");
     h.draw();
@@ -218,7 +218,7 @@ test("Textured diffuse shader", 3, function() {
 });
 
 // Scene: webgl-rendering02.xhtml
-test("Diffuse shader with vertex colors", 3, function() {
+test("Diffuse material with vertex colors", 3, function() {
     var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
@@ -239,21 +239,21 @@ test("Diffuse shader with vertex colors", 3, function() {
     cgroup.visible = true;
 });
 
-test("Simple custom shader", 4, function() {
+test("Simple custom material", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
     var h = getHandler(x);
-    var cgroup = this.doc.getElementById("customShaderGroup");
+    var cgroup = this.doc.getElementById("custommaterialGroup");
     cgroup.setAttribute("visible", "true");
     h.draw();
 
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,255,0,255], "Custom shader with default green color");
+    deepEqual(actual, [0,255,0,255], "Custom material with default green color");
 
-    cgroup.setAttribute("shader", "#customShader2");
+    cgroup.setAttribute("material", "#custommaterial2");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,255,255], "Custom shader with given blue color");
+    deepEqual(actual, [0,0,255,255], "Custom material with given blue color");
 
 });
 
@@ -300,7 +300,7 @@ module("WebGL: Ambient term", {
     }
 });
 
-test("Diffuse shader", 4, function() {
+test("Diffuse material", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
 
@@ -326,7 +326,7 @@ test("Diffuse shader", 4, function() {
     testFunc();
 });
 
-test("Phong shader", 4, function() {
+test("Phong material", 4, function() {
     var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
 
@@ -351,7 +351,7 @@ test("Phong shader", 4, function() {
     testFunc();
 });
 
-module("WebGL Shaders and Textures 2", {
+module("WebGL materials and Textures 2", {
     setup : function() {
         stop();
         var that = this;
@@ -370,12 +370,12 @@ module("WebGL Shaders and Textures 2", {
 
 
 
-test("Switching to previously unused shader", 3, function() {
+test("Switching to previously unused material", 3, function() {
     var x = this.doc.getElementById("xml3DElem"),
         gl = getContextForXml3DElement(x),
         testFunc = null, h = getHandler(x);
 
-    this.doc.getElementById("myGroup").shader = "#phong2";
+    this.doc.getElementById("myGroup").material = "#phong2";
 
     x.addEventListener("framedrawn", function(n) {
         if(testFunc)

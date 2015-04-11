@@ -16,7 +16,7 @@ var Asset = function(refNode){
     this.listener = [];
     this.loading = false;
     this.refNode = refNode || null;
-    this.shader = null;
+    this.material = null;
     this.transform = null;
 
     this.assetResult = null;
@@ -68,8 +68,8 @@ Asset.prototype.setName = function(name){
     invalidateAsset(this);
 };
 
-Asset.prototype.setShader = function(shader){
-    this.shader = shader;
+Asset.prototype.setMaterial = function(material){
+    this.material = material;
     invalidateAsset(this);
 };
 
@@ -224,7 +224,7 @@ var SubData = function(xflowNodeOut, xflowNodeIn, refNode){
     this.postCompute = null;
     this.postFilter = null;
     this.includes = [];
-    this.shader = null;
+    this.material = null;
     this.transform = null;
     this.meshType = null;
     this.assetParent = null;
@@ -318,8 +318,8 @@ SubData.prototype.setIncludes = function(includes){
     invalidateParent(this);
 };
 
-SubData.prototype.setShader = function(shader){
-    this.shader = shader;
+SubData.prototype.setMaterial = function(material){
+    this.material = material;
     invalidateParent(this);
 };
 
@@ -352,7 +352,7 @@ var AssetResult = function(){
     this.namedSubResults = {};
     this.allSubResults = [];
 
-    this.shader = null;
+    this.material = null;
     this.transform = null;
     this.pickFilter = null;
 };
@@ -376,7 +376,7 @@ function constructAssetTable(table, asset){
     else
         table.pickFilter = asset.pickFilter;
 
-    if(asset.shader) table.shader = asset.shader;
+    if(asset.material) table.material = asset.material;
     if(asset.transform) table.transform = combineTransform(table.transform, asset.transform);
 
 
@@ -486,7 +486,7 @@ function copySrcTable(table, srcTable, pickFilter){
     else{
         table.pickFilter = pickFilter || srcTable.pickFilter;
     }
-    if(srcTable.shader) table.shader = srcTable.shader;
+    if(srcTable.material) table.material = srcTable.material;
     if(srcTable.transform) table.transform = combineTransform(table.transform, srcTable.transform);
 }
 
@@ -511,7 +511,7 @@ function rec_getDataTree(table){
         meshes: [],
         groups: [],
         transform: table.transform,
-        shader: table.shader,
+        material: table.material,
         postTransformXflowNode: null
     };
 
@@ -522,7 +522,7 @@ function rec_getDataTree(table){
             node.meshes.push({
                 xflowNode: entry.accumulatedXflowNode,
                 type: entry.meshType,
-                shader: entry.shader,
+                material: entry.material,
                 transform: entry.transform,
                 refNode: entry.refNode
             });
@@ -627,7 +627,7 @@ function AssetTableEntry (subData){
     this.meshType = null;
 
     this.postQueue = [];
-    this.shader = null;
+    this.material = null;
     this.transform = null;
 
     this.accumulatedXflowNode = null;
@@ -649,7 +649,7 @@ AssetTableEntry.prototype.pushTableEntry = function(srcEntry){
     if(srcEntry.meshType) this.meshType = srcEntry.meshType;
 
     if(srcEntry.transform) this.transform = combineTransform(this.transform, srcEntry.transform);
-    if(srcEntry.shader) this.shader = srcEntry.shader;
+    if(srcEntry.material) this.material = srcEntry.material;
 
     this.postQueue.push.apply(this.postQueue, srcEntry.postQueue);
 };
@@ -669,7 +669,7 @@ AssetTableEntry.prototype.pushPostEntry = function(subData){
     this.accumulatedXflowNode = subData.xflowNodeOut;
     Set.add(this.classNames, subData.classNames);
     if(subData.meshType) this.meshType = subData.meshType;
-    if(subData.shader) this.shader = subData.shader;
+    if(subData.material) this.material = subData.material;
     if(subData.transform) this.transform = combineTransform(this.transform, subData.transform);
 };
 

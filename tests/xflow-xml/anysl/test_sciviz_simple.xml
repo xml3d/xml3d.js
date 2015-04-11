@@ -1,7 +1,7 @@
 <XflowTest>
   <Input>
 
-    <script id="myMorphing" type="x-shader/anysl.vertex.text">
+    <script id="myMorphing" type="x-material/anysl.vertex.text">
       <![CDATA[
 program(MyMorphing,
     param(in, float3, in_position),

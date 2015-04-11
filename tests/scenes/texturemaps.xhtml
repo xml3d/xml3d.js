@@ -17,23 +17,23 @@
           <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
           <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
-        <shader id="s_phongDiffuseColor" script="urn:xml3d:shader:phong">
+        <material id="s_phongDiffuseColor" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">1 1 0</float3>
           <float3 name="specularColor">0 0 0</float3>
-        </shader>
-        <shader id="s_phongSpecularColor" script="urn:xml3d:shader:phong">
+        </material>
+        <material id="s_phongSpecularColor" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">0 0 0</float3>
           <float3 name="specularColor">1 1 0</float3>
-        </shader>
-        <shader id="s_phongEmissiveColor" script="urn:xml3d:shader:phong">
+        </material>
+        <material id="s_phongEmissiveColor" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">0 0 0</float3>
           <float3 name="emissiveColor">1 1 0</float3>
           <float3 name="specularColor">0 0 0</float3>
-        </shader>
-        <shader id="s_diffuseEmissiveColor" script="urn:xml3d:shader:diffuse">
+        </material>
+        <material id="s_diffuseEmissiveColor" script="urn:xml3d:material:diffuse">
           <float3 name="diffuseColor">0 0 0</float3>
           <float3 name="emissiveColor">1 1 0</float3>
-        </shader>
+        </material>
 
         
         <lightshader id="ls_Point" script="urn:xml3d:lightshader:point">
@@ -51,19 +51,19 @@
           <light shader="#ls_Point"/>
       </group>
       
-      <group id="diffuseColor" shader="#s_phongDiffuseColor" transform="#t_object1" visible="false">
+      <group id="diffuseColor" material="#s_phongDiffuseColor" transform="#t_object1" visible="false">
         <mesh type="triangles" src="#simplePlane1" />
       </group>
       
-      <group id="specularColor" shader="#s_phongSpecularColor" transform="#t_object1" visible="false">
+      <group id="specularColor" material="#s_phongSpecularColor" transform="#t_object1" visible="false">
         <mesh type="triangles" src="#simplePlane1" />
       </group>
       
-      <group id="emissiveColor" shader="#s_phongEmissiveColor" transform="#t_object1" visible="false">
+      <group id="emissiveColor" material="#s_phongEmissiveColor" transform="#t_object1" visible="false">
         <mesh type="triangles" src="#simplePlane1" />
       </group>
       
-      <group id="diffuseEmissiveColor" shader="#s_diffuseEmissiveColor" transform="#t_object1" visible="false">
+      <group id="diffuseEmissiveColor" material="#s_diffuseEmissiveColor" transform="#t_object1" visible="false">
         <mesh type="triangles" src="#simplePlane1" />
       </group>
     </xml3d>
@@ -77,35 +77,35 @@
           <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
           <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
-        <shader id="s_phongDiffuseTexture" script="urn:xml3d:shader:phong">
+        <material id="s_phongDiffuseTexture" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">1 1 1</float3>
           <texture name="diffuseTexture">
             <img src="textures/yellow.png" />
           </texture>
           <float3 name="specularColor">0 0 0</float3>
-        </shader>
-        <shader id="s_phongSpecularTexture" script="urn:xml3d:shader:phong">
+        </material>
+        <material id="s_phongSpecularTexture" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">0 0 0</float3>
           <float3 name="specularColor">1 1 1</float3>
           <texture name="specularTexture">
             <img src="textures/yellow.png" />
           </texture>
-        </shader>
-        <shader id="s_phongEmissiveTexture" script="urn:xml3d:shader:phong">
+        </material>
+        <material id="s_phongEmissiveTexture" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">0 0 0</float3>
           <float3 name="specularColor">0 0 0</float3>
           <texture name="emissiveTexture">
             <img src="textures/yellow.png" />
           </texture>
           <float3 name="emissiveColor">1 1 1</float3>
-        </shader>
-        <shader id="s_diffuseEmissiveTexture" script="urn:xml3d:shader:diffuse">
+        </material>
+        <material id="s_diffuseEmissiveTexture" script="urn:xml3d:material:diffuse">
           <float3 name="diffuseColor">0 0 0</float3>
           <texture name="emissiveTexture">
             <img src="textures/yellow.png" />
           </texture>
           <float3 name="emissiveColor">1 1 1</float3>
-        </shader>
+        </material>
 
         <lightshader id="ls_Point2" script="urn:xml3d:lightshader:point">
            <float3 name="intensity">
@@ -123,19 +123,19 @@
           <light shader="#ls_Point2"/>
       </group>
       
-      <group id="diffuseTexture" shader="#s_phongDiffuseTexture" transform="#t_object2" visible="false">
+      <group id="diffuseTexture" material="#s_phongDiffuseTexture" transform="#t_object2" visible="false">
         <mesh type="triangles" src="#simplePlane2" />
       </group>
       
-      <group id="specularTexture" shader="#s_phongSpecularTexture" transform="#t_object2" visible="false">
+      <group id="specularTexture" material="#s_phongSpecularTexture" transform="#t_object2" visible="false">
         <mesh type="triangles" src="#simplePlane2" />
       </group>
       
-      <group id="emissiveTexture" shader="#s_phongEmissiveTexture" transform="#t_object2" visible="false">
+      <group id="emissiveTexture" material="#s_phongEmissiveTexture" transform="#t_object2" visible="false">
         <mesh type="triangles" src="#simplePlane2" />
       </group>
       
-      <group id="diffuseEmissiveTexture" shader="#s_diffuseEmissiveTexture" transform="#t_object2" visible="false">
+      <group id="diffuseEmissiveTexture" material="#s_diffuseEmissiveTexture" transform="#t_object2" visible="false">
         <mesh type="triangles" src="#simplePlane2" />
       </group>
     </xml3d>

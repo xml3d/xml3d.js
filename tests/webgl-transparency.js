@@ -22,27 +22,27 @@ test("ProgramObject.hastransparency is set correctly", function() {
 
     console.log(getWebGLAdapter(this.doc.getElementById("opaque")));
 
-    var shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("opaque"))._materialConfiguration.id).shaderClosures[0];
-    ok(shader, "Found #opaque shader");
-    if(shader) equal(shader.hasTransparency(), false, "Opaque shader has no transparency set");
+    var material = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("opaque"))._materialConfiguration.id).shaderClosures[0];
+    ok(material, "Found #opaque material");
+    if(material) equal(material.hasTransparency(), false, "Opaque material has no transparency set");
 
-    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("non-opaque"))._materialConfiguration.id).shaderClosures[0];
-    ok(shader, "Found #non-opaque shader");
-    if(shader) equal(shader.hasTransparency(), true, "Non-Opaque shader has transparency set");
+    material = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("non-opaque"))._materialConfiguration.id).shaderClosures[0];
+    ok(material, "Found #non-opaque material");
+    if(material) equal(material.hasTransparency(), true, "Non-Opaque material has transparency set");
 
-    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("matte"))._materialConfiguration.id).shaderClosures[0];
-    ok(shader, "Found #matte shader");
-    if(shader) equal(shader.hasTransparency(), false, "Matte shader is always opaque");
+    material = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("matte"))._materialConfiguration.id).shaderClosures[0];
+    ok(material, "Found #matte material");
+    if(material) equal(material.hasTransparency(), false, "Matte material is always opaque");
 
     var transparencyAttribute = this.doc.getElementById("change_transparencyAttribute");
 
-    shader = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("change"))._materialConfiguration.id).shaderClosures[0];
+    material = shaderFactory.getTemplateById(getWebGLAdapter(this.doc.getElementById("change"))._materialConfiguration.id).shaderClosures[0];
 
-    ok(shader, "Found #change shader");
-    if(shader){
-        equal(shader.hasTransparency(), false, "Initially opaque");
+    ok(material, "Found #change material");
+    if(material){
+        equal(material.hasTransparency(), false, "Initially opaque");
         xml3dElement.addEventListener("framedrawn", function(n) {
-            equal(shader.hasTransparency(), true, "Changed after setting transparency parameter to 0.5");
+            equal(material.hasTransparency(), true, "Changed after setting transparency parameter to 0.5");
             start();
         });
         transparencyAttribute.textContent = "0.5";

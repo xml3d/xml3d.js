@@ -16,8 +16,10 @@ var AdapterHandle = require("../../base/adapterhandle.js");
 var AssetAdapter = function (factory, node) {
     NodeAdapter.call(this, factory, node);
 
-    // Node handles for src and proto
-    this.asset = null;
+    /**
+     *  @type Asset
+     **/
+    this.asset = new Asset(this.node);
     if (node.localName.toLowerCase() !== "model") {
         this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
     }
@@ -26,13 +28,12 @@ var AssetAdapter = function (factory, node) {
 createClass(AssetAdapter, NodeAdapter);
 
 AssetAdapter.prototype.init = function () {
-    this.asset = new Asset(this.node);
     this.asset.addChangeListener(this);
     this.asset.setName(this.node.getAttribute("name"));
     updateAdapterHandle(this, "src", this.node.getAttribute("src"));
     updatePickFilter(this);
     updateChildren(this);
-    setShaderUrl(this, this.asset);
+    setMaterialUrl(this, this.asset);
     this.transformFetcher && this.transformFetcher.update();
 };
 
@@ -126,8 +127,8 @@ AssetAdapter.prototype.notifyChanged = function (evt) {
             case "name":
                 this.asset.setName(this.node.getAttribute("name"));
                 break;
-            case "shader":
-                setShaderUrl(this, this.asset);
+            case "material":
+                setMaterialUrl(this, this.asset);
                 break;
             case "style":
             case "transform":
@@ -239,14 +240,19 @@ function updateSubDataLoadState(dataAdapter) {
 }
 
 
-function setShaderUrl(adapter, dest) {
+/**
+ *
+ * @param adapter
+ * @param {Asset} dest
+ */
+function setMaterialUrl(adapter, dest) {
     var node = adapter.node;
-    var shaderUrl = node.getAttribute("shader");
-    if (shaderUrl) {
-        var shaderId = Resource.getAbsoluteURI(node.ownerDocument._documentURL || node.ownerDocument.URL, shaderUrl);
-        dest.setShader(shaderId.toString());
+    var materialURL = node.getAttribute("material");
+    if (materialURL) {
+        var materialAbsoluteURL = Resource.getAbsoluteURI(node.ownerDocument._documentURL || node.ownerDocument.URL, materialURL);
+        dest.setMaterial(materialAbsoluteURL.toString());
     } else {
-        dest.setShader(null);
+        dest.setMaterial(null);
     }
 }
 
@@ -258,7 +264,7 @@ createClass(AssetMeshAdapter, AssetDataAdapter);
 
 AssetMeshAdapter.prototype.init = function () {
     AssetDataAdapter.prototype.init.call(this);
-    setShaderUrl(this, this.assetEntry);
+    setMaterialUrl(this, this.assetEntry);
     this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles");
     this.assetEntry.setMatchFilter(this.node.getAttribute("match"));
     this.transformFetcher.update();
@@ -268,8 +274,8 @@ AssetMeshAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type == Events.VALUE_MODIFIED) {
         var attr = evt.mutation.attributeName;
         switch (attr) {
-            case "shader":
-                setShaderUrl(this, this.assetEntry);
+            case "material":
+                setMaterialUrl(this, this.assetEntry);
                 break;
             case "match":
                 this.assetEntry.setMatchFilter(this.node.getAttribute("match"));

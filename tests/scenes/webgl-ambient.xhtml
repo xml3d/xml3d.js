@@ -17,38 +17,38 @@
                <transform id="t5" translation="0 -2 0"/>
                <transform id="t6" translation="2.5 -2 0"/>
                
-               <shader id="shader_diffuse" script="urn:xml3d:shader:diffuse">
+               <material id="material_diffuse" script="urn:xml3d:material:diffuse">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
                   <float name="ambientIntensity">0.8</float>
-               </shader>
-               <shader id="shader_diffuse_texture" script="urn:xml3d:shader:diffuse">
+               </material>
+               <material id="material_diffuse_texture" script="urn:xml3d:material:diffuse">
                   <float3 name="diffuseColor">0.5 1 1</float3>
                   <float name="ambientIntensity">0.5</float>
                   <texture id="tex1" name="diffuseTexture">
                     <img id="tex1img" src="textures/yellow.png"/>
                   </texture>
-               </shader>
-               <shader id="shader_diffuse_vertexcolors" script="urn:xml3d:shader:diffuse">
+               </material>
+               <material id="material_diffuse_vertexcolors" script="urn:xml3d:material:diffuse">
                   <bool name="useVertexColor">true</bool>
                   <float name="ambientIntensity">0.9</float>
                   <float3 name="diffuseColor">0.4 0.8 0.8</float3>
-               </shader>
-               <shader id="shader_phong" script="urn:xml3d:shader:phong">
+               </material>
+               <material id="material_phong" script="urn:xml3d:material:phong">
                   <float3 name="diffuseColor">1 0.2 0.3</float3>
                   <float name="ambientIntensity">0.8</float>
-               </shader>
-               <shader id="shader_phong_texture" script="urn:xml3d:shader:phong">
+               </material>
+               <material id="material_phong_texture" script="urn:xml3d:material:phong">
                   <float3 name="diffuseColor">0.5 1 1</float3>
                   <float name="ambientIntensity">0.5</float>
                   <texture id="tex1" name="diffuseTexture">
                     <img id="tex1img" src="textures/yellow.png"/>
                   </texture>
-               </shader>
-               <shader id="shader_phong_vertexcolors" script="urn:xml3d:shader:phong">
+               </material>
+               <material id="material_phong_vertexcolors" script="urn:xml3d:material:phong">
                   <bool name="useVertexColor">true</bool>
                   <float name="ambientIntensity">0.9</float>
                   <float3 name="diffuseColor">0.4 0.8 0.8</float3>
-               </shader>
+               </material>
 
                <data id="mySimpleMesh" type="triangles">
                   <int name="index">0 1 2 1 2 3</int>
@@ -76,22 +76,22 @@
             </defs>
             <view/>
             <group onmouseover="console.log(evt.x, evt.y);" onmousemove="console.log(evt.x, evt.y);">
-                <group shader="#shader_diffuse" transform="#t1">
+                <group material="#material_diffuse" transform="#t1">
                     <mesh id="pickingMesh1" src="#mySimpleMesh"/>
                 </group>
-                <group shader="#shader_diffuse_texture" transform="#t2">
+                <group material="#material_diffuse_texture" transform="#t2">
                    <mesh id="pickingMesh2" src="#mySimpleMesh"/>
                 </group>
-                <group shader="#shader_diffuse_vertexcolors" transform="#t3">
+                <group material="#material_diffuse_vertexcolors" transform="#t3">
                    <mesh id="pickingMesh3" src="#mySimpleMesh"/>
                 </group>
-                <group shader="#shader_phong" transform="#t4">
+                <group material="#material_phong" transform="#t4">
                     <mesh id="pickingMesh4" src="#mySimpleMesh"/>
                 </group>
-                <group shader="#shader_phong_texture" transform="#t5">
+                <group material="#material_phong_texture" transform="#t5">
                    <mesh id="pickingMesh5" src="#mySimpleMesh"/>
                 </group>
-                <group shader="#shader_phong_vertexcolors" transform="#t6">
+                <group material="#material_phong_vertexcolors" transform="#t6">
                    <mesh id="pickingMesh6" src="#mySimpleMesh"/>
                 </group>
             </group>

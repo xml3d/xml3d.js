@@ -35,13 +35,13 @@ test("Get Local Adapters", function() {
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().node.nodeName, "data", "Adapter adapts data");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#shader1", "data");
-    ok(handle.hasAdapter(), "Handle of #shader1 has 'data' adapter");
+    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#material1", "data");
+    ok(handle.hasAdapter(), "Handle of #material1 has 'data' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
-    equal(handle.getAdapter().node.nodeName, "shader", "Adapter adapts shader");
+    equal(handle.getAdapter().node.nodeName, "material", "Adapter adapts material");
 
-    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#shader1", 'webgl', canvasId);
-    ok(handle.hasAdapter(), "Handle of #shader1 has 'webgl' adapter");
+    handle = XML3D.resource.getAdapterHandle(this.doc.URL, "#material1", 'webgl', canvasId);
+    ok(handle.hasAdapter(), "Handle of #material1 has 'webgl' adapter");
     ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
     equal(handle.getAdapter().factory.aspect, "webgl", "Adapter has right aspect");
 
@@ -91,9 +91,9 @@ test("Get External Adapters", 17, function() {
         ok(handle.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
         // TODO: ok(handle.getAdapter() instanceof 'data'.DataAdapter, "Adapter is instanceof 'data'.DataAdapter");
 
-        var handle2 = XML3D.resource.getAdapterHandle(self.doc.URL, "xml/shaders.xml#flatgreen2",
+        var handle2 = XML3D.resource.getAdapterHandle(self.doc.URL, "xml/materials.xml#flatgreen2",
             'webgl', canvasId);
-        ok(!handle2.hasAdapter(), "Handle of 'xml/shaders.xml#flatgreen2' has no 'webgl' adapter yet");
+        ok(!handle2.hasAdapter(), "Handle of 'xml/materials.xml#flatgreen2' has no 'webgl' adapter yet");
         ok(handle2.status == AdapterHandle.STATUS.LOADING, "Handle status is 'LOADING'" );
 
         handle2.addListener(function(e){
@@ -103,7 +103,7 @@ test("Get External Adapters", 17, function() {
             ok(handle2.status == AdapterHandle.STATUS.READY, "Handle status is 'READY'" );
             equal(handle2.getAdapter().factory.aspect, 'webgl', "Adapter has right aspect");
             // TODO: No access to RenderAdapter
-            //ok(handle2.getAdapter() instanceof XML3D.webgl.ShaderRenderAdapter, "Adapter is instanceof XML3D.webgl.ShaderRenderAdapter");
+            //ok(handle2.getAdapter() instanceof XML3D.webgl.MaterialRenderAdapter, "Adapter is instanceof XML3D.webgl.MaterialRenderAdapter");
 
             start();
         });

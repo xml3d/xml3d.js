@@ -18,15 +18,15 @@
           <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
 
-        <shader id="shader1" script="urn:xml3d:shader:flat">
+        <material id="material1" script="urn:xml3d:material:flat">
           <float3 name="diffuseColor">0 0 0</float3>
-        </shader>
+        </material>
 
       </defs>
     <view id="myView" />
     <light id="myLight"/>
     
-    <group id="group1" transform="#transform1" shader="#shader1" >
+    <group id="group1" transform="#transform1" material="#material1" >
         <mesh id="mesh1" type="triangles" src="#data1" />
     </group>
     

@@ -68,7 +68,7 @@ XML3D.createClass(AbstractShaderClosure, null, {
 
     compile: function () {
         if (!this.source.fragment || !this.source.vertex) {
-            XML3D.debug.logError("No source found for shader", this);
+            XML3D.debug.logError("No source found for material", this);
             return;
         }
 

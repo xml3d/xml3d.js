@@ -47,12 +47,12 @@
     </Input>
     <TestProcess>    
     
-        <Show title="Show Vertex Shader Instance 1" data="#instance1" what="VertexShader" filter="position color" >
+        <Show title="Show Vertex material Instance 1" data="#instance1" what="VertexShader" filter="position color" >
         	<VSConnection in="position" out="position" type="FLOAT3_WORLD_POINT" />
         	<VSConnection in="color" out="color" type="FLOAT4" optional="true" />
         </Show>
         
-        <Show title="Show Vertex Shader Instance 2" data="#instance2" what="VertexShader" filter="position color" >
+        <Show title="Show Vertex material Instance 2" data="#instance2" what="VertexShader" filter="position color" >
         	<VSConnection in="position" out="position" type="FLOAT3_VIEW_POINT" />
         	<VSConnection in="color" out="color" type="FLOAT4" optional="true" />
         </Show>

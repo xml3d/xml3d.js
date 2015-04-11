@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xml3d xmlns="http://www.xml3d.org/2009/xml3d" >
-    <shader id="redShader" script="urn:xml3d:shader:flat">
+    <defs>
+    <material id="redmaterial" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">1 0.5 0.5</float3>
         <float name="ambientIntensity">1.0</float>
-    </shader>
-    <shader id="pinkShader" script="urn:xml3d:shader:flat">
+    </material>
+    <material id="pinkmaterial" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">1 0.5 1</float3>
         <float name="ambientIntensity">1.0</float>
-    </shader>
-    <shader id="blueShader" script="urn:xml3d:shader:flat">
+    </material>
+    <material id="bluematerial" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">0 0 1</float3>
         <float name="ambientIntensity">1.0</float>
-    </shader>
-    <shader id="greenShader" script="urn:xml3d:shader:flat">
+    </material>
+    <material id="greenmaterial" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">0 1 0</float3>
         <float name="ambientIntensity">1.0</float>
-    </shader>
+    </material>
 
     <data id="rectBase" >
         <int name="index">0 1 2 1 2 3</int>
@@ -43,7 +44,7 @@
 
 
     <asset id="asset1" >
-        <assetmesh name="mesh1" type="triangles" shader="#redShader" >
+        <assetmesh name="mesh1" type="triangles" material="#redmaterial" >
             <data src="#rectBase" />
             <data src="#position1" />
         </assetmesh>
@@ -52,26 +53,26 @@
         <assetdata name="base" id="baseSubData" >
             <data src="#rectBase" />
         </assetdata>
-        <assetmesh name="mesh1" includes="base" type="triangles" shader="#redShader"  >
+        <assetmesh name="mesh1" includes="base" type="triangles" material="#redmaterial"  >
             <data src="#position1" />
         </assetmesh>
-        <assetmesh name="mesh2" includes="base" type="triangles" shader="#blueShader" id="innerSubData" >
+        <assetmesh name="mesh2" includes="base" type="triangles" material="#bluematerial" id="innerSubData" >
             <data src="#position2" />
         </assetmesh>
     </asset>
     <asset id="asset2Alt" >
-        <assetmesh name="blaBlubb" type="triangles" shader="#pinkShader"  >
+        <assetmesh name="blaBlubb" type="triangles" material="#pinkmaterial"  >
             <data src="#rectBase" />
             <data src="#position3" />
         </assetmesh>
-        <assetmesh name="mesh2" type="triangles" shader="#blueShader"  >
+        <assetmesh name="mesh2" type="triangles" material="#bluematerial"  >
             <data src="#rectBase" />
             <data src="#position2" />
         </assetmesh>
     </asset>
 
     <asset id="asset3" src="#asset2">
-        <assetmesh name="mesh3" includes="base" type="triangles" shader="#greenShader" style="transform: translateX(-2px)" >
+        <assetmesh name="mesh3" includes="base" type="triangles" material="#greenmaterial" style="transform: translateX(-2px)" >
             <data src="#position3" />
         </assetmesh>
     </asset>
@@ -81,5 +82,6 @@
             <data src="../json/simpleMesh.json" />
         </assetmesh>
     </asset>
+    </defs>
 
 </xml3d>

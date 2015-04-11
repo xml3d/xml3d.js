@@ -61,16 +61,16 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         }
     },
 
-    getMaterialConfiguration: function (shaderHref, index) {
+    getMaterialConfiguration: function (materialURI, index) {
         var result = null;
-        if (shaderHref) {
-            var adapterHandle = this.getAdapterHandle(shaderHref);
-            this.connectAdapterHandle("shader_" + index, adapterHandle);
+        if (materialURI) {
+            var adapterHandle = this.getAdapterHandle(materialURI);
+            this.connectAdapterHandle("material_" + index, adapterHandle);
 
             switch (adapterHandle.status) {
 
                 case AdapterHandle.STATUS.NOT_FOUND:
-                    XML3D.debug.logError("Could not find <shader> of url '" + adapterHandle.url + "' ", this.node);
+                    XML3D.debug.logError("Could not find <material> of url '" + adapterHandle.url + "' ", this.node);
                     break;
                 case AdapterHandle.STATUS.READY:
                     var adapter = adapterHandle.getAdapter();
@@ -99,7 +99,7 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
                 return;
             case Events.ADAPTER_HANDLE_CHANGED:
                 var splits = evt.key.split("_");
-                if (splits[0] == "shader") {
+                if (splits[0] == "material") {
                     var renderNodeId = +splits[1];
                     // We identify the corresponding rendernode by the handler key
                     // This is a workaround that should be removed if there are
@@ -182,7 +182,7 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
         name: adapter.node.id
     });
     groupNode.setLocalMatrix(dataTreeNode.transform || c_IDENTITY);
-    groupNode.setMaterial(adapter.getMaterialConfiguration(dataTreeNode.shader, adapter._subRenderNodes.length));
+    groupNode.setMaterial(adapter.getMaterialConfiguration(dataTreeNode.material, adapter._subRenderNodes.length));
     adapter._subRenderNodes.push(groupNode);
 
     var meshSets = dataTreeNode.meshes, i;
@@ -197,7 +197,7 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
             visible: true
         });
         renderNode.setLocalMatrix(meshSets[i].transform || c_IDENTITY);
-        renderNode.setMaterial(adapter.getMaterialConfiguration(meshSets[i].shader, adapter._subRenderNodes.length));
+        renderNode.setMaterial(adapter.getMaterialConfiguration(meshSets[i].material, adapter._subRenderNodes.length));
         adapter._subRenderNodes.push(renderNode);
     }
     var groups = dataTreeNode.groups;

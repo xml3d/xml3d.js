@@ -112,7 +112,7 @@ test("Light spot geometry test", 6, function() {
 
 });
 
-test("Change of light shader parameters check against lights.spot", 8, function() {
+test("Change of light material parameters check against lights.spot", 8, function() {
     var x = this.doc.getElementById("xml3DElem"),
     actual,
     win = this.doc.defaultView,

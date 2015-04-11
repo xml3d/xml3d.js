@@ -11,7 +11,7 @@
 
     </Input>
     <TestProcess>
-        <VSCheck title="Check Vertex Shader" data="#mesh" >
+        <VSCheck title="Check Vertex material" data="#mesh" >
             <VSConfig>
                 <VSConnection in="position" out="worldPosition" type="FLOAT3" transform="WORLD_POINT" />
                 <VSConnection in="normal" out="worldNormal" type="FLOAT3" transform="WORLD_NORMAL" />

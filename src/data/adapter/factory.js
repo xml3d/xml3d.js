@@ -31,7 +31,8 @@ XML3DDataAdapterFactory.prototype.aspect = "data";
 
 var reg = {
     'mesh': Misc.SinkDataAdapter,
-    'shader': Misc.SinkDataAdapter,
+    'material': Misc.SinkDataAdapter,
+    'shader': Misc.SinkDataAdapter, // TODO(ksons): Remove in 5.1
     'lightshader': Misc.SinkDataAdapter,
     'float': ValueDataAdapter,
     'float2': ValueDataAdapter,

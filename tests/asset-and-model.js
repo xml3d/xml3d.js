@@ -38,7 +38,7 @@ test("Static Test", 3, function() {
 });
 
 
-test("Modify shader assignment", 6, function() {
+test("Modify material assignment", 6, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
@@ -49,31 +49,31 @@ test("Modify shader assignment", 6, function() {
             if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
                 return;
             testStep++;
-            self.doc.getElementById("innerSubData").shader = "#pinkShader";
+            self.doc.getElementById("innerSubData").material = "#pinkmaterial";
         }
         else if(testStep == 1){
             if( XML3DUnit.getPixelValue(glTest, 324, 40)[0] != 255)
                 return;
             QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 324, 40), [255,127,255,255], PIXEL_EPSILON,
-                "One instance has shader color replaced" );
+                "One instance has material color replaced" );
             QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,255,0,255], PIXEL_EPSILON,
-                "Other instance with overridden shader has color NOT replaced" );
+                "Other instance with overridden material has color NOT replaced" );
             testStep++;
-            self.doc.getElementById("outerSubData").shader = "";
+            self.doc.getElementById("outerSubData").material = "";
         }
         else if(testStep == 2){
             if( XML3DUnit.getPixelValue(glTest, 124, 134)[0] != 255)
                 return;
             QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [255,127,255,255], PIXEL_EPSILON,
-                "Other instance has overriden shader removed and therefore updated color" );
+                "Other instance has overriden material removed and therefore updated color" );
             testStep++;
-            self.doc.getElementById("outerSubData").shader = "#blueShader";
+            self.doc.getElementById("outerSubData").material = "#bluematerial";
         }
         else if(testStep == 3){
             if( XML3DUnit.getPixelValue(glTest, 124, 134)[0] != 0)
                 return;
             QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 124, 134), [0,0,255,255], PIXEL_EPSILON,
-                "Other instance now has blue color due to newly added shader" );
+                "Other instance now has blue color due to newly added material" );
             start();
         }
     }

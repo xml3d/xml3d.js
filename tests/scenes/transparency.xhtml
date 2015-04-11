@@ -20,37 +20,37 @@
           <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
           <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
         </data>
-        <shader id="matte" script="urn:xml3d:shader:matte">
+        <material id="matte" script="urn:xml3d:material:matte">
           <float name="transparency">0.5</float>
-        </shader>
-        <shader id="opaque" script="urn:xml3d:shader:phong">
+        </material>
+        <material id="opaque" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">0 0.2 0.8</float3>
           <float name="transparency">0</float>
           <float name="ambientIntensity">1</float>
-        </shader>
-        <shader id="non-opaque" script="urn:xml3d:shader:phong">
+        </material>
+        <material id="non-opaque" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">1 1 0</float3>
           <float name="transparency">0.5</float>
           <float name="ambientIntensity">1</float>
-        </shader>
-        <shader id="change" script="urn:xml3d:shader:phong">
+        </material>
+        <material id="change" script="urn:xml3d:material:phong">
           <float3 name="diffuseColor">0 0.2 0.8</float3>
           <float id="change_transparencyAttribute" name="transparency">0</float>
           <float name="ambientIntensity">1</float>
-        </shader>
+        </material>
         
       </defs>
       <view id="myView" />
-      <group id="meshGroup" shader="#opaque" transform="#t_identity" visible="true">
+      <group id="meshGroup" material="#opaque" transform="#t_identity" visible="true">
         <mesh src="#meshData" />
       </group>
-      <group id="parentGroup" transform="#t_front" shader="#non-opaque">
+      <group id="parentGroup" transform="#t_front" material="#non-opaque">
         <mesh src="#meshData" />
       </group>
-      <group id="parentGroup" transform="#t_side" shader="#matte">
+      <group id="parentGroup" transform="#t_side" material="#matte">
             <mesh src="#meshData" />
       </group>
-      <group id="parentGroup" transform="#t_side" shader="#change">
+      <group id="parentGroup" transform="#t_side" material="#change">
           <mesh src="#meshData" />
       </group>
     </xml3d>

@@ -3,11 +3,11 @@ var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
 var Events = require("../../../interface/notification.js");
 var AdapterHandle = require("../../../base/adapterhandle.js");
 
-var TransformableAdapter = function (factory, node, handleShader, handleTransform) {
+var TransformableAdapter = function (factory, node, handleMaterial, handleTransform) {
     RenderAdapter.call(this, factory, node);
     this.renderNode = null;
-    this.shaderHandler = null;
-    this.handleShader = handleShader || false;
+    this.materialHandler = null;
+    this.handleMaterial = handleMaterial || false;
     if (handleTransform) {
         this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
     }
@@ -16,30 +16,30 @@ var TransformableAdapter = function (factory, node, handleShader, handleTransfor
 XML3D.createClass(TransformableAdapter, RenderAdapter);
 
 XML3D.extend(TransformableAdapter.prototype, {
-    updateShaderHandler: function () {
-        var shaderURI = getShaderURI(this.node);
-        if (!shaderURI) {
-            this.disconnectAdapterHandle("shader");
-            this.shaderHandler = null;
+    updateMaterialHandler: function () {
+        var materialURI = getMaterialURI(this.node);
+        if (!materialURI) {
+            this.disconnectAdapterHandle("material");
+            this.materialHandler = null;
         } else {
-            this.shaderHandler = this.getAdapterHandle(shaderURI);
-            this.connectAdapterHandle("shader", this.shaderHandler);
+            this.materialHandler = this.getAdapterHandle(materialURI);
+            this.connectAdapterHandle("material", this.materialHandler);
         }
-        this.referencedShaderChanged();
+        this.referencedMaterialChanged();
     },
 
-    referencedShaderChanged: function () {
-        if (!this.shaderHandler) {
+    referencedMaterialChanged: function () {
+        if (!this.materialHandler) {
             this.getRenderNode().setMaterial(null);
             return;
         }
-        var status = this.shaderHandler.status;
+        var status = this.materialHandler.status;
         if (status === AdapterHandle.STATUS.NOT_FOUND) {
-            XML3D.debug.logError("Could not find element of url '" + this.shaderHandler.url + "' for shader", this.node);
+            XML3D.debug.logError("Could not find element of url '" + this.materialHandler.url + "' for material", this.node);
             this.getRenderNode().setMaterial(null);
             return;
         }
-        var adapter = this.shaderHandler.getAdapter();
+        var adapter = this.materialHandler.getAdapter();
         if (adapter && adapter.getMaterialConfiguration) {
             this.getRenderNode().setMaterial(adapter.getMaterialConfiguration());
         } else {
@@ -77,32 +77,32 @@ XML3D.extend(TransformableAdapter.prototype, {
                 var newValue = evt.mutation.target.getAttribute("visible");
                 this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
                 this.factory.renderer.requestRedraw("Transformable visibility changed.");
-            } else if (target == "shader" && this.handleShader) {
-                this.updateShaderHandler();
-                this.factory.renderer.requestRedraw("Transformable shader changed.");
+            } else if (target == "material" && this.handleMaterial) {
+                this.updateMaterialHandler();
+                this.factory.renderer.requestRedraw("Transformable material changed.");
             }
         } else if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
             var key = evt.key;
-            if (key == "shader") {
-                this.updateShaderHandler();
-                this.factory.renderer.requestRedraw("Shader reference changed.");
+            if (key == "material") {
+                this.updateMaterialHandler();
+                this.factory.renderer.requestRedraw("Material reference changed.");
             }
         }
     }
 });
 
-function getShaderURI(node) {
-    var shaderHref = node.shader;
-    if (shaderHref == "") {
+function getMaterialURI(node) {
+    var materialURI = node.getAttribute("material");
+    if (!materialURI) {
         var styleValue = node.getAttribute('style');
         if (styleValue) {
-            var pattern = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
+            var pattern = /material\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
             var result = pattern.exec(styleValue);
             if (result)
-                shaderHref = result[1];
+                materialURI = result[1];
         }
     }
-    return shaderHref;
+    return materialURI;
 }
 
 module.exports = TransformableAdapter;

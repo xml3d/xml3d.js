@@ -22,7 +22,8 @@ var registry = {
         defs: require("./defs.js"),
         mesh: require("./mesh.js"),
         model: require("./model.js"),
-        shader: require("./shader.js"),
+        material: require("./material.js"),
+        shader: require("./material.js"), // TODO(ksons): Remove in 5.1
         group: require("./group.js"),
         light: require("./light.js"),
         lightshader: require("./lightshader.js")

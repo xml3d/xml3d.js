@@ -1,4 +1,4 @@
-module("Shader overrides (no shader recompilation)", {
+module("material overrides (no material recompilation)", {
     setup : function() {
         stop();
         var that = this;
@@ -7,7 +7,7 @@ module("Shader overrides (no shader recompilation)", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/shader-overrides.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/material-overrides.xhtml"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -22,17 +22,17 @@ test("Uniform overrides", 8, function() {
     var handler = getHandler(xml3dElement);
     var testFunc = function(n) {
         var actual = win.getPixelValue(gl, 40, 175);
-        deepEqual(actual, [ 0, 0, 255, 255 ], "1: shader: blue");
+        deepEqual(actual, [ 0, 0, 255, 255 ], "1: material: blue");
         actual = win.getPixelValue(gl, 120, 175);
-        deepEqual(actual, [ 255, 0, 0, 255 ], "2: shader: red");
+        deepEqual(actual, [ 255, 0, 0, 255 ], "2: material: red");
         actual = win.getPixelValue(gl, 200, 175);
-        deepEqual(actual, [ 0, 0, 255, 255 ], "3: shader: blue");
+        deepEqual(actual, [ 0, 0, 255, 255 ], "3: material: blue");
         actual = win.getPixelValue(gl, 280, 175);
-        deepEqual(actual, [ 255, 255, 0, 255 ], "4: shader: yellow");
+        deepEqual(actual, [ 255, 255, 0, 255 ], "4: material: yellow");
         actual = win.getPixelValue(gl, 360, 175);
-        deepEqual(actual, [ 0, 255, 0, 255 ], "5: shader: green");
+        deepEqual(actual, [ 0, 255, 0, 255 ], "5: material: green");
         actual = win.getPixelValue(gl, 440, 175);
-        deepEqual(actual, [ 0, 0, 255, 255 ], "6: shader: blue");
+        deepEqual(actual, [ 0, 0, 255, 255 ], "6: material: blue");
         xml3dElement.removeEventListener("framedrawn", testFunc);
         start();
     };
@@ -49,17 +49,17 @@ test("Uniform override changes", 8, function() {
     var handler = getHandler(xml3dElement);
     var testFunc = function(n) {
         var actual = win.getPixelValue(gl, 40, 175);
-        deepEqual(actual, [ 0, 0, 255, 255 ], "1: shader: blue");
+        deepEqual(actual, [ 0, 0, 255, 255 ], "1: material: blue");
         actual = win.getPixelValue(gl, 120, 175);
-        deepEqual(actual, [ 255, 0, 0, 255 ], "2: shader: red");
+        deepEqual(actual, [ 255, 0, 0, 255 ], "2: material: red");
         actual = win.getPixelValue(gl, 200, 175);
-        deepEqual(actual, [ 0, 0, 255, 255 ], "3: shader: blue");
+        deepEqual(actual, [ 0, 0, 255, 255 ], "3: material: blue");
         actual = win.getPixelValue(gl, 280, 175);
-        deepEqual(actual, [ 255, 255, 0, 255 ], "4: shader: yellow");
+        deepEqual(actual, [ 255, 255, 0, 255 ], "4: material: yellow");
         actual = win.getPixelValue(gl, 360, 175);
-        deepEqual(actual, [ 0, 0, 255, 255 ], "5: shader: blue");
+        deepEqual(actual, [ 0, 0, 255, 255 ], "5: material: blue");
         actual = win.getPixelValue(gl, 440, 175);
-        deepEqual(actual, [ 0, 255, 0, 255 ], "6: shader: green");
+        deepEqual(actual, [ 0, 255, 0, 255 ], "6: material: green");
         xml3dElement.removeEventListener("framedrawn", testFunc);
         start();
     };
@@ -81,7 +81,7 @@ test("Uniform override changes", 8, function() {
 });
 
 
-test("Uniform override with default shader", 4, function() {
+test("Uniform override with default material", 4, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var win = this.doc.defaultView;
     var gl = getContextForXml3DElement(xml3dElement);
@@ -100,7 +100,7 @@ test("Uniform override with default shader", 4, function() {
         } else if (testStep === 1) {
             console.log("2");
             actual = win.getPixelValue(gl, 250, 175);
-            deepEqual(actual, [ 255, 0, 0, 255 ], "Default shader, override removed");
+            deepEqual(actual, [ 255, 0, 0, 255 ], "Default material, override removed");
             testStep++;
         }
     };
@@ -114,7 +114,7 @@ test("Uniform override with default shader", 4, function() {
 });
 
 
-module("Shader overrides (with shader recompilation)", {
+module("material overrides (with material recompilation)", {
     setup : function() {
         stop();
         var that = this;
@@ -123,7 +123,7 @@ module("Shader overrides (with shader recompilation)", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/shader-overrides02.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/material-overrides02.xhtml"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

@@ -1,7 +1,7 @@
 <XflowTest>
     <Input>
 
-      <script id="add2" type="x-shader/anysl.vertex.text">
+      <script id="add2" type="x-material/anysl.vertex.text">
 <![CDATA[
             #define PROGRAM_PARAMS(X)                    \
                 X(in,  float, value, NO_SEMANTIC)        \
@@ -19,7 +19,7 @@
 ]]>
       </script>
 
-      <script id="add3" type="x-shader/anysl.vertex.text">
+      <script id="add3" type="x-material/anysl.vertex.text">
 <![CDATA[
             #define PROGRAM_PARAMS(X)                  \
                 X(in,  float, value, size:data)        \

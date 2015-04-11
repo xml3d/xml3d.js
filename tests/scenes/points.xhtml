@@ -18,54 +18,54 @@
       </data>
     </defs>
 
-    <shader id="pointColorShader" script="urn:xml3d:shader:point" >
+    <material id="pointColormaterial" script="urn:xml3d:material:point" >
         <bool name="useVertexColor">true</bool>
-    </shader>
-    <shader id="pointTexShader" script="urn:xml3d:shader:point" >
+    </material>
+    <material id="pointTexmaterial" script="urn:xml3d:material:point" >
       <float name="texCoordSize" >0.5 0.5</float>
       <texture name="diffuseTexture" >
           <img src="textures/points.png" />
       </texture>
-    </shader>
-    <shader id="pointTexColorShader" script="urn:xml3d:shader:point" >
+    </material>
+    <material id="pointTexColormaterial" script="urn:xml3d:material:point" >
       <bool name="useVertexColor">true</bool>
       <float name="texCoordSize" >0.5 0.5</float>
       <texture name="diffuseTexture" >
           <img src="textures/points.png" />
       </texture>
-    </shader>
+    </material>
 
 
     <group style="transform: translateZ(-15px)" >
-        <group shader="#pointColorShader" >
+        <group material="#pointColormaterial" >
             <mesh type="points" src="#pointData" />
         </group>
-        <group style="transform: translateX(-4px)" shader="#pointTexShader" >
+        <group style="transform: translateX(-4px)" material="#pointTexmaterial" >
             <mesh type="points" src="#pointData" />
         </group>
-        <group style="transform: translateX(4px)" shader="#pointTexColorShader" >
+        <group style="transform: translateX(4px)" material="#pointTexColormaterial" >
             <mesh type="points" src="#pointData" />
         </group>
     </group>
     <group style="transform: translate3d(0, 4px, -20px)" >
-      <group shader="#pointColorShader" >
+      <group material="#pointColormaterial" >
           <mesh type="points" src="#pointData" />
       </group>
-      <group style="transform: translateX(-4px)" shader="#pointTexShader" >
+      <group style="transform: translateX(-4px)" material="#pointTexmaterial" >
           <mesh type="points" src="#pointData" />
       </group>
-      <group style="transform: translateX(4px)" shader="#pointTexColorShader" >
+      <group style="transform: translateX(4px)" material="#pointTexColormaterial" >
           <mesh type="points" src="#pointData" />
       </group>
     </group>
     <group style="transform: translate3d(0, -3px, -12px)" >
-      <group shader="#pointColorShader" >
+      <group material="#pointColormaterial" >
           <mesh type="points" src="#pointData" />
       </group>
-      <group style="transform: translateX(-4px)" shader="#pointTexShader" >
+      <group style="transform: translateX(-4px)" material="#pointTexmaterial" >
           <mesh type="points" src="#pointData" />
       </group>
-      <group style="transform: translateX(4px)" shader="#pointTexColorShader" >
+      <group style="transform: translateX(4px)" material="#pointTexColormaterial" >
           <mesh type="points" src="#pointData" />
       </group>
     </group>

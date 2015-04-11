@@ -126,7 +126,7 @@ module("Xflow tests", {
             outputIdx = code.indexOf("// OUTPUT");
 
         ok(inputIdx != -1 && codeIdx != -1 && outputIdx != -1,
-            title + "=> Shader has expected structure");
+            title + "=> material has expected structure");
 
         var action = testNode.firstElementChild;
         while (action) {
@@ -165,7 +165,7 @@ module("Xflow tests", {
 
     VSInputBufferCount: function(result, action, title){
         var count = action.getAttribute("count")*1;
-        equal(result.inputNames.length, count, title + "=> Vertex Shader has " +
+        equal(result.inputNames.length, count, title + "=> Vertex material has " +
             count + " input buffers.");
     },
     VSOutAttribCount: function(result, action, title){
@@ -175,7 +175,7 @@ module("Xflow tests", {
         var fragment = code.substring(outputIdx, inputIdx);
 
         var matches = fragment.match(/varying /g), actualCount = matches && matches.length || 0;
-        equal(actualCount, count, title + "=> Vertex Shader has " +
+        equal(actualCount, count, title + "=> Vertex material has " +
             count + " 'varying' parameters.");
     },
     VSInAttribCount: function(result, action, title){
@@ -185,7 +185,7 @@ module("Xflow tests", {
         var fragment = code.substring(inputIdx, codeIdx);
 
         var matches = fragment.match(/attribute /g), actualCount = matches && matches.length || 0;
-        equal(actualCount, count, title + "=> Vertex Shader has " +
+        equal(actualCount, count, title + "=> Vertex material has " +
             count + " 'attribute' parameters.");
     },
     VSUniformAttribCount: function(result, action, title){
@@ -195,7 +195,7 @@ module("Xflow tests", {
         var fragment = code.substring(inputIdx, codeIdx);
 
         var matches = fragment.match(/uniform /g), actualCount = matches && matches.length || 0;
-        equal(actualCount, count, title + "=> Vertex Shader has " +
+        equal(actualCount, count, title + "=> Vertex material has " +
             count + " 'uniform' parameters.");
     },
     VSOutputIsVarying: function(result, action, title){

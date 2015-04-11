@@ -3,7 +3,7 @@
   <head>
      <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
     <script type="text/javascript" src="../../build/output/xml3d.js"></script>
-    <script type="text/javascript" src="scripts/customShader.js"></script>
+    <script type="text/javascript" src="scripts/custommaterial.js"></script>
    <title>
     XML3D Rendering 2
    </title>
@@ -14,35 +14,35 @@
    
     
     
-    <shader id="texShader1" script="urn:xml3d:shader:phong">
+    <material id="texmaterial1" script="urn:xml3d:material:phong">
         <texture id="tex1" name="diffuseTexture">
             <img id="tex1img" src="textures/yellow.png"/>
         </texture>
-    </shader> 
+    </material>
     
-    <shader id="npotTexShader" script="urn:xml3d:shader:phong">
+    <material id="npotTexmaterial" script="urn:xml3d:material:phong">
         <float3 name="specularColor">0 0 0</float3>
         <texture id="npottex" name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img id="npotteximg" src="textures/bluegreen.png"/>
         </texture>
-    </shader> 
+    </material>
      
-    <shader id="diffuseTexShader" script="urn:xml3d:shader:diffuse">
+    <material id="diffuseTexmaterial" script="urn:xml3d:material:diffuse">
         <texture id="tex1" name="diffuseTexture">
             <img id="tex1img" src="textures/yellow.png"/>
         </texture>
-    </shader>
+    </material>
     
-    <shader id="customShader" script="urn:xml3d:shader:customtest">
-    </shader>  
-    <shader id="customShader2" script="urn:xml3d:shader:customtest">
+    <material id="custommaterial" script="urn:xml3d:material:customtest">
+    </material>
+    <material id="custommaterial2" script="urn:xml3d:material:customtest">
         <float3 name="someColor">0 0 1</float3>
-    </shader>    
-    <shader id="diffuseShader" script="urn:xml3d:shader:diffuse">
+    </material>
+    <material id="diffusematerial" script="urn:xml3d:material:diffuse">
         <float3 name="diffuseColor">1 1 1</float3>
         <float name="ambientIntensity">1</float>
         <bool name="useVertexColor">true</bool>
-    </shader> 
+    </material>
     <data id="meshdata" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
         <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
@@ -75,25 +75,25 @@
       <light shader="#ls_Spot"/>
     </group>
     
-    <group id="myGroup" shader="#texShader1" visible="false">
+    <group id="myGroup" material="#texmaterial1" visible="false">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
 	    </mesh>
     </group>  
-    <group id="coloredMeshGroup" shader="#diffuseShader" visible="false">
+    <group id="coloredMeshGroup" material="#diffusematerial" visible="false">
         <mesh src="#coloredmeshdata" type="triangles">
         </mesh>
     </group>  
-    <group id="diffuseTexGroup" shader="#diffuseTexShader" visible="false">
+    <group id="diffuseTexGroup" material="#diffuseTexmaterial" visible="false">
         <mesh src="#meshdata" type="triangles">
         </mesh>
     </group>  
     
-    <group id="npotTexGroup" shader="#npotTexShader" visible="false">
+    <group id="npotTexGroup" material="#npotTexmaterial" visible="false">
         <mesh src="#wrapMeshData" type="triangles">
         </mesh>
     </group> 
 
-    <group id="customShaderGroup" shader="#customShader" visible="false">
+    <group id="custommaterialGroup" material="#custommaterial" visible="false">
         <mesh src="#meshdata" type="triangles">
         </mesh>
     </group> 

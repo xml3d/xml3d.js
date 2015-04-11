@@ -15,25 +15,25 @@
 </script>
 <xml3d id="Scene" activeview="#v_Camera" style="width: 512px; height: 512px; background-color:rgb(65,65,65);">
   <defs>
-    <shader id="opaque" script="urn:xml3d:shader:phong">
+    <material id="opaque" script="urn:xml3d:material:phong">
       <float3 name="emissiveColor">0 0 1</float3>
       <float name="transparency">0.0</float>
-    </shader>
-    <shader id="red" script="urn:xml3d:shader:phong">
+    </material>
+    <material id="red" script="urn:xml3d:material:phong">
       <float3 name="emissiveColor">1 0 0</float3>
       <float name="transparency">0.0</float>
-    </shader>
-    <shader id="semi-transparent" script="urn:xml3d:shader:phong">
+    </material>
+    <material id="semi-transparent" script="urn:xml3d:material:phong">
       <float3 name="emissiveColor">0 1 0</float3>
       <float name="transparency">0.50</float>
-    </shader>
+    </material>
   </defs>
   <view id="v_view"></view>
-  <group id="Plane" class="layer-0" shader="#opaque">
+  <group id="Plane" class="layer-0" material="#opaque">
     <model id="Plane" src="assets/plane.xml#Plane"></model>
 
   </group>
-  <group shader="#red">
+  <group material="#red">
     <model style="transform: translate3d(0px, 1px, -1px)" src="assets/plane.xml#Plane"></model>
   </group>
   <group id="Camera" class="layer-0"
@@ -46,17 +46,17 @@
   var setOpaque = function () {
     var trans = document.querySelector("#opaque float[name=transparency]");
     trans.textContent = "0";
-    group.setAttribute("shader", "#opaque");
+    group.setAttribute("material", "#opaque");
   };
 
   var setSemiTransparent = function () {
-    group.setAttribute("shader", "#semi-transparent");
+    group.setAttribute("material", "#semi-transparent");
   };
 
   var makeOpaqueTransparent = function() {
     var trans = document.querySelector("#opaque float[name=transparency]");
     trans.textContent = "0.5";
-    group.setAttribute("shader", "#opaque");
+    group.setAttribute("material", "#opaque");
   }
 
 

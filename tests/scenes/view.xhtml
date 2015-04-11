@@ -13,78 +13,78 @@
        style="width: 500px; height: 300px; background-color: black;"
        activeview="#view_right">
    <defs>
-      <shader id="shader_front" script="urn:xml3d:shader:phong">
+      <material id="material_front" script="urn:xml3d:material:phong">
          <float3 name="diffuseColor">0 0 1</float3>
          <float name="ambientIntensity">1</float>
          <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/front.png"/>
          </texture>
-      </shader>
+      </material>
       <data id="data_front">
          <int name="index">0 2 1 0 3 2 </int>
          <float3 name="position">-1.0 -1.0 1.0 1.0 -1.0 1.0 1.0 1.0 1.0 -1.0 1.0 1.0 </float3>
          <float3 name="normal">0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 </float3>
          <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0 </float2>
       </data>
-      <shader id="shader_right" script="urn:xml3d:shader:phong">
+      <material id="material_right" script="urn:xml3d:material:phong">
          <float3 name="diffuseColor">1 0 0</float3>
          <float name="ambientIntensity">1</float>
          <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/right.png"/>
          </texture>
-      </shader>
+      </material>
       <data id="data_right">
          <int name="index">0 2 1 0 3 2 </int>
          <float3 name="position">1.0 -1.0 1.0 1.0 -1.0 -1.0 1.0 1.0 -1.0 1.0 1.0 1.0 </float3>
          <float3 name="normal">-1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 </float3>
          <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0 </float2>
       </data>
-      <shader id="shader_rear" script="urn:xml3d:shader:phong">
+      <material id="material_rear" script="urn:xml3d:material:phong">
          <float3 name="diffuseColor">1 1 0</float3>
          <float name="ambientIntensity">1</float>
          <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/rear.png"/>
          </texture>
-      </shader>
+      </material>
       <data id="data_rear">
          <int name="index">0 2 1 0 3 2 </int>
          <float3 name="position">1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 1.0 -1.0 1.0 1.0 -1.0 </float3>
          <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 </float3>
          <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0 </float2>
       </data>
-      <shader id="shader_left" script="urn:xml3d:shader:phong">
+      <material id="material_left" script="urn:xml3d:material:phong">
          <float3 name="diffuseColor">0 1 1</float3>
          <float name="ambientIntensity">1</float>
          <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/left.png"/>
          </texture>
-      </shader>
+      </material>
       <data id="data_left">
          <int name="index">0 2 1 0 3 2</int>
          <float3 name="position">-1.0 -1.0 1.0 -1.0 1.0 1.0 -1.0 1.0 -1.0 -1.0 -1.0 -1.0 </float3>
          <float3 name="normal">1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 </float3>
          <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0 </float2>
       </data>
-      <shader id="shader_top" script="urn:xml3d:shader:phong">
+      <material id="material_top" script="urn:xml3d:material:phong">
          <float3 name="diffuseColor">0 1 0</float3>
          <float name="ambientIntensity">1</float>
          <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/top.png"/>
          </texture>
-      </shader>
+      </material>
       <data id="data_top">
          <int name="index">0 2 1 0 3 2 </int>
          <float3 name="position">-1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 -1.0 -1.0 1.0 -1.0 </float3>
          <float3 name="normal">0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 </float3>
          <float2 name="texcoord">0.0 0.0 1.0 0.0 1.0 1.0 0.0 1.0 </float2>
       </data>
-      <shader id="shader_bottom" script="urn:xml3d:shader:phong">
+      <material id="material_bottom" script="urn:xml3d:material:phong">
          <float3 name="diffuseColor">1 0 1</float3>
          <float name="ambientIntensity">1</float>
          <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
             <img src="textures/bottom.png"/>
          </texture>
-      </shader>
+      </material>
       <data id="data_bottom">
          <int name="index">0 2 1 0 3 2 </int>
          <float3 name="position">-1.0 -1.0 1.0 -1.0 -1.0 -1.0 1.0 -1.0 -1.0 1.0 -1.0 1.0 </float3>
@@ -106,22 +106,22 @@
    <view id="view_bottom" position="0 -10 0" orientation="1 0 0 1.5708" fieldofview="0.7854"/>
    <group id="root">
       <group>
-         <group id="shape_d2e23" shader="#shader_front">
+         <group id="shape_d2e23" material="#material_front">
             <mesh type="triangles" src="#data_front"/>
          </group>
-         <group id="shape_d2e30" shader="#shader_right">
+         <group id="shape_d2e30" material="#material_right">
             <mesh type="triangles" src="#data_right"/>
          </group>
-         <group id="shape_d2e37" shader="#shader_rear">
+         <group id="shape_d2e37" material="#material_rear">
             <mesh type="triangles" src="#data_rear"/>
          </group>
-         <group id="shape_d2e44" shader="#shader_left">
+         <group id="shape_d2e44" material="#material_left">
             <mesh type="triangles" src="#data_left"/>
          </group>
-         <group id="shape_d2e51" shader="#shader_top">
+         <group id="shape_d2e51" material="#material_top">
             <mesh type="triangles" src="#data_top"/>
          </group>
-         <group id="shape_d2e58" shader="#shader_bottom">
+         <group id="shape_d2e58" material="#material_bottom">
             <mesh type="triangles" src="#data_bottom"/>
          </group>
       </group>

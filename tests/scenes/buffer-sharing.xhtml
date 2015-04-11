@@ -26,7 +26,7 @@
 
     </defs>
 
-    <group id="meshGroup" shader="#pink" >
+    <group id="meshGroup" material="#pink" >
       <mesh id="myMesh02" >
         <data src="#morphSingle" />
       </mesh>
@@ -41,12 +41,12 @@
 
   <xml3d id="xml3dScene2" width="400px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d">
 
-      <shader id="pink" script="urn:xml3d:shader:flat">
+      <material id="pink" script="urn:xml3d:material:flat">
           <float3 name="diffuseColor">1 0 1</float3>
-      </shader>
+      </material>
       <transform id="left" translation="-3 0 0" />
 
-      <group id="meshGroup" shader="#pink" >
+      <group id="meshGroup" material="#pink" >
           <mesh id="myMesh02" >
               <data src="#morphSingle" />
           </mesh>

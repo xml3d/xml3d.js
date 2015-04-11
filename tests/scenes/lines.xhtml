@@ -25,18 +25,18 @@
       </data>
     </defs>
 
-    <shader id="lineShader" script="urn:xml3d:shader:flat" >
+    <material id="linematerial" script="urn:xml3d:material:flat" >
         <float3 name="diffuseColor">1 0 0</float3>
-    </shader>
+    </material>
 
     <group style="transform: translateZ(-15px)" >
-        <group shader="#lineShader" >
+        <group material="#linematerial" >
             <mesh type="lines" src="#lineData" />
         </group>
-        <group shader="#lineShader" style="transform: translateX(-3px)"  >
+        <group material="#linematerial" style="transform: translateX(-3px)"  >
             <mesh type="lines" src="#lineData2" />
         </group>
-        <group shader="#lineShader" style="transform: translateX(3px)"  >
+        <group material="#linematerial" style="transform: translateX(3px)"  >
             <mesh type="linestrips" src="#lineData3" />
         </group>
     </group>

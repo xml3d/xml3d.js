@@ -10,11 +10,11 @@
   <body style="background-color: #FFF;width:500px">
   <xml3d activeview="#defaultView" id="xml3DElem1" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
     <defs>
-    <shader id="flatblue" script="urn:xml3d:shader:flat">
+    <material id="flatblue" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">
             0 0 1
         </float3>
-    </shader>
+    </material>
     
     <data id="meshdata" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
@@ -26,18 +26,18 @@
     
     <view id="defaultView" position="0 0 3"/>
    
-    <group id="myGroup" visible="true" shader="#flatblue">
+    <group id="myGroup" visible="true" material="#flatblue">
         <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
     </group>
     </xml3d>
     
    <xml3d id="xml3DElem2" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
     <defs>
-    <shader id="flatblue" script="urn:xml3d:shader:flat">
+    <material id="flatblue" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">
             0 0 1
         </float3>
-    </shader>
+    </material>
     
     <data id="meshdata" type="triangles">
         <int name="index">0 1 2 1 2 3</int>
@@ -49,7 +49,7 @@
     
     <view id="canvas2view" position="0 0 -30"/>
    
-    <group id="myGroup" visible="true" shader="#flatblue">
+    <group id="myGroup" visible="true" material="#flatblue">
         <mesh id="mySimpleMesh" src="#meshdata" type="triangles"/>
     </group>
     </xml3d>

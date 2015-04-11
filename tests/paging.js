@@ -2,7 +2,7 @@ module("Paging", {
     setup: function () {
         this.scene = new XML3DTestLib.Scene();
         this.scene.createDrawable = function() {
-            return null; // Prevents shader creation
+            return null; // Prevents material creation
         };
     }
 });

@@ -16,12 +16,12 @@
       </data>
     </defs>
 
-    <shader id="pointColorShader" script="urn:xml3d:shader:point" >
+    <material id="pointColormaterial" script="urn:xml3d:material:point" >
         <bool name="useVertexColor">true</bool>
-    </shader>
+    </material>
 
     <group style="transform: translateZ(-15px)" >
-        <group shader="#pointColorShader" >
+        <group material="#pointColormaterial" >
             <mesh type="points" src="#pointData" />
         </group>
     </group>

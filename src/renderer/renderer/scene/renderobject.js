@@ -28,7 +28,7 @@ IRenderObject.prototype.isVisible = function () {
 };
 IRenderObject.prototype.setTransformDirty = function () {
 };
-IRenderObject.prototype.setShader = function () {
+IRenderObject.prototype.setMaterial = function () {
 };
 IRenderObject.prototype.hasTransparency = function () {
 };

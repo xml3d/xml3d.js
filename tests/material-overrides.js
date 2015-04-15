@@ -123,7 +123,7 @@ module("material overrides (with material recompilation)", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/material-overrides02.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/material-overrides02.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

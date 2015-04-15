@@ -8,7 +8,7 @@ module("WebGL Lights", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-rendering03.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/webgl-rendering03.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

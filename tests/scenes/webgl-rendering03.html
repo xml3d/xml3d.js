@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
- <html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-     <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
-    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
-   <title>
-    XML3D
-   </title>
-  </head>
-  <body style="background-color: #FFF;width:500px">
-   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Rendering 3</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #FFF;width:500px">
+   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;">
     <defs>   
 
     <material id="diffusematerial" script="urn:xml3d:material:diffuse">
@@ -27,12 +26,12 @@
     </data>
     
     <data id="wrapMeshData">
-        <data src="#meshdata"/>
+        <data src="#meshdata"></data>
         <float2 name="texcoord">0.0 2.0 2.0 2.0 0.0 0.0 2.0 0.0</float2>
     </data>
     
     <data id="coloredmeshdata">
-        <data src="#meshdata"/>
+        <data src="#meshdata"></data>
         <float3 name="color">0.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.0 1.0 1.0 0.0</float3>
     </data>
     
@@ -66,19 +65,19 @@
        </float3>
     </lightshader>
     
-    <transform id="t_Point" translation="0 0 3"/>
-    <transform id="t_dirLight" rotation="0 0 1 0"/>
-    <transform id="t_Spot" translation="0 0 3" rotation="0 0 1 0"/>
+    <transform id="t_Point" translation="0 0 3"></transform>
+    <transform id="t_dirLight" rotation="0 0 1 0"></transform>
+    <transform id="t_Spot" translation="0 0 3" rotation="0 0 1 0"></transform>
       
     </defs>
     
-    <view id="defaultView" position="0 0 3"/>
+    <view id="defaultView" position="0 0 3"></view>
     
     <group transform="#t_Point" id="pointlight">
-      <light shader="#ls_Point" id="pointlightLight"/>
+      <light shader="#ls_Point" id="pointlightLight"></light>
     </group>
     <group id="dirlight" transform="#t_dirLight">
-      <light id="dirlightelement" shader="#ls_Dir"/>
+      <light id="dirlightelement" shader="#ls_Dir"></light>
     </group>
     
     <group transform="#t_Point" id="pointlight2">
@@ -98,14 +97,14 @@
     </group> 
 
     </xml3d>
-    <script type="text/javascript">
-    function getPixelValue(canvas, x,y) {
-        var pixels = new Uint8Array(4), a = new Array(4);
-        canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
-        for(var i=0;i&lt;4;i++)
-            a[i] = pixels[i];
-        return a;
-    }
-    </script>
+   <script type="text/javascript">
+     function getPixelValue(canvas, x, y) {
+       var pixels = new Uint8Array(4), a = new Array(4);
+       canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
+       for (var i = 0; i < 4; i++)
+         a[i] = pixels[i];
+       return a;
+     }
+   </script>
   </body>
  </html>

@@ -1,19 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
- <html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-     <link rel="stylesheet" type="text/css" media="all" href="frame.css"/>
-    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
-    <script type="text/javascript" src="scripts/custommaterial.js"></script>
-   <title>
-    XML3D Rendering 2
-   </title>
-  </head>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Rendering 2</title>
+  <link rel="stylesheet" type="text/css" media="all"	href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+  <script type="text/javascript" src="scripts/custommaterial.js"></script>
+</head>
   <body style="background-color: #FFF;width:500px">
-   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
+   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;">
     <defs>   
    
-    
-    
     <material id="texmaterial1" script="urn:xml3d:material:phong">
         <texture id="tex1" name="diffuseTexture">
             <img id="tex1img" src="textures/yellow.png"/>
@@ -51,12 +48,12 @@
     </data>
     
     <data id="wrapMeshData" type="triangles">
-        <data src="#meshdata"/>
+        <data src="#meshdata"></data>
         <float2 name="texcoord">0.0 2.0 2.0 2.0 0.0 0.0 2.0 0.0</float2>
     </data>
     
     <data id="coloredmeshdata" type="triangles">
-        <data src="#meshdata"/>
+        <data src="#meshdata"></data>
         <float3 name="color">0.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.0 1.0 1.0 0.0</float3>
     </data>
     
@@ -66,11 +63,11 @@
         1 1 1
        </float3>
       </lightshader>
-      <transform id="t_Lamp" translation="0 0 3"/>
+      <transform id="t_Lamp" translation="0 0 3"></transform>
       
     </defs>
     
-    <view id="defaultView" position="0 0 3"/>
+    <view id="defaultView" position="0 0 3"></view>
     <group transform="#t_Lamp" id="mainlight">
       <light shader="#ls_Spot"/>
     </group>
@@ -103,7 +100,7 @@
     function getPixelValue(canvas, x,y) {
         var pixels = new Uint8Array(4), a = new Array(4);
         canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
-        for(var i=0;i&lt;4;i++)
+        for(var i=0;i<4;i++)
             a[i] = pixels[i];
         return a;
     }

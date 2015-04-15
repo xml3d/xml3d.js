@@ -7,7 +7,7 @@ module("WebGL Spotlights", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-rendering05.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/webgl-rendering05.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

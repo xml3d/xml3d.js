@@ -111,7 +111,7 @@ module("Composed Element notification tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-rendering02.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/webgl-rendering02.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -148,7 +148,7 @@ module("Typed array notification tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/basic.xhtml", this.cb);
+        loadDocument("scenes/basic.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

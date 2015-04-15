@@ -334,7 +334,7 @@ module("Element initialization tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/basic.xhtml", this.cb);
+        loadDocument("scenes/basic.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

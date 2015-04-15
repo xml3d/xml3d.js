@@ -9,7 +9,7 @@ module("Element configuration tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/basic.xhtml", this.cb);
+        loadDocument("scenes/basic.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -27,11 +27,11 @@ test("Auto-configuration", 8, function() {
    var x = this.doc.getElementById("myXml3d");
    ok(x, "Object is adressable");
    equal(typeof x._configured, 'object', "Object is configured");
-   equal(x.nodeName, "xml3d", "Is XML3D element");
+   equal(x.nodeName, "XML3D", "Is XML3D element");
    x = this.doc.getElementById("myGroup");
    ok(x, "Object is adressable");
    equal(typeof x._configured, 'object', "Object is configured");
-   equal(x.nodeName, "group", "Is group element");
+   equal(x.nodeName, "GROUP", "Is group element");
 });
 
 test("Auto-configuration on insertion", 6, function() {
@@ -97,7 +97,7 @@ module("Adapter tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/basic.xhtml", this.cb);
+        loadDocument("scenes/basic.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -137,7 +137,7 @@ module("Mutation tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/basic.xhtml", this.cb);
+        loadDocument("scenes/basic.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

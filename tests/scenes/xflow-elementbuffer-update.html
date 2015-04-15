@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <link href="frame.css" media="all" rel="stylesheet" type="text/css"/>
-    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
-    <script type="text/javascript" src="./scripts/myxflow.js"></script>
-    <script type="text/javascript" src="../../tools/camera.js"></script>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Element Buffer Update Scene</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+  <script type="text/javascript" src="./scripts/myxflow.js"></script>
+  <script type="text/javascript" src="../../tools/camera.js"></script>
 </head>
 <body>
 <h1>
@@ -12,12 +14,11 @@
 </h1>
 
 <div>
-    <xml3d id="xml3DElem" activeview="#Camera" style="width: 500px; height: 350px; background-color:grey;"
-           xmlns="http://www.xml3d.org/2009/xml3d">
+    <xml3d id="xml3DElem" activeview="#Camera" style="width: 500px; height: 350px; background-color:grey;">
         <defs id="mainDef">
-            <transform id="t_1" translation="-7.5 0 0"/>
-            <transform id="t_2" translation="-4.5 0 0"/>
-            <transform id="t_light" rotation="-1 0 0 2"/>
+            <transform id="t_1" translation="-7.5 0 0"></transform>
+            <transform id="t_2" translation="-4.5 0 0"></transform>
+            <transform id="t_light" rotation="-1 0 0 2"></transform>
 
             <data id="wave" compute="(position, normal) = xflow.mywave(position, normal, str, len, phase)">
                 <float name="str" id="strength">0.11</float>
@@ -38,23 +39,23 @@
                 <float name="ambientIntensity">0.8</float>
             </material>
         </defs>
-        <view id="Camera" position="0 11 11" orientation="-1 0 0 0.707"/>
+        <view id="Camera" position="0 11 11" orientation="-1 0 0 0.707"></view>
         <group transform="#t_light">
-            <light shader="#ls_dir"/>
+            <light shader="#ls_dir"></light>
         </group>
         <group id="test1" material="#mat">
             <group transform="#t_1">
                 <mesh id="m_1" type="triangles">
-                    <data src="#wave"/>
+                    <data src="#wave"></data>
                     <float3 name="diffuseColor">0.8 1 1</float3>
                     <texture name="diffuseTexture">
-                        <img src="textures/yellow.png"/>
+                        <img src="textures/yellow.png">
                     </texture>
                 </mesh>
             </group>
             <group transform="#t_2">
                 <mesh id="m_2" type="triangles">
-                    <data src="#grid"/>
+                    <data src="#grid"></data>
                     <float3 name="diffuseColor">1 0 0</float3>
                 </mesh>
             </group>
@@ -67,7 +68,7 @@
     function getPixelValue(canvas, x, y) {
         var pixels = new Uint8Array(4), a = new Array(4);
         canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
-        for (var i = 0; i &lt; 4; i++)
+        for (var i = 0; i < 4; i++)
             a[i] = pixels[i];
         return a;
     }

@@ -8,7 +8,7 @@ module("WebGL Scenegraph", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-rendering01.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/webgl-rendering01.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

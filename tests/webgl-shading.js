@@ -134,7 +134,7 @@ module("WebGL materials and Textures", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-rendering02.xhtml" + window.location.search, this.cb);
+        loadDocument("scenes/webgl-rendering02.html" + window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -217,7 +217,7 @@ test("Textured diffuse material", 3, function() {
     group.visible = true;
 });
 
-// Scene: webgl-rendering02.xhtml
+// Scene: webgl-rendering02.html
 test("Diffuse material with vertex colors", 3, function() {
     var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
     var gl = getContextForXml3DElement(x);
@@ -360,7 +360,7 @@ module("WebGL materials and Textures 2", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-rendering04.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/webgl-rendering04.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

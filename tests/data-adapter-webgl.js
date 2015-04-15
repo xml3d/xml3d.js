@@ -7,7 +7,7 @@ module("Data Adapter", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/data-adapter.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/data-adapter.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

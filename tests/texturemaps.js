@@ -1,5 +1,5 @@
 
-// Scene: texturemaps.xhtml
+// Scene: texturemaps.html
 module("Texture Maps", {
     setup : function() {
         stop();
@@ -9,7 +9,7 @@ module("Texture Maps", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/texturemaps.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/texturemaps.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

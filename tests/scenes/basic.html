@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Basic Scene</title>
+  <link rel="stylesheet" type="text/css" media="all"	href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+  <xml3d id="myXml3d" width="1000" height="300">
+    <defs>
+      <transform id="t_identity"></transform>
+      <transform id="t_regular"></transform>
+      <transform id="t_translation" translation="1 2 3"></transform>
+      <transform id="t_rotation" rotation="1 0 0 1.57079632679489"></transform>
+      <transform id="t_rotation2" rotation="0 1 0 1.57079632679489"></transform>
+      <transform id="t_rotation3" rotation="0 0 1 1.57079632679489"></transform>
+      <transform id="t_scale" scale="1 2 3"></transform>
+      <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708"  translation="1 2 3"></transform>
+      <lightshader id="basic_point" script="urn:xml3d:lightshader:point">
+
+      </lightshader>
+    </defs>
+    <group id="viewParent">
+        <view id="myView" fieldofview="0.5"></view>
+    </group>
+    <group id="lightParent">
+        <light id="myLight" shader="#basic_point"></light>
+    </group>
+    <group id="myGroup" visible="false">
+        <mesh id="myMesh01" type="lines" onclick="alert('Hallo');"></mesh>
+    </group>
+    <group id="meshGroup" transform="#t_regular">
+        <mesh id="myMesh02">
+              <int id="indices" name="index">0 1 2 1 2 3</int>
+              <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+              <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+              <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0
+               0.0 0.0<!-- This is a comment -->1.0 0.0</float2>
+        </mesh>
+    </group>
+    <group id="transformedGroup" transform="#t_mixed">
+    </group>
+    <group id="parentGroup" transform="#t_rotation">
+        <group id="child01" transform="#t_identity"></group>
+        <group id="child02" transform="#t_identity"></group>
+    </group>
+  </xml3d>
+</body>
+</html>

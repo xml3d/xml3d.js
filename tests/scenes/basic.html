@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
   <title>XML3D Basic Scene</title>
-  <link rel="stylesheet" type="text/css" media="all"	href="frame.css">
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
 </head>
 <body style="background-color: #fff;width:500px">
@@ -16,16 +14,13 @@
       <transform id="t_rotation2" rotation="0 1 0 1.57079632679489"></transform>
       <transform id="t_rotation3" rotation="0 0 1 1.57079632679489"></transform>
       <transform id="t_scale" scale="1 2 3"></transform>
-      <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708"  translation="1 2 3"></transform>
-      <lightshader id="basic_point" script="urn:xml3d:lightshader:point">
-
-      </lightshader>
+      <transform id="t_mixed" scale="1 2 3" rotation="1 0 0 1.5708" translation="1 2 3"></transform>
     </defs>
     <group id="viewParent">
         <view id="myView" fieldofview="0.5"></view>
     </group>
     <group id="lightParent">
-        <light id="myLight" shader="#basic_point"></light>
+        <light id="myLight" model="urn:xml3d:light:point"></light>
     </group>
     <group id="myGroup" visible="false">
         <mesh id="myMesh01" type="lines" onclick="alert('Hallo');"></mesh>
@@ -46,5 +41,5 @@
         <group id="child02" transform="#t_identity"></group>
     </group>
   </xml3d>
-</body>
-</html>
+
+</body></html>

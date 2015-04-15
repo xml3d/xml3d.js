@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
   <title>XML3D Rendering 1</title>
   <link rel="stylesheet" type="text/css" media="all" href="frame.css">
@@ -8,20 +6,20 @@
 </head>
 
   <body style="background-color: #FFF;width:500px">
-   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;" xmlns="http://www.xml3d.org/2009/xml3d">
+   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;">
     <defs>
-    <transform id="t_group3" rotation="0 1 0 1.57" ></transform>
-    <transform id="t_viewtest" rotation="0 1 0 1.57" ></transform>
-    <transform id="t_viewtest2" translation="0 0 -6" ></transform>
-    <transform id="t_group4" rotation="0 1 0 1.57" ></transform>
+    <transform id="t_group3" rotation="0 1 0 1.57"></transform>
+    <transform id="t_viewtest" rotation="0 1 0 1.57"></transform>
+    <transform id="t_viewtest2" translation="0 0 -6"></transform>
+    <transform id="t_group4" rotation="0 1 0 1.57"></transform>
     <transform id="t_cubetop" rotation="1 0 0 1.57" translation="0 1 0"></transform>
     <transform id="t_cubebottom" rotation="1 0 0 -1.57" translation="0 -1 0"></transform>
     <transform id="t_cubeleft" rotation="0 1 0 1.57" translation="1 0 0"></transform>
     <transform id="t_cuberight" rotation="0 1 0 -1.57" translation="-1 0 0"></transform>
     <transform id="t_cubeback" rotation="0 1 0 -3.141" translation="0 0 -1"></transform>
     <transform id="t_cubefront" translation="0 0 1"></transform>
-    <transform id="t_camera1" ></transform>
-    <transform id="t_grouptransformed" translation="0 0 -3" ></transform>
+    <transform id="t_camera1"></transform>
+    <transform id="t_grouptransformed" translation="0 0 -3"></transform>
 
     <material id="flatblue" script="urn:xml3d:material:flat">
         <float3 name="diffuseColor">
@@ -58,19 +56,13 @@
         </float3>
     </material>
 
-    <data id="meshdata" type="triangles">
-        <int name="index">0 1 2 1 2 3</int>
-        <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
-        <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
-        <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    <data id="meshdata">
+      <int name="index">0 1 2 1 2 3</int>
+      <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+      <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
     </data>
-    <lightshader id="ls_Spot" script="urn:xml3d:lightshader:point">
-        <float3 name="attenuation">1 0 0</float3>
-       <float3 name="intensity">
-        1 1 1
-       </float3>
-      </lightshader>
-      <transform id="t_Lamp" translation="0 0 3"></transform>
+    <transform id="t_Lamp" translation="0 0 3"></transform>
 
     </defs>
 
@@ -134,7 +126,7 @@
         <group transform="#t_cubeback" material="#flatyellow">
             <mesh src="#meshdata" type="triangles"></mesh>
         </group>
-         <group transform="#t_cubefront" >
+         <group transform="#t_cubefront">
         <mesh src="#meshdata" type="triangles"></mesh>
         </group>
     </group>
@@ -148,5 +140,6 @@
        return a;
      }
    </script>
-  </body>
- </html>
+  
+ 
+</body></html>

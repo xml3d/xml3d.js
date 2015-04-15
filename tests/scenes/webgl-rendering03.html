@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
   <title>XML3D Rendering 3</title>
   <link rel="stylesheet" type="text/css" media="all" href="frame.css">
@@ -34,37 +32,7 @@
         <data src="#meshdata"></data>
         <float3 name="color">0.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.0 1.0 1.0 0.0</float3>
     </data>
-    
-    <lightshader id="ls_Point" script="urn:xml3d:lightshader:point">
-       <float3 name="intensity" id="pointIntensity">
-        10 0 0
-       </float3>
-       <float3 name="attenuation">
-       1 0 0
-       </float3>
-    </lightshader>
-    
-    <lightshader id="ls_Point2" script="urn:xml3d:lightshader:point">
-       <float3 name="intensity">
-        0 0 10
-       </float3>
-       <float3 name="attenuation">
-       1 0 0
-       </float3>
-    </lightshader>
-    
-    <lightshader id="ls_Dir" script="urn:xml3d:lightshader:directional">
-       <float3 id="lsdIntensity" name="intensity">
-        0 0 10
-       </float3>
-    </lightshader>
-    
-    <lightshader id="ls_Spot" script="urn:xml3d:lightshader:spot">
-       <float3 id="lsIntensity" name="intensity">
-        0 10 0
-       </float3>
-    </lightshader>
-    
+
     <transform id="t_Point" translation="0 0 3"></transform>
     <transform id="t_dirLight" rotation="0 0 1 0"></transform>
     <transform id="t_Spot" translation="0 0 3" rotation="0 0 1 0"></transform>
@@ -74,10 +42,21 @@
     <view id="defaultView" position="0 0 3"></view>
     
     <group transform="#t_Point" id="pointlight">
-      <light shader="#ls_Point" id="pointlightLight"></light>
+      <light id="pointlightLight" model="urn:xml3d:light:point">
+        <float3 name="intensity" id="pointIntensity">
+          10 0 0
+        </float3>
+        <float3 name="attenuation">
+          1 0 0
+        </float3>
+      </light>
     </group>
     <group id="dirlight" transform="#t_dirLight">
-      <light id="dirlightelement" shader="#ls_Dir"></light>
+      <light id="dirlightelement" model="urn:xml3d:light:directional">
+        <float3 id="lsdIntensity" name="intensity">
+          0 0 10
+        </float3>
+      </light>
     </group>
     
     <group transform="#t_Point" id="pointlight2">
@@ -106,5 +85,6 @@
        return a;
      }
    </script>
-  </body>
- </html>
+  
+ 
+</body></html>

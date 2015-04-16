@@ -1,0 +1,22 @@
+div.attributes table {
+  margin-top: 0;
+  margin-bottom: 16px;
+  border-collapse: collapse;
+}
+
+div.attributes table td, th {
+    padding: 6px 13px;
+    border: 1px solid #ddd;
+}
+
+div.attributes table tr {
+  background-color: #fff;
+}
+
+div.attributes table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+div.attributes table th {
+  font-weight: bold;
+}

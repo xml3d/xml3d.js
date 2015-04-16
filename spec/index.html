@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>XML3D 5.0 Specification</title>
   <script src='http://www.w3.org/Tools/respec/respec-w3c-common' async class='remove'></script>
+  <link rel="stylesheet" href="xml3d-spec.css">
 
   <script class='remove'>
     var respecConfig = {
@@ -79,10 +80,145 @@
     <h3>Generic data model</h3>
   </section>
   <section>
+    <h3>Predefined primitive types</h3>
+  </section>
+  <section>
     <h3>Predefined material models</h3>
   </section>
   <section>
     <h3>Predefined light models</h3>
+    <section>
+    <h2>Point Lights</h2>
+    <p>URN: <code>urn:xml3d:light:point</code></p>
+    <div class="attributes">Attributes:
+     <table>
+      <tbody><tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>position</td>
+        <td>float3</td>
+        <td>0 0 0</td>
+        <td>The position of the point light in object space</td>
+      </tr>
+      <tr>
+        <td>attenuation</td>
+        <td>float3</td>
+        <td>0 0 1</td>
+        <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
+      </tr>
+      <tr>
+        <td>intensity</td>
+        <td>float3</td>
+        <td>1 1 1</td>
+        <td>The RGB intensity of the point light.</td>
+      </tr>
+      </tbody>
+    </table>
+    </div>
+    <p>
+    Point light sources emit light from a single point in space with a uniform distribution in all directions, i.e. omnidirectional.
+    The position of the point light is defined by its <i>position</i> attribute and affected by the transformation of the light element that defines
+    the occurrence of the point light. The orientation of the light element is not influencing the light.
+    </p>
+    </section>
+
+    <section>
+    <h2>Directional Lights</h2>
+    <p>URN: <code>urn:xml3d:light:directional</code></p>
+    <div class="attributes">Attributes:
+      <table>
+        <tbody>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>direction</td>
+          <td>float3</td>
+          <td>0 0 -1</td>
+          <td>The direction of the light in object space.</td>
+        </tr>
+        <tr>
+          <td>intensity</td>
+          <td>float3</td>
+          <td>1 1 1</td>
+          <td>The RGB intensity of the point light.</td>
+        </tr>
+        </tbody>
+      </table>
+      </div>
+      <p>
+     Directional light sources, also known as distant light sources, emit light along parallel rays from an infinite distance away. The direction the light sources
+        emits from is defined by its <i>direction</i> attribute and affected by the transformation of the light element that defines
+    the occurrence of the distant light. The position of the light element is not taken into account.
+    </p>
+
+      </section>
+
+    <section>
+    <h2>Spot Lights</h2>  <p>URN: <code>urn:xml3d:light:spot</code></p>
+    <div class="attributes">Attributes:
+      <table>
+        <tbody>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>position</td>
+          <td>float3</td>
+          <td>0 0 0</td>
+          <td>The position of the point light in object space</td>
+        </tr>
+        <tr>
+          <td>direction</td>
+          <td>float3</td>
+          <td>0 0 -1</td>
+          <td>The direction of the light in object space.</td>
+        </tr>
+        <tr>
+          <td>intensity</td>
+          <td>float3</td>
+          <td>1 1 1</td>
+          <td>The <i>RGB</i> intensity of the directional light.</td>
+        </tr>
+        <tr>
+          <td>attenuation</td>
+          <td>float3</td>
+          <td>0 0 1</td>
+          <td>The attenuation of the point light given as its constant, linear, e.g quadratic component.</td>
+        </tr>
+        <tr>
+          <td>falloffAngle</td>
+          <td>float</td>
+          <td>Math.PI/4</td>
+          <td>Spot angle in radians. Controls the size of the outer cone of a spot light, i.e. the circular area a spot
+            light covers.
+          </td>
+        </tr>
+        <tr>
+          <td>softness</td>
+          <td>float</td>
+          <td>0</td>
+          <td>Softness of the spot light in the range [0;1].</td>
+        </tr>
+        </tbody>
+      </table>
+      </div>
+      <p>
+      Spot light source are a variation of point lights: Instead of emitting light omnidirectional, they emit light from their position in a cone of direction.
+      The <i>fallOffAngle</i> attribute defines the size of the cone. Objects outside the cone defined by the <i>fallOffAngle</i> are not lit by the light source. The <i>softness</i>
+      attribute defines the percentage of the cone in which the illumination ramps down from full to no illumination, i.e. a softness of 0 specifies a hard transition between full to no illumination and a softness of 1.0 a linear transition along the radius of the cone.
+      </p>
+      </section>
   </section>
 </section>
 
@@ -211,6 +347,42 @@
     </section>
     <section>
       <h4>The <code>light</code> element</h4>
+      <p>The <span class="element-name">light</span> element defines a light source in the scene that emits light based on the light model defined by
+      the <a href="#attr-light-model" class="internalDFN">model</a> attribute. The light uses the <a href="h-generic-data-model">generic data model</a> to define the parameters of the referenced material model.
+      The coordinate system of the <span class="element-name">light</span> element defines the base coordinate system for the light. However, the final position and direction of the light source can altered by
+      specific parameters of the light model.
+      </p>
+      <p>A light affects all geometry elements within the same scene, i.e. with the same xml3d element as ancestor.</p>
+      <div class="issue">Do we need means for or at least a note about filtering the affected elements?</div>
+      <p>
+      The light model used by the light is defined by the  <dfn id="attr-light-model">model</dfn> attribute.
+      If the <code>model</code> attribute is present, it must contain a valid non-empty URN referencing one of the <a href="#predefined-light-models">predefined light models</a>.
+      If the URN is empty or references an unknown light model, or if the <code>model</code> attribute is not present, the <a href="#predefined-light-models">directional light</a> model is used.
+      <div class="issue">Should we ignore unknown light models instead?</div>
+      <div class="note">Currently, XML3D supports predefined light models only. However, similar to materials, we envisage programmable light models for future versions of XML3D.
+      </div>
+
+
+      <p>This example illustrates the use of a single light source based on the predefined directional light model using its default parameters:</p>
+       <pre class='example highlight'>
+&lt;light&gt;&lt;/light&gt;
+       </pre>
+      Since no direction for the light source is specified for the light source, the default direction <code>0 0 -1</code> (along the negative z axis) is transformed by the global
+      coordinate system of the light element.
+
+     <p>This example illustrates the use of a single light source based on the predefined point light model:</p>
+       <pre class='example highlight'>
+&lt;light model=&quot;urn:xml3d:light:point&quot;&gt;
+  &lt;float3 name=&quot;intensity&quot;&gt;0.8 0.8 1&lt;/float3&gt;
+&lt;/light&gt;
+       </pre>
+
+
+       <dl title='interface XML3DLightElement : XML3DDataElement' class='idl'>
+        <dt>attribute DOMString model</dt>
+        <dd>The <code>model</code> IDL attribute must reflect the <a href="#attr-light-model" class="internalDFN">model</a> content attribute.</dd>
+      </dl>
+      </p>
     </section>
     <section>
       <h4>The <code>mesh</code> element</h4>

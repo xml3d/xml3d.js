@@ -560,7 +560,7 @@ classInfo['volume'] = {
     visible: {a: handlers.BoolAttributeHandler, params: true},
     compute: {a: handlers.StringAttributeHandler},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
-    getBoundingBox : {m: methods.deprecatedGetBoundingBoxLocal},
+    getBoundingBox : {m: methods.volumeGetBoundingBox},
     getWorldBoundingBox : {m: methods.getWorldBoundingBox},
     getLocalBoundingBox : {m: methods.getLocalBoundingBox},
     getOutputNames: {m: methods.volumeGetOutputNames},

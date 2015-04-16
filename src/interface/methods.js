@@ -271,6 +271,7 @@ methods.XML3DDataSourceTypeSetScriptValue = function(data){
 
 };
 
+methods.volumeGetBoundingBox        = methods.deprecatedGetBoundingBoxLocal; // Does this belong here?
 methods.volumeGetOutputNames 		= methods.meshGetOutputNames;
 methods.volumeGetOutputChannelInfo	= methods.meshGetOutputChannelInfo;
 methods.volumeGetComputeInfo 		= methods.meshGetComputeInfo;

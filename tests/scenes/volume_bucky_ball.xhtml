@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>XML3D Basic Scene</title>
+	<link rel="stylesheet" type="text/css" media="all"	href="frame.css"/>
+	
+	<link rel="stylesheet" type="text/css" href="styles.css" />	<!-- PREVENT on select-->
+	
+	<script type="text/javascript" src="../../build/output/xml3d.js"></script>	
+	<script type="text/javascript" src="../../tools/camera.js"></script>
+	
+	<script type="text/javascript" src="scripts/input_options.js"> </script>
+	
+	<script type='text/javascript' > 
+		document.addEventListener("load", attachTFWidget, false);
+		
+		function attachTFWidget() {
+			new XML3D.webgl.TransferFunctionWidget("transferFunction1", "divForTFWidget");
+		};
+	</script>	
+	
+</head>
+<body onload="onChangeSize();">
+	<div id="log" style="display:none;">  </div>
+	<div style="margin:20px;"> 	Test volume tag  </div>
+	
+	<div style="position:absolute; top:50px; left:20px; outline:1px solid black; ">
+		<xml3d xmlns="http://www.xml3d.org/2009/xml3d" id="myxml3d" renderer="rtpie"
+			   style="width: 612px; height: 500px; background-color: black;"
+               activeView="#defaultView">
+
+			<defs>
+                <shader id="transferFunction1" script="urn:xml3d:shader:raycaster">
+					<texture name="transferFunction">
+                        <img src="transferfunctions/bucky_ball.png"/>
+                    </texture>
+				</shader>	
+				
+				
+				<transform id="t_volume1" translation="-0.5 -0.5 -0.5" />  
+			</defs>
+				
+            <view id="defaultView" position="0.0 0.0 2.5" />
+			
+			<group id="group_volume1" shader="#transferFunction1" transform="#t_volume1" >
+				<volume id="test_volume" >
+                    <data src="binaries/bucky_ball.bvd" />
+					<float3 id="test_volume_size"   name="size" />   <!-- size is taken from the form controls -->
+					<int    id="test_volume_rt"     name="renderType"          > 0 			</int>
+					<float  id="test_volume_step"   name="stepSize"            > 0.02 		</float>
+					<float  id="test_volume_intens" name="baseIntensity"       > 30.0	 	</float>
+					<float  id="test_volume_accurs" name="rayTerminationAccuracy" > 0.975 	</float>
+					<int    id="test_volume_startp" name="randomizeStartPosition" > 0 		</int>
+                </volume>
+			</group>
+
+		</xml3d>
+	
+		<div style="position:absolute; top:10px; left:980px; width:300px;">
+			<p>Rendering method</p>
+			<select id="cRenderType" onchange="onValueChange(this.value, 'test_volume_rt');">
+				<option value="0">Transparent</option>
+				<option value="1">Maximum Intensity Projection</option>
+			</select> 
+			<br/> <br/>	
+
+			<label class="checkbox">
+				<input id="randomizeChackBox" type="checkbox" onchange="onValueChange(this.checked?1:0,'test_volume_startp');"/> randomized sampling
+			</label>
+			<br/> <br/>	
+			
+			<label class="control-label" for="inputStepSize">Step size</label>
+			<div class="controls">
+				<select id="inputStepSize" onchange="onValueChange(this.value, 'test_volume_step');">
+					<option selected="selected">0.02</option>
+					<option>0.01</option>
+					<option>0.005</option>
+					<option>0.0025</option>
+					<option>0.001</option>
+					<option>0.0008</option>
+				</select>
+			</div>
+			<br/> 
+			
+			<label class="control-label" for="inputAccuracy">Ray Termination Accuracy</label>
+			<div class="controls">
+				<select id="inputAccuracy" onchange="onValueChange(this.value, 'test_volume_accurs');">
+					<option>0.99</option>
+					<option selected="selected">0.975</option>
+					<option>0.95</option>
+					<option>0.9</option>
+					<option>0.8</option>
+				</select>
+			</div>
+			<br/> 
+			
+			<label class="control-label" for="inputIntensity">Volume Opacity</label>
+			<div class="controls">
+				<select id="inputIntensity" onchange="onValueChange(this.value, 'test_volume_intens');">
+					<option>400.0</option>
+					<option>200.0</option>
+					<option>100.0</option>
+					<option>50.0</option>
+					<option selected="selected">30.0</option>
+					<option>10.0</option>
+					<option>1.0</option>
+				</select>
+			</div>
+			<br/> 	
+			
+			<label for="sizeX" style="padding-left:7px;">Size X</label>	<br/>
+			<input id="sizeX" type="range" min="0.1" max="10" step="0.2" value="1" onchange='onChangeSize();'/> <br/>
+			
+			<label for="sizeY" style="padding-left:7px;">Size Y</label>	<br/>
+			<input id="sizeY" type="range" min="0.1" max="10" step="0.2" value="1" onchange='onChangeSize();'/> <br/>
+			
+			<label for="sizeZ" style="padding-left:7px;">Size Z</label>	<br/>
+			<input id="sizeZ" type="range" min="0.1" max="10" step="0.2" value="1" onchange='onChangeSize();'/> <br/>
+			
+			<label for="sceneWidth" style="padding-left:7px;">Scene width</label>	<br/>
+			<input id="sceneWidth" type="range" min="50" max="1000" value="612" onchange='document.getElementById("myxml3d").style.width = value+"px";'/> <br/>
+			<label for="sceneHeight" style="padding-left:7px;">Scene height</label>	<br/>
+			<input id="sceneHeight" type="range" min="50" max="1000" value="500" onchange='document.getElementById("myxml3d").style.height = value+"px";'/> <br/>
+		</div>
+		
+	</div>
+	
+</body>
+</html>

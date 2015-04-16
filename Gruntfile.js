@@ -126,7 +126,13 @@ exports = module.exports = function (grunt) {
         },
 
         watch: {
-            files: ['src/**'], tasks: ['default']
+            src: {
+                files: ['src/**'], tasks: ['default']
+            },
+            spec: {
+                files: ['spec/**'],
+                options: { livereload: true }
+            }
         }
 
 

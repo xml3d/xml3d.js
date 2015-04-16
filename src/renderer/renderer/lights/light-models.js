@@ -69,22 +69,24 @@ function createXflowValue(dataNode, name, type, value) {
 var LightModel = function (id, light, dataNode, config) {
     this.id = id;
     this.light = light;
-    this.dataNode = dataNode;
     this.configuration = config;
     this.parameters = Object.keys(config);
     /**
      * If the light has not data, just use the default parameters
      */
     if (dataNode) {
-        dataNode.insertBefore(createXflowData(config), null);
+        var data = new DataNode();
+        data.insertBefore(createXflowData(config), null);
+        data.insertBefore(dataNode, null);
+        this.dataNode = data;
     } else {
-        dataNode = createXflowData(config);
+        this.dataNode = createXflowData(config);
     }
 
     // Horizontal opening angle of the light camera. Derived from falloffAngle in case of spot light
     this.fovy =  Math.PI/2.0;
 
-    this.lightParameterRequest = new ComputeRequest(dataNode, this.parameters, this.lightParametersChanged.bind(this));
+    this.lightParameterRequest = new ComputeRequest(this.dataNode, this.parameters, this.lightParametersChanged.bind(this));
     this.lightParametersChanged(this.lightParameterRequest, null);
 };
 
@@ -197,7 +199,7 @@ function transformDefault(target, offset, light) {
 
 
 /**
- * Implement XML3D's predefined point light model urn:xml3d:lightshader:point
+ * Implement XML3D's predefined point light model urn:xml3d:light:point
  * @param {DataNode} dataNode
  * @param {RenderLight} light
  * @extends LightModel
@@ -246,7 +248,7 @@ XML3D.createClass(PointLightModel, LightModel, {
 
 
 /**
- * Implement XML3D's predefined spot light model urn:xml3d:lightshader:spot
+ * Implement XML3D's predefined spot light model urn:xml3d:light:spot
  * @param {DataNode} dataNode
  * @param {RenderLight} light
  * @extends LightModel
@@ -296,7 +298,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
 
 
 /**
- * Implement XML3D's predefined spot light model urn:xml3d:lightshader:directional
+ * Implement XML3D's predefined spot light model urn:xml3d:light:directional
  * @param {DataNode} dataNode
  * @param {RenderLight} light
  * @extends LightModel

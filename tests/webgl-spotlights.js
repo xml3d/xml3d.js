@@ -119,7 +119,7 @@ test("Change of light material parameters check against lights.spot", 8, functio
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
 
-    var ls_Spot = this.doc.getElementById("ls_Spot");
+    var ls_Spot = this.doc.querySelector("light");
     var lights = h.renderer.scene.lights;
     var params = {};
 

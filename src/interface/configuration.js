@@ -326,12 +326,24 @@ classInfo['light'] = {
     onkeyup: {a: handlers.EventAttributeHandler},
     visible: {a: handlers.BoolAttributeHandler, params: true},
     global: {a: handlers.BoolAttributeHandler, params: false},
-    intensity: {a: handlers.FloatAttributeHandler, params: 1},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
-    shader: {a: handlers.StringAttributeHandler}
+    onload: {a: handlers.EventAttributeHandler},
+    onprogress: {a: handlers.EventAttributeHandler},
+    complete: {p: properties.XML3DNestedDataContainerTypeComplete},
+    progressLevel: {p: properties.XML3DNestedDataContainerTypeProgressLevel},
+    compute: {a: handlers.StringAttributeHandler},
+    getOutputNames: {m: methods.XML3DShaderProviderTypeGetOutputNames},
+    getOutputChannelInfo: {m: methods.XML3DShaderProviderTypeGetOutputChannelInfo},
+    getComputeInfo: {m: methods.XML3DShaderProviderTypeGetComputeInfo},
+    getProtoInfo: {m: methods.XML3DShaderProviderTypeGetProtoInfo},
+    isOutputConnected: {m: methods.XML3DShaderProviderTypeIsOutputConnected},
+    getResult: {m: methods.XML3DShaderProviderTypeGetResult},
+    src: {a: handlers.StringAttributeHandler},
+    model: {a: handlers.StringAttributeHandler}
     };
 /**
  * Properties and methods for <lightshader>
+ * // TODO(ksons): Remove in XML3D 5.1
  **/
 classInfo['lightshader'] = {
     id: {a: handlers.IDHandler},

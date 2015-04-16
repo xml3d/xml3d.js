@@ -152,26 +152,10 @@ test("&lt;light&gt; interface test", function() {
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
     equal(typeof e.visible, "boolean", "visible is of type 'boolean'");
     equal(typeof e.global, "boolean", "global is of type 'boolean'");
-    equal(typeof e.intensity, "number", "intensity is of type 'number'");
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
-    equal(typeof e.shader, "string", "shader is of type 'string'");
+    equal(typeof e.model, "string", "model is of type 'string'");
 });
-test("&lt;lightshader&gt; interface test", function() {
-    var e = document.createElementNS(XML3D.xml3dNS, "lightshader");
-    ok(e, "lightshader exits");
-    equal(typeof e.className, "string", "className is of type 'string'");
-    equal(typeof e.style, "object", "style is of type 'object'");
-    equal(typeof e.id, "string", "id is of type 'string'");
-    equal(typeof e.compute, "string", "compute is of type 'string'");
-    equal(typeof e.getOutputNames, "function", "getOutputNames is of type 'function'");
-    equal(typeof e.getOutputChannelInfo, "function", "getOutputChannelInfo is of type 'function'");
-    equal(typeof e.getComputeInfo, "function", "getComputeInfo is of type 'function'");
-    equal(typeof e.getProtoInfo, "function", "getProtoInfo is of type 'function'");
-    equal(typeof e.isOutputConnected, "function", "isOutputConnected is of type 'function'");
-    equal(typeof e.getResult, "function", "getResult is of type 'function'");
-    equal(typeof e.script, "string", "script is of type 'string'");
-    equal(typeof e.src, "string", "src is of type 'string'");
-});
+
 test("&lt;script&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "script");
     ok(e, "script exits");

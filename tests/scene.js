@@ -21,6 +21,7 @@ test("Light attributes", 10, function () {
 
     var light = this.scene.createRenderLight({
         light: {
+            model: "urn:xml3d:light:directional",
             data: dataNode
         }
     });
@@ -32,7 +33,7 @@ test("Light attributes", 10, function () {
     QUnit.closeVector(actualVector, new XML3DVec3(1, 1, 1), EPSILON, "Intensity default");
 
     equal(lightModels.directional.lightModels.length, 1, "Light without type is in directional container (default)");
-    light.setLightType("spot");
+    light.setLightType("urn:xml3d:light:spot");
     equal(light.model.id, "spot", "Changed type to 'spot'");
 
     equal(lightModels.directional.lightModels.length, 0, "Light has left directional light container");
@@ -99,7 +100,7 @@ test("Light removal: Issue #71", function () {
         parent: group,
         light: {
             data: dataNode,
-            type: "point"
+            model: "urn:xml3d:light:point"
         }
     });
 
@@ -108,7 +109,7 @@ test("Light removal: Issue #71", function () {
         parent: group,
         light: {
             data: dataNode,
-            type: "point"
+            model: "urn:xml3d:light:point"
         }
     });
     this.scene.createRenderGroup({parent: group});

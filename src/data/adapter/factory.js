@@ -33,7 +33,7 @@ var reg = {
     'mesh': Misc.SinkDataAdapter,
     'material': Misc.SinkDataAdapter,
     'shader': Misc.SinkDataAdapter, // TODO(ksons): Remove in 5.1
-    'lightshader': Misc.SinkDataAdapter,
+    'light': Misc.SinkDataAdapter,
     'float': ValueDataAdapter,
     'float2': ValueDataAdapter,
     'float3': ValueDataAdapter,

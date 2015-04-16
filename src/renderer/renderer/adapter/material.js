@@ -12,7 +12,7 @@ var AdapterHandle = require("../../../base/adapterhandle.js");
  */
 var MaterialRenderAdapter = function (factory, node) {
     RenderAdapter.call(this, factory, node);
-    this._dataAdapter = Resource.getAdapter(this.node, "data");
+    this._dataAdapter = Resource.getAdapter(node, "data");
     /** @type MaterialConfiguration | null **/
     this._materialConfiguration = null;
     this._materialModel = null;

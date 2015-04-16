@@ -48,8 +48,8 @@ test("Phong fragment shader", function() {
     notEqual(fragment1.indexOf("HAS_DIFFUSETEXTURE 0"), -1, "HAS_DIFFUSETEXTURE set");
 
     directives = [];
-    var point1 = scene.createRenderLight({light: { type: "point"}});
-    var point2 = scene.createRenderLight({light: { type: "point"}});
+    var point1 = scene.createRenderLight({light: { model: "urn:xml3d:light:point"}});
+    var point2 = scene.createRenderLight({light: { model: "urn:xml3d:light:point"}});
 
     phong.addDirectives.call(phong, directives, scene.lights, materialParameters);
     equal(directives.length, 10, "10 directives from phong material");
@@ -64,7 +64,7 @@ test("Phong fragment shader", function() {
     // Remove the two point lights and add a directional light instead
     point1.remove();
     point2.remove();
-    var dir1 = scene.createRenderLight({light: { type: "directional"}});
+    var dir1 = scene.createRenderLight({light: { model: "urn:xml3d:light:directional"}});
 
     phong.addDirectives.call(phong, directives, scene.lights, materialParameters);
     var fragment3 = this.mergeDirectives(directives, this.addFragmentShaderHeader(phong.fragment));
@@ -88,7 +88,7 @@ test("Phong fragment shader", function() {
     directives = [];
     dir1.remove();
     // Create 15 point lights
-    var pointLights = Array.apply(null, Array(15)).map(function() { return  scene.createRenderLight({light: { type: "point"}}); });
+    var pointLights = Array.apply(null, Array(15)).map(function() { return  scene.createRenderLight({light: { model: "urn:xml3d:light:point"}}); });
 
     phong.addDirectives.call(phong, directives, scene.lights, {
         specularTexture : {}
@@ -104,9 +104,9 @@ test("Phong fragment shader", function() {
     notEqual(fragment5.indexOf("HAS_EMISSIVETEXTURE 0"), -1, "HAS_EMISSIVETEXTURE set");
 
     pointLights.forEach(function(light, idx) { if (idx > 4) light.remove(); });
-    var dir1 = scene.createRenderLight({light: { type: "directional"}});
-    var dir2 = scene.createRenderLight({light: { type: "directional"}});
-    var dir3 = scene.createRenderLight({light: { type: "directional"}});
+    var dir1 = scene.createRenderLight({light: { model: "urn:xml3d:light:directional"}});
+    var dir2 = scene.createRenderLight({light: { model: "urn:xml3d:light:directional"}});
+    var dir3 = scene.createRenderLight({light: { model: "urn:xml3d:light:directional"}});
 
     directives = [];
     phong.addDirectives.call(phong, directives, scene.lights, {

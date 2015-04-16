@@ -20,11 +20,11 @@ var c_BoundingBox = new XML3D.math.bbox.create();
 
 function createLightModel(type, data, light) {
     switch (type) {
-        case "point":
+        case "urn:xml3d:light:point":
             return new LightModels.PointLightModel(data, light);
-        case "spot":
+        case "urn:xml3d:light:spot":
             return new LightModels.SpotLightModel(data, light);
-        case "directional":
+        case "urn:xml3d:light:directional":
             return new LightModels.DirectionalLightModel(data, light);
         default:
             XML3D.debug.logWarning("Unknown light model: ", type, ". Using directional instead.");
@@ -45,7 +45,7 @@ var RenderLight = function (scene, pageEntry, opt) {
     var light = opt.light || {};
     this.userData = null;
     this.localIntensity = opt.localIntensity !== undefined ? opt.localIntensity : 1.0;
-    this.setLightType(light.type, light.data);
+    this.setLightType(light.model, light.data);
 };
 RenderLight.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -53,7 +53,6 @@ XML3D.createClass(RenderLight, RenderNode);
 XML3D.extend(RenderLight.prototype, {
 
     setLightType: function (modelId, data) {
-        modelId = modelId || "directional";
         if (this.model) {
             if (this.model.id == modelId) {
                 return; // Nothing changed

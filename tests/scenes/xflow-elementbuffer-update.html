@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
   <title>XML3D Element Buffer Update Scene</title>
   <link rel="stylesheet" type="text/css" media="all" href="frame.css">
@@ -29,10 +27,6 @@
                 </data>
             </data>
 
-            <lightshader id="ls_dir" script="urn:xml3d:lightshader:directional">
-                <float3 name="intensity">1 1 1</float3>
-            </lightshader>
-
             <material id="mat" script="urn:xml3d:material:phong">
                 <float3 name="diffuseColor">0.2 0.2 0.2</float3>
                 <float3 name="specularColor">0.0 0.0 0.0</float3>
@@ -41,7 +35,7 @@
         </defs>
         <view id="Camera" position="0 11 11" orientation="-1 0 0 0.707"></view>
         <group transform="#t_light">
-            <light shader="#ls_dir"></light>
+            <light model="urn:xml3d:light:directional"><float3 name="intensity">1 1 1</float3></light>
         </group>
         <group id="test1" material="#mat">
             <group transform="#t_1">

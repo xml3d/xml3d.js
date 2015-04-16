@@ -1,5 +1,7 @@
 var TransformableAdapter = require("./transformable.js");
 var Events = require("../../../interface/notification.js");
+var Resource = require("../../../base/resourcemanager.js").Resource;
+
 /**
  * Adapter for <light>
  * @constructor
@@ -8,7 +10,7 @@ var Events = require("../../../interface/notification.js");
  */
 var LightRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, true);
-    this.updateLightShader();
+    this.dataAdapter = Resource.getAdapter(node, "data");
     this.createRenderNode();
 };
 XML3D.createClass(LightRenderAdapter, TransformableAdapter);
@@ -16,13 +18,12 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter);
 LightRenderAdapter.prototype.createRenderNode = function () {
     var parentAdapter = this.getParentRenderAdapter();
     var parentNode = parentAdapter.getRenderNode && parentAdapter.getRenderNode();
-    var lightShader = this.getLightShader();
     this.renderNode = this.factory.getScene().createRenderLight({
         light: {
-            type: lightShader ? lightShader.getLightType() : null, data: lightShader ? lightShader.getDataNode() : null
+            model: this.node.getAttribute("model") || "urn:xml3d:light:directional",
+            data: this.dataAdapter.getXflowNode()
         },
         parent: parentNode,
-        shader: lightShader,
         visible: !this.node.visible ? false : undefined,
         localIntensity: this.node.intensity
     });
@@ -36,17 +37,12 @@ LightRenderAdapter.prototype.notifyChanged = function (evt) {
             this.dispose();
             return;
         case Events.ADAPTER_HANDLE_CHANGED:
-            if (evt.key == "shader") {
-                //The lightshader was destroyed, so this light is now invalid
-                this.renderNode.remove();
-                return;
-            }
             break;
         case Events.VALUE_MODIFIED:
             this.valueModified(evt.mutation);
             break;
         case Events.ADAPTER_VALUE_CHANGED:
-            this.renderNode.setLightType(evt.adapter.getLightType(), evt.adapter.getDataNode());
+            this.renderNode.setLightType(this.getLightModel(), evt.adapter.getDataNode());
     }
 };
 
@@ -56,36 +52,19 @@ LightRenderAdapter.prototype.valueModified = function (mutation) {
         case "visible":
             this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
             break;
-        case "intensity":
-            this.renderNode.setLocalIntensity(newValue);
+        case "intensity": // TODO(ksons): remove in 5.1
+            XML3D.debug.logWarning("The <light> attribute intensity is deprecated in XML3D 5.0.", this.node);
             break;
-        case "shader":
+        case "model":
             this.renderNode.remove();
-            this.updateLightShader();
             this.createRenderNode();
             break;
     }
 };
 
-LightRenderAdapter.prototype.updateLightShader = function () {
-    var shaderHref = this.node.shader;
-    if (!shaderHref) {
-        var styleValue = this.node.getAttribute('style');
-        if (styleValue) {
-            var pattern = /shader\s*:\s*url\s*\(\s*(\S+)\s*\)/i;
-            var result = pattern.exec(styleValue);
-            if (result)
-                shaderHref = result[1];
-        }
-    }
-    this.connectAdapterHandle("shader", this.getAdapterHandle(shaderHref));
-};
 
-/**
- *
- */
-LightRenderAdapter.prototype.getLightShader = function () {
-    return this.getConnectedAdapter("shader");
+LightRenderAdapter.prototype.getLightModel = function () {
+    return ;
 };
 
 LightRenderAdapter.prototype.dispose = function () {

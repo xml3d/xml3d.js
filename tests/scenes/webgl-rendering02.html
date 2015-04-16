@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
+<!DOCTYPE html><html><head lang="en">
   <meta charset="UTF-8">
   <title>XML3D Rendering 2</title>
-  <link rel="stylesheet" type="text/css" media="all"	href="frame.css">
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
   <script type="text/javascript" src="../../build/output/xml3d.js"></script>
   <script type="text/javascript" src="scripts/custommaterial.js"></script>
 </head>
@@ -40,37 +38,36 @@
         <float name="ambientIntensity">1</float>
         <bool name="useVertexColor">true</bool>
     </material>
-    <data id="meshdata" type="triangles">
+    <data id="meshdata">
         <int name="index">0 1 2 1 2 3</int>
         <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
         <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
     </data>
     
-    <data id="wrapMeshData" type="triangles">
+    <data id="wrapMeshData">
         <data src="#meshdata"></data>
         <float2 name="texcoord">0.0 2.0 2.0 2.0 0.0 0.0 2.0 0.0</float2>
     </data>
     
-    <data id="coloredmeshdata" type="triangles">
+    <data id="coloredmeshdata">
         <data src="#meshdata"></data>
         <float3 name="color">0.0 0.0 1.0 0.0 1.0 0.0 1.0 0.0 0.0 1.0 1.0 0.0</float3>
     </data>
     
-    <lightshader id="ls_Spot" script="urn:xml3d:lightshader:point">
-        <float3 name="attenuation">1 0 0</float3>
-       <float3 name="intensity">
-        1 1 1
-       </float3>
-      </lightshader>
-      <transform id="t_Lamp" translation="0 0 3"></transform>
+    <transform id="t_Lamp" translation="0 0 3"></transform>
       
     </defs>
     
     <view id="defaultView" position="0 0 3"></view>
-    <group transform="#t_Lamp" id="mainlight">
-      <light shader="#ls_Spot"/>
-    </group>
+     <group transform="#t_Lamp" id="mainlight">
+       <light model="urn:xml3d:light:point">
+         <float3 name="attenuation">1 0 0</float3>
+         <float3 name="intensity">
+           1 1 1
+         </float3>
+       </light>
+     </group>
     
     <group id="myGroup" material="#texmaterial1" visible="false">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles">
@@ -105,5 +102,5 @@
         return a;
     }
     </script>
-  </body>
- </html>
+</body>
+</html>

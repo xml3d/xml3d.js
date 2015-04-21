@@ -1,5 +1,6 @@
 var printStackTrace = require("../contrib/stacktrace-0.4.js");
 var Options = require("./options.js");
+var assert = require("assert");
 
 (function (ns) {
 
@@ -83,21 +84,7 @@ var Options = require("./options.js");
         logException: function () {
             XML3D.debug.doLog(XML3D.debug.EXCEPTION, arguments);
         },
-        assert: function (c, msg) {
-            if (!c) {
-                var caller;
-                try{
-                    caller = XML3D.debug.assert.caller ? XML3D.debug.assert.caller.name : null;
-                }
-                catch(e){
-                    caller = null;
-                }
-                if (caller)
-                    XML3D.debug.doLog(XML3D.debug.WARNING, ["Assertion failed in " + caller, msg ]);
-                else
-                    XML3D.debug.doLog(XML3D.debug.WARNING, ["Assertion failed", msg ]);
-            }
-        },
+        assert: assert,
         trace: function (msg, logType) {
             logType = logType !== undefined ? logType : XML3D.debug.ERROR;
             if (window.console.trace) {

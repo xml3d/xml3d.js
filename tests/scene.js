@@ -14,19 +14,18 @@ var SceneConstants = XML3DTestLib.SceneConstants;
 var DataNode = XML3DTestLib.DataNode;
 var ComputeRequest = XML3DTestLib.ComputeRequest;
 
-test("Light attributes", 10, function () {
+test("Light attributes", 9, function () {
 
     var dataNode = new DataNode(false);
     var lightModels = this.scene.lights._models;
 
     var light = this.scene.createRenderLight({
-        light: {
+        configuration: {
             model: "urn:xml3d:light:directional",
             data: dataNode
         }
     });
 
-    equal(light.localIntensity, 1.0, "Local intensity default");
     var result = new ComputeRequest(light.model.dataNode, ["intensity"]).getResult();
     var actualVector = new XML3DVec3();
     actualVector.set(result.getOutputData("intensity").getValue());
@@ -49,7 +48,7 @@ test("Light attributes", 10, function () {
     equal(lightModels.directional.lightModels.length, 1, "Light without type is in directional container (default)");
 });
 
-test("Light callbacks", 9, function () {
+test("Light callbacks", 8, function () {
 
     var dataNode = new DataNode(false);
 
@@ -81,8 +80,7 @@ test("Light callbacks", 9, function () {
         start();
     });
 
-    stop(6);
-    light.setLocalIntensity(0.5);
+    stop(5);
     group.setLocalVisible(false);
     group.setLocalVisible(true);
     light.setVisible(false);
@@ -98,8 +96,8 @@ test("Light removal: Issue #71", function () {
     var group = this.scene.createRenderGroup();
     this.scene.createRenderLight({ // SC 3: Add a new light to the scene
         parent: group,
-        light: {
-            data: dataNode,
+        configuration: {
+            dataNode: dataNode,
             model: "urn:xml3d:light:point"
         }
     });
@@ -107,8 +105,8 @@ test("Light removal: Issue #71", function () {
     group = this.scene.createRenderGroup();
     var light = this.scene.createRenderLight({ // SC 3: Add a new light to the scene
         parent: group,
-        light: {
-            data: dataNode,
+        configuration: {
+            dataNode: dataNode,
             model: "urn:xml3d:light:point"
         }
     });

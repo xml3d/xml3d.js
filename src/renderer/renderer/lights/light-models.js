@@ -192,8 +192,6 @@ function transformPose(light, position, direction) {
 }
 
 function transformDefault(target, offset, light) {
-    var color = target["intensity"].subarray(offset * 3, offset * 3 + 3);
-    XML3D.math.vec3.scale(color, color, light.localIntensity);
     target["on"][offset] = light.visible;
 }
 

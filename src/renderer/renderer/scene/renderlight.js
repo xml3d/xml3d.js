@@ -42,10 +42,8 @@ function createLightModel(type, data, light) {
 var RenderLight = function (scene, pageEntry, opt) {
     RenderNode.call(this, NODE_TYPE.LIGHT, scene, pageEntry, opt);
     opt = opt || {};
-    var light = opt.light || {};
-    this.userData = null;
-    this.localIntensity = opt.localIntensity !== undefined ? opt.localIntensity : 1.0;
-    this.setLightType(light.model, light.data);
+    var configuration = opt.configuration || {};
+    this.setLightType(configuration.model, configuration.dataNode);
 };
 RenderLight.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -100,11 +98,6 @@ XML3D.extend(RenderLight.prototype, {
             this.visible = visible;
             this.lightValueChanged();
         }
-    },
-
-    setLocalIntensity: function (intensity) {
-        this.localIntensity = intensity;
-        this.lightValueChanged();
     },
 
     remove: function () {

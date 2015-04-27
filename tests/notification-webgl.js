@@ -1,14 +1,22 @@
-
 function NotifyingAdapterFactory() {
     XML3DTestLib.Adapter.NodeAdapterFactory.call(this, "test");
     var that = this;
     this.name = "test";
     this.event = null;
     this.type = "NotifyingAdapterFactory";
-    this.createAdapter = function() {
+    this.createAdapter = function () {
         return {
-            init : function() {},
-            notifyChanged : function(e) {
+            init: function () {
+            },
+            attributeChangedCallback: function (name, oldValue, newValue) {
+                that.event = {
+                    name : name,
+                    oldValue: oldValue,
+                    newValue: newValue
+                };
+                ok(true, "Adapter notified: " + e);
+            },
+            notifyChanged: function (e) {
                 that.event = e;
                 ok(true, "Adapter notified: " + e);
             }
@@ -27,7 +35,7 @@ test("Factory test", 2, function() {
     this.factory.createAdapter().notifyChanged({});
 });
 
-test("Event attribute notification tests", 7, function() {
+test("Event attribute notification tests", 4, function() {
     var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created"); // 1
@@ -36,12 +44,10 @@ test("Event attribute notification tests", 7, function() {
     var evt = this.factory.event;
     //console.dir(evt);
     ok(evt, "Event has been thrown"); // 3
-    ok(evt.toString().match(/NotificationWrapper/), "Type is NotificationWrapper"); // 4
-    ok(evt.mutation, "DOM notification is wrapped"); // 5
-    equal(evt.mutation.attributeName, "onclick", "MutationEvent::attrName set"); // 6
+    equal(evt.name, "onclick", "MutationEvent::attrName set"); // 6
     e.onclick = function() {}; // Adapter Notified (Not anymore!)
     XML3D.flushDOMChanges();
-    equal(evt.mutation.attributeName, "onclick", "MutationEvent::attrName"); // 8
+    equal(evt.name, "onclick", "MutationEvent::attrName"); // 8
 });
 
 test("Int attribute notifcation tests", 2, function() {

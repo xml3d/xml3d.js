@@ -108,6 +108,27 @@ AssetAdapter.prototype.onTransformChange = function (attrName, matrix) {
     this.asset.setTransform(matrix);
 };
 
+AssetAdapter.prototype.attributeChangedCallback = function(name, oldValue, newValue) {
+        switch (name) {
+            case "name":
+                this.asset.setName(newValue);
+                break;
+            case "material":
+                setMaterialUrl(this, this.asset);
+                break;
+            case "style":
+            case "transform":
+                this.transformFetcher && this.transformFetcher.update();
+                break;
+            case "src":
+                updateAdapterHandle(this, "src", newValue);
+                break;
+            case "pick":
+                updatePickFilter(this);
+                break;
+        }
+};
+
 
 AssetAdapter.prototype.notifyChanged = function (evt) {
     if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
@@ -121,28 +142,7 @@ AssetAdapter.prototype.notifyChanged = function (evt) {
     } else if (evt.type == Events.NODE_REMOVED) {
         updateChildren(this);
 
-    } else if (evt.type == Events.VALUE_MODIFIED) {
-        var attr = evt.mutation.attributeName;
-        switch (attr) {
-            case "name":
-                this.asset.setName(this.node.getAttribute("name"));
-                break;
-            case "material":
-                setMaterialUrl(this, this.asset);
-                break;
-            case "style":
-            case "transform":
-                this.transformFetcher && this.transformFetcher.update();
-                break;
-            case "src":
-                updateAdapterHandle(this, "src", this.node.getAttribute("src"));
-                break;
-            case "pick":
-                updatePickFilter(this);
-                break;
-        }
-
-    } else if (evt.type == Events.THIS_REMOVED) {
+    }  else if (evt.type == Events.THIS_REMOVED) {
         this.clearAdapterHandles();
     }
 };
@@ -177,29 +177,30 @@ AssetDataAdapter.prototype.connectedAdapterChanged = function (attributeName, ad
     }
 };
 
+AssetDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
+    DataAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+    switch (name) {
+        case "name":
+            this.assetEntry.setName(newValue);
+            break;
+        case "compute":
+            updatePostCompute(this);
+            break;
+        case "class":
+            updateClassNames(this);
+            break;
+        case "filter":
+            this.assetEntry.setPostFilter(newValue);
+            break;
+        case "includes":
+            updateIncludes(newValue);
+            break;
+    }
+};
+
 AssetDataAdapter.prototype.notifyChanged = function (evt) {
     DataAdapter.prototype.notifyChanged.call(this, evt);
-    if (evt.type == Events.VALUE_MODIFIED) {
-        var attr = evt.mutation.attributeName;
-        switch (attr) {
-            case "name":
-                this.assetEntry.setName(this.node.getAttribute("name"));
-                break;
-            case "compute":
-                updatePostCompute(this);
-                break;
-            case "class":
-                updateClassNames(this);
-                break;
-            case "filter":
-                this.assetEntry.setPostFilter(this.node.getAttribute("filter"));
-                break;
-            case "includes":
-                updateIncludes(this.node.getAttribute("includes"));
-                break;
-        }
 
-    }
 };
 
 AssetDataAdapter.prototype.onTransformChange = function (attrName, matrix) {
@@ -260,36 +261,38 @@ var AssetMeshAdapter = function (factory, node) {
     AssetDataAdapter.call(this, factory, node);
     this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
 };
-createClass(AssetMeshAdapter, AssetDataAdapter);
+createClass(AssetMeshAdapter, AssetDataAdapter, {
 
-AssetMeshAdapter.prototype.init = function () {
-    AssetDataAdapter.prototype.init.call(this);
-    setMaterialUrl(this, this.assetEntry);
-    this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles");
-    this.assetEntry.setMatchFilter(this.node.getAttribute("match"));
-    this.transformFetcher.update();
-};
-AssetMeshAdapter.prototype.notifyChanged = function (evt) {
-    AssetDataAdapter.prototype.notifyChanged.call(this, evt);
-    if (evt.type == Events.VALUE_MODIFIED) {
-        var attr = evt.mutation.attributeName;
-        switch (attr) {
+    init: function () {
+        AssetDataAdapter.prototype.init.call(this);
+        setMaterialUrl(this, this.assetEntry);
+        this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles");
+        this.assetEntry.setMatchFilter(this.node.getAttribute("match"));
+        this.transformFetcher.update();
+    },
+
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        AssetDataAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+        switch (name) {
             case "material":
                 setMaterialUrl(this, this.assetEntry);
                 break;
             case "match":
-                this.assetEntry.setMatchFilter(this.node.getAttribute("match"));
+                this.assetEntry.setMatchFilter(newValue);
                 break;
             case "style":
             case "transform":
                 this.transformFetcher.update();
                 break;
             case "type":
-                this.assetEntry.setMeshType(this.node.getAttribute("type") || "triangles")
+                this.assetEntry.setMeshType(newValue || "triangles")
         }
+    },
 
+    notifyChanged: function (evt) {
+        AssetDataAdapter.prototype.notifyChanged.call(this, evt);
     }
-};
+});
 
 module.exports = {
     AssetAdapter: AssetAdapter, AssetMeshAdapter: AssetMeshAdapter, AssetDataAdapter: AssetDataAdapter

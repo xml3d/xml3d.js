@@ -6,17 +6,18 @@ var Util = require("../../utils/misc.js");
 var Resource = require("../../base/resourcemanager.js").Resource;
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 var createClass = XML3D.createClass;
-    /**
-     * SinkDataAdapter represents the sink in the data hierarchy (no parents).
-     * @constructor
-     * @extends {DataAdapter}
-     * @param factory
-     * @param node
-     */
-    var SinkDataAdapter = function(factory, node) {
-        DataAdapter.call(this, factory, node);
-    };
-    createClass(SinkDataAdapter, DataAdapter);
+
+/**
+ * SinkDataAdapter represents the sink in the data hierarchy (no parents).
+ * @constructor
+ * @extends {DataAdapter}
+ * @param factory
+ * @param node
+ */
+var SinkDataAdapter = function(factory, node) {
+    DataAdapter.call(this, factory, node);
+};
+createClass(SinkDataAdapter, DataAdapter, {
 
     /**
      * Indicates whether this DataAdapter is a SinkAdapter (has no parent
@@ -24,16 +25,17 @@ var createClass = XML3D.createClass;
      *
      * @returns true if this DataAdapter is a SinkAdapter, otherwise false.
      */
-    SinkDataAdapter.prototype.isSinkAdapter = function() {
+    isSinkAdapter: function () {
         return true;
-    };
+    },
 
     /**
      * Returns String representation of this DataAdapter
      */
-    SinkDataAdapter.prototype.toString = function() {
+    toString: function () {
         return "XML3D.data.SinkDataAdapter";
-    };
+    }
+});
 
 
     var ImgDataAdapter = function(factory, node) {
@@ -43,62 +45,63 @@ var createClass = XML3D.createClass;
         if (node.src)
             this.createImageFromURL(node.src);
     };
-    createClass(ImgDataAdapter, NodeAdapter);
+    createClass(ImgDataAdapter, NodeAdapter, {
 
-    /**
-     * Creates a new image object
-     *
-     * @param {string} url
-     */
-    ImgDataAdapter.prototype.createImageFromURL = function(url) {
-        var that = this;
-        var uri = new URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
-        var onload = function (e, image) {
+        /**
+         * Creates a new image object
+         *
+         * @param {string} url
+         */
+        createImageFromURL: function (url) {
+            var that = this;
+            var uri = new URI(url).getAbsoluteURI(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL);
+            var onload = function (e, image) {
+                if (that.textureEntry) {
+                    that.textureEntry.setImage(image, true);
+                }
+            };
+            var onerror = function (e, image) {
+                XML3D.debug.logError("Could not load image URI=" + image.src);
+            };
+            this.image = Resource.getImage(uri, onload, onerror);
             if (that.textureEntry) {
-                that.textureEntry.setImage(image, true);
+                that.textureEntry.setImage(this.image, true);
             }
-        };
-        var onerror = function (e, image) {
-            XML3D.debug.logError("Could not load image URI="+image.src);
-        };
-        this.image = Resource.getImage(uri, onload, onerror);
-        if (that.textureEntry) {
-            that.textureEntry.setImage(this.image, true);
-        }
-    };
+        },
 
-    /**
-     * @param {Xflow.TextureEntry} entry
-     */
-    ImgDataAdapter.prototype.setTextureEntry = function(entry) {
-        this.textureEntry = entry;
-        if (this.image) {
-            this.textureEntry.setImage(this.image, true);
-        }
-    };
-
-    ImgDataAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == Events.VALUE_MODIFIED) {
-            var attr = evt.mutation.attributeName;
-            if(attr == "src"){
-                this.createImageFromURL(this.node.src);
+        /**
+         * @param {Xflow.TextureEntry} entry
+         */
+        setTextureEntry: function (entry) {
+            this.textureEntry = entry;
+            if (this.image) {
+                this.textureEntry.setImage(this.image, true);
             }
-        };
-    };
+        },
 
-    ImgDataAdapter.prototype.getValue = function(cb, obj) {
-        return this.image;
-    };
+        attributeChangedCallback: function (name, oldValue, newValue) {
+            if (name == "src") {
+                this.createImageFromURL(newValue);
+            }
+        },
 
-    ImgDataAdapter.prototype.getOutputs = function() {
-        var result = {};
-        result['image'] = this;
-        return result;
-    };
+        notifyChanged: function (evt) {
+        },
 
-    ImgDataAdapter.prototype.resolveScript = function() {
-        return null;
-    };
+        getValue: function (cb, obj) {
+            return this.image;
+        },
+
+        getOutputs: function () {
+            var result = {};
+            result['image'] = this;
+            return result;
+        },
+
+        resolveScript: function () {
+            return null;
+        }
+    });
 
     var VideoDataAdapter = function(factory, node) {
         DataAdapter.call(this, factory, node);
@@ -176,12 +179,12 @@ var createClass = XML3D.createClass;
     };
 
     VideoDataAdapter.prototype.notifyChanged = function(evt) {
-        if (evt.type == Events.VALUE_MODIFIED) {
-            var attr = evt.mutation.attributeName;
-            if(attr == "src"){
-                this.createVideoFromURL(this.node.src);
-            }
-        };
+    };
+
+    VideoDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
+        if (name == "src") {
+            this.createVideoFromURL(newValue);
+        }
     };
 
     VideoDataAdapter.prototype.getValue = function(cb, obj) {

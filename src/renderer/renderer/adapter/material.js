@@ -20,8 +20,7 @@ var MaterialRenderAdapter = function (factory, node) {
     this.updateMaterialConfiguration();
 };
 
-XML3D.createClass(MaterialRenderAdapter, RenderAdapter);
-XML3D.extend(MaterialRenderAdapter.prototype, {
+XML3D.createClass(MaterialRenderAdapter, RenderAdapter,  {
 
     getMaterialConfiguration: function() {
         return this._materialConfiguration;
@@ -59,20 +58,14 @@ XML3D.extend(MaterialRenderAdapter.prototype, {
         return new URI(this.node.getAttribute("script"));
     },
 
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        if (name == "script") {
+            this.updateMaterialConfiguration();
+        }
+    },
+
     notifyChanged: function (evt) {
         switch (evt.type) {
-            case Events.VALUE_MODIFIED:
-                var target = evt.mutation.attributeName;
-                switch (target) {
-                    case "script":
-                        this.updateMaterialConfiguration();
-                        break;
-                    default:
-                        XML3D.debug.logWarning("Unhandled mutation event in material adapter for parameter '" + target + "'");
-                        break;
-
-                }
-                break;
             case Events.ADAPTER_HANDLE_CHANGED:
                 if (evt.handleStatus == AdapterHandle.STATUS.NOT_FOUND) {
                     XML3D.debug.logError("Could not find material for url '" + evt.url + "'");
@@ -81,8 +74,6 @@ XML3D.extend(MaterialRenderAdapter.prototype, {
                 this.updateMaterialConfiguration();
                 break;
         }
-
-
     }
 });
 

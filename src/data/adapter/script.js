@@ -10,33 +10,39 @@ var ScriptDataAdapter = function(factory, node) {
         this.connectAdapterHandle(node.name, this.connectedAdapterHandle);
     }
 };
-createClass(ScriptDataAdapter, NodeAdapter);
 
-ScriptDataAdapter.prototype.getScriptType = function(){
-    return this.node.type;
-};
+createClass(ScriptDataAdapter, NodeAdapter, {
 
-ScriptDataAdapter.prototype.getScript = function(){
-    if (this.node.src) {
-        return this.externalScript;
-    } else {
-        return this.node.value;
+    getScriptType: function () {
+        return this.node.type;
+    },
+
+    getScript: function () {
+        if (this.node.src) {
+            return this.externalScript;
+        } else {
+            return this.node.value;
+        }
+    },
+
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        this.notifyOppositeAdapters();
+    },
+
+    notifyChanged: function (evt) {
+        switch (evt.type) {
+            case Events.NODE_INSERTED:
+            case Events.NODE_REMOVED:
+            case Events.VALUE_MODIFIED:
+                this.notifyOppositeAdapters();
+                break;
+
+            case Events.ADAPTER_HANDLE_CHANGED:
+                this.externalScript = evt.adapter.script;
+                this.notifyOppositeAdapters();
+                break;
+        }
     }
-};
-
-ScriptDataAdapter.prototype.notifyChanged = function(evt) {
-    switch(evt.type){
-        case Events.VALUE_MODIFIED:
-        case Events.NODE_INSERTED:
-        case Events.NODE_REMOVED:
-            this.notifyOppositeAdapters();
-            break;
-
-        case Events.ADAPTER_HANDLE_CHANGED:
-            this.externalScript = evt.adapter.script;
-            this.notifyOppositeAdapters();
-            break;
-    }
-};
+});
 
 module.exports = ScriptDataAdapter;

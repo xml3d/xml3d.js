@@ -13,9 +13,9 @@ var TransformableAdapter = function (factory, node, handleMaterial, handleTransf
     }
 
 };
-XML3D.createClass(TransformableAdapter, RenderAdapter);
 
-XML3D.extend(TransformableAdapter.prototype, {
+XML3D.createClass(TransformableAdapter, RenderAdapter, {
+
     updateMaterialHandler: function () {
         var materialURI = getMaterialURI(this.node);
         if (!materialURI) {
@@ -49,39 +49,46 @@ XML3D.extend(TransformableAdapter.prototype, {
 
     onDispose: function () {
         this.transformFetcher && this.transformFetcher.clear();
-    }, onConfigured: function () {
-    }, getRenderNode: function () {
+    },
+
+    onConfigured: function () {
+    },
+
+    getRenderNode: function () {
         if (!this.renderNode) {
             this.renderNode = this.createRenderNode ? this.createRenderNode() : null;
             this.updateLocalMatrix();
         }
         return this.renderNode;
-    }, updateLocalMatrix: function () {
+    },
+
+    updateLocalMatrix: function () {
         this.transformFetcher && this.transformFetcher.update();
-    }, onTransformChange: function (attrName, matrix) {
+    },
+
+    onTransformChange: function (attrName, matrix) {
         if (attrName == "transform") {
             this.renderNode.setLocalMatrix(matrix);
         }
 
     },
 
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        if (name == "transform") {
+            this.transformFetcher && this.transformFetcher.update();
+        } else if (name == "style") {
+            this.transformFetcher && this.transformFetcher.updateMatrix();
+        } else if (name == "visible") {
+            this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
+            this.factory.renderer.requestRedraw("Transformable visibility changed.");
+        } else if (name == "material" && this.handleMaterial) {
+            this.updateMaterialHandler();
+            this.factory.renderer.requestRedraw("Transformable material changed.");
+        }
+    },
 
     notifyChanged: function (evt) {
-        if (evt.type == Events.VALUE_MODIFIED) {
-            var target = evt.mutation.attributeName;
-            if (target == "transform") {
-                this.transformFetcher && this.transformFetcher.update();
-            } else if (target == "style") {
-                this.transformFetcher && this.transformFetcher.updateMatrix();
-            } else if (target == "visible") {
-                var newValue = evt.mutation.target.getAttribute("visible");
-                this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
-                this.factory.renderer.requestRedraw("Transformable visibility changed.");
-            } else if (target == "material" && this.handleMaterial) {
-                this.updateMaterialHandler();
-                this.factory.renderer.requestRedraw("Transformable material changed.");
-            }
-        } else if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
+     if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
             var key = evt.key;
             if (key == "material") {
                 this.updateMaterialHandler();

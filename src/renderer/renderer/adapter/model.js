@@ -86,6 +86,10 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         return result;
     },
 
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+    },
+
     /**
      * @param evt
      */

@@ -10,9 +10,7 @@ var XML3DRenderAdapter = function (factory, node) {
     this.fireLoadEventAfterDraw = false;
     this.firstLoadFired = false;
 };
-XML3D.createClass(XML3DRenderAdapter, RenderAdapter);
-
-XML3D.extend(XML3DRenderAdapter.prototype, {
+XML3D.createClass(XML3DRenderAdapter, RenderAdapter, {
     updateActiveViewAdapter: function () {
         var href = this.node.getAttribute("activeView");
         if (href) {
@@ -20,14 +18,25 @@ XML3D.extend(XML3DRenderAdapter.prototype, {
         } else {
             this.disconnectAdapterHandle("activeView");
         }
-    }, setViewAdapter: function (adapter) {
+    },
+
+    setViewAdapter: function (adapter) {
         adapter = adapter || this.getConnectedAdapter("activeView");
         if (!(adapter && adapter.getRenderNode)) {
             var viewElement = getOrCreateActiveView(this.node);
             adapter = this.factory.getAdapter(viewElement);
         }
         this.factory.getScene().setActiveView(adapter.getRenderNode());
-    }, dispose: function () {
+    },
+
+    attributeChangedCallback: function(name, oldValue, newValue) {
+        if(name.toLowerCase() == "activeview") {
+            this.updateActiveViewAdapter();
+            this.setViewAdapter();
+        }
+    },
+
+    dispose: function () {
         this.clearAdapterHandles();
     }
 });
@@ -45,12 +54,6 @@ XML3DRenderAdapter.prototype.notifyChanged = function (evt) {
         case Events.NODE_REMOVED:
             // Handled in removed node
             return;
-    }
-
-    var target = evt.mutation.attributeName;
-    if (target && (target.toLowerCase() === "activeview")) {
-        this.updateActiveViewAdapter();
-        this.setViewAdapter();
     }
 };
 

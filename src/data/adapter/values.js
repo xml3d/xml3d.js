@@ -54,15 +54,20 @@ ValueDataAdapter.prototype.notifyChanged = function (evt) {
         if (!attr) {
             delete this.node._configured.scriptValue;
             this.xflowInputNode.data.setValue(this.node.value);
-        } else if (attr == "name") {
-            this.xflowInputNode.name = this.node.name;
-        } else if (attr == "key") {
-            this.xflowInputNode.key = this.node.key;
-        } else if (attr == "param") {
-            this.xflowInputNode.paramName = this.node.param ? this.node.name : null;
         }
     }
 };
+
+ValueDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
+    if (name == "name") {
+        this.xflowInputNode.name = newValue;
+    } else if (name == "key") {
+        this.xflowInputNode.key = newValue;
+    } else if (name == "param") {
+        this.xflowInputNode.paramName = newValue ? this.node.name : null;
+    }
+};
+
 
 ValueDataAdapter.prototype.setScriptValue = function (value) {
     // TODO: Add Type check

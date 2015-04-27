@@ -31,6 +31,13 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
         return this.node.hasAttribute("type") ? this.node.getAttribute("type") : "triangles";
     },
 
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+        if (name == "type") {
+            this.renderNode.setType(newValue);
+        }
+    },
+
     /**
      * @param {Events.Notification} evt
      */
@@ -45,25 +52,10 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
             case Events.NODE_REMOVED:
                 // this.createPerObjectData();
                 return;
-            case Events.VALUE_MODIFIED:
-                this.valueChanged(evt.mutation);
         }
-    }, /**
-     * @param {MutationEvent} evt
-     */
-    valueChanged: function (mutation) {
-        var target = mutation.attributeName;
-        switch (target) {
-            case "src":
-                // Handled by data component
-                break;
+    },
 
-            case "type":
-                this.renderNode.setType(mutation.target.getAttribute("type"));
-                break;
-        }
-
-    }, dispose: function () {
+    dispose: function () {
         this.getRenderNode().remove();
         this.clearAdapterHandles();
     }

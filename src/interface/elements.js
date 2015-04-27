@@ -129,23 +129,24 @@ function addRecursive(element){
     Resource.notifyNodeIdChange(element, null, element.id);
 }
 
+/**
+ *
+ * @param {MutationRecord} mutation
+ */
 function handleAttributeChanged(mutation) {
     var target = mutation.target;
     var elementHandler = target._configured;
     if (!elementHandler) {
         return;
     }
-    var notified = false;
+
     var attributeHandler = elementHandler.handlers[mutation.attributeName] || elementHandler.handlers[mutation.attributeName.toLowerCase()];
     if (attributeHandler && attributeHandler.setFromAttribute) {
         var newValue = target.getAttribute(mutation.attributeName);
-        notified = attributeHandler.setFromAttribute(newValue, mutation.oldValue, target, elementHandler.storage);
+        var notified = attributeHandler.setFromAttribute(newValue, mutation.oldValue, target, elementHandler.storage);
+        XML3D.debug.assert(!notified, "We assume no attribute handler notifies adapters anymore.");
     }
-
-    if (!notified) {
-        var n = new events.NotificationWrapper(mutation, events.VALUE_MODIFIED, mutation.target);
-        elementHandler.notify(n);
-    }
+    elementHandler.attributeChangedCallback(mutation);
 }
 
 
@@ -275,6 +276,21 @@ ElementHandler.prototype.notify =  function(evt) {
     for(var a in adapters) {
         try {
             adapters[a].notifyChanged(evt);
+        } catch (e) {
+            XML3D.debug.logException(e);
+        }
+    }
+};
+
+/**
+ * @param {MutationRecord} mutation
+ */
+ElementHandler.prototype.attributeChangedCallback =  function(mutation) {
+    var adapters = this.adapters;
+    for(var a in adapters) {
+        XML3D.debug.assert(adapters[a].attributeChangedCallback, "Adapter implements 'attributeChangedCallback': " + this.element.nodeName + " (" + a + ")");
+        try {
+            adapters[a].attributeChangedCallback(mutation.attributeName, mutation.oldValue, this.element.getAttribute(mutation.attributeName), mutation.attributeNamespace);
         } catch (e) {
             XML3D.debug.logException(e);
         }

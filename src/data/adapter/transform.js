@@ -65,12 +65,13 @@ TransformDataAdapter.prototype.getMatrix = function () {
     return this.matrix;
 };
 
+TransformDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
+   this.needsUpdate = true;
+   this.notifyOppositeAdapters(Events.ADAPTER_VALUE_CHANGED);
+};
 
 TransformDataAdapter.prototype.notifyChanged = function (e) {
-    if (e.type == Events.VALUE_MODIFIED) {
-        this.needsUpdate = true;
-        this.notifyOppositeAdapters(Events.ADAPTER_VALUE_CHANGED);
-    } else if (e.type == Events.NODE_REMOVED) {
+    if (e.type == Events.NODE_REMOVED) {
         this.dispose();
         this.notifyOppositeAdapters(Events.ADAPTER_HANDLE_CHANGED);
     }

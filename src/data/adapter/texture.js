@@ -80,17 +80,17 @@ TextureDataAdapter.prototype.getValue = function () {
     return this.value;
 };
 
-TextureDataAdapter.prototype.notifyChanged = function (evt) {
-    if (evt.type == Events.VALUE_MODIFIED) {
-        var attr = evt.mutation.attributeName;
-        if (attr == "name") {
-            this.xflowInputNode.name = this.node.name;
-        } else if (attr == "key") {
-            this.xflowInputNode.key = this.node.key;
-        } else if (attr == "param") {
-            this.xflowInputNode.paramName = this.node.param ? this.node.name : null;
-        }
+TextureDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
+    if (name == "name") {
+        this.xflowInputNode.name = newValue;
+    } else if (name == "key") {
+        this.xflowInputNode.key = newValue;
+    } else if (name == "param") {
+        this.xflowInputNode.paramName = newValue ? this.node.name : null;
     }
+};
+
+TextureDataAdapter.prototype.notifyChanged = function (evt) {
 };
 
 /**

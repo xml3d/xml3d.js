@@ -164,23 +164,20 @@ DataAdapter.prototype.notifyChanged = function (evt) {
         var removedXflowNode = adapter.getXflowNode();
         this.xflowDataNode.removeChild(removedXflowNode);
 
-    } else if (evt.type === Events.VALUE_MODIFIED) {
-        var attr = evt.mutation.attributeName;
-
-        if (attr === "filter" && !this.assetData) {
-            this.xflowDataNode.setFilter(this.node.getAttribute(attr));
-        }
-        else if (attr === "compute" && !this.assetData) {
-            updateCompute(this);
-        }
-        else if (attr === "src") {
-            this.updateAdapterHandle(attr, this.node.getAttribute(attr));
-        } else if (attr === "platform") {
-            updatePlatform(this);
-        }
-
     } else if (evt.type === Events.THIS_REMOVED) {
         this.clearAdapterHandles();
+    }
+};
+
+DataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
+    if (name === "filter" && !this.assetData) {
+        this.xflowDataNode.setFilter(newValue);
+    } else if (name === "compute" && !this.assetData) {
+        updateCompute(this);
+    } else if (name === "src") {
+        this.updateAdapterHandle(name, newValue);
+    } else if (name === "platform") {
+        updatePlatform(this);
     }
 };
 

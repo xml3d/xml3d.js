@@ -28,26 +28,8 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
         });
     },
 
-    notifyChanged: function (evt) {
-        switch (evt.type) {
-            case Events.NODE_REMOVED:
-                return;
-            case Events.THIS_REMOVED:
-                this.dispose();
-                return;
-            case Events.ADAPTER_HANDLE_CHANGED:
-                break;
-            case Events.VALUE_MODIFIED:
-                this.valueModified(evt.mutation);
-                break;
-            case Events.ADAPTER_VALUE_CHANGED:
-                this.renderNode.setLightType(this.getLightModel(), evt.adapter.getDataNode());
-        }
-    },
-
-    valueModified: function (mutation) {
-        var newValue = mutation.target.getAttribute(mutation.attributeName);
-        switch (mutation.attributeName) {
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        switch (name) {
             case "visible":
                 this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
                 break;
@@ -58,6 +40,16 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
                 this.renderNode.remove();
                 this.createRenderNode();
                 break;
+        }
+    },
+
+    notifyChanged: function (evt) {
+        switch (evt.type) {
+            case Events.NODE_REMOVED:
+                return;
+            case Events.THIS_REMOVED:
+                this.dispose();
+                return;
         }
     },
 

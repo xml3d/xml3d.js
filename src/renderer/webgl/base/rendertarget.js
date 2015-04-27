@@ -70,16 +70,13 @@ XML3D.extend(GLRenderTarget.prototype, {
     }, getScale: function () {
         return this.scale;
     }, bind: function () {
-        var created = false;
         if (!this.handle) {
             this.createFrameBuffer(this.opt.colorFormat, this.opt.depthFormat, this.opt.stencilFormat);
-            created = true;
         }
         if (this.valid) {
             var gl = this.context.gl;
             gl.bindFramebuffer(gl.FRAMEBUFFER, this.handle);
-            // Set default viewport
-            created && gl.viewport(0, 0, this.width, this.height);
+            gl.viewport(0, 0, this.width, this.height);
         }
     }, unbind: function () {
         var gl = this.context.gl;
@@ -306,16 +303,13 @@ XML3D.extend(GLScaledRenderTarget.prototype, {
             return this.scale;
         },
         bind: function (side) {
-            var created = false;
             if (this.framebuffers.length <= 0) {
                 this.createFrameBuffers(this.opt.colorFormat, this.opt.depthFormat, this.opt.stencilFormat);
-                created = true;
             }
             if (this.valid) {
                 var gl = this.context.gl;
                 gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffers[side]);
-                // Set default viewport
-                created && gl.viewport(0, 0, this.width, this.height);
+                gl.viewport(0, 0, this.width, this.height);
             }
         },
         unbind: function () {

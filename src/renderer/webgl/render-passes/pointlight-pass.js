@@ -109,7 +109,6 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
                 target.bind(side);
 
                 gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
-                gl.viewport(0, 0, width, height);
                 gl.enable(gl.DEPTH_TEST);
 
                 var count = {objects: 0, primitives: 0};

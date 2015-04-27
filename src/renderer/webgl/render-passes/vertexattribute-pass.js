@@ -17,7 +17,6 @@ XML3D.extend(VertexAttributePass.prototype, {
 
         target.bind();
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.viewport(0, 0, target.getWidth(), target.getHeight());
         gl.enable(gl.DEPTH_TEST);
 
         scene.updateReadyObjectsFromActiveView(aspect);

@@ -29,7 +29,6 @@ XML3D.extend(ForwardRenderPass.prototype, {
 
             target.bind();
             this.setGLStates();
-            gl.viewport(0, 0, width, height);
 
             scene.updateReadyObjectsFromActiveView(aspect);
             scene.getActiveView().getWorldToViewMatrix(c_worldToViewMatrix);

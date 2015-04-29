@@ -24,6 +24,9 @@
   },
   "dependencies": {
     "gl-matrix": "http://github.com/toji/gl-matrix/tarball/master",
+    "lodash.assign": "^3.1.0",
+    "lodash.create": "^3.1.0",
+    "lodash.defaults": "^3.1.1",
     "texture-manager": "http://github.com/ksons/texture-manager/tarball/master"
   }
 }

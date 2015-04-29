@@ -161,7 +161,7 @@ createClass(SinkDataAdapter, DataAdapter, {
 
     VideoDataAdapter.prototype._tick = function() {
         this._ticking = true;
-        window.requestAnimFrame(this._boundTick, 30);
+        window.requestAnimationFrame(this._boundTick);
         // FIXME Do this only when currentTime is changed (what about webcam ?)
         if (this.textureEntry) {
             this.textureEntry.setImage(this.video);

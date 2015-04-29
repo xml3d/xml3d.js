@@ -1,4 +1,3 @@
-require("../utils/array.js");
 var Resource = require("../base/resourcemanager.js").Resource;
 
 var string2bool = function(string) {
@@ -410,7 +409,7 @@ handlers.BoolArrayValueHandler.prototype.parse = function(elem) {
     var m = str.match(exp);
     if (!m)
         return new Uint8Array();
-    m = Array.map(m, string2bool);
+    m = m.map(string2bool);
     return m ? new Uint8Array(m) : new Uint8Array();
 };
 

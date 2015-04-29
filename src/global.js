@@ -1,3 +1,6 @@
+var assign = require("lodash.assign");
+var create = require("lodash.create");
+
 if (window.XML3D !== undefined) {
     throw new Error("Tried to define the XML3D namespace a second time. Please ensure xml3d.js is only loaded once!");
 }
@@ -22,65 +25,22 @@ XML3D.createElement = function(tagName) {
     return document.createElementNS(XML3D.xml3dNS, tagName);
 };
 
-XML3D.extend = function(a, b) {
-    for ( var prop in b) {
-        var g = b.__lookupGetter__(prop), s = b.__lookupSetter__(prop);
-        if (g||s) {
-            if (g) {
-                a.__defineGetter__(prop, g);
-            }
-            if (s) {
-                a.__defineSetter__(prop, s);
-            }
-        } else {
-            if (b[prop] === undefined) {
-                delete a[prop];
-            } else if (prop !== "constructor" || a !== window) {
-                a[prop] = b[prop];
-            }
-        }
-    }
-    return a;
-};
-
-/**
- * Returns true if ctor is a superclass of subclassCtor.
- * @param ctor
- * @param subclassCtor
- * @return {Boolean}
- */
-XML3D.isSuperclassOf = function(ctor, subclassCtor) {
-    while (subclassCtor && subclassCtor.superclass) {
-        if (subclassCtor.superclass === ctor.prototype)
-            return true;
-        subclassCtor = subclassCtor.superclass.constructor;
-    }
-    return false;
-};
+XML3D.extend = assign;
 
 /**
  *
- * @param {Object} ctor Constructor
+ * @param {Object} obj Constructor
  * @param {Object} parent Parent class
  * @param {Object=} methods Methods to add to the class
  * @return {Object!}
  */
-XML3D.createClass = function(ctor, parent, methods) {
-    methods = methods || {};
-    if (parent) {
-        /** @constructor */
-        var F = function() {
-        };
-        F.prototype = parent.prototype;
-        ctor.prototype = new F();
-        ctor.prototype.constructor = ctor;
-        ctor.superclass = parent.prototype;
+XML3D.createClass = function(obj, parent, methods) {
+    if(!parent) {
+        assign(obj.prototype, methods);
+    } else {
+        obj.prototype = create(parent.prototype, methods);
     }
-    ctor.isSuperclassOf = XML3D.isSuperclassOf.bind(ctor, ctor);
-    for ( var m in methods) {
-        ctor.prototype[m] = methods[m];
-    }
-    return ctor;
+    return obj;
 };
 
 XML3D.debug = require("./utils/debug.js");

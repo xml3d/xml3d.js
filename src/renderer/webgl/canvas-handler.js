@@ -35,7 +35,7 @@ GLCanvasHandler.prototype.setRenderer = function (renderer) {
 GLCanvasHandler.prototype.initialize = function () {
      this.configureCanvas();
 
-    // This function is called at regular intervals by requestAnimFrame to
+    // This function is called at regular intervals by requestAnimationFrame to
     // determine if a redraw
     // is needed
     var that = this;
@@ -52,7 +52,7 @@ GLCanvasHandler.prototype.initialize = function () {
             that.draw();
         }
 
-        window.requestAnimFrame(that.tick, MAXFPS);
+        window.requestAnimationFrame(that.tick, MAXFPS);
     };
 
       // Block the right-click context menu on the canvas unless it's explicitly toggled

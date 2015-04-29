@@ -1,6 +1,5 @@
 var events = require("./notification.js");
 var ClassInfo = require("./configuration.js").classInfo;
-require("../utils/array.js");
 var Resource = require("../base/resourcemanager.js").Resource;
 
 var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver),
@@ -398,7 +397,7 @@ config.element = function(element) {
  */
 config.configure = function(element) {
     if (Array.isArray(element)) {
-        Array.forEach(element, function(el) {
+        element.forEach(function(el) {
             config.element(el);
         });
     } else {

@@ -1,5 +1,3 @@
-require("../../../utils/array.js");
-
 module.exports = {
     /**
      * Set uniforms for active program

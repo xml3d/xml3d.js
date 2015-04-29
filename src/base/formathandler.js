@@ -14,7 +14,7 @@ var FormatHandler = function() {
 };
 
 FormatHandler.prototype.registerFactoryClass = function (factoryClass) {
-    if (!factoryClass.prototype.aspect || !XML3D.isSuperclassOf(AdapterFactory, factoryClass))
+    if (!factoryClass.prototype.aspect )
         throw new Error("factoryClass must be a subclass of XML3D.base.AdapterFactory");
     this.factoryClasses[factoryClass.prototype.aspect] = factoryClass;
 };

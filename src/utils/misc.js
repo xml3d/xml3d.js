@@ -1,16 +1,5 @@
 // utils/misc.js
 
-window.requestAnimFrame = (function(){
-    return  window.requestAnimationFrame       ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame    ||
-            window.oRequestAnimationFrame      ||
-            window.msRequestAnimationFrame     ||
-            function(f, fps){
-              window.setTimeout(f, 1000 / fps);
-            };
-  })();
-
 (function(exports) {
 
 

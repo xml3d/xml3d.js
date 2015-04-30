@@ -40,7 +40,9 @@ XML3D.extend(GLCanvasTarget.prototype, {
         return this.height;
     }, getScale: function () {
         return 1;
-    }, bind: empty, unbind: empty, resize: empty
+    }, bind: function() {
+        this.context.gl.viewport(0, 0, this.width, this.height);
+    }, unbind: empty, resize: empty
 });
 
 /**

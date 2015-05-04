@@ -96,7 +96,7 @@ XML3D.extend(RenderGroup.prototype, {
     addChild: function (child) {
         this.children.push(child);
         this.setBoundingBoxDirty();
-        this.scene.dispatchEvent({type: EVENT_TYPE.SCENE_STRUCTURE_CHANGED, newChild: child});
+        this.scene.emit(EVENT_TYPE.SCENE_STRUCTURE_CHANGED, child, false);
     },
 
     removeChild: function (child) {
@@ -104,7 +104,7 @@ XML3D.extend(RenderGroup.prototype, {
         if (index != -1) {
             this.children.splice(index, 1);
         }
-        this.scene.dispatchEvent({type: EVENT_TYPE.SCENE_STRUCTURE_CHANGED, removedChild: child});
+        this.scene.emit(EVENT_TYPE.SCENE_STRUCTURE_CHANGED, child, true);
     },
 
     getChildren: function () {

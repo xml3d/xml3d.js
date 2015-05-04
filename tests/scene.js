@@ -58,8 +58,8 @@ test("Light callbacks", 8, function () {
         }
     });
 
-    this.scene.addEventListener(SceneConstants.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (event) {
-        ok(event.light, "Got a structure changed callback");
+    this.scene.addListener(SceneConstants.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (light) {
+        ok(light === light, "Got a structure changed callback");
         start();
     });
 
@@ -75,7 +75,7 @@ test("Light callbacks", 8, function () {
         }
     });
 
-    this.scene.addEventListener(SceneConstants.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (event) {
+    this.scene.addListener(SceneConstants.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (light) {
         ok(true, "Got a value changed callback");
         start();
     });

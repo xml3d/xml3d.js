@@ -116,11 +116,11 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         if (!this.bindedShaderChanged) this.bindedShaderChanged = this.shaderChanged.bind(this);
 
         if (this.shaderComposer)
-            this.shaderComposer.removeEventListener(MaterialEvents.MATERIAL_STRUCTURE_CHANGED, this.bindedShaderChanged);
+            this.shaderComposer.removeListener(MaterialEvents.MATERIAL_STRUCTURE_CHANGED, this.bindedShaderChanged);
 
         this.shaderComposer = shaderComposer;
         if (this.shaderComposer)
-            this.shaderComposer.addEventListener(MaterialEvents.MATERIAL_STRUCTURE_CHANGED, this.bindedShaderChanged);
+            this.shaderComposer.on(MaterialEvents.MATERIAL_STRUCTURE_CHANGED, this.bindedShaderChanged);
 
         this.changeState |= CHANGE_STATE.SHADER_CHANGED;
     },
@@ -171,11 +171,10 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
         var newValid = !!this.shaderClosure && this.typeDataValid;
 
         if (oldValid != newValid) {
-            this.dispatchEvent({
-                type: EVENT_TYPE.DRAWABLE_STATE_CHANGED,
-                newState: newValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE,
-                oldState: oldValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE
-            });
+            this.emit(EVENT_TYPE.DRAWABLE_STATE_CHANGED,
+                newValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE,
+                oldValid ? READY_STATE.COMPLETE : READY_STATE.INCOMPLETE
+            );
         }
         this.changeState = CHANGE_STATE.NOTHING_CHANGED;
 
@@ -208,7 +207,7 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
      */
     typeDataChanged: function (request, state) {
         this.changeState |= state == XC.RESULT_STATE.CHANGED_STRUCTURE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.TYPE_DATA_CHANGED;
-        this.dispatchEvent({type: EVENT_TYPE.SCENE_SHAPE_CHANGED});
+        this.emit(EVENT_TYPE.SCENE_SHAPE_CHANGED);
         this.context.requestRedraw("Mesh Type Data Change");
         XML3D.debug.logDebug("XflowMesh: Type data changed", request, state, this.changeState);
     },
@@ -384,7 +383,7 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
     shaderInputDataChanged: function (request, state) {
         this.changeState |= state != XC.RESULT_STATE.CHANGED_DATA_VALUE ? CHANGE_STATE.STRUCTURE_CHANGED : CHANGE_STATE.VS_DATA_CHANGED;
         // TODO: We don't know if the change of data only influences the surface shading or the actual mesh shape
-        this.dispatchEvent({type: EVENT_TYPE.SCENE_SHAPE_CHANGED});
+        this.emit(EVENT_TYPE.SCENE_SHAPE_CHANGED);
         this.context.requestRedraw("Mesh Attribute Data Changed");
         XML3D.debug.logDebug("XflowMesh: Attribute data changed", request, state, this.changeState);
     },

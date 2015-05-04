@@ -1,7 +1,7 @@
 var GLScene = require("../scene/glscene.js");
 var GLLights = require("../scene/gllights.js");
 var MaterialEvents = require("../materials/events.js");
-var EventDispatcher = require("../../../contrib/EventDispatcher.js");
+var EventEmitter = require("events").EventEmitter;
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var XC = require("../../../xflow/interface/constants.js");
 
@@ -55,6 +55,7 @@ IShaderComposer.prototype.getShaderAttributes = function () {
  * @constructor
  */
 var AbstractShaderComposer = function (context, shaderInfo) {
+    EventEmitter.call(this);
     this.context = context;
     this.shaderClosures = [];
     this.dataChanged = false;
@@ -62,7 +63,7 @@ var AbstractShaderComposer = function (context, shaderInfo) {
     this.request = null;
 };
 
-XML3D.createClass(AbstractShaderComposer, EventDispatcher, {
+XML3D.createClass(AbstractShaderComposer, EventEmitter, {
 
     // Implemented by subclass
     setShaderInfo: null,
@@ -180,7 +181,7 @@ XML3D.createClass(AbstractShaderComposer, EventDispatcher, {
     initializeShaderClosure: function (shaderClosure, scene) {
         shaderClosure.compile();
 
-        scene.dispatchEvent({type: MaterialEvents.MATERIAL_INITIALIZED});
+        scene.emit(MaterialEvents.MATERIAL_INITIALIZED);
         this.updateClosureFromComputeResult(shaderClosure, this.getShaderDataResult());
         this.updateClosureFromLightParameters(shaderClosure, scene);
         this.shaderClosures.push(shaderClosure);
@@ -191,7 +192,7 @@ XML3D.createClass(AbstractShaderComposer, EventDispatcher, {
         for (var i = 0; i < this.shaderClosures.length; ++i) {
             this.shaderClosures[i].obsolete = true;
         }
-        this.dispatchEvent({type: MaterialEvents.MATERIAL_STRUCTURE_CHANGED});
+        this.emit(MaterialEvents.MATERIAL_STRUCTURE_CHANGED);
         this.dataChanged = true;
         this.updateLightValues = true;
     },

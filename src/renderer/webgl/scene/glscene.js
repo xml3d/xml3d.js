@@ -187,28 +187,28 @@ XML3D.extend(GLScene.prototype, {
         }
     },
     addListeners: function () {
-        this.addEventListener(C.EVENT_TYPE.SCENE_STRUCTURE_CHANGED, function (event) {
-            if (event.newChild !== undefined) {
-                this.addChildEvent(event.newChild);
-            } else if (event.removedChild !== undefined) {
-                this.removeChildEvent(event.removedChild);
+        this.on(C.EVENT_TYPE.SCENE_STRUCTURE_CHANGED, function (child, removed) {
+            if (removed) {
+                this.removeChildEvent(child);
+            } else {
+                this.addChildEvent(child);
             }
         });
-        this.addEventListener(C.EVENT_TYPE.VIEW_CHANGED, function (/*event*/) {
+        this.on(C.EVENT_TYPE.VIEW_CHANGED, function (/*newView*/) {
             this.context.requestRedraw("Active view changed.");
         });
-        this.addEventListener(C.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (/*event*/) {
+        this.on(C.EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, function (/*event*/) {
             this.lightsNeedUpdate = true;
             this.shaderFactory.setLightStructureDirty();
             this.context.requestRedraw("Light structure changed.");
         });
-        this.addEventListener(C.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (event) {
+        this.on(C.EVENT_TYPE.LIGHT_VALUE_CHANGED, function (light) {
             this.lightsNeedUpdate = true;
             this.shaderFactory.setLightValueChanged();
-            this.lights.lightValueChanged(event.light);
+            this.lights.lightValueChanged(light);
             this.context.requestRedraw("Light value changed.");
         });
-         this.addEventListener(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (event) {
+         this.on(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (/* event */) {
             // Need to update light frustum. Defer this until the next render phase
              this.lightsNeedUpdate = true;
         });

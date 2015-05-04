@@ -11,13 +11,14 @@ var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var XC = require("../../../xflow/interface/constants.js");
 var URI = require("../../../utils/uri.js").URI;
-var EventDispatcher = require("../../../contrib/EventDispatcher.js");
+var EventEmitter = require('events').EventEmitter;
 
 /**
- *
+ * @extends {EventEmitter}
  * @constructor
  */
 var Scene = function () {
+    EventEmitter.call(this);
     this.boundingBox = new XML3D.math.bbox.create();
     this.lights = new LightManager();
     this.pager = new Pager();
@@ -31,7 +32,7 @@ var Scene = function () {
     this.rootNode = this.createRootNode();
 };
 
-XML3D.createClass(Scene, EventDispatcher, {
+XML3D.createClass(Scene, EventEmitter, {
     /**
      * @returns {RenderView}
      */
@@ -45,7 +46,7 @@ XML3D.createClass(Scene, EventDispatcher, {
             if (!view)
                 throw new Error("Active view must not be null");
             this.activeView = view;
-            this.dispatchEvent({type: C.EVENT_TYPE.VIEW_CHANGED, newView: this.activeView});
+            this.emit(C.EVENT_TYPE.VIEW_CHANGED, this.activeView);
         }
     },
     /**
@@ -140,7 +141,7 @@ XML3D.createClass(Scene, EventDispatcher, {
             );
         }
         return this._defaultMaterial;
-    },
+    }
 
 
 

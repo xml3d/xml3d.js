@@ -70,12 +70,12 @@ XML3D.extend(RenderLight.prototype, {
 
     lightValueChanged: function () {
         if (this.model) { // FIXME: Complex dependency
-            this.scene.dispatchEvent({type: EVENT_TYPE.LIGHT_VALUE_CHANGED, light: this});
+            this.scene.emit(EVENT_TYPE.LIGHT_VALUE_CHANGED, this);
         }
     },
 
     lightStructureChanged: function (removed) {
-        this.scene.dispatchEvent({type: EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, light: this, removed: removed});
+        this.scene.emit(EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this, removed);
     },
 
     updateWorldMatrix: function () {

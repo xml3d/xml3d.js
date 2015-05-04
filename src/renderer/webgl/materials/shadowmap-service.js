@@ -11,18 +11,18 @@ var PointLightPass = require("../render-passes/pointlight-pass");
  */
 var ShadowMapService = function (context, scene) {
     this.context = context;
-    scene.addEventListener(EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChanged.bind(this));
-    scene.addEventListener(EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChanged.bind(this));
-    scene.addEventListener(EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChanged.bind(this));
+    scene.on(EVENT_TYPE.LIGHT_STRUCTURE_CHANGED, this.onLightStructureChanged.bind(this));
+    scene.on(EVENT_TYPE.LIGHT_VALUE_CHANGED, this.onLightValueChanged.bind(this));
+    scene.on(EVENT_TYPE.SCENE_SHAPE_CHANGED, this.onSceneShapeChanged.bind(this));
 
     this.shadowMapInfos = [];
     this.dirty = true;
 };
 
 XML3D.extend(ShadowMapService.prototype, {
-    onLightStructureChanged: function (event) {
-        var light = event.light, remove = light.removed, shadowMapInfos = this.shadowMapInfos;
-        if (remove) {
+    onLightStructureChanged: function (light, removed) {
+        var shadowMapInfos = this.shadowMapInfos;
+        if (removed) {
             removeLight(shadowMapInfos, light);
         } else {
             if (lightNeedsShadowMap(light)) {
@@ -40,7 +40,7 @@ XML3D.extend(ShadowMapService.prototype, {
         this.requestRendering("scene shape changed");
     },
 
-    requestRendering: function(reason) {
+    requestRendering: function(/*reason*/) {
         this.dirty = true;
     },
 
@@ -55,7 +55,7 @@ XML3D.extend(ShadowMapService.prototype, {
     },
 
     fillGlobalParameters: function(globals) {
-        var shadowUnits = mergeShadowParameters(this.shadowMapInfos)
+        var shadowUnits = mergeShadowParameters(this.shadowMapInfos);
         XML3D.extend(globals, shadowUnits);
     }
 
@@ -124,7 +124,7 @@ function createPointLightPass(light, context, params) {
 function mergeShadowParameters(shadowMapInfos) {
     var result = {};
     ["spot", "point", "directional"].forEach(function(model) {
-        var sameModel = shadowMapInfos.filter(function(info) { return info.light.model.id == model; })
+        var sameModel = shadowMapInfos.filter(function(info) { return info.light.model.id == model; });
         result[model + "LightShadowMap"] = sameModel.map(function (info) {
             return info.slot;
         });

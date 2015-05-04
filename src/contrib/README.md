@@ -12,10 +12,3 @@ Author: Jon Bringhurst
 URL: https://github.com/fintler/webgl-unproject
 License: SGI FREE SOFTWARE LICENSE B
 
-### eventdispatcher.js ###
-
-JavaScript events for custom objects
-
-Author: mrdoob
-URL: https://github.com/mrdoob/eventdispatcher.js
-License: The MIT License

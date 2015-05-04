@@ -134,17 +134,17 @@ XML3D.createClass(RenderObject, RenderNode, {
         var result = this.scene.createDrawable(this);
         if (result) {
             var that = this;
-            result.addEventListener(C.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function (evt) {
-                if (evt.newState === DrawableClosure.READY_STATE.COMPLETE) {
+            result.on(C.EVENT_TYPE.DRAWABLE_STATE_CHANGED, function (newState, oldState) {
+                if (newState === DrawableClosure.READY_STATE.COMPLETE) {
                     that.scene.moveFromQueueToReady(that);
-                } else if (evt.newState === DrawableClosure.READY_STATE.INCOMPLETE && evt.oldState === DrawableClosure.READY_STATE.COMPLETE) {
+                } else if (newState === DrawableClosure.READY_STATE.INCOMPLETE && oldState === DrawableClosure.READY_STATE.COMPLETE) {
                     that.scene.moveFromReadyToQueue(that);
                 }
             });
             result.updateTypeRequest();
             result.calculateBoundingBox();
-            result.addEventListener(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (evt) {
-                that.scene.dispatchEvent({type: C.EVENT_TYPE.SCENE_SHAPE_CHANGED})
+            result.on(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (evt) {
+                that.scene.emit(C.EVENT_TYPE.SCENE_SHAPE_CHANGED)
             })
         }
         return result;
@@ -305,7 +305,7 @@ XML3D.createClass(RenderObject, RenderNode, {
     setTransformDirty: function () {
         this.transformDirty = true;
         this.setBoundingBoxDirty();
-        this.scene.dispatchEvent({type: C.EVENT_TYPE.SCENE_SHAPE_CHANGED});
+        this.scene.emit(C.EVENT_TYPE.SCENE_SHAPE_CHANGED);
         this.scene.requestRedraw("Transformation changed");
     },
 

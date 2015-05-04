@@ -11,17 +11,16 @@ var DataNode = require("../../../xflow/interface/graph.js").DataNode;
 var BufferEntry = require("../../../xflow/interface/data.js").BufferEntry;
 var XC = require("../../../xflow/interface/constants.js");
 var URI = require("../../../utils/uri.js").URI;
+var EventDispatcher = require("../../../contrib/EventDispatcher.js");
 
 /**
  *
  * @constructor
- * @extends Pager
  */
 var Scene = function () {
-    Pager.call(this);
-
     this.boundingBox = new XML3D.math.bbox.create();
     this.lights = new LightManager();
+    this.pager = new Pager();
 
     /** @type RenderView */
     this.activeView = null;
@@ -31,10 +30,8 @@ var Scene = function () {
 
     this.rootNode = this.createRootNode();
 };
-XML3D.createClass(Scene, Pager);
 
-
-XML3D.extend(Scene.prototype, {
+XML3D.createClass(Scene, EventDispatcher, {
     /**
      * @returns {RenderView}
      */
@@ -56,22 +53,22 @@ XML3D.extend(Scene.prototype, {
      * @returns {RenderObject}
      */
     createRenderObject: function (opt) {
-        var pageEntry = this.getPageEntry(RenderObject.ENTRY_SIZE);
+        var pageEntry = this.pager.getPageEntry(RenderObject.ENTRY_SIZE);
         return new RenderObject(this, pageEntry, opt);
     },
 
     createRenderGroup: function (opt) {
-        var pageEntry = this.getPageEntry(RenderGroup.ENTRY_SIZE);
+        var pageEntry = this.pager.getPageEntry(RenderGroup.ENTRY_SIZE);
         return new RenderGroup(this, pageEntry, opt);
     },
 
     createRenderView: function (opt) {
-        var pageEntry = this.getPageEntry(RenderView.ENTRY_SIZE);
+        var pageEntry = this.pager.getPageEntry(RenderView.ENTRY_SIZE);
         return new RenderView(this, pageEntry, opt);
     },
 
     createRenderLight: function (opt) {
-        var pageEntry = this.getPageEntry(RenderLight.ENTRY_SIZE);
+        var pageEntry = this.pager.getPageEntry(RenderLight.ENTRY_SIZE);
         return new RenderLight(this, pageEntry, opt);
     },
 
@@ -80,7 +77,7 @@ XML3D.extend(Scene.prototype, {
     },
 
     createRootNode: function () {
-        var pageEntry = this.getPageEntry(RenderGroup.ENTRY_SIZE);
+        var pageEntry = this.pager.getPageEntry(RenderGroup.ENTRY_SIZE);
         var root = new RenderGroup(this, pageEntry, {
             material: this.getDefaultMaterial()
         });
@@ -143,7 +140,9 @@ XML3D.extend(Scene.prototype, {
             );
         }
         return this._defaultMaterial;
-    }
+    },
+
+
 
 });
 

@@ -1,10 +1,13 @@
-var EventDispatcher = require("../../../contrib/EventDispatcher.js");
+var DEFAULT_PAGE_SIZE = 1 << 12;
 
 /**
- * @extends {EventDispatcher}
  * @constructor
  */
-var Pager = function () {
+var Pager = function (opt) {
+    opt = opt || {};
+
+    this.pageSize = opt.pageSize || DEFAULT_PAGE_SIZE;
+
     /** @type Array<Float32Array> */
     this.pages = [];
     /** @type number */
@@ -15,12 +18,12 @@ var Pager = function () {
     this.addPage();
 };
 
-XML3D.createClass(Pager, EventDispatcher, {
+XML3D.extend(Pager.prototype, {
     addPage: function () {
-        var page = new Float32Array(Pager.PAGE_SIZE);
+        var page = new Float32Array(this.pageSize);
         this.pages.push(page);
         this.nextOffset = 0;
-        XML3D.debug.logInfo("Adding page", this.pages.length, "(", Pager.PAGE_SIZE * Float32Array.BYTES_PER_ELEMENT * this.pages.length / 1024, "kB)");
+        XML3D.debug.logInfo("Adding page", this.pages.length, "(", this.pageSize * Float32Array.BYTES_PER_ELEMENT * this.pages.length / 1024, "kB)");
     },
 
     getPageEntry: function (size) {
@@ -46,7 +49,7 @@ XML3D.createClass(Pager, EventDispatcher, {
      * @returns {{ page: Float32Array, offset: number, size: number }}
      */
     createPageEntry: function (size) {
-        if (this.nextOffset + size > Pager.PAGE_SIZE) {
+        if (this.nextOffset + size > this.pageSize) {
             this.addPage();
             return this.getPageEntry(size);
         }
@@ -68,7 +71,6 @@ XML3D.createClass(Pager, EventDispatcher, {
         sameSizeEntries.push(entryInfo);
     }
 });
-Pager.PAGE_SIZE = 1 << 12;
 
 module.exports = Pager;
 

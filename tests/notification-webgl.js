@@ -14,7 +14,7 @@ function NotifyingAdapterFactory() {
                     oldValue: oldValue,
                     newValue: newValue
                 };
-                ok(true, "Adapter notified: " + e);
+                ok(true, "Adapter notified: " + name);
             },
             notifyChanged: function (e) {
                 that.event = e;
@@ -35,7 +35,7 @@ test("Factory test", 2, function() {
     this.factory.createAdapter().notifyChanged({});
 });
 
-test("Event attribute notification tests", 4, function() {
+test("Event attribute notification tests", 5, function() {
     var e = document.createElementNS(XML3D.xml3dNS, "xml3d");
     var a = this.factory.getAdapter(e);
     ok(a, "Adapter created"); // 1

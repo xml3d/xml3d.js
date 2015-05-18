@@ -454,12 +454,79 @@
     <section>
       <h4>The <code>float</code>, <code>float2</code>, <code>float3</code>, <code>float4</code>, and
         <code>float4x4</code> elements</h4>
+        <p>The <code>float*</code> elements hold a space separated list of floating point values. The tag name determines how this data is interpreted, ie. a <code>float2</code> element
+            will interpret the data as an array of 2D vectors while a <code>float4x4</code> element will interpret it as an array of 4x4 matrices. </p>
+        <div class="issue">We should move the following usage description to a "Value Elements" section.</div>
+        <p>The <dfn id="attr-data-name">name</dfn> attribute acts as an ID for the data contained in this element. It may be referenced in XFlow operators or
+            in material shaders. If two value elements with the same name are present in an XFlow data graph then the value nearest the top will replace any value
+            nested deeper inside the graph.</p>
+
+        <p>In this example the value of the <code>color</code> field will be <code>1.0 0.0 0.0</code> when referencing <code>#my-data</code>.</p>
+        <pre class='example highlight'>
+            &lt;data id="my-data"&gt;
+                &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt;
+                &lt;data&gt;
+                    &lt;float3 name="color"&gt;1.0 1.0 1.0&lt;/float3&gt;
+                &lt;/data&gt;
+            &lt;/data&gt;
+       </pre>
+        <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
+            <dt>attribute DOMString name</dt>
+            <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
+            <dt>attribute boolean param</dt>
+            <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
+                the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
+                element for example usage.</dd>
+            <dt>attribute float key</dt>
+            <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
+
+            <dt>void setScriptValue(Float32Array value)</dt>
+            <dd>
+                A high performance setter to set the data of this value element directly through JavaScript.
+            </dd>
+        </dl>
+
+
     </section>
     <section>
       <h4>The <code>int</code> and <code>int4</code> elements</h4>
+        <p>The <code>int*</code> elements hold a space separated list of integer values. The tag name determines how this data is interpreted, ie. an <code>int4</code> element
+            will interpret the data as an array of 4-component integer vectors. </p>
+        <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
+            <dt>attribute DOMString name</dt>
+            <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
+            <dt>attribute boolean param</dt>
+            <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
+                the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
+                element for example usage.</dd>
+            <dt>attribute float key</dt>
+            <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
+
+            <dt>void setScriptValue(Int16Array value)</dt>
+            <dd>
+                A high performance setter to set the data of this value element directly through JavaScript.
+            </dd>
+        </dl>
     </section>
     <section>
       <h4>The <code>bool</code> element</h4>
+        <p>The <code>bool</code> element holds a space separated list of boolean values. The values may be given in string form (<code>true/false</code>) or as integers (<code>1/0</code>). </p>
+
+        <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
+            <dt>attribute DOMString name</dt>
+            <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
+            <dt>attribute boolean param</dt>
+            <dd>Marks this value as one to be supplied by a different data element. Value elements with the <code>param</code> attribute are
+                the only value elements that may be empty, all others must contain data. See the <a href="#the-dataflow-element" class="internalDFN">dataflow</a>
+                element for example usage.</dd>
+            <dt>attribute float key</dt>
+            <dd>A keyframe value to assist in defining animated values. A script may, for example, interpolate the data between successive keys.</dd>
+
+            <dt>void setScriptValue(Int16Array value)</dt>
+            <dd>
+                A high performance setter to set the data of this value element directly through JavaScript.
+            </dd>
+        </dl>
     </section>
     <section>
       <h4>The <code>texture</code> element</h4>

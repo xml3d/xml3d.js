@@ -224,6 +224,41 @@
 
 <section>
   <h2>The elements of XML3D</h2>
+  <section>
+      <h3>Kinds of elements</h3>
+      <section>
+          <h4>Transformable elements</h4>
+      </section>
+      <section>
+          <h4>Data elements</h4>
+      </section>
+      <section>
+          <h4>Value elements</h4>
+          <p>Value elements are the leaf nodes of an Xflow graph. They may not be nested and may not contain any non-text child elements. Data should be provided as a text node
+              containing a space-separated list of values. The tag name determines how this data is interpreted:</p>
+          <pre class="example highlight">
+              &lt;bool&gt;1 0 0&lt;/bool&gt;     // an array of three boolean values
+              &lt;float3&gt;1 0 0&lt;/float3&gt; // a single three-dimensional floating point vector
+          </pre>
+
+          <p>The <code>name</code> attribute of a value element acts as an ID for the data contained in this element. It may be referenced in XFlow operators or
+              in material shaders. If two value elements with the same name are present in an XFlow data graph then the value nearest the top will replace any value
+              nested deeper inside the graph.</p>
+
+          <p>In this example the value of the <code>color</code> field will be <code>1.0 0.0 0.0</code> when referencing <code>#my-data</code>.</p>
+        <pre class='example highlight'>
+            &lt;data id="my-data"&gt;
+                &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt;
+                &lt;data&gt;
+                    &lt;float3 name="color"&gt;1.0 1.0 1.0&lt;/float3&gt;
+                &lt;/data&gt;
+            &lt;/data&gt;
+       </pre>
+      </section>
+      <section>
+          <h4>Interactive elements</h4>
+      </section>
+  </section>
 
   <section>
     <h3>The root element</h3>
@@ -456,20 +491,7 @@
         <code>float4x4</code> elements</h4>
         <p>The <code>float*</code> elements hold a space separated list of floating point values. The tag name determines how this data is interpreted, ie. a <code>float2</code> element
             will interpret the data as an array of 2D vectors while a <code>float4x4</code> element will interpret it as an array of 4x4 matrices. </p>
-        <div class="issue">We should move the following usage description to a "Value Elements" section.</div>
-        <p>The <dfn id="attr-data-name">name</dfn> attribute acts as an ID for the data contained in this element. It may be referenced in XFlow operators or
-            in material shaders. If two value elements with the same name are present in an XFlow data graph then the value nearest the top will replace any value
-            nested deeper inside the graph.</p>
 
-        <p>In this example the value of the <code>color</code> field will be <code>1.0 0.0 0.0</code> when referencing <code>#my-data</code>.</p>
-        <pre class='example highlight'>
-            &lt;data id="my-data"&gt;
-                &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt;
-                &lt;data&gt;
-                    &lt;float3 name="color"&gt;1.0 1.0 1.0&lt;/float3&gt;
-                &lt;/data&gt;
-            &lt;/data&gt;
-       </pre>
         <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
             <dt>attribute DOMString name</dt>
             <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>

@@ -264,6 +264,8 @@
     <h3>The root element</h3>
     <section>
       <h4>The <code>xml3d</code> element</h4>
+        <dl class='element'>
+        </dl>
 
       <dl title='interface XML3DXml3dElement : HTMLElement' class='idl'>
         <dt>attribute unsigned long width</dt>
@@ -310,6 +312,10 @@
     <h3>Scene elements</h3>
     <section>
       <h4>The <code>group</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#transformable-elements">Transformable element</a></dd>
+        </dl>
         <dl title='interface XML3DGroupElement : HTMLElement' class='idl'>
             <dt>attribute DOMString transform</dt>
             <dd>Accepts a URI fragment referencing a <a>transform</a> element. Alternatively a transformation may be defined
@@ -335,6 +341,10 @@
     </section>
     <section>
       <h4>The <code>view</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#transformable-elements">Transformable element</a></dd>
+        </dl>
         <dl title='interface XML3DViewElement : HTMLElement' class='idl'>
             <dt>attribute XML3DVec3 position</dt>
             <dd>The position of the camera in world space</dd>
@@ -382,6 +392,11 @@
     </section>
     <section>
       <h4>The <code>light</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#data-elements">Data element</a></dd>
+            <dd><a href="#transformable-elements">Transformable element</a></dd>
+        </dl>
       <p>The <span class="element-name">light</span> element defines a light source in the scene that emits light based on the light model defined by
       the <a href="#attr-light-model" class="internalDFN">model</a> attribute. The light uses the <a href="h-generic-data-model">generic data model</a> to define the parameters of the referenced material model.
       The coordinate system of the <span class="element-name">light</span> element defines the base coordinate system for the light. However, the final position and direction of the light source can altered by
@@ -421,9 +436,19 @@
     </section>
     <section>
       <h4>The <code>mesh</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#data-elements">Data element</a></dd>
+            <dd><a href="#transformable-elements">Transformable element</a></dd>
+        </dl>
     </section>
     <section>
       <h4>The <code>model</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#data-elements">Data element</a></dd>
+            <dd><a href="#transformable-elements">Transformable element</a></dd>
+        </dl>
     </section>
   </section>
 
@@ -431,6 +456,8 @@
     <h3>Definition Areas</h3>
     <section>
       <h4>The <code>defs</code> element</h4>
+        <dl class='element'>
+        </dl>
     </section>
   </section>
 
@@ -438,6 +465,10 @@
     <h3>Property elements</h3>
     <section>
       <h4>The <code>material</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#data-elements">Data element</a></dd>
+        </dl>
       <p>A material describes the surface shading of an object. Materials are defined using a <span class="element-name">material</span>
       element and then
       referenced by the <a href="#dfn-material-property" class="internalDFN">material</a> property on a given <a href="#scene-elements">scene
@@ -481,14 +512,22 @@
     <h3>Data and dataflow elements</h3>
     <section>
       <h4>The <code>data</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#data-elements">Data element</a></dd>
+        </dl>
        <dl title='interface XML3DDataElement : HTMLElement' class='idl'>
         <dt>attribute DOMString script</dt>
         <dd>The <code>script</code> IDL attribute must reflect the <a href="#attr-material-script" class="internalDFN">script</a> content attribute.</dd>
       </dl>
     </section>
     <section>
-      <h4>The <code>float</code>, <code>float2</code>, <code>float3</code>, <code>float4</code>, and
-        <code>float4x4</code> elements</h4>
+        <h4>The <code>float</code>, <code>float2</code>, <code>float3</code>, <code>float4</code>, and
+            <code>float4x4</code> elements</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#value-elements">Value element</a></dd>
+        </dl>
         <p>The <code>float*</code> elements hold a space separated list of floating point values. The tag name determines how this data is interpreted, ie. a <code>float2</code> element
             will interpret the data as an array of 2D vectors while a <code>float4x4</code> element will interpret it as an array of 4x4 matrices. </p>
 
@@ -512,6 +551,10 @@
     </section>
     <section>
       <h4>The <code>int</code> and <code>int4</code> elements</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#value-elements">Value element</a></dd>
+        </dl>
         <p>The <code>int*</code> elements hold a space separated list of integer values. The tag name determines how this data is interpreted, ie. an <code>int4</code> element
             will interpret the data as an array of 4-component integer vectors. </p>
         <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
@@ -532,6 +575,10 @@
     </section>
     <section>
       <h4>The <code>bool</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#value-elements">Value element</a></dd>
+        </dl>
         <p>The <code>bool</code> element holds a space separated list of boolean values. The values may be given in string form (<code>true/false</code>) or as integers (<code>1/0</code>). </p>
 
         <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
@@ -552,6 +599,10 @@
     </section>
     <section>
       <h4>The <code>texture</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#value-elements">Value element</a></dd>
+        </dl>
         <section>
             <dl title="enum WrapMode" class="idl">
                 <dt>clamp</dt>
@@ -603,6 +654,10 @@
     </section>
     <section>
       <h4>The <code>dataflow</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#data-elements">Data element</a></dd>
+        </dl>
     </section>
   </section>
 
@@ -610,12 +665,22 @@
     <h3>Assets</h3>
     <section>
       <h4>The <code>asset</code> element</h4>
+        <dl class='element'>
+        </dl>
     </section>
     <section>
       <h4>The <code>assetdata</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#data-elements">Data element</a></dd>
+        </dl>
     </section>
     <section>
       <h4>The <code>assetmesh</code> element</h4>
+        <dl class='element'>
+            <dt>Categories:</dt>
+            <dd><a href="#data-elements">Data element</a></dd>
+        </dl>
     </section>
   </section>
 

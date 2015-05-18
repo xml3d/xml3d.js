@@ -20,3 +20,40 @@ div.attributes table tr:nth-child(2n) {
 div.attributes table th {
   font-weight: bold;
 }
+
+/* Element blocks with Categories list */
+section h4 {
+    position: relative;
+    top: 0;
+    left: 0;
+    z-index: 4;
+}
+
+.element {
+    background: #F4F4FA;
+    color: black;
+    margin: 0 0 1em 0.15em;
+    padding: 0 1em 0.25em 0.75em;
+    border-left: solid #9999FF 0.25em;
+    position: relative;
+    z-index: 2;
+}
+
+.element:before {
+    position: absolute;
+    top: 0;
+    left: -1.15em;
+    height: 2em;
+    width: 0.9em;
+    background: #F4F4FA;
+    content: ' ';
+    border-style: none none solid solid;
+    border-color: #9999FF;
+    border-width: 0.25em;
+}
+
+h4 + .element, h4 + div + .element {
+    margin-top: -2.9em;
+    padding-top: 2em;
+}
+/* /Element blocks with Categories list */

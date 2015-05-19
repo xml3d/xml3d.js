@@ -7,7 +7,7 @@ module("Options", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/view.xhtml?xml3d-loglevel=exception", this.cb);
+        loadDocument("scenes/view.html?xml3d-loglevel=exception", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

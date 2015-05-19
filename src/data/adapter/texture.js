@@ -22,7 +22,7 @@ XML3D.createClass(TextureDataAdapter, NodeAdapter, {
     createTextureEntry: function () {
         var node = this.node;
         var entry = new TextureEntry(null);
-        initTextureSamplingParameters(entry.getSamplerConfig(), node.getAttribute("wrap"), node.getAttribute("filter"), node.getAttribute("samples"));
+        initTextureSamplingParameters(entry.getSamplerConfig(), node.getAttribute("wrap"), node.getAttribute("filter"), node.getAttribute("anisotropy"));
 
         var imageAdapter = this.factory.getAdapter(this.node.firstElementChild);
         if (imageAdapter) {
@@ -108,7 +108,7 @@ function shouldGenerateMipMaps(minFilter, magFilter) {
     return (minFilter != WebGLRenderingContext.NEAREST && minFilter != WebGLRenderingContext.LINEAR) || (magFilter != WebGLRenderingContext.NEAREST && magFilter != WebGLRenderingContext.LINEAR);
 }
 
-function parseTextureSamplingParameters(wrap, filter, samples) {
+function parseTextureSamplingParameters(wrap, filter, anisotropy) {
     var result = {}, args;
 
     if(wrap) {
@@ -123,12 +123,14 @@ function parseTextureSamplingParameters(wrap, filter, samples) {
         result.magFilter = filterToGL[args[args.length - 1]];
     }
 
-    if(samples) {
-        var number = parseInt(samples);
+    if(anisotropy) {
+        var number = parseFloat(anisotropy);
         if (number == Number.NaN) {
-            number = samples == "max" ? "max" : undefined
+            number = anisotropy == "max" ? Infinity : undefined
+        } else {
+            number = Math.min(1.0, number)
         }
-        result.samples = number;
+        result.anisotropy = number;
     }
 
     return result;
@@ -142,7 +144,7 @@ function initTextureSamplingParameters(config, wrap, filter, samples) {
         minFilter: WebGLRenderingContext.LINEAR_MIPMAP_LINEAR,
         magFilter: WebGLRenderingContext.LINEAR,
         textureType: XC.TEX_TYPE.TEXTURE_2D,
-        samples: 1
+        anisotropy: 1
     });
     assign(config, params);
     config.generateMipMap = shouldGenerateMipMaps(config.minFilter, config.magFilter);

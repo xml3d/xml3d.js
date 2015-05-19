@@ -265,7 +265,7 @@ test("&lt;texture&gt; interface test", function() {
     equal(typeof e.type, "string", "type is of type 'string'");
     equal(typeof e.filter, "string", "filter is of type 'string'");
     equal(typeof e.wrap, "string", "wrap is of type 'string'");
-    equal(typeof e.samples, "string", "samples is of type 'string'");
+    equal(typeof e.anisotropy, "string", "anisotropy is of type 'string'");
 });
 test("&lt;img&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "img");

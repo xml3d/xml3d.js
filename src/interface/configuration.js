@@ -504,7 +504,7 @@ classInfo['texture'] = {
     type: {a: handlers.EnumAttributeHandler, params: {e: TextureTypes, d: 0}},
     filter: {a: handlers.StringAttributeHandler},
     wrap: {a: handlers.StringAttributeHandler},
-    samples: {a: handlers.StringAttributeHandler}
+    anisotropy: {a: handlers.StringAttributeHandler}
     };
 /**
  * Properties and methods for <img>

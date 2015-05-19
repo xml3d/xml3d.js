@@ -231,6 +231,31 @@
       </section>
       <section>
           <h4>Data elements</h4>
+          <p>Data elements are the non-leaf nodes of an Xflow graph. They may contain any combination of data elements and <a href="#value-elements">value elements</a>. They may also reference
+          other data elements through the <code>src</code> attribute using a standard HTML URI.</p>
+
+          <p>The ultimate function of a graph of data elements is to provide data to a "sink".  Some data sinks in XML3D include the <a href="#the-mesh-element"><code>mesh</code></a> element, the
+              <a href="#the-material-element"><code>material</code></a> element and the <a href="#the-view-element"><code>projection</code></a> attribute of the
+              <a href="#the-view-element"><code>view</code></a> element. </p>
+
+          <p>The ability to reference data elements makes it possible to share a common set of data between many different sinks. This saves memory and increases performance, as the data is also
+          shared internally whenever possible. For example, a set of vertex positions may be shared between many instances of the same mesh using a different set of face indices each time. Internally
+          these meshes will also share a common WebGL vertex position buffer:</p>
+          <pre class="example highlight">
+              &lt;data id="shared_positions"&gt;
+                &lt;float3 name="position"&gt; 1.0 0.0 0.0 0.5 1.0 1.0 ... &lt;/float3&gt;
+              &lt;/data&gt;
+              &lt;mesh&gt;
+                &lt;data src="#shared_positions"&gt;&lt;/data&gt;
+                &lt;int name="index"&gt; 0 1 2 3 4 5 ... &lt;/int&gt;
+              &lt;/mesh&gt;
+              &lt;mesh&gt;
+                &lt;data src="#shared_positions"&gt;&lt;/data&gt;
+                &lt;int name="index"&gt; 3 4 5 0 1 2 ... &lt;/int&gt;
+              &lt;/mesh&gt;
+          </pre>
+
+
       </section>
       <section>
           <h4>Value elements</h4>
@@ -314,6 +339,7 @@
       <h4>The <code>group</code> element</h4>
         <dl class='element'>
             <dt>Categories:</dt>
+            <dd><a href="#interactive-elements">Interactive element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
         <dl title='interface XML3DGroupElement : HTMLElement' class='idl'>
@@ -439,6 +465,7 @@
         <dl class='element'>
             <dt>Categories:</dt>
             <dd><a href="#data-elements">Data element</a></dd>
+            <dd><a href="#interactive-elements">Interactive element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
     </section>
@@ -447,6 +474,7 @@
         <dl class='element'>
             <dt>Categories:</dt>
             <dd><a href="#data-elements">Data element</a></dd>
+            <dd><a href="#interactive-elements">Interactive element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
     </section>
@@ -531,7 +559,7 @@
         <p>The <code>float*</code> elements hold a space separated list of floating point values. The tag name determines how this data is interpreted, ie. a <code>float2</code> element
             will interpret the data as an array of 2D vectors while a <code>float4x4</code> element will interpret it as an array of 4x4 matrices. </p>
 
-        <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
+        <dl title='interface XML3DFloatValueElement : HTMLElement' class='idl'>
             <dt>attribute DOMString name</dt>
             <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
             <dt>attribute boolean param</dt>
@@ -557,7 +585,7 @@
         </dl>
         <p>The <code>int*</code> elements hold a space separated list of integer values. The tag name determines how this data is interpreted, ie. an <code>int4</code> element
             will interpret the data as an array of 4-component integer vectors. </p>
-        <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
+        <dl title='interface XML3DIntValueElement : HTMLElement' class='idl'>
             <dt>attribute DOMString name</dt>
             <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
             <dt>attribute boolean param</dt>
@@ -581,7 +609,7 @@
         </dl>
         <p>The <code>bool</code> element holds a space separated list of boolean values. The values may be given in string form (<code>true/false</code>) or as integers (<code>1/0</code>). </p>
 
-        <dl title='interface XML3DValueElement : HTMLElement' class='idl'>
+        <dl title='interface XML3DBoolValueElement : HTMLElement' class='idl'>
             <dt>attribute DOMString name</dt>
             <dd>The name of the value element. A good name should be a semantic description of the data that this element holds.</dd>
             <dt>attribute boolean param</dt>

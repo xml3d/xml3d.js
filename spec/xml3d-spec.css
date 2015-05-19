@@ -34,7 +34,7 @@ section h4 {
     color: black;
     margin: 0 0 1em 0.15em;
     padding: 0 1em 0.25em 0.75em;
-    border-left: solid #9999FF 0.25em;
+    border-left: solid #9999FF 0.5em;
     position: relative;
     z-index: 2;
 }
@@ -42,14 +42,14 @@ section h4 {
 .element:before {
     position: absolute;
     top: 0;
-    left: -1.15em;
+    left: -1.45em;
     height: 2em;
     width: 0.9em;
     background: #F4F4FA;
     content: ' ';
     border-style: none none solid solid;
     border-color: #9999FF;
-    border-width: 0.25em;
+    border-width: 0.5em;
 }
 
 h4 + .element, h4 + div + .element {

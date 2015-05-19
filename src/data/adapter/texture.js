@@ -4,108 +4,149 @@ var XC = require("../../xflow/interface/constants.js");
 var Events = require("../../interface/notification.js");
 var NodeAdapter = require("../../base/adapter.js").NodeAdapter;
 
-var clampToGL = function (modeStr) {
-    if (modeStr == "clamp")
-        return WebGLRenderingContext.CLAMP_TO_EDGE;
-    if (modeStr == "repeat")
-        return WebGLRenderingContext.REPEAT;
-};
+var defaults = require('lodash.defaults');
+var assign = require('lodash.assign');
 
-var filterToGL = function (modeStr) {
-    if (modeStr == "nearest")
-        return WebGLRenderingContext.NEAREST;
-    if (modeStr == "linear")
-        return WebGLRenderingContext.LINEAR;
-    if (modeStr == "nearest-mipmap-nearest")
-        return WebGLRenderingContext.NEAREST_MIPMAP_NEAREST;
-    if (modeStr == "linear-mipmap-nearest")
-        return WebGLRenderingContext.LINEAR_MIPMAP_NEAREST;
-    if (modeStr == "nearest-mipmap-linear")
-        return WebGLRenderingContext.NEAREST_MIPMAP_LINEAR;
-    if (modeStr == "linear-mipmap-linear")
-        return WebGLRenderingContext.LINEAR_MIPMAP_LINEAR;
-};
 
 var TextureDataAdapter = function (factory, node) {
     NodeAdapter.call(this, factory, node);
 };
-XML3D.createClass(TextureDataAdapter, NodeAdapter);
 
-TextureDataAdapter.prototype.init = function () {
-    this.xflowInputNode = this.createXflowNode();
-    this.xflowInputNode.data = this.createTextureEntry();
-};
+XML3D.createClass(TextureDataAdapter, NodeAdapter, {
 
-TextureDataAdapter.prototype.createTextureEntry = function () {
-    var node = this.node;
-    var entry = new TextureEntry(null);
-    var config = entry.getSamplerConfig();
-    config.wrapS = clampToGL(node.wrapS);
-    config.wrapT = clampToGL(node.wrapT);
-    config.minFilter = filterToGL(node.filterMin);
-    config.magFilter = filterToGL(node.filterMag);
-    config.textureType = XC.TEX_TYPE.TEXTURE_2D;
-    config.generateMipMap = this.shouldGenerateMipMaps(config.minFilter, config.magFilter);
+    init: function () {
+        this.xflowInputNode = this.createXflowNode();
+        this.xflowInputNode.data = this.createTextureEntry();
+    },
 
-    var imageAdapter = this.factory.getAdapter(this.node.firstElementChild);
-    if (imageAdapter) {
-        imageAdapter.setTextureEntry(entry);
+    createTextureEntry: function () {
+        var node = this.node;
+        var entry = new TextureEntry(null);
+        initTextureSamplingParameters(entry.getSamplerConfig(), node.getAttribute("wrap"), node.getAttribute("filter"), node.getAttribute("samples"));
+
+        var imageAdapter = this.factory.getAdapter(this.node.firstElementChild);
+        if (imageAdapter) {
+            imageAdapter.setTextureEntry(entry);
+        }
+        return entry;
+    },
+
+    shouldGenerateMipMaps: shouldGenerateMipMaps,
+
+    /**
+     *
+     * @returns {InputNode}
+     */
+    createXflowNode: function () {
+        var xnode = new InputNode();
+        xnode.name = this.node.name;
+        xnode.paramName = this.node.param ? this.node.name : null;
+        xnode.key = this.node.key;
+        return xnode;
+    },
+
+    setScriptValue: function () {
+        XML3D.debug.logError("Texture currently does not support setScriptValue()");
+    },
+
+    getOutputs: function () {
+        var result = {};
+        result[this.node.name] = this;
+        return result;
+    },
+
+    getValue: function () {
+        return this.value;
+    },
+
+    attributeChangedCallback: function (name, oldValue, newValue) {
+        switch (name) {
+            case "name":
+                this.xflowInputNode.name = newValue;
+                break;
+            case "param":
+                this.xflowInputNode.paramName = newValue ? this.node.name : null;
+                break;
+            case "key":
+                this.xflowInputNode.key = newValue;
+                break;
+            case "wrap":
+            case "filter":
+            case "samples":
+                this.xflowInputNode.data = this.createTextureEntry();
+                break;
+        }
+    },
+
+    notifyChanged: function () { /* Nothing to do */
+    },
+
+    /**
+     * @return {Element}
+     */
+    getXflowNode: function () {
+        return this.xflowInputNode;
     }
-    return entry;
+
+});
+
+var wrapToGL = {
+    "clamp":  WebGLRenderingContext.CLAMP_TO_EDGE,
+    "repeat": WebGLRenderingContext.REPEAT
 };
 
-TextureDataAdapter.prototype.shouldGenerateMipMaps = function (minFilter, magFilter) {
+var filterToGL = {
+    "nearest": WebGLRenderingContext.NEAREST,
+    "linear": WebGLRenderingContext.LINEAR,
+    "nearest-mipmap-nearest": WebGLRenderingContext.NEAREST_MIPMAP_NEAREST,
+    "linear-mipmap-nearest": WebGLRenderingContext.LINEAR_MIPMAP_NEAREST,
+    "nearest-mipmap-linear": WebGLRenderingContext.NEAREST_MIPMAP_LINEAR,
+    "linear-mipmap-linear": WebGLRenderingContext.LINEAR_MIPMAP_LINEAR
+};
+
+function shouldGenerateMipMaps(minFilter, magFilter) {
     return (minFilter != WebGLRenderingContext.NEAREST && minFilter != WebGLRenderingContext.LINEAR) || (magFilter != WebGLRenderingContext.NEAREST && magFilter != WebGLRenderingContext.LINEAR);
-};
-
-TextureDataAdapter.prototype.createXflowNode = function () {
-    var xnode = new InputNode();
-    xnode.name = this.node.name;
-    xnode.paramName = this.node.param ? this.node.name : null;
-    xnode.key = this.node.key;
-    return xnode;
-};
-
-TextureDataAdapter.prototype.setScriptValue = function (value) {
-    XML3D.debug.logError("Texture currently does not support setScriptValue()");
 }
 
-TextureDataAdapter.prototype.getOutputs = function () {
-    var result = {};
-    result[this.node.name] = this;
-    return result;
-};
+function parseTextureSamplingParameters(wrap, filter, samples) {
+    var result = {}, args;
 
-TextureDataAdapter.prototype.getValue = function () {
-    return this.value;
-};
-
-TextureDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, newValue) {
-    if (name == "name") {
-        this.xflowInputNode.name = newValue;
-    } else if (name == "key") {
-        this.xflowInputNode.key = newValue;
-    } else if (name == "param") {
-        this.xflowInputNode.paramName = newValue ? this.node.name : null;
+    if(wrap) {
+        args = wrap.split(/(\s+)/);
+        result.wrapS = wrapToGL[args[0]];
+        result.wrapT = wrapToGL[args[args.length - 1]];
     }
-};
 
-TextureDataAdapter.prototype.notifyChanged = function (evt) {
-};
+    if(filter) {
+        args = filter.split(/(\s+)/);
+        result.minFilter = filterToGL[args[0]];
+        result.magFilter = filterToGL[args[args.length - 1]];
+    }
 
-/**
- * @return {Element}
- */
-TextureDataAdapter.prototype.getXflowNode = function () {
-    return this.xflowInputNode;
-};
+    if(samples) {
+        var number = parseInt(samples);
+        if (number == Number.NaN) {
+            number = samples == "max" ? "max" : undefined
+        }
+        result.samples = number;
+    }
 
-/**
- * Returns String representation of this TextureDataAdapter
- */
-TextureDataAdapter.prototype.toString = function () {
-    return "XML3D.data.TextureDataAdapter";
-};
+    return result;
+}
+
+function initTextureSamplingParameters(config, wrap, filter, samples) {
+    var params = parseTextureSamplingParameters(wrap, filter, samples);
+    defaults(params, {
+        wrapS: WebGLRenderingContext.CLAMP_TO_EDGE,
+        wrapT: WebGLRenderingContext.CLAMP_TO_EDGE,
+        minFilter: WebGLRenderingContext.LINEAR_MIPMAP_LINEAR,
+        magFilter: WebGLRenderingContext.LINEAR,
+        textureType: XC.TEX_TYPE.TEXTURE_2D,
+        samples: 1
+    });
+    assign(config, params);
+    config.generateMipMap = shouldGenerateMipMaps(config.minFilter, config.magFilter);
+}
 
 // Export
 module.exports = TextureDataAdapter;

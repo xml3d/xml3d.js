@@ -263,12 +263,9 @@ test("&lt;texture&gt; interface test", function() {
     equal(typeof e.param, "boolean", "param is of type 'boolean'");
     equal(typeof e.key, "number", "key is of type 'number'");
     equal(typeof e.type, "string", "type is of type 'string'");
-    equal(typeof e.filterMin, "string", "filterMin is of type 'string'");
-    equal(typeof e.filterMag, "string", "filterMag is of type 'string'");
-    equal(typeof e.filterMip, "string", "filterMip is of type 'string'");
-    equal(typeof e.wrapS, "string", "wrapS is of type 'string'");
-    equal(typeof e.wrapT, "string", "wrapT is of type 'string'");
-    equal(typeof e.wrapU, "string", "wrapU is of type 'string'");
+    equal(typeof e.filter, "string", "filter is of type 'string'");
+    equal(typeof e.wrap, "string", "wrap is of type 'string'");
+    equal(typeof e.samples, "string", "samples is of type 'string'");
 });
 test("&lt;img&gt; interface test", function() {
     var e = document.createElementNS(XML3D.xml3dNS, "img");

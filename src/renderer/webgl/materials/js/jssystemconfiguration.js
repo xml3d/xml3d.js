@@ -1,8 +1,7 @@
 var GLContext = require("../../base/context.js");
 var singleton = null;
 
-var SYSTEM_CONTEXT_TEMPLATE = {
-    "type": "object", "kind": "any", "info": {
+var SYSTEM_CONTEXT_TEMPLATE =  {
         "coords": {"type": "object", "kind": "float3", "source": "uniform"},
         "cameraPosition": {"type": "object", "kind": "float3", "source": "uniform"},
         "viewMatrix": {"type": "object", "kind": "matrix4", "source": "uniform"},
@@ -113,16 +112,15 @@ var SYSTEM_CONTEXT_TEMPLATE = {
         },
         "ssaoMap": {"type": "object", "kind": "texture", "source": "uniform"},
         "environment": {"type": "object", "kind": "texture", "source": "uniform"}
-    }
 };
 
 function createSystemConfiguration(context) {
     var result = SYSTEM_CONTEXT_TEMPLATE;
     var ext = context.getExtensionByName(GLContext.EXTENSIONS.STANDARD_DERIVATES);
     if (ext) {
-        result.info.fwidth = {type: Shade.TYPES.FUNCTION};
-        result.info.dx = {type: Shade.TYPES.FUNCTION};
-        result.info.dy = {type: Shade.TYPES.FUNCTION};
+        result.fwidth = {type: Shade.TYPES.FUNCTION};
+        result.dx = {type: Shade.TYPES.FUNCTION};
+        result.dy = {type: Shade.TYPES.FUNCTION};
     }
     return result;
 }

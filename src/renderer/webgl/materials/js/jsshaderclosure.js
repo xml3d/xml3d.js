@@ -5,18 +5,6 @@ var getJSSystemConfiguration = require("./jssystemconfiguration.js");
 var XC = require("../../../../xflow/interface/constants.js");
 var Options = require("../../../../utils/options.js");
 
-var c_SystemUpdate = {
-    "pointLightOn": {
-        staticValue: "MAX_POINTLIGHTS",
-        staticSize: ["pointLightOn", "pointLightAttenuation", "pointLightIntensity", "pointLightPosition", "pointLightCastShadow", "pointLightShadowBias", "pointLightShadowMap", "pointLightMatrix", "pointLightNearFar"]
-    }, "directionalLightOn": {
-        staticValue: "MAX_DIRECTIONALLIGHTS",
-        staticSize: ["directionalLightOn", "directionalLightIntensity", "directionalLightDirection", "directionalLightCastShadow", "directionalLightShadowBias", "directionalLightShadowMap", "directionalLightMatrix"]
-    }, "spotLightOn": {
-        staticValue: "MAX_SPOTLIGHTS",
-        staticSize: ["spotLightOn", "spotLightAttenuation", "spotLightIntensity", "spotLightPosition", "spotLightDirection", "spotLightCosFalloffAngle", "spotLightCosSoftFalloffAngle", "spotLightCastShadow", "spotLightShadowBias", "spotLightShadowMap", "spotLightMatrix"]
-    }
-};
 
 var c_jsShaderCache = {};
 
@@ -141,32 +129,27 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
 
         var vsDataResult = vsRequest.getResult();
 
-        var contextData = {
-            "this": getJSSystemConfiguration(this.context),
-            "global.shade": [{"extra": {"type": "object", "kind": "any", "global": true, "info": {}}}]
-        };
+        var systemParameters = getSystemParameters(this.context, scene.systemUniforms);
+        var environmentParameters = {};
 
-        var systemUniforms = scene.systemUniforms, systemInfo = contextData["this"].info;
-        for (var systemSource in c_SystemUpdate) {
-            var entry = c_SystemUpdate[systemSource];
-            var length = systemUniforms[systemSource] && systemUniforms[systemSource].length;
-            systemInfo[entry.staticValue].staticValue = length;
-            for (var i = 0; i < entry.staticSize.length; ++i)
-                systemInfo[entry.staticSize[i]].staticSize = length;
-        }
 
-        var contextInfo = contextData["global.shade"][0].extra.info;
 
         var shaderEntries = shaderResult && shaderResult.getOutputMap(), vsShaderOutput = vsDataResult && vsDataResult.outputNames;
 
         for (var i = 0; i < this.extractedParams.length; ++i) {
             var paramName = this.extractedParams[i];
             if (vsShaderOutput && vsShaderOutput.indexOf(paramName) != -1) {
-                contextInfo[paramName] = convertXflow2ShadeType(vsDataResult.getOutputType(paramName), vsDataResult.isOutputUniform(paramName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
+                environmentParameters[paramName] = convertXflow2ShadeType(vsDataResult.getOutputType(paramName), vsDataResult.isOutputUniform(paramName) ? Shade.SOURCES.UNIFORM : Shade.SOURCES.VERTEX);
             } else if (shaderEntries && shaderEntries[paramName]) {
-                contextInfo[paramName] = convertXflow2ShadeType(shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
+                environmentParameters[paramName] = convertXflow2ShadeType(shaderEntries[paramName].type, Shade.SOURCES.UNIFORM);
             }
         }
+
+        var contextData = {
+            "this": { "type": "object", "kind": "any", "info": systemParameters },
+            "global.shade": [{"extra": {"type": "object", "kind": "any", "global": true, "info": environmentParameters }}]
+        };
+
         XML3D.debug.logDebug("CONTEXT:", contextData);
 
         var options = {
@@ -181,7 +164,7 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         };
         var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
 
-        var jsShaderKey = implementation + ";" + JSON.stringify(options) + ";" + JSON.stringify(contextInfo) + ";" + this.sourceTemplate;
+        var jsShaderKey = implementation + ";" + JSON.stringify(options) + ";" + JSON.stringify(environmentParameters) + ";" + this.sourceTemplate;
 
         var cacheEntry;
         if (!(cacheEntry = c_jsShaderCache[jsShaderKey])) {
@@ -258,5 +241,54 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
     }
 
 });
+
+/**
+ * @param {GLContext} context
+ * @param {{}} globals
+ * @returns {{}}
+ */
+function getSystemParameters(context, globals) {
+    var result = getJSSystemConfiguration(context);
+
+    // Update light parameters which vary in their size depending on number of lights defined
+    ["point", "directional", "spot"].forEach(function(model) {
+        var on = model + "LightOn";
+        result["MAX_" + model.toUpperCase() + "LIGHTS"].staticValue = globals[on] && globals[on].length;
+    });
+
+    for (var global in globals) {
+        var entry = result[global];
+        if(entry && entry.staticSize) {
+            var aLength = globals[global].length;
+            var tupleSize = getTupleSize(entry);
+            entry.staticSize = aLength / tupleSize;
+        }
+
+    }
+    return result;
+}
+
+/**
+ * @param {{}} desc Object type descriptor
+ * @returns {number}
+ */
+function getTupleSize(desc) {
+    if(desc.type == "array") {
+        var elements = desc.elements;
+        if (elements.type == "object") {
+            switch(elements.kind) {
+                case "texture":
+                case "float": return 1;
+                case "float2": return 2;
+                case "float3": return 3;
+                case "float4": return 4;
+                case "matrix4": return 16;
+                default: throw ("Unknown array element kind:" + elements.kind);
+            }
+        }
+    }
+    return 1;
+}
+
 module.exports = JSShaderClosure;
 

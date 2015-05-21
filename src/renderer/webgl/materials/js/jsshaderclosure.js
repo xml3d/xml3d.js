@@ -164,6 +164,7 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         };
         var implementation = scene.deferred ? "xml3d-glsl-deferred" : "xml3d-glsl-forward";
 
+        // TODO(ksons): Add global parameters
         var jsShaderKey = implementation + ";" + JSON.stringify(options) + ";" + JSON.stringify(environmentParameters) + ";" + this.sourceTemplate;
 
         var cacheEntry;
@@ -248,23 +249,34 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
  * @returns {{}}
  */
 function getSystemParameters(context, globals) {
-    var result = getJSSystemConfiguration(context);
+    var result = XML3D.extend({}, getJSSystemConfiguration(context));
+
+    // Set all parameters that are not defined in globals to 'undefined'
+    for (var param in result) {
+        if (param in globals) {
+            // if the parameter is in globals, check if it requires a static size
+            var entry = result[param];
+            if (entry.staticSize) {
+                var aLength = globals[param].length;
+                var tupleSize = getTupleSize(entry);
+                entry.staticSize = aLength / tupleSize;
+            }
+        } else {
+            var notInGlobals = result[param];
+            // Skip those parameters that indicate a function or that will be derived in a later step
+            if (notInGlobals.type == "function" || notInGlobals.derived) {
+                continue;
+            }
+            result[param] = {type: "undefined"};
+        }
+    }
 
     // Update light parameters which vary in their size depending on number of lights defined
-    ["point", "directional", "spot"].forEach(function(model) {
+    ["point", "directional", "spot"].forEach(function (model) {
         var on = model + "LightOn";
-        result["MAX_" + model.toUpperCase() + "LIGHTS"].staticValue = globals[on] && globals[on].length;
+        result["MAX_" + model.toUpperCase() + "LIGHTS"] = {"type": "int", "source": "constant", "staticValue": globals[on] && globals[on].length};
     });
 
-    for (var global in globals) {
-        var entry = result[global];
-        if(entry && entry.staticSize) {
-            var aLength = globals[global].length;
-            var tupleSize = getTupleSize(entry);
-            entry.staticSize = aLength / tupleSize;
-        }
-
-    }
     return result;
 }
 

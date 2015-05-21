@@ -12,7 +12,6 @@ var SYSTEM_CONTEXT_TEMPLATE =  {
         "modelMatrixN": {"type": "object", "kind": "matrix3", "source": "uniform"},
         "modelViewMatrixN": {"type": "object", "kind": "matrix3", "source": "uniform"},
 
-        "MAX_POINTLIGHTS": {"type": "int", "source": "constant", "staticValue": 5},
         "pointLightOn": {"type": "array", "elements": {"type": "boolean"}, "staticSize": 5, "source": "uniform"},
         "pointLightAttenuation": {
             "type": "array", "elements": {"type": "object", "kind": "float3"}, "staticSize": 5, "source": "uniform"
@@ -51,7 +50,6 @@ var SYSTEM_CONTEXT_TEMPLATE =  {
             "source": "uniform"
         },
 
-        "MAX_DIRECTIONALLIGHTS": {"type": "int", "source": "constant", "staticValue": 5},
         "directionalLightOn": {"type": "array", "elements": {"type": "boolean"}, "staticSize": 5, "source": "uniform"},
         "directionalLightIntensity": {
             "type": "array", "elements": {"type": "object", "kind": "float3"}, "staticSize": 5, "source": "uniform"
@@ -75,7 +73,6 @@ var SYSTEM_CONTEXT_TEMPLATE =  {
             "source": "uniform"
         },
 
-        "MAX_SPOTLIGHTS": {"type": "int", "source": "constant", "staticValue": 5},
         "spotLightOn": {"type": "array", "elements": {"type": "boolean"}, "staticSize": 5, "source": "uniform"},
         "spotLightAttenuation": {
             "type": "array", "elements": {"type": "object", "kind": "float3"}, "staticSize": 5, "source": "uniform"
@@ -110,7 +107,7 @@ var SYSTEM_CONTEXT_TEMPLATE =  {
             "staticSize": 5,
             "source": "uniform"
         },
-        "ssaoMap": {"type": "object", "kind": "texture", "source": "uniform"},
+        // "ssaoMap": {"type": "object", "kind": "texture", "source": "uniform"},
         "environment": {"type": "object", "kind": "texture", "source": "uniform"}
 };
 

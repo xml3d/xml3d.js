@@ -158,26 +158,26 @@ LightModel.prototype = {
         this.light.getFrustum(1).getProjectionMatrix(target);
     },
 
-    getLightViewMatrix: (function() {
-        var tmp = mat4.create();
+    getLightViewMatrix: function (mat4) {
+        //var p_dir = this.getParameter("direction");
+        //var p_pos = this.getParameter("position");
+        var entry = this.light.scene.lights.getModelEntry(this.id);
+        var p_dir = entry.parameters["direction"]; //transformed paramt
+        var p_pos = entry.parameters["position"];
 
-        return function (mat) {
-            var p_dir = this.getParameter("direction");
-            var p_pos = this.getParameter("position");
+        // Get the world matrix from the light in the transformation hierarchy
+        // world => light
+        //this.light.getWorldMatrix(mat4);
 
-            // Get the world matrix from the light in the transformation hierarchy
-            // world => light
-            this.light.getWorldMatrix(mat);
+        // Derive rotation from the direction and standard direction (-z => no rotation)
+        var q_rot = XML3D.math.quat.rotationTo(XML3D.math.quat.create(),c_standardDirection, p_dir);
+        // Create matrix from rotation and translation
+        var trans = XML3D.math.mat4.fromRotationTranslation(XML3D.math.mat4.create(), q_rot, p_pos);
+        // Add to world matrix
+        //XML3D.math.mat4.mul(mat4, mat4, trans);
 
-            // Derive rotation from the direction and standard direction (-z => no rotation)
-            var q_rot = XML3D.math.quat.rotationTo(quat.create(),c_standardDirection, p_dir);
-            // Create matrix from rotation and translation
-            mat4.fromRotationTranslation(tmp, q_rot, p_pos);
-            // Add to world matrix\
-            mat4.mul(mat, mat, tmp);
-
-            // Invert:  light => world
-            mat4.invert(mat, mat);
+        // Invert:  light => world
+        XML3D.math.mat4.invert(mat4, trans);
         }
     })()
 

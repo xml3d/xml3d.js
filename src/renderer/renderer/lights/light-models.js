@@ -343,7 +343,8 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
 
 
 
-    getLightViewMatrix: function (mat4) {        var entry = this.light.scene.lights.getModelEntry(this.id);
+    getLightViewMatrix: function (mat4) {
+        var entry = this.light.scene.lights.getModelEntry(this.id);
         var p_dir = entry.parameters["direction"];
         var p_pos = entry.parameters["position"];
         var bb =        new XML3D.math.bbox.create();

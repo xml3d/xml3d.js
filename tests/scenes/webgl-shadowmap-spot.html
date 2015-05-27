@@ -1,0 +1,113 @@
+<!DOCTYPE html><html><head lang="en">
+    <meta charset="UTF-8">
+    <title>XML3D Shadow Mapping Scene</title>
+    <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+    <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+    <!--script type="text/javascript" src="../../tools/camera.js"></script-->
+</head>
+<body style="background-color: #FFF;width:500px">
+<xml3d activeview="#defaultView" id="xml3DElem" style="background-color: red; width: 200px; height: 200px;">
+    <defs>
+
+        <material id="diffusematerial" script="urn:xml3d:material:diffuse">
+            <float3 name="diffuseColor">0.5 0.5 0.5</float3>
+            <float3 name="emissiveColor">0 0 0</float3>
+        </material>
+
+        <material id="phongmaterial" script="urn:xml3d:material:phong">
+            <float3 name="diffuseColor">0.5 0.5 0.5</float3>
+        </material>
+
+        <data id="square_vertical">
+            <int name="index">0 1 2 2 3 0</int>
+            <float3 name="position">10.0 -10.0 -10.0
+                10.0 10.0 -10.0
+                -10.0 10.0 -10.0
+                -10.0 -10.0 -10.0</float3>
+            <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+            <float2 name="texcoord">0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0</float2>
+            <float3 name="color">1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0</float3>
+        </data>
+
+        <data id="triangle">
+            <int name="index">0 1 2 </int>
+            <float3 name="position">-1 -1 0
+                0 1  0
+                1 -1 0</float3>
+            <float3 name="normal">0.0 0.0 1.0
+                0.0 0.0 1.0
+                0.0 0.0 1.0 </float3>
+            <float2 name="texcoord">0.0 1.0
+                1.0 1.0
+                0.0 0.0 </float2>
+            <float3 name="color">1.0 0.0 0.0
+                1.0 0.0 0.0
+                1.0 0.0 0.0</float3>
+        </data>
+
+
+
+
+        <transform id="t_square" translation="0 0 0" rotation="0 1 0 0.0" scale="1.0 1.0 1.0"></transform>
+        <transform id="t_triangle_i" translation="0 0 -2.5" rotation="0 1 0 0.0" scale="1.0 1.0 1.0"></transform>
+        <transform id="t_triangle_b" translation="0 0 0"  rotation="0 1 0 0.0" scale="1.0 1.0 1.0"></transform>
+        <transform id="t_triangle_c" translation="0 0 0"  rotation="0 1 0 0.0" scale="1.0 1.0 1.0"></transform>
+        <transform id="t_view" translation="0 0 40"></transform>
+        <transform id="t_light" translation="0 0 0"></transform>
+        <transform id="t_light_rotation" rotation="0 1 0 0.0"> <!--"0.78539816339" --> </transform>
+
+    </defs>
+
+    <group  id="g_view" transform="#t_view">
+        <view id="defaultView" fieldOfView="0.3948"></view>
+    </group>
+
+    <group  id="g_light" transform="#t_light" visible="true">
+        <group  id="g_light_rotation" transform="#t_light_rotation">
+            <light id="light" model="urn:xml3d:light:spot">
+                <float3 id="light_intensity" name="intensity">
+                    2 2 6
+                </float3>
+                <float3 id="light_direction"name="direction">
+                    0 0 -1
+                </float3>
+                <float3 name="attenuation">0.01 0.01 0.01</float3>
+                <float  name="cutOffAngle">20.0</float>
+                <float  name="beamWidth">1.0</float>
+                <bool id="light_castShadow" name="castShadow">true</bool>
+                <bool id="light_on" name="on">true</bool>
+                <float id="light_bias" name="shadowBias">0.005</float>
+            </light>
+        </group>
+    </group>
+
+    <group id="diffuseShadedGroup" material="#diffusematerial" transform="#t_triangle_i">
+        <mesh id="triangle_i" src="#triangle" type="triangles" visible="true">
+        </mesh>
+    </group>
+    <group id="diffuseShadedGroup2" material="#diffusematerial" transform="#t_triangle_c">
+        <mesh id="triangle_c" src="#triangle" type="triangles" visible="false">
+        </mesh>
+    </group>
+    <group id="diffuseShadedGroup3" material="#diffusematerial" transform="#t_triangle_b">
+        <mesh id="triangle_b" src="#triangle" type="triangles" visible="false">
+        </mesh>
+    </group>
+    <group id="phongShadedGroup" material="#phongmaterial" transform="#t_square">
+        <mesh id="square" src="#square_vertical" type="triangles" visible="true">
+        </mesh>
+    </group>
+
+</xml3d>
+<script type="text/javascript">
+    function getPixelValue(canvas, x, y) {
+        var pixels = new Uint8Array(4), a = new Array(4);
+        canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
+        for (var i = 0; i < 4; i++)
+            a[i] = pixels[i];
+        return a;
+    }
+</script>
+
+
+</body></html>

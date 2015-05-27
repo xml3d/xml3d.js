@@ -119,7 +119,7 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
 
                 frustum.getProjectionMatrix(c_projMat_tmp, aspect);
 
-                scene.updateReadyObjectsFromMatrices(c_viewMat_tmp, c_projMat_tmp);
+                scene.updateReadyObjectsFromLightView(this.light.model, frustum, c_viewMat_tmp, c_projMat_tmp);
                 var objects = this.sorter.sortScene(scene);
 
                 var parameters = {};

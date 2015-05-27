@@ -191,6 +191,33 @@ XML3D.extend(GLScene.prototype, {
             obj.updateModelViewProjectionMatrix(projectionMatrix);
         }
     },
+
+    updateReadyObjectsFromLightView: (function() {
+        var c_viewToWorldMatrix = XML3D.math.mat4.create();
+        var c_bbox = XML3D.math.bbox.create();
+        var c_frustumTest = new FrustumTest();
+
+        return function (lightmodel, frustum, c_worldToViewMatrix, c_projMat_tmp) {
+            var readyObjects = this.ready;
+            for (var i = 0, l = readyObjects.length; i < l; i++) {
+                var obj = readyObjects[i];
+                obj.updateModelViewMatrix(c_worldToViewMatrix);
+                obj.updateModelMatrixN();
+                obj.updateModelViewProjectionMatrix(c_projMat_tmp);
+            }
+
+            this.updateBoundingBox();
+            XML3D.math.mat4.invert(c_viewToWorldMatrix,c_worldToViewMatrix);
+            c_frustumTest.set(frustum, c_viewToWorldMatrix);
+
+            for (var i = 0, l = readyObjects.length; i < l; i++) {
+                var obj = readyObjects[i];
+                obj.getWorldSpaceBoundingBox(c_bbox);
+                obj.inFrustum = this.doFrustumCulling ? c_frustumTest.isBoxVisible(c_bbox) : true;
+            }
+        }
+    }()),
+
     addListeners: function () {
         this.on(C.EVENT_TYPE.SCENE_STRUCTURE_CHANGED, function (child, removed) {
             if (removed) {

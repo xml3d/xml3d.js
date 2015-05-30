@@ -216,7 +216,7 @@ XML3D.materials.register("phong", {
         "			vec3 perspectiveDivPos = lspos.xyz / lspos.w * 0.5 + 0.5;",
         "			float lsDepth = perspectiveDivPos.z;",
         "			vec2 lightuv = perspectiveDivPos.xy;",
-        "			float depth = unpackDepth(texture2D(spotLightShadowMap[i], lightuv));// + spotLightShadowBias[i];",
+        "			float depth = unpackDepth(texture2D(spotLightShadowMap[i], lightuv)) + spotLightShadowBias[i];",
         "           if(lsDepth < depth)",
         "               shadowInfluence = 1.0;",
         "       }",

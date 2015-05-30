@@ -40,70 +40,34 @@ XML3D.createClass(PointLightPass, SceneRenderPass, {
                 var mat_rot = new XML3D.Mat4();
 
                 if (side == 0) { //look into +x o
-                    mat_rot.m11 = 0;
-                    mat_rot.m12 = 0;
-                    mat_rot.m13 = -1;
-                    mat_rot.m21 = 0;
-                    mat_rot.m22 = -1;
-                    mat_rot.m23 = 0;
-                    mat_rot.m31 = -1;
-                    mat_rot.m32 = 0;
-                    mat_rot.m33 = 0;
+                    mat_rot[0] = 0;     mat_rot[1] = 0;     mat_rot[2] = -1;
+                    mat_rot[4] = 0;     mat_rot[5] = -1;    mat_rot[6] = 0;
+                    mat_rot[8] = -1;    mat_rot[9] = 0;     mat_rot[10] = 0;
 
                 } else if (side == 1) { //look into -x
-                    mat_rot.m11 = 0;
-                    mat_rot.m12 = 0;
-                    mat_rot.m13 = 1;
-                    mat_rot.m21 = 0;
-                    mat_rot.m22 = -1;
-                    mat_rot.m23 = 0;
-                    mat_rot.m31 = 1;
-                    mat_rot.m32 = 0;
-                    mat_rot.m33 = 0;
+                    mat_rot[0] = 0;     mat_rot[1] = 0;     mat_rot[2] = 1;
+                    mat_rot[4] = 0;     mat_rot[5] = -1;    mat_rot[6] = 0;
+                    mat_rot[8] = 1;     mat_rot[9] = 0;     mat_rot[10] = 0;
 
                 } else if (side == 2) { //look into +y
-                    mat_rot.m11 = 1;
-                    mat_rot.m12 = 0;
-                    mat_rot.m13 = 0;
-                    mat_rot.m21 = 0;
-                    mat_rot.m22 = 0;
-                    mat_rot.m23 = -1;
-                    mat_rot.m31 = 0;
-                    mat_rot.m32 = 1;
-                    mat_rot.m33 = 0;
+                    mat_rot[0] = 1;     mat_rot[1] = 0;     mat_rot[2] = 0;
+                    mat_rot[4] = 0;     mat_rot[5] = 0;     mat_rot[6] = -1;
+                    mat_rot[8] = 0;     mat_rot[9] = 1;     mat_rot[10] = 0;
 
                 } else if (side == 3) { //look into -y
-                    mat_rot.m11 = 1;
-                    mat_rot.m12 = 0;
-                    mat_rot.m13 = 0;
-                    mat_rot.m21 = 0;
-                    mat_rot.m22 = 0;
-                    mat_rot.m23 = 1;
-                    mat_rot.m31 = 0;
-                    mat_rot.m32 = -1;
-                    mat_rot.m33 = 0;
+                    mat_rot[0] = 1;     mat_rot[1] = 0;     mat_rot[2] = 0;
+                    mat_rot[4] = 0;     mat_rot[5] = 0;     mat_rot[6] = 1;
+                    mat_rot[8] = 0;     mat_rot[9] = -1;    mat_rot[10] = 0;
 
                 } else if (side == 4) { //look into +z
-                    mat_rot.m11 = 1;
-                    mat_rot.m12 = 0;
-                    mat_rot.m13 = 0;
-                    mat_rot.m21 = 0;
-                    mat_rot.m22 = -1;
-                    mat_rot.m23 = 0;
-                    mat_rot.m31 = 0;
-                    mat_rot.m32 = 0;
-                    mat_rot.m33 = -1;
+                    mat_rot[0] = 1;     mat_rot[1] = 0;     mat_rot[2] = 0;
+                    mat_rot[4] = 0;     mat_rot[5] = -1;    mat_rot[6] = 0;
+                    mat_rot[8] = 0;     mat_rot[9] = 0;     mat_rot[10] = -1;
 
                 } else if (side == 5) { //look into -z
-                    mat_rot.m11 = -1;
-                    mat_rot.m12 = 0;
-                    mat_rot.m13 = 0;
-                    mat_rot.m21 = 0;
-                    mat_rot.m22 = -1;
-                    mat_rot.m23 = 0;
-                    mat_rot.m31 = 0;
-                    mat_rot.m32 = 0;
-                    mat_rot.m32 = 1;
+                    mat_rot[0] = -1;    mat_rot[1] = 0;     mat_rot[2] = 0;
+                    mat_rot[4] = 0;     mat_rot[5] = -1;    mat_rot[6] = 0;
+                    mat_rot[8] = 0;     mat_rot[9] = 0;     mat_rot[10] = 1;
                 }
 
                 target.bind(side);

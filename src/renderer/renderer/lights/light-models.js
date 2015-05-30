@@ -163,25 +163,22 @@ LightModel.prototype = {
     },
 
     getLightViewMatrix: function (mat4) {
-        //var p_dir = this.getParameter("direction");
-        //var p_pos = this.getParameter("position");
-        var entry = this.light.scene.lights.getModelEntry(this.id);
-        var p_dir = entry.parameters["direction"]; //transformed paramt
-        var p_pos = entry.parameters["position"];
+        var p_dir = this.getParameter("direction");
+        var p_pos = this.getParameter("position");
 
         // Get the world matrix from the light in the transformation hierarchy
         // world => light
-        //this.light.getWorldMatrix(mat4);
+        this.light.getWorldMatrix(mat4);
 
         // Derive rotation from the direction and standard direction (-z => no rotation)
         var q_rot = XML3D.math.quat.rotationTo(XML3D.math.quat.create(),c_standardDirection, p_dir);
         // Create matrix from rotation and translation
         var trans = XML3D.math.mat4.fromRotationTranslation(XML3D.math.mat4.create(), q_rot, p_pos);
         // Add to world matrix
-        //XML3D.math.mat4.mul(mat4, mat4, trans);
+        XML3D.math.mat4.mul(mat4, mat4, trans);
 
         // Invert:  light => world
-        XML3D.math.mat4.invert(mat4, trans);
+        XML3D.math.mat4.invert(mat4, mat4);
         }
     })()
 
@@ -251,8 +248,14 @@ XML3D.createClass(PointLightModel, LightModel, {
 
     transformParameters: function (target, offset) {
         var position = target["position"].subarray(offset * 3, offset * 3 + 3);
-        transformPose(this.light, position, null);
+        var direction = target["direction"].subarray(offset * 3, offset * 3 + 3);
+        transformPose(this.light, position, direction);
         transformDefault(target, offset, this.light);
+    },
+
+    getLightData: function (target, offset) {
+        var matrix = target["matrix"].subarray(offset * 16, offset * 16 + 16);
+        this.getLightViewMatrix(matrix);
     }
 });
 
@@ -347,7 +350,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
     getLightViewMatrix: function (mat4) {
         var entry = this.light.scene.lights.getModelEntry(this.id);
         var p_dir = entry.parameters["direction"];
-        var p_pos = entry.parameters["position"];
+        var p_pos =     XML3D.math.vec3.create();
         var bb =        new XML3D.math.bbox.create();
         var bbSize =    XML3D.math.vec3.create();
         var bbCenter =  XML3D.math.vec3.create();

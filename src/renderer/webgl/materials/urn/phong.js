@@ -80,13 +80,14 @@ XML3D.materials.register("phong", {
         "uniform bool pointLightOn[MAX_POINTLIGHTS];",
         "uniform bool pointLightCastShadow[MAX_POINTLIGHTS];",
             "#if HAS_POINTLIGHT_SHADOWMAPS",
+            "uniform mat4 pointLightMatrix[MAX_POINTLIGHTS];",          //ModelView Matrix NO PROJECTION here
             "uniform samplerCube pointLightShadowMap[MAX_POINTLIGHTS];",
             "uniform float pointLightShadowBias[MAX_POINTLIGHTS];",
             "uniform vec2 pointLightNearFar[MAX_POINTLIGHTS];",
-            "float vecToDepth(vec3 vec, float n, float f){",
+            "float vecToDepth(vec3 vec, vec2 nf){",
                 "vec3 absVec = abs(vec);" +
                 "float maxComp = max(absVec.x, max(absVec.y, absVec.z));",
-                "float res = (f+n)/(f-n)-(2.0*f*n)/(f-n)/maxComp;",
+                "float res = (nf.y+nf.x)/(nf.y-nf.x)-(2.0*nf.y*nf.x)/(nf.y-nf.x)/maxComp;",
                 "return res*0.5+0.5;",
             "}",
             "#endif",
@@ -103,7 +104,7 @@ XML3D.materials.register("phong", {
         "uniform float spotLightSoftness[MAX_SPOTLIGHTS];",
         "uniform bool spotLightCastShadow[MAX_SPOTLIGHTS];",
             "#if HAS_SPOTLIGHT_SHADOWMAPS",
-            "uniform mat4 spotLightMatrix[ MAX_SPOTLIGHTS ];",//used for shadowmapcoord calculation
+            "uniform mat4 spotLightMatrix[ MAX_SPOTLIGHTS ];",          //ModelViewPROJECTION Matrix
             "uniform sampler2D spotLightShadowMap[MAX_SPOTLIGHTS];",
             "uniform float spotLightShadowBias[MAX_SPOTLIGHTS];",
             "#endif",
@@ -116,7 +117,7 @@ XML3D.materials.register("phong", {
         "uniform bool directionalLightOn[MAX_DIRECTIONALLIGHTS];",
         "uniform bool directionalLightCastShadow[MAX_DIRECTIONALLIGHTS];",
             "#if HAS_DIRECTIONALLIGHT_SHADOWMAPS",
-            "uniform mat4 directionalLightMatrix[MAX_DIRECTIONALLIGHTS];",
+            "uniform mat4 directionalLightMatrix[MAX_DIRECTIONALLIGHTS];",          //ModelViewPROJECTION Matrix
             "uniform sampler2D directionalLightShadowMap[MAX_DIRECTIONALLIGHTS];",
             "uniform float directionalLightShadowBias[MAX_DIRECTIONALLIGHTS];",
             "#endif",
@@ -130,7 +131,7 @@ XML3D.materials.register("phong", {
         "#if MAX_POINTLIGHTS > 0 && HAS_POINTLIGHT_SHADOWMAPS",
         "    vec3 pointLightShadowMapDirection[MAX_POINTLIGHTS];",
         "    for(int i = 0; i < MAX_POINTLIGHTS; i++) {",
-        "       pointLightShadowMapDirection[i] = fragWorldPosition - pointLightPosition[i];",
+        "      pointLightShadowMapDirection[i] = (pointLightMatrix[i] * vec4(fragWorldPosition, 1.0)).xyz;",
         "    }",
         "#endif",
         "#if MAX_SPOTLIGHTS > 0 && HAS_SPOTLIGHT_SHADOWMAPS",
@@ -178,7 +179,7 @@ XML3D.materials.register("phong", {
         "   #if HAS_POINTLIGHT_SHADOWMAPS",
         "       if(pointLightCastShadow[i]){",
         "           shadowInfluence = 0.0;",
-        "           float lsDepth = vecToDepth(pointLightShadowMapDirection[i], pointLightNearFar[i].x, pointLightNearFar[i].y );",
+        "           float lsDepth = vecToDepth((pointLightMatrix[i]*vec4(fragWorldPosition - pointLightPosition[i],0.0)).xyz, pointLightNearFar[i]);",
         "		    float depth = unpackDepth( textureCube(pointLightShadowMap[i], pointLightShadowMapDirection[i])) +  pointLightShadowBias[i];",
         "           if(lsDepth < depth)",
         "               shadowInfluence = 1.0;",
@@ -215,7 +216,7 @@ XML3D.materials.register("phong", {
         "			vec3 perspectiveDivPos = lspos.xyz / lspos.w * 0.5 + 0.5;",
         "			float lsDepth = perspectiveDivPos.z;",
         "			vec2 lightuv = perspectiveDivPos.xy;",
-        "			float depth = unpackDepth(texture2D(spotLightShadowMap[i], lightuv)) + spotLightShadowBias[i];",
+        "			float depth = unpackDepth(texture2D(spotLightShadowMap[i], lightuv));// + spotLightShadowBias[i];",
         "           if(lsDepth < depth)",
         "               shadowInfluence = 1.0;",
         "       }",
@@ -280,6 +281,8 @@ XML3D.materials.register("phong", {
         "  }", // dirLight loop
         "#endif",
         "  gl_FragColor = vec4(color, alpha);",
+        "  //float depth = pointLightFragDepth[0];// unpackDepth( textureCube(pointLightShadowMap[0], pointLightShadowMapDirection[0])) +  pointLightShadowBias[0];",
+        "  //gl_FragColor = vec4(depth*1.5,depth*1.0,depth*1.0,1.0);",
         "}"
     ].join("\n"),
 

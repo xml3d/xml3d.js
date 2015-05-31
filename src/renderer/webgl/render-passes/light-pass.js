@@ -38,6 +38,8 @@ XML3D.createClass(LightPass, SceneRenderPass, {
             target.bind();
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
             gl.enable(gl.DEPTH_TEST);
+            gl.enable(gl.POLYGON_OFFSET_FILL);
+            gl.polygonOffset(4.0, -20.0);          // Set the polygon offset
 
             var count = {objects: 0, primitives: 0};
 
@@ -58,6 +60,8 @@ XML3D.createClass(LightPass, SceneRenderPass, {
                 });
             }
 
+            gl.polygonOffset(0, 0);          // Set the polygon offset
+            gl.disable(gl.POLYGON_OFFSET_FILL);
             // Do not render transparent objects (considered to not throw shadows
             target.unbind();
             return {count: count};

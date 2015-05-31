@@ -12,7 +12,7 @@ var PointLightData = {
     "intensity": {type: XC.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
     "attenuation": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
     "position": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
-    "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0005]},
+    "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
     "direction": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
     "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
     "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]},
@@ -30,7 +30,8 @@ var SpotLightData = {
     "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
     "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
     "matrix": {type: XC.DATA_TYPE.FLOAT4X4, 'default': [1, 0, 0, 0,   0, 1, 0, 0,    0, 0, 1, 0,  0, 0, 0, 1]},
-    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]}
+    "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]},
+    "nearFar": {type: XC.DATA_TYPE.FLOAT2, 'default': [1.0, 100.0]}
 };
 
 var DirectionalLightData = {
@@ -40,7 +41,8 @@ var DirectionalLightData = {
     "position": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
     "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
     "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]},
-    "matrix": {type: XC.DATA_TYPE.FLOAT4X4, 'default': [1, 0, 0, 0,   0, 1, 0, 0,    0, 0, 1, 0,  0, 0, 0, 1]}
+    "matrix": {type: XC.DATA_TYPE.FLOAT4X4, 'default': [1, 0, 0, 0,   0, 1, 0, 0,    0, 0, 1, 0,  0, 0, 0, 1]},
+    "nearFar": {type: XC.DATA_TYPE.FLOAT2, 'default': [1.0, 100.0]}
 };
 
 
@@ -276,8 +278,11 @@ var SpotLightModel = function (dataNode, light) {
 
 XML3D.createClass(SpotLightModel, LightModel, {
     getFrustum: function (aspect, sceneBoundingBox) {
+        var entry = this.light.scene.lights.getModelEntry(this.id);
 
         if (sceneBoundingBox.isEmpty()) {
+            entry.parameters["nearFar"][0] = 1.0;
+            entry.parameters["nearFar"][1] = 110.0;
             return new Frustum(1.0, 110.0, 0, this.fovy, aspect, false)
         }
 
@@ -290,6 +295,8 @@ XML3D.createClass(SpotLightModel, LightModel, {
         };
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
+        entry.parameters["nearFar"][0] = nf.near;
+        entry.parameters["nearFar"][1] = nf.far;
 
         return new Frustum(nf.near, nf.far, 0, this.fovy, aspect, false);
     },
@@ -324,7 +331,10 @@ var DirectionalLightModel = function (dataNode, light) {
 
 XML3D.createClass(DirectionalLightModel, LightModel, {
     getFrustum: function(aspect, sceneBoundingBox) {
-        if (sceneBoundingBox.isEmpty()) {
+        var entry = this.light.scene.lights.getModelEntry(this.id);
+        if (XML3D.math.bbox.isEmpty(sceneBoundingBox)) {
+            entry.parameters["nearFar"][0] = 1.0;
+            entry.parameters["nearFar"][1] = 110.0;
             return new Frustum(1.0, 110.0, 0, this.fovy, aspect, true)
         }
 
@@ -336,6 +346,9 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
                     far:  -sceneBoundingBox.min.z};
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
+        entry.parameters["nearFar"][0] = nf.near;
+        entry.parameters["nearFar"][1] = nf.far;
+
         return new Frustum(nf.near, nf.far, 0, this.fovy, aspect, true);
     },
 

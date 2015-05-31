@@ -107,6 +107,7 @@ XML3D.materials.register("phong", {
             "uniform mat4 spotLightMatrix[ MAX_SPOTLIGHTS ];",          //ModelViewPROJECTION Matrix
             "uniform sampler2D spotLightShadowMap[MAX_SPOTLIGHTS];",
             "uniform float spotLightShadowBias[MAX_SPOTLIGHTS];",
+            "uniform vec2 spotLightNearFar[MAX_SPOTLIGHTS];",
             "#endif",
         "#endif",
 
@@ -181,8 +182,8 @@ XML3D.materials.register("phong", {
         "           shadowInfluence = 0.0;",
                                 //vecToDepth return a depth in [0,1]
         "           float lsDepth = vecToDepth((pointLightMatrix[i]*vec4(fragWorldPosition - pointLightPosition[i],0.0)).xyz, pointLightNearFar[i]);",
-        "           float adaptiveBias = 30.0*(1.0-lsDepth)+0.9;", //scale up Bias near the light and go down to 0.9
-        "		    float depth = unpackDepth( textureCube(pointLightShadowMap[i], pointLightShadowMapDirection[i])) +  pointLightShadowBias[i] *adaptiveBias;",
+        "           float biasScale = 3.0*pointLightNearFar[i].y*(1.0-lsDepth)*(1.0-lsDepth)+1.0;", //scale up Bias near the light and go down
+        "		    float depth = unpackDepth( textureCube(pointLightShadowMap[i], pointLightShadowMapDirection[i])) +  pointLightShadowBias[i] * biasScale;",
         "           if(lsDepth < depth)",
         "               shadowInfluence = 1.0;",
         "       }",
@@ -218,7 +219,8 @@ XML3D.materials.register("phong", {
         "			vec3 perspectiveDivPos = lspos.xyz / lspos.w * 0.5 + 0.5;",
         "			float lsDepth = perspectiveDivPos.z;",
         "			vec2 lightuv = perspectiveDivPos.xy;",
-        "			float depth = unpackDepth(texture2D(spotLightShadowMap[i], lightuv)) + spotLightShadowBias[i];",
+        "           float biasScale = 3.0*spotLightNearFar[i].y*(1.0-lsDepth)*(1.0-lsDepth)+1.0;", //scale up Bias near the light and go down
+        "			float depth = unpackDepth(texture2D(spotLightShadowMap[i], lightuv)) + spotLightShadowBias[i] * biasScale;",
         "           if(lsDepth < depth)",
         "               shadowInfluence = 1.0;",
         "       }",

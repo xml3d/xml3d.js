@@ -179,8 +179,10 @@ XML3D.materials.register("phong", {
         "   #if HAS_POINTLIGHT_SHADOWMAPS",
         "       if(pointLightCastShadow[i]){",
         "           shadowInfluence = 0.0;",
+                                //vecToDepth return a depth in [0,1]
         "           float lsDepth = vecToDepth((pointLightMatrix[i]*vec4(fragWorldPosition - pointLightPosition[i],0.0)).xyz, pointLightNearFar[i]);",
-        "		    float depth = unpackDepth( textureCube(pointLightShadowMap[i], pointLightShadowMapDirection[i])) +  pointLightShadowBias[i];",
+        "           float adaptiveBias = 30.0*(1.0-lsDepth)+0.9;", //scale up Bias near the light and go down to 0.9
+        "		    float depth = unpackDepth( textureCube(pointLightShadowMap[i], pointLightShadowMapDirection[i])) +  pointLightShadowBias[i] *adaptiveBias;",
         "           if(lsDepth < depth)",
         "               shadowInfluence = 1.0;",
         "       }",

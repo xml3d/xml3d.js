@@ -12,7 +12,7 @@ var PointLightData = {
     "intensity": {type: XC.DATA_TYPE.FLOAT3, 'default': [1, 1, 1]},
     "attenuation": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 1]},
     "position": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, 0]},
-    "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0001]},
+    "shadowBias": {type: XC.DATA_TYPE.FLOAT, 'default': [0.0005]},
     "direction": {type: XC.DATA_TYPE.FLOAT3, 'default': [0, 0, -1]},
     "castShadow": {type: XC.DATA_TYPE.BOOL, 'default': [false]},
     "on": {type: XC.DATA_TYPE.BOOL, 'default': [true]},

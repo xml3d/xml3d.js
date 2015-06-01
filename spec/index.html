@@ -268,7 +268,7 @@
 
           <p>The <code>name</code> attribute of a value element acts as an ID for the data contained in this element. It may be referenced in XFlow operators or
               in material shaders. If two value elements with the same name are present in an XFlow data graph then the value nearest the top will replace any value
-              nested deeper inside the graph.</p>
+              nested deeper within the graph.</p>
 
           <p>In this example the value of the <code>color</code> field will be <code>1.0 0.0 0.0</code> when referencing <code>#my-data</code>.</p>
         <pre class='example highlight'>
@@ -279,9 +279,32 @@
                 &lt;/data&gt;
             &lt;/data&gt;
        </pre>
+
       </section>
       <section>
           <h4>Interactive elements</h4>
+          <p>Interactive elements are those which are able to receive mouse event listeners. The list of available mouse event listeners is described in the
+          <a href="#events">Events</a> section.</p>
+
+          <p>In order to receive a mouse event an element must have a renderable object somewhere in its subtree for the user to interact with. When the user
+          interacts with this object (eg. clicks on it) the relevant MouseEvent will be generated on the <a href="#the-mesh-element"><code>mesh</code></a> or
+              <a href="#the-model-element"><code>model</code></a> element and then bubbled up the scene hierarchy. This will continue until the event reaches the
+          <a href="#the-xml3d-element"><code>xml3d</code></a> element, or until <code>event.stopPropagation()</code> is called.</p>
+
+          <p>In the following example, when clicking on the object in the scene corresponding to this <a href="#the-mesh-element"><code>mesh</code></a> element,
+          both listeners will be triggered in the appropriate order:</p>
+
+           <pre class='example highlight'>
+            &lt;group onmousedown="myMouseDownListener(event)"&gt;
+                &lt;group&gt;
+                    &lt;mesh onmouseup="myMouseUpListener(event)" type="triangles"&gt;&lt;/mesh&gt;
+                &lt;/group&gt;
+            &lt;/group&gt;
+           </pre>
+
+          <div class="note">Object visibility may affect whether or not mouse event listeners are triggered. See the <a href="#css-properties">CSS Properties</a>
+          section on visibility for more information.</div>
+
       </section>
   </section>
 
@@ -755,6 +778,26 @@
 
 <section>
   <h2>Events</h2>
+    <section>
+        <h3>Mouse and Keyboard Events</h3>
+        The following event listeners are available on all <a href="#interactive-elements">interactive elements</a>:
+            <ul>
+                <li>onclick</li>
+                <li>ondblclick</li>
+                <li>onmousedown</li>
+                <li>onmouseup</li>
+                <li>onmouseover</li>
+                <li>onmousemove</li>
+                <li>onmouseout</li>
+                <li>onkeypress</li>
+                <li>onkeydown</li>
+                <li>onkeyup</li>
+            </ul>
+        The event received by these listeners is a standard HTML5 <a href="http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevents">MouseEvent</a>
+        or <a href="http://www.w3.org/TR/DOM-Level-3-Events/#events-keyboardevents">KeyboardEvent</a> respectively. As in normal HTML, event listeners
+        may be added to the element through an appropriate <code>on[eventName]</code> attribute or through JavaScript using <code>element.addEventListener(...)</code>.
+        <div class="note">Listeners registered through an attribute must use the following format: <code>"myListenerFunction(event)"</code></div>
+    </section>
     <section>
         <h3>FrameDrawn</h3>
         <dl title='interface FrameDrawn : CustomEvent' class='idl'>

@@ -19,6 +19,8 @@ var ValueDataAdapter = function (factory, node) {
 };
 XML3D.createClass(ValueDataAdapter, NodeAdapter);
 
+// TODO(ksons): In a first step, name-mangle every value element that has the
+// sys flag set
 ValueDataAdapter.prototype.init = function()
 {
     var config = this.node._configured, value;

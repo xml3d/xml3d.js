@@ -57,6 +57,8 @@ var reg = {
     'assetdata': Asset.AssetDataAdapter,
     'assetmesh': Asset.AssetMeshAdapter,
     'model': Asset.AssetAdapter
+    // TODO(ksons): Add an data adapter for the xml3d element that provides a container for system parameter (DataNode)
+    // including default values
 };
 
 /**

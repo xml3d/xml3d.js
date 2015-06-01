@@ -27,6 +27,9 @@ var DataAdapter = function (factory, node) {
 XML3D.createClass(DataAdapter, BaseDataAdapter);
 
 DataAdapter.prototype.init = function () {
+    // TODO(ksons): Here, every data node is composed. Add the system's data node
+    // to every data node in a first appraoch
+
     this.xflowDataNode = new DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;

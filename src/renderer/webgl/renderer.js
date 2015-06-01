@@ -69,6 +69,10 @@ var GLRenderer = function (element, canvasHandler) {
     this.height = canvas.clientHeight;
 
     this.context = new GLContext(canvas, this._canvasHandler.id);
+
+    // TODO(ksons): Get the data adapter for the element and pass it to the scene
+    // the scene implementation should fill the system DataNode with the relevant
+    // data (Scene: renderer-independent values, GLScene: renderer-dependent values)
     this.scene = new GLScene(this.context);
 
     var factory = xml3dFormatHandler.getFactory("webgl", this._canvasHandler.id);

@@ -491,14 +491,140 @@
             <dd><a href="#interactive-elements">Interactive element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
+
+        <p>A mesh represents a single renderable object in the scene. To be drawn correctly a mesh must either inherit a
+            <a href="#the-material-element"><code>material</code></a> from a parent element or assign its own through the <code>material</code> attribute.</p>
+
+        <div class="note">A mesh can only be assigned a single material. Models that contain multiple materials will have to be broken down into separate meshes.</div>
+
+        <p>The simplest way to define a mesh is to include its data directly in the <code>mesh</code> element:</p>
+
+        <pre class='example highlight'>
+            &lt;mesh type="triangles" material="#myMaterial"&gt;
+                &lt;int name="index"&gt;0 1 2 ... &lt;/int&gt;
+                &lt;float3 name="position"&gt;1.0 0.0 0.0 ... &lt;/float3&gt;
+                &lt;float3 name="normal"&gt;0.0 1.0 0.0 ... &lt;/float3&gt;
+            &lt;/mesh&gt;
+        </pre>
+
+        <p>However it's usually a good idea to reference this data instead, either in the same document or in an external document as shown below:</p>
+
+        <pre class='example highlight'>
+            &lt;!-- myDataElement is the id of a data element containing the mesh data --&gt;
+            &lt;mesh src="myMesh.xml#myDataElement" type="triangles" material="#myMaterial"&gt;&lt;/mesh&gt;
+        </pre>
+
+        <p>Each entry in the mesh data is passed on to the material shader in the form of a vertex attribute. A mesh must <i>always</i> supply at least a
+        <code>position</code> entry, any others are optional but may be required by a material in order to be rendered properly (eg. <code>normal</code> in
+        conjunction with the predefined <code>phong</code> material). </p>
+
+        <p>As with any <a href="#data-elements">data element</a>, a mesh may override certain entries or supply its own. This applies even to material entries:</p>
+
+        <pre class='example highlight'>
+            &lt;!-- This mesh will be rendered with a blue diffuseColor even though the material specifies a red one --&gt;
+            &lt;mesh src="myMesh.xml#myDataElement" type="triangles" material="#myRedMaterial"&gt;
+                &lt;float3 name="diffuseColor"&gt;0.0 0.0 1.0&lt;float3&gt;
+            &lt;/mesh&gt;
+        </pre>
+
+        <dl title='interface XML3DMeshElement : HTMLElement' class='idl'>
+            <dt>attribute DOMString type</dt>
+            <dd>The primitive type that this mesh uses. Supported values are <code>triangles</code>, <code>tristrips</code>,
+                <code>points</code>, <code>lines</code> and <code>linestrips</code>.</dd>
+
+            <dt>attribute DOMString src</dt>
+            <dd>URI reference to another data element containing the data for this mesh. Can be a reference to an external document.</dd>
+
+            <dt>attribute DOMString material</dt>
+            <dd>URI reference to a <a href="#the-material-element"><code>material</code></a> element.</dd>
+
+            <dt>attribute DOMString transform</dt>
+            <dd>URI reference to a <a href="#the-transform-element"><code>transform</code></a> element.</dd>
+
+            <dt>XML3DDataResult getResult(Array filter)</dt>
+            <dd>Returns a XML3DDataResult object containing the data for the fields requested by the given filter, eg.
+                <code>["position", "index", "normal"]</code>. This is useful for accessing the mesh data directly through JavaScript.</dd>
+
+            <dt>Array getOutputNames()</dt>
+            <dd>Returns the names of the data fields available to this mesh node. </dd>
+
+            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dd>Returns the transformation matrix of this mesh element in world space (includes parent transformations).
+            </dd>
+            <dt>XML3DMatrix getLocalMatrix()</dt>
+            <dd>Returns the local transformation matrix of this mesh element (does not include parent transformations).
+            </dd>
+            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dd>Returns the bounding box of this mesh in object space, without any transformations applied. </dd>
+
+            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dd>Returns the bounding box of this mesh in world space.</dd>
+        </dl>
     </section>
-    <section>
+      <section>
       <h4>The <code>model</code> element</h4>
         <dl class='element'>
             <dt>Categories:</dt>
             <dd><a href="#data-elements">Data element</a></dd>
             <dd><a href="#interactive-elements">Interactive element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
+        </dl>
+          <p>A model is an instantiation of an <a href="the-asset-element"><code>asset</code></a>. This is useful for rendering complex objects
+              with many individual meshes or materials. Not only is it easier to insert a single <code>model</code> element into the DOM, it's also much
+              more efficient. </p>
+
+          <p>When referencing an external file the URI <i>must</i> contain the id of the <a href="the-asset-element"><code>asset</code></a> element to
+          be instantiated:</p>
+
+          <pre class='example highlight'>
+            &lt;model src="myExternalAsset.xml#myAsset"&gt;&lt;/model&gt;
+          </pre>
+
+          <p>A model may override data inside the Asset by specifying the <a href="#the-assetmesh-element"><code>assetmesh</code></a> or
+              <a href="#the-assetdata-element"><code>assetdata</code></a> element that should be overwritten. For example, to change the material
+          of a mesh inside the Asset named "hat" we would define our model tag as follows:</p>
+
+          <pre class='example highlight'>
+            &lt;model src="myExternalAsset.xml#myAsset"&gt;
+               &lt;assetmesh name="hat" material="#aNewMaterialDefinedLocally"&gt;&lt;/assetmesh&gt;
+            &lt;/model&gt;
+          </pre>
+
+          This behavior is especially useful in driving animations inside the instantiated asset. Each instance of the <code>model</code> element can have its
+          own animation state, even if all reference the same asset. Typically this is done by exposing the animation key through its own <code>assetdata</code>, which
+          is then overwritten in the <code>model</code>:
+
+          <pre class='example highlight'>
+            &lt;!-- Assuming "myAsset" contains an assetdata element with name "animation" --&gt;
+            &lt;model src="myExternalAsset.xml#myAsset"&gt;
+               &lt;assetdata name="animation"&gt;
+                &lt;float id="animation_key" name="key"&gt;1.0&lt;/float&gt;
+              &lt;/assetdata&gt;
+            &lt;/model&gt;
+          </pre>
+
+          By changing the value of the <code>animation_key</code> through JavaScript we can now control the model's animation state.
+
+        <dl title='interface XML3DModelElement : HTMLElement' class='idl'>
+            <dt>attribute DOMString src</dt>
+            <dd>URI reference to an <a href="#the-asset-element"><code>asset</code></a> element that this <code>model</code> should instantiate.</dd>
+
+            <dt>attribute DOMString material</dt>
+            <dd>URI reference to a <a href="#the-material-element"><code>material</code></a> element. This material will only be used for
+            objects that do not define their own material inside the <code>asset</code>.</dd>
+
+            <dt>attribute DOMString transform</dt>
+            <dd>URI reference to a <a href="#the-transform-element"><code>transform</code></a> element.</dd>
+
+            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dd>Returns the transformation matrix of this model in world space, including parent transformations).
+            </dd>
+
+            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dd>Returns the bounding box of this model without any parent transformations applied.</dd>
+
+            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dd>Returns the bounding box of this model in world space, including parent transformations.</dd>
         </dl>
     </section>
   </section>

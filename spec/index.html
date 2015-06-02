@@ -774,61 +774,108 @@
             </dd>
         </dl>
     </section>
+
+
+
+
+
+
+    <!-- texture element -->
     <section>
       <h4>The <code>texture</code> element</h4>
-        <dl class='element'>
-            <dt>Categories:</dt>
-            <dd><a href="#value-elements">Value element</a></dd>
-        </dl>
-        <section>
-            <dl title="enum WrapMode" class="idl">
-                <dt>clamp</dt>
-                <dd>Corresponds to gl.CLAMP_TO_EDGE. Texture coordinates are clamped to the 0..1 range.</dd>
-                <dt>repeat</dt>
-                <dd>Corresponds to gl.REPEAT. Texture coordinates are wrapped to the 0..1 range.</dd>
-            </dl>
-        </section>
-        <section>
-            <dl title="enum FilterMode" class="idl">
-                <dt>nearest</dt>
-                <dd>Corresponds to gl.NEAREST. </dd>
-                <dt>linear</dt>
-                <dd>Corresponds to gl.LINEAR. </dd>
-                <dt>nearest-mipmap-nearest</dt>
-                <dd>Corresponds to gl.NEAREST_MIPMAP_NEAREST </dd>
-                <dt>nearest-mipmap-linear</dt>
-                <dd>Corresponds to gl.NEAREST_MIPMAP_LINEAR </dd>
-                <dt>linear-mipmap-nearest</dt>
-                <dd>Corresponds to gl.LINEAR_MIPMAP_NEAREST </dd>
-                <dt>linear-mipmap-linear</dt>
-                <dd>Corresponds to gl.LINEAR_MIPMAP_LINEAR </dd>
-            </dl>
-        </section>
-        <dl title='interface XML3DTextureElement : HTMLElement' class='idl'>
-            <dt>attribute WrapMode wraps</dt>
-            <dd>Texture wrapping mode to be used on the x axis</dd>
-            <dt>attribute WrapMode wrapt</dt>
-            <dd>Texture wrapping mode to be used on the y axis</dd>
-            <dt>attribute WrapMode wrapu</dt>
-            <dd>Texture wrapping mode to be used on the z axis</dd>
-            <dt>attribute FilterMode filtermin</dt>
-            <dd>The texture filtering mode to be used for minification.</dd>
-            <dt>attribute FilterMode filtermag</dt>
-            <dd>The texture filtering mode to be used for magnification.</dd>
-            <dt>attribute FilterMode filtermip</dt>
-            <dd>TODO</dd>
-            <dt>attribute string name</dt>
-            <dd>Required. The name of the texture as defined by the material shader. </dd>
-            <dt>attribute boolean param</dt>
-            <dd>If this element appears inside a DataFlow element the param attribute will mark it as a parameter to be supplied by the Data element referencing the DataFlow. </dd>
-            <dt>attribute string type</dt>
-            <dd>TODO </dd>
-        </dl>
-        <p class="note">
-            XML3D will automatically resize textures to the nearest power-of-two dimensions when the texture wrap mode is set to "repeat" or filtermin is set to anything other than "nearest" or
-            "linear". See <a href="https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support">WebGL limitations</a> for more information.
-        </p>
+      <dl class='element'>
+        <dt>Categories:</dt>
+        <dd><a href="#value-elements">Value element</a></dd>
+        <dt>Content model:</dt>
+        <dd>One or more <code>img</code>, <code>video</code>, or <code>canvas</code> elements</dd>
+      </dl>
+
+      The texture element represents a texture that can be used as parameter for materials or as input for generic
+      dataflow processing.
+      The image data of the texture is defined by its children.
+      The texture element's attributes determine how samples are derived from the image.
+      <p class="note">
+        Texture sampling attributes configure fixed-function sampling methods on the graphics hardware.
+        Thus these attributes qualify as CSS properties. We have abstained from using CSS properties because we
+        currently cannot define custom CSS properties.
+      </p>
+
+
+      <div>The <dfn id="attr-texture-wrap">wrap</dfn> attribute controls the texture access if the provided texture
+        coordinates are outside range [0;1]. The wrap attribute is a combined enumerated attribute.
+        A valid wrap value is a string that matches the <code>wrap</code> production of the following form:
+      <pre>
+        wrap := &lt;wrap-mode&gt; &lt;wrap-mode&gt;?
+        wrap-mode := repeat | clamp
+      </pre>
+        If two <code>wrap-mode</code> values are given, then the first value defines the wrap mode for s coordinates and
+        the second for t coordinates. Otherwise the wrap mode is applied in all directions.
+        The wrap-mode values correspond to CLAMP_TO_EDGE and REPEAT in OpenGL.
+
+      </div>
+      <br>
+
+      <div>The <dfn id="attr-texture-filter">filter</dfn> attribute controls the filtering of the texture, i.e. which
+        texture pixel access function is used. The <code>wrap</code> attribute is a combined enumerated attribute.
+        A valid filter value is a string that matches the filter production of the following form:
+      <pre>
+        filter := (&lt;min-filter-mode&gt; &lt;mag-filter-mode&gt;) | &lt;mag-filter-mode&gt;
+        min-filter-mode := nearest | linear | nearest-mipmap-nearest | nearest-mipmap-linear | linear-mipmap-nearest | linear-mipmap-linear
+        mag-filter-mode := nearest | linear
+      </pre>
+        If only the <code>mag-filter-mode</code> is given, the specified function is used for both, minifying and
+        magnification. Otherwise, the <code>min-filter-mode</code> is used for minifying and the
+        <code>mag-filter-mode</code> is used for magnification.
+        The functions specified by the filter modes correspond to those in OpenGL (NEAREST, LINEAR,
+        NEAREST_MIPMAP_NEAREST, NEAREST_MIPMAP_LINEAR, LINEAR_MIPMAP_NEAREST, and LINEAR_MIPMAP_LINEAR).
+        The default filter mode is "linear-mipmap-linear linear".
+      </div>
+
+      <p class="note">
+        xml3d.js will automatically resize textures to the nearest power-of-two dimensions when the texture wrap mode is
+        set to "repeat" or filtermin is set to anything other than "nearest" or
+        "linear". See <a
+        href="https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support">WebGL
+        limitations</a> for more information.
+      </p>
+
+      Here is an example of using the <code>wrap</code> and <code>filter</code> attributes to configure the sampling of a texture:
+      <pre class="example highlight">
+&lt;texture name=&quot;diffuseTexture&quot; wrap=&quot;repeat clamp&quot; filter=&quot;nearest linear&quot;&gt;
+  &lt;img src=&quot;../stone.jpg&quot;/&gt;
+&lt;/texture&gt;
+      </pre>
+
+       The <dfn id="attr-texture-type">type</dfn>  attribute is an <a href="http://www.w3.org/TR/html5/single-page.html#enumerated-attribute">enumerated attribute</a> with four states with three explicit keywords:
+       <dl>
+         <dt>The <dfn id="attr-texture-type-1d">1D</dfn> keyword, which maps to the <i>1D</i> state</dt>
+         <dd>The 1D state means the children elements define a 1D texture each.</dt>
+         <dt>The <dfn id="attr-texture-type-2d">2D</dfn> keyword, which maps to the <i>2D</i> state</dt>
+         <dd>The 2D state means the children elements defines a 2D texture.</dd>
+         <dt>The <dfn id="attr-texture-type-3d">3D</dfn> keyword, which maps to the <i>3D</i> state</dt>
+         <dd>The 3D state means the children elements defines a 3D texture.</dd>
+         <dt>The <i>auto</i> state</dt>
+         <dd>The type of the texture is determined by the system based on the texture's children elements.</dd>
+       </dl>
+       <p>The <code><a href="#attr-texture-type" class="internalDFN">type</a></code> attribute's <i>missing value default</i> is the <i>auto</i> state.</p>
+
+
+      <dl title='interface XML3DTextureElement : HTMLElement' class='idl'>
+        <dt>attribute DOMString wrap</dt>
+        <dd>The <code>wrap</code> IDL attribute must reflect the respective content attribute of the same name.</dd>
+        <dt>attribute DOMString filter</dt>
+        <dd>The <code>filter</code> IDL attribute must reflect the respective content attribute of the same name.</dd>
+        <dt>attribute DOMString name</dt>
+        <dd>Required. The name of the texture as defined by the material shader.</dd>
+        <dt>attribute boolean param</dt>
+        <dd>If this element appears inside a DataFlow element the param attribute will mark it as a parameter to be
+          supplied by the Data element referencing the DataFlow.
+        </dd>
+        <dt>attribute DOMString type</dt>
+        <dd>The <code>type</code></dfn> IDL attribute must reflect the content attribute of the same name, <a href="http://www.w3.org/TR/html5/single-page.html#limited-to-only-known-values">limited to only known values</a>.</dd>
+      </dl>
     </section>
+
     <section>
       <h4>The <code>dataflow</code> element</h4>
         <dl class='element'>

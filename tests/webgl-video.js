@@ -11,7 +11,7 @@ module("WebGL Video", {
             that.doc.body.appendChild(script);
             start();
         };
-        loadDocument("scenes/video.xhtml", this.cb);
+        loadDocument("scenes/video.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

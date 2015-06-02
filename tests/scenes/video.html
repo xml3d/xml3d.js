@@ -1,27 +1,23 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
+<!DOCTYPE html><html><head lang="en">
+  <meta charset="UTF-8">
     <title>XML3D Basic Scene</title>
       <script type="text/javascript" src="../../build/output/xml3d.js"></script>
       <script type="text/javascript" src="../../tools/camera.js"></script>
   </head>
   <body>
     <div>
-      <xml3d id="MyXml3d" style="width: 640px; height: 480px; border: 1px solid gray" activeview="#myview"
-             xmlns="http://www.xml3d.org/2009/xml3d">
+      <xml3d id="MyXml3d" style="width: 640px; height: 480px; border: 1px solid gray" activeview="#myview">
         <defs>
           <material id="ex4_2_texmaterial" script="urn:xml3d:material:flat">
             <float3 name="diffuseColor">1.0 1.0 1.0</float3>
             <float name="ambientIntensity">1.0</float>
-            <texture name="diffuseTexture" wraps="repeat" wrapt="repeat">
-              <video id="myvideo"/>
+            <texture name="diffuseTexture" wrap="repeat">
+              <video id="myvideo"></video>
             </texture>
           </material>
         </defs>
-        <view id="myview" position="0 0 -8" orientation="0 1 0 3.14159" fieldofview="0.7854" />
-        <group style="material: url(#ex4_2_texmaterial)" >
+        <view id="myview" position="0 0 -8" orientation="0 1 0 3.14159" fieldofview="0.7854"></view>
+        <group style="material: url(#ex4_2_texmaterial)">
           <mesh type="triangles">
             <int name="index">0 1 2  1 2 3</int>
             <float3 name="position">
@@ -40,5 +36,5 @@
         </group>
       </xml3d>
     </div>
-  </body>
-</html>
+
+</body></html>

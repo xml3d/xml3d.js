@@ -11,20 +11,20 @@
    
     <material id="texmaterial1" script="urn:xml3d:material:phong">
         <texture id="tex1" name="diffuseTexture">
-            <img id="tex1img" src="textures/yellow.png"/>
+            <img id="tex1img" src="textures/yellow.png">
         </texture>
     </material>
     
     <material id="npotTexmaterial" script="urn:xml3d:material:phong">
         <float3 name="specularColor">0 0 0</float3>
-        <texture id="npottex" name="diffuseTexture" wraps="repeat" wrapt="repeat">
-            <img id="npotteximg" src="textures/bluegreen.png"/>
+        <texture id="npottex" name="diffuseTexture" wrap="repeat">
+            <img id="npotteximg" src="textures/bluegreen.png">
         </texture>
     </material>
      
     <material id="diffuseTexmaterial" script="urn:xml3d:material:diffuse">
         <texture id="tex1" name="diffuseTexture">
-            <img id="tex1img" src="textures/yellow.png"/>
+            <img id="tex1img" src="textures/yellow.png">
         </texture>
     </material>
     
@@ -102,5 +102,6 @@
         return a;
     }
     </script>
-</body>
-</html>
+
+
+</body></html>

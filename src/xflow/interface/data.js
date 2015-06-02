@@ -31,6 +31,7 @@ var SamplerConfig = function(){
     this.colorR = 0;
     this.colorG = 0;
     this.colorB = 0;
+    this.anisotropy = 0; // number of max samples for anisotropic filtering
     this.generateMipMap = 0;
 };
 
@@ -45,6 +46,7 @@ SamplerConfig.prototype.setDefaults = function() {
     this.colorR = 0;
     this.colorG = 0;
     this.colorB = 0;
+    this.anisotropy = 1; // number of max samples for anisotropic filtering
     this.generateMipMap = 0;
 };
 

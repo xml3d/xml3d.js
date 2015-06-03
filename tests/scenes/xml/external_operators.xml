@@ -7,8 +7,8 @@
         <script name="xflow.add2" src="../../scripts/add2.js" type="text/javascript"></script>
         <script name="xflow.add3" src="../../scripts/add3.js" type="text/javascript"></script>
         <compute>
-            position = xflow.add2(position, posAdd1);
-            position = xflow.add3(position, posAdd2);
+            someresult = xflow.add2(position, posAdd1);
+            position = xflow.add3(someresult, posAdd2);
         </compute>
     </dataflow>
 

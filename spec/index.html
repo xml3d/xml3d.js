@@ -948,6 +948,24 @@
   <h2>CSS Properties</h2>
 </section>
 
+<section>
+    <h2>Content-Types</h2>
+    <p>XML3D specifies the following content-types for external resources:</p>
+    <pre>
+        JSON mesh file     model/vnd.xml3d.mesh+json
+
+        XML mesh file      model/vnd.xml3d.mesh+xml
+
+        XML asset file     model/vnd.xml3d.model+xml
+
+        BLAST binary       model/vnd.xml3d.[model|mesh]+blast
+    </pre>
+    <p>XML3D will set the appropriate <code>Accept</code> header when requesting these resources. The response should include a
+    <code>Content-Type</code> header with the same content-type <b>or</b> the appropriate standard type
+    <code>application/json</code>, <code>application/xml</code> or <code>application/octet-stream</code>. </p>
+    <div class="note">A response with no <code>Content-Type</code> header at all <em>will not be handled</em> and will generate an error message.</div>
+</section>
+
 
 <section>
   <h2>Events</h2>

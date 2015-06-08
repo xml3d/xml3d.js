@@ -1005,9 +1005,71 @@
             <dt>Categories:</dt>
             <dd><a href="#data-elements">Data element</a></dd>
         </dl>
+        <p>Data elements are the non-leaf nodes in an Xflow graph. They act primarily as containers for data but may also modify that data through
+        compute operators and filters. When data elements are nested the data from all child elements is merged, in this sense the parent data element acts as a data
+         aggregator. In the case of two data fields with the same name the data element further down the list in the DOM will have priority. For example:</p>
+
+        <pre class='example highlight'>
+        &lt;data&gt; &lt;!-- At this level "color" will be "0.0 1.0 0.0" --&gt;
+          &lt;data&gt;
+            &lt;float3 name="color"&gt;1.0 0.0 0.0&lt;/float3&gt;
+          &lt;/data&gt;
+          &lt;data&gt;
+            &lt;float3 name="color"&gt;0.0 1.0 0.0&lt;/float3&gt;
+          &lt;/data&gt;
+        &lt;/data&gt;
+        </pre>
+
+        <p>Data elements may also reference other data elements. This can be used to share a common dataset between objects, overwriting certain fields on a
+        per-object basis as required. See the <a href="#data-elements">data elements</a> section for an example.</p>
+
+        <p>One important use for data elements is to dynamically change or generate data, for example to drive an animation or generate a ground mesh from a height map.
+         This can be accomplished with a combination of compute operators and data overrides. The following is an example of a simple compute operator that will add the
+        provided offset to all vertex positions of a mesh:</p>
+
+         <pre class='example highlight'>
+        &lt;mesh&gt;
+           &lt;data compute="position = xflow.add(position, offset)"&gt;
+             &lt;float3 name="offset"&gt;0.5 0.5 0.5 ... &lt;/float3&gt;
+             &lt;data id="originalData"&gt;
+                &lt;float3 name="position"&gt;1.0 0.0 0.0 ... &lt;/float3&gt;
+             &lt;/data&gt;
+           &lt;/data&gt;
+        &lt;/mesh&gt;
+        </pre>
+
+        When using a compute operator with a data element all input arguments must be available to the data element that invokes the operator. In this example the
+        "position" field of the <code>mesh</code> will contain the offset position data, while the data element with id <code>originalData</code> will contain the
+        original positions. If this data element were referenced from another mesh it would also return the original positions:
+
+        <pre class='example highlight'>
+        &lt;mesh&gt;
+            &lt;!-- "positions" contains the original data 1.0 0.0 0.0 ... --&gt;
+           &lt;data src="#originalData"&gt;&lt;/data&gt;
+        &lt;/mesh&gt;
+        </pre>
+
+        Xflow is designed as a reactive framework, meaning operators will only be recomputed if input data has changed and a sink element has requested the
+        output data (eg. during a draw call in a subsequent frame).
+
        <dl title='interface XML3DDataElement : HTMLElement' class='idl'>
-        <dt>attribute DOMString script</dt>
-        <dd>The <code>script</code> IDL attribute must reflect the <a href="#attr-material-script" class="internalDFN">script</a> content attribute.</dd>
+       <dt>attribute DOMString compute</dt>
+       <dd>A Javascript-like statement that can invoke an Xflow compute operator on a set of input data. See the <a href="#the-compute-operator">compute operator</a>
+            section for more information.</dd>
+       <dt>attribute DOMString filter</dt>
+       <dd>May contain a filter (<code>keep</code>, <code>rename</code> or <code>remove</code>) to adjust the data that is provided by this data element. See the
+            Wiki page <a href="https://github.com/xml3d/xml3d.js/wiki/How-to-use-Xflow">How to use Xflow</a> for more information.</dd>
+       <dt>attribute DOMString src</dt>
+       <dd>Accepts an HTML ID reference to another data element. The other element's data will be included in place of this one. Note that any child elements
+           are ignored when the <code>src</code> attribute is set.</dd>
+       <dt>XML3DDataResult getResult(Array filter)</dt>
+       <dd>Returns a XML3DDataResult object containing the data for the fields requested by the given filter, eg.
+            <code>["position", "index", "normal"]</code>. This is useful for accessing the data directly through JavaScript.</dd>
+
+       <dt>Array getOutputNames()</dt>
+       <dd>Returns the names of the data fields available to this data element. </dd>
+
+
       </dl>
     </section>
     <section>
@@ -1254,6 +1316,14 @@
   <section>
     <h3>XML3DRay</h3>
   </section>
+</section>
+
+<section>
+    <h2>Xflow</h2>
+
+    <section>
+        <h3>The compute operator</h3>
+    </section>
 </section>
 
 <section>

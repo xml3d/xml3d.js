@@ -84,6 +84,218 @@
   </section>
   <section>
     <h3>Predefined material models</h3>
+    <section>
+      <h2>Matte</h2>
+
+      <p>URN: <code>urn:xml3d:material:matte</code></p>
+
+      <div class="attributes">Attributes:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>diffuseColor</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The objects RGB color</td>
+          </tr>
+          <tr>
+            <td>useVertexColor</td>
+            <td>bool</td>
+            <td>false</td>
+            <td>if true, the vertex attribute 'color' is used to color the object.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Simple material that does not apply any lighting but shades the object with a single uniform color defined by
+        the <code>diffuseColor</code> parameter or by the
+        vertex attribute <code>color</code>, if <code>useVertexColor</code> is set to ''true''.
+      </p>
+    </section>
+
+    <section>
+      <h2>Diffuse</h2>
+
+      <p>URN: <code>urn:xml3d:material:diffuse</code></p>
+
+      <div class="attributes">Attributes:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>diffuseColor</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The object's RGB diffuse color component.</td>
+          </tr>
+          <tr>
+            <td>diffuseTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+
+          <tr>
+            <td>emissiveColor</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The object's RGB emissive color component.</td>
+          </tr>
+          <tr>
+            <td>emissiveTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+          <tr>
+            <td>ambientIntensity</td>
+            <td>float</td>
+            <td>0</td>
+            <td>The amount of the 'diffuseColor' to be added to the shading without considering lighting.</td>
+          </tr>
+          <tr>
+            <td>transparency</td>
+            <td>float</td>
+            <td>0</td>
+            <td>The transparency of the object, with 0 being opaque and 1 being fully transparent.</td>
+          </tr>
+          <tr>
+            <td>useVertexColor</td>
+            <td>bool</td>
+            <td>false</td>
+            <td>Setting <i>useVertexColor</i> to 'true', the vertex attribute 'color' will be multiplied to the diffuse
+              color component.
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Material model for diffuse surfaces that reflects light equally in all directions. Additionally, the surface has
+        an optional emissive and ambient component.
+        This is the logic of the diffuse material model in JavaScript/shade.js pseudo code:
+      <pre class="highlight">
+        function shade(env) {
+          var diffuseColor = env.diffuseColor || new Vec3(1, 1, 1);
+          var emissiveColor = env.emissiveColor || new Vec3(0);
+          var transparency = Math.min(1, env.transparency);
+
+          if (env.useVertexColor && env.color) {
+            diffuseColor *= new Vec3(env.color);
+          }
+
+          if (env.diffuseTexture.sample2D) {
+             var texDiffuse = env.diffuseTexture.sample2D(env.texcoord);
+             diffuseColor *= texDiffuse.rgb();
+             transparency *= (1 - texDiffuse.a());
+          }
+
+          return Shade.diffuse(diffuseColor, env.normal)
+                      .transparent(transparency)
+                      .emissive(emissiveColor);
+        }
+      </pre>
+      </p>
+    </section>
+
+    <section>
+      <h2>Phong</h2>
+
+      <p>URN: <code>urn:xml3d:material:phong</code></p>
+
+      <div class="attributes">Attributes:
+        <table>
+          <tbody>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>diffuseColor</td>
+            <td>float3</td>
+            <td>1 1 1</td>
+            <td>The object's RGB diffuse color component.</td>
+          </tr>
+          <tr>
+            <td>diffuseTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+          <tr>
+            <td>specularColor</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The object's RGB specular color component.</td>
+          </tr>
+          <tr>
+            <td>specularTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+          <tr>
+            <td>shininess</td>
+            <td>float</td>
+            <td>0.5</td>
+            <td>A scalar for the object's specular exponent, to be multiplied by 128 (e.g. a value of 0.5 will give a specular exponent of 64)</td>
+          </tr>
+          <tr>
+            <td>emissiveColor</td>
+            <td>float3</td>
+            <td>0 0 0</td>
+            <td>The object's RGB emissive color component.</td>
+          </tr>
+          <tr>
+            <td>emissiveTexture</td>
+            <td>texture</td>
+            <td>-</td>
+            <td>TODO</td>
+          </tr>
+          <tr>
+            <td>ambientIntensity</td>
+            <td>float</td>
+            <td>0</td>
+            <td>The amount of the 'diffuseColor' to be added to the shading without considering lighting.</td>
+          </tr>
+          <tr>
+            <td>transparency</td>
+            <td>float</td>
+            <td>0</td>
+            <td>The transparency of the object, with 0 being opaque and 1 being fully transparent.</td>
+          </tr>
+          <tr>
+            <td>useVertexColor</td>
+            <td>bool</td>
+            <td>false</td>
+            <td>Setting <i>useVertexColor</i> to 'true', the vertex attribute 'color' will be multiplied to the diffuse
+              color component.
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        TODO
+      </p>
+    </section>
+    </section>
+
+
   </section>
   <section>
     <h3>Predefined light models</h3>

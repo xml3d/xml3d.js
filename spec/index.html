@@ -709,6 +709,32 @@
       <h4>The <code>defs</code> element</h4>
         <dl class='element'>
         </dl>
+        <p>The defs element is simply an organizational tool to separate the scene tree from elements that are not explicitly
+        part of the scene, but may be referenced by elements that are. These implicit elements include <a href="#the-transform-element"><code>transform</code></a>,
+        <a href="#the-material-element"><code>material</code></a>, <a href="#the-data-element"><code>data</code></a> and <a href="#the-dataflow-element"><code>dataflow</code></a>. Note that
+        any of these elements may appear inside the scene tree as well, it's just good practice to keep them in the <code>defs</code> section
+        whenever possible.</p>
+
+        Ideally the only elements that should appear outside the <code>defs</code> section are <a href="#the-group-element"><code>group</code></a>,
+        <a href="#the-mesh-element"><code>mesh</code></a>, <a href="#the-model-element"><code>model</code></a> and <a href="#the-view-element"><code>view</code></a>.
+        Note that these elements will be ignored if they are inside the <code>defs</code> section, since it is not considered part of the scene tree.
+        <a href="#the-group-element"><code>data</code></a> elements usually belong in the <code>defs</code> section but may also be part of the
+        scene tree if contained by a <a href="#the-mesh-element"><code>mesh</code></a> element.
+
+        <pre class="example highlight" >
+          &lt;xml3d&gt;
+            &lt;defs&gt;
+               &lt;transform id="myTransform" rotation="0 1 0 0.75"&gt;
+               &lt;data id="myMeshData" &gt;
+                  &lt;float3 name="position"&gt;1.0 0.0 0.0 ...&lt;/float3&gt;
+               &lt;/data&gt;
+            &lt;/defs&gt;
+
+            &lt;group transform="#myTransform"&gt;
+               &lt;mesh src="#myMeshData" type="triangles"&gt;&lt;/mesh&gt;
+            &lt;/group&gt;
+          &lt;/xml3d&gt;
+        </pre>
     </section>
   </section>
 

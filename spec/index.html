@@ -328,14 +328,33 @@
         <dt>attribute DOMString activeview</dt>
         <dd>The activeview IDL attribute must reflect the respective content attribute of the same name.</dd>
 
-        <dt>HTMLElement? getElementByPoint(unsigned long x, unsigned long y)</dt>
-        <dd>Returns the element at the point with <b>window</b> coordinates x,y if there is a scene element; otherwise, returns
-          null.
+        <dt>HTMLElement? getElementByPoint()</dt>
+        <dd>
+            Returns the element at the point with <b>window</b> coordinates x,y if there is a scene element; otherwise, returns
+            null.
+            <dl class='parameters'>
+                <dt>unsigned long x</dt>
+                <dd>The x coordinate relative to the top left of the browser window</dd>
+                <dt>unsigned long y</dt>
+                <dd>The y coordinate relative to the top left of the browser window</dd>
+                <dt>optional XML3DVec3 hitPoint</dt>
+                <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
+                <dt>optional XML3DVec3 hitNormal</dt>
+                <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
+            </dl>
         </dd>
 
-        <dt>HTMLElement? getElementByRay(XML3DRay ray)</dt>
+        <dt>HTMLElement? getElementByRay()</dt>
         <dd>Returns the first element that intersects with ray if the ray intersects with a a scene element; otherwise,
           returns null.
+            <dl class='parameters'>
+                <dt>XML3DRay ray</dt>
+                <dd></dd>
+                <dt>optional XML3DVec3 hitPoint</dt>
+                <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
+                <dt>optional XML3DVec3 hitNormal</dt>
+                <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
+            </dl>
         </dd>
 
         <dt>XML3DBox getLocalBoundingBox()</dt>
@@ -344,8 +363,16 @@
         <dt>XML3DBox getWorldBoundingBox()</dt>
         <dd>Returns the bounding box of the scene in world space.</dd>
 
-        <dt>XML3DRay generateRay(unsigned int x, unsigned int y)</dt>
-        <dd>Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new XML3DRay from the given x,y <b>window</b> coordinates.</dd>
+        <dt>XML3DRay generateRay()</dt>
+        <dd>
+            Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new XML3DRay from the given x,y <b>window</b> coordinates.
+            <dl class='parameters'>
+                <dt>unsigned long x</dt>
+                <dd>The x coordinate relative to the top left of the browser window</dd>
+                <dt>unsigned long y</dt>
+                <dd>The y coordinate relative to the top left of the browser window</dd>
+            </dl>
+        </dd>
 
           <dt>attribute Function onframedrawn</dt>
           <dd>Event listener to be executed whenever a new frame has been drawn. Is passed a <a>FrameDrawn</a> event.
@@ -617,7 +644,7 @@
             <dd>URI reference to a <a href="#the-transform-element"><code>transform</code></a> element.</dd>
 
             <dt>XML3DMatrix getWorldMatrix()</dt>
-            <dd>Returns the transformation matrix of this model in world space, including parent transformations).
+            <dd>Returns the transformation matrix of this model in world space, including parent transformations.
             </dd>
 
             <dt>XML3DBox getLocalBoundingBox()</dt>

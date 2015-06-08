@@ -392,6 +392,51 @@
             <dd><a href="#interactive-elements">Interactive element</a></dd>
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
+        <p>Group elements are the non-leaf nodes in an XML3D scene tree. They can be used to build transformation hierarchies and to group
+        renderable objects together. Groups can be nested, but because they are not Xflow elements they may not hold any
+        <a href="#data-elements">data elements</a> and cannot be referenced by other <code>group</code> elements. This means that
+        unlike data elements, groups build a tree structure rather than a graph. Each group may only have a single parent.</p>
+
+        <p>Most properties of groups will be inherited by child elements. Each property is inherited differently, as summed up in this table:</p>
+        <div class="attributes">
+        <table>
+            <tbody>
+            <tr>
+                <th>Property</th>
+                <th>Behavior if absent</th>
+                <th>Behavior if present</th>
+            </tr>
+            <tr>
+                <td>material</td>
+                <td>Inherited from parent group</td>
+                <td>Overrides the value from the parent group</td>
+            </tr>
+            <tr>
+                <td>transform</td>
+                <td>Inherited from parent group</td>
+                <td>Multiplied with parent transformation</td>
+            </tr>
+            <tr>
+                <td>visibility</td>
+                <td>Inherited from parent group</td>
+                <td><code>parent.visibility</code> equals <code>false</code> then <code>false</code> else <code>visibility</code></td>
+            </tr>
+            <tr>
+                <td>event listeners</td>
+                <td>Inherited from parent group</td>
+                <td>Called in addition to parent listener, unless <code>event.stopPropagation()</code> is invoked</td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <pre class="example highlight">
+            &lt;group visible="false" material="#blueMaterial"&gt;
+                &lt;group visible="true"&gt;
+                    &lt;!-- This mesh will not be visible but will inherit #blueMaterial --&gt;
+                    &lt;mesh type="triangles"&gt;&lt;/mesh&gt;
+                &lt;/group&gt;
+            &lt;/group&gt;
+        </pre>
         <dl title='interface XML3DGroupElement : HTMLElement' class='idl'>
             <dt>attribute DOMString transform</dt>
             <dd>Accepts a URI fragment referencing a <a>transform</a> element. Alternatively a transformation may be defined
@@ -409,10 +454,12 @@
             <dd>Returns the local transformation matrix of this group element (does not include parent transformations).
             </dd>
             <dt>XML3DBox getLocalBoundingBox()</dt>
-            <dd>Returns the bounding box of this group in its local transformation space. </dd>
+            <dd>Returns the bounding box of this group in its local transformation space. This is calculated as the smallest volume containing the
+                bounding boxes of all child elements.</dd>
 
             <dt>XML3DBox getWorldBoundingBox()</dt>
-            <dd>Returns the bounding box of this group in world space.</dd>
+            <dd>Returns the bounding box of this group in world space. This is calculated as the smallest volume containing the
+            bounding boxes of all child elements.</dd>
         </dl>
     </section>
     <section>

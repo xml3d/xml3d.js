@@ -264,8 +264,14 @@ function getSystemParameters(context, globals) {
         var entry = result[global];
         if(entry && entry.staticSize) {
             var aLength = globals[global].length;
-            var tupleSize = getTupleSize(entry);
-            entry.staticSize = aLength / tupleSize;
+            if (aLength) {
+                var tupleSize = getTupleSize(entry);
+                entry.staticSize = aLength / tupleSize;
+            } else {
+                // Do not allow a array of size 0, remove entry instead
+                // TODO(ksons): Remove once we can check array size in shade.js
+                delete result[global];
+            }
         }
 
     }

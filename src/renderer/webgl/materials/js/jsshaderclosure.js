@@ -177,12 +177,14 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
 
                 cacheEntry = {
                     source: glslShader.source, uniformSetter: glslShader.uniformSetter, spaceInfo: spaceInfo
-                }
+                };
+                cacheEntry.hasTransparentShaderClosure = workSet.getProcessingData("isTransparent");
 
                 this.uniformSetter = glslShader.uniformSetter;
                 this.source = {
                     fragment: glslShader.source, vertex: this.createVertexShader(vsRequest, vsDataResult, spaceInfo)
                 }
+
                 if (scene.deferred) {
                     cacheEntry.signatures = workSet.getProcessingData("colorClosureSignatures");
                 }
@@ -199,7 +201,9 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
         }
         this.source = {
             fragment: cacheEntry.source, vertex: this.createVertexShader(vsRequest, vsDataResult, cacheEntry.spaceInfo)
-        }
+        };
+        this.hasTransparentShaderClosure = cacheEntry.hasTransparentShaderClosure;
+
         this.uniformSetter = cacheEntry.uniformSetter;
         if (scene.deferred) {
             scene.colorClosureSignatures.push.apply(scene.colorClosureSignatures, cacheEntry.signatures);
@@ -233,7 +237,7 @@ XML3D.createClass(JSShaderClosure, AbstractShaderClosure, {
 
     getTransparencyFromInputData: function (dataMap) {
         // TODO: Compute Transparency
-        return false;
+        return this.hasTransparentShaderClosure;
     },
 
     /* Default values are compiled into shade.js */

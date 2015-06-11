@@ -754,6 +754,13 @@ module("Xflow External Operators", {
             ok(true, "Scene loaded");
             that.win = document.getElementById("xml3dframe").contentWindow;
             that.doc = document.getElementById("xml3dframe").contentDocument;
+            // This overriding function is for the test "Dataflows - External Operators"
+            that.win.XML3D.debug.logError = function() {
+                if (arguments[0] && arguments[0].indexOf("No operator 'xflow.add3'") != -1) {
+                    window.forceTestFail = true;
+                }
+                that.win.XML3D.debug.doLog(XML3D.debug.ERROR, arguments);
+            };
             start();
         };
         loadDocument("scenes/data-xflow-external-operators.html"+window.location.search, this.cb);
@@ -767,8 +774,11 @@ module("Xflow External Operators", {
 test("Dataflows - External Operators", function() {
     var xml3dElem = this.doc.getElementById("xml3dElem");
     var mesh = this.doc.getElementById("mesh1");
+
     var loaded = function() {
         start();
+        // The only way to reliably detect this fail state is through the error message thrown by XML3D
+        ok(!window.forceTestFail, "External operators were loaded without errors");
         var positions = mesh.getResult()._entries.position;
         QUnit.closeArray(positions.value, [3,2,2,2,1,2], EPSILON, "Dataflow positions were correctly computed");
     };

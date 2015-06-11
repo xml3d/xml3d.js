@@ -110,6 +110,14 @@ XML3D.extend(Xflow, require("./xflow/interface/graph.js"));
 XML3D.extend(Xflow, require("./xflow/interface/data.js"));
 Xflow.ComputeRequest = require("./xflow/interface/request.js").ComputeRequest;
 
+XML3D.webgl = XML3D.webgl || {};
+XML3D.webgl.FullscreenQuad = require("./renderer/webgl/base/fullscreenquad.js");
+XML3D.webgl.BaseRenderPass = require("./renderer/webgl/render-passes/base.js");
+XML3D.webgl.ForwardRenderPass = require("./renderer/webgl/render-passes/forward.js");
+XML3D.webgl.BaseRenderTree = require("./renderer/webgl/render-trees/base.js");
+XML3D.extend(XML3D.webgl, require("./renderer/webgl/base/rendertarget.js"));
+
+
 require("./xflow/operator/default");
 
 module.exports = {

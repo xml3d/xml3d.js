@@ -401,6 +401,13 @@ Object.defineProperty(DataNode.prototype, "userData", {
 DataNode.prototype.setLoading = function(loading){
     if(this._loading != loading){
         this._loading = loading;
+        this._channelNode.setStructureOutOfSync();
+        this._channelNode.loading = loading;
+        for (var sub in this._substitutionNodes) {
+            var subNode = this._substitutionNodes[sub];
+            subNode.setStructureOutOfSync();
+            subNode.loading = loading;
+        }
         updateProgressLevel(this);
         Base._flushResultCallbacks();
     }

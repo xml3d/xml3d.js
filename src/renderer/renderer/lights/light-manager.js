@@ -52,7 +52,11 @@ LightManager.prototype = {
             var model = light.model;
             var entry = that.getModelEntry(model.id);
             var offset = entry.lightModels.indexOf(model);
-            XML3D.debug.assert(offset != -1, "Light values changed for a light that is not managed by this LightManager");
+            if (offset < 0) {
+                //These changes are for a light that no longer exists so we can ignore them
+                //This can happen for ex. during a delayed change notification that isn't fired until after a remove()
+                return;
+            }
             model.fillLightParameters(entry.parameters, offset);
             model.getLightData(entry.parameters, offset);
             entry.changed = true;

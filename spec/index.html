@@ -1443,11 +1443,84 @@
 </section>
 
 <section>
-    <h2>Xflow</h2>
+  <h2>Xflow</h2>
 
-    <section>
-        <h3>The compute operator</h3>
-    </section>
+  <section>
+    <h3>The compute operator</h3>
+    <p>Compute operators can be used to change or create data inside an Xflow graph. They operate like functions, receiving a set of input arguments, doing some work
+    and then outputting the result. On <a href="#the-data-element"><code>data</code></a> elements operators may be invoked through the <code>compute</code> attribute
+    using the following syntax:</p>
+
+    <pre>
+     compute="(output1 [,output2...]) = xflow.[operatorName]([argument1, ...])"
+    </pre>
+
+    <p>The fields listed as outputs will be added to the list of data that this data element provides. The arguments must be available to the data element that invokes
+    the operator, either as <a href="#value-elements">value elements</a> or provided by a child data element. Compute operators can be invoked in sequence by nesting data
+    elements: </p>
+
+    <pre class='example highlight'>
+      &lt;data compute="position = xflow.add(position, offset2)"&gt;
+        &lt;data compute="position = xflow.add(position, offset1)"&gt;
+          &lt;float3 name="position"&gt;...&lt;/float3&gt;
+          &lt;float3 name="offset1"&gt;...&lt;/float3&gt;
+        &lt;/data&gt;
+        &lt;float3 name="offset2"&gt;...&lt;/float3&gt;
+      &lt;/data&gt;
+    </pre>
+
+    <p>XML3D includes several compute operators by default (a complete list may be found <a href="https://github.com/xml3d/xml3d.js/wiki/Xflow-operator-list">here</a>)
+    but also provides an interface to declare custom compute operators. These can be saved in their own JavaScript files and served alongside xml3d.js. Before being used a custom
+    operator must be registered with Xflow by calling <code>Xflow.registerOperator</code> with the following syntax:</p>
+
+    <pre class="example highlight">
+      Xflow.registerOperator("myOperatorName", {
+        outputs: [ {type: 'float3', name: 'outputName', customAlloc=true },
+                   ...
+        ],
+
+        params:  [ {type: 'int', source: 'inputName1', optional=true },
+                   {type: 'float3', source: 'inputName2', array=true },
+                   ...
+        ],
+
+        alloc: function(sizes [, inputName1, ...]) {
+           // Only necessary if one or more inputs or outputs have the flag 'customAlloc=true'
+           sizes['outputName'] = inputName2.length;
+        },
+
+        evaluate: function(outputName, inputName1, inputName2, info) {
+           ...
+        }
+      });
+    </pre>
+
+    <p>In essence the declaration of the compute operator must contain at least a list of input and output fields, including types, and an <code>evaluate</code> function that is called by
+      Xflow during data processing. Input fields may be marked as <code>optional</code>, otherwise they will generate an error if missing.
+
+    </p><p>Both input and output fields may be allocated
+      with a custom size, indicated with the <code>customAlloc</code> flag. When this flag is present Xflow will call the <code>alloc</code> function, which should declare the sizes of the
+      data arrays that Xflow needs to create for these fields. If a field is not marked with <code>customAlloc</code> then Xflow will attempt to choose the right size based on the inputs to the
+      compute operator.
+    </p>
+    <p>
+      Fields marked with the <code>array</code> flag will be provided to the <code>evaluate</code> function as an intact array instead of per-element. This allows random access on the full range
+      of data. If this flag is not set then the field will be broken down into discrete elements (according to its data type) with the <code>evaluate</code> function being called once per element.
+      This of course requires that all input and output fields contain the same number of elements and Xflow will generate an error if this is not the case.
+    </p>
+    <p>The <code>evaluate</code> function will always be called with the list of output fields first, then the input fields, then an <code>info</code> object supplied by Xflow. The <code>info</code>
+      object contains information about how the data can be iterated and offers a place to store data during processing:
+    </p>
+
+    <pre>
+      info = {
+        iterFlag: [true|false,...], // Is the input at this position an array that should be iterated over or a single element?
+        iterateCount: number,       // The number of elements in the input data to iterate over
+        customData: {}              // A field to hold custom data during and between operator executions
+      }
+    </pre>
+
+  </section>
 </section>
 
 <section>

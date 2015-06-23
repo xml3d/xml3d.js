@@ -51,7 +51,7 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
             case "projection":
                 this.projectionFetcher.update();
                 break;
-            case "fieldOfView":
+            case "fieldofview":
                 this.renderNode.updateFieldOfView(this.node.fieldOfView);
                 break;
             default:

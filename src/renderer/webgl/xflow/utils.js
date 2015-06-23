@@ -1,4 +1,3 @@
-var GLContext = require("../base/context.js");
 var XC = require("../../../xflow/interface/constants.js");
 
 function convertToJSArray(value) {
@@ -25,7 +24,7 @@ var createElementBuffer = function (context, data, maxIndex) {
     } else if (maxIndex < (1 << 16)) {
         glType = gl.UNSIGNED_SHORT;
         bufferData = new Uint16Array(data);
-    } else if (!context.extensions[GLContext.EXTENSIONS.UINT32_INDICES]) {
+    } else if (!context.extensions["OES_element_index_uint"]) {
         XML3D.debug.logError("Trying to use index data with indices larger than 65535, but this is not supported on your platform. Indexing errors will occur.");
         glType = gl.UNSIGNED_SHORT;
         bufferData = new Uint16Array(data);

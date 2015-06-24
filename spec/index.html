@@ -1474,7 +1474,7 @@
     operator must be registered with Xflow by calling <code>Xflow.registerOperator</code> with the following syntax:</p>
 
     <pre class="example highlight">
-      Xflow.registerOperator("myOperatorName", {
+      Xflow.registerOperator("xflow.myOperatorName", {
         outputs: [ {type: 'float3', name: 'outputName', customAlloc=true },
                    ...
         ],
@@ -1485,7 +1485,7 @@
         ],
 
         alloc: function(sizes [, inputName1, ...]) {
-           // Only necessary if one or more inputs or outputs have the flag 'customAlloc=true'
+           // Only necessary if one or more outputs have the flag 'customAlloc=true'
            sizes['outputName'] = inputName2.length;
         },
 
@@ -1498,16 +1498,16 @@
     <p>In essence the declaration of the compute operator must contain at least a list of input and output fields, including types, and an <code>evaluate</code> function that is called by
       Xflow during data processing. Input fields may be marked as <code>optional</code>, otherwise they will generate an error if missing.
 
-    </p><p>Both input and output fields may be allocated
+    </p><p>Output fields may be allocated
       with a custom size, indicated with the <code>customAlloc</code> flag. When this flag is present Xflow will call the <code>alloc</code> function, which should declare the sizes of the
       data arrays that Xflow needs to create for these fields. If a field is not marked with <code>customAlloc</code> then Xflow will attempt to choose the right size based on the inputs to the
       compute operator.
     </p>
     <p>
-      Fields marked with the <code>array</code> flag will be provided to the <code>evaluate</code> function as an intact array instead of per-element. This allows random access on the full range
-      of data. If this flag is not set then the field will be broken down into discrete elements (according to its data type) with the <code>evaluate</code> function being called once per element.
-      This of course requires that all input and output fields contain the same number of elements and Xflow will generate an error if this is not the case.
-    </p>
+      Fields marked with the <code>array</code> flag will be provided to the <code>evaluate</code> function as is and will exclude them from the normal length-matching checks that Xflow performs
+      on input arguments. This can be used, for example, to pass an array of data with 100 elements while the other input fields all contain thousands of elements. Normally this would generate
+      an error as Xflow would not be able to properly iterate through the data.</p>
+
     <p>The <code>evaluate</code> function will always be called with the list of output fields first, then the input fields, then an <code>info</code> object supplied by Xflow. The <code>info</code>
       object contains information about how the data can be iterated and offers a place to store data during processing:
     </p>
@@ -1515,10 +1515,37 @@
     <pre>
       info = {
         iterFlag: [true|false,...], // Is the input at this position an array that should be iterated over or a single element?
-        iterateCount: number,       // The number of elements in the input data to iterate over
+        iterateCount: number,       // The number of elements in the input data to iterate over, ie. (input array length) / (tuple size)
         customData: {}              // A field to hold custom data during and between operator executions
       }
     </pre>
+    <div class="note">Fields marked with the <code>array</code> flag will always have an iterFlag value of <code>false</code></div>
+
+    <p>The following is an example operator that uses the <code>info</code> object to iterate over a set of <em>positions</em>, adding a constant <em>offset</em> and returning the
+    result as a new array of <em>positions</em>: </p>
+
+    <pre class="example highlight">
+      Xflow.registerOperator("xflow.addOffset", {
+        outputs: [ {type: 'float3', name: 'result' }
+        ],
+
+        params:  [ {type: 'float3', source: 'position' },
+                   {type: 'float3', source: 'offset', array=true }
+        ],
+
+        evaluate: function(result, position, offset, info) {
+           // In this example 'offset' is an array with 3 values (a single float3)
+           // 'position' is an array containing thousands of values
+
+           for (var i=0; i < info.iterateCount; i++) {
+              result[i*3] = position[ info.iterFlag[0] ? i*3 : 0 ] + offset[0];
+              result[i*3+1] = position[ info.iterFlag[0] ? i*3+1 : 1 ] + offset[1];
+              result[i*3+1] = position[ info.iterFlag[0] ? i*3+2 : 2 ] + offset[2];
+           }
+        }
+      }
+    </pre>
+
 
   </section>
 </section>

@@ -181,7 +181,7 @@ VertexShaderRequest.prototype.getVertexShader = function(){
     return this._vertexShader;
 };
 
-VertexShaderRequest.prototype._onResultChanged = function(result, notification){
+VertexShaderRequest.prototype._onResultChanged = function(notification){
     this._onDataNodeChange(notification);
 };
 

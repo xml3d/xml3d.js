@@ -1,3 +1,5 @@
+var assert = require("assert");
+
 // Error Callbacks:
 var c_errorCallbacks = [];
 
@@ -62,6 +64,7 @@ module.exports = {
      * @private
      */
     _queueResultCallback: function (requestOrResult, resultState) {
+        assert(resultState !== undefined);
         var index;
         if (( index = c_listedCallbacks.indexOf(requestOrResult)) == -1) {
             index = c_listedCallbacks.length;

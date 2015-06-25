@@ -5,6 +5,10 @@ var css = {};
 css.TRANSFORM_PROPERTY = null;
 
 css.init = function () {
+    var styleElement = document.createElement("style");
+    styleElement.textContent = "xml3d * { display: inherit; }";
+    document.head.appendChild(styleElement);
+
     if ('transform' in document.body.style) {
         css.TRANSFORM_PROPERTY = 'transform'
     } else if ('WebkitTransform' in document.body.style) {

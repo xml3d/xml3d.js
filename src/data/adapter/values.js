@@ -31,8 +31,10 @@ ValueDataAdapter.prototype.init = function()
     else{
         delete config.scriptValue;
         if (this.node.sys == true){
+            // FIXME: Better approach to get <xml3d> element here
         	var xml3dNode = document.getElementsByTagName("XML3D")[0];
         	var systemDataNode= this.factory.getAdapter(xml3dNode).xflowDataNode;
+            // FIXME: Append system to parent data adapter, remove BufferEntry if it exists
         	for (child in systemDataNode._children){
         		if (systemDataNode._children[child].name == "_system_"+this.node.name){
         			value = systemDataNode._children[child].data.getValue();

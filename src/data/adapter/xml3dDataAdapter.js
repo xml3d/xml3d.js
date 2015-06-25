@@ -7,6 +7,7 @@ var InputNode = require("../../xflow/interface/graph.js").InputNode;
 var BufferEntry = require("../../xflow/interface/data.js").BufferEntry;
 var XC = require("../../xflow/interface/constants.js");
 
+// FIXME: Remove copied code! Rename to xml3d.js
 
 var XML3DDataAdapter= function (factory, node) {
     NodeAdapter.call(this, factory, node);

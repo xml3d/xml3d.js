@@ -30,6 +30,7 @@ DataAdapter.prototype.init = function () {
     // TODO(ksons): Here, every data node is composed. Add the system's data node
     // to every data node in a first approach
 	//Get the xml3d Node
+    // FIXME: Get it right!
     var xml3dNode = document.getElementsByTagName("XML3D")[0];	
     
     //get xml3d data adapter
@@ -49,6 +50,8 @@ DataAdapter.prototype.init = function () {
     }
     recursiveDataAdapterConstruction(this);
 
+    // FIXME: Use insertBefore to guarantee right position
+    // FIXME: Add data node with filter set
     //append system data node to every data node
     this.xflowDataNode.appendChild(systemDataNode);
 };

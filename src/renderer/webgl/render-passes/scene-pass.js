@@ -75,7 +75,7 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
 
             for (var i = 0, n = objectArray.length; i < n; i++) {
                 var obj = objectArray[i];
-                if (!obj.isVisible())
+                if (!obj.visible)
                     continue;
 
                 var mesh = obj.mesh;

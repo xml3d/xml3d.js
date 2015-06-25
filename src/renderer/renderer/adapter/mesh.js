@@ -7,7 +7,9 @@ var Resource = require("../../../base/resourcemanager.js").Resource;
  */
 var MeshRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, true, true);
+    this.style = window.getComputedStyle(node);
     this.createRenderNode();
+
 };
 
 XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
@@ -21,8 +23,9 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
         this.renderNode = this.getScene().createRenderObject({
             parent: parentNode, node: this.node, object: {
                 data: dataAdapter.getXflowNode(), type: this.getMeshType()
-            }, name: this.node.id, visible: !this.node.visible ? false : undefined
+            }, name: this.node.id
         });
+        this.updateVisibility();
         this.updateLocalMatrix();
         this.updateMaterialHandler();
     },
@@ -36,6 +39,19 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
         if (name == "type") {
             this.renderNode.setType(newValue);
         }
+    },
+
+    styleChangedCallback: function() {
+        TransformableAdapter.prototype.styleChangedCallback.call();
+        this.updateVisibility();
+    },
+
+    updateVisibility: function() {
+        var visible = this.style.getPropertyValue("display").trim() != "none";
+        this.renderNode.setLocalVisible(visible);
+        var pickable = this.style.getPropertyValue("visibility").trim() != "hidden";
+        // this.renderNode.pickable = pickable;
+        this.factory.renderer.requestRedraw("Visibility changed.");
     },
 
     /**

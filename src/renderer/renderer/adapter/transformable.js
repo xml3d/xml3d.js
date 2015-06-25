@@ -74,6 +74,8 @@ XML3D.createClass(TransformableAdapter, RenderAdapter, {
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
+        RenderAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+
         if (name == "transform") {
             this.transformFetcher && this.transformFetcher.update();
         } else if (name == "style") {

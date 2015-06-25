@@ -13,6 +13,7 @@ var DEFAULT_LIGHT_MODEL = "urn:xml3d:light:directional";
 var LightRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, false, true);
     this.dataAdapter = Resource.getAdapter(node, "data");
+    this.style = window.getComputedStyle(node);
     this.createRenderNode();
 };
 
@@ -29,10 +30,9 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
+        TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+
         switch (name) {
-            case "visible":
-                this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
-                break;
             case "intensity": // TODO(ksons): remove in 5.1
                 XML3D.debug.logWarning("The <light> attribute intensity is deprecated in XML3D 5.0.", this.node);
                 break;
@@ -42,6 +42,18 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
                 break;
         }
     },
+
+    styleChangedCallback: function () {
+        TransformableAdapter.prototype.styleChangedCallback.call();
+        this.updateVisibility();
+    },
+
+    updateVisibility: function () {
+        var visible = this.style.getPropertyValue("display").trim() != "none";
+        this.renderNode.setLocalVisible(visible);
+        this.factory.renderer.requestRedraw("Light visibility changed.");
+    },
+
 
     notifyChanged: function (evt) {
         switch (evt.type) {

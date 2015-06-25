@@ -13,7 +13,7 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();
         this.renderNode = this.getScene().createRenderGroup({
-            parent: parentNode, visible: this.node.visible, name: this.node.id
+            parent: parentNode, name: this.node.id
         });
         this.updateLocalMatrix();
         this.updateMaterialHandler();

@@ -79,9 +79,6 @@ var GLRenderer = function (element, canvasHandler) {
     xml3dAdapter.traverse(function () {
     });
 
-    this.scene.rootNode.setVisible(true);
-
-
     /** @type {RenderObject} */
     this.pickedObject = null;
 

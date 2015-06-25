@@ -5,34 +5,6 @@ var C = require("./constants.js");
 var Scene= require("./scene.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 
-/**
- * @interface
- */
-var IRenderObject = function () {
-};
-IRenderObject.prototype.getModelViewMatrix = function () {
-};
-IRenderObject.prototype.getModelViewProjectionMatrix = function () {
-};
-IRenderObject.prototype.getModelMatrixN = function () {
-};
-IRenderObject.prototype.getModelViewMatrixN = function () {
-};
-IRenderObject.prototype.getObjectSpaceBoundingBox = function () {
-};
-IRenderObject.prototype.getWorldSpaceBoundingBox = function () {
-};
-IRenderObject.prototype.updateWorldSpaceMatrices = function () {
-};
-IRenderObject.prototype.isVisible = function () {
-};
-IRenderObject.prototype.setTransformDirty = function () {
-};
-IRenderObject.prototype.setMaterial = function () {
-};
-IRenderObject.prototype.hasTransparency = function () {
-};
-
 // Entry:
 /** @const */
 var WORLD_MATRIX_OFFSET = 0;
@@ -116,7 +88,8 @@ var RenderObject = function (scene, pageEntry, opt) {
     /** {Object?} **/
     this.override = null;
 
-
+    this.visible = true;
+    this.pickable = true;
 };
 RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -373,9 +346,9 @@ XML3D.createClass(RenderObject, RenderNode, {
     })(),
 
     setLocalVisible: function (newVal) {
-        this.localVisible = newVal;
-        this.setVisible(this.parent && this.parent.isVisible() && newVal);
+        this.visible = newVal;
         this.setBoundingBoxDirty();
+        this.r
     },
 
     getProgram: function () {

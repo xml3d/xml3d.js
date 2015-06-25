@@ -29,6 +29,13 @@ RenderAdapter.prototype.initChildElements = function (element) {
     }
 };
 
+RenderAdapter.prototype.attributeChangedCallback = function(name, oldValue, newValue) {
+     if (name == "style" || name == "class" || name == "id") {
+         this.styleChangedCallback();
+     }
+};
+
+RenderAdapter.prototype.styleChangedCallback = function() {};
 
 RenderAdapter.prototype.applyTransformMatrix = function (transform) {
     return transform;

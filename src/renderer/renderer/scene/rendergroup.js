@@ -83,10 +83,8 @@ XML3D.extend(RenderGroup.prototype, {
 
             for (var i = 0, j = this.children.length; i < j; i++) {
                 var obj = this.children[i];
-                if (obj.isVisible()) {
-                    obj.getWorldSpaceBoundingBox(childBB);
-                    XML3D.math.bbox.extendWithBox(localBB, childBB);
-                }
+                obj.getWorldSpaceBoundingBox(childBB);
+                XML3D.math.bbox.extendWithBox(localBB, childBB);
             }
             this.setWorldSpaceBoundingBox(localBB);
             this.boundingBoxDirty = false;
@@ -163,12 +161,6 @@ XML3D.extend(RenderGroup.prototype, {
         if (this.parent) {
             this.parent.setBoundingBoxDirty();
         }
-    },
-
-    setLocalVisible: function (newVal) {
-        this.localVisible = newVal;
-        this.setVisible(this.parent && this.parent.isVisible() && newVal);
-        this.setBoundingBoxDirty();
     },
 
     findRayIntersections: (function () {

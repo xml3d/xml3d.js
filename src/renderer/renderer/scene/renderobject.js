@@ -345,11 +345,18 @@ XML3D.createClass(RenderObject, RenderNode, {
         }
     })(),
 
-    setLocalVisible: function (newVal) {
+    setVisible: function (newVal) {
         this.visible = newVal;
         this.setBoundingBoxDirty();
-        this.r
+        this.scene.requestRedraw("Visibility changed.");
     },
+
+    setPickable: function (value) {
+        if (this.pickable == value)
+            return;
+        this.pickable = value;
+    },
+
 
     getProgram: function () {
         return this.drawable.getProgram();

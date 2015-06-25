@@ -47,11 +47,10 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     },
 
     updateVisibility: function() {
-        var visible = this.style.getPropertyValue("display").trim() != "none";
-        this.renderNode.setLocalVisible(visible);
-        var pickable = this.style.getPropertyValue("visibility").trim() != "hidden";
-        // this.renderNode.pickable = pickable;
-        this.factory.renderer.requestRedraw("Visibility changed.");
+        var none = this.style.getPropertyValue("display").trim() == "none";
+        var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
+        this.renderNode.setVisible(!(none || hidden));
+        this.renderNode.setPickable(!none);
     },
 
     /**

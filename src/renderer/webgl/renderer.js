@@ -73,11 +73,14 @@ var GLRenderer = function (element, canvasHandler) {
     // TODO(ksons): Get the data adapter for the element and pass it to the scene
     // the scene implementation should fill the system DataNode with the relevant
     // data (Scene: renderer-independent values, GLScene: renderer-dependent values)
-    this.scene = new GLScene(this.context);
+    var dataFactory = xml3dFormatHandler.getFactory("data", this._canvasHandler.id);
+    var xml3dDataAdapter = dataFactory.getAdapter(element); 
+    this.scene = new GLScene(this.context,xml3dDataAdapter);
 
     var factory = xml3dFormatHandler.getFactory("webgl", this._canvasHandler.id);
     factory.setScene(this.scene);
     factory.setRenderer(this);
+
 
     var xml3dAdapter = factory.getAdapter(element);
     xml3dAdapter.traverse(function () {

@@ -8,6 +8,7 @@ var ValueDataAdapter = require("./values.js");
 var DataAdapter = require("./data.js");
 var ComputeDataAdapter = require("./compute.js");
 var DataflowDataAdapter = require("./dataflow.js");
+var Xml3dDataAdapter = require("./xml3dDataAdapter.js");
 // Register JSON Handler
 require("./json/factory.js");
 // Register JavaScript Handler (required for external shade.js Javascript resources)
@@ -56,7 +57,8 @@ var reg = {
     'asset': Asset.AssetAdapter,
     'assetdata': Asset.AssetDataAdapter,
     'assetmesh': Asset.AssetMeshAdapter,
-    'model': Asset.AssetAdapter
+    'model': Asset.AssetAdapter,
+    'xml3d': Xml3dDataAdapter
     // TODO(ksons): Add an data adapter for the xml3d element that provides a container for system parameter (DataNode)
     // including default values
 };

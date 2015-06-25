@@ -6,6 +6,7 @@ var ShaderComposerFactory = require("../materials/shadercomposerfactory.js");
 var Options = require("../../../utils/options.js");
 var ShadowMapService = require("../materials/shadowmap-service");
 
+
 var OPTION_FRUSTUM_CULLING = "renderer-frustumCulling";
 var OPTION_SHADEJS_EXTRACT_UNIFORMS = "shadejs-extractUniformExpressions";
 var OPTION_SHADEJS_TRANSFORM_SPACES = "shadejs-transformSpaces";
@@ -30,13 +31,16 @@ for (var flag in FLAGS) {
  * @extends {Scene}
  * @constructor
  */
-var GLScene = function (context) {
-    Scene.call(this);
+var GLScene = function (context,systemDataAdapter) {
+	Scene.call(this);
     this.context = context;
     this.shaderFactory = new ShaderComposerFactory(context);
     this.drawableFactory = new DrawableFactory();
-
+    
     this.shadowMapService = new ShadowMapService(context, this);
+    // TODO: set it in the more abstratc scene, comment parameters
+    this.systemDataAdapter = systemDataAdapter; // save the global parameters in scene
+
     /**
      * @type {Array.<RenderObject>}
      */
@@ -48,7 +52,8 @@ var GLScene = function (context) {
     this.colorClosureSignatures = [];
     this.doFrustumCulling = !!Options.getValue(OPTION_FRUSTUM_CULLING);
     this.addListeners();
-};
+    this.setRendererDependentData();
+    };
 
 XML3D.createClass(GLScene, Scene);
 
@@ -90,6 +95,7 @@ XML3D.extend(GLScene.prototype, {
             this.updateLightParameters();
             this.lights.lightValueChanged();
         }
+        this.setRendererDependentData();
         this.updateObjectsForRendering();
 
         // Render shadow maps if necessary
@@ -249,6 +255,13 @@ XML3D.extend(GLScene.prototype, {
         if (key == OPTION_FRUSTUM_CULLING) {
             this.doFrustumCulling = !!value;
         }
+    },
+    
+    setRendererDependentData: function(){
+    	for (child in this.systemDataAdapter.xflowDataNode._children){
+    		// Here we set the renderer dependent values
+    			
+    		}
     }
 });
 module.exports = GLScene;

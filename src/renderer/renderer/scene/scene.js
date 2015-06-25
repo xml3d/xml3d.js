@@ -30,6 +30,7 @@ var Scene = function () {
     this._defaultMaterial = null;
 
     this.rootNode = this.createRootNode();
+    this.setRendererIndependentData();
 };
 
 XML3D.createClass(Scene, EventEmitter, {
@@ -141,6 +142,18 @@ XML3D.createClass(Scene, EventEmitter, {
             );
         }
         return this._defaultMaterial;
+    },
+
+    setRendererIndependentData: function () {
+        for (child in this.systemDataAdapter.xflowDataNode._children) {
+            //Here we set rendered-independent values
+            // TODO: Check if there is an easier way to set values
+            if (this.systemDataAdapter.xflowDataNode._children[child].name == "_system_time") {
+                var newTime = performance.now() - this.systemDataAdapter.xflowDataNode._children[child].data.getValue()[0];
+                this.systemDataAdapter.xflowDataNode._children[child].data.setValue(new Float32Array([newTime]));
+
+            }
+        }
     }
 
 

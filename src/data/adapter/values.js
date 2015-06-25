@@ -24,12 +24,26 @@ XML3D.createClass(ValueDataAdapter, NodeAdapter);
 ValueDataAdapter.prototype.init = function()
 {
     var config = this.node._configured, value;
+
     if(this.node.textContent == "[value set by script]"){
         value = config.scriptValue;
     }
     else{
         delete config.scriptValue;
-        value = this.node.value;
+        if (this.node.sys == true){
+        	var xml3dNode = document.getElementsByTagName("XML3D")[0];
+        	var systemDataNode= this.factory.getAdapter(xml3dNode).xflowDataNode;
+        	for (child in systemDataNode._children){
+        		if (systemDataNode._children[child].name == "_system_"+this.node.name){
+        			value = systemDataNode._children[child].data.getValue();
+//        			this.xflowInputNode = systemDataNode._children[child];
+//        			return;
+        		}
+        	}
+        	
+        }
+        else
+        	value = this.node.value;
     }
 
     var type = XC.DATA_TYPE.fromString(this.node.localName);

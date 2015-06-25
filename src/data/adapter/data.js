@@ -28,8 +28,13 @@ XML3D.createClass(DataAdapter, BaseDataAdapter);
 
 DataAdapter.prototype.init = function () {
     // TODO(ksons): Here, every data node is composed. Add the system's data node
-    // to every data node in a first appraoch
-
+    // to every data node in a first approach
+	//Get the xml3d Node
+    var xml3dNode = document.getElementsByTagName("XML3D")[0];	
+    
+    //get xml3d data adapter
+    var systemDataNode= this.factory.getAdapter(xml3dNode).xflowDataNode;
+	
     this.xflowDataNode = new DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
@@ -43,6 +48,9 @@ DataAdapter.prototype.init = function () {
         updateCompute(this);
     }
     recursiveDataAdapterConstruction(this);
+
+    //append system data node to every data node
+    this.xflowDataNode.appendChild(systemDataNode);
 };
 
 DataAdapter.prototype.updateAdapterHandle = function(key, url) {

@@ -30,7 +30,7 @@ function displayWebGLNotSupportedInfo(xml3dElement){
 
         xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
         hideDiv.appendChild(xml3dElement);
-        hideDiv.style.display = "none";
+        //hideDiv.style.display = "none";
 
         var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
         if(xml3dElement.hasAttribute("class")){

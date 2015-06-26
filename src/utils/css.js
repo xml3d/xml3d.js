@@ -6,8 +6,11 @@ css.TRANSFORM_PROPERTY = null;
 
 css.init = function () {
     var styleElement = document.createElement("style");
-    styleElement.textContent = "xml3d * { display: inherit; }";
+    styleElement.textContent = "xml3d * { display: inherit; }" +
+        "float,float2,float3,float4,float4x4,int,int4,bool,texture,compute { display: none; }";
     document.head.appendChild(styleElement);
+
+
 
     if ('transform' in document.body.style) {
         css.TRANSFORM_PROPERTY = 'transform'

@@ -230,7 +230,10 @@ function resolveMutations(mutations){
             }
 
         } else if (mutation.type == 'attributes') {
-            var cssTarget = mutation.target._configured ? mutation.target : mutation.target.querySelector("xml3d")
+            var mutationTarget = mutation.target;
+            if (mutation.attributeName === "id" || mutation.attributeName === "class")
+                mutationTarget = mutation.target.parentNode;
+            var cssTarget = mutationTarget._configured ? mutationTarget : mutationTarget.querySelector("xml3d");
             if(cssTarget && cssTarget._configured) { // xml3d is a child node
                 var adaptersNames = Object.keys(cssTarget._configured.adapters).filter(function(a) {
                     return a.indexOf("webgl") == 0;

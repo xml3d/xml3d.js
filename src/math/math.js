@@ -12,6 +12,31 @@ module.exports = function (math) {
         return dest;
     };
 
+    math.vec2.toDOMString = function(vec) {
+        return vec[0] + " " + vec[1];
+    };
+
+    math.vec3.toDOMString = function(vec) {
+        return vec[0] + " " + vec[1] + " " + vec[2];
+    };
+
+    math.vec4.toDOMString = function(vec) {
+        return vec[0] + " " + vec[1] + " " + vec[2] + " " + vec[3];
+    };
+
+    math.mat3.toDOMString = function(mat) {
+        return mat[0] + " " + mat[1] + " " + mat[2] + " " +
+            mat[3] + " " + mat[4] + " " + mat[5] + " " +
+            mat[6] + " " + mat[7] + " " + mat[8];
+    };
+
+    math.mat4.toDOMString = function(mat) {
+        return mat[0] + " " + mat[1] + " " + mat[2] + " " + mat[3] + " " +
+            mat[4] + " " + mat[5] + " " + mat[6] + " " + mat[7] + " " +
+            mat[8] + " " + mat[9] + " " + mat[10] + " " + mat[11] + " " +
+            mat[12] + " " + mat[13] + " " + mat[14] + " " + mat[15];
+    };
+
 
     math.mat4.multiplyOffsetVec3 = function (mat, matOffset, vec, vecOffset, dest) {
         if (!dest) {

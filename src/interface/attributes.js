@@ -51,35 +51,35 @@ handlers.StringAttributeHandler = function(id) {
     };
 };
 
-handlers.EnumAttributeHandler = function(id, p) {
+handlers.EnumAttributeHandler = function(id, enumObj) {
     AttributeHandler.call(this);
     id = id.toLowerCase();
 
     this.init = function(elem, storage){
-        storage[id] = p.d;
+        storage[id] = enumObj.defaultValue;
         if (elem.hasAttribute(id))
             this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
     };
     this.setFromAttribute = function(v, prevValue, elem, storage) {
         var value = v.toLowerCase();
-        storage[id] = (value && p.e[value] !== undefined) ? p.e[value] : p.d;
+        storage[id] = (value && enumObj.values[value] !== undefined) ? enumObj.values[value] : enumObj.defaultValue;
         return false;
     };
     this.desc = {
         get : function() {
             XML3D.flushDOMChanges();
             var storage = getStorage(this);
-            return p.e[storage[id]];
+            return enumObj.values[storage[id]];
         },
         set : function(v) {
                 // Attribute is set to whatever comes in
             this.setAttribute(id, v);
             var storage = getStorage(this);
             var value = typeof v == 'string' ? v.toLowerCase() : undefined;
-            if (value && p.e[value] !== undefined)
-                storage[id] = p.e[value];
+            if (value && enumObj.values[value] !== undefined)
+                storage[id] = enumObj.values[value];
             else
-                storage[id] = p.d;
+                storage[id] = enumObj.defaultValue;
         }
     };
 };

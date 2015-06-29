@@ -87,16 +87,16 @@
     };
 
     bbox.size = function (target, b) {
-        target[0] = b[3] - b[0];
-        target[1] = b[4] - b[1];
-        target[2] = b[5] - b[2];
+        target[0] = Math.max(b[3] - b[0], 0);
+        target[1] = Math.max(b[4] - b[1], 0);
+        target[2] = Math.max(b[5] - b[2], 0);
         return target;
     };
 
     bbox.halfSize = function (target, b) {
-        target[0] = (b[3] - b[0]) * 0.5;
-        target[1] = (b[4] - b[1]) * 0.5;
-        target[2] = (b[5] - b[2]) * 0.5;
+        target[0] = Math.max(b[3] - b[0], 0) * 0.5;
+        target[1] = Math.max(b[4] - b[1], 0) * 0.5;
+        target[2] = Math.max(b[5] - b[2], 0) * 0.5;
         return target;
     };
 

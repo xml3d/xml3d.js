@@ -1,6 +1,8 @@
 (function() {
     var TMP_MATRIX = XML3D.math.mat4.create();
     var TMP_VEC = XML3D.math.vec3.create();
+    var TMP_QUAT = XML3D.math.quat.create();
+    var mat4 = XML3D.math.mat4;
 
     Xflow.registerOperator("xflow.createTransformInv", {
         outputs: [{type: 'float4x4', name: 'result'}],
@@ -12,24 +14,26 @@
         evaluate: function (result, translation, rotation, scale, center, scaleOrientation, info) {
             for (var i = 0; i < info.iterateCount; i++) {
                 var dest = result.subarray(i * 16);
-
-                center && XML3D.math.mat4.translate(dest, dest, center);
+                mat4.identity(dest);
+                center && mat4.translate(dest, dest, info.iterFlag[3] ? center.subarray(i*3) : center);
 
                 if (scaleOrientation) {
-                    XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1], scaleOrientation[2], scaleOrientation[3]], [0, 0, 0]);
-                    XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
+                    mat4.fromRotationTranslation(TMP_MATRIX, info.iterFlag[4] ? scaleOrientation.subarray(i*4) : scaleOrientation, [0, 0, 0]);
+                    mat4.multiply(dest, dest, TMP_MATRIX);
                 }
-                scale && XML3D.math.mat4.scale(dest, dest, XML3D.math.vec3.reciprocal(scale, TMP_VEC));
+                scale && mat4.scale(dest, dest, XML3D.math.vec3.reciprocal(info.iterFlag[2] ? scale.subarray(i*3) : scale, TMP_VEC));
                 if (scaleOrientation) {
-                    XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1], scaleOrientation[2], -scaleOrientation[3]], [0, 0, 0]);
-                    XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
+                    XML3D.math.quat.copy(TMP_QUAT, info.iterFlag[4] ? scaleOrientation.subarray(i*4) : scaleOrientation);
+                    mat4.fromRotationTranslation(TMP_MATRIX, XML3D.math.quat.invert(TMP_QUAT, TMP_QUAT), [0, 0, 0]);
+                    mat4.multiply(dest, dest, TMP_MATRIX);
                 }
                 if (rotation) {
-                    XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [rotation[0], rotation[1], rotation[2], -rotation[3]], [0, 0, 0]);
-                    XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
+                    XML3D.math.quat.copy(TMP_QUAT, info.iterFlag[1] ? rotation.subarray(i*4) : rotation);
+                    mat4.fromRotationTranslation(TMP_MATRIX, XML3D.math.quat.invert(TMP_QUAT, TMP_QUAT), [0, 0, 0]);
+                    mat4.multiply(dest, dest, TMP_MATRIX);
                 }
-                center && XML3D.math.mat4.translate(dest, dest, XML3D.math.vec3.negate(TMP_VEC, center));
-                translation && XML3D.math.mat4.translate(dest, dest, XML3D.math.vec3.negate(TMP_VEC, translation));
+                center && mat4.translate(dest, dest, XML3D.math.vec3.negate(TMP_VEC, info.iterFlag[3] ? center.subarray(i*3) : center));
+                translation && mat4.translate(dest, dest, XML3D.math.vec3.negate(TMP_VEC, info.iterFlag[0] ? translation.subarray(i*3) : translation));
 
             }
         }

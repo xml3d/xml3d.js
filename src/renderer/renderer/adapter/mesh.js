@@ -66,29 +66,25 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
 
 XML3D.extend(MeshRenderAdapter.prototype, {
     /**
-     * @return {Window.XML3DBox}
+     * @return {XML3D.math.bbox}
      */
     getLocalBoundingBox: function () {
+        var bbox = new XML3D.math.bbox.create();
         if (this.renderNode) {
-            var bbox = new XML3D.math.bbox.create();
             this.renderNode.getObjectSpaceBoundingBox(bbox);
-            return XML3D.math.bbox.asXML3DBox(bbox);
         }
-
-        return new window.XML3DBox();
+        return bbox;
     },
 
     /**
-     * @return {Window.XML3DBox}
+     * @return {XML3D.math.bbox}
      */
     getWorldBoundingBox: function () {
+        var bbox = new XML3D.math.bbox.create();
         if (this.renderNode) {
-            var bbox = new XML3D.math.bbox.create();
             this.renderNode.getWorldSpaceBoundingBox(bbox);
-            return XML3D.math.bbox.asXML3DBox(bbox);
         }
-
-        return new window.XML3DBox();
+        return bbox;
     },
 
     /**

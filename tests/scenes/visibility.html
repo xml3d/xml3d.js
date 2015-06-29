@@ -1,0 +1,168 @@
+<!DOCTYPE html><html><head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Rendering 1</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+
+  <body style="background-color: #FFF;width:500px">
+   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;">
+    <defs>
+    <transform id="t_group3" rotation="0 1 0 1.57"></transform>
+    <transform id="t_viewtest" rotation="0 1 0 1.57"></transform>
+    <transform id="t_viewtest2" translation="0 0 -6"></transform>
+    <transform id="t_group4" rotation="0 1 0 1.57"></transform>
+    <transform id="t_cubetop" rotation="1 0 0 1.57" translation="0 1 0"></transform>
+    <transform id="t_cubebottom" rotation="1 0 0 -1.57" translation="0 -1 0"></transform>
+    <transform id="t_cubeleft" rotation="0 1 0 1.57" translation="1 0 0"></transform>
+    <transform id="t_cuberight" rotation="0 1 0 -1.57" translation="-1 0 0"></transform>
+    <transform id="t_cubeback" rotation="0 1 0 -3.141" translation="0 0 -1"></transform>
+    <transform id="t_cubefront" translation="0 0 1"></transform>
+    <transform id="t_camera1"></transform>
+    <transform id="t_grouptransformed" translation="0 0 -3"></transform>
+
+    <material id="flatblue" script="urn:xml3d:material:flat">
+        <float3 name="diffuseColor">
+            0 0 1
+        </float3>
+    </material>
+    <material id="flatgreen" script="urn:xml3d:material:flat">
+        <float3 name="diffuseColor">
+            0 1 0
+        </float3>
+    </material>
+    <material id="flatpurple" script="urn:xml3d:material:flat">
+        <float3 name="diffuseColor">
+            1 0 1
+        </float3>
+    </material>
+    <material id="flatyellow" script="urn:xml3d:material:flat">
+        <float3 name="diffuseColor">
+            1 1 0
+        </float3>
+    </material>
+
+    <material id="flatblack" script="urn:xml3d:material:flat">
+        <float3 name="diffuseColor">
+            0 0 0
+        </float3>
+    </material>
+    <material id="phonggreen" script="urn:xml3d:material:phong">
+        <float3 id="phonggreen_color" name="diffuseColor">
+            0 1 0
+        </float3>
+        <float3 id="phonggreen_emissive" name="emissiveColor">
+            0 0 0
+        </float3>
+    </material>
+
+    <data id="meshdata">
+      <int name="index">0 1 2 1 2 3</int>
+      <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+      <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+    <transform id="t_Lamp" translation="0 0 3"></transform>
+
+    </defs>
+
+
+    <group id="cameraGroup1" transform="#t_camera1">
+         <view id="transformTestView" position="0 0 -3" orientation="0 1 0 3.141"></view>
+    </group>
+    <view id="defaultView" position="0 0 3"></view>
+    <view id="identView" position="0 0 0"></view>
+
+    <view id="viewOrientationTest" position="-3 0 0" orientation="0 1 0 -1.57"></view>
+
+    <group id="viewTest" style="display: none;" transform="#t_viewtest">
+        <mesh src="#meshdata" type="triangles"></mesh>
+        <group transform="#t_viewtest2" material="#flatyellow">
+            <mesh src="#meshdata" type="triangles"></mesh>
+        </group>
+    </group>
+
+    <group id="myGroup" style="display: none;">
+	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles"></mesh>
+    </group>
+
+   <group id="myTransformedGroup" transform="#t_grouptransformed" style="display: none;">
+       <mesh id="myTransformedMesh" src="#meshdata" type="triangles"></mesh>
+   </group>
+
+     <group id="myEmptyGroup" style="display: none;">
+
+     </group>
+
+    <group id="group1" material="#flatyellow" style="display: none;">
+    <group id="group2" material="#flatblue">
+        <mesh id="myNestedMesh" src="#meshdata" type="triangles">
+
+        </mesh>
+    </group>
+    </group>
+
+    <group id="group3" transform="#t_group3" style="display: none;">
+    <group id="group4" transform="#t_group4">
+        <mesh id="myNestedMesh2" src="#meshdata" type="triangles">
+
+        </mesh>
+    </group>
+    </group>
+
+    <group id="group5" style="display: none;">
+        <group transform="#t_cubetop" material="#flatblue">
+            <mesh src="#meshdata" type="triangles"></mesh>
+        </group>
+        <group transform="#t_cubeleft" material="#flatgreen">
+            <mesh src="#meshdata" type="triangles"></mesh>
+        </group>
+        <group transform="#t_cuberight" material="#flatblack">
+            <mesh src="#meshdata" type="triangles"></mesh>
+        </group>
+        <group transform="#t_cubebottom" material="#flatpurple">
+            <mesh src="#meshdata" type="triangles"></mesh>
+        </group>
+        <group transform="#t_cubeback" material="#flatyellow">
+            <mesh src="#meshdata" type="triangles"></mesh>
+        </group>
+         <group transform="#t_cubefront">
+        <mesh src="#meshdata" type="triangles"></mesh>
+        </group>
+    </group>
+    </xml3d>
+   <script type="text/javascript">
+     function getPixelValue(canvas, x, y) {
+       var pixels = new Uint8Array(4), a = new Array(4);
+       canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
+       for (var i = 0; i < 4; i++)
+         a[i] = pixels[i];
+       return a;
+     }
+   </script>
+   <script>
+     var mesh;
+  var addInvisbleMesh = function () {
+    mesh =  document.createElement("mesh");
+    mesh.setAttribute("src", "#meshdata");
+    mesh.setAttribute("style", "display: none;");
+    document.querySelector("xml3d").appendChild(mesh);
+  };
+
+     var makeVisibleStyle = function() {
+       if(mesh) {
+         mesh.style.display = "inline";
+       }
+     }
+
+
+
+</script>
+<div>
+  <ol style="padding: 40px" >
+  <li><a href="#"onclick="addInvisbleMesh()">Add invisible mesh</a></li>
+    <li><a href="#"onclick="makeVisibleStyle()">Make visible</a></li>
+</ol>
+</div>
+ 
+</body></html>

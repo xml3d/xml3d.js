@@ -241,12 +241,12 @@ XML3D.extend(ModelRenderAdapter.prototype, {
     },
 
     /**
-     * @return {Window.XML3DMatrix}
+     * @return {mat4}
      */
     getWorldMatrix: function () {
-        var m = new window.XML3DMatrix(), obj = this.renderNode;
+        var m = XML3D.math.mat4.create(), obj = this.renderNode;
         if (obj) {
-            obj.getWorldMatrix(m._data);
+            obj.getWorldMatrix(m);
         }
         return m;
     }

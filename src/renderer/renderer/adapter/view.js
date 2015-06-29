@@ -24,18 +24,18 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
 
     /* Interface method */
     getViewMatrix: function () {
-        var m = new window.XML3DMatrix();
-        this.renderNode.getWorldToViewMatrix(m._data);
+        var m = XML3D.math.mat4.create();
+        this.renderNode.getWorldToViewMatrix(m);
         return m;
     },
 
     /**
      * returns view2world matrix
-     * @return {window.XML3DMatrix}
+     * @return {mat4}
      */
     getWorldMatrix: function () {
-        var m = new window.XML3DMatrix();
-        this.renderNode.getViewToWorldMatrix(m._data);
+        var m = XML3D.math.mat4.create();
+        this.renderNode.getViewToWorldMatrix(m);
         return m;
     },
 

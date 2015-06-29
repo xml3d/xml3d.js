@@ -76,8 +76,12 @@ methods.viewGetViewMatrix = function() {
     // Fallback implementation
     var p = this.position;
     var r = this.orientation;
-    var a = r.axis;
-    return new window.XML3DMatrix().translate(p.x, p.y, p.z).rotateAxisAngle(a.x, a.y, a.z, r.angle).inverse();
+    var a = r[3];
+    var mat = XML3D.math.mat4.create();
+    XML3D.math.mat4.translate(mat, mat, p);
+    XML3D.math.mat4.rotate(mat, mat, r[3], r);
+    XML3D.math.mat4.invert(mat, mat);
+    return mat;
 };
 
 methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
@@ -109,7 +113,7 @@ methods.groupGetLocalMatrix = function() {
             return adapters[adapter].getLocalMatrix();
         }
     }
-    return new window.XML3DMatrix();
+    return XML3D.math.mat4.create();
 };
 
 /**
@@ -123,7 +127,7 @@ methods.getWorldBoundingBox = function() {
             return adapters[adapter].getWorldBoundingBox();
         }
     }
-    return new window.XML3DBox();
+    return XML3D.math.bbox.create();
 };
 
 /**
@@ -137,7 +141,7 @@ methods.getLocalBoundingBox = function() {
             return adapters[adapter].getLocalBoundingBox();
         }
     }
-    return new window.XML3DBox();
+    return XML3D.math.bbox.create();
 };
 
 methods.xml3dGetRenderInterface = function() {
@@ -160,7 +164,7 @@ methods.XML3DGraphTypeGetWorldMatrix = function() {
             return adapters[adapter].getWorldMatrix();
         }
     }
-    return new window.XML3DMatrix();
+    return XML3D.math.mat4.create();
 };
 
 methods.videoPlay = function() {

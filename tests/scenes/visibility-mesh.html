@@ -1,0 +1,93 @@
+<!DOCTYPE html><html><head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Rendering 1</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+  <style>
+    .invisible {
+      display: none;
+    }
+  </style>
+</head>
+
+  <body style="background-color: #FFF;width:500px">
+   <xml3d activeview="#defaultView" id="xml3DElem" style="background-color: grey; width: 200px; height: 200px;">
+    <defs>
+
+    <data id="meshdata">
+      <int name="index">0 1 2 1 2 3</int>
+      <float3 name="position">-1.0 -1.0 0.0 1.0 -1.0 0.0 -1.0 1.0 0.0 1.0 1.0 0.0</float3>
+      <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      <float2 name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+
+    </defs>
+    <view id="defaultView" position="0 0 3"></view>
+
+    </xml3d>
+   <script type="text/javascript">
+     function getPixelValue(canvas, x, y) {
+       var pixels = new Uint8Array(4), a = new Array(4);
+       canvas.readPixels(x, y, 1, 1, WebGLRenderingContext.RGBA, WebGLRenderingContext.UNSIGNED_BYTE, pixels);
+       for (var i = 0; i < 4; i++)
+         a[i] = pixels[i];
+       return a;
+     }
+   </script>
+   <script>
+     var mesh;
+     var addInvisbleMesh = function () {
+       mesh = document.createElement("mesh");
+       mesh.setAttribute("src", "#meshdata");
+       mesh.setAttribute("style", "display: none;");
+       document.querySelector("xml3d").appendChild(mesh);
+     };
+
+     var makeVisibleStyle = function () {
+       if (mesh) {
+         mesh.removeAttribute("style");
+       }
+     };
+
+     var makeInvisibleStyle = function () {
+       if (mesh) {
+         mesh.setAttribute("style", "display: none;");
+       }
+     };
+     var makeInvisibleClass = function () {
+       // Remove style to make sure that class applies
+       makeVisibleStyle();
+       if (mesh) {
+         mesh.setAttribute("class", "invisible");
+       }
+     };
+     var makeVisibleClass = function () {
+       // Remove style to make sure that class applies
+       makeVisibleStyle();
+       if (mesh) {
+         mesh.removeAttribute("class");
+       }
+     };
+
+     var makeInvisibleAPI = function() {
+        if (mesh) {
+         mesh.style.display = "none";
+       }
+     }
+
+
+
+</script>
+   <div>
+     <ol style="padding: 40px">
+       <li><a href="#" onclick="addInvisbleMesh()">Add invisible mesh</a></li>
+       <li><a href="#" onclick="makeVisibleStyle()">Make visible (remove style attribute)</a></li>
+       <li><a href="#" onclick="makeInvisibleStyle()">Make invisible (add style attibute)</a></li>
+       <li><a href="#" onclick="makeInvisibleClass()">Make invisible (add class)</a></li>
+       <li><a href="#" onclick="makeVisibleClass()">Make visible (remove class)</a></li>
+       <li><a href="#" onclick="makeInvisibleAPI()">Make invisible (using style API)</a></li>
+
+     </ol>
+   </div>
+ 
+</body></html>

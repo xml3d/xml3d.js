@@ -73,54 +73,6 @@ module.exports = function (math) {
         return dest;
     };
 
-    var IDENT_MAT = XML3D.math.mat4.identity(XML3D.math.mat4.create());
-    var TMP_MATRIX = XML3D.math.mat4.create();
-    var TMP_VEC = XML3D.math.vec3.create();
-
-    math.mat4.makeTransformXflow = function (translation, rotation, scale, center, scaleOrientation, dest) {
-        XML3D.math.mat4.identity(dest);
-        if (translation) XML3D.math.mat4.translate(dest, dest, translation);
-        if (center) XML3D.math.mat4.translate(dest, dest, center);
-        if (rotation) {
-            XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [rotation[0], rotation[1], rotation[2], rotation[3]], [0, 0, 0]);
-            XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
-        }
-        if (scaleOrientation) {
-            XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1], scaleOrientation[2], scaleOrientation[3]], [0, 0, 0]);
-            XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
-        }
-        if (scale) XML3D.math.mat4.scale(dest, dest, scale);
-        if (scaleOrientation) {
-            XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1], scaleOrientation[2], -scaleOrientation[3]], [0, 0, 0]);
-            XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
-        }
-        if (center) {
-            XML3D.math.mat4.translate(dest, dest, XML3D.math.vec3.negate(TMP_VEC, center));
-        }
-    };
-
-    math.mat4.makeTransformInvXflow = function (translation, rotation, scale, center, scaleOrientation, dest) {
-        XML3D.math.mat4.identity(dest);
-        if (center) {
-            XML3D.math.mat4.translate(dest, dest, center);
-        }
-        if (scaleOrientation) {
-            XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1], scaleOrientation[2], scaleOrientation[3]], [0, 0, 0])
-            XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
-        }
-        if (scale) XML3D.math.mat4.scale(dest, dest, XML3D.math.vec3.reciprocal(scale, TMP_VEC));
-        if (scaleOrientation) {
-            XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [scaleOrientation[0], scaleOrientation[1], scaleOrientation[2], -scaleOrientation[3]], [0, 0, 0])
-            XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
-        }
-        if (rotation) {
-            XML3D.math.mat4.fromRotationTranslation(TMP_MATRIX, [rotation[0], rotation[1], rotation[2], -rotation[3]], [0, 0, 0])
-            XML3D.math.mat4.multiply(dest, dest, TMP_MATRIX);
-        }
-        if (center) XML3D.math.mat4.translate(dest, dest, XML3D.math.vec3.negate(TMP_VEC, center));
-        if (translation) XML3D.math.mat4.translate(dest, dest, XML3D.math.vec3.negate(TMP_VEC, translation));
-    };
-
     math.mat4.multiplyOffset = function (dest, destOffset, mat, offset1, mat2, offset2) {
         var a00 = mat2[offset2 + 0], a01 = mat2[offset2 + 1], a02 = mat2[offset2 + 2], a03 = mat2[offset2 + 3];
         var a10 = mat2[offset2 + 4], a11 = mat2[offset2 + 5], a12 = mat2[offset2 + 6], a13 = mat2[offset2 + 7];

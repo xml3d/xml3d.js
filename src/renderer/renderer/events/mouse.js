@@ -121,7 +121,7 @@ MouseEventHandler.prototype =  {
      * @param {Event} event
      * @param {number} x
      * @param {number} y
-     * @return {XML3DVec3}
+     * @return {XML3D.math.vec3}
      */
     initExtendedMouseEvent: function (event, x, y) {
         var handler = this._canvasHandler;
@@ -131,15 +131,16 @@ MouseEventHandler.prototype =  {
             var cachedNormal = undefined;
 
             event.__defineGetter__("normal", function () {
-                if (cachedNormal !== undefined) return cachedNormal;
-                var norm = (handler.getWorldSpaceNormalByPoint(x, y));
-                cachedNormal = norm ? new window.XML3DVec3(norm[0], norm[1], norm[2]) : null;
+                if (!cachedNormal) {
+                    var norm = (handler.getWorldSpaceNormalByPoint(x, y));
+                    cachedNormal = norm || null;
+                }
                 return cachedNormal;
             });
             event.__defineGetter__("position", function () {
                 if (!cachedPosition) {
                     var pos = handler.getWorldSpacePositionByPoint(x, y);
-                    cachedPosition = pos ? new window.XML3DVec3(pos[0], pos[1], pos[2]) : null;
+                    cachedPosition = pos || null;
                 }
                 return cachedPosition;
             });

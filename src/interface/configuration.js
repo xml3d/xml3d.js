@@ -263,11 +263,11 @@ classInfo['model'] = {
 classInfo['transform'] = {
     id: {a: handlers.IDHandler},
     className: {a: handlers.StringAttributeHandler, id: 'class'},
-    translation: {a: handlers.XML3DVec3AttributeHandler, params: [0, 0, 0]},
-    scale: {a: handlers.XML3DVec3AttributeHandler, params: [1, 1, 1]},
-    rotation: {a: handlers.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
-    center: {a: handlers.XML3DVec3AttributeHandler, params: [0, 0, 0]},
-    scaleOrientation: {a: handlers.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]}
+    translation: {a: handlers.Vec3AttributeHandler, params: [0, 0, 0]},
+    scale: {a: handlers.Vec3AttributeHandler, params: [1, 1, 1]},
+    rotation: {a: handlers.quatAttributeHandler, params: [0, 0, 1, 0]},
+    center: {a: handlers.Vec3AttributeHandler, params: [0, 0, 0]},
+    scaleOrientation: {a: handlers.QuatAttributeHandler, params: [0, 0, 1, 0]}
     };
 /**
  * Properties and methods for <material>
@@ -542,8 +542,8 @@ classInfo['view'] = {
     onkeydown: {a: handlers.EventAttributeHandler},
     onkeyup: {a: handlers.EventAttributeHandler},
     visible: {a: handlers.BoolAttributeHandler, params: true},
-    position: {a: handlers.XML3DVec3AttributeHandler, params: [0, 0, 0]},
-    orientation: {a: handlers.XML3DRotationAttributeHandler, params: [0, 0, 1, 0]},
+    position: {a: handlers.Vec3AttributeHandler, params: [0, 0, 0]},
+    orientation: {a: handlers.QuatAttributeHandler, params: [0, 0, 1, 0]},
     fieldOfView: {a: handlers.FloatAttributeHandler, params: 0.785398},
     getWorldMatrix: {m: methods.XML3DGraphTypeGetWorldMatrix},
     setDirection: {m: methods.viewSetDirection},

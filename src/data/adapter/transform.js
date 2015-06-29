@@ -30,15 +30,15 @@ TransformDataAdapter.prototype.init = function () {
 TransformDataAdapter.prototype.updateMatrix = function () {
     var n = this.node;
     var transform = this.transform;
-    var centerVec = n.center._data;
+    var centerVec = n.center;
 
-    XML3D.math.mat4.fromQuat(transform.scaleOrientation, n.scaleOrientation._data);
-    XML3D.math.mat4.fromQuat(transform.rotation, n.rotation._data);
+    XML3D.math.mat4.fromQuat(transform.scaleOrientation, n.scaleOrientation);
+    XML3D.math.mat4.fromQuat(transform.rotation, n.rotation);
 
-    XML3D.math.mat4.translate(transform.translate, IDENT_MAT, n.translation._data);
+    XML3D.math.mat4.translate(transform.translate, IDENT_MAT, n.translation);
     XML3D.math.mat4.translate(transform.center, IDENT_MAT, centerVec);
     XML3D.math.mat4.translate(transform.centerInverse, IDENT_MAT, XML3D.math.vec3.negate(centerVec, centerVec));
-    XML3D.math.mat4.scale(transform.scale, IDENT_MAT, n.scale._data);
+    XML3D.math.mat4.scale(transform.scale, IDENT_MAT, n.scale);
     XML3D.math.mat4.invert(transform.scaleOrientationInv, transform.scaleOrientation);
 
     multiplyComponents(transform, this.matrix);

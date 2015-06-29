@@ -241,7 +241,7 @@ handlers.BoolAttributeHandler = function(id, defaultValue) {
     };
 };
 
-handlers.XML3DVec3AttributeHandler = function(id, defaultValue) {
+handlers.Vec3AttributeHandler = function(id, defaultValue) {
     var that = this;
     id = id.toLowerCase();
 
@@ -275,7 +275,7 @@ handlers.XML3DVec3AttributeHandler = function(id, defaultValue) {
             if (!storage[id]) {
                 that.setFromAttribute(this.getAttribute(id), null, this, storage);
             }
-            return storage[id];
+            return XML3D.math.vec3.clone(storage[id]);
         },
         set : function(value) {
             var storage = getStorage(this);
@@ -291,7 +291,7 @@ handlers.XML3DVec3AttributeHandler = function(id, defaultValue) {
     };
 };
 
-handlers.XML3DRotationAttributeHandler = function(id, defaultValue) {
+handlers.QuatAttributeHandler = function(id, defaultValue) {
     var that = this;
     id = id.toLowerCase();
 
@@ -327,7 +327,7 @@ handlers.XML3DRotationAttributeHandler = function(id, defaultValue) {
             if (!storage[id]) {
                 that.setFromAttribute(this.getAttribute(id), null, this, storage);
             }
-            return storage[id];
+            return XML3D.math.quat.clone(storage[id]);
         },
         set : function(value) {
             var storage = getStorage(this);

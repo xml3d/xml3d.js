@@ -249,17 +249,17 @@ handlers.Vec3AttributeHandler = function(id, defaultValue) {
         storage[id] = null;
     };
 
-    this.setFromAttribute = function(value, prevValue, elem, storage) {
+    this.setFromAttribute = function(value, prevValue, elem, storage, init) {
         if (!storage[id]) {
             storage[id] = XML3D.math.vec3.create();
         }
         var v = storage[id];
-        var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
+        var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
         if (!m  || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3])) {
             v[0] = defaultValue[0];
             v[1] = defaultValue[1];
             v[2] = defaultValue[2];
-            XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
+            !init && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
         } else {
             v[0] = +m[1];
             v[1] = +m[2];
@@ -273,7 +273,7 @@ handlers.Vec3AttributeHandler = function(id, defaultValue) {
             XML3D.flushDOMChanges();
             var storage = getStorage(this);
             if (!storage[id]) {
-                that.setFromAttribute(this.getAttribute(id), null, this, storage);
+                that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
             return XML3D.math.vec3.clone(storage[id]);
         },
@@ -286,7 +286,7 @@ handlers.Vec3AttributeHandler = function(id, defaultValue) {
             } else {
                 v[0] = value[0]; v[1] = value[1]; v[2] = value[2];
             }
-            this.setAttribute(id, v.toDOMString());
+            this.setAttribute(id, XML3D.math.vec3.toDOMString(v));
         }
     };
 };
@@ -299,7 +299,7 @@ handlers.QuatAttributeHandler = function(id, defaultValue) {
         storage[id] = null;
     };
 
-    this.setFromAttribute = function(value, prevValue, elem, storage) {
+    this.setFromAttribute = function(value, prevValue, elem, storage, init) {
         if (!storage[id]) {
             storage[id] = XML3D.math.quat.create();
         }
@@ -310,7 +310,7 @@ handlers.QuatAttributeHandler = function(id, defaultValue) {
             v[1] = defaultValue[1];
             v[2] = defaultValue[2];
             v[3] = defaultValue[3];
-            XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
+            !init && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
         } else {
             v[0] = +m[1];
             v[1] = +m[2];
@@ -325,7 +325,7 @@ handlers.QuatAttributeHandler = function(id, defaultValue) {
             XML3D.flushDOMChanges();
             var storage = getStorage(this);
             if (!storage[id]) {
-                that.setFromAttribute(this.getAttribute(id), null, this, storage);
+                that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
             return XML3D.math.quat.clone(storage[id]);
         },
@@ -338,7 +338,7 @@ handlers.QuatAttributeHandler = function(id, defaultValue) {
             } else {
                 v[0] = value[0]; v[1] = value[1]; v[2] = value[2]; v[3] = value[3];
             }
-            this.setAttribute(id, v.toDOMString());
+            this.setAttribute(id, XML3D.math.quat.toDOMString(v));
         }
     };
 };

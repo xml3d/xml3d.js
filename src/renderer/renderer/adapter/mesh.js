@@ -73,13 +73,11 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     dispose: function () {
         this.getRenderNode().remove();
         this.clearAdapterHandles();
-    }
-});
+    },
 
 
-// Interface methods
+    // Interface methods
 
-XML3D.extend(MeshRenderAdapter.prototype, {
     /**
      * @return {XML3D.math.bbox}
      */

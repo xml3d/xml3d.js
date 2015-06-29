@@ -376,7 +376,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         XML3D.math.bbox.size(bbSize, bb);
         var max = (bbSize[0] > bbSize[1]) ? bbSize[0] : bbSize[1];
         max = 0.55 * (max);//enlarge 10percent to make sure nothing gets cut off
-        this.fovy = Math.atan(max)*2.0;
+        this.fovy = max <= 0 ? Math.PI : Math.atan(max)*2.0;
 
         entry.parameters["direction"] = p_dir;
         entry.parameters["position"]  = p_pos;

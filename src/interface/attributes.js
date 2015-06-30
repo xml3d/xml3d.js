@@ -306,16 +306,10 @@ handlers.QuatAttributeHandler = function(id, defaultValue) {
         var v = storage[id];
         var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
         if (!m  || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3]) || isNaN(+m[4])) {
-            v[0] = defaultValue[0];
-            v[1] = defaultValue[1];
-            v[2] = defaultValue[2];
-            v[3] = defaultValue[3];
+            XML3D.math.quat.setAxisAngle(v, defaultValue, defaultValue[3]);
             !init && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
         } else {
-            v[0] = +m[1];
-            v[1] = +m[2];
-            v[2] = +m[3];
-            v[3] = +m[4];
+            XML3D.math.quat.setAxisAngle(v, [+m[1], +m[2], +m[3]], +m[4]);
         }
         return false;
     };
@@ -334,9 +328,9 @@ handlers.QuatAttributeHandler = function(id, defaultValue) {
             var v = storage[id];
             if (value.length !== 4 || isNaN(value[0]) || isNaN(value[1]) || isNaN(value[2]) || isNaN(value[3])) {
                 XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
-                v = defaultValue;
+                XML3D.math.quat.setAxisAngle(v, defaultValue, defaultValue[3]);
             } else {
-                v[0] = value[0]; v[1] = value[1]; v[2] = value[2]; v[3] = value[3];
+                XML3D.math.quat.setAxisAngle(v, value, value[3]);
             }
             this.setAttribute(id, XML3D.math.quat.toDOMString(v));
         }

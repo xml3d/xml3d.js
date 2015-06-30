@@ -29,9 +29,11 @@ XML3D.createClass(DataAdapter, BaseDataAdapter);
 DataAdapter.prototype.init = function () {
     // TODO(ksons): Here, every data node is composed. Add the system's data node
     // to every data node in a first approach
-	//Get the xml3d Node
-    // FIXME: Get it right!
-    var xml3dNode = document.getElementsByTagName("XML3D")[0];	
+	//Going up in the DOM hierarchy to find XML3D node
+	var xml3dNode = this.node;        	
+	while(xml3dNode.localName != "xml3d"){
+		xml3dNode = xml3dNode.parentNode; 
+	}
     
     //get xml3d data adapter
     var systemDataNode= this.factory.getAdapter(xml3dNode).xflowDataNode;
@@ -53,7 +55,6 @@ DataAdapter.prototype.init = function () {
     // FIXME: Use insertBefore to guarantee right position
     // FIXME: Add data node with filter set
     //append system data node to every data node
-    this.xflowDataNode.appendChild(systemDataNode);
 };
 
 DataAdapter.prototype.updateAdapterHandle = function(key, url) {

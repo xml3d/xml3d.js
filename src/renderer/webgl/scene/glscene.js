@@ -28,19 +28,17 @@ for (var flag in FLAGS) {
 /**
  *
  * @param {GLContext} context
+ * @param {XML3DDataAdapter} systemDataAdapter
  * @extends {Scene}
  * @constructor
  */
-var GLScene = function (context,systemDataAdapter) {
-	Scene.call(this);
+var GLScene = function (context, systemDataAdapter) {
+	Scene.call(this, systemDataAdapter);
     this.context = context;
     this.shaderFactory = new ShaderComposerFactory(context);
     this.drawableFactory = new DrawableFactory();
     
     this.shadowMapService = new ShadowMapService(context, this);
-    // TODO: set it in the more abstratc scene, comment parameters
-    this.systemDataAdapter = systemDataAdapter; // save the global parameters in scene
-
     /**
      * @type {Array.<RenderObject>}
      */
@@ -53,6 +51,7 @@ var GLScene = function (context,systemDataAdapter) {
     this.doFrustumCulling = !!Options.getValue(OPTION_FRUSTUM_CULLING);
     this.addListeners();
     this.setRendererDependentData();
+//    this.setSystemDataFilter();
     };
 
 XML3D.createClass(GLScene, Scene);
@@ -262,7 +261,16 @@ XML3D.extend(GLScene.prototype, {
     		// Here we set the renderer dependent values
     			
     		}
-    }
+    },
+//    setSystemDataFilter: function(){
+////    	this.systemDataAdapter.xflowDataNode.filterType= "rename";
+//    	var filter = "rename({";
+//    	for (child in this.systemDataAdapter.xflowDataNode._children){
+//    			filter += this.systemDataAdapter.xflowDataNode._children[child]._name.replace("_system_","") +":" +this.systemDataAdapter.xflowDataNode._children[child]._name +",";
+//    		}
+//    	filter= filter.slice(0,-1)+"})";
+//    	this.systemDataAdapter.xflowDataNode.setFilter(filter);
+//    }
 });
 module.exports = GLScene;
 

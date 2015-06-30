@@ -14,14 +14,16 @@ var URI = require("../../../utils/uri.js").URI;
 var EventEmitter = require('events').EventEmitter;
 
 /**
+ * @param {XML3DDataAdapter} systemDataAdapter
  * @extends {EventEmitter}
  * @constructor
  */
-var Scene = function () {
+var Scene = function (systemDataAdapter) {
     EventEmitter.call(this);
     this.boundingBox = new XML3D.math.bbox.create();
     this.lights = new LightManager();
     this.pager = new Pager();
+    this.systemDataAdapter = systemDataAdapter;
 
     /** @type RenderView */
     this.activeView = null;

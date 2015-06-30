@@ -17,6 +17,7 @@
   </material>
   <material id="Material" script="urn:xml3d:material:phong">
     <float3 name="diffuseColor">0.800000011920929 0.800000011920929 0.800000011920929</float3>
+    <int name="test" sys>3</int>
   </material>
  </defs>
  <view id="v_pview" position="0 0 31" orientation="0 0 1 1.57"></view>
@@ -34,7 +35,7 @@
       <float3 name="normal">-1.0 0.0 -0.0 -1.0 0.0 -0.0 -1.0 0.0 -0.0 -1.0 0.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 1.0 0.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 -1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0 -0.0 0.0 1.0</float3>
       <int name="index">0 1 2 2 3 0 4 5 6 6 7 4 8 9 10 10 11 8 12 13 14 14 15 12 16 17 18 18 19 16 20 21 22 22 23 20 </int>
       <data compute="(diffuseColor) = xflow.animateColor(time)"><!-- TODO: Implement xflow.animateColor -->
-        <float name="time" id="time" sys=true></float>
+        <float name="time" id="time" sys></float>
       </data>
   </mesh>
  </group>
@@ -42,15 +43,5 @@
   <model src="assets/plane2.xml#Plane"></model>
  </group>
 </xml3d>
-
-<script type="text/javascript">
-    /* Run timer for wave animation */
-    window.setInterval(20);
-    document.querySelector("#mesh").addEventListener('xml3dsystem', function(){
-        console.log("XML3D SYSTEM: " + event.detail.systemtype);
-        console.log(event.detail);
-    })
-  </script>
-
 </body>
 </html>

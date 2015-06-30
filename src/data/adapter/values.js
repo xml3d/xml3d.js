@@ -30,16 +30,33 @@ ValueDataAdapter.prototype.init = function()
     }
     else{
         delete config.scriptValue;
-        if (this.node.sys == true){
-            // FIXME: Better approach to get <xml3d> element here
-        	var xml3dNode = document.getElementsByTagName("XML3D")[0];
+        if (this.node.sys != undefined){
+        	// get the parent data adapter 
+        	var parentDataAdapter = this.factory.getAdapter(this.node.parentNode);
+        	
+        	//Going up in the DOM hierarchy to find XML3D node
+        	var xml3dNode = this.node;        	
+        	while(xml3dNode.localName != "xml3d"){
+        		xml3dNode = xml3dNode.parentNode; 
+        	}
+        	
         	var systemDataNode= this.factory.getAdapter(xml3dNode).xflowDataNode;
             // FIXME: Append system to parent data adapter, remove BufferEntry if it exists
         	for (child in systemDataNode._children){
         		if (systemDataNode._children[child].name == "_system_"+this.node.name){
-        			value = systemDataNode._children[child].data.getValue();
-//        			this.xflowInputNode = systemDataNode._children[child];
-//        			return;
+        			this.xflowInputNode =  systemDataNode._children[child];
+        			var filter = systemDataNode.filterMapping;
+        			if(!filter){
+        		    	filter = "rename({";
+        				filter += this.node.name+":_system_" +this.node.name+",";
+        				filter= filter.slice(0,-1)+"})";
+        			    systemDataNode.setFilter(filter);
+        	    	}
+        	    	else{
+        	    		filter.setNamePair(this.node.name,"_system_" +this.node.name);
+        	    	}
+        			parentDataAdapter.xflowDataNode.insertBefore(systemDataNode,parentDataAdapter.xflowDataNode._children[0]);
+        			return;
         		}
         	}
         	

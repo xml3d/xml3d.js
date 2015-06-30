@@ -423,7 +423,7 @@ classInfo['float'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
-    sys: {a: handlers.BoolAttributeHandler, params: false},
+    sys: {a: handlers.BoolAttributeHandler},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.FloatArrayValueHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
@@ -436,7 +436,7 @@ classInfo['float2'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
-    sys: {a: handlers.BoolAttributeHandler, params: false},
+    sys: {a: handlers.BoolAttributeHandler},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.Float2ArrayValueHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
@@ -449,7 +449,7 @@ classInfo['float3'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
-    sys: {a: handlers.BoolAttributeHandler, params: false},
+    sys: {a: handlers.BoolAttributeHandler},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.Float3ArrayValueHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
@@ -462,7 +462,7 @@ classInfo['float4'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
-    sys: {a: handlers.BoolAttributeHandler, params: false},
+    sys: {a: handlers.BoolAttributeHandler},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.Float4ArrayValueHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
@@ -475,7 +475,7 @@ classInfo['float4x4'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
-    sys: {a: handlers.BoolAttributeHandler, params: false},
+    sys: {a: handlers.BoolAttributeHandler},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.Float4x4ArrayValueHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
@@ -488,7 +488,7 @@ classInfo['int'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
-    sys: {a: handlers.BoolAttributeHandler, params: false},
+    sys: {a: handlers.BoolAttributeHandler},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.IntArrayValueHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
@@ -501,7 +501,7 @@ classInfo['int4'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
-    sys: {a: handlers.BoolAttributeHandler, params: false},
+    sys: {a: handlers.BoolAttributeHandler},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     value: {a: handlers.IntArrayValueHandler},
     setScriptValue: {m: methods.XML3DDataSourceTypeSetScriptValue}
@@ -526,7 +526,7 @@ classInfo['texture'] = {
     className: {a: handlers.StringAttributeHandler, id: 'class'},
     name: {a: handlers.StringAttributeHandler},
     param: {a: handlers.BoolAttributeHandler, params: false},
-    sys: {a: handlers.BoolAttributeHandler, params: false},
+    sys: {a: handlers.BoolAttributeHandler},
     key: {a: handlers.FloatAttributeHandler, params: 0.0},
     type: {a: handlers.EnumAttributeHandler, params: {e: TextureTypes, d: 0}},
     filterMin: {a: handlers.EnumAttributeHandler, params: {e: FilterTypes, d: 6}},

@@ -8,7 +8,7 @@ var ValueDataAdapter = require("./values.js");
 var DataAdapter = require("./data.js");
 var ComputeDataAdapter = require("./compute.js");
 var DataflowDataAdapter = require("./dataflow.js");
-var Xml3dDataAdapter = require("./xml3dDataAdapter.js");
+var Xml3dDataAdapter = require("./xml3d.js");
 // Register JSON Handler
 require("./json/factory.js");
 // Register JavaScript Handler (required for external shade.js Javascript resources)

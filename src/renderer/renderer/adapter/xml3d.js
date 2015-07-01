@@ -156,15 +156,19 @@ XML3DRenderAdapter.prototype.getElementByRay = (function () {
         if (hitObject !== null && (hitPoint || hitNormal)) {
             if (hitPoint) {
                 var vec = renderer.getWorldSpacePositionByRay(xml3dRay, hitObject, c_viewMat, c_projMat);
-                hitPoint.set(vec[0], vec[1], vec[2]);
+                XML3D.math.vec3.copy(hitPoint, vec);
             }
             if (hitNormal) {
                 var vec = renderer.getWorldSpaceNormalByRay(xml3dRay, hitObject, c_viewMat, c_projMat);
-                hitNormal.set(vec[0], vec[1], vec[2]);
+                XML3D.math.vec3.copy(hitNormal, vec);
             }
         } else {
-            if (hitPoint) hitPoint.set(NaN, NaN, NaN);
-            if (hitNormal) hitNormal.set(NaN, NaN, NaN);
+            if (hitPoint) {
+                hitPoint[0] = hitPoint[1] = hitPoint[2] = NaN;
+            }
+            if (hitNormal) {
+                hitNormal[0] = hitNormal[1] = hitNormal[2] = NaN;
+            }
         }
         return hitObject !== null ? hitObject.node : null;
     }

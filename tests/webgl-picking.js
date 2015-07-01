@@ -65,21 +65,21 @@ test("Pick with large object ids", function() {
 test("xml3d Apadater getElementByPoint test", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
 
-    var position = new XML3DVec3(), normal = new XML3DVec3();
+    var position = XML3D.math.vec3.create(), normal = XML3D.math.vec3.create();
     var element = xml3dElement.getElementByPoint(88,60, position , normal);
     ok(element, "Object picked");
     strictEqual(element, this.doc.getElementById("pickingMesh1"));
-    QUnit.closeVector(normal, new XML3DVec3(0,0,1), EPSILON, "Picked correct normal");
+    QUnit.closeVector(normal, XML3D.math.vec3.fromValues(0,0,1), EPSILON, "Picked correct normal");
 
     element = xml3dElement.getElementByPoint(5,5, position, normal);
     strictEqual(element, null, "Nothing picked");
-    ok(isNaN(position.x) && isNaN(position.y) && isNaN(position.z), "Picked correct position");
-    ok(isNaN(normal.x) && isNaN(normal.y) && isNaN(normal.z), "Picked correct normal");
+    ok(isNaN(position[0]) && isNaN(position[1]) && isNaN(position[2]), "Picked correct position");
+    ok(isNaN(normal[0]) && isNaN(normal[1]) && isNaN(normal[2]), "Picked correct normal");
 
     element = xml3dElement.getElementByPoint(88,60, position , normal);
     ok(element, "Object picked");
     strictEqual(element, this.doc.getElementById("pickingMesh1"));
-    QUnit.closeVector(normal, new XML3DVec3(0,0,1), EPSILON, "Picked correct normal");
+    QUnit.closeVector(normal, XML3D.math.vec3.fromValues(0,0,1), EPSILON, "Picked correct normal");
 
 });
 
@@ -108,7 +108,7 @@ test("Position picking test", 4, function() {
     target.addEventListener("click", function(evt) {
         start();
         ok(evt.position);
-        QUnit.closeVector(evt.position, new XML3DVec3(-2.503,2.01,-10), EPSILON, "Picked position is correct");
+        QUnit.closeVector(evt.position, XML3D.math.vec3.fromValues(-2.503,2.01,-10), EPSILON, "Picked position is correct");
     }, false);
 
     h.getPickObjectByPoint(89,51);
@@ -124,7 +124,7 @@ test("Normal picking test", 4, function() {
     target.addEventListener("click", function(evt) {
         var normal = evt.normal;
         ok(normal);
-        QUnit.closeVector(evt.normal, new XML3DVec3(0,0,1), EPSILON, "Picked correct normal");
+        QUnit.closeVector(evt.normal, XML3D.math.vec3.fromValues(0,0,1), EPSILON, "Picked correct normal");
         start();
     }, false);
 
@@ -178,18 +178,16 @@ test("Simple picking with getElementByRay", 5, function() {
     var target = this.doc.getElementById("pickingMesh8");
     var target2 = this.doc.getElementById("pickingMesh9");
 
-    var ray = new XML3DRay();
-    ray.origin.set(new XML3DVec3(10, -0.1, -10));
-    ray.direction.set(new XML3DVec3(-1, 0, 0));
+    var ray = XML3D.math.ray.fromOriginDirection([10,-0.1,-10], [-1,0,0]);
 
     var obj = xml3dElement.getElementByRay(ray);
     equal(obj, target, "Ray orthogonal to camera returned the first intersected mesh");
 
-    ray.direction.set(new XML3DVec3(1, 0, 0));
+    XML3D.math.ray.setDirection(ray, XML3D.math.vec3.fromValues(1, 0, 0));
     obj = xml3dElement.getElementByRay(ray);
     equal(obj, null, "The same ray with inverted direction returned null");
 
-    ray.origin.set(new XML3DVec3(-10, -0.1, -10));
+    XML3D.math.ray.setOrigin(ray, XML3D.math.vec3.fromValues(-10, -0.1, -10));
     obj = xml3dElement.getElementByRay(ray);
     equal(obj, target2, "The inverted ray shot from the other side returns the right mesh");
 });
@@ -198,21 +196,19 @@ test("Position and normal with getElementByRay", 6, function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
     var h = getHandler(xml3dElement);
 
-    var ray = new XML3DRay();
-    ray.origin.set(new XML3DVec3(-10, 0, -10));
-    ray.direction.set(new XML3DVec3(1, 0, 0));
+    var ray = XML3D.math.ray.fromOriginDirection([-10,0,-10], [1,0,0]);
 
-    var foundNormal = new XML3DVec3();
-    var foundPosition = new XML3DVec3();
+    var foundNormal = XML3D.math.vec3.create();
+    var foundPosition = XML3D.math.vec3.create();
 
     var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
-    QUnit.closeVector(foundPosition, new XML3DVec3(-1,0.02,-9.98), EPSILON, "Found correct position");
-    QUnit.closeVector(foundNormal, new XML3DVec3(1, 0, 0), EPSILON, "Found correct normal");
+    QUnit.closeVector(foundPosition, XML3D.math.vec3.fromValues(-1,0.02,-9.98), EPSILON, "Found correct position");
+    QUnit.closeVector(foundNormal, XML3D.math.vec3.fromValues(1, 0, 0), EPSILON, "Found correct normal");
 
-    ray.origin.set(new XML3DVec3(10, 0, -10));
+    XML3D.math.ray.setOrigin(ray, XML3D.math.vec3.fromValues(10, 0, -10));
     obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
-    ok(isNaN(foundPosition.x) && isNaN(foundPosition.y) && isNaN(foundPosition.z), "Position returns NaN for no hit object");
-    ok(isNaN(foundNormal.x) && isNaN(foundNormal.y) && isNaN(foundNormal.z), "Normal returns NaN for no hit object");
+    ok(isNaN(foundPosition[0]) && isNaN(foundPosition[1]) && isNaN(foundPosition[2]), "Position returns NaN for no hit object");
+    ok(isNaN(foundNormal[0]) && isNaN(foundNormal[1]) && isNaN(foundNormal[2]), "Normal returns NaN for no hit object");
 });
 
 test("Overlapping objects with getElementByRay", 6, function() {
@@ -221,19 +217,17 @@ test("Overlapping objects with getElementByRay", 6, function() {
     var target = this.doc.getElementById("pickingMesh11");
     var target2 = this.doc.getElementById("pickingMesh10");
 
-    var ray = new XML3DRay();
-    ray.origin.set(new XML3DVec3(-5, 0, 100));
-    ray.direction.set(new XML3DVec3(0, 0, -1));
+    var ray = XML3D.math.ray.fromOriginDirection([-5,0,100], [0,0,-1]);
 
-    var foundNormal = new XML3DVec3();
-    var foundPosition = new XML3DVec3();
+    var foundNormal = XML3D.math.vec3.create();
+    var foundPosition = XML3D.math.vec3.create();
 
     var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
     equal(obj, target, "Returned the correct object");
-    QUnit.closeVector(foundPosition, new XML3DVec3(-4.77, 0.23, -10), EPSILON, "Found correct position");
-    QUnit.closeVector(foundNormal, new XML3DVec3(0, 0, 1), EPSILON, "Found correct normal");
+    QUnit.closeVector(foundPosition, XML3D.math.vec3.fromValues(-4.77, 0.23, -10), EPSILON, "Found correct position");
+    QUnit.closeVector(foundNormal, XML3D.math.vec3.fromValues(0, 0, 1), EPSILON, "Found correct normal");
 
-    ray.origin.set(new XML3DVec3(-4, 0, 100));
+    XML3D.math.ray.setOrigin(ray, XML3D.math.vec3.fromValues(-4, 0, 100));
     obj = xml3dElement.getElementByRay(ray);
     equal(obj, target2, "Returned the square donut object");
 });
@@ -243,15 +237,13 @@ test("Ray parallel to an object", 4, function() {
     var h = getHandler(xml3dElement);
     var target = this.doc.getElementById("pickingMesh2");
 
-    var ray = new XML3DRay();
-    ray.origin.set(new XML3DVec3(0, 0, -9));
-    ray.direction.set(new XML3DVec3(0, 1, -0.5));
+    var ray = XML3D.math.ray.fromOriginDirection([0,0,-9], [0,1,-0.5]);
 
     var obj = xml3dElement.getElementByRay(ray);
     equal(obj, target, "Slightly downward angle returns the plane");
 
-    ray.origin.set(new XML3DVec3(0, 0, -10));
-    ray.direction.set(new XML3DVec3(0, 1, 0));
+    XML3D.math.ray.setOrigin(ray, XML3D.math.vec3.fromValues(0, 0, -10));
+    XML3D.math.ray.setDirection(ray, XML3D.math.vec3.fromValues(0, 1, 0));
 
     obj = xml3dElement.getElementByRay(ray);
     equal(obj, null, "Ray parallel to plane returns null");

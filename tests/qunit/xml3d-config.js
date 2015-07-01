@@ -5,9 +5,9 @@ QUnit.extend( QUnit, {
      */
     __passesVector : function(actual, expected, maxDifference) {
 
-        return (Math.abs(actual.x - expected.x) <= maxDifference &&
-                Math.abs(actual.y - expected.y) <= maxDifference &&
-                Math.abs(actual.z - expected.z) <= maxDifference);
+        return (Math.abs(actual[0] - expected[0]) <= maxDifference &&
+                Math.abs(actual[1] - expected[1]) <= maxDifference &&
+                Math.abs(actual[2] - expected[2]) <= maxDifference);
     },
 
     closeVector : function(actual, expected, maxDifference, message) {
@@ -18,8 +18,8 @@ QUnit.extend( QUnit, {
 
     closeRotation : function(actual, expected, maxDifference, message) {
         var passes = (actual === expected) ||
-            QUnit.__passesVector(actual.axis, expected.axis, maxDifference) &&
-            (Math.abs((actual.angle % Math.PI) - (expected.angle % Math.PI)) <= maxDifference);
+            QUnit.__passesVector(actual, expected, maxDifference) &&
+            (Math.abs((actual[3] % Math.PI) - (expected[3] % Math.PI)) <= maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
 
@@ -30,22 +30,22 @@ QUnit.extend( QUnit, {
         }
 
         var passes =
-            Math.abs(actual.m11 - expected.m11) <= maxDifference &&
-            Math.abs(actual.m12 - expected.m12) <= maxDifference &&
-            Math.abs(actual.m13 - expected.m13) <= maxDifference &&
-            Math.abs(actual.m14 - expected.m14) <= maxDifference &&
-            Math.abs(actual.m21 - expected.m21) <= maxDifference &&
-            Math.abs(actual.m22 - expected.m22) <= maxDifference &&
-            Math.abs(actual.m23 - expected.m23) <= maxDifference &&
-            Math.abs(actual.m24 - expected.m24) <= maxDifference &&
-            Math.abs(actual.m31 - expected.m31) <= maxDifference &&
-            Math.abs(actual.m32 - expected.m32) <= maxDifference &&
-            Math.abs(actual.m33 - expected.m33) <= maxDifference &&
-            Math.abs(actual.m34 - expected.m34) <= maxDifference &&
-            Math.abs(actual.m41 - expected.m41) <= maxDifference &&
-            Math.abs(actual.m42 - expected.m42) <= maxDifference &&
-            Math.abs(actual.m43 - expected.m43) <= maxDifference &&
-            Math.abs(actual.m44 - expected.m44) <= maxDifference ;
+            Math.abs(actual[0] - expected[0]) <= maxDifference &&
+            Math.abs(actual[1] - expected[1]) <= maxDifference &&
+            Math.abs(actual[2] - expected[2]) <= maxDifference &&
+            Math.abs(actual[3] - expected[3]) <= maxDifference &&
+            Math.abs(actual[4] - expected[4]) <= maxDifference &&
+            Math.abs(actual[5] - expected[5]) <= maxDifference &&
+            Math.abs(actual[6] - expected[6]) <= maxDifference &&
+            Math.abs(actual[7] - expected[7]) <= maxDifference &&
+            Math.abs(actual[8] - expected[8]) <= maxDifference &&
+            Math.abs(actual[9] - expected[9]) <= maxDifference &&
+            Math.abs(actual[10] - expected[10]) <= maxDifference &&
+            Math.abs(actual[11] - expected[11]) <= maxDifference &&
+            Math.abs(actual[12] - expected[12]) <= maxDifference &&
+            Math.abs(actual[13] - expected[13]) <= maxDifference &&
+            Math.abs(actual[14] - expected[14]) <= maxDifference &&
+            Math.abs(actual[15] - expected[15]) <= maxDifference ;
         QUnit.push(passes, actual, expected, message);
     },
 

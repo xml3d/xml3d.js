@@ -31,9 +31,11 @@ TransformDataAdapter.prototype.updateMatrix = function () {
     var n = this.node;
     var transform = this.transform;
     var centerVec = n.center;
+    var so = n.scaleOrientation;
+    var ro = n.rotation;
 
-    XML3D.math.mat4.fromQuat(transform.scaleOrientation, n.scaleOrientation);
-    XML3D.math.mat4.fromQuat(transform.rotation, n.rotation);
+    XML3D.math.mat4.fromRotation(transform.scaleOrientation, so[3], so);
+    XML3D.math.mat4.fromRotation(transform.rotation, ro[3], ro);
 
     XML3D.math.mat4.translate(transform.translate, IDENT_MAT, n.translation);
     XML3D.math.mat4.translate(transform.center, IDENT_MAT, centerVec);

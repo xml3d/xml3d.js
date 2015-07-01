@@ -24,6 +24,10 @@ module.exports = function (math) {
         return vec[0] + " " + vec[1] + " " + vec[2] + " " + vec[3];
     };
 
+    math.quat.toDOMString = function(quat) {
+        return quat[0] + " " + quat[1] + " " + quat[2] + " " + quat[3];
+    };
+
     math.mat3.toDOMString = function(mat) {
         return mat[0] + " " + mat[1] + " " + mat[2] + " " +
             mat[3] + " " + mat[4] + " " + mat[5] + " " +
@@ -137,6 +141,16 @@ module.exports = function (math) {
         dest[iwd] = c1 * quat[iw1] + c2 * quat2[iw2];
     };
 
+    math.quat.fromAxisAngle = function(axis, angle) {
+        var q = math.quat.create();
+        if (axis.length === 4 && angle === undefined) {
+            math.quat.setAxisAngle(q, axis, axis[3]);
+        } else {
+            math.quat.setAxisAngle(q, axis, angle);
+        }
+        return math.quat.normalize(q,q);
+    };
+
     /**
      * Transforms the vec3 with a mat4.
      * 4th vector component is implicitly '0'
@@ -154,7 +168,7 @@ module.exports = function (math) {
         return out;
     };
 
-    math.quat.setFromMat3 = function(m, dest) {
+    math.quat.setFromMat3 = function(dest, m) {
         var tr = m[0] + m[4] + m[8];
 
         if (tr > 0) {
@@ -184,7 +198,7 @@ module.exports = function (math) {
         }
     };
 
-    math.quat.setFromBasis = function(X,Y,Z,dest) {
+    math.quat.setFromBasis = function(dest, X,Y,Z) {
         var lx = 1.0 / XML3D.math.vec3.length(X);
         var ly = 1.0 / XML3D.math.vec3.length(Y);
         var lz = 1.0 / XML3D.math.vec3.length(Z);
@@ -198,7 +212,29 @@ module.exports = function (math) {
         m[6] = X[2] * lx;
         m[7] = Y[2] * ly;
         m[8] = Z[2] * lz;
-        XML3D.math.quat.setFromMat3(m,dest);
+        XML3D.math.quat.setFromMat3(dest, m);
+    };
+
+    math.vec4.fromQuat = function(q) {
+        var dest = XML3D.math.vec4.create();
+        if (q[3] > 1) {
+            XML3D.math.quat.normalize(q,q);
+        }
+        var s = Math.sqrt(1-q[3]*q[3]);
+        var angle = 2*Math.acos(q[3]);
+        if (s < 0.0001) {
+            // Axis is practically 0 so we return the identity quaternion
+            dest[0] = 0;
+            dest[1] = 0;
+            dest[2] = 0;
+            dest[3] = 1;
+        } else {
+            dest[0] = q[0] / s;
+            dest[1] = q[1] / s;
+            dest[2] = q[2] / s;
+            dest[3] = angle;
+        }
+        return dest;
     };
 
 

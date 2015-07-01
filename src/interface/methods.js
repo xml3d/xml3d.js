@@ -32,36 +32,39 @@ var tmpZ = vec3.create();
 
 methods.viewSetDirection = function(direction) {
     direction = direction || vec3.fromValues(0,0,-1);
-    direction = direction.normalize();
+    vec3.normalize(direction, direction);
     var up = vec3.fromValues(0,1,0);
-    vec3.transformQuat(up, up, this.orientation);
+    var orientation = XML3D.math.quat.fromAxisAngle(this.orientation);
+    vec3.transformQuat(up, up, orientation);
     vec3.normalize(up, up);
 
     vec3.cross(tmpX, direction, up);
     if(!vec3.length(tmpX)) {
-        vec3.transformQuat(tmpX, vec3.fromValues(1,0,0), this.orientation);
+        vec3.transformQuat(tmpX, vec3.fromValues(1,0,0), orientation);
     }
     vec3.cross(tmpY, tmpX, direction);
     vec3.negate(tmpZ, direction);
 
     var q = XML3D.math.quat.create();
-    XML3D.math.quat.setFromBasis(tmpX, tmpY, tmpZ, q);
-    this.orientation = q;
+    XML3D.math.quat.setFromBasis(q, tmpX, tmpY, tmpZ);
+    this.orientation = XML3D.math.vec4.fromQuat(q);
 };
 
 methods.viewSetUpVector = function(up) {
     up = up || vec3.fromValues(0,1,0);
     vec3.normalize(up, up);
+    var orientation = XML3D.math.quat.fromAxisAngle(this.orientation);
     var r = XML3D.math.quat.create();
-    XML3D.math.quat.rotationTo(r, up, [0,1,0]);
-    XML3D.math.quat.mul(r, this.orientation, r);
+    XML3D.math.quat.rotationTo(r, [0,1,0], up);
+    XML3D.math.quat.mul(r, orientation, r);
     XML3D.math.quat.normalize(r,r);
-    this.orientation = r;
+    this.orientation = XML3D.math.vec4.fromQuat(r);
 };
 
 methods.viewGetUpVector = function() {
     var up = vec3.fromValues(0, 1, 0);
-    vec3.transformQuat(up, up, this.orientation);
+    var orientation = XML3D.math.quat.fromAxisAngle(this.orientation);
+    vec3.transformQuat(up, up, orientation);
     return up;
 };
 
@@ -81,11 +84,9 @@ methods.viewGetViewMatrix = function() {
     }
     // Fallback implementation
     var p = this.position;
-    var r = this.orientation;
-    var a = r[3];
+    var r = XML3D.math.quat.fromAxisAngle(this.orientation);
     var mat = XML3D.math.mat4.create();
-    XML3D.math.mat4.translate(mat, mat, p);
-    XML3D.math.mat4.rotate(mat, mat, r[3], r);
+    XML3D.math.mat4.fromRotationTranslation(mat, r, p);
     XML3D.math.mat4.invert(mat, mat);
     return mat;
 };

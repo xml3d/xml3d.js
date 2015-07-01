@@ -13,7 +13,8 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
         var m = XML3D.math.mat4.create();
-        XML3D.math.mat4.fromQuat(m, this.node.orientation);
+        var axisAngle = this.node.orientation;
+        XML3D.math.mat4.fromRotation(m, axisAngle[3], axisAngle);
         this.renderNode = this.factory.renderer.scene.createRenderView({
             position: this.node.position,
             orientation: m,
@@ -45,7 +46,8 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
         switch (name) {
             case "orientation":
                 var m = XML3D.math.mat4.create();
-                XML3D.math.mat4.fromQuat(m, this.node.orientation)
+                var axisAngle = this.node.orientation;
+                XML3D.math.mat4.fromRotation(m, axisAngle[3], axisAngle);
                 this.renderNode.updateOrientation(m);
                 break;
             case "position":

@@ -279,6 +279,9 @@ handlers.Vec3AttributeHandler = function(id, defaultValue) {
         },
         set : function(value) {
             var storage = getStorage(this);
+            if (!storage[id]) {
+                that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
+            }
             var v = storage[id];
             if (value.length !== 3 || isNaN(value[0]) || isNaN(value[1]) || isNaN(value[2])) {
                 XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
@@ -291,7 +294,8 @@ handlers.Vec3AttributeHandler = function(id, defaultValue) {
     };
 };
 
-handlers.QuatAttributeHandler = function(id, defaultValue) {
+// Note: All vec4 attributes are considered to be axis-angle, NOT quaternions!
+handlers.Vec4AttributeHandler = function(id, defaultValue) {
     var that = this;
     id = id.toLowerCase();
 
@@ -301,15 +305,15 @@ handlers.QuatAttributeHandler = function(id, defaultValue) {
 
     this.setFromAttribute = function(value, prevValue, elem, storage, init) {
         if (!storage[id]) {
-            storage[id] = XML3D.math.quat.create();
+            storage[id] = XML3D.math.vec4.create();
         }
         var v = storage[id];
         var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
         if (!m  || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3]) || isNaN(+m[4])) {
-            XML3D.math.quat.setAxisAngle(v, defaultValue, defaultValue[3]);
+            XML3D.math.vec4.copy(v, defaultValue);
             !init && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
         } else {
-            XML3D.math.quat.setAxisAngle(v, [+m[1], +m[2], +m[3]], +m[4]);
+            XML3D.math.vec4.set(v, +m[1], +m[2], +m[3], +m[4]);
         }
         return false;
     };
@@ -321,18 +325,21 @@ handlers.QuatAttributeHandler = function(id, defaultValue) {
             if (!storage[id]) {
                 that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
-            return XML3D.math.quat.clone(storage[id]);
+            return XML3D.math.vec4.clone(storage[id]);
         },
         set : function(value) {
             var storage = getStorage(this);
+            if (!storage[id]) {
+                that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
+            }
             var v = storage[id];
             if (value.length !== 4 || isNaN(value[0]) || isNaN(value[1]) || isNaN(value[2]) || isNaN(value[3])) {
                 XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
-                XML3D.math.quat.setAxisAngle(v, defaultValue, defaultValue[3]);
+                XML3D.math.vec4.copy(v, defaultValue);
             } else {
-                XML3D.math.quat.setAxisAngle(v, value, value[3]);
+                XML3D.math.quat.copy(v, value);
             }
-            this.setAttribute(id, XML3D.math.quat.toDOMString(v));
+            this.setAttribute(id, XML3D.math.vec4.toDOMString(value));
         }
     };
 };

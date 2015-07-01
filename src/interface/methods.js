@@ -109,7 +109,7 @@ methods.xml3dGenerateRay = function(x, y) {
             return adapters[adapter].generateRay(x, y);
         }
     }
-    return new window.XML3DRay();
+    return XML3D.math.ray.create();
 };
 
 methods.groupGetLocalMatrix = function() {

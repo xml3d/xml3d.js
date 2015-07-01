@@ -179,16 +179,18 @@
      * @returns {boolean}
      */
     bbox.intersects = function(bb, xml3dRay, opt) {
-        var inverseDirX = 1 / xml3dRay._direction.x;
-        var inverseDirY = 1 / xml3dRay._direction.y;
-        var inverseDirZ = 1 / xml3dRay._direction.z;
+        var origin = XML3D.math.ray.origin(xml3dRay);
+        var direction = XML3D.math.ray.direction(xml3dRay);
+        var inverseDirX = 1 / direction[0];
+        var inverseDirY = 1 / direction[1];
+        var inverseDirZ = 1 / direction[2];
 
-        var t1 = (bb[0] - xml3dRay._origin.x) * inverseDirX;
-        var t2 = (bb[3] - xml3dRay._origin.x) * inverseDirX;
-        var t3 = (bb[1] - xml3dRay._origin.y) * inverseDirY;
-        var t4 = (bb[4] - xml3dRay._origin.y) * inverseDirY;
-        var t5 = (bb[2] - xml3dRay._origin.z) * inverseDirZ;
-        var t6 = (bb[5] - xml3dRay._origin.z) * inverseDirZ;
+        var t1 = (bb[0] - origin[0]) * inverseDirX;
+        var t2 = (bb[3] - origin[0]) * inverseDirX;
+        var t3 = (bb[1] - origin[1]) * inverseDirY;
+        var t4 = (bb[4] - origin[1]) * inverseDirY;
+        var t5 = (bb[2] - origin[2]) * inverseDirZ;
+        var t6 = (bb[5] - origin[2]) * inverseDirZ;
 
         var tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
         var tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));

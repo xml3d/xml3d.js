@@ -55,6 +55,7 @@ XML3D.resource.registerFormat = require("./base/resourcemanager.js").registerFor
 XML3D.webcl = require("./utils/webcl.js").webcl;
 XML3D.math = require("gl-matrix");
 XML3D.math.bbox = require("./math/bbox.js");
+XML3D.math.ray = require("./math/ray.js");
 require("./math/math.js")(XML3D.math);
 
 window.XML3DBox = require("./types/box.js");

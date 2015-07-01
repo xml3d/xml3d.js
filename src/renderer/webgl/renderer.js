@@ -220,7 +220,7 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     calculateMatricesForRay: function (ray, viewMat, projMat) {
-        this.rayCamera.updatePosition(ray.origin._data);
+        this.rayCamera.updatePosition(XML3D.math.ray.origin(ray));
         this.rayCamera.updateOrientation(this.calculateOrientationForRayDirection(ray));
         this.rayCamera.getWorldToViewMatrix(viewMat);
         var aspect = this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight();
@@ -237,14 +237,14 @@ XML3D.extend(GLRenderer.prototype, {
 
         return function (ray) {
             XML3D.math.vec3.set(up, 0, 1, 0);
-            XML3D.math.vec3.cross(tmpX, ray.direction._data, up);
+            XML3D.math.vec3.cross(tmpX, XML3D.math.ray.direction(ray), up);
             if (!XML3D.math.vec3.length(tmpX)) {
                 XML3D.math.vec3.set(tmpX, 1, 0, 0);
             }
-            XML3D.math.vec3.cross(tmpY, tmpX, ray.direction._data);
-            XML3D.math.vec3.negate(tmpZ, ray.direction._data);
+            XML3D.math.vec3.cross(tmpY, tmpX, XML3D.math.ray.direction(ray));
+            XML3D.math.vec3.negate(tmpZ, XML3D.math.ray.direction(ray));
 
-            XML3D.math.quat.setFromBasis(tmpX, tmpY, tmpZ, q);
+            XML3D.math.quat.setFromBasis(q, tmpX, tmpY, tmpZ);
             XML3D.math.mat4.fromRotationTranslation(m, q, [0, 0, 0]);
             return m;
         }
@@ -308,7 +308,7 @@ XML3D.extend(GLRenderer.prototype, {
             view.getWorldToViewMatrix(c_viewMatrix);
             view.getProjectionMatrix(c_projectionMatrix, viewport[2] / viewport[3]);
 
-            var ray = new window.XML3DRay();
+            var ray = XML3D.math.ray.create();
 
             var nearHit = new Array();
             var farHit = new Array();
@@ -324,11 +324,9 @@ XML3D.extend(GLRenderer.prototype, {
 
             // calculate ray
             XML3D.math.mat4.invert(c_viewMatrix, c_viewMatrix);
-            var viewPos = new window.XML3DVec3(c_viewMatrix[12], c_viewMatrix[13], c_viewMatrix[14]);
 
-            ray.origin.set(viewPos);
-            ray.direction.set(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
-            ray.direction.set(ray.direction.normalize());
+            XML3D.math.ray.setOrigin(ray, XML3D.math.vec3.fromValues(c_viewMatrix[12], c_viewMatrix[13], c_viewMatrix[14]));
+            XML3D.math.ray.setDirection(ray, XML3D.math.vec3.fromValues(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]));
 
             return ray;
         }

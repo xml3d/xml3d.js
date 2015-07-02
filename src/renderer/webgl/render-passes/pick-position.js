@@ -30,7 +30,7 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
             obj.getWorldMatrix(c_modelMatrix);
 
             obj.getObjectSpaceBoundingBox(this.objectBoundingBox);
-            XML3D.math.bbox.transform(this.objectBoundingBox, c_modelMatrix, this.objectBoundingBox);
+            XML3D.math.bbox.transformAxisAligned(this.objectBoundingBox, c_modelMatrix, this.objectBoundingBox);
 
             var program = this.renderInterface.context.programFactory.getPickingPositionProgram();
             program.bind();

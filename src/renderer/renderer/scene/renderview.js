@@ -105,7 +105,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
                     return { near: 1, far: 10 };
                 }
                 this.getWorldToViewMatrix(t_mat);
-                XML3D.math.bbox.transform(bb, t_mat, bb);
+                XML3D.math.bbox.transformAxisAligned(bb, t_mat, bb);
 
                 var near = -bb[5],
                     far = -bb[2],

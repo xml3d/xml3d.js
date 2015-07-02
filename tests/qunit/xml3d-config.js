@@ -57,9 +57,10 @@ QUnit.extend( QUnit, {
     },
 
     closeBox : function(actual, expected, maxDifference, message) {
-        var passes = actual.isEmpty() ? expected.isEmpty() :
-            QUnit.__passesVector(actual.min, expected.min, maxDifference) &&
-            QUnit.__passesVector(actual.max, expected.max, maxDifference);
+        var bbox = XML3D.math.bbox;
+        var passes = bbox.isEmpty(actual) ? bbox.isEmpty(expected) :
+            QUnit.__passesVector(bbox.min(actual), bbox.min(expected), maxDifference) &&
+            QUnit.__passesVector(bbox.max(actual), bbox.max(expected), maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
 

@@ -82,7 +82,7 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
                 }
             });
             this.renderNode.getLocalMatrix(localMat);
-            XML3D.math.bbox.transform(bbox, localMat, bbox);
+            XML3D.math.bbox.transformAxisAligned(bbox, localMat, bbox);
             return bbox;
         }
     })(),

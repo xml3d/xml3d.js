@@ -57,6 +57,14 @@
         return target;
     };
 
+    bbox.min = function(box) {
+        return box.subarray(0,3);
+    };
+
+    bbox.max = function(box) {
+        return box.subarray(3,6);
+    };
+
     bbox.extendWithBox = function (target, other) {
         for (var i = 0; i < 3; i++) {
             target[i] = Math.min(other[i], target[i]);
@@ -93,20 +101,22 @@
         return target;
     };
 
-    bbox.halfSize = function (target, b) {
+    bbox.extent = function (target, b) {
         target[0] = Math.max(b[3] - b[0], 0) * 0.5;
         target[1] = Math.max(b[4] - b[1], 0) * 0.5;
         target[2] = Math.max(b[5] - b[2], 0) * 0.5;
         return target;
     };
 
-    bbox.transform = function (out, mat, box) {
-        if (box[0] > box[3] || box[1] > box[4] || box[2] > box[5]) {
+    bbox.transformAxisAligned = function (out, mat, box) {
+        if (bbox.isEmpty(box)) {
             bbox.copy(out, box); // an empty box remains empty
             return;
         }
-        box = bbox.clone(box);
-
+        if (out === box) {
+            //The algorithm breaks if source and dest are the same so create a new instance of the source box
+            box = bbox.clone(box);
+        }
         if (mat[3] == 0 && mat[7] == 0 && mat[11] == 0 && mat[15] == 1) {
 
             for (var i = 0; i < 3; i++) {
@@ -133,35 +143,16 @@
         throw new Error("Matrix is not affine");
     };
 
-    bbox.transform2 = (function () {
-        var absMat = XML3D.math.mat4.create();
-        var center = XML3D.math.vec3.create();
-        var extend = XML3D.math.vec3.create();
-
-        return function (out, mat, box) {
-
-            bbox.center(center, box);
-            bbox.halfSize(extend, box);
-
-            XML3D.math.mat4.copy(absMat, mat);
-            absMat.set([0, 0, 0, 1], 12);
-            for (var i = 0; i < 16; i++) {
-                absMat[i] = Math.abs(absMat[i]);
-            }
-
-            XML3D.math.vec3.transformMat4(extend, extend, absMat);
-            XML3D.math.vec3.transformMat4(center, center, mat);
-
-            out[0] = center[0] - extend[0];
-            out[1] = center[1] - extend[1];
-            out[2] = center[2] - extend[2];
-            out[3] = center[0] + extend[0];
-            out[4] = center[1] + extend[1];
-            out[5] = center[2] + extend[2];
-
-            return out;
+    bbox.transform = function (out, mat, box) {
+        if (bbox.isEmpty(box)) {
+            bbox.copy(out, box); // an empty box remains empty
+            return;
         }
-    }());
+
+        XML3D.math.vec3.transformMat4(out, box, mat);
+        XML3D.math.vec3.transformMat4(bbox.max(out), bbox.max(box), mat);
+        return out;
+    };
 
     bbox.longestSide = function (b) {
         var x = Math.abs(b[3] - b[0]);
@@ -211,28 +202,6 @@
 
         opt.dist = tmin;
         return true;
-    };
-
-    bbox.asXML3DBox = function (bb) {
-        var result = new window.XML3DBox();
-        result.min._data[0] = bb[0];
-        result.min._data[1] = bb[1];
-        result.min._data[2] = bb[2];
-        result.max._data[0] = bb[3];
-        result.max._data[1] = bb[4];
-        result.max._data[2] = bb[5];
-        return result;
-    };
-
-    bbox.fromXML3DBox = function(bb) {
-        var out = new Float32Array(6);
-        out[0] = bb.min._data[0];
-        out[1] = bb.min._data[1];
-        out[2] = bb.min._data[2];
-        out[3] = bb.max._data[0];
-        out[4] = bb.max._data[1];
-        out[5] = bb.max._data[2];
-        return out;
     };
 
     bbox.str = function (a) {

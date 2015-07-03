@@ -26,6 +26,7 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
             configuration: this.createLightConfiguration(),
             parent: parentNode
         });
+        this.updateVisibility();
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
@@ -48,8 +49,8 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
     },
 
     updateVisibility: function () {
-        var visible = this.style.getPropertyValue("display").trim() != "none";
-        this.renderNode.setVisible(visible);
+        var none = this.style.getPropertyValue("display").trim() == "none";
+        this.renderNode.setVisible(!none);
         this.factory.renderer.requestRedraw("Light visibility changed.");
     },
 

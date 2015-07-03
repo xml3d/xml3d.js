@@ -42,23 +42,27 @@ ValueDataAdapter.prototype.init = function()
         	
         	var systemDataNode= this.factory.getAdapter(xml3dNode).xflowDataNode;
             // FIXME: Append system to parent data adapter, remove BufferEntry if it exists
-        	for (child in systemDataNode._children){
-        		if (systemDataNode._children[child].name == "_system_"+this.node.name){
-        			this.xflowInputNode =  systemDataNode._children[child];
-        			var filter = systemDataNode.filterMapping;
-        			if(!filter){
-        		    	filter = "rename({";
-        				filter += this.node.name+":_system_" +this.node.name+",";
-        				filter= filter.slice(0,-1)+"})";
-        			    systemDataNode.setFilter(filter);
-        	    	}
-        	    	else{
-        	    		filter.setNamePair(this.node.name,"_system_" +this.node.name);
-        	    	}
-        			parentDataAdapter.xflowDataNode.insertBefore(systemDataNode,parentDataAdapter.xflowDataNode._children[0]);
-        			return;
-        		}
-        	}
+            // TODO: forEach, getChildByName
+            // TODO: Move up to the DataAdapter
+            for (var child in systemDataNode._children) {
+                if (systemDataNode._children[child].name == "_system_" + this.node.name) {
+                    this.xflowInputNode = systemDataNode._children[child];
+                    var filter = systemDataNode.filterMapping;
+                    if (!filter) {
+                        filter = "rename({";
+                        filter += this.node.name + ":_system_" + this.node.name + ",";
+                        filter = filter.slice(0, -1) + "})";
+                        systemDataNode.setFilter(filter);
+                    } else {
+                        filter.setNamePair(this.node.name, "_system_" + this.node.name);
+                    }
+                    parentDataAdapter.xflowDataNode.insertBefore(systemDataNode, parentDataAdapter.xflowDataNode._children[0]);
+                    return;
+                } else {
+                    // Print an info (once)
+                }
+
+            }
         	
         }
         else

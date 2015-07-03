@@ -147,12 +147,12 @@ XML3D.createClass(Scene, EventEmitter, {
     },
 
     setRendererIndependentData: function () {
-        for (child in this.systemDataAdapter.xflowDataNode._children) {
+        // TODO(jasu): forEach
+        for (var child in this.systemDataAdapter.xflowDataNode._children) {
             //Here we set rendered-independent values
-            // TODO: Check if there is an easier way to set values
+            // TODO: Check if there is an easier way to set values, add a DataNode::getChildByName (xml3d.js\src\xflow\interface\graph.js)
             if (this.systemDataAdapter.xflowDataNode._children[child].name == "_system_time") {
-                var newTime = performance.now() - this.systemDataAdapter.xflowDataNode._children[child].data.getValue()[0];
-                this.systemDataAdapter.xflowDataNode._children[child].data.setValue(new Float32Array([newTime]));
+                this.systemDataAdapter.xflowDataNode._children[child].data.setValue(new Float32Array([performance.now()]));
 
             }
         }

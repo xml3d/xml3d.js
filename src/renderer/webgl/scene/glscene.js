@@ -89,6 +89,7 @@ XML3D.extend(GLScene.prototype, {
     },
 
     update: function () {
+        this.setRendererIndependentData();
         if (this.lightsNeedUpdate) {
             this.lightsNeedUpdate = false;
             this.updateLightParameters();

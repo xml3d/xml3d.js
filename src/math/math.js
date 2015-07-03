@@ -1,7 +1,7 @@
 module.exports = function (math) {
 
 // Additional methods in glMatrix style
-    math.vec3.reciprocal = function (vec, dest) {
+    math.vec3.reciprocal = function (dest, vec) {
         if (!dest) {
             dest = vec;
         }
@@ -16,17 +16,42 @@ module.exports = function (math) {
         return vec[0] + " " + vec[1];
     };
 
+    math.vec2.fromDOMString = function(str) {
+        var s = str.split(' ');
+        if (s.length !== 2 || isNaN(+s[0]) || isNaN(+s[1])) {
+            throw "Could not parse '"+str+"' into a valid vec2 object";
+        }
+        return math.vec2.fromValues(+s[0], +s[1]);
+    };
+
     math.vec3.toDOMString = function(vec) {
         return vec[0] + " " + vec[1] + " " + vec[2];
     };
+
+    math.vec3.fromDOMString = function(str) {
+        var s = str.split(' ');
+        if (s.length !== 3 || isNaN(+s[0]) || isNaN(+s[1]) || isNaN(+s[2])) {
+            throw "Could not parse '"+str+"' into a valid vec3 object";
+        }
+        return math.vec3.fromValues(+s[0], +s[1], +s[2]);
+    };
+
 
     math.vec4.toDOMString = function(vec) {
         return vec[0] + " " + vec[1] + " " + vec[2] + " " + vec[3];
     };
 
-    math.quat.toDOMString = function(quat) {
-        return quat[0] + " " + quat[1] + " " + quat[2] + " " + quat[3];
+    math.vec4.fromDOMString = function(str) {
+        var s = str.split(' ');
+        if (s.length !== 4 || isNaN(+s[0]) || isNaN(+s[1]) || isNaN(+s[2]) || isNaN(+s[3])) {
+            throw "Could not parse '"+str+"' into a valid vec4 or quat object";
+        }
+        return math.vec4.fromValues(+s[0], +s[1], +s[2], +s[3]);
     };
+
+    math.quat.toDOMString = math.vec4.toDOMString
+
+    math.quat.fromDOMString = math.vec4.fromDOMString;
 
     math.mat3.toDOMString = function(mat) {
         return mat[0] + " " + mat[1] + " " + mat[2] + " " +
@@ -34,11 +59,41 @@ module.exports = function (math) {
             mat[6] + " " + mat[7] + " " + mat[8];
     };
 
+    math.mat3.fromDOMString = function(str) {
+        var s = str.split(' ');
+        if (s.length !== 9) {
+            throw "Could not parse '"+str+"' into a valid mat3 object";
+        }
+        var mat = math.mat3.create();
+        for (var i=0; i<9; i++) {
+            mat[i] = +s[i];
+            if (isNaN(mat[i])) {
+                throw "Could not parse '"+str+"' into a valid mat3 object";
+            }
+        }
+        return mat;
+    };
+
     math.mat4.toDOMString = function(mat) {
         return mat[0] + " " + mat[1] + " " + mat[2] + " " + mat[3] + " " +
             mat[4] + " " + mat[5] + " " + mat[6] + " " + mat[7] + " " +
             mat[8] + " " + mat[9] + " " + mat[10] + " " + mat[11] + " " +
             mat[12] + " " + mat[13] + " " + mat[14] + " " + mat[15];
+    };
+
+    math.mat4.fromDOMString = function(str) {
+        var s = str.split(' ');
+        if (s.length !== 16) {
+            throw "Could not parse '"+str+"' into a valid mat4 object";
+        }
+        var mat = math.mat4.create();
+        for (var i=0; i<16; i++) {
+            mat[i] = +s[i];
+            if (isNaN(mat[i])) {
+                throw "Could not parse '"+str+"' into a valid mat4 object";
+            }
+        }
+        return mat;
     };
 
 
@@ -196,6 +251,7 @@ module.exports = function (math) {
             dest[1] = (m[5] + m[7]) / s;
             dest[2] = 0.25 * s;
         }
+        return dest;
     };
 
     math.quat.setFromBasis = function(dest, X,Y,Z) {
@@ -212,7 +268,7 @@ module.exports = function (math) {
         m[6] = X[2] * lx;
         m[7] = Y[2] * ly;
         m[8] = Z[2] * lz;
-        XML3D.math.quat.setFromMat3(dest, m);
+        return XML3D.math.quat.setFromMat3(dest, m);
     };
 
     math.vec4.fromQuat = function(q) {

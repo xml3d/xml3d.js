@@ -80,9 +80,11 @@
 
     ray.setDirection = function(ray, direction) {
         XML3D.math.vec3.normalize(ray.subarray(3,6), direction);
-        //ray[3] = direction[1];
-        //ray[4] = direction[2];
-        //ray[5] = direction[3];
+    };
+
+    ray.str = function (a) {
+        return 'ray(origin: ' + a[0] + ', ' + a[1] + ', ' + a[2] + ', direction: ' + a[3] + ', ' +
+            a[4] + ', ' + a[5] + ')';
     };
 
     module.exports = ray;

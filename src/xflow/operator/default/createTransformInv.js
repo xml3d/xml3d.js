@@ -21,7 +21,7 @@
                     mat4.fromRotationTranslation(TMP_MATRIX, info.iterFlag[4] ? scaleOrientation.subarray(i*4) : scaleOrientation, [0, 0, 0]);
                     mat4.multiply(dest, dest, TMP_MATRIX);
                 }
-                scale && mat4.scale(dest, dest, XML3D.math.vec3.reciprocal(info.iterFlag[2] ? scale.subarray(i*3) : scale, TMP_VEC));
+                scale && mat4.scale(dest, dest, XML3D.math.vec3.reciprocal(TMP_VEC, info.iterFlag[2] ? scale.subarray(i*3) : scale));
                 if (scaleOrientation) {
                     XML3D.math.quat.copy(TMP_QUAT, info.iterFlag[4] ? scaleOrientation.subarray(i*4) : scaleOrientation);
                     mat4.fromRotationTranslation(TMP_MATRIX, XML3D.math.quat.invert(TMP_QUAT, TMP_QUAT), [0, 0, 0]);

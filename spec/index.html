@@ -552,9 +552,9 @@
                 <dd>The x coordinate relative to the top left of the browser window</dd>
                 <dt>unsigned long y</dt>
                 <dd>The y coordinate relative to the top left of the browser window</dd>
-                <dt>optional XML3DVec3 hitPoint</dt>
+                <dt>optional vec3 hitPoint</dt>
                 <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
-                <dt>optional XML3DVec3 hitNormal</dt>
+                <dt>optional vec3 hitNormal</dt>
                 <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
             </dl>
         </dd>
@@ -563,24 +563,24 @@
         <dd>Returns the first element that intersects with ray if the ray intersects with a a scene element; otherwise,
           returns null.
             <dl class='parameters'>
-                <dt>XML3DRay ray</dt>
+                <dt>ray ray</dt>
                 <dd></dd>
-                <dt>optional XML3DVec3 hitPoint</dt>
+                <dt>optional vec3 hitPoint</dt>
                 <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
-                <dt>optional XML3DVec3 hitNormal</dt>
+                <dt>optional vec3 hitNormal</dt>
                 <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
             </dl>
         </dd>
 
-        <dt>XML3DBox getLocalBoundingBox()</dt>
+        <dt>bbox getLocalBoundingBox()</dt>
         <dd>Returns the bounding box of the scene. Because the XML3D element is the root element the bounding box will be in world space by definition.</dd>
 
-        <dt>XML3DBox getWorldBoundingBox()</dt>
+        <dt>bbox getWorldBoundingBox()</dt>
         <dd>Returns the bounding box of the scene in world space.</dd>
 
-        <dt>XML3DRay generateRay()</dt>
+        <dt>ray generateRay()</dt>
         <dd>
-            Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new XML3DRay from the given x,y <b>window</b> coordinates.
+            Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new ray from the given x,y <b>window</b> coordinates.
             <dl class='parameters'>
                 <dt>unsigned long x</dt>
                 <dd>The x coordinate relative to the top left of the browser window</dd>
@@ -665,17 +665,17 @@
             <dt>attribute boolean visible</dt>
             <dd>A value of "false" will prevent this group being drawn to the canvas. Visibility is inherited from the parent group
             if this attribute is not present. </dd>
-            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dt>mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this group element in world space (includes parent transformations).
             </dd>
-            <dt>XML3DMatrix getLocalMatrix()</dt>
+            <dt>mat4 getLocalMatrix()</dt>
             <dd>Returns the local transformation matrix of this group element (does not include parent transformations).
             </dd>
-            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dt>bbox getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this group in its local transformation space. This is calculated as the smallest volume containing the
                 bounding boxes of all child elements.</dd>
 
-            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dt>bbox getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this group in world space. This is calculated as the smallest volume containing the
             bounding boxes of all child elements.</dd>
         </dl>
@@ -690,10 +690,10 @@
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
         <dl title='interface XML3DViewElement : HTMLElement' class='idl'>
-            <dt>attribute XML3DVec3 position</dt>
+            <dt>attribute vec3 position</dt>
             <dd>The position of the camera in world space</dd>
 
-            <dt>attribute XML3DRotation orientation</dt>
+            <dt>attribute vec4 orientation</dt>
             <dd>The orientation (rotation) of the camera</dd>
 
             <dt>attribute float fieldofview</dt>
@@ -704,32 +704,32 @@
             <dd>Overrides the camera's internal projection matrix. The attribute should contain a URI to a data element
                 supplying a float4x4 matrix named "projection". This can be used to, for example, create an orthographic camera. </dd>
 
-            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dt>mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this view element in world space.
             </dd>
 
-            <dt>void setUpVector(XML3DVec3 direction)</dt>
+            <dt>void setUpVector(vec3 direction)</dt>
             <dd>Change the up vector of the camera. This method changes the current orientation. The up vector will be
                 lost if the orientation is explicitly set at a later time.
             </dd>
 
-            <dt>void setDirection(XML3DVec3 direction)</dt>
+            <dt>void setDirection(vec3 direction)</dt>
             <dd>Change the orientation of the camera to look along the given direction vector.
             </dd>
 
-            <dt>XML3DVec3 getDirection()</dt>
+            <dt>vec3 getDirection()</dt>
             <dd>Returns the current direction of the camera, which is extracted from the orientation.
             </dd>
 
-            <dt>XML3DVec3 getUpVector()</dt>
+            <dt>vec3 getUpVector()</dt>
             <dd>Returns the current up vector of the camera, which is extracted from the orientation.
             </dd>
 
-            <dt>XML3DMatrix getViewMatrix()</dt>
+            <dt>mat4 getViewMatrix()</dt>
             <dd>Returns the view matrix of the camera (the matrix used to transform from world to view space).
             </dd>
 
-            <dt>void lookAt(XML3DVec3 point)</dt>
+            <dt>void lookAt(vec3 point)</dt>
             <dd>Change the orientation of the camera to look at the given point.
             </dd>
         </dl>
@@ -852,16 +852,16 @@
             <dt>Array getOutputNames()</dt>
             <dd>Returns the names of the data fields available to this mesh node. </dd>
 
-            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dt>mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this mesh element in world space (includes parent transformations).
             </dd>
-            <dt>XML3DMatrix getLocalMatrix()</dt>
+            <dt>mat4 getLocalMatrix()</dt>
             <dd>Returns the local transformation matrix of this mesh element (does not include parent transformations).
             </dd>
-            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dt>bbox getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this mesh in object space, without any transformations applied. </dd>
 
-            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dt>bbox getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this mesh in world space.</dd>
         </dl>
     </section>
@@ -923,14 +923,14 @@
             <dt>attribute DOMString transform</dt>
             <dd>URI reference to a <a href="#the-transform-element"><code>transform</code></a> element.</dd>
 
-            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dt>mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this model in world space, including parent transformations.
             </dd>
 
-            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dt>bbox getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this model without any parent transformations applied.</dd>
 
-            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dt>bbox getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this model in world space, including parent transformations.</dd>
         </dl>
     </section>
@@ -1018,7 +1018,7 @@
     <section>
       <h4>The <code>transform</code> element</h4>
         <dl title='interface XML3DTransformElement : HTMLElement' class='idl'>
-            <dt>attribute XML3DRotation scaleorientation</dt>
+            <dt>attribute vec4 scaleorientation</dt>
             <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>.</dd>
         </dl>
     </section>

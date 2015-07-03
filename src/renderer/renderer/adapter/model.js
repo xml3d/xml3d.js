@@ -9,6 +9,7 @@ var ModelRenderAdapter = function (factory, node) {
     this.asset = null;
     this.postTransformXflowRequests = [];
     this.postTransformRenderGroups = [];
+    this.style = window.getComputedStyle(node);
     this.createRenderNode();
     this._bindedRequestCallback = this.onXflowRequestChange.bind(this);
     this.transformFetcher.update();
@@ -28,10 +29,12 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         var parentNode = parent.getRenderNode && parent.getRenderNode();
 
         this.renderNode = this.getScene().createRenderGroup({
-            parent: parentNode, visible: this.node.visible, name: this.node.id
+            parent: parentNode, name: this.node.id
         });
         this.renderNode.setLocalMatrix(c_IDENTITY);
         this.createModelRenderNodes();
+        this.updateVisibility();
+
     },
 
     clearModelRenderNodes: function () {
@@ -89,6 +92,28 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
     attributeChangedCallback: function (name, oldValue, newValue) {
         TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
     },
+
+    styleChangedCallback: function() {
+        TransformableAdapter.prototype.styleChangedCallback.call();
+        this.updateVisibility();
+    },
+
+    updateVisibility: function() {
+        var none = this.style.getPropertyValue("display").trim() == "none";
+        var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
+        var visible = !(none || hidden);
+        var propagate = function(node) {
+            if (node.setVisible) {
+                 node.setVisible(visible)
+            }
+            if (node.children) {
+                node.children.forEach(propagate);
+            }
+        };
+        propagate(this.renderNode);
+        // TODO(ksons): this.renderNode.setPickable(!none);
+    },
+
 
     /**
      * @param evt

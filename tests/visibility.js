@@ -134,3 +134,57 @@ test("Group visibility", 10, function() {
     addInvisibleMeshToVisibleGroup.fin(QUnit.start).done();
 
 });
+
+test("Model visibility", 7, function() {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/visibility-model.html"+window.location.search);
+
+    var changeFunction = function (f) {
+        return function (scene) {
+            scene.ownerDocument.defaultView[f]();
+            return scene;
+        }
+    };
+    var checkInit = frameLoaded.then(function(doc) { return doc.querySelector("xml3d") }).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s),250,150);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Initially transparent");
+        return s;
+    });
+
+    var checkInvisibleModel = checkInit.then(changeFunction("addInvisibleModel")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 250, 150);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "display:none during insertion: Invisible model not rendered.");
+        return s;
+    });
+
+     var makeVisibleModel = checkInvisibleModel.then(changeFunction("makeVisible")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 250, 150);
+        QUnit.closeArray(pick, [255, 127, 127, 255], PIXEL_EPSILON, "display:inherit: Visible model is rendered.");
+        return s;
+    });
+
+    var makeGroupInvisible = makeVisibleModel.then(changeFunction("makeGroupInvisible")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 250, 150);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "display:none for group: Invisible group, model not rendered.");
+        return s;
+    });
+
+    var makeModelInvisible = makeGroupInvisible.then(changeFunction("makeModelInvisible")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 250, 150);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "display:none for model: Invisible model not rendered.");
+        return s;
+    });
+
+    var makeVisibleModel2 = makeModelInvisible.then(changeFunction("makeVisible")).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 250, 150);
+        QUnit.closeArray(pick, [255, 127, 127, 255], PIXEL_EPSILON, "display:inherit: Visible model is rendered again.");
+        return s;
+    });
+
+
+
+
+    makeVisibleModel2.fin(QUnit.start).done();
+
+});

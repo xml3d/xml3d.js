@@ -82,33 +82,7 @@ test("Modify material assignment", 6, function() {
     stop();
 });
 
-test("Modify asset src", 4, function() {
-    var xTest = this.doc.getElementById("xml3dTest"),
-        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
-    var self = this;
 
-    var testStep = 0;
-    function onFrameDrawn(){
-        if(testStep == 0){
-            if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
-                return;
-            testStep++;
-            self.doc.getElementById("mm2").src = "#asset2Alt";
-        }
-        else if(testStep == 1){
-            if( XML3DUnit.getPixelValue(glTest, 69, 121)[3] != 0)
-                return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 121), [0,0,0,0], PIXEL_EPSILON,
-                "Old Rectangle removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 150), [255,127,255,255], PIXEL_EPSILON,
-                "New Rectangle added" );
-            start();
-        }
-    }
-    xTest.addEventListener("framedrawn", onFrameDrawn);
-    hTest.draw();
-    stop();
-});
 
 test("Modify asset pick", 6, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
@@ -426,3 +400,27 @@ test("Nested Assets" , function() {
 
 
 
+module("Asset and Model", {
+
+});
+
+test("Modify asset src", 3, function () {
+    stop();
+
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-basic.html" + window.location.search);
+
+    var test = frameLoaded.then(function (doc) {
+        var scene = doc.querySelector("#xml3dTest");
+        doc.getElementById("mm2").src = "#asset2Alt";
+        return scene;
+    }).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 69, 121);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Old Rectangle removed");
+        pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 69, 150);
+        QUnit.closeArray(pick, [255, 127, 255, 255], PIXEL_EPSILON, "New Rectangle added");
+        return s;
+    });
+
+    test.fin(QUnit.start).done();
+
+});

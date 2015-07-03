@@ -694,7 +694,7 @@
             <dd>The position of the camera in world space</dd>
 
             <dt>attribute vec4 orientation</dt>
-            <dd>The orientation (rotation) of the camera</dd>
+            <dd>The orientation (rotation) of the camera in axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
 
             <dt>attribute float fieldofview</dt>
             <dd>The <b>vertical</b> field of view of this camera, expressed in radians.
@@ -1019,7 +1019,7 @@
       <h4>The <code>transform</code> element</h4>
         <dl title='interface XML3DTransformElement : HTMLElement' class='idl'>
             <dt>attribute vec4 scaleorientation</dt>
-            <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>.</dd>
+            <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>. In axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
         </dl>
     </section>
   </section>
@@ -1504,7 +1504,7 @@
 
   <section>
     <h3>bbox</h3>
-    <p>The <code>bbox</code> object is a glMatrix style <code>Float32Array</code> of length 6 holding the minimum and maximum points of a bounding box.</p>
+    <p>The <code>bbox</code> object is a glMatrix style <code>Float32Array</code> of length 6 holding the minimum and maximum points of a bounding box. </p>
     <dl title='interface bbox' class='idl'>
       <dt>static bbox create()</dt>
       <dd>Creates a new bbox with <code>Number.MAX_VALUE</code> as its minimum and <code>Number.MIN_VALUE</code> as maximum.</dd>
@@ -1538,9 +1538,20 @@
       <dd>Transforms the bbox with the given transformation matrix and writes the resulting bbox into <code>dest</code>. The resulting bbox is <b>not</b> axis-aligned./dd>
       <dt>static float longestSide(bbox box)</dt>
       <dd>Returns the length of the longest side of the given bbox.</dd>
-      <dt>static boolean intersects(bbox box, ray r, Object opt)</dt>
-      <dd>Returns true if the ray intersects the bbox. If <code>opt.dist</code> exists then the distance to the intersection point will also be written into this field. If the ray does
-       not intersect then this field will hold <code>Number.MAX_VALUE</code>.</dd>
+      <dt>static boolean intersects()</dt>
+      <dd>
+        <dl class='parameters'>
+          <dt>bbox box</dt>
+          <dd></dd>
+          <dt>ray r</dt>
+          <dd></dd>
+          <dt>optional Object opt</dt>
+          <dd>If <code>opt.dist</code> exists then the distance to the intersection point will be written into this field. If the ray does
+            not intersect then this field will hold <code>Number.MAX_VALUE</code></dd>
+        </dl>
+
+        Returns true if the ray intersects the bbox.
+      </dd>
       <dt>static DOMString str(bbox box)</dt>
       <dd>A human readable string representation of the bbox.</dd>
     </dl>
@@ -1569,7 +1580,7 @@
       <dd>Set the origin of the ray.</dd>
       <dt>static ray setDirection(ray dest, vec3 dir)</dt>
       <dd>Set the direction of the ray. Note: the direction is normalized before setting.</dd>
-      <dt>static DOMString str(ray s)</dt>
+      <dt>static DOMString str(ray ray)</dt>
       <dd>A human readable string representation of the ray.</dd>
     </dl>
   </section>

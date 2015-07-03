@@ -48,75 +48,6 @@ function getContextForXml3DElement(x) {
     return renderer ? renderer.context.gl : null;
 }
 
-
-
-test("Background and invisible mesh", 4, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-
-    actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,0,0], "Transparent at 40,40");
-    actual = win.getPixelValue(gl, 0, 0);
-    deepEqual(actual, [0,0,0,0], "Transparent at 0,0");
-});
-
-test("Change visibility via script", 9, function() {
-    var x = this.doc.getElementById("xml3DElem"),
-        actual,
-        win = this.doc.defaultView,
-        gl = getContextForXml3DElement(x),
-        testFunc = null, renderer = getRenderer(x);
-
-    x.addEventListener("framedrawn", function(n) {
-            ok("Redraw was triggered");
-            ok(!renderer.needsRedraw(), "Redraw not required");
-            if(testFunc)
-                testFunc(n);
-            start();
-    });
-    testFunc = function(n) {
-        equal(n.detail.count.objects, 1, "1 Object drawn");
-        equal(n.detail.count.primitives, 2, "2 Triangles drawn");
-        actual = win.getPixelValue(gl, 40, 40);
-        deepEqual(actual, [255,0,0,255], "Red at 40,40");
-        actual = win.getPixelValue(gl, 0, 0);
-        deepEqual(actual, [0,0,0,0], "Transparent at 0,0");
-    };
-    stop();
-    this.doc.getElementById("myGroup").visible = true;
-    this.win.XML3D.flushDOMChanges();
-    ok(renderer.needsRedraw(), "Redraw required");
-});
-
-test("Add children in invisible group", 8, function() {
-    var x = this.doc.getElementById("xml3DElem"),
-        actual,
-        win = this.doc.defaultView,
-        gl = getContextForXml3DElement(x),
-        testFunc = null, h = getHandler(x);
-
-    x.addEventListener("framedrawn", function(n) {
-        ok("Redraw was triggered");
-        ok(!h.renderer.needsDraw, "Redraw not required");
-        if(testFunc)
-            testFunc(n);
-        start();
-    });
-    testFunc = function(n) {
-        equal(n.detail.count.objects, 0, "0 Objects drawn");
-        equal(n.detail.count.objects, 0, "0 Triangles drawn");
-        actual = win.getPixelValue(gl, 40, 40);
-        deepEqual(actual, [0,0,0,0], "Transparent at 40,40");
-    };
-    stop();
-    var mesh = this.doc.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
-    mesh.setAttribute("src", "#meshdata");
-
-    this.doc.getElementById("myEmptyGroup").appendChild(mesh);
-    this.win.XML3D.flushDOMChanges();
-    ok(h.renderer.needsDraw, "Redraw required");
-});
-
 test("Change active view via script", 8, function() {
     // 1: Found frame
     // 2: Scene loaded
@@ -154,7 +85,7 @@ test("Test mesh.getLocalBoundingBox", 3, function() {
         start();
     });
     stop();
-    group.visible = true;
+    group.style.display = 'inherit';
 
 });
 
@@ -172,7 +103,7 @@ test("Test mesh.getWorldBoundingBox", 3, function() {
         start();
     });
     stop();
-    group.visible = true;
+    group.style.display = 'inherit';
 
 });
 
@@ -184,7 +115,7 @@ test("Change material via script", 6, function() {
     var h = getHandler(x);
     var group = this.doc.getElementById("myGroup");
 
-    group.visible = true;
+    group.style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,0,0,255], "Red at 40,40 [visible true]");
@@ -214,23 +145,23 @@ test("Change visible/material for nested groups", 8, function() {
 
     var outerGroup = this.doc.getElementById("group1");
     var innerGroup = this.doc.getElementById("group2");
-    innerGroup.setAttribute("visible", "true");
+    innerGroup.setAttribute("style", "display: inherit;");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [parent group's visible overrides child]");
 
-    innerGroup.setAttribute("visible", "false");
-    outerGroup.setAttribute("visible", "true");
+    innerGroup.setAttribute("style", "display: none;");
+    outerGroup.setAttribute("style", "display: inherit;");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,0], "Transparent at 40,40 [child group's visible overrides parent]");
 
-    innerGroup.setAttribute("visible", "true");
+    innerGroup.setAttribute("style", "display: inherit;");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,255,255], "Blue at 40,40 [both visible, child material overrides parent]");
 
-    innerGroup.setAttribute("material", "");
+    /*innerGroup.setAttribute("material", "");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [255,255,0,255], "Yellow at 40,40 [remove child material, #flatYellow active]");
@@ -243,7 +174,7 @@ test("Change visible/material for nested groups", 8, function() {
     outerGroup.setAttribute("material", "#flatblack");
     h.draw();
     actual = win.getPixelValue(gl, 40, 40);
-    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child material overrides new parent material]");
+    deepEqual(actual, [0,0,255,255], "Blue at 40,40 [child material overrides new parent material]");*/
 });
 
 test("Simple add/remove mesh", 12, function() {
@@ -388,7 +319,7 @@ test("Nested transforms", 8, function() {
     var group3 = this.doc.getElementById("group3");
     var group4 = this.doc.getElementById("group4");
 
-    group3.visible = true;
+    group3.style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,0,255], "Red at 90,90 [nested y-axis rotations]");
@@ -436,14 +367,14 @@ test("Camera with group transforms", 7, function() {
     var camtest = this.doc.getElementById("viewTest");
 
     //Simple test of camera orientation to check that view matrix is built correctly
-    camtest.visible = true;
+    camtest.style.display = 'inherit';
     x.setAttribute("activeView", "#viewOrientationTest");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,0,255], "Simple camera orientation check, Red");
 
-    camtest.visible = false;
-    group5.visible = true;
+    camtest.style.display = 'none';
+    group5.style.display = 'inherit';
     x.setAttribute("activeView", "#transformTestView");
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
@@ -476,7 +407,7 @@ test("Camera setDirection/upVector", 5, function() {
     var view = this.doc.getElementById("viewOrientationTest");
     var camtest = this.doc.getElementById("viewTest");
 
-    camtest.visible = true;
+    camtest.style.display = 'inherit';
     view.setAttribute("orientation", "0 0 1 0");
     x.setAttribute("activeView", "#viewOrientationTest");
     h.draw();
@@ -518,7 +449,7 @@ test("Add a mesh dynamically", 4, function() {
             start();
     });
     stop();
-    g.visible = true;
+    g.style.visible = 'inherit';
 });
 
 test("Add invisible groups and meshes", 7, function() {

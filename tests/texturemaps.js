@@ -21,8 +21,8 @@ test("Phong diffuse texture", 3, function() {
     var xTest = this.doc.getElementById("xml3dTest"), hTest = getHandler(xTest);
     var xRef = this.doc.getElementById("xml3dReference"), hRef = getHandler(xRef);
 
-    this.doc.getElementById("diffuseTexture").visible = true;
-    this.doc.getElementById("diffuseColor").visible = true;
+    this.doc.getElementById("diffuseTexture").style.display = 'inherit';
+    this.doc.getElementById("diffuseColor").style.display = 'inherit';
     hTest.draw();
     hRef.draw();
 
@@ -45,8 +45,8 @@ test("Phong specular texture", 3, function() {
     var xTest = this.doc.getElementById("xml3dTest"), hTest = getHandler(xTest);
     var xRef = this.doc.getElementById("xml3dReference"), hRef = getHandler(xRef);
 
-    this.doc.getElementById("specularTexture").visible = true;
-    this.doc.getElementById("specularColor").visible = true;
+    this.doc.getElementById("specularTexture").style.display = 'inherit';
+    this.doc.getElementById("specularColor").style.display = 'inherit';
     hTest.draw();
     hRef.draw();
 
@@ -68,8 +68,8 @@ test("Phong emissive texture", 3, function() {
     var xTest = this.doc.getElementById("xml3dTest"), hTest = getHandler(xTest);
     var xRef = this.doc.getElementById("xml3dReference"), hRef = getHandler(xRef);
 
-    this.doc.getElementById("emissiveTexture").visible = true;
-    this.doc.getElementById("emissiveColor").visible = true;
+    this.doc.getElementById("emissiveTexture").style.display = 'inherit';
+    this.doc.getElementById("emissiveColor").style.display = 'inherit';
     hTest.draw();
     hRef.draw();
 
@@ -92,8 +92,8 @@ test("Diffuse emissive texture", 3, function() {
     var xTest = this.doc.getElementById("xml3dTest"), hTest = getHandler(xTest);
     var xRef = this.doc.getElementById("xml3dReference"), hRef = getHandler(xRef);
 
-    this.doc.getElementById("diffuseEmissiveTexture").visible = true;
-    this.doc.getElementById("diffuseEmissiveColor").visible = true;
+    this.doc.getElementById("diffuseEmissiveTexture").style.display = 'inherit';
+    this.doc.getElementById("diffuseEmissiveColor").style.display = 'inherit';
     hTest.draw();
     hRef.draw();
 

@@ -83,7 +83,7 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
      */
     getLocalBoundingBox: function () {
         var bbox = new XML3D.math.bbox.create();
-        if (this.renderNode) {
+        if (this.renderNode && this.renderNode.visible) {
             this.renderNode.getObjectSpaceBoundingBox(bbox);
         }
         return bbox;
@@ -94,7 +94,7 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
      */
     getWorldBoundingBox: function () {
         var bbox = new XML3D.math.bbox.create();
-        if (this.renderNode) {
+        if (this.renderNode && this.renderNode.visible) {
             this.renderNode.getWorldSpaceBoundingBox(bbox);
         }
         return bbox;

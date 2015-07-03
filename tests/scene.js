@@ -48,7 +48,7 @@ test("Light attributes", 9, function () {
     equal(lightModels.directional.lightModels.length, 1, "Light without type is in directional container (default)");
 });
 
-test("Light callbacks", 8, function () {
+test("Light callbacks", 6, function () {
 
     var dataNode = new DataNode(false);
 
@@ -80,9 +80,7 @@ test("Light callbacks", 8, function () {
         start();
     });
 
-    stop(5);
-    group.setLocalVisible(false);
-    group.setLocalVisible(true);
+    stop(3);
     light.setVisible(false);
     light.setVisible(true);
     group.setLocalMatrix(XML3D.math.mat4.create());
@@ -155,11 +153,11 @@ test("Bounding Boxes", 7, function () {
     QUnit.closeArray(actualBB, new Float32Array([3, 3, -1, 5, 5, 1]), EPSILON, "New group's transform was applied correctly");
     group.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeArray(actualBB, new Float32Array([2, -2, -2, 6, 5, 2]), EPSILON, "Original group's BB was expanded correctly");
-    obj2.setLocalVisible(false);
+    obj2.setVisible(false);
     group.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 2, 2]), EPSILON, "Making new object invisible reverts original group's BB");
 
-    obj2.setLocalVisible(true);
+    obj2.setVisible(true);
     group.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 5, 2]), EPSILON, "Object is visible again");
     group.setLocalMatrix(XML3D.math.mat4.create());

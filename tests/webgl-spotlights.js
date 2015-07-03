@@ -70,15 +70,15 @@ test("All spot lights visibility off", 4, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("mainlight").visible = false;
+    this.doc.getElementById("mainlight").style.display = 'none';
 
-    this.doc.getElementById("diffuseShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,255,0,255], "Green emissive diffuse object");
 
-    this.doc.getElementById("diffuseShadedGroup").visible = false;
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'none';
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,0,255], "Black phong object");
@@ -90,10 +90,10 @@ test("Light spot geometry test", 6, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("mainlight").visible = true;
+    this.doc.getElementById("mainlight").style.display = 'inherit';
 
-    this.doc.getElementById("diffuseShadedGroup").visible = false;
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'none';
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 100, 100);
     deepEqual(actual, [255,255,255,255], "White phong light spot (at 100, 100)");
@@ -101,8 +101,8 @@ test("Light spot geometry test", 6, function() {
     actual = win.getPixelValue(gl, 40, 40);
     deepEqual(actual, [0,0,0,255], "Black phong background object (at 40, 40)");
 
-    this.doc.getElementById("diffuseShadedGroup").visible = true;
-    this.doc.getElementById("phongShadedGroup").visible = false;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'inherit';
+    this.doc.getElementById("phongShadedGroup").style.display = 'none';
     h.draw();
     actual = win.getPixelValue(gl, 100, 100);
     deepEqual(actual, [255,255,255,255], "White diffuse light spot (at 100, 100)");

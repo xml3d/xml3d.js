@@ -19,6 +19,7 @@ test("Static Transforms", 3, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
+    stop();
 
     var testStep = 0;
     function onFrameDrawn(){
@@ -38,11 +39,9 @@ test("Static Transforms", 3, function() {
     }
 
     xTest.addEventListener("framedrawn", onFrameDrawn);
+    this.doc.getElementById("rootGroup").style.display = 'inline';
 
-    this.doc.getElementById("rootGroup").visible = true;
-    hTest.draw();
 
-    stop();
 });
 
 test("Change transform", 5, function() {
@@ -50,7 +49,7 @@ test("Change transform", 5, function() {
         glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
     var self = this;
     var group = this.doc.getElementById("rootGroup");
-    group.visible = true;
+    group.style.display = 'inherit';
 
     hTest.draw();
     var actual = XML3DUnit.getPixelValue(glTest, 200, 100);

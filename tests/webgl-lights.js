@@ -24,16 +24,16 @@ test("All lights visibility off", 4, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("dirlight").visible = false;
-    this.doc.getElementById("pointlight").visible = false;
+    this.doc.getElementById("dirlight").style.display = 'none';
+    this.doc.getElementById("pointlight").style.display = 'none';
 
-    this.doc.getElementById("diffuseShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,255,0,255], "Green emissive diffuse object");
 
-    this.doc.getElementById("diffuseShadedGroup").visible = false;
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'none';
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,0,255], "Black phong object");
@@ -45,16 +45,16 @@ test("A red point light", 4, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("dirlight").visible = false;
-    this.doc.getElementById("pointlight").visible = true;
+    this.doc.getElementById("dirlight").style.display = 'none';
+    this.doc.getElementById("pointlight").style.display = 'inherit';
 
-    this.doc.getElementById("diffuseShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,255,0,255], "Diffuse object with green emissive = yellow");
 
-    this.doc.getElementById("diffuseShadedGroup").visible = false;
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'none';
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,0,255], "Phong object is lit red");
@@ -66,16 +66,16 @@ test("Blue directional light", 4, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("dirlight").visible = true;
-    this.doc.getElementById("pointlight").visible = false;
+    this.doc.getElementById("dirlight").style.display = 'inherit';
+    this.doc.getElementById("pointlight").style.display = 'none';
 
-    this.doc.getElementById("diffuseShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,255,255,255], "Diffuse object with green emissive");
 
-    this.doc.getElementById("diffuseShadedGroup").visible = false;
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'none';
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,255,255], "Phong object is lit blue");
@@ -87,16 +87,16 @@ test("Red point light, blue dir light", 4, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("dirlight").visible = true;
-    this.doc.getElementById("pointlight").visible = true;
+    this.doc.getElementById("dirlight").style.display = 'inherit';
+    this.doc.getElementById("pointlight").style.display = 'inherit';
 
-    this.doc.getElementById("diffuseShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,255,255,255], "Diffuse object with green emissive");
 
-    this.doc.getElementById("diffuseShadedGroup").visible = false;
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("diffuseShadedGroup").style.display = 'none';
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,255,255], "Phong object is lit purple");
@@ -108,10 +108,10 @@ test("Change directional light direction", 5, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("dirlight").visible = true;
-    this.doc.getElementById("pointlight").visible = false;
+    this.doc.getElementById("dirlight").style.display = 'inherit';
+    this.doc.getElementById("pointlight").style.display = 'none';
 
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,255,255], "Initial light direction");
@@ -134,10 +134,10 @@ test("Change lightshader intensity", 4, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("dirlight").visible = true;
-    this.doc.getElementById("pointlight").visible = false;
+    this.doc.getElementById("dirlight").style.display = 'inherit';
+    this.doc.getElementById("pointlight").style.display = 'none';
 
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,0,255,255], "Initial light intensity");
@@ -176,9 +176,9 @@ test("Adding lights", 6, function() {
 
     equal(lightModels.spot.lightModels.length, 1, "Spot light was added to the lights array");
 
-    this.doc.getElementById("dirlight").visible = false;
-    this.doc.getElementById("pointlight").visible = false;
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("dirlight").style.display = 'none';
+    this.doc.getElementById("pointlight").style.display = 'none';
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [0,255,255,255], "Phong object is lit by the new lights");
@@ -193,10 +193,10 @@ test("Removing lights", 6, function() {
     var lightModels = h.renderer.scene.lights._models;
     ok(lightModels.point.lightModels.length == 1 && lightModels.directional.lightModels.length == 1, "Renderer sees 2 lights");
 
-    this.doc.getElementById("dirlight").visible = true;
-    this.doc.getElementById("pointlight").visible = true;
+    this.doc.getElementById("dirlight").style.display = 'inherit';
+    this.doc.getElementById("pointlight").style.display = 'inherit';
 
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,255,255], "Phong object is lit by both lights");
@@ -219,10 +219,10 @@ test("Change light shader", 5, function() {
     win = this.doc.defaultView,
     gl = getContextForXml3DElement(x),
     h = getHandler(x);
-    this.doc.getElementById("pointlight").visible = true;
-    this.doc.getElementById("dirlight").visible = false;
+    this.doc.getElementById("pointlight").style.display = 'inherit';
+    this.doc.getElementById("dirlight").style.display = 'none';
 
-    this.doc.getElementById("phongShadedGroup").visible = true;
+    this.doc.getElementById("phongShadedGroup").style.display = 'inherit';
     h.draw();
     actual = win.getPixelValue(gl, 90, 90);
     deepEqual(actual, [255,0,0,255], "Phong object is lit by red point light shader");

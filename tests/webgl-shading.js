@@ -144,7 +144,7 @@ module("WebGL materials and Textures", {
 
 test("Simple texture", 3, function() {
     var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView, gl = getContextForXml3DElement(x), testFunc = null, h = getHandler(x);
-    this.doc.getElementById("myGroup").visible = true;
+    this.doc.getElementById("myGroup").style.display = 'inherit';
 
     x.addEventListener("framedrawn", function(n) {
         if (testFunc)
@@ -169,7 +169,7 @@ test("Simple texture", 3, function() {
 
 test("Changing texture", 3, function() {
     var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView, gl = getContextForXml3DElement(x), h = getHandler(x);
-    this.doc.getElementById("myGroup").visible = true;
+    this.doc.getElementById("myGroup").style.display = 'inherit';
     h.draw(); // Draw now and make a redraw unnecessary
     var run = false;
     x.addEventListener("framedrawn", function(n) {
@@ -198,7 +198,7 @@ test("NPOT texture resizing", 4, function() {
         start();
     });
 
-    this.doc.getElementById("npotTexGroup").visible = true;
+    this.doc.getElementById("npotTexGroup").style.display = 'inherit';
     stop();
 });
 
@@ -214,7 +214,7 @@ test("Textured diffuse material", 3, function() {
         start();
     });
     stop();
-    group.visible = true;
+    group.style.display = 'inherit';
 });
 
 // Scene: webgl-rendering02.html
@@ -236,7 +236,7 @@ test("Diffuse material with vertex colors", 3, function() {
         start();
     });
     stop();
-    cgroup.visible = true;
+    cgroup.style.display = 'inherit';
 });
 
 test("Simple custom material", 4, function() {

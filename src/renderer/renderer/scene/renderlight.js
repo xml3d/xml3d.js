@@ -68,7 +68,7 @@ XML3D.extend(RenderLight.prototype, {
         XML3D.debug.logError("RenderLight::setLocalMatrix not implemented");
     },
 
-    setLocalVisible: function(visible) {
+    setVisible: function(visible) {
         this.visible = visible;
         this.lightValueChanged(); // TODO: Request rendering
     },

@@ -190,33 +190,33 @@ test("Boolean interface tests", function() {
         // The semantic is: If the disabled attribute is set, it's disabled otherwise not
         // This makes only sense for booleans, where the default is false.
         // Thus we use the "standard" behavior as for example an integer value
-        e = document.createElementNS(XML3D.xml3dNS, "group");
+        e = document.createElement("float");
 
         // Set via interface
-        equal(e.visible, true, "group.visible is 'true' initially.");
-        e.visible = false;
-        equal(e.visible, false, "group.visible set to false;");
-        e.visible = true;
-        equal(e.visible, true, "group.visible set to true;");
-        e.visible = 0;
-        equal(e.visible, false, "group.visible set to 0;");
-        e.visible = "false"; // Non-empty string evaulates to 'true'
-        equal(e.visible, true, "group.visible set to non-empty string.");
+        equal(e.param, false, "float.param is 'true' initially.");
+        e.param = true;
+        equal(e.param, true, "float.param set to false;");
+        e.param = false;
+        equal(e.param, false, "float.param set to true;");
+        e.param = 0;
+        equal(e.param, false, "float.param set to 0;");
+        e.param = "false"; // Non-empty string evaulates to 'true'
+        equal(e.param, true, "float.param set to non-empty string.");
 
-        equal(e.getAttribute("visible"), "true", "Attribute evaluates to 'true'.");
+        equal(e.getAttribute("param"), "true", "Attribute evaluates to 'true'.");
 
         // Set via attribute
-        e.visible = false;
-        e.setAttribute("visible", "true");
-        equal(e.visible, true, "Value set via setAttribute to 'true'.");
+        e.param = false;
+        e.setAttribute("param", "true");
+        equal(e.param, true, "Value set via setAttribute to 'true'.");
 
-        e.visible = true;
-        equal(e.getAttribute("visible"), "true", "getAttribute = 'true'.");
-        e.visible = false;
-        equal(e.getAttribute("visible"), "false", "getAttribute = 'false'.");
+        e.param = true;
+        equal(e.getAttribute("param"), "true", "getAttribute = 'true'.");
+        e.param = false;
+        equal(e.getAttribute("param"), "false", "getAttribute = 'false'.");
 
-        e.setAttribute("visible", "asdf");
-        equal(e.visible, true, "Invalid value set via setAttribute.");
+        e.setAttribute("param", "asdf");
+        equal(e.param, true, "Invalid value set via setAttribute.");
     });
 
 test("Vec3 interface tests", function() {
@@ -338,7 +338,6 @@ test("Interface initialization", function() {
     QUnit.closeArray(t.rotation, [1,0,0,1.5708], EPSILON, "XML3DRotation (transform::rotation) initialized.");
     QUnit.close(v.fieldOfView, 0.5, EPSILON, "Float (view::rotation) initialized.");
     equal(x.width, 1000, "Int (xml3d::width) initialized.");
-    equal(g.visible, false, "Boolean (group::visible) initialized.");
     equal(m.type, "lines", "Enumeration (mesh::type) initialized.");
     equal(g.onclick, null, "Event attribute (group::onclick) non-initialized.");
     equal(typeof m.onclick, "function", "Event attribute (mesh::onclick) initialized.");

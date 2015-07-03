@@ -86,8 +86,8 @@ test("Uniform override with default material", 4, function() {
     var win = this.doc.defaultView;
     var gl = getContextForXml3DElement(xml3dElement);
     var handler = getHandler(xml3dElement);
-    this.doc.getElementById("test1").visible = false;
-    this.doc.getElementById("test2").visible = true;
+    this.doc.getElementById("test1").style.display = 'none';
+    this.doc.getElementById("test2").style.display = 'inherit';
     var testStep = 0;
 
     var testFunc = function(n) {

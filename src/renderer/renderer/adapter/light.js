@@ -24,8 +24,7 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
         var parentNode = parentAdapter.getRenderNode && parentAdapter.getRenderNode();
         this.renderNode = this.factory.getScene().createRenderLight({
             configuration: this.createLightConfiguration(),
-            parent: parentNode,
-            visible: !this.node.visible ? false : undefined
+            parent: parentNode
         });
     },
 
@@ -50,7 +49,7 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
 
     updateVisibility: function () {
         var visible = this.style.getPropertyValue("display").trim() != "none";
-        this.renderNode.setLocalVisible(visible);
+        this.renderNode.setVisible(visible);
         this.factory.renderer.requestRedraw("Light visibility changed.");
     },
 

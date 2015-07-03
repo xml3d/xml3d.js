@@ -71,11 +71,8 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
 
         return function () {
             var bbox = XML3D.math.bbox.create();
-            if (!this.renderNode.visible) {
-                return bbox;
-            }
             Array.prototype.forEach.call(this.node.childNodes, function (c) {
-                if (c.getLocalBoundingBox && c.visible) {
+                if (c.getLocalBoundingBox)
                     childBB = c.getLocalBoundingBox();
                     XML3D.math.bbox.extendWithBox(bbox, childBB);
 

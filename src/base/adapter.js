@@ -136,7 +136,7 @@ NodeAdapter.prototype.notifyChanged = function(e) {
 NodeAdapter.prototype.getAdapterHandle = function(uri, aspectType, canvasId) {
     canvasId = canvasId === undefined ? this.factory.canvasId : canvasId;
     return Resource.getAdapterHandle(this.node.ownerDocument._documentURL || this.node.ownerDocument.URL,
-        uri, aspectType || this.factory.aspect, canvasId);
+        uri, aspectType || this.factory.aspect, canvasId, this.node.nodeName);
 };
 /**
  * notifies all adapter that refer to this adapter through AdapterHandles.

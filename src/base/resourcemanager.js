@@ -176,8 +176,9 @@ function isBinaryExtension(url) {
  * Load a document via XMLHttpRequest
  * @private
  * @param {string} url URL of the document
+ * @param {string} acceptType The content type that should be requested for this document
  */
-function loadDocument(url) {
+function loadDocument(url, acceptType) {
     var xmlHttp = null;
     try {
         xmlHttp = new XMLHttpRequest();
@@ -190,6 +191,8 @@ function loadDocument(url) {
         xmlHttp.open('GET', url, true);
         if (isBinaryExtension(url))
             xmlHttp.responseType = "arraybuffer";
+
+        xmlHttp.setRequestHeader("Accept", acceptType);
 
         xmlHttp.onreadystatechange = function() {
             if (xmlHttp._aborted) // This check is possibly not needed
@@ -282,7 +285,7 @@ function setDocumentData(httpRequest, url, mimetype) {
     var response = null;
     if (httpRequest.responseType == "arraybuffer") {
         response = httpRequest.response;
-    } else if (cleanedMimetype == "application/json") {
+    } else if (cleanedMimetype.match(/json/)) {
         response = JSON.parse(httpRequest.responseText);
     } else if (cleanedMimetype.match(/xml/)) {
         response = httpRequest.responseXML;
@@ -293,7 +296,7 @@ function setDocumentData(httpRequest, url, mimetype) {
                 "': XML Syntax error");
             return;
         }
-    } else if (cleanedMimetype == "application/octet-stream" || mimetype == "text/plain; charset=x-user-defined") {
+    } else if (cleanedMimetype == "application/octet-stream" || mimetype.match(/text\/plain/)) {
         XML3D.debug.logError("Possibly wrong loading of resource " + url + ". Mimetype is " + mimetype + " but response is not an ArrayBuffer");
         response = httpRequest.response;
     } else if (cleanedMimetype == "application/javascript" || mimetype == "text/javascript") {
@@ -481,11 +484,12 @@ Resource.getAbsoluteURI = function(baseURI, uri){
  *
  * @param {String} baseURI - the base URI from which to look up the reference
  * @param {URI} uri - The URI used to find the referred AdapterHandle. Can be relative
+ * @param {string} nodeName The tag name of the element referencing this adapter handle
  * @param {Object} adapterType The type of adapter required (e.g. XML3D.data or XML3D.webgl)
  * @param {number=} canvasId Id of GLCanvasHandler handler this adapter depends on, 0 if not depending on any GLCanvasHandler
  * @returns {?AdapterHandle} The requested AdapterHandler. Note: might be null
  */
-Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId) {
+Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId, nodeName) {
     canvasId = canvasId || 0;
     uri = Resource.getAbsoluteURI(baseURI, uri);
 
@@ -523,7 +527,8 @@ Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId) {
             updateExternalHandles(docURI, uri.fragment);
         } else {
             if (!docData) {
-                loadDocument(docURI);
+                var acceptType = getAcceptTypeForNode(nodeName, docURI);
+                loadDocument(docURI, acceptType);
                 c_cachedDocuments[docURI] = docData = {
                     fragments: []
                 };
@@ -533,6 +538,23 @@ Resource.getAdapterHandle = function(baseURI, uri, adapterType, canvasId) {
     }
     return handle;
 };
+
+function getAcceptTypeForNode(nodeName, uri) {
+    nodeName = nodeName || "";
+    switch(nodeName.toLowerCase()) {
+        case "model":
+            return "model/vnd.xml3d.model+xml";
+        case "mesh":
+        case "data":
+            if (uri.path && uri.path.match(/\.json/)) {
+                return "model/vnd.xml3d.mesh+json";
+            } else {
+                return "model/vnd.xml3d.mesh+xml";
+            }
+        default:
+            return "model/vnd.xml3d.mesh+xml";
+    }
+}
 
 /**
  * Get any adapter, internal or external.

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Picking Test Scene</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+<!-- offset the xml3d element from the top and from the left about 111 pixels -->
+<div style="float:top;width:500px;height:111px;"></div>
+<div style="float:left;width:111px;height:500px;"></div>
+
+<xml3d id="xml3DElem" style="background-color: black; width: 300px; height: 200px;" activeview="#default_view">
+  <defs>
+    <transform id="troot" rotation="0 1 0 1.57"></transform>
+    <transform id="t1" translation="-2 0 0"></transform>
+    <transform id="t2" translation="2 0 0" rotation="1 0 0 0.7"></transform>
+    <transform id="tview" translation="5 0 0"></transform>
+
+    <data id="mySimpleMesh" type="triangles">
+      <int name="index">0 1 2 1 2 3</int>
+      <float3 name="position">
+        -1.0 -1.0 0
+        1.0 -1.0 0
+        -1.0 1.0 0
+        1.0 1.0 0
+      </float3>
+      <float3 name="normal">
+        0.0 0.0 1.0
+        0.0 0.0 1.0
+        0.0 0.0 1.0
+        0.0 0.0 1.0
+      </float3>
+      <float2 name="texcoord">
+        0.0 1.0
+        1.0 1.0
+        0.0 0.0
+        1.0 0.0
+      </float2>
+    </data>
+  </defs>
+
+  <group transform="#tview">
+    <view id="default_view" position="5 0 0" orientation="0 1 0 1.57"></view>
+  </group>
+
+  <group transform="#troot">
+    <group transform="#t1">
+      <mesh id="m1" src="#mySimpleMesh"></mesh>
+    </group>
+    <group transform="#t2">
+      <mesh id="m2" src="#mySimpleMesh"></mesh>
+    </group>
+  </group>
+</xml3d>
+</body>
+</html>

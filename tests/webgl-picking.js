@@ -7,7 +7,7 @@ module("WebGL Picking tests", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/webgl-picking.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/webgl-picking.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");

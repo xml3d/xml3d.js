@@ -7,6 +7,7 @@ var vec3 = XML3D.math.vec3;
 
 methods.xml3dGetElementByRay = function(ray, hitPoint, hitNormal) {
     XML3D.flushDOMChanges();
+    XML3D.flushCSSChanges();
     var adapters = this._configured.adapters || {};
     for (var adapter in adapters) {
         if (adapters[adapter].getElementByRay) {
@@ -93,6 +94,7 @@ methods.viewGetViewMatrix = function() {
 
 methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
     XML3D.flushDOMChanges();
+    XML3D.flushCSSChanges();
     var adapters = this._configured.adapters || {};
     for (var adapter in adapters) {
         if (adapters[adapter].getElementByPoint) {

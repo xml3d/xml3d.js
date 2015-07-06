@@ -10,7 +10,7 @@ module("Picking Tests", {
             that.xml3dEl = that.doc.getElementById("xml3DElem");
             start();
         };
-        loadDocument("scenes/picking.xhtml", this.cb);
+        loadDocument("scenes/picking.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -30,6 +30,21 @@ test("xml3d.getElementByPoint(): simple pick 'm1'", function() {
 
     ok(m, "Pick is not null");
     equal(m && m.id, "m1");
+});
+
+test("xml3d.getElementByPoint(): do not pick invisible object", function() {
+
+    var m = this.xml3dEl.getElementByPoint(211, 211);
+
+    ok(m, "Pick is not null");
+    equal(m && m.id, "m1");
+
+    m.style.display = "none";
+
+    m = this.xml3dEl.getElementByPoint(211, 211);
+    strictEqual(m, null, "Not picked anymore");
+
+
 });
 
 test("xml3d.getElementByPoint(): picked mesh 'm1'", function() {

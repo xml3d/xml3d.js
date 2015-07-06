@@ -97,10 +97,11 @@ XML3DRenderAdapter.prototype.getComplete = function () {
 };
 
 XML3DRenderAdapter.prototype.getWorldBoundingBox = function () {
-    var bbox = new window.XML3DBox();
+    var bbox = XML3D.math.bbox.create();
     Array.prototype.forEach.call(this.node.childNodes, function (c) {
-        if (c.getWorldBoundingBox)
-            bbox.extend(c.getWorldBoundingBox());
+        if (c.getWorldBoundingBox) {
+            XML3D.math.bbox.extendWithBox(bbox, c.getWorldBoundingBox());
+        }
     });
     return bbox;
 };
@@ -118,15 +119,19 @@ XML3DRenderAdapter.prototype.getElementByPoint = function (x, y, hitPoint, hitNo
     if (object) {
         if (hitPoint) {
             var vec = renderer.getWorldSpacePositionByPoint(relX, relY, object);
-            hitPoint.set(vec[0], vec[1], vec[2]);
+            XML3D.math.vec3.copy(hitPoint, vec);
         }
         if (hitNormal) {
             var vec = renderer.getWorldSpaceNormalByPoint(relX, relY, object);
-            hitNormal.set(vec[0], vec[1], vec[2]);
+            XML3D.math.vec3.copy(hitNormal, vec);
         }
     } else {
-        if (hitPoint) hitPoint.set(NaN, NaN, NaN);
-        if (hitNormal) hitNormal.set(NaN, NaN, NaN);
+        if (hitPoint) {
+            hitPoint[0] = hitPoint[1] = hitPoint[2] = NaN;
+        }
+        if (hitNormal) {
+            hitNormal[0] = hitNormal[1] = hitNormal[2] = NaN;
+        }
     }
     return object ? object.node : null;
 };
@@ -151,15 +156,19 @@ XML3DRenderAdapter.prototype.getElementByRay = (function () {
         if (hitObject !== null && (hitPoint || hitNormal)) {
             if (hitPoint) {
                 var vec = renderer.getWorldSpacePositionByRay(xml3dRay, hitObject, c_viewMat, c_projMat);
-                hitPoint.set(vec[0], vec[1], vec[2]);
+                XML3D.math.vec3.copy(hitPoint, vec);
             }
             if (hitNormal) {
                 var vec = renderer.getWorldSpaceNormalByRay(xml3dRay, hitObject, c_viewMat, c_projMat);
-                hitNormal.set(vec[0], vec[1], vec[2]);
+                XML3D.math.vec3.copy(hitNormal, vec);
             }
         } else {
-            if (hitPoint) hitPoint.set(NaN, NaN, NaN);
-            if (hitNormal) hitNormal.set(NaN, NaN, NaN);
+            if (hitPoint) {
+                hitPoint[0] = hitPoint[1] = hitPoint[2] = NaN;
+            }
+            if (hitNormal) {
+                hitNormal[0] = hitNormal[1] = hitNormal[2] = NaN;
+            }
         }
         return hitObject !== null ? hitObject.node : null;
     }

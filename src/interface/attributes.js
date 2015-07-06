@@ -51,35 +51,35 @@ handlers.StringAttributeHandler = function(id) {
     };
 };
 
-handlers.EnumAttributeHandler = function(id, p) {
+handlers.EnumAttributeHandler = function(id, enumObj) {
     AttributeHandler.call(this);
     id = id.toLowerCase();
 
     this.init = function(elem, storage){
-        storage[id] = p.d;
+        storage[id] = enumObj.defaultValue;
         if (elem.hasAttribute(id))
             this.setFromAttribute(elem.getAttribute(id), null, elem, storage);
     };
     this.setFromAttribute = function(v, prevValue, elem, storage) {
         var value = v.toLowerCase();
-        storage[id] = (value && p.e[value] !== undefined) ? p.e[value] : p.d;
+        storage[id] = (value && enumObj.values[value] !== undefined) ? enumObj.values[value] : enumObj.defaultValue;
         return false;
     };
     this.desc = {
         get : function() {
             XML3D.flushDOMChanges();
             var storage = getStorage(this);
-            return p.e[storage[id]];
+            return enumObj.values[storage[id]];
         },
         set : function(v) {
                 // Attribute is set to whatever comes in
             this.setAttribute(id, v);
             var storage = getStorage(this);
             var value = typeof v == 'string' ? v.toLowerCase() : undefined;
-            if (value && p.e[value] !== undefined)
-                storage[id] = p.e[value];
+            if (value && enumObj.values[value] !== undefined)
+                storage[id] = enumObj.values[value];
             else
-                storage[id] = p.d;
+                storage[id] = enumObj.defaultValue;
         }
     };
 };
@@ -241,7 +241,7 @@ handlers.BoolAttributeHandler = function(id, defaultValue) {
     };
 };
 
-handlers.XML3DVec3AttributeHandler = function(id, d) {
+handlers.Vec3AttributeHandler = function(id, defaultValue) {
     var that = this;
     id = id.toLowerCase();
 
@@ -249,27 +249,21 @@ handlers.XML3DVec3AttributeHandler = function(id, d) {
         storage[id] = null;
     };
 
-    this.initVec3 = function(elem, storage, x, y, z){
-        var changed = function(value) {
-            elem.setAttribute(id, value.x + " " + value.y + " " + value.z);
-        };
-        storage[id] = new window.XML3DVec3(x, y, z, changed);
-    };
-
-    this.setFromAttribute = function(value, prevValue, elem, storage) {
+    this.setFromAttribute = function(value, prevValue, elem, storage, init) {
         if (!storage[id]) {
-            var initializing = true;
-            this.initVec3(elem, storage, 0, 0, 0);
+            storage[id] = XML3D.math.vec3.create();
         }
         var v = storage[id];
         var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
-        if (!m || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3])) {
-            v._data.set(d);
-            !initializing && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
+        if (!m  || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3])) {
+            v[0] = defaultValue[0];
+            v[1] = defaultValue[1];
+            v[2] = defaultValue[2];
+            !init && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
         } else {
-            v._data[0] = +m[1];
-            v._data[1] = +m[2];
-            v._data[2] = +m[3];
+            v[0] = +m[1];
+            v[1] = +m[2];
+            v[2] = +m[3];
         }
         return false;
     };
@@ -279,17 +273,29 @@ handlers.XML3DVec3AttributeHandler = function(id, d) {
             XML3D.flushDOMChanges();
             var storage = getStorage(this);
             if (!storage[id]) {
-                that.setFromAttribute(this.getAttribute(id), null, this, storage);
+                that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
-            return storage[id];
+            return XML3D.math.vec3.clone(storage[id]);
         },
         set : function(value) {
-            throw Error("Can't set " + this.nodeName + "::" + id + ": it's readonly");
+            var storage = getStorage(this);
+            if (!storage[id]) {
+                that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
+            }
+            var v = storage[id];
+            if (value.length !== 3 || isNaN(value[0]) || isNaN(value[1]) || isNaN(value[2])) {
+                XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
+                v = defaultValue;
+            } else {
+                v[0] = value[0]; v[1] = value[1]; v[2] = value[2];
+            }
+            this.setAttribute(id, XML3D.math.vec3.toDOMString(v));
         }
     };
 };
 
-handlers.XML3DRotationAttributeHandler = function(id, d) {
+// Note: All vec4 attributes are considered to be axis-angle, NOT quaternions!
+handlers.Vec4AttributeHandler = function(id, defaultValue) {
     var that = this;
     id = id.toLowerCase();
 
@@ -297,33 +303,17 @@ handlers.XML3DRotationAttributeHandler = function(id, d) {
         storage[id] = null;
     };
 
-    this.initRotation = function(elem, storage){
-        var changed = function(v) {
-            elem.setAttribute(id, v.axis.x + " " + v.axis.y + " " + v.axis.z + " " + v.angle);
-        };
-        storage[id] = new window.XML3DRotation(null, null, changed);
-    };
-
-    this.setFromAttribute = function(value, prevValue, elem, storage) {
+    this.setFromAttribute = function(value, prevValue, elem, storage, init) {
         if (!storage[id]) {
-            var initializing = true;
-            this.initRotation(elem, storage);
+            storage[id] = XML3D.math.vec4.create();
         }
         var v = storage[id];
         var m = /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/.exec(value);
         if (!m  || isNaN(+m[1]) || isNaN(+m[2]) || isNaN(+m[3]) || isNaN(+m[4])) {
-            v._axis._data[0] = d[0];
-            v._axis._data[1] = d[1];
-            v._axis._data[2] = d[2];
-            v._angle = d[3];
-            v._updateQuaternion();
-            !initializing && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
+            XML3D.math.vec4.copy(v, defaultValue);
+            !init && XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, elem);
         } else {
-            v._axis._data[0] = +m[1];
-            v._axis._data[1] = +m[2];
-            v._axis._data[2] = +m[3];
-            v._angle = +m[4];
-            v._updateQuaternion();
+            XML3D.math.vec4.set(v, +m[1], +m[2], +m[3], +m[4]);
         }
         return false;
     };
@@ -333,12 +323,23 @@ handlers.XML3DRotationAttributeHandler = function(id, d) {
             XML3D.flushDOMChanges();
             var storage = getStorage(this);
             if (!storage[id]) {
-                that.setFromAttribute(this.getAttribute(id), null, this, storage);
+                that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
-            return storage[id];
+            return XML3D.math.vec4.clone(storage[id]);
         },
         set : function(value) {
-            throw Error("Can't set " + this.nodeName + "::" + id + ": it's readonly");
+            var storage = getStorage(this);
+            if (!storage[id]) {
+                that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
+            }
+            var v = storage[id];
+            if (value.length !== 4 || isNaN(value[0]) || isNaN(value[1]) || isNaN(value[2]) || isNaN(value[3])) {
+                XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
+                XML3D.math.vec4.copy(v, defaultValue);
+            } else {
+                XML3D.math.quat.copy(v, value);
+            }
+            this.setAttribute(id, XML3D.math.vec4.toDOMString(value));
         }
     };
 };

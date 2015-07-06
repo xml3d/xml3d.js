@@ -55,14 +55,10 @@ XML3D.resource.registerFormat = require("./base/resourcemanager.js").registerFor
 XML3D.webcl = require("./utils/webcl.js").webcl;
 XML3D.math = require("gl-matrix");
 XML3D.math.bbox = require("./math/bbox.js");
+XML3D.math.ray = require("./math/ray.js");
 require("./math/math.js")(XML3D.math);
 
-window.XML3DBox = require("./types/box.js");
 XML3D.extend(window, require("./types/data-observer.js"));
-window.XML3DMatrix = require("./types/matrix.js");
-window.XML3DRay = require("./types/ray.js");
-window.XML3DRotation = require("./types/rotation.js");
-window.XML3DVec3 = require("./types/vec3.js");
 
 Xflow.registerOperator = require("./xflow/operator/operator.js").registerOperator;
 Xflow.constants = require("./xflow/interface/constants.js");

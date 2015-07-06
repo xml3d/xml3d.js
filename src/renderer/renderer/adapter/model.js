@@ -218,35 +218,31 @@ XML3D.extend(ModelRenderAdapter.prototype, {
      * @return {Window.XML3DBox}
      */
     getLocalBoundingBox: function () {
+        var bbox = new XML3D.math.bbox.create();
         if (this.renderNode) {
-            var bbox = new XML3D.math.bbox.create();
             this.renderNode.getObjectSpaceBoundingBox(bbox);
-            return XML3D.math.bbox.asXML3DBox(bbox);
         }
-
-        return new window.XML3DBox();
+        return bbox;
     },
 
     /**
      * @return {Window.XML3DBox}
      */
     getWorldBoundingBox: function () {
+        var bbox = new XML3D.math.bbox.create();
         if (this.renderNode) {
-            var bbox = new XML3D.math.bbox.create();
             this.renderNode.getWorldSpaceBoundingBox(bbox);
-            return XML3D.math.bbox.asXML3DBox(bbox);
         }
-
-        return new window.XML3DBox();
+        return bbox;
     },
 
     /**
-     * @return {Window.XML3DMatrix}
+     * @return {mat4}
      */
     getWorldMatrix: function () {
-        var m = new window.XML3DMatrix(), obj = this.renderNode;
+        var m = XML3D.math.mat4.create(), obj = this.renderNode;
         if (obj) {
-            obj.getWorldMatrix(m._data);
+            obj.getWorldMatrix(m);
         }
         return m;
     }

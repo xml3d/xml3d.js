@@ -62,38 +62,40 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
     getWorldBoundingBox: function () {
         var bbox = XML3D.math.bbox.create();
         this.renderNode.getWorldSpaceBoundingBox(bbox);
-        return XML3D.math.bbox.asXML3DBox(bbox);
+        return bbox;
     },
 
-//TODO: improve efficiency of this function once XML3D types are overhauled
     getLocalBoundingBox: (function () {
         var localMat = XML3D.math.mat4.create();
+        var childBB = XML3D.math.bbox.create();
 
         return function () {
-            var bbox = new window.XML3DBox();
+            var bbox = XML3D.math.bbox.create();
             if (!this.renderNode.visible) {
                 return bbox;
             }
             Array.prototype.forEach.call(this.node.childNodes, function (c) {
-                if (c.getLocalBoundingBox && c.visible)
-                    bbox.extend(c.getLocalBoundingBox());
+                if (c.getLocalBoundingBox && c.visible) {
+                    childBB = c.getLocalBoundingBox();
+                    XML3D.math.bbox.extendWithBox(bbox, childBB);
+
+                }
             });
             this.renderNode.getLocalMatrix(localMat);
-            var localBB = XML3D.math.bbox.fromXML3DBox(bbox);
-            XML3D.math.bbox.transform(localBB, localMat, localBB);
-            return XML3D.math.bbox.asXML3DBox(localBB);
+            XML3D.math.bbox.transformAxisAligned(bbox, localMat, bbox);
+            return bbox;
         }
     })(),
 
     getLocalMatrix: function () {
-        var m = new window.XML3DMatrix();
-        this.renderNode.getLocalMatrix(m._data);
+        var m = XML3D.math.mat4.create();
+        this.renderNode.getLocalMatrix(m);
         return m;
     },
 
     getWorldMatrix: function () {
-        var m = new window.XML3DMatrix();
-        this.renderNode.getWorldMatrix(m._data);
+        var m = XML3D.math.mat4.create();
+        this.renderNode.getWorldMatrix(m);
         return m;
     }
 });

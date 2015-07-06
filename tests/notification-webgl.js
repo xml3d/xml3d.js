@@ -74,23 +74,19 @@ test("Boolean attribute notification tests", 2, function() {
     XML3D.flushDOMChanges();
 });
 
-test("XML3DVec attribute notification tests", 3, function() {
+test("XML3DVec attribute notification tests", 2, function() {
     var e = document.createElementNS(XML3D.xml3dNS, "transform");
     var a = this.factory.getAdapter(e);
     e.setAttribute("scale", "1 2 3");
-    e.scale.x = 4.0;
-    e.scale.setVec3Value("4 5 6");
+    e.scale = XML3D.math.vec3.fromValues(1,1,1);
     XML3D.flushDOMChanges();
 });
 
-test("XML3DRotation attribute notification tests", 5, function() {
+test("XML3DRotation attribute notification tests", 2, function() {
     var e = document.createElementNS(XML3D.xml3dNS, "transform");
     var a = this.factory.getAdapter(e);
     e.setAttribute("rotation", "1 0 0 3.14");
-    e.rotation.angle = 4.0;
-    e.rotation.axis.y = 1.0;
-    e.rotation.axis.setVec3Value("1 0 0");
-    e.rotation.setAxisAngleValue("1 4 5 6");
+    e.rotation = XML3D.math.vec4.fromValues(1, 0, 0, 4);
     XML3D.flushDOMChanges();
 });
 

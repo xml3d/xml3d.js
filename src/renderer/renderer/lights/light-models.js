@@ -221,7 +221,7 @@ XML3D.createClass(PointLightModel, LightModel, {
 
         var t_mat = XML3D.math.mat4.create();
         this.getLightViewMatrix(t_mat);
-        XML3D.math.bbox.transform(sceneBoundingBox, t_mat, sceneBoundingBox);
+        XML3D.math.bbox.transformAxisAligned(sceneBoundingBox, t_mat, sceneBoundingBox);
 
         var nf = {
             near: -sceneBoundingBox[5], far: -sceneBoundingBox[2]
@@ -267,7 +267,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
 
         var t_mat = XML3D.math.mat4.create();
         this.getLightViewMatrix(t_mat);
-        XML3D.math.bbox.transform(sceneBoundingBox, t_mat, sceneBoundingBox);
+        XML3D.math.bbox.transformAxisAligned(sceneBoundingBox, t_mat, sceneBoundingBox);
 
         var nf = {
             near: -sceneBoundingBox[5], far: -sceneBoundingBox[2]
@@ -316,7 +316,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
 
         var t_mat = XML3D.math.mat4.create();
         this.getLightViewMatrix(t_mat);
-        XML3D.math.bbox.transform(sceneBoundingBox, t_mat, sceneBoundingBox);
+        XML3D.math.bbox.transformAxisAligned(sceneBoundingBox, t_mat, sceneBoundingBox);
 
         var nf = {  near: -sceneBoundingBox[5],
                     far:  -sceneBoundingBox[2]};
@@ -371,12 +371,12 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
 
         var bb = new XML3D.math.bbox.create();
         this.light.scene.getBoundingBox(bb);
-        XML3D.math.bbox.transform(bb, mat4, bb);
+        XML3D.math.bbox.transformAxisAligned(bb, mat4, bb);
         var bbSize = XML3D.math.vec3.create();
         XML3D.math.bbox.size(bbSize, bb);
         var max = (bbSize[0] > bbSize[1]) ? bbSize[0] : bbSize[1];
         max = 0.55 * (max);//enlarge 10percent to make sure nothing gets cut off
-        this.fovy = Math.atan(max)*2.0;
+        this.fovy = max <= 0 ? Math.PI : Math.atan(max)*2.0;
 
         entry.parameters["direction"] = p_dir;
         entry.parameters["position"]  = p_pos;

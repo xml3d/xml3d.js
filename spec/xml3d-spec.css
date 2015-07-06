@@ -22,7 +22,7 @@ div.attributes table th {
 }
 
 /* Element blocks with Categories list */
-section h4 {
+section h4, section h3 {
     position: relative;
     top: 0;
     left: 0;
@@ -52,7 +52,7 @@ section h4 {
     border-width: 0.5em;
 }
 
-h4 + .element, h4 + div + .element {
+h4 + .element, h4 + div + .element, h3 + .element, h3 + div + .element {
     margin-top: -2.9em;
     padding-top: 2em;
 }

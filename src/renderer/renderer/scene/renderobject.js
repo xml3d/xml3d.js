@@ -366,7 +366,7 @@ XML3D.createClass(RenderObject, RenderNode, {
         return function () {
             this.getObjectSpaceBoundingBox(c_box);
             this.getWorldMatrix(c_trans);
-            XML3D.math.bbox.transform(c_box, c_trans, c_box);
+            XML3D.math.bbox.transformAxisAligned(c_box, c_trans, c_box);
             this.setWorldSpaceBoundingBox(c_box);
             this.boundingBoxDirty = false;
         }

@@ -27,9 +27,9 @@ test("Light attributes", 9, function () {
     });
 
     var result = new ComputeRequest(light.model.dataNode, ["intensity"]).getResult();
-    var actualVector = new XML3DVec3();
+    var actualVector = XML3D.math.vec3.create();
     actualVector.set(result.getOutputData("intensity").getValue());
-    QUnit.closeVector(actualVector, new XML3DVec3(1, 1, 1), EPSILON, "Intensity default");
+    QUnit.closeVector(actualVector, XML3D.math.vec3.fromValues(1, 1, 1), EPSILON, "Intensity default");
 
     equal(lightModels.directional.lightModels.length, 1, "Light without type is in directional container (default)");
     light.setLightType("urn:xml3d:light:spot");
@@ -187,12 +187,15 @@ test("Clipping Planes", function() {
     obj.setObjectSpaceBoundingBox([-2, -2, -2, 2, 2, 2]);
     deepEqual(view.getClippingPlanes(), { near: 0.05, far: 2.05 }, "Larger values");
 
-    view.updateOrientation(new XML3DRotation(new XML3DVec3(0,1,0), Math.PI / 2.0).toMatrix()._data);
+    var mat = XML3D.math.mat4.create();
+    XML3D.math.mat4.fromRotation(mat, Math.PI/2.0, [0,1,0]);
+    view.updateOrientation(mat);
     var planes = view.getClippingPlanes();
     QUnit.close(planes.near, 0.05, EPSILON, "Rotated 180: near");
     QUnit.close(planes.far, 2.05, EPSILON, "Rotated 180: far");
 
-    view.updateOrientation(new XML3DRotation(new XML3DVec3(0,0.707,0.707), Math.PI / 3.0).toMatrix()._data);
+    XML3D.math.mat4.fromRotation(mat, Math.PI/3.0, [0,0.707,0.707]);
+    view.updateOrientation(mat);
 
     planes = view.getClippingPlanes();
     QUnit.close(planes.near, 0.05 , EPSILON, "Rotated arbitrary: near");

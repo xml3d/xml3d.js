@@ -552,9 +552,9 @@
                 <dd>The x coordinate relative to the top left of the browser window</dd>
                 <dt>unsigned long y</dt>
                 <dd>The y coordinate relative to the top left of the browser window</dd>
-                <dt>optional XML3DVec3 hitPoint</dt>
+                <dt>optional vec3 hitPoint</dt>
                 <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
-                <dt>optional XML3DVec3 hitNormal</dt>
+                <dt>optional vec3 hitNormal</dt>
                 <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
             </dl>
         </dd>
@@ -563,24 +563,24 @@
         <dd>Returns the first element that intersects with ray if the ray intersects with a a scene element; otherwise,
           returns null.
             <dl class='parameters'>
-                <dt>XML3DRay ray</dt>
+                <dt>ray ray</dt>
                 <dd></dd>
-                <dt>optional XML3DVec3 hitPoint</dt>
+                <dt>optional vec3 hitPoint</dt>
                 <dd>If provided this vector will be filled with the position of the hit point in world space.</dd>
-                <dt>optional XML3DVec3 hitNormal</dt>
+                <dt>optional vec3 hitNormal</dt>
                 <dd>If provided this vector will be filled with the normal of the hit point in world space.</dd>
             </dl>
         </dd>
 
-        <dt>XML3DBox getLocalBoundingBox()</dt>
+        <dt>bbox getLocalBoundingBox()</dt>
         <dd>Returns the bounding box of the scene. Because the XML3D element is the root element the bounding box will be in world space by definition.</dd>
 
-        <dt>XML3DBox getWorldBoundingBox()</dt>
+        <dt>bbox getWorldBoundingBox()</dt>
         <dd>Returns the bounding box of the scene in world space.</dd>
 
-        <dt>XML3DRay generateRay()</dt>
+        <dt>ray generateRay()</dt>
         <dd>
-            Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new XML3DRay from the given x,y <b>window</b> coordinates.
+            Uses <a href="https://github.com/fintler/webgl-unproject">WebGL unProject</a> to generate a new ray from the given x,y <b>window</b> coordinates.
             <dl class='parameters'>
                 <dt>unsigned long x</dt>
                 <dd>The x coordinate relative to the top left of the browser window</dd>
@@ -665,17 +665,17 @@
             <dt>attribute boolean visible</dt>
             <dd>A value of "false" will prevent this group being drawn to the canvas. Visibility is inherited from the parent group
             if this attribute is not present. </dd>
-            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dt>mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this group element in world space (includes parent transformations).
             </dd>
-            <dt>XML3DMatrix getLocalMatrix()</dt>
+            <dt>mat4 getLocalMatrix()</dt>
             <dd>Returns the local transformation matrix of this group element (does not include parent transformations).
             </dd>
-            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dt>bbox getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this group in its local transformation space. This is calculated as the smallest volume containing the
                 bounding boxes of all child elements.</dd>
 
-            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dt>bbox getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this group in world space. This is calculated as the smallest volume containing the
             bounding boxes of all child elements.</dd>
         </dl>
@@ -690,11 +690,11 @@
             <dd><a href="#transformable-elements">Transformable element</a></dd>
         </dl>
         <dl title='interface XML3DViewElement : HTMLElement' class='idl'>
-            <dt>attribute XML3DVec3 position</dt>
+            <dt>attribute vec3 position</dt>
             <dd>The position of the camera in world space</dd>
 
-            <dt>attribute XML3DRotation orientation</dt>
-            <dd>The orientation (rotation) of the camera</dd>
+            <dt>attribute vec4 orientation</dt>
+            <dd>The orientation (rotation) of the camera in axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
 
             <dt>attribute float fieldofview</dt>
             <dd>The <b>vertical</b> field of view of this camera, expressed in radians.
@@ -704,32 +704,32 @@
             <dd>Overrides the camera's internal projection matrix. The attribute should contain a URI to a data element
                 supplying a float4x4 matrix named "projection". This can be used to, for example, create an orthographic camera. </dd>
 
-            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dt>mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this view element in world space.
             </dd>
 
-            <dt>void setUpVector(XML3DVec3 direction)</dt>
+            <dt>void setUpVector(vec3 direction)</dt>
             <dd>Change the up vector of the camera. This method changes the current orientation. The up vector will be
                 lost if the orientation is explicitly set at a later time.
             </dd>
 
-            <dt>void setDirection(XML3DVec3 direction)</dt>
+            <dt>void setDirection(vec3 direction)</dt>
             <dd>Change the orientation of the camera to look along the given direction vector.
             </dd>
 
-            <dt>XML3DVec3 getDirection()</dt>
+            <dt>vec3 getDirection()</dt>
             <dd>Returns the current direction of the camera, which is extracted from the orientation.
             </dd>
 
-            <dt>XML3DVec3 getUpVector()</dt>
+            <dt>vec3 getUpVector()</dt>
             <dd>Returns the current up vector of the camera, which is extracted from the orientation.
             </dd>
 
-            <dt>XML3DMatrix getViewMatrix()</dt>
+            <dt>mat4 getViewMatrix()</dt>
             <dd>Returns the view matrix of the camera (the matrix used to transform from world to view space).
             </dd>
 
-            <dt>void lookAt(XML3DVec3 point)</dt>
+            <dt>void lookAt(vec3 point)</dt>
             <dd>Change the orientation of the camera to look at the given point.
             </dd>
         </dl>
@@ -852,16 +852,16 @@
             <dt>Array getOutputNames()</dt>
             <dd>Returns the names of the data fields available to this mesh node. </dd>
 
-            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dt>mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this mesh element in world space (includes parent transformations).
             </dd>
-            <dt>XML3DMatrix getLocalMatrix()</dt>
+            <dt>mat4 getLocalMatrix()</dt>
             <dd>Returns the local transformation matrix of this mesh element (does not include parent transformations).
             </dd>
-            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dt>bbox getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this mesh in object space, without any transformations applied. </dd>
 
-            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dt>bbox getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this mesh in world space.</dd>
         </dl>
     </section>
@@ -923,14 +923,14 @@
             <dt>attribute DOMString transform</dt>
             <dd>URI reference to a <a href="#the-transform-element"><code>transform</code></a> element.</dd>
 
-            <dt>XML3DMatrix getWorldMatrix()</dt>
+            <dt>mat4 getWorldMatrix()</dt>
             <dd>Returns the transformation matrix of this model in world space, including parent transformations.
             </dd>
 
-            <dt>XML3DBox getLocalBoundingBox()</dt>
+            <dt>bbox getLocalBoundingBox()</dt>
             <dd>Returns the bounding box of this model without any parent transformations applied.</dd>
 
-            <dt>XML3DBox getWorldBoundingBox()</dt>
+            <dt>bbox getWorldBoundingBox()</dt>
             <dd>Returns the bounding box of this model in world space, including parent transformations.</dd>
         </dl>
     </section>
@@ -1018,8 +1018,8 @@
     <section>
       <h4>The <code>transform</code> element</h4>
         <dl title='interface XML3DTransformElement : HTMLElement' class='idl'>
-            <dt>attribute XML3DRotation scaleorientation</dt>
-            <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>.</dd>
+            <dt>attribute vec4 scaleorientation</dt>
+            <dd>The orientation on which to apply the scaling factor supplied by the IDL attribute <i>scale</i>. In axis-angle form [x,y,z,a] with the angle expressed in radians.</dd>
         </dl>
     </section>
   </section>
@@ -1410,35 +1410,202 @@
 
 <section>
   <h2>Datatypes</h2>
+  <p>XML3D uses the <a href="https://github.com/toji/gl-matrix">glMatrix</a> math library, exposed through <code>XML3D.math</code>. It also defines a
+  few additional objects in the style of glMatrix as well as additional functions for the standard glMatrix datatypes. For completeness we list all
+  available datatypes in this section but only provide detailed descriptions for those functions or objects that XML3D adds to the glMatrix library.</p>
+
+  <p>It's important to note that all datatypes in XML3D are really just <code>Float32Array</code> instances with no functions or attributes of their own.
+  All math related functions are static with the first argument typically being the destination for the return value, as seen in this example:</p>
+
+  <pre class='example highlight'>
+     var vec = XML3D.math.vec3.fromValues(1, 0, 0); // Returns a new Float32Array with values 1, 0, 0
+     XML3D.math.vec3.scale(vec, vec, 2.0);          // Scale 'vec' and write the result back into 'vec'
+
+     var mat = XML3D.math.mat4.create();            // Returns a new Float32Array containing an identity matrix
+     XML3D.math.mat4.rotateY(mat, mat, 1.57);       // Rotate the matrix 90 degrees on the Y axis
+
+     XML3D.math.vec3.transformMat4(vec, vec, mat);  // Transform 'vec' with the matrix
+  </pre>
+
+  <p>Full documentation for glMatrix <a href="http://glmatrix.net/docs/2.2.0/">can be found here.</a></p>
   <section>
-    <h3>XML3DVec3</h3>
-    <dl title='interface XML3DVec3' class='idl'>
-      <dt>attribute float x</dt>
-      <dd></dd>
-      <dt>attribute float y</dt>
-      <dd></dd>
-      <dt>attribute float z</dt>
-      <dd></dd>
+    <h3>vec2</h3>
+    <dl class='element'>
+      <dt>External documentation:</dt>
+      <dd><a href="http://glmatrix.net/docs/2.2.0/symbols/vec2.html">glMatrix vec2</a></dd>
+    </dl>
+
+    <dl title='interface vec2' class='idl'>
+      <dt>static vec2 fromDOMString(DOMString str)</dt>
+      <dd>Creates a new vec2 object from the space-separated string representation as used in element attributes.</dd>
+      <dt>static DOMString toDOMString(vec2 vec)</dt>
+      <dd>Converts a vec2 into the space-seperated string representation used in element attributes.</dd>
     </dl>
   </section>
   <section>
-    <h3>XML3DRotation</h3>
-  </section>
-  <section>
-    <h3>XML3DMatrix</h3>
-  </section>
-  <section>
-    <h3>XML3DBox</h3>
-    XML3DBox defines an axis-aligned box, i.e. its faces are along the X, Y, Z axis.
-    <dl title='interface XML3DBox' class='idl'>
-      <dt>attribute XML3DVec3 min</dt>
-      <dd></dd>
-      <dt>attribute XML3DVec3 max</dt>
-      <dd></dd>
+    <h3>vec3</h3>
+    <dl class='element'>
+      <dt>External documentation:</dt>
+      <dd><a href="http://glmatrix.net/docs/2.2.0/symbols/vec3.html">glMatrix vec3</a></dd>
+    </dl>
+    <dl title='interface vec3' class='idl'>
+      <dt>static vec3 fromDOMString(DOMString str)</dt>
+      <dd>Creates a new vec3 object from the space-separated string representation as used in element attributes.</dd>
+      <dt>static DOMString toDOMString(vec3 vec)</dt>
+      <dd>Converts a vec3 into the space-seperated string representation used in element attributes.</dd>
+      <dt>static vec3 reciprocal(vec3 dest, vec3 src)</dt>
+      <dd>Writes the reciprocal of 'src' into 'dest' and also returns it.</dd>
     </dl>
   </section>
   <section>
-    <h3>XML3DRay</h3>
+    <h3>vec4</h3>
+    <dl class='element'>
+      <dt>External documentation:</dt>
+      <dd><a href="http://glmatrix.net/docs/2.2.0/symbols/vec4.html">glMatrix vec4</a></dd>
+    </dl>
+    <p>In XML3D a vec4 is also used to represent an axis-angle rotation, where the first three values represent the axis and the
+    fourth value represents the angle in radians. This representation is used for rotation attributes such as the
+      <a href="#the-view-element"><code>view</code></a> element's <code>orientation</code> attribute.</p>
+    <dl title='interface vec4' class='idl'>
+      <dt>static vec4 fromDOMString(DOMString str)</dt>
+      <dd>Creates a new vec4 object from the space-separated string representation as used in element attributes.</dd>
+      <dt>static DOMString toDOMString(vec3 vec)</dt>
+      <dd>Converts a vec4 into the space-seperated string representation used in element attributes.</dd>
+      <dt>static vec4 fromQuat(vec4 dest, quat src)</dt>
+      <dd>Converts the quaternion representation of a rotation into an axis-angle representation.</dd>
+    </dl>
+  </section>
+  <section>
+    <h3>quat</h3>
+    <dl class='element'>
+      <dt>External documentation:</dt>
+      <dd><a href="http://glmatrix.net/docs/2.2.0/symbols/quat.html">glMatrix quat</a></dd>
+    </dl>
+    <dl title='interface quat' class='idl'>
+      <dt>static quat fromDOMString(DOMString str)</dt>
+      <dd>Creates a new quat object from the space-separated string representation as used in element attributes.</dd>
+      <dt>static DOMString toDOMString(quat vec)</dt>
+      <dd>Converts a quat into the space-seperated string representation used in element attributes.</dd>
+      <dt>static quat fromAxisAngle(quat dest, vec4 src)</dt>
+      <dd>Converts the axis-angle representation of a rotation into a quaternion representation.</dd>
+      <dt>static quat setFromMat3(quat dest, mat3 src)</dt>
+      <dd>Creates a quaternion representation of the given mat3 rotation matrix.</dd>
+      <dt>static quat setFromBasis(quat dest, vec3 x, vec3 y, vec3 z)</dt>
+      <dd>Creates a quaternion representation of the rotation described by the three perpendicular basis vectors.</dd>
+    </dl>
+  </section>
+  <section>
+    <h3>mat3</h3>
+    <dl class='element'>
+      <dt>External documentation:</dt>
+      <dd><a href="http://glmatrix.net/docs/2.2.0/symbols/mat3.html">glMatrix mat3</a></dd>
+    </dl>
+    <dl title='interface mat3' class='idl'>
+      <dt>static mat3 fromDOMString(DOMString str)</dt>
+      <dd>Creates a new mat3 object from the space-separated string representation as used in element attributes.</dd>
+      <dt>static DOMString toDOMString(mat3 mat)</dt>
+      <dd>Converts a mat3 into the space-seperated string representation used in element attributes.</dd>
+    </dl>
+  </section>
+  <section>
+    <h3>mat4</h3>
+    <dl class='element'>
+      <dt>External documentation:</dt>
+      <dd><a href="http://glmatrix.net/docs/2.2.0/symbols/mat4.html">glMatrix mat4</a></dd>
+    </dl>
+    <dl title='interface mat4' class='idl'>
+      <dt>static mat4 fromDOMString(DOMString str)</dt>
+      <dd>Creates a new mat4 object from the space-separated string representation as used in element attributes.</dd>
+      <dt>static DOMString toDOMString(mat4 vec)</dt>
+      <dd>Converts a mat4 into the space-seperated string representation used in element attributes.</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h3>bbox</h3>
+    <dl class='element'>
+    </dl>
+    <p>The <code>bbox</code> object is a glMatrix style <code>Float32Array</code> of length 6 holding the minimum and maximum points of a bounding box. </p>
+    <dl title='interface bbox' class='idl'>
+      <dt>static bbox create()</dt>
+      <dd>Creates a new bbox with <code>Number.MAX_VALUE</code> as its minimum and <code>Number.MIN_VALUE</code> as maximum.</dd>
+      <dt>static bbox clone(bbox src)</dt>
+      <dd>Returns a new clone of the given bbox.</dd>
+      <dt>static bbox copy(bbox dest, bbox src)</dt>
+      <dd>Copies the values of the src bbox into dest and also returns the dest bbox.</dd>
+      <dt>static bbox copyMin(bbox dest, bbox src)</dt>
+      <dd>Copies only the minimum point from the src bbox into the dest bbox.</dd>
+      <dt>static bbox copyMax(bbox dest, bbox src)</dt>
+      <dd>Copies only the maximum point from the src bbox into the dest bbox.</dd>
+      <dt>static vec3 min(bbox box)</dt>
+      <dd>Returns a new view on the underlying Float32Array containing only the minimum point. Changes to this view will also change the bbox.</dd>
+      <dt>static vec3 max(bbox box)</dt>
+      <dd>Returns a new view on the underlying Float32Array containing only the maximum point. Changes to this view will also change the bbox.</dd>
+      <dt>static bbox extendWithBox(bbox toExpand, bbox expandWith)</dt>
+      <dd>Expands the <code>toExpand</code> bbox to also encompass the <code>expandWith</code> bbox. <code>toExpand</code> will remain axis-aligned.</dd>
+      <dt>static bbox empty(bbox box)</dt>
+      <dd>Resets the given bbox back to the empty state.</dd>
+      <dt>static boolean isEmpty(bbox box)</dt>
+      <dd>Returns true if the bbox is empty. Empty is defined as any bbox whose minimum point is greater than its maximum.</dd>
+      <dt>static vec3 center(vec3 dest, bbox box)</dt>
+      <dd>Sets the given vec3 object to the center of the bbox.</dd>
+      <dt>static vec3 size(vec3 dest, bbox box)</dt>
+      <dd>Sets the given vec3 object to hold the size of the bbox, defined as the vector that results from subtracting its minimum from its maximum.</dd>
+      <dt>static vec3 extent(vec3 dest, bbox box)</dt>
+      <dd>Sets the given vec3 object to hold the extent of the bbox, defined as half of its size.</dd>
+      <dt>static bbox transformAxisAligned(bbox dest, mat4 mat, bbox box)</dt>
+      <dd>Transforms the bbox with the given transformation matrix and writes the resulting bbox into <code>dest</code>. The resulting bbox remains axis-aligned.</dd>
+      <dt>static bbox transform(bbox dest, mat4 mat, bbox box)</dt>
+      <dd>Transforms the bbox with the given transformation matrix and writes the resulting bbox into <code>dest</code>. The resulting bbox is <b>not</b> axis-aligned./dd>
+      <dt>static float longestSide(bbox box)</dt>
+      <dd>Returns the length of the longest side of the given bbox.</dd>
+      <dt>static boolean intersects()</dt>
+      <dd>
+        <dl class='parameters'>
+          <dt>bbox box</dt>
+          <dd></dd>
+          <dt>ray r</dt>
+          <dd></dd>
+          <dt>optional Object opt</dt>
+          <dd>If <code>opt.dist</code> exists then the distance to the intersection point will be written into this field. If the ray does
+            not intersect then this field will hold <code>Number.MAX_VALUE</code></dd>
+        </dl>
+
+        Returns true if the ray intersects the bbox.
+      </dd>
+      <dt>static DOMString str(bbox box)</dt>
+      <dd>A human readable string representation of the bbox.</dd>
+    </dl>
+  </section>
+  <section>
+    <h3>ray</h3>
+    <dl class='element'>
+    </dl>
+    <p>The <code>ray</code> object is a glMatrix style <code>Float32Array</code> of length 6 holding the origin and direction of a ray.</p>
+    <dl title='interface ray' class='idl'>
+      <dt>static ray create()</dt>
+      <dd>Creates a new ray with origin <code>(0, 0, 0)</code> and direction <code>(0, 0, -1)</code>.</dd>
+      <dt>static ray fromOriginDirection(vec3 origin, vec3 direction)</dt>
+      <dd>Creates a new ray with the given origin and direction.</dd>
+      <dt>static ray clone(ray src)</dt>
+      <dd>Returns a new clone of the given ray.</dd>
+      <dt>static ray copy(ray dest, ray src)</dt>
+      <dd>Copies the values of the src ray into dest and also returns the dest ray.</dd>
+      <dt>static ray copyOrigin(ray dest, ray src)</dt>
+      <dd>Copies only the origin point from the src ray into the dest ray.</dd>
+      <dt>static ray copyDirection(ray dest, ray src)</dt>
+      <dd>Copies only the direction from the src ray into the dest ray.</dd>
+      <dt>static vec3 origin(ray src)</dt>
+      <dd>Returns a new view on the underlying Float32Array containing only the origin. Changes to this view will also change the ray.</dd>
+      <dt>static vec3 direction(ray src)</dt>
+      <dd>Returns a new view on the underlying Float32Array containing only the direction. Changes to this view will also change the ray.</dd>
+      <dt>static ray setOrigin(ray dest, vec3 origin)</dt>
+      <dd>Set the origin of the ray.</dd>
+      <dt>static ray setDirection(ray dest, vec3 dir)</dt>
+      <dd>Set the direction of the ray. Note: the direction is normalized before setting.</dd>
+      <dt>static DOMString str(ray ray)</dt>
+      <dd>A human readable string representation of the ray.</dd>
+    </dl>
   </section>
 </section>
 

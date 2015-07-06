@@ -5,9 +5,9 @@ QUnit.extend( QUnit, {
      */
     __passesVector : function(actual, expected, maxDifference) {
 
-        return (Math.abs(actual.x - expected.x) <= maxDifference &&
-                Math.abs(actual.y - expected.y) <= maxDifference &&
-                Math.abs(actual.z - expected.z) <= maxDifference);
+        return (Math.abs(actual[0] - expected[0]) <= maxDifference &&
+                Math.abs(actual[1] - expected[1]) <= maxDifference &&
+                Math.abs(actual[2] - expected[2]) <= maxDifference);
     },
 
     closeVector : function(actual, expected, maxDifference, message) {
@@ -18,8 +18,8 @@ QUnit.extend( QUnit, {
 
     closeRotation : function(actual, expected, maxDifference, message) {
         var passes = (actual === expected) ||
-            QUnit.__passesVector(actual.axis, expected.axis, maxDifference) &&
-            (Math.abs((actual.angle % Math.PI) - (expected.angle % Math.PI)) <= maxDifference);
+            QUnit.__passesVector(actual, expected, maxDifference) &&
+            (Math.abs((actual[3] % Math.PI) - (expected[3] % Math.PI)) <= maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
 
@@ -30,36 +30,38 @@ QUnit.extend( QUnit, {
         }
 
         var passes =
-            Math.abs(actual.m11 - expected.m11) <= maxDifference &&
-            Math.abs(actual.m12 - expected.m12) <= maxDifference &&
-            Math.abs(actual.m13 - expected.m13) <= maxDifference &&
-            Math.abs(actual.m14 - expected.m14) <= maxDifference &&
-            Math.abs(actual.m21 - expected.m21) <= maxDifference &&
-            Math.abs(actual.m22 - expected.m22) <= maxDifference &&
-            Math.abs(actual.m23 - expected.m23) <= maxDifference &&
-            Math.abs(actual.m24 - expected.m24) <= maxDifference &&
-            Math.abs(actual.m31 - expected.m31) <= maxDifference &&
-            Math.abs(actual.m32 - expected.m32) <= maxDifference &&
-            Math.abs(actual.m33 - expected.m33) <= maxDifference &&
-            Math.abs(actual.m34 - expected.m34) <= maxDifference &&
-            Math.abs(actual.m41 - expected.m41) <= maxDifference &&
-            Math.abs(actual.m42 - expected.m42) <= maxDifference &&
-            Math.abs(actual.m43 - expected.m43) <= maxDifference &&
-            Math.abs(actual.m44 - expected.m44) <= maxDifference ;
+            Math.abs(actual[0] - expected[0]) <= maxDifference &&
+            Math.abs(actual[1] - expected[1]) <= maxDifference &&
+            Math.abs(actual[2] - expected[2]) <= maxDifference &&
+            Math.abs(actual[3] - expected[3]) <= maxDifference &&
+            Math.abs(actual[4] - expected[4]) <= maxDifference &&
+            Math.abs(actual[5] - expected[5]) <= maxDifference &&
+            Math.abs(actual[6] - expected[6]) <= maxDifference &&
+            Math.abs(actual[7] - expected[7]) <= maxDifference &&
+            Math.abs(actual[8] - expected[8]) <= maxDifference &&
+            Math.abs(actual[9] - expected[9]) <= maxDifference &&
+            Math.abs(actual[10] - expected[10]) <= maxDifference &&
+            Math.abs(actual[11] - expected[11]) <= maxDifference &&
+            Math.abs(actual[12] - expected[12]) <= maxDifference &&
+            Math.abs(actual[13] - expected[13]) <= maxDifference &&
+            Math.abs(actual[14] - expected[14]) <= maxDifference &&
+            Math.abs(actual[15] - expected[15]) <= maxDifference ;
         QUnit.push(passes, actual, expected, message);
     },
 
     closeRay : function(actual, expected, maxDifference, message) {
+        var ray = XML3D.math.ray;
         var passes =
-            QUnit.__passesVector(actual.origin, expected.origin, maxDifference) &&
-            QUnit.__passesVector(actual.direction, expected.direction, maxDifference);
+            QUnit.__passesVector(ray.origin(actual), ray.origin(expected), maxDifference) &&
+            QUnit.__passesVector(ray.direction(actual), ray.direction(expected), maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
 
     closeBox : function(actual, expected, maxDifference, message) {
-        var passes = actual.isEmpty() ? expected.isEmpty() :
-            QUnit.__passesVector(actual.min, expected.min, maxDifference) &&
-            QUnit.__passesVector(actual.max, expected.max, maxDifference);
+        var bbox = XML3D.math.bbox;
+        var passes = bbox.isEmpty(actual) ? bbox.isEmpty(expected) :
+            QUnit.__passesVector(bbox.min(actual), bbox.min(expected), maxDifference) &&
+            QUnit.__passesVector(bbox.max(actual), bbox.max(expected), maxDifference);
         QUnit.push(passes, actual, expected, message);
     },
 
@@ -97,19 +99,19 @@ QUnit.extend( QUnit, {
 });
 new (function() {
 
-    function isVec3(arg) { return arg.toString() == '[object XML3DVec3]';};
-    function isRotation(arg) { return arg.toString() == '[object XML3DRotation]';};
-    function isBox(arg) { return arg.toString() == '[object XML3DBox]';};
+    function isVec3(arg) { return arg.length === 3;}
+    function isRotation(arg) { return arg.length === 4}
+    function isBox(arg) { return arg.length === 6}
     function isMatrix(arg) {
-        if (arg.toString() == '[object XML3DMatrix]')
+        if (arg.length === 16)
             return true;
         if (window.WebKitCSSMatrix)
             return arg instanceof window.WebKitCSSMatrix;
         return false;
-    };
+    }
     function isFloatArray(arg) {
         return arg.toString() == '[object Float32Array]';
-    };
+    }
     function isIntArray(arg) {
         return arg.toString() == '[object Int32Array]';
     }
@@ -118,17 +120,17 @@ new (function() {
     QUnit.jsDump.setParser("object", function(a,b) {
         if(!a) return original(a,b);
         if(isVec3(a))
-            return "XML3DVec("+a.x+", "+a.y+", "+a.z+")";
+            return "vec3("+a[0]+", "+a[1]+", "+a[2]+")";
         if(isRotation(a))
-            return "XML3DRotation("+a.axis.x+", "+a.axis.y+", "+a.axis.z+", "+ a.angle+")";
+            return "vec4("+a[0]+", "+a[1]+", "+a[2]+", "+ a[3]+")";
         if(isMatrix(a))
-            return 'XML3DMatrix(\n' +
-            a.m11 + ", " +  a.m12 + ", " +  a.m13 + ", " +  a.m14 + "\n" +
-            a.m21 + ", " +  a.m22 + ", " +  a.m23 + ", " +  a.m24 + "\n" +
-            a.m31 + ", " +  a.m32 + ", " +  a.m33 + ", " +  a.m34 + "\n" +
-            a.m41 + ", " +  a.m42 + ", " +  a.m43 + ", " +  a.m44 + ")";
+            return 'mat(\n' +
+            a[0] + ", " +  a[1] + ", " +  a[2] + ", " +  a[3] + "\n" +
+            a[4] + ", " +  a[5] + ", " +  a[6] + ", " +  a[7] + "\n" +
+            a[8] + ", " +  a[9] + ", " +  a[10] + ", " +  a[11] + "\n" +
+            a[12] + ", " +  a[13] + ", " +  a[14] + ", " +  a[15] + ")";
         if(isBox(a))
-            return a.isEmpty() ? "XML3DBox(empty)" : "XML3DBox(("+a.min.x+", "+a.min.y+", "+a.min.z+"),("+a.max.x+", "+a.max.y+", "+a.max.z+"))";
+            return XML3D.math.bbox.isEmpty(a) ? "bbox(empty)" : "bbox(("+a[0]+", "+a[1]+", "+a[2]+"),("+a[3]+", "+a[4]+", "+a[5]+"))";
         if(isFloatArray(a)) {
             var str = "Float32Array[";
             for (var i=0; i < a.length; i++)

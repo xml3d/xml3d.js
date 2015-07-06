@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>XML3D Transparency Test Scene</title>
+  <link rel="stylesheet" type="text/css" media="all" href="frame.css">
+  <script type="text/javascript" src="../../build/output/xml3d.js"></script>
+</head>
+<body style="background-color: #fff;width:500px">
+<xml3d id="xml3DElem" style="width: 300px; height: 200px; background-color: black;">
+  <defs>
+    <transform id="t_identity"></transform>
+    <transform id="t_front" translation="0.5 0 1"></transform>
+    <transform id="t_side" translation="-3 0 0"></transform>
+    <data id="meshData">
+      <int id="indices" name="index">0 1 2 1 2 3</int>
+      <float3 id="positions" name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
+      <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
+      <float2 id="texcoords" name="texcoord">0.0 1.0 1.0 1.0 0.0 0.0 1.0 0.0</float2>
+    </data>
+    <material id="matte" script="urn:xml3d:material:matte">
+      <float name="transparency">0.5</float>
+    </material>
+    <material id="opaque" script="urn:xml3d:material:phong">
+      <float3 name="diffuseColor">0 0.2 0.8</float3>
+      <float name="transparency">0</float>
+      <float name="ambientIntensity">1</float>
+    </material>
+    <material id="non-opaque" script="urn:xml3d:material:phong">
+      <float3 name="diffuseColor">1 1 0</float3>
+      <float name="transparency">0.5</float>
+      <float name="ambientIntensity">1</float>
+    </material>
+    <material id="change" script="urn:xml3d:material:phong">
+      <float3 name="diffuseColor">0 0.2 0.8</float3>
+      <float id="change_transparencyAttribute" name="transparency">0</float>
+      <float name="ambientIntensity">1</float>
+    </material>
+
+  </defs>
+  <view id="myView"></view>
+  <group id="meshGroup" material="#opaque" transform="#t_identity">
+    <mesh src="#meshData"></mesh>
+  </group>
+  <group id="group1" transform="#t_front" material="#non-opaque">
+    <mesh src="#meshData"></mesh>
+  </group>
+  <group id="group2" transform="#t_side" material="#matte">
+    <mesh src="#meshData"></mesh>
+  </group>
+  <group id="group3" transform="#t_side" material="#change">
+    <mesh src="#meshData"></mesh>
+  </group>
+</xml3d>
+</body>
+</html>

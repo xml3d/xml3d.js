@@ -337,9 +337,13 @@ XML3D.createClass(RenderObject, RenderNode, {
         var c_trans = new XML3D.math.mat4.create();
 
         return function () {
-            this.getObjectSpaceBoundingBox(c_box);
-            this.getWorldMatrix(c_trans);
-            XML3D.math.bbox.transformAxisAligned(c_box, c_trans, c_box);
+            if(!this.visible) {
+                XML3D.math.bbox.empty(c_box);
+            } else {
+                this.getObjectSpaceBoundingBox(c_box);
+                this.getWorldMatrix(c_trans);
+                XML3D.math.bbox.transformAxisAligned(c_box, c_trans, c_box);
+            }
             this.setWorldSpaceBoundingBox(c_box);
             this.boundingBoxDirty = false;
         }

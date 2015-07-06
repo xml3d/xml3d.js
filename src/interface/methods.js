@@ -128,6 +128,8 @@ methods.groupGetLocalMatrix = function() {
  */
 methods.getWorldBoundingBox = function() {
     XML3D.flushDOMChanges();
+    // Visibility influences bounding box
+    XML3D.flushCSSChanges();
     var adapters = this._configured.adapters || {};
     for (var adapter in adapters) {
         if (adapters[adapter].getWorldBoundingBox) {
@@ -142,6 +144,8 @@ methods.getWorldBoundingBox = function() {
  */
 methods.getLocalBoundingBox = function() {
     XML3D.flushDOMChanges();
+    // Visibility influences bounding box
+    XML3D.flushCSSChanges();
     var adapters = this._configured.adapters || {};
     for (var adapter in adapters) {
         if (adapters[adapter].getLocalBoundingBox) {

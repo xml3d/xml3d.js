@@ -80,7 +80,7 @@ XML3D.createClass(Scene, EventEmitter, {
     createRootNode: function () {
         var pageEntry = this.pager.getPageEntry(RenderGroup.ENTRY_SIZE);
         var root = new RenderGroup(this, pageEntry, {
-            material: this.getDefaultMaterial()
+            material: this.getDefaultMaterial(), name: "@scene"
         });
         root.setWorldMatrix(XML3D.math.mat4.create());
         root.setLocalMatrix(XML3D.math.mat4.create());

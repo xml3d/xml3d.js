@@ -172,6 +172,8 @@ function onNodeRemoved(evt) {
     }
 }
 
+var observer = null;
+
 function onLoad() {
 
     Options.setOptionsFromQuery();
@@ -209,8 +211,7 @@ function onUnload() {
         XML3D.document.onunload();
 }
 
-var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver),
-    observer = null;
+
 
 function resolveMutations(mutations){
     for(var i = 0; i < mutations.length; ++i){
@@ -251,7 +252,7 @@ function resolveMutations(mutations){
     }
 }
 
-function flushObserver(){
+XML3D.flushCSSChanges = function(){
     if(observer){
         resolveMutations(observer.takeRecords());
     }

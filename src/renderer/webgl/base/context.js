@@ -45,7 +45,7 @@ EXTENSIONS.MULTIPLE_RENDER_TARGETS = 'WEBGL_draw_buffers';
 EXTENSIONS.DEPTH_TEXTURE = 'WEBGL_depth_texture';
 EXTENSIONS.FLOAT_COLOR_BUFFER = 'WEBGL_color_buffer_float';
 EXTENSIONS.FLOAT_TEXTURES = 'OES_texture_float';
-EXTENSIONS.UINT32_INDICES = 'OES_element_index_uint';
+EXTENSIONS.UINT32_INDICES = 'OES_element_index_uint'; //Also defined in xflow/utils/utils.js
 
 XML3D.extend(GLContext.prototype, {
     getXflowEntryWebGlData: function (entry) {

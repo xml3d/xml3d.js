@@ -44,7 +44,8 @@ JSShaderComposer.convertSysName = function (name) {
 XML3D.createClass(JSShaderComposer, AbstractShaderComposer, {
     setShaderInfo: function (config) {
         try {
-            this.extractedParams = Shade.extractParameters(this.sourceTemplate, {implementation: "xml3d-glsl-forward"}).shaderParameters;
+            var ast = Shade.parse(this.sourceTemplate, {loc: true});
+            this.extractedParams = Shade.extractParameters(ast, {implementation: "xml3d-glsl-forward"}).shaderParameters;
             // FIXME: Shader.js should always request position (in case
         } catch (e) {
             // We ignore errors here. They will reoccur when updating connected mesh closures

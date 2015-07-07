@@ -58,7 +58,7 @@ p.notifyChanged = function (evt) {
                 case "perspective":
                     this.perspectiveFetcher.update();
                     break;
-                case "fieldOfView":
+                case "fieldofview":
                     this.renderNode.updateFieldOfView(this.node.fieldOfView);
                     break;
                 default:

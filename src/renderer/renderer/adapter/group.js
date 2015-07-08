@@ -3,6 +3,7 @@ var Events = require("../../../interface/notification.js");
 
 var GroupRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, true, true);
+    this.style = window.getComputedStyle(node);
     this.createRenderNode();
 };
 
@@ -46,6 +47,17 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
             default:
                 XML3D.debug.logWarning("Unhandled connected adapter event for " + evt.key + " in group adapter");
         }
+    },
+
+     styleChangedCallback: function() {
+        TransformableAdapter.prototype.styleChangedCallback.call();
+        this.updateVisibility();
+    },
+
+    updateVisibility: function() {
+        var none = this.style.getPropertyValue("display").trim() == "none";
+        var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
+        this.renderNode.setLocalVisible(!(none || hidden));
     },
 
     dispose: function () {

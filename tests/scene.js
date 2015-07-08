@@ -81,8 +81,8 @@ test("Light callbacks", 6, function () {
     });
 
     stop(3);
-    light.setVisible(false);
-    light.setVisible(true);
+    light.setLocalVisible(false);
+    light.setLocalVisible(true);
     group.setLocalMatrix(XML3D.math.mat4.create());
 
     // REMOVE
@@ -153,11 +153,11 @@ test("Bounding Boxes", 7, function () {
     QUnit.closeArray(actualBB, new Float32Array([3, 3, -1, 5, 5, 1]), EPSILON, "New group's transform was applied correctly");
     group.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeArray(actualBB, new Float32Array([2, -2, -2, 6, 5, 2]), EPSILON, "Original group's BB was expanded correctly");
-    obj2.setVisible(false);
+    obj2.setLocalVisible(false);
     group.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 2, 2]), EPSILON, "Making new object invisible reverts original group's BB");
 
-    obj2.setVisible(true);
+    obj2.setLocalVisible(true);
     group.getWorldSpaceBoundingBox(actualBB);
     QUnit.closeArray(actualBB, new Float32Array([2, -2, -2,6, 5, 2]), EPSILON, "Object is visible again");
     group.setLocalMatrix(XML3D.math.mat4.create());

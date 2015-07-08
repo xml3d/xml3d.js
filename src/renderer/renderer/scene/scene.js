@@ -85,7 +85,6 @@ XML3D.createClass(Scene, EventEmitter, {
         root.setWorldMatrix(XML3D.math.mat4.create());
         root.setLocalMatrix(XML3D.math.mat4.create());
         root.transformDirty = false;
-        root.visible = true;
         return root;
     },
 

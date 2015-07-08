@@ -19,6 +19,13 @@ var RenderNode = function (type, scene, pageEntry, opt) {
     this.entrySize = pageEntry.size;
     this.transformDirty = true;
     this.children = [];
+    this.localVisible = true;
+    this.parent = null;
+
+    Object.defineProperties(this, {
+        visible: { get: function() { return this.parent ? (this.parent.visible && this.localVisible) : this.localVisible; } }
+    });
+
     this.setParent(opt.parent || scene.rootNode);
 };
 
@@ -27,6 +34,18 @@ XML3D.extend(RenderNode.prototype, {
     getChildren: function () {
         return this.children;
     },
+
+    setLocalVisible: function(visible) {
+        if (visible == this.setLocalVisible) {
+            return;
+        }
+        this.localVisible = visible;
+        this.visibilityChanged();
+        this.scene.requestRedraw && this.scene.requestRedraw("Visibility changed.");
+    },
+
+    // Overwrite if additional checks need to be made
+    visibilityChanged: function() {},
 
     getParent: function () {
         return this.parent;

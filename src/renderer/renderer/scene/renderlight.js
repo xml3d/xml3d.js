@@ -44,7 +44,6 @@ var RenderLight = function (scene, pageEntry, opt) {
     opt = opt || {};
     var configuration = opt.configuration || {};
     this.setLightType(configuration.model, configuration.dataNode);
-    this.visible = true;
 };
 RenderLight.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -68,10 +67,6 @@ XML3D.extend(RenderLight.prototype, {
         XML3D.debug.logError("RenderLight::setLocalMatrix not implemented");
     },
 
-    setVisible: function(visible) {
-        this.visible = visible;
-        this.lightValueChanged(); // TODO: Request rendering
-    },
 
     getFrustum: function (aspect) {
         this.scene.getBoundingBox(c_BoundingBox);
@@ -95,6 +90,11 @@ XML3D.extend(RenderLight.prototype, {
             // We change position / direction of the light
             this.lightValueChanged();
         }
+    },
+
+    visibilityChanged: function (newVal) {
+        // Visibility is a light parameter
+        this.lightValueChanged();
     },
 
     setTransformDirty: function () {

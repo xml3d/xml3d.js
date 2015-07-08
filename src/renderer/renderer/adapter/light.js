@@ -50,7 +50,7 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
 
     updateVisibility: function () {
         var none = this.style.getPropertyValue("display").trim() == "none";
-        this.renderNode.setVisible(!none);
+        this.renderNode.setLocalVisible(!none);
         this.factory.renderer.requestRedraw("Light visibility changed.");
     },
 

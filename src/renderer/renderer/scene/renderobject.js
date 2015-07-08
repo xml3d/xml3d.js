@@ -88,7 +88,6 @@ var RenderObject = function (scene, pageEntry, opt) {
     /** {Object?} **/
     this.override = null;
 
-    this.visible = true;
     this.pickable = true;
 };
 RenderObject.ENTRY_SIZE = ENTRY_SIZE;
@@ -349,10 +348,8 @@ XML3D.createClass(RenderObject, RenderNode, {
         }
     })(),
 
-    setVisible: function (newVal) {
-        this.visible = newVal;
+    visibilityChanged: function (newVal) {
         this.setBoundingBoxDirty();
-        this.scene.requestRedraw("Visibility changed.");
     },
 
     setPickable: function (value) {

@@ -103,8 +103,8 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
         var visible = !(none || hidden);
         var propagate = function(node) {
-            if (node.setVisible) {
-                 node.setVisible(visible)
+            if (node.setLocalVisible) {
+                 node.setLocalVisible(visible)
             }
             if (node.children) {
                 node.children.forEach(propagate);

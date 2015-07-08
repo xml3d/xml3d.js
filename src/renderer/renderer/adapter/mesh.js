@@ -49,7 +49,7 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     updateVisibility: function() {
         var none = this.style.getPropertyValue("display").trim() == "none";
         var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
-        this.renderNode.setVisible(!(none || hidden));
+        this.renderNode.setLocalVisible(!(none || hidden));
         this.renderNode.setPickable(!none);
     },
 

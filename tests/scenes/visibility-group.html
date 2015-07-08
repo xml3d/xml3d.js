@@ -86,6 +86,7 @@
 
        mesh = document.createElement("mesh");
        mesh.setAttribute("src", "#meshdata");
+       mesh.style.display = "inline";
        group.appendChild(mesh);
      };
 
@@ -112,7 +113,7 @@
        <li><a href="#" onclick="makeVisibleClass()">Make group visible (remove class)</a></li>
        <li><a href="#" onclick="makeInvisibleAPI()">Make group invisible (using style API)</a></li>
        <li><a href="#" onclick="addVisibleMeshToInvisibleGroup()">Add mesh to invisible group</a></li>
-       <li><a href="#" onclick="addInvisibleMeshToVisibleGroup()">Add mesh to invisible group</a></li>
+       <li><a href="#" onclick="addInvisibleMeshToVisibleGroup()">Add invisible mesh to visible group</a></li>
      </ol>
    </div>
  

@@ -62,7 +62,8 @@ test("Change active view via script", 8, function() {
     equal(x.activeView, "#defaultView", "Initial active view is #default"); // 3
 
     var v = this.doc.getElementById("defaultView");
-    QUnit.closeMatrix(v.getViewMatrix(), new XML3DMatrix().translate(0,0,-3), EPSILON, "Check view matrix"); // 4
+    var m = XML3D.math.mat4.create();
+    QUnit.closeMatrix(v.getViewMatrix(), XML3D.math.mat4.translate(m, m, [0,0,-3]), EPSILON, "Check view matrix"); // 4
 
     x.activeView = "#viewOrientationTest";
     this.win.XML3D.flushDOMChanges();
@@ -71,7 +72,7 @@ test("Change active view via script", 8, function() {
 });
 
 
-test("Test mesh.getLocalBoundingBox", 4, function() {
+test("Test mesh.getLocalBoundingBox", 3, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("xml3DElem");
@@ -80,11 +81,7 @@ test("Test mesh.getLocalBoundingBox", 4, function() {
     var mesh = this.doc.getElementById("myTransformedMesh");
     x.addEventListener("framedrawn", function(n) {
         var bb = mesh.getLocalBoundingBox();
-        var max = bb._max._data;
-        var min = bb._min._data;
-
-        deepEqual([max[0], max[1], max[2]], [1,1,0], "BBox max is (1,1,0)");
-        deepEqual([min[0], min[1], min[2]], [-1,-1,0], "BBox min is (-1,-1,0)");
+        QUnit.closeArray(bb, [1,1,0,-1,-1,0], "Local box is has max [1, 1, 0] and min [-1, -1, 0]");
         start();
     });
     stop();
@@ -92,7 +89,7 @@ test("Test mesh.getLocalBoundingBox", 4, function() {
 
 });
 
-test("Test mesh.getWorldBoundingBox", 4, function() {
+test("Test mesh.getWorldBoundingBox", 3, function() {
     // 1: Found frame
     // 2: Scene loaded
     var x = this.doc.getElementById("xml3DElem");
@@ -101,11 +98,8 @@ test("Test mesh.getWorldBoundingBox", 4, function() {
     var mesh = this.doc.getElementById("myTransformedMesh");
     x.addEventListener("framedrawn", function(n) {
         var bb = mesh.getWorldBoundingBox();
-        var max = bb._max._data;
-        var min = bb._min._data;
+        QUnit.closeArray(bb, [1,1,-3,-1,-1,-3], "World box has max [1, 1, -3] and min [-1, -1, -3]");
 
-        deepEqual([max[0], max[1], max[2]], [1,1,-3], "BBox max is (1,1,-3)");
-        deepEqual([min[0], min[1], min[2]], [-1,-1,-3], "BBox min is (-1,-1,-3)");
         start();
     });
     stop();
@@ -570,15 +564,15 @@ test("Camera setDirection/upVector", 4, function () {
         QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Camera looking down z axis, transparent");
         return s;
     }).then(function (s) {
-        view.setDirection(new XML3DVec3(1, 0, 0));
+        view.setDirection(XML3D.math.vec3.fromValues(1, 0, 0));
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
         QUnit.closeArray(pick, [255, 0, 0, 255], PIXEL_EPSILON, "Camera looking to the right, red");
         return s;
     }).then(function (s) {
-        view.setUpVector(new XML3DVec3(0, -1, 0));
-        view.setDirection(new XML3DVec3(-1, 0, 0));
+        view.setUpVector(XML3D.math.vec3.fromValues(0, -1, 0));
+        view.setDirection(XML3D.math.vec3.fromValues(-1, 0, 0));
         return s;
     }).then(promiseSceneRendered).then(function (s) {
         var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);

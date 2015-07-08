@@ -11,6 +11,8 @@ QUnit.extend( QUnit, {
     },
 
     closeVector : function(actual, expected, maxDifference, message) {
+        if (actual.data) actual = actual.data;
+        if (expected.data) expected = expected.data;
         var passes = (actual === expected) ||
             QUnit.__passesVector(actual, expected, maxDifference);
         QUnit.push(passes, actual, expected, message);
@@ -27,6 +29,14 @@ QUnit.extend( QUnit, {
         if(!actual || !expected) {
             QUnit.push(actual === expected, actual, expected, message);
             return;
+        }
+
+        if (actual.data) {
+            actual = actual.data;
+        }
+
+        if (expected.data) {
+            expected = expected.data;
         }
 
         var passes =

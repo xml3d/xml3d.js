@@ -13,10 +13,10 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
         var m = XML3D.math.mat4.create();
-        var axisAngle = this.node.orientation;
-        XML3D.math.mat4.fromRotation(m, axisAngle[3], axisAngle);
+        var aa = this.node.orientation;
+        XML3D.math.mat4.fromRotation(m, aa.angle, aa.axis.data);
         this.renderNode = this.factory.renderer.scene.createRenderView({
-            position: this.node.position,
+            position: this.node.position.data,
             orientation: m,
             fieldOfView: this.node.fieldOfView,
             parent: parentNode
@@ -26,8 +26,8 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
 
     /* Interface method */
     getViewMatrix: function () {
-        var m = XML3D.math.mat4.create();
-        this.renderNode.getWorldToViewMatrix(m);
+        var m = new XML3D.Mat4();
+        this.renderNode.getWorldToViewMatrix(m.data);
         return m;
     },
 
@@ -36,8 +36,8 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
      * @return {mat4}
      */
     getWorldMatrix: function () {
-        var m = XML3D.math.mat4.create();
-        this.renderNode.getViewToWorldMatrix(m);
+        var m = new XML3D.Mat4();
+        this.renderNode.getViewToWorldMatrix(m.data);
         return m;
     },
 
@@ -46,12 +46,12 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
         switch (name) {
             case "orientation":
                 var m = XML3D.math.mat4.create();
-                var axisAngle = this.node.orientation;
-                XML3D.math.mat4.fromRotation(m, axisAngle[3], axisAngle);
+                var aa = this.node.orientation;
+                XML3D.math.mat4.fromRotation(m, aa.angle, aa.axis.data);
                 this.renderNode.updateOrientation(m);
                 break;
             case "position":
-                this.renderNode.updatePosition(this.node.position);
+                this.renderNode.updatePosition(this.node.position.data);
                 break;
             case "projection":
                 this.projectionFetcher.update();

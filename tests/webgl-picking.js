@@ -62,10 +62,10 @@ test("Pick with large object ids", function() {
 
 });
 
-test("xml3d Apadater getElementByPoint test", function() {
+test("xml3d Adapter getElementByPoint test", function() {
     var xml3dElement = this.doc.getElementById("xml3DElem");
 
-    var position = XML3D.math.vec3.create(), normal = XML3D.math.vec3.create();
+    var position = new XML3D.Vec3(), normal = new XML3D.Vec3();
     var element = xml3dElement.getElementByPoint(88,60, position , normal);
     ok(element, "Object picked");
     strictEqual(element, this.doc.getElementById("pickingMesh1"));
@@ -73,8 +73,8 @@ test("xml3d Apadater getElementByPoint test", function() {
 
     element = xml3dElement.getElementByPoint(5,5, position, normal);
     strictEqual(element, null, "Nothing picked");
-    ok(isNaN(position[0]) && isNaN(position[1]) && isNaN(position[2]), "Picked correct position");
-    ok(isNaN(normal[0]) && isNaN(normal[1]) && isNaN(normal[2]), "Picked correct normal");
+    ok(isNaN(position.data[0]) && isNaN(position.data[1]) && isNaN(position.data[2]), "Picked correct position");
+    ok(isNaN(normal.data[0]) && isNaN(normal.data[1]) && isNaN(normal.data[2]), "Picked correct normal");
 
     element = xml3dElement.getElementByPoint(88,60, position , normal);
     ok(element, "Object picked");
@@ -198,8 +198,8 @@ test("Position and normal with getElementByRay", 6, function() {
 
     var ray = XML3D.math.ray.fromOriginDirection([-10,0,-10], [1,0,0]);
 
-    var foundNormal = XML3D.math.vec3.create();
-    var foundPosition = XML3D.math.vec3.create();
+    var foundNormal = new XML3D.Vec3();
+    var foundPosition = new XML3D.Vec3();
 
     var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
     QUnit.closeVector(foundPosition, XML3D.math.vec3.fromValues(-1,0.02,-9.98), EPSILON, "Found correct position");
@@ -207,8 +207,8 @@ test("Position and normal with getElementByRay", 6, function() {
 
     XML3D.math.ray.setOrigin(ray, XML3D.math.vec3.fromValues(10, 0, -10));
     obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
-    ok(isNaN(foundPosition[0]) && isNaN(foundPosition[1]) && isNaN(foundPosition[2]), "Position returns NaN for no hit object");
-    ok(isNaN(foundNormal[0]) && isNaN(foundNormal[1]) && isNaN(foundNormal[2]), "Normal returns NaN for no hit object");
+    ok(isNaN(foundPosition.data[0]) && isNaN(foundPosition.data[1]) && isNaN(foundPosition.data[2]), "Position returns NaN for no hit object");
+    ok(isNaN(foundNormal.data[0]) && isNaN(foundNormal.data[1]) && isNaN(foundNormal.data[2]), "Normal returns NaN for no hit object");
 });
 
 test("Overlapping objects with getElementByRay", 6, function() {
@@ -219,8 +219,8 @@ test("Overlapping objects with getElementByRay", 6, function() {
 
     var ray = XML3D.math.ray.fromOriginDirection([-5,0,100], [0,0,-1]);
 
-    var foundNormal = XML3D.math.vec3.create();
-    var foundPosition = XML3D.math.vec3.create();
+    var foundNormal = new XML3D.Vec3();
+    var foundPosition = new XML3D.Vec3();
 
     var obj = xml3dElement.getElementByRay(ray, foundPosition, foundNormal);
     equal(obj, target, "Returned the correct object");

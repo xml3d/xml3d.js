@@ -97,14 +97,14 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
     })(),
 
     getLocalMatrix: function () {
-        var m = XML3D.math.mat4.create();
-        this.renderNode.getLocalMatrix(m);
+        var m = new XML3D.Mat4();
+        this.renderNode.getLocalMatrix(m.data);
         return m;
     },
 
     getWorldMatrix: function () {
-        var m = XML3D.math.mat4.create();
-        this.renderNode.getWorldMatrix(m);
+        var m = new XML3D.Mat4();
+        this.renderNode.getWorldMatrix(m.data);
         return m;
     }
 });

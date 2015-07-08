@@ -49,8 +49,8 @@ test("xml3d.getElementByPoint(): do not pick invisible object", function() {
 
 test("xml3d.getElementByPoint(): picked mesh 'm1'", function() {
 
-    var hitP = XML3D.math.vec3.create();
-    var hitN = XML3D.math.vec3.create();
+    var hitP = new XML3D.Vec3();
+    var hitN = new XML3D.Vec3();
 
     var m = this.xml3dEl.getElementByPoint(212, 214, hitP, hitN);
 
@@ -66,8 +66,8 @@ test("xml3d.getElementByPoint(): picked mesh 'm1'", function() {
 
 test("xml3d.getElementByPoint(): picked mesh 'm2'", function() {
 
-    var hitP = XML3D.math.vec3.create();
-    var hitN = XML3D.math.vec3.create();
+    var hitP = new XML3D.Vec3();
+    var hitN = new XML3D.Vec3();
 
     var m = this.xml3dEl.getElementByPoint(305, 211, hitP, hitN);
 

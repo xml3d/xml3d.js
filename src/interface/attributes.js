@@ -275,7 +275,7 @@ handlers.Vec3AttributeHandler = function(id, defaultValue) {
             if (!storage[id]) {
                 that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
-            return XML3D.math.vec3.clone(storage[id]);
+            return new XML3D.Vec3(storage[id]);
         },
         set : function(value) {
             var storage = getStorage(this);
@@ -283,11 +283,12 @@ handlers.Vec3AttributeHandler = function(id, defaultValue) {
                 that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
             var v = storage[id];
-            if (value.length !== 3 || isNaN(value[0]) || isNaN(value[1]) || isNaN(value[2])) {
+            var val = value.data ? value.data : value;
+            if (val.length !== 3 || isNaN(val[0]) || isNaN(val[1]) || isNaN(val[2])) {
                 XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
                 v = defaultValue;
             } else {
-                v[0] = value[0]; v[1] = value[1]; v[2] = value[2];
+                v[0] = val[0]; v[1] = val[1]; v[2] = val[2];
             }
             this.setAttribute(id, XML3D.math.vec3.toDOMString(v));
         }
@@ -325,7 +326,7 @@ handlers.Vec4AttributeHandler = function(id, defaultValue) {
             if (!storage[id]) {
                 that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
-            return XML3D.math.vec4.clone(storage[id]);
+            return new XML3D.Vec4(storage[id]);
         },
         set : function(value) {
             var storage = getStorage(this);
@@ -333,13 +334,14 @@ handlers.Vec4AttributeHandler = function(id, defaultValue) {
                 that.setFromAttribute(this.getAttribute(id), null, this, storage, true);
             }
             var v = storage[id];
-            if (value.length !== 4 || isNaN(value[0]) || isNaN(value[1]) || isNaN(value[2]) || isNaN(value[3])) {
+            var val = value.data ? value.data : value;
+            if (val.length !== 4 || isNaN(val[0]) || isNaN(val[1]) || isNaN(val[2]) || isNaN(val[3])) {
                 XML3D.debug.logWarning("Invalid attribute ["+id+"] value: " + value, this);
                 XML3D.math.vec4.copy(v, defaultValue);
             } else {
-                XML3D.math.quat.copy(v, value);
+                XML3D.math.quat.copy(v, val);
             }
-            this.setAttribute(id, XML3D.math.vec4.toDOMString(value));
+            this.setAttribute(id, XML3D.math.vec4.toDOMString(v));
         }
     };
 };

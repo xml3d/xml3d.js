@@ -18,60 +18,49 @@ methods.xml3dGetElementByRay = function(ray, hitPoint, hitNormal) {
 };
 
 methods.viewGetDirection = function() {
-    var dir = vec3.fromValues(0,0,-1);
-    vec3.transformQuat(dir, dir, this.orientation);
-    return dir;
+    var dir = new XML3D.Vec3().set(0,0,-1);
+    var orientation = new XML3D.Quat().setFromAxisAngle(this.orientation);
+    return dir.transformQuat(orientation);
 };
 
 methods.viewSetPosition = function(pos) {
     this.position = pos;
 };
 
-var tmpX = vec3.create();
-var tmpY = vec3.create();
-var tmpZ = vec3.create();
-
 methods.viewSetDirection = function(direction) {
-    direction = direction || vec3.fromValues(0,0,-1);
-    vec3.normalize(direction, direction);
-    var up = vec3.fromValues(0,1,0);
-    var orientation = XML3D.math.quat.fromAxisAngle(this.orientation);
-    vec3.transformQuat(up, up, orientation);
-    vec3.normalize(up, up);
+    direction.data ? direction.normalize() : vec3.normalize(direction, direction);
+    var up = new XML3D.Vec3().set(0,1,0);
+    var orientation = new XML3D.Quat().setFromAxisAngle(this.orientation);
+    up.transformQuat(orientation).normalize();
 
-    vec3.cross(tmpX, direction, up);
-    if(!vec3.length(tmpX)) {
-        vec3.transformQuat(tmpX, vec3.fromValues(1,0,0), orientation);
+    var basisX = new XML3D.Vec3(direction).cross(up);
+    if (!basisX.length()) {
+        basisX.set(1,0,0).transformQuat(orientation);
     }
-    vec3.cross(tmpY, tmpX, direction);
-    vec3.negate(tmpZ, direction);
+    var basisY = new XML3D.Vec3(basisX).cross(direction);
+    var basisZ = new XML3D.Vec3(direction).negate();
 
-    var q = XML3D.math.quat.create();
-    XML3D.math.quat.setFromBasis(q, tmpX, tmpY, tmpZ);
-    this.orientation = XML3D.math.vec4.fromQuat(q);
+    var q = new XML3D.Quat().setFromBasis(basisX, basisY, basisZ);
+    this.orientation = new XML3D.Vec4().setFromQuat(q);
 };
 
 methods.viewSetUpVector = function(up) {
-    up = up || vec3.fromValues(0,1,0);
-    vec3.normalize(up, up);
-    var orientation = XML3D.math.quat.fromAxisAngle(this.orientation);
-    var r = XML3D.math.quat.create();
-    XML3D.math.quat.rotationTo(r, [0,1,0], up);
-    XML3D.math.quat.mul(r, orientation, r);
-    XML3D.math.quat.normalize(r,r);
-    this.orientation = XML3D.math.vec4.fromQuat(r);
+    up.data ? up.normalize() : vec3.normalize(up, up);
+    var orientation = new XML3D.Quat().setFromAxisAngle(this.orientation);
+    var r = new XML3D.Quat().setFromRotationTo([0,1,0], up);
+    orientation.mul(r).normalize();
+    this.orientation = new XML3D.Vec4().setFromQuat(orientation);
 };
 
 methods.viewGetUpVector = function() {
-    var up = vec3.fromValues(0, 1, 0);
-    var orientation = XML3D.math.quat.fromAxisAngle(this.orientation);
-    vec3.transformQuat(up, up, orientation);
-    return up;
+    var up = new XML3D.Vec3().set(0, 1, 0);
+    var orientation = new XML3D.Quat().setFromAxisAngle(this.orientation);
+    return up.transformQuat(orientation);
 };
 
 methods.viewLookAt = function(point) {
-    var dir = vec3.create();
-    vec3.sub(dir, point, this.position);
+    var dir = new XML3D.Vec3();
+    vec3.sub(dir.data, point.data ? point.data : point, this.position.data);
     this.setDirection(dir);
 };
 
@@ -85,11 +74,8 @@ methods.viewGetViewMatrix = function() {
     }
     // Fallback implementation
     var p = this.position;
-    var r = XML3D.math.quat.fromAxisAngle(this.orientation);
-    var mat = XML3D.math.mat4.create();
-    XML3D.math.mat4.fromRotationTranslation(mat, r, p);
-    XML3D.math.mat4.invert(mat, mat);
-    return mat;
+    var r = new XML3D.Quat().setFromAxisAngle(this.orientation);
+    return new XML3D.Mat4().setFromRotationTranslation(r,p).invert();
 };
 
 methods.xml3dGetElementByPoint = function(x, y, hitPoint, hitNormal) {
@@ -122,7 +108,7 @@ methods.groupGetLocalMatrix = function() {
             return adapters[adapter].getLocalMatrix();
         }
     }
-    return XML3D.math.mat4.create();
+    return new XML3D.Mat4();
 };
 
 /**
@@ -177,7 +163,7 @@ methods.XML3DGraphTypeGetWorldMatrix = function() {
             return adapters[adapter].getWorldMatrix();
         }
     }
-    return XML3D.math.mat4.create();
+    return new XML3D.Mat4();
 };
 
 methods.videoPlay = function() {

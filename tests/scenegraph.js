@@ -157,7 +157,7 @@ module("Bounding Boxes", {
             that.xml3dElement = that.doc.getElementById("myXml3d");
             start();
         };
-        loadDocument("scenes/boundingBox.xhtml", this.cb);
+        loadDocument("scenes/boundingBox.html", this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -228,16 +228,17 @@ test("Groups and Meshes, World space", 11, function() {
 
 test("Hidden groups", 5, function() {
     var root = this.doc.getElementById("g_Root");
-    root.visible = false;
+    //root.style.display = 'none';
     var group = this.doc.getElementById("g_PartiallyHidden");
-    group.visible = true;
+    group.style.display = 'inherit';
+    this.win.XML3D.flushDOMChanges();
 
     var boundingBox = group.getWorldBoundingBox();
     QUnit.closeArray(boundingBox, [2,1.5,-1,4,3.5,1], EPSILON, "Hidden child group: (2 1.5 -1) to (4 3.5 1)");
-    this.doc.getElementById("invisible_cube").visible = true;
+    this.doc.getElementById("invisible_cube").style.display = 'inherit';
     boundingBox = group.getWorldBoundingBox();
     QUnit.closeArray(boundingBox, [-4,1.5,-1,4,3.5,1], EPSILON, "Visible child group: (-4 1.5 -1) to (4 3.5 1)");
-    this.doc.getElementById("invisible_mesh").visible = false;
+    this.doc.getElementById("invisible_mesh").style.display = 'none';
     boundingBox = group.getWorldBoundingBox();
     QUnit.closeArray(boundingBox, [2,1.5,-1,4,3.5,1], EPSILON, "Hidden child mesh: (2 1.5 -1) to (4 3.5 1)");
 });

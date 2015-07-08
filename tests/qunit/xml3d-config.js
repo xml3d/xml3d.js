@@ -266,13 +266,13 @@ function promiseOneSceneCompleteAndRendered(xml3dElement) {
     return deferred.promise;
 }
 
-function promiseSceneRendered(xml3dElement) {
+function promiseSceneRendered(xml3dElement, returnEvent) {
     var renderer = getRenderer(xml3dElement);
     var glContext = getContextForXml3DElement(xml3dElement);
     var deferred = Q.defer();
 
     var first = true;
-    var f = function() {
+    var f = function(e) {
         if(first) {
             first = false;
             renderer.requestRedraw("test-triggered");
@@ -281,13 +281,17 @@ function promiseSceneRendered(xml3dElement) {
         xml3dElement.removeEventListener("framedrawn", f, true);
         XML3DUnit.getPixelValue(glContext, 1, 1);
         window.setTimeout(function() {
-            deferred.resolve(xml3dElement);
+            deferred.resolve(returnEvent ? e : xml3dElement);
         }, 100);
     };
 
     xml3dElement.addEventListener("framedrawn",f,false);
     renderer.requestRedraw("test-triggered");
     return deferred.promise;
+}
+
+function promiseSceneRenderedEvent(xml3dElement) {
+    return promiseSceneRendered(xml3dElement, true);
 }
 
 function getWebGLAdapter(x) {

@@ -11,8 +11,6 @@ var WORLD_MATRIX_OFFSET = 0;
 var RenderNode = function (type, scene, pageEntry, opt) {
     opt = opt || {};
 
-    var visible = (opt.visible !== false);
-
     this.scene = scene;
     this.type = type;
     this.name = opt.name || "";
@@ -21,11 +19,14 @@ var RenderNode = function (type, scene, pageEntry, opt) {
     this.entrySize = pageEntry.size;
     this.transformDirty = true;
     this.children = [];
+    this.localVisible = true;
+    this.parent = null;
+
+    Object.defineProperties(this, {
+        visible: { get: function() { return this.parent ? (this.parent.visible && this.localVisible) : this.localVisible; } }
+    });
+
     this.setParent(opt.parent || scene.rootNode);
-    // The global visibility depends on visibility of parents
-    this.visible = undefined;
-    // and will be evaluated by setLocalVisible
-    this.setLocalVisible(visible);
 };
 
 XML3D.extend(RenderNode.prototype, {
@@ -33,6 +34,18 @@ XML3D.extend(RenderNode.prototype, {
     getChildren: function () {
         return this.children;
     },
+
+    setLocalVisible: function(visible) {
+        if (visible == this.setLocalVisible) {
+            return;
+        }
+        this.localVisible = visible;
+        this.visibilityChanged();
+        this.scene.requestRedraw && this.scene.requestRedraw("Visibility changed.");
+    },
+
+    // Overwrite if additional checks need to be made
+    visibilityChanged: function() {},
 
     getParent: function () {
         return this.parent;
@@ -43,9 +56,6 @@ XML3D.extend(RenderNode.prototype, {
         if (parent && parent.addChild) {
             parent.addChild(this);
         }
-        // Reevaluate visibility, which might change due to
-        // invisibility of parent
-        this.setLocalVisible(this.localVisible);
     },
 
     traverse: function (callback) {
@@ -77,31 +87,8 @@ XML3D.extend(RenderNode.prototype, {
         }
     },
 
-    isVisible: function () {
-        return this.visible;
-    },
-
     setTransformDirty: function () {
         this.transformDirty = true;
-    },
-
-    setLocalVisible: function (newVal) {
-        this.localVisible = newVal;
-        this.setVisible(this.parent && this.parent.isVisible() && newVal);
-    },
-
-    setVisible: function (newVal) {
-        var downstream = newVal;
-        if (this.localVisible === false) {
-            downstream = false;
-        }
-        if (this.visible === downstream) {
-            return
-        }
-        this.visible = downstream;
-        this.children.forEach(function (obj) {
-            obj.setVisible(downstream);
-        });
     },
 
     remove: function () {

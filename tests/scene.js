@@ -48,7 +48,7 @@ test("Light attributes", 9, function () {
     equal(lightModels.directional.lightModels.length, 1, "Light without type is in directional container (default)");
 });
 
-test("Light callbacks", 8, function () {
+test("Light callbacks", 6, function () {
 
     var dataNode = new DataNode(false);
 
@@ -80,11 +80,9 @@ test("Light callbacks", 8, function () {
         start();
     });
 
-    stop(5);
-    group.setLocalVisible(false);
-    group.setLocalVisible(true);
-    light.setVisible(false);
-    light.setVisible(true);
+    stop(3);
+    light.setLocalVisible(false);
+    light.setLocalVisible(true);
     group.setLocalMatrix(XML3D.math.mat4.create());
 
     // REMOVE

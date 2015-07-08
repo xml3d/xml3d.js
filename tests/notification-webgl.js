@@ -67,10 +67,10 @@ test("Float attribute notification tests", 2, function() {
 });
 
 test("Boolean attribute notification tests", 2, function() {
-    e = document.createElementNS(XML3D.xml3dNS, "view");
+    e = document.createElement("float");
     var a = this.factory.getAdapter(e);
-    e.setAttribute("visible", "false");
-    e.visible = true;
+    e.setAttribute("param", "true");
+    e.param = false;
     XML3D.flushDOMChanges();
 });
 

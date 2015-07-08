@@ -7,7 +7,7 @@ module("Asset and Model", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/asset-basic.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/asset-basic.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -82,33 +82,7 @@ test("Modify material assignment", 6, function() {
     stop();
 });
 
-test("Modify asset src", 4, function() {
-    var xTest = this.doc.getElementById("xml3dTest"),
-        glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
-    var self = this;
 
-    var testStep = 0;
-    function onFrameDrawn(){
-        if(testStep == 0){
-            if( XML3DUnit.getPixelValue(glTest, 250, 150)[0] == 0)
-                return;
-            testStep++;
-            self.doc.getElementById("mm2").src = "#asset2Alt";
-        }
-        else if(testStep == 1){
-            if( XML3DUnit.getPixelValue(glTest, 69, 121)[3] != 0)
-                return;
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 121), [0,0,0,0], PIXEL_EPSILON,
-                "Old Rectangle removed" );
-            QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 69, 150), [255,127,255,255], PIXEL_EPSILON,
-                "New Rectangle added" );
-            start();
-        }
-    }
-    xTest.addEventListener("framedrawn", onFrameDrawn);
-    hTest.draw();
-    stop();
-});
 
 test("Modify asset pick", 6, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
@@ -217,7 +191,7 @@ module("Asset and Model", {
             that.doc = document.getElementById("xml3dframe").contentDocument;
             start();
         };
-        loadDocument("scenes/asset-classnames.xhtml"+window.location.search, this.cb);
+        loadDocument("scenes/asset-classnames.html"+window.location.search, this.cb);
     },
     teardown : function() {
         var v = document.getElementById("xml3dframe");
@@ -424,54 +398,29 @@ test("Nested Assets" , function() {
     frameRendererd();
 });
 
+
+
 module("Asset and Model", {
-    setup : function() {
-        stop();
-        var that = this;
-        this.cb = function(e) {
-            ok(true, "Scene loaded");
-            that.doc = document.getElementById("xml3dframe").contentDocument;
-            start();
-        };
-        loadDocument("scenes/asset-scenegraph.xhtml"+window.location.search, this.cb);
-    },
-    teardown : function() {
-        var v = document.getElementById("xml3dframe");
-        v.removeEventListener("load", this.cb, true);
-    }
+
 });
 
-test("Model visibility", 6, function() {
-    var xTest = this.doc.getElementById("xml3dTest"),
-        glTest = getContextForXml3DElement(xTest),
-        hTest = getHandler(xTest);
+test("Modify asset src", 3, function () {
+    stop();
 
-    var group = this.doc.getElementById("visibilityGroup");
-    var model = this.doc.createElement("model");
-    model.setAttribute("src", "#asset2");
-    model.setAttribute("visible", "false");
-    group.appendChild(model);
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/asset-basic.html" + window.location.search);
 
-    hTest.draw();
-    QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [0,0,0,0], PIXEL_EPSILON,
-        "Model was added invisible" );
+    var test = frameLoaded.then(function (doc) {
+        var scene = doc.querySelector("#xml3dTest");
+        doc.getElementById("mm2").src = "#asset2Alt";
+        return scene;
+    }).then(promiseSceneRendered).then(function (s) {
+        var pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 69, 121);
+        QUnit.closeArray(pick, [0, 0, 0, 0], PIXEL_EPSILON, "Old Rectangle removed");
+        pick = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 69, 150);
+        QUnit.closeArray(pick, [255, 127, 255, 255], PIXEL_EPSILON, "New Rectangle added");
+        return s;
+    });
 
-    model.setAttribute("visible", "true");
-    XML3D.flushDOMChanges();
-    hTest.draw();
-    QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [255,128,128,255], PIXEL_EPSILON,
-        "Model is now visible" );
+    test.fin(QUnit.start).done();
 
-    group.setAttribute("visible", "false");
-    XML3D.flushDOMChanges();
-    hTest.draw();
-    QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [0,0,0,0], PIXEL_EPSILON,
-        "Group visibility inherited by model" );
-
-    model.setAttribute("visible", "false");
-    group.setAttribute("visible", "true");
-    XML3D.flushDOMChanges();
-    hTest.draw();
-    QUnit.closeArray(XML3DUnit.getPixelValue(glTest, 250, 150), [0,0,0,0], PIXEL_EPSILON,
-        "Set model invisible, then group visible, model is invisible" );
 });

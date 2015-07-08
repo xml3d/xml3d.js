@@ -5,34 +5,6 @@ var C = require("./constants.js");
 var Scene= require("./scene.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 
-/**
- * @interface
- */
-var IRenderObject = function () {
-};
-IRenderObject.prototype.getModelViewMatrix = function () {
-};
-IRenderObject.prototype.getModelViewProjectionMatrix = function () {
-};
-IRenderObject.prototype.getModelMatrixN = function () {
-};
-IRenderObject.prototype.getModelViewMatrixN = function () {
-};
-IRenderObject.prototype.getObjectSpaceBoundingBox = function () {
-};
-IRenderObject.prototype.getWorldSpaceBoundingBox = function () {
-};
-IRenderObject.prototype.updateWorldSpaceMatrices = function () {
-};
-IRenderObject.prototype.isVisible = function () {
-};
-IRenderObject.prototype.setTransformDirty = function () {
-};
-IRenderObject.prototype.setMaterial = function () {
-};
-IRenderObject.prototype.hasTransparency = function () {
-};
-
 // Entry:
 /** @const */
 var WORLD_MATRIX_OFFSET = 0;
@@ -116,7 +88,7 @@ var RenderObject = function (scene, pageEntry, opt) {
     /** {Object?} **/
     this.override = null;
 
-
+    this.pickable = true;
 };
 RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
@@ -364,19 +336,28 @@ XML3D.createClass(RenderObject, RenderNode, {
         var c_trans = new XML3D.math.mat4.create();
 
         return function () {
-            this.getObjectSpaceBoundingBox(c_box);
-            this.getWorldMatrix(c_trans);
-            XML3D.math.bbox.transformAxisAligned(c_box, c_trans, c_box);
+            if(!this.visible) {
+                XML3D.math.bbox.empty(c_box);
+            } else {
+                this.getObjectSpaceBoundingBox(c_box);
+                this.getWorldMatrix(c_trans);
+                XML3D.math.bbox.transformAxisAligned(c_box, c_trans, c_box);
+            }
             this.setWorldSpaceBoundingBox(c_box);
             this.boundingBoxDirty = false;
         }
     })(),
 
-    setLocalVisible: function (newVal) {
-        this.localVisible = newVal;
-        this.setVisible(this.parent && this.parent.isVisible() && newVal);
+    visibilityChanged: function (newVal) {
         this.setBoundingBoxDirty();
     },
+
+    setPickable: function (value) {
+        if (this.pickable == value)
+            return;
+        this.pickable = value;
+    },
+
 
     getProgram: function () {
         return this.drawable.getProgram();

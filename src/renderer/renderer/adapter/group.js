@@ -3,6 +3,7 @@ var Events = require("../../../interface/notification.js");
 
 var GroupRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, true, true);
+    this.style = window.getComputedStyle(node);
     this.createRenderNode();
 };
 
@@ -13,7 +14,7 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode && parent.getRenderNode();
         this.renderNode = this.getScene().createRenderGroup({
-            parent: parentNode, visible: this.node.visible, name: this.node.id
+            parent: parentNode, name: this.node.id
         });
         this.updateLocalMatrix();
         this.updateMaterialHandler();
@@ -48,6 +49,17 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
         }
     },
 
+     styleChangedCallback: function() {
+        TransformableAdapter.prototype.styleChangedCallback.call();
+        this.updateVisibility();
+    },
+
+    updateVisibility: function() {
+        var none = this.style.getPropertyValue("display").trim() == "none";
+        var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
+        this.renderNode.setLocalVisible(!(none || hidden));
+    },
+
     dispose: function () {
         // Dispose all children as well
         this.traverse(function (adapter) {
@@ -71,11 +83,8 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
 
         return function () {
             var bbox = XML3D.math.bbox.create();
-            if (!this.renderNode.visible) {
-                return bbox;
-            }
             Array.prototype.forEach.call(this.node.childNodes, function (c) {
-                if (c.getLocalBoundingBox && c.visible) {
+                if (c.getLocalBoundingBox) {
                     childBB = c.getLocalBoundingBox();
                     XML3D.math.bbox.extendWithBox(bbox, childBB);
 

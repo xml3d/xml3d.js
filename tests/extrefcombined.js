@@ -2,7 +2,7 @@ module("External References", {
     setup : function() {
         var that = this;
         stop();
-        Q.fcall(promiseIFrameLoaded, "scenes/extref-combined.xhtml?xml3d-loglevel=debug").then(function (doc) {
+        Q.fcall(promiseIFrameLoaded, "scenes/extref-combined.html?xml3d-loglevel=debug").then(function (doc) {
             that.doc = doc;
             ok(true, "Scene loaded");
         }).fin(QUnit.start).done();
@@ -20,7 +20,7 @@ test("Mesh JSON reference", 6, function () {
     var xml3dReference2 = self.doc.getElementById("xml3dReference2");
     stop();
     var test1 = promiseSceneRendered(xml3dReference).then(promiseOneSceneCompleteAndRendered, xml3dTest).then(function () {
-        self.doc.getElementById("jsonGroup").visible = true;
+        self.doc.getElementById("jsonGroup").style.display = 'inline';
         return Q(xml3dTest);
     }).then(promiseSceneRendered).then(function () {
         QUnit.closeArray(XML3DUnit.readScenePixels(xml3dTest),XML3DUnit.readScenePixels(xml3dReference), PIXEL_EPSILON, "JSON render matches", true);
@@ -66,7 +66,7 @@ test("Sequence JSON reference", 4, function() {
 
     xTest.addEventListener("framedrawn", onFrameDrawn);
 
-    this.doc.getElementById("jsonSequenceGroup").visible = true;
+    this.doc.getElementById("jsonSequenceGroup").style.display = 'inherit';
     hTest.draw();
 
     stop();
@@ -121,7 +121,7 @@ test("Mesh XML reference", 5, function() {
     xTest.addEventListener("framedrawn", onFrameDrawn);
 
 
-    this.doc.getElementById("xmlGroup").visible = true;
+    this.doc.getElementById("xmlGroup").style.display = 'inherit';
     hTest.draw();
 
     stop();
@@ -137,7 +137,7 @@ test("material JSON reference", 3, function() {
     var xTest = this.doc.getElementById("xml3dTest"),
     glTest = getContextForXml3DElement(xTest), hTest = getHandler(xTest);
 
-    this.doc.getElementById("jsonmaterialGroup").visible = true;
+    this.doc.getElementById("jsonmaterialGroup").style.display = 'inherit';
     this.doc.getElementById("meshGroup").setAttribute("material", "#flatgreen");
     hTest.draw();
     hRef.draw();
@@ -200,7 +200,7 @@ test("material XML reference", 4, function() {
     this.doc.getElementById("groupRef1").setAttribute("material", "#refFlatGreen");
     hRef.draw();
 
-    this.doc.getElementById("xmlmaterialGroup").visible = true;
+    this.doc.getElementById("xmlmaterialGroup").style.display = 'inherit';
     hTest.draw();
 
     stop();

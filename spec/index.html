@@ -295,8 +295,6 @@
     </section>
     </section>
 
-
-  </section>
   <section>
     <h3>Predefined light models</h3>
     <section>
@@ -432,6 +430,79 @@
       </p>
       </section>
   </section>
+  </section>
+
+</section>
+
+<section>
+  <h2>Style</h2>
+  Since XML3D extends HTML, all [[CSS2]] properties also apply to XML3D elements. However, only the semantic of a few of them make sense for the 3D scene description.
+  In the following we list those properties that influence the rendering of the scene.
+
+  <div class="note">Other properties may affect XML3D elements in the future. Good candidates include the <code>visible</code> and <code>pointer-events</code> properties.</div>
+  <section>
+    <h3>The <code>display</code> property</h3>
+
+    <div class="propdef">
+      <dl>
+        <dt>
+          <span class="index-def" title="'display'"><a name="propdef-display" class="propdef-title"><strong>'display'</strong></a></span>
+        </dt>
+        <dd>
+          <table class="propinfo" cellspacing="0" cellpadding="0">
+            <tbody>
+            <tr valign="baseline">
+              <td><em>Value:</em>&nbsp;&nbsp;</td>
+              <td>inline | block | list-item | inline-block |
+                table | inline-table | table-row-group | table-header-group |
+                table-footer-group | table-row | table-column-group | table-column |
+                table-cell | table-caption | none | inherit
+              </td>
+            </tr>
+            <tr valign="baseline">
+              <td><em>Initial:</em>&nbsp;&nbsp;</td>
+              <td>inherit
+              </td>
+            </tr>
+            <tr valign="baseline">
+              <td><em>Applies to:</em>&nbsp;&nbsp;</td>
+              <td><a href="#scene-elements">Scene elements</a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </dd>
+      </dl>
+    </div>
+    <p>The meanings of the values of this property for XML3D elements:</p>
+    <dl>
+      <dt><span class="index-def" title="'nonde', definition of"><strong>none</strong></span>
+      </dt>
+      <dd>This value causes an element to not contribute to the rendering, i.e. geometry elements are not rendered, light elements do not emit light
+        into the scene. Also, geometry elements do not generate bounding boxes (empty boxes) nor contribute to their parent's bounding box.
+        Descendant elements do not display and do not contribute to the parents' bounding boxes either.
+      </dd>
+      <dt><span class="index-def" title="definition of other values">&lt;other values&gt;</span>
+      </dt>
+      <dd>All other values do not affect the rendering of the element.
+      </dd>
+    </dl>
+    Here are some examples for the 'display' property:
+    <pre class="example highlight">
+      mesh.hidden { display: none } /* do not display meshes with hidden class */
+      xml3d > * > * > * > * model { display: none; } /* Hide all models deeper than the fifth hierarchy level */
+    </pre>
+
+    Modifying the <code>display</code> property with jQuery:
+    <pre class="example highlight">
+      $("#myMesh").hide();
+      $(".walls").toggle();
+    </pre>
+
+
+  </section>
+
+
 </section>
 
 <section>
@@ -514,7 +585,7 @@
             &lt;/group&gt;
            </pre>
 
-          <div class="note">Object visibility may affect whether or not mouse event listeners are triggered. See the <a href="#css-properties">CSS Properties</a>
+          <div class="note">Object visibility may affect whether or not mouse event listeners are triggered. See the <a href="#style">Style</a>
           section on visibility for more information.</div>
 
       </section>
@@ -1717,9 +1788,6 @@
   </section>
 </section>
 
-<section>
-  <h2>CSS Properties</h2>
-</section>
 
 <section>
     <h2>Content-Types</h2>

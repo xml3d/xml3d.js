@@ -75,26 +75,26 @@
 
     <view id="viewOrientationTest" position="-3 0 0" orientation="0 1 0 -1.57"></view>
 
-    <group id="viewTest" visible="false" transform="#t_viewtest">
+    <group id="viewTest" style="display: none;" transform="#t_viewtest">
         <mesh src="#meshdata" type="triangles"></mesh>
         <group transform="#t_viewtest2" material="#flatyellow">
             <mesh src="#meshdata" type="triangles"></mesh>
         </group>
     </group>
 
-    <group id="myGroup" visible="false">
+    <group id="myGroup" style="display: none;">
 	    <mesh id="mySimpleMesh" src="#meshdata" type="triangles"></mesh>
     </group>
 
-   <group id="myTransformedGroup" transform="#t_grouptransformed" visible="false">
+   <group id="myTransformedGroup" transform="#t_grouptransformed" style="display: none;">
        <mesh id="myTransformedMesh" src="#meshdata" type="triangles"></mesh>
    </group>
 
-     <group id="myEmptyGroup" visible="false">
+     <group id="myEmptyGroup" style="display: none;">
 
      </group>
 
-    <group id="group1" material="#flatyellow" visible="false">
+    <group id="group1" material="#flatyellow" style="display: none;">
     <group id="group2" material="#flatblue">
         <mesh id="myNestedMesh" src="#meshdata" type="triangles">
 
@@ -102,7 +102,7 @@
     </group>
     </group>
 
-    <group id="group3" transform="#t_group3" visible="false">
+    <group id="group3" transform="#t_group3" style="display: none;">
     <group id="group4" transform="#t_group4">
         <mesh id="myNestedMesh2" src="#meshdata" type="triangles">
 
@@ -110,7 +110,7 @@
     </group>
     </group>
 
-    <group id="group5" visible="false">
+    <group id="group5" style="display: none;">
         <group transform="#t_cubetop" material="#flatblue">
             <mesh src="#meshdata" type="triangles"></mesh>
         </group>

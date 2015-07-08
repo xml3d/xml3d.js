@@ -68,7 +68,6 @@ test("&lt;group&gt; interface test", function() {
     equal(typeof e.onkeypress, "object", "onkeypress is of type 'object'");
     equal(typeof e.onkeydown, "object", "onkeydown is of type 'object'");
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
-    equal(typeof e.visible, "boolean", "visible is of type 'boolean'");
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
     equal(typeof e.getLocalMatrix, "function", "getLocalMatrix is of type 'function'");
     equal(typeof e.getLocalBoundingBox, "function", "getLocalBoundingBox is of type 'function'");
@@ -92,7 +91,6 @@ test("&lt;mesh&gt; interface test", function() {
     equal(typeof e.onkeypress, "object", "onkeypress is of type 'object'");
     equal(typeof e.onkeydown, "object", "onkeydown is of type 'object'");
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
-    equal(typeof e.visible, "boolean", "visible is of type 'boolean'");
     equal(typeof e.type, "string", "type is of type 'string'");
     equal(typeof e.compute, "string", "compute is of type 'string'");
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
@@ -150,7 +148,6 @@ test("&lt;light&gt; interface test", function() {
     equal(typeof e.onkeypress, "object", "onkeypress is of type 'object'");
     equal(typeof e.onkeydown, "object", "onkeydown is of type 'object'");
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
-    equal(typeof e.visible, "boolean", "visible is of type 'boolean'");
     equal(typeof e.global, "boolean", "global is of type 'boolean'");
     equal(typeof e.getWorldMatrix, "function", "getWorldMatrix is of type 'function'");
     equal(typeof e.model, "string", "model is of type 'string'");
@@ -302,7 +299,6 @@ test("&lt;view&gt; interface test", function() {
     equal(typeof e.onkeypress, "object", "onkeypress is of type 'object'");
     equal(typeof e.onkeydown, "object", "onkeydown is of type 'object'");
     equal(typeof e.onkeyup, "object", "onkeyup is of type 'object'");
-    equal(typeof e.visible, "boolean", "visible is of type 'boolean'");
     equal(typeof e.position, "object", "position is of type 'object'");
     equal(typeof e.orientation, "object", "orientation is of type 'object'");
     equal(typeof e.fieldOfView, "number", "fieldOfView is of type 'number'");

@@ -74,13 +74,12 @@ XML3D.createClass(TransformableAdapter, RenderAdapter, {
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
+        RenderAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+
         if (name == "transform") {
             this.transformFetcher && this.transformFetcher.update();
         } else if (name == "style") {
             this.transformFetcher && this.transformFetcher.updateMatrix();
-        } else if (name == "visible") {
-            this.renderNode.setLocalVisible(newValue && (newValue.toLowerCase() !== "false"));
-            this.factory.renderer.requestRedraw("Transformable visibility changed.");
         } else if (name == "material" && this.handleMaterial) {
             this.updateMaterialHandler();
             this.factory.renderer.requestRedraw("Transformable material changed.");

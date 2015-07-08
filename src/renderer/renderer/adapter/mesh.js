@@ -7,7 +7,9 @@ var Resource = require("../../../base/resourcemanager.js").Resource;
  */
 var MeshRenderAdapter = function (factory, node) {
     TransformableAdapter.call(this, factory, node, true, true);
+    this.style = window.getComputedStyle(node);
     this.createRenderNode();
+
 };
 
 XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
@@ -21,8 +23,9 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
         this.renderNode = this.getScene().createRenderObject({
             parent: parentNode, node: this.node, object: {
                 data: dataAdapter.getXflowNode(), type: this.getMeshType()
-            }, name: this.node.id, visible: !this.node.visible ? false : undefined
+            }, name: this.node.id
         });
+        this.updateVisibility();
         this.updateLocalMatrix();
         this.updateMaterialHandler();
     },
@@ -36,6 +39,18 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
         if (name == "type") {
             this.renderNode.setType(newValue);
         }
+    },
+
+    styleChangedCallback: function() {
+        TransformableAdapter.prototype.styleChangedCallback.call();
+        this.updateVisibility();
+    },
+
+    updateVisibility: function() {
+        var none = this.style.getPropertyValue("display").trim() == "none";
+        var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
+        this.renderNode.setLocalVisible(!(none || hidden));
+        this.renderNode.setPickable(!none);
     },
 
     /**
@@ -58,19 +73,17 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     dispose: function () {
         this.getRenderNode().remove();
         this.clearAdapterHandles();
-    }
-});
+    },
 
 
-// Interface methods
+    // Interface methods
 
-XML3D.extend(MeshRenderAdapter.prototype, {
     /**
      * @return {XML3D.math.bbox}
      */
     getLocalBoundingBox: function () {
         var bbox = new XML3D.math.bbox.create();
-        if (this.renderNode) {
+        if (this.renderNode && this.renderNode.visible) {
             this.renderNode.getObjectSpaceBoundingBox(bbox);
         }
         return bbox;
@@ -81,7 +94,7 @@ XML3D.extend(MeshRenderAdapter.prototype, {
      */
     getWorldBoundingBox: function () {
         var bbox = new XML3D.math.bbox.create();
-        if (this.renderNode) {
+        if (this.renderNode && this.renderNode.visible) {
             this.renderNode.getWorldSpaceBoundingBox(bbox);
         }
         return bbox;

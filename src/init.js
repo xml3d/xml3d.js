@@ -30,7 +30,7 @@ function displayWebGLNotSupportedInfo(xml3dElement){
 
         xml3dElement.parentNode.insertBefore(hideDiv, xml3dElement);
         hideDiv.appendChild(xml3dElement);
-        hideDiv.style.display = "none";
+        //hideDiv.style.display = "none";
 
         var infoDiv = document.createElementNS(XML3D.xhtmlNS, 'div');
         if(xml3dElement.hasAttribute("class")){
@@ -172,6 +172,8 @@ function onNodeRemoved(evt) {
     }
 }
 
+var observer = null;
+
 function onLoad() {
 
     Options.setOptionsFromQuery();
@@ -193,13 +195,14 @@ function onLoad() {
         initXML3DElement(xml3ds[i]);
     }
 
+    // TODO(ksons): Remove this, no MutationObserver no XML3D
     if(!MutationObserver){
         document.addEventListener('DOMNodeInserted', onNodeInserted, false);
         document.addEventListener('DOMNodeRemoved', onNodeRemoved, false);
     }
     else{
         observer = new MutationObserver(resolveMutations);
-        observer.observe(document.documentElement, { childList: true, subtree: true} );
+        observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: [ "class", "id", "style" ] } );
     }
 }
 
@@ -208,8 +211,7 @@ function onUnload() {
         XML3D.document.onunload();
 }
 
-var MutationObserver = (window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver),
-    observer = null;
+
 
 function resolveMutations(mutations){
     for(var i = 0; i < mutations.length; ++i){
@@ -228,11 +230,29 @@ function resolveMutations(mutations){
                     destroyXML3DElement(removedNodes[j]);
             }
 
+        } else if (mutation.type == 'attributes') {
+            var mutationTarget = mutation.target;
+            if (mutation.attributeName === "id" || mutation.attributeName === "class")
+                mutationTarget = mutation.target.parentNode;
+            var cssTarget = mutationTarget._configured ? mutationTarget : mutationTarget.querySelector("xml3d");
+            if(cssTarget && cssTarget._configured) { // xml3d is a child node
+                var adaptersNames = Object.keys(cssTarget._configured.adapters).filter(function(a) {
+                    return a.indexOf("webgl") == 0;
+                });
+                adaptersNames.map(function(name){return cssTarget._configured.adapters[name];}).forEach(function(renderAdapter) {
+                    renderAdapter.traverse(function(adapter) {
+                        adapter.styleChangedCallback();
+                    })
+
+                });
+
+            }
+
         }
     }
 }
 
-function flushObserver(){
+XML3D.flushCSSChanges = function(){
     if(observer){
         resolveMutations(observer.takeRecords());
     }

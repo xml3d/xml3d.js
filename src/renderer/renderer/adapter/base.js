@@ -3,39 +3,45 @@ var NodeAdapter = require("../../../base/adapter.js").NodeAdapter;
 var RenderAdapter = function (factory, node) {
     NodeAdapter.call(this, factory, node);
 };
-XML3D.createClass(RenderAdapter, NodeAdapter);
 
+XML3D.createClass(RenderAdapter, NodeAdapter, {
 
-RenderAdapter.prototype.getParentRenderAdapter = function () {
-    return this.factory.getAdapter(this.node.parentNode, RenderAdapter);
-};
+    getParentRenderAdapter: function () {
+        return this.factory.getAdapter(this.node.parentNode, RenderAdapter);
+    },
 
-/**
- * @param element
- */
-RenderAdapter.prototype.initElement = function (element) {
-    this.factory.getAdapter(element);
-    this.initChildElements(element);
-};
+    /**
+     * @param element
+     */
+    initElement: function (element) {
+        this.factory.getAdapter(element);
+        this.initChildElements(element);
+    },
 
-/**
- * @param {Element} element
- */
-RenderAdapter.prototype.initChildElements = function (element) {
-    var child = element.firstElementChild;
-    while (child) {
-        this.initElement(child);
-        child = child.nextElementSibling;
+    /**
+     * @param {Element} element
+     */
+    initChildElements: function (element) {
+        var child = element.firstElementChild;
+        while (child) {
+            this.initElement(child);
+            child = child.nextElementSibling;
+        }
+    },
+
+    attributeChangedCallback: function (name, oldValue, newValue) {
+    },
+
+    styleChangedCallback: function () {
+    },
+
+    applyTransformMatrix: function (transform) {
+        return transform;
+    },
+
+    getScene: function () {
+        return this.factory.renderer.scene;
     }
-};
-
-
-RenderAdapter.prototype.applyTransformMatrix = function (transform) {
-    return transform;
-};
-
-RenderAdapter.prototype.getScene = function () {
-    return this.factory.renderer.scene;
-};
+});
 
 module.exports = RenderAdapter;

@@ -63,6 +63,11 @@ XML3D.extend(RenderLight.prototype, {
         this.lightStructureChanged(false);
     },
 
+    setLocalMatrix: function (source) {
+        XML3D.debug.logError("RenderLight::setLocalMatrix not implemented");
+    },
+
+
     getFrustum: function (aspect) {
         this.scene.getBoundingBox(c_BoundingBox);
         return this.model.getFrustum(aspect, c_BoundingBox);
@@ -87,18 +92,15 @@ XML3D.extend(RenderLight.prototype, {
         }
     },
 
+    visibilityChanged: function (newVal) {
+        // Visibility is a light parameter
+        this.lightValueChanged();
+    },
+
     setTransformDirty: function () {
         this.updateWorldMatrix();
     },
 
-
-    setVisible: function (newVal) {
-        var visible = (this.localVisible && newVal);
-        if (this.visible != visible) {
-            this.visible = visible;
-            this.lightValueChanged();
-        }
-    },
 
     remove: function () {
         this.parent.removeChild(this);

@@ -125,135 +125,122 @@ test("Phong fragment shader", function() {
     notEqual(fragment5.indexOf("HAS_EMISSIVETEXTURE 1"), -1, "HAS_EMISSIVETEXTURE set");
 });
 
-module("WebGL materials and Textures", {
-    setup : function() {
-        stop();
-        var that = this;
-        this.cb = function(e) {
-            ok(true, "Scene loaded");
-            that.doc = document.getElementById("xml3dframe").contentDocument;
-            start();
-        };
-        loadDocument("scenes/webgl-rendering02.html" + window.location.search, this.cb);
-    },
-    teardown : function() {
-        var v = document.getElementById("xml3dframe");
-        v.removeEventListener("load", this.cb, true);
-    }
+
+
+
+
+
+
+
+
+
+module("Materials with Textures", {
+
 });
 
-test("Simple texture", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView, gl = getContextForXml3DElement(x), testFunc = null, h = getHandler(x);
-    this.doc.getElementById("myGroup").visible = true;
-
-    x.addEventListener("framedrawn", function(n) {
-        if (testFunc)
-            testFunc(n);
-    });
-
-    var tested = 0;
-    testFunc = function(n) {
-        actual = win.getPixelValue(gl, 40, 40);
-        if (actual[0] == 0)
-            return;
-        tested++;
-        if(tested == 2){
-            console.log("Tested twice!");
-        }
-        deepEqual(actual, [ 241, 241, 0, 255 ], "Yellow texture");
-        start();
-    };
+test("Simple texture", 2, function () {
     stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering02.html");
 
+    var test = frameLoaded.then(function (doc) {
+        doc.getElementById("myGroup").style.display = 'inherit';
+        return doc.querySelector("#xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
+        deepEqual(actual, [241, 241, 0, 255], "Yellow texture");
+
+    });
+    test.fin(QUnit.start).done();
 });
 
 test("Changing texture", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView, gl = getContextForXml3DElement(x), h = getHandler(x);
-    this.doc.getElementById("myGroup").visible = true;
-    h.draw(); // Draw now and make a redraw unnecessary
-    var run = false;
-    x.addEventListener("framedrawn", function(n) {
-        if (!run) {
-            run = true;
-            setTimeout(function() {
-                var actual = win.getPixelValue(gl, 40, 40);
-                deepEqual(actual, [ 241, 0, 241, 255 ], "Magenta texture");
-                start();
-            }, 500);
-        }
+     stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering02.html");
 
+    var test = frameLoaded.then(function (doc) {
+        doc.getElementById("myGroup").style.display = 'inherit';
+        return doc.querySelector("#xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
+        deepEqual(actual, [241, 241, 0, 255], "Yellow texture");
+        return s;
+    }).then(function(s) {
+        s.ownerDocument.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
+        return s;
+    }).then(promiseOneSceneCompleteAndRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
+        deepEqual(actual, [241, 0, 241, 255], "Magenta texture");
     });
-    stop();
-    this.doc.getElementById("tex1img").setAttribute("src", "textures/magenta.png");
+     test.fin(QUnit.start).done();
 });
 
-test("NPOT texture resizing", 4, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView, gl = getContextForXml3DElement(x), h = getHandler(x);
-
-    x.addEventListener("framedrawn", function(n) {
-        actual = win.getPixelValue(gl, 40, 40);
-        deepEqual(actual, [ 0, 241, 0, 255 ], "Green at 40,40");
-        actual = win.getPixelValue(gl, 120, 80);
-        deepEqual(actual, [ 0, 0, 253, 255 ], "Blue at 120,80");
-        start();
-    });
-
-    this.doc.getElementById("npotTexGroup").visible = true;
+test("NPOT texture resizing", 3, function () {
     stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering02.html");
+
+    var test = frameLoaded.then(function (doc) {
+        doc.getElementById("npotTexGroup").style.display = 'inherit';
+        return doc.querySelector("#xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
+        deepEqual(actual, [0, 241, 0, 255], "Green at 40,40");
+        actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 120, 80);
+        deepEqual(actual, [0, 0, 253, 255], "Blue at 120,80");
+    });
+    test.fin(QUnit.start).done();
 });
 
-test("Textured diffuse material", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"), actual, win = this.doc.defaultView, gl = getContextForXml3DElement(x), testFunc = null, h = getHandler(x);
-    var group = this.doc.getElementById("diffuseTexGroup");
-    h.draw();
-    x.addEventListener("framedrawn", function(n) {
-        actual = win.getPixelValue(gl, 40, 40);
-        if (actual[0] == 0) // texture hasn't finished loading yet
-            return;
+test("Textured diffuse material", 2, function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering02.html");
+
+    var test = frameLoaded.then(function (doc) {
+        var group = doc.getElementById("diffuseTexGroup");
+        group.style.display = 'inherit';
+        return doc.querySelector("#xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 40, 40);
         deepEqual(actual, [ 241, 241, 0, 255 ], "Yellow diffuse texture");
-        start();
     });
-    stop();
-    group.visible = true;
+    test.fin(QUnit.start).done();
 });
 
-// Scene: webgl-rendering02.html
-test("Diffuse material with vertex colors", 3, function() {
-    var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    var h = getHandler(x);
-    var cgroup = this.doc.getElementById("coloredMeshGroup");
-    //h.draw();
-    var tested = 0;
-    x.addEventListener("framedrawn", function(n) {
-        var actual = win.getPixelValue(gl, 90, 90);
-        tested++;
-        if(tested == 2){
-            console.log("Tested twice!");
-        }
+test("Diffuse material with vertex colors", 2, function() {
+    stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering02.html");
 
+    var test = frameLoaded.then(function (doc) {
+        var cgroup = doc.getElementById("coloredMeshGroup");
+        cgroup.style.display = 'inherit';
+        return doc.querySelector("#xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
         QUnit.closePixel(actual, [ 225, 225, 60, 255 ], 1, "Corners have colors red, yellow, green, blue");
-        start();
     });
-    stop();
-    cgroup.visible = true;
+    test.fin(QUnit.start).done();
 });
 
-test("Simple custom material", 4, function() {
-    var x = this.doc.getElementById("xml3DElem"), win = this.doc.defaultView;
-    var gl = getContextForXml3DElement(x);
-    var h = getHandler(x);
-    var cgroup = this.doc.getElementById("custommaterialGroup");
-    cgroup.setAttribute("visible", "true");
-    h.draw();
+test("Simple custom material", 3, function() {
+     stop();
+    var frameLoaded = Q.fcall(promiseIFrameLoaded, "scenes/webgl-rendering02.html");
+    var cgroup;
 
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,255,0,255], "Custom material with default green color");
-
-    cgroup.setAttribute("material", "#custommaterial2");
-    h.draw();
-    actual = win.getPixelValue(gl, 90, 90);
-    deepEqual(actual, [0,0,255,255], "Custom material with given blue color");
+    var test = frameLoaded.then(function (doc) {
+        cgroup = doc.getElementById("custommaterialGroup");
+        cgroup.style.display = 'inherit';
+        return doc.querySelector("#xml3DElem");
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
+        QUnit.closePixel(actual, [0,255,0,255],1, "Custom material with default green color");
+        return s;
+    }).then(function(s) {
+        cgroup.setAttribute("material", "#custommaterial2");
+        return s;
+    }).then(promiseSceneRendered).then(function (s) {
+        var actual = XML3DUnit.getPixelValue(getContextForXml3DElement(s), 90, 90);
+        QUnit.closePixel(actual, [0,0,255,255],1, "Custom material with given blue color");
+    });
+    test.fin(QUnit.start).done();
 
 });
 

@@ -150,16 +150,17 @@ XML3D.extend(GLScene.prototype, {
         var c_frustumTest = new FrustumTest();
 
         return function (aspectRatio) {
-            var activeView = this.getActiveView(), readyObjects = this.ready;
+            var activeView = this.getActiveView(), readyObjects = this.ready, i, l, obj;
 
             // Update all MV matrices
             activeView.getWorldToViewMatrix(c_worldToViewMatrix);
-            readyObjects.forEach(function (obj) {
+
+            for (i = 0, l = readyObjects.length; i < l; i++) {
+                obj = readyObjects[i];
                 obj.updateModelViewMatrix(c_worldToViewMatrix);
                 obj.updateModelMatrixN();
                 obj.updateModelViewMatrixN();
-            });
-
+            }
             this.updateBoundingBox();
 
 
@@ -169,8 +170,8 @@ XML3D.extend(GLScene.prototype, {
             var frustum = activeView.getFrustum();
             c_frustumTest.set(frustum, c_viewToWorldMatrix);
 
-            for (var i = 0, l = readyObjects.length; i < l; i++) {
-                var obj = readyObjects[i];
+            for (i = 0, l = readyObjects.length; i < l; i++) {
+                obj = readyObjects[i];
                 obj.updateModelViewProjectionMatrix(c_projMat_tmp);
                 obj.getWorldSpaceBoundingBox(c_bbox);
                 obj.inFrustum = this.doFrustumCulling ? c_frustumTest.isBoxVisible(c_bbox) : true;
@@ -210,6 +211,7 @@ XML3D.extend(GLScene.prototype, {
         });
          this.on(C.EVENT_TYPE.SCENE_SHAPE_CHANGED, function (/* event */) {
             // Need to update light frustum. Defer this until the next render phase
+            // TODO(ksons) Only light frustum and shadow maps need update, not the whole scene
              this.lightsNeedUpdate = true;
         });
 

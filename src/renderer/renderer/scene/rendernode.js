@@ -19,14 +19,14 @@ var RenderNode = function (type, scene, pageEntry, opt) {
     this.entrySize = pageEntry.size;
     this.transformDirty = true;
     this.children = [];
-    this.localVisible = true;
     this.parent = null;
 
-    Object.defineProperties(this, {
-        visible: { get: function() { return this.parent ? (this.parent.visible && this.localVisible) : this.localVisible; } }
-    });
-
     this.setParent(opt.parent || scene.rootNode);
+
+    this.localVisible = true;
+    // The global visibility depends on visibility of parents
+    this.visible = true;
+    this.evaluateVisibility();
 };
 
 XML3D.extend(RenderNode.prototype, {
@@ -35,16 +35,28 @@ XML3D.extend(RenderNode.prototype, {
         return this.children;
     },
 
-    setLocalVisible: function(visible) {
-        if (visible == this.setLocalVisible) {
-            return;
+    evaluateVisibility: function() {
+        var oldVisible = this.visible;
+        if(this.parent && !this.parent.visible) {
+            this.visible = false;
+        } else {
+            this.visible = this.localVisible;
         }
-        this.localVisible = visible;
-        this.visibilityChanged();
-        this.scene.requestRedraw && this.scene.requestRedraw("Visibility changed.");
+        if(oldVisible !== this.visible) {
+            this.visibilityChanged();
+            this.scene.requestRedraw && this.scene.requestRedraw("Visibility changed.");
+        }
     },
 
-    // Overwrite if additional checks need to be made
+    setLocalVisible: function(newVisible) {
+        if (this.localVisible === newVisible) {
+            return;
+        }
+        this.localVisible = newVisible;
+        this.evaluateVisibility();
+    },
+
+    // Needs to be overwritten
     visibilityChanged: function() {},
 
     getParent: function () {
@@ -56,6 +68,9 @@ XML3D.extend(RenderNode.prototype, {
         if (parent && parent.addChild) {
             parent.addChild(this);
         }
+        // Reevaluate visibility, which might change due to
+        // invisibility of parent
+        this.evaluateVisibility();
     },
 
     traverse: function (callback) {

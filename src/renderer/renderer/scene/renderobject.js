@@ -348,7 +348,7 @@ XML3D.createClass(RenderObject, RenderNode, {
         }
     })(),
 
-    visibilityChanged: function (newVal) {
+    visibilityChanged: function () {
         this.setBoundingBoxDirty();
     },
 

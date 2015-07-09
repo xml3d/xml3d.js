@@ -119,12 +119,13 @@ XML3D.extend(RenderGroup.prototype, {
     setTransformDirty: function () {
         if (this.transformDirty) {
             //We can be sure all child nodes are already set to transformDirty from here
-            //return;
+            return;
         }
         this.transformDirty = true;
-        this.children.forEach(function (obj) {
-            obj.setTransformDirty();
-        });
+        var children = this.children;
+        for(var i = 0, l = children.length; i < l; i++) {
+            children[i].setTransformDirty();
+        }
     },
 
     /**
@@ -155,6 +156,18 @@ XML3D.extend(RenderGroup.prototype, {
     getMaterial: function () {
         return this._material || this.parent.getMaterial();
     },
+
+    /**
+     * A group propagates its visibility
+     */
+    visibilityChanged: function () {
+        var children = this.children;
+        for (var i = 0, l = children.length; i < l; i++) {
+            children[i].evaluateVisibility();
+        }
+    },
+
+
 
     setBoundingBoxDirty: function () {
         this.boundingBoxDirty = true;

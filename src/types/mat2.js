@@ -30,8 +30,8 @@ Mat2.prototype.adjoint = function() {
     return this;
 };
 
-Mat2.prototype.clone = function(b) {
-   return new Mat2(b);
+Mat2.prototype.clone = function() {
+   return new Mat2(this);
 };
 
 Mat2.prototype.copy = function(b) {

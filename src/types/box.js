@@ -141,6 +141,9 @@ Box.prototype.transform = function(mat) {
 };
 
 Box.prototype.longestSide = function() {
+    if (this.isEmpty()) {
+        return 0;
+    }
     var x = Math.abs(this.data[3] - this.data[0]);
     var y = Math.abs(this.data[4] - this.data[1]);
     var z = Math.abs(this.data[5] - this.data[2]);

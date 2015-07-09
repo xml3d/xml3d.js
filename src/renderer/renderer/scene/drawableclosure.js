@@ -1,9 +1,12 @@
 var EventEmitter = require('events').EventEmitter;
 
 var DrawableClosure = function (context, type) {
+    EventEmitter.call(this);
     this.context = context;
     this._type = type;
     this._valid = false;
+    // Do not limit the number of listeners
+    this.setMaxListeners(0);
 };
 
 DrawableClosure.TYPES = {

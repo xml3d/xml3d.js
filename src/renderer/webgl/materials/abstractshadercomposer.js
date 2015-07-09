@@ -53,6 +53,7 @@ IShaderComposer.prototype.getShaderAttributes = function () {
 
 /**
  * @constructor
+ * @extends EventEmitter
  */
 var AbstractShaderComposer = function (context, shaderInfo) {
     EventEmitter.call(this);
@@ -61,6 +62,7 @@ var AbstractShaderComposer = function (context, shaderInfo) {
     this.dataChanged = false;
     this.updateLightValues = false;
     this.request = null;
+    this.setMaxListeners(0);
 };
 
 XML3D.createClass(AbstractShaderComposer, EventEmitter, {

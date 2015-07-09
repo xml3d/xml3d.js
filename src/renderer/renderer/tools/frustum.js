@@ -213,16 +213,16 @@ XML3D.extend(FrustumTest.prototype, {
     isBoxVisible: (function () {
 
         return function (bbox) {
-            if (XML3D.math.bbox.isEmpty(bbox))
+            if (bbox.isEmpty())
                 return false;
 
 
             for (var i = 0; i < this.frustumPlanes.length; i++) {
                 var plane = this.frustumPlanes[i];
                 var normal = plane.normal;
-                var bbx = normal[0] >= 0.0 ? bbox[3] : bbox[0];
-                var bby = normal[1] >= 0.0 ? bbox[4] : bbox[1];
-                var bbz = normal[2] >= 0.0 ? bbox[5] : bbox[2];
+                var bbx = normal[0] >= 0.0 ? bbox.max.x : bbox.min.x;
+                var bby = normal[1] >= 0.0 ? bbox.max.y : bbox.min.y;
+                var bbz = normal[2] >= 0.0 ? bbox.max.z : bbox.min.z;
 
                 // Compute the distance
                 var distance = bbx * normal[0] + bby * normal[1] + bbz * normal[2] + plane.distance;

@@ -97,7 +97,7 @@ methods.xml3dGenerateRay = function(x, y) {
             return adapters[adapter].generateRay(x, y);
         }
     }
-    return XML3D.math.ray.create();
+    return new XML3D.Ray();
 };
 
 methods.groupGetLocalMatrix = function() {
@@ -124,7 +124,7 @@ methods.getWorldBoundingBox = function() {
             return adapters[adapter].getWorldBoundingBox();
         }
     }
-    return XML3D.math.bbox.create();
+    return new XML3D.Box();
 };
 
 /**
@@ -140,7 +140,7 @@ methods.getLocalBoundingBox = function() {
             return adapters[adapter].getLocalBoundingBox();
         }
     }
-    return XML3D.math.bbox.create();
+    return new XML3D.Box();
 };
 
 methods.xml3dGetRenderInterface = function() {

@@ -212,7 +212,7 @@ XML3D.createClass(PointLightModel, LightModel, {
         var orthogonal = false;
         var entry = this.light.scene.lights.getModelEntry(this.id);
 
-        if (XML3D.math.bbox.isEmpty(sceneBoundingBox)) {
+        if (sceneBoundingBox.isEmpty()) {
             entry.parameters["nearFar"][0] = 1.0;
             entry.parameters["nearFar"][1] = 110.0;
             return new Frustum(1.0, 110.0, 0, this.fovy, aspect, orthogonal)
@@ -221,10 +221,10 @@ XML3D.createClass(PointLightModel, LightModel, {
 
         var t_mat = XML3D.math.mat4.create();
         this.getLightViewMatrix(t_mat);
-        XML3D.math.bbox.transformAxisAligned(sceneBoundingBox, t_mat, sceneBoundingBox);
+        sceneBoundingBox.transformAxisAligned(t_mat);
 
         var nf = {
-            near: -sceneBoundingBox[5], far: -sceneBoundingBox[2]
+            near: -sceneBoundingBox.max.z, far: -sceneBoundingBox.min.z
         };
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
@@ -260,17 +260,17 @@ var SpotLightModel = function (dataNode, light) {
 XML3D.createClass(SpotLightModel, LightModel, {
     getFrustum: function (aspect, sceneBoundingBox) {
 
-        if (XML3D.math.bbox.isEmpty(sceneBoundingBox)) {
+        if (sceneBoundingBox.isEmpty()) {
             return new Frustum(1.0, 110.0, 0, this.fovy, aspect, false)
         }
 
 
         var t_mat = XML3D.math.mat4.create();
         this.getLightViewMatrix(t_mat);
-        XML3D.math.bbox.transformAxisAligned(sceneBoundingBox, t_mat, sceneBoundingBox);
+        sceneBoundingBox.transformAxisAligned(t_mat);
 
         var nf = {
-            near: -sceneBoundingBox[5], far: -sceneBoundingBox[2]
+            near: -sceneBoundingBox.max.z, far: -sceneBoundingBox.min.z
         };
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
@@ -310,16 +310,16 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
     getFrustum: function(aspect, sceneBoundingBox) {
         var orthogonal = true;
 
-        if (XML3D.math.bbox.isEmpty(sceneBoundingBox)) {
+        if (sceneBoundingBox.isEmpty()) {
             return new Frustum(1.0, 110.0, 0, this.fovy, aspect, orthogonal)
         }
 
         var t_mat = XML3D.math.mat4.create();
         this.getLightViewMatrix(t_mat);
-        XML3D.math.bbox.transformAxisAligned(sceneBoundingBox, t_mat, sceneBoundingBox);
+        sceneBoundingBox.extend(t_mat);
 
-        var nf = {  near: -sceneBoundingBox[5],
-                    far:  -sceneBoundingBox[2]};
+        var nf = {  near: -sceneBoundingBox.max.z,
+                    far:  -sceneBoundingBox.min.z};
         // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
         this._expandNearFar(nf);
 
@@ -340,16 +340,14 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         var p_dir = entry.parameters["direction"];
         var p_pos = entry.parameters["position"];
 
-        var bb = new XML3D.math.bbox.create();
+        var bb = new XML3D.Box();
         this.light.scene.getBoundingBox(bb);
-        var bbSize = XML3D.math.vec3.create();
-        var bbCenter = XML3D.math.vec3.create();
         var off = XML3D.math.vec3.create();
-        XML3D.math.bbox.center(bbCenter, bb);
-        XML3D.math.bbox.size(bbSize, bb);
-        var d = XML3D.math.vec3.len(bbSize); //diameter of bounding sphere of the scene
+        var bbCenter = bb.center();
+        var bbSize = bb.size();
+        var d = bbSize.length(); //diameter of bounding sphere of the scene
         XML3D.math.vec3.scale(off, p_dir, -0.55 * d); //enlarge a bit on the radius of the scene
-        p_pos = XML3D.math.vec3.add(p_pos, bbCenter, off);
+        p_pos = XML3D.math.vec3.add(p_pos, bbCenter.data, off);
         entry.parameters["position"] = p_pos;
 
 
@@ -369,11 +367,11 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         XML3D.math.mat4.translate(mat4, mat4, p_pos);
         XML3D.math.mat4.multiply(mat4, mat4, lookat_mat);
 
-        var bb = new XML3D.math.bbox.create();
+        bb = new XML3D.Box();
         this.light.scene.getBoundingBox(bb);
-        XML3D.math.bbox.transformAxisAligned(bb, mat4, bb);
-        var bbSize = XML3D.math.vec3.create();
-        XML3D.math.bbox.size(bbSize, bb);
+        bb.transformAxisAligned(mat4);
+        bbSize = bb.size();
+        bbSize = bbSize.data;
         var max = (bbSize[0] > bbSize[1]) ? bbSize[0] : bbSize[1];
         max = 0.55 * (max);//enlarge 10percent to make sure nothing gets cut off
         this.fovy = max <= 0 ? Math.PI : Math.atan(max)*2.0;

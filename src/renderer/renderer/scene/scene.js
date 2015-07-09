@@ -19,7 +19,7 @@ var EventEmitter = require('events').EventEmitter;
  */
 var Scene = function () {
     EventEmitter.call(this);
-    this.boundingBox = new XML3D.math.bbox.create();
+    this.boundingBox = new XML3D.Box();
     this.lights = new LightManager();
     this.pager = new Pager();
 
@@ -98,7 +98,7 @@ XML3D.createClass(Scene, EventEmitter, {
 
     getBoundingBox: function (bb) {
         this.updateBoundingBox();
-        XML3D.math.bbox.copy(bb, this.boundingBox);
+        bb.copy(this.boundingBox);
     },
 
     createDrawable: function (/*obj*/) {

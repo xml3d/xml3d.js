@@ -90,8 +90,8 @@ test("xml3d.generateRay(): point to mesh 'm1'", function() {
     var expectOrig = XML3D.math.vec3.fromValues(10, 0, 0);
     var expectDir = XML3D.math.vec3.fromValues(-0.96001172, 0.0755365341, 0.2695769667);
 
-    QUnit.closeVector(XML3D.math.ray.origin(ray), expectOrig, EPSILON, "ray's origin");
-    QUnit.closeVector(XML3D.math.ray.direction(ray), expectDir, EPSILON, "ray's direction");
+    QUnit.closeVector(ray.origin, expectOrig, EPSILON, "ray's origin");
+    QUnit.closeVector(ray.direction, expectDir, EPSILON, "ray's direction");
 });
 
 test("xml3d.generateRay(): point to mesh 'm2'", function() {
@@ -103,6 +103,6 @@ test("xml3d.generateRay(): point to mesh 'm2'", function() {
     var expectOrig = XML3D.math.vec3.fromValues(10, 0, 0);
     var expectDir = XML3D.math.vec3.fromValues(-0.9664570689, -0.04404431, -0.2530234456);
 
-    QUnit.closeVector(XML3D.math.ray.origin(ray), expectOrig, EPSILON, "ray's origin");
-    QUnit.closeVector(XML3D.math.ray.direction(ray), expectDir, EPSILON, "ray's direction");
+    QUnit.closeVector(ray.origin, expectOrig, EPSILON, "ray's origin");
+    QUnit.closeVector(ray.direction, expectDir, EPSILON, "ray's direction");
 });

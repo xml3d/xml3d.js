@@ -81,7 +81,7 @@ test("Test mesh.getLocalBoundingBox", 3, function() {
     var mesh = this.doc.getElementById("myTransformedMesh");
     x.addEventListener("framedrawn", function(n) {
         var bb = mesh.getLocalBoundingBox();
-        QUnit.closeArray(bb, [1,1,0,-1,-1,0], "Local box is has max [1, 1, 0] and min [-1, -1, 0]");
+        QUnit.closeArray(bb.data, [1,1,0,-1,-1,0], "Local box is has max [1, 1, 0] and min [-1, -1, 0]");
         start();
     });
     stop();
@@ -98,7 +98,7 @@ test("Test mesh.getWorldBoundingBox", 3, function() {
     var mesh = this.doc.getElementById("myTransformedMesh");
     x.addEventListener("framedrawn", function(n) {
         var bb = mesh.getWorldBoundingBox();
-        QUnit.closeArray(bb, [1,1,-3,-1,-1,-3], "World box has max [1, 1, -3] and min [-1, -1, -3]");
+        QUnit.closeArray(bb.data, [1,1,-3,-1,-1,-3], "World box has max [1, 1, -3] and min [-1, -1, -3]");
 
         start();
     });

@@ -1,19 +1,18 @@
 module("Element methods tests", {});
-var bbox = XML3D.math.bbox;
 
 test("xml3d methods test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "xml3d");
     ok(node);
 
     equal(node.getElementByPoint(0,0, new XML3D.Vec3(), new XML3D.Vec3()), null, "xml3d::getElementByPoint returns ");
-    ok(node.generateRay(0,0) instanceof Float32Array, "xml3d::generateRay returns ");
-    equal(node.getElementByRay(XML3D.math.ray.create(), new XML3D.Vec3(), new XML3D.Vec3()), null, "xml3d::getElementByRay returns ");
+    ok(node.generateRay(0,0).data instanceof Float32Array, "xml3d::generateRay returns ");
+    equal(node.getElementByRay(new XML3D.Ray(), new XML3D.Vec3(), new XML3D.Vec3()), null, "xml3d::getElementByRay returns ");
 
-    ok(node.getLocalBoundingBox()instanceof Float32Array, "xml3d::getLocalBoundingBox returns ");
-    ok(bbox.isEmpty(node.getLocalBoundingBox()), "Empty xml3d delivers empty BoundingBox");
+    ok(node.getLocalBoundingBox().data instanceof Float32Array, "xml3d::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
 
-    ok(node.getWorldBoundingBox() instanceof Float32Array, "xml3d::getWorldBoundingBox returns ");
-    ok(bbox.isEmpty(node.getWorldBoundingBox()), "Empty xml3d delivers empty BoundingBox");
+    ok(node.getWorldBoundingBox().data instanceof Float32Array, "xml3d::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty xml3d delivers empty BoundingBox");
 });
 test("group interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "group");
@@ -27,11 +26,11 @@ test("group interface test", function() {
     deepEqual(node.getLocalMatrix().data, XML3D.math.mat4.create(),
             "group::getLocalMatrix returns identity matrix with default attributes.");
 
-    ok(node.getLocalBoundingBox() instanceof Float32Array, "group::getLocalBoundingBox returns ");
-    ok(bbox.isEmpty(node.getLocalBoundingBox()), "Empty group delivers empty BoundingBox");
+    ok(node.getLocalBoundingBox().data instanceof Float32Array, "group::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
 
-    ok(node.getWorldBoundingBox() instanceof Float32Array, "group::getWorldBoundingBox returns ");
-    ok(bbox.isEmpty(node.getWorldBoundingBox()), "Empty group delivers empty BoundingBox");
+    ok(node.getWorldBoundingBox().data instanceof Float32Array, "group::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty group delivers empty BoundingBox");
 });
 test("mesh interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "mesh");
@@ -41,11 +40,11 @@ test("mesh interface test", function() {
     deepEqual(node.getWorldMatrix().data, XML3D.math.mat4.create(),
             "mesh::getWorldMatrix returns identity matrix if not in hierarchy.");
 
-    ok(node.getLocalBoundingBox() instanceof Float32Array, "mesh::getLocalBoundingBox returns ");
-    ok(bbox.isEmpty(node.getLocalBoundingBox()), "Empty mesh delivers empty BoundingBox");
+    ok(node.getLocalBoundingBox().data instanceof Float32Array, "mesh::getLocalBoundingBox returns ");
+    ok(node.getLocalBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
 
-    ok(node.getWorldBoundingBox() instanceof Float32Array, "mesh::getWorldBoundingBox returns ");
-    ok(bbox.isEmpty(node.getWorldBoundingBox()), "Empty mesh delivers empty BoundingBox");
+    ok(node.getWorldBoundingBox().data instanceof Float32Array, "mesh::getWorldBoundingBox returns ");
+    ok(node.getWorldBoundingBox().isEmpty(), "Empty mesh delivers empty BoundingBox");
 });
 test("light interface test", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "light");
@@ -84,7 +83,7 @@ test("data interface test", function() {
 test("view::lookAt tests", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
     ok(node);
-    QUnit.closeArray(node.position.data, XML3D.math.vec3.create(), EPSILON, "Default position");
+    QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
     QUnit.closeRotation(node.orientation.data, [0,0,0,1], EPSILON, "Default orientation");
     node.lookAt([0,0,-10]);
     QUnit.closeRotation(node.orientation.data, [0,0,0,1], EPSILON, "Look along default direction");
@@ -99,20 +98,20 @@ test("view::lookAt tests", function() {
 test("view::setUpVector tests", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
     ok(node);
-    QUnit.closeArray(node.position.data, XML3D.math.vec3.create(), EPSILON, "Default position");
+    QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
     QUnit.closeRotation(node.orientation.data, XML3D.math.vec4.fromValues(0,0,0,1), EPSILON, "Default orientation");
     node.setUpVector([0,0,1]);
-    QUnit.closeRotation(node.orientation.data, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
+    QUnit.closeRotation(node.orientation, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
     node.orientation = new XML3D.Vec4();
     node.setUpVector([0,-1,0]);
-    QUnit.closeRotation(node.orientation.data, [0,0,1, Math.PI], EPSILON, "Up vector is -y");
+    QUnit.closeRotation(node.orientation, [0,0,1, Math.PI], EPSILON, "Up vector is -y");
 });
 
 test("view::setDirection tests", function() {
     var node = document.createElementNS("http://www.xml3d.org/2009/xml3d", "view");
     ok(node);
-    QUnit.closeArray(node.position.data, XML3D.math.vec3.create(), EPSILON, "Default position");
-    QUnit.closeRotation(node.orientation.data, [0,0,0,1], EPSILON, "Default orientation");
+    QUnit.closeVector(node.position, XML3D.math.vec3.create(), EPSILON, "Default position");
+    QUnit.closeRotation(node.orientation, [0,0,0,1], EPSILON, "Default orientation");
     node.setDirection([0,1,0]);
-    QUnit.closeRotation(node.orientation.data, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
+    QUnit.closeRotation(node.orientation, [1,0,0, Math.PI/2.0], EPSILON, "Up vector is +z");
 });

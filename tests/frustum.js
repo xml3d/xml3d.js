@@ -48,19 +48,19 @@ test("Planes", function() {
 test("Culling", function() {
     var frustum = new XML3DTestLib.Frustum.Frustum(1, 12, 0, 0.78, 1);
     var test = new XML3DTestLib.Frustum.FrustumTest(frustum, XML3D.math.mat4.create());
-    var bbox = XML3D.math.bbox.create();
+    var bbox = new XML3D.Box();
     ok(!test.isBoxVisible(bbox), "Empty box is not visible.");
 
 
-    bbox = [-10, -10, -10, 10, 10, 10];
+    bbox.data = new Float32Array([-10, -10, -10, 10, 10, 10]);
     ok(test.isBoxVisible(bbox), "Box is visible.");
 
     // Box behind far
-    bbox = [15, 15, -15, 30, 30, -30];
+    bbox.data = new Float32Array([15, 15, -15, 30, 30, -30]);
     ok(!test.isBoxVisible(bbox), "Box behind far is not visible.");
 
     // Box before near
-    bbox = [-30, -30, 5, 30, 30, -1];
+    bbox.data = new Float32Array([-30, -30, 5, 30, 30, -1]);
     ok(!test.isBoxVisible(bbox), "Box before near is not visible.");
 
 });

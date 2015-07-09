@@ -96,19 +96,19 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         })(),
 
         getClippingPlanes: (function() {
-            var t_mat = XML3D.math.mat4.create();
-            var bb = new XML3D.math.bbox.create();
+            var t_mat = new XML3D.Mat4();
+            var bb = new XML3D.Box();
 
             return function() {
                 this.scene.getBoundingBox(bb);
-                if (XML3D.math.bbox.isEmpty(bb)) {
+                if (bb.isEmpty()) {
                     return { near: 1, far: 10 };
                 }
-                this.getWorldToViewMatrix(t_mat);
-                XML3D.math.bbox.transformAxisAligned(bb, t_mat, bb);
+                this.getWorldToViewMatrix(t_mat.data);
+                bb.transformAxisAligned(t_mat);
 
-                var near = -bb[5],
-                    far = -bb[2],
+                var near = -bb.max.z,
+                    far = -bb.min.z,
                     expand = Math.max((far - near) * 0.005, 0.05);
 
                 // Expand the view frustum a bit to ensure 2D objects parallel to the camera are rendered
@@ -216,7 +216,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         },
 
         getWorldSpaceBoundingBox: function(bbox) {
-            XML3D.math.bbox.empty(bbox);
+            bbox.setEmpty();
         }
     });
 

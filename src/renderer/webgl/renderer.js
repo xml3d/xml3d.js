@@ -217,7 +217,7 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     calculateMatricesForRay: function (ray, viewMat, projMat) {
-        this.rayCamera.updatePosition(XML3D.math.ray.origin(ray));
+        this.rayCamera.updatePosition(ray.origin.data);
         this.rayCamera.updateOrientation(this.calculateOrientationForRayDirection(ray));
         this.rayCamera.getWorldToViewMatrix(viewMat);
         var aspect = this.pickObjectPass.output.getWidth() / this.pickObjectPass.output.getHeight();
@@ -234,12 +234,12 @@ XML3D.extend(GLRenderer.prototype, {
 
         return function (ray) {
             XML3D.math.vec3.set(up, 0, 1, 0);
-            XML3D.math.vec3.cross(tmpX, XML3D.math.ray.direction(ray), up);
+            XML3D.math.vec3.cross(tmpX, ray.direction.data, up);
             if (!XML3D.math.vec3.length(tmpX)) {
                 XML3D.math.vec3.set(tmpX, 1, 0, 0);
             }
-            XML3D.math.vec3.cross(tmpY, tmpX, XML3D.math.ray.direction(ray));
-            XML3D.math.vec3.negate(tmpZ, XML3D.math.ray.direction(ray));
+            XML3D.math.vec3.cross(tmpY, tmpX, ray.direction.data);
+            XML3D.math.vec3.negate(tmpZ, ray.direction.data);
 
             XML3D.math.quat.setFromBasis(q, tmpX, tmpY, tmpZ);
             XML3D.math.mat4.fromRotationTranslation(m, q, [0, 0, 0]);
@@ -294,7 +294,7 @@ XML3D.extend(GLRenderer.prototype, {
             var glY = canvasToGlY(this._canvasHandler.getCanvas(), canvasY);
 
             // setup input to unproject
-            var viewport = new Array();
+            var viewport = new Float32Array(4);
             viewport[0] = 0;
             viewport[1] = 0;
             viewport[2] = this.width;
@@ -305,10 +305,10 @@ XML3D.extend(GLRenderer.prototype, {
             view.getWorldToViewMatrix(c_viewMatrix);
             view.getProjectionMatrix(c_projectionMatrix, viewport[2] / viewport[3]);
 
-            var ray = XML3D.math.ray.create();
+            var ray = new XML3D.Ray();
 
-            var nearHit = new Array();
-            var farHit = new Array();
+            var nearHit = new Float32Array(3);
+            var farHit = new Float32Array(3);
 
             // do unprojections
             if (false === GLU.unProject(canvasX, glY, 0, c_viewMatrix, c_projectionMatrix, viewport, nearHit)) {
@@ -321,9 +321,8 @@ XML3D.extend(GLRenderer.prototype, {
 
             // calculate ray
             XML3D.math.mat4.invert(c_viewMatrix, c_viewMatrix);
-
-            XML3D.math.ray.setOrigin(ray, XML3D.math.vec3.fromValues(c_viewMatrix[12], c_viewMatrix[13], c_viewMatrix[14]));
-            XML3D.math.ray.setDirection(ray, XML3D.math.vec3.fromValues(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]));
+            ray.origin = XML3D.math.vec3.fromValues(c_viewMatrix[12], c_viewMatrix[13], c_viewMatrix[14]);
+            ray.direction = XML3D.math.vec3.fromValues(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
 
             return ray;
         }

@@ -15,7 +15,7 @@ var CLIPPLANE_NEAR_MIN = 1.0;
 /** @const */
 var ENTRY_SIZE = 16;
 
-var c_BoundingBox = new XML3D.math.bbox.create();
+var c_BoundingBox = new XML3D.Box();
 
 
 function createLightModel(type, data, light) {
@@ -110,7 +110,7 @@ XML3D.extend(RenderLight.prototype, {
 
 
     getWorldSpaceBoundingBox: function (bbox) {
-        XML3D.math.bbox.empty(bbox);
+        bbox.setEmpty();
     }
 });
 

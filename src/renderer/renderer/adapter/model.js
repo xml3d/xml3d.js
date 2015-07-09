@@ -240,10 +240,10 @@ function rec_createRenderNodes(adapter, parentNode, dataTreeNode) {
 
 XML3D.extend(ModelRenderAdapter.prototype, {
     /**
-     * @return {Window.XML3DBox}
+     * @return {XML3D.Box}
      */
     getLocalBoundingBox: function () {
-        var bbox = new XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         if (this.renderNode) {
             this.renderNode.getObjectSpaceBoundingBox(bbox);
         }
@@ -251,10 +251,10 @@ XML3D.extend(ModelRenderAdapter.prototype, {
     },
 
     /**
-     * @return {Window.XML3DBox}
+     * @return {XML3D.Box}
      */
     getWorldBoundingBox: function () {
-        var bbox = new XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         if (this.renderNode) {
             this.renderNode.getWorldSpaceBoundingBox(bbox);
         }

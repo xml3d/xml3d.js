@@ -65,6 +65,8 @@ XML3D.Vec2 = require("./types/vec2.js");
 XML3D.Vec3 = require("./types/vec3.js");
 XML3D.Vec4 = require("./types/vec4.js");
 XML3D.Quat = require("./types/quat.js");
+XML3D.Ray = require("./types/ray.js");
+XML3D.Box = require("./types/box.js");
 
 XML3D.extend(window, require("./types/data-observer.js"));
 

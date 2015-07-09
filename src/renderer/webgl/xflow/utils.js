@@ -168,10 +168,12 @@ module.exports = {
      * @returns {Float32Array}
      */
     calculateBoundingBox: function (positions, index) {
-        var bbox = new XML3D.math.bbox.create(), i;
+        var box = new XML3D.Box(), i;
 
         if (!positions || positions.length < 3)
-            return bbox;
+            return box;
+
+        var bbox = box.data;
 
         if (index) {
             var i0 = index[0] * 3;
@@ -224,6 +226,6 @@ module.exports = {
                     bbox[5] = positions[i + 2];
             }
         }
-        return bbox;
+        return box;
     }
 };

@@ -6,8 +6,8 @@ var ObjectSorter = function () {
 
 };
 
-var c_bbox = XML3D.math.bbox.create();
-var c_center = XML3D.math.vec3.create();
+var c_bbox = new XML3D.Box();
+var c_center = new XML3D.Vec3();
 
 XML3D.extend(ObjectSorter.prototype, {
     /**
@@ -40,10 +40,10 @@ XML3D.extend(ObjectSorter.prototype, {
             for (i = 0; i < withinShader.length; i++) {
                 obj = withinShader[i];
                 obj.getWorldSpaceBoundingBox(c_bbox);
-                XML3D.math.bbox.center(c_center, c_bbox);
-                viewMatrix && XML3D.math.vec3.transformMat4(c_center, c_center, viewMatrix);
+                c_bbox.center(c_center);
+                viewMatrix && c_center.transformMat4(viewMatrix);
                 sortedArray[i] = {
-                    obj: obj, depth: c_center[2]
+                    obj: obj, depth: c_center.z
                 };
             }
             sortedArray.sort(function (a, b) {
@@ -58,9 +58,9 @@ XML3D.extend(ObjectSorter.prototype, {
             for (i = 0; i < tlength; i++) {
                 obj = transparentArray[i];
                 obj.getWorldSpaceBoundingBox(c_bbox);
-                XML3D.math.bbox.center(c_center, c_bbox);
-                viewMatrix && XML3D.math.vec3.transformMat4(c_center, c_center, viewMatrix);
-                transparentArray[i] = [obj, c_center[2]];
+                c_bbox.center(c_center);
+                viewMatrix && c_center.transformMat4(viewMatrix);
+                transparentArray[i] = [obj, c_center.z];
             }
 
             transparentArray.sort(function (a, b) {

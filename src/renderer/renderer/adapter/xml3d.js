@@ -97,10 +97,10 @@ XML3DRenderAdapter.prototype.getComplete = function () {
 };
 
 XML3DRenderAdapter.prototype.getWorldBoundingBox = function () {
-    var bbox = XML3D.math.bbox.create();
+    var bbox = new XML3D.Box()
     Array.prototype.forEach.call(this.node.childNodes, function (c) {
         if (c.getWorldBoundingBox) {
-            XML3D.math.bbox.extendWithBox(bbox, c.getWorldBoundingBox());
+            bbox.extend(c.getWorldBoundingBox());
         }
     });
     return bbox;

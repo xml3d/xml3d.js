@@ -2,7 +2,7 @@ var BaseRenderPass = require("./base.js");
 
 var PickPositionRenderPass = function (renderInterface, output, opt) {
     BaseRenderPass.call(this, renderInterface, output, opt);
-    this.objectBoundingBox = XML3D.math.bbox.create();
+    this.objectBoundingBox = new XML3D.Box();
 };
 XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
     render: (function () {
@@ -30,13 +30,13 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
             obj.getWorldMatrix(c_modelMatrix);
 
             obj.getObjectSpaceBoundingBox(this.objectBoundingBox);
-            XML3D.math.bbox.transformAxisAligned(this.objectBoundingBox, c_modelMatrix, this.objectBoundingBox);
+            this.objectBoundingBox.transformAxisAligned(c_modelMatrix);
 
             var program = this.renderInterface.context.programFactory.getPickingPositionProgram();
             program.bind();
             obj.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
-            c_uniformCollection.sysBase["bbox"] = this.objectBoundingBox;
+            c_uniformCollection.sysBase["bbox"] = this.objectBoundingBox.data;
             c_uniformCollection.sysBase["modelMatrix"] = c_modelMatrix;
             c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
 
@@ -60,9 +60,9 @@ XML3D.createClass(PickPositionRenderPass, BaseRenderPass, {
                 c_vec3[1] = data[1] / 255;
                 c_vec3[2] = data[2] / 255;
 
-                var size = XML3D.math.bbox.size(XML3D.math.vec3.create(), this.objectBoundingBox);
+                var size = this.objectBoundingBox.size().data;
                 size = XML3D.math.vec3.mul(size, c_vec3, size);
-                XML3D.math.vec3.add(size, this.objectBoundingBox, size);
+                XML3D.math.vec3.add(size, this.objectBoundingBox.data, size);
                 return size;
             } else {
                 return null;

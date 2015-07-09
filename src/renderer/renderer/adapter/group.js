@@ -18,7 +18,7 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
         });
         this.updateLocalMatrix();
         this.updateMaterialHandler();
-        var bbox = XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         this.renderNode.setWorldSpaceBoundingBox(bbox);
     },
 
@@ -72,26 +72,25 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
 
     /* Interface methods */
     getWorldBoundingBox: function () {
-        var bbox = XML3D.math.bbox.create();
+        var bbox = new XML3D.Box();
         this.renderNode.getWorldSpaceBoundingBox(bbox);
         return bbox;
     },
 
     getLocalBoundingBox: (function () {
-        var localMat = XML3D.math.mat4.create();
-        var childBB = XML3D.math.bbox.create();
+        var localMat = new XML3D.Mat4();
+        var childBB = new XML3D.Box();
 
         return function () {
-            var bbox = XML3D.math.bbox.create();
+            var bbox = new XML3D.Box();
             Array.prototype.forEach.call(this.node.childNodes, function (c) {
                 if (c.getLocalBoundingBox) {
                     childBB = c.getLocalBoundingBox();
-                    XML3D.math.bbox.extendWithBox(bbox, childBB);
-
+                    bbox.extend(childBB);
                 }
             });
-            this.renderNode.getLocalMatrix(localMat);
-            XML3D.math.bbox.transformAxisAligned(bbox, localMat, bbox);
+            this.renderNode.getLocalMatrix(localMat.data);
+            bbox.transformAxisAligned(localMat);
             return bbox;
         }
     })(),

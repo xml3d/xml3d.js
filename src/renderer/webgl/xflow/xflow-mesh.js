@@ -182,7 +182,7 @@ XML3D.createClass(XflowMesh, DrawableClosure, {
     },
 
     calculateBoundingBox: (function () {
-        var c_empty = XML3D.math.bbox.create();
+        var c_empty = new XML3D.Box();
 
         return function () {
             // compute bounding box from positions and indices, if present

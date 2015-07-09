@@ -148,6 +148,10 @@ Box.prototype.longestSide = function() {
 };
 
 Box.prototype.intersects = function(ray, opt) {
+    if (this.isEmpty()) {
+        opt.dist = Infinity;
+        return false;
+    }
     var origin = ray.origin;
     var direction = ray.direction;
     var inverseDirX = 1 / direction.x;
@@ -168,13 +172,8 @@ Box.prototype.intersects = function(ray, opt) {
         return tmax > 0 && tmin <= tmax;
     }
 
-    if (tmax < 0) {
-        opt.dist = Number.MAX_VALUE;
-        return false;
-    }
-
-    if (tmin > tmax) {
-        opt.dist = Number.MAX_VALUE;
+    if (tmax < 0 || tmin > tmax) {
+        opt.dist = Infinity;
         return false;
     }
 

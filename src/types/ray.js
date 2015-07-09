@@ -5,7 +5,7 @@ var Ray = function(ray) {
     this.data = new Float32Array(6);
     this.data[5] = -1;
     if (ray) {
-        this.copy(ray);
+        this.data = ray.data ? ray.data : ray;
     }
 };
 
@@ -41,7 +41,7 @@ Ray.prototype.setFromOriginDirection = function(origin, direction) {
 };
 
 Ray.prototype.clone = function() {
-    return new Ray(this);
+    return new Ray().copy(this);
 };
 
 Ray.prototype.copy = function(other) {

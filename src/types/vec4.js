@@ -3,7 +3,7 @@ var Vec3 = require("./vec3.js");
 
 var Vec4 = function(vec) {
     if (vec) {
-        this.data = vec4.clone(vec.data ? vec.data : vec);
+        this.data = vec.data ? vec.data : vec;
     } else {
         this.data = vec4.create();
     }
@@ -54,7 +54,7 @@ Vec4.prototype.add = function(b) {
 };
 
 Vec4.prototype.clone = function() {
-   return new Vec4(this);
+   return new Vec4().copy(this);
 };
 
 Vec4.prototype.copy = function(b) {

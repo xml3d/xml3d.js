@@ -2,7 +2,7 @@ var mat4 = require("gl-matrix").mat4;
 
 var Mat4 = function(mat) {
     if (mat) {
-        this.data = mat4.clone(mat.data ? mat.data : mat);
+        this.data = mat.data ? mat.data : mat;
     } else {
         this.data = mat4.create();
     }
@@ -79,7 +79,7 @@ Mat4.prototype.adjoint = function() {
 };
 
 Mat4.prototype.clone = function() {
-   return new Mat4(this);
+   return new Mat4().copy(this);
 };
 
 Mat4.prototype.copy = function(b) {

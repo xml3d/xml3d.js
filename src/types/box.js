@@ -35,7 +35,7 @@ Object.defineProperty(Box.prototype, "max", {
 });
 
 Box.prototype.clone = function() {
-    return new Box(this);
+    return new Box().copy(this);
 };
 
 Box.prototype.copy = function(other) {
@@ -136,7 +136,7 @@ Box.prototype.transform = function(mat) {
     }
 
     this.min.transformMat4(mat);
-    this.max.transformMat4(max);
+    this.max.transformMat4(mat);
     return this;
 };
 

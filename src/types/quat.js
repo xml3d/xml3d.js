@@ -2,7 +2,7 @@ var quat = require("gl-matrix").quat;
 
 var Quat = function(vec) {
     if (vec) {
-        this.data = quat.clone(vec.data ? vec.data : vec);
+        this.data = vec.data ? vec.data : vec;
     } else {
         this.data = quat.create();
     }
@@ -44,7 +44,7 @@ Quat.prototype.calculateW = function() {
 };
 
 Quat.prototype.clone = function() {
-   return new Quat(this);
+   return new Quat().copy(this);
 };
 
 Quat.prototype.conjugate = function() {

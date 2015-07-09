@@ -2,7 +2,7 @@ var vec2 = require("gl-matrix").vec2;
 
 var Vec2 = function(vec) {
     if (vec) {
-        this.data = vec2.clone(vec.data ? vec.data : vec);
+        this.data = vec.data ? vec.data : vec;
     } else {
         this.data = vec2.create();
     }
@@ -27,7 +27,7 @@ Vec2.prototype.add = function(b) {
 };
 
 Vec2.prototype.clone = function() {
-   return new Vec2(this);
+   return new Vec2().copy();
 };
 
 Vec2.prototype.copy = function(b) {

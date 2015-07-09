@@ -33,12 +33,12 @@ methods.viewSetDirection = function(direction) {
     var orientation = new XML3D.Quat().setFromAxisAngle(this.orientation);
     up.transformQuat(orientation).normalize();
 
-    var basisX = new XML3D.Vec3(direction).cross(up);
+    var basisX = new XML3D.Vec3().copy(direction).cross(up);
     if (!basisX.length()) {
         basisX.set(1,0,0).transformQuat(orientation);
     }
-    var basisY = new XML3D.Vec3(basisX).cross(direction);
-    var basisZ = new XML3D.Vec3(direction).negate();
+    var basisY = basisX.clone().cross(direction);
+    var basisZ = new XML3D.Vec3().copy(direction).negate();
 
     var q = new XML3D.Quat().setFromBasis(basisX, basisY, basisZ);
     this.orientation = new XML3D.Vec4().setFromQuat(q);

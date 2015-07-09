@@ -2,7 +2,7 @@ var mat3 = require("gl-matrix").mat3;
 
 var Mat3 = function(mat) {
     if (mat) {
-        this.data = mat3.clone(mat.data ? mat.data : mat);
+        this.data = mat.data ? mat.data : mat;
     } else {
         this.data = mat3.create();
     }
@@ -52,7 +52,7 @@ Mat3.prototype.adjoint = function() {
 };
 
 Mat3.prototype.clone = function() {
-   return new Mat3(this);
+   return new Mat3().copy(this);
 };
 
 Mat3.prototype.copy = function(b) {

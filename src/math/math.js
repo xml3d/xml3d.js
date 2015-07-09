@@ -12,9 +12,11 @@ module.exports = function (math) {
         return dest;
     };
 
-    math.vec2.toDOMString = function(vec) {
-        return vec[0] + " " + vec[1];
+    var toDOMString = function(data) {
+        return Array.prototype.join.call(data, ' ');
     };
+
+    math.vec2.toDOMString = toDOMString;
 
     math.vec2.fromDOMString = function(str) {
         var s = str.split(' ');
@@ -24,9 +26,7 @@ module.exports = function (math) {
         return math.vec2.fromValues(+s[0], +s[1]);
     };
 
-    math.vec3.toDOMString = function(vec) {
-        return vec[0] + " " + vec[1] + " " + vec[2];
-    };
+    math.vec3.toDOMString = toDOMString;
 
     math.vec3.fromDOMString = function(str) {
         var s = str.split(' ');
@@ -37,9 +37,7 @@ module.exports = function (math) {
     };
 
 
-    math.vec4.toDOMString = function(vec) {
-        return vec[0] + " " + vec[1] + " " + vec[2] + " " + vec[3];
-    };
+    math.vec4.toDOMString = toDOMString;
 
     math.vec4.fromDOMString = function(str) {
         var s = str.split(' ');
@@ -49,15 +47,11 @@ module.exports = function (math) {
         return math.vec4.fromValues(+s[0], +s[1], +s[2], +s[3]);
     };
 
-    math.quat.toDOMString = math.vec4.toDOMString
+    math.quat.toDOMString = toDOMString;
 
     math.quat.fromDOMString = math.vec4.fromDOMString;
 
-    math.mat3.toDOMString = function(mat) {
-        return mat[0] + " " + mat[1] + " " + mat[2] + " " +
-            mat[3] + " " + mat[4] + " " + mat[5] + " " +
-            mat[6] + " " + mat[7] + " " + mat[8];
-    };
+    math.mat3.toDOMString = toDOMString;
 
     math.mat3.fromDOMString = function(str) {
         var s = str.split(' ');
@@ -74,12 +68,7 @@ module.exports = function (math) {
         return mat;
     };
 
-    math.mat4.toDOMString = function(mat) {
-        return mat[0] + " " + mat[1] + " " + mat[2] + " " + mat[3] + " " +
-            mat[4] + " " + mat[5] + " " + mat[6] + " " + mat[7] + " " +
-            mat[8] + " " + mat[9] + " " + mat[10] + " " + mat[11] + " " +
-            mat[12] + " " + mat[13] + " " + mat[14] + " " + mat[15];
-    };
+    math.mat4.toDOMString = toDOMString;
 
     math.mat4.fromDOMString = function(str) {
         var s = str.split(' ');

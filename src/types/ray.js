@@ -45,8 +45,19 @@ Ray.prototype.clone = function() {
 };
 
 Ray.prototype.copy = function(other) {
-    this.origin = other.origin;
-    this.direction = other.direction;
+    this.copyOrigin(other);
+    this.copyDirection(other);
+    return this;
+};
+
+Ray.prototype.copyOrigin = function(other) {
+    vec3.copy(this.data, other.data ? other.data : other);
+    return this;
+};
+
+Ray.prototype.copyDirection = function(other) {
+    vec3.copy(this.data.subarray(3,6), other.data ? other.data.subarray(3,6) : other.subarray(3,6));
+    return this;
 };
 
 Ray.prototype.intersects = function(box, opt) {

@@ -3,37 +3,63 @@
 //--- XML3DRay ---
 //============================================================================
 
-var ray = XML3D.math.ray;
+module("XML3DRay tests", {
 
-module("math.ray tests", {
-
-    //ident : ray.create(),
-    ray1 : new Float32Array([1,2,3,4,5,6])
+    ident : new XML3D.Ray(),
+    ray1 : new XML3D.Ray(new Float32Array([1,2,3,4,5,6]))
 });
 
-//test("Default Constructor", function() {
-//
-//    ok(XML3D.math.ray !== 'undefined', "Test for global constructor.");
-//    ok(typeof ray.create == 'function', "Global constructor is a function.");
-//    ok(typeof ray.create() == 'object', "ray instance is object.");
-//
-//    QUnit.closeVector(ray.origin(this.ident), XML3D.math.vec3.fromValues(0, 0, 0), EPSILON, "default origin");
-//    QUnit.closeVector(ray.direction(this.ident), XML3D.math.vec3.fromValues(0, 0, -1), EPSILON, "default direction");
-//});
-//
-//test("Assigning Constructor", function() {
-//
-//    QUnit.closeVector(ray.origin(this.ray1), XML3D.math.vec3.fromValues(1,2,3), EPSILON, "origin");
-//    QUnit.closeVector(ray.direction(this.ray1), XML3D.math.vec3.fromValues(4,5,6), EPSILON, "direction");
-//});
-//
-//test("Copy Constructor", function()  {
-//    var c = ray.create();
-//    ray.copy(c, this.ray1);
-//    notStrictEqual(c, this.ray1);
-//    QUnit.closeArray(c, this.ray1, EPSILON);
-//});
+test("Default Constructor", function() {
 
+    ok(XML3D.Ray !== 'undefined', "Test for global constructor.");
+    ok(typeof XML3D.Ray == 'function', "Global constructor is a function.");
+    ok(typeof new XML3D.Ray() == 'object', "ray instance is object.");
+
+    QUnit.closeArray(this.ident.data, [0, 0, 0, 0, 0, -1], EPSILON, "default origin and direction");
+});
+
+test("Wrapper Constructor", function() {
+    var data = new Float32Array(6);
+    var ray = new XML3D.Ray(data);
+    ray.data[0] = 1;
+    QUnit.closeArray(data, [1,0,0,0,0,0], EPSILON, "Ray properly wrapped the given Float32Array");
+});
+
+test("Ray::accessors", function()  {
+    var ray = new XML3D.Ray().setFromOriginDirection([1,0,0], [0,1,0]);
+    var origin = ray.origin;
+    var direction = ray.direction;
+    QUnit.closeVector(origin, [1,0,0], EPSILON, "origin getter returned the right value");
+    QUnit.closeVector(direction, [0,1,0], EPSILON, "direction getter returned the right value");
+    origin.y = 5;
+    direction.y = -5;
+    QUnit.closeArray(ray.data, [1,5,0,0,-5,0], EPSILON, "Changing the returned vectors also changes the ray's data");
+
+    ray.origin = [5,5,5];
+    ray.direction = new XML3D.Vec3().set(1,0,0);
+    QUnit.closeArray(ray.data, [5,5,5,1,0,0], EPSILON, "Setters work with arrays and Vec3 objects");
+});
+
+test("Ray::intersects", function()  {
+    var ray = new XML3D.Ray().setFromOriginDirection([-5,0,0], [1,0,0]);
+    var box = new XML3D.Box(new Float32Array([-1,-1,-1,1,1,1]));
+    var didIntersect = ray.intersects(box);
+    ok(didIntersect, "Ray intersected the box");
+});
+
+test("Ray::copy", function()  {
+    var ray = new XML3D.Ray().copy(this.ray1);
+    QUnit.closeArray(ray.data, this.ray1.data, EPSILON, "The copy has the right values");
+    ray.origin.x = 100;
+    QUnit.closeVector(this.ray1.origin, [1,2,3], EPSILON, "Changing the copy did not change the original");
+});
+
+test("Ray::clone", function()  {
+    var ray = this.ray1.clone();
+    QUnit.closeArray(ray.data, this.ray1.data, EPSILON, "The clone has the right values");
+    ray.origin.x = 100;
+    QUnit.closeVector(this.ray1.origin, [1,2,3], EPSILON, "Changing the clone did not change the original");
+});
 
 // ============================================================================
 // --- XML3DBox ---

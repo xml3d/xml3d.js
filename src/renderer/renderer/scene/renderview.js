@@ -62,7 +62,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
                 tmp_mat4.multiply(this.orientation);
                 this.parent.getWorldMatrix(tmp_parent);
                 XML3D.math.mat4.multiply(tmp_mat4.data, tmp_parent.data, tmp_mat4.data);
-                this.worldSpacePosition.set(tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
+                this.worldSpacePosition.set(tmp_mat4.m41, tmp_mat4.m42, tmp_mat4.m43);
                 this.setViewToWorldMatrix(tmp_mat4);
                 tmp_mat4.invert();
                 this.setWorldToViewMatrix(tmp_mat4);

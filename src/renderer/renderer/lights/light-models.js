@@ -315,7 +315,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
 
         var t_mat = new XML3D.Mat4();
         this.getLightViewMatrix(t_mat);
-        sceneBoundingBox.extend(t_mat);
+        sceneBoundingBox.transformAxisAligned(t_mat);
 
         var nf = {  near: -sceneBoundingBox.max.z,
                     far:  -sceneBoundingBox.min.z};

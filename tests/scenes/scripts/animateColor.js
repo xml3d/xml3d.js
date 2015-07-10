@@ -4,9 +4,9 @@ Xflow.registerOperator("xflow.animateColor", {
     platforms: ["JAVASCRIPT", "GLSL_VS"],
     evaluate: function(diffuseColor,time) {
     	var d = new Date();
-    	diffuseColor[0] = time[0];
-    	diffuseColor[1] = 0;
-    	diffuseColor[2] = time[0];
+    	diffuseColor[0] = Math.cos(time[0]/500);
+    	diffuseColor[1] = Math.sin(time[0]/500);
+    	diffuseColor[2] = Math.tan(time[0]/500);
     	return diffuseColor;
     }
 });

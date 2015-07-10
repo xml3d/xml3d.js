@@ -514,7 +514,24 @@ DataNode.prototype.removeChild = function(child){
     this.notify( C.RESULT_STATE.CHANGED_STRUCTURE);
     Base._flushResultCallbacks();
 };
-
+/**
+ * @param {InputNodeI|dataNode} child
+ */
+DataNode.prototype.getChildByName = function(name){
+	for (var i in this._children){
+		if (this._children[i].name == name)
+			return this._children[i];
+	}
+};
+/**
+ * @param {dataNode} child
+ */
+DataNode.prototype.hasSystemDataNode = function(){
+	for (var i in this._children){
+		if (this._children[i].systemDataAdapter != undefined)
+			return this._children[i];
+	}
+};
 /**
  * @param {GraphNode} child
  * @param {GraphNode} beforeNode

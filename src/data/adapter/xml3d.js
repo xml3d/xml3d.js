@@ -25,6 +25,7 @@ XML3DDataAdapter.prototype.init = function()
 	this.xflowDataNode = new DataNode(false);
     this.xflowDataNode.addLoadListener(this.onXflowLoadEvent.bind(this));
     this.xflowDataNode.userData = this.node;
+    this.xflowDataNode.systemDataAdapter = true;
 	this.setDefaultValues();
 	
 };
@@ -33,6 +34,11 @@ XML3DDataAdapter.prototype.setDefaultValues = function(){
 	var inputNode = new InputNode();
     inputNode.name="_system_time";
     inputNode.data = new BufferEntry(XC.DATA_TYPE.FLOAT, new Float32Array([0.0]));
+    this.xflowDataNode.appendChild(inputNode);
+    
+    inputNode = new InputNode();
+    inputNode.name="_system_test";
+    inputNode.data = new BufferEntry(XC.DATA_TYPE.FLOAT, new Float32Array([5.0]));
     this.xflowDataNode.appendChild(inputNode);
 }
 

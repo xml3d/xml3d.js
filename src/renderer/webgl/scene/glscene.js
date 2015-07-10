@@ -258,20 +258,7 @@ XML3D.extend(GLScene.prototype, {
     },
     
     setRendererDependentData: function(){
-    	for (child in this.systemDataAdapter.xflowDataNode._children){
-    		// Here we set the renderer dependent values
-    			
-    		}
     },
-//    setSystemDataFilter: function(){
-////    	this.systemDataAdapter.xflowDataNode.filterType= "rename";
-//    	var filter = "rename({";
-//    	for (child in this.systemDataAdapter.xflowDataNode._children){
-//    			filter += this.systemDataAdapter.xflowDataNode._children[child]._name.replace("_system_","") +":" +this.systemDataAdapter.xflowDataNode._children[child]._name +",";
-//    		}
-//    	filter= filter.slice(0,-1)+"})";
-//    	this.systemDataAdapter.xflowDataNode.setFilter(filter);
-//    }
 });
 module.exports = GLScene;
 

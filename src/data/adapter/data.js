@@ -109,27 +109,63 @@ function recursiveDataNodeAttrInit(parentNode) {
 
 function recursiveDataAdapterConstruction(adapter) {
     for (var child = adapter.node.firstElementChild; child !== null; child = child.nextElementSibling) {
-        var subadapter = adapter.factory.getAdapter(child);
-        if (subadapter) {
-            if (subadapter.getXflowNode) {
-                adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
-            } else if (subadapter.getScriptType) {
-                var scriptId = subadapter.node.name;
-                if (!scriptId) {
-                    XML3D.debug.logError("Parsing error: Externally referenced operators must have a 'name' attribute matching the name they were registered with. ", subadapter.node);
-                    scriptId = "unknown_operator";
-                }
-                adapter.externalScripts[scriptId] = subadapter;
-                if (subadapter.connectedAdapterHandle) {
-                    adapter.connectAdapterHandle(scriptId, subadapter.connectedAdapterHandle);
-                }
-                adapter.xflowDataNode.setLoading(true);
+    	//Here we check for data nodes with sys flag set
+    	if (child.sys != undefined){
+    		//Going up in the DOM hierarchy to find XML3D node
+    		var xml3dNode = child;        	
+        	while(xml3dNode.localName != "xml3d"){
+        		xml3dNode = xml3dNode.parentNode; 
+        	}
+        	var systemDataNode = adapter.factory.getAdapter(xml3dNode).xflowDataNode;
+        	
+        	//Check if a system parameter with this name exists
+        	if (systemDataNode.getChildByName("_system_" + child.name)) {
+        		//Check if the systemDataNode is already added to adapter or not
+        		var adapterSystemDataNode = adapter.xflowDataNode.hasSystemDataNode(); 
+        		if (!adapterSystemDataNode){
+	        		var filter = systemDataNode.filterMapping;
+	                if (!filter) {
+	                	filter = "keep({";
+	                    filter += child.name + ":_system_" + child.name + ",";
+	                    filter = filter.slice(0, -1) + "})";
+	                    systemDataNode.setFilter(filter);
+	                } else {
+	                    filter.setNamePair(child.name, "_system_" + child.name);
+	                }
+	                adapter.xflowDataNode.appendChild(systemDataNode);
+        		}
+        		else{
+        			//SystemDataNode is already added to the adapter. We only update the filter
+        			adapterSystemDataNode.filterMapping.setNamePair(child.name, "_system_" + child.name);
+        		}
+            } else {
+                XML3D.debug.logWarning("Parameter "+ child.name + " doesn't exist in global parameters!");
             }
-            // Passes _platform values to children nodes starting from the node
-            // where these attributes are first defined
-            if (adapter.xflowDataNode._platform !== null) {
-                recursiveDataNodeAttrInit(adapter.xflowDataNode);
-            }
+    	}
+    	else{
+	        var subadapter = adapter.factory.getAdapter(child);
+	        if (subadapter) {
+	            if (subadapter.getXflowNode) {
+	                adapter.xflowDataNode.appendChild(subadapter.getXflowNode());
+	            } else if (subadapter.getScriptType) {
+	                var scriptId = subadapter.node.name;
+	                if (!scriptId) {
+	                    XML3D.debug.logError("Parsing error: Externally referenced operators must have a 'name' attribute matching the name they were registered with. ", subadapter.node);
+	                    scriptId = "unknown_operator";
+	                }
+	                adapter.externalScripts[scriptId] = subadapter;
+	                if (subadapter.connectedAdapterHandle) {
+	                    adapter.connectAdapterHandle(scriptId, subadapter.connectedAdapterHandle);
+	                }
+	                adapter.xflowDataNode.setLoading(true);
+	            }
+
+	        }
+    	}
+        // Passes _platform values to children nodes starting from the node
+        // where these attributes are first defined
+        if (adapter.xflowDataNode._platform !== null) {
+            recursiveDataNodeAttrInit(adapter.xflowDataNode);
         }
     }
 }

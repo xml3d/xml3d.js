@@ -225,24 +225,24 @@ XML3D.extend(GLRenderer.prototype, {
     },
 
     calculateOrientationForRayDirection: (function () {
-        var tmpX = XML3D.math.vec3.create();
-        var tmpY = XML3D.math.vec3.create();
-        var tmpZ = XML3D.math.vec3.create();
-        var up = XML3D.math.vec3.create();
-        var q = XML3D.math.quat.create();
-        var m = XML3D.math.mat4.create();
+        var tmpX = new XML3D.Vec3();
+        var tmpY = new XML3D.Vec3();
+        var tmpZ = new XML3D.Vec3();
+        var up = new XML3D.Vec3();
+        var q = new XML3D.Quat();
+        var m = new XML3D.Mat4();
 
         return function (ray) {
-            XML3D.math.vec3.set(up, 0, 1, 0);
-            XML3D.math.vec3.cross(tmpX, ray.direction.data, up);
-            if (!XML3D.math.vec3.length(tmpX)) {
-                XML3D.math.vec3.set(tmpX, 1, 0, 0);
+            up.set(0, 1, 0);
+            XML3D.math.vec3.cross(tmpX.data, ray.direction.data, up.data);
+            if (!tmpX.length()) {
+                tmpX.set(1, 0, 0);
             }
-            XML3D.math.vec3.cross(tmpY, tmpX, ray.direction.data);
-            XML3D.math.vec3.negate(tmpZ, ray.direction.data);
+            XML3D.math.vec3.cross(tmpY.data, tmpX.data, ray.direction.data);
+            XML3D.math.vec3.negate(tmpZ.data, ray.direction.data);
 
-            XML3D.math.quat.setFromBasis(q, tmpX, tmpY, tmpZ);
-            XML3D.math.mat4.fromRotationTranslation(m, q, [0, 0, 0]);
+            q.setFromBasis(tmpX, tmpY, tmpZ);
+            m.setFromRotationTranslation(q, [0,0,0]);
             return m;
         }
     })(),
@@ -286,8 +286,8 @@ XML3D.extend(GLRenderer.prototype, {
      */
     generateRay: (function () {
 
-        var c_viewMatrix = XML3D.math.mat4.create();
-        var c_projectionMatrix = XML3D.math.mat4.create();
+        var c_viewMatrix = new XML3D.Mat4();
+        var c_projectionMatrix = new XML3D.Mat4();
 
         return function (canvasX, canvasY) {
 
@@ -311,17 +311,17 @@ XML3D.extend(GLRenderer.prototype, {
             var farHit = new Float32Array(3);
 
             // do unprojections
-            if (false === GLU.unProject(canvasX, glY, 0, c_viewMatrix, c_projectionMatrix, viewport, nearHit)) {
+            if (false === GLU.unProject(canvasX, glY, 0, c_viewMatrix.data, c_projectionMatrix.data, viewport, nearHit)) {
                 return ray;
             }
 
-            if (false === GLU.unProject(canvasX, glY, 1, c_viewMatrix, c_projectionMatrix, viewport, farHit)) {
+            if (false === GLU.unProject(canvasX, glY, 1, c_viewMatrix.data, c_projectionMatrix.data, viewport, farHit)) {
                 return ray;
             }
 
             // calculate ray
-            XML3D.math.mat4.invert(c_viewMatrix, c_viewMatrix);
-            ray.origin = XML3D.math.vec3.fromValues(c_viewMatrix[12], c_viewMatrix[13], c_viewMatrix[14]);
+            c_viewMatrix.invert();
+            ray.origin = XML3D.math.vec3.fromValues(c_viewMatrix.m41, c_viewMatrix.m42, c_viewMatrix.m43);
             ray.direction = XML3D.math.vec3.fromValues(farHit[0] - nearHit[0], farHit[1] - nearHit[1], farHit[2] - nearHit[2]);
 
             return ray;

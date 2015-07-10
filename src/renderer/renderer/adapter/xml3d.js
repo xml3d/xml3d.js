@@ -146,8 +146,8 @@ XML3DRenderAdapter.prototype.generateRay = function (x, y) {
 };
 
 XML3DRenderAdapter.prototype.getElementByRay = (function () {
-    var c_viewMat = XML3D.math.mat4.create();
-    var c_projMat = XML3D.math.mat4.create();
+    var c_viewMat = new XML3D.Mat4();
+    var c_projMat = new XML3D.Mat4();
 
     return function (xml3dRay, hitPoint, hitNormal) {
         var renderer = this.factory.getRenderer();

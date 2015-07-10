@@ -139,16 +139,16 @@ LightModel.prototype = {
     },
 
     getLightData: function (target, offset) {
-        var matrix = target["matrix"].subarray(offset * 16, offset * 16 + 16);
+        var matrix = new XML3D.Mat4(target["matrix"].subarray(offset * 16, offset * 16 + 16));
         this.getLightViewProjectionMatrix(matrix);
     },
 
     getLightViewProjectionMatrix: function (target) {
-        var LVM = XML3D.math.mat4.create();
-        var LPM = XML3D.math.mat4.create();
+        var LVM = new XML3D.Mat4();
+        var LPM = new XML3D.Mat4();
         this.getLightViewMatrix(LVM);
         this.getLightProjectionMatrix(LPM);
-        XML3D.math.mat4.multiply(target, LPM, LVM);
+        XML3D.math.mat4.multiply(target.data, LPM.data, LVM.data);
     },
 
     getLightProjectionMatrix: function (target) {
@@ -164,30 +164,30 @@ LightModel.prototype = {
         this.light.getWorldMatrix(mat4);
 
         // Derive rotation from the direction and standard direction (-z => no rotation)
-        var q_rot = XML3D.math.quat.rotationTo(XML3D.math.quat.create(),c_standardDirection, p_dir);
+        var q_rot = XML3D.math.quat.rotationTo(XML3D.math.quat.create(),c_standardDirection.data, p_dir);
         // Create matrix from rotation and translation
         var trans = XML3D.math.mat4.fromRotationTranslation(XML3D.math.mat4.create(), q_rot, p_pos);
         // Add to world matrix
-        XML3D.math.mat4.mul(mat4, mat4, trans);
+        mat4.mul(trans);
 
         // Invert:  light => world
-        XML3D.math.mat4.invert(mat4, mat4);
+        mat4.invert();
     }
 
 };
 
-var c_tmpWorldMatrix = XML3D.math.mat4.create();
-var c_standardDirection = XML3D.math.vec3.fromValues(0,0,-1);
+var c_tmpWorldMatrix = new XML3D.Mat4();
+var c_standardDirection = new XML3D.Vec3().set(0,0,-1);
 
 
 function transformPose(light, position, direction) {
     light.getWorldMatrix(c_tmpWorldMatrix);
     if (position) {
-        XML3D.math.vec3.transformMat4(position, position, c_tmpWorldMatrix);
+        position.transformMat4(c_tmpWorldMatrix);
     }
     if (direction) {
-        XML3D.math.vec3.transformDirection(direction, direction, c_tmpWorldMatrix);
-        XML3D.math.vec3.normalize(direction, direction);
+        XML3D.math.vec3.transformDirection(direction.data, direction.data, c_tmpWorldMatrix.data);
+        direction.normalize();
     }
 }
 
@@ -219,7 +219,7 @@ XML3D.createClass(PointLightModel, LightModel, {
         }
 
 
-        var t_mat = XML3D.math.mat4.create();
+        var t_mat = new XML3D.Mat4();
         this.getLightViewMatrix(t_mat);
         sceneBoundingBox.transformAxisAligned(t_mat);
 
@@ -237,7 +237,7 @@ XML3D.createClass(PointLightModel, LightModel, {
 
     transformParameters: function (target, offset) {
         var position = target["position"].subarray(offset * 3, offset * 3 + 3);
-        transformPose(this.light, position, null);
+        transformPose(this.light, new XML3D.Vec3(position), null);
         transformDefault(target, offset, this.light);
     }
 });
@@ -264,8 +264,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
             return new Frustum(1.0, 110.0, 0, this.fovy, aspect, false)
         }
 
-
-        var t_mat = XML3D.math.mat4.create();
+        var t_mat = new XML3D.Mat4();
         this.getLightViewMatrix(t_mat);
         sceneBoundingBox.transformAxisAligned(t_mat);
 
@@ -282,7 +281,7 @@ XML3D.createClass(SpotLightModel, LightModel, {
         var position = target["position"].subarray(offset * 3, offset * 3 + 3);
         var direction = target["direction"].subarray(offset * 3, offset * 3 + 3);
         // Transform position and direction from object to world space
-        transformPose(this.light, position, direction);
+        transformPose(this.light, new XML3D.Vec3(position), new XML3D.Vec3(direction));
         transformDefault(target, offset, this.light);
     },
 
@@ -314,7 +313,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
             return new Frustum(1.0, 110.0, 0, this.fovy, aspect, orthogonal)
         }
 
-        var t_mat = XML3D.math.mat4.create();
+        var t_mat = new XML3D.Mat4();
         this.getLightViewMatrix(t_mat);
         sceneBoundingBox.extend(t_mat);
 
@@ -328,7 +327,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
 
     transformParameters: function (target, offset) {
         var direction = target["direction"].subarray(offset * 3, offset * 3 + 3);
-        transformPose(this.light, null, direction);
+        transformPose(this.light, null, new XML3D.Vec3(direction));
         transformDefault(target, offset, this.light);
     },
 
@@ -352,7 +351,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
 
 
         //create new transformation matrix depending on the updated parameters
-        XML3D.math.mat4.identity(mat4);
+        XML3D.math.mat4.identity(mat4.data);
         var lookat_mat = XML3D.math.mat4.create();
         var top_vec = XML3D.math.vec3.fromValues(0.0, 1.0, 0.0);
         if ((p_dir[0] == 0.0) && (p_dir[2] == 0.0)) //check if top_vec colinear with direction
@@ -364,12 +363,12 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         XML3D.math.vec3.normalize(up_vec, up_vec);
         XML3D.math.mat4.lookAt(lookat_mat, XML3D.math.vec3.fromValues(0.0, 0.0, 0.0), p_dir, up_vec);
         XML3D.math.mat4.invert(lookat_mat, lookat_mat);
-        XML3D.math.mat4.translate(mat4, mat4, p_pos);
-        XML3D.math.mat4.multiply(mat4, mat4, lookat_mat);
+        XML3D.math.mat4.translate(mat4.data, mat4.data, p_pos);
+        XML3D.math.mat4.multiply(mat4.data, mat4.data, lookat_mat);
 
         bb = new XML3D.Box();
         this.light.scene.getBoundingBox(bb);
-        bb.transformAxisAligned(mat4);
+        bb.transformAxisAligned(mat4.data);
         bbSize = bb.size();
         bbSize = bbSize.data;
         var max = (bbSize[0] > bbSize[1]) ? bbSize[0] : bbSize[1];
@@ -379,7 +378,7 @@ XML3D.createClass(DirectionalLightModel, LightModel, {
         entry.parameters["direction"] = p_dir;
         entry.parameters["position"]  = p_pos;
 
-        XML3D.math.mat4.invert(mat4, mat4);
+        mat4.invert();
     }
 
 });

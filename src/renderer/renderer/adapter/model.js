@@ -15,7 +15,7 @@ var ModelRenderAdapter = function (factory, node) {
     this.transformFetcher.update();
 };
 
-var c_IDENTITY = XML3D.math.mat4.create();
+var c_IDENTITY = new XML3D.Mat4();
 
 XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
 
@@ -163,7 +163,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         if (index != -1) {
             this.updatePostTransform(this.postTransformRenderGroups[index], request);
         }
-    }, updatePostTransform: function (renderNode, xflowRequest) {
+    },
+
+    updatePostTransform: function (renderNode, xflowRequest) {
         var dataResult = xflowRequest.getResult();
         var transformData = (dataResult.getOutputData("transform") && dataResult.getOutputData("transform").getValue());
         if (!transformData) {
@@ -172,7 +174,9 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
             return;
         }
         renderNode.setLocalMatrix(transformData);
-    }, dispose: function () {
+    },
+
+    dispose: function () {
         this.asset.removeChangeListener(this);
         this.clearModelRenderNodes();
         this.getRenderNode().remove();
@@ -267,7 +271,7 @@ XML3D.extend(ModelRenderAdapter.prototype, {
     getWorldMatrix: function () {
         var m = new XML3D.Mat4(), obj = this.renderNode;
         if (obj) {
-            obj.getWorldMatrix(m.data);
+            obj.getWorldMatrix(m);
         }
         return m;
     }

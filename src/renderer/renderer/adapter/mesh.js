@@ -106,7 +106,7 @@ XML3D.createClass(MeshRenderAdapter, TransformableAdapter, {
     getWorldMatrix: function () {
         var m = new XML3D.Mat4(), obj = this.renderNode;
         if (obj) {
-            obj.getWorldMatrix(m.data);
+            obj.getWorldMatrix(m);
         }
         return m;
     }

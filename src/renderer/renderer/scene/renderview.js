@@ -1,6 +1,8 @@
 var RenderNode = require("./rendernode.js");
 var Constants = require("./constants.js");
 var Frustum = require("../tools/frustum.js").Frustum;
+var Vec3 = require("../../../types/vec3.js");
+var Mat4 = require("../../../types/mat4.js");
 
 var NODE_TYPE = Constants.NODE_TYPE;
 var EVENT_TYPE = Constants.EVENT_TYPE;
@@ -28,10 +30,10 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
     var RenderView = function(scene, pageEntry, opt) {
         RenderNode.call(this, NODE_TYPE.VIEW, scene, pageEntry, opt);
         opt = opt || {};
-        this.position = opt.position || XML3D.math.vec3.create();
-        this.orientation = opt.orientation || XML3D.math.mat4.create();
+        this.position = opt.position || new Vec3();
+        this.orientation = opt.orientation || new Mat4();
         this.fieldOfView = opt.fieldOfView !== undefined ? opt.fieldOfView : DEFAULT_FIELDOFVIEW;
-        this.worldSpacePosition = XML3D.math.vec3.create();
+        this.worldSpacePosition = new Vec3();
         this.projectionOverride = opt.projectionOverride;
         this.viewDirty = true;
         this.projectionDirty = true;
@@ -48,28 +50,28 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
         },
 
         updateViewMatrix: (function() {
-            var tmp_mat4 = XML3D.math.mat4.create();
-            var tmp_parent = XML3D.math.mat4.create();
+            var tmp_mat4 = new Mat4();
+            var tmp_parent = new Mat4();
 
             return function () {
-                XML3D.math.mat4.identity(tmp_mat4);
-                tmp_mat4[12] = this.position[0];
-                tmp_mat4[13] = this.position[1];
-                tmp_mat4[14] = this.position[2];
+                tmp_mat4.identity();
+                tmp_mat4.m41 = this.position.x;
+                tmp_mat4.m42 = this.position.y;
+                tmp_mat4.m43 = this.position.z;
                 // tmp = T * O
-                XML3D.math.mat4.multiply(tmp_mat4, tmp_mat4, this.orientation);
+                tmp_mat4.multiply(this.orientation);
                 this.parent.getWorldMatrix(tmp_parent);
-                XML3D.math.mat4.multiply(tmp_mat4, tmp_parent, tmp_mat4);
-                XML3D.math.vec3.set(this.worldSpacePosition, tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
+                XML3D.math.mat4.multiply(tmp_mat4.data, tmp_parent.data, tmp_mat4.data);
+                this.worldSpacePosition.set(tmp_mat4[12], tmp_mat4[13], tmp_mat4[14]);
                 this.setViewToWorldMatrix(tmp_mat4);
-                XML3D.math.mat4.invert(tmp_mat4, tmp_mat4);
+                tmp_mat4.invert();
                 this.setWorldToViewMatrix(tmp_mat4);
                 this.viewDirty = false;
             }
         })(),
 
         updateProjectionMatrix: (function() {
-            var tmp = XML3D.math.mat4.create();
+            var tmp = new Mat4();
 
             return function(aspect) {
                 if (this.projectionOverride) {
@@ -85,7 +87,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
                     fovy = this.fieldOfView;
 
                 // Calculate perspective projectionMatrix
-                XML3D.math.mat4.perspective(tmp, fovy, aspect, near, far);
+                tmp.perspective(fovy, aspect, near, far);
                 // Set projectionMatrix
                 this.setProjectionMatrix(tmp);
                 // Update Frustum
@@ -104,7 +106,7 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
                 if (bb.isEmpty()) {
                     return { near: 1, far: 10 };
                 }
-                this.getWorldToViewMatrix(t_mat.data);
+                this.getWorldToViewMatrix(t_mat);
                 bb.transformAxisAligned(t_mat);
 
                 var near = -bb.max.z,
@@ -119,30 +121,16 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
             }
         })(),
 
-        /**
-         * @param {Float32Array} source
-         * @param {number} offset
-         */
-        setMatrix: function(source, offset) {
-            var o = this.offset + offset;
-            for(var i = 0; i < 16; i++, o++) {
-                this.page[o] = source[i];
-            }
-        },
-
         setWorldToViewMatrix: function(source) {
-            this.setMatrix(source, WORLD_TO_VIEW_MATRIX_OFFSET);
+            this.setMat4InPage(source, WORLD_TO_VIEW_MATRIX_OFFSET);
         },
 
         setViewToWorldMatrix: function(source) {
-            this.setMatrix(source, VIEW_TO_WORLD_MATRIX_OFFSET);
+            this.setMat4InPage(source, VIEW_TO_WORLD_MATRIX_OFFSET);
         },
 
         setProjectionMatrix: function(source) {
-            var o = this.offset + PROJECTION_MATRIX_OFFSET;
-            for(var i = 0; i < 16; i++, o++) {
-                this.page[o] = source[i];
-            }
+            this.setMat4InPage(source, PROJECTION_MATRIX_OFFSET);
             this.projectionDirty = false;
         },
 
@@ -164,16 +152,12 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
 
         updatePosition: function(newPos) {
             this.setTransformDirty();
-            this.position[0] = newPos[0];
-            this.position[1] = newPos[1];
-            this.position[2] = newPos[2];
+            this.position.copy(newPos);
         },
 
         updateOrientation: function(newOrientation) {
             this.setTransformDirty();
-            for (var i = 0; i < 16; i++) {
-                this.orientation[i] = newOrientation[i];
-            }
+            this.orientation.copy(newOrientation);
         },
 
         updateFieldOfView: function(newFov) {
@@ -185,30 +169,21 @@ var EVENT_TYPE = Constants.EVENT_TYPE;
             if (this.viewDirty) {
                 this.updateViewMatrix();
             }
-            var o = this.offset + VIEW_TO_WORLD_MATRIX_OFFSET;
-            for (var i = 0; i < 16; i++, o++) {
-                dest[i] = this.page[o];
-            }
+            this.getMat4FromPage(dest, VIEW_TO_WORLD_MATRIX_OFFSET);
         },
 
         getWorldToViewMatrix: function (dest) {
             if (this.viewDirty) {
                 this.updateViewMatrix();
             }
-            var o = this.offset + WORLD_TO_VIEW_MATRIX_OFFSET;
-            for (var i = 0; i < 16; i++, o++) {
-                dest[i] = this.page[o];
-            }
+            this.getMat4FromPage(dest, WORLD_TO_VIEW_MATRIX_OFFSET);
         },
 
         getProjectionMatrix: function(dest, aspect) {
-                if (this.projectionDirty || aspect != this.lastAspectRatio) {
-                    this.updateProjectionMatrix(aspect);
-                }
-                var o = this.offset + PROJECTION_MATRIX_OFFSET;
-                for(var i = 0; i < 16; i++, o++) {
-                    dest[i] = this.page[o];
-                }
+            if (this.projectionDirty || aspect != this.lastAspectRatio) {
+                this.updateProjectionMatrix(aspect);
+            }
+            this.getMat4FromPage(dest, PROJECTION_MATRIX_OFFSET);
         },
 
         getWorldSpacePosition: function() {

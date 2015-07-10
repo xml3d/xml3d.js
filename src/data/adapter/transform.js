@@ -9,39 +9,40 @@ var TransformDataAdapter = function (factory, node) {
 
 XML3D.createClass(TransformDataAdapter, NodeAdapter);
 
-var IDENT_MAT = XML3D.math.mat4.identity(XML3D.math.mat4.create());
+var IDENT_MAT = new XML3D.Mat4();
 
 TransformDataAdapter.prototype.init = function () {
     // Create all matrices, no valid values yet
-    this.matrix = XML3D.math.mat4.create();
+    this.matrix = new XML3D.Mat4();
     this.transform = {
-        translate: XML3D.math.mat4.create(),
-        scale: XML3D.math.mat4.create(),
-        scaleOrientation: XML3D.math.mat4.create(),
-        scaleOrientationInv: XML3D.math.mat4.create(),
-        center: XML3D.math.mat4.create(),
-        centerInverse: XML3D.math.mat4.create(),
-        rotation: XML3D.math.mat4.create()
+        translate: new XML3D.Mat4(),
+        scale: new XML3D.Mat4(),
+        scaleOrientation: new XML3D.Mat4(),
+        scaleOrientationInv: new XML3D.Mat4(),
+        center: new XML3D.Mat4(),
+        centerInverse: new XML3D.Mat4(),
+        rotation: new XML3D.Mat4()
     };
     this.needsUpdate = true;
     this.checkForImproperNesting();
 };
 
 TransformDataAdapter.prototype.updateMatrix = function () {
+    this.matrix.identity();
     var n = this.node;
     var transform = this.transform;
-    var centerVec = n.center.data;
-    var so = n.scaleOrientation.data;
-    var ro = n.rotation.data;
+    var centerVec = n.center;
+    var so = n.scaleOrientation;
+    var ro = n.rotation;
 
-    XML3D.math.mat4.fromRotation(transform.scaleOrientation, so[3], so);
-    XML3D.math.mat4.fromRotation(transform.rotation, ro[3], ro);
+    transform.scaleOrientation.identity().rotate(so.angle, so.axis);
+    transform.rotation.identity().rotate(ro.angle, ro.axis);
 
-    XML3D.math.mat4.translate(transform.translate, IDENT_MAT, n.translation.data);
-    XML3D.math.mat4.translate(transform.center, IDENT_MAT, centerVec);
-    XML3D.math.mat4.translate(transform.centerInverse, IDENT_MAT, XML3D.math.vec3.negate(centerVec, centerVec));
-    XML3D.math.mat4.scale(transform.scale, IDENT_MAT, n.scale.data);
-    XML3D.math.mat4.invert(transform.scaleOrientationInv, transform.scaleOrientation);
+    transform.translate.identity().translate(n.translation);
+    transform.center.identity().translate(centerVec);
+    transform.centerInverse.identity().translate(centerVec.negate());
+    transform.scale.identity().scale(n.scale);
+    XML3D.math.mat4.invert(transform.scaleOrientationInv.data, transform.scaleOrientation.data);
 
     multiplyComponents(transform, this.matrix);
     this.needsUpdate = false;
@@ -49,17 +50,17 @@ TransformDataAdapter.prototype.updateMatrix = function () {
 
 function multiplyComponents(transform, matrix) {
     // M = T * C
-    XML3D.math.mat4.multiply(matrix, transform.translate, transform.center);
+    XML3D.math.mat4.multiply(matrix.data, transform.translate.data, transform.center.data);
     // M = T * C * R
-    XML3D.math.mat4.multiply(matrix, matrix, transform.rotation);
+    matrix.multiply(transform.rotation);
     // M = T * C * R * SO
-    XML3D.math.mat4.multiply(matrix, matrix, transform.scaleOrientation);
+    matrix.multiply(transform.scaleOrientation);
     // M = T * C * R * SO * S
-    XML3D.math.mat4.multiply(matrix, matrix, transform.scale);
+    matrix.multiply(transform.scale);
     // M = T * C * R * SO * S * -SO
-    XML3D.math.mat4.multiply(matrix, matrix, transform.scaleOrientationInv);
+    matrix.multiply(transform.scaleOrientationInv);
     // M = T * C * R * SO * S * -SO * -C
-    XML3D.math.mat4.multiply(matrix, matrix, transform.centerInverse);
+    matrix.multiply(transform.centerInverse);
 }
 
 TransformDataAdapter.prototype.getMatrix = function () {

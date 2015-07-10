@@ -14,11 +14,11 @@ XML3D.extend(ForwardRenderPass.prototype, {
 
     render: (function () {
         /**
-         * @type Float32Array
+         * @type XML3D.Mat4
          */
-        var c_worldToViewMatrix = XML3D.math.mat4.create();
-        var c_viewToWorldMatrix = XML3D.math.mat4.create();
-        var c_projectionMatrix = XML3D.math.mat4.create();
+        var c_worldToViewMatrix = new XML3D.Mat4();
+        var c_viewToWorldMatrix = new XML3D.Mat4();
+        var c_projectionMatrix = new XML3D.Mat4();
         var c_programSystemUniforms = ["viewMatrix", "viewInverseMatrix", "projectionMatrix", "cameraPosition", "coords", "ssaoMap", "width"];
 
         return function (scene) {
@@ -37,10 +37,10 @@ XML3D.extend(ForwardRenderPass.prototype, {
 
             var sorted = this.sorter.sortScene(scene, c_worldToViewMatrix);
 
-            systemUniforms["viewMatrix"] = c_worldToViewMatrix;
-            systemUniforms["viewInverseMatrix"] = c_viewToWorldMatrix;
-            systemUniforms["projectionMatrix"] = c_projectionMatrix;
-            systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition();
+            systemUniforms["viewMatrix"] = c_worldToViewMatrix.data;
+            systemUniforms["viewInverseMatrix"] = c_viewToWorldMatrix.data;
+            systemUniforms["projectionMatrix"] = c_projectionMatrix.data;
+            systemUniforms["cameraPosition"] = scene.getActiveView().getWorldSpacePosition().data;
             systemUniforms["coords"] = [target.width, target.height, 1];
 
             if (this.inputs.ssaoMap)

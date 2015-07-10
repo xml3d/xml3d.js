@@ -65,6 +65,28 @@ XML3D.extend(RenderNode.prototype, {
         })
     },
 
+    /**
+     * @param {Mat4} source
+     * @param {number} offset
+     */
+    setMat4InPage: function(source, offset) {
+        var o = this.offset + offset;
+        for(var i = 0; i < 16; i++, o++) {
+            this.page[o] = source.data[i];
+        }
+    },
+
+    /**
+     * @param {Mat4} dest
+     * @param {number} offset
+     */
+    getMat4FromPage: function(dest, offset) {
+        var o = this.offset + offset;
+        for(var i = 0; i < 16; i++, o++) {
+            dest.data[i] = this.page[o];
+        }
+    },
+
     getWorldMatrix: function (dest) {
         if (this.transformDirty) {
             this.parent.getWorldMatrix(dest);
@@ -72,15 +94,12 @@ XML3D.extend(RenderNode.prototype, {
         }
         var o = this.offset + WORLD_MATRIX_OFFSET;
         for (var i = 0; i < 16; i++, o++) {
-            dest[i] = this.page[o];
+            dest.data[i] = this.page[o];
         }
     },
 
     setWorldMatrix: function (source) {
-        var o = this.offset + WORLD_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            this.page[o] = source[i];
-        }
+        this.setMat4InPage(source, WORLD_MATRIX_OFFSET);
         this.transformDirty = false;
         if (this.setBoundingBoxDirty) {
             this.setBoundingBoxDirty();

@@ -6,9 +6,9 @@ var PickNormalRenderPass = function (renderInterface, output, opt) {
 
 XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
     render: (function () {
-        var c_modelViewProjectionMatrix = XML3D.math.mat4.create();
-        var c_worldMatrix = XML3D.math.mat4.create();
-        var c_normalMatrix3 = XML3D.math.mat3.create();
+        var c_modelViewProjectionMatrix = new XML3D.Mat4();
+        var c_worldMatrix = new XML3D.Mat4();
+        var c_normalMatrix3 = new XML3D.Mat3();
         var c_uniformCollection = {
                 envBase: {},
                 envOverride: null,
@@ -32,16 +32,15 @@ XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
             object.getModelViewProjectionMatrix(c_modelViewProjectionMatrix);
 
             object.getWorldMatrix(c_worldMatrix);
-            if (!XML3D.math.mat3.normalFromMat4(c_normalMatrix3, c_worldMatrix)) {
-                XML3D.math.mat3.identity(c_normalMatrix3);
+            if (!XML3D.math.mat3.normalFromMat4(c_normalMatrix3.data, c_worldMatrix.data)) {
+                c_normalMatrix3.identity();
             }
-            ;
 
             var program = this.renderInterface.context.programFactory.getPickingNormalProgram();
             program.bind();
 
-            c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix;
-            c_uniformCollection.sysBase["modelViewMatrixN"] = c_normalMatrix3;
+            c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_modelViewProjectionMatrix.data;
+            c_uniformCollection.sysBase["modelViewMatrixN"] = c_normalMatrix3.data;
 
             program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
             object.mesh.draw(program);
@@ -56,20 +55,20 @@ XML3D.createClass(PickNormalRenderPass, BaseRenderPass, {
      * @returns {Object} Vector with normal data
      */
     readNormalFromPickingBuffer: (function () {
-        var c_pickVector = XML3D.math.vec3.create();
-        var c_one = XML3D.math.vec3.fromValues(1, 1, 1);
+        var c_pickVector = new XML3D.Vec3();
+        var c_one = new XML3D.Vec3().set(1, 1, 1);
 
         return function (glX, glY) {
             var data = this.readPixelDataFromBuffer(glX, glY, this.output);
             if (!data) {
                 return null;
             }
-            c_pickVector[0] = data[0] / 254;
-            c_pickVector[1] = data[1] / 254;
-            c_pickVector[2] = data[2] / 254;
+            c_pickVector.x = data[0] / 254;
+            c_pickVector.y = data[1] / 254;
+            c_pickVector.z = data[2] / 254;
 
             // TODO: Optimize (2 Float arrays created)
-            return XML3D.math.vec3.subtract(XML3D.math.vec3.create(), XML3D.math.vec3.scale(XML3D.math.vec3.create(), c_pickVector, 2.0), c_one);
+            return c_pickVector.scale(2).subtract(c_one);
         }
     }())
 });

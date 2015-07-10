@@ -41,11 +41,11 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
      * @param Array
      */
     renderObjectsToActiveBuffer: (function () {
-        var tmpModelMatrix = XML3D.math.mat4.create();
-        var tmpModelMatrixN = XML3D.math.mat3.create();
-        var tmpModelView = XML3D.math.mat4.create();
-        var tmpModelViewProjection = XML3D.math.mat4.create();
-        var tmpModelViewN = XML3D.math.mat3.create();
+        var tmpModelMatrix = new XML3D.Mat4();
+        var tmpModelMatrixN = new XML3D.Mat3();
+        var tmpModelView = new XML3D.Mat4();
+        var tmpModelViewProjection = new XML3D.Mat4();
+        var tmpModelViewN = new XML3D.Mat3();
         var c_objectSystemUniforms = ["modelMatrix", "modelMatrixN", "modelViewMatrix", "modelViewProjectionMatrix", "modelViewMatrixN"];
 
         return function (objectArray, scene, target, systemUniforms, sceneParameterFilter, opt) {
@@ -82,19 +82,19 @@ XML3D.createClass(SceneRenderPass, BaseRenderPass, {
                 XML3D.debug.assert(mesh, "We need a mesh at this point.");
 
                 obj.getWorldMatrix(tmpModelMatrix);
-                systemUniforms["modelMatrix"] = tmpModelMatrix;
+                systemUniforms["modelMatrix"] = tmpModelMatrix.data;
 
                 obj.getModelMatrixN(tmpModelMatrixN);
-                systemUniforms["modelMatrixN"] = tmpModelMatrixN;
+                systemUniforms["modelMatrixN"] = tmpModelMatrixN.data;
 
                 obj.getModelViewMatrix(tmpModelView);
-                systemUniforms["modelViewMatrix"] = tmpModelView;
+                systemUniforms["modelViewMatrix"] = tmpModelView.data;
 
                 obj.getModelViewProjectionMatrix(tmpModelViewProjection);
-                systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection;
+                systemUniforms["modelViewProjectionMatrix"] = tmpModelViewProjection.data;
 
                 obj.getModelViewMatrixN(tmpModelViewN);
-                systemUniforms["modelViewMatrixN"] = tmpModelViewN;
+                systemUniforms["modelViewMatrixN"] = tmpModelViewN.data;
 
                 program.setSystemUniformVariables(c_objectSystemUniforms, systemUniforms);
 

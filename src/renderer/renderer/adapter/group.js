@@ -89,7 +89,7 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
                     bbox.extend(childBB);
                 }
             });
-            this.renderNode.getLocalMatrix(localMat.data);
+            this.renderNode.getLocalMatrix(localMat);
             bbox.transformAxisAligned(localMat);
             return bbox;
         }
@@ -97,13 +97,13 @@ XML3D.createClass(GroupRenderAdapter, TransformableAdapter, {
 
     getLocalMatrix: function () {
         var m = new XML3D.Mat4();
-        this.renderNode.getLocalMatrix(m.data);
+        this.renderNode.getLocalMatrix(m);
         return m;
     },
 
     getWorldMatrix: function () {
         var m = new XML3D.Mat4();
-        this.renderNode.getWorldMatrix(m.data);
+        this.renderNode.getWorldMatrix(m);
         return m;
     }
 });

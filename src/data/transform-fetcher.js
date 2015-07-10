@@ -34,7 +34,8 @@ DOMTransformFetcher.prototype.updateMatrix = function () {
 };
 
 DOMTransformFetcher.prototype.getMatrix = ( function () {
-    var IDENTITY = XML3D.math.mat4.create();
+    var IDENTITY = new XML3D.Mat4();
+
     return function () {
         if (!this.onlyDataTransform) {
             var cssMatrix = CSS.getCSSMatrix(this.node);
@@ -50,7 +51,7 @@ DOMTransformFetcher.prototype.getMatrix = ( function () {
                 var dataResult = this.xflowRequest.getResult();
                 var transformData = (dataResult.getOutputData(this.dataName) && dataResult.getOutputData(this.dataName).getValue());
                 if (transformData)
-                    return transformData;
+                    return new XML3D.Mat4(transformData);
             }
             if (adapter.getMatrix) {
                 return adapter.getMatrix();

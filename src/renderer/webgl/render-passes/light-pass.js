@@ -27,8 +27,8 @@ XML3D.createClass(LightPass, SceneRenderPass, {
     },
 
     render: (function () {
-        var c_viewMat_tmp = XML3D.math.mat4.create();
-        var c_projMat_tmp = XML3D.math.mat4.create();
+        var c_viewMat_tmp = new XML3D.Mat4();
+        var c_projMat_tmp = new XML3D.Mat4();
         var c_programSystemUniforms = ["viewMatrix", "projectionMatrix"];
 
         return function (scene) {
@@ -47,8 +47,8 @@ XML3D.createClass(LightPass, SceneRenderPass, {
             var objects = this.sorter.sortScene(scene);
 
             var parameters = {};
-            parameters["viewMatrix"] = c_viewMat_tmp;
-            parameters["projectionMatrix"] = c_projMat_tmp;
+            parameters["viewMatrix"] = c_viewMat_tmp.data;
+            parameters["projectionMatrix"] = c_projMat_tmp.data;
 
             //Render opaque objects
             for (var shader in objects.opaque) {

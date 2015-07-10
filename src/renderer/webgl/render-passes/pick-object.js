@@ -7,7 +7,7 @@ XML3D.createClass(PickObjectRenderPass, BaseRenderPass);
 
 XML3D.extend(PickObjectRenderPass.prototype, {
     render: (function () {
-        var c_mvp = XML3D.math.mat4.create(), c_uniformCollection = {
+        var c_mvp = new XML3D.Mat4(), c_uniformCollection = {
                 envBase: {},
                 envOverride: null,
                 sysBase: {}
@@ -46,7 +46,7 @@ XML3D.extend(PickObjectRenderPass.prototype, {
                 var c3 = objId & 255;
 
                 c_uniformCollection.sysBase["id"] = [c3 / 255.0, c2 / 255.0, c1 / 255.0];
-                c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_mvp;
+                c_uniformCollection.sysBase["modelViewProjectionMatrix"] = c_mvp.data;
 
                 program.setUniformVariables(null, c_systemUniformNames, c_uniformCollection);
                 mesh.draw(program);

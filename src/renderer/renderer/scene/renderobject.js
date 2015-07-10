@@ -92,7 +92,7 @@ var RenderObject = function (scene, pageEntry, opt) {
 };
 RenderObject.ENTRY_SIZE = ENTRY_SIZE;
 
-RenderObject.IDENTITY_MATRIX = XML3D.math.mat4.create();
+RenderObject.IDENTITY_MATRIX = new XML3D.Mat4();
 
 XML3D.createClass(RenderObject, RenderNode, {
     createTransformRequest: function () {
@@ -136,17 +136,11 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     getLocalMatrix: function (dest) {
-        var o = this.offset + LOCAL_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            dest[i] = this.page[o];
-        }
+        this.getMat4FromPage(dest, LOCAL_MATRIX_OFFSET);
     },
 
     setLocalMatrix: function (source) {
-        var o = this.offset + LOCAL_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            this.page[o] = source[i];
-        }
+        this.setMat4InPage(source, LOCAL_MATRIX_OFFSET);
         this.setTransformDirty();
         this.setBoundingBoxDirty();
     },
@@ -154,49 +148,45 @@ XML3D.createClass(RenderObject, RenderNode, {
     dispose: function () {
         this.transformDataRequest && this.transformDataRequest.clear();
         this.scene.remove(this);
-    }, onTransformDataChange: function () {
+    },
+
+    onTransformDataChange: function () {
         this.setTransformDirty();
     },
 
-    getModelViewMatrix: function (target) {
-        var o = this.offset + MODELVIEW_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            target[i] = this.page[o];
-        }
+    getModelViewMatrix: function (dest) {
+        this.getMat4FromPage(dest, MODELVIEW_MATRIX_OFFSET);
     },
 
-    getModelMatrixN: function (target) {
+    getModelMatrixN: function (dest) {
         var o = this.offset + MODEL_MATRIX_N_OFFSET;
-        target[0] = this.page[o];
-        target[1] = this.page[o + 1];
-        target[2] = this.page[o + 2];
-        target[3] = this.page[o + 4];
-        target[4] = this.page[o + 5];
-        target[5] = this.page[o + 6];
-        target[6] = this.page[o + 8];
-        target[7] = this.page[o + 9];
-        target[8] = this.page[o + 10];
+        dest[0] = this.page[o];
+        dest[1] = this.page[o + 1];
+        dest[2] = this.page[o + 2];
+        dest[3] = this.page[o + 4];
+        dest[4] = this.page[o + 5];
+        dest[5] = this.page[o + 6];
+        dest[6] = this.page[o + 8];
+        dest[7] = this.page[o + 9];
+        dest[8] = this.page[o + 10];
     },
 
-    getModelViewMatrixN: function (target) {
+    getModelViewMatrixN: function (dest) {
         var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
-        target[0] = this.page[o];
-        target[1] = this.page[o + 1];
-        target[2] = this.page[o + 2];
-        target[3] = this.page[o + 4];
-        target[4] = this.page[o + 5];
-        target[5] = this.page[o + 6];
-        target[6] = this.page[o + 8];
-        target[7] = this.page[o + 9];
-        target[8] = this.page[o + 10];
+        dest[0] = this.page[o];
+        dest[1] = this.page[o + 1];
+        dest[2] = this.page[o + 2];
+        dest[3] = this.page[o + 4];
+        dest[4] = this.page[o + 5];
+        dest[5] = this.page[o + 6];
+        dest[6] = this.page[o + 8];
+        dest[7] = this.page[o + 9];
+        dest[8] = this.page[o + 10];
     },
 
 
     getModelViewProjectionMatrix: function (dest) {
-        var o = this.offset + MODELVIEWPROJECTION_MATRIX_OFFSET;
-        for (var i = 0; i < 16; i++, o++) {
-            dest[i] = this.page[o];
-        }
+        this.getMat4FromPage(dest, MODELVIEWPROJECTION_MATRIX_OFFSET);
     },
 
     updateWorldSpaceMatrices: function (view, projection) {
@@ -210,17 +200,17 @@ XML3D.createClass(RenderObject, RenderNode, {
     },
 
     updateWorldMatrix: (function () {
-        var tmp_mat = XML3D.math.mat4.create();
+        var tmp_mat = new XML3D.Mat4();
         return function () {
             this.parent.getWorldMatrix(tmp_mat);
             var page = this.page;
             var offset = this.offset;
-            XML3D.math.mat4.multiplyOffset(tmp_mat, 0, page, offset + LOCAL_MATRIX_OFFSET, tmp_mat, 0);
+            XML3D.math.mat4.multiplyOffset(tmp_mat.data, 0, page, offset + LOCAL_MATRIX_OFFSET, tmp_mat.data, 0);
             if (this.transformDataRequest) {
                 var result = this.transformDataRequest.getResult();
                 var transformData = result.getOutputData("meshTransform");
                 if (transformData && transformData.getValue()) {
-                    XML3D.math.mat4.multiply(tmp_mat, tmp_mat, transformData.getValue());
+                    XML3D.math.mat4.multiply(tmp_mat.data, tmp_mat.data, transformData.getValue());
                 }
             }
             this.setWorldMatrix(tmp_mat);
@@ -236,33 +226,27 @@ XML3D.createClass(RenderObject, RenderNode, {
         }
         var page = this.page;
         var offset = this.offset;
-        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEW_MATRIX_OFFSET, page, offset + WORLD_MATRIX_OFFSET, view, 0);
+        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEW_MATRIX_OFFSET, page, offset + WORLD_MATRIX_OFFSET, view.data, 0);
     },
 
     updateModelMatrixN: (function () {
-        var c_tmpMatrix = XML3D.math.mat4.create();
+        var c_tmpMatrix = new XML3D.Mat4();
         return function () {
             this.getWorldMatrix(c_tmpMatrix);
-            var normalMatrix = XML3D.math.mat4.invert(c_tmpMatrix, c_tmpMatrix);
-            normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : RenderObject.IDENTITY_MATRIX;
-            var o = this.offset + MODEL_MATRIX_N_OFFSET;
-            for (var i = 0; i < 16; i++, o++) {
-                this.page[o] = normalMatrix[i];
-            }
+            var normalMatrix = c_tmpMatrix.invert();
+            normalMatrix = normalMatrix ? normalMatrix.transpose() : RenderObject.IDENTITY_MATRIX;
+            this.setMat4InPage(normalMatrix, MODEL_MATRIX_N_OFFSET);
         }
     })(),
 
     /** Relies on an up-to-date view matrix **/
     updateModelViewMatrixN: (function () {
-        var c_tmpMatrix = XML3D.math.mat4.create();
+        var c_tmpMatrix = new XML3D.Mat4();
         return function () {
             this.getModelViewMatrix(c_tmpMatrix);
-            var normalMatrix = XML3D.math.mat4.invert(c_tmpMatrix, c_tmpMatrix);
-            normalMatrix = normalMatrix ? XML3D.math.mat4.transpose(normalMatrix, normalMatrix) : RenderObject.IDENTITY_MATRIX;
-            var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
-            for (var i = 0; i < 16; i++, o++) {
-                this.page[o] = normalMatrix[i];
-            }
+            var normalMatrix = c_tmpMatrix.invert();
+            normalMatrix = normalMatrix ? normalMatrix.transpose() : RenderObject.IDENTITY_MATRIX;
+            this.setMat4InPage(normalMatrix, MODELVIEW_MATRIX_N_OFFSET);
         }
     })(),
 
@@ -271,7 +255,7 @@ XML3D.createClass(RenderObject, RenderNode, {
     updateModelViewProjectionMatrix: function (projection) {
         var page = this.page;
         var offset = this.offset;
-        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEWPROJECTION_MATRIX_OFFSET, page, offset + MODELVIEW_MATRIX_OFFSET, projection, 0);
+        XML3D.math.mat4.multiplyOffset(page, offset + MODELVIEWPROJECTION_MATRIX_OFFSET, page, offset + MODELVIEW_MATRIX_OFFSET, projection.data, 0);
     },
 
     setTransformDirty: function () {
@@ -340,7 +324,7 @@ XML3D.createClass(RenderObject, RenderNode, {
                 c_box.setEmpty();
             } else {
                 this.getObjectSpaceBoundingBox(c_box);
-                this.getWorldMatrix(c_trans.data);
+                this.getWorldMatrix(c_trans);
                 c_box.transformAxisAligned(c_trans);
             }
             this.setWorldSpaceBoundingBox(c_box);

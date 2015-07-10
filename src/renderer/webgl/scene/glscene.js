@@ -143,9 +143,9 @@ XML3D.extend(GLScene.prototype, {
     },
 
     updateReadyObjectsFromActiveView: (function () {
-        var c_worldToViewMatrix = XML3D.math.mat4.create();
-        var c_viewToWorldMatrix = XML3D.math.mat4.create();
-        var c_projMat_tmp = XML3D.math.mat4.create();
+        var c_worldToViewMatrix = new XML3D.Mat4();
+        var c_viewToWorldMatrix = new XML3D.Mat4();
+        var c_projMat_tmp = new XML3D.Mat4();
         var c_bbox = new XML3D.Box();
         var c_frustumTest = new FrustumTest();
 
@@ -161,7 +161,6 @@ XML3D.extend(GLScene.prototype, {
             });
 
             this.updateBoundingBox();
-
 
             activeView.getProjectionMatrix(c_projMat_tmp, aspectRatio);
             activeView.getViewToWorldMatrix(c_viewToWorldMatrix);

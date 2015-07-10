@@ -12,7 +12,7 @@ var c_center = new XML3D.Vec3();
 XML3D.extend(ObjectSorter.prototype, {
     /**
      * @param {GLScene} scene
-     * @param {Float32Array?} viewMatrix Matrix to apply to objects world space extend before sorting
+     * @param {XML3D.Mat4?} viewMatrix Matrix to apply to objects world space extend before sorting
      */
     sortScene: function (scene, viewMatrix) {
         var sourceObjectArray = scene.ready, opaque = {}, transparent = [];

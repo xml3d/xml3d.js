@@ -152,7 +152,9 @@ Box.prototype.longestSide = function() {
 
 Box.prototype.intersects = function(ray, opt) {
     if (this.isEmpty()) {
-        opt.dist = Infinity;
+        if (opt !== undefined && opt.dist !== undefined) {
+            opt.dist = Infinity;
+        }
         return false;
     }
     var origin = ray.origin;

@@ -118,8 +118,9 @@ Mat3.prototype.toDOMString = function() {
     return mat3.toDOMString(this.data);
 };
 
-Mat3.prototype.fromDOMString = function(str) {
-    return new Mat3(mat3.fromDOMString(str));
+Mat3.prototype.setFromDOMString = function(str) {
+    this.data = mat3.fromDOMString(str);
+    return this;
 };
 
 module.exports = Mat3;

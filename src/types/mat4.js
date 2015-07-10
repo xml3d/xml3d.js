@@ -175,8 +175,9 @@ Mat4.prototype.toDOMString = function() {
     return mat4.toDOMString(this.data);
 };
 
-Mat4.prototype.fromDOMString = function(str) {
-    return new Mat4(mat4.fromDOMString(str));
+Mat4.prototype.setFromDOMString = function(str) {
+    this.data = mat4.fromDOMString(str);
+    return this;
 };
 
 module.exports = Mat4;

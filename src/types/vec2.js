@@ -152,8 +152,9 @@ Vec2.prototype.toDOMString = function() {
     return vec2.toDOMString(this.data);
 };
 
-Vec2.prototype.fromDOMString = function(str) {
-    return new Vec2(vec2.fromDOMString(str));
+Vec2.prototype.setFromDOMString = function(str) {
+    this.data = vec2.fromDOMString(str);
+    return this;
 };
 
 module.exports = Vec2;

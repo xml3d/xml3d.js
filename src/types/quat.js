@@ -157,8 +157,8 @@ Quat.prototype.toDOMString = function() {
     return quat.toDOMString(this.data);
 };
 
-Quat.prototype.fromDOMString = function(str) {
-    return new Quat(quat.fromDOMString(str));
+Quat.prototype.setFromDOMString = function(str) {
+    this.data = quat.fromDOMString(str);
 };
 
 module.exports = Quat;

@@ -77,8 +77,9 @@ Mat2.prototype.toDOMString = function() {
     return mat2.toDOMString(this.data);
 };
 
-Mat2.prototype.fromDOMString = function(str) {
-    return new Mat2(mat2.fromDOMString(str));
+Mat2.prototype.setFromDOMString = function(str) {
+    this.data = mat2.fromDOMString(str);
+    return this;
 };
 
 module.exports = Mat2;

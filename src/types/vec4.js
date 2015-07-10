@@ -168,8 +168,9 @@ Vec4.prototype.toDOMString = function() {
     return vec4.toDOMString(this.data);
 };
 
-Vec4.prototype.fromDOMString = function(str) {
-    return new Vec4(vec4.fromDOMString(str));
+Vec4.prototype.setFromDOMString = function(str) {
+    this.data = vec4.fromDOMString(str);
+    return this;
 };
 
 module.exports = Vec4;

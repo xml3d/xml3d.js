@@ -154,8 +154,9 @@ Vec3.prototype.toDOMString = function() {
     return vec3.toDOMString(this.data);
 };
 
-Vec3.prototype.fromDOMString = function(str) {
-    return new Vec3(vec3.fromDOMString(str));
+Vec3.prototype.setFromDOMString = function(str) {
+    this.data = vec3.fromDOMString(str);
+    return this;
 };
 
 module.exports = Vec3;

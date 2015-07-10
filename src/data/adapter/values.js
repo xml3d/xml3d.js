@@ -69,6 +69,7 @@ ValueDataAdapter.prototype.attributeChangedCallback = function (name, oldValue, 
     } else if (name == "param") {
         this.xflowInputNode.paramName = newValue ? this.node.name : null;
     }
+    // TODO: sys flag removed -> Update parent data node
 };
 
 

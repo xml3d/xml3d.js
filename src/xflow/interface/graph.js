@@ -518,6 +518,7 @@ DataNode.prototype.removeChild = function(child){
  * @param {InputNodeI|dataNode} child
  */
 DataNode.prototype.getChildByName = function(name){
+    // TODO(ksons): Do not use for(i in obj) for arrays
 	for (var i in this._children){
 		if (this._children[i].name == name)
 			return this._children[i];

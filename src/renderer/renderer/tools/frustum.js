@@ -135,38 +135,37 @@ XML3D.extend(Frustum.prototype, {
 
 
         return function (planes, M) {
-            var a = vec3.transformMat4(c_a.data, [this.left, this.bottom, -this.nearPlane], M.data);
-            var b = vec3.transformMat4(c_b.data, [this.left, this.top, -this.nearPlane], M.data);
-            var c = vec3.transformMat4(c_c.data, [this.right, this.top, -this.nearPlane], M.data);
-            var d = vec3.transformMat4(c_d.data, [this.right, this.bottom, -this.nearPlane], M.data);
-            var e, f, g, h, o;
+            vec3.transformMat4(c_a.data, [this.left, this.bottom, -this.nearPlane], M.data);
+            vec3.transformMat4(c_b.data, [this.left, this.top, -this.nearPlane], M.data);
+            vec3.transformMat4(c_c.data, [this.right, this.top, -this.nearPlane], M.data);
+            vec3.transformMat4(c_d.data, [this.right, this.bottom, -this.nearPlane], M.data);
             if (!this.orthographic) {
                 var s = this.farPlane / this.nearPlane;
                 var farLeft = s * this.left;
                 var farRight = s * this.right;
                 var farTop = s * this.top;
                 var farBottom = s * this.bottom;
-                e = vec3.transformMat4(c_e.data, [farLeft, farBottom, -this.farPlane], M.data);
-                f = vec3.transformMat4(c_f.data, [farLeft, farTop, -this.farPlane], M.data);
-                g = vec3.transformMat4(c_g.data, [farRight, farTop, -this.farPlane], M.data);
-                o = vec3.transformMat4(c_o.data, [0, 0, 0], M.data);
-                planes[0].setFromPoints(o, c, b);
-                planes[1].setFromPoints(o, d, c);
-                planes[2].setFromPoints(o, a, d);
-                planes[3].setFromPoints(o, b, a);
-                planes[4].setFromPoints(a, d, c);
-                planes[5].setFromPoints(e, f, g);
+                vec3.transformMat4(c_e.data, [farLeft, farBottom, -this.farPlane], M.data);
+                vec3.transformMat4(c_f.data, [farLeft, farTop, -this.farPlane], M.data);
+                vec3.transformMat4(c_g.data, [farRight, farTop, -this.farPlane], M.data);
+                vec3.transformMat4(c_o.data, [0, 0, 0], M.data);
+                planes[0].setFromPoints(c_o, c_c, c_b);
+                planes[1].setFromPoints(c_o, c_d, c_c);
+                planes[2].setFromPoints(c_o, c_a, c_d);
+                planes[3].setFromPoints(c_o, c_b, c_a);
+                planes[4].setFromPoints(c_a, c_d, c_c);
+                planes[5].setFromPoints(c_e, c_f, c_g);
             } else {
-                e = vec3.transformMat4(c_e.data, [this.left, this.bottom, -this.farPlane], M.data);
-                f = vec3.transformMat4(c_f.data, [this.left, this.top, -this.farPlane], M.data);
-                g = vec3.transformMat4(c_g.data, [this.right, this.top, -this.farPlane], M.data);
-                h = vec3.transformMat4(c_o.data, [this.right, this.bottom, -this.farPlane], M.data);
-                planes[0].setFromPoints(c, g, f);
-                planes[1].setFromPoints(d, h, g);
-                planes[2].setFromPoints(a, e, h);
-                planes[3].setFromPoints(b, f, e);
-                planes[4].setFromPoints(a, d, c);
-                planes[5].setFromPoints(e, f, g);
+                vec3.transformMat4(c_e.data, [this.left, this.bottom, -this.farPlane], M.data);
+                vec3.transformMat4(c_f.data, [this.left, this.top, -this.farPlane], M.data);
+                vec3.transformMat4(c_g.data, [this.right, this.top, -this.farPlane], M.data);
+                vec3.transformMat4(c_o.data, [this.right, this.bottom, -this.farPlane], M.data);
+                planes[0].setFromPoints(c_c, c_g, c_f);
+                planes[1].setFromPoints(c_d, c_o, c_g);
+                planes[2].setFromPoints(c_a, c_e, c_o);
+                planes[3].setFromPoints(c_b, c_f, c_e);
+                planes[4].setFromPoints(c_a, c_d, c_c);
+                planes[5].setFromPoints(c_e, c_f, c_g);
             }
         };
     }())
@@ -182,7 +181,7 @@ var Plane = function () {
 
 XML3D.extend(Plane.prototype, {
     setFromPoints: function (point1, point2, point3) {
-        vec3.cross(this.normal.data, vec3.sub(tmp2, point3, point1), vec3.sub(tmp1, point2, point1));
+        vec3.cross(this.normal.data, vec3.sub(tmp2.data, point3.data, point1.data), vec3.sub(tmp1.data, point2.data, point1.data));
         this.normal.normalize();
         this.distance = -this.normal.dot(point1);
     },

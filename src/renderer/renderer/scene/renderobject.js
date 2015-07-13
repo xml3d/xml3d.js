@@ -160,28 +160,28 @@ XML3D.createClass(RenderObject, RenderNode, {
 
     getModelMatrixN: function (dest) {
         var o = this.offset + MODEL_MATRIX_N_OFFSET;
-        dest[0] = this.page[o];
-        dest[1] = this.page[o + 1];
-        dest[2] = this.page[o + 2];
-        dest[3] = this.page[o + 4];
-        dest[4] = this.page[o + 5];
-        dest[5] = this.page[o + 6];
-        dest[6] = this.page[o + 8];
-        dest[7] = this.page[o + 9];
-        dest[8] = this.page[o + 10];
+        dest.data[0] = this.page[o];
+        dest.data[1] = this.page[o + 1];
+        dest.data[2] = this.page[o + 2];
+        dest.data[3] = this.page[o + 4];
+        dest.data[4] = this.page[o + 5];
+        dest.data[5] = this.page[o + 6];
+        dest.data[6] = this.page[o + 8];
+        dest.data[7] = this.page[o + 9];
+        dest.data[8] = this.page[o + 10];
     },
 
     getModelViewMatrixN: function (dest) {
         var o = this.offset + MODELVIEW_MATRIX_N_OFFSET;
-        dest[0] = this.page[o];
-        dest[1] = this.page[o + 1];
-        dest[2] = this.page[o + 2];
-        dest[3] = this.page[o + 4];
-        dest[4] = this.page[o + 5];
-        dest[5] = this.page[o + 6];
-        dest[6] = this.page[o + 8];
-        dest[7] = this.page[o + 9];
-        dest[8] = this.page[o + 10];
+        dest.data[0] = this.page[o];
+        dest.data[1] = this.page[o + 1];
+        dest.data[2] = this.page[o + 2];
+        dest.data[3] = this.page[o + 4];
+        dest.data[4] = this.page[o + 5];
+        dest.data[5] = this.page[o + 6];
+        dest.data[6] = this.page[o + 8];
+        dest.data[7] = this.page[o + 9];
+        dest.data[8] = this.page[o + 10];
     },
 
 

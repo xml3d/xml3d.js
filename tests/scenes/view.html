@@ -90,17 +90,17 @@
       </data>
       <transform id="t_cam" translation="0 0 2" rotation="0 1 0 1.5708"></transform>
     </defs>
-    <view id="view_rear" position="0 0 -10" orientation="0 1 0 3.14159" fieldofview="0.7854"></view>
-    <view id="view_front" position="0 0 10" fieldofview="0.7854"></view>
+    <view id="view_rear" fieldofview="0.7854" style="transform: translate3d(0px, 0px, -10px) rotate3d(0, 1, 0, 180.0deg)"></view>
+    <view id="view_front" fieldofview="0.7854" style="transform: translate3d(0px, 0px, 10px)"></view>
     <group transform="#t_cam">
 
     </group>
     <group transform="#t_cam">
     </group>
-    <view id="view_right" position="10 0 0" orientation="0 1 0 1.5708" fieldofview="0.7854"></view>
-    <view id="view_left" position="-10 0 0" orientation="0 1 0 -1.5708" fieldofview="0.7854"></view>
-    <view id="view_top" position="0 10 0" orientation="1 0 0 -1.5708" fieldofview="0.7854"></view>
-    <view id="view_bottom" position="0 -10 0" orientation="1 0 0 1.5708" fieldofview="0.7854"></view>
+    <view id="view_right" fieldofview="0.7854" style="transform: translate3d(10px, 0px, 0px) rotate3d(0, 1, 0, 90.0deg)"></view>
+    <view id="view_left" fieldofview="0.7854" style="transform: translate3d(-10px, 0px, 0px) rotate3d(0, 1, 0, -90.0deg)"></view>
+    <view id="view_top" fieldofview="0.7854" style="transform: translate3d(0px, 10px, 0px) rotate3d(1, 0, 0, -90.0deg)"></view>
+    <view id="view_bottom" fieldofview="0.7854" style="transform: translate3d(0px, -10px, 0px) rotate3d(1, 0, 0, 90.0deg)"></view>
     <group id="root">
       <group>
         <group id="shape_d2e23" material="#material_front">
@@ -136,6 +136,7 @@
     document.getElementById("myxml3d").activeView = "#view_" + which;
   }
 </script>
+
 
 
 </body></html>

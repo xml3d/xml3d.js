@@ -26,23 +26,23 @@
             <float name="ambientIntensity">1.0</float>
         </material>
 
-        <data id="rectBase" >
+        <data id="rectBase">
             <int name="index">0 1 2 1 2 3</int>
 
             <float3 name="normal">0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0</float3>
         </data>
-        <data id="shortIndex" >
+        <data id="shortIndex">
             <int name="index">0 1 2</int>
         </data>
-        <data id="position1" >
+        <data id="position1">
             <float3 name="position">-1.0 -1.0 -10.0 1.0 -1.0 -10.0 -1.0 1.0 -10.0 1.0 1.0 -10.0</float3>
         </data>
-        <data id="position2" >
+        <data id="position2">
            <float3 name="position">1.0 -1.0 -10.0  3.0 -1.0 -10.0  1.0 1.0 -10.0  3.0 1.0 -10.0</float3>
         </data>
-        <data id="position3" >
-           <data src="#position1" ></data>
-           <float4x4 name="meshTransform" >
+        <data id="position3">
+           <data src="#position1"></data>
+           <float4x4 name="meshTransform">
                 0.5 0 0 0
                 0 0.5 0 0
                 0 0 1 0
@@ -51,108 +51,108 @@
         </data>
 
 
-        <asset id="asset1" >
-            <assetmesh name="mesh1" type="triangles" material="#redmaterial" >
-                <data src="#rectBase" ></data>
-                <data src="#position1" ></data>
+        <asset id="asset1">
+            <assetmesh name="mesh1" type="triangles" material="#redmaterial">
+                <data src="#rectBase"></data>
+                <data src="#position1"></data>
             </assetmesh>
         </asset>
-        <asset id="asset2" >
-            <assetdata name="base" id="baseSubData" >
-                <data src="#rectBase" ></data>
+        <asset id="asset2">
+            <assetdata name="base" id="baseSubData">
+                <data src="#rectBase"></data>
             </assetdata>
-            <assetmesh name="mesh1" includes="base" type="triangles" material="#redmaterial"  >
-                <data src="#position1" ></data>
+            <assetmesh name="mesh1" includes="base" type="triangles" material="#redmaterial">
+                <data src="#position1"></data>
             </assetmesh>
-            <assetmesh name="mesh2" includes="base" type="triangles" material="#bluematerial" id="innerSubData" >
-                <data src="#position2" ></data>
+            <assetmesh name="mesh2" includes="base" type="triangles" material="#bluematerial" id="innerSubData">
+                <data src="#position2"></data>
             </assetmesh>
         </asset>
-        <asset id="asset2Alt" >
-            <assetmesh name="blaBlubb" type="triangles" material="#pinkmaterial"  >
-                <data src="#rectBase" ></data>
-                <data src="#position3" ></data>
+        <asset id="asset2Alt">
+            <assetmesh name="blaBlubb" type="triangles" material="#pinkmaterial">
+                <data src="#rectBase"></data>
+                <data src="#position3"></data>
             </assetmesh>
-            <assetmesh name="mesh2" type="triangles" material="#bluematerial"  >
-                <data src="#rectBase" ></data>
-                <data src="#position2" ></data>
+            <assetmesh name="mesh2" type="triangles" material="#bluematerial">
+                <data src="#rectBase"></data>
+                <data src="#position2"></data>
             </assetmesh>
         </asset>
 
         <asset id="asset3" src="#asset2">
-            <assetmesh name="mesh3" includes="base" type="triangles" material="#greenmaterial" style="transform: translateX(-2px)"  >
-                <data src="#position3" ></data>
+            <assetmesh name="mesh3" includes="base" type="triangles" material="#greenmaterial" style="transform: translateX(-2px)">
+                <data src="#position3"></data>
             </assetmesh>
         </asset>
 
     </defs>
-    <group id="meshGroup" >
-        <model id="mm1" src="#asset1" ></model>
+    <group id="meshGroup">
+        <model id="mm1" src="#asset1"></model>
 
-        <group style="transform: translateX(-5px)" >
-            <model id="mm2" src="#asset2" >
-                <assetmesh name="mesh2" material="#greenmaterial" id="outerSubData" >
+        <group style="transform: translateX(-5px)">
+            <model id="mm2" src="#asset2">
+                <assetmesh name="mesh2" material="#greenmaterial" id="outerSubData">
                      <int name="index">0 1 2</int>
                 </assetmesh>
             </model>
         </group>
-        <group style="transform: translateY(-3px)" >
-            <model id="mm3" src="#asset3" ></model>
+        <group style="transform: translateY(-3px)">
+            <model id="mm3" src="#asset3"></model>
         </group>
-        <group style="transform: translateX(3px)" >
-            <model id="mm4" src="#asset2" pick="mesh2" ></model>
+        <group style="transform: translateX(3px)">
+            <model id="mm4" src="#asset2" pick="mesh2"></model>
         </group>
     </group>
   </xml3d>
 
   <xml3d id="xml3dReference" width="500px" height="300px" xmlns="http://www.xml3d.org/2009/xml3d" style="background: black">
-    <group id="meshGroup" >
-        <group material="#redmaterial" >
-            <mesh material="#redmaterial" >
-                <data src="#rectBase" ></data>
-                <data src="#position1" ></data>
+    <group id="meshGroup">
+        <group material="#redmaterial">
+            <mesh material="#redmaterial">
+                <data src="#rectBase"></data>
+                <data src="#position1"></data>
             </mesh>
         </group>
-        <group style="transform: translateX(-5px)" >
-            <group material="#redmaterial" >
-                 <mesh >
-                    <data src="#rectBase" ></data>
-                    <data src="#position1" ></data>
+        <group style="transform: translateX(-5px)">
+            <group material="#redmaterial">
+                 <mesh>
+                    <data src="#rectBase"></data>
+                    <data src="#position1"></data>
                 </mesh>
             </group>
-            <group material="#greenmaterial" >
-                 <mesh >
-                    <data src="#rectBase" ></data>
-                    <data src="#position2" ></data>
-                    <data src="#shortIndex" ></data>
-                </mesh>
-            </group>
-        </group>
-        <group style="transform: translateX(3px)" >
-            <group material="#bluematerial" >
-                 <mesh >
-                    <data src="#rectBase" ></data>
-                    <data src="#position2" ></data>
+            <group material="#greenmaterial">
+                 <mesh>
+                    <data src="#rectBase"></data>
+                    <data src="#position2"></data>
+                    <data src="#shortIndex"></data>
                 </mesh>
             </group>
         </group>
-        <group style="transform: translateY(-3px)" >
-            <group material="#redmaterial" >
-                 <mesh >
-                    <data src="#rectBase" ></data>
-                    <data src="#position1" ></data>
+        <group style="transform: translateX(3px)">
+            <group material="#bluematerial">
+                 <mesh>
+                    <data src="#rectBase"></data>
+                    <data src="#position2"></data>
                 </mesh>
             </group>
-            <group material="#bluematerial" >
-                 <mesh >
-                    <data src="#rectBase" ></data>
-                    <data src="#position2" ></data>
+        </group>
+        <group style="transform: translateY(-3px)">
+            <group material="#redmaterial">
+                 <mesh>
+                    <data src="#rectBase"></data>
+                    <data src="#position1"></data>
                 </mesh>
             </group>
-            <group material="#greenmaterial" style="transform: translateX(-2px)" >
-                 <mesh >
-                    <data src="#rectBase" ></data>
-                    <data src="#position3" ></data>
+            <group material="#bluematerial">
+                 <mesh>
+                    <data src="#rectBase"></data>
+                    <data src="#position2"></data>
+                </mesh>
+            </group>
+            <group material="#greenmaterial" style="transform: translateX(-2px)">
+                 <mesh>
+                    <data src="#rectBase"></data>
+                    <data src="#position3"></data>
                 </mesh>
             </group>
         </group>
@@ -160,5 +160,6 @@
   </xml3d>
 
 
-</body>
-</html>
+
+
+</body></html>

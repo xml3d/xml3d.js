@@ -36,14 +36,14 @@ TransformDataAdapter.prototype.updateMatrix = function () {
     var so = n.scaleOrientation.data;
     var ro = n.rotation.data;
 
-    mat4.rotate(transform.scaleOrientation, IDENT_MAT, so[3], so);
-    mat4.rotate(transform.rotation, IDENT_MAT, ro[3], ro);
+    mat4.fromRotation(transform.scaleOrientation, so[3], so);
+    mat4.fromRotation(transform.rotation, ro[3], ro);
+
     mat4.translate(transform.translate, IDENT_MAT, n.translation.data);
     mat4.translate(transform.center, IDENT_MAT, centerVec);
     mat4.translate(transform.centerInverse, IDENT_MAT, vec3.negate(centerVec, centerVec));
     mat4.scale(transform.scale, IDENT_MAT, n.scale.data);
-
-    XML3D.math.mat4.invert(transform.scaleOrientationInv, transform.scaleOrientation);
+    mat4.invert(transform.scaleOrientationInv, transform.scaleOrientation);
 
     multiplyComponents(transform, this.matrix);
     this.needsUpdate = false;

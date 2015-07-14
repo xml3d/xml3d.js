@@ -1,4 +1,5 @@
-var TransformableAdapter = require("./transformable.js");
+var SceneElementAdapter = require("./scene-element.js");
+
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
 var LightConfiguration = require("../scene/light-configuration.js");
@@ -11,13 +12,12 @@ var DEFAULT_LIGHT_MODEL = "urn:xml3d:light:directional";
  * @param {Element} node
  */
 var LightRenderAdapter = function (factory, node) {
-    TransformableAdapter.call(this, factory, node, false, true);
+    SceneElementAdapter.call(this, factory, node, false, true);
     this.dataAdapter = Resource.getAdapter(node, "data");
-    this.style = window.getComputedStyle(node);
     this.createRenderNode();
 };
 
-XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
+XML3D.createClass(LightRenderAdapter, SceneElementAdapter, {
 
     createRenderNode: function () {
         var parentAdapter = this.getParentRenderAdapter();
@@ -30,7 +30,7 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
-        TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+        SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
 
         switch (name) {
             case "intensity": // TODO(ksons): remove in 5.1
@@ -43,15 +43,9 @@ XML3D.createClass(LightRenderAdapter, TransformableAdapter, {
         }
     },
 
-    styleChangedCallback: function () {
-        TransformableAdapter.prototype.styleChangedCallback.call();
-        this.updateVisibility();
-    },
-
     updateVisibility: function () {
         var none = this.style.getPropertyValue("display").trim() == "none";
         this.renderNode.setLocalVisible(!none);
-        this.factory.renderer.requestRedraw("Light visibility changed.");
     },
 
 

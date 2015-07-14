@@ -1,4 +1,4 @@
-var TransformableAdapter = require("./transformable.js");
+var SceneElementAdapter = require("./scene-element.js");
 var ComputeRequest = require("../../../xflow/interface/request.js").ComputeRequest;
 var Events = require("../../../interface/notification.js");
 var Resource = require("../../../base/resourcemanager.js").Resource;
@@ -6,11 +6,10 @@ var AdapterHandle = require("../../../base/adapterhandle.js");
 var mat4 = require("gl-matrix").mat4;
 
 var ModelRenderAdapter = function (factory, node) {
-    TransformableAdapter.call(this, factory, node, false, true);
+    SceneElementAdapter.call(this, factory, node, false, true);
     this.asset = null;
     this.postTransformXflowRequests = [];
     this.postTransformRenderGroups = [];
-    this.style = window.getComputedStyle(node);
     this.createRenderNode();
     this._bindedRequestCallback = this.onXflowRequestChange.bind(this);
     this.transformFetcher.update();
@@ -18,7 +17,7 @@ var ModelRenderAdapter = function (factory, node) {
 
 var c_IDENTITY = mat4.create();
 
-XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
+XML3D.createClass(ModelRenderAdapter, SceneElementAdapter, {
 
     createRenderNode: function () {
         var dataAdapter = Resource.getAdapter(this.node, "data");
@@ -90,15 +89,6 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
         return result;
     },
 
-    attributeChangedCallback: function (name, oldValue, newValue) {
-        TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
-    },
-
-    styleChangedCallback: function() {
-        TransformableAdapter.prototype.styleChangedCallback.call();
-        this.updateVisibility();
-    },
-
     updateVisibility: function() {
         var none = this.style.getPropertyValue("display").trim() == "none";
         var hidden  = this.style.getPropertyValue("visibility").trim() == "hidden";
@@ -112,7 +102,6 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
             }
         };
         propagate(this.renderNode);
-        // TODO(ksons): this.renderNode.setPickable(!none);
     },
 
 
@@ -120,13 +109,8 @@ XML3D.createClass(ModelRenderAdapter, TransformableAdapter, {
      * @param evt
      */
     notifyChanged: function (evt) {
-        TransformableAdapter.prototype.notifyChanged.call(this, evt);
+        SceneElementAdapter.prototype.notifyChanged.call(this, evt);
         switch (evt.type) {
-            case  Events.NODE_INSERTED:
-                return;
-            case Events.THIS_REMOVED:
-                this.dispose();
-                return;
             case Events.ADAPTER_HANDLE_CHANGED:
                 var splits = evt.key.split("_");
                 if (splits[0] == "material") {

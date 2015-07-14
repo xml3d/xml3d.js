@@ -1,28 +1,28 @@
-var TransformableAdapter = require("./transformable.js");
+var SceneElementAdapter = require("./scene-element.js");
 var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
 var Events = require("../../../interface/notification.js");
-var mat4 = require("gl-matrix").mat4;
 
 var ViewRenderAdapter = function (factory, node) {
-    TransformableAdapter.call(this, factory, node, false, false);
+    SceneElementAdapter.call(this, factory, node, false, false);
     this.projectionFetcher = new DOMTransformFetcher(this, "projection", "projection", true);
     this.createRenderNode();
 };
-
-XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
+XML3D.createClass(ViewRenderAdapter, SceneElementAdapter, {
 
     createRenderNode: function () {
         var parent = this.getParentRenderAdapter();
         var parentNode = parent.getRenderNode ? parent.getRenderNode() : this.factory.renderer.scene.createRootNode();
-        var rot = this.node.orientation.data;
-        var m = mat4.fromRotation(mat4.create(), rot[3], rot);
-        this.renderNode = this.factory.renderer.scene.createRenderView({
-            position: this.node.position.data,
-            orientation: m,
-            fieldOfView: this.node.fieldOfView,
+        this.renderNode = this.factory.renderer.scene.createRenderGroup({
             parent: parentNode
         });
+        this.updateLocalMatrix();
+        this.updateIntrinsicCameraParameters();
+    },
+
+    updateIntrinsicCameraParameters: function() {
         this.projectionFetcher.update();
+        var fieldOfView = +this.node.getAttribute("fieldofview");
+        this.renderNode.fieldOfView = fieldOfView;
     },
 
     /* Interface method */
@@ -43,28 +43,17 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
     },
 
     attributeChangedCallback: function (name, oldValue, newValue) {
-        TransformableAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
+        SceneElementAdapter.prototype.attributeChangedCallback.call(this, name, oldValue, newValue);
         switch (name) {
-            case "orientation":
-                var rot = this.node.orientation.data;
-                var m = mat4.fromRotation(mat4.create(), rot[3], rot);
-                this.renderNode.updateOrientation(m);
-                break;
-            case "position":
-                this.renderNode.updatePosition(this.node.position.data);
-                break;
             case "projection":
-                this.projectionFetcher.update();
-                break;
             case "fieldofview":
-                this.renderNode.updateFieldOfView(this.node.fieldOfView);
+                this.updateIntrinsicCameraParameters();
                 break;
-            default:
-                XML3D.debug.logWarning("Unhandled value changed event in view adapter for attribute:" + target);
         }
     },
 
     notifyChanged: function (evt) {
+        SceneElementAdapter.prototype.notifyChanged.call(this, evt);
         switch (evt.type) {
             case Events.THIS_REMOVED:
                 this.dispose();
@@ -74,13 +63,15 @@ XML3D.createClass(ViewRenderAdapter, TransformableAdapter, {
     },
 
     onTransformChange: function (attrName, matrix) {
-        TransformableAdapter.prototype.onTransformChange.call(this, attrName, matrix);
+        SceneElementAdapter.prototype.onTransformChange.call(this, attrName, matrix);
         if (attrName == "projection") {
             this.renderNode.setProjectionOverride(matrix);
         }
     },
 
     dispose: function () {
+
+
         this.projectionFetcher.clear();
         this.getRenderNode().remove();
         this.clearAdapterHandles();

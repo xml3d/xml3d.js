@@ -3,18 +3,33 @@ var DOMTransformFetcher = require("../../../data/transform-fetcher.js");
 var Events = require("../../../interface/notification.js");
 var AdapterHandle = require("../../../base/adapterhandle.js");
 
-var TransformableAdapter = function (factory, node, handleMaterial, handleTransform) {
+/**
+ * The SceneElementAdapter adapter is the base adapter for all scene elements,
+ * i.e. <group>, <view>, <mesh>, <light> and <model>. These are also
+ * those element that create an object inside the {@link Scene} data structure
+ *
+ * @param {RenderAdapterFactory} factory
+ * @param {HTMLElement} node
+ * @param handleMaterial
+ * @constructor
+ * @see @link http://xml3d.org/xml3d/specification/5.0/#scene-elements
+ */
+var SceneElementAdapter = function (factory, node, handleMaterial) {
     RenderAdapter.call(this, factory, node);
     this.renderNode = null;
+
+    /**
+     * Living object: Holds the style of the associated node
+     * @type {CSSStyleDeclaration}
+     */
+    this.style = window.getComputedStyle(node);
+
     this.materialHandler = null;
     this.handleMaterial = handleMaterial || false;
-    if (handleTransform) {
-        this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
-    }
-
+    this.transformFetcher = new DOMTransformFetcher(this, "transform", "transform");
 };
 
-XML3D.createClass(TransformableAdapter, RenderAdapter, {
+XML3D.createClass(SceneElementAdapter, RenderAdapter, {
 
     updateMaterialHandler: function () {
         var materialURI = getMaterialURI(this.node);
@@ -62,12 +77,31 @@ XML3D.createClass(TransformableAdapter, RenderAdapter, {
         return this.renderNode;
     },
 
+    updateVisibility: function () {
+        var none = this.style.getPropertyValue("display").trim() == "none";
+        var hidden = this.style.getPropertyValue("visibility").trim() == "hidden";
+        this.renderNode.setLocalVisible(!(none || hidden));
+    },
+
+    dispose: function() {
+        this.getRenderNode().remove();
+        this.clearAdapterHandles();
+    },
+
+
+
+    styleChangedCallback: function() {
+        this.updateVisibility();
+    },
+
+
     updateLocalMatrix: function () {
         this.transformFetcher && this.transformFetcher.update();
     },
 
     onTransformChange: function (attrName, matrix) {
         if (attrName == "transform") {
+            console.log("set transform to rendernode", attrName, this.node.nodeName, this.node.id);
             this.renderNode.setLocalMatrix(matrix);
         }
 
@@ -87,12 +121,14 @@ XML3D.createClass(TransformableAdapter, RenderAdapter, {
     },
 
     notifyChanged: function (evt) {
-     if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
+        if (evt.type == Events.ADAPTER_HANDLE_CHANGED) {
             var key = evt.key;
             if (key == "material") {
                 this.updateMaterialHandler();
                 this.factory.renderer.requestRedraw("Material reference changed.");
             }
+        } else if (evt.type == Events.THIS_REMOVED) {
+            this.dispose();
         }
     }
 });
@@ -111,4 +147,4 @@ function getMaterialURI(node) {
     return materialURI;
 }
 
-module.exports = TransformableAdapter;
+module.exports = SceneElementAdapter;

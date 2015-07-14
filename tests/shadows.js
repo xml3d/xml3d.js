@@ -17,16 +17,16 @@ test("light matrices", 21, function () {
         var lights = getWebGLFactory(s).getScene().lights;
         equal(lights._lights.length, 1, "Light in light manger");
         ok("spot" in lights._models, "Has spot light");
-        var actual = new XML3D.Mat4();
+        var actual = XML3D.math.mat4.create();
         var expected = new XML3D.Mat4();
 
         var light = lights._lights[0];
 
-        expected.translate([0, 0, 10]);
+        expected = expected.translate([0, 0, 10]);
         light.getWorldMatrix(actual);
         QUnit.closeMatrix(actual, expected, EPSILON, "RenderLight World matrix");
 
-        expected.invert();
+        expected = expected.invert();
         var spot = lights._models.spot.lightModels[0];
         spot.getLightViewMatrix(actual);
         QUnit.closeMatrix(actual, expected, EPSILON, "LightViewMatrix");
@@ -34,13 +34,13 @@ test("light matrices", 21, function () {
         // Depends on how the near/far plane is calculated. Thus this is just for regression:
         expected = [2.4142074584960938, 0, 0, 0, 0, 2.4142074584960938, 0, 0, 0, 0, -1.2035882472991943, -1, 0, 0, -2.204, 0];
         spot.getLightProjectionMatrix(actual);
-        QUnit.closeArray(actual.data, expected, EPSILON, "LightProjectionMatrix");
+        QUnit.closeMatrix(actual, expected, EPSILON, "LightProjectionMatrix");
 
         spot.getLightViewProjectionMatrix(actual);
 
         var params = {};
         lights.fillGlobalParameters(params, true);
-        QUnit.closeArray(params.spotLightMatrix, actual.data, EPSILON, "spotLightMatrix");
+        QUnit.closeMatrix(params.spotLightMatrix, actual, EPSILON, "spotLightMatrix");
 
         QUnit.closeArray(params.spotLightPosition, [0, 0, 10], EPSILON, "spotLightPosition");
         QUnit.closeArray(params.spotLightDirection, [0, 0, -1], EPSILON, "spotLightDirection");
@@ -52,14 +52,14 @@ test("light matrices", 21, function () {
         var lights = getWebGLFactory(s).getScene().lights;
 
         var light = lights._lights[0];
-        var actual = new XML3D.Mat4();
+        var actual = XML3D.math.mat4.create();
         var expected = new XML3D.Mat4();
 
-        expected.translate([0, 0, 10]);
+        expected = expected.translate([0, 0, 10]);
         light.getWorldMatrix(actual);
         QUnit.closeMatrix(actual, expected, EPSILON, "setPosition::RenderLight World matrix");
 
-        expected.translate([1, 1, 1]).invert();
+        expected = expected.translate([1, 1, 1]).invert();
         var spot = lights._models.spot.lightModels[0];
         spot.getLightViewMatrix(actual);
         QUnit.closeMatrix(actual, expected, EPSILON, "setPosition::LightViewMatrix");
@@ -67,13 +67,13 @@ test("light matrices", 21, function () {
         // Depends on how the near/far plane is calculated. Thus this is just for regression:
         expected = [2.4142074584960938, 0, 0, 0, 0, 2.4142074584960938, 0, 0, 0, 0, -1.1847789287567139, -1, 0, 0, -2.184778928756714, 0 ];
         spot.getLightProjectionMatrix(actual);
-        QUnit.closeArray(actual.data, expected, EPSILON, "setPosition::LightProjectionMatrix");
+        QUnit.closeMatrix(actual, expected, EPSILON, "setPosition::LightProjectionMatrix");
 
         spot.getLightViewProjectionMatrix(actual);
 
         var params = {};
         lights.fillGlobalParameters(params, true);
-        QUnit.closeArray(params.spotLightMatrix, actual.data, EPSILON, "setPosition::spotLightMatrix");
+        QUnit.closeMatrix(params.spotLightMatrix, actual, EPSILON, "setPosition::spotLightMatrix");
 
         QUnit.closeArray(params.spotLightPosition, [1, 1, 11], EPSILON, "setPosition::spotLightPosition");
         QUnit.closeArray(params.spotLightDirection, [0, 0, -1], EPSILON, "setPosition::spotLightDirection");
@@ -85,14 +85,14 @@ test("light matrices", 21, function () {
         var lights = getWebGLFactory(s).getScene().lights;
 
         var light = lights._lights[0];
-        var actual = new XML3D.Mat4();
+        var actual = XML3D.math.mat4.create();
         var expected = new XML3D.Mat4();
 
-        expected.translate([0, 0, 10]);
+        expected = expected.translate([0, 0, 10]);
         light.getWorldMatrix(actual);
         QUnit.closeMatrix(actual, expected, EPSILON, "setDirection::RenderLight World matrix");
 
-        expected.translate([1,1,1]).rotateX(-0.1).invert();
+        expected = expected.translate([1,1,1]).rotateX(-0.1).invert();
         var spot = lights._models.spot.lightModels[0];
         spot.getLightViewMatrix(actual);
         QUnit.closeMatrix(actual, expected, EPSILON, "setDirection::LightViewMatrix");
@@ -100,13 +100,13 @@ test("light matrices", 21, function () {
         // Depends on how the near/far plane is calculated. Thus this is just for regression:
         expected = [2.4142074584960938, 0, 0, 0, 0, 2.4142074584960938, 0, 0, 0, 0, -1.1646840572357178, -1, 0, 0, -2.1646840572357178, 0 ];
         spot.getLightProjectionMatrix(actual);
-        QUnit.closeArray(actual.data, expected, EPSILON, "setDirection::LightProjectionMatrix");
+        QUnit.closeMatrix(actual, expected, EPSILON, "setDirection::LightProjectionMatrix");
 
         spot.getLightViewProjectionMatrix(actual);
 
         var params = {};
         lights.fillGlobalParameters(params, true);
-        QUnit.closeArray(params.spotLightMatrix, actual.data, EPSILON, "setDirection::spotLightMatrix");
+        QUnit.closeMatrix(params.spotLightMatrix, actual, EPSILON, "setDirection::spotLightMatrix");
 
         QUnit.closeArray(params.spotLightPosition, [1, 1, 11], EPSILON, "setDirection::spotLightPosition");
         QUnit.closeArray(params.spotLightDirection, [0, -0.1, -0.995], EPSILON, "setDirection::spotLightDirection");
